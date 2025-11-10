@@ -56,22 +56,24 @@ const ImageElementCard: React.FC<ImageElementCardProps> = ({
           </button>
         </div>
 
-        <div className="space-y-2 text-sm">
+        <div className="flex items-center gap-3 text-sm">
           <div className="flex">
-            <span className="w-20 text-gray-500">定位类型:</span>
-            <span className="text-gray-900">{element.positionType}</span>
+            <span className="text-gray-500">定位类型:</span>
+            <span className="ml-2 text-gray-900">{element.positionType}</span>
           </div>
           <div className="flex">
-            <span className="w-20 text-gray-500">位置信息:</span>
-            <span className="text-gray-900">{element.positionInfo}</span>
+            <span className="text-gray-500">位置信息:</span>
+            <span className="ml-2 text-gray-900">{element.positionInfo}</span>
           </div>
           <div className="flex">
-            <span className="w-20 text-gray-500">尺寸:</span>
-            <span className="text-gray-900">{element.dimensions}</span>
+            <span className="text-gray-500">尺寸:</span>
+            <span className="ml-2 text-gray-900">{element.dimensions}</span>
           </div>
           <div className="flex">
-            <span className="w-20 text-gray-500">修饰:</span>
-            <span className="text-gray-900">{element.modifiers || '-'}</span>
+            <span className="text-gray-500">修饰:</span>
+            <span className="ml-2 text-gray-900">
+              {element.modifiers || '-'}
+            </span>
           </div>
         </div>
 

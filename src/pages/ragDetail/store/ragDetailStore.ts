@@ -46,7 +46,7 @@ export const useRagDetailStore = create<RagDetailState & RagDetailActions>(
     error: null,
     // Segment Drawer state
     segmentDrawerVisible: false,
-    segmentDrawerTab: 'trace',
+    segmentDrawerTab: 'detail',
     segmentDrawerSegmentId: null,
 
     // Actions

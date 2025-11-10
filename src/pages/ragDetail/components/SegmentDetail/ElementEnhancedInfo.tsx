@@ -7,6 +7,7 @@ import React from 'react';
 import { Input, Select } from '@arco-design/web-react';
 import type { Element } from '../../types';
 import { useSegmentDetailStore } from './store/segmentDetailStore';
+import ElementEnhancementInformation from './assets/element-enhancement-information.svg';
 
 const { TextArea } = Input;
 
@@ -43,13 +44,13 @@ const ElementEnhancedInfo: React.FC<ElementEnhancedInfoProps> = ({
   return (
     <div className="mt-4 rounded-lg bg-gray-50 p-3">
       <div className="mb-2 flex items-center gap-1 text-sm font-medium text-gray-700">
-        <span className="text-blue-600">📊</span>
-        元素增强信息
+        <ElementEnhancementInformation />
+        <span className="text-sm font-semibold leading-5">元素增强信息</span>
       </div>
 
       {/* 关键描述 */}
-      <div className="mb-3">
-        <div className="mb-1 text-xs text-gray-500">关键描述:</div>
+      <div className="mb-3 flex gap-2">
+        <div className="mb-1 w-[150px] text-xs text-gray-500">关键描述:</div>
         {isEditing ? (
           <TextArea
             value={element.relatedDescription || ''}
@@ -65,8 +66,8 @@ const ElementEnhancedInfo: React.FC<ElementEnhancedInfoProps> = ({
       </div>
 
       {/* 抽取实体 */}
-      <div>
-        <div className="mb-1 text-xs text-gray-500">抽取实体:</div>
+      <div className="flex items-center gap-2">
+        <div className="text-xs text-gray-500">抽取实体:</div>
         {isEditing ? (
           <Select
             mode="multiple"

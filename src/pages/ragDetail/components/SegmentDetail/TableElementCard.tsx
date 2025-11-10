@@ -49,11 +49,11 @@ const TableElementCard: React.FC<TableElementCardProps> = ({
       <div className="mb-3 overflow-x-auto">
         <table className="w-full border-collapse">
           <thead>
-            <tr className="bg-gray-50">
+            <tr>
               {element.headers.map((header, index) => (
                 <th
                   key={index}
-                  className="border border-gray-200 px-4 py-2 text-left text-sm font-medium text-gray-700"
+                  className="border border-gray-200 px-4 py-2 text-left text-sm font-medium font-semibold text-gray-700"
                 >
                   {isEditing ? (
                     <Input
@@ -97,14 +97,14 @@ const TableElementCard: React.FC<TableElementCardProps> = ({
         </table>
       </div>
 
-      <div className="space-y-2 text-sm">
+      <div className="flex items-center gap-3 text-sm">
         <div className="flex">
-          <span className="w-20 text-gray-500">定位类型:</span>
-          <span className="text-gray-900">{element.positionType}</span>
+          <span className="text-gray-500">定位类型:</span>
+          <span className="ml-2 text-gray-900">{element.positionType}</span>
         </div>
         <div className="flex">
-          <span className="w-20 text-gray-500">位置信息:</span>
-          <span className="text-gray-900">{element.positionInfo}</span>
+          <span className="text-gray-500">位置信息:</span>
+          <span className="ml-2 text-gray-900">{element.positionInfo}</span>
         </div>
       </div>
 
