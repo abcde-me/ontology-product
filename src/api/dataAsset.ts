@@ -306,6 +306,7 @@ export async function listDataAssetSource(): Promise<
         type: 'dataset',
         name: '数据集',
         tableName: 'table001',
+        databaseName: 'database001',
         fields: [
           {
             name: 'id',
@@ -321,6 +322,7 @@ export async function listDataAssetSource(): Promise<
         type: 'datavolume',
         name: '源数据目录-卷',
         tableName: 'table002',
+        databaseName: 'database002',
         fields: [
           {
             name: 'id',
@@ -336,6 +338,7 @@ export async function listDataAssetSource(): Promise<
         type: 'database',
         name: '源数据目录-数据库',
         tableName: 'table003',
+        databaseName: 'database003',
         fields: [
           {
             name: 'id',
@@ -351,6 +354,7 @@ export async function listDataAssetSource(): Promise<
         type: 'metadata',
         name: '源数据目录-元数据-目录1',
         tableName: 'table004',
+        databaseName: 'database004',
         fields: [
           {
             name: 'id',
@@ -366,6 +370,7 @@ export async function listDataAssetSource(): Promise<
         type: 'metadata',
         name: '源数据目录-元数据-目录2',
         tableName: 'table005',
+        databaseName: 'database005',
         fields: [
           {
             name: 'id',
