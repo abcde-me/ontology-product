@@ -1588,6 +1588,7 @@ const DatasetManagement: React.FC = () => {
 
       {/* 新增场景类型弹窗 */}
       <Modal
+        className={styles.addSceneTypeModal}
         visible={addSceneTypeVisible}
         onOk={() => sceneTypeForm.submit()}
         onCancel={() => setAddSceneTypeVisible(false)}
