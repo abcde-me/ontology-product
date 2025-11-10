@@ -49,8 +49,8 @@ const ElementEnhancedInfo: React.FC<ElementEnhancedInfoProps> = ({
       </div>
 
       {/* 关键描述 */}
-      <div className="mb-3 flex">
-        <div className="mb-1 w-[180px] text-xs text-gray-500">关键描述:</div>
+      <div className="mb-3 flex gap-2">
+        <div className="mb-1 w-[150px] text-xs text-gray-500">关键描述:</div>
         {isEditing ? (
           <TextArea
             value={element.relatedDescription || ''}
@@ -66,8 +66,8 @@ const ElementEnhancedInfo: React.FC<ElementEnhancedInfoProps> = ({
       </div>
 
       {/* 抽取实体 */}
-      <div className="flex">
-        <div className="mb-1 w-[180px] text-xs text-gray-500">抽取实体:</div>
+      <div className="flex items-center gap-2">
+        <div className="text-xs text-gray-500">抽取实体:</div>
         {isEditing ? (
           <Select
             mode="multiple"
