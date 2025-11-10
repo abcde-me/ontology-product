@@ -945,9 +945,12 @@ export default function RequirementDetail() {
     );
   }, [annotationTypeContentCode]);
 
-  const { data: modelList = [] } = useGetModelList({
-    enabled: showPreLabeling
-  });
+  const { data: modelList = [] } = useGetModelList(
+    { label_type: annotationTypeVal },
+    {
+      enabled: showPreLabeling
+    }
+  );
 
   const model_name = Form.useWatch('model_name', basicForm);
 
