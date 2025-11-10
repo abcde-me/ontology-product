@@ -178,14 +178,14 @@ interface FieldMapping {
 
 ### DataSource
 
-```typescript
-interface DataSource {
-  dataset: boolean; // 数据集
-  volume: boolean; // 卷
-  database: boolean; // 数据库
-  metadataDir: boolean; // 元数据目录
-}
-```
+数据来源使用动态类型 `Record<string, boolean>`，所有取值均来自接口 `findDataAssetMapping` 返回的数据。根据接口返回的 `mapping` 数组中的 `type` 字段动态提取数据来源类型。
+
+映射关系：
+
+- `dataset` -> `dataset` (数据集)
+- `datavolume` -> `volume` (源数据目录-卷)
+- `database` -> `database` (源数据目录-数据库)
+- `metadata` -> `metadataDir` (源数据目录-元数据-目录)
 
 ## 待实现功能
 

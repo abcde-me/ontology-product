@@ -4,7 +4,10 @@ import { Steps, Message } from '@arco-design/web-react';
 import { findDataAssetMapping } from '@/api/dataAsset';
 import Step1MetadataFields from './Step1MetadataFields';
 import Step2FieldMapping from './Step2FieldMapping';
-import { DataAssetField } from '@/types/dataAssetApi';
+import {
+  DataAssetField,
+  FindDataAssetMappingItemRes
+} from '@/types/dataAssetApi';
 
 interface DataAssetFormContainerProps {
   isEditMode?: boolean;
@@ -21,18 +24,8 @@ export interface FieldMapping {
   id: string;
   sequence: number;
   assetName: string;
-  dataset: string;
-  volume: string;
-  database: string;
-  metadataDir: string;
-}
-
-// 数据来源类型
-export interface DataSource {
-  dataset: boolean;
-  volume: boolean;
-  database: boolean;
-  metadataDir: boolean;
+  // 动态的数据来源类型字段（键为接口返回的类型，值为映射值）
+  [key: string]: string | number | undefined;
 }
 
 export default function DataAssetFormContainer({
@@ -55,60 +48,34 @@ export default function DataAssetFormContainer({
       allowModify: true
     }
   ]);
-  const [dataSources, setDataSources] = useState<DataSource>({
-    dataset: true,
-    volume: false,
-    database: false,
-    metadataDir: false
-  });
+  const [dataSources, setDataSources] = useState<Record<string, boolean>>({});
   const [mappings, setMappings] = useState<FieldMapping[]>([]);
   const [autoMapping, setAutoMapping] = useState(true);
+  const [findDataAssetMappingData, setFindDataAssetMappingData] = useState<
+    FindDataAssetMappingItemRes[]
+  >([]);
 
-  // 获取编辑数据
-  const fetchEditData = async () => {
-    if (!id) return;
-
+  // 获取数据资产映射数据
+  const fetchDataAssetMapping = async () => {
     try {
       setLoading(true);
       const res = await findDataAssetMapping();
 
-      if (res.code === '' && res.status === 200) {
-        const data = res.data;
-
-        // 设置元数据字段
-        // if (data.metadataFields) {
-        //   setMetadataFields(data.metadataFields);
-        // }
-
-        // // 设置数据来源
-        // if (data.dataSources) {
-        //   setDataSources(data.dataSources);
-        // }
-
-        // // 设置字段映射
-        // if (data.mappings) {
-        //   setMappings(data.mappings);
-        // }
-
-        // // 设置自动映射
-        // if (data.autoMapping !== undefined) {
-        //   setAutoMapping(data.autoMapping);
-        // }
+      if (res.status === 200) {
+        setFindDataAssetMappingData(res.data || []);
       }
     } catch (error) {
-      console.error('获取数据资产详情失败:', error);
+      console.error('获取数据资产映射失败:', error);
       Message.error('获取数据失败，请重试');
     } finally {
       setLoading(false);
     }
   };
 
-  // 组件挂载时获取编辑数据
+  // 组件挂载时获取数据资产映射数据
   useEffect(() => {
-    if (isEditMode && id) {
-      fetchEditData();
-    }
-  }, [isEditMode, id]);
+    fetchDataAssetMapping();
+  }, []);
 
   // 下一步
   const handleNext = () => {
@@ -170,6 +137,7 @@ export default function DataAssetFormContainer({
                 setMetadataFields={setMetadataFields}
                 dataSources={dataSources}
                 setDataSources={setDataSources}
+                findDataAssetMappingData={findDataAssetMappingData}
                 onCancel={handleCancel}
                 onNext={handleNext}
               />
@@ -183,6 +151,7 @@ export default function DataAssetFormContainer({
                 setAutoMapping={setAutoMapping}
                 metadataFields={metadataFields}
                 dataSources={dataSources}
+                findDataAssetMappingData={findDataAssetMappingData}
                 onCancel={handleCancel}
                 onPrev={handlePrev}
                 onFinish={handleFinish}

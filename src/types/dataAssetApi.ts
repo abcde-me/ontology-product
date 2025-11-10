@@ -111,10 +111,16 @@ export interface ColumnField {
   nameEn: string;
   /** 字段类型 */
   type: string;
+  /** 默认值 */
+  default: string;
   /** 是否为枚举类型 */
-  isEnum: boolean;
+  isEnumAble: boolean;
+  /** 是否可修改 */
+  allowModify: boolean;
   /** 是否显示 */
-  isDisplay: boolean;
+  // isDisplay: boolean;
+  /** 显示排序 0代表不显示，1代表第一列，2代表第二列，以此类推 */
+  displaySort: number;
 }
 
 export interface EditDataAssetFieldsDisplayReq {

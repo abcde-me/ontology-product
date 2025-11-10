@@ -78,7 +78,7 @@ const EditSingleAssetModal: React.FC<EditSingleAssetModalProps> = ({
   // 获取字段是否为枚举类型
   const isFieldEnum = (fieldEnName: string): boolean => {
     const field = fields.find((f) => f.nameEn === fieldEnName);
-    return field?.isEnum ?? false;
+    return field?.isEnumAble ?? false;
   };
 
   // 格式化当前值显示
