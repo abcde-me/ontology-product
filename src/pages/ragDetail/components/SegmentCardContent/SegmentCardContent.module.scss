@@ -1,0 +1,11 @@
+// 隐藏滚动条但保持滚动功能
+.scrollContainer {
+  // 隐藏滚动条
+  scrollbar-width: none; // Firefox
+  -ms-overflow-style: none; // IE and Edge
+
+  // Chrome, Safari, Opera
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
