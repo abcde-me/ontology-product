@@ -504,7 +504,7 @@ export const ModaForgeResourceEndpoints = {
   // 修改数据资产表列设置（前端展示）
   editDataAssetFieldsDisplay: PrefixAimdp + '/EditDataAssetFieldsDisplay',
   // 查询数据资产表列设置（前端展示）
-  findDataAssetFieldsDisplay: PrefixAimdp + '/FindDataAssetFieldsDisplay',
+  getDataAssetFieldsDisplay: PrefixAimdp + '/GetDataAssetFieldsDisplay',
   // 查询指定字段去重后的数量
   getDataAssetTableDistinctFieldCount:
     PrefixAimdp + '/GetDataAssetTableDistinctFieldCount',

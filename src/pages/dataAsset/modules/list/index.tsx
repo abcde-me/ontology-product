@@ -30,7 +30,6 @@ import ModifyTagsModal from '../../components/ModifyTagsModal';
 import EditSingleAssetModal from '../../components/EditSingleAssetModal';
 import { getTagList } from '@/api/datasetManagement';
 import {
-  listDataAssetSource,
   findDataAssetMapping,
   listDataAssetData,
   findDataAssetFieldsDisplay,
@@ -255,25 +254,28 @@ export default function DataAssetList() {
 
   const loadColumnSettings = async () => {
     const dataAssetFieldsDisplayRes = await findDataAssetFieldsDisplay({});
-    if (dataAssetFieldsDisplayRes.status !== 200) {
+    if (
+      dataAssetFieldsDisplayRes.status !== 200 ||
+      !dataAssetFieldsDisplayRes.data?.length
+    ) {
       return;
     }
 
     // 处理列设置数据
-    const { fields: displayFields } = dataAssetFieldsDisplayRes.data || {
-      fields: []
-    };
+    // const { fields: displayFields } = dataAssetFieldsDisplayRes.data || {
+    //   fields: []
+    // };
     // 将 API 返回的 ColumnField 格式转换为组件需要的格式
-    const convertedFields: ColumnField[] = (displayFields || []).map(
-      (field: ApiColumnField, index: number) => ({
-        id: field.nameEn || String(index),
-        name: field.nameZh,
-        type: field.type,
-        enumChecked: field.isEnumAble || false,
-        enumLoading: false,
-        enumCount: 0
-      })
-    );
+    const convertedFields: ColumnField[] = (
+      dataAssetFieldsDisplayRes.data || []
+    ).map((field: ApiColumnField, index: number) => ({
+      id: field.nameEn || String(index),
+      name: field.nameZh,
+      type: field.type,
+      enumChecked: field.isEnumAble || false,
+      enumLoading: false,
+      enumCount: 0
+    }));
     setColumnSettingsFields(convertedFields);
   };
 

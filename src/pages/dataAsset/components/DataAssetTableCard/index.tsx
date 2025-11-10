@@ -15,6 +15,7 @@ import { getTagList } from '@/api/dataAsset';
 import { editDataAssetDataBatch } from '@/api/dataAsset';
 import classNames from 'classnames';
 import styles from './index.module.scss';
+import noDataElement from '@/components/no-data';
 
 interface DataAssetTableCardProps {
   dataAssetList: ListDataAssetDataRes['records'];
@@ -130,8 +131,10 @@ export default function DataAssetTableCard({
 
   if (dataAssetList.length === 0) {
     return (
-      <div className="flex min-h-[200px] items-center justify-center text-sm text-[#6b7280]">
-        暂无数据资产
+      <div className="flex min-h-[200px] items-center justify-center">
+        {noDataElement({
+          description: '暂无数据资产'
+        })}
       </div>
     );
   }

@@ -179,7 +179,7 @@ const ColumnSettingModal: React.FC<ColumnSettingModalProps> = ({
         <div className="border-l-[1px] border-[var(--color-border-2)] p-[16px]">
           <div className="mb-[16px] flex w-[208px] items-center justify-between text-[var(--color-text-1)]">
             <span className="font-weight-500">
-              已选字段 {selectedIds.length}/40
+              已选字段 {selectedIds.length}/{fields.length}
             </span>
             <IconDelete
               className={`size-[16px] ${
