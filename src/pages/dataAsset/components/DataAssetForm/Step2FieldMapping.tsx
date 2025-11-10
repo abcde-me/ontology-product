@@ -20,6 +20,7 @@ import {
   FindDataAssetMappingItemRes,
   ListDataAssetSourceResItem
 } from '@/types/dataAssetApi';
+import { autoMapDataAssetFieldAndSource } from '@/api/dataAsset';
 
 const FormItem = Form.Item;
 const Row = Grid.Row;
@@ -227,9 +228,86 @@ export default function Step2FieldMapping({
     handleUpdateMapping
   ]);
 
+  const runAutoMap = async () => {
+    try {
+      if (!autoMapping) return;
+      if (!metadataFields || metadataFields.length === 0) return;
+      if (!dataSources || Object.keys(dataSources).length === 0) return;
+
+      // 构建请求参数
+      const req = {
+        fields: metadataFields.map((f) => ({
+          nameZh: f.nameZh,
+          nameEn: f.nameEn,
+          type: f.type,
+          default: f.default,
+          required: f.required,
+          allowModify: f.allowModify
+        })),
+        source: Object.keys(dataSources).map((key) => {
+          const fromAll =
+            findDataAssetMappingData.find((s) => s.name === key) ||
+            dataSources[key];
+          return {
+            type: fromAll?.type || key,
+            name: fromAll?.name || key,
+            tableName: fromAll?.tableName || '',
+            fields:
+              fromAll?.fields?.map((ff) => ({
+                name: ff.name,
+                type: ff.type
+              })) || []
+          };
+        })
+      };
+
+      const res = await autoMapDataAssetFieldAndSource(req);
+      if (res?.status !== 200 || !Array.isArray(res.data)) {
+        return;
+      }
+
+      // 基于 metadataFields 生成基础行
+      const nextMappings: FieldMapping[] = metadataFields.map((field, idx) => {
+        const row: FieldMapping = {
+          id: mappings[idx]?.id || `mapping_${Date.now()}_${idx}`,
+          sequence: idx + 1,
+          nameZh: mappings[idx]?.nameZh ?? field.nameZh
+        };
+        // 初始化所有选中的数据来源类型字段
+        Object.keys(dataSources).forEach((sourceType) => {
+          if (dataSources[sourceType]) {
+            row[sourceType] = '';
+          }
+        });
+        return row;
+      });
+
+      // 将自动映射结果填充到行
+      res.data.forEach((item) => {
+        const rowIdx = metadataFields.findIndex(
+          (f) => f.nameEn === item.fieldNameEn
+        );
+        if (rowIdx < 0) return;
+        item.mapping?.forEach((m) => {
+          // 使用数据来源类型作为列 key，值为 feildName
+          if (m?.type) {
+            (nextMappings[rowIdx] as any)[m.type] = m.feildName || '';
+          }
+        });
+      });
+
+      setMappings(nextMappings);
+      Message.success('已根据字段与数据来源自动完成映射');
+    } catch (e) {
+      // 静默失败，避免打扰
+      // 仅在明显错误时提示
+      Message.error('自动映射失败，请稍后重试');
+    }
+  };
+
   // 初始化映射
   useEffect(() => {
-    if (metadataFields.length > 0 && mappings.length === 0) {
+    if (metadataFields.length > 0 && mappings.length === 0 && !autoMapping) {
       const initialMappings: FieldMapping[] = metadataFields.map(
         (field, index) => {
           const mapping: FieldMapping = {
@@ -255,6 +333,11 @@ export default function Step2FieldMapping({
   useEffect(() => {
     form.setFieldsValue({ mappings });
   }, [mappings]);
+
+  // 自动映射：当开关开启，或依赖变化时触发
+  useEffect(() => {
+    runAutoMap();
+  }, [autoMapping, metadataFields, dataSources, findDataAssetMappingData]);
 
   // 添加映射行
   const handleAddMapping = () => {
@@ -294,14 +377,15 @@ export default function Step2FieldMapping({
     [mappings]
   );
 
-  // 导入字段
-  const handleImportFields = () => {
-    Message.info('导入字段功能待实现');
-  };
-
   // 自动映射
-  const handleAutoMapping = () => {
-    Message.info('自动映射功能待实现');
+  const handleAutoMapping = (v: boolean) => {
+    setAutoMapping(v);
+
+    if (!v) {
+      return;
+    }
+
+    runAutoMap();
   };
 
   // 完成
@@ -388,15 +472,11 @@ export default function Step2FieldMapping({
             <span className="text-[14px] text-[rgb(var(--primary-6))]">
               自动映射
             </span>
-            <Switch checked={autoMapping} onChange={setAutoMapping} />
+            <Switch
+              checked={autoMapping}
+              onChange={(v) => handleAutoMapping(v)}
+            />
           </div>
-          <Button
-            type="text"
-            icon={<IconDownload />}
-            onClick={handleImportFields}
-          >
-            导入字段
-          </Button>
         </div>
 
         <FormItem
