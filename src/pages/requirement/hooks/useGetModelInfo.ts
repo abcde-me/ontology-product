@@ -2,7 +2,10 @@ import { getModelList, getModelLabelList } from '@/api/dataAnnotation';
 import { useQuery } from 'react-query';
 import { isArray } from 'lodash-es';
 
-export const useGetModelList = (params: { label_type: number }, options?) => {
+export const useGetModelList = (
+  params: { label_type: number; page: number; page_size: number },
+  options?
+) => {
   const { data, isLoading, isFetching, refetch } = useQuery(
     ['get-model-list', params.label_type],
     () => getModelList(params),

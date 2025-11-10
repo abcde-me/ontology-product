@@ -946,7 +946,7 @@ export default function RequirementDetail() {
   }, [annotationTypeContentCode]);
 
   const { data: modelList = [] } = useGetModelList(
-    { label_type: annotationTypeVal },
+    { label_type: annotationTypeVal, page: 1, page_size: 1000 },
     {
       enabled: showPreLabeling
     }
