@@ -485,7 +485,7 @@ export const ModaForgeResourceEndpoints = {
   // 获取数据资产列表
   listDataAssetData: PrefixAimdp + '/ListDataAssetData',
   // 查询数据来源
-  listDataAssetSource: PrefixAimdp + '/ListDataAssetSource',
+  listDataAssetSource: PrefixAimdp + '/ListDataAssetSources',
   // 删除数据资产
   dataAssetDelete: PrefixAimdp + '/DeleteDataAsset',
   // 解析数据资产字段文件

@@ -307,34 +307,33 @@ export default function DataAssetList() {
   // 初始化搜索字段配置
   useEffect(() => {
     // 获取标签列表
-    getTagList()
-      .then((res) => {
-        if (res.code === 0 || res.code === undefined) {
-          const options = (res.data || []).map((tag: any) => ({
-            label: tag.name || tag.label,
-            value: tag.name || tag.value || tag.id
-          }));
-          setAssetTags(options);
-        }
-      })
-      .catch((err) => {
-        console.error('获取标签列表失败:', err);
-      });
-
+    // getTagList()
+    //   .then((res) => {
+    //     if (res.code === 0 || res.code === undefined) {
+    //       const options = (res.data || []).map((tag: any) => ({
+    //         label: tag.name || tag.label,
+    //         value: tag.name || tag.value || tag.id
+    //       }));
+    //       setAssetTags(options);
+    //     }
+    //   })
+    //   .catch((err) => {
+    //     console.error('获取标签列表失败:', err);
+    //   });
     // 获取资产来源列表
-    listDataAssetSource()
-      .then((res) => {
-        if (res.code === 0 || res.code === undefined) {
-          const options = (res.data || []).map((source: any) => ({
-            label: source.type || source.name || source.label,
-            value: source.type || source.name || source.value || source.id
-          }));
-          setAssetSources(options);
-        }
-      })
-      .catch((err) => {
-        console.error('获取资产来源列表失败:', err);
-      });
+    // listDataAssetSource()
+    //   .then((res) => {
+    //     if (res.code === 0 || res.code === undefined) {
+    //       const options = (res.data || []).map((source: any) => ({
+    //         label: source.type || source.name || source.label,
+    //         value: source.type || source.name || source.value || source.id
+    //       }));
+    //       setAssetSources(options);
+    //     }
+    //   })
+    //   .catch((err) => {
+    //     console.error('获取资产来源列表失败:', err);
+    //   });
   }, []);
 
   // 更新搜索字段配置（当标签和来源数据加载完成后）
