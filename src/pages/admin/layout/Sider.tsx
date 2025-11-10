@@ -19,7 +19,8 @@ const hideSidebarPaths = [
   '/tenant/compute/modaforge/workflowConfig',
   '/tenant/compute/modaforge/login',
   '/tenant/compute/modaforge/userinfo',
-  '/tenant/compute/modaforge/labelEditor'
+  '/tenant/compute/modaforge/labelEditor',
+  '/tenant/compute/modaforge/ragDetail'
 ];
 const collapseSidebarPaths = [];
 

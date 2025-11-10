@@ -121,6 +121,13 @@ export const routes: IRoute[] = [
     ],
     children: []
   },
+  // RAG详情页面
+  {
+    name: 'ragDetail',
+    key: '/tenant/compute/modaforge/ragDetail',
+    component: React.lazy(async () => import('../../ragDetail')),
+    children: []
+  },
   // 作业
   {
     name: 'workflowTask',
