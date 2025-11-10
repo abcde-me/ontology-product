@@ -356,7 +356,7 @@ export default function Step2FieldMapping({
           nameZh: row.nameZh || meta?.nameZh || '',
           nameEn: meta?.nameEn || '',
           type: meta?.type || '',
-          default: meta?.default || '',
+          default: meta?.default?.trim() === '' ? null : meta?.default,
           required: !!meta?.required,
           allowModify: !!meta?.allowModify,
           mapping,

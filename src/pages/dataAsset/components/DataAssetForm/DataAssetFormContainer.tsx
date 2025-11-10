@@ -49,7 +49,7 @@ export default function DataAssetFormContainer({
       nameZh: '',
       nameEn: '',
       type: undefined,
-      default: 'null',
+      default: '',
       required: true,
       allowModify: true
     }

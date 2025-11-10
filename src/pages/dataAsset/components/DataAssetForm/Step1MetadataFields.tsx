@@ -254,7 +254,7 @@ export default function Step1MetadataFields({
       nameZh: '',
       nameEn: '',
       type: undefined,
-      default: 'null',
+      default: '',
       required: true,
       allowModify: true
     };
