@@ -170,7 +170,7 @@ export const useTargetTree = () => {
           }
 
           const res = await getTargetCatalogFileListApi({
-            full_path: nodeData.full_path || '',
+            full_path: nodeData?.data?.base_dir + nodeData.full_path || '',
             sort_field: nodeData.sort_field || '',
             path_id: nodeData.id,
             sort_order: 'desc' as 'asc' | 'desc',
