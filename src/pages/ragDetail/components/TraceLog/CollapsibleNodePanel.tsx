@@ -59,19 +59,19 @@ const CollapsibleNodePanel: React.FC<CollapsibleNodePanelProps> = ({
           <div className="flex h-4 w-4 items-center justify-center rounded bg-[#E8F2FF] text-xs font-medium text-[#2563EB]">
             {node.index}
           </div>
-          <span className="ml-2 text-sm font-medium text-gray-900">
+          <span className="ml-2 text-sm font-semibold text-gray-900">
             {node.name}
           </span>
           <div className="ml-2 flex items-center">
             {node.status === 'success' ? (
               <>
                 <div className="h-1.5 w-1.5 rounded-full bg-green-500"></div>
-                <span className="ml-2 text-sm text-green-600">处理成功</span>
+                <span className="ml-2 text-sm">处理成功</span>
               </>
             ) : (
               <>
                 <div className="h-1.5 w-1.5 rounded-full bg-red-500"></div>
-                <span className="ml-2 text-sm text-red-600">处理失败</span>
+                <span className="ml-2 text-sm">处理失败</span>
               </>
             )}
           </div>
