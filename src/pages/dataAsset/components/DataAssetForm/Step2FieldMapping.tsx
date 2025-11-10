@@ -39,6 +39,14 @@ interface Step2FieldMappingProps {
   onFinish: (fieldsWithMappings: CreateDataAssetAndMappingReq) => void;
 }
 
+// 系统保留字段（不允许编辑、删除、导入）
+const RESERVED_FIELD_ENS = new Set([
+  'data_asset_name',
+  'tags',
+  'data_update_time',
+  'data_source'
+]);
+
 export default function Step2FieldMapping({
   mappings,
   setMappings,
@@ -201,26 +209,31 @@ export default function Step2FieldMapping({
       dataIndex: 'operation',
       width: 150,
       align: 'center' as const,
-      render: (_: any, record: FieldMapping) => (
-        <Space>
-          <Button
-            type="text"
-            onClick={() => handleAddMapping()}
-            className="cursor-pointer text-green-500"
-          >
-            添加行
-          </Button>
-          {mappings.length > 1 && (
+      render: (_: any, record: FieldMapping) => {
+        const meta = metadataFields[record.sequence - 1];
+        const isReserved =
+          !!meta?.nameEn && RESERVED_FIELD_ENS.has(meta.nameEn);
+        return (
+          <Space>
             <Button
               type="text"
-              onClick={() => handleDeleteMapping(record.id)}
-              className="cursor-pointer text-red-500"
+              onClick={() => handleAddMapping()}
+              className="cursor-pointer text-green-500"
             >
-              删除行
+              添加行
             </Button>
-          )}
-        </Space>
-      )
+            {mappings.length > 1 && !isReserved && (
+              <Button
+                type="text"
+                onClick={() => handleDeleteMapping(record.id)}
+                className="cursor-pointer text-red-500"
+              >
+                删除行
+              </Button>
+            )}
+          </Space>
+        );
+      }
     });
 
     return cols;
@@ -361,6 +374,13 @@ export default function Step2FieldMapping({
 
   // 删除映射行
   const handleDeleteMapping = (id: string) => {
+    const target = mappings.find((m) => m.id === id);
+    if (target) {
+      const meta = metadataFields[target.sequence - 1];
+      if (meta?.nameEn && RESERVED_FIELD_ENS.has(meta.nameEn)) {
+        return;
+      }
+    }
     setMappings(mappings.filter((mapping) => mapping.id !== id));
   };
 

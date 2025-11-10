@@ -219,23 +219,23 @@ export default function Step1MetadataFields({
         />
       )
     },
-    {
-      title: '必填',
-      dataIndex: 'required',
-      width: 80,
-      align: 'center' as const,
-      render: (_: any, record: any) => (
-        <Checkbox
-          checked={record.required}
-          disabled={
-            record.system === true || RESERVED_FIELD_ENS.has(record.nameEn)
-          }
-          onChange={(checked) =>
-            handleUpdateField(record.id, { required: checked })
-          }
-        />
-      )
-    },
+    // {
+    //   title: '必填',
+    //   dataIndex: 'required',
+    //   width: 80,
+    //   align: 'center' as const,
+    //   render: (_: any, record: any) => (
+    //     <Checkbox
+    //       checked={record.required}
+    //       disabled={
+    //         record.system === true || RESERVED_FIELD_ENS.has(record.nameEn)
+    //       }
+    //       onChange={(checked) =>
+    //         handleUpdateField(record.id, { required: checked })
+    //       }
+    //     />
+    //   )
+    // },
     {
       title: '可修改',
       dataIndex: 'allowModify',
