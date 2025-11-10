@@ -305,10 +305,16 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
 
         // 只有当时间存在时才添加时间参数，并转换为ISO字符串
         if (startTime) {
-          dbParams.start_time = new Date(startTime).toISOString();
+          const date = new Date(startTime);
+          // 添加8小时转换为东八区时间
+          date.setHours(date.getHours() + 8);
+          dbParams.start_time = date.toISOString();
         }
         if (endTime) {
-          dbParams.end_time = new Date(endTime).toISOString();
+          const date = new Date(endTime);
+          // 添加8小时转换为东八区时间
+          date.setHours(date.getHours() + 8);
+          dbParams.end_time = date.toISOString();
         }
         res = await getDbItemList(dbParams);
         console.log('调用数据库表API，参数:', dbParams);
