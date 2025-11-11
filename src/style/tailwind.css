@@ -146,3 +146,14 @@ input[name='card-radio-group']:focus-visible + .custom-radio-card {
 .shadow-border {
   box-shadow: -1px 0 0 0 #e8e9eb;
 }
+
+/* Hide scrollbar for Chrome, Safari and Opera */
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* Hide scrollbar for IE, Edge and Firefox */
+.scrollbar-hide {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}

@@ -1,0 +1,47 @@
+// 代码编辑器容器
+.sql-editor-container {
+  flex: 1;
+  background-color: #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  overflow: hidden;
+
+  :global(.arco-spin-children) {
+    height: 100%;
+  }
+
+  // CodeMirror 编辑器样式
+  .code-editor {
+    height: 100%;
+
+    :global(.cm-editor) {
+      height: 100%;
+    }
+  }
+
+  :global(.cm-content) {
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 24px;
+    color: #0f172a;
+  }
+
+  :global(.cm-placeholder) {
+    color: #94a3b8;
+  }
+
+  :global(.cm-line) {
+    padding: 0 12px;
+  }
+
+  :global(.cm-activeLine) {
+    background-color: unset;
+  }
+
+  :global(.cm-gutters) {
+    border: unset;
+    padding-top: 3px;
+    background-color: unset;
+    color: var(--color-text-4);
+    width: 24px;
+  }
+}

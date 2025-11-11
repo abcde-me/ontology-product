@@ -429,7 +429,8 @@ export default function DataLoad() {
         flexDirection: 'column',
         padding: '20px 21px 20px 20px',
         borderRadius: '10px',
-        minHeight: '100%'
+        marginTop: '20px',
+        minHeight: 'calc(100% - 40px)'
       }}
     >
       <h1
@@ -463,7 +464,7 @@ export default function DataLoad() {
             type="primary"
             icon={<IconPlus />}
             onClick={() => {
-              setVisible(true);
+              history.push('/tenant/compute/modaforge/dataLoad/create');
             }}
           >
             创建数据载入任务

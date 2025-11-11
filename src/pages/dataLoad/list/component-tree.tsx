@@ -769,7 +769,7 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
       >
         <div
           className={`overflow-hidden  text-ellipsis whitespace-nowrap ${dataRef?.isLastLeaf ? 'last-leaf-text' : ''} ${dataRef?.type === CatalogTypeEnum.table ? 'no-operation' : ''} ${dataRef?.type === CatalogTypeEnum.catalog ? 'catalog-title-text' : ''}`}
-          style={{ maxWidth: '150px' }}
+          // style={{ maxWidth: '150px' }}
         >
           {TitleText}
         </div>

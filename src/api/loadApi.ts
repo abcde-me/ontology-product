@@ -100,3 +100,27 @@ export async function getTableName(params: getTableNameParams) {
   //   }, 500);
   // });
 }
+
+export enum CheckSQLStatus {
+  /** 未校验 */
+  NONE = -1,
+  /** 校验成功 */
+  SUCCESS = 0,
+  /** 校验失败 */
+  ERROR = 1,
+  /** 校验中 */
+  CHECKING = 3
+}
+
+// 校验SQL语句
+export async function checkSQL(params: {
+  sql: string;
+  connectorId: number;
+}): Promise<
+  ApiRes<{
+    status: CheckSQLStatus;
+    message: string;
+  }>
+> {
+  return await UAPI.RES.checkSQLApi({}).post(params).inRegion().do();
+}

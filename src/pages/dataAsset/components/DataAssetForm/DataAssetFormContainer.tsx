@@ -1,10 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 import { Steps, Message } from '@arco-design/web-react';
-import { findDataAssetMapping } from '@/api/dataAsset';
+import {
+  findDataAssetMapping,
+  listDataAssetSource,
+  createDataAssetAndMapping
+} from '@/api/dataAsset';
 import Step1MetadataFields from './Step1MetadataFields';
 import Step2FieldMapping from './Step2FieldMapping';
-import { DataAssetField } from '@/types/dataAssetApi';
+import {
+  CreateDataAssetAndMappingReq,
+  DataAssetField,
+  FindDataAssetMappingItemRes,
+  ListDataAssetSourceResItem
+} from '@/types/dataAssetApi';
 
 interface DataAssetFormContainerProps {
   isEditMode?: boolean;
@@ -14,25 +23,21 @@ interface DataAssetFormContainerProps {
 // 第一步的字段定义
 export interface MetadataField extends DataAssetField {
   id: string;
+  /** 系统默认字段标记：用于前端禁用编辑/删除等 */
+  system?: boolean;
+  /** 是否为枚举类型（用于后续列展示配置，非后端创建必需） */
+  isEnumAble?: boolean;
+  /** 列展示顺序（用于后续列展示配置，非后端创建必需） */
+  displaySort?: number;
 }
 
 // 第二步的映射定义
 export interface FieldMapping {
   id: string;
   sequence: number;
-  assetName: string;
-  dataset: string;
-  volume: string;
-  database: string;
-  metadataDir: string;
-}
-
-// 数据来源类型
-export interface DataSource {
-  dataset: boolean;
-  volume: boolean;
-  database: boolean;
-  metadataDir: boolean;
+  nameZh: string;
+  // 动态的数据来源类型字段（键为接口返回的类型，值为映射值）
+  [key: string]: string | number | undefined;
 }
 
 export default function DataAssetFormContainer({
@@ -43,72 +48,93 @@ export default function DataAssetFormContainer({
   const [currentStep, setCurrentStep] = useState(0);
   const [loading, setLoading] = useState(false);
 
-  // 表单数据 - 默认包含一个字段
-  const [metadataFields, setMetadataFields] = useState<MetadataField[]>([
+  // 系统默认字段（表头）
+  const getDefaultSystemFields = (): MetadataField[] => [
     {
-      id: `field_${Date.now()}`,
-      nameZh: '',
-      nameEn: '',
-      type: undefined,
-      default: 'null',
+      id: `field_system_data_asset_name`,
+      nameZh: '数据资产名称',
+      nameEn: 'data_asset_name',
+      type: 'string',
+      default: '',
       required: true,
-      allowModify: true
+      allowModify: false,
+      system: true,
+      isEnumAble: false,
+      displaySort: 1
+    },
+    {
+      id: `field_system_tags`,
+      nameZh: '标签',
+      nameEn: 'tags',
+      type: 'array<varchar(64)>',
+      default: '',
+      required: true,
+      allowModify: false,
+      system: true,
+      isEnumAble: false,
+      displaySort: 2
+    },
+    {
+      id: `field_system_data_update_time`,
+      nameZh: '数据更新时间',
+      nameEn: 'data_update_time',
+      type: 'datetime',
+      default: '',
+      required: true,
+      allowModify: false,
+      system: true,
+      isEnumAble: false,
+      displaySort: 3
+    },
+    {
+      id: `field_system_data_source`,
+      nameZh: '来源',
+      nameEn: 'data_source',
+      type: 'string',
+      default: '',
+      required: true,
+      allowModify: false,
+      system: true,
+      isEnumAble: false,
+      displaySort: 4
     }
-  ]);
-  const [dataSources, setDataSources] = useState<DataSource>({
-    dataset: true,
-    volume: false,
-    database: false,
-    metadataDir: false
-  });
+  ];
+
+  // 表单数据 - 默认包含四个系统字段
+  const [metadataFields, setMetadataFields] = useState<MetadataField[]>(
+    getDefaultSystemFields()
+  );
+  const [dataSources, setDataSources] = useState<
+    Record<string, ListDataAssetSourceResItem>
+  >({});
   const [mappings, setMappings] = useState<FieldMapping[]>([]);
   const [autoMapping, setAutoMapping] = useState(true);
+  const [findDataAssetMappingData, setFindDataAssetMappingData] = useState<
+    ListDataAssetSourceResItem[]
+  >([]);
 
-  // 获取编辑数据
-  const fetchEditData = async () => {
-    if (!id) return;
-
+  // 获取数据资产映射数据
+  const fetchDataAssetMapping = async () => {
     try {
       setLoading(true);
-      const res = await findDataAssetMapping();
+      const res = await listDataAssetSource();
 
-      if (res.code === '' && res.status === 200) {
-        const data = res.data;
-
-        // 设置元数据字段
-        // if (data.metadataFields) {
-        //   setMetadataFields(data.metadataFields);
-        // }
-
-        // // 设置数据来源
-        // if (data.dataSources) {
-        //   setDataSources(data.dataSources);
-        // }
-
-        // // 设置字段映射
-        // if (data.mappings) {
-        //   setMappings(data.mappings);
-        // }
-
-        // // 设置自动映射
-        // if (data.autoMapping !== undefined) {
-        //   setAutoMapping(data.autoMapping);
-        // }
+      if (res.status !== 200) {
+        return;
       }
+
+      setFindDataAssetMappingData(res.data || []);
     } catch (error) {
-      console.error('获取数据资产详情失败:', error);
-      Message.error('获取数据失败，请重试');
+      Message.error('获取数据来源列表失败，请重试');
     } finally {
       setLoading(false);
     }
   };
 
-  // 组件挂载时获取编辑数据
+  // 组件挂载时获取数据资产映射数据
   useEffect(() => {
-    if (isEditMode && id) {
-      fetchEditData();
-    }
-  }, [isEditMode, id]);
+    fetchDataAssetMapping();
+  }, []);
 
   // 下一步
   const handleNext = () => {
@@ -126,15 +152,17 @@ export default function DataAssetFormContainer({
   };
 
   // 完成
-  const handleFinish = () => {
-    // TODO: 调用创建或更新API
-    console.log('提交数据:', {
-      metadataFields,
-      dataSources,
-      mappings,
-      autoMapping
-    });
-    // Message.success(isEditMode ? '更新成功' : '创建成功');
+  const handleFinish = async (
+    fieldsWithMappings: CreateDataAssetAndMappingReq
+  ) => {
+    const res = await createDataAssetAndMapping(fieldsWithMappings);
+
+    if (res.status !== 200) {
+      Message.error(res.message || '创建数据资产失败');
+      return;
+    }
+
+    Message.success('创建数据资产成功');
     history.push('/tenant/compute/modaforge/dataAsset/list');
   };
 
@@ -170,6 +198,7 @@ export default function DataAssetFormContainer({
                 setMetadataFields={setMetadataFields}
                 dataSources={dataSources}
                 setDataSources={setDataSources}
+                findDataAssetMappingData={findDataAssetMappingData}
                 onCancel={handleCancel}
                 onNext={handleNext}
               />
@@ -183,6 +212,7 @@ export default function DataAssetFormContainer({
                 setAutoMapping={setAutoMapping}
                 metadataFields={metadataFields}
                 dataSources={dataSources}
+                findDataAssetMappingData={findDataAssetMappingData}
                 onCancel={handleCancel}
                 onPrev={handlePrev}
                 onFinish={handleFinish}

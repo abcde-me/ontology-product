@@ -305,7 +305,7 @@ const columns = (
     filterIcon: <IconFilter />,
     filters: [
       { text: 'jsonl', value: datasetStorageType.jsonl },
-      { text: '文件', value: datasetStorageType.file },
+      { text: '向量', value: datasetStorageType.file },
       { text: '数据库表', value: datasetStorageType.table }
     ],
     filteredValue: selectedStorageTypeFilters,
@@ -318,7 +318,7 @@ const columns = (
             {record.storage_type === datasetStorageType.table
               ? '数据库表'
               : record.storage_type === datasetStorageType.file
-                ? '文件'
+                ? '向量'
                 : (record.storage_type ?? '-')}
           </span>
         </div>
@@ -566,7 +566,18 @@ const columns = (
             >
               编辑
             </Button> */}
-          <Button type="text">详情</Button>
+          <Button
+            type="text"
+            onClick={() => {
+              record.status === datasetStatus.normal ||
+              record.status === datasetStatus.version_updating ||
+              record.status === datasetStatus.version_update_failed
+                ? handleGoToDetail(record.id)
+                : '';
+            }}
+          >
+            详情
+          </Button>
           <Button type="text">移动</Button>
 
           <Dropdown
@@ -1499,20 +1510,37 @@ const DatasetManagement: React.FC = () => {
                 rowKey="id"
                 className={styles.datasetTable}
                 // rowHeight="47px"
-                columns={columns(
-                  handleGoToDetail,
-                  handleDelete,
-                  datasetList,
-                  handleExport,
-                  tagList,
-                  selectedTagFilters,
-                  selectedStorageTypeFilters,
-                  selectedStatusFilters,
-                  sortField,
-                  sortOrder,
-                  handleTableChange,
-                  handleRetry
-                )}
+                columns={
+                  item.key === 'all'
+                    ? columns(
+                        handleGoToDetail,
+                        handleDelete,
+                        datasetList,
+                        handleExport,
+                        tagList,
+                        selectedTagFilters,
+                        selectedStorageTypeFilters,
+                        selectedStatusFilters,
+                        sortField,
+                        sortOrder,
+                        handleTableChange,
+                        handleRetry
+                      )
+                    : columns(
+                        handleGoToDetail,
+                        handleDelete,
+                        datasetList,
+                        handleExport,
+                        tagList,
+                        selectedTagFilters,
+                        selectedStorageTypeFilters,
+                        selectedStatusFilters,
+                        sortField,
+                        sortOrder,
+                        handleTableChange,
+                        handleRetry
+                      ).filter((i) => i.dataIndex !== 'scenario_type')
+                }
                 data={datasetList}
                 rowSelection={rowSelection}
                 noDataElement={noDataElement({ description: '暂无数据' })}
@@ -1560,6 +1588,7 @@ const DatasetManagement: React.FC = () => {
 
       {/* 新增场景类型弹窗 */}
       <Modal
+        className={styles.addSceneTypeModal}
         visible={addSceneTypeVisible}
         onOk={() => sceneTypeForm.submit()}
         onCancel={() => setAddSceneTypeVisible(false)}

@@ -9,6 +9,7 @@ import {
   Pagination
 } from '@arco-design/web-react';
 import { ColumnProps } from '@arco-design/web-react/es/Table';
+import noDataElement from '@/components/no-data';
 
 // 可以根据实际情况，扩展 props 以接受 columns 变动等
 export interface DataAssetTableListProps {
@@ -97,25 +98,17 @@ const defaultColumns = [
       idx: number,
       { onEditAsset, onEditTags, onDelete }: any
     ) => (
-      <Space>
-        <Button
-          type="text"
-          style={{ marginRight: 6 }}
-          onClick={() => onEditAsset?.(record)}
-        >
+      <div className="flex items-center">
+        <Button type="text" onClick={() => onEditAsset?.(record)}>
           修改资产
         </Button>
-        <Button
-          type="text"
-          style={{ marginRight: 6 }}
-          onClick={() => onEditTags?.(record)}
-        >
+        <Button type="text" onClick={() => onEditTags?.(record)}>
           修改标签
         </Button>
         <Button type="text" onClick={() => onDelete?.(record)}>
           删除
         </Button>
-      </Space>
+      </div>
     )
   }
 ];
@@ -152,8 +145,19 @@ const DataAssetTableList: React.FC<DataAssetTableListProps> = ({
     onSelectChange?.(rowKeys.map((key) => String(key)));
   };
 
+  // 空态
+  if (!data || data.length === 0) {
+    return (
+      <div className="flex min-h-[200px] items-center justify-center">
+        {noDataElement({
+          description: '暂无数据资产'
+        })}
+      </div>
+    );
+  }
+
   return (
-    <div className="flex w-full flex-col">
+    <div className="flex w-full flex-col rounded-[12px] bg-white px-[16px] py-[16px]">
       <Table
         border={false}
         rowSelection={{

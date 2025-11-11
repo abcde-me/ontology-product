@@ -301,6 +301,7 @@ export const ModaForgeResourceEndpoints = {
   fileExportApi: PrefixAimdp + `/OutputToConnector`,
   listMetaData: PrefixAimdp + '/ListMetaData', // 查询元数据列表
   createDirMetaData: PrefixAimdp + '/CreateDirMetaData', // 创建元数据目录
+  checkSqlApi: PrefixAimdp + '/CheckSQL', // 校验SQL
 
   //数据集
   //获取数据集列表
@@ -337,6 +338,8 @@ export const ModaForgeResourceEndpoints = {
   dataContentFileList: PrefixAimdp + '/GetDatasetFilesTargetVersion',
   //数据内容数据库表
   dataContentTableList: PrefixAimdp + '/GetDatasetTableTargetVersion',
+  // 数据集场景分类列表
+  datasetSceneListApi: PrefixAimdp + '/ListScenes',
 
   // 连接器接口
 
@@ -390,6 +393,8 @@ export const ModaForgeResourceEndpoints = {
   reTryLoadApi: PrefixAimdp + '/RetryLoadTaskInstance',
   //载入获取表名
   getTableNameApi: PrefixAimdp + '/GenerateDBName',
+  // 校验SQL语句
+  checkSQLApi: PrefixAimdp + '/CheckSQL',
 
   // 数据标注接口
   // 数据标注配置 发布
@@ -408,6 +413,10 @@ export const ModaForgeResourceEndpoints = {
   getIndividualTreeListApi: PrefixUserCenter + '/ListUser',
   //  查询标注数据表格内容
   getAnnotationTabledDataApi: PrefixAimdp + '/ListSourceDirLoadTaskInstances',
+  // 获取模型列表
+  getModelList: PrefixLabelService + '/modelList',
+  // 获取模型标签信息
+  getModelLabelList: PrefixLabelService + '/modelLabelList',
 
   // python开发
   // 获取python列表
@@ -475,11 +484,14 @@ export const ModaForgeResourceEndpoints = {
 
   // 数据资产接口
   // 查询数据资产表字段和映射关系
-  findDataAssetMapping: PrefixAimdp + '/FindDataAssetMapping',
+  getDataAssetMapping: PrefixAimdp + '/GetDataAssetMapping',
+  // 自动映射
+  autoMapDataAssetFieldAndSource:
+    PrefixAimdp + '/AutoMapDataAssetFieldAndSource',
   // 获取数据资产列表
   listDataAssetData: PrefixAimdp + '/ListDataAssetData',
   // 查询数据来源
-  listDataAssetSource: PrefixAimdp + '/ListDataAssetSource',
+  listDataAssetSource: PrefixAimdp + '/ListDataAssetSources',
   // 删除数据资产
   dataAssetDelete: PrefixAimdp + '/DeleteDataAsset',
   // 解析数据资产字段文件
@@ -495,12 +507,14 @@ export const ModaForgeResourceEndpoints = {
   // 修改数据资产表列设置（前端展示）
   editDataAssetFieldsDisplay: PrefixAimdp + '/EditDataAssetFieldsDisplay',
   // 查询数据资产表列设置（前端展示）
-  findDataAssetFieldsDisplay: PrefixAimdp + '/FindDataAssetFieldsDisplay',
+  getDataAssetFieldsDisplay: PrefixAimdp + '/GetDataAssetFieldsDisplay',
   // 查询指定字段去重后的数量
   getDataAssetTableDistinctFieldCount:
     PrefixAimdp + '/GetDataAssetTableDistinctFieldCount',
   // 批量修改数据资产表中的数据信息
-  editDataAssetDataBatch: PrefixAimdp + '/EditDataAssetDataBatch'
+  editDataAssetDataBatch: PrefixAimdp + '/EditDataAssetDataBatch',
+  // 获取标签列表
+  listAssetTags: PrefixAimdp + '/ListAssetTags'
 };
 
 /**

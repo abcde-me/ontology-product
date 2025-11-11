@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Button,
   Table,
@@ -9,7 +9,9 @@ import {
   Popover,
   Dropdown,
   Menu,
-  Modal
+  Modal,
+  Tag,
+  Tooltip
 } from '@arco-design/web-react';
 import {
   IconPlus,
@@ -25,9 +27,9 @@ import SearchArea, { SearchField } from '../../components/SearchArea';
 import ViewToggle, { ViewType } from '../../components/ViewToggle';
 import ModifyAssetModal from '../../components/ModifyAssetModal';
 import ModifyTagsModal from '../../components/ModifyTagsModal';
+import EditSingleAssetModal from '../../components/EditSingleAssetModal';
 import { getTagList } from '@/api/datasetManagement';
 import {
-  listDataAssetSource,
   findDataAssetMapping,
   listDataAssetData,
   findDataAssetFieldsDisplay,
@@ -42,12 +44,14 @@ import {
 import { ColumnField } from '../../components/ColumnSettingModal';
 import ColumnSettingModal from '../../components/ColumnSettingModal';
 import { EditDataAssetData } from '@/types/dataAssetApi';
+import styles from './list.module.scss';
+import classNames from 'classnames';
 
 export default function DataAssetList() {
   const [dataAssetList, setDataAssetList] = useState<
     ListDataAssetDataRes['records']
   >([]);
-  const [viewType, setViewType] = useState<ViewType>(ViewType.LIST);
+  const [viewType, setViewType] = useState<ViewType>(ViewType.CARD);
   const [searchFields, setSearchFields] = useState<SearchField[]>([]);
   const [assetTags, setAssetTags] = useState<
     Array<{ label: string; value: any }>
@@ -64,7 +68,7 @@ export default function DataAssetList() {
   const [loading, setLoading] = useState(false);
   // 分页状态
   const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(12); // 默认卡片视图，每页12个
+  const [pageSize, setPageSize] = useState(60); // 默认卡片视图，每页12个
   const [total, setTotal] = useState(0);
   const [searchParams, setSearchParams] = useState({
     commonSearch: '',
@@ -75,10 +79,18 @@ export default function DataAssetList() {
   // 弹窗状态
   const [modifyAssetModalVisible, setModifyAssetModalVisible] = useState(false);
   const [modifyTagsModalVisible, setModifyTagsModalVisible] = useState(false);
+  const [editSingleAssetModalVisible, setEditSingleAssetModalVisible] =
+    useState(false);
+  const [editingRecord, setEditingRecord] = useState<any>(null); // 当前编辑的单条记录
   const [fieldsForModify, setFieldsForModify] = useState<
     Array<{ nameZh: string; nameEn: string; type: string }>
   >([]); // 用于修改资产的字段列表
+  const [columnFields, setColumnFields] = useState<ApiColumnField[]>([]); // 列字段列表（用于单条编辑）
   const history = useHistory();
+  // 吸顶状态
+  const [isSticky, setIsSticky] = useState(false);
+  const headerRef = useRef<HTMLDivElement>(null);
+  const sentinelRef = useRef<HTMLDivElement>(null);
 
   // 获取列表数据
   const loadListData = async (page: number, size: number) => {
@@ -113,6 +125,9 @@ export default function DataAssetList() {
         );
         setFieldsForModify(fieldsForModifyList);
 
+        // 保存列字段列表用于单条编辑弹窗
+        setColumnFields(fields || []);
+
         // 根据 fields 动态生成表格列
         const dynamicColumns = [
           {
@@ -125,18 +140,75 @@ export default function DataAssetList() {
           },
           // 根据 fields 生成列，保证每一列和表头一一对应
           ...(fields || [])
-            .filter((field: ApiColumnField) => field.isDisplay !== false)
-            .map((field: ApiColumnField) => ({
-              title: field.nameZh,
-              dataIndex: field.nameEn,
-              key: field.nameEn,
-              width: 150,
-              ellipsis: true
-            })),
+            .filter((field: ApiColumnField) => field.displaySort > 0)
+            .map((field: ApiColumnField) => {
+              // 如果是 tags 字段，使用 Tag 组件显示
+              if (field.nameEn === 'tags') {
+                return {
+                  title: field.nameZh,
+                  dataIndex: field.nameEn,
+                  key: field.nameEn,
+                  width: 150,
+                  render: (tagNames: string[] | string) => {
+                    // 处理字符串或数组格式
+                    let tags: string[] = [];
+                    if (Array.isArray(tagNames)) {
+                      tags = tagNames;
+                    } else if (typeof tagNames === 'string' && tagNames) {
+                      tags = tagNames
+                        .split(',')
+                        .map((tag) => tag.trim())
+                        .filter(Boolean);
+                    }
+
+                    if (!tags || tags.length === 0) return '-';
+
+                    return (
+                      <Space size="mini">
+                        {tags[0] && (
+                          <Tag>
+                            {tags[0].length > 5 ? (
+                              <Tooltip content={tags[0]}>
+                                {tags[0].substring(0, 5)}...
+                              </Tooltip>
+                            ) : (
+                              tags[0] || '-'
+                            )}
+                          </Tag>
+                        )}
+                        {tags.length > 1 && (
+                          <Tooltip
+                            content={tags.map((tag, index) => (
+                              <Tag
+                                key={`${tag}-${index}`}
+                                style={{ margin: '2px 2px' }}
+                              >
+                                {tag}
+                              </Tag>
+                            ))}
+                          >
+                            <Tag>+{tags.length - 1}</Tag>
+                          </Tooltip>
+                        )}
+                      </Space>
+                    );
+                  }
+                };
+              }
+
+              // 其他字段使用默认渲染
+              return {
+                title: field.nameZh,
+                dataIndex: field.nameEn,
+                key: field.nameEn,
+                width: 150,
+                ellipsis: true
+              };
+            }),
           {
             title: '操作',
             dataIndex: 'actions',
-            width: 200,
+            width: 204,
             key: 'actions',
             fixed: 'right' as const,
             render: (
@@ -145,25 +217,29 @@ export default function DataAssetList() {
               idx: number,
               { onEditAsset, onEditTags, onDelete }: any
             ) => (
-              <Space>
+              <div className="flex items-center gap-[16px]">
                 <Button
                   type="text"
-                  style={{ marginRight: 6 }}
                   onClick={() => onEditAsset?.(record)}
+                  className="px-[0px]"
                 >
                   修改资产
                 </Button>
                 <Button
                   type="text"
-                  style={{ marginRight: 6 }}
                   onClick={() => onEditTags?.(record)}
+                  className="px-[0px]"
                 >
                   修改标签
                 </Button>
-                <Button type="text" onClick={() => onDelete?.(record)}>
+                <Button
+                  type="text"
+                  className="px-[0px]"
+                  onClick={() => onDelete?.(record)}
+                >
                   删除
                 </Button>
-              </Space>
+              </div>
             )
           }
         ];
@@ -176,92 +252,90 @@ export default function DataAssetList() {
     }
   };
 
+  const loadColumnSettings = async () => {
+    const dataAssetFieldsDisplayRes = await findDataAssetFieldsDisplay({});
+    if (
+      dataAssetFieldsDisplayRes.status !== 200 ||
+      !dataAssetFieldsDisplayRes.data?.length
+    ) {
+      return;
+    }
+
+    // 处理列设置数据
+    // const { fields: displayFields } = dataAssetFieldsDisplayRes.data || {
+    //   fields: []
+    // };
+    // 将 API 返回的 ColumnField 格式转换为组件需要的格式
+    const convertedFields: ColumnField[] = (
+      dataAssetFieldsDisplayRes.data || []
+    ).map((field: ApiColumnField, index: number) => ({
+      id: field.nameEn || String(index),
+      name: field.nameZh,
+      type: field.type,
+      enumChecked: field.isEnumAble || false,
+      enumLoading: false,
+      enumCount: 0
+    }));
+    setColumnSettingsFields(convertedFields);
+  };
+
   // 初始化：检查是否有mapping数据
   useEffect(() => {
-    findDataAssetMapping()
-      .then((res) => {
-        if (res.code === 0 || res.code === undefined) {
-          const mappingData = res.data || [];
-          // 检查mapping数组长度，判断是否有数据
-          // 如果返回数组长度为0，说明没有任何映射配置，显示无数据页面
-          // 如果返回数组长度不为0，说明有映射配置，显示列表页
-          const hasData = mappingData.length > 0;
-          setHasMapping(hasData);
-
-          // 如果有mapping数据，并行请求列设置和列表数据
-          if (hasData) {
-            // 获取列设置
-            findDataAssetFieldsDisplay({})
-              .then((displayRes) => {
-                // 处理列设置数据
-                if (displayRes.code === 0 || displayRes.code === undefined) {
-                  const { fields: displayFields } = displayRes.data || {
-                    fields: []
-                  };
-                  // 将 API 返回的 ColumnField 格式转换为组件需要的格式
-                  const convertedFields: ColumnField[] = (
-                    displayFields || []
-                  ).map((field: ApiColumnField, index: number) => ({
-                    id: field.nameEn || String(index),
-                    name: field.nameZh,
-                    type: field.type,
-                    enumChecked: field.isEnum || false,
-                    enumLoading: false,
-                    enumCount: 0
-                  }));
-                  setColumnSettingsFields(convertedFields);
-                }
-              })
-              .catch((err) => {
-                console.error('获取列设置失败:', err);
-              });
-
-            // 加载列表数据
-            loadListData(1, 12);
-          }
-        } else {
-          // 接口失败时默认显示列表页
-          setHasMapping(true);
+    const init = async () => {
+      try {
+        const findDataAssetMappingRes = await findDataAssetMapping();
+        console.log('findDataAssetMappingRes', findDataAssetMappingRes);
+        if (findDataAssetMappingRes.status !== 200) {
+          setHasMapping(false);
+          return;
         }
-      })
-      .catch((err) => {
-        console.error('获取数据资产映射失败:', err);
-        // 接口失败时默认显示列表页
-        setHasMapping(true);
-      });
+
+        // 获取数据资产映射数据
+        const dataAssetMapping = findDataAssetMappingRes.data || [];
+
+        setHasMapping(dataAssetMapping.length > 0);
+
+        if (dataAssetMapping.length > 0) {
+          Promise.all([loadColumnSettings(), loadListData(1, pageSize)]);
+        }
+      } catch {
+        setHasMapping(false);
+      }
+    };
+
+    init();
   }, []);
 
   // 初始化搜索字段配置
   useEffect(() => {
     // 获取标签列表
-    getTagList()
-      .then((res) => {
-        if (res.code === 0 || res.code === undefined) {
-          const options = (res.data || []).map((tag: any) => ({
-            label: tag.name || tag.label,
-            value: tag.name || tag.value || tag.id
-          }));
-          setAssetTags(options);
-        }
-      })
-      .catch((err) => {
-        console.error('获取标签列表失败:', err);
-      });
-
+    // getTagList()
+    //   .then((res) => {
+    //     if (res.code === 0 || res.code === undefined) {
+    //       const options = (res.data || []).map((tag: any) => ({
+    //         label: tag.name || tag.label,
+    //         value: tag.name || tag.value || tag.id
+    //       }));
+    //       setAssetTags(options);
+    //     }
+    //   })
+    //   .catch((err) => {
+    //     console.error('获取标签列表失败:', err);
+    //   });
     // 获取资产来源列表
-    listDataAssetSource()
-      .then((res) => {
-        if (res.code === 0 || res.code === undefined) {
-          const options = (res.data || []).map((source: any) => ({
-            label: source.type || source.name || source.label,
-            value: source.type || source.name || source.value || source.id
-          }));
-          setAssetSources(options);
-        }
-      })
-      .catch((err) => {
-        console.error('获取资产来源列表失败:', err);
-      });
+    // listDataAssetSource()
+    //   .then((res) => {
+    //     if (res.code === 0 || res.code === undefined) {
+    //       const options = (res.data || []).map((source: any) => ({
+    //         label: source.type || source.name || source.label,
+    //         value: source.type || source.name || source.value || source.id
+    //       }));
+    //       setAssetSources(options);
+    //     }
+    //   })
+    //   .catch((err) => {
+    //     console.error('获取资产来源列表失败:', err);
+    //   });
   }, []);
 
   // 更新搜索字段配置（当标签和来源数据加载完成后）
@@ -297,6 +371,43 @@ export default function DataAssetList() {
     setSearchFields(fields);
   }, [assetTags, assetSources]);
 
+  // 检测吸顶状态
+  useEffect(() => {
+    // 只有当 hasMapping 为 true 时，sentinel 元素才会渲染
+    if (hasMapping !== true) return;
+
+    let observer: IntersectionObserver | null = null;
+
+    // 使用 requestAnimationFrame 确保 DOM 已经渲染
+    const rafId = requestAnimationFrame(() => {
+      const sentinel = sentinelRef.current;
+      if (!sentinel) return;
+
+      observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            // 当占位元素离开视口时，说明标题栏已经吸顶
+            setIsSticky(!entry.isIntersecting);
+          });
+        },
+        {
+          root: null,
+          rootMargin: '0px',
+          threshold: 0
+        }
+      );
+
+      observer.observe(sentinel);
+    });
+
+    return () => {
+      cancelAnimationFrame(rafId);
+      if (observer) {
+        observer.disconnect();
+      }
+    };
+  }, [hasMapping]);
+
   const handleCreateDataAsset = () => {
     // TODO: 实现创建数据资产的逻辑
     console.log('创建数据资产');
@@ -327,7 +438,7 @@ export default function DataAssetList() {
   const handleViewTypeChange = (type: ViewType) => {
     setViewType(type);
     // 切换视图时，重置分页并重新加载数据，清空选中状态
-    const newPageSize = type === ViewType.LIST ? 10 : 12;
+    const newPageSize = type === ViewType.LIST ? 50 : 48;
     setPageSize(newPageSize);
     setCurrentPage(1);
     setSelectedRowKeys([]);
@@ -490,8 +601,56 @@ export default function DataAssetList() {
 
   // 处理单个修改资产
   const handleSingleEditAsset = (record: any) => {
-    setSelectedRowKeys([record.id]);
-    setModifyAssetModalVisible(true);
+    setEditingRecord(record);
+    setEditSingleAssetModalVisible(true);
+  };
+
+  // 确认单条编辑资产
+  const handleSingleEditAssetConfirm = async (data: Record<string, any>) => {
+    if (!editingRecord) return;
+
+    try {
+      // 构建修改数据，只包含有变化的字段
+      const modifyContext: { fieldEnName: string; fieldValue: string }[] = [];
+      Object.keys(data).forEach((fieldEnName) => {
+        const newValue = data[fieldEnName];
+        const oldValue = editingRecord[fieldEnName];
+        // 如果值有变化，添加到修改列表
+        if (newValue !== oldValue) {
+          modifyContext.push({
+            fieldEnName,
+            fieldValue: Array.isArray(newValue)
+              ? newValue.join(',')
+              : String(newValue || '')
+          });
+        }
+      });
+
+      if (modifyContext.length === 0) {
+        Message.warning('没有需要修改的字段');
+        setEditSingleAssetModalVisible(false);
+        return;
+      }
+
+      const editData: EditDataAssetData = {
+        modifyMethod: ModifyMethod.COVER,
+        modifyIds: [editingRecord.id],
+        modifyContext
+      };
+      const res = await editDataAssetDataBatch(editData);
+      if (res.code === 0 || res.code === undefined) {
+        Message.success('修改成功');
+        setEditSingleAssetModalVisible(false);
+        setEditingRecord(null);
+        // 重新加载数据
+        loadListData(currentPage, pageSize);
+      } else {
+        Message.error('修改失败');
+      }
+    } catch (error) {
+      console.error('修改失败:', error);
+      Message.error('修改失败');
+    }
   };
 
   // 处理单个修改标签
@@ -546,8 +705,13 @@ export default function DataAssetList() {
 
   // 如果有mapping数据，显示带搜索区域的列表页
   return (
-    <div className="min-h-full w-full py-5 pr-5">
-      <div className="box-border h-full w-full rounded-2xl bg-white pb-[20px] pl-[24px] pr-6 pt-[20px]">
+    <div className={classNames('min-h-full w-full', styles['data-asset-list'])}>
+      <div
+        className={classNames(
+          'box-border h-full w-full py-[24px]',
+          styles['data-asset-list-content']
+        )}
+      >
         {/* {dataAssetList.length !== 0 && (
           <div className="mb-4 h-[30px] w-full leading-[30px]">
             <p className="text-xl font-bold">
@@ -562,10 +726,20 @@ export default function DataAssetList() {
           onMainSearch={handleMainSearch}
           onFieldSearch={handleFieldSearch}
           onReset={handleReset}
+          className="px-[24px]"
         />
 
+        {/* 占位元素，用于检测吸顶状态 */}
+        <div ref={sentinelRef} style={{ height: '1px', marginTop: '-1px' }} />
+
         {/* 标题和视图切换区域 */}
-        <div className="mb-4 flex h-[30px] w-full items-center justify-between leading-[32px]">
+        <div
+          ref={headerRef}
+          className={classNames(
+            'sticky top-0 z-10 flex w-full items-center justify-between px-[24px] pb-[16px] pt-[24px] leading-[30px]',
+            isSticky && 'bg-[var(--color-bg-4)]'
+          )}
+        >
           <p className="text-xl font-bold">数据资产（{total}）</p>
           <div className="flex items-center">
             {viewType === ViewType.LIST && (
@@ -664,7 +838,7 @@ export default function DataAssetList() {
             })}
           </div>
         ) : ( */}
-        <div>
+        <div className="px-[24px]">
           {loading ? (
             <div className="flex h-[calc(100%-70px)] items-center justify-center">
               <Spin />
@@ -725,6 +899,17 @@ export default function DataAssetList() {
         }
         onCancel={() => setModifyTagsModalVisible(false)}
         onConfirm={handleModifyTagsConfirm}
+      />
+      {/* 单条编辑资产弹窗 */}
+      <EditSingleAssetModal
+        visible={editSingleAssetModalVisible}
+        record={editingRecord}
+        fields={columnFields}
+        onCancel={() => {
+          setEditSingleAssetModalVisible(false);
+          setEditingRecord(null);
+        }}
+        onConfirm={handleSingleEditAssetConfirm}
       />
     </div>
   );

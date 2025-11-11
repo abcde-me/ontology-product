@@ -79,7 +79,7 @@ export default function Requirement() {
         }
       };
       const res = await getAnnotationList(params);
-      if (res.code === 0 && res.data) {
+      if (res.code === 'success' && res.data) {
         setRequirementData(res.data.result || []);
         setTotal(res.data?.total);
         setLoading(false);
@@ -174,7 +174,7 @@ export default function Requirement() {
       dataIndex: 'name',
       width: 280,
       ellipsis: true,
-      className: 'hover-change workflow-name',
+      className: 'hover-change requirement-name',
       render: (_, record) => {
         return renderEmptyPlaceholder(record.name) !== '-' ? (
           // 查看需求详情权限判断
@@ -341,7 +341,7 @@ export default function Requirement() {
                     try {
                       getAnnotationDownload({ requirement_id: record.id })
                         .then((res) => {
-                          if (res.code === 0) {
+                          if (res.code === 'success') {
                             const a = document.createElement('a');
                             a.href = res?.data?.download_url;
                             document.body.appendChild(a);

@@ -6,24 +6,16 @@ interface TextTruncateProps {
   maxW?: string;
   // 文本
   text: string;
-  //总行数
-  clientHeight?: number;
-  typeTooltip?;
 }
 
-const TextTruncate: React.FC<TextTruncateProps> = ({
-  maxW,
-  text,
-  clientHeight,
-  typeTooltip
-}) => {
+const TextTruncate: React.FC<TextTruncateProps> = ({ maxW, text }) => {
   const [overflow, setOverflow] = useState(false);
   const textRef = useRef<HTMLParagraphElement>(null);
 
   // 检查溢出的函数
   const checkOverflow = (element: HTMLElement | null) => {
     if (element) {
-      return element.scrollHeight > element.clientHeight;
+      return element.scrollWidth > element.clientWidth;
     }
     return false;
   };
@@ -50,31 +42,21 @@ const TextTruncate: React.FC<TextTruncateProps> = ({
   }, [text]);
 
   return (
-    <div
+    <p
       ref={textRef}
-      className=" cursor-pointer"
+      className="cursor-pointer truncate"
       style={{
-        maxWidth: maxW,
-        overflow: 'hidden',
-        textOverflow: 'ellipsis',
-        whiteSpace: 'nowrap'
+        maxWidth: maxW
       }}
     >
-      {!typeTooltip ? (
-        <>
-          {' '}
-          {overflow ? (
-            <Tooltip content={text} position="top">
-              {text}
-            </Tooltip>
-          ) : (
-            <>{text}</>
-          )}
-        </>
+      {overflow ? (
+        <Tooltip content={text} position="top">
+          {text}
+        </Tooltip>
       ) : (
-        <div>{text}</div>
+        <>{text}</>
       )}
-    </div>
+    </p>
   );
 };
 

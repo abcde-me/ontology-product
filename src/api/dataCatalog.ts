@@ -185,91 +185,90 @@ export interface GetCatalogListRes {
 export async function getCatalogList(
   param: GetCatalogListParams
 ): Promise<ApiRes<GetCatalogListRes>> {
-  // TODO: 联调
-  // return await UAPI.RES.catalogListApi({}).post(param).inRegion().do();
+  return await UAPI.RES.catalogListApi({}).post(param).inRegion().do();
 
   // mock data
-  return Promise.resolve({
-    code: '0',
-    message: 'success',
-    requestId: '123',
-    status: 200,
-    data: {
-      src: [
-        {
-          id: 122,
-          parent_id: 0,
-          type: 1,
-          type_name: 'catalog',
-          name: '源目录1',
-          base_dir: '/user/xxd',
-          children: {
-            volume: [
-              {
-                base_dir: '',
-                id: 201,
-                name: '目标卷A',
-                parent_id: 1,
-                type: 2,
-                type_name: 'volume'
-              }
-            ],
-            db: [
-              {
-                id: 101,
-                name: '目标数据库A',
-                type: 2,
-                type_name: 'db',
-                base_dir: '/target/volume1/dbA'
-              }
-            ],
-            meta_data: [
-              {
-                id: 1,
-                parent_id: 0,
-                name: '元数据1',
-                type: 1,
-                type_name: 'meta_data',
-                children: {
-                  item: [
-                    {
-                      id: 1,
-                      name: '元数据1',
-                      type: 1,
-                      type_name: 'meta_data'
-                    }
-                  ]
-                }
-              }
-            ]
-          }
-        }
-      ],
-      dst: [
-        {
-          id: 1,
-          name: '目标卷1',
-          type: 1,
-          type_name: 'volume',
-          base_dir: '/target/volume1',
-          parent_id: 0,
-          perms: ['read', 'write'],
-          children: {
-            volume: [
-              {
-                base_dir: '',
-                id: 201,
-                name: '目标卷A',
-                parent_id: 1,
-                type: 2,
-                type_name: 'volume'
-              }
-            ]
-          }
-        }
-      ]
-    }
-  });
+  // return Promise.resolve({
+  //   code: '0',
+  //   message: 'success',
+  //   requestId: '123',
+  //   status: 200,
+  //   data: {
+  //     src: [
+  //       {
+  //         id: 122,
+  //         parent_id: 0,
+  //         type: 1,
+  //         type_name: 'catalog',
+  //         name: '源目录1',
+  //         base_dir: '/user/xxd',
+  //         children: {
+  //           volume: [
+  //             {
+  //               base_dir: '',
+  //               id: 201,
+  //               name: '目标卷A',
+  //               parent_id: 1,
+  //               type: 2,
+  //               type_name: 'volume'
+  //             }
+  //           ],
+  //           db: [
+  //             {
+  //               id: 101,
+  //               name: '目标数据库A',
+  //               type: 2,
+  //               type_name: 'db',
+  //               base_dir: '/target/volume1/dbA'
+  //             }
+  //           ],
+  //           meta_data: [
+  //             {
+  //               id: 1,
+  //               parent_id: 0,
+  //               name: '元数据1',
+  //               type: 1,
+  //               type_name: 'meta_data',
+  //               children: {
+  //                 item: [
+  //                   {
+  //                     id: 1,
+  //                     name: '元数据1',
+  //                     type: 1,
+  //                     type_name: 'meta_data'
+  //                   }
+  //                 ]
+  //               }
+  //             }
+  //           ]
+  //         }
+  //       }
+  //     ],
+  //     dst: [
+  //       {
+  //         id: 1,
+  //         name: '目标卷1',
+  //         type: 1,
+  //         type_name: 'volume',
+  //         base_dir: '/target/volume1',
+  //         parent_id: 0,
+  //         perms: ['read', 'write'],
+  //         children: {
+  //           volume: [
+  //             {
+  //               base_dir: '',
+  //               id: 201,
+  //               name: '目标卷A',
+  //               parent_id: 1,
+  //               type: 2,
+  //               type_name: 'volume'
+  //             }
+  //           ]
+  //         }
+  //       }
+  //     ]
+  //   }
+  // });
 }
 
 export interface GetSourceCatalogFileListParams {
@@ -961,62 +960,46 @@ export async function getMetaDataList(
       records: [
         {
           id: 1,
-          name: '元数据1',
-          type: 'string',
-          searchContent: ['元数据1'],
+          name: '井位分布图.map',
+          type: '图件',
+          searchContent: ['井位分布图.map'],
           created_at: '2024-01-01 12:00:00',
           updated_at: '2024-01-01 12:00:00'
         },
         {
           id: 2,
-          name: '元数据2',
-          type: 'string',
-          searchContent: ['元数据2'],
+          name: '储量计算报告.pdf',
+          type: '文档',
+          searchContent: ['储量计算报告.pdf'],
           created_at: '2024-01-01 12:00:00',
           updated_at: '2024-01-01 12:00:00'
         },
         {
           id: 3,
-          name: '元数据3',
-          type: 'string',
-          searchContent: ['元数据3'],
+          name: '试井解释报告.pdf',
+          type: '文档',
+          searchContent: ['试井解释报告.pdf'],
           created_at: '2024-01-01 12:00:00',
           updated_at: '2024-01-01 12:00:00'
         },
         {
           id: 4,
-          name: '元数据4',
-          type: 'string',
-          searchContent: ['元数据4'],
+          name: '射孔数据表.job',
+          type: '体数据',
+          searchContent: ['射孔数据表.job'],
           created_at: '2024-01-01 12:00:00',
           updated_at: '2024-01-01 12:00:00'
         },
         {
           id: 5,
-          name: '元数据5',
-          type: 'string',
-          searchContent: ['元数据5'],
-          created_at: '2024-01-01 12:00:00',
-          updated_at: '2024-01-01 12:00:00'
-        },
-        {
-          id: 6,
-          name: '元数据6',
-          type: 'string',
-          searchContent: ['元数据6'],
-          created_at: '2024-01-01 12:00:00',
-          updated_at: '2024-01-01 12:00:00'
-        },
-        {
-          id: 7,
-          name: '元数据7',
-          type: 'string',
-          searchContent: ['元数据7'],
+          name: '井口温度压力实时趋势.realtime',
+          type: '体数据',
+          searchContent: ['井口温度压力实时趋势.realtime'],
           created_at: '2024-01-01 12:00:00',
           updated_at: '2024-01-01 12:00:00'
         }
       ],
-      total: 100,
+      total: 5,
       size: 10,
       current: 0,
       loadTaskStatus: LoadTaskStatus.COMPLETED
