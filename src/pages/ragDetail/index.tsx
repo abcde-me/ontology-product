@@ -1,9 +1,9 @@
 import React, { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
-import Header from './components/Header';
+import Header from './components/common/Header';
 import SceneRouter from './components/SceneRouter';
-import ImageModal from './components/ImageModal';
-import SegmentDrawer from './components/SegmentDrawer';
+import ImageModal from './components/common/ImageModal';
+import SegmentDrawer from './components/drawers/SegmentDrawer';
 import { useRagDetailStore } from './store/ragDetailStore';
 import './styles/index.css';
 

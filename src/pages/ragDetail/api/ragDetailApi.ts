@@ -19,7 +19,9 @@ import type {
 import { SegmentData } from '../utils/segmentData';
 import { TreeData, getTreeDataByRagId } from '../utils/treeData';
 import { getSegmentDataByRagId } from '../utils/segmentDataByRagId';
-import { NewSegmentData } from '../utils/newSegmentData';
+import { NewSegmentData_1001 } from '../utils/newSegmentData_1001';
+import { NewSegmentData_1002 } from '../utils/newSegmentData_1002';
+import { NewSegmentData_1003 } from '../utils/newSegmentData_1003';
 import { newTreeData } from '../utils/newTreeData';
 
 /**
@@ -244,11 +246,31 @@ export async function fetchRagDetail(ragId: string): Promise<RagDetailData> {
       let filePath = '/知识库/政策研究';
       let sceneType: 'pdf' | 'ppt' | 'excel' = 'pdf';
 
-      // 使用新的数据格式（ragId=1002 使用新数据）
-      if (ragId === '1002') {
-        // 使用新的数据源
-        const newSegmentResponse = NewSegmentData;
-        const newTreeResponse = newTreeData;
+      // 使用新的数据格式（ragId=1001, 1002, 1003 使用新数据）
+      if (ragId === '1001' || ragId === '1002' || ragId === '1003') {
+        let newSegmentResponse;
+        let newTreeResponse;
+
+        // 根据 ragId 选择不同的数据源
+        if (ragId === '1001') {
+          // 1001: 只有分段列表，无目录树
+          newSegmentResponse = NewSegmentData_1001;
+          newTreeResponse = null;
+          fileName = '纯文本分段示例（无目录树）.pdf';
+          filePath = '/知识库/示例文档';
+        } else if (ragId === '1002') {
+          // 1002: 有目录树 + 分段列表（纯文本）
+          newSegmentResponse = NewSegmentData_1002;
+          newTreeResponse = newTreeData;
+          fileName = '带目录树的文档（纯文本）.pdf';
+          filePath = '/知识库/结构化文档';
+        } else {
+          // 1003: 有目录树 + 分段列表（含图片和公式）
+          newSegmentResponse = NewSegmentData_1003;
+          newTreeResponse = newTreeData;
+          fileName = '图文混排文档（含图片和公式）.pdf';
+          filePath = '/知识库/多媒体文档';
+        }
 
         // 转换分段数据（添加类型断言）
         segments = (newSegmentResponse.data.list as ApiSegment[]).map(
@@ -261,14 +283,10 @@ export async function fetchRagDetail(ragId: string): Promise<RagDetailData> {
           newTreeResponse.data &&
           newTreeResponse.data.catalogs
         ) {
-          const rootNode = transformCatalogNode(
-            newTreeResponse.data.catalogs as any
-          );
+          const rootNode = transformCatalogNode(newTreeResponse.data.catalogs);
           directory = [rootNode];
         }
 
-        fileName = '带目录树的文档（新格式）.pdf';
-        filePath = '/知识库/结构化文档';
         sceneType = 'pdf';
       } else {
         // 使用旧的数据格式（其他 ragId）
@@ -291,13 +309,7 @@ export async function fetchRagDetail(ragId: string): Promise<RagDetailData> {
         }
 
         // 根据ragId设置不同的文件名和场景类型
-        if (ragId === '1001') {
-          fileName = '纯文本分段示例.pdf';
-          filePath = '/知识库/示例文档';
-        } else if (ragId === '1003') {
-          fileName = '图文混排文档.pdf';
-          filePath = '/知识库/多媒体文档';
-        } else if (ragId === '1004') {
+        if (ragId === '1004') {
           fileName = '2024年度工作总结.pptx';
           filePath =
             'https://view.officeapps.live.com/op/embed.aspx?src=https://scholar.harvard.edu/files/torman_personal/files/samplepptx.pptx';
