@@ -305,7 +305,7 @@ const columns = (
     filterIcon: <IconFilter />,
     filters: [
       { text: 'jsonl', value: datasetStorageType.jsonl },
-      { text: '文件', value: datasetStorageType.file },
+      { text: '向量', value: datasetStorageType.file },
       { text: '数据库表', value: datasetStorageType.table }
     ],
     filteredValue: selectedStorageTypeFilters,
@@ -318,7 +318,7 @@ const columns = (
             {record.storage_type === datasetStorageType.table
               ? '数据库表'
               : record.storage_type === datasetStorageType.file
-                ? '文件'
+                ? '向量'
                 : (record.storage_type ?? '-')}
           </span>
         </div>
