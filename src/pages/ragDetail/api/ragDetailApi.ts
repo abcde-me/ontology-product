@@ -56,6 +56,11 @@ function transformSegment(apiSegment: any): Segment {
     baseSegment.slideContent = apiSegment.slideContent;
   }
 
+  // 如果是表格分段，添加表格特有字段
+  if (apiSegment.tableData !== undefined) {
+    baseSegment.tableData = apiSegment.tableData;
+  }
+
   return baseSegment;
 }
 
@@ -187,6 +192,10 @@ export async function fetchRagDetail(ragId: string): Promise<RagDetailData> {
         filePath =
           'https://view.officeapps.live.com/op/embed.aspx?src=https://scholar.harvard.edu/files/torman_personal/files/samplepptx.pptx';
         sceneType = 'ppt';
+      } else if (ragId === '1005') {
+        fileName = '销售数据统计.xlsx';
+        filePath = '/知识库/数据表格';
+        sceneType = 'excel';
       }
 
       const result: RagDetailData = {

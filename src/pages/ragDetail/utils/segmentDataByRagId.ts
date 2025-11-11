@@ -6,6 +6,7 @@ import { SegmentData } from './segmentData';
  * ragId=1002: 纯文本分段
  * ragId=1003: 图文混排分段(包含图片)
  * ragId=1004: PPT分段
+ * ragId=1005: 表格分段
  */
 export function getSegmentDataByRagId(ragId: string) {
   if (ragId === '1003') {
@@ -14,6 +15,10 @@ export function getSegmentDataByRagId(ragId: string) {
 
   if (ragId === '1004') {
     return SegmentData_1004;
+  }
+
+  if (ragId === '1005') {
+    return SegmentData_1005;
   }
 
   // ragId=1001 和 1002 使用相同的纯文本分段数据
@@ -469,5 +474,164 @@ export const SegmentData_1004 = {
     limit: 20,
     page: 1,
     total: 5
+  }
+};
+
+// ragId=1005 的表格分段数据
+export const SegmentData_1005 = {
+  code: 'Success',
+  message: '请求成功',
+  data: {
+    data: [
+      {
+        id: 'segment-table-001',
+        dataset_id: 'dataset-68471725-5c49-4392-a7ce-2d02d3401160',
+        document_id: 'document-table-001',
+        position_bbox: {},
+        position: 0,
+        content: '员工信息表',
+        content_shot: '员工信息表',
+        sign_content: '',
+        answer: '',
+        word_count: 5,
+        tokens: 3,
+        keywords: null,
+        index_node_id: '',
+        index_node_hash: '',
+        hit_count: 0,
+        enabled: true,
+        disabled_at: '0001-01-01T00:00:00Z',
+        disabled_by: '',
+        status: 'completed',
+        created_by: '',
+        created_at: '2024-01-15T10:30:00Z',
+        updated_at: '2024-01-15T10:30:00Z',
+        updated_by: '',
+        indexing_at: '0001-01-01T00:00:00Z',
+        completed_at: '2024-01-15T10:30:00Z',
+        error: '',
+        stopped_at: '0001-01-01T00:00:00Z',
+        type: 0,
+        is_edit: false,
+        edited_at: '0001-01-01T00:00:00Z',
+        full_title: '员工信息表',
+        title_id: 'title::table::1',
+        node_id: 1,
+        level: 1,
+        title: '员工信息表',
+        tag_status: 0,
+        tableData: {
+          headers: ['员工ID', '姓名', '部门', '职位', '入职日期', '月薪（元）'],
+          rows: [
+            {
+              员工ID: 'E001',
+              姓名: '张三',
+              部门: '技术部',
+              职位: '高级工程师',
+              入职日期: '2020/3/15',
+              '月薪（元）': '18,000'
+            },
+            {
+              员工ID: 'E002',
+              姓名: '李四',
+              部门: '市场部',
+              职位: '市场经理',
+              入职日期: '2019/7/1',
+              '月薪（元）': '15,500'
+            },
+            {
+              员工ID: 'E003',
+              姓名: '王五',
+              部门: '销售部',
+              职位: '销售代表',
+              入职日期: '2021/5/20',
+              '月薪（元）': '8,000'
+            },
+            {
+              员工ID: 'E004',
+              姓名: '赵六',
+              部门: '技术部',
+              职位: '实习生',
+              入职日期: '2022/2/10',
+              '月薪（元）': '4,500'
+            }
+          ]
+        }
+      },
+      {
+        id: 'segment-table-002',
+        dataset_id: 'dataset-68471725-5c49-4392-a7ce-2d02d3401160',
+        document_id: 'document-table-001',
+        position_bbox: {},
+        position: 1,
+        content: '销售数据表',
+        content_shot: '销售数据表',
+        sign_content: '',
+        answer: '',
+        word_count: 5,
+        tokens: 3,
+        keywords: null,
+        index_node_id: '',
+        index_node_hash: '',
+        hit_count: 0,
+        enabled: true,
+        disabled_at: '0001-01-01T00:00:00Z',
+        disabled_by: '',
+        status: 'completed',
+        created_by: '',
+        created_at: '2024-01-15T10:35:00Z',
+        updated_at: '2024-01-15T10:35:00Z',
+        updated_by: '',
+        indexing_at: '0001-01-01T00:00:00Z',
+        completed_at: '2024-01-15T10:35:00Z',
+        error: '',
+        stopped_at: '0001-01-01T00:00:00Z',
+        type: 0,
+        is_edit: false,
+        edited_at: '0001-01-01T00:00:00Z',
+        full_title: '销售数据表',
+        title_id: 'title::table::2',
+        node_id: 2,
+        level: 1,
+        title: '销售数据表',
+        tag_status: 0,
+        tableData: {
+          headers: [
+            '产品名称',
+            '2023年销售额',
+            '2024年销售额',
+            '增长率',
+            '市场占有率'
+          ],
+          rows: [
+            {
+              产品名称: '产品A',
+              '2023年销售额': '1,200万',
+              '2024年销售额': '1,500万',
+              增长率: '25%',
+              市场占有率: '15%'
+            },
+            {
+              产品名称: '产品B',
+              '2023年销售额': '800万',
+              '2024年销售额': '1,000万',
+              增长率: '25%',
+              市场占有率: '10%'
+            },
+            {
+              产品名称: '产品C',
+              '2023年销售额': '600万',
+              '2024年销售额': '900万',
+              增长率: '50%',
+              市场占有率: '9%'
+            }
+          ]
+        }
+      }
+    ],
+    has_more: false,
+    limit: 20,
+    page: 1,
+    total: 2
   }
 };
