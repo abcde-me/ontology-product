@@ -1,4 +1,5 @@
 import React, { useMemo, useEffect, useRef } from 'react';
+import { Empty } from '@arco-design/web-react';
 import {
   useRagDetailStore,
   type Segment,
@@ -27,7 +28,8 @@ const SegmentList: React.FC<SegmentListProps> = ({
     selectedSegmentId: storeSelectedSegmentId,
     setSelectedSegmentId,
     highlightPdfCoordinates,
-    clearPdfHighlight
+    clearPdfHighlight,
+    segmentSearchText
   } = useRagDetailStore();
   const segmentRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
 
@@ -37,6 +39,40 @@ const SegmentList: React.FC<SegmentListProps> = ({
     propSelectedSegmentId !== undefined
       ? propSelectedSegmentId
       : storeSelectedSegmentId;
+
+  // 搜索过滤逻辑
+  const filteredSegments = useMemo(() => {
+    if (!segmentSearchText.trim()) {
+      return segments;
+    }
+
+    const searchLower = segmentSearchText.toLowerCase().trim();
+    return segments.filter((segment) => {
+      const titleMatch = segment.title?.toLowerCase().includes(searchLower);
+      const contentMatch = segment.content.toLowerCase().includes(searchLower);
+      return titleMatch || contentMatch;
+    });
+  }, [segments, segmentSearchText]);
+
+  // 按 title 分组
+  const groupedSegments = useMemo(() => {
+    const groups: { title: string; segments: Segment[] }[] = [];
+    const titleMap = new Map<string, Segment[]>();
+
+    filteredSegments.forEach((segment) => {
+      const title = segment.title || '未分类';
+      if (!titleMap.has(title)) {
+        titleMap.set(title, []);
+      }
+      titleMap.get(title)!.push(segment);
+    });
+
+    titleMap.forEach((segs, title) => {
+      groups.push({ title, segments: segs });
+    });
+
+    return groups;
+  }, [filteredSegments]);
 
   // 当选中的分段变化时，自动滚动到该分段
   useEffect(() => {
@@ -90,46 +126,72 @@ const SegmentList: React.FC<SegmentListProps> = ({
     }
   };
 
+  // 渲染分组的分段列表
   const segmentItems = useMemo(() => {
-    return segments.map((segment, index) => {
-      // 根据renderMode渲染不同的卡片
-      if (renderMode === 'image-text') {
-        return (
-          <div
-            key={segment.id}
-            ref={(el) => (segmentRefs.current[segment.id] = el)}
-            onClick={() => handleSegmentClick(segment.id)}
-            className={index > 0 ? 'mt-3' : ''}
-            style={{ cursor: 'pointer' }}
-          >
-            <ImageTextSegmentCard
-              segment={segment as ImageTextSegment}
-              isSelected={selectedSegmentId === segment.id}
-            />
-          </div>
-        );
-      }
-
+    if (groupedSegments.length === 0) {
       return (
-        <div
-          key={segment.id}
-          ref={(el) => (segmentRefs.current[segment.id] = el)}
-          onClick={() => handleSegmentClick(segment.id)}
-          className={index > 0 ? 'mt-3' : ''}
-          style={{ cursor: 'pointer' }}
-        >
-          <SegmentCard
-            segment={segment}
-            isSelected={selectedSegmentId === segment.id}
-          />
+        <div className="flex h-full items-center justify-center">
+          <Empty description="未找到匹配的分段" />
         </div>
       );
-    });
-  }, [segments, selectedSegmentId, renderMode]);
+    }
+
+    return groupedSegments.map((group, groupIndex) => (
+      <div key={group.title} className={groupIndex < 0 ? 'mt-6' : ''}>
+        {/* 标题分组头部 */}
+        <div className="rounded-md py-3">
+          <div className="text-sm font-medium text-[#0F172A]">
+            {group.title}
+          </div>
+        </div>
+
+        {/* 该标题下的分段列表 */}
+        <div className="space-y-3">
+          {group.segments.map((segment) => {
+            // 根据renderMode渲染不同的卡片
+            if (renderMode === 'image-text') {
+              return (
+                <div
+                  key={segment.id}
+                  ref={(el) => (segmentRefs.current[segment.id] = el)}
+                  onClick={() => handleSegmentClick(segment.id)}
+                  style={{ cursor: 'pointer' }}
+                >
+                  <ImageTextSegmentCard
+                    segment={segment as ImageTextSegment}
+                    isSelected={selectedSegmentId === segment.id}
+                  />
+                </div>
+              );
+            }
+
+            return (
+              <div
+                key={segment.id}
+                ref={(el) => (segmentRefs.current[segment.id] = el)}
+                onClick={() => handleSegmentClick(segment.id)}
+                style={{ cursor: 'pointer' }}
+              >
+                <SegmentCard
+                  segment={segment}
+                  isSelected={selectedSegmentId === segment.id}
+                />
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    ));
+  }, [groupedSegments, selectedSegmentId, renderMode]);
 
   return (
     <div className="flex h-full flex-col bg-white px-4">
-      {!hideHeader && <SegmentListHeader />}
+      {!hideHeader && (
+        <SegmentListHeader
+          totalCount={segments.length}
+          filteredCount={filteredSegments.length}
+        />
+      )}
       <div
         className={`flex-1 overflow-y-auto pb-4 ${styles.scrollContainer}`}
         style={{ minHeight: 0 }}

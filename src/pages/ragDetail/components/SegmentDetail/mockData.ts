@@ -8,6 +8,12 @@ import type { SegmentDetailData } from '../../types';
 export const mockSegmentDetailData: SegmentDetailData = {
   segmentId: 'file_001_chunk_001',
   charCount: 426,
+  enhancement: {
+    summary:
+      '按照本次发行前的股份数计算，对于截止本次发行前本行已经审计的最近一个审计基准日的滚存未分配利润，由本次发行前的本行老股东享有其中的 35%，其余部分由老股东和新股东共享；对于基准日之后实现的可分配利润，则全部由老股东和新股东共享。截至 2006 年 12 月 31 日，按滚存未分配利润计算的应由老',
+    hypotheticalAnswer:
+      '按照本次发行前的股份数计算，对于截止本次发行前本行已经审计的最近一个审计基准日的滚存未分配利润，由本次发行前的本行老股东享有其中的 35%，其余部分由老股东和新股东共享；对于基准日之后实现的可分配利润，则全部由老股东和新股东共享。截至 2006 年 12 月 31 日，按滚存未分配利润计算的应由老'
+  },
   elements: [
     {
       id: 'element_text_001',

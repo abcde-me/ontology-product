@@ -250,16 +250,20 @@ export async function fetchRagDetail(ragId: string): Promise<RagDetailData> {
         const newSegmentResponse = NewSegmentData;
         const newTreeResponse = newTreeData;
 
-        // 转换分段数据
-        segments = newSegmentResponse.data.list.map(transformSegment);
+        // 转换分段数据（添加类型断言）
+        segments = (newSegmentResponse.data.list as ApiSegment[]).map(
+          transformSegment
+        );
 
-        // 转换目录树数据
+        // 转换目录树数据（添加类型断言）
         if (
           newTreeResponse &&
           newTreeResponse.data &&
           newTreeResponse.data.catalogs
         ) {
-          const rootNode = transformCatalogNode(newTreeResponse.data.catalogs);
+          const rootNode = transformCatalogNode(
+            newTreeResponse.data.catalogs as any
+          );
           directory = [rootNode];
         }
 
@@ -364,7 +368,8 @@ export async function fetchSegmentDetail(
         (s: any) => s.id === segmentId
       );
       if (apiSegment) {
-        resolve(transformSegment(apiSegment));
+        // 使用旧的转换函数，因为 SegmentData 是旧格式
+        resolve(transformSegmentOld(apiSegment));
       } else {
         reject(new Error('Segment not found'));
       }

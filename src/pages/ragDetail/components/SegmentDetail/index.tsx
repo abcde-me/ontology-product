@@ -7,6 +7,7 @@ import React, { useEffect } from 'react';
 import { IconEdit } from '@arco-design/web-react/icon';
 import BasicInfo from './BasicInfo';
 import ElementList from './ElementList';
+import EnhancementInfo from './EnhancementInfo';
 import { useSegmentDetailStore } from './store/segmentDetailStore';
 import { useSegmentDrawerStore } from '../SegmentDrawer/store/segmentDrawerStore';
 
@@ -20,10 +21,16 @@ const SegmentDetail: React.FC<SegmentDetailProps> = ({ segmentId }) => {
     detailData: localDetailData,
     isEditing,
     loading,
+    isEditingEnhancement,
+    loadingEnhancement,
     initializeDetail,
     startEditing,
     cancelEditing,
-    confirmEditing
+    confirmEditing,
+    startEditingEnhancement,
+    cancelEditingEnhancement,
+    confirmEditingEnhancement,
+    updateEnhancement
   } = useSegmentDetailStore();
 
   // 从统一的 drawer store 获取数据
@@ -94,6 +101,21 @@ const SegmentDetail: React.FC<SegmentDetailProps> = ({ segmentId }) => {
             isEditing={isEditing}
           />
         </div>
+
+        {/* 分段增强信息 */}
+        {localDetailData.enhancement && (
+          <div className="mt-6">
+            <EnhancementInfo
+              enhancement={localDetailData.enhancement}
+              isEditing={isEditingEnhancement}
+              loading={loadingEnhancement}
+              onUpdate={updateEnhancement}
+              onStartEditing={startEditingEnhancement}
+              onCancelEditing={cancelEditingEnhancement}
+              onConfirmEditing={confirmEditingEnhancement}
+            />
+          </div>
+        )}
       </div>
     </div>
   );
