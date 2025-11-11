@@ -185,91 +185,90 @@ export interface GetCatalogListRes {
 export async function getCatalogList(
   param: GetCatalogListParams
 ): Promise<ApiRes<GetCatalogListRes>> {
-  // TODO: 联调
-  // return await UAPI.RES.catalogListApi({}).post(param).inRegion().do();
+  return await UAPI.RES.catalogListApi({}).post(param).inRegion().do();
 
   // mock data
-  return Promise.resolve({
-    code: '0',
-    message: 'success',
-    requestId: '123',
-    status: 200,
-    data: {
-      src: [
-        {
-          id: 122,
-          parent_id: 0,
-          type: 1,
-          type_name: 'catalog',
-          name: '源目录1',
-          base_dir: '/user/xxd',
-          children: {
-            volume: [
-              {
-                base_dir: '',
-                id: 201,
-                name: '目标卷A',
-                parent_id: 1,
-                type: 2,
-                type_name: 'volume'
-              }
-            ],
-            db: [
-              {
-                id: 101,
-                name: '目标数据库A',
-                type: 2,
-                type_name: 'db',
-                base_dir: '/target/volume1/dbA'
-              }
-            ],
-            meta_data: [
-              {
-                id: 1,
-                parent_id: 0,
-                name: '元数据1',
-                type: 1,
-                type_name: 'meta_data',
-                children: {
-                  item: [
-                    {
-                      id: 1,
-                      name: '元数据1',
-                      type: 1,
-                      type_name: 'meta_data'
-                    }
-                  ]
-                }
-              }
-            ]
-          }
-        }
-      ],
-      dst: [
-        {
-          id: 1,
-          name: '目标卷1',
-          type: 1,
-          type_name: 'volume',
-          base_dir: '/target/volume1',
-          parent_id: 0,
-          perms: ['read', 'write'],
-          children: {
-            volume: [
-              {
-                base_dir: '',
-                id: 201,
-                name: '目标卷A',
-                parent_id: 1,
-                type: 2,
-                type_name: 'volume'
-              }
-            ]
-          }
-        }
-      ]
-    }
-  });
+  // return Promise.resolve({
+  //   code: '0',
+  //   message: 'success',
+  //   requestId: '123',
+  //   status: 200,
+  //   data: {
+  //     src: [
+  //       {
+  //         id: 122,
+  //         parent_id: 0,
+  //         type: 1,
+  //         type_name: 'catalog',
+  //         name: '源目录1',
+  //         base_dir: '/user/xxd',
+  //         children: {
+  //           volume: [
+  //             {
+  //               base_dir: '',
+  //               id: 201,
+  //               name: '目标卷A',
+  //               parent_id: 1,
+  //               type: 2,
+  //               type_name: 'volume'
+  //             }
+  //           ],
+  //           db: [
+  //             {
+  //               id: 101,
+  //               name: '目标数据库A',
+  //               type: 2,
+  //               type_name: 'db',
+  //               base_dir: '/target/volume1/dbA'
+  //             }
+  //           ],
+  //           meta_data: [
+  //             {
+  //               id: 1,
+  //               parent_id: 0,
+  //               name: '元数据1',
+  //               type: 1,
+  //               type_name: 'meta_data',
+  //               children: {
+  //                 item: [
+  //                   {
+  //                     id: 1,
+  //                     name: '元数据1',
+  //                     type: 1,
+  //                     type_name: 'meta_data'
+  //                   }
+  //                 ]
+  //               }
+  //             }
+  //           ]
+  //         }
+  //       }
+  //     ],
+  //     dst: [
+  //       {
+  //         id: 1,
+  //         name: '目标卷1',
+  //         type: 1,
+  //         type_name: 'volume',
+  //         base_dir: '/target/volume1',
+  //         parent_id: 0,
+  //         perms: ['read', 'write'],
+  //         children: {
+  //           volume: [
+  //             {
+  //               base_dir: '',
+  //               id: 201,
+  //               name: '目标卷A',
+  //               parent_id: 1,
+  //               type: 2,
+  //               type_name: 'volume'
+  //             }
+  //           ]
+  //         }
+  //       }
+  //     ]
+  //   }
+  // });
 }
 
 export interface GetSourceCatalogFileListParams {

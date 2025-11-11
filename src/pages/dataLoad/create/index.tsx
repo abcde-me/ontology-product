@@ -170,6 +170,16 @@ const RunningInfoPanel = function ({
     setIsExpanded(newExpanded);
   };
 
+  // 当校验状态变成成功(0)或失败(1)时，自动展开面板
+  useEffect(() => {
+    if (
+      checkStatus === CheckSQLStatus.SUCCESS ||
+      checkStatus === CheckSQLStatus.ERROR
+    ) {
+      setIsExpanded(true);
+    }
+  }, [checkStatus]);
+
   // 根据校验状态渲染状态标签
   const renderCheckStatus = () => {
     switch (checkStatus) {
@@ -349,7 +359,8 @@ export default function DataLoadCreate() {
             processedItem.hasChildren = processedItem.children.length > 0;
           } else if (typeof item.children === 'object') {
             // 对象形式的 children 保留原始结构，由 ComponentTree 组件处理
-            // 这里暂时不处理，让 ComponentTree 组件自己处理
+            // 需要将对象形式的 children 赋值给 processedItem.children，以便 ComponentTree 可以访问
+            processedItem.children = item.children as any;
             processedItem.hasChildren = Object.values(item.children).some(
               (value: any) => Array.isArray(value) && value.length > 0
             );
@@ -709,14 +720,14 @@ export default function DataLoadCreate() {
 
     try {
       const res = await checkSQL({
-        sql: sqlContent,
+        sql: sqlContent.trim(),
         connectorId: Number(currentConnectorId)
       });
 
       if (res?.status === 200 && res.data) {
         // 根据返回的status更新校验状态
         setCheckStatus(res.data.status);
-        setCheckMessage(res.data.msg || '');
+        setCheckMessage(res.data.message || '');
       } else {
         setCheckStatus(CheckSQLStatus.ERROR);
         setCheckMessage(res?.message || '校验失败');
@@ -1068,14 +1079,14 @@ export default function DataLoadCreate() {
           </FormItem>
 
           {loadVal === LOAD_TYPES.CRON && (
-            <div className={Styles.cycleLoadingBox}>
-              <SchedulerRun
-                // @ts-expect-error
-                ref={SchedulerRunRef}
-                options={{}}
-                onOptionsChange={setExpression}
-              />
-            </div>
+            // <div className={Styles.cycleLoadingBox}>
+            <SchedulerRun
+              // @ts-expect-error
+              ref={SchedulerRunRef}
+              options={{}}
+              onOptionsChange={setExpression}
+            />
+            // </div>
           )}
 
           <FormItem
