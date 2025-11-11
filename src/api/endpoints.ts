@@ -338,6 +338,8 @@ export const ModaForgeResourceEndpoints = {
   dataContentFileList: PrefixAimdp + '/GetDatasetFilesTargetVersion',
   //数据内容数据库表
   dataContentTableList: PrefixAimdp + '/GetDatasetTableTargetVersion',
+  // 数据集场景分类列表
+  datasetSceneListApi: PrefixAimdp + '/ListScenes',
 
   // 连接器接口
 

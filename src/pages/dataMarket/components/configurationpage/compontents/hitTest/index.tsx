@@ -29,6 +29,10 @@ import NoDataEmpty from '@/components/NoDataEmpty';
 import TagContent from '../tagContent';
 import SegmentDrawer from '@/pages/ragDetail/components/drawers/SegmentDrawer';
 import { useRagDetailStore } from '@/pages/ragDetail/store/ragDetailStore';
+import CopyNormalIconSvg from '@/assets/rag/copy-normal.svg';
+import CopyHighIconSvg from '@/assets/rag/copy-high.svg';
+import JumpToHighIconSvg from '@/assets/rag/jump-to-high.svg';
+import JumpToNormalIconSvg from '@/assets/rag/jump-to-normal.svg';
 
 function PageContentFalse(props) {
   const { detailsdata, onInit } = props;
@@ -44,6 +48,13 @@ function PageContentFalse(props) {
   const [fromdata, setfromdata] = useState<any>({});
   const [showDrawer, setShowDrawer] = useState(false);
   const [defaultTab, setDefaultTab] = useState(segmentDrawerTab);
+  const [hoveredCopyButton, setHoveredCopyButton] = useState<boolean>(false);
+  const [hoveredCopyResult, setHoveredCopyResult] = useState<number | null>(
+    null
+  );
+  const [hoveredJumpResult, setHoveredJumpResult] = useState<number | null>(
+    null
+  );
   const [recordList, setRecordList] = useState<any>([
     {
       id: 1,
@@ -65,7 +76,8 @@ function PageContentFalse(props) {
     },
     {
       id: 2,
-      query: '蜂巢工厂',
+      query:
+        '蜂巢工厂蜂巢工厂蜂巢工厂蜂巢工厂蜂巢工厂蜂巢工厂蜂巢工厂蜂巢工厂蜂巢工厂蜂巢工厂蜂巢工厂蜂巢工厂蜂巢工厂蜂巢工厂蜂巢工厂蜂巢工厂蜂巢工厂蜂巢工厂蜂巢工厂蜂巢工厂蜂巢工厂蜂巢工厂蜂巢工厂蜂巢工厂',
       dataset_query_results: [],
       retrieval_model: {
         search_method: 'hybrid_search',
@@ -168,17 +180,36 @@ function PageContentFalse(props) {
   const oncEditPolicy = () => {
     seteditPolicy(true);
   };
+  const handleCopy = (data) => {
+    navigator.clipboard.writeText(data).then(() => {
+      Message.success(`已复制内容`);
+    });
+  };
   const recordColumns: any = [
     {
       title: `测试内容`,
       dataIndex: 'query',
       render: (query, record) => (
-        <EllipsisPopover
-          value={query}
-          isEdit={false}
-          preferTypography
-          className="ml-[16px]"
-        />
+        <div className={styles.historyTestContent}>
+          <EllipsisPopover value={query} isEdit={false} preferTypography />
+          <Tooltip content="复制">
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                handleCopy(record.query);
+              }}
+              onMouseEnter={() => setHoveredCopyButton(true)}
+              onMouseLeave={() => setHoveredCopyButton(false)}
+              className={styles.copy}
+            >
+              {hoveredCopyButton ? (
+                <CopyHighIconSvg className="h-4 w-4" />
+              ) : (
+                <CopyNormalIconSvg className="h-4 w-4" />
+              )}
+            </button>
+          </Tooltip>
+        </div>
       )
     },
     {
@@ -399,6 +430,45 @@ function PageContentFalse(props) {
                         <span className="ml-[8px] text-[12px] leading-5">
                           字符数：{e.content_shot.length}
                         </span>
+                        <span className="ml-[8px] text-[12px] leading-5">
+                          |
+                        </span>
+                        <span className="ml-[8px] text-[12px] leading-5">
+                          分段编号：{index + 1}
+                        </span>
+                        <Tooltip content="复制">
+                          <button
+                            onClick={(event) => {
+                              event.stopPropagation();
+                              handleCopy(e.content_shot);
+                            }}
+                            onMouseEnter={() => setHoveredCopyResult(index)}
+                            onMouseLeave={() => setHoveredCopyResult(null)}
+                            className="ml-[8px]"
+                          >
+                            {hoveredCopyResult === index ? (
+                              <CopyHighIconSvg className="h-3 w-3" />
+                            ) : (
+                              <CopyNormalIconSvg className="h-3 w-3" />
+                            )}
+                          </button>
+                        </Tooltip>
+                        <Tooltip content="跳转至分段位置">
+                          <button
+                            onClick={(event) => {
+                              event.stopPropagation();
+                            }}
+                            onMouseEnter={() => setHoveredJumpResult(index)}
+                            onMouseLeave={() => setHoveredJumpResult(null)}
+                            className="ml-[8px]"
+                          >
+                            {hoveredJumpResult === index ? (
+                              <JumpToHighIconSvg className="h-3 w-3" />
+                            ) : (
+                              <JumpToNormalIconSvg className="h-3 w-3" />
+                            )}
+                          </button>
+                        </Tooltip>
                       </div>
                       <div className={styles.operateBtn}>
                         <Button

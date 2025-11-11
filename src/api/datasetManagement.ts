@@ -256,3 +256,8 @@ export async function getDatasetVersionFile(
     .inRegion()
     .do();
 }
+
+// 获取数据集场景分类列表
+export async function getDatasetSceneList() {
+  return await UAPI.RES.datasetSceneListApi({}).post().inRegion().do();
+}
