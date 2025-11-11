@@ -1,7 +1,7 @@
 import React from 'react';
 import { Breadcrumb } from '@arco-design/web-react';
 import type { BreadcrumbProps } from '@arco-design/web-react';
-// import { LeftArrow, Separator } from '@/assets';
+import { LeftArrow, Separator } from '@/assets';
 import { useHistory } from 'react-router-dom';
 
 interface BreadCrumbHeaderProps {
@@ -39,18 +39,16 @@ const BreadCrumbHeader: React.FC<BreadCrumbHeaderProps> = ({
     <div className={`flex items-center ${className}`}>
       {/* 左箭头 */}
       {showArrow && (
-        <div>1</div>
-        // <LeftArrow
-        //   className="mr-[21px] cursor-pointer text-base"
-        //   onClick={onArrowClick}
-        // />
+        <LeftArrow
+          className="mr-[21px] cursor-pointer text-base"
+          onClick={onArrowClick}
+        />
       )}
 
       {/* 面包屑部分 */}
       <div className="shrink-0">
         <Breadcrumb
-          // separator={<Separator />}
-          separator={'>'}
+          separator={<Separator />}
           className="flex h-full items-center text-xl"
           {...breadcrumbProps}
         >
