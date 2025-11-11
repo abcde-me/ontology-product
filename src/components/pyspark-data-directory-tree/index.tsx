@@ -17,11 +17,11 @@ const directoryItems = [
     label: '源数据目录',
     icon: 'folder'
   },
-  {
-    id: 'target',
-    label: '目标数据目录',
-    icon: 'folder'
-  },
+  // {
+  //   id: 'target',
+  //   label: '目标数据目录',
+  //   icon: 'folder'
+  // },
   {
     id: 'dataset',
     label: '数据集',
