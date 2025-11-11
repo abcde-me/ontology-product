@@ -31,6 +31,7 @@ import { ModalDatasetForm, ModalDatasetFormVersion } from '../ModalDatasetForm';
 import { PermissionWrapper } from '@/components/PermissionGuard';
 import { SQL_PERMISSIONS } from '@/config/permissions';
 import styles from './RunningInfoPanel.module.scss';
+import dayjs from 'dayjs';
 
 const { Item: CollapseItem } = Collapse;
 const { TabPane } = Tabs;
@@ -243,14 +244,18 @@ const RunningInfoPanel: React.FC<RunningInfoPanelProps> = memo(
         return (
           <div className={styles['run-status']}>
             <span className="mr-4 text-[14px]">运行失败</span>
-            <RunFailedIcon className="mr-[8px]" />
-            <span className="text-[14px]">
-              {formatDateTime(runStartTime || '')}（
-              {runDuration < 1000
-                ? `${runDuration}ms`
-                : `${(runDuration / 1000).toFixed(2)}s`}
-              ）
-            </span>
+            {status !== RunningStatus.IDLE ? (
+              <>
+                <RunFailedIcon className="mr-[8px]" />
+                <span className="text-[14px]">
+                  {formatDateTime(runStartTime ?? '')}（
+                  {runDuration < 1000
+                    ? `${runDuration}ms`
+                    : `${(runDuration / 1000).toFixed(2)}s`}
+                  ）
+                </span>
+              </>
+            ) : null}
           </div>
         );
       }
