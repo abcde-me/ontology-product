@@ -244,17 +244,18 @@ const RunningInfoPanel: React.FC<RunningInfoPanelProps> = memo(
         return (
           <div className={styles['run-status']}>
             <span className="mr-4 text-[14px]">运行失败</span>
-            <RunFailedIcon className="mr-[8px]" />
-            <span className="text-[14px]">
-              {status === RunningStatus.IDLE
-                ? formatDateTime(dayjs().toDate())
-                : formatDateTime(runStartTime ?? dayjs().toDate())}
-              （
-              {runDuration < 1000
-                ? `${runDuration}ms`
-                : `${(runDuration / 1000).toFixed(2)}s`}
-              ）
-            </span>
+            {status !== RunningStatus.IDLE ? (
+              <>
+                <RunFailedIcon className="mr-[8px]" />
+                <span className="text-[14px]">
+                  {formatDateTime(runStartTime ?? '')}（
+                  {runDuration < 1000
+                    ? `${runDuration}ms`
+                    : `${(runDuration / 1000).toFixed(2)}s`}
+                  ）
+                </span>
+              </>
+            ) : null}
           </div>
         );
       }
