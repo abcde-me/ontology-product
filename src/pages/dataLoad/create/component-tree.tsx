@@ -1010,7 +1010,6 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
       console.warn('treeData不是数组:', treeData);
       return null;
     }
-    console.log('11111111', treeData);
     const treeNodes = treeData
       ?.map?.((item) => {
         if (!item || !item.id) {

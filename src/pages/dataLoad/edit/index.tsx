@@ -9,15 +9,10 @@ import {
   Collapse,
   Popover,
   Tag,
-  Typography
+  Typography,
+  Switch
 } from '@arco-design/web-react';
-import React, {
-  useEffect,
-  useRef,
-  useState,
-  useCallback,
-  useMemo
-} from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import Styles from './index.module.css';
 import SchedulerRun from '../../../components/scheduler-run';
 import {
@@ -30,7 +25,7 @@ import {
 import { getdetailList } from '@/api/connectionApi';
 import './index.css';
 import { validateName } from '@/utils/valiate';
-import ComponentTree from '../list/component-tree';
+import ComponentTree from '../create/component-tree';
 import { isNumber } from 'lodash-es';
 import { sql } from '@codemirror/lang-sql';
 import { lintGutter } from '@codemirror/lint';
@@ -185,6 +180,49 @@ interface RunningInfoPanelProps {
   checkMessage: string;
 }
 
+interface TreeNodeData {
+  id: string | number;
+  name?: string;
+  label?: string;
+  type_name?: string;
+  children?: TreeNodeData[] | Record<string, TreeNodeData[]>;
+  [key: string]: any;
+}
+
+// function findNodeById(
+//   nodes: (TreeNodeData | undefined)[] | undefined,
+//   targetId: string | number | null
+// ): TreeNodeData | null {
+//   if (!nodes || targetId === null || targetId === undefined) {
+//     return null;
+//   }
+
+//   for (const node of nodes) {
+//     if (!node) continue;
+//     if (String(node.id) === String(targetId)) {
+//       return node;
+//     }
+//     const children = node.children as any;
+//     if (Array.isArray(children)) {
+//       const found = findNodeById(children, targetId);
+//       if (found) {
+//         return found;
+//       }
+//     } else if (children && typeof children === 'object') {
+//       for (const childGroup of Object.values(children)) {
+//         if (Array.isArray(childGroup)) {
+//           const found = findNodeById(childGroup as any, targetId);
+//           if (found) {
+//             return found;
+//           }
+//         }
+//       }
+//     }
+//   }
+
+//   return null;
+// }
+
 const RunningInfoPanel = function ({
   checkStatus,
   checkMessage
@@ -304,6 +342,8 @@ const Edit = (props) => {
   const [directoryData, setDirectoryData] = useState([]) as any;
   // TreeSelect选中的keys
   const [selectedTreeKeys, setSelectedTreeKeys] = useState<string[]>([]);
+  const [selectedNodeType, setSelectedNodeType] =
+    useState<TreeNodeData['type_name']>();
   // TreeSelect显示的值（路径）
   const [treeSelectDisplayValue, setTreeSelectDisplayValue] =
     useState<string>('');
@@ -544,6 +584,15 @@ const Edit = (props) => {
           props.detailData?.data_path_id
         );
         if (nodeId) {
+          // const selectedNode = findNodeById(
+          //   directoryData as TreeNodeData[],
+          //   props.detailData?.data_path_id
+          // );
+          // if (selectedNode) {
+          //   setSelectedNodeType(selectedNode.type_name);
+          // } else {
+          //   setSelectedNodeType(undefined);
+          // }
           console.log('设置TreeSelect初始值:', nodeId);
           setSelectedTreeKeys([nodeId]);
           // 构建显示路径
@@ -635,6 +684,15 @@ const Edit = (props) => {
     [form]
   );
 
+  const handleSqlProcessChange = useCallback(
+    (value: boolean) => {
+      form.setFieldsValue({
+        sql_process_enabled: value ? 'enable' : 'disable'
+      });
+    },
+    [form]
+  );
+
   // 处理校验按钮点击
   const handleCheckSQL = useCallback(async () => {
     const currentConnectorId = props.detailData?.connector_id;
@@ -655,7 +713,7 @@ const Edit = (props) => {
 
     try {
       const res = await checkSQL({
-        sql: sqlContent,
+        sql: sqlContent.trim(),
         connectorId: Number(currentConnectorId)
       });
 
@@ -673,74 +731,19 @@ const Edit = (props) => {
     }
   }, [sqlContent, props.detailData?.connector_id]);
 
-  // 监听载入位置变化，用于控制SQL处理选项的显示
-  const destPath = Form.useWatch('dest_path', form);
-  const destPathDisplay = Form.useWatch('dest_path_display', form);
-
   // 监听SQL处理开关状态
   const sqlProcessEnabled = Form.useWatch('sql_process_enabled', form);
 
-  // 监听表选择状态
-  const tableName = Form.useWatch('table_id', form);
-
-  // 计算是否禁用"关闭"选项：当选择了多个表时禁用
-  const isDisableOptionDisabled = useMemo(() => {
-    const currentTableName = form.getFieldValue('table_id') || [];
-    return (
-      Array.isArray(currentTableName) &&
-      currentTableName.length > 1 &&
-      !currentTableName.includes('all')
-    );
-  }, [tableName, form]);
-
-  // SQL处理和表选择的双向逻辑关联
-  useEffect(() => {
-    const currentTableName = form.getFieldValue('table_id') || [];
-    const currentSqlProcess = form.getFieldValue('sql_process_enabled');
-
-    // 如果选择了多个表（排除"all"的情况），自动切换到"开启"
-    if (
-      Array.isArray(currentTableName) &&
-      currentTableName.length > 1 &&
-      !currentTableName.includes('all')
-    ) {
-      if (currentSqlProcess === 'disable') {
-        form.setFieldsValue({ sql_process_enabled: 'enable' });
-      }
-    }
-  }, [tableName, form]);
-
-  // 当SQL处理为"关闭"时，限制表选择只能选一个
-  useEffect(() => {
-    const currentTableName = form.getFieldValue('table_id') || [];
-    const currentSqlProcess = form.getFieldValue('sql_process_enabled');
-
-    if (
-      currentSqlProcess === 'disable' &&
-      Array.isArray(currentTableName) &&
-      currentTableName.length > 1
-    ) {
-      // 如果选择了多个表，只保留第一个
-      form.setFieldsValue({ table_id: [currentTableName[0]] });
-    }
-  }, [sqlProcessEnabled, form]);
-
   // 初始化SQL处理默认值
   useEffect(() => {
-    const currentSqlProcess = form.getFieldValue('sql_process_enabled');
-    if (!currentSqlProcess && props.detailData?.source_type === 'db') {
-      // 如果已有SQL内容，默认开启；否则根据是否有多个表来决定
-      const currentTableName = form.getFieldValue('table_id') || [];
-      const hasMultipleTables =
-        Array.isArray(currentTableName) &&
-        currentTableName.length > 1 &&
-        !currentTableName.includes('all');
-      form.setFieldsValue({
-        sql_process_enabled:
-          sqlContent || hasMultipleTables ? 'enable' : 'disable'
-      });
+    if (props.detailData?.source_type !== 'db') {
+      return;
     }
-  }, [form, props.detailData?.source_type, sqlContent]);
+    const currentSqlProcess = form.getFieldValue('sql_process_enabled');
+    if (!currentSqlProcess) {
+      form.setFieldsValue({ sql_process_enabled: 'disable' });
+    }
+  }, [form, props.detailData?.source_type]);
 
   // 点击确定
   const okHan = async () => {
@@ -912,63 +915,6 @@ const Edit = (props) => {
             showSearch
           ></Select>
         </FormItem>
-        {props.detailData?.source_type === 'db' && (
-          <FormItem
-            label="选择抽取的表："
-            field="table_id"
-            rules={[{ required: true, message: '请选择抽取的表' }]}
-            initialValue={props.detailData?.table_names}
-          >
-            <Select
-              mode="multiple"
-              placeholder="请选择抽取的表"
-              maxTagCount={2}
-              style={{ width: '100%', minWidth: 0 }}
-              allowClear
-              allowCreate
-              disabled={true}
-            >
-              <Option value="all">全部</Option>
-              {talbleList?.map((option) => (
-                <Option key={option} value={option}>
-                  {option}
-                </Option>
-              ))}
-            </Select>
-          </FormItem>
-        )}
-
-        <FormItem
-          label="载入形式："
-          initialValue={props.detailData?.load_type}
-          field="load_type"
-          labelCol={{ span: 3 }}
-          wrapperCol={{ span: 10 }}
-          rules={[{ required: true, message: '请选择数据源类型' }]}
-        >
-          <RadioGroup
-            onChange={(val) => {
-              handoffLoadFormHan(val);
-            }}
-            disabled={true}
-          >
-            <Radio value="once">单次载入</Radio>
-            <Radio value="cron">周期载入</Radio>
-          </RadioGroup>
-        </FormItem>
-        {loadVal == 'cron' ? (
-          <div className={classNames(Styles.cycleLoadingBox)}>
-            <SchedulerRun
-              // @ts-expect-error
-              ref={SchedulerRunRef}
-              options={props.cron}
-              onOptionsChange={(val) => {
-                setObj(val);
-              }}
-            ></SchedulerRun>
-          </div>
-        ) : null}
-
         <FormItem
           label="载入位置："
           field="dest_path_display"
@@ -986,6 +932,7 @@ const Edit = (props) => {
               if (!value) {
                 setSelectedTreeKeys([]);
                 setTreeSelectDisplayValue('');
+                setSelectedNodeType(undefined);
                 form.setFieldsValue({
                   dest_path_display: undefined,
                   dest_path: undefined
@@ -1003,10 +950,22 @@ const Edit = (props) => {
                 onDirectoryDataChange={setDirectoryData}
                 selectedKeys={selectedTreeKeys}
                 // onSelect={handleSelect}
-                onPathChange={(path, nodeId) => {
-                  console.log('路径变化:', path, '节点ID:', nodeId);
+                onPathChange={(path, nodeId, nodeData) => {
+                  console.log(
+                    '路径变化:',
+                    path,
+                    '节点ID:',
+                    nodeId,
+                    '节点数据:',
+                    nodeData
+                  );
                   // 更新选中的keys
-                  setSelectedTreeKeys([String(nodeId)]);
+                  const key =
+                    nodeId !== undefined && nodeId !== null
+                      ? String(nodeId)
+                      : undefined;
+                  setSelectedTreeKeys(key ? [key] : []);
+                  setSelectedNodeType(nodeData?.type_name);
                   // 更新显示值
                   setTreeSelectDisplayValue(path);
                   // 设置两个字段：显示字段和隐藏的节点ID字段
@@ -1043,43 +1002,23 @@ const Edit = (props) => {
         <FormItem field="dest_path" style={{ display: 'none' }}>
           <Input />
         </FormItem>
-
-        {/* SQL处理选项 - 只在数据库类型且载入位置有值时显示 */}
+        {/* SQL处理选项 - 仅在数据库类型且目录节点为元数据时显示 */}
         {props.detailData?.source_type === 'db' &&
-          (destPath || destPathDisplay) && (
+          selectedNodeType === 'meta_data' && (
             <>
               <FormItem
                 label="SQL处理："
                 field="sql_process_enabled"
+                labelAlign="right"
                 rules={[{ required: true, message: '请选择SQL处理状态' }]}
                 initialValue={
-                  props.detailData?.sql_process_enabled ||
-                  (sqlContent ? 'enable' : 'disable')
+                  props.detailData?.sql_process_enabled || 'disable'
                 }
               >
-                <Radio.Group
-                  onChange={(value) => {
-                    // 当切换到"关闭"时，如果选择了多个表，只保留第一个
-                    if (value === 'disable') {
-                      const currentTableName =
-                        form.getFieldValue('table_id') || [];
-                      if (
-                        Array.isArray(currentTableName) &&
-                        currentTableName.length > 1 &&
-                        !currentTableName.includes('all')
-                      ) {
-                        form.setFieldsValue({
-                          table_id: [currentTableName[0]]
-                        });
-                      }
-                    }
-                  }}
-                >
-                  <Radio value="enable">开启</Radio>
-                  <Radio value="disable" disabled={isDisableOptionDisabled}>
-                    关闭
-                  </Radio>
-                </Radio.Group>
+                <Switch
+                  checked={sqlProcessEnabled === 'enable'}
+                  onChange={handleSqlProcessChange}
+                />
               </FormItem>
 
               {sqlProcessEnabled === 'enable' && (
@@ -1135,6 +1074,70 @@ const Edit = (props) => {
               )}
             </>
           )}
+
+        {props.detailData?.source_type === 'db' &&
+          sqlProcessEnabled !== 'enable' && (
+            <FormItem
+              label="选择抽取的表："
+              field="table_id"
+              rules={[{ required: true, message: '请选择抽取的表' }]}
+              initialValue={props.detailData?.table_names}
+            >
+              <Select
+                mode={
+                  selectedNodeType === 'meta_data'
+                    ? undefined
+                    : ('multiple' as const)
+                }
+                placeholder="请选择抽取的表"
+                maxTagCount={2}
+                style={{ width: '100%', minWidth: 0 }}
+                allowClear
+                allowCreate
+                disabled={true}
+              >
+                {talbleList.length > 0 && selectedNodeType !== 'meta_data' && (
+                  <Option value="all">全部</Option>
+                )}
+                {talbleList?.map((option) => (
+                  <Option key={option} value={option}>
+                    {option}
+                  </Option>
+                ))}
+              </Select>
+            </FormItem>
+          )}
+
+        <FormItem
+          label="载入形式："
+          initialValue={props.detailData?.load_type}
+          field="load_type"
+          labelCol={{ span: 3 }}
+          wrapperCol={{ span: 10 }}
+          rules={[{ required: true, message: '请选择数据源类型' }]}
+        >
+          <RadioGroup
+            onChange={(val) => {
+              handoffLoadFormHan(val);
+            }}
+            disabled={true}
+          >
+            <Radio value="once">单次载入</Radio>
+            <Radio value="cron">周期载入</Radio>
+          </RadioGroup>
+        </FormItem>
+        {loadVal == 'cron' ? (
+          // <div className={classNames(Styles.cycleLoadingBox)}>
+          <SchedulerRun
+            // @ts-expect-error
+            ref={SchedulerRunRef}
+            options={props.cron}
+            onOptionsChange={(val) => {
+              setObj(val);
+            }}
+          ></SchedulerRun>
+        ) : // </div>
+        null}
       </Form>
       <div className={Styles.footerBbtnBox}>
         <Button
