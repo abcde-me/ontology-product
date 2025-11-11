@@ -45,7 +45,9 @@ interface TreeNodeData {
     | 'db'
     | 'db_parent'
     | 'datasource_parent'
-    | 'datasource_item';
+    | 'datasource_item'
+    | 'meta_data_parent'
+    | 'meta_data';
   type?: number;
   level?: number;
   isExpanded?: boolean;
@@ -70,7 +72,11 @@ interface ComponentTreeProps {
       e: Event;
     }
   ) => void;
-  onPathChange?: (path: string, nodeId?: string | number) => void; // 新增：路径变化回调，同时传递节点ID
+  onPathChange?: (
+    path: string,
+    nodeId?: string | number,
+    nodeData?: TreeNodeData
+  ) => void; // 新增：路径变化回调，同时传递节点ID
   showAddTree?: boolean; // 新增：是否显示添加目录按钮
   onAddTree?: () => void; // 新增：添加目录回调
   enableRootAdd?: boolean;
@@ -95,8 +101,6 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
   tableNameNames,
   selectedKeys = []
 }) => {
-  console.log('------directoryData------', directoryData);
-
   // 数据库节点下的输入框状态
   const [dbInputNodes, setDbInputNodes] = useState<Map<string, TreeNodeData>>(
     new Map()
@@ -174,6 +178,95 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
           };
 
           childNodes.push(dbNode);
+        }
+
+        // 为数据库类型添加"元数据"子节点
+        if (dataSourceType === 'db') {
+          let hasMetaDataNode = false;
+          if (item.children) {
+            if (Array.isArray(item.children)) {
+              hasMetaDataNode = item.children.some(
+                (child) =>
+                  child.name === '元数据' ||
+                  child.title === '元数据' ||
+                  child.type_name === 'meta_data_parent'
+              );
+            }
+          }
+
+          if (!hasMetaDataNode) {
+            let metaDataChildren: TreeNodeData[] = [];
+            if (item.children) {
+              if (Array.isArray(item.children)) {
+                metaDataChildren = item.children
+                  .filter(
+                    (child) =>
+                      child.type_name === 'meta_data' ||
+                      child.type === CatalogTypeEnum.meta_data
+                  )
+                  .map((metaItem) => ({
+                    id: metaItem.id,
+                    key: String(metaItem.id),
+                    name: metaItem.name,
+                    value: String(metaItem.id),
+                    label: metaItem.name || `未命名_${metaItem.id}`,
+                    title: metaItem.name || `未命名_${metaItem.id}`,
+                    type_name: 'meta_data' as const,
+                    level: (item.level || 0) + 2,
+                    isExpanded: false,
+                    hasChildren: false,
+                    isLastLeaf: true,
+                    parentId: String(item.id),
+                    perms: metaItem.perms
+                  }));
+              } else if (
+                typeof item.children === 'object' &&
+                (item.children as any).meta_data
+              ) {
+                const metaArray = (item.children as any).meta_data;
+                if (Array.isArray(metaArray)) {
+                  metaDataChildren = metaArray.map((metaItem: any) => ({
+                    id: metaItem.id,
+                    key: String(metaItem.id),
+                    name: metaItem.name,
+                    value: String(metaItem.id),
+                    label: metaItem.name || `未命名_${metaItem.id}`,
+                    title: metaItem.name || `未命名_${metaItem.id}`,
+                    type_name: 'meta_data' as const,
+                    level: (item.level || 0) + 2,
+                    isExpanded: false,
+                    hasChildren: false,
+                    isLastLeaf: true,
+                    parentId: String(item.id),
+                    perms: metaItem.perms
+                  }));
+                }
+              }
+            }
+
+            if (metaDataChildren.length > 0) {
+              const metaNodeKey = `${item.id}-meta_data`;
+              const metaNode: TreeNodeData = {
+                id: metaNodeKey,
+                key: metaNodeKey,
+                name: '元数据',
+                value: metaNodeKey,
+                label: '元数据',
+                title: '元数据',
+                type_name: 'meta_data_parent',
+                level: (item.level || 0) + 1,
+                isExpanded: false,
+                hasChildren: true,
+                isLastLeaf: false,
+                showInput: false,
+                isNew: false,
+                parentId: item.id,
+                children: metaDataChildren
+              };
+
+              childNodes.push(metaNode);
+            }
+          }
         }
 
         // 为本地文件类型添加"数据卷"子节点
@@ -486,16 +579,15 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
     if (
       nodeData?.type_name === 'catalog' ||
       nodeData?.type_name === 'db_parent' ||
-      nodeData?.type_name === 'datasource_parent'
+      nodeData?.type_name === 'datasource_parent' ||
+      nodeData?.type_name === 'meta_data_parent'
     ) {
       console.log('数据库节点或数据卷节点或目录节点不可选中');
       return; // 阻止选中数据库节点和数据卷节点或目录节点
     }
 
     // 调用原始的onSelect回调
-    if (onSelect) {
-      onSelect(selectedKeys, extra);
-    }
+    onSelect?.(selectedKeys, extra);
 
     // 如果有路径变化回调，构建并传递路径和节点ID
     if (onPathChange && selectedKeys.length > 0) {
@@ -510,7 +602,7 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
         : nodeData?.name || '';
 
       // 传递路径和节点ID
-      onPathChange(fullPath, nodeData?.id);
+      onPathChange(fullPath, nodeData?.id, nodeData);
     }
   };
 
@@ -858,7 +950,8 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
       dataRef?.type_name === 'db_item' ||
       dataRef?.type_name === 'volume' ||
       dataRef?.type_name === 'volume_item' ||
-      dataRef?.type_name === 'datasource_item'
+      dataRef?.type_name === 'datasource_item' ||
+      dataRef?.type_name === 'meta_data'
     ) {
       console.log(
         'Hiding switcher: type_name = db, db_item, volume, volume_item, or datasource_item'
