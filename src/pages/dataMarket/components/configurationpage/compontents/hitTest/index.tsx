@@ -27,7 +27,7 @@ import brother from '../brother';
 import MarkdownBase from '@/components/markdownBase';
 import NoDataEmpty from '@/components/NoDataEmpty';
 import TagContent from '../tagContent';
-import SegmentDrawer from '@/pages/ragDetail/components/SegmentDrawer';
+import SegmentDrawer from '@/pages/ragDetail/components/drawers/SegmentDrawer';
 import { useRagDetailStore } from '@/pages/ragDetail/store/ragDetailStore';
 import CopyNormalIconSvg from '@/assets/rag/copy-normal.svg';
 import CopyHighIconSvg from '@/assets/rag/copy-high.svg';

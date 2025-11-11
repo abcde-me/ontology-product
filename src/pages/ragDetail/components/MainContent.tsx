@@ -1,7 +1,7 @@
 import React from 'react';
 import { useRagDetailStore } from '../store/ragDetailStore';
-import PdfViewer from './PdfViewer';
-import SegmentList from './SegmentList';
+import PdfViewer from './scenes/pdf/PdfViewer';
+import SegmentList from './shared/SegmentList';
 
 const MainContent: React.FC = () => {
   const { showPdfViewer, loading, highlightedPdfCoordinate } =

@@ -17,11 +17,33 @@ export interface PDFCoordinate {
   y2: number; // 右下角Y坐标
 }
 
-// 后端返回的位置数据格式: { "0": [x1, y1, x2, y2], "1": [...] }
+// 新的后端返回的位置数据格式
+export interface ApiPosition {
+  page_id: number; // 页码（0-based）
+  bbox: [number, number, number, number]; // [x1, y1, x2, y2]
+}
+
+// 旧的后端返回的位置数据格式: { "0": [x1, y1, x2, y2], "1": [...] }
 export type PositionBBox = Record<string, number[]>;
 
-// 后端返回的分段数据结构
+// 新的后端返回的分段数据结构
 export interface ApiSegment {
+  id: string;
+  document_id: string;
+  chunk_index: number;
+  positions: ApiPosition[];
+  content: string;
+  type: 'text' | 'image' | 'table'; // 分段类型
+  char_count: number;
+  title: string;
+  title_id: string;
+  enabled: boolean;
+  source: string; // 'Auto' | 'Manual'
+  is_edit: boolean;
+}
+
+// 旧的后端返回的分段数据结构（保留以兼容旧数据）
+export interface ApiSegmentOld {
   id: string;
   dataset_id: string;
   document_id: string;
@@ -50,12 +72,17 @@ export interface Segment {
   content: string;
   charCount: number;
   segmentIndex: number;
-  createdAt: string;
-  updatedAt: string;
+  createdAt?: string;
+  updatedAt?: string;
   pdfCoordinates?: PDFCoordinate[]; // 可能跨多页
   title?: string;
+  titleId?: string; // 新增：用于关联目录树
   fullTitle?: string;
   level?: number;
+  type?: 'text' | 'image' | 'table'; // 新增：分段类型
+  enabled?: boolean;
+  source?: string;
+  isEdit?: boolean;
 }
 
 // 分层级分段（场景2）
@@ -131,15 +158,32 @@ export interface TableElement {
 // 元素联合类型
 export type Element = TextElement | ImageElement | TableElement;
 
+// 分段增强信息
+export interface EnhancementInfo {
+  summary: string; // 分段总结
+  hypotheticalAnswer: string; // 假设性问答
+}
+
 // 分段详情数据
 export interface SegmentDetailData {
   segmentId: string;
   charCount: number;
   elements: Element[];
+  enhancement?: EnhancementInfo; // 分段增强信息（可选）
 }
 
-// 后端返回的目录树节点结构
+// 新的后端返回的目录树节点结构
 export interface ApiCatalogNode {
+  level: number;
+  type: 'title' | 'text'; // title: 标题节点（不高亮分段），text: 文本节点（高亮分段）
+  chunk_id: string; // 对应分段的 id 或 title_id
+  content: string;
+  positions: ApiPosition[];
+  children?: ApiCatalogNode[];
+}
+
+// 旧的后端返回的目录树节点结构（保留以兼容旧数据）
+export interface ApiCatalogNodeOld {
   title: string;
   title_id: string;
   position: Record<string, string>; // {"0": "[73,109,481,137]"}
@@ -148,18 +192,19 @@ export interface ApiCatalogNode {
   short_texts?: string[];
   node_id: number;
   segment_ids: string[] | null;
-  children?: ApiCatalogNode[];
+  children?: ApiCatalogNodeOld[];
 }
 
 // 前端使用的目录树节点
 export interface DirectoryNode {
-  id: string;
-  label: string;
+  id: string; // 对应 chunk_id
+  label: string; // 对应 content
   level: number;
+  type: 'title' | 'text'; // title: 标题节点（不高亮分段），text: 文本节点（高亮分段）
   children?: DirectoryNode[];
-  segmentIds?: string[];
-  position?: PDFCoordinate[]; // 标题在PDF中的位置
-  isShort?: boolean; // 标记是否为short_text节点（子级）
+  segmentIds?: string[]; // 关联的分段ID列表（用于滚动定位）
+  position?: PDFCoordinate[]; // 在PDF中的位置
+  isShort?: boolean; // 标记是否为short_text节点（子级）- 保留以兼容旧逻辑
 }
 
 export interface RagDetailData {
@@ -207,6 +252,8 @@ export interface RagDetailState {
   segmentDrawerVisible: boolean;
   segmentDrawerTab: 'detail' | 'trace';
   segmentDrawerSegmentId: string | null;
+  // Segment search state
+  segmentSearchText: string;
 }
 
 export interface RagDetailActions {
@@ -228,6 +275,8 @@ export interface RagDetailActions {
   // Segment Drawer actions
   openSegmentDrawer: (segmentId: string, tab: 'detail' | 'trace') => void;
   closeSegmentDrawer: () => void;
+  // Segment search actions
+  setSegmentSearchText: (text: string) => void;
 }
 
 export type RagDetailStore = RagDetailState & RagDetailActions;
