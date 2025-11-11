@@ -51,13 +51,19 @@ export function useEditableTree({ catalogTreeStore }) {
 
   const generatorTreeNodes = useCallback((treeData: TreeDataType[]) => {
     return treeData?.map?.((item) => {
-      const { children, key, ...rest } = item;
+      const { children, id, ...rest } = item;
       // 确保数据库类型的节点能正确渲染其子节点
       const hasChildren = children && children.length > 0;
       const isExpandable = hasChildren;
 
       return (
-        <Tree.Node key={key} {...rest} dataRef={item} isLeaf={!isExpandable}>
+        <Tree.Node
+          key={id}
+          {...rest}
+          title={item.name}
+          dataRef={item}
+          isLeaf={!isExpandable}
+        >
           {hasChildren ? generatorTreeNodes(children) : null}
         </Tree.Node>
       );

@@ -33,11 +33,9 @@ export default function EditableTree() {
     renderTitle
   } = useEditableTree({ catalogTreeStore });
   const getdirectorylist = async () => {
-    console.log(treeData, 'treeData 123');
     try {
       const res = await getDirectoryList({});
-      console.log(res, '123');
-      if (res.code == '' && res.status == 200) {
+      if (res.status === 200) {
         setDirectoryArr(res.data.src);
       }
     } catch (error) {
