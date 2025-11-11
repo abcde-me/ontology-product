@@ -158,11 +158,18 @@ export interface TableElement {
 // 元素联合类型
 export type Element = TextElement | ImageElement | TableElement;
 
+// 分段增强信息
+export interface EnhancementInfo {
+  summary: string; // 分段总结
+  hypotheticalAnswer: string; // 假设性问答
+}
+
 // 分段详情数据
 export interface SegmentDetailData {
   segmentId: string;
   charCount: number;
   elements: Element[];
+  enhancement?: EnhancementInfo; // 分段增强信息（可选）
 }
 
 // 新的后端返回的目录树节点结构
@@ -245,6 +252,8 @@ export interface RagDetailState {
   segmentDrawerVisible: boolean;
   segmentDrawerTab: 'detail' | 'trace';
   segmentDrawerSegmentId: string | null;
+  // Segment search state
+  segmentSearchText: string;
 }
 
 export interface RagDetailActions {
@@ -266,6 +275,8 @@ export interface RagDetailActions {
   // Segment Drawer actions
   openSegmentDrawer: (segmentId: string, tab: 'detail' | 'trace') => void;
   closeSegmentDrawer: () => void;
+  // Segment search actions
+  setSegmentSearchText: (text: string) => void;
 }
 
 export type RagDetailStore = RagDetailState & RagDetailActions;

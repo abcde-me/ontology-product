@@ -48,6 +48,8 @@ export const useRagDetailStore = create<RagDetailState & RagDetailActions>(
     segmentDrawerVisible: false,
     segmentDrawerTab: 'detail',
     segmentDrawerSegmentId: null,
+    // Segment search state
+    segmentSearchText: '',
 
     // Actions
     initializeRagDetail: async (ragId: string) => {
@@ -277,6 +279,11 @@ export const useRagDetailStore = create<RagDetailState & RagDetailActions>(
         segmentDrawerVisible: false,
         segmentDrawerSegmentId: null
       });
+    },
+
+    // Segment search actions
+    setSegmentSearchText: (text: string) => {
+      set({ segmentSearchText: text });
     }
   })
 );

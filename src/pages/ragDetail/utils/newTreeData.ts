@@ -1,4 +1,12 @@
-export const newTreeData = {
+import type { ApiCatalogNode } from '../types';
+
+export const newTreeData: {
+  code: number;
+  message: string;
+  data: {
+    catalogs: ApiCatalogNode;
+  };
+} = {
   code: 0,
   message: '',
   data: {

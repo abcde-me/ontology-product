@@ -8,9 +8,9 @@
 
 import React from 'react';
 import { SceneType } from '../types';
-import PdfSceneContent from './PdfSceneContent';
-import PptSceneContent from './scenes/PptSceneContent';
-import TableSceneContent from './scenes/TableSceneContent';
+import PdfSceneContent from './scenes/pdf/PdfSceneContent';
+import PptSceneContent from './scenes/ppt/PptSceneContent';
+import TableSceneContent from './scenes/table/TableSceneContent';
 
 interface SceneRouterProps {
   sceneType: SceneType;
