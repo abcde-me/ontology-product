@@ -859,14 +859,15 @@ export default function RequirementDetail() {
     // 发布数据
     try {
       const res = await publishRequirement(obj);
-      if (res.code === 0) {
-        setPageLoading(false);
+      if (res.code === 'success') {
         Message.success('创建成功');
         history.goBack();
       }
       setLoading(false);
+      setPageLoading(false);
     } catch {
       setLoading(false);
+      setPageLoading(false);
     }
   };
 
@@ -877,7 +878,7 @@ export default function RequirementDetail() {
           const res = await getRequirementDetail({
             requirement_id: Number(requirementId)
           });
-          if (res.code === 0) {
+          if (res.code === 'success') {
             setAnnotationTypeContentCode(
               res?.data?.label_tool?.label_tool_code
             );
@@ -944,9 +945,12 @@ export default function RequirementDetail() {
     );
   }, [annotationTypeContentCode]);
 
-  const { data: modelList = [] } = useGetModelList({
-    enabled: showPreLabeling
-  });
+  const { data: modelList = [] } = useGetModelList(
+    { label_type: annotationTypeVal, page: 1, page_size: 1000 },
+    {
+      enabled: showPreLabeling
+    }
+  );
 
   const model_name = Form.useWatch('model_name', basicForm);
 
