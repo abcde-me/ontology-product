@@ -197,6 +197,16 @@ const RunningInfoPanel = function ({
     setIsExpanded(newExpanded);
   };
 
+  // 当校验状态变成成功(0)或失败(1)时，自动展开面板
+  useEffect(() => {
+    if (
+      checkStatus === CheckSQLStatus.SUCCESS ||
+      checkStatus === CheckSQLStatus.ERROR
+    ) {
+      setIsExpanded(true);
+    }
+  }, [checkStatus]);
+
   // 根据校验状态渲染状态标签
   const renderCheckStatus = () => {
     switch (checkStatus) {
@@ -652,7 +662,7 @@ const Edit = (props) => {
       if (res?.status === 200 && res.data) {
         // 根据返回的status更新校验状态
         setCheckStatus(res.data.status);
-        setCheckMessage(res.data.msg || '');
+        setCheckMessage(res.data.message || '');
       } else {
         setCheckStatus(CheckSQLStatus.ERROR);
         setCheckMessage(res?.message || '校验失败');
