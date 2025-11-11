@@ -627,7 +627,7 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
           <Empty />
         ) : (
           <Tree
-            className={styles['directory-pySpark-tree']}
+            className={styles['directory-pyspark-tree']}
             blockNode
             treeData={treeData}
             selectable
