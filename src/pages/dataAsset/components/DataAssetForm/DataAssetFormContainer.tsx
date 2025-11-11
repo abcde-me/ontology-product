@@ -1,12 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 import { Steps, Message } from '@arco-design/web-react';
-import { findDataAssetMapping } from '@/api/dataAsset';
+import {
+  findDataAssetMapping,
+  listDataAssetSource,
+  createDataAssetAndMapping
+} from '@/api/dataAsset';
 import Step1MetadataFields from './Step1MetadataFields';
 import Step2FieldMapping from './Step2FieldMapping';
 import {
+  CreateDataAssetAndMappingReq,
   DataAssetField,
-  FindDataAssetMappingItemRes
+  FindDataAssetMappingItemRes,
+  ListDataAssetSourceResItem
 } from '@/types/dataAssetApi';
 
 interface DataAssetFormContainerProps {
@@ -17,13 +23,19 @@ interface DataAssetFormContainerProps {
 // 第一步的字段定义
 export interface MetadataField extends DataAssetField {
   id: string;
+  /** 系统默认字段标记：用于前端禁用编辑/删除等 */
+  system?: boolean;
+  /** 是否为枚举类型（用于后续列展示配置，非后端创建必需） */
+  isEnumAble?: boolean;
+  /** 列展示顺序（用于后续列展示配置，非后端创建必需） */
+  displaySort?: number;
 }
 
 // 第二步的映射定义
 export interface FieldMapping {
   id: string;
   sequence: number;
-  assetName: string;
+  nameZh: string;
   // 动态的数据来源类型字段（键为接口返回的类型，值为映射值）
   [key: string]: string | number | undefined;
 }
@@ -36,37 +48,84 @@ export default function DataAssetFormContainer({
   const [currentStep, setCurrentStep] = useState(0);
   const [loading, setLoading] = useState(false);
 
-  // 表单数据 - 默认包含一个字段
-  const [metadataFields, setMetadataFields] = useState<MetadataField[]>([
+  // 系统默认字段（表头）
+  const getDefaultSystemFields = (): MetadataField[] => [
     {
-      id: `field_${Date.now()}`,
-      nameZh: '',
-      nameEn: '',
-      type: undefined,
-      default: 'null',
+      id: `field_system_data_asset_name`,
+      nameZh: '数据资产名称',
+      nameEn: 'data_asset_name',
+      type: 'string',
+      default: '',
       required: true,
-      allowModify: true
+      allowModify: false,
+      system: true,
+      isEnumAble: false,
+      displaySort: 1
+    },
+    {
+      id: `field_system_tags`,
+      nameZh: '标签',
+      nameEn: 'tags',
+      type: 'array<varchar(64)>',
+      default: '',
+      required: true,
+      allowModify: false,
+      system: true,
+      isEnumAble: false,
+      displaySort: 2
+    },
+    {
+      id: `field_system_data_update_time`,
+      nameZh: '数据更新时间',
+      nameEn: 'data_update_time',
+      type: 'datetime',
+      default: '',
+      required: true,
+      allowModify: false,
+      system: true,
+      isEnumAble: false,
+      displaySort: 3
+    },
+    {
+      id: `field_system_data_source`,
+      nameZh: '来源',
+      nameEn: 'data_source',
+      type: 'string',
+      default: '',
+      required: true,
+      allowModify: false,
+      system: true,
+      isEnumAble: false,
+      displaySort: 4
     }
-  ]);
-  const [dataSources, setDataSources] = useState<Record<string, boolean>>({});
+  ];
+
+  // 表单数据 - 默认包含四个系统字段
+  const [metadataFields, setMetadataFields] = useState<MetadataField[]>(
+    getDefaultSystemFields()
+  );
+  const [dataSources, setDataSources] = useState<
+    Record<string, ListDataAssetSourceResItem>
+  >({});
   const [mappings, setMappings] = useState<FieldMapping[]>([]);
   const [autoMapping, setAutoMapping] = useState(true);
   const [findDataAssetMappingData, setFindDataAssetMappingData] = useState<
-    FindDataAssetMappingItemRes[]
+    ListDataAssetSourceResItem[]
   >([]);
 
   // 获取数据资产映射数据
   const fetchDataAssetMapping = async () => {
     try {
       setLoading(true);
-      const res = await findDataAssetMapping();
+      const res = await listDataAssetSource();
 
-      if (res.status === 200) {
-        setFindDataAssetMappingData(res.data || []);
+      if (res.status !== 200) {
+        return;
       }
+
+      setFindDataAssetMappingData(res.data || []);
     } catch (error) {
-      console.error('获取数据资产映射失败:', error);
-      Message.error('获取数据失败，请重试');
+      Message.error('获取数据来源列表失败，请重试');
     } finally {
       setLoading(false);
     }
@@ -93,15 +152,17 @@ export default function DataAssetFormContainer({
   };
 
   // 完成
-  const handleFinish = () => {
-    // TODO: 调用创建或更新API
-    console.log('提交数据:', {
-      metadataFields,
-      dataSources,
-      mappings,
-      autoMapping
-    });
-    // Message.success(isEditMode ? '更新成功' : '创建成功');
+  const handleFinish = async (
+    fieldsWithMappings: CreateDataAssetAndMappingReq
+  ) => {
+    const res = await createDataAssetAndMapping(fieldsWithMappings);
+
+    if (res.status !== 200) {
+      Message.error(res.message || '创建数据资产失败');
+      return;
+    }
+
+    Message.success('创建数据资产成功');
     history.push('/tenant/compute/modaforge/dataAsset/list');
   };
 

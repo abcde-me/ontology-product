@@ -88,6 +88,8 @@ export interface ListDataAssetSourceResItem {
   type: string;
   /** 数据来源名称 */
   name: string;
+  /** 数据来源数据库名称 */
+  databaseName: string;
   /** 数据来源表名 */
   tableName: string;
   /** 数据来源字段列表 */
@@ -102,6 +104,29 @@ export interface ListDataAssetSourceResItem {
 export interface CreateDataAssetAndMappingReq
   extends FindDataAssetMappingItemRes {
   autoMap?: boolean;
+}
+
+export interface AutoMapDataAssetFieldAndSourceReq {
+  fields: Partial<DataAssetField>[];
+  source: {
+    type: string;
+    name: string;
+    tableName: string;
+    fields: {
+      name: string;
+      type: string;
+    }[];
+  }[];
+}
+
+export interface AutoMapDataAssetFieldAndSourceResItem {
+  fieldNameEn: string;
+  mapping: {
+    type: string;
+    tableName: string;
+    fieldType: string;
+    feildName: string;
+  }[];
 }
 
 export interface ColumnField {

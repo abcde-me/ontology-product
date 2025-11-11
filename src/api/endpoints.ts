@@ -481,11 +481,14 @@ export const ModaForgeResourceEndpoints = {
 
   // 数据资产接口
   // 查询数据资产表字段和映射关系
-  findDataAssetMapping: PrefixAimdp + '/FindDataAssetMapping',
+  getDataAssetMapping: PrefixAimdp + '/GetDataAssetMapping',
+  // 自动映射
+  autoMapDataAssetFieldAndSource:
+    PrefixAimdp + '/AutoMapDataAssetFieldAndSource',
   // 获取数据资产列表
   listDataAssetData: PrefixAimdp + '/ListDataAssetData',
   // 查询数据来源
-  listDataAssetSource: PrefixAimdp + '/ListDataAssetSource',
+  listDataAssetSource: PrefixAimdp + '/ListDataAssetSources',
   // 删除数据资产
   dataAssetDelete: PrefixAimdp + '/DeleteDataAsset',
   // 解析数据资产字段文件
@@ -501,7 +504,7 @@ export const ModaForgeResourceEndpoints = {
   // 修改数据资产表列设置（前端展示）
   editDataAssetFieldsDisplay: PrefixAimdp + '/EditDataAssetFieldsDisplay',
   // 查询数据资产表列设置（前端展示）
-  findDataAssetFieldsDisplay: PrefixAimdp + '/FindDataAssetFieldsDisplay',
+  getDataAssetFieldsDisplay: PrefixAimdp + '/GetDataAssetFieldsDisplay',
   // 查询指定字段去重后的数量
   getDataAssetTableDistinctFieldCount:
     PrefixAimdp + '/GetDataAssetTableDistinctFieldCount',

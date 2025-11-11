@@ -19,19 +19,30 @@ import styles from './Step1MetadataFields.module.scss';
 import { IconDownload, IconUpload } from '@arco-design/web-react/icon';
 import {
   DataAssetField,
-  FindDataAssetMappingItemRes
+  FindDataAssetMappingItemRes,
+  ListDataAssetSourceResItem
 } from '@/types/dataAssetApi';
 import { listDataAssetFieldTypes } from '@/api/dataAsset';
 import { ImportType } from '../../types';
 
 const FormItem = Form.Item;
 
+// 系统保留字段（不允许编辑、删除、导入）
+const RESERVED_FIELD_ENS = new Set([
+  'data_asset_name',
+  'tags',
+  'data_update_time',
+  'data_source'
+]);
+
 interface Step1MetadataFieldsProps {
   metadataFields: MetadataField[];
   setMetadataFields: React.Dispatch<React.SetStateAction<MetadataField[]>>;
-  dataSources: Record<string, boolean>;
-  setDataSources: React.Dispatch<React.SetStateAction<Record<string, boolean>>>;
-  findDataAssetMappingData: FindDataAssetMappingItemRes[];
+  dataSources: Record<string, ListDataAssetSourceResItem>;
+  setDataSources: React.Dispatch<
+    React.SetStateAction<Record<string, ListDataAssetSourceResItem>>
+  >;
+  findDataAssetMappingData: ListDataAssetSourceResItem[];
   onCancel: () => void;
   onNext: () => void;
 }
@@ -85,43 +96,42 @@ export default function Step1MetadataFields({
     if (!findDataAssetMappingData || findDataAssetMappingData.length === 0) {
       return {};
     }
-
-    // 使用 nameEn 字段作为数据源键
-    const result: Record<string, boolean> = {};
-    findDataAssetMappingData.forEach((field) => {
-      if (field.nameEn) {
-        result[field.nameEn] = true;
+    const result: Record<string, ListDataAssetSourceResItem> = {};
+    findDataAssetMappingData.forEach((item) => {
+      if (item.name) {
+        result[item.name] = item;
       }
     });
-
     return result;
   }, [findDataAssetMappingData]);
 
   // 数据来源类型的中文显示名称映射（仅用于显示）
-  const dataSourceDisplayNames: Record<string, string> = {
-    dataset: '数据集',
-    datavolume: '源数据目录-卷',
-    database: '源数据目录-数据库',
-    metadata: '源数据目录-元数据-目录'
-  };
+  // const dataSourceDisplayNames: Record<string, string> = {
+  //   dataset: '数据集',
+  //   datavolume: '源数据目录-卷',
+  //   database: '源数据目录-数据库',
+  //   metadata: '源数据目录-元数据-目录'
+  // };
 
   // 初始化 dataSources，确保所有可用的数据来源都有初始值
   useEffect(() => {
     if (Object.keys(availableDataSources).length > 0) {
-      const updatedDataSources = { ...dataSources };
+      const updatedDataSources: Record<string, ListDataAssetSourceResItem> = {
+        ...dataSources
+      };
       let hasUpdate = false;
 
       // 为新的可用数据来源设置初始值（如果还没有的话）
       Object.keys(availableDataSources).forEach((key) => {
         if (updatedDataSources[key] === undefined) {
-          updatedDataSources[key] = true;
+          updatedDataSources[key] = availableDataSources[key];
           hasUpdate = true;
         }
       });
 
       // 移除不再可用的数据来源
       Object.keys(updatedDataSources).forEach((key) => {
-        if (availableDataSources[key] === undefined) {
+        if (!(key in availableDataSources)) {
           delete updatedDataSources[key];
           hasUpdate = true;
         }
@@ -151,6 +161,9 @@ export default function Step1MetadataFields({
         <Input
           placeholder="请输入中文名称"
           value={record.nameZh}
+          disabled={
+            record.system === true || RESERVED_FIELD_ENS.has(record.nameEn)
+          }
           onChange={(value) => handleUpdateField(record.id, { nameZh: value })}
         />
       )
@@ -163,6 +176,9 @@ export default function Step1MetadataFields({
         <Input
           placeholder="请输入英文名称"
           value={record.nameEn}
+          disabled={
+            record.system === true || RESERVED_FIELD_ENS.has(record.nameEn)
+          }
           onChange={(value) => handleUpdateField(record.id, { nameEn: value })}
         />
       )
@@ -176,6 +192,9 @@ export default function Step1MetadataFields({
           placeholder="请选择"
           loading={fieldTypesLoading}
           value={record.type}
+          disabled={
+            record.system === true || RESERVED_FIELD_ENS.has(record.nameEn)
+          }
           onChange={(value) => handleUpdateField(record.id, { type: value })}
         >
           {fieldTypes.map((type) => (
@@ -193,24 +212,30 @@ export default function Step1MetadataFields({
       render: (_: any, record: any) => (
         <Input
           value={record.default}
+          disabled={
+            record.system === true || RESERVED_FIELD_ENS.has(record.nameEn)
+          }
           onChange={(value) => handleUpdateField(record.id, { default: value })}
         />
       )
     },
-    {
-      title: '必填',
-      dataIndex: 'required',
-      width: 80,
-      align: 'center' as const,
-      render: (_: any, record: any) => (
-        <Checkbox
-          checked={record.required}
-          onChange={(checked) =>
-            handleUpdateField(record.id, { required: checked })
-          }
-        />
-      )
-    },
+    // {
+    //   title: '必填',
+    //   dataIndex: 'required',
+    //   width: 80,
+    //   align: 'center' as const,
+    //   render: (_: any, record: any) => (
+    //     <Checkbox
+    //       checked={record.required}
+    //       disabled={
+    //         record.system === true || RESERVED_FIELD_ENS.has(record.nameEn)
+    //       }
+    //       onChange={(checked) =>
+    //         handleUpdateField(record.id, { required: checked })
+    //       }
+    //     />
+    //   )
+    // },
     {
       title: '可修改',
       dataIndex: 'allowModify',
@@ -219,6 +244,9 @@ export default function Step1MetadataFields({
       render: (_: any, record: any) => (
         <Checkbox
           checked={record.allowModify}
+          disabled={
+            record.system === true || RESERVED_FIELD_ENS.has(record.nameEn)
+          }
           onChange={(checked) =>
             handleUpdateField(record.id, { allowModify: checked })
           }
@@ -235,11 +263,14 @@ export default function Step1MetadataFields({
           <Button type="text" onClick={() => handleAddField()}>
             添加行
           </Button>
-          {metadataFields.length > 1 && (
-            <Button type="text" onClick={() => handleDeleteField(record.id)}>
-              删除行
-            </Button>
-          )}
+          {metadataFields.length > 1 &&
+            !(
+              record.system === true || RESERVED_FIELD_ENS.has(record.nameEn)
+            ) && (
+              <Button type="text" onClick={() => handleDeleteField(record.id)}>
+                删除行
+              </Button>
+            )}
         </div>
       )
     }
@@ -252,7 +283,7 @@ export default function Step1MetadataFields({
       nameZh: '',
       nameEn: '',
       type: undefined,
-      default: 'null',
+      default: '',
       required: true,
       allowModify: true
     };
@@ -263,6 +294,13 @@ export default function Step1MetadataFields({
 
   // 删除字段行
   const handleDeleteField = (id: string) => {
+    const target = metadataFields.find((f) => f.id === id);
+    if (
+      target &&
+      (target.system === true || RESERVED_FIELD_ENS.has(target.nameEn))
+    ) {
+      return;
+    }
     const updatedFields = metadataFields.filter((field) => field.id !== id);
     setMetadataFields(updatedFields);
     form.setFieldValue('metadataFields', updatedFields);
@@ -292,7 +330,11 @@ export default function Step1MetadataFields({
     dataAssetFields: DataAssetField[]
   ) => {
     // 将外部数据转换为内部使用结构
-    const mapped: MetadataField[] = (dataAssetFields || []).map((f, idx) => ({
+    // 过滤掉系统保留字段（通过模板导入不追加这些字段）
+    const filtered = (dataAssetFields || []).filter(
+      (f) => !RESERVED_FIELD_ENS.has((f.nameEn || '').trim())
+    );
+    const mapped: MetadataField[] = filtered.map((f, idx) => ({
       id: `field_import_${Date.now()}_${idx}`,
       nameZh: f.nameZh ?? '',
       nameEn: f.nameEn ?? '',
@@ -316,20 +358,40 @@ export default function Step1MetadataFields({
 
   // 数据源变更
   const handleDataSourceChange = (key: string, checked: boolean) => {
-    const updatedDataSources = { ...dataSources, [key]: checked };
+    const updatedDataSources: Record<string, ListDataAssetSourceResItem> = {
+      ...dataSources
+    };
+    if (checked) {
+      const item =
+        availableDataSources[key] ||
+        findDataAssetMappingData.find((i) => i.name === key);
+      if (item) {
+        updatedDataSources[key] = item;
+      }
+    } else {
+      delete updatedDataSources[key];
+    }
     setDataSources(updatedDataSources);
     form.setFieldValue('dataSources', updatedDataSources);
   };
 
   // 全选/取消全选数据源
   const handleSelectAllDataSources = (checked: boolean) => {
-    const updatedDataSources: Record<string, boolean> = { ...dataSources };
-    // 从 findDataAssetMappingData 中提取所有唯一的 nameEn 字段作为数据源键
-    findDataAssetMappingData.forEach((field) => {
-      if (field.nameEn) {
-        updatedDataSources[field.nameEn] = checked;
-      }
-    });
+    const updatedDataSources: Record<string, ListDataAssetSourceResItem> = {
+      ...dataSources
+    };
+    if (checked) {
+      findDataAssetMappingData.forEach((item) => {
+        if (item.name) {
+          updatedDataSources[item.name] = item;
+        }
+      });
+    } else {
+      // 清空所有
+      Object.keys(updatedDataSources).forEach(
+        (k) => delete updatedDataSources[k]
+      );
+    }
     setDataSources(updatedDataSources);
     form.setFieldValue('dataSources', updatedDataSources);
   };
@@ -357,16 +419,14 @@ export default function Step1MetadataFields({
   // 验证数据来源的自定义验证器
   const validateDataSource = useCallback(
     (value: any, callback: any) => {
-      const hasAnySource = Object.keys(availableDataSources).some(
-        (key) => dataSources[key] === true
-      );
+      const hasAnySource = Object.keys(dataSources).length > 0;
       if (!hasAnySource) {
         callback('请至少选择一个数据来源');
       } else {
         callback();
       }
     },
-    [dataSources, availableDataSources]
+    [dataSources]
   );
 
   // 下一步前验证
@@ -447,14 +507,14 @@ export default function Step1MetadataFields({
             {findDataAssetMappingData.length > 0 &&
               (() => {
                 // 从 findDataAssetMappingData 中提取所有唯一的 nameEn 字段作为数据源键
-                const nameEnArray = findDataAssetMappingData
-                  .map((field) => field.nameEn)
-                  .filter((nameEn): nameEn is string => !!nameEn);
+                const nameArray = findDataAssetMappingData
+                  .map((field) => field.name)
+                  .filter((name): name is string => !!name);
                 const allChecked =
-                  nameEnArray.length > 0 &&
-                  nameEnArray.every((nameEn) => dataSources[nameEn] === true);
-                const someChecked = nameEnArray.some(
-                  (nameEn) => dataSources[nameEn] === true
+                  nameArray.length > 0 &&
+                  nameArray.every((name) => !!dataSources[name]);
+                const someChecked = nameArray.some(
+                  (nameEn) => !!dataSources[nameEn]
                 );
 
                 return (
@@ -472,14 +532,14 @@ export default function Step1MetadataFields({
                 );
               })()}
             {findDataAssetMappingData.map((field) => (
-              <Col key={field.nameEn} span={4}>
+              <Col key={field.name} span={4}>
                 <Checkbox
-                  checked={dataSources[field.nameEn] || false}
+                  checked={!!dataSources[field.name]}
                   onChange={(checked) =>
-                    handleDataSourceChange(field.nameEn, checked)
+                    handleDataSourceChange(field.name, checked)
                   }
                 >
-                  {field.nameZh}
+                  {field.name}
                 </Checkbox>
               </Col>
             ))}
