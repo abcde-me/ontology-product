@@ -27,10 +27,14 @@ import brother from '../brother';
 import MarkdownBase from '@/components/markdownBase';
 import NoDataEmpty from '@/components/NoDataEmpty';
 import TagContent from '../tagContent';
+import SegmentDrawer from '@/pages/ragDetail/components/SegmentDrawer';
+import { useRagDetailStore } from '@/pages/ragDetail/store/ragDetailStore';
 
 function PageContentFalse(props) {
   const { detailsdata, onInit } = props;
   const { id } = detailsdata || {};
+  const { segmentDrawerTab, segmentDrawerSegmentId, segments } =
+    useRagDetailStore();
   const RadioGroup = Radio.Group;
   const InputSearch = Input.Search;
   const TextArea = Input.TextArea;
@@ -39,6 +43,7 @@ function PageContentFalse(props) {
   const [text, setText] = useState('');
   const [fromdata, setfromdata] = useState<any>({});
   const [showDrawer, setShowDrawer] = useState(false);
+  const [defaultTab, setDefaultTab] = useState(segmentDrawerTab);
   const [recordList, setRecordList] = useState<any>([
     {
       id: 1,
@@ -118,6 +123,10 @@ function PageContentFalse(props) {
   brother.on('editFuncFrom', () => {
     seteditChildVisible(true);
   });
+  // 获取当前打开 drawer 的分段信息
+  const currentSegment = segments.find(
+    (seg) => seg.id === segmentDrawerSegmentId
+  );
   const mocktest = {
     reordering: true,
     retrievalV: 'hybrid_search',
@@ -395,14 +404,20 @@ function PageContentFalse(props) {
                         <Button
                           type="outline"
                           icon={<IconStorage />}
-                          onClick={() => setShowDrawer(true)}
+                          onClick={() => {
+                            setShowDrawer(true);
+                            setDefaultTab('detail');
+                          }}
                         >
                           分段详情
                         </Button>
                         <Button
                           type="outline"
                           icon={<IconMindMapping />}
-                          onClick={() => setShowDrawer(true)}
+                          onClick={() => {
+                            setShowDrawer(true);
+                            setDefaultTab('trace');
+                          }}
                         >
                           溯源日志
                         </Button>
@@ -454,6 +469,13 @@ function PageContentFalse(props) {
           seteditPolicy={seteditPolicy}
         ></PolicyForm>
       </Modal>
+      <SegmentDrawer
+        visible={showDrawer}
+        onClose={() => setShowDrawer(false)}
+        defaultActiveTab={defaultTab}
+        currentSegmentIndex={currentSegment?.segmentIndex}
+        totalSegments={segments.length}
+      />
     </div>
   );
 }
