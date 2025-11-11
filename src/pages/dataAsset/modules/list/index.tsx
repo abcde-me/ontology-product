@@ -661,18 +661,16 @@ export default function DataAssetList() {
 
   // 处理资产设置跳转
   const handleAssetSettings = () => {
-    if (selectedRowKeys.length === 0) {
-      Message.warning('请先选择一个资产');
-      return;
-    }
-    if (selectedRowKeys.length > 1) {
-      Message.warning('请只选择一个资产进行设置');
-      return;
-    }
+    // if (selectedRowKeys.length === 0) {
+    //   Message.warning('请先选择一个资产');
+    //   return;
+    // }
+    // if (selectedRowKeys.length > 1) {
+    //   Message.warning('请只选择一个资产进行设置');
+    //   return;
+    // }
     // 跳转到编辑资产页面
-    history.push(
-      `/tenant/compute/modaforge/dataAsset/edit/${selectedRowKeys[0]}`
-    );
+    history.push(`/tenant/compute/modaforge/dataAsset/edit`);
   };
 
   // 如果还在加载中，显示空内容（或可以显示loading）
@@ -802,20 +800,20 @@ export default function DataAssetList() {
                   </Dropdown>
                 )}
 
-                <Popover
+                {/* <Popover
                   content="请先选择一个资产"
                   disabled={selectedRowKeys.length === 1}
                   position="top"
+                > */}
+                <Button
+                  icon={<IconSettings />}
+                  className="mr-[20px]"
+                  // disabled={selectedRowKeys.length !== 1}
+                  onClick={handleAssetSettings}
                 >
-                  <Button
-                    icon={<IconSettings />}
-                    className="mr-[20px]"
-                    disabled={selectedRowKeys.length !== 1}
-                    onClick={handleAssetSettings}
-                  >
-                    资产设置
-                  </Button>
-                </Popover>
+                  资产设置
+                </Button>
+                {/* </Popover> */}
                 <Button
                   icon={<IconSettings />}
                   className="mr-[20px]"
