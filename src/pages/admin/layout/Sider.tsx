@@ -1,11 +1,8 @@
-import { useQueryParams } from '@/utils';
 import { Layout, Menu } from '@arco-design/web-react';
 import cn from 'classnames';
 import React, { useEffect, useMemo, useState, useRef } from 'react';
-import { useHistory, useLocation, useParams } from 'react-router-dom';
-import WujieReact from 'wujie-react';
-import { getFlatRoutes, routes } from '../route';
-import { menus, filterMenusByPermissions, type MenuModel } from './menus';
+import { useHistory, useLocation } from 'react-router-dom';
+import { menus, type MenuModel } from './menus';
 import './sider.scss';
 import { usePermission } from '@/hooks/usePermission';
 import { useUserInfoStore } from '@/store/userInfoStore';
@@ -32,9 +29,6 @@ function LayoutWithSider({ children }) {
 
   const history = useHistory();
   const location = useLocation();
-  const queryParams = useQueryParams();
-  const params = useParams();
-  const flattenRoutes = getFlatRoutes(routes);
 
   // 用于防抖的 ref
   const clickTimeoutRef = useRef<NodeJS.Timeout | null>(null);
