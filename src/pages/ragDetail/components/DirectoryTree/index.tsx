@@ -105,35 +105,25 @@ const DirectoryTree: React.FC<DirectoryTreeProps> = ({ nodes }) => {
     // 如果有选中的分段ID，查找对应的目录树节点
     if (selectedSegmentId) {
       // 递归查找包含该segmentId的节点
-      // 优先匹配子级节点（isShort为true的节点），如果找不到再匹配父级
+      // 优先匹配 type='text' 的节点（chunk_id 等于 segmentId）
       const findNodeBySegmentId = (
         nodeList: DirectoryNode[],
         segmentId: string
       ): DirectoryNode | null => {
-        let parentMatch: DirectoryNode | null = null;
-
         for (const node of nodeList) {
-          // 先递归查找子节点（优先匹配子级）
+          // 优先匹配：type='text' 且 id 等于 segmentId
+          if (node.type === 'text' && node.id === segmentId) {
+            return node;
+          }
+
+          // 递归查找子节点
           if (node.children && node.children.length > 0) {
             const found = findNodeBySegmentId(node.children, segmentId);
             if (found) return found;
           }
-
-          // 检查当前节点的segmentIds是否包含该segmentId
-          if (node.segmentIds && node.segmentIds.includes(segmentId)) {
-            // 如果是isShort节点（子级），直接返回
-            if (node.isShort) {
-              return node;
-            }
-            // 如果是父级节点，先保存，继续查找是否有子级匹配
-            if (!parentMatch) {
-              parentMatch = node;
-            }
-          }
         }
 
-        // 如果没有找到子级匹配，返回父级匹配
-        return parentMatch;
+        return null;
       };
 
       const foundNode = findNodeBySegmentId(nodes, selectedSegmentId);
@@ -188,35 +178,8 @@ const DirectoryTree: React.FC<DirectoryTreeProps> = ({ nodes }) => {
   const handleSelect = (selectedKeys: string[]) => {
     if (selectedKeys.length > 0) {
       const nodeId = selectedKeys[0];
+      // 调用 store 中的 selectDirectoryNode，它会处理所有逻辑
       selectDirectoryNode(nodeId);
-
-      // 查找节点
-      const node = findNode(nodeId, nodes);
-      if (!node) return;
-
-      // 如果节点有position，高亮PDF位置
-      if (node.position && node.position.length > 0) {
-        highlightPdfCoordinates(node.position);
-      } else {
-        // 清除PDF高亮
-        clearPdfHighlight();
-      }
-
-      // 如果节点有segmentIds，说明需要滚动到对应的分段
-      if (node.segmentIds && node.segmentIds.length > 0) {
-        const firstSegmentId = node.segmentIds[0];
-
-        // 如果是short text节点（子级），需要高亮
-        if (node.isShort) {
-          setSelectedSegmentId(firstSegmentId);
-        } else {
-          // 如果是父级（有short_texts），只滚动不高亮
-          setSelectedSegmentId(null);
-        }
-
-        // 滚动到分段
-        scrollToSegment(firstSegmentId);
-      }
     }
   };
 
