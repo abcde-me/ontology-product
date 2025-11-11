@@ -119,7 +119,7 @@ export async function checkSQL(params: {
 }): Promise<
   ApiRes<{
     status: CheckSQLStatus;
-    msg: string;
+    message: string;
   }>
 > {
   return await UAPI.RES.checkSQLApi({}).post(params).inRegion().do();

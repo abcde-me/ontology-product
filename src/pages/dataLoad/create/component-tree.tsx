@@ -95,6 +95,8 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
   tableNameNames,
   selectedKeys = []
 }) => {
+  console.log('------directoryData------', directoryData);
+
   // 数据库节点下的输入框状态
   const [dbInputNodes, setDbInputNodes] = useState<Map<string, TreeNodeData>>(
     new Map()
