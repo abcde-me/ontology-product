@@ -1,0 +1,73 @@
+.annotation-type-warp {
+  width: 900px;
+  border: 1px solid #cbd5e1;
+  border-radius: 4px;
+
+  .type-header {
+    width: 900px;
+    display: flex;
+
+    .item-base-class {
+      flex: 1;
+      text-align: center;
+      padding: 5px 0;
+      cursor: pointer;
+      border-bottom: 1px solid #cbd5e1;
+      border-right: 1px solid #cbd5e1;
+      font-size: 14px;
+
+      &:last-child {
+        border-right: none;
+      }
+    }
+
+    .active {
+      border-bottom: none;
+      color: #007dfa;
+      font-weight: 500;
+    }
+  }
+
+  .type-content {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    padding: 16px;
+  }
+
+  .mutex-btn {
+    color: #0f172a;
+    border: 1px solid #cbd5e1;
+    border-radius: 4px;
+    padding: 4px 12px;
+    margin-right: 8px;
+    width: 210px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    cursor: pointer;
+
+    &:last-child {
+      margin-right: 0;
+    }
+
+    &.active {
+      background-color: #eef6ff;
+      color: #007dfa;
+      border-color: #007dfa;
+      font-weight: 500;
+    }
+  }
+
+  .disabled-div {
+    /* 阻止鼠标交互 */
+    // pointer-events: none;
+    /* 视觉上表示不可用 */
+    opacity: 0.6;
+    cursor: not-allowed;
+    /* 可选：添加灰色背景等样式 */
+    color: #94a3b8;
+  }
+}

@@ -5,7 +5,7 @@
   margin: 20px 20px 20px 0;
   padding: 20px 20px 20px 24px;
   border-radius: 10px;
-  min-height: calc(100% - 30px);
+  min-height: calc(100% - 40px);
 
   .requirement-form {
     display: flex;
@@ -14,14 +14,6 @@
     width: 100%;
     padding-right: 5px;
     padding-bottom: 16px;
-  }
-
-  .arco-table-tr > th {
-    background-color: rgb(245, 249, 255) !important;
-  }
-
-  .arco-pagination-total-text {
-    line-height: 32px;
   }
 
   .operate-text {
@@ -38,7 +30,7 @@
     cursor: not-allowed;
   }
 
-  tbody .workflow-name .ellipsis-text {
+  tbody .requirement-name .ellipsis-text {
     font-weight: 600;
   }
 
@@ -122,13 +114,6 @@
     background: #e3e3e3;
     border-radius: 50%;
     display: inline-block;
-  }
-
-  .workflow-name-content {
-    width: 268px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
   }
 }
 

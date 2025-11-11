@@ -75,7 +75,21 @@ const PermissionRoute: React.FC<{ route: any }> = ({ route }) => {
   }
 
   // 检查用户是否拥有该权限
-  const hasPermission = userActions.actions.includes(route.permission);
+  // if (Array.isArray(route.permission)) {
+  //   const hasPermission = route.permission.every((perm) => userActions.actions.includes(perm));
+  //   if (!hasPermission) {
+  //     return <Page403 />;
+  //   }
+  // } else {
+  //   const hasPermission = userActions.actions.includes(route.permission);
+  //   if (!hasPermission) {
+  //     return <Page403 />;
+  //   }
+  // }
+
+  const hasPermission = Array.isArray(route.permission)
+    ? route.permission.some((perm) => userActions.actions?.includes(perm))
+    : userActions.actions?.includes(route.permission);
 
   // 无权限时显示403页面
   if (!hasPermission) {

@@ -36,7 +36,7 @@ export default function ViewToggle({
         type="button"
         onClick={() => handleChange(ViewType.CARD)}
         className={
-          'flex h-[32px] w-[32px] cursor-pointer items-center justify-center rounded-bl-[4px] rounded-tl-[4px] border bg-white ' +
+          'flex h-[32px] w-[32px] cursor-pointer items-center justify-center rounded-bl-[4px] rounded-tl-[4px] border bg-[#EEF6FF] ' +
           (selectedView === ViewType.CARD
             ? 'border-[rgba(var(--primary-6))] text-[rgba(var(--primary-6))]'
             : 'border-[var(--color-border-2)]')
@@ -53,7 +53,7 @@ export default function ViewToggle({
         type="button"
         onClick={() => handleChange(ViewType.LIST)}
         className={
-          'flex h-[32px] w-[32px] cursor-pointer items-center justify-center rounded-br-[4px] rounded-tr-[4px] border bg-white ' +
+          'flex h-[32px] w-[32px] cursor-pointer items-center justify-center rounded-br-[4px] rounded-tr-[4px] border bg-[#EEF6FF] ' +
           (selectedView === ViewType.LIST
             ? 'border-[rgba(var(--primary-6))] text-[rgba(var(--primary-6))]'
             : 'border-[var(--color-border-2)]')

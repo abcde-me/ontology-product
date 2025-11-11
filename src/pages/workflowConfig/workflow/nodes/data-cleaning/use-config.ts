@@ -42,6 +42,7 @@ const useConfig = (id: string, payload: CodeNodeType) => {
         draft.mg_duplicate_checkbox = payload.mg_duplicate_checkbox;
         draft.mg_duplicate_ngram = payload.mg_duplicate_ngram;
         draft.mg_duplicate = payload?.mg_duplicate;
+        draft.written_correct = payload?.written_correct;
         draft.dclean_type = [
           {
             type: 'data_standardization',
@@ -116,6 +117,14 @@ const useConfig = (id: string, payload: CodeNodeType) => {
                   ? payload?.mg_duplicate_ngram
                   : 0,
               md5: payload?.mg_duplicate_checkbox === 'md5' ? 1 : 0
+            }
+          },
+          {
+            type: 'written_correct',
+            title: '错别字改写',
+            options: {
+              // 1 处理 0 不处理
+              written_correct: payload?.written_correct ? 1 : 0
             }
           }
         ];

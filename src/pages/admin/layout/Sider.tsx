@@ -19,7 +19,8 @@ const hideSidebarPaths = [
   '/tenant/compute/modaforge/workflowConfig',
   '/tenant/compute/modaforge/login',
   '/tenant/compute/modaforge/userinfo',
-  '/tenant/compute/modaforge/labelEditor'
+  '/tenant/compute/modaforge/labelEditor',
+  '/tenant/compute/modaforge/ragDetail'
 ];
 const collapseSidebarPaths = [];
 
@@ -114,7 +115,6 @@ function LayoutWithSider({ children }) {
   );
 
   const getMenu = (data: typeof menus) => {
-    console.log('data', data);
     return data.map((item) => {
       if (!item.children || item.children.length === 0)
         return (

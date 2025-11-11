@@ -29,6 +29,24 @@
   border-bottom: 2px solid #165dff;
 }
 
+.datasetManagementContainer {
+  :global(.arco-tabs-content) {
+    padding-top: 0px;
+    background: #f0f6fe;
+  }
+  :global(.arco-tabs-header-scroll) {
+    background: #f0f6fe;
+  }
+  :global(.arco-tabs) {
+    overflow: visible;
+  }
+  :global(.arco-tabs-header-nav) {
+    position: sticky;
+    top: 30px;
+    z-index: 3;
+  }
+}
+
 .datasetManagement {
   background: #f5f5f5;
   padding: 24px;
@@ -74,7 +92,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
+  margin: 20px 0;
   padding: 0;
   z-index: 1;
 }
@@ -391,4 +409,8 @@
   color: #007dfa;
   cursor: pointer;
   margin: 0 0 0 5px;
+}
+
+.addSceneTypeModal {
+  width: 620px;
 }

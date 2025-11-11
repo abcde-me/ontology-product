@@ -1,0 +1,81 @@
+import React, { useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
+import Header from './components/common/Header';
+import SceneRouter from './components/SceneRouter';
+import ImageModal from './components/common/ImageModal';
+import SegmentDrawer from './components/drawers/SegmentDrawer';
+import { useRagDetailStore } from './store/ragDetailStore';
+import './styles/index.css';
+
+function RagDetail() {
+  const location = useLocation();
+  const {
+    initializeRagDetail,
+    sceneType,
+    showPdfViewer,
+    loading,
+    segmentDrawerVisible,
+    segmentDrawerTab,
+    segmentDrawerSegmentId,
+    closeSegmentDrawer,
+    segments
+  } = useRagDetailStore();
+
+  useEffect(() => {
+    const queryParams = new URLSearchParams(location.search);
+    const ragId = queryParams.get('ragId');
+    if (ragId) {
+      initializeRagDetail(ragId);
+    }
+  }, [location, initializeRagDetail]);
+
+  // 获取当前打开 drawer 的分段信息
+  const currentSegment = segments.find(
+    (seg) => seg.id === segmentDrawerSegmentId
+  );
+
+  return (
+    <div
+      className="rag-detail-page flex h-screen w-full flex-col overflow-hidden bg-[#F7F8FA]"
+      style={{ minHeight: 0 }}
+    >
+      <Header />
+      <div
+        className="flex-1 overflow-hidden px-4 pb-4"
+        style={{ minHeight: 0 }}
+      >
+        <div
+          className="h-full overflow-hidden rounded-[20px] bg-white"
+          style={{ minHeight: 0 }}
+        >
+          <SceneRouter
+            sceneType={sceneType}
+            showPdfViewer={showPdfViewer}
+            loading={loading}
+          />
+        </div>
+      </div>
+      {/* 图片放大弹窗 */}
+      <ImageModal />
+      {/* 分段详情/溯源日志抽屉 */}
+      {currentSegment && (
+        <SegmentDrawer
+          visible={segmentDrawerVisible}
+          onClose={closeSegmentDrawer}
+          defaultActiveTab={segmentDrawerTab}
+          currentSegmentIndex={currentSegment.segmentIndex}
+          totalSegments={segments.length}
+        />
+      )}
+      {/* <SegmentDrawer
+        visible={true}
+        onClose={closeSegmentDrawer}
+        defaultActiveTab={segmentDrawerTab}
+        currentSegmentIndex={currentSegment?.segmentIndex}
+        totalSegments={segments.length}
+      /> */}
+    </div>
+  );
+}
+
+export default RagDetail;

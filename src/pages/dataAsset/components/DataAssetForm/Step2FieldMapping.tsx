@@ -12,13 +12,15 @@ import {
   Space
 } from '@arco-design/web-react';
 // import { Download } from '@icon-park/react';
-import {
-  FieldMapping,
-  MetadataField,
-  DataSource
-} from './DataAssetFormContainer';
+import { FieldMapping, MetadataField } from './DataAssetFormContainer';
 import { IconDownload } from '@arco-design/web-react/icon';
 import styles from './Step2FieldMapping.module.scss';
+import {
+  CreateDataAssetAndMappingReq,
+  FindDataAssetMappingItemRes,
+  ListDataAssetSourceResItem
+} from '@/types/dataAssetApi';
+import { autoMapDataAssetFieldAndSource } from '@/api/dataAsset';
 
 const FormItem = Form.Item;
 const Row = Grid.Row;
@@ -30,11 +32,20 @@ interface Step2FieldMappingProps {
   autoMapping: boolean;
   setAutoMapping: React.Dispatch<React.SetStateAction<boolean>>;
   metadataFields: MetadataField[];
-  dataSources: DataSource;
+  dataSources: Record<string, ListDataAssetSourceResItem>;
+  findDataAssetMappingData: ListDataAssetSourceResItem[];
   onCancel: () => void;
   onPrev: () => void;
-  onFinish: () => void;
+  onFinish: (fieldsWithMappings: CreateDataAssetAndMappingReq) => void;
 }
+
+// 系统保留字段（不允许编辑、删除、导入）
+const RESERVED_FIELD_ENS = new Set([
+  'data_asset_name',
+  'tags',
+  'data_update_time',
+  'data_source'
+]);
 
 export default function Step2FieldMapping({
   mappings,
@@ -43,23 +54,85 @@ export default function Step2FieldMapping({
   setAutoMapping,
   metadataFields,
   dataSources,
+  findDataAssetMappingData,
   onCancel,
   onPrev,
   onFinish
 }: Step2FieldMappingProps) {
   const [form] = Form.useForm();
 
-  // 生成列配置
-  const columns = useMemo(() => {
-    const cols = ['序号', '数据资产名称'];
+  // 获取数据来源类型到名称的映射（仅用于显示）
+  // const sourceTypeToNameMap = useMemo(() => {
+  //   const map: Record<string, string> = {
+  //     dataset: '数据集',
+  //     datavolume: '源数据目录-卷',
+  //     database: '源数据目录-数据库',
+  //     metadata: '源数据目录-元数据-目录'
+  //   };
+  //   return map;
+  // }, []);
 
-    if (dataSources.dataset) cols.push('数据集');
-    if (dataSources.volume) cols.push('源数据目录-卷');
-    if (dataSources.database) cols.push('源数据目录-数据库');
-    if (dataSources.metadataDir) cols.push('源数据目录-元数据-目录');
+  // 生成列配置（动态处理所有数据来源类型）
+  // const columns = useMemo(() => {
+  //   const cols = ['序号', '数据资产名称'];
 
-    return cols;
-  }, [dataSources]);
+  //   // 遍历所有选中的数据来源类型，动态添加列
+  //   Object.keys(dataSources).forEach((sourceType) => {
+  //     if (dataSources[sourceType] === true) {
+  //       const displayName = sourceTypeToNameMap[sourceType] || sourceType;
+  //       cols.push(displayName);
+  //     }
+  //   });
+
+  //   return cols;
+  // }, [dataSources, sourceTypeToNameMap]);
+
+  // 更新映射
+  const handleUpdateMapping = useCallback(
+    (id: string, updates: Partial<FieldMapping>) => {
+      setMappings((prevMappings) =>
+        prevMappings.map((mapping) => {
+          if (mapping.id === id) {
+            return { ...mapping, ...updates };
+          }
+          return mapping;
+        })
+      );
+    },
+    []
+  );
+
+  // 根据字段类型和数据来源类型获取可用的映射选项
+  const getMappingOptions = useCallback(
+    (fieldType: string | undefined, sourceType: string) => {
+      if (
+        !fieldType ||
+        !findDataAssetMappingData ||
+        findDataAssetMappingData.length === 0
+      ) {
+        return [];
+      }
+
+      // 从匹配的字段中提取指定数据来源类型的映射选项
+      const options: ListDataAssetSourceResItem['fields'] = [];
+      findDataAssetMappingData.forEach((field) => {
+        if (
+          field.fields &&
+          Array.isArray(field.fields) &&
+          field.name === sourceType
+        ) {
+          field.fields.forEach((field) => {
+            if (field.type === fieldType) {
+              options.push(field);
+            }
+          });
+        }
+      });
+
+      return options;
+    },
+    [findDataAssetMappingData]
+  );
 
   // Table列定义
   const tableColumns = useMemo(() => {
@@ -72,12 +145,12 @@ export default function Step2FieldMapping({
       },
       {
         title: '数据资产名称',
-        dataIndex: 'assetName',
+        dataIndex: 'nameZh',
         width: 200,
         render: (_: any, record: FieldMapping) => (
           <Input
             placeholder="请输入数据资产名称"
-            value={record.assetName}
+            value={record.nameZh}
             onChange={(value) =>
               handleUpdateMapping(record.id, { assetName: value })
             }
@@ -86,166 +159,229 @@ export default function Step2FieldMapping({
       }
     ];
 
-    if (dataSources.dataset) {
-      cols.push({
-        title: '数据集',
-        dataIndex: 'dataset',
-        width: 200,
-        render: (_: any, record: FieldMapping) => (
-          <Select
-            placeholder="请选择"
-            value={record.dataset}
-            onChange={(value) =>
-              handleUpdateMapping(record.id, { dataset: value })
-            }
-          >
-            <Select.Option value="dataset1">这是一个数据集名称</Select.Option>
-          </Select>
-        )
-      });
-    }
+    // console.log('444444444444', dataSources);
 
-    if (dataSources.volume) {
-      cols.push({
-        title: '源数据目录-卷',
-        dataIndex: 'volume',
-        width: 200,
-        render: (_: any, record: FieldMapping) => (
-          <Select
-            placeholder="请选择"
-            value={record.volume}
-            onChange={(value) =>
-              handleUpdateMapping(record.id, { volume: value })
-            }
-          >
-            <Select.Option value="volume1">这是一个源数据目录-卷</Select.Option>
-          </Select>
-        )
-      });
-    }
+    // 根据选中的数据来源动态生成列
+    // 直接遍历 dataSources 的键（这些键就是接口返回的类型）
+    Object.keys(dataSources).forEach((sourceType) => {
+      // 检查该数据来源是否被选中（存在即选中）
+      if (dataSources[sourceType]) {
+        const columnTitle = sourceType;
+        cols.push({
+          title: columnTitle,
+          dataIndex: sourceType,
+          width: 200,
+          render: (_: any, record: FieldMapping, index: number) => {
+            // 根据当前行的字段类型获取映射选项
+            // 通过 sequence 找到对应的 metadataField
+            const metadataField = metadataFields.find(
+              (field, idx) => idx === record.sequence - 1
+            );
+            const fieldType = metadataField?.type;
+            const options = getMappingOptions(fieldType, sourceType);
+            const disableMappingForThisRow =
+              metadataField?.nameEn === 'tags' ||
+              metadataField?.nameEn === 'data_source';
 
-    if (dataSources.database) {
-      cols.push({
-        title: '源数据目录-数据库',
-        dataIndex: 'database',
-        width: 200,
-        render: (_: any, record: FieldMapping) => (
-          <Select
-            placeholder="请选择"
-            value={record.database}
-            onChange={(value) =>
-              handleUpdateMapping(record.id, { database: value })
-            }
-          >
-            <Select.Option value="db1">这是一个源数据目录-数据库</Select.Option>
-          </Select>
-        )
-      });
-    }
-
-    if (dataSources.metadataDir) {
-      cols.push({
-        title: '源数据目录-元数据-目录',
-        dataIndex: 'metadataDir',
-        width: 200,
-        render: (_: any, record: FieldMapping) => (
-          <Select
-            placeholder="请选择"
-            value={record.metadataDir}
-            onChange={(value) =>
-              handleUpdateMapping(record.id, { metadataDir: value })
-            }
-          >
-            <Select.Option value="metadata1">
-              这是一个源数据目录-元数据-目录
-            </Select.Option>
-          </Select>
-        )
-      });
-    }
+            return (
+              <Select
+                placeholder="请选择"
+                value={record[sourceType]}
+                disabled={disableMappingForThisRow}
+                onChange={(value) =>
+                  handleUpdateMapping(record.id, { [sourceType]: value })
+                }
+              >
+                {options.map((option) => (
+                  <Select.Option key={option.name} value={option.name}>
+                    {option.name}
+                  </Select.Option>
+                ))}
+              </Select>
+            );
+          }
+        });
+      }
+    });
 
     cols.push({
       title: '操作',
       dataIndex: 'operation',
       width: 150,
       align: 'center' as const,
-      render: (_: any, record: FieldMapping) => (
-        <Space>
-          <Button
-            type="text"
-            onClick={() => handleAddMapping()}
-            className="cursor-pointer text-green-500"
-          >
-            添加行
-          </Button>
-          {mappings.length > 1 && (
+      render: (_: any, record: FieldMapping) => {
+        const meta = metadataFields[record.sequence - 1];
+        const isReserved =
+          !!meta?.nameEn && RESERVED_FIELD_ENS.has(meta.nameEn);
+        return (
+          <Space>
             <Button
               type="text"
-              onClick={() => handleDeleteMapping(record.id)}
-              className="cursor-pointer text-red-500"
+              onClick={() => handleAddMapping()}
+              className="cursor-pointer text-green-500"
             >
-              删除行
+              添加行
             </Button>
-          )}
-        </Space>
-      )
+            {mappings.length > 1 && !isReserved && (
+              <Button
+                type="text"
+                onClick={() => handleDeleteMapping(record.id)}
+                className="cursor-pointer text-red-500"
+              >
+                删除行
+              </Button>
+            )}
+          </Space>
+        );
+      }
     });
 
     return cols;
-  }, [dataSources, mappings]);
+  }, [
+    dataSources,
+    mappings,
+    metadataFields,
+    getMappingOptions,
+    handleUpdateMapping
+  ]);
+
+  const runAutoMap = async () => {
+    try {
+      if (!autoMapping) return;
+      if (!metadataFields || metadataFields.length === 0) return;
+      if (!dataSources || Object.keys(dataSources).length === 0) return;
+
+      // 构建请求参数
+      const req = {
+        fields: metadataFields.map((f) => ({
+          nameZh: f.nameZh,
+          nameEn: f.nameEn,
+          type: f.type,
+          default: f.default,
+          required: f.required,
+          allowModify: f.allowModify
+        })),
+        source: Object.keys(dataSources).map((key) => {
+          const fromAll =
+            findDataAssetMappingData.find((s) => s.name === key) ||
+            dataSources[key];
+          return {
+            type: fromAll?.type || key,
+            name: fromAll?.name || key,
+            tableName: fromAll?.tableName || '',
+            fields:
+              fromAll?.fields?.map((ff) => ({
+                name: ff.name,
+                type: ff.type
+              })) || []
+          };
+        })
+      };
+
+      const res = await autoMapDataAssetFieldAndSource(req);
+      if (res?.status !== 200 || !Array.isArray(res.data)) {
+        return;
+      }
+
+      // 基于 metadataFields 生成基础行
+      const nextMappings: FieldMapping[] = metadataFields.map((field, idx) => {
+        const row: FieldMapping = {
+          id: mappings[idx]?.id || `mapping_${Date.now()}_${idx}`,
+          sequence: idx + 1,
+          nameZh: mappings[idx]?.nameZh ?? field.nameZh
+        };
+        // 初始化所有选中的数据来源类型字段
+        Object.keys(dataSources).forEach((sourceType) => {
+          if (dataSources[sourceType]) {
+            row[sourceType] = '';
+          }
+        });
+        return row;
+      });
+
+      // 将自动映射结果填充到行
+      res.data.forEach((item) => {
+        const rowIdx = metadataFields.findIndex(
+          (f) => f.nameEn === item.fieldNameEn
+        );
+        if (rowIdx < 0) return;
+        item.mapping?.forEach((m) => {
+          // 使用数据来源类型作为列 key，值为 feildName
+          if (m?.type) {
+            (nextMappings[rowIdx] as any)[m.type] = m.feildName || '';
+          }
+        });
+      });
+
+      setMappings(nextMappings);
+      Message.success('已根据字段与数据来源自动完成映射');
+    } catch (e) {
+      // 静默失败，避免打扰
+      // 仅在明显错误时提示
+      Message.error('自动映射失败，请稍后重试');
+    }
+  };
 
   // 初始化映射
   useEffect(() => {
-    if (metadataFields.length > 0 && mappings.length === 0) {
+    if (metadataFields.length > 0 && mappings.length === 0 && !autoMapping) {
       const initialMappings: FieldMapping[] = metadataFields.map(
-        (field, index) => ({
-          id: `mapping_${Date.now()}_${index}`,
-          sequence: index + 1,
-          assetName: field.nameZh,
-          dataset: '',
-          volume: '',
-          database: '',
-          metadataDir: ''
-        })
+        (field, index) => {
+          const mapping: FieldMapping = {
+            id: `mapping_${Date.now()}_${index}`,
+            sequence: index + 1,
+            nameZh: field.nameZh
+          };
+          // 动态初始化所有选中的数据来源类型字段
+          Object.keys(dataSources).forEach((sourceType) => {
+            if (dataSources[sourceType]) {
+              mapping[sourceType] = '';
+            }
+          });
+          return mapping;
+        }
       );
       setMappings(initialMappings);
     }
-  }, [metadataFields]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [metadataFields, dataSources]);
 
   // 初始化表单值
   useEffect(() => {
     form.setFieldsValue({ mappings });
   }, [mappings]);
 
+  // 自动映射：当开关开启，或依赖变化时触发
+  useEffect(() => {
+    runAutoMap();
+  }, [autoMapping, metadataFields, dataSources, findDataAssetMappingData]);
+
   // 添加映射行
   const handleAddMapping = () => {
     const newMapping: FieldMapping = {
       id: `mapping_${Date.now()}`,
       sequence: mappings.length + 1,
-      assetName: '',
-      dataset: '',
-      volume: '',
-      database: '',
-      metadataDir: ''
+      nameZh: ''
     };
+    // 动态初始化所有选中的数据来源类型字段
+    Object.keys(dataSources).forEach((sourceType) => {
+      if (dataSources[sourceType]) {
+        newMapping[sourceType] = '';
+      }
+    });
     setMappings([...mappings, newMapping]);
   };
 
   // 删除映射行
   const handleDeleteMapping = (id: string) => {
+    const target = mappings.find((m) => m.id === id);
+    if (target) {
+      const meta = metadataFields[target.sequence - 1];
+      if (meta?.nameEn && RESERVED_FIELD_ENS.has(meta.nameEn)) {
+        return;
+      }
+    }
     setMappings(mappings.filter((mapping) => mapping.id !== id));
-  };
-
-  // 更新映射
-  const handleUpdateMapping = (id: string, updates: Partial<FieldMapping>) => {
-    setMappings(
-      mappings.map((mapping) => {
-        if (mapping.id === id) {
-          return { ...mapping, ...updates };
-        }
-        return mapping;
-      })
-    );
   };
 
   // 验证映射数据
@@ -254,9 +390,7 @@ export default function Step2FieldMapping({
       if (mappings.length === 0) {
         callback('请至少添加一个映射');
       } else {
-        const incompleteMappings = mappings.some(
-          (mapping) => !mapping.assetName
-        );
+        const incompleteMappings = mappings.some((mapping) => !mapping.nameZh);
         if (incompleteMappings) {
           callback('请填写完整的映射信息');
         } else {
@@ -267,21 +401,78 @@ export default function Step2FieldMapping({
     [mappings]
   );
 
-  // 导入字段
-  const handleImportFields = () => {
-    Message.info('导入字段功能待实现');
-  };
-
   // 自动映射
-  const handleAutoMapping = () => {
-    Message.info('自动映射功能待实现');
+  const handleAutoMapping = (v: boolean) => {
+    setAutoMapping(v);
+
+    if (!v) {
+      return;
+    }
+
+    runAutoMap();
   };
 
   // 完成
   const handleFinish = async () => {
     try {
       await form.validate();
-      onFinish();
+      const rawMappings: FieldMapping[] = form.getFieldValue('mappings') || [];
+
+      // 将原始映射表单数据格式化为后端需要的结构
+      const formatted = rawMappings.map((row) => {
+        // 通过 sequence 找到对应的元数据字段（nameEn、type、default、required、allowModify）
+        const meta = metadataFields[row.sequence - 1];
+
+        // 构建 mapping 数组：遍历被选中的数据来源键（这些键是 dataSources 的键，对应 ListDataAssetSourceResItem.name）
+        const mapping = Object.keys(dataSources).reduce<
+          {
+            type: string;
+            tableName: string;
+            fieldName: string;
+            fieldType: string;
+            databaseName: string;
+          }[]
+        >((acc, sourceKey) => {
+          const selectedFieldName = row[sourceKey] as string | undefined;
+          if (!selectedFieldName) {
+            return acc;
+          }
+
+          // 优先从全量来源列表中查找（包含 tableName、fields 等）
+          const sourceInfo =
+            findDataAssetMappingData.find((s) => s.name === sourceKey) ||
+            dataSources[sourceKey];
+          if (!sourceInfo) {
+            return acc;
+          }
+
+          const fieldInfo =
+            sourceInfo.fields?.find((f) => f.name === selectedFieldName) ||
+            undefined;
+
+          acc.push({
+            type: sourceInfo.type,
+            tableName: sourceInfo.tableName,
+            databaseName: sourceInfo.databaseName,
+            fieldName: selectedFieldName,
+            fieldType: fieldInfo?.type || ''
+          });
+          return acc;
+        }, []);
+
+        return {
+          nameZh: row.nameZh || meta?.nameZh || '',
+          nameEn: meta?.nameEn || '',
+          type: meta?.type || '',
+          default: meta?.default?.trim() === '' ? null : meta?.default,
+          required: !!meta?.required,
+          allowModify: !!meta?.allowModify,
+          mapping,
+          autoMap: false
+        };
+      });
+
+      onFinish(formatted as unknown as CreateDataAssetAndMappingReq);
     } catch (error) {
       console.error('表单验证失败:', error);
       Message.error('请填写完整的映射信息');
@@ -305,15 +496,11 @@ export default function Step2FieldMapping({
             <span className="text-[14px] text-[rgb(var(--primary-6))]">
               自动映射
             </span>
-            <Switch checked={autoMapping} onChange={setAutoMapping} />
+            <Switch
+              checked={autoMapping}
+              onChange={(v) => handleAutoMapping(v)}
+            />
           </div>
-          <Button
-            type="text"
-            icon={<IconDownload />}
-            onClick={handleImportFields}
-          >
-            导入字段
-          </Button>
         </div>
 
         <FormItem

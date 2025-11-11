@@ -1,112 +1,113 @@
-import type { FC } from 'react'
-import React from 'react'
-import { useTranslation } from 'react-i18next'
-import { RiClipboardLine, RiThumbUpLine, RiThumbDownLine } from '@remixicon/react'
-import copy from 'copy-to-clipboard'
-import type { FeedbackType } from '@/pages/workflowConfig/chat/chat/type'
-import Button from '@/pages/workflowConfig/components/button'
-import Toast from '@/pages/workflowConfig/components/toast'
-import Tooltip from '@/pages/workflowConfig/components/tooltip'
+import type { FC } from 'react';
+import React from 'react';
+import { useTranslation } from 'react-i18next';
+import {
+  RiClipboardLine,
+  RiThumbUpLine,
+  RiThumbDownLine
+} from '@remixicon/react';
+import copy from 'copy-to-clipboard';
+import type { FeedbackType } from '@/pages/workflowConfig/chat/chat/type';
+import Button from '@/pages/workflowConfig/components/button';
+import Toast from '@/pages/workflowConfig/components/toast';
+import Tooltip from '@/pages/workflowConfig/components/tooltip';
 
 type IResultHeaderProps = {
-  result: string
-  showFeedback: boolean
-  feedback: FeedbackType
-  onFeedback: (feedback: FeedbackType) => void
-}
+  result: string;
+  showFeedback: boolean;
+  feedback: FeedbackType;
+  onFeedback: (feedback: FeedbackType) => void;
+};
 
 const Header: FC<IResultHeaderProps> = ({
   feedback,
   showFeedback,
   onFeedback,
-  result,
+  result
 }) => {
-  const { t } = useTranslation('plugin__console-plugin-appforge')
+  const { t } = useTranslation('plugin__console-plugin-appforge');
   return (
-    <div className='flex w-full justify-between items-center '>
-      <div className='text-gray-800 text-2xl leading-4 font-normal'>{t('share.generation.resultTitle')}</div>
-      <div className='flex items-center space-x-2'>
+    <div className="flex w-full items-center justify-between ">
+      <div className="text-2xl font-normal leading-4 text-gray-800">
+        {t('share.generation.resultTitle')}
+      </div>
+      <div className="flex items-center space-x-2">
         <Button
-          className='h-7 p-[2px] pr-2'
+          className="h-7 p-[2px] pr-2"
           onClick={() => {
-            copy(result)
-            Toast.notify({ type: 'success', message: 'copied' })
+            copy(result);
+            Toast.notify({ type: 'success', message: 'copied' });
           }}
         >
           <>
-            <RiClipboardLine className='text-gray-500 w-4 h-3 mr-1' />
-            <span className='text-gray-500 text-xs leading-3'>{t('share.generation.copy')}</span>
+            <RiClipboardLine className="mr-1 h-3 w-4 text-gray-500" />
+            <span className="text-xs leading-3 text-gray-500">
+              {t('share.generation.copy')}
+            </span>
           </>
         </Button>
 
         {showFeedback && feedback.rating && feedback.rating === 'like' && (
-          <Tooltip
-            popupContent="Undo Great Rating"
-          >
+          <Tooltip popupContent="Undo Great Rating">
             <div
               onClick={() => {
                 onFeedback({
-                  rating: null,
-                })
+                  rating: null
+                });
               }}
-              className='flex w-7 h-7 items-center justify-center rounded-md cursor-pointer  !text-primary-600 border border-primary-200 bg-primary-100 hover:border-primary-300 hover:bg-primary-200'>
+              className="flex h-7 w-7 cursor-pointer items-center justify-center rounded-md  border border-primary-200 bg-primary-100 !text-primary-600 hover:border-primary-300 hover:bg-primary-200"
+            >
               <RiThumbUpLine className="size-[16px]" />
             </div>
           </Tooltip>
         )}
 
         {showFeedback && feedback.rating && feedback.rating === 'dislike' && (
-          <Tooltip
-            popupContent="Undo Undesirable Response"
-          >
+          <Tooltip popupContent="Undo Undesirable Response">
             <div
               onClick={() => {
                 onFeedback({
-                  rating: null,
-                })
+                  rating: null
+                });
               }}
-              className='flex w-7 h-7 items-center justify-center rounded-md cursor-pointer  !text-red-600 border border-red-200 bg-red-100 hover:border-red-300 hover:bg-red-200'>
+              className="flex h-7 w-7 cursor-pointer items-center justify-center rounded-md  border border-red-200 bg-red-100 !text-red-600 hover:border-red-300 hover:bg-red-200"
+            >
               <RiThumbDownLine className="size-[16px]" />
             </div>
           </Tooltip>
         )}
 
         {showFeedback && !feedback.rating && (
-          <div className='flex rounded-lg border border-gray-200 p-[1px] space-x-1'>
-            <Tooltip
-              popupContent="Great Rating"
-              needsDelay={false}
-            >
+          <div className="flex space-x-1 rounded-lg border border-gray-200 p-[1px]">
+            <Tooltip popupContent="Great Rating" needsDelay={false}>
               <div
                 onClick={() => {
                   onFeedback({
-                    rating: 'like',
-                  })
+                    rating: 'like'
+                  });
                 }}
-                className='flex w-6 h-6 items-center justify-center rounded-md cursor-pointer hover:bg-gray-100'>
+                className="flex h-6 w-6 cursor-pointer items-center justify-center rounded-md hover:bg-gray-100"
+              >
                 <RiThumbUpLine className="size-[16px]" />
               </div>
             </Tooltip>
-            <Tooltip
-              popupContent="Undesirable Response"
-              needsDelay={false}
-            >
+            <Tooltip popupContent="Undesirable Response" needsDelay={false}>
               <div
                 onClick={() => {
                   onFeedback({
-                    rating: 'dislike',
-                  })
+                    rating: 'dislike'
+                  });
                 }}
-                className='flex w-6 h-6 items-center justify-center rounded-md cursor-pointer hover:bg-gray-100'>
+                className="flex h-6 w-6 cursor-pointer items-center justify-center rounded-md hover:bg-gray-100"
+              >
                 <RiThumbDownLine className="size-[16px]" />
               </div>
             </Tooltip>
           </div>
         )}
       </div>
-
     </div>
-  )
-}
+  );
+};
 
-export default React.memo(Header)
+export default React.memo(Header);

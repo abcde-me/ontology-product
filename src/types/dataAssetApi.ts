@@ -88,6 +88,8 @@ export interface ListDataAssetSourceResItem {
   type: string;
   /** 数据来源名称 */
   name: string;
+  /** 数据来源数据库名称 */
+  databaseName: string;
   /** 数据来源表名 */
   tableName: string;
   /** 数据来源字段列表 */
@@ -104,6 +106,29 @@ export interface CreateDataAssetAndMappingReq
   autoMap?: boolean;
 }
 
+export interface AutoMapDataAssetFieldAndSourceReq {
+  fields: Partial<DataAssetField>[];
+  source: {
+    type: string;
+    name: string;
+    tableName: string;
+    fields: {
+      name: string;
+      type: string;
+    }[];
+  }[];
+}
+
+export interface AutoMapDataAssetFieldAndSourceResItem {
+  fieldNameEn: string;
+  mapping: {
+    type: string;
+    tableName: string;
+    fieldType: string;
+    feildName: string;
+  }[];
+}
+
 export interface ColumnField {
   /** 字段中文名 */
   nameZh: string;
@@ -111,10 +136,16 @@ export interface ColumnField {
   nameEn: string;
   /** 字段类型 */
   type: string;
+  /** 默认值 */
+  default: string;
   /** 是否为枚举类型 */
-  isEnum: boolean;
+  isEnumAble: boolean;
+  /** 是否可修改 */
+  allowModify: boolean;
   /** 是否显示 */
-  isDisplay: boolean;
+  // isDisplay: boolean;
+  /** 显示排序 0代表不显示，1代表第一列，2代表第二列，以此类推 */
+  displaySort: number;
 }
 
 export interface EditDataAssetFieldsDisplayReq {
