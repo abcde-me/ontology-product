@@ -556,14 +556,14 @@ export default function DataAssetList() {
         ]
       };
       const res = await editDataAssetDataBatch(editData);
-      if (res.code === 0 || res.code === undefined) {
+      if (res.code === '' && res.status === 200) {
         Message.success('修改成功');
         setModifyAssetModalVisible(false);
         setSelectedRowKeys([]);
         // 重新加载数据
         loadListData(currentPage, pageSize);
       } else {
-        Message.error('修改失败');
+        Message.error(res.message ?? '修改失败');
       }
     } catch (error) {
       console.error('修改失败:', error);
@@ -645,14 +645,14 @@ export default function DataAssetList() {
         modifyContext
       };
       const res = await editDataAssetDataBatch(editData);
-      if (res.code === 0 || res.code === undefined) {
+      if (res?.code === '' && res?.status === 200) {
         Message.success('修改成功');
         setEditSingleAssetModalVisible(false);
         setEditingRecord(null);
         // 重新加载数据
         loadListData(currentPage, pageSize);
       } else {
-        Message.error('修改失败');
+        Message.error(res?.message ?? '修改失败');
       }
     } catch (error) {
       console.error('修改失败:', error);

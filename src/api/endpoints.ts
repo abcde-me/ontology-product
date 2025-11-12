@@ -541,7 +541,7 @@ export const ModaForgeResourceEndpoints = {
   // 批量修改数据资产表中的数据信息
   editDataAssetDataBatch: PrefixAimdp + '/EditDataAssetDataBatch',
   // 获取标签列表
-  listAssetTags: PrefixAimdp + '/ListAssetTags',
+  listBaseTags: PrefixAimdp + '/ListBaseTags',
   // 批量删除数据资产表中的数据信息
   deleteDataAssetDataBatch: PrefixAimdp + '/DeleteDataAssetDataBatch'
 };
