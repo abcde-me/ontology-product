@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { Input } from '@arco-design/web-react';
+import { Input, Select } from '@arco-design/web-react';
 import { IconEdit } from '@arco-design/web-react/icon';
 import type { EnhancementInfo as EnhancementInfoType } from '../../../../types';
 
@@ -67,8 +67,8 @@ const EnhancementInfo: React.FC<EnhancementInfoProps> = ({
       {/* 内容区域 */}
       <div className="space-y-4">
         {/* 分段总结 */}
-        <div>
-          <label className="mb-2 block text-sm font-medium text-[#0F172A]">
+        <div className="flex gap-2">
+          <label className="block w-[100px] text-sm font-medium text-[#0F172A]">
             分段总结：
           </label>
           {isEditing ? (
@@ -80,15 +80,15 @@ const EnhancementInfo: React.FC<EnhancementInfoProps> = ({
               className="w-full"
             />
           ) : (
-            <div className="whitespace-pre-wrap text-sm text-[#475569]">
+            <div className="w-full whitespace-pre-wrap text-sm text-[#475569]">
               {enhancement.summary}
             </div>
           )}
         </div>
 
         {/* 假设性问答 */}
-        <div>
-          <label className="mb-2 block text-sm font-medium text-[#0F172A]">
+        <div className="flex gap-2">
+          <label className="block w-[100px] text-sm font-medium text-[#0F172A]">
             假设性问答：
           </label>
           {isEditing ? (
@@ -100,8 +100,79 @@ const EnhancementInfo: React.FC<EnhancementInfoProps> = ({
               className="w-full"
             />
           ) : (
-            <div className="whitespace-pre-wrap text-sm text-[#475569]">
+            <div className="w-full whitespace-pre-wrap text-sm text-[#475569]">
               {enhancement.hypotheticalAnswer}
+            </div>
+          )}
+        </div>
+
+        {/* 实体 */}
+        <div className="flex items-center gap-2">
+          <label className="block w-[100px] text-sm font-medium text-[#0F172A]">
+            实体:
+          </label>
+          {isEditing ? (
+            <Select
+              mode="multiple"
+              placeholder="请输入或选择实体"
+              value={enhancement.extractionEntity || []}
+              onChange={(values) => onUpdate('extractionEntity', values)}
+              allowCreate
+              allowClear
+              style={{ width: '100%' }}
+            />
+          ) : (
+            <div className="flex flex-wrap gap-2">
+              {enhancement.extractionEntity &&
+              enhancement.extractionEntity.length > 0 ? (
+                enhancement.extractionEntity.map((entity, index) => (
+                  <span
+                    key={index}
+                    className="inline-flex items-center rounded bg-white px-2 py-1 text-xs text-gray-700"
+                  >
+                    {entity}
+                  </span>
+                ))
+              ) : (
+                <span className="whitespace-pre-wrap text-sm text-[#475569]">
+                  -
+                </span>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* 标签 */}
+        <div className="flex items-center gap-2">
+          <label className="block w-[100px] text-sm font-medium text-[#0F172A]">
+            标签:
+          </label>
+          {isEditing ? (
+            <Select
+              mode="multiple"
+              placeholder="请输入或选择标签"
+              value={enhancement.tags || []}
+              onChange={(values) => onUpdate('tags', values)}
+              allowCreate
+              allowClear
+              style={{ width: '100%' }}
+            />
+          ) : (
+            <div className="flex flex-wrap gap-2">
+              {enhancement.tags && enhancement.tags.length > 0 ? (
+                enhancement.tags.map((entity, index) => (
+                  <span
+                    key={index}
+                    className="inline-flex items-center rounded bg-white px-2 py-1 text-xs text-gray-700"
+                  >
+                    {entity}
+                  </span>
+                ))
+              ) : (
+                <span className="whitespace-pre-wrap text-sm text-[#475569]">
+                  -
+                </span>
+              )}
             </div>
           )}
         </div>

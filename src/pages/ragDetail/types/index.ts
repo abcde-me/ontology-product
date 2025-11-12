@@ -162,6 +162,8 @@ export type Element = TextElement | ImageElement | TableElement;
 export interface EnhancementInfo {
   summary: string; // 分段总结
   hypotheticalAnswer: string; // 假设性问答
+  extractionEntity?: string[]; // 实体
+  tags?: string[]; // 标签
 }
 
 // 分段详情数据
