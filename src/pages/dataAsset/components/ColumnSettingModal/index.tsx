@@ -14,6 +14,7 @@ import './index.module.scss'; // 确保引入样式文件
 import { ReactSortable } from 'react-sortablejs';
 import DragIcon from '../../assets/drag-icon.svg';
 import styles from './index.module.scss';
+import { RESERVED_FIELD_ENS } from '../../utils/const';
 // const SortableAny = ReactSortable as any;
 
 export interface ColumnField {
@@ -144,7 +145,10 @@ const ColumnSettingModal: React.FC<ColumnSettingModalProps> = ({
             rowSelection={{
               type: 'checkbox',
               selectedRowKeys: selectedIds,
-              onChange: (keys) => setSelectedIds(keys as string[])
+              onChange: (keys) => setSelectedIds(keys as string[]),
+              checkboxProps: (record: ColumnField) => ({
+                disabled: RESERVED_FIELD_ENS.has(record.id)
+              })
             }}
             rowClassName={(_, idx) =>
               idx === displayFields.length - 1
