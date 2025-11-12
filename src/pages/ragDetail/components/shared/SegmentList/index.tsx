@@ -40,7 +40,7 @@ const SegmentList: React.FC<SegmentListProps> = ({
       ? propSelectedSegmentId
       : storeSelectedSegmentId;
 
-  // 搜索过滤逻辑
+  // 搜索过滤逻辑 - 只根据 content 搜索
   const filteredSegments = useMemo(() => {
     if (!segmentSearchText.trim()) {
       return segments;
@@ -48,9 +48,7 @@ const SegmentList: React.FC<SegmentListProps> = ({
 
     const searchLower = segmentSearchText.toLowerCase().trim();
     return segments.filter((segment) => {
-      const titleMatch = segment.title?.toLowerCase().includes(searchLower);
-      const contentMatch = segment.content.toLowerCase().includes(searchLower);
-      return titleMatch || contentMatch;
+      return segment.content.toLowerCase().includes(searchLower);
     });
   }, [segments, segmentSearchText]);
 
