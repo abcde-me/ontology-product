@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Tree, Input } from '@arco-design/web-react';
 import { IconCaretDown, IconPlus } from '@arco-design/web-react/icon';
 import classNames from 'classnames';
@@ -30,7 +30,6 @@ export default function EditableTree() {
     renderExtra,
     renderTitle
   } = useEditableTree({ catalogTreeStore });
-
   return (
     <div className={classNames('pl-3 pr-3 pt-2')}>
       <div className="mb-2 mt-[-8px] flex items-center justify-between">

@@ -102,6 +102,13 @@ export const menus: MenuModel[] = [
         path: '/tenant/compute/modaforge/dataLoad',
         key: 'dataLoad',
         permission: DATA_LOAD_PERMISSIONS.LIST
+      },
+      {
+        title: '数据目录',
+        icon: <DataCatalog className={iconClass} />,
+        key: 'dataCatalog',
+        path: '/tenant/compute/modaforge/dataCatalog',
+        permission: DATA_CATALOG_PERMISSIONS.LIST
       }
     ]
   },
@@ -173,13 +180,6 @@ export const menus: MenuModel[] = [
     title: '数据管理',
     key: 'DataManagement',
     children: [
-      {
-        title: '数据目录',
-        icon: <DataCatalog className={iconClass} />,
-        key: 'dataCatalog',
-        path: '/tenant/compute/modaforge/dataCatalog',
-        permission: DATA_CATALOG_PERMISSIONS.LIST
-      },
       {
         title: '数据集市',
         icon: <DatasetManagement className={iconClass} />,
