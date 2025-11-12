@@ -32,7 +32,7 @@ export default function EditableTree() {
     renderExtra,
     renderTitle
   } = useEditableTree({ catalogTreeStore });
-  const getdirectorylist = async () => {
+  const getDirectoryListData = async () => {
     try {
       const res = await getDirectoryList({});
       if (res.status === 200) {
@@ -43,7 +43,7 @@ export default function EditableTree() {
     }
   };
   useEffect(() => {
-    getdirectorylist();
+    getDirectoryListData();
   }, [treeData]);
   return (
     <div className={classNames('pl-3 pr-3 pt-2')}>
