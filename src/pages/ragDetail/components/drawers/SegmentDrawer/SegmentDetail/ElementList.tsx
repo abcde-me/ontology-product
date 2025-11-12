@@ -8,6 +8,7 @@ import type { Element } from '../../../../types';
 import TextElementCard from './TextElementCard';
 import ImageElementCard from './ImageElementCard';
 import TableElementCard from './TableElementCard';
+import FormulaElementCard from './FormulaElement';
 
 interface ElementListProps {
   elements: Element[];
@@ -36,6 +37,14 @@ const ElementList: React.FC<ElementListProps> = ({ elements, isEditing }) => {
       case 'table':
         return (
           <TableElementCard
+            key={element.id}
+            element={element}
+            isEditing={isEditing}
+          />
+        );
+      case 'formula':
+        return (
+          <FormulaElementCard
             key={element.id}
             element={element}
             isEditing={isEditing}
