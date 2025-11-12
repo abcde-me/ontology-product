@@ -2,6 +2,7 @@ import UAPI from '@/api';
 import {
   AutoMapDataAssetFieldAndSourceReq,
   AutoMapDataAssetFieldAndSourceResItem,
+  BaseTag,
   ColumnField,
   CreateDataAssetAndMappingReq,
   CreateDataAssetRes,
@@ -563,32 +564,29 @@ export async function deleteDataAssetDataBatch(params: { ids: string[] }) {
   // return await UAPI.RES.deleteDataAssetDataBatch({}).post(params).inRegion().do();
 }
 
-export async function getTagList(): Promise<
-  ApiRes<{ id: string; value: string }[]>
-> {
+export async function getTagList(): Promise<ApiRes<BaseTag[]>> {
   return Promise.resolve({
     code: 0,
     status: 200,
     data: [
       {
-        id: '1',
-        value: '标签1'
-      },
-      {
-        id: '2',
-        value: '标签2'
-      },
-      {
-        id: '3',
-        value: '标签3'
-      },
-      {
-        id: '4',
-        value: '标签4'
-      },
-      {
-        id: '5',
-        value: '标签5'
+        id: 'tag-999',
+        name: 'test',
+        description: 'test',
+        valueList: [
+          {
+            id: 'tagvalue-777',
+            tagValue: '1'
+          },
+          {
+            id: 'tagvalue-888',
+            tagValue: '2'
+          },
+          {
+            id: 'tagvalue-999',
+            tagValue: '3'
+          }
+        ]
       }
     ],
     message: 'success',
