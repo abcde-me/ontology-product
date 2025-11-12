@@ -21,7 +21,8 @@ import { getTreeDataByRagId } from '../utils/treeData';
 import { getSegmentDataByRagId } from '../utils/segmentDataByRagId';
 import {
   ListKnowledgeDocumentCatalogs,
-  ListKnowledgeChunks
+  ListKnowledgeChunks,
+  UpdateKnowledgeChunk
 } from '@/api/modules/rag';
 
 /**
@@ -379,29 +380,51 @@ export async function fetchRagDetail(
 
 /**
  * 更新分段内容
- * @param _ragId - RAG ID (未使用)
- * @param segmentId - 分段ID
+ * @param datasetId - 数据集ID
+ * @param documentId - 文档ID
+ * @param chunkId - 分块ID
  * @param content - 新的内容
  * @returns 更新后的分段
  */
 export async function updateSegmentContent(
-  _ragId: string,
-  segmentId: string,
+  datasetId: string,
+  documentId: string,
+  chunkId: string,
   content: string
 ): Promise<Segment> {
-  // TODO: 替换为真实API调用
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve({
-        id: segmentId,
-        content,
-        charCount: content.length,
-        segmentIndex: 1,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      });
-    }, 300);
-  });
+  try {
+    const response = await UpdateKnowledgeChunk({
+      dataset_id: datasetId,
+      document_id: documentId,
+      chunk_id: chunkId,
+      content
+    });
+
+    // 检查响应格式
+    if (response && (response as any).data) {
+      const data = (response as any).data;
+      return {
+        id: data.id || chunkId,
+        content: data.content || content,
+        charCount: (data.content || content).length,
+        segmentIndex: data.chunk_index || 0,
+        createdAt: data.created_at || new Date().toISOString(),
+        updatedAt: data.updated_at || new Date().toISOString()
+      };
+    }
+
+    // 如果响应格式不符合预期，返回基本信息
+    return {
+      id: chunkId,
+      content,
+      charCount: content.length,
+      segmentIndex: 0,
+      updatedAt: new Date().toISOString()
+    };
+  } catch (error) {
+    console.error('Failed to update segment content:', error);
+    throw error;
+  }
 }
 
 /**

@@ -245,6 +245,7 @@ export interface SegmentUpdatePayload {
 
 export interface RagDetailState {
   ragId: string | null;
+  datasetId: string | null; // 数据集ID
   fileName: string;
   filePath: string;
   sceneType: SceneType;

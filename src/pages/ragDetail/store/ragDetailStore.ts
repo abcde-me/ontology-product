@@ -29,6 +29,7 @@ export const useRagDetailStore = create<RagDetailState & RagDetailActions>(
   (set, get) => ({
     // State
     ragId: null,
+    datasetId: null,
     fileName: '',
     filePath: '',
     sceneType: 'pdf', // 默认为PDF文件类型
@@ -57,6 +58,7 @@ export const useRagDetailStore = create<RagDetailState & RagDetailActions>(
       try {
         const data = await fetchRagDetail(datasetId, documentId);
         set({
+          datasetId, // 保存 datasetId
           ragId: documentId, // 使用 documentId 作为 ragId
           fileName: data.fileName,
           filePath: data.filePath,
@@ -185,10 +187,18 @@ export const useRagDetailStore = create<RagDetailState & RagDetailActions>(
 
     updateSegmentContent: async (segmentId: string, content: string) => {
       try {
-        const ragId = get().ragId;
-        if (!ragId) throw new Error('RAG ID not found');
+        const datasetId = get().datasetId;
+        const documentId = get().ragId;
+        if (!datasetId || !documentId) {
+          throw new Error('Dataset ID or Document ID not found');
+        }
 
-        await apiUpdateSegmentContent(ragId, segmentId, content);
+        await apiUpdateSegmentContent(
+          datasetId,
+          documentId,
+          segmentId,
+          content
+        );
 
         const segments = get().segments.map((seg) =>
           seg.id === segmentId
