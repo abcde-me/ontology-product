@@ -74,7 +74,7 @@ export default function DataAssetList() {
   const [loading, setLoading] = useState(false);
   // 分页状态
   const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(12); // 默认卡片视图，每页12个
+  const [pageSize, setPageSize] = useState(10); // 默认卡片视图，每页12个
   const [total, setTotal] = useState(0);
   const [searchParams, setSearchParams] = useState({
     commonSearch: '',
@@ -406,8 +406,6 @@ export default function DataAssetList() {
   }, [hasMapping]);
 
   const handleCreateDataAsset = () => {
-    // TODO: 实现创建数据资产的逻辑
-    console.log('创建数据资产');
     history.push('/tenant/compute/modaforge/dataAsset/create');
   };
 
@@ -435,7 +433,7 @@ export default function DataAssetList() {
   const handleViewTypeChange = (type: ViewType) => {
     setViewType(type);
     // 切换视图时，重置分页并重新加载数据，清空选中状态
-    const newPageSize = type === ViewType.LIST ? 50 : 48;
+    const newPageSize = type === ViewType.LIST ? 10 : 12;
     setPageSize(newPageSize);
     setCurrentPage(1);
     setSelectedRowKeys([]);
@@ -456,7 +454,12 @@ export default function DataAssetList() {
 
   // 列设置弹窗回调
   const handleModalOk = (selectedFields: any) => {
-    editDataAssetFieldsDisplay({ fields: selectedFields }).then((res) => {
+    editDataAssetFieldsDisplay({
+      fields: selectedFields.map((field: ColumnField, index: number) => ({
+        ...field,
+        displaySort: index + 1
+      }))
+    }).then((res) => {
       if (res.status !== 200) {
         Message.error(res.message ?? '列设置失败');
         return;
