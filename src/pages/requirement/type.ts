@@ -20,7 +20,8 @@ export enum RequirementStatus {
   Draft = 1, // 发布中
   Published = 2, // 已发布
   PublishFailed = 3, // 发布失败
-  Annotated = 4 // 标注完成
+  Annotated = 4, // 标注完成
+  PreAnnotated = 5 // 预标注中
 }
 export const RequirementStatusMap = {
   [RequirementStatus.Draft]: '发布中',

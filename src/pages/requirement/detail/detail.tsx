@@ -851,8 +851,8 @@ export default function RequirementDetail() {
           org_id: taskTypeVal === 2 ? taskAssignData : departmentIds
         }
     };
-    if (model_name) {
-      new_publishData['model_name'] = model_name;
+    if (model_id) {
+      new_publishData['model_id'] = model_id;
     }
     const obj: any = removeEmptyArrays(new_publishData);
     setLoading(true);
@@ -885,7 +885,7 @@ export default function RequirementDetail() {
             setAnnotationTypeContentVal(res?.data?.label_tool?.label_tool_code);
             basicForm.setFieldValue('name', res?.data?.name);
             basicForm.setFieldValue('description', res?.data?.description);
-            basicForm.setFieldValue('model_name', res?.data?.model_name);
+            basicForm.setFieldValue('model_id', res?.data?.model_id);
             setGetDetailObj(res?.data);
             setTaskTypeVal(res?.data?.team_type);
             res?.data?.labels?.map((item) => {
@@ -946,17 +946,17 @@ export default function RequirementDetail() {
   }, [annotationTypeContentCode]);
 
   const { data: modelList = [] } = useGetModelList(
-    { label_type: annotationTypeVal, page: 1, page_size: 1000 },
+    { label_tool_code: annotationTypeContentCode, page: 1, page_size: 1000 },
     {
       enabled: showPreLabeling
     }
   );
 
-  const model_name = Form.useWatch('model_name', basicForm);
+  const model_id = Form.useWatch('model_id', basicForm);
 
   const { data: modelLabelList = [] } = useGetModelLabelList(
-    { model_name },
-    { enabled: !!model_name }
+    { model_id },
+    { enabled: !!model_id }
   );
 
   // 监听预标注模型变化，清空所有模型映射字段
@@ -968,7 +968,7 @@ export default function RequirementDetail() {
         item['label_mapping'] = '';
       });
     }
-  }, [model_name, type]);
+  }, [model_id, type]);
 
   return (
     <div className="requirement-detail">
@@ -1114,7 +1114,7 @@ export default function RequirementDetail() {
               </FormItem>
               {showPreLabeling && (
                 <FormItem
-                  field="model_name"
+                  field="model_id"
                   label="预标注模型:"
                   style={{ marginBottom: 24 }}
                 >
@@ -1248,7 +1248,7 @@ export default function RequirementDetail() {
                                   >
                                     <Input
                                       style={{
-                                        minWidth: !!model_name ? 180 : 260
+                                        minWidth: !!model_id ? 180 : 260
                                       }}
                                       onChange={(val: any) => {
                                         updateNestedValue(
@@ -1315,7 +1315,7 @@ export default function RequirementDetail() {
                                   >
                                     <Input
                                       style={{
-                                        minWidth: !!model_name ? 180 : 260
+                                        minWidth: !!model_id ? 180 : 260
                                       }}
                                       onChange={(val: any) => {
                                         updateNestedValue(
@@ -1357,7 +1357,7 @@ export default function RequirementDetail() {
                                       value={item.label_name_cn}
                                     />
                                   </FormItem>
-                                  {!!model_name && (
+                                  {!!model_id && (
                                     <FormItem
                                       label="模型映射:"
                                       field={`label_mapping_${type === 'detail' ? item?.id : item?.label_id}`}
@@ -1416,7 +1416,7 @@ export default function RequirementDetail() {
                                           ''
                                         );
                                         // 形状改变时，清空对应的模型映射值
-                                        if (model_name) {
+                                        if (model_id) {
                                           const mappingFieldName = `label_mapping_${type === 'detail' ? item?.id : item?.label_id}`;
                                           labelToolForm.setFieldValue(
                                             mappingFieldName,
