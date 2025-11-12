@@ -491,13 +491,13 @@ export default function DataAssetList() {
       onOk: async () => {
         try {
           const res = await deleteDataAssetDataBatch({ ids: selectedRowKeys });
-          if (res.code === 0 || res.code === undefined) {
+          if (res.status === 200 && res.code === '') {
             Message.success('删除成功');
             setSelectedRowKeys([]);
             // 重新加载数据
             loadListData(currentPage, pageSize);
           } else {
-            Message.error('删除失败');
+            Message.error(res.message ?? '删除失败');
           }
         } catch (error) {
           console.error('删除失败:', error);
@@ -515,13 +515,13 @@ export default function DataAssetList() {
       onOk: async () => {
         try {
           const res = await deleteDataAssetDataBatch({ ids: [record.id] });
-          if (res.code === 0 || res.code === undefined) {
+          if (res.status === 200 && res.code === '') {
             Message.success('删除成功');
             setSelectedRowKeys([]);
             // 重新加载数据
             loadListData(currentPage, pageSize);
           } else {
-            Message.error('删除失败');
+            Message.error(res.message ?? '删除失败');
           }
         } catch (error) {
           console.error('删除失败:', error);
