@@ -3,7 +3,7 @@ import './index.scss';
 import DirectoryTree, {
   type TreeNodeItem,
   DirectoryTreeRef
-} from '@/components/directory-tree/DirectoryTree';
+} from '../../components/directory-tree/DirectoryTree';
 import { useFileManager } from '../../hooks/useFileManager';
 
 interface NotebookTabContentProps {

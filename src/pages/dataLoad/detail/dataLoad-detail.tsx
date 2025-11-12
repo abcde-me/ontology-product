@@ -112,7 +112,7 @@ const DataLoadDetail = () => {
         root_type: 1
       });
       if (res.code == '' && res.status == 200) {
-        setDirectoryArr(res.data.src);
+        setDirectoryArr(res.data?.src as any);
       }
     } catch (error) {
       console.error('Error fetching directory list:', error);
