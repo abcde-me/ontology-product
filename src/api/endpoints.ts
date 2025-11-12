@@ -245,7 +245,8 @@ export const ModaForgeResourceEndpoints = {
   // 编辑分块元素信息
   UpdateKnowledgeChunkMaterials: PrefixRag + '/UpdateKnowledgeChunkMaterials',
   // 编辑分块增强信息
-  UpdateKnowledgeChunkEnhancement: PrefixRag + '/UpdateKnowledgeChunkEnhancement',
+  UpdateKnowledgeChunkEnhancement:
+    PrefixRag + '/UpdateKnowledgeChunkEnhancement',
   // 查询分块溯源日志
   GetKnowledgeChunkTraceLog: PrefixRag + '/GetKnowledgeChunkTraceLog',
   // 运行命中测试
@@ -540,7 +541,9 @@ export const ModaForgeResourceEndpoints = {
   // 批量修改数据资产表中的数据信息
   editDataAssetDataBatch: PrefixAimdp + '/EditDataAssetDataBatch',
   // 获取标签列表
-  listAssetTags: PrefixAimdp + '/ListAssetTags'
+  listAssetTags: PrefixAimdp + '/ListAssetTags',
+  // 批量删除数据资产表中的数据信息
+  deleteDataAssetDataBatch: PrefixAimdp + '/DeleteDataAssetDataBatch'
 };
 
 /**
