@@ -262,9 +262,9 @@ export async function listDataAssetData(
 }
 
 // 修改数据资产
-export async function editDataAssetAndMapping(
-  params: CreateDataAssetAndMappingReq
-) {
+export async function editDataAssetAndMapping(params: {
+  fields: CreateDataAssetAndMappingReq;
+}) {
   return await UAPI.RES.editDataAssetAndMapping({})
     .post(params)
     .inRegion()
@@ -410,9 +410,9 @@ export async function listDataAssetSource(): Promise<
 }
 
 // 创建数据资产和映射关系
-export async function createDataAssetAndMapping(
-  params: CreateDataAssetAndMappingReq
-) {
+export async function createDataAssetAndMapping(params: {
+  fields: CreateDataAssetAndMappingReq;
+}) {
   return await UAPI.RES.createDataAssetAndMapping({})
     .post(params)
     .inRegion()

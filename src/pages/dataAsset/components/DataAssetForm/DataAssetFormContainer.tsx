@@ -336,7 +336,9 @@ export default function DataAssetFormContainer({
     async (fieldsWithMappings: CreateDataAssetAndMappingReq) => {
       const res = await (
         isEditMode ? editDataAssetAndMapping : createDataAssetAndMapping
-      )(fieldsWithMappings);
+      )({
+        fields: fieldsWithMappings
+      });
 
       if (res.status !== 200) {
         Message.error(res.message || '创建数据资产失败');
