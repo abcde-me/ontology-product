@@ -463,14 +463,17 @@ export async function autoMapDataAssetColumn(
 export async function editDataAssetFieldsDisplay(
   params: EditDataAssetFieldsDisplayReq
 ) {
-  return Promise.resolve({
-    code: 0,
-    status: 200,
-    data: {},
-    message: 'success',
-    requestId: ''
-  });
-  // return await UAPI.RES.editDataAssetFieldsDisplay({}).post(params).inRegion().do();
+  // return Promise.resolve({
+  //   code: 0,
+  //   status: 200,
+  //   data: {},
+  //   message: 'success',
+  //   requestId: ''
+  // });
+  return await UAPI.RES.editDataAssetFieldsDisplay({})
+    .post(params)
+    .inRegion()
+    .do();
 }
 
 // 查询数据资产表列设置（前端展示）

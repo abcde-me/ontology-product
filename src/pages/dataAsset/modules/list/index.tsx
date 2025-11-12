@@ -34,16 +34,17 @@ import {
   findDataAssetFieldsDisplay,
   deleteDataAssetDataBatch,
   editDataAssetDataBatch,
-  getTagList
+  getTagList,
+  editDataAssetFieldsDisplay
 } from '@/api/dataAsset';
 import {
   ColumnField as ApiColumnField,
   ListDataAssetDataRes,
-  ModifyMethod
+  ModifyMethod,
+  EditDataAssetData
 } from '@/types/dataAssetApi';
 import { ColumnField } from '../../components/ColumnSettingModal';
 import ColumnSettingModal from '../../components/ColumnSettingModal';
-import { EditDataAssetData } from '@/types/dataAssetApi';
 import styles from './list.module.scss';
 import classNames from 'classnames';
 
@@ -267,7 +268,8 @@ export default function DataAssetList() {
       type: field.type,
       enumChecked: field.isEnumAble || false,
       enumLoading: false,
-      enumCount: 0
+      enumCount: 0,
+      displaySort: field.displaySort || 0
     }));
     setColumnSettingsFields(convertedFields);
   };
@@ -454,9 +456,15 @@ export default function DataAssetList() {
 
   // 列设置弹窗回调
   const handleModalOk = (selectedFields: any) => {
-    // TODO: 处理列设置确定逻辑
-    setColumnModalOpen(false);
-    // Message.success('列设置已保存');
+    editDataAssetFieldsDisplay({ fields: selectedFields }).then((res) => {
+      if (res.status !== 200) {
+        Message.error(res.message ?? '列设置失败');
+        return;
+      }
+      Message.success('列设置成功');
+      setColumnModalOpen(false);
+      loadListData(1, pageSize);
+    });
   };
   const handleModalCancel = () => setColumnModalOpen(false);
   const handleColumnChange = (list: ColumnField[]) => {
