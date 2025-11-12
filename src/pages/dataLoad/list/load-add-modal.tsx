@@ -233,7 +233,7 @@ const LoadAddModal = (props: propsType) => {
   async function getdirectoryDataList() {
     try {
       const res = await getDirectoryList({
-        root_type: 1
+        // root_type: 1
       });
       if (!res || res.status !== 200) {
         console.error('获取目录列表失败:', res);
