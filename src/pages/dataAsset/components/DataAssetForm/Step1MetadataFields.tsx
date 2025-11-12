@@ -24,8 +24,12 @@ import {
 } from '@/types/dataAssetApi';
 import { listDataAssetFieldTypes } from '@/api/dataAsset';
 import { ImportType } from '../../types';
+import noDataElement from '@/components/no-data';
 
 const FormItem = Form.Item;
+
+const getDataSourceKey = (item: ListDataAssetSourceResItem) =>
+  `${item.type ?? ''}::${item.databaseName ?? ''}::${item.tableName ?? ''}`;
 
 // 系统保留字段（不允许编辑、删除、导入）
 const RESERVED_FIELD_ENS = new Set([
@@ -34,6 +38,31 @@ const RESERVED_FIELD_ENS = new Set([
   'data_update_time',
   'data_source'
 ]);
+
+const normalizeDataSources = (
+  sources: Record<string, ListDataAssetSourceResItem> = {},
+  available: Record<string, ListDataAssetSourceResItem> = {}
+): Record<string, ListDataAssetSourceResItem> => {
+  const result: Record<string, ListDataAssetSourceResItem> = {};
+  Object.keys(sources).forEach((key) => {
+    if (available[key]) {
+      result[key] = available[key];
+    }
+  });
+  return result;
+};
+
+const areDataSourcesEqual = (
+  a: Record<string, ListDataAssetSourceResItem> = {},
+  b: Record<string, ListDataAssetSourceResItem> = {}
+) => {
+  const aKeys = Object.keys(a);
+  const bKeys = Object.keys(b);
+  if (aKeys.length !== bKeys.length) {
+    return false;
+  }
+  return aKeys.every((key) => b[key] === a[key]);
+};
 
 interface Step1MetadataFieldsProps {
   metadataFields: MetadataField[];
@@ -98,8 +127,9 @@ export default function Step1MetadataFields({
     }
     const result: Record<string, ListDataAssetSourceResItem> = {};
     findDataAssetMappingData.forEach((item) => {
-      if (item.name) {
-        result[item.name] = item;
+      const key = getDataSourceKey(item);
+      if (key) {
+        result[key] = item;
       }
     });
     return result;
@@ -113,37 +143,23 @@ export default function Step1MetadataFields({
   //   metadata: '源数据目录-元数据-目录'
   // };
 
-  // 初始化 dataSources，确保所有可用的数据来源都有初始值
+  const normalizedDataSources = useMemo(
+    () => normalizeDataSources(dataSources, availableDataSources),
+    [dataSources, availableDataSources]
+  );
+
   useEffect(() => {
-    if (Object.keys(availableDataSources).length > 0) {
-      const updatedDataSources: Record<string, ListDataAssetSourceResItem> = {
-        ...dataSources
-      };
-      let hasUpdate = false;
-
-      // 为新的可用数据来源设置初始值（如果还没有的话）
-      Object.keys(availableDataSources).forEach((key) => {
-        if (updatedDataSources[key] === undefined) {
-          updatedDataSources[key] = availableDataSources[key];
-          hasUpdate = true;
-        }
-      });
-
-      // 移除不再可用的数据来源
-      Object.keys(updatedDataSources).forEach((key) => {
-        if (!(key in availableDataSources)) {
-          delete updatedDataSources[key];
-          hasUpdate = true;
-        }
-      });
-
-      if (hasUpdate) {
-        setDataSources(updatedDataSources);
-        form.setFieldValue('dataSources', updatedDataSources);
-      }
+    if (!areDataSourcesEqual(dataSources, normalizedDataSources)) {
+      setDataSources(normalizedDataSources);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [availableDataSources]);
+  }, [dataSources, normalizedDataSources, setDataSources]);
+
+  useEffect(() => {
+    const current = form.getFieldValue('dataSources');
+    if (current !== normalizedDataSources) {
+      form.setFieldValue('dataSources', normalizedDataSources);
+    }
+  }, [form, normalizedDataSources]);
 
   // Table列定义（字段名对齐 DataAssetField）
   const columns = [
@@ -359,12 +375,12 @@ export default function Step1MetadataFields({
   // 数据源变更
   const handleDataSourceChange = (key: string, checked: boolean) => {
     const updatedDataSources: Record<string, ListDataAssetSourceResItem> = {
-      ...dataSources
+      ...normalizedDataSources
     };
     if (checked) {
       const item =
         availableDataSources[key] ||
-        findDataAssetMappingData.find((i) => i.name === key);
+        findDataAssetMappingData.find((i) => getDataSourceKey(i) === key);
       if (item) {
         updatedDataSources[key] = item;
       }
@@ -377,20 +393,14 @@ export default function Step1MetadataFields({
 
   // 全选/取消全选数据源
   const handleSelectAllDataSources = (checked: boolean) => {
-    const updatedDataSources: Record<string, ListDataAssetSourceResItem> = {
-      ...dataSources
-    };
+    const updatedDataSources: Record<string, ListDataAssetSourceResItem> = {};
     if (checked) {
       findDataAssetMappingData.forEach((item) => {
-        if (item.name) {
-          updatedDataSources[item.name] = item;
+        const key = getDataSourceKey(item);
+        if (key) {
+          updatedDataSources[key] = availableDataSources[key] ?? item;
         }
       });
-    } else {
-      // 清空所有
-      Object.keys(updatedDataSources).forEach(
-        (k) => delete updatedDataSources[k]
-      );
     }
     setDataSources(updatedDataSources);
     form.setFieldValue('dataSources', updatedDataSources);
@@ -419,21 +429,21 @@ export default function Step1MetadataFields({
   // 验证数据来源的自定义验证器
   const validateDataSource = useCallback(
     (value: any, callback: any) => {
-      const hasAnySource = Object.keys(dataSources).length > 0;
+      const hasAnySource = Object.keys(normalizedDataSources).length > 0;
       if (!hasAnySource) {
         callback('请至少选择一个数据来源');
       } else {
         callback();
       }
     },
-    [dataSources]
+    [normalizedDataSources]
   );
 
   // 下一步前验证
   const handleNextStep = async () => {
     // 同步metadataFields和dataSources到form
     form.setFieldValue('metadataFields', metadataFields);
-    form.setFieldValue('dataSources', dataSources);
+    form.setFieldValue('dataSources', normalizedDataSources);
 
     try {
       await form.validate();
@@ -456,7 +466,7 @@ export default function Step1MetadataFields({
         form={form}
         initialValues={{
           metadataFields,
-          dataSources
+          dataSources: normalizedDataSources
         }}
         labelCol={{ span: 24 }}
         wrapperCol={{ span: 24 }}
@@ -483,6 +493,7 @@ export default function Step1MetadataFields({
         >
           <div className="mt-[16px] w-full">
             <Table
+              noDataElement={noDataElement({ description: '暂无数据' })}
               columns={columns}
               className="w-full"
               data={metadataFields.map((f, idx) => ({
@@ -507,14 +518,14 @@ export default function Step1MetadataFields({
             {findDataAssetMappingData.length > 0 &&
               (() => {
                 // 从 findDataAssetMappingData 中提取所有唯一的 nameEn 字段作为数据源键
-                const nameArray = findDataAssetMappingData
-                  .map((field) => field.name)
-                  .filter((name): name is string => !!name);
+                const keyArray = findDataAssetMappingData
+                  .map((field) => getDataSourceKey(field))
+                  .filter((key): key is string => !!key);
                 const allChecked =
-                  nameArray.length > 0 &&
-                  nameArray.every((name) => !!dataSources[name]);
-                const someChecked = nameArray.some(
-                  (nameEn) => !!dataSources[nameEn]
+                  keyArray.length > 0 &&
+                  keyArray.every((key) => !!normalizedDataSources[key]);
+                const someChecked = keyArray.some(
+                  (key) => !!normalizedDataSources[key]
                 );
 
                 return (
@@ -531,18 +542,22 @@ export default function Step1MetadataFields({
                   </Col>
                 );
               })()}
-            {findDataAssetMappingData.map((field) => (
-              <Col key={field.name} span={4}>
-                <Checkbox
-                  checked={!!dataSources[field.name]}
-                  onChange={(checked) =>
-                    handleDataSourceChange(field.name, checked)
-                  }
-                >
-                  {field.name}
-                </Checkbox>
-              </Col>
-            ))}
+            {findDataAssetMappingData.map((field) => {
+              const key = getDataSourceKey(field);
+              if (!key) {
+                return null;
+              }
+              return (
+                <Col key={key} span={4}>
+                  <Checkbox
+                    checked={!!normalizedDataSources[key]}
+                    onChange={(checked) => handleDataSourceChange(key, checked)}
+                  >
+                    {field.name}
+                  </Checkbox>
+                </Col>
+              );
+            })}
           </Row>
         </FormItem>
       </Form>

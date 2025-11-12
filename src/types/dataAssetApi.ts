@@ -28,11 +28,12 @@ export interface MappingItem {
 
 /** 查询数据资产表字段和映射关系 */
 export interface FindDataAssetMappingItemRes extends DataAssetField {
-  mapping: {
+  Mapping: {
     type: string;
     tableName: string;
+    databaseName: string;
     fieldType: string;
-    feildName: string;
+    fieldName: string;
   }[];
 }
 
@@ -87,7 +88,7 @@ export interface ListDataAssetSourceResItem {
   /** 数据来源类型 */
   type: string;
   /** 数据来源名称 */
-  name: string;
+  name?: string;
   /** 数据来源数据库名称 */
   databaseName: string;
   /** 数据来源表名 */
@@ -112,6 +113,7 @@ export interface AutoMapDataAssetFieldAndSourceReq {
     type: string;
     name: string;
     tableName: string;
+    databaseName?: string;
     fields: {
       name: string;
       type: string;
@@ -124,6 +126,7 @@ export interface AutoMapDataAssetFieldAndSourceResItem {
   mapping: {
     type: string;
     tableName: string;
+    databaseName?: string;
     fieldType: string;
     feildName: string;
   }[];
