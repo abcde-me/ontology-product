@@ -51,6 +51,15 @@ export const mockSegmentDetailData: SegmentDetailData = {
       extractionEntity: ['股票市场', '金融投资', '分红'],
       positionType: '坐标',
       positionInfo: '坐标 (100,200)'
+    },
+    {
+      id: 'element_formula_001',
+      type: 'formula',
+      content: `\\int_{a}^{b} f(x) \\, dx = F(b) - F(a) \\quad (1)`,
+      relatedDescription: `\\int_{a}^{b} f(x) \\, dx = F(b) - F(a) \\quad (1)`,
+      extractionEntity: ['股票市场', '金融投资', '分红'],
+      positionType: '坐标',
+      positionInfo: '坐标 (100,200)'
     }
   ]
 };
