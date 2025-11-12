@@ -79,7 +79,7 @@ export default function DataAssetTableCard({
   useEffect(() => {
     getTagList()
       .then((res) => {
-        if (res.code === 0) {
+        if (res.status === 200) {
           setTagList(res.data ?? []);
         } else {
           console.error('获取标签列表失败:', res.message);
@@ -212,6 +212,11 @@ export default function DataAssetTableCard({
                   maxTagCount={{
                     count: 2,
                     render: (invisibleTagCount) => {
+                      console.log(
+                        'invisibleTagCount',
+                        recordTags,
+                        invisibleTagCount
+                      );
                       const remainingTags = recordTags.slice(2);
                       return (
                         <Tooltip

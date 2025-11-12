@@ -546,14 +546,14 @@ export async function getDataAssetTableDistinctFieldCount(params: {
 }
 
 export async function editDataAssetDataBatch(params: EditDataAssetData) {
-  return Promise.resolve({
-    code: 0,
-    status: 200,
-    data: {},
-    message: 'success',
-    requestId: ''
-  });
-  // return await UAPI.RES.editDataAssetDataBatch({}).post(params).inRegion().do();
+  // return Promise.resolve({
+  //   code: 0,
+  //   status: 200,
+  //   data: {},
+  //   message: 'success',
+  //   requestId: ''
+  // });
+  return await UAPI.RES.editDataAssetDataBatch({}).post(params).inRegion().do();
 }
 
 export async function deleteDataAssetDataBatch(params: { ids: string[] }) {
@@ -571,32 +571,32 @@ export async function deleteDataAssetDataBatch(params: { ids: string[] }) {
 }
 
 export async function getTagList(): Promise<ApiRes<BaseTag[]>> {
-  return Promise.resolve({
-    code: 0,
-    status: 200,
-    data: [
-      {
-        id: 'tag-999',
-        name: 'test',
-        description: 'test',
-        valueList: [
-          {
-            id: 'tagvalue-777',
-            tagValue: '1'
-          },
-          {
-            id: 'tagvalue-888',
-            tagValue: '2'
-          },
-          {
-            id: 'tagvalue-999',
-            tagValue: '3'
-          }
-        ]
-      }
-    ],
-    message: 'success',
-    requestId: ''
-  });
-  // return await UAPI.RES.listAssetTags({}).post({}).inRegion().do();
+  // return Promise.resolve({
+  //   code: 0,
+  //   status: 200,
+  //   data: [
+  //     {
+  //       id: 'tag-999',
+  //       name: 'test',
+  //       description: 'test',
+  //       valueList: [
+  //         {
+  //           id: 'tagvalue-777',
+  //           tagValue: '1'
+  //         },
+  //         {
+  //           id: 'tagvalue-888',
+  //           tagValue: '2'
+  //         },
+  //         {
+  //           id: 'tagvalue-999',
+  //           tagValue: '3'
+  //         }
+  //       ]
+  //     }
+  //   ],
+  //   message: 'success',
+  //   requestId: ''
+  // });
+  return await UAPI.RES.listBaseTags({}).post({}).inRegion().do();
 }

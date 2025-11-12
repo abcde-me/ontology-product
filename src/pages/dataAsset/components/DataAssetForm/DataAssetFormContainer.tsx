@@ -340,12 +340,14 @@ export default function DataAssetFormContainer({
         fields: fieldsWithMappings
       });
 
-      if (res.status !== 200) {
-        Message.error(res.message || '创建数据资产失败');
+      if (res.status !== 200 || res.code !== '') {
+        Message.error(
+          res.message || (isEditMode ? '编辑数据资产失败' : '创建数据资产失败')
+        );
         return;
       }
 
-      Message.success('创建数据资产成功');
+      Message.success(isEditMode ? '编辑数据资产成功' : '创建数据资产成功');
       history.push('/tenant/compute/modaforge/dataAsset/list');
     },
     [history, isEditMode]

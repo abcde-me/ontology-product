@@ -253,7 +253,8 @@ export default function Step2FieldMapping({
           type: f.type,
           default: f.default,
           required: f.required,
-          allowModify: f.allowModify
+          allowModify: f.allowModify,
+          displaySort: f.displaySort
         })),
         source: Object.keys(dataSources).map((key) => {
           const fromAll =
@@ -418,7 +419,7 @@ export default function Step2FieldMapping({
     runAutoMap();
   };
 
-  const mappingsState = Form.useFormState('mappings', form) || {};
+  // const mappingsState = Form.useFormState('mappings', form) || {};
 
   // 完成
   const handleFinish = async () => {
