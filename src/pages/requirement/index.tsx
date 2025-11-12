@@ -159,6 +159,13 @@ export default function Requirement() {
             <span className="status-text">标注完成</span>
           </div>
         );
+      case RequirementStatus.PreAnnotated:
+        return (
+          <div className="status-item">
+            <span className="status-draft-icon" />
+            <span className="status-text">预标注中</span>
+          </div>
+        );
     }
   };
   // 查看需求详情权限
@@ -280,6 +287,10 @@ export default function Requirement() {
         {
           text: '标注完成',
           value: RequirementStatus.Annotated
+        },
+        {
+          text: '预标注中',
+          value: RequirementStatus.PreAnnotated
         }
       ]
     },

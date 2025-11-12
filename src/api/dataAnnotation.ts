@@ -157,7 +157,7 @@ export async function getAnnotationTabledData(params: {
 }
 
 // 模型列表
-export async function getModelList(params: { label_type: number }) {
+export async function getModelList(params) {
   return await UAPI.RES.getModelList({}).post(params).inRegion().do();
 }
 
