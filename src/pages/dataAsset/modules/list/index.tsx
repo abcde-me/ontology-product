@@ -49,6 +49,7 @@ import { ColumnField } from '../../components/ColumnSettingModal';
 import ColumnSettingModal from '../../components/ColumnSettingModal';
 import styles from './list.module.scss';
 import classNames from 'classnames';
+import { FieldSearchItem } from '@/api/dataCatalog';
 
 interface TagValue {
   tagId: string;
@@ -60,7 +61,7 @@ export default function DataAssetList() {
     ListDataAssetDataRes['records']
   >([]);
   const [viewType, setViewType] = useState<ViewType>(ViewType.CARD);
-  const [searchFields, setSearchFields] = useState<SearchField[]>([]);
+  const [searchFields, setSearchFields] = useState<ColumnField[]>([]);
   const [assetTags, setAssetTags] = useState<
     Array<{ label: string; value: any }>
   >([]);
@@ -272,9 +273,16 @@ export default function DataAssetList() {
       enumChecked: field.isEnumAble || false,
       enumLoading: false,
       enumCount: 0,
-      displaySort: field.displaySort || 0
+      displaySort: field.displaySort || 0,
+      // 可枚举列表
+      values: field.values || []
     }));
     setColumnSettingsFields(convertedFields);
+    console.log(
+      '看一下列设置返回的内容',
+      convertedFields.filter((field) => field.displaySort > 0)
+    );
+    setSearchFields(convertedFields.filter((field) => field.displaySort > 0));
   };
 
   // 初始化：检查是否有mapping数据
@@ -399,10 +407,8 @@ export default function DataAssetList() {
   };
 
   // 处理字段搜索
-  const handleFieldSearch = (fieldValues: Record<string, any>) => {
-    console.log('字段搜索:', fieldValues);
-    // TODO: 调用搜索API
-    // getDataAssetList(fieldValues).then(...)
+  const handleFieldSearch = (fieldValues: FieldSearchItem[]) => {
+    setSearchParams({ ...searchParams, fieldSearch: fieldValues });
   };
 
   // 处理重置

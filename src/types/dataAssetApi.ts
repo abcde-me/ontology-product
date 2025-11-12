@@ -151,6 +151,8 @@ export interface ColumnField {
   // isDisplay: boolean;
   /** 显示排序 0代表不显示，1代表第一列，2代表第二列，以此类推 */
   displaySort: number;
+  /** 字段值 */
+  values: string[];
 }
 
 export interface EditDataAssetFieldsDisplayReq {
