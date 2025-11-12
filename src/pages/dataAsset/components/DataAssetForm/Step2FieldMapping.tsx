@@ -21,6 +21,7 @@ import {
   ListDataAssetSourceResItem
 } from '@/types/dataAssetApi';
 import { autoMapDataAssetFieldAndSource } from '@/api/dataAsset';
+import { RESERVED_FIELD_ENS } from '../../utils/const';
 
 const FormItem = Form.Item;
 const Row = Grid.Row;
@@ -33,7 +34,7 @@ const composeDataSourceKey = (
 ) => `${type ?? ''}::${databaseName ?? ''}::${tableName ?? ''}`;
 
 const getDataSourceKey = (item: ListDataAssetSourceResItem) =>
-  composeDataSourceKey(item.type, item.databaseName, item.tableName);
+  composeDataSourceKey(item?.type, item?.databaseName, item?.tableName);
 
 interface Step2FieldMappingProps {
   mappings: FieldMapping[];
@@ -47,14 +48,6 @@ interface Step2FieldMappingProps {
   onPrev: () => void;
   onFinish: (fieldsWithMappings: CreateDataAssetAndMappingReq) => void;
 }
-
-// 系统保留字段（不允许编辑、删除、导入）
-const RESERVED_FIELD_ENS = new Set([
-  'data_asset_name',
-  'tags',
-  'data_update_time',
-  'data_source'
-]);
 
 export default function Step2FieldMapping({
   mappings,
@@ -158,14 +151,11 @@ export default function Step2FieldMapping({
       }
     ];
 
-    // console.log('444444444444', dataSources);
-
     // 根据选中的数据来源动态生成列
     // 直接遍历 dataSources 的键（这些键就是接口返回的类型）
     Object.keys(dataSources).forEach((sourceKey) => {
       // 检查该数据来源是否被选中（存在即选中）
       const sourceInfo = dataSources[sourceKey];
-      console.log('11111', sourceInfo);
       if (sourceInfo) {
         const columnTitle = sourceInfo.name || sourceKey;
         cols.push({
@@ -176,12 +166,10 @@ export default function Step2FieldMapping({
             // 根据当前行的字段类型获取映射选项
             // 通过 sequence 找到对应的 metadataField
             const metadataField = metadataFields.find(
-              (field, idx) => idx === record.sequence - 1
+              (field, idx) => field.nameEn === record.id
             );
             const fieldType = metadataField?.type;
             const options = getMappingOptions(fieldType, sourceKey);
-
-            console.log('sdoisiduisudisu', record, metadataField);
 
             const disableMappingForThisRow =
               metadataField?.nameEn === 'tags' ||
@@ -190,7 +178,7 @@ export default function Step2FieldMapping({
             return (
               <Select
                 placeholder="请选择"
-                value={metadataField?.mapping?.[0]?.fieldName || ''}
+                defaultValue={record[sourceKey]}
                 disabled={disableMappingForThisRow}
                 onChange={(value) =>
                   handleUpdateMapping(record.id, { [sourceKey]: value })
@@ -333,27 +321,28 @@ export default function Step2FieldMapping({
 
   // 初始化映射
   useEffect(() => {
-    if (metadataFields.length > 0 && mappings.length === 0 && !autoMapping) {
+    if (metadataFields.length > 0) {
       const initialMappings: FieldMapping[] = metadataFields.map(
         (field, index) => {
-          const mapping: FieldMapping = {
-            id: `mapping_${Date.now()}_${index}`,
-            sequence: index + 1,
-            nameZh: field.nameZh
-          };
-          // 动态初始化所有选中的数据来源类型字段
-          Object.keys(dataSources).forEach((sourceType) => {
-            if (dataSources[sourceType]) {
-              mapping[sourceType] = '';
-            }
+          const sourceKeys = {};
+          field?.mapping?.forEach((item) => {
+            const key = getDataSourceKey(
+              item as unknown as ListDataAssetSourceResItem
+            );
+            sourceKeys[key] = item.fieldName;
           });
+          const mapping: FieldMapping = {
+            id: field.nameEn,
+            sequence: index + 1,
+            nameZh: field.nameZh,
+            ...sourceKeys
+          };
           return mapping;
         }
       );
       setMappings(initialMappings);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [metadataFields, dataSources]);
+  }, [metadataFields]);
 
   // 初始化表单值
   useEffect(() => {
@@ -421,11 +410,14 @@ export default function Step2FieldMapping({
     runAutoMap();
   };
 
+  const mappingsState = Form.useFormState('mappings', form) || {};
+
   // 完成
   const handleFinish = async () => {
     try {
       await form.validate();
       const rawMappings: FieldMapping[] = form.getFieldValue('mappings') || [];
+      console.log('-----------finish--------', rawMappings, mappingsState);
 
       // 将原始映射表单数据格式化为后端需要的结构
       const formatted = rawMappings.map((row) => {
@@ -479,7 +471,8 @@ export default function Step2FieldMapping({
           required: !!meta?.required,
           allowModify: !!meta?.allowModify,
           mapping,
-          autoMap: false
+          autoMap: false,
+          displaySort: meta?.displaySort || 0
         };
       });
 
@@ -495,7 +488,7 @@ export default function Step2FieldMapping({
       {/* 映射列表 */}
       <Form
         form={form}
-        initialValues={{ mappings }}
+        // initialValues={metadataFields}
         labelCol={{ span: 24 }}
         wrapperCol={{ span: 24 }}
         labelAlign="left"
@@ -518,6 +511,7 @@ export default function Step2FieldMapping({
           label="映射列表："
           required
           field="mappings"
+          // initialValue={metadataFields}
           className="mb-[24px]"
           rules={[{ validator: validateMappings }]}
         >

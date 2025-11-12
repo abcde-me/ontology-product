@@ -529,7 +529,7 @@ export const ModaForgeResourceEndpoints = {
   // 创建数据资产和映射关系
   createDataAssetAndMapping: PrefixAimdp + '/CreateDataAssetAndMapping',
   // 修改数据资产和映射关系
-  editDataAsset: PrefixAimdp + '/EditDataAsset',
+  editDataAssetAndMapping: PrefixAimdp + '/EditDataAssetAndMapping',
   // 修改数据资产表列设置（前端展示）
   editDataAssetFieldsDisplay: PrefixAimdp + '/EditDataAssetFieldsDisplay',
   // 查询数据资产表列设置（前端展示）
