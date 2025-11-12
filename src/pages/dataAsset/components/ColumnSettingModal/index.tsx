@@ -25,6 +25,7 @@ export interface ColumnField {
   enumLoading: boolean;
   enumCount: number; // 枚举数
   displaySort: number;
+  values: string[];
 }
 
 export interface ColumnSettingModalProps {
