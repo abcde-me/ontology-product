@@ -398,7 +398,13 @@ const DatasetForm = React.forwardRef<
         // getVolumePreviewData(path);
         getVolumePreviewData(
           value?.[1]?.[1],
-          '/dst/' + value?.[0]?.[1] + '/volume/' + value?.[1]?.[0]
+          value?.[0]?.[0] === '/'
+            ? '/dst/' + value?.[0]?.[1] + '/volume/' + value?.[1]?.[0]
+            : value?.[0]?.[0] +
+                '/dst/' +
+                value?.[0]?.[1] +
+                '/volume/' +
+                value?.[1]?.[0]
         );
       } else if (Array.isArray(value) && value.length === 2) {
         return;
@@ -474,7 +480,13 @@ const DatasetForm = React.forwardRef<
     // 仅在 current 或 pageSize 变化时执行
     getVolumePreviewData(
       targetData?.[1]?.[1],
-      '/dst/' + targetData?.[0]?.[1] + '/volume/' + targetData?.[1]?.[0]
+      targetData?.[0]?.[0] === '/'
+        ? '/dst/' + targetData?.[0]?.[1] + '/volume/' + targetData?.[1]?.[0]
+        : targetData?.[0]?.[0] +
+            '/dst/' +
+            targetData?.[0]?.[1] +
+            '/volume/' +
+            targetData?.[1]?.[0]
     );
   }, [current, pageSize]);
 
