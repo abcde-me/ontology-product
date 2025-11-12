@@ -108,7 +108,7 @@ const TableElementCard: React.FC<TableElementCardProps> = ({
         </div>
       </div>
 
-      <ElementEnhancedInfo element={element} isEditing={isEditing} />
+      {/* <ElementEnhancedInfo element={element} isEditing={isEditing} /> */}
     </div>
   );
 };

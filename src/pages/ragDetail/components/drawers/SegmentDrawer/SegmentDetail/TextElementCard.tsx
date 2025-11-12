@@ -60,7 +60,7 @@ const TextElementCard: React.FC<TextElementCardProps> = ({
         </div>
       </div>
 
-      <ElementEnhancedInfo element={element} isEditing={isEditing} />
+      {/* <ElementEnhancedInfo element={element} isEditing={isEditing} /> */}
     </div>
   );
 };

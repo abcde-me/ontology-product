@@ -77,7 +77,7 @@ const ImageElementCard: React.FC<ImageElementCardProps> = ({
           </div>
         </div>
 
-        <ElementEnhancedInfo element={element} isEditing={isEditing} />
+        {/* <ElementEnhancedInfo element={element} isEditing={isEditing} /> */}
       </div>
 
       {/* 图片预览弹窗 */}

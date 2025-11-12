@@ -257,7 +257,7 @@ export const routes: IRoute[] = [
       },
       {
         name: 'dataAssetEdit',
-        key: '/tenant/compute/modaforge/dataAsset/edit/:id',
+        key: '/tenant/compute/modaforge/dataAsset/edit',
         component: React.lazy(
           async () => import('../../dataAsset/modules/edit')
         ),

@@ -58,8 +58,177 @@ interface CatalogListParams {
   dir_type?: number;
   // 其他可能的字段...
 }
+
+export interface VolumeItem {
+  id: number;
+  parent_id: number;
+  type: number;
+  type_name: string;
+  name: string;
+  base_dir: string;
+}
+export interface DbItem {
+  id: number;
+  parent_id: number;
+  type: number;
+  type_name: string;
+  name: string;
+  base_dir: string;
+  children: {
+    db_item: DbItem[];
+  };
+}
+export interface MetaDataItem {
+  id: number;
+  parent_id: number;
+  type: number;
+  type_name: string;
+  name: string;
+  base_dir: string;
+}
+export interface GetCatalogListRes {
+  src: {
+    id: number;
+    parent_id: number;
+    type: number;
+    type_name: string;
+    name: string;
+    base_dir: string;
+    children: {
+      volume: VolumeItem[];
+      db: DbItem[];
+      meta_data: MetaDataItem[];
+    };
+  }[];
+}
 // 获取数据集列表
-export async function getDirectoryList(params: CatalogListParams) {
+export async function getDirectoryList(
+  params: CatalogListParams
+): Promise<ApiRes<GetCatalogListRes>> {
+  // return Promise.resolve({
+  //   code: '0',
+  //   message: 'success',
+  //   requestId: '123',
+  //   status: 200,
+  //   data: {
+  //     src: [{
+  //       "id": 1969,
+  //       "parent_id": 0,
+  //       "type": 1,
+  //       "type_name": "catalog",
+  //       "name": "syq",
+  //       "base_dir": "/user/aimdp/aimdp-manager/test",
+  //       "children": {
+  //         "db": [
+  //           {
+  //             "id": 1983,
+  //             "parent_id": 1969,
+  //             "type": 3,
+  //             "type_name": "db",
+  //             "name": "测试断点续传",
+  //             "base_dir": "/user/aimdp/aimdp-manager/test",
+  //             "children": {
+  //               "db_item": [
+  //                 {
+  //                   "id": 0,
+  //                   "parent_id": 0,
+  //                   "type": 4,
+  //                   "type_name": "db_item",
+  //                   "name": "ods050_aimdp_tunnel_service",
+  //                   "base_dir": "",
+  //                   "children": null,
+  //                   "perms": null
+  //                 }
+  //               ]
+  //             },
+  //             "perms": []
+  //           },
+  //           {
+  //             "id": 1981,
+  //             "parent_id": 1990,
+  //             "type": 3,
+  //             "type_name": "db",
+  //             "name": "测试断点续传11111",
+  //             "base_dir": "/user/aimdp/aimdp-manager/test",
+  //           }
+  //         ],
+  //         "volume": [
+  //           {
+  //             "id": 2007,
+  //             "parent_id": 1969,
+  //             "type": 2,
+  //             "type_name": "volume",
+  //             "name": "问答",
+  //             "base_dir": "/user/aimdp/aimdp-manager/test",
+  //             "children": {},
+  //             "perms": []
+  //           },
+  //           {
+  //             "id": 1990,
+  //             "parent_id": 1969,
+  //             "type": 2,
+  //             "type_name": "volume",
+  //             "name": "zip",
+  //             "base_dir": "/user/aimdp/aimdp-manager/test",
+  //             "children": {},
+  //             "perms": []
+  //           },
+  //           {
+  //             "id": 1979,
+  //             "parent_id": 1969,
+  //             "type": 2,
+  //             "type_name": "volume",
+  //             "name": "清洗测试",
+  //             "base_dir": "/user/aimdp/aimdp-manager/test",
+  //             "children": {},
+  //             "perms": []
+  //           },
+  //           {
+  //             "id": 1974,
+  //             "parent_id": 1969,
+  //             "type": 2,
+  //             "type_name": "volume",
+  //             "name": "word",
+  //             "base_dir": "/user/aimdp/aimdp-manager/test",
+  //             "children": {},
+  //             "perms": []
+  //           },
+  //           {
+  //             "id": 1973,
+  //             "parent_id": 1969,
+  //             "type": 2,
+  //             "type_name": "volume",
+  //             "name": "图片",
+  //             "base_dir": "/user/aimdp/aimdp-manager/test",
+  //             "children": {},
+  //             "perms": []
+  //           },
+  //           {
+  //             "id": 1970,
+  //             "parent_id": 1969,
+  //             "type": 2,
+  //             "type_name": "volume",
+  //             "name": "源数据卷_1762764492740",
+  //             "base_dir": "/user/aimdp/aimdp-manager/test",
+  //             "children": {},
+  //             "perms": []
+  //           }
+  //         ],
+  //         "meta_data": [
+  //           {
+  //             "id": 1,
+  //             "parent_id": 1969,
+  //             "type": 2,
+  //             "type_name": "meta_data",
+  //             "name": "meta_data1",
+  //             "base_dir": "/meta_data1"
+  //           }
+  //         ]
+  //       },
+  //       "perms": []
+  //     }]
+  //   }
+  // });
   return await UAPI.RES.catalogListApi({}).post(params).inRegion().do();
 }
 // 停止单个载入任务

@@ -11,7 +11,8 @@ import {
   Collapse,
   Popover,
   Tabs,
-  Typography
+  Typography,
+  Switch
 } from '@arco-design/web-react';
 import React, {
   useEffect,
@@ -103,7 +104,9 @@ interface TreeNodeData {
     | 'db'
     | 'db_parent'
     | 'datasource_parent'
-    | 'datasource_item';
+    | 'datasource_item'
+    | 'meta_data_parent'
+    | 'meta_data';
   type?: number;
   level?: number;
   isExpanded?: boolean;
@@ -313,6 +316,8 @@ export default function DataLoadCreate() {
     CheckSQLStatus.NONE
   );
   const [checkMessage, setCheckMessage] = useState<string>('');
+  const [selectedNodeType, setSelectedNodeType] =
+    useState<TreeNodeData['type_name']>();
 
   // 处理树形数据的通用函数
   const processTreeData = useCallback(
@@ -447,16 +452,16 @@ export default function DataLoadCreate() {
       const currentSqlProcess = form.getFieldValue('sql_process_enabled');
 
       // 如果SQL处理为"关闭"，限制只能选一个
-      if (
-        currentSqlProcess === 'disable' &&
-        Array.isArray(value) &&
-        value.length > 1
-      ) {
-        // 只保留最后一个选择的值
-        const lastValue = value[value.length - 1];
-        form.setFieldsValue({ table_name: [lastValue] });
-        return;
-      }
+      // if (
+      //   currentSqlProcess === 'disable' &&
+      //   Array.isArray(value) &&
+      //   value.length > 1
+      // ) {
+      //   // 只保留最后一个选择的值
+      //   const lastValue = value[value.length - 1];
+      //   form.setFieldsValue({ table_name: [lastValue] });
+      //   return;
+      // }
 
       if (value.includes('all')) {
         form.setFieldsValue({ table_name: ['all'] });
@@ -670,10 +675,12 @@ export default function DataLoadCreate() {
 
   // 处理路径变化
   const handlePathChange = useCallback(
-    (path: string, nodeId?: string | number) => {
-      console.log('路径变化:', path, '节点ID:', nodeId);
+    (path: string, nodeId?: string | number, nodeData?: TreeNodeData) => {
+      console.log('路径变化:', path, '节点ID:', nodeId, '节点数据:', nodeData);
       setSelectedNodeId(nodeId || null);
       form.setFieldsValue({ dest_path: path ? [path] : undefined });
+
+      setSelectedNodeType(nodeData?.type_name);
 
       if (nodeId !== undefined && isNumber(nodeId)) {
         setDropdownVisible(false);
@@ -699,6 +706,15 @@ export default function DataLoadCreate() {
       return prevStatus;
     });
   }, []);
+
+  const handleSqlProcessChange = useCallback(
+    (value: boolean) => {
+      form.setFieldsValue({
+        sql_process_enabled: value ? 'enable' : 'disable'
+      });
+    },
+    [form]
+  );
 
   // 处理校验按钮点击
   const handleCheckSQL = useCallback(async () => {
@@ -769,42 +785,42 @@ export default function DataLoadCreate() {
   }, [tableName, form]);
 
   // SQL处理和表选择的双向逻辑关联
-  useEffect(() => {
-    const currentTableName = form.getFieldValue('table_name') || [];
-    const currentSqlProcess = form.getFieldValue('sql_process_enabled');
+  // useEffect(() => {
+  //   const currentTableName = form.getFieldValue('table_name') || [];
+  //   const currentSqlProcess = form.getFieldValue('sql_process_enabled');
 
-    // 如果选择了多个表（排除"all"的情况），自动切换到"开启"
-    if (
-      Array.isArray(currentTableName) &&
-      currentTableName.length > 1 &&
-      !currentTableName.includes('all')
-    ) {
-      if (currentSqlProcess === 'disable') {
-        form.setFieldsValue({ sql_process_enabled: 'enable' });
-      }
-    }
-  }, [tableName, form]);
+  //   // 如果选择了多个表（排除"all"的情况），自动切换到"开启"
+  //   if (
+  //     Array.isArray(currentTableName) &&
+  //     currentTableName.length > 1 &&
+  //     !currentTableName.includes('all')
+  //   ) {
+  //     if (currentSqlProcess === 'disable') {
+  //       form.setFieldsValue({ sql_process_enabled: 'enable' });
+  //     }
+  //   }
+  // }, [tableName, form]);
 
   // 当SQL处理为"关闭"时，限制表选择只能选一个
-  useEffect(() => {
-    const currentTableName = form.getFieldValue('table_name') || [];
-    const currentSqlProcess = form.getFieldValue('sql_process_enabled');
+  // useEffect(() => {
+  //   const currentTableName = form.getFieldValue('table_name') || [];
+  //   const currentSqlProcess = form.getFieldValue('sql_process_enabled');
 
-    if (
-      currentSqlProcess === 'disable' &&
-      Array.isArray(currentTableName) &&
-      currentTableName.length > 1
-    ) {
-      // 如果选择了多个表，只保留第一个
-      form.setFieldsValue({ table_name: [currentTableName[0]] });
-    }
-  }, [sqlProcessEnabled, form]);
+  //   if (
+  //     currentSqlProcess === 'disable' &&
+  //     Array.isArray(currentTableName) &&
+  //     currentTableName.length > 1
+  //   ) {
+  //     // 如果选择了多个表，只保留第一个
+  //     form.setFieldsValue({ table_name: [currentTableName[0]] });
+  //   }
+  // }, [sqlProcessEnabled, form]);
 
-  // 初始化SQL处理默认值为"开启"
+  // 初始化SQL处理默认值为"关闭"
   useEffect(() => {
     const currentSqlProcess = form.getFieldValue('sql_process_enabled');
     if (!currentSqlProcess) {
-      form.setFieldsValue({ sql_process_enabled: 'enable' });
+      form.setFieldsValue({ sql_process_enabled: 'disable' });
     }
   }, [form]);
 
@@ -987,57 +1003,24 @@ export default function DataLoadCreate() {
           </FormItem>
 
           {sourceType !== SOURCE_TYPES.LOCAL ? (
-            <>
-              <FormItem
-                label="绑定连接器："
-                field="connector_id"
-                labelAlign="right"
-                rules={[{ required: true, message: '请选择连接器' }]}
+            <FormItem
+              label="绑定连接器："
+              field="connector_id"
+              labelAlign="right"
+              rules={[{ required: true, message: '请选择连接器' }]}
+            >
+              <Select
+                placeholder="请选择连接器"
+                showSearch
+                filterOption={filterOption}
               >
-                <Select
-                  placeholder="请选择连接器"
-                  showSearch
-                  filterOption={filterOption}
-                >
-                  {connectName.map((option) => (
-                    <Option key={option.key} value={option.key}>
-                      {option.label}
-                    </Option>
-                  ))}
-                </Select>
-              </FormItem>
-
-              {sourceType === SOURCE_TYPES.DB && (
-                <FormItem
-                  label="选择抽取的表："
-                  field="table_name"
-                  labelAlign="right"
-                  rules={[{ required: true, message: '请选择抽取的表' }]}
-                  extra="只能载入public schema的表"
-                >
-                  <Select
-                    className="select-tag-style"
-                    onChange={handleAllTagChange}
-                    ref={selectRef}
-                    mode="multiple"
-                    maxTagCount={{
-                      count: 2,
-                      render: renderTableTags
-                    }}
-                    placeholder="请选择抽取的表"
-                    style={{ width: '100%', minWidth: 0 }}
-                    allowClear
-                  >
-                    {tableList.length > 0 && <Option value="all">全部</Option>}
-                    {tableList.map((option) => (
-                      <Option key={option} value={option}>
-                        {option}
-                      </Option>
-                    ))}
-                  </Select>
-                </FormItem>
-              )}
-            </>
+                {connectName.map((option) => (
+                  <Option key={option.key} value={option.key}>
+                    {option.label}
+                  </Option>
+                ))}
+              </Select>
+            </FormItem>
           ) : (
             <FormItem
               label="选择文件："
@@ -1061,32 +1044,6 @@ export default function DataLoadCreate() {
                 onUploadingChange={setIsFileUploading}
               />
             </FormItem>
-          )}
-
-          <FormItem
-            label="载入形式："
-            initialValue={LOAD_TYPES.ONCE}
-            field="load_type"
-            labelAlign="right"
-            rules={[{ required: true, message: '请选择载入形式' }]}
-          >
-            <RadioGroup onChange={handleLoadTypeChange}>
-              <Radio value={LOAD_TYPES.ONCE}>单次载入</Radio>
-              {sourceType !== SOURCE_TYPES.LOCAL && (
-                <Radio value={LOAD_TYPES.CRON}>周期载入</Radio>
-              )}
-            </RadioGroup>
-          </FormItem>
-
-          {loadVal === LOAD_TYPES.CRON && (
-            // <div className={Styles.cycleLoadingBox}>
-            <SchedulerRun
-              // @ts-expect-error
-              ref={SchedulerRunRef}
-              options={{}}
-              onOptionsChange={setExpression}
-            />
-            // </div>
           )}
 
           <FormItem
@@ -1137,106 +1094,147 @@ export default function DataLoadCreate() {
             />
           </FormItem>
 
-          {sourceType === SOURCE_TYPES.DB && destPath && (
-            <>
-              <FormItem
-                label="SQL处理："
-                field="sql_process_enabled"
-                labelAlign="right"
-                rules={[{ required: true, message: '请选择SQL处理状态' }]}
-                initialValue="enable"
-              >
-                <Radio.Group
-                  onChange={(value) => {
-                    // 当切换到"关闭"时，如果选择了多个表，只保留第一个
-                    if (value === 'disable') {
-                      const currentTableName =
-                        form.getFieldValue('table_name') || [];
-                      if (
-                        Array.isArray(currentTableName) &&
-                        currentTableName.length > 1 &&
-                        !currentTableName.includes('all')
-                      ) {
-                        form.setFieldsValue({
-                          table_name: [currentTableName[0]]
-                        });
-                      }
-                    }
-                  }}
-                >
-                  <Radio value="enable">开启</Radio>
-                  <Radio value="disable" disabled={isDisableOptionDisabled}>
-                    关闭
-                  </Radio>
-                </Radio.Group>
-              </FormItem>
-
-              {sqlProcessEnabled === 'enable' && (
+          {sourceType === SOURCE_TYPES.DB &&
+            selectedNodeType === 'meta_data' && (
+              <>
                 <FormItem
-                  label=" "
-                  field="sql_process"
+                  label="SQL处理："
+                  field="sql_process_enabled"
                   labelAlign="right"
-                  // rules={[
-                  //     {
-                  //         required: sqlProcessEnabled === 'enable',
-                  //         message: '请输入SQL处理'
-                  //     }
-                  // ]}
+                  rules={[{ required: true, message: '请选择SQL处理状态' }]}
+                  initialValue="enable"
                 >
-                  <div
-                    className={classNames(
-                      styles['sql-editor-container'],
-                      'rounded-[4px] border border-solid border-[#E2E8F0]'
-                    )}
-                  >
-                    <div className="flex items-center gap-[8px] border-b border-solid border-[#E2E8F0] p-[12px] pb-[12px]">
-                      <Button
-                        type="secondary"
-                        icon={<IconCaretRight className="mr-[4px]" />}
-                        className="h-[26px]"
-                        onClick={handleCheckSQL}
-                        loading={checkStatus === CheckSQLStatus.CHECKING}
-                      >
-                        校验
-                      </Button>
-
-                      <Button
-                        type="text"
-                        icon={<SQLFormatIcon />}
-                        // onClick={handleFormatCode}
-                        className="h-[26px]"
-                      >
-                        格式化
-                      </Button>
-                    </div>
-                    <CodeMirror
-                      value={sqlContent}
-                      onChange={handleSqlContentChange}
-                      placeholder={placeholderValue}
-                      // readOnly={
-                      //     !hasUpdatePermission || runStatus === RunningStatus.RUNNING
-                      // }
-                      theme={myTheme}
-                      extensions={[
-                        sql({ upperCaseKeywords: true }),
-                        lintGutter()
-                      ]}
-                      basicSetup={{
-                        lineNumbers: true,
-                        highlightActiveLineGutter: false
-                      }}
-                      className={styles['code-editor']}
-                    />
-                    {checkStatus !== CheckSQLStatus.NONE && (
-                      <RunningInfoPanel
-                        checkStatus={checkStatus}
-                        checkMessage={checkMessage}
-                      />
-                    )}
-                  </div>
+                  <Switch
+                    checked={sqlProcessEnabled === 'enable'}
+                    onChange={handleSqlProcessChange}
+                  />
                 </FormItem>
+
+                {sqlProcessEnabled === 'enable' && (
+                  <FormItem
+                    label=" "
+                    field="sql_process"
+                    labelAlign="right"
+                    // rules={[
+                    //     {
+                    //         required: sqlProcessEnabled === 'enable',
+                    //         message: '请输入SQL处理'
+                    //     }
+                    // ]}
+                  >
+                    <div
+                      className={classNames(
+                        styles['sql-editor-container'],
+                        'rounded-[4px] border border-solid border-[#E2E8F0]'
+                      )}
+                    >
+                      <div className="flex items-center gap-[8px] border-b border-solid border-[#E2E8F0] p-[12px] pb-[12px]">
+                        <Button
+                          type="secondary"
+                          icon={<IconCaretRight className="mr-[4px]" />}
+                          className="h-[26px]"
+                          onClick={handleCheckSQL}
+                          loading={checkStatus === CheckSQLStatus.CHECKING}
+                        >
+                          校验
+                        </Button>
+
+                        <Button
+                          type="text"
+                          icon={<SQLFormatIcon />}
+                          // onClick={handleFormatCode}
+                          className="h-[26px]"
+                        >
+                          格式化
+                        </Button>
+                      </div>
+                      <CodeMirror
+                        value={sqlContent}
+                        onChange={handleSqlContentChange}
+                        placeholder={placeholderValue}
+                        // readOnly={
+                        //     !hasUpdatePermission || runStatus === RunningStatus.RUNNING
+                        // }
+                        theme={myTheme}
+                        extensions={[
+                          sql({ upperCaseKeywords: true }),
+                          lintGutter()
+                        ]}
+                        basicSetup={{
+                          lineNumbers: true,
+                          highlightActiveLineGutter: false
+                        }}
+                        className={styles['code-editor']}
+                      />
+                      {checkStatus !== CheckSQLStatus.NONE && (
+                        <RunningInfoPanel
+                          checkStatus={checkStatus}
+                          checkMessage={checkMessage}
+                        />
+                      )}
+                    </div>
+                  </FormItem>
+                )}
+              </>
+            )}
+
+          {sourceType === SOURCE_TYPES.DB && sqlProcessEnabled !== 'enable' && (
+            <FormItem
+              label="选择抽取的表："
+              field="table_name"
+              labelAlign="right"
+              rules={[{ required: true, message: '请选择抽取的表' }]}
+              extra="只能载入public schema的表"
+            >
+              <Select
+                className="select-tag-style"
+                onChange={handleAllTagChange}
+                ref={selectRef}
+                mode={selectedNodeType === 'meta_data' ? undefined : 'multiple'}
+                maxTagCount={{
+                  count: 2,
+                  render: renderTableTags
+                }}
+                placeholder="请选择抽取的表"
+                style={{ width: '100%', minWidth: 0 }}
+                allowClear
+              >
+                {tableList.length > 0 && selectedNodeType !== 'meta_data' && (
+                  <Option value="all">全部</Option>
+                )}
+                {tableList.map((option) => (
+                  <Option key={option} value={option}>
+                    {option}
+                  </Option>
+                ))}
+              </Select>
+            </FormItem>
+          )}
+
+          <FormItem
+            label="载入形式："
+            initialValue={LOAD_TYPES.ONCE}
+            field="load_type"
+            labelAlign="right"
+            rules={[{ required: true, message: '请选择载入形式' }]}
+          >
+            <RadioGroup onChange={handleLoadTypeChange}>
+              <Radio value={LOAD_TYPES.ONCE}>单次载入</Radio>
+              {sourceType !== SOURCE_TYPES.LOCAL && (
+                <Radio value={LOAD_TYPES.CRON}>周期载入</Radio>
               )}
-            </>
+            </RadioGroup>
+          </FormItem>
+
+          {loadVal === LOAD_TYPES.CRON && (
+            // <div className={Styles.cycleLoadingBox}>
+            <SchedulerRun
+              // @ts-expect-error
+              ref={SchedulerRunRef}
+              options={{}}
+              onOptionsChange={setExpression}
+            />
+            // </div>
           )}
         </Form>
 
