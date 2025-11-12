@@ -303,22 +303,20 @@ export default function DataAssetList() {
   // 初始化搜索字段配置
   useEffect(() => {
     // 获取标签列表
-    getTagList()
-      .then((res) => {
-        if (res.status !== 200) {
-          return;
-        }
-
-        const options = (res.data || []).map((tag: any) => ({
-          label: tag.name || tag.label,
-          value: tag.name || tag.value || tag.id
-        }));
-
-        setAssetTags(options);
-      })
-      .catch((err) => {
-        console.error('获取标签列表失败:', err);
-      });
+    // getTagList()
+    //   .then((res) => {
+    //     if (res.status !== 200) {
+    //       return;
+    //     }
+    //     const options = (res.data || []).map((tag: any) => ({
+    //       label: tag.name || tag.label,
+    //       value: tag.name || tag.value || tag.id
+    //     }));
+    //     setAssetTags(options);
+    //   })
+    //   .catch((err) => {
+    //     console.error('获取标签列表失败:', err);
+    //   });
     // 获取资产来源列表
     // listDataAssetSource()
     //   .then((res) => {
