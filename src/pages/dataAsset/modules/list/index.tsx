@@ -41,7 +41,9 @@ import {
   ColumnField as ApiColumnField,
   ListDataAssetDataRes,
   ModifyMethod,
-  EditDataAssetData
+  EditDataAssetData,
+  BaseTag,
+  TagValueItem
 } from '@/types/dataAssetApi';
 import { ColumnField } from '../../components/ColumnSettingModal';
 import ColumnSettingModal from '../../components/ColumnSettingModal';
@@ -97,6 +99,7 @@ export default function DataAssetList() {
   const [isSticky, setIsSticky] = useState(false);
   const headerRef = useRef<HTMLDivElement>(null);
   const sentinelRef = useRef<HTMLDivElement>(null);
+  const [tagList, setTagList] = useState<BaseTag[]>([]);
 
   // 获取列表数据
   const loadListData = async (page: number, size: number) => {
@@ -300,71 +303,54 @@ export default function DataAssetList() {
     init();
   }, []);
 
-  // 初始化搜索字段配置
+  // 获取标签列表
   useEffect(() => {
-    // 获取标签列表
-    // getTagList()
-    //   .then((res) => {
-    //     if (res.status !== 200) {
-    //       return;
-    //     }
-    //     const options = (res.data || []).map((tag: any) => ({
-    //       label: tag.name || tag.label,
-    //       value: tag.name || tag.value || tag.id
-    //     }));
-    //     setAssetTags(options);
-    //   })
-    //   .catch((err) => {
-    //     console.error('获取标签列表失败:', err);
-    //   });
-    // 获取资产来源列表
-    // listDataAssetSource()
-    //   .then((res) => {
-    //     if (res.code === 0 || res.code === undefined) {
-    //       const options = (res.data || []).map((source: any) => ({
-    //         label: source.type || source.name || source.label,
-    //         value: source.type || source.name || source.value || source.id
-    //       }));
-    //       setAssetSources(options);
-    //     }
-    //   })
-    //   .catch((err) => {
-    //     console.error('获取资产来源列表失败:', err);
-    //   });
+    getTagList()
+      .then((res) => {
+        if (res.status === 200) {
+          setTagList(res.data ?? []);
+        } else {
+          console.error('获取标签列表失败:', res.message);
+        }
+      })
+      .catch((err) => {
+        console.error('获取标签列表失败:', err);
+      });
   }, []);
 
   // 更新搜索字段配置（当标签和来源数据加载完成后）
   useEffect(() => {
-    const fields: SearchField[] = [
-      {
-        key: 'name',
-        label: '数据资产名称',
-        type: 'input',
-        paramKey: 'name'
-      },
-      {
-        key: 'tag',
-        label: '资产标签',
-        type: 'select',
-        options: assetTags,
-        paramKey: 'tag'
-      },
-      {
-        key: 'source',
-        label: '资产来源',
-        type: 'select',
-        options: assetSources,
-        paramKey: 'source'
-      },
-      {
-        key: 'updateTime',
-        label: '更新时间',
-        type: 'daterange',
-        paramKey: 'updateTime'
-      }
-    ];
-    setSearchFields(fields);
-  }, [assetTags, assetSources]);
+    // const fields: SearchField[] = [
+    //   {
+    //     key: 'name',
+    //     label: '数据资产名称',
+    //     type: 'input',
+    //     paramKey: 'name'
+    //   },
+    //   {
+    //     key: 'tag',
+    //     label: '资产标签',
+    //     type: 'select',
+    //     options: assetTags,
+    //     paramKey: 'tag'
+    //   },
+    //   {
+    //     key: 'source',
+    //     label: '资产来源',
+    //     type: 'select',
+    //     options: assetSources,
+    //     paramKey: 'source'
+    //   },
+    //   {
+    //     key: 'updateTime',
+    //     label: '更新时间',
+    //     type: 'daterange',
+    //     paramKey: 'updateTime'
+    //   }
+    // ];
+    // setSearchFields(fields);
+    loadListData(1, pageSize);
+  }, [searchParams]);
 
   // 检测吸顶状态
   useEffect(() => {
@@ -409,9 +395,7 @@ export default function DataAssetList() {
 
   // 处理主搜索
   const handleMainSearch = (value: string) => {
-    console.log('主搜索:', value);
-    // TODO: 调用搜索API
-    // getDataAssetList({ keyword: value }).then(...)
+    setSearchParams({ ...searchParams, commonSearch: value });
   };
 
   // 处理字段搜索
@@ -862,6 +846,7 @@ export default function DataAssetList() {
             />
           ) : (
             <DataAssetTableCard
+              tagList={tagList}
               dataAssetList={dataAssetList}
               loading={loading}
               currentPage={currentPage}
@@ -893,11 +878,11 @@ export default function DataAssetList() {
       {/* 修改标签弹窗 */}
       <ModifyTagsModal
         visible={modifyTagsModalVisible}
-        tagOptions={assetTags}
+        tagOptions={tagList}
         initialTags={
           selectedRowKeys.length === 1
             ? (dataAssetList.find((item) => item.id === selectedRowKeys[0])
-                ?.tags as string[]) || []
+                ?.tags as TagValueItem[]) || []
             : []
         }
         onCancel={() => setModifyTagsModalVisible(false)}

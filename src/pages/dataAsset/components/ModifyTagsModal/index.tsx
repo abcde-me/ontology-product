@@ -1,17 +1,19 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import {
   Modal,
   Button,
   Select,
   Form,
   Tooltip,
-  Tag
+  Tag,
+  TreeSelect
 } from '@arco-design/web-react';
+import { BaseTag, TagValueItem } from '@/types/dataAssetApi';
 
 interface ModifyTagsModalProps {
   visible: boolean;
-  tagOptions: Array<{ label: string; value: any }>;
-  initialTags?: string[];
+  tagOptions: BaseTag[];
+  initialTags?: TagValueItem[];
   onCancel: () => void;
   onConfirm: (tags: string[]) => void;
 }
@@ -24,6 +26,24 @@ const ModifyTagsModal: React.FC<ModifyTagsModalProps> = ({
   onConfirm
 }) => {
   const [form] = Form.useForm();
+  const tagTreeData = useMemo(
+    () =>
+      tagOptions.map((tag) => ({
+        key: tag.id,
+        value: tag.id,
+        title: tag.name,
+        selectable: false,
+        checkable: false,
+        disableCheckbox: true,
+        children: (tag.valueList || []).map((item) => ({
+          key: item.id,
+          value: item.id,
+          title: item.tagValue,
+          parentId: tag.id
+        }))
+      })),
+    [tagOptions]
+  );
 
   useEffect(() => {
     if (visible) {
@@ -59,13 +79,22 @@ const ModifyTagsModal: React.FC<ModifyTagsModalProps> = ({
           field="tags"
           rules={[{ required: true, message: '请选择标签' }]}
         >
-          <Select
-            placeholder=""
-            mode="multiple"
+          <TreeSelect
+            placeholder="请选择标签"
+            value={initialTags.map((item) => {
+              return {
+                label: item.tagValue,
+                value: item.id
+              };
+            })}
+            multiple
+            treeCheckable
+            treeCheckStrictly
+            labelInValue
+            treeData={tagTreeData}
             // value={recordTags}
-            options={tagOptions}
-            dropdownMenuClassName="data-asset-dropdown-select"
-            allowCreate
+            // options={tagOptions}
+            // dropdownMenuClassName="data-asset-dropdown-select"
             // renderTag={tagRender}
             // popupVisible={selectVisible[record.id] || false}
             // onVisibleChange={(visible) => {
@@ -104,7 +133,7 @@ const ModifyTagsModal: React.FC<ModifyTagsModalProps> = ({
               }
             }}
             // onChange={(values) => handleTagChange(record.id, values)}
-          ></Select>
+          ></TreeSelect>
           {/* <Select
             mode="multiple"
             placeholder="请选择标签"
