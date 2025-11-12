@@ -23,6 +23,7 @@ export interface ColumnField {
   enumChecked: boolean; // 是否勾选枚举
   enumLoading: boolean;
   enumCount: number; // 枚举数
+  displaySort: number;
 }
 
 export interface ColumnSettingModalProps {
@@ -57,7 +58,10 @@ const ColumnSettingModal: React.FC<ColumnSettingModalProps> = ({
     if (externalFields) {
       setFields(externalFields);
       // 更新选中的字段ID列表
-      const allIds = externalFields.map((f) => f.id).filter(Boolean);
+      const allIds = externalFields
+        .filter((f) => f.displaySort > 0)
+        .map((f) => f.id)
+        .filter(Boolean);
       if (allIds.length > 0) {
         setSelectedIds(allIds);
       }
