@@ -19,8 +19,8 @@ export const useGetModelList = (
           return [];
         }
         return res.data.result.map((item) => ({
-          label: item.id,
-          value: item.name
+          label: item.name,
+          value: item.id
         }));
       }
     }
