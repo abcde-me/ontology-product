@@ -38,6 +38,7 @@ const getDataSourceKey = (item: ListDataAssetSourceResItem) =>
 
 interface Step2FieldMappingProps {
   mappings: FieldMapping[];
+  currentStep: number;
   setMappings: React.Dispatch<React.SetStateAction<FieldMapping[]>>;
   autoMapping: boolean;
   setAutoMapping: React.Dispatch<React.SetStateAction<boolean>>;
@@ -50,6 +51,7 @@ interface Step2FieldMappingProps {
 }
 
 export default function Step2FieldMapping({
+  currentStep,
   mappings,
   setMappings,
   autoMapping,
@@ -239,7 +241,7 @@ export default function Step2FieldMapping({
 
   const runAutoMap = async () => {
     try {
-      if (!autoMapping) return;
+      if (!autoMapping || currentStep !== 1) return;
       if (!metadataFields || metadataFields.length === 0) return;
       if (!dataSources || Object.keys(dataSources).length === 0) return;
 
@@ -352,7 +354,13 @@ export default function Step2FieldMapping({
   // 自动映射：当开关开启，或依赖变化时触发
   useEffect(() => {
     runAutoMap();
-  }, [autoMapping, metadataFields, dataSources, findDataAssetMappingData]);
+  }, [
+    autoMapping,
+    metadataFields,
+    dataSources,
+    findDataAssetMappingData,
+    currentStep
+  ]);
 
   // 添加映射行
   const handleAddMapping = () => {
@@ -417,7 +425,6 @@ export default function Step2FieldMapping({
     try {
       await form.validate();
       const rawMappings: FieldMapping[] = form.getFieldValue('mappings') || [];
-      console.log('-----------finish--------', rawMappings, mappingsState);
 
       // 将原始映射表单数据格式化为后端需要的结构
       const formatted = rawMappings.map((row) => {

@@ -317,14 +317,14 @@ export default function DataAssetFormContainer({
   }, []);
 
   // 下一步
-  const handleNext = useCallback(() => {
+  const handleNext = () => {
     setCurrentStep((prev) => prev + 1);
-  }, []);
+  };
 
   // 上一步
-  const handlePrev = useCallback(() => {
+  const handlePrev = () => {
     setCurrentStep((prev) => prev - 1);
-  }, []);
+  };
 
   // 取消
   const handleCancel = useCallback(() => {
@@ -374,6 +374,7 @@ export default function DataAssetFormContainer({
         key: 'mapping',
         element: (
           <Step2FieldMapping
+            currentStep={currentStep}
             mappings={mappings}
             setMappings={setMappings}
             autoMapping={autoMapping}
