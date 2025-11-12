@@ -573,7 +573,7 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
             style={{ height: '32px' }}
           />
           {from === DirectoryTreeFrom.SQL ? (
-            <PermissionWrapper permission={SQL_PERMISSIONS.CAN_CREATE}>
+            <PermissionWrapper permission={SQL_PERMISSIONS.CREATE}>
               {/* <Button
                 type="text"
                 size="small"
@@ -627,7 +627,7 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
           <Empty />
         ) : (
           <Tree
-            className={styles['directory-pySpark-tree']}
+            className={styles['directory-pyspark-tree']}
             blockNode
             treeData={treeData}
             selectable
