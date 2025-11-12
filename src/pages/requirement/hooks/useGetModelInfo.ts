@@ -3,21 +3,24 @@ import { useQuery } from 'react-query';
 import { isArray } from 'lodash-es';
 
 export const useGetModelList = (
-  params: { label_type: number; page: number; page_size: number },
+  params: { label_tool_code: string; page: number; page_size: number },
   options?
 ) => {
   const { data, isLoading, isFetching, refetch } = useQuery(
-    ['get-model-list', params.label_type],
+    ['get-model-list', params.label_tool_code],
     () => getModelList(params),
     {
       ...options,
-      select(data) {
-        if (!isArray(data?.data?.result)) {
+      select(res) {
+        if (res?.code !== 'success') {
           return [];
         }
-        return data.data.result.map((item) => ({
+        if (!isArray(res?.data?.result)) {
+          return [];
+        }
+        return res.data.result.map((item) => ({
           label: item.name,
-          value: item.name
+          value: item.id
         }));
       }
     }
@@ -31,21 +34,25 @@ export const useGetModelList = (
 };
 
 export const useGetModelLabelList = (
-  params: { model_name: string },
+  params: { model_id: number },
   options?
 ) => {
   const { data, isLoading, isFetching, refetch } = useQuery(
-    ['get-model-label-list', params.model_name],
+    ['get-model-label-list', params.model_id],
     () => getModelLabelList(params),
     {
       ...options,
-      select(data) {
-        if (!isArray(data?.data?.label_list)) {
+      select(res) {
+        if (res?.code !== 'success') {
           return [];
         }
-        return data.data.label_list.map((item) => ({
-          label: item.label_name,
-          value: item.label_shape
+        if (!isArray(res?.data?.label_list)) {
+          return [];
+        }
+        return res.data.label_list.map((item) => ({
+          label: item.label_mapping,
+          value: item.label_mapping,
+          ...item
         }));
       }
     }

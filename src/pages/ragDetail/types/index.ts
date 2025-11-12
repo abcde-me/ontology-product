@@ -117,7 +117,7 @@ export interface TableSegment extends Segment {
 }
 
 // 元素类型定义
-export type ElementType = 'text' | 'image' | 'table';
+export type ElementType = 'text' | 'image' | 'table' | 'formula';
 
 // 文本元素
 export interface TextElement {
@@ -155,8 +155,23 @@ export interface TableElement {
   positionInfo?: string; // 位置信息
 }
 
+// 公式元素
+export interface FormulaElement {
+  id: string;
+  type: 'formula';
+  content: string;
+  relatedDescription?: string; // 关键描述
+  extractionEntity?: string[]; // 抽取实体（标签）
+  positionType?: string; // 定位类型
+  positionInfo?: string; // 位置信息
+}
+
 // 元素联合类型
-export type Element = TextElement | ImageElement | TableElement;
+export type Element =
+  | TextElement
+  | ImageElement
+  | TableElement
+  | FormulaElement;
 
 // 分段增强信息
 export interface EnhancementInfo {
@@ -230,6 +245,7 @@ export interface SegmentUpdatePayload {
 
 export interface RagDetailState {
   ragId: string | null;
+  datasetId: string | null; // 数据集ID
   fileName: string;
   filePath: string;
   sceneType: SceneType;
@@ -259,7 +275,7 @@ export interface RagDetailState {
 }
 
 export interface RagDetailActions {
-  initializeRagDetail: (ragId: string) => Promise<void>;
+  initializeRagDetail: (datasetId: string, documentId: string) => Promise<void>;
   selectSegment: (segmentId: string) => void;
   selectDirectoryNode: (nodeId: string) => void;
   startEditingSegment: (segmentId: string) => void;

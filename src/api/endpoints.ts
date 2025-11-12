@@ -218,6 +218,10 @@ export const ResourceEndpointsV2 = {
 
 export const PrefixUserSpace = API_PREFIX + '/user-space/api/v1';
 export const PrefixAuthCenter = API_PREFIX + '/auth-center/api/v1';
+
+// RAG
+export const PrefixRag = API_PREFIX + '/dataset-service/internal/v1';
+
 // 多模态数据治理平台接口
 // TODO: 代替换接口
 export const ModaForgeResourceEndpoints = {
@@ -226,6 +230,29 @@ export const ModaForgeResourceEndpoints = {
   Logout: PrefixUserSpace + '/Logout',
   GetUser: PrefixUserSpace + '/GetUser',
   GetProjOrg: PrefixUserSpace + '/GetProjOrg',
+
+  // RAG相关
+  // 查询知识库文件列表
+  ListKnowledgeDocuments: PrefixRag + '/ListKnowledgeDocuments',
+  // 查询知识库文件目录层级
+  ListKnowledgeDocumentCatalogs: PrefixRag + '/ListKnowledgeDocumentCatalogs',
+  // 查询知识库分块列表
+  ListKnowledgeChunks: PrefixRag + '/ListKnowledgeChunks',
+  // 查询分块详情
+  GetKnowledgeChunk: PrefixRag + '/GetKnowledgeChunk',
+  // 编辑分块内容
+  UpdateKnowledgeChunk: PrefixRag + '/UpdateKnowledgeChunk',
+  // 编辑分块元素信息
+  UpdateKnowledgeChunkMaterials: PrefixRag + '/UpdateKnowledgeChunkMaterials',
+  // 编辑分块增强信息
+  UpdateKnowledgeChunkEnhancement:
+    PrefixRag + '/UpdateKnowledgeChunkEnhancement',
+  // 查询分块溯源日志
+  GetKnowledgeChunkTraceLog: PrefixRag + '/GetKnowledgeChunkTraceLog',
+  // 运行命中测试
+  RunKnowledgeHitTesting: PrefixRag + '/RunKnowledgeHitTesting',
+  // 查询命中测试历史记录
+  ListKnowledgeHitTestingRecords: PrefixRag + '/ListKnowledgeHitTestingRecords',
 
   ResourcePermissionActions: PrefixAuthCenter + '/GetResourcePermissionActions',
   // 新建工作流
@@ -503,7 +530,7 @@ export const ModaForgeResourceEndpoints = {
   // 创建数据资产和映射关系
   createDataAssetAndMapping: PrefixAimdp + '/CreateDataAssetAndMapping',
   // 修改数据资产和映射关系
-  editDataAsset: PrefixAimdp + '/EditDataAsset',
+  editDataAssetAndMapping: PrefixAimdp + '/EditDataAssetAndMapping',
   // 修改数据资产表列设置（前端展示）
   editDataAssetFieldsDisplay: PrefixAimdp + '/EditDataAssetFieldsDisplay',
   // 查询数据资产表列设置（前端展示）
@@ -514,7 +541,9 @@ export const ModaForgeResourceEndpoints = {
   // 批量修改数据资产表中的数据信息
   editDataAssetDataBatch: PrefixAimdp + '/EditDataAssetDataBatch',
   // 获取标签列表
-  listAssetTags: PrefixAimdp + '/ListAssetTags'
+  listBaseTags: PrefixAimdp + '/ListBaseTags',
+  // 批量删除数据资产表中的数据信息
+  deleteDataAssetDataBatch: PrefixAimdp + '/DeleteDataAssetDataBatch'
 };
 
 /**

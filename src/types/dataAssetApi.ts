@@ -12,6 +12,8 @@ export interface DataAssetField {
   required: boolean;
   /** 是否可修改 */
   allowModify: boolean;
+  /** 显示排序 0代表不显示，1代表第一列，2代表第二列，以此类推 */
+  displaySort?: number;
 }
 
 /** 数据来源字段的映射关系 */
@@ -28,7 +30,7 @@ export interface MappingItem {
 
 /** 查询数据资产表字段和映射关系 */
 export interface FindDataAssetMappingItemRes extends DataAssetField {
-  Mapping: {
+  mapping: {
     type: string;
     tableName: string;
     databaseName: string;
@@ -205,4 +207,16 @@ export interface EditDataAssetData {
     fieldEnName: string;
     fieldValue: string;
   }[];
+}
+
+export interface TagValueItem {
+  id: string;
+  tagValue: string;
+}
+
+export interface BaseTag {
+  id: string;
+  name: string;
+  description: string;
+  valueList: TagValueItem[];
 }

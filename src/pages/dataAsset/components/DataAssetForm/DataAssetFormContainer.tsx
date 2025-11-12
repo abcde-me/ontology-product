@@ -4,7 +4,8 @@ import { Steps, Message } from '@arco-design/web-react';
 import {
   findDataAssetMapping,
   listDataAssetSource,
-  createDataAssetAndMapping
+  createDataAssetAndMapping,
+  editDataAssetAndMapping
 } from '@/api/dataAsset';
 import Step1MetadataFields from './Step1MetadataFields';
 import Step2FieldMapping from './Step2FieldMapping';
@@ -14,6 +15,64 @@ import {
   FindDataAssetMappingItemRes,
   ListDataAssetSourceResItem
 } from '@/types/dataAssetApi';
+import { RESERVED_FIELD_ENS } from '../../utils/const';
+
+type DisplaySortable = {
+  nameEn?: string;
+  displaySort?: number;
+};
+
+const RESERVED_DISPLAY_SORT_MAP = Array.from(RESERVED_FIELD_ENS).reduce<
+  Record<string, number>
+>((acc, key, index) => {
+  acc[key] = index + 1;
+  return acc;
+}, {});
+
+function assignReservedDisplaySort<T extends DisplaySortable>(
+  fields: T[] | undefined | null
+): T[] {
+  if (!fields || !Array.isArray(fields)) {
+    return [] as T[];
+  }
+
+  const decorated = fields.map((field, index) => {
+    const reservedSort = field?.nameEn
+      ? RESERVED_DISPLAY_SORT_MAP[field.nameEn]
+      : undefined;
+    const displaySort = reservedSort ?? 0;
+
+    return {
+      field,
+      index,
+      displaySort
+    };
+  });
+
+  decorated.sort((a, b) => {
+    const sortA = a.displaySort ?? 0;
+    const sortB = b.displaySort ?? 0;
+
+    if (sortA === sortB) {
+      return a.index - b.index;
+    }
+
+    if (sortA === 0) {
+      return 1;
+    }
+
+    if (sortB === 0) {
+      return -1;
+    }
+
+    return sortA - sortB;
+  });
+
+  return decorated.map(({ field, displaySort }) => ({
+    ...field,
+    displaySort
+  })) as T[];
+}
 
 interface DataAssetFormContainerProps {
   isEditMode?: boolean;
@@ -87,10 +146,10 @@ export default function DataAssetFormContainer({
         displaySort: 2
       },
       {
-        id: `field_system_data_update_time`,
-        nameZh: '数据更新时间',
-        nameEn: 'data_update_time',
-        type: 'datetime',
+        id: `field_system_data_source`,
+        nameZh: '来源',
+        nameEn: 'data_source',
+        type: 'string',
         default: '',
         required: true,
         allowModify: false,
@@ -99,10 +158,10 @@ export default function DataAssetFormContainer({
         displaySort: 3
       },
       {
-        id: `field_system_data_source`,
-        nameZh: '来源',
-        nameEn: 'data_source',
-        type: 'string',
+        id: `field_system_data_update_time`,
+        nameZh: '数据更新时间',
+        nameEn: 'data_update_time',
+        type: 'datetime',
         default: '',
         required: true,
         allowModify: false,
@@ -126,6 +185,58 @@ export default function DataAssetFormContainer({
     ListDataAssetSourceResItem[]
   >([]);
 
+  // const updateMetadataFields = useCallback<
+  //   React.Dispatch<React.SetStateAction<MetadataField[]>>
+  // >(
+  //   (updater) => {
+  //     setMetadataFields((prev) => {
+  //       const next =
+  //         typeof updater === 'function'
+  //           ? (updater as (prevState: MetadataField[]) => MetadataField[])(
+  //             prev
+  //           )
+  //           : updater;
+  //       return assignReservedDisplaySort(next);
+  //     });
+  //   },
+  //   [setMetadataFields]
+  // );
+
+  const normalizeDataSources = (
+    sources: Record<string, ListDataAssetSourceResItem> = {},
+    available: Record<string, ListDataAssetSourceResItem> = {}
+  ): Record<string, ListDataAssetSourceResItem> => {
+    const result: Record<string, ListDataAssetSourceResItem> = {};
+    Object.keys(sources).forEach((key) => {
+      if (available[key]) {
+        result[key] = available[key];
+      }
+    });
+    return result;
+  };
+
+  const getDataSourceKey = (item: Partial<ListDataAssetSourceResItem>) =>
+    `${item.type ?? ''}::${item.databaseName ?? ''}::${item.tableName ?? ''}`;
+
+  const availableDataSources = useMemo(() => {
+    if (!findDataAssetMappingData || findDataAssetMappingData.length === 0) {
+      return {};
+    }
+    const result: Record<string, ListDataAssetSourceResItem> = {};
+    findDataAssetMappingData.forEach((item) => {
+      const key = getDataSourceKey(item);
+      if (key) {
+        result[key] = item;
+      }
+    });
+    return result;
+  }, [findDataAssetMappingData]);
+
+  const normalizedDataSources = useMemo(
+    () => normalizeDataSources(dataSources, availableDataSources),
+    [dataSources, availableDataSources]
+  );
+
   // 获取数据资产映射数据
   const fetchDataAssetMapping = async () => {
     try {
@@ -144,9 +255,6 @@ export default function DataAssetFormContainer({
     }
   };
 
-  const getDataSourceKey = (item: Partial<ListDataAssetSourceResItem>) =>
-    `${item.type ?? ''}::${item.databaseName ?? ''}::${item.tableName ?? ''}`;
-
   const initDataAssetMapping = async () => {
     setAutoMapping(false);
     const res = await findDataAssetMapping();
@@ -155,7 +263,7 @@ export default function DataAssetFormContainer({
     }
 
     setMetadataFields(
-      res.data.map((item) => ({
+      res?.data?.map((item) => ({
         id: item.nameEn,
         nameZh: item.nameZh,
         nameEn: item.nameEn,
@@ -163,17 +271,18 @@ export default function DataAssetFormContainer({
         default: item.default,
         required: item.required,
         allowModify: item.allowModify,
-        mapping: item.Mapping
-      }))
+        displaySort: RESERVED_DISPLAY_SORT_MAP[item.nameEn] ?? 0,
+        mapping: item.mapping
+      })) || []
     );
 
     const dataSourcesMap = {};
     res.data?.forEach((item) => {
-      if (!item.Mapping?.length) {
+      if (!item.mapping?.length) {
         return;
       }
 
-      item.Mapping?.forEach((subItem) => {
+      item.mapping?.forEach((subItem) => {
         const key = getDataSourceKey(subItem);
 
         if (dataSourcesMap[key]) {
@@ -208,14 +317,14 @@ export default function DataAssetFormContainer({
   }, []);
 
   // 下一步
-  const handleNext = useCallback(() => {
+  const handleNext = () => {
     setCurrentStep((prev) => prev + 1);
-  }, []);
+  };
 
   // 上一步
-  const handlePrev = useCallback(() => {
+  const handlePrev = () => {
     setCurrentStep((prev) => prev - 1);
-  }, []);
+  };
 
   // 取消
   const handleCancel = useCallback(() => {
@@ -225,17 +334,23 @@ export default function DataAssetFormContainer({
   // 完成
   const handleFinish = useCallback(
     async (fieldsWithMappings: CreateDataAssetAndMappingReq) => {
-      const res = await createDataAssetAndMapping(fieldsWithMappings);
+      const res = await (
+        isEditMode ? editDataAssetAndMapping : createDataAssetAndMapping
+      )({
+        fields: fieldsWithMappings
+      });
 
-      if (res.status !== 200) {
-        Message.error(res.message || '创建数据资产失败');
+      if (res.status !== 200 || res.code !== '') {
+        Message.error(
+          res.message || (isEditMode ? '编辑数据资产失败' : '创建数据资产失败')
+        );
         return;
       }
 
-      Message.success('创建数据资产成功');
+      Message.success(isEditMode ? '编辑数据资产成功' : '创建数据资产成功');
       history.push('/tenant/compute/modaforge/dataAsset/list');
     },
-    [history]
+    [history, isEditMode]
   );
 
   // 页面标题
@@ -251,7 +366,7 @@ export default function DataAssetFormContainer({
           <Step1MetadataFields
             metadataFields={metadataFields}
             setMetadataFields={setMetadataFields}
-            dataSources={dataSources}
+            dataSources={normalizedDataSources}
             setDataSources={setDataSources}
             findDataAssetMappingData={findDataAssetMappingData}
             onCancel={handleCancel}
@@ -263,12 +378,13 @@ export default function DataAssetFormContainer({
         key: 'mapping',
         element: (
           <Step2FieldMapping
+            currentStep={currentStep}
             mappings={mappings}
             setMappings={setMappings}
             autoMapping={autoMapping}
             setAutoMapping={setAutoMapping}
             metadataFields={metadataFields}
-            dataSources={dataSources}
+            dataSources={normalizedDataSources}
             findDataAssetMappingData={findDataAssetMappingData}
             onCancel={handleCancel}
             onPrev={handlePrev}
@@ -287,6 +403,7 @@ export default function DataAssetFormContainer({
       handleNext,
       handlePrev,
       handleFinish
+      // updateMetadataFields
     ]
   );
 
@@ -304,8 +421,8 @@ export default function DataAssetFormContainer({
               current={currentStep}
               style={{ maxWidth: 440, margin: '0 auto' }}
             >
-              <Steps.Step title={step1Title} />
-              <Steps.Step title={step2Title} />
+              <Steps.Step key="step1" title={step1Title} />
+              <Steps.Step key="step2" title={step2Title} />
             </Steps>
           </div>
 

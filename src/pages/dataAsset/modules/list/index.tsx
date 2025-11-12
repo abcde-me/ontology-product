@@ -28,24 +28,30 @@ import ViewToggle, { ViewType } from '../../components/ViewToggle';
 import ModifyAssetModal from '../../components/ModifyAssetModal';
 import ModifyTagsModal from '../../components/ModifyTagsModal';
 import EditSingleAssetModal from '../../components/EditSingleAssetModal';
-import { getTagList } from '@/api/datasetManagement';
 import {
   findDataAssetMapping,
   listDataAssetData,
   findDataAssetFieldsDisplay,
   deleteDataAssetDataBatch,
-  editDataAssetDataBatch
+  editDataAssetDataBatch,
+  getTagList,
+  editDataAssetFieldsDisplay
 } from '@/api/dataAsset';
 import {
   ColumnField as ApiColumnField,
   ListDataAssetDataRes,
-  ModifyMethod
+  ModifyMethod,
+  EditDataAssetData
 } from '@/types/dataAssetApi';
 import { ColumnField } from '../../components/ColumnSettingModal';
 import ColumnSettingModal from '../../components/ColumnSettingModal';
-import { EditDataAssetData } from '@/types/dataAssetApi';
 import styles from './list.module.scss';
 import classNames from 'classnames';
+
+interface TagValue {
+  tagId: string;
+  tagValue: string;
+}
 
 export default function DataAssetList() {
   const [dataAssetList, setDataAssetList] = useState<
@@ -68,7 +74,7 @@ export default function DataAssetList() {
   const [loading, setLoading] = useState(false);
   // 分页状态
   const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(60); // 默认卡片视图，每页12个
+  const [pageSize, setPageSize] = useState(10); // 默认卡片视图，每页12个
   const [total, setTotal] = useState(0);
   const [searchParams, setSearchParams] = useState({
     commonSearch: '',
@@ -102,149 +108,137 @@ export default function DataAssetList() {
         pageSize: size
       });
 
-      if (listRes.code === 0 || listRes.code === undefined) {
-        const {
-          fields,
-          records,
-          total: totalCount
-        } = listRes.data || {
-          fields: [],
-          records: [],
-          total: 0
-        };
-        setDataAssetList(records || []);
-        setTotal(totalCount || 0);
+      if (listRes.status !== 200 || !listRes.data) {
+        Message.error(listRes.message || '获取数据资产列表失败');
+        return;
+      }
 
-        // 保存字段列表用于修改资产弹窗
-        const fieldsForModifyList = (fields || []).map(
-          (field: ApiColumnField) => ({
-            nameZh: field.nameZh,
-            nameEn: field.nameEn,
-            type: field.type
-          })
-        );
-        setFieldsForModify(fieldsForModifyList);
+      const { fields, records, total: totalCount } = listRes.data;
+      setDataAssetList(records || []);
+      setTotal(totalCount || 0);
 
-        // 保存列字段列表用于单条编辑弹窗
-        setColumnFields(fields || []);
+      // 保存字段列表用于修改资产弹窗
+      const fieldsForModifyList = (fields || []).map(
+        (field: ApiColumnField) => ({
+          nameZh: field.nameZh,
+          nameEn: field.nameEn,
+          type: field.type
+        })
+      );
+      setFieldsForModify(fieldsForModifyList);
 
-        // 根据 fields 动态生成表格列
-        const dynamicColumns = [
-          {
-            title: '序号',
-            dataIndex: 'index',
-            width: 80,
-            key: 'index',
-            render: (_: any, __: any, idx: number) =>
-              (page - 1) * size + idx + 1
-          },
-          // 根据 fields 生成列，保证每一列和表头一一对应
-          ...(fields || [])
-            .filter((field: ApiColumnField) => field.displaySort > 0)
-            .map((field: ApiColumnField) => {
-              // 如果是 tags 字段，使用 Tag 组件显示
-              if (field.nameEn === 'tags') {
-                return {
-                  title: field.nameZh,
-                  dataIndex: field.nameEn,
-                  key: field.nameEn,
-                  width: 150,
-                  render: (tagNames: string[] | string) => {
-                    // 处理字符串或数组格式
-                    let tags: string[] = [];
-                    if (Array.isArray(tagNames)) {
-                      tags = tagNames;
-                    } else if (typeof tagNames === 'string' && tagNames) {
-                      tags = tagNames
-                        .split(',')
-                        .map((tag) => tag.trim())
-                        .filter(Boolean);
-                    }
+      // 保存列字段列表用于单条编辑弹窗
+      setColumnFields(fields || []);
 
-                    if (!tags || tags.length === 0) return '-';
-
-                    return (
-                      <Space size="mini">
-                        {tags[0] && (
-                          <Tag>
-                            {tags[0].length > 5 ? (
-                              <Tooltip content={tags[0]}>
-                                {tags[0].substring(0, 5)}...
-                              </Tooltip>
-                            ) : (
-                              tags[0] || '-'
-                            )}
-                          </Tag>
-                        )}
-                        {tags.length > 1 && (
-                          <Tooltip
-                            content={tags.map((tag, index) => (
-                              <Tag
-                                key={`${tag}-${index}`}
-                                style={{ margin: '2px 2px' }}
-                              >
-                                {tag}
-                              </Tag>
-                            ))}
-                          >
-                            <Tag>+{tags.length - 1}</Tag>
-                          </Tooltip>
-                        )}
-                      </Space>
-                    );
-                  }
-                };
-              }
-
-              // 其他字段使用默认渲染
+      // 根据 fields 动态生成表格列
+      const dynamicColumns = [
+        {
+          title: '序号',
+          dataIndex: 'index',
+          width: 80,
+          key: 'index',
+          render: (_: any, __: any, idx: number) => (page - 1) * size + idx + 1
+        },
+        // 根据 fields 生成列，保证每一列和表头一一对应
+        ...(fields || [])
+          .filter((field: ApiColumnField) => field.displaySort > 0)
+          .map((field: ApiColumnField) => {
+            // 如果是 tags 字段，使用 Tag 组件显示
+            if (field.nameEn === 'tags') {
               return {
                 title: field.nameZh,
                 dataIndex: field.nameEn,
                 key: field.nameEn,
                 width: 150,
-                ellipsis: true
+                render: (tagNames: TagValue[]) => {
+                  // 处理字符串或数组格式
+                  const tags = tagNames;
+
+                  if (!tags || tags.length === 0) return '-';
+
+                  return (
+                    <Space size="mini">
+                      {tags[0] && (
+                        <Tag>
+                          {tags[0].tagValue.length > 5 ? (
+                            <Tooltip content={tags[0].tagValue}>
+                              {tags[0].tagValue.substring(0, 5)}...
+                            </Tooltip>
+                          ) : (
+                            tags[0].tagValue || '-'
+                          )}
+                        </Tag>
+                      )}
+                      {tags.length > 1 && (
+                        <Tooltip
+                          content={tags
+                            .slice(1)
+                            .map((item: TagValue, index: number) => (
+                              <Tag
+                                key={item.tagId}
+                                style={{ margin: '2px 2px' }}
+                              >
+                                {item.tagValue}
+                              </Tag>
+                            ))}
+                        >
+                          <Tag>+{tags.length - 1}</Tag>
+                        </Tooltip>
+                      )}
+                    </Space>
+                  );
+                }
               };
-            }),
-          {
-            title: '操作',
-            dataIndex: 'actions',
-            width: 204,
-            key: 'actions',
-            fixed: 'right' as const,
-            render: (
-              _: any,
-              record: any,
-              idx: number,
-              { onEditAsset, onEditTags, onDelete }: any
-            ) => (
-              <div className="flex items-center gap-[16px]">
-                <Button
-                  type="text"
-                  onClick={() => onEditAsset?.(record)}
-                  className="px-[0px]"
-                >
-                  修改资产
-                </Button>
-                <Button
-                  type="text"
-                  onClick={() => onEditTags?.(record)}
-                  className="px-[0px]"
-                >
-                  修改标签
-                </Button>
-                <Button
-                  type="text"
-                  className="px-[0px]"
-                  onClick={() => onDelete?.(record)}
-                >
-                  删除
-                </Button>
-              </div>
-            )
-          }
-        ];
-        setTableColumns(dynamicColumns);
-      }
+            }
+
+            // 其他字段使用默认渲染
+            return {
+              title: field.nameZh,
+              dataIndex: field.nameEn,
+              key: field.nameEn,
+              width: 150,
+              ellipsis: true
+            };
+          }),
+        {
+          title: '操作',
+          dataIndex: 'actions',
+          width: 204,
+          key: 'actions',
+          fixed: 'right' as const,
+          render: (
+            val: any,
+            record: any,
+            idx: number,
+            { onEditAsset, onEditTags, onDelete }: any
+          ) => (
+            <div className="flex items-center gap-[16px]">
+              <Button
+                type="text"
+                onClick={() => onEditAsset?.(record)}
+                className="px-[0px]"
+              >
+                修改资产
+              </Button>
+              <Button
+                type="text"
+                onClick={() => onEditTags?.(record)}
+                className="px-[0px]"
+              >
+                修改标签
+              </Button>
+              <Button
+                type="text"
+                className="px-[0px]"
+                onClick={() => onDelete?.(record)}
+              >
+                删除
+              </Button>
+            </div>
+          )
+        }
+      ];
+      setTableColumns(dynamicColumns);
     } catch (err) {
       console.error('获取数据资产列表失败:', err);
     } finally {
@@ -274,7 +268,8 @@ export default function DataAssetList() {
       type: field.type,
       enumChecked: field.isEnumAble || false,
       enumLoading: false,
-      enumCount: 0
+      enumCount: 0,
+      displaySort: field.displaySort || 0
     }));
     setColumnSettingsFields(convertedFields);
   };
@@ -284,7 +279,6 @@ export default function DataAssetList() {
     const init = async () => {
       try {
         const findDataAssetMappingRes = await findDataAssetMapping();
-        console.log('findDataAssetMappingRes', findDataAssetMappingRes);
         if (findDataAssetMappingRes.status !== 200) {
           setHasMapping(false);
           return;
@@ -311,13 +305,14 @@ export default function DataAssetList() {
     // 获取标签列表
     // getTagList()
     //   .then((res) => {
-    //     if (res.code === 0 || res.code === undefined) {
-    //       const options = (res.data || []).map((tag: any) => ({
-    //         label: tag.name || tag.label,
-    //         value: tag.name || tag.value || tag.id
-    //       }));
-    //       setAssetTags(options);
+    //     if (res.status !== 200) {
+    //       return;
     //     }
+    //     const options = (res.data || []).map((tag: any) => ({
+    //       label: tag.name || tag.label,
+    //       value: tag.name || tag.value || tag.id
+    //     }));
+    //     setAssetTags(options);
     //   })
     //   .catch((err) => {
     //     console.error('获取标签列表失败:', err);
@@ -409,8 +404,6 @@ export default function DataAssetList() {
   }, [hasMapping]);
 
   const handleCreateDataAsset = () => {
-    // TODO: 实现创建数据资产的逻辑
-    console.log('创建数据资产');
     history.push('/tenant/compute/modaforge/dataAsset/create');
   };
 
@@ -438,7 +431,7 @@ export default function DataAssetList() {
   const handleViewTypeChange = (type: ViewType) => {
     setViewType(type);
     // 切换视图时，重置分页并重新加载数据，清空选中状态
-    const newPageSize = type === ViewType.LIST ? 50 : 48;
+    const newPageSize = type === ViewType.LIST ? 10 : 12;
     setPageSize(newPageSize);
     setCurrentPage(1);
     setSelectedRowKeys([]);
@@ -459,9 +452,20 @@ export default function DataAssetList() {
 
   // 列设置弹窗回调
   const handleModalOk = (selectedFields: any) => {
-    // TODO: 处理列设置确定逻辑
-    setColumnModalOpen(false);
-    // Message.success('列设置已保存');
+    editDataAssetFieldsDisplay({
+      fields: selectedFields.map((field: ColumnField, index: number) => ({
+        ...field,
+        displaySort: index + 1
+      }))
+    }).then((res) => {
+      if (res.status !== 200) {
+        Message.error(res.message ?? '列设置失败');
+        return;
+      }
+      Message.success('列设置成功');
+      setColumnModalOpen(false);
+      loadListData(1, pageSize);
+    });
   };
   const handleModalCancel = () => setColumnModalOpen(false);
   const handleColumnChange = (list: ColumnField[]) => {
@@ -477,6 +481,7 @@ export default function DataAssetList() {
   // 处理批量删除
   const handleBatchDelete = () => {
     if (selectedRowKeys.length === 0) return;
+    console.log('selectedRowKeys', selectedRowKeys);
 
     Modal.confirm({
       title: '确定删除资产吗?',
@@ -484,13 +489,13 @@ export default function DataAssetList() {
       onOk: async () => {
         try {
           const res = await deleteDataAssetDataBatch({ ids: selectedRowKeys });
-          if (res.code === 0 || res.code === undefined) {
+          if (res.status === 200 && res.code === '') {
             Message.success('删除成功');
             setSelectedRowKeys([]);
             // 重新加载数据
             loadListData(currentPage, pageSize);
           } else {
-            Message.error('删除失败');
+            Message.error(res.message ?? '删除失败');
           }
         } catch (error) {
           console.error('删除失败:', error);
@@ -508,13 +513,13 @@ export default function DataAssetList() {
       onOk: async () => {
         try {
           const res = await deleteDataAssetDataBatch({ ids: [record.id] });
-          if (res.code === 0 || res.code === undefined) {
+          if (res.status === 200 && res.code === '') {
             Message.success('删除成功');
             setSelectedRowKeys([]);
             // 重新加载数据
             loadListData(currentPage, pageSize);
           } else {
-            Message.error('删除失败');
+            Message.error(res.message ?? '删除失败');
           }
         } catch (error) {
           console.error('删除失败:', error);
@@ -549,14 +554,14 @@ export default function DataAssetList() {
         ]
       };
       const res = await editDataAssetDataBatch(editData);
-      if (res.code === 0 || res.code === undefined) {
+      if (res.code === '' && res.status === 200) {
         Message.success('修改成功');
         setModifyAssetModalVisible(false);
         setSelectedRowKeys([]);
         // 重新加载数据
         loadListData(currentPage, pageSize);
       } else {
-        Message.error('修改失败');
+        Message.error(res.message ?? '修改失败');
       }
     } catch (error) {
       console.error('修改失败:', error);
@@ -638,14 +643,14 @@ export default function DataAssetList() {
         modifyContext
       };
       const res = await editDataAssetDataBatch(editData);
-      if (res.code === 0 || res.code === undefined) {
+      if (res?.code === '' && res?.status === 200) {
         Message.success('修改成功');
         setEditSingleAssetModalVisible(false);
         setEditingRecord(null);
         // 重新加载数据
         loadListData(currentPage, pageSize);
       } else {
-        Message.error('修改失败');
+        Message.error(res?.message ?? '修改失败');
       }
     } catch (error) {
       console.error('修改失败:', error);

@@ -14,6 +14,7 @@ import './index.module.scss'; // 确保引入样式文件
 import { ReactSortable } from 'react-sortablejs';
 import DragIcon from '../../assets/drag-icon.svg';
 import styles from './index.module.scss';
+import { RESERVED_FIELD_ENS } from '../../utils/const';
 // const SortableAny = ReactSortable as any;
 
 export interface ColumnField {
@@ -23,6 +24,7 @@ export interface ColumnField {
   enumChecked: boolean; // 是否勾选枚举
   enumLoading: boolean;
   enumCount: number; // 枚举数
+  displaySort: number;
 }
 
 export interface ColumnSettingModalProps {
@@ -57,7 +59,10 @@ const ColumnSettingModal: React.FC<ColumnSettingModalProps> = ({
     if (externalFields) {
       setFields(externalFields);
       // 更新选中的字段ID列表
-      const allIds = externalFields.map((f) => f.id).filter(Boolean);
+      const allIds = externalFields
+        .filter((f) => f.displaySort > 0)
+        .map((f) => f.id)
+        .filter(Boolean);
       if (allIds.length > 0) {
         setSelectedIds(allIds);
       }
@@ -140,7 +145,10 @@ const ColumnSettingModal: React.FC<ColumnSettingModalProps> = ({
             rowSelection={{
               type: 'checkbox',
               selectedRowKeys: selectedIds,
-              onChange: (keys) => setSelectedIds(keys as string[])
+              onChange: (keys) => setSelectedIds(keys as string[]),
+              checkboxProps: (record: ColumnField) => ({
+                disabled: RESERVED_FIELD_ENS.has(record.id)
+              })
             }}
             rowClassName={(_, idx) =>
               idx === displayFields.length - 1
