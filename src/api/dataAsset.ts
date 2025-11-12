@@ -557,14 +557,17 @@ export async function editDataAssetDataBatch(params: EditDataAssetData) {
 }
 
 export async function deleteDataAssetDataBatch(params: { ids: string[] }) {
-  return Promise.resolve({
-    code: 0,
-    status: 200,
-    data: {},
-    message: 'success',
-    requestId: ''
-  });
-  // return await UAPI.RES.deleteDataAssetDataBatch({}).post(params).inRegion().do();
+  // return Promise.resolve({
+  //   code: 0,
+  //   status: 200,
+  //   data: {},
+  //   message: 'success',
+  //   requestId: ''
+  // });
+  return await UAPI.RES.deleteDataAssetDataBatch({})
+    .post(params)
+    .inRegion()
+    .do();
 }
 
 export async function getTagList(): Promise<ApiRes<BaseTag[]>> {

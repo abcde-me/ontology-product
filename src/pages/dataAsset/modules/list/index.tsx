@@ -483,6 +483,7 @@ export default function DataAssetList() {
   // 处理批量删除
   const handleBatchDelete = () => {
     if (selectedRowKeys.length === 0) return;
+    console.log('selectedRowKeys', selectedRowKeys);
 
     Modal.confirm({
       title: '确定删除资产吗?',
