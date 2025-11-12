@@ -23,9 +23,16 @@ function RagDetail() {
 
   useEffect(() => {
     const queryParams = new URLSearchParams(location.search);
+    const datasetId = queryParams.get('datasetId');
+    const documentId = queryParams.get('documentId');
+    // 保留 ragId 以支持旧的 URL 格式
     const ragId = queryParams.get('ragId');
-    if (ragId) {
-      initializeRagDetail(ragId);
+
+    if (datasetId && documentId) {
+      initializeRagDetail(datasetId, documentId);
+    } else if (ragId) {
+      // 兼容旧的 ragId 参数
+      initializeRagDetail(ragId, ragId);
     }
   }, [location, initializeRagDetail]);
 

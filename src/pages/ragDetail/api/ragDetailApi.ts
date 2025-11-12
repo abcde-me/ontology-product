@@ -17,12 +17,12 @@ import type {
   ApiCatalogNodeOld
 } from '../types';
 import { SegmentData } from '../utils/segmentData';
-import { TreeData, getTreeDataByRagId } from '../utils/treeData';
+import { getTreeDataByRagId } from '../utils/treeData';
 import { getSegmentDataByRagId } from '../utils/segmentDataByRagId';
-import { NewSegmentData_1001 } from '../utils/newSegmentData_1001';
-import { NewSegmentData_1002 } from '../utils/newSegmentData_1002';
-import { NewSegmentData_1003 } from '../utils/newSegmentData_1003';
-import { newTreeData } from '../utils/newTreeData';
+import {
+  ListKnowledgeDocumentCatalogs,
+  ListKnowledgeChunks
+} from '@/api/modules/rag';
 
 /**
  * 将新的后端 positions 数组转换为前端的 PDFCoordinate 数组
@@ -232,107 +232,149 @@ function transformCatalogNodeOld(apiNode: any): DirectoryNode {
 }
 
 /**
+ * 获取分块列表数据
+ * @param datasetId - 数据集ID
+ * @param documentId - 文档ID
+ * @returns 分块列表数据
+ */
+export async function fetchSegments(
+  datasetId: string,
+  documentId: string
+): Promise<Segment[]> {
+  try {
+    const response = await ListKnowledgeChunks({
+      datasetId,
+      documentId
+    });
+
+    // 检查响应格式
+    if (response && (response as any).data && (response as any).data.list) {
+      const segments = ((response as any).data.list as ApiSegment[]).map(
+        transformSegment
+      );
+      return segments;
+    }
+
+    return [];
+  } catch (error) {
+    console.error('Failed to fetch segments:', error);
+    return [];
+  }
+}
+
+/**
+ * 获取目录树数据
+ * @param datasetId - 数据集ID
+ * @param documentId - 文档ID
+ * @returns 目录树数据
+ */
+export async function fetchCatalog(
+  datasetId: string,
+  documentId: string
+): Promise<DirectoryNode[] | undefined> {
+  try {
+    const response = await ListKnowledgeDocumentCatalogs({
+      datasetId,
+      documentId
+    });
+
+    // 检查响应格式
+    if (response && (response as any).data && (response as any).data.catalogs) {
+      const rootNode = transformCatalogNode((response as any).data.catalogs);
+      return [rootNode];
+    }
+
+    return undefined;
+  } catch (error) {
+    console.error('Failed to fetch catalog:', error);
+    return undefined;
+  }
+}
+
+/**
  * 获取RAG详情数据
- * @param ragId - RAG ID
+ * @param datasetId - 数据集ID
+ * @param documentId - 文档ID
  * @returns RAG详情数据
  */
-export async function fetchRagDetail(ragId: string): Promise<RagDetailData> {
-  // 根据ragId获取对应的Mock数据
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      let segments: Segment[] = [];
-      let directory: DirectoryNode[] | undefined;
-      let fileName = '有为政府如何促进中国产业政策演进.pdf';
-      let filePath = '/知识库/政策研究';
-      let sceneType: 'pdf' | 'ppt' | 'excel' = 'pdf';
+export async function fetchRagDetail(
+  datasetId: string,
+  documentId: string
+): Promise<RagDetailData> {
+  // 根据 datasetId 和 documentId 获取对应的数据
+  let segments: Segment[] = [];
+  let directory: DirectoryNode[] | undefined;
+  let fileName = '有为政府如何促进中国产业政策演进.pdf';
+  let filePath = '/知识库/政策研究';
+  let sceneType: 'pdf' | 'ppt' | 'excel' = 'pdf';
 
-      // 使用新的数据格式（ragId=1001, 1002, 1003 使用新数据）
-      if (ragId === '1001' || ragId === '1002' || ragId === '1003') {
-        let newSegmentResponse;
-        let newTreeResponse;
+  // 使用新的数据格式（documentId=1001, 1002, 1003 使用新接口）
+  if (documentId === '1001' || documentId === '1002' || documentId === '1003') {
+    // 根据 documentId 设置文件名和路径
+    if (documentId === '1001') {
+      // 1001: 只有分段列表，无目录树
+      fileName = '纯文本分段示例（无目录树）.pdf';
+      filePath = '/知识库/示例文档';
+    } else if (documentId === '1002') {
+      // 1002: 有目录树 + 分段列表（纯文本）
+      fileName = '带目录树的文档（纯文本）.pdf';
+      filePath = '/知识库/结构化文档';
+    } else {
+      // 1003: 有目录树 + 分段列表（含图片和公式）
+      fileName = '图文混排文档（含图片和公式）.pdf';
+      filePath = '/知识库/多媒体文档';
+    }
 
-        // 根据 ragId 选择不同的数据源
-        if (ragId === '1001') {
-          // 1001: 只有分段列表，无目录树
-          newSegmentResponse = NewSegmentData_1001;
-          newTreeResponse = null;
-          fileName = '纯文本分段示例（无目录树）.pdf';
-          filePath = '/知识库/示例文档';
-        } else if (ragId === '1002') {
-          // 1002: 有目录树 + 分段列表（纯文本）
-          newSegmentResponse = NewSegmentData_1002;
-          newTreeResponse = newTreeData;
-          fileName = '带目录树的文档（纯文本）.pdf';
-          filePath = '/知识库/结构化文档';
-        } else {
-          // 1003: 有目录树 + 分段列表（含图片和公式）
-          newSegmentResponse = NewSegmentData_1003;
-          newTreeResponse = newTreeData;
-          fileName = '图文混排文档（含图片和公式）.pdf';
-          filePath = '/知识库/多媒体文档';
-        }
+    // 调用接口获取分段数据
+    segments = await fetchSegments(datasetId, documentId);
 
-        // 转换分段数据（添加类型断言）
-        segments = (newSegmentResponse.data.list as ApiSegment[]).map(
-          transformSegment
-        );
+    // 调用接口获取目录树数据
+    directory = await fetchCatalog(datasetId, documentId);
 
-        // 转换目录树数据（添加类型断言）
-        if (
-          newTreeResponse &&
-          newTreeResponse.data &&
-          newTreeResponse.data.catalogs
-        ) {
-          const rootNode = transformCatalogNode(newTreeResponse.data.catalogs);
-          directory = [rootNode];
-        }
+    sceneType = 'pdf';
+  } else {
+    // 使用旧的数据格式（其他 documentId）
+    const segmentResponse = getSegmentDataByRagId(documentId);
+    const treeResponse = getTreeDataByRagId(documentId);
 
-        sceneType = 'pdf';
-      } else {
-        // 使用旧的数据格式（其他 ragId）
-        const segmentResponse = getSegmentDataByRagId(ragId);
-        const treeResponse = getTreeDataByRagId(ragId);
+    // 转换分段数据（使用旧的转换函数）
+    segments = segmentResponse.data.data.map(transformSegmentOld);
 
-        // 转换分段数据（使用旧的转换函数）
-        segments = segmentResponse.data.data.map(transformSegmentOld);
+    // 转换目录树数据（使用旧的转换函数）
+    if (
+      treeResponse &&
+      treeResponse.data &&
+      treeResponse.data.catalog_content
+    ) {
+      const rootNode = transformCatalogNodeOld(
+        treeResponse.data.catalog_content
+      );
+      directory = [rootNode];
+    }
 
-        // 转换目录树数据（使用旧的转换函数）
-        if (
-          treeResponse &&
-          treeResponse.data &&
-          treeResponse.data.catalog_content
-        ) {
-          const rootNode = transformCatalogNodeOld(
-            treeResponse.data.catalog_content
-          );
-          directory = [rootNode];
-        }
+    // 根据 documentId 设置不同的文件名和场景类型
+    if (documentId === '1004') {
+      fileName = '2024年度工作总结.pptx';
+      filePath =
+        'https://view.officeapps.live.com/op/embed.aspx?src=https://scholar.harvard.edu/files/torman_personal/files/samplepptx.pptx';
+      sceneType = 'ppt';
+    } else if (documentId === '1005') {
+      fileName = '销售数据统计.xlsx';
+      filePath = '/知识库/数据表格';
+      sceneType = 'excel';
+    }
+  }
 
-        // 根据ragId设置不同的文件名和场景类型
-        if (ragId === '1004') {
-          fileName = '2024年度工作总结.pptx';
-          filePath =
-            'https://view.officeapps.live.com/op/embed.aspx?src=https://scholar.harvard.edu/files/torman_personal/files/samplepptx.pptx';
-          sceneType = 'ppt';
-        } else if (ragId === '1005') {
-          fileName = '销售数据统计.xlsx';
-          filePath = '/知识库/数据表格';
-          sceneType = 'excel';
-        }
-      }
+  const result: RagDetailData = {
+    ragId: documentId, // 使用 documentId 作为 ragId
+    fileName,
+    filePath,
+    sceneType,
+    segments,
+    directory
+  };
 
-      const result: RagDetailData = {
-        ragId,
-        fileName,
-        filePath,
-        sceneType,
-        segments,
-        directory
-      };
-
-      resolve(result);
-    }, 300);
-  });
+  return result;
 }
 
 /**

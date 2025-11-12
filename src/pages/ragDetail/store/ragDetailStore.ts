@@ -52,12 +52,12 @@ export const useRagDetailStore = create<RagDetailState & RagDetailActions>(
     segmentSearchText: '',
 
     // Actions
-    initializeRagDetail: async (ragId: string) => {
+    initializeRagDetail: async (datasetId: string, documentId: string) => {
       set({ loading: true, error: null });
       try {
-        const data = await fetchRagDetail(ragId);
+        const data = await fetchRagDetail(datasetId, documentId);
         set({
-          ragId,
+          ragId: documentId, // 使用 documentId 作为 ragId
           fileName: data.fileName,
           filePath: data.filePath,
           sceneType: data.sceneType,
