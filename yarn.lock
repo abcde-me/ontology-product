@@ -2945,71 +2945,71 @@
   dependencies:
     "@monaco-editor/loader" "^1.4.0"
 
-"@napi-rs/canvas-android-arm64@0.1.70":
-  version "0.1.70"
-  resolved "http://npm.cestc.cn/@napi-rs/canvas-android-arm64/download/@napi-rs/canvas-android-arm64-0.1.70.tgz#9b8eff01f5be1597becd77d4c1c6117c0eb3a164"
-  integrity sha1-m47/AfW+FZe+zXfUwcYRfA6zoWQ=
+"@napi-rs/canvas-android-arm64@0.1.81":
+  version "0.1.81"
+  resolved "http://npm.cestc.cn/@napi-rs/canvas-android-arm64/download/@napi-rs/canvas-android-arm64-0.1.81.tgz#ad1f3a433178b22e39fb3491e924107aeb457675"
+  integrity sha1-rR86QzF4si45+zSR6SQQeutFdnU=
 
-"@napi-rs/canvas-darwin-arm64@0.1.70":
-  version "0.1.70"
-  resolved "http://npm.cestc.cn/@napi-rs/canvas-darwin-arm64/download/@napi-rs/canvas-darwin-arm64-0.1.70.tgz#3bba057cec0780b8c24fe04ca20e530b08213320"
-  integrity sha1-O7oFfOwHgLjCT+BMog5TCwghMyA=
+"@napi-rs/canvas-darwin-arm64@0.1.81":
+  version "0.1.81"
+  resolved "http://npm.cestc.cn/@napi-rs/canvas-darwin-arm64/download/@napi-rs/canvas-darwin-arm64-0.1.81.tgz#4b669ba98fb3d396f3439d62228ab7527c44f086"
+  integrity sha1-S2abqY+z05bzQ51iIoq3UnxE8IY=
 
-"@napi-rs/canvas-darwin-x64@0.1.70":
-  version "0.1.70"
-  resolved "http://npm.cestc.cn/@napi-rs/canvas-darwin-x64/download/@napi-rs/canvas-darwin-x64-0.1.70.tgz#954dc89245a32a82bc6f24707f1521c14ba4ce58"
-  integrity sha1-lU3IkkWjKoK8byRwfxUhwUukzlg=
+"@napi-rs/canvas-darwin-x64@0.1.81":
+  version "0.1.81"
+  resolved "http://npm.cestc.cn/@napi-rs/canvas-darwin-x64/download/@napi-rs/canvas-darwin-x64-0.1.81.tgz#c5bb17f2223a9163731f979f4703a417cc92eae9"
+  integrity sha1-xbsX8iI6kWNzH5efRwOkF8yS6uk=
 
-"@napi-rs/canvas-linux-arm-gnueabihf@0.1.70":
-  version "0.1.70"
-  resolved "http://npm.cestc.cn/@napi-rs/canvas-linux-arm-gnueabihf/download/@napi-rs/canvas-linux-arm-gnueabihf-0.1.70.tgz#d48dafa8788d7d32c932bac01ed9224115574822"
-  integrity sha1-1I2vqHiNfTLJMrrAHtkiQRVXSCI=
+"@napi-rs/canvas-linux-arm-gnueabihf@0.1.81":
+  version "0.1.81"
+  resolved "http://npm.cestc.cn/@napi-rs/canvas-linux-arm-gnueabihf/download/@napi-rs/canvas-linux-arm-gnueabihf-0.1.81.tgz#5cbd11e47a9ef005e660d701425c57b7acdecce0"
+  integrity sha1-XL0R5Hqe8AXmYNcBQlxXt6zezOA=
 
-"@napi-rs/canvas-linux-arm64-gnu@0.1.70":
-  version "0.1.70"
-  resolved "http://npm.cestc.cn/@napi-rs/canvas-linux-arm64-gnu/download/@napi-rs/canvas-linux-arm64-gnu-0.1.70.tgz#522d3f1446941e3acec0bde344bc1711a60373ab"
-  integrity sha1-Ui0/FEaUHjrOwL3jRLwXEaYDc6s=
+"@napi-rs/canvas-linux-arm64-gnu@0.1.81":
+  version "0.1.81"
+  resolved "http://npm.cestc.cn/@napi-rs/canvas-linux-arm64-gnu/download/@napi-rs/canvas-linux-arm64-gnu-0.1.81.tgz#b9a8a9f24fdcd59156d7d62ce35808cbfc7f0099"
+  integrity sha1-uaip8k/c1ZFW19Ys41gIy/x/AJk=
 
-"@napi-rs/canvas-linux-arm64-musl@0.1.70":
-  version "0.1.70"
-  resolved "http://npm.cestc.cn/@napi-rs/canvas-linux-arm64-musl/download/@napi-rs/canvas-linux-arm64-musl-0.1.70.tgz#ab6a35f29c1b71ed42a395de3976406e1198c3c5"
-  integrity sha1-q2o18pwbce1Co5XeOXZAbhGYw8U=
+"@napi-rs/canvas-linux-arm64-musl@0.1.81":
+  version "0.1.81"
+  resolved "http://npm.cestc.cn/@napi-rs/canvas-linux-arm64-musl/download/@napi-rs/canvas-linux-arm64-musl-0.1.81.tgz#48aa694e2319616b8cfdfaa035deb339b034de68"
+  integrity sha1-SKppTiMZYWuM/fqgNd6zObA03mg=
 
-"@napi-rs/canvas-linux-riscv64-gnu@0.1.70":
-  version "0.1.70"
-  resolved "http://npm.cestc.cn/@napi-rs/canvas-linux-riscv64-gnu/download/@napi-rs/canvas-linux-riscv64-gnu-0.1.70.tgz#1ea23aa40f94009a334da745184d64f56ba26343"
-  integrity sha1-HqI6pA+UAJozTadFGE1k9WuiY0M=
+"@napi-rs/canvas-linux-riscv64-gnu@0.1.81":
+  version "0.1.81"
+  resolved "http://npm.cestc.cn/@napi-rs/canvas-linux-riscv64-gnu/download/@napi-rs/canvas-linux-riscv64-gnu-0.1.81.tgz#eb757d56ae613c6bcc6e2413c5713463d1788d2d"
+  integrity sha1-63V9Vq5hPGvMbiQTxXE0Y9F4jS0=
 
-"@napi-rs/canvas-linux-x64-gnu@0.1.70":
-  version "0.1.70"
-  resolved "http://npm.cestc.cn/@napi-rs/canvas-linux-x64-gnu/download/@napi-rs/canvas-linux-x64-gnu-0.1.70.tgz#ac16dd88895aa81323cca015bde2f0432c7f361c"
-  integrity sha1-rBbdiIlaqBMjzKAVveLwQyx/Nhw=
+"@napi-rs/canvas-linux-x64-gnu@0.1.81":
+  version "0.1.81"
+  resolved "http://npm.cestc.cn/@napi-rs/canvas-linux-x64-gnu/download/@napi-rs/canvas-linux-x64-gnu-0.1.81.tgz#e9384ccc5a8dc74fa4b4365ccf40b6cfd9ec180d"
+  integrity sha1-6ThMzFqNx0+ktDZcz0C2z9nsGA0=
 
-"@napi-rs/canvas-linux-x64-musl@0.1.70":
-  version "0.1.70"
-  resolved "http://npm.cestc.cn/@napi-rs/canvas-linux-x64-musl/download/@napi-rs/canvas-linux-x64-musl-0.1.70.tgz#d85c2f435f5f1c59139b5a7e12fcdfcedf8e6e70"
-  integrity sha1-2FwvQ19fHFkTm1p+Evzfzt+ObnA=
+"@napi-rs/canvas-linux-x64-musl@0.1.81":
+  version "0.1.81"
+  resolved "http://npm.cestc.cn/@napi-rs/canvas-linux-x64-musl/download/@napi-rs/canvas-linux-x64-musl-0.1.81.tgz#07c004f01dc430201f1725e585fe8ee871532450"
+  integrity sha1-B8AE8B3EMCAfFyXlhf6O6HFTJFA=
 
-"@napi-rs/canvas-win32-x64-msvc@0.1.70":
-  version "0.1.70"
-  resolved "http://npm.cestc.cn/@napi-rs/canvas-win32-x64-msvc/download/@napi-rs/canvas-win32-x64-msvc-0.1.70.tgz#b66c858f39a605846a4951305afe6b12ae078238"
-  integrity sha1-tmyFjzmmBYRqSVEwWv5rEq4Hgjg=
+"@napi-rs/canvas-win32-x64-msvc@0.1.81":
+  version "0.1.81"
+  resolved "http://npm.cestc.cn/@napi-rs/canvas-win32-x64-msvc/download/@napi-rs/canvas-win32-x64-msvc-0.1.81.tgz#e76784880f26d48f4863d73c9891c53f161ffe6e"
+  integrity sha1-52eEiA8m1I9IY9c8mJHFPxYf/m4=
 
 "@napi-rs/canvas@^0.1.80":
-  version "0.1.70"
-  resolved "http://npm.cestc.cn/@napi-rs/canvas/download/@napi-rs/canvas-0.1.70.tgz#b8624eb6c4142d171d81b604f9822ead8144cc1a"
-  integrity sha1-uGJOtsQULRcdgbYE+YIurYFEzBo=
+  version "0.1.81"
+  resolved "http://npm.cestc.cn/@napi-rs/canvas/download/@napi-rs/canvas-0.1.81.tgz#4cb1556171a64480e52d2a3766aa5413bfc4a9b1"
+  integrity sha1-TLFVYXGmRIDlLSo3ZqpUE7/EqbE=
   optionalDependencies:
-    "@napi-rs/canvas-android-arm64" "0.1.70"
-    "@napi-rs/canvas-darwin-arm64" "0.1.70"
-    "@napi-rs/canvas-darwin-x64" "0.1.70"
-    "@napi-rs/canvas-linux-arm-gnueabihf" "0.1.70"
-    "@napi-rs/canvas-linux-arm64-gnu" "0.1.70"
-    "@napi-rs/canvas-linux-arm64-musl" "0.1.70"
-    "@napi-rs/canvas-linux-riscv64-gnu" "0.1.70"
-    "@napi-rs/canvas-linux-x64-gnu" "0.1.70"
-    "@napi-rs/canvas-linux-x64-musl" "0.1.70"
-    "@napi-rs/canvas-win32-x64-msvc" "0.1.70"
+    "@napi-rs/canvas-android-arm64" "0.1.81"
+    "@napi-rs/canvas-darwin-arm64" "0.1.81"
+    "@napi-rs/canvas-darwin-x64" "0.1.81"
+    "@napi-rs/canvas-linux-arm-gnueabihf" "0.1.81"
+    "@napi-rs/canvas-linux-arm64-gnu" "0.1.81"
+    "@napi-rs/canvas-linux-arm64-musl" "0.1.81"
+    "@napi-rs/canvas-linux-riscv64-gnu" "0.1.81"
+    "@napi-rs/canvas-linux-x64-gnu" "0.1.81"
+    "@napi-rs/canvas-linux-x64-musl" "0.1.81"
+    "@napi-rs/canvas-win32-x64-msvc" "0.1.81"
 
 "@nextjournal/lang-clojure@^1.0.0":
   version "1.0.0"
