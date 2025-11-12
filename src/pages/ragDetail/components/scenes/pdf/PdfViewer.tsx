@@ -32,30 +32,38 @@ const PdfViewer: React.FC<PdfViewerProps> = ({
   useEffect(() => {
     const loadPdf = async () => {
       if (useMockBinaryData) {
-        // 使用mock二进制数据
+        // 使用mock二进制数据（直接加载，不通过URL）
         setLoading(true);
+        setPdfPath(''); // 清空路径
         try {
           const binaryData = await mockApiGetPdfBinaryData(
             'mock-dataset',
             'mock-document'
           );
           setPdfBinaryData(binaryData);
-          console.log('Loaded mock PDF binary data');
+          console.log('✅ 使用Mock二进制数据加载PDF');
         } catch (error) {
           console.error('Error loading mock PDF binary data:', error);
         } finally {
           setLoading(false);
         }
+      } else if (propPdfData) {
+        // 使用传入的二进制数据
+        setPdfPath(''); // 清空路径
+        setPdfBinaryData(propPdfData);
+        console.log('✅ 使用传入的二进制数据加载PDF');
       } else if (filePath) {
         // 使用URL路径
+        setPdfBinaryData(undefined); // 清空二进制数据
         setPdfPath(filePath);
-        console.log('Using PDF path:', filePath);
-      } else if (!propPdfData) {
+        console.log('✅ 使用URL路径加载PDF:', filePath);
+      } else {
         // 默认使用在线PDF文件进行测试
+        setPdfBinaryData(undefined); // 清空二进制数据
         const samplePdf =
           'https://raw.githubusercontent.com/mozilla/pdf.js/ba2edeae/web/compressed.tracemonkey-pldi-09.pdf';
         setPdfPath(samplePdf);
-        console.log('Using sample PDF:', samplePdf);
+        console.log('✅ 使用默认在线PDF:', samplePdf);
       }
     };
 
