@@ -208,3 +208,15 @@ export interface EditDataAssetData {
     fieldValue: string;
   }[];
 }
+
+export interface TagValueItem {
+  id: string;
+  tagValue: string;
+}
+
+export interface BaseTag {
+  id: string;
+  name: string;
+  description: string;
+  valueList: TagValueItem[];
+}
