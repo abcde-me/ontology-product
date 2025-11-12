@@ -26,6 +26,15 @@ const FormItem = Form.Item;
 const Row = Grid.Row;
 const Col = Grid.Col;
 
+const composeDataSourceKey = (
+  type?: string,
+  databaseName?: string,
+  tableName?: string
+) => `${type ?? ''}::${databaseName ?? ''}::${tableName ?? ''}`;
+
+const getDataSourceKey = (item: ListDataAssetSourceResItem) =>
+  composeDataSourceKey(item.type, item.databaseName, item.tableName);
+
 interface Step2FieldMappingProps {
   mappings: FieldMapping[];
   setMappings: React.Dispatch<React.SetStateAction<FieldMapping[]>>;
@@ -104,34 +113,24 @@ export default function Step2FieldMapping({
 
   // 根据字段类型和数据来源类型获取可用的映射选项
   const getMappingOptions = useCallback(
-    (fieldType: string | undefined, sourceType: string) => {
-      if (
-        !fieldType ||
-        !findDataAssetMappingData ||
-        findDataAssetMappingData.length === 0
-      ) {
+    (fieldType: string | undefined, sourceKey: string) => {
+      if (!fieldType) {
         return [];
       }
 
-      // 从匹配的字段中提取指定数据来源类型的映射选项
-      const options: ListDataAssetSourceResItem['fields'] = [];
-      findDataAssetMappingData.forEach((field) => {
-        if (
-          field.fields &&
-          Array.isArray(field.fields) &&
-          field.name === sourceType
-        ) {
-          field.fields.forEach((field) => {
-            if (field.type === fieldType) {
-              options.push(field);
-            }
-          });
-        }
-      });
+      const sourceInfo =
+        dataSources[sourceKey] ||
+        findDataAssetMappingData.find(
+          (item) => getDataSourceKey(item) === sourceKey
+        );
 
-      return options;
+      if (!sourceInfo || !Array.isArray(sourceInfo.fields)) {
+        return [];
+      }
+
+      return sourceInfo.fields.filter((field) => field.type === fieldType);
     },
-    [findDataAssetMappingData]
+    [dataSources, findDataAssetMappingData]
   );
 
   // Table列定义
@@ -163,13 +162,15 @@ export default function Step2FieldMapping({
 
     // 根据选中的数据来源动态生成列
     // 直接遍历 dataSources 的键（这些键就是接口返回的类型）
-    Object.keys(dataSources).forEach((sourceType) => {
+    Object.keys(dataSources).forEach((sourceKey) => {
       // 检查该数据来源是否被选中（存在即选中）
-      if (dataSources[sourceType]) {
-        const columnTitle = sourceType;
+      const sourceInfo = dataSources[sourceKey];
+      console.log('11111', sourceInfo);
+      if (sourceInfo) {
+        const columnTitle = sourceInfo.name || sourceKey;
         cols.push({
           title: columnTitle,
-          dataIndex: sourceType,
+          dataIndex: sourceKey,
           width: 200,
           render: (_: any, record: FieldMapping, index: number) => {
             // 根据当前行的字段类型获取映射选项
@@ -178,7 +179,10 @@ export default function Step2FieldMapping({
               (field, idx) => idx === record.sequence - 1
             );
             const fieldType = metadataField?.type;
-            const options = getMappingOptions(fieldType, sourceType);
+            const options = getMappingOptions(fieldType, sourceKey);
+
+            console.log('sdoisiduisudisu', record, metadataField);
+
             const disableMappingForThisRow =
               metadataField?.nameEn === 'tags' ||
               metadataField?.nameEn === 'data_source';
@@ -186,10 +190,10 @@ export default function Step2FieldMapping({
             return (
               <Select
                 placeholder="请选择"
-                value={record[sourceType]}
+                value={metadataField?.mapping?.[0]?.fieldName || ''}
                 disabled={disableMappingForThisRow}
                 onChange={(value) =>
-                  handleUpdateMapping(record.id, { [sourceType]: value })
+                  handleUpdateMapping(record.id, { [sourceKey]: value })
                 }
               >
                 {options.map((option) => (
@@ -263,12 +267,13 @@ export default function Step2FieldMapping({
         })),
         source: Object.keys(dataSources).map((key) => {
           const fromAll =
-            findDataAssetMappingData.find((s) => s.name === key) ||
-            dataSources[key];
+            dataSources[key] ||
+            findDataAssetMappingData.find((s) => getDataSourceKey(s) === key);
           return {
             type: fromAll?.type || key,
             name: fromAll?.name || key,
             tableName: fromAll?.tableName || '',
+            databaseName: fromAll?.databaseName || '',
             fields:
               fromAll?.fields?.map((ff) => ({
                 name: ff.name,
@@ -291,9 +296,9 @@ export default function Step2FieldMapping({
           nameZh: mappings[idx]?.nameZh ?? field.nameZh
         };
         // 初始化所有选中的数据来源类型字段
-        Object.keys(dataSources).forEach((sourceType) => {
-          if (dataSources[sourceType]) {
-            row[sourceType] = '';
+        Object.keys(dataSources).forEach((sourceKey) => {
+          if (dataSources[sourceKey]) {
+            row[sourceKey] = '';
           }
         });
         return row;
@@ -306,9 +311,13 @@ export default function Step2FieldMapping({
         );
         if (rowIdx < 0) return;
         item.mapping?.forEach((m) => {
-          // 使用数据来源类型作为列 key，值为 feildName
-          if (m?.type) {
-            (nextMappings[rowIdx] as any)[m.type] = m.feildName || '';
+          const targetKey = composeDataSourceKey(
+            m?.type,
+            m?.databaseName,
+            m?.tableName
+          );
+          if (targetKey && targetKey in dataSources) {
+            (nextMappings[rowIdx] as any)[targetKey] = m?.feildName || '';
           }
         });
       });
@@ -364,9 +373,9 @@ export default function Step2FieldMapping({
       nameZh: ''
     };
     // 动态初始化所有选中的数据来源类型字段
-    Object.keys(dataSources).forEach((sourceType) => {
-      if (dataSources[sourceType]) {
-        newMapping[sourceType] = '';
+    Object.keys(dataSources).forEach((sourceKey) => {
+      if (dataSources[sourceKey]) {
+        newMapping[sourceKey] = '';
       }
     });
     setMappings([...mappings, newMapping]);
@@ -440,8 +449,10 @@ export default function Step2FieldMapping({
 
           // 优先从全量来源列表中查找（包含 tableName、fields 等）
           const sourceInfo =
-            findDataAssetMappingData.find((s) => s.name === sourceKey) ||
-            dataSources[sourceKey];
+            dataSources[sourceKey] ||
+            findDataAssetMappingData.find(
+              (s) => getDataSourceKey(s) === sourceKey
+            );
           if (!sourceInfo) {
             return acc;
           }

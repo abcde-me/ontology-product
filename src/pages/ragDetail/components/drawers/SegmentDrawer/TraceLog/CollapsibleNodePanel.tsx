@@ -18,7 +18,7 @@ interface CollapsibleNodePanelProps {
 const CollapsibleNodePanel: React.FC<CollapsibleNodePanelProps> = ({
   node
 }) => {
-  const [isExpanded, setIsExpanded] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(true);
   const [hoveredCopyButton, setHoveredCopyButton] = useState<
     'input' | 'output' | null
   >(null);

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useRagDetailStore } from '../../../store/ragDetailStore';
 import SegmentList from '../../shared/SegmentList';
 import DirectoryTree from '../../shared/DirectoryTree';
@@ -22,7 +22,6 @@ const PdfSceneContent: React.FC<PdfSceneContentProps> = ({
   loading
 }) => {
   const { segments, directory, fileName, filePath } = useRagDetailStore();
-  const [useMockBinaryData, setUseMockBinaryData] = useState(false);
 
   // 判断是否有目录树数据
   const hasDirectory = directory && directory.length > 0;
@@ -31,11 +30,6 @@ const PdfSceneContent: React.FC<PdfSceneContentProps> = ({
   const hasImages = segments.some(
     (seg: any) => seg.images && seg.images.length > 0
   );
-
-  const handleToggleMockBinaryData = (checked: boolean) => {
-    setUseMockBinaryData(checked);
-    console.log('Toggle mock binary data:', checked);
-  };
 
   if (loading) {
     return (
@@ -51,11 +45,7 @@ const PdfSceneContent: React.FC<PdfSceneContentProps> = ({
   return (
     <div className="flex h-full flex-col" style={{ minHeight: 0 }}>
       {/* 顶部：文件名和操作按钮 */}
-      <ContentHeader
-        fileName={fileName}
-        useMockBinaryData={useMockBinaryData}
-        onToggleMockBinaryData={handleToggleMockBinaryData}
-      />
+      <ContentHeader fileName={fileName} />
 
       {/* 下方：内容区域 */}
       <div className="flex flex-1 overflow-hidden" style={{ minHeight: 0 }}>
@@ -68,7 +58,7 @@ const PdfSceneContent: React.FC<PdfSceneContentProps> = ({
             fileName={fileName}
             filePath={filePath}
             hideHeader
-            useMockBinaryData={useMockBinaryData}
+            useMockBinaryData={true}
           />
         </div>
         {/* PDF和右侧内容之间的分隔线 */}

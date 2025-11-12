@@ -56,11 +56,17 @@ const PdfRenderer: React.FC<PdfRendererProps> = ({
 
           if (pdfData) {
             // 使用二进制数据加载PDF
+            console.log(
+              '📄 使用二进制数据加载PDF, 大小:',
+              pdfData.byteLength,
+              'bytes'
+            );
             const blob = new Blob([pdfData], { type: 'application/pdf' });
             const docURL = URL.createObjectURL(blob);
             loadingTask = pdfjsLib.getDocument(docURL);
           } else if (filePath) {
             // 使用URL加载PDF
+            console.log('📄 使用URL加载PDF:', filePath);
             loadingTask = pdfjsLib.getDocument(filePath);
           }
 
@@ -69,10 +75,11 @@ const PdfRenderer: React.FC<PdfRendererProps> = ({
             pdfDocRef.current = pdf;
             setTotalPages(pdf.numPages);
             originalImagesRef.current = {};
+            console.log('✅ PDF加载成功! 总页数:', pdf.numPages);
           }
           setLoading(false);
         } catch (error) {
-          console.error('Error loading PDF:', error);
+          console.error('❌ Error loading PDF:', error);
           setTotalPages(0);
           setLoading(false);
         }
