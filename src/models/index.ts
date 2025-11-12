@@ -341,7 +341,7 @@ export class Model<
     const needDispatchRef = useRef(false);
     useEffect(() => {
       unmountRef.current = false;
-      funcRef.current(this, false);
+      funcRef.current?.(this, false);
       const unsubscribe = this.subscribeWithKeys((__, silent) => {
         if (!unmountRef.current) {
           needDispatchRef.current = true;
@@ -358,7 +358,7 @@ export class Model<
     }, []);
     useEffect(() => {
       if (needDispatchRef.current) {
-        funcRef.current(this, false);
+        funcRef.current?.(this, false);
         needDispatchRef.current = false;
       }
     }, [this._dispatchSignal, funcRef]);
