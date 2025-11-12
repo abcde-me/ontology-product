@@ -37,7 +37,7 @@ const TableSegmentCard: React.FC<TableSegmentCardProps> = ({
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       onClick={() => {
-        if (editingSegmentId === segment.id) {
+        if (isEditing) {
           return;
         }
         selectSegment(segment.id);
@@ -58,13 +58,27 @@ const TableSegmentCard: React.FC<TableSegmentCardProps> = ({
       {/* 表格预览 */}
       {tableData && (
         <div className="mb-3 overflow-x-auto bg-white">
-          <table className="w-full border-collapse">
+          <table
+            className={`border-collapse ${
+              tableData.headers.length >= 4 ? '' : 'w-full'
+            }`}
+            style={
+              tableData.headers.length >= 4
+                ? { tableLayout: 'fixed', width: 'auto' }
+                : { tableLayout: 'auto' }
+            }
+          >
             <thead>
               <tr>
                 {tableData.headers.map((header, index) => (
                   <th
                     key={index}
                     className="border border-[#E2E8F0] px-4 py-2 text-left text-sm font-semibold text-[#1E293B]"
+                    style={
+                      tableData.headers.length >= 4
+                        ? { width: '200px', minWidth: '200px' }
+                        : {}
+                    }
                   >
                     {isEditing ? (
                       <Input
@@ -87,6 +101,11 @@ const TableSegmentCard: React.FC<TableSegmentCardProps> = ({
                     <td
                       key={colIndex}
                       className="border bg-white px-4 py-2 text-sm"
+                      style={
+                        tableData.headers.length >= 4
+                          ? { width: '200px', minWidth: '200px' }
+                          : {}
+                      }
                     >
                       {isEditing ? (
                         <Input
