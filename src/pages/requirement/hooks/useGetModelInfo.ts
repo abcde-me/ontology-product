@@ -50,8 +50,9 @@ export const useGetModelLabelList = (
           return [];
         }
         return res.data.label_list.map((item) => ({
-          label: item.label_name,
-          value: item.label_mapping
+          label: item.label_mapping,
+          value: item.label_mapping,
+          ...item
         }));
       }
     }
