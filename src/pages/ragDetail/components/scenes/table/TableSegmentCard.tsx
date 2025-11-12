@@ -3,7 +3,8 @@
  * 表格分段卡片
  */
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
+import { useClickAway } from 'ahooks';
 import { TableSegment } from '../../../types';
 import { useRagDetailStore } from '../../../store/ragDetailStore';
 import SegmentCardActions from '../../shared/SegmentCardActions';
@@ -18,12 +19,23 @@ const TableSegmentCard: React.FC<TableSegmentCardProps> = ({
   segment,
   isSelected
 }) => {
-  const { selectSegment, editingSegmentId } = useRagDetailStore();
+  const { selectSegment, editingSegmentId, cancelEditingSegment } =
+    useRagDetailStore();
   const [isHovered, setIsHovered] = useState(false);
   const isEditing = editingSegmentId === segment.id;
   const tableData = segment.tableData;
+  const cardRef = useRef<HTMLDivElement>(null);
+
+  // 点击外部区域取消编辑
+  useClickAway(() => {
+    if (isEditing) {
+      cancelEditingSegment();
+    }
+  }, cardRef);
+
   return (
     <div
+      ref={cardRef}
       className={`
         cursor-pointer rounded-lg border-[1px] px-3 transition-all duration-200
         ${
