@@ -6,6 +6,8 @@
 import React, { useState } from 'react';
 import { TableSegment } from '../../../types';
 import { useRagDetailStore } from '../../../store/ragDetailStore';
+import SegmentCardActions from '../../shared/SegmentCardActions';
+import { Input } from '@arco-design/web-react';
 
 interface TableSegmentCardProps {
   segment: TableSegment;
@@ -16,15 +18,14 @@ const TableSegmentCard: React.FC<TableSegmentCardProps> = ({
   segment,
   isSelected
 }) => {
-  const { selectSegment } = useRagDetailStore();
+  const { selectSegment, editingSegmentId } = useRagDetailStore();
   const [isHovered, setIsHovered] = useState(false);
-
+  const isEditing = editingSegmentId === segment.id;
   const tableData = segment.tableData;
-
   return (
     <div
       className={`
-        cursor-pointer rounded-lg border-2 transition-all duration-200
+        cursor-pointer rounded-lg border-[1px] px-3 transition-all duration-200
         ${
           isSelected
             ? 'border-[#007DFA] bg-blue-50'
@@ -35,61 +36,76 @@ const TableSegmentCard: React.FC<TableSegmentCardProps> = ({
       `}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      onClick={() => selectSegment(segment.id)}
+      onClick={() => {
+        if (editingSegmentId === segment.id) {
+          return;
+        }
+        selectSegment(segment.id);
+      }}
     >
       {/* 卡片头部 */}
-      <div className="flex items-center justify-between border-b border-gray-200 px-4 py-3">
-        <div className="flex items-center gap-3">
-          <span className="text-sm font-medium text-gray-900">
-            {segment.content}
-          </span>
+      <div className="flex items-center justify-between px-3 pb-[7px] pt-3">
+        <div className="flex-1">
+          <div className="text-xs text-gray-500">
+            字符数: {segment.charCount} 分段数: {segment.segmentIndex}/100
+          </div>
         </div>
-        <span className="text-xs text-gray-400">
-          {tableData?.rows.length || 0} 行
-        </span>
+        {(isSelected || isHovered) && (
+          <SegmentCardActions segment={segment} isEditing={isEditing} />
+        )}
       </div>
 
       {/* 表格预览 */}
       {tableData && (
-        <div className="max-h-[300px] overflow-x-auto p-3">
-          <table className="w-full border-collapse text-xs">
+        <div className="mb-3 overflow-x-auto bg-white">
+          <table className="w-full border-collapse">
             <thead>
-              <tr className="border-b border-gray-200 bg-gray-50">
+              <tr>
                 {tableData.headers.map((header, index) => (
                   <th
                     key={index}
-                    className="whitespace-nowrap border-r border-gray-200 px-2 py-1 text-left font-semibold text-gray-900 last:border-r-0"
+                    className="border border-[#E2E8F0] px-4 py-2 text-left text-sm font-semibold text-[#1E293B]"
                   >
-                    {header}
+                    {isEditing ? (
+                      <Input
+                        value={header}
+                        //  onChange={(value) => handleHeaderChange(index, value)}
+                        size="small"
+                        className="w-full"
+                      />
+                    ) : (
+                      header
+                    )}
                   </th>
                 ))}
               </tr>
             </thead>
             <tbody>
-              {tableData.rows.slice(0, 3).map((row, rowIndex) => (
-                <tr
-                  key={rowIndex}
-                  className={`border-b border-gray-200 ${
-                    rowIndex % 2 === 0 ? 'bg-white' : 'bg-gray-50'
-                  }`}
-                >
+              {tableData.rows.map((row, rowIndex) => (
+                <tr key={rowIndex}>
                   {tableData.headers.map((header, colIndex) => (
                     <td
                       key={colIndex}
-                      className="truncate border-r border-gray-200 px-2 py-1 text-gray-700 last:border-r-0"
+                      className="border bg-white px-4 py-2 text-sm"
                     >
-                      {row[header] || '-'}
+                      {isEditing ? (
+                        <Input
+                          value={row[header]}
+                          //  onChange={(value) =>
+                          //    handleCellChange(rowIndex, header, value)
+                          //  }
+                          size="small"
+                          className="w-full"
+                        />
+                      ) : (
+                        <span className="text-gray-900">{row[header]}</span>
+                      )}
                     </td>
                   ))}
                 </tr>
               ))}
             </tbody>
           </table>
-          {tableData.rows.length > 3 && (
-            <div className="mt-2 text-center text-xs text-gray-500">
-              ... 还有 {tableData.rows.length - 3} 行
-            </div>
-          )}
         </div>
       )}
     </div>
