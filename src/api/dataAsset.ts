@@ -261,8 +261,13 @@ export async function listDataAssetData(
 }
 
 // 修改数据资产
-export async function editDataAsset(params: CreateDataAssetAndMappingReq) {
-  return await UAPI.RES.editDataAsset({}).post(params).inRegion().do();
+export async function editDataAssetAndMapping(
+  params: CreateDataAssetAndMappingReq
+) {
+  return await UAPI.RES.editDataAssetAndMapping({})
+    .post(params)
+    .inRegion()
+    .do();
 }
 
 // 删除数据资产
