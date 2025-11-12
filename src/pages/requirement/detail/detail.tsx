@@ -1375,9 +1375,13 @@ export default function RequirementDetail() {
                                               [labelIndex, 'label_mapping'],
                                               val
                                             );
+                                            const curShape =
+                                              modelLabelList.find(
+                                                (item) => item.value === val
+                                              )?.label_shape;
                                             // 使用 LABEL_MAPPING 将字符串形状转换为数字
                                             const mappedShape =
-                                              LABEL_MAPPING[val];
+                                              LABEL_MAPPING[curShape];
 
                                             if (mappedShape !== undefined) {
                                               const shapeFieldName = `label_shape_${type === 'detail' ? item?.id : item?.label_id}`;
