@@ -29,6 +29,7 @@ import {
 } from '@/api/datasetManagement';
 import { debounce } from 'lodash-es';
 import getFileIcon from '../file-icon';
+import { SceneType } from '@/pages/datasetManagement';
 
 interface Dataset {
   key?: string;
@@ -60,6 +61,7 @@ interface DatasetFormProps {
   visible: boolean;
   onSubmit: (formData: any) => Promise<void>;
   onCancel: () => void;
+  sceneOption: SceneType[];
 }
 
 const FormItem = Form.Item;
@@ -181,7 +183,7 @@ const DatasetForm = React.forwardRef<
   { resetForm: () => void },
   DatasetFormProps
 >((props, ref) => {
-  const { visible, onSubmit, onCancel } = props;
+  const { visible, onSubmit, onCancel, sceneOption } = props;
   const [form] = Form.useForm();
   const [dataSource, setDataSource] = useState<'volume' | 'connector'>(
     'volume'
@@ -220,17 +222,8 @@ const DatasetForm = React.forwardRef<
   const [total, setTotal] = useState(10);
   // 使用 useRef 来标记是否是首次渲染
   const isInitialMount = useRef(true);
-  //场景分类选项
-  const sceneTypeOptions = [
-    {
-      label: 'nlp',
-      value: 'nlp'
-    },
-    {
-      label: 'gan',
-      value: 'gan'
-    }
-  ];
+  // 场景分类
+  const [sceneType, setSceneType] = useState<string>('');
 
   useImperativeHandle(ref, () => {
     const resetForm = () => {
@@ -787,7 +780,27 @@ const DatasetForm = React.forwardRef<
             field="sceneType"
             rules={[{ required: true, message: '请选择场景分类' }]}
           >
-            <Select placeholder="请选择场景分类" options={sceneTypeOptions} />
+            <Select
+              placeholder="请选择场景分类"
+              renderFormat={(option) => {
+                return option?.child?.props?.children?.props?.children[0]?.props
+                  ?.children;
+              }}
+            >
+              {sceneOption.map((item) => (
+                <Select.Option key={item.id} value={item.id}>
+                  <div className="flex flex-col">
+                    <div className="text-[14px] leading-[22px]">
+                      {item.name}
+                    </div>
+                    <EllipsisPopover
+                      className="text-[14px] leading-[22px] text-[#6E7B8D]"
+                      value={item.description}
+                    />
+                  </div>
+                </Select.Option>
+              ))}
+            </Select>
           </FormItem>
 
           {dataSource === 'volume' && (
