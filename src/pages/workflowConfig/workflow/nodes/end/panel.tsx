@@ -98,7 +98,7 @@ const Panel: FC<NodePanelProps<EndNodeType>> = ({ id, data }) => {
                 if (!/^[a-zA-Z0-9_]+$/.test(value)) {
                   return callback('数据集名称只能包含字母、数字和下划线');
                 }
-                // 长度校验到达50个字符时，校验通过
+                // 长度校验到达50个字符时无法继续输入，校验通过
                 if (value?.length <= 50) {
                   return callback();
                 } else {
@@ -110,6 +110,7 @@ const Panel: FC<NodePanelProps<EndNodeType>> = ({ id, data }) => {
           style={{ margin: 0, paddingBottom: 24 }}
         >
           <Input
+            maxLength={50}
             value={knowledgeBaseName}
             placeholder="请输入数据集名称"
             style={{ width: '100%' }}
