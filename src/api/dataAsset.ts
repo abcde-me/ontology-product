@@ -535,14 +535,17 @@ export async function findDataAssetFieldsDisplay(
 export async function getDataAssetTableDistinctFieldCount(params: {
   fieldEnName: string;
 }): Promise<ApiRes<number>> {
-  return Promise.resolve({
-    code: 0,
-    status: 200,
-    data: 10,
-    message: 'success',
-    requestId: ''
-  });
-  // return await UAPI.RES.getDataAssetTableDistinctFieldCount({}).post(params).inRegion().do();
+  // return Promise.resolve({
+  //   code: 0,
+  //   status: 200,
+  //   data: 10,
+  //   message: 'success',
+  //   requestId: ''
+  // });
+  return await UAPI.RES.getDataAssetTableDistinctFieldCount({})
+    .post(params)
+    .inRegion()
+    .do();
 }
 
 export async function editDataAssetDataBatch(params: EditDataAssetData) {
@@ -599,4 +602,17 @@ export async function getTagList(): Promise<ApiRes<BaseTag[]>> {
   //   requestId: ''
   // });
   return await UAPI.RES.listBaseTags({}).post({}).inRegion().do();
+}
+
+export async function editDataAssetDataTagsBatch(params: {
+  Ids: string[];
+  tags: {
+    id: string;
+    value: string;
+  }[];
+}): Promise<ApiRes<any>> {
+  return await UAPI.RES.editDataAssetDataTagsBatch({})
+    .post(params)
+    .inRegion()
+    .do();
 }

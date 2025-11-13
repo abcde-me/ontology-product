@@ -11,14 +11,19 @@ import {
 import { BaseTag, TagValueItem } from '@/types/dataAssetApi';
 
 interface ModifyTagsModalProps {
+  selectedRowKeys: string[];
   visible: boolean;
   tagOptions: BaseTag[];
   initialTags?: TagValueItem[];
   onCancel: () => void;
-  onConfirm: (tags: string[]) => void;
+  onConfirm: (
+    tags: { label: string; value: string }[],
+    selectedRowKeys: string[]
+  ) => void;
 }
 
 const ModifyTagsModal: React.FC<ModifyTagsModalProps> = ({
+  selectedRowKeys,
   visible,
   tagOptions,
   initialTags = [],
@@ -57,7 +62,7 @@ const ModifyTagsModal: React.FC<ModifyTagsModalProps> = ({
   const handleConfirm = async () => {
     try {
       const values = await form.validate();
-      onConfirm(values.tags || []);
+      onConfirm(values.tags || [], selectedRowKeys);
     } catch (error) {
       // 验证失败，不做任何操作
     }
