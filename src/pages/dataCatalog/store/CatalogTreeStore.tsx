@@ -21,6 +21,10 @@ interface BaseTreeData {
   children?: {
     db_item?: BaseTreeData[];
   };
+  extendsObj?: {
+    db_name?: string;
+    table_name?: string;
+  };
 }
 
 interface ITreeData extends BaseTreeData {
@@ -46,6 +50,7 @@ export interface CatalogTreeState {
   inputRef: React.RefObject<RefInputType>;
   selectedPath: string;
   loading?: boolean;
+  extendsObj: Record<string, unknown>;
 }
 
 interface Effects {
@@ -72,7 +77,8 @@ export class CatalogTreeStore extends Model<CatalogTreeState, Effects> {
         selectedNodeType: '', // 初始化选中节点类型
         selectedParentId: '', // 初始化选中节点的父节点ID
         inputRef: React.createRef<RefInputType>(),
-        selectedPath: ''
+        selectedPath: '',
+        extendsObj: {}
       },
       effects: {
         fetchData: createAsyncEffect(
@@ -159,6 +165,7 @@ export class CatalogTreeStore extends Model<CatalogTreeState, Effects> {
         treeData: cacheTreeData,
         rawTreeData: cacheTreeData,
         expandedKeys: defaultExpand,
+        extendsObj: selectedNode?.extends ?? {},
         selectedKey: selectedNode?.id ? String(selectedNode.id) : '', // 存储实际ID
         selectedTreeKey: selectedNode?.key || '', // 存储完整的树节点key
         selectedPath: selectedNode?.fullPath || ''

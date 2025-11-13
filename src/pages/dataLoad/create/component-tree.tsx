@@ -609,7 +609,7 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
   // 生成新的目录名称
   const generateName = useCallback(
     (data: TreeNodeData[], typeText?: string) => {
-      const baseName = `${activeTab === 'src' ? '源' : '目标'}${typeText || '目录'}`;
+      const baseName = `${typeText || '目录'}`;
       // const set = new Set(
       //   data.map((item) => item.name || item.label || item.title)
       // );

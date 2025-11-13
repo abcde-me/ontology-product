@@ -66,7 +66,7 @@ export function useEditableTree({ catalogTreeStore }) {
 
   const generateName = useCallback(
     (data: TreeDataType[], typeText?: string) => {
-      const baseName = `${activeTab === 'src' ? '源' : '目标'}${typeText || '目录'}`;
+      const baseName = `${typeText || '目录'}`;
       // const set = new Set(data.map((item) => item.name));
       // let x = data.length + 1;
       const name = `${baseName}_${Date.now()}`;
@@ -149,6 +149,7 @@ export function useEditableTree({ catalogTreeStore }) {
       dataRef?.type_name !== 'db'
     ) {
       catalogTreeStore.setState({
+        extendsObj: dataRef?.extends ?? {},
         selectedKey: dataRef?.id ? String(dataRef.id) : selectedKeys[0], // 存储实际的数据ID
         selectedTreeKey: selectedKeys[0], // 存储完整的树节点key用于显示选中样式
         selectedPath: dataRef?.fullPath,
