@@ -4,11 +4,15 @@ import { IconRefresh } from '@arco-design/web-react/icon';
 import { getMetaDataList, Field, FieldSearchItem } from '@/api/dataCatalog';
 import { useDataCatalog } from '../DataCatalogProvider/Context';
 import SearchArea, { SearchField } from './MetaDataSearchArea';
+import noDataElement from '@/components/no-data';
 
 export default function MetaData() {
   const dataCatalog = useDataCatalog();
   const { catalogTreeStore } = dataCatalog;
-  const { selectedKey } = catalogTreeStore.useGetState(['selectedKey']);
+  const { selectedKey, selectedParentId } = catalogTreeStore.useGetState([
+    'selectedKey',
+    'selectedParentId'
+  ]);
 
   // 状态管理
   const [loading, setLoading] = useState(false);
@@ -29,13 +33,14 @@ export default function MetaData() {
         page: currentPage,
         pageSize: pageSize,
         fieldSearch: fieldSearch,
-        queryLoadTaskInstance: false
+        queryLoadTaskInstance: false,
+        path_id: selectedParentId ? Number(selectedParentId) : 0
       });
 
-      if (res.code === '0' || res.status === 200) {
+      if (res.code === '' && res.status === 200) {
         const data = res.data || {};
         setTableData(data.records || []);
-        setSearchFields(data.searchfields || []);
+        setSearchFields(data.fields || []);
         setTotal(data.total || 0);
       }
     } catch (error) {
@@ -49,7 +54,7 @@ export default function MetaData() {
   useEffect(() => {
     loadData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentPage, pageSize, selectedKey, fieldSearch]);
+  }, [currentPage, pageSize, selectedKey, selectedParentId, fieldSearch]);
 
   // 动态构建表格列
   const columns = useMemo(() => {
@@ -155,9 +160,7 @@ export default function MetaData() {
           pagination={false}
           border={false}
           scroll={{ x: true }}
-          noDataElement={
-            <div style={{ padding: '20px', textAlign: 'center' }}>暂无数据</div>
-          }
+          noDataElement={noDataElement({ description: '暂无数据' })}
         />
 
         {/* 分页 */}

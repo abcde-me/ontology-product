@@ -311,45 +311,35 @@ export class CatalogTreeStore extends Model<CatalogTreeState, Effects> {
 
       // 根据activeKey决定支持的类型：源数据支持volume、db和metadata，目标数据只支持volume
       if (activeKey === 'src') {
-        // 源数据：处理 volume
-        if (catalog.children?.volume) {
-          childrenArr.push(
-            this.convertVolumeType(
-              activeKey,
-              catalog.id,
-              catalog.children.volume
-            )
-          );
-        }
+        // 源数据：始终渲染 volume、db、metadata 三个分组
+        childrenArr.push(
+          this.convertVolumeType(
+            activeKey,
+            catalog.id,
+            catalog.children?.volume ?? []
+          )
+        );
 
-        // 源数据：处理 db
-        if (catalog.children?.db) {
-          childrenArr.push(
-            this.convertDbType(activeKey, catalog.id, catalog.children.db)
-          );
-        }
+        childrenArr.push(
+          this.convertDbType(activeKey, catalog.id, catalog.children?.db ?? [])
+        );
 
-        // 源数据：处理 metadata
-        if (catalog.children?.metadata) {
-          childrenArr.push(
-            this.convertMetaDataType(
-              activeKey,
-              catalog.id,
-              catalog.children.metadata
-            )
-          );
-        }
+        childrenArr.push(
+          this.convertMetaDataType(
+            activeKey,
+            catalog.id,
+            catalog.children?.metadata ?? []
+          )
+        );
       } else {
-        // 目标数据：只处理 volume
-        if (catalog.children?.volume) {
-          childrenArr.push(
-            this.convertVolumeType(
-              activeKey,
-              catalog.id,
-              catalog.children.volume
-            )
-          );
-        }
+        // 目标数据：始终渲染 volume 分组
+        childrenArr.push(
+          this.convertVolumeType(
+            activeKey,
+            catalog.id,
+            catalog.children?.volume ?? []
+          )
+        );
       }
 
       return {
