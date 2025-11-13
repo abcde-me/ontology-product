@@ -24,7 +24,7 @@ function OperationCenterPage() {
         <WujieReact
           width="100%"
           height="100%"
-          name="operationcenter"
+          name="mdp_operation_center"
           url={pageUrl}
           sync={true}
           alive={true}
