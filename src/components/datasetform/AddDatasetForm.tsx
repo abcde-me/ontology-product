@@ -57,6 +57,24 @@ enum StorageType {
   File = 'file'
 }
 
+interface FileItem {
+  abs_data_path: string;
+  connector_id: number;
+  connector_name: string;
+  data_path_id: number;
+  execution_id: string;
+  file_name: string;
+  file_size: number;
+  file_sub_path: string;
+  file_type: string;
+  file_uuid: string;
+  id: number;
+  perms: Array<string>;
+  real_abs_data_path: string;
+  task_load_start_time: string;
+  upload_user: string;
+}
+
 interface DatasetFormProps {
   visible: boolean;
   onSubmit: (formData: any) => Promise<void>;
@@ -200,7 +218,9 @@ const DatasetForm = React.forwardRef<
   >([]); //连接器文件信息
   const [previewData, setPreviewData] = useState(null); //数据目录预览数据
   const [isPreviewFile, setIsPreviewFile] = useState(false); //数据目录文件预览数据
-  const [previewFileData, setPreviewFileData] = useState<string[] | null>(null); //数据目录文件预览数据
+  const [previewFileData, setPreviewFileData] = useState<FileItem[] | null>(
+    null
+  ); //数据目录文件预览数据
   const [previewColumns, setPreviewColumns] = useState<[]>([]); //数据目录预览表格列（从后端获取）
   //标签列表
   const [tagList, setTagList] = useState<{ label: string; value: string }[]>(
@@ -212,6 +232,7 @@ const DatasetForm = React.forwardRef<
   const [targetData, setTargetData] = useState<string | (string | string[])[]>(
     []
   );
+  const [filesType, setFilesType] = useState<StorageType>(StorageType.File);
   // 选择的文件ID
   const [fileIds, setFileIds] = useState<string[]>([]);
   // 当前的第几页
@@ -510,7 +531,8 @@ const DatasetForm = React.forwardRef<
             dataSource === 'volume'
               ? values.targetDataSource
               : values.connector, //数据目录卷用targetDataSource，连接器用connector
-          path_file_ids: fileIds
+          path_file_ids: fileIds,
+          data_type: filesType
         };
         // setIscreateTagDisabled(true);
 
@@ -869,7 +891,13 @@ const DatasetForm = React.forwardRef<
                     pagination={false}
                     rowSelection={{
                       type: 'checkbox',
-                      onChange: (selectedRowKeys) => {
+                      onChange: (selectedRowKeys, selectedRows: FileItem[]) => {
+                        const isNotJsonl = selectedRows.some(
+                          (item) => item.file_type !== 'JSONL'
+                        );
+                        setFilesType(
+                          isNotJsonl ? StorageType.File : StorageType.Jsonl
+                        );
                         setFileIds(selectedRowKeys as string[]);
                       }
                     }}
