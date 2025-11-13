@@ -1,17 +1,26 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Table, Pagination, Button, Space } from '@arco-design/web-react';
+import {
+  Table,
+  Pagination,
+  Button,
+  Space,
+  Message,
+  Spin
+} from '@arco-design/web-react';
 import { IconRefresh } from '@arco-design/web-react/icon';
 import { useRequest } from 'ahooks';
 import {
   getMetaDataList,
   Field,
   FieldSearchItem,
-  LoadTaskStatus
+  LoadTaskStatus,
+  refreshMetaDataList
 } from '@/api/dataCatalog';
 import { useDataCatalog } from '../DataCatalogProvider/Context';
 import SearchArea, { SearchField } from './MetaDataSearchArea';
 import noDataElement from '@/components/no-data';
 import dayjs from 'dayjs';
+import EllipsisPopover from '@/components/ellipsis-popover-com';
 
 export default function MetaData() {
   const dataCatalog = useDataCatalog();
@@ -64,10 +73,12 @@ export default function MetaData() {
       onSuccess: (loadTaskStatus) => {
         if (loadTaskStatus === LoadTaskStatus.COMPLETED) {
           cancelPolling();
+          setLoading(false);
         }
       },
       onError: () => {
         cancelPolling();
+        setLoading(false);
       }
     }
   );
@@ -121,16 +132,32 @@ export default function MetaData() {
       dataIndex: field.nameEn,
       key: field.nameEn,
       ellipsis: true,
+      width: 200,
       render: (value: any) => {
+        let displayValue: any = value;
+
         if (field.type === 'datetime') {
-          return value ? dayjs(value).format('YYYY-MM-DD HH:mm:ss') : '-';
+          displayValue = value
+            ? dayjs(value).format('YYYY-MM-DD HH:mm:ss')
+            : '-';
+        } else if (Array.isArray(value)) {
+          // 如果值是数组，转换为字符串显示
+          displayValue = value.join(', ');
+        } else if (
+          displayValue === null ||
+          displayValue === undefined ||
+          displayValue === ''
+        ) {
+          displayValue = '-';
         }
 
-        // 如果值是数组，转换为字符串显示
-        if (Array.isArray(value)) {
-          return value.join(', ');
-        }
-        return value ?? '-';
+        return (
+          <EllipsisPopover
+            value={displayValue}
+            preferTypography
+            ellipsis={{ rows: 1 }}
+          />
+        );
       }
     }));
   }, [searchFields]);
@@ -150,9 +177,23 @@ export default function MetaData() {
   };
 
   // 处理刷新
-  const handleRefresh = () => {
+  const handleRefresh = async () => {
     // 如果已有轮询在进行，先取消
     cancelPolling();
+
+    setLoading(true);
+
+    const res = await refreshMetaDataList({
+      path_id: selectedParentId ? Number(selectedParentId) : 0,
+      db_name: (extendsObj?.db_name as string) || '',
+      table_name: (extendsObj?.table_name as string) || ''
+    });
+
+    if (res.code !== '' || res.status !== 200) {
+      Message.error(res?.message ?? '刷新失败');
+      setLoading(false);
+      return;
+    }
 
     // 启动新的轮询
     pollMetaDataList();
@@ -182,6 +223,17 @@ export default function MetaData() {
     setFieldSearch([]);
     setCurrentPage(1);
   };
+
+  if (loading) {
+    return (
+      <div
+        className="flex w-full items-center justify-center"
+        style={{ minHeight: 'calc(100vh - 200px)' }}
+      >
+        <Spin size={32} tip="数据载入中" />
+      </div>
+    );
+  }
 
   return (
     <div>
@@ -218,13 +270,12 @@ export default function MetaData() {
         </div>
 
         {/* 表格 */}
-        {columns.length === 0 && !loading ? (
+        {columns.length === 0 ? (
           <div className="flex min-h-[200px] items-center justify-center">
             {noDataElement({ description: '暂无载入数据' })}
           </div>
         ) : (
           <Table
-            loading={loading}
             columns={columns}
             data={tableData}
             // rowKey={(record, index) => record.id || index}
