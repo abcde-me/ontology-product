@@ -1,15 +1,13 @@
 /**
  * Scene Router Component
  * 根据文件类型（fileType/sceneType）渲染不同的场景组件
- * - PDF: 自动根据数据判断是普通文本、层级结构还是图文混合
- * - PPT: PPT场景
+ * - PDF/PPT: 使用PdfSceneContent渲染（后端返回相同的二进制数据格式）
  * - Excel: 表格场景
  */
 
 import React from 'react';
 import { SceneType } from '../types';
 import PdfSceneContent from './scenes/pdf/PdfSceneContent';
-import PptSceneContent from './scenes/ppt/PptSceneContent';
 import TableSceneContent from './scenes/table/TableSceneContent';
 
 interface SceneRouterProps {
@@ -25,14 +23,13 @@ const SceneRouter: React.FC<SceneRouterProps> = ({
 }) => {
   switch (sceneType) {
     case 'pdf':
-      // PDF场景：根据数据自动判断渲染模式（文本/层级/图文）
+    case 'ppt':
+      // PDF/PPT场景：使用相同的处理方式
+      // 后端返回相同的二进制数据格式，浏览器无法直接展示PPT，
+      // 所以PPT也通过PDF查看器渲染
       return (
         <PdfSceneContent showPdfViewer={showPdfViewer} loading={loading} />
       );
-
-    case 'ppt':
-      // PPT场景
-      return <PptSceneContent loading={loading} />;
 
     case 'excel':
       // Excel/表格场景

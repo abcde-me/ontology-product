@@ -2,6 +2,7 @@ import UAPI from '@/api';
 import {
   AutoMapDataAssetFieldAndSourceReq,
   AutoMapDataAssetFieldAndSourceResItem,
+  BaseTag,
   ColumnField,
   CreateDataAssetAndMappingReq,
   CreateDataAssetRes,
@@ -261,8 +262,13 @@ export async function listDataAssetData(
 }
 
 // 修改数据资产
-export async function editDataAsset(params: CreateDataAssetAndMappingReq) {
-  return await UAPI.RES.editDataAsset({}).post(params).inRegion().do();
+export async function editDataAssetAndMapping(params: {
+  fields: CreateDataAssetAndMappingReq;
+}) {
+  return await UAPI.RES.editDataAssetAndMapping({})
+    .post(params)
+    .inRegion()
+    .do();
 }
 
 // 删除数据资产
@@ -404,9 +410,9 @@ export async function listDataAssetSource(): Promise<
 }
 
 // 创建数据资产和映射关系
-export async function createDataAssetAndMapping(
-  params: CreateDataAssetAndMappingReq
-) {
+export async function createDataAssetAndMapping(params: {
+  fields: CreateDataAssetAndMappingReq;
+}) {
   return await UAPI.RES.createDataAssetAndMapping({})
     .post(params)
     .inRegion()
@@ -457,14 +463,17 @@ export async function autoMapDataAssetColumn(
 export async function editDataAssetFieldsDisplay(
   params: EditDataAssetFieldsDisplayReq
 ) {
-  return Promise.resolve({
-    code: 0,
-    status: 200,
-    data: {},
-    message: 'success',
-    requestId: ''
-  });
-  // return await UAPI.RES.editDataAssetFieldsDisplay({}).post(params).inRegion().do();
+  // return Promise.resolve({
+  //   code: 0,
+  //   status: 200,
+  //   data: {},
+  //   message: 'success',
+  //   requestId: ''
+  // });
+  return await UAPI.RES.editDataAssetFieldsDisplay({})
+    .post(params)
+    .inRegion()
+    .do();
 }
 
 // 查询数据资产表列设置（前端展示）
@@ -526,68 +535,84 @@ export async function findDataAssetFieldsDisplay(
 export async function getDataAssetTableDistinctFieldCount(params: {
   fieldEnName: string;
 }): Promise<ApiRes<number>> {
-  return Promise.resolve({
-    code: 0,
-    status: 200,
-    data: 10,
-    message: 'success',
-    requestId: ''
-  });
-  // return await UAPI.RES.getDataAssetTableDistinctFieldCount({}).post(params).inRegion().do();
+  // return Promise.resolve({
+  //   code: 0,
+  //   status: 200,
+  //   data: 10,
+  //   message: 'success',
+  //   requestId: ''
+  // });
+  return await UAPI.RES.getDataAssetTableDistinctFieldCount({})
+    .post(params)
+    .inRegion()
+    .do();
 }
 
 export async function editDataAssetDataBatch(params: EditDataAssetData) {
-  return Promise.resolve({
-    code: 0,
-    status: 200,
-    data: {},
-    message: 'success',
-    requestId: ''
-  });
-  // return await UAPI.RES.editDataAssetDataBatch({}).post(params).inRegion().do();
+  // return Promise.resolve({
+  //   code: 0,
+  //   status: 200,
+  //   data: {},
+  //   message: 'success',
+  //   requestId: ''
+  // });
+  return await UAPI.RES.editDataAssetDataBatch({}).post(params).inRegion().do();
 }
 
 export async function deleteDataAssetDataBatch(params: { ids: string[] }) {
-  return Promise.resolve({
-    code: 0,
-    status: 200,
-    data: {},
-    message: 'success',
-    requestId: ''
-  });
-  // return await UAPI.RES.deleteDataAssetDataBatch({}).post(params).inRegion().do();
+  // return Promise.resolve({
+  //   code: 0,
+  //   status: 200,
+  //   data: {},
+  //   message: 'success',
+  //   requestId: ''
+  // });
+  return await UAPI.RES.deleteDataAssetDataBatch({})
+    .post(params)
+    .inRegion()
+    .do();
 }
 
-export async function getTagList(): Promise<
-  ApiRes<{ id: string; value: string }[]>
-> {
-  return Promise.resolve({
-    code: 0,
-    status: 200,
-    data: [
-      {
-        id: '1',
-        value: '标签1'
-      },
-      {
-        id: '2',
-        value: '标签2'
-      },
-      {
-        id: '3',
-        value: '标签3'
-      },
-      {
-        id: '4',
-        value: '标签4'
-      },
-      {
-        id: '5',
-        value: '标签5'
-      }
-    ],
-    message: 'success',
-    requestId: ''
-  });
-  // return await UAPI.RES.listAssetTags({}).post({}).inRegion().do();
+export async function getTagList(): Promise<ApiRes<BaseTag[]>> {
+  // return Promise.resolve({
+  //   code: 0,
+  //   status: 200,
+  //   data: [
+  //     {
+  //       id: 'tag-999',
+  //       name: 'test',
+  //       description: 'test',
+  //       valueList: [
+  //         {
+  //           id: 'tagvalue-777',
+  //           tagValue: '1'
+  //         },
+  //         {
+  //           id: 'tagvalue-888',
+  //           tagValue: '2'
+  //         },
+  //         {
+  //           id: 'tagvalue-999',
+  //           tagValue: '3'
+  //         }
+  //       ]
+  //     }
+  //   ],
+  //   message: 'success',
+  //   requestId: ''
+  // });
+  return await UAPI.RES.listBaseTags({}).post({}).inRegion().do();
+}
+
+export async function editDataAssetDataTagsBatch(params: {
+  Ids: string[];
+  tags: {
+    id: string;
+    value: string;
+  }[];
+}): Promise<ApiRes<any>> {
+  return await UAPI.RES.editDataAssetDataTagsBatch({})
+    .post(params)
+    .inRegion()
+    .do();
 }

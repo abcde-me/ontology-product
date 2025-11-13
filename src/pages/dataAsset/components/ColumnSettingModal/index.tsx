@@ -14,21 +14,26 @@ import './index.module.scss'; // 确保引入样式文件
 import { ReactSortable } from 'react-sortablejs';
 import DragIcon from '../../assets/drag-icon.svg';
 import styles from './index.module.scss';
+import { RESERVED_FIELD_ENS } from '../../utils/const';
+import { getDataAssetTableDistinctFieldCount } from '@/api/dataAsset';
 // const SortableAny = ReactSortable as any;
 
 export interface ColumnField {
-  id: string; // 唯一key
-  name: string;
+  id: string; // 唯一标识
+  nameEn: string; // 唯一标识
+  nameZh: string;
   type: string;
-  enumChecked: boolean; // 是否勾选枚举
+  isEnumAble: boolean; // 是否勾选枚举
   enumLoading: boolean;
   enumCount: number; // 枚举数
+  displaySort: number;
+  values: string[];
 }
 
 export interface ColumnSettingModalProps {
   visible: boolean;
   fields?: ColumnField[]; // 外部传入的字段列表
-  onOk: (selected: ColumnField[]) => void;
+  onOk: (selectedIds: string[], displayFields: ColumnField[]) => void;
   onCancel: () => void;
   onChange: (list: ColumnField[]) => void;
 }
@@ -47,7 +52,7 @@ const ColumnSettingModal: React.FC<ColumnSettingModalProps> = ({
   const [fields, setFields] = useState<ColumnField[]>(initialFields);
   // 初始化选中的字段（外部传入时选择所有字段，否则使用默认）
   const initialSelectedIds = externalFields
-    ? externalFields.map((f) => f.id).filter(Boolean)
+    ? externalFields.map((f) => f.nameEn).filter(Boolean)
     : defaultSelected;
   const [selectedIds, setSelectedIds] = useState<string[]>(initialSelectedIds);
   const [searchKeyword, setSearchKeyword] = useState('');
@@ -57,7 +62,10 @@ const ColumnSettingModal: React.FC<ColumnSettingModalProps> = ({
     if (externalFields) {
       setFields(externalFields);
       // 更新选中的字段ID列表
-      const allIds = externalFields.map((f) => f.id).filter(Boolean);
+      const allIds = externalFields
+        .filter((f) => f.displaySort > 0)
+        .map((f) => f.nameEn)
+        .filter(Boolean);
       if (allIds.length > 0) {
         setSelectedIds(allIds);
       }
@@ -67,50 +75,75 @@ const ColumnSettingModal: React.FC<ColumnSettingModalProps> = ({
   const displayFields = searchKeyword
     ? fields.filter(
         (f) =>
-          f.name.toLowerCase().includes(searchKeyword.toLowerCase()) ||
+          f.nameZh.toLowerCase().includes(searchKeyword.toLowerCase()) ||
           f.type.toLowerCase().includes(searchKeyword.toLowerCase())
       )
     : fields;
   // 已选的field数据，按照selectedIds的顺序
   const selectedFields = selectedIds
-    .map((id) => fields.find((f) => f.id === id))
+    .map((nameEn) => fields.find((f) => f.nameEn === nameEn))
     .filter(Boolean) as ColumnField[];
   // 枚举复选框 mock
-  const handleEnumCheck = (id: string, checked: boolean) => {
-    setFields((fields) =>
-      fields.map((f) => (f.id === id ? { ...f, enumLoading: true } : f))
-    );
-    setTimeout(() => {
-      if (id === '2' || id === '3') {
+  const handleEnumCheck = async (nameEn: string, checked: boolean) => {
+    if (!checked) {
+      setFields((fields) =>
+        fields.map((f) =>
+          f.nameEn === nameEn ? { ...f, enumCount: 0, isEnumAble: checked } : f
+        )
+      );
+      return;
+    }
+
+    try {
+      setFields((fields) =>
+        fields.map((f) =>
+          f.nameEn === nameEn ? { ...f, enumLoading: true } : f
+        )
+      );
+
+      const res = await getDataAssetTableDistinctFieldCount({
+        fieldEnName: nameEn
+      });
+
+      if (res.code !== '' || res.status !== 200 || res.data > 1000) {
+        Message.error('该字段不可勾选为枚举类型');
         setFields((fields) =>
           fields.map((f) =>
-            f.id === id
-              ? {
-                  ...f,
-                  enumChecked: checked,
-                  enumCount: checked ? 10 : 0,
-                  enumLoading: false
-                }
-              : f
+            f.nameEn === nameEn ? { ...f, enumLoading: false } : f
           )
         );
-      } else {
-        setFields((fields) =>
-          fields.map((f) => (f.id === id ? { ...f, enumLoading: false } : f))
-        );
-        Message.error('该字段不可勾选为枚举类型');
+        return;
       }
-    }, 1000);
+
+      setFields((fields) =>
+        fields.map((f) =>
+          f.nameEn === nameEn
+            ? {
+                ...f,
+                enumCount: res.data,
+                isEnumAble: checked,
+                enumLoading: false
+              }
+            : f
+        )
+      );
+    } catch {
+      setFields((fields) =>
+        fields.map((f) =>
+          f.nameEn === nameEn ? { ...f, enumLoading: false } : f
+        )
+      );
+    }
   };
   // 右侧删除按钮
-  const handleRemove = (id: string) =>
-    setSelectedIds((ids) => ids.filter((_id) => _id !== id));
+  const handleRemove = (nameEn: string) =>
+    setSelectedIds((ids) => ids.filter((_id) => _id !== nameEn));
 
   return (
     <Modal
       title="列设置"
       visible={visible}
-      onOk={() => onOk(selectedFields)}
+      onOk={() => onOk(selectedIds, fields)}
       onCancel={onCancel}
       className={styles['column-setting-modal']}
       style={{ width: 900, height: 800 }}
@@ -134,13 +167,16 @@ const ColumnSettingModal: React.FC<ColumnSettingModalProps> = ({
           <Table
             data={displayFields}
             border={false}
-            rowKey="id"
+            rowKey="nameEn"
             pagination={false}
             style={{ flex: 1 }}
             rowSelection={{
               type: 'checkbox',
               selectedRowKeys: selectedIds,
-              onChange: (keys) => setSelectedIds(keys as string[])
+              onChange: (keys) => setSelectedIds(keys as string[]),
+              checkboxProps: (record: ColumnField) => ({
+                disabled: RESERVED_FIELD_ENS.has(record.nameEn)
+              })
             }}
             rowClassName={(_, idx) =>
               idx === displayFields.length - 1
@@ -148,11 +184,11 @@ const ColumnSettingModal: React.FC<ColumnSettingModalProps> = ({
                 : ''
             }
             columns={[
-              { title: '字段名称', dataIndex: 'name', width: 310 },
+              { title: '字段名称', dataIndex: 'nameZh', width: 310 },
               { title: '类型', dataIndex: 'type', width: 100 },
               {
                 title: '设为枚举类型',
-                dataIndex: 'enumChecked',
+                dataIndex: 'isEnumAble',
                 width: 126,
                 render: (_: any, record: ColumnField) => (
                   <span className="flex flex-col items-center">
@@ -160,11 +196,11 @@ const ColumnSettingModal: React.FC<ColumnSettingModalProps> = ({
                       <Spin size={14} />
                     ) : (
                       <Checkbox
-                        checked={record.enumChecked}
-                        onChange={(val) => handleEnumCheck(record.id, val)}
+                        checked={record.isEnumAble}
+                        onChange={(val) => handleEnumCheck(record.nameEn, val)}
                       />
                     )}
-                    {record.enumChecked && !record.enumLoading && (
+                    {record.isEnumAble && !record.enumLoading && (
                       <span className="text-[var(--color-text-4)]">
                         {record.enumCount}枚举量
                       </span>
@@ -198,7 +234,7 @@ const ColumnSettingModal: React.FC<ColumnSettingModalProps> = ({
             list={selectedFields}
             setList={(list) => {
               // 从新的列表顺序中提取id数组，更新selectedIds状态
-              const newOrderIds = list.map((item) => item.id);
+              const newOrderIds = list.map((item) => item.nameEn);
               setSelectedIds(newOrderIds);
               // 通知父组件顺序变化
               onChange(list);
@@ -206,18 +242,20 @@ const ColumnSettingModal: React.FC<ColumnSettingModalProps> = ({
           >
             {selectedFields.map((field) => (
               <div
-                key={field.id}
-                data-id={field.id}
+                key={field.nameEn}
+                data-nameEn={field.nameEn}
                 className="m-t-[7px] flex h-[40px] items-center"
               >
                 <DragIcon className="mr-[8px] h-[14px] w-[14px]"></DragIcon>
                 {/* <div className='w-[14px] h-[14px] mr-[8px]'>
                   
                 </div> */}
-                <span className="line-height-[40px] flex-1">{field.name}</span>
+                <span className="line-height-[40px] flex-1">
+                  {field.nameZh}
+                </span>
                 <IconClose
                   className="size-[12px] cursor-pointer"
-                  onClick={() => handleRemove(field.id)}
+                  onClick={() => handleRemove(field.nameEn)}
                 />
               </div>
             ))}

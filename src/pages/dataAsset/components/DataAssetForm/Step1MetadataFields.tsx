@@ -25,44 +25,37 @@ import {
 import { listDataAssetFieldTypes } from '@/api/dataAsset';
 import { ImportType } from '../../types';
 import noDataElement from '@/components/no-data';
+import { RESERVED_FIELD_ENS } from '../../utils/const';
 
 const FormItem = Form.Item;
 
 const getDataSourceKey = (item: ListDataAssetSourceResItem) =>
   `${item.type ?? ''}::${item.databaseName ?? ''}::${item.tableName ?? ''}`;
 
-// 系统保留字段（不允许编辑、删除、导入）
-const RESERVED_FIELD_ENS = new Set([
-  'data_asset_name',
-  'tags',
-  'data_update_time',
-  'data_source'
-]);
+// const normalizeDataSources = (
+//   sources: Record<string, ListDataAssetSourceResItem> = {},
+//   available: Record<string, ListDataAssetSourceResItem> = {}
+// ): Record<string, ListDataAssetSourceResItem> => {
+//   const result: Record<string, ListDataAssetSourceResItem> = {};
+//   Object.keys(sources).forEach((key) => {
+//     if (available[key]) {
+//       result[key] = available[key];
+//     }
+//   });
+//   return result;
+// };
 
-const normalizeDataSources = (
-  sources: Record<string, ListDataAssetSourceResItem> = {},
-  available: Record<string, ListDataAssetSourceResItem> = {}
-): Record<string, ListDataAssetSourceResItem> => {
-  const result: Record<string, ListDataAssetSourceResItem> = {};
-  Object.keys(sources).forEach((key) => {
-    if (available[key]) {
-      result[key] = available[key];
-    }
-  });
-  return result;
-};
-
-const areDataSourcesEqual = (
-  a: Record<string, ListDataAssetSourceResItem> = {},
-  b: Record<string, ListDataAssetSourceResItem> = {}
-) => {
-  const aKeys = Object.keys(a);
-  const bKeys = Object.keys(b);
-  if (aKeys.length !== bKeys.length) {
-    return false;
-  }
-  return aKeys.every((key) => b[key] === a[key]);
-};
+// const areDataSourcesEqual = (
+//   a: Record<string, ListDataAssetSourceResItem> = {},
+//   b: Record<string, ListDataAssetSourceResItem> = {}
+// ) => {
+//   const aKeys = Object.keys(a);
+//   const bKeys = Object.keys(b);
+//   if (aKeys.length !== bKeys.length) {
+//     return false;
+//   }
+//   return aKeys.every((key) => b[key] === a[key]);
+// };
 
 interface Step1MetadataFieldsProps {
   metadataFields: MetadataField[];
@@ -121,19 +114,19 @@ export default function Step1MetadataFields({
   }, []);
 
   // 从 findDataAssetMappingData 直接计算可用的数据来源（使用 nameEn 作为键）
-  const availableDataSources = useMemo(() => {
-    if (!findDataAssetMappingData || findDataAssetMappingData.length === 0) {
-      return {};
-    }
-    const result: Record<string, ListDataAssetSourceResItem> = {};
-    findDataAssetMappingData.forEach((item) => {
-      const key = getDataSourceKey(item);
-      if (key) {
-        result[key] = item;
-      }
-    });
-    return result;
-  }, [findDataAssetMappingData]);
+  // const availableDataSources = useMemo(() => {
+  //   if (!findDataAssetMappingData || findDataAssetMappingData.length === 0) {
+  //     return {};
+  //   }
+  //   const result: Record<string, ListDataAssetSourceResItem> = {};
+  //   findDataAssetMappingData.forEach((item) => {
+  //     const key = getDataSourceKey(item);
+  //     if (key) {
+  //       result[key] = item;
+  //     }
+  //   });
+  //   return result;
+  // }, [findDataAssetMappingData]);
 
   // 数据来源类型的中文显示名称映射（仅用于显示）
   // const dataSourceDisplayNames: Record<string, string> = {
@@ -143,23 +136,23 @@ export default function Step1MetadataFields({
   //   metadata: '源数据目录-元数据-目录'
   // };
 
-  const normalizedDataSources = useMemo(
-    () => normalizeDataSources(dataSources, availableDataSources),
-    [dataSources, availableDataSources]
-  );
+  // const normalizedDataSources = useMemo(
+  //   () => normalizeDataSources(dataSources, availableDataSources),
+  //   [dataSources, availableDataSources]
+  // );
 
-  useEffect(() => {
-    if (!areDataSourcesEqual(dataSources, normalizedDataSources)) {
-      setDataSources(normalizedDataSources);
-    }
-  }, [dataSources, normalizedDataSources, setDataSources]);
+  // useEffect(() => {
+  //   if (!areDataSourcesEqual(dataSources, normalizedDataSources)) {
+  //     setDataSources(normalizedDataSources);
+  //   }
+  // }, [dataSources, normalizedDataSources, setDataSources]);
 
-  useEffect(() => {
-    const current = form.getFieldValue('dataSources');
-    if (current !== normalizedDataSources) {
-      form.setFieldValue('dataSources', normalizedDataSources);
-    }
-  }, [form, normalizedDataSources]);
+  // useEffect(() => {
+  //   const current = form.getFieldValue('dataSources');
+  //   if (current !== normalizedDataSources) {
+  //     form.setFieldValue('dataSources', normalizedDataSources);
+  //   }
+  // }, [form, normalizedDataSources]);
 
   // Table列定义（字段名对齐 DataAssetField）
   const columns = [
@@ -375,11 +368,11 @@ export default function Step1MetadataFields({
   // 数据源变更
   const handleDataSourceChange = (key: string, checked: boolean) => {
     const updatedDataSources: Record<string, ListDataAssetSourceResItem> = {
-      ...normalizedDataSources
+      ...dataSources
     };
     if (checked) {
       const item =
-        availableDataSources[key] ||
+        dataSources[key] ||
         findDataAssetMappingData.find((i) => getDataSourceKey(i) === key);
       if (item) {
         updatedDataSources[key] = item;
@@ -398,7 +391,7 @@ export default function Step1MetadataFields({
       findDataAssetMappingData.forEach((item) => {
         const key = getDataSourceKey(item);
         if (key) {
-          updatedDataSources[key] = availableDataSources[key] ?? item;
+          updatedDataSources[key] = dataSources[key] ?? item;
         }
       });
     }
@@ -429,21 +422,21 @@ export default function Step1MetadataFields({
   // 验证数据来源的自定义验证器
   const validateDataSource = useCallback(
     (value: any, callback: any) => {
-      const hasAnySource = Object.keys(normalizedDataSources).length > 0;
+      const hasAnySource = Object.keys(dataSources).length > 0;
       if (!hasAnySource) {
         callback('请至少选择一个数据来源');
       } else {
         callback();
       }
     },
-    [normalizedDataSources]
+    [dataSources]
   );
 
   // 下一步前验证
   const handleNextStep = async () => {
     // 同步metadataFields和dataSources到form
     form.setFieldValue('metadataFields', metadataFields);
-    form.setFieldValue('dataSources', normalizedDataSources);
+    form.setFieldValue('dataSources', dataSources);
 
     try {
       await form.validate();
@@ -452,6 +445,12 @@ export default function Step1MetadataFields({
       console.error('表单验证失败:', error);
     }
   };
+
+  // useEffect(() => {
+  //   if (editMode) {
+
+  //   }
+  // }, []);
 
   return (
     <>
@@ -466,7 +465,7 @@ export default function Step1MetadataFields({
         form={form}
         initialValues={{
           metadataFields,
-          dataSources: normalizedDataSources
+          dataSources
         }}
         labelCol={{ span: 24 }}
         wrapperCol={{ span: 24 }}
@@ -500,6 +499,7 @@ export default function Step1MetadataFields({
                 ...f,
                 sequence: idx + 1
               }))}
+              rowKey="id"
               pagination={false}
               border={false}
             />
@@ -515,7 +515,8 @@ export default function Step1MetadataFields({
           rules={[{ validator: validateDataSource }]}
         >
           <Row gutter={24}>
-            {findDataAssetMappingData.length > 0 &&
+            {console.log('findDataAssetMappingData', findDataAssetMappingData)}
+            {findDataAssetMappingData?.length > 0 &&
               (() => {
                 // 从 findDataAssetMappingData 中提取所有唯一的 nameEn 字段作为数据源键
                 const keyArray = findDataAssetMappingData
@@ -523,13 +524,11 @@ export default function Step1MetadataFields({
                   .filter((key): key is string => !!key);
                 const allChecked =
                   keyArray.length > 0 &&
-                  keyArray.every((key) => !!normalizedDataSources[key]);
-                const someChecked = keyArray.some(
-                  (key) => !!normalizedDataSources[key]
-                );
+                  keyArray.every((key) => !!dataSources[key]);
+                const someChecked = keyArray.some((key) => !!dataSources[key]);
 
                 return (
-                  <Col span={4}>
+                  <Col key="all" span={4}>
                     <Checkbox
                       checked={allChecked}
                       indeterminate={someChecked && !allChecked}
@@ -550,7 +549,7 @@ export default function Step1MetadataFields({
               return (
                 <Col key={key} span={4}>
                   <Checkbox
-                    checked={!!normalizedDataSources[key]}
+                    checked={!!dataSources[key]}
                     onChange={(checked) => handleDataSourceChange(key, checked)}
                   >
                     {field.name}

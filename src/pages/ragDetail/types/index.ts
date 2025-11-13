@@ -245,6 +245,7 @@ export interface SegmentUpdatePayload {
 
 export interface RagDetailState {
   ragId: string | null;
+  datasetId: string | null; // 数据集ID
   fileName: string;
   filePath: string;
   sceneType: SceneType;
@@ -274,7 +275,7 @@ export interface RagDetailState {
 }
 
 export interface RagDetailActions {
-  initializeRagDetail: (ragId: string) => Promise<void>;
+  initializeRagDetail: (datasetId: string, documentId: string) => Promise<void>;
   selectSegment: (segmentId: string) => void;
   selectDirectoryNode: (nodeId: string) => void;
   startEditingSegment: (segmentId: string) => void;

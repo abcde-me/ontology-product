@@ -109,7 +109,7 @@ const DataLoadDetail = () => {
   const getdirectorylist = async () => {
     try {
       const res = await getDirectoryList({
-        root_type: 1
+        // root_type: 1
       });
       if (res.code == '' && res.status == 200) {
         setDirectoryArr(res.data?.src as any);

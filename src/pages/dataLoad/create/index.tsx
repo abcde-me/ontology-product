@@ -385,7 +385,7 @@ export default function DataLoadCreate() {
     TreeNodeData[]
   > => {
     try {
-      const res = await getDirectoryList({ root_type: 1 });
+      const res = await getDirectoryList({});
 
       if (!res || res.status !== 200) {
         console.error('获取目录列表失败:', res);

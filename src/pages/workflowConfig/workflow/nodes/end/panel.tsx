@@ -161,11 +161,12 @@ const Panel: FC<NodePanelProps<EndNodeType>> = ({ id, data }) => {
           field="description"
           style={{ margin: 0, paddingBottom: 24 }}
         >
-          <Input
+          <Input.TextArea
             placeholder="可以描述数据集的用途、特点或其他相关信息"
-            type="textarea"
-            style={{ width: '100%' }}
+            style={{ width: '100%', height: 62 }}
             allowClear
+            maxLength={500}
+            showWordLimit
           />
         </FormItem>
         <FormItem label="场景分类：" field="scene_id" style={{ margin: 0 }}>

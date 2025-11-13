@@ -26,92 +26,92 @@ export interface DataAssetTableListProps {
   onSelectChange?: (selectedRowKeys: string[]) => void;
 }
 
-const defaultColumns = [
-  {
-    title: '序号',
-    dataIndex: 'index',
-    width: 80,
-    key: 'index',
-    render: (_: any, __: any, idx: number) => idx + 1
-  },
-  {
-    title: '数据资产名称',
-    dataIndex: 'name',
-    width: 200,
-    key: 'name',
-    ellipsis: true
-  },
-  {
-    title: '资产标签',
-    dataIndex: 'tags',
-    key: 'tags',
-    render: (tag_names: string[]) => {
-      if (!tag_names || tag_names.length === 0) return '-';
-      return (
-        <Space size="mini">
-          {tag_names[0] && (
-            <Tag>
-              {tag_names[0].length > 2 ? (
-                <Tooltip content={tag_names[0]}>
-                  {tag_names[0].substring(0, 5)}...
-                </Tooltip>
-              ) : (
-                tag_names[0] || '-'
-              )}
-            </Tag>
-          )}
-          {tag_names.length > 1 && (
-            <Tooltip
-              content={tag_names.map((tag, index) => (
-                <Tag key={`${tag}-${index}`} style={{ margin: '2px 2px' }}>
-                  {tag}
-                </Tag>
-              ))}
-            >
-              <Tag>+{tag_names.length - 1}</Tag>
-            </Tooltip>
-          )}
-        </Space>
-      );
-    }
-  },
-  {
-    title: '来源',
-    dataIndex: 'source',
-    width: 150,
-    key: 'source'
-  },
-  {
-    title: '更新时间',
-    dataIndex: 'updateTime',
-    key: 'updateTime',
-    width: 180
-  },
-  {
-    title: '操作',
-    dataIndex: 'actions',
-    width: 200,
-    key: 'actions',
-    render: (
-      _: any,
-      record: any,
-      idx: number,
-      { onEditAsset, onEditTags, onDelete }: any
-    ) => (
-      <div className="flex items-center">
-        <Button type="text" onClick={() => onEditAsset?.(record)}>
-          修改资产
-        </Button>
-        <Button type="text" onClick={() => onEditTags?.(record)}>
-          修改标签
-        </Button>
-        <Button type="text" onClick={() => onDelete?.(record)}>
-          删除
-        </Button>
-      </div>
-    )
-  }
-];
+// const defaultColumns = [
+//   {
+//     title: '序号',
+//     dataIndex: 'index',
+//     width: 80,
+//     key: 'index',
+//     render: (_: any, __: any, idx: number) => idx + 1
+//   },
+//   {
+//     title: '数据资产名称',
+//     dataIndex: 'name',
+//     width: 200,
+//     key: 'name',
+//     ellipsis: true
+//   },
+//   // {
+//   //   title: '资产标签',
+//   //   dataIndex: 'tags',
+//   //   key: 'tags',
+//   //   render: (tag_names: string[]) => {
+//   //     if (!tag_names || tag_names.length === 0) return '-';
+//   //     return (
+//   //       <Space size="mini">
+//   //         {tag_names[0] && (
+//   //           <Tag>
+//   //             {tag_names[0].length > 2 ? (
+//   //               <Tooltip content={tag_names[0]}>
+//   //                 {tag_names[0].substring(0, 5)}...
+//   //               </Tooltip>
+//   //             ) : (
+//   //               tag_names[0] || '-'
+//   //             )}
+//   //           </Tag>
+//   //         )}
+//   //         {tag_names.length > 1 && (
+//   //           <Tooltip
+//   //             content={tag_names.map((tag, index) => (
+//   //               <Tag key={`${tag}-${index}`} style={{ margin: '2px 2px' }}>
+//   //                 {tag}
+//   //               </Tag>
+//   //             ))}
+//   //           >
+//   //             <Tag>+{tag_names.length - 1}</Tag>
+//   //           </Tooltip>
+//   //         )}
+//   //       </Space>
+//   //     );
+//   //   }
+//   // },
+//   {
+//     title: '来源',
+//     dataIndex: 'source',
+//     width: 150,
+//     key: 'source'
+//   },
+//   {
+//     title: '更新时间',
+//     dataIndex: 'updateTime',
+//     key: 'updateTime',
+//     width: 180
+//   },
+//   {
+//     title: '操作',
+//     dataIndex: 'actions',
+//     width: 200,
+//     key: 'actions',
+//     render: (
+//       _: any,
+//       record: any,
+//       idx: number,
+//       { onEditAsset, onEditTags, onDelete }: any
+//     ) => (
+//       <div className="flex items-center">
+//         <Button type="text" onClick={() => onEditAsset?.(record)}>
+//           修改资产
+//         </Button>
+//         <Button type="text" onClick={() => onEditTags?.(record)}>
+//           修改标签
+//         </Button>
+//         <Button type="text" onClick={() => onDelete?.(record)}>
+//           删除
+//         </Button>
+//       </div>
+//     )
+//   }
+// ];
 
 const DataAssetTableList: React.FC<DataAssetTableListProps> = ({
   data,
@@ -127,7 +127,7 @@ const DataAssetTableList: React.FC<DataAssetTableListProps> = ({
   onSelectChange
 }) => {
   // 使用传入的 columns 或默认的 columns
-  const tableColumns = columns || defaultColumns;
+  const tableColumns = columns;
 
   // 计算起始索引（用于序号显示）
   const startIndex = (currentPage - 1) * pageSize;
@@ -166,13 +166,14 @@ const DataAssetTableList: React.FC<DataAssetTableListProps> = ({
           onChange: handleRowSelectionChange
         }}
         columns={
-          tableColumns.map((col) =>
+          tableColumns?.map((col) =>
             col.dataIndex === 'actions'
               ? {
                   ...col,
                   render: (val: any, record: any, idx: number) =>
                     col.render
-                      ? col.render(val, record, idx, {
+                      ? // @ts-expect-error
+                        col.render(val, record, idx, {
                           onEditAsset,
                           onEditTags,
                           onDelete
@@ -206,7 +207,6 @@ const DataAssetTableList: React.FC<DataAssetTableListProps> = ({
             sizeOptions={[10, 20, 50, 100]}
             sizeCanChange
             onChange={handlePageChange}
-            onPageSizeChange={handlePageChange}
           />
         </div>
       )}
