@@ -229,6 +229,7 @@ export function useEditableTree({ catalogTreeStore }) {
     }
     let newTreeData: TreeDataType[] = [...treeData];
     let res: Partial<ApiRes<any>> = {};
+    console.log(dataRef, type, '查看dataRef');
     if (type === 'db_item') {
       const params = {
         path_id: dataRef?.parent_id,
@@ -486,18 +487,21 @@ export function useEditableTree({ catalogTreeStore }) {
               ) && (
                 <>
                   {
-                    <PermissionWrapper
-                      permission={DATA_CATALOG_PERMISSIONS.CAN_UPDATE_DIRS}
-                    >
-                      <Tooltip color="white" content="重命名">
-                        <IconEdit
-                          className={
-                            'extra-icon mr-2 hover:text-[rgb(var(--primary-6))]'
-                          }
-                          onClick={() => handleEdit(node)}
-                        />
-                      </Tooltip>
-                    </PermissionWrapper>
+                    // 元数据节点不显示重命名按钮
+                    dataRef?.type !== CatalogTypeEnum.metadata && (
+                      <PermissionWrapper
+                        permission={DATA_CATALOG_PERMISSIONS.CAN_UPDATE_DIRS}
+                      >
+                        <Tooltip color="white" content="重命名">
+                          <IconEdit
+                            className={
+                              'extra-icon mr-2 hover:text-[rgb(var(--primary-6))]'
+                            }
+                            onClick={() => handleEdit(node)}
+                          />
+                        </Tooltip>
+                      </PermissionWrapper>
+                    )
                   }
                   {
                     <PermissionWrapper
