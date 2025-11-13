@@ -855,6 +855,9 @@ export interface GetMetaDataListParams {
   page: number;
   pageSize: number;
   fieldSearch: FieldSearchItem[];
+  path_id: number;
+  db_name?: string;
+  table_name?: string;
   // 轮询元数据列表时，接口参数中的queryLoadTaskInstance = true
   // 其他情况，queryLoadTaskInstance = false
   queryLoadTaskInstance: boolean;
@@ -884,7 +887,7 @@ export interface RecordItem {
 }
 
 export interface GetMetaDataListRes {
-  searchfields: Field[];
+  fields: Field[];
   records: RecordItem[];
   total: number;
   size: number;
@@ -902,103 +905,103 @@ export interface FieldSearchItem {
 export async function getMetaDataList(
   params: GetMetaDataListParams
 ): Promise<ApiRes<GetMetaDataListRes>> {
-  return Promise.resolve({
-    code: '0',
-    message: 'success',
-    requestId: '123',
-    status: 200,
-    data: {
-      searchfields: [
-        {
-          nameEn: 'name',
-          nameZh: '名称',
-          type: 'string',
-          default: '',
-          required: false,
-          allowModify: true,
-          isEnumAble: false,
-          enumValues: []
-        },
-        {
-          nameEn: 'type',
-          nameZh: '类型',
-          type: 'string',
-          default: '',
-          required: false,
-          allowModify: true,
-          isEnumAble: false,
-          enumValues: []
-        },
-        {
-          nameEn: 'created_at',
-          nameZh: '创建时间',
-          type: 'string',
-          default: '',
-          required: false,
-          allowModify: true,
-          isEnumAble: false,
-          enumValues: []
-        },
-        {
-          nameEn: 'updated_at',
-          nameZh: '更新时间',
-          type: 'string',
-          default: '',
-          required: false,
-          allowModify: true,
-          isEnumAble: false,
-          enumValues: []
-        }
-      ],
-      records: [
-        {
-          id: 1,
-          name: '井位分布图.map',
-          type: '图件',
-          searchContent: ['井位分布图.map'],
-          created_at: '2024-01-01 12:00:00',
-          updated_at: '2024-01-01 12:00:00'
-        },
-        {
-          id: 2,
-          name: '储量计算报告.pdf',
-          type: '文档',
-          searchContent: ['储量计算报告.pdf'],
-          created_at: '2024-01-01 12:00:00',
-          updated_at: '2024-01-01 12:00:00'
-        },
-        {
-          id: 3,
-          name: '试井解释报告.pdf',
-          type: '文档',
-          searchContent: ['试井解释报告.pdf'],
-          created_at: '2024-01-01 12:00:00',
-          updated_at: '2024-01-01 12:00:00'
-        },
-        {
-          id: 4,
-          name: '射孔数据表.job',
-          type: '体数据',
-          searchContent: ['射孔数据表.job'],
-          created_at: '2024-01-01 12:00:00',
-          updated_at: '2024-01-01 12:00:00'
-        },
-        {
-          id: 5,
-          name: '井口温度压力实时趋势.realtime',
-          type: '体数据',
-          searchContent: ['井口温度压力实时趋势.realtime'],
-          created_at: '2024-01-01 12:00:00',
-          updated_at: '2024-01-01 12:00:00'
-        }
-      ],
-      total: 5,
-      size: 10,
-      current: 0,
-      loadTaskStatus: LoadTaskStatus.COMPLETED
-    }
-  });
-  // return await UAPI.RES.listMetaData({}).post(params).inRegion().do();
+  // return Promise.resolve({
+  //   code: '0',
+  //   message: 'success',
+  //   requestId: '123',
+  //   status: 200,
+  //   data: {
+  //     searchfields: [
+  //       {
+  //         nameEn: 'name',
+  //         nameZh: '名称',
+  //         type: 'string',
+  //         default: '',
+  //         required: false,
+  //         allowModify: true,
+  //         isEnumAble: false,
+  //         enumValues: []
+  //       },
+  //       {
+  //         nameEn: 'type',
+  //         nameZh: '类型',
+  //         type: 'string',
+  //         default: '',
+  //         required: false,
+  //         allowModify: true,
+  //         isEnumAble: false,
+  //         enumValues: []
+  //       },
+  //       {
+  //         nameEn: 'created_at',
+  //         nameZh: '创建时间',
+  //         type: 'string',
+  //         default: '',
+  //         required: false,
+  //         allowModify: true,
+  //         isEnumAble: false,
+  //         enumValues: []
+  //       },
+  //       {
+  //         nameEn: 'updated_at',
+  //         nameZh: '更新时间',
+  //         type: 'string',
+  //         default: '',
+  //         required: false,
+  //         allowModify: true,
+  //         isEnumAble: false,
+  //         enumValues: []
+  //       }
+  //     ],
+  //     records: [
+  //       {
+  //         id: 1,
+  //         name: '井位分布图.map',
+  //         type: '图件',
+  //         searchContent: ['井位分布图.map'],
+  //         created_at: '2024-01-01 12:00:00',
+  //         updated_at: '2024-01-01 12:00:00'
+  //       },
+  //       {
+  //         id: 2,
+  //         name: '储量计算报告.pdf',
+  //         type: '文档',
+  //         searchContent: ['储量计算报告.pdf'],
+  //         created_at: '2024-01-01 12:00:00',
+  //         updated_at: '2024-01-01 12:00:00'
+  //       },
+  //       {
+  //         id: 3,
+  //         name: '试井解释报告.pdf',
+  //         type: '文档',
+  //         searchContent: ['试井解释报告.pdf'],
+  //         created_at: '2024-01-01 12:00:00',
+  //         updated_at: '2024-01-01 12:00:00'
+  //       },
+  //       {
+  //         id: 4,
+  //         name: '射孔数据表.job',
+  //         type: '体数据',
+  //         searchContent: ['射孔数据表.job'],
+  //         created_at: '2024-01-01 12:00:00',
+  //         updated_at: '2024-01-01 12:00:00'
+  //       },
+  //       {
+  //         id: 5,
+  //         name: '井口温度压力实时趋势.realtime',
+  //         type: '体数据',
+  //         searchContent: ['井口温度压力实时趋势.realtime'],
+  //         created_at: '2024-01-01 12:00:00',
+  //         updated_at: '2024-01-01 12:00:00'
+  //       }
+  //     ],
+  //     total: 5,
+  //     size: 10,
+  //     current: 0,
+  //     loadTaskStatus: LoadTaskStatus.COMPLETED
+  //   }
+  // });
+  return await UAPI.RES.listMetaData({}).post(params).inRegion().do();
 }
 
 //新建元数据
