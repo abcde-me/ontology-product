@@ -3,7 +3,7 @@ import { TreeDataType } from '@arco-design/web-react/es/Tree/interface';
 import React from 'react';
 import { RefInputType } from '@arco-design/web-react/es/Input/interface';
 import { DataCatalog } from '../components/DataCatalogProvider/DataCatalog';
-import { RootTypeEnum, subLeafKeys } from '../consts';
+import { CatalogTypeEnum, RootTypeEnum, subLeafKeys } from '../consts';
 import { getCatalogList } from '@/api/dataCatalog';
 import { searchTreeData } from '../utils';
 
@@ -300,7 +300,8 @@ export class CatalogTreeStore extends Model<CatalogTreeState, Effects> {
           isLastLeaf: true,
           fullPath: '',
           // TODO: 需要根据item.children.item的类型来决定children的类型
-          children: []
+          children: [],
+          type: CatalogTypeEnum.metadata
         };
       })
     };
