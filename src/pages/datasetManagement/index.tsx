@@ -942,7 +942,8 @@ const DatasetManagement: React.FC = () => {
               connector_id: parseInt(formData?.targetDataSource) || 0,
               connector_file_ids: formData?.selectedFiles || []
             },
-      scene_type: formData.sceneType
+      scene_type: formData.sceneType,
+      file_type: formData.file_type
     };
 
     console.log('提交数据:', submitData);
