@@ -941,7 +941,8 @@ const DatasetManagement: React.FC = () => {
           : {
               connector_id: parseInt(formData?.targetDataSource) || 0,
               connector_file_ids: formData?.selectedFiles || []
-            }
+            },
+      scene_type: formData.sceneType
     };
 
     console.log('提交数据:', submitData);
@@ -1680,6 +1681,7 @@ const DatasetManagement: React.FC = () => {
         visible={modalVisible}
         onSubmit={handleSubmit}
         onCancel={closeModal}
+        sceneOption={datasetSceneOption}
         ref={childRef}
       />
       {/* 导出数据集弹窗 */}
@@ -1729,7 +1731,13 @@ const DatasetManagement: React.FC = () => {
       >
         <Form form={moveDatasetForm} onSubmit={handleMoveDatasetSubmit}>
           <Form.Item label="移动至" field="scene_id">
-            <Select placeholder="请选择标签">
+            <Select
+              placeholder="请选择标签"
+              renderFormat={(option) => {
+                return option?.child?.props?.children?.props?.children[0]?.props
+                  ?.children;
+              }}
+            >
               {datasetSceneOption.map((item) => (
                 <Select.Option key={item.id} value={item.id}>
                   <div className="flex flex-col">
