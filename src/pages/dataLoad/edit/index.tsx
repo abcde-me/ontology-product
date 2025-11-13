@@ -720,7 +720,7 @@ const Edit = (props) => {
       if (res?.status === 200 && res.data) {
         // 根据返回的status更新校验状态
         setCheckStatus(res.data.status);
-        setCheckMessage(res.data.message || '');
+        setCheckMessage(res.data.msg || '');
       } else {
         setCheckStatus(CheckSQLStatus.ERROR);
         setCheckMessage(res?.message || '校验失败');
@@ -774,6 +774,69 @@ const Edit = (props) => {
       if (!pathId) {
         Message.error('请选择载入位置');
         return;
+      }
+
+      // SQL 处理开启时，确保 SQL 已通过校验
+      if (props.detailData?.source_type === 'db') {
+        const sqlProcessEnabled =
+          rest.sql_process_enabled || form.getFieldValue('sql_process_enabled');
+
+        if (sqlProcessEnabled === 'enable') {
+          const sqlToCheck = (
+            rest.sql_process ??
+            sqlContent ??
+            props.detailData?.sql_process ??
+            ''
+          ).trim();
+          const currentConnectorId =
+            props.detailData?.connector_id ||
+            form.getFieldValue('connector_id');
+
+          if (!currentConnectorId) {
+            Message.error('请先选择数据源连接器');
+            return;
+          }
+
+          if (!sqlToCheck) {
+            Message.error('请输入SQL语句');
+            return;
+          }
+
+          if (checkStatus !== CheckSQLStatus.SUCCESS) {
+            setCheckStatus(CheckSQLStatus.CHECKING);
+            setCheckMessage('');
+
+            try {
+              const checkRes = await checkSQL({
+                sql: sqlToCheck,
+                connectorId: Number(currentConnectorId)
+              });
+
+              if (
+                checkRes?.status === 200 &&
+                checkRes.data?.status === CheckSQLStatus.SUCCESS
+              ) {
+                setCheckStatus(CheckSQLStatus.SUCCESS);
+                setCheckMessage(checkRes.data?.msg || '');
+              } else {
+                const failedStatus =
+                  checkRes?.data?.status ?? CheckSQLStatus.ERROR;
+                const failedMessage =
+                  checkRes?.data?.msg || checkRes?.message || 'SQL校验失败';
+                setCheckStatus(failedStatus);
+                setCheckMessage(failedMessage);
+                Message.error(failedMessage);
+                return;
+              }
+            } catch (err: any) {
+              const errorMessage = err?.message || 'SQL校验异常，请稍后重试';
+              setCheckStatus(CheckSQLStatus.ERROR);
+              setCheckMessage(errorMessage);
+              Message.error(errorMessage);
+              return;
+            }
+          }
+        }
       }
       // 构建基础表单数据
       const baseFormData: any = {

@@ -66,8 +66,8 @@ const TableDetail = (props) => {
           <div style={{ marginLeft: '7px' }}>
             {item.status == RunStateType[RunState.SUCCEED].value &&
               RunStateType[RunState.SUCCEED].text}
-            {item.status == RunStateType[RunState.FAILED].value &&
-              RunStateType[RunState.FAILED].text}
+            {item.status == RunStateType[RunState.FAILURE].value &&
+              RunStateType[RunState.FAILURE].text}
             {item.status == RunStateType[RunState.RUNNING].value &&
               RunStateType[RunState.RUNNING].text}
             {item.status == RunStateType[RunState.STOPPED].value &&
@@ -112,7 +112,7 @@ const TableDetail = (props) => {
         },
         {
           text: '运行失败',
-          value: RunState.FAILED
+          value: RunState.FAILURE
         },
         {
           text: '运行停止',
