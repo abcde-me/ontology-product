@@ -579,7 +579,8 @@ export default function DataLoadCreate() {
         dest_path_id: pathId,
         submit_type: submitType === SUBMIT_TYPES.KEEP ? 1 : 2,
         table_names: processedTableNames,
-        db_name: sourceType === SOURCE_TYPES.DB ? tableNames : null
+        db_name: sourceType === SOURCE_TYPES.DB ? tableNames : null,
+        sql: formValues.sql_process_enabled === 'enable' ? formValues.sql : ''
       };
     },
     [sourceType, loadVal, expression, tableList, uploadedFiles, tableNames]

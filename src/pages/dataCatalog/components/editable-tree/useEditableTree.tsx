@@ -303,7 +303,7 @@ export function useEditableTree({ catalogTreeStore }) {
       targetChildrenArray =
         rawChildrenTreeData?.children?.find((child) => child.type === 'db')
           ?.children ?? [];
-    } else if (dataRef?.type === 'meta_data') {
+    } else if (dataRef?.type === 'metadata') {
       const name = generateName(
         targetChildrenArray,
         subLeafKeys[dataRef?.type] // 根据类型生成对应的名称
@@ -480,7 +480,7 @@ export function useEditableTree({ catalogTreeStore }) {
           ) : (
             <>
               {/* 其他类型的操作按钮 */}
-              {['volume', 'db', 'meta_data'].every(
+              {['volume', 'db', 'metadata'].every(
                 (key) => dataRef?.type !== key
               ) && (
                 <>
@@ -532,7 +532,7 @@ export function useEditableTree({ catalogTreeStore }) {
               {/* 为数据卷、数据库和元数据都添加新建按钮 */}
               {(dataRef?.type === 'volume' ||
                 dataRef?.type === 'db' ||
-                dataRef?.type === 'meta_data') && (
+                dataRef?.type === 'metadata') && (
                 <PermissionWrapper
                   permission={DATA_CATALOG_PERMISSIONS.CAN_CREATE_VOLUME}
                 >

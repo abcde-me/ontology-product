@@ -27,7 +27,7 @@ interface ITreeData extends BaseTreeData {
   children?: {
     volume?: BaseTreeData[];
     db?: BaseTreeData[];
-    meta_data?: BaseTreeData[];
+    metadata?: BaseTreeData[];
     db_item?: BaseTreeData[];
   };
 }
@@ -267,20 +267,20 @@ export class CatalogTreeStore extends Model<CatalogTreeState, Effects> {
   }
 
   /**
-   * 转换 meta_data 类型数据为树节点
+   * 转换 metadata 类型数据为树节点
    */
   private convertMetaDataType(
     activeKey: string,
     catalogId: number,
     metaData: BaseTreeData[]
   ): TreeDataType {
-    const typeKey = `${activeKey}-${catalogId}-meta_data`;
+    const typeKey = `${activeKey}-${catalogId}-metadata`;
     const typeData = metaData || [];
 
     return {
-      title: subLeafKeys.meta_data || '元数据',
+      title: subLeafKeys.metadata || '元数据',
       key: typeKey,
-      type: 'meta_data',
+      type: 'metadata',
       parent_id: catalogId,
       fullPath: '',
       children: typeData.map((item) => {
@@ -288,7 +288,7 @@ export class CatalogTreeStore extends Model<CatalogTreeState, Effects> {
         return {
           ...rest,
           title: item.name,
-          key: `${activeKey}-${catalogId}-meta_data-${item.id}`,
+          key: `${activeKey}-${catalogId}-metadata-${item.id}`,
           parent_id: catalogId,
           isLastLeaf: true,
           fullPath: '',
@@ -309,7 +309,7 @@ export class CatalogTreeStore extends Model<CatalogTreeState, Effects> {
     return data.map((catalog) => {
       const childrenArr: TreeDataType[] = [];
 
-      // 根据activeKey决定支持的类型：源数据支持volume、db和meta_data，目标数据只支持volume
+      // 根据activeKey决定支持的类型：源数据支持volume、db和metadata，目标数据只支持volume
       if (activeKey === 'src') {
         // 源数据：处理 volume
         if (catalog.children?.volume) {
@@ -329,13 +329,13 @@ export class CatalogTreeStore extends Model<CatalogTreeState, Effects> {
           );
         }
 
-        // 源数据：处理 meta_data
-        if (catalog.children?.meta_data) {
+        // 源数据：处理 metadata
+        if (catalog.children?.metadata) {
           childrenArr.push(
             this.convertMetaDataType(
               activeKey,
               catalog.id,
-              catalog.children.meta_data
+              catalog.children.metadata
             )
           );
         }

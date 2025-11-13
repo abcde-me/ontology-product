@@ -17,6 +17,9 @@
     line-height: 22px;
     letter-spacing: 0%;
     font-family: 'PingFangSC';
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 }
 
