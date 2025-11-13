@@ -222,8 +222,6 @@ const DatasetForm = React.forwardRef<
   const [total, setTotal] = useState(10);
   // 使用 useRef 来标记是否是首次渲染
   const isInitialMount = useRef(true);
-  // 场景分类
-  const [sceneType, setSceneType] = useState<string>('');
 
   useImperativeHandle(ref, () => {
     const resetForm = () => {
