@@ -1,10 +1,8 @@
 import {
   Button,
-  Cascader,
   Form,
   Input,
   Message,
-  Popover,
   Radio,
   Select,
   TreeSelect
@@ -13,11 +11,9 @@ import React, { useEffect, useRef, useState } from 'react';
 import Styles from './index.module.css';
 import SchedulerRun from '../../../components/scheduler-run';
 import { editLoad, getDirectoryList } from '@/api/loadApi';
-import { getConnectionList, getdetailList } from '@/api/connectionApi';
+import { getdetailList } from '@/api/connectionApi';
 import './index.css';
 import { validateName } from '@/utils/valiate';
-import ellipsisPopoverCom from '@/components/ellipsis-popover-com';
-import EllipsisPopoverCom from '@/components/ellipsis-popover-com';
 import ComponentTree from '../list/component-tree';
 import { isNumber } from 'lodash-es';
 
@@ -27,15 +23,6 @@ interface DirectoryItem {
   label: string;
   children?: DirectoryItem[];
 }
-// 定义cron类型
-interface CronType {
-  date: string;
-  hour: string;
-  minute: string;
-  month: string;
-  week: string;
-}
-
 // 添加根据ID构建级联路径的函数
 function findPathById(
   data: DirectoryItem[],
@@ -169,7 +156,7 @@ const Edit = (props) => {
   const SchedulerRunRef = useRef<HTMLFormElement>(null);
   const form = props.editForm;
   // 载入类型的默认值
-  const [loadVal, setLoadVal] = useState(props.detailData.load_type);
+  const [loadVal, setLoadVal] = useState(props.detailData?.load_type);
   // 按钮以及表单的禁用状态
   const [loading, setLoading] = useState(false);
   // 默认表达式的状态
@@ -177,7 +164,6 @@ const Edit = (props) => {
   // 存储初始路径
   const [initialPath, setInitialPath] = useState<(string | string[])[]>([]);
   const [directoryData, setDirectoryData] = useState([]) as any;
-  const [directoryLoading, setDirectoryLoading] = useState(false);
   // TreeSelect选中的keys
   const [selectedTreeKeys, setSelectedTreeKeys] = useState<string[]>([]);
   // TreeSelect显示的值（路径）
@@ -191,12 +177,6 @@ const Edit = (props) => {
     try {
       const res = await getdetailList(connector_id);
       setTableList(res?.data?.table_name || []);
-      console.log(
-        res?.data?.table_name,
-        '查看抽取的表12321321321332111111111111'
-      );
-
-      console.log(res, '获取连接器下面的表格');
     } catch (error) {
       console.error('获取连接器表格数据失败:', error);
     }
@@ -209,16 +189,10 @@ const Edit = (props) => {
   }, []);
   async function getdirectoryDataList() {
     try {
-      setDirectoryLoading(true);
-      console.log(
-        '开始获取目录数据，当前数据源类型:',
-        props.detailData.source_type
-      );
       const res = await getDirectoryList({
         root_type: 1,
         dir_type: props.detailData.source_type === 'db' ? 3 : undefined
       });
-      console.log('API响应:', res);
       if (!res || res.status !== 200) {
         console.error('获取目录列表失败:', res);
         setDirectoryData([]);
@@ -239,14 +213,11 @@ const Edit = (props) => {
         setDirectoryData([]);
         return [];
       }
-      console.log('原始目录数据:', res.data.src);
 
       if (
         props.detailData.source_type === 's3' ||
         props.detailData.source_type === 'hdfs'
       ) {
-        console.log('处理对象存储/HDFS数据');
-
         const processTreeData = (
           data: any[],
           parentNode: any = null
@@ -383,22 +354,21 @@ const Edit = (props) => {
       }
       return [];
     } finally {
-      setDirectoryLoading(false);
     }
   }
   // 根据data_path_id构建路径
   useEffect(() => {
     if (props.detailData?.data_path_id && directoryData.length > 0) {
       if (
-        props.detailData.source_type === 'db' ||
-        props.detailData.source_type === 'local' ||
-        props.detailData.source_type === 'hdfs' ||
-        props.detailData.source_type === 's3'
+        props.detailData?.source_type === 'db' ||
+        props.detailData?.source_type === 'local' ||
+        props.detailData?.source_type === 'hdfs' ||
+        props.detailData?.source_type === 's3'
       ) {
         // 数据库、本地文件、HDFS、S3类型都使用TreeSelect，需要找到对应的节点ID
         const nodeId = findTreeSelectPathById(
           directoryData,
-          props.detailData.data_path_id
+          props.detailData?.data_path_id
         );
         if (nodeId) {
           console.log('设置TreeSelect初始值:', nodeId);
@@ -406,10 +376,10 @@ const Edit = (props) => {
           // 构建显示路径
           let displayPath = buildTreeSelectDisplayPath(
             directoryData,
-            props.detailData.data_path_id
+            props.detailData?.data_path_id
           );
-          props.detailData.source_type === 'db'
-            ? (displayPath = displayPath + '/' + props.detailData.db_name)
+          props.detailData?.source_type === 'db'
+            ? (displayPath = displayPath + '/' + props.detailData?.db_name)
             : null;
           setTreeSelectDisplayValue(displayPath);
           form.setFieldsValue({
@@ -419,7 +389,10 @@ const Edit = (props) => {
         }
       } else {
         // 其他类型使用Cascader（如果还有的话）
-        const path = findPathById(directoryData, props.detailData.data_path_id);
+        const path = findPathById(
+          directoryData,
+          props.detailData?.data_path_id
+        );
         if (path) {
           setInitialPath(path as (string | string[])[]);
           form.setFieldsValue({
@@ -431,7 +404,7 @@ const Edit = (props) => {
   }, [
     props.detailData?.data_path_id,
     directoryData,
-    props.detailData.source_type
+    props.detailData?.source_type
   ]);
   useEffect(() => {
     getdirectoryDataList();
@@ -470,21 +443,21 @@ const Edit = (props) => {
     // 点击取消隐藏弹框并且重置表单数据
     props.hideEditModalHan();
   };
-  console.log(props.detailData.load_type);
+  console.log(props.detailData?.load_type);
 
   // 点击确定
   const okHan = async () => {
     try {
       setLoading(true);
       const formValues = await form.validate();
-      const { time, day, cycle, ...rest } = formValues;
+      const { ...rest } = formValues;
       // 处理不同数据源类型的路径ID获取
       let pathId;
       if (
-        props.detailData.source_type === 'db' ||
-        props.detailData.source_type === 'local' ||
-        props.detailData.source_type === 'hdfs' ||
-        props.detailData.source_type === 's3'
+        props.detailData?.source_type === 'db' ||
+        props.detailData?.source_type === 'local' ||
+        props.detailData?.source_type === 'hdfs' ||
+        props.detailData?.source_type === 's3'
       ) {
         // 数据库、本地文件、HDFS、S3类型：dest_path直接是节点ID
         pathId = rest.dest_path;
@@ -502,7 +475,7 @@ const Edit = (props) => {
         Message.error('请选择载入位置');
         return;
       }
-      if (props.detailData.load_type !== 'once') {
+      if (props.detailData?.load_type !== 'once') {
         const valid = await SchedulerRunRef.current?.validate();
         if (!valid) return;
         const formData = {
@@ -569,7 +542,7 @@ const Edit = (props) => {
         <FormItem
           label="任务名称："
           required
-          initialValue={props.detailData.name}
+          initialValue={props.detailData?.name}
           field="name"
           labelCol={{ span: 5 }}
           wrapperCol={{ span: 19 }}
@@ -603,7 +576,7 @@ const Edit = (props) => {
           wrapperCol={{ span: 19 }}
           labelAlign="right"
           rules={[{ required: true, message: '请选择数据源类型' }]}
-          initialValue={props.detailData.source_type}
+          initialValue={props.detailData?.source_type}
         >
           <RadioGroup disabled={true}>
             <Radio value="s3">对象存储</Radio>
@@ -619,7 +592,7 @@ const Edit = (props) => {
           wrapperCol={{ span: 19 }}
           labelAlign="right"
           rules={[{ required: true, message: '请输入任务名称' }]}
-          initialValue={props.detailData.connector_name}
+          initialValue={props.detailData?.connector_name}
         >
           <Select
             placeholder="请选择连接器"
@@ -627,7 +600,7 @@ const Edit = (props) => {
             showSearch
           ></Select>
         </FormItem>
-        {props.detailData.source_type === 'db' && (
+        {props.detailData?.source_type === 'db' && (
           <FormItem
             label="选择抽取的表："
             field="table_id"
@@ -635,7 +608,7 @@ const Edit = (props) => {
             wrapperCol={{ span: 19 }}
             labelAlign="right"
             rules={[{ required: true, message: '请选择抽取的表' }]}
-            initialValue={props.detailData.table_names}
+            initialValue={props.detailData?.table_names}
           >
             <Select
               mode="multiple"
@@ -658,7 +631,7 @@ const Edit = (props) => {
 
         <FormItem
           label="载入形式："
-          initialValue={props.detailData.load_type}
+          initialValue={props.detailData?.load_type}
           field="load_type"
           labelCol={{ span: 5 }}
           wrapperCol={{ span: 19 }}
@@ -719,7 +692,7 @@ const Edit = (props) => {
               padding: 0,
               overflow: 'hidden' // 防止外层出现滚动条
             }}
-            dropdownRender={(originNode) => (
+            dropdownRender={() => (
               <ComponentTree
                 directoryData={directoryData}
                 onDirectoryDataChange={setDirectoryData}
@@ -752,8 +725,8 @@ const Edit = (props) => {
                 enableRootAdd={true}
                 activeTab="src"
                 onDataRefresh={getdirectoryDataList}
-                dataSourceType={props.detailData.source_type}
-                tableNameNames={props.detailData.db_name}
+                dataSourceType={props.detailData?.source_type}
+                tableNameNames={props.detailData?.db_name}
               />
             )}
           >

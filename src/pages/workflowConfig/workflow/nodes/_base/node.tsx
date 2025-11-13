@@ -1,28 +1,20 @@
 import type { FC, ReactElement } from 'react';
-import React, { cloneElement, memo, useEffect, useMemo, useRef } from 'react';
+import React, { cloneElement, memo, useEffect, useRef } from 'react';
 import {
   RiAlertFill,
   RiCheckboxCircleFill,
   RiErrorWarningFill,
   RiLoader2Line
 } from '@remixicon/react';
-import { useTranslation } from 'react-i18next';
 import type { NodeProps } from '../../types';
 import { BlockEnum, NodeRunningStatus } from '../../types';
-import { useNodesReadOnly, useToolIcon } from '../../hooks';
-import { hasErrorHandleNode, hasRetryNode } from '../../utils';
+import { useNodesReadOnly } from '../../hooks';
 import { useNodeIterationInteractions } from '../iteration/use-interactions';
 import { useNodeLoopInteractions } from '../loop/use-interactions';
-import type { IterationNodeType } from '../iteration/types';
 import { NodeSourceHandle, NodeTargetHandle } from './components/node-handle';
-import NodeResizer from './components/node-resizer';
 import NodeControl from './components/node-control';
-import ErrorHandleOnNode from './components/error-handle/error-handle-on-node';
-import RetryOnNode from './components/retry/retry-on-node';
-import AddVariablePopupWithPosition from './components/add-variable-popup-with-position';
 import cn from '@/pages/workflowConfig/utils/classnames';
 import BlockIcon from '@/pages/workflowConfig/workflow/block-icon';
-import Tooltip from '@/pages/workflowConfig/components/tooltip';
 import EllipsisPopover from '@/components/ellipsis-popover-com';
 
 type BaseNodeProps = {
@@ -30,12 +22,10 @@ type BaseNodeProps = {
 } & NodeProps;
 
 const BaseNode: FC<BaseNodeProps> = ({ id, data, children }) => {
-  const { t } = useTranslation('plugin__console-plugin-appforge');
   const nodeRef = useRef<HTMLDivElement>(null);
   const { nodesReadOnly } = useNodesReadOnly();
   const { handleNodeIterationChildSizeChange } = useNodeIterationInteractions();
   const { handleNodeLoopChildSizeChange } = useNodeLoopInteractions();
-  const toolIcon = useToolIcon(data);
 
   useEffect(() => {
     if (nodeRef.current && data.selected && data.isInIteration) {
@@ -73,27 +63,6 @@ const BaseNode: FC<BaseNodeProps> = ({ id, data, children }) => {
   const showSelectedBorder =
     data.selected || data._isBundled || data._isEntering;
 
-  const {
-    showRunningBorder,
-    showSuccessBorder,
-    showFailedBorder,
-    showExceptionBorder
-  } = useMemo(() => {
-    return {
-      showRunningBorder:
-        data._runningStatus === NodeRunningStatus.Running &&
-        !showSelectedBorder,
-      showSuccessBorder:
-        data._runningStatus === NodeRunningStatus.Succeeded &&
-        !showSelectedBorder,
-      showFailedBorder:
-        data._runningStatus === NodeRunningStatus.Failed && !showSelectedBorder,
-      showExceptionBorder:
-        data._runningStatus === NodeRunningStatus.Exception &&
-        !showSelectedBorder
-    };
-  }, [data._runningStatus, showSelectedBorder]);
-
   return (
     <div
       className={cn(
@@ -107,25 +76,16 @@ const BaseNode: FC<BaseNodeProps> = ({ id, data, children }) => {
       )}
       ref={nodeRef}
       style={{
-        width:
-          data.type === BlockEnum.Iteration || data.type === BlockEnum.Loop
-            ? data.width
-            : 'auto',
-        height:
-          data.type === BlockEnum.Iteration || data.type === BlockEnum.Loop
-            ? data.height
-            : 'auto'
+        width: 'auto',
+        height: 'auto'
       }}
     >
       <div
         className={cn(
           'wk-node group relative shadow-xs',
           'rounded-[12px] border border-transparent',
-          data.type !== BlockEnum.Iteration &&
-            data.type !== BlockEnum.Loop &&
-            'w-[240px] bg-workflow-block-bg',
-          (data.type === BlockEnum.Iteration || data.type === BlockEnum.Loop) &&
-            'flex h-full w-full flex-col border-workflow-block-border bg-workflow-block-bg-transparent',
+          'w-[240px] bg-workflow-block-bg',
+          'flex h-full flex-col border-workflow-block-border bg-workflow-block-bg-transparent',
           !data._runningStatus && 'show-hover-shadow hover:shadow-lg',
           // showRunningBorder && '!border-state-accent-solid',
           // showSuccessBorder && '!border-state-success-solid',
@@ -143,15 +103,9 @@ const BaseNode: FC<BaseNodeProps> = ({ id, data, children }) => {
             </div>
           )
         } */}
-        {data._showAddVariablePopup && (
+        {/* {data._showAddVariablePopup && (
           <AddVariablePopupWithPosition nodeId={id} nodeData={data} />
-        )}
-        {data.type === BlockEnum.Iteration && (
-          <NodeResizer nodeId={id} nodeData={data} />
-        )}
-        {data.type === BlockEnum.Loop && (
-          <NodeResizer nodeId={id} nodeData={data} />
-        )}
+        )} */}
         {!data._isCandidate && (
           <NodeTargetHandle
             id={id}
@@ -160,35 +114,24 @@ const BaseNode: FC<BaseNodeProps> = ({ id, data, children }) => {
             handleId="target"
           />
         )}
-        {data.type !== BlockEnum.IfElse &&
-          data.type !== BlockEnum.QuestionClassifier &&
-          !data._isCandidate && (
-            <NodeSourceHandle
-              id={id}
-              data={data}
-              handleClassName="!top-4 !-right-[9px] !translate-y-0"
-              handleId="source"
-            />
-          )}
+        {!data._isCandidate && (
+          <NodeSourceHandle
+            id={id}
+            data={data}
+            handleClassName="!top-4 !-right-[9px] !translate-y-0"
+            handleId="source"
+          />
+        )}
         {!data._runningStatus &&
           !nodesReadOnly &&
           !data._isCandidate &&
           data.type !== BlockEnum.Start && <NodeControl id={id} data={data} />}
         <div
           className={cn(
-            'wk-node-header flex items-center rounded-t-2xl px-3 pb-[12px] pt-3',
-            (data.type === BlockEnum.Iteration ||
-              data.type === BlockEnum.Loop) &&
-              'bg-transparent',
-            data.type === BlockEnum.Tool ? 'tool-icon' : ''
+            'wk-node-header flex items-center rounded-t-2xl px-3 pb-[12px] pt-3'
           )}
         >
-          <BlockIcon
-            className="mr-2 shrink-0"
-            type={data.type}
-            size="md"
-            toolIcon={toolIcon}
-          />
+          <BlockIcon className="mr-2 shrink-0" type={data.type} size="md" />
           <div className="system-sm-semibold-uppercase mr-1 flex grow items-center truncate text-text-primary">
             <EllipsisPopover
               value={data.title}
@@ -200,23 +143,6 @@ const BaseNode: FC<BaseNodeProps> = ({ id, data, children }) => {
             {/* <div className="text-[12px]/[18px] font-bold text-[#1E293B]">
               {data.title}
             </div> */}
-            {data.type === BlockEnum.Iteration &&
-              (data as IterationNodeType).is_parallel && (
-                <Tooltip
-                  popupContent={
-                    <div className="w-[180px]">
-                      <div className="font-extrabold">
-                        {t('workflow.nodes.iteration.parallelModeEnableTitle')}
-                      </div>
-                      {t('workflow.nodes.iteration.parallelModeEnableDesc')}
-                    </div>
-                  }
-                >
-                  <div className="system-2xs-medium-uppercase ml-1 flex items-center justify-center rounded-[5px] border-[1px] border-text-warning px-[5px] py-[3px] text-text-warning ">
-                    {t('workflow.nodes.iteration.parallelModeUpper')}
-                  </div>
-                </Tooltip>
-              )}
           </div>
           {data._iterationLength &&
             data._iterationIndex &&
@@ -262,15 +188,7 @@ const BaseNode: FC<BaseNodeProps> = ({ id, data, children }) => {
             />
           </div>
         )}
-        {data.type !== BlockEnum.Iteration &&
-          data.type !== BlockEnum.Loop &&
-          cloneElement(children, { id, data })}
-        {(data.type === BlockEnum.Iteration ||
-          data.type === BlockEnum.Loop) && (
-          <div className="grow pb-1 pl-1 pr-1">
-            {cloneElement(children, { id, data })}
-          </div>
-        )}
+        {cloneElement(children, { id, data })}
         {/* {
           hasRetryNode(data.type) && (
             <RetryOnNode

@@ -5,31 +5,25 @@ import { useShallow } from 'zustand/react/shallow';
 import type { CommonNodeType } from '../types';
 import { Panel as NodePanel } from '../nodes';
 import { useStore } from '../store';
-import { useIsChatMode } from '../hooks';
-// import DebugAndPreview from './debug-and-preview'
-import Record from './record';
-import WorkflowPreview from './workflow-preview';
-// import ChatRecord from './chat-record'
-// import ChatVariablePanel from './chat-variable-panel'
-// import EnvPanel from './env-panel'
-import GlobalVariablePanel from './global-variable-panel';
-import VersionHistoryPanel from './version-history-panel';
+// import { useIsChatMode } from '../hooks';
+// import Record from './record';
+// import WorkflowPreview from './workflow-preview';
+// import GlobalVariablePanel from './global-variable-panel';
+// import VersionHistoryPanel from './version-history-panel';
 import cn from '@/pages/workflowConfig/utils/classnames';
 import { useStore as useTaskStore } from '@/pages/workflowConfig/task/store';
 import MessageLogModal from '@/pages/workflowConfig/components/message-log-modal';
 
 const Panel: FC = () => {
   const nodes = useNodes<CommonNodeType>();
-  const isChatMode = useIsChatMode();
+  // const isChatMode = useIsChatMode();
   const selectedNode = nodes.find((node) => node.data.selected);
-  const historyWorkflowData = useStore((s) => s.historyWorkflowData);
-  const showDebugAndPreviewPanel = useStore((s) => s.showDebugAndPreviewPanel);
-  const showEnvPanel = useStore((s) => s.showEnvPanel);
-  const showChatVariablePanel = useStore((s) => s.showChatVariablePanel);
-  const showGlobalVariablePanel = useStore((s) => s.showGlobalVariablePanel);
-  const showWorkflowVersionHistoryPanel = useStore(
-    (s) => s.showWorkflowVersionHistoryPanel
-  );
+  // const historyWorkflowData = useStore((s) => s.historyWorkflowData);
+  // const showDebugAndPreviewPanel = useStore((s) => s.showDebugAndPreviewPanel);
+  // const showGlobalVariablePanel = useStore((s) => s.showGlobalVariablePanel);
+  // const showWorkflowVersionHistoryPanel = useStore(
+  //   (s) => s.showWorkflowVersionHistoryPanel
+  // );
   const isRestoring = useStore((s) => s.isRestoring);
   const {
     currentLogItem,
@@ -68,30 +62,10 @@ const Panel: FC = () => {
         />
       )}
       {!!selectedNode && <NodePanel {...selectedNode} />}
-      {historyWorkflowData && !isChatMode && <Record />}
-      {/* {
-        historyWorkflowData && isChatMode && (
-          <ChatRecord />
-        )
-      } */}
-      {/* {
-        showDebugAndPreviewPanel && isChatMode && (
-          <DebugAndPreview />
-        )
-      } */}
+      {/* {historyWorkflowData && !isChatMode && <Record />}
       {showDebugAndPreviewPanel && !isChatMode && <WorkflowPreview />}
-      {/* {
-        showEnvPanel && (
-          <EnvPanel />
-        )
-      } */}
-      {/* {
-        showChatVariablePanel && (
-          <ChatVariablePanel />
-        )
-      } */}
       {showGlobalVariablePanel && <GlobalVariablePanel />}
-      {showWorkflowVersionHistoryPanel && <VersionHistoryPanel />}
+      {showWorkflowVersionHistoryPanel && <VersionHistoryPanel />} */}
     </div>
   );
 };

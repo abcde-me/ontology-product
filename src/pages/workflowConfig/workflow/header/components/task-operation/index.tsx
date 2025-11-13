@@ -1,19 +1,7 @@
-import React, {
-  memo,
-  useCallback,
-  useImperativeHandle,
-  useRef,
-  useState
-} from 'react';
+import React, { memo, useCallback, useRef, useState } from 'react';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
-import { useKeyPress } from 'ahooks';
-import { getKeyboardKeyCodeBySystem } from '@/pages/workflowConfig/workflow/utils';
 import { Button, Modal } from '@arco-design/web-react';
-import {
-  useStore,
-  useStore as useTaskStore
-} from '@/pages/workflowConfig/task/store';
 import type { PublishWorkflowParams } from '@/pages/workflowConfig/types/workflow';
 import { Space } from '@arco-design/web-react';
 import { TaskOperationProps, ModelAndParameter } from '../../types';
@@ -22,19 +10,16 @@ import CircleIcon from '@/assets/workflow-header-circle.svg';
 import CircleIconDisabled from '@/assets/workflow-header-circle-disabled.svg';
 import PlayIcon from '@/assets/workflow-header-play.svg';
 import PlayIconDisabled from '@/assets/workflow-header-play-disabled.svg';
-import './index.scss';
+import styles from './index.module.scss';
 import { IsOnline, WorkflowOperation } from '@/types/workflowApi';
 
 dayjs.extend(relativeTime);
-
-const PUBLISH_SHORTCUT = ['⌘', '⇧', 'P'];
 
 const AppPublisher = ({
   workflowStatus,
   cycleText,
   onOperate
 }: TaskOperationProps) => {
-  const [published, setPublished] = useState(false);
   const [newCycleText, setNewCycleText] = useState(cycleText);
   const [schedulerDialogVisible, setSchedulerDialogVisible] = useState(false);
   const isOnline = workflowStatus === IsOnline.online;
@@ -62,10 +47,10 @@ const AppPublisher = ({
 
   return (
     <>
-      <Space className="task-operation">
+      <Space className={styles['task-operation']}>
         <Button
           type="outline"
-          className="toggle-btn"
+          className={styles['toggle-btn']}
           onClick={() => {
             console.log('我进行了操作', isOnline);
             handleOperate(
@@ -77,7 +62,7 @@ const AppPublisher = ({
         </Button>
         <div>
           <Button
-            className="scheduler-btn"
+            className={styles['scheduler-btn']}
             type="outline"
             disabled={!isOnline}
             onClick={() => setSchedulerDialogVisible(true)}
@@ -111,7 +96,7 @@ const AppPublisher = ({
           </Modal>
         </div>
         <Button
-          className="run-btn"
+          className={styles['run-btn']}
           type="primary"
           disabled={!isOnline}
           onClick={() => handleOperate(WorkflowOperation.RUNNING)}

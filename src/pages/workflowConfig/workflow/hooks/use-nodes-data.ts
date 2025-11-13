@@ -3,7 +3,6 @@ import { useTranslation } from 'react-i18next';
 import produce from 'immer';
 import { BlockEnum } from '../types';
 import { NODES_EXTRA_DATA, NODES_INITIAL_DATA } from '../constants';
-import { useIsChatMode } from './use-workflow';
 
 export const useNodesInitialData = () => {
   const { t } = useTranslation('plugin__console-plugin-appforge');
@@ -21,7 +20,7 @@ export const useNodesInitialData = () => {
 
 export const useNodesExtraData = () => {
   const { t } = useTranslation('plugin__console-plugin-appforge');
-  const isChatMode = useIsChatMode();
+  const isChatMode = false;
 
   return useMemo(
     () =>
@@ -59,17 +58,13 @@ export const useAvailableBlocks = (
       availablePrevBlocks: availablePrevBlocks.filter((nType) => {
         if (
           isInIteration &&
-          (nType === BlockEnum.Iteration ||
-            nType === BlockEnum.Loop ||
-            nType === BlockEnum.End)
+          nType === BlockEnum.End
         )
           return false;
 
         if (
           isInLoop &&
-          (nType === BlockEnum.Iteration ||
-            nType === BlockEnum.Loop ||
-            nType === BlockEnum.End)
+          nType === BlockEnum.End
         )
           return false;
 
@@ -77,18 +72,12 @@ export const useAvailableBlocks = (
       }),
       availableNextBlocks: availableNextBlocks.filter((nType) => {
         if (
-          isInIteration &&
-          (nType === BlockEnum.Iteration ||
-            nType === BlockEnum.Loop ||
-            nType === BlockEnum.End)
+          isInIteration && nType === BlockEnum.End
         )
           return false;
 
         if (
-          isInLoop &&
-          (nType === BlockEnum.Iteration ||
-            nType === BlockEnum.Loop ||
-            nType === BlockEnum.End)
+          isInLoop && nType === BlockEnum.End
         )
           return false;
 

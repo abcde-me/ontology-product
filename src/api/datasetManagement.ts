@@ -37,7 +37,7 @@ interface ConnectorListParams {
 }
 
 interface ConnectorFileListParams {
-  connector_id: string;
+  id?: string;
   path?: string;
   page?: number;
   type?: string;
@@ -45,7 +45,7 @@ interface ConnectorFileListParams {
 }
 
 interface UpdateDatasetParams {
-  id: string;
+  id: number;
   name?: string;
   description?: string;
   tag_ids?: string[];
@@ -60,7 +60,7 @@ interface DatasetContentsParams {
 }
 
 interface DatasetDetailPageParams {
-  id: string;
+  id: number;
 }
 
 // 数据变更类型枚举
@@ -134,14 +134,13 @@ export async function getDatasetList(params: DatasetListParams = {}) {
   if (sort_order) {
     queryParams.sort_order = sort_order; // asc 或 desc
   }
-  console.log('queryParams', queryParams);
   return UAPI.RES.datasetsApi({}).post(queryParams).inRegion().do();
 }
 
 //获取数据集详情
-export async function getDatasetDetail(id: string) {
-  return UAPI.RES.datasetDetailApi({ id }).get().inRegion().do();
-}
+// export async function getDatasetDetail(id: string) {
+//   return UAPI.RES.datasetDetailApi({ id }).get().inRegion().do();
+// }
 
 //新建数据集
 export async function createDataset(params: CreateDatasetParams) {
@@ -150,67 +149,58 @@ export async function createDataset(params: CreateDatasetParams) {
 
 //获取标签列表
 export async function getTagList() {
-  return UAPI.RES.tagListApi({}).get().inRegion().do();
+  return UAPI.RES.tagListApi({}).post({}).inRegion().do();
 }
 
 //查询连接器信息列表
 export async function getConnectorList(params: ConnectorListParams = {}) {
   return UAPI.RES.connectorListApi({})
-    .get(params)
+    .post(params)
     .inRegion()
     .do({ preCheck: false });
 }
 
 //查询指定连接器加载成功的文件信息
 export async function getConnectorFileList(params: ConnectorFileListParams) {
-  return UAPI.RES.connectorFileListApi({ connector_id: params.connector_id })
-    .get({ type: params.type })
-    .inRegion()
-    .do();
+  return UAPI.RES.connectorFileListApi({}).post(params).inRegion().do();
 }
 
 //修改数据集
 export async function updateDataset(params: UpdateDatasetParams) {
-  return UAPI.RES.updateDatasetApi({ dataset_id: params.id })
-    .put(params)
-    .inRegion()
-    .do();
+  return UAPI.RES.updateDatasetApi({}).post(params).inRegion().do();
 }
 
 //获取数据集详情页
 export async function getDatasetDetailPage(params: DatasetDetailPageParams) {
-  return UAPI.RES.datasetDetailPageApi({ dataset_id: params.id })
-    .get()
-    .inRegion()
-    .do();
+  return UAPI.RES.datasetDetailPageApi({}).post(params).inRegion().do();
 }
 
 //获取数据集详情页的数据内容
 export async function getDatasetContents(params: DatasetContentsParams) {
-  return UAPI.RES.datasetContentsApi({}).get(params).inRegion().do();
-}
-
-//编辑数据集版本数据
-export async function editDatasetVersion(params: EditDatasetVersionParams) {
-  return UAPI.RES.editDatasetVersionApi({}).put(params).inRegion().do();
-}
-
-//获取数据集版本列表
-export async function getDatasetVersionList(params: any) {
-  return UAPI.RES.datasetVersionListApi({}).get(params).inRegion().do();
-}
-
-//删除数据集
-export async function deleteDataset(params: any) {
-  return UAPI.RES.deleteDatasetApi({ dataset_id: params.id })
-    .delete()
+  return UAPI.RES.datasetContentsApi({})
+    .post({ ...params, id: Number(params.id) })
     .inRegion()
     .do();
 }
 
+//编辑数据集版本数据
+export async function editDatasetVersion(params: EditDatasetVersionParams) {
+  return UAPI.RES.editDatasetVersionApi({}).post(params).inRegion().do();
+}
+
+//获取数据集版本列表
+export async function getDatasetVersionList(params: any) {
+  return UAPI.RES.datasetVersionListApi({}).post(params).inRegion().do();
+}
+
+//删除数据集
+export async function deleteDataset(params: any) {
+  return UAPI.RES.deleteDatasetApi({}).post(params).inRegion().do();
+}
+
 //批量删除数据集
 export async function batchDeleteDataset(params: BatchDeleteDatasetParams) {
-  return UAPI.RES.batchDeleteDatasetApi({}).delete(params).inRegion().do();
+  return UAPI.RES.batchDeleteDatasetApi({}).post(params).inRegion().do();
 }
 
 //版本重新生成
@@ -228,7 +218,7 @@ interface TargetDataFileQueryParams {
 }
 //查询目标数据文件列表
 export async function getTargetDataFileList(params: TargetDataFileQueryParams) {
-  return await UAPI.RES.targetDataFileListApi({}).get(params).inRegion().do();
+  return await UAPI.RES.targetDataFileListApi({}).post(params).inRegion().do();
 }
 //查询数据内容文件列表
 export async function getDataContentFileList(params: {
@@ -237,133 +227,32 @@ export async function getDataContentFileList(params: {
   page: number;
   page_size: number;
 }) {
-  return await UAPI.RES.dataContentFileList({}).get(params).inRegion().do();
+  return await UAPI.RES.dataContentFileList({})
+    .post({ ...params, id: Number(params.id) })
+    .inRegion()
+    .do();
 }
 //查询数据内容数据库列表
 export async function getDataContentTableList(params: {
   id: number | string;
   version_id: string;
 }) {
-  return await UAPI.RES.dataContentTableList({}).get(params).inRegion().do();
+  return await UAPI.RES.dataContentTableList({}).post(params).inRegion().do();
 }
-
-//获取连接器列表
-// export async function getconnectorList(params: any = {}){
-//   return UAPI.RES.connectorListAPI({}).get(params).inRegion().do();
-// }
-// //获取连接器文件信息
-// export async function getconnectorFileInformation(params: any = {}){
-//   return UAPI.RES.datasets({}).post(params).inRegion().do();
-// }
-
-// export async function deleteDataset(params:any){
-//   return UAPI.RES.datasets({}).delete(params).inRegion().do();
-// }
 
 // 搜索数据集列表
 export async function searchDatasetList(
   params: GetDatasetListReq
 ): Promise<ApiRes<GetDatasetListRes>> {
-  // TODO: 联调
   return await UAPI.RES.datasetsApi({}).post(params).inRegion().do();
-
-  // Mock implementation per spe
-  // return Promise.resolve({
-  //   status: 200,
-  //   code: '',
-  //   message: 'OK',
-  //   requestId: '1',
-  //   data: {
-  //     list: [
-  //       {
-  //         database: 'sample_db',
-  //         id: 331,
-  //         latest_size: 102400,
-  //         latest_table: 'sample_table',
-  //         latest_version: 'v1.0.0',
-  //         name: '示例数据集',
-  //         scheams: [
-  //           { cn_name: '姓名', name: 'name' },
-  //           { cn_name: '年龄', name: 'age' }
-  //         ],
-  //         status: 'active',
-  //         storage_type: 'table'
-  //       },
-  //       {
-  //         database: 'test_db',
-  //         id: 347,
-  //         latest_size: 204800,
-  //         latest_table: 'test_table',
-  //         latest_version: 'v2.1.0',
-  //         name: '测试数据集',
-  //         scheams: [
-  //           { cn_name: '编号', name: 'id' },
-  //           { cn_name: '分数', name: 'score' }
-  //         ],
-  //         status: 'inactive',
-  //         storage_type: 'jsonl'
-  //       }
-  //     ],
-  //     total: 0,
-  //     page: 1,
-  //     limit: 10
-  //   }
-  // });
 }
 
 export async function getDatasetVersionFile(
   params: DatasetVersionFileParams
 ): Promise<ApiRes<DatasetVersionFileRes>> {
   // TODO: 联调
-  return await UAPI.RES.dataContentFileList({}).get(params).inRegion().do();
-
-  // Mock implementation per spe
-  // return Promise.resolve({
-  //   status: 200,
-  //   code: '',
-  //   message: 'OK',
-  //   requestId: '1',
-  //   data: {
-  //     list: [
-  //       {
-  //         created_at: '2021-01-01 12:00:00',
-  //         file_modify_time: '2021-01-01 12:00:00',
-  //         file_name: 'example.txt',
-  //         file_size: '1024',
-  //         file_type: 'file'
-  //       },
-  //       {
-  //         created_at: '2021-02-15 09:30:00',
-  //         file_modify_time: '2021-02-15 10:00:00',
-  //         file_name: 'data.jsonl',
-  //         file_size: '2048',
-  //         file_type: 'file'
-  //       },
-  //       {
-  //         created_at: '2021-03-10 14:20:00',
-  //         file_modify_time: '2021-03-10 15:00:00',
-  //         file_name: 'table_data.csv',
-  //         file_size: '4096',
-  //         file_type: 'file'
-  //       },
-  //       {
-  //         created_at: '2021-04-01 08:00:00',
-  //         file_modify_time: '2021-04-01 08:30:00',
-  //         file_name: 'report.pdf',
-  //         file_size: '5120',
-  //         file_type: 'file'
-  //       },
-  //       {
-  //         created_at: '2021-05-20 16:45:00',
-  //         file_modify_time: '2021-05-20 17:00:00',
-  //         file_name: 'archive.zip',
-  //         file_size: '8192',
-  //         file_type: 'file'
-  //       }
-  //     ],
-  //     total: 1,
-  //     page: 1,
-  //     limit: 10
-  //   }
-  // });
+  return await UAPI.RES.dataContentFileList({})
+    .post({ ...params, id: Number(params.id) })
+    .inRegion()
+    .do();
 }

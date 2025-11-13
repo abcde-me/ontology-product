@@ -37,7 +37,6 @@ interface DstCatalogItemWithPath {
   id?: number;
   name?: string;
   parent_id?: number;
-  perms?: string[];
   type?: number;
   type_name?: string;
   full_path?: string;
@@ -271,7 +270,6 @@ export const useSourceTargetTree = (dataType) => {
       return null;
     };
 
-    console.log('treeData', treeData);
     console.log('nodeKey', nodeKey);
     const nodePath = findNodePath(treeData, nodeKey);
     if (!nodePath) return null;

@@ -11,19 +11,20 @@ import { ColumnProps } from '@arco-design/web-react/es/Table';
 import EllipsisPopover from '@/components/ellipsis-popover-com';
 import noDataElement from '@/components/no-data';
 import { getAnnotationTaskList } from '@/api/dataAnnotation';
-import { useUserInfo } from '@/store/userInfoStore';
+import { useHasPermission, useUserInfo } from '@/store/userInfoStore';
+import { ANNOTATION_TASK_PERMISSIONS } from '@/config/permissions';
 import { openNewPage } from '@/utils/env';
 import { RequirementTypeNameMap } from './type';
 import { SorterInfo } from '@arco-design/web-react/es/Table/interface';
 import './index.scss';
 
-export default function Requirement() {
+function TaskList() {
   const [form] = Form.useForm();
   const FormItem = Form.Item;
   const userInfo = useUserInfo();
   const InputSearch = Input.Search;
   // 初始化搜索框value
-  const [searchValue, setSearchValue]: any = useState(null);
+  const [searchValue, setSearchValue] = useState<any>(null);
   // 初始化任务列表数据
   const [taskData, setTaskData] = useState([]);
   // 当前的第几页
@@ -37,7 +38,7 @@ export default function Requirement() {
   // 区分是否点击按钮清空搜索框
   const [isClickClear, setIsClickClear] = useState(false);
   // 初始化筛选的值
-  const [sortValue, setSortValue]: any = useState({});
+  const [sortValue, setSortValue] = useState<any>({});
 
   // 组件初始化
   useEffect(() => {
@@ -79,7 +80,7 @@ export default function Requirement() {
   };
 
   // 查看详情
-  const viewDetailWorkflow = (record: Record<string, any>) => {
+  const viewDetailRequirement = (record: Record<string, any>) => {
     openNewPage(
       `/modaforge/tenant/compute/modaforge/labelEditor?rId=${record.id}`
     );
@@ -106,6 +107,11 @@ export default function Requirement() {
 
     setSortValue(sortdata);
   };
+
+  // 查询是否有权限标注
+  const hasPermissionGetTask = useHasPermission(
+    ANNOTATION_TASK_PERMISSIONS.GET
+  );
 
   // table数据为空时展示-
   const renderEmptyPlaceholder = (value: string | null) => {
@@ -224,19 +230,19 @@ export default function Requirement() {
       fixed: 'right',
       width: 75,
       render: (_, record) => {
-        const perms = record.perms || [];
         return (
           <div style={{ display: 'flex' }}>
             {/* {perms.includes(WORKFLOW_LIST_PERMISSIONS.CAN_GET) && ( */}
-            <span
-              className="operate-text"
-              onClick={() => {
-                viewDetailWorkflow(record);
-              }}
-            >
-              标注
-            </span>
-            {/* )} */}
+            {hasPermissionGetTask && (
+              <span
+                className="operate-text"
+                onClick={() => {
+                  viewDetailRequirement(record);
+                }}
+              >
+                标注
+              </span>
+            )}
           </div>
         );
       }
@@ -287,7 +293,6 @@ export default function Requirement() {
         pagination={false}
         noDataElement={noDataElement({
           description: '暂无任务'
-          // perms: WORKFLOW_LIST_PERMISSIONS.CAN_CREATE,
         })}
         rowKey="id"
         loading={loading}
@@ -318,3 +323,5 @@ export default function Requirement() {
     </div>
   );
 }
+
+export default TaskList;

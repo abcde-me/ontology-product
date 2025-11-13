@@ -121,10 +121,11 @@ export class CatalogTreeStore extends Model<CatalogTreeState, Effects> {
 
   async initTreeData(options: Parameters<Effects['fetchData']>[0]) {
     const { activeTab } = this.getState();
+    const activeKey = options?.activeTab || activeTab;
 
     try {
       const cacheTreeData = await this.getRawData({
-        activeKey: options?.activeTab || activeTab
+        activeKey
       });
 
       let defaultExpand: string[] = [];
@@ -133,7 +134,7 @@ export class CatalogTreeStore extends Model<CatalogTreeState, Effects> {
 
       if (options?.parent_id && options.id) {
         // 根据新的key格式查找节点
-        const parentKey = `${activeTab}-catalog-${options.parent_id}`;
+        const parentKey = `${activeKey}-catalog-${options.parent_id}`;
         defaultNode =
           cacheTreeData.find((d) => d.key === parentKey) || defaultNode;
         selectedNode =
@@ -149,7 +150,7 @@ export class CatalogTreeStore extends Model<CatalogTreeState, Effects> {
 
       return {
         searchValue: '',
-        activeTab: options?.activeTab || activeTab,
+        activeTab: activeKey,
         treeData: cacheTreeData,
         rawTreeData: cacheTreeData,
         expandedKeys: defaultExpand,

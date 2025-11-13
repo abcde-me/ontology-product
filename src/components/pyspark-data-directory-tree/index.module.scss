@@ -1,0 +1,33 @@
+.pyspark-data-directory-tree {
+  height: 100%;
+
+  .tree-content {
+    :global(.arco-tree-node-indent) {
+      display: none;
+    }
+
+    :global(.arco-tree-node-switcher) {
+      width: 0;
+      display: none;
+    }
+  }
+
+  :global(.arco-tree-node-custom-icon) {
+    margin-right: 4px;
+  }
+
+  //   :global(.arco-tree-node) {
+  //     position: relative;
+  //     border-radius: 2px;
+  //     padding-left: 0 !important;
+  //     overflow: hidden;
+
+  //     &:global(.arco-tree-node-title) {
+  //       padding: 7px 0;
+  //       font-size: 14px;
+  //       display: flex;
+  //       align-items: center;
+  //       margin-left: 0px;
+  //     }
+  //   }
+}

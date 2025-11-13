@@ -1,6 +1,4 @@
 import UAPI from '@/api';
-import { Get, Post } from '@/utils/request';
-import { Message } from '@arco-design/web-react';
 
 // 数据目录相关接口
 
@@ -188,7 +186,7 @@ export async function getCatalogList(
   param: GetCatalogListParams
 ): Promise<ApiRes<GetCatalogListRes>> {
   // TODO: 联调
-  return await UAPI.RES.catalogListApi({}).get(param).inRegion().do();
+  return await UAPI.RES.catalogListApi({}).post(param).inRegion().do();
 
   // mock data
   // return Promise.resolve({
@@ -437,7 +435,7 @@ export interface GetTargetCatalogFileListParams {
   /**
    * 文件所属目录ID，卷ID
    */
-  path_id: string;
+  path_id: string | number;
   /**
    * 搜索数据内容
    */
@@ -560,7 +558,10 @@ export async function getTargetCatalogFileList(
   param: GetTargetCatalogFileListParams
 ): Promise<ApiRes<GetTargetCatalogFileListRes>> {
   // TODO: 联调
-  return await UAPI.RES.targetDataFileListApi({}).get(param).inRegion().do();
+  return await UAPI.RES.targetDataFileListApi({})
+    .post({ ...param })
+    .inRegion()
+    .do();
 
   // mock data
   // return Promise.resolve({
@@ -618,21 +619,24 @@ export async function deleteVolume(
   id: string,
   params?: { root_type?: string }
 ) {
-  const res = await UAPI.RES.volumeDeleteApi({ id })
-    .delete(params)
+  const res = await UAPI.RES.volumeDeleteApi({})
+    .post({ ...params, id })
     .inRegion()
     .do();
   return res;
 }
 // 删除库表
 export async function deleteTable(data) {
-  const res = await UAPI.RES.tableDeleteApi({}).post(data).inRegion().do();
+  const res = await UAPI.RES.tableDeleteApi({})
+    .post({ ...data })
+    .inRegion()
+    .do();
   return res;
 }
 // 重命名目录
 export async function renameCatalog(id: string, params: any) {
-  const res = await UAPI.RES.catalogRenameApi({ catalogId: id })
-    .put(params)
+  const res = await UAPI.RES.catalogRenameApi({})
+    .post({ ...params, catalogId: id })
     .inRegion()
     .do();
   return res;
@@ -658,10 +662,6 @@ interface TargetDataFileQueryParams {
   sort_order?: string;
 }
 
-interface SourceFileTypeList {
-  id: string;
-}
-
 // 定义删除目标文件的参数接口
 interface TargetFileDeleteParams {
   file_ids: Array<number | string>;
@@ -683,7 +683,7 @@ interface SourceDataFileQueryParams {
 //查询目标数据文件列表
 export async function getTargetDataFileList(params: TargetDataFileQueryParams) {
   const { file_type, ...restParams } = params;
-
+  console.log('params222', params);
   const queryParams = new URLSearchParams();
 
   Object.entries(restParams).forEach(([key, value]) => {
@@ -698,46 +698,41 @@ export async function getTargetDataFileList(params: TargetDataFileQueryParams) {
       queryParams.append('file_type', type);
     });
   }
-
-  return await UAPI.RES.targetDataFileListApi({})
-    .get(queryParams)
-    .inRegion()
-    .do();
+  console.log('queryParams', queryParams);
+  return await UAPI.RES.targetDataFileListApi({}).post(params).inRegion().do();
 }
 //查询目标数据文件类型列表
 export async function getTargetFileTypeList() {
-  return await UAPI.RES.targetFileTypeListApi({}).get().inRegion().do();
+  return await UAPI.RES.targetFileTypeListApi({}).post().inRegion().do();
 }
 //查询源数据文件类型列表
 export async function getSourceFileTypeList(params) {
-  return await UAPI.RES.sourceFileTypeListApi({
-    file_id: params.id
-  })
-    .get()
+  return await UAPI.RES.sourceFileTypeListApi({})
+    .post({ data_path_id: Number(params?.id) })
     .inRegion()
     .do();
 }
 
 //删除目标文件
 export async function deleteTargetFile(params: TargetFileDeleteParams) {
-  const { file_ids, ...restParams } = params;
+  // const { file_ids, ...restParams } = params;
 
-  const queryParams = new URLSearchParams();
+  // const queryParams = new URLSearchParams();
 
-  Object.entries(restParams).forEach(([key, value]) => {
-    if (value !== undefined && value !== null) {
-      queryParams.append(key, String(value));
-    }
-  });
+  // Object.entries(restParams).forEach(([key, value]) => {
+  //   if (value !== undefined && value !== null) {
+  //     queryParams.append(key, String(value));
+  //   }
+  // });
 
-  file_ids.forEach((id) => {
-    queryParams.append('file_ids', String(id));
-  });
+  // file_ids.forEach((id) => {
+  //   queryParams.append('file_ids', String(id));
+  // });
 
   return await UAPI.RES.targetDataFileDeleteApi({})
-    .delete()
-    .withConfig({
-      params: queryParams
+    .post({
+      ...params,
+      path_id: Number(params.path_id)
     })
     .inRegion()
     .do();
@@ -745,39 +740,42 @@ export async function deleteTargetFile(params: TargetFileDeleteParams) {
 
 //查询源数据文件列表
 export async function getSourceDataFileList(params: SourceDataFileQueryParams) {
-  return await UAPI.RES.sourceDataFileListApi({}).post(params).inRegion().do();
+  return await UAPI.RES.sourceDataFileListApi({})
+    .post({ ...params })
+    .inRegion()
+    .do();
 }
 //删除源数据目录单个文件
 export async function deleteSourceFile(id: string) {
-  return await UAPI.RES.sourceDataFileDeleteApi({ file_id: id })
-    .delete()
+  return await UAPI.RES.sourceDataFileDeleteApi({})
+    .post({ id })
     .inRegion()
     .do();
 }
 //批量删除源数据文件
 export async function deleteSourceFileBatch(params: any) {
   return await UAPI.RES.sourceDataFileDeleteBatcheApi({})
-    .delete(params)
+    .post({ ...params })
     .inRegion()
     .do();
 }
 
 //预览/搜索数据集
 export async function getCatalogPreview(param: any = {}) {
-  return await UAPI.RES.catalogPreviewApi({}).get(param).inRegion().do();
+  return await UAPI.RES.catalogPreviewApi({}).post(param).inRegion().do();
 }
 
 //删除目录文件接口
 export async function deleteFileById(id: string, params: any = {}) {
-  return await UAPI.RES.fileDeleteApi({ file_id: id }) //暂定只传一个id，后面再添加其他参数
-    .delete(params)
+  return await UAPI.RES.fileDeleteApi({}) //暂定只传一个id，后面再添加其他参数
+    .post({ ...params, file_id: id })
     .inRegion()
     .do();
 }
 
 //查询指定目录下，已加载成功的文件记录
 export async function getDataCatalogList(param: any = {}) {
-  return await UAPI.RES.dataCatalogListApi({}).get(param).inRegion().do();
+  return await UAPI.RES.dataCatalogListApi({}).post(param).inRegion().do();
 }
 
 // 获取数据目录列表
@@ -811,7 +809,7 @@ export async function getDbItemList(params: DbTableListParamss) {
   //         file_size: 100,
   //         upload_user: '小王1',
   //         task_load_start_time: '2025-08-28T13:43:06+08:00',
-  //         connector_name: 'mysql',
+  //         connector_name: 'MySQL',
   //         deleted_at: null,
   //         extras: {
   //           ds_workflow_id: '150455535967520',
@@ -829,7 +827,7 @@ export async function getDbItemList(params: DbTableListParamss) {
   //         file_size: 100,
   //         upload_user: '小王2',
   //         task_load_start_time: '2025-08-28T13:43:06+08:00',
-  //         connector_name: 'mysql',
+  //         connector_name: 'MySQL',
   //         deleted_at: null,
   //         extras: {
   //           ds_workflow_id: '150455535967520',
@@ -847,7 +845,7 @@ export async function getDbItemList(params: DbTableListParamss) {
   //         file_size: 100,
   //         upload_user: '小王3',
   //         task_load_start_time: '2025-08-28T13:43:06+08:00',
-  //         connector_name: 'mysql',
+  //         connector_name: 'MySQL',
   //         deleted_at: null,
   //         extras: {
   //           ds_workflow_id: '150455535967520',
@@ -866,7 +864,7 @@ export async function getDbItemList(params: DbTableListParamss) {
   //         file_size: 100,
   //         upload_user: '小王4',
   //         task_load_start_time: '2025-08-28T13:43:06+08:00',
-  //         connector_name: 'mysql',
+  //         connector_name: 'MySQL',
   //         deleted_at: null,
   //         extras: {
   //           ds_workflow_id: '150455535967520',
@@ -884,7 +882,7 @@ export async function getDbItemList(params: DbTableListParamss) {
   //         file_size: 100,
   //         upload_user: '小王5',
   //         task_load_start_time: '2025-08-28T13:43:06+08:00',
-  //         connector_name: 'mysql',
+  //         connector_name: 'MySQL',
   //         deleted_at: null,
   //         extras: {
   //           ds_workflow_id: '150455535967520',
@@ -902,7 +900,7 @@ export async function getDbItemList(params: DbTableListParamss) {
   //         file_size: 100,
   //         upload_user: '小王6',
   //         task_load_start_time: '2025-08-28T13:43:06+08:00',
-  //         connector_name: 'mysql',
+  //         connector_name: 'MySQL',
   //         deleted_at: null,
   //         extras: {
   //           ds_workflow_id: '150455535967520',
@@ -920,7 +918,7 @@ export async function getDbItemList(params: DbTableListParamss) {
   //         file_size: 100,
   //         upload_user: '小王7',
   //         task_load_start_time: '2025-08-28T13:43:06+08:00',
-  //         connector_name: 'mysql',
+  //         connector_name: 'MySQL',
   //         deleted_at: null,
   //         extras: {
   //           ds_workflow_id: '150455535967520',
@@ -938,7 +936,7 @@ export async function getDbItemList(params: DbTableListParamss) {
   //         file_size: 100,
   //         upload_user: '小王8',
   //         task_load_start_time: '2025-08-28T13:43:06+08:00',
-  //         connector_name: 'mysql',
+  //         connector_name: 'MySQL',
   //         deleted_at: null,
   //         extras: {
   //           ds_workflow_id: '150455535967520',
@@ -956,7 +954,7 @@ export async function getDbItemList(params: DbTableListParamss) {
   //         file_size: 100,
   //         upload_user: '小王9',
   //         task_load_start_time: '2025-08-28T13:43:06+08:00',
-  //         connector_name: 'mysql',
+  //         connector_name: 'MySQL',
   //         deleted_at: null,
   //         extras: {
   //           ds_workflow_id: '150455535967520',
@@ -974,7 +972,7 @@ export async function getDbItemList(params: DbTableListParamss) {
   //         file_size: 100,
   //         upload_user: '小王10',
   //         task_load_start_time: '2025-08-28T13:43:06+08:00',
-  //         connector_name: 'mysql',
+  //         connector_name: 'MySQL',
   //         deleted_at: null,
   //         extras: {
   //           ds_workflow_id: '150455535967520',
@@ -992,7 +990,7 @@ export async function getDbItemList(params: DbTableListParamss) {
   //         file_size: 100,
   //         upload_user: '小王11',
   //         task_load_start_time: '2025-08-28T13:43:06+08:00',
-  //         connector_name: 'mysql',
+  //         connector_name: 'MySQL',
   //         deleted_at: null,
   //         extras: {
   //           ds_workflow_id: '150455535967520',
@@ -1010,7 +1008,7 @@ export async function getDbItemList(params: DbTableListParamss) {
   //         file_size: 100,
   //         upload_user: '小王12',
   //         task_load_start_time: '2025-08-28T13:43:06+08:00',
-  //         connector_name: 'mysql',
+  //         connector_name: 'MySQL',
   //         deleted_at: null,
   //         extras: {
   //           ds_workflow_id: '150455535967520',

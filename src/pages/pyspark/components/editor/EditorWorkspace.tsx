@@ -21,11 +21,13 @@ import { useExportDaset } from '../../hooks/useExportDaset';
 import DatasetForm from '../daset-export/AddDatasetForm';
 import ExampleCodeModal from './ExampleCodeModal';
 import { PYSPARK_PERMISSIONS } from '@/config/permissions';
-import DiaoYongSuanZiIcon from '@/assets/python/diaoyongsuanzi.svg';
 import ExampleIcon from '@/assets/python/example.svg';
 import SuanZiIcon from '@/assets/python/diaoyongsuanzi.svg';
 import IconStop from '@/assets/sql/sql-stop-icon.svg';
 import copy from 'copy-to-clipboard';
+import { PermissionWrapper } from '@/components/PermissionGuard';
+import { useHasPermission } from '@/store/userInfoStore';
+import classNames from 'classnames';
 
 interface NotebookWorkspaceProps {
   content: string;
@@ -33,7 +35,6 @@ interface NotebookWorkspaceProps {
   currentFileId?: string;
   activeTab?: string;
   fileTabs?: Array<{
-    perms?: Array<string>;
     key: string;
     title: string;
     content: string;
@@ -47,8 +48,6 @@ interface NotebookWorkspaceProps {
 
 const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = memo(
   ({
-    content,
-    fileName,
     currentFileId,
     activeTab,
     fileTabs,
@@ -58,12 +57,9 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = memo(
     onEditorFocusChange
   }) => {
     const editorRef = useRef<ReactCodeMirrorRef>(null);
-    const [lastCursorPosition, setLastCursorPosition] =
-      React.useState<number>(0);
-    const [isEditorFocused, setIsEditorFocused] =
-      React.useState<boolean>(false);
     const [exampleModalVisible, setExampleModalVisible] =
       useState<boolean>(false);
+    const hasUpdatePermission = useHasPermission(PYSPARK_PERMISSIONS.MODIFY);
     // 使用useEditor hook管理编辑器状态
     const {
       runStatus,
@@ -71,8 +67,6 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = memo(
       runDuration,
       activeKey,
       setActiveKey,
-      handleStopRunCode,
-      handleRunCode,
       handleGetRunLog,
       handleGetRunResult,
       lastAutoSave,
@@ -105,11 +99,6 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = memo(
       }
     });
 
-    const getActiveTabPerms = () => {
-      const now_active =
-        fileTabs?.filter((item) => item.key === activeTab) || [];
-      return now_active[0]?.perms || [];
-    };
     // console.log('看一看编辑器卡顿的事情～');
 
     // const myTheme = createTheme({
@@ -157,10 +146,6 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = memo(
       setModalDatasetVisible(false);
     };
 
-    const handleExportList = () => {
-      console.log('Exporting list...');
-    };
-
     const handleCallOperator = () => {
       // 切换到左侧tools菜单
       if (onSidebarTabChange) {
@@ -186,16 +171,9 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = memo(
       }
     };
 
-    // 处理光标位置变化
-    const handleCursorChange = useCallback((view: EditorView) => {
-      const pos = view.state.selection.main.head;
-      setLastCursorPosition(pos);
-    }, []);
-
     // 处理编辑器聚焦状态变化
     const handleFocusChange = useCallback(
       (focused: boolean) => {
-        setIsEditorFocused(focused);
         if (onEditorFocusChange) {
           onEditorFocusChange(focused);
         }
@@ -208,7 +186,7 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = memo(
       if (!editorRef.current?.view) return;
 
       // 检查权限
-      if (!getActiveTabPerms()?.includes(PYSPARK_PERMISSIONS.CAN_UPDATE)) {
+      if (!hasUpdatePermission) {
         Message.warning('没有编辑权限，无法插入内容');
         return;
       }
@@ -237,20 +215,17 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = memo(
       }
     }, [insertContentAtCursor, onInsertContent]);
 
+    // 计算编辑器是否为只读状态
+    const isReadOnly =
+      !hasUpdatePermission || runStatus === RunningStatus.RUNNING;
+
     return (
       <div className="notebook-content">
         {/* 顶部工具栏 */}
         <div className="notebook-toolbar">
           <div className="toolbar-left">
             <Space size={12}>
-              {((runStatus === RunningStatus.RUNNING &&
-                getActiveTabPerms()?.includes(
-                  PYSPARK_PERMISSIONS.CAN_CANCEL_RUN
-                )) ||
-                (runStatus !== RunningStatus.RUNNING &&
-                  getActiveTabPerms()?.includes(
-                    PYSPARK_PERMISSIONS.CAN_RUN
-                  ))) && (
+              <PermissionWrapper permission={PYSPARK_PERMISSIONS.RUN}>
                 <Button
                   type="primary"
                   icon={
@@ -266,10 +241,8 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = memo(
                 >
                   {runStatus === RunningStatus.RUNNING ? '停止运行' : '运行'}
                 </Button>
-              )}
-              {getActiveTabPerms()?.includes(
-                PYSPARK_PERMISSIONS.CAN_EXPORT
-              ) && (
+              </PermissionWrapper>
+              <PermissionWrapper permission={PYSPARK_PERMISSIONS.EXPORT}>
                 <Button
                   icon={<IconUpload />}
                   onClick={handleExportDataset}
@@ -278,7 +251,7 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = memo(
                 >
                   导出数据集
                 </Button>
-              )}
+              </PermissionWrapper>
               <Button
                 type="text"
                 icon={<SuanZiIcon />}
@@ -310,16 +283,16 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = memo(
 
         {/* 编辑器区域 */}
         <div
-          className={`pyspark-editor-container ${getActiveTabPerms()?.includes(PYSPARK_PERMISSIONS.CAN_UPDATE) ? '' : 'running-code-mirror'}`}
+          className={classNames('pyspark-editor-container', {
+            'running-code-mirror': isReadOnly
+          })}
         >
           <CodeMirror
             ref={editorRef}
             value={editorContent}
             onChange={handleContentChange}
             placeholder={placeholderValue}
-            readOnly={
-              !getActiveTabPerms()?.includes(PYSPARK_PERMISSIONS.CAN_UPDATE)
-            }
+            readOnly={isReadOnly}
             extensions={[
               python(),
               lintGutter(),
@@ -331,9 +304,6 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = memo(
               }),
               syntaxHighlighting(defaultHighlightStyle, { fallback: true }),
               EditorView.updateListener.of((update) => {
-                if (update.selectionSet) {
-                  handleCursorChange(update.view);
-                }
                 if (update.focusChanged) {
                   handleFocusChange(update.view.hasFocus);
                 }

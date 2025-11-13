@@ -1,13 +1,10 @@
 import type { FC } from 'react';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import type { VideoParserNodeType } from './types';
 import {
-  BlockEnum,
   type NodeProps
 } from '@/pages/workflowConfig/workflow/types';
-import { useNodes, useStoreApi, type Node } from 'reactflow';
-import { StartNodeType } from '../start/types';
-import { getLoadTaskFiles } from '@/api/loadApi';
+import { type Node } from 'reactflow';
 import { useUnmountedRef } from 'ahooks';
 import { getModelList } from '@/api/modelV2';
 import useConfig from './use-config';

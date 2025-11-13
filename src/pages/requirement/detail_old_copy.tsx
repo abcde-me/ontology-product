@@ -26,19 +26,19 @@ import {
 import { useParams } from '@/utils/url';
 import { useHistory } from 'react-router';
 import { useUserInfo } from '@/store/userInfoStore';
-import { DataSourceModal } from '@/pages/requirement/components/DetailModal';
-import { DepartmentModal } from './components/DepartmentModal';
-import { IndividualModal } from './components/IndividualModal';
+import { DataSourceModal } from './detail/components/DetailModal';
+import { DepartmentModal } from './detail/components/DepartmentModal';
+import { IndividualModal } from './detail/components/IndividualModal';
 import { v4 as uuidV4 } from 'uuid';
 import {
   convertToUTCFormat,
   getRandomHexColorStrict,
   shapeOptions
 } from './common';
-import AnnotationType from './components/AnnotationType';
-import TextSubstanceComponent from './components/TextEntity';
+import AnnotationType from './detail/components/AnnotationType';
+import TextSubstanceComponent from './detail/components/TextEntity';
 import { publishRequirement, getRequirementDetail } from '@/api/dataAnnotation';
-import { Classify } from './components/Classify';
+import { Classify } from './detail/components/Classify';
 import _, { omitBy, isArray, isEmpty, min } from 'lodash';
 import {
   AnnotationChildType,
@@ -50,7 +50,7 @@ import {
   toolFileType
 } from './type';
 
-import './detail.scss';
+import './detail/detail.scss';
 const BreadcrumbItem = Breadcrumb.Item;
 
 // 定义数据类型接口

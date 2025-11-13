@@ -9,6 +9,7 @@ import { IconLoading } from '@arco-design/web-react/icon';
 import EllipsisPopoverCom from '@/components/ellipsis-popover-com';
 import noDataElement from '@/components/no-data';
 import { DATA_LOAD_PERMISSIONS } from '@/config/permissions';
+import { useHasPermission } from '@/hooks/usePermission';
 interface DataType {
   status: Array<string>;
   sort: string;
@@ -22,11 +23,12 @@ interface PropsType {
 }
 const TableDetail = (props) => {
   const history = useHistory();
+  const hasStopPermission = useHasPermission(DATA_LOAD_PERMISSIONS.CAN_STOP);
   const { type } = props;
   const columns: any = [
     {
-      title: '运行ID',
-      dataIndex: 'execution_id',
+      title: '运行名称',
+      dataIndex: 'execution_name',
       width: 300,
       ellipsis: true,
       render: (text: string) => {
@@ -39,7 +41,7 @@ const TableDetail = (props) => {
       dataIndex: 'status',
       render: (_, item) => (
         <div style={{ display: 'flex', alignItems: 'center' }}>
-          {item.status === 'stopping' ? (
+          {item.status === 'READY_STOP' ? (
             <IconLoading style={{ color: '#165dff', fontSize: '14px' }} />
           ) : (
             <div
@@ -48,13 +50,13 @@ const TableDetail = (props) => {
                 height: '8px',
                 borderRadius: '50%',
                 background:
-                  item.status === 'succeed'
+                  item.status === 'SUCCESS'
                     ? '#10B981'
-                    : item.status === 'failed'
+                    : item.status === 'FAILURE'
                       ? '#EF4444'
-                      : item.status === 'running'
+                      : item.status === 'RUNNING_EXECUTION'
                         ? '#007DFA'
-                        : item.status === 'stopped'
+                        : item.status === 'STOP'
                           ? '#94A3B8'
                           : ''
               }}
@@ -64,30 +66,29 @@ const TableDetail = (props) => {
           <div style={{ marginLeft: '7px' }}>
             {item.status == RunStateType[RunState.SUCCEED].value &&
               RunStateType[RunState.SUCCEED].text}
-            {item.status == RunStateType[RunState.FAILED].value &&
-              RunStateType[RunState.FAILED].text}
+            {item.status == RunStateType[RunState.FAILURE].value &&
+              RunStateType[RunState.FAILURE].text}
             {item.status == RunStateType[RunState.RUNNING].value &&
               RunStateType[RunState.RUNNING].text}
             {item.status == RunStateType[RunState.STOPPED].value &&
               RunStateType[RunState.STOPPED].text}
-            {item.status === 'stopping' && '停止中'}
+            {item.status === 'READY_STOP' && '停止中'}
           </div>
-          {item.status == 'running' &&
-            props.permission.includes(DATA_LOAD_PERMISSIONS.CAN_STOP) && (
-              <span
-                style={{
-                  color: 'rgb(0, 125, 250)',
-                  marginLeft: '7px',
-                  cursor: 'pointer'
-                }}
-                onClick={() => {
-                  stopTaskHan(item.execution_id);
-                }}
-              >
-                停止
-              </span>
-            )}
-          {item.status === 'failed' && (
+          {hasStopPermission && item.status == 'RUNNING_EXECUTION' && (
+            <span
+              style={{
+                color: 'rgb(0, 125, 250)',
+                marginLeft: '7px',
+                cursor: 'pointer'
+              }}
+              onClick={() => {
+                stopTaskHan(item.execution_id);
+              }}
+            >
+              停止
+            </span>
+          )}
+          {item.status === 'FAILURE' && (
             <span
               style={{
                 color: '#007DFA',
@@ -111,7 +112,7 @@ const TableDetail = (props) => {
         },
         {
           text: '运行失败',
-          value: RunState.FAILED
+          value: RunState.FAILURE
         },
         {
           text: '运行停止',

@@ -1,11 +1,8 @@
 import { string } from 'mobx-state-tree/dist/internal';
-import type {
-  CommonNodeType,
-  Variable
-} from '@/pages/workflowConfig/workflow/types';
+import type { CommonNodeType } from '@/pages/workflowConfig/workflow/types';
 
 export type EndNodeType = CommonNodeType & {
-  outputs: Variable[];
+  outputs: any[];
   target_path_id: number;
   target_path_name: string;
   isKnowledgeBaseNameValid: boolean;

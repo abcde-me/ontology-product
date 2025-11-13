@@ -175,10 +175,6 @@ export interface CreateSqlScriptParams {
   uid: string;
 }
 
-export interface CopySqlScriptReq {
-  script_file_id?: string;
-}
-
 export interface CreateSqlScriptData {
   perms: Array<string>;
   script_id: string;
@@ -286,6 +282,13 @@ export enum RunningStatus {
   SUCCESS = 1,
   /** 运行中 */
   RUNNING = 2
+}
+
+export enum RunLogStatus {
+  /** 继续获取日志 */
+  CONTINUE = '0',
+  /** 停止获取日志 */
+  STOP = '1'
 }
 
 export interface RunResultSqlScriptData {

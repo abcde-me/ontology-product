@@ -11,10 +11,7 @@ import {
   IconDelete,
   IconEdit,
   IconStorage,
-  IconArchive,
-  IconFolder,
-  IconCaretDown,
-  IconFile
+  IconArchive
 } from '@arco-design/web-react/icon';
 import { CatalogTypeEnum, RootTypeEnum, subLeafKeys } from '../../consts';
 import {
@@ -23,12 +20,11 @@ import {
   deleteVolume,
   deleteTable,
   renameCatalog,
-  addDb,
-  getDbItemList
+  addDb
 } from '@/api/dataCatalog';
 import { validateName } from '@/utils/valiate';
-import { PermissionGuard } from '@/components/PermissionGuard';
 import { DATA_CATALOG_PERMISSIONS } from '@/config/permissions';
+import { PermissionWrapper } from '@/components/PermissionGuard';
 import styles from '../../modal.module.css';
 
 export function useEditableTree({ catalogTreeStore }) {
@@ -113,10 +109,7 @@ export function useEditableTree({ catalogTreeStore }) {
     const keys: string[] = [];
     const loop = (data: TreeDataType[]) => {
       data?.forEach?.((item) => {
-        if (
-          typeof item.title === 'string' &&
-          item.title?.toLowerCase().indexOf(value.toLowerCase()) > -1
-        ) {
+        if (typeof item.title === 'string' && item.title?.indexOf(value) > -1) {
           if (item.parentKey) {
             keys.push(item.parentKey);
           }
@@ -134,14 +127,7 @@ export function useEditableTree({ catalogTreeStore }) {
     });
   };
 
-  const handleExpand = (
-    expandedKeys: string[],
-    extra?: {
-      expanded: boolean;
-      node: NodeInstance;
-      expandedNodes: NodeInstance[];
-    }
-  ) => {
+  const handleExpand = (expandedKeys: string[]) => {
     catalogTreeStore.setState({
       expandedKeys: expandedKeys
     });
@@ -428,6 +414,7 @@ export function useEditableTree({ catalogTreeStore }) {
       // 编辑
       if (fileName !== dataRef?.name) {
         res = await renameCatalog(dataRef?.id, {
+          id: dataRef?.id,
           new_name: fileName,
           root_type: root_type,
           type: dataRef?.type,
@@ -446,95 +433,105 @@ export function useEditableTree({ catalogTreeStore }) {
   const renderExtra = (node: NodeProps) => {
     const { dataRef } = node;
     perms = dataRef?.perms ? dataRef.perms : perms;
+
     return (
       !dataRef?.showInput && (
         <div className={'extra-container flex items-center justify-between'}>
           {/* db_item 类型只显示删除按钮 */}
           {dataRef?.type === CatalogTypeEnum.db_item ? (
             <>
-              {(dataRef?.perms?.includes(
-                DATA_CATALOG_PERMISSIONS.CAN_DELETE_DIRS
-              ) ||
-                dataRef?.type === CatalogTypeEnum.db_item) && (
-                <Tooltip color="white" content="删除">
-                  <IconDelete
-                    onClick={() => {
-                      Modal.confirm({
-                        title: '确认删除数据库表?',
-                        content: '删除后不可恢复',
-                        async onOk() {
-                          try {
-                            await handleDelete(node, 'db_item');
-                          } catch (apiError: any) {
-                            Message.error(
-                              '删除失败: ' + (apiError.message || '请稍后重试')
-                            );
-                          }
-                        },
-                        className: styles['modalWrapper']
-                      });
-                    }}
-                    className="hover:text-[rgb(var(--primary-6))]"
-                  />
-                </Tooltip>
+              {dataRef?.type === CatalogTypeEnum.db_item && (
+                <PermissionWrapper
+                  permission={DATA_CATALOG_PERMISSIONS.CAN_DELETE_DIRS}
+                >
+                  <Tooltip color="white" content="删除">
+                    <IconDelete
+                      onClick={() => {
+                        Modal.confirm({
+                          title: '确认删除数据库表?',
+                          content: '删除后不可恢复',
+                          async onOk() {
+                            try {
+                              await handleDelete(node, 'db_item');
+                            } catch (apiError: any) {
+                              Message.error(
+                                '删除失败: ' +
+                                  (apiError.message || '请稍后重试')
+                              );
+                            }
+                          },
+                          className: styles['modalWrapper']
+                        });
+                      }}
+                      className="hover:text-[rgb(var(--primary-6))]"
+                    />
+                  </Tooltip>
+                </PermissionWrapper>
               )}
             </>
           ) : (
             <>
               {/* 其他类型的操作按钮 */}
-              {['volume'].every((key) => dataRef?.type !== key) && (
+              {['volume', 'db'].every((key) => dataRef?.type !== key) && (
                 <>
-                  {dataRef?.perms?.includes(
-                    DATA_CATALOG_PERMISSIONS.CAN_UPDATE_DIRS
-                  ) && (
-                    <Tooltip color="white" content="重命名">
-                      <IconEdit
-                        className={
-                          'extra-icon mr-2 hover:text-[rgb(var(--primary-6))]'
-                        }
-                        onClick={() => handleEdit(node)}
-                      />
-                    </Tooltip>
-                  )}
-                  {dataRef?.perms?.includes(
-                    DATA_CATALOG_PERMISSIONS.CAN_DELETE_DIRS
-                  ) && (
-                    <Tooltip color="white" content="删除">
-                      <IconDelete
-                        onClick={() => {
-                          Modal.confirm({
-                            title: '确认删除目录?',
-                            content:
-                              '删除后，该目录下所有内容将被删除，不可恢复',
-                            async onOk() {
-                              try {
-                                await handleDelete(node, 'directory');
-                              } catch (apiError: any) {
-                                Message.error(
-                                  '删除失败: ' +
-                                    (apiError.message || '请稍后重试')
-                                );
-                              }
-                            },
-                            className: styles['modalWrapper']
-                          });
-                        }}
-                        className="hover:text-[rgb(var(--primary-6))]"
-                      />
-                    </Tooltip>
-                  )}
+                  {
+                    <PermissionWrapper
+                      permission={DATA_CATALOG_PERMISSIONS.CAN_UPDATE_DIRS}
+                    >
+                      <Tooltip color="white" content="重命名">
+                        <IconEdit
+                          className={
+                            'extra-icon mr-2 hover:text-[rgb(var(--primary-6))]'
+                          }
+                          onClick={() => handleEdit(node)}
+                        />
+                      </Tooltip>
+                    </PermissionWrapper>
+                  }
+                  {
+                    <PermissionWrapper
+                      permission={DATA_CATALOG_PERMISSIONS.CAN_DELETE_DIRS}
+                    >
+                      <Tooltip color="white" content="删除">
+                        <IconDelete
+                          onClick={() => {
+                            Modal.confirm({
+                              title: '确认删除目录?',
+                              content:
+                                '删除后，该目录下所有内容将被删除，不可恢复',
+                              async onOk() {
+                                try {
+                                  await handleDelete(node, 'directory');
+                                } catch (apiError: any) {
+                                  Message.error(
+                                    '删除失败: ' +
+                                      (apiError.message || '请稍后重试')
+                                  );
+                                }
+                              },
+                              className: styles['modalWrapper']
+                            });
+                          }}
+                          className="hover:text-[rgb(var(--primary-6))]"
+                        />
+                      </Tooltip>
+                    </PermissionWrapper>
+                  }
                 </>
               )}
               {/* 为数据卷和数据库都添加新建按钮 */}
-              {(dataRef?.type === 'volume' || dataRef?.type === 'db') &&
-                perms.includes(DATA_CATALOG_PERMISSIONS.CAN_CREATE_VOLUME) && (
+              {(dataRef?.type === 'volume' || dataRef?.type === 'db') && (
+                <PermissionWrapper
+                  permission={DATA_CATALOG_PERMISSIONS.CAN_CREATE_VOLUME}
+                >
                   <Tooltip color="white" content="新建">
                     <IconPlus
                       className="ml-2 text-xs hover:text-[rgb(var(--primary-6))]"
                       onClick={() => addSubVolume(node)}
                     />
                   </Tooltip>
-                )}
+                </PermissionWrapper>
+              )}
             </>
           )}
         </div>
@@ -544,11 +541,10 @@ export function useEditableTree({ catalogTreeStore }) {
 
   const renderTitleText = (props: NodeProps) => {
     const { dataRef, title } = props;
-    console.log(dataRef, '----', dataRef?.isLastLeaf, '查看dataRef');
 
     let TitleText: ReactNode = title;
     if (searchValue.length && typeof title === 'string') {
-      const index = title.toLowerCase().indexOf(searchValue.toLowerCase());
+      const index = title.indexOf(searchValue);
       if (index !== -1) {
         const prefix = title.slice(0, index);
         const suffix = title.slice(index + searchValue.length);
@@ -583,8 +579,6 @@ export function useEditableTree({ catalogTreeStore }) {
 
   const renderTitle = (props: NodeProps) => {
     const { dataRef } = props;
-    // console.log(dataRef?.type, '查看dataRef77777');
-    console.log(dataRef, '再次查看dataRef');
 
     return (
       <div className={classNames('flex items-center overflow-hidden')}>

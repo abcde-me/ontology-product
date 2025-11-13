@@ -350,17 +350,19 @@ const columns = (
               <IconInfoCircle style={{ margin: '0 0 0 5px' }} />
             </Tooltip>
           ) : null}
-          {perms?.includes(
-            DATA_MANAGEMENT_PERMISSIONS.CAN_UPDATE_VERSION_RETRY
-          ) &&
-            (status === datasetStatus.version_update_failed ? (
+
+          {status === datasetStatus.version_update_failed ? (
+            <PermissionWrapper
+              permission={DATA_MANAGEMENT_PERMISSIONS.CAN_UPDATE_VERSION_RETRY}
+            >
               <span
                 className={styles.retryText}
                 onClick={() => handleRetry(record.id, record.latest_version)}
               >
                 重试
               </span>
-            ) : null)}
+            </PermissionWrapper>
+          ) : null}
         </div>
       );
     }
@@ -410,21 +412,21 @@ const columns = (
     dataIndex: 'src_model',
     filterIcon: <IconFilter />,
     width: 130,
-    filters: (() => {
-      const modelSet = new Set<string>();
-      datasetList?.forEach((dataset) => {
-        if (dataset.src_model) {
-          modelSet.add(dataset.src_model);
-        }
-      });
-      return Array.from(modelSet).map((model) => ({
-        text: model,
-        value: model
-      }));
-    })(),
-    onFilter: (value: string, record: Dataset) => {
-      return record.src_model === value;
-    },
+    // filters: (() => {
+    //   const modelSet = new Set<string>();
+    //   datasetList?.forEach((dataset) => {
+    //     if (dataset.src_model) {
+    //       modelSet.add(dataset.src_model);
+    //     }
+    //   });
+    //   return Array.from(modelSet).map((model) => ({
+    //     text: model,
+    //     value: model
+    //   }));
+    // })(),
+    // onFilter: (value: string, record: Dataset) => {
+    //   return record.src_model === value;
+    // },
     render: (src_model: string) => {
       if (!src_model) return '-';
       return (
@@ -522,8 +524,10 @@ const columns = (
           >
             详情
           </Button> */}
-          {perms?.includes(DATA_MANAGEMENT_PERMISSIONS.CAN_SEARCH) &&
-            record.storage_type !== datasetStorageType.table && (
+          {record.storage_type !== datasetStorageType.table && (
+            <PermissionWrapper
+              permission={DATA_MANAGEMENT_PERMISSIONS.CAN_SEARCH}
+            >
               <Button
                 type="text"
                 className={`${styles.actionButton} ${record.status === datasetStatus.normal ? styles.export : styles.disabled}`}
@@ -538,8 +542,12 @@ const columns = (
               >
                 导出
               </Button>
-            )}
-          {perms?.includes(DATA_MANAGEMENT_PERMISSIONS.CAN_DELETE) && (
+            </PermissionWrapper>
+          )}
+
+          <PermissionWrapper
+            permission={DATA_MANAGEMENT_PERMISSIONS.CAN_DELETE}
+          >
             <Button
               type="text"
               className={`${styles.actionButton} ${styles.delete}`}
@@ -553,7 +561,7 @@ const columns = (
             >
               删除
             </Button>
-          )}
+          </PermissionWrapper>
         </div>
       );
     }
@@ -592,7 +600,6 @@ export enum datasetStatus {
   version_updating = 'version_updating',
   version_update_failed = 'version_update_failed'
 }
-
 const DatasetManagement: React.FC = () => {
   const history = useHistory();
   const [tagList, setTagList] = React.useState<{ id: number; name: string }[]>(
@@ -756,7 +763,7 @@ const DatasetManagement: React.FC = () => {
 
   // 删除数据集的方法
   const deleteDatasetRecord = (record: Dataset) => {
-    deleteDataset(record)
+    deleteDataset({ id: record?.id })
       .then((res) => {
         fetchDatasetList();
         Message.success('删除成功');
@@ -913,6 +920,12 @@ const DatasetManagement: React.FC = () => {
   ]);
 
   // 处理表格变化（包括过滤器变化）
+  // 1. 添加selectedSrcModelFilters状态变量（在第640行左右，其他过滤状态变量附近）
+  const [selectedSrcModelFilters, setSelectedSrcModelFilters] = React.useState<
+    string[]
+  >([]); //选中的生成模型过滤
+
+  // 2. 修改handleTableChange函数（在第854行左右）
   const handleTableChange = (pagination: any, sorter: any, filters: any) => {
     // 处理标签过滤
     if (filters.tag_names && filters.tag_names !== selectedTagFilters) {
@@ -931,6 +944,18 @@ const DatasetManagement: React.FC = () => {
     if (filters.status && filters.status !== selectedStatusFilters) {
       setSelectedStatusFilters(filters.status);
       setCurrentPage(1); // 重置到第一页
+    }
+
+    // 添加处理生成模型过滤
+    if (filters.src_model && filters.src_model !== selectedSrcModelFilters) {
+      setSelectedSrcModelFilters(filters.src_model);
+      setCurrentPage(1); // 重置到第一页
+    }
+
+    // 添加清除生成模型过滤的逻辑
+    if (filters.src_model === undefined) {
+      setSelectedSrcModelFilters([]);
+      setCurrentPage(1);
     }
 
     if (filters.tag_names === undefined) {

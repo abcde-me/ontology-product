@@ -1,10 +1,9 @@
-import React, { FC, useEffect, useState } from 'react';
+import React, { FC, useState } from 'react';
 import {
   Form,
   Input,
   Link,
   Message,
-  PaginationProps,
   Table,
   TableColumnProps,
   Tooltip
@@ -26,6 +25,7 @@ import noDataElement from '@/components/no-data';
 import { PYSPARK_PERMISSIONS } from '@/config/permissions';
 import { IconInfoCircle } from '@arco-design/web-react/icon';
 import ModalDatasetDetail from '../data-manager/ModalDatasetDetail';
+import { PermissionWrapper } from '@/components/PermissionGuard';
 
 const FormItem = Form.Item;
 
@@ -123,13 +123,13 @@ const DatasetsList: FC = () => {
           case ExportStatus.Exporting:
             text = '导出中';
             color = '#1890ff';
-            actionBtn = item.perms?.includes(
-              PYSPARK_PERMISSIONS.CAN_EXPORT_STOP
-            ) && (
-              <Link href="#" onClick={() => handleStopTask(item)}>
-                {' '}
-                停止{' '}
-              </Link>
+            actionBtn = (
+              <PermissionWrapper permission={PYSPARK_PERMISSIONS.EXPORT}>
+                <Link href="#" onClick={() => handleStopTask(item)}>
+                  {' '}
+                  停止{' '}
+                </Link>
+              </PermissionWrapper>
             );
             break;
           case ExportStatus.ExportSuccess:
@@ -139,12 +139,12 @@ const DatasetsList: FC = () => {
           case ExportStatus.ExportFailed:
             text = '导出失败';
             color = '#ff4d4f';
-            actionBtn = item.perms?.includes(
-              PYSPARK_PERMISSIONS.CAN_EXPORT_RETRY
-            ) && (
-              <Tooltip content={item.err_reason}>
-                <IconInfoCircle />
-              </Tooltip>
+            actionBtn = (
+              <PermissionWrapper permission={PYSPARK_PERMISSIONS.EXPORT}>
+                <Tooltip content={item.err_reason}>
+                  <IconInfoCircle />
+                </Tooltip>
+              </PermissionWrapper>
             );
             break;
           case ExportStatus.ExportTerminated:

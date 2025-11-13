@@ -9,7 +9,7 @@ import createTheme from '@uiw/codemirror-themes';
 import CodeMirror, { ReactCodeMirrorRef } from '@uiw/react-codemirror';
 import React, { memo, useCallback, useEffect, useRef } from 'react';
 import { format } from 'sql-formatter';
-import './EditorWorkspace.scss';
+import styles from './EditorWorkspace.module.scss';
 
 import SQLFormatIcon from '@/assets/sql/sql-format-ico.svg';
 import IconStop from '@/assets/sql/sql-stop-icon.svg';
@@ -18,6 +18,7 @@ import { useHasPermission } from '@/store/userInfoStore';
 import { EditorProvider, useEditorContext } from '../../contexts/EditorContext';
 import { FileTab } from '../../hooks/useTabManager';
 import RunningInfoPanel from './RunningInfoPanel';
+import classNames from 'classnames';
 
 interface NotebookWorkspaceProps {
   content: string;
@@ -42,11 +43,9 @@ const EditorWorkspaceContent: React.FC<{
   const [lastCursorPosition, setLastCursorPosition] = React.useState<number>(0);
   const [isEditorFocused, setIsEditorFocused] = React.useState<boolean>(false);
 
-  const hasRunPermission = useHasPermission(SQL_PERMISSIONS.CAN_RUN);
-  const hasUpdatePermission = useHasPermission(SQL_PERMISSIONS.CAN_UPDATE);
-  const hasCancelRunPermission = useHasPermission(
-    SQL_PERMISSIONS.CAN_CANCEL_RUN
-  );
+  const hasRunPermission = useHasPermission(SQL_PERMISSIONS.RUN);
+  const hasUpdatePermission = useHasPermission(SQL_PERMISSIONS.MODIFY);
+  const hasCancelRunPermission = useHasPermission(SQL_PERMISSIONS.RUN);
 
   // 从 Context 获取编辑器状态
   const {
@@ -171,10 +170,10 @@ const EditorWorkspaceContent: React.FC<{
   }, [insertContentAtCursor, onInsertContent]);
 
   return (
-    <div className="sql-content">
+    <div className={styles['sql-content']}>
       {/* 顶部工具栏 */}
-      <div className="sql-toolbar">
-        <div className="toolbar-left">
+      <div className={styles['sql-toolbar']}>
+        <div className={styles['toolbar-left']}>
           <Space size={12}>
             {((hasRunPermission && runStatus !== RunningStatus.RUNNING) ||
               (hasCancelRunPermission &&
@@ -190,7 +189,9 @@ const EditorWorkspaceContent: React.FC<{
                 }
                 disabled={editorContent?.trim() === ''}
                 onClick={handleRunClick}
-                className={`h-[26px] ${runStatus === RunningStatus.RUNNING ? 'btn-running' : ''}`}
+                className={classNames('h-[26px]', {
+                  [styles['btn-running']]: runStatus === RunningStatus.RUNNING
+                })}
               >
                 {runStatus === RunningStatus.RUNNING ? '停止运行' : '运行'}
               </Button>
@@ -207,7 +208,7 @@ const EditorWorkspaceContent: React.FC<{
           </Space>
         </div>
         {lastAutoSave && (
-          <div className="toolbar-right">
+          <div className={styles['toolbar-right']}>
             <Space size={12}>
               <span className="text-sm text-gray-500">
                 自动保存: {lastAutoSave || '未保存'}
@@ -220,7 +221,9 @@ const EditorWorkspaceContent: React.FC<{
       {/* 编辑器区域 */}
 
       <div
-        className={`sql-editor-container ${hasUpdatePermission ? '' : 'running-code-mirror'}`}
+        className={classNames(styles['sql-editor-container'], {
+          [styles['running-code-mirror']]: !hasUpdatePermission
+        })}
       >
         <Spin
           style={{
@@ -260,7 +263,7 @@ const EditorWorkspaceContent: React.FC<{
               lineNumbers: true,
               highlightActiveLineGutter: false
             }}
-            className="code-editor"
+            className={styles['code-editor']}
           />
         </Spin>
       </div>

@@ -5,19 +5,15 @@ import {
   Input,
   Modal,
   PaginationProps,
-  Popover,
   Select,
   Table,
   TableColumnProps
 } from '@arco-design/web-react';
 import EllipsisPopover from '@/components/ellipsis-popover-com';
 import getFileIcon from '@/components/file-icon';
-import './ModalTargetVolumnDetail.scss';
-// import { getTargetFileTypeList } from '@/api/dataCatalog';
-// import { getSourceDataFileList } from '@/api/dataCatalog';
-import { formatTime } from '@/utils/format';
+import styles from './ModalTargetVolumnDetail.module.scss';
+import classNames from 'classnames';
 import {
-  getTargetCatalogFileList,
   GetTargetCatalogFileListItem,
   getTargetDataFileList,
   getTargetFileTypeList
@@ -25,22 +21,6 @@ import {
 import timeFormattig from '@/utils/timeFormatting';
 
 const FormItem = Form.Item;
-
-const formatDateTime = (dateTimeString: string): string => {
-  try {
-    const date = new Date(dateTimeString);
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    const hours = String(date.getHours()).padStart(2, '0');
-    const minutes = String(date.getMinutes()).padStart(2, '0');
-    const seconds = String(date.getSeconds()).padStart(2, '0');
-
-    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
-  } catch (error) {
-    return dateTimeString; // 如果格式化失败，返回原字符串
-  }
-};
 
 /** 数据卷详情 弹框 */
 const ModalVolumnDetail = ({
@@ -83,7 +63,7 @@ const FileList = (props) => {
   } = useTableList({ volumn });
 
   return (
-    <div className="pyspark-modal-target-volumn-detail">
+    <div className={styles['pyspark-modal-target-volumn-detail']}>
       <Form autoComplete="off" layout="inline">
         <FormItem
           field="['file_name', 'search_type']"
@@ -171,29 +151,42 @@ const WorkflowIdCell = ({ record }) => {
   const extras = record?.extras || {};
 
   return (
-    <div className="unified-columns-wrapper">
-      <div className="unified-columns">
-        <span className="unified-columns-label">原文件:&nbsp;</span>
-        <span className="unified-columns-content unified-columns-file">
+    <div className={styles['unified-columns-wrapper']}>
+      <div className={styles['unified-columns']}>
+        <span className={styles['unified-columns-label']}>原文件:&nbsp;</span>
+        <span
+          className={classNames(
+            styles['unified-columns-content'],
+            styles['unified-columns-file']
+          )}
+        >
           {extras.file_name ?? '无文件名'}
         </span>
       </div>
-      <div className="unified-columns">
-        <span className="unified-columns-label unified-columns-workflow">
+      <div className={styles['unified-columns']}>
+        <span
+          className={classNames(
+            styles['unified-columns-label'],
+            styles['unified-columns-workflow']
+          )}
+        >
           工作流ID:&nbsp;
         </span>
-        <span className="unified-columns-content" style={{ maxWidth: 170 }}>
+        <span
+          className={styles['unified-columns-content']}
+          style={{ maxWidth: 170 }}
+        >
           {extras.workflow_uuid ? (
             <>
               <a
-                className="jump-workflow"
+                className={styles['jump-workflow']}
                 target="_blank"
                 rel="noreferrer"
                 href={`/modaforge/tenant/compute/modaforge/workflowConfig?workflow_uuid=${extras.workflow_uuid}&ds_workflow_id=${extras.ds_workflow_id}`}
               >
                 {extras.workflow_uuid}
               </a>
-              <span className="jump-workflow-icon"></span>
+              <span className={styles['jump-workflow-icon']}></span>
             </>
           ) : (
             '-'
@@ -211,7 +204,7 @@ const useTableList = (props) => {
   >({
     ...defaultSearchParams,
     path_id: volumn.id,
-    full_path: volumn.full_path ?? ''
+    full_path: volumn?.base_dir + volumn.full_path || ''
   });
   const [fileTypeList, setFileTypeList] =
     useState<{ text: string; value: string }[]>(defaultfileTypeList);
@@ -406,5 +399,4 @@ interface ListDataItem {
     file_size: string;
     workflow_uuid: string;
   };
-  perms: string[];
 }

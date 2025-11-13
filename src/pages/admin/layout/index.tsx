@@ -1,4 +1,3 @@
-import useAuthTimeout from '@/hooks/useAuthTimeout';
 import { GlobalState } from '@/store';
 import '@/style/tailwind.css';
 import '@/style/markdowm.less';
@@ -15,10 +14,15 @@ import { getFlatRoutes, routes } from '../route';
 import Bread from './Bread';
 import { withSider } from './Sider';
 import { useUserInfoStore } from '@/store/userInfoStore';
+import { Page403 } from '@/pages/errorPages';
+import { usePermission } from '@/hooks';
+import AuthLoad from '@/pages/errorPages/authLoad';
+import PermissionRoute from './PermissionRoute';
 
 type LayoutPageProps = {
   history: any;
 };
+
 const LayoutPage: React.FC<LayoutPageProps> = () => {
   const { t } = useTranslation('plugin__console-plugin-aidp');
   const { sidebarIsReady } = useSelector((state: any) => {
@@ -39,10 +43,10 @@ const LayoutPage: React.FC<LayoutPageProps> = () => {
   // 身份验证超时管理：
   // 开发环境：token有效期1分钟，剩余30秒时续约
   // 生产环境：token有效期60分钟，剩余30分钟时续约
-  useAuthTimeout({
-    renewBeforeExpire: 30, // 开发环境30秒，生产环境10分钟
-    renewEndpoint: '/api/auth/v1/renew'
-  });
+  // useAuthTimeout({
+  //   renewBeforeExpire: 30, // 开发环境30秒，生产环境10分钟
+  //   renewEndpoint: '/api/auth/v1/renew'
+  // });
 
   // 获取用户信息 - 在 layout 初始化时调用
   React.useEffect(() => {
@@ -119,7 +123,9 @@ const LayoutPage: React.FC<LayoutPageProps> = () => {
                   <Route
                     key={route.key}
                     path={route.key}
-                    component={route.component}
+                    render={() => <PermissionRoute route={route} />}
+                    // render={() => <PermissionRoute route={route} />}
+                    exact={route.exact !== false} // 默认加exact， 除非显示关闭
                   />
                 );
               })}

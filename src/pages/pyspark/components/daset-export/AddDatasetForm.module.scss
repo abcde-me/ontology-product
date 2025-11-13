@@ -2,12 +2,15 @@
 
 /* Modal内容区域样式调整 - 只影响这个组件的Modal */
 .modalWrapper :global(.arco-modal-content) {
-  padding-left: 0px;
+  padding-left: 0;
 }
+
 .modalWrapper :global(.arco-form-label-item > label) {
   white-space: nowrap;
+
   /* 不换行 */
 }
+
 /* 单元格内容截断显示 */
 .cellContent {
   display: block;

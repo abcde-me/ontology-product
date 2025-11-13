@@ -1,29 +1,22 @@
 import React, { forwardRef, useImperativeHandle, useEffect } from 'react';
-import { Typography } from '@arco-design/web-react';
-import { PythonListItem } from '@/types/pythonApi';
-import './index.scss';
+import styles from './index.module.scss';
+import classNames from 'classnames';
 import DirectoryTree, {
   type TreeNodeItem,
   DirectoryTreeRef
 } from '@/components/directory-tree/DirectoryTree';
 import { useFileManager } from '../../hooks/useFileManager';
 
-const { Title } = Typography;
-
 interface NotebookTabContentProps {
   type: 'files' | 'tools' | 'data';
-  onFileOpen?: (
-    fileId: string,
-    fileName?: string,
-    perms?: Array<string>
-  ) => void;
+  onFileOpen?: (fileId: string, fileName?: string) => void;
   onFileDelete?: (fileId: string) => void; // 添加删除文件时关闭标签页的回调
   onFileRename?: (fileId: string, newName: string) => void; // 添加重命名文件时更新标签页标题的回调
   hasOpenTabs?: () => boolean; // 检查是否有标签页打开的回调
   directoryTreeRef?: React.Ref<DirectoryTreeRef>; // 修改：使用 Ref 而不是 RefObject
   externalSelectedKeys?: string[]; // 外部传入的选中状态
   onCurrentFolderChange?: (folderId: string) => void; // 添加当前文件夹变化的回调
-  onCanCreateChange?: (isCanCreate: boolean) => void; // 添加创建权限变化的回调
+  // onCanCreateChange?: (isCanCreate: boolean) => void; // 添加创建权限变化的回调
 }
 
 const PythonTabContent: React.FC<NotebookTabContentProps> = ({
@@ -33,8 +26,8 @@ const PythonTabContent: React.FC<NotebookTabContentProps> = ({
   hasOpenTabs, // 接收检查是否有标签页打开的回调
   directoryTreeRef,
   externalSelectedKeys,
-  onCurrentFolderChange, // 接收当前文件夹变化的回调
-  onCanCreateChange // 接收创建权限变化的回调
+  onCurrentFolderChange // 接收当前文件夹变化的回调
+  // onCanCreateChange // 接收创建权限变化的回调
 }) => {
   // 使用文件管理器hook
   const {
@@ -43,9 +36,7 @@ const PythonTabContent: React.FC<NotebookTabContentProps> = ({
     selectedKeys,
     currentFolderId,
     handleSearch,
-    handleNew,
     handleTreeSelect,
-    handleTreeExpand,
     handleCreate,
     handleRename,
     handleCopy,
@@ -72,17 +63,17 @@ const PythonTabContent: React.FC<NotebookTabContentProps> = ({
   }, [currentFolderId, onCurrentFolderChange]);
 
   // 监听创建权限变化，通知父组件
-  useEffect(() => {
-    if (onCanCreateChange) {
-      onCanCreateChange(isCanCreate);
-    }
-  }, [isCanCreate, onCanCreateChange]);
+  // useEffect(() => {
+  //   if (onCanCreateChange) {
+  //     onCanCreateChange(isCanCreate);
+  //   }
+  // }, [isCanCreate, onCanCreateChange]);
 
   // 暴露方法给父组件
   useImperativeHandle(
     directoryTreeRef,
     () => ({
-      startRootCreate: (isFolder = true) => {
+      startRootCreate: () => {
         // 这里可以调用 DirectoryTree 的 startRootCreate 方法
         // 由于我们使用的是 DirectoryTree 组件，这个方法会通过 ref 传递
       },
@@ -93,10 +84,15 @@ const PythonTabContent: React.FC<NotebookTabContentProps> = ({
   );
 
   return (
-    <div className="python-tab-content sider-container">
-      <div className="sider-title">PySpark文件</div>
+    <div
+      className={classNames(
+        styles['python-tab-content'],
+        styles['sider-container']
+      )}
+    >
+      <div className={styles['sider-title']}>PySpark文件</div>
 
-      <div className="tab-tree">
+      <div className={styles['tab-tree']}>
         <DirectoryTree
           ref={directoryTreeRef} // 传递 ref
           data={pythonList as TreeNodeItem[]}

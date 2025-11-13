@@ -12,7 +12,7 @@ import { useToolsManager } from '../../hooks/useToolsManager';
 import { OperatorItem } from '@/types/pythonApi';
 import EllipsisPopover from '@/components/ellipsis-popover-com';
 import copy from 'copy-to-clipboard';
-import './index.scss';
+import styles from './index.module.scss';
 import ModalToolDetail from './ModalToolDetail';
 import SuziRead from '@/assets/python/suanzi-read.svg';
 import SuziQiePian from '@/assets/python/suanzi-qiepian.svg';
@@ -22,6 +22,7 @@ import SuziStrong from '@/assets/python/suanzi-strong.svg';
 import SuziVector from '@/assets/python/suanzi-xiangliang.svg';
 import SuziSave from '@/assets/python/suanzi-save.svg';
 import SuziIcon from '@/assets/python/suanzi-icon.svg';
+import classNames from 'classnames';
 
 // 算子图标映射类型
 type OperatorIconMap = Record<string, string>;
@@ -148,8 +149,8 @@ const ToolsManager: React.FC<ToolsManagerProps> = ({
     return operatorList.map((category, categoryIndex) => ({
       key: `category-${categoryIndex}`,
       title: (
-        <div className="tools-manager__category-header">
-          <span className="tools-manager__category-title">
+        <div className={styles['tools-manager__category-header']}>
+          <span className={styles['tools-manager__category-title']}>
             {category.catalog}
           </span>
         </div>
@@ -158,7 +159,10 @@ const ToolsManager: React.FC<ToolsManagerProps> = ({
         key: `operator-${categoryIndex}-${itemIndex}`,
         title: (
           <div
-            className={`tools-manager__operator ${hoveredItem === `operator-${categoryIndex}-${itemIndex}` ? 'tools-manager__operator--hovered' : ''}`}
+            className={classNames(styles['tools-manager__operator'], {
+              [styles['tools-manager__operator--hovered']]:
+                hoveredItem === `operator-${categoryIndex}-${itemIndex}`
+            })}
             onMouseEnter={() =>
               setHoveredItem(`operator-${categoryIndex}-${itemIndex}`)
             }
@@ -167,28 +171,28 @@ const ToolsManager: React.FC<ToolsManagerProps> = ({
             {/* 算子图标 */}
 
             <div
-              className="tools-manager__operator-icon"
+              className={styles['tools-manager__operator-icon']}
               style={{ backgroundColor: getOperatorIconBgColor(item.name) }}
             >
               {ICON_MAP[category.catalog_id] || <SuziIcon />}
             </div>
 
             {/* 算子信息 */}
-            <div className="tools-manager__operator-info">
-              <div className="tools-manager__operator-title">
+            <div className={styles['tools-manager__operator-info']}>
+              <div className={styles['tools-manager__operator-title']}>
                 <EllipsisPopover
                   value={item.name}
-                  className="tools-manager__operator-name"
+                  className={styles['tools-manager__operator-name']}
                   ellipsis={{
                     rows: 1,
                     cssEllipsis: true
                   }}
                 />
               </div>
-              <div className="tools-manager__operator-description">
+              <div className={styles['tools-manager__operator-description']}>
                 <EllipsisPopover
                   value={item.description}
-                  className="tools-manager__operator-desc"
+                  className={styles['tools-manager__operator-desc']}
                   ellipsis={{
                     rows: 1,
                     cssEllipsis: true
@@ -199,11 +203,14 @@ const ToolsManager: React.FC<ToolsManagerProps> = ({
 
             {/* 操作按钮 - 仅在hover时显示 */}
             {
-              <div className="tools-manager__operator-actions">
+              <div className={styles['tools-manager__operator-actions']}>
                 <Button
                   type="text"
                   size="small"
-                  className="tools-manager__action-btn tools-manager__action-btn--detail"
+                  className={classNames(
+                    styles['tools-manager__action-btn'],
+                    styles['tools-manager__action-btn--detail']
+                  )}
                   onClick={(e) => {
                     e.stopPropagation();
                     handleDetailClick(item);
@@ -214,7 +221,10 @@ const ToolsManager: React.FC<ToolsManagerProps> = ({
                 <Button
                   type="outline"
                   size="small"
-                  className="tools-manager__action-btn tools-manager__action-btn--insert"
+                  className={classNames(
+                    styles['tools-manager__action-btn'],
+                    styles['tools-manager__action-btn--insert']
+                  )}
                   onClick={(e) => {
                     e.stopPropagation();
                     handleInsertClick(item);
@@ -254,9 +264,11 @@ const ToolsManager: React.FC<ToolsManagerProps> = ({
   };
 
   return (
-    <div className="tools-manager sider-container">
+    <div
+      className={classNames(styles['tools-manager'], styles['sider-container'])}
+    >
       {/* 标题 */}
-      <div className="sider-title">算子库</div>
+      <div className={styles['sider-title']}>算子库</div>
 
       {/* 搜索框 */}
       <div className="mb-2">
@@ -271,7 +283,7 @@ const ToolsManager: React.FC<ToolsManagerProps> = ({
       </div>
 
       {/* Tree组件 */}
-      <div className="tools-manager__content">
+      <div className={styles['tools-manager__content']}>
         {loading ? (
           <div className="mt-[110px] flex flex-col items-center">
             <Spin size={26} />
@@ -286,7 +298,7 @@ const ToolsManager: React.FC<ToolsManagerProps> = ({
             onSelect={handleSelect}
             showLine={false}
             blockNode={true}
-            className="tools-manager__tree"
+            className={styles['tools-manager__tree']}
           />
         ) : (
           <Empty description="暂无数据" />

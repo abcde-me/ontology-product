@@ -6,9 +6,7 @@ import {
   Space,
   Radio,
   Table,
-  Checkbox,
   Cascader,
-  Typography,
   Modal,
   Tooltip,
   Message,
@@ -16,12 +14,11 @@ import {
   Pagination
 } from '@arco-design/web-react';
 import type { OptionInfo } from '@arco-design/web-react/es/Select/interface';
-import TooltipOnOverflow from './tootioOnocweflow';
 import EllipsisPopover from '@/components/ellipsis-popover-com';
 const { Option } = Select;
 import React, { useState, useEffect, useImperativeHandle, useRef } from 'react';
 import styles from './AddDatasetForm.module.css';
-import './AddDatasetForm.css';
+import './AddDatasetForm.scss';
 import { getCatalogList, getCatalogPreview } from '@/api/dataCatalog';
 import { validateName } from '@/utils/valiate';
 import {
@@ -32,7 +29,6 @@ import {
 } from '@/api/datasetManagement';
 import { debounce } from 'lodash-es';
 import getFileIcon from '../file-icon';
-const { Text } = Typography;
 
 interface Dataset {
   key?: string;
@@ -43,13 +39,6 @@ interface Dataset {
   storageType: StorageType;
   targetDataSource?: string;
   selectedFiles?: string[];
-}
-
-interface DataFile {
-  key: string;
-  filename: string;
-  size: string;
-  modifyTime: string;
 }
 
 interface ConnectorFile {
@@ -142,17 +131,6 @@ function convertToSelectOptions(connectorList) {
   }));
 }
 
-//标签测试数据
-const tagOptions = [
-  {
-    id: 1,
-    name: 'nlp'
-  },
-  {
-    id: 2,
-    name: 'gan'
-  }
-];
 // 格式化日期时间
 function formatDateTime(isoString) {
   const date = new Date(isoString);
@@ -174,15 +152,6 @@ function convertTotagSelectOptions(data = []) {
     // TODO: ts错误
     // @ts-expect-error
     value: item.name
-  }));
-}
-
-//连接器文件信息转换为select选项的函数，咱不使用
-function transformToSelectOptions(fileList) {
-  return fileList.map((file) => ({
-    label: `${file.name}`,
-    value: file.path,
-    data: file
   }));
 }
 
@@ -222,8 +191,6 @@ const DatasetForm = React.forwardRef<
     null
   ); //选择的连接器ID
   const [selectedFiles, setSelectedFiles] = useState<string[]>([]); //选择文件
-  const [showFileSelection, setShowFileSelection] = useState(false); //文件选择
-  const [showDataPreview, setShowDataPreview] = useState(false); //数据预览
   const [targetDataSourceOptions, setTargetDataSourceOptions] = useState([]); //目标数据源选项
   const [connectorList, setConnectorList] = useState([]); //连接器列表
   const [connectorFileInformation, setConnectorFileInformation] = useState<
@@ -237,8 +204,6 @@ const DatasetForm = React.forwardRef<
   const [tagList, setTagList] = useState<{ label: string; value: string }[]>(
     []
   );
-  //是否禁用新建标签·
-  const [iscreateTagDisabled, setIscreateTagDisabled] = useState(false);
   const [inputValue, setInputValue] = useState('');
   const [tableLoading, setTableLoading] = useState(false);
   const [canSubmit, setCanSubmit] = useState(true);
@@ -272,13 +237,10 @@ const DatasetForm = React.forwardRef<
       setPreviewFileData(null);
       form.setFieldValue('dataSource', 'volume');
       form.setFieldValue('storageType', StorageType.File);
-      setIscreateTagDisabled(false);
       // form.setFieldValue('tag', undefined);
       // setTargetDataSourceOptions([]); //重置目标数据源选项
     };
-    const setcreateTagDisabled = () => {
-      setIscreateTagDisabled(false);
-    };
+    const setcreateTagDisabled = () => {};
     return {
       resetForm,
       setcreateTagDisabled
@@ -336,8 +298,6 @@ const DatasetForm = React.forwardRef<
     form.setFieldValue('targetDataSource', undefined);
     setDataSource(value);
     form.setFieldValue('dataSource', value);
-    setShowFileSelection(false); //不显示文件选择
-    setShowDataPreview(false); //不显示数据预览
     setSelectedConnector(null); //清除连接器选择
     setSelectedFiles([]);
     setConnectorFileInformation([]); //清除连接器文件信息
@@ -355,8 +315,6 @@ const DatasetForm = React.forwardRef<
     form.setFieldValue('targetDataSource', undefined);
     setStorageType(value);
     form.setFieldValue('storageType', value);
-    setShowFileSelection(false); //不显示文件选择
-    setShowDataPreview(false); //不显示数据预览
     setSelectedConnector(null); //清除连接器选择
     setSelectedFiles([]);
     setConnectorFileInformation([]); //清除连接器文件信息
@@ -375,21 +333,14 @@ const DatasetForm = React.forwardRef<
   ) => {
     if (dataSource === 'volume') {
       console.log('选择的值:', value);
+      setCurrent(1);
       setTargetData(value);
 
       // 判断是一级目录还是二级目录
       if (Array.isArray(value) && Array.isArray(value[0])) {
         // 二级目录选择：value = [[catalog.base_dir, catalog.name], [volume.name, volume.id]]
 
-        // const catalogpath = value?.[0]?.[0];
-        // const catalogId = value?.[0]?.[1];
         const selectedItem = value?.[1]?.[0];
-        // const basePath = String(catalogpath?.[0]?.[0]??'');
-        // const formattedPath =
-        //   basePath.length > 1 && basePath.endsWith('/')
-        //     ? `${basePath}/`
-        //     : basePath;
-        // const path = `${formattedPath}dst/${catalogId}/volume/${selectedItem}`;
         if (selectedItem == undefined) {
           setPreviewColumns([]);
           Message.warning('请选择二级目录！');
@@ -430,7 +381,7 @@ const DatasetForm = React.forwardRef<
 
   // 模拟连接器文件数据
   const getConnectorFileInformationfun = (id: string, type?: string) => {
-    getConnectorFileList({ connector_id: id, type: type })
+    getConnectorFileList({ id, type })
       .then((res) => {
         // 判断接口返回状态
         if (res.stat !== 0 && !res.code) {
@@ -668,7 +619,7 @@ const DatasetForm = React.forwardRef<
             style={{ marginBottom: 16 }}
           >
             <Input
-              maxLength={128}
+              maxLength={255}
               showWordLimit
               // style={{ width: '100%', marginLeft: 10 }}
               placeholder="输入数据集名称"
@@ -801,8 +752,7 @@ const DatasetForm = React.forwardRef<
               >
                 <Cascader
                   placeholder="请选择"
-                  //@ts-expect-error
-                  renderFormat={(labels, selectedOptions) => {
+                  renderFormat={(labels) => {
                     const value = `${labels.join(' / ')}`;
                     return (
                       <div>
@@ -816,7 +766,7 @@ const DatasetForm = React.forwardRef<
                   showSearch={{
                     retainInputValue: true
                   }}
-                  renderOption={(node, _level) => {
+                  renderOption={(node) => {
                     return (
                       <div>
                         <EllipsisPopover value={node.label} />
@@ -889,7 +839,7 @@ const DatasetForm = React.forwardRef<
                     pagination={false}
                     rowSelection={{
                       type: 'checkbox',
-                      onChange: (selectedRowKeys, selectedRows) => {
+                      onChange: (selectedRowKeys) => {
                         setFileIds(selectedRowKeys as string[]);
                       }
                     }}
@@ -975,7 +925,7 @@ const DatasetForm = React.forwardRef<
                     <Select
                       placeholder={
                         !selectedConnector
-                          ? '请先选数据文件'
+                          ? '请先选择连接器'
                           : '请选择要使用的文件'
                       }
                       mode="multiple"

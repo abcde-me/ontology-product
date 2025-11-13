@@ -20,12 +20,12 @@ const defaultfileTypeList = [
   {
     label: 'MySQL',
     text: 'MySQL',
-    value: 'mysql'
+    value: 'MySQL'
   },
   {
     label: 'PostgreSQL',
     text: 'PostgreSQL',
-    value: 'postgresql'
+    value: 'PostgreSQL'
   }
 ];
 

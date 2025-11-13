@@ -1,16 +1,31 @@
-import { useLogoInfo } from '@/utils/swr';
-import { logout, removeLoginToken } from '@/utils/env';
-import { Dropdown, Menu, Tooltip, Link } from '@arco-design/web-react';
-import React, { type CSSProperties, useCallback } from 'react';
+import {
+  Dropdown,
+  Menu,
+  Tooltip,
+  Link,
+  Cascader
+} from '@arco-design/web-react';
+import React, {
+  type CSSProperties,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  useMemo
+} from 'react';
+import { useHistory } from 'react-router-dom';
+import { menus, filterMenusByPermissions, type MenuModel } from './menus';
 import HeaderLogo from '@/assets/header-logo.png';
 import cls from 'classnames';
-import { usePathChange } from '@/hooks';
+import { ProjectIdKey } from '@/utils/const';
+import { setLocalStorage, getLocalStorage } from '@/utils/storage';
+import { usePathChange, usePermission } from '@/hooks';
 import { IconQuestionCircle, IconUser } from '@arco-design/web-react/icon';
 import { useUserInfo, useUserInfoStore } from '@/store/userInfoStore';
-import { openNewPage } from '@/utils/env';
-import { PrefixV2 } from '@/api/endpoints';
-import axios from 'axios';
-import { getToken } from '@/utils/request';
+import { handlePathName } from '@/hooks/use-path-change';
+import { logout } from '@/utils/env';
+import { GetProjOrg } from '@/api/modules/project';
+import { isSameArray } from '@/utils/array';
 
 export default function Header({
   className,
@@ -19,23 +34,45 @@ export default function Header({
   className?: string;
   style?: CSSProperties;
 }) {
-  const { data } = useLogoInfo();
+  // const { data } = useLogoInfo();
+  const data = {
+    logoPic: HeaderLogo
+  };
   const { pushPath } = usePathChange();
+  const isMountedRef = useRef(true);
 
   // 从全局 store 获取用户信息
   const userInfo = useUserInfo();
-  console.log('userInfo', userInfo);
-  const { clearUserInfo } = useUserInfoStore();
+  const {
+    clearUserInfo,
+    setUserActions,
+    projectId,
+    setProjectId,
+    isInitialized,
+    fetchUserInfo
+  } = useUserInfoStore();
+  const { setUserPermissions } = usePermission();
+  const { id: userId } = userInfo || {};
+  const [projects, setProjects] = useState<Record<string, any>[]>([]);
+  const FullStorageKey = useMemo(() => `${ProjectIdKey}${userId}`, [userId]);
+  // 组件卸载时的清理
+  useEffect(() => {
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
 
   const logoutAction = useCallback(() => {
-    removeLoginToken();
+    // 清除本地存储的 token
+    localStorage.removeItem('loginToken');
+    localStorage.removeItem('console_token');
 
     // 清除全局用户信息
     clearUserInfo();
 
     // 跳转到登录页面
     logout();
-  }, [pushPath, clearUserInfo]);
+  }, [clearUserInfo]);
 
   const onClickUserDropdown = useCallback(
     (action) => {
@@ -44,7 +81,7 @@ export default function Header({
           logoutAction();
           break;
         case 'account':
-          pushPath('/tenant/compute/modaforge/userinfo');
+          pushPath(handlePathName('/userinfo'));
           break;
         default:
           break;
@@ -52,26 +89,61 @@ export default function Header({
     },
     [logoutAction, pushPath]
   );
+  useEffect(() => {
+    const list = async () => {
+      const { data: result } = await GetProjOrg({});
+      setProjects(result);
+      const fullProjectIdKey = `${ProjectIdKey}${userInfo?.id}`;
+      console.log('fullProjectIdKey', fullProjectIdKey);
 
-  const goHelp = () => {
-    openNewPage('/modaforge/assets/多模态数据治理平台 - 用户手册.pdf');
-    // const url = `${PrefixV2}/files/browser/api-demo`;
-    // axios
-    //   .get(url, {
-    //     responseType: 'arraybuffer',
-    //     // @ts-ignore
-    //     headers: { ...getToken() }
-    //   })
-    //   .then((res) => {
-    //     // 转换pdf
-    //     try {
-    //       const blob = new Blob([res.data], { type: 'application/pdf' });
-    //       const docURL = URL.createObjectURL(blob);
-    //       window.open(docURL, '_blank');
-    //     } catch {
-    //       // Message.error('无法加载PDF文件，请检查文件结构或文件完整性');
-    //     }
-    //   });
+      if (result.length) {
+        const pId = getLocalStorage<string[]>(fullProjectIdKey);
+        if (Array.isArray(pId)) {
+          const org = result.find((r) => r.id === pId[0]);
+          if (org && org.projectList.find((p) => p.id === pId[1])) {
+            setProjectId(pId);
+            return;
+          }
+        }
+
+        const defaultPId = [result[0].id, result[0].projectList[0].id];
+        setLocalStorage(fullProjectIdKey, defaultPId);
+        setProjectId(defaultPId);
+      }
+    };
+
+    if (userInfo?.id) {
+      list();
+    }
+  }, [userInfo?.id]);
+
+  // React.useEffect(() => {
+  //   if (projectId && projectId[1]) {
+  //     setUserPermissions(projectId[1]);
+  //   }
+  // }, [projectId[1]]);
+
+  useEffect(() => {
+    if (!isInitialized) {
+      fetchUserInfo();
+    }
+  }, [fetchUserInfo, isInitialized]);
+
+  const changeProject = (value: string[]) => {
+    if (!userId || !userId.length) return;
+    if (isSameArray(value, projectId)) return;
+
+    setLocalStorage(FullStorageKey, value);
+    // 重置权限状态，这样下次初始化时会重新加载权限
+    setUserActions({ isAdmin: false, actions: null });
+    setProjectId(value);
+  };
+
+  const goHelp = async () => {
+    // const res = await getDocContent('file-ea3d6713-147b-4b33-8488-59ddb9be4a0a');
+    // const blob = new Blob([res], { type: 'application/pdf' });
+    // const docURL = URL.createObjectURL(blob);
+    // window.open(docURL, '_blank');
   };
 
   return (
@@ -82,15 +154,47 @@ export default function Header({
       )}
       style={style}
     >
-      <a href="/modaforge/" className="flex items-center">
-        <img className="h-[18px]" src={data?.logoPic || HeaderLogo} />
-        <div className="mx-[6px] h-[18px] w-[1px] bg-white"></div>
-        <div className="text-[16px] leading-[22px] text-white">
-          多模态数据治理平台
+      <div className="flex h-full items-center">
+        <a href="/" className="flex items-center">
+          <img className="h-[18px]" src={data?.logoPic || HeaderLogo} />
+          <div className="mx-[6px] h-[18px] w-[1px] bg-white"></div>
+          <div className="text-[16px] leading-[22px] text-white">
+            多模态数据治理平台
+          </div>
+        </a>
+        <div className="project-selector ml-[24px] flex items-center">
+          <Cascader
+            placeholder="请选择项目"
+            bordered={false}
+            style={{
+              width: 160,
+              backgroundColor: '#FFFFFF33',
+              borderRadius: 4
+            }}
+            dropdownMenuClassName="project-selector-dropdown"
+            fieldNames={{
+              label: 'title',
+              value: 'id',
+              children: 'projectList'
+            }}
+            options={projects}
+            showSearch
+            filterOption={(input, node) => {
+              return (
+                node.value.toLowerCase().indexOf(input.toLowerCase()) > -1 ||
+                node.label.toLowerCase().indexOf(input.toLowerCase()) > -1
+              );
+            }}
+            value={projectId}
+            onChange={(value, option) => {
+              changeProject(value as string[]);
+            }}
+          ></Cascader>
         </div>
-      </a>
+      </div>
+
       <div className="flex items-center gap-x-[16px]">
-        <Tooltip content="查看用户手册">
+        <Tooltip content="下载帮助文档">
           <Link
             href="#"
             icon={
@@ -111,19 +215,19 @@ export default function Header({
                     <IconUser />
                   </div>
                   <span className="text-[14px]/[20px] text-[#151B26]">
-                    {userInfo?.username}
+                    {userInfo?.name}
                   </span>
                 </div>
                 <div className="rounded-[4px] border-[1px] border-[#CBD5E1] px-[8px] text-[12px]/[20px] text-[#6E7B8D]">
-                  {userInfo?.role}
+                  {userInfo?.roles[0]?.name}
                 </div>
               </Menu.Item>
-              {!userInfo?.is_super_admin && (
+              {userInfo?.organization?.id !== '' && (
                 <Menu.Item
                   key="org"
                   className="flex h-[24px] items-center bg-[#E7ECF0] px-[12px] text-[14px]/[20px] text-[#151B26] hover:bg-[#E7ECF0]"
                 >
-                  组织：{userInfo?.organization}
+                  组织：{userInfo?.organization?.name}
                 </Menu.Item>
               )}
 

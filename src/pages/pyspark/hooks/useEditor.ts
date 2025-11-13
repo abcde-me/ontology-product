@@ -6,7 +6,7 @@ import {
   useThrottleFn,
   useDebounceFn
 } from 'ahooks';
-import { RunningStatus } from '@/types/pythonApi';
+import { RunLogStatus, RunningStatus } from '@/types/pythonApi';
 import {
   runPythonItem,
   getRunResult,
@@ -76,6 +76,9 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
   const [editorContent, setEditorContent] = useState('');
   const [placeholderValue] = useState(defaultContent);
   const [runStatus, setRunStatus] = useState<RunningStatus>(RunningStatus.IDLE);
+  const [runLogStatus, setRunLogStatus] = useState<RunLogStatus>(
+    RunLogStatus.STOP
+  );
   const [runStartTime, setRunStartTime] = useState<Date | null>(null);
   const [runDuration, setRunDuration] = useState<number>(0);
   const [lastAutoSave, setLastAutoSave] = useState<string>('');
@@ -84,7 +87,7 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
   const [runResult, setRunResult] = useState<string>('');
   const [isPanelOpen, setIsPanelOpen] = useState<boolean>(false);
   const [hasFetchedResult, setHasFetchedResult] = useState<boolean>(false);
-  const [activeKey, setActiveKey] = useState<string>('result');
+  const [activeKey, setActiveKey] = useState<string>('log');
 
   // 跟踪前一个 runStatus 状态
   const prevRunStatusRef = useRef<RunningStatus>(RunningStatus.IDLE);
@@ -108,8 +111,8 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
   // 轮询获取运行结果
   const { runAsync: getRunResultPolling, cancel: cancelGetRunResultPolling } =
     useRequest(getRunResult, {
-      pollingInterval: 10000,
-      pollingWhenHidden: false,
+      pollingInterval: 2000,
+      pollingWhenHidden: true,
       manual: true,
       onSuccess: (res) => {
         if (res?.status !== 200) {
@@ -144,32 +147,32 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
   // 轮询获取日志
   const { runAsync: getRunLogPolling, cancel: cancelGetRunLogPolling } =
     useRequest(getRunLog, {
-      pollingInterval: 10000,
-      pollingWhenHidden: false,
+      pollingInterval: 2000,
+      pollingWhenHidden: true,
       manual: true,
       onSuccess: (res) => {
         if (res?.status !== 200) {
-          setRunStatus(RunningStatus.FAILED);
-          cancelGetRunResultPolling();
+          setRunLogStatus(RunLogStatus.STOP);
+          cancelGetRunLogPolling();
           setRunLog(res?.message ?? '获取日志失败');
           return;
         }
 
-        if (res?.data?.log) {
-          cancelGetRunResultPolling();
-        }
-
+        setRunLogStatus(res?.data?.status ?? RunLogStatus.STOP);
         setRunLog(res?.data?.log ?? '');
+
+        if (res?.data?.status === RunLogStatus.STOP) {
+          cancelGetRunLogPolling();
+        }
       },
       onError: (error) => {
-        setRunStatus(RunningStatus.FAILED);
-        cancelGetRunResultPolling();
+        setRunLogStatus(RunLogStatus.STOP);
+        cancelGetRunLogPolling();
         setRunResult(error?.message ?? '获取运行结果失败');
       }
     });
 
   const handleActiveTabChange = async () => {
-    console.log('handleActiveTabChange', prevActiveTabRef.current, activeTab);
     // 如果 activeTab 发生变化，且不是初始化
     if (
       prevActiveTabRef.current !== undefined &&
@@ -221,7 +224,7 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
     }
 
     // 标签页切换时重置面板状态为关闭
-    setActiveKey('result');
+    setActiveKey('log');
     setRunStatus(RunningStatus.IDLE);
     setExecid('');
     setRunStartTime(null);
@@ -232,6 +235,8 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
     setIsPanelOpen(false); // 重置面板状态为关闭
     // 取消正在进行的轮询
     cancelGetRunResultPolling();
+    // 取消正在进行的轮询获取日志
+    cancelGetRunLogPolling();
 
     // 如果有 fileId，重新加载文件内容以获取最新状态
     if (currentTab.fileId) {
@@ -271,9 +276,7 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
       setEditorContent(currentTab.content);
     }
 
-    () => {
-      handleSaveThrottled.cancel();
-    };
+    handleSaveThrottled.cancel();
   }, [activeTab]); // 只依赖 activeTab，避免不必要的重复更新
 
   // 延时自动保存 - 使用 useCallback 优化
@@ -306,6 +309,12 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
     ),
     { wait: 5000, leading: true, trailing: true }
   );
+
+  useEffect(() => {
+    return () => {
+      handleSaveThrottled.cancel();
+    };
+  }, [handleSaveThrottled]);
 
   // 处理内容变化 - 优化依赖项
   const handleContentChange = useCallback(
@@ -350,12 +359,14 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
 
       if (res?.status !== 200) {
         Message.error(res?.message ?? '运行失败');
+        setRunStatus(RunningStatus.IDLE);
         return;
       }
 
       setExecid(res.data.execid);
     } catch (error) {
       Message.error('运行失败');
+      setRunStatus(RunningStatus.IDLE);
     }
   }, [runStatus, currentFileId, editorContent]);
 
@@ -369,9 +380,15 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
     }
 
     cancelGetRunResultPolling();
+    cancelGetRunLogPolling();
     setRunStatus(RunningStatus.IDLE);
     setHasFetchedResult(true);
-  }, [currentFileId, execid, cancelGetRunResultPolling]);
+  }, [
+    currentFileId,
+    execid,
+    cancelGetRunResultPolling,
+    cancelGetRunLogPolling
+  ]);
 
   // 统一的按钮点击处理函数（带防抖）
   const handleButtonClick = useCallback(() => {
@@ -395,9 +412,12 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
     }
     const res = await getRunLog(currentFileId, { execid });
 
-    if (res?.status === 200) {
-      setRunLog(res.data.log);
+    if (res?.status !== 200) {
+      setRunLog(res.message ?? '获取日志失败');
+      return;
     }
+
+    setRunLog(res?.data?.log ?? '');
   }, [currentFileId, execid]);
 
   const handleGetRunResult = useCallback(async () => {
@@ -421,12 +441,13 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
 
   // 监听运行状态变化，自动获取结果 - 优化依赖项
   useEffect(() => {
-    if (runStatus !== RunningStatus.RUNNING) {
-      cancelGetRunResultPolling();
-    }
-
     if (!execid || !currentFileId) {
       return;
+    }
+
+    if (runStatus !== RunningStatus.RUNNING) {
+      cancelGetRunResultPolling();
+      // cancelGetRunLogPolling();
     }
 
     // 运行中时，轮询获取运行结果
@@ -436,6 +457,14 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
         getRunResultPolling(currentFileId, {
           execid
         });
+
+        console.log('获取运行日志', currentFileId, execid);
+
+        getRunLogPolling(currentFileId, {
+          execid
+        });
+
+        console.log('获取运行日志成功');
       } catch (error) {
         console.error('获取运行结果失败:', error);
         setRunStatus(RunningStatus.FAILED);
@@ -444,6 +473,13 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
 
     fetchResult();
   }, [execid]);
+
+  useEffect(() => {
+    return () => {
+      cancelGetRunResultPolling();
+      cancelGetRunLogPolling();
+    };
+  }, [cancelGetRunResultPolling, cancelGetRunLogPolling]);
 
   // 当 currentFileId 变化时，重置运行相关状态
   // useEffect(() => {

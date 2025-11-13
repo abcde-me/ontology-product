@@ -1,46 +1,35 @@
-import { FC, useEffect, useRef, useState } from 'react';
+import { FC, useEffect, useState } from 'react';
 import React from 'react';
-import produce from 'immer';
-import { useTranslation } from 'react-i18next';
 import useConfig from './use-config';
 import type { StartNodeType } from './types';
 import {
   BlockEnum,
-  type InputVar,
   type NodePanelProps
 } from '@/pages/workflowConfig/workflow/types';
 import {
   Form,
-  Input,
   Select,
   Checkbox,
   Switch,
-  Cascader,
   Button,
   Tag,
   AutoComplete,
   Message
 } from '@arco-design/web-react';
-import { v4 as uuid4 } from 'uuid';
-import { cloneDeep, debounce, escapeRegExp } from 'lodash-es';
+import { cloneDeep, escapeRegExp } from 'lodash-es';
 import PdfIcon from '@/assets/file/pdf-icon.svg';
 import ImageIcon from '@/assets/file/image-icon.svg';
 import AudioIcon from '@/assets/file/audio-icon.svg';
 import VideoIcon from '@/assets/file/video-icon.svg';
 import CustomizeIcon from '@/assets/file/customize-icon.svg';
 import StartNodeDefault, { FileOptions } from './default';
-import { useStoreApi } from 'reactflow';
-import { useNodeDataUpdate } from '@/pages/workflowConfig/workflow/hooks';
 import { getCatalogList } from '@/api/dataCatalog';
-import { getLoadTaskFiles } from '@/api/loadApi';
 import { useHistory } from 'react-router-dom';
 import { IconPlus } from '@arco-design/web-react/icon';
 
 const FormItem = Form.Item;
-const i18nPrefix = 'workflow.nodes.start';
 
 const Panel: FC<NodePanelProps<StartNodeType>> = ({ id, data }) => {
-  const { t } = useTranslation('plugin__console-plugin-appforge');
   const { data_category } = StartNodeDefault.defaultValue;
   const [srcDirs, setSrcDirs] = useState<Array<Record<string, any>>>([]);
   const [customizeFormat, setCustomizeFormat] = useState<string[]>(
@@ -51,8 +40,6 @@ const Panel: FC<NodePanelProps<StartNodeType>> = ({ id, data }) => {
   );
   const [customizeInputValue, setCustomizeInputValue] = useState('');
   const [form] = Form.useForm();
-  // const store = useStoreApi();
-  // const { handleNodeDataUpdateWithSyncDraft } = useNodeDataUpdate();
   const history = useHistory();
   const { OptGroup, Option } = AutoComplete;
 
@@ -213,7 +200,6 @@ const Panel: FC<NodePanelProps<StartNodeType>> = ({ id, data }) => {
         updatedConfig
       ]
     });
-    console.log(updatedConfig, index, 'updatedConfig');
     doFileConfigChange(
       BlockEnum.Customize,
       form.getFieldValue('data_path_id'),
@@ -454,7 +440,7 @@ const Panel: FC<NodePanelProps<StartNodeType>> = ({ id, data }) => {
               />
             </FormItem>
           </div>
-          {/* <div className="mt-[12px] flex flex-col gap-y-[12px] rounded-[12px] border-[1px] border-[#CBD5E1] p-[16px]">
+          <div className="mt-[12px] flex flex-col gap-y-[12px] rounded-[12px] border-[1px] border-[#CBD5E1] p-[16px]">
             <div className="flex h-[22px] items-center gap-x-[8px]">
               <FormItem
                 field="data_category[4].enabled"
@@ -528,7 +514,7 @@ const Panel: FC<NodePanelProps<StartNodeType>> = ({ id, data }) => {
                 )}
               </div>
             )}
-          </div> */}
+          </div>
         </FormItem>
       </Form>
     </div>

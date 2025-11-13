@@ -1,5 +1,5 @@
 import type { MouseEvent } from 'react';
-import React, { memo, useCallback, useEffect, useState } from 'react';
+import React, { memo, useCallback, useState } from 'react';
 import { Handle, Position } from 'reactflow';
 import { useTranslation } from 'react-i18next';
 import { BlockEnum, NodeRunningStatus } from '../../../types';
@@ -8,12 +8,10 @@ import BlockSelector from '../../../block-selector';
 import type { ToolDefaultValue } from '../../../block-selector/types';
 import {
   useAvailableBlocks,
-  useIsChatMode,
   useNodesInteractions,
   useNodesReadOnly,
   useWorkflow
 } from '../../../hooks';
-import { useStore } from '../../../store';
 import cn from '@/pages/workflowConfig/utils/classnames';
 
 type NodeHandleProps = {
@@ -81,11 +79,11 @@ export const NodeTargetHandle = memo(
             'z-[2] after:absolute after:right-1.5 after:top-1 after:h-2 after:w-2 after:rounded-full after:bg-workflow-link-line-handle',
             'transition-all hover:scale-125',
             data._runningStatus === NodeRunningStatus.Succeeded &&
-              'after:bg-workflow-link-line-success-handle',
+            'after:bg-workflow-link-line-success-handle',
             data._runningStatus === NodeRunningStatus.Failed &&
-              'after:bg-workflow-link-line-error-handle',
+            'after:bg-workflow-link-line-error-handle',
             data._runningStatus === NodeRunningStatus.Exception &&
-              'after:bg-workflow-link-line-failure-handle',
+            'after:bg-workflow-link-line-failure-handle',
             !connected && 'before:opacity-0 after:opacity-0',
             data.type === BlockEnum.Start && 'opacity-0',
             handleClassName
@@ -127,7 +125,6 @@ export const NodeSourceHandle = memo(
     showExceptionStatus
   }: NodeHandleProps) => {
     const { t } = useTranslation('plugin__console-plugin-appforge');
-    const notInitialWorkflow = useStore((s) => s.notInitialWorkflow);
     const [open, setOpen] = useState(false);
     const { handleNodeAdd } = useNodesInteractions();
     const { getNodesReadOnly } = useNodesReadOnly();
@@ -137,7 +134,6 @@ export const NodeSourceHandle = memo(
       data.isInLoop
     );
     const isConnectable = !!availableNextBlocks.length;
-    const isChatMode = useIsChatMode();
     const { checkParallelLimit } = useWorkflow();
 
     const connected = data._connectedSourceHandleIds?.includes(handleId);
@@ -183,12 +179,12 @@ export const NodeSourceHandle = memo(
           'z-[2] after:absolute after:right-1.5 after:top-1 after:h-2 after:w-2 after:rounded-full after:bg-workflow-link-line-handle',
           'transition-all hover:scale-125',
           data._runningStatus === NodeRunningStatus.Succeeded &&
-            'after:bg-workflow-link-line-success-handle',
+          'after:bg-workflow-link-line-success-handle',
           data._runningStatus === NodeRunningStatus.Failed &&
-            'after:bg-workflow-link-line-error-handle',
+          'after:bg-workflow-link-line-error-handle',
           showExceptionStatus &&
-            data._runningStatus === NodeRunningStatus.Exception &&
-            'after:bg-workflow-link-line-failure-handle',
+          data._runningStatus === NodeRunningStatus.Exception &&
+          'after:bg-workflow-link-line-failure-handle',
           !connected && 'before:opacity-0 after:opacity-0',
           handleClassName
         )}

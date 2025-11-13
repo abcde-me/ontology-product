@@ -41,7 +41,6 @@ export interface DstCatalogItemWithPath {
   sort_field?: string;
   name?: string;
   parent_id?: number;
-  perms?: string[];
   type?: number;
   type_name?: string;
   full_path?: string;
@@ -171,9 +170,9 @@ export const useTargetTree = () => {
           }
 
           const res = await getTargetCatalogFileListApi({
-            full_path: nodeData.full_path || '',
+            full_path: nodeData?.data?.base_dir + nodeData.full_path || '',
             sort_field: nodeData.sort_field || '',
-            path_id: nodeData.id.toString(),
+            path_id: nodeData.id,
             sort_order: 'desc' as 'asc' | 'desc',
             limit: 1000,
             page: 1

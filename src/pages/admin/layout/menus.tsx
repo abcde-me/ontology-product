@@ -1,5 +1,23 @@
 import React from 'react';
 import { isWujie } from '@/utils/env';
+import {
+  CONNECTION_PERMISSIONS,
+  DATA_LOAD_PERMISSIONS,
+  WORKFLOW_LIST_PERMISSIONS,
+  WORKFLOW_TASK_PERMISSIONS,
+  DATA_CATALOG_PERMISSIONS,
+  DATA_MANAGEMENT_PERMISSIONS,
+  PYSPARK_PERMISSIONS,
+  SQL_PERMISSIONS,
+  REQUIREMENT_PERMISSIONS,
+  ANNOTATION_TASK_PERMISSIONS,
+  ORGANIZATION_PERMISSIONS,
+  USER_PERMISSIONS,
+  USER_GROUP_PERMISSIONS,
+  ROLE_PERMISSIONS,
+  PROJECT_PERMISSIONS,
+  API_KEY_PERMISSIONS
+} from '@/config/permissions';
 import Connection from '@/assets/sider/connection.svg';
 import DataLoad from '@/assets/sider/data-load.svg';
 import DataCatalog from '@/assets/sider/data-catalog.svg';
@@ -8,6 +26,7 @@ import WorkflowList from '@/assets/sider/workflow-list.svg';
 import WorkflowTask from '@/assets/sider/workflow-task.svg';
 import OrganMenu from '@/assets/sider/organmenu.svg';
 import MemberMenu from '@/assets/sider/membermenu.svg';
+import BaseMenu from '@/assets/sider/basemenu.svg';
 import PasparkMenu from '@/assets/sider/pyspark.svg';
 import SqlMenu from '@/assets/sider/sql.svg';
 import AnnotationTask from '@/assets/sider/annotationTask.svg';
@@ -24,6 +43,7 @@ export type MenuModel = {
   type?: string;
   external?: boolean;
   permission?: string; // 添加权限字段
+  queryParamMatcher?: (search: string) => boolean; // 用于匹配查询参数
 };
 
 export const filterMenusByPermissions = (
@@ -73,14 +93,14 @@ export const menus: MenuModel[] = [
         icon: <Connection className={iconClass} />,
         key: 'connection',
         path: '/tenant/compute/modaforge/connection',
-        permission: 'connectors:can_search'
+        permission: CONNECTION_PERMISSIONS.LIST
       },
       {
         title: '数据载入',
         icon: <DataLoad className={iconClass} />,
         path: '/tenant/compute/modaforge/dataLoad',
         key: 'dataLoad',
-        permission: 'dataloader:can_search'
+        permission: DATA_LOAD_PERMISSIONS.LIST
       }
     ]
   },
@@ -94,14 +114,14 @@ export const menus: MenuModel[] = [
         icon: <WorkflowList className={iconClass} />,
         key: 'workflowList',
         path: '/tenant/compute/modaforge/workflowList',
-        permission: 'workflow:can_search'
+        permission: WORKFLOW_LIST_PERMISSIONS.LIST
       },
       {
         title: '作业',
         icon: <WorkflowTask className={iconClass} />,
         key: 'workflowTask',
         path: '/tenant/compute/modaforge/workflowTask',
-        permission: 'workflowInstance:can_search'
+        permission: WORKFLOW_TASK_PERMISSIONS.LIST
       }
     ]
   },
@@ -115,14 +135,14 @@ export const menus: MenuModel[] = [
         icon: <PasparkMenu className={iconClass} />,
         key: 'pyspark',
         path: '/tenant/compute/modaforge/pyspark',
-        permission: 'pyspark:can_search'
+        permission: PYSPARK_PERMISSIONS.LIST
       },
       {
         title: 'SQL开发',
         icon: <SqlMenu className={iconClass} />,
         key: 'sql',
         path: '/tenant/compute/modaforge/sql',
-        permission: 'sql_script:can_search'
+        permission: SQL_PERMISSIONS.LIST
       }
     ]
   },
@@ -135,13 +155,15 @@ export const menus: MenuModel[] = [
         title: '需求管理',
         icon: <RequirementManagement className={iconClass} />,
         key: 'requirement',
-        path: '/tenant/compute/modaforge/requirement'
+        path: '/tenant/compute/modaforge/requirement',
+        permission: REQUIREMENT_PERMISSIONS.LIST
       },
       {
         title: '标注任务',
         icon: <AnnotationTask className={iconClass} />,
         key: 'taskList',
-        path: '/tenant/compute/modaforge/taskList'
+        path: '/tenant/compute/modaforge/taskList',
+        permission: ANNOTATION_TASK_PERMISSIONS.LIST
       }
     ]
   },
@@ -155,14 +177,14 @@ export const menus: MenuModel[] = [
         icon: <DataCatalog className={iconClass} />,
         key: 'dataCatalog',
         path: '/tenant/compute/modaforge/dataCatalog',
-        permission: 'directory:can_search_dirs'
+        permission: DATA_CATALOG_PERMISSIONS.LIST
       },
       {
         title: '数据集管理',
         icon: <DatasetManagement className={iconClass} />,
         key: 'datasetManagement',
         path: '/tenant/compute/modaforge/datasetManagement',
-        permission: 'datasets:can_search'
+        permission: DATA_MANAGEMENT_PERMISSIONS.LIST
       }
     ]
   },
@@ -176,15 +198,107 @@ export const menus: MenuModel[] = [
         title: '组织管理',
         icon: <OrganMenu className={iconClass} />,
         key: 'orgMgmt',
-        path: '/tenant/compute/modaforge/organization',
-        permission: 'organizations:can_search'
+        path:
+          '/tenant/compute/modaforge/operationCenter?url=' +
+          encodeURIComponent(
+            '/operationcenter/tenant/compute/operationcenter/organization'
+          ),
+        activePaths: ['/tenant/compute/modaforge/operationCenter'],
+        queryParamMatcher: (search: string) => {
+          const url = new URLSearchParams(search).get('url');
+          return url?.includes('organization') ?? false;
+        },
+        permission: ORGANIZATION_PERMISSIONS.MENU
       },
       {
         title: '用户管理',
         icon: <MemberMenu className={iconClass} />,
-        path: '/tenant/compute/modaforge/member',
+        path:
+          '/tenant/compute/modaforge/operationCenter?url=' +
+          encodeURIComponent(
+            '/operationcenter/tenant/compute/operationcenter/user'
+          ),
         key: 'userMgmt',
-        permission: 'users:can_search'
+        activePaths: ['/tenant/compute/modaforge/operationCenter'],
+        queryParamMatcher: (search: string) => {
+          const url = new URLSearchParams(search).get('url');
+          return (
+            (url?.includes('/user') && !url?.includes('user-group')) ?? false
+          );
+        },
+        permission: USER_PERMISSIONS.MENU
+      },
+      {
+        title: '用户组管理',
+        icon: <MemberMenu className={iconClass} />,
+        path:
+          '/tenant/compute/modaforge/operationCenter?url=' +
+          encodeURIComponent(
+            '/operationcenter/tenant/compute/operationcenter/user-group'
+          ),
+        key: 'userGroupMgmt',
+        activePaths: ['/tenant/compute/modaforge/operationCenter'],
+        queryParamMatcher: (search: string) => {
+          const url = new URLSearchParams(search).get('url');
+          return url?.includes('user-group') ?? false;
+        },
+        permission: USER_GROUP_PERMISSIONS.MENU
+      },
+      {
+        title: '角色管理',
+        icon: <BaseMenu className={iconClass} />,
+        path:
+          '/tenant/compute/modaforge/operationCenter?url=' +
+          encodeURIComponent(
+            '/operationcenter/tenant/compute/operationcenter/role'
+          ),
+        key: 'roleMgmt',
+        activePaths: ['/tenant/compute/modaforge/operationCenter'],
+        queryParamMatcher: (search: string) => {
+          const url = new URLSearchParams(search).get('url');
+          return url?.includes('role') ?? false;
+        },
+        permission: ROLE_PERMISSIONS.MENU
+      }
+    ]
+  },
+  {
+    type: 'itemGroup',
+    title: '工作空间',
+    key: 'workspaceGroup',
+    external: true,
+    children: [
+      {
+        title: '项目管理',
+        icon: <OrganMenu className={iconClass} />,
+        key: 'projectMgmt',
+        path:
+          '/tenant/compute/modaforge/operationCenter?url=' +
+          encodeURIComponent(
+            '/operationcenter/tenant/compute/operationcenter/project'
+          ),
+        activePaths: ['/tenant/compute/modaforge/operationCenter'],
+        queryParamMatcher: (search: string) => {
+          const url = new URLSearchParams(search).get('url');
+          return url?.includes('project') ?? false;
+        },
+        permission: PROJECT_PERMISSIONS.MENU
+      },
+      {
+        title: 'API Key管理',
+        icon: <OrganMenu className={iconClass} />,
+        key: 'apiKeyMgmt',
+        path:
+          '/tenant/compute/modaforge/operationCenter?url=' +
+          encodeURIComponent(
+            '/operationcenter/tenant/compute/operationcenter/apikey'
+          ),
+        activePaths: ['/tenant/compute/modaforge/operationCenter'],
+        queryParamMatcher: (search: string) => {
+          const url = new URLSearchParams(search).get('url');
+          return url?.includes('apikey') ?? false;
+        },
+        permission: API_KEY_PERMISSIONS.MENU
       }
     ]
   }

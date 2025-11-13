@@ -28,7 +28,6 @@ export default function HomePage() {
   useEffect(() => {
     // 获取角色数据并打印
     getRoleData().then((res) => {
-      console.log('getRoleData 返回内容:', res);
       const map: Record<string, string> = {};
       if (res?.data && Array.isArray(res.data)) {
         res.data.forEach((item: any) => {
@@ -45,7 +44,6 @@ export default function HomePage() {
       form.current?.setFieldsValue(userInfo);
     }
   }, [userInfo]);
-  console.log('userInfo', userInfo);
   return (
     <div className="flex min-h-screen justify-center bg-gray-50 py-12">
       <div className="w-full max-w-2xl px-4">
@@ -107,13 +105,14 @@ export default function HomePage() {
           <div className="mb-3 text-[16px]">
             <span className="inline-block w-12 font-[500]">部门</span>
             <span className="ml-4 text-gray-600">
-              {userInfo?.organization_full}
+              {userInfo?.organization?.name}
             </span>
           </div>
           <div className="text-[16px]">
             <span className="inline-block w-12 font-[500]">角色</span>
             <span className="ml-4 text-gray-600">
-              {(userInfo?.role && roleMap[userInfo.role]) || userInfo?.role}
+              {userInfo?.roles &&
+                userInfo?.roles.map((role: any) => role.name).join(', ')}
             </span>
           </div>
         </div>
@@ -125,7 +124,7 @@ export default function HomePage() {
         onOk={async (values) => {
           // console.log('接收到的用户信息:', values);
           const res = await updateUser(values);
-          if (res.success) {
+          if (res.statusCode === 0) {
             // 重置表单
             Message.success('修改成功');
             // 更新全局 store 中的用户信息
@@ -138,17 +137,20 @@ export default function HomePage() {
         initialValues={{
           account: userInfo?.account || '',
           phone: userInfo?.phone || '',
-          username: userInfo?.username || ''
+          username: userInfo?.name || ''
         }}
       />
 
       <PasswordModal
         visible={passwordVisible}
         onOk={async (values) => {
-          // console.log('接收到的密码信息:', values);
-          const res = await updatePassword(values);
-          console.log('res', res);
-          if (res.success) {
+          console.log('接收到的密码信息:', values);
+          const res = await updatePassword({
+            userid: userInfo?.id,
+            oldPassword: values.OldPassword,
+            newPassword: values.newPassword
+          });
+          if (res.statusCode === 0) {
             // 重置表单
             passwordForm.current?.resetFields();
             Message.success('修改成功');

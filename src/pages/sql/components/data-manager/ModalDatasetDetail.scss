@@ -1,5 +1,6 @@
 // 数据集详情
-.my-dataset-detail {
+// TODO 跟数据集详情页面共用组件，后续再模块化
+.sql-my-dataset-detail {
   .arco-tabs-content {
     min-height: unset;
   }
@@ -14,9 +15,13 @@
 
   .dataset-detail {
     min-height: unset;
+    padding: 0;
 
     .basic-info-card {
       min-height: unset;
+    }
+    .basic-info-card .arco-card-body {
+      padding: 0;
     }
   }
 }

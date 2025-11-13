@@ -1,21 +1,11 @@
-import SpaceIcon1 from '@/assets/space-icon1.svg';
-import IconApps from '@/assets/home.svg';
-import { useQueryParams } from '@/utils';
-import {
-  Button,
-  Layout,
-  Popover,
-  Menu,
-  Input,
-  Trigger
-} from '@arco-design/web-react';
+import { Layout, Menu } from '@arco-design/web-react';
 import cn from 'classnames';
-import React, { useEffect, useMemo, useState } from 'react';
-import { useHistory, useLocation, useParams } from 'react-router-dom';
-import { useUserInfo } from '@/store/userInfoStore';
-import { getFlatRoutes, routes } from '../route';
-import { menus, filterMenusByPermissions, type MenuModel } from './menus';
+import React, { useEffect, useMemo, useState, useRef } from 'react';
+import { useHistory, useLocation } from 'react-router-dom';
+import { menus, type MenuModel } from './menus';
 import './sider.scss';
+import { usePermission } from '@/hooks/usePermission';
+import { useUserInfoStore } from '@/store/userInfoStore';
 
 const MenuItem = Menu.Item;
 const SubMenu = Menu.SubMenu;
@@ -31,23 +21,18 @@ const hideSidebarPaths = [
 const collapseSidebarPaths = [];
 
 function LayoutWithSider({ children }) {
-  // 从全局 store 获取用户信息
-  const userInfo = useUserInfo();
-
-  // 根据用户权限过滤菜单
-  const filteredMenus = useMemo(() => {
-    const userPermissions = userInfo?.perms || [];
-    return filterMenusByPermissions(menus, userPermissions);
-  }, [userInfo?.perms]);
+  const { createPermissionFilter } = usePermission();
 
   const [collapsed, setCollapsed] = useState(false);
-  const [showMenus, setShowMenus] = useState(filteredMenus);
+  const [showMenus, setShowMenus] = useState(menus);
+  const { userMenus } = useUserInfoStore();
 
   const history = useHistory();
   const location = useLocation();
-  const queryParams = useQueryParams();
-  const params = useParams();
-  const flattenRoutes = getFlatRoutes(routes);
+
+  // 用于防抖的 ref
+  const clickTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const lastClickPathRef = useRef<string | null>(null);
 
   const sidebarHidden = hideSidebarPaths.some(
     (path) => path === location.pathname
@@ -64,13 +49,23 @@ function LayoutWithSider({ children }) {
           const path = activePaths.find((path) =>
             location.pathname.startsWith(path ?? '')
           );
-          if (path) return [menu.key];
+          if (path) {
+            // 如果有查询参数匹配器，使用它来进一步判断
+            if (menu.queryParamMatcher) {
+              if (menu.queryParamMatcher(location.search)) {
+                return [menu.key];
+              }
+              continue;
+            } else {
+              return [menu.key];
+            }
+          }
         }
       }
       return null;
     };
     return findMatch(showMenus);
-  }, [location.pathname, showMenus]);
+  }, [location.pathname, location.search, showMenus]);
 
   const [openKeys, setopenKeys] = useState(actives || []);
 
@@ -79,29 +74,34 @@ function LayoutWithSider({ children }) {
   };
 
   const clickMenu = React.useCallback(
-    (key: string) => {
-      const route = flattenRoutes.find((r) => r.key === key);
-      if (route?.sub) {
-        let tmp = key;
-        // 菜单跳转时保持param参数不变
-        for (const param in params) {
-          if (Object.prototype.hasOwnProperty.call(params, param)) {
-            const val = params[param];
-            const reg = new RegExp(`/:${param}/`, 'g');
-            if (reg.test(tmp)) {
-              tmp = tmp.replace(reg, `/${val}/`);
-            }
-          }
-        }
-        history.push(tmp + '?' + queryParams);
-      } else {
-        history.push(key);
+    (path: string) => {
+      // 防抖处理：如果在 300ms 内点击相同的路径，则忽略
+      if (lastClickPathRef.current === path && clickTimeoutRef.current) {
+        return;
       }
+
+      // 清除之前的超时
+      if (clickTimeoutRef.current) {
+        clearTimeout(clickTimeoutRef.current);
+      }
+
+      lastClickPathRef.current = path;
+
+      // 直接导航，不需要销毁 wujie 应用
+      // operationCenter 页面会通过 useLocation 监听 URL 变化并自动重新加载
+      history.push(path);
+
+      // 设置超时，300ms 后重置防抖状态
+      clickTimeoutRef.current = setTimeout(() => {
+        lastClickPathRef.current = null;
+        clickTimeoutRef.current = null;
+      }, 300);
     },
-    [flattenRoutes, history, params, queryParams]
+    [history]
   );
 
   const getMenu = (data: typeof menus) => {
+    console.log('data', data);
     return data.map((item) => {
       if (!item.children || item.children.length === 0)
         return (
@@ -146,8 +146,8 @@ function LayoutWithSider({ children }) {
   };
 
   useEffect(() => {
-    setShowMenus(filteredMenus);
-  }, [filteredMenus]);
+    setShowMenus(userMenus);
+  }, [userMenus]);
 
   useEffect(() => {
     setopenKeys((keys) => {
@@ -161,6 +161,15 @@ function LayoutWithSider({ children }) {
     );
     setCollapsed(collapse);
   }, [location.pathname]);
+
+  // 清理超时
+  useEffect(() => {
+    return () => {
+      if (clickTimeoutRef.current) {
+        clearTimeout(clickTimeoutRef.current);
+      }
+    };
+  }, []);
 
   return (
     <Layout className="h-full flex-auto overflow-auto">
@@ -181,7 +190,7 @@ function LayoutWithSider({ children }) {
               setopenKeys(openKeys);
             }}
           >
-            {getMenu(showMenus)}
+            {getMenu(createPermissionFilter(showMenus))}
           </Menu>
         </Sider>
       )}

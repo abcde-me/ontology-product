@@ -1,29 +1,19 @@
 import type { FC, ReactElement } from 'react';
 import React, { cloneElement, memo, useCallback } from 'react';
-import { RiCloseLine, RiPlayLargeLine } from '@remixicon/react';
+import { RiCloseLine } from '@remixicon/react';
 import { useShallow } from 'zustand/react/shallow';
-import { useTranslation } from 'react-i18next';
-// import NextStep from './components/next-step'
-// import PanelOperator from './components/panel-operator'
-// import HelpLink from './components/help-link'
 import {
   DescriptionInput,
   TitleInput
 } from './components/title-description-input';
-// import ErrorHandleOnPanel from './components/error-handle/error-handle-on-panel'
-// import RetryOnPanel from './components/retry/retry-on-panel'
 import { useResizePanel } from './hooks/use-resize-panel';
 import cn from '@/pages/workflowConfig/utils/classnames';
 import BlockIcon from '@/pages/workflowConfig/workflow/block-icon';
-// import Split from '@/pages/workflowConfig/workflow/nodes/_base/components/split'
 import {
   WorkflowHistoryEvent,
-  useAvailableBlocks,
   useNodeDataUpdate,
   useNodesInteractions,
-  useNodesReadOnly,
-  useNodesSyncDraft,
-  useToolIcon,
+  // useToolIcon,
   useWorkflow,
   useWorkflowHistory
 } from '@/pages/workflowConfig/workflow/hooks';
@@ -42,7 +32,6 @@ type BasePanelProps = {
 } & Node;
 
 const BasePanel: FC<BasePanelProps> = ({ id, data, children }) => {
-  const { t } = useTranslation('plugin__console-plugin-appforge');
   const { showMessageLogModal } = useTaskStore(
     useShallow((state) => ({
       showMessageLogModal: state.showMessageLogModal
@@ -54,14 +43,7 @@ const BasePanel: FC<BasePanelProps> = ({ id, data, children }) => {
     : 600;
   const { setPanelWidth } = useWorkflow();
   const { handleNodeSelect } = useNodesInteractions();
-  const { handleSyncWorkflowDraft } = useNodesSyncDraft();
-  const { nodesReadOnly } = useNodesReadOnly();
-  const { availableNextBlocks } = useAvailableBlocks(
-    data.type,
-    data.isInIteration,
-    data.isInLoop
-  );
-  const toolIcon = useToolIcon(data);
+  // const toolIcon = useToolIcon(data);
 
   const handleResize = useCallback(
     (width: number) => {
@@ -70,7 +52,7 @@ const BasePanel: FC<BasePanelProps> = ({ id, data, children }) => {
     [setPanelWidth]
   );
 
-  const { triggerRef, containerRef } = useResizePanel({
+  const { containerRef } = useResizePanel({
     direction: 'horizontal',
     triggerDirection: 'left',
     minWidth: 420,
@@ -80,7 +62,7 @@ const BasePanel: FC<BasePanelProps> = ({ id, data, children }) => {
 
   const { saveStateToHistory } = useWorkflowHistory();
 
-  const { handleNodeDataUpdate, handleNodeDataUpdateWithSyncDraft } =
+  const { handleNodeDataUpdateWithSyncDraft } =
     useNodeDataUpdate();
 
   const handleTitleBlur = useCallback(
@@ -103,7 +85,7 @@ const BasePanel: FC<BasePanelProps> = ({ id, data, children }) => {
       className={cn(
         'wk-node-config-panel-wrapper relative mr-0 h-full',
         showMessageLogModal &&
-          '!absolute -top-[5px] right-[416px] z-0 !mr-0 w-[384px] overflow-hidden rounded-2xl border-[0.5px] border-components-panel-border shadow-lg transition-all'
+        '!absolute -top-[5px] right-[416px] z-0 !mr-0 w-[384px] overflow-hidden rounded-2xl border-[0.5px] border-components-panel-border shadow-lg transition-all'
       )}
     >
       {/* <div
@@ -126,7 +108,7 @@ const BasePanel: FC<BasePanelProps> = ({ id, data, children }) => {
             <BlockIcon
               className="mr-[8px] size-[20px] shrink-0"
               type={data.type}
-              toolIcon={toolIcon}
+              // toolIcon={toolIcon}
               size="md"
             />
             <TitleInput

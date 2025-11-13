@@ -659,7 +659,7 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
             style={{ height: '32px' }}
           />
           {from === DirectoryTreeFrom.SQL ? (
-            <PermissionWrapper permission={SQL_PERMISSIONS.CAN_CREATE}>
+            <PermissionWrapper permission={SQL_PERMISSIONS.CREATE}>
               {/* <Button
                 type="text"
                 size="small"
@@ -677,30 +677,32 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
               </div>
             </PermissionWrapper>
           ) : (
-            <Dropdown
-              trigger="click"
-              position="bl"
-              droplist={
-                <Menu
-                  onClickMenuItem={(key) => {
-                    if (key === 'folder') {
-                      startRootCreate(true);
-                    } else if (key === 'file') {
-                      startRootCreate(false);
-                    }
-                  }}
-                >
-                  <Menu.Item key="file">新建PySpark</Menu.Item>
-                  <Menu.Item key="folder">新建文件夹</Menu.Item>
-                </Menu>
-              }
-            >
-              {isCanCreate && (
-                <Button type="text" size="small" icon={<IconPlus />}>
-                  {newButtonText}
-                </Button>
-              )}
-            </Dropdown>
+            <PermissionWrapper permission={PYSPARK_PERMISSIONS.CREATE}>
+              <Dropdown
+                trigger="click"
+                position="bl"
+                droplist={
+                  <Menu
+                    onClickMenuItem={(key) => {
+                      if (key === 'folder') {
+                        startRootCreate(true);
+                      } else if (key === 'file') {
+                        startRootCreate(false);
+                      }
+                    }}
+                  >
+                    <Menu.Item key="file">新建PySpark</Menu.Item>
+                    <Menu.Item key="folder">新建文件夹</Menu.Item>
+                  </Menu>
+                }
+              >
+                {isCanCreate && (
+                  <Button type="text" size="small" icon={<IconPlus />}>
+                    {newButtonText}
+                  </Button>
+                )}
+              </Dropdown>
+            </PermissionWrapper>
           )}
         </div>
 
@@ -746,16 +748,16 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
 
               return (
                 <div className="directory-tree-extra">
-                  {node.dataRef?.perms?.includes(nowPermissions.CAN_RENAME) && (
+                  <PermissionWrapper permission={nowPermissions.MODIFY}>
                     <Tooltip color="white" content="重命名">
                       <IconEdit
                         className="mr-1 text-[14px] hover:text-[rgb(var(--primary-6))]"
                         onClick={() => handleEdit(node)}
                       />
                     </Tooltip>
-                  )}
-                  {node.dataRef?.type !== PythonItemType.Directory &&
-                    node.dataRef?.perms?.includes(nowPermissions.CAN_COPY) && (
+                  </PermissionWrapper>
+                  <PermissionWrapper permission={nowPermissions.CREATE}>
+                    {node.dataRef?.type !== PythonItemType.Directory && (
                       <Tooltip color="white" content="复制并粘贴">
                         <IconCopy
                           className="mr-1 text-[14px] hover:text-[rgb(var(--primary-6))]"
@@ -765,7 +767,8 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
                         />
                       </Tooltip>
                     )}
-                  {node.dataRef?.perms?.includes(nowPermissions.CAN_DELETE) && (
+                  </PermissionWrapper>
+                  <PermissionWrapper permission={nowPermissions.DELETE}>
                     <Tooltip color="white" content="删除">
                       <IconDelete
                         className="text-[14px] hover:text-[rgb(var(--primary-6))]"
@@ -774,7 +777,7 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
                         }
                       />
                     </Tooltip>
-                  )}
+                  </PermissionWrapper>
                 </div>
               );
             }}

@@ -13,7 +13,7 @@ export async function addLoad(params: any) {
 }
 // 删除载入任务
 export async function delLoad(task_id) {
-  return await UAPI.RES.delLoadApi({ task_id }).delete().inRegion().do();
+  return await UAPI.RES.delLoadApi({}).post({ task_id }).inRegion().do();
 }
 // 修改载入任务
 export async function editLoad(params) {
@@ -21,14 +21,14 @@ export async function editLoad(params) {
   if (params.dest_path_id) {
     params.dest_path_id = Number(params.dest_path_id);
   }
-  return await UAPI.RES.editLoadApi({ task_id: params.task_id })
-    .put(params)
-    .inRegion()
-    .do();
+  return await UAPI.RES.editLoadApi({}).post(params).inRegion().do();
 }
 // 查看载入任务详情
 export async function getLoad(task_id) {
-  return await UAPI.RES.getLoadApi({ task_id }).get().inRegion().do();
+  return await UAPI.RES.getLoadApi({})
+    .post({ task_id: Number(task_id) })
+    .inRegion()
+    .do();
 }
 // 启停单个载入任务
 export async function startAndStopeLoad(params) {
@@ -42,8 +42,10 @@ export async function runLoad(params) {
 }
 // 查询载入任务记录
 export async function getLoadRecord(id) {
-  return await UAPI.RES.getLoadRecordDetailApi({ task_id: id })
-    .get()
+  return await UAPI.RES.getLoadRecordDetailApi({})
+    .post({
+      execution_id: id
+    })
     .inRegion()
     .do();
 }
@@ -58,7 +60,7 @@ interface CatalogListParams {
 }
 // 获取数据集列表
 export async function getDirectoryList(params: CatalogListParams) {
-  return await UAPI.RES.catalogListApi({}).get(params).inRegion().do();
+  return await UAPI.RES.catalogListApi({}).post(params).inRegion().do();
 }
 // 停止单个载入任务
 export async function stopeLoad(params) {

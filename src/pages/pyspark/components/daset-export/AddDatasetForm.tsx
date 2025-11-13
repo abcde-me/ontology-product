@@ -3,39 +3,25 @@ import {
   Input,
   Button,
   Select,
-  Space,
   Radio,
   Table,
-  Checkbox,
-  Cascader,
-  Typography,
   Modal,
   Tooltip,
   Message,
-  Tag,
-  Pagination
+  Tag
 } from '@arco-design/web-react';
-import type { OptionInfo } from '@arco-design/web-react/es/Select/interface';
 import EllipsisPopover from '@/components/ellipsis-popover-com';
-const { Option } = Select;
-import React, { useState, useEffect, useImperativeHandle, useRef } from 'react';
+import React, { useState, useEffect, useImperativeHandle } from 'react';
 import styles from './AddDatasetForm.module.scss';
-import './AddDatasetForm.css';
-import { getCatalogList, getCatalogPreview } from '@/api/dataCatalog';
+import { getCatalogList } from '@/api/dataCatalog';
 import { validateName } from '@/utils/valiate';
-import {
-  getConnectorList,
-  getConnectorFileList,
-  getTagList,
-  getTargetDataFileList
-} from '@/api/datasetManagement';
+import { getConnectorList, getTagList } from '@/api/datasetManagement';
 import { debounce } from 'lodash-es';
 import getFileIcon from '@/components/file-icon';
 import { getExportFile, getExportJsonl } from '@/api/pyspark';
 import { GetExportFile } from '@/types/pythonApi';
-import { formatFileSize, formatTime } from '@/utils/format';
+import { formatFileSize } from '@/utils/format';
 import timeFormattig from '@/utils/timeFormatting';
-const { Text } = Typography;
 
 interface Dataset {
   key?: string;
@@ -46,23 +32,6 @@ interface Dataset {
   storageType: StorageType;
   targetDataSource?: string;
   selectedFiles?: string[];
-}
-
-interface DataFile {
-  key: string;
-  filename: string;
-  size: string;
-  modifyTime: string;
-}
-
-interface ConnectorFile {
-  name: string;
-  path: string;
-  size: number;
-  last_modified: string;
-  type: string;
-  sub_path: string;
-  file_id: string;
 }
 
 enum StorageType {
@@ -81,96 +50,6 @@ interface DatasetFormProps {
 
 const FormItem = Form.Item;
 
-// 转换函数：将新数据格式转换为 Cascader 组件需要的格式
-function convertToCascaderOptions(dataSourceData) {
-  return dataSourceData.map((catalog) => ({
-    label: <EllipsisPopover value={catalog.name}></EllipsisPopover>,
-    // label: catalog.name,
-    value: [catalog.base_dir, catalog.name],
-    children:
-      catalog.children && catalog.children.volume
-        ? catalog.children.volume.map((volume) => ({
-            label: <EllipsisPopover value={volume.name}></EllipsisPopover>,
-            // label: volume.name,
-            value: [volume.name, volume.id],
-            type: 'volume',
-            originalData: volume
-          }))
-        : []
-  }));
-}
-
-//高亮函数
-function highlight(text, keyword) {
-  if (!keyword) return text;
-  const idx = text.toLowerCase().indexOf(keyword.toLowerCase());
-  if (idx === -1) return text;
-  return (
-    <>
-      {text.slice(0, idx)}
-      <span style={{ color: '#007DFA' }}>
-        {text.slice(idx, idx + keyword.length)}
-      </span>
-      {text.slice(idx + keyword.length)}
-    </>
-  );
-}
-
-function itemPathDisplay(item) {
-  // 如果 sub_path 为空，显示短横线
-  if (item === '') return <span>-</span>;
-
-  // 如果长度小于等于 5，显示完整内容，否则截取前五个字符加省略号
-  const displayPath =
-    item.length <= 5 ? item.sub_path : `${item.substring(0, 5)}...`;
-
-  return <span style={{ color: '#334155' }}>{displayPath}</span>;
-}
-
-//连接器列表转换为select选项 函数
-function convertToSelectOptions(connectorList) {
-  return connectorList.map((connector) => ({
-    label: (
-      // <Tooltip content={connector.name}>
-      <div
-        style={{
-          width: '100%',
-          whiteSpace: 'nowrap',
-          overflow: 'hidden',
-          textOverflow: 'ellipsis'
-        }}
-      >
-        {connector.name}
-      </div>
-      // </Tooltip>
-    ),
-    value: connector.id
-  }));
-}
-
-//标签测试数据
-const tagOptions = [
-  {
-    id: 1,
-    name: 'nlp'
-  },
-  {
-    id: 2,
-    name: 'gan'
-  }
-];
-// 格式化日期时间
-function formatDateTime(isoString) {
-  const date = new Date(isoString);
-  const pad = (n) => n.toString().padStart(2, '0');
-  return (
-    <span>
-      {date.getFullYear()}-{pad(date.getMonth() + 1)}-{pad(date.getDate())}{' '}
-      {pad(date.getHours())}:{pad(date.getMinutes())}:{pad(date.getSeconds())}
-    </span>
-  );
-}
-
 //标签列表转换为select选项
 function convertTotagSelectOptions(data = []) {
   return data.map((item) => ({
@@ -180,15 +59,6 @@ function convertTotagSelectOptions(data = []) {
     // TODO: ts错误
     // @ts-expect-error
     value: item.name
-  }));
-}
-
-//连接器文件信息转换为select选项的函数，咱不使用
-function transformToSelectOptions(fileList) {
-  return fileList.map((file) => ({
-    label: `${file.name}`,
-    value: file.path,
-    data: file
   }));
 }
 
@@ -226,17 +96,7 @@ const DatasetForm = React.forwardRef<
   const [storageType, setStorageType] = useState<StorageType>(
     StorageType.Jsonl
   );
-  const [selectedConnector, setSelectedConnector] = useState<string | null>(
-    null
-  ); //选择的连接器ID
   const [selectedFiles, setSelectedFiles] = useState<string[]>([]); //选择文件
-  const [showFileSelection, setShowFileSelection] = useState(false); //文件选择
-  const [showDataPreview, setShowDataPreview] = useState(false); //数据预览
-  const [targetDataSourceOptions, setTargetDataSourceOptions] = useState([]); //目标数据源选项
-  const [connectorList, setConnectorList] = useState([]); //连接器列表
-  const [connectorFileInformation, setConnectorFileInformation] = useState<
-    ConnectorFile[]
-  >([]); //连接器文件信息
   const [previewData, setPreviewData] = useState(null); //数据目录预览数据
   const [isPreviewFile, setIsPreviewFile] = useState(false); //数据目录文件预览数据
   const [previewFileData, setPreviewFileData] = useState<
@@ -248,23 +108,10 @@ const DatasetForm = React.forwardRef<
     []
   );
   //是否禁用新建标签·
-  const [iscreateTagDisabled, setIscreateTagDisabled] = useState(false);
-  const [inputValue, setInputValue] = useState('');
   const [tableLoading, setTableLoading] = useState(false);
   const [canSubmit, setCanSubmit] = useState(true);
-  const [targetData, setTargetData] = useState<string | (string | string[])[]>(
-    []
-  );
   // 选择的文件ID
-  const [fileIds, setFileIds] = useState<string[]>([]);
-  // 当前的第几页
-  const [current, setCurrent] = useState(1);
-  // 每页展示数据的数据量
-  const [pageSize, setPageSize] = useState(10);
-  // 总数据量
-  const [total, setTotal] = useState(10);
-  // 使用 useRef 来标记是否是首次渲染
-  const isInitialMount = useRef(true);
+  const [fileIds] = useState<string[]>([]);
 
   useImperativeHandle(ref, () => {
     const resetForm = () => {
@@ -273,22 +120,15 @@ const DatasetForm = React.forwardRef<
       // form.setFieldValue('targetDataSource', '');
       setDataSource('volume'); //重置数据源
       setStorageType(StorageType.Jsonl); //重置数据集类型
-      setSelectedConnector(null); //重置连接器
       setSelectedFiles([]); //重置选择文件
-      setConnectorFileInformation([]); //重置连接器文件信息
       setPreviewData(null); //重置预览数据
       setPreviewColumns([]); //重置预览表格列
       setIsPreviewFile(false);
       setPreviewFileData(null);
       form.setFieldValue('dataSource', 'volume');
       form.setFieldValue('storageType', StorageType.Jsonl);
-      setIscreateTagDisabled(false);
-      // form.setFieldValue('tag', undefined);
-      // setTargetDataSourceOptions([]); //重置目标数据源选项
     };
-    const setcreateTagDisabled = () => {
-      setIscreateTagDisabled(false);
-    };
+    const setcreateTagDisabled = () => {};
     return {
       resetForm,
       setcreateTagDisabled
@@ -317,18 +157,12 @@ const DatasetForm = React.forwardRef<
 
   useEffect(() => {
     // 数据目录卷
-    getCatalogList({ root_type: 2 }).then((res) => {
-      setTargetDataSourceOptions(
-        convertToCascaderOptions(res?.data?.dst ?? [])
-      );
-    });
+    getCatalogList({ root_type: 2 }).then(() => {});
 
     //连接器
     // TODO: ts错误
     // @ts-expect-error
-    getConnectorList({ scope: 1 }).then((res) => {
-      setConnectorList(convertToSelectOptions(res?.data?.items ?? []));
-    });
+    getConnectorList({ scope: 1 }).then(() => {});
 
     //标签
     getTagList().then((res) => {
@@ -336,35 +170,12 @@ const DatasetForm = React.forwardRef<
     });
   }, []);
 
-  // 处理数据来源变化
-  const handleDataSourceChange = (value: 'volume' | 'connector') => {
-    form.setFieldValue('targetDataSource', undefined);
-    setDataSource(value);
-    form.setFieldValue('dataSource', value);
-    setShowFileSelection(false); //不显示文件选择
-    setShowDataPreview(false); //不显示数据预览
-    setSelectedConnector(null); //清除连接器选择
-    setSelectedFiles([]);
-    setConnectorFileInformation([]); //清除连接器文件信息
-    setPreviewData(null);
-    setIsPreviewFile(false);
-    setPreviewFileData(null); //重置文件预览数据
-    setPreviewColumns([]); //重置表格列
-    // 清除表单字段
-    form.setFieldValue('connector', undefined);
-    form.setFieldValue('selectedFiles', []);
-  };
-
   // 处理数据集类型变化
   const handleStorageTypeChange = (value: StorageType) => {
     form.setFieldValue('targetDataSource', undefined);
     setStorageType(value);
     form.setFieldValue('storageType', value);
-    setShowFileSelection(false); //不显示文件选择
-    setShowDataPreview(false); //不显示数据预览
-    setSelectedConnector(null); //清除连接器选择
     setSelectedFiles([]);
-    setConnectorFileInformation([]); //清除连接器文件信息
     setPreviewData(null);
     setIsPreviewFile(false);
     setPreviewFileData(null); //重置文件预览数据
@@ -436,9 +247,6 @@ const DatasetForm = React.forwardRef<
     }
   };
 
-  const mapselectFiles = (files: any[]) => {
-    return files.map((item) => item.file_name);
-  };
   //提交数据
   const handleSubmit = debounce(() => {
     form
@@ -565,7 +373,7 @@ const DatasetForm = React.forwardRef<
             style={{ marginBottom: 16 }}
           >
             <Input
-              maxLength={128}
+              maxLength={255}
               showWordLimit
               // style={{ width: '100%', marginLeft: 10 }}
               placeholder="输入数据集名称"
@@ -726,7 +534,7 @@ const DatasetForm = React.forwardRef<
                   pagination={false}
                   rowSelection={{
                     type: 'checkbox',
-                    onChange: (selectedRowKeys, selectedRows) => {
+                    onChange: (selectedRowKeys) => {
                       setSelectedFiles(selectedRowKeys as string[]);
                     }
                   }}
