@@ -7,7 +7,7 @@ import type { NodePanelProps } from '@/pages/workflowConfig/workflow/types';
 import { Checkbox, Form, Input, Select } from '@arco-design/web-react';
 import { getWorkflowTargetPath, knowledgeBaseNameCheck } from '@/api/workflow';
 import { useUserInfo } from '@/store/userInfoStore';
-import { getTagList } from '@/api/datasetManagement';
+import { getTagList, getDatasetSceneList } from '@/api/datasetManagement';
 import './end.scss';
 
 const Panel: FC<NodePanelProps<EndNodeType>> = ({ id, data }) => {
@@ -37,21 +37,10 @@ const Panel: FC<NodePanelProps<EndNodeType>> = ({ id, data }) => {
     getTagList().then((res) => {
       setKnowledgeBaseNameOptions(res.data || []);
     });
-
-    setSceneCategoryOptions([
-      {
-        id: 1,
-        name: '场景分类1'
-      },
-      {
-        id: 2,
-        name: '场景分类2'
-      },
-      {
-        id: 3,
-        name: '场景分类3'
-      }
-    ]);
+    getDatasetSceneList()?.then((res) => {
+      console.log(res, '123');
+      setSceneCategoryOptions(res.data || []);
+    });
   }, []);
   useEffect(() => {
     getWorkflowTargetPath(2, '').then((res) => {
@@ -180,11 +169,9 @@ const Panel: FC<NodePanelProps<EndNodeType>> = ({ id, data }) => {
             {sceneCategoryOptions.map((option) => (
               <Option key={option.id} value={option.id}>
                 <div className="scene-category-item">
-                  <span className="item-text text-[14px]">
-                    场景分类{option.id}
-                  </span>
+                  <span className="item-text text-[14px]">{option.name}</span>
                   <span className="item-text text-[14px] text-[#6E7B8D]">
-                    {option.name}
+                    {option.description}
                   </span>
                 </div>
               </Option>
