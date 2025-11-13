@@ -925,7 +925,6 @@ const DatasetManagement: React.FC = () => {
     //       : basePath;
     //   fullPath = `${formattedPath}dst/${formData?.targetDataSource?.[0]?.[1]}/volume/${formData?.targetDataSource?.[1]?.[0] ?? ''}`;
     // }
-    console.log(formData, 'fffffffff');
     const submitData = {
       name: formData.name,
       description: formData.description,
