@@ -207,7 +207,6 @@ const DataAssetTableList: React.FC<DataAssetTableListProps> = ({
             sizeOptions={[10, 20, 50, 100]}
             sizeCanChange
             onChange={handlePageChange}
-            onPageSizeChange={handlePageChange}
           />
         </div>
       )}

@@ -108,10 +108,7 @@ export function useEditableTree({ catalogTreeStore }) {
     const keys: string[] = [];
     const loop = (data: TreeDataType[]) => {
       data?.forEach?.((item) => {
-        if (
-          typeof item.title === 'string' &&
-          item.title?.toLowerCase().indexOf(value.toLowerCase()) > -1
-        ) {
+        if (typeof item.title === 'string' && item.title?.indexOf(value) > -1) {
           if (item.parentKey) {
             keys.push(item.parentKey);
           }
@@ -410,7 +407,7 @@ export function useEditableTree({ catalogTreeStore }) {
 
           break;
 
-        case CatalogTypeEnum.meta_data:
+        case CatalogTypeEnum.metadata:
           // 新建元数据
           res = await addMetaData({
             name: fileName,
@@ -559,7 +556,7 @@ export function useEditableTree({ catalogTreeStore }) {
 
     let TitleText: ReactNode = title;
     if (searchValue.length && typeof title === 'string') {
-      const index = title.toLowerCase().indexOf(searchValue.toLowerCase());
+      const index = title.indexOf(searchValue);
       if (index !== -1) {
         const prefix = title.slice(0, index);
         const suffix = title.slice(index + searchValue.length);

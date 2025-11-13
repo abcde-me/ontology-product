@@ -287,7 +287,7 @@ export const ModaForgeResourceEndpoints = {
   scriptingBenchResult: PrefixAimdp + '/GetWorkFlowScriptResult',
   // 工作流-知识库名称校验
   knowledgeBaseNameCheck:
-    PrefixAimdp + '/query-service/api/knowledge/validKnowledgeName',
+    API_PREFIX + '/query-service/api/v1/validKnowledgeName',
 
   // 作业列表
   taskList: PrefixAimdp + '/ListWorkflowInstances',
@@ -543,7 +543,9 @@ export const ModaForgeResourceEndpoints = {
   // 获取标签列表
   listBaseTags: PrefixAimdp + '/ListBaseTags',
   // 批量删除数据资产表中的数据信息
-  deleteDataAssetDataBatch: PrefixAimdp + '/DeleteDataAssetDataBatch'
+  deleteDataAssetDataBatch: PrefixAimdp + '/DeleteDataAssetDataBatch',
+  // 批量修改数据资产表中的标签信息
+  editDataAssetDataTagsBatch: PrefixAimdp + '/EditDataAssetDataTagsBatch'
 };
 
 /**

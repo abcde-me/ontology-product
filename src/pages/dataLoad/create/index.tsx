@@ -105,8 +105,8 @@ interface TreeNodeData {
     | 'db_parent'
     | 'datasource_parent'
     | 'datasource_item'
-    | 'meta_data_parent'
-    | 'meta_data';
+    | 'metadata_parent'
+    | 'metadata';
   type?: number;
   level?: number;
   isExpanded?: boolean;
@@ -140,6 +140,8 @@ interface FormValues {
   table_name?: string[];
   dest_path?: string[];
   load_type?: string;
+  sql_process_enabled?: string;
+  sql?: string;
 }
 
 interface CycleText {
@@ -590,13 +592,25 @@ export default function DataLoadCreate() {
         return '请选择载入位置';
       }
 
-      if (sourceType === SOURCE_TYPES.DB) {
+      if (
+        sourceType === SOURCE_TYPES.DB &&
+        formValues.sql_process_enabled === 'disable'
+      ) {
         const processedTableNames = formValues.table_name?.includes('all')
           ? tableList
           : formValues.table_name;
 
         if (!processedTableNames || processedTableNames.length === 0) {
           return '请选择要抽取的表';
+        }
+      }
+
+      if (
+        sourceType === SOURCE_TYPES.DB &&
+        formValues.sql_process_enabled === 'enable'
+      ) {
+        if (!formValues.sql) {
+          return '请输入SQL语句';
         }
       }
 
@@ -629,11 +643,67 @@ export default function DataLoadCreate() {
           }
         }
 
+        // SQL 处理开启时，确保 SQL 已通过校验
+        if (
+          sourceType === SOURCE_TYPES.DB &&
+          formValues.sql_process_enabled === 'enable'
+        ) {
+          const sqlToCheck = (formValues.sql || '').trim();
+          const currentConnectorId =
+            formValues.connector_id || form.getFieldValue('connector_id');
+
+          if (!currentConnectorId) {
+            Message.error('请先选择数据源连接器');
+            return;
+          }
+
+          if (!sqlToCheck) {
+            Message.error('请输入SQL语句');
+            return;
+          }
+
+          if (checkStatus !== CheckSQLStatus.SUCCESS) {
+            setCheckStatus(CheckSQLStatus.CHECKING);
+            setCheckMessage('');
+
+            try {
+              const checkRes = await checkSQL({
+                sql: sqlToCheck,
+                connectorId: Number(currentConnectorId)
+              });
+
+              if (
+                checkRes?.status === 200 &&
+                checkRes.data?.status === CheckSQLStatus.SUCCESS
+              ) {
+                setCheckStatus(CheckSQLStatus.SUCCESS);
+                setCheckMessage(checkRes.data?.msg || '');
+              } else {
+                const failedStatus =
+                  checkRes?.data?.status ?? CheckSQLStatus.ERROR;
+                const failedMessage =
+                  checkRes?.data?.msg || checkRes?.message || 'SQL校验失败';
+                setCheckStatus(failedStatus);
+                setCheckMessage(failedMessage);
+                Message.error(failedMessage);
+                return;
+              }
+            } catch (err: any) {
+              const errorMessage = err?.message || 'SQL校验异常，请稍后重试';
+              setCheckStatus(CheckSQLStatus.ERROR);
+              setCheckMessage(errorMessage);
+              Message.error(errorMessage);
+              return;
+            }
+          }
+        }
+
         // 构建并提交表单数据
         if (!pathId) {
           Message.error('请选择载入位置');
           return;
         }
+        console.log('formValues', formValues);
         const formData = buildFormData(formValues, pathId, submitType);
         const res = await addLoad(formData);
 
@@ -659,7 +729,16 @@ export default function DataLoadCreate() {
         setLoading(false);
       }
     },
-    [form, selectedNodeId, loadVal, validateFormData, buildFormData, history]
+    [
+      form,
+      selectedNodeId,
+      loadVal,
+      validateFormData,
+      buildFormData,
+      history,
+      sourceType,
+      checkStatus
+    ]
   );
 
   // 取消操作
@@ -705,6 +784,9 @@ export default function DataLoadCreate() {
       }
       return prevStatus;
     });
+    form.setFieldsValue({
+      sql: value
+    });
   }, []);
 
   const handleSqlProcessChange = useCallback(
@@ -743,7 +825,7 @@ export default function DataLoadCreate() {
       if (res?.status === 200 && res.data) {
         // 根据返回的status更新校验状态
         setCheckStatus(res.data.status);
-        setCheckMessage(res.data.message || '');
+        setCheckMessage(res.data.msg || '');
       } else {
         setCheckStatus(CheckSQLStatus.ERROR);
         setCheckMessage(res?.message || '校验失败');
@@ -1095,7 +1177,7 @@ export default function DataLoadCreate() {
           </FormItem>
 
           {sourceType === SOURCE_TYPES.DB &&
-            selectedNodeType === 'meta_data' && (
+            selectedNodeType === 'metadata' && (
               <>
                 <FormItem
                   label="SQL处理："
@@ -1113,7 +1195,7 @@ export default function DataLoadCreate() {
                 {sqlProcessEnabled === 'enable' && (
                   <FormItem
                     label=" "
-                    field="sql_process"
+                    field="sql"
                     labelAlign="right"
                     // rules={[
                     //     {
@@ -1190,7 +1272,7 @@ export default function DataLoadCreate() {
                 className="select-tag-style"
                 onChange={handleAllTagChange}
                 ref={selectRef}
-                mode={selectedNodeType === 'meta_data' ? undefined : 'multiple'}
+                mode={selectedNodeType === 'metadata' ? undefined : 'multiple'}
                 maxTagCount={{
                   count: 2,
                   render: renderTableTags
@@ -1199,7 +1281,7 @@ export default function DataLoadCreate() {
                 style={{ width: '100%', minWidth: 0 }}
                 allowClear
               >
-                {tableList.length > 0 && selectedNodeType !== 'meta_data' && (
+                {tableList.length > 0 && selectedNodeType !== 'metadata' && (
                   <Option value="all">全部</Option>
                 )}
                 {tableList.map((option) => (

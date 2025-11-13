@@ -23,10 +23,12 @@ interface DataAssetTableCardProps {
   currentPage?: number;
   pageSize?: number;
   total?: number;
+  tagList: BaseTag[];
   onPageChange?: (page: number, newPageSize?: number) => void;
 }
 
 export default function DataAssetTableCard({
+  tagList,
   dataAssetList,
   loading = false,
   currentPage = 1,
@@ -34,7 +36,7 @@ export default function DataAssetTableCard({
   total = 0,
   onPageChange
 }: DataAssetTableCardProps) {
-  const [tagList, setTagList] = useState<BaseTag[]>([]);
+  // const [tagList, setTagList] = useState<BaseTag[]>([]);
   const [editingTagRecordId, setEditingTagRecordId] = useState<string | null>(
     null
   );
@@ -76,19 +78,19 @@ export default function DataAssetTableCard({
   };
 
   // 获取标签列表
-  useEffect(() => {
-    getTagList()
-      .then((res) => {
-        if (res.status === 200) {
-          setTagList(res.data ?? []);
-        } else {
-          console.error('获取标签列表失败:', res.message);
-        }
-      })
-      .catch((err) => {
-        console.error('获取标签列表失败:', err);
-      });
-  }, []);
+  // useEffect(() => {
+  //   getTagList()
+  //     .then((res) => {
+  //       if (res.status === 200) {
+  //         setTagList(res.data ?? []);
+  //       } else {
+  //         console.error('获取标签列表失败:', res.message);
+  //       }
+  //     })
+  //     .catch((err) => {
+  //       console.error('获取标签列表失败:', err);
+  //     });
+  // }, []);
 
   // 初始化标签值
   useEffect(() => {
@@ -198,7 +200,7 @@ export default function DataAssetTableCard({
                   labelInValue
                   treeData={tagTreeData}
                   className={classNames('w-full', styles['tag-wrapper'])}
-                  renderTag={tagRender}
+                  // renderTag={tagRender}
                   popupVisible={selectVisible[record?.id] || false}
                   onVisibleChange={(visible) => {
                     setSelectVisible((prev) => ({
@@ -224,8 +226,8 @@ export default function DataAssetTableCard({
                             <div className="ml-[-4px] flex max-w-[300px] flex-wrap gap-1">
                               {remainingTags.map((item, i) => (
                                 <Tag
-                                  key={item?.tagId}
                                   className={classNames(styles['tag'])}
+                                  key={item?.tagId}
                                 >
                                   {item?.tagValue}
                                 </Tag>

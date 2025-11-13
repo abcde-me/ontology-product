@@ -182,10 +182,8 @@ export interface GetCatalogListRes {
 }
 
 // 获取数据目录列表
-export async function getCatalogList(
-  param: GetCatalogListParams
-): Promise<ApiRes<GetCatalogListRes>> {
-  return await UAPI.RES.catalogListApi({}).post(param).inRegion().do();
+export async function getCatalogList(): Promise<ApiRes<GetCatalogListRes>> {
+  return await UAPI.RES.catalogListApi({}).post().inRegion().do();
 
   // mock data
   // return Promise.resolve({
@@ -453,7 +451,7 @@ export interface GetTargetCatalogFileListParams {
   /**
    * 文件所属目录ID，卷ID
    */
-  path_id: string;
+  path_id: string | number;
   /**
    * 搜索数据内容
    */

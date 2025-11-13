@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import {
   Button,
   Table,
@@ -35,18 +35,22 @@ import {
   deleteDataAssetDataBatch,
   editDataAssetDataBatch,
   getTagList,
-  editDataAssetFieldsDisplay
+  editDataAssetFieldsDisplay,
+  editDataAssetDataTagsBatch
 } from '@/api/dataAsset';
 import {
   ColumnField as ApiColumnField,
   ListDataAssetDataRes,
   ModifyMethod,
-  EditDataAssetData
+  EditDataAssetData,
+  BaseTag,
+  TagValueItem
 } from '@/types/dataAssetApi';
 import { ColumnField } from '../../components/ColumnSettingModal';
 import ColumnSettingModal from '../../components/ColumnSettingModal';
 import styles from './list.module.scss';
 import classNames from 'classnames';
+import { FieldSearchItem } from '@/api/dataCatalog';
 
 interface TagValue {
   tagId: string;
@@ -58,7 +62,7 @@ export default function DataAssetList() {
     ListDataAssetDataRes['records']
   >([]);
   const [viewType, setViewType] = useState<ViewType>(ViewType.CARD);
-  const [searchFields, setSearchFields] = useState<SearchField[]>([]);
+  const [searchFields, setSearchFields] = useState<ColumnField[]>([]);
   const [assetTags, setAssetTags] = useState<
     Array<{ label: string; value: any }>
   >([]);
@@ -97,6 +101,28 @@ export default function DataAssetList() {
   const [isSticky, setIsSticky] = useState(false);
   const headerRef = useRef<HTMLDivElement>(null);
   const sentinelRef = useRef<HTMLDivElement>(null);
+  const [tagList, setTagList] = useState<BaseTag[]>([]);
+
+  const aggregatedSelectedTags = useMemo<TagValueItem[]>(() => {
+    if (selectedRowKeys.length === 0) {
+      return [];
+    }
+
+    const tagMap = new Map<string, TagValueItem>();
+
+    selectedRowKeys.forEach((key) => {
+      const targetRecord = dataAssetList.find((item) => item.id === key);
+      const targetTags = (targetRecord?.tags as TagValueItem[]) || [];
+
+      targetTags.forEach((tag) => {
+        if (tag?.id && !tagMap.has(tag.id)) {
+          tagMap.set(tag.id, tag);
+        }
+      });
+    });
+
+    return Array.from(tagMap.values());
+  }, [selectedRowKeys, dataAssetList]);
 
   // 获取列表数据
   const loadListData = async (page: number, size: number) => {
@@ -264,14 +290,22 @@ export default function DataAssetList() {
       dataAssetFieldsDisplayRes.data || []
     ).map((field: ApiColumnField, index: number) => ({
       id: field.nameEn || String(index),
-      name: field.nameZh,
+      nameEn: field.nameEn || String(index),
+      nameZh: field.nameZh,
       type: field.type,
-      enumChecked: field.isEnumAble || false,
+      isEnumAble: field.isEnumAble || false,
       enumLoading: false,
       enumCount: 0,
-      displaySort: field.displaySort || 0
+      displaySort: field.displaySort || 0,
+      // 可枚举列表
+      values: field.values || []
     }));
     setColumnSettingsFields(convertedFields);
+    console.log(
+      '看一下列设置返回的内容',
+      convertedFields.filter((field) => field.displaySort > 0)
+    );
+    setSearchFields(convertedFields.filter((field) => field.displaySort > 0));
   };
 
   // 初始化：检查是否有mapping数据
@@ -300,71 +334,54 @@ export default function DataAssetList() {
     init();
   }, []);
 
-  // 初始化搜索字段配置
+  // 获取标签列表
   useEffect(() => {
-    // 获取标签列表
-    // getTagList()
-    //   .then((res) => {
-    //     if (res.status !== 200) {
-    //       return;
-    //     }
-    //     const options = (res.data || []).map((tag: any) => ({
-    //       label: tag.name || tag.label,
-    //       value: tag.name || tag.value || tag.id
-    //     }));
-    //     setAssetTags(options);
-    //   })
-    //   .catch((err) => {
-    //     console.error('获取标签列表失败:', err);
-    //   });
-    // 获取资产来源列表
-    // listDataAssetSource()
-    //   .then((res) => {
-    //     if (res.code === 0 || res.code === undefined) {
-    //       const options = (res.data || []).map((source: any) => ({
-    //         label: source.type || source.name || source.label,
-    //         value: source.type || source.name || source.value || source.id
-    //       }));
-    //       setAssetSources(options);
-    //     }
-    //   })
-    //   .catch((err) => {
-    //     console.error('获取资产来源列表失败:', err);
-    //   });
+    getTagList()
+      .then((res) => {
+        if (res.status === 200) {
+          setTagList(res.data ?? []);
+        } else {
+          console.error('获取标签列表失败:', res.message);
+        }
+      })
+      .catch((err) => {
+        console.error('获取标签列表失败:', err);
+      });
   }, []);
 
   // 更新搜索字段配置（当标签和来源数据加载完成后）
   useEffect(() => {
-    const fields: SearchField[] = [
-      {
-        key: 'name',
-        label: '数据资产名称',
-        type: 'input',
-        paramKey: 'name'
-      },
-      {
-        key: 'tag',
-        label: '资产标签',
-        type: 'select',
-        options: assetTags,
-        paramKey: 'tag'
-      },
-      {
-        key: 'source',
-        label: '资产来源',
-        type: 'select',
-        options: assetSources,
-        paramKey: 'source'
-      },
-      {
-        key: 'updateTime',
-        label: '更新时间',
-        type: 'daterange',
-        paramKey: 'updateTime'
-      }
-    ];
-    setSearchFields(fields);
-  }, [assetTags, assetSources]);
+    // const fields: SearchField[] = [
+    //   {
+    //     key: 'name',
+    //     label: '数据资产名称',
+    //     type: 'input',
+    //     paramKey: 'name'
+    //   },
+    //   {
+    //     key: 'tag',
+    //     label: '资产标签',
+    //     type: 'select',
+    //     options: assetTags,
+    //     paramKey: 'tag'
+    //   },
+    //   {
+    //     key: 'source',
+    //     label: '资产来源',
+    //     type: 'select',
+    //     options: assetSources,
+    //     paramKey: 'source'
+    //   },
+    //   {
+    //     key: 'updateTime',
+    //     label: '更新时间',
+    //     type: 'daterange',
+    //     paramKey: 'updateTime'
+    //   }
+    // ];
+    // setSearchFields(fields);
+    loadListData(1, pageSize);
+  }, [searchParams]);
 
   // 检测吸顶状态
   useEffect(() => {
@@ -409,16 +426,12 @@ export default function DataAssetList() {
 
   // 处理主搜索
   const handleMainSearch = (value: string) => {
-    console.log('主搜索:', value);
-    // TODO: 调用搜索API
-    // getDataAssetList({ keyword: value }).then(...)
+    setSearchParams({ ...searchParams, commonSearch: value });
   };
 
   // 处理字段搜索
-  const handleFieldSearch = (fieldValues: Record<string, any>) => {
-    console.log('字段搜索:', fieldValues);
-    // TODO: 调用搜索API
-    // getDataAssetList(fieldValues).then(...)
+  const handleFieldSearch = (fieldValues: FieldSearchItem[]) => {
+    setSearchParams({ ...searchParams, fieldSearch: fieldValues });
   };
 
   // 处理重置
@@ -439,34 +452,60 @@ export default function DataAssetList() {
   };
 
   // 处理分页变化
-  const handlePageChange = (page: number, newPageSize?: number) => {
-    const targetPage = newPageSize ? 1 : page;
-    const targetPageSize = newPageSize || pageSize;
+  const handlePageChange = (page: number, nextPageSize?: number) => {
+    const isSizeChange = nextPageSize && nextPageSize !== pageSize;
+    const targetPageSize = isSizeChange ? nextPageSize : pageSize;
+    const targetPage = isSizeChange ? 1 : page;
+
     setCurrentPage(targetPage);
-    if (newPageSize) {
-      setPageSize(newPageSize);
+    console.log('nextPageSize', nextPageSize, targetPage);
+    if (isSizeChange && nextPageSize) {
+      setPageSize(nextPageSize);
     }
     setSelectedRowKeys([]); // 分页变化时清空选中状态
     loadListData(targetPage, targetPageSize);
   };
 
   // 列设置弹窗回调
-  const handleModalOk = (selectedFields: any) => {
+  const handleModalOk = (
+    selectedIds: string[],
+    displayFields: ColumnField[]
+  ) => {
+    const selectedFields = selectedIds
+      .map((nameEn) =>
+        displayFields.find(
+          (field) => field.nameEn === nameEn || field.id === nameEn
+        )
+      )
+      .filter(Boolean) as ColumnField[];
+    const selectedIdSet = new Set(selectedIds);
+
     editDataAssetFieldsDisplay({
-      fields: selectedFields.map((field: ColumnField, index: number) => ({
-        ...field,
-        displaySort: index + 1
-      }))
+      fields: [
+        ...selectedFields.map((field, index) => ({
+          ...field,
+          displaySort: index + 1
+        })),
+        ...displayFields
+          .filter(
+            ({ nameEn, id }) =>
+              !selectedIdSet.has(nameEn) && !selectedIdSet.has(id)
+          )
+          .map((field) => ({ ...field, displaySort: 0 }))
+      ] as unknown as ApiColumnField[]
     }).then((res) => {
-      if (res.status !== 200) {
+      if (res.status !== 200 || res.code !== '') {
         Message.error(res.message ?? '列设置失败');
         return;
       }
       Message.success('列设置成功');
       setColumnModalOpen(false);
+
       loadListData(1, pageSize);
+      loadColumnSettings();
     });
   };
+
   const handleModalCancel = () => setColumnModalOpen(false);
   const handleColumnChange = (list: ColumnField[]) => {
     console.log('列设置变化:', list);
@@ -576,7 +615,10 @@ export default function DataAssetList() {
   };
 
   // 确认修改标签
-  const handleModifyTagsConfirm = async (tags: string[]) => {
+  const handleModifyTagsConfirm = async (
+    tags: { label: string; value: string }[],
+    selectedRowKeys: string[]
+  ) => {
     try {
       const editData: EditDataAssetData = {
         modifyMethod: ModifyMethod.COVER,
@@ -588,15 +630,18 @@ export default function DataAssetList() {
           }
         ]
       };
-      const res = await editDataAssetDataBatch(editData);
-      if (res.code === 0 || res.code === undefined) {
+      const res = await editDataAssetDataTagsBatch({
+        Ids: selectedRowKeys,
+        tags: tags.map((tag) => ({ id: tag.value, value: tag.label }))
+      });
+      if (res.code === '' && res.status === 200) {
         Message.success('标签修改成功');
         setModifyTagsModalVisible(false);
         setSelectedRowKeys([]);
         // 重新加载数据
         loadListData(currentPage, pageSize);
       } else {
-        Message.error('标签修改失败');
+        Message.error(res.message ?? '标签修改失败');
       }
     } catch (error) {
       console.error('标签修改失败:', error);
@@ -862,6 +907,7 @@ export default function DataAssetList() {
             />
           ) : (
             <DataAssetTableCard
+              tagList={tagList}
               dataAssetList={dataAssetList}
               loading={loading}
               currentPage={currentPage}
@@ -893,13 +939,9 @@ export default function DataAssetList() {
       {/* 修改标签弹窗 */}
       <ModifyTagsModal
         visible={modifyTagsModalVisible}
-        tagOptions={assetTags}
-        initialTags={
-          selectedRowKeys.length === 1
-            ? (dataAssetList.find((item) => item.id === selectedRowKeys[0])
-                ?.tags as string[]) || []
-            : []
-        }
+        tagOptions={tagList}
+        selectedRowKeys={selectedRowKeys}
+        initialTags={aggregatedSelectedTags}
         onCancel={() => setModifyTagsModalVisible(false)}
         onConfirm={handleModifyTagsConfirm}
       />
@@ -907,7 +949,9 @@ export default function DataAssetList() {
       <EditSingleAssetModal
         visible={editSingleAssetModalVisible}
         record={editingRecord}
-        fields={columnFields}
+        fields={columnFields.filter(
+          (field) => field.nameEn !== 'tags' && field.displaySort > 0
+        )}
         onCancel={() => {
           setEditSingleAssetModalVisible(false);
           setEditingRecord(null);

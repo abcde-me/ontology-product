@@ -13,6 +13,8 @@ import {
   IconUp,
   IconSettings
 } from '@arco-design/web-react/icon';
+import { ColumnField } from '../ColumnSettingModal';
+import { FieldSearchItem } from '@/api/dataCatalog';
 
 export interface SearchField {
   /** 字段唯一标识 */
@@ -29,7 +31,7 @@ export interface SearchField {
 
 export interface SearchAreaProps {
   /** 搜索字段配置列表 */
-  fields?: SearchField[];
+  fields?: ColumnField[];
   /** 主搜索框的值 */
   mainSearchValue?: string;
   /** 主搜索框占位符 */
@@ -37,7 +39,7 @@ export interface SearchAreaProps {
   /** 主搜索回调 */
   onMainSearch?: (value: string) => void;
   /** 字段搜索回调 */
-  onFieldSearch?: (fieldValues: Record<string, any>) => void;
+  onFieldSearch?: (fieldValues: FieldSearchItem[]) => void;
   /** 重置回调 */
   onReset?: () => void;
   /** 样式类 */
@@ -68,20 +70,13 @@ export default function SearchArea({
 
   // 初始化：默认勾选所有字段
   useEffect(() => {
-    const defaultChecked = new Set(fields.map((f) => f.key));
+    const defaultChecked = new Set(fields.slice(0, 4).map((f) => f.id));
     setCheckedFields(defaultChecked);
   }, [fields]);
 
   // 处理主搜索（点击搜索图标或按Enter）
   const handleMainSearch = () => {
     onMainSearch?.(mainSearch);
-  };
-
-  // 处理主搜索框回车
-  const handleMainSearchEnter = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      handleMainSearch();
-    }
   };
 
   // 处理字段值变化
@@ -96,19 +91,26 @@ export default function SearchArea({
   const handleQuery = () => {
     // 只传递已勾选字段的值
     const searchParams: Record<string, any> = {};
+    const fieldSearch: FieldSearchItem[] = [];
     checkedFields.forEach((fieldKey) => {
-      const field = fields.find((f) => f.key === fieldKey);
+      const field = fields.find((f) => f.id === fieldKey);
       if (
         field &&
         fieldValues[fieldKey] !== undefined &&
         fieldValues[fieldKey] !== null &&
         fieldValues[fieldKey] !== ''
       ) {
-        const paramKey = field.paramKey || fieldKey;
+        const paramKey = field.id || fieldKey;
         searchParams[paramKey] = fieldValues[fieldKey];
+
+        fieldSearch.push({
+          nameEn: field.id,
+          type: field.type,
+          searchContent: [fieldValues[fieldKey]]
+        });
       }
     });
-    onFieldSearch?.(searchParams);
+    onFieldSearch?.(fieldSearch);
   };
 
   // 处理重置按钮点击
@@ -137,7 +139,7 @@ export default function SearchArea({
   // 全选/取消全选
   const handleSelectAll = (checked: boolean) => {
     if (checked) {
-      setCheckedFields(new Set(fields.map((f) => f.key)));
+      setCheckedFields(new Set(fields.map((f) => f.id)));
     } else {
       setCheckedFields(new Set());
     }
@@ -146,11 +148,11 @@ export default function SearchArea({
   // 是否有字段被勾选
   const hasCheckedFields = checkedFields.size > 0;
   // 筛选出已勾选的字段用于显示
-  const visibleFields = fields.filter((f) => checkedFields.has(f.key));
+  const visibleFields = fields.filter((f) => checkedFields.has(f.id));
   // 筛选设置搜索条件下拉框中的字段（根据搜索关键词）
   const filteredFieldsForSettings = fields.filter((f) =>
     settingsSearchKeyword
-      ? f.label.toLowerCase().includes(settingsSearchKeyword.toLowerCase())
+      ? f.nameZh.toLowerCase().includes(settingsSearchKeyword.toLowerCase())
       : true
   );
 
@@ -178,11 +180,11 @@ export default function SearchArea({
           <Checkbox
             checked={
               filteredFieldsForSettings.length > 0 &&
-              filteredFieldsForSettings.every((f) => checkedFields.has(f.key))
+              filteredFieldsForSettings.every((f) => checkedFields.has(f.id))
             }
             indeterminate={
-              filteredFieldsForSettings.some((f) => checkedFields.has(f.key)) &&
-              !filteredFieldsForSettings.every((f) => checkedFields.has(f.key))
+              filteredFieldsForSettings.some((f) => checkedFields.has(f.id)) &&
+              !filteredFieldsForSettings.every((f) => checkedFields.has(f.id))
             }
           >
             全选
@@ -190,14 +192,14 @@ export default function SearchArea({
         </div>
         {filteredFieldsForSettings.map((field) => (
           <div
-            key={field.key}
+            key={field.id}
             className="flex cursor-pointer items-center px-4 py-2 transition-colors hover:bg-[var(--color-fill-2)]"
             onClick={() =>
-              toggleFieldCheck(field.key, !checkedFields.has(field.key))
+              toggleFieldCheck(field.id, !checkedFields.has(field.id))
             }
           >
-            <Checkbox checked={checkedFields.has(field.key)}>
-              {field.label}
+            <Checkbox checked={checkedFields.has(field.id)}>
+              {field.nameZh}
             </Checkbox>
           </div>
         ))}
@@ -232,16 +234,25 @@ export default function SearchArea({
   };
 
   // 渲染字段搜索输入组件
-  const renderFieldInput = (field: SearchField) => {
-    const value = fieldValues[field.key];
+  const renderFieldInput = (field: ColumnField) => {
+    const value = fieldValues[field.id];
+    let fieldType = field.type;
 
-    switch (field.type) {
-      case 'input':
+    if (field.isEnumAble && field.values?.length > 0) {
+      fieldType = 'select';
+    } else if (field.type === 'datetime') {
+      fieldType = 'range';
+    } else {
+      fieldType = 'string';
+    }
+
+    switch (fieldType) {
+      case 'string':
         return (
           <Input
             placeholder={`输入关键字搜索`}
             value={value || ''}
-            onChange={(val) => handleFieldValueChange(field.key, val)}
+            onChange={(val) => handleFieldValueChange(field.id, val)}
             suffix={<IconSearch />}
             allowClear
           />
@@ -249,24 +260,24 @@ export default function SearchArea({
       case 'select':
         return (
           <Select
-            placeholder={`请选择${field.label}`}
+            placeholder={`请选择${field.nameZh}`}
             value={value}
-            onChange={(val) => handleFieldValueChange(field.key, val)}
+            onChange={(val) => handleFieldValueChange(field.id, val)}
             allowClear
             showSearch
           >
-            {field.options?.map((opt) => (
-              <Select.Option key={opt.value} value={opt.value}>
-                {opt.label}
+            {field.values?.map((opt) => (
+              <Select.Option key={opt} value={opt}>
+                {opt}
               </Select.Option>
             ))}
           </Select>
         );
-      case 'daterange':
+      case 'range':
         return (
           <DatePicker.RangePicker
             value={value}
-            onChange={(val) => handleFieldValueChange(field.key, val)}
+            onChange={(val) => handleFieldValueChange(field.nameZh, val)}
             allowClear
             placeholder={['开始日期', '结束日期']}
           />
@@ -280,12 +291,13 @@ export default function SearchArea({
     <div className={`${className}`}>
       {/* 主搜索区域 */}
       <div className="flex items-center gap-3">
-        <Input
+        <Input.Search
           className="w-[480px]"
           placeholder={mainSearchPlaceholder}
           value={mainSearch}
           onChange={setMainSearch}
-          onPressEnter={handleMainSearchEnter}
+          onClear={handleMainSearch}
+          onPressEnter={handleMainSearch}
           suffix={
             <IconSearch
               className="cursor-pointer text-[var(--color-text-2)] transition-colors hover:text-[rgb(var(--primary-6))]"
@@ -320,9 +332,9 @@ export default function SearchArea({
           {visibleFields.length > 0 && (
             <div className="mb-4 flex flex-wrap gap-4">
               {visibleFields.map((field) => (
-                <div key={field.key} className="flex items-center gap-3">
+                <div key={field.id} className="flex items-center gap-3">
                   <span className="whitespace-nowrap text-sm text-[var(--color-text-1)]">
-                    {field.label}:
+                    {field.nameZh}:
                   </span>
                   <div className="w-[200px]">{renderFieldInput(field)}</div>
                 </div>

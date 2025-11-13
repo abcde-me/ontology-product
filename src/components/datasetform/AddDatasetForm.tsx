@@ -280,9 +280,9 @@ const DatasetForm = React.forwardRef<
 
   useEffect(() => {
     // 数据目录卷
-    getCatalogList({ root_type: 2 }).then((res) => {
+    getCatalogList().then((res) => {
       setTargetDataSourceOptions(
-        convertToCascaderOptions(res?.data?.dst ?? [])
+        convertToCascaderOptions(res?.data?.src ?? [])
       );
     }); //获取数据来源中数据目录卷中的选项（不可以直接使用，需要处理数据）
     // setTargetDataSourceOptions(
@@ -630,7 +630,7 @@ const DatasetForm = React.forwardRef<
             style={{ marginBottom: 16 }}
           >
             <Input
-              maxLength={128}
+              maxLength={255}
               showWordLimit
               // style={{ width: '100%', marginLeft: 10 }}
               placeholder="输入数据集名称"
