@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import {
   Button,
   Table,
@@ -35,7 +35,8 @@ import {
   deleteDataAssetDataBatch,
   editDataAssetDataBatch,
   getTagList,
-  editDataAssetFieldsDisplay
+  editDataAssetFieldsDisplay,
+  editDataAssetDataTagsBatch
 } from '@/api/dataAsset';
 import {
   ColumnField as ApiColumnField,
@@ -101,6 +102,27 @@ export default function DataAssetList() {
   const headerRef = useRef<HTMLDivElement>(null);
   const sentinelRef = useRef<HTMLDivElement>(null);
   const [tagList, setTagList] = useState<BaseTag[]>([]);
+
+  const aggregatedSelectedTags = useMemo<TagValueItem[]>(() => {
+    if (selectedRowKeys.length === 0) {
+      return [];
+    }
+
+    const tagMap = new Map<string, TagValueItem>();
+
+    selectedRowKeys.forEach((key) => {
+      const targetRecord = dataAssetList.find((item) => item.id === key);
+      const targetTags = (targetRecord?.tags as TagValueItem[]) || [];
+
+      targetTags.forEach((tag) => {
+        if (tag?.id && !tagMap.has(tag.id)) {
+          tagMap.set(tag.id, tag);
+        }
+      });
+    });
+
+    return Array.from(tagMap.values());
+  }, [selectedRowKeys, dataAssetList]);
 
   // 获取列表数据
   const loadListData = async (page: number, size: number) => {
@@ -268,9 +290,10 @@ export default function DataAssetList() {
       dataAssetFieldsDisplayRes.data || []
     ).map((field: ApiColumnField, index: number) => ({
       id: field.nameEn || String(index),
-      name: field.nameZh,
+      nameEn: field.nameEn || String(index),
+      nameZh: field.nameZh,
       type: field.type,
-      enumChecked: field.isEnumAble || false,
+      isEnumAble: field.isEnumAble || false,
       enumLoading: false,
       enumCount: 0,
       displaySort: field.displaySort || 0,
@@ -429,34 +452,60 @@ export default function DataAssetList() {
   };
 
   // 处理分页变化
-  const handlePageChange = (page: number, newPageSize?: number) => {
-    const targetPage = newPageSize ? 1 : page;
-    const targetPageSize = newPageSize || pageSize;
+  const handlePageChange = (page: number, nextPageSize?: number) => {
+    const isSizeChange = nextPageSize && nextPageSize !== pageSize;
+    const targetPageSize = isSizeChange ? nextPageSize : pageSize;
+    const targetPage = isSizeChange ? 1 : page;
+
     setCurrentPage(targetPage);
-    if (newPageSize) {
-      setPageSize(newPageSize);
+    console.log('nextPageSize', nextPageSize, targetPage);
+    if (isSizeChange && nextPageSize) {
+      setPageSize(nextPageSize);
     }
     setSelectedRowKeys([]); // 分页变化时清空选中状态
     loadListData(targetPage, targetPageSize);
   };
 
   // 列设置弹窗回调
-  const handleModalOk = (selectedFields: any) => {
+  const handleModalOk = (
+    selectedIds: string[],
+    displayFields: ColumnField[]
+  ) => {
+    const selectedFields = selectedIds
+      .map((nameEn) =>
+        displayFields.find(
+          (field) => field.nameEn === nameEn || field.id === nameEn
+        )
+      )
+      .filter(Boolean) as ColumnField[];
+    const selectedIdSet = new Set(selectedIds);
+
     editDataAssetFieldsDisplay({
-      fields: selectedFields.map((field: ColumnField, index: number) => ({
-        ...field,
-        displaySort: index + 1
-      }))
+      fields: [
+        ...selectedFields.map((field, index) => ({
+          ...field,
+          displaySort: index + 1
+        })),
+        ...displayFields
+          .filter(
+            ({ nameEn, id }) =>
+              !selectedIdSet.has(nameEn) && !selectedIdSet.has(id)
+          )
+          .map((field) => ({ ...field, displaySort: 0 }))
+      ] as unknown as ApiColumnField[]
     }).then((res) => {
-      if (res.status !== 200) {
+      if (res.status !== 200 || res.code !== '') {
         Message.error(res.message ?? '列设置失败');
         return;
       }
       Message.success('列设置成功');
       setColumnModalOpen(false);
+
       loadListData(1, pageSize);
+      loadColumnSettings();
     });
   };
+
   const handleModalCancel = () => setColumnModalOpen(false);
   const handleColumnChange = (list: ColumnField[]) => {
     console.log('列设置变化:', list);
@@ -566,7 +615,10 @@ export default function DataAssetList() {
   };
 
   // 确认修改标签
-  const handleModifyTagsConfirm = async (tags: string[]) => {
+  const handleModifyTagsConfirm = async (
+    tags: { label: string; value: string }[],
+    selectedRowKeys: string[]
+  ) => {
     try {
       const editData: EditDataAssetData = {
         modifyMethod: ModifyMethod.COVER,
@@ -578,15 +630,18 @@ export default function DataAssetList() {
           }
         ]
       };
-      const res = await editDataAssetDataBatch(editData);
-      if (res.code === 0 || res.code === undefined) {
+      const res = await editDataAssetDataTagsBatch({
+        Ids: selectedRowKeys,
+        tags: tags.map((tag) => ({ id: tag.value, value: tag.label }))
+      });
+      if (res.code === 0 && res.status === 200) {
         Message.success('标签修改成功');
         setModifyTagsModalVisible(false);
         setSelectedRowKeys([]);
         // 重新加载数据
         loadListData(currentPage, pageSize);
       } else {
-        Message.error('标签修改失败');
+        Message.error(res.message ?? '标签修改失败');
       }
     } catch (error) {
       console.error('标签修改失败:', error);
@@ -885,12 +940,8 @@ export default function DataAssetList() {
       <ModifyTagsModal
         visible={modifyTagsModalVisible}
         tagOptions={tagList}
-        initialTags={
-          selectedRowKeys.length === 1
-            ? (dataAssetList.find((item) => item.id === selectedRowKeys[0])
-                ?.tags as TagValueItem[]) || []
-            : []
-        }
+        selectedRowKeys={selectedRowKeys}
+        initialTags={aggregatedSelectedTags}
         onCancel={() => setModifyTagsModalVisible(false)}
         onConfirm={handleModifyTagsConfirm}
       />
@@ -898,7 +949,9 @@ export default function DataAssetList() {
       <EditSingleAssetModal
         visible={editSingleAssetModalVisible}
         record={editingRecord}
-        fields={columnFields}
+        fields={columnFields.filter(
+          (field) => field.nameEn !== 'tags' && field.displaySort > 0
+        )}
         onCancel={() => {
           setEditSingleAssetModalVisible(false);
           setEditingRecord(null);

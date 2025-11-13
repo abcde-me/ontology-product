@@ -152,7 +152,7 @@ export default function SearchArea({
   // 筛选设置搜索条件下拉框中的字段（根据搜索关键词）
   const filteredFieldsForSettings = fields.filter((f) =>
     settingsSearchKeyword
-      ? f.name.toLowerCase().includes(settingsSearchKeyword.toLowerCase())
+      ? f.nameZh.toLowerCase().includes(settingsSearchKeyword.toLowerCase())
       : true
   );
 
@@ -199,7 +199,7 @@ export default function SearchArea({
             }
           >
             <Checkbox checked={checkedFields.has(field.id)}>
-              {field.name}
+              {field.nameZh}
             </Checkbox>
           </div>
         ))}
@@ -238,7 +238,7 @@ export default function SearchArea({
     const value = fieldValues[field.id];
     let fieldType = field.type;
 
-    if (field.enumChecked && field.values?.length > 0) {
+    if (field.isEnumAble && field.values?.length > 0) {
       fieldType = 'select';
     } else if (field.type === 'datetime') {
       fieldType = 'range';
@@ -260,7 +260,7 @@ export default function SearchArea({
       case 'select':
         return (
           <Select
-            placeholder={`请选择${field.name}`}
+            placeholder={`请选择${field.nameZh}`}
             value={value}
             onChange={(val) => handleFieldValueChange(field.id, val)}
             allowClear
@@ -277,7 +277,7 @@ export default function SearchArea({
         return (
           <DatePicker.RangePicker
             value={value}
-            onChange={(val) => handleFieldValueChange(field.name, val)}
+            onChange={(val) => handleFieldValueChange(field.nameZh, val)}
             allowClear
             placeholder={['开始日期', '结束日期']}
           />
@@ -334,7 +334,7 @@ export default function SearchArea({
               {visibleFields.map((field) => (
                 <div key={field.id} className="flex items-center gap-3">
                   <span className="whitespace-nowrap text-sm text-[var(--color-text-1)]">
-                    {field.name}:
+                    {field.nameZh}:
                   </span>
                   <div className="w-[200px]">{renderFieldInput(field)}</div>
                 </div>
