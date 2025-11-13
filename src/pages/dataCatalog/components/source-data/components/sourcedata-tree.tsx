@@ -44,6 +44,11 @@ interface RawDataNode {
       name: string;
       parent_id: number;
     }>;
+    meta_data?: Array<{
+      id: number;
+      name: string;
+      parent_id: number;
+    }>;
   }>;
 }
 
@@ -101,6 +106,20 @@ function transformRawDataToTreeData(rawData: RawDataNode[]): TreeNodeType[] {
           };
           children.push(dbParent);
         }
+
+        // 处理元数据
+        if (childGroup.meta_data && childGroup.meta_data.length > 0) {
+          const metaDataParent: TreeNodeType = {
+            title: '元数据',
+            key: `${key}-meta_data`,
+            rawData: {
+              type: 'meta_data_parent',
+              id: `${node.id}-meta_data`,
+              name: '元数据'
+            }
+          };
+          children.push(metaDataParent);
+        }
       });
     }
 
@@ -115,75 +134,6 @@ function transformRawDataToTreeData(rawData: RawDataNode[]): TreeNodeType[] {
 
   return rawData.map((node, index) => transformNode(node, `${index}-`));
 }
-
-// 树数据结构
-// const TreeData: TreeNodeType[] = [
-//     {
-//         title: '目录1录1录1录1录1录6666',
-//         key: '0-0',
-//         children: [
-//             {
-//                 title: '数据卷',
-//                 key: '0-0-1',
-//                 children: [
-//                     {
-//                         // icon: <IconFile />,
-//                         title: '文件16666666666666666666.txt',
-//                         key: '0-0-1-1',
-//                     },
-//                     {
-//                         title: 'source-vol3source-vol3',
-//                         key: '0-0-1-2',
-//                     },
-//                     {
-//                         title: '文件3.docx',
-//                         key: '0-0-1-3',
-//                     },
-//                 ],
-//             },
-//             {
-//                 title: '数据库',
-//                 key: '0-0-2',
-//                 children: [
-//                     {
-//                         title: '数据库1',
-//                         key: '0-0-2-1',
-//                     },
-//                     {
-//                         title: '数据库2',
-//                         key: '0-0-2-2',
-//                     },
-//                 ],
-//             },
-//         ],
-//     },
-//     {
-//         title: '目录2',
-//         key: '0-1',
-//         children: [
-//             {
-//                 title: '文件夹1',
-//                 key: '0-1-1',
-//                 children: [
-//                     {
-//                         title: '文档1',
-//                         key: '0-1-1-0',
-//                     },
-//                 ],
-//             },
-//             {
-//                 title: '文件夹2',
-//                 key: '0-1-2',
-//                 children: [
-//                     {
-//                         title: '文档2',
-//                         key: '0-1-2-0',
-//                     },
-//                 ],
-//             },
-//         ],
-//     },
-// ];
 
 //获取树数据
 //模拟获取树数据
@@ -309,7 +259,8 @@ export default function SourceDataTree(props: SourceDataTreeProps) {
   const [expandedKeys, setExpandedKeys] = useState([
     '0-1',
     '0-1-volume',
-    '0-1-db'
+    '0-1-db',
+    '0-1-meta_data'
   ]);
 
   // 设置默认选中的节点key（卷下的第一个文件）
@@ -367,24 +318,13 @@ export default function SourceDataTree(props: SourceDataTreeProps) {
 
   // 处理树节点选择事件
   const handleSelect = (selectedKeys, nodeData) => {
-    console.log('选中节点', selectedKeys);
-    console.log('选中节点信息', nodeData.node);
-
     // 获取当前选中节点的详细信息
     if (nodeData.node) {
       const currentNode = nodeData.node;
-      console.log(
-        '当前选中节点信息666',
-        currentNode.props?.rawData || currentNode.rawData
-      );
 
       // 获取原始数据信息（包含ID、类型等重要信息）
       const rawData = currentNode.props?.rawData || currentNode.rawData;
       if (rawData) {
-        console.log('当前选中节点的详细信息999998888:', currentNode);
-        // 获取爷爷级目录名称
-        const grandparentName = getGrandparentCatalogName(selectedKeys[0]);
-        console.log('爷爷级目录名称:', grandparentName);
         // 获取完整的层级信息
         const hierarchyInfo = getNodeHierarchyInfo(selectedKeys[0]);
         if (hierarchyInfo) {
@@ -1036,6 +976,7 @@ export default function SourceDataTree(props: SourceDataTreeProps) {
             // 处理节点选择事件
             onSelect={handleSelect}
             renderExtra={(node) => {
+              console.log('node------->', node);
               return (
                 <div
                   onMouseEnter={() => {
@@ -1046,7 +987,9 @@ export default function SourceDataTree(props: SourceDataTreeProps) {
                   {hoveredKey === node._key && (
                     <>
                       {/* 【针对"数据库"和"数据卷"节点的特殊处理】 */}
-                      {node.title == '数据库' || node.title == '数据卷' ? (
+                      {node.title == '数据库' ||
+                      node.title == '数据卷' ||
+                      node.title == '元数据' ? (
                         <>
                           {/* 删除按钮 */}
                           <Tooltip color="white" content="删除">
@@ -1070,9 +1013,10 @@ export default function SourceDataTree(props: SourceDataTreeProps) {
                             />
                           </Tooltip>
 
-                          {/* 【添加子节点按钮】- 只在"数据库"和"数据卷"节点显示 */}
+                          {/* 【添加子节点按钮】- 只在"数据库"和"数据卷"和"元数据"节点显示 */}
                           {(node.title == '数据库' ||
-                            node.title == '数据卷') && (
+                            node.title == '数据卷' ||
+                            node.title == '元数据') && (
                             <IconPlus
                               style={{
                                 cursor: 'pointer',

@@ -141,7 +141,7 @@ const EditDatasetForm: React.FC<Props> = ({
           ]}
         >
           <Input
-            maxLength={128}
+            maxLength={255}
             showWordLimit
             placeholder="请输入数据集名称"
             style={{ marginLeft: '8px' }}

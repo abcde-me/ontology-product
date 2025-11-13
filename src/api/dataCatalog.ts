@@ -182,11 +182,8 @@ export interface GetCatalogListRes {
 }
 
 // 获取数据目录列表
-export async function getCatalogList(
-  param: GetCatalogListParams
-): Promise<ApiRes<GetCatalogListRes>> {
-  // TODO: 联调
-  return await UAPI.RES.catalogListApi({}).post(param).inRegion().do();
+export async function getCatalogList(): Promise<ApiRes<GetCatalogListRes>> {
+  return await UAPI.RES.catalogListApi({}).post().inRegion().do();
 
   // mock data
   // return Promise.resolve({
@@ -221,6 +218,25 @@ export async function getCatalogList(
   //               type: 2,
   //               type_name: 'db',
   //               base_dir: '/target/volume1/dbA'
+  //             }
+  //           ],
+  //           meta_data: [
+  //             {
+  //               id: 1,
+  //               parent_id: 0,
+  //               name: '元数据1',
+  //               type: 1,
+  //               type_name: 'meta_data',
+  //               children: {
+  //                 item: [
+  //                   {
+  //                     id: 1,
+  //                     name: '元数据1',
+  //                     type: 1,
+  //                     type_name: 'meta_data'
+  //                   }
+  //                 ]
+  //               }
   //             }
   //           ]
   //         }
@@ -435,7 +451,7 @@ export interface GetTargetCatalogFileListParams {
   /**
    * 文件所属目录ID，卷ID
    */
-  path_id: string;
+  path_id: string | number;
   /**
    * 搜索数据内容
    */
@@ -715,24 +731,24 @@ export async function getSourceFileTypeList(params) {
 
 //删除目标文件
 export async function deleteTargetFile(params: TargetFileDeleteParams) {
-  const { file_ids, ...restParams } = params;
+  // const { file_ids, ...restParams } = params;
 
-  const queryParams = new URLSearchParams();
+  // const queryParams = new URLSearchParams();
 
-  Object.entries(restParams).forEach(([key, value]) => {
-    if (value !== undefined && value !== null) {
-      queryParams.append(key, String(value));
-    }
-  });
+  // Object.entries(restParams).forEach(([key, value]) => {
+  //   if (value !== undefined && value !== null) {
+  //     queryParams.append(key, String(value));
+  //   }
+  // });
 
-  file_ids.forEach((id) => {
-    queryParams.append('file_ids', String(id));
-  });
+  // file_ids.forEach((id) => {
+  //   queryParams.append('file_ids', String(id));
+  // });
 
   return await UAPI.RES.targetDataFileDeleteApi({})
-    .post()
-    .withConfig({
-      params: queryParams
+    .post({
+      ...params,
+      path_id: Number(params.path_id)
     })
     .inRegion()
     .do();
@@ -748,7 +764,7 @@ export async function getSourceDataFileList(params: SourceDataFileQueryParams) {
 //删除源数据目录单个文件
 export async function deleteSourceFile(id: string) {
   return await UAPI.RES.sourceDataFileDeleteApi({})
-    .post({ file_id: id })
+    .post({ id })
     .inRegion()
     .do();
 }
@@ -793,237 +809,6 @@ export async function exportFile(params: any = {}) {
 //获取数据库表列表
 export async function getDbItemList(params: DbTableListParamss) {
   return await UAPI.RES.dbItemListApi({}).post(params).inRegion().do();
-  //模拟数据
-  //  return Promise.resolve({
-  //   code: '0',
-  //   message: 'success',
-  //   requestId: '123',
-  //   status: 200,
-  //   data: {
-  //     list: [
-  //       {
-  //         id: 17228,
-  //         generated_at: '2025-08-28T13:43:04+08:00',
-  //         file_name: '1504',
-  //         file_type: 'jsonl',
-  //         file_size: 100,
-  //         upload_user: '小王1',
-  //         task_load_start_time: '2025-08-28T13:43:06+08:00',
-  //         connector_name: 'mysql',
-  //         deleted_at: null,
-  //         extras: {
-  //           ds_workflow_id: '150455535967520',
-  //           file_name: '150455535967520.469.1756359557089.augment.jsonl',
-  //           file_size: '',
-  //           workflow_uuid: '3d117aa8-91ab-430f-b77f-0cfc877ab5e5'
-  //         },
-  //         perms: ['dst_file:can_export', 'dst_file:can_delete']
-  //       },
-  //               {
-  //         id: 17228,
-  //         generated_at: '2025-08-28T13:43:04+08:00',
-  //         file_name: '1504',
-  //         file_type: 'jsonl',
-  //         file_size: 100,
-  //         upload_user: '小王2',
-  //         task_load_start_time: '2025-08-28T13:43:06+08:00',
-  //         connector_name: 'mysql',
-  //         deleted_at: null,
-  //         extras: {
-  //           ds_workflow_id: '150455535967520',
-  //           file_name: '150455535967520.469.1756359557089.augment.jsonl',
-  //           file_size: '',
-  //           workflow_uuid: '3d117aa8-91ab-430f-b77f-0cfc877ab5e5'
-  //         },
-  //         perms: ['dst_file:can_export', 'dst_file:can_delete']
-  //       },
-  //               {
-  //         id: 17228,
-  //         generated_at: '2025-08-28T13:43:04+08:00',
-  //         file_name: '1504',
-  //         file_type: 'jsonl',
-  //         file_size: 100,
-  //         upload_user: '小王3',
-  //         task_load_start_time: '2025-08-28T13:43:06+08:00',
-  //         connector_name: 'mysql',
-  //         deleted_at: null,
-  //         extras: {
-  //           ds_workflow_id: '150455535967520',
-  //           file_name: '150455535967520.469.1756359557089.augment.jsonl',
-  //           file_size: '',
-  //           workflow_uuid: '3d117aa8-91ab-430f-b77f-0cfc877ab5e5'
-  //         },
-  //         perms: ['dst_file:can_export', 'dst_file:can_delete']
-  //       },
-
-  //       {
-  //         id: 17228,
-  //         generated_at: '2025-08-28T13:43:04+08:00',
-  //         file_name: '1504',
-  //         file_type: 'jsonl',
-  //         file_size: 100,
-  //         upload_user: '小王4',
-  //         task_load_start_time: '2025-08-28T13:43:06+08:00',
-  //         connector_name: 'mysql',
-  //         deleted_at: null,
-  //         extras: {
-  //           ds_workflow_id: '150455535967520',
-  //           file_name: '150455535967520.469.1756359557089.augment.jsonl',
-  //           file_size: '',
-  //           workflow_uuid: '3d117aa8-91ab-430f-b77f-0cfc877ab5e5'
-  //         },
-  //         perms: ['dst_file:can_export', 'dst_file:can_delete']
-  //       },
-  //               {
-  //         id: 17228,
-  //         generated_at: '2025-08-28T13:43:04+08:00',
-  //         file_name: '1504',
-  //         file_type: 'jsonl',
-  //         file_size: 100,
-  //         upload_user: '小王5',
-  //         task_load_start_time: '2025-08-28T13:43:06+08:00',
-  //         connector_name: 'mysql',
-  //         deleted_at: null,
-  //         extras: {
-  //           ds_workflow_id: '150455535967520',
-  //           file_name: '150455535967520.469.1756359557089.augment.jsonl',
-  //           file_size: '',
-  //           workflow_uuid: '3d117aa8-91ab-430f-b77f-0cfc877ab5e5'
-  //         },
-  //         perms: ['dst_file:can_export', 'dst_file:can_delete']
-  //       },
-  //               {
-  //         id: 17228,
-  //         generated_at: '2025-08-28T13:43:04+08:00',
-  //         file_name: '1504',
-  //         file_type: 'jsonl',
-  //         file_size: 100,
-  //         upload_user: '小王6',
-  //         task_load_start_time: '2025-08-28T13:43:06+08:00',
-  //         connector_name: 'mysql',
-  //         deleted_at: null,
-  //         extras: {
-  //           ds_workflow_id: '150455535967520',
-  //           file_name: '150455535967520.469.1756359557089.augment.jsonl',
-  //           file_size: '',
-  //           workflow_uuid: '3d117aa8-91ab-430f-b77f-0cfc877ab5e5'
-  //         },
-  //         perms: ['dst_file:can_export', 'dst_file:can_delete']
-  //       },
-  //               {
-  //         id: 17228,
-  //         generated_at: '2025-08-28T13:43:04+08:00',
-  //         file_name: '1504',
-  //         file_type: 'jsonl',
-  //         file_size: 100,
-  //         upload_user: '小王7',
-  //         task_load_start_time: '2025-08-28T13:43:06+08:00',
-  //         connector_name: 'mysql',
-  //         deleted_at: null,
-  //         extras: {
-  //           ds_workflow_id: '150455535967520',
-  //           file_name: '150455535967520.469.1756359557089.augment.jsonl',
-  //           file_size: '',
-  //           workflow_uuid: '3d117aa8-91ab-430f-b77f-0cfc877ab5e5'
-  //         },
-  //         perms: ['dst_file:can_export', 'dst_file:can_delete']
-  //       },
-  //               {
-  //         id: 17228,
-  //         generated_at: '2025-08-28T13:43:04+08:00',
-  //         file_name: '1504',
-  //         file_type: 'jsonl',
-  //         file_size: 100,
-  //         upload_user: '小王8',
-  //         task_load_start_time: '2025-08-28T13:43:06+08:00',
-  //         connector_name: 'mysql',
-  //         deleted_at: null,
-  //         extras: {
-  //           ds_workflow_id: '150455535967520',
-  //           file_name: '150455535967520.469.1756359557089.augment.jsonl',
-  //           file_size: '',
-  //           workflow_uuid: '3d117aa8-91ab-430f-b77f-0cfc877ab5e5'
-  //         },
-  //         perms: ['dst_file:can_export', 'dst_file:can_delete']
-  //       },
-  //               {
-  //         id: 17228,
-  //         generated_at: '2025-08-28T13:43:04+08:00',
-  //         file_name: '1504',
-  //         file_type: 'jsonl',
-  //         file_size: 100,
-  //         upload_user: '小王9',
-  //         task_load_start_time: '2025-08-28T13:43:06+08:00',
-  //         connector_name: 'mysql',
-  //         deleted_at: null,
-  //         extras: {
-  //           ds_workflow_id: '150455535967520',
-  //           file_name: '150455535967520.469.1756359557089.augment.jsonl',
-  //           file_size: '',
-  //           workflow_uuid: '3d117aa8-91ab-430f-b77f-0cfc877ab5e5'
-  //         },
-  //         perms: ['dst_file:can_export', 'dst_file:can_delete']
-  //       },
-  //               {
-  //         id: 17228,
-  //         generated_at: '2025-08-28T13:43:04+08:00',
-  //         file_name: '1504',
-  //         file_type: 'jsonl',
-  //         file_size: 100,
-  //         upload_user: '小王10',
-  //         task_load_start_time: '2025-08-28T13:43:06+08:00',
-  //         connector_name: 'mysql',
-  //         deleted_at: null,
-  //         extras: {
-  //           ds_workflow_id: '150455535967520',
-  //           file_name: '150455535967520.469.1756359557089.augment.jsonl',
-  //           file_size: '',
-  //           workflow_uuid: '3d117aa8-91ab-430f-b77f-0cfc877ab5e5'
-  //         },
-  //         perms: ['dst_file:can_export', 'dst_file:can_delete']
-  //       },
-  //               {
-  //         id: 17228,
-  //         generated_at: '2025-08-28T13:43:04+08:00',
-  //         file_name: '1504',
-  //         file_type: 'jsonl',
-  //         file_size: 100,
-  //         upload_user: '小王11',
-  //         task_load_start_time: '2025-08-28T13:43:06+08:00',
-  //         connector_name: 'mysql',
-  //         deleted_at: null,
-  //         extras: {
-  //           ds_workflow_id: '150455535967520',
-  //           file_name: '150455535967520.469.1756359557089.augment.jsonl',
-  //           file_size: '',
-  //           workflow_uuid: '3d117aa8-91ab-430f-b77f-0cfc877ab5e5'
-  //         },
-  //         perms: ['dst_file:can_export', 'dst_file:can_delete']
-  //       },
-  //               {
-  //         id: 17228,
-  //         generated_at: '2025-08-28T13:43:04+08:00',
-  //         file_name: '1504',
-  //         file_type: 'jsonl',
-  //         file_size: 100,
-  //         upload_user: '小王12',
-  //         task_load_start_time: '2025-08-28T13:43:06+08:00',
-  //         connector_name: 'mysql',
-  //         deleted_at: null,
-  //         extras: {
-  //           ds_workflow_id: '150455535967520',
-  //           file_name: '150455535967520.469.1756359557089.augment.jsonl',
-  //           file_size: '',
-  //           workflow_uuid: '3d117aa8-91ab-430f-b77f-0cfc877ab5e5'
-  //         },
-  //         perms: ['dst_file:can_export', 'dst_file:can_delete']
-  //       },
-  //     ],
-  //     total: 0,
-  //     page: 1,
-  //     page_size: 100
-  //   }
-  // });
 }
 
 export interface GetDbItemDetailRes {
@@ -1069,4 +854,175 @@ export interface Sample {
 //查询源库下的表详情
 export async function getDbItemDetail(params: GetDbItemDetailParams) {
   return await UAPI.RES.dbItemDetailApi({}).post(params).inRegion().do();
+}
+
+export interface GetMetaDataListParams {
+  page: number;
+  pageSize: number;
+  fieldSearch: FieldSearchItem[];
+  // 轮询元数据列表时，接口参数中的queryLoadTaskInstance = true
+  // 其他情况，queryLoadTaskInstance = false
+  queryLoadTaskInstance: boolean;
+}
+
+export enum LoadTaskStatus {
+  LOADING = 'loading',
+  COMPLETED = 'completed'
+}
+
+export interface Field {
+  nameEn: string;
+  nameZh: string;
+  type: string;
+  default: '';
+  required: boolean;
+  allowModify: boolean;
+  isEnumAble: boolean;
+  enumValues: unknown[];
+}
+
+export interface RecordItem {
+  id: number;
+  name: string;
+  type: string;
+  searchContent: string[];
+}
+
+export interface GetMetaDataListRes {
+  searchfields: Field[];
+  records: RecordItem[];
+  total: number;
+  size: number;
+  current: number;
+  loadTaskStatus: LoadTaskStatus;
+}
+
+export interface FieldSearchItem {
+  nameEn: string;
+  type: string;
+  searchContent: string[];
+}
+
+//查询元数据列表
+export async function getMetaDataList(
+  params: GetMetaDataListParams
+): Promise<ApiRes<GetMetaDataListRes>> {
+  return Promise.resolve({
+    code: '0',
+    message: 'success',
+    requestId: '123',
+    status: 200,
+    data: {
+      searchfields: [
+        {
+          nameEn: 'name',
+          nameZh: '名称',
+          type: 'string',
+          default: '',
+          required: false,
+          allowModify: true,
+          isEnumAble: false,
+          enumValues: []
+        },
+        {
+          nameEn: 'type',
+          nameZh: '类型',
+          type: 'string',
+          default: '',
+          required: false,
+          allowModify: true,
+          isEnumAble: false,
+          enumValues: []
+        },
+        {
+          nameEn: 'created_at',
+          nameZh: '创建时间',
+          type: 'string',
+          default: '',
+          required: false,
+          allowModify: true,
+          isEnumAble: false,
+          enumValues: []
+        },
+        {
+          nameEn: 'updated_at',
+          nameZh: '更新时间',
+          type: 'string',
+          default: '',
+          required: false,
+          allowModify: true,
+          isEnumAble: false,
+          enumValues: []
+        }
+      ],
+      records: [
+        {
+          id: 1,
+          name: '井位分布图.map',
+          type: '图件',
+          searchContent: ['井位分布图.map'],
+          created_at: '2024-01-01 12:00:00',
+          updated_at: '2024-01-01 12:00:00'
+        },
+        {
+          id: 2,
+          name: '储量计算报告.pdf',
+          type: '文档',
+          searchContent: ['储量计算报告.pdf'],
+          created_at: '2024-01-01 12:00:00',
+          updated_at: '2024-01-01 12:00:00'
+        },
+        {
+          id: 3,
+          name: '试井解释报告.pdf',
+          type: '文档',
+          searchContent: ['试井解释报告.pdf'],
+          created_at: '2024-01-01 12:00:00',
+          updated_at: '2024-01-01 12:00:00'
+        },
+        {
+          id: 4,
+          name: '射孔数据表.job',
+          type: '体数据',
+          searchContent: ['射孔数据表.job'],
+          created_at: '2024-01-01 12:00:00',
+          updated_at: '2024-01-01 12:00:00'
+        },
+        {
+          id: 5,
+          name: '井口温度压力实时趋势.realtime',
+          type: '体数据',
+          searchContent: ['井口温度压力实时趋势.realtime'],
+          created_at: '2024-01-01 12:00:00',
+          updated_at: '2024-01-01 12:00:00'
+        }
+      ],
+      total: 5,
+      size: 10,
+      current: 0,
+      loadTaskStatus: LoadTaskStatus.COMPLETED
+    }
+  });
+  // return await UAPI.RES.listMetaData({}).post(params).inRegion().do();
+}
+
+//新建元数据
+export async function addMetaData(params: {
+  name: string;
+  parent_id: number;
+}): Promise<
+  ApiRes<{
+    id: number;
+  }>
+> {
+  return Promise.resolve({
+    code: '0',
+    message: 'success',
+    requestId: '123',
+    status: 200,
+    data: {
+      id: 1
+    }
+  });
+  // return await UAPI.RES.createDirMetaData({}).post(params).inRegion().do();
 }

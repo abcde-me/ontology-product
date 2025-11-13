@@ -16,8 +16,8 @@ const FormItem = Form.Item;
 const RadioGroup = Radio.Group;
 const Option = Select.Option;
 const options = [
-  { text: 'MySQL', value: 'mysql' },
-  { text: 'PostgreSQL', value: 'postgresql' }
+  { text: 'MySQL', value: 'MySQL' },
+  { text: 'PostgreSQL', value: 'PostgreSQL' }
 ];
 const add = forwardRef((props: any, ref) => {
   // 创建的表单实例
@@ -38,7 +38,7 @@ const add = forwardRef((props: any, ref) => {
       setVisible(true);
       // 添加模式 - 重置表单
       form.resetFields();
-      form.setFieldsValue({ type: 's3', name: '', sub_type: 'mysql' });
+      form.setFieldsValue({ type: 's3', name: '', sub_type: 'MySQL' });
       setStorageType('s3');
     }
   }));
@@ -406,7 +406,7 @@ const add = forwardRef((props: any, ref) => {
                     //     showIcon: true
                     //   })
                     // }
-                    defaultValue="mysql"
+                    defaultValue="MySQL"
                   >
                     {options.map((option, index) => (
                       <Option key={option.value} value={option.value}>

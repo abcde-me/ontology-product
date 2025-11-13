@@ -46,19 +46,19 @@ export default function SourceData() {
   };
 
   return (
-    <div className="data-catalog-left-box mr-[16px] w-[260px] overflow-auto rounded border border-solid border-[#E2E8F0]">
+    <div className="data-catalog-left-box mr-[16px] w-[260px] overflow-auto">
       <div className="h-[40px] w-full">
-        <Tabs
+        {/* <Tabs
           activeTab={activeTab}
           onChange={(e) => handleTabChange(e)}
           className="tabs-center"
         >
           {tabKeys.map((tab) => (
             <TabPane key={tab.key} title={tab.title}>
-              <EditableTree />
             </TabPane>
           ))}
-        </Tabs>
+        </Tabs> */}
+        <EditableTree />
       </div>
     </div>
   );

@@ -18,7 +18,7 @@ import EllipsisPopover from '@/components/ellipsis-popover-com';
 const { Option } = Select;
 import React, { useState, useEffect, useImperativeHandle, useRef } from 'react';
 import styles from './AddDatasetForm.module.scss';
-import './AddDatasetForm.css';
+import './AddDatasetForm.scss';
 import { getCatalogList, getCatalogPreview } from '@/api/dataCatalog';
 import { validateName } from '@/utils/valiate';
 import {
@@ -280,9 +280,9 @@ const DatasetForm = React.forwardRef<
 
   useEffect(() => {
     // 数据目录卷
-    getCatalogList({ root_type: 2 }).then((res) => {
+    getCatalogList().then((res) => {
       setTargetDataSourceOptions(
-        convertToCascaderOptions(res?.data?.dst ?? [])
+        convertToCascaderOptions(res?.data?.src ?? [])
       );
     }); //获取数据来源中数据目录卷中的选项（不可以直接使用，需要处理数据）
     // setTargetDataSourceOptions(
@@ -630,7 +630,7 @@ const DatasetForm = React.forwardRef<
             style={{ marginBottom: 16 }}
           >
             <Input
-              maxLength={128}
+              maxLength={255}
               showWordLimit
               // style={{ width: '100%', marginLeft: 10 }}
               placeholder="输入数据集名称"
@@ -707,7 +707,7 @@ const DatasetForm = React.forwardRef<
               // style={{ marginLeft: 10 }}
             />
           </FormItem>
-          <FormItem
+          {/* <FormItem
             label="数据来源"
             field="dataSource"
             rules={[{ required: true, message: '请选择数据来源' }]}
@@ -716,13 +716,52 @@ const DatasetForm = React.forwardRef<
             <Radio.Group
               value={dataSource}
               onChange={handleDataSourceChange}
-              // style={{ marginLeft: 10 }}
+            // style={{ marginLeft: 10 }}
             >
               <Radio value="volume">数据目录卷</Radio>
               <Radio value="connector">连接器</Radio>
             </Radio.Group>
-          </FormItem>
+          </FormItem> */}
           <FormItem
+            label="数据来源"
+            field="targetDataSource"
+            rules={[{ required: true, message: '请选择目标数据目录卷' }]}
+          >
+            <Cascader
+              placeholder="请选择"
+              renderFormat={(labels) => {
+                const value = `${labels.join(' / ')}`;
+                return (
+                  <div>
+                    <EllipsisPopover value={value}></EllipsisPopover>
+                  </div>
+                );
+              }}
+              options={targetDataSourceOptions}
+              onChange={handleTargetDataSourceChange}
+              expandTrigger="hover"
+              showSearch={{
+                retainInputValue: true
+              }}
+              renderOption={(node) => {
+                return (
+                  <div>
+                    <EllipsisPopover value={node.label} />
+                  </div>
+                );
+              }}
+              dropdownMenuColumnStyle={{
+                whiteSpace: 'nowrap',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                maxWidth: '400px',
+                display: 'inline-block',
+                verticalAlign: 'middle'
+              }}
+              dropdownMenuClassName="showData"
+            />
+          </FormItem>
+          {/* <FormItem
             label="格式类型"
             field="storageType"
             rules={[{ required: true, message: '请选择格式类型' }]}
@@ -739,7 +778,7 @@ const DatasetForm = React.forwardRef<
               <Radio value={StorageType.File}>文件</Radio>
               <Radio value={StorageType.Jsonl}>jsonl</Radio>
             </Radio.Group>
-          </FormItem>
+          </FormItem> */}
           <FormItem
             label="场景分类"
             field="sceneType"
@@ -761,47 +800,6 @@ const DatasetForm = React.forwardRef<
                 // flexDirection: 'column'
               }}
             >
-              <FormItem
-                label="选择目标数据目录/卷"
-                field="targetDataSource"
-                rules={[{ required: true, message: '请选择目标数据目录卷' }]}
-                labelCol={{ span: 5 }}
-                wrapperCol={{ span: 19 }}
-              >
-                <Cascader
-                  placeholder="请选择"
-                  renderFormat={(labels) => {
-                    const value = `${labels.join(' / ')}`;
-                    return (
-                      <div>
-                        <EllipsisPopover value={value}></EllipsisPopover>
-                      </div>
-                    );
-                  }}
-                  options={targetDataSourceOptions}
-                  onChange={handleTargetDataSourceChange}
-                  expandTrigger="hover"
-                  showSearch={{
-                    retainInputValue: true
-                  }}
-                  renderOption={(node) => {
-                    return (
-                      <div>
-                        <EllipsisPopover value={node.label} />
-                      </div>
-                    );
-                  }}
-                  dropdownMenuColumnStyle={{
-                    whiteSpace: 'nowrap',
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    maxWidth: '400px',
-                    display: 'inline-block',
-                    verticalAlign: 'middle'
-                  }}
-                  dropdownMenuClassName="showData"
-                />
-              </FormItem>
               <div
                 style={{
                   // marginLeft: 20,
@@ -943,7 +941,7 @@ const DatasetForm = React.forwardRef<
                     <Select
                       placeholder={
                         !selectedConnector
-                          ? '请先选数据文件'
+                          ? '请先选择连接器'
                           : '请选择要使用的文件'
                       }
                       mode="multiple"

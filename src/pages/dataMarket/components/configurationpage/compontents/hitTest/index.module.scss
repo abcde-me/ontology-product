@@ -76,6 +76,15 @@
       .selectedRowMz {
         border: 1px solid blue !important; /* 设置选中行的边框为1px实线蓝色 */
       }
+      .historyTestContent {
+        display: flex;
+        .copy {
+          display: none;
+        }
+      }
+      .historyTestContent:hover .copy {
+        display: block;
+      }
     }
   }
   .rightContent {
@@ -161,24 +170,14 @@
           /* padding: 0 8px; */
           margin-bottom: 12px;
           .segmentationHeader {
-            height: 40px;
+            min-height: 40px;
             padding: 8px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            .sl {
-              display: flex;
-              align-items: center;
-              .nm {
-                width: 96px;
-                white-space: nowrap; /* 禁止换行 */
-                overflow: hidden; /* 超出部分隐藏 */
-                text-overflow: ellipsis; /* 超出部分显示省略号 */
-                cursor: pointer; /* 鼠标悬停时显示手型 */
-              }
-              .sp {
-                margin-left: 12px;
-              }
+            flex-wrap: wrap;
+            .operateBtn {
+              display: none;
             }
             .sr {
               display: flex;
@@ -200,11 +199,40 @@
               }
             }
           }
+          .sl {
+            display: flex;
+            align-items: center;
+            padding: 0 8px 8px;
+            .nm {
+              width: 96px;
+              white-space: nowrap; /* 禁止换行 */
+              overflow: hidden; /* 超出部分隐藏 */
+              text-overflow: ellipsis; /* 超出部分显示省略号 */
+              cursor: pointer; /* 鼠标悬停时显示手型 */
+            }
+            .sp {
+              margin-left: 12px;
+            }
+          }
           .segmentationContent {
             padding-bottom: 12px;
             padding: 0 8px 8px;
             max-height: 100px;
             overflow-y: auto;
+          }
+        }
+        .segmentationBox:hover {
+          .operateBtn {
+            display: flex;
+            flex: 1;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 8px;
+            height: 24px;
+
+            :global(.arco-btn) {
+              height: 24px;
+            }
           }
         }
       }

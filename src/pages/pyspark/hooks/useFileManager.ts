@@ -80,7 +80,7 @@ export const useFileManager = (
         console.log('targetFolderId', targetFolderId);
         const res = await getPythonList(targetFolderId, {
           name: searchValue,
-          mode: 1,
+          mode: 2,
           page: 1,
           page_size: 1000
         });
@@ -154,7 +154,12 @@ export const useFileManager = (
       const targetFolderId = folderId || currentFolderId;
       setIsLoading(true);
       try {
-        const rawPythonList = await getPythonList(targetFolderId, {});
+        const rawPythonList = await getPythonList(targetFolderId, {
+          name: searchValue,
+          mode: 2,
+          page: 1,
+          page_size: 20
+        });
 
         if (rawPythonList.status !== 200) {
           Message.error(rawPythonList?.message ?? '获取文件列表失败');
@@ -188,7 +193,7 @@ export const useFileManager = (
         }
 
         const createRes = await createPythonItem({
-          path_id: Number(node?.dataRef?.path_id ?? currentFolderId),
+          path_id: Number(node?.dataRef?.parentKey),
           type: node?.dataRef?.type,
           name: finalName
         });
@@ -238,12 +243,12 @@ export const useFileManager = (
   const handleRename = useCallback(
     async (finalName: string, node: any) => {
       try {
-        const fileId = node?.dataRef?.id;
+        const fileId = node?.dataRef?.id || node?.id;
         const renameRes = await renamePythonItem(fileId, {
           id: fileId,
           name: finalName,
           path: node?.dataRef?.path,
-          type: node?.dataRef?.type
+          type: node?.dataRef?.type || node?.type
         });
 
         if (renameRes.status !== 200) {
@@ -351,9 +356,9 @@ export const useFileManager = (
 
         const res = await getPythonList(String(folderId), {
           name: searchValue,
-          mode: 0,
+          mode: 2,
           page: 1,
-          page_size: 20
+          page_size: 1000
         });
         setIsCanCreate(res?.data?.create_perm ?? false);
         return res?.data?.items ?? [];
@@ -371,7 +376,12 @@ export const useFileManager = (
     try {
       // 更新当前文件夹ID
       setCurrentFolderId(parentId || '0');
-      const res = await getPythonList(String(parentId || ''), {} as any);
+      const res = await getPythonList(String(parentId || ''), {
+        name: searchValue,
+        mode: 2,
+        page: 1,
+        page_size: 20
+      } as any);
       setIsCanCreate(res?.data?.create_perm ?? false);
       return res?.data?.items || [];
     } catch (error) {

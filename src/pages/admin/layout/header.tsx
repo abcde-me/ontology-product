@@ -10,7 +10,8 @@ import React, {
   useCallback,
   useEffect,
   useRef,
-  useState
+  useState,
+  useMemo
 } from 'react';
 import { useHistory } from 'react-router-dom';
 import { menus, filterMenusByPermissions, type MenuModel } from './menus';
@@ -24,6 +25,7 @@ import { useUserInfo, useUserInfoStore } from '@/store/userInfoStore';
 import { handlePathName } from '@/hooks/use-path-change';
 import { logout } from '@/utils/env';
 import { GetProjOrg } from '@/api/modules/project';
+import { isSameArray } from '@/utils/array';
 
 export default function Header({
   className,
@@ -41,10 +43,18 @@ export default function Header({
 
   // 从全局 store 获取用户信息
   const userInfo = useUserInfo();
-  const { clearUserInfo, setUserActions, projectId, setProjectId } =
-    useUserInfoStore();
+  const {
+    clearUserInfo,
+    setUserActions,
+    projectId,
+    setProjectId,
+    isInitialized,
+    fetchUserInfo
+  } = useUserInfoStore();
   const { setUserPermissions } = usePermission();
+  const { id: userId } = userInfo || {};
   const [projects, setProjects] = useState<Record<string, any>[]>([]);
+  const FullStorageKey = useMemo(() => `${ProjectIdKey}${userId}`, [userId]);
   // 组件卸载时的清理
   useEffect(() => {
     return () => {
@@ -83,9 +93,11 @@ export default function Header({
     const list = async () => {
       const { data: result } = await GetProjOrg({});
       setProjects(result);
+      const fullProjectIdKey = `${ProjectIdKey}${userInfo?.id}`;
+      console.log('fullProjectIdKey', fullProjectIdKey);
 
       if (result.length) {
-        const pId = getLocalStorage<string[]>(ProjectIdKey);
+        const pId = getLocalStorage<string[]>(fullProjectIdKey);
         if (Array.isArray(pId)) {
           const org = result.find((r) => r.id === pId[0]);
           if (org && org.projectList.find((p) => p.id === pId[1])) {
@@ -95,21 +107,33 @@ export default function Header({
         }
 
         const defaultPId = [result[0].id, result[0].projectList[0].id];
-        setLocalStorage(ProjectIdKey, defaultPId);
+        setLocalStorage(fullProjectIdKey, defaultPId);
         setProjectId(defaultPId);
       }
     };
-    list();
-  }, []);
 
-  React.useEffect(() => {
-    if (projectId && projectId[1]) {
-      setUserPermissions(projectId[1]);
+    if (userInfo?.id) {
+      list();
     }
-  }, [projectId[1]]);
+  }, [userInfo?.id]);
+
+  // React.useEffect(() => {
+  //   if (projectId && projectId[1]) {
+  //     setUserPermissions(projectId[1]);
+  //   }
+  // }, [projectId[1]]);
+
+  useEffect(() => {
+    if (!isInitialized) {
+      fetchUserInfo();
+    }
+  }, [fetchUserInfo, isInitialized]);
 
   const changeProject = (value: string[]) => {
-    setLocalStorage(ProjectIdKey, value);
+    if (!userId || !userId.length) return;
+    if (isSameArray(value, projectId)) return;
+
+    setLocalStorage(FullStorageKey, value);
     // 重置权限状态，这样下次初始化时会重新加载权限
     setUserActions({ isAdmin: false, actions: null });
     setProjectId(value);

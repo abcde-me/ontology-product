@@ -11,6 +11,7 @@ import { FileTab, useTabManager } from './hooks/useTabManager';
 import styles from './index.module.scss';
 import { SQL_PERMISSIONS } from '@/config/permissions';
 import { useHasPermission } from '@/store/userInfoStore';
+import { useLocation, useHistory } from 'react-router-dom';
 
 const { Content, Sider } = Layout;
 const TabPane = Tabs.TabPane;
@@ -20,11 +21,24 @@ type TabKey = 'data' | 'files' | 'dataset';
 const defaultActiveTab = 'data';
 
 const SqlIndex: React.FC = memo(() => {
+  const location = useLocation();
+  const history = useHistory();
   const [activeTab, setActiveTab] = useState<TabKey>(defaultActiveTab);
   const [insertContentFunction, setInsertContentFunction] = useState<
     ((content: string) => void) | null
   >(null);
+  const [isEditorFocused, setIsEditorFocused] = useState<boolean>(false);
   const isEditorFocusedRef = useRef<boolean>(false);
+
+  // 从URL查询参数中解析activeTab
+  const getActiveTabFromUrl = () => {
+    const searchParams = new URLSearchParams(location.search);
+    return searchParams.get('activeTab') || defaultActiveTab;
+  };
+
+  useEffect(() => {
+    setActiveTab(getActiveTabFromUrl() as TabKey);
+  }, [location.search]);
 
   // 添加状态桥接：用于同步FileManager的选中状态
   const [fileManagerSelectedKeys, setFileManagerSelectedKeys] = useState<
@@ -56,6 +70,16 @@ const SqlIndex: React.FC = memo(() => {
 
   const handleTabChange = (key: string) => {
     setActiveTab(key as TabKey);
+    const searchParams = new URLSearchParams(location.search);
+
+    // 更新activeTab参数
+    searchParams.set('activeTab', key);
+
+    // 使用history更新URL，不触发页面重载
+    history.push({
+      pathname: location.pathname,
+      search: searchParams.toString()
+    });
   };
 
   const handleActiveUpdate = (tabData: FileTab) => {
@@ -70,12 +94,6 @@ const SqlIndex: React.FC = memo(() => {
 
   // 插入内容到编辑器
   const insertContentToEditor = (content: string) => {
-    console.log(
-      'insertContentToEditor called with:',
-      content,
-      'isEditorFocused:',
-      isEditorFocusedRef.current
-    );
     if (insertContentFunction) {
       insertContentFunction(content);
     }
@@ -84,6 +102,7 @@ const SqlIndex: React.FC = memo(() => {
   // 处理编辑器聚焦状态变化
   const handleEditorFocusChange = (focused: boolean) => {
     isEditorFocusedRef.current = focused;
+    setIsEditorFocused(focused);
   };
 
   // 刷新目录的函数
@@ -146,7 +165,7 @@ const SqlIndex: React.FC = memo(() => {
               />
             )}
           </TabPane>
-          {useHasPermission(SQL_PERMISSIONS.CAN_EXPORT_TASK_LIST) && (
+          {useHasPermission(SQL_PERMISSIONS.LIST) && (
             <TabPane
               key="dataset"
               title={

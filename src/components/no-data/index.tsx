@@ -5,7 +5,7 @@ import './index.css';
 import { PermissionWrapper } from '../PermissionGuard';
 
 export default function noDataElement(props: {
-  description: string;
+  description: string | ReactNode;
   btnText?: string | ReactNode;
   perms?: string;
   handleBtn?: ((e: Event) => void) | undefined;
@@ -18,7 +18,11 @@ export default function noDataElement(props: {
       description={
         btnText ? (
           <div style={{ display: 'flex', flexDirection: 'column' }}>
-            <span className="description-text">{description}</span>
+            {typeof description === 'string' ? (
+              <span className="description-text">{description}</span>
+            ) : (
+              description
+            )}
             <PermissionWrapper permission={perms}>
               <Button
                 type="primary"
@@ -29,8 +33,10 @@ export default function noDataElement(props: {
               </Button>
             </PermissionWrapper>
           </div>
-        ) : (
+        ) : typeof description === 'string' ? (
           <span className="description-text">{description}</span>
+        ) : (
+          description
         )
       }
     />

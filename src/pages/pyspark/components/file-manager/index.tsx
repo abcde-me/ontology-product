@@ -3,7 +3,7 @@ import './index.scss';
 import DirectoryTree, {
   type TreeNodeItem,
   DirectoryTreeRef
-} from '@/components/directory-tree/DirectoryTree';
+} from '../../components/directory-tree/DirectoryTree';
 import { useFileManager } from '../../hooks/useFileManager';
 
 interface NotebookTabContentProps {
@@ -15,7 +15,7 @@ interface NotebookTabContentProps {
   directoryTreeRef?: React.Ref<DirectoryTreeRef>; // 修改：使用 Ref 而不是 RefObject
   externalSelectedKeys?: string[]; // 外部传入的选中状态
   onCurrentFolderChange?: (folderId: string) => void; // 添加当前文件夹变化的回调
-  onCanCreateChange?: (isCanCreate: boolean) => void; // 添加创建权限变化的回调
+  // onCanCreateChange?: (isCanCreate: boolean) => void; // 添加创建权限变化的回调
 }
 
 const PythonTabContent: React.FC<NotebookTabContentProps> = ({
@@ -25,8 +25,8 @@ const PythonTabContent: React.FC<NotebookTabContentProps> = ({
   hasOpenTabs, // 接收检查是否有标签页打开的回调
   directoryTreeRef,
   externalSelectedKeys,
-  onCurrentFolderChange, // 接收当前文件夹变化的回调
-  onCanCreateChange // 接收创建权限变化的回调
+  onCurrentFolderChange // 接收当前文件夹变化的回调
+  // onCanCreateChange // 接收创建权限变化的回调
 }) => {
   // 使用文件管理器hook
   const {
@@ -62,11 +62,11 @@ const PythonTabContent: React.FC<NotebookTabContentProps> = ({
   }, [currentFolderId, onCurrentFolderChange]);
 
   // 监听创建权限变化，通知父组件
-  useEffect(() => {
-    if (onCanCreateChange) {
-      onCanCreateChange(isCanCreate);
-    }
-  }, [isCanCreate, onCanCreateChange]);
+  // useEffect(() => {
+  //   if (onCanCreateChange) {
+  //     onCanCreateChange(isCanCreate);
+  //   }
+  // }, [isCanCreate, onCanCreateChange]);
 
   // 暴露方法给父组件
   useImperativeHandle(

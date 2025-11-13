@@ -86,8 +86,8 @@ export default function DataLoad() {
               width: '8px',
               height: '8px',
               background:
-                item.status == RunState.FAILED
-                  ? RunStateType[RunState.FAILED].color
+                item.status == RunState.FAILURE
+                  ? RunStateType[RunState.FAILURE].color
                   : item.status == RunState.SUCCEED
                     ? RunStateType[RunState.SUCCEED].color
                     : item.status == RunState.RUNNING
@@ -101,8 +101,8 @@ export default function DataLoad() {
           <div style={{ marginLeft: '6px' }}>
             {item.status == RunState.SUCCEED &&
               RunStateType[RunState.SUCCEED].text}
-            {item.status == RunState.FAILED &&
-              RunStateType[RunState.FAILED].text}
+            {item.status == RunState.FAILURE &&
+              RunStateType[RunState.FAILURE].text}
             {item.status == RunState.RUNNING &&
               RunStateType[RunState.RUNNING].text}
             {item.status == RunState.STOPPED &&
@@ -116,8 +116,8 @@ export default function DataLoad() {
           value: RunStateType[RunState.SUCCEED].value
         },
         {
-          text: RunStateType[RunState.FAILED].text,
-          value: RunStateType[RunState.FAILED].value
+          text: RunStateType[RunState.FAILURE].text,
+          value: RunStateType[RunState.FAILURE].value
         },
         {
           text: RunStateType[RunState.RUNNING].text,
@@ -429,7 +429,8 @@ export default function DataLoad() {
         flexDirection: 'column',
         padding: '20px 21px 20px 20px',
         borderRadius: '10px',
-        minHeight: '100%'
+        marginTop: '20px',
+        minHeight: 'calc(100% - 40px)'
       }}
     >
       <h1
@@ -463,7 +464,7 @@ export default function DataLoad() {
             type="primary"
             icon={<IconPlus />}
             onClick={() => {
-              setVisible(true);
+              history.push('/tenant/compute/modaforge/dataLoad/create');
             }}
           >
             创建数据载入任务

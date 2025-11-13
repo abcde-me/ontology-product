@@ -1,4 +1,4 @@
-import React, { useState, useEffect, memo } from 'react';
+import React, { useState, useEffect, memo, useRef } from 'react';
 import {
   Collapse,
   Tabs,
@@ -57,6 +57,7 @@ const RunningInfoPanel: React.FC<RunningInfoPanelProps> = memo(
     getPrevRunStatus
   }) => {
     const [isExpanded, setIsExpanded] = useState(false);
+    const logContentRef = useRef<HTMLDivElement>(null);
 
     // 自定义expandIcon组件，包含popover功能
     const CustomExpandIcon = () => {
@@ -82,6 +83,21 @@ const RunningInfoPanel: React.FC<RunningInfoPanelProps> = memo(
       console.log('isPanelOpen', isPanelOpen);
       setIsExpanded(isPanelOpen || false);
     }, [isPanelOpen]);
+
+    // 监听日志内容变化，自动滚动到底部
+    useEffect(() => {
+      if (activeKey === 'log' && runLog && isExpanded) {
+        // 查找实际的滚动容器（.arco-tabs-content）
+        const tabsContent = document.querySelector(
+          '.running-info-panel .arco-tabs-content'
+        ) as HTMLElement;
+        if (tabsContent) {
+          setTimeout(() => {
+            tabsContent.scrollTop = tabsContent.scrollHeight;
+          }, 0);
+        }
+      }
+    }, [runLog]);
 
     // 监听运行状态变化，自动展开面板
     useEffect(() => {
@@ -257,7 +273,10 @@ const RunningInfoPanel: React.FC<RunningInfoPanelProps> = memo(
                   </TabPane>
 
                   <TabPane key="log" title="日志">
-                    <div className="runlog-content tab-content-wrapper">
+                    <div
+                      ref={logContentRef}
+                      className="runlog-content tab-content-wrapper"
+                    >
                       {(() => {
                         // 如果有日志内容，直接显示
                         if (runLog && runLog.trim() !== '') {

@@ -58,7 +58,7 @@ function TaskList() {
     try {
       const params: any = {
         page: current, //第几页
-        pageSize: pageSize, //每页个数
+        page_size: pageSize, //每页个数
         order: sortValue?.order,
         filters: {
           name: searchValue,
@@ -67,7 +67,7 @@ function TaskList() {
         }
       };
       const res = await getAnnotationTaskList(params);
-      if (res.code === 0) {
+      if (res.code === 'success') {
         setTaskData(res?.data?.result || []);
         setTotal(res.data?.total);
         setLoading(false);
@@ -80,7 +80,7 @@ function TaskList() {
   };
 
   // 查看详情
-  const viewDetailWorkflow = (record: Record<string, any>) => {
+  const viewDetailRequirement = (record: Record<string, any>) => {
     openNewPage(
       `/modaforge/tenant/compute/modaforge/labelEditor?rId=${record.id}`
     );
@@ -125,7 +125,7 @@ function TaskList() {
       dataIndex: 'name',
       width: 300,
       ellipsis: true,
-      className: 'hover-change workflow-name',
+      className: 'hover-change requirement-name',
       render: (_, record) => {
         return renderEmptyPlaceholder(record.name) !== '-' ? (
           <Tooltip content={record?.name}>{record?.name}</Tooltip>
@@ -237,7 +237,7 @@ function TaskList() {
               <span
                 className="operate-text"
                 onClick={() => {
-                  viewDetailWorkflow(record);
+                  viewDetailRequirement(record);
                 }}
               >
                 标注

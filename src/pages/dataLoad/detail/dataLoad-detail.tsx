@@ -5,7 +5,6 @@ import {
   Grid,
   Input,
   Message,
-  Modal,
   Pagination,
   Popover,
   Switch
@@ -14,7 +13,6 @@ import { IconArrowLeft, IconEdit, IconPlus } from '@arco-design/web-react/icon';
 import React, { useEffect, useState } from 'react';
 import TableDetail from './table-detail';
 import './index.css';
-import Edit from '../edit';
 import { ExecutionHistory, TaskInfo } from '../type';
 import { useParams } from '@/utils/url';
 import {
@@ -79,8 +77,6 @@ const DataLoadDetail = () => {
   const handlePageChange = (page) => {
     setCurrent(page);
   };
-  // 编辑弹框的状态
-  const [editVisible, setEditVisible] = useState(false);
   // 相切列表loding的状态
   const [detailListLoading, setDetailListLoading] = useState(false);
 
@@ -91,9 +87,9 @@ const DataLoadDetail = () => {
   );
   const hasStartPermission = useHasPermission(DATA_LOAD_PERMISSIONS.CAN_START);
 
-  // 点击编辑显示弹框
-  const hideEditModal = () => {
-    setEditVisible(false);
+  // 点击编辑跳转到编辑页面
+  const handleEdit = () => {
+    history.push(`/tenant/compute/modaforge/dataLoad/edit/${loadId}`);
   };
   // 返回上一层的函数
   const OneLevelUpHan = () => {
@@ -113,10 +109,10 @@ const DataLoadDetail = () => {
   const getdirectorylist = async () => {
     try {
       const res = await getDirectoryList({
-        root_type: 1
+        // root_type: 1
       });
       if (res.code == '' && res.status == 200) {
-        setDirectoryArr(res.data.src);
+        setDirectoryArr(res.data?.src as any);
       }
     } catch (error) {
       console.error('Error fetching directory list:', error);
@@ -137,7 +133,7 @@ const DataLoadDetail = () => {
         task_id: Number(loadId),
         page: current,
         page_size: pageSize,
-        execution_id: searchValue.trim(),
+        execution_name: searchValue.trim(),
         ...directoryObj
       });
       setTotal(res?.data?.total ?? 0);
@@ -167,7 +163,7 @@ const DataLoadDetail = () => {
         task_id: Number(loadId),
         page: current,
         page_size: pageSize,
-        execution_id: searchValue.trim(),
+        execution_name: searchValue.trim(),
         ...directoryObj
       });
       if (res?.data?.items?.[0]?.status === 'stopped') {
@@ -248,7 +244,7 @@ const DataLoadDetail = () => {
         task_id: Number(loadId),
         page: 1,
         page_size: pageSize,
-        execution_id: '',
+        execution_name: '',
         ...directoryObj
       });
       setTotal(res?.data?.total ?? 0);
@@ -332,10 +328,7 @@ const DataLoadDetail = () => {
                   cursor: runningFlag ? '' : 'pointer',
                   fontSize: '14px'
                 }}
-                onClick={() => {
-                  setEditVisible(true);
-                  console.log(listDetail?.run_config?.cycle_text);
-                }}
+                onClick={handleEdit}
               >
                 <IconEdit /> 编辑
               </div>
@@ -576,7 +569,7 @@ const DataLoadDetail = () => {
           <InputSearch
             onClear={clearHan}
             allowClear
-            placeholder="搜索运行ID"
+            placeholder="搜索运行名称"
             style={{ width: 220 }}
             onPressEnter={() => {
               getDetailList();
@@ -638,30 +631,6 @@ const DataLoadDetail = () => {
             }}
           />
         )}
-        <Modal
-          style={{ width: '600px' }}
-          title="编辑数据载入任务"
-          visible={editVisible}
-          // onOk={() => setEditVisible(false)}
-          onCancel={() => setEditVisible(false)}
-          autoFocus={false}
-          focusLock={true}
-          footer={null}
-          unmountOnExit={true}
-        >
-          <Edit
-            hideEditModalHan={hideEditModal}
-            detailData={listDetail}
-            editForm={form}
-            getDetailList={getTask_idHan}
-            loadId={Number(loadId)}
-            cron={
-              listDetail &&
-              listDetail.run_config &&
-              listDetail.run_config.cycle_text
-            }
-          />
-        </Modal>
       </div>
     </div>
   );

@@ -2,6 +2,7 @@ import React, { memo, useCallback, useState } from 'react';
 import Textarea from 'rc-textarea';
 import { useTranslation } from 'react-i18next';
 import { Message } from '@arco-design/web-react';
+import { useNodesReadOnly } from '../../../hooks/use-workflow';
 
 type TitleInputProps = {
   value: string;
@@ -11,6 +12,7 @@ type TitleInputProps = {
 
 export const TitleInput = memo(
   ({ value, onBlur, className = '' }: TitleInputProps) => {
+    const { getNodesReadOnly } = useNodesReadOnly();
     const { t } = useTranslation('plugin__console-plugin-appforge');
     const [localValue, setLocalValue] = useState(value);
 
@@ -50,7 +52,7 @@ export const TitleInput = memo(
     return (
       <input
         value={localValue}
-        onChange={(e) => setLocalValue(e.target.value)}
+        onChange={(e) => !getNodesReadOnly() && setLocalValue(e.target.value)}
         className={`
         system-xl-semibold mr-2 h-7 min-w-0 grow appearance-none rounded-md border border-transparent px-1 text-[#1E293B]
         text-text-primary outline-none focus:shadow-xs ${className}

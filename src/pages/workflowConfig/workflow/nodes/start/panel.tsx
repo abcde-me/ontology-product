@@ -264,17 +264,17 @@ const Panel: FC<NodePanelProps<StartNodeType>> = ({ id, data }) => {
         }}
       >
         <FormItem
-          label="源数据目录"
+          label="数据目录"
           field="data_path_id"
-          rules={[{ required: true, message: '源数据目录必须选择' }]}
+          rules={[{ required: true, message: '数据目录必须选择' }]}
           disabled={readOnly || !srcDirs.length}
           extra={
             srcDirs.length ? (
-              '选择工作流需处理数据的源数据目录，目录变更时将会同步下游节点更新。'
+              '选择工作流需处理数据的目录，目录变更时将会同步下游节点更新。'
             ) : (
               <>
                 <span>
-                  暂无源数据目录，请先到
+                  暂无数据目录，请先到
                   <span
                     className="cursor-pointer text-[#007DFA]"
                     onClick={gotoData}
@@ -288,7 +288,7 @@ const Panel: FC<NodePanelProps<StartNodeType>> = ({ id, data }) => {
           }
         >
           <Select
-            placeholder="请选择源数据目录"
+            placeholder="请输入或选择数据目录"
             showSearch
             onChange={handlePathChange}
             filterOption={(inputValue, option) =>

@@ -20,7 +20,8 @@ export enum RequirementStatus {
   Draft = 1, // 发布中
   Published = 2, // 已发布
   PublishFailed = 3, // 发布失败
-  Annotated = 4 // 标注完成
+  Annotated = 4, // 标注完成
+  PreAnnotated = 5 // 预标注中
 }
 export const RequirementStatusMap = {
   [RequirementStatus.Draft]: '发布中',
@@ -99,25 +100,48 @@ export const TeamTypeMap = {
   [TeamType.DEPARTMENT]: '部门'
 };
 // 标注工具查询表格type类型
-// 1 图片 2 文本 3 音频 4 视频
 export const toolFileType = {
-  2: ['jpeg', 'jpg', 'png', 'gif'],
-  1: ['txt', 'json'],
-  3: ['mp3', 'wma', 'wav', 'flac', 'ape', 'aac'],
-  4: [
-    'wmv',
-    'asf',
-    'asx',
-    'rm',
-    'rmvb',
-    'mp4',
-    '3gp',
-    'mov',
-    'm4v',
-    'avi',
-    'dat',
-    'mkv',
-    'flv',
-    'vob'
+  [AnnotationTypeStatus.IMAGE]: ['JPEG', 'JPG', 'PNG', 'GIF'],
+  [AnnotationTypeStatus.TEXT]: ['TXT', 'JSON'],
+  [AnnotationTypeStatus.AUDIO]: ['MP3', 'WMA', 'WAV', 'FLAC', 'APE', 'AAC'],
+  [AnnotationTypeStatus.VIDEO]: [
+    'WMV',
+    'ASF',
+    'ASX',
+    'RM',
+    'RMVB',
+    'MP4',
+    '3GP',
+    'MOV',
+    'M4V',
+    'AVI',
+    'DAT',
+    'MKV',
+    'FLV',
+    'VOB'
   ]
 };
+
+export interface LabelInfoAttribute {
+  label_info_id: string;
+  attribute_name_cn: string;
+  attribute_name_en: string;
+  input_type: 1 | 2; // 1=选项，2=输入框
+}
+
+export interface LabelInfoAttributeGroup {
+  attribute_id: string;
+  attribute_group_name: string;
+  attribute_group_class: 1 | 2 | 3; // 1=单选，2=多选，3=输入框
+  attribute_group_type: 1 | 2; // 1=必选，2=非必选
+  label_info_attribute: LabelInfoAttribute[];
+}
+export interface LabelData {
+  label_id: string;
+  label_name_cn: string;
+  label_name_en: string;
+  label_shape: LabelShape; // 1=点，2=线，3=正方形，4=多边形 5=椭圆 6=立方体
+  label_colour: string;
+  label_info_attribute_groups: LabelInfoAttributeGroup[];
+  label_mapping?: string; // 模型映射字段（可选）
+}

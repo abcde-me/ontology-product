@@ -43,11 +43,9 @@ const EditorWorkspaceContent: React.FC<{
   const [lastCursorPosition, setLastCursorPosition] = React.useState<number>(0);
   const [isEditorFocused, setIsEditorFocused] = React.useState<boolean>(false);
 
-  const hasRunPermission = useHasPermission(SQL_PERMISSIONS.CAN_RUN);
-  const hasUpdatePermission = useHasPermission(SQL_PERMISSIONS.CAN_UPDATE);
-  const hasCancelRunPermission = useHasPermission(
-    SQL_PERMISSIONS.CAN_CANCEL_RUN
-  );
+  const hasRunPermission = useHasPermission(SQL_PERMISSIONS.RUN);
+  const hasUpdatePermission = useHasPermission(SQL_PERMISSIONS.MODIFY);
+  const hasCancelRunPermission = useHasPermission(SQL_PERMISSIONS.RUN);
 
   // 从 Context 获取编辑器状态
   const {

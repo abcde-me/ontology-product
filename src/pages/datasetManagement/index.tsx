@@ -11,7 +11,11 @@ import {
   Message,
   Select,
   Checkbox,
-  Tooltip
+  Tooltip,
+  Dropdown,
+  Menu,
+  Tabs,
+  Form
 } from '@arco-design/web-react';
 import {
   IconPlus,
@@ -25,7 +29,10 @@ import {
   IconCloseCircleFill,
   IconCheckCircleFill,
   IconExclamationCircleFill,
-  IconInfoCircle
+  IconInfoCircle,
+  IconDown,
+  IconUp,
+  IconTag
 } from '@arco-design/web-react/icon';
 import { useHistory } from 'react-router-dom';
 import noDataElement from '@/components/no-data';
@@ -40,7 +47,7 @@ import {
 import EllipsisPopover from '../../components/ellipsis-popover-com';
 import DatasetForm from '@/components/datasetform/AddDatasetForm';
 import NoDataEmpty from '@/components/NoDataEmpty';
-import styles from './index.module.css';
+import styles from './index.module.scss';
 import FormComponent from '@/components/data-catalog-content/components/popups-form';
 // 名称显示组件 - 只有在文本被截断时才显示Tooltip
 import { PermissionWrapper } from '@/components/PermissionGuard';
@@ -55,6 +62,11 @@ import style from 'react-syntax-highlighter/dist/esm/styles/hljs/a11y-dark';
 import { color } from 'echarts';
 import getFileIcon from '@/components/file-icon';
 import { formatFileSize } from '@/utils/format';
+import dataTypesIcon from '@/pages/datasetManagement/assets/dataset_dataType.png';
+import dataRelationIcon from '@/pages/datasetManagement/assets/dataset_relation.png';
+import dataGuaranteeIcon from '@/pages/datasetManagement/assets/dataset_guarantee.png';
+import dataSceneIcon from '@/pages/datasetManagement/assets/dataset_scene.png';
+import { throttle } from 'lodash';
 
 // 时间格式化函数
 const formatDateTime = (dateTimeString: string): string => {
@@ -293,7 +305,7 @@ const columns = (
     filterIcon: <IconFilter />,
     filters: [
       { text: 'jsonl', value: datasetStorageType.jsonl },
-      { text: '文件', value: datasetStorageType.file },
+      { text: '向量', value: datasetStorageType.file },
       { text: '数据库表', value: datasetStorageType.table }
     ],
     filteredValue: selectedStorageTypeFilters,
@@ -306,7 +318,7 @@ const columns = (
             {record.storage_type === datasetStorageType.table
               ? '数据库表'
               : record.storage_type === datasetStorageType.file
-                ? '文件'
+                ? '向量'
                 : (record.storage_type ?? '-')}
           </span>
         </div>
@@ -542,61 +554,85 @@ const columns = (
   {
     title: '操作',
     dataIndex: 'op',
-    width: 104,
+    width: 200,
     fixed: 'right' as const,
     render: (_: unknown, record: Dataset) => {
       const perms = record.perms;
       return (
-        <div style={{ display: 'flex', alignItems: 'center' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
           {/* <Button
-          type="text"
-          className={`${styles.actionButton} ${styles.export}`}
-        >
-          编辑
-        </Button> */}
-          {/* <Button
-            type='text'
+              type="text"
+              className={`${styles.actionButton} ${styles.export}`}
+            >
+              编辑
+            </Button> */}
+          <Button
+            type="text"
+            onClick={() => {
+              record.status === datasetStatus.normal ||
+              record.status === datasetStatus.version_updating ||
+              record.status === datasetStatus.version_update_failed
+                ? handleGoToDetail(record.id)
+                : '';
+            }}
           >
             详情
-          </Button> */}
-          {record.storage_type !== datasetStorageType.table && (
-            <PermissionWrapper
-              permission={DATA_MANAGEMENT_PERMISSIONS.CAN_SEARCH}
-            >
-              <Button
-                type="text"
-                className={`${styles.actionButton} ${record.status === datasetStatus.normal ? styles.export : styles.disabled}`}
-                onClick={() => handleExport(record)}
-                disabled={record.status !== datasetStatus.normal}
-                style={{
-                  padding: '0 8px 0 5px',
-                  height: '100%',
-                  borderTop: 'none',
-                  borderBottom: 'none'
-                }}
-              >
-                导出
-              </Button>
-            </PermissionWrapper>
-          )}
+          </Button>
+          <Button type="text">移动</Button>
 
-          <PermissionWrapper
-            permission={DATA_MANAGEMENT_PERMISSIONS.CAN_DELETE}
+          <Dropdown
+            droplist={
+              <Menu>
+                {record.storage_type !== datasetStorageType.table && (
+                  <Menu.Item key="export">
+                    <PermissionWrapper
+                      permission={DATA_MANAGEMENT_PERMISSIONS.CAN_SEARCH}
+                    >
+                      <Button
+                        type="text"
+                        className={`${styles.actionButton} ${record.status === datasetStatus.normal ? styles.export : styles.disabled}`}
+                        onClick={() => handleExport(record)}
+                        disabled={record.status !== datasetStatus.normal}
+                        style={{
+                          padding: '0 8px 0 5px',
+                          height: '100%',
+                          borderTop: 'none',
+                          borderBottom: 'none'
+                        }}
+                      >
+                        导出
+                      </Button>
+                    </PermissionWrapper>
+                  </Menu.Item>
+                )}
+                <Menu.Item key="delete">
+                  <PermissionWrapper
+                    permission={DATA_MANAGEMENT_PERMISSIONS.CAN_DELETE}
+                  >
+                    <Button
+                      type="text"
+                      className={`${styles.actionButton} ${styles.delete}`}
+                      onClick={() => handleDelete(record)}
+                      style={{
+                        padding: '0 8px 0 5px',
+                        height: '100%',
+                        borderTop: 'none',
+                        borderBottom: 'none'
+                      }}
+                    >
+                      删除
+                    </Button>
+                  </PermissionWrapper>
+                </Menu.Item>
+              </Menu>
+            }
+            trigger="click"
+            position="bl"
           >
-            <Button
-              type="text"
-              className={`${styles.actionButton} ${styles.delete}`}
-              onClick={() => handleDelete(record)}
-              style={{
-                padding: '0 8px 0 5px',
-                height: '100%',
-                borderTop: 'none',
-                borderBottom: 'none'
-              }}
-            >
-              删除
+            <Button type="text">
+              更多 <IconDown />
             </Button>
-          </PermissionWrapper>
+          </Dropdown>
         </div>
       );
     }
@@ -635,9 +671,10 @@ export enum datasetStatus {
   version_updating = 'version_updating',
   version_update_failed = 'version_update_failed'
 }
-
 const DatasetManagement: React.FC = () => {
   const history = useHistory();
+  const TabPane = Tabs.TabPane;
+  const [sceneTypeForm] = Form.useForm();
   const [tagList, setTagList] = React.useState<{ id: number; name: string }[]>(
     []
   ); //标签列表
@@ -673,6 +710,12 @@ const DatasetManagement: React.FC = () => {
   // 排序相关状态
   const [sortField, setSortField] = React.useState<string>(''); // 排序字段：created_at 或 updated_at
   const [sortOrder, setSortOrder] = React.useState<string>(''); // 排序方向：asc 或 desc
+  // 描述是否展开
+  const [isHiddenBaseInfo, setIsHiddenBaseInfo] =
+    React.useState<boolean>(false);
+  const [tabData, setTabData] = React.useState<string[]>([]);
+  const [addSceneTypeVisible, setAddSceneTypeVisible] =
+    React.useState<boolean>(false);
 
   const childRef = useRef<{
     resetForm: () => void;
@@ -691,11 +734,119 @@ const DatasetManagement: React.FC = () => {
   const [downloadData, setDownloadData] = React.useState<Dataset | null>(null);
   const [visible, setVisible] = React.useState(false); // 导出弹框控制
 
+  const lastScrollTop = React.useRef(0);
+  const stickyRef = React.useRef<{ current: { offsetTop: number } }>(null);
+  const [isSticky, setIsSticky] = useState(false);
+
+  useEffect(() => {
+    const container = document.querySelector('.layout-detail');
+    if (!container) return;
+    const handleScroll = (event) => {
+      const currentScrollTop = container.scrollTop;
+      if (stickyRef.current) {
+        const stickyTop = stickyRef.current.current.offsetTop;
+        setIsSticky(stickyTop === 86);
+      }
+
+      if (container.scrollTop > 20 && !isHiddenBaseInfo) {
+        setIsHiddenBaseInfo(true);
+      } else if (currentScrollTop === 0 && isHiddenBaseInfo) {
+        setIsHiddenBaseInfo(false);
+        setIsSticky(false);
+        event.preventDefault();
+      }
+      lastScrollTop.current = currentScrollTop;
+    };
+
+    // 节流处理滚动事件，避免频繁触发
+    const throttledHandleScroll = throttle(handleScroll, 100);
+
+    // 监听滚轮事件
+    container.addEventListener('scroll', throttledHandleScroll, {
+      passive: false
+    });
+
+    // 在组件卸载时移除监听器
+    return () => {
+      container.removeEventListener('scroll', throttledHandleScroll);
+      throttledHandleScroll.cancel(); // 清除节流计时器
+    };
+  }, [isHiddenBaseInfo]);
+
   // 搜索字段选项
   const searchOptions = [
     { label: '名称', value: 'name' },
     { label: '描述说明', value: 'description' }
   ];
+
+  // 数据集市header
+  const datasetMarketHeaderData = [
+    {
+      title: '丰富的数据类型',
+      desc: '支持模型微调数据集、CV标注数据集、RAG知识库等多种数据类型',
+      icon: dataTypesIcon
+    },
+    {
+      title: '数据血缘追溯',
+      desc: '完整记录数据加工全链路，确保数据质量可追溯、可审计',
+      icon: dataRelationIcon
+    },
+    {
+      title: '高质量数据保障',
+      desc: '支持模型自动质检与人工质检相结合，确保数据集高质量输出',
+      icon: dataGuaranteeIcon
+    },
+    {
+      title: '广泛的应用场景',
+      desc: '应用于大模型微调、AI模型训练、商业智能分析等场景',
+      icon: dataSceneIcon
+    }
+  ];
+
+  // 数据集tab数据
+  const datasetTabData = [
+    {
+      title: '全部',
+      key: 'all',
+      count: 180,
+      desc: '为模型训练和微调构建的高质量数据集，支持JSON、JSONL、COCO、YOLO等多种格式，涵盖文本、图像、语音等任务类型',
+      tags: ['文本分类训练集', '代码生成样本', '图片生成样本']
+    },
+    {
+      title: '模型训练与微调数据集',
+      key: '2',
+      count: 100,
+      desc: '为模型训练和微调构建的高质量数据集，支持JSON、JSONL、COCO、YOLO等多种格式，涵盖文本、图像、语音等任务类型',
+      tags: ['文本分类训练集', '代码生成样本', '图片生成样本']
+    },
+    {
+      title: 'RAG知识库',
+      key: '3',
+      count: 20,
+      desc: '为模型训练和微调构建的高质量数据集，支持JSON、JSONL、COCO、YOLO等多种格式，涵盖文本、图像、语音等任务类型',
+      tags: ['文本分类训练集', '代码生成样本', '图片生成样本']
+    },
+    {
+      title: '数据分析',
+      key: '4',
+      count: 20,
+      desc: '为模型训练和微调构建的高质量数据集，支持JSON、JSONL、COCO、YOLO等多种格式，涵盖文本、图像、语音等任务类型',
+      tags: ['文本分类训练集', '代码生成样本', '图片生成样本']
+    },
+    {
+      title: '其他',
+      key: '5',
+      count: 40,
+      desc: '为模型训练和微调构建的高质量数据集，支持JSON、JSONL、COCO、YOLO等多种格式，涵盖文本、图像、语音等任务类型',
+      tags: ['文本分类训练集', '代码生成样本', '图片生成样本']
+    }
+  ];
+
+  // 新增场景类型提交
+  const handleAddSceneTypeSubmit = (values: any) => {
+    console.log('新增场景类型:', values);
+    setAddSceneTypeVisible(false);
+  };
 
   // 行选择配置
   const rowSelection = {
@@ -956,6 +1107,12 @@ const DatasetManagement: React.FC = () => {
   ]);
 
   // 处理表格变化（包括过滤器变化）
+  // 1. 添加selectedSrcModelFilters状态变量（在第640行左右，其他过滤状态变量附近）
+  const [selectedSrcModelFilters, setSelectedSrcModelFilters] = React.useState<
+    string[]
+  >([]); //选中的生成模型过滤
+
+  // 2. 修改handleTableChange函数（在第854行左右）
   const handleTableChange = (pagination: any, sorter: any, filters: any) => {
     // 处理标签过滤
     if (filters.tag_names && filters.tag_names !== selectedTagFilters) {
@@ -974,6 +1131,18 @@ const DatasetManagement: React.FC = () => {
     if (filters.status && filters.status !== selectedStatusFilters) {
       setSelectedStatusFilters(filters.status);
       setCurrentPage(1); // 重置到第一页
+    }
+
+    // 添加处理生成模型过滤
+    if (filters.src_model && filters.src_model !== selectedSrcModelFilters) {
+      setSelectedSrcModelFilters(filters.src_model);
+      setCurrentPage(1); // 重置到第一页
+    }
+
+    // 添加清除生成模型过滤的逻辑
+    if (filters.src_model === undefined) {
+      setSelectedSrcModelFilters([]);
+      setCurrentPage(1);
     }
 
     if (filters.tag_names === undefined) {
@@ -1149,164 +1318,271 @@ const DatasetManagement: React.FC = () => {
 
   return (
     <div
+      className={styles.datasetManagementContainer}
       style={{
-        backgroundColor: 'white',
         minHeight: 'calc(100vh - 80px)',
         display: 'flex',
         flexDirection: 'column',
-        margin: '20px 20px 20px 0px',
         borderRadius: '10px',
-        padding: '20px'
+        padding: '24px'
       }}
     >
-      <div
+      <h1
         style={{
-          display: 'flex',
-          flexDirection: 'row',
-          alignItems: 'center',
-          marginBottom: '20px'
+          fontSize: '20px',
+          fontWeight: 'bold',
+          color: '#0F172A',
+          position: 'sticky',
+          top: 0,
+          zIndex: 10,
+          background: `${!isSticky ? 'unset' : '#f0f6fe'}`
         }}
       >
-        <h1
-          style={{
-            fontSize: '20px',
-            fontWeight: 'bold',
-            margin: '0px 15px 0px 0px',
-            color: '#0F172A'
-          }}
-        >
-          数据集市
-        </h1>
-        {/* <div
-          style={{
-            color: '#334155',
-            margin: '0px',
-            fontSize: '14px'
-          }}
-        >
-          管理用于模型精调和训练的数据集
-        </div> */}
-      </div>
-      <div className={styles.searchToolbar}>
-        <Input.Group compact>
-          <Select
-            style={{ width: 100, height: 32 }}
-            value={searchField}
-            onChange={(value) => setSearchField(value)}
-            options={searchOptions}
-          />
-          <Input.Search
-            allowClear
-            placeholder="输入关键字搜索"
-            style={{ width: 160, height: 32 }}
-            value={search}
-            onChange={(value) => setSearch(value)}
-            onClear={() => {
-              setSearch('');
-              setCurrentPage(1);
-              setActualSearch('');
-            }}
-            // onChange={(value) => {
-            //   setSearch(value);
-            //   // 当清空搜索框时（点击叉号），立即触发搜索
-            //   if (value === '') {
-            //     setCurrentPage(1);
-            //     setActualSearch('');
-            //     setActualSearchField(searchField);
-            //   }
-            // }}
-            onPressEnter={handleSearch}
-            onSearch={handleSearch}
-          />
-        </Input.Group>
-        <div className={styles.actionButtons}>
-          <PermissionWrapper
-            permission={DATA_MANAGEMENT_PERMISSIONS.CAN_DELETE_BATCH}
-          >
-            <Tooltip
-              content={selectedRowKeys.length === 0 ? '请选择文件' : ''}
-              disabled={selectedRowKeys.length > 0}
-              style={{ fontSize: '14px' }}
-            >
-              <Button
-                icon={<IconDelete />}
-                className={styles.batchDeleteBtn}
-                disabled={selectedRowKeys.length === 0}
-                onClick={handleBatchDelete}
-                type="secondary"
-              >
-                批量删除
-              </Button>
-            </Tooltip>
-          </PermissionWrapper>
-          <PermissionWrapper
-            permission={DATA_MANAGEMENT_PERMISSIONS.CAN_SEARCH_BATCH}
-          >
-            <Tooltip
-              content={selectedRowKeys.length === 0 ? '请选择文件' : ''}
-              disabled={selectedRowKeys.length > 0}
-            >
-              <Button
-                icon={<IconDownload />}
-                className={styles.batchExportBtn}
-                disabled={batchExportDisabled}
-                onClick={handleBatchExport}
-              >
-                批量导出
-              </Button>
-            </Tooltip>
-          </PermissionWrapper>
-          <PermissionWrapper
-            permission={DATA_MANAGEMENT_PERMISSIONS.CAN_CREATE}
-          >
-            <Button
-              type="primary"
-              icon={<IconPlus />}
-              onClick={openCreateModal}
-            >
-              新建数据集
-            </Button>
-          </PermissionWrapper>
-        </div>
-      </div>
-
-      <Table
-        rowKey="id"
-        className={styles.datasetTable}
-        // rowHeight="47px"
-        columns={columns(
-          handleGoToDetail,
-          handleDelete,
-          datasetList,
-          handleExport,
-          tagList,
-          selectedTagFilters,
-          selectedStorageTypeFilters,
-          selectedStatusFilters,
-          sortField,
-          sortOrder,
-          handleTableChange,
-          handleRetry
-        )}
-        data={datasetList}
-        rowSelection={rowSelection}
-        noDataElement={noDataElement({ description: '暂无数据' })}
-        pagination={{
-          current: currentPage,
-          total: total,
-          pageSize: pageSize,
-          showTotal: (total, range) => `共${total}条`,
-          sizeCanChange: true,
-          showJumper: true,
-          pageSizeChangeResetCurrent: true,
-          onChange: handlePageChange,
-          onPageSizeChange: handlePageSizeChange,
-          sizeOptions: [10, 20, 50, 100]
+        数据集市
+      </h1>
+      <div
+        style={{
+          color: '#334155',
+          margin: '0px',
+          fontSize: '14px',
+          display: 'flex',
+          justifyContent: 'space-between'
         }}
-        border={false}
-        scroll={{ x: 1200 }}
-        onChange={handleTableChange}
-      />
+      >
+        <span>
+          从数据接入到智能应用，构建企业级高质量数据集，支持模型训练、知识库构建与数据分析
+        </span>
+        <Dropdown trigger="click" position="br">
+          <Button
+            type="text"
+            onClick={() => setIsHiddenBaseInfo(!isHiddenBaseInfo)}
+          >
+            {isHiddenBaseInfo ? '展开' : '收起'}
+            {isHiddenBaseInfo ? <IconDown /> : <IconUp />}
+          </Button>
+        </Dropdown>
+      </div>
+      {!isHiddenBaseInfo && (
+        <div
+          style={{
+            borderRadius: '8px',
+            border: '1px solid #FFF',
+            background: 'rgba(255, 255, 255, 0.48)',
+            boxShadow: '0 0 3.5px 0 rgba(0, 0, 0, 0.04)',
+            display: 'flex',
+            flexDirection: 'row',
+            marginBottom: '20px',
+            zIndex: 1
+          }}
+        >
+          {datasetMarketHeaderData.map((item, index) => (
+            <div
+              style={{
+                display: 'flex',
+                flexDirection: 'row',
+                padding: '16px 20px',
+                gap: '20px'
+              }}
+              key={index}
+            >
+              <div>
+                <h1
+                  style={{
+                    fontSize: '16px',
+                    fontWeight: 600,
+                    lineHeight: '24px'
+                  }}
+                >
+                  {item.title}
+                </h1>
+                <span style={{ fontSize: '12px', lineHeight: '18px' }}>
+                  {item.desc}
+                </span>
+              </div>
+              <img
+                style={{ width: '80px', height: '80px' }}
+                src={item.icon}
+                alt={item.title}
+              />
+            </div>
+          ))}
+        </div>
+      )}
+      <Tabs
+        editable
+        defaultActiveTab="all"
+        style={{ zIndex: 1 }}
+        type="card"
+        onAddTab={() => setAddSceneTypeVisible(true)}
+        ref={stickyRef}
+      >
+        {datasetTabData.map((item, index) => (
+          <TabPane key={item.key} title={item.title} closable={false}>
+            <Typography.Paragraph>
+              {item.key !== 'all' && (
+                <div
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    padding: '12px',
+                    backgroundColor: 'rgba(255, 255, 255, 0.48)',
+                    borderRadius: '8px',
+                    marginTop: '20px'
+                  }}
+                >
+                  <span>{item.desc}</span>
+                  <span style={{ marginTop: '8px' }}>
+                    <IconTag style={{ marginRight: '5px' }} />
+                    {item.tags.map((tag, index) => (
+                      <Tag
+                        key={index}
+                        style={{
+                          marginRight: '5px',
+                          background: '#FFF',
+                          border: '1px solid #E2E8F0',
+                          padding: '4px'
+                        }}
+                      >
+                        {tag}
+                      </Tag>
+                    ))}
+                  </span>
+                </div>
+              )}
+              <div className={styles.searchToolbar}>
+                <Input.Group compact>
+                  <Select
+                    style={{ width: 100, height: 32 }}
+                    value={searchField}
+                    onChange={(value) => setSearchField(value)}
+                    options={searchOptions}
+                  />
+                  <Input.Search
+                    allowClear
+                    placeholder="输入关键字搜索"
+                    style={{ width: 160, height: 32 }}
+                    value={search}
+                    onChange={(value) => setSearch(value)}
+                    onClear={() => {
+                      setSearch('');
+                      setCurrentPage(1);
+                      setActualSearch('');
+                    }}
+                    onPressEnter={handleSearch}
+                    onSearch={handleSearch}
+                  />
+                </Input.Group>
+                <div className={styles.actionButtons}>
+                  <PermissionWrapper
+                    permission={DATA_MANAGEMENT_PERMISSIONS.CAN_DELETE_BATCH}
+                  >
+                    <Tooltip
+                      content={selectedRowKeys.length === 0 ? '请选择文件' : ''}
+                      disabled={selectedRowKeys.length > 0}
+                      style={{ fontSize: '14px' }}
+                    >
+                      <Button
+                        icon={<IconDelete />}
+                        className={styles.batchDeleteBtn}
+                        disabled={selectedRowKeys.length === 0}
+                        onClick={handleBatchDelete}
+                        type="secondary"
+                      >
+                        批量删除
+                      </Button>
+                    </Tooltip>
+                  </PermissionWrapper>
+                  <PermissionWrapper
+                    permission={DATA_MANAGEMENT_PERMISSIONS.CAN_SEARCH_BATCH}
+                  >
+                    <Tooltip
+                      content={selectedRowKeys.length === 0 ? '请选择文件' : ''}
+                      disabled={selectedRowKeys.length > 0}
+                    >
+                      <Button
+                        icon={<IconDownload />}
+                        className={styles.batchExportBtn}
+                        disabled={batchExportDisabled}
+                        onClick={handleBatchExport}
+                      >
+                        批量导出
+                      </Button>
+                    </Tooltip>
+                  </PermissionWrapper>
+                  <PermissionWrapper
+                    permission={DATA_MANAGEMENT_PERMISSIONS.CAN_CREATE}
+                  >
+                    <Button
+                      type="primary"
+                      icon={<IconPlus />}
+                      onClick={openCreateModal}
+                    >
+                      新建数据集
+                    </Button>
+                  </PermissionWrapper>
+                </div>
+              </div>
+
+              <Table
+                rowKey="id"
+                className={styles.datasetTable}
+                // rowHeight="47px"
+                columns={
+                  item.key === 'all'
+                    ? columns(
+                        handleGoToDetail,
+                        handleDelete,
+                        datasetList,
+                        handleExport,
+                        tagList,
+                        selectedTagFilters,
+                        selectedStorageTypeFilters,
+                        selectedStatusFilters,
+                        sortField,
+                        sortOrder,
+                        handleTableChange,
+                        handleRetry
+                      )
+                    : columns(
+                        handleGoToDetail,
+                        handleDelete,
+                        datasetList,
+                        handleExport,
+                        tagList,
+                        selectedTagFilters,
+                        selectedStorageTypeFilters,
+                        selectedStatusFilters,
+                        sortField,
+                        sortOrder,
+                        handleTableChange,
+                        handleRetry
+                      ).filter((i) => i.dataIndex !== 'scenario_type')
+                }
+                data={datasetList}
+                rowSelection={rowSelection}
+                noDataElement={noDataElement({ description: '暂无数据' })}
+                pagination={{
+                  current: currentPage,
+                  total: total,
+                  pageSize: pageSize,
+                  showTotal: (total, range) => `共${total}条`,
+                  sizeCanChange: true,
+                  showJumper: true,
+                  pageSizeChangeResetCurrent: true,
+                  onChange: handlePageChange,
+                  onPageSizeChange: handlePageSizeChange,
+                  sizeOptions: [10, 20, 50, 100]
+                }}
+                border={false}
+                scroll={{
+                  x: 1200
+                }}
+                onChange={handleTableChange}
+              />
+            </Typography.Paragraph>
+          </TabPane>
+        ))}
+      </Tabs>
 
       {/* 新建数据集弹框 */}
       <DatasetForm
@@ -1326,6 +1602,31 @@ const DatasetManagement: React.FC = () => {
         }
         handlClear={handClear}
       />
+
+      {/* 新增场景类型弹窗 */}
+      <Modal
+        className={styles.addSceneTypeModal}
+        visible={addSceneTypeVisible}
+        onOk={() => sceneTypeForm.submit()}
+        onCancel={() => setAddSceneTypeVisible(false)}
+        title="新增场景类型"
+      >
+        <Form form={sceneTypeForm} onSubmit={handleAddSceneTypeSubmit}>
+          <Form.Item
+            label="场景分类名称："
+            field="sceneTypeName"
+            rules={[{ required: true, message: '请输入场景类型名称' }]}
+          >
+            <Input placeholder="请输入名称" />
+          </Form.Item>
+          <Form.Item label="场景分类标签：" field="sceneTypeTag">
+            <Select placeholder="请选择标签" />
+          </Form.Item>
+          <Form.Item label="描述说明：" field="sceneTypeDesc">
+            <Input.TextArea placeholder="可以描述数据集的用途、特点或其他相关信息" />
+          </Form.Item>
+        </Form>
+      </Modal>
     </div>
   );
 };

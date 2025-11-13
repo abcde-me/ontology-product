@@ -24,11 +24,14 @@ import {
   IconUp
 } from '@arco-design/web-react/icon';
 import copy from 'copy-to-clipboard';
-import React, { memo, useEffect, useState } from 'react';
+import React, { memo, useEffect, useState, useRef } from 'react';
 import { useEditorContext } from '../../contexts/EditorContext';
 import { addSortToColumns, formatDateTime } from '../../utils';
 import { ModalDatasetForm, ModalDatasetFormVersion } from '../ModalDatasetForm';
+import { PermissionWrapper } from '@/components/PermissionGuard';
+import { SQL_PERMISSIONS } from '@/config/permissions';
 import styles from './RunningInfoPanel.module.scss';
+import dayjs from 'dayjs';
 
 const { Item: CollapseItem } = Collapse;
 const { TabPane } = Tabs;
@@ -45,6 +48,7 @@ const RunningInfoPanel: React.FC<RunningInfoPanelProps> = memo(
     const [activeKey, setActiveKey] = useState<string>('result');
     const [isExpanded, setIsExpanded] = useState(false);
     const [hasUserClosed, setHasUserClosed] = useState(false);
+    const logContentRef = useRef<HTMLDivElement>(null);
 
     const [formVisible, setFormVisible] = useState(false); // 保存为新数据集
     const [versionFormVisible, setVersionFormVisible] = useState(false); // 保存为新版本
@@ -88,6 +92,24 @@ const RunningInfoPanel: React.FC<RunningInfoPanelProps> = memo(
         setHasUserClosed(false);
       }
     }, [runStatus]);
+
+    // 监听日志内容变化，自动滚动到底部
+    useEffect(() => {
+      if (
+        activeKey === 'log' &&
+        runLog &&
+        isExpanded &&
+        logContentRef.current
+      ) {
+        // 使用 ref 直接获取滚动容器，确保 DOM 更新后再滚动
+        requestAnimationFrame(() => {
+          if (logContentRef.current) {
+            logContentRef.current.scrollTop =
+              logContentRef.current.scrollHeight;
+          }
+        });
+      }
+    }, [runLog]);
 
     // 监听运行状态变化，自动展开面板
     useEffect(() => {
@@ -208,7 +230,7 @@ const RunningInfoPanel: React.FC<RunningInfoPanelProps> = memo(
               <span className="mr-4 text-[14px]">运行成功</span>
               <RunSuccessIcon className="mr-[8px]" />
               <span className="text-[14px]">
-                {formatDateTime(runStartTime || '')}（
+                {formatDateTime(runStartTime ?? '')}（
                 {runDuration < 1000
                   ? `${runDuration}ms`
                   : `${(runDuration / 1000).toFixed(2)}s`}
@@ -218,18 +240,22 @@ const RunningInfoPanel: React.FC<RunningInfoPanelProps> = memo(
           </Space>
         );
       }
-      if (status === RunningStatus.FAILED) {
+      if (status === RunningStatus.FAILED || status === RunningStatus.IDLE) {
         return (
           <div className={styles['run-status']}>
             <span className="mr-4 text-[14px]">运行失败</span>
-            <RunFailedIcon className="mr-[8px]" />
-            <span className="text-[14px]">
-              {formatDateTime(runStartTime || '')}（
-              {runDuration < 1000
-                ? `${runDuration}ms`
-                : `${(runDuration / 1000).toFixed(2)}s`}
-              ）
-            </span>
+            {status !== RunningStatus.IDLE ? (
+              <>
+                <RunFailedIcon className="mr-[8px]" />
+                <span className="text-[14px]">
+                  {formatDateTime(runStartTime ?? '')}（
+                  {runDuration < 1000
+                    ? `${runDuration}ms`
+                    : `${(runDuration / 1000).toFixed(2)}s`}
+                  ）
+                </span>
+              </>
+            ) : null}
           </div>
         );
       }
@@ -259,7 +285,7 @@ const RunningInfoPanel: React.FC<RunningInfoPanelProps> = memo(
     );
 
     return (
-      <div className={styles['sql-running-info-panel']}>
+      <div className={`running-info-panel ${styles['sql-running-info-panel']}`}>
         <Collapse
           activeKey={isExpanded ? ['1'] : []}
           onChange={handlePanelChange}
@@ -360,76 +386,78 @@ const RunningInfoPanel: React.FC<RunningInfoPanelProps> = memo(
                         行数据
                       </span>
                     </Space>
-                    <Dropdown
-                      position="br"
-                      disabled={runStatus !== RunningStatus.SUCCESS}
-                      droplist={
-                        <Menu onClickMenuItem={handleMenuClick}>
-                          <Menu.Item key="1" style={{ height: 'auto' }}>
-                            <div style={{ padding: '7px 12px' }}>
-                              <div
-                                style={{
-                                  fontSize: '14px',
-                                  fontWeight: 600,
-                                  lineHeight: '22px',
-                                  color: '#0F172A',
-                                  marginBottom: '4px'
-                                }}
-                              >
-                                保存为新数据集
-                              </div>
-                              <div
-                                style={{
-                                  fontSize: '12px',
-                                  lineHeight: '18px',
-                                  color: '#334155'
-                                }}
-                              >
-                                适用于字段变更或使用场景差异较大等场景
-                              </div>
-                            </div>
-                          </Menu.Item>
-                          <Menu.Item key="2" style={{ height: 'auto' }}>
-                            <div style={{ padding: '7px 12px' }}>
-                              <div
-                                style={{
-                                  fontSize: '14px',
-                                  fontWeight: 600,
-                                  lineHeight: '22px',
-                                  color: '#0F172A',
-                                  marginBottom: '4px'
-                                }}
-                              >
-                                保存为新版本
-                              </div>
-                              <div
-                                style={{
-                                  fontSize: '12px',
-                                  lineHeight: '18px',
-                                  color: '#334155'
-                                }}
-                              >
-                                已存在数据集且字段不变
-                              </div>
-                            </div>
-                          </Menu.Item>
-                        </Menu>
-                      }
-                    >
-                      <Button
-                        type="outline"
-                        size="mini"
-                        icon={<SaveToDasetIcon />}
-                        style={{
-                          fontSize: '14px',
-                          color: '#1E293B',
-                          fontWeight: 600
-                        }}
+                    <PermissionWrapper permission={SQL_PERMISSIONS.EXPORT}>
+                      <Dropdown
+                        position="br"
                         disabled={runStatus !== RunningStatus.SUCCESS}
+                        droplist={
+                          <Menu onClickMenuItem={handleMenuClick}>
+                            <Menu.Item key="1" style={{ height: 'auto' }}>
+                              <div style={{ padding: '7px 12px' }}>
+                                <div
+                                  style={{
+                                    fontSize: '14px',
+                                    fontWeight: 600,
+                                    lineHeight: '22px',
+                                    color: '#0F172A',
+                                    marginBottom: '4px'
+                                  }}
+                                >
+                                  保存为新数据集
+                                </div>
+                                <div
+                                  style={{
+                                    fontSize: '12px',
+                                    lineHeight: '18px',
+                                    color: '#334155'
+                                  }}
+                                >
+                                  适用于字段变更或使用场景差异较大等场景
+                                </div>
+                              </div>
+                            </Menu.Item>
+                            <Menu.Item key="2" style={{ height: 'auto' }}>
+                              <div style={{ padding: '7px 12px' }}>
+                                <div
+                                  style={{
+                                    fontSize: '14px',
+                                    fontWeight: 600,
+                                    lineHeight: '22px',
+                                    color: '#0F172A',
+                                    marginBottom: '4px'
+                                  }}
+                                >
+                                  保存为新版本
+                                </div>
+                                <div
+                                  style={{
+                                    fontSize: '12px',
+                                    lineHeight: '18px',
+                                    color: '#334155'
+                                  }}
+                                >
+                                  已存在数据集且字段不变
+                                </div>
+                              </div>
+                            </Menu.Item>
+                          </Menu>
+                        }
                       >
-                        保存到数据集
-                      </Button>
-                    </Dropdown>
+                        <Button
+                          type="outline"
+                          size="mini"
+                          icon={<SaveToDasetIcon />}
+                          style={{
+                            fontSize: '14px',
+                            color: '#1E293B',
+                            fontWeight: 600
+                          }}
+                          disabled={runStatus !== RunningStatus.SUCCESS}
+                        >
+                          保存到数据集
+                        </Button>
+                      </Dropdown>
+                    </PermissionWrapper>
                   </div>
                 )}
               </div>
@@ -483,7 +511,7 @@ const RunningInfoPanel: React.FC<RunningInfoPanelProps> = memo(
                   </div>
                 </TabPane>
                 <TabPane key="log" title="日志">
-                  <div className={styles['runlog-content']}>
+                  <div ref={logContentRef} className={styles['runlog-content']}>
                     {(() => {
                       // 如果有日志内容，直接显示
                       if (runLog && runLog.trim() !== '') {

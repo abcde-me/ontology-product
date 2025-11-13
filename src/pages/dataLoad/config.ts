@@ -1,8 +1,9 @@
 export enum RunState {
   SUCCEED = 'SUCCESS',
-  FAILED = 'FAILURE',
+  FAILURE = 'FAILURE',
   RUNNING = 'RUNNING_EXECUTION',
-  STOPPED = 'STOP'
+  STOPPED = 'STOP',
+  FAILED = 'FAILED'
 }
 
 export const RunStateType = {
@@ -11,7 +12,7 @@ export const RunStateType = {
     value: 'SUCCESS',
     color: '#10B981'
   },
-  [RunState.FAILED]: {
+  [RunState.FAILURE]: {
     text: '运行失败',
     value: 'FAILURE',
     color: '#EF4444'
@@ -25,6 +26,11 @@ export const RunStateType = {
     text: '运行停止',
     value: 'STOP',
     color: '#94A3B8'
+  },
+  [RunState.FAILED]: {
+    text: '运行失败',
+    value: 'FAILED',
+    color: '#EF4444'
   }
 };
 export enum Load {
@@ -68,10 +74,10 @@ export const TYPE_CONFIG = {
 export const DATABASE_TYPE_ENUM = [
   {
     label: 'MySQL',
-    value: 'mysql'
+    value: 'MySQL'
   },
   {
     label: 'PostgreSQL',
-    value: 'postgresql'
+    value: 'PostgreSQL'
   }
 ];

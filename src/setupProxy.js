@@ -25,7 +25,7 @@ const addProxy = (options) => {
 };
 const targets = {
   test: 'http://110.154.34.22:38883',
-  dev: 'http://10.252.216.16:9040',
+  dev: 'http://10.252.216.16:9030',
   qa: 'http://10.252.216.13:9040',
   prod: 'http://10.252.216.19:9040'
 };
@@ -61,6 +61,19 @@ module.exports = function (app) {
 
           return req.baseUrl + req.url;
         }
+      })
+    );
+    app.use(
+      ['/api/aiap/v1'],
+      createProxyMiddleware({
+        // target: 'http://10.1.4.73:30890/api/aiap/v1',
+        target: 'http://61.182.98.8:38049/api/aiap/v1',
+        changeOrigin: true,
+        secure: false
+        // logger: console,
+        // pathRewrite: {
+        //   '^/api/appforge/v1': ''
+        // }
       })
     );
     app.use(

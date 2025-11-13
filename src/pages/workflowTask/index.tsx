@@ -13,6 +13,8 @@ import noDataElement from '@/components/no-data';
 import { useUserInfo } from '@/store/userInfoStore';
 import { getTaskList } from '@/api/taskList';
 import { SorterInfo } from '@arco-design/web-react/es/Table/interface';
+import { PermissionWrapper } from '@/components/PermissionGuard';
+import { WORKFLOW_TASK_PERMISSIONS } from '@/config/permissions';
 import styles from './index.module.scss';
 
 const InputSearch = Input.Search;
@@ -114,6 +116,10 @@ export default function WorkflowTask() {
     history.push(
       `/tenant/compute/modaforge/dataCatalog?root_type=${root_type}&id=${id}&parent_id=${parent_id}`
     );
+  };
+  // 跳转目标数据 - 数据集详情
+  const handleToTargetDatasetDetail = (id: string) => {
+    history.push(`/tenant/compute/modaforge/datasetManagement/detail/${id}`);
   };
 
   // 筛选排序操作
@@ -272,7 +278,7 @@ export default function WorkflowTask() {
       )
     },
     {
-      title: '源数据目录',
+      title: '起点',
       dataIndex: 'source_path',
       width: 200,
       ellipsis: true,
@@ -293,7 +299,7 @@ export default function WorkflowTask() {
       )
     },
     {
-      title: '目标数据目录',
+      title: '终点',
       dataIndex: 'target_path',
       width: 200,
       ellipsis: true,
@@ -303,13 +309,7 @@ export default function WorkflowTask() {
           value={renderEmptyPlaceholder(record.target_path)}
           isEdit={false}
           isLink
-          handleLink={() =>
-            handleToDirectoryPath(
-              record.target_path_id,
-              record.target_parent_id,
-              2
-            )
-          }
+          handleLink={() => handleToTargetDatasetDetail(record.id)}
         />
       )
     },
@@ -337,19 +337,21 @@ export default function WorkflowTask() {
       width: 85,
       fixed: 'right',
       render: (_, record) => (
-        <span
-          className={styles['operate-text']}
-          onClick={() =>
-            handleToTaskDeatil(
-              record?.id ?? '',
-              record?.workflow_uuid ?? '',
-              record?.ds_workflow_id ?? '',
-              record?.workflow_version ?? ''
-            )
-          }
-        >
-          详情
-        </span>
+        <PermissionWrapper permission={WORKFLOW_TASK_PERMISSIONS.CAN_UPDATE}>
+          <span
+            className={styles['operate-text']}
+            onClick={() =>
+              handleToTaskDeatil(
+                record?.id ?? '',
+                record?.workflow_uuid ?? '',
+                record?.ds_workflow_id ?? '',
+                record?.workflow_version ?? ''
+              )
+            }
+          >
+            详情
+          </span>
+        </PermissionWrapper>
       )
     }
   ];
