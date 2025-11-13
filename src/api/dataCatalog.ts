@@ -1010,14 +1010,5 @@ export async function addMetaData(params: {
     id: number;
   }>
 > {
-  return Promise.resolve({
-    code: '0',
-    message: 'success',
-    requestId: '123',
-    status: 200,
-    data: {
-      id: 1
-    }
-  });
-  // return await UAPI.RES.createDirMetaData({}).post(params).inRegion().do();
+  return await UAPI.RES.createDirMetaData({}).post(params).inRegion().do();
 }
