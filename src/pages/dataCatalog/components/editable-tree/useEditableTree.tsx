@@ -410,7 +410,7 @@ export function useEditableTree({ catalogTreeStore }) {
 
           break;
 
-        case CatalogTypeEnum.meta_data:
+        case CatalogTypeEnum.metadata:
           // 新建元数据
           res = await addMetaData({
             name: fileName,

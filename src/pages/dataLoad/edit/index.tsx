@@ -1004,7 +1004,7 @@ const Edit = (props) => {
         </FormItem>
         {/* SQL处理选项 - 仅在数据库类型且目录节点为元数据时显示 */}
         {props.detailData?.source_type === 'db' &&
-          selectedNodeType === 'meta_data' && (
+          selectedNodeType === 'metadata' && (
             <>
               <FormItem
                 label="SQL处理："
@@ -1085,7 +1085,7 @@ const Edit = (props) => {
             >
               <Select
                 mode={
-                  selectedNodeType === 'meta_data'
+                  selectedNodeType === 'metadata'
                     ? undefined
                     : ('multiple' as const)
                 }
@@ -1096,7 +1096,7 @@ const Edit = (props) => {
                 allowCreate
                 disabled={true}
               >
-                {talbleList.length > 0 && selectedNodeType !== 'meta_data' && (
+                {talbleList.length > 0 && selectedNodeType !== 'metadata' && (
                   <Option value="all">全部</Option>
                 )}
                 {talbleList?.map((option) => (

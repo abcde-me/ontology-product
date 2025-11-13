@@ -634,7 +634,7 @@ export default function DataAssetList() {
         Ids: selectedRowKeys,
         tags: tags.map((tag) => ({ id: tag.value, value: tag.label }))
       });
-      if (res.code === 0 && res.status === 200) {
+      if (res.code === '' && res.status === 200) {
         Message.success('标签修改成功');
         setModifyTagsModalVisible(false);
         setSelectedRowKeys([]);

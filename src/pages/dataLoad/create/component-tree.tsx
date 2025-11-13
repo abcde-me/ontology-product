@@ -46,8 +46,8 @@ interface TreeNodeData {
     | 'db_parent'
     | 'datasource_parent'
     | 'datasource_item'
-    | 'meta_data_parent'
-    | 'meta_data';
+    | 'metadata_parent'
+    | 'metadata';
   type?: number;
   level?: number;
   isExpanded?: boolean;
@@ -189,7 +189,7 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
                 (child) =>
                   child.name === '元数据' ||
                   child.title === '元数据' ||
-                  child.type_name === 'meta_data_parent'
+                  child.type_name === 'metadata_parent'
               );
             }
           }
@@ -201,8 +201,8 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
                 metaDataChildren = item.children
                   .filter(
                     (child) =>
-                      child.type_name === 'meta_data' ||
-                      child.type === CatalogTypeEnum.meta_data
+                      child.type_name === 'metadata' ||
+                      child.type === CatalogTypeEnum.metadata
                   )
                   .map((metaItem) => ({
                     id: metaItem.id,
@@ -211,7 +211,7 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
                     value: String(metaItem.id),
                     label: metaItem.name || `未命名_${metaItem.id}`,
                     title: metaItem.name || `未命名_${metaItem.id}`,
-                    type_name: 'meta_data' as const,
+                    type_name: 'metadata' as const,
                     level: (item.level || 0) + 2,
                     isExpanded: false,
                     hasChildren: false,
@@ -221,9 +221,9 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
                   }));
               } else if (
                 typeof item.children === 'object' &&
-                (item.children as any).meta_data
+                (item.children as any).metadata
               ) {
-                const metaArray = (item.children as any).meta_data;
+                const metaArray = (item.children as any).metadata;
                 if (Array.isArray(metaArray)) {
                   metaDataChildren = metaArray.map((metaItem: any) => ({
                     id: metaItem.id,
@@ -232,7 +232,7 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
                     value: String(metaItem.id),
                     label: metaItem.name || `未命名_${metaItem.id}`,
                     title: metaItem.name || `未命名_${metaItem.id}`,
-                    type_name: 'meta_data' as const,
+                    type_name: 'metadata' as const,
                     level: (item.level || 0) + 2,
                     isExpanded: false,
                     hasChildren: false,
@@ -245,7 +245,7 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
             }
 
             if (metaDataChildren.length > 0) {
-              const metaNodeKey = `${item.id}-meta_data`;
+              const metaNodeKey = `${item.id}-metadata`;
               const metaNode: TreeNodeData = {
                 id: metaNodeKey,
                 key: metaNodeKey,
@@ -253,7 +253,7 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
                 value: metaNodeKey,
                 label: '元数据',
                 title: '元数据',
-                type_name: 'meta_data_parent',
+                type_name: 'metadata_parent',
                 level: (item.level || 0) + 1,
                 isExpanded: false,
                 hasChildren: true,
@@ -580,7 +580,7 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
       nodeData?.type_name === 'catalog' ||
       nodeData?.type_name === 'db_parent' ||
       nodeData?.type_name === 'datasource_parent' ||
-      nodeData?.type_name === 'meta_data_parent'
+      nodeData?.type_name === 'metadata_parent'
     ) {
       console.log('数据库节点或数据卷节点或目录节点不可选中');
       return; // 阻止选中数据库节点和数据卷节点或目录节点
@@ -951,7 +951,7 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
       dataRef?.type_name === 'volume' ||
       dataRef?.type_name === 'volume_item' ||
       dataRef?.type_name === 'datasource_item' ||
-      dataRef?.type_name === 'meta_data'
+      dataRef?.type_name === 'metadata'
     ) {
       console.log(
         'Hiding switcher: type_name = db, db_item, volume, volume_item, or datasource_item'

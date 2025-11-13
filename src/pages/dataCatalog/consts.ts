@@ -16,7 +16,7 @@ export enum CatalogTypeEnum {
   db = 3,
   db_item = 4,
   table = 5,
-  meta_data = 6
+  metadata = 6
 }
 
 export enum RootTypeEnum {
