@@ -532,7 +532,7 @@ const DatasetForm = React.forwardRef<
               ? values.targetDataSource
               : values.connector, //数据目录卷用targetDataSource，连接器用connector
           path_file_ids: fileIds,
-          file_type: filesType
+          data_type: filesType
         };
         // setIscreateTagDisabled(true);
 

@@ -943,7 +943,7 @@ const DatasetManagement: React.FC = () => {
               connector_file_ids: formData?.selectedFiles || []
             },
       scene_type: formData.sceneType,
-      file_type: formData.file_type
+      data_type: formData.data_type
     };
 
     console.log('提交数据:', submitData);
