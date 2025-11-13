@@ -353,7 +353,7 @@ const Edit = (props) => {
   const [dropdownVisible, setDropdownVisible] = useState(false);
   // SQL处理相关状态
   const [sqlContent, setSqlContent] = useState<string>(
-    props.detailData?.sql_process || ''
+    props.detailData?.sql || ''
   );
   const [checkStatus, setCheckStatus] = useState<CheckSQLStatus>(
     CheckSQLStatus.NONE
@@ -671,7 +671,7 @@ const Edit = (props) => {
   const handleSqlContentChange = useCallback(
     (value: string) => {
       setSqlContent(value);
-      form.setFieldsValue({ sql_process: value });
+      form.setFieldsValue({ sql: value });
       // 当SQL内容变化时，重置校验状态
       setCheckStatus((prevStatus) => {
         if (prevStatus !== CheckSQLStatus.NONE) {
@@ -783,9 +783,9 @@ const Edit = (props) => {
 
         if (sqlProcessEnabled === 'enable') {
           const sqlToCheck = (
-            rest.sql_process ??
+            rest.sql ??
             sqlContent ??
-            props.detailData?.sql_process ??
+            props.detailData?.sql ??
             ''
           ).trim();
           const currentConnectorId =
@@ -852,10 +852,10 @@ const Edit = (props) => {
           rest.sql_process_enabled || form.getFieldValue('sql_process_enabled');
         if (sqlProcessEnabled === 'enable') {
           baseFormData.sql_process_enabled = 'enable';
-          baseFormData.sql_process = rest.sql_process || sqlContent || '';
+          baseFormData.sql = rest.sql || sqlContent || '';
         } else {
           baseFormData.sql_process_enabled = 'disable';
-          baseFormData.sql_process = '';
+          baseFormData.sql = '';
         }
       }
 
@@ -1085,7 +1085,7 @@ const Edit = (props) => {
               </FormItem>
 
               {sqlProcessEnabled === 'enable' && (
-                <FormItem label=" " field="sql_process">
+                <FormItem label=" " field="sql">
                   <div
                     className={classNames(
                       styles['sql-editor-container'],
