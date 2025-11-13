@@ -11,6 +11,7 @@ import {
 import { useDataCatalog } from '../DataCatalogProvider/Context';
 import SearchArea, { SearchField } from './MetaDataSearchArea';
 import noDataElement from '@/components/no-data';
+import dayjs from 'dayjs';
 
 export default function MetaData() {
   const dataCatalog = useDataCatalog();
@@ -121,6 +122,10 @@ export default function MetaData() {
       key: field.nameEn,
       ellipsis: true,
       render: (value: any) => {
+        if (field.type === 'datetime') {
+          return value ? dayjs(value).format('YYYY-MM-DD HH:mm:ss') : '-';
+        }
+
         // 如果值是数组，转换为字符串显示
         if (Array.isArray(value)) {
           return value.join(', ');
