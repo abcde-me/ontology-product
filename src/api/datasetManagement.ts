@@ -18,6 +18,7 @@ interface DatasetListParams {
   status?: string[];
   sort_field?: string;
   sort_order?: string;
+  scene_ids?: string[];
 }
 
 interface CreateDatasetParams {
@@ -109,7 +110,8 @@ export async function getDatasetList(params: DatasetListParams = {}) {
     storage_type,
     status,
     sort_field,
-    sort_order
+    sort_order,
+    scene_ids
   } = params;
   const queryParams: Record<string, any> = {
     page,
@@ -117,6 +119,9 @@ export async function getDatasetList(params: DatasetListParams = {}) {
   };
   if (search_field && search) {
     queryParams[search_field] = search;
+  }
+  if (scene_ids && scene_ids.length > 0) {
+    queryParams.scene_ids = scene_ids;
   }
   if (tag_names && tag_names.length > 0) {
     queryParams.tags = tag_names; // 直接赋值数组

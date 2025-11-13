@@ -106,9 +106,7 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
     let newTreeData: any[] = [];
     try {
       setTreeLoading(true);
-      getCatalogList({
-        root_type: 1
-      }).then((res) => {
+      getCatalogList({}).then((res) => {
         setTreeLoading(false);
         if (res.status !== 200) {
           return;

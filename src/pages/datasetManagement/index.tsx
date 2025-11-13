@@ -42,7 +42,8 @@ import {
   deleteDataset,
   batchDeleteDataset,
   datasetVersionRebuild,
-  getTagList
+  getTagList,
+  getDatasetSceneList
 } from '@/api/datasetManagement';
 import EllipsisPopover from '../../components/ellipsis-popover-com';
 import DatasetForm from '@/components/datasetform/AddDatasetForm';
@@ -87,7 +88,7 @@ const formatDateTime = (dateTimeString: string): string => {
 
 // 数据集类型
 export interface Dataset {
-  latest_size: number;
+  size: number;
   id: number;
   name: string;
   description: string;
@@ -110,6 +111,14 @@ export interface Dataset {
     | 'normal'
     | 'version_updating'
     | 'version_update_failed';
+}
+
+export interface SceneType {
+  name: string;
+  id: number;
+  description: string;
+  dataset_count: number;
+  tags: Array<string>;
 }
 
 // 状态显示配置
@@ -151,6 +160,7 @@ const columns = (
   datasetList: Dataset[],
   handleExport: (record: Dataset) => void,
   tagList: { id: number; name: string }[],
+  datasetSceneOption: Array<SceneType>,
   selectedTagFilters: string[],
   selectedStorageTypeFilters: string[], //存储格式过滤
   selectedStatusFilters: string[], //状态过滤
@@ -158,7 +168,8 @@ const columns = (
   sortOrder: string,
   handleTableChange: (pagination: any, sorter: any, filters: any) => void,
   handleRetry: (id: string | number, version_id: string) => void,
-  selectedScenarioFilters?: string[], //场景分类过滤
+  setMoveDatasetVisible: (visible: boolean) => void,
+  selectedSceneFilters?: string[], //场景分类过滤
   selectedSourceFilters?: string[] //来源过滤
 ) => [
   {
@@ -216,14 +227,17 @@ const columns = (
   },
   {
     title: '场景分类',
-    dataIndex: 'scenario_type',
+    dataIndex: 'scene',
     width: 120,
-    filters: tagList.map((tag) => ({ text: tag.name, value: tag.name })),
-    filteredValue: selectedScenarioFilters,
+    filters: datasetSceneOption.map((scene) => ({
+      text: scene.name,
+      value: scene.id
+    })),
+    filteredValue: selectedSceneFilters,
     filterMultiple: true,
-    render: (src_model: string) => {
-      if (!src_model) return '-';
-      return src_model;
+    render: (scene: string) => {
+      if (!scene) return '-';
+      return scene;
     }
   },
   {
@@ -327,7 +341,7 @@ const columns = (
   },
   {
     title: '来源',
-    dataIndex: 'source',
+    dataIndex: 'sources',
     width: 120,
     filterIcon: <IconFilter />,
     filters: [
@@ -339,9 +353,9 @@ const columns = (
   },
   {
     title: '文件大小',
-    dataIndex: 'latest_size',
+    dataIndex: 'size',
     width: 120,
-    render: (_, record: Dataset) => formatFileSize(record.latest_size || 0)
+    render: (_, record: Dataset) => formatFileSize(record.size || 0)
   },
   {
     title: '状态',
@@ -487,11 +501,11 @@ const columns = (
   // },
   {
     title: '数据目录',
-    dataIndex: 'directory',
+    dataIndex: 'file_path',
     width: 200,
-    render: (directory: string) => {
-      if (!directory) return '-';
-      return <EllipsisPopover value={directory}></EllipsisPopover>;
+    render: (file_path: string) => {
+      if (!file_path) return '-';
+      return <EllipsisPopover value={file_path}></EllipsisPopover>;
     }
   },
   {
@@ -578,7 +592,9 @@ const columns = (
           >
             详情
           </Button>
-          <Button type="text">移动</Button>
+          <Button type="text" onClick={() => setMoveDatasetVisible(true)}>
+            移动
+          </Button>
 
           <Dropdown
             droplist={
@@ -675,6 +691,7 @@ const DatasetManagement: React.FC = () => {
   const history = useHistory();
   const TabPane = Tabs.TabPane;
   const [sceneTypeForm] = Form.useForm();
+  const [moveDatasetForm] = Form.useForm();
   const [tagList, setTagList] = React.useState<{ id: number; name: string }[]>(
     []
   ); //标签列表
@@ -707,6 +724,11 @@ const DatasetManagement: React.FC = () => {
     string[]
   >([]); //选中的状态过滤
 
+  // 场景分类过滤相关状态
+  const [selectedSceneFilters, setSelectedSceneFilters] = React.useState<
+    (number | string)[]
+  >([]); //选中的状态过滤
+
   // 排序相关状态
   const [sortField, setSortField] = React.useState<string>(''); // 排序字段：created_at 或 updated_at
   const [sortOrder, setSortOrder] = React.useState<string>(''); // 排序方向：asc 或 desc
@@ -715,6 +737,8 @@ const DatasetManagement: React.FC = () => {
     React.useState<boolean>(false);
   const [tabData, setTabData] = React.useState<string[]>([]);
   const [addSceneTypeVisible, setAddSceneTypeVisible] =
+    React.useState<boolean>(false);
+  const [moveDatasetVisible, setMoveDatasetVisible] =
     React.useState<boolean>(false);
 
   const childRef = useRef<{
@@ -737,6 +761,12 @@ const DatasetManagement: React.FC = () => {
   const lastScrollTop = React.useRef(0);
   const stickyRef = React.useRef<{ current: { offsetTop: number } }>(null);
   const [isSticky, setIsSticky] = useState(false);
+  const [datasetSceneList, setDatasetSceneList] = React.useState<
+    Array<SceneType>
+  >([]); //数据集场景分类列表
+  const [datasetSceneOption, setDatasetSceneOption] = React.useState<
+    Array<SceneType>
+  >([]);
 
   useEffect(() => {
     const container = document.querySelector('.layout-detail');
@@ -848,6 +878,11 @@ const DatasetManagement: React.FC = () => {
     setAddSceneTypeVisible(false);
   };
 
+  // 移动数据集提交
+  const handleMoveDatasetSubmit = (values: any) => {
+    console.log('移动数据集:', values);
+    setMoveDatasetVisible(false);
+  };
   // 行选择配置
   const rowSelection = {
     selectedRowKeys,
@@ -1057,6 +1092,11 @@ const DatasetManagement: React.FC = () => {
       search_field: actualSearchField
     };
 
+    // 添加场景分类过滤参数
+    if (selectedSceneFilters.length > 0) {
+      params.scene_ids = selectedSceneFilters;
+    }
+
     // 添加标签过滤参数
     if (selectedTagFilters.length > 0) {
       params.tag_names = selectedTagFilters;
@@ -1100,6 +1140,7 @@ const DatasetManagement: React.FC = () => {
     actualSearch,
     actualSearchField,
     selectedTagFilters,
+    selectedSceneFilters,
     selectedStatusFilters,
     selectedStorageTypeFilters,
     sortField,
@@ -1114,6 +1155,11 @@ const DatasetManagement: React.FC = () => {
 
   // 2. 修改handleTableChange函数（在第854行左右）
   const handleTableChange = (pagination: any, sorter: any, filters: any) => {
+    // 处理场景分类过滤
+    if (filters.scene && filters.scene !== selectedSceneFilters) {
+      setSelectedSceneFilters(filters.scene);
+      setCurrentPage(1);
+    }
     // 处理标签过滤
     if (filters.tag_names && filters.tag_names !== selectedTagFilters) {
       setSelectedTagFilters(filters.tag_names);
@@ -1137,6 +1183,11 @@ const DatasetManagement: React.FC = () => {
     if (filters.src_model && filters.src_model !== selectedSrcModelFilters) {
       setSelectedSrcModelFilters(filters.src_model);
       setCurrentPage(1); // 重置到第一页
+    }
+
+    if (filters.scene === undefined) {
+      setSelectedSceneFilters([]);
+      setCurrentPage(1);
     }
 
     // 添加清除生成模型过滤的逻辑
@@ -1205,7 +1256,31 @@ const DatasetManagement: React.FC = () => {
         setTagList([]);
         Message.error('获取标签列表失败');
       });
+    getSceneList();
   }, []);
+
+  // 获取场景分类
+  const getSceneList = () => {
+    getDatasetSceneList().then((res) => {
+      if (res.data && res.code === '') {
+        let total = 0;
+        res.data.map((item) => {
+          total = total + item?.dataset_count;
+        });
+        const allSceneTab = {
+          name: '全部',
+          id: 0,
+          dataset_count: total
+        };
+        const newSceneList = [allSceneTab, ...res.data];
+        setDatasetSceneList(newSceneList);
+        setDatasetSceneOption(res.data);
+      } else {
+        console.error('数据集场景分类列表数据格式错误:', res);
+        setDatasetSceneList([]);
+      }
+    });
+  };
 
   // 批量删除
   const handleBatchDelete = () => {
@@ -1408,18 +1483,28 @@ const DatasetManagement: React.FC = () => {
           ))}
         </div>
       )}
+      {/* 注释内容为新建按钮 */}
       <Tabs
-        editable
-        defaultActiveTab="all"
+        // editable
+        defaultActiveTab="0"
         style={{ zIndex: 1 }}
         type="card"
-        onAddTab={() => setAddSceneTypeVisible(true)}
+        // onAddTab={() => setAddSceneTypeVisible(true)}
         ref={stickyRef}
+        onChange={(value) => {
+          const selectValue = value === '0' ? [] : [Number(value)];
+          setSelectedSceneFilters(selectValue);
+          setCurrentPage(1);
+        }}
       >
-        {datasetTabData.map((item, index) => (
-          <TabPane key={item.key} title={item.title} closable={false}>
+        {datasetSceneList.map((item, index) => (
+          <TabPane
+            key={item.id}
+            title={item.name + '(' + item.dataset_count + ')'}
+            closable={false}
+          >
             <Typography.Paragraph>
-              {item.key !== 'all' && (
+              {item.id !== 0 && (
                 <div
                   style={{
                     display: 'flex',
@@ -1430,7 +1515,7 @@ const DatasetManagement: React.FC = () => {
                     marginTop: '20px'
                   }}
                 >
-                  <span>{item.desc}</span>
+                  <span>{item.description}</span>
                   <span style={{ marginTop: '8px' }}>
                     <IconTag style={{ marginRight: '5px' }} />
                     {item.tags.map((tag, index) => (
@@ -1528,20 +1613,23 @@ const DatasetManagement: React.FC = () => {
                 className={styles.datasetTable}
                 // rowHeight="47px"
                 columns={
-                  item.key === 'all'
+                  item.id === 0
                     ? columns(
                         handleGoToDetail,
                         handleDelete,
                         datasetList,
                         handleExport,
                         tagList,
+                        datasetSceneOption,
                         selectedTagFilters,
                         selectedStorageTypeFilters,
                         selectedStatusFilters,
                         sortField,
                         sortOrder,
                         handleTableChange,
-                        handleRetry
+                        handleRetry,
+                        setMoveDatasetVisible,
+                        selectedSceneFilters as string[]
                       )
                     : columns(
                         handleGoToDetail,
@@ -1549,14 +1637,17 @@ const DatasetManagement: React.FC = () => {
                         datasetList,
                         handleExport,
                         tagList,
+                        datasetSceneOption,
                         selectedTagFilters,
                         selectedStorageTypeFilters,
                         selectedStatusFilters,
                         sortField,
                         sortOrder,
                         handleTableChange,
-                        handleRetry
-                      ).filter((i) => i.dataIndex !== 'scenario_type')
+                        handleRetry,
+                        setMoveDatasetVisible,
+                        selectedSceneFilters as string[]
+                      ).filter((i) => i.dataIndex !== 'scene')
                 }
                 data={datasetList}
                 rowSelection={rowSelection}
@@ -1624,6 +1715,35 @@ const DatasetManagement: React.FC = () => {
           </Form.Item>
           <Form.Item label="描述说明：" field="sceneTypeDesc">
             <Input.TextArea placeholder="可以描述数据集的用途、特点或其他相关信息" />
+          </Form.Item>
+        </Form>
+      </Modal>
+
+      {/* 移动数据集弹窗 */}
+      <Modal
+        className={styles.addSceneTypeModal}
+        visible={moveDatasetVisible}
+        onOk={() => moveDatasetForm.submit()}
+        onCancel={() => setMoveDatasetVisible(false)}
+        title="移动设置"
+      >
+        <Form form={moveDatasetForm} onSubmit={handleMoveDatasetSubmit}>
+          <Form.Item label="移动至" field="scene_id">
+            <Select placeholder="请选择标签">
+              {datasetSceneOption.map((item) => (
+                <Select.Option key={item.id} value={item.id}>
+                  <div className="flex flex-col">
+                    <div className="text-[14px] leading-[22px]">
+                      {item.name}
+                    </div>
+                    <EllipsisPopover
+                      className="text-[14px] leading-[22px] text-[#6E7B8D]"
+                      value={item.description}
+                    />
+                  </div>
+                </Select.Option>
+              ))}
+            </Select>
           </Form.Item>
         </Form>
       </Modal>

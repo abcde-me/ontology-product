@@ -113,7 +113,6 @@ export class CatalogTreeStore extends Model<CatalogTreeState, Effects> {
     const activeKey = props?.activeKey || activeTab;
 
     const res = await getCatalogList({
-      root_type: RootTypeEnum[activeKey],
       search: props?.searchValue
     });
 
