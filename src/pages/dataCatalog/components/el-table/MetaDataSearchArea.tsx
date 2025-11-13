@@ -15,7 +15,7 @@ export interface SearchField {
   /** 字段显示名称 */
   label: string;
   /** 字段类型: 'input' | 'select' | 'daterange' */
-  type: 'input' | 'select' | 'daterange';
+  type: string;
   /** 下拉框选项（type为select时必填） */
   options?: Array<{ label: string; value: any }>;
   /** 字段对应的搜索参数key */
@@ -204,8 +204,15 @@ export default function SearchArea({
   // 渲染字段搜索输入组件
   const renderFieldInput = (field: SearchField) => {
     const value = fieldValues[field.key];
+    let fieldType = field.type;
 
-    switch (field.type) {
+    if (field.type === 'daterange') {
+      fieldType = 'range';
+    } else {
+      fieldType = 'input';
+    }
+
+    switch (fieldType) {
       case 'input':
         return (
           <Input

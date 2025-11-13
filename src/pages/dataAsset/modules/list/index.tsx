@@ -51,6 +51,7 @@ import ColumnSettingModal from '../../components/ColumnSettingModal';
 import styles from './list.module.scss';
 import classNames from 'classnames';
 import { FieldSearchItem } from '@/api/dataCatalog';
+import dayjs from 'dayjs';
 
 interface TagValue {
   tagId: string;
@@ -223,7 +224,15 @@ export default function DataAssetList() {
               dataIndex: field.nameEn,
               key: field.nameEn,
               width: 150,
-              ellipsis: true
+              ellipsis: true,
+              render: (value: any) => {
+                if (field.type === 'datetime') {
+                  return value
+                    ? dayjs(value).format('YYYY-MM-DD HH:mm:ss')
+                    : '-';
+                }
+                return value ?? '-';
+              }
             };
           }),
         {

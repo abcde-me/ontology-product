@@ -256,6 +256,7 @@ export async function reTryLoad(params: reTryLoadParams) {
 //载入时获取表名
 interface getTableNameParams {
   connector_id: string;
+  generate_type: 'db' | 'metadata';
 }
 export async function getTableName(params: getTableNameParams) {
   return await UAPI.RES.getTableNameApi({}).post(params).inRegion().do();

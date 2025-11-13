@@ -1,10 +1,17 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Table, Pagination, Button, Space } from '@arco-design/web-react';
 import { IconRefresh } from '@arco-design/web-react/icon';
-import { getMetaDataList, Field, FieldSearchItem } from '@/api/dataCatalog';
+import { useRequest } from 'ahooks';
+import {
+  getMetaDataList,
+  Field,
+  FieldSearchItem,
+  LoadTaskStatus
+} from '@/api/dataCatalog';
 import { useDataCatalog } from '../DataCatalogProvider/Context';
 import SearchArea, { SearchField } from './MetaDataSearchArea';
 import noDataElement from '@/components/no-data';
+import dayjs from 'dayjs';
 
 export default function MetaData() {
   const dataCatalog = useDataCatalog();
@@ -24,6 +31,46 @@ export default function MetaData() {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [fieldSearch, setFieldSearch] = useState<FieldSearchItem[]>([]);
+
+  // 轮询获取元数据列表
+  const { runAsync: pollMetaDataList, cancel: cancelPolling } = useRequest(
+    async () => {
+      if (!selectedKey) return;
+
+      const res = await getMetaDataList({
+        page: currentPage,
+        pageSize: pageSize,
+        fieldSearch: fieldSearch,
+        queryLoadTaskInstance: true,
+        path_id: selectedParentId ? Number(selectedParentId) : 0,
+        db_name: (extendsObj?.db_name as string) || '',
+        table_name: (extendsObj?.table_name as string) || ''
+      });
+
+      if (res.code === '' && res.status === 200) {
+        const data = res.data || {};
+        setTableData(data.records || []);
+        setSearchFields(data.fields || []);
+        setTotal(data.total || 0);
+
+        return data.loadTaskStatus;
+      }
+      return null;
+    },
+    {
+      pollingInterval: 5000,
+      pollingWhenHidden: false,
+      manual: true,
+      onSuccess: (loadTaskStatus) => {
+        if (loadTaskStatus === LoadTaskStatus.COMPLETED) {
+          cancelPolling();
+        }
+      },
+      onError: () => {
+        cancelPolling();
+      }
+    }
+  );
 
   // 获取列表数据
   const loadData = async () => {
@@ -60,6 +107,13 @@ export default function MetaData() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentPage, pageSize, selectedKey, selectedParentId, fieldSearch]);
 
+  // 组件卸载时取消轮询
+  useEffect(() => {
+    return () => {
+      cancelPolling();
+    };
+  }, [cancelPolling]);
+
   // 动态构建表格列
   const columns = useMemo(() => {
     return searchFields.map((field: Field) => ({
@@ -68,6 +122,10 @@ export default function MetaData() {
       key: field.nameEn,
       ellipsis: true,
       render: (value: any) => {
+        if (field.type === 'datetime') {
+          return value ? dayjs(value).format('YYYY-MM-DD HH:mm:ss') : '-';
+        }
+
         // 如果值是数组，转换为字符串显示
         if (Array.isArray(value)) {
           return value.join(', ');
@@ -91,10 +149,13 @@ export default function MetaData() {
     setCurrentPage(1);
   };
 
-  // 处理刷新（先不写逻辑）
+  // 处理刷新
   const handleRefresh = () => {
-    // TODO: 刷新逻辑
-    console.log('刷新');
+    // 如果已有轮询在进行，先取消
+    cancelPolling();
+
+    // 启动新的轮询
+    pollMetaDataList();
   };
 
   // 处理字段搜索
