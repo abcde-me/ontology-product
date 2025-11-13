@@ -1011,6 +1011,14 @@ export async function getMetaDataList(
   return await UAPI.RES.listMetaData({}).post(params).inRegion().do();
 }
 
+export async function refreshMetaDataList(params: {
+  path_id: number;
+  db_name: string;
+  table_name: string;
+}) {
+  return await UAPI.RES.refreshMetaDataList({}).post(params).inRegion().do();
+}
+
 //新建元数据
 export async function addMetaData(params: {
   name: string;

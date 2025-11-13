@@ -48,9 +48,10 @@ export default function SearchArea({
   // 设置搜索条件的搜索关键词
   const [settingsSearchKeyword, setSettingsSearchKeyword] = useState('');
 
-  // 初始化：默认勾选所有字段
+  // 初始化：默认勾选前三个字段
   useEffect(() => {
-    const defaultChecked = new Set(fields.map((f) => f.key));
+    const defaultCheckedKeys = fields.slice(0, 3).map((f) => f.key);
+    const defaultChecked = new Set(defaultCheckedKeys);
     setCheckedFields(defaultChecked);
   }, [fields]);
 
@@ -265,7 +266,7 @@ export default function SearchArea({
                 <span className="whitespace-nowrap text-sm text-[var(--color-text-1)]">
                   {field.label}:
                 </span>
-                <div className="w-[200px]">{renderFieldInput(field)}</div>
+                <div className="w-[260px]">{renderFieldInput(field)}</div>
               </div>
             ))}
           </div>
