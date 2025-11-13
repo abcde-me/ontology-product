@@ -333,6 +333,51 @@ export async function fetchRagDetail(
     directory = await fetchCatalog(datasetId, documentId);
 
     sceneType = 'pdf';
+  } else if (documentId === '1004') {
+    // PPT 场景
+    fileName = '2024年度工作总结.pptx';
+    filePath =
+      'https://view.officeapps.live.com/op/embed.aspx?src=https://scholar.harvard.edu/files/torman_personal/files/samplepptx.pptx';
+    sceneType = 'ppt';
+
+    // 使用旧的数据格式获取分段数据
+    const segmentResponse = getSegmentDataByRagId(documentId);
+    segments = segmentResponse.data.data.map(transformSegmentOld);
+
+    // PPT 场景通常没有目录树
+    const treeResponse = getTreeDataByRagId(documentId);
+    if (
+      treeResponse &&
+      treeResponse.data &&
+      treeResponse.data.catalog_content
+    ) {
+      const rootNode = transformCatalogNodeOld(
+        treeResponse.data.catalog_content
+      );
+      directory = [rootNode];
+    }
+  } else if (documentId === '1005') {
+    // Table/Excel 场景
+    fileName = '销售数据统计.xlsx';
+    filePath = '/知识库/数据表格';
+    sceneType = 'excel';
+
+    // 使用旧的数据格式获取分段数据
+    const segmentResponse = getSegmentDataByRagId(documentId);
+    segments = segmentResponse.data.data.map(transformSegmentOld);
+
+    // Table 场景通常没有目录树
+    const treeResponse = getTreeDataByRagId(documentId);
+    if (
+      treeResponse &&
+      treeResponse.data &&
+      treeResponse.data.catalog_content
+    ) {
+      const rootNode = transformCatalogNodeOld(
+        treeResponse.data.catalog_content
+      );
+      directory = [rootNode];
+    }
   } else {
     // 使用旧的数据格式（其他 documentId）
     const segmentResponse = getSegmentDataByRagId(documentId);
@@ -351,18 +396,6 @@ export async function fetchRagDetail(
         treeResponse.data.catalog_content
       );
       directory = [rootNode];
-    }
-
-    // 根据 documentId 设置不同的文件名和场景类型
-    if (documentId === '1004') {
-      fileName = '2024年度工作总结.pptx';
-      filePath =
-        'https://view.officeapps.live.com/op/embed.aspx?src=https://scholar.harvard.edu/files/torman_personal/files/samplepptx.pptx';
-      sceneType = 'ppt';
-    } else if (documentId === '1005') {
-      fileName = '销售数据统计.xlsx';
-      filePath = '/知识库/数据表格';
-      sceneType = 'excel';
     }
   }
 
