@@ -358,7 +358,7 @@ export const useFileManager = (
           name: searchValue,
           mode: 2,
           page: 1,
-          page_size: 20
+          page_size: 1000
         });
         setIsCanCreate(res?.data?.create_perm ?? false);
         return res?.data?.items ?? [];

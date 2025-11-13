@@ -591,7 +591,9 @@ const LoadAddModal = (props: propsType) => {
       });
     }
   };
-
+  const getChunkedFile = (file: any) => {
+    setUploadedFiles(file);
+  };
   return (
     <div style={{ display: 'flex', flexDirection: 'column' }}>
       <Form
@@ -791,6 +793,7 @@ const LoadAddModal = (props: propsType) => {
               onFileChange={handleFileChange}
               onFileDelete={handleFileDelete}
               onUploadingChange={setIsFileUploading}
+              getChunkedFile={getChunkedFile}
             />
           </FormItem>
         )}

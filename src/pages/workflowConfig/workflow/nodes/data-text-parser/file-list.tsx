@@ -104,8 +104,7 @@ function FileList({
       filters: fileTypes
         .join('/')
         .split('/')
-        .map((f) => ({ text: f.toLowerCase(), value: f.toLowerCase() })),
-      onFilter: (value, row) => value.includes(row.file_type)
+        .map((f) => ({ text: f.toLowerCase(), value: f.toLowerCase() }))
     },
     {
       title: '文件大小',
@@ -155,10 +154,11 @@ function FileList({
         // };
         result = await getLoadTaskFiles({
           data_path_id: sourcePath,
-          file_type: formats,
+          file_type: params?.file_type ?? formats,
           file_size: 2 * 1024 * 1024 * 1024 - 1, // 过滤掉2G以上文件
           page_size: pagination.limit,
-          page: params.page
+          page: params.page,
+          sort: params.sort
         });
       } else {
         result = {
@@ -169,7 +169,6 @@ function FileList({
         };
       }
       if (unmountedRef.current) return;
-      // console.log('列表数据:', item);
       const { items = [], total = 0 } = result.data;
       setFilesData(items || []);
       setPagination((prevPagination) => ({
@@ -187,6 +186,7 @@ function FileList({
       console.log('loadFiles', total, files);
       handleFilesChange(files, total - files.length);
     } catch (error) {
+      console.log('获取文件列表失败:', error);
       setFilesData([]);
     } finally {
       if (unmountedRef.current) return;
@@ -197,19 +197,21 @@ function FileList({
   const onChangeTable = (pagination, sorter, filters, extra) => {
     console.log('表格变化:', { pagination, sorter, filters, extra });
 
-    if (extra.action === 'paginate') {
-      setPagination((prev) => ({
-        ...prev,
-        page: pagination.current,
-        limit: pagination.pageSize
-      }));
-      loadFiles({
-        ...pagination,
-        page: pagination.current,
-        limit: pagination.pageSize
-      });
-      return;
-    }
+    // if (extra.action === 'paginate') {
+    setPagination((prev) => ({
+      ...prev,
+      page: pagination.current,
+      limit: pagination.pageSize
+    }));
+    loadFiles({
+      ...pagination,
+      page: pagination.current,
+      limit: pagination.pageSize,
+      sort: sorter?.direction === 'descend' ? 'desc' : 'asc',
+      file_type: filters?.file_type
+    });
+    return;
+    // }
   };
 
   useEffect(() => {
@@ -241,7 +243,6 @@ function FileList({
           };
         },
         onSelect: (selected, record, selectedRows) => {
-          console.log('onSelect:', selected, record, selectedRows);
           if (selected) {
             if (!selectedRowKeys.includes(record.id)) {
               setSelectedRowKeys([...selectedRowKeys, record.id]);

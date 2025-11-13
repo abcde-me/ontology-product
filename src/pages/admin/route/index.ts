@@ -12,7 +12,13 @@ import {
   DATA_CATALOG_PERMISSIONS,
   DATA_MANAGEMENT_PERMISSIONS,
   REQUIREMENT_PERMISSIONS,
-  ANNOTATION_TASK_PERMISSIONS
+  ANNOTATION_TASK_PERMISSIONS,
+  ORGANIZATION_PERMISSIONS,
+  USER_PERMISSIONS,
+  USER_GROUP_PERMISSIONS,
+  ROLE_PERMISSIONS,
+  PROJECT_PERMISSIONS,
+  API_KEY_PERMISSIONS
 } from '@/config/permissions';
 
 export type IRoute = AuthParams & {
@@ -29,6 +35,7 @@ export type IRoute = AuthParams & {
   exact?: boolean;
   // 路由权限标识
   permission?: string | string[];
+  anyPermission?: string[]; // 任一权限
 };
 
 // om 运维、tenant 运营、portal 租户
@@ -115,7 +122,7 @@ export const routes: IRoute[] = [
     name: 'workflowConfig',
     key: '/tenant/compute/modaforge/workflowConfig',
     component: React.lazy(async () => import('../../workflowConfig')),
-    permission: [
+    anyPermission: [
       WORKFLOW_LIST_PERMISSIONS.CAN_CREATE,
       WORKFLOW_LIST_PERMISSIONS.GET
     ],
@@ -302,7 +309,15 @@ export const routes: IRoute[] = [
     key: '/tenant/compute/modaforge/operationCenter',
     component: React.lazy(async () => import('../../operationCenter')),
     // permission: 'organizations:can_view',
-    children: []
+    children: [],
+    anyPermission: [
+      ORGANIZATION_PERMISSIONS.MENU,
+      USER_PERMISSIONS.MENU,
+      USER_GROUP_PERMISSIONS.MENU,
+      ROLE_PERMISSIONS.MENU,
+      PROJECT_PERMISSIONS.MENU,
+      API_KEY_PERMISSIONS.MENU
+    ]
   }
 ];
 

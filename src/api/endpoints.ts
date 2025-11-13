@@ -287,7 +287,7 @@ export const ModaForgeResourceEndpoints = {
   scriptingBenchResult: PrefixAimdp + '/GetWorkFlowScriptResult',
   // 工作流-知识库名称校验
   knowledgeBaseNameCheck:
-    PrefixAimdp + '/query-service/api/knowledge/validKnowledgeName',
+    API_PREFIX + '/query-service/api/v1/validKnowledgeName',
 
   // 作业列表
   taskList: PrefixAimdp + '/ListWorkflowInstances',

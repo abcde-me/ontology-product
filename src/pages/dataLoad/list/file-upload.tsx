@@ -7,12 +7,14 @@ interface UploadsProps {
   onFileChange: (fileData: any, blobURL?: string) => void;
   onFileDelete?: (fileName: string) => void;
   onUploadingChange?: (isUploading: boolean) => void;
+  getChunkedFile?: (file: any) => void;
 }
 
 const Uploads: React.FC<UploadsProps> = ({
   onFileChange,
   onFileDelete,
-  onUploadingChange
+  onUploadingChange,
+  getChunkedFile
 }) => {
   let hasShownFileCountError = false;
   const [fileList, setFileList] = useState<any>([]);
@@ -31,7 +33,9 @@ const Uploads: React.FC<UploadsProps> = ({
     console.log('files', files);
     const prevLength = fileList.length;
     setFileList(files);
-
+    if (getChunkedFile) {
+      getChunkedFile(files);
+    }
     // 检查是否有文件正在上传
     const isUploading = files.some((file: any) => file.status === 'uploading');
     if (onUploadingChange) {
@@ -95,14 +99,14 @@ const Uploads: React.FC<UploadsProps> = ({
     const files = Array.from(e.dataTransfer.files);
 
     // 检查拖拽的文件类型（不显示单个错误信息）
-    // const invalidFiles = files.filter((file: any) => !checkFileType(file));
-    // if (invalidFiles.length > 0) {
-    //   // 只显示一次错误提示
-    //   Message.error(
-    //     '只能上传 .doc,.docx,.ppt,.pptx,.pdf,.jpg,.jpeg,.png,.txt,.md,.wav,.mp3,.aac,.flac,.mp4,.mov,.mkv文件'
-    //   );
-    //   return false;
-    // }
+    const invalidFiles = files.filter((file: any) => !checkFileType(file));
+    if (invalidFiles.length > 0) {
+      // 只显示一次错误提示
+      Message.error(
+        '只能上传 .doc,.docx,.ppt,.pptx,.pdf,.jpg,.jpeg,.png,.txt,.md,.wav,.mp3,.aac,.flac,.mp4,.mov,.mkv文件'
+      );
+      return false;
+    }
   };
 
   const checkFile = (file: any, list: any) => {
@@ -152,15 +156,15 @@ const Uploads: React.FC<UploadsProps> = ({
     }
 
     // 检查文件类型
-    // if (!checkFileType(file)) {
-    //   return false;
-    // }
+    if (!checkFileType(file)) {
+      return false;
+    }
 
-    // // 检查文件大小
-    // if (file.size > 100 * 1024 * 1024) {
-    //   Message.error('单文件大小不能超过100M');
-    //   return false;
-    // }
+    // 检查文件大小
+    if (file.size > 100 * 1024 * 1024) {
+      Message.error('单文件大小不能超过100M');
+      return false;
+    }
     return true;
   };
   return (
@@ -168,10 +172,10 @@ const Uploads: React.FC<UploadsProps> = ({
       drag
       className="upload-file"
       multiple
-      // accept=".doc,.docx,.ppt,.pptx,.pdf,.jpg,.jpeg,.png,.txt,.md,.wav,.mp3,.aac,.flac,.mp4,.mov,.mkv"
-      // beforeUpload={(file, list) => {
-      //   return checkFile(file, list);
-      // }}
+      accept=".doc,.docx,.ppt,.pptx,.pdf,.jpg,.jpeg,.png,.txt,.md,.wav,.mp3,.aac,.flac,.mp4,.mov,.mkv"
+      beforeUpload={(file, list) => {
+        return checkFile(file, list);
+      }}
       action={`${PrefixAimdp}/UploadLoadTaskFile`}
       onChange={handleUploadChange}
       onDrop={handleDrop}

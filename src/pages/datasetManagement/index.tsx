@@ -671,7 +671,6 @@ export enum datasetStatus {
   version_updating = 'version_updating',
   version_update_failed = 'version_update_failed'
 }
-
 const DatasetManagement: React.FC = () => {
   const history = useHistory();
   const TabPane = Tabs.TabPane;
@@ -1108,6 +1107,12 @@ const DatasetManagement: React.FC = () => {
   ]);
 
   // 处理表格变化（包括过滤器变化）
+  // 1. 添加selectedSrcModelFilters状态变量（在第640行左右，其他过滤状态变量附近）
+  const [selectedSrcModelFilters, setSelectedSrcModelFilters] = React.useState<
+    string[]
+  >([]); //选中的生成模型过滤
+
+  // 2. 修改handleTableChange函数（在第854行左右）
   const handleTableChange = (pagination: any, sorter: any, filters: any) => {
     // 处理标签过滤
     if (filters.tag_names && filters.tag_names !== selectedTagFilters) {
@@ -1126,6 +1131,18 @@ const DatasetManagement: React.FC = () => {
     if (filters.status && filters.status !== selectedStatusFilters) {
       setSelectedStatusFilters(filters.status);
       setCurrentPage(1); // 重置到第一页
+    }
+
+    // 添加处理生成模型过滤
+    if (filters.src_model && filters.src_model !== selectedSrcModelFilters) {
+      setSelectedSrcModelFilters(filters.src_model);
+      setCurrentPage(1); // 重置到第一页
+    }
+
+    // 添加清除生成模型过滤的逻辑
+    if (filters.src_model === undefined) {
+      setSelectedSrcModelFilters([]);
+      setCurrentPage(1);
     }
 
     if (filters.tag_names === undefined) {

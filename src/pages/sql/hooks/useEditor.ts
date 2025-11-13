@@ -191,8 +191,8 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
   // 轮询获取运行结果
   const { runAsync: getRunResultPolling, cancel: cancelGetRunResultPolling } =
     useRequest(getRunResultSqlScript, {
-      pollingInterval: 5000,
-      pollingWhenHidden: false,
+      pollingInterval: 2000,
+      pollingWhenHidden: true,
       manual: true,
       onSuccess: (res) => {
         if (res?.status !== 200) {
@@ -226,11 +226,12 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
   const { runAsync: getRunLogPolling, cancel: cancelGetRunLogPolling } =
     useRequest(getRunLogSqlScript, {
       pollingInterval: 2000,
-      pollingWhenHidden: false,
+      pollingWhenHidden: true,
       manual: true,
       onSuccess: (res) => {
         if (res?.status !== 200) {
           setRunLogStatus(RunLogStatus.STOP);
+          console.log('111111');
           cancelGetRunLogPolling();
           setRunLog(res?.message ?? '获取日志失败');
           setHasFetchedLog(true);
@@ -242,11 +243,14 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
         setHasFetchedLog(true);
 
         if (res?.data?.status === RunLogStatus.STOP) {
+          console.log('停止轮询获取日志', res?.data?.status);
+          console.log('2222222');
           cancelGetRunLogPolling();
         }
       },
       onError: () => {
         setRunLogStatus(RunLogStatus.STOP);
+        console.log('3333333');
         cancelGetRunLogPolling();
         setRunLog('获取日志失败');
         setHasFetchedLog(true);
@@ -263,6 +267,7 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
       if (res?.status === 200) {
         setRunResult(res.data?.sql_result_lists);
         setHasFetchedResult(true);
+        setRunStatus(res.data?.run_status);
       } else {
         setRunResult([]);
         setHasFetchedResult(true);
@@ -457,14 +462,14 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
 
   // 监听运行状态变化，自动获取结果 - 优化依赖项
   useEffect(() => {
-    if (runStatus !== RunningStatus.RUNNING) {
-      console.log('取消轮询');
-      cancelGetRunResultPolling();
-      cancelGetRunLogPolling();
-    }
-
     if (!execid || !currentFile?.scriptId) {
       return;
+    }
+
+    if (runStatus !== RunningStatus.RUNNING) {
+      console.log('取消轮询', runStatus, execid);
+      // cancelGetRunResultPolling();
+      // cancelGetRunLogPolling();
     }
 
     updateRunStatus(RunningStatus.RUNNING);
@@ -493,6 +498,14 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
 
     fetchResult();
   }, [execid]);
+
+  // 页面卸载时停止轮询
+  useEffect(() => {
+    return () => {
+      cancelGetRunResultPolling();
+      cancelGetRunLogPolling();
+    };
+  }, [cancelGetRunResultPolling, cancelGetRunLogPolling]);
 
   // 监听 activeTab 变化，重新更新编辑器状态
   useEffect(() => {
@@ -543,7 +556,7 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
       loadFileContent();
     }
 
-    () => {
+    return () => {
       handleSaveThrottled.cancel();
     };
   }, [activeTab]); // 只依赖 activeTab，避免不必要的重复更新
