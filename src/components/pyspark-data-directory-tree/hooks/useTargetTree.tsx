@@ -76,10 +76,9 @@ export const useTargetTree = () => {
   // 获取数据目录列表
   const getCatalogList = async (
     search?: string,
-    root_type: CatalogRootType = CatalogRootType.Target,
     dir_type: CatalogItemType = CatalogItemType.Volume
   ) => {
-    const res = await getCatalogListApi({ root_type, search, dir_type });
+    const res = await getCatalogListApi({ search, dir_type });
 
     if (res?.status !== 200) {
       return [];

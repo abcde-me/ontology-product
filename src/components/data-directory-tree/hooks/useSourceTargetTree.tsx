@@ -190,11 +190,10 @@ export const useSourceTargetTree = (dataType) => {
 
   // 获取数据目录列表
   const getCatalogList = async (
-    root_type: CatalogRootType,
     dir_type?: CatalogItemType,
     search?: string
   ) => {
-    const res = await getCatalogListApi({ root_type, search, dir_type });
+    const res = await getCatalogListApi({ search, dir_type });
 
     if (res?.status !== 200) {
       return;
@@ -492,9 +491,7 @@ export const useSourceTargetTree = (dataType) => {
   };
 
   useEffect(() => {
-    getCatalogList(
-      dataType === 'source' ? CatalogRootType.Source : CatalogRootType.Target
-    );
+    getCatalogList();
   }, [dataType]);
 
   return {

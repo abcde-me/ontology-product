@@ -63,7 +63,7 @@ export interface GetCatalogListParams {
   /**
    * 获取目录类型，0: 获取所有数据目录，1: 获取源数据目录，2：获取目标数据目录
    */
-  root_type: CatalogRootType;
+  // root_type: CatalogRootType;
   /**
    * 搜索关键字
    */
@@ -176,14 +176,9 @@ export interface SrcCatalogItem {
   type_name?: string;
 }
 
-export interface GetCatalogListRes {
-  dst: DstCatalogItem[];
-  src: SrcCatalogItem[];
-}
-
 // 获取数据目录列表
-export async function getCatalogList(): Promise<ApiRes<GetCatalogListRes>> {
-  return await UAPI.RES.catalogListApi({}).post().inRegion().do();
+export async function getCatalogList(param: GetCatalogListParams) {
+  return await UAPI.RES.catalogListApi({}).post(param).inRegion().do();
 
   // mock data
   // return Promise.resolve({

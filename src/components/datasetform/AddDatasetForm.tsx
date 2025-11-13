@@ -19,7 +19,7 @@ const { Option } = Select;
 import React, { useState, useEffect, useImperativeHandle, useRef } from 'react';
 import styles from './AddDatasetForm.module.scss';
 import './AddDatasetForm.scss';
-import { getCatalogList, getCatalogPreview } from '@/api/dataCatalog';
+import { getCatalogList, getSourceDataFileList } from '@/api/dataCatalog';
 import { validateName } from '@/utils/valiate';
 import {
   getConnectorList,
@@ -280,7 +280,7 @@ const DatasetForm = React.forwardRef<
 
   useEffect(() => {
     // 数据目录卷
-    getCatalogList().then((res) => {
+    getCatalogList({}).then((res) => {
       setTargetDataSourceOptions(
         convertToCascaderOptions(res?.data?.src ?? [])
       );
@@ -456,39 +456,42 @@ const DatasetForm = React.forwardRef<
   const getVolumePreviewData = (volumeId: string, file_path: string) => {
     setTableLoading(true);
     // 这里应该调用真实的API
-    if (storageType === StorageType.Jsonl) {
-      getCatalogPreview({ path_id: volumeId })
-        .then((res) => {
-          if (res.status !== 200) {
-            Message.error(res.message);
-            setPreviewData(null);
-            setPreviewColumns([]);
-            return;
-          }
-          setPreviewData(stringifyFirstLevelValues(res.data.list || []));
-          setPreviewColumns(formatTableData(res.data.field_names)); //设置表格列（从后端返回的列配置）
-        })
-        .finally(() => {
-          setTableLoading(false);
-        });
-    } else if (storageType === StorageType.File) {
-      const params = {
-        path_id: volumeId,
-        full_path: file_path,
-        page: current,
-        limit: pageSize
-      };
-      getTargetDataFileList(params).then((res) => {
-        if (res.data && res.code === '') {
-          setIsPreviewFile(true);
-          setPreviewFileData(res.data.list || []);
-          setTotal(res.data.total);
-        } else {
-          Message.error(res.message);
-          setIsPreviewFile(false);
-        }
-      });
-    }
+    // if (storageType === StorageType.Jsonl) {
+    //   getCatalogPreview({ path_id: volumeId })
+    //     .then((res) => {
+    //       if (res.status !== 200) {
+    //         Message.error(res.message);
+    //         setPreviewData(null);
+    //         setPreviewColumns([]);
+    //         return;
+    //       }
+    //       setPreviewData(stringifyFirstLevelValues(res.data.list || []));
+    //       setPreviewColumns(formatTableData(res.data.field_names)); //设置表格列（从后端返回的列配置）
+    //     })
+    //     .finally(() => {
+    //       setTableLoading(false);
+    //     });
+    // } else if (storageType === StorageType.File) {
+    const params = {
+      data_path_id: Number(volumeId),
+      file_name: '',
+      page: current,
+      page_size: pageSize,
+      file_type: [],
+      start: '',
+      end: ''
+    };
+    getSourceDataFileList(params).then((res) => {
+      if (res.data && res.code === '') {
+        setIsPreviewFile(true);
+        setPreviewFileData(res.data.items || []);
+        setTotal(res.data.total);
+      } else {
+        Message.error(res.message);
+        setIsPreviewFile(false);
+      }
+    });
+    // }
 
     // setPreviewData(csmockPreviewData);
     // setPreviewColumns(formatTableData(cspreviewColumns)); //模拟从后端获取的columns配置
