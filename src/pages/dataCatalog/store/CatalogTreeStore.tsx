@@ -255,13 +255,13 @@ export class CatalogTreeStore extends Model<CatalogTreeState, Effects> {
           children:
             item.children?.db_item && item.children.db_item.length > 0
               ? item.children.db_item.map((table) => {
-                  const { children: tableChildren, ...tableRest } = table;
+                  const { children: tableChildren, ...tableRest } = table || {};
                   return {
                     ...tableRest,
-                    title: table.name,
-                    key: `${activeKey}-${catalogId}-db-${item.id}-table-${table.id}`,
+                    title: table?.name || '',
+                    key: `${activeKey}-${catalogId}-db-${item.id}-table-${table?.id || ''}`,
                     parent_id: item.id,
-                    type: table.type,
+                    type: table?.type,
                     type_name: 'db_item',
                     isLastLeaf: true,
                     fullPath: ''
