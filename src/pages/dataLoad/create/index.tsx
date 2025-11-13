@@ -105,8 +105,8 @@ interface TreeNodeData {
     | 'db_parent'
     | 'datasource_parent'
     | 'datasource_item'
-    | 'meta_data_parent'
-    | 'meta_data';
+    | 'metadata_parent'
+    | 'metadata';
   type?: number;
   level?: number;
   isExpanded?: boolean;
@@ -1095,7 +1095,7 @@ export default function DataLoadCreate() {
           </FormItem>
 
           {sourceType === SOURCE_TYPES.DB &&
-            selectedNodeType === 'meta_data' && (
+            selectedNodeType === 'metadata' && (
               <>
                 <FormItem
                   label="SQL处理："
@@ -1190,7 +1190,7 @@ export default function DataLoadCreate() {
                 className="select-tag-style"
                 onChange={handleAllTagChange}
                 ref={selectRef}
-                mode={selectedNodeType === 'meta_data' ? undefined : 'multiple'}
+                mode={selectedNodeType === 'metadata' ? undefined : 'multiple'}
                 maxTagCount={{
                   count: 2,
                   render: renderTableTags
@@ -1199,7 +1199,7 @@ export default function DataLoadCreate() {
                 style={{ width: '100%', minWidth: 0 }}
                 allowClear
               >
-                {tableList.length > 0 && selectedNodeType !== 'meta_data' && (
+                {tableList.length > 0 && selectedNodeType !== 'metadata' && (
                   <Option value="all">全部</Option>
                 )}
                 {tableList.map((option) => (
