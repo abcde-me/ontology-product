@@ -106,7 +106,7 @@ export default function SearchArea({
         fieldSearch.push({
           nameEn: field.id,
           type: field.type,
-          searchContent: [fieldValues[fieldKey]]
+          queryValue: fieldValues[fieldKey]
         });
       }
     });

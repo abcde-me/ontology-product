@@ -9,10 +9,12 @@ import noDataElement from '@/components/no-data';
 export default function MetaData() {
   const dataCatalog = useDataCatalog();
   const { catalogTreeStore } = dataCatalog;
-  const { selectedKey, selectedParentId } = catalogTreeStore.useGetState([
-    'selectedKey',
-    'selectedParentId'
-  ]);
+  const { selectedKey, selectedParentId, extendsObj } =
+    catalogTreeStore.useGetState([
+      'selectedKey',
+      'selectedParentId',
+      'extendsObj'
+    ]);
 
   // 状态管理
   const [loading, setLoading] = useState(false);
@@ -34,7 +36,9 @@ export default function MetaData() {
         pageSize: pageSize,
         fieldSearch: fieldSearch,
         queryLoadTaskInstance: false,
-        path_id: selectedParentId ? Number(selectedParentId) : 0
+        path_id: selectedParentId ? Number(selectedParentId) : 0,
+        db_name: (extendsObj?.db_name as string) || '',
+        table_name: (extendsObj?.table_name as string) || ''
       });
 
       if (res.code === '' && res.status === 200) {
@@ -103,7 +107,7 @@ export default function MetaData() {
         return {
           nameEn: key,
           type: field?.type || 'string',
-          searchContent: Array.isArray(value) ? value : [value]
+          queryValue: value
         };
       }
     );
@@ -121,16 +125,18 @@ export default function MetaData() {
   return (
     <div>
       {/* 搜索区域 */}
-      <SearchArea
-        fields={searchFields.map((field: Field) => ({
-          key: field.nameEn,
-          label: field.nameZh || field.nameEn,
-          type: 'input',
-          paramKey: field.nameEn
-        }))}
-        onFieldSearch={handleFieldSearch}
-        onReset={handleReset}
-      />
+      {columns.length > 0 && (
+        <SearchArea
+          fields={searchFields.map((field: Field) => ({
+            key: field.nameEn,
+            label: field.nameZh || field.nameEn,
+            type: 'input',
+            paramKey: field.nameEn
+          }))}
+          onFieldSearch={handleFieldSearch}
+          onReset={handleReset}
+        />
+      )}
 
       <div className="data-catalog-content">
         {/* 标题和刷新按钮 */}
@@ -139,7 +145,6 @@ export default function MetaData() {
           <Space>
             <Button
               type="outline"
-              shape="circle"
               icon={<IconRefresh />}
               onClick={handleRefresh}
               style={{
@@ -152,16 +157,22 @@ export default function MetaData() {
         </div>
 
         {/* 表格 */}
-        <Table
-          loading={loading}
-          columns={columns}
-          data={tableData}
-          // rowKey={(record, index) => record.id || index}
-          pagination={false}
-          border={false}
-          scroll={{ x: true }}
-          noDataElement={noDataElement({ description: '暂无数据' })}
-        />
+        {columns.length === 0 && !loading ? (
+          <div className="flex min-h-[200px] items-center justify-center">
+            {noDataElement({ description: '暂无载入数据' })}
+          </div>
+        ) : (
+          <Table
+            loading={loading}
+            columns={columns}
+            data={tableData}
+            // rowKey={(record, index) => record.id || index}
+            pagination={false}
+            border={false}
+            scroll={{ x: true }}
+            noDataElement={noDataElement({ description: '暂无载入数据' })}
+          />
+        )}
 
         {/* 分页 */}
         {total > 0 && (
