@@ -744,8 +744,6 @@ const DatasetForm = React.forwardRef<
                 retainInputValue: true
               }}
               renderOption={(node) => {
-                console.log(node, ' ddddd');
-
                 return (
                   <div>
                     <EllipsisPopover value={node.label} />
