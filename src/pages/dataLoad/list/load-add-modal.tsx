@@ -888,34 +888,35 @@ const LoadAddModal = (props: propsType) => {
                       dest_path: path
                     });
 
-                    console.log('生成数据库名称------', sourceType, nodeData);
-                    // if (sourceType === 'db') {
                     const connectorValue = form.getFieldValue('connector_id');
                     const typeName = nodeData?.type_name;
-                    if (!connectorValue) {
-                      setTableNames('');
-                    } else if (typeName === 'db' || typeName === 'metadata') {
+                    if (
+                      typeName === 'db' &&
+                      typeName === 'metadata' &&
+                      connectorValue
+                    ) {
                       const generateType =
                         typeName === 'metadata' ? 'metadata' : 'db';
-                      // void (async () => {
                       try {
                         const tableNameRes = await getTableName({
                           connector_id: connectorValue,
                           generate_type: generateType
                         });
-                        setTableNames(tableNameRes?.data || '');
+
+                        if (tableNameRes?.status === 200) {
+                          setTableNames(tableNameRes?.data || '');
+                        } else {
+                          setTableNames('');
+                          Message.error('生成数据库名称失败，请重试');
+                        }
                       } catch (error) {
                         console.error('生成数据库名称失败:', error);
                         setTableNames('');
                         Message.error('生成数据库名称失败，请重试');
                       }
-                      // })();
                     } else {
                       setTableNames('');
                     }
-                    // } else {
-                    //   setTableNames('');
-                    // }
 
                     // 选择完成后关闭下拉框
                     // 初始节点id是一个字符串， 生成成功后是number类型
