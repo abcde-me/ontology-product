@@ -433,10 +433,7 @@ export default function DataLoadCreate() {
         const res = await getdetailList({ id: connectorId });
 
         if (sourceType === SOURCE_TYPES.DB) {
-          const tableNameRes = await getTableName({
-            connector_id: connectorId
-          });
-          setTableNames(tableNameRes?.data || '');
+          setTableNames('');
         }
 
         setTableList(res?.data?.table_name || []);
@@ -514,7 +511,7 @@ export default function DataLoadCreate() {
         form.setFieldsValue({ connector_id: 'local_files_uploaded' });
       }
     },
-    [form, sourceType]
+    [form, sourceType, getTableName]
   );
 
   // 处理文件删除
@@ -580,7 +577,8 @@ export default function DataLoadCreate() {
         submit_type: submitType === SUBMIT_TYPES.KEEP ? 1 : 2,
         table_names: processedTableNames,
         db_name: sourceType === SOURCE_TYPES.DB ? tableNames : null,
-        sql: formValues.sql_process_enabled === 'enable' ? formValues.sql : ''
+        sql: formValues.sql_process_enabled === 'enable' ? formValues.sql : '',
+        path_type: selectedNodeType
       };
     },
     [sourceType, loadVal, expression, tableList, uploadedFiles, tableNames]
@@ -762,11 +760,40 @@ export default function DataLoadCreate() {
 
       setSelectedNodeType(nodeData?.type_name);
 
+      if (sourceType === SOURCE_TYPES.DB) {
+        const currentConnectorId = form.getFieldValue('connector_id');
+        const typeName = nodeData?.type_name;
+
+        if (!currentConnectorId) {
+          setTableNames('');
+        } else if (typeName === 'db' || typeName === 'metadata') {
+          const generateType = typeName === 'metadata' ? 'metadata' : 'db';
+
+          void (async () => {
+            try {
+              const tableNameRes = await getTableName({
+                connector_id: currentConnectorId,
+                generate_type: generateType
+              });
+              setTableNames(tableNameRes?.data || '');
+            } catch (error) {
+              console.error('生成数据库名称失败:', error);
+              setTableNames('');
+              Message.error('生成数据库名称失败，请重试');
+            }
+          })();
+        } else {
+          setTableNames('');
+        }
+      } else {
+        setTableNames('');
+      }
+
       if (nodeId !== undefined && isNumber(nodeId)) {
         setDropdownVisible(false);
       }
     },
-    [form]
+    [form, sourceType, getTableName]
   );
 
   // 下拉框过滤选项
@@ -844,7 +871,12 @@ export default function DataLoadCreate() {
       getConnectorDetailList(connectorId);
       if (sourceType === SOURCE_TYPES.DB) {
         form.setFieldsValue({ table_name: undefined });
+        setTableNames('');
+      } else {
+        setTableNames('');
       }
+    } else {
+      setTableNames('');
     }
   }, [connectorId, sourceType, form, getConnectorDetailList]);
 

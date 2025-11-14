@@ -215,23 +215,30 @@ export async function getCatalogList(param: GetCatalogListParams) {
   //               base_dir: '/target/volume1/dbA'
   //             }
   //           ],
-  //           meta_data: [
+  //           metadata: [
   //             {
-  //               id: 1,
-  //               parent_id: 0,
-  //               name: '元数据1',
-  //               type: 1,
-  //               type_name: 'meta_data',
-  //               children: {
-  //                 item: [
-  //                   {
-  //                     id: 1,
-  //                     name: '元数据1',
-  //                     type: 1,
-  //                     type_name: 'meta_data'
-  //                   }
-  //                 ]
+  //               "id": 226,
+  //               "parent_id": 225,
+  //               "type": 4,
+  //               "type_name": "metadata",
+  //               "name": "源元数据_1763029016092",
+  //               "base_dir": "/",
+  //               "children": {},
+  //               "perms": [],
+  //               "extends": {
+  //                 "db_name": "dbA",
+  //                 "table_name": "tableA"
   //               }
+  //               // children: {
+  //               //   item: [
+  //               //     {
+  //               //       id: 1,
+  //               //       name: '元数据1',
+  //               //       type: 1,
+  //               //       type_name: 'meta_data'
+  //               //     }
+  //               //   ]
+  //               // }
   //             }
   //           ]
   //         }
@@ -856,8 +863,8 @@ export interface GetMetaDataListParams {
   pageSize: number;
   fieldSearch: FieldSearchItem[];
   path_id: number;
-  db_name?: string;
-  table_name?: string;
+  db_name: string;
+  table_name: string;
   // 轮询元数据列表时，接口参数中的queryLoadTaskInstance = true
   // 其他情况，queryLoadTaskInstance = false
   queryLoadTaskInstance: boolean;
@@ -898,7 +905,7 @@ export interface GetMetaDataListRes {
 export interface FieldSearchItem {
   nameEn: string;
   type: string;
-  searchContent: string[];
+  queryValue: string;
 }
 
 //查询元数据列表
@@ -1002,6 +1009,14 @@ export async function getMetaDataList(
   //   }
   // });
   return await UAPI.RES.listMetaData({}).post(params).inRegion().do();
+}
+
+export async function refreshMetaDataList(params: {
+  path_id: number;
+  db_name: string;
+  table_name: string;
+}) {
+  return await UAPI.RES.refreshMetaDataList({}).post(params).inRegion().do();
 }
 
 //新建元数据

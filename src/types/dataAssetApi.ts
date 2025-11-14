@@ -222,3 +222,9 @@ export interface BaseTag {
   description: string;
   valueList: TagValueItem[];
 }
+
+export interface FieldSearchItem {
+  nameEn: string;
+  type: string;
+  searchContent: string[];
+}

@@ -3,7 +3,7 @@ import { TreeDataType } from '@arco-design/web-react/es/Tree/interface';
 import React from 'react';
 import { RefInputType } from '@arco-design/web-react/es/Input/interface';
 import { DataCatalog } from '../components/DataCatalogProvider/DataCatalog';
-import { RootTypeEnum, subLeafKeys } from '../consts';
+import { CatalogTypeEnum, RootTypeEnum, subLeafKeys } from '../consts';
 import { getCatalogList } from '@/api/dataCatalog';
 import { searchTreeData } from '../utils';
 
@@ -20,6 +20,10 @@ interface BaseTreeData {
   defaultName?: string;
   children?: {
     db_item?: BaseTreeData[];
+  };
+  extendsObj?: {
+    db_name?: string;
+    table_name?: string;
   };
 }
 
@@ -46,6 +50,7 @@ export interface CatalogTreeState {
   inputRef: React.RefObject<RefInputType>;
   selectedPath: string;
   loading?: boolean;
+  extendsObj: Record<string, unknown>;
 }
 
 interface Effects {
@@ -72,7 +77,8 @@ export class CatalogTreeStore extends Model<CatalogTreeState, Effects> {
         selectedNodeType: '', // 初始化选中节点类型
         selectedParentId: '', // 初始化选中节点的父节点ID
         inputRef: React.createRef<RefInputType>(),
-        selectedPath: ''
+        selectedPath: '',
+        extendsObj: {}
       },
       effects: {
         fetchData: createAsyncEffect(
@@ -159,6 +165,7 @@ export class CatalogTreeStore extends Model<CatalogTreeState, Effects> {
         treeData: cacheTreeData,
         rawTreeData: cacheTreeData,
         expandedKeys: defaultExpand,
+        extendsObj: selectedNode?.extends ?? {},
         selectedKey: selectedNode?.id ? String(selectedNode.id) : '', // 存储实际ID
         selectedTreeKey: selectedNode?.key || '', // 存储完整的树节点key
         selectedPath: selectedNode?.fullPath || ''
@@ -248,13 +255,13 @@ export class CatalogTreeStore extends Model<CatalogTreeState, Effects> {
           children:
             item.children?.db_item && item.children.db_item.length > 0
               ? item.children.db_item.map((table) => {
-                  const { children: tableChildren, ...tableRest } = table;
+                  const { children: tableChildren, ...tableRest } = table || {};
                   return {
                     ...tableRest,
-                    title: table.name,
-                    key: `${activeKey}-${catalogId}-db-${item.id}-table-${table.id}`,
+                    title: table?.name || '',
+                    key: `${activeKey}-${catalogId}-db-${item.id}-table-${table?.id || ''}`,
                     parent_id: item.id,
-                    type: table.type,
+                    type: table?.type,
                     type_name: 'db_item',
                     isLastLeaf: true,
                     fullPath: ''
@@ -293,7 +300,8 @@ export class CatalogTreeStore extends Model<CatalogTreeState, Effects> {
           isLastLeaf: true,
           fullPath: '',
           // TODO: 需要根据item.children.item的类型来决定children的类型
-          children: []
+          children: [],
+          type: CatalogTypeEnum.metadata
         };
       })
     };

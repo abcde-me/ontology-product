@@ -327,6 +327,7 @@ export const ModaForgeResourceEndpoints = {
   createMetaDataDefinition: PrefixAimdp + '/CreateMetaDataDefinition', // 创建元数据目录
   fileExportApi: PrefixAimdp + `/OutputToConnector`,
   listMetaData: PrefixAimdp + '/ListMetaData', // 查询元数据列表
+  refreshMetaDataList: PrefixAimdp + '/RefreshMetaDataList', // 刷新元数据列表
   createDirMetaData: PrefixAimdp + '/CreateDirMetaData', // 创建元数据目录
   checkSqlApi: PrefixAimdp + '/CheckSQL', // 校验SQL
 

@@ -66,7 +66,7 @@ export function useEditableTree({ catalogTreeStore }) {
 
   const generateName = useCallback(
     (data: TreeDataType[], typeText?: string) => {
-      const baseName = `${activeTab === 'src' ? '源' : '目标'}${typeText || '目录'}`;
+      const baseName = `${typeText || '目录'}`;
       // const set = new Set(data.map((item) => item.name));
       // let x = data.length + 1;
       const name = `${baseName}_${Date.now()}`;
@@ -149,6 +149,7 @@ export function useEditableTree({ catalogTreeStore }) {
       dataRef?.type_name !== 'db'
     ) {
       catalogTreeStore.setState({
+        extendsObj: dataRef?.extends ?? {},
         selectedKey: dataRef?.id ? String(dataRef.id) : selectedKeys[0], // 存储实际的数据ID
         selectedTreeKey: selectedKeys[0], // 存储完整的树节点key用于显示选中样式
         selectedPath: dataRef?.fullPath,
@@ -228,6 +229,7 @@ export function useEditableTree({ catalogTreeStore }) {
     }
     let newTreeData: TreeDataType[] = [...treeData];
     let res: Partial<ApiRes<any>> = {};
+    console.log(dataRef, type, '查看dataRef');
     if (type === 'db_item') {
       const params = {
         path_id: dataRef?.parent_id,
@@ -485,18 +487,21 @@ export function useEditableTree({ catalogTreeStore }) {
               ) && (
                 <>
                   {
-                    <PermissionWrapper
-                      permission={DATA_CATALOG_PERMISSIONS.CAN_UPDATE_DIRS}
-                    >
-                      <Tooltip color="white" content="重命名">
-                        <IconEdit
-                          className={
-                            'extra-icon mr-2 hover:text-[rgb(var(--primary-6))]'
-                          }
-                          onClick={() => handleEdit(node)}
-                        />
-                      </Tooltip>
-                    </PermissionWrapper>
+                    // 元数据节点不显示重命名按钮
+                    dataRef?.type !== CatalogTypeEnum.metadata && (
+                      <PermissionWrapper
+                        permission={DATA_CATALOG_PERMISSIONS.CAN_UPDATE_DIRS}
+                      >
+                        <Tooltip color="white" content="重命名">
+                          <IconEdit
+                            className={
+                              'extra-icon mr-2 hover:text-[rgb(var(--primary-6))]'
+                            }
+                            onClick={() => handleEdit(node)}
+                          />
+                        </Tooltip>
+                      </PermissionWrapper>
+                    )
                   }
                   {
                     <PermissionWrapper

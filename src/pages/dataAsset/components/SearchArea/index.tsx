@@ -14,7 +14,7 @@ import {
   IconSettings
 } from '@arco-design/web-react/icon';
 import { ColumnField } from '../ColumnSettingModal';
-import { FieldSearchItem } from '@/api/dataCatalog';
+import { FieldSearchItem } from '@/types/dataAssetApi';
 
 export interface SearchField {
   /** 字段唯一标识 */
