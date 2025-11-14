@@ -942,7 +942,7 @@ const DatasetManagement: React.FC = () => {
               connector_id: parseInt(formData?.targetDataSource) || 0,
               connector_file_ids: formData?.selectedFiles || []
             },
-      scene_type: formData.sceneType,
+      scene_id: formData.sceneType,
       data_type: formData.data_type
     };
 
@@ -1272,7 +1272,9 @@ const DatasetManagement: React.FC = () => {
         const allSceneTab = {
           name: '全部',
           id: 0,
-          dataset_count: total
+          dataset_count: total,
+          description: '',
+          tags: []
         };
         const newSceneList = [allSceneTab, ...res.data];
         setDatasetSceneList(newSceneList);
