@@ -75,8 +75,8 @@ function transformSegment(apiSegment: ApiSegment): Segment {
     charCount: apiSegment.char_count,
     segmentIndex: apiSegment.chunk_index,
     pdfCoordinates: transformApiPositions(apiSegment.positions),
-    title: apiSegment.title || undefined,
-    titleId: apiSegment.title_id || undefined,
+    parentTitle: apiSegment.parent_title || undefined,
+    parentTitleId: apiSegment.parent_title_id || undefined,
     type: apiSegment.type,
     enabled: apiSegment.enabled,
     source: apiSegment.source,
@@ -98,7 +98,7 @@ function transformSegmentOld(apiSegment: any): Segment {
     createdAt: apiSegment.created_at,
     updatedAt: apiSegment.updated_at,
     pdfCoordinates: transformPositionBBox(apiSegment.position_bbox),
-    title: apiSegment.title || undefined,
+    parentTitle: apiSegment.title || undefined,
     fullTitle: apiSegment.full_title || undefined,
     level: apiSegment.level
   };

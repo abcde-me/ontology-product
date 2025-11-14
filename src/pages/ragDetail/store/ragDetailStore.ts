@@ -93,12 +93,12 @@ export const useRagDetailStore = create<RagDetailState & RagDetailActions>(
         const clickedSegment = segments.find((seg) => seg.id === segmentId);
 
         // 查找目录树节点的逻辑：
-        // 1. 如果分段有 titleId，优先查找 type='text' 且 chunk_id 等于分段 id 的节点
+        // 1. 如果分段有 parentTitleId，优先查找 type='text' 且 chunk_id 等于分段 id 的节点
         // 2. 如果找不到，再查找包含该 segmentId 的节点
         const findNodeBySegmentId = (
           nodes: DirectoryNode[],
           targetSegmentId: string,
-          targetTitleId?: string
+          targetParentTitleId?: string
         ): string | null => {
           for (const node of nodes) {
             // 优先匹配：type='text' 且 chunk_id 等于分段 id
@@ -111,7 +111,7 @@ export const useRagDetailStore = create<RagDetailState & RagDetailActions>(
               const result = findNodeBySegmentId(
                 node.children,
                 targetSegmentId,
-                targetTitleId
+                targetParentTitleId
               );
               if (result) return result;
             }
@@ -122,7 +122,7 @@ export const useRagDetailStore = create<RagDetailState & RagDetailActions>(
         const nodeId = findNodeBySegmentId(
           directory,
           segmentId,
-          clickedSegment?.titleId
+          clickedSegment?.parentTitleId
         );
 
         if (nodeId) {
