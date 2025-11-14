@@ -728,7 +728,7 @@ const DatasetDetail = (props: {
   // 跳转到分段列表页面
   const handleGoToSegmentList = (document_id: string) => {
     history.push(
-      `/tenant/compute/modaforge/datasetManagement/segmentList?datasetId=${detailId}&documentId=${document_id}`
+      `/tenant/compute/modaforge/datasetManagement/ragDetail?datasetId=${detailId}&documentId=${document_id}`
     );
   };
 
