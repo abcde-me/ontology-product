@@ -78,17 +78,20 @@ UAPI_CONFIG.addResponseInterceptor(
         //这里判断下是否是json格式，如果不是先按错误论处，需要等后端规范化他们的接口
         try {
           if (res && typeof res === 'string') {
-            if (
-              response.headers['content-type'] &&
-              response.headers['content-type'].includes('application/pdf')
-            ) {
-              const blob = new Blob([res], {
-                type: 'application/pdf'
-              });
-              return blob;
-            } else {
-              return JSON.parse(res);
+            const contentTypeHeader = response.headers?.['content-type'] ?? '';
+            const isBlobResponse = response.config?.responseType === 'blob';
+
+            if (isBlobResponse) {
+              const blobData =
+                response.data instanceof Blob
+                  ? response.data
+                  : new Blob([response.data], {
+                      type: contentTypeHeader || 'application/octet-stream'
+                    });
+              return isBlobResponse ? response : blobData;
             }
+
+            return JSON.parse(res);
           }
         } catch (err) {
           throw err;

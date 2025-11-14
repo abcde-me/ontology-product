@@ -546,7 +546,10 @@ export const ModaForgeResourceEndpoints = {
   // 批量删除数据资产表中的数据信息
   deleteDataAssetDataBatch: PrefixAimdp + '/DeleteDataAssetDataBatch',
   // 批量修改数据资产表中的标签信息
-  editDataAssetDataTagsBatch: PrefixAimdp + '/EditDataAssetDataTagsBatch'
+  editDataAssetDataTagsBatch: PrefixAimdp + '/EditDataAssetDataTagsBatch',
+  // 下载数据资产字段模板
+  downloadDataAssetFieldsTemplate:
+    PrefixAimdp + '/DownloadDataAssetFieldsTemplate'
 };
 
 /**

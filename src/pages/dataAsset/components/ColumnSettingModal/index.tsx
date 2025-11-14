@@ -90,7 +90,9 @@ const ColumnSettingModal: React.FC<ColumnSettingModalProps> = ({
     if (!checked) {
       setFields((fields) =>
         fields.map((f) =>
-          f.nameEn === nameEn ? { ...f, enumCount: 0, isEnumAble: checked } : f
+          f.nameEn === nameEn
+            ? { ...f, distinctCount: 0, isEnumAble: checked }
+            : f
         )
       );
       return;
@@ -122,7 +124,7 @@ const ColumnSettingModal: React.FC<ColumnSettingModalProps> = ({
           f.nameEn === nameEn
             ? {
                 ...f,
-                enumCount: res.data,
+                distinctCount: res.data,
                 isEnumAble: checked,
                 enumLoading: false
               }
