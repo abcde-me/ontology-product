@@ -259,45 +259,6 @@ const formatDate = (dateString: string) => {
   );
 };
 
-// 数据内容文件表格列定义
-const contentFileColumns = [
-  {
-    title: 'ID',
-    dataIndex: 'id',
-    width: 80
-  },
-  {
-    title: '文件名称',
-    dataIndex: 'file_name',
-    width: 300,
-    render: (_, record) => (
-      <EllipsisPopover value={record.file_name || '-'} isEdit={false} />
-    )
-  },
-  {
-    title: '文件类型',
-    dataIndex: 'file_type',
-    width: 100,
-    render: (_, record) => (
-      <div>
-        {getFileIcon(record.file_type)} {record.file_type}
-      </div>
-    )
-  },
-  {
-    title: '文件大小',
-    dataIndex: 'file_size',
-    width: 100,
-    render: (_, record) => <span>{formatFileSize(record.file_size)}</span>
-  },
-  {
-    title: '修改时间',
-    dataIndex: 'file_modify_time',
-    width: 180,
-    render: (_, record) => <span>{formatDate(record.file_modify_time)}</span>
-  }
-];
-
 // 版本历史表格列定义
 const versionColumns: any[] = [
   // {
@@ -568,6 +529,61 @@ const DatasetDetail = (props: {
   const [isHiddenBaseInfo, setIsHiddenBaseInfo] = React.useState(false); // 基础信息是否隐藏
   const lastScrollTop = React.useRef(0);
 
+  // 数据内容文件表格列定义
+  const contentFileColumns = [
+    {
+      title: '文件名称',
+      dataIndex: 'file_name',
+      width: 300,
+      render: (_, record) => (
+        <EllipsisPopover value={record.file_name || '-'} isEdit={false} />
+      )
+    },
+    {
+      title: '文件类型',
+      dataIndex: 'file_type',
+      width: 100,
+      render: (_, record) => (
+        <div>
+          {getFileIcon(record.file_type)} {record.file_type}
+        </div>
+      )
+    },
+    {
+      title: '文件大小',
+      dataIndex: 'file_size',
+      width: 100,
+      render: (_, record) => <span>{formatFileSize(record.file_size)}</span>
+    },
+    {
+      title: '分段数',
+      dataIndex: 'segment_count',
+      width: 100,
+      render: (_, record) => <span>{record.segment_count}</span>
+    },
+    {
+      title: '状态',
+      dataIndex: 'status',
+      width: 100,
+      render: (_, record) => <span>{record.status}</span>
+    },
+    {
+      title: '操作',
+      dataIndex: 'operate',
+      width: 100,
+      render: (_, record) => (
+        <div className="flex">
+          <Button type="text" onClick={() => handleGoToSegmentList(record.id)}>
+            分段列表
+          </Button>
+          <Button type="text" onClick={() => {}}>
+            删除
+          </Button>
+        </div>
+      )
+    }
+  ];
+
   useEffect(() => {
     const container = document.querySelector('.layout-detail');
     if (!container) return;
@@ -707,6 +723,13 @@ const DatasetDetail = (props: {
   // 跳转到数据集管理页面
   const handleGoToDatasetList = () => {
     history.push('/tenant/compute/modaforge/datasetManagement');
+  };
+
+  // 跳转到分段列表页面
+  const handleGoToSegmentList = (document_id: string) => {
+    history.push(
+      `/tenant/compute/modaforge/datasetManagement/segmentList?datasetId=${detailId}&documentId=${document_id}`
+    );
   };
 
   // 打开编辑弹窗

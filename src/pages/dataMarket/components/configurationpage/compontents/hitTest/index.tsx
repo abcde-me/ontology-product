@@ -139,6 +139,9 @@ function PageContentFalse(props) {
   const currentSegment = segments.find(
     (seg) => seg.id === segmentDrawerSegmentId
   );
+  const queryParams = new URLSearchParams(location.search);
+  const datasetId = queryParams.get('datasetId');
+  const documentId = queryParams.get('documentId');
   const mocktest = {
     reordering: true,
     retrievalV: 'hybrid_search',
@@ -539,13 +542,18 @@ function PageContentFalse(props) {
           seteditPolicy={seteditPolicy}
         ></PolicyForm>
       </Modal>
-      <SegmentDrawer
-        visible={showDrawer}
-        onClose={() => setShowDrawer(false)}
-        defaultActiveTab={defaultTab}
-        currentSegmentIndex={currentSegment?.segmentIndex}
-        totalSegments={segments.length}
-      />
+      {currentSegment && (
+        <SegmentDrawer
+          visible={showDrawer}
+          onClose={() => setShowDrawer(false)}
+          defaultActiveTab={defaultTab}
+          currentSegmentIndex={currentSegment?.segmentIndex}
+          totalSegments={segments.length}
+          datasetId={datasetId || ''}
+          chunkId={currentSegment.id}
+          segments={segments}
+        />
+      )}
     </div>
   );
 }

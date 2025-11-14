@@ -562,7 +562,7 @@ const DatasetForm = React.forwardRef<
       width: 300,
       render: (_, record) => (
         <EllipsisPopover
-          value={record.extras?.file_name || '-'}
+          value={record.file_name || '-'}
           isEdit={false}
           preferTypography
         />
@@ -589,7 +589,7 @@ const DatasetForm = React.forwardRef<
       title: '文件大小',
       dataIndex: 'file_size', // 使用动态获取的文件类型筛选器
       width: 134,
-      render: (_, record) => <span>{record.extras?.file_size || '-'}</span>
+      render: (_, record) => <span>{record.file_size || '-'}</span>
     }
   ];
 
