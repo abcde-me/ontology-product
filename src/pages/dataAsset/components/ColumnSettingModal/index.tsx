@@ -14,7 +14,7 @@ import './index.module.scss'; // 确保引入样式文件
 import { ReactSortable } from 'react-sortablejs';
 import DragIcon from '../../assets/drag-icon.svg';
 import styles from './index.module.scss';
-import { RESERVED_FIELD_ENS } from '../../utils/const';
+import { isTagsField, RESERVED_FIELD_ENS } from '../../utils/const';
 import { getDataAssetTableDistinctFieldCount } from '@/api/dataAsset';
 import { BaseTag } from '@/types/dataAssetApi';
 // const SortableAny = ReactSortable as any;
@@ -26,7 +26,7 @@ export interface ColumnField {
   type: string;
   isEnumAble: boolean; // 是否勾选枚举
   enumLoading: boolean;
-  enumCount: number; // 枚举数
+  distinctCount: number; // 枚举数
   displaySort: number;
   values: Array<string | BaseTag>;
 }
@@ -197,15 +197,20 @@ const ColumnSettingModal: React.FC<ColumnSettingModalProps> = ({
                       <Spin size={14} />
                     ) : (
                       <Checkbox
-                        checked={record.isEnumAble}
+                        checked={
+                          isTagsField(record.nameEn) ? false : record.isEnumAble
+                        }
+                        disabled={isTagsField(record.nameEn)}
                         onChange={(val) => handleEnumCheck(record.nameEn, val)}
                       />
                     )}
-                    {record.isEnumAble && !record.enumLoading && (
-                      <span className="text-[var(--color-text-4)]">
-                        {record.enumCount}枚举量
-                      </span>
-                    )}
+                    {record.isEnumAble &&
+                      !isTagsField(record.nameEn) &&
+                      !record.enumLoading && (
+                        <span className="text-[var(--color-text-4)]">
+                          {record.distinctCount}枚举量
+                        </span>
+                      )}
                   </span>
                 )
               }
