@@ -8,3 +8,5 @@ export const RESERVED_FIELD_ENS = new Set([
 
 export const TAGS_FIELD_EN_NAME = 'tags';
 export const isTagsField = (nameEn: string) => nameEn === TAGS_FIELD_EN_NAME;
+export const isDateType = (type: string) =>
+  type === 'datetime' || type === 'date';

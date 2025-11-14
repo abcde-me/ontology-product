@@ -18,7 +18,8 @@ import {
 } from '@arco-design/web-react/icon';
 import { ColumnField } from '../ColumnSettingModal';
 import { FieldSearchItem, BaseTag, TagValueItem } from '@/types/dataAssetApi';
-import { isTagsField } from '../../utils/const';
+import { isDateType, isTagsField } from '../../utils/const';
+import dayjs from 'dayjs';
 
 export interface SearchField {
   /** 字段唯一标识 */
@@ -49,6 +50,27 @@ export interface SearchAreaProps {
   /** 样式类 */
   className?: string;
 }
+
+const formatSearchContent = (field: ColumnField, value: any): string[] => {
+  if (field.type === 'datetime' && Array.isArray(value)) {
+    const formattedValues = value
+      .filter((item) => item !== undefined && item !== null && item !== '')
+      .map((item) => {
+        const date = dayjs(item);
+        return date.isValid()
+          ? date.format('YYYY-MM-DD HH:mm:ss')
+          : String(item ?? '');
+      });
+
+    const joinedValue = formattedValues.join('_');
+    return joinedValue ? [joinedValue] : [];
+  }
+
+  const normalizedValues = Array.isArray(value) ? value : [value];
+  return normalizedValues
+    .filter((item) => item !== undefined && item !== null && item !== '')
+    .map((item) => String(item));
+};
 
 export default function SearchArea({
   fields = [],
@@ -85,6 +107,7 @@ export default function SearchArea({
 
   // 处理字段值变化
   const handleFieldValueChange = (fieldKey: string, value: any) => {
+    console.log('-----时间勾选值----', fieldKey, value);
     setFieldValues((prev) => ({
       ...prev,
       [fieldKey]: value
@@ -98,7 +121,7 @@ export default function SearchArea({
     const fieldSearch: FieldSearchItem[] = [];
     checkedFields.forEach((fieldKey) => {
       const field = fields.find((f) => f.id === fieldKey);
-      console.log(field, '------fieldValues------');
+      console.log(field, '------field------');
       if (
         field &&
         fieldValues[fieldKey] !== undefined &&
@@ -112,9 +135,7 @@ export default function SearchArea({
           isEnumAble: field.isEnumAble ?? false,
           nameEn: field.id,
           type: field.type,
-          searchContent: Array.isArray(fieldValues[fieldKey])
-            ? fieldValues[fieldKey]
-            : [fieldValues[fieldKey]]
+          searchContent: formatSearchContent(field, fieldValues[fieldKey])
         });
       }
     });
@@ -314,7 +335,7 @@ export default function SearchArea({
       );
     }
 
-    if (field.type === 'datetime') {
+    if (isDateType(field.type)) {
       fieldType = 'range';
     } else if (field.isEnumAble && field.values?.length > 0) {
       fieldType = 'select';
@@ -380,8 +401,10 @@ export default function SearchArea({
         return (
           <DatePicker.RangePicker
             value={value}
-            onChange={(val) => handleFieldValueChange(field.nameZh, val)}
+            onChange={(val) => handleFieldValueChange(field.id, val)}
             allowClear
+            showTime={{ format: 'HH:mm:ss' }}
+            format="YYYY-MM-DD HH:mm:ss"
             placeholder={['开始日期', '结束日期']}
           />
         );
@@ -439,7 +462,7 @@ export default function SearchArea({
                   <span className="whitespace-nowrap text-sm text-[var(--color-text-1)]">
                     {field.nameZh}:
                   </span>
-                  <div className="w-[260px]">{renderFieldInput(field)}</div>
+                  <div className="w-[380px]">{renderFieldInput(field)}</div>
                 </div>
               ))}
             </div>

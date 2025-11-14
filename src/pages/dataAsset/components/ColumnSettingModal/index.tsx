@@ -25,6 +25,7 @@ export interface ColumnField {
   nameZh: string;
   type: string;
   isEnumAble: boolean; // 是否勾选枚举
+  isEnumAbleForColumn: boolean; // 列设置弹窗中是否可勾选为枚举类型
   enumLoading: boolean;
   distinctCount: number; // 枚举数
   displaySort: number;
@@ -65,8 +66,8 @@ const ColumnSettingModal: React.FC<ColumnSettingModalProps> = ({
       // 更新选中的字段ID列表
       const allIds = externalFields
         .filter((f) => f.displaySort > 0)
-        .map((f) => f.nameEn)
-        .filter(Boolean);
+        .sort((a, b) => Number(a?.displaySort) - Number(b?.displaySort))
+        .map((f) => f.nameEn);
       if (allIds.length > 0) {
         setSelectedIds(allIds);
       }
@@ -198,14 +199,14 @@ const ColumnSettingModal: React.FC<ColumnSettingModalProps> = ({
                     ) : (
                       <Checkbox
                         checked={
-                          isTagsField(record.nameEn) ? false : record.isEnumAble
+                          record.isEnumAbleForColumn ? record.isEnumAble : false
                         }
-                        disabled={isTagsField(record.nameEn)}
+                        disabled={!record.isEnumAbleForColumn}
                         onChange={(val) => handleEnumCheck(record.nameEn, val)}
                       />
                     )}
                     {record.isEnumAble &&
-                      !isTagsField(record.nameEn) &&
+                      record.isEnumAbleForColumn &&
                       !record.enumLoading && (
                         <span className="text-[var(--color-text-4)]">
                           {record.distinctCount}枚举量
