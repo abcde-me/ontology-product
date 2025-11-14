@@ -68,7 +68,7 @@ const PdfSceneContent: React.FC<PdfSceneContentProps> = ({
         {hasDirectory && directory && (
           <>
             <div
-              className={`h-full w-[240px] flex-shrink-0 overflow-hidden bg-gray-50 ${!showPdfViewer ? 'ml-4 rounded-bl-[20px]' : ''}`}
+              className={`h-full w-[240px] flex-shrink-0 overflow-hidden bg-gray-50 ${!showPdfViewer ? 'rounded-bl-[20px]' : ''}`}
               style={{ minHeight: 0 }}
             >
               <DirectoryTree nodes={directory} />
