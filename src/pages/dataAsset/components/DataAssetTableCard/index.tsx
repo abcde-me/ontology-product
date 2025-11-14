@@ -1,19 +1,25 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { TreeSelect, Tooltip, Tag, Pagination } from '@arco-design/web-react';
+import {
+  TreeSelect,
+  Tooltip,
+  Tag,
+  Pagination,
+  Message
+} from '@arco-design/web-react';
 import {
   ListDataAssetDataRes,
   EditDataAssetData,
   ModifyMethod,
   BaseTag
 } from '@/types/dataAssetApi';
-import { getTagList } from '@/api/dataAsset';
+import { editDataAssetDataTagsBatch, getTagList } from '@/api/dataAsset';
 import { editDataAssetDataBatch } from '@/api/dataAsset';
 import classNames from 'classnames';
 import styles from './index.module.scss';
 import noDataElement from '@/components/no-data';
 
 interface TagValue {
-  tagId: string;
+  id: string;
   tagValue: string;
 }
 
@@ -46,20 +52,23 @@ export default function DataAssetTableCard({
   );
   const tagTreeData = useMemo(
     () =>
-      tagList.map((tag) => ({
-        key: tag.id,
-        value: tag.id,
-        title: tag.name,
-        selectable: false,
-        checkable: false,
-        disableCheckbox: true,
-        children: (tag.valueList || []).map((item) => ({
-          key: item.id,
-          value: item.id,
-          title: item.tagValue,
-          parentId: tag.id
-        }))
-      })),
+      tagList.map((tag) => {
+        // console.log('------tag------', tag);
+        return {
+          key: tag.id,
+          value: tag.id,
+          title: tag.name,
+          selectable: false,
+          checkable: false,
+          disableCheckbox: true,
+          children: (tag.valueList || []).map((item) => ({
+            key: item.id,
+            value: item.id,
+            title: item.tagValue,
+            parentId: tag.id
+          }))
+        };
+      }),
     [tagList]
   );
 
@@ -105,7 +114,7 @@ export default function DataAssetTableCard({
   }, [dataAssetList]);
 
   // 直接使用传入的数据，不再进行客户端分页
-  const paginatedList = dataAssetList;
+  // const paginatedList = dataAssetList;
 
   // 处理标签变化
   const handleTagChange = (recordId: string, values: TagValue[]) => {
@@ -113,6 +122,21 @@ export default function DataAssetTableCard({
       ...prev,
       [recordId]: values
     }));
+  };
+
+  const updateRecordTags = async (recordId: string, values: TagValue[]) => {
+    const tags = tagValues[recordId] ?? [];
+
+    const res = await editDataAssetDataTagsBatch({
+      Ids: tags.map((item) => item.id),
+      tags: tags.map((item) => ({ id: item.id, value: item.tagValue }))
+    });
+
+    if (res.code === '' && res.status === 200) {
+      Message.success('标签更新成功');
+    } else {
+      Message.error(res.message ?? '标签更新失败');
+    }
   };
 
   // 格式化更新时间
@@ -168,8 +192,8 @@ export default function DataAssetTableCard({
       )}
     >
       <div className="mb-6 grid grid-cols-4 gap-x-[12px] gap-y-6">
-        {paginatedList.map((record) => {
-          const recordTags = tagValues[record?.id] || record?.tags || [];
+        {dataAssetList.map((record) => {
+          const recordTags = tagValues[record.id] ?? record.tags ?? [];
 
           return (
             <div
@@ -188,12 +212,13 @@ export default function DataAssetTableCard({
               <div className="relative ml-[-4px] flex h-[36px] items-center">
                 <TreeSelect
                   placeholder=""
-                  value={recordTags.map((item) => {
+                  value={recordTags?.map((item) => {
                     return {
                       label: item.tagValue,
-                      value: item.tagId
+                      value: item.id
                     };
                   })}
+                  // key="tagId"
                   multiple
                   treeCheckable
                   treeCheckStrictly
@@ -209,6 +234,8 @@ export default function DataAssetTableCard({
                     }));
                     if (visible) {
                       setEditingTagRecordId(record?.id);
+                    } else {
+                      updateRecordTags(record?.id, recordTags);
                     }
                   }}
                   maxTagCount={{
@@ -227,7 +254,7 @@ export default function DataAssetTableCard({
                               {remainingTags.map((item, i) => (
                                 <Tag
                                   className={classNames(styles['tag'])}
-                                  key={item?.tagId}
+                                  key={item?.id}
                                 >
                                   {item?.tagValue}
                                 </Tag>
@@ -244,7 +271,7 @@ export default function DataAssetTableCard({
                     const nextValues = (
                       Array.isArray(values) ? values : values ? [values] : []
                     ).map((item) => ({
-                      tagId: item.value,
+                      id: item.value,
                       tagValue: String(item.label ?? '')
                     }));
                     handleTagChange(record?.id, nextValues);

@@ -84,7 +84,7 @@ export default function DataAssetList() {
   const [loading, setLoading] = useState(false);
   // 分页状态
   const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10); // 默认卡片视图，每页12个
+  const [pageSize, setPageSize] = useState(12); // 默认卡片视图，每页12个
   const [total, setTotal] = useState(0);
   const [searchParams, setSearchParams] = useState({
     commonSearch: '',
