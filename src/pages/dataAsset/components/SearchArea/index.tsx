@@ -96,7 +96,7 @@ export default function SearchArea({
 
   // 初始化：默认勾选所有字段
   useEffect(() => {
-    const defaultChecked = new Set(fields.slice(0, 4).map((f) => f.id));
+    const defaultChecked = new Set(fields.slice(0, 3).map((f) => f.id));
     setCheckedFields(defaultChecked);
   }, [fields]);
 
@@ -107,7 +107,6 @@ export default function SearchArea({
 
   // 处理字段值变化
   const handleFieldValueChange = (fieldKey: string, value: any) => {
-    console.log('-----时间勾选值----', fieldKey, value);
     setFieldValues((prev) => ({
       ...prev,
       [fieldKey]: value
@@ -121,7 +120,6 @@ export default function SearchArea({
     const fieldSearch: FieldSearchItem[] = [];
     checkedFields.forEach((fieldKey) => {
       const field = fields.find((f) => f.id === fieldKey);
-      console.log(field, '------field------');
       if (
         field &&
         fieldValues[fieldKey] !== undefined &&

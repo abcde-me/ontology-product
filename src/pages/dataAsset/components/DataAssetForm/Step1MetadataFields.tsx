@@ -7,55 +7,27 @@ import {
   Input,
   Message,
   Form,
-  Upload,
   Table,
-  Select,
-  Space
+  Select
 } from '@arco-design/web-react';
-// import { Add, Upload } from '@arco-design/web-react/icon';
 import { MetadataField } from './DataAssetFormContainer';
 import ImportFieldsModal from './ImportFieldsModal';
 import styles from './Step1MetadataFields.module.scss';
-import { IconDownload, IconUpload } from '@arco-design/web-react/icon';
+import { IconDownload } from '@arco-design/web-react/icon';
 import {
   DataAssetField,
-  FindDataAssetMappingItemRes,
   ListDataAssetSourceResItem
 } from '@/types/dataAssetApi';
 import { listDataAssetFieldTypes } from '@/api/dataAsset';
 import { ImportType } from '../../types';
 import noDataElement from '@/components/no-data';
 import { RESERVED_FIELD_ENS } from '../../utils/const';
+import EllipsisPopoverCom from '@/components/ellipsis-popover-com';
 
 const FormItem = Form.Item;
 
 const getDataSourceKey = (item: ListDataAssetSourceResItem) =>
   `${item.type ?? ''}::${item.databaseName ?? ''}::${item.tableName ?? ''}`;
-
-// const normalizeDataSources = (
-//   sources: Record<string, ListDataAssetSourceResItem> = {},
-//   available: Record<string, ListDataAssetSourceResItem> = {}
-// ): Record<string, ListDataAssetSourceResItem> => {
-//   const result: Record<string, ListDataAssetSourceResItem> = {};
-//   Object.keys(sources).forEach((key) => {
-//     if (available[key]) {
-//       result[key] = available[key];
-//     }
-//   });
-//   return result;
-// };
-
-// const areDataSourcesEqual = (
-//   a: Record<string, ListDataAssetSourceResItem> = {},
-//   b: Record<string, ListDataAssetSourceResItem> = {}
-// ) => {
-//   const aKeys = Object.keys(a);
-//   const bKeys = Object.keys(b);
-//   if (aKeys.length !== bKeys.length) {
-//     return false;
-//   }
-//   return aKeys.every((key) => b[key] === a[key]);
-// };
 
 interface Step1MetadataFieldsProps {
   metadataFields: MetadataField[];
@@ -113,53 +85,12 @@ export default function Step1MetadataFields({
     };
   }, []);
 
-  // 从 findDataAssetMappingData 直接计算可用的数据来源（使用 nameEn 作为键）
-  // const availableDataSources = useMemo(() => {
-  //   if (!findDataAssetMappingData || findDataAssetMappingData.length === 0) {
-  //     return {};
-  //   }
-  //   const result: Record<string, ListDataAssetSourceResItem> = {};
-  //   findDataAssetMappingData.forEach((item) => {
-  //     const key = getDataSourceKey(item);
-  //     if (key) {
-  //       result[key] = item;
-  //     }
-  //   });
-  //   return result;
-  // }, [findDataAssetMappingData]);
-
-  // 数据来源类型的中文显示名称映射（仅用于显示）
-  // const dataSourceDisplayNames: Record<string, string> = {
-  //   dataset: '数据集',
-  //   datavolume: '源数据目录-卷',
-  //   database: '源数据目录-数据库',
-  //   metadata: '源数据目录-元数据-目录'
-  // };
-
-  // const normalizedDataSources = useMemo(
-  //   () => normalizeDataSources(dataSources, availableDataSources),
-  //   [dataSources, availableDataSources]
-  // );
-
-  // useEffect(() => {
-  //   if (!areDataSourcesEqual(dataSources, normalizedDataSources)) {
-  //     setDataSources(normalizedDataSources);
-  //   }
-  // }, [dataSources, normalizedDataSources, setDataSources]);
-
-  // useEffect(() => {
-  //   const current = form.getFieldValue('dataSources');
-  //   if (current !== normalizedDataSources) {
-  //     form.setFieldValue('dataSources', normalizedDataSources);
-  //   }
-  // }, [form, normalizedDataSources]);
-
   // Table列定义（字段名对齐 DataAssetField）
   const columns = [
     {
       title: '序号',
       dataIndex: 'sequence',
-      width: 80,
+      width: 60,
       align: 'center' as const
     },
     {
@@ -195,7 +126,7 @@ export default function Step1MetadataFields({
     {
       title: '字段类型',
       dataIndex: 'type',
-      width: 150,
+      width: 160,
       render: (_: any, record: any) => (
         <Select
           placeholder="请选择"
@@ -217,7 +148,7 @@ export default function Step1MetadataFields({
     {
       title: '空值默认填充',
       dataIndex: 'default',
-      width: 200,
+      width: 272,
       render: (_: any, record: any) => (
         <Input
           value={record.default}
@@ -266,7 +197,8 @@ export default function Step1MetadataFields({
       title: '操作',
       dataIndex: 'operation',
       width: 100,
-      align: 'center' as const,
+      fixed: 'right' as const,
+      align: 'left' as const,
       render: (_: any, record: MetadataField) => (
         <div className="flex items-center">
           <Button type="text" onClick={() => handleAddField()}>
@@ -446,12 +378,6 @@ export default function Step1MetadataFields({
     }
   };
 
-  // useEffect(() => {
-  //   if (editMode) {
-
-  //   }
-  // }, []);
-
   return (
     <>
       {/* 导入字段模态框 */}
@@ -492,6 +418,7 @@ export default function Step1MetadataFields({
         >
           <div className="mt-[16px] w-full">
             <Table
+              scroll={{ x: 'max-content' }}
               noDataElement={noDataElement({ description: '暂无数据' })}
               columns={columns}
               className="w-full"
@@ -515,7 +442,6 @@ export default function Step1MetadataFields({
           rules={[{ validator: validateDataSource }]}
         >
           <Row gutter={24}>
-            {console.log('findDataAssetMappingData', findDataAssetMappingData)}
             {findDataAssetMappingData?.length > 0 &&
               (() => {
                 // 从 findDataAssetMappingData 中提取所有唯一的 nameEn 字段作为数据源键
@@ -528,7 +454,7 @@ export default function Step1MetadataFields({
                 const someChecked = keyArray.some((key) => !!dataSources[key]);
 
                 return (
-                  <Col key="all" span={4}>
+                  <Col key="all" span={4} className={styles.dataSourceCol}>
                     <Checkbox
                       checked={allChecked}
                       indeterminate={someChecked && !allChecked}
@@ -547,12 +473,19 @@ export default function Step1MetadataFields({
                 return null;
               }
               return (
-                <Col key={key} span={4}>
+                <Col key={key} span={4} className={styles.dataSourceCol}>
                   <Checkbox
+                    className="w-full"
                     checked={!!dataSources[key]}
                     onChange={(checked) => handleDataSourceChange(key, checked)}
                   >
-                    {field.name}
+                    <div className="inline-block" style={{ width: 164 }}>
+                      <EllipsisPopoverCom
+                        value={field.name || '--'}
+                        wrapperClassName="inline-block w-full"
+                        className="text-[14px]"
+                      />
+                    </div>
                   </Checkbox>
                 </Col>
               );
