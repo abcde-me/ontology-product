@@ -128,7 +128,7 @@ export default function DataAssetTableCard({
     const tags = tagValues[recordId] ?? [];
 
     const res = await editDataAssetDataTagsBatch({
-      Ids: tags.map((item) => item.id),
+      Ids: [recordId],
       tags: tags.map((item) => ({ id: item.id, value: item.tagValue }))
     });
 
