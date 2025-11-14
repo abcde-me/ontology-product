@@ -14,17 +14,27 @@ import type {
   PositionBBox,
   ApiPosition,
   ApiSegmentOld,
-  ApiCatalogNodeOld
+  ApiCatalogNodeOld,
+  ApiSegmentDetail,
+  SegmentDetailData,
+  Element,
+  TextElement,
+  ImageElement,
+  TableElement,
+  FormulaElement,
+  EnhancementInfo
 } from '../types';
 import { SegmentData } from '../utils/segmentData';
 import { getTreeDataByRagId } from '../utils/treeData';
 import { getSegmentDataByRagId } from '../utils/segmentDataByRagId';
 import { LogData } from '../utils/logData';
+import { SegDetailData } from '../utils/segDetailData';
 import {
   ListKnowledgeDocumentCatalogs,
   ListKnowledgeChunks,
   UpdateKnowledgeChunk,
-  GetKnowledgeChunkTraceLog
+  GetKnowledgeChunkTraceLog,
+  GetKnowledgeChunk
 } from '@/api/modules/rag';
 
 /**
@@ -567,4 +577,171 @@ export async function batchUpdateSegments(
       resolve(segments);
     }, 500);
   });
+}
+
+/**
+ * 将后端返回的 ApiMaterial 转换为前端的 Element
+ */
+function transformApiMaterialToElement(material: any): Element {
+  const baseElement = {
+    id: material.id,
+    type: material.type === 'title' ? 'text' : material.type // 将 title 转换为 text
+  };
+
+  // 提取位置信息
+  let positionType: string | undefined;
+  let positionInfo: string | undefined;
+  let pageId: number | undefined;
+
+  if (material.positions && material.positions.length > 0) {
+    const position = material.positions[0];
+    if (position.bbox) {
+      positionType = '坐标';
+      positionInfo = `(${position.bbox[0]}, ${position.bbox[1]})`;
+    }
+    pageId = position.page_id;
+  }
+
+  switch (material.type) {
+    case 'text':
+    case 'title':
+      return {
+        ...baseElement,
+        type: 'text',
+        content: material.text,
+        positionType,
+        positionInfo,
+        pageId
+      } as TextElement & { pageId?: number };
+
+    case 'image':
+      return {
+        ...baseElement,
+        type: 'image',
+        url: material.text || material.uri,
+        positionType,
+        positionInfo,
+        pageId
+      } as ImageElement & { pageId?: number };
+
+    case 'table':
+      try {
+        const tableData = JSON.parse(material.text);
+        return {
+          ...baseElement,
+          type: 'table',
+          headers: Object.keys(tableData),
+          rows: [tableData],
+          positionType,
+          positionInfo,
+          pageId
+        } as TableElement & { pageId?: number };
+      } catch {
+        return {
+          ...baseElement,
+          type: 'table',
+          headers: [],
+          rows: [],
+          positionType,
+          positionInfo,
+          pageId
+        } as TableElement & { pageId?: number };
+      }
+
+    case 'formula':
+      return {
+        ...baseElement,
+        type: 'formula',
+        content: material.text,
+        positionType,
+        positionInfo,
+        pageId
+      } as FormulaElement & { pageId?: number };
+
+    default:
+      return {
+        ...baseElement,
+        type: 'text',
+        content: material.text,
+        positionType,
+        positionInfo,
+        pageId
+      } as TextElement & { pageId?: number };
+  }
+}
+
+/**
+ * 将后端返回的 ApiSegmentDetail 转换为前端的 SegmentDetailData
+ */
+function transformApiSegmentDetail(
+  apiData: ApiSegmentDetail
+): SegmentDetailData {
+  // 转换元素列表
+  const elements: Element[] = (apiData.materials || []).map((material) =>
+    transformApiMaterialToElement(material)
+  );
+
+  // 转换增强信息
+  let enhancement: EnhancementInfo | undefined;
+  if (apiData.ai_data) {
+    enhancement = {
+      summary: apiData.ai_data.summaries || '',
+      hypotheticalAnswer: apiData.ai_data.questions || '',
+      extractionEntity: apiData.ai_data.keywords,
+      tags: apiData.ai_data.tags?.map((tag) => tag.name)
+    };
+  }
+
+  // 转换元数据
+  const metadata: Record<string, string> = {};
+  if (apiData.parent_id) {
+    metadata['parent_id'] = apiData.parent_id;
+  }
+  if (apiData.left_chunk_id) {
+    metadata['left_chunk_id'] = apiData.left_chunk_id;
+  }
+  if (apiData.right_chunk_id) {
+    metadata['right_chunk_id'] = apiData.right_chunk_id;
+  }
+
+  return {
+    segmentId: apiData.id,
+    charCount: apiData.char_count,
+    elements,
+    enhancement,
+    metadata: Object.keys(metadata).length > 0 ? metadata : undefined
+  };
+}
+
+/**
+ * 获取分段的详细信息（包括元素、增强信息等）
+ * @param datasetId - 数据集ID
+ * @param chunkId - 分块ID
+ */
+export async function fetchSegmentDetailInfo(
+  datasetId: string,
+  chunkId: string
+): Promise<SegmentDetailData> {
+  try {
+    // 调用真实API
+    const response = await GetKnowledgeChunk({
+      dataset_id: datasetId,
+      chunk_id: chunkId
+    });
+
+    // 检查响应格式
+    if (response && response.data) {
+      const apiData = response.data as ApiSegmentDetail;
+      return transformApiSegmentDetail(apiData);
+    }
+
+    // 如果响应格式不符合预期，返回 mock 数据
+    const mockData = SegDetailData.data as ApiSegmentDetail;
+    return transformApiSegmentDetail(mockData);
+  } catch (error) {
+    console.error('Failed to fetch segment detail:', error);
+    // 降级处理：返回 mock 数据
+    const mockData = SegDetailData.data as ApiSegmentDetail;
+    return transformApiSegmentDetail(mockData);
+  }
 }

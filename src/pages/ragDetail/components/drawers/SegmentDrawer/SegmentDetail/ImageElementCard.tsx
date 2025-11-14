@@ -56,25 +56,39 @@ const ImageElementCard: React.FC<ImageElementCardProps> = ({
           </button>
         </div>
 
-        <div className="flex items-center gap-3 text-sm">
-          <div className="flex">
-            <span className="text-gray-500">定位类型:</span>
-            <span className="ml-2 text-gray-900">{element.positionType}</span>
-          </div>
-          <div className="flex">
-            <span className="text-gray-500">位置信息:</span>
-            <span className="ml-2 text-gray-900">{element.positionInfo}</span>
-          </div>
-          <div className="flex">
-            <span className="text-gray-500">尺寸:</span>
-            <span className="ml-2 text-gray-900">{element.dimensions}</span>
-          </div>
-          <div className="flex">
-            <span className="text-gray-500">修饰:</span>
-            <span className="ml-2 text-gray-900">
-              {element.modifiers || '-'}
-            </span>
-          </div>
+        <div className="flex flex-col gap-2 text-sm">
+          {element.positionType && (
+            <div className="flex">
+              <span className="text-gray-500">定位类型:</span>
+              <span className="ml-2 text-gray-900">{element.positionType}</span>
+            </div>
+          )}
+          {element.positionInfo && (
+            <div className="flex">
+              <span className="text-gray-500">位置信息:</span>
+              <span className="ml-2 text-gray-900">{element.positionInfo}</span>
+            </div>
+          )}
+          {(element as any).pageId && (
+            <div className="flex">
+              <span className="text-gray-500">页码:</span>
+              <span className="ml-2 text-gray-900">
+                {(element as any).pageId}
+              </span>
+            </div>
+          )}
+          {element.dimensions && (
+            <div className="flex">
+              <span className="text-gray-500">尺寸:</span>
+              <span className="ml-2 text-gray-900">{element.dimensions}</span>
+            </div>
+          )}
+          {element.modifiers && (
+            <div className="flex">
+              <span className="text-gray-500">修饰:</span>
+              <span className="ml-2 text-gray-900">{element.modifiers}</span>
+            </div>
+          )}
         </div>
 
         {/* <ElementEnhancedInfo element={element} isEditing={isEditing} /> */}

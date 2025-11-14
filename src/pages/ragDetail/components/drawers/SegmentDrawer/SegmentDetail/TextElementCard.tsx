@@ -49,16 +49,30 @@ const TextElementCard: React.FC<TextElementCardProps> = ({
         </div>
       )}
 
-      <div className="flex items-center gap-3 text-sm">
-        <div className="flex">
-          <span className="w-18 text-gray-500">定位类型：</span>
-          <span className="text-gray-900">{element.positionType}</span>
+      {(element.positionType ||
+        element.positionInfo ||
+        (element as any).pageId) && (
+        <div className="flex items-center gap-3 text-sm">
+          {element.positionType && (
+            <div className="flex">
+              <span className="w-18 text-gray-500">定位类型：</span>
+              <span className="text-gray-900">{element.positionType}</span>
+            </div>
+          )}
+          {element.positionInfo && (
+            <div className="flex">
+              <span className="w-18 text-gray-500">位置信息：</span>
+              <span className="text-gray-900">{element.positionInfo}</span>
+            </div>
+          )}
+          {(element as any).pageId && (
+            <div className="flex">
+              <span className="w-18 text-gray-500">页码：</span>
+              <span className="text-gray-900">{(element as any).pageId}</span>
+            </div>
+          )}
         </div>
-        <div className="flex">
-          <span className="w-18 text-gray-500">位置信息：</span>
-          <span className="text-gray-900">{element.positionInfo}</span>
-        </div>
-      </div>
+      )}
 
       {/* <ElementEnhancedInfo element={element} isEditing={isEditing} /> */}
     </div>
