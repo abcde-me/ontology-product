@@ -5,7 +5,10 @@ import {
   Select,
   DatePicker,
   Popover,
-  Checkbox
+  Checkbox,
+  Tooltip,
+  Tag,
+  TreeSelect
 } from '@arco-design/web-react';
 import {
   IconSearch,
@@ -14,7 +17,7 @@ import {
   IconSettings
 } from '@arco-design/web-react/icon';
 import { ColumnField } from '../ColumnSettingModal';
-import { FieldSearchItem } from '@/types/dataAssetApi';
+import { FieldSearchItem, BaseTag, TagValueItem } from '@/types/dataAssetApi';
 
 export interface SearchField {
   /** 字段唯一标识 */
@@ -94,6 +97,7 @@ export default function SearchArea({
     const fieldSearch: FieldSearchItem[] = [];
     checkedFields.forEach((fieldKey) => {
       const field = fields.find((f) => f.id === fieldKey);
+      console.log(field, '------fieldValues------');
       if (
         field &&
         fieldValues[fieldKey] !== undefined &&
@@ -104,9 +108,12 @@ export default function SearchArea({
         searchParams[paramKey] = fieldValues[fieldKey];
 
         fieldSearch.push({
+          isEnumAble: field.isEnumAble ?? false,
           nameEn: field.id,
           type: field.type,
-          searchContent: [fieldValues[fieldKey]]
+          searchContent: Array.isArray(fieldValues[fieldKey])
+            ? fieldValues[fieldKey]
+            : [fieldValues[fieldKey]]
         });
       }
     });
@@ -233,15 +240,86 @@ export default function SearchArea({
     return button;
   };
 
+  const isBaseTagOption = (opt: string | BaseTag): opt is BaseTag => {
+    if (typeof opt !== 'object' || opt === null) {
+      return false;
+    }
+    return Array.isArray((opt as any).valueList);
+  };
+
   // 渲染字段搜索输入组件
   const renderFieldInput = (field: ColumnField) => {
     const value = fieldValues[field.id];
     let fieldType = field.type;
+    const isTagsField = field.nameEn === 'tags';
 
-    if (field.isEnumAble && field.values?.length > 0) {
-      fieldType = 'select';
-    } else if (field.type === 'datetime') {
+    if (isTagsField) {
+      const tagOptions = (field.values || []).filter(isBaseTagOption);
+      const treeData = tagOptions.map((tag) => ({
+        key: tag.id,
+        value: tag.id,
+        title: tag.name,
+        selectable: false,
+        checkable: false,
+        disableCheckbox: true,
+        children: (tag.valueList || []).map((item: TagValueItem) => ({
+          key: item.id,
+          value: item.tagValue,
+          title: item.tagValue
+        }))
+      }));
+
+      return (
+        <TreeSelect
+          placeholder={`请选择${field.nameZh}`}
+          value={Array.isArray(value) ? value : []}
+          multiple
+          treeCheckable
+          treeCheckedStrategy="child"
+          treeData={treeData}
+          onChange={(val) => {
+            const nextValue = Array.isArray(val)
+              ? val
+              : val !== undefined && val !== null
+                ? [val]
+                : [];
+            handleFieldValueChange(field.id, nextValue);
+          }}
+          maxTagCount={{
+            count: 2,
+            render: (invisibleTagCount) => {
+              // const allTags = form.getFieldValue('tags') || [];
+              const remainingTags = value.slice(2);
+              return (
+                <Tooltip
+                  content={
+                    <div className="ml-[-4px] flex max-w-[300px] flex-wrap gap-1">
+                      {remainingTags.map((item, i) => (
+                        <Tag
+                          key={i}
+                          className="bg-[#E7ECF0] text-[14px] text-[#0F172A]"
+                          // className={classNames(styles['tag'])}
+                        >
+                          {item}
+                        </Tag>
+                      ))}
+                    </div>
+                  }
+                >
+                  +{invisibleTagCount}
+                </Tooltip>
+              );
+            }
+          }}
+          allowClear
+        />
+      );
+    }
+
+    if (field.type === 'datetime') {
       fieldType = 'range';
+    } else if (field.isEnumAble && field.values?.length > 0) {
+      fieldType = 'select';
     } else {
       fieldType = 'string';
     }
@@ -262,15 +340,18 @@ export default function SearchArea({
           <Select
             placeholder={`请选择${field.nameZh}`}
             value={value}
+            mode="multiple"
+            maxTagCount={2}
             onChange={(val) => handleFieldValueChange(field.id, val)}
             allowClear
-            showSearch
           >
-            {field.values?.map((opt) => (
-              <Select.Option key={opt} value={opt}>
-                {opt}
-              </Select.Option>
-            ))}
+            {field.values
+              ?.filter((opt): opt is string => typeof opt === 'string')
+              .map((opt) => (
+                <Select.Option key={opt} value={opt}>
+                  {opt}
+                </Select.Option>
+              ))}
           </Select>
         );
       case 'range':
