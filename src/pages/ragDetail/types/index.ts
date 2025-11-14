@@ -187,6 +187,7 @@ export interface SegmentDetailData {
   charCount: number;
   elements: Element[];
   enhancement?: EnhancementInfo; // 分段增强信息（可选）
+  metadata?: Record<string, string>; // 元数据（可选）
 }
 
 // 新的后端返回的目录树节点结构

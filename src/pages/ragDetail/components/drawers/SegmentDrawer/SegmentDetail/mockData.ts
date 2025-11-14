@@ -61,5 +61,10 @@ export const mockSegmentDetailData: SegmentDetailData = {
       positionType: '坐标',
       positionInfo: '坐标 (100,200)'
     }
-  ]
+  ],
+  metadata: {
+    fatherParagraph: 'file_001_chunk_001',
+    leftParagraph: 'file_001_chunk_002',
+    rightParagraph: 'file_001_chunk_003'
+  }
 };
