@@ -286,6 +286,7 @@ export function useEditableTree({ catalogTreeStore }) {
 
   // 添加子级元素（数据卷或数据库）
   const addSubVolume = (node: NodeProps) => {
+    console.log(node, '123node');
     const { dataRef } = node;
 
     const rawChildrenTreeData = rawTreeData.find(
@@ -306,44 +307,48 @@ export function useEditableTree({ catalogTreeStore }) {
         rawChildrenTreeData?.children?.find((child) => child.type === 'db')
           ?.children ?? [];
     } else if (dataRef?.type === 'metadata') {
-      const name = generateName(
-        targetChildrenArray,
-        subLeafKeys[dataRef?.type] // 根据类型生成对应的名称
-      );
-
-      const cachTreeData = treeData.map((item: TreeDataType) => {
-        if (item.key === node.pathParentKeys?.[0]) {
-          // 找到对应类型的子节点并在其下添加新元素
-          item.children?.forEach((child: TreeDataType) => {
-            if (child.type === dataRef?.type) {
-              child.children?.unshift(genereteInputNode(name, node));
-            }
-          });
-        }
-        return item;
-      });
-
-      // 只展开当前操作的节点路径，避免展开同级节点
-      const newExpandedKeys = [...expandedKeys];
-      if (dataRef?.key && !newExpandedKeys.includes(dataRef.key)) {
-        newExpandedKeys.push(dataRef.key);
-      }
-      // 确保父节点也是展开状态
-      if (
-        node.pathParentKeys?.[0] &&
-        !newExpandedKeys.includes(node.pathParentKeys[0])
-      ) {
-        newExpandedKeys.push(node.pathParentKeys[0]);
-      }
-
-      catalogTreeStore.setState({
-        inputValue: name,
-        defaultName: name,
-        treeData: cachTreeData,
-        expandedKeys: newExpandedKeys
-      });
-      focusAndSelectInput();
+      targetChildrenArray =
+        rawChildrenTreeData?.children?.find((child) => child.type === 'db')
+          ?.children ?? [];
     }
+
+    const name = generateName(
+      targetChildrenArray,
+      subLeafKeys[dataRef?.type] // 根据类型生成对应的名称
+    );
+
+    const cachTreeData = treeData.map((item: TreeDataType) => {
+      if (item.key === node.pathParentKeys?.[0]) {
+        // 找到对应类型的子节点并在其下添加新元素
+        item.children?.forEach((child: TreeDataType) => {
+          if (child.type === dataRef?.type) {
+            child.children?.unshift(genereteInputNode(name, node));
+          }
+        });
+      }
+      return item;
+    });
+
+    // 只展开当前操作的节点路径，避免展开同级节点
+    const newExpandedKeys = [...expandedKeys];
+    if (dataRef?.key && !newExpandedKeys.includes(dataRef.key)) {
+      newExpandedKeys.push(dataRef.key);
+    }
+    // 确保父节点也是展开状态
+    if (
+      node.pathParentKeys?.[0] &&
+      !newExpandedKeys.includes(node.pathParentKeys[0])
+    ) {
+      newExpandedKeys.push(node.pathParentKeys[0]);
+    }
+
+    catalogTreeStore.setState({
+      inputValue: name,
+      defaultName: name,
+      treeData: cachTreeData,
+      expandedKeys: newExpandedKeys
+    });
+    focusAndSelectInput();
   };
 
   const onEditFinish = async (props: NodeProps) => {
@@ -370,6 +375,7 @@ export function useEditableTree({ catalogTreeStore }) {
     let newTreeData: TreeDataType[] = [];
     let res: Partial<ApiRes<any>> = {};
 
+    console.log(dataRef, '=123data');
     if (dataRef?.isAdd) {
       switch (dataRef?.type) {
         case CatalogTypeEnum.catalog:
