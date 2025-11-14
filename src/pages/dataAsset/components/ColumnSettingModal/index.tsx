@@ -14,7 +14,7 @@ import './index.module.scss'; // 确保引入样式文件
 import { ReactSortable } from 'react-sortablejs';
 import DragIcon from '../../assets/drag-icon.svg';
 import styles from './index.module.scss';
-import { RESERVED_FIELD_ENS } from '../../utils/const';
+import { isTagsField, RESERVED_FIELD_ENS } from '../../utils/const';
 import { getDataAssetTableDistinctFieldCount } from '@/api/dataAsset';
 import { BaseTag } from '@/types/dataAssetApi';
 // const SortableAny = ReactSortable as any;
@@ -25,8 +25,9 @@ export interface ColumnField {
   nameZh: string;
   type: string;
   isEnumAble: boolean; // 是否勾选枚举
+  isEnumAbleForColumn: boolean; // 列设置弹窗中是否可勾选为枚举类型
   enumLoading: boolean;
-  enumCount: number; // 枚举数
+  distinctCount: number; // 枚举数
   displaySort: number;
   values: Array<string | BaseTag>;
 }
@@ -65,8 +66,8 @@ const ColumnSettingModal: React.FC<ColumnSettingModalProps> = ({
       // 更新选中的字段ID列表
       const allIds = externalFields
         .filter((f) => f.displaySort > 0)
-        .map((f) => f.nameEn)
-        .filter(Boolean);
+        .sort((a, b) => Number(a?.displaySort) - Number(b?.displaySort))
+        .map((f) => f.nameEn);
       if (allIds.length > 0) {
         setSelectedIds(allIds);
       }
@@ -197,15 +198,20 @@ const ColumnSettingModal: React.FC<ColumnSettingModalProps> = ({
                       <Spin size={14} />
                     ) : (
                       <Checkbox
-                        checked={record.isEnumAble}
+                        checked={
+                          record.isEnumAbleForColumn ? record.isEnumAble : false
+                        }
+                        disabled={!record.isEnumAbleForColumn}
                         onChange={(val) => handleEnumCheck(record.nameEn, val)}
                       />
                     )}
-                    {record.isEnumAble && !record.enumLoading && (
-                      <span className="text-[var(--color-text-4)]">
-                        {record.enumCount}枚举量
-                      </span>
-                    )}
+                    {record.isEnumAble &&
+                      record.isEnumAbleForColumn &&
+                      !record.enumLoading && (
+                        <span className="text-[var(--color-text-4)]">
+                          {record.distinctCount}枚举量
+                        </span>
+                      )}
                   </span>
                 )
               }

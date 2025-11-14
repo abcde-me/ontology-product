@@ -52,13 +52,13 @@ const SegmentList: React.FC<SegmentListProps> = ({
     });
   }, [segments, segmentSearchText]);
 
-  // 按 title 分组
+  // 按 parentTitle 分组
   const groupedSegments = useMemo(() => {
     const groups: { title: string; segments: Segment[] }[] = [];
     const titleMap = new Map<string, Segment[]>();
 
     filteredSegments.forEach((segment) => {
-      const title = segment.title || '未分类';
+      const title = segment.parentTitle || '未分类';
       if (!titleMap.has(title)) {
         titleMap.set(title, []);
       }

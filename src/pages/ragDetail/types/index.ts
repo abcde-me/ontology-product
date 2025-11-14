@@ -35,8 +35,8 @@ export interface ApiSegment {
   content: string;
   type: 'text' | 'image' | 'table'; // 分段类型
   char_count: number;
-  title: string;
-  title_id: string;
+  parent_title: string;
+  parent_title_id: string;
   enabled: boolean;
   source: string; // 'Auto' | 'Manual'
   is_edit: boolean;
@@ -75,8 +75,8 @@ export interface Segment {
   createdAt?: string;
   updatedAt?: string;
   pdfCoordinates?: PDFCoordinate[]; // 可能跨多页
-  title?: string;
-  titleId?: string; // 新增：用于关联目录树
+  parentTitle?: string;
+  parentTitleId?: string; // 新增：用于关联目录树
   fullTitle?: string;
   level?: number;
   type?: 'text' | 'image' | 'table'; // 新增：分段类型
