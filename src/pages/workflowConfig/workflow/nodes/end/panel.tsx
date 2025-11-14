@@ -9,6 +9,7 @@ import { getWorkflowTargetPath, knowledgeBaseNameCheck } from '@/api/workflow';
 import { useUserInfo } from '@/store/userInfoStore';
 import { getTagList, getDatasetSceneList } from '@/api/datasetManagement';
 import './end.scss';
+import { validateName } from '@/utils/valiate';
 
 const Panel: FC<NodePanelProps<EndNodeType>> = ({ id, data }) => {
   const userInfo = useUserInfo();
@@ -95,14 +96,12 @@ const Panel: FC<NodePanelProps<EndNodeType>> = ({ id, data }) => {
                 if (value === '' || value === undefined) {
                   return callback('请输入数据集名称');
                 }
-                if (!/^[a-zA-Z0-9_]+$/.test(value)) {
-                  return callback('数据集名称只能包含字母、数字和下划线');
-                }
-                // 长度校验到达50个字符时无法继续输入，校验通过
-                if (value?.length <= 50) {
-                  return callback();
+                if (!validateName(value).isValid) {
+                  return callback(
+                    validateName(value).errorMessage ?? '数据集名称格式不正确'
+                  );
                 } else {
-                  return callback('数据集名称长度不能超过50个字符');
+                  return callback();
                 }
               }
             }
