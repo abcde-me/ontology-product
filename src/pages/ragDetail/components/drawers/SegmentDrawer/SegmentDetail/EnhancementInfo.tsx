@@ -68,7 +68,7 @@ const EnhancementInfo: React.FC<EnhancementInfoProps> = ({
       <div className="space-y-4">
         {/* 分段总结 */}
         <div className="flex gap-2">
-          <label className="block w-[100px] text-sm font-medium text-[#0F172A]">
+          <label className="block w-[100px] text-sm  text-[#6E7B8D]">
             分段总结：
           </label>
           {isEditing ? (
@@ -88,7 +88,7 @@ const EnhancementInfo: React.FC<EnhancementInfoProps> = ({
 
         {/* 假设性问答 */}
         <div className="flex gap-2">
-          <label className="block w-[100px] text-sm font-medium text-[#0F172A]">
+          <label className="block w-[100px] text-sm  text-[#6E7B8D]">
             假设性问答：
           </label>
           {isEditing ? (
@@ -107,8 +107,8 @@ const EnhancementInfo: React.FC<EnhancementInfoProps> = ({
         </div>
 
         {/* 实体 */}
-        <div className="flex items-center gap-2">
-          <label className="block w-[100px] text-sm font-medium text-[#0F172A]">
+        <div className="flex items-center">
+          <label className="block w-[100px] text-sm  text-[#6E7B8D]">
             实体:
           </label>
           {isEditing ? (
@@ -122,13 +122,14 @@ const EnhancementInfo: React.FC<EnhancementInfoProps> = ({
               style={{ width: '100%' }}
             />
           ) : (
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap" style={{ gap: '4px' }}>
               {enhancement.extractionEntity &&
               enhancement.extractionEntity.length > 0 ? (
                 enhancement.extractionEntity.map((entity, index) => (
                   <span
                     key={index}
-                    className="inline-flex items-center rounded bg-white px-2 py-1 text-xs text-gray-700"
+                    className="inline-flex items-center border border-[#E2E8F0] bg-white px-2 py-1 text-xs text-gray-700"
+                    style={{ borderRadius: '2px' }}
                   >
                     {entity}
                   </span>
@@ -143,8 +144,8 @@ const EnhancementInfo: React.FC<EnhancementInfoProps> = ({
         </div>
 
         {/* 标签 */}
-        <div className="flex items-center gap-2">
-          <label className="block w-[100px] text-sm font-medium text-[#0F172A]">
+        <div className="flex items-center">
+          <label className="block w-[100px] text-sm  text-[#6E7B8D]">
             标签:
           </label>
           {isEditing ? (
@@ -158,12 +159,13 @@ const EnhancementInfo: React.FC<EnhancementInfoProps> = ({
               style={{ width: '100%' }}
             />
           ) : (
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap" style={{ gap: '4px' }}>
               {enhancement.tags && enhancement.tags.length > 0 ? (
                 enhancement.tags.map((entity, index) => (
                   <span
                     key={index}
-                    className="inline-flex items-center rounded bg-white px-2 py-1 text-xs text-gray-700"
+                    className="inline-flex items-center border border-[#E2E8F0] bg-white px-2 py-1 text-xs text-gray-700"
+                    style={{ borderRadius: '2px' }}
                   >
                     {entity}
                   </span>

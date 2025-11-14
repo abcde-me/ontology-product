@@ -4,12 +4,10 @@
  */
 
 import { create } from 'zustand';
-import { mockSegmentDetailData } from '../SegmentDetail/mockData';
 import {
-  mockTraceLogStatistics,
-  mockNodeDetails
-} from '../../../../utils/traceLogMockData';
-import { fetchSegmentTraceLog } from '../../../../api/ragDetailApi';
+  fetchSegmentTraceLog,
+  fetchSegmentDetailInfo
+} from '../../../../api/ragDetailApi';
 import type { SegmentDetailData } from '../../../../types';
 import type {
   TraceLogStatistics,
@@ -235,17 +233,16 @@ export const useSegmentDrawerStore = create<SegmentDrawerStore>((set, get) => ({
     try {
       set({ segmentDetailLoading: true, segmentDetailError: null });
 
-      console.log('📥 加载分段详情:', segmentIndex);
+      const { datasetId, chunkId } = get();
 
-      // TODO: 调用真实 API
-      // const response = await fetch(`/api/segments/${segmentIndex}/detail`);
-      // const data = await response.json();
+      console.log('📥 加载分段详情:', {
+        segmentIndex,
+        datasetId,
+        chunkId
+      });
 
-      // 模拟 API 调用
-      await new Promise((resolve) => setTimeout(resolve, 300));
-
-      // 使用 mock 数据
-      const data = JSON.parse(JSON.stringify(mockSegmentDetailData));
+      // 调用真实 API
+      const data = await fetchSegmentDetailInfo(datasetId, chunkId);
 
       set({
         segmentDetailData: data,

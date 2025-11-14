@@ -181,6 +181,49 @@ export interface EnhancementInfo {
   tags?: string[]; // 标签
 }
 
+// 新的后端返回的位置信息
+export interface ApiPosition {
+  bbox?: [number, number, number, number]; // 坐标 [x1, y1, x2, y2]
+  text_offset?: {
+    start: number;
+    end: number;
+  };
+  xpath?: string;
+  block_index?: number;
+  page_id?: number; // 页码
+}
+
+// 新的后端返回的元素格式
+export interface ApiMaterial {
+  id: string; // 元素ID
+  type: 'text' | 'title' | 'table' | 'image' | 'formula'; // 元素类型
+  text: string; // 文本内容（对于image是s3路径，对于table是JSON字符串，对于formula是公式字符串）
+  positions?: ApiPosition[]; // 位置信息
+  uri?: string; // 资源URI（如S3路径）
+}
+
+// 新的后端返回的AI增强数据
+export interface ApiAiData {
+  summaries?: string; // 总结
+  questions?: string; // 假设性问题
+  keywords?: string[]; // 实体
+  tags?: Array<{
+    id: number;
+    name: string;
+  }>; // 标签
+}
+
+// 新的后端返回的分段详情数据
+export interface ApiSegmentDetail {
+  id: string; // 分段编号
+  char_count: number; // 分段大小
+  parent_id?: string; // 父分片ID
+  left_chunk_id?: string; // 左邻分片ID
+  right_chunk_id?: string; // 右邻分片ID
+  materials?: ApiMaterial[]; // 元素列表
+  ai_data?: ApiAiData; // AI增强数据
+}
+
 // 分段详情数据
 export interface SegmentDetailData {
   segmentId: string;
