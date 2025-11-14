@@ -56,6 +56,7 @@ import styles from './list.module.scss';
 import classNames from 'classnames';
 import { FieldSearchItem } from '@/types/dataAssetApi';
 import dayjs from 'dayjs';
+import { isTagsField, TAGS_FIELD_EN_NAME } from '../../utils/const';
 
 interface TagValue {
   tagId: string;
@@ -178,7 +179,7 @@ export default function DataAssetList() {
           .filter((field: ApiColumnField) => field.displaySort > 0)
           .map((field: ApiColumnField) => {
             // 如果是 tags 字段，使用 Tag 组件显示
-            if (field.nameEn === 'tags') {
+            if (isTagsField(field.nameEn)) {
               return {
                 title: field.nameZh,
                 dataIndex: field.nameEn,
@@ -329,17 +330,18 @@ export default function DataAssetList() {
   const convertFields = useCallback(
     (fields: ApiColumnField[]): ColumnField[] =>
       fields.map((field: ApiColumnField, index: number) => {
-        const isTagsField = field.nameEn === 'tags';
         return {
           id: field.nameEn || String(index),
           nameEn: field.nameEn || String(index),
           nameZh: field.nameZh,
           type: field.type,
-          isEnumAble: isTagsField ? true : field.isEnumAble || false,
+          isEnumAble: isTagsField(field.nameEn)
+            ? true
+            : field.isEnumAble || false,
           enumLoading: false,
-          enumCount: 0,
+          distinctCount: field.distinctCount || 0,
           displaySort: field.displaySort || 0,
-          values: isTagsField ? tagList : field.values || []
+          values: isTagsField(field.nameEn) ? tagList : field.values || []
         };
       }),
     [tagList]
@@ -609,16 +611,6 @@ export default function DataAssetList() {
     selectedRowKeys: string[]
   ) => {
     try {
-      const editData: EditDataAssetData = {
-        modifyMethod: ModifyMethod.COVER,
-        modifyIds: selectedRowKeys,
-        modifyContext: [
-          {
-            fieldEnName: 'tags',
-            fieldValue: tags.join(',')
-          }
-        ]
-      };
       const res = await editDataAssetDataTagsBatch({
         Ids: selectedRowKeys,
         tags: tags.map((tag) => ({ id: tag.value, value: tag.label }))
@@ -893,34 +885,42 @@ export default function DataAssetList() {
         onChange={handleColumnChange}
       />
       {/* 修改资产弹窗 */}
-      <ModifyAssetModal
-        visible={modifyAssetModalVisible}
-        fields={fieldsForModify}
-        onCancel={() => setModifyAssetModalVisible(false)}
-        onConfirm={handleModifyAssetConfirm}
-      />
+      {modifyAssetModalVisible && (
+        <ModifyAssetModal
+          visible={modifyAssetModalVisible}
+          fields={
+            fieldsForModify?.filter((field) => !isTagsField(field.nameEn)) ?? []
+          }
+          onCancel={() => setModifyAssetModalVisible(false)}
+          onConfirm={handleModifyAssetConfirm}
+        />
+      )}
       {/* 修改标签弹窗 */}
-      <ModifyTagsModal
-        visible={modifyTagsModalVisible}
-        tagOptions={tagList}
-        selectedRowKeys={selectedRowKeys}
-        initialTags={aggregatedSelectedTags}
-        onCancel={() => setModifyTagsModalVisible(false)}
-        onConfirm={handleModifyTagsConfirm}
-      />
+      {modifyTagsModalVisible && (
+        <ModifyTagsModal
+          visible={modifyTagsModalVisible}
+          tagOptions={tagList}
+          selectedRowKeys={selectedRowKeys}
+          initialTags={aggregatedSelectedTags}
+          onCancel={() => setModifyTagsModalVisible(false)}
+          onConfirm={handleModifyTagsConfirm}
+        />
+      )}
       {/* 单条编辑资产弹窗 */}
-      <EditSingleAssetModal
-        visible={editSingleAssetModalVisible}
-        record={editingRecord}
-        fields={columnFields.filter(
-          (field) => field.nameEn !== 'tags' && field.displaySort > 0
-        )}
-        onCancel={() => {
-          setEditSingleAssetModalVisible(false);
-          setEditingRecord(null);
-        }}
-        onConfirm={handleSingleEditAssetConfirm}
-      />
+      {editSingleAssetModalVisible && (
+        <EditSingleAssetModal
+          visible={editSingleAssetModalVisible}
+          record={editingRecord}
+          fields={columnFields.filter(
+            (field) => !isTagsField(field.nameEn) && field.displaySort > 0
+          )}
+          onCancel={() => {
+            setEditSingleAssetModalVisible(false);
+            setEditingRecord(null);
+          }}
+          onConfirm={handleSingleEditAssetConfirm}
+        />
+      )}
     </div>
   );
 }

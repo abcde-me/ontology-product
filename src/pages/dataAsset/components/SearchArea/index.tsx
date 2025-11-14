@@ -18,6 +18,7 @@ import {
 } from '@arco-design/web-react/icon';
 import { ColumnField } from '../ColumnSettingModal';
 import { FieldSearchItem, BaseTag, TagValueItem } from '@/types/dataAssetApi';
+import { isTagsField } from '../../utils/const';
 
 export interface SearchField {
   /** 字段唯一标识 */
@@ -251,9 +252,7 @@ export default function SearchArea({
   const renderFieldInput = (field: ColumnField) => {
     const value = fieldValues[field.id];
     let fieldType = field.type;
-    const isTagsField = field.nameEn === 'tags';
-
-    if (isTagsField) {
+    if (isTagsField(field.nameEn)) {
       const tagOptions = (field.values || []).filter(isBaseTagOption);
       const treeData = tagOptions.map((tag) => ({
         key: tag.id,
@@ -288,7 +287,6 @@ export default function SearchArea({
           maxTagCount={{
             count: 2,
             render: (invisibleTagCount) => {
-              // const allTags = form.getFieldValue('tags') || [];
               const remainingTags = value.slice(2);
               return (
                 <Tooltip
@@ -341,7 +339,31 @@ export default function SearchArea({
             placeholder={`请选择${field.nameZh}`}
             value={value}
             mode="multiple"
-            maxTagCount={2}
+            maxTagCount={{
+              count: 2,
+              render: (invisibleTagCount) => {
+                const remainingTags = value.slice(2);
+                return (
+                  <Tooltip
+                    content={
+                      <div className="ml-[-4px] flex max-w-[300px] flex-wrap gap-1">
+                        {remainingTags.map((item, i) => (
+                          <Tag
+                            key={i}
+                            className="bg-[#E7ECF0] text-[14px] text-[#0F172A]"
+                            // className={classNames(styles['tag'])}
+                          >
+                            {item}
+                          </Tag>
+                        ))}
+                      </div>
+                    }
+                  >
+                    +{invisibleTagCount}
+                  </Tooltip>
+                );
+              }
+            }}
             onChange={(val) => handleFieldValueChange(field.id, val)}
             allowClear
           >
@@ -417,7 +439,7 @@ export default function SearchArea({
                   <span className="whitespace-nowrap text-sm text-[var(--color-text-1)]">
                     {field.nameZh}:
                   </span>
-                  <div className="w-[200px]">{renderFieldInput(field)}</div>
+                  <div className="w-[260px]">{renderFieldInput(field)}</div>
                 </div>
               ))}
             </div>

@@ -25,23 +25,23 @@ const EditSingleAssetModal: React.FC<EditSingleAssetModalProps> = ({
   const [loading, setLoading] = useState(false);
 
   // 获取字段的可修改性信息
-  useEffect(() => {
-    if (visible) {
-      setLoading(true);
-      findDataAssetMapping()
-        .then((res) => {
-          if (res.code === 0 || res.code === undefined) {
-            setFieldMapping(res.data || []);
-          }
-        })
-        .catch((err) => {
-          console.error('获取字段映射失败:', err);
-        })
-        .finally(() => {
-          setLoading(false);
-        });
-    }
-  }, [visible]);
+  // useEffect(() => {
+  //   if (visible) {
+  //     setLoading(true);
+  //     findDataAssetMapping()
+  //       .then((res) => {
+  //         if (res.code === 0 || res.code === undefined) {
+  //           setFieldMapping(res.data || []);
+  //         }
+  //       })
+  //       .catch((err) => {
+  //         console.error('获取字段映射失败:', err);
+  //       })
+  //       .finally(() => {
+  //         setLoading(false);
+  //       });
+  //   }
+  // }, [visible]);
 
   // 初始化表单数据
   useEffect(() => {
@@ -65,7 +65,7 @@ const EditSingleAssetModal: React.FC<EditSingleAssetModalProps> = ({
 
   // 判断字段是否可修改
   const isFieldEditable = (fieldEnName: string): boolean => {
-    const mapping = fieldMapping.find((item) => item.nameEn === fieldEnName);
+    const mapping = fields.find((item) => item.nameEn === fieldEnName);
     return mapping?.allowModify ?? true; // 默认可修改
   };
 
@@ -76,10 +76,10 @@ const EditSingleAssetModal: React.FC<EditSingleAssetModalProps> = ({
   };
 
   // 获取字段是否为枚举类型
-  const isFieldEnum = (fieldEnName: string): boolean => {
-    const field = fields.find((f) => f.nameEn === fieldEnName);
-    return field?.isEnumAble ?? false;
-  };
+  // const isFieldEnum = (fieldEnName: string): boolean => {
+  //   const field = fields.find((f) => f.nameEn === fieldEnName);
+  //   return field?.isEnumAble ?? false;
+  // };
 
   // 格式化当前值显示
   const formatCurrentValue = (value: any): string => {
@@ -121,7 +121,7 @@ const EditSingleAssetModal: React.FC<EditSingleAssetModalProps> = ({
               {fields.map((field) => {
                 const isEditable = isFieldEditable(field.nameEn);
                 const fieldType = getFieldType(field.nameEn);
-                const isEnum = isFieldEnum(field.nameEn);
+                // const isEnum = isFieldEnum(field.nameEn);
                 const currentValue = record?.[field.nameEn];
 
                 return (
@@ -135,17 +135,6 @@ const EditSingleAssetModal: React.FC<EditSingleAssetModalProps> = ({
                     <td className="px-4 py-3">
                       {!isEditable ? (
                         <span className="text-sm text-[#86909C]">不可修改</span>
-                      ) : isEnum || fieldType === 'select' ? (
-                        <Form.Item
-                          field={field.nameEn}
-                          style={{ marginBottom: 0 }}
-                        >
-                          <Select
-                            placeholder="请选择"
-                            style={{ width: '100%' }}
-                            allowClear
-                          />
-                        </Form.Item>
                       ) : (
                         <Form.Item
                           field={field.nameEn}

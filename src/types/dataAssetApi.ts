@@ -153,6 +153,8 @@ export interface ColumnField {
   displaySort: number;
   /** 字段值 */
   values: Array<string | BaseTag>;
+  /** 去重后的数量 */
+  distinctCount: number;
 }
 
 export interface EditDataAssetFieldsDisplayReq {
