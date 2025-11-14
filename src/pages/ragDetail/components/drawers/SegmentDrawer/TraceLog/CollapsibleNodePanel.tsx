@@ -57,7 +57,7 @@ const CollapsibleNodePanel: React.FC<CollapsibleNodePanelProps> = ({
         {/* Left side: Index, Name, Status */}
         <div className="flex items-center">
           <div className="flex h-4 w-4 items-center justify-center rounded bg-[#E8F2FF] text-xs font-medium text-[#2563EB]">
-            {node.index}
+            {node.index + 1}
           </div>
           <span className="ml-2 text-sm font-semibold text-gray-900">
             {node.name}

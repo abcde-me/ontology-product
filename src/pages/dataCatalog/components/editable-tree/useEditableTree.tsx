@@ -219,7 +219,7 @@ export function useEditableTree({ catalogTreeStore }) {
     focusAndSelectInput();
   };
 
-  // 删除目录 or 卷 or 数据库表
+  // 删除目录 or 卷 or 数据库表 or 元数据
   const handleDelete = async (node: NodeProps, type: string) => {
     const { _key, dataRef } = node;
 

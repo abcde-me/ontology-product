@@ -5,7 +5,10 @@ import {
   Select,
   DatePicker,
   Popover,
-  Checkbox
+  Checkbox,
+  Tooltip,
+  Tag,
+  TreeSelect
 } from '@arco-design/web-react';
 import {
   IconSearch,
@@ -14,7 +17,9 @@ import {
   IconSettings
 } from '@arco-design/web-react/icon';
 import { ColumnField } from '../ColumnSettingModal';
-import { FieldSearchItem } from '@/api/dataCatalog';
+import { FieldSearchItem, BaseTag, TagValueItem } from '@/types/dataAssetApi';
+import { isDateType, isTagsField } from '../../utils/const';
+import dayjs from 'dayjs';
 
 export interface SearchField {
   /** 字段唯一标识 */
@@ -45,6 +50,27 @@ export interface SearchAreaProps {
   /** 样式类 */
   className?: string;
 }
+
+const formatSearchContent = (field: ColumnField, value: any): string[] => {
+  if (field.type === 'datetime' && Array.isArray(value)) {
+    const formattedValues = value
+      .filter((item) => item !== undefined && item !== null && item !== '')
+      .map((item) => {
+        const date = dayjs(item);
+        return date.isValid()
+          ? date.format('YYYY-MM-DD HH:mm:ss')
+          : String(item ?? '');
+      });
+
+    const joinedValue = formattedValues.join('_');
+    return joinedValue ? [joinedValue] : [];
+  }
+
+  const normalizedValues = Array.isArray(value) ? value : [value];
+  return normalizedValues
+    .filter((item) => item !== undefined && item !== null && item !== '')
+    .map((item) => String(item));
+};
 
 export default function SearchArea({
   fields = [],
@@ -81,6 +107,7 @@ export default function SearchArea({
 
   // 处理字段值变化
   const handleFieldValueChange = (fieldKey: string, value: any) => {
+    console.log('-----时间勾选值----', fieldKey, value);
     setFieldValues((prev) => ({
       ...prev,
       [fieldKey]: value
@@ -94,6 +121,7 @@ export default function SearchArea({
     const fieldSearch: FieldSearchItem[] = [];
     checkedFields.forEach((fieldKey) => {
       const field = fields.find((f) => f.id === fieldKey);
+      console.log(field, '------field------');
       if (
         field &&
         fieldValues[fieldKey] !== undefined &&
@@ -104,9 +132,10 @@ export default function SearchArea({
         searchParams[paramKey] = fieldValues[fieldKey];
 
         fieldSearch.push({
+          isEnumAble: field.isEnumAble ?? false,
           nameEn: field.id,
           type: field.type,
-          queryValue: fieldValues[fieldKey]
+          searchContent: formatSearchContent(field, fieldValues[fieldKey])
         });
       }
     });
@@ -233,15 +262,83 @@ export default function SearchArea({
     return button;
   };
 
+  const isBaseTagOption = (opt: string | BaseTag): opt is BaseTag => {
+    if (typeof opt !== 'object' || opt === null) {
+      return false;
+    }
+    return Array.isArray((opt as any).valueList);
+  };
+
   // 渲染字段搜索输入组件
   const renderFieldInput = (field: ColumnField) => {
     const value = fieldValues[field.id];
     let fieldType = field.type;
+    if (isTagsField(field.nameEn)) {
+      const tagOptions = (field.values || []).filter(isBaseTagOption);
+      const treeData = tagOptions.map((tag) => ({
+        key: tag.id,
+        value: tag.id,
+        title: tag.name,
+        selectable: false,
+        checkable: false,
+        disableCheckbox: true,
+        children: (tag.valueList || []).map((item: TagValueItem) => ({
+          key: item.id,
+          value: item.tagValue,
+          title: item.tagValue
+        }))
+      }));
 
-    if (field.isEnumAble && field.values?.length > 0) {
-      fieldType = 'select';
-    } else if (field.type === 'datetime') {
+      return (
+        <TreeSelect
+          placeholder={`请选择${field.nameZh}`}
+          value={Array.isArray(value) ? value : []}
+          multiple
+          treeCheckable
+          treeCheckedStrategy="child"
+          treeData={treeData}
+          onChange={(val) => {
+            const nextValue = Array.isArray(val)
+              ? val
+              : val !== undefined && val !== null
+                ? [val]
+                : [];
+            handleFieldValueChange(field.id, nextValue);
+          }}
+          maxTagCount={{
+            count: 2,
+            render: (invisibleTagCount) => {
+              const remainingTags = value.slice(2);
+              return (
+                <Tooltip
+                  content={
+                    <div className="ml-[-4px] flex max-w-[300px] flex-wrap gap-1">
+                      {remainingTags.map((item, i) => (
+                        <Tag
+                          key={i}
+                          className="bg-[#E7ECF0] text-[14px] text-[#0F172A]"
+                          // className={classNames(styles['tag'])}
+                        >
+                          {item}
+                        </Tag>
+                      ))}
+                    </div>
+                  }
+                >
+                  +{invisibleTagCount}
+                </Tooltip>
+              );
+            }
+          }}
+          allowClear
+        />
+      );
+    }
+
+    if (isDateType(field.type)) {
       fieldType = 'range';
+    } else if (field.isEnumAble && field.values?.length > 0) {
+      fieldType = 'select';
     } else {
       fieldType = 'string';
     }
@@ -262,23 +359,52 @@ export default function SearchArea({
           <Select
             placeholder={`请选择${field.nameZh}`}
             value={value}
+            mode="multiple"
+            maxTagCount={{
+              count: 2,
+              render: (invisibleTagCount) => {
+                const remainingTags = value.slice(2);
+                return (
+                  <Tooltip
+                    content={
+                      <div className="ml-[-4px] flex max-w-[300px] flex-wrap gap-1">
+                        {remainingTags.map((item, i) => (
+                          <Tag
+                            key={i}
+                            className="bg-[#E7ECF0] text-[14px] text-[#0F172A]"
+                            // className={classNames(styles['tag'])}
+                          >
+                            {item}
+                          </Tag>
+                        ))}
+                      </div>
+                    }
+                  >
+                    +{invisibleTagCount}
+                  </Tooltip>
+                );
+              }
+            }}
             onChange={(val) => handleFieldValueChange(field.id, val)}
             allowClear
-            showSearch
           >
-            {field.values?.map((opt) => (
-              <Select.Option key={opt} value={opt}>
-                {opt}
-              </Select.Option>
-            ))}
+            {field.values
+              ?.filter((opt): opt is string => typeof opt === 'string')
+              .map((opt) => (
+                <Select.Option key={opt} value={opt}>
+                  {opt}
+                </Select.Option>
+              ))}
           </Select>
         );
       case 'range':
         return (
           <DatePicker.RangePicker
             value={value}
-            onChange={(val) => handleFieldValueChange(field.nameZh, val)}
+            onChange={(val) => handleFieldValueChange(field.id, val)}
             allowClear
+            showTime={{ format: 'HH:mm:ss' }}
+            format="YYYY-MM-DD HH:mm:ss"
             placeholder={['开始日期', '结束日期']}
           />
         );
@@ -336,7 +462,7 @@ export default function SearchArea({
                   <span className="whitespace-nowrap text-sm text-[var(--color-text-1)]">
                     {field.nameZh}:
                   </span>
-                  <div className="w-[200px]">{renderFieldInput(field)}</div>
+                  <div className="w-[380px]">{renderFieldInput(field)}</div>
                 </div>
               ))}
             </div>
