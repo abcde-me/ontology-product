@@ -308,8 +308,9 @@ export function useEditableTree({ catalogTreeStore }) {
           ?.children ?? [];
     } else if (dataRef?.type === 'metadata') {
       targetChildrenArray =
-        rawChildrenTreeData?.children?.find((child) => child.type === 'db')
-          ?.children ?? [];
+        rawChildrenTreeData?.children?.find(
+          (child) => child.type === 'metadata'
+        )?.children ?? [];
     }
 
     const name = generateName(
