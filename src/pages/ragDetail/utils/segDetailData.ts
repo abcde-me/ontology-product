@@ -67,7 +67,7 @@ export const SegDetailData = {
       {
         id: '4', // 元素ID
         type: 'formula', // "text","title","table","image","formula"
-        text: '$$y = \\beta_0 + \\beta_1 x_1 + \\beta_2 x_2 + \\epsilon$$', // 文本内容
+        text: '$$y = \\beta_0 + \\beta_1 x_1 + \\beta_2 x_2 + \\epsilon$$', // 文本内容（包含$$用于MathJax识别）
         positions: [
           {
             bbox: [1, 2, 3, 4],

@@ -54,24 +54,24 @@ const FormulaElementCard: React.FC<FormulaElementCardProps> = ({
       {(element.positionType ||
         element.positionInfo ||
         (element as any).pageId) && (
-        <div className="flex items-center gap-3 text-sm">
+        <div className="flex items-center gap-6 text-sm">
           {element.positionType && (
-            <div className="flex">
+            <span className="text-gray-900">
               <span className="w-18 text-gray-500">定位类型：</span>
-              <span className="text-gray-900">{element.positionType}</span>
-            </div>
+              {element.positionType}
+            </span>
           )}
           {element.positionInfo && (
-            <div className="flex">
+            <span className="text-gray-900">
               <span className="w-18 text-gray-500">位置信息：</span>
-              <span className="text-gray-900">{element.positionInfo}</span>
-            </div>
+              {element.positionInfo}
+            </span>
           )}
           {(element as any).pageId && (
-            <div className="flex">
+            <span className="text-gray-900">
               <span className="w-18 text-gray-500">页码：</span>
-              <span className="text-gray-900">{(element as any).pageId}</span>
-            </div>
+              {(element as any).pageId}
+            </span>
           )}
         </div>
       )}

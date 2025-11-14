@@ -595,9 +595,10 @@ function transformApiMaterialToElement(material: any): Element {
 
   if (material.positions && material.positions.length > 0) {
     const position = material.positions[0];
-    if (position.bbox) {
+    if (position.bbox && position.bbox.length === 4) {
       positionType = '坐标';
-      positionInfo = `(${position.bbox[0]}, ${position.bbox[1]})`;
+      // 显示两个坐标点: (x1, y1) 和 (x2, y2)
+      positionInfo = `(${position.bbox[0]}, ${position.bbox[1]}) - (${position.bbox[2]}, ${position.bbox[3]})`;
     }
     pageId = position.page_id;
   }
