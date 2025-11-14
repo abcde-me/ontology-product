@@ -1,8 +1,12 @@
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import React, {
+  useState,
+  useEffect,
+  useRef,
+  useMemo,
+  useCallback
+} from 'react';
 import {
   Button,
-  Table,
-  Pagination,
   Message,
   Space,
   Spin,
@@ -97,6 +101,9 @@ export default function DataAssetList() {
     Array<{ nameZh: string; nameEn: string; type: string }>
   >([]); // 用于修改资产的字段列表
   const [columnFields, setColumnFields] = useState<ApiColumnField[]>([]); // 列字段列表（用于单条编辑）
+  const [rawDisplayFields, setRawDisplayFields] = useState<ApiColumnField[]>(
+    []
+  );
   const history = useHistory();
   // 吸顶状态
   const [isSticky, setIsSticky] = useState(false);
@@ -290,31 +297,7 @@ export default function DataAssetList() {
       return;
     }
 
-    // 处理列设置数据
-    // const { fields: displayFields } = dataAssetFieldsDisplayRes.data || {
-    //   fields: []
-    // };
-    // 将 API 返回的 ColumnField 格式转换为组件需要的格式
-    const convertedFields: ColumnField[] = (
-      dataAssetFieldsDisplayRes.data || []
-    ).map((field: ApiColumnField, index: number) => ({
-      id: field.nameEn || String(index),
-      nameEn: field.nameEn || String(index),
-      nameZh: field.nameZh,
-      type: field.type,
-      isEnumAble: field.isEnumAble || false,
-      enumLoading: false,
-      enumCount: 0,
-      displaySort: field.displaySort || 0,
-      // 可枚举列表
-      values: field.values || []
-    }));
-    setColumnSettingsFields(convertedFields);
-    console.log(
-      '看一下列设置返回的内容',
-      convertedFields.filter((field) => field.displaySort > 0)
-    );
-    setSearchFields(convertedFields.filter((field) => field.displaySort > 0));
+    setRawDisplayFields(dataAssetFieldsDisplayRes.data || []);
   };
 
   // 初始化：检查是否有mapping数据
@@ -343,6 +326,34 @@ export default function DataAssetList() {
     init();
   }, []);
 
+  const convertFields = useCallback(
+    (fields: ApiColumnField[]): ColumnField[] =>
+      fields.map((field: ApiColumnField, index: number) => {
+        const isTagsField = field.nameEn === 'tags';
+        return {
+          id: field.nameEn || String(index),
+          nameEn: field.nameEn || String(index),
+          nameZh: field.nameZh,
+          type: field.type,
+          isEnumAble: isTagsField ? true : field.isEnumAble || false,
+          enumLoading: false,
+          enumCount: 0,
+          displaySort: field.displaySort || 0,
+          values: isTagsField ? tagList : field.values || []
+        };
+      }),
+    [tagList]
+  );
+
+  useEffect(() => {
+    if (!rawDisplayFields.length) {
+      return;
+    }
+    const convertedFields = convertFields(rawDisplayFields);
+    setColumnSettingsFields(convertedFields);
+    setSearchFields(convertedFields.filter((field) => field.displaySort > 0));
+  }, [rawDisplayFields, convertFields]);
+
   // 获取标签列表
   useEffect(() => {
     getTagList()
@@ -360,35 +371,6 @@ export default function DataAssetList() {
 
   // 更新搜索字段配置（当标签和来源数据加载完成后）
   useEffect(() => {
-    // const fields: SearchField[] = [
-    //   {
-    //     key: 'name',
-    //     label: '数据资产名称',
-    //     type: 'input',
-    //     paramKey: 'name'
-    //   },
-    //   {
-    //     key: 'tag',
-    //     label: '资产标签',
-    //     type: 'select',
-    //     options: assetTags,
-    //     paramKey: 'tag'
-    //   },
-    //   {
-    //     key: 'source',
-    //     label: '资产来源',
-    //     type: 'select',
-    //     options: assetSources,
-    //     paramKey: 'source'
-    //   },
-    //   {
-    //     key: 'updateTime',
-    //     label: '更新时间',
-    //     type: 'daterange',
-    //     paramKey: 'updateTime'
-    //   }
-    // ];
-    // setSearchFields(fields);
     loadListData(1, pageSize);
   }, [searchParams]);
 
@@ -467,7 +449,6 @@ export default function DataAssetList() {
     const targetPage = isSizeChange ? 1 : page;
 
     setCurrentPage(targetPage);
-    console.log('nextPageSize', nextPageSize, targetPage);
     if (isSizeChange && nextPageSize) {
       setPageSize(nextPageSize);
     }
@@ -529,7 +510,6 @@ export default function DataAssetList() {
   // 处理批量删除
   const handleBatchDelete = () => {
     if (selectedRowKeys.length === 0) return;
-    console.log('selectedRowKeys', selectedRowKeys);
 
     Modal.confirm({
       title: '确定删除资产吗?',
@@ -720,15 +700,6 @@ export default function DataAssetList() {
 
   // 处理资产设置跳转
   const handleAssetSettings = () => {
-    // if (selectedRowKeys.length === 0) {
-    //   Message.warning('请先选择一个资产');
-    //   return;
-    // }
-    // if (selectedRowKeys.length > 1) {
-    //   Message.warning('请只选择一个资产进行设置');
-    //   return;
-    // }
-    // 跳转到编辑资产页面
     history.push(`/tenant/compute/modaforge/dataAsset/edit`);
   };
 
@@ -769,14 +740,6 @@ export default function DataAssetList() {
           styles['data-asset-list-content']
         )}
       >
-        {/* {dataAssetList.length !== 0 && (
-          <div className="mb-4 h-[30px] w-full leading-[30px]">
-            <p className="text-xl font-bold">
-              数据资产（{dataAssetList.length}）
-            </p>
-          </div>
-        )} */}
-
         {/* 搜索区域 */}
         <SearchArea
           fields={searchFields}
@@ -886,15 +849,6 @@ export default function DataAssetList() {
           </div>
         </div>
 
-        {/* {dataAssetList.length === 0 ? (
-          <div className="flex h-[calc(100%-70px)] items-center justify-center">
-            {noDataElement({
-              description: '暂无数据资产',
-              btnText: '创建数据资产',
-              handleBtn: handleCreateDataAsset
-            })}
-          </div>
-        ) : ( */}
         <div className="px-[24px]">
           {loading ? (
             <div className="flex h-[calc(100%-70px)] items-center justify-center">

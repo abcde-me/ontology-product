@@ -16,6 +16,7 @@ import DragIcon from '../../assets/drag-icon.svg';
 import styles from './index.module.scss';
 import { RESERVED_FIELD_ENS } from '../../utils/const';
 import { getDataAssetTableDistinctFieldCount } from '@/api/dataAsset';
+import { BaseTag } from '@/types/dataAssetApi';
 // const SortableAny = ReactSortable as any;
 
 export interface ColumnField {
@@ -27,7 +28,7 @@ export interface ColumnField {
   enumLoading: boolean;
   enumCount: number; // 枚举数
   displaySort: number;
-  values: string[];
+  values: Array<string | BaseTag>;
 }
 
 export interface ColumnSettingModalProps {
@@ -105,8 +106,8 @@ const ColumnSettingModal: React.FC<ColumnSettingModalProps> = ({
         fieldEnName: nameEn
       });
 
-      if (res.code !== '' || res.status !== 200 || res.data > 1000) {
-        Message.error('该字段不可勾选为枚举类型');
+      if (res?.code !== '' || res?.status !== 200 || res?.data > 1000) {
+        Message.error(res?.message ?? '该字段不可勾选为枚举类型');
         setFields((fields) =>
           fields.map((f) =>
             f.nameEn === nameEn ? { ...f, enumLoading: false } : f

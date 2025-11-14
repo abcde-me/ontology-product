@@ -97,20 +97,6 @@ const ModifyTagsModal: React.FC<ModifyTagsModalProps> = ({
             treeCheckStrictly
             labelInValue
             treeData={tagTreeData}
-            // value={recordTags}
-            // options={tagOptions}
-            // dropdownMenuClassName="data-asset-dropdown-select"
-            // renderTag={tagRender}
-            // popupVisible={selectVisible[record.id] || false}
-            // onVisibleChange={(visible) => {
-            //   setSelectVisible((prev) => ({
-            //     ...prev,
-            //     [record.id]: visible
-            //   }));
-            //   if (visible) {
-            //     setEditingTagRecordId(record.id);
-            //   }
-            // }}
             maxTagCount={{
               count: 2,
               render: (invisibleTagCount) => {
