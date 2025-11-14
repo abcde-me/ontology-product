@@ -33,6 +33,9 @@ const FieldImportUpload: React.FC<FieldImportUploadProps> = ({
   onUploadingChange
 }) => {
   const [fileList, setFileList] = useState<any>([]);
+  const hasErrorFile = fileList.some(
+    (file: any) => file.status === UploadStatus.error
+  );
 
   const handleUploadChange = (files: any) => {
     const processedFiles = files.map((file: any) => {
@@ -156,6 +159,7 @@ const FieldImportUpload: React.FC<FieldImportUploadProps> = ({
         drag
         className="upload-file"
         accept=".xlsx,.xls"
+        showUploadList={!hasErrorFile}
         beforeUpload={(file) => {
           return checkFile(file);
         }}

@@ -134,7 +134,7 @@ export default function Step2FieldMapping({
       {
         title: '序号',
         dataIndex: 'sequence',
-        width: 80,
+        width: 40,
         align: 'center' as const
       },
       {
@@ -201,8 +201,9 @@ export default function Step2FieldMapping({
     cols.push({
       title: '操作',
       dataIndex: 'operation',
-      width: 150,
-      align: 'center' as const,
+      width: 132,
+      align: 'left' as const,
+      fixed: 'right' as const,
       render: (_: any, record: FieldMapping) => {
         const meta = metadataFields[record.sequence - 1];
         const isReserved =

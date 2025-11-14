@@ -6,14 +6,9 @@ import {
   Pagination,
   Message
 } from '@arco-design/web-react';
-import {
-  ListDataAssetDataRes,
-  EditDataAssetData,
-  ModifyMethod,
-  BaseTag
-} from '@/types/dataAssetApi';
-import { editDataAssetDataTagsBatch, getTagList } from '@/api/dataAsset';
-import { editDataAssetDataBatch } from '@/api/dataAsset';
+import { ListDataAssetDataRes, BaseTag } from '@/types/dataAssetApi';
+import { editDataAssetDataTagsBatch } from '@/api/dataAsset';
+import EllipsisPopoverCom from '@/components/ellipsis-popover-com';
 import classNames from 'classnames';
 import styles from './index.module.scss';
 import noDataElement from '@/components/no-data';
@@ -205,7 +200,11 @@ export default function DataAssetTableCard({
             >
               {/* 标题 */}
               <div className="truncate text-base font-semibold leading-6 text-[#1f2937]">
-                {(record?.data_asset_name as string) || '未命名资产'}
+                <EllipsisPopoverCom
+                  value={record?.data_asset_name || '未命名资产'}
+                  wrapperClassName="w-full"
+                  className="text-[14px]"
+                />
               </div>
 
               {/* 标签区域 */}

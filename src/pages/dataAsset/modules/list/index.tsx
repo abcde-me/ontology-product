@@ -170,6 +170,7 @@ export default function DataAssetList() {
         {
           title: '序号',
           dataIndex: 'index',
+          fixed: 'right' as const,
           width: 80,
           key: 'index',
           render: (_: any, __: any, idx: number) => (page - 1) * size + idx + 1
