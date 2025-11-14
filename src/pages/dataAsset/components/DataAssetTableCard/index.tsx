@@ -267,6 +267,12 @@ export default function DataAssetTableCard({
                       );
                     }
                   }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      updateRecordTags(record?.id, recordTags);
+                    }
+                  }}
                   onChange={(values) => {
                     const nextValues = (
                       Array.isArray(values) ? values : values ? [values] : []
