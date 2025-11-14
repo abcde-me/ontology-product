@@ -34,7 +34,7 @@ const EnhancementInfo: React.FC<EnhancementInfoProps> = ({
       {/* 标题和编辑按钮 */}
       <div className="mb-4 flex items-center justify-between">
         <h3 className="text-base font-medium text-gray-900">分段增强信息</h3>
-        <div className="flex gap-2">
+        {/* <div className="flex gap-2">
           {!isEditing ? (
             <button
               onClick={onStartEditing}
@@ -61,7 +61,7 @@ const EnhancementInfo: React.FC<EnhancementInfoProps> = ({
               </button>
             </>
           )}
-        </div>
+        </div> */}
       </div>
 
       {/* 内容区域 */}
