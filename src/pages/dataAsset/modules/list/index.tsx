@@ -56,7 +56,7 @@ import styles from './list.module.scss';
 import classNames from 'classnames';
 import { FieldSearchItem } from '@/types/dataAssetApi';
 import dayjs from 'dayjs';
-import { isTagsField, TAGS_FIELD_EN_NAME } from '../../utils/const';
+import { isDateType, isTagsField, TAGS_FIELD_EN_NAME } from '../../utils/const';
 
 interface TagValue {
   tagId: string;
@@ -330,14 +330,26 @@ export default function DataAssetList() {
   const convertFields = useCallback(
     (fields: ApiColumnField[]): ColumnField[] =>
       fields.map((field: ApiColumnField, index: number) => {
+        // 时间类型or标签类型不能勾选为枚举类型
+        const isEnumAbleForColumn =
+          isDateType(field.type) || isTagsField(field.nameEn) ? false : true;
+        let isEnumAble = field.isEnumAble;
+
+        // 搜索时传给服务端的值，要求标签类型是true, 时间类型是false
+        if (isTagsField(field.nameEn)) {
+          isEnumAble = true;
+        } else if (isDateType(field.type)) {
+          isEnumAble = false;
+        }
+
         return {
           id: field.nameEn || String(index),
           nameEn: field.nameEn || String(index),
           nameZh: field.nameZh,
           type: field.type,
-          isEnumAble: isTagsField(field.nameEn)
-            ? true
-            : field.isEnumAble || false,
+          // 列设置弹窗中是否可勾选为枚举类型
+          isEnumAbleForColumn,
+          isEnumAble,
           enumLoading: false,
           distinctCount: field.distinctCount || 0,
           displaySort: field.displaySort || 0,
