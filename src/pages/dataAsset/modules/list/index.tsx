@@ -50,7 +50,7 @@ import { ColumnField } from '../../components/ColumnSettingModal';
 import ColumnSettingModal from '../../components/ColumnSettingModal';
 import styles from './list.module.scss';
 import classNames from 'classnames';
-import { FieldSearchItem } from '@/api/dataCatalog';
+import { FieldSearchItem } from '@/types/dataAssetApi';
 import dayjs from 'dayjs';
 
 interface TagValue {

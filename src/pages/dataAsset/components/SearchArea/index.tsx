@@ -14,7 +14,7 @@ import {
   IconSettings
 } from '@arco-design/web-react/icon';
 import { ColumnField } from '../ColumnSettingModal';
-import { FieldSearchItem } from '@/api/dataCatalog';
+import { FieldSearchItem } from '@/types/dataAssetApi';
 
 export interface SearchField {
   /** 字段唯一标识 */
@@ -106,7 +106,7 @@ export default function SearchArea({
         fieldSearch.push({
           nameEn: field.id,
           type: field.type,
-          queryValue: fieldValues[fieldKey]
+          searchContent: [fieldValues[fieldKey]]
         });
       }
     });
