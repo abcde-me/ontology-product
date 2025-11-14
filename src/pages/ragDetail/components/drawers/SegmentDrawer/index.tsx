@@ -17,6 +17,9 @@ interface SegmentDrawerProps {
   defaultActiveTab?: 'detail' | 'trace';
   currentSegmentIndex?: number;
   totalSegments?: number;
+  datasetId?: string;
+  chunkId?: string;
+  segments?: Array<{ id: string; [key: string]: any }>;
 }
 
 const SegmentDrawer: React.FC<SegmentDrawerProps> = ({
@@ -24,23 +27,40 @@ const SegmentDrawer: React.FC<SegmentDrawerProps> = ({
   onClose,
   defaultActiveTab = 'trace',
   currentSegmentIndex = 1,
-  totalSegments = 100
+  totalSegments = 100,
+  datasetId = '',
+  chunkId = '',
+  segments = []
 }) => {
   const {
     activeTab,
     currentSegmentIndex: storeSegmentIndex,
     openDrawer,
     closeDrawer,
-    setTotalSegments
+    setTotalSegments,
+    setDatasetIdAndChunkId,
+    setSegments
   } = useSegmentDrawerStore();
 
   // 当外部 props 变化时，同步到 store
   useEffect(() => {
     if (visible) {
       setTotalSegments(totalSegments);
-      openDrawer(currentSegmentIndex, defaultActiveTab);
+      setDatasetIdAndChunkId(datasetId, chunkId);
+      setSegments(segments);
+      // 将 0-based 的 segmentIndex 转换为 1-based 的 currentSegmentIndex
+      const displayIndex = currentSegmentIndex + 1;
+      openDrawer(displayIndex, defaultActiveTab);
     }
-  }, [visible, currentSegmentIndex, defaultActiveTab, totalSegments]);
+  }, [
+    visible,
+    currentSegmentIndex,
+    defaultActiveTab,
+    totalSegments,
+    datasetId,
+    chunkId,
+    segments
+  ]);
 
   // 关闭抽屉时调用外部 onClose
   const handleClose = () => {

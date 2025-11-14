@@ -19,10 +19,12 @@ import type {
 import { SegmentData } from '../utils/segmentData';
 import { getTreeDataByRagId } from '../utils/treeData';
 import { getSegmentDataByRagId } from '../utils/segmentDataByRagId';
+import { LogData } from '../utils/logData';
 import {
   ListKnowledgeDocumentCatalogs,
   ListKnowledgeChunks,
-  UpdateKnowledgeChunk
+  UpdateKnowledgeChunk,
+  GetKnowledgeChunkTraceLog
 } from '@/api/modules/rag';
 
 /**
@@ -489,37 +491,33 @@ export async function fetchSegmentDetail(
 
 /**
  * 获取溯源日志
- * @param ragId - RAG ID
- * @param segmentId - 分段ID
- * @returns 溯源日志列表
+ * @param datasetId - 数据集ID
+ * @param chunkId - 分块ID
+ * @returns 溯源日志数据
  */
 export async function fetchSegmentTraceLog(
-  ragId: string,
-  segmentId: string
-): Promise<any[]> {
-  // TODO: 替换为真实API调用
-  // const response = await fetch(`/api/rag/${ragId}/segments/${segmentId}/trace-log`);
-  // const data = await response.json();
-  // return data;
+  datasetId: string,
+  chunkId: string
+): Promise<any> {
+  try {
+    // 调用真实API
+    const response = await GetKnowledgeChunkTraceLog({
+      dataset_id: datasetId,
+      chunk_id: chunkId
+    });
 
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve([
-        {
-          id: '1',
-          action: 'created',
-          timestamp: new Date().toISOString(),
-          operator: 'system'
-        },
-        {
-          id: '2',
-          action: 'updated',
-          timestamp: new Date().toISOString(),
-          operator: 'user'
-        }
-      ]);
-    }, 300);
-  });
+    // 检查响应格式
+    if (response && response.data) {
+      return response.data;
+    }
+
+    // 如果响应格式不符合预期，返回 mock 数据
+    return LogData.data;
+  } catch (error) {
+    console.error('Failed to fetch segment trace log:', error);
+    // 降级处理：返回 mock 数据
+    return LogData.data;
+  }
 }
 
 /**

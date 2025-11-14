@@ -18,7 +18,8 @@ function RagDetail() {
     segmentDrawerTab,
     segmentDrawerSegmentId,
     closeSegmentDrawer,
-    segments
+    segments,
+    datasetId
   } = useRagDetailStore();
 
   useEffect(() => {
@@ -72,6 +73,9 @@ function RagDetail() {
           defaultActiveTab={segmentDrawerTab}
           currentSegmentIndex={currentSegment.segmentIndex}
           totalSegments={segments.length}
+          datasetId={datasetId || ''}
+          chunkId={currentSegment.id}
+          segments={segments}
         />
       )}
       {/* <SegmentDrawer
