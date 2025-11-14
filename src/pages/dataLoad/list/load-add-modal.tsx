@@ -485,9 +485,7 @@ const LoadAddModal = (props: propsType) => {
       console.log('connector_id', connector_id);
       const res = await getdetailList({ id: connector_id });
       if (sourceType === 'db') {
-        const tableNameRes = await getTableName({ connector_id: connector_id });
-        console.log(tableNameRes, '获取连接器下面的表格');
-        setTableNames(tableNameRes?.data);
+        setTableNames('');
       }
       setTableList(res?.data?.table_name || []);
       console.log(res, '获取连接器下面的表格');
@@ -497,15 +495,22 @@ const LoadAddModal = (props: propsType) => {
   };
   const connectorId = Form.useWatch('connector_id', form);
   useEffect(() => {
-    if (connectorId) {
-      getConnectorDetailList(connectorId);
-      if (sourceType === 'db') {
-        form.setFieldsValue({
-          table_name: undefined
-        });
-      }
+    if (!connectorId) {
+      setTableNames('');
+      return;
     }
-  }, [connectorId]);
+
+    getConnectorDetailList(connectorId);
+
+    if (sourceType === 'db') {
+      form.setFieldsValue({
+        table_name: undefined
+      });
+      setTableNames('');
+    } else {
+      setTableNames('');
+    }
+  }, [connectorId, sourceType, form, getConnectorDetailList]);
   // 创建 MutationObserver 监听 DOM 变化
   const observer = new MutationObserver(() => {
     const items = document.querySelectorAll('.arco-cascader-list-item');
@@ -866,20 +871,60 @@ const LoadAddModal = (props: propsType) => {
                 onDirectoryDataChange={setDirectoryData}
                 onSelect={handleSelect}
                 selectedKeys={selectedTreeKeys}
-                onPathChange={(path, nodeId) => {
-                  console.log('路径变化:', path, '节点ID:', nodeId);
-                  // 存储节点ID用于表单提交
-                  setSelectedNodeId(nodeId || null);
-                  // 设置表单显示值为路径
-                  form.setFieldsValue({
-                    dest_path: path
-                  });
-                  // 选择完成后关闭下拉框
-                  // 初始节点id是一个字符串， 生成成功后是number类型
-                  if (isNumber(nodeId)) {
-                    setDropdownVisible(false);
-                  }
-                }}
+                onPathChange={
+                  (async (path, nodeId, nodeData) => {
+                    console.log(
+                      '路径变化:',
+                      path,
+                      '节点ID:',
+                      nodeId,
+                      '节点数据:',
+                      nodeData
+                    );
+                    // 存储节点ID用于表单提交
+                    setSelectedNodeId(nodeId || null);
+                    // 设置表单显示值为路径
+                    form.setFieldsValue({
+                      dest_path: path
+                    });
+
+                    const connectorValue = form.getFieldValue('connector_id');
+                    const typeName = nodeData?.type_name;
+                    if (
+                      typeName === 'db' &&
+                      typeName === 'metadata' &&
+                      connectorValue
+                    ) {
+                      const generateType =
+                        typeName === 'metadata' ? 'metadata' : 'db';
+                      try {
+                        const tableNameRes = await getTableName({
+                          connector_id: connectorValue,
+                          generate_type: generateType
+                        });
+
+                        if (tableNameRes?.status === 200) {
+                          setTableNames(tableNameRes?.data || '');
+                        } else {
+                          setTableNames('');
+                          Message.error('生成数据库名称失败，请重试');
+                        }
+                      } catch (error) {
+                        console.error('生成数据库名称失败:', error);
+                        setTableNames('');
+                        Message.error('生成数据库名称失败，请重试');
+                      }
+                    } else {
+                      setTableNames('');
+                    }
+
+                    // 选择完成后关闭下拉框
+                    // 初始节点id是一个字符串， 生成成功后是number类型
+                    if (isNumber(nodeId)) {
+                      setDropdownVisible(false);
+                    }
+                  }) as any
+                }
                 showAddTree={true}
                 enableRootAdd={true}
                 activeTab="src"
