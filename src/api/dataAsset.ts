@@ -1,4 +1,5 @@
 import UAPI from '@/api';
+import type { AxiosResponse } from 'axios';
 import {
   AutoMapDataAssetFieldAndSourceReq,
   AutoMapDataAssetFieldAndSourceResItem,
@@ -280,26 +281,37 @@ export async function deleteDataAsset(id: string) {
 export async function analyzeDataAssetFieldsFile(params: {
   file: File;
 }): Promise<ApiRes<DataAssetField[]>> {
-  return Promise.resolve({
-    code: 0,
-    status: 200,
-    data: [
-      {
-        nameZh: '数据集',
-        nameEn: 'dataset',
-        type: 'string',
-        default: '',
-        required: false,
-        allowModify: true
-      }
-    ],
-    message: 'success',
-    requestId: ''
-  });
-  // return await UAPI.RES.analyzeDataAssetFieldsFile({})
-  //   .post(params)
-  //   .inRegion()
-  //   .do();
+  // return Promise.resolve({
+  //   code: 0,
+  //   status: 200,
+  //   data: [
+  //     {
+  //       nameZh: '数据集',
+  //       nameEn: 'dataset',
+  //       type: 'string',
+  //       default: '',
+  //       required: false,
+  //       allowModify: true
+  //     }
+  //   ],
+  //   message: 'success',
+  //   requestId: ''
+  // });
+  return await UAPI.RES.analyzeDataAssetFieldsFile({})
+    .post(params)
+    .inRegion()
+    .do();
+}
+
+// 下载数据资产字段模板
+export async function downloadDataAssetFieldsTemplate(): Promise<
+  AxiosResponse<Blob>
+> {
+  return (await UAPI.RES.downloadDataAssetFieldsTemplate({})
+    .post()
+    .withConfig({ responseType: 'blob' })
+    .inRegion()
+    .do({ preCheck: false })) as AxiosResponse<Blob>;
 }
 
 // 查询支持的字段类型
@@ -424,7 +436,7 @@ export async function editDataAssetColumnMap(
   params: any
 ): Promise<ApiRes<any>> {
   return Promise.resolve({
-    code: 0,
+    code: '0',
     status: 200,
     data: {},
     message: 'success',
@@ -438,7 +450,7 @@ export async function autoMapDataAssetColumn(
   params: EditDataAssetColumnMapReq
 ): Promise<ApiRes<EditDataAssetColumnMapResItem[]>> {
   return Promise.resolve({
-    code: 0,
+    code: '0',
     status: 200,
     data: [
       {
