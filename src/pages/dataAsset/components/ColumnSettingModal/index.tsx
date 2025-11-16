@@ -226,7 +226,7 @@ const ColumnSettingModal: React.FC<ColumnSettingModalProps> = ({
             <span className="font-weight-500">
               已选字段 {selectedIds.length}/{fields.length}
             </span>
-            <IconDelete
+            {/* <IconDelete
               className={`size-[16px] ${
                 selectedIds.length === 0
                   ? 'pointer-events-none cursor-not-allowed text-[var(--color-text-4)]'
@@ -235,7 +235,7 @@ const ColumnSettingModal: React.FC<ColumnSettingModalProps> = ({
               onClick={() => {
                 if (selectedIds.length > 0) setSelectedIds([]);
               }}
-            />
+            /> */}
           </div>
           <ReactSortable
             tag="div"
@@ -249,25 +249,35 @@ const ColumnSettingModal: React.FC<ColumnSettingModalProps> = ({
               onChange(list);
             }}
           >
-            {selectedFields.map((field) => (
-              <div
-                key={field.nameEn}
-                data-nameEn={field.nameEn}
-                className="m-t-[7px] flex h-[40px] items-center"
-              >
-                <DragIcon className="mr-[8px] h-[14px] w-[14px]"></DragIcon>
-                {/* <div className='w-[14px] h-[14px] mr-[8px]'>
-                  
-                </div> */}
-                <span className="line-height-[40px] flex-1">
-                  {field.nameZh}
-                </span>
-                <IconClose
-                  className="size-[12px] cursor-pointer"
-                  onClick={() => handleRemove(field.nameEn)}
-                />
-              </div>
-            ))}
+            {selectedFields.map((field) => {
+              const isReserved = RESERVED_FIELD_ENS.has(field.nameEn);
+              return (
+                <div
+                  key={field.nameEn}
+                  data-nameEn={field.nameEn}
+                  className="m-t-[7px] flex h-[40px] items-center"
+                >
+                  <DragIcon className="mr-[8px] h-[14px] w-[14px]"></DragIcon>
+                  {/* <div className='w-[14px] h-[14px] mr-[8px]'>
+                    
+                  </div> */}
+                  <span className="line-height-[40px] flex-1">
+                    {field.nameZh}
+                  </span>
+                  <IconClose
+                    className={`size-[12px] ${
+                      isReserved
+                        ? 'cursor-not-allowed text-[var(--color-text-4)]'
+                        : 'cursor-pointer'
+                    }`}
+                    onClick={() => {
+                      if (isReserved) return;
+                      handleRemove(field.nameEn);
+                    }}
+                  />
+                </div>
+              );
+            })}
           </ReactSortable>
         </div>
       </div>

@@ -16,7 +16,8 @@ import {
   addVolume,
   deleteVolume,
   renameCatalog,
-  addDb
+  addDb,
+  addMetaData
 } from '@/api/dataCatalog';
 import { RefInputType } from '@arco-design/web-react/es/Input/interface';
 import {
@@ -111,6 +112,11 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
     Map<string, TreeNodeData>
   >(new Map());
 
+  // 元数据节点下的输入框状态
+  const [metadataInputNodes, setMetadataInputNodes] = useState<
+    Map<string, TreeNodeData>
+  >(new Map());
+
   // 处理数据：为每个目录添加"数据库"子节点，为本地文件类型添加"数据卷"子节点
   const processedDirectoryData = React.useMemo(() => {
     return directoryData.map((item) => {
@@ -194,6 +200,7 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
             }
           }
 
+          // 不存在元数据父节点时也渲染一个，便于右侧“新建”出现；并合并处于输入状态的元数据子节点
           if (!hasMetaDataNode) {
             let metaDataChildren: TreeNodeData[] = [];
             if (item.children) {
@@ -244,28 +251,31 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
               }
             }
 
-            if (metaDataChildren.length > 0) {
-              const metaNodeKey = `${item.id}-metadata`;
-              const metaNode: TreeNodeData = {
-                id: metaNodeKey,
-                key: metaNodeKey,
-                name: '元数据',
-                value: metaNodeKey,
-                label: '元数据',
-                title: '元数据',
-                type_name: 'metadata_parent',
-                level: (item.level || 0) + 1,
-                isExpanded: false,
-                hasChildren: true,
-                isLastLeaf: false,
-                showInput: false,
-                isNew: false,
-                parentId: item.id,
-                children: metaDataChildren
-              };
-
-              childNodes.push(metaNode);
+            const metaNodeKey = `${item.id}-metadata`;
+            const metaInputNode = metadataInputNodes.get(metaNodeKey);
+            if (metaInputNode) {
+              metaDataChildren = [metaInputNode, ...metaDataChildren];
             }
+
+            const metaNode: TreeNodeData = {
+              id: metaNodeKey,
+              key: metaNodeKey,
+              name: '元数据',
+              value: metaNodeKey,
+              label: '元数据',
+              title: '元数据',
+              type_name: 'metadata_parent',
+              level: (item.level || 0) + 1,
+              isExpanded: Boolean(metaInputNode),
+              hasChildren: true,
+              isLastLeaf: false,
+              showInput: false,
+              isNew: false,
+              parentId: item.id,
+              children: metaDataChildren
+            };
+
+            childNodes.push(metaNode);
           }
         }
 
@@ -355,7 +365,13 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
 
       return item;
     });
-  }, [directoryData, dbInputNodes, datasourceInputNodes, dataSourceType]);
+  }, [
+    directoryData,
+    dbInputNodes,
+    datasourceInputNodes,
+    metadataInputNodes,
+    dataSourceType
+  ]);
   // 状态管理
   const inputRef = useRef<RefInputType>(null);
   const [inputValue, setInputValue] = useState('');
@@ -389,6 +405,10 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
       dataRef.parentId &&
       datasourceInputNodes.has(`${dataRef.parentId}-datasource`);
 
+    const isMetadataInput =
+      dataRef.parentId &&
+      metadataInputNodes.has(`${dataRef.parentId}-metadata`);
+
     // 如果输入为空，删除该节点
     if (!fileName) {
       if (isDbInput) {
@@ -403,6 +423,12 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
         const newDatasourceInputNodes = new Map(datasourceInputNodes);
         newDatasourceInputNodes.delete(datasourceNodeKey);
         setDatasourceInputNodes(newDatasourceInputNodes);
+      } else if (isMetadataInput) {
+        // 删除元数据输入节点
+        const metadataNodeKey = `${dataRef.parentId}-metadata`;
+        const newMetadataInputNodes = new Map(metadataInputNodes);
+        newMetadataInputNodes.delete(metadataNodeKey);
+        setMetadataInputNodes(newMetadataInputNodes);
       } else {
         const updateNodeRecursively = (
           data: TreeNodeData[]
@@ -454,6 +480,7 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
     let res: Partial<ApiRes<any>> = {};
 
     if (dataRef?.isNew) {
+      console.log('看一下新建节点的类型:', dataRef?.type_name);
       // 新建节点
       switch (dataRef?.type_name) {
         case 'catalog':
@@ -502,6 +529,25 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
             setDatasourceInputNodes(newDatasourceInputNodes);
           }
           break;
+        case 'metadata':
+          const metadataParentId = dataRef.parentId;
+          res = await addMetaData({
+            name: fileName,
+            parent_id: metadataParentId
+          });
+          if (res.status !== 200) {
+            Message.error(res?.message ?? '新建元数据失败');
+            return;
+          }
+
+          // 如果是元数据输入框，清理状态
+          if (isMetadataInput) {
+            const metadataNodeKey = `${dataRef.parentId}-metadata`;
+            const newMetadataInputNodes = new Map(metadataInputNodes);
+            newMetadataInputNodes.delete(metadataNodeKey);
+            setMetadataInputNodes(newMetadataInputNodes);
+          }
+          break;
         default:
           break;
       }
@@ -522,7 +568,7 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
     }
 
     // 数据库输入框和数据卷输入框需要特殊处理刷新逻辑
-    if (isDbInput || isDatasourceInput) {
+    if (isDbInput || isDatasourceInput || isMetadataInput) {
       // 对于数据库输入框和数据卷输入框，刷新数据并清理输入状态
       if (onDataRefresh) {
         const newTreeData = await onDataRefresh();
@@ -638,6 +684,11 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
         node.dataRef.name === '数据卷'
       ) {
         nodeTypeName = 'datasource_item';
+      } else if (
+        node.dataRef.title === '元数据' ||
+        node.dataRef.name === '元数据'
+      ) {
+        nodeTypeName = 'metadata';
       } else {
         nodeTypeName = node.dataRef.type_name || 'catalog';
       }
@@ -674,6 +725,14 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
         } else {
           newNode.parentId = node.dataRef?.id;
         }
+      } else if (node.dataRef?.type_name === 'metadata_parent') {
+        // 元数据节点：比较key或者从key中提取的ID
+        const key = node.dataRef?.key || node.dataRef?.id;
+        if (typeof key === 'string' && key.includes('-metadata')) {
+          newNode.parentId = Number(key.replace('-metadata', ''));
+        } else {
+          newNode.parentId = node.dataRef?.id;
+        }
       } else {
         newNode.parentId = node.dataRef?.id;
       }
@@ -704,7 +763,7 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
   };
 
   // 添加子节点
-  const addSubVolume = (node: NodeProps) => {
+  const addSubItem = (node: NodeProps) => {
     const { dataRef } = node;
     const existingChildren: TreeNodeData[] = (dataRef?.children || []).map(
       (child) => ({
@@ -731,6 +790,8 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
       typeText = '数据库';
     } else if (dataRef?.title === '数据卷' || dataRef?.name === '数据卷') {
       typeText = '数据卷';
+    } else if (dataRef?.title === '元数据' || dataRef?.name === '元数据') {
+      typeText = '元数据';
     }
     const newName = generateName(existingChildren, typeText);
     // const newName = '默认名称';
@@ -759,6 +820,14 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
             (typeof targetKey === 'string' &&
               targetKey.includes('-datasource') &&
               item.id === Number(targetKey.replace('-datasource', '')));
+        } else if (dataRef?.type_name === 'metadata_parent') {
+          // 元数据节点：比较key或者从key中提取的ID
+          const targetKey = dataRef?.key || dataRef?.id;
+          isTargetNode =
+            item.key === targetKey ||
+            (typeof targetKey === 'string' &&
+              targetKey.includes('-metadata') &&
+              item.id === Number(targetKey.replace('-metadata', '')));
         } else {
           // 普通节点：直接比较ID
           isTargetNode = item.id === dataRef?.id;
@@ -793,9 +862,10 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
       setDbInputNodes(newDbInputNodes);
 
       // 确保数据库节点展开
-      if (!expandedKeys.includes(dbNodeKey)) {
-        setExpandedKeys([...expandedKeys, dbNodeKey]);
-      }
+      console.log('新建的时候展开的节点:', expandedKeys, dbNodeKey);
+      setExpandedKeys((prev) =>
+        prev.includes(dbNodeKey) ? prev : [...prev, dbNodeKey]
+      );
 
       console.log('数据库节点添加子项，dbNodeKey:', dbNodeKey);
     } else if (dataRef?.type_name === 'datasource_parent') {
@@ -806,11 +876,25 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
       setDatasourceInputNodes(newDatasourceInputNodes);
 
       // 确保数据卷节点展开
-      if (!expandedKeys.includes(datasourceNodeKey)) {
-        setExpandedKeys([...expandedKeys, datasourceNodeKey]);
-      }
+      console.log('新建的时候展开的节点:', expandedKeys, datasourceNodeKey);
+      setExpandedKeys((prev) =>
+        prev.includes(datasourceNodeKey) ? prev : [...prev, datasourceNodeKey]
+      );
 
       console.log('数据卷节点添加子项，datasourceNodeKey:', datasourceNodeKey);
+    } else if (dataRef?.type_name === 'metadata_parent') {
+      // 元数据节点下的添加：添加到metadataInputNodes状态中
+      const metadataNodeKey = dataRef?.key || `${dataRef?.id}-metadata`;
+      const newMetadataInputNodes = new Map(metadataInputNodes);
+      newMetadataInputNodes.set(metadataNodeKey, newInputNode);
+      setMetadataInputNodes(newMetadataInputNodes);
+
+      // 确保元数据节点展开
+      setExpandedKeys((prev) =>
+        prev.includes(metadataNodeKey) ? prev : [...prev, metadataNodeKey]
+      );
+
+      console.log('元数据节点添加子项，metadataNodeKey:', metadataNodeKey);
     } else {
       const updatedData = updateDirectoryData(processedDirectoryData);
       const originalFormatData = updatedData.map((item) => {
@@ -831,8 +915,10 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
 
     // 确保父节点展开 - 添加到expandedKeys中
     const parentKey = dataRef?.id?.toString();
-    if (parentKey && !expandedKeys.includes(parentKey)) {
-      setExpandedKeys([...expandedKeys, parentKey]);
+    if (parentKey) {
+      setExpandedKeys((prev) =>
+        prev.includes(parentKey) ? prev : [...prev, parentKey]
+      );
     }
 
     // 设置输入状态
@@ -876,8 +962,18 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
     return (
       <div
         className="flex items-center overflow-hidden"
-        // onMouseEnter={() => setHoverNode(dataRef as TreeNodeData)}
-        style={{ marginLeft: dataRef?.type_name === 'db' ? '-20px' : '0px' }}
+        onMouseEnter={() => setHoverNode(dataRef as TreeNodeData)}
+        style={{
+          marginLeft:
+            dataRef?.type_name === 'db' ||
+            dataRef?.type_name === 'db_item' ||
+            dataRef?.type_name === 'metadata' ||
+            dataRef?.type_name === 'volume' ||
+            dataRef?.type_name === 'volume_item' ||
+            dataRef?.type_name === 'datasource_item'
+              ? '-20px'
+              : '0px'
+        }}
       >
         {dataRef?.showInput ? (
           <Input
@@ -914,7 +1010,9 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
       dataRef?.title === '数据库' ||
       dataRef?.name === '数据库' ||
       dataRef?.title === '数据卷' ||
-      dataRef?.name === '数据卷';
+      dataRef?.name === '数据卷' ||
+      dataRef?.title === '元数据' ||
+      dataRef?.name === '元数据';
 
     return (
       !dataRef?.showInput && (
@@ -925,7 +1023,7 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
               <div
                 className="flex items-center opacity-100 transition-opacity duration-200"
                 style={{ color: '#2563EB' }}
-                onClick={() => addSubVolume(node)}
+                onClick={() => addSubItem(node)}
               >
                 <IconPlus />
                 <span className="ml-1 text-xs">新建</span>

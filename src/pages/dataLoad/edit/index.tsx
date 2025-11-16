@@ -388,7 +388,7 @@ const Edit = (props) => {
   });
   const getTableList = async (connector_id: string) => {
     try {
-      const res = await getdetailList(connector_id);
+      const res = await getdetailList({ id: connector_id });
       setTableList(res?.data?.table_name || []);
     } catch (error) {
       console.error('获取连接器表格数据失败:', error);
