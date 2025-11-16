@@ -13,7 +13,7 @@ import {
   Switch
 } from '@arco-design/web-react';
 import React, { useEffect, useRef, useState, useCallback } from 'react';
-import Styles from './index.module.css';
+import Styles from './index.module.scss';
 import SchedulerRun from '../../../components/scheduler-run';
 import {
   editLoad,
@@ -789,17 +789,6 @@ const Edit = (props) => {
     });
   }, [form, props.detailData?.sql, props.detailData?.source_type]);
 
-  // 初始化SQL处理默认值
-  // useEffect(() => {
-  //   if (props.detailData?.source_type !== 'db') {
-  //     return;
-  //   }
-  //   const currentSqlProcess = form.getFieldValue('sql_process_enabled');
-  //   if (!currentSqlProcess) {
-  //     form.setFieldsValue({ sql_process_enabled: 'disable' });
-  //   }
-  // }, [form, props.detailData?.source_type]);
-
   // 当详情返回包含非空SQL时，自动发起一次校验
   useEffect(() => {
     // 仅对数据库类型处理
@@ -807,15 +796,10 @@ const Edit = (props) => {
 
     const initialSql = (props.detailData?.sql || '').trim();
     const currentConnectorId = props.detailData?.connector_id;
-    // 读取当前开关状态（优先取表单里的值，其次取详情里的初始值）
-    // const sqlProcess = props.detailData?.sql_process_enabled ||
-    //   'disable';
 
     if (!initialSql || !currentConnectorId) return;
     // 同步编辑器内容
     setSqlContent(initialSql);
-    console.log('------3333-------', currentConnectorId);
-    // setSqlProcessEnabled(props.detailData?.sql_process_enabled);
     // 触发校验
     (async () => {
       try {
@@ -1175,6 +1159,8 @@ const Edit = (props) => {
                 }
               >
                 <Switch
+                  // 编辑态，禁止更改SQL处理状态
+                  disabled={true}
                   checked={sqlProcessEnabled === 'enable'}
                   onChange={handleSqlProcessChange}
                 />
@@ -1191,7 +1177,7 @@ const Edit = (props) => {
                     <div className="flex items-center gap-[8px] border-b border-solid border-[#E2E8F0] p-[12px] pb-[12px]">
                       <Button
                         type="secondary"
-                        disabled={!sqlContent || sqlContent.trim() === ''}
+                        disabled
                         icon={<IconCaretRight className="mr-[4px]" />}
                         className="h-[26px]"
                         onClick={handleCheckSQL}
@@ -1200,15 +1186,16 @@ const Edit = (props) => {
                         校验
                       </Button>
 
-                      <Button
+                      {/* <Button
                         type="text"
                         icon={<SQLFormatIcon />}
                         className="h-[26px]"
                       >
                         格式化
-                      </Button>
+                      </Button> */}
                     </div>
                     <CodeMirror
+                      readOnly
                       value={sqlContent}
                       onChange={handleSqlContentChange}
                       placeholder={placeholderValue}
@@ -1221,7 +1208,10 @@ const Edit = (props) => {
                         lineNumbers: true,
                         highlightActiveLineGutter: false
                       }}
-                      className={styles['code-editor']}
+                      className={classNames(
+                        Styles['code-editor'],
+                        Styles['code-mirror-disabled']
+                      )}
                     />
                     {checkStatus !== CheckSQLStatus.NONE && (
                       <RunningInfoPanel

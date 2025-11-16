@@ -45,3 +45,12 @@
 .arco-timepicker-container {
   width: '100%';
 }
+.code-mirror-disabled {
+  cursor: not-allowed;
+  pointer-events: none;
+  opacity: 0.7;
+
+  :global(.cm-scroller) {
+    background-color: #f8fafd;
+  }
+}
