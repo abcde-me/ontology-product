@@ -1193,61 +1193,61 @@ export default function DataLoadCreate() {
                   />
                 </FormItem>
 
-                {/* {sqlProcessEnabled === 'enable' && ( */}
-                <FormItem label=" " field="sql" labelAlign="right">
-                  <div
-                    className={classNames(
-                      styles['sql-editor-container'],
-                      'rounded-[4px] border border-solid border-[#E2E8F0]'
-                    )}
-                  >
-                    <div className="flex items-center gap-[8px] border-b border-solid border-[#E2E8F0] p-[12px] pb-[12px]">
-                      <Button
-                        type="secondary"
-                        icon={<IconCaretRight className="mr-[4px]" />}
-                        className="h-[26px]"
-                        onClick={handleCheckSQL}
-                        loading={checkStatus === CheckSQLStatus.CHECKING}
-                      >
-                        校验
-                      </Button>
+                {sqlProcessEnabled === 'enable' && (
+                  <FormItem label=" " field="sql" labelAlign="right">
+                    <div
+                      className={classNames(
+                        styles['sql-editor-container'],
+                        'rounded-[4px] border border-solid border-[#E2E8F0]'
+                      )}
+                    >
+                      <div className="flex items-center gap-[8px] border-b border-solid border-[#E2E8F0] p-[12px] pb-[12px]">
+                        <Button
+                          type="secondary"
+                          icon={<IconCaretRight className="mr-[4px]" />}
+                          className="h-[26px]"
+                          onClick={handleCheckSQL}
+                          loading={checkStatus === CheckSQLStatus.CHECKING}
+                        >
+                          校验
+                        </Button>
 
-                      <Button
-                        type="text"
-                        icon={<SQLFormatIcon />}
-                        // onClick={handleFormatCode}
-                        className="h-[26px]"
-                      >
-                        格式化
-                      </Button>
-                    </div>
-                    <CodeMirror
-                      value={sqlContent}
-                      onChange={handleSqlContentChange}
-                      placeholder={placeholderValue}
-                      // readOnly={
-                      //     !hasUpdatePermission || runStatus === RunningStatus.RUNNING
-                      // }
-                      theme={myTheme}
-                      extensions={[
-                        sql({ upperCaseKeywords: true }),
-                        lintGutter()
-                      ]}
-                      basicSetup={{
-                        lineNumbers: true,
-                        highlightActiveLineGutter: false
-                      }}
-                      className={styles['code-editor']}
-                    />
-                    {checkStatus !== CheckSQLStatus.NONE && (
-                      <RunningInfoPanel
-                        checkStatus={checkStatus}
-                        checkMessage={checkMessage}
+                        <Button
+                          type="text"
+                          icon={<SQLFormatIcon />}
+                          // onClick={handleFormatCode}
+                          className="h-[26px]"
+                        >
+                          格式化
+                        </Button>
+                      </div>
+                      <CodeMirror
+                        value={sqlContent}
+                        onChange={handleSqlContentChange}
+                        placeholder={placeholderValue}
+                        // readOnly={
+                        //     !hasUpdatePermission || runStatus === RunningStatus.RUNNING
+                        // }
+                        theme={myTheme}
+                        extensions={[
+                          sql({ upperCaseKeywords: true }),
+                          lintGutter()
+                        ]}
+                        basicSetup={{
+                          lineNumbers: true,
+                          highlightActiveLineGutter: false
+                        }}
+                        className={styles['code-editor']}
                       />
-                    )}
-                  </div>
-                </FormItem>
-                {/* )} */}
+                      {checkStatus !== CheckSQLStatus.NONE && (
+                        <RunningInfoPanel
+                          checkStatus={checkStatus}
+                          checkMessage={checkMessage}
+                        />
+                      )}
+                    </div>
+                  </FormItem>
+                )}
               </>
             )}
 
