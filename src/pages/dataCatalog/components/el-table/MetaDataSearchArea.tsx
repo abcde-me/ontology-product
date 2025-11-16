@@ -8,6 +8,8 @@ import {
   Checkbox
 } from '@arco-design/web-react';
 import { IconSearch, IconSettings } from '@arco-design/web-react/icon';
+import { FieldSearchItem } from '@/api/dataCatalog';
+import dayjs from 'dayjs';
 
 export interface SearchField {
   /** 字段唯一标识 */
@@ -63,10 +65,28 @@ export default function SearchArea({
     }));
   };
 
+  const formatSearchContent = (field: SearchField, value: any): string => {
+    if (field.type === 'datetime' && Array.isArray(value)) {
+      const formattedValues = value
+        .filter((item) => item !== undefined && item !== null && item !== '')
+        .map((item) => {
+          const date = dayjs(item);
+          return date.isValid()
+            ? date.format('YYYY-MM-DD HH:mm:ss')
+            : String(item ?? '');
+        });
+
+      return formattedValues.join('_');
+    }
+
+    return Array.isArray(value) ? value.join(',') : String(value);
+  };
+
   // 处理查询按钮点击
   const handleQuery = () => {
     // 只传递已勾选字段的值
-    const searchParams: Record<string, any> = {};
+    // const searchParams: Record<string, any> = {};
+    const fieldSearch: FieldSearchItem[] = [];
     checkedFields.forEach((fieldKey) => {
       const field = fields.find((f) => f.key === fieldKey);
       if (
@@ -76,10 +96,16 @@ export default function SearchArea({
         fieldValues[fieldKey] !== ''
       ) {
         const paramKey = field.paramKey || fieldKey;
-        searchParams[paramKey] = fieldValues[fieldKey];
+        // searchParams[paramKey] = fieldValues[fieldKey];
+
+        fieldSearch.push({
+          nameEn: field.key,
+          type: field.type,
+          queryValue: formatSearchContent(field, fieldValues[fieldKey])
+        });
       }
     });
-    onFieldSearch?.(searchParams);
+    onFieldSearch?.(fieldSearch);
   };
 
   // 处理重置按钮点击
@@ -207,7 +233,7 @@ export default function SearchArea({
     const value = fieldValues[field.key];
     let fieldType = field.type;
 
-    if (field.type === 'daterange') {
+    if (field.type === 'datetime' || field.type === 'date') {
       fieldType = 'range';
     } else {
       fieldType = 'input';
@@ -240,12 +266,14 @@ export default function SearchArea({
             ))}
           </Select>
         );
-      case 'daterange':
+      case 'range':
         return (
           <DatePicker.RangePicker
             value={value}
             onChange={(val) => handleFieldValueChange(field.key, val)}
             allowClear
+            showTime={{ format: 'HH:mm:ss' }}
+            format="YYYY-MM-DD HH:mm:ss"
             placeholder={['开始日期', '结束日期']}
           />
         );
