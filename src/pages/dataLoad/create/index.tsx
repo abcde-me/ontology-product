@@ -1206,6 +1206,7 @@ export default function DataLoadCreate() {
                       <div className="flex items-center gap-[8px] border-b border-solid border-[#E2E8F0] p-[12px] pb-[12px]">
                         <Button
                           type="secondary"
+                          disabled={!sqlContent || sqlContent.trim() === ''}
                           icon={<IconCaretRight className="mr-[4px]" />}
                           className="h-[26px]"
                           onClick={handleCheckSQL}

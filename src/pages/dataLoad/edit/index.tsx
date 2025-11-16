@@ -241,6 +241,40 @@ interface TreeNodeData {
 //   return null;
 // }
 
+function findNodeById(
+  nodes: (TreeNodeData | undefined)[] | undefined,
+  targetId: string | number | null
+): TreeNodeData | null {
+  if (!nodes || targetId === null || targetId === undefined) {
+    return null;
+  }
+
+  for (const node of nodes) {
+    if (!node) continue;
+    if (String(node.id) === String(targetId)) {
+      return node;
+    }
+    const children = node.children as any;
+    if (Array.isArray(children)) {
+      const found = findNodeById(children, targetId);
+      if (found) {
+        return found;
+      }
+    } else if (children && typeof children === 'object') {
+      for (const childGroup of Object.values(children)) {
+        if (Array.isArray(childGroup)) {
+          const found = findNodeById(childGroup as any, targetId);
+          if (found) {
+            return found;
+          }
+        }
+      }
+    }
+  }
+
+  return null;
+}
+
 const RunningInfoPanel = function ({
   checkStatus,
   checkMessage
@@ -614,6 +648,10 @@ const Edit = (props) => {
             dest_path_display: displayPath, // 显示完整路径
             dest_path: nodeId // 隐藏字段保存节点ID
           });
+          // 设置节点类型，保证编辑回显时的条件渲染正常
+          const selectedNode =
+            findNodeById(directoryData, props.detailData?.data_path_id) || null;
+          setSelectedNodeType(selectedNode?.type_name);
         }
       } else {
         // 其他类型使用Cascader（如果还有的话）
@@ -740,16 +778,66 @@ const Edit = (props) => {
   // 监听SQL处理开关状态
   const sqlProcessEnabled = Form.useWatch('sql_process_enabled', form);
 
-  // 初始化SQL处理默认值
+  // 根据初始 SQL 是否有值来设置开关初始状态
   useEffect(() => {
-    if (props.detailData?.source_type !== 'db') {
-      return;
-    }
-    const currentSqlProcess = form.getFieldValue('sql_process_enabled');
-    if (!currentSqlProcess) {
-      form.setFieldsValue({ sql_process_enabled: 'disable' });
-    }
-  }, [form, props.detailData?.source_type]);
+    if (props.detailData?.source_type !== 'db') return;
+    const hasInitialSql =
+      typeof props.detailData?.sql === 'string' &&
+      props.detailData.sql.trim() !== '';
+    form.setFieldsValue({
+      sql_process_enabled: hasInitialSql ? 'enable' : 'disable'
+    });
+  }, [form, props.detailData?.sql, props.detailData?.source_type]);
+
+  // 初始化SQL处理默认值
+  // useEffect(() => {
+  //   if (props.detailData?.source_type !== 'db') {
+  //     return;
+  //   }
+  //   const currentSqlProcess = form.getFieldValue('sql_process_enabled');
+  //   if (!currentSqlProcess) {
+  //     form.setFieldsValue({ sql_process_enabled: 'disable' });
+  //   }
+  // }, [form, props.detailData?.source_type]);
+
+  // 当详情返回包含非空SQL时，自动发起一次校验
+  useEffect(() => {
+    // 仅对数据库类型处理
+    if (props.detailData?.source_type !== 'db') return;
+
+    const initialSql = (props.detailData?.sql || '').trim();
+    const currentConnectorId = props.detailData?.connector_id;
+    // 读取当前开关状态（优先取表单里的值，其次取详情里的初始值）
+    // const sqlProcess = props.detailData?.sql_process_enabled ||
+    //   'disable';
+
+    if (!initialSql || !currentConnectorId) return;
+    // 同步编辑器内容
+    setSqlContent(initialSql);
+    console.log('------3333-------', currentConnectorId);
+    // setSqlProcessEnabled(props.detailData?.sql_process_enabled);
+    // 触发校验
+    (async () => {
+      try {
+        setCheckStatus(CheckSQLStatus.CHECKING);
+        setCheckMessage('');
+        const res = await checkSQL({
+          sql: initialSql,
+          connectorId: Number(currentConnectorId)
+        });
+        if (res?.status === 200 && res.data) {
+          setCheckStatus(res.data.status);
+          setCheckMessage(res.data.msg || '');
+        } else {
+          setCheckStatus(CheckSQLStatus.ERROR);
+          setCheckMessage(res?.message || '校验失败');
+        }
+      } catch (error: any) {
+        setCheckStatus(CheckSQLStatus.ERROR);
+        setCheckMessage(error?.message || '校验异常，请稍后重试');
+      }
+    })();
+  }, []);
 
   // 点击确定
   const okHan = async () => {
@@ -1081,7 +1169,9 @@ const Edit = (props) => {
                 labelAlign="right"
                 rules={[{ required: true, message: '请选择SQL处理状态' }]}
                 initialValue={
-                  props.detailData?.sql_process_enabled || 'disable'
+                  props.detailData?.sql && props.detailData.sql.trim() !== ''
+                    ? 'enable'
+                    : 'disable'
                 }
               >
                 <Switch
@@ -1101,6 +1191,7 @@ const Edit = (props) => {
                     <div className="flex items-center gap-[8px] border-b border-solid border-[#E2E8F0] p-[12px] pb-[12px]">
                       <Button
                         type="secondary"
+                        disabled={!sqlContent || sqlContent.trim() === ''}
                         icon={<IconCaretRight className="mr-[4px]" />}
                         className="h-[26px]"
                         onClick={handleCheckSQL}
