@@ -643,10 +643,7 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
         processedDirectoryData,
         selectedKeys[0]
       );
-      const fullPath = pathArray
-        ? pathArray.join('/') +
-          (dataSourceType === 'db' ? '/' + tableNameNames : '') // 只有数据库类型才拼接表名
-        : nodeData?.name || '';
+      const fullPath = pathArray ? pathArray.join('/') : nodeData?.name || '';
 
       // 传递路径和节点ID
       onPathChange(fullPath, nodeData?.id, nodeData);
