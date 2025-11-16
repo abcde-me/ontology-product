@@ -21,7 +21,7 @@ import {
 import { listDataAssetFieldTypes } from '@/api/dataAsset';
 import { ImportType } from '../../types';
 import noDataElement from '@/components/no-data';
-import { RESERVED_FIELD_ENS } from '../../utils/const';
+import { RESERVED_FIELD_ENS, SYSTEM_FIELDS } from '../../utils/const';
 import EllipsisPopoverCom from '@/components/ellipsis-popover-com';
 
 const FormItem = Form.Item;
@@ -261,7 +261,6 @@ export default function Step1MetadataFields({
 
   // 导入字段
   const handleImportFields = () => {
-    console.log('导入字段', showImportModal);
     setShowImportModal(true);
   };
 
@@ -286,8 +285,9 @@ export default function Step1MetadataFields({
     }));
 
     if (importType === ImportType.overwrite) {
-      setMetadataFields(mapped);
-      form.setFieldValue('metadataFields', mapped);
+      const withSystem = [...SYSTEM_FIELDS, ...mapped];
+      setMetadataFields(withSystem);
+      form.setFieldValue('metadataFields', withSystem);
     } else {
       const combined = [...metadataFields, ...mapped];
       setMetadataFields(combined);

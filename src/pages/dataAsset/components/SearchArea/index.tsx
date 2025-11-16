@@ -19,6 +19,7 @@ import {
 import { ColumnField } from '../ColumnSettingModal';
 import { FieldSearchItem, BaseTag, TagValueItem } from '@/types/dataAssetApi';
 import { isDateType, isTagsField } from '../../utils/const';
+import styles from './index.module.scss';
 import dayjs from 'dayjs';
 
 export interface SearchField {
@@ -96,7 +97,7 @@ export default function SearchArea({
 
   // 初始化：默认勾选所有字段
   useEffect(() => {
-    const defaultChecked = new Set(fields.slice(0, 3).map((f) => f.id));
+    const defaultChecked = new Set(fields.slice(0, 4).map((f) => f.id));
     setCheckedFields(defaultChecked);
   }, [fields]);
 
@@ -290,6 +291,7 @@ export default function SearchArea({
       return (
         <TreeSelect
           placeholder={`请选择${field.nameZh}`}
+          className={styles['dropdown-select']}
           value={Array.isArray(value) ? value : []}
           multiple
           treeCheckable
@@ -358,6 +360,7 @@ export default function SearchArea({
             placeholder={`请选择${field.nameZh}`}
             value={value}
             mode="multiple"
+            className={styles['dropdown-select']}
             maxTagCount={{
               count: 2,
               render: (invisibleTagCount) => {
@@ -412,7 +415,7 @@ export default function SearchArea({
   };
 
   return (
-    <div className={`${className}`}>
+    <div className={`${className} ${styles['search-area']}`}>
       {/* 主搜索区域 */}
       <div className="flex items-center gap-3">
         <Input.Search

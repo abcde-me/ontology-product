@@ -141,15 +141,21 @@ export default function Step2FieldMapping({
         title: '数据资产名称',
         dataIndex: 'nameZh',
         width: 200,
-        render: (_: any, record: FieldMapping) => (
-          <Input
-            placeholder="请输入数据资产名称"
-            value={record.nameZh}
-            onChange={(value) =>
-              handleUpdateMapping(record.id, { nameZh: value })
-            }
-          />
-        )
+        render: (_: any, record: FieldMapping) => {
+          const meta = metadataFields[record.sequence - 1];
+          const isReserved =
+            !!meta?.nameEn && RESERVED_FIELD_ENS.has(meta.nameEn);
+          return (
+            <Input
+              placeholder="请输入数据资产名称"
+              value={record.nameZh}
+              disabled={isReserved}
+              onChange={(value) =>
+                handleUpdateMapping(record.id, { nameZh: value })
+              }
+            />
+          );
+        }
       }
     ];
 
@@ -502,7 +508,6 @@ export default function Step2FieldMapping({
       onFinish(formatted as unknown as CreateDataAssetAndMappingReq);
     } catch (error) {
       console.error('表单验证失败:', error);
-      Message.error('请填写完整的映射信息');
     }
   };
 
@@ -542,6 +547,7 @@ export default function Step2FieldMapping({
             columns={tableColumns}
             className="mt-[16px] w-full"
             data={mappings}
+            rowKey="id"
             pagination={false}
             border={false}
           />
