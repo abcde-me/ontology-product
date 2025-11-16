@@ -243,6 +243,7 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
                     level: (item.level || 0) + 2,
                     isExpanded: false,
                     hasChildren: false,
+                    extends: metaItem.extends,
                     isLastLeaf: true,
                     parentId: String(item.id),
                     perms: metaItem.perms
@@ -935,17 +936,20 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
   const renderTitleText = (props: NodeProps) => {
     const { dataRef, title } = props;
     const TitleText = title;
+    const getTooltipContent = (node: any, fallbackTitle: any) => {
+      if (hasDataBaseNode(node)) {
+        return '该目录已存在数据库，请新建或选择其他目录';
+      }
+      if (hasMetadataBound(node)) {
+        return '该目录已存在元数据，请新建或选择其他目录';
+      }
+      if (!subLeafKeys[node?.type]) {
+        return fallbackTitle;
+      }
+      return '';
+    };
     return (
-      <Tooltip
-        color="white"
-        content={
-          hasDataBaseNode(dataRef)
-            ? '该目录已存在数据库，请新建或选择其他目录'
-            : !subLeafKeys[dataRef?.type]
-              ? title
-              : ''
-        }
-      >
+      <Tooltip color="white" content={getTooltipContent(dataRef, title)}>
         <div
           className={`overflow-hidden  text-ellipsis whitespace-nowrap ${dataRef?.isLastLeaf ? 'last-leaf-text' : ''} ${dataRef?.type === CatalogTypeEnum.table ? 'no-operation' : ''} ${dataRef?.type === CatalogTypeEnum.catalog ? 'catalog-title-text' : ''}`}
           // style={{ maxWidth: '150px' }}
@@ -963,17 +967,17 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
       <div
         className="flex items-center overflow-hidden"
         onMouseEnter={() => setHoverNode(dataRef as TreeNodeData)}
-        style={{
-          marginLeft:
-            dataRef?.type_name === 'db' ||
-            dataRef?.type_name === 'db_item' ||
-            dataRef?.type_name === 'metadata' ||
-            dataRef?.type_name === 'volume' ||
-            dataRef?.type_name === 'volume_item' ||
-            dataRef?.type_name === 'datasource_item'
-              ? '-20px'
-              : '0px'
-        }}
+        // style={{
+        //   marginLeft:
+        //     dataRef?.type_name === 'db' ||
+        //       dataRef?.type_name === 'db_item' ||
+        //       dataRef?.type_name === 'metadata' ||
+        //       dataRef?.type_name === 'volume' ||
+        //       dataRef?.type_name === 'volume_item' ||
+        //       dataRef?.type_name === 'datasource_item'
+        //       ? '-20px'
+        //       : '0px'
+        // }}
       >
         {dataRef?.showInput ? (
           <Input
@@ -1102,6 +1106,21 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
     return hasDbItems || hasArrayChildren;
   };
 
+  /**
+   * 检查元数据节点是否已绑定元数据（db_name 与 table_name 均不为空）
+   */
+  const hasMetadataBound = (
+    item: TreeNodeData | TreeDataType | null | undefined
+  ): boolean => {
+    if (!item) return false;
+    const nodeData = item as TreeNodeData;
+    if (nodeData.type_name !== 'metadata') return false;
+    const ext = (nodeData as any)?.extends || (nodeData as any)?.extend;
+    const dbName = ext?.db_name;
+    const tableName = ext?.table_name;
+    return Boolean(dbName) && Boolean(tableName);
+  };
+
   // 生成树节点
   const generatorTreeNodes = (treeData: TreeDataType[]) => {
     if (!Array.isArray(treeData)) {
@@ -1123,7 +1142,7 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
             {...rest}
             dataRef={item}
             title={item.name}
-            disabled={hasDataBaseNode(item)}
+            disabled={hasDataBaseNode(item) || hasMetadataBound(item)}
             // selectable={!isDbNode}
           >
             {hasChildren ? generatorTreeNodes(children) : null}
