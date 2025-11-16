@@ -575,7 +575,9 @@ export default function DataLoadCreate() {
         },
         dest_path_id: pathId,
         submit_type: submitType === SUBMIT_TYPES.KEEP ? 1 : 2,
-        table_names: processedTableNames,
+        table_names: Array.isArray(processedTableNames)
+          ? processedTableNames
+          : [processedTableNames],
         db_name: sourceType === SOURCE_TYPES.DB ? tableNames : null,
         sql: formValues.sql_process_enabled === 'enable' ? formValues.sql : '',
         path_type: selectedNodeType
