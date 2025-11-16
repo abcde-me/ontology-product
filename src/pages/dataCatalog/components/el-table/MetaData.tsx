@@ -58,7 +58,7 @@ export default function MetaData() {
         pageSize: pageSize,
         fieldSearch: fieldSearch,
         queryLoadTaskInstance: true,
-        path_id: selectedParentId ? Number(selectedParentId) : 0,
+        path_id: Number(selectedKey) ?? 0,
         db_name: (extendsObj?.db_name as string) || '',
         table_name: (extendsObj?.table_name as string) || ''
       });
@@ -102,7 +102,7 @@ export default function MetaData() {
         pageSize: pageSize,
         fieldSearch: fieldSearch,
         queryLoadTaskInstance: false,
-        path_id: selectedParentId ? Number(selectedParentId) : 0,
+        path_id: Number(selectedKey) ?? 0,
         db_name: (extendsObj?.db_name as string) || '',
         table_name: (extendsObj?.table_name as string) || ''
       });
@@ -122,6 +122,10 @@ export default function MetaData() {
 
   // 初始化加载数据
   useEffect(() => {
+    if (pollLoading || loading) {
+      return;
+    }
+
     loadData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentPage, pageSize, selectedKey, selectedParentId, fieldSearch]);
@@ -192,7 +196,7 @@ export default function MetaData() {
 
     setPollLoading(true);
     const res = await refreshMetaDataList({
-      path_id: selectedParentId ? Number(selectedParentId) : 0,
+      path_id: Number(selectedKey) ?? 0,
       db_name: (extendsObj?.db_name as string) || '',
       table_name: (extendsObj?.table_name as string) || ''
     });
