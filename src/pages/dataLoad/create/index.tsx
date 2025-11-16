@@ -899,38 +899,6 @@ export default function DataLoadCreate() {
     );
   }, [tableName, form]);
 
-  // SQL处理和表选择的双向逻辑关联
-  // useEffect(() => {
-  //   const currentTableName = form.getFieldValue('table_name') || [];
-  //   const currentSqlProcess = form.getFieldValue('sql_process_enabled');
-
-  //   // 如果选择了多个表（排除"all"的情况），自动切换到"开启"
-  //   if (
-  //     Array.isArray(currentTableName) &&
-  //     currentTableName.length > 1 &&
-  //     !currentTableName.includes('all')
-  //   ) {
-  //     if (currentSqlProcess === 'disable') {
-  //       form.setFieldsValue({ sql_process_enabled: 'enable' });
-  //     }
-  //   }
-  // }, [tableName, form]);
-
-  // 当SQL处理为"关闭"时，限制表选择只能选一个
-  // useEffect(() => {
-  //   const currentTableName = form.getFieldValue('table_name') || [];
-  //   const currentSqlProcess = form.getFieldValue('sql_process_enabled');
-
-  //   if (
-  //     currentSqlProcess === 'disable' &&
-  //     Array.isArray(currentTableName) &&
-  //     currentTableName.length > 1
-  //   ) {
-  //     // 如果选择了多个表，只保留第一个
-  //     form.setFieldsValue({ table_name: [currentTableName[0]] });
-  //   }
-  // }, [sqlProcessEnabled, form]);
-
   // 初始化SQL处理默认值为"关闭"
   useEffect(() => {
     const currentSqlProcess = form.getFieldValue('sql_process_enabled');
@@ -1225,71 +1193,61 @@ export default function DataLoadCreate() {
                   />
                 </FormItem>
 
-                {sqlProcessEnabled === 'enable' && (
-                  <FormItem
-                    label=" "
-                    field="sql"
-                    labelAlign="right"
-                    // rules={[
-                    //     {
-                    //         required: sqlProcessEnabled === 'enable',
-                    //         message: '请输入SQL处理'
-                    //     }
-                    // ]}
+                {/* {sqlProcessEnabled === 'enable' && ( */}
+                <FormItem label=" " field="sql" labelAlign="right">
+                  <div
+                    className={classNames(
+                      styles['sql-editor-container'],
+                      'rounded-[4px] border border-solid border-[#E2E8F0]'
+                    )}
                   >
-                    <div
-                      className={classNames(
-                        styles['sql-editor-container'],
-                        'rounded-[4px] border border-solid border-[#E2E8F0]'
-                      )}
-                    >
-                      <div className="flex items-center gap-[8px] border-b border-solid border-[#E2E8F0] p-[12px] pb-[12px]">
-                        <Button
-                          type="secondary"
-                          icon={<IconCaretRight className="mr-[4px]" />}
-                          className="h-[26px]"
-                          onClick={handleCheckSQL}
-                          loading={checkStatus === CheckSQLStatus.CHECKING}
-                        >
-                          校验
-                        </Button>
+                    <div className="flex items-center gap-[8px] border-b border-solid border-[#E2E8F0] p-[12px] pb-[12px]">
+                      <Button
+                        type="secondary"
+                        icon={<IconCaretRight className="mr-[4px]" />}
+                        className="h-[26px]"
+                        onClick={handleCheckSQL}
+                        loading={checkStatus === CheckSQLStatus.CHECKING}
+                      >
+                        校验
+                      </Button>
 
-                        <Button
-                          type="text"
-                          icon={<SQLFormatIcon />}
-                          // onClick={handleFormatCode}
-                          className="h-[26px]"
-                        >
-                          格式化
-                        </Button>
-                      </div>
-                      <CodeMirror
-                        value={sqlContent}
-                        onChange={handleSqlContentChange}
-                        placeholder={placeholderValue}
-                        // readOnly={
-                        //     !hasUpdatePermission || runStatus === RunningStatus.RUNNING
-                        // }
-                        theme={myTheme}
-                        extensions={[
-                          sql({ upperCaseKeywords: true }),
-                          lintGutter()
-                        ]}
-                        basicSetup={{
-                          lineNumbers: true,
-                          highlightActiveLineGutter: false
-                        }}
-                        className={styles['code-editor']}
-                      />
-                      {checkStatus !== CheckSQLStatus.NONE && (
-                        <RunningInfoPanel
-                          checkStatus={checkStatus}
-                          checkMessage={checkMessage}
-                        />
-                      )}
+                      <Button
+                        type="text"
+                        icon={<SQLFormatIcon />}
+                        // onClick={handleFormatCode}
+                        className="h-[26px]"
+                      >
+                        格式化
+                      </Button>
                     </div>
-                  </FormItem>
-                )}
+                    <CodeMirror
+                      value={sqlContent}
+                      onChange={handleSqlContentChange}
+                      placeholder={placeholderValue}
+                      // readOnly={
+                      //     !hasUpdatePermission || runStatus === RunningStatus.RUNNING
+                      // }
+                      theme={myTheme}
+                      extensions={[
+                        sql({ upperCaseKeywords: true }),
+                        lintGutter()
+                      ]}
+                      basicSetup={{
+                        lineNumbers: true,
+                        highlightActiveLineGutter: false
+                      }}
+                      className={styles['code-editor']}
+                    />
+                    {checkStatus !== CheckSQLStatus.NONE && (
+                      <RunningInfoPanel
+                        checkStatus={checkStatus}
+                        checkMessage={checkMessage}
+                      />
+                    )}
+                  </div>
+                </FormItem>
+                {/* )} */}
               </>
             )}
 

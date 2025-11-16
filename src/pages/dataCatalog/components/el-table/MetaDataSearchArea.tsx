@@ -28,7 +28,7 @@ export interface SearchAreaProps {
   /** 搜索字段配置列表 */
   fields?: SearchField[];
   /** 字段搜索回调 */
-  onFieldSearch?: (fieldValues: Record<string, any>) => void;
+  onFieldSearch?: (fieldValues: FieldSearchItem[]) => void;
   /** 重置回调 */
   onReset?: () => void;
   /** 样式类 */
@@ -55,7 +55,7 @@ export default function SearchArea({
     const defaultCheckedKeys = fields.slice(0, 3).map((f) => f.key);
     const defaultChecked = new Set(defaultCheckedKeys);
     setCheckedFields(defaultChecked);
-  }, [fields]);
+  }, []);
 
   // 处理字段值变化
   const handleFieldValueChange = (fieldKey: string, value: any) => {
@@ -232,6 +232,7 @@ export default function SearchArea({
   const renderFieldInput = (field: SearchField) => {
     const value = fieldValues[field.key];
     let fieldType = field.type;
+    console.log('field:', field);
 
     if (field.type === 'datetime' || field.type === 'date') {
       fieldType = 'range';

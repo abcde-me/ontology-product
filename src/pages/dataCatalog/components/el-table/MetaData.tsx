@@ -208,19 +208,8 @@ export default function MetaData() {
   };
 
   // 处理字段搜索
-  const handleFieldSearch = (fieldValues: Record<string, any>) => {
-    // 将搜索条件转换为 FieldSearchItem 格式
-    const searchItems: FieldSearchItem[] = Object.entries(fieldValues).map(
-      ([key, value]) => {
-        const field = searchFields.find((f) => f.nameEn === key);
-        return {
-          nameEn: key,
-          type: field?.type || 'string',
-          queryValue: value
-        };
-      }
-    );
-    setFieldSearch(searchItems);
+  const handleFieldSearch = (fieldValues: FieldSearchItem[]) => {
+    setFieldSearch(fieldValues);
     setCurrentPage(1); // 重置到第一页
   };
 
@@ -250,7 +239,7 @@ export default function MetaData() {
           fields={searchFields.map((field: Field) => ({
             key: field.nameEn,
             label: field.nameZh || field.nameEn,
-            type: 'input',
+            type: field.type,
             paramKey: field.nameEn
           }))}
           onFieldSearch={handleFieldSearch}
