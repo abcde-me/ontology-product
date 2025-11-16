@@ -97,6 +97,15 @@ function findTreeSelectPathById(
         if (result) return result;
       }
 
+      if (
+        item.children &&
+        typeof item.children === 'object' &&
+        item.children.metadata
+      ) {
+        const result = findInTree(item.children.metadata, target);
+        if (result) return result;
+      }
+
       // 对于本地文件类型，还需要检查children.volume数组
       if (
         item.children &&
@@ -145,6 +154,15 @@ function buildTreeSelectDisplayPath(
         item.children.db
       ) {
         const result = buildPath(item.children.db, target, newPath);
+        if (result) return result;
+      }
+
+      if (
+        item.children &&
+        typeof item.children === 'object' &&
+        item.children.metadata
+      ) {
+        const result = buildPath(item.children.metadata, target, newPath);
         if (result) return result;
       }
 
@@ -403,8 +421,8 @@ const Edit = (props) => {
   async function getdirectoryDataList() {
     try {
       const res = await getDirectoryList({
-        root_type: 1,
-        dir_type: props.detailData.source_type === 'db' ? 3 : undefined
+        root_type: 1
+        // dir_type: props.detailData.source_type === 'db' ? 3 : undefined
       });
       if (!res || res.status !== 200) {
         console.error('获取目录列表失败:', res);
@@ -584,25 +602,13 @@ const Edit = (props) => {
           props.detailData?.data_path_id
         );
         if (nodeId) {
-          // const selectedNode = findNodeById(
-          //   directoryData as TreeNodeData[],
-          //   props.detailData?.data_path_id
-          // );
-          // if (selectedNode) {
-          //   setSelectedNodeType(selectedNode.type_name);
-          // } else {
-          //   setSelectedNodeType(undefined);
-          // }
-          console.log('设置TreeSelect初始值:', nodeId);
           setSelectedTreeKeys([nodeId]);
           // 构建显示路径
-          let displayPath = buildTreeSelectDisplayPath(
+          const displayPath = buildTreeSelectDisplayPath(
             directoryData,
             props.detailData?.data_path_id
           );
-          props.detailData?.source_type === 'db'
-            ? (displayPath = displayPath + '/' + props.detailData?.db_name)
-            : null;
+
           setTreeSelectDisplayValue(displayPath);
           form.setFieldsValue({
             dest_path_display: displayPath, // 显示完整路径
