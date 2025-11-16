@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useRagDetailStore } from '../../../store/ragDetailStore';
 import PdfRenderer from './PdfRenderer';
 import { PDFCoordinate } from '../../../types';
@@ -36,15 +36,21 @@ const PdfViewer: React.FC<PdfViewerProps> = ({
         setLoading(true);
         setPdfPath(''); // 清空路径
         try {
+          console.log('📥 开始加载Mock二进制数据...');
           const binaryData = await mockApiGetPdfBinaryData(
             'mock-dataset',
             'mock-document'
           );
+          console.log(
+            '✅ Mock二进制数据加载成功，大小:',
+            binaryData.byteLength,
+            'bytes'
+          );
           setPdfBinaryData(binaryData);
           console.log('✅ 使用Mock二进制数据加载PDF');
+          setLoading(false);
         } catch (error) {
-          console.error('Error loading mock PDF binary data:', error);
-        } finally {
+          console.error('❌ Error loading mock PDF binary data:', error);
           setLoading(false);
         }
       } else if (propPdfData) {
@@ -68,7 +74,7 @@ const PdfViewer: React.FC<PdfViewerProps> = ({
     };
 
     loadPdf();
-  }, [filePath, propPdfData, useMockBinaryData]);
+  }, [useMockBinaryData]);
 
   const displayFileName = propFileName || storeName || 'Document.pdf';
 

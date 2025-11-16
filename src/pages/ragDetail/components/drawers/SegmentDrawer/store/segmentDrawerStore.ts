@@ -4,11 +4,10 @@
  */
 
 import { create } from 'zustand';
-import { mockSegmentDetailData } from '../SegmentDetail/mockData';
 import {
-  mockTraceLogStatistics,
-  mockNodeDetails
-} from '../../../../utils/traceLogMockData';
+  fetchSegmentTraceLog,
+  fetchSegmentDetailInfo
+} from '../../../../api/ragDetailApi';
 import type { SegmentDetailData } from '../../../../types';
 import type {
   TraceLogStatistics,
@@ -23,6 +22,13 @@ interface SegmentDrawerState {
   // 分段导航
   currentSegmentIndex: number;
   totalSegments: number;
+
+  // API 参数
+  datasetId: string;
+  chunkId: string;
+
+  // 分段列表（用于导航时获取对应的 chunkId）
+  segments: Array<{ id: string; [key: string]: any }>;
 
   // 分段详情数据
   segmentDetailData: SegmentDetailData | null;
@@ -45,6 +51,8 @@ interface SegmentDrawerActions {
   closeDrawer: () => void;
   setActiveTab: (tab: 'detail' | 'trace') => void;
   setTotalSegments: (total: number) => void;
+  setDatasetIdAndChunkId: (datasetId: string, chunkId: string) => void;
+  setSegments: (segments: Array<{ id: string; [key: string]: any }>) => void;
 
   // 分段导航
   goToPrevSegment: () => Promise<void>;
@@ -61,11 +69,45 @@ interface SegmentDrawerActions {
 
 type SegmentDrawerStore = SegmentDrawerState & SegmentDrawerActions;
 
+/**
+ * 格式化成本时间（毫秒转分钟）
+ */
+function formatCostTime(milliseconds: number): string {
+  const minutes = Math.round(milliseconds / 60000);
+  return `${minutes}min`;
+}
+
+/**
+ * 格式化持续时间（毫秒转秒）
+ */
+function formatDuration(milliseconds: number): string {
+  const seconds = Math.round(milliseconds / 1000);
+  return `${seconds}s`;
+}
+
+/**
+ * 格式化时间戳（Unix 时间戳转 YYYY-MM-DD HH:MM:SS）
+ */
+function formatTimestamp(timestamp: number): string {
+  if (!timestamp) return '';
+  const date = new Date(timestamp * 1000);
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  const hours = String(date.getHours()).padStart(2, '0');
+  const minutes = String(date.getMinutes()).padStart(2, '0');
+  const seconds = String(date.getSeconds()).padStart(2, '0');
+  return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+}
+
 const initialState: SegmentDrawerState = {
   visible: false,
   activeTab: 'trace',
   currentSegmentIndex: 1,
   totalSegments: 100,
+  datasetId: '',
+  chunkId: '',
+  segments: [],
   segmentDetailData: null,
   segmentDetailLoading: false,
   segmentDetailError: null,
@@ -117,12 +159,26 @@ export const useSegmentDrawerStore = create<SegmentDrawerStore>((set, get) => ({
     set({ totalSegments: total });
   },
 
+  // 设置 datasetId 和 chunkId
+  setDatasetIdAndChunkId: (datasetId: string, chunkId: string) => {
+    set({ datasetId, chunkId });
+  },
+
+  // 设置分段列表
+  setSegments: (segments: Array<{ id: string; [key: string]: any }>) => {
+    set({ segments });
+  },
+
   // 上一个分段
   goToPrevSegment: async () => {
-    const { currentSegmentIndex, activeTab } = get();
+    const { currentSegmentIndex, activeTab, segments } = get();
     if (currentSegmentIndex > 1) {
       const newIndex = currentSegmentIndex - 1;
-      set({ currentSegmentIndex: newIndex });
+      // 获取对应分段的 id（segments 是 0-based，但 currentSegmentIndex 是 1-based）
+      const newSegment = segments[newIndex - 1];
+      const newChunkId = newSegment?.id || '';
+
+      set({ currentSegmentIndex: newIndex, chunkId: newChunkId });
 
       // 加载新分段的数据
       if (activeTab === 'detail') {
@@ -135,10 +191,14 @@ export const useSegmentDrawerStore = create<SegmentDrawerStore>((set, get) => ({
 
   // 下一个分段
   goToNextSegment: async () => {
-    const { currentSegmentIndex, totalSegments, activeTab } = get();
+    const { currentSegmentIndex, totalSegments, activeTab, segments } = get();
     if (currentSegmentIndex < totalSegments) {
       const newIndex = currentSegmentIndex + 1;
-      set({ currentSegmentIndex: newIndex });
+      // 获取对应分段的 id（segments 是 0-based，但 currentSegmentIndex 是 1-based）
+      const newSegment = segments[newIndex - 1];
+      const newChunkId = newSegment?.id || '';
+
+      set({ currentSegmentIndex: newIndex, chunkId: newChunkId });
 
       // 加载新分段的数据
       if (activeTab === 'detail') {
@@ -151,9 +211,13 @@ export const useSegmentDrawerStore = create<SegmentDrawerStore>((set, get) => ({
 
   // 跳转到指定分段
   goToSegment: async (index: number) => {
-    const { totalSegments, activeTab } = get();
+    const { totalSegments, activeTab, segments } = get();
     if (index >= 1 && index <= totalSegments) {
-      set({ currentSegmentIndex: index });
+      // 获取对应分段的 id（segments 是 0-based，但 index 是 1-based）
+      const newSegment = segments[index - 1];
+      const newChunkId = newSegment?.id || '';
+
+      set({ currentSegmentIndex: index, chunkId: newChunkId });
 
       // 加载新分段的数据
       if (activeTab === 'detail') {
@@ -169,17 +233,16 @@ export const useSegmentDrawerStore = create<SegmentDrawerStore>((set, get) => ({
     try {
       set({ segmentDetailLoading: true, segmentDetailError: null });
 
-      console.log('📥 加载分段详情:', segmentIndex);
+      const { datasetId, chunkId } = get();
 
-      // TODO: 调用真实 API
-      // const response = await fetch(`/api/segments/${segmentIndex}/detail`);
-      // const data = await response.json();
+      console.log('📥 加载分段详情:', {
+        segmentIndex,
+        datasetId,
+        chunkId
+      });
 
-      // 模拟 API 调用
-      await new Promise((resolve) => setTimeout(resolve, 300));
-
-      // 使用 mock 数据
-      const data = JSON.parse(JSON.stringify(mockSegmentDetailData));
+      // 调用真实 API
+      const data = await fetchSegmentDetailInfo(datasetId, chunkId);
 
       set({
         segmentDetailData: data,
@@ -202,18 +265,37 @@ export const useSegmentDrawerStore = create<SegmentDrawerStore>((set, get) => ({
     try {
       set({ traceLogLoading: true, traceLogError: null });
 
-      console.log('📥 加载溯源日志:', segmentIndex);
+      const { datasetId, chunkId } = get();
 
-      // TODO: 调用真实 API
-      // const response = await fetch(`/api/segments/${segmentIndex}/trace`);
-      // const data = await response.json();
+      console.log('📥 加载溯源日志:', {
+        segmentIndex,
+        datasetId,
+        chunkId
+      });
 
-      // 模拟 API 调用
-      await new Promise((resolve) => setTimeout(resolve, 300));
+      // 调用真实 API
+      const traceLogData = await fetchSegmentTraceLog(datasetId, chunkId);
 
-      // 使用 mock 数据
-      const statistics = JSON.parse(JSON.stringify(mockTraceLogStatistics));
-      const nodes = JSON.parse(JSON.stringify(mockNodeDetails));
+      // 转换 API 返回的数据格式
+      const statistics = {
+        totalNodes: traceLogData.node_count || 0,
+        successNodes: traceLogData.node_success_count || 0,
+        totalTime: formatCostTime(traceLogData.cost_time || 0)
+      };
+
+      const nodes = (traceLogData.nodes || []).map(
+        (node: any, index: number) => ({
+          id: `node_${index}`,
+          index: node.node_index || index,
+          name: node.node_type || '未知节点',
+          status: node.status === 1 ? 'success' : 'failed',
+          duration: formatDuration(node.cost_time || 0),
+          startTime: formatTimestamp(node.start_time || 0),
+          input: node.node_input ? JSON.parse(node.node_input) : {},
+          output: node.node_output ? JSON.parse(node.node_output) : {},
+          msg: node.msg || ''
+        })
+      );
 
       set({
         traceLogStatistics: statistics,

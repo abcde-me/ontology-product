@@ -247,7 +247,7 @@ export const PROJECT_PERMISSIONS = {
 
 // API KEY管理
 export const API_KEY_PERMISSIONS = {
-  MENU: 'aisocket:apikey:read:menu'
+  MENU: 'common:apikey:read:list'
 } as const;
 
 // 聚合所有权限

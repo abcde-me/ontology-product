@@ -1,10 +1,11 @@
 import React, { useState, useCallback, useRef, useEffect } from 'react';
 import * as pdfjsLib from 'pdfjs-dist';
+import pdfjsWorker from 'pdfjs-dist/build/pdf.worker.entry';
 import { Spin } from '@arco-design/web-react';
 import styles from './PdfRenderer.module.scss';
 
 // 配置worker
-pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
+pdfjsLib.GlobalWorkerOptions.workerSrc = pdfjsWorker;
 
 interface PDFCoordinate {
   page: number;
@@ -48,6 +49,8 @@ const PdfRenderer: React.FC<PdfRendererProps> = ({
   // 加载PDF文档
   useEffect(() => {
     if (filePath || pdfData) {
+      let docURL: string | undefined;
+
       const loadPdf = async () => {
         setLoading(true);
         setTotalPages(0);
@@ -62,7 +65,7 @@ const PdfRenderer: React.FC<PdfRendererProps> = ({
               'bytes'
             );
             const blob = new Blob([pdfData], { type: 'application/pdf' });
-            const docURL = URL.createObjectURL(blob);
+            docURL = URL.createObjectURL(blob);
             loadingTask = pdfjsLib.getDocument(docURL);
           } else if (filePath) {
             // 使用URL加载PDF
@@ -71,8 +74,10 @@ const PdfRenderer: React.FC<PdfRendererProps> = ({
           }
 
           if (loadingTask) {
+            console.log('tttt');
             const pdf = await loadingTask.promise;
             pdfDocRef.current = pdf;
+            console.log('pdfddd', pdf);
             setTotalPages(pdf.numPages);
             originalImagesRef.current = {};
             console.log('✅ PDF加载成功! 总页数:', pdf.numPages);
@@ -85,6 +90,13 @@ const PdfRenderer: React.FC<PdfRendererProps> = ({
         }
       };
       loadPdf();
+
+      // Cleanup: 释放 Object URL
+      return () => {
+        if (docURL) {
+          URL.revokeObjectURL(docURL);
+        }
+      };
     }
   }, [filePath, pdfData]);
 

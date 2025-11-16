@@ -10,6 +10,7 @@ import ElementList from './ElementList';
 import EnhancementInfo from './EnhancementInfo';
 import { useSegmentDetailStore } from './store/segmentDetailStore';
 import { useSegmentDrawerStore } from '../store/segmentDrawerStore';
+import { ParagraphMetadata } from './ParagrapMetadata';
 
 interface SegmentDetailProps {
   segmentId: string;
@@ -115,6 +116,11 @@ const SegmentDetail: React.FC<SegmentDetailProps> = ({ segmentId }) => {
               onConfirmEditing={confirmEditingEnhancement}
             />
           </div>
+        )}
+
+        {/* 分段元数据 */}
+        {localDetailData.metadata && (
+          <ParagraphMetadata metadata={localDetailData.metadata} />
         )}
       </div>
     </div>
