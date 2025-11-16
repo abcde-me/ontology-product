@@ -6,6 +6,7 @@ import {
   Message,
   Form,
   Select,
+  Modal,
   Switch,
   Grid,
   Table,
@@ -148,6 +149,7 @@ export default function Step2FieldMapping({
           return (
             <Input
               placeholder="请输入数据资产名称"
+              allowClear
               value={record.nameZh}
               disabled={isReserved}
               onChange={(value) =>
@@ -431,12 +433,23 @@ export default function Step2FieldMapping({
 
   // 自动映射
   const handleAutoMapping = (v: boolean) => {
-    setAutoMapping(v);
-
     if (!v) {
+      Modal.confirm({
+        title: '确认关闭自动映射？',
+        content: '关闭后将不再自动根据来源字段进行映射，是否继续关闭？',
+        okText: '继续关闭',
+        cancelText: '取消',
+        onOk: () => {
+          setAutoMapping(false);
+        },
+        onCancel: () => {
+          // 保持开启状态
+          setAutoMapping(true);
+        }
+      });
       return;
     }
-
+    setAutoMapping(true);
     runAutoMap();
   };
 

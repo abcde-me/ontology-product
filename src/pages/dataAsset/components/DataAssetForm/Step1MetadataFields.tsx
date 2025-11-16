@@ -100,6 +100,7 @@ export default function Step1MetadataFields({
       render: (_: any, record: any) => (
         <Input
           placeholder="请输入中文名称"
+          allowClear
           value={record.nameZh}
           disabled={
             record.system === true || RESERVED_FIELD_ENS.has(record.nameEn)
@@ -116,6 +117,7 @@ export default function Step1MetadataFields({
         <Input
           placeholder="请输入英文名称"
           value={record.nameEn}
+          allowClear
           disabled={
             record.system === true || RESERVED_FIELD_ENS.has(record.nameEn)
           }
@@ -152,6 +154,7 @@ export default function Step1MetadataFields({
       render: (_: any, record: any) => (
         <Input
           value={record.default}
+          allowClear
           disabled={
             record.system === true || RESERVED_FIELD_ENS.has(record.nameEn)
           }

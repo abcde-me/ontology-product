@@ -154,7 +154,10 @@ export default function DataAssetList() {
 
       // 保存字段列表用于修改资产弹窗
       const fieldsForModifyList = (fields || [])
-        .filter((field: ApiColumnField) => !!field?.allowModify)
+        .filter(
+          (field: ApiColumnField) =>
+            !!field?.allowModify && field.displaySort > 0
+        )
         .map((field: ApiColumnField) => ({
           nameZh: field?.nameZh,
           nameEn: field?.nameEn,
@@ -164,7 +167,9 @@ export default function DataAssetList() {
       setFieldsForModify(fieldsForModifyList);
 
       // 保存列字段列表用于单条编辑弹窗
-      setColumnFields(fields || []);
+      setColumnFields(
+        fields.filter((field: ApiColumnField) => field.displaySort > 0) || []
+      );
 
       // 根据 fields 动态生成表格列
       const dynamicColumns = [
