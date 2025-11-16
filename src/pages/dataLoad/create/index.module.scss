@@ -45,3 +45,9 @@
     width: 24px;
   }
 }
+
+.sql-editor-form-item {
+  :global(.arco-form-label-item .arco-form-item-symbol) {
+    display: none;
+  }
+}

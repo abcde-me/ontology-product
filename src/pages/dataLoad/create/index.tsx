@@ -14,6 +14,7 @@ import {
   Typography,
   Switch
 } from '@arco-design/web-react';
+import { format } from 'sql-formatter';
 import React, {
   useEffect,
   useRef,
@@ -253,7 +254,7 @@ const RunningInfoPanel = function ({
           }
           name="1"
         >
-          <div className={styles['panel-content']}>
+          <div className={classNames(styles['panel-content'], 'h-[120px]')}>
             {checkMessage && (
               <div style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
                 {checkMessage}
@@ -725,7 +726,7 @@ export default function DataLoadCreate() {
         }
       } catch (error) {
         console.error('表单处理失败:', error);
-        Message.error('表单处理失败，请重试');
+        // Message.error('表单处理失败，请重试');
       } finally {
         setLoading(false);
       }
@@ -865,6 +866,24 @@ export default function DataLoadCreate() {
       setCheckMessage(error?.message || '校验异常，请稍后重试');
     }
   }, [sqlContent, form]);
+
+  const handleFormatCode = useCallback(() => {
+    if (checkStatus === CheckSQLStatus.CHECKING) {
+      Message.warning('SQL校验中，暂不支持格式化');
+      return;
+    }
+
+    if (sqlContent) {
+      try {
+        const formattedCode = format(sqlContent, { language: 'sql' });
+        setSqlContent(formattedCode);
+        Message.success('格式化成功');
+      } catch (e) {
+        console.error(e);
+        Message.error('格式化失败');
+      }
+    }
+  }, [sqlContent, checkStatus]);
 
   // 监听连接器ID变化
   const connectorId = Form.useWatch('connector_id', form);
@@ -1190,24 +1209,32 @@ export default function DataLoadCreate() {
                   initialValue="enable"
                 >
                   <Switch
+                    checkedText="开"
+                    uncheckedText="关"
                     checked={sqlProcessEnabled === 'enable'}
                     onChange={handleSqlProcessChange}
                   />
                 </FormItem>
 
                 {sqlProcessEnabled === 'enable' && (
-                  <FormItem label=" " field="sql" labelAlign="right">
+                  <FormItem
+                    className={styles['sql-editor-form-item']}
+                    label=" "
+                    field="sql"
+                    labelAlign="right"
+                    rules={[{ required: true, message: '请输入SQL语句' }]}
+                  >
                     <div
                       className={classNames(
                         styles['sql-editor-container'],
                         'rounded-[4px] border border-solid border-[#E2E8F0]'
                       )}
                     >
-                      <div className="flex items-center gap-[8px] border-b border-solid border-[#E2E8F0] p-[12px] pb-[12px]">
+                      <div className="flex items-center border-b border-solid border-[#E2E8F0] p-[12px] pb-[12px]">
                         <Button
                           type="secondary"
                           disabled={!sqlContent || sqlContent.trim() === ''}
-                          icon={<IconCaretRight className="mr-[4px]" />}
+                          icon={<IconCaretRight />}
                           className="h-[26px]"
                           onClick={handleCheckSQL}
                           loading={checkStatus === CheckSQLStatus.CHECKING}
@@ -1218,7 +1245,7 @@ export default function DataLoadCreate() {
                         <Button
                           type="text"
                           icon={<SQLFormatIcon />}
-                          // onClick={handleFormatCode}
+                          onClick={handleFormatCode}
                           className="h-[26px]"
                         >
                           格式化
