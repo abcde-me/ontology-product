@@ -1080,6 +1080,11 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
     if (!item) {
       return false;
     }
+    // 如果当前节点是选中的节点，跳过检查
+    const currentId = (item as any)?.id ?? (item as any)?.key;
+    if (currentId != null && selectedKeys?.includes(String(currentId))) {
+      return false;
+    }
 
     // 类型保护：确保节点有 type_name 属性
     const nodeData = item as TreeNodeData;
@@ -1110,6 +1115,11 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
     item: TreeNodeData | TreeDataType | null | undefined
   ): boolean => {
     if (!item) return false;
+    // 如果当前节点是选中的节点，跳过检查
+    const currentId = (item as any)?.id ?? (item as any)?.key;
+    if (currentId != null && selectedKeys?.includes(String(currentId))) {
+      return false;
+    }
     const nodeData = item as TreeNodeData;
     if (nodeData.type_name !== 'metadata') return false;
     const ext = (nodeData as any)?.extends || (nodeData as any)?.extend;
