@@ -148,7 +148,7 @@ export default function MetaData() {
       render: (value: any) => {
         let displayValue: any = value;
 
-        if (field.type === 'datetime') {
+        if (field.type?.includes('date')) {
           displayValue = value
             ? dayjs(value).format('YYYY-MM-DD HH:mm:ss')
             : '-';

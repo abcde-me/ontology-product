@@ -53,7 +53,7 @@ export interface SearchAreaProps {
 }
 
 const formatSearchContent = (field: ColumnField, value: any): string[] => {
-  if (field.type === 'datetime' && Array.isArray(value)) {
+  if (field.type.includes('date') && Array.isArray(value)) {
     const formattedValues = value
       .filter((item) => item !== undefined && item !== null && item !== '')
       .map((item) => {

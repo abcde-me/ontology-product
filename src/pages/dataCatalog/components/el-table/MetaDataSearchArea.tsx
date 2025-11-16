@@ -67,7 +67,7 @@ export default function SearchArea({
   };
 
   const formatSearchContent = (field: SearchField, value: any): string => {
-    if (field.type === 'datetime' && Array.isArray(value)) {
+    if (field.type.includes('date') && Array.isArray(value)) {
       const formattedValues = value
         .filter((item) => item !== undefined && item !== null && item !== '')
         .map((item) => {
@@ -234,7 +234,7 @@ export default function SearchArea({
     const value = fieldValues[field.key];
     let fieldType = field.type;
 
-    if (field.type === 'datetime' || field.type === 'date') {
+    if (field.type.includes('datetime') || field.type === 'date') {
       fieldType = 'range';
     } else {
       fieldType = 'input';

@@ -245,7 +245,7 @@ export default function DataAssetList() {
               width: 150,
               ellipsis: true,
               render: (value: any) => {
-                if (field.type === 'datetime') {
+                if (field.type.includes('date')) {
                   return value
                     ? dayjs(value).format('YYYY-MM-DD HH:mm:ss')
                     : '-';
