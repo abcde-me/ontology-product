@@ -295,7 +295,7 @@ export default function SearchArea({
                 <span className="whitespace-nowrap text-sm text-[var(--color-text-1)]">
                   {field.label}:
                 </span>
-                <div className="w-[260px]">{renderFieldInput(field)}</div>
+                <div className="min-w-[260px]">{renderFieldInput(field)}</div>
               </div>
             ))}
           </div>
