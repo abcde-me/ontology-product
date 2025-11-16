@@ -52,6 +52,7 @@ export default function SearchArea({
 
   // 初始化：默认勾选前三个字段
   useEffect(() => {
+    console.log('fields-----:', fields);
     const defaultCheckedKeys = fields.slice(0, 3).map((f) => f.key);
     const defaultChecked = new Set(defaultCheckedKeys);
     setCheckedFields(defaultChecked);
@@ -232,7 +233,6 @@ export default function SearchArea({
   const renderFieldInput = (field: SearchField) => {
     const value = fieldValues[field.key];
     let fieldType = field.type;
-    console.log('field:', field);
 
     if (field.type === 'datetime' || field.type === 'date') {
       fieldType = 'range';

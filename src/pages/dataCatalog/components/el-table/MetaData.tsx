@@ -239,7 +239,7 @@ export default function MetaData() {
       {/* 搜索区域 */}
       {columns.length > 0 && (
         <SearchArea
-          key={searchAreaResetKey}
+          key={selectedKey}
           fields={searchFields.map((field: Field) => ({
             key: field.nameEn,
             label: field.nameZh || field.nameEn,
