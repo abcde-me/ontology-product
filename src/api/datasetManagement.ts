@@ -272,3 +272,14 @@ export async function getDatasetVersionFile(
 export async function getDatasetSceneList() {
   return await UAPI.RES.datasetSceneListApi({}).post().inRegion().do();
 }
+
+// 批量更新数据集场景分类
+export async function datasetBatchUpdateScene(params: {
+  scene_id: number;
+  dataset_ids: number[];
+}) {
+  return await UAPI.RES.datasetBatchUpdateSceneApi({})
+    .post(params)
+    .inRegion()
+    .do();
+}
