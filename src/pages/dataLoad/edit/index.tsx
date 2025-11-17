@@ -445,12 +445,6 @@ const Edit = (props) => {
       console.error('获取连接器表格数据失败:', error);
     }
   };
-  useEffect(() => {
-    if (props.detailData?.connector_id) {
-      getTableList(props.detailData.connector_id);
-    }
-    getdirectoryDataList();
-  }, []);
   async function getdirectoryDataList() {
     try {
       const res = await getDirectoryList({
@@ -671,24 +665,34 @@ const Edit = (props) => {
     directoryData,
     props.detailData?.source_type
   ]);
+
+  // 初始化数据：获取目录列表、表格列表，并设置 MutationObserver
   useEffect(() => {
+    // 获取目录列表
     getdirectoryDataList();
+
+    // 获取连接器表格列表
+    if (props.detailData?.connector_id) {
+      getTableList(props.detailData.connector_id);
+    }
+
+    // 创建 MutationObserver 监听 DOM 变化
+    const observer = new MutationObserver(() => {
+      const items = document.querySelectorAll('.arco-cascader-list-item');
+      items.forEach((item) => item.removeAttribute('title'));
+    });
+
+    // 开始监听整个文档
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true
+    });
+
+    // 清理函数：断开 observer
     return () => {
       observer.disconnect();
     };
   }, []);
-
-  // 创建 MutationObserver 监听 DOM 变化
-  const observer = new MutationObserver(() => {
-    const items = document.querySelectorAll('.arco-cascader-list-item');
-    items.forEach((item) => item.removeAttribute('title'));
-  });
-
-  // 开始监听整个文档
-  observer.observe(document.body, {
-    childList: true,
-    subtree: true
-  });
   // 切换载入类型的函数
   const handoffLoadFormHan = (val) => {
     if (val === 'once') {
@@ -976,7 +980,8 @@ const Edit = (props) => {
           Message.error(res.message);
         }
       }
-      props.getDetailList();
+      // 移除此处的 getDetailList 调用，因为返回详情页后，详情页会自动刷新数据
+      // props.getDetailList();
     } catch (error) {
       console.error('表单处理失败:', error);
     } finally {
