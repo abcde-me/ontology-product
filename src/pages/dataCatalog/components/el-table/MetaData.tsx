@@ -279,7 +279,7 @@ export default function MetaData() {
             columns={columns}
             data={tableData}
             loading={loading}
-            // rowKey={(record, index) => record.id || index}
+            rowKey="id"
             pagination={false}
             border={false}
             scroll={{ x: true }}
