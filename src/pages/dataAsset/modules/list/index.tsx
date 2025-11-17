@@ -441,8 +441,15 @@ export default function DataAssetList() {
   };
 
   // 处理字段搜索
-  const handleFieldSearch = (fieldValues: FieldSearchItem[]) => {
-    setSearchParams({ ...searchParams, fieldSearch: fieldValues });
+  const handleFieldSearch = (
+    fieldValues: FieldSearchItem[],
+    commonSearch: string
+  ) => {
+    setSearchParams({
+      ...searchParams,
+      fieldSearch: fieldValues,
+      commonSearch
+    });
   };
 
   // 处理重置
