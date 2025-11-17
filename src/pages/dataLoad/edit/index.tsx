@@ -34,7 +34,7 @@ import CodeMirror from '@uiw/react-codemirror';
 import { IconCaretRight, IconDown, IconUp } from '@arco-design/web-react/icon';
 import SQLFormatIcon from '@/assets/sql/sql-format-ico.svg';
 import classNames from 'classnames';
-import styles from '../create/index.module.scss';
+import styles from '../edit/index.module.scss';
 import { useHistory, useParams as useRouteParams } from 'react-router';
 
 // 定义目录数据类型
@@ -986,6 +986,7 @@ const Edit = (props) => {
 
   return (
     <div
+      className={styles['data-load-create-container']}
       style={{
         display: 'flex',
         flexDirection: 'column',
@@ -1287,10 +1288,10 @@ const Edit = (props) => {
         ) : // </div>
         null}
       </Form>
-      <div className={styles.footerBbtnBox}>
+      <div className={styles['footer-btn-box']}>
         <Button
           onClick={props.hideEditModalHan || cancelHan}
-          style={{ marginRight: '20px' }}
+          style={{ marginRight: '8px' }}
         >
           取消
         </Button>
@@ -1397,7 +1398,7 @@ export default function DataLoadEdit() {
       <div className="mb-[9px] mt-[17px] text-[20px] font-bold leading-[32px]">
         编辑数据载入任务
       </div>
-      <div className="flex h-[calc(100%-58px-17px)] flex-col items-start justify-start overflow-y-auto rounded-[16px] bg-white p-[24px]">
+      <div className="flex h-[calc(100%-58px-17px)] flex-col items-start justify-start overflow-y-auto rounded-[16px] bg-white">
         <Edit
           detailData={detailData}
           editForm={form}
