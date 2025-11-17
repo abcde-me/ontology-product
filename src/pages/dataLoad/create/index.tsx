@@ -254,7 +254,7 @@ const RunningInfoPanel = function ({
           }
           name="1"
         >
-          <div className={classNames(styles['panel-content'], 'h-[120px]')}>
+          <div className={classNames(styles['panel-content'])}>
             {checkMessage && (
               <div
                 style={{
