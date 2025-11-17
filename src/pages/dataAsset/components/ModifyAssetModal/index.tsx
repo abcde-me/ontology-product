@@ -33,6 +33,7 @@ const ModifyAssetModal: React.FC<ModifyAssetModalProps> = ({
 
   const fieldValue = Form.useWatch('fieldValue', form);
   const charCount = fieldValue?.length || 0;
+  const modifyMethod = Form.useWatch('modifyMethod', form);
 
   useEffect(() => {
     if (visible) {
@@ -49,11 +50,14 @@ const ModifyAssetModal: React.FC<ModifyAssetModalProps> = ({
   const handleConfirm = async () => {
     try {
       const values = await form.validate();
+      const isCover = values.modifyMethod === ModifyMethod.COVER;
       onConfirm({
         modifyMethod: values.modifyMethod,
         fieldEnName: values.fieldEnName,
-        separator: values.separator || '',
-        fieldValue: values.fieldValue || ''
+        separator: isCover ? '' : values.separator || '',
+        fieldValue: isCover
+          ? (values.fieldValue ?? '')
+          : `${values.separator ?? ''}${values.fieldValue ?? ''}`
       });
     } catch (error) {
       // 验证失败，不做任何操作
@@ -101,13 +105,15 @@ const ModifyAssetModal: React.FC<ModifyAssetModalProps> = ({
         </Form.Item>
 
         {/* 分隔符 */}
-        <Form.Item
-          label="分隔符"
-          field="separator"
-          extra="同一个单元格中多个内容之间的分隔符号"
-        >
-          <Input placeholder="请输入" style={{ width: '100%' }} />
-        </Form.Item>
+        {modifyMethod !== ModifyMethod.COVER && (
+          <Form.Item
+            label="分隔符"
+            field="separator"
+            extra="同一个单元格中多个内容之间的分隔符号"
+          >
+            <Input placeholder="请输入" style={{ width: '100%' }} />
+          </Form.Item>
+        )}
 
         {/* 更改为 */}
         <Form.Item label="更改为" field="fieldValue">
