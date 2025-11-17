@@ -870,7 +870,7 @@ const Edit = (props) => {
             form.getFieldValue('connector_id');
 
           if (!currentConnectorId) {
-            Message.error('请先选择数据源连接器');
+            Message.error('请先绑定连接器');
             return;
           }
 
@@ -1358,7 +1358,6 @@ export default function DataLoadEdit() {
 
   // 编辑成功后的回调
   const handleEditSuccess = () => {
-    Message.success('修改成功');
     history.goBack();
   };
 
