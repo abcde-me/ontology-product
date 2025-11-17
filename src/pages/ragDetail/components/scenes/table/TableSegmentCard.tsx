@@ -8,6 +8,7 @@ import { useClickAway } from 'ahooks';
 import { TableSegment } from '../../../types';
 import { useRagDetailStore } from '../../../store/ragDetailStore';
 import SegmentCardActions from '../../shared/SegmentCardActions';
+import SegmentMarkdown from '../../common/SegmentMarkdown';
 import { Input } from '@arco-design/web-react';
 
 interface TableSegmentCardProps {
@@ -23,9 +24,52 @@ const TableSegmentCard: React.FC<TableSegmentCardProps> = ({
     useRagDetailStore();
   const [isHovered, setIsHovered] = useState(false);
   const isEditing = editingSegmentId === segment.id;
-  const tableData = segment.tableData;
   const cardRef = useRef<HTMLDivElement>(null);
 
+  // 根据当前定义的 tableData 值生成表格结构
+  const rawTableData = {
+    ID: 1,
+    问题: '整个共和国、城市地区和农村地区家庭在医疗服务和护理上的平均年度支出是多少英镑？',
+    回答: '### 家庭在服务和医疗保健上的平均年度支出 1. **整个共和国家庭在服务和医疗保健上的平均年度支出：** - 2019/2020 年，整个共和国家庭在服务和医疗保健上的平均年度支出为 7,779.3 英镑（信息 1）。 2. **城镇家庭在服务和医疗保健上的平均年度支出：** - 2019/2020 年城镇家庭在服务和医疗保健上的平均年度支出为 6,779.3 埃及镑（信息 1）。 3. **农村家庭在服务和医疗保健上的平均年度支出：** - 2019/2020 年农村家庭在服务和医疗保健上的平均年度支出为 6,113.5 埃及镑（信息 1）。'
+  };
+
+  // 转换为表格格式：headers 和 rows
+  const tableData = {
+    headers: Object.keys(rawTableData),
+    rows: [rawTableData]
+  };
+
+  // 判断内容是否包含 markdown 格式
+  const containsMarkdown = (content: string | number): boolean => {
+    if (typeof content === 'number') return false;
+    const markdownPatterns = [
+      /^#{1,6}\s/, // 标题 (#, ##, ###, etc.)
+      /\*\*.*?\*\*/, // 粗体 (**text**)
+      /\*.*?\*/, // 斜体 (*text*)
+      /\[.*?\]\(.*?\)/, // 链接 [text](url)
+      /^\s*[-*+]\s/, // 无序列表 (-, *, +)
+      /^\s*\d+\.\s/, // 有序列表 (1., 2., etc.)
+      /`.*?`/, // 行内代码 (`code`)
+      /```[\s\S]*?```/, // 代码块 (```code```)
+      /^\s*>\s/, // 引用 (> text)
+      /\|.*\|/, // 表格 (| col |)
+      /!\[.*?\]\(.*?\)/ // 图片 ![alt](url)
+    ];
+    return markdownPatterns.some((pattern) => pattern.test(content));
+  };
+
+  // 渲染单元格内容
+  const renderCellContent = (content: string | number) => {
+    const contentStr = String(content);
+    if (containsMarkdown(contentStr)) {
+      return (
+        <div className="text-gray-900">
+          <SegmentMarkdown content={contentStr} className="!m-0 !p-0" />
+        </div>
+      );
+    }
+    return <span className="text-gray-900">{contentStr}</span>;
+  };
   // 点击外部区域取消编辑
   useClickAway(() => {
     if (isEditing) {
@@ -76,8 +120,11 @@ const TableSegmentCard: React.FC<TableSegmentCardProps> = ({
             }`}
             style={
               tableData.headers.length >= 4
-                ? { tableLayout: 'fixed', width: 'auto' }
-                : { tableLayout: 'auto' }
+                ? {
+                    tableLayout: 'fixed',
+                    width: `${tableData.headers.length * 200}px`
+                  }
+                : { tableLayout: 'fixed', width: '100%' }
             }
           >
             <thead>
@@ -89,7 +136,7 @@ const TableSegmentCard: React.FC<TableSegmentCardProps> = ({
                     style={
                       tableData.headers.length >= 4
                         ? { width: '200px', minWidth: '200px' }
-                        : {}
+                        : { width: `${100 / tableData.headers.length}%` }
                     }
                   >
                     {isEditing ? (
@@ -116,7 +163,7 @@ const TableSegmentCard: React.FC<TableSegmentCardProps> = ({
                       style={
                         tableData.headers.length >= 4
                           ? { width: '200px', minWidth: '200px' }
-                          : {}
+                          : { width: `${100 / tableData.headers.length}%` }
                       }
                     >
                       {isEditing ? (
@@ -129,7 +176,7 @@ const TableSegmentCard: React.FC<TableSegmentCardProps> = ({
                           className="w-full"
                         />
                       ) : (
-                        <span className="text-gray-900">{row[header]}</span>
+                        renderCellContent(row[header])
                       )}
                     </td>
                   ))}

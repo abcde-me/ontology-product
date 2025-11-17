@@ -32,9 +32,8 @@ const TableSegmentList: React.FC<TableSegmentListProps> = ({
 
     const searchLower = segmentSearchText.toLowerCase().trim();
     return segments.filter((segment) => {
-      const titleMatch = segment.title?.toLowerCase().includes(searchLower);
       const contentMatch = segment.content.toLowerCase().includes(searchLower);
-      return titleMatch || contentMatch;
+      return contentMatch;
     });
   }, [segments, segmentSearchText]);
 
