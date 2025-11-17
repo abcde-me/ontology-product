@@ -111,16 +111,12 @@ const ModifyAssetModal: React.FC<ModifyAssetModalProps> = ({
 
         {/* 更改为 */}
         <Form.Item label="更改为" field="fieldValue">
-          <div className="relative">
-            <TextArea
-              placeholder="输入覆盖或者追加的内容,多个字段用分隔符分割"
-              style={{ width: '100%', minHeight: 120 }}
-              maxLength={maxLength}
-            />
-            <div className="absolute bottom-2 right-2 text-xs text-[#86909C]">
-              {charCount}/{maxLength}
-            </div>
-          </div>
+          <TextArea
+            placeholder="输入覆盖或者追加的内容,多个字段用分隔符分割"
+            style={{ width: '100%', minHeight: 120 }}
+            maxLength={maxLength}
+            showWordLimit
+          />
         </Form.Item>
 
         {/* 按钮 */}
