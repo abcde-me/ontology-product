@@ -13,7 +13,6 @@ import {
   Switch
 } from '@arco-design/web-react';
 import React, { useEffect, useRef, useState, useCallback } from 'react';
-import Styles from './index.module.scss';
 import SchedulerRun from '../../../components/scheduler-run';
 import {
   editLoad,
@@ -1002,7 +1001,7 @@ const Edit = (props) => {
         initialValues={{
           dest_path: initialPath
         }}
-        className={styles.dataLoadForm}
+        className={styles['data-load-form']}
       >
         <FormItem
           label="任务名称："
@@ -1208,8 +1207,8 @@ const Edit = (props) => {
                         highlightActiveLineGutter: false
                       }}
                       className={classNames(
-                        Styles['code-editor'],
-                        Styles['code-mirror-disabled']
+                        styles['code-editor'],
+                        styles['code-mirror-disabled']
                       )}
                     />
                     {checkStatus !== CheckSQLStatus.NONE && (
@@ -1288,7 +1287,7 @@ const Edit = (props) => {
         ) : // </div>
         null}
       </Form>
-      <div className={Styles.footerBbtnBox}>
+      <div className={styles.footerBbtnBox}>
         <Button
           onClick={props.hideEditModalHan || cancelHan}
           style={{ marginRight: '20px' }}
