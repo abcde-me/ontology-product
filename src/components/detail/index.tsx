@@ -1105,7 +1105,7 @@ const DatasetDetail = (props: {
         id: id,
         version_id: datasetDetail.latest_version,
         page: fileCurrentPage,
-        page_size: filePageSize
+        limit: filePageSize
       };
       return getDataContentFileList(params)
         .then((res) => {

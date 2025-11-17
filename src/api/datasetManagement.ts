@@ -236,7 +236,7 @@ export async function getDataContentFileList(params: {
   id: number | string;
   version_id: string;
   page: number;
-  page_size: number;
+  limit: number;
 }) {
   return await UAPI.RES.dataContentFileList({})
     .post({ ...params, id: Number(params.id) })
