@@ -187,9 +187,6 @@ export default function Step1MetadataFields({
       render: (_: any, record: any) => (
         <Checkbox
           checked={record.allowModify}
-          disabled={
-            record.system === true || RESERVED_FIELD_ENS.has(record.nameEn)
-          }
           onChange={(checked) =>
             handleUpdateField(record.id, { allowModify: checked })
           }

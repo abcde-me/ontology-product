@@ -45,7 +45,10 @@ export interface SearchAreaProps {
   /** 主搜索回调 */
   onMainSearch?: (value: string) => void;
   /** 字段搜索回调 */
-  onFieldSearch?: (fieldValues: FieldSearchItem[]) => void;
+  onFieldSearch?: (
+    fieldValues: FieldSearchItem[],
+    commonSearch: string
+  ) => void;
   /** 重置回调 */
   onReset?: () => void;
   /** 样式类 */
@@ -76,7 +79,7 @@ const formatSearchContent = (field: ColumnField, value: any): string[] => {
 export default function SearchArea({
   fields = [],
   mainSearchValue = '',
-  mainSearchPlaceholder = '请输入搜索内容,如10月份所有的表',
+  mainSearchPlaceholder = '请输入搜索内容',
   onMainSearch,
   onFieldSearch,
   onReset,
@@ -138,7 +141,7 @@ export default function SearchArea({
         });
       }
     });
-    onFieldSearch?.(fieldSearch);
+    onFieldSearch?.(fieldSearch, mainSearch);
   };
 
   // 处理重置按钮点击
