@@ -166,7 +166,16 @@ export const useFileManager = (
           return [];
         }
 
-        const items = rawPythonList?.data?.items ?? [];
+        const items =
+          rawPythonList?.data?.items.map((item) => {
+            return {
+              ...item,
+              key: String(item.id),
+              title: item.name,
+              type: item.type,
+              children: item.type === PythonItemType.Directory ? [] : undefined
+            };
+          }) ?? [];
         setPythonList(items);
         setIsCanCreate(rawPythonList?.data?.create_perm ?? false);
         return items; // 返回获取到的数据
