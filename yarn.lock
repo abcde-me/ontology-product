@@ -6056,6 +6056,11 @@ adjust-sourcemap-loader@^4.0.0:
     loader-utils "^2.0.0"
     regex-parser "^2.2.11"
 
+adler-32@~1.3.0:
+  version "1.3.1"
+  resolved "http://npm.cestc.cn/adler-32/download/adler-32-1.3.1.tgz#1dbf0b36dda0012189a32b3679061932df1821e2"
+  integrity sha1-Hb8LNt2gASGJoys2eQYZMt8YIeI=
+
 agent-base@6:
   version "6.0.2"
   resolved "http://npm.cestc.cn/agent-base/download/agent-base-6.0.2.tgz#49fff58577cfee3f37176feab4c22e00f86d7f77"
@@ -7564,6 +7569,14 @@ center-align@^0.1.1:
     align-text "^0.1.3"
     lazy-cache "^1.0.3"
 
+cfb@~1.2.1:
+  version "1.2.2"
+  resolved "http://npm.cestc.cn/cfb/download/cfb-1.2.2.tgz#94e687628c700e5155436dac05f74e08df23bc44"
+  integrity sha1-lOaHYoxwDlFVQ22sBfdOCN8jvEQ=
+  dependencies:
+    adler-32 "~1.3.0"
+    crc-32 "~1.2.0"
+
 chai@^4.2.0:
   version "4.5.0"
   resolved "http://npm.cestc.cn/chai/download/chai-4.5.0.tgz#707e49923afdd9b13a8b0b47d33d732d13812fd8"
@@ -8052,6 +8065,11 @@ codemirror@^6.0.0:
     "@codemirror/state" "^6.0.0"
     "@codemirror/view" "^6.0.0"
 
+codepage@~1.15.0:
+  version "1.15.0"
+  resolved "http://npm.cestc.cn/codepage/download/codepage-1.15.0.tgz#2e00519024b39424ec66eeb3ec07227e692618ab"
+  integrity sha1-LgBRkCSzlCTsZu6z7AcifmkmGKs=
+
 coffeeify@^3.0.1:
   version "3.0.1"
   resolved "http://npm.cestc.cn/coffeeify/download/coffeeify-3.0.1.tgz#5e2753000c50bd24c693115f33864248dd11136c"
@@ -8518,6 +8536,11 @@ cosmiconfig@^8.3.5:
     js-yaml "^4.1.0"
     parse-json "^5.2.0"
     path-type "^4.0.0"
+
+crc-32@~1.2.0, crc-32@~1.2.1:
+  version "1.2.2"
+  resolved "http://npm.cestc.cn/crc-32/download/crc-32-1.2.2.tgz#3cad35a934b8bf71f25ca524b6da51fb7eace2ff"
+  integrity sha1-PK01qTS4v3HyXKUkttpR+36s4v8=
 
 create-ecdh@^4.0.4:
   version "4.0.4"
@@ -11546,6 +11569,11 @@ forwarded@0.2.0:
   version "0.2.0"
   resolved "http://npm.cestc.cn/forwarded/download/forwarded-0.2.0.tgz#2269936428aad4c15c7ebe9779a84bf0b2a81811"
   integrity sha1-ImmTZCiq1MFcfr6XeahL8LKoGBE=
+
+frac@~1.1.2:
+  version "1.1.2"
+  resolved "http://npm.cestc.cn/frac/download/frac-1.1.2.tgz#3d74f7f6478c88a1b5020306d747dc6313c74d0b"
+  integrity sha1-PXT39keMiKG1AgMG10fcYxPHTQs=
 
 fraction.js@^4.3.7:
   version "4.3.7"
@@ -20834,6 +20862,13 @@ sql-formatter@^15.4.0:
     get-stdin "=8.0.0"
     nearley "^2.20.1"
 
+ssf@~0.11.2:
+  version "0.11.2"
+  resolved "http://npm.cestc.cn/ssf/download/ssf-0.11.2.tgz#0b99698b237548d088fc43cdf2b70c1a7512c06c"
+  integrity sha1-C5lpiyN1SNCI/EPN8rcMGnUSwGw=
+  dependencies:
+    frac "~1.1.2"
+
 sshpk@^1.14.1:
   version "1.18.0"
   resolved "http://npm.cestc.cn/sshpk/download/sshpk-1.18.0.tgz#1663e55cddf4d688b86a46b77f0d5fe363aba028"
@@ -23522,6 +23557,11 @@ window-size@0.1.0:
   resolved "http://npm.cestc.cn/window-size/download/window-size-0.1.0.tgz#5438cd2ea93b202efa3a19fe8887aee7c94f9c9d"
   integrity sha1-VDjNLqk7IC76Ohn+iIeu58lPnJ0=
 
+wmf@~1.0.1:
+  version "1.0.2"
+  resolved "http://npm.cestc.cn/wmf/download/wmf-1.0.2.tgz#7d19d621071a08c2bdc6b7e688a9c435298cc2da"
+  integrity sha1-fRnWIQcaCMK9xrfmiKnENSmMwto=
+
 wolfy87-eventemitter@^5.1.0:
   version "5.2.9"
   resolved "http://npm.cestc.cn/wolfy87-eventemitter/download/wolfy87-eventemitter-5.2.9.tgz#e879f770b30fbb6512a8afbb330c388591099c2a"
@@ -23531,6 +23571,11 @@ word-wrap@^1.2.5, word-wrap@~1.2.3:
   version "1.2.5"
   resolved "http://npm.cestc.cn/word-wrap/download/word-wrap-1.2.5.tgz#d2c45c6dd4fbce621a66f136cbe328afd0410b34"
   integrity sha1-0sRcbdT7zmIaZvE2y+Mor9BBCzQ=
+
+word@~0.3.0:
+  version "0.3.0"
+  resolved "http://npm.cestc.cn/word/download/word-0.3.0.tgz#8542157e4f8e849f4a363a288992d47612db9961"
+  integrity sha1-hUIVfk+OhJ9KNjooiZLUdhLbmWE=
 
 wordwrap@0.0.2:
   version "0.0.2"
@@ -23846,6 +23891,19 @@ xdg-basedir@^3.0.0:
   version "3.0.0"
   resolved "http://npm.cestc.cn/xdg-basedir/download/xdg-basedir-3.0.0.tgz#496b2cc109eca8dbacfe2dc72b603c17c5870ad4"
   integrity sha1-SWsswQnsqNus/i3HK2A8F8WHCtQ=
+
+xlsx@^0.18.5:
+  version "0.18.5"
+  resolved "http://npm.cestc.cn/xlsx/download/xlsx-0.18.5.tgz#16711b9113c848076b8a177022799ad356eba7d0"
+  integrity sha1-FnEbkRPISAdrihdwInma01brp9A=
+  dependencies:
+    adler-32 "~1.3.0"
+    cfb "~1.2.1"
+    codepage "~1.15.0"
+    crc-32 "~1.2.1"
+    ssf "~0.11.2"
+    wmf "~1.0.1"
+    word "~0.3.0"
 
 xml-name-validator@^3.0.0:
   version "3.0.0"
