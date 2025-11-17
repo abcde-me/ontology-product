@@ -4,6 +4,7 @@
   background-color: #fff;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
   overflow: hidden;
+  position: relative;
 
   :global(.arco-spin-children) {
     height: 100%;
@@ -12,6 +13,7 @@
   // CodeMirror 编辑器样式
   .code-editor {
     height: 100%;
+    min-height: 300px;
 
     :global(.cm-editor) {
       height: 100%;
@@ -44,10 +46,44 @@
     color: var(--color-text-4);
     width: 24px;
   }
+
+  .sql-running-info-panel {
+    :global(.arco-collapse-item-content-box) {
+      padding: 8px 12px 12px;
+    }
+  }
 }
 
 .sql-editor-form-item {
   :global(.arco-form-label-item .arco-form-item-symbol) {
     display: none;
+  }
+}
+
+.data-load-form {
+  padding: 24px 24px 0;
+
+  :global(.arco-form-label-item) {
+    width: 128px;
+    min-width: 128px;
+    flex: 0 0 128px;
+  }
+
+  :global(.arco-form-item-wrapper) {
+    max-width: 640px;
+  }
+}
+
+.data-load-create-container {
+  .footer-btn-box {
+    position: sticky;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 20px 24px;
+    background-color: #fff;
+    width: 100%;
+    z-index: 1;
+    border-top: 1px solid #e2e8f0;
   }
 }

@@ -1002,8 +1002,7 @@ const Edit = (props) => {
         initialValues={{
           dest_path: initialPath
         }}
-        labelCol={{ span: 3 }}
-        wrapperCol={{ span: 10 }}
+        className={styles.dataLoadForm}
       >
         <FormItem
           label="任务名称："
