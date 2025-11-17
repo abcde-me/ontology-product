@@ -54,3 +54,15 @@
     background-color: #f8fafd;
   }
 }
+
+.dataLoadForm {
+  :global(.arco-form-label-item) {
+    width: 128px;
+    min-width: 128px;
+    flex: 0 0 128px;
+  }
+
+  :global(.arco-form-item-wrapper) {
+    max-width: 640px;
+  }
+}

@@ -33,6 +33,7 @@ const ModifyAssetModal: React.FC<ModifyAssetModalProps> = ({
 
   const fieldValue = Form.useWatch('fieldValue', form);
   const charCount = fieldValue?.length || 0;
+  const modifyMethod = Form.useWatch('modifyMethod', form);
 
   useEffect(() => {
     if (visible) {
@@ -49,11 +50,14 @@ const ModifyAssetModal: React.FC<ModifyAssetModalProps> = ({
   const handleConfirm = async () => {
     try {
       const values = await form.validate();
+      const isCover = values.modifyMethod === ModifyMethod.COVER;
       onConfirm({
         modifyMethod: values.modifyMethod,
         fieldEnName: values.fieldEnName,
-        separator: values.separator || '',
-        fieldValue: values.fieldValue || ''
+        separator: isCover ? '' : values.separator || '',
+        fieldValue: isCover
+          ? (values.fieldValue ?? '')
+          : `${values.separator ?? ''}${values.fieldValue ?? ''}`
       });
     } catch (error) {
       // 验证失败，不做任何操作
@@ -101,26 +105,24 @@ const ModifyAssetModal: React.FC<ModifyAssetModalProps> = ({
         </Form.Item>
 
         {/* 分隔符 */}
-        <Form.Item
-          label="分隔符"
-          field="separator"
-          extra="同一个单元格中多个内容之间的分隔符号"
-        >
-          <Input placeholder="请输入" style={{ width: '100%' }} />
-        </Form.Item>
+        {modifyMethod !== ModifyMethod.COVER && (
+          <Form.Item
+            label="分隔符"
+            field="separator"
+            extra="同一个单元格中多个内容之间的分隔符号"
+          >
+            <Input placeholder="请输入" style={{ width: '100%' }} />
+          </Form.Item>
+        )}
 
         {/* 更改为 */}
         <Form.Item label="更改为" field="fieldValue">
-          <div className="relative">
-            <TextArea
-              placeholder="输入覆盖或者追加的内容,多个字段用分隔符分割"
-              style={{ width: '100%', minHeight: 120 }}
-              maxLength={maxLength}
-            />
-            <div className="absolute bottom-2 right-2 text-xs text-[#86909C]">
-              {charCount}/{maxLength}
-            </div>
-          </div>
+          <TextArea
+            placeholder="输入覆盖或者追加的内容,多个字段用分隔符分割"
+            style={{ width: '100%', minHeight: 120 }}
+            maxLength={maxLength}
+            showWordLimit
+          />
         </Form.Item>
 
         {/* 按钮 */}

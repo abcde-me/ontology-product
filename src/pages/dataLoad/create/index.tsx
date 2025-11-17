@@ -256,7 +256,14 @@ const RunningInfoPanel = function ({
         >
           <div className={classNames(styles['panel-content'], 'h-[120px]')}>
             {checkMessage && (
-              <div style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
+              <div
+                style={{
+                  whiteSpace: 'pre-wrap',
+                  wordBreak: 'break-word',
+                  fontSize: '14px',
+                  lineHeight: '22px'
+                }}
+              >
                 {checkMessage}
               </div>
             )}
@@ -834,7 +841,7 @@ export default function DataLoadCreate() {
     const currentConnectorId = form.getFieldValue('connector_id');
 
     if (!currentConnectorId) {
-      Message.error('请先选择数据源连接器');
+      Message.error('请先绑定连接器');
       return;
     }
 
@@ -1050,17 +1057,21 @@ export default function DataLoadCreate() {
   }, [form]);
 
   return (
-    <div className="h-full px-[20px]">
+    <div className={classNames('h-full px-[20px]')}>
       <div className="mb-[9px] mt-[17px] text-[20px] font-bold leading-[32px]">
         创建数据载入任务
       </div>
-      <div className="flex h-[calc(100%-58px-17px)] flex-col items-start justify-start overflow-y-auto rounded-[16px] bg-white p-[24px]">
+      <div
+        className={classNames(
+          'flex h-[calc(100%-58px-17px)] flex-col items-start justify-start overflow-y-auto rounded-[16px] bg-white',
+          styles['data-load-create-container']
+        )}
+      >
         <Form
           autoComplete="off"
           form={form}
-          labelCol={{ span: 3 }}
-          wrapperCol={{ span: 10 }}
           disabled={loading}
+          className={styles['data-load-form']}
         >
           <FormItem
             label="任务名称："
@@ -1329,19 +1340,21 @@ export default function DataLoadCreate() {
             </RadioGroup>
           </FormItem>
 
-          {loadVal === LOAD_TYPES.CRON && (
-            // <div className={Styles.cycleLoadingBox}>
-            <SchedulerRun
-              // @ts-expect-error
-              ref={SchedulerRunRef}
-              options={{}}
-              onOptionsChange={setExpression}
-            />
-            // </div>
-          )}
+          <FormItem label="">
+            {loadVal === LOAD_TYPES.CRON && (
+              // <div className={Styles.cycleLoadingBox}>
+              <SchedulerRun
+                // @ts-expect-error
+                ref={SchedulerRunRef}
+                options={{}}
+                onOptionsChange={setExpression}
+              />
+              // </div>
+            )}
+          </FormItem>
         </Form>
 
-        <div className={Styles.footerBbtnBox}>
+        <div className={styles['footer-btn-box']}>
           <Button
             onClick={() => handleSubmit(SUBMIT_TYPES.RUN)}
             type="primary"

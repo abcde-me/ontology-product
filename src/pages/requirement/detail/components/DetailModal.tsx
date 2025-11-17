@@ -11,7 +11,7 @@ import {
   Tooltip,
   Spin
 } from '@arco-design/web-react';
-import { getCatalogList } from '@/api/dataCatalog';
+import { CatalogItemType, getCatalogList } from '@/api/dataCatalog';
 import { getAnnotationTabledData } from '@/api/dataAnnotation';
 import dayjs from 'dayjs';
 import noDataElement from '@/components/no-data';
@@ -106,7 +106,7 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
     let newTreeData: any[] = [];
     try {
       setTreeLoading(true);
-      getCatalogList({}).then((res) => {
+      getCatalogList({ dir_type: CatalogItemType.Volume }).then((res) => {
         setTreeLoading(false);
         if (res.status !== 200) {
           return;
@@ -287,6 +287,8 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
         settableLoading(false);
       }
     } catch (error) {
+      setTableData([]);
+      setTotal(0);
       settableLoading(false);
     } finally {
       settableLoading(false);

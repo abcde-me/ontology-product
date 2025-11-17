@@ -341,7 +341,7 @@ const columns = (
   },
   {
     title: '来源',
-    dataIndex: 'sources',
+    dataIndex: 'src_name',
     width: 120,
     filterIcon: <IconFilter />,
     filters: [
