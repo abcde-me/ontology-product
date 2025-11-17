@@ -77,7 +77,7 @@ interface DatasetDetail {
 
 enum StorageType {
   jsonl = 'jsonl',
-  file = 'file',
+  vector = 'vector',
   table = 'table',
   image = 'image',
   video = 'video',
@@ -547,6 +547,7 @@ const DatasetDetail = (props: {
       title: '文件类型',
       dataIndex: 'file_type',
       width: 100,
+      filter: [],
       render: (_, record) => (
         <div>
           {getFileIcon(record.file_type)} {record.file_type}
@@ -557,6 +558,7 @@ const DatasetDetail = (props: {
       title: '文件大小',
       dataIndex: 'file_size',
       width: 100,
+      sorter: true, // 启用排序功能，但不提供排序函数
       render: (_, record) => <span>{formatFileSize(record.file_size)}</span>
     },
     {
@@ -569,6 +571,7 @@ const DatasetDetail = (props: {
       title: '状态',
       dataIndex: 'status',
       width: 100,
+      filter: [],
       render: (_, record) => <span>{record.status}</span>
     },
     {
@@ -751,7 +754,7 @@ const DatasetDetail = (props: {
     switch (type) {
       case StorageType.table:
         return '数据库表';
-      case StorageType.file:
+      case StorageType.vector:
         return '向量';
       case StorageType.video:
         return '视频';
@@ -1134,7 +1137,7 @@ const DatasetDetail = (props: {
   const fetchDatasetContents = () => {
     if (!datasetDetail || !id) return Promise.resolve();
 
-    if (datasetDetail.storage_type === StorageType.file) {
+    if (datasetDetail.storage_type === StorageType.vector) {
       const params = {
         id: id,
         version_id: datasetDetail.latest_version,
@@ -1582,7 +1585,7 @@ const DatasetDetail = (props: {
             // setCurrentPage(1);
           }}
         >
-          {datasetDetail?.storage_type === StorageType.file ? (
+          {datasetDetail?.storage_type === StorageType.vector ? (
             <TabPane key="content" title="文件列表">
               <Table
                 columns={contentFileColumns}
@@ -1818,11 +1821,12 @@ const DatasetDetail = (props: {
               </div>
             </TabPane>
           )}
-          {datasetDetail && datasetDetail.storage_type === StorageType.file && (
-            <TabPane key="hittest" title="命中测试">
-              <HitTest />
-            </TabPane>
-          )}
+          {datasetDetail &&
+            datasetDetail.storage_type === StorageType.vector && (
+              <TabPane key="hittest" title="命中测试">
+                <HitTest />
+              </TabPane>
+            )}
           {/* <TabPane key="element" title="元素搜索"></TabPane> */}
           <TabPane key="version" title="变更记录">
             {activeTab === 'version' ? (
