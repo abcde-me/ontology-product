@@ -573,7 +573,12 @@ const DatasetDetail = (props: {
       width: 100,
       render: (_, record) => (
         <div className="flex">
-          <Button type="text" onClick={() => handleGoToSegmentList(record.id)}>
+          <Button
+            type="text"
+            onClick={() =>
+              handleGoToSegmentList(record.id, record.bucket_name, record.path)
+            }
+          >
             分段列表
           </Button>
           <Button type="text" onClick={() => {}}>
@@ -726,9 +731,13 @@ const DatasetDetail = (props: {
   };
 
   // 跳转到分段列表页面
-  const handleGoToSegmentList = (document_id: string) => {
+  const handleGoToSegmentList = (
+    document_id: string,
+    bucket_name: string,
+    path: string
+  ) => {
     history.push(
-      `/tenant/compute/modaforge/datasetManagement/ragDetail?datasetId=${detailId}&documentId=${document_id}`
+      `/tenant/compute/modaforge/datasetManagement/ragDetail?datasetId=${detailId}&documentId=${document_id}&bucketName=${bucket_name}&path=${path}`
     );
   };
 
