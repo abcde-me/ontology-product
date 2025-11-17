@@ -359,11 +359,11 @@ export const ModaForgeResourceEndpoints = {
   //编辑数据集版本数据
   editDatasetVersionApi: PrefixAimdp + '/EditDatasetTargetVersion',
   //获取数据集版本列表
-  datasetVersionListApi: PrefixAimdp + '/ListDatasetVersion',
+  datasetVersionListApi: PrefixAimdp + '/ListDatasetChangeLogs',
   //版本重新生成
   datasetVersionRebuildApi: PrefixAimdp + '/RenewDatasetTargetVersion',
   //数据内容文件表
-  dataContentFileList: PrefixAimdp + '/GetDatasetFilesTargetVersion',
+  dataContentFileList: PrefixAimdp + '/ListDatasetFiles',
   //数据内容数据库表
   dataContentTableList: PrefixAimdp + '/GetDatasetTableTargetVersion',
   // 数据集场景分类列表
