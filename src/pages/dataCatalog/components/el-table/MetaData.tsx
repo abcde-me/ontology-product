@@ -9,6 +9,7 @@ import {
 } from '@arco-design/web-react';
 import { IconRefresh } from '@arco-design/web-react/icon';
 import { useRequest } from 'ahooks';
+import { delay } from 'lodash-es';
 import {
   getMetaDataList,
   Field,
@@ -208,7 +209,7 @@ export default function MetaData() {
     }
 
     // 启动新的轮询
-    pollMetaDataList();
+    delay(pollMetaDataList, 500);
   };
 
   // 处理字段搜索
@@ -279,7 +280,7 @@ export default function MetaData() {
             columns={columns}
             data={tableData}
             loading={loading}
-            // rowKey={(record, index) => record.id || index}
+            rowKey="id"
             pagination={false}
             border={false}
             scroll={{ x: true }}

@@ -376,7 +376,6 @@ export function useEditableTree({ catalogTreeStore }) {
     let newTreeData: TreeDataType[] = [];
     let res: Partial<ApiRes<any>> = {};
 
-    console.log(dataRef, '=123data');
     if (dataRef?.isAdd) {
       switch (dataRef?.type) {
         case CatalogTypeEnum.catalog:

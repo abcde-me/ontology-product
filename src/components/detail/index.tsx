@@ -78,7 +78,11 @@ interface DatasetDetail {
 enum StorageType {
   jsonl = 'jsonl',
   file = 'file',
-  table = 'table'
+  table = 'table',
+  image = 'image',
+  video = 'video',
+  audio = 'audio',
+  other = 'other'
 }
 
 interface TableColumn {
@@ -575,6 +579,7 @@ const DatasetDetail = (props: {
         <div className="flex">
           <Button
             type="text"
+            className="pl-0"
             onClick={() =>
               handleGoToSegmentList(record.id, record.bucket_name, record.path)
             }
@@ -739,6 +744,26 @@ const DatasetDetail = (props: {
     history.push(
       `/tenant/compute/modaforge/datasetManagement/ragDetail?datasetId=${detailId}&documentId=${document_id}&bucketName=${bucket_name}&path=${path}`
     );
+  };
+
+  // 获取文件类型名称
+  const getFileTypeName = (type: string) => {
+    switch (type) {
+      case StorageType.table:
+        return '数据库表';
+      case StorageType.file:
+        return '向量';
+      case StorageType.video:
+        return '视频';
+      case StorageType.audio:
+        return '音频';
+      case StorageType.image:
+        return '图片';
+      case StorageType.jsonl:
+        return '文本';
+      default:
+        return '其他';
+    }
   };
 
   // 打开编辑弹窗
@@ -1473,13 +1498,7 @@ const DatasetDetail = (props: {
                     },
                     {
                       label: '存储格式:',
-                      value: datasetDetail.storage_type
-                        ? datasetDetail.storage_type === StorageType.file
-                          ? '文件'
-                          : datasetDetail.storage_type === StorageType.table
-                            ? '数据库表'
-                            : datasetDetail.storage_type
-                        : '-'
+                      value: getFileTypeName(datasetDetail.storage_type) || '-'
                     }
                     // {
                     //   label: '文件大小:',
@@ -1799,9 +1818,11 @@ const DatasetDetail = (props: {
               </div>
             </TabPane>
           )}
-          <TabPane key="hittest" title="命中测试">
-            <HitTest />
-          </TabPane>
+          {datasetDetail && datasetDetail.storage_type === StorageType.file && (
+            <TabPane key="hittest" title="命中测试">
+              <HitTest />
+            </TabPane>
+          )}
           {/* <TabPane key="element" title="元素搜索"></TabPane> */}
           <TabPane key="version" title="变更记录">
             {activeTab === 'version' ? (

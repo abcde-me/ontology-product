@@ -218,13 +218,13 @@ export default function Step2FieldMapping({
           !!meta?.nameEn && RESERVED_FIELD_ENS.has(meta.nameEn);
         return (
           <Space>
-            <Button
+            {/* <Button
               type="text"
               onClick={() => handleAddMapping()}
               className="cursor-pointer text-green-500"
             >
               添加行
-            </Button>
+            </Button> */}
             {mappings.length > 1 && !isReserved && (
               <Button
                 type="text"
