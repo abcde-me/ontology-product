@@ -547,6 +547,7 @@ const DatasetDetail = (props: {
       title: '文件类型',
       dataIndex: 'file_type',
       width: 100,
+      filter: [],
       render: (_, record) => (
         <div>
           {getFileIcon(record.file_type)} {record.file_type}
@@ -557,6 +558,7 @@ const DatasetDetail = (props: {
       title: '文件大小',
       dataIndex: 'file_size',
       width: 100,
+      sorter: true, // 启用排序功能，但不提供排序函数
       render: (_, record) => <span>{formatFileSize(record.file_size)}</span>
     },
     {
@@ -569,6 +571,7 @@ const DatasetDetail = (props: {
       title: '状态',
       dataIndex: 'status',
       width: 100,
+      filter: [],
       render: (_, record) => <span>{record.status}</span>
     },
     {
