@@ -571,7 +571,7 @@ export default function Eltable() {
   // 如果是元数据目录，直接渲染 MetaData 组件
   if (selectedNodeType === 'metadata') {
     return (
-      <div style={{ flex: 1, overflowX: 'auto' }}>
+      <div key={selectedKey} style={{ flex: 1, overflowX: 'auto' }}>
         <div style={{ height: 'calc(100% - 50px)' }}>
           <div className="data-catalog-content">
             <MetaData />

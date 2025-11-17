@@ -13,7 +13,7 @@ import {
   Switch
 } from '@arco-design/web-react';
 import React, { useEffect, useRef, useState, useCallback } from 'react';
-import Styles from './index.module.css';
+import Styles from './index.module.scss';
 import SchedulerRun from '../../../components/scheduler-run';
 import {
   editLoad,
@@ -97,6 +97,15 @@ function findTreeSelectPathById(
         if (result) return result;
       }
 
+      if (
+        item.children &&
+        typeof item.children === 'object' &&
+        item.children.metadata
+      ) {
+        const result = findInTree(item.children.metadata, target);
+        if (result) return result;
+      }
+
       // 对于本地文件类型，还需要检查children.volume数组
       if (
         item.children &&
@@ -145,6 +154,15 @@ function buildTreeSelectDisplayPath(
         item.children.db
       ) {
         const result = buildPath(item.children.db, target, newPath);
+        if (result) return result;
+      }
+
+      if (
+        item.children &&
+        typeof item.children === 'object' &&
+        item.children.metadata
+      ) {
+        const result = buildPath(item.children.metadata, target, newPath);
         if (result) return result;
       }
 
@@ -222,6 +240,40 @@ interface TreeNodeData {
 
 //   return null;
 // }
+
+function findNodeById(
+  nodes: (TreeNodeData | undefined)[] | undefined,
+  targetId: string | number | null
+): TreeNodeData | null {
+  if (!nodes || targetId === null || targetId === undefined) {
+    return null;
+  }
+
+  for (const node of nodes) {
+    if (!node) continue;
+    if (String(node.id) === String(targetId)) {
+      return node;
+    }
+    const children = node.children as any;
+    if (Array.isArray(children)) {
+      const found = findNodeById(children, targetId);
+      if (found) {
+        return found;
+      }
+    } else if (children && typeof children === 'object') {
+      for (const childGroup of Object.values(children)) {
+        if (Array.isArray(childGroup)) {
+          const found = findNodeById(childGroup as any, targetId);
+          if (found) {
+            return found;
+          }
+        }
+      }
+    }
+  }
+
+  return null;
+}
 
 const RunningInfoPanel = function ({
   checkStatus,
@@ -388,7 +440,7 @@ const Edit = (props) => {
   });
   const getTableList = async (connector_id: string) => {
     try {
-      const res = await getdetailList(connector_id);
+      const res = await getdetailList({ id: connector_id });
       setTableList(res?.data?.table_name || []);
     } catch (error) {
       console.error('获取连接器表格数据失败:', error);
@@ -403,8 +455,8 @@ const Edit = (props) => {
   async function getdirectoryDataList() {
     try {
       const res = await getDirectoryList({
-        root_type: 1,
-        dir_type: props.detailData.source_type === 'db' ? 3 : undefined
+        root_type: 1
+        // dir_type: props.detailData.source_type === 'db' ? 3 : undefined
       });
       if (!res || res.status !== 200) {
         console.error('获取目录列表失败:', res);
@@ -584,30 +636,22 @@ const Edit = (props) => {
           props.detailData?.data_path_id
         );
         if (nodeId) {
-          // const selectedNode = findNodeById(
-          //   directoryData as TreeNodeData[],
-          //   props.detailData?.data_path_id
-          // );
-          // if (selectedNode) {
-          //   setSelectedNodeType(selectedNode.type_name);
-          // } else {
-          //   setSelectedNodeType(undefined);
-          // }
-          console.log('设置TreeSelect初始值:', nodeId);
           setSelectedTreeKeys([nodeId]);
           // 构建显示路径
-          let displayPath = buildTreeSelectDisplayPath(
+          const displayPath = buildTreeSelectDisplayPath(
             directoryData,
             props.detailData?.data_path_id
           );
-          props.detailData?.source_type === 'db'
-            ? (displayPath = displayPath + '/' + props.detailData?.db_name)
-            : null;
+
           setTreeSelectDisplayValue(displayPath);
           form.setFieldsValue({
             dest_path_display: displayPath, // 显示完整路径
             dest_path: nodeId // 隐藏字段保存节点ID
           });
+          // 设置节点类型，保证编辑回显时的条件渲染正常
+          const selectedNode =
+            findNodeById(directoryData, props.detailData?.data_path_id) || null;
+          setSelectedNodeType(selectedNode?.type_name);
         }
       } else {
         // 其他类型使用Cascader（如果还有的话）
@@ -734,16 +778,50 @@ const Edit = (props) => {
   // 监听SQL处理开关状态
   const sqlProcessEnabled = Form.useWatch('sql_process_enabled', form);
 
-  // 初始化SQL处理默认值
+  // 根据初始 SQL 是否有值来设置开关初始状态
   useEffect(() => {
-    if (props.detailData?.source_type !== 'db') {
-      return;
-    }
-    const currentSqlProcess = form.getFieldValue('sql_process_enabled');
-    if (!currentSqlProcess) {
-      form.setFieldsValue({ sql_process_enabled: 'disable' });
-    }
-  }, [form, props.detailData?.source_type]);
+    if (props.detailData?.source_type !== 'db') return;
+    const hasInitialSql =
+      typeof props.detailData?.sql === 'string' &&
+      props.detailData.sql.trim() !== '';
+    form.setFieldsValue({
+      sql_process_enabled: hasInitialSql ? 'enable' : 'disable'
+    });
+  }, [form, props.detailData?.sql, props.detailData?.source_type]);
+
+  // 当详情返回包含非空SQL时，自动发起一次校验
+  useEffect(() => {
+    // 仅对数据库类型处理
+    if (props.detailData?.source_type !== 'db') return;
+
+    const initialSql = (props.detailData?.sql || '').trim();
+    const currentConnectorId = props.detailData?.connector_id;
+
+    if (!initialSql || !currentConnectorId) return;
+    // 同步编辑器内容
+    setSqlContent(initialSql);
+    // 触发校验
+    (async () => {
+      try {
+        setCheckStatus(CheckSQLStatus.CHECKING);
+        setCheckMessage('');
+        const res = await checkSQL({
+          sql: initialSql,
+          connectorId: Number(currentConnectorId)
+        });
+        if (res?.status === 200 && res.data) {
+          setCheckStatus(res.data.status);
+          setCheckMessage(res.data.msg || '');
+        } else {
+          setCheckStatus(CheckSQLStatus.ERROR);
+          setCheckMessage(res?.message || '校验失败');
+        }
+      } catch (error: any) {
+        setCheckStatus(CheckSQLStatus.ERROR);
+        setCheckMessage(error?.message || '校验异常，请稍后重试');
+      }
+    })();
+  }, []);
 
   // 点击确定
   const okHan = async () => {
@@ -1075,10 +1153,14 @@ const Edit = (props) => {
                 labelAlign="right"
                 rules={[{ required: true, message: '请选择SQL处理状态' }]}
                 initialValue={
-                  props.detailData?.sql_process_enabled || 'disable'
+                  props.detailData?.sql && props.detailData.sql.trim() !== ''
+                    ? 'enable'
+                    : 'disable'
                 }
               >
                 <Switch
+                  // 编辑态，禁止更改SQL处理状态
+                  disabled={true}
                   checked={sqlProcessEnabled === 'enable'}
                   onChange={handleSqlProcessChange}
                 />
@@ -1095,6 +1177,7 @@ const Edit = (props) => {
                     <div className="flex items-center gap-[8px] border-b border-solid border-[#E2E8F0] p-[12px] pb-[12px]">
                       <Button
                         type="secondary"
+                        disabled
                         icon={<IconCaretRight className="mr-[4px]" />}
                         className="h-[26px]"
                         onClick={handleCheckSQL}
@@ -1103,15 +1186,16 @@ const Edit = (props) => {
                         校验
                       </Button>
 
-                      <Button
+                      {/* <Button
                         type="text"
                         icon={<SQLFormatIcon />}
                         className="h-[26px]"
                       >
                         格式化
-                      </Button>
+                      </Button> */}
                     </div>
                     <CodeMirror
+                      readOnly
                       value={sqlContent}
                       onChange={handleSqlContentChange}
                       placeholder={placeholderValue}
@@ -1124,7 +1208,10 @@ const Edit = (props) => {
                         lineNumbers: true,
                         highlightActiveLineGutter: false
                       }}
-                      className={styles['code-editor']}
+                      className={classNames(
+                        Styles['code-editor'],
+                        Styles['code-mirror-disabled']
+                      )}
                     />
                     {checkStatus !== CheckSQLStatus.NONE && (
                       <RunningInfoPanel

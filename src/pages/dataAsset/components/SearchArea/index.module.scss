@@ -1,0 +1,14 @@
+.search-area {
+  :global(.arco-tree-select-size-default.arco-tree-select-multiple input) {
+    font-size: 14px;
+  }
+
+  .dropdown-select {
+    /* 修复多选 Select 组件 placeholder 显示不完全的问题 */
+    :global(.arco-input-tag-inner) {
+      input {
+        min-width: 200px;
+      }
+    }
+  }
+}

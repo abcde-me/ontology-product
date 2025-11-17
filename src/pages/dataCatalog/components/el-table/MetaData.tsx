@@ -33,6 +33,7 @@ export default function MetaData() {
     ]);
 
   // 状态管理
+  const [pollLoading, setPollLoading] = useState(false);
   const [loading, setLoading] = useState(false);
   const [tableData, setTableData] = useState<Record<string, any>[]>([]);
   const [searchFields, setSearchFields] = useState<Field[]>([]);
@@ -40,6 +41,12 @@ export default function MetaData() {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [fieldSearch, setFieldSearch] = useState<FieldSearchItem[]>([]);
+  const [searchAreaResetKey, setSearchAreaResetKey] = useState(0);
+  const clearSearchConditions = () => {
+    setFieldSearch([]);
+    setCurrentPage(1);
+    setSearchAreaResetKey((prev) => prev + 1);
+  };
 
   // 轮询获取元数据列表
   const { runAsync: pollMetaDataList, cancel: cancelPolling } = useRequest(
@@ -51,7 +58,7 @@ export default function MetaData() {
         pageSize: pageSize,
         fieldSearch: fieldSearch,
         queryLoadTaskInstance: true,
-        path_id: selectedParentId ? Number(selectedParentId) : 0,
+        path_id: Number(selectedKey) ?? 0,
         db_name: (extendsObj?.db_name as string) || '',
         table_name: (extendsObj?.table_name as string) || ''
       });
@@ -73,12 +80,12 @@ export default function MetaData() {
       onSuccess: (loadTaskStatus) => {
         if (loadTaskStatus === LoadTaskStatus.COMPLETED) {
           cancelPolling();
-          setLoading(false);
+          setPollLoading(false);
         }
       },
       onError: () => {
         cancelPolling();
-        setLoading(false);
+        setPollLoading(false);
       }
     }
   );
@@ -88,13 +95,14 @@ export default function MetaData() {
     if (!selectedKey) return;
 
     setLoading(true);
+
     try {
       const res = await getMetaDataList({
         page: currentPage,
         pageSize: pageSize,
         fieldSearch: fieldSearch,
         queryLoadTaskInstance: false,
-        path_id: selectedParentId ? Number(selectedParentId) : 0,
+        path_id: Number(selectedKey) ?? 0,
         db_name: (extendsObj?.db_name as string) || '',
         table_name: (extendsObj?.table_name as string) || ''
       });
@@ -114,6 +122,10 @@ export default function MetaData() {
 
   // 初始化加载数据
   useEffect(() => {
+    if (pollLoading || loading) {
+      return;
+    }
+
     loadData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentPage, pageSize, selectedKey, selectedParentId, fieldSearch]);
@@ -136,7 +148,7 @@ export default function MetaData() {
       render: (value: any) => {
         let displayValue: any = value;
 
-        if (field.type === 'datetime') {
+        if (field.type?.includes('date')) {
           displayValue = value
             ? dayjs(value).format('YYYY-MM-DD HH:mm:ss')
             : '-';
@@ -178,20 +190,20 @@ export default function MetaData() {
 
   // 处理刷新
   const handleRefresh = async () => {
+    clearSearchConditions();
     // 如果已有轮询在进行，先取消
     cancelPolling();
 
-    setLoading(true);
-
+    setPollLoading(true);
     const res = await refreshMetaDataList({
-      path_id: selectedParentId ? Number(selectedParentId) : 0,
+      path_id: Number(selectedKey) ?? 0,
       db_name: (extendsObj?.db_name as string) || '',
       table_name: (extendsObj?.table_name as string) || ''
     });
 
     if (res.code !== '' || res.status !== 200) {
       Message.error(res?.message ?? '刷新失败');
-      setLoading(false);
+      setPollLoading(false);
       return;
     }
 
@@ -200,31 +212,18 @@ export default function MetaData() {
   };
 
   // 处理字段搜索
-  const handleFieldSearch = (fieldValues: Record<string, any>) => {
-    console.log('字段搜索:', fieldValues);
-    // 将搜索条件转换为 FieldSearchItem 格式
-    const searchItems: FieldSearchItem[] = Object.entries(fieldValues).map(
-      ([key, value]) => {
-        const field = searchFields.find((f) => f.nameEn === key);
-        return {
-          nameEn: key,
-          type: field?.type || 'string',
-          queryValue: value
-        };
-      }
-    );
-    setFieldSearch(searchItems);
+  const handleFieldSearch = (fieldValues: FieldSearchItem[]) => {
+    setFieldSearch(fieldValues);
     setCurrentPage(1); // 重置到第一页
   };
 
   // 处理重置
   const handleReset = () => {
     console.log('重置搜索条件');
-    setFieldSearch([]);
-    setCurrentPage(1);
+    clearSearchConditions();
   };
 
-  if (loading) {
+  if (pollLoading) {
     return (
       <div
         className="flex w-full items-center justify-center"
@@ -240,10 +239,11 @@ export default function MetaData() {
       {/* 搜索区域 */}
       {columns.length > 0 && (
         <SearchArea
+          key={selectedKey}
           fields={searchFields.map((field: Field) => ({
             key: field.nameEn,
             label: field.nameZh || field.nameEn,
-            type: 'input',
+            type: field.type,
             paramKey: field.nameEn
           }))}
           onFieldSearch={handleFieldSearch}
@@ -278,6 +278,7 @@ export default function MetaData() {
           <Table
             columns={columns}
             data={tableData}
+            loading={loading}
             // rowKey={(record, index) => record.id || index}
             pagination={false}
             border={false}

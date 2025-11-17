@@ -14,7 +14,12 @@ export async function delconnectionList(params) {
 }
 // 查看的api
 export async function getdetailList(params) {
-  return await UAPI.RES.getconnection({}).post(params).inRegion().do();
+  return await UAPI.RES.getconnection({})
+    .post({
+      id: Number(params.id)
+    })
+    .inRegion()
+    .do();
 }
 // 修改的api
 export async function updataConnectionList(params: any) {

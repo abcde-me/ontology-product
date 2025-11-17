@@ -84,7 +84,7 @@ export default function DataAssetList() {
   const [loading, setLoading] = useState(false);
   // 分页状态
   const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10); // 默认卡片视图，每页12个
+  const [pageSize, setPageSize] = useState(12); // 默认卡片视图，每页12个
   const [total, setTotal] = useState(0);
   const [searchParams, setSearchParams] = useState({
     commonSearch: '',
@@ -153,23 +153,30 @@ export default function DataAssetList() {
       setTotal(totalCount || 0);
 
       // 保存字段列表用于修改资产弹窗
-      const fieldsForModifyList = (fields || []).map(
-        (field: ApiColumnField) => ({
-          nameZh: field.nameZh,
-          nameEn: field.nameEn,
-          type: field.type
-        })
-      );
+      const fieldsForModifyList = (fields || [])
+        .filter(
+          (field: ApiColumnField) =>
+            !!field?.allowModify && field.displaySort > 0
+        )
+        .map((field: ApiColumnField) => ({
+          nameZh: field?.nameZh,
+          nameEn: field?.nameEn,
+          type: field?.type
+        }));
+
       setFieldsForModify(fieldsForModifyList);
 
       // 保存列字段列表用于单条编辑弹窗
-      setColumnFields(fields || []);
+      setColumnFields(
+        fields.filter((field: ApiColumnField) => field.displaySort > 0) || []
+      );
 
       // 根据 fields 动态生成表格列
       const dynamicColumns = [
         {
           title: '序号',
           dataIndex: 'index',
+          fixed: 'left' as const,
           width: 80,
           key: 'index',
           render: (_: any, __: any, idx: number) => (page - 1) * size + idx + 1
@@ -177,6 +184,10 @@ export default function DataAssetList() {
         // 根据 fields 生成列，保证每一列和表头一一对应
         ...(fields || [])
           .filter((field: ApiColumnField) => field.displaySort > 0)
+          .sort(
+            (a: ApiColumnField, b: ApiColumnField) =>
+              a.displaySort - b.displaySort
+          )
           .map((field: ApiColumnField) => {
             // 如果是 tags 字段，使用 Tag 组件显示
             if (isTagsField(field.nameEn)) {
@@ -234,7 +245,7 @@ export default function DataAssetList() {
               width: 150,
               ellipsis: true,
               render: (value: any) => {
-                if (field.type === 'datetime') {
+                if (field.type.includes('date')) {
                   return value
                     ? dayjs(value).format('YYYY-MM-DD HH:mm:ss')
                     : '-';
@@ -441,8 +452,8 @@ export default function DataAssetList() {
 
   // 处理重置
   const handleReset = () => {
-    console.log('重置搜索条件');
-    // TODO: 重新获取列表数据
+    setSearchParams({ ...searchParams, fieldSearch: [] });
+    setCurrentPage(1);
   };
 
   // 切换视图类型

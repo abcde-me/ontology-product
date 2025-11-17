@@ -19,6 +19,7 @@ import {
 import { ColumnField } from '../ColumnSettingModal';
 import { FieldSearchItem, BaseTag, TagValueItem } from '@/types/dataAssetApi';
 import { isDateType, isTagsField } from '../../utils/const';
+import styles from './index.module.scss';
 import dayjs from 'dayjs';
 
 export interface SearchField {
@@ -52,7 +53,7 @@ export interface SearchAreaProps {
 }
 
 const formatSearchContent = (field: ColumnField, value: any): string[] => {
-  if (field.type === 'datetime' && Array.isArray(value)) {
+  if (field.type.includes('date') && Array.isArray(value)) {
     const formattedValues = value
       .filter((item) => item !== undefined && item !== null && item !== '')
       .map((item) => {
@@ -107,7 +108,6 @@ export default function SearchArea({
 
   // 处理字段值变化
   const handleFieldValueChange = (fieldKey: string, value: any) => {
-    console.log('-----时间勾选值----', fieldKey, value);
     setFieldValues((prev) => ({
       ...prev,
       [fieldKey]: value
@@ -121,7 +121,6 @@ export default function SearchArea({
     const fieldSearch: FieldSearchItem[] = [];
     checkedFields.forEach((fieldKey) => {
       const field = fields.find((f) => f.id === fieldKey);
-      console.log(field, '------field------');
       if (
         field &&
         fieldValues[fieldKey] !== undefined &&
@@ -292,6 +291,7 @@ export default function SearchArea({
       return (
         <TreeSelect
           placeholder={`请选择${field.nameZh}`}
+          className={styles['dropdown-select']}
           value={Array.isArray(value) ? value : []}
           multiple
           treeCheckable
@@ -360,6 +360,7 @@ export default function SearchArea({
             placeholder={`请选择${field.nameZh}`}
             value={value}
             mode="multiple"
+            className={styles['dropdown-select']}
             maxTagCount={{
               count: 2,
               render: (invisibleTagCount) => {
@@ -414,7 +415,7 @@ export default function SearchArea({
   };
 
   return (
-    <div className={`${className}`}>
+    <div className={`${className} ${styles['search-area']}`}>
       {/* 主搜索区域 */}
       <div className="flex items-center gap-3">
         <Input.Search

@@ -20,6 +20,8 @@ export interface DataAssetField {
 export interface MappingItem {
   /** 数据来源字段名 */
   feildName: string;
+  /** 数据来源字段名（兼容新字段名） */
+  fieldName?: string;
   /** 数据来源表名 */
   tableName: string;
   /** 数据来源类型 */
@@ -131,6 +133,7 @@ export interface AutoMapDataAssetFieldAndSourceResItem {
     databaseName?: string;
     fieldType: string;
     feildName: string;
+    fieldName?: string;
   }[];
 }
 

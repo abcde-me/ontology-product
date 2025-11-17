@@ -6,6 +6,7 @@ import {
   Message,
   Form,
   Select,
+  Modal,
   Switch,
   Grid,
   Table,
@@ -134,22 +135,29 @@ export default function Step2FieldMapping({
       {
         title: '序号',
         dataIndex: 'sequence',
-        width: 80,
+        width: 40,
         align: 'center' as const
       },
       {
         title: '数据资产名称',
         dataIndex: 'nameZh',
         width: 200,
-        render: (_: any, record: FieldMapping) => (
-          <Input
-            placeholder="请输入数据资产名称"
-            value={record.nameZh}
-            onChange={(value) =>
-              handleUpdateMapping(record.id, { assetName: value })
-            }
-          />
-        )
+        render: (_: any, record: FieldMapping) => {
+          const meta = metadataFields[record.sequence - 1];
+          const isReserved =
+            !!meta?.nameEn && RESERVED_FIELD_ENS.has(meta.nameEn);
+          return (
+            <Input
+              placeholder="请输入数据资产名称"
+              allowClear
+              value={record.nameZh}
+              disabled={isReserved}
+              onChange={(value) =>
+                handleUpdateMapping(record.id, { nameZh: value })
+              }
+            />
+          );
+        }
       }
     ];
 
@@ -180,7 +188,7 @@ export default function Step2FieldMapping({
             return (
               <Select
                 placeholder="请选择"
-                defaultValue={record[sourceKey]}
+                value={record[sourceKey] as string | undefined}
                 disabled={disableMappingForThisRow}
                 onChange={(value) =>
                   handleUpdateMapping(record.id, { [sourceKey]: value })
@@ -201,8 +209,9 @@ export default function Step2FieldMapping({
     cols.push({
       title: '操作',
       dataIndex: 'operation',
-      width: 150,
-      align: 'center' as const,
+      width: 132,
+      align: 'left' as const,
+      fixed: 'right' as const,
       render: (_: any, record: FieldMapping) => {
         const meta = metadataFields[record.sequence - 1];
         const isReserved =
@@ -279,13 +288,26 @@ export default function Step2FieldMapping({
         return;
       }
 
+      // 预先构建 nameEn -> 行索引 的映射，减少后续查找
+      const fieldIndexMap = metadataFields.reduce<Record<string, number>>(
+        (acc, field, idx) => {
+          if (field?.nameEn) {
+            acc[field.nameEn] = idx;
+          }
+          return acc;
+        },
+        {}
+      );
+
       // 基于 metadataFields 生成基础行
       const nextMappings: FieldMapping[] = metadataFields.map((field, idx) => {
+        const existingRow = mappings[idx];
         const row: FieldMapping = {
-          id: mappings[idx]?.id || `mapping_${Date.now()}_${idx}`,
+          id: field.nameEn || existingRow?.id || `mapping_${Date.now()}_${idx}`,
           sequence: idx + 1,
-          nameZh: mappings[idx]?.nameZh ?? field.nameZh
+          nameZh: existingRow?.nameZh ?? field.nameZh
         };
+
         // 初始化所有选中的数据来源类型字段
         Object.keys(dataSources).forEach((sourceKey) => {
           if (dataSources[sourceKey]) {
@@ -297,18 +319,19 @@ export default function Step2FieldMapping({
 
       // 将自动映射结果填充到行
       res.data.forEach((item) => {
-        const rowIdx = metadataFields.findIndex(
-          (f) => f.nameEn === item.fieldNameEn
-        );
-        if (rowIdx < 0) return;
-        item.mapping?.forEach((m) => {
+        if (!item?.fieldNameEn) return;
+        const rowIdx = fieldIndexMap[item.fieldNameEn];
+        if (rowIdx === undefined) return;
+        if (!Array.isArray(item.mapping)) return;
+
+        item.mapping.forEach((m) => {
           const targetKey = composeDataSourceKey(
             m?.type,
             m?.databaseName,
             m?.tableName
           );
           if (targetKey && targetKey in dataSources) {
-            (nextMappings[rowIdx] as any)[targetKey] = m?.feildName || '';
+            (nextMappings[rowIdx] as any)[targetKey] = m?.fieldName || '';
           }
         });
       });
@@ -410,12 +433,23 @@ export default function Step2FieldMapping({
 
   // 自动映射
   const handleAutoMapping = (v: boolean) => {
-    setAutoMapping(v);
-
     if (!v) {
+      Modal.confirm({
+        title: '确认关闭自动映射？',
+        content: '关闭后将不再自动根据来源字段进行映射，是否继续关闭？',
+        okText: '继续关闭',
+        cancelText: '取消',
+        onOk: () => {
+          setAutoMapping(false);
+        },
+        onCancel: () => {
+          // 保持开启状态
+          setAutoMapping(true);
+        }
+      });
       return;
     }
-
+    setAutoMapping(true);
     runAutoMap();
   };
 
@@ -487,7 +521,6 @@ export default function Step2FieldMapping({
       onFinish(formatted as unknown as CreateDataAssetAndMappingReq);
     } catch (error) {
       console.error('表单验证失败:', error);
-      Message.error('请填写完整的映射信息');
     }
   };
 
@@ -527,6 +560,7 @@ export default function Step2FieldMapping({
             columns={tableColumns}
             className="mt-[16px] w-full"
             data={mappings}
+            rowKey="id"
             pagination={false}
             border={false}
           />

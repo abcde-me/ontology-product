@@ -15,7 +15,7 @@ import {
   FindDataAssetMappingItemRes,
   ListDataAssetSourceResItem
 } from '@/types/dataAssetApi';
-import { RESERVED_FIELD_ENS } from '../../utils/const';
+import { RESERVED_FIELD_ENS, SYSTEM_FIELDS } from '../../utils/const';
 
 type DisplaySortable = {
   nameEn?: string;
@@ -120,56 +120,7 @@ export default function DataAssetFormContainer({
       return [];
     }
 
-    return [
-      {
-        id: `field_system_data_asset_name`,
-        nameZh: '数据资产名称',
-        nameEn: 'data_asset_name',
-        type: 'string',
-        default: '',
-        required: true,
-        allowModify: false,
-        system: true,
-        isEnumAble: false,
-        displaySort: 1
-      },
-      {
-        id: `field_system_tags`,
-        nameZh: '标签',
-        nameEn: 'tags',
-        type: 'array<varchar(64)>',
-        default: '',
-        required: true,
-        allowModify: false,
-        system: true,
-        isEnumAble: false,
-        displaySort: 2
-      },
-      {
-        id: `field_system_data_source`,
-        nameZh: '来源',
-        nameEn: 'data_source',
-        type: 'string',
-        default: '',
-        required: true,
-        allowModify: false,
-        system: true,
-        isEnumAble: false,
-        displaySort: 3
-      },
-      {
-        id: `field_system_data_update_time`,
-        nameZh: '数据更新时间',
-        nameEn: 'data_update_time',
-        type: 'datetime',
-        default: '',
-        required: true,
-        allowModify: false,
-        system: true,
-        isEnumAble: false,
-        displaySort: 4
-      }
-    ];
+    return SYSTEM_FIELDS;
   };
 
   // 表单数据 - 默认包含四个系统字段
@@ -184,23 +135,6 @@ export default function DataAssetFormContainer({
   const [findDataAssetMappingData, setFindDataAssetMappingData] = useState<
     ListDataAssetSourceResItem[]
   >([]);
-
-  // const updateMetadataFields = useCallback<
-  //   React.Dispatch<React.SetStateAction<MetadataField[]>>
-  // >(
-  //   (updater) => {
-  //     setMetadataFields((prev) => {
-  //       const next =
-  //         typeof updater === 'function'
-  //           ? (updater as (prevState: MetadataField[]) => MetadataField[])(
-  //             prev
-  //           )
-  //           : updater;
-  //       return assignReservedDisplaySort(next);
-  //     });
-  //   },
-  //   [setMetadataFields]
-  // );
 
   const normalizeDataSources = (
     sources: Record<string, ListDataAssetSourceResItem> = {},
@@ -262,8 +196,10 @@ export default function DataAssetFormContainer({
       return;
     }
 
-    setMetadataFields(
+    // 根据系统保留字段顺序，初始化编辑态时将四个系统字段置前
+    const mappedFields =
       res?.data?.map((item) => ({
+        key: item.nameEn,
         id: item.nameEn,
         nameZh: item.nameZh,
         nameEn: item.nameEn,
@@ -273,8 +209,9 @@ export default function DataAssetFormContainer({
         allowModify: item.allowModify,
         displaySort: RESERVED_DISPLAY_SORT_MAP[item.nameEn] ?? 0,
         mapping: item.mapping
-      })) || []
-    );
+      })) || [];
+
+    setMetadataFields(assignReservedDisplaySort(mappedFields));
 
     const dataSourcesMap = {};
     res.data?.forEach((item) => {

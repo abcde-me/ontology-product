@@ -14,6 +14,7 @@ import {
   Typography,
   Switch
 } from '@arco-design/web-react';
+import { format } from 'sql-formatter';
 import React, {
   useEffect,
   useRef,
@@ -253,7 +254,7 @@ const RunningInfoPanel = function ({
           }
           name="1"
         >
-          <div className={styles['panel-content']}>
+          <div className={classNames(styles['panel-content'], 'h-[120px]')}>
             {checkMessage && (
               <div style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
                 {checkMessage}
@@ -575,7 +576,9 @@ export default function DataLoadCreate() {
         },
         dest_path_id: pathId,
         submit_type: submitType === SUBMIT_TYPES.KEEP ? 1 : 2,
-        table_names: processedTableNames,
+        table_names: Array.isArray(processedTableNames)
+          ? processedTableNames
+          : [processedTableNames],
         db_name: sourceType === SOURCE_TYPES.DB ? tableNames : null,
         sql: formValues.sql_process_enabled === 'enable' ? formValues.sql : '',
         path_type: selectedNodeType
@@ -723,7 +726,7 @@ export default function DataLoadCreate() {
         }
       } catch (error) {
         console.error('表单处理失败:', error);
-        Message.error('表单处理失败，请重试');
+        // Message.error('表单处理失败，请重试');
       } finally {
         setLoading(false);
       }
@@ -864,6 +867,24 @@ export default function DataLoadCreate() {
     }
   }, [sqlContent, form]);
 
+  const handleFormatCode = useCallback(() => {
+    if (checkStatus === CheckSQLStatus.CHECKING) {
+      Message.warning('SQL校验中，暂不支持格式化');
+      return;
+    }
+
+    if (sqlContent) {
+      try {
+        const formattedCode = format(sqlContent, { language: 'sql' });
+        setSqlContent(formattedCode);
+        Message.success('格式化成功');
+      } catch (e) {
+        console.error(e);
+        Message.error('格式化失败');
+      }
+    }
+  }, [sqlContent, checkStatus]);
+
   // 监听连接器ID变化
   const connectorId = Form.useWatch('connector_id', form);
   useEffect(() => {
@@ -898,38 +919,6 @@ export default function DataLoadCreate() {
       !currentTableName.includes('all')
     );
   }, [tableName, form]);
-
-  // SQL处理和表选择的双向逻辑关联
-  // useEffect(() => {
-  //   const currentTableName = form.getFieldValue('table_name') || [];
-  //   const currentSqlProcess = form.getFieldValue('sql_process_enabled');
-
-  //   // 如果选择了多个表（排除"all"的情况），自动切换到"开启"
-  //   if (
-  //     Array.isArray(currentTableName) &&
-  //     currentTableName.length > 1 &&
-  //     !currentTableName.includes('all')
-  //   ) {
-  //     if (currentSqlProcess === 'disable') {
-  //       form.setFieldsValue({ sql_process_enabled: 'enable' });
-  //     }
-  //   }
-  // }, [tableName, form]);
-
-  // 当SQL处理为"关闭"时，限制表选择只能选一个
-  // useEffect(() => {
-  //   const currentTableName = form.getFieldValue('table_name') || [];
-  //   const currentSqlProcess = form.getFieldValue('sql_process_enabled');
-
-  //   if (
-  //     currentSqlProcess === 'disable' &&
-  //     Array.isArray(currentTableName) &&
-  //     currentTableName.length > 1
-  //   ) {
-  //     // 如果选择了多个表，只保留第一个
-  //     form.setFieldsValue({ table_name: [currentTableName[0]] });
-  //   }
-  // }, [sqlProcessEnabled, form]);
 
   // 初始化SQL处理默认值为"关闭"
   useEffect(() => {
@@ -1220,6 +1209,8 @@ export default function DataLoadCreate() {
                   initialValue="enable"
                 >
                   <Switch
+                    checkedText="开"
+                    uncheckedText="关"
                     checked={sqlProcessEnabled === 'enable'}
                     onChange={handleSqlProcessChange}
                   />
@@ -1227,15 +1218,11 @@ export default function DataLoadCreate() {
 
                 {sqlProcessEnabled === 'enable' && (
                   <FormItem
+                    className={styles['sql-editor-form-item']}
                     label=" "
                     field="sql"
                     labelAlign="right"
-                    // rules={[
-                    //     {
-                    //         required: sqlProcessEnabled === 'enable',
-                    //         message: '请输入SQL处理'
-                    //     }
-                    // ]}
+                    rules={[{ required: true, message: '请输入SQL语句' }]}
                   >
                     <div
                       className={classNames(
@@ -1243,10 +1230,11 @@ export default function DataLoadCreate() {
                         'rounded-[4px] border border-solid border-[#E2E8F0]'
                       )}
                     >
-                      <div className="flex items-center gap-[8px] border-b border-solid border-[#E2E8F0] p-[12px] pb-[12px]">
+                      <div className="flex items-center border-b border-solid border-[#E2E8F0] p-[12px] pb-[12px]">
                         <Button
                           type="secondary"
-                          icon={<IconCaretRight className="mr-[4px]" />}
+                          disabled={!sqlContent || sqlContent.trim() === ''}
+                          icon={<IconCaretRight />}
                           className="h-[26px]"
                           onClick={handleCheckSQL}
                           loading={checkStatus === CheckSQLStatus.CHECKING}
@@ -1257,7 +1245,7 @@ export default function DataLoadCreate() {
                         <Button
                           type="text"
                           icon={<SQLFormatIcon />}
-                          // onClick={handleFormatCode}
+                          onClick={handleFormatCode}
                           className="h-[26px]"
                         >
                           格式化
