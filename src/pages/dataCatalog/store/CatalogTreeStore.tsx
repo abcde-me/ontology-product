@@ -261,7 +261,7 @@ export class CatalogTreeStore extends Model<CatalogTreeState, Effects> {
                     title: table?.name || '',
                     key: `${activeKey}-${catalogId}-db-${item.id}-table-${table?.id || ''}`,
                     parent_id: item.id,
-                    type: table?.type,
+                    type: CatalogTypeEnum.db_item,
                     type_name: 'db_item',
                     isLastLeaf: true,
                     fullPath: ''
