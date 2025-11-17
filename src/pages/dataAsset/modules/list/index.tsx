@@ -110,6 +110,7 @@ export default function DataAssetList() {
   const [isSticky, setIsSticky] = useState(false);
   const headerRef = useRef<HTMLDivElement>(null);
   const sentinelRef = useRef<HTMLDivElement>(null);
+  const isFirstMountRef = useRef(true);
   const [tagList, setTagList] = useState<BaseTag[]>([]);
 
   const aggregatedSelectedTags = useMemo<TagValueItem[]>(() => {
@@ -391,6 +392,11 @@ export default function DataAssetList() {
 
   // 更新搜索字段配置（当标签和来源数据加载完成后）
   useEffect(() => {
+    // 首次进入页面时不请求
+    if (isFirstMountRef.current) {
+      isFirstMountRef.current = false;
+      return;
+    }
     loadListData(1, pageSize);
   }, [searchParams]);
 
