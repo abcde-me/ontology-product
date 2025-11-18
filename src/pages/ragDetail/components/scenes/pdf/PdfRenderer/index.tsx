@@ -31,7 +31,6 @@ interface PdfRendererProps {
  * - 自动滚动到高亮位置
  */
 const PdfRenderer: React.FC<PdfRendererProps> = ({
-  filePath,
   pdfData,
   highlightCoordinates,
   onPageChange,
@@ -48,7 +47,7 @@ const PdfRenderer: React.FC<PdfRendererProps> = ({
 
   // 加载PDF文档
   useEffect(() => {
-    if (filePath || pdfData) {
+    if (pdfData) {
       let docURL: string | undefined;
 
       const loadPdf = async () => {
@@ -58,29 +57,19 @@ const PdfRenderer: React.FC<PdfRendererProps> = ({
           let loadingTask: pdfjsLib.PDFDocumentLoadingTask | undefined;
 
           if (pdfData) {
-            // 使用二进制数据加载PDF
-            console.log(
-              '📄 使用二进制数据加载PDF, 大小:',
-              pdfData.byteLength,
-              'bytes'
-            );
-            const blob = new Blob([pdfData], { type: 'application/pdf' });
+            // 使用二进制数据加载PDF - 参考 test.tsx
+            const blob = new Blob([pdfData], {
+              type: 'application/octet-stream'
+            });
             docURL = URL.createObjectURL(blob);
             loadingTask = pdfjsLib.getDocument(docURL);
-          } else if (filePath) {
-            // 使用URL加载PDF
-            console.log('📄 使用URL加载PDF:', filePath);
-            loadingTask = pdfjsLib.getDocument(filePath);
           }
 
           if (loadingTask) {
-            console.log('tttt');
             const pdf = await loadingTask.promise;
             pdfDocRef.current = pdf;
-            console.log('pdfddd', pdf);
             setTotalPages(pdf.numPages);
             originalImagesRef.current = {};
-            console.log('✅ PDF加载成功! 总页数:', pdf.numPages);
           }
           setLoading(false);
         } catch (error) {
@@ -98,7 +87,7 @@ const PdfRenderer: React.FC<PdfRendererProps> = ({
         }
       };
     }
-  }, [filePath, pdfData]);
+  }, [pdfData]);
 
   // 渲染单个页面
   const renderPage = useCallback(
@@ -111,15 +100,28 @@ const PdfRenderer: React.FC<PdfRendererProps> = ({
       const canvas = canvasRef.current[pageNum - 1];
       if (canvas) {
         const ctx = canvas.getContext('2d', { willReadFrequently: true })!;
-        ctx.imageSmoothingEnabled = false;
+
+        // 获取设备像素比，提高清晰度
+        const devicePixelRatio = window.devicePixelRatio || 1;
 
         const containerWidth = divRef?.current?.offsetWidth || 0;
         const maxWidth = containerWidth * 1;
         const scaleFactor = maxWidth / viewport.width;
-        const newViewport = page.getViewport({ scale: scaleFactor });
+        const newViewport = page.getViewport({
+          scale: scaleFactor * devicePixelRatio
+        });
 
+        // 设置 Canvas 实际像素大小（高分辨率）
         canvas.height = newViewport.height;
         canvas.width = newViewport.width;
+
+        // 设置 Canvas 显示大小（CSS 像素）
+        canvas.style.height = `${newViewport.height / devicePixelRatio}px`;
+        canvas.style.width = `${newViewport.width / devicePixelRatio}px`;
+
+        // 启用图像平滑以获得更好的渲染质量
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = 'high';
 
         await page.render({ canvasContext: ctx, viewport: newViewport })
           .promise;
@@ -176,20 +178,28 @@ const PdfRenderer: React.FC<PdfRendererProps> = ({
       const firstPageNum = firstCoord.page;
 
       // 绘制所有高亮区域
+      const devicePixelRatio = window.devicePixelRatio || 1;
+
       highlightCoordinates.forEach((coord) => {
         const pageNumber = coord.page;
         const targetCanvas = canvasRef.current[pageNumber - 1];
 
         if (targetCanvas && originalImagesRef.current[pageNumber]) {
           const { x1, y1, x2, y2 } = coord;
-          const width = x2 - x1;
-          const height = y2 - y1;
+
+          // 根据设备像素比调整坐标
+          const scaledX1 = x1 * devicePixelRatio;
+          const scaledY1 = y1 * devicePixelRatio;
+          const scaledX2 = x2 * devicePixelRatio;
+          const scaledY2 = y2 * devicePixelRatio;
+          const width = scaledX2 - scaledX1;
+          const height = scaledY2 - scaledY1;
 
           const ctx = targetCanvas.getContext('2d')!;
           ctx.save();
           ctx.globalAlpha = 0.3;
           ctx.fillStyle = BACKGROUND_COLOR;
-          ctx.fillRect(x1, y1, width, height);
+          ctx.fillRect(scaledX1, scaledY1, width, height);
           ctx.restore();
         }
       });
