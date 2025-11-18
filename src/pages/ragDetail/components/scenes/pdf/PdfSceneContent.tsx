@@ -1,4 +1,5 @@
 import React from 'react';
+import { Spin } from '@arco-design/web-react';
 import { useRagDetailStore } from '../../../store/ragDetailStore';
 import SegmentList from '../../shared/SegmentList';
 import DirectoryTree from '../../shared/DirectoryTree';
@@ -35,8 +36,9 @@ const PdfSceneContent: React.FC<PdfSceneContentProps> = ({
     return (
       <div className="flex h-full items-center justify-center">
         <div className="text-center">
-          <div className="mx-auto mb-4 h-12 w-12 animate-spin rounded-full border-b-2 border-blue-500"></div>
-          <p className="text-gray-600">加载中...</p>
+          <div className="flex h-[calc(100%-70px)] items-center justify-center">
+            <Spin />
+          </div>
         </div>
       </div>
     );
