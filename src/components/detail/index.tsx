@@ -1137,7 +1137,6 @@ const DatasetDetail = (props: {
   const fetchDatasetContents = () => {
     if (!datasetDetail || !id) return Promise.resolve();
 
-    // if (datasetDetail.storage_type === StorageType.vector || datasetDetail.storage_type === StorageType.file) {
     const params = {
       id: id,
       version_id: datasetDetail.latest_version,
@@ -1152,67 +1151,25 @@ const DatasetDetail = (props: {
           return;
         }
         if (res.data) {
-          setContentFileData(res.data.list || []);
-          setFileTotal(res.data.total);
-          setContentData(res.data.list || []);
-          setContentColumnslist(res.data.field_names || []);
-          setIdName(res.data.id_name || '');
-          setTotal(res.data.total || 0);
-          setContentDatabackup(res.data.list || []);
+          if (datasetDetail.storage_type === StorageType.jsonl) {
+            setContentData(res.data?.list || []);
+            setContentColumnslist(res.data?.field_names || []);
+            setIdName(res.data?.id_name || '');
+            setTotal(res.data?.total || 0);
+            setContentDatabackup(res.data?.list || []);
+          } else if (datasetDetail.storage_type === StorageType.table) {
+            setContentTableColumnsList(res.data?.columns || []);
+            setContentTableData(res.data?.data || []);
+          } else {
+            setContentFileData(res.data?.list || []);
+            setFileTotal(res.data?.total || 0);
+          }
         }
       })
       .catch((err) => {
         console.error('获取数据集内容失败:', err);
         Message.error('加载数据失败');
       });
-    // } else if (datasetDetail.storage_type === StorageType.jsonl) {
-    //   const params: any = {
-    //     id: id,
-    //     page: currentPage,
-    //     limit: pageSize,
-    //     keyword: actualSearchValue || undefined,
-    //     version_id: datasetDetail.latest_version
-    //   };
-
-    //   return getDatasetContents(params)
-    //     .then((res) => {
-    //       if (res.status !== 200) {
-    //         Message.error('获取内容数据失败');
-    //         return;
-    //       }
-    //       if (res.data) {
-    //         setContentData(res.data.list || []);
-    //         setContentColumnslist(res.data.field_names || []);
-    //         setIdName(res.data.id_name || '');
-    //         setTotal(res.data.total || 0);
-    //         setContentDatabackup(res.data.list || []);
-    //       }
-    //     })
-    //     .catch((err) => {
-    //       console.error('获取数据集内容失败:', err);
-    //       Message.error('加载数据失败');
-    //     });
-    // } else {
-    //   const params = {
-    //     id: Number(id),
-    //     version_id: datasetDetail.latest_version
-    //   };
-    //   return getDataContentTableList(params)
-    //     .then((res) => {
-    //       if (res.status !== 200) {
-    //         Message.error('获取内容数据失败');
-    //         return;
-    //       }
-    //       if (res.data) {
-    //         setContentTableColumnsList(res.data.columns || []);
-    //         setContentTableData(res.data.data || []);
-    //       }
-    //     })
-    //     .catch((err) => {
-    //       console.error('获取数据集内容失败:', err);
-    //       Message.error('加载数据失败');
-    //     });
-    // }
   };
 
   // 更新表格列配置 - 只在编辑状态变化时执行
@@ -1591,43 +1548,7 @@ const DatasetDetail = (props: {
             // setCurrentPage(1);
           }}
         >
-          {datasetDetail?.storage_type === StorageType.vector ? (
-            <TabPane key="content" title="文件列表">
-              <Table
-                columns={contentFileColumns}
-                data={contentFileData}
-                pagination={false}
-                rowKey="id"
-                noDataElement={noDataElement({ description: '暂无数据' })}
-                scroll={{ x: 'max-content' }}
-                border={false}
-              />
-              <div className="pagination-wrapper">
-                <Pagination
-                  disabled={updateStatus}
-                  style={{
-                    float: 'right'
-                  }}
-                  current={fileCurrentPage}
-                  pageSize={filePageSize}
-                  total={fileTotal}
-                  onChange={(filePage) => {
-                    setFileCurrentPage(filePage);
-                  }}
-                  onPageSizeChange={(filePageSize) => {
-                    setFilePageSize(filePageSize);
-                    setFileCurrentPage(1);
-                  }}
-                  showTotal={(total, range) =>
-                    `第 ${range[0]}-${range[1]} 条，共 ${total} 条数据`
-                  }
-                  sizeOptions={[10, 20, 50, 100]}
-                  showJumper
-                  sizeCanChange={true}
-                />
-              </div>
-            </TabPane>
-          ) : datasetDetail?.storage_type === StorageType.jsonl ? (
+          {datasetDetail?.storage_type === StorageType.jsonl ? (
             <TabPane key="content" title="文件列表">
               {/* 搜索系统 */}
               <div
@@ -1813,7 +1734,7 @@ const DatasetDetail = (props: {
                 noDataElement({ description: '暂无数据' })
               )}
             </TabPane>
-          ) : (
+          ) : datasetDetail?.storage_type === StorageType.table ? (
             // 数据库表数据内容
             <TabPane key="content" title="文件列表">
               <div className="table-scroll-container">
@@ -1823,6 +1744,48 @@ const DatasetDetail = (props: {
                   pagination={false}
                   rowKey="id"
                   border={false}
+                />
+              </div>
+            </TabPane>
+          ) : (
+            <TabPane key="content" title="文件列表">
+              <Table
+                columns={
+                  datasetDetail?.storage_type === StorageType.vector
+                    ? contentFileColumns
+                    : contentFileColumns.filter(
+                        (item) => item.dataIndex !== 'operate'
+                      )
+                }
+                data={contentFileData}
+                pagination={false}
+                rowKey="id"
+                noDataElement={noDataElement({ description: '暂无数据' })}
+                scroll={{ x: 'max-content' }}
+                border={false}
+              />
+              <div className="pagination-wrapper">
+                <Pagination
+                  disabled={updateStatus}
+                  style={{
+                    float: 'right'
+                  }}
+                  current={fileCurrentPage}
+                  pageSize={filePageSize}
+                  total={fileTotal}
+                  onChange={(filePage) => {
+                    setFileCurrentPage(filePage);
+                  }}
+                  onPageSizeChange={(filePageSize) => {
+                    setFilePageSize(filePageSize);
+                    setFileCurrentPage(1);
+                  }}
+                  showTotal={(total, range) =>
+                    `第 ${range[0]}-${range[1]} 条，共 ${total} 条数据`
+                  }
+                  sizeOptions={[10, 20, 50, 100]}
+                  showJumper
+                  sizeCanChange={true}
                 />
               </div>
             </TabPane>
