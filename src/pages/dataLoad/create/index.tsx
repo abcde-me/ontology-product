@@ -771,6 +771,10 @@ export default function DataLoadCreate() {
       setSelectedNodeType(nodeData?.type_name);
 
       if (sourceType === SOURCE_TYPES.DB) {
+        // 当载入位置变化时，重置选择抽取的表
+        form.setFieldsValue({ table_name: undefined });
+        form.setFieldsValue({ db_name: nodeData?.name });
+
         const currentConnectorId = form.getFieldValue('connector_id');
         const typeName = nodeData?.type_name;
 
