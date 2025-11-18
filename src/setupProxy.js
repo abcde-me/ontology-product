@@ -64,6 +64,23 @@ module.exports = function (app) {
       })
     );
     app.use(
+      ['/metadata-service/api/v1'],
+      createProxyMiddleware({
+        target: 'http://10.252.216.16:30895',
+        changeOrigin: true,
+        secure: false,
+        logger: console,
+        pathRewrite: (path, req) => {
+          // todo 待删除 test
+          if (currentTarget === targets['test']) {
+            return path;
+          }
+
+          return req.baseUrl + req.url;
+        }
+      })
+    );
+    app.use(
       ['/api/aiap/v1'],
       createProxyMiddleware({
         // target: 'http://10.1.4.73:30890/api/aiap/v1',

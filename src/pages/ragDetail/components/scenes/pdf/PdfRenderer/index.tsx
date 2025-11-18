@@ -31,7 +31,6 @@ interface PdfRendererProps {
  * - 自动滚动到高亮位置
  */
 const PdfRenderer: React.FC<PdfRendererProps> = ({
-  filePath,
   pdfData,
   highlightCoordinates,
   onPageChange,
@@ -48,7 +47,7 @@ const PdfRenderer: React.FC<PdfRendererProps> = ({
 
   // 加载PDF文档
   useEffect(() => {
-    if (filePath || pdfData) {
+    if (pdfData) {
       let docURL: string | undefined;
 
       const loadPdf = async () => {
@@ -58,29 +57,19 @@ const PdfRenderer: React.FC<PdfRendererProps> = ({
           let loadingTask: pdfjsLib.PDFDocumentLoadingTask | undefined;
 
           if (pdfData) {
-            // 使用二进制数据加载PDF
-            console.log(
-              '📄 使用二进制数据加载PDF, 大小:',
-              pdfData.byteLength,
-              'bytes'
-            );
-            const blob = new Blob([pdfData], { type: 'application/pdf' });
+            // 使用二进制数据加载PDF - 参考 test.tsx
+            const blob = new Blob([pdfData], {
+              type: 'application/octet-stream'
+            });
             docURL = URL.createObjectURL(blob);
             loadingTask = pdfjsLib.getDocument(docURL);
-          } else if (filePath) {
-            // 使用URL加载PDF
-            console.log('📄 使用URL加载PDF:', filePath);
-            loadingTask = pdfjsLib.getDocument(filePath);
           }
 
           if (loadingTask) {
-            console.log('tttt');
             const pdf = await loadingTask.promise;
             pdfDocRef.current = pdf;
-            console.log('pdfddd', pdf);
             setTotalPages(pdf.numPages);
             originalImagesRef.current = {};
-            console.log('✅ PDF加载成功! 总页数:', pdf.numPages);
           }
           setLoading(false);
         } catch (error) {
@@ -98,7 +87,7 @@ const PdfRenderer: React.FC<PdfRendererProps> = ({
         }
       };
     }
-  }, [filePath, pdfData]);
+  }, [pdfData]);
 
   // 渲染单个页面
   const renderPage = useCallback(
