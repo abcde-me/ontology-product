@@ -1111,7 +1111,7 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
 
     return (
       !dataRef?.showInput && (
-        <div className={'flex items-center justify-between'} style={{}}>
+        <div className={'flex h-full items-center justify-between'} style={{}}>
           {/* 只在"数据库"或"数据卷"父节点显示新建按钮，只在悬浮时显示 */}
           {canAddChildren && isCurrentNodeHovered && (
             <Tooltip color="white" content="新建">

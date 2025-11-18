@@ -703,10 +703,13 @@ const Edit = (props) => {
   const handlePathChange = useCallback(
     (path: string, nodeId?: string | number, nodeData?: TreeNodeData) => {
       console.log('路径变化:', path, '节点ID:', nodeId, '节点数据:', nodeData);
-      setSelectedNodeId(nodeId || null);
+      // 优先使用 nodeData.id，如果没有则使用 nodeId，确保 dest_path_id 正确更新
+      const destPathId = nodeData?.id || nodeId || null;
+      setSelectedNodeId(destPathId);
       setSelectedPath(path);
       form.setFieldsValue({ dest_path: path ? [path] : undefined });
       setSelectedNodeType(nodeData?.type_name);
+      console.log('更新后的 dest_path_id:', destPathId);
     },
     [form]
   );
