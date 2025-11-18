@@ -804,9 +804,13 @@ const DatasetManagement: React.FC = () => {
         setIsSticky(stickyTop === 86);
       }
 
-      if (container.scrollTop > 20 && !isHiddenBaseInfo) {
+      if (event.deltaY > 0 && !isHiddenBaseInfo) {
         setIsHiddenBaseInfo(true);
-      } else if (currentScrollTop === 0 && isHiddenBaseInfo) {
+      } else if (
+        currentScrollTop === 0 &&
+        event.deltaY < 0 &&
+        isHiddenBaseInfo
+      ) {
         setIsHiddenBaseInfo(false);
         setIsSticky(false);
         event.preventDefault();
@@ -818,13 +822,13 @@ const DatasetManagement: React.FC = () => {
     const throttledHandleScroll = throttle(handleScroll, 100);
 
     // 监听滚轮事件
-    container.addEventListener('scroll', throttledHandleScroll, {
+    container.addEventListener('wheel', throttledHandleScroll, {
       passive: false
     });
 
     // 在组件卸载时移除监听器
     return () => {
-      container.removeEventListener('scroll', throttledHandleScroll);
+      container.removeEventListener('wheel', throttledHandleScroll);
       throttledHandleScroll.cancel(); // 清除节流计时器
     };
   }, [isHiddenBaseInfo]);

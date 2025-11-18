@@ -603,9 +603,13 @@ const DatasetDetail = (props: {
     const handleScroll = (event) => {
       const currentScrollTop = container.scrollTop;
 
-      if (container.scrollTop > 20 && !isHiddenBaseInfo) {
+      if (event.deltaY > 0 && !isHiddenBaseInfo) {
         setIsHiddenBaseInfo(true);
-      } else if (currentScrollTop === 0 && isHiddenBaseInfo) {
+      } else if (
+        currentScrollTop === 0 &&
+        event.deltaY < 0 &&
+        isHiddenBaseInfo
+      ) {
         setIsHiddenBaseInfo(false);
         event.preventDefault();
       }
@@ -616,11 +620,11 @@ const DatasetDetail = (props: {
     const throttledHandleScroll = throttle(handleScroll, 100);
 
     // 监听滚轮事件
-    container.addEventListener('scroll', handleScroll, { passive: false });
+    container.addEventListener('wheel', handleScroll, { passive: false });
 
     // 在组件卸载时移除监听器
     return () => {
-      container.removeEventListener('scroll', handleScroll);
+      container.removeEventListener('wheel', handleScroll);
       throttledHandleScroll.cancel(); // 清除节流计时器
     };
   }, [isHiddenBaseInfo]);
