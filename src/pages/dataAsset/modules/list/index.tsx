@@ -110,6 +110,7 @@ export default function DataAssetList() {
   const [isSticky, setIsSticky] = useState(false);
   const headerRef = useRef<HTMLDivElement>(null);
   const sentinelRef = useRef<HTMLDivElement>(null);
+  const isFirstMountRef = useRef(true);
   const [tagList, setTagList] = useState<BaseTag[]>([]);
 
   const aggregatedSelectedTags = useMemo<TagValueItem[]>(() => {
@@ -154,10 +155,7 @@ export default function DataAssetList() {
 
       // 保存字段列表用于修改资产弹窗
       const fieldsForModifyList = (fields || [])
-        .filter(
-          (field: ApiColumnField) =>
-            !!field?.allowModify && field.displaySort > 0
-        )
+        .filter((field: ApiColumnField) => !!field?.allowModify)
         .map((field: ApiColumnField) => ({
           nameZh: field?.nameZh,
           nameEn: field?.nameEn,
@@ -167,9 +165,7 @@ export default function DataAssetList() {
       setFieldsForModify(fieldsForModifyList);
 
       // 保存列字段列表用于单条编辑弹窗
-      setColumnFields(
-        fields.filter((field: ApiColumnField) => field.displaySort > 0) || []
-      );
+      setColumnFields(fields || []);
 
       // 根据 fields 动态生成表格列
       const dynamicColumns = [
@@ -396,6 +392,11 @@ export default function DataAssetList() {
 
   // 更新搜索字段配置（当标签和来源数据加载完成后）
   useEffect(() => {
+    // 首次进入页面时不请求
+    if (isFirstMountRef.current) {
+      isFirstMountRef.current = false;
+      return;
+    }
     loadListData(1, pageSize);
   }, [searchParams]);
 
@@ -446,8 +447,15 @@ export default function DataAssetList() {
   };
 
   // 处理字段搜索
-  const handleFieldSearch = (fieldValues: FieldSearchItem[]) => {
-    setSearchParams({ ...searchParams, fieldSearch: fieldValues });
+  const handleFieldSearch = (
+    fieldValues: FieldSearchItem[],
+    commonSearch: string
+  ) => {
+    setSearchParams({
+      ...searchParams,
+      fieldSearch: fieldValues,
+      commonSearch
+    });
   };
 
   // 处理重置
@@ -932,11 +940,10 @@ export default function DataAssetList() {
       {/* 单条编辑资产弹窗 */}
       {editSingleAssetModalVisible && (
         <EditSingleAssetModal
+          key={editingRecord?.id}
           visible={editSingleAssetModalVisible}
           record={editingRecord}
-          fields={columnFields.filter(
-            (field) => !isTagsField(field.nameEn) && field.displaySort > 0
-          )}
+          fields={columnFields.filter((field) => !isTagsField(field.nameEn))}
           onCancel={() => {
             setEditSingleAssetModalVisible(false);
             setEditingRecord(null);

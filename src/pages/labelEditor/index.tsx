@@ -53,7 +53,7 @@ function LabelEditorPage() {
 
   const getAvailableTask = async () => {
     const taskInfo = await getTask(requirementId!);
-    if (!taskInfo.data.task_id) {
+    if (!taskInfo?.data?.task_id) {
       Modal.destroyAll();
       Modal.info({
         escToExit: false,
@@ -101,7 +101,7 @@ function LabelEditorPage() {
 
   const saveTaskWrapper = async (...args: any[]) => {
     const result = await args[args.length - 1](...args.slice(0, -1));
-    if (result.code === 600) {
+    if (result.code !== 'success') {
       Message.clear();
       Modal.destroyAll();
       Modal.info({

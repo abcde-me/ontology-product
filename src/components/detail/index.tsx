@@ -77,8 +77,12 @@ interface DatasetDetail {
 
 enum StorageType {
   jsonl = 'jsonl',
-  file = 'file',
-  table = 'table'
+  vector = 'vector',
+  table = 'table',
+  image = 'image',
+  video = 'video',
+  audio = 'audio',
+  other = 'other'
 }
 
 interface TableColumn {
@@ -543,6 +547,7 @@ const DatasetDetail = (props: {
       title: '文件类型',
       dataIndex: 'file_type',
       width: 100,
+      filter: [],
       render: (_, record) => (
         <div>
           {getFileIcon(record.file_type)} {record.file_type}
@@ -553,6 +558,7 @@ const DatasetDetail = (props: {
       title: '文件大小',
       dataIndex: 'file_size',
       width: 100,
+      sorter: true, // 启用排序功能，但不提供排序函数
       render: (_, record) => <span>{formatFileSize(record.file_size)}</span>
     },
     {
@@ -565,6 +571,7 @@ const DatasetDetail = (props: {
       title: '状态',
       dataIndex: 'status',
       width: 100,
+      filter: [],
       render: (_, record) => <span>{record.status}</span>
     },
     {
@@ -573,7 +580,13 @@ const DatasetDetail = (props: {
       width: 100,
       render: (_, record) => (
         <div className="flex">
-          <Button type="text" onClick={() => handleGoToSegmentList(record.id)}>
+          <Button
+            type="text"
+            className="pl-0"
+            onClick={() =>
+              handleGoToSegmentList(record.id, record.bucket_name, record.path)
+            }
+          >
             分段列表
           </Button>
           <Button type="text" onClick={() => {}}>
@@ -726,10 +739,34 @@ const DatasetDetail = (props: {
   };
 
   // 跳转到分段列表页面
-  const handleGoToSegmentList = (document_id: string) => {
+  const handleGoToSegmentList = (
+    document_id: string,
+    bucket_name: string,
+    path: string
+  ) => {
     history.push(
-      `/tenant/compute/modaforge/datasetManagement/ragDetail?datasetId=${detailId}&documentId=${document_id}`
+      `/tenant/compute/modaforge/datasetManagement/ragDetail?datasetId=${detailId}&documentId=${document_id}&bucketName=${bucket_name}&path=${path}`
     );
+  };
+
+  // 获取文件类型名称
+  const getFileTypeName = (type: string) => {
+    switch (type) {
+      case StorageType.table:
+        return '数据库表';
+      case StorageType.vector:
+        return '向量';
+      case StorageType.video:
+        return '视频';
+      case StorageType.audio:
+        return '音频';
+      case StorageType.image:
+        return '图片';
+      case StorageType.jsonl:
+        return '文本';
+      default:
+        return '其他';
+    }
   };
 
   // 打开编辑弹窗
@@ -1100,12 +1137,12 @@ const DatasetDetail = (props: {
   const fetchDatasetContents = () => {
     if (!datasetDetail || !id) return Promise.resolve();
 
-    if (datasetDetail.storage_type === StorageType.file) {
+    if (datasetDetail.storage_type === StorageType.vector) {
       const params = {
         id: id,
         version_id: datasetDetail.latest_version,
         page: fileCurrentPage,
-        page_size: filePageSize
+        limit: filePageSize
       };
       return getDataContentFileList(params)
         .then((res) => {
@@ -1464,13 +1501,7 @@ const DatasetDetail = (props: {
                     },
                     {
                       label: '存储格式:',
-                      value: datasetDetail.storage_type
-                        ? datasetDetail.storage_type === StorageType.file
-                          ? '文件'
-                          : datasetDetail.storage_type === StorageType.table
-                            ? '数据库表'
-                            : datasetDetail.storage_type
-                        : '-'
+                      value: getFileTypeName(datasetDetail.storage_type) || '-'
                     }
                     // {
                     //   label: '文件大小:',
@@ -1554,7 +1585,7 @@ const DatasetDetail = (props: {
             // setCurrentPage(1);
           }}
         >
-          {datasetDetail?.storage_type === StorageType.file ? (
+          {datasetDetail?.storage_type === StorageType.vector ? (
             <TabPane key="content" title="文件列表">
               <Table
                 columns={contentFileColumns}
@@ -1790,9 +1821,12 @@ const DatasetDetail = (props: {
               </div>
             </TabPane>
           )}
-          <TabPane key="hittest" title="命中测试">
-            <HitTest />
-          </TabPane>
+          {datasetDetail &&
+            datasetDetail.storage_type === StorageType.vector && (
+              <TabPane key="hittest" title="命中测试">
+                <HitTest />
+              </TabPane>
+            )}
           {/* <TabPane key="element" title="元素搜索"></TabPane> */}
           <TabPane key="version" title="变更记录">
             {activeTab === 'version' ? (

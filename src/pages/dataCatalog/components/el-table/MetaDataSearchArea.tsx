@@ -284,9 +284,9 @@ export default function SearchArea({
   };
 
   return (
-    <div className={`${className}`}>
+    <div className={`flex max-h-[269px] flex-col ${className}`}>
       {/* 字段搜索区域 */}
-      <div>
+      <div className="flex-1 overflow-y-auto">
         {/* 字段搜索列表 */}
         {visibleFields.length > 0 && (
           <div className="mb-4 flex flex-wrap gap-4">
@@ -300,24 +300,24 @@ export default function SearchArea({
             ))}
           </div>
         )}
+      </div>
 
-        {/* 操作按钮区域 */}
-        <div className="flex items-center gap-2">
-          <QueryButton />
-          <Button onClick={handleReset}>重置</Button>
-          <Popover
-            content={settingsContent}
-            trigger="click"
-            position="bl"
-            popupVisible={settingsVisible}
-            onVisibleChange={setSettingsVisible}
-          >
-            <Button type="text" className="ml-auto flex items-center gap-1">
-              <IconSettings />
-              设置搜索条件
-            </Button>
-          </Popover>
-        </div>
+      {/* 操作按钮区域 */}
+      <div className="flex flex-shrink-0 items-center gap-2 border-b border-[#E5E6EB] py-4">
+        <QueryButton />
+        <Button onClick={handleReset}>重置</Button>
+        <Popover
+          content={settingsContent}
+          trigger="click"
+          position="bl"
+          popupVisible={settingsVisible}
+          onVisibleChange={setSettingsVisible}
+        >
+          <Button type="text" className="ml-auto flex items-center gap-1">
+            <IconSettings />
+            设置搜索条件
+          </Button>
+        </Popover>
       </div>
     </div>
   );

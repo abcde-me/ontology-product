@@ -43,7 +43,8 @@ import {
   batchDeleteDataset,
   datasetVersionRebuild,
   getTagList,
-  getDatasetSceneList
+  getDatasetSceneList,
+  datasetBatchUpdateScene
 } from '@/api/datasetManagement';
 import EllipsisPopover from '../../components/ellipsis-popover-com';
 import DatasetForm from '@/components/datasetform/AddDatasetForm';
@@ -67,7 +68,9 @@ import dataTypesIcon from '@/pages/datasetManagement/assets/dataset_dataType.png
 import dataRelationIcon from '@/pages/datasetManagement/assets/dataset_relation.png';
 import dataGuaranteeIcon from '@/pages/datasetManagement/assets/dataset_guarantee.png';
 import dataSceneIcon from '@/pages/datasetManagement/assets/dataset_scene.png';
-import { throttle } from 'lodash';
+import DatasetMoveIcon from '@/pages/datasetManagement/assets/dataset_move.svg';
+import DatasetMoveActiveIcon from '@/pages/datasetManagement/assets/dataset_move_active.svg';
+import { set, throttle } from 'lodash';
 
 // 时间格式化函数
 const formatDateTime = (dateTimeString: string): string => {
@@ -169,6 +172,8 @@ const columns = (
   handleTableChange: (pagination: any, sorter: any, filters: any) => void,
   handleRetry: (id: string | number, version_id: string) => void,
   setMoveDatasetVisible: (visible: boolean) => void,
+  setMoveDatasetId: (ids: number[]) => void,
+  getFileTypeName: (type: string) => string,
   selectedSceneFilters?: string[], //场景分类过滤
   selectedSourceFilters?: string[] //来源过滤
 ) => [
@@ -318,9 +323,13 @@ const columns = (
     width: 120,
     filterIcon: <IconFilter />,
     filters: [
-      { text: 'jsonl', value: datasetStorageType.jsonl },
-      { text: '向量', value: datasetStorageType.file },
-      { text: '数据库表', value: datasetStorageType.table }
+      { text: '文本', value: datasetStorageType.jsonl },
+      { text: '向量', value: datasetStorageType.vector },
+      { text: '数据库表', value: datasetStorageType.table },
+      { text: '图片', value: datasetStorageType.image },
+      { text: '视频', value: datasetStorageType.video },
+      { text: '音频', value: datasetStorageType.audio },
+      { text: '其他', value: datasetStorageType.other }
     ],
     filteredValue: selectedStorageTypeFilters,
     filterMultiple: true,
@@ -329,11 +338,7 @@ const columns = (
         <div style={{ display: 'flex', alignItems: 'center' }}>
           <div>{getFileIcon(record.storage_type ?? '-')}</div>
           <span className="ml-[4px]">
-            {record.storage_type === datasetStorageType.table
-              ? '数据库表'
-              : record.storage_type === datasetStorageType.file
-                ? '向量'
-                : (record.storage_type ?? '-')}
+            {getFileTypeName(record.storage_type ?? '-')}
           </span>
         </div>
       );
@@ -341,12 +346,15 @@ const columns = (
   },
   {
     title: '来源',
-    dataIndex: 'sources',
+    dataIndex: 'src_name',
     width: 120,
     filterIcon: <IconFilter />,
     filters: [
-      { text: '标注', value: 1 },
-      { text: '工作流', value: 2 }
+      { text: '标注', value: '' },
+      { text: '工作流', value: 2 },
+      { text: 'pyspark', value: 3 },
+      { text: 'sql', value: 4 },
+      { text: '数据目录', value: 5 }
     ],
     filteredValue: selectedSourceFilters,
     filterMultiple: true
@@ -592,7 +600,13 @@ const columns = (
           >
             详情
           </Button>
-          <Button type="text" onClick={() => setMoveDatasetVisible(true)}>
+          <Button
+            type="text"
+            onClick={() => {
+              setMoveDatasetVisible(true);
+              setMoveDatasetId([record.id]);
+            }}
+          >
             移动
           </Button>
 
@@ -675,8 +689,12 @@ export enum datasetStatusName {
 // 枚举数据集状态名称
 export enum datasetStorageType {
   jsonl = 'jsonl',
-  file = 'file',
-  table = 'table'
+  vector = 'vector',
+  table = 'table',
+  image = 'image',
+  video = 'video',
+  audio = 'audio',
+  other = 'other'
 }
 
 // 枚举数据集状态名称
@@ -729,6 +747,11 @@ const DatasetManagement: React.FC = () => {
     (number | string)[]
   >([]); //选中的状态过滤
 
+  // 来源过滤相关状态
+  const [selectedSourceFilters, setSelectedSourceFilters] = React.useState<
+    string[]
+  >([]); //选中的来源过滤
+
   // 排序相关状态
   const [sortField, setSortField] = React.useState<string>(''); // 排序字段：created_at 或 updated_at
   const [sortOrder, setSortOrder] = React.useState<string>(''); // 排序方向：asc 或 desc
@@ -740,7 +763,9 @@ const DatasetManagement: React.FC = () => {
     React.useState<boolean>(false);
   const [moveDatasetVisible, setMoveDatasetVisible] =
     React.useState<boolean>(false);
-
+  const [moveDatasetId, setMoveDatasetId] = React.useState<number[] | null>(
+    null
+  );
   const childRef = useRef<{
     resetForm: () => void;
     setcreateTagDisabled: () => void;
@@ -881,6 +906,26 @@ const DatasetManagement: React.FC = () => {
   // 移动数据集提交
   const handleMoveDatasetSubmit = (values: any) => {
     console.log('移动数据集:', values);
+    const params = {
+      scene_id: values.scene_id,
+      dataset_ids: moveDatasetId || selectedRowKeys.map((key) => Number(key))
+    };
+    datasetBatchUpdateScene(params).then((res) => {
+      if (res.code === '') {
+        Message.success('移动数据集成功');
+        setSelectedRowKeys([]);
+        setSelectedRows([]);
+        getDatasetList().then((res) => {
+          if (res.code === 0) {
+            setDatasetList(res.data?.dataset_list || []);
+          }
+        });
+      } else {
+        Message.error(res.msg || '移动数据集失败');
+      }
+    });
+    moveDatasetForm.resetFields();
+    setMoveDatasetId(null);
     setMoveDatasetVisible(false);
   };
   // 行选择配置
@@ -910,6 +955,26 @@ const DatasetManagement: React.FC = () => {
     history.push(
       `/tenant/compute/modaforge/datasetManagement/detail/${datasetId}`
     );
+  };
+
+  // 获取文件类型名称
+  const getFileTypeName = (type: string) => {
+    switch (type) {
+      case datasetStorageType.table:
+        return '数据库表';
+      case datasetStorageType.vector:
+        return '向量';
+      case datasetStorageType.video:
+        return '视频';
+      case datasetStorageType.audio:
+        return '音频';
+      case datasetStorageType.image:
+        return '图片';
+      case datasetStorageType.jsonl:
+        return '文本';
+      default:
+        return '其他';
+    }
   };
 
   // 提交表单数据,新建数据集
@@ -1099,6 +1164,11 @@ const DatasetManagement: React.FC = () => {
       params.scene_ids = selectedSceneFilters;
     }
 
+    // 添加来源过滤参数
+    if (selectedSourceFilters.length > 0) {
+      params.src_name = selectedSourceFilters;
+    }
+
     // 添加标签过滤参数
     if (selectedTagFilters.length > 0) {
       params.tag_names = selectedTagFilters;
@@ -1143,6 +1213,7 @@ const DatasetManagement: React.FC = () => {
     actualSearchField,
     selectedTagFilters,
     selectedSceneFilters,
+    selectedSourceFilters,
     selectedStatusFilters,
     selectedStorageTypeFilters,
     sortField,
@@ -1161,6 +1232,11 @@ const DatasetManagement: React.FC = () => {
     if (filters.scene && filters.scene !== selectedSceneFilters) {
       setSelectedSceneFilters(filters.scene);
       setCurrentPage(1);
+    }
+    // 处理来源过滤
+    if (filters.src_name && filters.src_name !== selectedSourceFilters) {
+      setSelectedSourceFilters(filters.src_name);
+      setCurrentPage(1); // 重置到第一页
     }
     // 处理标签过滤
     if (filters.tag_names && filters.tag_names !== selectedTagFilters) {
@@ -1189,6 +1265,12 @@ const DatasetManagement: React.FC = () => {
 
     if (filters.scene === undefined) {
       setSelectedSceneFilters([]);
+      setCurrentPage(1);
+    }
+
+    // 处理清除来源过滤
+    if (filters.src_name === undefined) {
+      setSelectedSourceFilters([]);
       setCurrentPage(1);
     }
 
@@ -1598,6 +1680,25 @@ const DatasetManagement: React.FC = () => {
                       </Button>
                     </Tooltip>
                   </PermissionWrapper>
+                  <Tooltip
+                    content={selectedRowKeys.length === 0 ? '请选择文件' : ''}
+                    disabled={selectedRowKeys.length > 0}
+                  >
+                    <Button
+                      icon={
+                        selectedRowKeys.length === 0 ? (
+                          <DatasetMoveIcon />
+                        ) : (
+                          <DatasetMoveActiveIcon />
+                        )
+                      }
+                      className={styles.batchDeleteBtn}
+                      disabled={selectedRowKeys.length === 0}
+                      onClick={() => setMoveDatasetVisible(true)}
+                    >
+                      批量移动
+                    </Button>
+                  </Tooltip>
                   <PermissionWrapper
                     permission={DATA_MANAGEMENT_PERMISSIONS.CAN_CREATE}
                   >
@@ -1633,7 +1734,10 @@ const DatasetManagement: React.FC = () => {
                         handleTableChange,
                         handleRetry,
                         setMoveDatasetVisible,
-                        selectedSceneFilters as string[]
+                        setMoveDatasetId,
+                        getFileTypeName,
+                        selectedSceneFilters as string[],
+                        selectedSourceFilters
                       )
                     : columns(
                         handleGoToDetail,
@@ -1650,7 +1754,10 @@ const DatasetManagement: React.FC = () => {
                         handleTableChange,
                         handleRetry,
                         setMoveDatasetVisible,
-                        selectedSceneFilters as string[]
+                        setMoveDatasetId,
+                        getFileTypeName,
+                        selectedSceneFilters as string[],
+                        selectedSourceFilters
                       ).filter((i) => i.dataIndex !== 'scene')
                 }
                 data={datasetList}
@@ -1729,7 +1836,11 @@ const DatasetManagement: React.FC = () => {
         className={styles.addSceneTypeModal}
         visible={moveDatasetVisible}
         onOk={() => moveDatasetForm.submit()}
-        onCancel={() => setMoveDatasetVisible(false)}
+        onCancel={() => {
+          moveDatasetForm.resetFields();
+          setMoveDatasetId(null);
+          setMoveDatasetVisible(false);
+        }}
         title="移动设置"
       >
         <Form form={moveDatasetForm} onSubmit={handleMoveDatasetSubmit}>

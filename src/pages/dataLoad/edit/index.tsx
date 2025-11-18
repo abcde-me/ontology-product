@@ -13,7 +13,6 @@ import {
   Switch
 } from '@arco-design/web-react';
 import React, { useEffect, useRef, useState, useCallback } from 'react';
-import Styles from './index.module.scss';
 import SchedulerRun from '../../../components/scheduler-run';
 import {
   editLoad,
@@ -35,7 +34,7 @@ import CodeMirror from '@uiw/react-codemirror';
 import { IconCaretRight, IconDown, IconUp } from '@arco-design/web-react/icon';
 import SQLFormatIcon from '@/assets/sql/sql-format-ico.svg';
 import classNames from 'classnames';
-import styles from '../create/index.module.scss';
+import styles from '../edit/index.module.scss';
 import { useHistory, useParams as useRouteParams } from 'react-router';
 
 // 定义目录数据类型
@@ -446,12 +445,6 @@ const Edit = (props) => {
       console.error('获取连接器表格数据失败:', error);
     }
   };
-  useEffect(() => {
-    if (props.detailData?.connector_id) {
-      getTableList(props.detailData.connector_id);
-    }
-    getdirectoryDataList();
-  }, []);
   async function getdirectoryDataList() {
     try {
       const res = await getDirectoryList({
@@ -672,24 +665,34 @@ const Edit = (props) => {
     directoryData,
     props.detailData?.source_type
   ]);
+
+  // 初始化数据：获取目录列表、表格列表，并设置 MutationObserver
   useEffect(() => {
+    // 获取目录列表
     getdirectoryDataList();
+
+    // 获取连接器表格列表
+    if (props.detailData?.connector_id) {
+      getTableList(props.detailData.connector_id);
+    }
+
+    // 创建 MutationObserver 监听 DOM 变化
+    const observer = new MutationObserver(() => {
+      const items = document.querySelectorAll('.arco-cascader-list-item');
+      items.forEach((item) => item.removeAttribute('title'));
+    });
+
+    // 开始监听整个文档
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true
+    });
+
+    // 清理函数：断开 observer
     return () => {
       observer.disconnect();
     };
   }, []);
-
-  // 创建 MutationObserver 监听 DOM 变化
-  const observer = new MutationObserver(() => {
-    const items = document.querySelectorAll('.arco-cascader-list-item');
-    items.forEach((item) => item.removeAttribute('title'));
-  });
-
-  // 开始监听整个文档
-  observer.observe(document.body, {
-    childList: true,
-    subtree: true
-  });
   // 切换载入类型的函数
   const handoffLoadFormHan = (val) => {
     if (val === 'once') {
@@ -871,7 +874,7 @@ const Edit = (props) => {
             form.getFieldValue('connector_id');
 
           if (!currentConnectorId) {
-            Message.error('请先选择数据源连接器');
+            Message.error('请先绑定连接器');
             return;
           }
 
@@ -977,7 +980,8 @@ const Edit = (props) => {
           Message.error(res.message);
         }
       }
-      props.getDetailList();
+      // 移除此处的 getDetailList 调用，因为返回详情页后，详情页会自动刷新数据
+      // props.getDetailList();
     } catch (error) {
       console.error('表单处理失败:', error);
     } finally {
@@ -987,6 +991,7 @@ const Edit = (props) => {
 
   return (
     <div
+      className={styles['data-load-create-container']}
       style={{
         display: 'flex',
         flexDirection: 'column',
@@ -1002,8 +1007,7 @@ const Edit = (props) => {
         initialValues={{
           dest_path: initialPath
         }}
-        labelCol={{ span: 3 }}
-        wrapperCol={{ span: 10 }}
+        className={styles['data-load-form']}
       >
         <FormItem
           label="任务名称："
@@ -1209,8 +1213,8 @@ const Edit = (props) => {
                         highlightActiveLineGutter: false
                       }}
                       className={classNames(
-                        Styles['code-editor'],
-                        Styles['code-mirror-disabled']
+                        styles['code-editor'],
+                        styles['code-mirror-disabled']
                       )}
                     />
                     {checkStatus !== CheckSQLStatus.NONE && (
@@ -1289,10 +1293,10 @@ const Edit = (props) => {
         ) : // </div>
         null}
       </Form>
-      <div className={Styles.footerBbtnBox}>
+      <div className={styles['footer-btn-box']}>
         <Button
           onClick={props.hideEditModalHan || cancelHan}
-          style={{ marginRight: '20px' }}
+          style={{ marginRight: '8px' }}
         >
           取消
         </Button>
@@ -1359,7 +1363,6 @@ export default function DataLoadEdit() {
 
   // 编辑成功后的回调
   const handleEditSuccess = () => {
-    Message.success('修改成功');
     history.goBack();
   };
 
@@ -1399,7 +1402,7 @@ export default function DataLoadEdit() {
       <div className="mb-[9px] mt-[17px] text-[20px] font-bold leading-[32px]">
         编辑数据载入任务
       </div>
-      <div className="flex h-[calc(100%-58px-17px)] flex-col items-start justify-start overflow-y-auto rounded-[16px] bg-white p-[24px]">
+      <div className="flex h-[calc(100%-58px-17px)] flex-col items-start justify-start overflow-y-auto rounded-[16px] bg-white">
         <Edit
           detailData={detailData}
           editForm={form}
