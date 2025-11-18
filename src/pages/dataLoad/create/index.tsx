@@ -552,13 +552,27 @@ export default function DataLoadCreate() {
   );
 
   // 切换数据源类型
-  const handleSourceTypeChange = useCallback((value: string) => {
-    console.log('切换数据源类型到:', value);
-    setDirectoryData([]);
-    setTableList([]);
-    setConnectName([]);
-    setSourceType(value);
-  }, []);
+  const handleSourceTypeChange = useCallback(
+    (value: string) => {
+      console.log('切换数据源类型到:', value);
+      setDirectoryData([]);
+      setTableList([]);
+      setConnectName([]);
+      setSourceType(value);
+      // 清空绑定连接器
+      form.setFieldsValue({ connector_id: undefined });
+      // 清空相关状态
+      setTableNames('');
+      setSqlContent('');
+      setCheckStatus(CheckSQLStatus.NONE);
+      setCheckMessage('');
+      form.setFieldsValue({
+        table_name: undefined,
+        sql_process_enabled: 'disable'
+      });
+    },
+    [form]
+  );
 
   // 构建表单数据
   const buildFormData = useCallback(
