@@ -421,6 +421,11 @@ export function useEditableTree({ catalogTreeStore }) {
             name: fileName,
             parent_id: dataRef.parent_id
           });
+
+          if (res.status !== 200) {
+            Message.error(res?.message ?? '新建元数据失败');
+          }
+
           break;
 
         default:
