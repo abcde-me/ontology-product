@@ -1137,76 +1137,82 @@ const DatasetDetail = (props: {
   const fetchDatasetContents = () => {
     if (!datasetDetail || !id) return Promise.resolve();
 
-    if (datasetDetail.storage_type === StorageType.vector) {
-      const params = {
-        id: id,
-        version_id: datasetDetail.latest_version,
-        page: fileCurrentPage,
-        limit: filePageSize
-      };
-      return getDataContentFileList(params)
-        .then((res) => {
-          if (res.status !== 200) {
-            Message.error('获取内容数据失败');
-            return;
-          }
-          if (res.data) {
-            setContentFileData(res.data.list || []);
-            setFileTotal(res.data.total);
-          }
-        })
-        .catch((err) => {
-          console.error('获取数据集内容失败:', err);
-          Message.error('加载数据失败');
-        });
-    } else if (datasetDetail.storage_type === StorageType.jsonl) {
-      const params: any = {
-        id: id,
-        page: currentPage,
-        limit: pageSize,
-        keyword: actualSearchValue || undefined,
-        version_id: datasetDetail.latest_version
-      };
+    // if (datasetDetail.storage_type === StorageType.vector || datasetDetail.storage_type === StorageType.file) {
+    const params = {
+      id: id,
+      version_id: datasetDetail.latest_version,
+      page: fileCurrentPage,
+      limit: filePageSize,
+      storage_type: datasetDetail.storage_type
+    };
+    return getDataContentFileList(params)
+      .then((res) => {
+        if (res.status !== 200) {
+          Message.error('获取内容数据失败');
+          return;
+        }
+        if (res.data) {
+          setContentFileData(res.data.list || []);
+          setFileTotal(res.data.total);
+          setContentData(res.data.list || []);
+          setContentColumnslist(res.data.field_names || []);
+          setIdName(res.data.id_name || '');
+          setTotal(res.data.total || 0);
+          setContentDatabackup(res.data.list || []);
+        }
+      })
+      .catch((err) => {
+        console.error('获取数据集内容失败:', err);
+        Message.error('加载数据失败');
+      });
+    // } else if (datasetDetail.storage_type === StorageType.jsonl) {
+    //   const params: any = {
+    //     id: id,
+    //     page: currentPage,
+    //     limit: pageSize,
+    //     keyword: actualSearchValue || undefined,
+    //     version_id: datasetDetail.latest_version
+    //   };
 
-      return getDatasetContents(params)
-        .then((res) => {
-          if (res.status !== 200) {
-            Message.error('获取内容数据失败');
-            return;
-          }
-          if (res.data) {
-            setContentData(res.data.list || []);
-            setContentColumnslist(res.data.field_names || []);
-            setIdName(res.data.id_name || '');
-            setTotal(res.data.total || 0);
-            setContentDatabackup(res.data.list || []);
-          }
-        })
-        .catch((err) => {
-          console.error('获取数据集内容失败:', err);
-          Message.error('加载数据失败');
-        });
-    } else {
-      const params = {
-        id: Number(id),
-        version_id: datasetDetail.latest_version
-      };
-      return getDataContentTableList(params)
-        .then((res) => {
-          if (res.status !== 200) {
-            Message.error('获取内容数据失败');
-            return;
-          }
-          if (res.data) {
-            setContentTableColumnsList(res.data.columns || []);
-            setContentTableData(res.data.data || []);
-          }
-        })
-        .catch((err) => {
-          console.error('获取数据集内容失败:', err);
-          Message.error('加载数据失败');
-        });
-    }
+    //   return getDatasetContents(params)
+    //     .then((res) => {
+    //       if (res.status !== 200) {
+    //         Message.error('获取内容数据失败');
+    //         return;
+    //       }
+    //       if (res.data) {
+    //         setContentData(res.data.list || []);
+    //         setContentColumnslist(res.data.field_names || []);
+    //         setIdName(res.data.id_name || '');
+    //         setTotal(res.data.total || 0);
+    //         setContentDatabackup(res.data.list || []);
+    //       }
+    //     })
+    //     .catch((err) => {
+    //       console.error('获取数据集内容失败:', err);
+    //       Message.error('加载数据失败');
+    //     });
+    // } else {
+    //   const params = {
+    //     id: Number(id),
+    //     version_id: datasetDetail.latest_version
+    //   };
+    //   return getDataContentTableList(params)
+    //     .then((res) => {
+    //       if (res.status !== 200) {
+    //         Message.error('获取内容数据失败');
+    //         return;
+    //       }
+    //       if (res.data) {
+    //         setContentTableColumnsList(res.data.columns || []);
+    //         setContentTableData(res.data.data || []);
+    //       }
+    //     })
+    //     .catch((err) => {
+    //       console.error('获取数据集内容失败:', err);
+    //       Message.error('加载数据失败');
+    //     });
+    // }
   };
 
   // 更新表格列配置 - 只在编辑状态变化时执行
