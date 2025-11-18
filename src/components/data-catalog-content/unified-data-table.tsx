@@ -279,12 +279,11 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
         newSourceParams.file_type = validFileTypes;
       }
       let res;
-      console.log(tableType, '查看tableType11111111');
-      console.log(selectedNodeType, '查看selectedNodeType');
 
       // 根据节点类型决定调用哪个API
       if (selectedNodeType === 'db_item') {
         let databaseName = '';
+        console.log(selectedFullPath, '----查看selectedFullPath----');
         if (selectedFullPath) {
           const pathParts = selectedFullPath.split('/');
           if (pathParts.length >= 2) {
