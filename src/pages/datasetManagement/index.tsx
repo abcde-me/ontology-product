@@ -590,6 +590,7 @@ const columns = (
             </Button> */}
           <Button
             type="text"
+            disabled={record.status !== datasetStatus.normal}
             onClick={() => {
               record.status === datasetStatus.normal ||
               record.status === datasetStatus.version_updating ||
@@ -915,11 +916,7 @@ const DatasetManagement: React.FC = () => {
         Message.success('移动数据集成功');
         setSelectedRowKeys([]);
         setSelectedRows([]);
-        getDatasetList().then((res) => {
-          if (res.code === 0) {
-            setDatasetList(res.data?.dataset_list || []);
-          }
-        });
+        fetchDatasetList();
       } else {
         Message.error(res.msg || '移动数据集失败');
       }
@@ -1855,7 +1852,7 @@ const DatasetManagement: React.FC = () => {
               {datasetSceneOption.map((item) => (
                 <Select.Option key={item.id} value={item.id}>
                   <div className="flex flex-col">
-                    <div className="text-[14px] leading-[22px]">
+                    <div className="mt-[2px] text-[14px] leading-[22px]">
                       {item.name}
                     </div>
                     <EllipsisPopover
