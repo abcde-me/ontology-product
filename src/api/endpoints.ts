@@ -372,13 +372,13 @@ export const ModaForgeResourceEndpoints = {
   //版本重新生成
   datasetVersionRebuildApi: PrefixAimdp + '/RenewDatasetTargetVersion',
   //数据内容文件表
-  dataContentFileList: PrefixAimdp + '/ListDatasetFiles',
+  dataContentFileList: PrefixAimdp + '/ListDatasetData',
   //数据内容数据库表
   dataContentTableList: PrefixAimdp + '/GetDatasetTableTargetVersion',
   // 数据集场景分类列表
   datasetSceneListApi: PrefixAimdp + '/ListScenes',
   // 数据集场景分类批量更新
-  datasetBatchUpdateSceneApi: PrefixAimdp + '/BatchUpdateScenes',
+  datasetBatchUpdateSceneApi: PrefixAimdp + '/BatchUpdateScene',
 
   // 连接器接口
 

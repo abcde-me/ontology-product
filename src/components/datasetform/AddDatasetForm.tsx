@@ -741,7 +741,7 @@ const DatasetForm = React.forwardRef<
           <FormItem
             label="数据来源"
             field="targetDataSource"
-            rules={[{ required: true, message: '请选择目标数据目录卷' }]}
+            rules={[{ required: true, message: '请选择目标数据来源' }]}
           >
             <Cascader
               placeholder="请选择"
@@ -810,7 +810,7 @@ const DatasetForm = React.forwardRef<
               {sceneOption.map((item) => (
                 <Select.Option key={item.id} value={item.id}>
                   <div className="flex flex-col">
-                    <div className="text-[14px] leading-[22px]">
+                    <div className="mt-[2px] text-[14px] leading-[22px]">
                       {item.name}
                     </div>
                     <EllipsisPopover
