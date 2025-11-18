@@ -1,5 +1,17 @@
-import React, { useRef, useState, useCallback, useEffect } from 'react';
-import { Tree, Input, Tooltip, Message } from '@arco-design/web-react';
+import React, {
+  useRef,
+  useState,
+  useCallback,
+  useEffect,
+  useMemo
+} from 'react';
+import {
+  Tree,
+  Input,
+  Tooltip,
+  Message,
+  TreeSelect
+} from '@arco-design/web-react';
 import {
   IconCaretDown,
   IconPlus,
@@ -26,6 +38,7 @@ import {
   RootTypeEnum
 } from '../../dataCatalog/consts';
 import { validateName } from '@/utils/valiate';
+import { isNumber } from 'lodash-es';
 import './index.module.scss';
 
 const TreeNode = Tree.Node;
@@ -86,6 +99,12 @@ interface ComponentTreeProps {
   dataSourceType?: string; // 新增：数据源类型，用于判断是否显示数据卷节点
   tableNameNames?: string; // 新增：表名
   selectedKeys?: string[]; // 新增：选中的节点keys
+  // TreeSelect 相关 props
+  placeholder?: string; // TreeSelect 占位符
+  allowClear?: boolean; // 是否允许清除
+  className?: string; // TreeSelect 样式类名
+  value?: string | string[]; // TreeSelect 的值
+  onChange?: (value: string | string[]) => void; // TreeSelect 值变化回调
 }
 
 const ComponentTree: React.FC<ComponentTreeProps> = ({
@@ -100,7 +119,12 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
   onDataRefresh,
   dataSourceType,
   tableNameNames,
-  selectedKeys = []
+  selectedKeys = [],
+  placeholder = '请选择载入位置',
+  allowClear = true,
+  className = 'db-tree-select',
+  value,
+  onChange
 }) => {
   // 数据库节点下的输入框状态
   const [dbInputNodes, setDbInputNodes] = useState<Map<string, TreeNodeData>>(
@@ -118,19 +142,61 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
   >(new Map());
 
   // 处理数据：为每个目录添加"数据库"子节点，为本地文件类型添加"数据卷"子节点
+  // 辅助函数：将对象形式的 children 转换为数组形式，并递归处理子节点
+  const normalizeChildren = (children: any): TreeNodeData[] => {
+    if (!children) {
+      return [];
+    }
+    if (Array.isArray(children)) {
+      // 递归处理数组中的每个子节点
+      return children.map((child) => {
+        if (child && typeof child === 'object') {
+          return {
+            ...child,
+            children: normalizeChildren(child.children)
+          };
+        }
+        return child;
+      });
+    }
+    if (typeof children === 'object') {
+      // 如果是对象形式（如 { volume: [...], db_item: [...] }），转换为数组
+      const childrenArray: TreeNodeData[] = [];
+      Object.values(children).forEach((value: any) => {
+        if (Array.isArray(value)) {
+          childrenArray.push(...value);
+        } else if (value) {
+          childrenArray.push(value);
+        }
+      });
+      // 递归处理转换后的数组中的每个子节点
+      return childrenArray.map((child) => {
+        if (child && typeof child === 'object') {
+          return {
+            ...child,
+            children: normalizeChildren(child.children)
+          };
+        }
+        return child;
+      });
+    }
+    return [];
+  };
+
   const processedDirectoryData = React.useMemo(() => {
     return directoryData.map((item) => {
+      // 先规范化 children，确保是数组形式
+      const normalizedChildren = normalizeChildren(item.children);
+
       if (item.type_name === 'catalog') {
         const childNodes: TreeNodeData[] = [];
 
         // 检查是否已经有"数据库"子节点
         let hasDbNode = false;
-        if (item.children) {
-          if (Array.isArray(item.children)) {
-            hasDbNode = item.children.some(
-              (child) => child.name === '数据库' || child.title === '数据库'
-            );
-          }
+        if (normalizedChildren.length > 0) {
+          hasDbNode = normalizedChildren.some(
+            (child) => child.name === '数据库' || child.title === '数据库'
+          );
         }
 
         // 为目录节点添加"数据库"子节点
@@ -145,19 +211,11 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
 
           // 获取数据库类型的子节点
           let dbNodeChildren: TreeNodeData[] = [];
-          if (item.children) {
-            // 如果children是数组形式，过滤数据库相关的数据
-            if (Array.isArray(item.children)) {
-              dbNodeChildren = item.children.filter(
-                (child) =>
-                  child.type_name === 'db' || child.type_name === 'db_item'
-              );
-            } else if (
-              typeof item.children === 'object' &&
-              (item.children as any).db
-            ) {
-              dbNodeChildren = (item.children as any).db || [];
-            }
+          if (normalizedChildren.length > 0) {
+            dbNodeChildren = normalizedChildren.filter(
+              (child) =>
+                child.type_name === 'db' || child.type_name === 'db_item'
+            );
           }
 
           // 如果有数据库输入节点，添加到子节点开头
@@ -189,67 +247,40 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
         // 为数据库类型添加"元数据"子节点
         if (dataSourceType === 'db') {
           let hasMetaDataNode = false;
-          if (item.children) {
-            if (Array.isArray(item.children)) {
-              hasMetaDataNode = item.children.some(
-                (child) =>
-                  child.name === '元数据' ||
-                  child.title === '元数据' ||
-                  child.type_name === 'metadata_parent'
-              );
-            }
+          if (normalizedChildren.length > 0) {
+            hasMetaDataNode = normalizedChildren.some(
+              (child) =>
+                child.name === '元数据' ||
+                child.title === '元数据' ||
+                child.type_name === 'metadata_parent'
+            );
           }
 
-          // 不存在元数据父节点时也渲染一个，便于右侧“新建”出现；并合并处于输入状态的元数据子节点
+          // 不存在元数据父节点时也渲染一个，便于右侧"新建"出现；并合并处于输入状态的元数据子节点
           if (!hasMetaDataNode) {
             let metaDataChildren: TreeNodeData[] = [];
-            if (item.children) {
-              if (Array.isArray(item.children)) {
-                metaDataChildren = item.children
-                  .filter(
-                    (child) =>
-                      child.type_name === 'metadata' ||
-                      child.type === CatalogTypeEnum.metadata
-                  )
-                  .map((metaItem) => ({
-                    id: metaItem.id,
-                    key: String(metaItem.id),
-                    name: metaItem.name,
-                    value: String(metaItem.id),
-                    label: metaItem.name || `未命名_${metaItem.id}`,
-                    title: metaItem.name || `未命名_${metaItem.id}`,
-                    type_name: 'metadata' as const,
-                    level: (item.level || 0) + 2,
-                    isExpanded: false,
-                    hasChildren: false,
-                    isLastLeaf: true,
-                    parentId: String(item.id),
-                    perms: metaItem.perms
-                  }));
-              } else if (
-                typeof item.children === 'object' &&
-                (item.children as any).metadata
-              ) {
-                const metaArray = (item.children as any).metadata;
-                if (Array.isArray(metaArray)) {
-                  metaDataChildren = metaArray.map((metaItem: any) => ({
-                    id: metaItem.id,
-                    key: String(metaItem.id),
-                    name: metaItem.name,
-                    value: String(metaItem.id),
-                    label: metaItem.name || `未命名_${metaItem.id}`,
-                    title: metaItem.name || `未命名_${metaItem.id}`,
-                    type_name: 'metadata' as const,
-                    level: (item.level || 0) + 2,
-                    isExpanded: false,
-                    hasChildren: false,
-                    extends: metaItem.extends,
-                    isLastLeaf: true,
-                    parentId: String(item.id),
-                    perms: metaItem.perms
-                  }));
-                }
-              }
+            if (normalizedChildren.length > 0) {
+              metaDataChildren = normalizedChildren
+                .filter(
+                  (child) =>
+                    child.type_name === 'metadata' ||
+                    child.type === CatalogTypeEnum.metadata
+                )
+                .map((metaItem) => ({
+                  id: metaItem.id,
+                  key: String(metaItem.id),
+                  name: metaItem.name,
+                  value: String(metaItem.id),
+                  label: metaItem.name || `未命名_${metaItem.id}`,
+                  title: metaItem.name || `未命名_${metaItem.id}`,
+                  type_name: 'metadata' as const,
+                  level: (item.level || 0) + 2,
+                  isExpanded: false,
+                  hasChildren: false,
+                  isLastLeaf: true,
+                  parentId: String(item.id),
+                  perms: metaItem.perms
+                }));
             }
 
             const metaNodeKey = `${item.id}-metadata`;
@@ -287,12 +318,10 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
           dataSourceType === 's3'
         ) {
           let hasDataSourceNode = false;
-          if (item.children) {
-            if (Array.isArray(item.children)) {
-              hasDataSourceNode = item.children.some(
-                (child) => child.name === '数据卷' || child.title === '数据卷'
-              );
-            }
+          if (normalizedChildren.length > 0) {
+            hasDataSourceNode = normalizedChildren.some(
+              (child) => child.name === '数据卷' || child.title === '数据卷'
+            );
           }
 
           if (!hasDataSourceNode) {
@@ -302,22 +331,12 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
 
             // 获取数据卷类型的子节点
             let datasourceNodeChildren: TreeNodeData[] = [];
-            if (item.children) {
-              // 如果children是数组形式，过滤数据卷相关的数据
-              if (Array.isArray(item.children)) {
-                datasourceNodeChildren = item.children.filter(
-                  (child) =>
-                    child.type_name === 'volume' ||
-                    child.type_name === 'volume_item'
-                );
-              }
-              // 如果children是对象形式，从children.volume中获取数据
-              else if (
-                typeof item.children === 'object' &&
-                (item.children as any).volume
-              ) {
-                datasourceNodeChildren = (item.children as any).volume || [];
-              }
+            if (normalizedChildren.length > 0) {
+              datasourceNodeChildren = normalizedChildren.filter(
+                (child) =>
+                  child.type_name === 'volume' ||
+                  child.type_name === 'volume_item'
+              );
             }
 
             // 如果有数据卷输入节点，添加到子节点开头
@@ -359,12 +378,18 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
         } else {
           return {
             ...item,
-            hasChildren: item.children && item.children.length > 0
+            children: normalizedChildren,
+            hasChildren: normalizedChildren.length > 0
           };
         }
       }
 
-      return item;
+      // 对于非 catalog 类型的节点，也要确保 children 是数组形式
+      return {
+        ...item,
+        children: normalizedChildren,
+        hasChildren: normalizedChildren.length > 0
+      };
     });
   }, [
     directoryData,
@@ -379,6 +404,7 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
   const [isEditing, setIsEditing] = useState(false);
   const [hoverNode, setHoverNode] = useState<TreeNodeData | null>(null);
   const [expandedKeys, setExpandedKeys] = useState<string[]>([]);
+  const [dropdownVisible, setDropdownVisible] = useState(false);
 
   // 聚焦输入框
   const focusAndSelectInput = () => {
@@ -612,17 +638,65 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
 
   // 增强的选择处理函数
   const handleEnhancedSelect = (
-    selectedKeys: string[],
-    extra: {
-      selected: boolean;
-      selectedNodes: NodeInstance[];
-      node: NodeInstance;
-      e: Event;
+    selectedKeys: string[] | string | any,
+    extra?: {
+      selected?: boolean;
+      selectedNodes?: NodeInstance[];
+      node?: NodeInstance;
+      e?: Event;
     }
   ) => {
-    const selectedNode = extra.node;
-    const nodeData = selectedNode.props.dataRef as TreeNodeData;
+    // 确保 selectedKeys 是数组
+    const keysArray = Array.isArray(selectedKeys)
+      ? selectedKeys
+      : selectedKeys
+        ? [String(selectedKeys)]
+        : [];
 
+    // 如果没有选中任何节点，直接返回
+    if (keysArray.length === 0) {
+      return;
+    }
+
+    // 确保 extra 存在且包含必要的属性
+    const safeExtra = extra || {
+      selected: true,
+      selectedNodes: [],
+      node: {} as NodeInstance,
+      e: {} as Event
+    };
+
+    // 尝试从 extra.node 获取节点数据
+    let nodeData: TreeNodeData | undefined;
+    const node = safeExtra.node as any;
+    if (node?.props?.dataRef) {
+      nodeData = node.props.dataRef as TreeNodeData;
+    } else if (node?.dataRef) {
+      nodeData = node.dataRef as TreeNodeData;
+    }
+
+    // 如果无法从 extra.node 获取数据，尝试从 treeData 中查找
+    if (!nodeData) {
+      const findNodeById = (
+        data: TreeDataType[],
+        id: string
+      ): TreeNodeData | null => {
+        for (const item of data) {
+          if (String(item.id) === String(id)) {
+            return item as TreeNodeData;
+          }
+          if (item.children && Array.isArray(item.children)) {
+            const found = findNodeById(item.children, id);
+            if (found) return found;
+          }
+        }
+        return null;
+      };
+      nodeData =
+        findNodeById(processedDirectoryData, keysArray[0]) || undefined;
+    }
+
+    // 检查节点类型，阻止选中某些类型的节点
     if (
       nodeData?.type_name === 'catalog' ||
       nodeData?.type_name === 'db_parent' ||
@@ -633,20 +707,40 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
       return; // 阻止选中数据库节点和数据卷节点或目录节点
     }
 
+    // 确保 selectedNodes 是数组
+    const safeSelectedNodes = Array.isArray(safeExtra.selectedNodes)
+      ? safeExtra.selectedNodes
+      : [];
+
     // 调用原始的onSelect回调
-    onSelect?.(selectedKeys, extra);
+    onSelect?.(keysArray, {
+      selected: safeExtra.selected ?? true,
+      selectedNodes: safeSelectedNodes,
+      node: safeExtra.node || ({} as NodeInstance),
+      e: safeExtra.e || ({} as Event)
+    });
 
     // 如果有路径变化回调，构建并传递路径和节点ID
-    if (onPathChange && selectedKeys.length > 0) {
-      // 构建完整路径
+    if (onPathChange && keysArray.length > 0 && nodeData) {
+      // 构建完整路径（使用原始数据，不使用过滤后的数据）
       const pathArray = buildPathFromTreeData(
         processedDirectoryData,
-        selectedKeys[0]
+        keysArray[0]
       );
       const fullPath = pathArray ? pathArray.join('/') : nodeData?.name || '';
 
+      // 更新 TreeSelect 的值
+      if (onChange) {
+        onChange(keysArray[0]);
+      }
+
       // 传递路径和节点ID
       onPathChange(fullPath, nodeData?.id, nodeData);
+
+      // 选择节点后关闭下拉框
+      if (nodeData?.id !== undefined && isNumber(nodeData.id)) {
+        setDropdownVisible(false);
+      }
     }
   };
 
@@ -1017,7 +1111,7 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
 
     return (
       !dataRef?.showInput && (
-        <div className={'flex items-center justify-between'} style={{}}>
+        <div className={'flex h-full items-center justify-between'} style={{}}>
           {/* 只在"数据库"或"数据卷"父节点显示新建按钮，只在悬浮时显示 */}
           {canAddChildren && isCurrentNodeHovered && (
             <Tooltip color="white" content="新建">
@@ -1128,6 +1222,114 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
     return Boolean(dbName) && Boolean(tableName);
   };
 
+  // 将数据转换为 TreeSelect 需要的 treeData 格式
+  const convertToTreeData = useCallback(
+    (data: TreeDataType[]): any[] => {
+      if (!Array.isArray(data)) {
+        return [];
+      }
+
+      return data
+        .map((item) => {
+          if (!item) {
+            return null;
+          }
+
+          const treeNode: any = {
+            key: String(item.id),
+            title: item.name || item.label || item.title || '',
+            value: String(item.id),
+            disabled: hasDataBaseNode(item) || hasMetadataBound(item),
+            dataRef: item, // 保留原始数据引用
+            ...item
+          };
+
+          // 处理 children：确保是数组格式
+          if (item.children) {
+            if (Array.isArray(item.children) && item.children.length > 0) {
+              // 如果 children 是数组，递归处理
+              treeNode.children = convertToTreeData(item.children);
+            } else if (
+              typeof item.children === 'object' &&
+              !Array.isArray(item.children)
+            ) {
+              // 如果 children 是对象形式（如 { volume: [...], db_item: [...] }），
+              // 需要将其转换为数组形式
+              const childrenArray: TreeDataType[] = [];
+              Object.values(item.children).forEach((value: any) => {
+                if (Array.isArray(value)) {
+                  childrenArray.push(...value);
+                } else if (value) {
+                  childrenArray.push(value);
+                }
+              });
+              if (childrenArray.length > 0) {
+                treeNode.children = convertToTreeData(childrenArray);
+              }
+            }
+          }
+
+          return treeNode;
+        })
+        .filter(Boolean); // 过滤掉 null 值
+    },
+    [selectedKeys]
+  );
+
+  // TreeSelect 的 treeData
+  const treeData = useMemo(() => {
+    return convertToTreeData(processedDirectoryData);
+  }, [processedDirectoryData, convertToTreeData]);
+
+  // TreeSelect 的过滤函数
+  const filterTreeNode = useCallback((inputText: string, node: any) => {
+    if (!inputText) return true;
+
+    const searchValue = inputText.toLowerCase();
+
+    // 获取节点标题（支持多种属性结构）
+    const nodeTitle =
+      node.props?.title ||
+      node.title ||
+      node.dataRef?.name ||
+      node.dataRef?.title ||
+      '';
+
+    // 如果节点标题匹配，返回 true
+    if (nodeTitle.toLowerCase().includes(searchValue)) {
+      return true;
+    }
+
+    // 递归检查子节点是否匹配
+    const checkChildren = (children: any[]): boolean => {
+      if (!children || !Array.isArray(children)) return false;
+
+      return children.some((child: any) => {
+        const childTitle =
+          child.props?.title ||
+          child.title ||
+          child.dataRef?.name ||
+          child.dataRef?.title ||
+          '';
+        if (childTitle.toLowerCase().includes(searchValue)) {
+          return true;
+        }
+        // 递归检查子节点的子节点
+        if (child.children && Array.isArray(child.children)) {
+          return checkChildren(child.children);
+        }
+        return false;
+      });
+    };
+
+    // 检查子节点
+    if (node.children && Array.isArray(node.children)) {
+      return checkChildren(node.children);
+    }
+
+    return false;
+  }, []);
+
   // 生成树节点
   const generatorTreeNodes = (treeData: TreeDataType[]) => {
     if (!Array.isArray(treeData)) {
@@ -1207,52 +1409,126 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
     );
   };
 
+  // 处理 TreeSelect 的选择变化
+  const handleTreeSelectChange = (val: string | string[]) => {
+    if (onChange) {
+      onChange(val);
+    }
+
+    if (!val) {
+      // 清空时也清空选择
+      onSelect?.([], {
+        selected: false,
+        selectedNodes: [],
+        node: {} as NodeInstance,
+        e: {} as Event
+      });
+      onPathChange?.('', undefined, undefined);
+    } else {
+      // 根据选中的值找到对应的节点数据
+      const findNodeById = (
+        data: TreeDataType[],
+        id: string
+      ): TreeNodeData | null => {
+        for (const item of data) {
+          if (String(item.id) === String(id)) {
+            return item as TreeNodeData;
+          }
+          if (item.children && Array.isArray(item.children)) {
+            const found = findNodeById(item.children, id);
+            if (found) return found;
+          }
+        }
+        return null;
+      };
+
+      const selectedId = Array.isArray(val) ? val[0] : val;
+      const nodeData = findNodeById(processedDirectoryData, selectedId);
+
+      if (nodeData) {
+        // 构建路径
+        const pathArray = buildPathFromTreeData(
+          processedDirectoryData,
+          selectedId
+        );
+        const fullPath = pathArray ? pathArray.join('/') : nodeData?.name || '';
+
+        // 调用回调
+        onSelect?.([selectedId], {
+          selected: true,
+          selectedNodes: [],
+          node: {} as NodeInstance,
+          e: {} as Event
+        });
+        onPathChange?.(fullPath, nodeData?.id, nodeData);
+      }
+    }
+  };
+
+  // 使用 TreeSelect
   return (
-    <div
-      style={{
+    <TreeSelect
+      className={className}
+      placeholder={placeholder}
+      allowClear={allowClear}
+      showSearch
+      filterTreeNode={filterTreeNode}
+      treeData={treeData}
+      value={value}
+      onChange={handleTreeSelectChange}
+      popupVisible={dropdownVisible}
+      onVisibleChange={(visible) => {
+        setDropdownVisible(visible);
+      }}
+      dropdownMenuStyle={{
+        maxHeight: 300,
         display: 'flex',
         flexDirection: 'column',
-        height: '100%',
-        maxHeight: showAddTree ? 300 : 'auto',
-        position: 'relative',
-        padding: showAddTree ? '12px 12px 0 12px' : '4px 0'
+        overflow: 'hidden',
+        padding: '12px 12px 0 12px'
       }}
-      onMouseLeave={() => setHoverNode(null)}
-    >
-      <div
-        style={{
-          flex: 1,
-          overflow: 'auto',
-          minHeight: 0,
-          padding: '4px 0'
-        }}
-      >
-        <Tree
-          showLine
-          blockNode
-          selectable
-          selectedKeys={selectedKeys}
-          expandedKeys={expandedKeys}
-          onExpand={(keys) => setExpandedKeys(keys)}
-          renderTitle={renderTitle}
-          icons={(node) => ({
-            switcherIcon: shouldShowSwitcherIcon(node) ? (
-              <IconCaretDown />
-            ) : (
-              (node as any)?.type_name === 'volume' && (
-                <IconStorage style={{ fontSize: '14px' }} />
-              )
+      treeProps={{
+        showLine: true,
+        blockNode: true,
+        selectedKeys: selectedKeys,
+        expandedKeys: expandedKeys,
+        onExpand: (keys) => setExpandedKeys(keys),
+        renderTitle: renderTitle,
+        icons: (node) => ({
+          switcherIcon: shouldShowSwitcherIcon(node) ? (
+            <IconCaretDown />
+          ) : (
+            (node as any)?.type_name === 'volume' && (
+              <IconStorage style={{ fontSize: '14px' }} />
             )
-          })}
-          onSelect={handleEnhancedSelect}
-          renderExtra={renderExtra}
-          className="ModelTree"
+          )
+        }),
+        onSelect: handleEnhancedSelect,
+        renderExtra: renderExtra,
+        className: 'ModelTree'
+      }}
+      dropdownRender={(menu) => (
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            maxHeight: 300,
+            overflow: 'hidden'
+          }}
         >
-          {generatorTreeNodes(processedDirectoryData)}
-        </Tree>
-      </div>
-      <AddTreeComponent />
-    </div>
+          <div
+            style={{
+              flex: 1,
+              overflow: 'auto',
+              minHeight: 0
+            }}
+          >
+            {menu}
+          </div>
+          {showAddTree && <AddTreeComponent />}
+        </div>
+      )}
+    />
   );
 };
 
