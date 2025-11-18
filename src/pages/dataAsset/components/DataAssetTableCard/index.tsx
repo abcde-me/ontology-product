@@ -69,6 +69,9 @@ export default function DataAssetTableCard({
 
   const tagRender = (props) => {
     const { value } = props;
+
+    console.log(props, 'props------');
+
     const tagLabel =
       typeof value === 'object' && value !== null ? value.label : value;
     const tagKey =
@@ -333,7 +336,6 @@ export default function DataAssetTableCard({
             sizeOptions={[12, 24, 48, 96]}
             sizeCanChange
             onChange={handlePageChange}
-            onPageSizeChange={handlePageChange}
           />
         </div>
       )}

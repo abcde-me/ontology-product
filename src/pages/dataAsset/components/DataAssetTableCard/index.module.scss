@@ -20,6 +20,10 @@
     margin-right: 4px;
   }
 
+  :global(.arco-tree-select .arco-tree-select-view .arco-tag-close-btn) {
+    display: none;
+  }
+
   :global(.arco-tree-select .arco-tree-select-view) {
     border: 1px solid transparent;
     background-color: transparent;
