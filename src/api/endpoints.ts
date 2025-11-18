@@ -222,6 +222,9 @@ export const PrefixAuthCenter = API_PREFIX + '/auth-center/api/v1';
 // RAG
 export const PrefixRag = API_PREFIX + '/dataset-service/internal/v1';
 
+// 引擎
+export const PrefixEngine = '/metadata-service/api/v1';
+
 // 多模态数据治理平台接口
 // TODO: 代替换接口
 export const ModaForgeResourceEndpoints = {
@@ -230,6 +233,12 @@ export const ModaForgeResourceEndpoints = {
   Logout: PrefixUserSpace + '/Logout',
   GetUser: PrefixUserSpace + '/GetUser',
   GetProjOrg: PrefixUserSpace + '/GetProjOrg',
+
+  // 引擎相关
+  // 获取文件二进制数据
+  GetFileBinaryData:
+    PrefixEngine +
+    '/file/downloadFile?bucket=datasource-dev&path=/10/10/orginal/用户权限.pdf',
 
   // RAG相关
   // 查询知识库文件列表
