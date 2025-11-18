@@ -195,7 +195,7 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
         let hasDbNode = false;
         if (normalizedChildren.length > 0) {
           hasDbNode = normalizedChildren.some(
-            (child) => child.name === '数据库' || child.title === '数据库'
+            (child) => child.type_name === 'db_parent'
           );
         }
 
@@ -249,10 +249,7 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
           let hasMetaDataNode = false;
           if (normalizedChildren.length > 0) {
             hasMetaDataNode = normalizedChildren.some(
-              (child) =>
-                child.name === '元数据' ||
-                child.title === '元数据' ||
-                child.type_name === 'metadata_parent'
+              (child) => child.type_name === 'metadata_parent'
             );
           }
 
@@ -320,7 +317,7 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
           let hasDataSourceNode = false;
           if (normalizedChildren.length > 0) {
             hasDataSourceNode = normalizedChildren.some(
-              (child) => child.name === '数据卷' || child.title === '数据卷'
+              (child) => child.type_name === 'datasource_parent'
             );
           }
 
@@ -769,17 +766,11 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
     let nodeTypeName: TreeNodeData['type_name'] = 'catalog';
 
     if (node?.dataRef) {
-      if (node.dataRef.title === '数据库' || node.dataRef.name === '数据库') {
+      if (node.dataRef.type_name === 'db_parent') {
         nodeTypeName = 'db_item';
-      } else if (
-        node.dataRef.title === '数据卷' ||
-        node.dataRef.name === '数据卷'
-      ) {
+      } else if (node.dataRef.type_name === 'datasource_parent') {
         nodeTypeName = 'datasource_item';
-      } else if (
-        node.dataRef.title === '元数据' ||
-        node.dataRef.name === '元数据'
-      ) {
+      } else if (node.dataRef.type_name === 'metadata_parent') {
         nodeTypeName = 'metadata';
       } else {
         nodeTypeName = node.dataRef.type_name || 'catalog';
@@ -878,11 +869,11 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
       })
     );
     let typeText = '';
-    if (dataRef?.title === '数据库' || dataRef?.name === '数据库') {
+    if (dataRef?.type_name === 'db_parent') {
       typeText = '数据库';
-    } else if (dataRef?.title === '数据卷' || dataRef?.name === '数据卷') {
+    } else if (dataRef?.type_name === 'datasource_parent') {
       typeText = '数据卷';
-    } else if (dataRef?.title === '元数据' || dataRef?.name === '元数据') {
+    } else if (dataRef?.type_name === 'metadata_parent') {
       typeText = '元数据';
     }
     const newName = generateName(existingChildren, typeText);
@@ -993,7 +984,7 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
         if (
           item.children &&
           item.children.length === 1 &&
-          item.children[0].name === '数据库'
+          item.children[0].type_name === 'db_parent'
         ) {
           return {
             ...item,
@@ -1100,14 +1091,11 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
     perms = dataRef?.perms ? dataRef.perms : perms;
     // 只有当前节点被悬浮时才显示新建按钮
     const isCurrentNodeHovered = hoverNode && hoverNode.id === dataRef?.id;
-    // 只有标题为"数据库"或"数据卷"的节点才能添加子节点
+    // 只有type_name为db_parent、datasource_parent或metadata_parent的节点才能添加子节点
     const canAddChildren =
-      dataRef?.title === '数据库' ||
-      dataRef?.name === '数据库' ||
-      dataRef?.title === '数据卷' ||
-      dataRef?.name === '数据卷' ||
-      dataRef?.title === '元数据' ||
-      dataRef?.name === '元数据';
+      dataRef?.type_name === 'db_parent' ||
+      dataRef?.type_name === 'datasource_parent' ||
+      dataRef?.type_name === 'metadata_parent';
 
     return (
       !dataRef?.showInput && (
