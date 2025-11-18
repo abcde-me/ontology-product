@@ -58,7 +58,8 @@ const nodeDefault: NodeDefault<CodeNodeType> = {
       case_uniformity,
       case_transform,
       mg_duplicate_checkbox,
-      mg_duplicate_ngram
+      mg_duplicate_ngram,
+      written_correct
     } = payload;
     const mg_duplicate =
       mg_duplicate_checkbox === 'md5' ||
@@ -73,6 +74,7 @@ const nodeDefault: NodeDefault<CodeNodeType> = {
         df_is,
         oh_is,
         mg_duplicate,
+        written_correct,
         threshold_switch && threshold > 0
       ].some(Boolean);
     };
