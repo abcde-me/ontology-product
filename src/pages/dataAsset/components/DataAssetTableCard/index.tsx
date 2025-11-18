@@ -48,7 +48,6 @@ export default function DataAssetTableCard({
   const tagTreeData = useMemo(
     () =>
       tagList.map((tag) => {
-        // console.log('------tag------', tag);
         return {
           key: tag.id,
           value: tag.id,
@@ -69,8 +68,6 @@ export default function DataAssetTableCard({
 
   const tagRender = (props) => {
     const { value } = props;
-
-    console.log(props, 'props------');
 
     const tagLabel =
       typeof value === 'object' && value !== null ? value.label : value;
@@ -202,11 +199,11 @@ export default function DataAssetTableCard({
               )}
             >
               {/* 标题 */}
-              <div className="truncate text-base font-semibold leading-6 text-[#1f2937]">
+              <div className="mb-[4px] truncate text-base font-semibold leading-6 text-[var(--color-text-2)]">
                 <EllipsisPopoverCom
                   value={record?.data_asset_name || '未命名资产'}
                   wrapperClassName="w-full"
-                  className="text-[14px]"
+                  className="text-[18px]"
                 />
               </div>
 
@@ -311,7 +308,7 @@ export default function DataAssetTableCard({
               </div>
 
               {/* 来源信息 */}
-              <div className="text-xs leading-6 text-[#6b7280]">
+              <div className="mb-[22px] mt-[4px] text-xs leading-6 text-[#6b7280]">
                 {formatSource(record?.data_source as string)}
               </div>
 
