@@ -171,9 +171,7 @@ export const useFileManager = (
             return {
               ...item,
               key: String(item.id),
-              title: item.name,
-              type: item.type,
-              children: item.type === PythonItemType.Directory ? [] : undefined
+              title: item.name
             };
           }) ?? [];
         setPythonList(items);
