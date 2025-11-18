@@ -44,7 +44,7 @@ function RagDetail() {
 
   return (
     <div
-      className="rag-detail-page flex h-screen w-full flex-col overflow-hidden bg-[#F7F8FA]"
+      className="rag-detail-page flex h-screen w-full flex-col overflow-hidden bg-[#EFF6FE]"
       style={{ minHeight: 0 }}
     >
       <Header />
@@ -78,13 +78,6 @@ function RagDetail() {
           segments={segments}
         />
       )}
-      {/* <SegmentDrawer
-        visible={true}
-        onClose={closeSegmentDrawer}
-        defaultActiveTab={segmentDrawerTab}
-        currentSegmentIndex={currentSegment?.segmentIndex}
-        totalSegments={segments.length}
-      /> */}
     </div>
   );
 }
