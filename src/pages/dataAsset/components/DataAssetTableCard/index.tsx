@@ -308,12 +308,12 @@ export default function DataAssetTableCard({
               </div>
 
               {/* 来源信息 */}
-              <div className="mb-[22px] mt-[4px] text-xs leading-6 text-[#6b7280]">
+              <div className="line-height-[22px] mb-[22px] mt-[4px] text-[14px] text-[#6E7B8D]">
                 {formatSource(record?.data_source as string)}
               </div>
 
               {/* 更新时间 */}
-              <div className="text-xs leading-6 text-[#6b7280]">
+              <div className="line-height-[22px] text-[14px] text-[#6E7B8D]">
                 {formatUpdateTime(record?.data_update_time as string)}
               </div>
             </div>
