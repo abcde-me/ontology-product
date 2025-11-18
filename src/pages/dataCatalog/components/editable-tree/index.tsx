@@ -20,7 +20,6 @@ export default function EditableTree() {
       'selectedTreeKey',
       'inputValue'
     ]);
-
   const {
     generatorTreeNodes,
     onSearchChange,
@@ -30,6 +29,16 @@ export default function EditableTree() {
     renderExtra,
     renderTitle
   } = useEditableTree({ catalogTreeStore });
+  const params = new URLSearchParams(window.location.search);
+  const id = params.get('id');
+  const parent_id = params.get('parent_id');
+  const catalog_type = params.get('catalog_type');
+  const [defaultTreeKey, setDefaultTreeKey] = useState<string[]>([]);
+
+  useEffect(() => {
+    setDefaultTreeKey([`src-${parent_id}-${catalog_type}-${id}`]);
+  }, [id, parent_id, catalog_type]);
+  // const catalog_type: any = params.get('catalog_type');
   return (
     <div className={classNames('pl-3 pr-3 pt-2')}>
       <div className="mb-2 mt-[-8px] flex items-center justify-between">
@@ -59,6 +68,7 @@ export default function EditableTree() {
           blockNode
           selectable
           expandedKeys={expandedKeys}
+          defaultSelectedKeys={defaultTreeKey}
           selectedKeys={[selectedTreeKey]}
           icons={(node) => ({
             switcherIcon: !node.dataRef?.isLastLeaf ? <IconCaretDown /> : null
