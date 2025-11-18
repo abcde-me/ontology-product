@@ -40,7 +40,7 @@ export default function DataLoad() {
   // 跳转目录
   const handleToDirectoryPath = (id: string, parent_id: string) => {
     history.push(
-      `/tenant/compute/modaforge/dataCatalog?id=${id}&parent_id=${parent_id}`
+      `/tenant/compute/modaforge/dataCatalog/list?id=${id}&parent_id=${parent_id}`
     );
   };
   const renderEmptyPlaceholder = (value: string | null) => {
@@ -204,7 +204,7 @@ export default function DataLoad() {
             isEdit={false}
             isLink
             handleLink={() => {
-              handleToDirectoryPath(record.data_path_id, record.data_path_name);
+              handleToDirectoryPath(record.data_path_id, record.parent_id);
             }}
           />
         ) : (

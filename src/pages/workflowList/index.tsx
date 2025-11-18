@@ -99,7 +99,7 @@ export default function WorkflowList() {
     root_type: string | number
   ) => {
     history.push(
-      `/tenant/compute/modaforge/dataCatalog?root_type=${root_type}&id=${id}&parent_id=${parent_id}`
+      `/tenant/compute/modaforge/dataCatalog/list?root_type=${root_type}&id=${id}&parent_id=${parent_id}`
     );
   };
   // 跳转目标数据 - 数据集详情
