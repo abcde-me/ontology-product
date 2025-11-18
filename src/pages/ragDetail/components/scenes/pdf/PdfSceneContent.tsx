@@ -54,12 +54,7 @@ const PdfSceneContent: React.FC<PdfSceneContentProps> = ({
           className={`h-full flex-1 overflow-hidden bg-gray-50 ${!hasDirectory ? 'ml-4 rounded-bl-[20px]' : 'ml-4'} ${!showPdfViewer ? 'hidden' : ''}`}
           style={{ minHeight: 0 }}
         >
-          <PdfViewer
-            fileName={fileName}
-            filePath={filePath}
-            hideHeader
-            useMockBinaryData={true}
-          />
+          <PdfViewer fileName={fileName} hideHeader />
         </div>
         {/* PDF和右侧内容之间的分隔线 */}
         {showPdfViewer && <div className="w-[1px] flex-shrink-0 bg-gray-200" />}
