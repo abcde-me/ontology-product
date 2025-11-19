@@ -55,9 +55,9 @@ const Panel: FC<NodePanelProps<TextParserNodeType>> = ({ id, data }) => {
       // if (!inputs.text_pic_model_id) {
       //   fields.text_pic_model_id = defaultPicId;
       // }
-      if (!inputs.text_emb_model_id) {
-        fields.text_emb_model_id = defaultTextId;
-      }
+      // if (!inputs.text_emb_model_id) {
+      //   fields.text_emb_model_id = defaultTextId;
+      // }
       if (Object.keys(fields).length) {
         form.setFieldsValue(fields);
       }

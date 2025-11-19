@@ -20,7 +20,6 @@ export default function EditableTree() {
       'selectedTreeKey',
       'inputValue'
     ]);
-
   const {
     generatorTreeNodes,
     onSearchChange,

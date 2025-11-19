@@ -268,7 +268,7 @@ export default function SearchArea({
     if (typeof opt !== 'object' || opt === null) {
       return false;
     }
-    return Array.isArray((opt as any).valueList);
+    return Array.isArray(opt.valueList);
   };
 
   // 渲染字段搜索输入组件
@@ -475,7 +475,9 @@ export default function SearchArea({
           {/* 操作按钮区域 */}
           <div className="flex items-center gap-2">
             <QueryButton />
-            <Button onClick={handleReset}>重置</Button>
+            <Button disabled={!hasCheckedFields} onClick={handleReset}>
+              重置
+            </Button>
             <Popover
               content={settingsContent}
               trigger="click"

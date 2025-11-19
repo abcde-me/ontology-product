@@ -221,6 +221,7 @@ export const PrefixAuthCenter = API_PREFIX + '/auth-center/api/v1';
 
 // RAG
 export const PrefixRag = API_PREFIX + '/dataset-service/internal/v1';
+export const PrefixRagV2 = '/aimdp-manager/api/v1';
 
 // 引擎
 export const PrefixEngine = '/metadata-service/api/v1';
@@ -235,29 +236,28 @@ export const ModaForgeResourceEndpoints = {
   GetProjOrg: PrefixUserSpace + '/GetProjOrg',
 
   // 引擎相关
-  // 获取文件二进制数据
-  GetFileBinaryData:
-    PrefixEngine +
-    '/file/downloadFile?bucket=datasource-dev&path=/10/10/orginal/用户权限.pdf',
-
+  // 获取文件二进制数据 (参数通过 query string 传递: bucket, path)
+  GetFileBinaryData: PrefixEngine + '/file/downloadFile',
   // RAG相关
+  // 预览图片
+  PreviewUrl: PrefixAimdp + '/PreviewUrl',
   // 查询知识库文件列表
   ListKnowledgeDocuments: PrefixRag + '/ListKnowledgeDocuments',
   // 查询知识库文件目录层级
-  ListKnowledgeDocumentCatalogs: PrefixRag + '/ListKnowledgeDocumentCatalogs',
+  ListKnowledgeDocumentCatalogs: PrefixRagV2 + '/ListKnowledgeDocumentCatalogs',
   // 查询知识库分块列表
-  ListKnowledgeChunks: PrefixRag + '/ListKnowledgeChunks',
+  ListKnowledgeChunks: PrefixRagV2 + '/ListKnowledgeChunks',
   // 查询分块详情
-  GetKnowledgeChunk: PrefixRag + '/GetKnowledgeChunk',
+  GetKnowledgeChunk: PrefixRagV2 + '/GetKnowledgeChunk',
   // 编辑分块内容
-  UpdateKnowledgeChunk: PrefixRag + '/UpdateKnowledgeChunk',
+  UpdateKnowledgeChunk: PrefixRagV2 + '/UpdateKnowledgeChunk',
   // 编辑分块元素信息
-  UpdateKnowledgeChunkMaterials: PrefixRag + '/UpdateKnowledgeChunkMaterials',
+  UpdateKnowledgeChunkMaterials: PrefixRagV2 + '/UpdateKnowledgeChunkMaterials',
   // 编辑分块增强信息
   UpdateKnowledgeChunkEnhancement:
     PrefixRag + '/UpdateKnowledgeChunkEnhancement',
   // 查询分块溯源日志
-  GetKnowledgeChunkTraceLog: PrefixRag + '/GetKnowledgeChunkTraceLog',
+  GetKnowledgeChunkTraceLog: PrefixRagV2 + '/GetKnowledgeChunkTrace',
   // 运行命中测试
   RunKnowledgeHitTesting: PrefixRag + '/RunKnowledgeHitTesting',
   // 查询命中测试历史记录
@@ -366,7 +366,7 @@ export const ModaForgeResourceEndpoints = {
   //查询数据集详细信息的数据内容和
   datasetContentsApi: PrefixAimdp + '/GetDatasetTargetVersion',
   //编辑数据集版本数据
-  editDatasetVersionApi: PrefixAimdp + '/EditDatasetTargetVersion',
+  editDatasetVersionApi: PrefixAimdp + '/UpdateJsonLData',
   //获取数据集版本列表
   datasetVersionListApi: PrefixAimdp + '/ListDatasetChangeLogs',
   //版本重新生成

@@ -13,8 +13,6 @@ import type {
   PDFCoordinate,
   PositionBBox,
   ApiPosition,
-  ApiSegmentOld,
-  ApiCatalogNodeOld,
   ApiSegmentDetail,
   SegmentDetailData,
   Element,
@@ -261,10 +259,8 @@ export async function fetchSegments(
     });
 
     // 检查响应格式
-    if (response && (response as any).data && (response as any).data.list) {
-      const segments = ((response as any).data.list as ApiSegment[]).map(
-        transformSegment
-      );
+    if (response && response.data && response.data) {
+      const segments = (response.data as ApiSegment[]).map(transformSegment);
       return segments;
     }
 
@@ -290,10 +286,11 @@ export async function fetchCatalog(
       datasetId,
       documentId
     });
+    console.log(response, 'response2222');
 
     // 检查响应格式
-    if (response && (response as any).data && (response as any).data.catalogs) {
-      const rootNode = transformCatalogNode((response as any).data.catalogs);
+    if (response && response.data && response.data.catalogs) {
+      const rootNode = transformCatalogNode(response.data.catalogs);
       return [rootNode];
     }
 
@@ -345,29 +342,6 @@ export async function fetchRagDetail(
     directory = await fetchCatalog(datasetId, documentId);
 
     sceneType = 'pdf';
-  } else if (documentId === '1004') {
-    // PPT 场景
-    fileName = '2024年度工作总结.pptx';
-    filePath =
-      'https://view.officeapps.live.com/op/embed.aspx?src=https://scholar.harvard.edu/files/torman_personal/files/samplepptx.pptx';
-    sceneType = 'ppt';
-
-    // 使用旧的数据格式获取分段数据
-    const segmentResponse = getSegmentDataByRagId(documentId);
-    segments = segmentResponse.data.data.map(transformSegmentOld);
-
-    // PPT 场景通常没有目录树
-    const treeResponse = getTreeDataByRagId(documentId);
-    if (
-      treeResponse &&
-      treeResponse.data &&
-      treeResponse.data.catalog_content
-    ) {
-      const rootNode = transformCatalogNodeOld(
-        treeResponse.data.catalog_content
-      );
-      directory = [rootNode];
-    }
   } else if (documentId === '1005') {
     // Table/Excel 场景
     fileName = '销售数据统计.xlsx';
@@ -411,13 +385,25 @@ export async function fetchRagDetail(
     }
   }
 
+  // 根据 sceneType 设置 bucket 和 path（测试数据）
+  const bucket = 'datasource-dev';
+  let path = '';
+
+  if (sceneType === 'pdf') {
+    path = '/10/10/orginal/用户权限.pdf';
+  } else if (sceneType === 'excel') {
+    path = '/10/10/orginal/用户权限.docx';
+  }
+
   const result: RagDetailData = {
     ragId: documentId, // 使用 documentId 作为 ragId
     fileName,
     filePath,
     sceneType,
     segments,
-    directory
+    directory,
+    bucket,
+    path
   };
 
   return result;
@@ -429,15 +415,22 @@ export async function fetchRagDetail(
  * @param documentId - 文档ID
  * @param chunkId - 分块ID
  * @param content - 新的内容
- * @returns 更新后的分段
+ * @returns Promise<void> - 更新成功后不返回数据，调用方应该重新获取分段列表
  */
 export async function updateSegmentContent(
   datasetId: string,
   documentId: string,
   chunkId: string,
   content: string
-): Promise<Segment> {
+): Promise<void> {
   try {
+    console.log('📤 调用更新分段接口:', {
+      datasetId,
+      documentId,
+      chunkId,
+      content
+    });
+
     const response = await UpdateKnowledgeChunk({
       dataset_id: datasetId,
       document_id: documentId,
@@ -445,29 +438,12 @@ export async function updateSegmentContent(
       content
     });
 
-    // 检查响应格式
-    if (response && (response as any).data) {
-      const data = (response as any).data;
-      return {
-        id: data.id || chunkId,
-        content: data.content || content,
-        charCount: (data.content || content).length,
-        segmentIndex: data.chunk_index || 0,
-        createdAt: data.created_at || new Date().toISOString(),
-        updatedAt: data.updated_at || new Date().toISOString()
-      };
-    }
+    console.log('✅ 更新分段接口调用成功:', response);
 
-    // 如果响应格式不符合预期，返回基本信息
-    return {
-      id: chunkId,
-      content,
-      charCount: content.length,
-      segmentIndex: 0,
-      updatedAt: new Date().toISOString()
-    };
+    // 更新成功，不返回数据
+    // 调用方应该重新调用 fetchSegments 来获取最新的分段列表
   } catch (error) {
-    console.error('Failed to update segment content:', error);
+    console.error('❌ 更新分段内容失败:', error);
     throw error;
   }
 }
@@ -622,7 +598,9 @@ function transformApiMaterialToElement(material: any): Element {
         url: material.text || material.uri,
         positionType,
         positionInfo,
-        pageId
+        pageId,
+        bucketName: material.bucket_name,
+        path: material.path
       } as ImageElement & { pageId?: number };
 
     case 'table':

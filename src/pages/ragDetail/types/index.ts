@@ -141,6 +141,8 @@ export interface ImageElement {
   positionInfo?: string; // 位置信息
   dimensions?: string; // 尺寸
   modifiers?: string; // 修饰
+  bucketName?: string; // S3 bucket 名称
+  path?: string; // S3 路径
 }
 
 // 表格元素
@@ -181,8 +183,8 @@ export interface EnhancementInfo {
   tags?: string[]; // 标签
 }
 
-// 新的后端返回的位置信息
-export interface ApiPosition {
+// 新的后端返回的位置信息（用于分段详情）
+export interface ApiPositionDetail {
   bbox?: [number, number, number, number]; // 坐标 [x1, y1, x2, y2]
   text_offset?: {
     start: number;
@@ -198,8 +200,10 @@ export interface ApiMaterial {
   id: string; // 元素ID
   type: 'text' | 'title' | 'table' | 'image' | 'formula'; // 元素类型
   text: string; // 文本内容（对于image是s3路径，对于table是JSON字符串，对于formula是公式字符串）
-  positions?: ApiPosition[]; // 位置信息
+  positions?: ApiPositionDetail[]; // 位置信息
   uri?: string; // 资源URI（如S3路径）
+  bucket_name?: string; // S3 bucket 名称（图片专用）
+  path?: string; // S3 路径（图片专用）
 }
 
 // 新的后端返回的AI增强数据
@@ -271,7 +275,7 @@ export interface DirectoryNode {
 export interface RagDetailData {
   ragId: string;
   fileName: string;
-  filePath: string;
+  filePath: string; // 显示用的文件路径
   sceneType: SceneType;
   segments:
     | Segment[]
@@ -280,6 +284,8 @@ export interface RagDetailData {
     | PptSegment[]
     | TableSegment[];
   directory?: DirectoryNode[]; // 仅在hierarchical场景中使用
+  bucket?: string; // 文件存储桶
+  path?: string; // 文件实际存储路径
 }
 
 export interface SegmentUpdatePayload {
@@ -316,10 +322,21 @@ export interface RagDetailState {
   segmentDrawerSegmentId: string | null;
   // Segment search state
   segmentSearchText: string;
+  // File binary data state
+  fileBinaryData: ArrayBuffer | null; // 文件二进制数据
+  fileBinaryDataLoading: boolean; // 文件二进制数据加载状态
+  fileBinaryDataError: string | null; // 文件二进制数据加载错误
+  bucket: string; // 文件存储桶
+  path: string; // 文件路径
 }
 
 export interface RagDetailActions {
-  initializeRagDetail: (datasetId: string, documentId: string) => Promise<void>;
+  initializeRagDetail: (
+    datasetId: string,
+    documentId: string,
+    bucketName?: string | null,
+    path?: string | null
+  ) => Promise<void>;
   selectSegment: (segmentId: string) => void;
   selectDirectoryNode: (nodeId: string) => void;
   startEditingSegment: (segmentId: string) => void;
@@ -339,6 +356,9 @@ export interface RagDetailActions {
   closeSegmentDrawer: () => void;
   // Segment search actions
   setSegmentSearchText: (text: string) => void;
+  // File binary data actions
+  loadFileBinaryData: (bucket: string, path: string) => Promise<void>;
+  clearFileBinaryData: () => void;
 }
 
 export type RagDetailStore = RagDetailState & RagDetailActions;

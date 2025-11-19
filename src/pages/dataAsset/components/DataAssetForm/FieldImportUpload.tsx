@@ -79,10 +79,7 @@ const FieldImportUpload: React.FC<FieldImportUploadProps> = ({
 
       // 处理已完成的文件
       const completedFiles = processedFiles.filter(
-        (file: any) =>
-          file.status === UploadStatus.done &&
-          file.response &&
-          file.response.data
+        (file: any) => file.status === UploadStatus.done && file.response
       );
 
       if (completedFiles.length > 0) {
