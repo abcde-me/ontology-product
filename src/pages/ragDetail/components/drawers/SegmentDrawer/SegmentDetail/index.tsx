@@ -34,8 +34,9 @@ const SegmentDetail: React.FC<SegmentDetailProps> = ({ segmentId }) => {
     updateEnhancement
   } = useSegmentDetailStore();
 
-  // 从统一的 drawer store 获取数据
-  const { segmentDetailData, segmentDetailLoading } = useSegmentDrawerStore();
+  // 从统一的 drawer store 获取数据和 datasetId
+  const { segmentDetailData, segmentDetailLoading, datasetId } =
+    useSegmentDrawerStore();
 
   // 初始化数据
   useEffect(() => {
@@ -86,7 +87,7 @@ const SegmentDetail: React.FC<SegmentDetailProps> = ({ segmentId }) => {
                     取消
                   </button>
                   <button
-                    onClick={confirmEditing}
+                    onClick={() => confirmEditing(datasetId)}
                     className="rounded bg-blue-600 px-3 py-1.5 text-sm text-white hover:bg-blue-700 disabled:opacity-50"
                     disabled={loading}
                   >
