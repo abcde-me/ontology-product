@@ -305,7 +305,9 @@ export default function SearchArea({
       {/* 操作按钮区域 */}
       <div className="flex flex-shrink-0 items-center gap-2 border-b border-[#E5E6EB] py-4">
         <QueryButton />
-        <Button onClick={handleReset}>重置</Button>
+        <Button disabled={!hasCheckedFields} onClick={handleReset}>
+          重置
+        </Button>
         <Popover
           content={settingsContent}
           trigger="click"
