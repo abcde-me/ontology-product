@@ -8,6 +8,16 @@ export interface GetFileBinaryDataParams {
   path: string;
 }
 
+// 预览图片
+export interface PreviewUrlParams {
+  path: string;
+  bucket_name: string;
+}
+
+export function previewUrl(params: PreviewUrlParams) {
+  return UAPI.RES.PreviewUrl({}).post(params).inRegion().do();
+}
+
 export function getFileBinaryData(params: GetFileBinaryDataParams) {
   return UAPI.RES.GetFileBinaryData({})
     .get(params)

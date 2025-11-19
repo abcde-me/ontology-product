@@ -239,6 +239,8 @@ export const ModaForgeResourceEndpoints = {
   // 获取文件二进制数据 (参数通过 query string 传递: bucket, path)
   GetFileBinaryData: PrefixEngine + '/file/downloadFile',
   // RAG相关
+  // 预览图片
+  PreviewUrl: PrefixAimdp + '/PreviewUrl',
   // 查询知识库文件列表
   ListKnowledgeDocuments: PrefixRag + '/ListKnowledgeDocuments',
   // 查询知识库文件目录层级
@@ -250,7 +252,7 @@ export const ModaForgeResourceEndpoints = {
   // 编辑分块内容
   UpdateKnowledgeChunk: PrefixRagV2 + '/UpdateKnowledgeChunk',
   // 编辑分块元素信息
-  UpdateKnowledgeChunkMaterials: PrefixRag + '/UpdateKnowledgeChunkMaterials',
+  UpdateKnowledgeChunkMaterials: PrefixRagV2 + '/UpdateKnowledgeChunkMaterials',
   // 编辑分块增强信息
   UpdateKnowledgeChunkEnhancement:
     PrefixRag + '/UpdateKnowledgeChunkEnhancement',
