@@ -354,11 +354,13 @@ export default function Eltable() {
             }
           } else {
             const fileIds = selectedRows.map((item: { id: number }) => item.id);
-
-            ids.push(...fileIds);
+            const fileUuids = selectedRows.map(
+              (item: { file_uuid: string }) => item.file_uuid
+            );
             if (selectedRows.length > 0) {
               const res = await deleteSourceFileBatch({
-                ids: ids
+                ids: fileIds,
+                file_uuids: fileUuids
               });
               if (res.status === 200) {
                 Message.success('删除成功');
