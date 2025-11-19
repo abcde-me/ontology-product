@@ -1,7 +1,8 @@
 import { create } from 'zustand';
 import {
   fetchRagDetail,
-  updateSegmentContent as apiUpdateSegmentContent
+  updateSegmentContent as apiUpdateSegmentContent,
+  fetchSegments
 } from '../api/ragDetailApi';
 import {
   Segment,
@@ -223,6 +224,9 @@ export const useRagDetailStore = create<RagDetailState & RagDetailActions>(
           throw new Error('Dataset ID or Document ID not found');
         }
 
+        console.log('🔄 开始更新分段内容:', { segmentId, content });
+
+        // 调用更新接口
         await apiUpdateSegmentContent(
           datasetId,
           documentId,
@@ -230,18 +234,20 @@ export const useRagDetailStore = create<RagDetailState & RagDetailActions>(
           content
         );
 
-        const segments = get().segments.map((seg) =>
-          seg.id === segmentId
-            ? {
-                ...seg,
-                content,
-                charCount: content.length,
-                updatedAt: new Date().toISOString()
-              }
-            : seg
-        );
-        set({ segments, editingSegmentId: null });
+        console.log('✅ 分段内容更新成功，重新获取分段列表...');
+
+        // 更新成功后，重新获取分段列表数据
+        const updatedSegments = await fetchSegments(datasetId, documentId);
+
+        console.log('✅ 分段列表刷新成功:', updatedSegments);
+
+        // 更新 store 中的 segments 数据
+        set({
+          segments: updatedSegments,
+          editingSegmentId: null
+        });
       } catch (error) {
+        console.error('❌ 更新分段内容失败:', error);
         set({
           error:
             error instanceof Error ? error.message : 'Failed to update segment'

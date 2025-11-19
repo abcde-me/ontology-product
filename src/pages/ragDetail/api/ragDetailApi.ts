@@ -415,15 +415,22 @@ export async function fetchRagDetail(
  * @param documentId - 文档ID
  * @param chunkId - 分块ID
  * @param content - 新的内容
- * @returns 更新后的分段
+ * @returns Promise<void> - 更新成功后不返回数据，调用方应该重新获取分段列表
  */
 export async function updateSegmentContent(
   datasetId: string,
   documentId: string,
   chunkId: string,
   content: string
-): Promise<Segment> {
+): Promise<void> {
   try {
+    console.log('📤 调用更新分段接口:', {
+      datasetId,
+      documentId,
+      chunkId,
+      content
+    });
+
     const response = await UpdateKnowledgeChunk({
       dataset_id: datasetId,
       document_id: documentId,
@@ -431,29 +438,12 @@ export async function updateSegmentContent(
       content
     });
 
-    // 检查响应格式
-    if (response && (response as any).data) {
-      const data = (response as any).data;
-      return {
-        id: data.id || chunkId,
-        content: data.content || content,
-        charCount: (data.content || content).length,
-        segmentIndex: data.chunk_index || 0,
-        createdAt: data.created_at || new Date().toISOString(),
-        updatedAt: data.updated_at || new Date().toISOString()
-      };
-    }
+    console.log('✅ 更新分段接口调用成功:', response);
 
-    // 如果响应格式不符合预期，返回基本信息
-    return {
-      id: chunkId,
-      content,
-      charCount: content.length,
-      segmentIndex: 0,
-      updatedAt: new Date().toISOString()
-    };
+    // 更新成功，不返回数据
+    // 调用方应该重新调用 fetchSegments 来获取最新的分段列表
   } catch (error) {
-    console.error('Failed to update segment content:', error);
+    console.error('❌ 更新分段内容失败:', error);
     throw error;
   }
 }
