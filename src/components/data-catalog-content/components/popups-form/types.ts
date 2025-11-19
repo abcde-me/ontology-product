@@ -17,6 +17,7 @@ export interface SourceDataItem {
   file_sub_path: string;
   file_type: string;
   id: number;
+  file_uuid: string;
   task_load_start_time: string;
   upload_user: string;
   real_abs_data_path: string;
