@@ -13,8 +13,6 @@ import type {
   PDFCoordinate,
   PositionBBox,
   ApiPosition,
-  ApiSegmentOld,
-  ApiCatalogNodeOld,
   ApiSegmentDetail,
   SegmentDetailData,
   Element,
@@ -344,29 +342,6 @@ export async function fetchRagDetail(
     directory = await fetchCatalog(datasetId, documentId);
 
     sceneType = 'pdf';
-  } else if (documentId === '1004') {
-    // PPT 场景
-    fileName = '2024年度工作总结.pptx';
-    filePath =
-      'https://view.officeapps.live.com/op/embed.aspx?src=https://scholar.harvard.edu/files/torman_personal/files/samplepptx.pptx';
-    sceneType = 'ppt';
-
-    // 使用旧的数据格式获取分段数据
-    const segmentResponse = getSegmentDataByRagId(documentId);
-    segments = segmentResponse.data.data.map(transformSegmentOld);
-
-    // PPT 场景通常没有目录树
-    const treeResponse = getTreeDataByRagId(documentId);
-    if (
-      treeResponse &&
-      treeResponse.data &&
-      treeResponse.data.catalog_content
-    ) {
-      const rootNode = transformCatalogNodeOld(
-        treeResponse.data.catalog_content
-      );
-      directory = [rootNode];
-    }
   } else if (documentId === '1005') {
     // Table/Excel 场景
     fileName = '销售数据统计.xlsx';
@@ -416,8 +391,6 @@ export async function fetchRagDetail(
 
   if (sceneType === 'pdf') {
     path = '/10/10/orginal/用户权限.pdf';
-  } else if (sceneType === 'ppt') {
-    path = '/10/10/orginal/新建 PPT 演示文稿.ppt';
   } else if (sceneType === 'excel') {
     path = '/10/10/orginal/用户权限.docx';
   }
