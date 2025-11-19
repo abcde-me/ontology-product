@@ -57,24 +57,24 @@ export function GetKnowledgeChunk(params) {
 export function UpdateKnowledgeChunk(params) {
   console.log('编辑分块内容:', params);
   // TODO: 替换为真实API调用
-  // return UAPI.RES.UpdateKnowledgeChunk({}).post(params).inRegion().do();
+  return UAPI.RES.UpdateKnowledgeChunk({}).post(params).inRegion().do();
 
   // 临时返回 mock 数据
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve({
-        code: 0,
-        data: {
-          id: params.chunk_id,
-          chunk_index: 0,
-          content: params.content,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        },
-        message: 'Success'
-      });
-    }, 300);
-  });
+  // return new Promise((resolve) => {
+  //   setTimeout(() => {
+  //     resolve({
+  //       code: 0,
+  //       data: {
+  //         id: params.chunk_id,
+  //         chunk_index: 0,
+  //         content: params.content,
+  //         created_at: new Date().toISOString(),
+  //         updated_at: new Date().toISOString()
+  //       },
+  //       message: 'Success'
+  //     });
+  //   }, 300);
+  // });
 }
 // 编辑分块元素信息
 export function UpdateKnowledgeChunkMaterials(params) {

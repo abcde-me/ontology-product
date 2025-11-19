@@ -248,7 +248,7 @@ export const ModaForgeResourceEndpoints = {
   // 查询分块详情
   GetKnowledgeChunk: PrefixRagV2 + '/GetKnowledgeChunk',
   // 编辑分块内容
-  UpdateKnowledgeChunk: PrefixRag + '/UpdateKnowledgeChunk',
+  UpdateKnowledgeChunk: PrefixRagV2 + '/UpdateKnowledgeChunk',
   // 编辑分块元素信息
   UpdateKnowledgeChunkMaterials: PrefixRag + '/UpdateKnowledgeChunkMaterials',
   // 编辑分块增强信息
