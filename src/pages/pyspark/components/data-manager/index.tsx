@@ -12,7 +12,7 @@ import copy from 'copy-to-clipboard';
 const { Title } = Typography;
 
 interface PythonTabContentProps {
-  onInsertContent?: (content: string) => void;
+  onInsertContent?: (content: string | number) => void;
   getIsEditorFocused?: () => boolean;
 }
 
@@ -75,20 +75,33 @@ const PythonTabContent: React.FC<PythonTabContentProps> = ({
   // 处理数据卷插入或复制
   const handleVolumeInsert = (volume: FluffyVolume) => {
     const isEditorFocusedNow = getIsEditorFocused?.() ?? false;
-    const fileUuid = volume?.file_uuid ?? '';
-    console.log('数据卷插入:', volume);
+    const typeName = volume?.type_name ?? '';
+    let content: string | number = '';
 
-    if (!fileUuid) {
-      Message.warning('内容为空');
-      return;
+    console.log('-------volume-------', volume);
+
+    if (typeName === 'volume') {
+      if (!volume?.id) {
+        Message.warning('内容为空');
+        return;
+      }
+
+      content = volume?.id;
+    } else {
+      if (!volume?.file_uuid) {
+        Message.warning('内容为空');
+        return;
+      }
+
+      content = volume?.file_uuid;
     }
 
     if (isEditorFocusedNow && onInsertContent) {
       // 编辑器聚焦时插入内容
-      onInsertContent(String(fileUuid));
+      onInsertContent(String(content));
     } else {
       // 编辑器未聚焦时复制到剪贴板
-      const isSuccess = copy(String(fileUuid));
+      const isSuccess = copy(String(content));
 
       if (isSuccess) {
         Message.success('内容复制成功，请粘贴到编辑器');
