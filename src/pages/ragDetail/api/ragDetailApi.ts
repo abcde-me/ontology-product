@@ -598,7 +598,9 @@ function transformApiMaterialToElement(material: any): Element {
         url: material.text || material.uri,
         positionType,
         positionInfo,
-        pageId
+        pageId,
+        bucketName: material.bucket_name,
+        path: material.path
       } as ImageElement & { pageId?: number };
 
     case 'table':

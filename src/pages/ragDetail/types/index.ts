@@ -141,6 +141,8 @@ export interface ImageElement {
   positionInfo?: string; // 位置信息
   dimensions?: string; // 尺寸
   modifiers?: string; // 修饰
+  bucketName?: string; // S3 bucket 名称
+  path?: string; // S3 路径
 }
 
 // 表格元素
@@ -200,6 +202,8 @@ export interface ApiMaterial {
   text: string; // 文本内容（对于image是s3路径，对于table是JSON字符串，对于formula是公式字符串）
   positions?: ApiPositionDetail[]; // 位置信息
   uri?: string; // 资源URI（如S3路径）
+  bucket_name?: string; // S3 bucket 名称（图片专用）
+  path?: string; // S3 路径（图片专用）
 }
 
 // 新的后端返回的AI增强数据
