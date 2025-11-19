@@ -366,7 +366,7 @@ export const ModaForgeResourceEndpoints = {
   //查询数据集详细信息的数据内容和
   datasetContentsApi: PrefixAimdp + '/GetDatasetTargetVersion',
   //编辑数据集版本数据
-  editDatasetVersionApi: PrefixAimdp + '/EditDatasetTargetVersion',
+  editDatasetVersionApi: PrefixAimdp + '/UpdateJsonLData',
   //获取数据集版本列表
   datasetVersionListApi: PrefixAimdp + '/ListDatasetChangeLogs',
   //版本重新生成
