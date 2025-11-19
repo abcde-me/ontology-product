@@ -14,15 +14,9 @@ import {
   IconCaretDown,
   IconCaretRight
 } from '@arco-design/web-react/icon';
-import { useDatasetTree } from '../../hooks/useDatasetTree';
-import { DatasetListItem } from '@/types/datasetManagement';
 import './index.scss';
-import { A } from '@svgdotjs/svg.js';
 import { formatFileSize } from '@/utils/format';
 import { useSourceTree } from '../../hooks/useSourceTree';
-import { FluffyVolume } from '@/api/dataCatalog';
-
-const { Title } = Typography;
 
 interface SourceTreeProps {
   isEditorFocused?: boolean;
@@ -192,7 +186,7 @@ const SourceTree: React.FC<SourceTreeProps> = ({
                         详情
                       </Button>
                     )}
-                    {isFile && (
+                    {(isFile || isVolumeItem) && (
                       <Button
                         type="outline"
                         className="pyspark-source-tree__insert-btn"
