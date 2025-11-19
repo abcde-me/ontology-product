@@ -47,6 +47,6 @@ export const generateLabels = (data: any[]) => {
 
 // 模型标签形状映射：将API返回的字符串形状转换为数字
 export const LABEL_MAPPING = {
-  rectangle: 3, // 矩形
-  polygon: 4 // 多边形
+  3: 'rectangle', // 矩形
+  4: 'polygon' // 多边形
 };
