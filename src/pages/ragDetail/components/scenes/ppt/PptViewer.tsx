@@ -1,52 +1,60 @@
 /**
  * PPT Viewer Component
  * PPT在线查看器 - 类似PdfViewer的实现
- * 使用iframe + Office Online Viewer或Google Docs Viewer来渲染PPT文件
+ * 从后端获取PPT二进制数据并渲染
  */
 
 import React, { useState, useEffect, useRef } from 'react';
 import { useRagDetailStore } from '../../../store/ragDetailStore';
+import { getFileBinaryData } from '@/api/modules/rag';
 
 interface PptViewerProps {
   fileName?: string;
-  filePath?: string;
-  pptData?: ArrayBuffer; // 支持直接传入二进制数据
   hideHeader?: boolean;
 }
 
 const PptViewer: React.FC<PptViewerProps> = ({
-  fileName,
-  filePath,
-  pptData,
+  fileName: propFileName,
   hideHeader = false
 }) => {
-  const { selectedSegmentId, segments } = useRagDetailStore();
-  const iframeRef = useRef<HTMLIFrameElement>(null);
-  const [pptUrl, setPptUrl] = useState<string>('');
-  const [loading, setLoading] = useState(true);
+  const {
+    fileName: storeName,
+    selectedSegmentId,
+    segments
+  } = useRagDetailStore();
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [pptData, setPptData] = useState<ArrayBuffer | null>(null);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   // 显示的文件名
-  const displayFileName = fileName || filePath?.split('/').pop() || 'PPT文档';
+  const displayFileName = propFileName || storeName || 'PPT文档';
 
-  // 处理PPT文件URL
+  // 加载PPT二进制数据
   useEffect(() => {
-    if (pptData) {
-      // 如果有二进制数据，创建Blob URL
-      const blob = new Blob([pptData], {
-        type: 'application/vnd.openxmlformats-officedocument.presentationml.presentation'
-      });
-      const url = URL.createObjectURL(blob);
-      setPptUrl(url);
+    const loadPpt = async () => {
+      setLoading(true);
+      setPptData(null);
+      setError(null);
 
-      return () => {
-        URL.revokeObjectURL(url);
-      };
-    } else if (filePath) {
-      // 使用文件路径
-      setPptUrl(filePath);
-    }
-  }, [pptData, filePath]);
+      try {
+        const response = await getFileBinaryData();
+        console.log('✅ PPT二进制数据加载成功:', {
+          type: typeof response,
+          isArrayBuffer: response instanceof ArrayBuffer,
+          size: response instanceof ArrayBuffer ? response.byteLength : 0
+        });
+        setPptData(response as ArrayBuffer);
+      } catch (err) {
+        console.error('❌ 加载PPT失败:', err);
+        setError('加载PPT文件失败');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadPpt();
+  }, []);
 
   // 监听selectedSegmentId变化，跳转到对应的幻灯片
   useEffect(() => {

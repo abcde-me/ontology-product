@@ -13,8 +13,6 @@ import type {
   PDFCoordinate,
   PositionBBox,
   ApiPosition,
-  ApiSegmentOld,
-  ApiCatalogNodeOld,
   ApiSegmentDetail,
   SegmentDetailData,
   Element,
@@ -261,10 +259,8 @@ export async function fetchSegments(
     });
 
     // 检查响应格式
-    if (response && (response as any).data && (response as any).data.list) {
-      const segments = ((response as any).data.list as ApiSegment[]).map(
-        transformSegment
-      );
+    if (response && response.data && response.data) {
+      const segments = (response.data as ApiSegment[]).map(transformSegment);
       return segments;
     }
 
@@ -290,10 +286,11 @@ export async function fetchCatalog(
       datasetId,
       documentId
     });
+    console.log(response, 'response2222');
 
     // 检查响应格式
-    if (response && (response as any).data && (response as any).data.catalogs) {
-      const rootNode = transformCatalogNode((response as any).data.catalogs);
+    if (response && response.data && response.data.catalogs) {
+      const rootNode = transformCatalogNode(response.data.catalogs);
       return [rootNode];
     }
 
@@ -345,29 +342,6 @@ export async function fetchRagDetail(
     directory = await fetchCatalog(datasetId, documentId);
 
     sceneType = 'pdf';
-  } else if (documentId === '1004') {
-    // PPT 场景
-    fileName = '2024年度工作总结.pptx';
-    filePath =
-      'https://view.officeapps.live.com/op/embed.aspx?src=https://scholar.harvard.edu/files/torman_personal/files/samplepptx.pptx';
-    sceneType = 'ppt';
-
-    // 使用旧的数据格式获取分段数据
-    const segmentResponse = getSegmentDataByRagId(documentId);
-    segments = segmentResponse.data.data.map(transformSegmentOld);
-
-    // PPT 场景通常没有目录树
-    const treeResponse = getTreeDataByRagId(documentId);
-    if (
-      treeResponse &&
-      treeResponse.data &&
-      treeResponse.data.catalog_content
-    ) {
-      const rootNode = transformCatalogNodeOld(
-        treeResponse.data.catalog_content
-      );
-      directory = [rootNode];
-    }
   } else if (documentId === '1005') {
     // Table/Excel 场景
     fileName = '销售数据统计.xlsx';
@@ -411,13 +385,25 @@ export async function fetchRagDetail(
     }
   }
 
+  // 根据 sceneType 设置 bucket 和 path（测试数据）
+  const bucket = 'datasource-dev';
+  let path = '';
+
+  if (sceneType === 'pdf') {
+    path = '/10/10/orginal/用户权限.pdf';
+  } else if (sceneType === 'excel') {
+    path = '/10/10/orginal/用户权限.docx';
+  }
+
   const result: RagDetailData = {
     ragId: documentId, // 使用 documentId 作为 ragId
     fileName,
     filePath,
     sceneType,
     segments,
-    directory
+    directory,
+    bucket,
+    path
   };
 
   return result;

@@ -221,6 +221,10 @@ export const PrefixAuthCenter = API_PREFIX + '/auth-center/api/v1';
 
 // RAG
 export const PrefixRag = API_PREFIX + '/dataset-service/internal/v1';
+export const PrefixRagV2 = '/aimdp-manager/api/v1';
+
+// 引擎
+export const PrefixEngine = '/metadata-service/api/v1';
 
 // 多模态数据治理平台接口
 // TODO: 代替换接口
@@ -231,15 +235,18 @@ export const ModaForgeResourceEndpoints = {
   GetUser: PrefixUserSpace + '/GetUser',
   GetProjOrg: PrefixUserSpace + '/GetProjOrg',
 
+  // 引擎相关
+  // 获取文件二进制数据 (参数通过 query string 传递: bucket, path)
+  GetFileBinaryData: PrefixEngine + '/file/downloadFile',
   // RAG相关
   // 查询知识库文件列表
   ListKnowledgeDocuments: PrefixRag + '/ListKnowledgeDocuments',
   // 查询知识库文件目录层级
-  ListKnowledgeDocumentCatalogs: PrefixRag + '/ListKnowledgeDocumentCatalogs',
+  ListKnowledgeDocumentCatalogs: PrefixRagV2 + '/ListKnowledgeDocumentCatalogs',
   // 查询知识库分块列表
-  ListKnowledgeChunks: PrefixRag + '/ListKnowledgeChunks',
+  ListKnowledgeChunks: PrefixRagV2 + '/ListKnowledgeChunks',
   // 查询分块详情
-  GetKnowledgeChunk: PrefixRag + '/GetKnowledgeChunk',
+  GetKnowledgeChunk: PrefixRagV2 + '/GetKnowledgeChunk',
   // 编辑分块内容
   UpdateKnowledgeChunk: PrefixRag + '/UpdateKnowledgeChunk',
   // 编辑分块元素信息
@@ -248,7 +255,7 @@ export const ModaForgeResourceEndpoints = {
   UpdateKnowledgeChunkEnhancement:
     PrefixRag + '/UpdateKnowledgeChunkEnhancement',
   // 查询分块溯源日志
-  GetKnowledgeChunkTraceLog: PrefixRag + '/GetKnowledgeChunkTraceLog',
+  GetKnowledgeChunkTraceLog: PrefixRagV2 + '/GetKnowledgeChunkTrace',
   // 运行命中测试
   RunKnowledgeHitTesting: PrefixRag + '/RunKnowledgeHitTesting',
   // 查询命中测试历史记录
@@ -363,13 +370,13 @@ export const ModaForgeResourceEndpoints = {
   //版本重新生成
   datasetVersionRebuildApi: PrefixAimdp + '/RenewDatasetTargetVersion',
   //数据内容文件表
-  dataContentFileList: PrefixAimdp + '/ListDatasetFiles',
+  dataContentFileList: PrefixAimdp + '/ListDatasetData',
   //数据内容数据库表
   dataContentTableList: PrefixAimdp + '/GetDatasetTableTargetVersion',
   // 数据集场景分类列表
   datasetSceneListApi: PrefixAimdp + '/ListScenes',
   // 数据集场景分类批量更新
-  datasetBatchUpdateSceneApi: PrefixAimdp + '/BatchUpdateScenes',
+  datasetBatchUpdateSceneApi: PrefixAimdp + '/BatchUpdateScene',
 
   // 连接器接口
 

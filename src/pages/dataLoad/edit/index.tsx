@@ -5,7 +5,6 @@ import {
   Message,
   Radio,
   Select,
-  TreeSelect,
   Collapse,
   Popover,
   Tag,
@@ -395,13 +394,14 @@ const Edit = (props) => {
   const [selectedTreeKeys, setSelectedTreeKeys] = useState<string[]>([]);
   const [selectedNodeType, setSelectedNodeType] =
     useState<TreeNodeData['type_name']>();
-  // TreeSelect显示的值（路径）
-  const [treeSelectDisplayValue, setTreeSelectDisplayValue] =
-    useState<string>('');
+  // 选中的路径
+  const [selectedPath, setSelectedPath] = useState<string>('');
+  // 选中的节点ID
+  const [selectedNodeId, setSelectedNodeId] = useState<string | number | null>(
+    null
+  );
   //获取连接器下面的表格
   const [talbleList, setTableList] = useState([]);
-  // TreeSelect 下拉框显示状态
-  const [dropdownVisible, setDropdownVisible] = useState(false);
   // SQL处理相关状态
   const [sqlContent, setSqlContent] = useState<string>(
     props.detailData?.sql || ''
@@ -617,53 +617,32 @@ const Edit = (props) => {
   // 根据data_path_id构建路径
   useEffect(() => {
     if (props.detailData?.data_path_id && directoryData.length > 0) {
-      if (
-        props.detailData?.source_type === 'db' ||
-        props.detailData?.source_type === 'local' ||
-        props.detailData?.source_type === 'hdfs' ||
-        props.detailData?.source_type === 's3'
-      ) {
-        // 数据库、本地文件、HDFS、S3类型都使用TreeSelect，需要找到对应的节点ID
-        const nodeId = findTreeSelectPathById(
-          directoryData,
-          props.detailData?.data_path_id
-        );
-        if (nodeId) {
-          setSelectedTreeKeys([nodeId]);
-          // 构建显示路径
-          const displayPath = buildTreeSelectDisplayPath(
-            directoryData,
-            props.detailData?.data_path_id
-          );
+      // 找到对应的节点
+      const selectedNode =
+        findNodeById(directoryData, props.detailData?.data_path_id) || null;
 
-          setTreeSelectDisplayValue(displayPath);
-          form.setFieldsValue({
-            dest_path_display: displayPath, // 显示完整路径
-            dest_path: nodeId // 隐藏字段保存节点ID
-          });
-          // 设置节点类型，保证编辑回显时的条件渲染正常
-          const selectedNode =
-            findNodeById(directoryData, props.detailData?.data_path_id) || null;
-          setSelectedNodeType(selectedNode?.type_name);
-        }
-      } else {
-        // 其他类型使用Cascader（如果还有的话）
-        const path = findPathById(
+      if (selectedNode) {
+        const nodeId = String(selectedNode.id);
+        setSelectedNodeId(selectedNode.id);
+        setSelectedTreeKeys([nodeId]);
+        setSelectedNodeType(selectedNode?.type_name);
+
+        // 构建显示路径
+        const displayPath = buildTreeSelectDisplayPath(
           directoryData,
           props.detailData?.data_path_id
         );
-        if (path) {
-          setInitialPath(path as (string | string[])[]);
-          form.setFieldsValue({
-            dest_path: path
-          });
-        }
+        setSelectedPath(displayPath);
+        form.setFieldsValue({
+          dest_path: displayPath ? [displayPath] : undefined
+        });
       }
     }
   }, [
     props.detailData?.data_path_id,
     directoryData,
-    props.detailData?.source_type
+    props.detailData?.source_type,
+    form
   ]);
 
   // 初始化数据：获取目录列表、表格列表，并设置 MutationObserver
@@ -713,6 +692,33 @@ const Edit = (props) => {
     props.hideEditModalHan();
   };
   console.log(props.detailData?.load_type);
+
+  // 处理树选择
+  const handleTreeSelect = useCallback((selectedKeys: string[]) => {
+    console.log('handleSelect called', selectedKeys);
+    setSelectedTreeKeys(selectedKeys);
+  }, []);
+
+  // 处理路径变化
+  const handlePathChange = useCallback(
+    (path: string, nodeId?: string | number, nodeData?: TreeNodeData) => {
+      console.log('路径变化:', path, '节点ID:', nodeId, '节点数据:', nodeData);
+      // 优先使用 nodeData.id，如果没有则使用 nodeId，确保 dest_path_id 正确更新
+      const destPathId = nodeData?.id || nodeId || null;
+      setSelectedNodeId(destPathId);
+      setSelectedPath(path);
+      form.setFieldsValue({ dest_path: path ? [path] : undefined });
+      setSelectedNodeType(nodeData?.type_name);
+      console.log('更新后的 dest_path_id:', destPathId);
+    },
+    [form]
+  );
+
+  // 数据刷新回调
+  const handleDataRefresh = useCallback(async () => {
+    console.log('ComponentTree 请求数据刷新');
+    return await getdirectoryDataList();
+  }, []);
 
   // 处理SQL内容变化
   const handleSqlContentChange = useCallback(
@@ -832,22 +838,12 @@ const Edit = (props) => {
       setLoading(true);
       const formValues = await form.validate();
       const { ...rest } = formValues;
-      // 处理不同数据源类型的路径ID获取
-      let pathId;
-      if (
-        props.detailData?.source_type === 'db' ||
-        props.detailData?.source_type === 'local' ||
-        props.detailData?.source_type === 'hdfs' ||
-        props.detailData?.source_type === 's3'
-      ) {
-        // 数据库、本地文件、HDFS、S3类型：dest_path直接是节点ID
-        pathId = rest.dest_path;
-      } else {
-        // 其他类型：dest_path是数组，取最后一个元素
-        pathId = Array.isArray(rest.dest_path)
+      // 使用 selectedNodeId 作为路径ID
+      const pathId =
+        selectedNodeId ||
+        (Array.isArray(rest.dest_path)
           ? rest.dest_path.at(-1)
-          : rest.dest_path;
-      }
+          : rest.dest_path);
 
       console.log('最终的pathId (将作为dest_path_id传递):', pathId);
 
@@ -1062,90 +1058,35 @@ const Edit = (props) => {
         </FormItem>
         <FormItem
           label="载入位置："
-          field="dest_path_display"
+          field="dest_path"
+          labelAlign="right"
           rules={[{ required: true, message: '请选择载入位置' }]}
         >
-          <TreeSelect
+          <ComponentTree
             className="db-tree-select"
-            placeholder="Please select ..."
+            placeholder="请选择载入位置"
             allowClear
-            popupVisible={dropdownVisible}
-            onVisibleChange={setDropdownVisible}
-            value={treeSelectDisplayValue}
-            onChange={(value) => {
-              // 处理清除选择的情况
-              if (!value) {
+            value={selectedPath}
+            onChange={(val) => {
+              setSelectedPath(val as string);
+              if (!val) {
+                form.setFieldsValue({ dest_path: undefined });
+                setSelectedNodeId(null);
                 setSelectedTreeKeys([]);
-                setTreeSelectDisplayValue('');
-                setSelectedNodeType(undefined);
-                form.setFieldsValue({
-                  dest_path_display: undefined,
-                  dest_path: undefined
-                });
               }
             }}
-            dropdownMenuStyle={{
-              maxHeight: 300,
-              padding: 0,
-              overflow: 'hidden' // 防止外层出现滚动条
-            }}
-            dropdownRender={() => (
-              <ComponentTree
-                directoryData={directoryData}
-                onDirectoryDataChange={setDirectoryData}
-                selectedKeys={selectedTreeKeys}
-                // onSelect={handleSelect}
-                onPathChange={(path, nodeId, nodeData) => {
-                  console.log(
-                    '路径变化:',
-                    path,
-                    '节点ID:',
-                    nodeId,
-                    '节点数据:',
-                    nodeData
-                  );
-                  // 更新选中的keys
-                  const key =
-                    nodeId !== undefined && nodeId !== null
-                      ? String(nodeId)
-                      : undefined;
-                  setSelectedTreeKeys(key ? [key] : []);
-                  setSelectedNodeType(nodeData?.type_name);
-                  // 更新显示值
-                  setTreeSelectDisplayValue(path);
-                  // 设置两个字段：显示字段和隐藏的节点ID字段
-                  form.setFieldsValue({
-                    dest_path_display: path, // 显示完整路径
-                    dest_path: nodeId // 隐藏字段保存节点ID，用作dest_path_id
-                  });
-                  console.log(
-                    '表单字段已设置 - dest_path_display:',
-                    path,
-                    'dest_path:',
-                    nodeId
-                  );
-                  // 选择完成后关闭下拉框
-                  // 初始节点id是一个字符串， 生成成功后是number类型
-                  if (isNumber(nodeId)) {
-                    setDropdownVisible(false);
-                  }
-                }}
-                showAddTree={true}
-                enableRootAdd={true}
-                activeTab="src"
-                onDataRefresh={getdirectoryDataList}
-                dataSourceType={props.detailData?.source_type}
-                tableNameNames={props.detailData?.db_name}
-              />
-            )}
-          >
-            {/* {generatorTreeNodes(directoryData)} */}
-          </TreeSelect>
-        </FormItem>
-
-        {/* 隐藏字段保存节点ID用于后端提交 */}
-        <FormItem field="dest_path" style={{ display: 'none' }}>
-          <Input />
+            directoryData={directoryData}
+            onDirectoryDataChange={setDirectoryData}
+            onSelect={handleTreeSelect}
+            selectedKeys={selectedTreeKeys}
+            onPathChange={handlePathChange}
+            showAddTree={true}
+            enableRootAdd={true}
+            activeTab="src"
+            onDataRefresh={handleDataRefresh}
+            dataSourceType={props.detailData?.source_type}
+            tableNameNames={props.detailData?.db_name}
+          />
         </FormItem>
         {/* SQL处理选项 - 仅在数据库类型且目录节点为元数据时显示 */}
         {props.detailData?.source_type === 'db' &&

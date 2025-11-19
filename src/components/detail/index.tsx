@@ -52,6 +52,7 @@ import getFileIcon from '@/components/file-icon';
 import { PermissionWrapper } from '../PermissionGuard';
 import HitTest from '@/pages/dataMarket/components/configurationpage/hit-test';
 import { throttle } from 'lodash';
+import { FileType } from '@/utils/type';
 const { Title, Text } = Typography;
 const { TabPane } = Tabs;
 
@@ -89,6 +90,82 @@ interface TableColumn {
   name: string;
   cn_name: string;
 }
+
+enum FileStatusType {
+  success = 'success',
+  fail = 'fail'
+}
+
+const filterFileTypes = [
+  {
+    text: FileType.pdf,
+    value: FileType.pdf
+  },
+  {
+    text: FileType.ppt,
+    value: FileType.ppt
+  },
+  {
+    text: FileType.pptx,
+    value: FileType.pptx
+  },
+  {
+    text: FileType.txt,
+    value: FileType.txt
+  },
+  {
+    text: FileType.md,
+    value: FileType.md
+  },
+  {
+    text: FileType.doc,
+    value: FileType.doc
+  },
+  {
+    text: FileType.docx,
+    value: FileType.docx
+  },
+  {
+    text: FileType.jpg,
+    value: FileType.jpg
+  },
+  {
+    text: FileType.png,
+    value: FileType.png
+  },
+  {
+    text: FileType.jpeg,
+    value: FileType.jpeg
+  },
+  {
+    text: FileType.wav,
+    value: FileType.wav
+  },
+  {
+    text: FileType.mp3,
+    value: FileType.mp3
+  },
+  {
+    text: FileType.aac,
+    value: FileType.aac
+  },
+  {
+    text: FileType.flac,
+    value: FileType.flac
+  },
+  {
+    text: FileType.mp4,
+    value: FileType.mp4
+  },
+  {
+    text: FileType.mov,
+    value: FileType.mov
+  },
+  {
+    text: FileType.mkv,
+    value: FileType.mkv
+  }
+];
 
 const countWidth = (count: number) => {
   if (count > 4) {
@@ -299,16 +376,28 @@ const versionColumns: any[] = [
     dataIndex: 'type',
     width: 226,
     filters: [
-      { text: '数据导入', value: 1 },
-      { text: '用户手动修改', value: 2 },
-      { text: '工作流修改', value: 3 }
+      { text: '手动创建', value: 1 },
+      { text: '手动编辑', value: 2 },
+      { text: 'SQL脚本创建', value: 3 },
+      { text: 'SQL脚本覆盖更新', value: 4 },
+      { text: 'PySpark脚本创建', value: 5 },
+      { text: 'PySpark脚本覆盖更新', value: 6 },
+      { text: '工作流创建', value: 7 },
+      { text: '工作流增量更新', value: 8 },
+      { text: '工作流覆盖更新', value: 9 }
     ],
     onFilter: (value: number, record: any) => record.type === value,
     render: (type: number) => {
       const typeMap = {
-        1: '数据导入',
-        2: '用户手动修改',
-        3: '工作流修改'
+        1: '手动创建',
+        2: '手动编辑',
+        3: 'SQL脚本创建',
+        4: 'SQL脚本覆盖更新',
+        5: 'PySpark脚本创建',
+        6: 'PySpark脚本覆盖更新',
+        7: '工作流创建',
+        8: '工作流增量更新',
+        9: '工作流覆盖更新'
       };
       return <div style={{ whiteSpace: 'nowrap' }}>{typeMap[type] || '-'}</div>;
     }
@@ -531,71 +620,165 @@ const DatasetDetail = (props: {
 
   const [isModalVisible, setIsModalVisible] = React.useState(false); // 防止重复弹窗
   const [isHiddenBaseInfo, setIsHiddenBaseInfo] = React.useState(false); // 基础信息是否隐藏
+  // 区分是否点击按钮清空搜索框
+  const [isClickClear, setIsClickClear] = React.useState(false);
+  // 初始化筛选的值
+  const [sortValue, setSortValue] = React.useState({
+    sorter: {
+      field: 'file_size',
+      direction: ''
+    },
+    filters: {
+      file_type: [] as string[],
+      status: [] as string[]
+    }
+  });
   const lastScrollTop = React.useRef(0);
 
   // 数据内容文件表格列定义
-  const contentFileColumns = [
-    {
-      title: '文件名称',
-      dataIndex: 'file_name',
-      width: 300,
-      render: (_, record) => (
-        <EllipsisPopover value={record.file_name || '-'} isEdit={false} />
-      )
-    },
-    {
-      title: '文件类型',
-      dataIndex: 'file_type',
-      width: 100,
-      filter: [],
-      render: (_, record) => (
-        <div>
-          {getFileIcon(record.file_type)} {record.file_type}
-        </div>
-      )
-    },
-    {
-      title: '文件大小',
-      dataIndex: 'file_size',
-      width: 100,
-      sorter: true, // 启用排序功能，但不提供排序函数
-      render: (_, record) => <span>{formatFileSize(record.file_size)}</span>
-    },
-    {
-      title: '分段数',
-      dataIndex: 'segment_count',
-      width: 100,
-      render: (_, record) => <span>{record.segment_count}</span>
-    },
-    {
-      title: '状态',
-      dataIndex: 'status',
-      width: 100,
-      filter: [],
-      render: (_, record) => <span>{record.status}</span>
-    },
-    {
-      title: '操作',
-      dataIndex: 'operate',
-      width: 100,
-      render: (_, record) => (
-        <div className="flex">
-          <Button
-            type="text"
-            className="pl-0"
-            onClick={() =>
-              handleGoToSegmentList(record.id, record.bucket_name, record.path)
-            }
-          >
-            分段列表
-          </Button>
-          <Button type="text" onClick={() => {}}>
-            删除
-          </Button>
-        </div>
-      )
-    }
-  ];
+  const contentFileColumns =
+    datasetDetail?.storage_type === StorageType.vector
+      ? [
+          {
+            title: '文件名称',
+            dataIndex: 'file_name',
+            width: 250,
+            render: (_, record) => (
+              <EllipsisPopover value={record.file_name || '-'} isEdit={false} />
+            )
+          },
+          {
+            title: '文件类型',
+            dataIndex: 'file_type',
+            width: 130,
+            filters: filterFileTypes,
+            render: (_, record) => (
+              <div>
+                {getFileIcon(record.file_type)} {record.file_type}
+              </div>
+            )
+          },
+          {
+            title: '文件大小',
+            dataIndex: 'file_size',
+            width: 100,
+            sorter: true, // 启用排序功能，但不提供排序函数
+            render: (_, record) => (
+              <span>{formatFileSize(record.file_size)}</span>
+            )
+          },
+          {
+            title: '分段数',
+            dataIndex: 'segment_count',
+            width: 100,
+            render: (_, record) => <span>{record.segment_count}</span>
+          },
+          {
+            title: '状态',
+            dataIndex: 'status',
+            width: 150,
+            filters: [
+              {
+                text: '处理成功',
+                value: FileStatusType.success
+              },
+              {
+                text: '处理失败',
+                value: FileStatusType.fail
+              }
+            ],
+            render: (_, record) => (
+              <div style={{ display: 'flex', alignItems: 'center' }}>
+                <div
+                  style={{
+                    width: '8px',
+                    height: '8px',
+                    backgroundColor:
+                      record.status === FileStatusType.success
+                        ? '#10B981'
+                        : '#EF4444',
+                    borderRadius: '50%',
+                    marginRight: '5px'
+                  }}
+                ></div>
+                <span>
+                  {record.status === FileStatusType.success
+                    ? '处理成功'
+                    : '处理失败'}
+                </span>
+                <Button type="text" className="ml-[8px] pl-0">
+                  重试
+                </Button>
+              </div>
+            )
+          },
+          {
+            title: '操作',
+            dataIndex: 'operate',
+            width: 100,
+            render: (_, record) => (
+              <div className="flex">
+                <Button
+                  type="text"
+                  className="pl-0"
+                  onClick={() =>
+                    handleGoToSegmentList(
+                      record.id,
+                      record.bucket_name,
+                      record.path
+                    )
+                  }
+                >
+                  分段列表
+                </Button>
+                <Button type="text" onClick={() => {}}>
+                  删除
+                </Button>
+              </div>
+            )
+          }
+        ]
+      : [
+          {
+            title: 'ID',
+            dataIndex: 'id',
+            width: 80
+          },
+          {
+            title: '文件名称',
+            dataIndex: 'file_name',
+            width: 300,
+            render: (_, record) => (
+              <EllipsisPopover value={record.file_name || '-'} isEdit={false} />
+            )
+          },
+          {
+            title: '文件类型',
+            dataIndex: 'file_type',
+            width: 100,
+            render: (_, record) => (
+              <div>
+                {getFileIcon(record.file_type)} {record.file_type}
+              </div>
+            )
+          },
+          {
+            title: '文件大小',
+            dataIndex: 'file_size',
+            width: 100,
+            render: (_, record) => (
+              <span>{formatFileSize(record.file_size)}</span>
+            )
+          },
+          {
+            title: '修改时间',
+            dataIndex: 'file_modify_time',
+            width: 180,
+            render: (_, record) => (
+              <span>{formatDate(record.file_modify_time)}</span>
+            )
+          }
+        ];
 
   useEffect(() => {
     const container = document.querySelector('.layout-detail');
@@ -603,9 +786,13 @@ const DatasetDetail = (props: {
     const handleScroll = (event) => {
       const currentScrollTop = container.scrollTop;
 
-      if (container.scrollTop > 20 && !isHiddenBaseInfo) {
+      if (event.deltaY > 0 && !isHiddenBaseInfo) {
         setIsHiddenBaseInfo(true);
-      } else if (currentScrollTop === 0 && isHiddenBaseInfo) {
+      } else if (
+        currentScrollTop === 0 &&
+        event.deltaY < 0 &&
+        isHiddenBaseInfo
+      ) {
         setIsHiddenBaseInfo(false);
         event.preventDefault();
       }
@@ -616,14 +803,28 @@ const DatasetDetail = (props: {
     const throttledHandleScroll = throttle(handleScroll, 100);
 
     // 监听滚轮事件
-    container.addEventListener('scroll', handleScroll, { passive: false });
+    container.addEventListener('wheel', handleScroll, { passive: false });
 
     // 在组件卸载时移除监听器
     return () => {
-      container.removeEventListener('scroll', handleScroll);
+      container.removeEventListener('wheel', handleScroll);
       throttledHandleScroll.cancel(); // 清除节流计时器
     };
   }, [isHiddenBaseInfo]);
+
+  useEffect(() => {
+    if (isClickClear) {
+      fetchDatasetContents();
+      setIsClickClear(false);
+    }
+  }, [isClickClear]);
+
+  useEffect(() => {
+    if (sortValue.sorter || sortValue.filters) {
+      setCurrentPage(1);
+      fetchDatasetContents();
+    }
+  }, [sortValue]);
 
   React.useEffect(() => {
     //@ts-expect-error
@@ -1137,76 +1338,49 @@ const DatasetDetail = (props: {
   const fetchDatasetContents = () => {
     if (!datasetDetail || !id) return Promise.resolve();
 
-    if (datasetDetail.storage_type === StorageType.vector) {
-      const params = {
-        id: id,
-        version_id: datasetDetail.latest_version,
-        page: fileCurrentPage,
-        limit: filePageSize
-      };
-      return getDataContentFileList(params)
-        .then((res) => {
-          if (res.status !== 200) {
-            Message.error('获取内容数据失败');
-            return;
+    const params = {
+      id: id,
+      version_id: datasetDetail.latest_version,
+      page: fileCurrentPage,
+      limit: filePageSize,
+      storage_type: datasetDetail.storage_type,
+      name: searchValue,
+      format_list: sortValue.filters?.file_type || [],
+      status_list: sortValue.filters?.status || [],
+      order_by: sortValue.sorter?.field || 'file_size',
+      order:
+        sortValue.sorter?.direction === 'ascend'
+          ? 'asc'
+          : sortValue.sorter?.direction === 'descend'
+            ? 'desc'
+            : ''
+    };
+    return getDataContentFileList(params)
+      .then((res) => {
+        if (res.status !== 200) {
+          Message.error('获取内容数据失败');
+          return;
+        }
+        if (res.data) {
+          if (datasetDetail.storage_type === StorageType.jsonl) {
+            setContentData(res.data?.list || []);
+            setContentColumnslist(res.data?.field_names || []);
+            setIdName(res.data?.id_name || '');
+            setTotal(res.data?.total || 0);
+            setContentDatabackup(res.data?.list || []);
+          } else if (datasetDetail.storage_type === StorageType.table) {
+            setContentTableColumnsList(res.data?.columns || []);
+            setContentTableData(res.data?.data || []);
+          } else {
+            setContentFileData(res.data?.list || []);
+            setFileTotal(res.data?.total || 0);
           }
-          if (res.data) {
-            setContentFileData(res.data.list || []);
-            setFileTotal(res.data.total);
-          }
-        })
-        .catch((err) => {
-          console.error('获取数据集内容失败:', err);
-          Message.error('加载数据失败');
-        });
-    } else if (datasetDetail.storage_type === StorageType.jsonl) {
-      const params: any = {
-        id: id,
-        page: currentPage,
-        limit: pageSize,
-        keyword: actualSearchValue || undefined,
-        version_id: datasetDetail.latest_version
-      };
-
-      return getDatasetContents(params)
-        .then((res) => {
-          if (res.status !== 200) {
-            Message.error('获取内容数据失败');
-            return;
-          }
-          if (res.data) {
-            setContentData(res.data.list || []);
-            setContentColumnslist(res.data.field_names || []);
-            setIdName(res.data.id_name || '');
-            setTotal(res.data.total || 0);
-            setContentDatabackup(res.data.list || []);
-          }
-        })
-        .catch((err) => {
-          console.error('获取数据集内容失败:', err);
-          Message.error('加载数据失败');
-        });
-    } else {
-      const params = {
-        id: Number(id),
-        version_id: datasetDetail.latest_version
-      };
-      return getDataContentTableList(params)
-        .then((res) => {
-          if (res.status !== 200) {
-            Message.error('获取内容数据失败');
-            return;
-          }
-          if (res.data) {
-            setContentTableColumnsList(res.data.columns || []);
-            setContentTableData(res.data.data || []);
-          }
-        })
-        .catch((err) => {
-          console.error('获取数据集内容失败:', err);
-          Message.error('加载数据失败');
-        });
-    }
+        }
+      })
+      .catch((err) => {
+        console.error('获取数据集内容失败:', err);
+        Message.error('加载数据失败');
+      });
   };
 
   // 更新表格列配置 - 只在编辑状态变化时执行
@@ -1585,43 +1759,7 @@ const DatasetDetail = (props: {
             // setCurrentPage(1);
           }}
         >
-          {datasetDetail?.storage_type === StorageType.vector ? (
-            <TabPane key="content" title="文件列表">
-              <Table
-                columns={contentFileColumns}
-                data={contentFileData}
-                pagination={false}
-                rowKey="id"
-                noDataElement={noDataElement({ description: '暂无数据' })}
-                scroll={{ x: 'max-content' }}
-                border={false}
-              />
-              <div className="pagination-wrapper">
-                <Pagination
-                  disabled={updateStatus}
-                  style={{
-                    float: 'right'
-                  }}
-                  current={fileCurrentPage}
-                  pageSize={filePageSize}
-                  total={fileTotal}
-                  onChange={(filePage) => {
-                    setFileCurrentPage(filePage);
-                  }}
-                  onPageSizeChange={(filePageSize) => {
-                    setFilePageSize(filePageSize);
-                    setFileCurrentPage(1);
-                  }}
-                  showTotal={(total, range) =>
-                    `第 ${range[0]}-${range[1]} 条，共 ${total} 条数据`
-                  }
-                  sizeOptions={[10, 20, 50, 100]}
-                  showJumper
-                  sizeCanChange={true}
-                />
-              </div>
-            </TabPane>
-          ) : datasetDetail?.storage_type === StorageType.jsonl ? (
+          {datasetDetail?.storage_type === StorageType.jsonl ? (
             <TabPane key="content" title="文件列表">
               {/* 搜索系统 */}
               <div
@@ -1807,7 +1945,7 @@ const DatasetDetail = (props: {
                 noDataElement({ description: '暂无数据' })
               )}
             </TabPane>
-          ) : (
+          ) : datasetDetail?.storage_type === StorageType.table ? (
             // 数据库表数据内容
             <TabPane key="content" title="文件列表">
               <div className="table-scroll-container">
@@ -1817,6 +1955,79 @@ const DatasetDetail = (props: {
                   pagination={false}
                   rowKey="id"
                   border={false}
+                />
+              </div>
+            </TabPane>
+          ) : (
+            <TabPane key="content" title="文件列表">
+              {datasetDetail?.storage_type === StorageType.vector && (
+                <Input.Search
+                  allowClear
+                  className="mb-[12px] block w-[260px]"
+                  placeholder="输入文件名称"
+                  value={searchValue}
+                  onChange={(value) => setSearchValue(value)}
+                  onSearch={() => {
+                    setFileCurrentPage(1);
+                    fetchDatasetContents();
+                  }}
+                  onClear={() => {
+                    setSearchValue('');
+                    setFileCurrentPage(1);
+                    setIsClickClear(true);
+                  }}
+                  onPressEnter={() => {
+                    setFileCurrentPage(1);
+                    fetchDatasetContents();
+                  }}
+                />
+              )}
+              <Table
+                columns={contentFileColumns}
+                data={contentFileData}
+                pagination={false}
+                rowKey="id"
+                noDataElement={noDataElement({ description: '暂无数据' })}
+                scroll={{ x: 'max-content' }}
+                border={false}
+                onChange={(pagination, sorter, filters) => {
+                  const singleSorter = Array.isArray(sorter)
+                    ? sorter[0]
+                    : sorter;
+                  setSortValue({
+                    sorter: {
+                      field: singleSorter?.field as string,
+                      direction: singleSorter.direction as string
+                    },
+                    filters: {
+                      file_type: filters.file_type || [],
+                      status: filters.status || []
+                    }
+                  });
+                }}
+              />
+              <div className="pagination-wrapper">
+                <Pagination
+                  disabled={updateStatus}
+                  style={{
+                    float: 'right'
+                  }}
+                  current={fileCurrentPage}
+                  pageSize={filePageSize}
+                  total={fileTotal}
+                  onChange={(filePage) => {
+                    setFileCurrentPage(filePage);
+                  }}
+                  onPageSizeChange={(filePageSize) => {
+                    setFilePageSize(filePageSize);
+                    setFileCurrentPage(1);
+                  }}
+                  showTotal={(total, range) =>
+                    `第 ${range[0]}-${range[1]} 条，共 ${total} 条数据`
+                  }
+                  sizeOptions={[10, 20, 50, 100]}
+                  showJumper
+                  sizeCanChange={true}
                 />
               </div>
             </TabPane>

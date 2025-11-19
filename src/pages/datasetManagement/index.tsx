@@ -350,11 +350,11 @@ const columns = (
     width: 120,
     filterIcon: <IconFilter />,
     filters: [
-      { text: '标注', value: '' },
+      { text: '标注', value: 5 },
       { text: '工作流', value: 2 },
       { text: 'pyspark', value: 3 },
       { text: 'sql', value: 4 },
-      { text: '数据目录', value: 5 }
+      { text: '数据目录', value: 1 }
     ],
     filteredValue: selectedSourceFilters,
     filterMultiple: true
@@ -590,6 +590,7 @@ const columns = (
             </Button> */}
           <Button
             type="text"
+            disabled={record.status !== datasetStatus.normal}
             onClick={() => {
               record.status === datasetStatus.normal ||
               record.status === datasetStatus.version_updating ||
@@ -803,9 +804,13 @@ const DatasetManagement: React.FC = () => {
         setIsSticky(stickyTop === 86);
       }
 
-      if (container.scrollTop > 20 && !isHiddenBaseInfo) {
+      if (event.deltaY > 0 && !isHiddenBaseInfo) {
         setIsHiddenBaseInfo(true);
-      } else if (currentScrollTop === 0 && isHiddenBaseInfo) {
+      } else if (
+        currentScrollTop === 0 &&
+        event.deltaY < 0 &&
+        isHiddenBaseInfo
+      ) {
         setIsHiddenBaseInfo(false);
         setIsSticky(false);
         event.preventDefault();
@@ -817,13 +822,13 @@ const DatasetManagement: React.FC = () => {
     const throttledHandleScroll = throttle(handleScroll, 100);
 
     // 监听滚轮事件
-    container.addEventListener('scroll', throttledHandleScroll, {
+    container.addEventListener('wheel', throttledHandleScroll, {
       passive: false
     });
 
     // 在组件卸载时移除监听器
     return () => {
-      container.removeEventListener('scroll', throttledHandleScroll);
+      container.removeEventListener('wheel', throttledHandleScroll);
       throttledHandleScroll.cancel(); // 清除节流计时器
     };
   }, [isHiddenBaseInfo]);
@@ -915,11 +920,7 @@ const DatasetManagement: React.FC = () => {
         Message.success('移动数据集成功');
         setSelectedRowKeys([]);
         setSelectedRows([]);
-        getDatasetList().then((res) => {
-          if (res.code === 0) {
-            setDatasetList(res.data?.dataset_list || []);
-          }
-        });
+        fetchDatasetList();
       } else {
         Message.error(res.msg || '移动数据集失败');
       }
@@ -1166,7 +1167,7 @@ const DatasetManagement: React.FC = () => {
 
     // 添加来源过滤参数
     if (selectedSourceFilters.length > 0) {
-      params.src_name = selectedSourceFilters;
+      params.src_list = selectedSourceFilters;
     }
 
     // 添加标签过滤参数
@@ -1855,7 +1856,7 @@ const DatasetManagement: React.FC = () => {
               {datasetSceneOption.map((item) => (
                 <Select.Option key={item.id} value={item.id}>
                   <div className="flex flex-col">
-                    <div className="text-[14px] leading-[22px]">
+                    <div className="mt-[2px] text-[14px] leading-[22px]">
                       {item.name}
                     </div>
                     <EllipsisPopover
