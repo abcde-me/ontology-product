@@ -7,7 +7,6 @@ import {
   Select,
   Tooltip,
   Tag,
-  TreeSelect,
   Collapse,
   Popover,
   Tabs,
@@ -22,7 +21,6 @@ import React, {
   useCallback,
   useMemo
 } from 'react';
-import Styles from '../list/index.module.scss';
 import SchedulerRun from '../../../components/scheduler-run';
 import {
   addLoad,
@@ -318,8 +316,8 @@ export default function DataLoadCreate() {
   const [selectedTreeKeys, setSelectedTreeKeys] = useState<string[]>([]);
   const [uploadedFiles, setUploadedFiles] = useState<FileData[]>([]);
   const [isFileUploading, setIsFileUploading] = useState(false);
-  const [dropdownVisible, setDropdownVisible] = useState(false);
   const [directoryData, setDirectoryData] = useState<TreeNodeData[]>([]);
+  const [selectedPath, setSelectedPath] = useState<string>('');
   const [tableList, setTableList] = useState<string[]>([]);
   const [sqlContent, setSqlContent] = useState<string>('');
   const [checkStatus, setCheckStatus] = useState<CheckSQLStatus>(
@@ -440,9 +438,8 @@ export default function DataLoadCreate() {
       try {
         const res = await getdetailList({ id: connectorId });
 
-        if (sourceType === SOURCE_TYPES.DB) {
-          setTableNames('');
-        }
+        // 移除这里的 setTableNames('')，因为 useEffect 中已经处理了重置逻辑
+        // 如果在这里重置，可能会在 getTableName 返回结果后覆盖它
 
         setTableList(res?.data?.table_name || []);
       } catch (error) {
@@ -519,7 +516,7 @@ export default function DataLoadCreate() {
         form.setFieldsValue({ connector_id: 'local_files_uploaded' });
       }
     },
-    [form, sourceType, getTableName]
+    [form, sourceType]
   );
 
   // 处理文件删除
@@ -555,14 +552,27 @@ export default function DataLoadCreate() {
   );
 
   // 切换数据源类型
-  const handleSourceTypeChange = useCallback((e: any) => {
-    const newSourceType = e.target.value;
-    console.log('切换数据源类型到:', newSourceType);
-    setDirectoryData([]);
-    setTableList([]);
-    setConnectName([]);
-    setSourceType(newSourceType);
-  }, []);
+  const handleSourceTypeChange = useCallback(
+    (value: string) => {
+      console.log('切换数据源类型到:', value);
+      setDirectoryData([]);
+      setTableList([]);
+      setConnectName([]);
+      setSourceType(value);
+      // 清空绑定连接器
+      form.setFieldsValue({ connector_id: undefined });
+      // 清空相关状态
+      setTableNames('');
+      setSqlContent('');
+      setCheckStatus(CheckSQLStatus.NONE);
+      setCheckMessage('');
+      form.setFieldsValue({
+        table_name: undefined,
+        sql_process_enabled: 'disable'
+      });
+    },
+    [form]
+  );
 
   // 构建表单数据
   const buildFormData = useCallback(
@@ -766,44 +776,43 @@ export default function DataLoadCreate() {
     (path: string, nodeId?: string | number, nodeData?: TreeNodeData) => {
       console.log('路径变化:', path, '节点ID:', nodeId, '节点数据:', nodeData);
       setSelectedNodeId(nodeId || null);
+      setSelectedPath(path);
       form.setFieldsValue({ dest_path: path ? [path] : undefined });
 
       setSelectedNodeType(nodeData?.type_name);
 
       if (sourceType === SOURCE_TYPES.DB) {
+        // 当载入位置变化时，重置选择抽取的表
+        form.setFieldsValue({ table_name: undefined });
+        form.setFieldsValue({ db_name: nodeData?.name });
+
         const currentConnectorId = form.getFieldValue('connector_id');
         const typeName = nodeData?.type_name;
 
-        if (!currentConnectorId) {
-          setTableNames('');
-        } else if (typeName === 'db' || typeName === 'metadata') {
-          const generateType = typeName === 'metadata' ? 'metadata' : 'db';
+        // if (!currentConnectorId) {
+        //   setTableNames('');
+        // } else if (typeName === 'db' || typeName === 'metadata') {
+        //   const generateType = typeName === 'metadata' ? 'metadata' : 'db';
 
-          void (async () => {
-            try {
-              const tableNameRes = await getTableName({
-                connector_id: currentConnectorId,
-                generate_type: generateType
-              });
-              setTableNames(tableNameRes?.data || '');
-            } catch (error) {
-              console.error('生成数据库名称失败:', error);
-              setTableNames('');
-              Message.error('生成数据库名称失败，请重试');
-            }
-          })();
-        } else {
-          setTableNames('');
-        }
-      } else {
-        setTableNames('');
-      }
-
-      if (nodeId !== undefined && isNumber(nodeId)) {
-        setDropdownVisible(false);
+        //   void (async () => {
+        //     try {
+        //       const tableNameRes = await getTableName({
+        //         connector_id: currentConnectorId,
+        //         generate_type: generateType
+        //       });
+        //       setTableNames(tableNameRes?.data || '');
+        //     } catch (error) {
+        //       console.error('生成数据库名称失败:', error);
+        //       setTableNames('');
+        //       Message.error('生成数据库名称失败，请重试');
+        //     }
+        //   })();
+        // } else {
+        //   setTableNames('');
+        // }
       }
     },
-    [form, sourceType, getTableName]
+    [form, sourceType]
   );
 
   // 下拉框过滤选项
@@ -900,13 +909,49 @@ export default function DataLoadCreate() {
       if (sourceType === SOURCE_TYPES.DB) {
         form.setFieldsValue({ table_name: undefined });
         setTableNames('');
+
+        // 如果载入位置已经有值，主动请求 getTableName
+        if (selectedPath && selectedNodeType) {
+          const typeName = selectedNodeType;
+          if (typeName === 'db' || typeName === 'metadata') {
+            const generateType = typeName === 'metadata' ? 'metadata' : 'db';
+
+            void (async () => {
+              try {
+                const tableNameRes = await getTableName({
+                  connector_id: connectorId,
+                  generate_type: generateType
+                });
+                if (tableNameRes?.status === 200) {
+                  setTableNames(tableNameRes?.data || '');
+                } else {
+                  setTableNames('');
+                  Message.error(
+                    tableNameRes?.message ?? '生成数据库名称失败，请重试'
+                  );
+                }
+              } catch (error) {
+                console.error('生成数据库名称失败:', error);
+                setTableNames('');
+                Message.error('生成数据库名称失败，请重试');
+              }
+            })();
+          }
+        }
       } else {
         setTableNames('');
       }
     } else {
       setTableNames('');
     }
-  }, [connectorId, sourceType, form, getConnectorDetailList]);
+  }, [
+    connectorId,
+    sourceType,
+    form,
+    getConnectorDetailList,
+    selectedPath,
+    selectedNodeType
+  ]);
 
   // 监听载入位置变化，用于控制SQL处理选项的显示
   const destPath = Form.useWatch('dest_path', form);
@@ -978,7 +1023,8 @@ export default function DataLoadCreate() {
     return () => {
       cancelled = true;
     };
-  }, [sourceType, form, getdirectoryDataList]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sourceType]); // 只监听 sourceType 变化，form 和 getdirectoryDataList 是稳定的引用
 
   // MutationObserver 清理
   useEffect(() => {
@@ -1107,9 +1153,8 @@ export default function DataLoadCreate() {
             labelAlign="right"
             rules={[{ required: true, message: '请选择数据源类型' }]}
             initialValue={SOURCE_TYPES.S3}
-            onChange={handleSourceTypeChange}
           >
-            <RadioGroup>
+            <RadioGroup onChange={handleSourceTypeChange}>
               <Radio value={SOURCE_TYPES.S3}>对象存储(S3)</Radio>
               <Radio value={SOURCE_TYPES.HDFS}>HDFS</Radio>
               <Radio value={SOURCE_TYPES.DB}>数据库</Radio>
@@ -1180,32 +1225,30 @@ export default function DataLoadCreate() {
               ) : null
             }
           >
-            <TreeSelect
+            <ComponentTree
               className="db-tree-select"
               placeholder="请选择载入位置"
               allowClear
-              popupVisible={dropdownVisible}
-              onVisibleChange={setDropdownVisible}
-              dropdownMenuStyle={{
-                maxHeight: 300,
-                padding: 0,
-                overflow: 'hidden'
+              value={selectedPath}
+              onChange={(val) => {
+                setSelectedPath(val as string);
+                if (!val) {
+                  form.setFieldsValue({ dest_path: undefined });
+                  setSelectedNodeId(null);
+                  setSelectedTreeKeys([]);
+                }
               }}
-              dropdownRender={() => (
-                <ComponentTree
-                  directoryData={directoryData}
-                  onDirectoryDataChange={setDirectoryData}
-                  onSelect={handleTreeSelect}
-                  selectedKeys={selectedTreeKeys}
-                  onPathChange={handlePathChange}
-                  showAddTree={true}
-                  enableRootAdd={true}
-                  activeTab="src"
-                  onDataRefresh={handleDataRefresh}
-                  dataSourceType={sourceType}
-                  tableNameNames={tableNames}
-                />
-              )}
+              directoryData={directoryData}
+              onDirectoryDataChange={setDirectoryData}
+              onSelect={handleTreeSelect}
+              selectedKeys={selectedTreeKeys}
+              onPathChange={handlePathChange}
+              showAddTree={true}
+              enableRootAdd={true}
+              activeTab="src"
+              onDataRefresh={handleDataRefresh}
+              dataSourceType={sourceType}
+              tableNameNames={tableNames}
             />
           </FormItem>
 

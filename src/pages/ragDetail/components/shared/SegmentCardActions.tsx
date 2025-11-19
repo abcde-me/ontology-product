@@ -1,5 +1,8 @@
 import React from 'react';
 import { useRagDetailStore, type Segment } from '../../store/ragDetailStore';
+import SegDetailSvg from '@/assets/rag/seg-detail.svg';
+import SourceLogSvg from '@/assets/rag/source-log.svg';
+import EditSvg from '@/assets/rag/edit.svg';
 
 interface SegmentCardActionsProps {
   segment: Segment;
@@ -17,7 +20,8 @@ const SegmentCardActions: React.FC<SegmentCardActionsProps> = ({
     segmentDrawerSegmentId
   } = useRagDetailStore();
 
-  const buttonBaseClass = 'px-3 py-1 text-xs rounded transition-all border';
+  const buttonBaseClass =
+    'px-3 py-1 text-xs rounded transition-all border flex items-center gap-2';
   const getButtonClass = (action: 'edit' | 'detail' | 'trace') => {
     // 检查当前分段的 drawer 是否打开
     const isDrawerOpenForThisSegment =
@@ -44,7 +48,8 @@ const SegmentCardActions: React.FC<SegmentCardActionsProps> = ({
         className={getButtonClass('edit')}
         title="编辑分段"
       >
-        编辑分段
+        <EditSvg />
+        <span className="font-medium text-[#1E293B]">编辑分段</span>
       </button>
 
       <button
@@ -55,7 +60,8 @@ const SegmentCardActions: React.FC<SegmentCardActionsProps> = ({
         className={getButtonClass('detail')}
         title="分段详情"
       >
-        分段详情
+        <SegDetailSvg />
+        <span className="font-medium text-[#1E293B]">分段详情</span>
       </button>
 
       <button
@@ -66,7 +72,8 @@ const SegmentCardActions: React.FC<SegmentCardActionsProps> = ({
         className={getButtonClass('trace')}
         title="溯源日志"
       >
-        溯源日志
+        <SourceLogSvg />
+        <span className="font-medium text-[#1E293B]">溯源日志</span>
       </button>
     </div>
   );

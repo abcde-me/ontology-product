@@ -36,7 +36,7 @@ const Header: React.FC = () => {
   };
 
   return (
-    <div className="flex h-[56px] items-center bg-[#F7F8FA] px-[20px]">
+    <div className="flex h-[56px] items-center px-[20px]">
       <BreadCrumbHeader list={breadcrumbItems} onArrowClick={handleBack} />
     </div>
   );

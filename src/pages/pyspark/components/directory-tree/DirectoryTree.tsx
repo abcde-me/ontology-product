@@ -379,9 +379,22 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
       }
       focusAndSelect();
     };
+    // 查找children 修改参数 showInput true
+    const updateValue = (arr, targetId, updateObj) => {
+      arr.forEach((item) => {
+        if (item.id === targetId) {
+          Object.assign(item, updateObj);
+        }
+        if (item.children && item.children.length > 0) {
+          updateValue(item.children, targetId, updateObj);
+        }
+      });
 
+      // return items;
+    };
     const handleEdit = (node: NodeProps) => {
       const currentName = node.dataRef?.name;
+      updateValue(treeData, node?.dataRef?.id, { showInput: true });
       const newTree = treeData?.map((n) => {
         if (String(n?.id) === String(node.dataRef?.id)) {
           return { ...n, dataRef: { ...n.dataRef, showInput: true } };
