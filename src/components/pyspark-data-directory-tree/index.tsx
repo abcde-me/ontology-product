@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { Tree } from '@arco-design/web-react';
 import DataCollection from './components/daset-tree';
 import SourceTree from './components/source-tree';
-import TargetTree from './components/target-tree';
 import FileIcon from './assets/file-icon.svg';
 import { DatasetListItem } from '@/types/datasetManagement';
 import './index.scss';
@@ -17,11 +16,6 @@ const directoryItems = [
     label: '源数据目录',
     icon: 'folder'
   },
-  // {
-  //   id: 'target',
-  //   label: '目标数据目录',
-  //   icon: 'folder'
-  // },
   {
     id: 'dataset',
     label: '数据集',
@@ -142,15 +136,6 @@ const DataDirectoryTree: React.FC<DataDirectoryTreeProps> = ({
           <SourceTree
             onBack={handleBack}
             onViewSourceDetail={handleSourceDetail}
-            onInsert={handleVolumeInsert}
-            isEditorFocused={getIsEditorFocused?.() ?? false}
-          />
-        );
-      case 'target':
-        return (
-          <TargetTree
-            onBack={handleBack}
-            onViewTargetDetail={handleTargetDetail}
             onInsert={handleVolumeInsert}
             isEditorFocused={getIsEditorFocused?.() ?? false}
           />
