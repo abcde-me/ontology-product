@@ -246,7 +246,7 @@ export const ModaForgeResourceEndpoints = {
   // 查询知识库分块列表
   ListKnowledgeChunks: PrefixRagV2 + '/ListKnowledgeChunks',
   // 查询分块详情
-  GetKnowledgeChunk: PrefixRag + '/GetKnowledgeChunk',
+  GetKnowledgeChunk: PrefixRagV2 + '/GetKnowledgeChunk',
   // 编辑分块内容
   UpdateKnowledgeChunk: PrefixRag + '/UpdateKnowledgeChunk',
   // 编辑分块元素信息
@@ -255,7 +255,7 @@ export const ModaForgeResourceEndpoints = {
   UpdateKnowledgeChunkEnhancement:
     PrefixRag + '/UpdateKnowledgeChunkEnhancement',
   // 查询分块溯源日志
-  GetKnowledgeChunkTraceLog: PrefixRag + '/GetKnowledgeChunkTraceLog',
+  GetKnowledgeChunkTraceLog: PrefixRagV2 + '/GetKnowledgeChunkTrace',
   // 运行命中测试
   RunKnowledgeHitTesting: PrefixRag + '/RunKnowledgeHitTesting',
   // 查询命中测试历史记录
