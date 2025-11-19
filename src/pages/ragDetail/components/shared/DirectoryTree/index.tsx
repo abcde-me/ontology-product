@@ -3,7 +3,7 @@
  * 显示分层级的目录树，最多5层
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useRef, useEffect, useState } from 'react';
 import { Tree, Tooltip } from '@arco-design/web-react';
 import type { TreeProps } from '@arco-design/web-react/es/Tree';
 import { DirectoryNode } from '../../../types';
@@ -14,21 +14,49 @@ interface DirectoryTreeProps {
   nodes: DirectoryNode[];
 }
 
-// 自定义树节点标题组件，支持文本溢出省略和tooltip
+// 自定义树节点标题组件，只在文本溢出时显示 tooltip
 const TreeNodeTitle: React.FC<{ label: string }> = ({ label }) => {
-  return (
+  const textRef = useRef<HTMLDivElement>(null);
+  const [isOverflow, setIsOverflow] = useState(false);
+
+  useEffect(() => {
+    const checkOverflow = () => {
+      if (textRef.current) {
+        // 检查元素的滚动宽度是否大于可见宽度
+        const isTextOverflow =
+          textRef.current.scrollWidth > textRef.current.clientWidth;
+        setIsOverflow(isTextOverflow);
+      }
+    };
+
+    checkOverflow();
+
+    // 监听窗口大小变化，重新检查溢出状态
+    window.addEventListener('resize', checkOverflow);
+    return () => window.removeEventListener('resize', checkOverflow);
+  }, [label]);
+
+  const textElement = (
+    <div
+      ref={textRef}
+      style={{
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+        whiteSpace: 'nowrap',
+        width: '100%'
+      }}
+    >
+      {label}
+    </div>
+  );
+
+  // 只在溢出时显示 Tooltip
+  return isOverflow ? (
     <Tooltip content={label} position="top">
-      <div
-        style={{
-          overflow: 'hidden',
-          textOverflow: 'ellipsis',
-          whiteSpace: 'nowrap',
-          width: '100%'
-        }}
-      >
-        {label}
-      </div>
+      {textElement}
     </Tooltip>
+  ) : (
+    textElement
   );
 };
 

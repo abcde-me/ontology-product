@@ -31,7 +31,7 @@ const CollapsibleNodePanel: React.FC<CollapsibleNodePanelProps> = ({
   const handleCopy = (data: any, section: 'input' | 'output') => {
     const jsonString = JSON.stringify(data, null, 2);
     navigator.clipboard.writeText(jsonString).then(() => {
-      Message.success(`已复制${section === 'input' ? '输入' : '输出'}数据`);
+      Message.success(`复制成功`);
     });
   };
 
