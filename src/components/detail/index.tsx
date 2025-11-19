@@ -376,16 +376,28 @@ const versionColumns: any[] = [
     dataIndex: 'type',
     width: 226,
     filters: [
-      { text: '数据导入', value: 1 },
-      { text: '用户手动修改', value: 2 },
-      { text: '工作流修改', value: 3 }
+      { text: '手动创建', value: 1 },
+      { text: '手动编辑', value: 2 },
+      { text: 'SQL脚本创建', value: 3 },
+      { text: 'SQL脚本覆盖更新', value: 4 },
+      { text: 'PySpark脚本创建', value: 5 },
+      { text: 'PySpark脚本覆盖更新', value: 6 },
+      { text: '工作流创建', value: 7 },
+      { text: '工作流增量更新', value: 8 },
+      { text: '工作流覆盖更新', value: 9 }
     ],
     onFilter: (value: number, record: any) => record.type === value,
     render: (type: number) => {
       const typeMap = {
-        1: '数据导入',
-        2: '用户手动修改',
-        3: '工作流修改'
+        1: '手动创建',
+        2: '手动编辑',
+        3: 'SQL脚本创建',
+        4: 'SQL脚本覆盖更新',
+        5: 'PySpark脚本创建',
+        6: 'PySpark脚本覆盖更新',
+        7: '工作流创建',
+        8: '工作流增量更新',
+        9: '工作流覆盖更新'
       };
       return <div style={{ whiteSpace: 'nowrap' }}>{typeMap[type] || '-'}</div>;
     }
