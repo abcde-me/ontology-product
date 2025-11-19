@@ -118,7 +118,7 @@ const TableSegmentCard: React.FC<TableSegmentCardProps> = ({
       {tableData && (
         <div className="mb-3 overflow-x-auto bg-white">
           <table
-            className={`border-collapse ${
+            className={`border-collapse border ${
               tableData.headers.length >= 4 ? '' : 'w-full'
             }`}
             style={
@@ -135,7 +135,7 @@ const TableSegmentCard: React.FC<TableSegmentCardProps> = ({
                 {tableData.headers.map((header, index) => (
                   <th
                     key={index}
-                    className="border border-[#E2E8F0] px-4 py-2 text-left text-sm font-semibold text-[#1E293B]"
+                    className="border-b border-[#E2E8F0] px-4 py-2 text-left text-sm font-semibold text-[#1E293B]"
                     style={
                       tableData.headers.length >= 4
                         ? { width: '200px', minWidth: '200px' }
@@ -162,7 +162,7 @@ const TableSegmentCard: React.FC<TableSegmentCardProps> = ({
                   {tableData.headers.map((header, colIndex) => (
                     <td
                       key={colIndex}
-                      className="border bg-white px-4 py-2 text-sm"
+                      className="border-b bg-white px-4 py-2 text-sm"
                       style={
                         tableData.headers.length >= 4
                           ? { width: '200px', minWidth: '200px' }
