@@ -350,11 +350,11 @@ const columns = (
     width: 120,
     filterIcon: <IconFilter />,
     filters: [
-      { text: '标注', value: 1 },
+      { text: '标注', value: 5 },
       { text: '工作流', value: 2 },
       { text: 'pyspark', value: 3 },
       { text: 'sql', value: 4 },
-      { text: '数据目录', value: 5 }
+      { text: '数据目录', value: 1 }
     ],
     filteredValue: selectedSourceFilters,
     filterMultiple: true
