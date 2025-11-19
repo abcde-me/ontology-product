@@ -1363,7 +1363,7 @@ const DatasetManagement: React.FC = () => {
         setDatasetSceneList(newSceneList);
         setDatasetSceneOption(res.data);
       } else {
-        console.error('数据集场景分类列表数据格式错误:', res);
+        Message.error(res.message || '数据获取失败');
         setDatasetSceneList([]);
       }
     });
