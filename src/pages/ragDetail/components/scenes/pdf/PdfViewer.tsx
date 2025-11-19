@@ -1,8 +1,7 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React from 'react';
 import { useRagDetailStore } from '../../../store/ragDetailStore';
 import PdfRenderer from './PdfRenderer';
 import { PDFCoordinate } from '../../../types';
-import { getFileBinaryData } from '@/api/modules/rag';
 
 interface PdfViewerProps {
   fileName?: string;
@@ -15,35 +14,20 @@ const PdfViewer: React.FC<PdfViewerProps> = ({
   highlightCoordinates,
   hideHeader = false
 }) => {
-  const { fileName: storeName, highlightedPdfCoordinates } =
-    useRagDetailStore();
-  const [pdfData, setPdfData] = useState<ArrayBuffer | null>(null);
-  const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    const loadPdf = async () => {
-      setLoading(true);
-      setPdfData(null);
-
-      try {
-        const response = await getFileBinaryData();
-        setPdfData(response as ArrayBuffer);
-      } catch (error) {
-        console.error('❌ 加载PDF失败:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadPdf();
-  }, []);
+  const {
+    fileName: storeName,
+    highlightedPdfCoordinates,
+    fileBinaryData,
+    fileBinaryDataLoading,
+    fileBinaryDataError
+  } = useRagDetailStore();
 
   const displayFileName = propFileName || storeName || 'Document.pdf';
 
   // 使用props传入的坐标或store中的坐标
   const coordinates = highlightCoordinates || highlightedPdfCoordinates;
 
-  if (loading) {
+  if (fileBinaryDataLoading) {
     return (
       <div className="flex h-full w-full items-center justify-center bg-gray-50">
         <div className="text-center">
@@ -53,7 +37,17 @@ const PdfViewer: React.FC<PdfViewerProps> = ({
     );
   }
 
-  if (!pdfData) {
+  if (fileBinaryDataError) {
+    return (
+      <div className="flex h-full w-full items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <p className="text-red-600">加载PDF失败: {fileBinaryDataError}</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!fileBinaryData) {
     return (
       <div className="flex h-full w-full items-center justify-center bg-gray-50">
         <div className="text-center">
@@ -77,7 +71,7 @@ const PdfViewer: React.FC<PdfViewerProps> = ({
       {/* PDF内容 */}
       <div className="flex-1 overflow-auto bg-[#F7F8FA]">
         <PdfRenderer
-          pdfData={pdfData}
+          pdfData={fileBinaryData}
           highlightCoordinates={coordinates}
           scale={1.3}
         />

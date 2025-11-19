@@ -64,6 +64,23 @@ module.exports = function (app) {
       })
     );
     app.use(
+      ['/aimdp-manager/api/v1'],
+      createProxyMiddleware({
+        target: 'https://m1.apifoxmock.com/m1/6509548-6210071-default',
+        changeOrigin: true,
+        secure: false,
+        logger: console,
+        pathRewrite: (path, req) => {
+          // todo 待删除 test
+          if (currentTarget === targets['test']) {
+            return path;
+          }
+
+          return req.baseUrl + req.url;
+        }
+      })
+    );
+    app.use(
       ['/metadata-service/api/v1'],
       createProxyMiddleware({
         target: 'http://10.252.216.16:30895',
