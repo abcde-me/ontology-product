@@ -5,7 +5,8 @@ import {
   Button,
   Space,
   Message,
-  Spin
+  Spin,
+  Tooltip
 } from '@arco-design/web-react';
 import { IconRefresh } from '@arco-design/web-react/icon';
 import { useRequest } from 'ahooks';
@@ -256,7 +257,7 @@ export default function MetaData() {
         {/* 标题和刷新按钮 */}
         <div className="mb-[12px] mt-[12px] flex items-center justify-between">
           <div className="text-[16px] font-bold">数据湖目录({total})</div>
-          <Space>
+          <Tooltip content="刷新">
             <Button
               type="outline"
               icon={<IconRefresh />}
@@ -267,7 +268,7 @@ export default function MetaData() {
                 padding: 0
               }}
             />
-          </Space>
+          </Tooltip>
         </div>
 
         {/* 表格 */}

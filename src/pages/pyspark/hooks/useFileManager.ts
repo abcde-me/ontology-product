@@ -167,13 +167,19 @@ export const useFileManager = (
         }
 
         const items =
-          rawPythonList?.data?.items.map((item) => {
+          rawPythonList?.data?.items.map((item: any) => {
+            // 给子级增加key
+            if (item?.children && item?.children?.length > 0) {
+              item.children = item.children.map((child) => ({
+                ...child,
+                key: String(child.id),
+                title: child.name
+              }));
+            }
             return {
               ...item,
               key: String(item.id),
-              title: item.name,
-              type: item.type,
-              children: item.type === PythonItemType.Directory ? [] : undefined
+              title: item.name
             };
           }) ?? [];
         setPythonList(items);
@@ -262,6 +268,8 @@ export const useFileManager = (
 
         if (renameRes.status !== 200) {
           Message.error(renameRes?.message ?? '重命名失败');
+          // 返回失败状态和原始名称
+          getRawPythonList(currentFolderId);
           return null;
         }
 
@@ -274,10 +282,12 @@ export const useFileManager = (
 
         // 刷新当前文件夹列表
         await getRawPythonList(currentFolderId);
-        return renameRes.data;
+        // 返回成功状态和数据
+        return { success: true, data: renameRes.data };
       } catch (error) {
         console.error('重命名失败:', error);
         Message.error('重命名失败');
+        getRawPythonList(currentFolderId);
         return null;
       }
     },

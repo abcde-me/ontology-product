@@ -2,6 +2,15 @@ import UAPI from '@/api';
 import { newTreeData } from '@/pages/ragDetail/utils/newTreeData';
 import { NewSegmentData } from '@/pages/ragDetail/utils/newSegmentData';
 
+// 获取原始文件二进制数据
+export function getFileBinaryData() {
+  return UAPI.RES.GetFileBinaryData({})
+    .get({})
+    .withConfig({ responseType: 'arraybuffer' })
+    .inRegion()
+    .do();
+}
+
 // 查询知识库文件列表
 export function ListKnowledgeDocuments(params) {
   return UAPI.RES.ListKnowledgeDocuments({}).post(params).inRegion().do();

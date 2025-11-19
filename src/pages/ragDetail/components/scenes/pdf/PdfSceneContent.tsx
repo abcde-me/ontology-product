@@ -1,4 +1,5 @@
 import React from 'react';
+import { Spin } from '@arco-design/web-react';
 import { useRagDetailStore } from '../../../store/ragDetailStore';
 import SegmentList from '../../shared/SegmentList';
 import DirectoryTree from '../../shared/DirectoryTree';
@@ -35,8 +36,9 @@ const PdfSceneContent: React.FC<PdfSceneContentProps> = ({
     return (
       <div className="flex h-full items-center justify-center">
         <div className="text-center">
-          <div className="mx-auto mb-4 h-12 w-12 animate-spin rounded-full border-b-2 border-blue-500"></div>
-          <p className="text-gray-600">加载中...</p>
+          <div className="flex h-[calc(100%-70px)] items-center justify-center">
+            <Spin />
+          </div>
         </div>
       </div>
     );
@@ -54,12 +56,7 @@ const PdfSceneContent: React.FC<PdfSceneContentProps> = ({
           className={`h-full flex-1 overflow-hidden bg-gray-50 ${!hasDirectory ? 'ml-4 rounded-bl-[20px]' : 'ml-4'} ${!showPdfViewer ? 'hidden' : ''}`}
           style={{ minHeight: 0 }}
         >
-          <PdfViewer
-            fileName={fileName}
-            filePath={filePath}
-            hideHeader
-            useMockBinaryData={true}
-          />
+          <PdfViewer fileName={fileName} hideHeader />
         </div>
         {/* PDF和右侧内容之间的分隔线 */}
         {showPdfViewer && <div className="w-[1px] flex-shrink-0 bg-gray-200" />}

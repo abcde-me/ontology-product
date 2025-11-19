@@ -764,16 +764,19 @@ export async function getSourceDataFileList(params: SourceDataFileQueryParams) {
     .do();
 }
 //删除源数据目录单个文件
-export async function deleteSourceFile(id: string) {
+export async function deleteSourceFile(params: {
+  id: number;
+  file_uuid: string;
+}) {
   return await UAPI.RES.sourceDataFileDeleteApi({})
-    .post({ id })
+    .post(params)
     .inRegion()
     .do();
 }
 //批量删除源数据文件
 export async function deleteSourceFileBatch(params: any) {
   return await UAPI.RES.sourceDataFileDeleteBatcheApi({})
-    .post({ ...params })
+    .post(params)
     .inRegion()
     .do();
 }

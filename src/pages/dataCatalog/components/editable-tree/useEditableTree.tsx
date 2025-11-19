@@ -152,7 +152,7 @@ export function useEditableTree({ catalogTreeStore }) {
         extendsObj: dataRef?.extends ?? {},
         selectedKey: dataRef?.id ? String(dataRef.id) : selectedKeys[0], // 存储实际的数据ID
         selectedTreeKey: selectedKeys[0], // 存储完整的树节点key用于显示选中样式
-        selectedPath: dataRef?.fullPath,
+        selectedPath: dataRef?.fullPath || '',
         selectedNodeType: dataRef?.type_name || dataRef?.type || '', // 存储节点类型
         selectedParentId: dataRef?.parent_id ? String(dataRef.parent_id) : '' // 存储父节点ID
       });
@@ -421,6 +421,11 @@ export function useEditableTree({ catalogTreeStore }) {
             name: fileName,
             parent_id: dataRef.parent_id
           });
+
+          if (res.status !== 200) {
+            Message.error(res?.message ?? '新建元数据失败');
+          }
+
           break;
 
         default:
