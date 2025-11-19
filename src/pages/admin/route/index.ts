@@ -208,7 +208,7 @@ export const routes: IRoute[] = [
         name: 'dataCatalogList',
         key: '/tenant/compute/modaforge/dataCatalog/list',
         component: React.lazy(async () => import('../../dataCatalog/list')),
-        permission: DATA_MANAGEMENT_PERMISSIONS.LIST
+        permission: DATA_CATALOG_PERMISSIONS.LIST
       },
       {
         // 创建元数据目录
@@ -217,7 +217,7 @@ export const routes: IRoute[] = [
         component: React.lazy(
           async () => import('../../dataCatalog/createMetaData')
         ),
-        permission: DATA_MANAGEMENT_PERMISSIONS.LIST
+        permission: DATA_CATALOG_PERMISSIONS.LIST
       }
       // {
       //   name: 'dataAssetEdit',
