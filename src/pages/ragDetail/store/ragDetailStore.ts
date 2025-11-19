@@ -15,6 +15,7 @@ import {
   TableSegment,
   PDFCoordinate
 } from '../types';
+import { getFileBinaryData, GetFileBinaryDataParams } from '@/api/modules/rag';
 
 // 导出Segment类型供其他组件使用
 export type {
@@ -51,12 +52,28 @@ export const useRagDetailStore = create<RagDetailState & RagDetailActions>(
     segmentDrawerSegmentId: null,
     // Segment search state
     segmentSearchText: '',
+    // File binary data state
+    fileBinaryData: null,
+    fileBinaryDataLoading: false,
+    fileBinaryDataError: null,
+    bucket: '',
+    path: '',
 
     // Actions
-    initializeRagDetail: async (datasetId: string, documentId: string) => {
+    initializeRagDetail: async (
+      datasetId: string,
+      documentId: string,
+      bucketName?: string | null,
+      path?: string | null
+    ) => {
       set({ loading: true, error: null });
       try {
         const data = await fetchRagDetail(datasetId, documentId);
+
+        // 优先使用 URL 参数中的 bucket 和 path，如果没有则使用 API 返回的
+        const finalBucket = bucketName || data.bucket || '';
+        const finalPath = path || data.path || '';
+
         set({
           datasetId, // 保存 datasetId
           ragId: documentId, // 使用 documentId 作为 ragId
@@ -65,11 +82,24 @@ export const useRagDetailStore = create<RagDetailState & RagDetailActions>(
           sceneType: data.sceneType,
           segments: data.segments,
           directory: data.directory,
+          bucket: finalBucket, // 保存 bucket
+          path: finalPath, // 保存 path
           // 默认不选中任何分段和目录节点
           selectedSegmentId: null,
           selectedDirectoryNodeId: null,
           loading: false
         });
+
+        // 如果有 bucket 和 path，自动加载文件二进制数据
+        if (finalBucket && finalPath) {
+          console.log('🔍 自动加载文件二进制数据:', {
+            bucket: finalBucket,
+            path: finalPath
+          });
+          get().loadFileBinaryData(finalBucket, finalPath);
+        } else {
+          console.warn('⚠️ 缺少 bucket 或 path，无法加载文件二进制数据');
+        }
       } catch (error) {
         set({
           error:
@@ -294,6 +324,44 @@ export const useRagDetailStore = create<RagDetailState & RagDetailActions>(
     // Segment search actions
     setSegmentSearchText: (text: string) => {
       set({ segmentSearchText: text });
+    },
+
+    // File binary data actions
+    loadFileBinaryData: async (bucket: string, path: string) => {
+      set({
+        fileBinaryDataLoading: true,
+        fileBinaryDataError: null,
+        bucket,
+        path
+      });
+
+      try {
+        console.log('🔍 开始加载文件二进制数据:', { bucket, path });
+        const response = await getFileBinaryData({ bucket, path });
+        console.log('✅ 文件二进制数据加载成功:', response);
+
+        set({
+          fileBinaryData: response as ArrayBuffer,
+          fileBinaryDataLoading: false
+        });
+      } catch (error) {
+        console.error('❌ 加载文件二进制数据失败:', error);
+        set({
+          fileBinaryDataError:
+            error instanceof Error
+              ? error.message
+              : 'Failed to load file binary data',
+          fileBinaryDataLoading: false
+        });
+      }
+    },
+
+    clearFileBinaryData: () => {
+      set({
+        fileBinaryData: null,
+        fileBinaryDataLoading: false,
+        fileBinaryDataError: null
+      });
     }
   })
 );
