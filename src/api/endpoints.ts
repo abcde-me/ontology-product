@@ -221,6 +221,7 @@ export const PrefixAuthCenter = API_PREFIX + '/auth-center/api/v1';
 
 // RAG
 export const PrefixRag = API_PREFIX + '/dataset-service/internal/v1';
+export const PrefixRagV2 = '/aimdp-manager/api/v1';
 
 // 引擎
 export const PrefixEngine = '/metadata-service/api/v1';
@@ -235,18 +236,15 @@ export const ModaForgeResourceEndpoints = {
   GetProjOrg: PrefixUserSpace + '/GetProjOrg',
 
   // 引擎相关
-  // 获取文件二进制数据
-  GetFileBinaryData:
-    PrefixEngine +
-    '/file/downloadFile?bucket=datasource-dev&path=/10/10/orginal/用户权限.pdf',
-
+  // 获取文件二进制数据 (参数通过 query string 传递: bucket, path)
+  GetFileBinaryData: PrefixEngine + '/file/downloadFile',
   // RAG相关
   // 查询知识库文件列表
   ListKnowledgeDocuments: PrefixRag + '/ListKnowledgeDocuments',
   // 查询知识库文件目录层级
-  ListKnowledgeDocumentCatalogs: PrefixRag + '/ListKnowledgeDocumentCatalogs',
+  ListKnowledgeDocumentCatalogs: PrefixRagV2 + '/ListKnowledgeDocumentCatalogs',
   // 查询知识库分块列表
-  ListKnowledgeChunks: PrefixRag + '/ListKnowledgeChunks',
+  ListKnowledgeChunks: PrefixRagV2 + '/ListKnowledgeChunks',
   // 查询分块详情
   GetKnowledgeChunk: PrefixRag + '/GetKnowledgeChunk',
   // 编辑分块内容

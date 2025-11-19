@@ -135,6 +135,15 @@ export const routes: IRoute[] = [
     component: React.lazy(async () => import('../../ragDetail')),
     children: []
   },
+  // 文件数据对比测试页面
+  {
+    name: 'compareFileData',
+    key: '/tenant/compute/modaforge/compareFileData',
+    component: React.lazy(
+      async () => import('../../ragDetail/test/CompareFileData')
+    ),
+    children: []
+  },
   // 作业
   {
     name: 'workflowTask',

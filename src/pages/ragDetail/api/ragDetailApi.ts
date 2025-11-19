@@ -261,10 +261,8 @@ export async function fetchSegments(
     });
 
     // 检查响应格式
-    if (response && (response as any).data && (response as any).data.list) {
-      const segments = ((response as any).data.list as ApiSegment[]).map(
-        transformSegment
-      );
+    if (response && response.data && response.data) {
+      const segments = (response.data as ApiSegment[]).map(transformSegment);
       return segments;
     }
 
@@ -290,10 +288,11 @@ export async function fetchCatalog(
       datasetId,
       documentId
     });
+    console.log(response, 'response2222');
 
     // 检查响应格式
-    if (response && (response as any).data && (response as any).data.catalogs) {
-      const rootNode = transformCatalogNode((response as any).data.catalogs);
+    if (response && response.data && response.data.catalogs) {
+      const rootNode = transformCatalogNode(response.data.catalogs);
       return [rootNode];
     }
 
@@ -411,13 +410,27 @@ export async function fetchRagDetail(
     }
   }
 
+  // 根据 sceneType 设置 bucket 和 path（测试数据）
+  const bucket = 'datasource-dev';
+  let path = '';
+
+  if (sceneType === 'pdf') {
+    path = '/10/10/orginal/用户权限.pdf';
+  } else if (sceneType === 'ppt') {
+    path = '/10/10/orginal/新建 PPT 演示文稿.ppt';
+  } else if (sceneType === 'excel') {
+    path = '/10/10/orginal/用户权限.docx';
+  }
+
   const result: RagDetailData = {
     ragId: documentId, // 使用 documentId 作为 ragId
     fileName,
     filePath,
     sceneType,
     segments,
-    directory
+    directory,
+    bucket,
+    path
   };
 
   return result;
