@@ -19,7 +19,7 @@ interface DatasetListParams {
   sort_field?: string;
   sort_order?: string;
   scene_ids?: string[];
-  src_name?: string[];
+  src_list?: number[];
 }
 
 interface CreateDatasetParams {
@@ -113,7 +113,7 @@ export async function getDatasetList(params: DatasetListParams = {}) {
     sort_field,
     sort_order,
     scene_ids,
-    src_name
+    src_list
   } = params;
   const queryParams: Record<string, any> = {
     page,
@@ -132,8 +132,8 @@ export async function getDatasetList(params: DatasetListParams = {}) {
     queryParams.storage_type_list = storage_type; // 直接赋值数组
   }
   // 添加来源过滤参数
-  if (params.src_name && params.src_name.length > 0) {
-    queryParams.src_name = src_name; // 直接赋值数组
+  if (params.src_list && params.src_list.length > 0) {
+    queryParams.src_list = src_list; // 直接赋值数组
   }
   if (status && status.length > 0) {
     queryParams.status_list = status; // 直接赋值数组
