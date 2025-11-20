@@ -57,7 +57,7 @@ import classNames from 'classnames';
 import { FieldSearchItem } from '@/types/dataAssetApi';
 import dayjs from 'dayjs';
 import { isDateType, isTagsField, TAGS_FIELD_EN_NAME } from '../../utils/const';
-import PermissionWrapper from '@/components/PermissionGuard';
+import { PermissionWrapper } from '@/components/PermissionGuard';
 import { DATA_ASSET_PERMISSIONS } from '@/config/permissions';
 
 interface TagValue {
@@ -829,7 +829,7 @@ export default function DataAssetList() {
                   </Popover>
                 ) : (
                   <PermissionWrapper
-                    permission={[
+                    anyPermission={[
                       DATA_ASSET_PERMISSIONS.MODIFY_TAG,
                       DATA_ASSET_PERMISSIONS.MODIFY_ASSET
                     ]}
