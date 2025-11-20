@@ -195,7 +195,16 @@ const ColumnSettingModal: React.FC<ColumnSettingModalProps> = ({
             rowSelection={{
               type: 'checkbox',
               selectedRowKeys: selectedIds,
-              onChange: (keys) => setSelectedIds(keys as string[]),
+              onChange: (keys) => {
+                // 过滤掉系统字段，保留当前已选中的系统字段
+                const filteredKeys = (keys as string[]).filter(
+                  (key) => !RESERVED_FIELD_ENS.has(key)
+                );
+                const systemFields = selectedIds.filter((key) =>
+                  RESERVED_FIELD_ENS.has(key)
+                );
+                setSelectedIds([...systemFields, ...filteredKeys]);
+              },
               checkboxProps: (record: ColumnField) => ({
                 disabled: RESERVED_FIELD_ENS.has(record.nameEn)
               })

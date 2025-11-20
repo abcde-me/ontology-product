@@ -106,28 +106,7 @@ export default function SearchArea({
 
   // 处理主搜索（点击搜索图标或按Enter）
   const handleMainSearch = () => {
-    const searchParams: Record<string, any> = {};
-    const fieldSearch: FieldSearchItem[] = [];
-    checkedFields.forEach((fieldKey) => {
-      const field = fields.find((f) => f.id === fieldKey);
-      if (
-        field &&
-        fieldValues[fieldKey] !== undefined &&
-        fieldValues[fieldKey] !== null &&
-        fieldValues[fieldKey] !== ''
-      ) {
-        const paramKey = field.id || fieldKey;
-        searchParams[paramKey] = fieldValues[fieldKey];
-
-        fieldSearch.push({
-          isEnumAble: field.isEnumAble ?? false,
-          nameEn: field.id,
-          type: field.type,
-          searchContent: formatSearchContent(field, fieldValues[fieldKey])
-        });
-      }
-    });
-    onMainSearch?.(fieldSearch, mainSearch);
+    onMainSearch?.([], mainSearch);
   };
 
   // 处理字段值变化
