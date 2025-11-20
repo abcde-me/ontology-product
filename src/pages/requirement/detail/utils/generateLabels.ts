@@ -11,7 +11,7 @@ export const generateInitialData = [
     label_shape: LabelShape.RECTANGLE,
     label_colour: getRandomHexColorStrict(),
     label_info_attribute_groups: [],
-    label_mapping: ''
+    label_mappings: []
   }
 ];
 

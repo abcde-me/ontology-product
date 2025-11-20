@@ -491,7 +491,7 @@ export default function RequirementDetail() {
       lastLabel.label_name_en = '';
       lastLabel.label_name_cn = '';
       // 清空模型映射，让用户重新选择
-      lastLabel.label_mapping = '';
+      lastLabel.label_mappings = [];
 
       // 确保完整保留所有属性组和属性
       if (
@@ -898,10 +898,10 @@ export default function RequirementDetail() {
                 `label_name_en_${item?.id}`,
                 item?.label_name_en
               );
-              if (item?.label_mapping) {
+              if (item?.label_mappings) {
                 labelToolForm.setFieldValue(
-                  `label_mapping_${item?.id}`,
-                  item?.label_mapping
+                  `label_mappings_${item?.id}`,
+                  item?.label_mappings
                 );
               }
               labelToolForm.setFieldValue(
@@ -946,6 +946,10 @@ export default function RequirementDetail() {
     );
   }, [annotationTypeContentCode]);
 
+  useEffect(() => {
+    basicForm.setFieldValue('model_id', undefined);
+  }, [annotationTypeContentCode]);
+
   const { data: modelList = [] } = useGetModelList(
     { label_tool_code: annotationTypeContentCode, page: 1, page_size: 1000 },
     {
@@ -964,9 +968,9 @@ export default function RequirementDetail() {
   useEffect(() => {
     if (labelDataList && labelDataList.length > 0 && type !== 'detail') {
       labelDataList.forEach((item) => {
-        const fieldName = `label_mapping_${item?.label_id}`;
+        const fieldName = `label_mappings_${item?.label_id}`;
         labelToolForm.setFieldValue(fieldName, undefined);
-        item['label_mapping'] = '';
+        item['label_mappings'] = [];
       });
     }
   }, [model_id, type]);
@@ -1366,17 +1370,18 @@ export default function RequirementDetail() {
                                   {!!model_id && (
                                     <FormItem
                                       label="模型映射:"
-                                      field={`label_mapping_${type === 'detail' ? item?.id : item?.label_id}`}
+                                      field={`label_mappings_${type === 'detail' ? item?.id : item?.label_id}`}
                                       style={{ padding: 0 }}
                                     >
                                       <Select
+                                        className="label-mapping-select"
                                         mode="multiple"
                                         maxTagCount={{
                                           count: 1,
                                           render: (invisibleNumber) => {
                                             // 获取当前选中的值
                                             const currentValue =
-                                              item.label_mapping || [];
+                                              item.label_mappings || [];
                                             const selectedValues =
                                               Array.isArray(currentValue)
                                                 ? currentValue
@@ -1434,7 +1439,7 @@ export default function RequirementDetail() {
                                         allowClear
                                         onChange={(val: any) => {
                                           updateNestedValue(
-                                            [labelIndex, 'label_mapping'],
+                                            [labelIndex, 'label_mappings'],
                                             val
                                           );
                                         }}
@@ -1465,12 +1470,12 @@ export default function RequirementDetail() {
                                           parseInt(val)
                                         );
                                         updateNestedValue(
-                                          [labelIndex, 'label_mapping'],
-                                          ''
+                                          [labelIndex, 'label_mappings'],
+                                          []
                                         );
                                         // 形状改变时，清空对应的模型映射值
                                         if (model_id) {
-                                          const mappingFieldName = `label_mapping_${type === 'detail' ? item?.id : item?.label_id}`;
+                                          const mappingFieldName = `label_mappings_${type === 'detail' ? item?.id : item?.label_id}`;
                                           labelToolForm.setFieldValue(
                                             mappingFieldName,
                                             undefined
