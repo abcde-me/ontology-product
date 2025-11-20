@@ -23,6 +23,8 @@ import SearchArea, { SearchField } from './MetaDataSearchArea';
 import noDataElement from '@/components/no-data';
 import dayjs from 'dayjs';
 import EllipsisPopover from '@/components/ellipsis-popover-com';
+import styles from './MetaData.module.scss';
+import classNames from 'classnames';
 
 export default function MetaData() {
   const dataCatalog = useDataCatalog();
@@ -237,7 +239,7 @@ export default function MetaData() {
   }
 
   return (
-    <div>
+    <div className={styles['meta-data']}>
       {/* 搜索区域 */}
       {columns.length > 0 && (
         <SearchArea
@@ -255,7 +257,12 @@ export default function MetaData() {
 
       <div className="data-catalog-content">
         {/* 标题和刷新按钮 */}
-        <div className="mb-[12px] mt-[12px] flex items-center justify-between">
+        <div
+          className={classNames(
+            'mb-[12px] mt-[12px] flex items-center justify-between',
+            styles['header-container']
+          )}
+        >
           <div className="text-[16px] font-bold">数据湖目录({total})</div>
           <Tooltip content="刷新">
             <Button
