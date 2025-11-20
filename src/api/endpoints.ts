@@ -237,8 +237,10 @@ export const ModaForgeResourceEndpoints = {
 
   // 引擎相关
   // 获取文件二进制数据 (参数通过 query string 传递: bucket, path)
-  GetFileBinaryData: PrefixEngine + '/file/downloadFile',
+  GetFileBinaryData: PrefixAimdp + '/DownloadFile',
   // RAG相关
+  // 查询知识库文件详情
+  GetKnowledgeDocument: PrefixRagV2 + '/GetKnowledgeDocument',
   // 预览图片
   PreviewUrl: PrefixAimdp + '/PreviewUrl',
   // 查询知识库文件列表
