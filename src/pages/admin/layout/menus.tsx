@@ -315,11 +315,11 @@ export const menus: MenuModel[] = [
         title: '标签管理',
         icon: <LabelMenu className={iconClass} />,
         path:
-          '/tenant/compute/appforge/operationCenter?url=' +
+          '/tenant/compute/modaforge/operationCenter?url=' +
           encodeURIComponent(
             '/operationcenter/tenant/compute/operationcenter/tag'
           ),
-        activePaths: ['/tenant/compute/appforge/operationCenter'],
+        activePaths: ['/tenant/compute/modaforge/operationCenter'],
         queryParamMatcher: (search: string) => {
           const url = new URLSearchParams(search).get('url');
           return url?.includes('tag') ?? false;
