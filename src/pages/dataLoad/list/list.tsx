@@ -38,9 +38,25 @@ export default function DataLoad() {
   const history = useHistory();
   const hasPermission = useHasPermission(DATA_LOAD_PERMISSIONS.CAN_GET);
   // 跳转目录
-  const handleToDirectoryPath = (id: string, parent_id: string) => {
+  const handleToDirectoryPath = (
+    id: string,
+    parent_id: string,
+    catalogType: string
+  ) => {
+    let newCatalogTypeVal = '';
+    catalogType?.split('/').map((item) => {
+      if (item === 'metadata') {
+        newCatalogTypeVal = 'metadata';
+      }
+      if (item === 'db') {
+        newCatalogTypeVal = 'db';
+      }
+      if (item === 'volume') {
+        newCatalogTypeVal = 'volume';
+      }
+    });
     history.push(
-      `/tenant/compute/modaforge/dataCatalog/list?id=${id}&parent_id=${parent_id}`
+      `/tenant/compute/modaforge/dataCatalog/list?id=${id}&parent_id=${parent_id}&catalog_type=${newCatalogTypeVal}`
     );
   };
   const renderEmptyPlaceholder = (value: string | null) => {
@@ -204,7 +220,11 @@ export default function DataLoad() {
             isEdit={false}
             isLink
             handleLink={() => {
-              handleToDirectoryPath(record.data_path_id, record.parent_id);
+              handleToDirectoryPath(
+                record.data_path_id,
+                record.parent_id,
+                record.data_path_name
+              );
             }}
           />
         ) : (

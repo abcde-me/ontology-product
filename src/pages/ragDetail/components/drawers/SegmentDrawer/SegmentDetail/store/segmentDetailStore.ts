@@ -4,6 +4,9 @@
  */
 
 import { create } from 'zustand';
+import { Message } from '@arco-design/web-react';
+import { UpdateKnowledgeChunkMaterials } from '@/api/modules/rag';
+import { fetchSegmentDetailInfo } from '../../../../../api/ragDetailApi';
 import type {
   SegmentDetailData,
   Element,
@@ -33,7 +36,7 @@ interface SegmentDetailActions {
   // 元素信息编辑控制
   startEditing: () => void;
   cancelEditing: () => void;
-  confirmEditing: () => Promise<void>;
+  confirmEditing: (datasetId: string) => Promise<void>;
 
   // 更新元素
   updateElement: (elementId: string, updates: Partial<Element>) => void;
@@ -98,17 +101,56 @@ export const useSegmentDetailStore = create<SegmentDetailStore>((set, get) => ({
   },
 
   // 确认编辑
-  confirmEditing: async () => {
+  confirmEditing: async (datasetId: string) => {
     const { detailData, segmentId } = get();
+
+    if (!detailData || !segmentId) {
+      console.error('❌ 缺少必要数据');
+      return;
+    }
+
+    if (!datasetId) {
+      console.error('❌ 缺少 datasetId 参数');
+      return;
+    }
 
     try {
       set({ loading: true, error: null });
 
-      // TODO: 调用 API 保存数据
-      console.log('💾 保存数据到后端:', { segmentId, detailData });
+      // 构建 materials 参数（只包含可编辑的元素：text、table、formula）
+      const materials = detailData.elements
+        .filter(
+          (el) =>
+            el.type === 'text' || el.type === 'table' || el.type === 'formula'
+        )
+        .map((el) => {
+          if (el.type === 'text' || el.type === 'formula') {
+            return {
+              id: el.id,
+              content: el.content
+            };
+          } else if (el.type === 'table') {
+            // 表格元素需要将 headers 和 rows 转换为字符串
+            return {
+              id: el.id,
+              content: JSON.stringify({
+                headers: el.headers,
+                rows: el.rows
+              })
+            };
+          }
+          return null;
+        })
+        .filter(
+          (item): item is { id: string; content: string } => item !== null
+        );
 
-      // 模拟 API 调用
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      // 调用真实 API
+      await UpdateKnowledgeChunkMaterials({
+        dataset_id: datasetId,
+        chunk_id: segmentId,
+        materials
+      });
 
       // 保存成功后，更新 initialData
       set({
@@ -117,13 +159,30 @@ export const useSegmentDetailStore = create<SegmentDetailStore>((set, get) => ({
         loading: false
       });
 
-      console.log('✅ 保存成功');
+      Message.success('保存成功');
+
+      // 重新获取分段详情数据以确保数据同步
+      try {
+        const updatedData = await fetchSegmentDetailInfo(datasetId, segmentId);
+
+        // 更新本地数据
+        set({
+          detailData: updatedData,
+          initialData: JSON.parse(JSON.stringify(updatedData))
+        });
+      } catch (refreshError) {
+        console.warn('⚠️ 重新获取分段详情失败，但保存已成功:', refreshError);
+        // 即使重新获取失败，保存操作也已经成功了，所以不需要抛出错误
+      }
     } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : '保存元素信息失败';
       set({
-        error: error instanceof Error ? error.message : '保存失败',
+        error: errorMessage,
         loading: false
       });
-      console.error('❌ 保存失败:', error);
+      Message.error(errorMessage);
+      console.error('❌ 保存元素信息失败:', error);
     }
   },
 
@@ -131,8 +190,6 @@ export const useSegmentDetailStore = create<SegmentDetailStore>((set, get) => ({
   updateElement: (elementId: string, updates: Partial<Element>) => {
     const { detailData } = get();
     if (!detailData) return;
-
-    console.log('🔄 updateElement 被调用:', { elementId, updates });
 
     // 只更新当前元素（所有字段都是独立的）
     const newElements = detailData.elements.map((el) =>
@@ -144,7 +201,6 @@ export const useSegmentDetailStore = create<SegmentDetailStore>((set, get) => ({
       elements: newElements
     };
 
-    console.log('✅ 更新后的数据:', newData);
     set({ detailData: newData });
   },
 
@@ -201,8 +257,6 @@ export const useSegmentDetailStore = create<SegmentDetailStore>((set, get) => ({
         isEditingEnhancement: false,
         loadingEnhancement: false
       }));
-
-      console.log('✅ 增强信息保存成功');
     } catch (error) {
       set({
         error: error instanceof Error ? error.message : '保存增强信息失败',
@@ -227,7 +281,6 @@ export const useSegmentDetailStore = create<SegmentDetailStore>((set, get) => ({
       }
     };
 
-    console.log('✅ 更新后的增强信息:', newData.enhancement);
     set({ detailData: newData });
   },
 

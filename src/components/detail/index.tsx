@@ -946,7 +946,7 @@ const DatasetDetail = (props: {
     path: string
   ) => {
     history.push(
-      `/tenant/compute/modaforge/datasetManagement/ragDetail?datasetId=${detailId}&documentId=${document_id}&bucketName=${bucket_name}&path=${path}`
+      `/tenant/compute/modaforge/datasetManagement/ragDetail?datasetId=${detailId}&documentId=${document_id}&bucketName=${bucket_name}&path=${path}&datasetName=${datasetDetail?.name}`
     );
   };
 
@@ -1466,7 +1466,9 @@ const DatasetDetail = (props: {
                 数据集管理
               </span>
             </Breadcrumb.Item>
-            <Breadcrumb.Item>数据集详情</Breadcrumb.Item>
+            <Breadcrumb.Item>
+              {datasetDetail?.name || '数据集详情'}
+            </Breadcrumb.Item>
           </Breadcrumb>
         </div>
       )}
@@ -1786,7 +1788,12 @@ const DatasetDetail = (props: {
                     flexShrink: 0
                   }}
                   allowClear
-                  suffix={<IconSearch style={{ color: '#999' }} />}
+                  suffix={
+                    <IconSearch
+                      style={{ color: '#999' }}
+                      onClick={handleSearch}
+                    />
+                  }
                 />
                 {contentData.length !== 0 && contentColumns.length !== 0 ? (
                   <>

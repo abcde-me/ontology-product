@@ -11,7 +11,8 @@ import {
   Popover,
   Tabs,
   Typography,
-  Switch
+  Switch,
+  Checkbox
 } from '@arco-design/web-react';
 import { format } from 'sql-formatter';
 import React, {
@@ -450,35 +451,88 @@ export default function DataLoadCreate() {
     [sourceType]
   );
 
+  // 计算选中状态：'all' | 'indeterminate' | 'none'
+  const getSelectAllStatus = useCallback(
+    (selectedValues: string[]): 'all' | 'indeterminate' | 'none' => {
+      if (!Array.isArray(selectedValues) || tableList.length === 0) {
+        return 'none';
+      }
+      const filteredValues = selectedValues.filter((item) => item !== 'all');
+      const selectedCount = filteredValues.length;
+      if (selectedCount === 0) {
+        return 'none';
+      }
+      if (selectedCount === tableList.length) {
+        return 'all';
+      }
+      return 'indeterminate';
+    },
+    [tableList]
+  );
+
+  // 处理"全部"选项的点击事件
+  const handleAllClick = useCallback(
+    (e: React.MouseEvent) => {
+      e.stopPropagation();
+      const currentValue = form.getFieldValue('table_name') || [];
+      const filteredValue = currentValue.filter(
+        (item: string) => item !== 'all'
+      );
+
+      // 判断是否全选
+      const isAllSelected =
+        filteredValue.length === tableList.length &&
+        tableList.length > 0 &&
+        tableList.every((option) => filteredValue.includes(option));
+
+      if (isAllSelected) {
+        // 当前全选，取消所有选择
+        form.setFieldsValue({ table_name: [] });
+      } else {
+        // 当前未全选或未选择，选中所有选项
+        if (tableList.length > 0) {
+          form.setFieldsValue({ table_name: [...tableList] });
+        }
+      }
+    },
+    [form, tableList]
+  );
+
   // 处理表格名称选择（全部标签逻辑）
   const handleAllTagChange = useCallback(
     (value: string[]) => {
-      const currentSqlProcess = form.getFieldValue('sql_process_enabled');
+      const currentValue = value || [];
+      const previousValue = form.getFieldValue('table_name') || [];
 
-      // 如果SQL处理为"关闭"，限制只能选一个
-      // if (
-      //   currentSqlProcess === 'disable' &&
-      //   Array.isArray(value) &&
-      //   value.length > 1
-      // ) {
-      //   // 只保留最后一个选择的值
-      //   const lastValue = value[value.length - 1];
-      //   form.setFieldsValue({ table_name: [lastValue] });
-      //   return;
-      // }
+      // 检查是否点击了"全部"选项（通过比较前后值的变化）
+      const previousHasAll = previousValue.includes('all');
+      const currentHasAll = currentValue.includes('all');
+      const clickedAll = previousHasAll !== currentHasAll;
 
-      if (value.includes('all')) {
-        form.setFieldsValue({ table_name: ['all'] });
-      } else {
-        const filteredValue = value.filter((item) => item !== 'all');
-        const hasAllOtherOptions =
+      if (clickedAll && currentHasAll) {
+        // 如果点击了"全部"选项（当前值包含 'all'），切换全选状态
+        const filteredPrevious = previousValue.filter(
+          (item: string) => item !== 'all'
+        );
+        const isAllSelected =
+          filteredPrevious.length === tableList.length &&
           tableList.length > 0 &&
-          tableList.every((option) => filteredValue.includes(option)) &&
-          filteredValue.length === tableList.length;
+          tableList.every((option) => filteredPrevious.includes(option));
 
-        form.setFieldsValue({
-          table_name: hasAllOtherOptions ? ['all'] : filteredValue
-        });
+        if (isAllSelected) {
+          // 当前全选，取消所有选择
+          form.setFieldsValue({ table_name: [] });
+        } else {
+          // 当前未全选或未选择，选中所有选项
+          // 包括：未选择任何数据、部分选择、或完全未选择的情况
+          if (tableList.length > 0) {
+            form.setFieldsValue({ table_name: [...tableList] });
+          }
+        }
+      } else {
+        // 正常选择，过滤掉 'all' 值
+        const filteredValue = currentValue.filter((item) => item !== 'all');
+        form.setFieldsValue({ table_name: filteredValue });
       }
     },
     [form, tableList]
@@ -566,6 +620,7 @@ export default function DataLoadCreate() {
       setSqlContent('');
       setCheckStatus(CheckSQLStatus.NONE);
       setCheckMessage('');
+      setSelectedNodeType(undefined);
       form.setFieldsValue({
         table_name: undefined,
         sql_process_enabled: 'disable'
@@ -577,7 +632,12 @@ export default function DataLoadCreate() {
   // 构建表单数据
   const buildFormData = useCallback(
     (formValues: FormValues, pathId: string | number, submitType: string) => {
-      const processedTableNames = formValues.table_name?.includes('all')
+      const tableNameValues = formValues.table_name || [];
+      const isAllSelected =
+        Array.isArray(tableNameValues) &&
+        tableNameValues.length === tableList.length &&
+        tableList.every((option) => tableNameValues.includes(option));
+      const processedTableNames = isAllSelected
         ? tableList
         : formValues.table_name || uploadedFiles;
 
@@ -615,7 +675,12 @@ export default function DataLoadCreate() {
         sourceType === SOURCE_TYPES.DB &&
         formValues.sql_process_enabled === 'disable'
       ) {
-        const processedTableNames = formValues.table_name?.includes('all')
+        const tableNameValues = formValues.table_name || [];
+        const isAllSelected =
+          Array.isArray(tableNameValues) &&
+          tableNameValues.length === tableList.length &&
+          tableList.every((option) => tableNameValues.includes(option));
+        const processedTableNames = isAllSelected
           ? tableList
           : formValues.table_name;
 
@@ -965,12 +1030,19 @@ export default function DataLoadCreate() {
   // 计算是否禁用"关闭"选项：当选择了多个表时禁用
   const isDisableOptionDisabled = useMemo(() => {
     const currentTableName = form.getFieldValue('table_name') || [];
-    return (
-      Array.isArray(currentTableName) &&
-      currentTableName.length > 1 &&
-      !currentTableName.includes('all')
-    );
+    const filteredValues = Array.isArray(currentTableName)
+      ? currentTableName.filter((item: string) => item !== 'all')
+      : [];
+    return filteredValues.length > 1;
   }, [tableName, form]);
+
+  // 计算"全部"选项的选中状态
+  const selectAllStatus = useMemo(() => {
+    const currentTableName = form.getFieldValue('table_name') || [];
+    return getSelectAllStatus(
+      Array.isArray(currentTableName) ? currentTableName : []
+    );
+  }, [tableName, form, getSelectAllStatus]);
 
   // 初始化SQL处理默认值为"关闭"
   useEffect(() => {
@@ -1088,7 +1160,6 @@ export default function DataLoadCreate() {
         >
           <span
             style={{
-              color: '#1890ff',
               cursor: 'pointer',
               fontSize: '12px',
               padding: '2px 4px',
@@ -1357,7 +1428,16 @@ export default function DataLoadCreate() {
                 allowClear
               >
                 {tableList.length > 0 && selectedNodeType !== 'metadata' && (
-                  <Option value="all">全部</Option>
+                  <div
+                    onClick={handleAllClick}
+                    className="flex cursor-pointer items-center pl-[7px]"
+                  >
+                    <Checkbox
+                      checked={selectAllStatus === 'all'}
+                      indeterminate={selectAllStatus === 'indeterminate'}
+                    />
+                    <span className="ml-[8px] text-[14px]">全部</span>
+                  </div>
                 )}
                 {tableList.map((option) => (
                   <Option key={option} value={option}>

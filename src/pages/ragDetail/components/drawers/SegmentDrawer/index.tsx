@@ -34,7 +34,7 @@ const SegmentDrawer: React.FC<SegmentDrawerProps> = ({
 }) => {
   const {
     activeTab,
-    currentSegmentIndex: storeSegmentIndex,
+    chunkId: storeChunkId,
     openDrawer,
     closeDrawer,
     setTotalSegments,
@@ -90,7 +90,7 @@ const SegmentDrawer: React.FC<SegmentDrawerProps> = ({
           {/* Tab Content */}
           <div className="flex-1 overflow-hidden">
             {activeTab === 'detail' && (
-              <SegmentDetail segmentId={`segment_${storeSegmentIndex}`} />
+              <SegmentDetail segmentId={storeChunkId} />
             )}
             {activeTab === 'trace' && <TraceLog />}
           </div>
