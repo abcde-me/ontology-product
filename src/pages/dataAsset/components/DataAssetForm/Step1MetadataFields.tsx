@@ -331,6 +331,26 @@ export default function Step1MetadataFields({
     form.setFieldValue('dataSources', updatedDataSources);
   };
 
+  // 验证nameEn字段是否符合规则
+  const validateNameEn = (nameEn: string): string | null => {
+    if (!nameEn) {
+      return null; // 空值由其他验证处理
+    }
+
+    // 规则1: 由字母、数字和下划线(_)组成（同时满足规则3: 不能有空格）
+    const validPattern = /^[a-zA-Z0-9_]+$/;
+    if (!validPattern.test(nameEn)) {
+      return '字段英文名称只能由字母、数字和下划线(_)组成，且不能有空格';
+    }
+
+    // 规则2: 必须以字母开头
+    if (!/^[a-zA-Z]/.test(nameEn)) {
+      return '字段英文名称必须以字母开头';
+    }
+
+    return null;
+  };
+
   // 验证字段列表的自定义验证器
   const validateMetadataFields = useCallback(
     (value: any, callback: any) => {
@@ -343,9 +363,19 @@ export default function Step1MetadataFields({
         );
         if (incompleteFields) {
           callback('请填写完整的字段信息');
-        } else {
-          callback();
+          return;
         }
+
+        // 验证nameEn字段格式
+        for (const field of metadataFields) {
+          const nameEnError = validateNameEn(field.nameEn);
+          if (nameEnError) {
+            callback(nameEnError);
+            return;
+          }
+        }
+
+        callback();
       }
     },
     [metadataFields]

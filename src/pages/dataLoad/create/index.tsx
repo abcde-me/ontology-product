@@ -79,8 +79,11 @@ const DEFAULT_ONCE_CYCLE = {
   week: ''
 };
 
-const placeholderValue = `如需多表关联后的表载入到系统中，请在此位置编写关联SQL语句
-SELECT filesname,B,C,D,E FROM table2,table3 WHERE t1.a=t2.a`;
+const placeholderValue = `请在此编写数据处理SQL , 处理结果必须包含id字段且id是唯一主键
+
+SELECT fileid as id, fileid ，filename， ........ 
+FROM table2 t1,table3 t2  
+WHERE t1.a=t2.a`;
 
 // 类型定义
 interface ConnectorOption {
