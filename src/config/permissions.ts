@@ -141,6 +141,17 @@ export const SQL_PERMISSIONS = {
   EXPORT: 'aimdp-manager:sql_script:manage:export'
 } as const;
 
+// 数据资产
+export const DATA_ASSET_PERMISSIONS = {
+  LIST: 'aimdp-manager:data_asset:read:list_data', // 菜单权限
+  DELETE: 'aimdp-manager:data_asset:manage:delete_asset',
+  MODIFY_TAG: 'aimdp-manager:data_asset:manage:modify_tag',
+  MODIFY_ASSET: 'aimdp-manager:data_asset:manage:modify_asset',
+  MODIFY_TABLE: 'aimdp-manager:data_asset:manage:modify_table',
+  CREATE_TABLE: 'aimdp-manager:data_asset:manage:create_table',
+  GET_TABLE: 'aimdp-manager:data_asset:read:get_table'
+} as const;
+
 // 需求管理权限
 export const REQUIREMENT_PERMISSIONS = {
   LIST: 'aimdp-manager:label_req_manager:read:get_req_list', // 菜单权限
