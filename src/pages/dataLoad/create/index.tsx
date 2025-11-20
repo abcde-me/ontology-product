@@ -36,13 +36,11 @@ import { validateName } from '@/utils/valiate';
 import Uploads from '../list/file-upload';
 import ComponentTree from './component-tree';
 import '../list/db-tree.scss';
-import { isNumber } from 'lodash-es';
 import { sql } from '@codemirror/lang-sql';
 import { lintGutter } from '@codemirror/lint';
-import { EditorView } from '@codemirror/view';
 import { tags as t } from '@lezer/highlight';
 import createTheme from '@uiw/codemirror-themes';
-import CodeMirror, { ReactCodeMirrorRef } from '@uiw/react-codemirror';
+import CodeMirror from '@uiw/react-codemirror';
 import styles from './index.module.scss';
 import { IconCaretRight, IconDown, IconUp } from '@arco-design/web-react/icon';
 import SQLFormatIcon from '@/assets/sql/sql-format-ico.svg';
@@ -79,8 +77,11 @@ const DEFAULT_ONCE_CYCLE = {
   week: ''
 };
 
-const placeholderValue = `如需多表关联后的表载入到系统中，请在此位置编写关联SQL语句
-SELECT filesname,B,C,D,E FROM table2,table3 WHERE t1.a=t2.a`;
+const placeholderValue = `请在此编写数据处理SQL , 处理结果必须包含id字段且id是唯一主键
+
+SELECT fileid as id, fileid ，filename， ........ 
+FROM table2 t1,table3 t2  
+WHERE t1.a=t2.a`;
 
 // 类型定义
 interface ConnectorOption {
@@ -544,15 +545,16 @@ export default function DataLoadCreate() {
       if (Array.isArray(fileData)) {
         if (fileData.length === 0) {
           setUploadedFiles([]);
-          if (sourceType === SOURCE_TYPES.LOCAL) {
-            form.setFieldsValue({ connector_id: undefined });
-          }
+          // if (sourceType === SOURCE_TYPES.LOCAL) {
+          //   // form.setFieldsValue({ connector_id: undefined });
+          // }
           return;
         }
+
         setUploadedFiles(fileData);
-        if (sourceType === SOURCE_TYPES.LOCAL) {
-          form.setFieldsValue({ connector_id: 'local_files_uploaded' });
-        }
+        // if (sourceType === SOURCE_TYPES.LOCAL) {
+        //   // form.setFieldsValue({ connector_id: 'local_files_uploaded' });
+        // }
         return;
       }
 
@@ -566,9 +568,9 @@ export default function DataLoadCreate() {
         return [...prev, fileData];
       });
 
-      if (sourceType === SOURCE_TYPES.LOCAL) {
-        form.setFieldsValue({ connector_id: 'local_files_uploaded' });
-      }
+      // if (sourceType === SOURCE_TYPES.LOCAL) {
+      //   // form.setFieldsValue({ connector_id: 'local_files_uploaded' });
+      // }
     },
     [form, sourceType]
   );
@@ -579,7 +581,7 @@ export default function DataLoadCreate() {
       setUploadedFiles((prev) => {
         const updatedFiles = prev.filter((file) => file.name !== fileName);
         if (updatedFiles.length === 0 && sourceType === SOURCE_TYPES.LOCAL) {
-          form.setFieldsValue({ connector_id: undefined });
+          // form.setFieldsValue({ connector_id: undefined });
         }
         return updatedFiles;
       });
@@ -632,14 +634,7 @@ export default function DataLoadCreate() {
   // 构建表单数据
   const buildFormData = useCallback(
     (formValues: FormValues, pathId: string | number, submitType: string) => {
-      const tableNameValues = formValues.table_name || [];
-      const isAllSelected =
-        Array.isArray(tableNameValues) &&
-        tableNameValues.length === tableList.length &&
-        tableList.every((option) => tableNameValues.includes(option));
-      const processedTableNames = isAllSelected
-        ? tableList
-        : formValues.table_name || uploadedFiles;
+      const processedTableNames = formValues.table_name || uploadedFiles;
 
       return {
         task_name: formValues.name,
