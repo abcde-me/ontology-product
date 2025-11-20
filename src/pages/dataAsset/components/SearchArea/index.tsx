@@ -146,6 +146,7 @@ export default function SearchArea({
 
   // 处理重置按钮点击
   const handleReset = () => {
+    setMainSearch('');
     setFieldValues({});
     onReset?.();
   };
