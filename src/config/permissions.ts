@@ -106,10 +106,10 @@ export const DATA_CATALOG_PERMISSIONS = {
   CAN_UPDATE_DIRS: 'aimdp-manager:directory:manage:modify', // 更新树
   CAN_DELETE_BATCH: 'aimdp-manager:directory:manage:delete', // 源目录文件批量删除
   CAN_DELETE_DST_FILE: 'aimdp-manager:directory:manage:delete', // 目标目录文件删除
-  CAN_SEARCH: 'aimdp-manager:connector:read:get', // 批量导出
-  CAN_SEARCH_DIR: 'aimdp-manager:connector:read:get', // 导出 - 源目录
+  CAN_SEARCH: 'aimdp-manager:directory:read:get', // 批量导出
+  CAN_SEARCH_DIR: 'aimdp-manager:directory:read:get', // 导出 - 源目录
   CAN_DELETE: 'aimdp-manager:directory:manage:delete', //  删除 - 源目录
-  CAN_EXPORT_LIST_FILE: 'aimdp-manager:connector:read:get', // 导出 - 目标目录文件
+  CAN_EXPORT_LIST_FILE: 'aimdp-manager:directory:read:get', // 导出 - 目标目录文件
   CAN_DELETE_LIST_FILE: 'aimdp-manager:directory:manage:delete', // 删除 - 目标目录文件
 
   LIST: 'aimdp-manager:directory:read:list', // 菜单权限
