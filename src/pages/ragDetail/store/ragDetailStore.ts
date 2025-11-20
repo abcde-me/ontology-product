@@ -88,10 +88,6 @@ export const useRagDetailStore = create<RagDetailState & RagDetailActions>(
           if (docResponse && docResponse.data) {
             documentName = docResponse.data.name || '';
             documentFormat = docResponse.data.format || '';
-            console.log('📄 获取文件详情成功:', {
-              name: documentName,
-              format: documentFormat
-            });
           }
         } catch (docError) {
           console.warn('⚠️ 获取文件详情失败:', docError);
