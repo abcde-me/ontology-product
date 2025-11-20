@@ -43,7 +43,7 @@ export interface SearchAreaProps {
   /** 主搜索框占位符 */
   mainSearchPlaceholder?: string;
   /** 主搜索回调 */
-  onMainSearch?: (value: string) => void;
+  onMainSearch?: (fieldValues: FieldSearchItem[], commonSearch: string) => void;
   /** 字段搜索回调 */
   onFieldSearch?: (
     fieldValues: FieldSearchItem[],
@@ -106,7 +106,28 @@ export default function SearchArea({
 
   // 处理主搜索（点击搜索图标或按Enter）
   const handleMainSearch = () => {
-    onMainSearch?.(mainSearch);
+    const searchParams: Record<string, any> = {};
+    const fieldSearch: FieldSearchItem[] = [];
+    checkedFields.forEach((fieldKey) => {
+      const field = fields.find((f) => f.id === fieldKey);
+      if (
+        field &&
+        fieldValues[fieldKey] !== undefined &&
+        fieldValues[fieldKey] !== null &&
+        fieldValues[fieldKey] !== ''
+      ) {
+        const paramKey = field.id || fieldKey;
+        searchParams[paramKey] = fieldValues[fieldKey];
+
+        fieldSearch.push({
+          isEnumAble: field.isEnumAble ?? false,
+          nameEn: field.id,
+          type: field.type,
+          searchContent: formatSearchContent(field, fieldValues[fieldKey])
+        });
+      }
+    });
+    onMainSearch?.(fieldSearch, mainSearch);
   };
 
   // 处理字段值变化
@@ -369,7 +390,6 @@ export default function SearchArea({
             placeholder={`输入关键字搜索`}
             value={value || ''}
             onChange={(val) => handleFieldValueChange(field.id, val)}
-            suffix={<IconSearch />}
             allowClear
           />
         );
