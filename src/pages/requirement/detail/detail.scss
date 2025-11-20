@@ -537,7 +537,13 @@
 }
 
 .label-mapping-select .arco-input-tag-inner {
+  flex-wrap: nowrap !important;
   input {
     min-width: 100px !important;
   }
+}
+
+.label-mapping-select .arco-select-view-multiple .arco-select-view-tag,
+.label-mapping-select .arco-input-tag-tag {
+  max-width: 80px !important;
 }
