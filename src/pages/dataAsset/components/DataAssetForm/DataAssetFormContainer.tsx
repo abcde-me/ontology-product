@@ -326,6 +326,7 @@ export default function DataAssetFormContainer({
             onCancel={handleCancel}
             onPrev={handlePrev}
             onFinish={handleFinish}
+            isEditMode={isEditMode}
           />
         )
       }

@@ -57,6 +57,8 @@ import classNames from 'classnames';
 import { FieldSearchItem } from '@/types/dataAssetApi';
 import dayjs from 'dayjs';
 import { isDateType, isTagsField, TAGS_FIELD_EN_NAME } from '../../utils/const';
+import { PermissionWrapper } from '@/components/PermissionGuard';
+import { DATA_ASSET_PERMISSIONS } from '@/config/permissions';
 
 interface TagValue {
   tagId: string;
@@ -263,27 +265,35 @@ export default function DataAssetList() {
             { onEditAsset, onEditTags, onDelete }: any
           ) => (
             <div className="flex items-center gap-[16px]">
-              <Button
-                type="text"
-                onClick={() => onEditAsset?.(record)}
-                className="px-[0px]"
+              <PermissionWrapper
+                permission={DATA_ASSET_PERMISSIONS.MODIFY_ASSET}
               >
-                修改资产
-              </Button>
-              <Button
-                type="text"
-                onClick={() => onEditTags?.(record)}
-                className="px-[0px]"
-              >
-                修改标签
-              </Button>
-              <Button
-                type="text"
-                className="px-[0px]"
-                onClick={() => onDelete?.(record)}
-              >
-                删除
-              </Button>
+                <Button
+                  type="text"
+                  onClick={() => onEditAsset?.(record)}
+                  className="px-[0px]"
+                >
+                  修改资产
+                </Button>
+              </PermissionWrapper>
+              <PermissionWrapper permission={DATA_ASSET_PERMISSIONS.MODIFY_TAG}>
+                <Button
+                  type="text"
+                  onClick={() => onEditTags?.(record)}
+                  className="px-[0px]"
+                >
+                  修改标签
+                </Button>
+              </PermissionWrapper>
+              <PermissionWrapper permission={DATA_ASSET_PERMISSIONS.DELETE}>
+                <Button
+                  type="text"
+                  className="px-[0px]"
+                  onClick={() => onDelete?.(record)}
+                >
+                  删除
+                </Button>
+              </PermissionWrapper>
             </div>
           )
         }
@@ -746,6 +756,7 @@ export default function DataAssetList() {
             {noDataElement({
               description: '暂无数据资产',
               btnText: '创建数据资产',
+              perms: DATA_ASSET_PERMISSIONS.CREATE_TABLE,
               handleBtn: handleCreateDataAsset
             })}
           </div>
@@ -788,20 +799,22 @@ export default function DataAssetList() {
             {viewType === ViewType.LIST && (
               <>
                 {/* 批量删除按钮 */}
-                <Popover
-                  content="请先选择资产"
-                  disabled={selectedRowKeys.length > 0}
-                  position="top"
-                >
-                  <Button
-                    icon={<IconDelete />}
-                    className="mr-[20px]"
-                    disabled={selectedRowKeys.length === 0}
-                    onClick={handleBatchDelete}
+                <PermissionWrapper permission={DATA_ASSET_PERMISSIONS.DELETE}>
+                  <Popover
+                    content="请先选择资产"
+                    disabled={selectedRowKeys.length > 0}
+                    position="top"
                   >
-                    批量删除
-                  </Button>
-                </Popover>
+                    <Button
+                      icon={<IconDelete />}
+                      className="mr-[20px]"
+                      disabled={selectedRowKeys.length === 0}
+                      onClick={handleBatchDelete}
+                    >
+                      批量删除
+                    </Button>
+                  </Popover>
+                </PermissionWrapper>
 
                 {/* 批量修改按钮 */}
                 {selectedRowKeys.length === 0 ? (
@@ -815,49 +828,53 @@ export default function DataAssetList() {
                     </Button>
                   </Popover>
                 ) : (
-                  <Dropdown
-                    droplist={
-                      <Menu style={{ width: '110px' }}>
-                        <Menu.Item
-                          key="modifyAsset"
-                          onClick={handleBatchModifyAsset}
-                        >
-                          修改资产
-                        </Menu.Item>
-                        <Menu.Item
-                          key="modifyTags"
-                          onClick={handleBatchModifyTags}
-                        >
-                          修改标签
-                        </Menu.Item>
-                      </Menu>
-                    }
-                    trigger="click"
-                    position="bl"
+                  <PermissionWrapper
+                    anyPermission={[
+                      DATA_ASSET_PERMISSIONS.MODIFY_TAG,
+                      DATA_ASSET_PERMISSIONS.MODIFY_ASSET
+                    ]}
                   >
-                    <Button
-                      icon={<IconEdit />}
-                      className="mr-[20px]"
-                      disabled={false}
+                    <Dropdown
+                      droplist={
+                        <Menu style={{ width: '110px' }}>
+                          <Menu.Item
+                            key="modifyAsset"
+                            onClick={handleBatchModifyAsset}
+                          >
+                            修改资产
+                          </Menu.Item>
+                          <Menu.Item
+                            key="modifyTags"
+                            onClick={handleBatchModifyTags}
+                          >
+                            修改标签
+                          </Menu.Item>
+                        </Menu>
+                      }
+                      trigger="click"
+                      position="bl"
                     >
-                      批量修改
-                    </Button>
-                  </Dropdown>
+                      <Button
+                        icon={<IconEdit />}
+                        className="mr-[20px]"
+                        disabled={false}
+                      >
+                        批量修改
+                      </Button>
+                    </Dropdown>
+                  </PermissionWrapper>
                 )}
-
-                {/* <Popover
-                  content="请先选择一个资产"
-                  disabled={selectedRowKeys.length === 1}
-                  position="top"
-                > */}
-                <Button
-                  icon={<IconSettings />}
-                  className="mr-[20px]"
-                  // disabled={selectedRowKeys.length !== 1}
-                  onClick={handleAssetSettings}
+                <PermissionWrapper
+                  permission={DATA_ASSET_PERMISSIONS.GET_TABLE}
                 >
-                  资产设置
-                </Button>
+                  <Button
+                    icon={<IconSettings />}
+                    className="mr-[20px]"
+                    onClick={handleAssetSettings}
+                  >
+                    资产设置
+                  </Button>
+                </PermissionWrapper>
                 {/* </Popover> */}
                 <Button
                   icon={<IconSettings />}

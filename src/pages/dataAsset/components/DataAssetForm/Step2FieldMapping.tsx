@@ -23,6 +23,8 @@ import {
 } from '@/types/dataAssetApi';
 import { autoMapDataAssetFieldAndSource } from '@/api/dataAsset';
 import { RESERVED_FIELD_ENS } from '../../utils/const';
+import { PermissionWrapper } from '@/components/PermissionGuard';
+import { DATA_ASSET_PERMISSIONS } from '@/config/permissions';
 
 const FormItem = Form.Item;
 const Row = Grid.Row;
@@ -49,6 +51,7 @@ interface Step2FieldMappingProps {
   onCancel: () => void;
   onPrev: () => void;
   onFinish: (fieldsWithMappings: CreateDataAssetAndMappingReq) => void;
+  isEditMode?: boolean;
 }
 
 export default function Step2FieldMapping({
@@ -62,7 +65,8 @@ export default function Step2FieldMapping({
   findDataAssetMappingData,
   onCancel,
   onPrev,
-  onFinish
+  onFinish,
+  isEditMode = false
 }: Step2FieldMappingProps) {
   const [form] = Form.useForm();
 
@@ -569,9 +573,17 @@ export default function Step2FieldMapping({
 
       {/* 操作按钮 */}
       <div className={styles.actionBar}>
-        <Button onClick={handleFinish} type="primary">
-          确定
-        </Button>
+        <PermissionWrapper
+          permission={
+            isEditMode
+              ? [DATA_ASSET_PERMISSIONS.MODIFY_TABLE]
+              : [DATA_ASSET_PERMISSIONS.CREATE_TABLE]
+          }
+        >
+          <Button onClick={handleFinish} type="primary">
+            确定
+          </Button>
+        </PermissionWrapper>
         <Button onClick={onPrev}>上一步</Button>
         <Button onClick={onCancel}>取消</Button>
       </div>
