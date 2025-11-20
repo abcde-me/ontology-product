@@ -535,3 +535,9 @@
 .menu-item-content-active:hover {
   color: #007dfa;
 }
+
+.label-mapping-select .arco-input-tag-inner {
+  input {
+    min-width: 100px !important;
+  }
+}
