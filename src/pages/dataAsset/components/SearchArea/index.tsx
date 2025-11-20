@@ -301,7 +301,7 @@ export default function SearchArea({
     return button;
   };
 
-  const isBaseTagOption = (opt: string | BaseTag): opt is BaseTag => {
+  const isBaseTagOption = (opt: string | number | BaseTag): opt is BaseTag => {
     if (typeof opt !== 'object' || opt === null) {
       return false;
     }
@@ -428,13 +428,11 @@ export default function SearchArea({
             onChange={(val) => handleFieldValueChange(field.id, val)}
             allowClear
           >
-            {field.values
-              ?.filter((opt): opt is string => typeof opt === 'string')
-              .map((opt) => (
-                <Select.Option key={opt} value={opt}>
-                  {opt}
-                </Select.Option>
-              ))}
+            {field.values.map((opt) => (
+              <Select.Option key={String(opt)} value={String(opt)}>
+                {opt}
+              </Select.Option>
+            ))}
           </Select>
         );
       case 'range':
