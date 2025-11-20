@@ -8,7 +8,8 @@ import {
   Message,
   Form,
   Table,
-  Select
+  Select,
+  DatePicker
 } from '@arco-design/web-react';
 import { MetadataField } from './DataAssetFormContainer';
 import ImportFieldsModal from './ImportFieldsModal';
@@ -21,8 +22,14 @@ import {
 import { listDataAssetFieldTypes } from '@/api/dataAsset';
 import { ImportType } from '../../types';
 import noDataElement from '@/components/no-data';
-import { RESERVED_FIELD_ENS, SYSTEM_FIELDS } from '../../utils/const';
+import {
+  RESERVED_FIELD_ENS,
+  SYSTEM_FIELDS,
+  isDateType,
+  isDateTimeType
+} from '../../utils/const';
 import EllipsisPopoverCom from '@/components/ellipsis-popover-com';
+import dayjs from 'dayjs';
 
 const FormItem = Form.Item;
 
@@ -151,16 +158,68 @@ export default function Step1MetadataFields({
       title: '空值默认填充',
       dataIndex: 'default',
       width: 272,
-      render: (_: any, record: any) => (
-        <Input
-          value={record.default}
-          allowClear
-          disabled={
-            record.system === true || RESERVED_FIELD_ENS.has(record.nameEn)
-          }
-          onChange={(value) => handleUpdateField(record.id, { default: value })}
-        />
-      )
+      render: (_: any, record: any) => {
+        const isDisabled =
+          record.system === true || RESERVED_FIELD_ENS.has(record.nameEn);
+        const fieldType = record.type;
+
+        // 如果是日期时间类型
+        if (isDateTimeType(fieldType)) {
+          return (
+            <DatePicker
+              value={record.default ? dayjs(record.default) : undefined}
+              allowClear
+              disabled={isDisabled}
+              showTime={{ format: 'HH:mm:ss' }}
+              format="YYYY-MM-DD HH:mm:ss"
+              placeholder="请选择时间"
+              style={{ width: '100%' }}
+              onChange={(value: any) => {
+                const dateStr = value
+                  ? typeof value.format === 'function'
+                    ? value.format('YYYY-MM-DD HH:mm:ss')
+                    : String(value)
+                  : '';
+                handleUpdateField(record.id, { default: dateStr });
+              }}
+            />
+          );
+        }
+
+        // 如果是日期类型
+        if (isDateType(fieldType)) {
+          return (
+            <DatePicker
+              value={record.default ? dayjs(record.default) : undefined}
+              allowClear
+              disabled={isDisabled}
+              format="YYYY-MM-DD"
+              placeholder="请选择日期"
+              style={{ width: '100%' }}
+              onChange={(value: any) => {
+                const dateStr = value
+                  ? typeof value.format === 'function'
+                    ? value.format('YYYY-MM-DD')
+                    : String(value)
+                  : '';
+                handleUpdateField(record.id, { default: dateStr });
+              }}
+            />
+          );
+        }
+
+        // 其他类型使用普通输入框
+        return (
+          <Input
+            value={record.default}
+            allowClear
+            disabled={isDisabled}
+            onChange={(value) =>
+              handleUpdateField(record.id, { default: value })
+            }
+          />
+        );
+      }
     },
     // {
     //   title: '必填',

@@ -553,6 +553,7 @@ export default function Step2FieldMapping({
         >
           <Table
             columns={tableColumns}
+            scroll={{ x: 'max-content' }}
             className="mt-[16px] w-full"
             data={mappings}
             rowKey="id"
