@@ -253,6 +253,54 @@ export default function DataAssetFormContainer({
     }
   }, []);
 
+  // 监听 metadataFields 变化，同步更新 mappings
+  useEffect(() => {
+    if (metadataFields.length === 0) {
+      setMappings([]);
+      return;
+    }
+
+    setMappings((prevMappings) => {
+      // 创建以 nameEn 为 key 的映射表，用于快速查找现有映射
+      const mappingMap = new Map<string, FieldMapping>();
+      prevMappings.forEach((mapping) => {
+        mappingMap.set(mapping.id, mapping);
+      });
+
+      // 为每个 metadataField 创建或更新对应的 mapping
+      const updatedMappings: FieldMapping[] = metadataFields.map(
+        (field, index) => {
+          const existingMapping = mappingMap.get(field.nameEn);
+
+          // 如果存在现有映射，保留其映射数据，只更新 sequence 和 nameZh
+          if (existingMapping) {
+            return {
+              ...existingMapping,
+              sequence: index + 1,
+              nameZh: field.nameZh
+            };
+          }
+
+          // 如果不存在，从 field.mapping 中提取数据来源映射创建新的 mapping
+          const sourceKeys: Record<string, string> = {};
+          field?.mapping?.forEach((item) => {
+            const key = getDataSourceKey(item);
+            sourceKeys[key] = item.fieldName;
+          });
+
+          return {
+            id: field.nameEn,
+            sequence: index + 1,
+            nameZh: field.nameZh,
+            ...sourceKeys
+          };
+        }
+      );
+
+      return updatedMappings;
+    });
+  }, [metadataFields]);
+
   // 下一步
   const handleNext = () => {
     setCurrentStep((prev) => prev + 1);
@@ -321,6 +369,7 @@ export default function DataAssetFormContainer({
             autoMapping={autoMapping}
             setAutoMapping={setAutoMapping}
             metadataFields={metadataFields}
+            setMetadataFields={setMetadataFields}
             dataSources={normalizedDataSources}
             findDataAssetMappingData={findDataAssetMappingData}
             onCancel={handleCancel}
