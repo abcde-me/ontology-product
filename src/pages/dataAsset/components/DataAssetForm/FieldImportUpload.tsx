@@ -3,6 +3,25 @@ import React, { useState } from 'react';
 import { PrefixAimdp } from '@/api/endpoints';
 import { IconUpload } from '@arco-design/web-react/icon';
 import { UploadStatus } from '../../types';
+import { downloadDataAssetFieldsTemplate } from '@/api/dataAsset';
+import { AxiosResponse } from 'axios';
+
+const getFileNameFromDisposition = (disposition?: string) => {
+  if (!disposition) return '';
+
+  const utf8Match = disposition.match(/filename\*=UTF-8''([^;]+)/i);
+  if (utf8Match?.[1]) {
+    try {
+      return decodeURIComponent(utf8Match[1]);
+    } catch (error) {
+      console.error('decode filename error', error);
+      return utf8Match[1];
+    }
+  }
+
+  const asciiMatch = disposition.match(/filename="?([^"]+)"?/i);
+  return asciiMatch?.[1] ?? '';
+};
 
 interface FieldImportUploadProps {
   onFileChange: (fileData: any) => void;
@@ -14,28 +33,53 @@ const FieldImportUpload: React.FC<FieldImportUploadProps> = ({
   onUploadingChange
 }) => {
   const [fileList, setFileList] = useState<any>([]);
+  const hasErrorFile = fileList.some(
+    (file: any) => file.status === UploadStatus.error
+  );
 
   const handleUploadChange = (files: any) => {
-    setFileList(files);
+    const processedFiles = files.map((file: any) => {
+      if (file.status === UploadStatus.done) {
+        if (file?.response?.code !== '' || file?.response?.status !== 200) {
+          Message.error(file?.response?.message ?? '上传失败，请重试');
+          return {
+            ...file,
+            status: UploadStatus.error
+          };
+        }
+      }
+
+      if (file.status === UploadStatus.error) {
+        const errorMsg =
+          file?.error?.response?.data?.message ||
+          file?.error?.message ||
+          file?.response?.message ||
+          '上传失败，请重试';
+        Message.error(errorMsg);
+      }
+
+      return file;
+    });
+
+    setFileList(processedFiles);
 
     // 检查是否有文件正在上传
-    const isUploading = files.some((file: any) => file.status === 'uploading');
+    const isUploading = processedFiles.some(
+      (file: any) => file.status === 'uploading'
+    );
     if (onUploadingChange) {
       onUploadingChange(isUploading);
     }
 
     if (onFileChange) {
-      if (files.length === 0) {
+      if (processedFiles.length === 0) {
         onFileChange(null);
         return;
       }
 
       // 处理已完成的文件
-      const completedFiles = files.filter(
-        (file: any) =>
-          file.status === UploadStatus.done &&
-          file.response &&
-          file.response.data
+      const completedFiles = processedFiles.filter(
+        (file: any) => file.status === UploadStatus.done && file.response
       );
 
       if (completedFiles.length > 0) {
@@ -88,9 +132,22 @@ const FieldImportUpload: React.FC<FieldImportUploadProps> = ({
     return true;
   };
 
-  const handleDownloadTemplate = () => {
-    // TODO: 实现模板下载功能
-    Message.info('模板下载功能待实现');
+  const handleDownloadTemplate = async () => {
+    try {
+      const res = (await downloadDataAssetFieldsTemplate()) as unknown as Blob;
+      const url = window.URL.createObjectURL(res);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `数据资产表模板.xlsx`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
+      Message.success('开始下载模板');
+    } catch (error) {
+      console.error('下载模板失败', error);
+      Message.error('下载模板失败');
+    }
   };
 
   return (
@@ -99,6 +156,7 @@ const FieldImportUpload: React.FC<FieldImportUploadProps> = ({
         drag
         className="upload-file"
         accept=".xlsx,.xls"
+        showUploadList={!hasErrorFile}
         beforeUpload={(file) => {
           return checkFile(file);
         }}
@@ -139,7 +197,11 @@ const FieldImportUpload: React.FC<FieldImportUploadProps> = ({
             <span>按照格式准备数据，点击</span>
             <a
               href="#"
-              onClick={handleDownloadTemplate}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                handleDownloadTemplate();
+              }}
               className="text-[#007DFA]"
             >
               下载模板

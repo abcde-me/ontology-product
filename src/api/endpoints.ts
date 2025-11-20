@@ -221,6 +221,10 @@ export const PrefixAuthCenter = API_PREFIX + '/auth-center/api/v1';
 
 // RAG
 export const PrefixRag = API_PREFIX + '/dataset-service/internal/v1';
+export const PrefixRagV2 = '/aimdp-manager/api/v1';
+
+// 引擎
+export const PrefixEngine = '/metadata-service/api/v1';
 
 // 多模态数据治理平台接口
 // TODO: 代替换接口
@@ -231,24 +235,31 @@ export const ModaForgeResourceEndpoints = {
   GetUser: PrefixUserSpace + '/GetUser',
   GetProjOrg: PrefixUserSpace + '/GetProjOrg',
 
+  // 引擎相关
+  // 获取文件二进制数据 (参数通过 query string 传递: bucket, path)
+  GetFileBinaryData: PrefixAimdp + '/DownloadFile',
   // RAG相关
+  // 查询知识库文件详情
+  GetKnowledgeDocument: PrefixRagV2 + '/GetKnowledgeDocument',
+  // 预览图片
+  PreviewUrl: PrefixAimdp + '/PreviewUrl',
   // 查询知识库文件列表
   ListKnowledgeDocuments: PrefixRag + '/ListKnowledgeDocuments',
   // 查询知识库文件目录层级
-  ListKnowledgeDocumentCatalogs: PrefixRag + '/ListKnowledgeDocumentCatalogs',
+  ListKnowledgeDocumentCatalogs: PrefixRagV2 + '/ListKnowledgeDocumentCatalogs',
   // 查询知识库分块列表
-  ListKnowledgeChunks: PrefixRag + '/ListKnowledgeChunks',
+  ListKnowledgeChunks: PrefixRagV2 + '/ListKnowledgeChunks',
   // 查询分块详情
-  GetKnowledgeChunk: PrefixRag + '/GetKnowledgeChunk',
+  GetKnowledgeChunk: PrefixRagV2 + '/GetKnowledgeChunk',
   // 编辑分块内容
-  UpdateKnowledgeChunk: PrefixRag + '/UpdateKnowledgeChunk',
+  UpdateKnowledgeChunk: PrefixRagV2 + '/UpdateKnowledgeChunk',
   // 编辑分块元素信息
-  UpdateKnowledgeChunkMaterials: PrefixRag + '/UpdateKnowledgeChunkMaterials',
+  UpdateKnowledgeChunkMaterials: PrefixRagV2 + '/UpdateKnowledgeChunkMaterials',
   // 编辑分块增强信息
   UpdateKnowledgeChunkEnhancement:
     PrefixRag + '/UpdateKnowledgeChunkEnhancement',
   // 查询分块溯源日志
-  GetKnowledgeChunkTraceLog: PrefixRag + '/GetKnowledgeChunkTraceLog',
+  GetKnowledgeChunkTraceLog: PrefixRagV2 + '/GetKnowledgeChunkTrace',
   // 运行命中测试
   RunKnowledgeHitTesting: PrefixRag + '/RunKnowledgeHitTesting',
   // 查询命中测试历史记录
@@ -327,6 +338,7 @@ export const ModaForgeResourceEndpoints = {
   createMetaDataDefinition: PrefixAimdp + '/CreateMetaDataDefinition', // 创建元数据目录
   fileExportApi: PrefixAimdp + `/OutputToConnector`,
   listMetaData: PrefixAimdp + '/ListMetaData', // 查询元数据列表
+  refreshMetaDataList: PrefixAimdp + '/RefreshMetaDataList', // 刷新元数据列表
   createDirMetaData: PrefixAimdp + '/CreateDirMetaData', // 创建元数据目录
   checkSqlApi: PrefixAimdp + '/CheckSQL', // 校验SQL
 
@@ -356,17 +368,19 @@ export const ModaForgeResourceEndpoints = {
   //查询数据集详细信息的数据内容和
   datasetContentsApi: PrefixAimdp + '/GetDatasetTargetVersion',
   //编辑数据集版本数据
-  editDatasetVersionApi: PrefixAimdp + '/EditDatasetTargetVersion',
+  editDatasetVersionApi: PrefixAimdp + '/UpdateJsonLData',
   //获取数据集版本列表
-  datasetVersionListApi: PrefixAimdp + '/ListDatasetVersion',
+  datasetVersionListApi: PrefixAimdp + '/ListDatasetChangeLogs',
   //版本重新生成
   datasetVersionRebuildApi: PrefixAimdp + '/RenewDatasetTargetVersion',
   //数据内容文件表
-  dataContentFileList: PrefixAimdp + '/GetDatasetFilesTargetVersion',
+  dataContentFileList: PrefixAimdp + '/ListDatasetData',
   //数据内容数据库表
   dataContentTableList: PrefixAimdp + '/GetDatasetTableTargetVersion',
   // 数据集场景分类列表
   datasetSceneListApi: PrefixAimdp + '/ListScenes',
+  // 数据集场景分类批量更新
+  datasetBatchUpdateSceneApi: PrefixAimdp + '/BatchUpdateScene',
 
   // 连接器接口
 
@@ -545,7 +559,10 @@ export const ModaForgeResourceEndpoints = {
   // 批量删除数据资产表中的数据信息
   deleteDataAssetDataBatch: PrefixAimdp + '/DeleteDataAssetDataBatch',
   // 批量修改数据资产表中的标签信息
-  editDataAssetDataTagsBatch: PrefixAimdp + '/EditDataAssetDataTagsBatch'
+  editDataAssetDataTagsBatch: PrefixAimdp + '/EditDataAssetDataTagsBatch',
+  // 下载数据资产字段模板
+  downloadDataAssetFieldsTemplate:
+    PrefixAimdp + '/DownloadDataAssetFieldsTemplate'
 };
 
 /**

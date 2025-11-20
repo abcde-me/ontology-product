@@ -1,0 +1,145 @@
+.arco-table-tr > th {
+  background-color: rgb(245, 249, 255) !important;
+}
+.arcoPagination {
+  display: flex;
+  justify-content: end;
+  margin-right: 20px;
+}
+.hoverStyle {
+  cursor: pointer;
+  color: rgb(0, 125, 250);
+}
+.hoverStyle:hover {
+  color: rgba(0, 125, 250, 0.5);
+}
+.footerBbtnBox {
+  margin: 14px 0px 20px 14px;
+  display: flex;
+  justify-content: flex-end;
+}
+.cycleLoadingBox {
+  width: '100%';
+  border: 0.8px solid #ccc;
+  border-radius: 6px;
+  margin: 15px 0px;
+  padding: 14px 10px 0px 0px;
+}
+.quickOptions {
+  width: '100%';
+  display: flex;
+  flex-wrap: wrap;
+}
+.quickOptionsChidren {
+  margin: 5px 3px;
+  padding: 2px 13px;
+  border: 0.7px solid #ccc;
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+}
+.arco-timepicker-container {
+  width: '100%';
+}
+// 代码编辑器容器
+.sql-editor-container {
+  flex: 1;
+  background-color: #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  overflow: hidden;
+  position: relative;
+
+  :global(.arco-spin-children) {
+    height: 100%;
+  }
+
+  // CodeMirror 编辑器样式
+  .code-editor {
+    height: 100%;
+    min-height: 300px;
+
+    :global(.cm-editor) {
+      height: 100%;
+    }
+  }
+
+  :global(.cm-content) {
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 24px;
+    color: #0f172a;
+  }
+
+  :global(.cm-placeholder) {
+    color: #94a3b8;
+  }
+
+  :global(.cm-line) {
+    padding: 0 12px;
+  }
+
+  :global(.cm-activeLine) {
+    background-color: unset;
+  }
+
+  :global(.cm-gutters) {
+    border: unset;
+    padding-top: 3px;
+    background-color: unset;
+    color: var(--color-text-4);
+    width: 24px;
+  }
+
+  .sql-running-info-panel {
+    :global(.arco-collapse-item-content-box) {
+      padding: 8px 12px 12px;
+    }
+  }
+}
+
+.sql-editor-form-item {
+  :global(.arco-form-label-item .arco-form-item-symbol) {
+    display: none;
+  }
+}
+.code-mirror-disabled {
+  cursor: not-allowed;
+  pointer-events: none;
+  opacity: 0.7;
+
+  :global(.cm-scroller) {
+    background-color: #f8fafd;
+  }
+}
+
+.data-load-form {
+  padding: 24px 24px 0;
+
+  :global(.arco-form-label-item) {
+    width: 128px;
+    min-width: 128px;
+    flex: 0 0 128px;
+  }
+
+  :global(.arco-form-item-wrapper) {
+    max-width: 640px;
+  }
+}
+
+.data-load-create-container {
+  .footer-btn-box {
+    position: sticky;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 20px 24px;
+    background-color: #fff;
+    width: 100%;
+    z-index: 1;
+    // border-top: 1px solid #e2e8f0;
+  }
+}

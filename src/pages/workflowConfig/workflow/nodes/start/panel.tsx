@@ -208,7 +208,7 @@ const Panel: FC<NodePanelProps<StartNodeType>> = ({ id, data }) => {
   };
 
   useEffect(() => {
-    getCatalogList({ root_type: 1 }).then((res) => {
+    getCatalogList({}).then((res) => {
       const dirs: Record<string, any>[] = [];
       res.data.src.forEach((catalog) => {
         dirs.push(

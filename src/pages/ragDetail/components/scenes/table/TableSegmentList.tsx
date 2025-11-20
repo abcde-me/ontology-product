@@ -4,52 +4,52 @@
  */
 
 import React, { useMemo } from 'react';
-import { TableSegment } from '../../../types';
 import { useRagDetailStore } from '../../../store/ragDetailStore';
+import { TableSegment } from '../../../types';
+import SegmentListHeader from '../../shared/SegmentListHeader';
 import TableSegmentCard from './TableSegmentCard';
-
 interface TableSegmentListProps {
   segments: TableSegment[];
-  showTableViewer?: boolean;
-  onToggleTableViewer?: () => void;
 }
 
 const TableSegmentList: React.FC<TableSegmentListProps> = ({
-  segments,
-  showTableViewer = true,
-  onToggleTableViewer
+  segments: propSegments
 }) => {
-  const { selectedSegmentId } = useRagDetailStore();
+  const {
+    selectedSegmentId,
+    segments: storeSegments,
+    segmentSearchText
+  } = useRagDetailStore();
 
-  const memoizedSegments = useMemo(() => {
-    return segments;
-  }, [segments]);
+  // 优先使用props，如果没有则使用store中的数据
+  const segments = propSegments || storeSegments;
+
+  // 搜索过滤逻辑
+  const filteredSegments = useMemo(() => {
+    if (!segmentSearchText.trim()) {
+      return segments;
+    }
+
+    const searchLower = segmentSearchText.toLowerCase().trim();
+    return segments.filter((segment) => {
+      const contentMatch = segment.content.toLowerCase().includes(searchLower);
+      return contentMatch;
+    });
+  }, [segments, segmentSearchText]);
 
   return (
     <div className="flex h-full flex-col bg-white">
       {/* 列表头部 */}
-      <div className="flex h-16 items-center justify-between border-b border-gray-200 bg-gray-50 px-4">
-        <div className="flex items-center gap-6">
-          <div className="text-sm text-gray-600">
-            表格数:{' '}
-            <span className="font-medium text-gray-900">{segments.length}</span>
-          </div>
-        </div>
-        {onToggleTableViewer && (
-          <button
-            onClick={onToggleTableViewer}
-            className="rounded px-3 py-1 text-sm text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900"
-          >
-            {showTableViewer ? '隐藏表格' : '显示表格'}
-          </button>
-        )}
-      </div>
+      <SegmentListHeader
+        totalCount={segments.length}
+        filteredCount={filteredSegments.length}
+      />
 
       {/* 分段列表 */}
-      <div className="flex-1 overflow-y-auto p-4">
-        {memoizedSegments.length > 0 ? (
+      <div className="flex-1 overflow-y-auto">
+        {filteredSegments.length > 0 ? (
           <div className="space-y-3">
-            {memoizedSegments.map((segment) => (
+            {filteredSegments.map((segment) => (
               <TableSegmentCard
                 key={segment.id}
                 segment={segment}

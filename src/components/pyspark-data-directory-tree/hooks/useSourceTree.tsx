@@ -44,11 +44,9 @@ export const useSourceTree = () => {
   // 获取数据目录列表
   const getCatalogList = async (
     search?: string,
-    root_type: CatalogRootType = CatalogRootType.Source,
     dir_type: CatalogItemType = CatalogItemType.Volume
   ) => {
     const res = await getCatalogListApi({
-      root_type,
       search,
       dir_type,
       fetch_volume_size: true

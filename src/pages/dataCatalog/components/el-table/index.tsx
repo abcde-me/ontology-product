@@ -86,13 +86,7 @@ export default function Eltable() {
   const [inputValue, setInputValue] = useState(''); // Source表格输入框的值
 
   // Target表格特有的状态（高级搜索）
-  const [searchType, setSearchType] = useState('数据内容'); // Target表格搜索类型状态
   const [searchKeyword, setSearchKeyword] = useState(''); // Target表格搜索关键字状态
-  const [searchCondition, setSearchCondition] = useState({
-    type: '数据内容',
-    keyword: '',
-    isActive: false
-  }); // Target表格搜索条件状态，传递给子组件
 
   const [visible, setVisible] = useState(false); // 下载弹框控制
 
@@ -128,16 +122,6 @@ export default function Eltable() {
         setSearchValue('');
         setInputValue('');
       }
-      if (tableType === 'target' || !tableType) {
-        // 重置目标表格搜索
-        setSearchKeyword('');
-        setSearchType('数据内容');
-        setSearchCondition({
-          type: '数据内容',
-          keyword: '',
-          isActive: false
-        });
-      }
     };
     window.addEventListener('resetSearchInputs', handleResetSearch);
     return () => {
@@ -153,11 +137,6 @@ export default function Eltable() {
         console.log('接收到搜索类型变化事件，重置关键词输入:', searchType);
         // 清空搜索关键词，保留搜索类型
         setSearchKeyword('');
-        setSearchCondition((prev) => ({
-          ...prev,
-          keyword: '',
-          isActive: false
-        }));
       }
     };
     window.addEventListener('resetSearchKeyword', handleResetSearchKeyword);
@@ -199,96 +178,6 @@ export default function Eltable() {
     setSearchValue('');
     const event = new CustomEvent('resetPageToFirst', {
       detail: { tableType: 'source' }
-    });
-    window.dispatchEvent(event);
-  };
-
-  // ========== Target表格的搜索逻辑 ==========
-  // Target表格搜索类型变化处理
-  const handleSearchTypeChange = (value) => {
-    setSearchType(value);
-    setSearchCondition((prev) => ({
-      ...prev,
-      type: value,
-      keyword: '',
-      isActive: false
-    }));
-    setSearchKeyword('');
-    const event = new CustomEvent('resetPageToFirst', {
-      detail: { tableType: 'target' }
-    });
-    window.dispatchEvent(event);
-  };
-
-  // Target表格的搜索逻辑（支持按类型搜索）
-  const handleTargetSearch = (keyword, type = searchType) => {
-    setSearchKeyword(keyword);
-
-    if (!keyword.trim()) {
-      // 如果搜索关键字为空，重置搜索条件
-      console.log('Target表格清空搜索');
-      setSearchCondition({
-        type: type,
-        keyword: '',
-        isActive: false
-      });
-      const event = new CustomEvent('resetPageToFirst', {
-        detail: { tableType: 'target' }
-      });
-      window.dispatchEvent(event);
-      return;
-    }
-
-    console.log(`Target表格按${type}搜索:`, keyword);
-
-    // 更新搜索条件，传递给子组件
-    const newSearchCondition = {
-      type: type,
-      keyword: keyword.trim(),
-      isActive: true
-    };
-
-    setSearchCondition(newSearchCondition);
-
-    if (type === '数据内容') {
-      // 按数据内容搜索的逻辑
-      handleContentSearch(keyword, newSearchCondition);
-    } else if (type === 'ID') {
-      // 按ID搜索的逻辑
-      handleIdSearch(keyword, newSearchCondition);
-    }
-
-    const event = new CustomEvent('resetPageToFirst', {
-      detail: { tableType: 'target' }
-    });
-    window.dispatchEvent(event);
-  };
-
-  // Target表格按数据内容搜索
-  const handleContentSearch = (keyword, condition) => {
-    console.log('执行数据内容搜索:', keyword);
-    console.log('搜索条件:', condition);
-    // 在这里添加按数据内容搜索的具体逻辑
-  };
-
-  // Target表格按ID搜索
-  const handleIdSearch = (keyword, condition) => {
-    console.log('执行ID搜索:', keyword);
-    console.log('搜索条件:', condition);
-    // 在这里添加按ID搜索的具体逻辑
-  };
-
-  // Target表格清除搜索
-  const handleTargetClear = () => {
-    setSearchKeyword('');
-    setSearchType('数据内容');
-    setSearchCondition({
-      type: '数据内容',
-      keyword: '',
-      isActive: false
-    });
-    const event = new CustomEvent('resetPageToFirst', {
-      detail: { tableType: 'target' }
     });
     window.dispatchEvent(event);
   };
@@ -354,11 +243,13 @@ export default function Eltable() {
             }
           } else {
             const fileIds = selectedRows.map((item: { id: number }) => item.id);
-
-            ids.push(...fileIds);
+            const fileUuids = selectedRows.map(
+              (item: { file_uuid: string }) => item.file_uuid
+            );
             if (selectedRows.length > 0) {
               const res = await deleteSourceFileBatch({
-                ids: ids
+                ids: fileIds,
+                file_uuids: fileUuids
               });
               if (res.status === 200) {
                 Message.success('删除成功');
@@ -415,71 +306,35 @@ export default function Eltable() {
 
   // 根据active类型渲染不同的搜索区域
   const renderSearchArea = () => {
-    if (activeTab === 'src') {
-      // Source表格的简单搜索区域
-      return (
-        <div
+    return (
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          background: '#f5f5f5',
+          borderRadius: 4,
+          overflow: 'hidden',
+          border: 0
+        }}
+      >
+        <Input.Search
+          allowClear
+          placeholder="输入文件名搜索"
+          value={inputValue}
+          onChange={(value) => setInputValue(value)}
+          onSearch={handleSourceSearch}
+          onPressEnter={() => handleSourceSearch(inputValue)}
+          onClear={handleSourceClear}
           style={{
-            display: 'flex',
-            alignItems: 'center',
-            background: '#f5f5f5',
-            borderRadius: 4,
-            overflow: 'hidden',
-            border: 0
+            width: 260,
+            height: 32,
+            border: 'none',
+            borderRadius: 0,
+            background: 'transparent'
           }}
-        >
-          <Input.Search
-            allowClear
-            placeholder="输入文件名搜索"
-            value={inputValue}
-            onChange={(value) => setInputValue(value)}
-            onSearch={handleSourceSearch}
-            onPressEnter={() => handleSourceSearch(inputValue)}
-            onClear={handleSourceClear}
-            style={{
-              width: 260,
-              height: 32,
-              border: 'none',
-              borderRadius: 0,
-              background: 'transparent'
-            }}
-          />
-        </div>
-      );
-    } else {
-      // Target表格的高级搜索区域（支持搜索类型选择）
-      return (
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            borderRadius: 4,
-            overflow: 'hidden',
-            width: '260px'
-          }}
-        >
-          <Input.Group compact>
-            <Select
-              value={searchType}
-              style={{ width: '100px' }}
-              onChange={handleSearchTypeChange}
-            >
-              <Select.Option value="数据内容">数据内容</Select.Option>
-              <Select.Option value="ID">ID</Select.Option>
-            </Select>
-            <InputSearch
-              placeholder={`输入ID/关键字搜索`}
-              style={{ width: '160px' }}
-              value={searchKeyword}
-              onChange={(value) => setSearchKeyword(value)}
-              onSearch={handleTargetSearch}
-              onClear={handleTargetClear}
-              allowClear
-            />
-          </Input.Group>
-        </div>
-      );
-    }
+        />
+      </div>
+    );
   };
 
   // 渲染通用的操作按钮区域
@@ -569,9 +424,9 @@ export default function Eltable() {
   );
 
   // 如果是元数据目录，直接渲染 MetaData 组件
-  if (selectedNodeType === 'meta_data') {
+  if (selectedNodeType === 'metadata') {
     return (
-      <div style={{ flex: 1, overflowX: 'auto' }}>
+      <div key={selectedKey} style={{ flex: 1, overflowX: 'auto' }}>
         <div style={{ height: 'calc(100% - 50px)' }}>
           <div className="data-catalog-content">
             <MetaData />
@@ -625,10 +480,9 @@ export default function Eltable() {
             onSelectionChange={handleSelectionChange}
             // Source表格专用属性
             searchValue={activeTab === 'src' ? searchValue : undefined}
-            searchCondition={activeTab === 'dst' ? searchCondition : undefined}
             startTime={startTime}
             endTime={endTime}
-            tableType={activeTab === 'src' ? 'source' : 'target'}
+            tableType={'source'}
             // 数据类型标识，默认为volume，可根据需要扩展
             dataType={selectedNodeType === 'db_item' ? 'database' : 'volume'}
             selectedFullPath={selectedPath}

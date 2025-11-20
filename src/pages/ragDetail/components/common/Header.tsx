@@ -5,10 +5,28 @@ import BreadCrumbHeader from '@/components/breadcrumb-header';
 
 const Header: React.FC = () => {
   const history = useHistory();
-  const { filePath } = useRagDetailStore();
-
+  const { filePath, documentName, datasetName } = useRagDetailStore();
   // 解析文件路径为面包屑项
   const breadcrumbItems = useMemo(() => {
+    // 优先使用 API 返回的 documentName 和 datasetName 构建面包屑
+    if (documentName && datasetName) {
+      return [
+        {
+          name: '知识库',
+          isLast: false
+        },
+        {
+          name: datasetName,
+          isLast: false
+        },
+        {
+          name: documentName,
+          isLast: true
+        }
+      ];
+    }
+
+    // 降级方案：使用 filePath
     if (!filePath) return [];
 
     // 支持两种格式：
@@ -29,14 +47,14 @@ const Header: React.FC = () => {
       // 最后一项是文件名，不可点击
       isLast: index === pathParts.length - 1
     }));
-  }, [filePath]);
+  }, [filePath, documentName, datasetName]);
 
   const handleBack = () => {
     history.goBack();
   };
 
   return (
-    <div className="flex h-[56px] items-center bg-[#F7F8FA] px-[20px]">
+    <div className="flex h-[56px] items-center px-[20px]">
       <BreadCrumbHeader list={breadcrumbItems} onArrowClick={handleBack} />
     </div>
   );

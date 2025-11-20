@@ -20,6 +20,8 @@ export interface DataAssetField {
 export interface MappingItem {
   /** 数据来源字段名 */
   feildName: string;
+  /** 数据来源字段名（兼容新字段名） */
+  fieldName?: string;
   /** 数据来源表名 */
   tableName: string;
   /** 数据来源类型 */
@@ -131,6 +133,7 @@ export interface AutoMapDataAssetFieldAndSourceResItem {
     databaseName?: string;
     fieldType: string;
     feildName: string;
+    fieldName?: string;
   }[];
 }
 
@@ -152,7 +155,9 @@ export interface ColumnField {
   /** 显示排序 0代表不显示，1代表第一列，2代表第二列，以此类推 */
   displaySort: number;
   /** 字段值 */
-  values: string[];
+  values: Array<string | BaseTag>;
+  /** 去重后的数量 */
+  distinctCount: number;
 }
 
 export interface EditDataAssetFieldsDisplayReq {
@@ -221,4 +226,11 @@ export interface BaseTag {
   name: string;
   description: string;
   valueList: TagValueItem[];
+}
+
+export interface FieldSearchItem {
+  isEnumAble: boolean;
+  nameEn: string;
+  type: string;
+  searchContent: string[];
 }

@@ -35,8 +35,8 @@ export interface ApiSegment {
   content: string;
   type: 'text' | 'image' | 'table'; // 分段类型
   char_count: number;
-  title: string;
-  title_id: string;
+  parent_title: string;
+  parent_title_id: string;
   enabled: boolean;
   source: string; // 'Auto' | 'Manual'
   is_edit: boolean;
@@ -75,8 +75,8 @@ export interface Segment {
   createdAt?: string;
   updatedAt?: string;
   pdfCoordinates?: PDFCoordinate[]; // 可能跨多页
-  title?: string;
-  titleId?: string; // 新增：用于关联目录树
+  parentTitle?: string;
+  parentTitleId?: string; // 新增：用于关联目录树
   fullTitle?: string;
   level?: number;
   type?: 'text' | 'image' | 'table'; // 新增：分段类型
@@ -141,6 +141,8 @@ export interface ImageElement {
   positionInfo?: string; // 位置信息
   dimensions?: string; // 尺寸
   modifiers?: string; // 修饰
+  bucketName?: string; // S3 bucket 名称
+  path?: string; // S3 路径
 }
 
 // 表格元素
@@ -181,12 +183,58 @@ export interface EnhancementInfo {
   tags?: string[]; // 标签
 }
 
+// 新的后端返回的位置信息（用于分段详情）
+export interface ApiPositionDetail {
+  bbox?: [number, number, number, number]; // 坐标 [x1, y1, x2, y2]
+  text_offset?: {
+    start: number;
+    end: number;
+  };
+  xpath?: string;
+  block_index?: number;
+  page_id?: number; // 页码
+}
+
+// 新的后端返回的元素格式
+export interface ApiMaterial {
+  id: string; // 元素ID
+  type: 'text' | 'title' | 'table' | 'image' | 'formula'; // 元素类型
+  text: string; // 文本内容（对于image是s3路径，对于table是JSON字符串，对于formula是公式字符串）
+  positions?: ApiPositionDetail[]; // 位置信息
+  uri?: string; // 资源URI（如S3路径）
+  bucket_name?: string; // S3 bucket 名称（图片专用）
+  path?: string; // S3 路径（图片专用）
+}
+
+// 新的后端返回的AI增强数据
+export interface ApiAiData {
+  summaries?: string; // 总结
+  questions?: string; // 假设性问题
+  keywords?: string[]; // 实体
+  tags?: Array<{
+    id: number;
+    name: string;
+  }>; // 标签
+}
+
+// 新的后端返回的分段详情数据
+export interface ApiSegmentDetail {
+  id: string; // 分段编号
+  char_count: number; // 分段大小
+  parent_id?: string; // 父分片ID
+  left_chunk_id?: string; // 左邻分片ID
+  right_chunk_id?: string; // 右邻分片ID
+  materials?: ApiMaterial[]; // 元素列表
+  ai_data?: ApiAiData; // AI增强数据
+}
+
 // 分段详情数据
 export interface SegmentDetailData {
   segmentId: string;
   charCount: number;
   elements: Element[];
   enhancement?: EnhancementInfo; // 分段增强信息（可选）
+  metadata?: Record<string, string>; // 元数据（可选）
 }
 
 // 新的后端返回的目录树节点结构
@@ -227,7 +275,7 @@ export interface DirectoryNode {
 export interface RagDetailData {
   ragId: string;
   fileName: string;
-  filePath: string;
+  filePath: string; // 显示用的文件路径
   sceneType: SceneType;
   segments:
     | Segment[]
@@ -236,6 +284,8 @@ export interface RagDetailData {
     | PptSegment[]
     | TableSegment[];
   directory?: DirectoryNode[]; // 仅在hierarchical场景中使用
+  bucket?: string; // 文件存储桶
+  path?: string; // 文件实际存储路径
 }
 
 export interface SegmentUpdatePayload {
@@ -272,10 +322,26 @@ export interface RagDetailState {
   segmentDrawerSegmentId: string | null;
   // Segment search state
   segmentSearchText: string;
+  // File binary data state
+  fileBinaryData: ArrayBuffer | null; // 文件二进制数据
+  fileBinaryDataLoading: boolean; // 文件二进制数据加载状态
+  fileBinaryDataError: string | null; // 文件二进制数据加载错误
+  bucket: string; // 文件存储桶
+  path: string; // 文件路径
+  // Document info state
+  documentName: string; // 文件名称（来自API）
+  datasetName: string; // 数据集名称（来自URL）
+  documentFormat: string; // 文件格式（来自API，对应sceneType）
 }
 
 export interface RagDetailActions {
-  initializeRagDetail: (datasetId: string, documentId: string) => Promise<void>;
+  initializeRagDetail: (
+    datasetId: string,
+    documentId: string,
+    bucketName?: string | null,
+    path?: string | null,
+    datasetName?: string | null
+  ) => Promise<void>;
   selectSegment: (segmentId: string) => void;
   selectDirectoryNode: (nodeId: string) => void;
   startEditingSegment: (segmentId: string) => void;
@@ -295,6 +361,9 @@ export interface RagDetailActions {
   closeSegmentDrawer: () => void;
   // Segment search actions
   setSegmentSearchText: (text: string) => void;
+  // File binary data actions
+  loadFileBinaryData: (bucket: string, path: string) => Promise<void>;
+  clearFileBinaryData: () => void;
 }
 
 export type RagDetailStore = RagDetailState & RagDetailActions;

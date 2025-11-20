@@ -10,6 +10,7 @@ import ElementList from './ElementList';
 import EnhancementInfo from './EnhancementInfo';
 import { useSegmentDetailStore } from './store/segmentDetailStore';
 import { useSegmentDrawerStore } from '../store/segmentDrawerStore';
+import { ParagraphMetadata } from './ParagrapMetadata';
 
 interface SegmentDetailProps {
   segmentId: string;
@@ -33,8 +34,9 @@ const SegmentDetail: React.FC<SegmentDetailProps> = ({ segmentId }) => {
     updateEnhancement
   } = useSegmentDetailStore();
 
-  // 从统一的 drawer store 获取数据
-  const { segmentDetailData, segmentDetailLoading } = useSegmentDrawerStore();
+  // 从统一的 drawer store 获取数据和 datasetId
+  const { segmentDetailData, segmentDetailLoading, datasetId } =
+    useSegmentDrawerStore();
 
   // 初始化数据
   useEffect(() => {
@@ -85,7 +87,7 @@ const SegmentDetail: React.FC<SegmentDetailProps> = ({ segmentId }) => {
                     取消
                   </button>
                   <button
-                    onClick={confirmEditing}
+                    onClick={() => confirmEditing(datasetId)}
                     className="rounded bg-blue-600 px-3 py-1.5 text-sm text-white hover:bg-blue-700 disabled:opacity-50"
                     disabled={loading}
                   >
@@ -115,6 +117,11 @@ const SegmentDetail: React.FC<SegmentDetailProps> = ({ segmentId }) => {
               onConfirmEditing={confirmEditingEnhancement}
             />
           </div>
+        )}
+
+        {/* 分段元数据 */}
+        {localDetailData.metadata && (
+          <ParagraphMetadata metadata={localDetailData.metadata} />
         )}
       </div>
     </div>

@@ -32,7 +32,7 @@ const Node: FC<NodeProps<StartNodeType>> = ({ id, data }) => {
     (data_category?.[4]?.enabled && data_category?.[4]?.format.length > 0);
 
   useEffect(() => {
-    getCatalogList({ root_type: 1 }).then((res) => {
+    getCatalogList({}).then((res) => {
       const dirs: Record<string, any>[] = [];
       res.data.src.forEach((catalog) => {
         dirs.push(...(catalog.children?.volume || []));

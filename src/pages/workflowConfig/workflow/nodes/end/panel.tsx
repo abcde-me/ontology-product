@@ -7,8 +7,9 @@ import type { NodePanelProps } from '@/pages/workflowConfig/workflow/types';
 import { Checkbox, Form, Input, Select } from '@arco-design/web-react';
 import { getWorkflowTargetPath, knowledgeBaseNameCheck } from '@/api/workflow';
 import { useUserInfo } from '@/store/userInfoStore';
-import { getTagList } from '@/api/datasetManagement';
+import { getTagList, getDatasetSceneList } from '@/api/datasetManagement';
 import './end.scss';
+import { validateName } from '@/utils/valiate';
 
 const Panel: FC<NodePanelProps<EndNodeType>> = ({ id, data }) => {
   const userInfo = useUserInfo();
@@ -20,7 +21,6 @@ const Panel: FC<NodePanelProps<EndNodeType>> = ({ id, data }) => {
   const workflow_uuid = searchParams.get('workflow_uuid');
 
   const [dataSource, setDataSource]: Array<any> = useState([]);
-  const [isEmbedding, setIsEmbedding] = useState(inputs?.is_embedding || false);
   const [knowledgeBaseNameValid, setKnowledgeBaseNameValid] = useState(true);
   const [knowledgeBaseName, setKnowledgeBaseName] = useState(
     inputs?.knowledge_base_name || ''
@@ -37,44 +37,26 @@ const Panel: FC<NodePanelProps<EndNodeType>> = ({ id, data }) => {
     getTagList().then((res) => {
       setKnowledgeBaseNameOptions(res.data || []);
     });
-
-    setSceneCategoryOptions([
-      {
-        id: 1,
-        name: '场景分类1'
-      },
-      {
-        id: 2,
-        name: '场景分类2'
-      },
-      {
-        id: 3,
-        name: '场景分类3'
-      }
-    ]);
-  }, []);
-  useEffect(() => {
-    getWorkflowTargetPath(2, '').then((res) => {
-      const dirsArr: Record<string, any>[] = [];
-      res.data.dst.forEach((catalog) => {
-        // 重置name结构
-        const restData = catalog.children?.volume?.map((item) => {
-          return {
-            ...item,
-            parent_name: catalog.name
-          };
-        });
-        dirsArr.push(...(restData || []));
-      });
-      setDataSource(dirsArr);
+    getDatasetSceneList()?.then((res) => {
+      setSceneCategoryOptions(res.data || []);
     });
   }, []);
+
+  useEffect(() => {
+    // 当sceneCategoryOptions有数据且Form已初始化，并且inputs.scene_id为空时设置默认值
+    if (sceneCategoryOptions.length > 0 && form) {
+      const currentSceneId = form.getFieldValue('scene_id');
+      // 只有在当前没有值的情况下才设置默认值
+      if (!currentSceneId && !inputs?.scene_id) {
+        form.setFieldsValue({ scene_id: sceneCategoryOptions[0]?.id });
+      }
+    }
+  }, [sceneCategoryOptions, form, inputs?.scene_id]);
 
   // 初始化时名称已回退为上一次输入合法名称，将名称校验设为true
   useEffect(() => {
     onValuesChange({ ...inputs, isKnowledgeBaseNameValid: true }, dataSource);
   }, []);
-
   return (
     <div className="wk-node-panel-content end-panel-content mt-[16px]">
       <Form
@@ -104,36 +86,30 @@ const Panel: FC<NodePanelProps<EndNodeType>> = ({ id, data }) => {
           tag_names: inputs?.tag_names
         }}
       >
-        {/* <FormItem
-          label="目标数据目录"
-          field="target_path_id"
-          rules={[{ required: true, message: '目标数据目录不可为空' }]}
-          style={{ margin: 0 }}
-          extra="选择工作流处理后数据的目标数据"
-        >
-          <Select
-            placeholder="请输入或选择目标数据目录"
-            style={{ width: '100%' }}
-            allowClear
-            showSearch
-            filterOption={(inputValue, option) => {
-              return option?.props?.children?.includes(inputValue);
-            }}
-          >
-            {dataSource.map((option) => (
-              <Option key={option.id} value={option.id}>
-                {`${option.parent_name}/${option.name}`}
-              </Option>
-            ))}
-          </Select>
-        </FormItem> */}
         <FormItem
           label="数据集名称："
           field="name"
-          rules={[{ required: true, message: '数据集名称不可为空' }]}
+          rules={[
+            {
+              required: true,
+              validator: (value, callback) => {
+                if (value === '' || value === undefined) {
+                  return callback('请输入数据集名称');
+                }
+                if (!validateName(value).isValid) {
+                  return callback(
+                    validateName(value).errorMessage ?? '数据集名称格式不正确'
+                  );
+                } else {
+                  return callback();
+                }
+              }
+            }
+          ]}
           style={{ margin: 0, paddingBottom: 24 }}
         >
           <Input
+            maxLength={50}
             value={knowledgeBaseName}
             placeholder="请输入数据集名称"
             style={{ width: '100%' }}
@@ -170,95 +146,19 @@ const Panel: FC<NodePanelProps<EndNodeType>> = ({ id, data }) => {
           />
         </FormItem>
         <FormItem label="场景分类：" field="scene_id" style={{ margin: 0 }}>
-          <Select
-            placeholder="请选择场景分类"
-            style={{ width: '100%' }}
-            filterOption={(inputValue, option) => {
-              return option?.props?.children?.includes(inputValue);
-            }}
-          >
+          <Select placeholder="请选择场景分类" style={{ width: '100%' }}>
             {sceneCategoryOptions.map((option) => (
               <Option key={option.id} value={option.id}>
                 <div className="scene-category-item">
-                  <span className="item-text text-[14px]">
-                    场景分类{option.id}
-                  </span>
+                  <span className="item-text text-[14px]">{option.name}</span>
                   <span className="item-text text-[14px] text-[#6E7B8D]">
-                    {option.name}
+                    {option.description}
                   </span>
                 </div>
               </Option>
             ))}
           </Select>
         </FormItem>
-        {/* <FormItem
-          extra="开启后会对输出数据执行向量化（Embedding）流程。"
-          field="is_embedding"
-        >
-          <Checkbox
-            className="mt-[8px] text-[14px]"
-            checked={isEmbedding}
-            value={isEmbedding}
-            onChange={(value) => {
-              setIsEmbedding(value);
-            }}
-          >
-            是否进行Embedding
-          </Checkbox>
-        </FormItem> */}
-        {/* {isEmbedding && (
-          <FormItem
-            label="知识库名称"
-            extra="为构建的知识库指定一个名称，用于后续的检索和管理"
-            field="knowledge_base_name"
-            rules={[
-              {
-                required: true,
-                validateTrigger: 'onBlur',
-                validator: async (value, callback) => {
-                  const formData = form.getFieldsValue() as EndNodeType;
-                  return knowledgeBaseNameCheck({
-                    knowledgeName: value,
-                    userId: userInfo?.id || '',
-                    dsWorkflowUuid: workflow_uuid || ''
-                  }).then((res) => {
-                    if (
-                      res.data &&
-                      (res.msg === 'success' || res.msg === '成功')
-                    ) {
-                      setKnowledgeBaseName(value);
-                      setKnowledgeBaseNameValid(true);
-                      // 校验通过保存名称
-                      onValuesChange(
-                        { ...formData, isKnowledgeBaseNameValid: true },
-                        dataSource
-                      );
-                    } else {
-                      // 校验未通过名称重置为之前名称
-                      setKnowledgeBaseNameValid(false);
-                      onValuesChange(
-                        {
-                          ...formData,
-                          isKnowledgeBaseNameValid: false,
-                          knowledge_base_name: knowledgeBaseName,
-                          knowledge_base_name_msg: res.msg
-                        },
-                        dataSource
-                      );
-                      callback(res.msg);
-                    }
-                  });
-                }
-              }
-            ]}
-          >
-            <Input
-              placeholder="请输入知识库名称（50字以内）"
-              maxLength={50}
-              value={knowledgeBaseName}
-            />
-          </FormItem>
-        )} */}
       </Form>
     </div>
   );

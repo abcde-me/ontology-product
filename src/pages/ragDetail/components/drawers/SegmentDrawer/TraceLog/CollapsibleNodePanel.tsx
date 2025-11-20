@@ -31,7 +31,7 @@ const CollapsibleNodePanel: React.FC<CollapsibleNodePanelProps> = ({
   const handleCopy = (data: any, section: 'input' | 'output') => {
     const jsonString = JSON.stringify(data, null, 2);
     navigator.clipboard.writeText(jsonString).then(() => {
-      Message.success(`已复制${section === 'input' ? '输入' : '输出'}数据`);
+      Message.success(`复制成功`);
     });
   };
 
@@ -57,7 +57,7 @@ const CollapsibleNodePanel: React.FC<CollapsibleNodePanelProps> = ({
         {/* Left side: Index, Name, Status */}
         <div className="flex items-center">
           <div className="flex h-4 w-4 items-center justify-center rounded bg-[#E8F2FF] text-xs font-medium text-[#2563EB]">
-            {node.index}
+            {node.index + 1}
           </div>
           <span className="ml-2 text-sm font-semibold text-gray-900">
             {node.name}

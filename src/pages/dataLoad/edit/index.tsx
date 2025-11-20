@@ -5,7 +5,6 @@ import {
   Message,
   Radio,
   Select,
-  TreeSelect,
   Collapse,
   Popover,
   Tag,
@@ -13,7 +12,6 @@ import {
   Switch
 } from '@arco-design/web-react';
 import React, { useEffect, useRef, useState, useCallback } from 'react';
-import Styles from './index.module.css';
 import SchedulerRun from '../../../components/scheduler-run';
 import {
   editLoad,
@@ -35,7 +33,7 @@ import CodeMirror from '@uiw/react-codemirror';
 import { IconCaretRight, IconDown, IconUp } from '@arco-design/web-react/icon';
 import SQLFormatIcon from '@/assets/sql/sql-format-ico.svg';
 import classNames from 'classnames';
-import styles from '../create/index.module.scss';
+import styles from '../edit/index.module.scss';
 import { useHistory, useParams as useRouteParams } from 'react-router';
 
 // 定义目录数据类型
@@ -97,6 +95,15 @@ function findTreeSelectPathById(
         if (result) return result;
       }
 
+      if (
+        item.children &&
+        typeof item.children === 'object' &&
+        item.children.metadata
+      ) {
+        const result = findInTree(item.children.metadata, target);
+        if (result) return result;
+      }
+
       // 对于本地文件类型，还需要检查children.volume数组
       if (
         item.children &&
@@ -145,6 +152,15 @@ function buildTreeSelectDisplayPath(
         item.children.db
       ) {
         const result = buildPath(item.children.db, target, newPath);
+        if (result) return result;
+      }
+
+      if (
+        item.children &&
+        typeof item.children === 'object' &&
+        item.children.metadata
+      ) {
+        const result = buildPath(item.children.metadata, target, newPath);
         if (result) return result;
       }
 
@@ -222,6 +238,40 @@ interface TreeNodeData {
 
 //   return null;
 // }
+
+function findNodeById(
+  nodes: (TreeNodeData | undefined)[] | undefined,
+  targetId: string | number | null
+): TreeNodeData | null {
+  if (!nodes || targetId === null || targetId === undefined) {
+    return null;
+  }
+
+  for (const node of nodes) {
+    if (!node) continue;
+    if (String(node.id) === String(targetId)) {
+      return node;
+    }
+    const children = node.children as any;
+    if (Array.isArray(children)) {
+      const found = findNodeById(children, targetId);
+      if (found) {
+        return found;
+      }
+    } else if (children && typeof children === 'object') {
+      for (const childGroup of Object.values(children)) {
+        if (Array.isArray(childGroup)) {
+          const found = findNodeById(childGroup as any, targetId);
+          if (found) {
+            return found;
+          }
+        }
+      }
+    }
+  }
+
+  return null;
+}
 
 const RunningInfoPanel = function ({
   checkStatus,
@@ -344,16 +394,17 @@ const Edit = (props) => {
   const [selectedTreeKeys, setSelectedTreeKeys] = useState<string[]>([]);
   const [selectedNodeType, setSelectedNodeType] =
     useState<TreeNodeData['type_name']>();
-  // TreeSelect显示的值（路径）
-  const [treeSelectDisplayValue, setTreeSelectDisplayValue] =
-    useState<string>('');
+  // 选中的路径
+  const [selectedPath, setSelectedPath] = useState<string>('');
+  // 选中的节点ID
+  const [selectedNodeId, setSelectedNodeId] = useState<string | number | null>(
+    null
+  );
   //获取连接器下面的表格
   const [talbleList, setTableList] = useState([]);
-  // TreeSelect 下拉框显示状态
-  const [dropdownVisible, setDropdownVisible] = useState(false);
   // SQL处理相关状态
   const [sqlContent, setSqlContent] = useState<string>(
-    props.detailData?.sql_process || ''
+    props.detailData?.sql || ''
   );
   const [checkStatus, setCheckStatus] = useState<CheckSQLStatus>(
     CheckSQLStatus.NONE
@@ -388,23 +439,17 @@ const Edit = (props) => {
   });
   const getTableList = async (connector_id: string) => {
     try {
-      const res = await getdetailList(connector_id);
+      const res = await getdetailList({ id: connector_id });
       setTableList(res?.data?.table_name || []);
     } catch (error) {
       console.error('获取连接器表格数据失败:', error);
     }
   };
-  useEffect(() => {
-    if (props.detailData?.connector_id) {
-      getTableList(props.detailData.connector_id);
-    }
-    getdirectoryDataList();
-  }, []);
   async function getdirectoryDataList() {
     try {
       const res = await getDirectoryList({
-        root_type: 1,
-        dir_type: props.detailData.source_type === 'db' ? 3 : undefined
+        root_type: 1
+        // dir_type: props.detailData.source_type === 'db' ? 3 : undefined
       });
       if (!res || res.status !== 200) {
         console.error('获取目录列表失败:', res);
@@ -572,80 +617,61 @@ const Edit = (props) => {
   // 根据data_path_id构建路径
   useEffect(() => {
     if (props.detailData?.data_path_id && directoryData.length > 0) {
-      if (
-        props.detailData?.source_type === 'db' ||
-        props.detailData?.source_type === 'local' ||
-        props.detailData?.source_type === 'hdfs' ||
-        props.detailData?.source_type === 's3'
-      ) {
-        // 数据库、本地文件、HDFS、S3类型都使用TreeSelect，需要找到对应的节点ID
-        const nodeId = findTreeSelectPathById(
+      // 找到对应的节点
+      const selectedNode =
+        findNodeById(directoryData, props.detailData?.data_path_id) || null;
+
+      if (selectedNode) {
+        const nodeId = String(selectedNode.id);
+        setSelectedNodeId(selectedNode.id);
+        setSelectedTreeKeys([nodeId]);
+        setSelectedNodeType(selectedNode?.type_name);
+
+        // 构建显示路径
+        const displayPath = buildTreeSelectDisplayPath(
           directoryData,
           props.detailData?.data_path_id
         );
-        if (nodeId) {
-          // const selectedNode = findNodeById(
-          //   directoryData as TreeNodeData[],
-          //   props.detailData?.data_path_id
-          // );
-          // if (selectedNode) {
-          //   setSelectedNodeType(selectedNode.type_name);
-          // } else {
-          //   setSelectedNodeType(undefined);
-          // }
-          console.log('设置TreeSelect初始值:', nodeId);
-          setSelectedTreeKeys([nodeId]);
-          // 构建显示路径
-          let displayPath = buildTreeSelectDisplayPath(
-            directoryData,
-            props.detailData?.data_path_id
-          );
-          props.detailData?.source_type === 'db'
-            ? (displayPath = displayPath + '/' + props.detailData?.db_name)
-            : null;
-          setTreeSelectDisplayValue(displayPath);
-          form.setFieldsValue({
-            dest_path_display: displayPath, // 显示完整路径
-            dest_path: nodeId // 隐藏字段保存节点ID
-          });
-        }
-      } else {
-        // 其他类型使用Cascader（如果还有的话）
-        const path = findPathById(
-          directoryData,
-          props.detailData?.data_path_id
-        );
-        if (path) {
-          setInitialPath(path as (string | string[])[]);
-          form.setFieldsValue({
-            dest_path: path
-          });
-        }
+        setSelectedPath(displayPath);
+        form.setFieldsValue({
+          dest_path: displayPath ? [displayPath] : undefined
+        });
       }
     }
   }, [
     props.detailData?.data_path_id,
     directoryData,
-    props.detailData?.source_type
+    props.detailData?.source_type,
+    form
   ]);
+
+  // 初始化数据：获取目录列表、表格列表，并设置 MutationObserver
   useEffect(() => {
+    // 获取目录列表
     getdirectoryDataList();
+
+    // 获取连接器表格列表
+    if (props.detailData?.connector_id) {
+      getTableList(props.detailData.connector_id);
+    }
+
+    // 创建 MutationObserver 监听 DOM 变化
+    const observer = new MutationObserver(() => {
+      const items = document.querySelectorAll('.arco-cascader-list-item');
+      items.forEach((item) => item.removeAttribute('title'));
+    });
+
+    // 开始监听整个文档
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true
+    });
+
+    // 清理函数：断开 observer
     return () => {
       observer.disconnect();
     };
   }, []);
-
-  // 创建 MutationObserver 监听 DOM 变化
-  const observer = new MutationObserver(() => {
-    const items = document.querySelectorAll('.arco-cascader-list-item');
-    items.forEach((item) => item.removeAttribute('title'));
-  });
-
-  // 开始监听整个文档
-  observer.observe(document.body, {
-    childList: true,
-    subtree: true
-  });
   // 切换载入类型的函数
   const handoffLoadFormHan = (val) => {
     if (val === 'once') {
@@ -667,11 +693,38 @@ const Edit = (props) => {
   };
   console.log(props.detailData?.load_type);
 
+  // 处理树选择
+  const handleTreeSelect = useCallback((selectedKeys: string[]) => {
+    console.log('handleSelect called', selectedKeys);
+    setSelectedTreeKeys(selectedKeys);
+  }, []);
+
+  // 处理路径变化
+  const handlePathChange = useCallback(
+    (path: string, nodeId?: string | number, nodeData?: TreeNodeData) => {
+      console.log('路径变化:', path, '节点ID:', nodeId, '节点数据:', nodeData);
+      // 优先使用 nodeData.id，如果没有则使用 nodeId，确保 dest_path_id 正确更新
+      const destPathId = nodeData?.id || nodeId || null;
+      setSelectedNodeId(destPathId);
+      setSelectedPath(path);
+      form.setFieldsValue({ dest_path: path ? [path] : undefined });
+      setSelectedNodeType(nodeData?.type_name);
+      console.log('更新后的 dest_path_id:', destPathId);
+    },
+    [form]
+  );
+
+  // 数据刷新回调
+  const handleDataRefresh = useCallback(async () => {
+    console.log('ComponentTree 请求数据刷新');
+    return await getdirectoryDataList();
+  }, []);
+
   // 处理SQL内容变化
   const handleSqlContentChange = useCallback(
     (value: string) => {
       setSqlContent(value);
-      form.setFieldsValue({ sql_process: value });
+      form.setFieldsValue({ sql: value });
       // 当SQL内容变化时，重置校验状态
       setCheckStatus((prevStatus) => {
         if (prevStatus !== CheckSQLStatus.NONE) {
@@ -734,16 +787,50 @@ const Edit = (props) => {
   // 监听SQL处理开关状态
   const sqlProcessEnabled = Form.useWatch('sql_process_enabled', form);
 
-  // 初始化SQL处理默认值
+  // 根据初始 SQL 是否有值来设置开关初始状态
   useEffect(() => {
-    if (props.detailData?.source_type !== 'db') {
-      return;
-    }
-    const currentSqlProcess = form.getFieldValue('sql_process_enabled');
-    if (!currentSqlProcess) {
-      form.setFieldsValue({ sql_process_enabled: 'disable' });
-    }
-  }, [form, props.detailData?.source_type]);
+    if (props.detailData?.source_type !== 'db') return;
+    const hasInitialSql =
+      typeof props.detailData?.sql === 'string' &&
+      props.detailData.sql.trim() !== '';
+    form.setFieldsValue({
+      sql_process_enabled: hasInitialSql ? 'enable' : 'disable'
+    });
+  }, [form, props.detailData?.sql, props.detailData?.source_type]);
+
+  // 当详情返回包含非空SQL时，自动发起一次校验
+  useEffect(() => {
+    // 仅对数据库类型处理
+    if (props.detailData?.source_type !== 'db') return;
+
+    const initialSql = (props.detailData?.sql || '').trim();
+    const currentConnectorId = props.detailData?.connector_id;
+
+    if (!initialSql || !currentConnectorId) return;
+    // 同步编辑器内容
+    setSqlContent(initialSql);
+    // 触发校验
+    (async () => {
+      try {
+        setCheckStatus(CheckSQLStatus.CHECKING);
+        setCheckMessage('');
+        const res = await checkSQL({
+          sql: initialSql,
+          connectorId: Number(currentConnectorId)
+        });
+        if (res?.status === 200 && res.data) {
+          setCheckStatus(res.data.status);
+          setCheckMessage(res.data.msg || '');
+        } else {
+          setCheckStatus(CheckSQLStatus.ERROR);
+          setCheckMessage(res?.message || '校验失败');
+        }
+      } catch (error: any) {
+        setCheckStatus(CheckSQLStatus.ERROR);
+        setCheckMessage(error?.message || '校验异常，请稍后重试');
+      }
+    })();
+  }, []);
 
   // 点击确定
   const okHan = async () => {
@@ -751,22 +838,12 @@ const Edit = (props) => {
       setLoading(true);
       const formValues = await form.validate();
       const { ...rest } = formValues;
-      // 处理不同数据源类型的路径ID获取
-      let pathId;
-      if (
-        props.detailData?.source_type === 'db' ||
-        props.detailData?.source_type === 'local' ||
-        props.detailData?.source_type === 'hdfs' ||
-        props.detailData?.source_type === 's3'
-      ) {
-        // 数据库、本地文件、HDFS、S3类型：dest_path直接是节点ID
-        pathId = rest.dest_path;
-      } else {
-        // 其他类型：dest_path是数组，取最后一个元素
-        pathId = Array.isArray(rest.dest_path)
+      // 使用 selectedNodeId 作为路径ID
+      const pathId =
+        selectedNodeId ||
+        (Array.isArray(rest.dest_path)
           ? rest.dest_path.at(-1)
-          : rest.dest_path;
-      }
+          : rest.dest_path);
 
       console.log('最终的pathId (将作为dest_path_id传递):', pathId);
 
@@ -783,9 +860,9 @@ const Edit = (props) => {
 
         if (sqlProcessEnabled === 'enable') {
           const sqlToCheck = (
-            rest.sql_process ??
+            rest.sql ??
             sqlContent ??
-            props.detailData?.sql_process ??
+            props.detailData?.sql ??
             ''
           ).trim();
           const currentConnectorId =
@@ -793,7 +870,7 @@ const Edit = (props) => {
             form.getFieldValue('connector_id');
 
           if (!currentConnectorId) {
-            Message.error('请先选择数据源连接器');
+            Message.error('请先绑定连接器');
             return;
           }
 
@@ -852,10 +929,10 @@ const Edit = (props) => {
           rest.sql_process_enabled || form.getFieldValue('sql_process_enabled');
         if (sqlProcessEnabled === 'enable') {
           baseFormData.sql_process_enabled = 'enable';
-          baseFormData.sql_process = rest.sql_process || sqlContent || '';
+          baseFormData.sql = rest.sql || sqlContent || '';
         } else {
           baseFormData.sql_process_enabled = 'disable';
-          baseFormData.sql_process = '';
+          baseFormData.sql = '';
         }
       }
 
@@ -899,7 +976,8 @@ const Edit = (props) => {
           Message.error(res.message);
         }
       }
-      props.getDetailList();
+      // 移除此处的 getDetailList 调用，因为返回详情页后，详情页会自动刷新数据
+      // props.getDetailList();
     } catch (error) {
       console.error('表单处理失败:', error);
     } finally {
@@ -909,6 +987,7 @@ const Edit = (props) => {
 
   return (
     <div
+      className={styles['data-load-create-container']}
       style={{
         display: 'flex',
         flexDirection: 'column',
@@ -924,8 +1003,7 @@ const Edit = (props) => {
         initialValues={{
           dest_path: initialPath
         }}
-        labelCol={{ span: 3 }}
-        wrapperCol={{ span: 10 }}
+        className={styles['data-load-form']}
       >
         <FormItem
           label="任务名称："
@@ -980,90 +1058,35 @@ const Edit = (props) => {
         </FormItem>
         <FormItem
           label="载入位置："
-          field="dest_path_display"
+          field="dest_path"
+          labelAlign="right"
           rules={[{ required: true, message: '请选择载入位置' }]}
         >
-          <TreeSelect
+          <ComponentTree
             className="db-tree-select"
-            placeholder="Please select ..."
+            placeholder="请选择载入位置"
             allowClear
-            popupVisible={dropdownVisible}
-            onVisibleChange={setDropdownVisible}
-            value={treeSelectDisplayValue}
-            onChange={(value) => {
-              // 处理清除选择的情况
-              if (!value) {
+            value={selectedPath}
+            onChange={(val) => {
+              setSelectedPath(val as string);
+              if (!val) {
+                form.setFieldsValue({ dest_path: undefined });
+                setSelectedNodeId(null);
                 setSelectedTreeKeys([]);
-                setTreeSelectDisplayValue('');
-                setSelectedNodeType(undefined);
-                form.setFieldsValue({
-                  dest_path_display: undefined,
-                  dest_path: undefined
-                });
               }
             }}
-            dropdownMenuStyle={{
-              maxHeight: 300,
-              padding: 0,
-              overflow: 'hidden' // 防止外层出现滚动条
-            }}
-            dropdownRender={() => (
-              <ComponentTree
-                directoryData={directoryData}
-                onDirectoryDataChange={setDirectoryData}
-                selectedKeys={selectedTreeKeys}
-                // onSelect={handleSelect}
-                onPathChange={(path, nodeId, nodeData) => {
-                  console.log(
-                    '路径变化:',
-                    path,
-                    '节点ID:',
-                    nodeId,
-                    '节点数据:',
-                    nodeData
-                  );
-                  // 更新选中的keys
-                  const key =
-                    nodeId !== undefined && nodeId !== null
-                      ? String(nodeId)
-                      : undefined;
-                  setSelectedTreeKeys(key ? [key] : []);
-                  setSelectedNodeType(nodeData?.type_name);
-                  // 更新显示值
-                  setTreeSelectDisplayValue(path);
-                  // 设置两个字段：显示字段和隐藏的节点ID字段
-                  form.setFieldsValue({
-                    dest_path_display: path, // 显示完整路径
-                    dest_path: nodeId // 隐藏字段保存节点ID，用作dest_path_id
-                  });
-                  console.log(
-                    '表单字段已设置 - dest_path_display:',
-                    path,
-                    'dest_path:',
-                    nodeId
-                  );
-                  // 选择完成后关闭下拉框
-                  // 初始节点id是一个字符串， 生成成功后是number类型
-                  if (isNumber(nodeId)) {
-                    setDropdownVisible(false);
-                  }
-                }}
-                showAddTree={true}
-                enableRootAdd={true}
-                activeTab="src"
-                onDataRefresh={getdirectoryDataList}
-                dataSourceType={props.detailData?.source_type}
-                tableNameNames={props.detailData?.db_name}
-              />
-            )}
-          >
-            {/* {generatorTreeNodes(directoryData)} */}
-          </TreeSelect>
-        </FormItem>
-
-        {/* 隐藏字段保存节点ID用于后端提交 */}
-        <FormItem field="dest_path" style={{ display: 'none' }}>
-          <Input />
+            directoryData={directoryData}
+            onDirectoryDataChange={setDirectoryData}
+            onSelect={handleTreeSelect}
+            selectedKeys={selectedTreeKeys}
+            onPathChange={handlePathChange}
+            showAddTree={true}
+            enableRootAdd={true}
+            activeTab="src"
+            onDataRefresh={handleDataRefresh}
+            dataSourceType={props.detailData?.source_type}
+            tableNameNames={props.detailData?.db_name}
+          />
         </FormItem>
         {/* SQL处理选项 - 仅在数据库类型且目录节点为元数据时显示 */}
         {props.detailData?.source_type === 'db' &&
@@ -1075,17 +1098,21 @@ const Edit = (props) => {
                 labelAlign="right"
                 rules={[{ required: true, message: '请选择SQL处理状态' }]}
                 initialValue={
-                  props.detailData?.sql_process_enabled || 'disable'
+                  props.detailData?.sql && props.detailData.sql.trim() !== ''
+                    ? 'enable'
+                    : 'disable'
                 }
               >
                 <Switch
+                  // 编辑态，禁止更改SQL处理状态
+                  disabled={true}
                   checked={sqlProcessEnabled === 'enable'}
                   onChange={handleSqlProcessChange}
                 />
               </FormItem>
 
               {sqlProcessEnabled === 'enable' && (
-                <FormItem label=" " field="sql_process">
+                <FormItem label=" " field="sql">
                   <div
                     className={classNames(
                       styles['sql-editor-container'],
@@ -1095,6 +1122,7 @@ const Edit = (props) => {
                     <div className="flex items-center gap-[8px] border-b border-solid border-[#E2E8F0] p-[12px] pb-[12px]">
                       <Button
                         type="secondary"
+                        disabled
                         icon={<IconCaretRight className="mr-[4px]" />}
                         className="h-[26px]"
                         onClick={handleCheckSQL}
@@ -1103,15 +1131,16 @@ const Edit = (props) => {
                         校验
                       </Button>
 
-                      <Button
+                      {/* <Button
                         type="text"
                         icon={<SQLFormatIcon />}
                         className="h-[26px]"
                       >
                         格式化
-                      </Button>
+                      </Button> */}
                     </div>
                     <CodeMirror
+                      readOnly
                       value={sqlContent}
                       onChange={handleSqlContentChange}
                       placeholder={placeholderValue}
@@ -1124,7 +1153,10 @@ const Edit = (props) => {
                         lineNumbers: true,
                         highlightActiveLineGutter: false
                       }}
-                      className={styles['code-editor']}
+                      className={classNames(
+                        styles['code-editor'],
+                        styles['code-mirror-disabled']
+                      )}
                     />
                     {checkStatus !== CheckSQLStatus.NONE && (
                       <RunningInfoPanel
@@ -1202,10 +1234,10 @@ const Edit = (props) => {
         ) : // </div>
         null}
       </Form>
-      <div className={Styles.footerBbtnBox}>
+      <div className={styles['footer-btn-box']}>
         <Button
           onClick={props.hideEditModalHan || cancelHan}
-          style={{ marginRight: '20px' }}
+          style={{ marginRight: '8px' }}
         >
           取消
         </Button>
@@ -1272,7 +1304,6 @@ export default function DataLoadEdit() {
 
   // 编辑成功后的回调
   const handleEditSuccess = () => {
-    Message.success('修改成功');
     history.goBack();
   };
 
@@ -1312,7 +1343,7 @@ export default function DataLoadEdit() {
       <div className="mb-[9px] mt-[17px] text-[20px] font-bold leading-[32px]">
         编辑数据载入任务
       </div>
-      <div className="flex h-[calc(100%-58px-17px)] flex-col items-start justify-start overflow-y-auto rounded-[16px] bg-white p-[24px]">
+      <div className="flex h-[calc(100%-58px-17px)] flex-col items-start justify-start overflow-y-auto rounded-[16px] bg-white">
         <Edit
           detailData={detailData}
           editForm={form}

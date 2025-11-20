@@ -5,6 +5,17 @@ import { useUserInfoStore } from '@/store/userInfoStore';
 
 const isNil = (o) => o === undefined || o === null;
 
+// 二进制内容类型列表
+const BinaryContentTypes = [
+  'application/octet-stream',
+  'application/pdf',
+  'image/',
+  'video/',
+  'audio/',
+  'application/zip',
+  'application/x-zip-compressed'
+];
+
 const excludeUrl = [
   '/ceai/user-space/api/v1/GetUser',
   '/ceai/user-space/api/v1/GetProjOrg',
@@ -43,14 +54,32 @@ UAPI_CONFIG.addRequestInterceptor(
       projectID: !shouldExclude && hasValidProjectId ? projectId[1] : undefined
     };
     console.log('commonParams', commonParams);
-    // 合并原有参数和公共参数
-    if (config.data) {
-      // 如果已有请求体，合并参数
-      config.data = { ...commonParams, ...config.data };
-    } else {
-      // 如果没有请求体，直接赋值
-      config.data = commonParams;
+
+    // 对于 POST/PUT/PATCH 请求，参数在 request body 中
+    if (
+      config.method &&
+      ['post', 'put', 'patch'].includes(config.method.toLowerCase())
+    ) {
+      // 合并原有参数和公共参数
+      if (config.data) {
+        // 如果已有请求体，合并参数
+        config.data = { ...commonParams, ...config.data };
+      } else {
+        // 如果没有请求体，直接赋值
+        config.data = commonParams;
+      }
     }
+
+    // 对于 GET 请求，参数在 query string 中
+    if (
+      config.method?.toLowerCase() === 'get' &&
+      hasValidProjectId &&
+      !shouldExclude
+    ) {
+      config.params = config.params || {};
+      config.params.projectID = projectId[1];
+    }
+
     return config;
   },
   (error) => {
@@ -68,6 +97,41 @@ UAPI_CONFIG.addResponseInterceptor(
       console.error('API返回401错误:', response.config?.url, res);
       logout(res?.data?.content);
     } else if (response.status >= 200 && response.status <= 299) {
+      // 【新增】检查是否是二进制流响应
+      const contentType = response.headers['content-type'] || '';
+      const isBinaryResponse = BinaryContentTypes.some((type) =>
+        contentType.includes(type)
+      );
+
+      // 如果是二进制响应，直接返回，避免进入错误处理逻辑
+      if (isBinaryResponse) {
+        const respType = (response.config as any).responseType;
+
+        // axios 已经按 blob/arraybuffer 返回，直接透传即可
+        if (respType === 'blob' || respType === 'arraybuffer') {
+          console.log('✅ 二进制响应处理:', {
+            contentType,
+            responseType: respType,
+            dataType: typeof res,
+            isArrayBuffer: res instanceof ArrayBuffer,
+            isBlob: res instanceof Blob,
+            size: res?.byteLength || res?.size || 0
+          });
+          return res;
+        }
+
+        const isBlob = typeof Blob !== 'undefined' && res instanceof Blob;
+        if (isBlob) return res;
+
+        // 如果是 ArrayBuffer
+        if (res instanceof ArrayBuffer) {
+          return res;
+        }
+
+        // 其它情况直接返回，不再强制包装，避免体积膨胀
+        return res;
+      }
+
       // 兼容没有code和message的接口
       if (
         ((isNil(res.code) || isNaN(res.code)) &&
@@ -78,17 +142,20 @@ UAPI_CONFIG.addResponseInterceptor(
         //这里判断下是否是json格式，如果不是先按错误论处，需要等后端规范化他们的接口
         try {
           if (res && typeof res === 'string') {
-            if (
-              response.headers['content-type'] &&
-              response.headers['content-type'].includes('application/pdf')
-            ) {
-              const blob = new Blob([res], {
-                type: 'application/pdf'
-              });
-              return blob;
-            } else {
-              return JSON.parse(res);
+            const contentTypeHeader = response.headers?.['content-type'] ?? '';
+            const isBlobResponse = response.config?.responseType === 'blob';
+
+            if (isBlobResponse) {
+              const blobData =
+                response.data instanceof Blob
+                  ? response.data
+                  : new Blob([response.data], {
+                      type: contentTypeHeader || 'application/octet-stream'
+                    });
+              return isBlobResponse ? response : blobData;
             }
+
+            return JSON.parse(res);
           }
         } catch (err) {
           throw err;

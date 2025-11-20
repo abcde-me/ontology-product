@@ -13,16 +13,26 @@ import type {
   PDFCoordinate,
   PositionBBox,
   ApiPosition,
-  ApiSegmentOld,
-  ApiCatalogNodeOld
+  ApiSegmentDetail,
+  SegmentDetailData,
+  Element,
+  TextElement,
+  ImageElement,
+  TableElement,
+  FormulaElement,
+  EnhancementInfo
 } from '../types';
 import { SegmentData } from '../utils/segmentData';
 import { getTreeDataByRagId } from '../utils/treeData';
 import { getSegmentDataByRagId } from '../utils/segmentDataByRagId';
+import { LogData } from '../utils/logData';
+import { SegDetailData } from '../utils/segDetailData';
 import {
   ListKnowledgeDocumentCatalogs,
   ListKnowledgeChunks,
-  UpdateKnowledgeChunk
+  UpdateKnowledgeChunk,
+  GetKnowledgeChunkTraceLog,
+  GetKnowledgeChunk
 } from '@/api/modules/rag';
 
 /**
@@ -63,8 +73,8 @@ function transformSegment(apiSegment: ApiSegment): Segment {
     charCount: apiSegment.char_count,
     segmentIndex: apiSegment.chunk_index,
     pdfCoordinates: transformApiPositions(apiSegment.positions),
-    title: apiSegment.title || undefined,
-    titleId: apiSegment.title_id || undefined,
+    parentTitle: apiSegment.parent_title || undefined,
+    parentTitleId: apiSegment.parent_title_id || undefined,
     type: apiSegment.type,
     enabled: apiSegment.enabled,
     source: apiSegment.source,
@@ -86,7 +96,7 @@ function transformSegmentOld(apiSegment: any): Segment {
     createdAt: apiSegment.created_at,
     updatedAt: apiSegment.updated_at,
     pdfCoordinates: transformPositionBBox(apiSegment.position_bbox),
-    title: apiSegment.title || undefined,
+    parentTitle: apiSegment.title || undefined,
     fullTitle: apiSegment.full_title || undefined,
     level: apiSegment.level
   };
@@ -249,10 +259,8 @@ export async function fetchSegments(
     });
 
     // 检查响应格式
-    if (response && (response as any).data && (response as any).data.list) {
-      const segments = ((response as any).data.list as ApiSegment[]).map(
-        transformSegment
-      );
+    if (response && response.data && response.data) {
+      const segments = (response.data as ApiSegment[]).map(transformSegment);
       return segments;
     }
 
@@ -278,10 +286,11 @@ export async function fetchCatalog(
       datasetId,
       documentId
     });
+    console.log(response, 'response2222');
 
     // 检查响应格式
-    if (response && (response as any).data && (response as any).data.catalogs) {
-      const rootNode = transformCatalogNode((response as any).data.catalogs);
+    if (response && response.data && response.data.catalogs) {
+      const rootNode = transformCatalogNode(response.data.catalogs);
       return [rootNode];
     }
 
@@ -333,29 +342,6 @@ export async function fetchRagDetail(
     directory = await fetchCatalog(datasetId, documentId);
 
     sceneType = 'pdf';
-  } else if (documentId === '1004') {
-    // PPT 场景
-    fileName = '2024年度工作总结.pptx';
-    filePath =
-      'https://view.officeapps.live.com/op/embed.aspx?src=https://scholar.harvard.edu/files/torman_personal/files/samplepptx.pptx';
-    sceneType = 'ppt';
-
-    // 使用旧的数据格式获取分段数据
-    const segmentResponse = getSegmentDataByRagId(documentId);
-    segments = segmentResponse.data.data.map(transformSegmentOld);
-
-    // PPT 场景通常没有目录树
-    const treeResponse = getTreeDataByRagId(documentId);
-    if (
-      treeResponse &&
-      treeResponse.data &&
-      treeResponse.data.catalog_content
-    ) {
-      const rootNode = transformCatalogNodeOld(
-        treeResponse.data.catalog_content
-      );
-      directory = [rootNode];
-    }
   } else if (documentId === '1005') {
     // Table/Excel 场景
     fileName = '销售数据统计.xlsx';
@@ -399,13 +385,25 @@ export async function fetchRagDetail(
     }
   }
 
+  // 根据 sceneType 设置 bucket 和 path（测试数据）
+  const bucket = 'datasource-dev';
+  let path = '';
+
+  if (sceneType === 'pdf') {
+    path = '/10/10/orginal/用户权限.pdf';
+  } else if (sceneType === 'excel') {
+    path = '/10/10/orginal/用户权限.docx';
+  }
+
   const result: RagDetailData = {
     ragId: documentId, // 使用 documentId 作为 ragId
     fileName,
     filePath,
     sceneType,
     segments,
-    directory
+    directory,
+    bucket,
+    path
   };
 
   return result;
@@ -417,15 +415,22 @@ export async function fetchRagDetail(
  * @param documentId - 文档ID
  * @param chunkId - 分块ID
  * @param content - 新的内容
- * @returns 更新后的分段
+ * @returns Promise<void> - 更新成功后不返回数据，调用方应该重新获取分段列表
  */
 export async function updateSegmentContent(
   datasetId: string,
   documentId: string,
   chunkId: string,
   content: string
-): Promise<Segment> {
+): Promise<void> {
   try {
+    console.log('📤 调用更新分段接口:', {
+      datasetId,
+      documentId,
+      chunkId,
+      content
+    });
+
     const response = await UpdateKnowledgeChunk({
       dataset_id: datasetId,
       document_id: documentId,
@@ -433,29 +438,12 @@ export async function updateSegmentContent(
       content
     });
 
-    // 检查响应格式
-    if (response && (response as any).data) {
-      const data = (response as any).data;
-      return {
-        id: data.id || chunkId,
-        content: data.content || content,
-        charCount: (data.content || content).length,
-        segmentIndex: data.chunk_index || 0,
-        createdAt: data.created_at || new Date().toISOString(),
-        updatedAt: data.updated_at || new Date().toISOString()
-      };
-    }
+    console.log('✅ 更新分段接口调用成功:', response);
 
-    // 如果响应格式不符合预期，返回基本信息
-    return {
-      id: chunkId,
-      content,
-      charCount: content.length,
-      segmentIndex: 0,
-      updatedAt: new Date().toISOString()
-    };
+    // 更新成功，不返回数据
+    // 调用方应该重新调用 fetchSegments 来获取最新的分段列表
   } catch (error) {
-    console.error('Failed to update segment content:', error);
+    console.error('❌ 更新分段内容失败:', error);
     throw error;
   }
 }
@@ -489,37 +477,33 @@ export async function fetchSegmentDetail(
 
 /**
  * 获取溯源日志
- * @param ragId - RAG ID
- * @param segmentId - 分段ID
- * @returns 溯源日志列表
+ * @param datasetId - 数据集ID
+ * @param chunkId - 分块ID
+ * @returns 溯源日志数据
  */
 export async function fetchSegmentTraceLog(
-  ragId: string,
-  segmentId: string
-): Promise<any[]> {
-  // TODO: 替换为真实API调用
-  // const response = await fetch(`/api/rag/${ragId}/segments/${segmentId}/trace-log`);
-  // const data = await response.json();
-  // return data;
+  datasetId: string,
+  chunkId: string
+): Promise<any> {
+  try {
+    // 调用真实API
+    const response = await GetKnowledgeChunkTraceLog({
+      dataset_id: datasetId,
+      chunk_id: chunkId
+    });
 
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve([
-        {
-          id: '1',
-          action: 'created',
-          timestamp: new Date().toISOString(),
-          operator: 'system'
-        },
-        {
-          id: '2',
-          action: 'updated',
-          timestamp: new Date().toISOString(),
-          operator: 'user'
-        }
-      ]);
-    }, 300);
-  });
+    // 检查响应格式
+    if (response && response.data) {
+      return response.data;
+    }
+
+    // 如果响应格式不符合预期，返回 mock 数据
+    return LogData.data;
+  } catch (error) {
+    console.error('Failed to fetch segment trace log:', error);
+    // 降级处理：返回 mock 数据
+    return LogData.data;
+  }
 }
 
 /**
@@ -569,4 +553,174 @@ export async function batchUpdateSegments(
       resolve(segments);
     }, 500);
   });
+}
+
+/**
+ * 将后端返回的 ApiMaterial 转换为前端的 Element
+ */
+function transformApiMaterialToElement(material: any): Element {
+  const baseElement = {
+    id: material.id,
+    type: material.type === 'title' ? 'text' : material.type // 将 title 转换为 text
+  };
+
+  // 提取位置信息
+  let positionType: string | undefined;
+  let positionInfo: string | undefined;
+  let pageId: number | undefined;
+
+  if (material.positions && material.positions.length > 0) {
+    const position = material.positions[0];
+    if (position.bbox && position.bbox.length === 4) {
+      positionType = '坐标';
+      // 显示两个坐标点: (x1, y1) 和 (x2, y2)
+      positionInfo = `(${position.bbox[0]}, ${position.bbox[1]}) - (${position.bbox[2]}, ${position.bbox[3]})`;
+    }
+    pageId = position.page_id;
+  }
+
+  switch (material.type) {
+    case 'text':
+    case 'title':
+      return {
+        ...baseElement,
+        type: 'text',
+        content: material.text,
+        positionType,
+        positionInfo,
+        pageId
+      } as TextElement & { pageId?: number };
+
+    case 'image':
+      return {
+        ...baseElement,
+        type: 'image',
+        url: material.text || material.uri,
+        positionType,
+        positionInfo,
+        pageId,
+        bucketName: material.bucket_name,
+        path: material.path
+      } as ImageElement & { pageId?: number };
+
+    case 'table':
+      try {
+        const tableData = JSON.parse(material.text);
+        return {
+          ...baseElement,
+          type: 'table',
+          headers: Object.keys(tableData),
+          rows: [tableData],
+          positionType,
+          positionInfo,
+          pageId
+        } as TableElement & { pageId?: number };
+      } catch {
+        return {
+          ...baseElement,
+          type: 'table',
+          headers: [],
+          rows: [],
+          positionType,
+          positionInfo,
+          pageId
+        } as TableElement & { pageId?: number };
+      }
+
+    case 'formula':
+      return {
+        ...baseElement,
+        type: 'formula',
+        content: material.text,
+        positionType,
+        positionInfo,
+        pageId
+      } as FormulaElement & { pageId?: number };
+
+    default:
+      return {
+        ...baseElement,
+        type: 'text',
+        content: material.text,
+        positionType,
+        positionInfo,
+        pageId
+      } as TextElement & { pageId?: number };
+  }
+}
+
+/**
+ * 将后端返回的 ApiSegmentDetail 转换为前端的 SegmentDetailData
+ */
+function transformApiSegmentDetail(
+  apiData: ApiSegmentDetail
+): SegmentDetailData {
+  // 转换元素列表
+  const elements: Element[] = (apiData.materials || []).map((material) =>
+    transformApiMaterialToElement(material)
+  );
+
+  // 转换增强信息
+  let enhancement: EnhancementInfo | undefined;
+  if (apiData.ai_data) {
+    enhancement = {
+      summary: apiData.ai_data.summaries || '',
+      hypotheticalAnswer: apiData.ai_data.questions || '',
+      extractionEntity: apiData.ai_data.keywords,
+      tags: apiData.ai_data.tags?.map((tag) => tag.name)
+    };
+  }
+
+  // 转换元数据
+  const metadata: Record<string, string> = {};
+  if (apiData.parent_id) {
+    metadata['parent_id'] = apiData.parent_id;
+  }
+  if (apiData.left_chunk_id) {
+    metadata['left_chunk_id'] = apiData.left_chunk_id;
+  }
+  if (apiData.right_chunk_id) {
+    metadata['right_chunk_id'] = apiData.right_chunk_id;
+  }
+
+  return {
+    segmentId: apiData.id,
+    charCount: apiData.char_count,
+    elements,
+    enhancement,
+    metadata: Object.keys(metadata).length > 0 ? metadata : undefined
+  };
+}
+
+/**
+ * 获取分段的详细信息（包括元素、增强信息等）
+ * @param datasetId - 数据集ID
+ * @param chunkId - 分块ID
+ */
+export async function fetchSegmentDetailInfo(
+  datasetId: string,
+  chunkId: string
+): Promise<SegmentDetailData> {
+  try {
+    // 调用真实API
+    const response = await GetKnowledgeChunk({
+      dataset_id: datasetId,
+      chunk_id: chunkId
+    });
+
+    // 检查响应格式
+    if (response && response.data) {
+      const apiData = response.data as ApiSegmentDetail;
+      return transformApiSegmentDetail(apiData);
+    }
+
+    // 如果响应格式不符合预期，返回 mock 数据
+    const mockData = SegDetailData.data as ApiSegmentDetail;
+    return transformApiSegmentDetail(mockData);
+  } catch (error) {
+    console.error('Failed to fetch segment detail:', error);
+    // 降级处理：返回 mock 数据
+    const mockData = SegDetailData.data as ApiSegmentDetail;
+    return transformApiSegmentDetail(mockData);
+  }
 }

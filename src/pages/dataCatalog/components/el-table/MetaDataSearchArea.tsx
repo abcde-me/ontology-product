@@ -8,6 +8,8 @@ import {
   Checkbox
 } from '@arco-design/web-react';
 import { IconSearch, IconSettings } from '@arco-design/web-react/icon';
+import { FieldSearchItem } from '@/api/dataCatalog';
+import dayjs from 'dayjs';
 
 export interface SearchField {
   /** 字段唯一标识 */
@@ -15,7 +17,7 @@ export interface SearchField {
   /** 字段显示名称 */
   label: string;
   /** 字段类型: 'input' | 'select' | 'daterange' */
-  type: 'input' | 'select' | 'daterange';
+  type: string;
   /** 下拉框选项（type为select时必填） */
   options?: Array<{ label: string; value: any }>;
   /** 字段对应的搜索参数key */
@@ -26,7 +28,7 @@ export interface SearchAreaProps {
   /** 搜索字段配置列表 */
   fields?: SearchField[];
   /** 字段搜索回调 */
-  onFieldSearch?: (fieldValues: Record<string, any>) => void;
+  onFieldSearch?: (fieldValues: FieldSearchItem[]) => void;
   /** 重置回调 */
   onReset?: () => void;
   /** 样式类 */
@@ -48,11 +50,13 @@ export default function SearchArea({
   // 设置搜索条件的搜索关键词
   const [settingsSearchKeyword, setSettingsSearchKeyword] = useState('');
 
-  // 初始化：默认勾选所有字段
+  // 初始化：默认勾选前三个字段
   useEffect(() => {
-    const defaultChecked = new Set(fields.map((f) => f.key));
+    console.log('fields-----:', fields);
+    const defaultCheckedKeys = fields.slice(0, 3).map((f) => f.key);
+    const defaultChecked = new Set(defaultCheckedKeys);
     setCheckedFields(defaultChecked);
-  }, [fields]);
+  }, []);
 
   // 处理字段值变化
   const handleFieldValueChange = (fieldKey: string, value: any) => {
@@ -62,10 +66,28 @@ export default function SearchArea({
     }));
   };
 
+  const formatSearchContent = (field: SearchField, value: any): string => {
+    if (field.type.includes('date') && Array.isArray(value)) {
+      const formattedValues = value
+        .filter((item) => item !== undefined && item !== null && item !== '')
+        .map((item) => {
+          const date = dayjs(item);
+          return date.isValid()
+            ? date.format('YYYY-MM-DD HH:mm:ss')
+            : String(item ?? '');
+        });
+
+      return formattedValues.join('_');
+    }
+
+    return Array.isArray(value) ? value.join(',') : String(value);
+  };
+
   // 处理查询按钮点击
   const handleQuery = () => {
     // 只传递已勾选字段的值
-    const searchParams: Record<string, any> = {};
+    // const searchParams: Record<string, any> = {};
+    const fieldSearch: FieldSearchItem[] = [];
     checkedFields.forEach((fieldKey) => {
       const field = fields.find((f) => f.key === fieldKey);
       if (
@@ -75,10 +97,16 @@ export default function SearchArea({
         fieldValues[fieldKey] !== ''
       ) {
         const paramKey = field.paramKey || fieldKey;
-        searchParams[paramKey] = fieldValues[fieldKey];
+        // searchParams[paramKey] = fieldValues[fieldKey];
+
+        fieldSearch.push({
+          nameEn: field.key,
+          type: field.type,
+          queryValue: formatSearchContent(field, fieldValues[fieldKey])
+        });
       }
     });
-    onFieldSearch?.(searchParams);
+    onFieldSearch?.(fieldSearch);
   };
 
   // 处理重置按钮点击
@@ -107,9 +135,24 @@ export default function SearchArea({
   // 全选/取消全选
   const handleSelectAll = (checked: boolean) => {
     if (checked) {
-      setCheckedFields(new Set(fields.map((f) => f.key)));
+      // 如果有搜索关键词，只选中搜索过滤后的字段，并清空之前的字段状态
+      if (settingsSearchKeyword) {
+        // 重新计算过滤后的字段列表
+        const filteredFields = fields.filter((f) =>
+          f.label.toLowerCase().includes(settingsSearchKeyword.toLowerCase())
+        );
+        const filteredFieldKeys = filteredFields.map((f) => f.key);
+        setCheckedFields(new Set(filteredFieldKeys));
+        // 清空之前所有字段的值
+        setFieldValues({});
+      } else {
+        // 没有搜索关键词时，选中所有字段
+        setCheckedFields(new Set(fields.map((f) => f.key)));
+      }
     } else {
       setCheckedFields(new Set());
+      // 取消全选时，清空所有字段的值
+      setFieldValues({});
     }
   };
 
@@ -204,8 +247,15 @@ export default function SearchArea({
   // 渲染字段搜索输入组件
   const renderFieldInput = (field: SearchField) => {
     const value = fieldValues[field.key];
+    let fieldType = field.type;
 
-    switch (field.type) {
+    if (field.type.includes('datetime') || field.type === 'date') {
+      fieldType = 'range';
+    } else {
+      fieldType = 'input';
+    }
+
+    switch (fieldType) {
       case 'input':
         return (
           <Input
@@ -232,12 +282,14 @@ export default function SearchArea({
             ))}
           </Select>
         );
-      case 'daterange':
+      case 'range':
         return (
           <DatePicker.RangePicker
             value={value}
             onChange={(val) => handleFieldValueChange(field.key, val)}
             allowClear
+            showTime={{ format: 'HH:mm:ss' }}
+            format="YYYY-MM-DD HH:mm:ss"
             placeholder={['开始日期', '结束日期']}
           />
         );
@@ -247,9 +299,9 @@ export default function SearchArea({
   };
 
   return (
-    <div className={`${className}`}>
+    <div className={`flex max-h-[269px] flex-col ${className}`}>
       {/* 字段搜索区域 */}
-      <div>
+      <div className="flex-1 overflow-y-auto">
         {/* 字段搜索列表 */}
         {visibleFields.length > 0 && (
           <div className="mb-4 flex flex-wrap gap-4">
@@ -258,29 +310,31 @@ export default function SearchArea({
                 <span className="whitespace-nowrap text-sm text-[var(--color-text-1)]">
                   {field.label}:
                 </span>
-                <div className="w-[200px]">{renderFieldInput(field)}</div>
+                <div className="min-w-[260px]">{renderFieldInput(field)}</div>
               </div>
             ))}
           </div>
         )}
+      </div>
 
-        {/* 操作按钮区域 */}
-        <div className="flex items-center gap-2">
-          <QueryButton />
-          <Button onClick={handleReset}>重置</Button>
-          <Popover
-            content={settingsContent}
-            trigger="click"
-            position="bl"
-            popupVisible={settingsVisible}
-            onVisibleChange={setSettingsVisible}
-          >
-            <Button type="text" className="ml-auto flex items-center gap-1">
-              <IconSettings />
-              设置搜索条件
-            </Button>
-          </Popover>
-        </div>
+      {/* 操作按钮区域 */}
+      <div className="flex flex-shrink-0 items-center gap-2 border-b border-[#E5E6EB] py-4">
+        <QueryButton />
+        <Button disabled={!hasCheckedFields} onClick={handleReset}>
+          重置
+        </Button>
+        <Popover
+          content={settingsContent}
+          trigger="click"
+          position="bl"
+          popupVisible={settingsVisible}
+          onVisibleChange={setSettingsVisible}
+        >
+          <Button type="text" className="ml-auto flex items-center gap-1">
+            <IconSettings />
+            设置搜索条件
+          </Button>
+        </Popover>
       </div>
     </div>
   );

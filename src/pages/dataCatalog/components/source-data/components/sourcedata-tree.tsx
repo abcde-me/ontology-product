@@ -44,7 +44,7 @@ interface RawDataNode {
       name: string;
       parent_id: number;
     }>;
-    meta_data?: Array<{
+    metadata?: Array<{
       id: number;
       name: string;
       parent_id: number;
@@ -108,13 +108,13 @@ function transformRawDataToTreeData(rawData: RawDataNode[]): TreeNodeType[] {
         }
 
         // 处理元数据
-        if (childGroup.meta_data && childGroup.meta_data.length > 0) {
+        if (childGroup.metadata && childGroup.metadata.length > 0) {
           const metaDataParent: TreeNodeType = {
             title: '元数据',
-            key: `${key}-meta_data`,
+            key: `${key}-metadata`,
             rawData: {
-              type: 'meta_data_parent',
-              id: `${node.id}-meta_data`,
+              type: 'metadata_parent',
+              id: `${node.id}-metadata`,
               name: '元数据'
             }
           };
@@ -260,7 +260,7 @@ export default function SourceDataTree(props: SourceDataTreeProps) {
     '0-1',
     '0-1-volume',
     '0-1-db',
-    '0-1-meta_data'
+    '0-1-metadata'
   ]);
 
   // 设置默认选中的节点key（卷下的第一个文件）

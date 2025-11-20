@@ -42,8 +42,9 @@ const SegmentCard: React.FC<SegmentCardProps> = ({ segment, isSelected }) => {
       {/* Header with segment info and actions */}
       <div className="flex items-center justify-between px-3 pb-[7px] pt-3">
         <div className="flex-1">
-          <div className="text-xs text-gray-500">
-            字符数: {segment.charCount} 分段数: {segment.segmentIndex}/100
+          <div className="flex items-center gap-3 text-xs font-medium text-[#6E7B8D]">
+            <span>字符数: {segment.charCount}</span>
+            <span>分段数: {segment.segmentIndex}/100</span>
           </div>
         </div>
         {(isSelected || isHovered) && (

@@ -1,7 +1,8 @@
 import { create } from 'zustand';
 import {
   fetchRagDetail,
-  updateSegmentContent as apiUpdateSegmentContent
+  updateSegmentContent as apiUpdateSegmentContent,
+  fetchSegments
 } from '../api/ragDetailApi';
 import {
   Segment,
@@ -15,6 +16,11 @@ import {
   TableSegment,
   PDFCoordinate
 } from '../types';
+import {
+  getFileBinaryData,
+  GetFileBinaryDataParams,
+  getKnowledgeDocument
+} from '@/api/modules/rag';
 
 // 导出Segment类型供其他组件使用
 export type {
@@ -51,25 +57,95 @@ export const useRagDetailStore = create<RagDetailState & RagDetailActions>(
     segmentDrawerSegmentId: null,
     // Segment search state
     segmentSearchText: '',
+    // File binary data state
+    fileBinaryData: null,
+    fileBinaryDataLoading: false,
+    fileBinaryDataError: null,
+    bucket: '',
+    path: '',
+    // Document info state
+    documentName: '',
+    datasetName: '',
+    documentFormat: '',
 
     // Actions
-    initializeRagDetail: async (datasetId: string, documentId: string) => {
+    initializeRagDetail: async (
+      datasetId: string,
+      documentId: string,
+      bucketName?: string | null,
+      path?: string | null,
+      datasetNameParam?: string | null
+    ) => {
       set({ loading: true, error: null });
       try {
+        // 先调用 getKnowledgeDocument 获取文件详情
+        let documentName = '';
+        let documentFormat = '';
+        try {
+          const docResponse = await getKnowledgeDocument({
+            document_id: documentId
+          });
+          if (docResponse && docResponse.data) {
+            documentName = docResponse.data.name || '';
+            documentFormat = docResponse.data.format || '';
+          }
+        } catch (docError) {
+          console.warn('⚠️ 获取文件详情失败:', docError);
+        }
+
         const data = await fetchRagDetail(datasetId, documentId);
+
+        // 优先使用 URL 参数中的 bucket 和 path，如果没有则使用 API 返回的
+        const finalBucket = bucketName || data.bucket || '';
+        const finalPath = path || data.path || '';
+
+        // 如果 API 返回了 documentFormat，将其映射到 sceneType
+        let finalSceneType = data.sceneType;
+        if (documentFormat) {
+          const formatLower = documentFormat.toLowerCase();
+          if (formatLower === 'pdf') {
+            finalSceneType = 'pdf';
+          } else if (formatLower === 'ppt' || formatLower === 'pptx') {
+            finalSceneType = 'ppt';
+          } else if (
+            formatLower === 'excel' ||
+            formatLower === 'xlsx' ||
+            formatLower === 'xls'
+          ) {
+            finalSceneType = 'excel';
+          }
+        }
+
         set({
           datasetId, // 保存 datasetId
           ragId: documentId, // 使用 documentId 作为 ragId
           fileName: data.fileName,
           filePath: data.filePath,
-          sceneType: data.sceneType,
+          sceneType: finalSceneType,
           segments: data.segments,
           directory: data.directory,
+          bucket: finalBucket, // 保存 bucket
+          path: finalPath, // 保存 path
+          // 文件详情
+          documentName,
+          datasetName: datasetNameParam || '',
+          documentFormat,
           // 默认不选中任何分段和目录节点
           selectedSegmentId: null,
           selectedDirectoryNodeId: null,
           loading: false
         });
+
+        // 如果有 bucket 和 path，自动加载文件二进制数据
+        if (finalBucket && finalPath) {
+          console.log('🔍 自动加载文件二进制数据:', {
+            bucket: finalBucket,
+            path: finalPath
+          });
+          get().loadFileBinaryData(finalBucket, finalPath);
+        } else {
+          console.warn('⚠️ 缺少 bucket 或 path，无法加载文件二进制数据');
+        }
       } catch (error) {
         set({
           error:
@@ -93,12 +169,12 @@ export const useRagDetailStore = create<RagDetailState & RagDetailActions>(
         const clickedSegment = segments.find((seg) => seg.id === segmentId);
 
         // 查找目录树节点的逻辑：
-        // 1. 如果分段有 titleId，优先查找 type='text' 且 chunk_id 等于分段 id 的节点
+        // 1. 如果分段有 parentTitleId，优先查找 type='text' 且 chunk_id 等于分段 id 的节点
         // 2. 如果找不到，再查找包含该 segmentId 的节点
         const findNodeBySegmentId = (
           nodes: DirectoryNode[],
           targetSegmentId: string,
-          targetTitleId?: string
+          targetParentTitleId?: string
         ): string | null => {
           for (const node of nodes) {
             // 优先匹配：type='text' 且 chunk_id 等于分段 id
@@ -111,7 +187,7 @@ export const useRagDetailStore = create<RagDetailState & RagDetailActions>(
               const result = findNodeBySegmentId(
                 node.children,
                 targetSegmentId,
-                targetTitleId
+                targetParentTitleId
               );
               if (result) return result;
             }
@@ -122,7 +198,7 @@ export const useRagDetailStore = create<RagDetailState & RagDetailActions>(
         const nodeId = findNodeBySegmentId(
           directory,
           segmentId,
-          clickedSegment?.titleId
+          clickedSegment?.parentTitleId
         );
 
         if (nodeId) {
@@ -193,6 +269,9 @@ export const useRagDetailStore = create<RagDetailState & RagDetailActions>(
           throw new Error('Dataset ID or Document ID not found');
         }
 
+        console.log('🔄 开始更新分段内容:', { segmentId, content });
+
+        // 调用更新接口
         await apiUpdateSegmentContent(
           datasetId,
           documentId,
@@ -200,18 +279,20 @@ export const useRagDetailStore = create<RagDetailState & RagDetailActions>(
           content
         );
 
-        const segments = get().segments.map((seg) =>
-          seg.id === segmentId
-            ? {
-                ...seg,
-                content,
-                charCount: content.length,
-                updatedAt: new Date().toISOString()
-              }
-            : seg
-        );
-        set({ segments, editingSegmentId: null });
+        console.log('✅ 分段内容更新成功，重新获取分段列表...');
+
+        // 更新成功后，重新获取分段列表数据
+        const updatedSegments = await fetchSegments(datasetId, documentId);
+
+        console.log('✅ 分段列表刷新成功:', updatedSegments);
+
+        // 更新 store 中的 segments 数据
+        set({
+          segments: updatedSegments,
+          editingSegmentId: null
+        });
       } catch (error) {
+        console.error('❌ 更新分段内容失败:', error);
         set({
           error:
             error instanceof Error ? error.message : 'Failed to update segment'
@@ -294,6 +375,44 @@ export const useRagDetailStore = create<RagDetailState & RagDetailActions>(
     // Segment search actions
     setSegmentSearchText: (text: string) => {
       set({ segmentSearchText: text });
+    },
+
+    // File binary data actions
+    loadFileBinaryData: async (bucket: string, path: string) => {
+      set({
+        fileBinaryDataLoading: true,
+        fileBinaryDataError: null,
+        bucket,
+        path
+      });
+
+      try {
+        console.log('🔍 开始加载文件二进制数据:', { bucket, path });
+        const response = await getFileBinaryData({ bucket_name: bucket, path });
+        console.log('✅ 文件二进制数据加载成功:', response);
+
+        set({
+          fileBinaryData: response as ArrayBuffer,
+          fileBinaryDataLoading: false
+        });
+      } catch (error) {
+        console.error('❌ 加载文件二进制数据失败:', error);
+        set({
+          fileBinaryDataError:
+            error instanceof Error
+              ? error.message
+              : 'Failed to load file binary data',
+          fileBinaryDataLoading: false
+        });
+      }
+    },
+
+    clearFileBinaryData: () => {
+      set({
+        fileBinaryData: null,
+        fileBinaryDataLoading: false,
+        fileBinaryDataError: null
+      });
     }
   })
 );

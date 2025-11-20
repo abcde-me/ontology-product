@@ -16,6 +16,7 @@ import { useHistory } from 'react-router-dom';
 import { delLoad, getLoadList } from '@/api/loadApi';
 import './index.scss';
 import EllipsisPopoverCom from '@/components/ellipsis-popover-com';
+import EllipsisPopover from '@/components/ellipsis-popover-com';
 import noDataElement from '@/components/no-data';
 import { PermissionWrapper } from '@/components/PermissionGuard';
 import { DATA_LOAD_PERMISSIONS } from '@/config/permissions';
@@ -36,6 +37,31 @@ const InputSearch = Input.Search;
 export default function DataLoad() {
   const history = useHistory();
   const hasPermission = useHasPermission(DATA_LOAD_PERMISSIONS.CAN_GET);
+  // 跳转目录
+  const handleToDirectoryPath = (
+    id: string,
+    parent_id: string,
+    catalogType: string
+  ) => {
+    let newCatalogTypeVal = '';
+    catalogType?.split('/').map((item) => {
+      if (item === 'metadata') {
+        newCatalogTypeVal = 'metadata';
+      }
+      if (item === 'db') {
+        newCatalogTypeVal = 'db';
+      }
+      if (item === 'volume') {
+        newCatalogTypeVal = 'volume';
+      }
+    });
+    history.push(
+      `/tenant/compute/modaforge/dataCatalog/list?id=${id}&parent_id=${parent_id}&catalog_type=${newCatalogTypeVal}`
+    );
+  };
+  const renderEmptyPlaceholder = (value: string | null) => {
+    return value === '' || value == null ? '-' : value;
+  };
   const columns = [
     {
       title: '载入任务名称',
@@ -187,15 +213,22 @@ export default function DataLoad() {
       title: '载入位置',
       width: 200,
       ellipsis: true,
-      render: (_, item) => {
-        return (
-          <div>
-            {item.data_path_name !== '' ? (
-              <EllipsisPopoverCom value={item.data_path_name} isEdit={false} />
-            ) : (
-              '-'
-            )}
-          </div>
+      render: (_, record) => {
+        return renderEmptyPlaceholder(record.data_path_name) !== '-' ? (
+          <EllipsisPopover
+            value={record.data_path_name}
+            isEdit={false}
+            isLink
+            handleLink={() => {
+              handleToDirectoryPath(
+                record.data_path_id,
+                record.parent_id,
+                record.data_path_name
+              );
+            }}
+          />
+        ) : (
+          <span>-</span>
         );
       }
     },

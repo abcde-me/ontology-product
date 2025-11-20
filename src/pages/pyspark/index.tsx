@@ -28,7 +28,7 @@ const Python: React.FC = memo(() => {
   const [activeTab, setActiveTab] = useState<TabKey>(defaultActiveTab);
   const isCanCreate = useHasPermission(PYSPARK_PERMISSIONS.CREATE);
   const [insertContentFunction, setInsertContentFunction] = useState<
-    ((content: string) => void) | null
+    ((content: string | number) => void) | null
   >(null);
   const [isEditorFocused, setIsEditorFocused] = useState<boolean>(false);
   const isEditorFocusedRef = useRef<boolean>(false);
@@ -125,7 +125,7 @@ const Python: React.FC = memo(() => {
   };
 
   // 插入内容到编辑器
-  const insertContentToEditor = (content: string) => {
+  const insertContentToEditor = (content: string | number) => {
     if (insertContentFunction) {
       insertContentFunction(content);
     }

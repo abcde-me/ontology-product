@@ -18,6 +18,8 @@ interface DatasetListParams {
   status?: string[];
   sort_field?: string;
   sort_order?: string;
+  scene_ids?: string[];
+  src_list?: number[];
 }
 
 interface CreateDatasetParams {
@@ -109,7 +111,9 @@ export async function getDatasetList(params: DatasetListParams = {}) {
     storage_type,
     status,
     sort_field,
-    sort_order
+    sort_order,
+    scene_ids,
+    src_list
   } = params;
   const queryParams: Record<string, any> = {
     page,
@@ -118,11 +122,18 @@ export async function getDatasetList(params: DatasetListParams = {}) {
   if (search_field && search) {
     queryParams[search_field] = search;
   }
+  if (scene_ids && scene_ids.length > 0) {
+    queryParams.scene_ids = scene_ids;
+  }
   if (tag_names && tag_names.length > 0) {
     queryParams.tags = tag_names; // 直接赋值数组
   }
   if (storage_type && storage_type.length > 0) {
     queryParams.storage_type_list = storage_type; // 直接赋值数组
+  }
+  // 添加来源过滤参数
+  if (params.src_list && params.src_list.length > 0) {
+    queryParams.src_list = src_list; // 直接赋值数组
   }
   if (status && status.length > 0) {
     queryParams.status_list = status; // 直接赋值数组
@@ -225,7 +236,7 @@ export async function getDataContentFileList(params: {
   id: number | string;
   version_id: string;
   page: number;
-  page_size: number;
+  limit: number;
 }) {
   return await UAPI.RES.dataContentFileList({})
     .post({ ...params, id: Number(params.id) })
@@ -260,4 +271,15 @@ export async function getDatasetVersionFile(
 // 获取数据集场景分类列表
 export async function getDatasetSceneList() {
   return await UAPI.RES.datasetSceneListApi({}).post().inRegion().do();
+}
+
+// 批量更新数据集场景分类
+export async function datasetBatchUpdateScene(params: {
+  scene_id: number;
+  dataset_ids: number[];
+}) {
+  return await UAPI.RES.datasetBatchUpdateSceneApi({})
+    .post(params)
+    .inRegion()
+    .do();
 }

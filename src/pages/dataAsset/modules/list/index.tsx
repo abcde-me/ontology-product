@@ -1,8 +1,12 @@
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import React, {
+  useState,
+  useEffect,
+  useRef,
+  useMemo,
+  useCallback
+} from 'react';
 import {
   Button,
-  Table,
-  Pagination,
   Message,
   Space,
   Spin,
@@ -50,7 +54,11 @@ import { ColumnField } from '../../components/ColumnSettingModal';
 import ColumnSettingModal from '../../components/ColumnSettingModal';
 import styles from './list.module.scss';
 import classNames from 'classnames';
-import { FieldSearchItem } from '@/api/dataCatalog';
+import { FieldSearchItem } from '@/types/dataAssetApi';
+import dayjs from 'dayjs';
+import { isDateType, isTagsField, TAGS_FIELD_EN_NAME } from '../../utils/const';
+import PermissionWrapper from '@/components/PermissionGuard';
+import { DATA_ASSET_PERMISSIONS } from '@/config/permissions';
 
 interface TagValue {
   tagId: string;
@@ -78,7 +86,7 @@ export default function DataAssetList() {
   const [loading, setLoading] = useState(false);
   // 分页状态
   const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10); // 默认卡片视图，每页12个
+  const [pageSize, setPageSize] = useState(12); // 默认卡片视图，每页12个
   const [total, setTotal] = useState(0);
   const [searchParams, setSearchParams] = useState({
     commonSearch: '',
@@ -96,11 +104,15 @@ export default function DataAssetList() {
     Array<{ nameZh: string; nameEn: string; type: string }>
   >([]); // 用于修改资产的字段列表
   const [columnFields, setColumnFields] = useState<ApiColumnField[]>([]); // 列字段列表（用于单条编辑）
+  const [rawDisplayFields, setRawDisplayFields] = useState<ApiColumnField[]>(
+    []
+  );
   const history = useHistory();
   // 吸顶状态
   const [isSticky, setIsSticky] = useState(false);
   const headerRef = useRef<HTMLDivElement>(null);
   const sentinelRef = useRef<HTMLDivElement>(null);
+  const isFirstMountRef = useRef(true);
   const [tagList, setTagList] = useState<BaseTag[]>([]);
 
   const aggregatedSelectedTags = useMemo<TagValueItem[]>(() => {
@@ -144,13 +156,14 @@ export default function DataAssetList() {
       setTotal(totalCount || 0);
 
       // 保存字段列表用于修改资产弹窗
-      const fieldsForModifyList = (fields || []).map(
-        (field: ApiColumnField) => ({
-          nameZh: field.nameZh,
-          nameEn: field.nameEn,
-          type: field.type
-        })
-      );
+      const fieldsForModifyList = (fields || [])
+        .filter((field: ApiColumnField) => !!field?.allowModify)
+        .map((field: ApiColumnField) => ({
+          nameZh: field?.nameZh,
+          nameEn: field?.nameEn,
+          type: field?.type
+        }));
+
       setFieldsForModify(fieldsForModifyList);
 
       // 保存列字段列表用于单条编辑弹窗
@@ -161,6 +174,7 @@ export default function DataAssetList() {
         {
           title: '序号',
           dataIndex: 'index',
+          fixed: 'left' as const,
           width: 80,
           key: 'index',
           render: (_: any, __: any, idx: number) => (page - 1) * size + idx + 1
@@ -168,9 +182,13 @@ export default function DataAssetList() {
         // 根据 fields 生成列，保证每一列和表头一一对应
         ...(fields || [])
           .filter((field: ApiColumnField) => field.displaySort > 0)
+          .sort(
+            (a: ApiColumnField, b: ApiColumnField) =>
+              a.displaySort - b.displaySort
+          )
           .map((field: ApiColumnField) => {
             // 如果是 tags 字段，使用 Tag 组件显示
-            if (field.nameEn === 'tags') {
+            if (isTagsField(field.nameEn)) {
               return {
                 title: field.nameZh,
                 dataIndex: field.nameEn,
@@ -223,7 +241,15 @@ export default function DataAssetList() {
               dataIndex: field.nameEn,
               key: field.nameEn,
               width: 150,
-              ellipsis: true
+              ellipsis: true,
+              render: (value: any) => {
+                if (field.type.includes('date')) {
+                  return value
+                    ? dayjs(value).format('YYYY-MM-DD HH:mm:ss')
+                    : '-';
+                }
+                return value ?? '-';
+              }
             };
           }),
         {
@@ -239,27 +265,35 @@ export default function DataAssetList() {
             { onEditAsset, onEditTags, onDelete }: any
           ) => (
             <div className="flex items-center gap-[16px]">
-              <Button
-                type="text"
-                onClick={() => onEditAsset?.(record)}
-                className="px-[0px]"
+              <PermissionWrapper
+                permission={DATA_ASSET_PERMISSIONS.MODIFY_ASSET}
               >
-                修改资产
-              </Button>
-              <Button
-                type="text"
-                onClick={() => onEditTags?.(record)}
-                className="px-[0px]"
-              >
-                修改标签
-              </Button>
-              <Button
-                type="text"
-                className="px-[0px]"
-                onClick={() => onDelete?.(record)}
-              >
-                删除
-              </Button>
+                <Button
+                  type="text"
+                  onClick={() => onEditAsset?.(record)}
+                  className="px-[0px]"
+                >
+                  修改资产
+                </Button>
+              </PermissionWrapper>
+              <PermissionWrapper permission={DATA_ASSET_PERMISSIONS.MODIFY_TAG}>
+                <Button
+                  type="text"
+                  onClick={() => onEditTags?.(record)}
+                  className="px-[0px]"
+                >
+                  修改标签
+                </Button>
+              </PermissionWrapper>
+              <PermissionWrapper permission={DATA_ASSET_PERMISSIONS.DELETE}>
+                <Button
+                  type="text"
+                  className="px-[0px]"
+                  onClick={() => onDelete?.(record)}
+                >
+                  删除
+                </Button>
+              </PermissionWrapper>
             </div>
           )
         }
@@ -281,31 +315,7 @@ export default function DataAssetList() {
       return;
     }
 
-    // 处理列设置数据
-    // const { fields: displayFields } = dataAssetFieldsDisplayRes.data || {
-    //   fields: []
-    // };
-    // 将 API 返回的 ColumnField 格式转换为组件需要的格式
-    const convertedFields: ColumnField[] = (
-      dataAssetFieldsDisplayRes.data || []
-    ).map((field: ApiColumnField, index: number) => ({
-      id: field.nameEn || String(index),
-      nameEn: field.nameEn || String(index),
-      nameZh: field.nameZh,
-      type: field.type,
-      isEnumAble: field.isEnumAble || false,
-      enumLoading: false,
-      enumCount: 0,
-      displaySort: field.displaySort || 0,
-      // 可枚举列表
-      values: field.values || []
-    }));
-    setColumnSettingsFields(convertedFields);
-    console.log(
-      '看一下列设置返回的内容',
-      convertedFields.filter((field) => field.displaySort > 0)
-    );
-    setSearchFields(convertedFields.filter((field) => field.displaySort > 0));
+    setRawDisplayFields(dataAssetFieldsDisplayRes.data || []);
   };
 
   // 初始化：检查是否有mapping数据
@@ -334,6 +344,47 @@ export default function DataAssetList() {
     init();
   }, []);
 
+  const convertFields = useCallback(
+    (fields: ApiColumnField[]): ColumnField[] =>
+      fields.map((field: ApiColumnField, index: number) => {
+        // 时间类型or标签类型不能勾选为枚举类型
+        const isEnumAbleForColumn =
+          isDateType(field.type) || isTagsField(field.nameEn) ? false : true;
+        let isEnumAble = field.isEnumAble;
+
+        // 搜索时传给服务端的值，要求标签类型是true, 时间类型是false
+        if (isTagsField(field.nameEn)) {
+          isEnumAble = true;
+        } else if (isDateType(field.type)) {
+          isEnumAble = false;
+        }
+
+        return {
+          id: field.nameEn || String(index),
+          nameEn: field.nameEn || String(index),
+          nameZh: field.nameZh,
+          type: field.type,
+          // 列设置弹窗中是否可勾选为枚举类型
+          isEnumAbleForColumn,
+          isEnumAble,
+          enumLoading: false,
+          distinctCount: field.distinctCount || 0,
+          displaySort: field.displaySort || 0,
+          values: isTagsField(field.nameEn) ? tagList : field.values || []
+        };
+      }),
+    [tagList]
+  );
+
+  useEffect(() => {
+    if (!rawDisplayFields.length) {
+      return;
+    }
+    const convertedFields = convertFields(rawDisplayFields);
+    setColumnSettingsFields(convertedFields);
+    setSearchFields(convertedFields.filter((field) => field.displaySort > 0));
+  }, [rawDisplayFields, convertFields]);
+
   // 获取标签列表
   useEffect(() => {
     getTagList()
@@ -351,35 +402,11 @@ export default function DataAssetList() {
 
   // 更新搜索字段配置（当标签和来源数据加载完成后）
   useEffect(() => {
-    // const fields: SearchField[] = [
-    //   {
-    //     key: 'name',
-    //     label: '数据资产名称',
-    //     type: 'input',
-    //     paramKey: 'name'
-    //   },
-    //   {
-    //     key: 'tag',
-    //     label: '资产标签',
-    //     type: 'select',
-    //     options: assetTags,
-    //     paramKey: 'tag'
-    //   },
-    //   {
-    //     key: 'source',
-    //     label: '资产来源',
-    //     type: 'select',
-    //     options: assetSources,
-    //     paramKey: 'source'
-    //   },
-    //   {
-    //     key: 'updateTime',
-    //     label: '更新时间',
-    //     type: 'daterange',
-    //     paramKey: 'updateTime'
-    //   }
-    // ];
-    // setSearchFields(fields);
+    // 首次进入页面时不请求
+    if (isFirstMountRef.current) {
+      isFirstMountRef.current = false;
+      return;
+    }
     loadListData(1, pageSize);
   }, [searchParams]);
 
@@ -430,14 +457,21 @@ export default function DataAssetList() {
   };
 
   // 处理字段搜索
-  const handleFieldSearch = (fieldValues: FieldSearchItem[]) => {
-    setSearchParams({ ...searchParams, fieldSearch: fieldValues });
+  const handleFieldSearch = (
+    fieldValues: FieldSearchItem[],
+    commonSearch: string
+  ) => {
+    setSearchParams({
+      ...searchParams,
+      fieldSearch: fieldValues,
+      commonSearch
+    });
   };
 
   // 处理重置
   const handleReset = () => {
-    console.log('重置搜索条件');
-    // TODO: 重新获取列表数据
+    setSearchParams({ ...searchParams, fieldSearch: [] });
+    setCurrentPage(1);
   };
 
   // 切换视图类型
@@ -458,7 +492,6 @@ export default function DataAssetList() {
     const targetPage = isSizeChange ? 1 : page;
 
     setCurrentPage(targetPage);
-    console.log('nextPageSize', nextPageSize, targetPage);
     if (isSizeChange && nextPageSize) {
       setPageSize(nextPageSize);
     }
@@ -520,7 +553,6 @@ export default function DataAssetList() {
   // 处理批量删除
   const handleBatchDelete = () => {
     if (selectedRowKeys.length === 0) return;
-    console.log('selectedRowKeys', selectedRowKeys);
 
     Modal.confirm({
       title: '确定删除资产吗?',
@@ -620,16 +652,6 @@ export default function DataAssetList() {
     selectedRowKeys: string[]
   ) => {
     try {
-      const editData: EditDataAssetData = {
-        modifyMethod: ModifyMethod.COVER,
-        modifyIds: selectedRowKeys,
-        modifyContext: [
-          {
-            fieldEnName: 'tags',
-            fieldValue: tags.join(',')
-          }
-        ]
-      };
       const res = await editDataAssetDataTagsBatch({
         Ids: selectedRowKeys,
         tags: tags.map((tag) => ({ id: tag.value, value: tag.label }))
@@ -711,15 +733,6 @@ export default function DataAssetList() {
 
   // 处理资产设置跳转
   const handleAssetSettings = () => {
-    // if (selectedRowKeys.length === 0) {
-    //   Message.warning('请先选择一个资产');
-    //   return;
-    // }
-    // if (selectedRowKeys.length > 1) {
-    //   Message.warning('请只选择一个资产进行设置');
-    //   return;
-    // }
-    // 跳转到编辑资产页面
     history.push(`/tenant/compute/modaforge/dataAsset/edit`);
   };
 
@@ -743,6 +756,7 @@ export default function DataAssetList() {
             {noDataElement({
               description: '暂无数据资产',
               btnText: '创建数据资产',
+              perms: DATA_ASSET_PERMISSIONS.CREATE_TABLE,
               handleBtn: handleCreateDataAsset
             })}
           </div>
@@ -760,14 +774,6 @@ export default function DataAssetList() {
           styles['data-asset-list-content']
         )}
       >
-        {/* {dataAssetList.length !== 0 && (
-          <div className="mb-4 h-[30px] w-full leading-[30px]">
-            <p className="text-xl font-bold">
-              数据资产（{dataAssetList.length}）
-            </p>
-          </div>
-        )} */}
-
         {/* 搜索区域 */}
         <SearchArea
           fields={searchFields}
@@ -793,20 +799,22 @@ export default function DataAssetList() {
             {viewType === ViewType.LIST && (
               <>
                 {/* 批量删除按钮 */}
-                <Popover
-                  content="请先选择资产"
-                  disabled={selectedRowKeys.length > 0}
-                  position="top"
-                >
-                  <Button
-                    icon={<IconDelete />}
-                    className="mr-[20px]"
-                    disabled={selectedRowKeys.length === 0}
-                    onClick={handleBatchDelete}
+                <PermissionWrapper permission={DATA_ASSET_PERMISSIONS.DELETE}>
+                  <Popover
+                    content="请先选择资产"
+                    disabled={selectedRowKeys.length > 0}
+                    position="top"
                   >
-                    批量删除
-                  </Button>
-                </Popover>
+                    <Button
+                      icon={<IconDelete />}
+                      className="mr-[20px]"
+                      disabled={selectedRowKeys.length === 0}
+                      onClick={handleBatchDelete}
+                    >
+                      批量删除
+                    </Button>
+                  </Popover>
+                </PermissionWrapper>
 
                 {/* 批量修改按钮 */}
                 {selectedRowKeys.length === 0 ? (
@@ -820,49 +828,53 @@ export default function DataAssetList() {
                     </Button>
                   </Popover>
                 ) : (
-                  <Dropdown
-                    droplist={
-                      <Menu style={{ width: '110px' }}>
-                        <Menu.Item
-                          key="modifyAsset"
-                          onClick={handleBatchModifyAsset}
-                        >
-                          修改资产
-                        </Menu.Item>
-                        <Menu.Item
-                          key="modifyTags"
-                          onClick={handleBatchModifyTags}
-                        >
-                          修改标签
-                        </Menu.Item>
-                      </Menu>
-                    }
-                    trigger="click"
-                    position="bl"
+                  <PermissionWrapper
+                    permission={[
+                      DATA_ASSET_PERMISSIONS.MODIFY_TAG,
+                      DATA_ASSET_PERMISSIONS.MODIFY_ASSET
+                    ]}
                   >
-                    <Button
-                      icon={<IconEdit />}
-                      className="mr-[20px]"
-                      disabled={false}
+                    <Dropdown
+                      droplist={
+                        <Menu style={{ width: '110px' }}>
+                          <Menu.Item
+                            key="modifyAsset"
+                            onClick={handleBatchModifyAsset}
+                          >
+                            修改资产
+                          </Menu.Item>
+                          <Menu.Item
+                            key="modifyTags"
+                            onClick={handleBatchModifyTags}
+                          >
+                            修改标签
+                          </Menu.Item>
+                        </Menu>
+                      }
+                      trigger="click"
+                      position="bl"
                     >
-                      批量修改
-                    </Button>
-                  </Dropdown>
+                      <Button
+                        icon={<IconEdit />}
+                        className="mr-[20px]"
+                        disabled={false}
+                      >
+                        批量修改
+                      </Button>
+                    </Dropdown>
+                  </PermissionWrapper>
                 )}
-
-                {/* <Popover
-                  content="请先选择一个资产"
-                  disabled={selectedRowKeys.length === 1}
-                  position="top"
-                > */}
-                <Button
-                  icon={<IconSettings />}
-                  className="mr-[20px]"
-                  // disabled={selectedRowKeys.length !== 1}
-                  onClick={handleAssetSettings}
+                <PermissionWrapper
+                  permission={DATA_ASSET_PERMISSIONS.GET_TABLE}
                 >
-                  资产设置
-                </Button>
+                  <Button
+                    icon={<IconSettings />}
+                    className="mr-[20px]"
+                    onClick={handleAssetSettings}
+                  >
+                    资产设置
+                  </Button>
+                </PermissionWrapper>
                 {/* </Popover> */}
                 <Button
                   icon={<IconSettings />}
@@ -877,15 +889,6 @@ export default function DataAssetList() {
           </div>
         </div>
 
-        {/* {dataAssetList.length === 0 ? (
-          <div className="flex h-[calc(100%-70px)] items-center justify-center">
-            {noDataElement({
-              description: '暂无数据资产',
-              btnText: '创建数据资产',
-              handleBtn: handleCreateDataAsset
-            })}
-          </div>
-        ) : ( */}
         <div className="px-[24px]">
           {loading ? (
             <div className="flex h-[calc(100%-70px)] items-center justify-center">
@@ -930,34 +933,41 @@ export default function DataAssetList() {
         onChange={handleColumnChange}
       />
       {/* 修改资产弹窗 */}
-      <ModifyAssetModal
-        visible={modifyAssetModalVisible}
-        fields={fieldsForModify}
-        onCancel={() => setModifyAssetModalVisible(false)}
-        onConfirm={handleModifyAssetConfirm}
-      />
+      {modifyAssetModalVisible && (
+        <ModifyAssetModal
+          visible={modifyAssetModalVisible}
+          fields={
+            fieldsForModify?.filter((field) => !isTagsField(field.nameEn)) ?? []
+          }
+          onCancel={() => setModifyAssetModalVisible(false)}
+          onConfirm={handleModifyAssetConfirm}
+        />
+      )}
       {/* 修改标签弹窗 */}
-      <ModifyTagsModal
-        visible={modifyTagsModalVisible}
-        tagOptions={tagList}
-        selectedRowKeys={selectedRowKeys}
-        initialTags={aggregatedSelectedTags}
-        onCancel={() => setModifyTagsModalVisible(false)}
-        onConfirm={handleModifyTagsConfirm}
-      />
+      {modifyTagsModalVisible && (
+        <ModifyTagsModal
+          visible={modifyTagsModalVisible}
+          tagOptions={tagList}
+          selectedRowKeys={selectedRowKeys}
+          initialTags={aggregatedSelectedTags}
+          onCancel={() => setModifyTagsModalVisible(false)}
+          onConfirm={handleModifyTagsConfirm}
+        />
+      )}
       {/* 单条编辑资产弹窗 */}
-      <EditSingleAssetModal
-        visible={editSingleAssetModalVisible}
-        record={editingRecord}
-        fields={columnFields.filter(
-          (field) => field.nameEn !== 'tags' && field.displaySort > 0
-        )}
-        onCancel={() => {
-          setEditSingleAssetModalVisible(false);
-          setEditingRecord(null);
-        }}
-        onConfirm={handleSingleEditAssetConfirm}
-      />
+      {editSingleAssetModalVisible && (
+        <EditSingleAssetModal
+          key={editingRecord?.id}
+          visible={editSingleAssetModalVisible}
+          record={editingRecord}
+          fields={columnFields.filter((field) => !isTagsField(field.nameEn))}
+          onCancel={() => {
+            setEditSingleAssetModalVisible(false);
+            setEditingRecord(null);
+          }}
+          onConfirm={handleSingleEditAssetConfirm}
+        />
+      )}
     </div>
   );
 }

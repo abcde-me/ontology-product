@@ -14,8 +14,9 @@ import './index.module.scss'; // 确保引入样式文件
 import { ReactSortable } from 'react-sortablejs';
 import DragIcon from '../../assets/drag-icon.svg';
 import styles from './index.module.scss';
-import { RESERVED_FIELD_ENS } from '../../utils/const';
+import { isTagsField, RESERVED_FIELD_ENS } from '../../utils/const';
 import { getDataAssetTableDistinctFieldCount } from '@/api/dataAsset';
+import { BaseTag } from '@/types/dataAssetApi';
 // const SortableAny = ReactSortable as any;
 
 export interface ColumnField {
@@ -24,10 +25,11 @@ export interface ColumnField {
   nameZh: string;
   type: string;
   isEnumAble: boolean; // 是否勾选枚举
+  isEnumAbleForColumn: boolean; // 列设置弹窗中是否可勾选为枚举类型
   enumLoading: boolean;
-  enumCount: number; // 枚举数
+  distinctCount: number; // 枚举数
   displaySort: number;
-  values: string[];
+  values: Array<string | BaseTag>;
 }
 
 export interface ColumnSettingModalProps {
@@ -64,8 +66,8 @@ const ColumnSettingModal: React.FC<ColumnSettingModalProps> = ({
       // 更新选中的字段ID列表
       const allIds = externalFields
         .filter((f) => f.displaySort > 0)
-        .map((f) => f.nameEn)
-        .filter(Boolean);
+        .sort((a, b) => Number(a?.displaySort) - Number(b?.displaySort))
+        .map((f) => f.nameEn);
       if (allIds.length > 0) {
         setSelectedIds(allIds);
       }
@@ -88,7 +90,9 @@ const ColumnSettingModal: React.FC<ColumnSettingModalProps> = ({
     if (!checked) {
       setFields((fields) =>
         fields.map((f) =>
-          f.nameEn === nameEn ? { ...f, enumCount: 0, isEnumAble: checked } : f
+          f.nameEn === nameEn
+            ? { ...f, distinctCount: 0, isEnumAble: checked }
+            : f
         )
       );
       return;
@@ -105,8 +109,8 @@ const ColumnSettingModal: React.FC<ColumnSettingModalProps> = ({
         fieldEnName: nameEn
       });
 
-      if (res.code !== '' || res.status !== 200 || res.data > 1000) {
-        Message.error('该字段不可勾选为枚举类型');
+      if (res?.code !== '' || res?.status !== 200 || res?.data > 1000) {
+        Message.error(res?.message ?? '该字段不可勾选为枚举类型');
         setFields((fields) =>
           fields.map((f) =>
             f.nameEn === nameEn ? { ...f, enumLoading: false } : f
@@ -120,7 +124,7 @@ const ColumnSettingModal: React.FC<ColumnSettingModalProps> = ({
           f.nameEn === nameEn
             ? {
                 ...f,
-                enumCount: res.data,
+                distinctCount: res.data,
                 isEnumAble: checked,
                 enumLoading: false
               }
@@ -196,15 +200,20 @@ const ColumnSettingModal: React.FC<ColumnSettingModalProps> = ({
                       <Spin size={14} />
                     ) : (
                       <Checkbox
-                        checked={record.isEnumAble}
+                        checked={
+                          record.isEnumAbleForColumn ? record.isEnumAble : false
+                        }
+                        disabled={!record.isEnumAbleForColumn}
                         onChange={(val) => handleEnumCheck(record.nameEn, val)}
                       />
                     )}
-                    {record.isEnumAble && !record.enumLoading && (
-                      <span className="text-[var(--color-text-4)]">
-                        {record.enumCount}枚举量
-                      </span>
-                    )}
+                    {record.isEnumAble &&
+                      record.isEnumAbleForColumn &&
+                      !record.enumLoading && (
+                        <span className="text-[var(--color-text-4)]">
+                          {record.distinctCount}枚举量
+                        </span>
+                      )}
                   </span>
                 )
               }
@@ -217,7 +226,7 @@ const ColumnSettingModal: React.FC<ColumnSettingModalProps> = ({
             <span className="font-weight-500">
               已选字段 {selectedIds.length}/{fields.length}
             </span>
-            <IconDelete
+            {/* <IconDelete
               className={`size-[16px] ${
                 selectedIds.length === 0
                   ? 'pointer-events-none cursor-not-allowed text-[var(--color-text-4)]'
@@ -226,7 +235,7 @@ const ColumnSettingModal: React.FC<ColumnSettingModalProps> = ({
               onClick={() => {
                 if (selectedIds.length > 0) setSelectedIds([]);
               }}
-            />
+            /> */}
           </div>
           <ReactSortable
             tag="div"
@@ -240,25 +249,35 @@ const ColumnSettingModal: React.FC<ColumnSettingModalProps> = ({
               onChange(list);
             }}
           >
-            {selectedFields.map((field) => (
-              <div
-                key={field.nameEn}
-                data-nameEn={field.nameEn}
-                className="m-t-[7px] flex h-[40px] items-center"
-              >
-                <DragIcon className="mr-[8px] h-[14px] w-[14px]"></DragIcon>
-                {/* <div className='w-[14px] h-[14px] mr-[8px]'>
-                  
-                </div> */}
-                <span className="line-height-[40px] flex-1">
-                  {field.nameZh}
-                </span>
-                <IconClose
-                  className="size-[12px] cursor-pointer"
-                  onClick={() => handleRemove(field.nameEn)}
-                />
-              </div>
-            ))}
+            {selectedFields.map((field) => {
+              const isReserved = RESERVED_FIELD_ENS.has(field.nameEn);
+              return (
+                <div
+                  key={field.nameEn}
+                  data-nameEn={field.nameEn}
+                  className="m-t-[7px] flex h-[40px] items-center"
+                >
+                  <DragIcon className="mr-[8px] h-[14px] w-[14px]"></DragIcon>
+                  {/* <div className='w-[14px] h-[14px] mr-[8px]'>
+                    
+                  </div> */}
+                  <span className="line-height-[40px] flex-1">
+                    {field.nameZh}
+                  </span>
+                  <IconClose
+                    className={`size-[12px] ${
+                      isReserved
+                        ? 'cursor-not-allowed text-[var(--color-text-4)]'
+                        : 'cursor-pointer'
+                    }`}
+                    onClick={() => {
+                      if (isReserved) return;
+                      handleRemove(field.nameEn);
+                    }}
+                  />
+                </div>
+              );
+            })}
           </ReactSortable>
         </div>
       </div>
