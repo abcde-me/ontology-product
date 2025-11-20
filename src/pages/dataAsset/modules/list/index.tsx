@@ -452,8 +452,15 @@ export default function DataAssetList() {
   };
 
   // 处理主搜索
-  const handleMainSearch = (value: string) => {
-    setSearchParams({ ...searchParams, commonSearch: value });
+  const handleMainSearch = (
+    fieldValues: FieldSearchItem[],
+    commonSearch: string
+  ) => {
+    setSearchParams({
+      ...searchParams,
+      fieldSearch: fieldValues,
+      commonSearch
+    });
   };
 
   // 处理字段搜索
