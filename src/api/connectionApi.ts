@@ -16,7 +16,7 @@ export async function delconnectionList(params) {
 export async function getdetailList(params) {
   return await UAPI.RES.getconnection({})
     .post({
-      id: params.id
+      id: Number(params.id)
     })
     .inRegion()
     .do();

@@ -36,13 +36,11 @@ import { validateName } from '@/utils/valiate';
 import Uploads from '../list/file-upload';
 import ComponentTree from './component-tree';
 import '../list/db-tree.scss';
-import { isNumber } from 'lodash-es';
 import { sql } from '@codemirror/lang-sql';
 import { lintGutter } from '@codemirror/lint';
-import { EditorView } from '@codemirror/view';
 import { tags as t } from '@lezer/highlight';
 import createTheme from '@uiw/codemirror-themes';
-import CodeMirror, { ReactCodeMirrorRef } from '@uiw/react-codemirror';
+import CodeMirror from '@uiw/react-codemirror';
 import styles from './index.module.scss';
 import { IconCaretRight, IconDown, IconUp } from '@arco-design/web-react/icon';
 import SQLFormatIcon from '@/assets/sql/sql-format-ico.svg';
@@ -547,16 +545,16 @@ export default function DataLoadCreate() {
       if (Array.isArray(fileData)) {
         if (fileData.length === 0) {
           setUploadedFiles([]);
-          if (sourceType === SOURCE_TYPES.LOCAL) {
-            // form.setFieldsValue({ connector_id: undefined });
-          }
+          // if (sourceType === SOURCE_TYPES.LOCAL) {
+          //   // form.setFieldsValue({ connector_id: undefined });
+          // }
           return;
         }
 
         setUploadedFiles(fileData);
-        if (sourceType === SOURCE_TYPES.LOCAL) {
-          // form.setFieldsValue({ connector_id: 'local_files_uploaded' });
-        }
+        // if (sourceType === SOURCE_TYPES.LOCAL) {
+        //   // form.setFieldsValue({ connector_id: 'local_files_uploaded' });
+        // }
         return;
       }
 
@@ -570,9 +568,9 @@ export default function DataLoadCreate() {
         return [...prev, fileData];
       });
 
-      if (sourceType === SOURCE_TYPES.LOCAL) {
-        // form.setFieldsValue({ connector_id: 'local_files_uploaded' });
-      }
+      // if (sourceType === SOURCE_TYPES.LOCAL) {
+      //   // form.setFieldsValue({ connector_id: 'local_files_uploaded' });
+      // }
     },
     [form, sourceType]
   );
@@ -636,14 +634,7 @@ export default function DataLoadCreate() {
   // 构建表单数据
   const buildFormData = useCallback(
     (formValues: FormValues, pathId: string | number, submitType: string) => {
-      const tableNameValues = formValues.table_name || [];
-      const isAllSelected =
-        Array.isArray(tableNameValues) &&
-        tableNameValues.length === tableList.length &&
-        tableList.every((option) => tableNameValues.includes(option));
-      const processedTableNames = isAllSelected
-        ? tableList
-        : formValues.table_name || uploadedFiles;
+      const processedTableNames = formValues.table_name || uploadedFiles;
 
       return {
         task_name: formValues.name,
@@ -973,11 +964,6 @@ export default function DataLoadCreate() {
   // 监听连接器ID变化
   const connectorId = Form.useWatch('connector_id', form);
   useEffect(() => {
-    // 数据源类型为本地文件时，设置连接器ID为local_files_uploaded
-    if (sourceType === SOURCE_TYPES.LOCAL) {
-      form.setFieldsValue({ connector_id: 'local_files_uploaded' });
-    }
-
     if (connectorId) {
       getConnectorDetailList(connectorId);
       if (sourceType === SOURCE_TYPES.DB) {
