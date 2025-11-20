@@ -106,28 +106,7 @@ export default function SearchArea({
 
   // 处理主搜索（点击搜索图标或按Enter）
   const handleMainSearch = () => {
-    const searchParams: Record<string, any> = {};
-    const fieldSearch: FieldSearchItem[] = [];
-    checkedFields.forEach((fieldKey) => {
-      const field = fields.find((f) => f.id === fieldKey);
-      if (
-        field &&
-        fieldValues[fieldKey] !== undefined &&
-        fieldValues[fieldKey] !== null &&
-        fieldValues[fieldKey] !== ''
-      ) {
-        const paramKey = field.id || fieldKey;
-        searchParams[paramKey] = fieldValues[fieldKey];
-
-        fieldSearch.push({
-          isEnumAble: field.isEnumAble ?? false,
-          nameEn: field.id,
-          type: field.type,
-          searchContent: formatSearchContent(field, fieldValues[fieldKey])
-        });
-      }
-    });
-    onMainSearch?.(fieldSearch, mainSearch);
+    onMainSearch?.([], mainSearch);
   };
 
   // 处理字段值变化
@@ -301,7 +280,7 @@ export default function SearchArea({
     return button;
   };
 
-  const isBaseTagOption = (opt: string | BaseTag): opt is BaseTag => {
+  const isBaseTagOption = (opt: string | number | BaseTag): opt is BaseTag => {
     if (typeof opt !== 'object' || opt === null) {
       return false;
     }
@@ -428,13 +407,11 @@ export default function SearchArea({
             onChange={(val) => handleFieldValueChange(field.id, val)}
             allowClear
           >
-            {field.values
-              ?.filter((opt): opt is string => typeof opt === 'string')
-              .map((opt) => (
-                <Select.Option key={opt} value={opt}>
-                  {opt}
-                </Select.Option>
-              ))}
+            {field.values.map((opt) => (
+              <Select.Option key={String(opt)} value={String(opt)}>
+                {opt}
+              </Select.Option>
+            ))}
           </Select>
         );
       case 'range':
