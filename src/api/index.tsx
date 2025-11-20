@@ -62,6 +62,17 @@ UAPI_CONFIG.addRequestInterceptor(
       // 如果没有请求体，直接赋值
       config.data = commonParams;
     }
+
+    // 对于 GET 请求，也需要添加到 query 参数中
+    if (
+      config.method?.toLowerCase() === 'get' &&
+      hasValidProjectId &&
+      !shouldExclude
+    ) {
+      config.params = config.params || {};
+      config.params.projectID = projectId[1];
+    }
+
     return config;
   },
   (error) => {

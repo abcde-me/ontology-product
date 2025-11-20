@@ -343,7 +343,7 @@ export const useRagDetailStore = create<RagDetailState & RagDetailActions>(
 
       try {
         console.log('🔍 开始加载文件二进制数据:', { bucket, path });
-        const response = await getFileBinaryData({ bucket, path });
+        const response = await getFileBinaryData({ bucket_name: bucket, path });
         console.log('✅ 文件二进制数据加载成功:', response);
 
         set({
