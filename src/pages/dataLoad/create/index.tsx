@@ -548,13 +548,14 @@ export default function DataLoadCreate() {
         if (fileData.length === 0) {
           setUploadedFiles([]);
           if (sourceType === SOURCE_TYPES.LOCAL) {
-            form.setFieldsValue({ connector_id: undefined });
+            // form.setFieldsValue({ connector_id: undefined });
           }
           return;
         }
+
         setUploadedFiles(fileData);
         if (sourceType === SOURCE_TYPES.LOCAL) {
-          form.setFieldsValue({ connector_id: 'local_files_uploaded' });
+          // form.setFieldsValue({ connector_id: 'local_files_uploaded' });
         }
         return;
       }
@@ -570,7 +571,7 @@ export default function DataLoadCreate() {
       });
 
       if (sourceType === SOURCE_TYPES.LOCAL) {
-        form.setFieldsValue({ connector_id: 'local_files_uploaded' });
+        // form.setFieldsValue({ connector_id: 'local_files_uploaded' });
       }
     },
     [form, sourceType]
@@ -582,7 +583,7 @@ export default function DataLoadCreate() {
       setUploadedFiles((prev) => {
         const updatedFiles = prev.filter((file) => file.name !== fileName);
         if (updatedFiles.length === 0 && sourceType === SOURCE_TYPES.LOCAL) {
-          form.setFieldsValue({ connector_id: undefined });
+          // form.setFieldsValue({ connector_id: undefined });
         }
         return updatedFiles;
       });
@@ -972,6 +973,11 @@ export default function DataLoadCreate() {
   // 监听连接器ID变化
   const connectorId = Form.useWatch('connector_id', form);
   useEffect(() => {
+    // 数据源类型为本地文件时，设置连接器ID为local_files_uploaded
+    if (sourceType === SOURCE_TYPES.LOCAL) {
+      form.setFieldsValue({ connector_id: 'local_files_uploaded' });
+    }
+
     if (connectorId) {
       getConnectorDetailList(connectorId);
       if (sourceType === SOURCE_TYPES.DB) {
