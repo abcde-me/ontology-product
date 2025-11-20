@@ -369,7 +369,6 @@ export default function SearchArea({
             placeholder={`输入关键字搜索`}
             value={value || ''}
             onChange={(val) => handleFieldValueChange(field.id, val)}
-            suffix={<IconSearch />}
             allowClear
           />
         );
