@@ -1921,6 +1921,7 @@ const DatasetDetail = (props: {
                         pagination={false}
                         // scroll={{ x: 'max-content' }}
                         border={false}
+                        rowKey="id"
                       />
                     </>
                   ) : null}
