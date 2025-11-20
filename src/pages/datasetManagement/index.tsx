@@ -373,9 +373,9 @@ const columns = (
     filters: [
       { text: '创建中', value: datasetStatus.creating },
       { text: '创建失败', value: datasetStatus.create_failed },
-      { text: '正常', value: datasetStatus.normal },
-      { text: '版本更新中', value: datasetStatus.version_updating },
-      { text: '版本更新失败', value: datasetStatus.version_update_failed }
+      { text: '正常', value: datasetStatus.normal }
+      // { text: '版本更新中', value: datasetStatus.version_updating },
+      // { text: '版本更新失败', value: datasetStatus.version_update_failed }
     ],
     filteredValue: selectedStatusFilters,
     filterMultiple: true,
@@ -1363,7 +1363,7 @@ const DatasetManagement: React.FC = () => {
         setDatasetSceneList(newSceneList);
         setDatasetSceneOption(res.data);
       } else {
-        console.error('数据集场景分类列表数据格式错误:', res);
+        Message.error(res.message || '数据获取失败');
         setDatasetSceneList([]);
       }
     });

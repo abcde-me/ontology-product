@@ -1788,7 +1788,12 @@ const DatasetDetail = (props: {
                     flexShrink: 0
                   }}
                   allowClear
-                  suffix={<IconSearch style={{ color: '#999' }} />}
+                  suffix={
+                    <IconSearch
+                      style={{ color: '#999' }}
+                      onClick={handleSearch}
+                    />
+                  }
                 />
                 {contentData.length !== 0 && contentColumns.length !== 0 ? (
                   <>
