@@ -170,9 +170,24 @@ export default function SearchArea({
   // 全选/取消全选
   const handleSelectAll = (checked: boolean) => {
     if (checked) {
-      setCheckedFields(new Set(fields.map((f) => f.id)));
+      // 如果有搜索关键词，只选中搜索过滤后的字段，并清空之前的字段状态
+      if (settingsSearchKeyword) {
+        // 重新计算过滤后的字段列表
+        const filteredFields = fields.filter((f) =>
+          f.nameZh.toLowerCase().includes(settingsSearchKeyword.toLowerCase())
+        );
+        const filteredFieldIds = filteredFields.map((f) => f.id);
+        setCheckedFields(new Set(filteredFieldIds));
+        // 清空之前所有字段的值
+        setFieldValues({});
+      } else {
+        // 没有搜索关键词时，选中所有字段
+        setCheckedFields(new Set(fields.map((f) => f.id)));
+      }
     } else {
       setCheckedFields(new Set());
+      // 取消全选时，清空所有字段的值
+      setFieldValues({});
     }
   };
 
@@ -268,7 +283,7 @@ export default function SearchArea({
     if (typeof opt !== 'object' || opt === null) {
       return false;
     }
-    return Array.isArray((opt as any).valueList);
+    return Array.isArray(opt.valueList);
   };
 
   // 渲染字段搜索输入组件
@@ -475,7 +490,9 @@ export default function SearchArea({
           {/* 操作按钮区域 */}
           <div className="flex items-center gap-2">
             <QueryButton />
-            <Button onClick={handleReset}>重置</Button>
+            <Button disabled={!hasCheckedFields} onClick={handleReset}>
+              重置
+            </Button>
             <Popover
               content={settingsContent}
               trigger="click"

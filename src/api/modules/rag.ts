@@ -4,7 +4,7 @@ import { NewSegmentData } from '@/pages/ragDetail/utils/newSegmentData';
 
 // 获取原始文件二进制数据
 export interface GetFileBinaryDataParams {
-  bucket: string;
+  bucket_name: string;
   path: string;
 }
 

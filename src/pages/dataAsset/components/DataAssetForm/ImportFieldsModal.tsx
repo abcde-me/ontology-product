@@ -32,8 +32,8 @@ const ImportFieldsModal: React.FC<ImportFieldsModalProps> = ({
 
   const handleFileChange = useCallback(
     (data: DataAssetField[]) => {
-      setFileData(data);
-      form.setFieldValue('fileData', data);
+      setFileData(data ?? []);
+      form.setFieldValue('fileData', data ?? []);
     },
     [form]
   );
