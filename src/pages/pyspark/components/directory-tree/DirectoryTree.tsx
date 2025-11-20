@@ -23,7 +23,12 @@ import type {
   NodeProps,
   TreeDataType
 } from '@arco-design/web-react/es/Tree/interface';
-import { IconPlus, IconEdit, IconDelete } from '@arco-design/web-react/icon';
+import {
+  IconPlus,
+  IconEdit,
+  IconDelete,
+  IconCopy
+} from '@arco-design/web-react/icon';
 import FolderIcon from '@/assets/python/folder.svg';
 import FileIcon from '@/assets/python/file.svg';
 import AddAfterIcon from '@/assets/python/add-after.svg';
@@ -445,7 +450,13 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
             : n
         );
     };
-
+    const handleCopy = (node: NodeProps) => {
+      try {
+        onCopy?.(`${node.dataRef?.name}_副本_${now()}`, node);
+      } catch (e) {
+        Message.error('复制失败');
+      }
+    };
     const handleEditFinish = async (node) => {
       if (node.dataRef?.isAdd) {
         const finalName = inputValue.trim() || defaultName;
@@ -720,6 +731,12 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
                     <IconEdit
                       className="mr-1 text-[14px] hover:text-[rgb(var(--primary-6))]"
                       onClick={() => handleEdit(node)}
+                    />
+                  </Tooltip>
+                  <Tooltip color="white" content="复制并粘贴">
+                    <IconCopy
+                      className="mr-1 text-[14px] hover:text-[rgb(var(--primary-6))]"
+                      onClick={() => handleCopy(node as unknown as NodeProps)}
                     />
                   </Tooltip>
                   {/* )} */}
