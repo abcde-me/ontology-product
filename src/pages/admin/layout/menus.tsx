@@ -17,7 +17,8 @@ import {
   ROLE_PERMISSIONS,
   PROJECT_PERMISSIONS,
   API_KEY_PERMISSIONS,
-  TAG_PERMISSIONS
+  TAG_PERMISSIONS,
+  DATA_ASSET_PERMISSIONS
 } from '@/config/permissions';
 import Connection from '@/assets/sider/connection.svg';
 import DataLoad from '@/assets/sider/data-load.svg';
@@ -194,7 +195,7 @@ export const menus: MenuModel[] = [
         icon: <DatasetManagement className={iconClass} />,
         key: 'dataAsset',
         path: '/tenant/compute/modaforge/dataAsset',
-        permission: DATA_MANAGEMENT_PERMISSIONS.LIST
+        permission: DATA_ASSET_PERMISSIONS.LIST
       }
     ]
   },
