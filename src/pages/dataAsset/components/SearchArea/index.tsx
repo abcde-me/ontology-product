@@ -18,7 +18,7 @@ import {
 } from '@arco-design/web-react/icon';
 import { ColumnField } from '../ColumnSettingModal';
 import { FieldSearchItem, BaseTag, TagValueItem } from '@/types/dataAssetApi';
-import { isDateType, isTagsField } from '../../utils/const';
+import { isDateType, isDateTimeType, isTagsField } from '../../utils/const';
 import styles from './index.module.scss';
 import dayjs from 'dayjs';
 
@@ -355,7 +355,9 @@ export default function SearchArea({
     }
 
     if (isDateType(field.type)) {
-      fieldType = 'range';
+      fieldType = 'date';
+    } else if (isDateTimeType(field.type)) {
+      fieldType = 'datetime';
     } else if (field.isEnumAble && field.values?.length > 0) {
       fieldType = 'select';
     } else {
@@ -414,7 +416,7 @@ export default function SearchArea({
             ))}
           </Select>
         );
-      case 'range':
+      case 'datetime':
         return (
           <DatePicker.RangePicker
             value={value}
@@ -423,6 +425,16 @@ export default function SearchArea({
             showTime={{ format: 'HH:mm:ss' }}
             format="YYYY-MM-DD HH:mm:ss"
             placeholder={['开始日期', '结束日期']}
+          />
+        );
+      case 'date':
+        return (
+          <DatePicker.RangePicker
+            value={value}
+            onChange={(val) => handleFieldValueChange(field.id, val)}
+            allowClear
+            format="YYYY-MM-DD"
+            placeholder={['开始时间', '结束时间']}
           />
         );
       default:

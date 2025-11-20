@@ -56,7 +56,12 @@ import styles from './list.module.scss';
 import classNames from 'classnames';
 import { FieldSearchItem } from '@/types/dataAssetApi';
 import dayjs from 'dayjs';
-import { isDateType, isTagsField, TAGS_FIELD_EN_NAME } from '../../utils/const';
+import {
+  isDateTimeType,
+  isDateType,
+  isTagsField,
+  TAGS_FIELD_EN_NAME
+} from '../../utils/const';
 import { PermissionWrapper } from '@/components/PermissionGuard';
 import { DATA_ASSET_PERMISSIONS } from '@/config/permissions';
 
@@ -349,13 +354,17 @@ export default function DataAssetList() {
       fields.map((field: ApiColumnField, index: number) => {
         // 时间类型or标签类型不能勾选为枚举类型
         const isEnumAbleForColumn =
-          isDateType(field.type) || isTagsField(field.nameEn) ? false : true;
+          isDateType(field.type) ||
+          isDateTimeType(field.type) ||
+          isTagsField(field.nameEn)
+            ? false
+            : true;
         let isEnumAble = field.isEnumAble;
 
         // 搜索时传给服务端的值，要求标签类型是true, 时间类型是false
         if (isTagsField(field.nameEn)) {
           isEnumAble = true;
-        } else if (isDateType(field.type)) {
+        } else if (isDateType(field.type) || isDateTimeType(field.type)) {
           isEnumAble = false;
         }
 
