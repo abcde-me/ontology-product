@@ -16,7 +16,8 @@ import {
   USER_GROUP_PERMISSIONS,
   ROLE_PERMISSIONS,
   PROJECT_PERMISSIONS,
-  API_KEY_PERMISSIONS
+  API_KEY_PERMISSIONS,
+  TAG_PERMISSIONS
 } from '@/config/permissions';
 import Connection from '@/assets/sider/connection.svg';
 import DataLoad from '@/assets/sider/data-load.svg';
@@ -31,6 +32,7 @@ import BaseMenu from '@/assets/sider/basemenu.svg';
 import PasparkMenu from '@/assets/sider/pyspark.svg';
 import SqlMenu from '@/assets/sider/sql.svg';
 import AnnotationTask from '@/assets/sider/annotationTask.svg';
+import LabelMenu from '@/assets/label-menu.svg';
 import RequirementManagement from '@/assets/sider/requirementManagement.svg';
 
 export type MenuModel = {
@@ -187,12 +189,6 @@ export const menus: MenuModel[] = [
         path: '/tenant/compute/modaforge/datasetManagement',
         permission: DATA_MANAGEMENT_PERMISSIONS.LIST
       },
-      // {
-      //   title: '命中测试',
-      //   icon: <DataMarket className={iconClass} />,
-      //   key: 'dataMarket',
-      //   path: '/tenant/compute/modaforge/dataMarketDetail'
-      // },
       {
         title: '数据资产',
         icon: <DatasetManagement className={iconClass} />,
@@ -313,6 +309,22 @@ export const menus: MenuModel[] = [
           return url?.includes('apikey') ?? false;
         },
         permission: API_KEY_PERMISSIONS.MENU
+      },
+      {
+        key: 'tag',
+        title: '标签管理',
+        icon: <LabelMenu className={iconClass} />,
+        path:
+          '/tenant/compute/modaforge/operationCenter?url=' +
+          encodeURIComponent(
+            '/operationcenter/tenant/compute/operationcenter/tag'
+          ),
+        activePaths: ['/tenant/compute/modaforge/operationCenter'],
+        queryParamMatcher: (search: string) => {
+          const url = new URLSearchParams(search).get('url');
+          return url?.includes('tag') ?? false;
+        },
+        permission: TAG_PERMISSIONS.LIST
       }
     ]
   }
