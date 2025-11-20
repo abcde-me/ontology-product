@@ -54,16 +54,23 @@ UAPI_CONFIG.addRequestInterceptor(
       projectID: !shouldExclude && hasValidProjectId ? projectId[1] : undefined
     };
     console.log('commonParams', commonParams);
-    // 合并原有参数和公共参数
-    if (config.data) {
-      // 如果已有请求体，合并参数
-      config.data = { ...commonParams, ...config.data };
-    } else {
-      // 如果没有请求体，直接赋值
-      config.data = commonParams;
+
+    // 对于 POST/PUT/PATCH 请求，参数在 request body 中
+    if (
+      config.method &&
+      ['post', 'put', 'patch'].includes(config.method.toLowerCase())
+    ) {
+      // 合并原有参数和公共参数
+      if (config.data) {
+        // 如果已有请求体，合并参数
+        config.data = { ...commonParams, ...config.data };
+      } else {
+        // 如果没有请求体，直接赋值
+        config.data = commonParams;
+      }
     }
 
-    // 对于 GET 请求，也需要添加到 query 参数中
+    // 对于 GET 请求，参数在 query string 中
     if (
       config.method?.toLowerCase() === 'get' &&
       hasValidProjectId &&
