@@ -66,6 +66,30 @@ export default function Step1MetadataFields({
   const [fieldTypesLoading, setFieldTypesLoading] = useState(false);
   const [form] = Form.useForm();
 
+  // 判断是否为新添加的字段（通过id前缀判断）
+  const isNewlyAddedField = useCallback((field: MetadataField): boolean => {
+    return (
+      field.id?.startsWith('field_') || field.id?.startsWith('field_import_')
+    );
+  }, []);
+
+  // 判断字段是否可编辑
+  const isFieldEditable = useCallback(
+    (field: MetadataField): boolean => {
+      // 系统字段和保留字段不可编辑
+      if (field.system === true || RESERVED_FIELD_ENS.has(field.nameEn)) {
+        return false;
+      }
+      // 编辑态下，只有新添加的字段可以编辑
+      if (isEditMode) {
+        return isNewlyAddedField(field);
+      }
+      // 非编辑态下，所有非系统/保留字段都可以编辑
+      return true;
+    },
+    [isEditMode, isNewlyAddedField]
+  );
+
   // 进入页面时查询支持的字段类型
   useEffect(() => {
     let isMounted = true;
@@ -111,11 +135,7 @@ export default function Step1MetadataFields({
           placeholder="请输入中文名称"
           allowClear
           value={record.nameZh}
-          disabled={
-            record.system === true ||
-            RESERVED_FIELD_ENS.has(record.nameEn) ||
-            isEditMode === true
-          }
+          disabled={!isFieldEditable(record)}
           onChange={(value) => handleUpdateField(record.id, { nameZh: value })}
         />
       )
@@ -129,11 +149,7 @@ export default function Step1MetadataFields({
           placeholder="请输入英文名称"
           value={record.nameEn}
           allowClear
-          disabled={
-            record.system === true ||
-            RESERVED_FIELD_ENS.has(record.nameEn) ||
-            isEditMode === true
-          }
+          disabled={!isFieldEditable(record)}
           onChange={(value) => handleUpdateField(record.id, { nameEn: value })}
         />
       )
@@ -147,11 +163,7 @@ export default function Step1MetadataFields({
           placeholder="请选择"
           loading={fieldTypesLoading}
           value={record.type}
-          disabled={
-            record.system === true ||
-            RESERVED_FIELD_ENS.has(record.nameEn) ||
-            isEditMode === true
-          }
+          disabled={!isFieldEditable(record)}
           onChange={(value) => handleUpdateField(record.id, { type: value })}
         >
           {fieldTypes.map((type) => (
@@ -167,10 +179,7 @@ export default function Step1MetadataFields({
       dataIndex: 'default',
       width: 272,
       render: (_: any, record: any) => {
-        const isDisabled =
-          record.system === true ||
-          RESERVED_FIELD_ENS.has(record.nameEn) ||
-          isEditMode === true;
+        const isDisabled = !isFieldEditable(record);
         const fieldType = record.type;
 
         // 如果是日期时间类型
