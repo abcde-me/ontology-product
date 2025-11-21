@@ -67,20 +67,6 @@
     flex: 1;
     min-height: 0;
     overflow: hidden;
-
-    // 设置初始面板大小 - 编辑器面板占60%，运行信息面板占40%
-    // :global {
-    //   .arco-resizebox-split-pane {
-    //     &:nth-child(1) {
-    //       flex: 0 0 60%;
-    //       min-height: 200px;
-    //     }
-    //     &:nth-child(3) {
-    //       flex: 0 0 40%;
-    //       min-height: 41px;
-    //     }
-    //   }
-    // }
   }
 
   // 代码编辑器容器

@@ -57,6 +57,10 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = memo(
     onEditorFocusChange
   }) => {
     const editorRef = useRef<ReactCodeMirrorRef>(null);
+    const [resizeBoxContainer, setResizeBoxContainer] =
+      useState<HTMLDivElement | null>(null);
+    const resizeObserverRef = useRef<ResizeObserver | null>(null);
+    const [resizeSize, setResizeSize] = useState<string>('500px');
     const [exampleModalVisible, setExampleModalVisible] =
       useState<boolean>(false);
     const hasUpdatePermission = useHasPermission(PYSPARK_PERMISSIONS.MODIFY);
@@ -194,6 +198,54 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = memo(
       });
     }, []);
 
+    // 计算尺寸的函数
+    const calculateSize = useCallback(
+      (container: HTMLDivElement) => {
+        if (!container) return;
+
+        const containerHeight = container.clientHeight;
+        if (containerHeight === 0) return;
+
+        // 当 isPanelOpen 为 true 时，size = 容器高度 - 300px
+        // 当 isPanelOpen 为 false 时，size = 容器高度 - 41px
+        const offset = isPanelOpen ? 300 : 41;
+        const calculatedSize = containerHeight - offset;
+
+        // 确保 size 是正数，并转换为像素字符串
+        if (calculatedSize > 0) {
+          setResizeSize(`${calculatedSize}px`);
+        }
+      },
+      [isPanelOpen]
+    );
+
+    // 使用回调 ref：当容器 DOM 元素被设置时，立即计算尺寸并设置 ResizeObserver
+    const setResizeBoxContainerRef = useCallback(
+      (element: HTMLDivElement | null) => {
+        // 清理之前的 ResizeObserver
+        if (resizeObserverRef.current) {
+          resizeObserverRef.current.disconnect();
+          resizeObserverRef.current = null;
+        }
+
+        // 更新状态
+        setResizeBoxContainer(element);
+
+        if (element) {
+          // 立即计算尺寸（此时 DOM 已经渲染完成）
+          calculateSize(element);
+
+          // 设置 ResizeObserver 监听容器尺寸变化
+          const resizeObserver = new ResizeObserver(() => {
+            calculateSize(element);
+          });
+          resizeObserver.observe(element);
+          resizeObserverRef.current = resizeObserver;
+        }
+      },
+      [calculateSize]
+    );
+
     // 监听插入内容事件
     useEffect(() => {
       if (onInsertContent) {
@@ -202,11 +254,28 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = memo(
       }
     }, [insertContentAtCursor, onInsertContent]);
 
+    // 当 isPanelOpen 变化时，重新计算尺寸
+    useEffect(() => {
+      if (resizeBoxContainer) {
+        calculateSize(resizeBoxContainer);
+      }
+    }, [isPanelOpen, calculateSize, resizeBoxContainer]);
+
+    // 清理 ResizeObserver
+    useEffect(() => {
+      return () => {
+        if (resizeObserverRef.current) {
+          resizeObserverRef.current.disconnect();
+          resizeObserverRef.current = null;
+        }
+      };
+    }, []);
+
     // 计算编辑器是否为只读状态
     const isReadOnly =
       !hasUpdatePermission || runStatus === RunningStatus.RUNNING;
 
-    const editorPane = (
+    const editorPanel = (
       <div
         className={classNames('pyspark-editor-container', {
           'running-code-mirror': isReadOnly
@@ -330,11 +399,13 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = memo(
 
         {/* 编辑器区域和运行信息面板 - 使用ResizeBox.Split分割 */}
         {execid ? (
-          <div className="resize-box-container">
+          <div className="resize-box-container" ref={setResizeBoxContainerRef}>
             <ResizeBox.Split
               direction="vertical"
-              style={{ height: '100%', minHeight: 0 }}
-              panes={[editorPane, runningInfoPanel]}
+              size={resizeSize}
+              style={{ height: '100%', minHeight: 'max-content' }}
+              panes={[editorPanel, runningInfoPanel]}
+              disabled={!isPanelOpen}
             />
           </div>
         ) : (
