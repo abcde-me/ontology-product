@@ -11,7 +11,7 @@ export const RESERVED_FIELD_ENS = new Set([
 ]);
 export const isTagsField = (nameEn: string) => nameEn === TAGS_FIELD_EN_NAME;
 export const isDateType = (type: string) => type === 'date';
-export const isDateTimeType = (type: string) => type.includes('datetime');
+export const isDateTimeType = (type: string) => type === 'datetime';
 export const SYSTEM_FIELDS = [
   {
     id: `field_system_data_asset_name`,
