@@ -5,6 +5,7 @@ import SQLIcon from '@/assets/sql/sql-left-menu.svg';
 import DasetIcon from '@/assets/sql/daset-left-menu.svg';
 import FileManager from './components/file-manager';
 import DataManager from './components/data-manager';
+import SplScriptManagement from './components/spl-script-management';
 import EditorContent from './components/editor';
 import DatasetsList from './components/DatasetsList';
 import { FileTab, useTabManager } from './hooks/useTabManager';
@@ -16,9 +17,9 @@ import { useLocation, useHistory } from 'react-router-dom';
 const { Content, Sider } = Layout;
 const TabPane = Tabs.TabPane;
 
-type TabKey = 'data' | 'files' | 'dataset';
+type TabKey = 'data' | 'files' | 'dataset' | 'script';
 
-const defaultActiveTab = 'data';
+const defaultActiveTab = 'script';
 
 const SqlIndex: React.FC = memo(() => {
   const location = useLocation();
@@ -66,7 +67,7 @@ const SqlIndex: React.FC = memo(() => {
   // 初始化创建一个默认SQL查询标签
   useEffect(() => addTab(), []);
 
-  const isDasetTab = activeTab === 'dataset';
+  const isDasetTab = activeTab === 'dataset' || activeTab === 'script';
 
   const handleTabChange = (key: string) => {
     setActiveTab(key as TabKey);
@@ -129,6 +130,16 @@ const SqlIndex: React.FC = memo(() => {
           className={styles['sql-tabs']}
           type="rounded"
         >
+          <TabPane
+            key="script"
+            title={
+              <Popover content="SQL脚本管理" position="left">
+                <DataIcon className={styles['sql-menu-icon']} />
+              </Popover>
+            }
+          >
+            {activeTab === 'script' && <SplScriptManagement key="script" />}
+          </TabPane>
           <TabPane
             key="data"
             title={
