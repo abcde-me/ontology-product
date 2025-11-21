@@ -6,7 +6,8 @@ import {
   Button,
   Spin,
   Message,
-  Input
+  Input,
+  Tooltip
 } from '@arco-design/web-react';
 import { IconDelete, IconClose, IconSearch } from '@arco-design/web-react/icon';
 import './index.module.scss'; // 确保引入样式文件
@@ -29,7 +30,7 @@ export interface ColumnField {
   enumLoading: boolean;
   distinctCount: number; // 枚举数
   displaySort: number;
-  values: Array<string | BaseTag>;
+  values: Array<string | number | BaseTag>;
 }
 
 export interface ColumnSettingModalProps {
@@ -41,6 +42,7 @@ export interface ColumnSettingModalProps {
 }
 
 const defaultSelected = ['1', '2', '3', '4'];
+const MAX_ENUM_COUNT = 1000;
 
 const ColumnSettingModal: React.FC<ColumnSettingModalProps> = ({
   visible,
@@ -109,13 +111,29 @@ const ColumnSettingModal: React.FC<ColumnSettingModalProps> = ({
         fieldEnName: nameEn
       });
 
-      if (res?.code !== '' || res?.status !== 200 || res?.data > 1000) {
-        Message.error(res?.message ?? '该字段不可勾选为枚举类型');
-        setFields((fields) =>
-          fields.map((f) =>
-            f.nameEn === nameEn ? { ...f, enumLoading: false } : f
-          )
-        );
+      if (
+        res?.code !== '' ||
+        res?.status !== 200 ||
+        res?.data > MAX_ENUM_COUNT
+      ) {
+        if (res?.data > MAX_ENUM_COUNT) {
+          Message.error('枚举量过大，不可设为枚举类型');
+          // 保存枚举量信息，用于禁用复选框
+          setFields((fields) =>
+            fields.map((f) =>
+              f.nameEn === nameEn
+                ? { ...f, distinctCount: res.data, enumLoading: false }
+                : f
+            )
+          );
+        } else {
+          Message.error(res?.message ?? '该字段不可勾选为枚举类型');
+          setFields((fields) =>
+            fields.map((f) =>
+              f.nameEn === nameEn ? { ...f, enumLoading: false } : f
+            )
+          );
+        }
         return;
       }
 
@@ -177,7 +195,16 @@ const ColumnSettingModal: React.FC<ColumnSettingModalProps> = ({
             rowSelection={{
               type: 'checkbox',
               selectedRowKeys: selectedIds,
-              onChange: (keys) => setSelectedIds(keys as string[]),
+              onChange: (keys) => {
+                // 过滤掉系统字段，保留当前已选中的系统字段
+                const filteredKeys = (keys as string[]).filter(
+                  (key) => !RESERVED_FIELD_ENS.has(key)
+                );
+                const systemFields = selectedIds.filter((key) =>
+                  RESERVED_FIELD_ENS.has(key)
+                );
+                setSelectedIds([...systemFields, ...filteredKeys]);
+              },
               checkboxProps: (record: ColumnField) => ({
                 disabled: RESERVED_FIELD_ENS.has(record.nameEn)
               })
@@ -194,28 +221,53 @@ const ColumnSettingModal: React.FC<ColumnSettingModalProps> = ({
                 title: '设为枚举类型',
                 dataIndex: 'isEnumAble',
                 width: 126,
-                render: (_: any, record: ColumnField) => (
-                  <span className="flex flex-col items-center">
-                    {record.enumLoading ? (
-                      <Spin size={14} />
-                    ) : (
-                      <Checkbox
-                        checked={
-                          record.isEnumAbleForColumn ? record.isEnumAble : false
-                        }
-                        disabled={!record.isEnumAbleForColumn}
-                        onChange={(val) => handleEnumCheck(record.nameEn, val)}
-                      />
-                    )}
-                    {record.isEnumAble &&
-                      record.isEnumAbleForColumn &&
-                      !record.enumLoading && (
-                        <span className="text-[var(--color-text-4)]">
-                          {record.distinctCount}枚举量
-                        </span>
+                render: (_: any, record: ColumnField) => {
+                  const isEnumCountTooLarge =
+                    record.distinctCount != null &&
+                    record.distinctCount > MAX_ENUM_COUNT;
+                  const isDisabled =
+                    !record.isEnumAbleForColumn || isEnumCountTooLarge;
+
+                  return (
+                    <span className="flex flex-col items-center">
+                      {record.enumLoading ? (
+                        <Spin size={14} />
+                      ) : (
+                        <Tooltip
+                          content={
+                            isEnumCountTooLarge
+                              ? '枚举量过大，不可设为枚举类型'
+                              : ''
+                          }
+                          disabled={!isEnumCountTooLarge}
+                        >
+                          <Checkbox
+                            checked={
+                              record.isEnumAbleForColumn
+                                ? record.isEnumAble
+                                : false
+                            }
+                            disabled={isDisabled}
+                            onChange={(val) =>
+                              handleEnumCheck(record.nameEn, val)
+                            }
+                            style={{
+                              cursor: isDisabled ? 'not-allowed' : 'pointer',
+                              opacity: isDisabled ? 0.5 : 1
+                            }}
+                          />
+                        </Tooltip>
                       )}
-                  </span>
-                )
+                      {record.isEnumAble &&
+                        record.isEnumAbleForColumn &&
+                        !record.enumLoading && (
+                          <span className="text-[var(--color-text-4)]">
+                            {record.distinctCount}枚举量
+                          </span>
+                        )}
+                    </span>
+                  );
+                }
               }
             ]}
           />

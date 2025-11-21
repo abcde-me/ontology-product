@@ -1,7 +1,16 @@
 import React, { useEffect, useState } from 'react';
-import { Modal, Button, Select, Input, Form } from '@arco-design/web-react';
+import {
+  Modal,
+  Button,
+  Select,
+  Input,
+  Form,
+  DatePicker
+} from '@arco-design/web-react';
 import { findDataAssetMapping } from '@/api/dataAsset';
 import { FindDataAssetMappingItemRes, ColumnField } from '@/types/dataAssetApi';
+import { isDateType, isDateTimeType } from '../../utils/const';
+import dayjs from 'dayjs';
 
 interface EditSingleAssetModalProps {
   visible: boolean;
@@ -82,14 +91,55 @@ const EditSingleAssetModal: React.FC<EditSingleAssetModalProps> = ({
   // };
 
   // 格式化当前值显示
-  const formatCurrentValue = (value: any): string => {
+  const formatCurrentValue = (value: any, fieldType?: string): string => {
     if (value === null || value === undefined) {
       return '-';
+    }
+    // 如果是时间类型，进行格式化转换
+    if (fieldType) {
+      if (isDateType(fieldType)) {
+        // date 类型格式化为 YYYY-MM-DD
+        const date = dayjs(value);
+        return date.isValid() ? date.format('YYYY-MM-DD') : String(value);
+      } else if (isDateTimeType(fieldType)) {
+        // datetime 类型格式化为 YYYY-MM-DD HH:mm:ss
+        const date = dayjs(value);
+        return date.isValid()
+          ? date.format('YYYY-MM-DD HH:mm:ss')
+          : String(value);
+      }
     }
     if (Array.isArray(value)) {
       return value.join(', ');
     }
     return String(value);
+  };
+
+  const getFieldInput = (fieldType?: string) => {
+    if (!fieldType) {
+      return <Input placeholder="请输入内容" style={{ width: '100%' }} />;
+    }
+
+    if (isDateType(fieldType)) {
+      return (
+        <DatePicker
+          placeholder="请选择日期"
+          style={{ width: '100%' }}
+          format="YYYY-MM-DD"
+        />
+      );
+    } else if (isDateTimeType(fieldType)) {
+      return (
+        <DatePicker
+          placeholder="请选择时间"
+          style={{ width: '100%' }}
+          showTime={{ format: 'HH:mm:ss' }}
+          format="YYYY-MM-DD HH:mm:ss"
+        />
+      );
+    } else {
+      return <Input placeholder="请输入内容" style={{ width: '100%' }} />;
+    }
   };
 
   return (
@@ -130,7 +180,7 @@ const EditSingleAssetModal: React.FC<EditSingleAssetModalProps> = ({
                       {field.nameZh}
                     </td>
                     <td className="px-4 py-3 text-sm text-[#1D2129]">
-                      {formatCurrentValue(currentValue)}
+                      {formatCurrentValue(currentValue, fieldType)}
                     </td>
                     <td className="px-4 py-3">
                       {!isEditable ? (
@@ -140,10 +190,7 @@ const EditSingleAssetModal: React.FC<EditSingleAssetModalProps> = ({
                           field={field.nameEn}
                           style={{ marginBottom: 0 }}
                         >
-                          <Input
-                            placeholder="请输入内容"
-                            style={{ width: '100%' }}
-                          />
+                          {getFieldInput(fieldType)}
                         </Form.Item>
                       )}
                     </td>
