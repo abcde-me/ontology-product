@@ -141,7 +141,7 @@ export default function Step2FieldMapping({
       {
         title: '序号',
         dataIndex: 'sequence',
-        width: 40,
+        width: 60,
         align: 'center' as const
       },
       {
