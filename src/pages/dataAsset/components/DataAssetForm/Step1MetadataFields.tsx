@@ -37,6 +37,7 @@ const getDataSourceKey = (item: ListDataAssetSourceResItem) =>
   `${item.type ?? ''}::${item.databaseName ?? ''}::${item.tableName ?? ''}`;
 
 interface Step1MetadataFieldsProps {
+  isEditMode: boolean;
   metadataFields: MetadataField[];
   setMetadataFields: React.Dispatch<React.SetStateAction<MetadataField[]>>;
   dataSources: Record<string, ListDataAssetSourceResItem>;
@@ -50,6 +51,7 @@ interface Step1MetadataFieldsProps {
 
 export default function Step1MetadataFields({
   metadataFields,
+  isEditMode,
   setMetadataFields,
   dataSources,
   setDataSources,
@@ -110,7 +112,9 @@ export default function Step1MetadataFields({
           allowClear
           value={record.nameZh}
           disabled={
-            record.system === true || RESERVED_FIELD_ENS.has(record.nameEn)
+            record.system === true ||
+            RESERVED_FIELD_ENS.has(record.nameEn) ||
+            isEditMode === true
           }
           onChange={(value) => handleUpdateField(record.id, { nameZh: value })}
         />
@@ -126,7 +130,9 @@ export default function Step1MetadataFields({
           value={record.nameEn}
           allowClear
           disabled={
-            record.system === true || RESERVED_FIELD_ENS.has(record.nameEn)
+            record.system === true ||
+            RESERVED_FIELD_ENS.has(record.nameEn) ||
+            isEditMode === true
           }
           onChange={(value) => handleUpdateField(record.id, { nameEn: value })}
         />
@@ -142,7 +148,9 @@ export default function Step1MetadataFields({
           loading={fieldTypesLoading}
           value={record.type}
           disabled={
-            record.system === true || RESERVED_FIELD_ENS.has(record.nameEn)
+            record.system === true ||
+            RESERVED_FIELD_ENS.has(record.nameEn) ||
+            isEditMode === true
           }
           onChange={(value) => handleUpdateField(record.id, { type: value })}
         >
@@ -160,7 +168,9 @@ export default function Step1MetadataFields({
       width: 272,
       render: (_: any, record: any) => {
         const isDisabled =
-          record.system === true || RESERVED_FIELD_ENS.has(record.nameEn);
+          record.system === true ||
+          RESERVED_FIELD_ENS.has(record.nameEn) ||
+          isEditMode === true;
         const fieldType = record.type;
 
         // 如果是日期时间类型

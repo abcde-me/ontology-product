@@ -374,6 +374,7 @@ export default function DataAssetFormContainer({
         key: 'metadata',
         element: (
           <Step1MetadataFields
+            isEditMode={isEditMode}
             metadataFields={metadataFields}
             setMetadataFields={setMetadataFields}
             dataSources={normalizedDataSources}
