@@ -50,11 +50,11 @@ const TableViewer: React.FC<TableViewerProps> = ({
         (sheetName, index) => {
           const worksheet = workbook.Sheets[sheetName];
 
-          // 将工作表转换为JSON数组，保留所有数据
+          // 将工作表转换为JSON数组，保留所有数据（包括空白行和空白单元格）
           const jsonData: any[][] = XLSX.utils.sheet_to_json(worksheet, {
             header: 1,
-            defval: null,
-            blankrows: false
+            defval: '',
+            blankrows: true
           });
 
           if (jsonData.length === 0) {
@@ -183,7 +183,7 @@ const TableViewer: React.FC<TableViewerProps> = ({
                     {tableData.headers.map((header, index) => (
                       <th
                         key={index}
-                        className="border-b px-4 py-3 text-left text-sm font-semibold text-gray-900"
+                        className="h-10 border-b px-4 text-left text-sm font-semibold text-gray-900"
                       >
                         {header}
                       </th>
@@ -198,7 +198,7 @@ const TableViewer: React.FC<TableViewerProps> = ({
                     {tableData?.headers.map((header, colIndex) => (
                       <td
                         key={colIndex}
-                        className="border-b px-4 py-3 text-sm text-gray-700"
+                        className="h-10 border-b px-4 text-sm text-gray-700"
                       >
                         {row[header || colIndex.toString()] || ''}
                       </td>
