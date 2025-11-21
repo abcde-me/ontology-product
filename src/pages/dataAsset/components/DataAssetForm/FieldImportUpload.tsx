@@ -33,59 +33,28 @@ const FieldImportUpload: React.FC<FieldImportUploadProps> = ({
   onUploadingChange
 }) => {
   const [fileList, setFileList] = useState<any>([]);
-  const hasErrorFile = fileList.some(
-    (file: any) => file.status === UploadStatus.error
-  );
 
-  const handleUploadChange = (files: any) => {
-    const processedFiles = files.map((file: any) => {
-      if (file.status === UploadStatus.done) {
-        if (file?.response?.code !== '' || file?.response?.status !== 200) {
-          Message.error(file?.response?.message ?? '上传失败，请重试');
-          return {
-            ...file,
-            status: UploadStatus.error
-          };
-        }
-      }
+  const handleUploadChange = (files: any, file: any) => {
+    // 更新 fileList 状态，让 Upload 组件受控
+    setFileList(files);
 
-      if (file.status === UploadStatus.error) {
-        const errorMsg =
-          file?.error?.response?.data?.message ||
-          file?.error?.message ||
-          file?.response?.message ||
-          '上传失败，请重试';
-        Message.error(errorMsg);
-      }
-
-      return file;
-    });
-
-    setFileList(processedFiles);
-
-    // 检查是否有文件正在上传
-    const isUploading = processedFiles.some(
-      (file: any) => file.status === 'uploading'
-    );
-    if (onUploadingChange) {
-      onUploadingChange(isUploading);
+    // 检查上传状态
+    if (file.status === UploadStatus.uploading) {
+      onUploadingChange?.(true);
+      return;
     }
 
-    if (onFileChange) {
-      if (processedFiles.length === 0) {
-        onFileChange(null);
+    if (file.status === UploadStatus.done) {
+      if (file.response?.code !== '' || file.response?.status !== 200) {
+        Message.error(file?.response?.message ?? '上传失败，请重试');
+        onUploadingChange?.(false);
         return;
       }
 
-      // 处理已完成的文件
-      const completedFiles = processedFiles.filter(
-        (file: any) => file.status === UploadStatus.done && file.response
-      );
-
-      if (completedFiles.length > 0) {
-        // 传递第一个完成的文件数据
-        onFileChange(completedFiles[0].response.data);
-      }
+      onFileChange(file?.response?.data ?? []);
+      onUploadingChange?.(false);
+    } else if (file.status === UploadStatus.error) {
+      onUploadingChange?.(false);
     }
   };
 
@@ -150,13 +119,21 @@ const FieldImportUpload: React.FC<FieldImportUploadProps> = ({
     }
   };
 
+  const handleRemove = (file: any) => {
+    const newFileList = fileList.filter((item: any) => item.uid !== file.uid);
+    setFileList(newFileList);
+    onFileChange([]);
+  };
+
   return (
     <div>
       <Upload
         drag
         className="upload-file"
         accept=".xlsx,.xls"
-        showUploadList={!hasErrorFile}
+        fileList={fileList}
+        showUploadList={fileList.length > 0 ? true : false}
+        onRemove={handleRemove}
         beforeUpload={(file) => {
           return checkFile(file);
         }}

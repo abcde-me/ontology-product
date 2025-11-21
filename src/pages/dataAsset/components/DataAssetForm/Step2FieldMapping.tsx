@@ -23,6 +23,8 @@ import {
 } from '@/types/dataAssetApi';
 import { autoMapDataAssetFieldAndSource } from '@/api/dataAsset';
 import { RESERVED_FIELD_ENS } from '../../utils/const';
+import { PermissionWrapper } from '@/components/PermissionGuard';
+import { DATA_ASSET_PERMISSIONS } from '@/config/permissions';
 
 const FormItem = Form.Item;
 const Row = Grid.Row;
@@ -44,11 +46,13 @@ interface Step2FieldMappingProps {
   autoMapping: boolean;
   setAutoMapping: React.Dispatch<React.SetStateAction<boolean>>;
   metadataFields: MetadataField[];
+  setMetadataFields: React.Dispatch<React.SetStateAction<MetadataField[]>>;
   dataSources: Record<string, ListDataAssetSourceResItem>;
   findDataAssetMappingData: ListDataAssetSourceResItem[];
   onCancel: () => void;
   onPrev: () => void;
   onFinish: (fieldsWithMappings: CreateDataAssetAndMappingReq) => void;
+  isEditMode?: boolean;
 }
 
 export default function Step2FieldMapping({
@@ -58,11 +62,13 @@ export default function Step2FieldMapping({
   autoMapping,
   setAutoMapping,
   metadataFields,
+  setMetadataFields,
   dataSources,
   findDataAssetMappingData,
   onCancel,
   onPrev,
-  onFinish
+  onFinish,
+  isEditMode = false
 }: Step2FieldMappingProps) {
   const [form] = Form.useForm();
 
@@ -345,31 +351,6 @@ export default function Step2FieldMapping({
     }
   };
 
-  // 初始化映射
-  useEffect(() => {
-    if (metadataFields.length > 0) {
-      const initialMappings: FieldMapping[] = metadataFields.map(
-        (field, index) => {
-          const sourceKeys = {};
-          field?.mapping?.forEach((item) => {
-            const key = getDataSourceKey(
-              item as unknown as ListDataAssetSourceResItem
-            );
-            sourceKeys[key] = item.fieldName;
-          });
-          const mapping: FieldMapping = {
-            id: field.nameEn,
-            sequence: index + 1,
-            nameZh: field.nameZh,
-            ...sourceKeys
-          };
-          return mapping;
-        }
-      );
-      setMappings(initialMappings);
-    }
-  }, [metadataFields]);
-
   // 初始化表单值
   useEffect(() => {
     form.setFieldsValue({ mappings });
@@ -411,7 +392,21 @@ export default function Step2FieldMapping({
         return;
       }
     }
-    setMappings(mappings.filter((mapping) => mapping.id !== id));
+
+    // 只更新 metadataFields，mappings 的更新由父组件监听 metadataFields 变化后同步更新
+    const fieldToDelete = metadataFields.find((field) => field.nameEn === id);
+    if (fieldToDelete) {
+      // 检查是否为保留字段
+      if (
+        !fieldToDelete.nameEn ||
+        !RESERVED_FIELD_ENS.has(fieldToDelete.nameEn)
+      ) {
+        const updatedFields = metadataFields.filter(
+          (field) => field.nameEn !== id
+        );
+        setMetadataFields(updatedFields);
+      }
+    }
   };
 
   // 验证映射数据
@@ -558,6 +553,7 @@ export default function Step2FieldMapping({
         >
           <Table
             columns={tableColumns}
+            scroll={{ x: 'max-content' }}
             className="mt-[16px] w-full"
             data={mappings}
             rowKey="id"
@@ -569,9 +565,17 @@ export default function Step2FieldMapping({
 
       {/* 操作按钮 */}
       <div className={styles.actionBar}>
-        <Button onClick={handleFinish} type="primary">
-          确定
-        </Button>
+        <PermissionWrapper
+          permission={
+            isEditMode
+              ? [DATA_ASSET_PERMISSIONS.MODIFY_TABLE]
+              : [DATA_ASSET_PERMISSIONS.CREATE_TABLE]
+          }
+        >
+          <Button onClick={handleFinish} type="primary">
+            确定
+          </Button>
+        </PermissionWrapper>
         <Button onClick={onPrev}>上一步</Button>
         <Button onClick={onCancel}>取消</Button>
       </div>

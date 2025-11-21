@@ -1402,6 +1402,34 @@ export default function RequirementDetail() {
                                               })
                                               .filter(Boolean);
 
+                                            // 删除隐藏标签的函数
+                                            const handleRemoveTag = (
+                                              valueToRemove: any
+                                            ) => {
+                                              const currentValue =
+                                                item.label_mappings || [];
+                                              const selectedValues =
+                                                Array.isArray(currentValue)
+                                                  ? currentValue
+                                                  : [currentValue];
+                                              // 移除指定的值
+                                              const newValues =
+                                                selectedValues.filter(
+                                                  (val) => val !== valueToRemove
+                                                );
+                                              // 更新数据状态
+                                              updateNestedValue(
+                                                [labelIndex, 'label_mappings'],
+                                                newValues
+                                              );
+                                              // 同时更新 Form 的值
+                                              const fieldName = `label_mappings_${type === 'detail' ? item?.id : item?.label_id}`;
+                                              labelToolForm.setFieldValue(
+                                                fieldName,
+                                                newValues
+                                              );
+                                            };
+
                                             return (
                                               <Tooltip
                                                 content={
@@ -1410,6 +1438,12 @@ export default function RequirementDetail() {
                                                       (option, i) => (
                                                         <Tag
                                                           key={i}
+                                                          closable
+                                                          onClose={() => {
+                                                            handleRemoveTag(
+                                                              option.value
+                                                            );
+                                                          }}
                                                           style={{
                                                             height: '24px',
                                                             background:
@@ -1419,7 +1453,8 @@ export default function RequirementDetail() {
                                                             fontSize: '12px',
                                                             alignItems:
                                                               'center',
-                                                            margin: '0 2px'
+                                                            margin: '0 2px',
+                                                            cursor: 'pointer'
                                                           }}
                                                         >
                                                           {option.label}

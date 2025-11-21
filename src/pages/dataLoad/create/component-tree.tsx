@@ -413,6 +413,60 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
     }, 100);
   };
 
+  // 清理输入框状态的辅助函数
+  const clearInputState = (
+    dataRef: TreeNodeData | TreeDataType,
+    isDbInput: boolean,
+    isDatasourceInput: boolean,
+    isMetadataInput: boolean
+  ) => {
+    if (isDbInput) {
+      // 删除数据库输入节点
+      const dbNodeKey = `${dataRef.parentId}-db`;
+      const newDbInputNodes = new Map(dbInputNodes);
+      newDbInputNodes.delete(dbNodeKey);
+      setDbInputNodes(newDbInputNodes);
+    } else if (isDatasourceInput) {
+      // 删除数据卷输入节点
+      const datasourceNodeKey = `${dataRef.parentId}-datasource`;
+      const newDatasourceInputNodes = new Map(datasourceInputNodes);
+      newDatasourceInputNodes.delete(datasourceNodeKey);
+      setDatasourceInputNodes(newDatasourceInputNodes);
+    } else if (isMetadataInput) {
+      // 删除元数据输入节点
+      const metadataNodeKey = `${dataRef.parentId}-metadata`;
+      const newMetadataInputNodes = new Map(metadataInputNodes);
+      newMetadataInputNodes.delete(metadataNodeKey);
+      setMetadataInputNodes(newMetadataInputNodes);
+    } else {
+      // 普通节点：从 directoryData 中删除
+      const updateNodeRecursively = (data: TreeNodeData[]): TreeNodeData[] => {
+        return data
+          .map((item) => {
+            if (item.id === dataRef.id) {
+              return null;
+            } else if (item.children && Array.isArray(item.children)) {
+              const updatedChildren = updateNodeRecursively(
+                item.children
+              ).filter((child): child is TreeNodeData => child !== null);
+              return {
+                ...item,
+                children: updatedChildren
+              };
+            }
+            return item;
+          })
+          .filter((item): item is TreeNodeData => item !== null);
+      };
+
+      const updatedData = updateNodeRecursively(directoryData);
+      onDirectoryDataChange(updatedData);
+    }
+    // 重置编辑状态
+    setIsEditing(false);
+    setInputValue('');
+  };
+
   // 编辑完成处理
   const onEditFinish = async (props: NodeProps) => {
     const { dataRef } = props;
@@ -487,6 +541,9 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
     const validateResult = validateName(fileName);
     if (!validateResult.isValid && validateResult.errorMessage) {
       Message.error(validateResult.errorMessage);
+      // 验证失败时，如果输入框失去焦点，清理输入框状态
+      // 注意：这里不立即清理，因为用户可能还想继续编辑
+      // 只有在真正失去焦点时才清理（通过 onBlur 触发）
       return;
     }
 
@@ -511,6 +568,13 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
           res = await addCatalog({ name: fileName, root_type: root_type });
           if (res.status !== 200) {
             Message.error(res?.message ?? '新增目录失败');
+            // 新建失败，清理输入框状态
+            clearInputState(
+              dataRef,
+              isDbInput,
+              isDatasourceInput,
+              isMetadataInput
+            );
             return;
           }
           break;
@@ -522,6 +586,13 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
           });
           if (res.status !== 200) {
             Message.error(res?.message ?? '新建数据库失败');
+            // 新建失败，清理输入框状态
+            clearInputState(
+              dataRef,
+              isDbInput,
+              isDatasourceInput,
+              isMetadataInput
+            );
             return;
           }
 
@@ -542,6 +613,13 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
           });
           if (res.status !== 200) {
             Message.error(res?.message ?? '新建数据卷失败');
+            // 新建失败，清理输入框状态
+            clearInputState(
+              dataRef,
+              isDbInput,
+              isDatasourceInput,
+              isMetadataInput
+            );
             return;
           }
 
@@ -561,6 +639,13 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
           });
           if (res.status !== 200) {
             Message.error(res?.message ?? '新建元数据失败');
+            // 新建失败，清理输入框状态
+            clearInputState(
+              dataRef,
+              isDbInput,
+              isDatasourceInput,
+              isMetadataInput
+            );
             return;
           }
 
@@ -586,6 +671,9 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
         });
         if (res.status !== 200) {
           Message.error(res?.message ?? '重命名目录失败');
+          // 重命名失败时，恢复编辑状态但不清理节点（因为这是编辑现有节点，不是新建）
+          setIsEditing(false);
+          setInputValue('');
           return;
         }
       }
@@ -691,17 +779,6 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
       };
       nodeData =
         findNodeById(processedDirectoryData, keysArray[0]) || undefined;
-    }
-
-    // 检查节点类型，阻止选中某些类型的节点
-    if (
-      nodeData?.type_name === 'catalog' ||
-      nodeData?.type_name === 'db_parent' ||
-      nodeData?.type_name === 'datasource_parent' ||
-      nodeData?.type_name === 'metadata_parent'
-    ) {
-      console.log('数据库节点或数据卷节点或目录节点不可选中');
-      return; // 阻止选中数据库节点和数据卷节点或目录节点
     }
 
     // 确保 selectedNodes 是数组
@@ -1151,6 +1228,42 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
   };
 
   /**
+   * 检查节点是否可选
+   * 只有数据库、元数据或者数据卷下面的节点才支持可选
+   * @param item - 树节点数据，可以是 TreeNodeData 或 TreeDataType 类型
+   * @returns 如果节点可选返回 false（disabled=false），否则返回 true（disabled=true）
+   */
+  const isNodeSelectable = (
+    item: TreeNodeData | TreeDataType | null | undefined
+  ): boolean => {
+    // 空值检查
+    if (!item) {
+      return false;
+    }
+
+    const nodeData = item as TreeNodeData;
+    const typeName = nodeData.type_name;
+
+    // 只有以下类型的节点可选：
+    // - db: 数据库节点
+    // - db_item: 数据库项节点
+    // - metadata: 元数据节点
+    // - volume: 数据卷节点
+    // - volume_item: 数据卷项节点
+    // - datasource_item: 数据源项节点
+    const selectableTypes = [
+      'db',
+      'db_item',
+      'metadata',
+      'volume',
+      'volume_item',
+      'datasource_item'
+    ];
+
+    return selectableTypes.includes(typeName || '');
+  };
+
+  /**
    * 检查节点是否为数据库节点且包含数据库子项
    * @param item - 树节点数据，可以是 TreeNodeData 或 TreeDataType 类型
    * @returns 如果是包含子项的数据库节点返回 true，否则返回 false
@@ -1227,7 +1340,10 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
             key: String(item.id),
             title: item.name || item.label || item.title || '',
             value: String(item.id),
-            disabled: hasDataBaseNode(item) || hasMetadataBound(item),
+            selectable:
+              isNodeSelectable(item) &&
+              !hasDataBaseNode(item) &&
+              !hasMetadataBound(item),
             dataRef: item, // 保留原始数据引用
             ...item
           };
@@ -1339,8 +1455,11 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
             {...rest}
             dataRef={item}
             title={item.name}
-            disabled={hasDataBaseNode(item) || hasMetadataBound(item)}
-            // selectable={!isDbNode}
+            selectable={
+              isNodeSelectable(item) &&
+              !hasDataBaseNode(item) &&
+              !hasMetadataBound(item)
+            }
           >
             {hasChildren ? generatorTreeNodes(children) : null}
           </TreeNode>

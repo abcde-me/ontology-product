@@ -36,13 +36,11 @@ import { validateName } from '@/utils/valiate';
 import Uploads from '../list/file-upload';
 import ComponentTree from './component-tree';
 import '../list/db-tree.scss';
-import { isNumber } from 'lodash-es';
 import { sql } from '@codemirror/lang-sql';
 import { lintGutter } from '@codemirror/lint';
-import { EditorView } from '@codemirror/view';
 import { tags as t } from '@lezer/highlight';
 import createTheme from '@uiw/codemirror-themes';
-import CodeMirror, { ReactCodeMirrorRef } from '@uiw/react-codemirror';
+import CodeMirror from '@uiw/react-codemirror';
 import styles from './index.module.scss';
 import { IconCaretRight, IconDown, IconUp } from '@arco-design/web-react/icon';
 import SQLFormatIcon from '@/assets/sql/sql-format-ico.svg';
@@ -79,8 +77,11 @@ const DEFAULT_ONCE_CYCLE = {
   week: ''
 };
 
-const placeholderValue = `如需多表关联后的表载入到系统中，请在此位置编写关联SQL语句
-SELECT filesname,B,C,D,E FROM table2,table3 WHERE t1.a=t2.a`;
+const placeholderValue = `请在此编写数据处理SQL , 处理结果必须包含id字段且id是唯一主键
+
+SELECT fileid as id, fileid ，filename， ........ 
+FROM table2 t1,table3 t2  
+WHERE t1.a=t2.a`;
 
 // 类型定义
 interface ConnectorOption {
@@ -500,18 +501,29 @@ export default function DataLoadCreate() {
 
   // 处理表格名称选择（全部标签逻辑）
   const handleAllTagChange = useCallback(
-    (value: string[]) => {
-      const currentValue = value || [];
+    (value: string | string[]) => {
+      // 单选模式下，value 是字符串；多选模式下，value 是数组
+      const isSingleMode = selectedNodeType === 'metadata';
+
+      if (isSingleMode) {
+        // 单选模式：直接设置单个值
+        form.setFieldsValue({ table_name: value || undefined });
+        return;
+      }
+
+      // 多选模式：处理数组逻辑
+      const currentValue = Array.isArray(value) ? value : [];
       const previousValue = form.getFieldValue('table_name') || [];
+      const previousArray = Array.isArray(previousValue) ? previousValue : [];
 
       // 检查是否点击了"全部"选项（通过比较前后值的变化）
-      const previousHasAll = previousValue.includes('all');
+      const previousHasAll = previousArray.includes('all');
       const currentHasAll = currentValue.includes('all');
       const clickedAll = previousHasAll !== currentHasAll;
 
       if (clickedAll && currentHasAll) {
         // 如果点击了"全部"选项（当前值包含 'all'），切换全选状态
-        const filteredPrevious = previousValue.filter(
+        const filteredPrevious = previousArray.filter(
           (item: string) => item !== 'all'
         );
         const isAllSelected =
@@ -535,7 +547,7 @@ export default function DataLoadCreate() {
         form.setFieldsValue({ table_name: filteredValue });
       }
     },
-    [form, tableList]
+    [form, tableList, selectedNodeType]
   );
 
   // 处理文件变化
@@ -544,15 +556,16 @@ export default function DataLoadCreate() {
       if (Array.isArray(fileData)) {
         if (fileData.length === 0) {
           setUploadedFiles([]);
-          if (sourceType === SOURCE_TYPES.LOCAL) {
-            form.setFieldsValue({ connector_id: undefined });
-          }
+          // if (sourceType === SOURCE_TYPES.LOCAL) {
+          //   // form.setFieldsValue({ connector_id: undefined });
+          // }
           return;
         }
+
         setUploadedFiles(fileData);
-        if (sourceType === SOURCE_TYPES.LOCAL) {
-          form.setFieldsValue({ connector_id: 'local_files_uploaded' });
-        }
+        // if (sourceType === SOURCE_TYPES.LOCAL) {
+        //   // form.setFieldsValue({ connector_id: 'local_files_uploaded' });
+        // }
         return;
       }
 
@@ -566,9 +579,9 @@ export default function DataLoadCreate() {
         return [...prev, fileData];
       });
 
-      if (sourceType === SOURCE_TYPES.LOCAL) {
-        form.setFieldsValue({ connector_id: 'local_files_uploaded' });
-      }
+      // if (sourceType === SOURCE_TYPES.LOCAL) {
+      //   // form.setFieldsValue({ connector_id: 'local_files_uploaded' });
+      // }
     },
     [form, sourceType]
   );
@@ -579,7 +592,7 @@ export default function DataLoadCreate() {
       setUploadedFiles((prev) => {
         const updatedFiles = prev.filter((file) => file.name !== fileName);
         if (updatedFiles.length === 0 && sourceType === SOURCE_TYPES.LOCAL) {
-          form.setFieldsValue({ connector_id: undefined });
+          // form.setFieldsValue({ connector_id: undefined });
         }
         return updatedFiles;
       });
@@ -632,14 +645,7 @@ export default function DataLoadCreate() {
   // 构建表单数据
   const buildFormData = useCallback(
     (formValues: FormValues, pathId: string | number, submitType: string) => {
-      const tableNameValues = formValues.table_name || [];
-      const isAllSelected =
-        Array.isArray(tableNameValues) &&
-        tableNameValues.length === tableList.length &&
-        tableList.every((option) => tableNameValues.includes(option));
-      const processedTableNames = isAllSelected
-        ? tableList
-        : formValues.table_name || uploadedFiles;
+      const processedTableNames = formValues.table_name || uploadedFiles;
 
       return {
         task_name: formValues.name,
@@ -1418,11 +1424,14 @@ export default function DataLoadCreate() {
                 className="select-tag-style"
                 onChange={handleAllTagChange}
                 ref={selectRef}
+                key={selectedNodeType}
                 mode={selectedNodeType === 'metadata' ? undefined : 'multiple'}
-                maxTagCount={{
-                  count: 2,
-                  render: renderTableTags
-                }}
+                {...(selectedNodeType !== 'metadata' && {
+                  maxTagCount: {
+                    count: 2,
+                    render: renderTableTags
+                  }
+                })}
                 placeholder="请选择抽取的表"
                 style={{ width: '100%', minWidth: 0 }}
                 allowClear

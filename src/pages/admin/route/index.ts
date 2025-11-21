@@ -133,6 +133,7 @@ export const routes: IRoute[] = [
     name: 'ragDetail',
     key: '/tenant/compute/modaforge/ragDetail',
     component: React.lazy(async () => import('../../ragDetail')),
+    permission: DATA_MANAGEMENT_PERMISSIONS.GET, // TODO： 修改为正确的权限点控制
     children: []
   },
   // 文件数据对比测试页面

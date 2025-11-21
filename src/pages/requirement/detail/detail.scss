@@ -537,7 +537,19 @@
 }
 
 .label-mapping-select .arco-input-tag-inner {
+  flex-wrap: nowrap !important;
   input {
     min-width: 100px !important;
+  }
+}
+
+// 有多个 tag 时才应用宽度限制
+.label-mapping-select .arco-input-tag-inner {
+  // 当有第二个 tag 时（第二个子元素也是 tag），所有 tag 都应用宽度限制
+  &:has(.arco-input-tag-tag:nth-child(2)) {
+    .arco-select-view-multiple .arco-select-view-tag,
+    .arco-input-tag-tag {
+      max-width: 80px !important;
+    }
   }
 }
