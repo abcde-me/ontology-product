@@ -20,16 +20,25 @@ const ContentHeader: React.FC<ContentHeaderProps> = ({
   showFileViewer,
   onToggleFileViewer
 }) => {
-  const { showPdfViewer, togglePdfViewer } = useRagDetailStore();
+  const { showPdfViewer, togglePdfViewer, documentName, documentFormat } =
+    useRagDetailStore();
 
   // 优先使用props，如果没有则使用store中的数据
   const isFileViewerVisible =
     showFileViewer !== undefined ? showFileViewer : showPdfViewer;
   const handleToggle = onToggleFileViewer || togglePdfViewer;
 
+  // 构建完整的文件名：{name}.{format}
+  const displayFileName =
+    documentName && documentFormat
+      ? `${documentName}.${documentFormat}`
+      : fileName;
+
   return (
     <div className="flex h-[52px] flex-shrink-0 items-center justify-between border-b border-gray-200 bg-white px-4">
-      <span className="text-[14px] font-medium text-gray-900">{fileName}</span>
+      <span className="text-[14px] font-medium text-gray-900">
+        {displayFileName}
+      </span>
       {/* 显示/隐藏原文件按钮 */}
       <button
         onClick={handleToggle}

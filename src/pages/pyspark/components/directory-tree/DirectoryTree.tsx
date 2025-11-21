@@ -23,7 +23,12 @@ import type {
   NodeProps,
   TreeDataType
 } from '@arco-design/web-react/es/Tree/interface';
-import { IconPlus, IconEdit, IconDelete } from '@arco-design/web-react/icon';
+import {
+  IconPlus,
+  IconEdit,
+  IconDelete,
+  IconCopy
+} from '@arco-design/web-react/icon';
 import FolderIcon from '@/assets/python/folder.svg';
 import FileIcon from '@/assets/python/file.svg';
 import AddAfterIcon from '@/assets/python/add-after.svg';
@@ -217,8 +222,29 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
       }, 0);
     };
 
+    // 本地过滤树数据函数
+    const filterTree = (inputValue: string) => {
+      const loop = (data) => {
+        const result: TreeNodeItem[] = [];
+        data.forEach((item) => {
+          if (item?.title?.indexOf(inputValue) > -1) {
+            result.push({ ...item });
+          } else if (item.children) {
+            const filterData = loop(item.children);
+
+            if (filterData.length) {
+              result.push({ ...item, children: filterData });
+            }
+          }
+        });
+        return result;
+      };
+
+      return loop(treeData);
+    };
+
     // 处理搜索
-    const handleSearch = async (value: string) => {
+    const handleSearch = (value: string) => {
       if (!value.trim()) {
         setIsSearchMode(false);
         setSearchResults([]);
@@ -228,31 +254,19 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
         return;
       }
 
-      if (!props.onSearch) {
-        Message.error('搜索功能未实现');
-        return;
-      }
-
       setIsSearching(true);
-      try {
-        const results = await props.onSearch(currentFolderId, value);
-        setSearchResults(results);
-        setIsSearchMode(true);
 
-        // 将搜索结果转换为树形数据
-        const formattedResults = formatTreeData(results);
-        setTreeData(formattedResults);
-      } catch (error) {
-        Message.error('搜索失败');
-      } finally {
-        setIsSearching(false);
+      const filteredData = filterTree(value);
+      if (filteredData.length === 0) {
+        // Message.info('未找到匹配的结果');
+        setTreeData([]);
+      } else {
+        setTreeData(filteredData);
       }
     };
 
     // 处理搜索框回车
-    const handleSearchEnter = (value: string) => {
-      handleSearch(value);
-    };
+    const handleSearchEnter = (value: string) => {};
 
     // 使用防抖处理输入事件
     const debouncedSearch = useCallback(debounce(handleSearch, 500), [
@@ -436,7 +450,13 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
             : n
         );
     };
-
+    const handleCopy = (node: NodeProps) => {
+      try {
+        onCopy?.(`${node.dataRef?.name}_副本_${now()}`, node);
+      } catch (e) {
+        Message.error('复制失败');
+      }
+    };
     const handleEditFinish = async (node) => {
       if (node.dataRef?.isAdd) {
         const finalName = inputValue.trim() || defaultName;
@@ -576,7 +596,10 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
             className={styles['directory-tree-header-search']}
             placeholder={placeholder}
             value={searchValue}
-            onChange={(value) => setSearchValue(value)}
+            onChange={(value) => {
+              setSearchValue(value);
+              debouncedSearch(value);
+            }}
             onSearch={handleSearchEnter}
             onClear={() => {
               handleSearchClear();
@@ -710,6 +733,12 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
                       onClick={() => handleEdit(node)}
                     />
                   </Tooltip>
+                  <Tooltip color="white" content="复制并粘贴">
+                    <IconCopy
+                      className="mr-1 text-[14px] hover:text-[rgb(var(--primary-6))]"
+                      onClick={() => handleCopy(node as unknown as NodeProps)}
+                    />
+                  </Tooltip>
                   {/* )} */}
                   {/* {node.dataRef?.type !== PythonItemType.Directory && */}
                   {/* node.dataRef?.perms?.includes(nowPermissions.CAN_COPY) && ( */}
@@ -756,7 +785,7 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
                 );
               }
 
-              const titleText = props.dataRef?.name;
+              const titleText = props.dataRef?.name || props?.title;
               return (
                 <div className="flex items-center overflow-hidden">
                   {icon}

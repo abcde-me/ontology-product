@@ -4,8 +4,26 @@ import { NewSegmentData } from '@/pages/ragDetail/utils/newSegmentData';
 
 // 获取原始文件二进制数据
 export interface GetFileBinaryDataParams {
-  bucket: string;
+  bucket_name: string;
   path: string;
+}
+
+// 查询知识库文件详情
+export interface GetKnowledgeDocumentParams {
+  document_id: string;
+}
+export function getKnowledgeDocument(params: GetKnowledgeDocumentParams) {
+  return UAPI.RES.GetKnowledgeDocument({}).post(params).inRegion().do();
+}
+
+// 预览图片
+export interface PreviewUrlParams {
+  path: string;
+  bucket_name: string;
+}
+
+export function previewUrl(params: PreviewUrlParams) {
+  return UAPI.RES.PreviewUrl({}).post(params).inRegion().do();
 }
 
 export function getFileBinaryData(params: GetFileBinaryDataParams) {

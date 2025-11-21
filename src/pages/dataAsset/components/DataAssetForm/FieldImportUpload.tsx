@@ -35,19 +35,30 @@ const FieldImportUpload: React.FC<FieldImportUploadProps> = ({
   const [fileList, setFileList] = useState<any>([]);
 
   const handleUploadChange = (files: any, file: any) => {
-    if (file.status !== UploadStatus.done) {
+    // 更新 fileList 状态，让 Upload 组件受控
+    setFileList(files);
+
+    // 检查上传状态
+    if (file.status === UploadStatus.uploading) {
+      onUploadingChange?.(true);
       return;
     }
 
-    if (file.response?.code !== '' || file.response?.status !== 200) {
-      Message.error(file?.response?.message ?? '上传失败，请重试');
+    if (file.status === UploadStatus.done) {
+      if (file.response?.code !== '' || file.response?.status !== 200) {
+        Message.error(file?.response?.message ?? '上传失败，请重试');
+        setFileList([]);
+        onUploadingChange?.(false);
+        return;
+      }
+
+      // 从最终的fileList中取值
+      const doneFile = files.find((f: any) => f.status === UploadStatus.done);
+      onFileChange(doneFile?.response?.data ?? []);
       onUploadingChange?.(false);
-      return;
+    } else if (file.status === UploadStatus.error) {
+      onUploadingChange?.(false);
     }
-
-    setFileList([file]);
-    onFileChange(file?.response?.data ?? []);
-    onUploadingChange?.(false);
   };
 
   const getToken = () => {
@@ -111,14 +122,21 @@ const FieldImportUpload: React.FC<FieldImportUploadProps> = ({
     }
   };
 
+  const handleRemove = (file: any) => {
+    const newFileList = fileList.filter((item: any) => item.uid !== file.uid);
+    setFileList(newFileList);
+    onFileChange([]);
+  };
+
   return (
     <div>
       <Upload
         drag
         className="upload-file"
         accept=".xlsx,.xls"
-        showUploadList={fileList.length > 0 ? true : false}
         fileList={fileList}
+        showUploadList={fileList.length > 0 ? true : false}
+        onRemove={handleRemove}
         beforeUpload={(file) => {
           return checkFile(file);
         }}

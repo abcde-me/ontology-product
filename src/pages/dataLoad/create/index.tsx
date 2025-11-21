@@ -501,18 +501,29 @@ export default function DataLoadCreate() {
 
   // 处理表格名称选择（全部标签逻辑）
   const handleAllTagChange = useCallback(
-    (value: string[]) => {
-      const currentValue = value || [];
+    (value: string | string[]) => {
+      // 单选模式下，value 是字符串；多选模式下，value 是数组
+      const isSingleMode = selectedNodeType === 'metadata';
+
+      if (isSingleMode) {
+        // 单选模式：直接设置单个值
+        form.setFieldsValue({ table_name: value || undefined });
+        return;
+      }
+
+      // 多选模式：处理数组逻辑
+      const currentValue = Array.isArray(value) ? value : [];
       const previousValue = form.getFieldValue('table_name') || [];
+      const previousArray = Array.isArray(previousValue) ? previousValue : [];
 
       // 检查是否点击了"全部"选项（通过比较前后值的变化）
-      const previousHasAll = previousValue.includes('all');
+      const previousHasAll = previousArray.includes('all');
       const currentHasAll = currentValue.includes('all');
       const clickedAll = previousHasAll !== currentHasAll;
 
       if (clickedAll && currentHasAll) {
         // 如果点击了"全部"选项（当前值包含 'all'），切换全选状态
-        const filteredPrevious = previousValue.filter(
+        const filteredPrevious = previousArray.filter(
           (item: string) => item !== 'all'
         );
         const isAllSelected =
@@ -536,7 +547,7 @@ export default function DataLoadCreate() {
         form.setFieldsValue({ table_name: filteredValue });
       }
     },
-    [form, tableList]
+    [form, tableList, selectedNodeType]
   );
 
   // 处理文件变化
@@ -1413,11 +1424,14 @@ export default function DataLoadCreate() {
                 className="select-tag-style"
                 onChange={handleAllTagChange}
                 ref={selectRef}
+                key={selectedNodeType}
                 mode={selectedNodeType === 'metadata' ? undefined : 'multiple'}
-                maxTagCount={{
-                  count: 2,
-                  render: renderTableTags
-                }}
+                {...(selectedNodeType !== 'metadata' && {
+                  maxTagCount: {
+                    count: 2,
+                    render: renderTableTags
+                  }
+                })}
                 placeholder="请选择抽取的表"
                 style={{ width: '100%', minWidth: 0 }}
                 allowClear

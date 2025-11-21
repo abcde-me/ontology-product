@@ -115,6 +115,33 @@ const EditSingleAssetModal: React.FC<EditSingleAssetModalProps> = ({
     return String(value);
   };
 
+  const getFieldInput = (fieldType?: string) => {
+    if (!fieldType) {
+      return <Input placeholder="请输入内容" style={{ width: '100%' }} />;
+    }
+
+    if (isDateType(fieldType)) {
+      return (
+        <DatePicker
+          placeholder="请选择日期"
+          style={{ width: '100%' }}
+          format="YYYY-MM-DD"
+        />
+      );
+    } else if (isDateTimeType(fieldType)) {
+      return (
+        <DatePicker
+          placeholder="请选择时间"
+          style={{ width: '100%' }}
+          showTime={{ format: 'HH:mm:ss' }}
+          format="YYYY-MM-DD HH:mm:ss"
+        />
+      );
+    } else {
+      return <Input placeholder="请输入内容" style={{ width: '100%' }} />;
+    }
+  };
+
   return (
     <Modal
       title="修改资产"
@@ -163,27 +190,7 @@ const EditSingleAssetModal: React.FC<EditSingleAssetModalProps> = ({
                           field={field.nameEn}
                           style={{ marginBottom: 0 }}
                         >
-                          {isDateType(fieldType) ? (
-                            isDateTimeType(fieldType) ? (
-                              <DatePicker
-                                placeholder="请选择时间"
-                                style={{ width: '100%' }}
-                                showTime={{ format: 'HH:mm:ss' }}
-                                format="YYYY-MM-DD HH:mm:ss"
-                              />
-                            ) : (
-                              <DatePicker
-                                placeholder="请选择日期"
-                                style={{ width: '100%' }}
-                                format="YYYY-MM-DD"
-                              />
-                            )
-                          ) : (
-                            <Input
-                              placeholder="请输入内容"
-                              style={{ width: '100%' }}
-                            />
-                          )}
+                          {getFieldInput(fieldType)}
                         </Form.Item>
                       )}
                     </td>

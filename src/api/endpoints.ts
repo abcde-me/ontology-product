@@ -237,8 +237,12 @@ export const ModaForgeResourceEndpoints = {
 
   // 引擎相关
   // 获取文件二进制数据 (参数通过 query string 传递: bucket, path)
-  GetFileBinaryData: PrefixEngine + '/file/downloadFile',
+  GetFileBinaryData: PrefixAimdp + '/DownloadFile',
   // RAG相关
+  // 查询知识库文件详情
+  GetKnowledgeDocument: PrefixRagV2 + '/GetKnowledgeDocument',
+  // 预览图片
+  PreviewUrl: PrefixAimdp + '/PreviewUrl',
   // 查询知识库文件列表
   ListKnowledgeDocuments: PrefixRag + '/ListKnowledgeDocuments',
   // 查询知识库文件目录层级
@@ -250,7 +254,7 @@ export const ModaForgeResourceEndpoints = {
   // 编辑分块内容
   UpdateKnowledgeChunk: PrefixRagV2 + '/UpdateKnowledgeChunk',
   // 编辑分块元素信息
-  UpdateKnowledgeChunkMaterials: PrefixRag + '/UpdateKnowledgeChunkMaterials',
+  UpdateKnowledgeChunkMaterials: PrefixRagV2 + '/UpdateKnowledgeChunkMaterials',
   // 编辑分块增强信息
   UpdateKnowledgeChunkEnhancement:
     PrefixRag + '/UpdateKnowledgeChunkEnhancement',
@@ -364,7 +368,7 @@ export const ModaForgeResourceEndpoints = {
   //查询数据集详细信息的数据内容和
   datasetContentsApi: PrefixAimdp + '/GetDatasetTargetVersion',
   //编辑数据集版本数据
-  editDatasetVersionApi: PrefixAimdp + '/EditDatasetTargetVersion',
+  editDatasetVersionApi: PrefixAimdp + '/UpdateJsonLData',
   //获取数据集版本列表
   datasetVersionListApi: PrefixAimdp + '/ListDatasetChangeLogs',
   //版本重新生成

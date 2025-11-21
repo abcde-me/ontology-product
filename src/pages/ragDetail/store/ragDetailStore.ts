@@ -16,7 +16,11 @@ import {
   TableSegment,
   PDFCoordinate
 } from '../types';
-import { getFileBinaryData, GetFileBinaryDataParams } from '@/api/modules/rag';
+import {
+  getFileBinaryData,
+  GetFileBinaryDataParams,
+  getKnowledgeDocument
+} from '@/api/modules/rag';
 
 // 导出Segment类型供其他组件使用
 export type {
@@ -59,32 +63,73 @@ export const useRagDetailStore = create<RagDetailState & RagDetailActions>(
     fileBinaryDataError: null,
     bucket: '',
     path: '',
+    // Document info state
+    documentName: '',
+    datasetName: '',
+    documentFormat: '',
 
     // Actions
     initializeRagDetail: async (
       datasetId: string,
       documentId: string,
       bucketName?: string | null,
-      path?: string | null
+      path?: string | null,
+      datasetNameParam?: string | null
     ) => {
       set({ loading: true, error: null });
       try {
+        // 先调用 getKnowledgeDocument 获取文件详情
+        let documentName = '';
+        let documentFormat = '';
+        try {
+          const docResponse = await getKnowledgeDocument({
+            document_id: documentId
+          });
+          if (docResponse && docResponse.data) {
+            documentName = docResponse.data.name || '';
+            documentFormat = docResponse.data.format || '';
+          }
+        } catch (docError) {
+          console.warn('⚠️ 获取文件详情失败:', docError);
+        }
+
         const data = await fetchRagDetail(datasetId, documentId);
 
         // 优先使用 URL 参数中的 bucket 和 path，如果没有则使用 API 返回的
         const finalBucket = bucketName || data.bucket || '';
         const finalPath = path || data.path || '';
 
+        // 如果 API 返回了 documentFormat，将其映射到 sceneType
+        let finalSceneType = data.sceneType;
+        if (documentFormat) {
+          const formatLower = documentFormat.toLowerCase();
+          if (formatLower === 'pdf') {
+            finalSceneType = 'pdf';
+          } else if (formatLower === 'ppt' || formatLower === 'pptx') {
+            finalSceneType = 'ppt';
+          } else if (
+            formatLower === 'excel' ||
+            formatLower === 'xlsx' ||
+            formatLower === 'xls'
+          ) {
+            finalSceneType = 'excel';
+          }
+        }
+
         set({
           datasetId, // 保存 datasetId
           ragId: documentId, // 使用 documentId 作为 ragId
           fileName: data.fileName,
           filePath: data.filePath,
-          sceneType: data.sceneType,
+          sceneType: finalSceneType,
           segments: data.segments,
           directory: data.directory,
           bucket: finalBucket, // 保存 bucket
           path: finalPath, // 保存 path
+          // 文件详情
+          documentName,
+          datasetName: datasetNameParam || '',
+          documentFormat,
           // 默认不选中任何分段和目录节点
           selectedSegmentId: null,
           selectedDirectoryNodeId: null,
@@ -343,7 +388,7 @@ export const useRagDetailStore = create<RagDetailState & RagDetailActions>(
 
       try {
         console.log('🔍 开始加载文件二进制数据:', { bucket, path });
-        const response = await getFileBinaryData({ bucket, path });
+        const response = await getFileBinaryData({ bucket_name: bucket, path });
         console.log('✅ 文件二进制数据加载成功:', response);
 
         set({
