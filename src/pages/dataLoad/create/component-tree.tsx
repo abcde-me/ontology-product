@@ -781,17 +781,6 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
         findNodeById(processedDirectoryData, keysArray[0]) || undefined;
     }
 
-    // 检查节点类型，阻止选中某些类型的节点
-    if (
-      nodeData?.type_name === 'catalog' ||
-      nodeData?.type_name === 'db_parent' ||
-      nodeData?.type_name === 'datasource_parent' ||
-      nodeData?.type_name === 'metadata_parent'
-    ) {
-      console.log('数据库节点或数据卷节点或目录节点不可选中');
-      return; // 阻止选中数据库节点和数据卷节点或目录节点
-    }
-
     // 确保 selectedNodes 是数组
     const safeSelectedNodes = Array.isArray(safeExtra.selectedNodes)
       ? safeExtra.selectedNodes
@@ -1239,6 +1228,42 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
   };
 
   /**
+   * 检查节点是否可选
+   * 只有数据库、元数据或者数据卷下面的节点才支持可选
+   * @param item - 树节点数据，可以是 TreeNodeData 或 TreeDataType 类型
+   * @returns 如果节点可选返回 false（disabled=false），否则返回 true（disabled=true）
+   */
+  const isNodeSelectable = (
+    item: TreeNodeData | TreeDataType | null | undefined
+  ): boolean => {
+    // 空值检查
+    if (!item) {
+      return false;
+    }
+
+    const nodeData = item as TreeNodeData;
+    const typeName = nodeData.type_name;
+
+    // 只有以下类型的节点可选：
+    // - db: 数据库节点
+    // - db_item: 数据库项节点
+    // - metadata: 元数据节点
+    // - volume: 数据卷节点
+    // - volume_item: 数据卷项节点
+    // - datasource_item: 数据源项节点
+    const selectableTypes = [
+      'db',
+      'db_item',
+      'metadata',
+      'volume',
+      'volume_item',
+      'datasource_item'
+    ];
+
+    return selectableTypes.includes(typeName || '');
+  };
+
+  /**
    * 检查节点是否为数据库节点且包含数据库子项
    * @param item - 树节点数据，可以是 TreeNodeData 或 TreeDataType 类型
    * @returns 如果是包含子项的数据库节点返回 true，否则返回 false
@@ -1315,7 +1340,10 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
             key: String(item.id),
             title: item.name || item.label || item.title || '',
             value: String(item.id),
-            disabled: hasDataBaseNode(item) || hasMetadataBound(item),
+            selectable:
+              isNodeSelectable(item) &&
+              !hasDataBaseNode(item) &&
+              !hasMetadataBound(item),
             dataRef: item, // 保留原始数据引用
             ...item
           };
@@ -1427,8 +1455,11 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
             {...rest}
             dataRef={item}
             title={item.name}
-            disabled={hasDataBaseNode(item) || hasMetadataBound(item)}
-            // selectable={!isDbNode}
+            selectable={
+              isNodeSelectable(item) &&
+              !hasDataBaseNode(item) &&
+              !hasMetadataBound(item)
+            }
           >
             {hasChildren ? generatorTreeNodes(children) : null}
           </TreeNode>
