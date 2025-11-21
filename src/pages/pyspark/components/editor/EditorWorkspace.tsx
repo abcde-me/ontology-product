@@ -1,5 +1,5 @@
 import React, { useRef, memo, useCallback, useEffect, useState } from 'react';
-import { Button, Message, Space } from '@arco-design/web-react';
+import { Button, Message, Space, ResizeBox } from '@arco-design/web-react';
 import { IconUpload, IconPlayArrowFill } from '@arco-design/web-react/icon';
 import CodeMirror, { ReactCodeMirrorRef } from '@uiw/react-codemirror';
 import { python } from '@codemirror/lang-python';
@@ -98,19 +98,6 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = memo(
         onSidebarTabChange('daset');
       }
     });
-
-    // console.log('看一看编辑器卡顿的事情～');
-
-    // const myTheme = createTheme({
-    //   theme: 'light',
-    //   settings: {
-    //     background: '#ffffff',
-    //     backgroundImage: '',
-    //     foreground: '#5d00ff',
-    //     lineHighlight: '#8a91991a'
-    //   },
-    //   styles: []
-    // });
 
     const myTheme = createTheme({
       theme: 'light',
@@ -219,6 +206,66 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = memo(
     const isReadOnly =
       !hasUpdatePermission || runStatus === RunningStatus.RUNNING;
 
+    const editorPane = (
+      <div
+        className={classNames('pyspark-editor-container', {
+          'running-code-mirror': isReadOnly
+        })}
+        style={{ height: '100%', overflow: 'auto' }}
+      >
+        <CodeMirror
+          ref={editorRef}
+          value={editorContent}
+          onChange={handleContentChange}
+          placeholder={placeholderValue}
+          readOnly={isReadOnly}
+          extensions={[
+            python(),
+            lintGutter(),
+            createPythonLinter({
+              checkSyntax: true,
+              checkStyle: true,
+              checkImports: true,
+              checkIndentation: true
+            }),
+            syntaxHighlighting(defaultHighlightStyle, { fallback: true }),
+            EditorView.updateListener.of((update) => {
+              if (update.focusChanged) {
+                handleFocusChange(update.view.hasFocus);
+              }
+            })
+          ]}
+          theme={myTheme}
+          basicSetup={{
+            lineNumbers: true,
+            highlightActiveLineGutter: false
+          }}
+          className="code-editor"
+        />
+      </div>
+    );
+
+    const runningInfoPanel = (
+      <div style={{ height: '100%', overflow: 'hidden' }}>
+        <RunningInfoPanel
+          key={currentFileId}
+          activeKey={activeKey}
+          setActiveKey={setActiveKey}
+          runResult={runResult}
+          runLog={runLog}
+          runStatus={runStatus}
+          runStartTime={runStartTime}
+          runDuration={runDuration}
+          hasFetchedResult={hasFetchedResult}
+          onGetRunLog={handleGetRunLog}
+          onGetRunResult={handleGetRunResult}
+          isPanelOpen={isPanelOpen}
+          onPanelStateChange={handlePanelStateChange}
+          getPrevRunStatus={getPrevRunStatus}
+        />
+      </div>
+    );
+
     return (
       <div className="notebook-content">
         {/* 顶部工具栏 */}
@@ -281,61 +328,52 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = memo(
           )}
         </div>
 
-        {/* 编辑器区域 */}
-        <div
-          className={classNames('pyspark-editor-container', {
-            'running-code-mirror': isReadOnly
-          })}
-        >
-          <CodeMirror
-            ref={editorRef}
-            value={editorContent}
-            onChange={handleContentChange}
-            placeholder={placeholderValue}
-            readOnly={isReadOnly}
-            extensions={[
-              python(),
-              lintGutter(),
-              createPythonLinter({
-                checkSyntax: true,
-                checkStyle: true,
-                checkImports: true,
-                checkIndentation: true
-              }),
-              syntaxHighlighting(defaultHighlightStyle, { fallback: true }),
-              EditorView.updateListener.of((update) => {
-                if (update.focusChanged) {
-                  handleFocusChange(update.view.hasFocus);
-                }
-              })
-            ]}
-            theme={myTheme}
-            basicSetup={{
-              lineNumbers: true,
-              highlightActiveLineGutter: false
-            }}
-            className="code-editor"
-          />
-        </div>
-
-        {/* 运行信息面板 - 只在execid不为空时展示 */}
-        {execid && (
-          <RunningInfoPanel
-            key={currentFileId}
-            activeKey={activeKey}
-            setActiveKey={setActiveKey}
-            runResult={runResult}
-            runLog={runLog}
-            runStatus={runStatus}
-            runStartTime={runStartTime}
-            runDuration={runDuration}
-            hasFetchedResult={hasFetchedResult}
-            onGetRunLog={handleGetRunLog}
-            onGetRunResult={handleGetRunResult}
-            isPanelOpen={isPanelOpen}
-            onPanelStateChange={handlePanelStateChange}
-            getPrevRunStatus={getPrevRunStatus}
-          />
+        {/* 编辑器区域和运行信息面板 - 使用ResizeBox.Split分割 */}
+        {execid ? (
+          <div className="resize-box-container">
+            <ResizeBox.Split
+              direction="vertical"
+              style={{ height: '100%', minHeight: 0 }}
+              panes={[editorPane, runningInfoPanel]}
+            />
+          </div>
+        ) : (
+          /* 没有execid时只显示编辑器 */
+          <div
+            className={classNames('pyspark-editor-container', {
+              'running-code-mirror': isReadOnly
+            })}
+          >
+            <CodeMirror
+              ref={editorRef}
+              value={editorContent}
+              onChange={handleContentChange}
+              placeholder={placeholderValue}
+              readOnly={isReadOnly}
+              extensions={[
+                python(),
+                lintGutter(),
+                createPythonLinter({
+                  checkSyntax: true,
+                  checkStyle: true,
+                  checkImports: true,
+                  checkIndentation: true
+                }),
+                syntaxHighlighting(defaultHighlightStyle, { fallback: true }),
+                EditorView.updateListener.of((update) => {
+                  if (update.focusChanged) {
+                    handleFocusChange(update.view.hasFocus);
+                  }
+                })
+              ]}
+              theme={myTheme}
+              basicSetup={{
+                lineNumbers: true,
+                highlightActiveLineGutter: false
+              }}
+              className="code-editor"
+            />
+          </div>
         )}
 
         {/* 新建数据集弹框 */}
