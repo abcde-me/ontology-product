@@ -1,4 +1,11 @@
-import React, { useState, useEffect, memo, useRef } from 'react';
+import React, {
+  useState,
+  useEffect,
+  memo,
+  useRef,
+  useLayoutEffect,
+  useCallback
+} from 'react';
 import {
   Collapse,
   Tabs,
@@ -58,6 +65,8 @@ const RunningInfoPanel: React.FC<RunningInfoPanelProps> = memo(
   }) => {
     const [isExpanded, setIsExpanded] = useState(false);
     const logContentRef = useRef<HTMLDivElement>(null);
+    const scrollContainerRef = useRef<HTMLElement | null>(null);
+    const shouldAutoScrollRef = useRef(true); // 是否应该自动滚动
 
     // 自定义expandIcon组件，包含popover功能
     const CustomExpandIcon = () => {
@@ -80,24 +89,42 @@ const RunningInfoPanel: React.FC<RunningInfoPanelProps> = memo(
 
     // 监听父组件传递的面板状态变化
     useEffect(() => {
-      console.log('isPanelOpen', isPanelOpen);
       setIsExpanded(isPanelOpen || false);
     }, [isPanelOpen]);
 
-    // 监听日志内容变化，自动滚动到底部
-    useEffect(() => {
-      if (activeKey === 'log' && runLog && isExpanded) {
-        // 查找实际的滚动容器（.arco-tabs-content）
-        const tabsContent = document.querySelector(
-          '.running-info-panel .arco-tabs-content'
-        ) as HTMLElement;
-        if (tabsContent) {
-          setTimeout(() => {
-            tabsContent.scrollTop = tabsContent.scrollHeight;
-          }, 0);
+    // 查找滚动容器的函数
+    const findScrollContainer = useCallback((): HTMLElement | null => {
+      if (logContentRef.current) {
+        // 从日志内容元素向上查找滚动容器
+        let parent = logContentRef.current.parentElement;
+        while (parent) {
+          if (parent.classList.contains('arco-tabs-content')) {
+            return parent;
+          }
+          parent = parent.parentElement;
         }
       }
-    }, [runLog]);
+      return null;
+    }, []);
+
+    // 自动滚动到底部的函数
+    const scrollToBottom = useCallback(() => {
+      if (!shouldAutoScrollRef.current) return;
+
+      const container = scrollContainerRef.current || findScrollContainer();
+      if (container) {
+        scrollContainerRef.current = container;
+        // 使用 requestAnimationFrame 确保在浏览器重绘前执行
+        requestAnimationFrame(() => {
+          container.scrollTop = container.scrollHeight;
+        });
+      }
+    }, [findScrollContainer]);
+
+    // 监听日志内容变化，自动滚动到底部
+    useLayoutEffect(() => {
+      scrollToBottom();
+    }, [runLog, scrollToBottom]);
 
     // 监听运行状态变化，自动展开面板
     useEffect(() => {
@@ -106,31 +133,7 @@ const RunningInfoPanel: React.FC<RunningInfoPanelProps> = memo(
         setIsExpanded(true);
         onPanelStateChange?.(true);
         setActiveKey('log'); // 运行中时显示日志标签页
-        // onGetRunLog?.();
       }
-      // 运行完成时自动展开面板
-      // else if (
-      //   runStatus === RunningStatus.SUCCESS ||
-      //   runStatus === RunningStatus.FAILED
-      // ) {
-      //   // 检查前一个状态，避免在状态重置时误触发
-      //   const prevStatus = getPrevRunStatus?.() || RunningStatus.IDLE;
-
-      //   // 只有当状态真正从运行中变为完成状态时才执行自动行为
-      //   // 避免在标签页切换时状态重置导致的误触发
-      //   if (prevStatus === RunningStatus.RUNNING) {
-      //     setIsExpanded(true);
-      //     onPanelStateChange?.(true);
-
-      //     // 根据运行结果自动定位到对应标签页
-      //     if (runStatus === RunningStatus.SUCCESS) {
-      //       setActiveKey('result');
-      //     } else if (runStatus === RunningStatus.FAILED) {
-      //       setActiveKey('log');
-      //       onGetRunLog?.();
-      //     }
-      //   }
-      // }
     }, [runStatus, onPanelStateChange, getPrevRunStatus]);
 
     const handleClickTab = (key: string) => {
