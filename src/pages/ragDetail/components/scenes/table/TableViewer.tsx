@@ -162,9 +162,9 @@ const TableViewer: React.FC<TableViewerProps> = ({
   };
 
   return (
-    <div className="flex h-full flex-col border-r bg-white">
+    <div className="flex h-full flex-col bg-white">
       {/* 表格显示区域 */}
-      <div className="flex-1 overflow-auto p-6">
+      <div className="flex-1 overflow-auto p-4">
         <div className="bg-white">
           {/* 表格标题 */}
           {/* <div className="border-b border-gray-200 bg-gray-50 px-4 py-3">
