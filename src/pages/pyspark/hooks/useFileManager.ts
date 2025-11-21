@@ -165,7 +165,10 @@ export const useFileManager = (
           Message.error(rawPythonList?.message ?? '获取文件列表失败');
           return [];
         }
-
+        if (!rawPythonList?.data?.items) {
+          setPythonList([]);
+          return [];
+        }
         const items =
           rawPythonList?.data?.items.map((item: any) => {
             // 给子级增加key
@@ -187,6 +190,7 @@ export const useFileManager = (
         return items; // 返回获取到的数据
       } catch (error) {
         console.error('获取Python列表失败:', error);
+        console.log('object 123', error);
         Message.error('获取文件列表失败');
         return [];
       } finally {
