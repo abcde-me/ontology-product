@@ -47,11 +47,14 @@ const FieldImportUpload: React.FC<FieldImportUploadProps> = ({
     if (file.status === UploadStatus.done) {
       if (file.response?.code !== '' || file.response?.status !== 200) {
         Message.error(file?.response?.message ?? '上传失败，请重试');
+        setFileList([]);
         onUploadingChange?.(false);
         return;
       }
 
-      onFileChange(file?.response?.data ?? []);
+      // 从最终的fileList中取值
+      const doneFile = files.find((f: any) => f.status === UploadStatus.done);
+      onFileChange(doneFile?.response?.data ?? []);
       onUploadingChange?.(false);
     } else if (file.status === UploadStatus.error) {
       onUploadingChange?.(false);
