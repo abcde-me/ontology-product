@@ -3,39 +3,6 @@
  * 统一管理所有权限标识符，避免硬编码
  */
 
-// 用户管理相关权限
-// export const USER_PERMISSIONS = {
-//   // 基础权限
-//   CAN_VIEW: 'user:can_view',
-//   CAN_SEARCH: 'user:can_search',
-//   CAN_CREATE: 'user:can_create',
-//   CAN_EDIT: 'user:can_edit',
-//   CAN_DELETE: 'user:can_delete',
-
-//   // 高级权限
-//   CAN_MANAGE: 'user:can_manage',
-//   CAN_RESET_PASSWORD: 'user:can_reset_password',
-//   CAN_CHANGE_ROLE: 'user:can_change_role',
-//   CAN_BATCH_IMPORT: 'user:can_batch_import',
-//   CAN_EXPORT: 'user:can_export',
-//   CAN_EXPORT_SENSITIVE: 'user:can_export_sensitive',
-
-//   // 状态管理
-//   CAN_ENABLE: 'user:can_enable',
-//   CAN_DISABLE: 'user:can_disable',
-//   CAN_BAN: 'user:can_ban'
-// } as const;
-
-// 组织管理相关权限
-// export const ORGANIZATION_PERMISSIONS = {
-//   CAN_VIEW: 'organizations:can_view',
-//   CAN_SEARCH: 'organizations:can_search',
-//   CAN_CREATE: 'organizations:can_create',
-//   CAN_EDIT: 'organizations:can_edit',
-//   CAN_DELETE: 'organizations:can_delete',
-//   CAN_MANAGE: 'organizations:can_manage'
-// } as const;
-
 // 连接器相关权限
 export const CONNECTION_PERMISSIONS = {
   CAN_CREATE: 'aimdp-manager:connector:manage:create',
@@ -106,10 +73,10 @@ export const DATA_CATALOG_PERMISSIONS = {
   CAN_UPDATE_DIRS: 'aimdp-manager:directory:manage:modify', // 更新树
   CAN_DELETE_BATCH: 'aimdp-manager:directory:manage:delete', // 源目录文件批量删除
   CAN_DELETE_DST_FILE: 'aimdp-manager:directory:manage:delete', // 目标目录文件删除
-  CAN_SEARCH: 'aimdp-manager:connector:read:get', // 批量导出
-  CAN_SEARCH_DIR: 'aimdp-manager:connector:read:get', // 导出 - 源目录
+  CAN_SEARCH: 'aimdp-manager:directory:read:get', // 批量导出
+  CAN_SEARCH_DIR: 'aimdp-manager:directory:read:get', // 导出 - 源目录
   CAN_DELETE: 'aimdp-manager:directory:manage:delete', //  删除 - 源目录
-  CAN_EXPORT_LIST_FILE: 'aimdp-manager:connector:read:get', // 导出 - 目标目录文件
+  CAN_EXPORT_LIST_FILE: 'aimdp-manager:directory:read:get', // 导出 - 目标目录文件
   CAN_DELETE_LIST_FILE: 'aimdp-manager:directory:manage:delete', // 删除 - 目标目录文件
 
   LIST: 'aimdp-manager:directory:read:list', // 菜单权限
@@ -149,18 +116,7 @@ export const NEW_WORKFLOW_PERMISSIONS = {
 
 // PySpark权限
 export const PYSPARK_PERMISSIONS = {
-  // LIST: 'aimdp-manager:pyspark:read:list', // 菜单权限
-  // CAN_DELETE: 'aimdp-manager:pyspark:manage:delete', // 删除
-  // CAN_UPDATE: 'aimdp-manager:pyspark:manage:modify', // 编辑
-  // CAN_COPY: 'aimdp-manager:pyspark:manage:create', // 复制
-  // CAN_RENAME: 'aimdp-manager:pyspark:read:list', // 重命名
-  // CAN_RUN: 'aimdp-manager:pyspark:manage:run', // 运行
-  // CAN_CANCEL_RUN: 'aimdp-manager:pyspark:manage:run', // 停止运行
-  // CAN_EXPORT: 'aimdp-manager:pyspark:manage:export', // 导出数据集按钮
   CAN_SEARCH_EXPORTS: 'aimdp-manager:pyspark:manage:export', // 导出列表
-  // CAN_EXPORT_STOP: 'aimdp-manager:pyspark:manage:export', // 导出停止
-  // CAN_EXPORT_RETRY: 'aimdp-manager:pyspark:manage:export', // 导出重试
-  // CAN_EXPORT_PREVIEW: 'aimdp-manager:pyspark:manage:export', // 导出预览
   CAN_DIRECTORY: 'aimdp-manager:directory:read:list', // 数据目录
   CAN_DATASETS_SEARCH: 'aimdp-manager:dataset:read:list', // 数据集列表
   CAN_RETRIEVE_OPERATOR: 'aimdp-manager:pyspark:read:list', // 算子库
@@ -176,23 +132,6 @@ export const PYSPARK_PERMISSIONS = {
 
 // SQL权限
 export const SQL_PERMISSIONS = {
-  // CAN_CREATE: 'aimdp-manager:sql_script:manage:create', // 创建
-  // CAN_DELETE: 'aimdp-manager:sql_script:manage:delete', // 删除
-  // CAN_UPDATE: 'aimdp-manager:sql_script:manage:modify', // 编辑
-  // CAN_COPY: 'aimdp-manager:sql_script:read:list', // 复制
-  // CAN_RENAME: 'aimdp-manager:sql_script:read:list', // 重命名
-  // CAN_SEARCH: 'aimdp-manager:sql_script:read:list', // 菜单权限
-  // CAN_GET: 'aimdp-manager:sql_script:read:get', // 详情
-  // CAN_RUN: 'aimdp-manager:sql_script:manage:run', // 运行
-  // CAN_CANCEL_RUN: 'aimdp-manager:sql_script:manage:run', // 取消运行
-  // CAN_GET_RUN_RESULT: 'aimdp-manager:sql_script:manage:run', // 获取运行结果
-  // CAN_EXPORT_RESULT: 'aimdp-manager:sql_script:manage:export', // 导出结果
-  // CAN_EXPORT_VERSION_UPDATE: 'aimdp-manager:sql_script:manage:export', // 导出版本更新
-  // CAN_EXPORT_TASK_LIST: 'aimdp-manager:sql_script:manage:export', // 导出任务列表
-  // CAN_EXPORT_TASK_STOP: 'aimdp-manager:sql_script:manage:export', // 导出任务停止
-  // CAN_EXPORT_TASK_RETRY: 'aimdp-manager:sql_script:manage:export', // 导出任务重试
-  // CAN_EXPORT_GET_SQL_INFO: 'aimdp-manager:sql_script:manage:export', // 导出任务对应的SQL详情
-
   LIST: 'aimdp-manager:sql_script:read:list', // 菜单权限
   GET: 'aimdp-manager:sql_script:read:get',
   CREATE: 'aimdp-manager:sql_script:manage:create',
@@ -200,6 +139,17 @@ export const SQL_PERMISSIONS = {
   MODIFY: 'aimdp-manager:sql_script:manage:modify',
   RUN: 'aimdp-manager:sql_script:manage:run',
   EXPORT: 'aimdp-manager:sql_script:manage:export'
+} as const;
+
+// 数据资产
+export const DATA_ASSET_PERMISSIONS = {
+  LIST: 'aimdp-manager:data_asset:read:list_data', // 菜单权限
+  DELETE: 'aimdp-manager:data_asset:manage:delete_asset',
+  MODIFY_TAG: 'aimdp-manager:data_asset:manage:modify_tag',
+  MODIFY_ASSET: 'aimdp-manager:data_asset:manage:modify_asset',
+  MODIFY_TABLE: 'aimdp-manager:data_asset:manage:modify_table',
+  CREATE_TABLE: 'aimdp-manager:data_asset:manage:create_table',
+  GET_TABLE: 'aimdp-manager:data_asset:read:get_table'
 } as const;
 
 // 需求管理权限
@@ -250,6 +200,15 @@ export const API_KEY_PERMISSIONS = {
   MENU: 'common:apikey:read:list'
 } as const;
 
+//标签管理
+export const TAG_PERMISSIONS = {
+  LIST: 'common:tag:read:listtag',
+  GET: 'common:tag:read:gettag',
+  CREATE: 'common:tag:manage:createtag',
+  DELETE: 'common:tag:manage:deletetag',
+  UPDATE: 'common:tag:manage:fullupdatetag'
+} as const;
+
 // 聚合所有权限
 export const ALL_PERMISSIONS = {
   USER: USER_PERMISSIONS,
@@ -276,12 +235,6 @@ export const PermissionUtils = {
   isUserPermission: (permission: string) => permission.startsWith('user:'),
   isOrgPermission: (permission: string) =>
     permission.startsWith('organizations:'),
-  // isAppPermission: (permission: string) => permission.startsWith('app:'),
-  // isKbPermission: (permission: string) => permission.startsWith('kb:'),
-  // isToolPermission: (permission: string) => permission.startsWith('tool:'),
-  // isWorkflowPermission: (permission: string) => permission.startsWith('workflow:'),
-  // isAdminPermission: (permission: string) => permission.startsWith('admin:'),
-
   /**
    * 获取权限的模块名
    */

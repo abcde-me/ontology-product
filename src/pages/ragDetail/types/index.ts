@@ -328,6 +328,10 @@ export interface RagDetailState {
   fileBinaryDataError: string | null; // 文件二进制数据加载错误
   bucket: string; // 文件存储桶
   path: string; // 文件路径
+  // Document info state
+  documentName: string; // 文件名称（来自API）
+  datasetName: string; // 数据集名称（来自URL）
+  documentFormat: string; // 文件格式（来自API，对应sceneType）
 }
 
 export interface RagDetailActions {
@@ -335,7 +339,8 @@ export interface RagDetailActions {
     datasetId: string,
     documentId: string,
     bucketName?: string | null,
-    path?: string | null
+    path?: string | null,
+    datasetName?: string | null
   ) => Promise<void>;
   selectSegment: (segmentId: string) => void;
   selectDirectoryNode: (nodeId: string) => void;

@@ -8,6 +8,14 @@ export interface GetFileBinaryDataParams {
   path: string;
 }
 
+// 查询知识库文件详情
+export interface GetKnowledgeDocumentParams {
+  document_id: string;
+}
+export function getKnowledgeDocument(params: GetKnowledgeDocumentParams) {
+  return UAPI.RES.GetKnowledgeDocument({}).post(params).inRegion().do();
+}
+
 // 预览图片
 export interface PreviewUrlParams {
   path: string;
