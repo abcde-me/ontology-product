@@ -40,7 +40,7 @@ const ImportFieldsModal: React.FC<ImportFieldsModalProps> = ({
 
   const validateFileData = useCallback(
     (value: any, callback: any) => {
-      if (!fileData) {
+      if (!fileData || fileData.length === 0) {
         callback('请选择并上传文件');
       } else {
         callback();
