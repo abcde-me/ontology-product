@@ -1,86 +1,120 @@
-.script-table-wrapper {
+.script-card-wrapper {
   background-color: white;
-  display: flex;
-  flex-direction: column;
 
-  :global(.arco-pagination-total-text) {
-    line-height: 32px;
+  .script-card-content {
+    display: flex;
+    flex-wrap: wrap;
   }
 
-  .operate-text {
-    color: rgb(0, 125, 250);
-    cursor: pointer;
-    margin-right: 16px;
+  .script-card-content-item {
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    padding: 16px;
+    width: calc(50% - 4px);
+    box-sizing: border-box;
+    min-height: 98px;
+    margin-bottom: 8px;
   }
 
-  .operate-text:hover {
-    color: rgba(67, 141, 251, 1);
+  .script-card-content-item:nth-child(odd) {
+    margin-right: 8px;
   }
 
-  .disabled-text {
-    color: #94a3b8;
-    cursor: not-allowed;
+  .script-card-content-item-title {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
   }
 
-  :global(tbody) .workflow-name :global(.ellipsis-text) {
-    font-weight: 600;
-  }
-
-  :global(tbody) .hover-change :global(.ellipsis-text) {
-    color: #1e293b;
-  }
-
-  :global(tbody)
-    :global(.arco-table-tr):hover
-    .hover-change
-    :global(.ellipsis-text) {
-    color: rgb(0, 125, 250);
-    cursor: pointer;
-  }
-
-  :global(tbody)
-    :global(.arco-table-tr):hover
-    :global(.hover-change)
-    :global(.ellipsis-text):hover {
-    color: rgba(67, 141, 251, 1);
-  }
-
-  .publish-part {
-    width: 75px;
+  .script-card-content-item-title-left {
     display: flex;
     align-items: center;
-    font-weight: 500;
-    padding: 0 8px;
-    border-radius: 4px;
-    font-size: 12px;
-    line-height: 20px;
   }
 
-  .published {
-    background: #dbf4ee;
-    color: #0ab58d;
-  }
-
-  .not-published {
-    background: #f7f7f9;
-    color: #6e7b8d;
-  }
-
-  .workflow-list-modal-title {
-    font-weight: 500;
-    font-size: 16px;
+  .script-card-content-item-title-btn {
+    width: 68px;
     height: 24px;
+    color: #1e293b !important;
+    text-align: center;
+    display: inline-block;
+    padding: 0px 8px !important;
+    border-color: #cbd5e1 !important;
+
+    &:hover {
+      border-color: #94a3b8 !important;
+      color: #1e293b !important;
+    }
   }
 
-  .workflow-list-modal-content {
-    font-weight: 400;
+  .script-card-content-item-title-text {
+    color: var(--text-color-text-2, #1e293b);
+    text-align: center;
+    font-family: 'PingFang SC';
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 24px;
+    margin-right: 8px;
+  }
+
+  .script-card-content-item-title-icon {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+  }
+
+  .icon-content {
+    margin: 0 8px;
+  }
+
+  .released-icon {
+    width: 12px;
+    height: 12px;
+    background-color: #10b981;
+    border-radius: 50%;
+    margin-right: 8px;
+  }
+
+  .unreleased-icon {
+    width: 12px;
+    height: 12px;
+    background-color: #94a3b8;
+    border-radius: 50%;
+    margin-right: 8px;
+  }
+
+  .scheduled-icon {
+    width: 12px;
+    height: 12px;
+    background-color: #007dfa;
+    border-radius: 50%;
+    margin-right: 8px;
+  }
+
+  .script-card-content-item-title-icon-text {
+    color: var(--text-color-text-2, #1e293b);
+    text-align: center;
+    font-family: 'PingFang SC';
+    font-size: 12px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 24px;
+  }
+
+  .script-card-content-item-content {
+    color: var(--text-color-text-4, #6e7b8d);
+    text-align: justify;
+    font-family: 'PingFang SC';
     font-size: 14px;
-    color: #1d2129;
-    height: 22px;
-    margin: 10px 0 0 28px;
-  }
-
-  :global(.arco-modal-footer) :global(.arco-btn-secondary):focus {
-    box-shadow: none;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 22px;
+    margin-top: 8px;
+    // 多行省略号
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
   }
 }

@@ -1,8 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { Form, Input } from '@arco-design/web-react';
+import { Button, Form, Input, Pagination } from '@arco-design/web-react';
 import { getWorkflowList } from '@/api/workflowList';
 import { useUserInfo } from '@/store/userInfoStore';
+import Mock from 'mockjs';
 import styles from './index.module.scss';
+import { IconCopy, IconDelete } from '@arco-design/web-react/icon';
+import { mock } from 'node:test';
 
 // 版本类型 已发版 未发版 调度中
 export const VersionType = {
@@ -34,7 +37,19 @@ const ScriptCard: React.FC = () => {
   const [loading, setLoading] = useState(false);
   // 区分是否点击按钮清空搜索框
   const [isClickClear, setIsClickClear] = useState(false);
-
+  // mock数据 接口返回
+  const [scriptCardList, setScriptCardList] = useState([]);
+  const mockjsData = Mock.mock({
+    'list|100': [
+      {
+        id: '@id',
+        version: '@integer(1, 100)',
+        title: '@ctitle(5,10)',
+        content: '@cparagraph(1,60)',
+        version_type: '@pick(["released", "unreleased", "scheduled"])'
+      }
+    ]
+  });
   // 组件初始化
   useEffect(() => {
     if (userInfo) getCardList();
@@ -48,7 +63,7 @@ const ScriptCard: React.FC = () => {
     }
   }, [isClickClear]);
 
-  const getCardList = async () => {
+  const getCardList = () => {
     setLoading(true);
     try {
       const params: any = {
@@ -57,17 +72,13 @@ const ScriptCard: React.FC = () => {
         page: current, //第几页
         page_size: pageSize //每页个数
       };
-      const res = await getWorkflowList(params);
-      if (res.status === 200 && res.data) {
-        setWorkflowData(res.data.list);
-        setCurrent(res.data.page_info?.page);
-        setPageSize(res.data.page_info?.page_size);
-        setTotal(res.data.page_info?.total || 10);
-      }
+      // const res = await getWorkflowList(params);
     } finally {
       setLoading(false);
     }
   };
+
+  //
 
   // 删除卡片脚本
   const deleteScript = async (id: string) => {
@@ -82,7 +93,71 @@ const ScriptCard: React.FC = () => {
     //     `/modaforge/tenant/compute/modaforge/workflowConfig?workflow_uuid=${workflow_uuid}&ds_workflow_id=${ds_workflow_id}`
     // );
   };
-
+  // 判断状态 已发版 未发版 调度中
+  const getVersionType = (version_type) => {
+    switch (version_type) {
+      case VersionType.RELEASED:
+        return (
+          <div className={styles['script-card-content-item-title-icon']}>
+            <span
+              className={
+                version_type === VersionType.RELEASED
+                  ? styles['released-icon']
+                  : ''
+              }
+            />
+            <div className={styles['script-card-content-item-title-icon-text']}>
+              {VersionTypeEnum.RELEASED}
+            </div>
+          </div>
+        );
+      case VersionType.UNRELEASED:
+        return (
+          <div className={styles['script-card-content-item-title-icon']}>
+            <span
+              className={
+                version_type === VersionType.UNRELEASED
+                  ? styles['unreleased-icon']
+                  : ''
+              }
+            />
+            <div className={styles['script-card-content-item-title-icon-text']}>
+              {VersionTypeEnum.UNRELEASED}
+            </div>
+          </div>
+        );
+      case VersionType.SCHEDULED:
+        return (
+          <div className={styles['script-card-content-item-title-icon']}>
+            <span
+              className={
+                version_type === VersionType.SCHEDULED
+                  ? styles['scheduled-icon']
+                  : ''
+              }
+            />
+            <div className={styles['script-card-content-item-title-icon-text']}>
+              {VersionTypeEnum.SCHEDULED}
+            </div>
+          </div>
+        );
+      default:
+        return (
+          <div className={styles['script-card-content-item-title-icon']}>
+            <span
+              className={
+                version_type === VersionType.UNRELEASED
+                  ? styles['unreleased-icon']
+                  : ''
+              }
+            />
+            <div className={styles['script-card-content-item-title-icon-text']}>
+              {VersionTypeEnum.UNRELEASED}
+            </div>
+          </div>
+        );
+    }
+  };
   return (
     <div className={styles['script-card-wrapper']}>
       <div
@@ -93,32 +168,42 @@ const ScriptCard: React.FC = () => {
           marginBottom: '16px'
         }}
       >
-        <Form autoComplete="off" layout="inline">
-          <FormItem label={null}>
-            <Input
-              style={{ width: '100%' }}
-              placeholder="请输入脚本内容关键词"
-            />
-          </FormItem>
-        </Form>
+        <Input style={{ width: '100%' }} placeholder="请输入脚本内容关键词" />
       </div>
       <div className={styles['script-card-content']}>
-        <div className={styles['script-card-content-item']}>
-          <div className={styles['script-card-content-item-title']}>
-            <div className={styles['script-card-content-item-title-text']}>
-              脚本名称
-            </div>
-            <div className={styles['script-card-content-item-title-icon']}>
-              <div
-                className={styles['script-card-content-item-title-icon-item']}
-              />
-              <div className={styles['script-card-content-item-title-text']}>
-                已发版
+        {mockjsData.list.map((item) => (
+          <div key={item.id} className={styles['script-card-content-item']}>
+            <div className={styles['script-card-content-item-title']}>
+              <div className={styles['script-card-content-item-title-left']}>
+                <div className={styles['script-card-content-item-title-text']}>
+                  <span>{item.title}</span>
+                  <span>(V{item.version})</span>
+                </div>
+                {getVersionType(item.version_type)}
+              </div>
+              <div>
+                <Button
+                  style={{ marginRight: 8 }}
+                  className={styles['script-card-content-item-title-btn']}
+                  icon={<IconCopy />}
+                >
+                  详情
+                </Button>
+                <Button
+                  className={styles['script-card-content-item-title-btn']}
+                  icon={<IconDelete />}
+                >
+                  删除
+                </Button>
               </div>
             </div>
+            <div className={styles['script-card-content-item-content']}>
+              {item.content}
+            </div>
           </div>
-        </div>
+        ))}
       </div>
+      <Pagination total={total} showTotal showJumper />
     </div>
   );
 };
