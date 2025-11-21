@@ -5,7 +5,8 @@ import {
   Input,
   Pagination,
   PaginationProps,
-  Table
+  Table,
+  Message
 } from '@arco-design/web-react';
 import { useHistory } from 'react-router';
 import { ColumnProps } from '@arco-design/web-react/es/Table';
@@ -357,8 +358,9 @@ export default function Requirement() {
                             a.href = res?.data?.download_url;
                             document.body.appendChild(a);
                             a.click();
+                          } else {
+                            Message.error(res.message);
                           }
-                          setLoading(false);
                         })
                         .catch(() => {})
                         .finally(() => {
