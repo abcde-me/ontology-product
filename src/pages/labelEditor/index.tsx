@@ -133,6 +133,21 @@ function LabelEditorPage() {
     }
   }, [taskId, labelUrl]);
 
+  // TODO 很奇怪， 当前版本保活模式下， 第二张图片无法标注
+  // 监听子应用的激活和失活（通过 labelUrl 变化，不依赖子应用生命周期改造）
+  useEffect(() => {
+    if (!labelUrl) return;
+
+    // 子应用激活（挂载）
+    console.log('子应用 labeleditor 已激活（挂载）🍉', { url: labelUrl });
+    bus.$emit('labeleditor-activated');
+    // 子应用失活（卸载或 URL 变化）
+    return () => {
+      console.log('子应用 labeleditor 已失活（卸载）🍉', { url: labelUrl });
+      bus.$emit('labeleditor-deactivated');
+    };
+  }, [labelUrl]);
+
   return (
     <div className={`app-label-editor-page h-full w-full overflow-x-auto`}>
       {!loading && labelUrl && (
@@ -142,15 +157,9 @@ function LabelEditorPage() {
           name="labeleditor"
           url={labelUrl}
           sync={true}
-          alive={true}
+          alive={false}
           loading={document.createElement('span') as any}
           plugins={WujiePlugins}
-          activated={() => {
-            bus.$emit('labeleditor-activated');
-          }}
-          deactivated={() => {
-            bus.$emit('labeleditor-deactivated');
-          }}
           props={{
             getImgJobMeta,
             getImgJobAnnotations,
