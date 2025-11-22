@@ -274,10 +274,10 @@
   dependencies:
     color "^3.1.3"
 
-"@arco-design/web-react@2.64.1":
-  version "2.64.1"
-  resolved "http://npm.cestc.cn/@arco-design/web-react/download/@arco-design/web-react-2.64.1.tgz#9da8278d27000c2c2c71d98f972fbcd6ee14e34a"
-  integrity sha1-nagnjScADCwscdmPly+81u4U40o=
+"@arco-design/web-react@2.66.5":
+  version "2.66.5"
+  resolved "http://npm.cestc.cn/@arco-design/web-react/download/@arco-design/web-react-2.66.5.tgz#3562e58d33ca5fc41747d48c25b683a6e2af9afa"
+  integrity sha1-NWLljTPKX8QXR9SMJbaDpuKvmvo=
   dependencies:
     "@arco-design/color" "^0.4.0"
     "@babel/runtime" "^7.5.5"
@@ -287,7 +287,7 @@
     dayjs "^1.10.5"
     lodash "^4.17.21"
     number-precision "^1.3.1"
-    react-focus-lock "^2.12.1"
+    react-focus-lock "^2.13.2"
     react-is "^18.2.0"
     react-transition-group "^4.3.0"
     resize-observer-polyfill "^1.5.1"
@@ -19037,7 +19037,7 @@ react-fast-compare@^3.1.1, react-fast-compare@^3.2.2:
   resolved "http://npm.cestc.cn/react-fast-compare/download/react-fast-compare-3.2.2.tgz#929a97a532304ce9fee4bcae44234f1ce2c21d49"
   integrity sha1-kpqXpTIwTOn+5LyuRCNPHOLCHUk=
 
-react-focus-lock@^2.12.1:
+react-focus-lock@^2.13.2:
   version "2.13.6"
   resolved "http://npm.cestc.cn/react-focus-lock/download/react-focus-lock-2.13.6.tgz#29751bf2e4e30f6248673cd87a347c74ff2af672"
   integrity sha1-KXUb8uTjD2JIZzzYejR8dP8q9nI=
