@@ -145,7 +145,17 @@ export const useFileManager = (
   const handleTreeExpand = useCallback((keys: string[]) => {
     setExpandedKeys(keys);
   }, []);
-
+  const addKeyToTree = (tree) => {
+    return tree.map((node) => {
+      const currentKey = String(node.id);
+      const children = node.children ? addKeyToTree(node.children) : undefined; // 无 children 则保持 undefined
+      return {
+        ...node,
+        key: currentKey, // 新增 key 字段
+        children // 递归处理后的子节点
+      };
+    });
+  };
   // 获取原始Python列表
   const getRawPythonList = useCallback(
     async (folderId?: string) => {
@@ -156,9 +166,9 @@ export const useFileManager = (
       try {
         const rawPythonList = await getPythonList(targetFolderId, {
           name: searchValue,
-          mode: 2,
-          page: 1,
-          page_size: 20
+          mode: 2
+          // page: 1,
+          // page_size: 1000
         });
 
         if (rawPythonList.status !== 200) {
@@ -169,22 +179,7 @@ export const useFileManager = (
           setPythonList([]);
           return [];
         }
-        const items =
-          rawPythonList?.data?.items.map((item: any) => {
-            // 给子级增加key
-            if (item?.children && item?.children?.length > 0) {
-              item.children = item.children.map((child) => ({
-                ...child,
-                key: String(child.id),
-                title: child.name
-              }));
-            }
-            return {
-              ...item,
-              key: String(item.id),
-              title: item.name
-            };
-          }) ?? [];
+        const items = addKeyToTree(rawPythonList?.data?.items);
         setPythonList(items);
         setIsCanCreate(rawPythonList?.data?.create_perm ?? false);
         return items; // 返回获取到的数据
@@ -401,9 +396,9 @@ export const useFileManager = (
       setCurrentFolderId(parentId || '0');
       const res = await getPythonList(String(parentId || ''), {
         name: searchValue,
-        mode: 2,
-        page: 1,
-        page_size: 20
+        mode: 2
+        // page: 1,
+        // page_size: 1000
       } as any);
       setIsCanCreate(res?.data?.create_perm ?? false);
       return res?.data?.items || [];
