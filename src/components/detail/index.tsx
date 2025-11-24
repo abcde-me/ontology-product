@@ -946,7 +946,7 @@ const DatasetDetail = (props: {
     path: string
   ) => {
     history.push(
-      `/tenant/compute/modaforge/datasetManagement/ragDetail?datasetId=${detailId}&documentId=${document_id}&bucketName=${bucket_name}&path=${path}&datasetName=${datasetDetail?.name}`
+      `/tenant/compute/modaforge/ragDetail?datasetId=${id}&documentId=${document_id}&bucketName=${bucket_name}&path=${path}&datasetName=${datasetDetail?.name}`
     );
   };
 
@@ -1921,6 +1921,7 @@ const DatasetDetail = (props: {
                         pagination={false}
                         // scroll={{ x: 'max-content' }}
                         border={false}
+                        rowKey="id"
                       />
                     </>
                   ) : null}
