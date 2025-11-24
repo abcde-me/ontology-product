@@ -26,7 +26,8 @@ import {
   RESERVED_FIELD_ENS,
   SYSTEM_FIELDS,
   isDateType,
-  isDateTimeType
+  isDateTimeType,
+  DATA_SOURCE_FIELD_EN_NAME
 } from '../../utils/const';
 import EllipsisPopoverCom from '@/components/ellipsis-popover-com';
 import dayjs from 'dayjs';
@@ -265,6 +266,7 @@ export default function Step1MetadataFields({
       render: (_: any, record: any) => (
         <Checkbox
           checked={record.allowModify}
+          disabled={record.nameEn === DATA_SOURCE_FIELD_EN_NAME}
           onChange={(checked) =>
             handleUpdateField(record.id, { allowModify: checked })
           }
