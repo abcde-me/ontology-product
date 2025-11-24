@@ -247,13 +247,13 @@ function transformCatalogNodeOld(apiNode: any): DirectoryNode {
  * @returns 分块列表数据
  */
 export async function fetchSegments(
-  datasetId: string,
+  datasetId: number,
   documentId: string
 ): Promise<Segment[]> {
   try {
     const response = await ListKnowledgeChunks({
-      datasetId,
-      documentId
+      dataset_id: Number(datasetId),
+      document_id: documentId
     });
 
     // 检查响应格式
@@ -276,13 +276,13 @@ export async function fetchSegments(
  * @returns 目录树数据
  */
 export async function fetchCatalog(
-  datasetId: string,
+  datasetId: number,
   documentId: string
 ): Promise<DirectoryNode[] | undefined> {
   try {
     const response = await ListKnowledgeDocumentCatalogs({
-      datasetId,
-      documentId
+      dataset_id: Number(datasetId),
+      document_id: documentId
     });
     console.log(response, 'response2222');
 
@@ -306,7 +306,7 @@ export async function fetchCatalog(
  * @returns RAG详情数据
  */
 export async function fetchRagDetail(
-  datasetId: string,
+  datasetId: number,
   documentId: string
 ): Promise<RagDetailData> {
   // 调用接口获取分段数据
@@ -361,7 +361,7 @@ export async function updateSegmentContent(
     });
 
     const response = await UpdateKnowledgeChunk({
-      dataset_id: datasetId,
+      dataset_id: Number(datasetId),
       document_id: documentId,
       chunk_id: chunkId,
       content
@@ -417,7 +417,7 @@ export async function fetchSegmentTraceLog(
   try {
     // 调用真实API
     const response = await GetKnowledgeChunkTraceLog({
-      dataset_id: datasetId,
+      dataset_id: Number(datasetId),
       chunk_id: chunkId
     });
 
