@@ -628,6 +628,8 @@ export default function DataAssetList() {
     fieldEnName: string;
     separator: string;
     fieldValue: string;
+    fileldType: string;
+    fieldZhName: string;
   }) => {
     try {
       const editData: EditDataAssetData = {
@@ -636,7 +638,9 @@ export default function DataAssetList() {
         modifyContext: [
           {
             fieldEnName: data.fieldEnName,
-            fieldValue: data.fieldValue
+            fieldValue: data.fieldValue,
+            fileldType: data.fileldType,
+            fieldZhName: data.fieldZhName
           }
         ]
       };
@@ -699,17 +703,28 @@ export default function DataAssetList() {
 
     try {
       // 构建修改数据，只包含有变化的字段
-      const modifyContext: { fieldEnName: string; fieldValue: string }[] = [];
+      const modifyContext: {
+        fieldEnName: string;
+        fieldValue: string;
+        fileldType: string;
+        fieldZhName: string;
+      }[] = [];
       Object.keys(data).forEach((fieldEnName) => {
         const newValue = data[fieldEnName];
         const oldValue = editingRecord[fieldEnName];
         // 如果值有变化，添加到修改列表
         if (newValue !== oldValue) {
+          // 根据fieldEnName找到对应的字段信息
+          const selectedField = columnFields.find(
+            (field) => field.nameEn === fieldEnName
+          );
           modifyContext.push({
             fieldEnName,
             fieldValue: Array.isArray(newValue)
               ? newValue.join(',')
-              : String(newValue || '')
+              : String(newValue || ''),
+            fileldType: selectedField?.type || '',
+            fieldZhName: selectedField?.nameZh || ''
           });
         }
       });
