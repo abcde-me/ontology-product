@@ -295,7 +295,7 @@ export interface SegmentUpdatePayload {
 
 export interface RagDetailState {
   ragId: string | null;
-  datasetId: string | null; // 数据集ID
+  datasetId: number | null; // 数据集ID
   fileName: string;
   filePath: string;
   sceneType: SceneType;
@@ -336,7 +336,7 @@ export interface RagDetailState {
 
 export interface RagDetailActions {
   initializeRagDetail: (
-    datasetId: string,
+    datasetId: number,
     documentId: string,
     bucketName?: string | null,
     path?: string | null,

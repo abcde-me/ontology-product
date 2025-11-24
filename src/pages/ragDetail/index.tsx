@@ -33,10 +33,13 @@ function RagDetail() {
     const ragId = queryParams.get('ragId');
 
     if (datasetId && documentId) {
-      initializeRagDetail(datasetId, documentId, bucketName, path, datasetName);
-    } else if (ragId) {
-      // 兼容旧的 ragId 参数
-      initializeRagDetail(ragId, ragId, bucketName, path, datasetName);
+      initializeRagDetail(
+        Number(datasetId),
+        documentId,
+        bucketName,
+        path,
+        datasetName
+      );
     }
   }, [location, initializeRagDetail]);
 
@@ -76,7 +79,7 @@ function RagDetail() {
           defaultActiveTab={segmentDrawerTab}
           currentSegmentIndex={currentSegment.segmentIndex}
           totalSegments={segments.length}
-          datasetId={datasetId || ''}
+          datasetId={datasetId ?? undefined}
           chunkId={currentSegment.id}
           segments={segments}
         />

@@ -70,7 +70,7 @@ export const useRagDetailStore = create<RagDetailState & RagDetailActions>(
 
     // Actions
     initializeRagDetail: async (
-      datasetId: string,
+      datasetId: number,
       documentId: string,
       bucketName?: string | null,
       path?: string | null,
@@ -117,7 +117,7 @@ export const useRagDetailStore = create<RagDetailState & RagDetailActions>(
         }
 
         set({
-          datasetId, // 保存 datasetId
+          datasetId: Number(datasetId), // 保存 datasetId
           ragId: documentId, // 使用 documentId 作为 ragId
           fileName: data.fileName,
           filePath: data.filePath,
