@@ -424,6 +424,7 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
       render: (_: any, record: any) => {
         return (
           <Link
+            disabled={type === 'detail'}
             onClick={() => {
               handleRemoveSelected(record.execution_id);
             }}
