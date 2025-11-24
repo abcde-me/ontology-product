@@ -288,7 +288,9 @@ export async function fetchCatalog(
 
     // 检查响应格式
     if (response && response.data && response.data.catalogs) {
+      console.log('response.data.catalogs', response.data.catalogs);
       const rootNode = transformCatalogNode(response.data.catalogs);
+      console.log('rootNode', rootNode);
       return [rootNode];
     }
 
