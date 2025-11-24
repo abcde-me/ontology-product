@@ -683,6 +683,7 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
               }
             }}
             renderExtra={(node: any) => {
+              console.log(node, '123 node');
               const isEditing = node.dataRef?.showInput;
               const nowPermissions =
                 from === DirectoryTreeFrom.SQL

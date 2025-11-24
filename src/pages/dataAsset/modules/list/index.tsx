@@ -486,7 +486,7 @@ export default function DataAssetList() {
 
   // 处理重置
   const handleReset = () => {
-    setSearchParams({ ...searchParams, fieldSearch: [] });
+    setSearchParams({ ...searchParams, fieldSearch: [], commonSearch: '' });
     setCurrentPage(1);
   };
 
