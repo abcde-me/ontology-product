@@ -960,12 +960,16 @@ const DatasetDetail = (props: {
   // 删除知识库文件
   const handleDeleteKnowledgeDocument = async (document_id: string) => {
     try {
-      await BatchDeleteKnowledgeDocument({
+      const res = await BatchDeleteKnowledgeDocument({
         dataset_id: Number(id),
         document_ids: [document_id]
       });
-      Message.success('删除成功');
-      fetchDatasetContents();
+      if (res.code === '' && res.status === 200) {
+        Message.success('删除成功');
+        fetchDatasetContents();
+      } else {
+        Message.error(res.message || '删除失败');
+      }
     } catch (error) {
       Message.error('删除失败');
     }
