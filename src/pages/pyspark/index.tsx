@@ -73,11 +73,6 @@ const Python: React.FC = memo(() => {
     }
   };
 
-  // 处理创建权限变化的回调
-  const handleCanCreateChange = (canCreate: boolean) => {
-    // setIsCanCreate(canCreate);
-  };
-
   const {
     fileState,
     directoryTreeRef,
@@ -273,8 +268,6 @@ const Python: React.FC = memo(() => {
         <ResizeBox.Split
           direction="horizontal"
           size={'360px'}
-          // min={200}
-          // max="80%"
           style={{ height: '100%' }}
           panes={[siderContent, contentPanel]}
         />

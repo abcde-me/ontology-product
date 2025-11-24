@@ -248,7 +248,7 @@ export const ModaForgeResourceEndpoints = {
   // 批量删除知识库文件列表
   BatchDeleteKnowledgeDocument: PrefixRag + '/BatchDeleteKnowledgeDocument',
   // 查询知识库文件目录层级
-  ListKnowledgeDocumentCatalogs: PrefixRagV2 + '/ListKnowledgeDocumentCatalogs',
+  ListKnowledgeDocumentCatalogs: PrefixAimdp + '/ListKnowledgeDocumentCatalogs',
   // 查询知识库分块列表
   ListKnowledgeChunks: PrefixRagV2 + '/ListKnowledgeChunks',
   // 查询分块详情

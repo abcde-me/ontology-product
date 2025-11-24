@@ -622,12 +622,14 @@ export default function DataAssetList() {
     setModifyAssetModalVisible(true);
   };
 
-  // 确认修改资产
+  // 确认批量修改资产
   const handleModifyAssetConfirm = async (data: {
     modifyMethod: ModifyMethod;
     fieldEnName: string;
     separator: string;
     fieldValue: string;
+    fieldType: string;
+    fieldZhName: string;
   }) => {
     try {
       const editData: EditDataAssetData = {
@@ -636,7 +638,9 @@ export default function DataAssetList() {
         modifyContext: [
           {
             fieldEnName: data.fieldEnName,
-            fieldValue: data.fieldValue
+            fieldValue: data.fieldValue,
+            fieldType: data.fieldType,
+            fieldZhName: data.fieldZhName
           }
         ]
       };
@@ -699,17 +703,28 @@ export default function DataAssetList() {
 
     try {
       // 构建修改数据，只包含有变化的字段
-      const modifyContext: { fieldEnName: string; fieldValue: string }[] = [];
+      const modifyContext: {
+        fieldEnName: string;
+        fieldValue: string;
+        fieldType: string;
+        fieldZhName: string;
+      }[] = [];
       Object.keys(data).forEach((fieldEnName) => {
         const newValue = data[fieldEnName];
         const oldValue = editingRecord[fieldEnName];
         // 如果值有变化，添加到修改列表
         if (newValue !== oldValue) {
+          // 根据fieldEnName找到对应的字段信息
+          const selectedField = columnFields.find(
+            (field) => field.nameEn === fieldEnName
+          );
           modifyContext.push({
             fieldEnName,
             fieldValue: Array.isArray(newValue)
               ? newValue.join(',')
-              : String(newValue || '')
+              : String(newValue || ''),
+            fieldType: selectedField?.type || '',
+            fieldZhName: selectedField?.nameZh || ''
           });
         }
       });

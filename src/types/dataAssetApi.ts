@@ -213,6 +213,8 @@ export interface EditDataAssetData {
   modifyContext: {
     fieldEnName: string;
     fieldValue: string;
+    fieldType: string;
+    fieldZhName?: string;
   }[];
 }
 
