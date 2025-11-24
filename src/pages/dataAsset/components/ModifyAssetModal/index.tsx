@@ -18,6 +18,8 @@ interface ModifyAssetModalProps {
     fieldEnName: string;
     separator: string;
     fieldValue: string;
+    fileldType: string;
+    fieldZhName: string;
   }) => void;
 }
 
@@ -51,13 +53,19 @@ const ModifyAssetModal: React.FC<ModifyAssetModalProps> = ({
     try {
       const values = await form.validate();
       const isCover = values.modifyMethod === ModifyMethod.COVER;
+      // 根据选择的fieldEnName找到对应的字段信息
+      const selectedField = fields.find(
+        (field) => field.nameEn === values.fieldEnName
+      );
       onConfirm({
         modifyMethod: values.modifyMethod,
         fieldEnName: values.fieldEnName,
         separator: isCover ? '' : values.separator || '',
         fieldValue: isCover
           ? (values.fieldValue ?? '')
-          : `${values.separator ?? ''}${values.fieldValue ?? ''}`
+          : `${values.separator ?? ''}${values.fieldValue ?? ''}`,
+        fileldType: selectedField?.type || '',
+        fieldZhName: selectedField?.nameZh || ''
       });
     } catch (error) {
       // 验证失败，不做任何操作
