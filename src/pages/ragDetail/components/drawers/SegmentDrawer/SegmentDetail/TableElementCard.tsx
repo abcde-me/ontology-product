@@ -46,14 +46,14 @@ const TableElementCard: React.FC<TableElementCardProps> = ({
         <span className="ml-2 text-sm text-gray-600">元素ID: {element.id}</span>
       </div>
 
-      <div className="mb-3 overflow-x-auto">
+      <div className="mb-3 overflow-x-auto rounded border border-[#E2E8F0] ">
         <table className="w-full border-collapse">
           <thead>
             <tr>
               {element.headers.map((header, index) => (
                 <th
                   key={index}
-                  className="border border-gray-200 px-4 py-2 text-left text-sm font-medium font-semibold text-gray-700"
+                  className="px-4 py-2 text-left text-sm font-medium font-semibold text-gray-700"
                 >
                   {isEditing ? (
                     <Input
@@ -75,7 +75,7 @@ const TableElementCard: React.FC<TableElementCardProps> = ({
                 {element.headers.map((header, colIndex) => (
                   <td
                     key={colIndex}
-                    className="border border-gray-200 px-4 py-2 text-sm"
+                    className="border-t border-[#E2E8F0] px-4 py-2 text-sm"
                   >
                     {isEditing ? (
                       <Input
