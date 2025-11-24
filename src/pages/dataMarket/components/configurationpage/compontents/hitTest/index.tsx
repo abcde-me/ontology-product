@@ -549,7 +549,7 @@ function PageContentFalse(props) {
           defaultActiveTab={defaultTab}
           currentSegmentIndex={currentSegment?.segmentIndex}
           totalSegments={segments.length}
-          datasetId={datasetId || ''}
+          datasetId={datasetId ? Number(datasetId) : undefined}
           chunkId={currentSegment.id}
           segments={segments}
         />

@@ -245,6 +245,8 @@ export const ModaForgeResourceEndpoints = {
   PreviewUrl: PrefixAimdp + '/PreviewUrl',
   // 查询知识库文件列表
   ListKnowledgeDocuments: PrefixRag + '/ListKnowledgeDocuments',
+  // 批量删除知识库文件列表
+  BatchDeleteKnowledgeDocument: PrefixRag + '/BatchDeleteKnowledgeDocument',
   // 查询知识库文件目录层级
   ListKnowledgeDocumentCatalogs: PrefixAimdp + '/ListKnowledgeDocumentCatalogs',
   // 查询知识库分块列表
