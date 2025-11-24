@@ -608,50 +608,30 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
             allowClear
             style={{ height: '32px' }}
           />
-          {from === DirectoryTreeFrom.SQL ? (
-            <PermissionWrapper permission={SQL_PERMISSIONS.CREATE}>
-              {/* <Button
-                type="text"
-                size="small"
-                icon={<IconPlus />}
-                onClick={() => startRootCreate(false)}
+          <Dropdown
+            trigger="click"
+            position="bl"
+            droplist={
+              <Menu
+                onClickMenuItem={(key) => {
+                  if (key === 'folder') {
+                    startRootCreate(true);
+                  } else if (key === 'file') {
+                    startRootCreate(false);
+                  }
+                }}
               >
-                新建
-              </Button> */}
-              <div
-                className="ml-1 flex w-16 cursor-pointer items-center justify-center text-xs text-[#2563EB]"
-                onClick={() => startRootCreate(false)}
-              >
-                <IconPlus className="mr-1" />
-                新建
-              </div>
-            </PermissionWrapper>
-          ) : (
-            <Dropdown
-              trigger="click"
-              position="bl"
-              droplist={
-                <Menu
-                  onClickMenuItem={(key) => {
-                    if (key === 'folder') {
-                      startRootCreate(true);
-                    } else if (key === 'file') {
-                      startRootCreate(false);
-                    }
-                  }}
-                >
-                  <Menu.Item key="file">新建PySpark</Menu.Item>
-                  <Menu.Item key="folder">新建文件夹</Menu.Item>
-                </Menu>
-              }
-            >
-              {isCanCreate && (
-                <Button type="text" size="small" icon={<IconPlus />}>
-                  {newButtonText}
-                </Button>
-              )}
-            </Dropdown>
-          )}
+                <Menu.Item key="file">新建PySpark</Menu.Item>
+                <Menu.Item key="folder">新建文件夹</Menu.Item>
+              </Menu>
+            }
+          >
+            {isCanCreate && (
+              <Button type="text" size="small" icon={<IconPlus />}>
+                {newButtonText}
+              </Button>
+            )}
+          </Dropdown>
         </div>
 
         {loading ? (
@@ -683,13 +663,7 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
               }
             }}
             renderExtra={(node: any) => {
-              console.log(node, '123 node');
               const isEditing = node.dataRef?.showInput;
-              const nowPermissions =
-                from === DirectoryTreeFrom.SQL
-                  ? SQL_PERMISSIONS
-                  : PYSPARK_PERMISSIONS;
-
               if (isEditing) return null;
 
               return (
@@ -717,10 +691,9 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
                         <IconPlus
                           onClick={() => {
                             if (!expandedKeys.includes(node?.dataRef?.id)) {
-                              setExpandedKeys([
-                                ...expandedKeys,
-                                node?.dataRef?.id
-                              ]);
+                              setExpandedKeys(
+                                [...expandedKeys, node?.dataRef?.id].map(String)
+                              );
                             }
                           }}
                           className="mr-1 text-[14px] hover:text-[rgb(var(--primary-6))]"

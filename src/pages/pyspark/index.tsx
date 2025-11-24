@@ -73,11 +73,6 @@ const Python: React.FC = memo(() => {
     }
   };
 
-  // 处理创建权限变化的回调
-  const handleCanCreateChange = (canCreate: boolean) => {
-    // setIsCanCreate(canCreate);
-  };
-
   const {
     fileState,
     directoryTreeRef,
