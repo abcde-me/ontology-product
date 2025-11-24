@@ -16,7 +16,8 @@ import {
   Input,
   Pagination,
   Tooltip,
-  TableColumnProps
+  TableColumnProps,
+  Popconfirm
 } from '@arco-design/web-react';
 import {
   IconArrowLeft,
@@ -44,6 +45,7 @@ import {
   getDataContentFileList,
   getDataContentTableList
 } from '@/api/datasetManagement';
+import { BatchDeleteKnowledgeDocument } from '@/api/modules/rag';
 import EditDatasetForm from '@/components/datasetform/EditDatasetForm';
 import { DATA_MANAGEMENT_PERMISSIONS } from '@/config/permissions';
 import './style.css';
@@ -641,37 +643,35 @@ const DatasetDetail = (props: {
       ? [
           {
             title: '文件名称',
-            dataIndex: 'file_name',
+            dataIndex: 'name',
             width: 250,
             render: (_, record) => (
-              <EllipsisPopover value={record.file_name || '-'} isEdit={false} />
+              <EllipsisPopover value={record.name || '-'} isEdit={false} />
             )
           },
           {
             title: '文件类型',
-            dataIndex: 'file_type',
+            dataIndex: 'format',
             width: 130,
             filters: filterFileTypes,
             render: (_, record) => (
               <div>
-                {getFileIcon(record.file_type)} {record.file_type}
+                {getFileIcon(record.format)} {record.format}
               </div>
             )
           },
           {
             title: '文件大小',
-            dataIndex: 'file_size',
+            dataIndex: 'size',
             width: 100,
             sorter: true, // 启用排序功能，但不提供排序函数
-            render: (_, record) => (
-              <span>{formatFileSize(record.file_size)}</span>
-            )
+            render: (_, record) => <span>{formatFileSize(record.size)}</span>
           },
           {
             title: '分段数',
-            dataIndex: 'segment_count',
+            dataIndex: 'chunk_count',
             width: 100,
-            render: (_, record) => <span>{record.segment_count}</span>
+            render: (_, record) => <span>{record.chunk_count}</span>
           },
           {
             title: '状态',
@@ -731,9 +731,16 @@ const DatasetDetail = (props: {
                 >
                   分段列表
                 </Button>
-                <Button type="text" onClick={() => {}}>
-                  删除
-                </Button>
+                <Popconfirm
+                  focusLock
+                  title="删除"
+                  content="确定删除该文件吗？"
+                  onOk={() => {
+                    handleDeleteKnowledgeDocument(record.id);
+                  }}
+                >
+                  <Button type="text">删除</Button>
+                </Popconfirm>
               </div>
             )
           }
@@ -948,6 +955,20 @@ const DatasetDetail = (props: {
     history.push(
       `/tenant/compute/modaforge/ragDetail?datasetId=${id}&documentId=${document_id}&bucketName=${bucket_name}&path=${path}&datasetName=${datasetDetail?.name}`
     );
+  };
+
+  // 删除知识库文件
+  const handleDeleteKnowledgeDocument = async (document_id: string) => {
+    try {
+      await BatchDeleteKnowledgeDocument({
+        dataset_id: Number(id),
+        document_ids: [document_id]
+      });
+      Message.success('删除成功');
+      fetchDatasetContents();
+    } catch (error) {
+      Message.error('删除失败');
+    }
   };
 
   // 获取文件类型名称
