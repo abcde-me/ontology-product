@@ -964,7 +964,7 @@ const DatasetDetail = (props: {
         dataset_id: Number(id),
         document_ids: [document_id]
       });
-      if (res.code === '' && res.msg === 'success') {
+      if (res.code === '' && res.message === 'success') {
         Message.success('删除成功');
         fetchDatasetContents();
       } else {
