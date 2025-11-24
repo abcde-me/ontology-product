@@ -16,6 +16,17 @@
     margin-bottom: 8px;
   }
 
+  .script-card-content-item:hover {
+    .script-card-content-item-title-right {
+      visibility: visible;
+    }
+  }
+
+  .script-card-content-item-title-text:hover {
+    cursor: pointer;
+    color: #007dfa;
+  }
+
   .script-card-content-item:nth-child(odd) {
     margin-right: 8px;
   }
@@ -29,6 +40,10 @@
   .script-card-content-item-title-left {
     display: flex;
     align-items: center;
+  }
+
+  .script-card-content-item-title-right {
+    visibility: hidden;
   }
 
   .script-card-content-item-title-btn {

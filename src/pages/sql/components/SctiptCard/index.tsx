@@ -181,7 +181,7 @@ const ScriptCard: React.FC = () => {
                 </div>
                 {getVersionType(item.version_type)}
               </div>
-              <div>
+              <div className={styles['script-card-content-item-title-right']}>
                 <Button
                   style={{ marginRight: 8 }}
                   className={styles['script-card-content-item-title-btn']}
