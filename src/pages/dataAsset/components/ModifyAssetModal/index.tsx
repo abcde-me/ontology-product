@@ -18,7 +18,7 @@ interface ModifyAssetModalProps {
     fieldEnName: string;
     separator: string;
     fieldValue: string;
-    fileldType: string;
+    fieldType: string;
     fieldZhName: string;
   }) => void;
 }
@@ -64,7 +64,7 @@ const ModifyAssetModal: React.FC<ModifyAssetModalProps> = ({
         fieldValue: isCover
           ? (values.fieldValue ?? '')
           : `${values.separator ?? ''}${values.fieldValue ?? ''}`,
-        fileldType: selectedField?.type || '',
+        fieldType: selectedField?.type || '',
         fieldZhName: selectedField?.nameZh || ''
       });
     } catch (error) {

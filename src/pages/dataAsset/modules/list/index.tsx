@@ -622,13 +622,13 @@ export default function DataAssetList() {
     setModifyAssetModalVisible(true);
   };
 
-  // 确认修改资产
+  // 确认批量修改资产
   const handleModifyAssetConfirm = async (data: {
     modifyMethod: ModifyMethod;
     fieldEnName: string;
     separator: string;
     fieldValue: string;
-    fileldType: string;
+    fieldType: string;
     fieldZhName: string;
   }) => {
     try {
@@ -639,7 +639,7 @@ export default function DataAssetList() {
           {
             fieldEnName: data.fieldEnName,
             fieldValue: data.fieldValue,
-            fileldType: data.fileldType,
+            fieldType: data.fieldType,
             fieldZhName: data.fieldZhName
           }
         ]
@@ -706,7 +706,7 @@ export default function DataAssetList() {
       const modifyContext: {
         fieldEnName: string;
         fieldValue: string;
-        fileldType: string;
+        fieldType: string;
         fieldZhName: string;
       }[] = [];
       Object.keys(data).forEach((fieldEnName) => {
@@ -723,7 +723,7 @@ export default function DataAssetList() {
             fieldValue: Array.isArray(newValue)
               ? newValue.join(',')
               : String(newValue || ''),
-            fileldType: selectedField?.type || '',
+            fieldType: selectedField?.type || '',
             fieldZhName: selectedField?.nameZh || ''
           });
         }
