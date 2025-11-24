@@ -964,11 +964,11 @@ const DatasetDetail = (props: {
         dataset_id: Number(id),
         document_ids: [document_id]
       });
-      if (res.code === '' && res.message === 'success') {
+      if (res.code === '' && res.status === 200) {
         Message.success('删除成功');
         fetchDatasetContents();
       } else {
-        Message.error('删除失败');
+        Message.error(res.message || '删除失败');
       }
     } catch (error) {
       Message.error('删除失败');
