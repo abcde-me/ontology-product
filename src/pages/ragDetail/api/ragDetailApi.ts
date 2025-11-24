@@ -288,7 +288,9 @@ export async function fetchCatalog(
 
     // 检查响应格式
     if (response && response.data && response.data.catalogs) {
+      console.log('response.data.catalogs', response.data.catalogs);
       const rootNode = transformCatalogNode(response.data.catalogs);
+      console.log('rootNode', rootNode);
       return [rootNode];
     }
 
@@ -314,6 +316,7 @@ export async function fetchRagDetail(
 
   // 调用接口获取目录树数据
   const directory = await fetchCatalog(datasetId, documentId);
+  console.log('directory', directory);
 
   // sceneType 默认为 pdf，实际会在 store 中根据 documentFormat 进行映射
   const sceneType: 'pdf' | 'ppt' | 'excel' = 'pdf';
@@ -347,7 +350,7 @@ export async function fetchRagDetail(
  * @returns Promise<void> - 更新成功后不返回数据，调用方应该重新获取分段列表
  */
 export async function updateSegmentContent(
-  datasetId: string,
+  datasetId: number,
   documentId: string,
   chunkId: string,
   content: string
@@ -411,7 +414,7 @@ export async function fetchSegmentDetail(
  * @returns 溯源日志数据
  */
 export async function fetchSegmentTraceLog(
-  datasetId: string,
+  datasetId: number,
   chunkId: string
 ): Promise<any> {
   try {

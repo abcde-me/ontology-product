@@ -46,6 +46,7 @@
 
   // 文件名样式 - 非 hover 态最大宽度 260px
   .file-name {
+    max-width: 600px;
     width: 100%;
     overflow: hidden;
     text-overflow: ellipsis;

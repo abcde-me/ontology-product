@@ -51,7 +51,7 @@ interface SegmentDrawerActions {
   closeDrawer: () => void;
   setActiveTab: (tab: 'detail' | 'trace') => void;
   setTotalSegments: (total: number) => void;
-  setDatasetIdAndChunkId: (datasetId: string, chunkId: string) => void;
+  setDatasetIdAndChunkId: (datasetId: number, chunkId: string) => void;
   setSegments: (segments: Array<{ id: string; [key: string]: any }>) => void;
 
   // 分段导航
@@ -160,8 +160,8 @@ export const useSegmentDrawerStore = create<SegmentDrawerStore>((set, get) => ({
   },
 
   // 设置 datasetId 和 chunkId
-  setDatasetIdAndChunkId: (datasetId: string, chunkId: string) => {
-    set({ datasetId, chunkId });
+  setDatasetIdAndChunkId: (datasetId: number, chunkId: string) => {
+    set({ datasetId: String(datasetId), chunkId });
   },
 
   // 设置分段列表
@@ -274,7 +274,10 @@ export const useSegmentDrawerStore = create<SegmentDrawerStore>((set, get) => ({
       });
 
       // 调用真实 API
-      const traceLogData = await fetchSegmentTraceLog(datasetId, chunkId);
+      const traceLogData = await fetchSegmentTraceLog(
+        Number(datasetId),
+        chunkId
+      );
 
       // 转换 API 返回的数据格式
       const statistics = {

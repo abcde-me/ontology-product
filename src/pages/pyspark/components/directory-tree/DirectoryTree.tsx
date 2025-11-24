@@ -221,13 +221,27 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
         inputRef.current?.dom?.select?.();
       }, 0);
     };
-
+    const collectAllKeys = (tree) => {
+      const keySet = new Set();
+      const recursiveCollect = (nodes) => {
+        nodes.forEach((node) => {
+          if (node?.key) {
+            keySet.add(node.key);
+          }
+          if (Array.isArray(node?.children) && node.children.length > 0) {
+            recursiveCollect(node.children);
+          }
+        });
+      };
+      recursiveCollect(tree);
+      return Array.from(keySet); // Set 转数组返回
+    };
     // 本地过滤树数据函数
     const filterTree = (inputValue: string) => {
       const loop = (data) => {
         const result: TreeNodeItem[] = [];
         data.forEach((item) => {
-          if (item?.title?.indexOf(inputValue) > -1) {
+          if (item?.name?.indexOf(inputValue) > -1) {
             result.push({ ...item });
           } else if (item.children) {
             const filterData = loop(item.children);
@@ -237,6 +251,7 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
             }
           }
         });
+        setExpandedKeys(collectAllKeys(result).map(String));
         return result;
       };
 
@@ -257,6 +272,7 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
       setIsSearching(true);
 
       const filteredData = filterTree(value);
+      console.log(filteredData, '123 filteredData');
       if (filteredData.length === 0) {
         // Message.info('未找到匹配的结果');
         setTreeData([]);
@@ -707,12 +723,14 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
                       onClick={() => handleEdit(node)}
                     />
                   </Tooltip>
-                  <Tooltip color="white" content="复制并粘贴">
-                    <IconCopy
-                      className="mr-1 text-[14px] hover:text-[rgb(var(--primary-6))]"
-                      onClick={() => handleCopy(node as unknown as NodeProps)}
-                    />
-                  </Tooltip>
+                  {node?.type !== 'directory' && (
+                    <Tooltip color="white" content="复制并粘贴">
+                      <IconCopy
+                        className="mr-1 text-[14px] hover:text-[rgb(var(--primary-6))]"
+                        onClick={() => handleCopy(node as unknown as NodeProps)}
+                      />
+                    </Tooltip>
+                  )}
                   {/* )} */}
                   {/* {node.dataRef?.type !== PythonItemType.Directory && */}
                   {/* node.dataRef?.perms?.includes(nowPermissions.CAN_COPY) && ( */}
