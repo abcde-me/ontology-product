@@ -39,6 +39,17 @@ export function ListKnowledgeDocuments(params) {
   return UAPI.RES.ListKnowledgeDocuments({}).post(params).inRegion().do();
 }
 
+// 批量删除知识库文件列表
+export interface BatchDeleteKnowledgeDocumentParams {
+  dataset_id: number;
+  document_ids: string[];
+}
+export function BatchDeleteKnowledgeDocument(
+  params: BatchDeleteKnowledgeDocumentParams
+) {
+  return UAPI.RES.BatchDeleteKnowledgeDocument({}).post(params).inRegion().do();
+}
+
 // 查询知识库文件目录层级
 export function ListKnowledgeDocumentCatalogs(params) {
   // TODO: 替换为真实API调用
