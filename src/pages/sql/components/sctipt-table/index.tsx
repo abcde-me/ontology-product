@@ -28,6 +28,7 @@ import { WORKFLOW_LIST_PERMISSIONS } from '@/config/permissions';
 import { IconClockCircle, IconRefresh } from '@arco-design/web-react/icon';
 import { openNewPage } from '@/utils/env';
 import styles from './index.module.scss';
+import { VersionType, VersionTypeEnum } from '../sctipt-card';
 
 const InputSearch = Input.Search;
 
@@ -144,6 +145,17 @@ const ScriptTable: React.FC = () => {
     workflow_uuid: number | string,
     workflow_version: string
   ) => {
+    // 如果当前有人在编辑不让删除
+    if (
+      workflowData.some(
+        (item: any) => item.version_type === VersionType.RELEASED
+      )
+    ) {
+      Message.error({
+        content: `${VersionTypeEnum.RELEASED}正在本地编辑，不可删除`
+      });
+      return;
+    }
     Modal.confirm({
       title: (
         <span className={styles['workflow-list-modal-title']}>
@@ -208,13 +220,82 @@ const ScriptTable: React.FC = () => {
   const renderEmptyPlaceholder = (value: string | null) => {
     return value === '' || value == null ? '-' : value;
   };
-
+  const getVersionType = (version_type) => {
+    switch (version_type) {
+      case VersionType.RELEASED:
+        return (
+          <div className={styles['script-card-content-item-title-icon']}>
+            <span
+              className={
+                version_type === VersionType.RELEASED
+                  ? styles['released-icon']
+                  : ''
+              }
+            />
+            <div className={styles['script-card-content-item-title-icon-text']}>
+              {VersionTypeEnum.RELEASED}
+            </div>
+          </div>
+        );
+      case VersionType.UNRELEASED:
+        return (
+          <div className={styles['script-card-content-item-title-icon']}>
+            <span
+              className={
+                version_type === VersionType.UNRELEASED
+                  ? styles['unreleased-icon']
+                  : ''
+              }
+            />
+            <div className={styles['script-card-content-item-title-icon-text']}>
+              {VersionTypeEnum.UNRELEASED}
+            </div>
+          </div>
+        );
+      case VersionType.SCHEDULED:
+        return (
+          <div className={styles['script-card-content-item-title-icon']}>
+            <span
+              className={
+                version_type === VersionType.SCHEDULED
+                  ? styles['scheduled-icon']
+                  : ''
+              }
+            />
+            <div className={styles['script-card-content-item-title-icon-text']}>
+              {VersionTypeEnum.SCHEDULED}
+            </div>
+          </div>
+        );
+      default:
+        return (
+          <div className={styles['script-card-content-item-title-icon']}>
+            <span
+              className={
+                version_type === VersionType.UNRELEASED
+                  ? styles['unreleased-icon']
+                  : ''
+              }
+            />
+            <div className={styles['script-card-content-item-title-icon-text']}>
+              {VersionTypeEnum.UNRELEASED}
+            </div>
+          </div>
+        );
+    }
+  };
   // table columns
   const columns: ColumnProps[] = [
     {
-      title: '工作流名称',
+      title: '序号',
+      dataIndex: 'id',
+      width: 80,
+      sorter: (a, b) => a.name.length - b.name.length
+    },
+    {
+      title: '脚本名称',
       dataIndex: 'workflow_name',
-      width: 280,
+      width: 180,
       ellipsis: true,
       className: styles['hover-change'] + ' ' + styles['workflow-name'],
       render: (_, record) => {
@@ -233,127 +314,76 @@ const ScriptTable: React.FC = () => {
       }
     },
     {
-      title: '运行方式',
+      title: '最近版本号',
       dataIndex: 'run_cycle',
       width: 120,
       render: (_, record) =>
-        record.run_cycle ? <span>周期运行</span> : <span>单次运行</span>,
-      filters: [
-        {
-          text: '单次运行',
-          value: 0
-        },
-        {
-          text: '周期运行',
-          value: 1
-        }
-      ]
+        record.run_cycle ? <span>周期运行</span> : <span>单次运行</span>
     },
     {
-      title: '状态',
+      title: '最新版本状态',
       dataIndex: 'is_online',
-      width: 100,
-      render: (_, record) =>
-        record.is_online ? (
-          <div className={styles['publish-part'] + ' ' + styles['published']}>
-            <Success11Icon className="mr-[6px] size-[16px]" />
-            <span>已上线</span>
-          </div>
-        ) : (
-          <div
-            className={styles['publish-part'] + ' ' + styles['not-published']}
-          >
-            <IconClockCircle className="mr-[6px] size-[16px]" />
-            <span>未上线</span>
-          </div>
-        ),
+      width: 160,
+      render: (_, record) => {
+        return getVersionType(record.version_type);
+      },
       filters: [
         {
-          text: '未上线',
+          text: '未发版',
           value: 0
         },
         {
-          text: '已上线',
+          text: '已发版',
           value: 1
+        },
+        {
+          text: '调度中',
+          value: 2
         }
       ]
     },
     {
-      title: '起点',
+      title: '开发人',
       dataIndex: 'source_path',
-      width: 280,
-      ellipsis: true,
-      className: styles['hover-change'],
-      render: (_, record) => {
-        return renderEmptyPlaceholder(record.source_path) !== '-' ? (
-          <EllipsisPopover
-            value={record.source_path}
-            isEdit={false}
-            isLink
-            handleLink={() => {
-              handleToDirectoryPath(
-                record.source_path_id,
-                record.parent_source_path_id,
-                1
-              );
-            }}
-          />
-        ) : (
-          <span>-</span>
-        );
-      }
-    },
-    {
-      title: '终点',
-      dataIndex: 'target_path',
-      width: 280,
-      ellipsis: true,
-      className: styles['hover-change'],
-      render: (_, record) => {
-        return renderEmptyPlaceholder(record.target_path) !== '-' ? (
-          <EllipsisPopover
-            value={record.target_path}
-            isEdit={false}
-            isLink
-            handleLink={() => {
-              handleToTargetDatasetDetail(record.id);
-            }}
-          />
-        ) : (
-          <span>-</span>
-        );
-      }
-    },
-    {
-      title: '创建人',
-      dataIndex: 'user_name',
       width: 100,
       ellipsis: true,
-      render: (_, record) => (
-        <EllipsisPopover
-          value={renderEmptyPlaceholder(record.user_name)}
-          isEdit={false}
-        />
-      )
+      className: styles['hover-change']
     },
     {
-      title: '创建时间',
-      dataIndex: 'create_time',
+      title: '调度版本',
+      dataIndex: 'target_path',
+      width: 100,
+      ellipsis: true
+    },
+    {
+      title: '所属任务节点',
+      dataIndex: 'user_name',
       width: 160,
+      ellipsis: true
+    },
+    {
+      title: '所属工作流',
+      dataIndex: 'user_name',
+      width: 160,
+      ellipsis: true
+    },
+    {
+      title: '最后执行时间',
+      dataIndex: 'create_time',
+      width: 180,
       render: (_, record) => (
         <span>
           {record.create_time == '' || record.create_time == null
             ? '-'
             : new Date(record.create_time).toLocaleString()}
         </span>
-      ),
-      sorter: true
+      )
     },
     {
       title: '操作',
       dataIndex: 'operate',
       fixed: 'right',
-      width: 165,
+      width: 200,
       render: (_, record) => {
         const perms = record.perms || [];
         return (
@@ -378,7 +408,7 @@ const ScriptTable: React.FC = () => {
                   handleCloneWorkflow(record.workflow_uuid);
                 }}
               >
-                复制
+                历史版本
               </span>
             </PermissionWrapper>
             <PermissionWrapper

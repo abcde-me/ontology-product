@@ -83,4 +83,44 @@
   :global(.arco-modal-footer) :global(.arco-btn-secondary):focus {
     box-shadow: none;
   }
+
+  .script-card-content-item-title-icon {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+  }
+
+  .script-card-content-item-title-icon-text {
+    color: var(--text-color-text-2, #1e293b);
+    text-align: center;
+    font-family: 'PingFang SC';
+    font-size: 12px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 24px;
+  }
+
+  .released-icon {
+    width: 12px;
+    height: 12px;
+    background-color: #10b981;
+    border-radius: 50%;
+    margin-right: 8px;
+  }
+
+  .unreleased-icon {
+    width: 12px;
+    height: 12px;
+    background-color: #94a3b8;
+    border-radius: 50%;
+    margin-right: 8px;
+  }
+
+  .scheduled-icon {
+    width: 12px;
+    height: 12px;
+    background-color: #007dfa;
+    border-radius: 50%;
+    margin-right: 8px;
+  }
 }

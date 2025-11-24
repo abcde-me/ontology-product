@@ -4,11 +4,11 @@ import { Button } from '@arco-design/web-react';
 import { RadioGroup } from '@headlessui/react';
 import { IconApps, IconInteraction } from '@arco-design/web-react/icon';
 import ViewToggle, { ViewType } from '../ViewToggle';
-import ScriptTable from '../SctiptTable';
-import ScriptCard from '../SctiptCard';
+import ScriptTable from '../sctipt-table';
+import ScriptCard from '../sctipt-card';
 const Processing: React.FC = memo(() => {
   const [processingNum, setProcessingNum] = React.useState<number>(100);
-  const [iconActive, setIconActive] = React.useState<ViewType>(ViewType.LIST); // table表示表格，card表示卡片
+  const [iconActive, setIconActive] = React.useState<ViewType>(ViewType.TABLE); // table表示表格，card表示卡片
   return (
     <div className={style['processing-wrapper']}>
       {/* 头部操作按钮 */}
