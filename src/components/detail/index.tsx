@@ -94,8 +94,9 @@ interface TableColumn {
 }
 
 enum FileStatusType {
-  success = 'success',
-  fail = 'fail'
+  success = 'Succeed',
+  fail = 'Error',
+  waiting = 'Waiting'
 }
 
 const filterFileTypes = [
@@ -693,6 +694,10 @@ const DatasetDetail = (props: {
               {
                 text: '处理失败',
                 value: FileStatusType.fail
+              },
+              {
+                text: '等待中',
+                value: FileStatusType.waiting
               }
             ],
             render: (_, record) => (
