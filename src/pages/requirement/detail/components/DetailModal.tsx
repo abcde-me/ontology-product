@@ -305,6 +305,23 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
   }, [checkedKeys, current, pageSize]);
   // 处理日期范围变化
   const handleDateChange = (value) => {
+    // 暂时这么处理吧， 1230版本变了
+    if (type === 'detail') {
+      if (value && value.length === 2) {
+        const [start, end] = value;
+        const filteredData = getDetailObj?.label_data_set.filter((item) => {
+          return (
+            formatDateTime(item.load_start_time) >= start + ' 00:00:00' &&
+            formatDateTime(item.load_end_time) <= end + ' 23:59:59'
+          );
+        });
+        setTableData(filteredData);
+      }
+      if (value === null || value === undefined || value === '') {
+        setTableData(getDetailObj?.label_data_set);
+      }
+      return;
+    }
     // 当选择了完整的日期范围（开始和结束），执行筛选
     if (value && value.length === 2) {
       const [start, end] = value;
@@ -377,8 +394,12 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
               onChange={handleDateChange}
               style={{ width: 350 }}
               onClear={() => {
+                if (type === 'detail') {
+                  setTableData(getDetailObj?.label_data_set);
+                } else {
+                  getTableData();
+                }
                 // setDateRange([]);
-                getTableData();
               }}
             />
             {/* <div className="form-option">
