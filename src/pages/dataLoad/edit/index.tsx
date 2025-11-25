@@ -24,14 +24,15 @@ import { getdetailList } from '@/api/connectionApi';
 import './index.css';
 import { validateName } from '@/utils/valiate';
 import ComponentTree from '../component-tree';
-import { isNumber } from 'lodash-es';
 import { sql } from '@codemirror/lang-sql';
 import { lintGutter } from '@codemirror/lint';
 import { tags as t } from '@lezer/highlight';
 import createTheme from '@uiw/codemirror-themes';
 import CodeMirror from '@uiw/react-codemirror';
-import { IconCaretRight, IconDown, IconUp } from '@arco-design/web-react/icon';
-import SQLFormatIcon from '@/assets/sql/sql-format-ico.svg';
+import { IconDown, IconLoading, IconUp } from '@arco-design/web-react/icon';
+import ValidateIcon from '../assets/validate-icon.svg';
+import RunFailedIcon from '@/assets/python/run-fail-icon.svg';
+import RunSuccessIcon from '@/assets/python/run-success-icon.svg';
 import classNames from 'classnames';
 import styles from '../edit/index.module.scss';
 import { useHistory, useParams as useRouteParams } from 'react-router';
@@ -311,11 +312,32 @@ const RunningInfoPanel = function ({
   const renderCheckStatus = () => {
     switch (checkStatus) {
       case CheckSQLStatus.CHECKING:
-        return <Tag color="blue">校验中</Tag>;
+        return (
+          <div className="flex items-center gap-[4px]">
+            <span className="text-[14px] text-[var(--color-text-4)]">
+              校验中
+            </span>
+            <IconLoading style={{ color: '#007DFA' }} />
+          </div>
+        );
       case CheckSQLStatus.SUCCESS:
-        return <Tag color="green">校验成功</Tag>;
+        return (
+          <div className="flex items-center gap-[4px]">
+            <span className="text-[14px] text-[var(--color-text-4)]">
+              校验成功
+            </span>
+            <RunSuccessIcon />
+          </div>
+        );
       case CheckSQLStatus.ERROR:
-        return <Tag color="red">校验失败</Tag>;
+        return (
+          <div className="flex items-center gap-[4px]">
+            <span className="text-[14px] text-[var(--color-text-4)]">
+              校验失败
+            </span>
+            <RunFailedIcon />
+          </div>
+        );
       default:
         return null;
     }
@@ -1135,7 +1157,7 @@ const Edit = (props) => {
                       <Button
                         type="secondary"
                         disabled
-                        icon={<IconCaretRight className="mr-[4px]" />}
+                        icon={<ValidateIcon className="mr-[4px]" />}
                         className="h-[26px]"
                         onClick={handleCheckSQL}
                         loading={checkStatus === CheckSQLStatus.CHECKING}
