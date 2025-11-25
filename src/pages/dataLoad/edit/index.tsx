@@ -1164,7 +1164,13 @@ const Edit = (props) => {
                 <FormItem
                   label=" "
                   field="sql"
-                  rules={[{ required: true, validator: validateSQL }]}
+                  rules={[
+                    {
+                      required: true,
+                      validator: (value, callback) =>
+                        validateSQL(value as string, callback)
+                    }
+                  ]}
                 >
                   <div
                     className={classNames(

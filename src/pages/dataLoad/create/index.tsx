@@ -1434,7 +1434,13 @@ export default function DataLoadCreate() {
                     label=" "
                     field="sql"
                     labelAlign="right"
-                    rules={[{ required: true, validator: validateSQL }]}
+                    rules={[
+                      {
+                        required: true,
+                        validator: (value, callback) =>
+                          validateSQL(value as string, callback)
+                      }
+                    ]}
                   >
                     <div
                       className={classNames(
