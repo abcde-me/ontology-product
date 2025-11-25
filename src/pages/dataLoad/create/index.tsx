@@ -321,6 +321,7 @@ export default function DataLoadCreate() {
   const [directoryData, setDirectoryData] = useState<TreeNodeData[]>([]);
   const [selectedPath, setSelectedPath] = useState<string>('');
   const [tableList, setTableList] = useState<string[]>([]);
+  const [tableSearchValue, setTableSearchValue] = useState<string>('');
   const [sqlContent, setSqlContent] = useState<string>('');
   const [checkStatus, setCheckStatus] = useState<CheckSQLStatus>(
     CheckSQLStatus.NONE
@@ -444,6 +445,8 @@ export default function DataLoadCreate() {
         // 如果在这里重置，可能会在 getTableName 返回结果后覆盖它
 
         setTableList(res?.data?.table_name || []);
+        // 重置搜索值
+        setTableSearchValue('');
       } catch (error) {
         console.error('获取连接器表格数据失败:', error);
         Message.error('获取连接器表格数据失败');
@@ -452,10 +455,21 @@ export default function DataLoadCreate() {
     [sourceType]
   );
 
+  // 计算过滤后的表格列表（基于搜索关键词）
+  const filteredTableList = useMemo(() => {
+    if (!tableSearchValue.trim()) {
+      return tableList;
+    }
+    const searchLower = tableSearchValue.toLowerCase();
+    return tableList.filter((table) =>
+      table.toLowerCase().includes(searchLower)
+    );
+  }, [tableList, tableSearchValue]);
+
   // 计算选中状态：'all' | 'indeterminate' | 'none'
   const getSelectAllStatus = useCallback(
     (selectedValues: string[]): 'all' | 'indeterminate' | 'none' => {
-      if (!Array.isArray(selectedValues) || tableList.length === 0) {
+      if (!Array.isArray(selectedValues) || filteredTableList.length === 0) {
         return 'none';
       }
       const filteredValues = selectedValues.filter((item) => item !== 'all');
@@ -463,12 +477,20 @@ export default function DataLoadCreate() {
       if (selectedCount === 0) {
         return 'none';
       }
-      if (selectedCount === tableList.length) {
+      // 检查是否所有过滤后的选项都被选中
+      const allFilteredSelected = filteredTableList.every((option) =>
+        filteredValues.includes(option)
+      );
+      if (allFilteredSelected && selectedCount === filteredTableList.length) {
         return 'all';
       }
-      return 'indeterminate';
+      // 检查是否有部分选中
+      const someFilteredSelected = filteredTableList.some((option) =>
+        filteredValues.includes(option)
+      );
+      return someFilteredSelected ? 'indeterminate' : 'none';
     },
-    [tableList]
+    [filteredTableList]
   );
 
   // 处理"全部"选项的点击事件
@@ -480,23 +502,28 @@ export default function DataLoadCreate() {
         (item: string) => item !== 'all'
       );
 
-      // 判断是否全选
+      // 判断是否全选（基于过滤后的列表）
       const isAllSelected =
-        filteredValue.length === tableList.length &&
-        tableList.length > 0 &&
-        tableList.every((option) => filteredValue.includes(option));
+        filteredTableList.length > 0 &&
+        filteredTableList.every((option) => filteredValue.includes(option));
 
       if (isAllSelected) {
-        // 当前全选，取消所有选择
-        form.setFieldsValue({ table_name: [] });
+        // 当前全选，取消所有过滤后选项的选择（保留其他未过滤的选项）
+        const remainingValues = filteredValue.filter(
+          (item: string) => !filteredTableList.includes(item)
+        );
+        form.setFieldsValue({ table_name: remainingValues });
       } else {
-        // 当前未全选或未选择，选中所有选项
-        if (tableList.length > 0) {
-          form.setFieldsValue({ table_name: [...tableList] });
+        // 当前未全选或未选择，选中所有过滤后的选项
+        if (filteredTableList.length > 0) {
+          const newValues = [
+            ...new Set([...filteredValue, ...filteredTableList])
+          ];
+          form.setFieldsValue({ table_name: newValues });
         }
       }
     },
-    [form, tableList]
+    [form, filteredTableList]
   );
 
   // 处理表格名称选择（全部标签逻辑）
@@ -526,19 +553,26 @@ export default function DataLoadCreate() {
         const filteredPrevious = previousArray.filter(
           (item: string) => item !== 'all'
         );
+        // 判断是否全选（基于过滤后的列表）
         const isAllSelected =
-          filteredPrevious.length === tableList.length &&
-          tableList.length > 0 &&
-          tableList.every((option) => filteredPrevious.includes(option));
+          filteredTableList.length > 0 &&
+          filteredTableList.every((option) =>
+            filteredPrevious.includes(option)
+          );
 
         if (isAllSelected) {
-          // 当前全选，取消所有选择
-          form.setFieldsValue({ table_name: [] });
+          // 当前全选，取消所有过滤后选项的选择（保留其他未过滤的选项）
+          const remainingValues = filteredPrevious.filter(
+            (item: string) => !filteredTableList.includes(item)
+          );
+          form.setFieldsValue({ table_name: remainingValues });
         } else {
-          // 当前未全选或未选择，选中所有选项
-          // 包括：未选择任何数据、部分选择、或完全未选择的情况
-          if (tableList.length > 0) {
-            form.setFieldsValue({ table_name: [...tableList] });
+          // 当前未全选或未选择，选中所有过滤后的选项
+          if (filteredTableList.length > 0) {
+            const newValues = [
+              ...new Set([...filteredPrevious, ...filteredTableList])
+            ];
+            form.setFieldsValue({ table_name: newValues });
           }
         }
       } else {
@@ -547,7 +581,7 @@ export default function DataLoadCreate() {
         form.setFieldsValue({ table_name: filteredValue });
       }
     },
-    [form, tableList, selectedNodeType]
+    [form, filteredTableList, selectedNodeType]
   );
 
   // 处理文件变化
@@ -624,6 +658,7 @@ export default function DataLoadCreate() {
       console.log('切换数据源类型到:', value);
       setDirectoryData([]);
       setTableList([]);
+      setTableSearchValue('');
       setConnectName([]);
       setSourceType(value);
       // 清空绑定连接器
@@ -1423,6 +1458,7 @@ export default function DataLoadCreate() {
               <Select
                 className="select-tag-style"
                 onChange={handleAllTagChange}
+                onSearch={setTableSearchValue}
                 ref={selectRef}
                 key={selectedNodeType}
                 mode={selectedNodeType === 'metadata' ? undefined : 'multiple'}
@@ -1435,20 +1471,26 @@ export default function DataLoadCreate() {
                 placeholder="请选择抽取的表"
                 style={{ width: '100%', minWidth: 0 }}
                 allowClear
+                filterOption={(input, option) => {
+                  // 由于我们使用 filteredTableList 来渲染选项，这里直接返回 true
+                  // 过滤逻辑已经在 filteredTableList 中处理
+                  return true;
+                }}
               >
-                {tableList.length > 0 && selectedNodeType !== 'metadata' && (
-                  <div
-                    onClick={handleAllClick}
-                    className="flex cursor-pointer items-center pl-[7px]"
-                  >
-                    <Checkbox
-                      checked={selectAllStatus === 'all'}
-                      indeterminate={selectAllStatus === 'indeterminate'}
-                    />
-                    <span className="ml-[8px] text-[14px]">全部</span>
-                  </div>
-                )}
-                {tableList.map((option) => (
+                {filteredTableList.length > 0 &&
+                  selectedNodeType !== 'metadata' && (
+                    <div
+                      onClick={handleAllClick}
+                      className="flex cursor-pointer items-center pl-[7px]"
+                    >
+                      <Checkbox
+                        checked={selectAllStatus === 'all'}
+                        indeterminate={selectAllStatus === 'indeterminate'}
+                      />
+                      <span className="ml-[8px] text-[14px]">全部</span>
+                    </div>
+                  )}
+                {filteredTableList.map((option) => (
                   <Option key={option} value={option}>
                     {option}
                   </Option>
