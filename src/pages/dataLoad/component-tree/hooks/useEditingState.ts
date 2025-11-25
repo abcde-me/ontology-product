@@ -3,7 +3,7 @@ import { RefInputType } from '@arco-design/web-react/es/Input/interface';
 import { TreeDataType } from '@arco-design/web-react/es/Tree/interface';
 import { TreeNodeData } from '../types';
 import { InputNodeType } from '../constants';
-import { getInputNodeKey } from '../utils/nodeTypeUtils';
+import { getInputNodeKey, getNodeTypeConfig } from '../utils/nodeTypeUtils';
 import { deleteNodeRecursively } from '../utils/dataTransform';
 
 interface UseEditingStateParams {
@@ -69,11 +69,13 @@ export const useEditingState = (params?: UseEditingStateParams) => {
 
       const { getInputNodeType, deleteInputNode } = params;
       const inputType = getInputNodeType(dataRef);
-      deleteInputNode(
-        inputType as InputNodeType,
-        `${dataRef.parentId}-${inputType}`
-      );
-
+      if (inputType) {
+        // 如果是catalog类型，也就是根目录，不存在parentId, 存在Map里的key是id
+        deleteInputNode(
+          inputType as InputNodeType,
+          dataRef.parentId ? `${dataRef.parentId}-${inputType}` : dataRef.id
+        );
+      }
       // 重置编辑状态
       resetEditingState();
     },

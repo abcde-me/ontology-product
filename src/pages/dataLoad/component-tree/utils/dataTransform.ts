@@ -163,12 +163,6 @@ export const findPathKeyById = (
     }
     return null;
   };
-  console.log(
-    '-----findPathKeyById------',
-    treeData,
-    id,
-    findKey(treeData, String(id))
-  );
   return findKey(treeData, String(id));
 };
 

@@ -17,7 +17,12 @@ export const NODE_TYPES = {
 /**
  * 节点类型配置
  */
-export type InputNodeType = 'db' | 'datasource' | 'metadata' | 'volumn';
+export type InputNodeType =
+  | 'db'
+  | 'datasource'
+  | 'metadata'
+  | 'volumn'
+  | 'catalog';
 
 export interface NodeTypeConfig {
   key: InputNodeType;

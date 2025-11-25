@@ -169,6 +169,8 @@ export const useApiOperations = ({
           if (handleApiError(res, '新增目录失败', nodeData)) {
             return false;
           }
+          // 清理输入节点状态
+          cleanupInputNode(inputType, nodeData.parentId!, NODE_TYPES.CATALOG);
           break;
         case NODE_TYPES.DB_ITEM:
           res = await createDatabase(fileName, nodeData.parentId!);

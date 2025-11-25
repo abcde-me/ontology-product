@@ -1,22 +1,16 @@
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { Input, Tooltip, Message, TreeSelect } from '@arco-design/web-react';
-import {
-  IconCaretDown,
-  IconPlus,
-  IconArchive
-} from '@arco-design/web-react/icon';
+import { IconCaretDown, IconPlus } from '@arco-design/web-react/icon';
 import {
   NodeProps,
-  TreeDataType,
   NodeInstance
 } from '@arco-design/web-react/es/Tree/interface';
 import { CatalogTypeEnum, subLeafKeys } from '../../dataCatalog/consts';
 import { validateName } from '@/utils/valiate';
-import { isNumber } from 'lodash-es';
 import '../create/index.module.scss';
 // 导入类型和工具函数
 import { TreeNodeData } from './types';
-import { InputNodeType, NODE_TYPES, SELECTABLE_NODE_TYPES } from './constants';
+import { NODE_TYPES, SELECTABLE_NODE_TYPES } from './constants';
 import {
   getNodeTypeConfig,
   getInputNodeKey,
@@ -107,12 +101,6 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
     cleanupInputNode
   } = useInputNodes();
 
-  useEffect(() => {
-    console.log('-----value111------', value);
-  }, [value]);
-
-  // console.log('-----value111------', value);
-
   // 创建父节点的辅助函数
   const createParentNode = useCallback(
     (
@@ -179,130 +167,140 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
       return [];
     }
 
-    const processedData = directoryData.map((item) => {
-      // 先规范化 children，确保是数组形式
-      const normalizedChildren = normalizeChildren(item.children);
-
-      if (item.type_name === NODE_TYPES.CATALOG) {
-        const childNodes: TreeNodeData[] = [];
-
-        // 为目录节点添加"数据库"子节点
-        if (shouldShowDbNode(dataSourceType)) {
-          const dbNode = createParentNode(
-            item,
-            normalizedChildren,
-            NODE_TYPES.DB_PARENT,
-            (child) =>
-              child.type_name === NODE_TYPES.DB ||
-              child.type_name === NODE_TYPES.DB_ITEM
-          );
-          if (dbNode) {
-            childNodes.push(dbNode);
-          }
+    const processedData = directoryData
+      .filter((item) => {
+        // 如果 showInput 是 true，但 inputNodes.catalog 中不存在此 id，则过滤掉，主要处理根目录的输入节点
+        if (item.showInput === true) {
+          const itemId = String(item.id);
+          return inputNodes?.catalog?.has(itemId);
         }
+        // 其他情况保留
+        return true;
+      })
+      .map((item) => {
+        // 先规范化 children，确保是数组形式
+        const normalizedChildren = normalizeChildren(item.children);
 
-        // 为数据库类型添加"元数据"子节点
-        if (shouldShowMetadataNode(dataSourceType)) {
-          const hasMetaDataNode = normalizedChildren.some(
-            (child) => child.type_name === NODE_TYPES.METADATA_PARENT
-          );
+        if (item.type_name === NODE_TYPES.CATALOG) {
+          const childNodes: TreeNodeData[] = [];
 
-          if (!hasMetaDataNode) {
-            let metaDataChildren: TreeNodeData[] = [];
-            if (normalizedChildren.length > 0) {
-              metaDataChildren = normalizedChildren
-                .filter(
-                  (child) =>
-                    child.type_name === NODE_TYPES.METADATA ||
-                    child.type === CatalogTypeEnum.metadata
-                )
-                .map((metaItem) => ({
-                  id: metaItem.id,
-                  key: String(metaItem.id),
-                  name: metaItem.name,
-                  value: String(metaItem.id),
-                  label: metaItem.name || `未命名_${metaItem.id}`,
-                  title: metaItem.name || `未命名_${metaItem.id}`,
-                  type_name: 'metadata' as const,
-                  level: (item.level || 0) + 2,
-                  isExpanded: false,
-                  hasChildren: false,
-                  isLastLeaf: true,
-                  parentId: String(item.id),
-                  perms: metaItem.perms
-                }));
-            }
-
-            const metaNodeKey = getInputNodeKey(
-              item.id,
-              NODE_TYPES.METADATA_PARENT
+          // 为目录节点添加"数据库"子节点
+          if (shouldShowDbNode(dataSourceType)) {
+            const dbNode = createParentNode(
+              item,
+              normalizedChildren,
+              NODE_TYPES.DB_PARENT,
+              (child) =>
+                child.type_name === NODE_TYPES.DB ||
+                child.type_name === NODE_TYPES.DB_ITEM
             );
-            if (metaNodeKey) {
-              const metaInputNode = getInputNode('metadata', metaNodeKey);
-              if (metaInputNode) {
-                metaDataChildren = [metaInputNode, ...metaDataChildren];
+            if (dbNode) {
+              childNodes.push(dbNode);
+            }
+          }
+
+          // 为数据库类型添加"元数据"子节点
+          if (shouldShowMetadataNode(dataSourceType)) {
+            const hasMetaDataNode = normalizedChildren.some(
+              (child) => child.type_name === NODE_TYPES.METADATA_PARENT
+            );
+
+            if (!hasMetaDataNode) {
+              let metaDataChildren: TreeNodeData[] = [];
+              if (normalizedChildren.length > 0) {
+                metaDataChildren = normalizedChildren
+                  .filter(
+                    (child) =>
+                      child.type_name === NODE_TYPES.METADATA ||
+                      child.type === CatalogTypeEnum.metadata
+                  )
+                  .map((metaItem) => ({
+                    id: metaItem.id,
+                    key: String(metaItem.id),
+                    name: metaItem.name,
+                    value: String(metaItem.id),
+                    label: metaItem.name || `未命名_${metaItem.id}`,
+                    title: metaItem.name || `未命名_${metaItem.id}`,
+                    type_name: 'metadata' as const,
+                    level: (item.level || 0) + 2,
+                    isExpanded: false,
+                    hasChildren: false,
+                    isLastLeaf: true,
+                    parentId: String(item.id),
+                    perms: metaItem.perms
+                  }));
               }
 
-              const metaNode: TreeNodeData = {
-                id: metaNodeKey,
-                key: metaNodeKey,
-                name: '元数据',
-                value: metaNodeKey,
-                label: '元数据',
-                title: '元数据',
-                type_name: NODE_TYPES.METADATA_PARENT,
-                level: (item.level || 0) + 1,
-                isExpanded: Boolean(metaInputNode),
-                hasChildren: true,
-                isLastLeaf: false,
-                showInput: false,
-                isNew: false,
-                parentId: item.id,
-                children: metaDataChildren
-              };
+              const metaNodeKey = getInputNodeKey(
+                item.id,
+                NODE_TYPES.METADATA_PARENT
+              );
+              if (metaNodeKey) {
+                const metaInputNode = getInputNode('metadata', metaNodeKey);
+                if (metaInputNode) {
+                  metaDataChildren = [metaInputNode, ...metaDataChildren];
+                }
 
-              childNodes.push(metaNode);
+                const metaNode: TreeNodeData = {
+                  id: metaNodeKey,
+                  key: metaNodeKey,
+                  name: '元数据',
+                  value: metaNodeKey,
+                  label: '元数据',
+                  title: '元数据',
+                  type_name: NODE_TYPES.METADATA_PARENT,
+                  level: (item.level || 0) + 1,
+                  isExpanded: Boolean(metaInputNode),
+                  hasChildren: true,
+                  isLastLeaf: false,
+                  showInput: false,
+                  isNew: false,
+                  parentId: item.id,
+                  children: metaDataChildren
+                };
+
+                childNodes.push(metaNode);
+              }
             }
           }
-        }
 
-        // 为本地文件类型添加"数据卷"子节点
-        if (shouldShowDatasourceNode(dataSourceType)) {
-          const datasourceNode = createParentNode(
-            item,
-            normalizedChildren,
-            NODE_TYPES.DATASOURCE_PARENT,
-            (child) =>
-              child.type_name === NODE_TYPES.VOLUME ||
-              child.type_name === NODE_TYPES.VOLUME_ITEM
-          );
-          if (datasourceNode) {
-            childNodes.push(datasourceNode);
+          // 为本地文件类型添加"数据卷"子节点
+          if (shouldShowDatasourceNode(dataSourceType)) {
+            const datasourceNode = createParentNode(
+              item,
+              normalizedChildren,
+              NODE_TYPES.DATASOURCE_PARENT,
+              (child) =>
+                child.type_name === NODE_TYPES.VOLUME ||
+                child.type_name === NODE_TYPES.VOLUME_ITEM
+            );
+            if (datasourceNode) {
+              childNodes.push(datasourceNode);
+            }
+          }
+
+          if (childNodes.length > 0) {
+            return {
+              ...item,
+              children: childNodes,
+              hasChildren: true
+            };
+          } else {
+            return {
+              ...item,
+              children: normalizedChildren,
+              hasChildren: normalizedChildren.length > 0
+            };
           }
         }
 
-        if (childNodes.length > 0) {
-          return {
-            ...item,
-            children: childNodes,
-            hasChildren: true
-          };
-        } else {
-          return {
-            ...item,
-            children: normalizedChildren,
-            hasChildren: normalizedChildren.length > 0
-          };
-        }
-      }
-
-      // 对于非 catalog 类型的节点，也要确保 children 是数组形式
-      return {
-        ...item,
-        children: normalizedChildren,
-        hasChildren: normalizedChildren.length > 0
-      };
-    });
+        // 对于非 catalog 类型的节点，也要确保 children 是数组形式
+        return {
+          ...item,
+          children: normalizedChildren,
+          hasChildren: normalizedChildren.length > 0
+        };
+      });
 
     // 在初始化时就为每个节点添加 TreeSelect 需要的属性
     const treeData = processedData
@@ -315,7 +313,6 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
         > => item !== null
       );
 
-    console.log('-----treeData------', treeData);
     return treeData;
   }, [
     directoryData,
@@ -384,7 +381,6 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
     }
 
     if (dataRef?.isNew) {
-      console.log('看一下新建节点的类型:', dataRef?.type_name);
       // 新建节点
       const success = await handleCreateNode(
         dataRef.type_name || '',
@@ -412,93 +408,6 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
       await refreshData();
     }
   };
-
-  // 增强的选择处理函数
-  // const handleEnhancedSelect = (
-  //     selectedKeys: string[] | string | any,
-  //     extra?: {
-  //         selected?: boolean;
-  //         selectedNodes?: NodeInstance[];
-  //         node?: NodeInstance;
-  //         e?: Event;
-  //     }
-  // ) => {
-  //     // 确保 selectedKeys 是数组
-  //     const keysArray = Array.isArray(selectedKeys)
-  //         ? selectedKeys
-  //         : selectedKeys
-  //             ? [String(selectedKeys)]
-  //             : [];
-
-  //     // 如果没有选中任何节点，直接返回
-  //     if (keysArray.length === 0) {
-  //         return;
-  //     }
-
-  //     // 确保 extra 存在且包含必要的属性
-  //     const safeExtra = extra || {
-  //         selected: true,
-  //         selectedNodes: [],
-  //         node: {} as NodeInstance,
-  //         e: {} as Event
-  //     };
-
-  //     // 尝试从 extra.node 获取节点数据
-  //     let nodeData: TreeNodeData | undefined;
-  //     const node = safeExtra.node as any;
-  //     if (node?.props?.dataRef) {
-  //         nodeData = node.props.dataRef as TreeNodeData;
-  //     } else if (node?.dataRef) {
-  //         nodeData = node.dataRef as TreeNodeData;
-  //     }
-
-  //     // 如果无法从 extra.node 获取数据，尝试从 treeData 中查找
-  //     if (!nodeData) {
-  //         nodeData =
-  //             findNodeById(processedDirectoryData, keysArray[0]) || undefined;
-  //     }
-
-  //     // 确保 selectedNodes 是数组
-  //     const safeSelectedNodes = Array.isArray(safeExtra.selectedNodes)
-  //         ? safeExtra.selectedNodes
-  //         : [];
-
-  //     // 调用原始的onSelect回调
-  //     onSelect?.(keysArray, {
-  //         selected: safeExtra.selected ?? true,
-  //         selectedNodes: safeSelectedNodes,
-  //         node: safeExtra.node || ({} as NodeInstance),
-  //         e: safeExtra.e || ({} as Event)
-  //     });
-
-  //     // 如果有路径变化回调，构建并传递路径和节点ID
-  //     if (onPathChange && keysArray.length > 0 && nodeData) {
-  //         // handlePathChangeWithCallbacks(keysArray[0], nodeData);
-
-  //         // 选择节点后关闭下拉框
-  //         if (nodeData?.id !== undefined && isNumber(nodeData.id)) {
-  //             setDropdownVisible(false);
-  //         }
-  //     }
-  // };
-
-  // 路径构建和回调的统一函数
-  // const handlePathChangeWithCallbacks = useCallback(
-  //     (nodeId: string, nodeData: TreeNodeData) => {
-  //         // 构建完整路径（使用原始数据，不使用过滤后的数据）
-  //         const pathArray = buildPathFromTreeData(processedDirectoryData, nodeId);
-  //         const fullPath = pathArray ? pathArray.join('/') : nodeData?.name || '';
-
-  //         // 更新 TreeSelect 的值
-  //         if (onChange) {
-  //             onChange(nodeId);
-  //         }
-
-  //         // 传递路径和节点ID
-  //         onPathChange?.(fullPath, nodeData?.id, nodeData);
-  //     },
-  //     [directoryData, onChange, onPathChange]
-  // );
 
   // 生成新的目录名称
   const generateName = useCallback(
@@ -559,10 +468,9 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
 
   // 添加根级目录
   const onCatalogAdd = () => {
-    // const name = generateName(directoryData);
     const name = `源目录_${Date.now()}`;
-    // const name = `源目录${directoryData?.length || '1'}`;
     const newNode = genereteInputNode(name);
+    setInputNode('catalog', newNode.key, newNode);
 
     // 更新目录数据，将新节点添加到开头
     onDirectoryDataChange([newNode, ...directoryData]);

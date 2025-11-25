@@ -8,6 +8,7 @@ import { getInputNodeKey } from '../utils/nodeTypeUtils';
  * 输入节点状态类型
  */
 export interface InputNodesState {
+  catalog: Map<string, TreeNodeData>;
   db: Map<string, TreeNodeData>;
   datasource: Map<string, TreeNodeData>;
   metadata: Map<string, TreeNodeData>;
@@ -18,7 +19,10 @@ export interface InputNodesState {
  * 用于管理数据库、数据卷、元数据三种类型的输入节点
  */
 export const useInputNodes = () => {
+  // inputNodes的结构为：{ db: Map<string, TreeNodeData>, datasource: Map<string, TreeNodeData>, metadata: Map<string, TreeNodeData>, catalog: Map<string, TreeNodeData> }
+  // 需要根据type来设置对应的Map,Map的key是对应新建节点的父节点的id
   const [inputNodes, setInputNodes] = useState<InputNodesState>({
+    catalog: new Map(),
     db: new Map(),
     datasource: new Map(),
     metadata: new Map()
@@ -39,6 +43,8 @@ export const useInputNodes = () => {
    */
   const setInputNode = useCallback(
     (type: InputNodeType, key: string, node: TreeNodeData) => {
+      // inputNodes的结构为：{ db: Map<string, TreeNodeData>, datasource: Map<string, TreeNodeData>, metadata: Map<string, TreeNodeData>, catalog: Map<string, TreeNodeData> }
+      // 需要根据type来设置对应的Map,Map的key是对应新建节点的父节点的id
       setInputNodes((prev) => {
         const newMap = new Map(prev[type]);
         newMap.set(key, node);
@@ -53,6 +59,10 @@ export const useInputNodes = () => {
    */
   const deleteInputNode = useCallback((type: InputNodeType, key: string) => {
     setInputNodes((prev) => {
+      // if (!key) {
+      //     return { ...prev, [type]: new Map() };
+      // }
+
       const newMap = new Map(prev[type]);
       newMap.delete(key);
       return { ...prev, [type]: newMap };
@@ -64,7 +74,7 @@ export const useInputNodes = () => {
    */
   const getInputNodeType = useCallback(
     (dataRef: TreeNodeData | TreeDataType): InputNodeType | null => {
-      if (!dataRef?.parentId) return null;
+      if (!dataRef?.parentId) return 'catalog';
       const parentId = dataRef.parentId;
       if (inputNodes.db.has(`${parentId}-db`)) return 'db';
       if (inputNodes.datasource.has(`${parentId}-datasource`))
