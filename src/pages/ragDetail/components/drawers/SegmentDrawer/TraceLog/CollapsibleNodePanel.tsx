@@ -46,6 +46,7 @@ const CollapsibleNodePanel: React.FC<CollapsibleNodePanelProps> = ({
       setOutputScrolled(scrollTop > 0);
     }
   };
+  console.log('node', node);
 
   return (
     <div className="mb-3 overflow-hidden rounded-lg border border-gray-200 bg-white">
