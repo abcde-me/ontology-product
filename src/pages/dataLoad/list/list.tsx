@@ -461,6 +461,7 @@ export default function DataLoad() {
         padding: '20px 21px 20px 20px',
         borderRadius: '10px',
         marginTop: '20px',
+        marginRight: '20px',
         minHeight: 'calc(100% - 40px)'
       }}
     >

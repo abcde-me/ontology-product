@@ -36,7 +36,14 @@ import {
 /**
  * 将新的后端 positions 数组转换为前端的 PDFCoordinate 数组
  */
-function transformApiPositions(positions: ApiPosition[]): PDFCoordinate[] {
+function transformApiPositions(
+  positions: ApiPosition[] | null | undefined
+): PDFCoordinate[] {
+  // 处理 null 或 undefined 的情况，返回空数组而不是抛出错误
+  if (!positions || positions.length === 0) {
+    return [];
+  }
+
   return positions.map((pos) => ({
     page: pos.page_id + 1, // 后端0-based,前端1-based
     x1: pos.bbox[0],
@@ -69,7 +76,7 @@ function transformSegment(apiSegment: ApiSegment): Segment {
     id: apiSegment.id,
     content: apiSegment.content,
     charCount: apiSegment.char_count,
-    segmentIndex: apiSegment.chunk_index,
+    segmentIndex: apiSegment.index,
     pdfCoordinates: transformApiPositions(apiSegment.positions),
     parentTitle: apiSegment.parent_title || undefined,
     parentTitleId: apiSegment.parent_title_id || undefined,

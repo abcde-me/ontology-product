@@ -1215,13 +1215,13 @@ export default function DataLoadCreate() {
   }, [form]);
 
   return (
-    <div className={classNames('h-full px-[20px]')}>
-      <div className="mb-[9px] mt-[17px] text-[20px] font-bold leading-[32px]">
+    <div className={classNames('h-full px-[20px] pt-[17px]')}>
+      <div className="mb-[9px] text-[20px] font-bold leading-[30px]">
         创建数据载入任务
       </div>
       <div
         className={classNames(
-          'flex h-[calc(100%-58px-17px)] flex-col items-start justify-start overflow-y-auto rounded-[16px] bg-white',
+          'flex h-[calc(100%-39px-25px)] flex-col items-start justify-start overflow-y-auto rounded-[16px] bg-white',
           styles['data-load-create-container']
         )}
       >
