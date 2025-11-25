@@ -9,6 +9,7 @@ import {
   Form,
   Image,
   Input,
+  InputNumber,
   Menu,
   Message,
   Radio,
@@ -1120,6 +1121,35 @@ export default function RequirementDetail() {
                   <div className="data-error-info error-info-text">
                     请选择数据
                   </div>
+                )}
+              </FormItem>
+              <FormItem
+                initialValue={1}
+                field="split_task_package"
+                label="拆分任务包:"
+                style={{ marginBottom: 24 }}
+              >
+                {selectedData?.length <= 0 && !getDetailObj?.label_count ? (
+                  <div className="data-content-set">
+                    <span style={{ color: '#86909c' }}>请先选择标注数据</span>
+                  </div>
+                ) : (
+                  <InputNumber
+                    mode="button"
+                    onChange={(value) => {
+                      setPublishData({
+                        ...publishData,
+                        split_task_package: value
+                      });
+                    }}
+                    min={1}
+                    max={
+                      getTotal(selectedData) || getDetailObj?.label_count || 1
+                    }
+                    precision={0}
+                    disabled={type === 'detail'}
+                    style={{ width: 200 }}
+                  />
                 )}
               </FormItem>
               {showPreLabeling && (
