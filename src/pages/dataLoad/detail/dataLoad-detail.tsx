@@ -312,7 +312,8 @@ const DataLoadDetail = () => {
           flexDirection: 'column',
           // margin: '10px 10px 20px 10px',
           borderRadius: '10px',
-          minHeight: '87vh'
+          minHeight: '87vh',
+          marginRight: '20px'
         }}
       >
         <div className="box">
