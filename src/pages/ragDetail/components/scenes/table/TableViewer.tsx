@@ -6,114 +6,90 @@
 import React, { useState, useEffect } from 'react';
 import * as XLSX from 'xlsx';
 import { TableSegment } from '../../../types';
+import { useRagDetailStore } from '../../../store/ragDetailStore';
 
 interface TableViewerProps {
   segments?: TableSegment[];
   excelUrl?: string; // 新增：Excel文件URL
 }
 
-const TableViewer: React.FC<TableViewerProps> = ({
-  segments = []
-  // excelUrl
-}) => {
+const TableViewer: React.FC<TableViewerProps> = ({}) => {
+  const { fileBinaryData, fileBinaryDataLoading, fileBinaryDataError } =
+    useRagDetailStore();
   const [currentTableIndex, setCurrentTableIndex] = useState(0);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [excelSheets, setExcelSheets] = useState<TableSegment[]>([]);
-  const excelUrl =
-    'http://10.252.216.16:30895/metadata-service/api/v1/file/downloadFile?bucket=datasource-dev&path=/10/10/orginal/111.xlsx';
   // 从URL加载Excel文件
   useEffect(() => {
-    if (excelUrl) {
-      loadExcelFromUrl(excelUrl);
+    if (fileBinaryData) {
+      loadExcelFromUrl();
     }
-  }, [excelUrl]);
+  }, [fileBinaryData]);
 
-  const loadExcelFromUrl = async (url: string) => {
-    setLoading(true);
-    setError(null);
-    try {
-      // 下载Excel文件
-      const response = await fetch(url);
-      if (!response.ok) {
-        throw new Error(`下载失败: ${response.status} ${response.statusText}`);
-      }
+  const loadExcelFromUrl = () => {
+    const workbook = XLSX.read(fileBinaryData, { type: 'array' });
+    // 将每个工作表转换为TableSegment格式
+    const sheets: TableSegment[] = workbook.SheetNames.map(
+      (sheetName, index) => {
+        const worksheet = workbook.Sheets[sheetName];
 
-      // 获取ArrayBuffer
-      const arrayBuffer = await response.arrayBuffer();
+        // 将工作表转换为JSON数组，保留所有数据（包括空白行和空白单元格）
+        const jsonData: any[][] = XLSX.utils.sheet_to_json(worksheet, {
+          header: 1,
+          defval: '',
+          blankrows: true
+        });
 
-      // 使用xlsx解析
-      const workbook = XLSX.read(arrayBuffer, { type: 'array' });
-
-      // 将每个工作表转换为TableSegment格式
-      const sheets: TableSegment[] = workbook.SheetNames.map(
-        (sheetName, index) => {
-          const worksheet = workbook.Sheets[sheetName];
-
-          // 将工作表转换为JSON数组，保留所有数据（包括空白行和空白单元格）
-          const jsonData: any[][] = XLSX.utils.sheet_to_json(worksheet, {
-            header: 1,
-            defval: '',
-            blankrows: true
-          });
-
-          if (jsonData.length === 0) {
-            return {
-              id: `sheet-${index}`,
-              content: sheetName,
-              charCount: 0,
-              segmentIndex: index,
-              tableData: {
-                headers: [],
-                rows: []
-              }
-            };
-          }
-
-          // 计算最大列数
-          const maxCols = Math.max(...jsonData.map((row) => row.length), 0);
-
-          // 第一行作为表头，如果第一行存在
-          const hasHeader = jsonData.length > 0;
-          const headerRow = hasHeader ? jsonData[0] : [];
-          const headers = Array.from({ length: maxCols }, (_, idx) => {
-            const cellValue = headerRow[idx];
-            return cellValue != null ? String(cellValue) : '';
-          });
-
-          // 剩余行作为数据行（如果第一行是表头，则从第二行开始）
-          const dataRows = hasHeader ? jsonData.slice(1) : jsonData;
-          const rows = dataRows.map((row) => {
-            const rowObj: Record<string, string> = {};
-            headers.forEach((header, idx) => {
-              const cellValue = row[idx];
-              rowObj[header || idx.toString()] =
-                cellValue != null ? String(cellValue) : '';
-            });
-            return rowObj;
-          });
-
+        if (jsonData.length === 0) {
           return {
             id: `sheet-${index}`,
             content: sheetName,
-            charCount: JSON.stringify(jsonData).length,
+            charCount: 0,
             segmentIndex: index,
             tableData: {
-              headers,
-              rows
+              headers: [],
+              rows: []
             }
           };
         }
-      );
 
-      setExcelSheets(sheets);
-      setCurrentTableIndex(0);
-    } catch (err) {
-      console.error('加载Excel文件失败:', err);
-      setError(err instanceof Error ? err.message : '加载Excel文件失败');
-    } finally {
-      setLoading(false);
-    }
+        // 计算最大列数
+        const maxCols = Math.max(...jsonData.map((row) => row.length), 0);
+
+        // 第一行作为表头，如果第一行存在
+        const hasHeader = jsonData.length > 0;
+        const headerRow = hasHeader ? jsonData[0] : [];
+        const headers = Array.from({ length: maxCols }, (_, idx) => {
+          const cellValue = headerRow[idx];
+          return cellValue != null ? String(cellValue) : '';
+        });
+
+        // 剩余行作为数据行（如果第一行是表头，则从第二行开始）
+        const dataRows = hasHeader ? jsonData.slice(1) : jsonData;
+        const rows = dataRows.map((row) => {
+          const rowObj: Record<string, string> = {};
+          headers.forEach((header, idx) => {
+            const cellValue = row[idx];
+            rowObj[header || idx.toString()] =
+              cellValue != null ? String(cellValue) : '';
+          });
+          return rowObj;
+        });
+
+        return {
+          id: `sheet-${index}`,
+          content: sheetName,
+          charCount: JSON.stringify(jsonData).length,
+          segmentIndex: index,
+          tableData: {
+            headers,
+            rows
+          }
+        };
+      }
+    );
+
+    setExcelSheets(sheets);
+    setCurrentTableIndex(0);
   };
 
   // 使用Excel数据或segments数据
@@ -121,7 +97,7 @@ const TableViewer: React.FC<TableViewerProps> = ({
   const currentSegment = displaySegments[currentTableIndex];
   const tableData = currentSegment?.tableData;
 
-  if (loading) {
+  if (fileBinaryDataLoading) {
     return (
       <div className="flex h-full items-center justify-center bg-gray-100">
         <div className="text-center">
@@ -132,12 +108,11 @@ const TableViewer: React.FC<TableViewerProps> = ({
     );
   }
 
-  if (error) {
+  if (fileBinaryDataError) {
     return (
       <div className="flex h-full items-center justify-center bg-gray-100">
         <div className="text-center">
           <div className="mb-2 text-red-600">加载失败</div>
-          <div className="text-sm text-gray-500">{error}</div>
         </div>
       </div>
     );
