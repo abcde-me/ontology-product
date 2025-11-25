@@ -70,7 +70,7 @@ import dataGuaranteeIcon from '@/pages/datasetManagement/assets/dataset_guarante
 import dataSceneIcon from '@/pages/datasetManagement/assets/dataset_scene.png';
 import DatasetMoveIcon from '@/pages/datasetManagement/assets/dataset_move.svg';
 import DatasetMoveActiveIcon from '@/pages/datasetManagement/assets/dataset_move_active.svg';
-import { set, throttle } from 'lodash';
+import { throttle } from 'lodash-es';
 
 // 时间格式化函数
 const formatDateTime = (dateTimeString: string): string => {

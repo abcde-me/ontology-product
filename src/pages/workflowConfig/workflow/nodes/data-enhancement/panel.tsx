@@ -14,7 +14,6 @@ import { getModelList } from '@/api/modelV2';
 import TextPlan from './textDefault';
 import { useUnmountedRef } from 'ahooks';
 import './data-enhancement.scss';
-import { get } from 'lodash';
 
 const Panel: FC<NodePanelProps<CodeNodeType>> = ({ id, data }) => {
   const [form] = Form.useForm();
