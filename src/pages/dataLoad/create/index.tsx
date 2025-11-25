@@ -43,12 +43,7 @@ import { tags as t } from '@lezer/highlight';
 import createTheme from '@uiw/codemirror-themes';
 import CodeMirror from '@uiw/react-codemirror';
 import styles from './index.module.scss';
-import {
-  IconDown,
-  IconInfoCircleFill,
-  IconLoading,
-  IconUp
-} from '@arco-design/web-react/icon';
+import { IconDown, IconLoading, IconUp } from '@arco-design/web-react/icon';
 import SQLFormatIcon from '@/assets/sql/sql-format-ico.svg';
 import ValidateIcon from '../assets/validate-icon.svg';
 import RunFailedIcon from '@/assets/python/run-fail-icon.svg';
@@ -769,9 +764,13 @@ export default function DataLoadCreate() {
         }
       }
 
+      if (checkStatus === CheckSQLStatus.ERROR) {
+        return '运行失败，请重新检查语句';
+      }
+
       return null;
     },
-    [sourceType, tableList]
+    [sourceType, tableList, checkStatus]
   );
 
   // 处理表单提交
@@ -817,7 +816,7 @@ export default function DataLoadCreate() {
             return;
           }
 
-          if (checkStatus !== CheckSQLStatus.SUCCESS) {
+          if (checkStatus === CheckSQLStatus.NONE) {
             setCheckStatus(CheckSQLStatus.CHECKING);
             setCheckMessage('');
 
@@ -1114,6 +1113,23 @@ export default function DataLoadCreate() {
       Array.isArray(currentTableName) ? currentTableName : []
     );
   }, [tableName, form, getSelectAllStatus]);
+
+  const validateSQL = useCallback(
+    (value: string, callback: (error?: string) => void) => {
+      if (!value || value.trim() === '') {
+        callback('请输入SQL语句');
+        return;
+      }
+
+      if (checkStatus === CheckSQLStatus.ERROR) {
+        callback('运行失败，请重新检查语句');
+        return;
+      }
+
+      return callback();
+    },
+    [checkStatus]
+  );
 
   // 初始化SQL处理默认值为"关闭"
   useEffect(() => {
@@ -1418,7 +1434,7 @@ export default function DataLoadCreate() {
                     label=" "
                     field="sql"
                     labelAlign="right"
-                    rules={[{ required: true, message: '请输入SQL语句' }]}
+                    rules={[{ required: true, validator: validateSQL }]}
                   >
                     <div
                       className={classNames(
