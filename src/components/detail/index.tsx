@@ -833,6 +833,10 @@ const DatasetDetail = (props: {
     }
   }, [sortValue]);
 
+  useEffect(() => {
+    fetchDatasetContents();
+  }, [filePageSize, fileCurrentPage]);
+
   React.useEffect(() => {
     //@ts-expect-error
     const unblock = history.block((location) => {
