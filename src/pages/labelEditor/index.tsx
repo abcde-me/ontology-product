@@ -92,6 +92,8 @@ function LabelEditorPage() {
   };
 
   const goBack = () => {
+    // TODO这里也加一个吧
+    bus.$emit('labeleditor-deactivated');
     history.push('/tenant/compute/modaforge/taskList');
   };
 
