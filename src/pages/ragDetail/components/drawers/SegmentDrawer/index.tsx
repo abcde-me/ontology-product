@@ -17,7 +17,7 @@ interface SegmentDrawerProps {
   defaultActiveTab?: 'detail' | 'trace';
   currentSegmentIndex?: number;
   totalSegments?: number;
-  datasetId?: string;
+  datasetId?: number;
   chunkId?: string;
   segments?: Array<{ id: string; [key: string]: any }>;
 }
@@ -28,7 +28,7 @@ const SegmentDrawer: React.FC<SegmentDrawerProps> = ({
   defaultActiveTab = 'trace',
   currentSegmentIndex = 1,
   totalSegments = 100,
-  datasetId = '',
+  datasetId = 0,
   chunkId = '',
   segments = []
 }) => {

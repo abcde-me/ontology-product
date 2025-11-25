@@ -33,6 +33,7 @@ import CopyNormalIconSvg from '@/assets/rag/copy-normal.svg';
 import CopyHighIconSvg from '@/assets/rag/copy-high.svg';
 import JumpToHighIconSvg from '@/assets/rag/jump-to-high.svg';
 import JumpToNormalIconSvg from '@/assets/rag/jump-to-normal.svg';
+import copy from 'copy-to-clipboard';
 
 function PageContentFalse(props) {
   const { detailsdata, onInit } = props;
@@ -184,9 +185,8 @@ function PageContentFalse(props) {
     seteditPolicy(true);
   };
   const handleCopy = (data) => {
-    navigator.clipboard.writeText(data).then(() => {
-      Message.success(`已复制内容`);
-    });
+    copy(data);
+    Message.success(`已复制内容`);
   };
   const recordColumns: any = [
     {
@@ -549,7 +549,7 @@ function PageContentFalse(props) {
           defaultActiveTab={defaultTab}
           currentSegmentIndex={currentSegment?.segmentIndex}
           totalSegments={segments.length}
-          datasetId={datasetId || ''}
+          datasetId={datasetId ? Number(datasetId) : undefined}
           chunkId={currentSegment.id}
           segments={segments}
         />

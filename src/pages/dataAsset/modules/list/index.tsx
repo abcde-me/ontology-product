@@ -56,8 +56,13 @@ import styles from './list.module.scss';
 import classNames from 'classnames';
 import { FieldSearchItem } from '@/types/dataAssetApi';
 import dayjs from 'dayjs';
-import { isDateType, isTagsField, TAGS_FIELD_EN_NAME } from '../../utils/const';
-import PermissionWrapper from '@/components/PermissionGuard';
+import {
+  isDateTimeType,
+  isDateType,
+  isTagsField,
+  TAGS_FIELD_EN_NAME
+} from '../../utils/const';
+import { PermissionWrapper } from '@/components/PermissionGuard';
 import { DATA_ASSET_PERMISSIONS } from '@/config/permissions';
 
 interface TagValue {
@@ -349,13 +354,17 @@ export default function DataAssetList() {
       fields.map((field: ApiColumnField, index: number) => {
         // 时间类型or标签类型不能勾选为枚举类型
         const isEnumAbleForColumn =
-          isDateType(field.type) || isTagsField(field.nameEn) ? false : true;
+          isDateType(field.type) ||
+          isDateTimeType(field.type) ||
+          isTagsField(field.nameEn)
+            ? false
+            : true;
         let isEnumAble = field.isEnumAble;
 
         // 搜索时传给服务端的值，要求标签类型是true, 时间类型是false
         if (isTagsField(field.nameEn)) {
           isEnumAble = true;
-        } else if (isDateType(field.type)) {
+        } else if (isDateType(field.type) || isDateTimeType(field.type)) {
           isEnumAble = false;
         }
 
@@ -452,8 +461,15 @@ export default function DataAssetList() {
   };
 
   // 处理主搜索
-  const handleMainSearch = (value: string) => {
-    setSearchParams({ ...searchParams, commonSearch: value });
+  const handleMainSearch = (
+    fieldValues: FieldSearchItem[],
+    commonSearch: string
+  ) => {
+    setSearchParams({
+      ...searchParams,
+      fieldSearch: fieldValues,
+      commonSearch
+    });
   };
 
   // 处理字段搜索
@@ -470,7 +486,7 @@ export default function DataAssetList() {
 
   // 处理重置
   const handleReset = () => {
-    setSearchParams({ ...searchParams, fieldSearch: [] });
+    setSearchParams({ ...searchParams, fieldSearch: [], commonSearch: '' });
     setCurrentPage(1);
   };
 
@@ -606,12 +622,14 @@ export default function DataAssetList() {
     setModifyAssetModalVisible(true);
   };
 
-  // 确认修改资产
+  // 确认批量修改资产
   const handleModifyAssetConfirm = async (data: {
     modifyMethod: ModifyMethod;
     fieldEnName: string;
     separator: string;
     fieldValue: string;
+    fieldType: string;
+    fieldZhName: string;
   }) => {
     try {
       const editData: EditDataAssetData = {
@@ -620,7 +638,9 @@ export default function DataAssetList() {
         modifyContext: [
           {
             fieldEnName: data.fieldEnName,
-            fieldValue: data.fieldValue
+            fieldValue: data.fieldValue,
+            fieldType: data.fieldType,
+            fieldZhName: data.fieldZhName
           }
         ]
       };
@@ -683,17 +703,28 @@ export default function DataAssetList() {
 
     try {
       // 构建修改数据，只包含有变化的字段
-      const modifyContext: { fieldEnName: string; fieldValue: string }[] = [];
+      const modifyContext: {
+        fieldEnName: string;
+        fieldValue: string;
+        fieldType: string;
+        fieldZhName: string;
+      }[] = [];
       Object.keys(data).forEach((fieldEnName) => {
         const newValue = data[fieldEnName];
         const oldValue = editingRecord[fieldEnName];
         // 如果值有变化，添加到修改列表
         if (newValue !== oldValue) {
+          // 根据fieldEnName找到对应的字段信息
+          const selectedField = columnFields.find(
+            (field) => field.nameEn === fieldEnName
+          );
           modifyContext.push({
             fieldEnName,
             fieldValue: Array.isArray(newValue)
               ? newValue.join(',')
-              : String(newValue || '')
+              : String(newValue || ''),
+            fieldType: selectedField?.type || '',
+            fieldZhName: selectedField?.nameZh || ''
           });
         }
       });
@@ -829,7 +860,7 @@ export default function DataAssetList() {
                   </Popover>
                 ) : (
                   <PermissionWrapper
-                    permission={[
+                    anyPermission={[
                       DATA_ASSET_PERMISSIONS.MODIFY_TAG,
                       DATA_ASSET_PERMISSIONS.MODIFY_ASSET
                     ]}

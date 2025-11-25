@@ -23,8 +23,6 @@ import type {
   EnhancementInfo
 } from '../types';
 import { SegmentData } from '../utils/segmentData';
-import { getTreeDataByRagId } from '../utils/treeData';
-import { getSegmentDataByRagId } from '../utils/segmentDataByRagId';
 import { LogData } from '../utils/logData';
 import { SegDetailData } from '../utils/segDetailData';
 import {
@@ -249,13 +247,13 @@ function transformCatalogNodeOld(apiNode: any): DirectoryNode {
  * @returns 分块列表数据
  */
 export async function fetchSegments(
-  datasetId: string,
+  datasetId: number,
   documentId: string
 ): Promise<Segment[]> {
   try {
     const response = await ListKnowledgeChunks({
-      datasetId,
-      documentId
+      dataset_id: Number(datasetId),
+      document_id: documentId
     });
 
     // 检查响应格式
@@ -278,19 +276,21 @@ export async function fetchSegments(
  * @returns 目录树数据
  */
 export async function fetchCatalog(
-  datasetId: string,
+  datasetId: number,
   documentId: string
 ): Promise<DirectoryNode[] | undefined> {
   try {
     const response = await ListKnowledgeDocumentCatalogs({
-      datasetId,
-      documentId
+      dataset_id: Number(datasetId),
+      document_id: documentId
     });
     console.log(response, 'response2222');
 
     // 检查响应格式
     if (response && response.data && response.data.catalogs) {
+      console.log('response.data.catalogs', response.data.catalogs);
       const rootNode = transformCatalogNode(response.data.catalogs);
+      console.log('rootNode', rootNode);
       return [rootNode];
     }
 
@@ -308,92 +308,24 @@ export async function fetchCatalog(
  * @returns RAG详情数据
  */
 export async function fetchRagDetail(
-  datasetId: string,
+  datasetId: number,
   documentId: string
 ): Promise<RagDetailData> {
-  // 根据 datasetId 和 documentId 获取对应的数据
-  let segments: Segment[] = [];
-  let directory: DirectoryNode[] | undefined;
-  let fileName = '有为政府如何促进中国产业政策演进.pdf';
-  let filePath = '/知识库/政策研究';
-  let sceneType: 'pdf' | 'ppt' | 'excel' = 'pdf';
+  // 调用接口获取分段数据
+  const segments = await fetchSegments(datasetId, documentId);
 
-  // 使用新的数据格式（documentId=1001, 1002, 1003 使用新接口）
-  if (documentId === '1001' || documentId === '1002' || documentId === '1003') {
-    // 根据 documentId 设置文件名和路径
-    if (documentId === '1001') {
-      // 1001: 只有分段列表，无目录树
-      fileName = '纯文本分段示例（无目录树）.pdf';
-      filePath = '/知识库/示例文档';
-    } else if (documentId === '1002') {
-      // 1002: 有目录树 + 分段列表（纯文本）
-      fileName = '带目录树的文档（纯文本）.pdf';
-      filePath = '/知识库/结构化文档';
-    } else {
-      // 1003: 有目录树 + 分段列表（含图片和公式）
-      fileName = '图文混排文档（含图片和公式）.pdf';
-      filePath = '/知识库/多媒体文档';
-    }
+  // 调用接口获取目录树数据
+  const directory = await fetchCatalog(datasetId, documentId);
+  console.log('directory', directory);
 
-    // 调用接口获取分段数据
-    segments = await fetchSegments(datasetId, documentId);
+  // sceneType 默认为 pdf，实际会在 store 中根据 documentFormat 进行映射
+  const sceneType: 'pdf' | 'ppt' | 'excel' = 'pdf';
 
-    // 调用接口获取目录树数据
-    directory = await fetchCatalog(datasetId, documentId);
-
-    sceneType = 'pdf';
-  } else if (documentId === '1005') {
-    // Table/Excel 场景
-    fileName = '销售数据统计.xlsx';
-    filePath = '/知识库/数据表格';
-    sceneType = 'excel';
-
-    // 使用旧的数据格式获取分段数据
-    const segmentResponse = getSegmentDataByRagId(documentId);
-    segments = segmentResponse.data.data.map(transformSegmentOld);
-
-    // Table 场景通常没有目录树
-    const treeResponse = getTreeDataByRagId(documentId);
-    if (
-      treeResponse &&
-      treeResponse.data &&
-      treeResponse.data.catalog_content
-    ) {
-      const rootNode = transformCatalogNodeOld(
-        treeResponse.data.catalog_content
-      );
-      directory = [rootNode];
-    }
-  } else {
-    // 使用旧的数据格式（其他 documentId）
-    const segmentResponse = getSegmentDataByRagId(documentId);
-    const treeResponse = getTreeDataByRagId(documentId);
-
-    // 转换分段数据（使用旧的转换函数）
-    segments = segmentResponse.data.data.map(transformSegmentOld);
-
-    // 转换目录树数据（使用旧的转换函数）
-    if (
-      treeResponse &&
-      treeResponse.data &&
-      treeResponse.data.catalog_content
-    ) {
-      const rootNode = transformCatalogNodeOld(
-        treeResponse.data.catalog_content
-      );
-      directory = [rootNode];
-    }
-  }
-
-  // 根据 sceneType 设置 bucket 和 path（测试数据）
+  // 默认值（这些值会在 store 中被 getKnowledgeDocument 接口返回的真实数据覆盖）
+  const fileName = '';
+  const filePath = '';
   const bucket = 'datasource-dev';
-  let path = '';
-
-  if (sceneType === 'pdf') {
-    path = '/10/10/orginal/用户权限.pdf';
-  } else if (sceneType === 'excel') {
-    path = '/10/10/orginal/用户权限.docx';
-  }
+  const path = '/10/10/orginal/用户权限.pdf';
 
   const result: RagDetailData = {
     ragId: documentId, // 使用 documentId 作为 ragId
@@ -418,7 +350,7 @@ export async function fetchRagDetail(
  * @returns Promise<void> - 更新成功后不返回数据，调用方应该重新获取分段列表
  */
 export async function updateSegmentContent(
-  datasetId: string,
+  datasetId: number,
   documentId: string,
   chunkId: string,
   content: string
@@ -432,7 +364,7 @@ export async function updateSegmentContent(
     });
 
     const response = await UpdateKnowledgeChunk({
-      dataset_id: datasetId,
+      dataset_id: Number(datasetId),
       document_id: documentId,
       chunk_id: chunkId,
       content
@@ -482,13 +414,13 @@ export async function fetchSegmentDetail(
  * @returns 溯源日志数据
  */
 export async function fetchSegmentTraceLog(
-  datasetId: string,
+  datasetId: number,
   chunkId: string
 ): Promise<any> {
   try {
     // 调用真实API
     const response = await GetKnowledgeChunkTraceLog({
-      dataset_id: datasetId,
+      dataset_id: Number(datasetId),
       chunk_id: chunkId
     });
 

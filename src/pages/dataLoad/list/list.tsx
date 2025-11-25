@@ -11,7 +11,6 @@ import { IconPlus } from '@arco-design/web-react/icon';
 import React, { useEffect, useState } from 'react';
 import Styles from './index.module.scss';
 import { ITableData } from './type';
-import LoadAddModal from './load-add-modal';
 import { useHistory } from 'react-router-dom';
 import { delLoad, getLoadList } from '@/api/loadApi';
 import './index.scss';
@@ -20,7 +19,6 @@ import EllipsisPopover from '@/components/ellipsis-popover-com';
 import noDataElement from '@/components/no-data';
 import { PermissionWrapper } from '@/components/PermissionGuard';
 import { DATA_LOAD_PERMISSIONS } from '@/config/permissions';
-import { OperationColumn } from '@ccf2e/arco-material';
 import { useHasPermission } from '@/hooks/usePermission';
 import getLabelByValue from '@/utils/getLabelByValue';
 import {
@@ -540,19 +538,6 @@ export default function DataLoad() {
           />
         )}
       </div>
-      <Modal
-        style={{ width: '680px' }}
-        title="创建数据载入任务"
-        visible={visible}
-        onOk={() => setVisible(false)}
-        onCancel={() => setVisible(false)}
-        autoFocus={false}
-        focusLock={true}
-        footer={null}
-        unmountOnExit={true}
-      >
-        <LoadAddModal hideModalHan={hideEditModal} getList={getdataLoadList} />
-      </Modal>
     </div>
   );
 }

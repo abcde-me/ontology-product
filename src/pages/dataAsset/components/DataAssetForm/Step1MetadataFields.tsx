@@ -8,7 +8,8 @@ import {
   Message,
   Form,
   Table,
-  Select
+  Select,
+  DatePicker
 } from '@arco-design/web-react';
 import { MetadataField } from './DataAssetFormContainer';
 import ImportFieldsModal from './ImportFieldsModal';
@@ -21,8 +22,15 @@ import {
 import { listDataAssetFieldTypes } from '@/api/dataAsset';
 import { ImportType } from '../../types';
 import noDataElement from '@/components/no-data';
-import { RESERVED_FIELD_ENS, SYSTEM_FIELDS } from '../../utils/const';
+import {
+  RESERVED_FIELD_ENS,
+  SYSTEM_FIELDS,
+  isDateType,
+  isDateTimeType,
+  DATA_SOURCE_FIELD_EN_NAME
+} from '../../utils/const';
 import EllipsisPopoverCom from '@/components/ellipsis-popover-com';
+import dayjs from 'dayjs';
 
 const FormItem = Form.Item;
 
@@ -30,6 +38,7 @@ const getDataSourceKey = (item: ListDataAssetSourceResItem) =>
   `${item.type ?? ''}::${item.databaseName ?? ''}::${item.tableName ?? ''}`;
 
 interface Step1MetadataFieldsProps {
+  isEditMode: boolean;
   metadataFields: MetadataField[];
   setMetadataFields: React.Dispatch<React.SetStateAction<MetadataField[]>>;
   dataSources: Record<string, ListDataAssetSourceResItem>;
@@ -43,6 +52,7 @@ interface Step1MetadataFieldsProps {
 
 export default function Step1MetadataFields({
   metadataFields,
+  isEditMode,
   setMetadataFields,
   dataSources,
   setDataSources,
@@ -56,6 +66,30 @@ export default function Step1MetadataFields({
   const [fieldTypes, setFieldTypes] = useState<string[]>([]);
   const [fieldTypesLoading, setFieldTypesLoading] = useState(false);
   const [form] = Form.useForm();
+
+  // 判断是否为新添加的字段（通过id前缀判断）
+  const isNewlyAddedField = useCallback((field: MetadataField): boolean => {
+    return (
+      field.id?.startsWith('field_') || field.id?.startsWith('field_import_')
+    );
+  }, []);
+
+  // 判断字段是否可编辑
+  const isFieldEditable = useCallback(
+    (field: MetadataField): boolean => {
+      // 系统字段和保留字段不可编辑
+      if (field.system === true || RESERVED_FIELD_ENS.has(field.nameEn)) {
+        return false;
+      }
+      // 编辑态下，只有新添加的字段可以编辑
+      if (isEditMode) {
+        return isNewlyAddedField(field);
+      }
+      // 非编辑态下，所有非系统/保留字段都可以编辑
+      return true;
+    },
+    [isEditMode, isNewlyAddedField]
+  );
 
   // 进入页面时查询支持的字段类型
   useEffect(() => {
@@ -102,9 +136,7 @@ export default function Step1MetadataFields({
           placeholder="请输入中文名称"
           allowClear
           value={record.nameZh}
-          disabled={
-            record.system === true || RESERVED_FIELD_ENS.has(record.nameEn)
-          }
+          disabled={!isFieldEditable(record)}
           onChange={(value) => handleUpdateField(record.id, { nameZh: value })}
         />
       )
@@ -118,9 +150,7 @@ export default function Step1MetadataFields({
           placeholder="请输入英文名称"
           value={record.nameEn}
           allowClear
-          disabled={
-            record.system === true || RESERVED_FIELD_ENS.has(record.nameEn)
-          }
+          disabled={!isFieldEditable(record)}
           onChange={(value) => handleUpdateField(record.id, { nameEn: value })}
         />
       )
@@ -134,9 +164,7 @@ export default function Step1MetadataFields({
           placeholder="请选择"
           loading={fieldTypesLoading}
           value={record.type}
-          disabled={
-            record.system === true || RESERVED_FIELD_ENS.has(record.nameEn)
-          }
+          disabled={!isFieldEditable(record)}
           onChange={(value) => handleUpdateField(record.id, { type: value })}
         >
           {fieldTypes.map((type) => (
@@ -151,16 +179,67 @@ export default function Step1MetadataFields({
       title: '空值默认填充',
       dataIndex: 'default',
       width: 272,
-      render: (_: any, record: any) => (
-        <Input
-          value={record.default}
-          allowClear
-          disabled={
-            record.system === true || RESERVED_FIELD_ENS.has(record.nameEn)
-          }
-          onChange={(value) => handleUpdateField(record.id, { default: value })}
-        />
-      )
+      render: (_: any, record: any) => {
+        const isDisabled = !isFieldEditable(record);
+        const fieldType = record.type;
+
+        // 如果是日期时间类型
+        if (isDateTimeType(fieldType)) {
+          return (
+            <DatePicker
+              value={record.default ? dayjs(record.default) : undefined}
+              allowClear
+              disabled={isDisabled}
+              showTime={{ format: 'HH:mm:ss' }}
+              format="YYYY-MM-DD HH:mm:ss"
+              placeholder="请选择时间"
+              style={{ width: '100%' }}
+              onChange={(value: any) => {
+                const dateStr = value
+                  ? typeof value.format === 'function'
+                    ? value.format('YYYY-MM-DD HH:mm:ss')
+                    : String(value)
+                  : '';
+                handleUpdateField(record.id, { default: dateStr });
+              }}
+            />
+          );
+        }
+
+        // 如果是日期类型
+        if (isDateType(fieldType)) {
+          return (
+            <DatePicker
+              value={record.default ? dayjs(record.default) : undefined}
+              allowClear
+              disabled={isDisabled}
+              format="YYYY-MM-DD"
+              placeholder="请选择日期"
+              style={{ width: '100%' }}
+              onChange={(value: any) => {
+                const dateStr = value
+                  ? typeof value.format === 'function'
+                    ? value.format('YYYY-MM-DD')
+                    : String(value)
+                  : '';
+                handleUpdateField(record.id, { default: dateStr });
+              }}
+            />
+          );
+        }
+
+        // 其他类型使用普通输入框
+        return (
+          <Input
+            value={record.default}
+            allowClear
+            disabled={isDisabled}
+            onChange={(value) =>
+              handleUpdateField(record.id, { default: value })
+            }
+          />
+        );
+      }
     },
     // {
     //   title: '必填',
@@ -187,6 +266,7 @@ export default function Step1MetadataFields({
       render: (_: any, record: any) => (
         <Checkbox
           checked={record.allowModify}
+          disabled={record.nameEn === DATA_SOURCE_FIELD_EN_NAME}
           onChange={(checked) =>
             handleUpdateField(record.id, { allowModify: checked })
           }
@@ -331,6 +411,26 @@ export default function Step1MetadataFields({
     form.setFieldValue('dataSources', updatedDataSources);
   };
 
+  // 验证nameEn字段是否符合规则
+  const validateNameEn = (nameEn: string): string | null => {
+    if (!nameEn) {
+      return null; // 空值由其他验证处理
+    }
+
+    // 规则1: 由字母、数字和下划线(_)组成（同时满足规则3: 不能有空格）
+    const validPattern = /^[a-zA-Z0-9_]+$/;
+    if (!validPattern.test(nameEn)) {
+      return '字段英文名称只能由字母、数字和下划线(_)组成，且不能有空格';
+    }
+
+    // 规则2: 必须以字母开头
+    if (!/^[a-zA-Z]/.test(nameEn)) {
+      return '字段英文名称必须以字母开头';
+    }
+
+    return null;
+  };
+
   // 验证字段列表的自定义验证器
   const validateMetadataFields = useCallback(
     (value: any, callback: any) => {
@@ -343,9 +443,19 @@ export default function Step1MetadataFields({
         );
         if (incompleteFields) {
           callback('请填写完整的字段信息');
-        } else {
-          callback();
+          return;
         }
+
+        // 验证nameEn字段格式
+        for (const field of metadataFields) {
+          const nameEnError = validateNameEn(field.nameEn);
+          if (nameEnError) {
+            callback(nameEnError);
+            return;
+          }
+        }
+
+        callback();
       }
     },
     [metadataFields]

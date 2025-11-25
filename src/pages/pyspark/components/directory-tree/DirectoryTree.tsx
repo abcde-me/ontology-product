@@ -23,7 +23,12 @@ import type {
   NodeProps,
   TreeDataType
 } from '@arco-design/web-react/es/Tree/interface';
-import { IconPlus, IconEdit, IconDelete } from '@arco-design/web-react/icon';
+import {
+  IconPlus,
+  IconEdit,
+  IconDelete,
+  IconCopy
+} from '@arco-design/web-react/icon';
 import FolderIcon from '@/assets/python/folder.svg';
 import FileIcon from '@/assets/python/file.svg';
 import AddAfterIcon from '@/assets/python/add-after.svg';
@@ -216,13 +221,27 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
         inputRef.current?.dom?.select?.();
       }, 0);
     };
-
+    const collectAllKeys = (tree) => {
+      const keySet = new Set();
+      const recursiveCollect = (nodes) => {
+        nodes.forEach((node) => {
+          if (node?.key) {
+            keySet.add(node.key);
+          }
+          if (Array.isArray(node?.children) && node.children.length > 0) {
+            recursiveCollect(node.children);
+          }
+        });
+      };
+      recursiveCollect(tree);
+      return Array.from(keySet); // Set 转数组返回
+    };
     // 本地过滤树数据函数
     const filterTree = (inputValue: string) => {
       const loop = (data) => {
         const result: TreeNodeItem[] = [];
         data.forEach((item) => {
-          if (item?.title?.indexOf(inputValue) > -1) {
+          if (item?.name?.indexOf(inputValue) > -1) {
             result.push({ ...item });
           } else if (item.children) {
             const filterData = loop(item.children);
@@ -232,6 +251,7 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
             }
           }
         });
+        setExpandedKeys(collectAllKeys(result).map(String));
         return result;
       };
 
@@ -252,6 +272,7 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
       setIsSearching(true);
 
       const filteredData = filterTree(value);
+      console.log(filteredData, '123 filteredData');
       if (filteredData.length === 0) {
         // Message.info('未找到匹配的结果');
         setTreeData([]);
@@ -445,7 +466,13 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
             : n
         );
     };
-
+    const handleCopy = (node: NodeProps) => {
+      try {
+        onCopy?.(`${node.dataRef?.name}_副本_${now()}`, node);
+      } catch (e) {
+        Message.error('复制失败');
+      }
+    };
     const handleEditFinish = async (node) => {
       if (node.dataRef?.isAdd) {
         const finalName = inputValue.trim() || defaultName;
@@ -597,50 +624,30 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
             allowClear
             style={{ height: '32px' }}
           />
-          {from === DirectoryTreeFrom.SQL ? (
-            <PermissionWrapper permission={SQL_PERMISSIONS.CREATE}>
-              {/* <Button
-                type="text"
-                size="small"
-                icon={<IconPlus />}
-                onClick={() => startRootCreate(false)}
+          <Dropdown
+            trigger="click"
+            position="bl"
+            droplist={
+              <Menu
+                onClickMenuItem={(key) => {
+                  if (key === 'folder') {
+                    startRootCreate(true);
+                  } else if (key === 'file') {
+                    startRootCreate(false);
+                  }
+                }}
               >
-                新建
-              </Button> */}
-              <div
-                className="ml-1 flex w-16 cursor-pointer items-center justify-center text-xs text-[#2563EB]"
-                onClick={() => startRootCreate(false)}
-              >
-                <IconPlus className="mr-1" />
-                新建
-              </div>
-            </PermissionWrapper>
-          ) : (
-            <Dropdown
-              trigger="click"
-              position="bl"
-              droplist={
-                <Menu
-                  onClickMenuItem={(key) => {
-                    if (key === 'folder') {
-                      startRootCreate(true);
-                    } else if (key === 'file') {
-                      startRootCreate(false);
-                    }
-                  }}
-                >
-                  <Menu.Item key="file">新建PySpark</Menu.Item>
-                  <Menu.Item key="folder">新建文件夹</Menu.Item>
-                </Menu>
-              }
-            >
-              {isCanCreate && (
-                <Button type="text" size="small" icon={<IconPlus />}>
-                  {newButtonText}
-                </Button>
-              )}
-            </Dropdown>
-          )}
+                <Menu.Item key="file">新建PySpark</Menu.Item>
+                <Menu.Item key="folder">新建文件夹</Menu.Item>
+              </Menu>
+            }
+          >
+            {isCanCreate && (
+              <Button type="text" size="small" icon={<IconPlus />}>
+                {newButtonText}
+              </Button>
+            )}
+          </Dropdown>
         </div>
 
         {loading ? (
@@ -673,11 +680,6 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
             }}
             renderExtra={(node: any) => {
               const isEditing = node.dataRef?.showInput;
-              const nowPermissions =
-                from === DirectoryTreeFrom.SQL
-                  ? SQL_PERMISSIONS
-                  : PYSPARK_PERMISSIONS;
-
               if (isEditing) return null;
 
               return (
@@ -705,10 +707,9 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
                         <IconPlus
                           onClick={() => {
                             if (!expandedKeys.includes(node?.dataRef?.id)) {
-                              setExpandedKeys([
-                                ...expandedKeys,
-                                node?.dataRef?.id
-                              ]);
+                              setExpandedKeys(
+                                [...expandedKeys, node?.dataRef?.id].map(String)
+                              );
                             }
                           }}
                           className="mr-1 text-[14px] hover:text-[rgb(var(--primary-6))]"
@@ -722,6 +723,14 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
                       onClick={() => handleEdit(node)}
                     />
                   </Tooltip>
+                  {node?.type !== 'directory' && (
+                    <Tooltip color="white" content="复制并粘贴">
+                      <IconCopy
+                        className="mr-1 text-[14px] hover:text-[rgb(var(--primary-6))]"
+                        onClick={() => handleCopy(node as unknown as NodeProps)}
+                      />
+                    </Tooltip>
+                  )}
                   {/* )} */}
                   {/* {node.dataRef?.type !== PythonItemType.Directory && */}
                   {/* node.dataRef?.perms?.includes(nowPermissions.CAN_COPY) && ( */}

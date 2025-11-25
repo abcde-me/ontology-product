@@ -52,7 +52,6 @@ export default function SearchArea({
 
   // 初始化：默认勾选前三个字段
   useEffect(() => {
-    console.log('fields-----:', fields);
     const defaultCheckedKeys = fields.slice(0, 3).map((f) => f.key);
     const defaultChecked = new Set(defaultCheckedKeys);
     setCheckedFields(defaultChecked);
@@ -262,7 +261,6 @@ export default function SearchArea({
             placeholder={`输入关键字搜索`}
             value={value || ''}
             onChange={(val) => handleFieldValueChange(field.key, val)}
-            suffix={<IconSearch />}
             allowClear
           />
         );

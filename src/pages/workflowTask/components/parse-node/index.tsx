@@ -3,7 +3,7 @@ import { Pagination, Table } from '@arco-design/web-react';
 import { ColumnProps } from '@arco-design/web-react/es/Table';
 import EllipsisPopover from '@/components/ellipsis-popover-com';
 import noDataElement from '@/components/no-data';
-import { debounce } from 'lodash';
+import { debounce } from 'lodash-es';
 import getFileIcon from '@/components/file-icon';
 import { SorterInfo } from '@arco-design/web-react/es/Table/interface';
 import { FileType } from '@/utils/type';

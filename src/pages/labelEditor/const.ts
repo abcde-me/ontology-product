@@ -32,4 +32,4 @@ export const WujiePlugins = navigator.userAgent.includes('Firefox')
         }
       }
     ]
-  : [];
+  : [InstanceofPlugin(), EventTargetPlugin()];

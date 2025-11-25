@@ -16,7 +16,8 @@ import {
   Input,
   Pagination,
   Tooltip,
-  TableColumnProps
+  TableColumnProps,
+  Popconfirm
 } from '@arco-design/web-react';
 import {
   IconArrowLeft,
@@ -44,6 +45,7 @@ import {
   getDataContentFileList,
   getDataContentTableList
 } from '@/api/datasetManagement';
+import { BatchDeleteKnowledgeDocument } from '@/api/modules/rag';
 import EditDatasetForm from '@/components/datasetform/EditDatasetForm';
 import { DATA_MANAGEMENT_PERMISSIONS } from '@/config/permissions';
 import './style.css';
@@ -51,8 +53,8 @@ import noDataElement from '@/components/no-data';
 import getFileIcon from '@/components/file-icon';
 import { PermissionWrapper } from '../PermissionGuard';
 import HitTest from '@/pages/dataMarket/components/configurationpage/hit-test';
-import { throttle } from 'lodash';
-import { FileType } from '@/utils/type';
+import { throttle } from 'lodash-es';
+import { FileTypeLarge } from '@/utils/type';
 const { Title, Text } = Typography;
 const { TabPane } = Tabs;
 
@@ -92,78 +94,87 @@ interface TableColumn {
 }
 
 enum FileStatusType {
-  success = 'success',
-  fail = 'fail'
+  success = 'Succeed',
+  fail = 'Error',
+  waiting = 'Waiting'
 }
 
 const filterFileTypes = [
   {
-    text: FileType.pdf,
-    value: FileType.pdf
+    text: FileTypeLarge.pdf,
+    value: FileTypeLarge.pdf
   },
   {
-    text: FileType.ppt,
-    value: FileType.ppt
+    text: FileTypeLarge.ppt,
+    value: FileTypeLarge.ppt
   },
   {
-    text: FileType.pptx,
-    value: FileType.pptx
+    text: FileTypeLarge.pptx,
+    value: FileTypeLarge.pptx
   },
   {
-    text: FileType.txt,
-    value: FileType.txt
+    text: FileTypeLarge.xls,
+    value: FileTypeLarge.xls
   },
   {
-    text: FileType.md,
-    value: FileType.md
+    text: FileTypeLarge.xlsx,
+    value: FileTypeLarge.xlsx
   },
   {
-    text: FileType.doc,
-    value: FileType.doc
+    text: FileTypeLarge.txt,
+    value: FileTypeLarge.txt
   },
   {
-    text: FileType.docx,
-    value: FileType.docx
+    text: FileTypeLarge.md,
+    value: FileTypeLarge.md
   },
   {
-    text: FileType.jpg,
-    value: FileType.jpg
+    text: FileTypeLarge.doc,
+    value: FileTypeLarge.doc
   },
   {
-    text: FileType.png,
-    value: FileType.png
+    text: FileTypeLarge.docx,
+    value: FileTypeLarge.docx
   },
   {
-    text: FileType.jpeg,
-    value: FileType.jpeg
+    text: FileTypeLarge.jpg,
+    value: FileTypeLarge.jpg
   },
   {
-    text: FileType.wav,
-    value: FileType.wav
+    text: FileTypeLarge.png,
+    value: FileTypeLarge.png
   },
   {
-    text: FileType.mp3,
-    value: FileType.mp3
+    text: FileTypeLarge.jpeg,
+    value: FileTypeLarge.jpeg
   },
   {
-    text: FileType.aac,
-    value: FileType.aac
+    text: FileTypeLarge.wav,
+    value: FileTypeLarge.wav
   },
   {
-    text: FileType.flac,
-    value: FileType.flac
+    text: FileTypeLarge.mp3,
+    value: FileTypeLarge.mp3
   },
   {
-    text: FileType.mp4,
-    value: FileType.mp4
+    text: FileTypeLarge.aac,
+    value: FileTypeLarge.aac
   },
   {
-    text: FileType.mov,
-    value: FileType.mov
+    text: FileTypeLarge.flac,
+    value: FileTypeLarge.flac
   },
   {
-    text: FileType.mkv,
-    value: FileType.mkv
+    text: FileTypeLarge.mp4,
+    value: FileTypeLarge.mp4
+  },
+  {
+    text: FileTypeLarge.mov,
+    value: FileTypeLarge.mov
+  },
+  {
+    text: FileTypeLarge.mkv,
+    value: FileTypeLarge.mkv
   }
 ];
 
@@ -641,37 +652,35 @@ const DatasetDetail = (props: {
       ? [
           {
             title: '文件名称',
-            dataIndex: 'file_name',
+            dataIndex: 'name',
             width: 250,
             render: (_, record) => (
-              <EllipsisPopover value={record.file_name || '-'} isEdit={false} />
+              <EllipsisPopover value={record.name || '-'} isEdit={false} />
             )
           },
           {
             title: '文件类型',
-            dataIndex: 'file_type',
+            dataIndex: 'format',
             width: 130,
             filters: filterFileTypes,
             render: (_, record) => (
               <div>
-                {getFileIcon(record.file_type)} {record.file_type}
+                {getFileIcon(record.format)} {record.format}
               </div>
             )
           },
           {
             title: '文件大小',
-            dataIndex: 'file_size',
+            dataIndex: 'size',
             width: 100,
             sorter: true, // 启用排序功能，但不提供排序函数
-            render: (_, record) => (
-              <span>{formatFileSize(record.file_size)}</span>
-            )
+            render: (_, record) => <span>{formatFileSize(record.size)}</span>
           },
           {
             title: '分段数',
-            dataIndex: 'segment_count',
+            dataIndex: 'chunk_count',
             width: 100,
-            render: (_, record) => <span>{record.segment_count}</span>
+            render: (_, record) => <span>{record.chunk_count}</span>
           },
           {
             title: '状态',
@@ -685,6 +694,10 @@ const DatasetDetail = (props: {
               {
                 text: '处理失败',
                 value: FileStatusType.fail
+              },
+              {
+                text: '等待中',
+                value: FileStatusType.waiting
               }
             ],
             render: (_, record) => (
@@ -731,9 +744,16 @@ const DatasetDetail = (props: {
                 >
                   分段列表
                 </Button>
-                <Button type="text" onClick={() => {}}>
-                  删除
-                </Button>
+                <Popconfirm
+                  focusLock
+                  title="删除"
+                  content="确定删除该文件吗？"
+                  onOk={() => {
+                    handleDeleteKnowledgeDocument(record.id);
+                  }}
+                >
+                  <Button type="text">删除</Button>
+                </Popconfirm>
               </div>
             )
           }
@@ -825,6 +845,10 @@ const DatasetDetail = (props: {
       fetchDatasetContents();
     }
   }, [sortValue]);
+
+  useEffect(() => {
+    fetchDatasetContents();
+  }, [filePageSize, fileCurrentPage]);
 
   React.useEffect(() => {
     //@ts-expect-error
@@ -946,8 +970,26 @@ const DatasetDetail = (props: {
     path: string
   ) => {
     history.push(
-      `/tenant/compute/modaforge/datasetManagement/ragDetail?datasetId=${detailId}&documentId=${document_id}&bucketName=${bucket_name}&path=${path}&datasetName=${datasetDetail?.name}`
+      `/tenant/compute/modaforge/ragDetail?datasetId=${id}&documentId=${document_id}&bucketName=${bucket_name}&path=${path}&datasetName=${datasetDetail?.name}`
     );
+  };
+
+  // 删除知识库文件
+  const handleDeleteKnowledgeDocument = async (document_id: string) => {
+    try {
+      const res = await BatchDeleteKnowledgeDocument({
+        dataset_id: Number(id),
+        document_ids: [document_id]
+      });
+      if (res.code === '' && res.status === 200) {
+        Message.success('删除成功');
+        fetchDatasetContents();
+      } else {
+        Message.error(res.message || '删除失败');
+      }
+    } catch (error) {
+      Message.error('删除失败');
+    }
   };
 
   // 获取文件类型名称
@@ -1921,6 +1963,7 @@ const DatasetDetail = (props: {
                         pagination={false}
                         // scroll={{ x: 'max-content' }}
                         border={false}
+                        rowKey="id"
                       />
                     </>
                   ) : null}
@@ -2001,13 +2044,14 @@ const DatasetDetail = (props: {
                   const singleSorter = Array.isArray(sorter)
                     ? sorter[0]
                     : sorter;
+                  console.log(singleSorter, filters);
                   setSortValue({
                     sorter: {
                       field: singleSorter?.field as string,
-                      direction: singleSorter.direction as string
+                      direction: singleSorter?.direction as string
                     },
                     filters: {
-                      file_type: filters.file_type || [],
+                      file_type: filters.format || [],
                       status: filters.status || []
                     }
                   });
