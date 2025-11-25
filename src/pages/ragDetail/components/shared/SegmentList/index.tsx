@@ -58,7 +58,7 @@ const SegmentList: React.FC<SegmentListProps> = ({
     const titleMap = new Map<string, Segment[]>();
 
     filteredSegments.forEach((segment) => {
-      const title = segment.parentTitle || '未分类';
+      const title = segment.parentTitle || '';
       if (!titleMap.has(title)) {
         titleMap.set(title, []);
       }

@@ -30,8 +30,8 @@ export type PositionBBox = Record<string, number[]>;
 export interface ApiSegment {
   id: string;
   document_id: string;
-  chunk_index: number;
-  positions: ApiPosition[];
+  index: number;
+  positions: ApiPosition[] | null; // 可能为 null
   content: string;
   type: 'text' | 'image' | 'table'; // 分段类型
   char_count: number;
@@ -243,7 +243,7 @@ export interface ApiCatalogNode {
   type: 'title' | 'text'; // title: 标题节点（不高亮分段），text: 文本节点（高亮分段）
   chunk_id: string; // 对应分段的 id 或 title_id
   content: string;
-  positions: ApiPosition[];
+  positions: ApiPosition[] | null; // 可能为 null
   children?: ApiCatalogNode[];
 }
 

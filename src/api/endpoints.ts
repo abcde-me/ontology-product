@@ -250,7 +250,7 @@ export const ModaForgeResourceEndpoints = {
   // 查询知识库文件目录层级
   ListKnowledgeDocumentCatalogs: PrefixRagV2 + '/ListKnowledgeDocumentData',
   // 查询知识库分块列表
-  ListKnowledgeChunks: PrefixRagV2 + '/ListKnowledgeChunks',
+  ListKnowledgeChunks: PrefixAimdp + '/ListKnowledgeChunks',
   // 查询分块详情
   GetKnowledgeChunk: PrefixRagV2 + '/GetKnowledgeChunk',
   // 编辑分块内容
