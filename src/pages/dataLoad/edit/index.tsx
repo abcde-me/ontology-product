@@ -821,6 +821,21 @@ const Edit = (props) => {
   // 监听SQL处理开关状态
   const sqlProcessEnabled = Form.useWatch('sql_process_enabled', form);
 
+  const validateSQL = useCallback(
+    (value: string, callback: (error?: string) => void) => {
+      if (!value || value.trim() === '') {
+        callback('请输入SQL语句');
+        return;
+      }
+      if (checkStatus === CheckSQLStatus.ERROR) {
+        callback('运行失败，请重新检查语句');
+        return;
+      }
+      return callback();
+    },
+    [checkStatus]
+  );
+
   // 根据初始 SQL 是否有值来设置开关初始状态
   useEffect(() => {
     if (props.detailData?.source_type !== 'db') return;
@@ -1146,7 +1161,11 @@ const Edit = (props) => {
               </FormItem>
 
               {sqlProcessEnabled === 'enable' && (
-                <FormItem label=" " field="sql">
+                <FormItem
+                  label=" "
+                  field="sql"
+                  rules={[{ required: true, validator: validateSQL }]}
+                >
                   <div
                     className={classNames(
                       styles['sql-editor-container'],
