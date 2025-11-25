@@ -14,7 +14,7 @@ import {
 } from '@arco-design/web-react';
 // import { Download } from '@icon-park/react';
 import { FieldMapping, MetadataField } from './DataAssetFormContainer';
-import { IconDownload } from '@arco-design/web-react/icon';
+import EllipsisPopover from '@/components/ellipsis-popover-com';
 import styles from './Step2FieldMapping.module.scss';
 import {
   CreateDataAssetAndMappingReq,
@@ -140,29 +140,33 @@ export default function Step2FieldMapping({
     const cols: any[] = [
       {
         title: '序号',
+        fixed: 'left' as const,
         dataIndex: 'sequence',
         width: 60,
-        align: 'center' as const
+        align: 'center' as const,
+        zIndex: 2
       },
       {
         title: '数据资产名称',
         dataIndex: 'nameZh',
+        fixed: 'left' as const,
         width: 200,
         render: (_: any, record: FieldMapping) => {
           const meta = metadataFields[record.sequence - 1];
           const isReserved =
             !!meta?.nameEn && RESERVED_FIELD_ENS.has(meta.nameEn);
-          return (
-            <Input
-              placeholder="请输入数据资产名称"
-              allowClear
-              value={record.nameZh}
-              disabled={isReserved}
-              onChange={(value) =>
-                handleUpdateMapping(record.id, { nameZh: value })
-              }
-            />
-          );
+          // return (
+          //   <Input
+          //     placeholder="请输入数据资产名称"
+          //     allowClear
+          //     value={record.nameZh}
+          //     disabled={isReserved}
+          //     onChange={(value) =>
+          //       handleUpdateMapping(record.id, { nameZh: value })
+          //     }
+          //   />
+          // );
+          return <EllipsisPopover value={record.nameZh} preferTypography />;
         }
       }
     ];
@@ -175,7 +179,8 @@ export default function Step2FieldMapping({
       if (sourceInfo) {
         const columnTitle = sourceInfo.name || sourceKey;
         cols.push({
-          title: columnTitle,
+          title: <EllipsisPopover value={columnTitle} preferTypography />,
+          ellipsis: true,
           dataIndex: sourceKey,
           width: 200,
           render: (_: any, record: FieldMapping, index: number) => {
@@ -212,38 +217,38 @@ export default function Step2FieldMapping({
       }
     });
 
-    cols.push({
-      title: '操作',
-      dataIndex: 'operation',
-      width: 132,
-      align: 'left' as const,
-      fixed: 'right' as const,
-      render: (_: any, record: FieldMapping) => {
-        const meta = metadataFields[record.sequence - 1];
-        const isReserved =
-          !!meta?.nameEn && RESERVED_FIELD_ENS.has(meta.nameEn);
-        return (
-          <Space>
-            {/* <Button
-              type="text"
-              onClick={() => handleAddMapping()}
-              className="cursor-pointer text-green-500"
-            >
-              添加行
-            </Button> */}
-            {mappings.length > 1 && !isReserved && (
-              <Button
-                type="text"
-                onClick={() => handleDeleteMapping(record.id)}
-                className="cursor-pointer text-red-500"
-              >
-                删除行
-              </Button>
-            )}
-          </Space>
-        );
-      }
-    });
+    // cols.push({
+    //   title: '操作',
+    //   dataIndex: 'operation',
+    //   width: 132,
+    //   align: 'left' as const,
+    //   fixed: 'right' as const,
+    //   render: (_: any, record: FieldMapping) => {
+    //     const meta = metadataFields[record.sequence - 1];
+    //     const isReserved =
+    //       !!meta?.nameEn && RESERVED_FIELD_ENS.has(meta.nameEn);
+    //     return (
+    //       <Space>
+    //         {/* <Button
+    //           type="text"
+    //           onClick={() => handleAddMapping()}
+    //           className="cursor-pointer text-green-500"
+    //         >
+    //           添加行
+    //         </Button> */}
+    //         {mappings.length > 1 && !isReserved && (
+    //           <Button
+    //             type="text"
+    //             onClick={() => handleDeleteMapping(record.id)}
+    //             className="cursor-pointer text-red-500"
+    //           >
+    //             删除行
+    //           </Button>
+    //         )}
+    //       </Space>
+    //     );
+    //   }
+    // });
 
     return cols;
   }, [

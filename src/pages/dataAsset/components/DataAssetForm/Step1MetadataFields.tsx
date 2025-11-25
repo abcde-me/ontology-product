@@ -124,6 +124,7 @@ export default function Step1MetadataFields({
     {
       title: '序号',
       dataIndex: 'sequence',
+      fixed: 'left' as const,
       width: 60,
       align: 'center' as const
     },
