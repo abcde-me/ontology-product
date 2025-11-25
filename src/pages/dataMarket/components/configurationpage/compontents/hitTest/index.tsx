@@ -185,7 +185,6 @@ function PageContentFalse(props) {
     seteditPolicy(true);
   };
   const handleCopy = (data) => {
-    console.log(data, 'dadada');
     copy(data);
     Message.success(`已复制内容`);
   };
