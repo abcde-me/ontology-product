@@ -239,7 +239,7 @@ const PdfRenderer: React.FC<PdfRendererProps> = ({
             </div>
           ) : (
             <div className="flex flex-1 flex-col items-center justify-center text-gray-600">
-              <p>无法加载PDF文件，请检查文件路径</p>
+              <p>无法加载文件，请检查数据格式</p>
             </div>
           )}
         </div>
