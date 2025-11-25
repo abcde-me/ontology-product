@@ -2839,6 +2839,30 @@ export default function RequirementDetail() {
               className="configuration-form"
             >
               <FormItem
+                initialValue={30}
+                field="timeoutRelease"
+                label={
+                  <span>
+                    超时释放
+                    <Tooltip content="领取任务后超时未提交，则自动释放回公池">
+                      <IconQuestionCircle
+                        style={{ marginLeft: 2, color: 'var(--color-text-4)' }}
+                      />
+                    </Tooltip>
+                    :
+                  </span>
+                }
+                rules={[{ required: true, message: '请选择超时释放时间' }]}
+              >
+                <InputNumber
+                  mode="button"
+                  min={1}
+                  precision={0}
+                  disabled={type === 'detail'}
+                  style={{ width: 200 }}
+                />
+              </FormItem>
+              <FormItem
                 label="选择类型:"
                 rules={[{ required: true, message: '请选择部门或者个人' }]}
               >
