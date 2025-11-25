@@ -644,16 +644,16 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
               <div className="content-table-form">
                 <div className="tree-node-name">{treeNodeName}</div>
                 <DatePicker.RangePicker
-              onChange={handleDateChange}
-              style={{ width: 350 }}
-              onClear={() => {
-                if (type === 'detail') {
-                  setTableData(getDetailObj?.label_data_set);
-                } else {
-                  getTableData();
-                }
-                // setDateRange([]);
-              }}
+                  onChange={handleDateChange}
+                  style={{ width: 350 }}
+                  onClear={() => {
+                    if (type === 'detail') {
+                      setTableData(getDetailObj?.label_data_set);
+                    } else {
+                      getTableData();
+                    }
+                    // setDateRange([]);
+                  }}
                 />
                 {/* <div className="form-option">
                 </div> */}
