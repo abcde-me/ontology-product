@@ -34,7 +34,7 @@ import { getConnectionList, getdetailList } from '@/api/connectionApi';
 import { useHistory } from 'react-router';
 import { validateName } from '@/utils/valiate';
 import Uploads from '../list/file-upload';
-import ComponentTree from './component-tree';
+import ComponentTree from '../component-tree';
 import '../list/db-tree.scss';
 import { sql } from '@codemirror/lang-sql';
 import { lintGutter } from '@codemirror/lint';
@@ -657,7 +657,7 @@ export default function DataLoadCreate() {
           cycle_text:
             loadVal === LOAD_TYPES.ONCE ? DEFAULT_ONCE_CYCLE : expression
         },
-        dest_path_id: pathId,
+        dest_path_id: Number(pathId),
         submit_type: submitType === SUBMIT_TYPES.KEEP ? 1 : 2,
         table_names: Array.isArray(processedTableNames)
           ? processedTableNames
