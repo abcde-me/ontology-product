@@ -22,9 +22,20 @@
     }
   }
 
+  .script-card-content-item-title-text {
+    max-width: 320px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
   .script-card-content-item-title-text:hover {
     cursor: pointer;
     color: #007dfa;
+    max-width: 240px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .script-card-content-item:nth-child(odd) {
@@ -43,7 +54,7 @@
   }
 
   .script-card-content-item-title-right {
-    visibility: hidden;
+    // visibility: hidden;
   }
 
   .script-card-content-item-title-btn {
@@ -60,6 +71,19 @@
       color: #1e293b !important;
     }
   }
+
+  .script-card-content-item-title-btns {
+    color: #1e293b !important;
+    text-align: center;
+    border-color: #cbd5e1 !important;
+
+    &:hover {
+      border-color: #94a3b8 !important;
+      color: #1e293b !important;
+    }
+  }
+
+  color: #1e293b !important;
 
   .script-card-content-item-title-text {
     color: var(--text-color-text-2, #1e293b);
@@ -83,24 +107,24 @@
   }
 
   .released-icon {
-    width: 12px;
-    height: 12px;
+    width: 8px;
+    height: 8px;
     background-color: #10b981;
     border-radius: 50%;
     margin-right: 8px;
   }
 
   .unreleased-icon {
-    width: 12px;
-    height: 12px;
+    width: 8px;
+    height: 8px;
     background-color: #94a3b8;
     border-radius: 50%;
     margin-right: 8px;
   }
 
   .scheduled-icon {
-    width: 12px;
-    height: 12px;
+    width: 8px;
+    height: 8px;
     background-color: #007dfa;
     border-radius: 50%;
     margin-right: 8px;

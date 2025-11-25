@@ -51,7 +51,7 @@ const PythonTabContent: React.FC<NotebookTabContentProps> = ({
   return (
     <div className={styles['sql-tab-content']}>
       <div className={styles['tab-header']}>
-        <Title className={styles['tab-title']}>SQL脚本列表</Title>
+        <Title className={styles['tab-title']}>加工脚本列表</Title>
       </div>
 
       <div className={`${styles['tab-tree']} ${styles['sider-container']}`}>

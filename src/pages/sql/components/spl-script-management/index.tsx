@@ -12,7 +12,7 @@ const SplScriptManagement: React.FC = memo(() => {
   return (
     <div className={styles['spl-script-management']}>
       <div className={styles['spl-script-management-title']}>SQL脚本管理</div>
-      <Tabs defaultActiveTab="processing" className={styles['spl-tabs']}>
+      <Tabs defaultActiveTab="query" className={styles['spl-tabs']}>
         <TabPane key="processing" title="加工脚本">
           <Processing />
         </TabPane>

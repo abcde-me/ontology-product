@@ -1,0 +1,39 @@
+.script-modal-table-wrapper {
+  .script-modal-table-content {
+    display: flex;
+    flex-wrap: wrap;
+    background-color: #f8fafd;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 16px;
+
+    .script-modal-table-content-item {
+      width: 48%;
+      margin-bottom: 16px;
+      display: flex;
+
+      &:nth-child(odd) {
+        margin-right: 4%;
+      }
+    }
+
+    .script-modal-table-content-item-label {
+      width: 100px;
+      color: var(--text-color-text-4, #6e7b8d);
+      font-family: 'PingFang SC';
+      font-size: 14px;
+      font-style: normal;
+      font-weight: 500;
+      line-height: 22px;
+    }
+
+    .script-modal-table-content-item-value {
+      color: var(--text-color-text-2, #1e293b);
+      font-family: 'PingFang SC';
+      font-size: 14px;
+      font-style: normal;
+      font-weight: 400;
+      line-height: 22px;
+    }
+  }
+}

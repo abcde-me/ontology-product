@@ -122,7 +122,7 @@ const SqlIndex: React.FC = memo(() => {
 
   return (
     <Layout className={styles['sql-page-layout']}>
-      <Sider width={isDasetTab ? '100%' : 360} className={styles['sql-sider']}>
+      <Sider width={isDasetTab ? '100%' : 400} className={styles['sql-sider']}>
         <Tabs
           activeTab={activeTab}
           onChange={handleTabChange}
@@ -143,7 +143,7 @@ const SqlIndex: React.FC = memo(() => {
           <TabPane
             key="data"
             title={
-              <Popover content="源数据" position="left">
+              <Popover content="数据列表" position="left">
                 <DataIcon className={styles['sql-menu-icon']} />
               </Popover>
             }
@@ -159,7 +159,7 @@ const SqlIndex: React.FC = memo(() => {
           <TabPane
             key="files"
             title={
-              <Popover content="SQL脚本列表" position="left">
+              <Popover content="加工脚本列表" position="left">
                 <SQLIcon className={styles['sql-menu-icon']} />
               </Popover>
             }
@@ -205,6 +205,7 @@ const SqlIndex: React.FC = memo(() => {
           onEditorFocusChange={handleEditorFocusChange}
           refreshDirectory={handleRefreshDirectory}
           selectFile={selectFile}
+          onToScriptList={handleTabChange}
         />
       </Content>
     </Layout>

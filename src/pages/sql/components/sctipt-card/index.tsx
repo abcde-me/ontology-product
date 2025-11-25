@@ -1,11 +1,21 @@
 import React, { useEffect, useState } from 'react';
-import { Button, Form, Input, Pagination } from '@arco-design/web-react';
+import {
+  Button,
+  Form,
+  Input,
+  Message,
+  Modal,
+  Pagination,
+  Popover,
+  Tooltip
+} from '@arco-design/web-react';
 import { getWorkflowList } from '@/api/workflowList';
 import { useUserInfo } from '@/store/userInfoStore';
 import Mock from 'mockjs';
 import styles from './index.module.scss';
 import { IconCopy, IconDelete } from '@arco-design/web-react/icon';
 import { mock } from 'node:test';
+import Tool from '@/pages/workflowConfig/workflow/block-selector/tool/tool';
 
 // 版本类型 已发版 未发版 调度中
 export const VersionType = {
@@ -44,7 +54,7 @@ const ScriptCard: React.FC = () => {
       {
         id: '@id',
         version: '@integer(1, 100)',
-        title: '@ctitle(5,10)',
+        title: '@ctitle(5,100)',
         content: '@cparagraph(1,60)',
         version_type: '@pick(["released", "unreleased", "scheduled"])'
       }
@@ -81,12 +91,50 @@ const ScriptCard: React.FC = () => {
   //
 
   // 删除卡片脚本
-  const deleteScript = async (id: string) => {
+  const deleteScript = (id: string, type) => {
+    console.log(type, '123');
+    if (type === VersionType.UNRELEASED) {
+      Message.error('调度中的脚本不能删除');
+      return;
+    }
+    if (type === VersionType.RELEASED) {
+      Modal.confirm({
+        title: (
+          <span className={styles['workflow-list-modal-title']}>
+            确认删除此脚本？
+          </span>
+        ),
+        content: (
+          <div className={styles['workflow-list-modal-content']}>
+            删除后，该脚本不可恢复。
+          </div>
+        ),
+        okText: '确定',
+        cancelText: '取消',
+        onOk: () => {
+          deleteCardScript(id);
+        }
+      });
+      return;
+    }
     // history.push(
     //     `/tenant/compute/modaforge/dataCatalog/list?root_type=${root_type}&id=${id}&parent_id=${parent_id}`
     // );
   };
-
+  // 删除脚本
+  const deleteCardScript = async (workflow_uuid: number | string) => {
+    // const res = await workflowDelete(workflow_uuid);
+    // if (res.status === 200 && res.code === '') {
+    //   Message.success({
+    //     content: '删除成功'
+    //   });
+    //   getList();
+    // } else {
+    //   Message.error({
+    //     content: res?.message ?? '删除失败，请稍后重试'
+    //   });
+    // }
+  };
   // 查看脚本详情
   const handleViewScriptDetail = (id: number) => {
     // openNewPage(
@@ -189,12 +237,27 @@ const ScriptCard: React.FC = () => {
                 >
                   详情
                 </Button>
-                <Button
-                  className={styles['script-card-content-item-title-btn']}
-                  icon={<IconDelete />}
+                <Popover
+                  content={
+                    item?.version_type === VersionType.SCHEDULED
+                      ? '调度中的脚本不可删除'
+                      : ''
+                  }
                 >
-                  删除
-                </Button>
+                  <Button
+                    style={{
+                      width: '68px',
+                      height: '24px',
+                      padding: '0px 8px'
+                    }}
+                    className={styles['script-card-content-item-title-btns']}
+                    icon={<IconDelete />}
+                    disabled={item.version_type === VersionType.SCHEDULED}
+                    onClick={() => deleteScript(item.id, item.version_type)}
+                  >
+                    删除
+                  </Button>
+                </Popover>
               </div>
             </div>
             <div className={styles['script-card-content-item-content']}>

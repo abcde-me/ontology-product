@@ -29,6 +29,7 @@ import { IconClockCircle, IconRefresh } from '@arco-design/web-react/icon';
 import { openNewPage } from '@/utils/env';
 import styles from './index.module.scss';
 import { VersionType, VersionTypeEnum } from '../sctipt-card';
+import ScriptModalTable from '../sctip-modal-table';
 
 const InputSearch = Input.Search;
 
@@ -57,6 +58,8 @@ const ScriptTable: React.FC = () => {
     run_cycle: '',
     sort: ''
   });
+  // 控制弹窗显示隐藏
+  const [visible, setVisible] = useState<boolean>(false);
 
   // 组件初始化
   useEffect(() => {
@@ -401,39 +404,40 @@ const ScriptTable: React.FC = () => {
                 详情
               </span>
             </PermissionWrapper>
-            <PermissionWrapper permission={WORKFLOW_LIST_PERMISSIONS.CAN_COPY}>
-              <span
-                className={styles['operate-text']}
-                onClick={() => {
-                  handleCloneWorkflow(record.workflow_uuid);
-                }}
-              >
-                历史版本
-              </span>
-            </PermissionWrapper>
-            <PermissionWrapper
-              permission={WORKFLOW_LIST_PERMISSIONS.CAN_DELETE}
+            {/* <PermissionWrapper permission={WORKFLOW_LIST_PERMISSIONS.CAN_COPY}> */}
+            <span
+              className={styles['operate-text']}
+              onClick={() => {
+                console.log(123);
+                setVisible(true);
+              }}
             >
-              <Popover
-                trigger="hover"
-                content="请先下线工作流"
-                position="top"
-                disabled={!record.is_online}
+              历史版本
+            </span>
+            {/* </PermissionWrapper> */}
+            {/* <PermissionWrapper
+              permission={WORKFLOW_LIST_PERMISSIONS.CAN_DELETE}
+            > */}
+            <Popover
+              trigger="hover"
+              content="请先下线工作流"
+              position="top"
+              disabled={!record.is_online}
+            >
+              <span
+                className={
+                  record.is_online
+                    ? styles['disabled-text']
+                    : styles['operate-text']
+                }
+                onClick={() =>
+                  handleDelete(record.workflow_uuid, record.workflow_version)
+                }
               >
-                <span
-                  className={
-                    record.is_online
-                      ? styles['disabled-text']
-                      : styles['operate-text']
-                  }
-                  onClick={() =>
-                    handleDelete(record.workflow_uuid, record.workflow_version)
-                  }
-                >
-                  删除
-                </span>
-              </Popover>
-            </PermissionWrapper>
+                删除
+              </span>
+            </Popover>
+            {/* </PermissionWrapper> */}
           </div>
         );
       }
@@ -540,6 +544,7 @@ const ScriptTable: React.FC = () => {
           style={{ justifyContent: 'flex-end', marginTop: '10px' }}
         />
       )}
+      <ScriptModalTable isVisible={visible} setChildStatus={setVisible} />
     </div>
   );
 };

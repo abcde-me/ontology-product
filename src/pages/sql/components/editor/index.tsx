@@ -21,6 +21,7 @@ interface EditorContentProps {
   onEditorFocusChange?: (isFocused: boolean) => void;
   refreshDirectory?: () => void;
   selectFile?: (fileId: string) => void;
+  onToScriptList?: (key: string) => void;
 }
 
 const EditorContent: React.FC<EditorContentProps> = memo(
@@ -35,7 +36,8 @@ const EditorContent: React.FC<EditorContentProps> = memo(
     onInsertContent,
     onEditorFocusChange,
     refreshDirectory,
-    selectFile
+    selectFile,
+    onToScriptList
   }) => {
     // 获取当前活动标签页
     const activeTabData = fileTabs.find((tab) => tab.key === activeTab);
@@ -137,7 +139,6 @@ const EditorContent: React.FC<EditorContentProps> = memo(
             </TabPane>
           ))}
         </Tabs>
-
         {/* 工作区 */}
         <div className={styles['sql-main-workspace']}>
           <EditorWorkspace
@@ -153,6 +154,7 @@ const EditorContent: React.FC<EditorContentProps> = memo(
             onEditorFocusChange={onEditorFocusChange}
             refreshDirectory={refreshDirectory}
             selectFile={selectFile}
+            onToScriptList={onToScriptList}
           />
         </div>
       </div>
