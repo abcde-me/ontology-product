@@ -12,7 +12,8 @@ import {
   Tabs,
   Typography,
   Switch,
-  Checkbox
+  Checkbox,
+  Space
 } from '@arco-design/web-react';
 import { format } from 'sql-formatter';
 import React, {
@@ -42,8 +43,16 @@ import { tags as t } from '@lezer/highlight';
 import createTheme from '@uiw/codemirror-themes';
 import CodeMirror from '@uiw/react-codemirror';
 import styles from './index.module.scss';
-import { IconCaretRight, IconDown, IconUp } from '@arco-design/web-react/icon';
+import {
+  IconDown,
+  IconInfoCircleFill,
+  IconLoading,
+  IconUp
+} from '@arco-design/web-react/icon';
 import SQLFormatIcon from '@/assets/sql/sql-format-ico.svg';
+import ValidateIcon from '../assets/validate-icon.svg';
+import RunFailedIcon from '@/assets/python/run-fail-icon.svg';
+import RunSuccessIcon from '@/assets/python/run-success-icon.svg';
 import classNames from 'classnames';
 
 // 常量定义
@@ -190,11 +199,32 @@ const RunningInfoPanel = function ({
   const renderCheckStatus = () => {
     switch (checkStatus) {
       case CheckSQLStatus.CHECKING:
-        return <Tag color="blue">校验中</Tag>;
+        return (
+          <div className="flex items-center gap-[4px]">
+            <span className="text-[14px] text-[var(--color-text-4)]">
+              校验中
+            </span>
+            <IconLoading style={{ color: '#007DFA' }} />
+          </div>
+        );
       case CheckSQLStatus.SUCCESS:
-        return <Tag color="green">校验成功</Tag>;
+        return (
+          <div className="flex items-center gap-[4px]">
+            <span className="text-[14px] text-[var(--color-text-4)]">
+              校验成功
+            </span>
+            <RunSuccessIcon />
+          </div>
+        );
       case CheckSQLStatus.ERROR:
-        return <Tag color="red">校验失败</Tag>;
+        return (
+          <div className="flex items-center gap-[4px]">
+            <span className="text-[14px] text-[var(--color-text-4)]">
+              校验失败
+            </span>
+            <RunFailedIcon />
+          </div>
+        );
       default:
         return null;
     }
@@ -1400,7 +1430,7 @@ export default function DataLoadCreate() {
                         <Button
                           type="secondary"
                           disabled={!sqlContent || sqlContent.trim() === ''}
-                          icon={<IconCaretRight />}
+                          icon={<ValidateIcon />}
                           className="h-[26px]"
                           onClick={handleCheckSQL}
                           loading={checkStatus === CheckSQLStatus.CHECKING}
@@ -1412,7 +1442,10 @@ export default function DataLoadCreate() {
                           type="text"
                           icon={<SQLFormatIcon />}
                           onClick={handleFormatCode}
-                          className="h-[26px]"
+                          className={classNames(
+                            'h-[26px]',
+                            styles['format-button']
+                          )}
                         >
                           格式化
                         </Button>
