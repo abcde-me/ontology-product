@@ -62,12 +62,14 @@ import {
   useGetModelList,
   useGetModelLabelList
 } from '../hooks/useGetModelInfo';
+import QualityConfig from './components/QualityConfig';
 const BreadcrumbItem = Breadcrumb.Item;
 
 export default function RequirementDetail() {
   const [basicForm] = Form.useForm();
   const [labelToolForm] = Form.useForm();
   const [distributeForm] = Form.useForm();
+  const [qualityTaskForm] = Form.useForm();
   const FormItem = Form.Item;
   const RadioGroup = Radio.Group;
   const Option = Select.Option;
@@ -2814,6 +2816,17 @@ export default function RequirementDetail() {
               </Form>
             </div>
           )}
+          {/* 质检任务配置 */}
+          <div className="quality-task-configuration">
+            <div className="basic-title">质检任务配置</div>
+            <Form
+              form={qualityTaskForm}
+              disabled={type === 'detail'}
+              className="configuration-form"
+            >
+              <QualityConfig form={qualityTaskForm} />
+            </Form>
+          </div>
           {/* 任务分配功能 */}
           <div className="task-configuration-content">
             <div className="basic-title">任务分配</div>
