@@ -24,6 +24,7 @@ import Connection from '@/assets/sider/connection.svg';
 import DataLoad from '@/assets/sider/data-load.svg';
 import DataCatalog from '@/assets/sider/data-catalog.svg';
 import DatasetManagement from '@/assets/sider/dataset-management.svg';
+import DataAsset from '@/assets/sider/data-asset.svg';
 import DataMarket from '@/assets/sider/dataset-management.svg';
 import WorkflowList from '@/assets/sider/workflow-list.svg';
 import WorkflowTask from '@/assets/sider/workflow-task.svg';
@@ -192,7 +193,7 @@ export const menus: MenuModel[] = [
       },
       {
         title: '数据资产',
-        icon: <DatasetManagement className={iconClass} />,
+        icon: <DataAsset className={iconClass} />,
         key: 'dataAsset',
         path: '/tenant/compute/modaforge/dataAsset',
         permission: DATA_ASSET_PERMISSIONS.LIST

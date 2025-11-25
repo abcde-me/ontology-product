@@ -18,7 +18,6 @@ import {
   Tooltip
 } from '@arco-design/web-react';
 import {
-  IconPlus,
   IconSettings,
   IconDelete,
   IconEdit
@@ -27,7 +26,7 @@ import { useHistory } from 'react-router-dom';
 import noDataElement from '@/components/no-data';
 import DataAssetTableList from '../../components/DataAssetTableList';
 import DataAssetTableCard from '../../components/DataAssetTableCard';
-import SearchArea, { SearchField } from '../../components/SearchArea';
+import SearchArea from '../../components/SearchArea';
 import ViewToggle, { ViewType } from '../../components/ViewToggle';
 import ModifyAssetModal from '../../components/ModifyAssetModal';
 import ModifyTagsModal from '../../components/ModifyTagsModal';
@@ -56,12 +55,7 @@ import styles from './list.module.scss';
 import classNames from 'classnames';
 import { FieldSearchItem } from '@/types/dataAssetApi';
 import dayjs from 'dayjs';
-import {
-  isDateTimeType,
-  isDateType,
-  isTagsField,
-  TAGS_FIELD_EN_NAME
-} from '../../utils/const';
+import { isDateTimeType, isDateType, isTagsField } from '../../utils/const';
 import { PermissionWrapper } from '@/components/PermissionGuard';
 import { DATA_ASSET_PERMISSIONS } from '@/config/permissions';
 
@@ -150,6 +144,8 @@ export default function DataAssetList() {
         page,
         pageSize: size
       });
+
+      setHasMapping(true);
 
       if (listRes.status !== 200 || !listRes.data) {
         Message.error(listRes.message || '获取数据资产列表失败');
@@ -335,8 +331,6 @@ export default function DataAssetList() {
 
         // 获取数据资产映射数据
         const dataAssetMapping = findDataAssetMappingRes.data || [];
-
-        setHasMapping(dataAssetMapping.length > 0);
 
         if (dataAssetMapping.length > 0) {
           Promise.all([loadColumnSettings(), loadListData(1, pageSize)]);
@@ -771,8 +765,8 @@ export default function DataAssetList() {
   if (hasMapping === null) {
     return (
       <div className="h-full w-full py-5 pr-5">
-        <div className="box-border h-full w-full rounded-2xl bg-white pb-[20px] pl-[24px] pr-6 pt-[20px]">
-          {/* 可以在这里添加loading状态 */}
+        <div className="box-border flex h-full w-full items-center justify-center rounded-2xl bg-white pb-[20px] pl-[24px] pr-6 pt-[20px]">
+          <Spin />
         </div>
       </div>
     );
@@ -920,9 +914,9 @@ export default function DataAssetList() {
           </div>
         </div>
 
-        <div className="px-[24px]">
+        <div className="h-full px-[24px]">
           {loading ? (
-            <div className="flex h-[calc(100%-70px)] items-center justify-center">
+            <div className="flex min-h-[200px] items-center justify-center">
               <Spin />
             </div>
           ) : viewType === ViewType.LIST ? (
