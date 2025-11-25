@@ -23,7 +23,7 @@ import {
 import { getdetailList } from '@/api/connectionApi';
 import './index.css';
 import { validateName } from '@/utils/valiate';
-import ComponentTree from '../create/component-tree';
+import ComponentTree from '../component-tree';
 import { isNumber } from 'lodash-es';
 import { sql } from '@codemirror/lang-sql';
 import { lintGutter } from '@codemirror/lint';
@@ -151,7 +151,10 @@ function buildTreeSelectDisplayPath(
         typeof item.children === 'object' &&
         item.children.db
       ) {
-        const result = buildPath(item.children.db, target, newPath);
+        const result = buildPath(item.children.db, target, [
+          ...newPath,
+          '数据库'
+        ]);
         if (result) return result;
       }
 
@@ -160,7 +163,10 @@ function buildTreeSelectDisplayPath(
         typeof item.children === 'object' &&
         item.children.metadata
       ) {
-        const result = buildPath(item.children.metadata, target, newPath);
+        const result = buildPath(item.children.metadata, target, [
+          ...newPath,
+          '元数据'
+        ]);
         if (result) return result;
       }
 
@@ -170,7 +176,10 @@ function buildTreeSelectDisplayPath(
         typeof item.children === 'object' &&
         item.children.volume
       ) {
-        const result = buildPath(item.children.volume, target, newPath);
+        const result = buildPath(item.children.volume, target, [
+          ...newPath,
+          '数据卷'
+        ]);
         if (result) return result;
       }
     }
@@ -922,7 +931,7 @@ const Edit = (props) => {
       const baseFormData: any = {
         task_id: Number(props.loadId),
         task_name: rest.name,
-        dest_path_id: pathId,
+        dest_path_id: Number(pathId),
         db_name: props.detailData?.db_name
       };
 
