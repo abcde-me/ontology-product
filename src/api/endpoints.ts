@@ -248,7 +248,7 @@ export const ModaForgeResourceEndpoints = {
   // 批量删除知识库文件列表
   BatchDeleteKnowledgeDocument: PrefixAimdp + '/BatchDeleteKnowledgeDocument',
   // 查询知识库文件目录层级
-  ListKnowledgeDocumentCatalogs: PrefixRagV2 + '/ListKnowledgeDocumentData',
+  ListKnowledgeDocumentCatalogs: PrefixAimdp + '/ListKnowledgeDocumentData',
   // 查询知识库分块列表
   ListKnowledgeChunks: PrefixAimdp + '/ListKnowledgeChunks',
   // 查询分块详情
@@ -261,7 +261,7 @@ export const ModaForgeResourceEndpoints = {
   UpdateKnowledgeChunkEnhancement:
     PrefixRag + '/UpdateKnowledgeChunkEnhancement',
   // 查询分块溯源日志
-  GetKnowledgeChunkTraceLog: PrefixRagV2 + '/GetKnowledgeChunkTrace',
+  GetKnowledgeChunkTraceLog: PrefixAimdp + '/GetKnowledgeChunkTrace',
   // 运行命中测试
   RunKnowledgeHitTesting: PrefixRag + '/RunKnowledgeHitTesting',
   // 查询命中测试历史记录

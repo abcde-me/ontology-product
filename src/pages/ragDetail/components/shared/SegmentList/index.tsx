@@ -52,21 +52,24 @@ const SegmentList: React.FC<SegmentListProps> = ({
     });
   }, [segments, segmentSearchText]);
 
-  // 按 parentTitle 分组
+  // 按 parentTitleId 分组（使用ID作为唯一标识符，避免重复的parentTitle导致分组错误）
   const groupedSegments = useMemo(() => {
-    const groups: { title: string; segments: Segment[] }[] = [];
-    const titleMap = new Map<string, Segment[]>();
+    const groups: { titleId: string; title: string; segments: Segment[] }[] =
+      [];
+    const titleMap = new Map<string, { title: string; segments: Segment[] }>();
 
     filteredSegments.forEach((segment) => {
+      const titleId = segment.parentTitleId || '';
       const title = segment.parentTitle || '';
-      if (!titleMap.has(title)) {
-        titleMap.set(title, []);
+
+      if (!titleMap.has(titleId)) {
+        titleMap.set(titleId, { title, segments: [] });
       }
-      titleMap.get(title)!.push(segment);
+      titleMap.get(titleId)!.segments.push(segment);
     });
 
-    titleMap.forEach((segs, title) => {
-      groups.push({ title, segments: segs });
+    titleMap.forEach((data, titleId) => {
+      groups.push({ titleId, title: data.title, segments: data.segments });
     });
 
     return groups;
@@ -135,13 +138,18 @@ const SegmentList: React.FC<SegmentListProps> = ({
     }
 
     return groupedSegments.map((group, groupIndex) => (
-      <div key={group.title} className={groupIndex < 0 ? 'mt-6' : ''}>
+      <div
+        key={group.titleId || `empty-${groupIndex}`}
+        className={groupIndex < 0 ? 'mt-6' : ''}
+      >
         {/* 标题分组头部 */}
-        <div className="rounded-md py-3">
-          <div className="text-sm font-medium text-[#0F172A]">
-            {group.title}
+        {group.title && (
+          <div className="rounded-md py-3">
+            <div className="text-sm font-medium text-[#0F172A]">
+              {group.title || ''}
+            </div>
           </div>
-        </div>
+        )}
 
         {/* 该标题下的分段列表 */}
         <div className="space-y-3">
@@ -158,6 +166,7 @@ const SegmentList: React.FC<SegmentListProps> = ({
                   <ImageTextSegmentCard
                     segment={segment as ImageTextSegment}
                     isSelected={selectedSegmentId === segment.id}
+                    totalSegments={segments.length}
                   />
                 </div>
               );
@@ -173,6 +182,7 @@ const SegmentList: React.FC<SegmentListProps> = ({
                 <SegmentCard
                   segment={segment}
                   isSelected={selectedSegmentId === segment.id}
+                  totalSegments={segments.length}
                 />
               </div>
             );

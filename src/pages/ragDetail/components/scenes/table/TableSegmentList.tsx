@@ -54,6 +54,7 @@ const TableSegmentList: React.FC<TableSegmentListProps> = ({
                 key={segment.id}
                 segment={segment}
                 isSelected={selectedSegmentId === segment.id}
+                totalSegments={segments.length}
               />
             ))}
           </div>

@@ -14,11 +14,13 @@ import { Input } from '@arco-design/web-react';
 interface TableSegmentCardProps {
   segment: TableSegment;
   isSelected: boolean;
+  totalSegments?: number;
 }
 
 const TableSegmentCard: React.FC<TableSegmentCardProps> = ({
   segment,
-  isSelected
+  isSelected,
+  totalSegments
 }) => {
   const { selectSegment, editingSegmentId, cancelEditingSegment } =
     useRagDetailStore();
@@ -103,7 +105,8 @@ const TableSegmentCard: React.FC<TableSegmentCardProps> = ({
       <div className="flex items-center justify-between px-3 pb-[7px] pt-3">
         <div className="flex-1">
           <div className="text-xs text-gray-500">
-            字符数: {segment.charCount} 分段数: {segment.segmentIndex}/100
+            字符数: {segment.charCount} 分段数: {segment.segmentIndex + 1}/
+            {totalSegments ?? 0}
           </div>
         </div>
         {(isSelected || isHovered) && (
