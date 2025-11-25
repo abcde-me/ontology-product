@@ -12,11 +12,13 @@ import styles from './SegmentCardContent/SegmentCardContent.module.scss';
 interface ImageTextSegmentCardProps {
   segment: ImageTextSegment;
   isSelected: boolean;
+  totalSegments?: number;
 }
 
 const ImageTextSegmentCard: React.FC<ImageTextSegmentCardProps> = ({
   segment,
-  isSelected
+  isSelected,
+  totalSegments
 }) => {
   const { selectSegment, editingSegmentId, openImageModal } =
     useRagDetailStore();
@@ -49,7 +51,8 @@ const ImageTextSegmentCard: React.FC<ImageTextSegmentCardProps> = ({
       <div className="flex items-center justify-between px-3 pb-[7px] pt-3">
         <div className="flex-1">
           <div className="text-xs text-gray-500">
-            字符数: {segment.charCount} 分段数: {segment.segmentIndex}/100
+            字符数: {segment.charCount} 分段数: {segment.segmentIndex + 1}/
+            {totalSegments ?? 0}
           </div>
         </div>
         {(isSelected || isHovered) && (

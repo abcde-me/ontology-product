@@ -289,7 +289,7 @@ export const useSegmentDrawerStore = create<SegmentDrawerStore>((set, get) => ({
       const nodes = (traceLogData.nodes || []).map(
         (node: any, index: number) => ({
           id: `node_${index}`,
-          index: node.node_index || index,
+          index: index,
           name: node.node_type || '未知节点',
           status: node.status === 1 ? 'success' : 'failed',
           duration: formatDuration(node.cost_time || 0),
