@@ -53,7 +53,7 @@ import noDataElement from '@/components/no-data';
 import getFileIcon from '@/components/file-icon';
 import { PermissionWrapper } from '../PermissionGuard';
 import HitTest from '@/pages/dataMarket/components/configurationpage/hit-test';
-import { throttle } from 'lodash';
+import { throttle } from 'lodash-es';
 import { FileType } from '@/utils/type';
 const { Title, Text } = Typography;
 const { TabPane } = Tabs;
@@ -832,6 +832,10 @@ const DatasetDetail = (props: {
       fetchDatasetContents();
     }
   }, [sortValue]);
+
+  useEffect(() => {
+    fetchDatasetContents();
+  }, [filePageSize, fileCurrentPage]);
 
   React.useEffect(() => {
     //@ts-expect-error
