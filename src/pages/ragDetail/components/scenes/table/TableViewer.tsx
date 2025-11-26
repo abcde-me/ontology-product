@@ -3,7 +3,7 @@
  * 表格查看器
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import * as XLSX from 'xlsx';
 import { TableSegment } from '../../../types';
 import { useRagDetailStore } from '../../../store/ragDetailStore';
@@ -19,6 +19,11 @@ const TableViewer: React.FC<TableViewerProps> = ({}) => {
     useRagDetailStore();
   const [currentTableIndex, setCurrentTableIndex] = useState(0);
   const [excelSheets, setExcelSheets] = useState<TableSegment[]>([]);
+  const [needsHorizontalScroll, setNeedsHorizontalScroll] = useState(false);
+  const [tableWidth, setTableWidth] = useState<number>(0);
+  const tableScrollRef = useRef<HTMLDivElement>(null);
+  const horizontalScrollRef = useRef<HTMLDivElement>(null);
+  const tableRef = useRef<HTMLTableElement>(null);
   // 从URL加载Excel文件
   useEffect(() => {
     if (fileBinaryData) {
@@ -98,6 +103,67 @@ const TableViewer: React.FC<TableViewerProps> = ({}) => {
   const currentSegment = displaySegments[currentTableIndex];
   const tableData = currentSegment?.tableData;
 
+  // 检测是否需要横向滚动
+  useEffect(() => {
+    const checkScrollNeeded = () => {
+      const tableScroll = tableScrollRef.current;
+      const table = tableRef.current;
+
+      if (!tableScroll || !table) {
+        setNeedsHorizontalScroll(false);
+        setTableWidth(0);
+        return;
+      }
+
+      // 检测表格实际宽度是否超过容器宽度
+      const currentTableWidth = table.scrollWidth;
+      const containerWidth = tableScroll.clientWidth;
+      setTableWidth(currentTableWidth);
+      setNeedsHorizontalScroll(currentTableWidth > containerWidth);
+    };
+
+    // 初始检测
+    checkScrollNeeded();
+
+    // 监听窗口大小变化和表格大小变化
+    const resizeObserver = new ResizeObserver(checkScrollNeeded);
+    if (tableScrollRef.current) {
+      resizeObserver.observe(tableScrollRef.current);
+    }
+    if (tableRef.current) {
+      resizeObserver.observe(tableRef.current);
+    }
+
+    // 延迟检测，确保表格已渲染
+    const timeoutId = setTimeout(checkScrollNeeded, 100);
+
+    return () => {
+      resizeObserver.disconnect();
+      clearTimeout(timeoutId);
+    };
+  }, [tableData]);
+
+  // 同步横向滚动
+  useEffect(() => {
+    const tableScroll = tableScrollRef.current;
+    const horizontalScroll = horizontalScrollRef.current;
+
+    if (!tableScroll || !horizontalScroll || !needsHorizontalScroll) return;
+
+    const handleScroll = () => {
+      horizontalScroll.scrollLeft = tableScroll.scrollLeft;
+    };
+
+    tableScroll.addEventListener('scroll', handleScroll);
+    horizontalScroll.addEventListener('scroll', () => {
+      tableScroll.scrollLeft = horizontalScroll.scrollLeft;
+    });
+
+    return () => {
+      tableScroll.removeEventListener('scroll', handleScroll);
+    };
+  }, [tableData, needsHorizontalScroll]);
+
   if (fileBinaryDataLoading) {
     return (
       <div className="flex h-full items-center justify-center bg-gray-100">
@@ -143,67 +209,85 @@ const TableViewer: React.FC<TableViewerProps> = ({}) => {
   return (
     <div className="flex h-full flex-col bg-white">
       {/* 表格显示区域 */}
-      <div className="flex-1 overflow-auto p-4">
-        <div className="bg-white">
-          {/* 表格标题 */}
-          {/* 表格内容 */}
-          <div className="overflow-x-auto">
-            <table
-              className={`border-collapse border ${
-                tableData.headers.length >= 4 ? '' : 'w-full'
-              }`}
-              style={
-                tableData.headers.length >= 4
-                  ? {
-                      tableLayout: 'fixed',
-                      width: `${tableData.headers.length * 200}px`
-                    }
-                  : { tableLayout: 'fixed', width: '100%' }
-              }
-            >
-              {/* 表头 */}
-              {tableData?.headers && tableData.headers.length > 0 && (
-                <thead>
-                  <tr className="bg-white">
-                    {tableData.headers.map((header, index) => (
-                      <th
-                        key={index}
-                        className="h-10 border-b px-4 text-left text-sm font-semibold text-gray-900"
-                        style={
-                          tableData.headers.length >= 4
-                            ? { width: '200px', minWidth: '200px' }
-                            : { width: `${100 / tableData.headers.length}%` }
-                        }
-                      >
-                        {header}
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
-              )}
-              {/* 数据行 */}
-              <tbody>
-                {tableData?.rows.map((row, rowIndex) => (
-                  <tr key={rowIndex} className="bg-white transition-colors">
-                    {tableData?.headers.map((header, colIndex) => (
-                      <td
-                        key={colIndex}
-                        className="h-10 border-b px-4 text-sm"
-                        style={
-                          tableData.headers.length >= 4
-                            ? { width: '200px', minWidth: '200px' }
-                            : { width: `${100 / tableData.headers.length}%` }
-                        }
-                      >
-                        {renderCellContent(row[header])}
-                      </td>
-                    ))}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+      <div className="flex flex-1 flex-col overflow-hidden p-4">
+        <div
+          className="flex-1 overflow-y-auto overflow-x-hidden"
+          ref={tableScrollRef}
+        >
+          <table
+            ref={tableRef}
+            className={`border-collapse border ${
+              tableData.headers.length >= 4 ? '' : 'w-full'
+            }`}
+            style={
+              tableData.headers.length >= 4
+                ? {
+                    tableLayout: 'fixed',
+                    width: `${tableData.headers.length * 200}px`
+                  }
+                : { tableLayout: 'fixed', width: '100%' }
+            }
+          >
+            {/* 表头 */}
+            {tableData?.headers && tableData.headers.length > 0 && (
+              <thead>
+                <tr className="bg-white">
+                  {tableData.headers.map((header, index) => (
+                    <th
+                      key={index}
+                      className="h-10 border-b px-4 text-left text-sm font-semibold text-gray-900"
+                      style={
+                        tableData.headers.length >= 4
+                          ? { width: '200px', minWidth: '200px' }
+                          : { width: `${100 / tableData.headers.length}%` }
+                      }
+                    >
+                      {header}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+            )}
+            {/* 数据行 */}
+            <tbody>
+              {tableData?.rows.map((row, rowIndex) => (
+                <tr key={rowIndex} className="bg-white transition-colors">
+                  {tableData?.headers.map((header, colIndex) => (
+                    <td
+                      key={colIndex}
+                      className="h-10 border-b px-4 text-sm"
+                      style={
+                        tableData.headers.length >= 4
+                          ? { width: '200px', minWidth: '200px' }
+                          : { width: `${100 / tableData.headers.length}%` }
+                      }
+                    >
+                      {renderCellContent(row[header])}
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
+        {/* 固定在底部的横向滚动条 - 仅在需要横向滚动时显示 */}
+        {needsHorizontalScroll && (
+          <div
+            ref={horizontalScrollRef}
+            className="overflow-x-scroll border-t bg-white"
+            style={{
+              height: '17px',
+              flexShrink: 0
+            }}
+          >
+            <div
+              style={{
+                height: '1px',
+                width: tableWidth > 0 ? `${tableWidth}px` : '100%'
+              }}
+            />
+          </div>
+        )}
       </div>
     </div>
   );
