@@ -177,8 +177,8 @@ export const useRagDetailStore = create<RagDetailState & RagDetailActions>(
           targetParentTitleId?: string
         ): string | null => {
           for (const node of nodes) {
-            // 优先匹配：type='text' 且 chunk_id 等于分段 id
-            if (node.type === 'text' && node.id === targetSegmentId) {
+            // 优先匹配：type='Text' 且 chunk_id 等于分段 id
+            if (node.type === 'Text' && node.id === targetSegmentId) {
               return node.id;
             }
 
@@ -236,13 +236,13 @@ export const useRagDetailStore = create<RagDetailState & RagDetailActions>(
       }
 
       // 根据节点类型决定是否高亮分段
-      if (clickedNode.type === 'text') {
-        // type='text': 高亮对应的分段（chunk_id 就是分段的 id）
+      if (clickedNode.type === 'Text') {
+        // type='Text': 高亮对应的分段（chunk_id 就是分段的 id）
         set({ selectedSegmentId: clickedNode.id });
         // 滚动到该分段
         get().scrollToSegment(clickedNode.id);
-      } else if (clickedNode.type === 'title') {
-        // type='title': 只滚动到第一个关联的分段，不高亮
+      } else if (clickedNode.type === 'Title') {
+        // type='Title': 只滚动到第一个关联的分段，不高亮
         if (clickedNode.segmentIds && clickedNode.segmentIds.length > 0) {
           const firstSegmentId = clickedNode.segmentIds[0];
           // 清除分段高亮
