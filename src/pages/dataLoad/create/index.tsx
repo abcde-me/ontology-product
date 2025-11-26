@@ -467,19 +467,24 @@ export default function DataLoadCreate() {
 
   // 处理表格列表数据，为每个节点添加 checkable 属性（只有叶子节点可勾选）
   const processTableListWithCheckable = useCallback(
-    (data: TableItem[]): TableItem[] => {
+    (data: TableItem[], parentTitle?: string): TableItem[] => {
       return data.map((item) => {
         const isLeaf = !item.children || item.children.length === 0;
+        // 如果有父节点，将父节点名称拼接到 value 前面
+        const value = parentTitle ? `${parentTitle}.${item.title}` : item.title;
         const processedItem: TableItem = {
           ...item,
           checkable: isLeaf,
-          key: item.key || item.title,
-          value: item.value || item.title
+          key: value,
+          value: value
         };
 
-        // 递归处理子节点
+        // 递归处理子节点，传递当前节点的完整路径（value）作为父节点名称
         if (item.children && item.children.length > 0) {
-          processedItem.children = processTableListWithCheckable(item.children);
+          processedItem.children = processTableListWithCheckable(
+            item.children,
+            value
+          );
         }
 
         return processedItem;
@@ -488,30 +493,31 @@ export default function DataLoadCreate() {
     []
   );
 
-  // 处理表格列表，用于单选模式（禁用所有复选框）
-  // const processTableListForSingleSelect = useCallback(
-  //   (data: TableItem[]): TableItem[] => {
-  //     return data.map((item) => {
-  //       const processedItem: TableItem = {
-  //         ...item,
-  //         checkable: false, // 明确禁用复选框
-  //         disableCheckbox: true, // 禁用复选框显示
-  //         key: item.key || item.title,
-  //         value: item.value || item.title
-  //       };
+  const processTableListForSingleSelect = useCallback(
+    (data: TableItem[], parentTitle?: string): TableItem[] => {
+      return data.map((item) => {
+        // 如果有父节点，将父节点名称拼接到 value 前面
+        // 始终基于 title 构建路径，确保路径的一致性
+        const value = parentTitle ? `${parentTitle}.${item.title}` : item.title;
+        const processedItem: TableItem = {
+          ...item,
+          key: value,
+          value: value
+        };
 
-  //       // 递归处理子节点
-  //       if (item.children && item.children.length > 0) {
-  //         processedItem.children = processTableListForSingleSelect(
-  //           item.children
-  //         );
-  //       }
+        // 递归处理子节点，传递当前节点的完整路径（value）作为父节点名称
+        if (item.children && item.children.length > 0) {
+          processedItem.children = processTableListForSingleSelect(
+            item.children,
+            value
+          );
+        }
 
-  //       return processedItem;
-  //     });
-  //   },
-  //   []
-  // );
+        return processedItem;
+      });
+    },
+    []
+  );
 
   // 获取连接器详情和表格列表
   const getConnectorDetailList = useCallback(
@@ -546,13 +552,16 @@ export default function DataLoadCreate() {
         // rawTableListRef.current = rawData;
 
         // 处理表格列表，为每个节点添加 checkable 属性
-        if (selectedNodeType === 'metadata') {
-          setTableList(res?.data?.table_name ?? []);
-        } else {
+        if (selectedNodeType !== 'metadata') {
           const processedTableList = processTableListWithCheckable(
             res?.data?.table_name ?? []
           );
           setTableList(processedTableList);
+        } else {
+          const processedTableListSingle = processTableListForSingleSelect(
+            res?.data?.table_name ?? []
+          );
+          setTableList(processedTableListSingle);
         }
 
         // 重置搜索值
@@ -1190,22 +1199,22 @@ export default function DataLoadCreate() {
   // }, [selectedNodeType, processTableListWithCheckable, processTableListForSingleSelect]);
 
   // 监听载入位置变化，用于控制SQL处理选项的显示
-  const destPath = Form.useWatch('dest_path', form);
+  // const destPath = Form.useWatch('dest_path', form);
 
   // 监听SQL处理开关状态
   const sqlProcessEnabled = Form.useWatch('sql_process_enabled', form);
 
   // 监听表选择状态
-  const tableName = Form.useWatch('table_name', form);
+  // const tableName = Form.useWatch('table_name', form);
 
   // 计算是否禁用"关闭"选项：当选择了多个表时禁用
-  const isDisableOptionDisabled = useMemo(() => {
-    const currentTableName = form.getFieldValue('table_name') || [];
-    const filteredValues = Array.isArray(currentTableName)
-      ? currentTableName.filter((item: string) => item !== 'all')
-      : [];
-    return filteredValues.length > 1;
-  }, [tableName, form]);
+  // const isDisableOptionDisabled = useMemo(() => {
+  //   const currentTableName = form.getFieldValue('table_name') || [];
+  //   const filteredValues = Array.isArray(currentTableName)
+  //     ? currentTableName.filter((item: string) => item !== 'all')
+  //     : [];
+  //   return filteredValues.length > 1;
+  // }, [tableName, form]);
 
   // 计算"全部"选项的选中状态
   // const selectAllStatus = useMemo(() => {
@@ -1609,9 +1618,11 @@ export default function DataLoadCreate() {
               field="table_name"
               labelAlign="right"
               rules={[{ required: true, message: '请选择抽取的表' }]}
-              extra="只能载入public schema的表"
             >
               <TreeSelect
+                onChange={(value) => {
+                  form.setFieldsValue({ table_name: value });
+                }}
                 loading={tableLoading}
                 multiple={selectedNodeType !== 'metadata'}
                 key={selectedNodeType}
