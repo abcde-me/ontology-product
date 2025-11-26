@@ -48,8 +48,6 @@ function RagDetail() {
     (seg) => seg.id === segmentDrawerSegmentId
   );
 
-  console.log(segments, 'sss');
-
   return (
     <div
       className="rag-detail-page flex h-screen w-full flex-col overflow-hidden bg-[#EFF6FE]"
