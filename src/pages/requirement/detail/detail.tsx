@@ -63,6 +63,14 @@ import {
   useGetModelLabelList
 } from '../hooks/useGetModelInfo';
 import QualityConfig from './components/QualityConfig';
+import {
+  TaskDistributionPanel,
+  TaskPackage,
+  ValidationErrors,
+  generateTaskPackages,
+  validateTaskAssignment,
+  formatSubmitData
+} from './components/TaskDistribution';
 const BreadcrumbItem = Breadcrumb.Item;
 
 export default function RequirementDetail() {
@@ -110,6 +118,33 @@ export default function RequirementDetail() {
     useState<LabelData[]>(generateInitialData);
   // 模版数据存储
   const [templateData, setTemplateData] = useState<any[]>([]);
+  // 任务分配模块状态
+  const [taskPackages, setTaskPackages] = useState<TaskPackage[]>([]);
+  const [taskDistributionErrors, setTaskDistributionErrors] =
+    useState<ValidationErrors>({});
+
+  // 监听 taskPackages 变化，自动清除已选人员的错误
+  useEffect(() => {
+    if (Object.keys(taskDistributionErrors).length > 0) {
+      const newErrors = { ...taskDistributionErrors };
+      let hasChanges = false;
+
+      taskPackages.forEach((pkg) => {
+        pkg.roles.forEach((role) => {
+          const errorKey = `${pkg.taskId}-${role.roleType}`;
+          // 如果该角色已经选择了人员，清除错误
+          if (newErrors[errorKey] && role.selectedCount > 0) {
+            delete newErrors[errorKey];
+            hasChanges = true;
+          }
+        });
+      });
+
+      if (hasChanges) {
+        setTaskDistributionErrors(newErrors);
+      }
+    }
+  }, [taskPackages]);
 
   useEffect(() => {
     if (selectedRadio !== '') {
@@ -119,6 +154,37 @@ export default function RequirementDetail() {
       setIsShowDataErrorInfo(false);
     }
   }, [selectedRadio, selectedData]);
+
+  // 监听表单字段变化，动态生成任务包列表
+  useEffect(() => {
+    const splitCount =
+      publishData?.split_task_package ||
+      labelToolForm.getFieldValue('split_task_package');
+    const qualityRounds =
+      qualityTaskForm.getFieldValue('qualityInspectionRounds') ?? 0;
+    const totalDataAmount =
+      getTotal(selectedData) || getDetailObj?.label_count || 0;
+
+    if (splitCount && totalDataAmount && splitCount >= 1) {
+      // 传入现有的taskPackages，保留已选数据
+      const packages = generateTaskPackages(
+        splitCount,
+        qualityRounds,
+        totalDataAmount,
+        taskPackages
+      );
+      setTaskPackages(packages);
+      // 清除验证错误
+      setTaskDistributionErrors({});
+    } else {
+      setTaskPackages([]);
+    }
+  }, [
+    publishData?.split_task_package,
+    selectedData,
+    getDetailObj?.label_count
+    // qualityInspectionRounds 需要通过表单变化触发
+  ]);
   // 找到现有的useEffect，在其后添加一个新的useEffect来处理templateData的更新同步
   useEffect(() => {
     if (activeTab === 1) {
@@ -756,22 +822,25 @@ export default function RequirementDetail() {
           return true;
         })
         .catch(() => {}),
-      // 任务验证
+      // 任务分配验证
       distributeForm
         .validate()
         .then(() => {
-          // 验证通过，切换到下一步
-          if (taskAssignData?.length === 0) {
-            setIsShowTypeErrorInfo(true);
-            return;
+          // 验证任务包分配
+          const errors = validateTaskAssignment(taskPackages);
+          if (Object.keys(errors).length > 0) {
+            setTaskDistributionErrors(errors);
+            Message.error('请完成所有必填的人员分配');
+            return false;
           }
           return true;
         })
         .catch(() => {
-          if (taskAssignData?.length === 0) {
-            setIsShowTypeErrorInfo(true);
-            return;
+          const errors = validateTaskAssignment(taskPackages);
+          if (Object.keys(errors).length > 0) {
+            setTaskDistributionErrors(errors);
           }
+          return false;
         })
     ]);
     // 所有的form 验证都通过调用发布接口
@@ -848,12 +917,17 @@ export default function RequirementDetail() {
         annotationTypeContentCode === AnnotationTypeContentCode.ENTITY
           ? relationRelations
           : [],
-      label_operate:
-        //配置标注人员
-        {
-          user_id: taskTypeVal === 1 ? taskAssignData : [],
-          org_id: taskTypeVal === 2 ? taskAssignData : departmentIds
-        }
+      // 任务分配数据
+      ...formatSubmitData(
+        taskPackages,
+        distributeForm.getFieldValue('timeoutRelease') || 30
+      ),
+      // 质检配置
+      quality_inspection_rounds:
+        qualityTaskForm.getFieldValue('qualityInspectionRounds') ?? 0,
+      quality_inspection_modification:
+        qualityTaskForm.getFieldValue('qualityInspectionModification') ?? 0,
+      reject_to: qualityTaskForm.getFieldValue('rejectTo') ?? 1
     };
     if (model_id) {
       new_publishData['model_id'] = model_id;
@@ -2823,6 +2897,28 @@ export default function RequirementDetail() {
               form={qualityTaskForm}
               disabled={type === 'detail'}
               className="configuration-form"
+              onValuesChange={(changedValues) => {
+                // 当质检轮次变化时，重新生成任务包列表
+                if ('qualityInspectionRounds' in changedValues) {
+                  const splitCount =
+                    publishData?.split_task_package ||
+                    labelToolForm.getFieldValue('split_task_package');
+                  const totalDataAmount =
+                    getTotal(selectedData) || getDetailObj?.label_count || 0;
+
+                  if (splitCount && totalDataAmount && splitCount >= 1) {
+                    // 传入现有的taskPackages，保留已选数据
+                    const packages = generateTaskPackages(
+                      splitCount,
+                      changedValues.qualityInspectionRounds ?? 0,
+                      totalDataAmount,
+                      taskPackages
+                    );
+                    setTaskPackages(packages);
+                    setTaskDistributionErrors({});
+                  }
+                }
+              }}
             >
               <QualityConfig form={qualityTaskForm} />
             </Form>
@@ -2862,90 +2958,16 @@ export default function RequirementDetail() {
                   style={{ width: 200 }}
                 />
               </FormItem>
-              <FormItem
-                label="选择类型:"
-                rules={[{ required: true, message: '请选择部门或者个人' }]}
-              >
-                <RadioGroup
-                  value={taskTypeVal}
-                  onChange={(val) => {
-                    setTaskTypeVal(val);
-                    setTaskAssignData([]);
-                  }}
-                  style={{ display: 'flex' }}
-                >
-                  <Radio
-                    style={{ display: 'flex', alignItems: 'center' }}
-                    value={2}
-                  >
-                    部门
-                  </Radio>
-                  <Radio
-                    style={{ display: 'flex', alignItems: 'center' }}
-                    value={1}
-                  >
-                    个人
-                  </Radio>
-                </RadioGroup>
+              <FormItem field="taskDistribution" label="分配人员:" required>
+                <TaskDistributionPanel
+                  taskPackages={taskPackages}
+                  onUpdate={setTaskPackages}
+                  validationErrors={taskDistributionErrors}
+                  disabled={type === 'detail'}
+                />
               </FormItem>
-              <FormItem
-                rules={[
-                  {
-                    required: true,
-                    message: '请选择类型'
-                  }
-                ]}
-                label={taskTypeVal === 2 ? '选择部门:' : '选择个人:'}
-                disabled={type === 'detail'}
-              >
-                <div className="btn-content-text">
-                  <Button
-                    onClick={() => {
-                      taskTypeVal === 2
-                        ? setDepartmentModalVisible(true)
-                        : setIndividualModalVisible(true);
-                    }}
-                  >
-                    {type === 'detail' ? '查看已选' : '选择'}
-                  </Button>
-                  <div className="text-content">
-                    已选{' '}
-                    {type === 'detail'
-                      ? getDetailObj?.label_operate?.user_id?.length ||
-                        getDetailObj?.label_operate?.org_id?.length
-                      : taskAssignData.length}
-                  </div>
-                </div>
-              </FormItem>
-              {isShowTypeErrorInfo && taskAssignData.length === 0 ? (
-                <div className="error-info">请选择部门或者个人内容</div>
-              ) : null}
             </Form>
           </div>
-          {taskTypeVal === 2 ? (
-            <DepartmentModal
-              visible={departmentModalVisible}
-              onClose={() => {
-                setDepartmentModalVisible(false);
-              }}
-              title="选择部门"
-              getChildTreeSelectData={handleChildTreeSelectData}
-              getDetailObj={getDetailObj}
-              type={type}
-            />
-          ) : (
-            <IndividualModal
-              visible={individualModalVisible}
-              onClose={() => {
-                setIndividualModalVisible(false);
-              }}
-              title="选择个人"
-              getChildTreeSelectData={handleChildTreeSelectData}
-              getTreeIds={getChildTreeIds}
-              getDetailObj={getDetailObj}
-              type={type}
-            />
-          )}
           {type !== 'detail' && (
             <div className="btn-content">
               <Button

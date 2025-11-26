@@ -1,0 +1,125 @@
+/**
+ * 任务分配模块样式
+ */
+
+// 任务分配面板
+.task-distribution-panel {
+  width: 100%;
+
+  .task-distribution-table {
+    .arco-table-th-item-title {
+      pointer-events: unset !important;
+    }
+    .role-assignments-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+      flex-wrap: nowrap;
+      min-height: 120px;
+
+      .role-arrow {
+        color: #c9cdd4;
+        font-size: 16px;
+        margin: 40px 0;
+        flex-shrink: 0;
+      }
+    }
+  }
+}
+
+// 角色分配卡片
+.role-assignment-card {
+  border: 1px solid #e5e6eb;
+  border-radius: 8px;
+  padding: 16px;
+  background: #ffffff;
+  min-width: 200px;
+  transition: all 0.3s;
+  flex-shrink: 0;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+
+  &.has-error {
+    border-color: #f53f3f;
+  }
+
+  .role-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #f2f3f5;
+
+    .role-icon {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+
+      .role-icon-text {
+        color: white;
+        font-size: 12px;
+        font-weight: 500;
+      }
+    }
+
+    .role-name {
+      font-size: 14px;
+      font-weight: 500;
+      color: #1d2129;
+    }
+  }
+
+  .assign-type-selector {
+    margin-bottom: 16px;
+  }
+
+  .select-action {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    .selected-count {
+      font-size: 14px;
+      color: #86909c;
+      text-align: center;
+    }
+  }
+
+  .error-message {
+    color: #f53f3f;
+    font-size: 14px;
+    margin-top: 8px;
+    padding: 4px 8px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+}
+
+.multiple-process-select .arco-input-tag-inner {
+  input {
+    min-width: 180px !important;
+  }
+}
+
+// 响应式布局
+@media (max-width: 1400px) {
+  .task-distribution-panel {
+    .role-assignments-row {
+      flex-wrap: wrap;
+
+      .role-assignment-card {
+        min-width: 100%;
+      }
+
+      .role-arrow {
+        display: none;
+      }
+    }
+  }
+}

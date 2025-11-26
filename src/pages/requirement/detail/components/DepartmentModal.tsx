@@ -61,6 +61,8 @@ interface DataSourceModalProps {
   getChildTreeSelectData: (data: any) => void;
   getDetailObj: any;
   type: any;
+  onConfirm?: (selectedIds: string[]) => void; // 新增：确认回调
+  initialSelected?: string[]; // 新增：初始选中的部门ID列表
 }
 const InputSearch = Input.Search;
 const DepartmentModal: React.FC<DataSourceModalProps> = ({
@@ -69,7 +71,9 @@ const DepartmentModal: React.FC<DataSourceModalProps> = ({
   title = '数据源',
   getChildTreeSelectData,
   getDetailObj,
-  type
+  type,
+  onConfirm,
+  initialSelected = []
 }) => {
   const [activeTab] = useState('src');
   const [treeData, setTreeData] = useState<any>([]);
@@ -78,11 +82,15 @@ const DepartmentModal: React.FC<DataSourceModalProps> = ({
   const [searchValue, setSearchValue] = useState<string>('');
   const [checkedKeysDetail, setCheckedKeysDetail] = useState<string[]>([]);
 
+  // 处理初始选中的数据
   useEffect(() => {
-    if (getDetailObj && type === 'detail') {
+    if (initialSelected && initialSelected.length > 0) {
+      setCheckedKeys(initialSelected);
+      setCheckedKeysDetail(initialSelected);
+    } else if (getDetailObj && type === 'detail') {
       setCheckedKeysDetail(getDetailObj?.label_operate?.org_id || []);
     }
-  }, [getDetailObj]);
+  }, [getDetailObj, initialSelected, type]);
   const getTreeData = () => {
     try {
       getDepartmentTreeList()
@@ -181,6 +189,9 @@ const DepartmentModal: React.FC<DataSourceModalProps> = ({
       footer={
         <Button
           onClick={() => {
+            if (onConfirm) {
+              onConfirm(checkedKeys);
+            }
             onClose();
           }}
           type="primary"
@@ -236,6 +247,7 @@ const DepartmentModal: React.FC<DataSourceModalProps> = ({
             }}
             treeData={treeData}
             onCheck={(key) => {
+              setCheckedKeys(key);
               getChildTreeSelectData(key);
             }}
           />

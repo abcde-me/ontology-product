@@ -71,6 +71,8 @@ interface DataSourceModalProps {
   getTreeIds: (data: any) => void;
   getDetailObj: any;
   type: any;
+  onConfirm?: (selectedIds: string[]) => void; // 新增：确认回调
+  initialSelected?: string[]; // 新增：初始选中的用户ID列表
 }
 
 const InputSearch = Input.Search;
@@ -83,7 +85,9 @@ const IndividualModal: React.FC<DataSourceModalProps> = ({
   initialSelectedData = [], // 接收初始数据
   getTreeIds,
   getDetailObj,
-  type
+  type,
+  onConfirm,
+  initialSelected = []
 }) => {
   const tableRef = useRef<any>(null);
   const [treeData, setTreeData] = useState<any>([]);
@@ -99,8 +103,11 @@ const IndividualModal: React.FC<DataSourceModalProps> = ({
   // 在组件状态定义中添加
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
 
+  // 处理初始选中的数据
   useEffect(() => {
-    if (getDetailObj) {
+    if (initialSelected && initialSelected.length > 0) {
+      setSelectedRowKeys(initialSelected);
+    } else if (getDetailObj) {
       setSelectedRowKeys(
         getDetailObj?.label_operate &&
           getDetailObj?.label_operate?.user_id?.map((item) => item)
@@ -110,7 +117,7 @@ const IndividualModal: React.FC<DataSourceModalProps> = ({
           getDetailObj?.label_operate?.org_id?.map((item) => item)
       );
     }
-  }, [getDetailObj]);
+  }, [getDetailObj, initialSelected]);
   const getTreeData = () => {
     try {
       getDepartmentTreeList()
@@ -263,6 +270,9 @@ const IndividualModal: React.FC<DataSourceModalProps> = ({
       footer={
         <Button
           onClick={() => {
+            if (onConfirm) {
+              onConfirm(selectedRowKeys as string[]);
+            }
             onClose();
           }}
           type="primary"
