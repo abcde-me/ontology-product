@@ -21,6 +21,7 @@ import { FieldSearchItem, BaseTag, TagValueItem } from '@/types/dataAssetApi';
 import { isDateType, isDateTimeType, isTagsField } from '../../utils/const';
 import styles from './index.module.scss';
 import dayjs from 'dayjs';
+import classNames from 'classnames';
 
 export interface SearchField {
   /** 字段唯一标识 */
@@ -510,7 +511,13 @@ export default function SearchArea({
               popupVisible={settingsVisible}
               onVisibleChange={setSettingsVisible}
             >
-              <Button type="text" className="ml-auto flex items-center gap-1">
+              <Button
+                type="text"
+                className={classNames(
+                  'ml-auto flex items-center gap-1',
+                  styles['settings-button']
+                )}
+              >
                 <IconSettings />
                 设置搜索条件
               </Button>

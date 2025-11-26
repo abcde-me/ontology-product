@@ -35,14 +35,22 @@ import {
 
 /**
  * 将新的后端 positions 数组转换为前端的 PDFCoordinate 数组
+ * 支持 bbox 为空的情况：仅定位到页面，不高亮
  */
-function transformApiPositions(positions: ApiPosition[]): PDFCoordinate[] {
+function transformApiPositions(
+  positions: ApiPosition[] | null | undefined
+): PDFCoordinate[] {
+  // 处理 null 或 undefined 的情况，返回空数组而不是抛出错误
+  if (!positions || positions.length === 0) {
+    return [];
+  }
+
   return positions.map((pos) => ({
     page: pos.page_id + 1, // 后端0-based,前端1-based
-    x1: pos.bbox[0],
-    y1: pos.bbox[1],
-    x2: pos.bbox[2],
-    y2: pos.bbox[3]
+    x1: pos.bbox && pos.bbox.length > 0 ? pos.bbox[0] : undefined,
+    y1: pos.bbox && pos.bbox.length > 1 ? pos.bbox[1] : undefined,
+    x2: pos.bbox && pos.bbox.length > 2 ? pos.bbox[2] : undefined,
+    y2: pos.bbox && pos.bbox.length > 3 ? pos.bbox[3] : undefined
   }));
 }
 
@@ -69,7 +77,7 @@ function transformSegment(apiSegment: ApiSegment): Segment {
     id: apiSegment.id,
     content: apiSegment.content,
     charCount: apiSegment.char_count,
-    segmentIndex: apiSegment.chunk_index,
+    segmentIndex: apiSegment.index,
     pdfCoordinates: transformApiPositions(apiSegment.positions),
     parentTitle: apiSegment.parent_title || undefined,
     parentTitleId: apiSegment.parent_title_id || undefined,
@@ -128,11 +136,11 @@ function transformCatalogNode(apiNode: ApiCatalogNode): DirectoryNode {
   };
 
   // 根据 type 设置 segmentIds
-  if (apiNode.type === 'text') {
-    // type 为 text 时，chunk_id 就是分段的 id
+  if (apiNode.type === 'Text') {
+    // type 为 Text 时，chunk_id 就是分段的 id
     node.segmentIds = [apiNode.chunk_id];
-  } else if (apiNode.type === 'title') {
-    // type 为 title 时，需要找到所有子节点中 type 为 text 的 chunk_id
+  } else if (apiNode.type === 'Title') {
+    // type 为 Title 时，需要找到所有子节点中 type 为 Text 的 chunk_id
     // 这里先不设置，后面递归处理完 children 后再收集
     node.segmentIds = [];
   }
@@ -141,8 +149,8 @@ function transformCatalogNode(apiNode: ApiCatalogNode): DirectoryNode {
   if (apiNode.children && apiNode.children.length > 0) {
     node.children = apiNode.children.map(transformCatalogNode);
 
-    // 如果是 title 类型，收集所有子节点的 segmentIds
-    if (apiNode.type === 'title') {
+    // 如果是 Title 类型，收集所有子节点的 segmentIds
+    if (apiNode.type === 'Title') {
       const collectSegmentIds = (nodes: DirectoryNode[]): string[] => {
         const ids: string[] = [];
         nodes.forEach((child) => {
@@ -170,7 +178,7 @@ function transformCatalogNodeOld(apiNode: any): DirectoryNode {
     id: apiNode.title_id,
     label: apiNode.title,
     level: apiNode.level,
-    type: 'title', // 旧数据默认为 title 类型
+    type: 'Title', // 旧数据默认为 Title 类型
     segmentIds: apiNode.segment_ids || undefined,
     children: []
   };
@@ -219,7 +227,7 @@ function transformCatalogNodeOld(apiNode: any): DirectoryNode {
         id: segmentId,
         label: text,
         level: apiNode.level + 1,
-        type: 'text', // short text 为 text 类型
+        type: 'Text', // short text 为 Text 类型
         isShort: true, // 标记为short text节点
         position,
         segmentIds: [segmentId],
@@ -284,14 +292,33 @@ export async function fetchCatalog(
       dataset_id: Number(datasetId),
       document_id: documentId
     });
-    console.log(response, 'response2222');
+    console.log('fetchCatalog response:', response);
 
-    // 检查响应格式
-    if (response && response.data && response.data.catalogs) {
-      console.log('response.data.catalogs', response.data.catalogs);
-      const rootNode = transformCatalogNode(response.data.catalogs);
-      console.log('rootNode', rootNode);
-      return [rootNode];
+    // 检查响应格式 - 支持多种可能的数据结构
+    if (response && response.data) {
+      let catalogData =
+        response.data.catalogs || response.data.catalog || response.data;
+
+      // 如果 catalogData 是数组，取第一个元素
+      if (Array.isArray(catalogData) && catalogData.length > 0) {
+        catalogData = catalogData[0];
+      }
+
+      // 验证 catalogData 是否有效
+      if (
+        catalogData &&
+        typeof catalogData === 'object' &&
+        'chunk_id' in catalogData
+      ) {
+        console.log('catalog data:', catalogData);
+        const rootNode = transformCatalogNode(catalogData);
+        console.log('rootNode:', rootNode);
+        return [rootNode];
+      } else {
+        console.warn('Invalid catalog data structure:', catalogData);
+      }
+    } else {
+      console.warn('No data in response:', response);
     }
 
     return undefined;
@@ -636,7 +663,7 @@ export async function fetchSegmentDetailInfo(
   try {
     // 调用真实API
     const response = await GetKnowledgeChunk({
-      dataset_id: datasetId,
+      dataset_id: Number(datasetId),
       chunk_id: chunkId
     });
 

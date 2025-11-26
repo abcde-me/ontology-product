@@ -139,8 +139,8 @@ const DirectoryTree: React.FC<DirectoryTreeProps> = ({ nodes }) => {
         segmentId: string
       ): DirectoryNode | null => {
         for (const node of nodeList) {
-          // 优先匹配：type='text' 且 id 等于 segmentId
-          if (node.type === 'text' && node.id === segmentId) {
+          // 优先匹配：type='Text' 且 id 等于 segmentId
+          if (node.type === 'Text' && node.id === segmentId) {
             return node;
           }
 

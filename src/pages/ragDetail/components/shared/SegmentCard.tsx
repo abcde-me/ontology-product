@@ -6,9 +6,14 @@ import SegmentCardActions from './SegmentCardActions';
 interface SegmentCardProps {
   segment: Segment;
   isSelected: boolean;
+  totalSegments?: number;
 }
 
-const SegmentCard: React.FC<SegmentCardProps> = ({ segment, isSelected }) => {
+const SegmentCard: React.FC<SegmentCardProps> = ({
+  segment,
+  isSelected,
+  totalSegments
+}) => {
   const { selectSegment, editingSegmentId, highlightPdfSegment } =
     useRagDetailStore();
   const [isHovered, setIsHovered] = useState(false);
@@ -44,7 +49,9 @@ const SegmentCard: React.FC<SegmentCardProps> = ({ segment, isSelected }) => {
         <div className="flex-1">
           <div className="flex items-center gap-3 text-xs font-medium text-[#6E7B8D]">
             <span>字符数: {segment.charCount}</span>
-            <span>分段数: {segment.segmentIndex}/100</span>
+            <span>
+              分段数: {segment.segmentIndex + 1}/{totalSegments ?? 0}
+            </span>
           </div>
         </div>
         {(isSelected || isHovered) && (

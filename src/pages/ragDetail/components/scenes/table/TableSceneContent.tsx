@@ -29,21 +29,27 @@ const TableSceneContent: React.FC<TableSceneContentProps> = ({ loading }) => {
   }
 
   return (
-    <div className="flex h-full flex-col">
+    <div className="flex h-full flex-col" style={{ minHeight: 0 }}>
       {/* 顶部：文件名和操作按钮 */}
       <ContentHeader fileName={fileName} />
 
       {/* 下方：内容区域 */}
-      <div className="flex flex-1 gap-4 overflow-hidden p-4">
+      <div className="flex flex-1 overflow-hidden" style={{ minHeight: 0 }}>
         {/* 表格查看器 */}
         {showPdfViewer && (
-          <div className="flex-1 overflow-hidden rounded-[20px] bg-gray-50">
-            <TableViewer segments={tableSegments} />
-          </div>
+          <>
+            <div className="flex-1 overflow-hidden rounded-[20px] bg-gray-50">
+              <TableViewer />
+            </div>
+            <div className="w-[1px] flex-shrink-0 bg-gray-200" />
+          </>
         )}
 
         {/* 分段列表 */}
-        <div className="flex-1 overflow-hidden rounded-[20px] bg-gray-50">
+        <div
+          className={`h-full flex-1 overflow-hidden rounded-br-[20px] bg-white ${!showPdfViewer ? 'ml-4 rounded-bl-[20px]' : ''}`}
+          style={{ minHeight: 0 }}
+        >
           <TableSegmentList segments={tableSegments} />
         </div>
       </div>

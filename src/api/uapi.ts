@@ -6,7 +6,6 @@ import axios, {
 } from 'axios';
 import {
   ActionEndpoints,
-  ResourceEndpoints,
   ResourceEndpointsV2,
   ModaForgeResourceEndpoints
 } from './endpoints';
@@ -29,7 +28,6 @@ type SetModuleFunction = (
 
 // 使用 keyof 和 typeof 获取 端点 的键
 type RESEndpointKeys =
-  | keyof typeof ResourceEndpoints
   | keyof typeof ResourceEndpointsV2
   | keyof typeof ModaForgeResourceEndpoints;
 type ACTEndpointKeys = keyof typeof ActionEndpoints;
@@ -112,7 +110,6 @@ type Endpoint = string;
 let defaultConfig: Partial<AxiosRequestConfig> = {};
 
 // 目前是固定引入端点
-const resEndpoints = ResourceEndpoints;
 const resEndpointsV2 = ResourceEndpointsV2;
 const modaForgeResEndpoints = ModaForgeResourceEndpoints;
 const actEndpoints = ActionEndpoints;
@@ -292,36 +289,6 @@ for (const key in actEndpoints) {
     const replacedUri = actEndpoints[key] as Endpoint;
     return createUAPIChain('post', replacedUri, data, true);
   };
-}
-
-// 通过一种方法，ResourceEndpoints 里每一个 key，将成为 API.RES 内对象的的 key
-for (const key in resEndpoints) {
-  const resourceEndpointFunction: RESEndpointsFunction = (
-    params: Record<string, string | number>
-  ) => {
-    const replacedUri = replaceUriParams(
-      resEndpoints[key] as Endpoint,
-      params || {}
-    );
-    return {
-      get: (params?: any) => createUAPIChain('get', replacedUri, params, false),
-      post: (data?: any) => createUAPIChain('post', replacedUri, data, true),
-      put: (data?: any) => createUAPIChain('put', replacedUri, data, true),
-      patch: (data?: any) => createUAPIChain('patch', replacedUri, data, true),
-      head: (params?: any) =>
-        createUAPIChain('head', replacedUri, params, false),
-      delete: (data?: any) =>
-        createUAPIChain(
-          'delete',
-          replacedUri,
-          data,
-          data instanceof Array || data instanceof Object
-        )
-    } as {
-      [Method in HttpMethod]: () => UAPIChain;
-    };
-  };
-  UAPI.RES[key] = resourceEndpointFunction;
 }
 
 // 通过一种方法，ResourceEndpointsV2 里每一个 key，将成为 API.RES 内对象的的 key

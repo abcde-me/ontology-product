@@ -12,7 +12,8 @@ import {
   Tabs,
   Typography,
   Switch,
-  Checkbox
+  Checkbox,
+  Space
 } from '@arco-design/web-react';
 import { format } from 'sql-formatter';
 import React, {
@@ -34,7 +35,7 @@ import { getConnectionList, getdetailList } from '@/api/connectionApi';
 import { useHistory } from 'react-router';
 import { validateName } from '@/utils/valiate';
 import Uploads from '../list/file-upload';
-import ComponentTree from './component-tree';
+import ComponentTree from '../component-tree';
 import '../list/db-tree.scss';
 import { sql } from '@codemirror/lang-sql';
 import { lintGutter } from '@codemirror/lint';
@@ -42,8 +43,11 @@ import { tags as t } from '@lezer/highlight';
 import createTheme from '@uiw/codemirror-themes';
 import CodeMirror from '@uiw/react-codemirror';
 import styles from './index.module.scss';
-import { IconCaretRight, IconDown, IconUp } from '@arco-design/web-react/icon';
+import { IconDown, IconLoading, IconUp } from '@arco-design/web-react/icon';
 import SQLFormatIcon from '@/assets/sql/sql-format-ico.svg';
+import ValidateIcon from '../assets/validate-icon.svg';
+import RunFailedIcon from '@/assets/python/run-fail-icon.svg';
+import RunSuccessIcon from '@/assets/python/run-success-icon.svg';
 import classNames from 'classnames';
 
 // 常量定义
@@ -190,11 +194,32 @@ const RunningInfoPanel = function ({
   const renderCheckStatus = () => {
     switch (checkStatus) {
       case CheckSQLStatus.CHECKING:
-        return <Tag color="blue">校验中</Tag>;
+        return (
+          <div className="flex items-center gap-[4px]">
+            <span className="text-[14px] text-[var(--color-text-4)]">
+              校验中
+            </span>
+            <IconLoading style={{ color: '#007DFA' }} />
+          </div>
+        );
       case CheckSQLStatus.SUCCESS:
-        return <Tag color="green">校验成功</Tag>;
+        return (
+          <div className="flex items-center gap-[4px]">
+            <span className="text-[14px] text-[var(--color-text-4)]">
+              校验成功
+            </span>
+            <RunSuccessIcon />
+          </div>
+        );
       case CheckSQLStatus.ERROR:
-        return <Tag color="red">校验失败</Tag>;
+        return (
+          <div className="flex items-center gap-[4px]">
+            <span className="text-[14px] text-[var(--color-text-4)]">
+              校验失败
+            </span>
+            <RunFailedIcon />
+          </div>
+        );
       default:
         return null;
     }
@@ -321,6 +346,7 @@ export default function DataLoadCreate() {
   const [directoryData, setDirectoryData] = useState<TreeNodeData[]>([]);
   const [selectedPath, setSelectedPath] = useState<string>('');
   const [tableList, setTableList] = useState<string[]>([]);
+  const [tableSearchValue, setTableSearchValue] = useState<string>('');
   const [sqlContent, setSqlContent] = useState<string>('');
   const [checkStatus, setCheckStatus] = useState<CheckSQLStatus>(
     CheckSQLStatus.NONE
@@ -444,6 +470,8 @@ export default function DataLoadCreate() {
         // 如果在这里重置，可能会在 getTableName 返回结果后覆盖它
 
         setTableList(res?.data?.table_name || []);
+        // 重置搜索值
+        setTableSearchValue('');
       } catch (error) {
         console.error('获取连接器表格数据失败:', error);
         Message.error('获取连接器表格数据失败');
@@ -452,10 +480,21 @@ export default function DataLoadCreate() {
     [sourceType]
   );
 
+  // 计算过滤后的表格列表（基于搜索关键词）
+  const filteredTableList = useMemo(() => {
+    if (!tableSearchValue.trim()) {
+      return tableList;
+    }
+    const searchLower = tableSearchValue.toLowerCase();
+    return tableList.filter((table) =>
+      table.toLowerCase().includes(searchLower)
+    );
+  }, [tableList, tableSearchValue]);
+
   // 计算选中状态：'all' | 'indeterminate' | 'none'
   const getSelectAllStatus = useCallback(
     (selectedValues: string[]): 'all' | 'indeterminate' | 'none' => {
-      if (!Array.isArray(selectedValues) || tableList.length === 0) {
+      if (!Array.isArray(selectedValues) || filteredTableList.length === 0) {
         return 'none';
       }
       const filteredValues = selectedValues.filter((item) => item !== 'all');
@@ -463,12 +502,20 @@ export default function DataLoadCreate() {
       if (selectedCount === 0) {
         return 'none';
       }
-      if (selectedCount === tableList.length) {
+      // 检查是否所有过滤后的选项都被选中
+      const allFilteredSelected = filteredTableList.every((option) =>
+        filteredValues.includes(option)
+      );
+      if (allFilteredSelected && selectedCount === filteredTableList.length) {
         return 'all';
       }
-      return 'indeterminate';
+      // 检查是否有部分选中
+      const someFilteredSelected = filteredTableList.some((option) =>
+        filteredValues.includes(option)
+      );
+      return someFilteredSelected ? 'indeterminate' : 'none';
     },
-    [tableList]
+    [filteredTableList]
   );
 
   // 处理"全部"选项的点击事件
@@ -480,23 +527,28 @@ export default function DataLoadCreate() {
         (item: string) => item !== 'all'
       );
 
-      // 判断是否全选
+      // 判断是否全选（基于过滤后的列表）
       const isAllSelected =
-        filteredValue.length === tableList.length &&
-        tableList.length > 0 &&
-        tableList.every((option) => filteredValue.includes(option));
+        filteredTableList.length > 0 &&
+        filteredTableList.every((option) => filteredValue.includes(option));
 
       if (isAllSelected) {
-        // 当前全选，取消所有选择
-        form.setFieldsValue({ table_name: [] });
+        // 当前全选，取消所有过滤后选项的选择（保留其他未过滤的选项）
+        const remainingValues = filteredValue.filter(
+          (item: string) => !filteredTableList.includes(item)
+        );
+        form.setFieldsValue({ table_name: remainingValues });
       } else {
-        // 当前未全选或未选择，选中所有选项
-        if (tableList.length > 0) {
-          form.setFieldsValue({ table_name: [...tableList] });
+        // 当前未全选或未选择，选中所有过滤后的选项
+        if (filteredTableList.length > 0) {
+          const newValues = [
+            ...new Set([...filteredValue, ...filteredTableList])
+          ];
+          form.setFieldsValue({ table_name: newValues });
         }
       }
     },
-    [form, tableList]
+    [form, filteredTableList]
   );
 
   // 处理表格名称选择（全部标签逻辑）
@@ -526,19 +578,26 @@ export default function DataLoadCreate() {
         const filteredPrevious = previousArray.filter(
           (item: string) => item !== 'all'
         );
+        // 判断是否全选（基于过滤后的列表）
         const isAllSelected =
-          filteredPrevious.length === tableList.length &&
-          tableList.length > 0 &&
-          tableList.every((option) => filteredPrevious.includes(option));
+          filteredTableList.length > 0 &&
+          filteredTableList.every((option) =>
+            filteredPrevious.includes(option)
+          );
 
         if (isAllSelected) {
-          // 当前全选，取消所有选择
-          form.setFieldsValue({ table_name: [] });
+          // 当前全选，取消所有过滤后选项的选择（保留其他未过滤的选项）
+          const remainingValues = filteredPrevious.filter(
+            (item: string) => !filteredTableList.includes(item)
+          );
+          form.setFieldsValue({ table_name: remainingValues });
         } else {
-          // 当前未全选或未选择，选中所有选项
-          // 包括：未选择任何数据、部分选择、或完全未选择的情况
-          if (tableList.length > 0) {
-            form.setFieldsValue({ table_name: [...tableList] });
+          // 当前未全选或未选择，选中所有过滤后的选项
+          if (filteredTableList.length > 0) {
+            const newValues = [
+              ...new Set([...filteredPrevious, ...filteredTableList])
+            ];
+            form.setFieldsValue({ table_name: newValues });
           }
         }
       } else {
@@ -547,7 +606,7 @@ export default function DataLoadCreate() {
         form.setFieldsValue({ table_name: filteredValue });
       }
     },
-    [form, tableList, selectedNodeType]
+    [form, filteredTableList, selectedNodeType]
   );
 
   // 处理文件变化
@@ -624,6 +683,7 @@ export default function DataLoadCreate() {
       console.log('切换数据源类型到:', value);
       setDirectoryData([]);
       setTableList([]);
+      setTableSearchValue('');
       setConnectName([]);
       setSourceType(value);
       // 清空绑定连接器
@@ -657,7 +717,7 @@ export default function DataLoadCreate() {
           cycle_text:
             loadVal === LOAD_TYPES.ONCE ? DEFAULT_ONCE_CYCLE : expression
         },
-        dest_path_id: pathId,
+        dest_path_id: Number(pathId),
         submit_type: submitType === SUBMIT_TYPES.KEEP ? 1 : 2,
         table_names: Array.isArray(processedTableNames)
           ? processedTableNames
@@ -704,9 +764,13 @@ export default function DataLoadCreate() {
         }
       }
 
+      if (checkStatus === CheckSQLStatus.ERROR) {
+        return '运行失败，请重新检查语句';
+      }
+
       return null;
     },
-    [sourceType, tableList]
+    [sourceType, tableList, checkStatus]
   );
 
   // 处理表单提交
@@ -752,7 +816,7 @@ export default function DataLoadCreate() {
             return;
           }
 
-          if (checkStatus !== CheckSQLStatus.SUCCESS) {
+          if (checkStatus === CheckSQLStatus.NONE) {
             setCheckStatus(CheckSQLStatus.CHECKING);
             setCheckMessage('');
 
@@ -1050,6 +1114,23 @@ export default function DataLoadCreate() {
     );
   }, [tableName, form, getSelectAllStatus]);
 
+  const validateSQL = useCallback(
+    (value: string, callback: (error?: string) => void) => {
+      if (!value || value.trim() === '') {
+        callback('请输入SQL语句');
+        return;
+      }
+
+      if (checkStatus === CheckSQLStatus.ERROR) {
+        callback('运行失败，请重新检查语句');
+        return;
+      }
+
+      return callback();
+    },
+    [checkStatus]
+  );
+
   // 初始化SQL处理默认值为"关闭"
   useEffect(() => {
     const currentSqlProcess = form.getFieldValue('sql_process_enabled');
@@ -1180,13 +1261,13 @@ export default function DataLoadCreate() {
   }, [form]);
 
   return (
-    <div className={classNames('h-full px-[20px]')}>
-      <div className="mb-[9px] mt-[17px] text-[20px] font-bold leading-[32px]">
+    <div className={classNames('h-full px-[20px] pt-[17px]')}>
+      <div className="mb-[9px] text-[20px] font-bold leading-[30px]">
         创建数据载入任务
       </div>
       <div
         className={classNames(
-          'flex h-[calc(100%-58px-17px)] flex-col items-start justify-start overflow-y-auto rounded-[16px] bg-white',
+          'flex h-[calc(100%-39px-25px)] flex-col items-start justify-start overflow-y-auto rounded-[16px] bg-white',
           styles['data-load-create-container']
         )}
       >
@@ -1353,7 +1434,13 @@ export default function DataLoadCreate() {
                     label=" "
                     field="sql"
                     labelAlign="right"
-                    rules={[{ required: true, message: '请输入SQL语句' }]}
+                    rules={[
+                      {
+                        required: true,
+                        validator: (value, callback) =>
+                          validateSQL(value as string, callback)
+                      }
+                    ]}
                   >
                     <div
                       className={classNames(
@@ -1365,7 +1452,7 @@ export default function DataLoadCreate() {
                         <Button
                           type="secondary"
                           disabled={!sqlContent || sqlContent.trim() === ''}
-                          icon={<IconCaretRight />}
+                          icon={<ValidateIcon />}
                           className="h-[26px]"
                           onClick={handleCheckSQL}
                           loading={checkStatus === CheckSQLStatus.CHECKING}
@@ -1377,7 +1464,10 @@ export default function DataLoadCreate() {
                           type="text"
                           icon={<SQLFormatIcon />}
                           onClick={handleFormatCode}
-                          className="h-[26px]"
+                          className={classNames(
+                            'h-[26px]',
+                            styles['format-button']
+                          )}
                         >
                           格式化
                         </Button>
@@ -1423,6 +1513,7 @@ export default function DataLoadCreate() {
               <Select
                 className="select-tag-style"
                 onChange={handleAllTagChange}
+                onSearch={setTableSearchValue}
                 ref={selectRef}
                 key={selectedNodeType}
                 mode={selectedNodeType === 'metadata' ? undefined : 'multiple'}
@@ -1435,20 +1526,26 @@ export default function DataLoadCreate() {
                 placeholder="请选择抽取的表"
                 style={{ width: '100%', minWidth: 0 }}
                 allowClear
+                filterOption={(input, option) => {
+                  // 由于我们使用 filteredTableList 来渲染选项，这里直接返回 true
+                  // 过滤逻辑已经在 filteredTableList 中处理
+                  return true;
+                }}
               >
-                {tableList.length > 0 && selectedNodeType !== 'metadata' && (
-                  <div
-                    onClick={handleAllClick}
-                    className="flex cursor-pointer items-center pl-[7px]"
-                  >
-                    <Checkbox
-                      checked={selectAllStatus === 'all'}
-                      indeterminate={selectAllStatus === 'indeterminate'}
-                    />
-                    <span className="ml-[8px] text-[14px]">全部</span>
-                  </div>
-                )}
-                {tableList.map((option) => (
+                {filteredTableList.length > 0 &&
+                  selectedNodeType !== 'metadata' && (
+                    <div
+                      onClick={handleAllClick}
+                      className="flex cursor-pointer items-center pl-[7px]"
+                    >
+                      <Checkbox
+                        checked={selectAllStatus === 'all'}
+                        indeterminate={selectAllStatus === 'indeterminate'}
+                      />
+                      <span className="ml-[8px] text-[14px]">全部</span>
+                    </div>
+                  )}
+                {filteredTableList.map((option) => (
                   <Option key={option} value={option}>
                     {option}
                   </Option>

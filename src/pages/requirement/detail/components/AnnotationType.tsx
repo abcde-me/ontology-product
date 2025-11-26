@@ -93,10 +93,10 @@ const AnnotationType: React.FC<AnnotationTypeProps> = ({
               className={[
                 'item-base-class',
                 selectedRadio === item.value ? 'active' : '',
-                item.value > 2 ? 'disabled-div' : ''
+                item.value > 2 || isDisabled ? 'disabled-div' : ''
               ].join(' ')}
               onClick={() => {
-                if (item?.value > 2) {
+                if (item?.value > 2 || isDisabled) {
                   return;
                 }
                 headerItemClick(item);
@@ -119,8 +119,11 @@ const AnnotationType: React.FC<AnnotationTypeProps> = ({
           ? btnPicData.map((item) => {
               return (
                 <div
-                  className={`mutex-btn ${activeKey === item.code ? 'active' : ''}`}
+                  className={`mutex-btn ${activeKey === item.code ? 'active' : ''} ${isDisabled ? 'disabled-div' : ''}`}
                   onClick={() => {
+                    if (isDisabled) {
+                      return;
+                    }
                     handleBtnClick(item.code);
                     setAnnotationTypeContentCode(item.code);
                   }}
@@ -137,6 +140,9 @@ const AnnotationType: React.FC<AnnotationTypeProps> = ({
                 <div
                   className={`mutex-btn ${activeKey === item.code || activeKey === item.key ? 'active' : ''} ${isDisabled ? 'disabled-div' : ''}`}
                   onClick={() => {
+                    if (isDisabled) {
+                      return;
+                    }
                     handleBtnClick(item.code);
                     setAnnotationTypeContentCode(item.code);
                   }}

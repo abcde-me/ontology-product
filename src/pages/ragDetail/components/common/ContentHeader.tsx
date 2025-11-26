@@ -30,9 +30,7 @@ const ContentHeader: React.FC<ContentHeaderProps> = ({
 
   // 构建完整的文件名：{name}.{format}
   const displayFileName =
-    documentName && documentFormat
-      ? `${documentName}.${documentFormat}`
-      : fileName;
+    documentName && documentFormat ? `${documentName}` : fileName;
 
   return (
     <div className="flex h-[52px] flex-shrink-0 items-center justify-between border-b border-gray-200 bg-white px-4">
