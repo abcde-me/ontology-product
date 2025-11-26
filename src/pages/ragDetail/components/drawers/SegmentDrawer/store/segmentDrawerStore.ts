@@ -86,11 +86,11 @@ function formatDuration(milliseconds: number): string {
 }
 
 /**
- * 格式化时间戳（Unix 时间戳转 YYYY-MM-DD HH:MM:SS）
+ * 格式化时间戳（13位毫秒时间戳转 YYYY-MM-DD HH:MM:SS）
  */
 function formatTimestamp(timestamp: number): string {
   if (!timestamp) return '';
-  const date = new Date(timestamp * 1000);
+  const date = new Date(timestamp);
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, '0');
   const day = String(date.getDate()).padStart(2, '0');
