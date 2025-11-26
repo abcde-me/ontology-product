@@ -2086,7 +2086,7 @@ const DatasetDetail = (props: {
           {datasetDetail &&
             datasetDetail.storage_type === StorageType.vector && (
               <TabPane key="hittest" title="命中测试">
-                <HitTest />
+                <HitTest datasetName={datasetDetail.name} />
               </TabPane>
             )}
           {/* <TabPane key="element" title="元素搜索"></TabPane> */}
