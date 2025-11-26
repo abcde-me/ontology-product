@@ -643,7 +643,7 @@ export async function fetchSegmentDetailInfo(
   try {
     // 调用真实API
     const response = await GetKnowledgeChunk({
-      dataset_id: datasetId,
+      dataset_id: Number(datasetId),
       chunk_id: chunkId
     });
 
