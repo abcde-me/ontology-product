@@ -73,6 +73,7 @@ export const useSegmentDetailStore = create<SegmentDetailStore>((set, get) => ({
   initializeDetail: (segmentId: string, data: SegmentDetailData) => {
     // 深拷贝数据，避免引用污染
     const deepCopy = JSON.parse(JSON.stringify(data));
+    console.log('初始化分段详情数据:', deepCopy);
     set({
       segmentId,
       detailData: deepCopy,
