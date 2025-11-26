@@ -215,7 +215,8 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
       width: 180,
       sorter: (a, b) => dayjs(a.start_time).unix() - dayjs(b.start_time).unix(),
       sortDirections: ['ascend' as const, 'descend' as const],
-      render: (text) => (type === 'detail' ? formatDateTime(text) : text)
+      render: (text, record) =>
+        type === 'detail' ? formatDateTime(record?.load_start_time) : text
     },
     {
       title: '载入结束时间',
@@ -223,7 +224,8 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
       width: 180,
       sorter: (a, b) => dayjs(a.end_time).unix() - dayjs(b.end_time).unix(),
       sortDirections: ['ascend' as const, 'descend' as const],
-      render: (text) => (type === 'detail' ? formatDateTime(text) : text)
+      render: (text, record) =>
+        type === 'detail' ? formatDateTime(record?.load_end_time) : text
     },
     {
       title: '数据量',
