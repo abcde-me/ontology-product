@@ -52,9 +52,9 @@ import './style.css';
 import noDataElement from '@/components/no-data';
 import getFileIcon from '@/components/file-icon';
 import { PermissionWrapper } from '../PermissionGuard';
-import HitTest from '@/pages/dataMarket/components/configurationpage/hit-test';
 import { throttle } from 'lodash-es';
 import { FileTypeLarge } from '@/utils/type';
+import HitTest from '@/pages/dataMarket/components/configurationpage/compontents/hitTest';
 const { Title, Text } = Typography;
 const { TabPane } = Tabs;
 

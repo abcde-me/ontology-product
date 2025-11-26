@@ -156,9 +156,9 @@ export const ModaForgeResourceEndpoints = {
   // 查询分块溯源日志
   GetKnowledgeChunkTraceLog: PrefixAimdp + '/GetKnowledgeChunkTrace',
   // 运行命中测试
-  RunKnowledgeHitTesting: PrefixRag + '/RunKnowledgeHitTesting',
+  RunKnowledgeHitTesting: PrefixAimdp + '/RunKnowledgeHitTesting',
   // 查询命中测试历史记录
-  ListKnowledgeHitTestingRecords: PrefixRag + '/ListKnowledgeHitTestingRecords',
+  ListKnowledgeHitTestingRecords: PrefixAimdp + '/ListKnowledgeHitTesting',
 
   ResourcePermissionActions: PrefixAuthCenter + '/GetResourcePermissionActions',
   // 新建工作流
