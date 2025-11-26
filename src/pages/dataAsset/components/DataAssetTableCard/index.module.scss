@@ -1,14 +1,14 @@
 .data-asset-table-card {
-  &-item {
-    border: none;
-  }
-
   &-item:first-child {
     background-image: url('../../assets/card-bg.png');
     background-size: 100% 100%;
     background-repeat: no-repeat;
     background-position: top;
     border: 1px solid #184ff2;
+  }
+
+  &-item:hover {
+    border: 1px solid #2563eb;
   }
 
   :global(.arco-tree-select .arco-tree-select-view .arco-input-tag-tag) {

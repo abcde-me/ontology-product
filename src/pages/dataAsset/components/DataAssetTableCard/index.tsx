@@ -194,7 +194,7 @@ export default function DataAssetTableCard({
             <div
               key={record?.id}
               className={classNames(
-                'flex flex-col rounded-lg border border-[#F2F3F5] bg-white p-4 shadow-sm transition-all duration-200 hover:shadow-md',
+                'flex flex-col rounded-lg border border-[#F2F3F5] bg-white p-4 transition-all duration-200 hover:shadow-md',
                 styles['data-asset-table-card-item']
               )}
             >
@@ -218,6 +218,7 @@ export default function DataAssetTableCard({
                     };
                   })}
                   // key="tagId"
+                  showSearch={false}
                   multiple
                   treeCheckable
                   treeCheckStrictly
@@ -283,11 +284,8 @@ export default function DataAssetTableCard({
                   }}
                 />
                 {recordTags?.length === 0 && (
-                  <div
-                    className="pointer-events-none absolute left-0 top-0 ml-[-4px] flex h-full w-full items-center"
-                    style={{ paddingLeft: '12px' }}
-                  >
-                    <span className="text-[#86909c]">
+                  <div className="pointer-events-none absolute left-0 top-0 ml-[-4px] flex h-full w-full cursor-pointer items-center pl-[8px]">
+                    <span className="text-[14px] text-[#86909c]">
                       暂无标签，
                       <span
                         className="pointer-events-auto cursor-pointer text-[#007DFA]"

@@ -35,6 +35,7 @@ import {
 
 /**
  * 将新的后端 positions 数组转换为前端的 PDFCoordinate 数组
+ * 支持 bbox 为空的情况：仅定位到页面，不高亮
  */
 function transformApiPositions(
   positions: ApiPosition[] | null | undefined
@@ -46,10 +47,10 @@ function transformApiPositions(
 
   return positions.map((pos) => ({
     page: pos.page_id + 1, // 后端0-based,前端1-based
-    x1: pos.bbox[0],
-    y1: pos.bbox[1],
-    x2: pos.bbox[2],
-    y2: pos.bbox[3]
+    x1: pos.bbox && pos.bbox.length > 0 ? pos.bbox[0] : undefined,
+    y1: pos.bbox && pos.bbox.length > 1 ? pos.bbox[1] : undefined,
+    x2: pos.bbox && pos.bbox.length > 2 ? pos.bbox[2] : undefined,
+    y2: pos.bbox && pos.bbox.length > 3 ? pos.bbox[3] : undefined
   }));
 }
 
