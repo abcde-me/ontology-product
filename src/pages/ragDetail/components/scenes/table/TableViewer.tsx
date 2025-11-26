@@ -7,7 +7,8 @@ import React, { useState, useEffect } from 'react';
 import * as XLSX from 'xlsx';
 import { TableSegment } from '../../../types';
 import { useRagDetailStore } from '../../../store/ragDetailStore';
-
+import SegmentMarkdown from '../../common/SegmentMarkdown';
+import { containsMarkdown } from '../../../utils/excelUtils';
 interface TableViewerProps {
   segments?: TableSegment[];
   excelUrl?: string; // 新增：Excel文件URL
@@ -126,14 +127,17 @@ const TableViewer: React.FC<TableViewerProps> = ({}) => {
     );
   }
 
-  const handlePrevious = () => {
-    setCurrentTableIndex((prev) => Math.max(0, prev - 1));
-  };
-
-  const handleNext = () => {
-    setCurrentTableIndex((prev) =>
-      Math.min(displaySegments.length - 1, prev + 1)
-    );
+  // 渲染单元格内容
+  const renderCellContent = (content: string | number) => {
+    const contentStr = String(content);
+    if (containsMarkdown(contentStr)) {
+      return (
+        <div className="text-gray-900">
+          <SegmentMarkdown content={contentStr} className="!m-0 !p-0" />
+        </div>
+      );
+    }
+    return <span className="text-gray-900">{contentStr}</span>;
   };
 
   return (
@@ -142,12 +146,6 @@ const TableViewer: React.FC<TableViewerProps> = ({}) => {
       <div className="flex-1 overflow-auto p-4">
         <div className="bg-white">
           {/* 表格标题 */}
-          {/* <div className="border-b border-gray-200 bg-gray-50 px-4 py-3">
-            <h3 className="text-sm font-semibold text-gray-900">
-              {currentSegment.content}
-            </h3>
-          </div> */}
-
           {/* 表格内容 */}
           <div className="overflow-x-auto">
             <table className="w-full border-collapse border border-gray-300">
@@ -171,11 +169,8 @@ const TableViewer: React.FC<TableViewerProps> = ({}) => {
                 {tableData?.rows.map((row, rowIndex) => (
                   <tr key={rowIndex} className="bg-white transition-colors">
                     {tableData?.headers.map((header, colIndex) => (
-                      <td
-                        key={colIndex}
-                        className="h-10 border-b px-4 text-sm text-gray-700"
-                      >
-                        {row[header || colIndex.toString()] || ''}
+                      <td key={colIndex} className="h-10 border-b px-4 text-sm">
+                        {renderCellContent(row[header])}
                       </td>
                     ))}
                   </tr>
@@ -185,30 +180,6 @@ const TableViewer: React.FC<TableViewerProps> = ({}) => {
           </div>
         </div>
       </div>
-
-      {/* 控制条 */}
-      {/* <div className="flex items-center justify-between border-t border-gray-200 bg-white px-4 py-3">
-        <button
-          onClick={handlePrevious}
-          disabled={currentTableIndex === 0}
-          className="rounded bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-200 disabled:cursor-not-allowed disabled:opacity-50"
-        >
-          ← 上一个
-        </button>
-
-        <div className="text-sm text-gray-600">
-          {excelUrl ? '工作表' : '表格'} {currentTableIndex + 1} /{' '}
-          {displaySegments.length}
-        </div>
-
-        <button
-          onClick={handleNext}
-          disabled={currentTableIndex === displaySegments.length - 1}
-          className="rounded bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-200 disabled:cursor-not-allowed disabled:opacity-50"
-        >
-          下一个 →
-        </button>
-      </div> */}
     </div>
   );
 };

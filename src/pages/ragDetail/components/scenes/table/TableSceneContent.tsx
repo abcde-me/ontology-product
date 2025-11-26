@@ -39,7 +39,7 @@ const TableSceneContent: React.FC<TableSceneContentProps> = ({ loading }) => {
         {showPdfViewer && (
           <>
             <div className="flex-1 overflow-hidden rounded-[20px] bg-gray-50">
-              <TableViewer segments={tableSegments} />
+              <TableViewer />
             </div>
             <div className="w-[1px] flex-shrink-0 bg-gray-200" />
           </>
