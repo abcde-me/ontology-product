@@ -544,7 +544,7 @@ function transformApiMaterialToElement(material: any): Element {
       return {
         ...baseElement,
         type: 'text',
-        content: material.text,
+        content: material.content,
         positionType,
         positionInfo,
         pageId
@@ -564,7 +564,7 @@ function transformApiMaterialToElement(material: any): Element {
 
     case 'table':
       try {
-        const tableData = JSON.parse(material.text);
+        const tableData = JSON.parse(material.content);
         return {
           ...baseElement,
           type: 'table',
@@ -590,7 +590,7 @@ function transformApiMaterialToElement(material: any): Element {
       return {
         ...baseElement,
         type: 'formula',
-        content: material.text,
+        content: material.content,
         positionType,
         positionInfo,
         pageId
@@ -600,7 +600,7 @@ function transformApiMaterialToElement(material: any): Element {
       return {
         ...baseElement,
         type: 'text',
-        content: material.text,
+        content: material.content,
         positionType,
         positionInfo,
         pageId
