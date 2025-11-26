@@ -22,7 +22,7 @@ const TextElementCard: React.FC<TextElementCardProps> = ({
 }) => {
   // 从 store 获取更新方法
   const updateElement = useSegmentDetailStore((state) => state.updateElement);
-
+  console.log('element', element);
   return (
     <div className="mb-6 rounded-lg border border-gray-200 bg-white p-4">
       <div className="mb-3 flex items-center">
