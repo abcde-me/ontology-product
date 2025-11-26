@@ -335,6 +335,8 @@ export default function DataAssetList() {
 
         if (dataAssetMapping.length > 0) {
           Promise.all([loadColumnSettings(), loadListData(1, pageSize)]);
+        } else {
+          setHasMapping(false);
         }
       } catch {
         setHasMapping(false);
