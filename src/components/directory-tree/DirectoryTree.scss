@@ -41,15 +41,12 @@
     // position: absolute;
     display: inline-flex;
     align-items: center;
-    // opacity: 0;
-    // visibility: hidden;
+    display: none;
     color: rgba(30, 41, 59, 1);
-    margin-top: 10px;
   }
 
   .arco-tree-node:hover .directory-tree-extra {
-    // opacity: 1;
-    // visibility: visible;
+    display: block;
   }
 
   .arco-tree-node-switcher {
@@ -153,6 +150,21 @@
     display: flex;
     align-items: center;
     justify-content: flex-start;
+  }
+
+  .script-card-content-item-title-icon-text {
+    color: var(--text-color-text-2, #1e293b);
+    text-align: center;
+    font-family: 'PingFang SC';
+    font-size: 12px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 24px;
+    display: none;
+  }
+
+  .arco-tree-node:hover .script-card-content-item-title-icon-text {
+    display: block;
   }
 
   .released-icon {

@@ -51,7 +51,10 @@ import { now } from 'lodash-es';
 import { PermissionWrapper } from '../PermissionGuard';
 import { debounce } from 'lodash-es';
 import SQLFileIcon from '@/assets/sql/sql-file-icon.svg';
-import { VersionType } from '@/pages/sql/components/sctipt-card';
+import {
+  VersionType,
+  VersionTypeEnum
+} from '@/pages/sql/components/sctipt-card';
 // 原始数据接口
 export type TreeNodeItem = Partial<PythonListItem> & {
   dataRef?: any;
@@ -620,6 +623,9 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
                   version_type === VersionType.RELEASED ? 'released-icon' : ''
                 }
               />
+              <div className={'script-card-content-item-title-icon-text'}>
+                {VersionTypeEnum.RELEASED}
+              </div>
             </div>
           );
         case VersionType.UNRELEASED:
@@ -632,6 +638,9 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
                     : ''
                 }
               />
+              <div className={'script-card-content-item-title-icon-text'}>
+                {VersionTypeEnum.UNRELEASED}
+              </div>
             </div>
           );
         case VersionType.SCHEDULED:
@@ -642,12 +651,18 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
                   version_type === VersionType.SCHEDULED ? 'scheduled-icon' : ''
                 }
               />
+              <div className={'script-card-content-item-title-icon-text'}>
+                {VersionTypeEnum.SCHEDULED}
+              </div>
             </div>
           );
         default:
           return (
             <div className={'script-card-content-item-title-icon'}>
               <span className={'unreleased-icon'} />
+              <div className={'script-card-content-item-title-icon-text'}>
+                {VersionTypeEnum.UNRELEASED}
+              </div>
             </div>
           );
       }
@@ -793,7 +808,6 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
               return (
                 <div className="directory-tree-extra">
                   <Dropdown
-                    trigger="click"
                     droplist={
                       <Menu>
                         <PermissionWrapper permission={nowPermissions.MODIFY}>
@@ -803,7 +817,6 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
                             }}
                             key="1"
                           >
-                            {' '}
                             <IconEdit className="mr-1" />
                             重命名
                           </Menu.Item>
@@ -815,7 +828,6 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
                             }}
                             key="2"
                           >
-                            {' '}
                             <IconCopy className="mr-1" />
                             复制为新脚本
                           </Menu.Item>
@@ -827,7 +839,6 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
                             }}
                             key="3"
                           >
-                            {' '}
                             <IconDelete className="mr-1" />
                             删除
                           </Menu.Item>

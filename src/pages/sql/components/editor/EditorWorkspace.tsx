@@ -9,6 +9,7 @@ import {
   Spin
 } from '@arco-design/web-react';
 import {
+  IconBook,
   IconCaretRight,
   IconSave,
   IconStorage
@@ -19,7 +20,7 @@ import { EditorView } from '@codemirror/view';
 import { tags as t } from '@lezer/highlight';
 import createTheme from '@uiw/codemirror-themes';
 import CodeMirror, { ReactCodeMirrorRef } from '@uiw/react-codemirror';
-import React, { memo, useCallback, useEffect, useRef } from 'react';
+import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { format } from 'sql-formatter';
 import styles from './EditorWorkspace.module.scss';
 
@@ -31,6 +32,8 @@ import { EditorProvider, useEditorContext } from '../../contexts/EditorContext';
 import { FileTab } from '../../hooks/useTabManager';
 import RunningInfoPanel from './RunningInfoPanel';
 import classNames from 'classnames';
+import { set } from 'lodash';
+import ModalParamList from '../data-manager/ModalParamList';
 
 interface NotebookWorkspaceProps {
   content: string;
@@ -45,6 +48,7 @@ interface NotebookWorkspaceProps {
   refreshDirectory?: () => void;
   selectFile?: (fileId: string) => void;
   onToScriptList?: (key: string) => void;
+  curActiveTab: string;
 }
 
 // 内部组件，使用 EditorContext
@@ -53,10 +57,18 @@ const EditorWorkspaceContent: React.FC<{
   onInsertContent?: (insertFn: (content: string) => void) => void;
   onEditorFocusChange?: (isFocused: boolean) => void;
   onToScriptList?: (key: string) => void;
+  curActiveTab: string;
 }> = memo(
-  ({ onInsertContent, onEditorFocusChange, fileName, onToScriptList }) => {
+  ({
+    onInsertContent,
+    onEditorFocusChange,
+    fileName,
+    onToScriptList,
+    curActiveTab
+  }) => {
     const FormItem = Form.Item;
     const [form] = Form.useForm();
+    const TextArea = Input.TextArea;
     const editorRef = useRef<ReactCodeMirrorRef>(null);
     const [lastCursorPosition, setLastCursorPosition] =
       React.useState<number>(0);
@@ -66,7 +78,14 @@ const EditorWorkspaceContent: React.FC<{
     const hasUpdatePermission = useHasPermission(SQL_PERMISSIONS.MODIFY);
     const hasCancelRunPermission = useHasPermission(SQL_PERMISSIONS.RUN);
     const [visible, setVisible] = React.useState<boolean>(false);
-
+    const [specificationsVisible, setSpecificationsVisible] =
+      React.useState<boolean>(false);
+    const [specificationsContent, setSpecificationsContent] =
+      React.useState<string>('测试文案');
+    const [newSpecificationsContent, setNewSpecificationsContent] =
+      React.useState<string>('');
+    const [isSpecificationsValid, setIsSpecificationsValid] = useState(true);
+    const [paramVisible, setParamVisible] = React.useState<boolean>(false);
     useEffect(() => {
       form.setFieldsValue({
         fileName: fileName
@@ -198,6 +217,9 @@ const EditorWorkspaceContent: React.FC<{
         onInsertContent(insertContentAtCursor);
       }
     }, [insertContentAtCursor, onInsertContent]);
+    const handleSpecificationsChange = (val: string) => {
+      setNewSpecificationsContent(val);
+    };
     return (
       <div className={styles['sql-content']}>
         {/* 顶部工具栏 */}
@@ -234,6 +256,26 @@ const EditorWorkspaceContent: React.FC<{
               >
                 格式化
               </Button>
+              {curActiveTab === 'files' && (
+                <>
+                  <Button
+                    type="text"
+                    icon={<IconBook />}
+                    onClick={() => setSpecificationsVisible(true)}
+                    className="h-[26px]"
+                  >
+                    开发规范
+                  </Button>
+                  <Button
+                    type="text"
+                    icon={<IconStorage />}
+                    onClick={() => setParamVisible(true)}
+                    className="h-[26px]"
+                  >
+                    参数列表
+                  </Button>
+                </>
+              )}
             </Space>
           </div>
           <div className={styles['toolbar-right']}>
@@ -246,25 +288,29 @@ const EditorWorkspaceContent: React.FC<{
                 </Space>
               </div>
             )}
-            <Button
-              onClick={() => {
-                handleSeeScriptList();
-              }}
-              className={styles['btn-script-list']}
-              disabled={runStatus === RunningStatus.RUNNING}
-              icon={<IconStorage />}
-            >
-              脚本列表
-            </Button>
-            <Button
-              className={styles['btn-save']}
-              onClick={() => {
-                setVisible(true);
-              }}
-              icon={<IconSave />}
-            >
-              保存
-            </Button>
+            {curActiveTab === 'data' && (
+              <Button
+                onClick={() => {
+                  handleSeeScriptList();
+                }}
+                className={styles['btn-script-list']}
+                disabled={runStatus === RunningStatus.RUNNING}
+                icon={<IconStorage />}
+              >
+                脚本列表
+              </Button>
+            )}
+            {curActiveTab === 'data' && (
+              <Button
+                className={styles['btn-save']}
+                onClick={() => {
+                  setVisible(true);
+                }}
+                icon={<IconSave />}
+              >
+                保存
+              </Button>
+            )}
           </div>
         </div>
 
@@ -356,6 +402,68 @@ const EditorWorkspaceContent: React.FC<{
             </FormItem>
           </Form>
         </Modal>
+        {/* 开发规范 */}
+        <Modal
+          title="开发规范"
+          visible={specificationsVisible}
+          onCancel={() => setSpecificationsVisible(false)}
+          footer={null}
+          style={{
+            width: 960,
+            height: 678
+          }}
+        >
+          <div className={styles['specifications-modal-content']}>
+            <div className={styles['specifications-modal-content-btn']}>
+              {isSpecificationsValid ? (
+                <Button
+                  onClick={() => {
+                    setIsSpecificationsValid(false);
+                  }}
+                  className={styles['btn-edit']}
+                >
+                  编辑
+                </Button>
+              ) : (
+                <div className={styles['btn-group-content']}>
+                  <Button
+                    onClick={() => {
+                      setIsSpecificationsValid(true);
+                      setNewSpecificationsContent(specificationsContent);
+                    }}
+                    className={styles['btn-cancel']}
+                  >
+                    取消
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      setSpecificationsContent(newSpecificationsContent);
+                      setIsSpecificationsValid(true);
+                    }}
+                    type="primary"
+                    className={styles['btn-save']}
+                  >
+                    确定
+                  </Button>
+                </div>
+              )}
+            </div>
+            {isSpecificationsValid ? (
+              <div className="pl-2 pt-2">{newSpecificationsContent}</div>
+            ) : (
+              <TextArea
+                placeholder="请输入开发规范"
+                style={{ width: 912, maxHeight: 590, height: 590 }}
+                defaultValue={specificationsContent}
+                onChange={(val) => handleSpecificationsChange(val)}
+              />
+            )}
+          </div>
+        </Modal>
+        <ModalParamList
+          paramVisible={paramVisible}
+          onCancel={() => setParamVisible(false)}
+        />
       </div>
     );
   }
@@ -375,7 +483,8 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = memo(
     onEditorFocusChange,
     refreshDirectory,
     selectFile,
-    onToScriptList
+    onToScriptList,
+    curActiveTab
   }) => {
     const editorOptions = {
       activeTab: tabKey,
@@ -415,6 +524,7 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = memo(
     return (
       <EditorProvider options={editorOptions}>
         <EditorWorkspaceContent
+          curActiveTab={curActiveTab}
           fileName={fileName}
           onToScriptList={onToScriptList}
           onInsertContent={onInsertContent}

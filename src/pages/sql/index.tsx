@@ -196,6 +196,7 @@ const SqlIndex: React.FC = memo(() => {
         <EditorContent
           fileTabs={fileState.fileTabs}
           activeTab={fileState.activeTab}
+          curActiveTab={activeTab}
           onTabChange={switchTab}
           onAddTab={(newFileInfo?: any) => addTab(newFileInfo)}
           onRemoveTab={removeTab}

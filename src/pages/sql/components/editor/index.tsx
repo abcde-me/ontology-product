@@ -22,6 +22,7 @@ interface EditorContentProps {
   refreshDirectory?: () => void;
   selectFile?: (fileId: string) => void;
   onToScriptList?: (key: string) => void;
+  curActiveTab: string;
 }
 
 const EditorContent: React.FC<EditorContentProps> = memo(
@@ -37,7 +38,8 @@ const EditorContent: React.FC<EditorContentProps> = memo(
     onEditorFocusChange,
     refreshDirectory,
     selectFile,
-    onToScriptList
+    onToScriptList,
+    curActiveTab
   }) => {
     // 获取当前活动标签页
     const activeTabData = fileTabs.find((tab) => tab.key === activeTab);
@@ -155,6 +157,7 @@ const EditorContent: React.FC<EditorContentProps> = memo(
             refreshDirectory={refreshDirectory}
             selectFile={selectFile}
             onToScriptList={onToScriptList}
+            curActiveTab={curActiveTab}
           />
         </div>
       </div>
