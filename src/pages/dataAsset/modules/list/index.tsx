@@ -303,6 +303,7 @@ export default function DataAssetList() {
     } catch (err) {
       console.error('获取数据资产列表失败:', err);
     } finally {
+      setHasMapping(true);
       setLoading(false);
     }
   };

@@ -446,7 +446,7 @@ export default function SearchArea({
   return (
     <div className={`${className} ${styles['search-area']}`}>
       {/* 主搜索区域 */}
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-[4px]">
         <Input.Search
           className="w-[480px]"
           placeholder={mainSearchPlaceholder}
