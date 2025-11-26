@@ -489,29 +489,29 @@ export default function DataLoadCreate() {
   );
 
   // 处理表格列表，用于单选模式（禁用所有复选框）
-  const processTableListForSingleSelect = useCallback(
-    (data: TableItem[]): TableItem[] => {
-      return data.map((item) => {
-        const processedItem: TableItem = {
-          ...item,
-          checkable: false, // 明确禁用复选框
-          disableCheckbox: true, // 禁用复选框显示
-          key: item.key || item.title,
-          value: item.value || item.title
-        };
+  // const processTableListForSingleSelect = useCallback(
+  //   (data: TableItem[]): TableItem[] => {
+  //     return data.map((item) => {
+  //       const processedItem: TableItem = {
+  //         ...item,
+  //         checkable: false, // 明确禁用复选框
+  //         disableCheckbox: true, // 禁用复选框显示
+  //         key: item.key || item.title,
+  //         value: item.value || item.title
+  //       };
 
-        // 递归处理子节点
-        if (item.children && item.children.length > 0) {
-          processedItem.children = processTableListForSingleSelect(
-            item.children
-          );
-        }
+  //       // 递归处理子节点
+  //       if (item.children && item.children.length > 0) {
+  //         processedItem.children = processTableListForSingleSelect(
+  //           item.children
+  //         );
+  //       }
 
-        return processedItem;
-      });
-    },
-    []
-  );
+  //       return processedItem;
+  //     });
+  //   },
+  //   []
+  // );
 
   // 获取连接器详情和表格列表
   const getConnectorDetailList = useCallback(
