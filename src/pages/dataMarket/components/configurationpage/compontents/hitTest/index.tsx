@@ -6,26 +6,14 @@ import {
   IconSettings,
   IconStorage
 } from '@arco-design/web-react/icon';
-import {
-  Button,
-  Input,
-  Message,
-  Modal,
-  Radio,
-  Tooltip
-} from '@arco-design/web-react';
+import { Button, Input, Message, Modal, Tooltip } from '@arco-design/web-react';
 import { Table } from '@ccf2e/arco-material';
 import { format } from 'date-fns';
 import PolicyForm from '@/components/policy-from/index';
-import {
-  getHitRecord,
-  postHitTest,
-  putknowledgeBaseList
-} from '@/api/datasetsV2';
 import EllipsisPopover from '@/components/ellipsis-popover-com';
 import brother from '../brother';
 import MarkdownBase from '@/components/markdownBase';
-import NoDataEmpty from '@/components/NoDataEmpty';
+import NoDataEmpty from '@/components/no-data';
 import TagContent from '../tagContent';
 import SegmentDrawer from '@/pages/ragDetail/components/drawers/SegmentDrawer';
 import { useRagDetailStore } from '@/pages/ragDetail/store/ragDetailStore';
@@ -34,14 +22,18 @@ import CopyHighIconSvg from '@/assets/rag/copy-high.svg';
 import JumpToHighIconSvg from '@/assets/rag/jump-to-high.svg';
 import JumpToNormalIconSvg from '@/assets/rag/jump-to-normal.svg';
 import copy from 'copy-to-clipboard';
+import {
+  RunKnowledgeHitTesting,
+  ListKnowledgeHitTestingRecords
+} from '@/api/modules/rag';
+import { useParams } from 'react-router-dom';
+import { useUserInfo } from '@/store/userInfoStore';
 
-function PageContentFalse(props) {
-  const { detailsdata, onInit } = props;
-  const { id } = detailsdata || {};
+function HitTest() {
+  const { id } = useParams<{ id: string }>(); //数据集id
   const { segmentDrawerTab, segmentDrawerSegmentId, segments } =
     useRagDetailStore();
-  const RadioGroup = Radio.Group;
-  const InputSearch = Input.Search;
+  const userInfo = useUserInfo();
   const TextArea = Input.TextArea;
   const childRef: any = useRef();
   const [editPolicy, seteditPolicy] = useState(false);
@@ -56,73 +48,8 @@ function PageContentFalse(props) {
   const [hoveredJumpResult, setHoveredJumpResult] = useState<number | null>(
     null
   );
-  const [recordList, setRecordList] = useState<any>([
-    {
-      id: 1,
-      query: '蜂巢工厂',
-      dataset_query_results: [],
-      retrieval_model: {
-        search_method: 'hybrid_search',
-        reranking_enable: true,
-        reranking_model: {
-          reranking_provider_name: '智源',
-          reranking_model_name: 'bge-rerank-base'
-        },
-        top_k: 6,
-        weights: 0.6,
-        score_threshold_enabled: true,
-        score_threshold: 0.6
-      },
-      created_at: '2025-09-29T17:19:10.131+08:00'
-    },
-    {
-      id: 2,
-      query:
-        '蜂巢工厂蜂巢工厂蜂巢工厂蜂巢工厂蜂巢工厂蜂巢工厂蜂巢工厂蜂巢工厂蜂巢工厂蜂巢工厂蜂巢工厂蜂巢工厂蜂巢工厂蜂巢工厂蜂巢工厂蜂巢工厂蜂巢工厂蜂巢工厂蜂巢工厂蜂巢工厂蜂巢工厂蜂巢工厂蜂巢工厂蜂巢工厂',
-      dataset_query_results: [],
-      retrieval_model: {
-        search_method: 'hybrid_search',
-        reranking_enable: true,
-        reranking_model: {
-          reranking_provider_name: '智源',
-          reranking_model_name: 'bge-rerank-base'
-        },
-        top_k: 6,
-        weights: 0.6,
-        score_threshold_enabled: true,
-        score_threshold: 0.6
-      },
-      created_at: '2025-09-29T17:18:58.506+08:00'
-    }
-  ]);
-  const [segmentationlist, setsegmentationlist] = useState([
-    {
-      chunk_id: 'segment-ac91be00-d773-45be-add0-89b423975605',
-      document_id: 'document-fb5ccf73-232c-4714-933e-e22e4eed4d5c',
-      document_name: '工作簿8.xlsx',
-      dataset_id: 'dataset-d9e0699d-d99d-44d3-98d0-142faee124b9',
-      content:
-        '{"企业全称":"中国经济信息社有限公司","简称或别名":"中国经济信息社.CIN.中国经济信息中心.中国经信社.经济信息社.中国经信","company_id":"58037e49939bef870af94d2402afdf03","股票代码":"（非上市企业）"}',
-      content_shot:
-        '{"企业全称":"中国经济信息社有限公司","简称或别名":"中国经济信息社.CIN.中国经济信息中心.中国经信社.经济信息社.中国经信","company_id":"58037e49939bef870af94d2402afdf03","股票代码":"（非上市企业）"}',
-      score: 0.17382812,
-      bbox: {},
-      extra_expr: ''
-    },
-    {
-      chunk_id: 'segment-5d5016a7-7a57-47e5-8e5f-81a6022320f3',
-      document_id: 'document-fb5ccf73-232c-4714-933e-e22e4eed4d5c',
-      document_name: '工作簿8.xlsx',
-      dataset_id: 'dataset-d9e0699d-d99d-44d3-98d0-142faee124b9',
-      content:
-        '{"企业全称":"中电云计算技术有限","简称或别名":"CEC·中电云·中电云技术·中电云技术有限公司·中电云计算·中电云计算技术公司","company_id":"8e4dc3b4413990fe30556bc9b9b79f34","股票代码":"（非上市企业）"}',
-      content_shot:
-        '{"企业全称":"中电云计算技术有限","简称或别名":"CEC·中电云·中电云技术·中电云技术有限公司·中电云计算·中电云计算技术公司","company_id":"8e4dc3b4413990fe30556bc9b9b79f34","股票代码":"（非上市企业）"}',
-      score: 0.14648438,
-      bbox: {},
-      extra_expr: ''
-    }
-  ]);
+  const [recordList, setRecordList] = useState<any>([]);
+  const [segmentationlist, setsegmentationlist] = useState([]);
   const [segmentationlistFilter, setsegmentationlistFilter] = useState([]);
   const [selectedRowIndex, setSelectedRowIndex] = useState<number | null>(0); // 默认选中第一行
   const [loading1, setLoading1] = useState(false);
@@ -133,6 +60,7 @@ function PageContentFalse(props) {
     page: 1, // 当前页码
     limit: 10 // 每页显示的数据条数
   });
+  const hasTriggered = useRef(false);
   brother.on('editFuncFrom', () => {
     seteditChildVisible(true);
   });
@@ -141,15 +69,13 @@ function PageContentFalse(props) {
     (seg) => seg.id === segmentDrawerSegmentId
   );
   const queryParams = new URLSearchParams(location.search);
-  const datasetId = queryParams.get('datasetId');
-  const documentId = queryParams.get('documentId');
   const mocktest = {
-    reordering: true,
-    retrievalV: 'hybrid_search',
-    scoreSwitch: true,
-    scoreValue: 0.6,
-    topK: 6,
-    weightSettings: 0.6
+    reranking_enable: false,
+    search_method: 'Vector',
+    score_threshold_enabled: true,
+    score_threshold: 0.6,
+    top_k: 6,
+    weights: 0.6
   };
   const submitEditeditPolicy = () => {
     childRef.current.submitEditeditPolicy();
@@ -162,17 +88,23 @@ function PageContentFalse(props) {
     init({ ...pagination });
   }, [id]);
   useEffect(() => {
-    if (recordList.length > 0) {
-      // setsegmentationlist(recordList[0].dataset_query_results || []);
-      setsegmentationlistFilter(recordList[0].dataset_query_results || []);
+    if (recordList.length > 0 && !hasTriggered.current) {
+      setsegmentationlist(recordList[0].retrieve_datas || []);
+      setsegmentationlistFilter(recordList[0].retrieve_datas || []);
+      hasTriggered.current = true;
     }
   }, [recordList]);
-  const init = async (params) => {
+  const init = async (value) => {
     if (!id) return;
+    const params = {
+      dataset_id: Number(id),
+      user_id: userInfo?.id,
+      ...value
+    };
     try {
       setLoading2(true);
-      const documentList = await getHitRecord(id, params);
-      const { data: dataList = [], total = '' } = documentList.data;
+      const documentList = await ListKnowledgeHitTestingRecords(params);
+      const { list: dataList = [], total = '' } = documentList.data;
       setRecordList(dataList || []);
       setPagination((prevPagination) => ({
         ...prevPagination,
@@ -239,31 +171,34 @@ function PageContentFalse(props) {
         datatp = fromdata;
       }
       const params = {
+        dataset_id: Number(id),
         query: text,
+        user_id: userInfo?.id,
         retrieval_model: {
-          search_method: datatp.retrievalV, //      semantic_search（语义检索） full_text_search（全文检索） hybrid_search（混合检索）
-          reranking_enable: datatp.reordering,
-          reranking_model: {
-            // rerank 模型设置
-            reranking_provider_name: '',
-            reranking_model_name: ''
-          },
-          top_k: datatp.topK, // 召回topk
-          weights: datatp.weightSettings,
-          score_threshold_enabled: datatp.scoreSwitch,
-          score_threshold: datatp.scoreValue, // 匹配分
-          tag_mode: datatp.tag_mode //  doc_tag（文档标签） segment_tag（分段标签）
+          search_method: datatp.search_method, //      semantic_search（语义检索） full_text_search（全文检索） hybrid_search（混合检索）
+          reranking_enable: datatp.reranking_enable,
+          reranking_model: datatp.reranking_model,
+          top_k: datatp.top_k, // 召回topk
+          weights: datatp.weights,
+          score_threshold_enabled: datatp.score_threshold_enabled,
+          score_threshold: datatp.score_threshold // 匹配分
+          // tag_mode: datatp.tag_mode //  doc_tag（文档标签） segment_tag（分段标签）
         }
       };
       setLoading1(true);
-      await postHitTest(id, params);
+      setLoading2(true);
+      const res = await RunKnowledgeHitTesting(params);
+      setsegmentationlist(res.data || []);
+      setsegmentationlistFilter(res.data || []);
       init({
         ...pagination,
         page: 1
       });
       setLoading1(false);
+      setLoading2(false);
     } catch {
       setLoading1(false);
+      setLoading2(false);
     }
   };
   const onChangeTable = (value) => {
@@ -281,9 +216,8 @@ function PageContentFalse(props) {
   const onRowClick = (record: any, index: number) => {
     setSelectedRowIndex(index); // 设置选中的行
     setText(record.query);
-    // setsegmentationlist(record.dataset_query_results || []);
-
-    setsegmentationlistFilter(recordList[index].dataset_query_results || []);
+    setsegmentationlist(record.retrieve_datas || []);
+    setsegmentationlistFilter(recordList[index].retrieve_datas || []);
   };
   const rowClassName = (record: any, index: number) => {
     // 如果是选中的行，给该行添加浅蓝色的背景
@@ -291,8 +225,8 @@ function PageContentFalse(props) {
   };
   const handleSearch = () => {
     const filterlist = value
-      ? segmentationlistFilter.filter((e: { content_shot: string }) =>
-          e.content_shot.includes(value)
+      ? segmentationlistFilter.filter((e: { content: string }) =>
+          e.content.includes(value)
         )
       : segmentationlistFilter;
 
@@ -303,20 +237,6 @@ function PageContentFalse(props) {
   };
   const clearEditChild = () => {
     childRef.current.clearEditFromOnc();
-  };
-  const FuncEdit = async (e) => {
-    try {
-      const params = {
-        name: e.name,
-        description: e.description,
-        datasetContentId: e.selectedOptionV[e.selectedOptionV.length - 1]
-      };
-      await putknowledgeBaseList(id, params);
-      onInit();
-      Message.success(`编辑成功`);
-    } catch {
-      Message.error(`编辑失败`);
-    }
   };
   const onChangeSup = useCallback((con: string) => {
     console.log(con);
@@ -337,6 +257,7 @@ function PageContentFalse(props) {
               autoSize={{ minRows: 13 }}
               allowClear
               maxLength={2000}
+              disabled={loading1}
               onChange={(value) => setText(value)} // 更新状态
             ></TextArea>
           </div>
@@ -365,19 +286,19 @@ function PageContentFalse(props) {
               开始测试
             </Button>
           )}
-          <Button
+          {/* <Button
             className={styles.cl}
             type="outline"
             icon={<IconSettings />}
             onClick={oncEditPolicy}
           >
             检索设置
-          </Button>
+          </Button> */}
         </div>
         <div className={styles.historyHeader}>历史记录</div>
         <div className={styles.historyContent}>
           {recordList.length === 0 ? (
-            <NoDataEmpty />
+            <NoDataEmpty description="暂无数据" />
           ) : (
             <Table
               loading={loading2}
@@ -431,7 +352,7 @@ function PageContentFalse(props) {
                           分值：{e.score.toFixed(2)}
                         </div>
                         <span className="ml-[8px] text-[12px] leading-5">
-                          字符数：{e.content_shot.length}
+                          字符数：{e?.content.length}
                         </span>
                         <span className="ml-[8px] text-[12px] leading-5">
                           |
@@ -443,7 +364,7 @@ function PageContentFalse(props) {
                           <button
                             onClick={(event) => {
                               event.stopPropagation();
-                              handleCopy(e.content_shot);
+                              handleCopy(e.content);
                             }}
                             onMouseEnter={() => setHoveredCopyResult(index)}
                             onMouseLeave={() => setHoveredCopyResult(null)}
@@ -498,7 +419,7 @@ function PageContentFalse(props) {
                     </div>
                     <div className={styles.segmentationContent}>
                       <MarkdownBase
-                        content={e.content_shot}
+                        content={e.content}
                         onChangeSup={onChangeSup}
                       ></MarkdownBase>
                     </div>
@@ -520,7 +441,7 @@ function PageContentFalse(props) {
                 );
               })
             ) : (
-              <NoDataEmpty />
+              <NoDataEmpty description="暂无结果" />
             )}
           </div>
         </div>
@@ -549,7 +470,7 @@ function PageContentFalse(props) {
           defaultActiveTab={defaultTab}
           currentSegmentIndex={currentSegment?.segmentIndex}
           totalSegments={segments.length}
-          datasetId={datasetId ? Number(datasetId) : undefined}
+          datasetId={id ? Number(id) : undefined}
           chunkId={currentSegment.id}
           segments={segments}
         />
@@ -557,4 +478,4 @@ function PageContentFalse(props) {
     </div>
   );
 }
-export default PageContentFalse;
+export default HitTest;
