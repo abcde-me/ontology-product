@@ -24,12 +24,15 @@ import JumpToNormalIconSvg from '@/assets/rag/jump-to-normal.svg';
 import copy from 'copy-to-clipboard';
 import {
   RunKnowledgeHitTesting,
-  ListKnowledgeHitTestingRecords
+  ListKnowledgeHitTestingRecords,
+  getKnowledgeDocument
 } from '@/api/modules/rag';
-import { useParams } from 'react-router-dom';
+import { useHistory, useParams } from 'react-router-dom';
 import { useUserInfo } from '@/store/userInfoStore';
 
-function HitTest() {
+function HitTest(props: { datasetName: string }) {
+  const { datasetName } = props;
+  const history = useHistory();
   const { id } = useParams<{ id: string }>(); //数据集id
   const { segmentDrawerTab } = useRagDetailStore();
   const userInfo = useUserInfo();
@@ -102,19 +105,23 @@ function HitTest() {
     try {
       setLoading2(true);
       const documentList = await ListKnowledgeHitTestingRecords(params);
-      const { list: dataList = [], total = '' } = documentList.data;
-      setRecordList(dataList || []);
-      const newSegmentList = dataList
-        .flatMap((item) => item.retrieve_datas || [])
-        .map((item) => ({
-          id: item.chunk_id,
-          ...item
+      if (documentList.code === '' && documentList.status === 200) {
+        const { list: dataList = [], total = '' } = documentList.data;
+        setRecordList(dataList || []);
+        const newSegmentList = dataList
+          .flatMap((item) => item.retrieve_datas || [])
+          .map((item) => ({
+            id: item.chunk_id,
+            ...item
+          }));
+        setSegmentList(newSegmentList || []);
+        setPagination((prevPagination) => ({
+          ...prevPagination,
+          total: total
         }));
-      setSegmentList(newSegmentList || []);
-      setPagination((prevPagination) => ({
-        ...prevPagination,
-        total: total
-      }));
+      } else {
+        Message.error(documentList.message || '接口调用失败');
+      }
       setLoading2(false);
     } catch {}
   };
@@ -193,12 +200,16 @@ function HitTest() {
       setLoading1(true);
       setLoading2(true);
       const res = await RunKnowledgeHitTesting(params);
-      setsegmentationlist(res.data || []);
-      setsegmentationlistFilter(res.data || []);
-      init({
-        ...pagination,
-        page: 1
-      });
+      if (res.code === '' && res.status === 200) {
+        setsegmentationlist(res.data || []);
+        setsegmentationlistFilter(res.data || []);
+        init({
+          ...pagination,
+          page: 1
+        });
+      } else {
+        Message.error(res.message || '接口调用失败');
+      }
       setLoading1(false);
       setLoading2(false);
     } catch {
@@ -246,6 +257,22 @@ function HitTest() {
   const onChangeSup = useCallback((con: string) => {
     console.log(con);
   }, []);
+  const handleToParagraph = async (
+    document_id: string,
+    position: string,
+    parent_title_id: string
+  ) => {
+    const res = await getKnowledgeDocument({
+      document_id
+    });
+    if (res.code === '' && res.status === 200) {
+      history.push(
+        `/tenant/compute/modaforge/ragDetail?datasetId=${id}&documentId=${document_id}&bucketName=${res.data.bucket_name}&path=${res.data.path}&datasetName=${datasetName}&position=${position}&parentTitleId=${parent_title_id}`
+      );
+    } else {
+      Message.error(res.message || '接口调用失败');
+    }
+  };
   return (
     <div className={styles.PageContentFalse}>
       <div className={styles.leftList}>
@@ -386,6 +413,11 @@ function HitTest() {
                           <button
                             onClick={(event) => {
                               event.stopPropagation();
+                              handleToParagraph(
+                                e.document_id,
+                                e.position,
+                                e.parent_title_id
+                              );
                             }}
                             onMouseEnter={() => setHoveredJumpResult(index)}
                             onMouseLeave={() => setHoveredJumpResult(null)}
