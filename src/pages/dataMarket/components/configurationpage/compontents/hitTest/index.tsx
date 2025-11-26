@@ -259,6 +259,7 @@ function HitTest(props: { datasetName: string }) {
   }, []);
   const handleToParagraph = async (
     document_id: string,
+    chunk_id: string,
     position: string,
     parent_title_id: string
   ) => {
@@ -267,7 +268,7 @@ function HitTest(props: { datasetName: string }) {
     });
     if (res.code === '' && res.status === 200) {
       history.push(
-        `/tenant/compute/modaforge/ragDetail?datasetId=${id}&documentId=${document_id}&bucketName=${res.data.bucket_name}&path=${res.data.path}&datasetName=${datasetName}&position=${position}&parentTitleId=${parent_title_id}`
+        `/tenant/compute/modaforge/ragDetail?datasetId=${id}&documentId=${document_id}&bucketName=${res.data.bucket_name}&path=${res.data.path}&datasetName=${datasetName}&chunkId=${chunk_id}&position=${position}&parentTitleId=${parent_title_id}`
       );
     } else {
       Message.error(res.message || '接口调用失败');
@@ -415,6 +416,7 @@ function HitTest(props: { datasetName: string }) {
                               event.stopPropagation();
                               handleToParagraph(
                                 e.document_id,
+                                e.chunk_id,
                                 e.position,
                                 e.parent_title_id
                               );
