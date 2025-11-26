@@ -148,7 +148,19 @@ const TableViewer: React.FC<TableViewerProps> = ({}) => {
           {/* 表格标题 */}
           {/* 表格内容 */}
           <div className="overflow-x-auto">
-            <table className="w-full border-collapse border border-gray-300">
+            <table
+              className={`border-collapse border ${
+                tableData.headers.length >= 4 ? '' : 'w-full'
+              }`}
+              style={
+                tableData.headers.length >= 4
+                  ? {
+                      tableLayout: 'fixed',
+                      width: `${tableData.headers.length * 200}px`
+                    }
+                  : { tableLayout: 'fixed', width: '100%' }
+              }
+            >
               {/* 表头 */}
               {tableData?.headers && tableData.headers.length > 0 && (
                 <thead>
@@ -157,6 +169,11 @@ const TableViewer: React.FC<TableViewerProps> = ({}) => {
                       <th
                         key={index}
                         className="h-10 border-b px-4 text-left text-sm font-semibold text-gray-900"
+                        style={
+                          tableData.headers.length >= 4
+                            ? { width: '200px', minWidth: '200px' }
+                            : { width: `${100 / tableData.headers.length}%` }
+                        }
                       >
                         {header}
                       </th>
@@ -169,7 +186,15 @@ const TableViewer: React.FC<TableViewerProps> = ({}) => {
                 {tableData?.rows.map((row, rowIndex) => (
                   <tr key={rowIndex} className="bg-white transition-colors">
                     {tableData?.headers.map((header, colIndex) => (
-                      <td key={colIndex} className="h-10 border-b px-4 text-sm">
+                      <td
+                        key={colIndex}
+                        className="h-10 border-b px-4 text-sm"
+                        style={
+                          tableData.headers.length >= 4
+                            ? { width: '200px', minWidth: '200px' }
+                            : { width: `${100 / tableData.headers.length}%` }
+                        }
+                      >
                         {renderCellContent(row[header])}
                       </td>
                     ))}
