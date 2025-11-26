@@ -9,12 +9,13 @@ export type FileType = 'pdf' | 'ppt' | 'excel';
 export type SceneType = FileType;
 
 // PDF坐标信息 - 前端使用格式
+// 支持 bbox 为空的情况：仅定位到页面，不高亮
 export interface PDFCoordinate {
   page: number; // 页码（1-based）
-  x1: number; // 左上角X坐标
-  y1: number; // 左上角Y坐标
-  x2: number; // 右下角X坐标
-  y2: number; // 右下角Y坐标
+  x1?: number; // 左上角X坐标（可选，为空时仅定位不高亮）
+  y1?: number; // 左上角Y坐标（可选，为空时仅定位不高亮）
+  x2?: number; // 右下角X坐标（可选，为空时仅定位不高亮）
+  y2?: number; // 右下角Y坐标（可选，为空时仅定位不高亮）
 }
 
 // 新的后端返回的位置数据格式
