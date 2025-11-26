@@ -133,7 +133,7 @@ export const ModaForgeResourceEndpoints = {
   GetFileBinaryData: PrefixAimdp + '/DownloadFile',
   // RAG相关
   // 查询知识库文件详情
-  GetKnowledgeDocument: PrefixRagV2 + '/GetKnowledgeDocument',
+  GetKnowledgeDocument: PrefixAimdp + '/GetKnowledgeDocument',
   // 预览图片
   PreviewUrl: PrefixAimdp + '/PreviewUrl',
   // 查询知识库文件列表
@@ -145,9 +145,9 @@ export const ModaForgeResourceEndpoints = {
   // 查询知识库分块列表
   ListKnowledgeChunks: PrefixAimdp + '/ListKnowledgeChunks',
   // 查询分块详情
-  GetKnowledgeChunk: PrefixRagV2 + '/GetKnowledgeChunk',
+  GetKnowledgeChunk: PrefixAimdp + '/GetKnowledgeChunk',
   // 编辑分块内容
-  UpdateKnowledgeChunk: PrefixRagV2 + '/UpdateKnowledgeChunk',
+  UpdateKnowledgeChunk: PrefixAimdp + '/UpdateKnowledgeChunk',
   // 编辑分块元素信息
   UpdateKnowledgeChunkMaterials: PrefixRagV2 + '/UpdateKnowledgeChunkMaterials',
   // 编辑分块增强信息
