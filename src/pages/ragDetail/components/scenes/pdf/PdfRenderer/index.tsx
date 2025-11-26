@@ -9,10 +9,10 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = pdfjsWorker;
 
 interface PDFCoordinate {
   page: number;
-  x1: number;
-  y1: number;
-  x2: number;
-  y2: number;
+  x1?: number;
+  y1?: number;
+  x2?: number;
+  y2?: number;
 }
 
 interface PdfRendererProps {
@@ -157,7 +157,7 @@ const PdfRenderer: React.FC<PdfRendererProps> = ({
     }
   }, [totalPages, renderPage]);
 
-  // 高亮指定坐标
+  // 高亮指定坐标 - 支持 bbox 为空时仅定位不高亮
   useEffect(() => {
     if (
       highlightCoordinates &&
@@ -173,11 +173,11 @@ const PdfRenderer: React.FC<PdfRendererProps> = ({
         }
       }
 
-      // 获取第一个坐标用于滚动
+      // 获取第一个坐标用于滚动（仅需要 page_id）
       const firstCoord = highlightCoordinates[0];
       const firstPageNum = firstCoord.page;
 
-      // 绘制所有高亮区域
+      // 绘制所有高亮区域（仅当 bbox 有数据时）
       const devicePixelRatio = window.devicePixelRatio || 1;
 
       highlightCoordinates.forEach((coord) => {
@@ -187,27 +187,39 @@ const PdfRenderer: React.FC<PdfRendererProps> = ({
         if (targetCanvas && originalImagesRef.current[pageNumber]) {
           const { x1, y1, x2, y2 } = coord;
 
-          // 根据设备像素比调整坐标
-          const scaledX1 = x1 * devicePixelRatio;
-          const scaledY1 = y1 * devicePixelRatio;
-          const scaledX2 = x2 * devicePixelRatio;
-          const scaledY2 = y2 * devicePixelRatio;
-          const width = scaledX2 - scaledX1;
-          const height = scaledY2 - scaledY1;
+          // 仅当 bbox 坐标都有效时才进行高亮
+          if (
+            x1 !== undefined &&
+            y1 !== undefined &&
+            x2 !== undefined &&
+            y2 !== undefined
+          ) {
+            // 根据设备像素比调整坐标
+            const scaledX1 = x1 * devicePixelRatio;
+            const scaledY1 = y1 * devicePixelRatio;
+            const scaledX2 = x2 * devicePixelRatio;
+            const scaledY2 = y2 * devicePixelRatio;
+            const width = scaledX2 - scaledX1;
+            const height = scaledY2 - scaledY1;
 
-          const ctx = targetCanvas.getContext('2d')!;
-          ctx.save();
-          ctx.globalAlpha = 0.3;
-          ctx.fillStyle = BACKGROUND_COLOR;
-          ctx.fillRect(scaledX1, scaledY1, width, height);
-          ctx.restore();
+            const ctx = targetCanvas.getContext('2d')!;
+            ctx.save();
+            ctx.globalAlpha = 0.3;
+            ctx.fillStyle = BACKGROUND_COLOR;
+            ctx.fillRect(scaledX1, scaledY1, width, height);
+            ctx.restore();
+          }
         }
       });
 
-      // 滚动到第一个高亮位置
+      // 滚动到第一个坐标的页面（仅需要 page_id，不需要 bbox）
       const firstCanvas = canvasRef.current[firstPageNum - 1];
       if (firstCanvas && containerRef.current) {
-        const targetOffset = firstCanvas.offsetTop + firstCoord.y1;
+        // 如果 bbox 有数据，滚动到具体位置；否则滚动到页面顶部
+        const targetOffset =
+          firstCoord.y1 !== undefined
+            ? firstCanvas.offsetTop + firstCoord.y1
+            : firstCanvas.offsetTop;
         containerRef.current.scrollTo({
           top: targetOffset,
           behavior: 'smooth'
