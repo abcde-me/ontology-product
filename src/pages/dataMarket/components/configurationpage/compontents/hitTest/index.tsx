@@ -31,8 +31,7 @@ import { useUserInfo } from '@/store/userInfoStore';
 
 function HitTest() {
   const { id } = useParams<{ id: string }>(); //数据集id
-  const { segmentDrawerTab, segmentDrawerSegmentId, segments } =
-    useRagDetailStore();
+  const { segmentDrawerTab } = useRagDetailStore();
   const userInfo = useUserInfo();
   const TextArea = Input.TextArea;
   const childRef: any = useRef();
@@ -41,6 +40,8 @@ function HitTest() {
   const [fromdata, setfromdata] = useState<any>({});
   const [showDrawer, setShowDrawer] = useState(false);
   const [defaultTab, setDefaultTab] = useState(segmentDrawerTab);
+  const [chunkId, setChunkId] = useState('');
+  const [documentId, setDocumentId] = useState('');
   const [hoveredCopyButton, setHoveredCopyButton] = useState<boolean>(false);
   const [hoveredCopyResult, setHoveredCopyResult] = useState<number | null>(
     null
@@ -56,6 +57,7 @@ function HitTest() {
   const [loading2, setLoading2] = useState(false);
   const [editChildVisible, seteditChildVisible] = useState(false);
   const [value, setValue] = useState('');
+  const [segmentList, setSegmentList] = useState([]);
   const [pagination, setPagination] = useState<any>({
     page: 1, // 当前页码
     limit: 10 // 每页显示的数据条数
@@ -64,11 +66,7 @@ function HitTest() {
   brother.on('editFuncFrom', () => {
     seteditChildVisible(true);
   });
-  // 获取当前打开 drawer 的分段信息
-  const currentSegment = segments.find(
-    (seg) => seg.id === segmentDrawerSegmentId
-  );
-  const queryParams = new URLSearchParams(location.search);
+
   const mocktest = {
     reranking_enable: false,
     search_method: 'Vector',
@@ -106,6 +104,13 @@ function HitTest() {
       const documentList = await ListKnowledgeHitTestingRecords(params);
       const { list: dataList = [], total = '' } = documentList.data;
       setRecordList(dataList || []);
+      const newSegmentList = dataList
+        .flatMap((item) => item.retrieve_datas || [])
+        .map((item) => ({
+          id: item.chunk_id,
+          ...item
+        }));
+      setSegmentList(newSegmentList || []);
       setPagination((prevPagination) => ({
         ...prevPagination,
         total: total
@@ -401,6 +406,8 @@ function HitTest() {
                           onClick={() => {
                             setShowDrawer(true);
                             setDefaultTab('detail');
+                            setChunkId(e.chunk_id);
+                            setDocumentId(e.document_id);
                           }}
                         >
                           分段详情
@@ -411,6 +418,8 @@ function HitTest() {
                           onClick={() => {
                             setShowDrawer(true);
                             setDefaultTab('trace');
+                            setChunkId(e.chunk_id);
+                            setDocumentId(e.document_id);
                           }}
                         >
                           溯源日志
@@ -463,18 +472,16 @@ function HitTest() {
           seteditPolicy={seteditPolicy}
         ></PolicyForm>
       </Modal>
-      {currentSegment && (
-        <SegmentDrawer
-          visible={showDrawer}
-          onClose={() => setShowDrawer(false)}
-          defaultActiveTab={defaultTab}
-          currentSegmentIndex={currentSegment?.segmentIndex}
-          totalSegments={segments.length}
-          datasetId={id ? Number(id) : undefined}
-          chunkId={currentSegment.id}
-          segments={segments}
-        />
-      )}
+
+      <SegmentDrawer
+        visible={showDrawer}
+        onClose={() => setShowDrawer(false)}
+        defaultActiveTab={defaultTab}
+        datasetId={id ? Number(id) : undefined}
+        chunkId={chunkId}
+        segments={segmentList}
+        totalSegments={segmentList.length}
+      />
     </div>
   );
 }
