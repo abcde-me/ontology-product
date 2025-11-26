@@ -38,7 +38,7 @@ const TableSegmentList: React.FC<TableSegmentListProps> = ({
   }, [segments, segmentSearchText]);
 
   return (
-    <div className="flex h-full flex-col bg-white">
+    <div className="flex h-full flex-col bg-white px-4">
       {/* 列表头部 */}
       <SegmentListHeader
         totalCount={segments.length}

@@ -10,7 +10,7 @@ import { useRagDetailStore } from '../../../store/ragDetailStore';
 import SegmentCardActions from '../../shared/SegmentCardActions';
 import SegmentMarkdown from '../../common/SegmentMarkdown';
 import { Input } from '@arco-design/web-react';
-
+import { containsMarkdown } from '../../../utils/excelUtils';
 interface TableSegmentCardProps {
   segment: TableSegment;
   isSelected: boolean;
@@ -39,25 +39,6 @@ const TableSegmentCard: React.FC<TableSegmentCardProps> = ({
   const tableData = {
     headers: Object.keys(rawTableData),
     rows: [rawTableData]
-  };
-
-  // 判断内容是否包含 markdown 格式
-  const containsMarkdown = (content: string | number): boolean => {
-    if (typeof content === 'number') return false;
-    const markdownPatterns = [
-      /^#{1,6}\s/, // 标题 (#, ##, ###, etc.)
-      /\*\*.*?\*\*/, // 粗体 (**text**)
-      /\*.*?\*/, // 斜体 (*text*)
-      /\[.*?\]\(.*?\)/, // 链接 [text](url)
-      /^\s*[-*+]\s/, // 无序列表 (-, *, +)
-      /^\s*\d+\.\s/, // 有序列表 (1., 2., etc.)
-      /`.*?`/, // 行内代码 (`code`)
-      /```[\s\S]*?```/, // 代码块 (```code```)
-      /^\s*>\s/, // 引用 (> text)
-      /\|.*\|/, // 表格 (| col |)
-      /!\[.*?\]\(.*?\)/ // 图片 ![alt](url)
-    ];
-    return markdownPatterns.some((pattern) => pattern.test(content));
   };
 
   // 渲染单元格内容
@@ -118,7 +99,7 @@ const TableSegmentCard: React.FC<TableSegmentCardProps> = ({
       {tableData && (
         <div className="mb-3 overflow-x-auto bg-white">
           <table
-            className={`border-collapse ${
+            className={`border-collapse border ${
               tableData.headers.length >= 4 ? '' : 'w-full'
             }`}
             style={
@@ -135,7 +116,7 @@ const TableSegmentCard: React.FC<TableSegmentCardProps> = ({
                 {tableData.headers.map((header, index) => (
                   <th
                     key={index}
-                    className="border border-[#E2E8F0] px-4 py-2 text-left text-sm font-semibold text-[#1E293B]"
+                    className="border-b border-[#E2E8F0] px-4 py-2 text-left text-sm font-semibold text-[#1E293B]"
                     style={
                       tableData.headers.length >= 4
                         ? { width: '200px', minWidth: '200px' }
@@ -162,7 +143,7 @@ const TableSegmentCard: React.FC<TableSegmentCardProps> = ({
                   {tableData.headers.map((header, colIndex) => (
                     <td
                       key={colIndex}
-                      className="border bg-white px-4 py-2 text-sm"
+                      className="border-b bg-white px-4 py-2 text-sm"
                       style={
                         tableData.headers.length >= 4
                           ? { width: '200px', minWidth: '200px' }
