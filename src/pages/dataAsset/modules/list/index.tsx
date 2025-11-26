@@ -303,6 +303,7 @@ export default function DataAssetList() {
     } catch (err) {
       console.error('获取数据资产列表失败:', err);
     } finally {
+      setHasMapping(true);
       setLoading(false);
     }
   };
@@ -334,6 +335,8 @@ export default function DataAssetList() {
 
         if (dataAssetMapping.length > 0) {
           Promise.all([loadColumnSettings(), loadListData(1, pageSize)]);
+        } else {
+          setHasMapping(false);
         }
       } catch {
         setHasMapping(false);
