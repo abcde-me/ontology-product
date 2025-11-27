@@ -148,7 +148,7 @@ export const useSegmentDetailStore = create<SegmentDetailStore>((set, get) => ({
 
       // 调用真实 API
       await UpdateKnowledgeChunkMaterials({
-        dataset_id: datasetId,
+        dataset_id: Number(datasetId),
         chunk_id: segmentId,
         materials
       });

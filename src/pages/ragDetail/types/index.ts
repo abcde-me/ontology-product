@@ -341,7 +341,9 @@ export interface RagDetailActions {
     documentId: string,
     bucketName?: string | null,
     path?: string | null,
-    datasetName?: string | null
+    datasetName?: string | null,
+    initialChunkId?: string | null,
+    initialPositionsStr?: string | null
   ) => Promise<void>;
   selectSegment: (segmentId: string) => void;
   selectDirectoryNode: (nodeId: string) => void;
@@ -363,7 +365,11 @@ export interface RagDetailActions {
   // Segment search actions
   setSegmentSearchText: (text: string) => void;
   // File binary data actions
-  loadFileBinaryData: (bucket: string, path: string) => Promise<void>;
+  loadFileBinaryData: (
+    bucket: string,
+    path: string,
+    isConvertPdf: boolean
+  ) => Promise<void>;
   clearFileBinaryData: () => void;
 }
 
