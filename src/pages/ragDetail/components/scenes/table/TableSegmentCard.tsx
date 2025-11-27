@@ -3,7 +3,7 @@
  * 表格分段卡片
  */
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useCallback, useMemo } from 'react';
 import { useClickAway } from 'ahooks';
 import { TableSegment } from '../../../types';
 import { useRagDetailStore } from '../../../store/ragDetailStore';
@@ -11,10 +11,16 @@ import SegmentCardActions from '../../shared/SegmentCardActions';
 import SegmentMarkdown from '../../common/SegmentMarkdown';
 import { Input } from '@arco-design/web-react';
 import { containsMarkdown } from '../../../utils/excelUtils';
+
 interface TableSegmentCardProps {
   segment: TableSegment;
   isSelected: boolean;
   totalSegments?: number;
+}
+
+interface TableData {
+  headers: string[];
+  rows: Array<Record<string, string>>;
 }
 
 const TableSegmentCard: React.FC<TableSegmentCardProps> = ({
@@ -22,27 +28,41 @@ const TableSegmentCard: React.FC<TableSegmentCardProps> = ({
   isSelected,
   totalSegments
 }) => {
-  const { selectSegment, editingSegmentId, cancelEditingSegment } =
-    useRagDetailStore();
+  const {
+    selectSegment,
+    editingSegmentId,
+    cancelEditingSegment,
+    updateSegmentContent
+  } = useRagDetailStore();
   const [isHovered, setIsHovered] = useState(false);
   const isEditing = editingSegmentId === segment.id;
   const cardRef = useRef<HTMLDivElement>(null);
+  const prevIsEditingRef = useRef<boolean>(false);
+  const isClickAwayRef = useRef<boolean>(false);
 
-  // 根据当前定义的 tableData 值生成表格结构
-  const rawTableData = {
-    ID: 1,
-    问题: '整个共和国、城市地区和农村地区家庭在医疗服务和护理上的平均年度支出是多少英镑？',
-    回答: '### 家庭在服务和医疗保健上的平均年度支出 1. **整个共和国家庭在服务和医疗保健上的平均年度支出：** - 2019/2020 年，整个共和国家庭在服务和医疗保健上的平均年度支出为 7,779.3 英镑（信息 1）。 2. **城镇家庭在服务和医疗保健上的平均年度支出：** - 2019/2020 年城镇家庭在服务和医疗保健上的平均年度支出为 6,779.3 埃及镑（信息 1）。 3. **农村家庭在服务和医疗保健上的平均年度支出：** - 2019/2020 年农村家庭在服务和医疗保健上的平均年度支出为 6,113.5 埃及镑（信息 1）。'
-  };
+  // 初始化表格数据
+  const initialTableData = useMemo<TableData>(() => {
+    const rawData = JSON.parse(segment.content);
+    return {
+      headers: Object.keys(rawData),
+      rows: [rawData]
+    };
+  }, [segment.content]);
 
-  // 转换为表格格式：headers 和 rows
-  const tableData = {
-    headers: Object.keys(rawTableData),
-    rows: [rawTableData]
-  };
+  const [tableData, setTableData] = useState<TableData>(initialTableData);
+
+  // 同步外部数据到本地状态
+  React.useEffect(() => {
+    setTableData(initialTableData);
+  }, [initialTableData]);
+
+  // 将表格数据转换为 JSON 字符串
+  const convertTableDataToJson = useCallback((data: TableData): string => {
+    return JSON.stringify(data.rows[0]);
+  }, []);
 
   // 渲染单元格内容
-  const renderCellContent = (content: string | number) => {
+  const renderCellContent = useCallback((content: string | number) => {
     const contentStr = String(content);
     if (containsMarkdown(contentStr)) {
       return (
@@ -52,13 +72,101 @@ const TableSegmentCard: React.FC<TableSegmentCardProps> = ({
       );
     }
     return <span className="text-gray-900">{contentStr}</span>;
-  };
-  // 点击外部区域取消编辑
+  }, []);
+
+  // 处理表头编辑
+  const handleHeaderChange = useCallback((index: number, value: string) => {
+    setTableData((prevData) => {
+      const oldHeader = prevData.headers[index];
+      const newHeaders = [...prevData.headers];
+      newHeaders[index] = value;
+
+      // 更新 rows 中的键名
+      const newRows = prevData.rows.map((row) => {
+        const newRow: Record<string, string> = {};
+        Object.entries(row).forEach(([key, val]) => {
+          newRow[key === oldHeader ? value : key] = val;
+        });
+        return newRow;
+      });
+
+      return { headers: newHeaders, rows: newRows };
+    });
+  }, []);
+
+  // 处理单元格编辑
+  const handleCellChange = useCallback(
+    (rowIndex: number, header: string, value: string) => {
+      setTableData((prevData) => {
+        const newRows = [...prevData.rows];
+        newRows[rowIndex] = { ...newRows[rowIndex], [header]: value };
+        return { ...prevData, rows: newRows };
+      });
+    },
+    []
+  );
+
+  // 保存编辑
+  const handleSave = useCallback(async () => {
+    try {
+      const jsonContent = convertTableDataToJson(tableData);
+
+      // 只有在内容发生变化时才更新
+      if (jsonContent !== segment.content) {
+        await updateSegmentContent(segment.id, jsonContent);
+      } else {
+        // 内容没有变化，只是取消编辑状态
+        cancelEditingSegment();
+      }
+    } catch (error) {
+      console.error('保存表格失败:', error);
+    }
+  }, [
+    tableData,
+    segment.id,
+    segment.content,
+    updateSegmentContent,
+    cancelEditingSegment,
+    convertTableDataToJson
+  ]);
+
+  // 监听编辑状态变化，从编辑状态退出时保存数据
+  React.useEffect(() => {
+    // 当从编辑状态变为非编辑状态时，保存数据
+    if (prevIsEditingRef.current && !isEditing) {
+      // 如果是点击外部区域触发的，跳过（已经在 useClickAway 中处理了）
+      if (!isClickAwayRef.current) {
+        handleSave();
+      }
+      // 重置标志
+      isClickAwayRef.current = false;
+    }
+    prevIsEditingRef.current = isEditing;
+  }, [isEditing, handleSave]);
+
+  // 点击外部区域：先取消编辑状态，再判断是否需要更新
   useClickAway(() => {
     if (isEditing) {
+      // 标记是点击外部区域触发的
+      isClickAwayRef.current = true;
+
+      // 先取消编辑状态
       cancelEditingSegment();
+
+      // 判断内容是否变化，如果变化则更新
+      const jsonContent = convertTableDataToJson(tableData);
+      if (jsonContent !== segment.content) {
+        updateSegmentContent(segment.id, jsonContent);
+      }
     }
   }, cardRef);
+
+  // 处理卡片点击
+  const handleCardClick = useCallback(() => {
+    if (!isEditing) {
+      selectSegment(segment.id);
+    }
+  }, [isEditing, selectSegment, segment.id]);
 
   return (
     <div
@@ -75,12 +183,7 @@ const TableSegmentCard: React.FC<TableSegmentCardProps> = ({
       `}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      onClick={() => {
-        if (isEditing) {
-          return;
-        }
-        selectSegment(segment.id);
-      }}
+      onClick={handleCardClick}
     >
       {/* 卡片头部 */}
       <div className="flex items-center justify-between px-3 pb-[7px] pt-3">
@@ -126,7 +229,7 @@ const TableSegmentCard: React.FC<TableSegmentCardProps> = ({
                     {isEditing ? (
                       <Input
                         value={header}
-                        //  onChange={(value) => handleHeaderChange(index, value)}
+                        onChange={(value) => handleHeaderChange(index, value)}
                         size="small"
                         className="w-full"
                       />
@@ -153,9 +256,9 @@ const TableSegmentCard: React.FC<TableSegmentCardProps> = ({
                       {isEditing ? (
                         <Input
                           value={row[header]}
-                          //  onChange={(value) =>
-                          //    handleCellChange(rowIndex, header, value)
-                          //  }
+                          onChange={(value) =>
+                            handleCellChange(rowIndex, header, value)
+                          }
                           size="small"
                           className="w-full"
                         />
