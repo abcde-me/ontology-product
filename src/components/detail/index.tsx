@@ -671,10 +671,12 @@ const DatasetDetail = (props: {
           },
           {
             title: '文件大小',
-            dataIndex: 'size',
+            dataIndex: 'file_size',
             width: 100,
             sorter: true, // 启用排序功能，但不提供排序函数
-            render: (_, record) => <span>{formatFileSize(record.size)}</span>
+            render: (_, record) => (
+              <span>{formatFileSize(record.file_size)}</span>
+            )
           },
           {
             title: '分段数',
