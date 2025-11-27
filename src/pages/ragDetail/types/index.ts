@@ -341,7 +341,9 @@ export interface RagDetailActions {
     documentId: string,
     bucketName?: string | null,
     path?: string | null,
-    datasetName?: string | null
+    datasetName?: string | null,
+    initialChunkId?: string | null,
+    initialPositionsStr?: string | null
   ) => Promise<void>;
   selectSegment: (segmentId: string) => void;
   selectDirectoryNode: (nodeId: string) => void;
