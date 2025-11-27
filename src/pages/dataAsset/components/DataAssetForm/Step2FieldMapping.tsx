@@ -196,10 +196,17 @@ export default function Step2FieldMapping({
               metadataField?.nameEn === 'tags' ||
               metadataField?.nameEn === 'data_source';
 
+            // 检查当前值是否在选项列表中
+            const currentValue = record[sourceKey] as string | undefined;
+            const optionValues = options.map((opt) => opt.name);
+            const isValidValue =
+              currentValue && optionValues.includes(currentValue);
+            const selectValue = isValidValue ? currentValue : undefined;
+
             return (
               <Select
                 placeholder="请选择"
-                value={record[sourceKey] as string | undefined}
+                value={selectValue}
                 disabled={disableMappingForThisRow}
                 onChange={(value) =>
                   handleUpdateMapping(record.id, { [sourceKey]: value })
@@ -371,6 +378,42 @@ export default function Step2FieldMapping({
     findDataAssetMappingData,
     currentStep
   ]);
+
+  // 清理无效的映射值：如果下拉列表不存在这个值，需要去掉
+  useEffect(() => {
+    let hasInvalidValue = false;
+    const updatedMappings = mappings.map((record) => {
+      const metadataField = metadataFields.find(
+        (field) => field.nameEn === record.id
+      );
+      const fieldType = metadataField?.type;
+
+      // 检查每个数据来源的映射值是否有效
+      const updates: Partial<FieldMapping> = {};
+      Object.keys(dataSources).forEach((sourceKey) => {
+        const currentValue = record[sourceKey] as string | undefined;
+        if (currentValue) {
+          const options = getMappingOptions(fieldType, sourceKey);
+          const optionValues = options.map((opt) => opt.name);
+          // 如果当前值不在选项列表中，清除它
+          if (!optionValues.includes(currentValue)) {
+            updates[sourceKey] = undefined;
+            hasInvalidValue = true;
+          }
+        }
+      });
+
+      if (Object.keys(updates).length > 0) {
+        return { ...record, ...updates };
+      }
+      return record;
+    });
+
+    if (hasInvalidValue) {
+      setMappings(updatedMappings);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [metadataFields, dataSources, findDataAssetMappingData]);
 
   // 添加映射行
   const handleAddMapping = () => {
