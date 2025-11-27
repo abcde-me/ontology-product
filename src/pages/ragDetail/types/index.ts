@@ -363,7 +363,11 @@ export interface RagDetailActions {
   // Segment search actions
   setSegmentSearchText: (text: string) => void;
   // File binary data actions
-  loadFileBinaryData: (bucket: string, path: string) => Promise<void>;
+  loadFileBinaryData: (
+    bucket: string,
+    path: string,
+    isConvertPdf: boolean
+  ) => Promise<void>;
   clearFileBinaryData: () => void;
 }
 
