@@ -508,15 +508,15 @@ const columns = (
   //     );
   //   }
   // },
-  {
-    title: '数据目录',
-    dataIndex: 'file_path',
-    width: 200,
-    render: (file_path: string) => {
-      if (!file_path) return '-';
-      return <EllipsisPopover value={file_path}></EllipsisPopover>;
-    }
-  },
+  // {
+  //   title: '数据目录',
+  //   dataIndex: 'file_path',
+  //   width: 200,
+  //   render: (file_path: string) => {
+  //     if (!file_path) return '-';
+  //     return <EllipsisPopover value={file_path}></EllipsisPopover>;
+  //   }
+  // },
   {
     title: '创建人',
     dataIndex: 'creator_name',
