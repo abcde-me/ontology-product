@@ -326,6 +326,9 @@ export default function DataAssetList() {
       try {
         const findDataAssetMappingRes = await findDataAssetMapping();
         if (findDataAssetMappingRes.status !== 200) {
+          Message.error(
+            findDataAssetMappingRes.message ?? '获取数据资产映射数据失败'
+          );
           setHasMapping(false);
           return;
         }

@@ -456,6 +456,25 @@ export default function Step1MetadataFields({
           }
         }
 
+        // 验证nameEn是否重复
+        const nameEnMap = new Map<string, number>();
+        for (const field of metadataFields) {
+          if (field.nameEn) {
+            const count = nameEnMap.get(field.nameEn) || 0;
+            nameEnMap.set(field.nameEn, count + 1);
+          }
+        }
+        const duplicateNames: string[] = [];
+        nameEnMap.forEach((count, nameEn) => {
+          if (count > 1) {
+            duplicateNames.push(nameEn);
+          }
+        });
+        if (duplicateNames.length > 0) {
+          callback(`字段英文名称不能重复：${duplicateNames.join('、')}`);
+          return;
+        }
+
         callback();
       }
     },
