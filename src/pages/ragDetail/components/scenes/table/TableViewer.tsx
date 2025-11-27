@@ -213,6 +213,16 @@ const TableViewer: React.FC<TableViewerProps> = ({}) => {
     return <span className="break-all text-gray-900">{contentStr}</span>;
   };
 
+  const handlePrevious = () => {
+    setCurrentTableIndex((prev) => Math.max(0, prev - 1));
+  };
+
+  const handleNext = () => {
+    setCurrentTableIndex((prev) =>
+      Math.min(displaySegments.length - 1, prev + 1)
+    );
+  };
+
   return (
     <div className="flex h-full flex-col bg-white">
       {/* 表格显示区域 */}
@@ -293,6 +303,29 @@ const TableViewer: React.FC<TableViewerProps> = ({}) => {
                 width: tableWidth > 0 ? `${tableWidth}px` : '100%'
               }}
             />
+          </div>
+        )}
+        {displaySegments.length > 1 && (
+          <div className="flex items-center justify-between border-t border-gray-200 bg-white px-4 py-3">
+            <button
+              onClick={handlePrevious}
+              disabled={currentTableIndex === 0}
+              className="rounded bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-200 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              ← 上一个
+            </button>
+
+            <div className="text-sm text-gray-600">
+              {currentSegment.content}
+            </div>
+
+            <button
+              onClick={handleNext}
+              disabled={currentTableIndex === displaySegments.length - 1}
+              className="rounded bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-200 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              下一个 →
+            </button>
           </div>
         )}
       </div>
