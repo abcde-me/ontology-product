@@ -84,7 +84,7 @@ const TableSegmentCard: React.FC<TableSegmentCardProps> = ({
         </div>
       );
     }
-    return <span className="text-gray-900">{contentStr}</span>;
+    return <span className="break-all text-gray-900">{contentStr}</span>;
   }, []);
 
   // 处理表头编辑

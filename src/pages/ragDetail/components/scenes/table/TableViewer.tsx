@@ -210,7 +210,7 @@ const TableViewer: React.FC<TableViewerProps> = ({}) => {
         </div>
       );
     }
-    return <span className="text-gray-900">{contentStr}</span>;
+    return <span className="break-all text-gray-900">{contentStr}</span>;
   };
 
   return (
