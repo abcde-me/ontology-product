@@ -114,6 +114,7 @@ export interface Dataset {
     | 'normal'
     | 'version_updating'
     | 'version_update_failed';
+  scene_id: number;
 }
 
 export interface SceneType {
@@ -366,7 +367,7 @@ const columns = (
     render: (_, record: Dataset) => formatFileSize(record.size || 0)
   },
   {
-    title: '状态',
+    title: '数据集状态',
     dataIndex: 'status',
     width: 180,
     filterIcon: <IconFilter />,
@@ -621,9 +622,12 @@ const columns = (
                     >
                       <Button
                         type="text"
-                        className={`${styles.actionButton} ${record.status === datasetStatus.normal ? styles.export : styles.disabled}`}
+                        className={`${styles.actionButton} ${record.status === datasetStatus.normal && record.scene_id !== 2 ? styles.export : styles.disabled}`}
                         onClick={() => handleExport(record)}
-                        disabled={record.status !== datasetStatus.normal}
+                        disabled={
+                          record.status !== datasetStatus.normal ||
+                          record.scene_id === 2
+                        }
                         style={{
                           padding: '0 8px 0 5px',
                           height: '100%',
@@ -863,45 +867,6 @@ const DatasetManagement: React.FC = () => {
     }
   ];
 
-  // 数据集tab数据
-  const datasetTabData = [
-    {
-      title: '全部',
-      key: 'all',
-      count: 180,
-      desc: '为模型训练和微调构建的高质量数据集，支持JSON、JSONL、COCO、YOLO等多种格式，涵盖文本、图像、语音等任务类型',
-      tags: ['文本分类训练集', '代码生成样本', '图片生成样本']
-    },
-    {
-      title: '模型训练与微调数据集',
-      key: '2',
-      count: 100,
-      desc: '为模型训练和微调构建的高质量数据集，支持JSON、JSONL、COCO、YOLO等多种格式，涵盖文本、图像、语音等任务类型',
-      tags: ['文本分类训练集', '代码生成样本', '图片生成样本']
-    },
-    {
-      title: 'RAG知识库',
-      key: '3',
-      count: 20,
-      desc: '为模型训练和微调构建的高质量数据集，支持JSON、JSONL、COCO、YOLO等多种格式，涵盖文本、图像、语音等任务类型',
-      tags: ['文本分类训练集', '代码生成样本', '图片生成样本']
-    },
-    {
-      title: '数据分析',
-      key: '4',
-      count: 20,
-      desc: '为模型训练和微调构建的高质量数据集，支持JSON、JSONL、COCO、YOLO等多种格式，涵盖文本、图像、语音等任务类型',
-      tags: ['文本分类训练集', '代码生成样本', '图片生成样本']
-    },
-    {
-      title: '其他',
-      key: '5',
-      count: 40,
-      desc: '为模型训练和微调构建的高质量数据集，支持JSON、JSONL、COCO、YOLO等多种格式，涵盖文本、图像、语音等任务类型',
-      tags: ['文本分类训练集', '代码生成样本', '图片生成样本']
-    }
-  ];
-
   // 新增场景类型提交
   const handleAddSceneTypeSubmit = (values: any) => {
     console.log('新增场景类型:', values);
@@ -910,7 +875,6 @@ const DatasetManagement: React.FC = () => {
 
   // 移动数据集提交
   const handleMoveDatasetSubmit = (values: any) => {
-    console.log('移动数据集:', values);
     const params = {
       scene_id: values.scene_id,
       dataset_ids: moveDatasetId || selectedRowKeys.map((key) => Number(key))
@@ -921,6 +885,7 @@ const DatasetManagement: React.FC = () => {
         setSelectedRowKeys([]);
         setSelectedRows([]);
         fetchDatasetList();
+        getSceneList();
       } else {
         Message.error(res.msg || '移动数据集失败');
       }
@@ -1446,8 +1411,13 @@ const DatasetManagement: React.FC = () => {
     // }
     // 过滤掉storage_type为table的数据集
     const filteredRows = selectedRows.filter(
-      (row) => row.storage_type !== datasetStorageType.table
+      (row) =>
+        row.storage_type !== datasetStorageType.table && row.scene_id !== 2
     );
+    const tableRows = selectedRows.filter(
+      (row) => row.storage_type === datasetStorageType.table
+    );
+    const konwledgeRows = selectedRows.filter((row) => row.scene_id === 2);
     const filteredRowKeys = filteredRows.map((row) => row.id);
 
     // 更新选中状态，移除不能导出的数据集
@@ -1459,9 +1429,13 @@ const DatasetManagement: React.FC = () => {
     console.log('批量导出(已过滤table类型):', filteredRows);
 
     // 如果过滤后有数据被移除，给用户提示
-    const removedCount = selectedRows.length - filteredRows.length;
-    if (removedCount > 0) {
-      Message.info(`已自动过滤 ${removedCount} 个数据库表类型的数据集`);
+    if (tableRows.length > 0) {
+      Message.info(`已自动过滤 ${tableRows.length} 个数据库表类型的数据集`);
+    }
+    if (konwledgeRows.length > 0) {
+      Message.info(
+        `已自动过滤 ${konwledgeRows.length} 个场景分类为知识库的数据集`
+      );
     }
   };
   //清除选中状态函数
