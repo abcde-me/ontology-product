@@ -115,7 +115,7 @@ export const useRagDetailStore = create<RagDetailState & RagDetailActions>(
             finalSceneType = 'excel';
           }
         }
-
+        console.log('finalSceneType', finalSceneType);
         set({
           datasetId: Number(datasetId), // 保存 datasetId
           ragId: documentId, // 使用 documentId 作为 ragId
@@ -136,13 +136,17 @@ export const useRagDetailStore = create<RagDetailState & RagDetailActions>(
           loading: false
         });
 
+        // @ts-ignore
+        const isConvertPdf =
+          finalSceneType === 'xlsx' || finalSceneType === 'xls' ? false : true;
+
         // 如果有 bucket 和 path，自动加载文件二进制数据
         if (finalBucket && finalPath) {
           console.log('🔍 自动加载文件二进制数据:', {
             bucket: finalBucket,
             path: finalPath
           });
-          get().loadFileBinaryData(finalBucket, finalPath);
+          get().loadFileBinaryData(finalBucket, finalPath, isConvertPdf);
         } else {
           console.warn('⚠️ 缺少 bucket 或 path，无法加载文件二进制数据');
         }
@@ -378,7 +382,11 @@ export const useRagDetailStore = create<RagDetailState & RagDetailActions>(
     },
 
     // File binary data actions
-    loadFileBinaryData: async (bucket: string, path: string) => {
+    loadFileBinaryData: async (
+      bucket: string,
+      path: string,
+      isConvertPdf: boolean
+    ) => {
       set({
         fileBinaryDataLoading: true,
         fileBinaryDataError: null,
@@ -388,7 +396,11 @@ export const useRagDetailStore = create<RagDetailState & RagDetailActions>(
 
       try {
         console.log('🔍 开始加载文件二进制数据:', { bucket, path });
-        const response = await getFileBinaryData({ bucket_name: bucket, path });
+        const response = await getFileBinaryData({
+          bucket_name: bucket,
+          path,
+          convert_pdf: isConvertPdf
+        });
         console.log('✅ 文件二进制数据加载成功:', response);
 
         set({
