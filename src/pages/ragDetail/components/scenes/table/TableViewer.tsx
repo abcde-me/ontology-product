@@ -45,6 +45,9 @@ const TableViewer: React.FC<TableViewerProps> = ({}) => {
           blankrows: true
         });
 
+        // 获取合并单元格信息
+        const merges = worksheet['!merges'] || [];
+
         if (jsonData.length === 0) {
           return {
             id: `sheet-${index}`,
@@ -53,7 +56,8 @@ const TableViewer: React.FC<TableViewerProps> = ({}) => {
             segmentIndex: index,
             tableData: {
               headers: [],
-              rows: []
+              rows: [],
+              merges: []
             }
           };
         }
@@ -95,7 +99,13 @@ const TableViewer: React.FC<TableViewerProps> = ({}) => {
           segmentIndex: index,
           tableData: {
             headers,
-            rows
+            rows,
+            merges: merges.map((merge) => ({
+              startRow: merge.s.r,
+              endRow: merge.e.r,
+              startCol: merge.s.c,
+              endCol: merge.e.c
+            }))
           }
         };
       }
@@ -213,6 +223,72 @@ const TableViewer: React.FC<TableViewerProps> = ({}) => {
     return <span className="break-all text-gray-900">{contentStr}</span>;
   };
 
+  // 获取单元格的合并信息
+  const getCellMergeInfo = (rowIndex: number, colIndex: number) => {
+    if (!tableData?.merges) return null;
+
+    // rowIndex是数据行索引（0-based），需要加1因为有表头
+    const actualRowIndex = rowIndex + 1;
+
+    for (const merge of tableData.merges) {
+      // 检查当前单元格是否是合并区域的起始单元格
+      if (merge.startRow === actualRowIndex && merge.startCol === colIndex) {
+        return {
+          rowSpan: merge.endRow - merge.startRow + 1,
+          colSpan: merge.endCol - merge.startCol + 1,
+          isStart: true
+        };
+      }
+      // 检查当前单元格是否在合并区域内（但不是起始单元格）
+      if (
+        actualRowIndex >= merge.startRow &&
+        actualRowIndex <= merge.endRow &&
+        colIndex >= merge.startCol &&
+        colIndex <= merge.endCol
+      ) {
+        return {
+          rowSpan: 1,
+          colSpan: 1,
+          isStart: false
+        };
+      }
+    }
+    return null;
+  };
+
+  // 检查表头单元格是否应该渲染
+  const shouldRenderHeaderCell = (colIndex: number) => {
+    if (!tableData?.merges) return true;
+
+    for (const merge of tableData.merges) {
+      // 检查是否在表头行的合并区域内（但不是起始单元格）
+      if (
+        merge.startRow === 0 &&
+        colIndex >= merge.startCol &&
+        colIndex <= merge.endCol &&
+        colIndex !== merge.startCol
+      ) {
+        return false;
+      }
+    }
+    return true;
+  };
+
+  // 获取表头单元格的合并信息
+  const getHeaderCellMergeInfo = (colIndex: number) => {
+    if (!tableData?.merges) return null;
+
+    for (const merge of tableData.merges) {
+      if (merge.startRow === 0 && merge.startCol === colIndex) {
+        return {
+          colSpan: merge.endCol - merge.startCol + 1,
+          rowSpan: merge.endRow - merge.startRow + 1
+        };
+      }
+    }
+    return null;
+  };
+
   const handlePrevious = () => {
     setCurrentTableIndex((prev) => Math.max(0, prev - 1));
   };
@@ -233,7 +309,7 @@ const TableViewer: React.FC<TableViewerProps> = ({}) => {
         >
           <table
             ref={tableRef}
-            className={`border-collapse border ${
+            className={`border-collapse ${
               tableData.headers.length >= 4 ? '' : 'w-full'
             }`}
             style={
@@ -242,26 +318,40 @@ const TableViewer: React.FC<TableViewerProps> = ({}) => {
                     tableLayout: 'fixed',
                     width: `${tableData.headers.length * 200}px`
                   }
-                : { tableLayout: 'fixed', width: '100%' }
+                : {
+                    tableLayout: 'fixed',
+                    width: '100%'
+                  }
             }
           >
             {/* 表头 */}
             {tableData?.headers && tableData.headers.length > 0 && (
               <thead>
                 <tr className="bg-white">
-                  {tableData.headers.map((header, index) => (
-                    <th
-                      key={index}
-                      className="h-10 border-b px-4 text-left text-sm font-semibold text-gray-900"
-                      style={
-                        tableData.headers.length >= 4
-                          ? { width: '200px', minWidth: '200px' }
-                          : { width: `${100 / tableData.headers.length}%` }
-                      }
-                    >
-                      {header}
-                    </th>
-                  ))}
+                  {tableData.headers.map((header, index) => {
+                    if (!shouldRenderHeaderCell(index)) {
+                      return null;
+                    }
+                    const mergeInfo = getHeaderCellMergeInfo(index);
+                    return (
+                      <th
+                        key={index}
+                        className="h-10 px-4 text-left text-sm font-semibold text-gray-900"
+                        style={{
+                          ...(tableData.headers.length >= 4
+                            ? { width: '200px', minWidth: '200px' }
+                            : { width: `${100 / tableData.headers.length}%` }),
+                          borderTop: '1px solid #e5e7eb',
+                          borderBottom: '1px solid #e5e7eb',
+                          verticalAlign: 'middle'
+                        }}
+                        colSpan={mergeInfo?.colSpan || 1}
+                        rowSpan={mergeInfo?.rowSpan || 1}
+                      >
+                        {header}
+                      </th>
+                    );
+                  })}
                 </tr>
               </thead>
             )}
@@ -269,19 +359,32 @@ const TableViewer: React.FC<TableViewerProps> = ({}) => {
             <tbody>
               {tableData?.rows.map((row, rowIndex) => (
                 <tr key={rowIndex} className="bg-white transition-colors">
-                  {tableData?.headers.map((header, colIndex) => (
-                    <td
-                      key={colIndex}
-                      className="h-10 border-b px-4 text-sm"
-                      style={
-                        tableData.headers.length >= 4
-                          ? { width: '200px', minWidth: '200px' }
-                          : { width: `${100 / tableData.headers.length}%` }
-                      }
-                    >
-                      {renderCellContent(row[header])}
-                    </td>
-                  ))}
+                  {tableData?.headers.map((header, colIndex) => {
+                    const mergeInfo = getCellMergeInfo(rowIndex, colIndex);
+
+                    // 如果单元格在合并区域内但不是起始单元格，则不渲染
+                    if (mergeInfo && !mergeInfo.isStart) {
+                      return null;
+                    }
+
+                    return (
+                      <td
+                        key={colIndex}
+                        className="h-10 px-4 text-sm"
+                        style={{
+                          ...(tableData.headers.length >= 4
+                            ? { width: '200px', minWidth: '200px' }
+                            : { width: `${100 / tableData.headers.length}%` }),
+                          borderBottom: '1px solid #e5e7eb',
+                          verticalAlign: 'middle'
+                        }}
+                        rowSpan={mergeInfo?.rowSpan || 1}
+                        colSpan={mergeInfo?.colSpan || 1}
+                      >
+                        {renderCellContent(row[header])}
+                      </td>
+                    );
+                  })}
                 </tr>
               ))}
             </tbody>
