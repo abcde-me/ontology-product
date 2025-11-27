@@ -203,6 +203,8 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = memo(
       (container: HTMLDivElement) => {
         if (!container) return;
 
+        console.log('2222222222222', container);
+
         const containerHeight = container.clientHeight;
         if (containerHeight === 0) return;
 
@@ -230,6 +232,7 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = memo(
 
         // 更新状态
         setResizeBoxContainer(element);
+        console.log('11111111111111111111111111111', element);
 
         if (element) {
           // 立即计算尺寸（此时 DOM 已经渲染完成）
