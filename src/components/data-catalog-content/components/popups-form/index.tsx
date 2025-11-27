@@ -85,14 +85,6 @@ const FormComponent: React.FC<FormProps> = ({
         }
       }
 
-      console.log(
-        filesArray,
-        'ffffff',
-        downloadData,
-        exportdataset,
-        exportdatas
-      );
-
       const params = {
         output_path: form.getFieldValue('path'),
         connector_id: Number(form.getFieldValue('province')),
