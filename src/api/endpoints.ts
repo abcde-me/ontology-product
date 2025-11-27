@@ -9,113 +9,6 @@
 // const Prefix = '/dify';
 const Prefix = '/api/appforge/v1';
 
-export const ResourceEndpoints = {
-  // 在该对象内添加资源端点声明
-  // 知识库
-  knowledgeBase: Prefix + '/console/api/datasets',
-  knowledgeBaseInit: Prefix + '/console/api/datasets/init',
-  knowledgeId: Prefix + '/console/api/datasets/{knowledgeId}',
-  knowledgeAction: Prefix + '/console/api/datasets/{action}',
-  knowledgeIdAction: Prefix + '/console/api/datasets/{knowledgeId}/{action}',
-  documentsList: Prefix + '/console/api/datasets/{knowledgeId}/documents',
-  documentsId:
-    Prefix + '/console/api/datasets/{knowledgeId}/documents/{documentId}',
-  documentsIdAction:
-    Prefix +
-    '/console/api/datasets/{knowledgeId}/documents/{documentId}/{action}',
-  batchIdAction:
-    Prefix + '/console/api/datasets/{knowledgeId}/batch/{batchId}/{action}',
-  //大模型列表
-  llmList: Prefix + '/console/api/workspaces/current/models/model-types/llm',
-  //大模型参数
-  llmParams:
-    Prefix +
-    '/console/api/workspaces/current/model-providers/{provider}/models/parameter-rules',
-  //应用列表
-  appList: Prefix + '/console/api/apps',
-  //删除应用
-  deleteApp: Prefix + '/console/api/apps/{appId}',
-  //创建应用
-  createApp: Prefix + '/console/api/apps',
-  //修改应用的标题，描述
-  modifyAppInfo: Prefix + `/console/api/apps/{appId}/site`,
-  //app详情
-  appDetail: Prefix + `/console/api/apps/{appId}`,
-  //发布app
-  publishApp: Prefix + `/console/api/apps/{appId}/model-config`,
-  //保存app
-  saveApp: Prefix + '/console/api/apps/{appId}/save/model-config',
-  //停止聊天
-  stopChat: Prefix + `/console/api/apps/{appId}/chat-messages/{taskId}/stop`,
-  //发送聊天消息
-  sendChatMsg: Prefix + `/console/api/apps/{appId}/chat-messages`,
-  //获取聊天信息
-  chatMsgs: Prefix + `/console/api/apps/{appId}/chat-messages`,
-  //聊天推荐问题
-  chatSuggestedQuestions:
-    Prefix +
-    `/console/api/apps/{appId}/chat-messages/{responseItemId}/suggested-questions`,
-  //内置工具集的工具列表
-  builtIntoolsList:
-    Prefix +
-    '/console/api/workspaces/current/tool-provider/builtin/{provider}/tools',
-  //自定义工具集的工具列表
-  customToolsList:
-    Prefix +
-    '/console/api/workspaces/current/tool-provider/api/tools?provider={provider}',
-  //工具商店列表
-  toolsProviders: Prefix + '/console/api/workspaces/current/tool-providers',
-  //我的工具列表
-  myToolsProviders:
-    Prefix + '/console/api/workspaces/current/owner/tool-providers',
-  //添加工具
-  addTool: Prefix + '/console/api/workspaces/current/tool-provider/api/add',
-  //工具集详情
-  collectionDetail:
-    Prefix + '/console/api/workspaces/current/tool-provider/api/get',
-  //修改工具
-  updateTool:
-    Prefix + '/console/api/workspaces/current/tool-provider/api/update',
-  //调试工具
-  debugTool:
-    Prefix + '/console/api/workspaces/current/tool-provider/api/test/pre',
-  // 删除工具
-  deleteTool:
-    Prefix + '/console/api/workspaces/current/tool-provider/api/delete',
-  // 工具授权配置schema
-  toolCredentialSchema:
-    Prefix +
-    '/console/api/workspaces/current/tool-provider/builtin/{collectionName}/credentials_schema',
-  //工具授权删除
-  toolCredentialDelete:
-    Prefix +
-    '/console/api/workspaces/current/tool-provider/builtin/{collectionName}/delete',
-  // 更新工具授权
-  toolCredentialUpdate:
-    Prefix +
-    '/console/api/workspaces/current/tool-provider/builtin/{collectionName}/update',
-  //发布工具
-  toolPublish:
-    Prefix + '/console/api/workspaces/current/tool-provider/api/publish',
-  //删除聊天会话
-  deleteConvension:
-    Prefix +
-    '/console/api/installed-apps/{appId}/conversations/{conversationId}',
-  //重命名会话
-  renameConvension:
-    Prefix +
-    '/console/api/installed-apps/{appId}/conversations/{conversationId}/name',
-  /**获取应用商店的app */
-  installedAppList: Prefix + '/console/api/installed-apps',
-  /**应用商店app详情 */
-  installedApp: Prefix + '/console/api/installed-apps/{appId}',
-  /**根据个人空间appid查询installedApp */
-  installedAppBasedId: Prefix + '/console/api/installed-apps/app-id/{id}',
-  /**文生图 */
-  imageGenerate: Prefix + '/console/api/apps/icon-gen',
-  /**客户化信息 */
-  logoInfo: '/api/menu/v1/ex/logo/info'
-};
 // todo 以下为临时联调硬编码方案，环境部署上线需要为正式环境
 const API_PREFIX = '/ceai';
 // 研发环境部署
@@ -240,32 +133,32 @@ export const ModaForgeResourceEndpoints = {
   GetFileBinaryData: PrefixAimdp + '/DownloadFile',
   // RAG相关
   // 查询知识库文件详情
-  GetKnowledgeDocument: PrefixRagV2 + '/GetKnowledgeDocument',
+  GetKnowledgeDocument: PrefixAimdp + '/GetKnowledgeDocument',
   // 预览图片
   PreviewUrl: PrefixAimdp + '/PreviewUrl',
   // 查询知识库文件列表
   ListKnowledgeDocuments: PrefixRag + '/ListKnowledgeDocuments',
   // 批量删除知识库文件列表
-  BatchDeleteKnowledgeDocument: PrefixRag + '/BatchDeleteKnowledgeDocument',
+  BatchDeleteKnowledgeDocument: PrefixAimdp + '/BatchDeleteKnowledgeDocument',
   // 查询知识库文件目录层级
-  ListKnowledgeDocumentCatalogs: PrefixAimdp + '/ListKnowledgeDocumentCatalogs',
+  ListKnowledgeDocumentCatalogs: PrefixAimdp + '/ListKnowledgeDocumentData',
   // 查询知识库分块列表
-  ListKnowledgeChunks: PrefixRagV2 + '/ListKnowledgeChunks',
+  ListKnowledgeChunks: PrefixAimdp + '/ListKnowledgeChunks',
   // 查询分块详情
-  GetKnowledgeChunk: PrefixRagV2 + '/GetKnowledgeChunk',
+  GetKnowledgeChunk: PrefixAimdp + '/GetKnowledgeChunk',
   // 编辑分块内容
-  UpdateKnowledgeChunk: PrefixRagV2 + '/UpdateKnowledgeChunk',
+  UpdateKnowledgeChunk: PrefixAimdp + '/UpdateKnowledgeChunk',
   // 编辑分块元素信息
-  UpdateKnowledgeChunkMaterials: PrefixRagV2 + '/UpdateKnowledgeChunkMaterials',
+  UpdateKnowledgeChunkMaterials: PrefixAimdp + '/UpdateKnowledgeChunkMaterials',
   // 编辑分块增强信息
   UpdateKnowledgeChunkEnhancement:
     PrefixRag + '/UpdateKnowledgeChunkEnhancement',
   // 查询分块溯源日志
-  GetKnowledgeChunkTraceLog: PrefixRagV2 + '/GetKnowledgeChunkTrace',
+  GetKnowledgeChunkTraceLog: PrefixAimdp + '/GetKnowledgeChunkTrace',
   // 运行命中测试
-  RunKnowledgeHitTesting: PrefixRag + '/RunKnowledgeHitTesting',
+  RunKnowledgeHitTesting: PrefixAimdp + '/RunKnowledgeHitTesting',
   // 查询命中测试历史记录
-  ListKnowledgeHitTestingRecords: PrefixRag + '/ListKnowledgeHitTestingRecords',
+  ListKnowledgeHitTestingRecords: PrefixAimdp + '/ListKnowledgeHitTesting',
 
   ResourcePermissionActions: PrefixAuthCenter + '/GetResourcePermissionActions',
   // 新建工作流

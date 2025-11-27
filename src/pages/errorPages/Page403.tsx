@@ -20,13 +20,13 @@ const Page403: React.FC = () => {
                 暂无权限
               </div>
               <div className="mb-3 mt-1 text-[14px] font-normal text-[#6E7B8D]">
-                您当前没有被分配到该项目，请联系管理员获取访问权限
+                当前组织下无项目，请创建项目或联系组织管理员创建项目
               </div>
-              <div className="flex items-center justify-center text-[14px] font-normal leading-[22px] text-[var(--color-text-1)]">
+              {/* <div className="flex items-center justify-center text-[14px] font-normal leading-[22px] text-[var(--color-text-1)]">
                 <div>姓名：张三</div>
                 <Divider type="vertical" className="mx-2 h-[14px]" />
                 <div>电话：13812345678</div>
-              </div>
+              </div> */}
             </div>
           }
         />

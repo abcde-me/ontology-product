@@ -86,11 +86,11 @@ function formatDuration(milliseconds: number): string {
 }
 
 /**
- * 格式化时间戳（Unix 时间戳转 YYYY-MM-DD HH:MM:SS）
+ * 格式化时间戳（13位毫秒时间戳转 YYYY-MM-DD HH:MM:SS）
  */
 function formatTimestamp(timestamp: number): string {
   if (!timestamp) return '';
-  const date = new Date(timestamp * 1000);
+  const date = new Date(timestamp);
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, '0');
   const day = String(date.getDate()).padStart(2, '0');
@@ -289,7 +289,7 @@ export const useSegmentDrawerStore = create<SegmentDrawerStore>((set, get) => ({
       const nodes = (traceLogData.nodes || []).map(
         (node: any, index: number) => ({
           id: `node_${index}`,
-          index: node.node_index || index,
+          index: index,
           name: node.node_type || '未知节点',
           status: node.status === 1 ? 'success' : 'failed',
           duration: formatDuration(node.cost_time || 0),

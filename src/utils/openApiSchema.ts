@@ -1,4 +1,4 @@
-import * as _ from 'lodash';
+import * as _ from 'lodash-es';
 export function newSchema(originSchema?: string) {
   const schema = originSchema
     ? JSON.parse(originSchema)

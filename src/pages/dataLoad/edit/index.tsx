@@ -23,15 +23,16 @@ import {
 import { getdetailList } from '@/api/connectionApi';
 import './index.css';
 import { validateName } from '@/utils/valiate';
-import ComponentTree from '../create/component-tree';
-import { isNumber } from 'lodash-es';
+import ComponentTree from '../component-tree';
 import { sql } from '@codemirror/lang-sql';
 import { lintGutter } from '@codemirror/lint';
 import { tags as t } from '@lezer/highlight';
 import createTheme from '@uiw/codemirror-themes';
 import CodeMirror from '@uiw/react-codemirror';
-import { IconCaretRight, IconDown, IconUp } from '@arco-design/web-react/icon';
-import SQLFormatIcon from '@/assets/sql/sql-format-ico.svg';
+import { IconDown, IconLoading, IconUp } from '@arco-design/web-react/icon';
+import ValidateIcon from '../assets/validate-icon.svg';
+import RunFailedIcon from '@/assets/python/run-fail-icon.svg';
+import RunSuccessIcon from '@/assets/python/run-success-icon.svg';
 import classNames from 'classnames';
 import styles from '../edit/index.module.scss';
 import { useHistory, useParams as useRouteParams } from 'react-router';
@@ -151,7 +152,10 @@ function buildTreeSelectDisplayPath(
         typeof item.children === 'object' &&
         item.children.db
       ) {
-        const result = buildPath(item.children.db, target, newPath);
+        const result = buildPath(item.children.db, target, [
+          ...newPath,
+          '数据库'
+        ]);
         if (result) return result;
       }
 
@@ -160,7 +164,10 @@ function buildTreeSelectDisplayPath(
         typeof item.children === 'object' &&
         item.children.metadata
       ) {
-        const result = buildPath(item.children.metadata, target, newPath);
+        const result = buildPath(item.children.metadata, target, [
+          ...newPath,
+          '元数据'
+        ]);
         if (result) return result;
       }
 
@@ -170,7 +177,10 @@ function buildTreeSelectDisplayPath(
         typeof item.children === 'object' &&
         item.children.volume
       ) {
-        const result = buildPath(item.children.volume, target, newPath);
+        const result = buildPath(item.children.volume, target, [
+          ...newPath,
+          '数据卷'
+        ]);
         if (result) return result;
       }
     }
@@ -302,11 +312,32 @@ const RunningInfoPanel = function ({
   const renderCheckStatus = () => {
     switch (checkStatus) {
       case CheckSQLStatus.CHECKING:
-        return <Tag color="blue">校验中</Tag>;
+        return (
+          <div className="flex items-center gap-[4px]">
+            <span className="text-[14px] text-[var(--color-text-4)]">
+              校验中
+            </span>
+            <IconLoading style={{ color: '#007DFA' }} />
+          </div>
+        );
       case CheckSQLStatus.SUCCESS:
-        return <Tag color="green">校验成功</Tag>;
+        return (
+          <div className="flex items-center gap-[4px]">
+            <span className="text-[14px] text-[var(--color-text-4)]">
+              校验成功
+            </span>
+            <RunSuccessIcon />
+          </div>
+        );
       case CheckSQLStatus.ERROR:
-        return <Tag color="red">校验失败</Tag>;
+        return (
+          <div className="flex items-center gap-[4px]">
+            <span className="text-[14px] text-[var(--color-text-4)]">
+              校验失败
+            </span>
+            <RunFailedIcon />
+          </div>
+        );
       default:
         return null;
     }
@@ -790,6 +821,21 @@ const Edit = (props) => {
   // 监听SQL处理开关状态
   const sqlProcessEnabled = Form.useWatch('sql_process_enabled', form);
 
+  const validateSQL = useCallback(
+    (value: string, callback: (error?: string) => void) => {
+      if (!value || value.trim() === '') {
+        callback('请输入SQL语句');
+        return;
+      }
+      if (checkStatus === CheckSQLStatus.ERROR) {
+        callback('运行失败，请重新检查语句');
+        return;
+      }
+      return callback();
+    },
+    [checkStatus]
+  );
+
   // 根据初始 SQL 是否有值来设置开关初始状态
   useEffect(() => {
     if (props.detailData?.source_type !== 'db') return;
@@ -922,7 +968,7 @@ const Edit = (props) => {
       const baseFormData: any = {
         task_id: Number(props.loadId),
         task_name: rest.name,
-        dest_path_id: pathId,
+        dest_path_id: Number(pathId),
         db_name: props.detailData?.db_name
       };
 
@@ -1115,7 +1161,17 @@ const Edit = (props) => {
               </FormItem>
 
               {sqlProcessEnabled === 'enable' && (
-                <FormItem label=" " field="sql">
+                <FormItem
+                  label=" "
+                  field="sql"
+                  rules={[
+                    {
+                      required: true,
+                      validator: (value, callback) =>
+                        validateSQL(value as string, callback)
+                    }
+                  ]}
+                >
                   <div
                     className={classNames(
                       styles['sql-editor-container'],
@@ -1126,7 +1182,7 @@ const Edit = (props) => {
                       <Button
                         type="secondary"
                         disabled
-                        icon={<IconCaretRight className="mr-[4px]" />}
+                        icon={<ValidateIcon className="mr-[4px]" />}
                         className="h-[26px]"
                         onClick={handleCheckSQL}
                         loading={checkStatus === CheckSQLStatus.CHECKING}
@@ -1317,11 +1373,11 @@ export default function DataLoadEdit() {
 
   if (loading) {
     return (
-      <div className="h-full px-[20px]">
-        <div className="mb-[9px] mt-[17px] text-[20px] font-bold leading-[32px]">
+      <div className="h-full px-[20px] pt-[17px]">
+        <div className="mb-[9px] text-[20px] font-bold leading-[30px]">
           编辑数据载入任务
         </div>
-        <div className="flex h-[calc(100%-58px-17px)] flex-col items-center justify-center overflow-y-auto rounded-[16px] bg-white p-[24px]">
+        <div className="flex h-[calc(100%-39px-25px)] flex-col items-center justify-center overflow-y-auto rounded-[16px] bg-white p-[24px]">
           <div>加载中...</div>
         </div>
       </div>

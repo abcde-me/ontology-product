@@ -10,6 +10,8 @@ import {
 import { IconSearch, IconSettings } from '@arco-design/web-react/icon';
 import { FieldSearchItem } from '@/api/dataCatalog';
 import dayjs from 'dayjs';
+import styles from './MetaDataSearchArea.module.scss';
+import classNames from 'classnames';
 
 export interface SearchField {
   /** 字段唯一标识 */
@@ -328,7 +330,13 @@ export default function SearchArea({
           popupVisible={settingsVisible}
           onVisibleChange={setSettingsVisible}
         >
-          <Button type="text" className="ml-auto flex items-center gap-1">
+          <Button
+            type="text"
+            className={classNames(
+              'ml-auto flex items-center gap-1',
+              styles['settings-button']
+            )}
+          >
             <IconSettings />
             设置搜索条件
           </Button>

@@ -52,9 +52,9 @@ import './style.css';
 import noDataElement from '@/components/no-data';
 import getFileIcon from '@/components/file-icon';
 import { PermissionWrapper } from '../PermissionGuard';
-import HitTest from '@/pages/dataMarket/components/configurationpage/hit-test';
-import { throttle } from 'lodash';
-import { FileType } from '@/utils/type';
+import { throttle } from 'lodash-es';
+import { FileTypeLarge } from '@/utils/type';
+import HitTest from '@/pages/dataMarket/components/configurationpage/compontents/hitTest';
 const { Title, Text } = Typography;
 const { TabPane } = Tabs;
 
@@ -94,78 +94,87 @@ interface TableColumn {
 }
 
 enum FileStatusType {
-  success = 'success',
-  fail = 'fail'
+  success = 'Succeed',
+  fail = 'Error',
+  waiting = 'Waiting'
 }
 
 const filterFileTypes = [
   {
-    text: FileType.pdf,
-    value: FileType.pdf
+    text: FileTypeLarge.pdf,
+    value: FileTypeLarge.pdf
   },
   {
-    text: FileType.ppt,
-    value: FileType.ppt
+    text: FileTypeLarge.ppt,
+    value: FileTypeLarge.ppt
   },
   {
-    text: FileType.pptx,
-    value: FileType.pptx
+    text: FileTypeLarge.pptx,
+    value: FileTypeLarge.pptx
   },
   {
-    text: FileType.txt,
-    value: FileType.txt
+    text: FileTypeLarge.xls,
+    value: FileTypeLarge.xls
   },
   {
-    text: FileType.md,
-    value: FileType.md
+    text: FileTypeLarge.xlsx,
+    value: FileTypeLarge.xlsx
   },
   {
-    text: FileType.doc,
-    value: FileType.doc
+    text: FileTypeLarge.txt,
+    value: FileTypeLarge.txt
   },
   {
-    text: FileType.docx,
-    value: FileType.docx
+    text: FileTypeLarge.md,
+    value: FileTypeLarge.md
   },
   {
-    text: FileType.jpg,
-    value: FileType.jpg
+    text: FileTypeLarge.doc,
+    value: FileTypeLarge.doc
   },
   {
-    text: FileType.png,
-    value: FileType.png
+    text: FileTypeLarge.docx,
+    value: FileTypeLarge.docx
   },
   {
-    text: FileType.jpeg,
-    value: FileType.jpeg
+    text: FileTypeLarge.jpg,
+    value: FileTypeLarge.jpg
   },
   {
-    text: FileType.wav,
-    value: FileType.wav
+    text: FileTypeLarge.png,
+    value: FileTypeLarge.png
   },
   {
-    text: FileType.mp3,
-    value: FileType.mp3
+    text: FileTypeLarge.jpeg,
+    value: FileTypeLarge.jpeg
   },
   {
-    text: FileType.aac,
-    value: FileType.aac
+    text: FileTypeLarge.wav,
+    value: FileTypeLarge.wav
   },
   {
-    text: FileType.flac,
-    value: FileType.flac
+    text: FileTypeLarge.mp3,
+    value: FileTypeLarge.mp3
   },
   {
-    text: FileType.mp4,
-    value: FileType.mp4
+    text: FileTypeLarge.aac,
+    value: FileTypeLarge.aac
   },
   {
-    text: FileType.mov,
-    value: FileType.mov
+    text: FileTypeLarge.flac,
+    value: FileTypeLarge.flac
   },
   {
-    text: FileType.mkv,
-    value: FileType.mkv
+    text: FileTypeLarge.mp4,
+    value: FileTypeLarge.mp4
+  },
+  {
+    text: FileTypeLarge.mov,
+    value: FileTypeLarge.mov
+  },
+  {
+    text: FileTypeLarge.mkv,
+    value: FileTypeLarge.mkv
   }
 ];
 
@@ -662,10 +671,12 @@ const DatasetDetail = (props: {
           },
           {
             title: '文件大小',
-            dataIndex: 'size',
+            dataIndex: 'file_size',
             width: 100,
             sorter: true, // 启用排序功能，但不提供排序函数
-            render: (_, record) => <span>{formatFileSize(record.size)}</span>
+            render: (_, record) => (
+              <span>{formatFileSize(record.file_size)}</span>
+            )
           },
           {
             title: '分段数',
@@ -685,6 +696,10 @@ const DatasetDetail = (props: {
               {
                 text: '处理失败',
                 value: FileStatusType.fail
+              },
+              {
+                text: '等待中',
+                value: FileStatusType.waiting
               }
             ],
             render: (_, record) => (
@@ -832,6 +847,10 @@ const DatasetDetail = (props: {
       fetchDatasetContents();
     }
   }, [sortValue]);
+
+  useEffect(() => {
+    fetchDatasetContents();
+  }, [filePageSize, fileCurrentPage]);
 
   React.useEffect(() => {
     //@ts-expect-error
@@ -2027,13 +2046,14 @@ const DatasetDetail = (props: {
                   const singleSorter = Array.isArray(sorter)
                     ? sorter[0]
                     : sorter;
+                  console.log(singleSorter, filters);
                   setSortValue({
                     sorter: {
                       field: singleSorter?.field as string,
-                      direction: singleSorter.direction as string
+                      direction: singleSorter?.direction as string
                     },
                     filters: {
-                      file_type: filters.file_type || [],
+                      file_type: filters.format || [],
                       status: filters.status || []
                     }
                   });
@@ -2068,7 +2088,7 @@ const DatasetDetail = (props: {
           {datasetDetail &&
             datasetDetail.storage_type === StorageType.vector && (
               <TabPane key="hittest" title="命中测试">
-                <HitTest />
+                <HitTest datasetName={datasetDetail.name} />
               </TabPane>
             )}
           {/* <TabPane key="element" title="元素搜索"></TabPane> */}

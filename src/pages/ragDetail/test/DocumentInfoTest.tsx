@@ -64,7 +64,9 @@ const DocumentInfoTest: React.FC = () => {
         testDocumentId,
         null,
         null,
-        testDatasetName
+        testDatasetName,
+        null,
+        null
       );
       console.log('✅ initializeRagDetail 调用成功');
     } catch (err: any) {

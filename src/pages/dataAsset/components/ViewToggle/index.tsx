@@ -1,5 +1,6 @@
 import React from 'react';
-import { IconApps, IconMenu } from '@arco-design/web-react/icon';
+import { IconApps } from '@arco-design/web-react/icon';
+import IconMenu from '../../assets/list-icon.svg';
 
 export enum ViewType {
   /** 卡片视图 */
@@ -39,12 +40,12 @@ export default function ViewToggle({
           'flex h-[32px] w-[32px] cursor-pointer items-center justify-center rounded-bl-[4px] rounded-tl-[4px] border bg-[#EEF6FF] ' +
           (selectedView === ViewType.CARD
             ? 'border-[rgba(var(--primary-6))] text-[rgba(var(--primary-6))]'
-            : 'border-[var(--color-border-2)]')
+            : 'border-[var(--color-border-1)]')
         }
       >
         <IconApps
           className={
-            'text-[22px] ' +
+            'text-[16px] ' +
             (selectedView === 'card' ? 'text-[var(--primary-6)]' : '')
           }
         />
@@ -56,12 +57,12 @@ export default function ViewToggle({
           'flex h-[32px] w-[32px] cursor-pointer items-center justify-center rounded-br-[4px] rounded-tr-[4px] border bg-[#EEF6FF] ' +
           (selectedView === ViewType.LIST
             ? 'border-[rgba(var(--primary-6))] text-[rgba(var(--primary-6))]'
-            : 'border-[var(--color-border-2)]')
+            : 'border-[var(--color-border-1)]')
         }
       >
         <IconMenu
           className={
-            'text-[22px] ' +
+            'text-[16px] ' +
             (selectedView === 'list' ? 'text-[var(--primary-6)]' : '')
           }
         />
