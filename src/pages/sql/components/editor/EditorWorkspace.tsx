@@ -32,7 +32,6 @@ import { EditorProvider, useEditorContext } from '../../contexts/EditorContext';
 import { FileTab } from '../../hooks/useTabManager';
 import RunningInfoPanel from './RunningInfoPanel';
 import classNames from 'classnames';
-import { set } from 'lodash';
 import ModalParamList from '../data-manager/ModalParamList';
 
 interface NotebookWorkspaceProps {
