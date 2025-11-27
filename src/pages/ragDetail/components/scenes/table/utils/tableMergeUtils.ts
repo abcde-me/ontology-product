@@ -95,13 +95,3 @@ export const getCellMergeInfo = (
   }
   return null;
 };
-
-/**
- * 检查是否为从第一行开始的跨行合并单元格
- */
-export const isFirstRowMerge = (
-  rowIndex: number,
-  mergeInfo: MergeInfo | null
-): boolean => {
-  return rowIndex === 0 && !!mergeInfo && mergeInfo.rowSpan > 1;
-};

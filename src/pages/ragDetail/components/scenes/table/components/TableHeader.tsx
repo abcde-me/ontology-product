@@ -4,12 +4,11 @@
  */
 
 import React from 'react';
-import {
-  shouldRenderHeaderCell,
-  getHeaderCellMergeInfo,
-  isFirstRowMerge
-} from '../utils/tableMergeUtils';
 import { CellMerge } from '../../../../types';
+import {
+  getHeaderCellMergeInfo,
+  shouldRenderHeaderCell
+} from '../utils/tableMergeUtils';
 
 interface TableHeaderProps {
   headerRows: any[][];
@@ -36,13 +35,10 @@ const TableHeader: React.FC<TableHeaderProps> = ({
               merges
             );
             const cellContent = cell != null ? String(cell) : '';
-
-            // 如果是从第一行开始的跨行合并单元格，不加粗
-            const shouldBold = !isFirstRowMerge(rowIndex, mergeInfo);
             return (
               <th
                 key={colIndex}
-                className={`h-10 px-4 text-left text-sm text-gray-900 ${shouldBold ? 'font-semibold' : ''}`}
+                className="h-10 px-4 text-left text-sm font-semibold text-gray-900"
                 style={{
                   ...(headers.length >= 4
                     ? { width: '200px', minWidth: '200px' }
