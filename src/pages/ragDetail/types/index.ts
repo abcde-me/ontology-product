@@ -241,7 +241,7 @@ export interface SegmentDetailData {
 // 新的后端返回的目录树节点结构
 export interface ApiCatalogNode {
   level: number;
-  type: 'Title' | 'Text'; // Title: 标题节点（不高亮分段），Text: 文本节点（高亮分段）
+  type: 'Title' | 'Text' | 'Image' | 'Formula' | 'Table'; // 节点类型：Title(标题), Text(文本), Image(图片), Formula(公式), Table(表格)
   chunk_id: string; // 对应分段的 id 或 title_id
   content: string;
   positions: ApiPosition[] | null; // 可能为 null
@@ -266,7 +266,7 @@ export interface DirectoryNode {
   id: string; // 对应 chunk_id
   label: string; // 对应 content
   level: number;
-  type: 'Title' | 'Text'; // Title: 标题节点（不高亮分段），Text: 文本节点（高亮分段）
+  type: 'Title' | 'Text' | 'Image' | 'Formula' | 'Table'; // 节点类型：Title(标题), Text(文本), Image(图片), Formula(公式), Table(表格)
   children?: DirectoryNode[];
   segmentIds?: string[]; // 关联的分段ID列表（用于滚动定位）
   position?: PDFCoordinate[]; // 在PDF中的位置
