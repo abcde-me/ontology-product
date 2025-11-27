@@ -178,6 +178,7 @@ export default function DataAssetFormContainer({
       const res = await listDataAssetSource();
 
       if (res.status !== 200) {
+        Message.error(res.message || '获取数据来源列表失败');
         return;
       }
 
@@ -310,29 +311,29 @@ export default function DataAssetFormContainer({
   const handlePrev = () => {
     // 清空第二步设置的内容
     // 重置 mappings 为基于 metadataFields 的初始状态（所有映射字段为空）
-    if (metadataFields.length > 0) {
-      const resetMappings: FieldMapping[] = metadataFields.map(
-        (field, index) => {
-          const mapping: FieldMapping = {
-            id: field.nameEn,
-            sequence: index + 1,
-            nameZh: field.nameZh
-          };
-          // 初始化所有选中的数据来源类型字段为空
-          Object.keys(normalizedDataSources).forEach((sourceKey) => {
-            if (normalizedDataSources[sourceKey]) {
-              mapping[sourceKey] = '';
-            }
-          });
-          return mapping;
-        }
-      );
-      setMappings(resetMappings);
-    } else {
-      setMappings([]);
-    }
-    // 重置自动映射开关
-    setAutoMapping(!isEditMode);
+    // if (metadataFields.length > 0) {
+    //   const resetMappings: FieldMapping[] = metadataFields.map(
+    //     (field, index) => {
+    //       const mapping: FieldMapping = {
+    //         id: field.nameEn,
+    //         sequence: index + 1,
+    //         nameZh: field.nameZh
+    //       };
+    //       // 初始化所有选中的数据来源类型字段为空
+    //       Object.keys(normalizedDataSources).forEach((sourceKey) => {
+    //         if (normalizedDataSources[sourceKey]) {
+    //           mapping[sourceKey] = '';
+    //         }
+    //       });
+    //       return mapping;
+    //     }
+    //   );
+    //   setMappings(resetMappings);
+    // } else {
+    //   setMappings([]);
+    // }
+    // // 重置自动映射开关
+    // setAutoMapping(!isEditMode);
     setCurrentStep((prev) => prev - 1);
   };
 
@@ -387,7 +388,7 @@ export default function DataAssetFormContainer({
       },
       {
         key: 'mapping',
-        element: (
+        element: currentStep === 1 && (
           <Step2FieldMapping
             currentStep={currentStep}
             mappings={mappings}

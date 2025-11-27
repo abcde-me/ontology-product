@@ -46,7 +46,7 @@ function transformApiPositions(
   }
 
   return positions.map((pos) => ({
-    page: pos.page_id + 1, // 后端0-based,前端1-based
+    page: pos.page_id,
     x1: pos.bbox && pos.bbox.length > 0 ? pos.bbox[0] : undefined,
     y1: pos.bbox && pos.bbox.length > 1 ? pos.bbox[1] : undefined,
     x2: pos.bbox && pos.bbox.length > 2 ? pos.bbox[2] : undefined,
@@ -136,11 +136,16 @@ function transformCatalogNode(apiNode: ApiCatalogNode): DirectoryNode {
   };
 
   // 根据 type 设置 segmentIds
-  if (apiNode.type === 'Text') {
-    // type 为 Text 时，chunk_id 就是分段的 id
+  // 对于 Text、Image、Formula、Table 等可选中的节点类型，chunk_id 就是分段的 id
+  if (
+    apiNode.type === 'Text' ||
+    apiNode.type === 'Image' ||
+    apiNode.type === 'Formula' ||
+    apiNode.type === 'Table'
+  ) {
     node.segmentIds = [apiNode.chunk_id];
   } else if (apiNode.type === 'Title') {
-    // type 为 Title 时，需要找到所有子节点中 type 为 Text 的 chunk_id
+    // type 为 Title 时，需要找到所有子节点中可选中的 chunk_id
     // 这里先不设置，后面递归处理完 children 后再收集
     node.segmentIds = [];
   }
@@ -296,20 +301,28 @@ export async function fetchCatalog(
 
     // 检查响应格式 - 支持多种可能的数据结构
     if (response && response.data) {
-      let catalogData =
+      const catalogData =
         response.data.catalogs || response.data.catalog || response.data;
 
-      // 如果 catalogData 是数组，取第一个元素
+      // 如果 catalogData 是数组，转换所有元素
       if (Array.isArray(catalogData) && catalogData.length > 0) {
-        catalogData = catalogData[0];
-      }
-
-      // 验证 catalogData 是否有效
-      if (
+        const nodes: DirectoryNode[] = [];
+        for (const item of catalogData) {
+          if (item && typeof item === 'object' && 'chunk_id' in item) {
+            const node = transformCatalogNode(item);
+            nodes.push(node);
+          }
+        }
+        if (nodes.length > 0) {
+          console.log('catalog nodes:', nodes);
+          return nodes;
+        }
+      } else if (
         catalogData &&
         typeof catalogData === 'object' &&
         'chunk_id' in catalogData
       ) {
+        // 单个对象的情况
         console.log('catalog data:', catalogData);
         const rootNode = transformCatalogNode(catalogData);
         console.log('rootNode:', rootNode);
@@ -564,12 +577,49 @@ function transformApiMaterialToElement(material: any): Element {
 
     case 'table':
       try {
-        const tableData = JSON.parse(material.content);
+        // 处理两种格式：
+        // 1. 新格式：多行JSON字符串，每行一个对象，用\n分隔
+        // 2. 旧格式：单个JSON对象 {headers: [...], rows: [...]}
+        let headers: string[] = [];
+        let rows: Record<string, string>[] = [];
+
+        // 尝试解析为新格式（多行JSON）
+        const lines = material.content.trim().split('\n');
+        if (lines.length > 0) {
+          try {
+            // 尝试解析第一行
+            const firstRow = JSON.parse(lines[0]);
+            if (typeof firstRow === 'object' && firstRow !== null) {
+              // 是新格式：单行对象
+              headers = Object.keys(firstRow);
+              rows = lines.map((line: string) => {
+                try {
+                  return JSON.parse(line);
+                } catch {
+                  return {};
+                }
+              });
+            }
+          } catch {
+            // 如果第一行解析失败，尝试解析整个content为旧格式
+            const tableData = JSON.parse(material.content);
+            if (tableData.headers && tableData.rows) {
+              // 旧格式
+              headers = tableData.headers;
+              rows = tableData.rows;
+            } else if (typeof tableData === 'object' && tableData !== null) {
+              // 单个对象
+              headers = Object.keys(tableData);
+              rows = [tableData];
+            }
+          }
+        }
+
         return {
           ...baseElement,
           type: 'table',
-          headers: Object.keys(tableData),
-          rows: [tableData],
+          headers,
+          rows,
           positionType,
           positionInfo,
           pageId
