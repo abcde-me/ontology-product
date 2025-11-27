@@ -20,7 +20,9 @@ import {
   updateSqlScriptParams,
   SqlTaskDetailData,
   DatasetsOptionsParams,
-  DatasetsOptionsData
+  DatasetsOptionsData,
+  ListDevelopScriptParams,
+  ListDevelopScriptParamsData
 } from '@/types/sqlApi';
 
 /** 数据集目录 */
@@ -266,4 +268,11 @@ export async function getDatasetsOptions(
   params: DatasetsOptionsParams
 ): Promise<ApiRes<DatasetsOptionsData>> {
   return await UAPI.RES.datasetsOptionsApi({}).post(params).inRegion().do();
+}
+
+// 获取开发脚本列表
+export async function getDevelopScriptList(
+  params: ListDevelopScriptParams
+): Promise<ApiRes<ListDevelopScriptParamsData>> {
+  return await UAPI.RES.ListDevelopScriptApi({}).post(params).inRegion().do();
 }

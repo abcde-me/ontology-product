@@ -5,6 +5,7 @@ import SQLIcon from '@/assets/sql/sql-left-menu.svg';
 import DasetIcon from '@/assets/sql/daset-left-menu.svg';
 import FileManager from './components/file-manager';
 import DataManager from './components/data-manager';
+import SplScriptManagement from './components/spl-script-management';
 import EditorContent from './components/editor';
 import DatasetsList from './components/DatasetsList';
 import { FileTab, useTabManager } from './hooks/useTabManager';
@@ -16,9 +17,9 @@ import { useLocation, useHistory } from 'react-router-dom';
 const { Content, Sider } = Layout;
 const TabPane = Tabs.TabPane;
 
-type TabKey = 'data' | 'files' | 'dataset';
+type TabKey = 'data' | 'files' | 'dataset' | 'script';
 
-const defaultActiveTab = 'data';
+const defaultActiveTab = 'script';
 
 const SqlIndex: React.FC = memo(() => {
   const location = useLocation();
@@ -66,7 +67,7 @@ const SqlIndex: React.FC = memo(() => {
   // 初始化创建一个默认SQL查询标签
   useEffect(() => addTab(), []);
 
-  const isDasetTab = activeTab === 'dataset';
+  const isDasetTab = activeTab === 'dataset' || activeTab === 'script';
 
   const handleTabChange = (key: string) => {
     setActiveTab(key as TabKey);
@@ -121,7 +122,7 @@ const SqlIndex: React.FC = memo(() => {
 
   return (
     <Layout className={styles['sql-page-layout']}>
-      <Sider width={isDasetTab ? '100%' : 360} className={styles['sql-sider']}>
+      <Sider width={isDasetTab ? '100%' : 400} className={styles['sql-sider']}>
         <Tabs
           activeTab={activeTab}
           onChange={handleTabChange}
@@ -130,9 +131,24 @@ const SqlIndex: React.FC = memo(() => {
           type="rounded"
         >
           <TabPane
+            key="script"
+            title={
+              <Popover content="SQL脚本管理" position="left">
+                <DataIcon className={styles['sql-menu-icon']} />
+              </Popover>
+            }
+          >
+            {activeTab === 'script' && (
+              <SplScriptManagement
+                onToScriptList={handleTabChange}
+                key="script"
+              />
+            )}
+          </TabPane>
+          <TabPane
             key="data"
             title={
-              <Popover content="源数据" position="left">
+              <Popover content="数据列表" position="left">
                 <DataIcon className={styles['sql-menu-icon']} />
               </Popover>
             }
@@ -148,7 +164,7 @@ const SqlIndex: React.FC = memo(() => {
           <TabPane
             key="files"
             title={
-              <Popover content="SQL脚本列表" position="left">
+              <Popover content="加工脚本列表" position="left">
                 <SQLIcon className={styles['sql-menu-icon']} />
               </Popover>
             }
@@ -185,6 +201,7 @@ const SqlIndex: React.FC = memo(() => {
         <EditorContent
           fileTabs={fileState.fileTabs}
           activeTab={fileState.activeTab}
+          curActiveTab={activeTab}
           onTabChange={switchTab}
           onAddTab={(newFileInfo?: any) => addTab(newFileInfo)}
           onRemoveTab={removeTab}
@@ -194,6 +211,7 @@ const SqlIndex: React.FC = memo(() => {
           onEditorFocusChange={handleEditorFocusChange}
           refreshDirectory={handleRefreshDirectory}
           selectFile={selectFile}
+          onToScriptList={handleTabChange}
         />
       </Content>
     </Layout>

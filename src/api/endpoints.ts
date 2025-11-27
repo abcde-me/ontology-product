@@ -525,6 +525,8 @@ export const ModaForgeResourceEndpoints = {
   leSaveTask: PrefixLabelService + '/saveTask',
   leGetTaskReuslt: PrefixLabelService + '/getTaskResult',
 
+  ListDevelopScriptApi: PrefixAimdp + '/ListDevelopScript',
+
   // 数据资产接口
   // 查询数据资产表字段和映射关系
   getDataAssetMapping: PrefixAimdp + '/GetDataAssetMapping',
