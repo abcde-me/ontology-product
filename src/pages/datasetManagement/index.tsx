@@ -1412,7 +1412,7 @@ const DatasetManagement: React.FC = () => {
     // 过滤掉storage_type为table的数据集
     const filteredRows = selectedRows.filter(
       (row) =>
-        row.storage_type !== datasetStorageType.table && row.scene_id !== 2
+        row.storage_type !== datasetStorageType.table || row.scene_id !== 2
     );
     const tableRows = selectedRows.filter(
       (row) => row.storage_type === datasetStorageType.table

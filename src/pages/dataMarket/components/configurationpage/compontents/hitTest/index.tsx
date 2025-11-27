@@ -319,14 +319,15 @@ function HitTest(props: { datasetName: string }) {
               开始测试
             </Button>
           )}
-          {/* <Button
+          <Button
             className={styles.cl}
             type="outline"
             icon={<IconSettings />}
             onClick={oncEditPolicy}
+            disabled
           >
             检索设置
-          </Button> */}
+          </Button>
         </div>
         <div className={styles.historyHeader}>历史记录</div>
         <div className={styles.historyContent}>
