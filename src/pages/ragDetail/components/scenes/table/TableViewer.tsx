@@ -81,10 +81,17 @@ const TableViewer: React.FC<TableViewerProps> = ({}) => {
           return rowObj;
         });
 
+        let charCount = 0;
+        try {
+          charCount = JSON.stringify(jsonData).length;
+        } catch (error) {
+          console.error('计算字符数失败:', error);
+        }
+
         return {
           id: `sheet-${index}`,
           content: sheetName,
-          charCount: JSON.stringify(jsonData).length,
+          charCount,
           segmentIndex: index,
           tableData: {
             headers,
@@ -203,7 +210,7 @@ const TableViewer: React.FC<TableViewerProps> = ({}) => {
         </div>
       );
     }
-    return <span className="text-gray-900">{contentStr}</span>;
+    return <span className="break-all text-gray-900">{contentStr}</span>;
   };
 
   return (

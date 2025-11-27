@@ -42,11 +42,19 @@ const TableSegmentCard: React.FC<TableSegmentCardProps> = ({
 
   // 初始化表格数据
   const initialTableData = useMemo<TableData>(() => {
-    const rawData = JSON.parse(segment.content);
-    return {
-      headers: Object.keys(rawData),
-      rows: [rawData]
-    };
+    try {
+      const rawData = JSON.parse(segment.content);
+      return {
+        headers: Object.keys(rawData),
+        rows: [rawData]
+      };
+    } catch (error) {
+      console.error('解析表格数据失败:', error);
+      return {
+        headers: [],
+        rows: []
+      };
+    }
   }, [segment.content]);
 
   const [tableData, setTableData] = useState<TableData>(initialTableData);
@@ -58,7 +66,12 @@ const TableSegmentCard: React.FC<TableSegmentCardProps> = ({
 
   // 将表格数据转换为 JSON 字符串
   const convertTableDataToJson = useCallback((data: TableData): string => {
-    return JSON.stringify(data.rows[0]);
+    try {
+      return JSON.stringify(data.rows[0]);
+    } catch (error) {
+      console.error('转换表格数据为JSON失败:', error);
+      return '{}';
+    }
   }, []);
 
   // 渲染单元格内容
@@ -71,7 +84,7 @@ const TableSegmentCard: React.FC<TableSegmentCardProps> = ({
         </div>
       );
     }
-    return <span className="text-gray-900">{contentStr}</span>;
+    return <span className="break-all text-gray-900">{contentStr}</span>;
   }, []);
 
   // 处理表头编辑
@@ -147,16 +160,20 @@ const TableSegmentCard: React.FC<TableSegmentCardProps> = ({
   // 点击外部区域：先取消编辑状态，再判断是否需要更新
   useClickAway(() => {
     if (isEditing) {
-      // 标记是点击外部区域触发的
-      isClickAwayRef.current = true;
+      try {
+        // 标记是点击外部区域触发的
+        isClickAwayRef.current = true;
 
-      // 先取消编辑状态
-      cancelEditingSegment();
+        // 先取消编辑状态
+        cancelEditingSegment();
 
-      // 判断内容是否变化，如果变化则更新
-      const jsonContent = convertTableDataToJson(tableData);
-      if (jsonContent !== segment.content) {
-        updateSegmentContent(segment.id, jsonContent);
+        // 判断内容是否变化，如果变化则更新
+        const jsonContent = convertTableDataToJson(tableData);
+        if (jsonContent !== segment.content) {
+          updateSegmentContent(segment.id, jsonContent);
+        }
+      } catch (error) {
+        console.error('点击外部区域保存失败:', error);
       }
     }
   }, cardRef);
