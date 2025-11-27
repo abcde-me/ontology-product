@@ -138,7 +138,11 @@ export const useRagDetailStore = create<RagDetailState & RagDetailActions>(
 
         // @ts-ignore
         const isConvertPdf =
-          finalSceneType === 'xlsx' || finalSceneType === 'xls' ? false : true;
+          finalSceneType === 'excel' ||
+          finalSceneType === 'xlsx' ||
+          finalSceneType === 'xls'
+            ? false
+            : true;
 
         // 如果有 bucket 和 path，自动加载文件二进制数据
         if (finalBucket && finalPath) {
