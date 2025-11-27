@@ -132,7 +132,7 @@ const SegmentList: React.FC<SegmentListProps> = ({
     if (groupedSegments.length === 0) {
       return (
         <div className="flex h-full items-center justify-center">
-          <Empty description="未找到匹配的分段" />
+          <Empty description="暂无数据" />
         </div>
       );
     }
