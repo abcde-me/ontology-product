@@ -417,6 +417,7 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = memo(
             className={classNames('pyspark-editor-container', {
               'running-code-mirror': isReadOnly
             })}
+            style={{ height: '100%', overflow: 'auto' }}
           >
             <CodeMirror
               ref={editorRef}
