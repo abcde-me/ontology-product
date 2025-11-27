@@ -109,11 +109,21 @@ export interface PptSegment extends Segment {
   slideContent?: string;
 }
 
+// 合并单元格信息
+export interface CellMerge {
+  startRow: number;
+  endRow: number;
+  startCol: number;
+  endCol: number;
+}
+
 // 表格分段（场景5）
 export interface TableSegment extends Segment {
   tableData?: {
     headers: string[];
     rows: Array<Record<string, string>>;
+    headerRows?: any[][]; // 多行表头数据
+    merges?: CellMerge[]; // 合并单元格信息
   };
 }
 

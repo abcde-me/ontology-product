@@ -76,14 +76,14 @@ const TableSegmentCard: React.FC<TableSegmentCardProps> = ({
 
   // 渲染单元格内容
   const renderCellContent = useCallback((content: string | number) => {
-    const contentStr = String(content);
-    if (containsMarkdown(contentStr)) {
-      return (
-        <div className="text-gray-900">
-          <SegmentMarkdown content={contentStr} className="!m-0 !p-0" />
-        </div>
-      );
-    }
+    const contentStr = String(content || '');
+    // if (containsMarkdown(contentStr)) {
+    //   return (
+    //     <div className="text-gray-900">
+    //       <SegmentMarkdown content={contentStr} className="!m-0 !p-0" />
+    //     </div>
+    //   );
+    // }
     return <span className="break-all text-gray-900">{contentStr}</span>;
   }, []);
 
