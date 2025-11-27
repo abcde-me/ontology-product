@@ -685,35 +685,39 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
                 <div className={styles['directory-tree-extra']}>
                   {node?.type === 'directory' && (
                     <PermissionWrapper permission={PYSPARK_PERMISSIONS.CREATE}>
-                      <Dropdown
-                        trigger="click"
-                        position="bl"
-                        droplist={
-                          <Menu
-                            onClickMenuItem={(key) => {
-                              if (key === 'folder') {
-                                startRootCreate(true, node, true);
-                              } else if (key === 'file') {
-                                startRootCreate(false, node, true);
+                      <Tooltip color="white" content="新建">
+                        <Dropdown
+                          trigger="click"
+                          position="bl"
+                          droplist={
+                            <Menu
+                              onClickMenuItem={(key) => {
+                                if (key === 'folder') {
+                                  startRootCreate(true, node, true);
+                                } else if (key === 'file') {
+                                  startRootCreate(false, node, true);
+                                }
+                              }}
+                            >
+                              <Menu.Item key="file">新建PySpark</Menu.Item>
+                              <Menu.Item key="folder">新建文件夹</Menu.Item>
+                            </Menu>
+                          }
+                        >
+                          <IconPlus
+                            onClick={() => {
+                              if (!expandedKeys.includes(node?.dataRef?.id)) {
+                                setExpandedKeys(
+                                  [...expandedKeys, node?.dataRef?.id].map(
+                                    String
+                                  )
+                                );
                               }
                             }}
-                          >
-                            <Menu.Item key="file">新建PySpark</Menu.Item>
-                            <Menu.Item key="folder">新建文件夹</Menu.Item>
-                          </Menu>
-                        }
-                      >
-                        <IconPlus
-                          onClick={() => {
-                            if (!expandedKeys.includes(node?.dataRef?.id)) {
-                              setExpandedKeys(
-                                [...expandedKeys, node?.dataRef?.id].map(String)
-                              );
-                            }
-                          }}
-                          className="mr-1 text-[14px] hover:text-[rgb(var(--primary-6))]"
-                        />
-                      </Dropdown>
+                            className="mr-1 text-[14px] hover:text-[rgb(var(--primary-6))]"
+                          />
+                        </Dropdown>
+                      </Tooltip>
                     </PermissionWrapper>
                   )}
                   <PermissionWrapper permission={PYSPARK_PERMISSIONS.MODIFY}>
