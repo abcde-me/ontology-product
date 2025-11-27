@@ -30,19 +30,21 @@ import { openNewPage } from '@/utils/env';
 import styles from './index.module.scss';
 import { VersionType, VersionTypeEnum } from '../sctipt-card';
 import ScriptModalTable from '../sctip-modal-table';
+import { getDevelopScriptList } from '@/api/sql';
 
 const InputSearch = Input.Search;
 
 const ScriptTable: React.FC = () => {
   const FormItem = Form.Item;
+  const [form] = Form.useForm();
   const Option = Select.Option;
   const options = ['全部', '已发布', '未发布', '草稿'];
   const history = useHistory();
   const userInfo = useUserInfo();
   // 初始化搜索框value
   const [searchValue, setSearchValue] = useState('');
-  // 初始化工作流列表数据
-  const [workflowData, setWorkflowData] = useState([]);
+  // 初始化开发脚本列表数据
+  const [developScriptData, setDevelopScriptData] = useState([]);
   // 当前的第几页
   const [current, setCurrent] = useState(1);
   // 每页展示数据的数据量
@@ -78,18 +80,19 @@ const ScriptTable: React.FC = () => {
     setLoading(true);
     try {
       const params: any = {
-        uid: userInfo?.id,
-        search_content: searchValue,
+        // uid: userInfo?.id,
+        // search_content: searchValue,
         page: current, //第几页
-        page_size: pageSize, //每页个数
-        ...sortValue
+        page_size: pageSize //每页个数
+        // ...sortValue
       };
-      const res = await getWorkflowList(params);
+      const res = await getDevelopScriptList(params);
+      console.log(res, '123');
       if (res.status === 200 && res.data) {
-        setWorkflowData(res.data.list);
-        setCurrent(res.data.page_info?.page);
-        setPageSize(res.data.page_info?.page_size);
-        setTotal(res.data.page_info?.total || 10);
+        // setDevelopScriptData(res.data.items);
+        // setCurrent(res.data.page_info?.page);
+        // setPageSize(res.data.page_info?.page_size);
+        // setTotal(res.data.page_info?.total || 10);
       }
     } finally {
       setLoading(false);
@@ -125,24 +128,6 @@ const ScriptTable: React.FC = () => {
     );
   };
 
-  // 复制工作流
-  const handleCloneWorkflow = async (workflow_uuid: number | string) => {
-    const res = await workflowCopy(workflow_uuid);
-    if (res.status === 200 && res.data) {
-      Message.success({
-        content: '复制成功'
-      });
-      openNewPage(
-        `/modaforge/tenant/compute/modaforge/workflowConfig?workflow_uuid=${res.data.workflow_uuid}&ds_workflow_id=${res.data.ds_workflow_id}`
-      );
-      getList();
-    } else {
-      Message.error({
-        content: res.message || '复制失败，请稍后重试'
-      });
-    }
-  };
-
   // 点击删除操作弹窗
   const handleDelete = (
     workflow_uuid: number | string,
@@ -150,7 +135,7 @@ const ScriptTable: React.FC = () => {
   ) => {
     // 如果当前有人在编辑不让删除
     if (
-      workflowData.some(
+      developScriptData.some(
         (item: any) => item.version_type === VersionType.RELEASED
       )
     ) {
@@ -455,6 +440,7 @@ const ScriptTable: React.FC = () => {
   const handleReset = () => {
     setSearchValue('');
     setIsClickClear(true);
+    form.resetFields();
   };
   return (
     <div className={styles['script-table-wrapper']}>
@@ -466,11 +452,11 @@ const ScriptTable: React.FC = () => {
           marginBottom: '16px'
         }}
       >
-        <Form autoComplete="off" layout="inline">
-          <FormItem label="脚本名称:">
+        <Form form={form} autoComplete="off" layout="inline">
+          <FormItem label="脚本名称:" field="search_content">
             <Input style={{ width: 236 }} placeholder="输入脚本名称搜索" />
           </FormItem>
-          <FormItem label="版本状态:">
+          <FormItem label="版本状态:" field="version_status">
             <Select
               placeholder="请选择版本状态"
               style={{ width: 236 }}
@@ -488,7 +474,7 @@ const ScriptTable: React.FC = () => {
               ))}
             </Select>
           </FormItem>
-          <FormItem label="开发人:">
+          <FormItem label="开发人:" field="developer">
             <Input style={{ width: 250 }} placeholder="输入关键字搜索" />
           </FormItem>
         </Form>
@@ -509,13 +495,10 @@ const ScriptTable: React.FC = () => {
       <Table
         border={false}
         columns={columns}
-        data={workflowData}
+        data={developScriptData}
         pagination={false}
         noDataElement={noDataElement({
-          description: '暂无工作流',
-          btnText: '创建工作流',
-          perms: WORKFLOW_LIST_PERMISSIONS.CREATE,
-          handleBtn: () => handleCreateWorkflow()
+          description: '暂无脚本'
         })}
         rowKey="id"
         loading={loading}
@@ -525,7 +508,7 @@ const ScriptTable: React.FC = () => {
         }
       />
       {/* 分页 */}
-      {workflowData && workflowData.length > 0 && (
+      {developScriptData && developScriptData.length > 0 && (
         <Pagination
           current={current}
           pageSize={pageSize}

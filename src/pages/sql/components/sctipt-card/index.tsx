@@ -216,7 +216,14 @@ const ScriptCard: React.FC = () => {
           marginBottom: '16px'
         }}
       >
-        <Input style={{ width: '100%' }} placeholder="请输入脚本内容关键词" />
+        <Input
+          allowClear
+          onClear={() => {
+            getCardList();
+          }}
+          style={{ width: '100%' }}
+          placeholder="请输入脚本内容关键词"
+        />
       </div>
       <div className={styles['script-card-content']}>
         {mockjsData.list.map((item) => (

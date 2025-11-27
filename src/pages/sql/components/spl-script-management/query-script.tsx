@@ -36,6 +36,7 @@ const InputSearch = Input.Search;
 
 const QueryScript: React.FC = () => {
   const FormItem = Form.Item;
+  const [form] = Form.useForm();
   const Option = Select.Option;
   const options = ['全部', '已发布', '未发布', '草稿'];
   const history = useHistory();
@@ -366,6 +367,7 @@ const QueryScript: React.FC = () => {
   const handleReset = () => {
     setSearchValue('');
     setIsClickClear(true);
+    form.resetFields();
   };
   return (
     <div className={styles['query-script-wrapper']}>
@@ -378,7 +380,7 @@ const QueryScript: React.FC = () => {
           marginBottom: '16px'
         }}
       >
-        <Form autoComplete="off" layout="inline">
+        <Form form={form} autoComplete="off" layout="inline">
           <FormItem label="脚本名称:" field="script_name">
             <Input style={{ width: 236 }} placeholder="输入脚本名称搜索" />
           </FormItem>

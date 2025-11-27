@@ -138,7 +138,12 @@ const SqlIndex: React.FC = memo(() => {
               </Popover>
             }
           >
-            {activeTab === 'script' && <SplScriptManagement key="script" />}
+            {activeTab === 'script' && (
+              <SplScriptManagement
+                onToScriptList={handleTabChange}
+                key="script"
+              />
+            )}
           </TabPane>
           <TabPane
             key="data"
