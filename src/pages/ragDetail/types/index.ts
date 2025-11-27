@@ -22,6 +22,7 @@ export interface PDFCoordinate {
 export interface ApiPosition {
   page_id: number; // 页码（0-based）
   bbox: [number, number, number, number]; // [x1, y1, x2, y2]
+  block_index?: number; // 块索引
 }
 
 // 旧的后端返回的位置数据格式: { "0": [x1, y1, x2, y2], "1": [...] }
@@ -84,6 +85,7 @@ export interface Segment {
   enabled?: boolean;
   source?: string;
   isEdit?: boolean;
+  positions?: ApiPosition[];
 }
 
 // 分层级分段（场景2）
@@ -343,6 +345,7 @@ export interface RagDetailState {
   documentName: string; // 文件名称（来自API）
   datasetName: string; // 数据集名称（来自URL）
   documentFormat: string; // 文件格式（来自API，对应sceneType）
+  highlightedExcelCoordinate: ApiPosition | null; // excel定位位置
 }
 
 export interface RagDetailActions {
@@ -381,6 +384,9 @@ export interface RagDetailActions {
     isConvertPdf: boolean
   ) => Promise<void>;
   clearFileBinaryData: () => void;
+  // excel定位位置
+  setHighlightedExcelCoordinate: (segmentId: string) => void;
+  clearHighlightedExcelCoordinate: () => void;
 }
 
 export type RagDetailStore = RagDetailState & RagDetailActions;
