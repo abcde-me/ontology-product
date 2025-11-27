@@ -122,6 +122,7 @@ export interface TableSegment extends Segment {
   tableData?: {
     headers: string[];
     rows: Array<Record<string, string>>;
+    headerRows?: any[][]; // 多行表头数据
     merges?: CellMerge[]; // 合并单元格信息
   };
 }
