@@ -170,9 +170,9 @@ const ColumnSettingModal: React.FC<ColumnSettingModalProps> = ({
       className={styles['column-setting-modal']}
       style={{ width: 900, height: 800 }}
     >
-      <div className="flex h-full justify-between gap-[16px] rounded-[12px] border-[1px] border-[var(--color-border-2)] pl-[16px]">
+      <div className="flex h-full justify-between rounded-[12px] border-[1px] border-[var(--color-border-2)] pl-[16px]">
         {/* 左侧表格区（带搜索） */}
-        <div>
+        <div className="overflow-auto pr-[16px]">
           <div className="mb-[16px] mt-[16px] flex items-center justify-between">
             <span className="font-weight-600 font-size-[14px] text-[var(--color-text-1)]">
               字段列表

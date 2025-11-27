@@ -55,6 +55,11 @@ const SegmentDetail: React.FC<SegmentDetailProps> = ({ segmentId }) => {
     );
   }
 
+  // 检查是否有可编辑的元素（非图片元素）
+  const hasEditableElements = localDetailData.elements.some(
+    (el) => el.type !== 'image'
+  );
+
   return (
     <div className="flex h-full flex-col overflow-hidden">
       <div className="scrollbar-hide flex-1 overflow-y-auto pb-6 pt-6">
@@ -68,34 +73,37 @@ const SegmentDetail: React.FC<SegmentDetailProps> = ({ segmentId }) => {
         <div>
           <div className="mb-4 flex items-center justify-between">
             <h3 className="text-base font-medium text-gray-900">元素信息</h3>
-            <div className="flex gap-2">
-              {!isEditing ? (
-                <button
-                  onClick={startEditing}
-                  className="flex items-center gap-1 rounded px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-100"
-                >
-                  <IconEdit className="text-base" />
-                  编辑
-                </button>
-              ) : (
-                <>
+            {/* 只有当存在可编辑的元素时，才显示编辑按钮 */}
+            {hasEditableElements && (
+              <div className="flex gap-2">
+                {!isEditing ? (
                   <button
-                    onClick={cancelEditing}
-                    className="rounded border border-gray-300 px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-50"
-                    disabled={loading}
+                    onClick={startEditing}
+                    className="flex items-center gap-1 rounded px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-100"
                   >
-                    取消
+                    <IconEdit className="text-base" />
+                    编辑
                   </button>
-                  <button
-                    onClick={() => confirmEditing(datasetId)}
-                    className="rounded bg-blue-600 px-3 py-1.5 text-sm text-white hover:bg-blue-700 disabled:opacity-50"
-                    disabled={loading}
-                  >
-                    {loading ? '保存中...' : '确定'}
-                  </button>
-                </>
-              )}
-            </div>
+                ) : (
+                  <>
+                    <button
+                      onClick={cancelEditing}
+                      className="rounded border border-gray-300 px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-50"
+                      disabled={loading}
+                    >
+                      取消
+                    </button>
+                    <button
+                      onClick={() => confirmEditing(datasetId)}
+                      className="rounded bg-blue-600 px-3 py-1.5 text-sm text-white hover:bg-blue-700 disabled:opacity-50"
+                      disabled={loading}
+                    >
+                      {loading ? '保存中...' : '确定'}
+                    </button>
+                  </>
+                )}
+              </div>
+            )}
           </div>
 
           <ElementList

@@ -17,7 +17,7 @@
     /* 修复多选 Select 组件 placeholder 显示不完全的问题 */
     :global(.arco-input-tag-inner) {
       input {
-        min-width: 200px;
+        min-width: 150px;
       }
     }
   }

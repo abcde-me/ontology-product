@@ -74,7 +74,9 @@ export const useRagDetailStore = create<RagDetailState & RagDetailActions>(
       documentId: string,
       bucketName?: string | null,
       path?: string | null,
-      datasetNameParam?: string | null
+      datasetNameParam?: string | null,
+      initialChunkId?: string | null,
+      initialPositionsStr?: string | null
     ) => {
       set({ loading: true, error: null });
       try {
@@ -115,6 +117,58 @@ export const useRagDetailStore = create<RagDetailState & RagDetailActions>(
             finalSceneType = 'excel';
           }
         }
+        console.log('finalSceneType', finalSceneType);
+
+        // 初始化定位参数
+        let initialSelectedSegmentId: string | null = null;
+        let initialHighlightedCoordinates: PDFCoordinate[] | undefined =
+          undefined;
+        let initialSelectedDirectoryNodeId: string | null = null;
+
+        // 如果 URL 中有 chunkId，则使用它来初始化定位
+        if (initialChunkId) {
+          initialSelectedSegmentId = initialChunkId;
+
+          // 查找对应的目录树节点（type='Text' 且 id 等于 chunkId）
+          const findTextNodeByChunkId = (
+            nodes: DirectoryNode[]
+          ): DirectoryNode | null => {
+            for (const node of nodes) {
+              if (node.type === 'Text' && node.id === initialChunkId) {
+                return node;
+              }
+              if (node.children) {
+                const found = findTextNodeByChunkId(node.children);
+                if (found) return found;
+              }
+            }
+            return null;
+          };
+
+          if (data.directory) {
+            const foundNode = findTextNodeByChunkId(data.directory);
+            if (foundNode) {
+              initialSelectedDirectoryNodeId = foundNode.id;
+              // 如果没有传入 positions，则使用目录树节点的 position
+              if (!initialPositionsStr && foundNode.position) {
+                initialHighlightedCoordinates = foundNode.position;
+              }
+            }
+          }
+        }
+
+        // 如果 URL 中有 positions，则解析并使用它
+        if (initialPositionsStr) {
+          try {
+            initialHighlightedCoordinates = JSON.parse(initialPositionsStr);
+            console.log(
+              '✅ 解析 URL positions 成功:',
+              initialHighlightedCoordinates
+            );
+          } catch (e) {
+            console.warn('⚠️ 解析 URL positions 失败:', e);
+          }
+        }
 
         set({
           datasetId: Number(datasetId), // 保存 datasetId
@@ -130,11 +184,15 @@ export const useRagDetailStore = create<RagDetailState & RagDetailActions>(
           documentName,
           datasetName: datasetNameParam || '',
           documentFormat,
-          // 默认不选中任何分段和目录节点
-          selectedSegmentId: null,
-          selectedDirectoryNodeId: null,
+          // 根据 URL 参数设置初始定位
+          selectedSegmentId: initialSelectedSegmentId,
+          selectedDirectoryNodeId: initialSelectedDirectoryNodeId,
+          highlightedPdfCoordinates: initialHighlightedCoordinates,
           loading: false
         });
+
+        // @ts-ignore
+        const isConvertPdf = finalSceneType === 'excel' ? false : true;
 
         // 如果有 bucket 和 path，自动加载文件二进制数据
         if (finalBucket && finalPath) {
@@ -142,7 +200,7 @@ export const useRagDetailStore = create<RagDetailState & RagDetailActions>(
             bucket: finalBucket,
             path: finalPath
           });
-          get().loadFileBinaryData(finalBucket, finalPath);
+          get().loadFileBinaryData(finalBucket, finalPath, isConvertPdf);
         } else {
           console.warn('⚠️ 缺少 bucket 或 path，无法加载文件二进制数据');
         }
@@ -378,17 +436,24 @@ export const useRagDetailStore = create<RagDetailState & RagDetailActions>(
     },
 
     // File binary data actions
-    loadFileBinaryData: async (bucket: string, path: string) => {
+    loadFileBinaryData: async (
+      bucket: string,
+      path: string,
+      isConvertPdf: boolean
+    ) => {
       set({
         fileBinaryDataLoading: true,
         fileBinaryDataError: null,
         bucket,
         path
       });
-
       try {
         console.log('🔍 开始加载文件二进制数据:', { bucket, path });
-        const response = await getFileBinaryData({ bucket_name: bucket, path });
+        const response = await getFileBinaryData({
+          bucket_name: bucket,
+          path,
+          convert_pdf: isConvertPdf
+        });
         console.log('✅ 文件二进制数据加载成功:', response);
 
         set({
