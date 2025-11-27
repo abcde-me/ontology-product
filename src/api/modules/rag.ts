@@ -6,7 +6,7 @@ import { NewSegmentData } from '@/pages/ragDetail/utils/newSegmentData';
 export interface GetFileBinaryDataParams {
   bucket_name: string;
   path: string;
-  convert_pdf?: boolean;
+  convertPdf?: boolean;
 }
 
 // 查询知识库文件详情
