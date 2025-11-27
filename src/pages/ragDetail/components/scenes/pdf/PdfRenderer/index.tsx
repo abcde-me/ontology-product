@@ -229,7 +229,7 @@ const PdfRenderer: React.FC<PdfRendererProps> = ({
   }, [highlightCoordinates, totalPages]);
 
   return (
-    <div className="relative flex h-full bg-[#f0f2f5]" ref={divRef}>
+    <div className="relative flex h-full bg-[#ffffff]" ref={divRef}>
       {loading ? (
         <div className="absolute z-10 flex h-full w-full items-center justify-center">
           <Spin tip="文档加载中..."></Spin>
