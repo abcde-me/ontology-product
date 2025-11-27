@@ -46,7 +46,7 @@ function transformApiPositions(
   }
 
   return positions.map((pos) => ({
-    page: pos.page_id + 1, // 后端0-based,前端1-based
+    page: pos.page_id,
     x1: pos.bbox && pos.bbox.length > 0 ? pos.bbox[0] : undefined,
     y1: pos.bbox && pos.bbox.length > 1 ? pos.bbox[1] : undefined,
     x2: pos.bbox && pos.bbox.length > 2 ? pos.bbox[2] : undefined,
