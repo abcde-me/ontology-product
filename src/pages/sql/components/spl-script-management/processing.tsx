@@ -23,7 +23,9 @@ const Processing: React.FC<PaginationProps> = memo(({ onToScriptList }) => {
         </div>
         <div className={style['processing-header-icons-group']}>
           {iconActive === ViewType.TABLE && (
-            <Button className={style['header-btn']}>下载全部</Button>
+            <Button onClick={() => {}} className={style['header-btn']}>
+              下载全部
+            </Button>
           )}
           <Button
             className={style['header-btn']}
@@ -41,7 +43,11 @@ const Processing: React.FC<PaginationProps> = memo(({ onToScriptList }) => {
         </div>
       </div>
       <div className={style['processing-content']}>
-        {iconActive === ViewType.TABLE ? <ScriptTable /> : <ScriptCard />}
+        {iconActive === ViewType.TABLE ? (
+          <ScriptTable />
+        ) : (
+          <ScriptCard onToScriptList={onToScriptList} />
+        )}
       </div>
     </div>
   );

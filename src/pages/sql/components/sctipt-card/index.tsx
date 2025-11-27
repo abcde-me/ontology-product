@@ -30,7 +30,11 @@ export enum VersionTypeEnum {
   SCHEDULED = '调度中'
 }
 
-const ScriptCard: React.FC = () => {
+interface ScriptCardProps {
+  onToScriptList: (type: string) => void;
+}
+
+const ScriptCard: React.FC<ScriptCardProps> = ({ onToScriptList }) => {
   const FormItem = Form.Item;
   const userInfo = useUserInfo();
   // 初始化搜索框value
@@ -241,6 +245,9 @@ const ScriptCard: React.FC = () => {
                   style={{ marginRight: 8 }}
                   className={styles['script-card-content-item-title-btn']}
                   icon={<IconCopy />}
+                  onClick={() => {
+                    onToScriptList('script');
+                  }}
                 >
                   详情
                 </Button>
