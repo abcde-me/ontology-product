@@ -61,8 +61,8 @@
   .runlog-content {
     white-space: pre; // 仅按换行符换行，保留空格
     word-break: normal; // 不在单词中间断行
-    overflow-x: auto; // 容器边界出现横向滚动条
-    overflow-y: hidden;
+    // overflow-x: hidden; // 容器边界出现横向滚动条
+    // overflow-y: hidden;
     overflow-wrap: normal; // 禁止自动换行
     padding: 12px;
   }
@@ -80,7 +80,7 @@
     padding: 0;
     flex: 1;
     min-height: 0;
-    overflow-y: auto;
+    overflow: auto;
   }
 
   .arco-collapse {
