@@ -14,15 +14,15 @@ const CompareFileData: React.FC = () => {
 
   // PDF 接口
   const PDF_URL =
-    '/metadata-service/api/v1/file/downloadFile?bucket=datasource-dev&path=/10/10/orginal/用户权限.pdf';
+    '/metadata-service/api/v1/file/downloadFile?bucket=datasource-dev&path=/10/10/orginal/用户权限.pdf&convertPdf=true';
 
   // PPT 接口
   const PPT_URL =
-    '/metadata-service/api/v1/file/downloadFile?bucket=datasource-dev&path=/10/10/orginal/新建 PPT 演示文稿.ppt';
+    '/metadata-service/api/v1/file/downloadFile?bucket=datasource-dev&path=/src/3d22f480-c250-499c-b8e7-3d5c5e6694d2/volume/ba07214b-fcda-4dfb-8fd0-681f54c6c12c/技术架构图0902.pptx&convertPdf=true';
 
   // DOCX 接口
   const DOCX_URL =
-    '/metadata-service/api/v1/file/downloadFile?bucket=datasource-dev&path=/10/10/orginal/用户权限.docx';
+    '/metadata-service/api/v1/file/downloadFile?bucket=datasource-dev&path=/src/78376d9d-ce8b-423f-8c8f-0c363d76120c/volume/516b4eb1-a098-483f-adda-dae338b7cf97/202407dashiji-jian.docx&convertPdf=true';
 
   const fetchFileData = async (url: string, fileType: string) => {
     try {
