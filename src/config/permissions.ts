@@ -96,6 +96,7 @@ export const DATA_MANAGEMENT_PERMISSIONS = {
   CAN_UPDATE_VERSION_RETRY: 'aimdp-manager:dataset:manage:modify', //重试
   CAN_UPDATE: 'aimdp-manager:dataset:manage:modify', //编辑
   CAN_UPDATE_VERSION_DATA: 'aimdp-manager:dataset:manage:modify', //编辑数据内容
+  CAN_MOVE: 'aimdp-manager:dataset:manage:modify', //移动场景分类
 
   LIST: 'aimdp-manager:dataset:read:list', // 菜单权限
   GET: 'aimdp-manager:dataset:read:get',

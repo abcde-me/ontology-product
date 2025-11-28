@@ -70,6 +70,7 @@ import dataGuaranteeIcon from '@/pages/datasetManagement/assets/dataset_guarante
 import dataSceneIcon from '@/pages/datasetManagement/assets/dataset_scene.png';
 import DatasetMoveIcon from '@/pages/datasetManagement/assets/dataset_move.svg';
 import DatasetMoveActiveIcon from '@/pages/datasetManagement/assets/dataset_move_active.svg';
+import { useHasPermission } from '@/store/userInfoStore';
 import { throttle } from 'lodash-es';
 
 // 时间格式化函数
@@ -175,6 +176,7 @@ const columns = (
   setMoveDatasetVisible: (visible: boolean) => void,
   setMoveDatasetId: (ids: number[]) => void,
   getFileTypeName: (type: string) => string,
+  isCanMove: boolean,
   selectedSceneFilters?: string[], //场景分类过滤
   selectedSourceFilters?: string[] //来源过滤
 ) => [
@@ -584,7 +586,7 @@ const columns = (
     fixed: 'right' as const,
     render: (_: unknown, record: Dataset) => {
       const perms = record.perms;
-      return (
+      return isCanMove ? (
         <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
           {/* <Button
               type="text"
@@ -671,6 +673,68 @@ const columns = (
               更多 <IconDown />
             </Button>
           </Dropdown>
+        </div>
+      ) : (
+        <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+          {/* <Button
+              type="text"
+              className={`${styles.actionButton} ${styles.export}`}
+            >
+              编辑
+            </Button> */}
+          <Button
+            type="text"
+            disabled={record.status !== datasetStatus.normal}
+            onClick={() => {
+              record.status === datasetStatus.normal ||
+              record.status === datasetStatus.version_updating ||
+              record.status === datasetStatus.version_update_failed
+                ? handleGoToDetail(record.id)
+                : '';
+            }}
+          >
+            详情
+          </Button>
+          {record.storage_type !== datasetStorageType.table && (
+            <PermissionWrapper
+              permission={DATA_MANAGEMENT_PERMISSIONS.CAN_SEARCH}
+            >
+              <Button
+                type="text"
+                className={`${styles.actionButton} ${record.status === datasetStatus.normal && record.scene_id !== 2 ? styles.export : styles.disabled}`}
+                onClick={() => handleExport(record)}
+                disabled={
+                  record.status !== datasetStatus.normal ||
+                  record.scene_id === 2
+                }
+                style={{
+                  padding: '0 8px 0 5px',
+                  height: '100%',
+                  borderTop: 'none',
+                  borderBottom: 'none'
+                }}
+              >
+                导出
+              </Button>
+            </PermissionWrapper>
+          )}
+          <PermissionWrapper
+            permission={DATA_MANAGEMENT_PERMISSIONS.CAN_DELETE}
+          >
+            <Button
+              type="text"
+              className={`${styles.actionButton} ${styles.delete}`}
+              onClick={() => handleDelete(record)}
+              style={{
+                padding: '0 8px 0 5px',
+                height: '100%',
+                borderTop: 'none',
+                borderBottom: 'none'
+              }}
+            >
+              删除
+            </Button>
+          </PermissionWrapper>
         </div>
       );
     }
@@ -800,6 +864,8 @@ const DatasetManagement: React.FC = () => {
   const [datasetSceneOption, setDatasetSceneOption] = React.useState<
     Array<SceneType>
   >([]);
+
+  const isCanMove = useHasPermission(DATA_MANAGEMENT_PERMISSIONS.CAN_MOVE);
 
   useEffect(() => {
     const container = document.querySelector('.layout-detail');
@@ -1658,25 +1724,29 @@ const DatasetManagement: React.FC = () => {
                       </Button>
                     </Tooltip>
                   </PermissionWrapper>
-                  <Tooltip
-                    content={selectedRowKeys.length === 0 ? '请选择文件' : ''}
-                    disabled={selectedRowKeys.length > 0}
+                  <PermissionWrapper
+                    permission={DATA_MANAGEMENT_PERMISSIONS.CAN_MOVE}
                   >
-                    <Button
-                      icon={
-                        selectedRowKeys.length === 0 ? (
-                          <DatasetMoveIcon />
-                        ) : (
-                          <DatasetMoveActiveIcon />
-                        )
-                      }
-                      className={styles.batchDeleteBtn}
-                      disabled={selectedRowKeys.length === 0}
-                      onClick={() => setMoveDatasetVisible(true)}
+                    <Tooltip
+                      content={selectedRowKeys.length === 0 ? '请选择文件' : ''}
+                      disabled={selectedRowKeys.length > 0}
                     >
-                      批量移动
-                    </Button>
-                  </Tooltip>
+                      <Button
+                        icon={
+                          selectedRowKeys.length === 0 ? (
+                            <DatasetMoveIcon />
+                          ) : (
+                            <DatasetMoveActiveIcon />
+                          )
+                        }
+                        className={styles.batchDeleteBtn}
+                        disabled={selectedRowKeys.length === 0}
+                        onClick={() => setMoveDatasetVisible(true)}
+                      >
+                        批量移动
+                      </Button>
+                    </Tooltip>
+                  </PermissionWrapper>
                   <PermissionWrapper
                     permission={DATA_MANAGEMENT_PERMISSIONS.CAN_CREATE}
                   >
@@ -1714,6 +1784,7 @@ const DatasetManagement: React.FC = () => {
                         setMoveDatasetVisible,
                         setMoveDatasetId,
                         getFileTypeName,
+                        isCanMove,
                         selectedSceneFilters as string[],
                         selectedSourceFilters
                       )
@@ -1734,6 +1805,7 @@ const DatasetManagement: React.FC = () => {
                         setMoveDatasetVisible,
                         setMoveDatasetId,
                         getFileTypeName,
+                        isCanMove,
                         selectedSceneFilters as string[],
                         selectedSourceFilters
                       ).filter((i) => i.dataIndex !== 'scene')
