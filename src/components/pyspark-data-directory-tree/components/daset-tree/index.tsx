@@ -107,7 +107,7 @@ const DataSetTree: React.FC<DataSetTreeProps> = ({
             className="pyspark-dataset-tree__back-icon"
             onClick={handleBack}
           />
-          <span className="pyspark-dataset-tree__title">数据集</span>
+          <span className="pyspark-dataset-tree__title">数据集市</span>
         </div>
       </div>
 
