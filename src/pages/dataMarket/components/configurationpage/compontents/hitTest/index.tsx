@@ -392,7 +392,7 @@ function HitTest(props: { datasetName: string }) {
                           |
                         </span>
                         <span className="ml-[8px] text-[12px] leading-5">
-                          分段编号：{index + 1}
+                          分段编号：{e.chunk_id}
                         </span>
                         <Tooltip content="复制">
                           <button

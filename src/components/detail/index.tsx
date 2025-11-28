@@ -711,7 +711,9 @@ const DatasetDetail = (props: {
                     backgroundColor:
                       record.status === FileStatusType.success
                         ? '#10B981'
-                        : '#EF4444',
+                        : record.status === FileStatusType.waiting
+                          ? '#007DFA'
+                          : '#EF4444',
                     borderRadius: '50%',
                     marginRight: '5px'
                   }}
@@ -719,11 +721,13 @@ const DatasetDetail = (props: {
                 <span>
                   {record.status === FileStatusType.success
                     ? '处理成功'
-                    : '处理失败'}
+                    : record.status === FileStatusType.waiting
+                      ? '等待中'
+                      : '处理失败'}
                 </span>
-                <Button type="text" className="ml-[8px] pl-0">
+                {/* <Button type="text" className="ml-[8px] pl-0">
                   重试
-                </Button>
+                </Button> */}
               </div>
             )
           },
