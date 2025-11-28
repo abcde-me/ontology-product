@@ -42,7 +42,7 @@ const SQLTabContent: React.FC<DataManagerProps> = ({
     const isEditorFocused = getIsEditorFocused?.() ?? false;
     let copyText = '';
     if (nodeData.type === 'dataset') {
-      copyText = `\`${nodeData?.data?.database}\`.\`${nodeData?.data?.latest_table}\``;
+      copyText = `\`${nodeData?.data?.database}\`.\`${nodeData?.data?.table}\``;
     }
     if (nodeData.type === 'scheam') {
       // `字段名`
@@ -125,7 +125,7 @@ const SQLTabContent: React.FC<DataManagerProps> = ({
   return (
     <div className={styles['sql-tab-content']}>
       <div className={styles['tab-header']}>
-        <Title className={styles['tab-title']}>源数据</Title>
+        <Title className={styles['tab-title']}>数据列表</Title>
       </div>
 
       <div className={`${styles['tab-tree']} ${styles['sider-container']}`}>

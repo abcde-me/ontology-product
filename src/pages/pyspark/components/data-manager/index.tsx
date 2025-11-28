@@ -132,7 +132,7 @@ const PythonTabContent: React.FC<PythonTabContentProps> = ({
 
   return (
     <div className="python-tab-content sider-container">
-      <div className="sider-title">数据目录</div>
+      <div className="sider-title">数据列表</div>
 
       <div className="tab-tree">
         <DataDirectoryTree

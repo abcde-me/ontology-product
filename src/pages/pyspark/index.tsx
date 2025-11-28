@@ -175,7 +175,7 @@ const Python: React.FC = memo(() => {
         <TabPane
           key="data"
           title={
-            <Popover content="数据目录" position="left">
+            <Popover content="数据列表" position="left">
               <div
                 style={{
                   display: 'flex',

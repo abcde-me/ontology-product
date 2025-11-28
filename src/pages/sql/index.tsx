@@ -132,7 +132,7 @@ const SqlIndex: React.FC = memo(() => {
           <TabPane
             key="data"
             title={
-              <Popover content="源数据" position="left">
+              <Popover content="数据列表" position="left">
                 <DataIcon className={styles['sql-menu-icon']} />
               </Popover>
             }
