@@ -97,7 +97,7 @@ const SourceTree: React.FC<SourceTreeProps> = ({
             className={styles['sql-source-tree__back-icon']}
             onClick={handleBack}
           />
-          <span className={styles['sql-source-tree__title']}>源数据目录</span>
+          <span className={styles['sql-source-tree__title']}>数据目录</span>
         </div>
       </div>
 
