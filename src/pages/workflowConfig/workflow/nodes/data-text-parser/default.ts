@@ -13,9 +13,9 @@ const nodeDefault: NodeDefault<TextParserNodeType> = {
     text_slice_rule: 1,
     slice_max_size: 800,
     text_proc_rules: [1],
-    text_ocr_model_id: '',
-    text_pic_model_id: '',
-    text_emb_model_id: ''
+    text_ocr_model_id: 0,
+    text_pic_model_id: 0,
+    text_emb_model_id: 0
   },
   getAvailablePrevNodes(isChatMode: boolean) {
     const nodes = isChatMode
@@ -35,7 +35,7 @@ const nodeDefault: NodeDefault<TextParserNodeType> = {
     let errorMessages = '';
     const {
       selected_files_num,
-      text_emb_model_id,
+      // text_emb_model_id,
       text_slice_rule,
       slice_max_size
     } = payload;
