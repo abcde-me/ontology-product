@@ -1,0 +1,47 @@
+<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <g clip-path="url(#clip0_4829_49636)">
+        <g clip-path="url(#clip1_4829_49636)">
+            <g clip-path="url(#clip2_4829_49636)">
+                <g clip-path="url(#clip3_4829_49636)">
+                    <g clip-path="url(#clip4_4829_49636)">
+                        <g clip-path="url(#clip5_4829_49636)">
+                            <mask id="mask0_4829_49636" style="mask-type:luminance" maskUnits="userSpaceOnUse" x="2"
+                                y="2" width="16" height="16">
+                                <rect x="17.2727" y="17.2725" width="14.5455" height="14.5455"
+                                    transform="rotate(-180 17.2727 17.2725)" fill="white" />
+                            </mask>
+                            <g mask="url(#mask0_4829_49636)">
+                                <path opacity="0.32"
+                                    d="M10.6806 10.6675H14.8604C16.1926 10.6673 17.2727 11.7474 17.2727 13.0798V14.8577C17.2727 16.19 16.1927 17.27 14.8604 17.27H13.093C11.7607 17.27 10.6806 16.19 10.6806 14.8577V10.6675Z"
+                                    fill="currentColor" />
+                                <path
+                                    d="M5.13989 10.6704C3.8076 10.6704 2.72681 11.7502 2.72681 13.0825V14.8599C2.72681 16.1921 3.80745 17.2729 5.13989 17.2729H6.92798C8.25991 17.2725 9.33911 16.1918 9.33911 14.8599L9.33911 11.5786C9.33886 11.0768 8.93185 10.6704 8.42993 10.6704L5.13989 10.6704ZM13.093 2.72705C11.7606 2.72705 10.6808 3.80703 10.6809 5.13916V8.42041C10.6809 8.92249 11.088 9.32959 11.5901 9.32959H14.8606C16.1927 9.32947 17.2726 8.24959 17.2727 6.91748V5.13916C17.2726 3.80688 16.1926 2.72695 14.8606 2.72705H13.093ZM5.13989 2.72705C3.80768 2.72705 2.72692 3.80697 2.72681 5.13916V6.91748C2.72694 8.2495 3.80762 9.32937 5.13989 9.32959L8.42993 9.32959C8.93201 9.32959 9.33911 8.92249 9.33911 8.42041V5.13916C9.33899 3.80681 8.25916 2.72683 6.927 2.72705H5.13989Z"
+                                    fill="currentColor" />
+                            </g>
+                        </g>
+                    </g>
+                </g>
+            </g>
+        </g>
+    </g>
+    <defs>
+        <clipPath id="clip0_4829_49636">
+            <rect width="20" height="20" fill="white" />
+        </clipPath>
+        <clipPath id="clip1_4829_49636">
+            <rect width="20" height="20" fill="white" />
+        </clipPath>
+        <clipPath id="clip2_4829_49636">
+            <rect width="20" height="20" fill="white" />
+        </clipPath>
+        <clipPath id="clip3_4829_49636">
+            <rect width="20" height="20" fill="white" />
+        </clipPath>
+        <clipPath id="clip4_4829_49636">
+            <rect width="20" height="20" fill="white" />
+        </clipPath>
+        <clipPath id="clip5_4829_49636">
+            <rect width="14.5455" height="14.5455" fill="white" transform="matrix(-1 0 0 1 17.2727 2.72705)" />
+        </clipPath>
+    </defs>
+</svg>

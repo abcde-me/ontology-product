@@ -52,9 +52,9 @@ import './style.css';
 import noDataElement from '@/components/no-data';
 import getFileIcon from '@/components/file-icon';
 import { PermissionWrapper } from '../PermissionGuard';
-import HitTest from '@/pages/dataMarket/components/configurationpage/hit-test';
 import { throttle } from 'lodash-es';
 import { FileTypeLarge } from '@/utils/type';
+import HitTest from '@/pages/dataMarket/components/configurationpage/compontents/hitTest';
 const { Title, Text } = Typography;
 const { TabPane } = Tabs;
 
@@ -671,10 +671,12 @@ const DatasetDetail = (props: {
           },
           {
             title: '文件大小',
-            dataIndex: 'size',
+            dataIndex: 'file_size',
             width: 100,
             sorter: true, // 启用排序功能，但不提供排序函数
-            render: (_, record) => <span>{formatFileSize(record.size)}</span>
+            render: (_, record) => (
+              <span>{formatFileSize(record.file_size)}</span>
+            )
           },
           {
             title: '分段数',
@@ -709,7 +711,9 @@ const DatasetDetail = (props: {
                     backgroundColor:
                       record.status === FileStatusType.success
                         ? '#10B981'
-                        : '#EF4444',
+                        : record.status === FileStatusType.waiting
+                          ? '#007DFA'
+                          : '#EF4444',
                     borderRadius: '50%',
                     marginRight: '5px'
                   }}
@@ -717,11 +721,13 @@ const DatasetDetail = (props: {
                 <span>
                   {record.status === FileStatusType.success
                     ? '处理成功'
-                    : '处理失败'}
+                    : record.status === FileStatusType.waiting
+                      ? '等待中'
+                      : '处理失败'}
                 </span>
-                <Button type="text" className="ml-[8px] pl-0">
+                {/* <Button type="text" className="ml-[8px] pl-0">
                   重试
-                </Button>
+                </Button> */}
               </div>
             )
           },
@@ -2086,7 +2092,7 @@ const DatasetDetail = (props: {
           {datasetDetail &&
             datasetDetail.storage_type === StorageType.vector && (
               <TabPane key="hittest" title="命中测试">
-                <HitTest />
+                <HitTest datasetName={datasetDetail.name} />
               </TabPane>
             )}
           {/* <TabPane key="element" title="元素搜索"></TabPane> */}

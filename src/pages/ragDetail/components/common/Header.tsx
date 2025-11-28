@@ -5,7 +5,8 @@ import BreadCrumbHeader from '@/components/breadcrumb-header';
 
 const Header: React.FC = () => {
   const history = useHistory();
-  const { filePath, documentName, datasetName } = useRagDetailStore();
+  const { filePath, documentName, datasetName, datasetId } =
+    useRagDetailStore();
   // 解析文件路径为面包屑项
   const breadcrumbItems = useMemo(() => {
     // 优先使用 API 返回的 documentName 和 datasetName 构建面包屑
@@ -50,7 +51,9 @@ const Header: React.FC = () => {
   }, [filePath, documentName, datasetName]);
 
   const handleBack = () => {
-    history.goBack();
+    history.push(
+      `/tenant/compute/modaforge/datasetManagement/detail/${datasetId}`
+    );
   };
 
   return (

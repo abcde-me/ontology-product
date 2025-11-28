@@ -14,7 +14,7 @@ import {
 } from '@arco-design/web-react';
 // import { Download } from '@icon-park/react';
 import { FieldMapping, MetadataField } from './DataAssetFormContainer';
-import { IconDownload } from '@arco-design/web-react/icon';
+import EllipsisPopover from '@/components/ellipsis-popover-com';
 import styles from './Step2FieldMapping.module.scss';
 import {
   CreateDataAssetAndMappingReq,
@@ -140,29 +140,33 @@ export default function Step2FieldMapping({
     const cols: any[] = [
       {
         title: '序号',
+        fixed: 'left' as const,
         dataIndex: 'sequence',
         width: 60,
-        align: 'center' as const
+        align: 'center' as const,
+        zIndex: 2
       },
       {
         title: '数据资产名称',
         dataIndex: 'nameZh',
+        fixed: 'left' as const,
         width: 200,
         render: (_: any, record: FieldMapping) => {
           const meta = metadataFields[record.sequence - 1];
           const isReserved =
             !!meta?.nameEn && RESERVED_FIELD_ENS.has(meta.nameEn);
-          return (
-            <Input
-              placeholder="请输入数据资产名称"
-              allowClear
-              value={record.nameZh}
-              disabled={isReserved}
-              onChange={(value) =>
-                handleUpdateMapping(record.id, { nameZh: value })
-              }
-            />
-          );
+          // return (
+          //   <Input
+          //     placeholder="请输入数据资产名称"
+          //     allowClear
+          //     value={record.nameZh}
+          //     disabled={isReserved}
+          //     onChange={(value) =>
+          //       handleUpdateMapping(record.id, { nameZh: value })
+          //     }
+          //   />
+          // );
+          return <EllipsisPopover value={record.nameZh} preferTypography />;
         }
       }
     ];
@@ -175,7 +179,8 @@ export default function Step2FieldMapping({
       if (sourceInfo) {
         const columnTitle = sourceInfo.name || sourceKey;
         cols.push({
-          title: columnTitle,
+          title: <EllipsisPopover value={columnTitle} preferTypography />,
+          ellipsis: true,
           dataIndex: sourceKey,
           width: 200,
           render: (_: any, record: FieldMapping, index: number) => {
@@ -191,10 +196,17 @@ export default function Step2FieldMapping({
               metadataField?.nameEn === 'tags' ||
               metadataField?.nameEn === 'data_source';
 
+            // 检查当前值是否在选项列表中
+            const currentValue = record[sourceKey] as string | undefined;
+            const optionValues = options.map((opt) => opt.name);
+            const isValidValue =
+              currentValue && optionValues.includes(currentValue);
+            const selectValue = isValidValue ? currentValue : undefined;
+
             return (
               <Select
                 placeholder="请选择"
-                value={record[sourceKey] as string | undefined}
+                value={selectValue}
                 disabled={disableMappingForThisRow}
                 onChange={(value) =>
                   handleUpdateMapping(record.id, { [sourceKey]: value })
@@ -212,38 +224,38 @@ export default function Step2FieldMapping({
       }
     });
 
-    cols.push({
-      title: '操作',
-      dataIndex: 'operation',
-      width: 132,
-      align: 'left' as const,
-      fixed: 'right' as const,
-      render: (_: any, record: FieldMapping) => {
-        const meta = metadataFields[record.sequence - 1];
-        const isReserved =
-          !!meta?.nameEn && RESERVED_FIELD_ENS.has(meta.nameEn);
-        return (
-          <Space>
-            {/* <Button
-              type="text"
-              onClick={() => handleAddMapping()}
-              className="cursor-pointer text-green-500"
-            >
-              添加行
-            </Button> */}
-            {mappings.length > 1 && !isReserved && (
-              <Button
-                type="text"
-                onClick={() => handleDeleteMapping(record.id)}
-                className="cursor-pointer text-red-500"
-              >
-                删除行
-              </Button>
-            )}
-          </Space>
-        );
-      }
-    });
+    // cols.push({
+    //   title: '操作',
+    //   dataIndex: 'operation',
+    //   width: 132,
+    //   align: 'left' as const,
+    //   fixed: 'right' as const,
+    //   render: (_: any, record: FieldMapping) => {
+    //     const meta = metadataFields[record.sequence - 1];
+    //     const isReserved =
+    //       !!meta?.nameEn && RESERVED_FIELD_ENS.has(meta.nameEn);
+    //     return (
+    //       <Space>
+    //         {/* <Button
+    //           type="text"
+    //           onClick={() => handleAddMapping()}
+    //           className="cursor-pointer text-green-500"
+    //         >
+    //           添加行
+    //         </Button> */}
+    //         {mappings.length > 1 && !isReserved && (
+    //           <Button
+    //             type="text"
+    //             onClick={() => handleDeleteMapping(record.id)}
+    //             className="cursor-pointer text-red-500"
+    //           >
+    //             删除行
+    //           </Button>
+    //         )}
+    //       </Space>
+    //     );
+    //   }
+    // });
 
     return cols;
   }, [
@@ -366,6 +378,42 @@ export default function Step2FieldMapping({
     findDataAssetMappingData,
     currentStep
   ]);
+
+  // 清理无效的映射值：如果下拉列表不存在这个值，需要去掉
+  useEffect(() => {
+    let hasInvalidValue = false;
+    const updatedMappings = mappings.map((record) => {
+      const metadataField = metadataFields.find(
+        (field) => field.nameEn === record.id
+      );
+      const fieldType = metadataField?.type;
+
+      // 检查每个数据来源的映射值是否有效
+      const updates: Partial<FieldMapping> = {};
+      Object.keys(dataSources).forEach((sourceKey) => {
+        const currentValue = record[sourceKey] as string | undefined;
+        if (currentValue) {
+          const options = getMappingOptions(fieldType, sourceKey);
+          const optionValues = options.map((opt) => opt.name);
+          // 如果当前值不在选项列表中，清除它
+          if (!optionValues.includes(currentValue)) {
+            updates[sourceKey] = undefined;
+            hasInvalidValue = true;
+          }
+        }
+      });
+
+      if (Object.keys(updates).length > 0) {
+        return { ...record, ...updates };
+      }
+      return record;
+    });
+
+    if (hasInvalidValue) {
+      setMappings(updatedMappings);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [metadataFields, dataSources, findDataAssetMappingData]);
 
   // 添加映射行
   const handleAddMapping = () => {

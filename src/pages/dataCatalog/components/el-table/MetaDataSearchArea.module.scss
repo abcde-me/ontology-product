@@ -1,0 +1,9 @@
+.settings-button:global(.arco-btn-text:not(.arco-btn-disabled)) {
+  color: var(--color-text-2);
+}
+
+.settings-button:global(
+  .arco-btn-text:not(.arco-btn-disabled):not(.arco-btn-loading):hover
+) {
+  color: var(--color-text-2);
+}

@@ -1,5 +1,11 @@
 .formContainer {
   position: relative;
+
+  :global(
+    .arco-select-single .arco-select-view-selector .arco-select-view-input
+  ) {
+    z-index: 0;
+  }
 }
 
 .operationButtonWrapper {

@@ -74,7 +74,7 @@
     flex: 1;
     background-color: #fff;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-    overflow: hidden;
+    overflow: hidden; // 默认隐藏溢出，但内联样式会覆盖为 auto
 
     // CodeMirror 编辑器样式
     .code-editor {
@@ -119,11 +119,30 @@
 
   .running-code-mirror {
     cursor: not-allowed;
-    pointer-events: none;
     opacity: 0.7;
+    // 允许容器滚动，但禁用编辑器内容的编辑交互
+    // 注意：内联样式 overflow: 'auto' 会覆盖这里的设置
 
+    // 禁用编辑器内容区域的指针事件，但允许滚动
+    .cm-content {
+      pointer-events: none;
+      user-select: none; // 禁用文本选择
+    }
+
+    // 允许滚动条正常工作 - CodeMirror 的滚动容器
     .cm-scroller {
-      background-color: #f8fafd;
+      pointer-events: auto; // 滚动容器可以接收滚动事件
+      overflow: auto !important; // 确保滚动条可见
+    }
+
+    // 禁用行号区域的交互
+    .cm-gutters {
+      pointer-events: none;
+    }
+
+    // 确保编辑器本身可以滚动
+    .cm-editor {
+      pointer-events: auto; // 编辑器容器可以接收滚动事件
     }
   }
 }

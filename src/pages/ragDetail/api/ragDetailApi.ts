@@ -35,14 +35,22 @@ import {
 
 /**
  * 将新的后端 positions 数组转换为前端的 PDFCoordinate 数组
+ * 支持 bbox 为空的情况：仅定位到页面，不高亮
  */
-function transformApiPositions(positions: ApiPosition[]): PDFCoordinate[] {
+function transformApiPositions(
+  positions: ApiPosition[] | null | undefined
+): PDFCoordinate[] {
+  // 处理 null 或 undefined 的情况，返回空数组而不是抛出错误
+  if (!positions || positions.length === 0) {
+    return [];
+  }
+
   return positions.map((pos) => ({
-    page: pos.page_id + 1, // 后端0-based,前端1-based
-    x1: pos.bbox[0],
-    y1: pos.bbox[1],
-    x2: pos.bbox[2],
-    y2: pos.bbox[3]
+    page: pos.page_id,
+    x1: pos.bbox && pos.bbox.length > 0 ? pos.bbox[0] : undefined,
+    y1: pos.bbox && pos.bbox.length > 1 ? pos.bbox[1] : undefined,
+    x2: pos.bbox && pos.bbox.length > 2 ? pos.bbox[2] : undefined,
+    y2: pos.bbox && pos.bbox.length > 3 ? pos.bbox[3] : undefined
   }));
 }
 
@@ -69,7 +77,7 @@ function transformSegment(apiSegment: ApiSegment): Segment {
     id: apiSegment.id,
     content: apiSegment.content,
     charCount: apiSegment.char_count,
-    segmentIndex: apiSegment.chunk_index,
+    segmentIndex: apiSegment.index,
     pdfCoordinates: transformApiPositions(apiSegment.positions),
     parentTitle: apiSegment.parent_title || undefined,
     parentTitleId: apiSegment.parent_title_id || undefined,
@@ -128,11 +136,16 @@ function transformCatalogNode(apiNode: ApiCatalogNode): DirectoryNode {
   };
 
   // 根据 type 设置 segmentIds
-  if (apiNode.type === 'text') {
-    // type 为 text 时，chunk_id 就是分段的 id
+  // 对于 Text、Image、Formula、Table 等可选中的节点类型，chunk_id 就是分段的 id
+  if (
+    apiNode.type === 'Text' ||
+    apiNode.type === 'Image' ||
+    apiNode.type === 'Formula' ||
+    apiNode.type === 'Table'
+  ) {
     node.segmentIds = [apiNode.chunk_id];
-  } else if (apiNode.type === 'title') {
-    // type 为 title 时，需要找到所有子节点中 type 为 text 的 chunk_id
+  } else if (apiNode.type === 'Title') {
+    // type 为 Title 时，需要找到所有子节点中可选中的 chunk_id
     // 这里先不设置，后面递归处理完 children 后再收集
     node.segmentIds = [];
   }
@@ -141,8 +154,8 @@ function transformCatalogNode(apiNode: ApiCatalogNode): DirectoryNode {
   if (apiNode.children && apiNode.children.length > 0) {
     node.children = apiNode.children.map(transformCatalogNode);
 
-    // 如果是 title 类型，收集所有子节点的 segmentIds
-    if (apiNode.type === 'title') {
+    // 如果是 Title 类型，收集所有子节点的 segmentIds
+    if (apiNode.type === 'Title') {
       const collectSegmentIds = (nodes: DirectoryNode[]): string[] => {
         const ids: string[] = [];
         nodes.forEach((child) => {
@@ -170,7 +183,7 @@ function transformCatalogNodeOld(apiNode: any): DirectoryNode {
     id: apiNode.title_id,
     label: apiNode.title,
     level: apiNode.level,
-    type: 'title', // 旧数据默认为 title 类型
+    type: 'Title', // 旧数据默认为 Title 类型
     segmentIds: apiNode.segment_ids || undefined,
     children: []
   };
@@ -219,7 +232,7 @@ function transformCatalogNodeOld(apiNode: any): DirectoryNode {
         id: segmentId,
         label: text,
         level: apiNode.level + 1,
-        type: 'text', // short text 为 text 类型
+        type: 'Text', // short text 为 Text 类型
         isShort: true, // 标记为short text节点
         position,
         segmentIds: [segmentId],
@@ -284,14 +297,41 @@ export async function fetchCatalog(
       dataset_id: Number(datasetId),
       document_id: documentId
     });
-    console.log(response, 'response2222');
+    console.log('fetchCatalog response:', response);
 
-    // 检查响应格式
-    if (response && response.data && response.data.catalogs) {
-      console.log('response.data.catalogs', response.data.catalogs);
-      const rootNode = transformCatalogNode(response.data.catalogs);
-      console.log('rootNode', rootNode);
-      return [rootNode];
+    // 检查响应格式 - 支持多种可能的数据结构
+    if (response && response.data) {
+      const catalogData =
+        response.data.catalogs || response.data.catalog || response.data;
+
+      // 如果 catalogData 是数组，转换所有元素
+      if (Array.isArray(catalogData) && catalogData.length > 0) {
+        const nodes: DirectoryNode[] = [];
+        for (const item of catalogData) {
+          if (item && typeof item === 'object' && 'chunk_id' in item) {
+            const node = transformCatalogNode(item);
+            nodes.push(node);
+          }
+        }
+        if (nodes.length > 0) {
+          console.log('catalog nodes:', nodes);
+          return nodes;
+        }
+      } else if (
+        catalogData &&
+        typeof catalogData === 'object' &&
+        'chunk_id' in catalogData
+      ) {
+        // 单个对象的情况
+        console.log('catalog data:', catalogData);
+        const rootNode = transformCatalogNode(catalogData);
+        console.log('rootNode:', rootNode);
+        return [rootNode];
+      } else {
+        console.warn('Invalid catalog data structure:', catalogData);
+      }
+    } else {
+      console.warn('No data in response:', response);
     }
 
     return undefined;
@@ -517,7 +557,7 @@ function transformApiMaterialToElement(material: any): Element {
       return {
         ...baseElement,
         type: 'text',
-        content: material.text,
+        content: material.content,
         positionType,
         positionInfo,
         pageId
@@ -537,12 +577,49 @@ function transformApiMaterialToElement(material: any): Element {
 
     case 'table':
       try {
-        const tableData = JSON.parse(material.text);
+        // 处理两种格式：
+        // 1. 新格式：多行JSON字符串，每行一个对象，用\n分隔
+        // 2. 旧格式：单个JSON对象 {headers: [...], rows: [...]}
+        let headers: string[] = [];
+        let rows: Record<string, string>[] = [];
+
+        // 尝试解析为新格式（多行JSON）
+        const lines = material.content.trim().split('\n');
+        if (lines.length > 0) {
+          try {
+            // 尝试解析第一行
+            const firstRow = JSON.parse(lines[0]);
+            if (typeof firstRow === 'object' && firstRow !== null) {
+              // 是新格式：单行对象
+              headers = Object.keys(firstRow);
+              rows = lines.map((line: string) => {
+                try {
+                  return JSON.parse(line);
+                } catch {
+                  return {};
+                }
+              });
+            }
+          } catch {
+            // 如果第一行解析失败，尝试解析整个content为旧格式
+            const tableData = JSON.parse(material.content);
+            if (tableData.headers && tableData.rows) {
+              // 旧格式
+              headers = tableData.headers;
+              rows = tableData.rows;
+            } else if (typeof tableData === 'object' && tableData !== null) {
+              // 单个对象
+              headers = Object.keys(tableData);
+              rows = [tableData];
+            }
+          }
+        }
+
         return {
           ...baseElement,
           type: 'table',
-          headers: Object.keys(tableData),
-          rows: [tableData],
+          headers,
+          rows,
           positionType,
           positionInfo,
           pageId
@@ -563,7 +640,7 @@ function transformApiMaterialToElement(material: any): Element {
       return {
         ...baseElement,
         type: 'formula',
-        content: material.text,
+        content: material.content,
         positionType,
         positionInfo,
         pageId
@@ -573,7 +650,7 @@ function transformApiMaterialToElement(material: any): Element {
       return {
         ...baseElement,
         type: 'text',
-        content: material.text,
+        content: material.content,
         positionType,
         positionInfo,
         pageId
@@ -636,7 +713,7 @@ export async function fetchSegmentDetailInfo(
   try {
     // 调用真实API
     const response = await GetKnowledgeChunk({
-      dataset_id: datasetId,
+      dataset_id: Number(datasetId),
       chunk_id: chunkId
     });
 
