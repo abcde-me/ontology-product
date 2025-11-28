@@ -15,7 +15,7 @@ const directoryItems = [
   },
   {
     id: 'source',
-    label: '源数据目录',
+    label: '数据目录',
     icon: 'folder'
   }
 ];
