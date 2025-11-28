@@ -59,7 +59,7 @@ export const useSourceTree = () => {
     return res?.data?.src ?? [];
   };
 
-  // 将数据集列表转换为树节点
+  // 将数据集市列表转换为树节点
   const convertSourceCatalogToTreeNode = useCallback(
     (catalog: SrcCatalogItem): TreeNodeData => {
       const children: TreeNodeData[] = [];

@@ -18,7 +18,7 @@ const directoryItems = [
   },
   {
     id: 'dataset',
-    label: '数据集',
+    label: '数据集市',
     icon: 'folder'
   }
 ];
