@@ -44,7 +44,7 @@
   &__content {
     padding-top: 8px;
     height: calc(100% - 64px);
-    overflow-y: auto;
+    // overflow-y: auto;
   }
 
   // 第三部分：列表
@@ -52,6 +52,7 @@
     .pyspark-dataset-tree__content-tree
     .arco-tree-node {
     position: relative;
+    display: flex; // 必须设置为 flex 容器，子元素的 flex: 1 才能生效
     align-items: center;
     padding-left: 0px;
     width: 100%;
@@ -60,16 +61,31 @@
       background-color: transparent;
     }
 
-    :global(.arco-tree-node-title) {
+    // 让 title 占据剩余空间
+    .arco-tree-node-title {
       display: flex;
       align-items: center;
+      flex: 1;
+      min-width: 0; // 允许 flex 子元素收缩，配合文本溢出使用
+      overflow: hidden;
       // width: 267px;
       // flex-basis: 267px;
       // flex-shrink: 0;
 
       .pyspark-dataset-tree__node-title {
         color: var(--primary-primary-6);
-        width: 236px;
+        width: 100%;
+        display: flex; // 确保是 flex 容器
+        flex: 1;
+        min-width: 0;
+        overflow: hidden;
+
+        .ellipsis-popover-div {
+          width: 100% !important;
+          flex: 1;
+          min-width: 0;
+          overflow: hidden;
+        }
       }
 
       &:hover {
@@ -77,16 +93,12 @@
 
         .pyspark-dataset-tree__node-title {
           color: var(--primary-primary-6);
-          width: 196px;
-        }
-
-        .pyspark-dataset-tree__node-title-file {
-          width: 180px;
+          // width: 65%;
         }
 
         .pyspark-dataset-tree__node-actions {
-          opacity: 1;
-          visibility: visible;
+          // opacity: 1;
+          display: block;
         }
       }
     }
@@ -103,6 +115,7 @@
 
     &-title-text {
       flex-grow: 1;
+      overflow: hidden;
     }
 
     &-custom-icon {
@@ -121,6 +134,9 @@
       display: flex;
       align-items: start;
       flex-direction: column;
+      flex: 1; // 占据剩余空间
+      min-width: 0; // 允许收缩
+      overflow: hidden;
     }
 
     // &-title {
@@ -142,12 +158,12 @@
     &-actions {
       display: flex;
       align-items: center;
-      opacity: 0;
-      visibility: hidden;
-      position: absolute;
-      right: 4px;
-      top: 50%;
-      transform: translateY(-50%);
+      // opacity: 0;
+      display: none;
+      // position: absolute;
+      // right: 4px;
+      // top: 50%;
+      // transform: translateY(-50%);
     }
   }
 

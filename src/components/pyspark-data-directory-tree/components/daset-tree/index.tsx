@@ -145,6 +145,7 @@ const DataSetTree: React.FC<DataSetTreeProps> = ({
             expandedKeys={expandedKeys}
             className="pyspark-dataset-tree__content-tree"
             onExpand={setExpandedKeys}
+            virtualListProps={{ height: '100%' }}
             icons={(props) => ({
               switcherIcon:
                 props.dataRef?.type === 'dataset' ? <IconCaretDown /> : null,
@@ -159,6 +160,7 @@ const DataSetTree: React.FC<DataSetTreeProps> = ({
                 <div className="pyspark-dataset-tree__node">
                   <div className="pyspark-dataset-tree__node-info">
                     <EllipsisPopover
+                      preferTypography
                       className={`pyspark-dataset-tree__node-title ${isDataset ? 'pyspark-dataset-tree__node-title-dataset' : 'pyspark-dataset-tree__node-title-file'}`}
                       value={highlightSearchKeyword(
                         String(nodeData?.title ?? ''),
