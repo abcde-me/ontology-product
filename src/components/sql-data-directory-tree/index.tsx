@@ -10,7 +10,7 @@ import styles from './index.module.scss';
 const directoryItems = [
   {
     id: 'dataset',
-    label: '数据集',
+    label: '数据集市',
     icon: 'folder'
   },
   {
@@ -60,12 +60,12 @@ const DataDirectoryTree: React.FC<DataDirectoryTreeProps> = ({
     setSelectedKeys([]);
   };
 
-  // 处理数据集详情查看
+  // 处理数据集市详情查看
   const handleDatasetDetail = (dataset: DatasetListItem) => {
     onViewDatasetDetail?.(dataset);
   };
 
-  // 处理数据集插入
+  // 处理数据集市插入
   const handleDatasetInsert = (dataset: DatasetListItem) => {
     onInsertDataset?.(dataset);
   };
@@ -87,9 +87,9 @@ const DataDirectoryTree: React.FC<DataDirectoryTreeProps> = ({
         return (
           <DataCollection
             onBack={handleBack}
-            // 数据集详情
+            // 数据集市详情
             onViewDatasetDetail={handleDatasetDetail}
-            // 数据集插入
+            // 数据集市插入
             onInsertDataset={handleDatasetInsert}
             // 插入内容
             // onInsertContent={handleDatasetInsert}
