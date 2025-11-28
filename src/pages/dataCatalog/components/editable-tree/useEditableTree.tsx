@@ -569,7 +569,6 @@ export function useEditableTree({ catalogTreeStore }) {
 
   const renderTitleText = (props: NodeProps) => {
     const { dataRef, title } = props;
-
     let TitleText: ReactNode = title;
     if (searchValue.length && typeof title === 'string') {
       const index = title.indexOf(searchValue);
