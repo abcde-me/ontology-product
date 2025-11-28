@@ -2,7 +2,7 @@ import type { ReactNode } from 'react';
 import React from 'react';
 import { QueryClient, QueryClientProvider } from 'react-query';
 
-const RequirementDetailProvider = ({ children }: { children: ReactNode }) => {
+const RequirementConfigProvider = ({ children }: { children: ReactNode }) => {
   const queryClient = new QueryClient({
     defaultOptions: {
       queries: {
@@ -17,4 +17,4 @@ const RequirementDetailProvider = ({ children }: { children: ReactNode }) => {
   );
 };
 
-export default RequirementDetailProvider;
+export default RequirementConfigProvider;

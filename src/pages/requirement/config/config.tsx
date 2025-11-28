@@ -63,7 +63,7 @@ import {
   ValidationErrors
 } from './components/TaskDistribution';
 import TextSubstanceComponent from './components/TextEntity';
-import './detail.scss';
+import './config.scss';
 import {
   generateInitialData,
   generateLabels,
@@ -71,7 +71,7 @@ import {
 } from './utils/generateLabels';
 const BreadcrumbItem = Breadcrumb.Item;
 
-export default function RequirementDetail() {
+export default function RequirementConfig() {
   const [basicForm] = Form.useForm();
   const [labelToolForm] = Form.useForm();
   const [distributeForm] = Form.useForm();

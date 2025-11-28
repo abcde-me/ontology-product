@@ -92,15 +92,15 @@ export default function Requirement() {
     }
   };
 
-  // 创建工作流
+  // 创建需求
   const handleCreateRequirement = () => {
-    history.push(`/tenant/compute/modaforge/requirementDetail?type=create`);
+    history.push(`/tenant/compute/modaforge/requirement/config?type=create`);
   };
 
   // 查看详情
   const viewDetailRequirement = (id: number | string) => {
     history.push(
-      `/tenant/compute/modaforge/requirementDetail?id=${id}&type=detail`
+      `/tenant/compute/modaforge/requirement/config?id=${id}&type=detail`
     );
   };
 

@@ -299,9 +299,9 @@ export const routes: IRoute[] = [
     permission: REQUIREMENT_PERMISSIONS.LIST,
     children: [
       {
-        name: 'requirementDetail',
-        key: '/tenant/compute/modaforge/requirementDetail',
-        component: React.lazy(async () => import('../../requirement/detail')),
+        name: 'requirementConfig',
+        key: '/tenant/compute/modaforge/requirement/config',
+        component: React.lazy(async () => import('../../requirement/config')),
         permission: REQUIREMENT_PERMISSIONS.GET
       }
     ]
