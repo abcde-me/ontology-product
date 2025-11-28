@@ -3,7 +3,7 @@ import { TreeDataType } from '@arco-design/web-react/es/Tree/interface';
 import React from 'react';
 import { RefInputType } from '@arco-design/web-react/es/Input/interface';
 import { DataCatalog } from '../components/DataCatalogProvider/DataCatalog';
-import { RootTypeEnum, subLeafKeys } from '../consts';
+import { CatalogTypeEnum, RootTypeEnum, subLeafKeys } from '../consts';
 import { getCatalogList } from '@/api/dataCatalog';
 import { searchTreeData } from '../utils';
 
@@ -21,13 +21,17 @@ interface BaseTreeData {
   children?: {
     db_item?: BaseTreeData[];
   };
+  extendsObj?: {
+    db_name?: string;
+    table_name?: string;
+  };
 }
 
 interface ITreeData extends BaseTreeData {
   children?: {
     volume?: BaseTreeData[];
     db?: BaseTreeData[];
-    meta_data?: BaseTreeData[];
+    metadata?: BaseTreeData[];
     db_item?: BaseTreeData[];
   };
 }
@@ -46,6 +50,7 @@ export interface CatalogTreeState {
   inputRef: React.RefObject<RefInputType>;
   selectedPath: string;
   loading?: boolean;
+  extendsObj: Record<string, unknown>;
 }
 
 interface Effects {
@@ -72,7 +77,8 @@ export class CatalogTreeStore extends Model<CatalogTreeState, Effects> {
         selectedNodeType: '', // 初始化选中节点类型
         selectedParentId: '', // 初始化选中节点的父节点ID
         inputRef: React.createRef<RefInputType>(),
-        selectedPath: ''
+        selectedPath: '',
+        extendsObj: {}
       },
       effects: {
         fetchData: createAsyncEffect(
@@ -113,7 +119,6 @@ export class CatalogTreeStore extends Model<CatalogTreeState, Effects> {
     const activeKey = props?.activeKey || activeTab;
 
     const res = await getCatalogList({
-      root_type: RootTypeEnum[activeKey],
       search: props?.searchValue
     });
 
@@ -137,22 +142,40 @@ export class CatalogTreeStore extends Model<CatalogTreeState, Effects> {
       let defaultExpand: string[] = [];
       let defaultNode = cacheTreeData?.[0];
       let selectedNode = defaultNode?.children?.[0]?.children?.[0];
+      let selectedGroupNode: TreeDataType | null = null; // 存储选中节点所在的分组节点
 
       if (options?.parent_id && options.id) {
         // 根据新的key格式查找节点
         const parentKey = `${activeKey}-catalog-${options.parent_id}`;
         defaultNode =
           cacheTreeData.find((d) => d.key === parentKey) || defaultNode;
-        selectedNode =
-          defaultNode?.children?.[0]?.children?.find((item: any) => {
-            return item.key.includes(`-${options.id}`);
-          }) || selectedNode;
+
+        // 遍历所有子节点类型（volume、db、metadata）来查找目标节点
+        if (defaultNode?.children && Array.isArray(defaultNode.children)) {
+          for (const groupNode of defaultNode.children) {
+            if (groupNode?.children && Array.isArray(groupNode.children)) {
+              const foundNode = groupNode.children.find((item: any) => {
+                return item.key.includes(`-${options.id}`);
+              });
+              if (foundNode) {
+                selectedNode = foundNode;
+                selectedGroupNode = groupNode; // 记录找到的分组节点
+                break;
+              }
+            }
+          }
+        }
       }
 
-      defaultExpand = [
-        defaultNode?.key || '',
-        defaultNode?.children?.[0]?.key || ''
-      ];
+      // 根据找到的节点所在的分组，展开对应的分组节点
+      // 如果没有找到特定节点，则默认展开第一个分组
+      const groupNodeToExpand = selectedGroupNode || defaultNode?.children?.[0];
+
+      defaultExpand = [defaultNode?.key || '', groupNodeToExpand?.key || ''];
+
+      // 将节点类型转换为字符串（用于右侧页面显示）
+      // 优先使用 type_name，否则直接使用 type
+      const nodeTypeStr = selectedNode?.type_name || selectedNode?.type || '';
 
       return {
         searchValue: '',
@@ -160,9 +183,14 @@ export class CatalogTreeStore extends Model<CatalogTreeState, Effects> {
         treeData: cacheTreeData,
         rawTreeData: cacheTreeData,
         expandedKeys: defaultExpand,
+        extendsObj: selectedNode?.extends ?? {},
         selectedKey: selectedNode?.id ? String(selectedNode.id) : '', // 存储实际ID
         selectedTreeKey: selectedNode?.key || '', // 存储完整的树节点key
-        selectedPath: selectedNode?.fullPath || ''
+        selectedPath: selectedNode?.fullPath || '',
+        selectedNodeType: nodeTypeStr, // 存储节点类型（字符串），用于右侧页面显示
+        selectedParentId: selectedNode?.parent_id
+          ? String(selectedNode.parent_id)
+          : '' // 存储父节点ID
       };
     } catch (err) {
       console.log(err);
@@ -195,7 +223,8 @@ export class CatalogTreeStore extends Model<CatalogTreeState, Effects> {
   private convertVolumeType(
     activeKey: string,
     catalogId: number,
-    volumeData: BaseTreeData[]
+    volumeData: BaseTreeData[],
+    catalogName?: string
   ): TreeDataType {
     const typeKey = `${activeKey}-${catalogId}-volume`;
     const typeData = volumeData || [];
@@ -208,13 +237,17 @@ export class CatalogTreeStore extends Model<CatalogTreeState, Effects> {
       fullPath: '',
       children: typeData.map((item) => {
         const { children, ...rest } = item;
+        // 构建 fullPath：/${activeKey}/${catalogName}/volume/${volumeName}
+        const fullPath = catalogName
+          ? `/${activeKey}/${catalogName}/volume/${item.name || ''}`
+          : '';
         return {
           ...rest,
           title: item.name,
           key: `${activeKey}-${catalogId}-volume-${item.id}`,
           parent_id: catalogId,
           isLastLeaf: true,
-          fullPath: ''
+          fullPath: fullPath
         };
       })
     };
@@ -249,16 +282,18 @@ export class CatalogTreeStore extends Model<CatalogTreeState, Effects> {
           children:
             item.children?.db_item && item.children.db_item.length > 0
               ? item.children.db_item.map((table) => {
-                  const { children: tableChildren, ...tableRest } = table;
+                  const { children: tableChildren, ...tableRest } = table || {};
+                  // 构建 fullPath：数据库名称/表名称
+                  const fullPath = `${item.name}/${table?.name || ''}`;
                   return {
                     ...tableRest,
-                    title: table.name,
-                    key: `${activeKey}-${catalogId}-db-${item.id}-table-${table.id}`,
+                    title: table?.name || '',
+                    key: `${activeKey}-${catalogId}-db-${item.id}-table-${table?.id ?? ''}`,
                     parent_id: item.id,
-                    type: table.type,
+                    type: CatalogTypeEnum.db_item,
                     type_name: 'db_item',
                     isLastLeaf: true,
-                    fullPath: ''
+                    fullPath: fullPath
                   };
                 })
               : []
@@ -268,20 +303,20 @@ export class CatalogTreeStore extends Model<CatalogTreeState, Effects> {
   }
 
   /**
-   * 转换 meta_data 类型数据为树节点
+   * 转换 metadata 类型数据为树节点
    */
   private convertMetaDataType(
     activeKey: string,
     catalogId: number,
     metaData: BaseTreeData[]
   ): TreeDataType {
-    const typeKey = `${activeKey}-${catalogId}-meta_data`;
+    const typeKey = `${activeKey}-${catalogId}-metadata`;
     const typeData = metaData || [];
 
     return {
-      title: subLeafKeys.meta_data || '元数据',
+      title: subLeafKeys.metadata || '元数据',
       key: typeKey,
-      type: 'meta_data',
+      type: 'metadata',
       parent_id: catalogId,
       fullPath: '',
       children: typeData.map((item) => {
@@ -289,12 +324,13 @@ export class CatalogTreeStore extends Model<CatalogTreeState, Effects> {
         return {
           ...rest,
           title: item.name,
-          key: `${activeKey}-${catalogId}-meta_data-${item.id}`,
+          key: `${activeKey}-${catalogId}-metadata-${item.id}`,
           parent_id: catalogId,
           isLastLeaf: true,
           fullPath: '',
           // TODO: 需要根据item.children.item的类型来决定children的类型
-          children: []
+          children: [],
+          type: CatalogTypeEnum.metadata
         };
       })
     };
@@ -310,47 +346,39 @@ export class CatalogTreeStore extends Model<CatalogTreeState, Effects> {
     return data.map((catalog) => {
       const childrenArr: TreeDataType[] = [];
 
-      // 根据activeKey决定支持的类型：源数据支持volume、db和meta_data，目标数据只支持volume
+      // 根据activeKey决定支持的类型：源数据支持volume、db和metadata，目标数据只支持volume
       if (activeKey === 'src') {
-        // 源数据：处理 volume
-        if (catalog.children?.volume) {
-          childrenArr.push(
-            this.convertVolumeType(
-              activeKey,
-              catalog.id,
-              catalog.children.volume
-            )
-          );
-        }
+        // 源数据：始终渲染 volume、db、metadata 三个分组
+        childrenArr.push(
+          this.convertVolumeType(
+            activeKey,
+            catalog.id,
+            catalog.children?.volume ?? [],
+            catalog.name
+          )
+        );
 
-        // 源数据：处理 db
-        if (catalog.children?.db) {
-          childrenArr.push(
-            this.convertDbType(activeKey, catalog.id, catalog.children.db)
-          );
-        }
+        childrenArr.push(
+          this.convertDbType(activeKey, catalog.id, catalog.children?.db ?? [])
+        );
 
-        // 源数据：处理 meta_data
-        if (catalog.children?.meta_data) {
-          childrenArr.push(
-            this.convertMetaDataType(
-              activeKey,
-              catalog.id,
-              catalog.children.meta_data
-            )
-          );
-        }
+        childrenArr.push(
+          this.convertMetaDataType(
+            activeKey,
+            catalog.id,
+            catalog.children?.metadata ?? []
+          )
+        );
       } else {
-        // 目标数据：只处理 volume
-        if (catalog.children?.volume) {
-          childrenArr.push(
-            this.convertVolumeType(
-              activeKey,
-              catalog.id,
-              catalog.children.volume
-            )
-          );
-        }
+        // 目标数据：始终渲染 volume 分组
+        childrenArr.push(
+          this.convertVolumeType(
+            activeKey,
+            catalog.id,
+            catalog.children?.volume ?? [],
+            catalog.name
+          )
+        );
       }
 
       return {

@@ -99,7 +99,7 @@ export default function WorkflowList() {
     root_type: string | number
   ) => {
     history.push(
-      `/tenant/compute/modaforge/dataCatalog?root_type=${root_type}&id=${id}&parent_id=${parent_id}`
+      `/tenant/compute/modaforge/dataCatalog/list?root_type=${root_type}&id=${id}&parent_id=${parent_id}`
     );
   };
   // 跳转目标数据 - 数据集详情
@@ -305,14 +305,14 @@ export default function WorkflowList() {
       ellipsis: true,
       className: styles['hover-change'],
       render: (_, record) => {
-        return renderEmptyPlaceholder(record.target_path) !== '-' ? (
+        return renderEmptyPlaceholder(record.dataset_name) !== '-' ? (
           <EllipsisPopover
-            value={record.target_path}
+            value={record.dataset_name}
             isEdit={false}
             isLink
-            handleLink={() => {
-              handleToTargetDatasetDetail(record.id);
-            }}
+            // handleLink={() => {
+            //   handleToTargetDatasetDetail(record.id);
+            // }}
           />
         ) : (
           <span>-</span>

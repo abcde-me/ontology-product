@@ -76,6 +76,20 @@
       .selectedRowMz {
         border: 1px solid blue !important; /* 设置选中行的边框为1px实线蓝色 */
       }
+      .historyTestContent {
+        display: flex;
+        :global(.ellipsis-popover-div) {
+          width: unset;
+          max-width: 100%;
+        }
+        .copy {
+          display: none;
+        }
+      }
+      .historyTestContent:hover .copy {
+        margin: -5px 0 0 12px;
+        display: block;
+      }
     }
   }
   .rightContent {
@@ -161,11 +175,12 @@
           /* padding: 0 8px; */
           margin-bottom: 12px;
           .segmentationHeader {
-            height: 40px;
+            min-height: 40px;
             padding: 8px;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            flex-wrap: wrap;
             .operateBtn {
               display: none;
             }
@@ -194,7 +209,7 @@
             align-items: center;
             padding: 0 8px 8px;
             .nm {
-              width: 96px;
+              width: 240px;
               white-space: nowrap; /* 禁止换行 */
               overflow: hidden; /* 超出部分隐藏 */
               text-overflow: ellipsis; /* 超出部分显示省略号 */
@@ -212,9 +227,12 @@
           }
         }
         .segmentationBox:hover {
+          border: 1px solid #007dfa;
           .operateBtn {
             display: flex;
+            flex: 1;
             align-items: center;
+            justify-content: flex-end;
             gap: 8px;
             height: 24px;
 

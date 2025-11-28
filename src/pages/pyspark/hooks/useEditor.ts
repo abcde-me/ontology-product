@@ -112,7 +112,7 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
   const { runAsync: getRunResultPolling, cancel: cancelGetRunResultPolling } =
     useRequest(getRunResult, {
       pollingInterval: 5000,
-      pollingWhenHidden: false,
+      pollingWhenHidden: true,
       manual: true,
       onSuccess: (res) => {
         if (res?.status !== 200) {
@@ -148,7 +148,7 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
   const { runAsync: getRunLogPolling, cancel: cancelGetRunLogPolling } =
     useRequest(getRunLog, {
       pollingInterval: 2000,
-      pollingWhenHidden: false,
+      pollingWhenHidden: true,
       manual: true,
       onSuccess: (res) => {
         if (res?.status !== 200) {
@@ -276,9 +276,7 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
       setEditorContent(currentTab.content);
     }
 
-    () => {
-      handleSaveThrottled.cancel();
-    };
+    handleSaveThrottled.cancel();
   }, [activeTab]); // 只依赖 activeTab，避免不必要的重复更新
 
   // 延时自动保存 - 使用 useCallback 优化
@@ -311,6 +309,12 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
     ),
     { wait: 5000, leading: true, trailing: true }
   );
+
+  useEffect(() => {
+    return () => {
+      handleSaveThrottled.cancel();
+    };
+  }, [handleSaveThrottled]);
 
   // 处理内容变化 - 优化依赖项
   const handleContentChange = useCallback(
@@ -437,13 +441,13 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
 
   // 监听运行状态变化，自动获取结果 - 优化依赖项
   useEffect(() => {
-    if (runStatus !== RunningStatus.RUNNING) {
-      cancelGetRunResultPolling();
-      cancelGetRunLogPolling();
-    }
-
     if (!execid || !currentFileId) {
       return;
+    }
+
+    if (runStatus !== RunningStatus.RUNNING) {
+      cancelGetRunResultPolling();
+      // cancelGetRunLogPolling();
     }
 
     // 运行中时，轮询获取运行结果
@@ -469,6 +473,13 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
 
     fetchResult();
   }, [execid]);
+
+  useEffect(() => {
+    return () => {
+      cancelGetRunResultPolling();
+      cancelGetRunLogPolling();
+    };
+  }, [cancelGetRunResultPolling, cancelGetRunLogPolling]);
 
   // 当 currentFileId 变化时，重置运行相关状态
   // useEffect(() => {

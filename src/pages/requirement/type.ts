@@ -20,7 +20,8 @@ export enum RequirementStatus {
   Draft = 1, // 发布中
   Published = 2, // 已发布
   PublishFailed = 3, // 发布失败
-  Annotated = 4 // 标注完成
+  Annotated = 4, // 标注完成
+  PreAnnotated = 5 // 预标注中
 }
 export const RequirementStatusMap = {
   [RequirementStatus.Draft]: '发布中',
@@ -142,5 +143,5 @@ export interface LabelData {
   label_shape: LabelShape; // 1=点，2=线，3=正方形，4=多边形 5=椭圆 6=立方体
   label_colour: string;
   label_info_attribute_groups: LabelInfoAttributeGroup[];
-  label_mapping?: string; // 模型映射字段（可选）
+  label_mappings?: string[]; // 模型映射字段（可选）
 }

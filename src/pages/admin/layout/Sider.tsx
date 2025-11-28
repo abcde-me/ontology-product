@@ -1,11 +1,8 @@
-import { useQueryParams } from '@/utils';
 import { Layout, Menu } from '@arco-design/web-react';
 import cn from 'classnames';
-import React, { useEffect, useMemo, useState } from 'react';
-import { useHistory, useLocation, useParams } from 'react-router-dom';
-import WujieReact from 'wujie-react';
-import { getFlatRoutes, routes } from '../route';
-import { menus, filterMenusByPermissions, type MenuModel } from './menus';
+import React, { useEffect, useMemo, useState, useRef } from 'react';
+import { useHistory, useLocation } from 'react-router-dom';
+import { menus, type MenuModel } from './menus';
 import './sider.scss';
 import { usePermission } from '@/hooks/usePermission';
 import { useUserInfoStore } from '@/store/userInfoStore';
@@ -19,7 +16,8 @@ const hideSidebarPaths = [
   '/tenant/compute/modaforge/workflowConfig',
   '/tenant/compute/modaforge/login',
   '/tenant/compute/modaforge/userinfo',
-  '/tenant/compute/modaforge/labelEditor'
+  '/tenant/compute/modaforge/labelEditor',
+  '/tenant/compute/modaforge/ragDetail'
 ];
 const collapseSidebarPaths = [];
 
@@ -32,9 +30,10 @@ function LayoutWithSider({ children }) {
 
   const history = useHistory();
   const location = useLocation();
-  const queryParams = useQueryParams();
-  const params = useParams();
-  const flattenRoutes = getFlatRoutes(routes);
+
+  // 用于防抖的 ref
+  const clickTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const lastClickPathRef = useRef<string | null>(null);
 
   const sidebarHidden = hideSidebarPaths.some(
     (path) => path === location.pathname
@@ -77,40 +76,29 @@ function LayoutWithSider({ children }) {
 
   const clickMenu = React.useCallback(
     (path: string) => {
-      // 检查是否是 operationCenter 路由
-      if (path.includes('/tenant/compute/modaforge/operationCenter')) {
-        try {
-          // 销毁 wujie 应用的缓存，使用正确的 API
-          WujieReact.destroyApp('operationcenter');
-          console.log('Destroyed operationcenter wujie app');
-        } catch (e) {
-          console.warn('Failed to destroy wujie app:', e);
-        }
-        // 直接导航到 operationCenter 路由，不需要查找 route 配置
-        history.push(path);
-      } else {
-        // 对于其他路由，查找对应的 route 配置
-        const route = flattenRoutes.find((r) => r.key === path);
-        if (route?.sub) {
-          let tmp = path;
-          // 菜单跳转时保持param参数不变
-          for (const param in params) {
-            if (Object.prototype.hasOwnProperty.call(params, param)) {
-              const val = params[param];
-              const reg = new RegExp(`/:${param}/`, 'g');
-              if (reg.test(tmp)) {
-                tmp = tmp.replace(reg, `/${val}/`);
-              }
-            }
-          }
-          history.push(tmp + '?' + queryParams);
-        } else {
-          // 点击菜单时，清除所有查询参数，确保导航到干净的状态
-          history.push(path);
-        }
+      // 防抖处理：如果在 300ms 内点击相同的路径，则忽略
+      if (lastClickPathRef.current === path && clickTimeoutRef.current) {
+        return;
       }
+
+      // 清除之前的超时
+      if (clickTimeoutRef.current) {
+        clearTimeout(clickTimeoutRef.current);
+      }
+
+      lastClickPathRef.current = path;
+
+      // 直接导航，不需要销毁 wujie 应用
+      // operationCenter 页面会通过 useLocation 监听 URL 变化并自动重新加载
+      history.push(path);
+
+      // 设置超时，300ms 后重置防抖状态
+      clickTimeoutRef.current = setTimeout(() => {
+        lastClickPathRef.current = null;
+        clickTimeoutRef.current = null;
+      }, 300);
     },
-    [flattenRoutes, history, params, queryParams]
+    [history]
   );
 
   const getMenu = (data: typeof menus) => {
@@ -173,6 +161,15 @@ function LayoutWithSider({ children }) {
     );
     setCollapsed(collapse);
   }, [location.pathname]);
+
+  // 清理超时
+  useEffect(() => {
+    return () => {
+      if (clickTimeoutRef.current) {
+        clearTimeout(clickTimeoutRef.current);
+      }
+    };
+  }, []);
 
   return (
     <Layout className="h-full flex-auto overflow-auto">

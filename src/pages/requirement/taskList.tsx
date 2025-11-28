@@ -58,7 +58,7 @@ function TaskList() {
     try {
       const params: any = {
         page: current, //第几页
-        pageSize: pageSize, //每页个数
+        page_size: pageSize, //每页个数
         order: sortValue?.order,
         filters: {
           name: searchValue,
@@ -67,7 +67,7 @@ function TaskList() {
         }
       };
       const res = await getAnnotationTaskList(params);
-      if (res.code === 0) {
+      if (res.code === 'success') {
         setTaskData(res?.data?.result || []);
         setTotal(res.data?.total);
         setLoading(false);

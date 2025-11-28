@@ -1,22 +1,29 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import {
   Modal,
   Button,
   Select,
   Form,
   Tooltip,
-  Tag
+  Tag,
+  TreeSelect
 } from '@arco-design/web-react';
+import { BaseTag, TagValueItem } from '@/types/dataAssetApi';
 
 interface ModifyTagsModalProps {
+  selectedRowKeys: string[];
   visible: boolean;
-  tagOptions: Array<{ label: string; value: any }>;
-  initialTags?: string[];
+  tagOptions: BaseTag[];
+  initialTags?: TagValueItem[];
   onCancel: () => void;
-  onConfirm: (tags: string[]) => void;
+  onConfirm: (
+    tags: { label: string; value: string }[],
+    selectedRowKeys: string[]
+  ) => void;
 }
 
 const ModifyTagsModal: React.FC<ModifyTagsModalProps> = ({
+  selectedRowKeys,
   visible,
   tagOptions,
   initialTags = [],
@@ -24,12 +31,33 @@ const ModifyTagsModal: React.FC<ModifyTagsModalProps> = ({
   onConfirm
 }) => {
   const [form] = Form.useForm();
+  const tagTreeData = useMemo(() => {
+    return tagOptions.map((tag) => ({
+      key: tag.id,
+      value: tag.id,
+      id: tag.id,
+      title: tag.name,
+      selectable: false,
+      checkable: false,
+      disableCheckbox: true,
+      children: (tag.valueList || []).map((item) => ({
+        key: item.id,
+        id: item.id,
+        value: item.id,
+        title: item.tagValue,
+        parentId: tag.id
+      }))
+    }));
+  }, [tagOptions]);
 
   useEffect(() => {
     if (visible) {
       form.resetFields();
       form.setFieldsValue({
-        tags: initialTags
+        tags: initialTags.map((item) => ({
+          label: item.tagValue,
+          value: item.id
+        }))
       });
     }
   }, [visible, initialTags, form]);
@@ -37,7 +65,7 @@ const ModifyTagsModal: React.FC<ModifyTagsModalProps> = ({
   const handleConfirm = async () => {
     try {
       const values = await form.validate();
-      onConfirm(values.tags || []);
+      onConfirm(values.tags || [], selectedRowKeys);
     } catch (error) {
       // 验证失败，不做任何操作
     }
@@ -54,29 +82,20 @@ const ModifyTagsModal: React.FC<ModifyTagsModalProps> = ({
     >
       <Form form={form} autoComplete="off">
         {/* 选择标签 */}
-        <Form.Item
-          label="选择标签"
-          field="tags"
-          rules={[{ required: true, message: '请选择标签' }]}
-        >
-          <Select
-            placeholder=""
-            mode="multiple"
-            // value={recordTags}
-            options={tagOptions}
-            dropdownMenuClassName="data-asset-dropdown-select"
-            allowCreate
-            // renderTag={tagRender}
-            // popupVisible={selectVisible[record.id] || false}
-            // onVisibleChange={(visible) => {
-            //   setSelectVisible((prev) => ({
-            //     ...prev,
-            //     [record.id]: visible
-            //   }));
-            //   if (visible) {
-            //     setEditingTagRecordId(record.id);
-            //   }
-            // }}
+        <Form.Item label="选择标签" field="tags">
+          <TreeSelect
+            placeholder="请选择标签"
+            value={initialTags.map((item) => {
+              return {
+                label: item.tagValue,
+                value: item.id
+              };
+            })}
+            multiple
+            treeCheckable
+            treeCheckStrictly
+            labelInValue
+            treeData={tagTreeData}
             maxTagCount={{
               count: 2,
               render: (invisibleTagCount) => {
@@ -90,7 +109,6 @@ const ModifyTagsModal: React.FC<ModifyTagsModalProps> = ({
                           <Tag
                             key={i}
                             className="bg-[#E7ECF0] text-[14px] text-[#0F172A]"
-                            // className={classNames(styles['tag'])}
                           >
                             {item}
                           </Tag>
@@ -103,16 +121,7 @@ const ModifyTagsModal: React.FC<ModifyTagsModalProps> = ({
                 );
               }
             }}
-            // onChange={(values) => handleTagChange(record.id, values)}
-          ></Select>
-          {/* <Select
-            mode="multiple"
-            placeholder="请选择标签"
-            style={{ width: '100%' }}
-            maxTagCount={2}
-            options={tagOptions}
-            allowCreate
-          /> */}
+          ></TreeSelect>
         </Form.Item>
 
         {/* 按钮 */}

@@ -14,6 +14,7 @@ import {
   Radio,
   Select,
   Spin,
+  Tag,
   Tooltip
 } from '@arco-design/web-react';
 import {
@@ -490,7 +491,7 @@ export default function RequirementDetail() {
       lastLabel.label_name_en = '';
       lastLabel.label_name_cn = '';
       // 清空模型映射，让用户重新选择
-      lastLabel.label_mapping = '';
+      lastLabel.label_mappings = [];
 
       // 确保完整保留所有属性组和属性
       if (
@@ -851,22 +852,23 @@ export default function RequirementDetail() {
           org_id: taskTypeVal === 2 ? taskAssignData : departmentIds
         }
     };
-    if (model_name) {
-      new_publishData['model_name'] = model_name;
+    if (model_id) {
+      new_publishData['model_id'] = model_id;
     }
     const obj: any = removeEmptyArrays(new_publishData);
     setLoading(true);
     // 发布数据
     try {
       const res = await publishRequirement(obj);
-      if (res.code === 0) {
-        setPageLoading(false);
+      if (res.code === 'success') {
         Message.success('创建成功');
         history.goBack();
       }
       setLoading(false);
+      setPageLoading(false);
     } catch {
       setLoading(false);
+      setPageLoading(false);
     }
   };
 
@@ -877,14 +879,14 @@ export default function RequirementDetail() {
           const res = await getRequirementDetail({
             requirement_id: Number(requirementId)
           });
-          if (res.code === 0) {
+          if (res.code === 'success') {
             setAnnotationTypeContentCode(
               res?.data?.label_tool?.label_tool_code
             );
             setAnnotationTypeContentVal(res?.data?.label_tool?.label_tool_code);
             basicForm.setFieldValue('name', res?.data?.name);
             basicForm.setFieldValue('description', res?.data?.description);
-            basicForm.setFieldValue('model_name', res?.data?.model_name);
+            basicForm.setFieldValue('model_id', res?.data?.model_id);
             setGetDetailObj(res?.data);
             setTaskTypeVal(res?.data?.team_type);
             res?.data?.labels?.map((item) => {
@@ -896,10 +898,10 @@ export default function RequirementDetail() {
                 `label_name_en_${item?.id}`,
                 item?.label_name_en
               );
-              if (item?.label_mapping) {
+              if (item?.label_mappings) {
                 labelToolForm.setFieldValue(
-                  `label_mapping_${item?.id}`,
-                  item?.label_mapping
+                  `label_mappings_${item?.id}`,
+                  item?.label_mappings
                 );
               }
               labelToolForm.setFieldValue(
@@ -944,27 +946,39 @@ export default function RequirementDetail() {
     );
   }, [annotationTypeContentCode]);
 
-  const { data: modelList = [] } = useGetModelList({
-    enabled: showPreLabeling
-  });
+  useEffect(() => {
+    basicForm.setFieldValue('model_id', undefined);
+  }, [annotationTypeContentCode]);
 
-  const model_name = Form.useWatch('model_name', basicForm);
+  const { data: modelList = [] } = useGetModelList(
+    { label_tool_code: annotationTypeContentCode, page: 1, page_size: 1000 },
+    {
+      enabled: showPreLabeling
+    }
+  );
+
+  const model_id = Form.useWatch('model_id', basicForm);
 
   const { data: modelLabelList = [] } = useGetModelLabelList(
-    { model_name },
-    { enabled: !!model_name }
+    { model_id },
+    { enabled: !!model_id }
   );
 
   // 监听预标注模型变化，清空所有模型映射字段
   useEffect(() => {
     if (labelDataList && labelDataList.length > 0 && type !== 'detail') {
       labelDataList.forEach((item) => {
-        const fieldName = `label_mapping_${item?.label_id}`;
+        const fieldName = `label_mappings_${item?.label_id}`;
         labelToolForm.setFieldValue(fieldName, undefined);
-        item['label_mapping'] = '';
+        item['label_mappings'] = [];
       });
     }
-  }, [model_name, type]);
+  }, [model_id, type]);
+
+  const curModelLabelList = (labelShape) => {
+    const curShape = LABEL_MAPPING[labelShape];
+    return modelLabelList.filter((item) => item.label_shape === curShape);
+  };
 
   return (
     <div className="requirement-detail">
@@ -1110,7 +1124,7 @@ export default function RequirementDetail() {
               </FormItem>
               {showPreLabeling && (
                 <FormItem
-                  field="model_name"
+                  field="model_id"
                   label="预标注模型:"
                   style={{ marginBottom: 24 }}
                 >
@@ -1244,7 +1258,7 @@ export default function RequirementDetail() {
                                   >
                                     <Input
                                       style={{
-                                        minWidth: !!model_name ? 180 : 260
+                                        minWidth: !!model_id ? 165 : 260
                                       }}
                                       onChange={(val: any) => {
                                         updateNestedValue(
@@ -1253,7 +1267,7 @@ export default function RequirementDetail() {
                                         );
                                       }}
                                       className="sortable-item-input"
-                                      placeholder="用于储存标注结果"
+                                      placeholder="储存标注结果"
                                       value={item.label_name_en}
                                     />
                                   </FormItem>
@@ -1311,7 +1325,7 @@ export default function RequirementDetail() {
                                   >
                                     <Input
                                       style={{
-                                        minWidth: !!model_name ? 180 : 260
+                                        minWidth: !!model_id ? 155 : 260
                                       }}
                                       onChange={(val: any) => {
                                         updateNestedValue(
@@ -1349,50 +1363,133 @@ export default function RequirementDetail() {
                                         }
                                       }}
                                       className="sortable-item-input"
-                                      placeholder="展示在标注页面的名称"
+                                      placeholder="展示在标注页的名称"
                                       value={item.label_name_cn}
                                     />
                                   </FormItem>
-                                  {!!model_name && (
+                                  {!!model_id && (
                                     <FormItem
                                       label="模型映射:"
-                                      field={`label_mapping_${type === 'detail' ? item?.id : item?.label_id}`}
+                                      field={`label_mappings_${type === 'detail' ? item?.id : item?.label_id}`}
                                       style={{ padding: 0 }}
                                     >
                                       <Select
-                                        placeholder="请选择"
-                                        options={modelLabelList}
-                                        style={{ width: 110 }}
-                                        allowClear
-                                        onChange={(val: any) => {
-                                          // 根据模型映射选择的值设置对应的形状
-                                          if (!!val) {
-                                            updateNestedValue(
-                                              [labelIndex, 'label_mapping'],
-                                              val
-                                            );
-                                            // 使用 LABEL_MAPPING 将字符串形状转换为数字
-                                            const mappedShape =
-                                              LABEL_MAPPING[val];
+                                        className="label-mapping-select"
+                                        mode="multiple"
+                                        maxTagCount={{
+                                          count: 1,
+                                          render: (invisibleNumber) => {
+                                            // 获取当前选中的值
+                                            const currentValue =
+                                              item.label_mappings || [];
+                                            const selectedValues =
+                                              Array.isArray(currentValue)
+                                                ? currentValue
+                                                : [currentValue];
+                                            // 获取隐藏的标签（从第二个开始）
+                                            const hiddenTags =
+                                              selectedValues.slice(1);
+                                            // 获取隐藏标签对应的选项信息
+                                            const hiddenOptions = hiddenTags
+                                              .map((val) => {
+                                                const option =
+                                                  curModelLabelList(
+                                                    item.label_shape ?? 3
+                                                  )?.find(
+                                                    (opt) => opt.value === val
+                                                  );
+                                                return option;
+                                              })
+                                              .filter(Boolean);
 
-                                            if (mappedShape !== undefined) {
-                                              const shapeFieldName = `label_shape_${type === 'detail' ? item?.id : item?.label_id}`;
-
-                                              // 先更新表单字段
-                                              labelToolForm.setFieldValue(
-                                                shapeFieldName,
-                                                mappedShape
-                                              );
-
-                                              // 再更新 labelDataList 中的形状值
+                                            // 删除隐藏标签的函数
+                                            const handleRemoveTag = (
+                                              valueToRemove: any
+                                            ) => {
+                                              const currentValue =
+                                                item.label_mappings || [];
+                                              const selectedValues =
+                                                Array.isArray(currentValue)
+                                                  ? currentValue
+                                                  : [currentValue];
+                                              // 移除指定的值
+                                              const newValues =
+                                                selectedValues.filter(
+                                                  (val) => val !== valueToRemove
+                                                );
+                                              // 更新数据状态
                                               updateNestedValue(
-                                                [labelIndex, 'label_shape'],
-                                                mappedShape
+                                                [labelIndex, 'label_mappings'],
+                                                newValues
                                               );
-                                            }
+                                              // 同时更新 Form 的值
+                                              const fieldName = `label_mappings_${type === 'detail' ? item?.id : item?.label_id}`;
+                                              labelToolForm.setFieldValue(
+                                                fieldName,
+                                                newValues
+                                              );
+                                            };
+
+                                            return (
+                                              <Tooltip
+                                                content={
+                                                  <div className="flex flex-wrap gap-1">
+                                                    {hiddenOptions.map(
+                                                      (option, i) => (
+                                                        <Tag
+                                                          key={i}
+                                                          closable
+                                                          onClose={() => {
+                                                            handleRemoveTag(
+                                                              option.value
+                                                            );
+                                                          }}
+                                                          style={{
+                                                            height: '24px',
+                                                            background:
+                                                              '#E7ECF0',
+                                                            color: '#0F172A',
+                                                            borderRadius: '2px',
+                                                            fontSize: '12px',
+                                                            alignItems:
+                                                              'center',
+                                                            margin: '0 2px',
+                                                            cursor: 'pointer'
+                                                          }}
+                                                        >
+                                                          {option.label}
+                                                        </Tag>
+                                                      )
+                                                    )}
+                                                  </div>
+                                                }
+                                              >
+                                                <span>+{invisibleNumber}</span>
+                                              </Tooltip>
+                                            );
                                           }
                                         }}
-                                      ></Select>
+                                        placeholder="请选择"
+                                        style={{ width: 150 }}
+                                        allowClear
+                                        onChange={(val: any) => {
+                                          updateNestedValue(
+                                            [labelIndex, 'label_mappings'],
+                                            val
+                                          );
+                                        }}
+                                      >
+                                        {curModelLabelList(
+                                          item.label_shape ?? 3
+                                        )?.map((option) => (
+                                          <Option
+                                            key={option.value}
+                                            value={option.value}
+                                          >
+                                            {option.label}
+                                          </Option>
+                                        ))}
+                                      </Select>
                                     </FormItem>
                                   )}
                                   <FormItem
@@ -1408,12 +1505,12 @@ export default function RequirementDetail() {
                                           parseInt(val)
                                         );
                                         updateNestedValue(
-                                          [labelIndex, 'label_mapping'],
-                                          ''
+                                          [labelIndex, 'label_mappings'],
+                                          []
                                         );
                                         // 形状改变时，清空对应的模型映射值
-                                        if (model_name) {
-                                          const mappingFieldName = `label_mapping_${type === 'detail' ? item?.id : item?.label_id}`;
+                                        if (model_id) {
+                                          const mappingFieldName = `label_mappings_${type === 'detail' ? item?.id : item?.label_id}`;
                                           labelToolForm.setFieldValue(
                                             mappingFieldName,
                                             undefined

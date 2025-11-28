@@ -1,16 +1,43 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Table, Pagination, Button, Space } from '@arco-design/web-react';
+import {
+  Table,
+  Pagination,
+  Button,
+  Space,
+  Message,
+  Spin,
+  Tooltip
+} from '@arco-design/web-react';
 import { IconRefresh } from '@arco-design/web-react/icon';
-import { getMetaDataList, Field, FieldSearchItem } from '@/api/dataCatalog';
+import { useRequest } from 'ahooks';
+import { delay } from 'lodash-es';
+import {
+  getMetaDataList,
+  Field,
+  FieldSearchItem,
+  LoadTaskStatus,
+  refreshMetaDataList
+} from '@/api/dataCatalog';
 import { useDataCatalog } from '../DataCatalogProvider/Context';
 import SearchArea, { SearchField } from './MetaDataSearchArea';
+import noDataElement from '@/components/no-data';
+import dayjs from 'dayjs';
+import EllipsisPopover from '@/components/ellipsis-popover-com';
+import styles from './MetaData.module.scss';
+import classNames from 'classnames';
 
 export default function MetaData() {
   const dataCatalog = useDataCatalog();
   const { catalogTreeStore } = dataCatalog;
-  const { selectedKey } = catalogTreeStore.useGetState(['selectedKey']);
+  const { selectedKey, selectedParentId, extendsObj } =
+    catalogTreeStore.useGetState([
+      'selectedKey',
+      'selectedParentId',
+      'extendsObj'
+    ]);
 
   // 状态管理
+  const [pollLoading, setPollLoading] = useState(false);
   const [loading, setLoading] = useState(false);
   const [tableData, setTableData] = useState<Record<string, any>[]>([]);
   const [searchFields, setSearchFields] = useState<Field[]>([]);
@@ -18,24 +45,76 @@ export default function MetaData() {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [fieldSearch, setFieldSearch] = useState<FieldSearchItem[]>([]);
+  const [searchAreaResetKey, setSearchAreaResetKey] = useState(0);
+  const clearSearchConditions = () => {
+    setFieldSearch([]);
+    setCurrentPage(1);
+    setSearchAreaResetKey((prev) => prev + 1);
+  };
+
+  // 轮询获取元数据列表
+  const { runAsync: pollMetaDataList, cancel: cancelPolling } = useRequest(
+    async () => {
+      if (!selectedKey) return;
+
+      const res = await getMetaDataList({
+        page: currentPage,
+        pageSize: pageSize,
+        fieldSearch: fieldSearch,
+        queryLoadTaskInstance: true,
+        path_id: Number(selectedKey) ?? 0,
+        db_name: (extendsObj?.db_name as string) || '',
+        table_name: (extendsObj?.table_name as string) || ''
+      });
+
+      if (res.code === '' && res.status === 200) {
+        const data = res.data || {};
+        setTableData(data.records || []);
+        setSearchFields(data.fields || []);
+        setTotal(data.total || 0);
+
+        return data.loadTaskStatus;
+      }
+      return null;
+    },
+    {
+      pollingInterval: 5000,
+      pollingWhenHidden: false,
+      manual: true,
+      onSuccess: (loadTaskStatus) => {
+        if (loadTaskStatus === LoadTaskStatus.COMPLETED) {
+          cancelPolling();
+          setPollLoading(false);
+        }
+      },
+      onError: () => {
+        cancelPolling();
+        setPollLoading(false);
+      }
+    }
+  );
 
   // 获取列表数据
   const loadData = async () => {
     if (!selectedKey) return;
 
     setLoading(true);
+
     try {
       const res = await getMetaDataList({
         page: currentPage,
         pageSize: pageSize,
         fieldSearch: fieldSearch,
-        queryLoadTaskInstance: false
+        queryLoadTaskInstance: false,
+        path_id: Number(selectedKey) ?? 0,
+        db_name: (extendsObj?.db_name as string) || '',
+        table_name: (extendsObj?.table_name as string) || ''
       });
 
-      if (res.code === '0' || res.status === 200) {
+      if (res.code === '' && res.status === 200) {
         const data = res.data || {};
         setTableData(data.records || []);
-        setSearchFields(data.searchfields || []);
+        setSearchFields(data.fields || []);
         setTotal(data.total || 0);
       }
     } catch (error) {
@@ -47,9 +126,20 @@ export default function MetaData() {
 
   // 初始化加载数据
   useEffect(() => {
+    if (pollLoading || loading) {
+      return;
+    }
+
     loadData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentPage, pageSize, selectedKey, fieldSearch]);
+  }, [currentPage, pageSize, selectedKey, selectedParentId, fieldSearch]);
+
+  // 组件卸载时取消轮询
+  useEffect(() => {
+    return () => {
+      cancelPolling();
+    };
+  }, [cancelPolling]);
 
   // 动态构建表格列
   const columns = useMemo(() => {
@@ -58,12 +148,32 @@ export default function MetaData() {
       dataIndex: field.nameEn,
       key: field.nameEn,
       ellipsis: true,
+      width: 200,
       render: (value: any) => {
-        // 如果值是数组，转换为字符串显示
-        if (Array.isArray(value)) {
-          return value.join(', ');
+        let displayValue: any = value;
+
+        if (field.type?.includes('date')) {
+          displayValue = value
+            ? dayjs(value).format('YYYY-MM-DD HH:mm:ss')
+            : '-';
+        } else if (Array.isArray(value)) {
+          // 如果值是数组，转换为字符串显示
+          displayValue = value.join(', ');
+        } else if (
+          displayValue === null ||
+          displayValue === undefined ||
+          displayValue === ''
+        ) {
+          displayValue = '-';
         }
-        return value ?? '-';
+
+        return (
+          <EllipsisPopover
+            value={displayValue}
+            preferTypography
+            ellipsis={{ rows: 1 }}
+          />
+        );
       }
     }));
   }, [searchFields]);
@@ -82,59 +192,81 @@ export default function MetaData() {
     setCurrentPage(1);
   };
 
-  // 处理刷新（先不写逻辑）
-  const handleRefresh = () => {
-    // TODO: 刷新逻辑
-    console.log('刷新');
+  // 处理刷新
+  const handleRefresh = async () => {
+    clearSearchConditions();
+    // 如果已有轮询在进行，先取消
+    cancelPolling();
+
+    setPollLoading(true);
+    const res = await refreshMetaDataList({
+      path_id: Number(selectedKey) ?? 0,
+      db_name: (extendsObj?.db_name as string) || '',
+      table_name: (extendsObj?.table_name as string) || ''
+    });
+
+    if (res.code !== '' || res.status !== 200) {
+      Message.error(res?.message ?? '刷新失败');
+      setPollLoading(false);
+      return;
+    }
+
+    // 启动新的轮询
+    delay(pollMetaDataList, 500);
   };
 
   // 处理字段搜索
-  const handleFieldSearch = (fieldValues: Record<string, any>) => {
-    console.log('字段搜索:', fieldValues);
-    // 将搜索条件转换为 FieldSearchItem 格式
-    const searchItems: FieldSearchItem[] = Object.entries(fieldValues).map(
-      ([key, value]) => {
-        const field = searchFields.find((f) => f.nameEn === key);
-        return {
-          nameEn: key,
-          type: field?.type || 'string',
-          searchContent: Array.isArray(value) ? value : [value]
-        };
-      }
-    );
-    setFieldSearch(searchItems);
+  const handleFieldSearch = (fieldValues: FieldSearchItem[]) => {
+    setFieldSearch(fieldValues);
     setCurrentPage(1); // 重置到第一页
   };
 
   // 处理重置
   const handleReset = () => {
     console.log('重置搜索条件');
-    setFieldSearch([]);
-    setCurrentPage(1);
+    clearSearchConditions();
   };
 
+  if (pollLoading) {
+    return (
+      <div
+        className="flex w-full items-center justify-center"
+        style={{ minHeight: 'calc(100vh - 200px)' }}
+      >
+        <Spin size={32} tip="数据载入中" />
+      </div>
+    );
+  }
+
   return (
-    <div>
+    <div className={styles['meta-data']}>
       {/* 搜索区域 */}
-      <SearchArea
-        fields={searchFields.map((field: Field) => ({
-          key: field.nameEn,
-          label: field.nameZh || field.nameEn,
-          type: 'input',
-          paramKey: field.nameEn
-        }))}
-        onFieldSearch={handleFieldSearch}
-        onReset={handleReset}
-      />
+      {columns.length > 0 && (
+        <SearchArea
+          key={selectedKey}
+          fields={searchFields.map((field: Field) => ({
+            key: field.nameEn,
+            label: field.nameZh || field.nameEn,
+            type: field.type,
+            paramKey: field.nameEn
+          }))}
+          onFieldSearch={handleFieldSearch}
+          onReset={handleReset}
+        />
+      )}
 
       <div className="data-catalog-content">
         {/* 标题和刷新按钮 */}
-        <div className="mb-[12px] mt-[12px] flex items-center justify-between">
+        <div
+          className={classNames(
+            'mb-[12px] mt-[12px] flex items-center justify-between',
+            styles['header-container']
+          )}
+        >
           <div className="text-[16px] font-bold">数据湖目录({total})</div>
-          <Space>
+          <Tooltip content="刷新">
             <Button
               type="outline"
-              shape="circle"
               icon={<IconRefresh />}
               onClick={handleRefresh}
               style={{
@@ -143,22 +275,26 @@ export default function MetaData() {
                 padding: 0
               }}
             />
-          </Space>
+          </Tooltip>
         </div>
 
         {/* 表格 */}
-        <Table
-          loading={loading}
-          columns={columns}
-          data={tableData}
-          // rowKey={(record, index) => record.id || index}
-          pagination={false}
-          border={false}
-          scroll={{ x: true }}
-          noDataElement={
-            <div style={{ padding: '20px', textAlign: 'center' }}>暂无数据</div>
-          }
-        />
+        {columns.length === 0 ? (
+          <div className="flex min-h-[200px] items-center justify-center">
+            {noDataElement({ description: '暂无载入数据' })}
+          </div>
+        ) : (
+          <Table
+            columns={columns}
+            data={tableData}
+            loading={loading}
+            rowKey="id"
+            pagination={false}
+            border={false}
+            scroll={{ x: true }}
+            noDataElement={noDataElement({ description: '暂无载入数据' })}
+          />
+        )}
 
         {/* 分页 */}
         {total > 0 && (

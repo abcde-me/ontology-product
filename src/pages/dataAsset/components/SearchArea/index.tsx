@@ -5,7 +5,10 @@ import {
   Select,
   DatePicker,
   Popover,
-  Checkbox
+  Checkbox,
+  Tooltip,
+  Tag,
+  TreeSelect
 } from '@arco-design/web-react';
 import {
   IconSearch,
@@ -13,6 +16,12 @@ import {
   IconUp,
   IconSettings
 } from '@arco-design/web-react/icon';
+import { ColumnField } from '../ColumnSettingModal';
+import { FieldSearchItem, BaseTag, TagValueItem } from '@/types/dataAssetApi';
+import { isDateType, isDateTimeType, isTagsField } from '../../utils/const';
+import styles from './index.module.scss';
+import dayjs from 'dayjs';
+import classNames from 'classnames';
 
 export interface SearchField {
   /** 字段唯一标识 */
@@ -29,25 +38,49 @@ export interface SearchField {
 
 export interface SearchAreaProps {
   /** 搜索字段配置列表 */
-  fields?: SearchField[];
+  fields?: ColumnField[];
   /** 主搜索框的值 */
   mainSearchValue?: string;
   /** 主搜索框占位符 */
   mainSearchPlaceholder?: string;
   /** 主搜索回调 */
-  onMainSearch?: (value: string) => void;
+  onMainSearch?: (fieldValues: FieldSearchItem[], commonSearch: string) => void;
   /** 字段搜索回调 */
-  onFieldSearch?: (fieldValues: Record<string, any>) => void;
+  onFieldSearch?: (
+    fieldValues: FieldSearchItem[],
+    commonSearch: string
+  ) => void;
   /** 重置回调 */
   onReset?: () => void;
   /** 样式类 */
   className?: string;
 }
 
+const formatSearchContent = (field: ColumnField, value: any): string[] => {
+  if (field.type.includes('date') && Array.isArray(value)) {
+    const formattedValues = value
+      .filter((item) => item !== undefined && item !== null && item !== '')
+      .map((item) => {
+        const date = dayjs(item);
+        return date.isValid()
+          ? date.format('YYYY-MM-DD HH:mm:ss')
+          : String(item ?? '');
+      });
+
+    const joinedValue = formattedValues.join('_');
+    return joinedValue ? [joinedValue] : [];
+  }
+
+  const normalizedValues = Array.isArray(value) ? value : [value];
+  return normalizedValues
+    .filter((item) => item !== undefined && item !== null && item !== '')
+    .map((item) => String(item));
+};
+
 export default function SearchArea({
   fields = [],
   mainSearchValue = '',
-  mainSearchPlaceholder = '请输入搜索内容,如10月份所有的表',
+  mainSearchPlaceholder = '请输入搜索内容',
   onMainSearch,
   onFieldSearch,
   onReset,
@@ -68,20 +101,13 @@ export default function SearchArea({
 
   // 初始化：默认勾选所有字段
   useEffect(() => {
-    const defaultChecked = new Set(fields.map((f) => f.key));
+    const defaultChecked = new Set(fields.slice(0, 4).map((f) => f.id));
     setCheckedFields(defaultChecked);
   }, [fields]);
 
   // 处理主搜索（点击搜索图标或按Enter）
   const handleMainSearch = () => {
-    onMainSearch?.(mainSearch);
-  };
-
-  // 处理主搜索框回车
-  const handleMainSearchEnter = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      handleMainSearch();
-    }
+    onMainSearch?.([], mainSearch);
   };
 
   // 处理字段值变化
@@ -96,23 +122,32 @@ export default function SearchArea({
   const handleQuery = () => {
     // 只传递已勾选字段的值
     const searchParams: Record<string, any> = {};
+    const fieldSearch: FieldSearchItem[] = [];
     checkedFields.forEach((fieldKey) => {
-      const field = fields.find((f) => f.key === fieldKey);
+      const field = fields.find((f) => f.id === fieldKey);
       if (
         field &&
         fieldValues[fieldKey] !== undefined &&
         fieldValues[fieldKey] !== null &&
         fieldValues[fieldKey] !== ''
       ) {
-        const paramKey = field.paramKey || fieldKey;
+        const paramKey = field.id || fieldKey;
         searchParams[paramKey] = fieldValues[fieldKey];
+
+        fieldSearch.push({
+          isEnumAble: field.isEnumAble ?? false,
+          nameEn: field.id,
+          type: field.type,
+          searchContent: formatSearchContent(field, fieldValues[fieldKey])
+        });
       }
     });
-    onFieldSearch?.(searchParams);
+    onFieldSearch?.(fieldSearch, mainSearch);
   };
 
   // 处理重置按钮点击
   const handleReset = () => {
+    setMainSearch('');
     setFieldValues({});
     onReset?.();
   };
@@ -137,20 +172,35 @@ export default function SearchArea({
   // 全选/取消全选
   const handleSelectAll = (checked: boolean) => {
     if (checked) {
-      setCheckedFields(new Set(fields.map((f) => f.key)));
+      // 如果有搜索关键词，只选中搜索过滤后的字段，并清空之前的字段状态
+      if (settingsSearchKeyword) {
+        // 重新计算过滤后的字段列表
+        const filteredFields = fields.filter((f) =>
+          f.nameZh.toLowerCase().includes(settingsSearchKeyword.toLowerCase())
+        );
+        const filteredFieldIds = filteredFields.map((f) => f.id);
+        setCheckedFields(new Set(filteredFieldIds));
+        // 清空之前所有字段的值
+        setFieldValues({});
+      } else {
+        // 没有搜索关键词时，选中所有字段
+        setCheckedFields(new Set(fields.map((f) => f.id)));
+      }
     } else {
       setCheckedFields(new Set());
+      // 取消全选时，清空所有字段的值
+      setFieldValues({});
     }
   };
 
   // 是否有字段被勾选
   const hasCheckedFields = checkedFields.size > 0;
   // 筛选出已勾选的字段用于显示
-  const visibleFields = fields.filter((f) => checkedFields.has(f.key));
+  const visibleFields = fields.filter((f) => checkedFields.has(f.id));
   // 筛选设置搜索条件下拉框中的字段（根据搜索关键词）
   const filteredFieldsForSettings = fields.filter((f) =>
     settingsSearchKeyword
-      ? f.label.toLowerCase().includes(settingsSearchKeyword.toLowerCase())
+      ? f.nameZh.toLowerCase().includes(settingsSearchKeyword.toLowerCase())
       : true
   );
 
@@ -178,11 +228,11 @@ export default function SearchArea({
           <Checkbox
             checked={
               filteredFieldsForSettings.length > 0 &&
-              filteredFieldsForSettings.every((f) => checkedFields.has(f.key))
+              filteredFieldsForSettings.every((f) => checkedFields.has(f.id))
             }
             indeterminate={
-              filteredFieldsForSettings.some((f) => checkedFields.has(f.key)) &&
-              !filteredFieldsForSettings.every((f) => checkedFields.has(f.key))
+              filteredFieldsForSettings.some((f) => checkedFields.has(f.id)) &&
+              !filteredFieldsForSettings.every((f) => checkedFields.has(f.id))
             }
           >
             全选
@@ -190,14 +240,14 @@ export default function SearchArea({
         </div>
         {filteredFieldsForSettings.map((field) => (
           <div
-            key={field.key}
+            key={field.id}
             className="flex cursor-pointer items-center px-4 py-2 transition-colors hover:bg-[var(--color-fill-2)]"
             onClick={() =>
-              toggleFieldCheck(field.key, !checkedFields.has(field.key))
+              toggleFieldCheck(field.id, !checkedFields.has(field.id))
             }
           >
-            <Checkbox checked={checkedFields.has(field.key)}>
-              {field.label}
+            <Checkbox checked={checkedFields.has(field.id)}>
+              {field.nameZh}
             </Checkbox>
           </div>
         ))}
@@ -231,44 +281,161 @@ export default function SearchArea({
     return button;
   };
 
-  // 渲染字段搜索输入组件
-  const renderFieldInput = (field: SearchField) => {
-    const value = fieldValues[field.key];
+  const isBaseTagOption = (opt: string | number | BaseTag): opt is BaseTag => {
+    if (typeof opt !== 'object' || opt === null) {
+      return false;
+    }
+    return Array.isArray(opt.valueList);
+  };
 
-    switch (field.type) {
-      case 'input':
+  // 渲染字段搜索输入组件
+  const renderFieldInput = (field: ColumnField) => {
+    const value = fieldValues[field.id];
+    let fieldType = field.type;
+    if (isTagsField(field.nameEn)) {
+      const tagOptions = (field.values || []).filter(isBaseTagOption);
+      const treeData = tagOptions.map((tag) => ({
+        key: tag.id,
+        value: tag.id,
+        title: tag.name,
+        selectable: false,
+        checkable: false,
+        disableCheckbox: true,
+        children: (tag.valueList || []).map((item: TagValueItem) => ({
+          key: item.id,
+          value: item.tagValue,
+          title: item.tagValue
+        }))
+      }));
+
+      return (
+        <TreeSelect
+          placeholder={`请选择${field.nameZh}`}
+          className={styles['dropdown-select']}
+          value={Array.isArray(value) ? value : []}
+          multiple
+          treeCheckable
+          treeCheckedStrategy="child"
+          treeData={treeData}
+          onChange={(val) => {
+            const nextValue = Array.isArray(val)
+              ? val
+              : val !== undefined && val !== null
+                ? [val]
+                : [];
+            handleFieldValueChange(field.id, nextValue);
+          }}
+          maxTagCount={{
+            count: 2,
+            render: (invisibleTagCount) => {
+              const remainingTags = value.slice(2);
+              return (
+                <Tooltip
+                  content={
+                    <div className="ml-[-4px] flex max-w-[300px] flex-wrap gap-1">
+                      {remainingTags.map((item, i) => (
+                        <Tag
+                          key={i}
+                          className="bg-[#E7ECF0] text-[14px] text-[#0F172A]"
+                          // className={classNames(styles['tag'])}
+                        >
+                          {item}
+                        </Tag>
+                      ))}
+                    </div>
+                  }
+                >
+                  +{invisibleTagCount}
+                </Tooltip>
+              );
+            }
+          }}
+          allowClear
+        />
+      );
+    }
+
+    if (isDateType(field.type)) {
+      fieldType = 'date';
+    } else if (isDateTimeType(field.type)) {
+      fieldType = 'datetime';
+    } else if (field.isEnumAble && field.values?.length > 0) {
+      fieldType = 'select';
+    } else {
+      fieldType = 'string';
+    }
+
+    switch (fieldType) {
+      case 'string':
         return (
           <Input
             placeholder={`输入关键字搜索`}
             value={value || ''}
-            onChange={(val) => handleFieldValueChange(field.key, val)}
-            suffix={<IconSearch />}
+            onChange={(val) => handleFieldValueChange(field.id, val)}
             allowClear
           />
         );
       case 'select':
         return (
           <Select
-            placeholder={`请选择${field.label}`}
+            placeholder={`请选择${field.nameZh}`}
             value={value}
-            onChange={(val) => handleFieldValueChange(field.key, val)}
+            mode="multiple"
+            className={styles['dropdown-select']}
+            maxTagCount={{
+              count: 2,
+              render: (invisibleTagCount) => {
+                const remainingTags = value.slice(2);
+                return (
+                  <Tooltip
+                    content={
+                      <div className="ml-[-4px] flex max-w-[300px] flex-wrap gap-1">
+                        {remainingTags.map((item, i) => (
+                          <Tag
+                            key={i}
+                            className="bg-[#E7ECF0] text-[14px] text-[#0F172A]"
+                            // className={classNames(styles['tag'])}
+                          >
+                            {item}
+                          </Tag>
+                        ))}
+                      </div>
+                    }
+                  >
+                    +{invisibleTagCount}
+                  </Tooltip>
+                );
+              }
+            }}
+            onChange={(val) => handleFieldValueChange(field.id, val)}
             allowClear
-            showSearch
           >
-            {field.options?.map((opt) => (
-              <Select.Option key={opt.value} value={opt.value}>
-                {opt.label}
+            {field.values.map((opt) => (
+              <Select.Option key={String(opt)} value={String(opt)}>
+                {opt}
               </Select.Option>
             ))}
           </Select>
         );
-      case 'daterange':
+      case 'datetime':
         return (
           <DatePicker.RangePicker
             value={value}
-            onChange={(val) => handleFieldValueChange(field.key, val)}
+            onChange={(val) => handleFieldValueChange(field.id, val)}
             allowClear
+            showTime={{ format: 'HH:mm:ss' }}
+            format="YYYY-MM-DD HH:mm:ss"
             placeholder={['开始日期', '结束日期']}
+          />
+        );
+      case 'date':
+        return (
+          <DatePicker.RangePicker
+            value={value}
+            onChange={(val) => handleFieldValueChange(field.id, val)}
+            allowClear
+            format="YYYY-MM-DD"
+            placeholder={['开始时间', '结束时间']}
           />
         );
       default:
@@ -277,15 +444,16 @@ export default function SearchArea({
   };
 
   return (
-    <div className={`${className}`}>
+    <div className={`${className} ${styles['search-area']}`}>
       {/* 主搜索区域 */}
-      <div className="flex items-center gap-3">
-        <Input
+      <div className="flex items-center gap-[4px]">
+        <Input.Search
           className="w-[480px]"
           placeholder={mainSearchPlaceholder}
           value={mainSearch}
           onChange={setMainSearch}
-          onPressEnter={handleMainSearchEnter}
+          onClear={handleMainSearch}
+          onPressEnter={handleMainSearch}
           suffix={
             <IconSearch
               className="cursor-pointer text-[var(--color-text-2)] transition-colors hover:text-[rgb(var(--primary-6))]"
@@ -320,11 +488,11 @@ export default function SearchArea({
           {visibleFields.length > 0 && (
             <div className="mb-4 flex flex-wrap gap-4">
               {visibleFields.map((field) => (
-                <div key={field.key} className="flex items-center gap-3">
+                <div key={field.id} className="flex items-center gap-3">
                   <span className="whitespace-nowrap text-sm text-[var(--color-text-1)]">
-                    {field.label}:
+                    {field.nameZh}:
                   </span>
-                  <div className="w-[200px]">{renderFieldInput(field)}</div>
+                  <div className="w-[380px]">{renderFieldInput(field)}</div>
                 </div>
               ))}
             </div>
@@ -333,7 +501,9 @@ export default function SearchArea({
           {/* 操作按钮区域 */}
           <div className="flex items-center gap-2">
             <QueryButton />
-            <Button onClick={handleReset}>重置</Button>
+            <Button disabled={!hasCheckedFields} onClick={handleReset}>
+              重置
+            </Button>
             <Popover
               content={settingsContent}
               trigger="click"
@@ -341,7 +511,13 @@ export default function SearchArea({
               popupVisible={settingsVisible}
               onVisibleChange={setSettingsVisible}
             >
-              <Button type="text" className="ml-auto flex items-center gap-1">
+              <Button
+                type="text"
+                className={classNames(
+                  'ml-auto flex items-center gap-1',
+                  styles['settings-button']
+                )}
+              >
                 <IconSettings />
                 设置搜索条件
               </Button>

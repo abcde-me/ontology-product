@@ -78,7 +78,9 @@ const hiddenTopBarRoutes = [
   '/tenant/compute/modaforge/workflowConfig',
   '/tenant/compute/modaforge/workflowPublic',
   '/tenant/compute/modaforge/agentCreate',
-  '/tenant/compute/modaforge/labelEditor'
+  '/tenant/compute/modaforge/labelEditor',
+  '/tenant/compute/modaforge/ragDetail',
+  '/tenant/compute/modaforge/compareFileData'
 ];
 
 function App() {

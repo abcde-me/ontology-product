@@ -1,8 +1,4 @@
 .data-asset-table-card {
-  &-item {
-    border: none;
-  }
-
   &-item:first-child {
     background-image: url('../../assets/card-bg.png');
     background-size: 100% 100%;
@@ -11,7 +7,26 @@
     border: 1px solid #184ff2;
   }
 
-  :global(.arco-select .arco-select-view) {
+  &-item:hover {
+    border: 1px solid #2563eb;
+  }
+
+  :global(.arco-tree-select .arco-tree-select-view .arco-input-tag-tag) {
+    background-color: #fafbff;
+    color: #646c85;
+    border: 1px solid #c3c7d4;
+    border-radius: 4px;
+    padding: 0 6px;
+    margin-right: 4px;
+    height: 20px;
+    font-size: 12px;
+  }
+
+  :global(.arco-tree-select .arco-tree-select-view .arco-tag-close-btn) {
+    display: none;
+  }
+
+  :global(.arco-tree-select .arco-tree-select-view) {
     border: 1px solid transparent;
     background-color: transparent;
 
@@ -25,7 +40,7 @@
     }
   }
 
-  :global(.arco-select-focused .arco-select-view) {
+  :global(.arco-tree-select-focused .arco-tree-select-view) {
     border: 1px solid transparent;
     background-color: #d9eaff;
 
@@ -34,7 +49,7 @@
     }
   }
 
-  :global(.arco-select-suffix) {
+  :global(.arco-tree-select-suffix) {
     display: none;
   }
 }

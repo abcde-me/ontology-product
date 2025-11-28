@@ -22,9 +22,9 @@ const Node: FC<NodeProps<TextParserNodeType>> = (props) => {
       const text_emb_model_id = textList[0]?.id || '';
 
       const fields = {} as Record<string, any>;
-      if (!props.data.text_emb_model_id) {
-        fields.text_emb_model_id = text_emb_model_id;
-      }
+      // if (!props.data.text_emb_model_id) {
+      //   fields.text_emb_model_id = text_emb_model_id;
+      // }
       handleModelChange(fields);
     });
   }, []);

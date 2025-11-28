@@ -1,4 +1,4 @@
-import * as _ from 'lodash';
+import { merge } from 'lodash-es';
 import { getLoginToken } from '@/utils/env';
 
 async function handleError(res) {
@@ -41,7 +41,7 @@ async function baseRequest(
     },
     signal: abortController.signal
   };
-  const newInit = _.merge(defaultInit, init);
+  const newInit = merge(defaultInit, init);
   const res = await fetch(url, newInit);
   if (!res.ok) {
     const msg = await handleError(res);

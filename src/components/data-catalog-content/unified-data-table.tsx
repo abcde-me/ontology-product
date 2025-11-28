@@ -279,12 +279,11 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
         newSourceParams.file_type = validFileTypes;
       }
       let res;
-      console.log(tableType, '查看tableType11111111');
-      console.log(selectedNodeType, '查看selectedNodeType');
 
       // 根据节点类型决定调用哪个API
       if (selectedNodeType === 'db_item') {
         let databaseName = '';
+        console.log(selectedFullPath, '----查看selectedFullPath----');
         if (selectedFullPath) {
           const pathParts = selectedFullPath.split('/');
           if (pathParts.length >= 2) {
@@ -305,10 +304,10 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
 
         // 只有当时间存在时才添加时间参数，并转换为ISO字符串
         if (startTime) {
-          dbParams.start_time = dayjs(startTime).toISOString();
+          dbParams.start_time = dayjs(startTime).format();
         }
         if (endTime) {
-          dbParams.end_time = dayjs(endTime).toISOString();
+          dbParams.end_time = dayjs(endTime).format();
         }
         res = await getDbItemList(dbParams);
         console.log('调用数据库表API，参数:', dbParams);
@@ -330,7 +329,11 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
           Array.isArray(res.data.list) &&
           res.data.list.length > 0
         ) {
-          setTableData(res.data.list);
+          const tableData = res.data.list.map((item) => ({
+            ...item,
+            id: item.table_id || item.id
+          }));
+          setTableData(tableData);
           setTotal(res.data.total || res.data.list.length || 0);
           // console.log(`获取${tableType}表格数据成功:`, res.data);
         }

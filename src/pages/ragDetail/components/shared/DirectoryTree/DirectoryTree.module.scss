@@ -1,0 +1,39 @@
+// DirectoryTree 样式
+.directoryTreeContainer {
+  // 隐藏横向和竖向滚动条，但保持滚动功能
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+
+  // 隐藏滚动条但保持滚动功能
+  scrollbar-width: none; // Firefox
+  -ms-overflow-style: none; // IE and Edge
+
+  &::-webkit-scrollbar {
+    display: none; // Chrome, Safari, Opera
+  }
+
+  // 确保Tree组件内部节点不会横向滚动
+  :global {
+    .arco-tree {
+      overflow-x: hidden !important;
+    }
+
+    .arco-tree-node {
+      overflow: hidden !important;
+    }
+
+    .arco-tree-node-title {
+      overflow: hidden !important;
+      text-overflow: ellipsis !important;
+      white-space: nowrap !important;
+      max-width: 100% !important;
+      display: block !important;
+    }
+
+    // 确保树节点内容区域不会超出
+    .arco-tree-node-content {
+      overflow: hidden !important;
+      max-width: 100% !important;
+    }
+  }
+}

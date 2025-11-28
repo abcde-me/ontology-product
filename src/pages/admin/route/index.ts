@@ -12,7 +12,13 @@ import {
   DATA_CATALOG_PERMISSIONS,
   DATA_MANAGEMENT_PERMISSIONS,
   REQUIREMENT_PERMISSIONS,
-  ANNOTATION_TASK_PERMISSIONS
+  ANNOTATION_TASK_PERMISSIONS,
+  ORGANIZATION_PERMISSIONS,
+  USER_PERMISSIONS,
+  USER_GROUP_PERMISSIONS,
+  ROLE_PERMISSIONS,
+  PROJECT_PERMISSIONS,
+  API_KEY_PERMISSIONS
 } from '@/config/permissions';
 
 export type IRoute = AuthParams & {
@@ -29,6 +35,7 @@ export type IRoute = AuthParams & {
   exact?: boolean;
   // 路由权限标识
   permission?: string | string[];
+  anyPermission?: string[]; // 任一权限
 };
 
 // om 运维、tenant 运营、portal 租户
@@ -60,6 +67,13 @@ export const routes: IRoute[] = [
         key: '/tenant/compute/modaforge/dataLoad/create',
         component: React.lazy(async () => import('../../dataLoad/create')),
         permission: DATA_LOAD_PERMISSIONS.LIST
+      },
+      {
+        // 编辑数据载入任务
+        name: 'editDataLoad',
+        key: '/tenant/compute/modaforge/dataLoad/edit/:task_id',
+        component: React.lazy(async () => import('../../dataLoad/edit')),
+        permission: DATA_LOAD_PERMISSIONS.CAN_UPDATE
       },
       {
         name: 'dataLoadDetail',
@@ -108,10 +122,27 @@ export const routes: IRoute[] = [
     name: 'workflowConfig',
     key: '/tenant/compute/modaforge/workflowConfig',
     component: React.lazy(async () => import('../../workflowConfig')),
-    permission: [
+    anyPermission: [
       WORKFLOW_LIST_PERMISSIONS.CAN_CREATE,
       WORKFLOW_LIST_PERMISSIONS.GET
     ],
+    children: []
+  },
+  // RAG详情页面
+  {
+    name: 'ragDetail',
+    key: '/tenant/compute/modaforge/ragDetail',
+    component: React.lazy(async () => import('../../ragDetail')),
+    permission: DATA_MANAGEMENT_PERMISSIONS.GET, // TODO： 修改为正确的权限点控制
+    children: []
+  },
+  // 文件数据对比测试页面
+  {
+    name: 'compareFileData',
+    key: '/tenant/compute/modaforge/compareFileData',
+    component: React.lazy(
+      async () => import('../../ragDetail/test/CompareFileData')
+    ),
     children: []
   },
   // 作业
@@ -178,7 +209,7 @@ export const routes: IRoute[] = [
         name: 'dataCatalogList',
         key: '/tenant/compute/modaforge/dataCatalog/list',
         component: React.lazy(async () => import('../../dataCatalog/list')),
-        permission: DATA_MANAGEMENT_PERMISSIONS.LIST
+        permission: DATA_CATALOG_PERMISSIONS.LIST
       },
       {
         // 创建元数据目录
@@ -187,7 +218,7 @@ export const routes: IRoute[] = [
         component: React.lazy(
           async () => import('../../dataCatalog/createMetaData')
         ),
-        permission: DATA_MANAGEMENT_PERMISSIONS.LIST
+        permission: DATA_CATALOG_PERMISSIONS.LIST
       }
       // {
       //   name: 'dataAssetEdit',
@@ -243,7 +274,7 @@ export const routes: IRoute[] = [
       },
       {
         name: 'dataAssetEdit',
-        key: '/tenant/compute/modaforge/dataAsset/edit/:id',
+        key: '/tenant/compute/modaforge/dataAsset/edit',
         component: React.lazy(
           async () => import('../../dataAsset/modules/edit')
         ),
@@ -288,7 +319,15 @@ export const routes: IRoute[] = [
     key: '/tenant/compute/modaforge/operationCenter',
     component: React.lazy(async () => import('../../operationCenter')),
     // permission: 'organizations:can_view',
-    children: []
+    children: [],
+    anyPermission: [
+      ORGANIZATION_PERMISSIONS.MENU,
+      USER_PERMISSIONS.MENU,
+      USER_GROUP_PERMISSIONS.MENU,
+      ROLE_PERMISSIONS.MENU,
+      PROJECT_PERMISSIONS.MENU,
+      API_KEY_PERMISSIONS.MENU
+    ]
   }
 ];
 

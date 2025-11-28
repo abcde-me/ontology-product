@@ -157,8 +157,8 @@ export async function getAnnotationTabledData(params: {
 }
 
 // 模型列表
-export async function getModelList() {
-  return await UAPI.RES.getModelList({}).post().inRegion().do();
+export async function getModelList(params) {
+  return await UAPI.RES.getModelList({}).post(params).inRegion().do();
 }
 
 // 获取模型标签信息

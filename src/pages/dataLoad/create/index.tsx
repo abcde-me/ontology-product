@@ -7,12 +7,14 @@ import {
   Select,
   Tooltip,
   Tag,
-  TreeSelect,
   Collapse,
   Popover,
   Tabs,
-  Typography
+  Typography,
+  Switch,
+  TreeSelect
 } from '@arco-design/web-react';
+import { format } from 'sql-formatter';
 import React, {
   useEffect,
   useRef,
@@ -20,25 +22,31 @@ import React, {
   useCallback,
   useMemo
 } from 'react';
-import Styles from '../list/index.module.scss';
 import SchedulerRun from '../../../components/scheduler-run';
-import { addLoad, getDirectoryList, getTableName } from '@/api/loadApi';
+import {
+  addLoad,
+  getDirectoryList,
+  getTableName,
+  checkSQL,
+  CheckSQLStatus
+} from '@/api/loadApi';
 import { getConnectionList, getdetailList } from '@/api/connectionApi';
 import { useHistory } from 'react-router';
 import { validateName } from '@/utils/valiate';
 import Uploads from '../list/file-upload';
-import ComponentTree from '../list/component-tree';
+import ComponentTree from '../component-tree';
 import '../list/db-tree.scss';
-import { isNumber } from 'lodash-es';
 import { sql } from '@codemirror/lang-sql';
 import { lintGutter } from '@codemirror/lint';
-import { EditorView } from '@codemirror/view';
 import { tags as t } from '@lezer/highlight';
 import createTheme from '@uiw/codemirror-themes';
-import CodeMirror, { ReactCodeMirrorRef } from '@uiw/react-codemirror';
+import CodeMirror from '@uiw/react-codemirror';
 import styles from './index.module.scss';
-import { IconCaretRight, IconDown, IconUp } from '@arco-design/web-react/icon';
+import { IconDown, IconLoading, IconUp } from '@arco-design/web-react/icon';
 import SQLFormatIcon from '@/assets/sql/sql-format-ico.svg';
+import ValidateIcon from '../assets/validate-icon.svg';
+import RunFailedIcon from '@/assets/python/run-fail-icon.svg';
+import RunSuccessIcon from '@/assets/python/run-success-icon.svg';
 import classNames from 'classnames';
 
 // 常量定义
@@ -72,6 +80,12 @@ const DEFAULT_ONCE_CYCLE = {
   week: ''
 };
 
+const placeholderValue = `请在此编写数据处理SQL , 处理结果必须包含id字段且id是唯一主键
+
+SELECT fileid as id, fileid ，filename， ........ 
+FROM table2 t1,table3 t2  
+WHERE t1.a=t2.a`;
+
 // 类型定义
 interface ConnectorOption {
   key: number;
@@ -94,7 +108,9 @@ interface TreeNodeData {
     | 'db'
     | 'db_parent'
     | 'datasource_parent'
-    | 'datasource_item';
+    | 'datasource_item'
+    | 'metadata_parent'
+    | 'metadata';
   type?: number;
   level?: number;
   isExpanded?: boolean;
@@ -128,6 +144,8 @@ interface FormValues {
   table_name?: string[];
   dest_path?: string[];
   load_type?: string;
+  sql_process_enabled?: string;
+  sql?: string;
 }
 
 interface CycleText {
@@ -138,12 +156,29 @@ interface CycleText {
   week?: string;
 }
 
+interface TableItem {
+  title: string;
+  children?: TableItem[];
+  checkable?: boolean;
+  disableCheckbox?: boolean;
+  key?: string;
+  value?: string;
+}
+
 // 组件实例
 const RadioGroup = Radio.Group;
 const FormItem = Form.Item;
 const Option = Select.Option;
 
-const RunningInfoPanel = function () {
+interface RunningInfoPanelProps {
+  checkStatus: CheckSQLStatus;
+  checkMessage: string;
+}
+
+const RunningInfoPanel = function ({
+  checkStatus,
+  checkMessage
+}: RunningInfoPanelProps) {
   const CollapseItem = Collapse.Item;
   const TabPane = Tabs.TabPane;
   const { Text } = Typography;
@@ -153,8 +188,55 @@ const RunningInfoPanel = function () {
     setIsExpanded(newExpanded);
   };
 
+  // 当校验状态变成成功(0)或失败(1)时，自动展开面板
+  useEffect(() => {
+    if (
+      checkStatus === CheckSQLStatus.SUCCESS ||
+      checkStatus === CheckSQLStatus.ERROR
+    ) {
+      setIsExpanded(true);
+    }
+  }, [checkStatus]);
+
+  // 根据校验状态渲染状态标签
+  const renderCheckStatus = () => {
+    switch (checkStatus) {
+      case CheckSQLStatus.CHECKING:
+        return (
+          <div className="flex items-center gap-[4px]">
+            <span className="text-[14px] text-[var(--color-text-4)]">
+              校验中
+            </span>
+            <IconLoading style={{ color: '#007DFA' }} />
+          </div>
+        );
+      case CheckSQLStatus.SUCCESS:
+        return (
+          <div className="flex items-center gap-[4px]">
+            <span className="text-[14px] text-[var(--color-text-4)]">
+              校验成功
+            </span>
+            <RunSuccessIcon />
+          </div>
+        );
+      case CheckSQLStatus.ERROR:
+        return (
+          <div className="flex items-center gap-[4px]">
+            <span className="text-[14px] text-[var(--color-text-4)]">
+              校验失败
+            </span>
+            <RunFailedIcon />
+          </div>
+        );
+      default:
+        return null;
+    }
+  };
+
   return (
-    <div className={`running-info-panel ${styles['sql-running-info-panel']}`}>
+    <div
+      className={`running-info-panel border-t border-solid border-[#E2E8F0] ${styles['sql-running-info-panel']}`}
+    >
       <Collapse
         activeKey={isExpanded ? ['1'] : []}
         onChange={handlePanelChange}
@@ -199,13 +281,26 @@ const RunningInfoPanel = function () {
                 <Text style={{ fontSize: '14px', fontWeight: 500 }}>
                   校验信息
                 </Text>
-                {/* {renderRunStatus(runStatus)} */}
+                {renderCheckStatus()}
               </div>
             </div>
           }
           name="1"
         >
-          <div className={styles['panel-content']}></div>
+          <div className={classNames(styles['panel-content'])}>
+            {checkMessage && (
+              <div
+                style={{
+                  whiteSpace: 'pre-wrap',
+                  wordBreak: 'break-word',
+                  fontSize: '14px',
+                  lineHeight: '22px'
+                }}
+              >
+                {checkMessage}
+              </div>
+            )}
+          </div>
         </CollapseItem>
       </Collapse>
     </div>
@@ -256,9 +351,19 @@ export default function DataLoadCreate() {
   const [selectedTreeKeys, setSelectedTreeKeys] = useState<string[]>([]);
   const [uploadedFiles, setUploadedFiles] = useState<FileData[]>([]);
   const [isFileUploading, setIsFileUploading] = useState(false);
-  const [dropdownVisible, setDropdownVisible] = useState(false);
   const [directoryData, setDirectoryData] = useState<TreeNodeData[]>([]);
-  const [tableList, setTableList] = useState<string[]>([]);
+  const [selectedPath, setSelectedPath] = useState<string>('');
+  const [tableList, setTableList] = useState<TableItem[]>([]);
+  const rawTableListRef = useRef<TableItem[]>([]); // 保存原始数据
+  const [tableLoading, setTableLoading] = useState<boolean>(false);
+  const [tableSearchValue, setTableSearchValue] = useState<string>('');
+  const [sqlContent, setSqlContent] = useState<string>('');
+  const [checkStatus, setCheckStatus] = useState<CheckSQLStatus>(
+    CheckSQLStatus.NONE
+  );
+  const [checkMessage, setCheckMessage] = useState<string>('');
+  const [selectedNodeType, setSelectedNodeType] =
+    useState<TreeNodeData['type_name']>();
 
   // 处理树形数据的通用函数
   const processTreeData = useCallback(
@@ -305,7 +410,8 @@ export default function DataLoadCreate() {
             processedItem.hasChildren = processedItem.children.length > 0;
           } else if (typeof item.children === 'object') {
             // 对象形式的 children 保留原始结构，由 ComponentTree 组件处理
-            // 这里暂时不处理，让 ComponentTree 组件自己处理
+            // 需要将对象形式的 children 赋值给 processedItem.children，以便 ComponentTree 可以访问
+            processedItem.children = item.children as any;
             processedItem.hasChildren = Object.values(item.children).some(
               (value: any) => Array.isArray(value) && value.length > 0
             );
@@ -325,7 +431,7 @@ export default function DataLoadCreate() {
     TreeNodeData[]
   > => {
     try {
-      const res = await getDirectoryList({ root_type: 1 });
+      const res = await getDirectoryList({});
 
       if (!res || res.status !== 200) {
         console.error('获取目录列表失败:', res);
@@ -359,52 +465,245 @@ export default function DataLoadCreate() {
     return await getdirectoryDataList();
   }, [getdirectoryDataList]);
 
+  // 处理表格列表数据，为每个节点添加 checkable 属性（只有叶子节点可勾选）
+  const processTableListWithCheckable = useCallback(
+    (data: TableItem[], parentTitle?: string): TableItem[] => {
+      return data.map((item) => {
+        const isLeaf = !item.children || item.children.length === 0;
+        // 如果有父节点，将父节点名称拼接到 value 前面
+        const value = parentTitle ? `${parentTitle}.${item.title}` : item.title;
+        const processedItem: TableItem = {
+          ...item,
+          checkable: isLeaf,
+          key: value,
+          value: value
+        };
+
+        // 递归处理子节点，传递当前节点的完整路径（value）作为父节点名称
+        if (item.children && item.children.length > 0) {
+          processedItem.children = processTableListWithCheckable(
+            item.children,
+            value
+          );
+        }
+
+        return processedItem;
+      });
+    },
+    []
+  );
+
+  const processTableListForSingleSelect = useCallback(
+    (data: TableItem[], parentTitle?: string): TableItem[] => {
+      return data.map((item) => {
+        // 如果有父节点，将父节点名称拼接到 value 前面
+        // 始终基于 title 构建路径，确保路径的一致性
+        const value = parentTitle ? `${parentTitle}.${item.title}` : item.title;
+        const processedItem: TableItem = {
+          ...item,
+          key: value,
+          value: value
+        };
+
+        // 递归处理子节点，传递当前节点的完整路径（value）作为父节点名称
+        if (item.children && item.children.length > 0) {
+          processedItem.children = processTableListForSingleSelect(
+            item.children,
+            value
+          );
+        }
+
+        return processedItem;
+      });
+    },
+    []
+  );
+
   // 获取连接器详情和表格列表
   const getConnectorDetailList = useCallback(
     async (connectorId: string) => {
+      setTableList([]);
+      rawTableListRef.current = [];
+
       if (!connectorId) {
         console.log('connector_id为空，跳过获取表格数据');
         return;
       }
 
+      if (tableLoading) {
+        console.log('表格数据正在加载，跳过获取表格数据');
+        return;
+      }
+
       try {
+        setTableLoading(true);
         const res = await getdetailList({ id: connectorId });
 
-        if (sourceType === SOURCE_TYPES.DB) {
-          const tableNameRes = await getTableName({
-            connector_id: connectorId
-          });
-          setTableNames(tableNameRes?.data || '');
+        if (!res || res.status !== 200) {
+          Message.error(res?.message || '获取连接器表格数据失败');
+          return;
         }
 
-        setTableList(res?.data?.table_name || []);
+        // 移除这里的 setTableNames('')，因为 useEffect 中已经处理了重置逻辑
+        // 如果在这里重置，可能会在 getTableName 返回结果后覆盖它
+
+        // 保存原始数据
+        // const rawData = res?.data?.table_name || [];
+        // rawTableListRef.current = rawData;
+
+        // 处理表格列表，为每个节点添加 checkable 属性
+        if (selectedNodeType !== 'metadata') {
+          const processedTableList = processTableListWithCheckable(
+            res?.data?.table_name ?? []
+          );
+          setTableList(processedTableList);
+        } else {
+          const processedTableListSingle = processTableListForSingleSelect(
+            res?.data?.table_name ?? []
+          );
+          setTableList(processedTableListSingle);
+        }
+
+        // 重置搜索值
+        setTableSearchValue('');
       } catch (error) {
         console.error('获取连接器表格数据失败:', error);
         Message.error('获取连接器表格数据失败');
+      } finally {
+        setTableLoading(false);
       }
     },
-    [sourceType]
+    [sourceType, selectedNodeType, processTableListWithCheckable]
   );
+
+  // 计算过滤后的表格列表（基于搜索关键词）
+  // const filteredTableList = useMemo(() => {
+  //   if (!tableSearchValue.trim()) {
+  //     return tableList;
+  //   }
+  //   const searchLower = tableSearchValue.toLowerCase();
+  //   return tableList.filter((table) =>
+  //     table.toLowerCase().includes(searchLower)
+  //   );
+  // }, [tableList, tableSearchValue]);
+
+  // 计算选中状态：'all' | 'indeterminate' | 'none'
+  // const getSelectAllStatus = useCallback(
+  //   (selectedValues: string[]): 'all' | 'indeterminate' | 'none' => {
+  //     if (!Array.isArray(selectedValues) || filteredTableList.length === 0) {
+  //       return 'none';
+  //     }
+  //     const filteredValues = selectedValues.filter((item) => item !== 'all');
+  //     const selectedCount = filteredValues.length;
+  //     if (selectedCount === 0) {
+  //       return 'none';
+  //     }
+  //     // 检查是否所有过滤后的选项都被选中
+  //     const allFilteredSelected = filteredTableList.every((option) =>
+  //       filteredValues.includes(option)
+  //     );
+  //     if (allFilteredSelected && selectedCount === filteredTableList.length) {
+  //       return 'all';
+  //     }
+  //     // 检查是否有部分选中
+  //     const someFilteredSelected = filteredTableList.some((option) =>
+  //       filteredValues.includes(option)
+  //     );
+  //     return someFilteredSelected ? 'indeterminate' : 'none';
+  //   },
+  //   [filteredTableList]
+  // );
+
+  // 处理"全部"选项的点击事件
+  // const handleAllClick = useCallback(
+  //   (e: React.MouseEvent) => {
+  //     e.stopPropagation();
+  //     const currentValue = form.getFieldValue('table_name') || [];
+  //     const filteredValue = currentValue.filter(
+  //       (item: string) => item !== 'all'
+  //     );
+
+  //     // 判断是否全选（基于过滤后的列表）
+  //     const isAllSelected =
+  //       filteredTableList.length > 0 &&
+  //       filteredTableList.every((option) => filteredValue.includes(option));
+
+  //     if (isAllSelected) {
+  //       // 当前全选，取消所有过滤后选项的选择（保留其他未过滤的选项）
+  //       const remainingValues = filteredValue.filter(
+  //         (item: string) => !filteredTableList.includes(item)
+  //       );
+  //       form.setFieldsValue({ table_name: remainingValues });
+  //     } else {
+  //       // 当前未全选或未选择，选中所有过滤后的选项
+  //       if (filteredTableList.length > 0) {
+  //         const newValues = [
+  //           ...new Set([...filteredValue, ...filteredTableList])
+  //         ];
+  //         form.setFieldsValue({ table_name: newValues });
+  //       }
+  //     }
+  //   },
+  //   [form, filteredTableList]
+  // );
 
   // 处理表格名称选择（全部标签逻辑）
-  const handleAllTagChange = useCallback(
-    (value: string[]) => {
-      if (value.includes('all')) {
-        form.setFieldsValue({ table_name: ['all'] });
-      } else {
-        const filteredValue = value.filter((item) => item !== 'all');
-        const hasAllOtherOptions =
-          tableList.length > 0 &&
-          tableList.every((option) => filteredValue.includes(option)) &&
-          filteredValue.length === tableList.length;
+  // const handleAllTagChange = useCallback(
+  //   (value: string | string[]) => {
+  //     // 单选模式下，value 是字符串；多选模式下，value 是数组
+  //     const isSingleMode = selectedNodeType === 'metadata';
 
-        form.setFieldsValue({
-          table_name: hasAllOtherOptions ? ['all'] : filteredValue
-        });
-      }
-    },
-    [form, tableList]
-  );
+  //     if (isSingleMode) {
+  //       // 单选模式：直接设置单个值
+  //       form.setFieldsValue({ table_name: value || undefined });
+  //       return;
+  //     }
+
+  //     // 多选模式：处理数组逻辑
+  //     const currentValue = Array.isArray(value) ? value : [];
+  //     const previousValue = form.getFieldValue('table_name') || [];
+  //     const previousArray = Array.isArray(previousValue) ? previousValue : [];
+
+  //     // 检查是否点击了"全部"选项（通过比较前后值的变化）
+  //     const previousHasAll = previousArray.includes('all');
+  //     const currentHasAll = currentValue.includes('all');
+  //     const clickedAll = previousHasAll !== currentHasAll;
+
+  //     if (clickedAll && currentHasAll) {
+  //       // 如果点击了"全部"选项（当前值包含 'all'），切换全选状态
+  //       const filteredPrevious = previousArray.filter(
+  //         (item: string) => item !== 'all'
+  //       );
+  //       // 判断是否全选（基于过滤后的列表）
+  //       const isAllSelected =
+  //         filteredTableList.length > 0 &&
+  //         filteredTableList.every((option) =>
+  //           filteredPrevious.includes(option)
+  //         );
+
+  //       if (isAllSelected) {
+  //         // 当前全选，取消所有过滤后选项的选择（保留其他未过滤的选项）
+  //         const remainingValues = filteredPrevious.filter(
+  //           (item: string) => !filteredTableList.includes(item)
+  //         );
+  //         form.setFieldsValue({ table_name: remainingValues });
+  //       } else {
+  //         // 当前未全选或未选择，选中所有过滤后的选项
+  //         if (filteredTableList.length > 0) {
+  //           const newValues = [
+  //             ...new Set([...filteredPrevious, ...filteredTableList])
+  //           ];
+  //           form.setFieldsValue({ table_name: newValues });
+  //         }
+  //       }
+  //     } else {
+  //       // 正常选择，过滤掉 'all' 值
+  //       const filteredValue = currentValue.filter((item) => item !== 'all');
+  //       form.setFieldsValue({ table_name: filteredValue });
+  //     }
+  //   },
+  //   [form, filteredTableList, selectedNodeType]
+  // );
 
   // 处理文件变化
   const handleFileChange = useCallback(
@@ -412,15 +711,16 @@ export default function DataLoadCreate() {
       if (Array.isArray(fileData)) {
         if (fileData.length === 0) {
           setUploadedFiles([]);
-          if (sourceType === SOURCE_TYPES.LOCAL) {
-            form.setFieldsValue({ connector_id: undefined });
-          }
+          // if (sourceType === SOURCE_TYPES.LOCAL) {
+          //   // form.setFieldsValue({ connector_id: undefined });
+          // }
           return;
         }
+
         setUploadedFiles(fileData);
-        if (sourceType === SOURCE_TYPES.LOCAL) {
-          form.setFieldsValue({ connector_id: 'local_files_uploaded' });
-        }
+        // if (sourceType === SOURCE_TYPES.LOCAL) {
+        //   // form.setFieldsValue({ connector_id: 'local_files_uploaded' });
+        // }
         return;
       }
 
@@ -434,9 +734,9 @@ export default function DataLoadCreate() {
         return [...prev, fileData];
       });
 
-      if (sourceType === SOURCE_TYPES.LOCAL) {
-        form.setFieldsValue({ connector_id: 'local_files_uploaded' });
-      }
+      // if (sourceType === SOURCE_TYPES.LOCAL) {
+      //   // form.setFieldsValue({ connector_id: 'local_files_uploaded' });
+      // }
     },
     [form, sourceType]
   );
@@ -447,7 +747,7 @@ export default function DataLoadCreate() {
       setUploadedFiles((prev) => {
         const updatedFiles = prev.filter((file) => file.name !== fileName);
         if (updatedFiles.length === 0 && sourceType === SOURCE_TYPES.LOCAL) {
-          form.setFieldsValue({ connector_id: undefined });
+          // form.setFieldsValue({ connector_id: undefined });
         }
         return updatedFiles;
       });
@@ -474,21 +774,35 @@ export default function DataLoadCreate() {
   );
 
   // 切换数据源类型
-  const handleSourceTypeChange = useCallback((e: any) => {
-    const newSourceType = e.target.value;
-    console.log('切换数据源类型到:', newSourceType);
-    setDirectoryData([]);
-    setTableList([]);
-    setConnectName([]);
-    setSourceType(newSourceType);
-  }, []);
+  const handleSourceTypeChange = useCallback(
+    (value: string) => {
+      console.log('切换数据源类型到:', value);
+      setDirectoryData([]);
+      setTableList([]);
+      rawTableListRef.current = [];
+      setTableSearchValue('');
+      setConnectName([]);
+      setSourceType(value);
+      // 清空绑定连接器
+      form.setFieldsValue({ connector_id: undefined });
+      // 清空相关状态
+      setTableNames('');
+      setSqlContent('');
+      setCheckStatus(CheckSQLStatus.NONE);
+      setCheckMessage('');
+      setSelectedNodeType(undefined);
+      form.setFieldsValue({
+        table_name: undefined,
+        sql_process_enabled: 'disable'
+      });
+    },
+    [form]
+  );
 
   // 构建表单数据
   const buildFormData = useCallback(
     (formValues: FormValues, pathId: string | number, submitType: string) => {
-      const processedTableNames = formValues.table_name?.includes('all')
-        ? tableList
-        : formValues.table_name || uploadedFiles;
+      const processedTableNames = formValues.table_name || uploadedFiles;
 
       return {
         task_name: formValues.name,
@@ -500,10 +814,14 @@ export default function DataLoadCreate() {
           cycle_text:
             loadVal === LOAD_TYPES.ONCE ? DEFAULT_ONCE_CYCLE : expression
         },
-        dest_path_id: pathId,
+        dest_path_id: Number(pathId),
         submit_type: submitType === SUBMIT_TYPES.KEEP ? 1 : 2,
-        table_names: processedTableNames,
-        db_name: sourceType === SOURCE_TYPES.DB ? tableNames : null
+        table_names: Array.isArray(processedTableNames)
+          ? processedTableNames
+          : [processedTableNames],
+        db_name: sourceType === SOURCE_TYPES.DB ? tableNames : null,
+        sql: formValues.sql_process_enabled === 'enable' ? formValues.sql : '',
+        path_type: selectedNodeType
       };
     },
     [sourceType, loadVal, expression, tableList, uploadedFiles, tableNames]
@@ -516,19 +834,38 @@ export default function DataLoadCreate() {
         return '请选择载入位置';
       }
 
-      if (sourceType === SOURCE_TYPES.DB) {
-        const processedTableNames = formValues.table_name?.includes('all')
-          ? tableList
-          : formValues.table_name;
+      if (
+        sourceType === SOURCE_TYPES.DB &&
+        formValues.sql_process_enabled === 'disable'
+      ) {
+        const tableNameValues = formValues.table_name || [];
+        // const isAllSelected =
+        //   Array.isArray(tableNameValues) &&
+        //   tableNameValues.length === tableList.length &&
+        //   tableList.every((option) => tableNameValues.includes(option));
+        const processedTableNames = formValues.table_name;
 
         if (!processedTableNames || processedTableNames.length === 0) {
           return '请选择要抽取的表';
         }
       }
 
+      if (
+        sourceType === SOURCE_TYPES.DB &&
+        formValues.sql_process_enabled === 'enable'
+      ) {
+        if (!formValues.sql) {
+          return '请输入SQL语句';
+        }
+      }
+
+      if (checkStatus === CheckSQLStatus.ERROR) {
+        return '运行失败，请重新检查语句';
+      }
+
       return null;
     },
-    [sourceType, tableList]
+    [sourceType, tableList, checkStatus]
   );
 
   // 处理表单提交
@@ -555,11 +892,67 @@ export default function DataLoadCreate() {
           }
         }
 
+        // SQL 处理开启时，确保 SQL 已通过校验
+        if (
+          sourceType === SOURCE_TYPES.DB &&
+          formValues.sql_process_enabled === 'enable'
+        ) {
+          const sqlToCheck = (formValues.sql || '').trim();
+          const currentConnectorId =
+            formValues.connector_id || form.getFieldValue('connector_id');
+
+          if (!currentConnectorId) {
+            Message.error('请先选择数据源连接器');
+            return;
+          }
+
+          if (!sqlToCheck) {
+            Message.error('请输入SQL语句');
+            return;
+          }
+
+          if (checkStatus === CheckSQLStatus.NONE) {
+            setCheckStatus(CheckSQLStatus.CHECKING);
+            setCheckMessage('');
+
+            try {
+              const checkRes = await checkSQL({
+                sql: sqlToCheck,
+                connectorId: Number(currentConnectorId)
+              });
+
+              if (
+                checkRes?.status === 200 &&
+                checkRes.data?.status === CheckSQLStatus.SUCCESS
+              ) {
+                setCheckStatus(CheckSQLStatus.SUCCESS);
+                setCheckMessage(checkRes.data?.msg || '');
+              } else {
+                const failedStatus =
+                  checkRes?.data?.status ?? CheckSQLStatus.ERROR;
+                const failedMessage =
+                  checkRes?.data?.msg || checkRes?.message || 'SQL校验失败';
+                setCheckStatus(failedStatus);
+                setCheckMessage(failedMessage);
+                Message.error(failedMessage);
+                return;
+              }
+            } catch (err: any) {
+              const errorMessage = err?.message || 'SQL校验异常，请稍后重试';
+              setCheckStatus(CheckSQLStatus.ERROR);
+              setCheckMessage(errorMessage);
+              Message.error(errorMessage);
+              return;
+            }
+          }
+        }
+
         // 构建并提交表单数据
         if (!pathId) {
           Message.error('请选择载入位置');
           return;
         }
+        console.log('formValues', formValues);
         const formData = buildFormData(formValues, pathId, submitType);
         const res = await addLoad(formData);
 
@@ -580,12 +973,21 @@ export default function DataLoadCreate() {
         }
       } catch (error) {
         console.error('表单处理失败:', error);
-        Message.error('表单处理失败，请重试');
+        // Message.error('表单处理失败，请重试');
       } finally {
         setLoading(false);
       }
     },
-    [form, selectedNodeId, loadVal, validateFormData, buildFormData, history]
+    [
+      form,
+      selectedNodeId,
+      loadVal,
+      validateFormData,
+      buildFormData,
+      history,
+      sourceType,
+      checkStatus
+    ]
   );
 
   // 取消操作
@@ -601,22 +1003,133 @@ export default function DataLoadCreate() {
 
   // 处理路径变化
   const handlePathChange = useCallback(
-    (path: string, nodeId?: string | number) => {
-      console.log('路径变化:', path, '节点ID:', nodeId);
+    (path: string, nodeId?: string | number, nodeData?: TreeNodeData) => {
+      console.log('路径变化:', path, '节点ID:', nodeId, '节点数据:', nodeData);
       setSelectedNodeId(nodeId || null);
+      setSelectedPath(path);
       form.setFieldsValue({ dest_path: path ? [path] : undefined });
 
-      if (nodeId !== undefined && isNumber(nodeId)) {
-        setDropdownVisible(false);
+      setSelectedNodeType(nodeData?.type_name);
+
+      if (sourceType === SOURCE_TYPES.DB) {
+        // 当载入位置变化时，重置选择抽取的表
+        form.setFieldsValue({ table_name: undefined });
+        form.setFieldsValue({ db_name: nodeData?.name });
+
+        const currentConnectorId = form.getFieldValue('connector_id');
+        const typeName = nodeData?.type_name;
+
+        // if (!currentConnectorId) {
+        //   setTableNames('');
+        // } else if (typeName === 'db' || typeName === 'metadata') {
+        //   const generateType = typeName === 'metadata' ? 'metadata' : 'db';
+
+        //   void (async () => {
+        //     try {
+        //       const tableNameRes = await getTableName({
+        //         connector_id: currentConnectorId,
+        //         generate_type: generateType
+        //       });
+        //       setTableNames(tableNameRes?.data || '');
+        //     } catch (error) {
+        //       console.error('生成数据库名称失败:', error);
+        //       setTableNames('');
+        //       Message.error('生成数据库名称失败，请重试');
+        //     }
+        //   })();
+        // } else {
+        //   setTableNames('');
+        // }
       }
     },
-    [form]
+    [form, sourceType]
   );
 
   // 下拉框过滤选项
   const filterOption = useCallback((input: string, option: any) => {
     return option.props.children?.toLowerCase().includes(input.toLowerCase());
   }, []);
+
+  // 处理SQL内容变化
+  const handleSqlContentChange = useCallback((value: string) => {
+    setSqlContent(value);
+    // 当SQL内容变化时，重置校验状态
+    setCheckStatus((prevStatus) => {
+      if (prevStatus !== CheckSQLStatus.NONE) {
+        setCheckMessage('');
+        return CheckSQLStatus.NONE;
+      }
+      return prevStatus;
+    });
+    form.setFieldsValue({
+      sql: value
+    });
+  }, []);
+
+  const handleSqlProcessChange = useCallback(
+    (value: boolean) => {
+      form.setFieldsValue({
+        sql_process_enabled: value ? 'enable' : 'disable'
+      });
+    },
+    [form]
+  );
+
+  // 处理校验按钮点击
+  const handleCheckSQL = useCallback(async () => {
+    const currentConnectorId = form.getFieldValue('connector_id');
+
+    if (!currentConnectorId) {
+      Message.error('请先绑定连接器');
+      return;
+    }
+
+    if (!sqlContent || sqlContent.trim() === '') {
+      Message.error('请输入SQL语句');
+      return;
+    }
+
+    // 设置校验中状态
+    setCheckStatus(CheckSQLStatus.CHECKING);
+    setCheckMessage('');
+
+    try {
+      const res = await checkSQL({
+        sql: sqlContent.trim(),
+        connectorId: Number(currentConnectorId)
+      });
+
+      if (res?.status === 200 && res.data) {
+        // 根据返回的status更新校验状态
+        setCheckStatus(res.data.status);
+        setCheckMessage(res.data.msg || '');
+      } else {
+        setCheckStatus(CheckSQLStatus.ERROR);
+        setCheckMessage(res?.message || '校验失败');
+      }
+    } catch (error: any) {
+      setCheckStatus(CheckSQLStatus.ERROR);
+      setCheckMessage(error?.message || '校验异常，请稍后重试');
+    }
+  }, [sqlContent, form]);
+
+  const handleFormatCode = useCallback(() => {
+    if (checkStatus === CheckSQLStatus.CHECKING) {
+      Message.warning('SQL校验中，暂不支持格式化');
+      return;
+    }
+
+    if (sqlContent) {
+      try {
+        const formattedCode = format(sqlContent, { language: 'sql' });
+        setSqlContent(formattedCode);
+        Message.success('格式化成功');
+      } catch (e) {
+        console.error(e);
+        Message.error('格式化失败');
+      }
+    }
+  }, [sqlContent, checkStatus]);
 
   // 监听连接器ID变化
   const connectorId = Form.useWatch('connector_id', form);
@@ -625,9 +1138,116 @@ export default function DataLoadCreate() {
       getConnectorDetailList(connectorId);
       if (sourceType === SOURCE_TYPES.DB) {
         form.setFieldsValue({ table_name: undefined });
+        setTableNames('');
+
+        // 如果载入位置已经有值，主动请求 getTableName
+        if (selectedPath && selectedNodeType) {
+          const typeName = selectedNodeType;
+          if (typeName === 'db' || typeName === 'metadata') {
+            const generateType = typeName === 'metadata' ? 'metadata' : 'db';
+
+            void (async () => {
+              try {
+                const tableNameRes = await getTableName({
+                  connector_id: connectorId,
+                  generate_type: generateType
+                });
+                if (tableNameRes?.status === 200) {
+                  setTableNames(tableNameRes?.data || '');
+                } else {
+                  setTableNames('');
+                  Message.error(
+                    tableNameRes?.message ?? '生成数据库名称失败，请重试'
+                  );
+                }
+              } catch (error) {
+                console.error('生成数据库名称失败:', error);
+                setTableNames('');
+                Message.error('生成数据库名称失败，请重试');
+              }
+            })();
+          }
+        }
+      } else {
+        setTableNames('');
       }
+    } else {
+      setTableNames('');
     }
-  }, [connectorId, sourceType, form, getConnectorDetailList]);
+  }, [
+    connectorId,
+    sourceType,
+    form,
+    getConnectorDetailList,
+    selectedPath,
+    selectedNodeType
+  ]);
+
+  // 当 selectedNodeType 改变时，重新处理现有的 tableList
+  // useEffect(() => {
+  //   if (rawTableListRef.current.length > 0) {
+  //     if (selectedNodeType !== 'metadata') {
+  //       // 多选模式：只有叶子节点可勾选
+  //       const processedTableList = processTableListWithCheckable(rawTableListRef.current);
+  //       setTableList(processedTableList);
+  //     } else {
+  //       // 单选模式：禁用所有复选框
+  //       const processedTableList = processTableListForSingleSelect(rawTableListRef.current);
+  //       setTableList(processedTableList);
+  //     }
+  //   }
+  // }, [selectedNodeType, processTableListWithCheckable, processTableListForSingleSelect]);
+
+  // 监听载入位置变化，用于控制SQL处理选项的显示
+  // const destPath = Form.useWatch('dest_path', form);
+
+  // 监听SQL处理开关状态
+  const sqlProcessEnabled = Form.useWatch('sql_process_enabled', form);
+
+  // 监听表选择状态
+  // const tableName = Form.useWatch('table_name', form);
+
+  // 计算是否禁用"关闭"选项：当选择了多个表时禁用
+  // const isDisableOptionDisabled = useMemo(() => {
+  //   const currentTableName = form.getFieldValue('table_name') || [];
+  //   const filteredValues = Array.isArray(currentTableName)
+  //     ? currentTableName.filter((item: string) => item !== 'all')
+  //     : [];
+  //   return filteredValues.length > 1;
+  // }, [tableName, form]);
+
+  // 计算"全部"选项的选中状态
+  // const selectAllStatus = useMemo(() => {
+  //   const currentTableName = form.getFieldValue('table_name') || [];
+  //   return getSelectAllStatus(
+  //     Array.isArray(currentTableName) ? currentTableName : []
+  //   );
+  // }, [tableName, form, getSelectAllStatus]);
+
+  const validateSQL = useCallback(
+    (value: string, callback: (error?: string) => void) => {
+      if (!value || value.trim() === '') {
+        callback('请输入SQL语句');
+        return;
+      }
+
+      if (checkStatus === CheckSQLStatus.ERROR) {
+        callback('运行失败，请重新检查语句');
+        return;
+      }
+
+      return callback();
+    },
+    [checkStatus]
+  );
+
+  // 初始化SQL处理默认值为"关闭"
+  useEffect(() => {
+    const currentSqlProcess = form.getFieldValue('sql_process_enabled');
+    if (!currentSqlProcess) {
+      form.setFieldsValue({ sql_process_enabled: 'disable' });
+    }
+  }, [form]);
 
   // 监听数据源类型变化
   useEffect(() => {
@@ -672,7 +1292,8 @@ export default function DataLoadCreate() {
     return () => {
       cancelled = true;
     };
-  }, [sourceType, form, getdirectoryDataList]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sourceType]); // 只监听 sourceType 变化，form 和 getdirectoryDataList 是稳定的引用
 
   // MutationObserver 清理
   useEffect(() => {
@@ -736,7 +1357,6 @@ export default function DataLoadCreate() {
         >
           <span
             style={{
-              color: '#1890ff',
               cursor: 'pointer',
               fontSize: '12px',
               padding: '2px 4px',
@@ -751,17 +1371,21 @@ export default function DataLoadCreate() {
   }, [form]);
 
   return (
-    <div className="h-full px-[20px]">
-      <div className="mb-[9px] mt-[17px] text-[20px] font-bold leading-[32px]">
+    <div className={classNames('h-full px-[20px] pt-[17px]')}>
+      <div className="mb-[9px] text-[20px] font-bold leading-[30px]">
         创建数据载入任务
       </div>
-      <div className="flex h-[calc(100%-58px-17px)] flex-col items-start justify-start overflow-y-auto rounded-[16px] bg-white p-[24px]">
+      <div
+        className={classNames(
+          'flex h-[calc(100%-39px-25px)] flex-col items-start justify-start overflow-y-auto rounded-[16px] bg-white',
+          styles['data-load-create-container']
+        )}
+      >
         <Form
           autoComplete="off"
           form={form}
-          labelCol={{ span: 3 }}
-          wrapperCol={{ span: 10 }}
           disabled={loading}
+          className={styles['data-load-form']}
         >
           <FormItem
             label="任务名称："
@@ -797,9 +1421,8 @@ export default function DataLoadCreate() {
             labelAlign="right"
             rules={[{ required: true, message: '请选择数据源类型' }]}
             initialValue={SOURCE_TYPES.S3}
-            onChange={handleSourceTypeChange}
           >
-            <RadioGroup>
+            <RadioGroup onChange={handleSourceTypeChange}>
               <Radio value={SOURCE_TYPES.S3}>对象存储(S3)</Radio>
               <Radio value={SOURCE_TYPES.HDFS}>HDFS</Radio>
               <Radio value={SOURCE_TYPES.DB}>数据库</Radio>
@@ -808,57 +1431,24 @@ export default function DataLoadCreate() {
           </FormItem>
 
           {sourceType !== SOURCE_TYPES.LOCAL ? (
-            <>
-              <FormItem
-                label="绑定连接器："
-                field="connector_id"
-                labelAlign="right"
-                rules={[{ required: true, message: '请选择连接器' }]}
+            <FormItem
+              label="绑定连接器："
+              field="connector_id"
+              labelAlign="right"
+              rules={[{ required: true, message: '请选择连接器' }]}
+            >
+              <Select
+                placeholder="请选择连接器"
+                showSearch
+                filterOption={filterOption}
               >
-                <Select
-                  placeholder="请选择连接器"
-                  showSearch
-                  filterOption={filterOption}
-                >
-                  {connectName.map((option) => (
-                    <Option key={option.key} value={option.key}>
-                      {option.label}
-                    </Option>
-                  ))}
-                </Select>
-              </FormItem>
-
-              {sourceType === SOURCE_TYPES.DB && (
-                <FormItem
-                  label="选择抽取的表："
-                  field="table_name"
-                  labelAlign="right"
-                  rules={[{ required: true, message: '请选择抽取的表' }]}
-                  extra="只能载入public schema的表"
-                >
-                  <Select
-                    className="select-tag-style"
-                    onChange={handleAllTagChange}
-                    ref={selectRef}
-                    mode="multiple"
-                    maxTagCount={{
-                      count: 2,
-                      render: renderTableTags
-                    }}
-                    placeholder="请选择抽取的表"
-                    style={{ width: '100%', minWidth: 0 }}
-                    allowClear
-                  >
-                    {tableList.length > 0 && <Option value="all">全部</Option>}
-                    {tableList.map((option) => (
-                      <Option key={option} value={option}>
-                        {option}
-                      </Option>
-                    ))}
-                  </Select>
-                </FormItem>
-              )}
-            </>
+                {connectName.map((option) => (
+                  <Option key={option.key} value={option.key}>
+                    {option.label}
+                  </Option>
+                ))}
+              </Select>
+            </FormItem>
           ) : (
             <FormItem
               label="选择文件："
@@ -885,32 +1475,6 @@ export default function DataLoadCreate() {
           )}
 
           <FormItem
-            label="载入形式："
-            initialValue={LOAD_TYPES.ONCE}
-            field="load_type"
-            labelAlign="right"
-            rules={[{ required: true, message: '请选择载入形式' }]}
-          >
-            <RadioGroup onChange={handleLoadTypeChange}>
-              <Radio value={LOAD_TYPES.ONCE}>单次载入</Radio>
-              {sourceType !== SOURCE_TYPES.LOCAL && (
-                <Radio value={LOAD_TYPES.CRON}>周期载入</Radio>
-              )}
-            </RadioGroup>
-          </FormItem>
-
-          {loadVal === LOAD_TYPES.CRON && (
-            <div className={Styles.cycleLoadingBox}>
-              <SchedulerRun
-                // @ts-expect-error
-                ref={SchedulerRunRef}
-                options={{}}
-                onOptionsChange={setExpression}
-              />
-            </div>
-          )}
-
-          <FormItem
             label="载入位置："
             field="dest_path"
             labelAlign="right"
@@ -929,87 +1493,212 @@ export default function DataLoadCreate() {
               ) : null
             }
           >
-            <TreeSelect
+            <ComponentTree
               className="db-tree-select"
               placeholder="请选择载入位置"
               allowClear
-              popupVisible={dropdownVisible}
-              onVisibleChange={setDropdownVisible}
-              dropdownMenuStyle={{
-                maxHeight: 300,
-                padding: 0,
-                overflow: 'hidden'
+              value={selectedPath}
+              onChange={(val) => {
+                setSelectedPath(val as string);
+                if (!val) {
+                  form.setFieldsValue({ dest_path: undefined });
+                  setSelectedNodeId(null);
+                  setSelectedTreeKeys([]);
+                }
               }}
-              dropdownRender={() => (
-                <ComponentTree
-                  directoryData={directoryData}
-                  onDirectoryDataChange={setDirectoryData}
-                  onSelect={handleTreeSelect}
-                  selectedKeys={selectedTreeKeys}
-                  onPathChange={handlePathChange}
-                  showAddTree={true}
-                  enableRootAdd={true}
-                  activeTab="src"
-                  onDataRefresh={handleDataRefresh}
-                  dataSourceType={sourceType}
-                  tableNameNames={tableNames}
-                />
-              )}
+              directoryData={directoryData}
+              onDirectoryDataChange={setDirectoryData}
+              onSelect={handleTreeSelect}
+              selectedKeys={selectedTreeKeys}
+              onPathChange={handlePathChange}
+              showAddTree={true}
+              enableRootAdd={true}
+              activeTab="src"
+              onDataRefresh={handleDataRefresh}
+              dataSourceType={sourceType}
+              tableNameNames={tableNames}
             />
           </FormItem>
 
-          <FormItem
-            label="SQL处理："
-            field="sql_process"
-            labelAlign="right"
-            rules={[{ required: true, message: '请输入SQL处理' }]}
-          >
-            <div
-              className={classNames(
-                styles['sql-editor-container'],
-                'rounded-[4px] border border-solid border-[#E2E8F0]'
-              )}
-            >
-              <div className="flex items-center gap-[8px] border-b border-solid border-[#E2E8F0] p-[12px] pb-[12px]">
-                <Button
-                  type="secondary"
-                  icon={<IconCaretRight className="mr-[4px]" />}
-                  className="h-[26px]"
-                  // onClick={handleRunClick}
+          {sourceType === SOURCE_TYPES.DB &&
+            selectedNodeType === 'metadata' && (
+              <>
+                <FormItem
+                  label="SQL处理："
+                  field="sql_process_enabled"
+                  labelAlign="right"
+                  rules={[{ required: true, message: '请选择SQL处理状态' }]}
+                  initialValue="enable"
                 >
-                  校验
-                </Button>
+                  <Switch
+                    checkedText="开"
+                    uncheckedText="关"
+                    checked={sqlProcessEnabled === 'enable'}
+                    onChange={handleSqlProcessChange}
+                  />
+                </FormItem>
 
-                <Button
-                  type="text"
-                  icon={<SQLFormatIcon />}
-                  // onClick={handleFormatCode}
-                  className="h-[26px]"
-                >
-                  格式化
-                </Button>
-              </div>
-              <CodeMirror
-                value={''}
-                // onChange={handleContentChange}
-                // placeholder={placeholderValue}
-                // readOnly={
-                //     !hasUpdatePermission || runStatus === RunningStatus.RUNNING
-                // }
-                theme={myTheme}
-                extensions={[sql({ upperCaseKeywords: true }), lintGutter()]}
-                basicSetup={{
-                  lineNumbers: true,
-                  highlightActiveLineGutter: false
+                {sqlProcessEnabled === 'enable' && (
+                  <FormItem
+                    className={styles['sql-editor-form-item']}
+                    label=" "
+                    field="sql"
+                    labelAlign="right"
+                    rules={[
+                      {
+                        required: true,
+                        validator: (value, callback) =>
+                          validateSQL(value as string, callback)
+                      }
+                    ]}
+                  >
+                    <div
+                      className={classNames(
+                        styles['sql-editor-container'],
+                        'rounded-[4px] border border-solid border-[#E2E8F0]'
+                      )}
+                    >
+                      <div className="flex items-center border-b border-solid border-[#E2E8F0] p-[12px] pb-[12px]">
+                        <Button
+                          type="secondary"
+                          disabled={!sqlContent || sqlContent.trim() === ''}
+                          icon={<ValidateIcon />}
+                          className="h-[26px]"
+                          onClick={handleCheckSQL}
+                          loading={checkStatus === CheckSQLStatus.CHECKING}
+                        >
+                          校验
+                        </Button>
+
+                        <Button
+                          type="text"
+                          icon={<SQLFormatIcon />}
+                          onClick={handleFormatCode}
+                          className={classNames(
+                            'h-[26px]',
+                            styles['format-button']
+                          )}
+                        >
+                          格式化
+                        </Button>
+                      </div>
+                      <CodeMirror
+                        value={sqlContent}
+                        onChange={handleSqlContentChange}
+                        placeholder={placeholderValue}
+                        // readOnly={
+                        //     !hasUpdatePermission || runStatus === RunningStatus.RUNNING
+                        // }
+                        theme={myTheme}
+                        extensions={[
+                          sql({ upperCaseKeywords: true }),
+                          lintGutter()
+                        ]}
+                        basicSetup={{
+                          lineNumbers: true,
+                          highlightActiveLineGutter: false
+                        }}
+                        className={styles['code-editor']}
+                      />
+                      {checkStatus !== CheckSQLStatus.NONE && (
+                        <RunningInfoPanel
+                          checkStatus={checkStatus}
+                          checkMessage={checkMessage}
+                        />
+                      )}
+                    </div>
+                  </FormItem>
+                )}
+              </>
+            )}
+
+          {sourceType === SOURCE_TYPES.DB && sqlProcessEnabled !== 'enable' && (
+            <FormItem
+              label="选择抽取的表："
+              field="table_name"
+              labelAlign="right"
+              rules={[{ required: true, message: '请选择抽取的表' }]}
+            >
+              <TreeSelect
+                onChange={(value) => {
+                  form.setFieldsValue({ table_name: value });
                 }}
-                className={styles['code-editor']}
+                loading={tableLoading}
+                multiple={selectedNodeType !== 'metadata'}
+                key={selectedNodeType}
+                treeCheckable={selectedNodeType !== 'metadata'}
+                maxTagCount={
+                  selectedNodeType !== 'metadata'
+                    ? {
+                        count: 2,
+                        render: (invisibleTagCount) => {
+                          const allTags =
+                            form.getFieldValue('table_name') || [];
+                          const remainingTags = allTags.slice(2);
+                          return (
+                            <Tooltip
+                              content={
+                                <div className="ml-[-4px] flex max-w-[300px] flex-wrap gap-1">
+                                  {remainingTags.map((item, i) => (
+                                    <Tag
+                                      key={i}
+                                      className="bg-[#E7ECF0] text-[14px] text-[#0F172A]"
+                                    >
+                                      {item}
+                                    </Tag>
+                                  ))}
+                                </div>
+                              }
+                            >
+                              +{invisibleTagCount}
+                            </Tooltip>
+                          );
+                        }
+                      }
+                    : undefined
+                }
+                allowClear
+                placeholder="请选择抽取的表"
+                treeData={tableList}
+                treeProps={{
+                  virtualListProps: {
+                    height: 300
+                  }
+                }}
               />
-              <RunningInfoPanel />
-            </div>
+            </FormItem>
+          )}
+
+          <FormItem
+            label="载入形式："
+            initialValue={LOAD_TYPES.ONCE}
+            field="load_type"
+            labelAlign="right"
+            rules={[{ required: true, message: '请选择载入形式' }]}
+          >
+            <RadioGroup onChange={handleLoadTypeChange}>
+              <Radio value={LOAD_TYPES.ONCE}>单次载入</Radio>
+              {sourceType !== SOURCE_TYPES.LOCAL && (
+                <Radio value={LOAD_TYPES.CRON}>周期载入</Radio>
+              )}
+            </RadioGroup>
+          </FormItem>
+
+          <FormItem label="">
+            {loadVal === LOAD_TYPES.CRON && (
+              // <div className={Styles.cycleLoadingBox}>
+              <SchedulerRun
+                // @ts-expect-error
+                ref={SchedulerRunRef}
+                options={{}}
+                onOptionsChange={setExpression}
+              />
+              // </div>
+            )}
           </FormItem>
         </Form>
 
-        <div className={Styles.footerBbtnBox}>
+        <div className={styles['footer-btn-box']}>
           <Button
             onClick={() => handleSubmit(SUBMIT_TYPES.RUN)}
             type="primary"

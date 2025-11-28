@@ -1,5 +1,11 @@
 .formContainer {
   position: relative;
+
+  :global(
+    .arco-select-single .arco-select-view-selector .arco-select-view-input
+  ) {
+    z-index: 0;
+  }
 }
 
 .importFieldsButton {
@@ -18,4 +24,10 @@
   display: flex;
   gap: 16px;
   z-index: 5;
+}
+
+.dataSourceCol {
+  min-width: 220px;
+  margin-bottom: 12px;
+  display: flex;
 }

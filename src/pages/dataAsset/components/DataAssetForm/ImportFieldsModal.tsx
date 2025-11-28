@@ -20,7 +20,7 @@ const ImportFieldsModal: React.FC<ImportFieldsModalProps> = ({
 }) => {
   const [form] = Form.useForm();
   const [isUploading, setIsUploading] = useState(false);
-  const [fileData, setFileData] = useState<UploadItem | null>(null);
+  const [fileData, setFileData] = useState<DataAssetField[] | null>(null);
 
   useEffect(() => {
     if (visible) {
@@ -31,25 +31,17 @@ const ImportFieldsModal: React.FC<ImportFieldsModalProps> = ({
   }, [visible, form]);
 
   const handleFileChange = useCallback(
-    (data: UploadItem) => {
-      setFileData(data);
-      // 验证文件字段
-      if (data?.status === UploadStatus.done) {
-        form.setFieldValue('fileData', data);
-        form.clearFields('fileData');
-      } else {
-        form.setFieldValue('fileData', null);
-      }
+    (data: DataAssetField[]) => {
+      setFileData(data ?? []);
+      form.setFieldValue('fileData', data ?? []);
     },
     [form]
   );
 
   const validateFileData = useCallback(
     (value: any, callback: any) => {
-      if (!fileData) {
-        // TODO: 联调放开验证
-        // callback('请选择并上传文件');
-        callback();
+      if (!fileData || fileData.length === 0) {
+        callback('请选择并上传文件');
       } else {
         callback();
       }
@@ -60,35 +52,7 @@ const ImportFieldsModal: React.FC<ImportFieldsModalProps> = ({
   const handleConfirm = async () => {
     try {
       const values = await form.validate();
-      // TODO: 确认返回值,先写死
-      // onConfirm(values.importType, fileData?.response?.data ?? []);
-      onConfirm(values.importType, [
-        {
-          nameZh: '111',
-          nameEn: '111',
-          type: 'string',
-          default: 'null',
-          required: true,
-          allowModify: true
-        },
-        {
-          nameZh: '222',
-          nameEn: '222',
-          type: 'number',
-          default: 'null',
-          required: true,
-          allowModify: true
-        },
-        {
-          nameZh: '333',
-          nameEn: '333',
-          type: 'boolean',
-          default: 'null',
-          required: true,
-          allowModify: true
-        }
-      ]);
-
+      onConfirm(values.importType, fileData ?? []);
       // 重置状态
       form.resetFields();
       setFileData(null);

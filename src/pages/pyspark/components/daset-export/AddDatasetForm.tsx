@@ -157,7 +157,7 @@ const DatasetForm = React.forwardRef<
 
   useEffect(() => {
     // 数据目录卷
-    getCatalogList({ root_type: 2 }).then(() => {});
+    getCatalogList({}).then(() => {});
 
     //连接器
     // TODO: ts错误
@@ -373,7 +373,7 @@ const DatasetForm = React.forwardRef<
             style={{ marginBottom: 16 }}
           >
             <Input
-              maxLength={128}
+              maxLength={255}
               showWordLimit
               // style={{ width: '100%', marginLeft: 10 }}
               placeholder="输入数据集名称"

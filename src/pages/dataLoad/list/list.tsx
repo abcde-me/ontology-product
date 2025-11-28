@@ -11,15 +11,14 @@ import { IconPlus } from '@arco-design/web-react/icon';
 import React, { useEffect, useState } from 'react';
 import Styles from './index.module.scss';
 import { ITableData } from './type';
-import LoadAddModal from './load-add-modal';
 import { useHistory } from 'react-router-dom';
 import { delLoad, getLoadList } from '@/api/loadApi';
 import './index.scss';
 import EllipsisPopoverCom from '@/components/ellipsis-popover-com';
+import EllipsisPopover from '@/components/ellipsis-popover-com';
 import noDataElement from '@/components/no-data';
 import { PermissionWrapper } from '@/components/PermissionGuard';
 import { DATA_LOAD_PERMISSIONS } from '@/config/permissions';
-import { OperationColumn } from '@ccf2e/arco-material';
 import { useHasPermission } from '@/hooks/usePermission';
 import getLabelByValue from '@/utils/getLabelByValue';
 import {
@@ -36,6 +35,31 @@ const InputSearch = Input.Search;
 export default function DataLoad() {
   const history = useHistory();
   const hasPermission = useHasPermission(DATA_LOAD_PERMISSIONS.CAN_GET);
+  // 跳转目录
+  const handleToDirectoryPath = (
+    id: string,
+    parent_id: string,
+    catalogType: string
+  ) => {
+    let newCatalogTypeVal = '';
+    catalogType?.split('/').map((item) => {
+      if (item === 'metadata') {
+        newCatalogTypeVal = 'metadata';
+      }
+      if (item === 'db') {
+        newCatalogTypeVal = 'db';
+      }
+      if (item === 'volume') {
+        newCatalogTypeVal = 'volume';
+      }
+    });
+    history.push(
+      `/tenant/compute/modaforge/dataCatalog/list?id=${id}&parent_id=${parent_id}&catalog_type=${newCatalogTypeVal}`
+    );
+  };
+  const renderEmptyPlaceholder = (value: string | null) => {
+    return value === '' || value == null ? '-' : value;
+  };
   const columns = [
     {
       title: '载入任务名称',
@@ -86,8 +110,8 @@ export default function DataLoad() {
               width: '8px',
               height: '8px',
               background:
-                item.status == RunState.FAILED
-                  ? RunStateType[RunState.FAILED].color
+                item.status == RunState.FAILURE
+                  ? RunStateType[RunState.FAILURE].color
                   : item.status == RunState.SUCCEED
                     ? RunStateType[RunState.SUCCEED].color
                     : item.status == RunState.RUNNING
@@ -101,8 +125,8 @@ export default function DataLoad() {
           <div style={{ marginLeft: '6px' }}>
             {item.status == RunState.SUCCEED &&
               RunStateType[RunState.SUCCEED].text}
-            {item.status == RunState.FAILED &&
-              RunStateType[RunState.FAILED].text}
+            {item.status == RunState.FAILURE &&
+              RunStateType[RunState.FAILURE].text}
             {item.status == RunState.RUNNING &&
               RunStateType[RunState.RUNNING].text}
             {item.status == RunState.STOPPED &&
@@ -116,8 +140,8 @@ export default function DataLoad() {
           value: RunStateType[RunState.SUCCEED].value
         },
         {
-          text: RunStateType[RunState.FAILED].text,
-          value: RunStateType[RunState.FAILED].value
+          text: RunStateType[RunState.FAILURE].text,
+          value: RunStateType[RunState.FAILURE].value
         },
         {
           text: RunStateType[RunState.RUNNING].text,
@@ -187,15 +211,22 @@ export default function DataLoad() {
       title: '载入位置',
       width: 200,
       ellipsis: true,
-      render: (_, item) => {
-        return (
-          <div>
-            {item.data_path_name !== '' ? (
-              <EllipsisPopoverCom value={item.data_path_name} isEdit={false} />
-            ) : (
-              '-'
-            )}
-          </div>
+      render: (_, record) => {
+        return renderEmptyPlaceholder(record.data_path_name) !== '-' ? (
+          <EllipsisPopover
+            value={record.data_path_name}
+            isEdit={false}
+            isLink
+            handleLink={() => {
+              handleToDirectoryPath(
+                record.data_path_id,
+                record.parent_id,
+                record.data_path_name
+              );
+            }}
+          />
+        ) : (
+          <span>-</span>
         );
       }
     },
@@ -430,6 +461,7 @@ export default function DataLoad() {
         padding: '20px 21px 20px 20px',
         borderRadius: '10px',
         marginTop: '20px',
+        marginRight: '20px',
         minHeight: 'calc(100% - 40px)'
       }}
     >
@@ -507,19 +539,6 @@ export default function DataLoad() {
           />
         )}
       </div>
-      <Modal
-        style={{ width: '680px' }}
-        title="创建数据载入任务"
-        visible={visible}
-        onOk={() => setVisible(false)}
-        onCancel={() => setVisible(false)}
-        autoFocus={false}
-        focusLock={true}
-        footer={null}
-        unmountOnExit={true}
-      >
-        <LoadAddModal hideModalHan={hideEditModal} getList={getdataLoadList} />
-      </Modal>
     </div>
   );
 }

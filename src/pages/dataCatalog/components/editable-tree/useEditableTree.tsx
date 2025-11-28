@@ -66,7 +66,7 @@ export function useEditableTree({ catalogTreeStore }) {
 
   const generateName = useCallback(
     (data: TreeDataType[], typeText?: string) => {
-      const baseName = `${activeTab === 'src' ? '源' : '目标'}${typeText || '目录'}`;
+      const baseName = `${typeText || '目录'}`;
       // const set = new Set(data.map((item) => item.name));
       // let x = data.length + 1;
       const name = `${baseName}_${Date.now()}`;
@@ -108,7 +108,7 @@ export function useEditableTree({ catalogTreeStore }) {
     const keys: string[] = [];
     const loop = (data: TreeDataType[]) => {
       data?.forEach?.((item) => {
-        if (typeof item.title === 'string' && item.title.indexOf(value) > -1) {
+        if (typeof item.title === 'string' && item.title?.indexOf(value) > -1) {
           if (item.parentKey) {
             keys.push(item.parentKey);
           }
@@ -149,9 +149,10 @@ export function useEditableTree({ catalogTreeStore }) {
       dataRef?.type_name !== 'db'
     ) {
       catalogTreeStore.setState({
+        extendsObj: dataRef?.extends ?? {},
         selectedKey: dataRef?.id ? String(dataRef.id) : selectedKeys[0], // 存储实际的数据ID
         selectedTreeKey: selectedKeys[0], // 存储完整的树节点key用于显示选中样式
-        selectedPath: dataRef?.fullPath,
+        selectedPath: dataRef?.fullPath || '',
         selectedNodeType: dataRef?.type_name || dataRef?.type || '', // 存储节点类型
         selectedParentId: dataRef?.parent_id ? String(dataRef.parent_id) : '' // 存储父节点ID
       });
@@ -218,7 +219,7 @@ export function useEditableTree({ catalogTreeStore }) {
     focusAndSelectInput();
   };
 
-  // 删除目录 or 卷 or 数据库表
+  // 删除目录 or 卷 or 数据库表 or 元数据
   const handleDelete = async (node: NodeProps, type: string) => {
     const { _key, dataRef } = node;
 
@@ -228,6 +229,7 @@ export function useEditableTree({ catalogTreeStore }) {
     }
     let newTreeData: TreeDataType[] = [...treeData];
     let res: Partial<ApiRes<any>> = {};
+    console.log(dataRef, type, '查看dataRef');
     if (type === 'db_item') {
       const params = {
         path_id: dataRef?.parent_id,
@@ -284,6 +286,7 @@ export function useEditableTree({ catalogTreeStore }) {
 
   // 添加子级元素（数据卷或数据库）
   const addSubVolume = (node: NodeProps) => {
+    console.log(node, '123node');
     const { dataRef } = node;
 
     const rawChildrenTreeData = rawTreeData.find(
@@ -303,45 +306,50 @@ export function useEditableTree({ catalogTreeStore }) {
       targetChildrenArray =
         rawChildrenTreeData?.children?.find((child) => child.type === 'db')
           ?.children ?? [];
-    } else if (dataRef?.type === 'meta_data') {
-      const name = generateName(
-        targetChildrenArray,
-        subLeafKeys[dataRef?.type] // 根据类型生成对应的名称
-      );
-
-      const cachTreeData = treeData.map((item: TreeDataType) => {
-        if (item.key === node.pathParentKeys?.[0]) {
-          // 找到对应类型的子节点并在其下添加新元素
-          item.children?.forEach((child: TreeDataType) => {
-            if (child.type === dataRef?.type) {
-              child.children?.unshift(genereteInputNode(name, node));
-            }
-          });
-        }
-        return item;
-      });
-
-      // 只展开当前操作的节点路径，避免展开同级节点
-      const newExpandedKeys = [...expandedKeys];
-      if (dataRef?.key && !newExpandedKeys.includes(dataRef.key)) {
-        newExpandedKeys.push(dataRef.key);
-      }
-      // 确保父节点也是展开状态
-      if (
-        node.pathParentKeys?.[0] &&
-        !newExpandedKeys.includes(node.pathParentKeys[0])
-      ) {
-        newExpandedKeys.push(node.pathParentKeys[0]);
-      }
-
-      catalogTreeStore.setState({
-        inputValue: name,
-        defaultName: name,
-        treeData: cachTreeData,
-        expandedKeys: newExpandedKeys
-      });
-      focusAndSelectInput();
+    } else if (dataRef?.type === 'metadata') {
+      targetChildrenArray =
+        rawChildrenTreeData?.children?.find(
+          (child) => child.type === 'metadata'
+        )?.children ?? [];
     }
+
+    const name = generateName(
+      targetChildrenArray,
+      subLeafKeys[dataRef?.type] // 根据类型生成对应的名称
+    );
+
+    const cachTreeData = treeData.map((item: TreeDataType) => {
+      if (item.key === node.pathParentKeys?.[0]) {
+        // 找到对应类型的子节点并在其下添加新元素
+        item.children?.forEach((child: TreeDataType) => {
+          if (child.type === dataRef?.type) {
+            child.children?.unshift(genereteInputNode(name, node));
+          }
+        });
+      }
+      return item;
+    });
+
+    // 只展开当前操作的节点路径，避免展开同级节点
+    const newExpandedKeys = [...expandedKeys];
+    if (dataRef?.key && !newExpandedKeys.includes(dataRef.key)) {
+      newExpandedKeys.push(dataRef.key);
+    }
+    // 确保父节点也是展开状态
+    if (
+      node.pathParentKeys?.[0] &&
+      !newExpandedKeys.includes(node.pathParentKeys[0])
+    ) {
+      newExpandedKeys.push(node.pathParentKeys[0]);
+    }
+
+    catalogTreeStore.setState({
+      inputValue: name,
+      defaultName: name,
+      treeData: cachTreeData,
+      expandedKeys: newExpandedKeys
+    });
+    focusAndSelectInput();
   };
 
   const onEditFinish = async (props: NodeProps) => {
@@ -407,12 +415,17 @@ export function useEditableTree({ catalogTreeStore }) {
 
           break;
 
-        case CatalogTypeEnum.meta_data:
+        case CatalogTypeEnum.metadata:
           // 新建元数据
           res = await addMetaData({
             name: fileName,
             parent_id: dataRef.parent_id
           });
+
+          if (res.status !== 200) {
+            Message.error(res?.message ?? '新建元数据失败');
+          }
+
           break;
 
         default:
@@ -480,23 +493,26 @@ export function useEditableTree({ catalogTreeStore }) {
           ) : (
             <>
               {/* 其他类型的操作按钮 */}
-              {['volume', 'db', 'meta_data'].every(
+              {['volume', 'db', 'metadata'].every(
                 (key) => dataRef?.type !== key
               ) && (
                 <>
                   {
-                    <PermissionWrapper
-                      permission={DATA_CATALOG_PERMISSIONS.CAN_UPDATE_DIRS}
-                    >
-                      <Tooltip color="white" content="重命名">
-                        <IconEdit
-                          className={
-                            'extra-icon mr-2 hover:text-[rgb(var(--primary-6))]'
-                          }
-                          onClick={() => handleEdit(node)}
-                        />
-                      </Tooltip>
-                    </PermissionWrapper>
+                    // 元数据节点不显示重命名按钮
+                    dataRef?.type !== CatalogTypeEnum.metadata && (
+                      <PermissionWrapper
+                        permission={DATA_CATALOG_PERMISSIONS.CAN_UPDATE_DIRS}
+                      >
+                        <Tooltip color="white" content="重命名">
+                          <IconEdit
+                            className={
+                              'extra-icon mr-2 hover:text-[rgb(var(--primary-6))]'
+                            }
+                            onClick={() => handleEdit(node)}
+                          />
+                        </Tooltip>
+                      </PermissionWrapper>
+                    )
                   }
                   {
                     <PermissionWrapper
@@ -532,7 +548,7 @@ export function useEditableTree({ catalogTreeStore }) {
               {/* 为数据卷、数据库和元数据都添加新建按钮 */}
               {(dataRef?.type === 'volume' ||
                 dataRef?.type === 'db' ||
-                dataRef?.type === 'meta_data') && (
+                dataRef?.type === 'metadata') && (
                 <PermissionWrapper
                   permission={DATA_CATALOG_PERMISSIONS.CAN_CREATE_VOLUME}
                 >

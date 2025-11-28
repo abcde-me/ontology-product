@@ -89,7 +89,7 @@ const AccessTable = (props) => {
             },
             {
               text: '失败',
-              value: RunState.FAILED
+              value: RunState.FAILURE
             }
           ]
         },
@@ -155,7 +155,8 @@ const AccessTable = (props) => {
                   ? STATUSTYPEARR[StatusType.FAIL].txt
                   : STATUSTYPEARR[StatusType.SYCCESS].txt}
               </div>
-              {item.status == StatusType.FAIL && (
+              {/* 目前后端不支持返回错误信息 */}
+              {/* {item.status == StatusType.FAIL && (
                 <Tooltip
                   mini
                   content={item.error_log}
@@ -165,7 +166,7 @@ const AccessTable = (props) => {
                     style={{ color: '#FB923C', fontSize: '16px' }}
                   />
                 </Tooltip>
-              )}
+              )} */}
             </div>
           ),
           filters: [
