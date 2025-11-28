@@ -129,16 +129,23 @@ export const useRagDetailStore = create<RagDetailState & RagDetailActions>(
         if (initialChunkId) {
           initialSelectedSegmentId = initialChunkId;
 
-          // 查找对应的目录树节点（type='Text' 且 id 等于 chunkId）
-          const findTextNodeByChunkId = (
+          // 查找对应的目录树节点（可选中的节点类型且 id 等于 chunkId）
+          const findSelectableNodeByChunkId = (
             nodes: DirectoryNode[]
           ): DirectoryNode | null => {
             for (const node of nodes) {
-              if (node.type === 'Text' && node.id === initialChunkId) {
+              // 匹配可选中的节点类型（Text、Image、Formula、Table）
+              if (
+                (node.type === 'Text' ||
+                  node.type === 'Image' ||
+                  node.type === 'Formula' ||
+                  node.type === 'Table') &&
+                node.id === initialChunkId
+              ) {
                 return node;
               }
               if (node.children) {
-                const found = findTextNodeByChunkId(node.children);
+                const found = findSelectableNodeByChunkId(node.children);
                 if (found) return found;
               }
             }
@@ -146,7 +153,7 @@ export const useRagDetailStore = create<RagDetailState & RagDetailActions>(
           };
 
           if (data.directory) {
-            const foundNode = findTextNodeByChunkId(data.directory);
+            const foundNode = findSelectableNodeByChunkId(data.directory);
             if (foundNode) {
               initialSelectedDirectoryNodeId = foundNode.id;
               // 如果没有传入 positions，则使用目录树节点的 position
@@ -227,7 +234,7 @@ export const useRagDetailStore = create<RagDetailState & RagDetailActions>(
         const clickedSegment = segments.find((seg) => seg.id === segmentId);
 
         // 查找目录树节点的逻辑：
-        // 1. 如果分段有 parentTitleId，优先查找 type='text' 且 chunk_id 等于分段 id 的节点
+        // 1. 优先查找 chunk_id 等于分段 id 的可选中节点（Text、Image、Formula、Table）
         // 2. 如果找不到，再查找包含该 segmentId 的节点
         const findNodeBySegmentId = (
           nodes: DirectoryNode[],
@@ -235,8 +242,14 @@ export const useRagDetailStore = create<RagDetailState & RagDetailActions>(
           targetParentTitleId?: string
         ): string | null => {
           for (const node of nodes) {
-            // 优先匹配：type='Text' 且 chunk_id 等于分段 id
-            if (node.type === 'Text' && node.id === targetSegmentId) {
+            // 优先匹配：可选中的节点类型（Text、Image、Formula、Table）且 chunk_id 等于分段 id
+            if (
+              (node.type === 'Text' ||
+                node.type === 'Image' ||
+                node.type === 'Formula' ||
+                node.type === 'Table') &&
+              node.id === targetSegmentId
+            ) {
               return node.id;
             }
 
@@ -294,8 +307,14 @@ export const useRagDetailStore = create<RagDetailState & RagDetailActions>(
       }
 
       // 根据节点类型决定是否高亮分段
-      if (clickedNode.type === 'Text') {
-        // type='Text': 高亮对应的分段（chunk_id 就是分段的 id）
+      // 对于可选中的节点类型（Text、Image、Formula、Table），高亮对应的分段
+      if (
+        clickedNode.type === 'Text' ||
+        clickedNode.type === 'Image' ||
+        clickedNode.type === 'Formula' ||
+        clickedNode.type === 'Table'
+      ) {
+        // 高亮对应的分段（chunk_id 就是分段的 id）
         set({ selectedSegmentId: clickedNode.id });
         // 滚动到该分段
         get().scrollToSegment(clickedNode.id);

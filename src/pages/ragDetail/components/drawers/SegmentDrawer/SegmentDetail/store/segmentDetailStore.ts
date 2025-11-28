@@ -163,7 +163,7 @@ export const useSegmentDetailStore = create<SegmentDetailStore>((set, get) => ({
         loading: false
       });
 
-      Message.success('保存成功');
+      Message.success('修改已保存，后台正在重新索引');
 
       // 重新获取分段详情数据以确保数据同步
       try {

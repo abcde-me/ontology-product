@@ -681,67 +681,80 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
             renderExtra={(node: any) => {
               const isEditing = node.dataRef?.showInput;
               if (isEditing) return null;
-
               return (
                 <div className={styles['directory-tree-extra']}>
                   {node?.type === 'directory' && (
-                    <Tooltip color="white" content="新建">
-                      <Dropdown
-                        trigger="click"
-                        position="bl"
-                        droplist={
-                          <Menu
-                            onClickMenuItem={(key) => {
-                              if (key === 'folder') {
-                                startRootCreate(true, node, true);
-                              } else if (key === 'file') {
-                                startRootCreate(false, node, true);
+                    <PermissionWrapper permission={PYSPARK_PERMISSIONS.CREATE}>
+                      <Tooltip color="white" content="新建">
+                        <Dropdown
+                          trigger="click"
+                          position="bl"
+                          droplist={
+                            <Menu
+                              onClickMenuItem={(key) => {
+                                if (key === 'folder') {
+                                  startRootCreate(true, node, true);
+                                } else if (key === 'file') {
+                                  startRootCreate(false, node, true);
+                                }
+                              }}
+                            >
+                              <Menu.Item key="file">新建PySpark</Menu.Item>
+                              <Menu.Item key="folder">新建文件夹</Menu.Item>
+                            </Menu>
+                          }
+                        >
+                          <IconPlus
+                            onClick={() => {
+                              if (!expandedKeys.includes(node?.dataRef?.id)) {
+                                setExpandedKeys(
+                                  [...expandedKeys, node?.dataRef?.id].map(
+                                    String
+                                  )
+                                );
                               }
                             }}
-                          >
-                            <Menu.Item key="file">新建PySpark</Menu.Item>
-                            <Menu.Item key="folder">新建文件夹</Menu.Item>
-                          </Menu>
-                        }
-                      >
-                        <IconPlus
-                          onClick={() => {
-                            if (!expandedKeys.includes(node?.dataRef?.id)) {
-                              setExpandedKeys(
-                                [...expandedKeys, node?.dataRef?.id].map(String)
-                              );
-                            }
-                          }}
-                          className="mr-1 text-[14px] hover:text-[rgb(var(--primary-6))]"
-                        />
-                      </Dropdown>
-                    </Tooltip>
+                            className="mr-1 text-[14px] hover:text-[rgb(var(--primary-6))]"
+                          />
+                        </Dropdown>
+                      </Tooltip>
+                    </PermissionWrapper>
                   )}
-                  <Tooltip color="white" content="重命名">
-                    <IconEdit
-                      className="mr-1 text-[14px] hover:text-[rgb(var(--primary-6))]"
-                      onClick={() => handleEdit(node)}
-                    />
-                  </Tooltip>
-                  {node?.type !== 'directory' && (
-                    <Tooltip color="white" content="复制并粘贴">
-                      <IconCopy
+                  <PermissionWrapper permission={PYSPARK_PERMISSIONS.MODIFY}>
+                    <Tooltip color="white" content="重命名">
+                      <IconEdit
                         className="mr-1 text-[14px] hover:text-[rgb(var(--primary-6))]"
-                        onClick={() => handleCopy(node as unknown as NodeProps)}
+                        onClick={() => handleEdit(node)}
                       />
                     </Tooltip>
+                  </PermissionWrapper>
+                  {node?.type !== 'directory' && (
+                    <PermissionWrapper permission={PYSPARK_PERMISSIONS.CREATE}>
+                      <Tooltip color="white" content="复制并粘贴">
+                        <IconCopy
+                          className="mr-1 text-[14px] hover:text-[rgb(var(--primary-6))]"
+                          onClick={() =>
+                            handleCopy(node as unknown as NodeProps)
+                          }
+                        />
+                      </Tooltip>
+                    </PermissionWrapper>
                   )}
                   {/* )} */}
                   {/* {node.dataRef?.type !== PythonItemType.Directory && */}
                   {/* node.dataRef?.perms?.includes(nowPermissions.CAN_COPY) && ( */}
                   {/* )} */}
                   {/* {node.dataRef?.perms?.includes(nowPermissions.CAN_DELETE) && ( */}
-                  <Tooltip color="white" content="删除">
-                    <IconDelete
-                      className="text-[14px] hover:text-[rgb(var(--primary-6))]"
-                      onClick={() => handleDelete(node as unknown as NodeProps)}
-                    />
-                  </Tooltip>
+                  <PermissionWrapper permission={PYSPARK_PERMISSIONS.DELETE}>
+                    <Tooltip color="white" content="删除">
+                      <IconDelete
+                        className="text-[14px] hover:text-[rgb(var(--primary-6))]"
+                        onClick={() =>
+                          handleDelete(node as unknown as NodeProps)
+                        }
+                      />
+                    </Tooltip>
+                  </PermissionWrapper>
                   {/* )} */}
                 </div>
               );

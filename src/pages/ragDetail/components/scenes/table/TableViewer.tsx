@@ -4,14 +4,22 @@
  */
 
 import React, { useState, useEffect, useRef } from 'react';
-import * as XLSX from 'xlsx';
 import { TableSegment } from '../../../types';
 import { useRagDetailStore } from '../../../store/ragDetailStore';
-import SegmentMarkdown from '../../common/SegmentMarkdown';
-import { containsMarkdown } from '../../../utils/excelUtils';
+import { parseExcelFromBinary } from './utils/excelParser';
+import { useTableScroll } from './hooks/useTableScroll';
+import TableHeader from './components/TableHeader';
+import TableBody from './components/TableBody';
+import TableNavigator from './components/TableNavigator';
+import {
+  LoadingState,
+  ErrorState,
+  EmptyState
+} from './components/LoadingStates';
+
 interface TableViewerProps {
   segments?: TableSegment[];
-  excelUrl?: string; // 新增：Excel文件URL
+  excelUrl?: string;
 }
 
 const TableViewer: React.FC<TableViewerProps> = ({}) => {
@@ -19,199 +27,58 @@ const TableViewer: React.FC<TableViewerProps> = ({}) => {
     useRagDetailStore();
   const [currentTableIndex, setCurrentTableIndex] = useState(0);
   const [excelSheets, setExcelSheets] = useState<TableSegment[]>([]);
-  const [needsHorizontalScroll, setNeedsHorizontalScroll] = useState(false);
-  const [tableWidth, setTableWidth] = useState<number>(0);
+
   const tableScrollRef = useRef<HTMLDivElement>(null);
   const horizontalScrollRef = useRef<HTMLDivElement>(null);
   const tableRef = useRef<HTMLTableElement>(null);
-  // 从URL加载Excel文件
-  useEffect(() => {
-    if (fileBinaryData) {
-      loadExcelFromUrl();
-    }
-  }, [fileBinaryData]);
 
-  const loadExcelFromUrl = () => {
-    const workbook = XLSX.read(fileBinaryData, { type: 'array' });
-    // 将每个工作表转换为TableSegment格式
-    const sheets: TableSegment[] = workbook.SheetNames.map(
-      (sheetName, index) => {
-        const worksheet = workbook.Sheets[sheetName];
-
-        // 将工作表转换为JSON数组，保留所有数据（包括空白行和空白单元格）
-        const jsonData: any[][] = XLSX.utils.sheet_to_json(worksheet, {
-          header: 1,
-          defval: '',
-          blankrows: true
-        });
-
-        if (jsonData.length === 0) {
-          return {
-            id: `sheet-${index}`,
-            content: sheetName,
-            charCount: 0,
-            segmentIndex: index,
-            tableData: {
-              headers: [],
-              rows: []
-            }
-          };
-        }
-
-        // 计算最大列数
-        const maxCols = Math.max(...jsonData.map((row) => row.length), 0);
-
-        // 第一行作为表头，如果第一行存在
-        const hasHeader = jsonData.length > 0;
-        const headerRow = hasHeader ? jsonData[0] : [];
-        const headers = Array.from({ length: maxCols }, (_, idx) => {
-          const cellValue = headerRow[idx];
-          return cellValue != null ? String(cellValue) : '';
-        });
-
-        // 剩余行作为数据行（如果第一行是表头，则从第二行开始）
-        const dataRows = hasHeader ? jsonData.slice(1) : jsonData;
-        const rows = dataRows.map((row) => {
-          const rowObj: Record<string, string> = {};
-          headers.forEach((header, idx) => {
-            const cellValue = row[idx];
-            rowObj[header || idx.toString()] =
-              cellValue != null ? String(cellValue) : '';
-          });
-          return rowObj;
-        });
-
-        let charCount = 0;
-        try {
-          charCount = JSON.stringify(jsonData).length;
-        } catch (error) {
-          console.error('计算字符数失败:', error);
-        }
-
-        return {
-          id: `sheet-${index}`,
-          content: sheetName,
-          charCount,
-          segmentIndex: index,
-          tableData: {
-            headers,
-            rows
-          }
-        };
-      }
-    );
-
-    setExcelSheets(sheets);
-    setCurrentTableIndex(0);
-  };
-
-  // 使用Excel数据或segments数据
+  // 使用Excel数据
   const displaySegments = excelSheets;
   const currentSegment = displaySegments[currentTableIndex];
   const tableData = currentSegment?.tableData;
 
-  // 检测是否需要横向滚动
+  // 使用滚动 Hook
+  const { needsHorizontalScroll, tableWidth } = useTableScroll({
+    tableScrollRef,
+    tableRef,
+    horizontalScrollRef,
+    tableData
+  });
+
+  // 从URL加载Excel文件
   useEffect(() => {
-    const checkScrollNeeded = () => {
-      const tableScroll = tableScrollRef.current;
-      const table = tableRef.current;
-
-      if (!tableScroll || !table) {
-        setNeedsHorizontalScroll(false);
-        setTableWidth(0);
-        return;
-      }
-
-      // 检测表格实际宽度是否超过容器宽度
-      const currentTableWidth = table.scrollWidth;
-      const containerWidth = tableScroll.clientWidth;
-      setTableWidth(currentTableWidth);
-      setNeedsHorizontalScroll(currentTableWidth > containerWidth);
-    };
-
-    // 初始检测
-    checkScrollNeeded();
-
-    // 监听窗口大小变化和表格大小变化
-    const resizeObserver = new ResizeObserver(checkScrollNeeded);
-    if (tableScrollRef.current) {
-      resizeObserver.observe(tableScrollRef.current);
+    if (fileBinaryData) {
+      const sheets = parseExcelFromBinary(fileBinaryData);
+      setExcelSheets(sheets);
+      setCurrentTableIndex(0);
     }
-    if (tableRef.current) {
-      resizeObserver.observe(tableRef.current);
-    }
+  }, [fileBinaryData]);
 
-    // 延迟检测，确保表格已渲染
-    const timeoutId = setTimeout(checkScrollNeeded, 100);
-
-    return () => {
-      resizeObserver.disconnect();
-      clearTimeout(timeoutId);
-    };
-  }, [tableData]);
-
-  // 同步横向滚动
-  useEffect(() => {
-    const tableScroll = tableScrollRef.current;
-    const horizontalScroll = horizontalScrollRef.current;
-
-    if (!tableScroll || !horizontalScroll || !needsHorizontalScroll) return;
-
-    const handleScroll = () => {
-      horizontalScroll.scrollLeft = tableScroll.scrollLeft;
-    };
-
-    tableScroll.addEventListener('scroll', handleScroll);
-    horizontalScroll.addEventListener('scroll', () => {
-      tableScroll.scrollLeft = horizontalScroll.scrollLeft;
-    });
-
-    return () => {
-      tableScroll.removeEventListener('scroll', handleScroll);
-    };
-  }, [tableData, needsHorizontalScroll]);
-
-  if (fileBinaryDataLoading) {
-    return (
-      <div className="flex h-full items-center justify-center bg-gray-100">
-        <div className="text-center">
-          <div className="mb-2 text-gray-600">正在加载Excel文件...</div>
-          <div className="text-sm text-gray-500">请稍候</div>
-        </div>
-      </div>
-    );
-  }
-
-  if (fileBinaryDataError) {
-    return (
-      <div className="flex h-full items-center justify-center bg-gray-100">
-        <div className="text-center">
-          <div className="mb-2 text-red-600">加载失败</div>
-        </div>
-      </div>
-    );
-  }
-
-  if (displaySegments.length === 0 || !tableData) {
-    return (
-      <div className="flex h-full items-center justify-center bg-gray-100">
-        <div className="text-gray-500">暂无表格数据</div>
-      </div>
-    );
-  }
-
-  // 渲染单元格内容
-  const renderCellContent = (content: string | number) => {
-    const contentStr = String(content);
-    if (containsMarkdown(contentStr)) {
-      return (
-        <div className="text-gray-900">
-          <SegmentMarkdown content={contentStr} className="!m-0 !p-0" />
-        </div>
-      );
-    }
-    return <span className="break-all text-gray-900">{contentStr}</span>;
+  // 导航处理
+  const handlePrevious = () => {
+    setCurrentTableIndex((prev) => Math.max(0, prev - 1));
   };
+
+  const handleNext = () => {
+    setCurrentTableIndex((prev) =>
+      Math.min(displaySegments.length - 1, prev + 1)
+    );
+  };
+
+  // 加载状态
+  if (fileBinaryDataLoading) {
+    return <LoadingState />;
+  }
+
+  // 错误状态
+  if (fileBinaryDataError) {
+    return <ErrorState />;
+  }
+
+  // 空数据状态
+  if (displaySegments.length === 0 || !tableData) {
+    return <EmptyState />;
+  }
 
   return (
     <div className="flex h-full flex-col bg-white">
@@ -223,7 +90,7 @@ const TableViewer: React.FC<TableViewerProps> = ({}) => {
         >
           <table
             ref={tableRef}
-            className={`border-collapse border ${
+            className={`border-collapse ${
               tableData.headers.length >= 4 ? '' : 'w-full'
             }`}
             style={
@@ -232,51 +99,33 @@ const TableViewer: React.FC<TableViewerProps> = ({}) => {
                     tableLayout: 'fixed',
                     width: `${tableData.headers.length * 200}px`
                   }
-                : { tableLayout: 'fixed', width: '100%' }
+                : {
+                    tableLayout: 'fixed',
+                    width: '100%'
+                  }
             }
           >
             {/* 表头 */}
-            {tableData?.headers && tableData.headers.length > 0 && (
-              <thead>
-                <tr className="bg-white">
-                  {tableData.headers.map((header, index) => (
-                    <th
-                      key={index}
-                      className="h-10 border-b px-4 text-left text-sm font-semibold text-gray-900"
-                      style={
-                        tableData.headers.length >= 4
-                          ? { width: '200px', minWidth: '200px' }
-                          : { width: `${100 / tableData.headers.length}%` }
-                      }
-                    >
-                      {header}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
+            {tableData?.headerRows && tableData.headerRows.length > 0 && (
+              <TableHeader
+                headerRows={tableData.headerRows}
+                headers={tableData.headers}
+                merges={tableData.merges}
+              />
             )}
+
             {/* 数据行 */}
-            <tbody>
-              {tableData?.rows.map((row, rowIndex) => (
-                <tr key={rowIndex} className="bg-white transition-colors">
-                  {tableData?.headers.map((header, colIndex) => (
-                    <td
-                      key={colIndex}
-                      className="h-10 border-b px-4 text-sm"
-                      style={
-                        tableData.headers.length >= 4
-                          ? { width: '200px', minWidth: '200px' }
-                          : { width: `${100 / tableData.headers.length}%` }
-                      }
-                    >
-                      {renderCellContent(row[header])}
-                    </td>
-                  ))}
-                </tr>
-              ))}
-            </tbody>
+            {tableData?.rows && (
+              <TableBody
+                rows={tableData.rows}
+                headers={tableData.headers}
+                headerRowCount={tableData.headerRows?.length || 0}
+                merges={tableData.merges}
+              />
+            )}
           </table>
         </div>
+
         {/* 固定在底部的横向滚动条 - 仅在需要横向滚动时显示 */}
         {needsHorizontalScroll && (
           <div
@@ -295,6 +144,15 @@ const TableViewer: React.FC<TableViewerProps> = ({}) => {
             />
           </div>
         )}
+
+        {/* 表格导航 */}
+        <TableNavigator
+          currentIndex={currentTableIndex}
+          total={displaySegments.length}
+          currentName={currentSegment.content}
+          onPrevious={handlePrevious}
+          onNext={handleNext}
+        />
       </div>
     </div>
   );
