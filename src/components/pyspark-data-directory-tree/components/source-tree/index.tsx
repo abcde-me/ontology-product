@@ -131,6 +131,7 @@ const SourceTree: React.FC<SourceTreeProps> = ({
         ) : (
           <Tree
             loadMore={loadMore}
+            virtualListProps={{ height: '100%' }}
             showLine
             blockNode
             expandedKeys={expandedKeys}
@@ -158,6 +159,7 @@ const SourceTree: React.FC<SourceTreeProps> = ({
                 <div className="pyspark-source-tree__node">
                   <div className="pyspark-source-tree__node-info">
                     <EllipsisPopover
+                      preferTypography
                       className={`pyspark-source-tree__node-title pyspark-source-tree__node-title-${nodeData?.type}`}
                       value={highlightSearchKeyword(
                         String(nodeData?.title ?? ''),
@@ -167,6 +169,7 @@ const SourceTree: React.FC<SourceTreeProps> = ({
                     {(nodeData?.type === 'file' ||
                       nodeData?.type === 'volume_item') && (
                       <EllipsisPopover
+                        preferTypography
                         className={`pyspark-source-tree__node-size pyspark-source-tree__node-size-${nodeData?.type}`}
                         value={
                           nodeData?.type === 'file'
