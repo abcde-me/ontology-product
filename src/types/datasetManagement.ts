@@ -41,7 +41,7 @@ export interface DatasetListItem {
   /**
    * 最新版本存储表名
    */
-  latest_table?: string;
+  table?: string;
   /**
    * 最新版本ID
    */
