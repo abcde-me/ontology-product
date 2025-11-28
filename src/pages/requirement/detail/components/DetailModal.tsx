@@ -37,7 +37,7 @@ interface DataSourceModalProps {
   type: string | null;
   getChildTableSelectData: (data: any, key) => void;
   initialSelectedData?: any[]; // 添加初始选中数据参数
-  getDetailObj: any;
+  requirementDetail: any;
 }
 
 const InputSearch = Input.Search;
@@ -50,7 +50,7 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
   title = '选择数据',
   getChildTableSelectData,
   initialSelectedData = [], // 接收初始数据
-  getDetailObj
+  requirementDetail
 }) => {
   const tableRef = useRef<any>(null);
   const [treeData, setTreeData] = useState<any>([]);
@@ -271,10 +271,12 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
           <Tree
             actionOnClick={['select', 'expand']}
             blockNode={true}
-            defaultExpandedKeys={getDetailObj?.label_data_set?.[0]?.dir_name.split(
+            defaultExpandedKeys={requirementDetail?.label_data_set?.[0]?.dir_name.split(
               ','
             )}
-            defaultSelectedKeys={[getDetailObj?.label_data_set?.[0]?.dir_name]}
+            defaultSelectedKeys={[
+              requirementDetail?.label_data_set?.[0]?.dir_name
+            ]}
             autoExpandParent={false}
             treeData={treeData}
             // checkStrictly={checkStrictly}
@@ -523,16 +525,18 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
     if (type === 'detail') {
       if (value && value.length === 2) {
         const [start, end] = value;
-        const filteredData = getDetailObj?.label_data_set.filter((item) => {
-          return (
-            formatDateTime(item.load_start_time) >= start + ' 00:00:00' &&
-            formatDateTime(item.load_end_time) <= end + ' 23:59:59'
-          );
-        });
+        const filteredData = requirementDetail?.label_data_set.filter(
+          (item) => {
+            return (
+              formatDateTime(item.load_start_time) >= start + ' 00:00:00' &&
+              formatDateTime(item.load_end_time) <= end + ' 23:59:59'
+            );
+          }
+        );
         setTableData(filteredData);
       }
       if (value === null || value === undefined || value === '') {
-        setTableData(getDetailObj?.label_data_set);
+        setTableData(requirementDetail?.label_data_set);
       }
       return;
     }
@@ -554,8 +558,8 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
   };
 
   useEffect(() => {
-    if (type === 'detail' && visible && getDetailObj?.label_data_set) {
-      const detailData = getDetailObj.label_data_set;
+    if (type === 'detail' && visible && requirementDetail?.label_data_set) {
+      const detailData = requirementDetail.label_data_set;
       setTableData(detailData);
 
       // 将详情数据转换为已选数据格式
@@ -570,16 +574,16 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
       setSelectedRowsContent(convertedData);
       setSelectedRowKeys(convertedData.map((item) => item.execution_id));
     }
-  }, [getDetailObj, type, visible]);
+  }, [requirementDetail, type, visible]);
 
   // 详情模式下，当树形数据加载完成后，初始化路径映射
   useEffect(() => {
     if (
       type === 'detail' &&
-      getDetailObj?.label_data_set &&
+      requirementDetail?.label_data_set &&
       originalTreeData.length > 0
     ) {
-      const detailData = getDetailObj.label_data_set;
+      const detailData = requirementDetail.label_data_set;
       const newPathMap = new Map<string, string>();
       detailData.forEach((item: any) => {
         if (item.dir_name) {
@@ -593,7 +597,7 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
         setSelectedDataPathMap(newPathMap);
       }
     }
-  }, [type, getDetailObj, originalTreeData.length]);
+  }, [type, requirementDetail, originalTreeData.length]);
   return (
     <Modal
       title={title}
@@ -648,7 +652,7 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
                   style={{ width: 350 }}
                   onClear={() => {
                     if (type === 'detail') {
-                      setTableData(getDetailObj?.label_data_set);
+                      setTableData(requirementDetail?.label_data_set);
                     } else {
                       getTableData();
                     }

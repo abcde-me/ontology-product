@@ -111,7 +111,7 @@ const RoleAssignmentCard: React.FC<RoleAssignmentCardProps> = ({
         getChildTreeSelectData={() => {
           // 不在选择时立即触发，只在点击确认按钮时触发
         }}
-        getDetailObj={null}
+        requirementDetail={null}
         type="create"
       />
 
@@ -126,7 +126,7 @@ const RoleAssignmentCard: React.FC<RoleAssignmentCardProps> = ({
           // 不在选择时立即触发，只在点击确认按钮时触发
         }}
         getTreeIds={() => {}}
-        getDetailObj={null}
+        requirementDetail={null}
         type="create"
       />
     </div>

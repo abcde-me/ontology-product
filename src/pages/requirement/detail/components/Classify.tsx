@@ -17,7 +17,7 @@ import './Classify.scss';
 
 interface ClassifyComponentProps {
   type: any;
-  getDetailObj: any;
+  requirementDetail: any;
   getClassIfyData: any;
 }
 // 选项配置 1 单选 2 多选 3 输入框
@@ -36,7 +36,7 @@ const optionConfig = [
   }
 ];
 const Classify = (props: ClassifyComponentProps) => {
-  const { type, getDetailObj, getClassIfyData } = props;
+  const { type, requirementDetail, getClassIfyData } = props;
   const [formClassify] = Form.useForm();
   const Option = Select.Option;
   const FormItem = Form.Item;
@@ -84,7 +84,7 @@ const Classify = (props: ClassifyComponentProps) => {
   };
   useEffect(() => {
     if (type === 'detail') {
-      getDetailObj?.file_labels?.map((item) => {
+      requirementDetail?.file_labels?.map((item) => {
         formClassify.setFieldValue(
           `attribute_group_name${item?.order_num}`,
           item?.attribute_group_name
@@ -101,9 +101,9 @@ const Classify = (props: ClassifyComponentProps) => {
           );
         });
       });
-      setTextRelations(getDetailObj?.file_labels);
+      setTextRelations(requirementDetail?.file_labels);
     }
-  }, [getDetailObj]);
+  }, [requirementDetail]);
 
   useEffect(() => {
     getClassIfyData(textRelations, formClassify);

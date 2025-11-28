@@ -59,7 +59,7 @@ interface DataSourceModalProps {
   onClose: () => void;
   title?: string;
   getChildTreeSelectData: (data: any) => void;
-  getDetailObj: any;
+  requirementDetail: any;
   type: any;
   onConfirm?: (selectedIds: string[]) => void; // 新增：确认回调
   initialSelected?: string[]; // 新增：初始选中的部门ID列表
@@ -70,7 +70,7 @@ const DepartmentModal: React.FC<DataSourceModalProps> = ({
   onClose,
   title = '数据源',
   getChildTreeSelectData,
-  getDetailObj,
+  requirementDetail,
   type,
   onConfirm,
   initialSelected = []
@@ -87,10 +87,10 @@ const DepartmentModal: React.FC<DataSourceModalProps> = ({
     if (initialSelected && initialSelected.length > 0) {
       setCheckedKeys(initialSelected);
       setCheckedKeysDetail(initialSelected);
-    } else if (getDetailObj && type === 'detail') {
-      setCheckedKeysDetail(getDetailObj?.label_operate?.org_id || []);
+    } else if (requirementDetail && type === 'detail') {
+      setCheckedKeysDetail(requirementDetail?.label_operate?.org_id || []);
     }
-  }, [getDetailObj, initialSelected, type]);
+  }, [requirementDetail, initialSelected, type]);
   const getTreeData = () => {
     try {
       getDepartmentTreeList()

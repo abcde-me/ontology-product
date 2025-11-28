@@ -29,14 +29,14 @@ const btnList = [
 ];
 interface TextSubstanceComponentProps {
   type: any;
-  getDetailObj?: any;
+  requirementDetail?: any;
   getTextEntityData?: any;
 }
 
 // 实体 --  labels
 // 实体关系 --  entity_relations
 const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
-  const { type, getDetailObj, getTextEntityData } = props;
+  const { type, requirementDetail, getTextEntityData } = props;
   const [formText] = Form.useForm();
   const [formLabel] = Form.useForm();
   const Option = Select.Option;
@@ -125,10 +125,10 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
 
   useEffect(() => {
     if (type === 'detail') {
-      setEntityRelations(getDetailObj?.labels);
-      setRelationRelations(getDetailObj?.entity_relations);
+      setEntityRelations(requirementDetail?.labels);
+      setRelationRelations(requirementDetail?.entity_relations);
       // 修复起始标签内容设置
-      getDetailObj?.labels?.forEach((item) => {
+      requirementDetail?.labels?.forEach((item) => {
         formText.setFieldValue(
           `label_name_en${item.order_num}`,
           item.label_name_en
@@ -138,7 +138,7 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
           item.label_name_cn
         );
       });
-      getDetailObj?.entity_relations?.forEach((item) => {
+      requirementDetail?.entity_relations?.forEach((item) => {
         formLabel.setFieldValue(
           `relation_name_en${item.order_num}`,
           item.relation_name_en
@@ -157,7 +157,7 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
         );
       });
     }
-  }, [getDetailObj]);
+  }, [requirementDetail]);
 
   useEffect(() => {
     getTextEntityData(entityRelations, relationRelations, formText, formLabel);

@@ -1,4 +1,4 @@
-import { getRequirementDetail, publishRequirement } from '@/api/dataAnnotation';
+import { publishRequirement } from '@/api/dataAnnotation';
 import { useParams } from '@/utils/url';
 import {
   Breadcrumb,
@@ -26,7 +26,7 @@ import {
   IconQuestionCircle
 } from '@arco-design/web-react/icon';
 import { cloneDeep, isArray, isEmpty, omitBy } from 'lodash-es';
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useHistory } from 'react-router';
 import { v4 as uuidV4 } from 'uuid';
 import {
@@ -35,42 +35,40 @@ import {
   shapeOptions
 } from '../common';
 import {
+  useGetModelLabelList,
+  useGetModelList
+} from '../hooks/useGetModelInfo';
+import { useGetRequirementDetail } from '../hooks/useGetRequirementDetail';
+import {
   AnnotationChildType,
   AnnotationTypeContentCode,
   AnnotationTypeStatus,
-  LabelInfoAttributeGroupType,
-  LabelShape,
-  RequirementTypeNameMap,
-  toolFileType,
+  LabelData,
   LabelInfoAttribute,
   LabelInfoAttributeGroup,
-  LabelData
+  LabelInfoAttributeGroupType,
+  RequirementTypeNameMap,
+  toolFileType
 } from '../type';
 import AnnotationType from './components/AnnotationType';
 import { Classify } from './components/Classify';
-import { DepartmentModal } from './components/DepartmentModal';
 import { DataSourceModal } from './components/DetailModal';
-import { IndividualModal } from './components/IndividualModal';
-import TextSubstanceComponent from './components/TextEntity';
-import {
-  generateLabels,
-  generateInitialData,
-  LABEL_MAPPING
-} from './utils/generateLabels';
-import './detail.scss';
-import {
-  useGetModelList,
-  useGetModelLabelList
-} from '../hooks/useGetModelInfo';
 import QualityConfig from './components/QualityConfig';
 import {
+  formatSubmitData,
+  generateTaskPackages,
   TaskDistributionPanel,
   TaskPackage,
-  ValidationErrors,
-  generateTaskPackages,
   validateTaskAssignment,
-  formatSubmitData
+  ValidationErrors
 } from './components/TaskDistribution';
+import TextSubstanceComponent from './components/TextEntity';
+import './detail.scss';
+import {
+  generateInitialData,
+  generateLabels,
+  LABEL_MAPPING
+} from './utils/generateLabels';
 const BreadcrumbItem = Breadcrumb.Item;
 
 export default function RequirementDetail() {
@@ -89,7 +87,6 @@ export default function RequirementDetail() {
   const [selectedRadio, setSelectedRadio] = useState('');
   const [isShowErrorInfo, setIsShowErrorInfo] = useState(false);
   const [isShowDataErrorInfo, setIsShowDataErrorInfo] = useState(false);
-  const [isShowTypeErrorInfo, setIsShowTypeErrorInfo] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   // 类型定义
   const [taskTypeVal, setTaskTypeVal] = useState(2);
@@ -97,18 +94,10 @@ export default function RequirementDetail() {
   const [publishData, setPublishData] = useState<any>({});
   // 数据集 - 选中数据内容
   const [selectedData, setSelectedData]: any = useState([]);
-  // 任务分配选中的数据
-  const [taskAssignData, setTaskAssignData]: any = useState([]);
-  // 选项部门数据内容
-  const [departmentIds, setDepartmentIds] = useState([]);
   // 添加loading状态控制
   const [loading, setLoading] = useState(false);
   // 标签和属性
   const [activeTab, setActiveTab] = useState(1);
-  // 详情数据存储
-  const [getDetailObj, setGetDetailObj]: any = useState({});
-  const [departmentModalVisible, setDepartmentModalVisible] = useState(false);
-  const [individualModalVisible, setIndividualModalVisible] = useState(false);
   const [TextEntityDataContent, setTextEntityDataContent]: any = useState({});
   const [formType, setFormType]: any = useState({});
   const [text_fl_data, setText_fl_data] = useState([]);
@@ -123,6 +112,65 @@ export default function RequirementDetail() {
   const [taskDistributionErrors, setTaskDistributionErrors] =
     useState<ValidationErrors>({});
 
+  const { data: requirementDetail = {} } = useGetRequirementDetail({
+    requirement_id: Number(requirementId)
+  });
+
+  useEffect(() => {
+    if (!isEmpty(requirementDetail)) {
+      setAnnotationTypeContentCode(
+        requirementDetail?.label_tool?.label_tool_code
+      );
+      setAnnotationTypeContentVal(
+        requirementDetail?.label_tool?.label_tool_code
+      );
+      basicForm.setFieldValue('name', requirementDetail?.name);
+      basicForm.setFieldValue('description', requirementDetail?.description);
+      basicForm.setFieldValue('model_id', requirementDetail?.model_id);
+      setTaskTypeVal(requirementDetail?.team_type);
+      requirementDetail?.labels?.map((item) => {
+        labelToolForm.setFieldValue(
+          `label_name_cn_${item?.id}`,
+          item?.label_name_cn
+        );
+        labelToolForm.setFieldValue(
+          `label_name_en_${item?.id}`,
+          item?.label_name_en
+        );
+        if (item?.label_mappings) {
+          labelToolForm.setFieldValue(
+            `label_mappings_${item?.id}`,
+            item?.label_mappings
+          );
+        }
+        labelToolForm.setFieldValue(
+          `label_shape_${item?.id}`,
+          item?.label_shape
+        );
+        labelToolForm.setFieldValue(
+          `label_colour_${item?.id}`,
+          item?.label_colour
+        );
+        item?.label_info_attribute_groups?.map((group) => {
+          labelToolForm.setFieldValue(
+            `label_info_attribute_groups_${group?.id}_attribute_group_name`,
+            group?.attribute_group_name
+          );
+          group?.label_info_attribute?.map((attribute) => {
+            labelToolForm.setFieldValue(
+              `label_info_attribute_groups_${attribute?.id}_attribute_name_cn`,
+              attribute?.attribute_name_cn
+            );
+            labelToolForm.setFieldValue(
+              `label_info_attribute_groups_${attribute?.id}_attribute_name_en`,
+              attribute?.attribute_name_en
+            );
+          });
+        });
+      });
+      setLabelDataList(requirementDetail?.labels);
+    }
+  }, [requirementDetail]);
   // 监听 taskPackages 变化，自动清除已选人员的错误
   useEffect(() => {
     if (Object.keys(taskDistributionErrors).length > 0) {
@@ -163,7 +211,7 @@ export default function RequirementDetail() {
     const qualityRounds =
       qualityTaskForm.getFieldValue('qualityInspectionRounds') ?? 0;
     const totalDataAmount =
-      getTotal(selectedData) || getDetailObj?.label_count || 0;
+      getTotal(selectedData) || requirementDetail?.label_count || 0;
 
     if (splitCount && totalDataAmount && splitCount >= 1) {
       // 传入现有的taskPackages，保留已选数据
@@ -182,7 +230,7 @@ export default function RequirementDetail() {
   }, [
     publishData?.split_task_package,
     selectedData,
-    getDetailObj?.label_count
+    requirementDetail?.label_count
     // qualityInspectionRounds 需要通过表单变化触发
   ]);
   // 找到现有的useEffect，在其后添加一个新的useEffect来处理templateData的更新同步
@@ -357,16 +405,6 @@ export default function RequirementDetail() {
     setSelectedData(newSetDataContent);
   };
 
-  const handleChildTreeSelectData = (data: any) => {
-    setTaskAssignData(data);
-    if (data?.length > 0) {
-      setIsShowTypeErrorInfo(false);
-    }
-    // setPublishData({ ...publishData, label_count: taskAssignData.length })
-  };
-  const getChildTreeIds = (data) => {
-    setDepartmentIds(data);
-  };
   // 显示标注类型 以及 类型内容
   const [annotationTypeVal, setAnnotationTypeVal] = useState(
     AnnotationTypeStatus.IMAGE
@@ -949,71 +987,6 @@ export default function RequirementDetail() {
     }
   };
 
-  useEffect(() => {
-    if (type === 'detail') {
-      const getDetail = async () => {
-        try {
-          const res = await getRequirementDetail({
-            requirement_id: Number(requirementId)
-          });
-          if (res.code === 'success') {
-            setAnnotationTypeContentCode(
-              res?.data?.label_tool?.label_tool_code
-            );
-            setAnnotationTypeContentVal(res?.data?.label_tool?.label_tool_code);
-            basicForm.setFieldValue('name', res?.data?.name);
-            basicForm.setFieldValue('description', res?.data?.description);
-            basicForm.setFieldValue('model_id', res?.data?.model_id);
-            setGetDetailObj(res?.data);
-            setTaskTypeVal(res?.data?.team_type);
-            res?.data?.labels?.map((item) => {
-              labelToolForm.setFieldValue(
-                `label_name_cn_${item?.id}`,
-                item?.label_name_cn
-              );
-              labelToolForm.setFieldValue(
-                `label_name_en_${item?.id}`,
-                item?.label_name_en
-              );
-              if (item?.label_mappings) {
-                labelToolForm.setFieldValue(
-                  `label_mappings_${item?.id}`,
-                  item?.label_mappings
-                );
-              }
-              labelToolForm.setFieldValue(
-                `label_shape_${item?.id}`,
-                item?.label_shape
-              );
-              labelToolForm.setFieldValue(
-                `label_colour_${item?.id}`,
-                item?.label_colour
-              );
-              item?.label_info_attribute_groups?.map((group) => {
-                labelToolForm.setFieldValue(
-                  `label_info_attribute_groups_${group?.id}_attribute_group_name`,
-                  group?.attribute_group_name
-                );
-                group?.label_info_attribute?.map((attribute) => {
-                  labelToolForm.setFieldValue(
-                    `label_info_attribute_groups_${attribute?.id}_attribute_name_cn`,
-                    attribute?.attribute_name_cn
-                  );
-                  labelToolForm.setFieldValue(
-                    `label_info_attribute_groups_${attribute?.id}_attribute_name_en`,
-                    attribute?.attribute_name_en
-                  );
-                });
-              });
-            });
-            setLabelDataList(res?.data?.labels);
-          }
-        } catch (error) {}
-      };
-      getDetail();
-    }
-  }, [requirementId]);
-
   // 图片、文本问答展示预标注
   const showPreLabeling = useMemo(() => {
     return (
@@ -1084,7 +1057,7 @@ export default function RequirementDetail() {
               >
                 需求管理
               </BreadcrumbItem>
-              <BreadcrumbItem>{getDetailObj?.name || ''}</BreadcrumbItem>
+              <BreadcrumbItem>{requirementDetail?.name || ''}</BreadcrumbItem>
             </Breadcrumb>
           </div>
         )}
@@ -1166,9 +1139,9 @@ export default function RequirementDetail() {
                 )}
                 <AnnotationType
                   isDisabled={type === 'detail'}
-                  label_type={getDetailObj?.label_type || 2}
+                  label_type={requirementDetail?.label_type || 2}
                   label_tool_code={
-                    getDetailObj?.label_tool?.label_tool_code ||
+                    requirementDetail?.label_tool?.label_tool_code ||
                     'IMAGE_ANNOTATION'
                   }
                   getChildAnnotationType={getAnnotationType}
@@ -1190,7 +1163,9 @@ export default function RequirementDetail() {
                   </Button>
                   <div className="data-set-text">
                     已选数据量{' '}
-                    {getTotal(selectedData) || getDetailObj?.label_count || 0}
+                    {getTotal(selectedData) ||
+                      requirementDetail?.label_count ||
+                      0}
                   </div>
                 </div>
                 {selectedData?.length <= 0 && isShowDataErrorInfo && (
@@ -1205,7 +1180,8 @@ export default function RequirementDetail() {
                 label="拆分任务包:"
                 style={{ marginBottom: 24 }}
               >
-                {selectedData?.length <= 0 && !getDetailObj?.label_count ? (
+                {selectedData?.length <= 0 &&
+                !requirementDetail?.label_count ? (
                   <div className="data-content-set">
                     <span style={{ color: '#86909c' }}>请先选择标注数据</span>
                   </div>
@@ -1220,7 +1196,9 @@ export default function RequirementDetail() {
                     }}
                     min={1}
                     max={
-                      getTotal(selectedData) || getDetailObj?.label_count || 1
+                      getTotal(selectedData) ||
+                      requirementDetail?.label_count ||
+                      1
                     }
                     precision={0}
                     disabled={type === 'detail'}
@@ -1252,7 +1230,7 @@ export default function RequirementDetail() {
               }}
               title="选择数据"
               getChildTableSelectData={handleChildData}
-              getDetailObj={getDetailObj}
+              requirementDetail={requirementDetail}
             />
           </div>
           {/* 工具配置部分 */}
@@ -2874,7 +2852,7 @@ export default function RequirementDetail() {
                     AnnotationTypeContentCode.ENTITY && (
                     <TextSubstanceComponent
                       type={type}
-                      getDetailObj={getDetailObj}
+                      requirementDetail={requirementDetail}
                       getTextEntityData={getTextFlChildData}
                     />
                   )}
@@ -2882,7 +2860,7 @@ export default function RequirementDetail() {
                     AnnotationTypeContentCode.TEXT_CLASSIFICATION && (
                     <Classify
                       type={type}
-                      getDetailObj={getDetailObj}
+                      requirementDetail={requirementDetail}
                       getClassIfyData={getClassIfyChildData}
                     />
                   )}
@@ -2904,7 +2882,9 @@ export default function RequirementDetail() {
                     publishData?.split_task_package ||
                     labelToolForm.getFieldValue('split_task_package');
                   const totalDataAmount =
-                    getTotal(selectedData) || getDetailObj?.label_count || 0;
+                    getTotal(selectedData) ||
+                    requirementDetail?.label_count ||
+                    0;
 
                   if (splitCount && totalDataAmount && splitCount >= 1) {
                     // 传入现有的taskPackages，保留已选数据

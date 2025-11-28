@@ -69,7 +69,7 @@ interface DataSourceModalProps {
   getChildTreeSelectData: (data: any) => void;
   initialSelectedData?: any[]; // 添加初始选中数据参数
   getTreeIds: (data: any) => void;
-  getDetailObj: any;
+  requirementDetail: any;
   type: any;
   onConfirm?: (selectedIds: string[]) => void; // 新增：确认回调
   initialSelected?: string[]; // 新增：初始选中的用户ID列表
@@ -84,7 +84,7 @@ const IndividualModal: React.FC<DataSourceModalProps> = ({
   getChildTreeSelectData,
   initialSelectedData = [], // 接收初始数据
   getTreeIds,
-  getDetailObj,
+  requirementDetail,
   type,
   onConfirm,
   initialSelected = []
@@ -107,17 +107,17 @@ const IndividualModal: React.FC<DataSourceModalProps> = ({
   useEffect(() => {
     if (initialSelected && initialSelected.length > 0) {
       setSelectedRowKeys(initialSelected);
-    } else if (getDetailObj) {
+    } else if (requirementDetail) {
       setSelectedRowKeys(
-        getDetailObj?.label_operate &&
-          getDetailObj?.label_operate?.user_id?.map((item) => item)
+        requirementDetail?.label_operate &&
+          requirementDetail?.label_operate?.user_id?.map((item) => item)
       );
       setCheckedKeys(
-        getDetailObj?.label_operate &&
-          getDetailObj?.label_operate?.org_id?.map((item) => item)
+        requirementDetail?.label_operate &&
+          requirementDetail?.label_operate?.org_id?.map((item) => item)
       );
     }
-  }, [getDetailObj, initialSelected]);
+  }, [requirementDetail, initialSelected]);
   const getTreeData = () => {
     try {
       getDepartmentTreeList()
