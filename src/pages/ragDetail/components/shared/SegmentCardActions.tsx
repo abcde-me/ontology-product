@@ -45,19 +45,18 @@ const SegmentCardActions: React.FC<SegmentCardActionsProps> = ({
   return (
     <div className="flex items-center gap-2">
       {/* 只有当不包含图片时，才显示编辑按钮 */}
-      {!containsImages && (
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            startEditingSegment(segment.id);
-          }}
-          className={getButtonClass('edit')}
-          title="编辑分段"
-        >
-          <EditSvg />
-          <span className="font-medium text-[#1E293B]">编辑分段</span>
-        </button>
-      )}
+
+      <button
+        onClick={(e) => {
+          e.stopPropagation();
+          startEditingSegment(segment.id);
+        }}
+        className={getButtonClass('edit')}
+        title="编辑分段"
+      >
+        <EditSvg />
+        <span className="font-medium text-[#1E293B]">编辑分段</span>
+      </button>
 
       <button
         onClick={(e) => {
