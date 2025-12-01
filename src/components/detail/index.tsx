@@ -1501,9 +1501,7 @@ const DatasetDetail = (props: {
         <div className="breadcrumb-wrapper">
           <IconArrowLeft
             style={{ cursor: 'pointer', fontSize: '14px' }}
-            onClick={() => {
-              handleBack();
-            }}
+            onClick={handleGoToDatasetList}
           />
           <Breadcrumb style={{ fontSize: 20, marginLeft: '21px' }}>
             <Breadcrumb.Item>
