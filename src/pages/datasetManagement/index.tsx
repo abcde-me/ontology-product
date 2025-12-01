@@ -627,11 +627,11 @@ const columns = (
                     >
                       <Button
                         type="text"
-                        className={`${styles.actionButton} ${record.status === datasetStatus.normal && record.scene_id !== 2 ? styles.export : styles.disabled}`}
+                        className={`${styles.actionButton} ${record.status === datasetStatus.normal && record.storage_type !== datasetStorageType.vector ? styles.export : styles.disabled}`}
                         onClick={() => handleExport(record)}
                         disabled={
                           record.status !== datasetStatus.normal ||
-                          record.scene_id === 2
+                          record.storage_type === datasetStorageType.vector
                         }
                         style={{
                           padding: '0 8px 0 5px',
@@ -701,11 +701,11 @@ const columns = (
             >
               <Button
                 type="text"
-                className={`${styles.actionButton} ${record.status === datasetStatus.normal && record.scene_id !== 2 ? styles.export : styles.disabled}`}
+                className={`${styles.actionButton} ${record.status === datasetStatus.normal && record.storage_type !== datasetStorageType.vector ? styles.export : styles.disabled}`}
                 onClick={() => handleExport(record)}
                 disabled={
                   record.status !== datasetStatus.normal ||
-                  record.scene_id === 2
+                  record.storage_type === datasetStorageType.vector
                 }
                 style={{
                   padding: '0 8px 0 5px',
