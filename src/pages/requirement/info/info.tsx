@@ -59,7 +59,7 @@ function RequirementInfo() {
       <div className={styles.requirementInfoContent}>
         <Tabs inkBarSize={{ width: '40px' }}>
           <TabPane key="detail" title="详情">
-            <RequirementDetail />
+            <RequirementDetail requirementDetail={requirementDetail} />
           </TabPane>
           <TabPane key="progress" title="进度">
             <RequirementProgress />
