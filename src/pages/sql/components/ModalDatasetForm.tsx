@@ -344,12 +344,12 @@ function DatasetVersionForm(props) {
 
       // 合并表单数据和 fields 数组
       const submitData: any = {
-        script_execid: formOrigin.execid,
-        fields,
-        dataset_id: selectedOption.current.id,
-        dataset_name: selectedOption.current.name,
-        desc: values.desc,
-        version_id: selectedOption.current.latest_version
+        // script_execid: formOrigin.execid,
+        tag_names: fields,
+        id: selectedOption.current.id,
+        name: selectedOption.current.name,
+        description: values.desc
+        // version_id: selectedOption.current.latest_version
       };
 
       setLoading(true);

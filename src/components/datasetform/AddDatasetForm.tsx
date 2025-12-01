@@ -602,7 +602,10 @@ const DatasetForm = React.forwardRef<
       visible={visible}
       footer={null}
       style={{ width: '960px' }}
-      onCancel={onCancel}
+      onCancel={() => {
+        onCancel();
+        form.resetFields();
+      }}
       maskClosable={false}
       className={styles.modalWrapper}
       // unmountOnExit={true}
@@ -894,6 +897,7 @@ const DatasetForm = React.forwardRef<
                     pagination={false}
                     rowSelection={{
                       type: 'checkbox',
+                      selectedRowKeys: fileIds,
                       onChange: (selectedRowKeys, selectedRows: FileItem[]) => {
                         const isNotJsonl = selectedRows.some(
                           (item) => item.file_type !== 'JSONL'
@@ -901,7 +905,10 @@ const DatasetForm = React.forwardRef<
                         setFilesType(
                           isNotJsonl ? StorageType.File : StorageType.Jsonl
                         );
-                        setFileIds(selectedRowKeys as string[]);
+                        const newFileIds = [
+                          ...new Set([...fileIds, ...selectedRowKeys])
+                        ];
+                        setFileIds(newFileIds as string[]);
                       }
                     }}
                   />
@@ -1128,7 +1135,14 @@ const DatasetForm = React.forwardRef<
                 // borderTop: '1px solid #f0f0f0'
               }}
             >
-              <Button onClick={onCancel}>取消</Button>
+              <Button
+                onClick={() => {
+                  onCancel();
+                  form.resetFields();
+                }}
+              >
+                取消
+              </Button>
               <Button
                 type="primary"
                 loading={!canSubmit}
