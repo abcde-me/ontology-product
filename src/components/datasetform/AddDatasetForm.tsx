@@ -602,7 +602,10 @@ const DatasetForm = React.forwardRef<
       visible={visible}
       footer={null}
       style={{ width: '960px' }}
-      onCancel={onCancel}
+      onCancel={() => {
+        onCancel();
+        form.resetFields();
+      }}
       maskClosable={false}
       className={styles.modalWrapper}
       // unmountOnExit={true}
@@ -1128,7 +1131,14 @@ const DatasetForm = React.forwardRef<
                 // borderTop: '1px solid #f0f0f0'
               }}
             >
-              <Button onClick={onCancel}>取消</Button>
+              <Button
+                onClick={() => {
+                  onCancel();
+                  form.resetFields();
+                }}
+              >
+                取消
+              </Button>
               <Button
                 type="primary"
                 loading={!canSubmit}
