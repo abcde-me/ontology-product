@@ -6,6 +6,7 @@ import {
   CONNECTION_PERMISSIONS,
   DATA_LOAD_PERMISSIONS,
   SQL_PERMISSIONS,
+  DATA_ASSET_PERMISSIONS,
   PYSPARK_PERMISSIONS,
   WORKFLOW_LIST_PERMISSIONS,
   WORKFLOW_TASK_PERMISSIONS,
@@ -254,7 +255,7 @@ export const routes: IRoute[] = [
     name: 'dataAsset',
     key: '/tenant/compute/modaforge/dataAsset',
     component: React.lazy(async () => import('../../dataAsset')),
-    permission: DATA_MANAGEMENT_PERMISSIONS.LIST,
+    permission: DATA_ASSET_PERMISSIONS.LIST,
     children: [
       {
         name: 'dataAssetList',
@@ -262,7 +263,7 @@ export const routes: IRoute[] = [
         component: React.lazy(
           async () => import('../../dataAsset/modules/list')
         ),
-        permission: DATA_MANAGEMENT_PERMISSIONS.LIST
+        permission: DATA_ASSET_PERMISSIONS.LIST
       },
       {
         name: 'dataAssetCreate',
@@ -270,7 +271,7 @@ export const routes: IRoute[] = [
         component: React.lazy(
           async () => import('../../dataAsset/modules/create')
         ),
-        permission: DATA_MANAGEMENT_PERMISSIONS.LIST
+        permission: DATA_ASSET_PERMISSIONS.LIST
       },
       {
         name: 'dataAssetEdit',
@@ -278,7 +279,7 @@ export const routes: IRoute[] = [
         component: React.lazy(
           async () => import('../../dataAsset/modules/edit')
         ),
-        permission: DATA_MANAGEMENT_PERMISSIONS.LIST
+        permission: DATA_ASSET_PERMISSIONS.LIST
       }
     ]
   },
