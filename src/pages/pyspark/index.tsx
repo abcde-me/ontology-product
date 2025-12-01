@@ -268,6 +268,8 @@ const Python: React.FC = memo(() => {
         <ResizeBox.Split
           direction="horizontal"
           size={'360px'}
+          min={'300px'}
+          max={'600px'}
           style={{ height: '100%' }}
           panes={[siderContent, contentPanel]}
         />
