@@ -4,6 +4,8 @@
  */
 
 import React, { useEffect } from 'react';
+import { DATA_MANAGEMENT_PERMISSIONS } from '@/config/permissions';
+import { PermissionWrapper } from '@/components/PermissionGuard';
 import { IconEdit } from '@arco-design/web-react/icon';
 import BasicInfo from './BasicInfo';
 import ElementList from './ElementList';
@@ -77,13 +79,17 @@ const SegmentDetail: React.FC<SegmentDetailProps> = ({ segmentId }) => {
             {hasEditableElements && (
               <div className="flex gap-2">
                 {!isEditing ? (
-                  <button
-                    onClick={startEditing}
-                    className="flex items-center gap-1 rounded px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-100"
+                  <PermissionWrapper
+                    permission={DATA_MANAGEMENT_PERMISSIONS.CAN_UPDATE}
                   >
-                    <IconEdit className="text-base" />
-                    编辑
-                  </button>
+                    <button
+                      onClick={startEditing}
+                      className="flex items-center gap-1 rounded px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-100"
+                    >
+                      <IconEdit className="text-base" />
+                      编辑
+                    </button>
+                  </PermissionWrapper>
                 ) : (
                   <>
                     <button

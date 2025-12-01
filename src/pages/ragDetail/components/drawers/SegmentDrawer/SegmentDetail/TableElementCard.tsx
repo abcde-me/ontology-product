@@ -113,12 +113,12 @@ const TableElementCard: React.FC<TableElementCardProps> = ({
               {element.positionInfo}
             </span>
           )} */}
-          {(element as any).pageId && (
+          {/* {(element as any).pageId && (
             <span className="text-gray-900">
               <span className="text-gray-500">页码:</span>
               {(element as any).pageId}
             </span>
-          )}
+          )} */}
         </div>
       )}
 
