@@ -285,7 +285,7 @@ const RunningInfoPanel: React.FC<RunningInfoPanelProps> = memo(
     );
 
     return (
-      <div className={`running-info-panel ${styles['sql-running-info-panel']}`}>
+      <div className={styles['sql-running-info-panel']}>
         <Collapse
           activeKey={isExpanded ? ['1'] : []}
           onChange={handlePanelChange}
