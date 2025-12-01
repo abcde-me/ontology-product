@@ -67,12 +67,12 @@ const FormulaElementCard: React.FC<FormulaElementCardProps> = ({
               {element.positionInfo}
             </span>
           )} */}
-          {(element as any).pageId && (
+          {/* {(element as any).pageId && (
             <span className="text-gray-900">
               <span className="w-18 text-gray-500">页码：</span>
               {(element as any).pageId}
             </span>
-          )}
+          )} */}
         </div>
       )}
 
