@@ -82,10 +82,10 @@ function formatCostTime(milliseconds: number): string {
   }
 
   if (seconds === 0) {
-    return `${minutes}min`;
+    return `${minutes}m`;
   }
 
-  return `${minutes}min ${seconds}s`;
+  return `${minutes}m ${seconds}s`;
 }
 
 /**
