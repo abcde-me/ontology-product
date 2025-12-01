@@ -165,8 +165,16 @@ const columns = (
   datasetList: Dataset[],
   handleExport: (record: Dataset) => void,
   tagList: { id: number; name: string }[],
+  newTagList: { id: number; name: string }[],
+  setNewTagList: (newTagList: { id: number; name: string }[]) => void,
+  fetchDatasetList: () => void,
   datasetSceneOption: Array<SceneType>,
-  selectedTagFilters: string[],
+  tagInputValue: string, //标签输入框值
+  setTagInputValue: (tagInputValue: string) => void,
+  selectedTagFilters: string[], //标签过滤
+  setSelectedTagFilters: (selectedTagFilters: string[]) => void,
+  selectedTag: string[], //标签过滤
+  setSelectedTag: (selectedTag: string[]) => void,
   selectedStorageTypeFilters: string[], //存储格式过滤
   selectedStatusFilters: string[], //状态过滤
   sortField: string,
@@ -252,9 +260,66 @@ const columns = (
     title: '数据集标签',
     dataIndex: 'tag_names',
     width: 150,
-    filters: tagList.map((tag) => ({ text: tag.name, value: tag.name })),
-    filteredValue: selectedTagFilters,
-    filterMultiple: true,
+    filterDropdown: (props) => {
+      return (
+        <div className="rounded-md shadow-md">
+          <div className="flex h-80 flex-col overflow-auto bg-white p-3">
+            <Input
+              className="mb-3"
+              placeholder="请输入关键字"
+              value={tagInputValue}
+              onChange={(value) => {
+                setTagInputValue(value);
+                setNewTagList(
+                  tagList.filter((tag) => {
+                    return tag.name.toLowerCase().includes(value.toLowerCase());
+                  })
+                );
+              }}
+            ></Input>
+            <Checkbox.Group
+              className="flex flex-col gap-3"
+              options={newTagList.map((tag) => ({
+                label: tag.name,
+                value: tag.name
+              }))}
+              value={selectedTag}
+              onChange={(value) => {
+                setSelectedTag(value);
+              }}
+            />
+          </div>
+          <div
+            className={`${styles.tagButtonBox} flex justify-end gap-2 border-t border-solid border-[#E2E8F0] bg-white px-3 py-2`}
+          >
+            <Button
+              type="outline"
+              className={styles.buttonReset}
+              onClick={() => {
+                setNewTagList(tagList);
+                setTagInputValue('');
+                setSelectedTag([]);
+                setSelectedTagFilters([]);
+                props.confirm();
+              }}
+            >
+              重置
+            </Button>
+            <Button
+              type="primary"
+              className="h-7 rounded-md bg-[#007DFA] px-3 text-xs text-white"
+              onClick={() => {
+                setSelectedTagFilters(selectedTag);
+                props.confirm();
+              }}
+            >
+              确定
+            </Button>
+          </div>
+        </div>
+      );
+    },
+    filteredValue: selectedTag,
     render: (tag_names: string[]) => {
       if (!tag_names || tag_names.length === 0) return '-';
       return (
@@ -627,11 +692,11 @@ const columns = (
                     >
                       <Button
                         type="text"
-                        className={`${styles.actionButton} ${record.status === datasetStatus.normal && record.scene_id !== 2 ? styles.export : styles.disabled}`}
+                        className={`${styles.actionButton} ${record.status === datasetStatus.normal && record.storage_type !== datasetStorageType.vector ? styles.export : styles.disabled}`}
                         onClick={() => handleExport(record)}
                         disabled={
                           record.status !== datasetStatus.normal ||
-                          record.scene_id === 2
+                          record.storage_type === datasetStorageType.vector
                         }
                         style={{
                           padding: '0 8px 0 5px',
@@ -701,11 +766,11 @@ const columns = (
             >
               <Button
                 type="text"
-                className={`${styles.actionButton} ${record.status === datasetStatus.normal && record.scene_id !== 2 ? styles.export : styles.disabled}`}
+                className={`${styles.actionButton} ${record.status === datasetStatus.normal && record.storage_type !== datasetStorageType.vector ? styles.export : styles.disabled}`}
                 onClick={() => handleExport(record)}
                 disabled={
                   record.status !== datasetStatus.normal ||
-                  record.scene_id === 2
+                  record.storage_type === datasetStorageType.vector
                 }
                 style={{
                   padding: '0 8px 0 5px',
@@ -785,6 +850,9 @@ const DatasetManagement: React.FC = () => {
   const [tagList, setTagList] = React.useState<{ id: number; name: string }[]>(
     []
   ); //标签列表
+  const [newTagList, setNewTagList] = React.useState<
+    { id: number; name: string }[]
+  >([]); //模糊搜索标签列表
   const [datasetList, setDatasetList] = React.useState<Dataset[]>([]); //数据集列表
   const [search, setSearch] = React.useState<string>(''); //搜索
   const [searchField, setSearchField] = React.useState<searchFieldType>(
@@ -800,10 +868,12 @@ const DatasetManagement: React.FC = () => {
   const [selectedRowKeys, setSelectedRowKeys] = React.useState<React.Key[]>([]); //选择行
   const [selectedRows, setSelectedRows] = React.useState<Array<Dataset>>([]); //选择行数据
 
+  const [tagInputValue, setTagInputValue] = React.useState<string>(''); //标签输入框值
   // 标签过滤相关状态
   const [selectedTagFilters, setSelectedTagFilters] = React.useState<string[]>(
     []
   ); //选中的标签过滤
+  const [selectedTag, setSelectedTag] = React.useState<string[]>([]); //存储选中的标签过滤
 
   // 存储格式过滤相关状态
   const [selectedStorageTypeFilters, setSelectedStorageTypeFilters] =
@@ -1067,12 +1137,15 @@ const DatasetManagement: React.FC = () => {
       try {
         if (tagListRes.data && Array.isArray(tagListRes.data)) {
           setTagList(tagListRes.data);
+          setNewTagList(tagListRes.data);
         } else {
           console.error('标签列表数据格式错误:', tagListRes);
           setTagList([]);
+          setNewTagList([]);
         }
       } catch {
         setTagList([]);
+        setNewTagList([]);
         Message.error('获取标签列表失败');
       }
 
@@ -1208,7 +1281,6 @@ const DatasetManagement: React.FC = () => {
     if (selectedTagFilters.length > 0) {
       params.tag_names = selectedTagFilters;
     }
-    console.log('selectedStorageTypeFilters', selectedStorageTypeFilters);
 
     // 添加存储格式过滤参数
     if (selectedStorageTypeFilters.length > 0) {
@@ -1246,8 +1318,8 @@ const DatasetManagement: React.FC = () => {
     pageSize,
     actualSearch,
     actualSearchField,
-    selectedTagFilters,
     selectedSceneFilters,
+    selectedTagFilters,
     selectedSourceFilters,
     selectedStatusFilters,
     selectedStorageTypeFilters,
@@ -1365,14 +1437,17 @@ const DatasetManagement: React.FC = () => {
       .then((res) => {
         if (res.data && Array.isArray(res.data)) {
           setTagList(res.data);
+          setNewTagList(res.data);
         } else {
           console.error('标签列表数据格式错误:', res);
           setTagList([]);
+          setNewTagList([]);
         }
       })
       .catch((err) => {
         console.error('获取标签列表失败:', err);
         setTagList([]);
+        setNewTagList([]);
         Message.error('获取标签列表失败');
       });
     getSceneList();
@@ -1481,12 +1556,15 @@ const DatasetManagement: React.FC = () => {
     // 过滤掉storage_type为table的数据集
     const filteredRows = selectedRows.filter(
       (row) =>
-        row.storage_type !== datasetStorageType.table || row.scene_id !== 2
+        row.storage_type !== datasetStorageType.table &&
+        row.storage_type !== datasetStorageType.vector
     );
     const tableRows = selectedRows.filter(
       (row) => row.storage_type === datasetStorageType.table
     );
-    const konwledgeRows = selectedRows.filter((row) => row.scene_id === 2);
+    const konwledgeRows = selectedRows.filter(
+      (row) => row.storage_type === datasetStorageType.vector
+    );
     const filteredRowKeys = filteredRows.map((row) => row.id);
 
     // 更新选中状态，移除不能导出的数据集
@@ -1773,8 +1851,16 @@ const DatasetManagement: React.FC = () => {
                         datasetList,
                         handleExport,
                         tagList,
+                        newTagList,
+                        setNewTagList,
+                        fetchDatasetList,
                         datasetSceneOption,
+                        tagInputValue,
+                        setTagInputValue,
                         selectedTagFilters,
+                        setSelectedTagFilters,
+                        selectedTag,
+                        setSelectedTag,
                         selectedStorageTypeFilters,
                         selectedStatusFilters,
                         sortField,
@@ -1794,8 +1880,16 @@ const DatasetManagement: React.FC = () => {
                         datasetList,
                         handleExport,
                         tagList,
+                        newTagList,
+                        setNewTagList,
+                        fetchDatasetList,
                         datasetSceneOption,
+                        tagInputValue,
+                        setTagInputValue,
                         selectedTagFilters,
+                        setSelectedTagFilters,
+                        selectedTag,
+                        setSelectedTag,
                         selectedStorageTypeFilters,
                         selectedStatusFilters,
                         sortField,

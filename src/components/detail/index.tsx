@@ -750,16 +750,20 @@ const DatasetDetail = (props: {
                 >
                   分段列表
                 </Button>
-                <Popconfirm
-                  focusLock
-                  title="删除"
-                  content="确定删除该文件吗？"
-                  onOk={() => {
-                    handleDeleteKnowledgeDocument(record.id);
-                  }}
+                <PermissionWrapper
+                  permission={DATA_MANAGEMENT_PERMISSIONS.CAN_DELETE}
                 >
-                  <Button type="text">删除</Button>
-                </Popconfirm>
+                  <Popconfirm
+                    focusLock
+                    title="删除"
+                    content="确定删除该文件吗？"
+                    onOk={() => {
+                      handleDeleteKnowledgeDocument(record.id);
+                    }}
+                  >
+                    <Button type="text">删除</Button>
+                  </Popconfirm>
+                </PermissionWrapper>
               </div>
             )
           }
@@ -1501,9 +1505,7 @@ const DatasetDetail = (props: {
         <div className="breadcrumb-wrapper">
           <IconArrowLeft
             style={{ cursor: 'pointer', fontSize: '14px' }}
-            onClick={() => {
-              handleBack();
-            }}
+            onClick={handleGoToDatasetList}
           />
           <Breadcrumb style={{ fontSize: 20, marginLeft: '21px' }}>
             <Breadcrumb.Item>
@@ -1511,7 +1513,7 @@ const DatasetDetail = (props: {
                 style={{ fontWeight: '500', fontSize: '20px' }}
                 onClick={handleGoToDatasetList}
               >
-                数据集管理
+                数据集市
               </span>
             </Breadcrumb.Item>
             <Breadcrumb.Item>
