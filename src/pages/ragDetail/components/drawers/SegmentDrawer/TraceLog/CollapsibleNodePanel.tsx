@@ -4,6 +4,7 @@
  */
 
 import React, { useState } from 'react';
+import copy from 'copy-to-clipboard';
 import { Message, Tooltip } from '@arco-design/web-react';
 import { NodeDetail } from '../../../../utils/traceLogMockData';
 import UpCollapseIconSvg from '@/assets/rag/up-collapse.svg';
@@ -30,9 +31,11 @@ const CollapsibleNodePanel: React.FC<CollapsibleNodePanelProps> = ({
 
   const handleCopy = (data: any, section: 'input' | 'output') => {
     const jsonString = JSON.stringify(data, null, 2);
-    navigator.clipboard.writeText(jsonString).then(() => {
-      Message.success(`复制成功`);
-    });
+    copy(jsonString);
+    Message.success(`复制成功`);
+    // navigator.clipboard.writeText(jsonString).then(() => {
+    //   Message.success(`复制成功`);
+    // });
   };
 
   const handleScroll = (
