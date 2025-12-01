@@ -32,7 +32,9 @@ const TableSegmentCard: React.FC<TableSegmentCardProps> = ({
     selectSegment,
     editingSegmentId,
     cancelEditingSegment,
-    updateSegmentContent
+    updateSegmentContent,
+    setHighlightedExcelCoordinate,
+    clearHighlightedExcelCoordinate
   } = useRagDetailStore();
   const [isHovered, setIsHovered] = useState(false);
   const isEditing = editingSegmentId === segment.id;
@@ -163,7 +165,8 @@ const TableSegmentCard: React.FC<TableSegmentCardProps> = ({
       try {
         // 标记是点击外部区域触发的
         isClickAwayRef.current = true;
-
+        // 取消高亮
+        clearHighlightedExcelCoordinate();
         // 先取消编辑状态
         cancelEditingSegment();
 
@@ -182,6 +185,7 @@ const TableSegmentCard: React.FC<TableSegmentCardProps> = ({
   const handleCardClick = useCallback(() => {
     if (!isEditing) {
       selectSegment(segment.id);
+      setHighlightedExcelCoordinate(segment.id);
     }
   }, [isEditing, selectSegment, segment.id]);
 
