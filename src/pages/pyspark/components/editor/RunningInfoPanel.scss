@@ -81,6 +81,19 @@
     flex: 1;
     min-height: 0;
     overflow: auto;
+
+    /** 支持虚拟列表 */
+    .arco-tabs-content-inner {
+      height: 100%;
+
+      .arco-tabs-content-item.arco-tabs-content-item-active {
+        height: 100%;
+
+        .arco-tabs-pane {
+          height: 100%;
+        }
+      }
+    }
   }
 
   .arco-collapse {
