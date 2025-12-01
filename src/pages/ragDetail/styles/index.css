@@ -38,7 +38,7 @@
   min-height: 0 !important;
 }
 
-.rag-detail-page .markdown-body img {
+/* .rag-detail-page .markdown-body img {
   cursor: pointer;
   transition: all 0.2s ease-in-out;
   border: 2px solid #e5e7eb;
@@ -52,7 +52,7 @@
   transform: scale(1.05);
   border-color: #007dfa;
   box-shadow: 0 4px 12px rgba(0, 125, 250, 0.2);
-}
+} */
 
 /* KaTeX 公式样式限制 */
 .rag-detail-page .katex-display {
