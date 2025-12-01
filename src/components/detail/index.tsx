@@ -1509,7 +1509,7 @@ const DatasetDetail = (props: {
                 style={{ fontWeight: '500', fontSize: '20px' }}
                 onClick={handleGoToDatasetList}
               >
-                数据集管理
+                数据集市
               </span>
             </Breadcrumb.Item>
             <Breadcrumb.Item>
