@@ -79,7 +79,7 @@ const ImageElementCard: React.FC<ImageElementCardProps> = ({
         </div>
 
         <div className="flex items-center gap-6 text-sm">
-          {element.positionType && (
+          {/* {element.positionType && (
             <span className="text-gray-900">
               <span className="text-gray-500">定位类型:</span>
               {element.positionType}
@@ -90,7 +90,7 @@ const ImageElementCard: React.FC<ImageElementCardProps> = ({
               <span className="text-gray-500">位置信息:</span>
               {element.positionInfo}
             </span>
-          )}
+          )} */}
           {(element as any).pageId && (
             <span className="text-gray-900">
               <span className="text-gray-500">页码:</span>

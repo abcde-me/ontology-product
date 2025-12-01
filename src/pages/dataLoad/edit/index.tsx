@@ -9,7 +9,8 @@ import {
   Popover,
   Tag,
   Typography,
-  Switch
+  Switch,
+  Tooltip
 } from '@arco-design/web-react';
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import SchedulerRun from '../../../components/scheduler-run';
@@ -1244,7 +1245,35 @@ const Edit = (props) => {
                     : ('multiple' as const)
                 }
                 placeholder="请选择抽取的表"
-                maxTagCount={2}
+                maxTagCount={
+                  selectedNodeType !== 'metadata'
+                    ? {
+                        count: 2,
+                        render: (invisibleTagCount) => {
+                          const allTags = form.getFieldValue('table_id') || [];
+                          const remainingTags = allTags.slice(2);
+                          return (
+                            <Tooltip
+                              content={
+                                <div className="ml-[-4px] flex max-w-[300px] flex-wrap gap-1">
+                                  {remainingTags.map((item, i) => (
+                                    <Tag
+                                      key={i}
+                                      className="bg-[#E7ECF0] text-[14px] text-[#0F172A]"
+                                    >
+                                      {item}
+                                    </Tag>
+                                  ))}
+                                </div>
+                              }
+                            >
+                              +{invisibleTagCount}
+                            </Tooltip>
+                          );
+                        }
+                      }
+                    : undefined
+                }
                 style={{ width: '100%', minWidth: 0 }}
                 allowClear
                 allowCreate
