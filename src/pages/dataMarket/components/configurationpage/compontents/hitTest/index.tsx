@@ -285,7 +285,7 @@ function HitTest(props: { datasetName: string }) {
           <div className={styles.testContentText}>
             <TextArea
               className={styles.inputBox}
-              placeholder="请输入文本进行召回测试"
+              placeholder="请输入文本进行命中测试"
               value={text}
               autoSize={{ minRows: 13 }}
               allowClear
