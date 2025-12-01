@@ -1481,12 +1481,15 @@ const DatasetManagement: React.FC = () => {
     // 过滤掉storage_type为table的数据集
     const filteredRows = selectedRows.filter(
       (row) =>
-        row.storage_type !== datasetStorageType.table || row.scene_id !== 2
+        row.storage_type !== datasetStorageType.table &&
+        row.storage_type !== datasetStorageType.vector
     );
     const tableRows = selectedRows.filter(
       (row) => row.storage_type === datasetStorageType.table
     );
-    const konwledgeRows = selectedRows.filter((row) => row.scene_id === 2);
+    const konwledgeRows = selectedRows.filter(
+      (row) => row.storage_type === datasetStorageType.vector
+    );
     const filteredRowKeys = filteredRows.map((row) => row.id);
 
     // 更新选中状态，移除不能导出的数据集
