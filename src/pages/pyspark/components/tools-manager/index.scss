@@ -19,27 +19,55 @@
       border-radius: 2px;
       overflow: hidden;
 
-      .tools-manager__operator-info {
-        .tools-manager__operator-name {
-          max-width: 144px !important;
-        }
+      // .tools-manager__operator-info {
+      //   .tools-manager__operator-name {
+      //     max-width: 144px !important;
+      //   }
 
-        .tools-manager__operator-desc {
-          max-width: 144px !important;
-        }
-      }
+      //   .tools-manager__operator-desc {
+      //     max-width: 144px !important;
+      //   }
+      // }
 
       .tools-manager__operator-actions {
-        opacity: 1;
-        visibility: visible;
+        display: flex;
       }
     }
 
+    // 让 title 占据剩余空间
     .arco-tree-node-title {
-      margin-left: -24px;
-      padding: 6px 8px;
-      cursor: unset;
+      display: flex;
+      align-items: center;
+      flex: 1;
+      min-width: 0; // 允许 flex 子元素收缩，配合文本溢出使用
+      overflow: hidden;
+
+      &-text {
+        width: 100%;
+      }
+
+      .pyspark-dataset-tree__node-title {
+        color: var(--primary-primary-6);
+        width: 100%;
+        display: flex; // 确保是 flex 容器
+        flex: 1;
+        min-width: 0;
+        overflow: hidden;
+
+        .ellipsis-popover-div {
+          width: 100% !important;
+          flex: 1;
+          min-width: 0;
+          overflow: hidden;
+        }
+      }
     }
+
+    // .arco-tree-node-title {
+    //   margin-left: -24px;
+    //   padding: 6px 8px;
+    //   cursor: unset;
+    // }
   }
 
   &__content {
@@ -103,7 +131,6 @@
       .tools-manager__operator-name {
         font-size: var(--font-size-primary);
         color: var(--color-text-2);
-        max-width: 240px;
       }
     }
 
@@ -111,19 +138,13 @@
       .tools-manager__operator-desc {
         font-size: var(--font-size-secondary);
         color: var(--color-text-4);
-        max-width: 240px;
       }
     }
 
     &-actions {
       display: flex;
-      opacity: 0;
-      visibility: hidden;
+      display: none;
       flex-shrink: 0;
-      position: absolute;
-      right: 4px;
-      top: 50%;
-      transform: translateY(-50%);
     }
   }
 
