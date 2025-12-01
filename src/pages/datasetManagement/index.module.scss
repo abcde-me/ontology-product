@@ -414,3 +414,20 @@
 .addSceneTypeModal {
   width: 620px;
 }
+
+.buttonReset {
+  height: 28px;
+  padding: 0 12px;
+  border-radius: 6px;
+  font-size: 12px;
+}
+
+.tagButtonBox :global(.arco-btn-outline) {
+  color: #007dfa;
+  border: 1px solid #007dfa;
+}
+
+.tagButtonBox :global(.arco-btn-outline):hover {
+  color: #438dfb !important;
+  border: 1px solid #438dfb !important;
+}

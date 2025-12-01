@@ -30,6 +30,7 @@ import {
 import { debounce } from 'lodash-es';
 import getFileIcon from '../file-icon';
 import { SceneType } from '@/pages/datasetManagement';
+import { formatFileSize } from '@/utils/format';
 
 interface Dataset {
   key?: string;
@@ -589,7 +590,9 @@ const DatasetForm = React.forwardRef<
       title: '文件大小',
       dataIndex: 'file_size', // 使用动态获取的文件类型筛选器
       width: 134,
-      render: (_, record) => <span>{record.file_size || '-'}</span>
+      render: (_, record) => (
+        <span>{formatFileSize(record.file_size) || '-'}</span>
+      )
     }
   ];
 
