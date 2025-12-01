@@ -750,16 +750,20 @@ const DatasetDetail = (props: {
                 >
                   分段列表
                 </Button>
-                <Popconfirm
-                  focusLock
-                  title="删除"
-                  content="确定删除该文件吗？"
-                  onOk={() => {
-                    handleDeleteKnowledgeDocument(record.id);
-                  }}
+                <PermissionWrapper
+                  permission={DATA_MANAGEMENT_PERMISSIONS.CAN_DELETE}
                 >
-                  <Button type="text">删除</Button>
-                </Popconfirm>
+                  <Popconfirm
+                    focusLock
+                    title="删除"
+                    content="确定删除该文件吗？"
+                    onOk={() => {
+                      handleDeleteKnowledgeDocument(record.id);
+                    }}
+                  >
+                    <Button type="text">删除</Button>
+                  </Popconfirm>
+                </PermissionWrapper>
               </div>
             )
           }
