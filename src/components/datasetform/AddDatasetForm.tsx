@@ -897,6 +897,7 @@ const DatasetForm = React.forwardRef<
                     pagination={false}
                     rowSelection={{
                       type: 'checkbox',
+                      selectedRowKeys: fileIds,
                       onChange: (selectedRowKeys, selectedRows: FileItem[]) => {
                         const isNotJsonl = selectedRows.some(
                           (item) => item.file_type !== 'JSONL'
@@ -904,7 +905,10 @@ const DatasetForm = React.forwardRef<
                         setFilesType(
                           isNotJsonl ? StorageType.File : StorageType.Jsonl
                         );
-                        setFileIds(selectedRowKeys as string[]);
+                        const newFileIds = [
+                          ...new Set([...fileIds, ...selectedRowKeys])
+                        ];
+                        setFileIds(newFileIds as string[]);
                       }
                     }}
                   />
