@@ -26,7 +26,7 @@ const addProxy = (options) => {
 const targets = {
   test: 'http://110.154.34.22:38883',
   dev: 'http://10.252.216.16:9030',
-  qa: 'http://10.252.216.13:9040',
+  qa: 'http://10.252.216.13:9030',
   prod: 'http://10.252.216.19:9040'
 };
 const currentTarget = targets['dev'];

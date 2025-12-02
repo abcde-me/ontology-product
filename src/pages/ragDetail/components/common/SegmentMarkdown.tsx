@@ -86,6 +86,55 @@ const SegmentMarkdown: React.FC<SegmentMarkdownProps> = ({
               {children}
             </Sup>
           ),
+          // 自定义表格组件,添加完整的边框样式
+          table: ({ children }) => (
+            <table
+              style={{
+                borderCollapse: 'collapse',
+                width: '100%'
+              }}
+            >
+              {children}
+            </table>
+          ),
+          thead: ({ children }) => (
+            <thead style={{ backgroundColor: '#fafafa' }}>{children}</thead>
+          ),
+          tbody: ({ children }) => <tbody>{children}</tbody>,
+          tr: ({ children }) => (
+            <tr
+              style={{
+                borderLeft: '1px solid #d9d9d9',
+                borderRight: '1px solid #d9d9d9'
+              }}
+            >
+              {children}
+            </tr>
+          ),
+          th: ({ children }) => (
+            <th
+              style={{
+                border: '1px solid #d9d9d9',
+                padding: '8px 12px',
+                textAlign: 'left',
+                fontWeight: 600,
+                color: '#000'
+              }}
+            >
+              {children}
+            </th>
+          ),
+          td: ({ children }) => (
+            <td
+              style={{
+                border: '1px solid #d9d9d9',
+                padding: '8px 12px',
+                color: '#666'
+              }}
+            >
+              {children}
+            </td>
+          ),
           // 自定义图片组件,支持点击放大
           img: ({ src, alt, ...props }) => (
             <img

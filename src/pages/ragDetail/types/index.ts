@@ -162,8 +162,7 @@ export interface ImageElement {
 export interface TableElement {
   id: string;
   type: 'table';
-  headers: string[];
-  rows: Array<Record<string, string>>;
+  content: string; // Markdown格式的表格字符串
   relatedDescription?: string; // 关键描述
   extractionEntity?: string[]; // 抽取实体（标签）
   positionType?: string; // 定位类型
@@ -212,7 +211,8 @@ export interface ApiPositionDetail {
 export interface ApiMaterial {
   id: string; // 元素ID
   type: 'text' | 'title' | 'table' | 'image' | 'formula'; // 元素类型
-  text: string; // 文本内容（对于image是s3路径，对于table是JSON字符串，对于formula是公式字符串）
+  text: string; // 文本内容（对于image是s3路径，对于table是Markdown格式的表格字符串，对于formula是公式字符串）
+  content?: string; // 内容字段（与text字段相同，用于兼容不同的后端返回格式）
   positions?: ApiPositionDetail[]; // 位置信息
   uri?: string; // 资源URI（如S3路径）
   bucket_name?: string; // S3 bucket 名称（图片专用）
