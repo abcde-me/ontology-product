@@ -1063,6 +1063,7 @@ export default function RequirementConfig() {
 
   // 判断属性组是否来自requirementDetail
   const isAttributeGroupFromDetail = (labelId: string, attributeId: string) => {
+    // 只有在edit模式下才需要判断，其他模式下都返回false（不禁用）
     if (type !== 'edit' || !requirementDetail?.labels) {
       return false;
     }
@@ -2046,49 +2047,30 @@ export default function RequirementConfig() {
                                                       marginLeft: 12,
                                                       fontSize: 16,
                                                       cursor:
-                                                        (type === 'edit' &&
-                                                          isAttributeGroupFromDetail(
-                                                            item?.label_id,
-                                                            attrGroup?.attribute_id
-                                                          )) ||
                                                         attrGroup?.isTemp ===
-                                                          true
+                                                        true
                                                           ? 'not-allowed'
                                                           : 'pointer',
                                                       opacity:
-                                                        (type === 'edit' &&
-                                                          isAttributeGroupFromDetail(
-                                                            item?.label_id,
-                                                            attrGroup?.attribute_id
-                                                          )) ||
                                                         attrGroup?.isTemp ===
-                                                          true
+                                                        true
                                                           ? 0.5
                                                           : 1
                                                     }}
                                                     className={`${
-                                                      attrGroup?.isTemp ===
-                                                        true ||
-                                                      (type === 'edit' &&
-                                                        isAttributeGroupFromDetail(
-                                                          item?.label_id,
-                                                          attrGroup?.attribute_id
-                                                        ))
+                                                      attrGroup?.isTemp === true
                                                         ? 'is-disabled'
                                                         : 'icon-wrapper'
                                                     }`}
                                                     onClick={() => {
+                                                      // 来自模板的属性组不可添加选项
                                                       if (
-                                                        (type === 'edit' &&
-                                                          isAttributeGroupFromDetail(
-                                                            item?.label_id,
-                                                            attrGroup?.attribute_id
-                                                          )) ||
                                                         attrGroup?.isTemp ===
-                                                          true
+                                                        true
                                                       ) {
                                                         return;
                                                       }
+                                                      // edit模式下，所有属性组都可以添加选项
                                                       // 修改增加逻辑 往倒数第二个增加
                                                       addAttribute(
                                                         labelIndex,
