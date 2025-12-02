@@ -290,50 +290,26 @@ export const useRagDetailStore = create<RagDetailState & RagDetailActions>(
 
       // 如果有目录树，找到对应的目录节点并高亮
       const directory = get().directory;
-      const segments = get().segments;
 
-      if (directory && segments) {
-        // 先找到被点击的分段
-        const clickedSegment = segments.find((seg) => seg.id === segmentId);
-
-        // 查找目录树节点的逻辑：
-        // 1. 优先查找 chunk_id 等于分段 id 的可选中节点（Text、Image、Formula、Table）
-        // 2. 如果找不到，再查找包含该 segmentId 的节点
-        const findNodeBySegmentId = (
-          nodes: DirectoryNode[],
-          targetSegmentId: string,
-          targetParentTitleId?: string
-        ): string | null => {
+      if (directory) {
+        // 简化逻辑：直接查找 chunk_id 等于分段 id 的节点
+        const findNodeBySegmentId = (nodes: DirectoryNode[]): string | null => {
           for (const node of nodes) {
-            // 优先匹配：可选中的节点类型（Text、Image、Formula、Table）且 chunk_id 等于分段 id
-            if (
-              (node.type === 'Text' ||
-                node.type === 'Image' ||
-                node.type === 'Formula' ||
-                node.type === 'Table') &&
-              node.id === targetSegmentId
-            ) {
+            // 直接匹配 chunk_id 等于分段 id 的节点
+            if (node.id === segmentId) {
               return node.id;
             }
 
             // 递归检查子节点
             if (node.children) {
-              const result = findNodeBySegmentId(
-                node.children,
-                targetSegmentId,
-                targetParentTitleId
-              );
+              const result = findNodeBySegmentId(node.children);
               if (result) return result;
             }
           }
           return null;
         };
 
-        const nodeId = findNodeBySegmentId(
-          directory,
-          segmentId,
-          clickedSegment?.parentTitleId
-        );
+        const nodeId = findNodeBySegmentId(directory);
 
         if (nodeId) {
           set({ selectedDirectoryNodeId: nodeId });
@@ -345,7 +321,8 @@ export const useRagDetailStore = create<RagDetailState & RagDetailActions>(
       set({ selectedDirectoryNodeId: nodeId });
 
       const directory = get().directory;
-      if (!directory) return;
+      const segments = get().segments;
+      if (!directory || !segments) return;
 
       // 查找被点击的节点
       const findNode = (nodes: DirectoryNode[]): DirectoryNode | null => {
@@ -369,27 +346,15 @@ export const useRagDetailStore = create<RagDetailState & RagDetailActions>(
         get().highlightPdfCoordinates(clickedNode.position);
       }
 
-      // 根据节点类型决定是否高亮分段
-      // 对于可选中的节点类型（Text、Image、Formula、Table），高亮对应的分段
-      if (
-        clickedNode.type === 'Text' ||
-        clickedNode.type === 'Image' ||
-        clickedNode.type === 'Formula' ||
-        clickedNode.type === 'Table'
-      ) {
-        // 高亮对应的分段（chunk_id 就是分段的 id）
+      // 简化逻辑：直接根据 chunk_id 查找对应的切片
+      // 如果找到对应的切片，则高亮并滚动到该切片
+      const matchedSegment = segments.find((seg) => seg.id === clickedNode.id);
+      if (matchedSegment) {
         set({ selectedSegmentId: clickedNode.id });
-        // 滚动到该分段
         get().scrollToSegment(clickedNode.id);
-      } else if (clickedNode.type === 'Title') {
-        // type='Title': 只滚动到第一个关联的分段，不高亮
-        if (clickedNode.segmentIds && clickedNode.segmentIds.length > 0) {
-          const firstSegmentId = clickedNode.segmentIds[0];
-          // 清除分段高亮
-          set({ selectedSegmentId: null });
-          // 滚动到第一个分段
-          get().scrollToSegment(firstSegmentId);
-        }
+      } else {
+        // 如果没有找到对应的切片，清除分段高亮
+        set({ selectedSegmentId: null });
       }
     },
 
