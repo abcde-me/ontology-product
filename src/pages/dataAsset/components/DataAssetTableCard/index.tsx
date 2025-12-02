@@ -201,9 +201,18 @@ export default function DataAssetTableCard({
               {/* 标题 */}
               <div className="mb-[4px] truncate text-base font-semibold leading-6 text-[var(--color-text-2)]">
                 <EllipsisPopoverCom
+                  preferTypography
                   value={record?.data_asset_name || '未命名资产'}
                   wrapperClassName="w-full"
                   className="text-[18px]"
+                  ellipsis={{
+                    showTooltip: {
+                      type: 'popover',
+                      props: {
+                        position: 'top'
+                      }
+                    }
+                  }}
                 />
               </div>
 
