@@ -17,11 +17,7 @@ import {
   Tag,
   Tooltip
 } from '@arco-design/web-react';
-import {
-  IconSettings,
-  IconDelete,
-  IconEdit
-} from '@arco-design/web-react/icon';
+import { IconDelete, IconEdit } from '@arco-design/web-react/icon';
 import { useHistory } from 'react-router-dom';
 import noDataElement from '@/components/no-data';
 import DataAssetTableList from '../../components/DataAssetTableList';
@@ -58,6 +54,8 @@ import dayjs from 'dayjs';
 import { isDateTimeType, isDateType, isTagsField } from '../../utils/const';
 import { PermissionWrapper } from '@/components/PermissionGuard';
 import { DATA_ASSET_PERMISSIONS } from '@/config/permissions';
+import AssetSettingIcon from '../../assets/asset-setting.svg';
+import ColumnSettingIcon from '../../assets/column-setting.svg';
 
 interface TagValue {
   tagId: string;
@@ -204,7 +202,17 @@ export default function DataAssetList() {
                   return (
                     <Space size="mini">
                       {tags[0] && (
-                        <Tag>
+                        <Tag
+                          style={{
+                            backgroundColor: '#FAFBFF',
+                            borderRadius: '4px',
+                            border: '1px solid #C3C7D4',
+                            fontSize: '14px',
+                            height: '22px',
+                            padding: '0 6px',
+                            color: '#646C85'
+                          }}
+                        >
                           {tags[0].tagValue.length > 5 ? (
                             <Tooltip content={tags[0].tagValue}>
                               {tags[0].tagValue.substring(0, 5)}...
@@ -221,13 +229,33 @@ export default function DataAssetList() {
                             .map((item: TagValue, index: number) => (
                               <Tag
                                 key={item.tagId}
-                                style={{ margin: '2px 2px' }}
+                                style={{
+                                  backgroundColor: '#FAFBFF',
+                                  borderRadius: '4px',
+                                  border: '1px solid #C3C7D4',
+                                  fontSize: '14px',
+                                  height: '22px',
+                                  padding: '0 6px',
+                                  color: '#646C85'
+                                }}
                               >
                                 {item.tagValue}
                               </Tag>
                             ))}
                         >
-                          <Tag>+{tags.length - 1}</Tag>
+                          <Tag
+                            style={{
+                              backgroundColor: '#FAFBFF',
+                              borderRadius: '4px',
+                              border: '1px solid #C3C7D4',
+                              fontSize: '14px',
+                              height: '22px',
+                              padding: '0 6px',
+                              color: '#646C85'
+                            }}
+                          >
+                            +{tags.length - 1}
+                          </Tag>
                         </Tooltip>
                       )}
                     </Space>
@@ -838,7 +866,7 @@ export default function DataAssetList() {
                   >
                     <Button
                       icon={<IconDelete />}
-                      className="mr-[20px]"
+                      className="mr-[8px]"
                       disabled={selectedRowKeys.length === 0}
                       onClick={handleBatchDelete}
                     >
@@ -852,7 +880,7 @@ export default function DataAssetList() {
                   <Popover content="请先选择资产" position="top">
                     <Button
                       icon={<IconEdit />}
-                      className="mr-[20px]"
+                      className="mr-[8px]"
                       disabled={true}
                     >
                       批量修改
@@ -887,7 +915,7 @@ export default function DataAssetList() {
                     >
                       <Button
                         icon={<IconEdit />}
-                        className="mr-[20px]"
+                        className="mr-[8px]"
                         disabled={false}
                       >
                         批量修改
@@ -899,8 +927,8 @@ export default function DataAssetList() {
                   permission={DATA_ASSET_PERMISSIONS.GET_TABLE}
                 >
                   <Button
-                    icon={<IconSettings />}
-                    className="mr-[20px]"
+                    icon={<AssetSettingIcon />}
+                    className="mr-[8px] flex items-center"
                     onClick={handleAssetSettings}
                   >
                     资产设置
@@ -908,8 +936,8 @@ export default function DataAssetList() {
                 </PermissionWrapper>
                 {/* </Popover> */}
                 <Button
-                  icon={<IconSettings />}
-                  className="mr-[20px]"
+                  icon={<ColumnSettingIcon />}
+                  className="mr-[8px] flex items-center"
                   onClick={() => setColumnModalOpen(true)}
                 >
                   列设置
