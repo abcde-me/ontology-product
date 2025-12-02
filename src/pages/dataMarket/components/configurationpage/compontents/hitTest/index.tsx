@@ -29,6 +29,7 @@ import {
 } from '@/api/modules/rag';
 import { useHistory, useParams } from 'react-router-dom';
 import { useUserInfo } from '@/store/userInfoStore';
+import getFileIcon from '@/components/file-icon';
 
 function HitTest(props: { datasetName: string }) {
   const { datasetName } = props;
@@ -274,6 +275,13 @@ function HitTest(props: { datasetName: string }) {
       Message.error(res.message || '接口调用失败');
     }
   };
+  const getFileExtension = (fileName) => {
+    if (typeof fileName !== 'string' || !fileName.includes('.')) {
+      return ''; // 非字符串/无扩展名返回空
+    }
+    // 找到最后一个.的位置，截取后面的字符
+    return fileName.slice(fileName.lastIndexOf('.') + 1);
+  };
   return (
     <div className={styles.PageContentFalse}>
       <div className={styles.leftList}>
@@ -469,10 +477,11 @@ function HitTest(props: { datasetName: string }) {
                     </div>
                     <div className={styles.sl}>
                       <span>
-                        <IconDriveFile />
+                        {/* <IconDriveFile /> */}
+                        {getFileIcon(getFileExtension(e.document_name))}
                       </span>
                       <Tooltip content={e.document_name}>
-                        <span
+                        <div
                           className={styles.nm}
                           onClick={() =>
                             handleToParagraph(
@@ -483,10 +492,12 @@ function HitTest(props: { datasetName: string }) {
                             )
                           }
                         >
-                          {e?.positions
-                            ? `${e.document_name} - 第${e?.positions[0]?.page_id}页`
-                            : e.document_name}
-                        </span>
+                          <div className="mt-[3px]">
+                            {e?.positions
+                              ? `${e.document_name} - 第${e?.positions[0]?.page_id}页`
+                              : e.document_name}
+                          </div>
+                        </div>
                       </Tooltip>
                       {/* <span className={styles.sp}>
                           分段数：{index + 1}/{segmentationlist.length}
