@@ -3,7 +3,7 @@ import { Form, Radio } from '@arco-design/web-react';
 const FormItem = Form.Item;
 const RadioGroup = Radio.Group;
 
-const QualityConfig = ({ form }) => {
+const QualityConfig = ({ form, type }) => {
   return (
     <>
       <FormItem
@@ -11,6 +11,7 @@ const QualityConfig = ({ form }) => {
         field="qualityInspectionRounds"
         rules={[{ required: true, message: '请选择质检轮次' }]}
         initialValue={1}
+        disabled={type === 'edit'}
       >
         <RadioGroup>
           <Radio value={0}>无质检</Radio>

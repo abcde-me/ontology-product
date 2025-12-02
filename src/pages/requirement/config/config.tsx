@@ -117,80 +117,77 @@ export default function RequirementConfig() {
   });
 
   useEffect(() => {
-    if (!isEmpty(requirementDetail)) {
-      setAnnotationTypeContentCode(
-        requirementDetail?.label_tool?.label_tool_code
+    if (isEmpty(requirementDetail)) {
+      return;
+    }
+    setAnnotationTypeContentCode(
+      requirementDetail?.label_tool?.label_tool_code
+    );
+    setAnnotationTypeContentVal(requirementDetail?.label_tool?.label_tool_code);
+    basicForm.setFieldValue('name', requirementDetail?.name);
+    basicForm.setFieldValue('description', requirementDetail?.description);
+    basicForm.setFieldValue('model_id', requirementDetail?.model_id);
+    // 任务分配变更， 不需要
+    // setTaskTypeVal(requirementDetail?.team_type);
+    requirementDetail?.labels?.map((item) => {
+      // 使用 label_id 来匹配表单字段
+      const labelId = item?.label_id || item?.id;
+      labelToolForm.setFieldValue(
+        `label_name_cn_${labelId}`,
+        item?.label_name_cn
       );
-      setAnnotationTypeContentVal(
-        requirementDetail?.label_tool?.label_tool_code
+      labelToolForm.setFieldValue(
+        `label_name_en_${labelId}`,
+        item?.label_name_en
       );
-      basicForm.setFieldValue('name', requirementDetail?.name);
-      basicForm.setFieldValue('description', requirementDetail?.description);
-      basicForm.setFieldValue('model_id', requirementDetail?.model_id);
-      setTaskTypeVal(requirementDetail?.team_type);
-      requirementDetail?.labels?.map((item) => {
-        // 使用 label_id 来匹配表单字段
-        const labelId = item?.label_id || item?.id;
+      if (!isEmpty(item?.label_mappings) && !isEmpty(item?.label_mappings[0])) {
         labelToolForm.setFieldValue(
-          `label_name_cn_${labelId}`,
-          item?.label_name_cn
+          `label_mappings_${labelId}`,
+          item?.label_mappings
         );
+      }
+      labelToolForm.setFieldValue(`label_shape_${labelId}`, item?.label_shape);
+      labelToolForm.setFieldValue(
+        `label_colour_${labelId}`,
+        item?.label_colour
+      );
+      item?.label_info_attribute_groups?.map((group) => {
+        // 使用 attribute_id 来匹配表单字段
+        const groupId = group?.attribute_id || group?.id;
         labelToolForm.setFieldValue(
-          `label_name_en_${labelId}`,
-          item?.label_name_en
+          `label_info_attribute_groups_${groupId}_attribute_group_name`,
+          group?.attribute_group_name
         );
-        if (item?.label_mappings) {
+        group?.label_info_attribute?.map((attribute) => {
+          // 使用 label_info_id 来匹配表单字段
+          const attrId = attribute?.label_info_id || attribute?.id;
           labelToolForm.setFieldValue(
-            `label_mappings_${labelId}`,
-            item?.label_mappings
+            `label_info_attribute_groups_${attrId}_attribute_name_cn`,
+            attribute?.attribute_name_cn
           );
-        }
-        labelToolForm.setFieldValue(
-          `label_shape_${labelId}`,
-          item?.label_shape
-        );
-        labelToolForm.setFieldValue(
-          `label_colour_${labelId}`,
-          item?.label_colour
-        );
-        item?.label_info_attribute_groups?.map((group) => {
-          // 使用 attribute_id 来匹配表单字段
-          const groupId = group?.attribute_id || group?.id;
           labelToolForm.setFieldValue(
-            `label_info_attribute_groups_${groupId}_attribute_group_name`,
-            group?.attribute_group_name
+            `label_info_attribute_groups_${attrId}_attribute_name_en`,
+            attribute?.attribute_name_en
           );
-          group?.label_info_attribute?.map((attribute) => {
-            // 使用 label_info_id 来匹配表单字段
-            const attrId = attribute?.label_info_id || attribute?.id;
-            labelToolForm.setFieldValue(
-              `label_info_attribute_groups_${attrId}_attribute_name_cn`,
-              attribute?.attribute_name_cn
-            );
-            labelToolForm.setFieldValue(
-              `label_info_attribute_groups_${attrId}_attribute_name_en`,
-              attribute?.attribute_name_en
-            );
-          });
         });
       });
-      // 映射数据结构，确保字段名正确
-      const mappedLabels = requirementDetail?.labels?.map((item) => ({
-        ...item,
-        label_id: item?.label_id || item?.id,
-        label_info_attribute_groups: item?.label_info_attribute_groups?.map(
-          (group) => ({
-            ...group,
-            attribute_id: group?.attribute_id || group?.id,
-            label_info_attribute: group?.label_info_attribute?.map((attr) => ({
-              ...attr,
-              label_info_id: attr?.label_info_id || attr?.id
-            }))
-          })
-        )
-      }));
-      setLabelDataList(mappedLabels);
-    }
+    });
+    // 映射数据结构，确保字段名正确
+    const mappedLabels = requirementDetail?.labels?.map((item) => ({
+      ...item,
+      label_id: item?.label_id || item?.id,
+      label_info_attribute_groups: item?.label_info_attribute_groups?.map(
+        (group) => ({
+          ...group,
+          attribute_id: group?.attribute_id || group?.id,
+          label_info_attribute: group?.label_info_attribute?.map((attr) => ({
+            ...attr,
+            label_info_id: attr?.label_info_id || attr?.id
+          }))
+        })
+      )
+    }));
+    setLabelDataList(mappedLabels);
   }, [requirementDetail]);
   // 监听 taskPackages 变化，自动清除已选人员的错误
   useEffect(() => {
@@ -231,8 +228,7 @@ export default function RequirementConfig() {
       labelToolForm.getFieldValue('split_task_package');
     const qualityRounds =
       qualityTaskForm.getFieldValue('qualityInspectionRounds') ?? 0;
-    const totalDataAmount =
-      getTotal(selectedData) || requirementDetail?.label_count || 0;
+    const totalDataAmount = getTotal(selectedData) || 0;
 
     if (splitCount && totalDataAmount && splitCount >= 1) {
       // 传入现有的taskPackages，保留已选数据
@@ -250,8 +246,8 @@ export default function RequirementConfig() {
     }
   }, [
     publishData?.split_task_package,
-    selectedData,
-    requirementDetail?.label_count
+    selectedData
+    // requirementDetail?.label_count
     // qualityInspectionRounds 需要通过表单变化触发
   ]);
   // 找到现有的useEffect，在其后添加一个新的useEffect来处理templateData的更新同步
@@ -1037,6 +1033,10 @@ export default function RequirementConfig() {
 
   // 监听预标注模型变化，清空所有模型映射字段
   useEffect(() => {
+    // 如果是copy、edit模式，初始化时不应该清空
+    if (type === 'copy' || type === 'edit') {
+      return;
+    }
     if (labelDataList && labelDataList.length > 0) {
       labelDataList.forEach((item) => {
         const fieldName = `label_mappings_${item?.label_id}`;
@@ -1151,7 +1151,7 @@ export default function RequirementConfig() {
               <FormItem
                 label="标注类型:"
                 required
-                disabled={type === 'edit' || type === 'copy'}
+                disabled={type === 'edit'}
                 className="annotation-tool"
                 field="label_type"
               >
@@ -1159,7 +1159,7 @@ export default function RequirementConfig() {
                   <span className="error-info-text">请选择标注工具</span>
                 )}
                 <AnnotationType
-                  isDisabled={type === 'edit' || type === 'copy'}
+                  isDisabled={type === 'edit'}
                   label_type={requirementDetail?.label_type || 2}
                   label_tool_code={
                     requirementDetail?.label_tool?.label_tool_code ||
@@ -1183,10 +1183,7 @@ export default function RequirementConfig() {
                     {type === 'edit' ? '新增数据' : '选择数据'}
                   </Button>
                   <div className="data-set-text">
-                    已选数据量{' '}
-                    {getTotal(selectedData) ||
-                      requirementDetail?.label_count ||
-                      0}
+                    已选数据量 {getTotal(selectedData) || 0}
                   </div>
                 </div>
                 {selectedData?.length <= 0 && isShowDataErrorInfo && (
@@ -1230,7 +1227,7 @@ export default function RequirementConfig() {
                 <FormItem
                   field="model_id"
                   label="预标注模型:"
-                  disabled={type === 'edit' || type === 'copy'}
+                  disabled={type === 'edit'}
                   style={{ marginBottom: 24 }}
                 >
                   <Select
@@ -2855,7 +2852,7 @@ export default function RequirementConfig() {
                 }
               }}
             >
-              <QualityConfig form={qualityTaskForm} />
+              <QualityConfig form={qualityTaskForm} type={type} />
             </Form>
           </div>
           {/* 任务分配功能 */}
