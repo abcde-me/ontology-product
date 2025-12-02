@@ -23,8 +23,12 @@ interface TableViewerProps {
 }
 
 const TableViewer: React.FC<TableViewerProps> = ({}) => {
-  const { fileBinaryData, fileBinaryDataLoading, fileBinaryDataError } =
-    useRagDetailStore();
+  const {
+    fileBinaryData,
+    fileBinaryDataLoading,
+    fileBinaryDataError,
+    highlightedPdfCoordinates
+  } = useRagDetailStore();
   const [currentTableIndex, setCurrentTableIndex] = useState(0);
   const [excelSheets, setExcelSheets] = useState<TableSegment[]>([]);
 
@@ -53,6 +57,25 @@ const TableViewer: React.FC<TableViewerProps> = ({}) => {
       setCurrentTableIndex(0);
     }
   }, [fileBinaryData]);
+
+  // 根据 highlightedPdfCoordinates 切换 sheet 页
+  useEffect(() => {
+    if (
+      highlightedPdfCoordinates &&
+      highlightedPdfCoordinates.length > 0 &&
+      excelSheets.length > 0
+    ) {
+      const firstCoordinate = highlightedPdfCoordinates[0];
+      if (firstCoordinate?.page) {
+        // page 是 1-based，需要转换为 0-based 索引
+        const targetIndex = firstCoordinate.page - 1;
+        // 确保索引在有效范围内
+        if (targetIndex >= 0 && targetIndex < excelSheets.length) {
+          setCurrentTableIndex(targetIndex);
+        }
+      }
+    }
+  }, [highlightedPdfCoordinates, excelSheets.length]);
 
   // 导航处理
   const handlePrevious = () => {
