@@ -67,8 +67,6 @@ export const useRagDetailStore = create<RagDetailState & RagDetailActions>(
     documentName: '',
     datasetName: '',
     documentFormat: '',
-    // excel定位位置
-    highlightedExcelCoordinate: null,
 
     // Actions
     initializeRagDetail: async (
@@ -517,20 +515,6 @@ export const useRagDetailStore = create<RagDetailState & RagDetailActions>(
     // Segment search actions
     setSegmentSearchText: (text: string) => {
       set({ segmentSearchText: text });
-    },
-
-    // excel定位位置
-    setHighlightedExcelCoordinate: (segmentId: string) => {
-      const segments = get().segments;
-      const segment = segments.find((s) => s.id === segmentId);
-      if (segment && segment.positions && segment.positions.length > 0) {
-        // 使用第一个坐标进行高亮
-        set({ highlightedExcelCoordinate: segment.positions[0] });
-      }
-    },
-
-    clearHighlightedExcelCoordinate: () => {
-      set({ highlightedExcelCoordinate: null });
     },
 
     // File binary data actions

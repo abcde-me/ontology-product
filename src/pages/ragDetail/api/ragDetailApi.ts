@@ -79,7 +79,6 @@ function transformSegment(apiSegment: ApiSegment): Segment {
     charCount: apiSegment.char_count,
     segmentIndex: apiSegment.index,
     pdfCoordinates: transformApiPositions(apiSegment.positions),
-    positions: apiSegment.positions || undefined,
     parentTitle: apiSegment.parent_title || undefined,
     parentTitleId: apiSegment.parent_title_id || undefined,
     type: apiSegment.type,
