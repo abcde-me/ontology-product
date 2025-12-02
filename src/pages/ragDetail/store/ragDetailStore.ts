@@ -129,25 +129,17 @@ export const useRagDetailStore = create<RagDetailState & RagDetailActions>(
 
         // 如果 URL 中有 chunkId，则使用它来初始化定位
         if (initialChunkId) {
-          initialSelectedSegmentId = initialChunkId;
-
-          // 查找对应的目录树节点（可选中的节点类型且 id 等于 chunkId）
-          const findSelectableNodeByChunkId = (
+          // 查找对应的目录树节点（任何类型的节点，id 等于 chunkId）
+          const findNodeByChunkId = (
             nodes: DirectoryNode[]
           ): DirectoryNode | null => {
             for (const node of nodes) {
-              // 匹配可选中的节点类型（Text、Image、Formula、Table）
-              if (
-                (node.type === 'Text' ||
-                  node.type === 'Image' ||
-                  node.type === 'Formula' ||
-                  node.type === 'Table') &&
-                node.id === initialChunkId
-              ) {
+              // 匹配 id 等于 chunkId 的任何节点
+              if (node.id === initialChunkId) {
                 return node;
               }
               if (node.children) {
-                const found = findSelectableNodeByChunkId(node.children);
+                const found = findNodeByChunkId(node.children);
                 if (found) return found;
               }
             }
@@ -155,9 +147,26 @@ export const useRagDetailStore = create<RagDetailState & RagDetailActions>(
           };
 
           if (data.directory) {
-            const foundNode = findSelectableNodeByChunkId(data.directory);
+            const foundNode = findNodeByChunkId(data.directory);
             if (foundNode) {
+              // 设置目录树选中节点
               initialSelectedDirectoryNodeId = foundNode.id;
+
+              // 根据节点类型决定是否设置 selectedSegmentId
+              if (
+                foundNode.type === 'Text' ||
+                foundNode.type === 'Image' ||
+                foundNode.type === 'Formula' ||
+                foundNode.type === 'Table'
+              ) {
+                // 如果是可选中类型，直接设置为 selectedSegmentId（会在切片列表中选中并高亮）
+                initialSelectedSegmentId = foundNode.id;
+              } else if (foundNode.type === 'Title') {
+                // 如果是 Title 类型，不设置 selectedSegmentId（切片列表不选中）
+                // 而是通过 scrollToSegment 滚动到第一个子节点
+                initialSelectedSegmentId = null;
+              }
+
               // 如果没有传入 positions，则使用目录树节点的 position
               if (!initialPositionsStr && foundNode.position) {
                 initialHighlightedCoordinates = foundNode.position;
@@ -199,6 +208,60 @@ export const useRagDetailStore = create<RagDetailState & RagDetailActions>(
           highlightedPdfCoordinates: initialHighlightedCoordinates,
           loading: false
         });
+
+        // 如果 URL 中有 chunkId 且对应的是 Title 节点，则滚动到第一个子节点
+        if (
+          initialChunkId &&
+          initialSelectedSegmentId === null &&
+          data.directory
+        ) {
+          const findNodeByChunkId = (
+            nodes: DirectoryNode[]
+          ): DirectoryNode | null => {
+            for (const node of nodes) {
+              if (node.id === initialChunkId) {
+                return node;
+              }
+              if (node.children) {
+                const found = findNodeByChunkId(node.children);
+                if (found) return found;
+              }
+            }
+            return null;
+          };
+
+          const foundNode = findNodeByChunkId(data.directory);
+          if (foundNode && foundNode.type === 'Title') {
+            // 查找第一个可选中的子节点
+            const findFirstSelectableChild = (
+              node: DirectoryNode
+            ): DirectoryNode | null => {
+              if (
+                node.type === 'Text' ||
+                node.type === 'Image' ||
+                node.type === 'Formula' ||
+                node.type === 'Table'
+              ) {
+                return node;
+              }
+              if (node.children && node.children.length > 0) {
+                for (const child of node.children) {
+                  const found = findFirstSelectableChild(child);
+                  if (found) return found;
+                }
+              }
+              return null;
+            };
+
+            const firstSelectableChild = findFirstSelectableChild(foundNode);
+            if (firstSelectableChild) {
+              // 延迟滚动到第一个子节点，确保 DOM 已经渲染完成
+              setTimeout(() => {
+                get().scrollToSegment(firstSelectableChild.id);
+              }, 100);
+            }
+          }
+        }
 
         // @ts-ignore
         const isConvertPdf = finalSceneType === 'excel' ? false : true;
