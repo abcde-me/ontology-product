@@ -418,7 +418,7 @@ function HitTest(props: { datasetName: string }) {
                               handleToParagraph(
                                 e.document_id,
                                 e.chunk_id,
-                                e.position,
+                                JSON.stringify(e.positions[0]),
                                 e.parent_title_id
                               );
                             }}
@@ -472,7 +472,21 @@ function HitTest(props: { datasetName: string }) {
                         <IconDriveFile />
                       </span>
                       <Tooltip content={e.document_name}>
-                        <span className={styles.nm}>{e.document_name}</span>
+                        <span
+                          className={styles.nm}
+                          onClick={() =>
+                            handleToParagraph(
+                              e.document_id,
+                              e.chunk_id,
+                              JSON.stringify(e.positions[0]),
+                              e.parent_title_id
+                            )
+                          }
+                        >
+                          {e?.positions
+                            ? `${e.document_name} - 第${e?.positions[0]?.page_id}页`
+                            : e.document_name}
+                        </span>
                       </Tooltip>
                       {/* <span className={styles.sp}>
                           分段数：{index + 1}/{segmentationlist.length}
