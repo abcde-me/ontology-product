@@ -1051,6 +1051,58 @@ export default function RequirementConfig() {
     return modelLabelList.filter((item) => item.label_shape === curShape);
   };
 
+  // 判断标签是否来自requirementDetail（用于edit模式下判断是否禁用）
+  const isLabelFromDetail = (labelId: string) => {
+    if (type !== 'edit' || !requirementDetail?.labels) {
+      return false;
+    }
+    return requirementDetail.labels.some(
+      (label) => (label.label_id || label.id) === labelId
+    );
+  };
+
+  // 判断属性组是否来自requirementDetail
+  const isAttributeGroupFromDetail = (labelId: string, attributeId: string) => {
+    if (type !== 'edit' || !requirementDetail?.labels) {
+      return false;
+    }
+    const label = requirementDetail.labels.find(
+      (l) => (l.label_id || l.id) === labelId
+    );
+    if (!label?.label_info_attribute_groups) {
+      return false;
+    }
+    return label.label_info_attribute_groups.some(
+      (group) => (group.attribute_id || group.id) === attributeId
+    );
+  };
+
+  // 判断属性是否来自requirementDetail
+  const isAttributeFromDetail = (
+    labelId: string,
+    attributeGroupId: string,
+    attributeId: string
+  ) => {
+    if (type !== 'edit' || !requirementDetail?.labels) {
+      return false;
+    }
+    const label = requirementDetail.labels.find(
+      (l) => (l.label_id || l.id) === labelId
+    );
+    if (!label?.label_info_attribute_groups) {
+      return false;
+    }
+    const attributeGroup = label.label_info_attribute_groups.find(
+      (group) => (group.attribute_id || group.id) === attributeGroupId
+    );
+    if (!attributeGroup?.label_info_attribute) {
+      return false;
+    }
+    return attributeGroup.label_info_attribute.some(
+      (attr) => (attr.label_info_id || attr.id) === attributeId
+    );
+  };
+
   return (
     <div className="requirement-detail">
       <div className="head-breadcrumb-box">
@@ -1358,6 +1410,10 @@ export default function RequirementConfig() {
                                     style={{ padding: 0 }}
                                   >
                                     <Input
+                                      disabled={
+                                        type === 'edit' &&
+                                        isLabelFromDetail(item?.label_id)
+                                      }
                                       style={{
                                         minWidth: !!model_id ? 165 : 260
                                       }}
@@ -1425,6 +1481,10 @@ export default function RequirementConfig() {
                                     ]}
                                   >
                                     <Input
+                                      disabled={
+                                        type === 'edit' &&
+                                        isLabelFromDetail(item?.label_id)
+                                      }
                                       style={{
                                         minWidth: !!model_id ? 155 : 260
                                       }}
@@ -1475,6 +1535,10 @@ export default function RequirementConfig() {
                                       style={{ padding: 0 }}
                                     >
                                       <Select
+                                        disabled={
+                                          type === 'edit' &&
+                                          isLabelFromDetail(item?.label_id)
+                                        }
                                         className="label-mapping-select"
                                         mode="multiple"
                                         maxTagCount={{
@@ -1598,6 +1662,10 @@ export default function RequirementConfig() {
                                     initialValue={item.label_shape ?? 3} // 添加initialValue确保表单初始化时就有默认值
                                   >
                                     <Select
+                                      disabled={
+                                        type === 'edit' &&
+                                        isLabelFromDetail(item?.label_id)
+                                      }
                                       placeholder="请选择形状"
                                       value={item.label_shape ?? 3}
                                       onChange={(val: any) => {
@@ -1682,6 +1750,10 @@ export default function RequirementConfig() {
                                   >
                                     <div className="color-content">
                                       <ColorPicker
+                                        disabled={
+                                          type === 'edit' &&
+                                          isLabelFromDetail(item?.label_id)
+                                        }
                                         defaultValue={item?.label_colour}
                                         onChange={(val: any) => {
                                           updateNestedValue(
@@ -1694,6 +1766,11 @@ export default function RequirementConfig() {
                                       <IconDown
                                         className="color-icon"
                                         onClick={(e) => {
+                                          if (
+                                            type === 'edit' &&
+                                            isLabelFromDetail(item?.label_id)
+                                          )
+                                            return;
                                           e.stopPropagation();
                                           const trigger =
                                             e.currentTarget.parentElement?.querySelector(
@@ -1702,7 +1779,11 @@ export default function RequirementConfig() {
                                           trigger?.click();
                                         }}
                                         style={{
-                                          cursor: 'pointer'
+                                          cursor:
+                                            type === 'edit' &&
+                                            isLabelFromDetail(item?.label_id)
+                                              ? 'not-allowed'
+                                              : 'pointer'
                                         }}
                                       />
                                     </div>
@@ -1711,10 +1792,32 @@ export default function RequirementConfig() {
                                     {labelDataList.length > 1 && (
                                       <Tooltip content="删除">
                                         <IconDelete
-                                          className="icon-wrapper"
+                                          className={`icon-wrapper ${
+                                            type === 'edit' &&
+                                            isLabelFromDetail(item?.label_id)
+                                              ? 'is-disabled'
+                                              : ''
+                                          }`}
                                           fontSize={16}
                                           onClick={() => {
+                                            if (
+                                              type === 'edit' &&
+                                              isLabelFromDetail(item?.label_id)
+                                            )
+                                              return;
                                             deleteLabel(labelIndex);
+                                          }}
+                                          style={{
+                                            cursor:
+                                              type === 'edit' &&
+                                              isLabelFromDetail(item?.label_id)
+                                                ? 'not-allowed'
+                                                : 'pointer',
+                                            opacity:
+                                              type === 'edit' &&
+                                              isLabelFromDetail(item?.label_id)
+                                                ? 0.5
+                                                : 1
                                           }}
                                         />
                                       </Tooltip>
@@ -1787,9 +1890,22 @@ export default function RequirementConfig() {
                                               ]}
                                             >
                                               <Input
+                                                disabled={
+                                                  (type === 'edit' &&
+                                                    isAttributeGroupFromDetail(
+                                                      item?.label_id,
+                                                      attrGroup?.attribute_id
+                                                    )) ||
+                                                  attrGroup?.isTemp === true
+                                                }
                                                 style={{
                                                   width: 522,
                                                   backgroundColor:
+                                                    (type === 'edit' &&
+                                                      isAttributeGroupFromDetail(
+                                                        item?.label_id,
+                                                        attrGroup?.attribute_id
+                                                      )) ||
                                                     attrGroup?.isTemp
                                                       ? '#e2e8f0'
                                                       : '#fff'
@@ -1817,6 +1933,11 @@ export default function RequirementConfig() {
                                             >
                                               <Select
                                                 disabled={
+                                                  (type === 'edit' &&
+                                                    isAttributeGroupFromDetail(
+                                                      item?.label_id,
+                                                      attrGroup?.attribute_id
+                                                    )) ||
                                                   attrGroup?.isTemp === true
                                                 }
                                                 className="mr-2"
@@ -1877,6 +1998,11 @@ export default function RequirementConfig() {
                                             >
                                               <Checkbox
                                                 disabled={
+                                                  (type === 'edit' &&
+                                                    isAttributeGroupFromDetail(
+                                                      item?.label_id,
+                                                      attrGroup?.attribute_id
+                                                    )) ||
                                                   attrGroup?.isTemp === true
                                                 }
                                                 style={{
@@ -1919,13 +2045,47 @@ export default function RequirementConfig() {
                                                     style={{
                                                       marginLeft: 12,
                                                       fontSize: 16,
-                                                      cursor: 'pointer'
+                                                      cursor:
+                                                        (type === 'edit' &&
+                                                          isAttributeGroupFromDetail(
+                                                            item?.label_id,
+                                                            attrGroup?.attribute_id
+                                                          )) ||
+                                                        attrGroup?.isTemp ===
+                                                          true
+                                                          ? 'not-allowed'
+                                                          : 'pointer',
+                                                      opacity:
+                                                        (type === 'edit' &&
+                                                          isAttributeGroupFromDetail(
+                                                            item?.label_id,
+                                                            attrGroup?.attribute_id
+                                                          )) ||
+                                                        attrGroup?.isTemp ===
+                                                          true
+                                                          ? 0.5
+                                                          : 1
                                                     }}
-                                                    className={`${attrGroup?.isTemp === true ? 'is-disabled' : 'icon-wrapper'}`}
+                                                    className={`${
+                                                      attrGroup?.isTemp ===
+                                                        true ||
+                                                      (type === 'edit' &&
+                                                        isAttributeGroupFromDetail(
+                                                          item?.label_id,
+                                                          attrGroup?.attribute_id
+                                                        ))
+                                                        ? 'is-disabled'
+                                                        : 'icon-wrapper'
+                                                    }`}
                                                     onClick={() => {
                                                       if (
+                                                        (type === 'edit' &&
+                                                          isAttributeGroupFromDetail(
+                                                            item?.label_id,
+                                                            attrGroup?.attribute_id
+                                                          )) ||
                                                         attrGroup?.isTemp ===
-                                                        true
+                                                          true
                                                       ) {
                                                         return;
                                                       }
@@ -1951,12 +2111,44 @@ export default function RequirementConfig() {
                                             >
                                               <Tooltip content="删除">
                                                 <IconDelete
-                                                  className="icon-wrapper"
+                                                  className={`icon-wrapper ${
+                                                    type === 'edit' &&
+                                                    isAttributeGroupFromDetail(
+                                                      item?.label_id,
+                                                      attrGroup?.attribute_id
+                                                    )
+                                                      ? 'is-disabled'
+                                                      : ''
+                                                  }`}
                                                   style={{
-                                                    marginLeft: 12
+                                                    marginLeft: 12,
+                                                    cursor:
+                                                      type === 'edit' &&
+                                                      isAttributeGroupFromDetail(
+                                                        item?.label_id,
+                                                        attrGroup?.attribute_id
+                                                      )
+                                                        ? 'not-allowed'
+                                                        : 'pointer',
+                                                    opacity:
+                                                      type === 'edit' &&
+                                                      isAttributeGroupFromDetail(
+                                                        item?.label_id,
+                                                        attrGroup?.attribute_id
+                                                      )
+                                                        ? 0.5
+                                                        : 1
                                                   }}
                                                   fontSize={16}
                                                   onClick={() => {
+                                                    if (
+                                                      type === 'edit' &&
+                                                      isAttributeGroupFromDetail(
+                                                        item?.label_id,
+                                                        attrGroup?.attribute_id
+                                                      )
+                                                    )
+                                                      return;
                                                     // 删除当前属性组
                                                     deleteAttributeGroup(
                                                       labelIndex,
@@ -2033,6 +2225,12 @@ export default function RequirementConfig() {
                                                         }
                                                       ]}
                                                       disabled={
+                                                        (type === 'edit' &&
+                                                          isAttributeFromDetail(
+                                                            item?.label_id,
+                                                            attrGroup?.attribute_id,
+                                                            attr?.label_info_id
+                                                          )) ||
                                                         attrGroup?.isTemp ===
                                                           true ||
                                                         attrGroup
@@ -2045,6 +2243,12 @@ export default function RequirementConfig() {
                                                     >
                                                       <Input
                                                         disabled={
+                                                          (type === 'edit' &&
+                                                            isAttributeFromDetail(
+                                                              item?.label_id,
+                                                              attrGroup?.attribute_id,
+                                                              attr?.label_info_id
+                                                            )) ||
                                                           attrGroup?.isTemp ===
                                                             true ||
                                                           attrGroup
@@ -2062,6 +2266,12 @@ export default function RequirementConfig() {
                                                         style={{
                                                           width: 340,
                                                           backgroundColor:
+                                                            (type === 'edit' &&
+                                                              isAttributeFromDetail(
+                                                                item?.label_id,
+                                                                attrGroup?.attribute_id,
+                                                                attr?.label_info_id
+                                                              )) ||
                                                             attrGroup?.isTemp ||
                                                             attrGroup
                                                               ?.label_info_attribute[
@@ -2172,6 +2382,12 @@ export default function RequirementConfig() {
                                                         style={{
                                                           width: 318,
                                                           backgroundColor:
+                                                            (type === 'edit' &&
+                                                              isAttributeFromDetail(
+                                                                item?.label_id,
+                                                                attrGroup?.attribute_id,
+                                                                attr?.label_info_id
+                                                              )) ||
                                                             attrGroup?.isTemp
                                                               ? '#e2e8f0'
                                                               : '#fff'
@@ -2182,8 +2398,14 @@ export default function RequirementConfig() {
                                                           attr.attribute_name_cn
                                                         }
                                                         disabled={
+                                                          (type === 'edit' &&
+                                                            isAttributeFromDetail(
+                                                              item?.label_id,
+                                                              attrGroup?.attribute_id,
+                                                              attr?.label_info_id
+                                                            )) ||
                                                           attrGroup?.isTemp ===
-                                                          true
+                                                            true
                                                         }
                                                         onChange={(val) =>
                                                           updateNestedValue(
@@ -2206,13 +2428,58 @@ export default function RequirementConfig() {
                                                       <FormItem>
                                                         <Tooltip content="删除">
                                                           <IconDelete
-                                                            className={`icon-wrapper ${attrGroup?.isTemp === true ? 'is-disabled' : ''}`}
+                                                            className={`icon-wrapper ${
+                                                              (type ===
+                                                                'edit' &&
+                                                                isAttributeFromDetail(
+                                                                  item?.label_id,
+                                                                  attrGroup?.attribute_id,
+                                                                  attr?.label_info_id
+                                                                )) ||
+                                                              attrGroup?.isTemp ===
+                                                                true
+                                                                ? 'is-disabled'
+                                                                : ''
+                                                            }`}
                                                             fontSize={16}
+                                                            style={{
+                                                              cursor:
+                                                                (type ===
+                                                                  'edit' &&
+                                                                  isAttributeFromDetail(
+                                                                    item?.label_id,
+                                                                    attrGroup?.attribute_id,
+                                                                    attr?.label_info_id
+                                                                  )) ||
+                                                                attrGroup?.isTemp ===
+                                                                  true
+                                                                  ? 'not-allowed'
+                                                                  : 'pointer',
+                                                              opacity:
+                                                                (type ===
+                                                                  'edit' &&
+                                                                  isAttributeFromDetail(
+                                                                    item?.label_id,
+                                                                    attrGroup?.attribute_id,
+                                                                    attr?.label_info_id
+                                                                  )) ||
+                                                                attrGroup?.isTemp ===
+                                                                  true
+                                                                  ? 0.5
+                                                                  : 1
+                                                            }}
                                                             onClick={() => {
                                                               // 删除当前属性组
                                                               if (
+                                                                (type ===
+                                                                  'edit' &&
+                                                                  isAttributeFromDetail(
+                                                                    item?.label_id,
+                                                                    attrGroup?.attribute_id,
+                                                                    attr?.label_info_id
+                                                                  )) ||
                                                                 attrGroup?.isTemp ===
-                                                                true
+                                                                  true
                                                               ) {
                                                                 return;
                                                               }
@@ -2483,6 +2750,9 @@ export default function RequirementConfig() {
                                     <IconPlus
                                       className="icon-wrapper ml-2"
                                       fontSize={16}
+                                      style={{
+                                        cursor: 'pointer'
+                                      }}
                                       onClick={() => {
                                         // 点击icon添加一个选项，选项插入是同组最后一项
                                         setTemplateData(
@@ -2520,6 +2790,9 @@ export default function RequirementConfig() {
                                     <IconDelete
                                       className="icon-wrapper ml-2"
                                       fontSize={16}
+                                      style={{
+                                        cursor: 'pointer'
+                                      }}
                                       onClick={() => {
                                         // 删除当前属性组
                                         setTemplateData(
@@ -2735,6 +3008,9 @@ export default function RequirementConfig() {
                                                 <IconDelete
                                                   className="icon-wrapper"
                                                   fontSize={16}
+                                                  style={{
+                                                    cursor: 'pointer'
+                                                  }}
                                                   onClick={() => {
                                                     // 删除当前属性组中的选项
                                                     setTemplateData(
