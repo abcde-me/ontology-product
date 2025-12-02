@@ -207,7 +207,7 @@ export default function SearchArea({
   // 设置搜索条件的内容
   const settingsContent = (
     <div className="flex max-h-[400px] min-w-[240px] max-w-[400px] flex-col rounded bg-white">
-      <div className="p-2 pb-1">
+      <div className="mb-[4px]">
         <Input
           placeholder="输入关键词搜索"
           prefix={<IconSearch />}
@@ -216,9 +216,9 @@ export default function SearchArea({
           allowClear
         />
       </div>
-      <div className="max-h-[300px] overflow-y-auto py-1">
+      <div className="max-h-[300px] overflow-y-auto">
         <div
-          className="flex cursor-pointer items-center px-4 py-2 transition-colors hover:bg-[var(--color-fill-2)]"
+          className="flex cursor-pointer items-center pb-[7px] pt-[7px] transition-colors hover:bg-[var(--color-fill-2)]"
           onClick={() =>
             handleSelectAll(
               checkedFields.size !== filteredFieldsForSettings.length
@@ -241,7 +241,7 @@ export default function SearchArea({
         {filteredFieldsForSettings.map((field) => (
           <div
             key={field.id}
-            className="flex cursor-pointer items-center px-4 py-2 transition-colors hover:bg-[var(--color-fill-2)]"
+            className="flex cursor-pointer items-center pb-[7px] pt-[7px] transition-colors hover:bg-[var(--color-fill-2)]"
             onClick={() =>
               toggleFieldCheck(field.id, !checkedFields.has(field.id))
             }
@@ -486,15 +486,17 @@ export default function SearchArea({
         <div className="border-b border-[#CBD5E1] py-[24px]">
           {/* 字段搜索列表 */}
           {visibleFields.length > 0 && (
-            <div className="mb-4 flex flex-wrap gap-4">
-              {visibleFields.map((field) => (
-                <div key={field.id} className="flex items-center gap-3">
-                  <span className="whitespace-nowrap text-sm text-[var(--color-text-1)]">
-                    {field.nameZh}:
-                  </span>
-                  <div className="w-[380px]">{renderFieldInput(field)}</div>
-                </div>
-              ))}
+            <div className="mb-4 grid grid-cols-4 gap-4">
+              {visibleFields.map((field) => {
+                return (
+                  <div key={field.id} className="flex items-center gap-3">
+                    <span className="whitespace-nowrap text-sm text-[var(--color-text-1)]">
+                      {field.nameZh}:
+                    </span>
+                    <div className="flex-1">{renderFieldInput(field)}</div>
+                  </div>
+                );
+              })}
             </div>
           )}
 
