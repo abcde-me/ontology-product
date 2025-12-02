@@ -130,7 +130,12 @@ const DirectoryTree: React.FC<DirectoryTreeProps> = ({ nodes }) => {
   // 默认不选中任何节点，只有当用户点击时才选中
   // 当分段列表被点击时，根据selectedSegmentId来高亮对应的目录树节点
   const selectedKeys = useMemo(() => {
-    // 如果有选中的分段ID，查找对应的目录树节点
+    // 优先级 1：如果有选中的目录节点ID（从 URL 或用户点击目录树），使用它
+    if (selectedDirectoryNodeId) {
+      return [selectedDirectoryNodeId];
+    }
+
+    // 优先级 2：如果有选中的分段ID（从分段列表点击），查找对应的目录树节点
     if (selectedSegmentId) {
       // 递归查找包含该segmentId的节点
       // 优先匹配 type='text' 的节点（chunk_id 等于 segmentId）
@@ -164,11 +169,6 @@ const DirectoryTree: React.FC<DirectoryTreeProps> = ({ nodes }) => {
       if (foundNode) {
         return [foundNode.id];
       }
-    }
-
-    // 如果有选中的目录节点ID（用户点击目录树），使用它
-    if (selectedDirectoryNodeId) {
-      return [selectedDirectoryNodeId];
     }
 
     // 默认不选中
