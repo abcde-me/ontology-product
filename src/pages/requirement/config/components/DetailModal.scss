@@ -21,7 +21,7 @@
       position: sticky;
       top: 0;
       z-index: 30;
-      padding: 16px 12px 8px 0px;
+      padding: 16px 12px 8px 0;
     }
 
     .arco-tree-node {
@@ -43,8 +43,10 @@
 
   .content-table:hover {
     scrollbar-width: auto;
+
     /* Firefox */
     -ms-overflow-style: auto;
+
     /* IE 和 Edge */
   }
 
@@ -76,7 +78,7 @@
     }
 
     .tree-node-name {
-      font-family: PingFang SC;
+      font-family: 'PingFang SC';
       font-weight: 500;
       font-size: 14px;
       letter-spacing: 0%;

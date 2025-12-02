@@ -64,9 +64,11 @@
   .disabled-div {
     /* 阻止鼠标交互 */
     // pointer-events: none;
+
     /* 视觉上表示不可用 */
     opacity: 0.6;
     cursor: not-allowed;
+
     /* 可选：添加灰色背景等样式 */
     color: #94a3b8;
   }

@@ -25,7 +25,7 @@
     margin-bottom: 8px;
 
     .attribute-title {
-      font-family: PingFang SC;
+      font-family: 'PingFang SC';
       font-weight: 400;
       font-size: 14px;
       line-height: 22px;
@@ -36,11 +36,12 @@
   .attribute-list {
     background-color: #f5f9ff;
     padding: 12px;
-    margin: 8px 16px 16px 16px;
+    margin: 8px 16px 16px;
   }
 
   .attribute-item {
     display: flex;
+
     &:last-child {
       .arco-form-message {
         margin-bottom: 0;
@@ -59,6 +60,7 @@
       color: #007dfa;
     }
   }
+
   .classify-relation-item_group_name {
     .arco-form-message {
       margin-bottom: 0;

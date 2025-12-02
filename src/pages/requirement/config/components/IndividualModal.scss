@@ -26,8 +26,10 @@
 
   .content-table:hover {
     scrollbar-width: auto;
+
     /* Firefox */
     -ms-overflow-style: auto;
+
     /* IE 和 Edge */
   }
 

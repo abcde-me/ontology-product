@@ -32,7 +32,7 @@
   }
 
   .arco-breadcrumb-item > .arco-icon {
-    color: #000000;
+    color: #000;
     cursor: pointer;
   }
 
@@ -43,12 +43,12 @@
 
     .breadcrumb-text:hover {
       cursor: pointer;
-      color: #000000;
+      color: #000;
     }
   }
 
   .basic-title {
-    font-family: PingFang SC;
+    font-family: 'PingFang SC';
     font-weight: 500;
     font-size: 16px;
     line-height: 24px;
@@ -67,7 +67,7 @@
   }
 
   .data-set-text {
-    font-family: PingFang SC;
+    font-family: 'PingFang SC';
     font-weight: 400;
     font-size: 14px;
     line-height: 22px;
@@ -138,7 +138,7 @@
   }
 
   .sortable-item {
-    padding: 0 16px 16px 16px;
+    padding: 0 16px 16px;
   }
 
   .sortable-item-content {
@@ -235,7 +235,7 @@
     background-color: #e7ecf0;
     border-radius: 4px;
     padding: 2px 4px;
-    font-family: PingFang SC;
+    font-family: 'PingFang SC';
     font-weight: 400;
     font-size: 12px;
     line-height: 18px;
@@ -251,7 +251,7 @@
   }
 
   .attribute-group-info-title-temp {
-    font-family: PingFang SC;
+    font-family: 'PingFang SC';
     font-weight: 400;
     font-size: 14px;
     line-height: 22px;
@@ -259,7 +259,7 @@
   }
 
   .attribute-group-info-title {
-    font-family: PingFang SC;
+    font-family: 'PingFang SC';
     font-weight: 400;
     font-size: 14px;
     line-height: 22px;
@@ -295,7 +295,7 @@
   }
 
   .label-name {
-    font-family: PingFang SC;
+    font-family: 'PingFang SC';
     font-weight: 400;
     font-size: 14px;
     line-height: 22px;
@@ -354,7 +354,7 @@
   }
 
   .attribute-group-item-template {
-    padding: 12px 12px 0 12px;
+    padding: 12px 12px 0;
     background-color: #f5f9ff;
     margin-top: 16px;
   }
@@ -374,7 +374,7 @@
     align-items: center;
 
     .text-content {
-      font-family: PingFang SC;
+      font-family: 'PingFang SC';
       font-weight: 400;
       font-size: 14px;
       line-height: 22px;
@@ -404,7 +404,7 @@
         cursor: pointer;
         border-bottom: 1px solid #cbd5e1;
         border-right: 1px solid #cbd5e1;
-        font-family: PingFang SC;
+        font-family: 'PingFang SC';
         font-size: 14px;
         line-height: 32px;
         letter-spacing: 0%;
@@ -458,9 +458,9 @@
 
   .btn-add {
     color: #1e293b;
-    font-family: PingFang SC;
+    font-family: 'PingFang SC';
     font-weight: 600;
-    font-style: Semibold;
+    font-style: semibold;
     font-size: 14px;
     line-height: 22px;
     vertical-align: middle;
@@ -538,6 +538,7 @@
 
 .label-mapping-select .arco-input-tag-inner {
   flex-wrap: nowrap !important;
+
   input {
     min-width: 100px !important;
   }
