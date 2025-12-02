@@ -257,6 +257,7 @@ const DatasetForm = React.forwardRef<
       setConnectorFileInformation([]); //重置连接器文件信息
       setPreviewData(null); //重置预览数据
       setPreviewColumns([]); //重置预览表格列
+      setFileIds([]);
       setIsPreviewFile(false);
       setPreviewFileData(null);
       form.setFieldValue('dataSource', 'volume');
@@ -605,6 +606,8 @@ const DatasetForm = React.forwardRef<
       onCancel={() => {
         onCancel();
         form.resetFields();
+        setFileIds([]);
+        setPreviewFileData(null);
       }}
       maskClosable={false}
       className={styles.modalWrapper}
@@ -1139,6 +1142,8 @@ const DatasetForm = React.forwardRef<
                 onClick={() => {
                   onCancel();
                   form.resetFields();
+                  setFileIds([]);
+                  setPreviewFileData(null);
                 }}
               >
                 取消
