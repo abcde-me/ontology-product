@@ -105,6 +105,22 @@ const filterFileTypes = [
     value: FileTypeLarge.pdf
   },
   {
+    text: FileTypeLarge.doc,
+    value: FileTypeLarge.doc
+  },
+  {
+    text: FileTypeLarge.docx,
+    value: FileTypeLarge.docx
+  },
+  {
+    text: FileTypeLarge.txt,
+    value: FileTypeLarge.txt
+  },
+  {
+    text: FileTypeLarge.md,
+    value: FileTypeLarge.md
+  },
+  {
     text: FileTypeLarge.ppt,
     value: FileTypeLarge.ppt
   },
@@ -121,60 +137,8 @@ const filterFileTypes = [
     value: FileTypeLarge.xlsx
   },
   {
-    text: FileTypeLarge.txt,
-    value: FileTypeLarge.txt
-  },
-  {
-    text: FileTypeLarge.md,
-    value: FileTypeLarge.md
-  },
-  {
-    text: FileTypeLarge.doc,
-    value: FileTypeLarge.doc
-  },
-  {
-    text: FileTypeLarge.docx,
-    value: FileTypeLarge.docx
-  },
-  {
-    text: FileTypeLarge.jpg,
-    value: FileTypeLarge.jpg
-  },
-  {
-    text: FileTypeLarge.png,
-    value: FileTypeLarge.png
-  },
-  {
-    text: FileTypeLarge.jpeg,
-    value: FileTypeLarge.jpeg
-  },
-  {
-    text: FileTypeLarge.wav,
-    value: FileTypeLarge.wav
-  },
-  {
-    text: FileTypeLarge.mp3,
-    value: FileTypeLarge.mp3
-  },
-  {
-    text: FileTypeLarge.aac,
-    value: FileTypeLarge.aac
-  },
-  {
-    text: FileTypeLarge.flac,
-    value: FileTypeLarge.flac
-  },
-  {
-    text: FileTypeLarge.mp4,
-    value: FileTypeLarge.mp4
-  },
-  {
-    text: FileTypeLarge.mov,
-    value: FileTypeLarge.mov
-  },
-  {
-    text: FileTypeLarge.mkv,
-    value: FileTypeLarge.mkv
+    text: FileTypeLarge.csv,
+    value: FileTypeLarge.csv
   }
 ];
 
@@ -1483,8 +1447,7 @@ const DatasetDetail = (props: {
   const handleVersionRebuild = () => {
     if (!datasetDetail) return;
     datasetVersionRebuild({
-      id: Number(id),
-      version_id: datasetDetail.latest_version
+      id: Number(id)
     })
       .then((res) => {
         if (res?.status === 200) {
@@ -2003,20 +1966,7 @@ const DatasetDetail = (props: {
                 noDataElement({ description: '暂无数据' })
               )}
             </TabPane>
-          ) : datasetDetail?.storage_type === StorageType.table ? (
-            // 数据库表数据内容
-            <TabPane key="content" title="文件列表">
-              <div className="table-scroll-container">
-                <Table
-                  columns={contentTableColumns}
-                  data={contentTableData}
-                  pagination={false}
-                  rowKey="id"
-                  border={false}
-                />
-              </div>
-            </TabPane>
-          ) : (
+          ) : datasetDetail?.storage_type === StorageType.vector ? (
             <TabPane key="content" title="文件列表">
               {datasetDetail?.storage_type === StorageType.vector && (
                 <Input.Search
@@ -2087,6 +2037,20 @@ const DatasetDetail = (props: {
                   sizeOptions={[10, 20, 50, 100]}
                   showJumper
                   sizeCanChange={true}
+                />
+              </div>
+            </TabPane>
+          ) : (
+            // 数据库表数据内容
+            <TabPane key="content" title="文件列表">
+              <div className="table-scroll-container">
+                <Table
+                  columns={contentTableColumns}
+                  data={contentTableData}
+                  pagination={false}
+                  rowKey="id"
+                  border={false}
+                  noDataElement={noDataElement({ description: '暂无数据' })}
                 />
               </div>
             </TabPane>

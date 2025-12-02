@@ -93,7 +93,6 @@ export interface BatchDeleteDatasetParams {
 //版本重新生成参数接口
 export interface DatasetVersionRebuildParams {
   id: string | number;
-  version_id: string;
 }
 
 /**
