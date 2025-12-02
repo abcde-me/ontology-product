@@ -83,27 +83,41 @@ const Classify = (props: ClassifyComponentProps) => {
     setTextRelations(newData);
   };
   useEffect(() => {
-    if (type === 'detail') {
-      requirementDetail?.file_labels?.map((item) => {
+    if (
+      requirementDetail?.file_labels &&
+      (type === 'edit' || type === 'copy')
+    ) {
+      // 映射数据结构，确保有正确的 ID 字段
+      const mappedLabels = requirementDetail?.file_labels?.map((item) => ({
+        ...item,
+        attribute_id: item?.attribute_id || item?.order_num || uuid(),
+        file_label_attribute: item?.file_label_attribute?.map((attr) => ({
+          ...attr,
+          attribute_id: attr?.attribute_id || attr?.order_num || uuid()
+        }))
+      }));
+
+      // 设置表单值
+      mappedLabels?.forEach((item) => {
         formClassify.setFieldValue(
-          `attribute_group_name${item?.order_num}`,
+          `attribute_group_name${item.attribute_id}`,
           item?.attribute_group_name
         );
         // 设置选项内容
-        item?.file_label_attribute?.map((group) => {
+        item?.file_label_attribute?.forEach((attr) => {
           formClassify.setFieldValue(
-            `attribute_name_en_${group?.order_num}`,
-            group?.attribute_name_en
+            `attribute_name_en_${attr.attribute_id}`,
+            attr?.attribute_name_en
           );
           formClassify.setFieldValue(
-            `attribute_name_cn_${group?.order_num}`,
-            group?.attribute_name_cn
+            `attribute_name_cn_${attr.attribute_id}`,
+            attr?.attribute_name_cn
           );
         });
       });
-      setTextRelations(requirementDetail?.file_labels);
+      setTextRelations(mappedLabels);
     }
-  }, [requirementDetail]);
+  }, [requirementDetail, type]);
 
   useEffect(() => {
     getClassIfyData(textRelations, formClassify);
@@ -113,7 +127,6 @@ const Classify = (props: ClassifyComponentProps) => {
     <div className="classify-warp">
       <Form
         form={formClassify}
-        disabled={type === 'detail'}
         onValuesChange={(_, val) => {
           setTextRelations({ ...textRelations, ...val });
         }}
@@ -129,8 +142,7 @@ const Classify = (props: ClassifyComponentProps) => {
                 <FormItem
                   style={{ paddingLeft: 16, marginRight: 8 }}
                   label="属性名称:"
-                  field={`attribute_group_name${type === 'detail' ? item?.order_num : item.attribute_id}`}
-                  // field={`attribute_group_name${item?.attribute_id}`}
+                  field={`attribute_group_name${item.attribute_id}`}
                   className="classify-relation-item_group_name"
                   rules={[
                     {
@@ -228,9 +240,9 @@ const Classify = (props: ClassifyComponentProps) => {
                 {item?.attribute_group_class !== 3 && (
                   <FormItem label={null} style={{ padding: 0, marginRight: 8 }}>
                     {/* 添加选项 */}
-                    <Tooltip content={type === 'detail' ? '' : '添加选项'}>
+                    <Tooltip content="添加选项">
                       <IconPlus
-                        className={`${type === 'detail' ? 'disabled-icon' : 'icon-content'}`}
+                        className="icon-content"
                         fontSize={18}
                         onClick={() => {
                           // 添加属性逻辑补充 - 在按钮位置(数组开头)添加新属性
@@ -315,15 +327,12 @@ const Classify = (props: ClassifyComponentProps) => {
                 )}
                 <FormItem label={null}>
                   {textRelations?.length > 1 && (
-                    <Tooltip content={type === 'detail' ? '' : '删除'}>
+                    <Tooltip content="删除">
                       <IconDelete
-                        className={`${type === 'detail' ? 'disabled-icon' : 'icon-content'}`}
+                        className="icon-content"
                         fontSize={18}
                         onClick={() => {
-                          if (type !== 'detail') {
-                            removeArrayItem(index);
-                            return;
-                          }
+                          removeArrayItem(index);
                         }}
                       />
                     </Tooltip>
@@ -342,7 +351,6 @@ const Classify = (props: ClassifyComponentProps) => {
                             : ''}
                       </div>
                       <Checkbox
-                        disabled={type === 'detail'}
                         style={{ whiteSpace: 'nowrap', fontSize: 14 }}
                         checked={
                           item.file_label_attribute.some(
@@ -368,10 +376,7 @@ const Classify = (props: ClassifyComponentProps) => {
                             const newAttribute =
                               newData[index].file_label_attribute[lastIndex];
                             if (newAttribute.input_type === 2) {
-                              const attributeId =
-                                type === 'detail'
-                                  ? newAttribute.order_num
-                                  : newAttribute.attribute_id;
+                              const attributeId = newAttribute.attribute_id;
                               formClassify?.setFieldValue(
                                 `attribute_name_en_${attributeId}`,
                                 '标注时的输入内容'
@@ -398,7 +403,7 @@ const Classify = (props: ClassifyComponentProps) => {
                     {item.file_label_attribute?.map((attr: any, attrIndex) => (
                       <div key={attr.attribute_id} className="attribute-item">
                         <FormItem
-                          field={`attribute_name_en_${type === 'detail' ? attr?.order_num : attr.attribute_id}`}
+                          field={`attribute_name_en_${attr.attribute_id}`}
                           style={{ padding: 0, marginRight: 8 }}
                           rules={[
                             {
@@ -438,14 +443,11 @@ const Classify = (props: ClassifyComponentProps) => {
                             </div>
                           }
                           disabled={
-                            type === 'detail' ||
-                            (attrIndex !== 0 &&
-                              attrIndex ===
-                                item.file_label_attribute?.length - 1 &&
-                              item?.file_label_attribute[attrIndex]
-                                .input_type === 2)
-                              ? true
-                              : false
+                            attrIndex !== 0 &&
+                            attrIndex ===
+                              item.file_label_attribute?.length - 1 &&
+                            item?.file_label_attribute[attrIndex].input_type ===
+                              2
                           }
                         >
                           <Input
@@ -462,7 +464,7 @@ const Classify = (props: ClassifyComponentProps) => {
                           />
                         </FormItem>
                         <FormItem
-                          field={`attribute_name_cn_${type === 'detail' ? attr?.order_num : attr.attribute_id}`}
+                          field={`attribute_name_cn_${attr.attribute_id}`}
                           style={{ padding: 0, marginRight: 8 }}
                           label={
                             <div style={{ color: '#6E7B8D' }}>
@@ -528,15 +530,12 @@ const Classify = (props: ClassifyComponentProps) => {
                         </FormItem>
                         <FormItem label={null}>
                           {item?.file_label_attribute?.length > 1 && (
-                            <Tooltip content={type === 'detail' ? '' : '删除'}>
+                            <Tooltip content="删除">
                               <IconDelete
-                                className={`${type === 'detail' ? 'disabled-icon' : 'icon-content'}`}
+                                className="icon-content"
                                 fontSize={18}
                                 onClick={() => {
-                                  if (type !== 'detail') {
-                                    removeAttribute(index, attrIndex);
-                                    return;
-                                  }
+                                  removeAttribute(index, attrIndex);
                                 }}
                               />
                             </Tooltip>
@@ -550,7 +549,6 @@ const Classify = (props: ClassifyComponentProps) => {
           ))}
         <div className="add-btn">
           <Button
-            disabled={type === 'detail'}
             onClick={() => {
               // 在按钮的位置添加新数据，不在最后一行添加
               // 修复：在当前位置插入新数据而非添加到数组末尾
@@ -580,9 +578,7 @@ const Classify = (props: ClassifyComponentProps) => {
               setTextRelations(newTextRelations);
             }}
           >
-            <IconPlus
-              className={`${type === 'detail' ? 'disabled-icon' : ''}`}
-            />
+            <IconPlus />
             添加属性
           </Button>
         </div>

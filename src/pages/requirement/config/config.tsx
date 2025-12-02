@@ -129,46 +129,67 @@ export default function RequirementConfig() {
       basicForm.setFieldValue('model_id', requirementDetail?.model_id);
       setTaskTypeVal(requirementDetail?.team_type);
       requirementDetail?.labels?.map((item) => {
+        // 使用 label_id 来匹配表单字段
+        const labelId = item?.label_id || item?.id;
         labelToolForm.setFieldValue(
-          `label_name_cn_${item?.id}`,
+          `label_name_cn_${labelId}`,
           item?.label_name_cn
         );
         labelToolForm.setFieldValue(
-          `label_name_en_${item?.id}`,
+          `label_name_en_${labelId}`,
           item?.label_name_en
         );
         if (item?.label_mappings) {
           labelToolForm.setFieldValue(
-            `label_mappings_${item?.id}`,
+            `label_mappings_${labelId}`,
             item?.label_mappings
           );
         }
         labelToolForm.setFieldValue(
-          `label_shape_${item?.id}`,
+          `label_shape_${labelId}`,
           item?.label_shape
         );
         labelToolForm.setFieldValue(
-          `label_colour_${item?.id}`,
+          `label_colour_${labelId}`,
           item?.label_colour
         );
         item?.label_info_attribute_groups?.map((group) => {
+          // 使用 attribute_id 来匹配表单字段
+          const groupId = group?.attribute_id || group?.id;
           labelToolForm.setFieldValue(
-            `label_info_attribute_groups_${group?.id}_attribute_group_name`,
+            `label_info_attribute_groups_${groupId}_attribute_group_name`,
             group?.attribute_group_name
           );
           group?.label_info_attribute?.map((attribute) => {
+            // 使用 label_info_id 来匹配表单字段
+            const attrId = attribute?.label_info_id || attribute?.id;
             labelToolForm.setFieldValue(
-              `label_info_attribute_groups_${attribute?.id}_attribute_name_cn`,
+              `label_info_attribute_groups_${attrId}_attribute_name_cn`,
               attribute?.attribute_name_cn
             );
             labelToolForm.setFieldValue(
-              `label_info_attribute_groups_${attribute?.id}_attribute_name_en`,
+              `label_info_attribute_groups_${attrId}_attribute_name_en`,
               attribute?.attribute_name_en
             );
           });
         });
       });
-      setLabelDataList(requirementDetail?.labels);
+      // 映射数据结构，确保字段名正确
+      const mappedLabels = requirementDetail?.labels?.map((item) => ({
+        ...item,
+        label_id: item?.label_id || item?.id,
+        label_info_attribute_groups: item?.label_info_attribute_groups?.map(
+          (group) => ({
+            ...group,
+            attribute_id: group?.attribute_id || group?.id,
+            label_info_attribute: group?.label_info_attribute?.map((attr) => ({
+              ...attr,
+              label_info_id: attr?.label_info_id || attr?.id
+            }))
+          })
+        )
+      }));
+      setLabelDataList(mappedLabels);
     }
   }, [requirementDetail]);
   // 监听 taskPackages 变化，自动清除已选人员的错误
@@ -1016,7 +1037,7 @@ export default function RequirementConfig() {
 
   // 监听预标注模型变化，清空所有模型映射字段
   useEffect(() => {
-    if (labelDataList && labelDataList.length > 0 && type !== 'detail') {
+    if (labelDataList && labelDataList.length > 0) {
       labelDataList.forEach((item) => {
         const fieldName = `label_mappings_${item?.label_id}`;
         labelToolForm.setFieldValue(fieldName, undefined);
@@ -1069,7 +1090,6 @@ export default function RequirementConfig() {
             <div className="basic-title">基础信息</div>
             <Form
               form={basicForm}
-              disabled={type === 'detail'}
               initialValues={{ name: publishData?.name }}
               onValuesChange={(_, val) => {
                 setPublishData({ ...publishData, ...val });
@@ -1131,6 +1151,7 @@ export default function RequirementConfig() {
               <FormItem
                 label="标注类型:"
                 required
+                disabled={type === 'edit' || type === 'copy'}
                 className="annotation-tool"
                 field="label_type"
               >
@@ -1138,7 +1159,7 @@ export default function RequirementConfig() {
                   <span className="error-info-text">请选择标注工具</span>
                 )}
                 <AnnotationType
-                  isDisabled={type === 'detail'}
+                  isDisabled={type === 'edit' || type === 'copy'}
                   label_type={requirementDetail?.label_type || 2}
                   label_tool_code={
                     requirementDetail?.label_tool?.label_tool_code ||
@@ -1159,7 +1180,7 @@ export default function RequirementConfig() {
                       setModalVisible(true);
                     }}
                   >
-                    {type === 'detail' ? '查看已选' : '选择数据'}
+                    {type === 'edit' ? '新增数据' : '选择数据'}
                   </Button>
                   <div className="data-set-text">
                     已选数据量{' '}
@@ -1201,7 +1222,6 @@ export default function RequirementConfig() {
                       1
                     }
                     precision={0}
-                    disabled={type === 'detail'}
                     style={{ width: 200 }}
                   />
                 )}
@@ -1210,6 +1230,7 @@ export default function RequirementConfig() {
                 <FormItem
                   field="model_id"
                   label="预标注模型:"
+                  disabled={type === 'edit' || type === 'copy'}
                   style={{ marginBottom: 24 }}
                 >
                   <Select
@@ -1242,7 +1263,6 @@ export default function RequirementConfig() {
             <div className="tool-annotation-config">
               <Form
                 form={labelToolForm}
-                disabled={type === 'detail'}
                 onValuesChange={(_, val) => {
                   setPublishData({ ...publishData, val });
                 }}
@@ -1313,7 +1333,7 @@ export default function RequirementConfig() {
                                 <div className="sortable-item-content">
                                   <FormItem
                                     label="标签名称:"
-                                    field={`label_name_en_${type === 'detail' ? item?.id : item?.label_id}`}
+                                    field={`label_name_en_${item?.label_id}`}
                                     rules={[
                                       {
                                         required: true,
@@ -1356,7 +1376,7 @@ export default function RequirementConfig() {
                                     />
                                   </FormItem>
                                   <FormItem
-                                    field={`label_name_cn_${type === 'detail' ? item?.id : item?.label_id}`}
+                                    field={`label_name_cn_${item?.label_id}`}
                                     label={
                                       <div>
                                         <span
@@ -1427,7 +1447,7 @@ export default function RequirementConfig() {
                                           currentItem.label_name_en?.trim()
                                         ) {
                                           // 使用 item 来生成字段名（与 FormItem 的 field 保持一致）
-                                          const fieldName = `label_name_cn_${type === 'detail' ? item?.id : item?.label_id}`;
+                                          const fieldName = `label_name_cn_${item?.label_id}`;
                                           // 更新数据状态
                                           updateNestedValue(
                                             [labelIndex, 'label_name_cn'],
@@ -1454,7 +1474,7 @@ export default function RequirementConfig() {
                                   {!!model_id && (
                                     <FormItem
                                       label="模型映射:"
-                                      field={`label_mappings_${type === 'detail' ? item?.id : item?.label_id}`}
+                                      field={`label_mappings_${item?.label_id}`}
                                       style={{ padding: 0 }}
                                     >
                                       <Select
@@ -1507,7 +1527,7 @@ export default function RequirementConfig() {
                                                 newValues
                                               );
                                               // 同时更新 Form 的值
-                                              const fieldName = `label_mappings_${type === 'detail' ? item?.id : item?.label_id}`;
+                                              const fieldName = `label_mappings_${item?.label_id}`;
                                               labelToolForm.setFieldValue(
                                                 fieldName,
                                                 newValues
@@ -1577,7 +1597,7 @@ export default function RequirementConfig() {
                                     </FormItem>
                                   )}
                                   <FormItem
-                                    field={`label_shape_${type === 'detail' ? item?.id : item?.label_id}`}
+                                    field={`label_shape_${item?.label_id}`}
                                     initialValue={item.label_shape ?? 3} // 添加initialValue确保表单初始化时就有默认值
                                   >
                                     <Select
@@ -1594,7 +1614,7 @@ export default function RequirementConfig() {
                                         );
                                         // 形状改变时，清空对应的模型映射值
                                         if (model_id) {
-                                          const mappingFieldName = `label_mappings_${type === 'detail' ? item?.id : item?.label_id}`;
+                                          const mappingFieldName = `label_mappings_${item?.label_id}`;
                                           labelToolForm.setFieldValue(
                                             mappingFieldName,
                                             undefined
@@ -1661,11 +1681,10 @@ export default function RequirementConfig() {
                                     </Select>
                                   </FormItem>
                                   <FormItem
-                                    field={`label_colour_${type === 'detail' ? item?.id : item?.label_id}`}
+                                    field={`label_colour_${item?.label_id}`}
                                   >
                                     <div className="color-content">
                                       <ColorPicker
-                                        disabled={type === 'detail'}
                                         defaultValue={item?.label_colour}
                                         onChange={(val: any) => {
                                           updateNestedValue(
@@ -1678,20 +1697,15 @@ export default function RequirementConfig() {
                                       <IconDown
                                         className="color-icon"
                                         onClick={(e) => {
-                                          if (type !== 'detail') {
-                                            e.stopPropagation();
-                                            const trigger =
-                                              e.currentTarget.parentElement?.querySelector(
-                                                '.arco-color-picker-preview'
-                                              ) as HTMLElement;
-                                            trigger?.click();
-                                          }
+                                          e.stopPropagation();
+                                          const trigger =
+                                            e.currentTarget.parentElement?.querySelector(
+                                              '.arco-color-picker-preview'
+                                            ) as HTMLElement;
+                                          trigger?.click();
                                         }}
                                         style={{
-                                          cursor:
-                                            type === 'detail'
-                                              ? 'not-allowed'
-                                              : 'pointer'
+                                          cursor: 'pointer'
                                         }}
                                       />
                                     </div>
@@ -1700,12 +1714,10 @@ export default function RequirementConfig() {
                                     {labelDataList.length > 1 && (
                                       <Tooltip content="删除">
                                         <IconDelete
-                                          className={`${type === 'detail' ? 'is-disabled' : 'icon-wrapper'}`}
+                                          className="icon-wrapper"
                                           fontSize={16}
                                           onClick={() => {
-                                            if (type !== 'detail') {
-                                              deleteLabel(labelIndex);
-                                            }
+                                            deleteLabel(labelIndex);
                                           }}
                                         />
                                       </Tooltip>
@@ -1723,9 +1735,8 @@ export default function RequirementConfig() {
                                         >
                                           <div className="attribute-group-content-item">
                                             <FormItem
-                                              field={`label_info_attribute_groups_${type === 'detail' ? attrGroup?.id : attrGroup?.attribute_id}_attribute_group_name`} // 使用item.label_id替代labelIndex
+                                              field={`label_info_attribute_groups_${attrGroup?.attribute_id}_attribute_group_name`} // 使用item.label_id替代labelIndex
                                               disabled={
-                                                type === 'detail' ||
                                                 attrGroup?.isTemp === true
                                               }
                                               className="attribute-group-name-label"
@@ -1782,7 +1793,6 @@ export default function RequirementConfig() {
                                                 style={{
                                                   width: 522,
                                                   backgroundColor:
-                                                    type === 'detail' ||
                                                     attrGroup?.isTemp
                                                       ? '#e2e8f0'
                                                       : '#fff'
@@ -1810,7 +1820,6 @@ export default function RequirementConfig() {
                                             >
                                               <Select
                                                 disabled={
-                                                  type === 'detail' ||
                                                   attrGroup?.isTemp === true
                                                 }
                                                 className="mr-2"
@@ -1871,7 +1880,6 @@ export default function RequirementConfig() {
                                             >
                                               <Checkbox
                                                 disabled={
-                                                  type === 'detail' ||
                                                   attrGroup?.isTemp === true
                                                 }
                                                 style={{
@@ -1905,7 +1913,6 @@ export default function RequirementConfig() {
                                                 3 && (
                                                 <Tooltip
                                                   content={
-                                                    type === 'detail' ||
                                                     attrGroup?.isTemp === true
                                                       ? ''
                                                       : '添加选项'
@@ -1915,33 +1922,27 @@ export default function RequirementConfig() {
                                                     style={{
                                                       marginLeft: 12,
                                                       fontSize: 16,
-                                                      cursor:
-                                                        type === 'detail'
-                                                          ? 'not-allowed'
-                                                          : 'pointer'
+                                                      cursor: 'pointer'
                                                     }}
-                                                    className={`${type === 'detail' || attrGroup?.isTemp === true ? 'is-disabled' : 'icon-wrapper'}`}
+                                                    className={`${attrGroup?.isTemp === true ? 'is-disabled' : 'icon-wrapper'}`}
                                                     onClick={() => {
                                                       if (
-                                                        type === 'detail' ||
                                                         attrGroup?.isTemp ===
-                                                          true
+                                                        true
                                                       ) {
                                                         return;
                                                       }
-                                                      if (type !== 'detail') {
-                                                        // 修改增加逻辑 往倒数第二个增加
-                                                        addAttribute(
-                                                          labelIndex,
-                                                          groupIndex,
+                                                      // 修改增加逻辑 往倒数第二个增加
+                                                      addAttribute(
+                                                        labelIndex,
+                                                        groupIndex,
+                                                        attrGroup
+                                                          .label_info_attribute?.[
                                                           attrGroup
-                                                            .label_info_attribute?.[
-                                                            attrGroup
-                                                              .label_info_attribute
-                                                              ?.length - 1
-                                                          ]?.input_type
-                                                        );
-                                                      }
+                                                            .label_info_attribute
+                                                            ?.length - 1
+                                                        ]?.input_type
+                                                      );
                                                     }}
                                                   />
                                                 </Tooltip>
@@ -1953,22 +1954,17 @@ export default function RequirementConfig() {
                                             >
                                               <Tooltip content="删除">
                                                 <IconDelete
-                                                  className={`icon-wrapper ${type === 'detail' ? 'is-disabled' : ''}`}
+                                                  className="icon-wrapper"
                                                   style={{
                                                     marginLeft: 12
                                                   }}
                                                   fontSize={16}
                                                   onClick={() => {
                                                     // 删除当前属性组
-                                                    if (type === 'detail') {
-                                                      return;
-                                                    }
-                                                    if (type !== 'detail') {
-                                                      deleteAttributeGroup(
-                                                        labelIndex,
-                                                        groupIndex
-                                                      );
-                                                    }
+                                                    deleteAttributeGroup(
+                                                      labelIndex,
+                                                      groupIndex
+                                                    );
                                                   }}
                                                 />
                                               </Tooltip>
@@ -1995,7 +1991,7 @@ export default function RequirementConfig() {
                                                           选项{attrIndex + 1}：
                                                         </div>
                                                       }
-                                                      field={`label_info_attribute_groups_${type === 'detail' ? attr?.id : attr?.label_info_id}_attribute_name_en`}
+                                                      field={`label_info_attribute_groups_${attr?.label_info_id}_attribute_name_en`}
                                                       rules={[
                                                         {
                                                           required: true,
@@ -2040,7 +2036,6 @@ export default function RequirementConfig() {
                                                         }
                                                       ]}
                                                       disabled={
-                                                        type === 'detail' ||
                                                         attrGroup?.isTemp ===
                                                           true ||
                                                         attrGroup
@@ -2053,7 +2048,6 @@ export default function RequirementConfig() {
                                                     >
                                                       <Input
                                                         disabled={
-                                                          type === 'detail' ||
                                                           attrGroup?.isTemp ===
                                                             true ||
                                                           attrGroup
@@ -2071,15 +2065,11 @@ export default function RequirementConfig() {
                                                         style={{
                                                           width: 340,
                                                           backgroundColor:
-                                                            type === 'detail' ||
                                                             attrGroup?.isTemp ||
-                                                            (type !==
-                                                              'detail' &&
-                                                              attrGroup
-                                                                ?.label_info_attribute[
-                                                                attrIndex
-                                                              ].input_type ===
-                                                                2)
+                                                            attrGroup
+                                                              ?.label_info_attribute[
+                                                              attrIndex
+                                                            ].input_type === 2
                                                               ? '#e2e8f0'
                                                               : '#fff'
                                                         }}
@@ -2179,13 +2169,12 @@ export default function RequirementConfig() {
                                                           }
                                                         }
                                                       ]}
-                                                      field={`label_info_attribute_groups_${type === 'detail' ? attr?.id : attr?.label_info_id}_attribute_name_cn`}
+                                                      field={`label_info_attribute_groups_${attr?.label_info_id}_attribute_name_cn`}
                                                     >
                                                       <Input
                                                         style={{
                                                           width: 318,
                                                           backgroundColor:
-                                                            type === 'detail' ||
                                                             attrGroup?.isTemp
                                                               ? '#e2e8f0'
                                                               : '#fff'
@@ -2196,9 +2185,8 @@ export default function RequirementConfig() {
                                                           attr.attribute_name_cn
                                                         }
                                                         disabled={
-                                                          type === 'detail' ||
                                                           attrGroup?.isTemp ===
-                                                            true
+                                                          true
                                                         }
                                                         onChange={(val) =>
                                                           updateNestedValue(
@@ -2221,28 +2209,21 @@ export default function RequirementConfig() {
                                                       <FormItem>
                                                         <Tooltip content="删除">
                                                           <IconDelete
-                                                            className={`icon-wrapper ${type === 'detail' || attrGroup?.isTemp === true ? 'is-disabled' : ''}`}
+                                                            className={`icon-wrapper ${attrGroup?.isTemp === true ? 'is-disabled' : ''}`}
                                                             fontSize={16}
                                                             onClick={() => {
                                                               // 删除当前属性组
                                                               if (
-                                                                type ===
-                                                                  'detail' ||
                                                                 attrGroup?.isTemp ===
-                                                                  true
+                                                                true
                                                               ) {
                                                                 return;
                                                               }
-                                                              if (
-                                                                type !==
-                                                                'detail'
-                                                              ) {
-                                                                deleteAttribute(
-                                                                  labelIndex,
-                                                                  groupIndex,
-                                                                  attrIndex
-                                                                );
-                                                              }
+                                                              deleteAttribute(
+                                                                labelIndex,
+                                                                groupIndex,
+                                                                attrIndex
+                                                              );
                                                             }}
                                                           />
                                                         </Tooltip>
@@ -2260,12 +2241,7 @@ export default function RequirementConfig() {
                                 <div className="btn-content-items">
                                   {labelIndex === labelDataList?.length - 1 && (
                                     <Button
-                                      disabled={type === 'detail'}
-                                      className={
-                                        type === 'detail'
-                                          ? 'btn-add-label'
-                                          : 'btn-add'
-                                      }
+                                      className="btn-add"
                                       style={{ marginRight: 16 }}
                                       onClick={() => {
                                         addNewLabel();
@@ -2276,12 +2252,7 @@ export default function RequirementConfig() {
                                     </Button>
                                   )}
                                   <Button
-                                    disabled={type === 'detail'}
-                                    className={[
-                                      type === 'detail'
-                                        ? ''
-                                        : 'btn-add-default btn-add'
-                                    ].join(' ')}
+                                    className="btn-add-default btn-add"
                                     style={{ marginRight: 16 }}
                                     onClick={() => {
                                       addAttributeGroup(labelIndex);
@@ -2292,7 +2263,6 @@ export default function RequirementConfig() {
                                   </Button>
                                   <div className="btn-option-content">
                                     <Dropdown
-                                      disabled={type === 'detail'}
                                       position={'bottom'}
                                       droplist={
                                         <Menu
@@ -2381,10 +2351,7 @@ export default function RequirementConfig() {
                                         </Menu>
                                       }
                                     >
-                                      <Button
-                                        disabled={type === 'detail'}
-                                        className="btn-add-template-attribute btn-add-default btn-add"
-                                      >
+                                      <Button className="btn-add-template-attribute btn-add-default btn-add">
                                         <IconPlus />
                                         添加模版属性
                                       </Button>
@@ -2409,7 +2376,6 @@ export default function RequirementConfig() {
                                   style={{ marginRight: 0, marginBottom: 0 }}
                                   field={`attribute_group_name_${attrGroup?.attribute_id}`}
                                   label="属性名称:"
-                                  disabled={type === 'detail'}
                                   rules={[
                                     {
                                       required: true,
@@ -2442,7 +2408,6 @@ export default function RequirementConfig() {
                                   ]}
                                 >
                                   <Input
-                                    disabled={type === 'detail'}
                                     style={{
                                       width: 546,
                                       height: 32
@@ -2519,35 +2484,33 @@ export default function RequirementConfig() {
                                     label={null}
                                   >
                                     <IconPlus
-                                      className={`icon-wrapper ml-2 ${type === 'detail' ? 'is-disabled' : ''}`}
+                                      className="icon-wrapper ml-2"
                                       fontSize={16}
                                       onClick={() => {
                                         // 点击icon添加一个选项，选项插入是同组最后一项
-                                        if (type !== 'detail') {
-                                          setTemplateData(
-                                            templateData?.map((g) => {
-                                              if (
-                                                g.attribute_id ===
-                                                attrGroup.attribute_id
-                                              ) {
-                                                return {
-                                                  ...g,
-                                                  label_info_attribute: [
-                                                    ...g.label_info_attribute,
-                                                    {
-                                                      label_info_id: uuidV4(),
-                                                      attribute_group_class:
-                                                        attrGroup.attribute_group_class,
-                                                      attribute_group_type:
-                                                        attrGroup.attribute_group_type
-                                                    }
-                                                  ]
-                                                };
-                                              }
-                                              return g;
-                                            })
-                                          );
-                                        }
+                                        setTemplateData(
+                                          templateData?.map((g) => {
+                                            if (
+                                              g.attribute_id ===
+                                              attrGroup.attribute_id
+                                            ) {
+                                              return {
+                                                ...g,
+                                                label_info_attribute: [
+                                                  ...g.label_info_attribute,
+                                                  {
+                                                    label_info_id: uuidV4(),
+                                                    attribute_group_class:
+                                                      attrGroup.attribute_group_class,
+                                                    attribute_group_type:
+                                                      attrGroup.attribute_group_type
+                                                  }
+                                                ]
+                                              };
+                                            }
+                                            return g;
+                                          })
+                                        );
                                       }}
                                     />
                                   </FormItem>
@@ -2558,19 +2521,17 @@ export default function RequirementConfig() {
                                 >
                                   <Tooltip content="删除">
                                     <IconDelete
-                                      className={`icon-wrapper ml-2 ${type === 'detail' ? 'is-disabled' : ''}`}
+                                      className="icon-wrapper ml-2"
                                       fontSize={16}
                                       onClick={() => {
                                         // 删除当前属性组
-                                        if (type !== 'detail') {
-                                          setTemplateData(
-                                            templateData.filter(
-                                              (g) =>
-                                                g.attribute_id !==
-                                                attrGroup.attribute_id
-                                            )
-                                          );
-                                        }
+                                        setTemplateData(
+                                          templateData.filter(
+                                            (g) =>
+                                              g.attribute_id !==
+                                              attrGroup.attribute_id
+                                          )
+                                        );
                                       }}
                                     />
                                   </Tooltip>
@@ -2775,29 +2736,27 @@ export default function RequirementConfig() {
                                               ?.length > 1 && (
                                               <Tooltip content="删除">
                                                 <IconDelete
-                                                  className={`icon-wrapper ${type === 'detail' ? 'is-disabled' : ''}`}
+                                                  className="icon-wrapper"
                                                   fontSize={16}
                                                   onClick={() => {
                                                     // 删除当前属性组中的选项
-                                                    if (type !== 'detail') {
-                                                      setTemplateData(
-                                                        templateData?.map(
-                                                          (label) =>
-                                                            label.attribute_id ===
-                                                            attrGroup.attribute_id
-                                                              ? {
-                                                                  ...label,
-                                                                  label_info_attribute:
-                                                                    label.label_info_attribute.filter(
-                                                                      (g) =>
-                                                                        g.label_info_id !==
-                                                                        attr.label_info_id
-                                                                    )
-                                                                }
-                                                              : label
-                                                        )
-                                                      );
-                                                    }
+                                                    setTemplateData(
+                                                      templateData?.map(
+                                                        (label) =>
+                                                          label.attribute_id ===
+                                                          attrGroup.attribute_id
+                                                            ? {
+                                                                ...label,
+                                                                label_info_attribute:
+                                                                  label.label_info_attribute.filter(
+                                                                    (g) =>
+                                                                      g.label_info_id !==
+                                                                      attr.label_info_id
+                                                                  )
+                                                              }
+                                                            : label
+                                                      )
+                                                    );
                                                   }}
                                                 />
                                               </Tooltip>
@@ -2812,14 +2771,11 @@ export default function RequirementConfig() {
                             </div>
                           ))}
                           <Button
-                            className={[
-                              type === 'detail' ? '' : 'btn-add-default btn-add'
-                            ].join(' ')}
+                            className="btn-add-default btn-add"
                             style={{
                               marginLeft: 16,
                               marginBottom: 16
                             }}
-                            disabled={type === 'detail'}
                             onClick={() => {
                               setTemplateData([
                                 ...templateData,
@@ -2873,7 +2829,6 @@ export default function RequirementConfig() {
             <div className="basic-title">质检任务配置</div>
             <Form
               form={qualityTaskForm}
-              disabled={type === 'detail'}
               className="configuration-form"
               onValuesChange={(changedValues) => {
                 // 当质检轮次变化时，重新生成任务包列表
@@ -2908,7 +2863,6 @@ export default function RequirementConfig() {
             <div className="basic-title">任务分配</div>
             <Form
               form={distributeForm}
-              disabled={type === 'detail'}
               onValuesChange={(_, val) => {
                 setPublishData({ ...publishData, val });
               }}
@@ -2934,7 +2888,6 @@ export default function RequirementConfig() {
                   mode="button"
                   min={1}
                   precision={0}
-                  disabled={type === 'detail'}
                   style={{ width: 200 }}
                 />
               </FormItem>
@@ -2943,34 +2896,30 @@ export default function RequirementConfig() {
                   taskPackages={taskPackages}
                   onUpdate={setTaskPackages}
                   validationErrors={taskDistributionErrors}
-                  disabled={type === 'detail'}
                 />
               </FormItem>
             </Form>
           </div>
-          {type !== 'detail' && (
-            <div className="btn-content">
-              <Button
-                onClick={() => {
-                  stepNext();
-                }}
-                disabled={type === 'detail'}
-                style={{ marginRight: 8 }}
-                type="primary"
-                loading={loading}
-              >
-                确认
-              </Button>
-              <Button
-                type="secondary"
-                onClick={() => {
-                  history.goBack();
-                }}
-              >
-                取消
-              </Button>
-            </div>
-          )}
+          <div className="btn-content">
+            <Button
+              onClick={() => {
+                stepNext();
+              }}
+              style={{ marginRight: 8 }}
+              type="primary"
+              loading={loading}
+            >
+              确认
+            </Button>
+            <Button
+              type="secondary"
+              onClick={() => {
+                history.goBack();
+              }}
+            >
+              取消
+            </Button>
+          </div>
         </div>
       </Spin>
     </div>

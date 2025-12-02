@@ -124,40 +124,57 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
   };
 
   useEffect(() => {
-    if (type === 'detail') {
-      setEntityRelations(requirementDetail?.labels);
-      setRelationRelations(requirementDetail?.entity_relations);
-      // 修复起始标签内容设置
-      requirementDetail?.labels?.forEach((item) => {
+    if (requirementDetail?.labels && (type === 'edit' || type === 'copy')) {
+      // 映射实体标签数据结构
+      const mappedLabels = requirementDetail?.labels?.map((item) => ({
+        ...item,
+        label_id: item?.label_id || item?.order_num || uuid()
+      }));
+
+      // 映射关系标签数据结构
+      const mappedRelations = requirementDetail?.entity_relations?.map(
+        (item) => ({
+          ...item,
+          relation_id: item?.relation_id || item?.order_num || uuid()
+        })
+      );
+
+      setEntityRelations(mappedLabels);
+      setRelationRelations(mappedRelations || []);
+
+      // 设置实体标签表单值
+      mappedLabels?.forEach((item) => {
         formText.setFieldValue(
-          `label_name_en${item.order_num}`,
+          `label_name_en${item.label_id}`,
           item.label_name_en
         );
         formText.setFieldValue(
-          `label_name_cn${item.order_num}`,
+          `label_name_cn${item.label_id}`,
           item.label_name_cn
         );
       });
-      requirementDetail?.entity_relations?.forEach((item) => {
+
+      // 设置关系标签表单值
+      mappedRelations?.forEach((item) => {
         formLabel.setFieldValue(
-          `relation_name_en${item.order_num}`,
+          `relation_name_en${item.relation_id}`,
           item.relation_name_en
         );
         formLabel.setFieldValue(
-          `relation_name_cn${item.order_num}`,
+          `relation_name_cn${item.relation_id}`,
           item.relation_name_cn
         );
         formLabel.setFieldValue(
-          `start_entity_labels${item.order_num}`,
+          `start_entity_labels${item.relation_id}`,
           item.start_entity_labels
         );
         formLabel.setFieldValue(
-          `target_entity_labels${item.order_num}`,
+          `target_entity_labels${item.relation_id}`,
           item.target_entity_labels
         );
       });
     }
-  }, [requirementDetail]);
+  }, [requirementDetail, type]);
 
   useEffect(() => {
     getTextEntityData(entityRelations, relationRelations, formText, formLabel);
@@ -194,7 +211,6 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
       </div>
       <Form
         form={formText}
-        disabled={type === 'detail'}
         layout="inline"
         labelAlign="right"
         labelCol={{ flex: 'none' }}
@@ -209,7 +225,7 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
                 <FormItem
                   style={{ paddingLeft: 16, marginRight: 8, marginBottom: 0 }}
                   label="标签名称:"
-                  field={`label_name_en${type === 'detail' ? item?.order_num : item?.label_id}`}
+                  field={`label_name_en${item?.label_id}`}
                   rules={[
                     {
                       required: true,
@@ -269,7 +285,7 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
                     </div>
                   }
                   style={{ padding: 0, marginRight: 8, marginBottom: 0 }}
-                  field={`label_name_cn${type === 'detail' ? item?.order_num : item?.label_id}`}
+                  field={`label_name_cn${item?.label_id}`}
                   rules={[
                     {
                       validateTrigger: ['onChange', 'onBlur'],
@@ -316,7 +332,7 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
                         currentItem.label_name_en?.trim()
                       ) {
                         // 使用 item 来生成字段名（与 FormItem 的 field 保持一致）
-                        const fieldName = `label_name_cn${type === 'detail' ? item?.order_num : item?.label_id}`;
+                        const fieldName = `label_name_cn${item?.label_id}`;
                         // 更新数据状态
                         handleFieldChange(
                           index,
@@ -344,7 +360,6 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
                 >
                   <div className="color-content">
                     <ColorPicker
-                      disabled={type === 'detail'}
                       defaultValue={item.label_colour}
                       showPreset
                       onChange={(value) => {
@@ -354,17 +369,15 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
                     <IconDown
                       className="color-icon"
                       onClick={(e) => {
-                        if (type !== 'detail') {
-                          e.stopPropagation();
-                          const trigger =
-                            e.currentTarget.parentElement?.querySelector(
-                              '.arco-color-picker-preview'
-                            ) as HTMLElement;
-                          trigger?.click();
-                        }
+                        e.stopPropagation();
+                        const trigger =
+                          e.currentTarget.parentElement?.querySelector(
+                            '.arco-color-picker-preview'
+                          ) as HTMLElement;
+                        trigger?.click();
                       }}
                       style={{
-                        cursor: type === 'detail' ? 'not-allowed' : 'pointer'
+                        cursor: 'pointer'
                       }}
                     />
                   </div>
@@ -374,16 +387,12 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
                   style={{ marginRight: 8, marginBottom: 0 }}
                 >
                   {entityRelations?.length > 1 && (
-                    <Tooltip content={type === 'detail' ? '' : '删除'}>
+                    <Tooltip content="删除">
                       <IconDelete
                         fontSize={18}
-                        className={
-                          type === 'detail' ? 'is-disabled' : 'icon-content'
-                        }
+                        className="icon-content"
                         onClick={() => {
-                          if (type !== 'detail') {
-                            removeArrayItem(index);
-                          }
+                          removeArrayItem(index);
                         }}
                       />
                     </Tooltip>
@@ -396,23 +405,20 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
       {selectedSubstanceValue === 1 && (
         <div className="add-btn" style={{ marginTop: 16 }}>
           <Button
-            disabled={type === 'detail'}
             onClick={() => {
-              if (type !== 'detail') {
-                setEntityRelations([
-                  ...entityRelations,
-                  {
-                    label_id: uuid(),
-                    order_num: entityRelations?.length + 1, // 排序
-                    label_name_cn: '', //展示名称
-                    label_name_en: '', //存储名称
-                    label_colour: getRandomHexColorStrict() //标签颜色（如#FFFFFF）
-                  }
-                ]);
-              }
+              setEntityRelations([
+                ...entityRelations,
+                {
+                  label_id: uuid(),
+                  order_num: entityRelations?.length + 1, // 排序
+                  label_name_cn: '', //展示名称
+                  label_name_en: '', //存储名称
+                  label_colour: getRandomHexColorStrict() //标签颜色（如#FFFFFF）
+                }
+              ]);
             }}
           >
-            <IconPlus className={`${type === 'detail' ? 'is-disabled' : ''}`} />
+            <IconPlus />
             添加标签
           </Button>
         </div>
@@ -423,7 +429,6 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
           <div className="relation-content-body">
             <Form
               form={formLabel}
-              disabled={type === 'detail'}
               onValuesChange={() => {}}
               layout="inline"
               labelAlign="right"
@@ -439,7 +444,7 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
                     >
                       <FormItem
                         style={{ paddingLeft: 16, marginRight: 8 }}
-                        field={`relation_name_en${type === 'detail' ? item?.order_num : item?.relation_id}`}
+                        field={`relation_name_en${item?.relation_id}`}
                         label="关系名称:"
                         rules={[
                           {
@@ -501,7 +506,7 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
                           </div>
                         }
                         style={{ padding: 0, marginRight: 8 }}
-                        field={`relation_name_cn${type === 'detail' ? item?.order_num : item?.relation_id}`}
+                        field={`relation_name_cn${item?.relation_id}`}
                         rules={[
                           {
                             validateTrigger: ['onChange'],
@@ -542,18 +547,12 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
                       </FormItem>
                       <FormItem label={null} style={{ marginRight: 8 }}>
                         {relationRelations?.length > 0 && (
-                          <Tooltip content={type === 'detail' ? '' : '删除'}>
+                          <Tooltip content="删除">
                             <IconDelete
                               fontSize={18}
-                              className={
-                                type === 'detail'
-                                  ? 'is-disabled'
-                                  : 'icon-content'
-                              }
+                              className="icon-content"
                               onClick={() => {
-                                if (type !== 'detail') {
-                                  removeRelationArrayItem(index);
-                                }
+                                removeRelationArrayItem(index);
                               }}
                             />
                           </Tooltip>
@@ -568,7 +567,7 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
                               marginRight: 8,
                               marginBottom: 0
                             }}
-                            field={`start_entity_labels${type === 'detail' ? item?.order_num : item?.relation_id}`}
+                            field={`start_entity_labels${item?.relation_id}`}
                             label="起始标签:"
                             rules={[
                               { required: true, message: '请选择起始标签' }
@@ -579,9 +578,7 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
                               allowClear
                               placeholder="请选择起始标签"
                               style={{
-                                width: 310,
-                                backgroundColor:
-                                  type === 'detail' ? '#e2e8f0' : '#fff'
+                                width: 310
                               }}
                               notFoundContent={renderNotFoundContent()}
                               onChange={(value) => {
@@ -633,7 +630,7 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
                                 }
                               }
                             ]}
-                            field={`target_entity_labels${type === 'detail' ? item?.order_num : item?.relation_id}`}
+                            field={`target_entity_labels${item?.relation_id}`}
                           >
                             <Select
                               mode="multiple"
@@ -641,9 +638,7 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
                               placeholder="请选择目标标签"
                               notFoundContent={renderNotFoundContent()}
                               style={{
-                                width: 320,
-                                backgroundColor:
-                                  type === 'detail' ? '#e2e8f0' : '#fff'
+                                width: 320
                               }}
                               onChange={(value) => {
                                 handleRelationFieldChange(
@@ -688,7 +683,6 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
           </div>
           <div className="add-btn">
             <Button
-              disabled={type === 'detail'}
               onClick={() => {
                 setRelationRelations([
                   ...relationRelations,

@@ -99,9 +99,7 @@ export default function Requirement() {
 
   // 查看详情
   const viewDetailRequirement = (id: number | string) => {
-    history.push(
-      `/tenant/compute/modaforge/requirement/config?id=${id}&type=detail`
-    );
+    history.push(`/tenant/compute/modaforge/requirement/info?id=${id}`);
   };
 
   // 筛选排序操作

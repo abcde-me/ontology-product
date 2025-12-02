@@ -27,6 +27,12 @@ function RequirementInfo() {
     );
   }
 
+  const handleToConfig = (type: 'copy' | 'edit') => {
+    history.push(
+      `/tenant/compute/modaforge/requirement/config?type=${type}&id=${requirementId}`
+    );
+  };
+
   return (
     <div className={styles.requirementInfo}>
       <div className={styles.headBreadcrumbBox}>
@@ -47,10 +53,18 @@ function RequirementInfo() {
         </div>
         <div className={styles.headBreadcrumbExtra}>
           <Space>
-            <Button type="outline" icon={<IconEdit />}>
+            <Button
+              type="outline"
+              icon={<IconEdit />}
+              onClick={() => handleToConfig('edit')}
+            >
               编辑
             </Button>
-            <Button type="outline" icon={<IconCopy />}>
+            <Button
+              type="outline"
+              icon={<IconCopy />}
+              onClick={() => handleToConfig('copy')}
+            >
               复制
             </Button>
           </Space>
