@@ -105,6 +105,22 @@ const filterFileTypes = [
     value: FileTypeLarge.pdf
   },
   {
+    text: FileTypeLarge.doc,
+    value: FileTypeLarge.doc
+  },
+  {
+    text: FileTypeLarge.docx,
+    value: FileTypeLarge.docx
+  },
+  {
+    text: FileTypeLarge.txt,
+    value: FileTypeLarge.txt
+  },
+  {
+    text: FileTypeLarge.md,
+    value: FileTypeLarge.md
+  },
+  {
     text: FileTypeLarge.ppt,
     value: FileTypeLarge.ppt
   },
@@ -121,60 +137,8 @@ const filterFileTypes = [
     value: FileTypeLarge.xlsx
   },
   {
-    text: FileTypeLarge.txt,
-    value: FileTypeLarge.txt
-  },
-  {
-    text: FileTypeLarge.md,
-    value: FileTypeLarge.md
-  },
-  {
-    text: FileTypeLarge.doc,
-    value: FileTypeLarge.doc
-  },
-  {
-    text: FileTypeLarge.docx,
-    value: FileTypeLarge.docx
-  },
-  {
-    text: FileTypeLarge.jpg,
-    value: FileTypeLarge.jpg
-  },
-  {
-    text: FileTypeLarge.png,
-    value: FileTypeLarge.png
-  },
-  {
-    text: FileTypeLarge.jpeg,
-    value: FileTypeLarge.jpeg
-  },
-  {
-    text: FileTypeLarge.wav,
-    value: FileTypeLarge.wav
-  },
-  {
-    text: FileTypeLarge.mp3,
-    value: FileTypeLarge.mp3
-  },
-  {
-    text: FileTypeLarge.aac,
-    value: FileTypeLarge.aac
-  },
-  {
-    text: FileTypeLarge.flac,
-    value: FileTypeLarge.flac
-  },
-  {
-    text: FileTypeLarge.mp4,
-    value: FileTypeLarge.mp4
-  },
-  {
-    text: FileTypeLarge.mov,
-    value: FileTypeLarge.mov
-  },
-  {
-    text: FileTypeLarge.mkv,
-    value: FileTypeLarge.mkv
+    text: FileTypeLarge.csv,
+    value: FileTypeLarge.csv
   }
 ];
 

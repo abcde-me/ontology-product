@@ -202,6 +202,8 @@ function HitTest(props: { datasetName: string }) {
       setLoading2(true);
       const res = await RunKnowledgeHitTesting(params);
       if (res.code === '' && res.status === 200) {
+        if (res?.data?.length === 0)
+          Message.info('未检索到相关内容，请更换测试内容或调整检索设置');
         setsegmentationlist(res.data || []);
         setsegmentationlistFilter(res.data || []);
         init({
