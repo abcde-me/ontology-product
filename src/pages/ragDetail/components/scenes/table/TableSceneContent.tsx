@@ -3,11 +3,12 @@
  * 表格分段场景：左侧表格 + 右侧分段表格
  */
 
-import React, { useMemo } from 'react';
+import { Spin } from '@arco-design/web-react';
+import React from 'react';
 import { useRagDetailStore } from '../../../store/ragDetailStore';
-import TableViewer from './TableViewer';
-import TableSegmentList from './TableSegmentList';
 import ContentHeader from '../../common/ContentHeader';
+import SegmentList from '../../shared/SegmentList';
+import TableViewer from './TableViewer';
 
 interface TableSceneContentProps {
   loading: boolean;
@@ -16,14 +17,14 @@ interface TableSceneContentProps {
 const TableSceneContent: React.FC<TableSceneContentProps> = ({ loading }) => {
   const { segments, fileName, showPdfViewer } = useRagDetailStore();
 
-  const tableSegments = useMemo(() => {
-    return segments as any[];
-  }, [segments]);
-
   if (loading) {
     return (
       <div className="flex h-full items-center justify-center">
-        <div className="text-gray-500">加载中...</div>
+        <div className="text-center">
+          <div className="flex h-[calc(100%-70px)] items-center justify-center">
+            <Spin />
+          </div>
+        </div>
       </div>
     );
   }
@@ -50,7 +51,11 @@ const TableSceneContent: React.FC<TableSceneContentProps> = ({ loading }) => {
           className={`h-full flex-1 overflow-hidden rounded-br-[20px] bg-white ${!showPdfViewer ? 'ml-4 rounded-bl-[20px]' : ''}`}
           style={{ minHeight: 0 }}
         >
-          <TableSegmentList segments={tableSegments} />
+          <SegmentList
+            segments={segments}
+            renderMode={'text'}
+            hideHeader={false}
+          />
         </div>
       </div>
     </div>
