@@ -1465,7 +1465,7 @@ const DatasetManagement: React.FC = () => {
           name: '全部',
           id: 0,
           dataset_count: total,
-          description: '显示所有类型的数据集',
+          description: '',
           tags: []
         };
         const newSceneList = [allSceneTab, ...res.data];
@@ -1712,18 +1712,18 @@ const DatasetManagement: React.FC = () => {
             closable={false}
           >
             <Typography.Paragraph>
-              <div
-                style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  padding: '12px',
-                  backgroundColor: 'rgba(255, 255, 255, 0.48)',
-                  borderRadius: '8px',
-                  marginTop: '20px'
-                }}
-              >
-                <span>{item.description}</span>
-                {item.id !== 0 && (
+              {item.id !== 0 && (
+                <div
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    padding: '12px',
+                    backgroundColor: 'rgba(255, 255, 255, 0.48)',
+                    borderRadius: '8px',
+                    marginTop: '20px'
+                  }}
+                >
+                  <span>{item.description}</span>
                   <span style={{ marginTop: '8px' }}>
                     <IconTag style={{ marginRight: '5px' }} />
                     {item.tags.map((tag, index) => (
@@ -1740,8 +1740,8 @@ const DatasetManagement: React.FC = () => {
                       </Tag>
                     ))}
                   </span>
-                )}
-              </div>
+                </div>
+              )}
               <div className={styles.searchToolbar}>
                 <Input.Group compact>
                   <Select
