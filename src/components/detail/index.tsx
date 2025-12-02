@@ -1483,8 +1483,7 @@ const DatasetDetail = (props: {
   const handleVersionRebuild = () => {
     if (!datasetDetail) return;
     datasetVersionRebuild({
-      id: Number(id),
-      version_id: datasetDetail.latest_version
+      id: Number(id)
     })
       .then((res) => {
         if (res?.status === 200) {
