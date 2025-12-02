@@ -131,16 +131,10 @@ export const useSegmentDetailStore = create<SegmentDetailStore>((set, get) => ({
               content: el.content
             };
           } else if (el.type === 'table') {
-            // 表格元素需要将 rows 转换为字符串
-            // 注意：接口期望的格式是单行对象的JSON字符串，而不是 {headers, rows} 的结构
-            // 例如：{"ID":"22","问题":"...","回答":"..."}
-            // 如果有多行，需要将每一行转换为单独的JSON字符串，或者保存为第一行的格式
-            const rowsContent = el.rows
-              .map((row) => JSON.stringify(row))
-              .join('\n');
+            // 表格元素直接保存markdown格式的content
             return {
               id: el.id,
-              content: rowsContent
+              content: el.content
             };
           }
           return null;
