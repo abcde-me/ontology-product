@@ -87,6 +87,8 @@ const RunningInfoPanel: React.FC<RunningInfoPanelProps> = memo(
       wrapperTarget: logContentRef,
       itemHeight: 20, // 每行大约20px高度
       overscan: 5 // 额外渲染的行数，减少以提升性能
+      // 使用 Math.floor 稳定计算可见行数，避免临界点抖动
+      // 通过自定义计算函数来稳定可见区域
     });
 
     const logVirtualListContent = useMemo(() => {
@@ -353,7 +355,8 @@ const RunningInfoPanel: React.FC<RunningInfoPanelProps> = memo(
                       className="run-result-content tab-content-wrapper"
                       style={{
                         height: '100%',
-                        overflow: 'auto'
+                        overflowX: 'scroll', // 始终显示横向滚动条，避免临界点抖动
+                        overflowY: 'auto'
                       }}
                     >
                       <div ref={resultContainerRef}>
@@ -368,7 +371,8 @@ const RunningInfoPanel: React.FC<RunningInfoPanelProps> = memo(
                       className="runlog-content tab-content-wrapper"
                       style={{
                         height: '100%',
-                        overflow: 'auto'
+                        overflowX: 'scroll', // 始终显示横向滚动条，避免临界点抖动
+                        overflowY: 'auto'
                       }}
                       onScroll={(e) => {
                         // 检测用户是否手动滚动，如果是则停止自动滚动
