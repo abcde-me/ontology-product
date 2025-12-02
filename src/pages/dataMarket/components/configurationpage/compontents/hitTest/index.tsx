@@ -483,7 +483,9 @@ function HitTest(props: { datasetName: string }) {
                             )
                           }
                         >
-                          {e.document_name} - 第{e.positions[0].page_id}页
+                          {e?.positions
+                            ? `${e.document_name} - 第${e?.positions[0]?.page_id}页`
+                            : e.document_name}
                         </span>
                       </Tooltip>
                       {/* <span className={styles.sp}>
