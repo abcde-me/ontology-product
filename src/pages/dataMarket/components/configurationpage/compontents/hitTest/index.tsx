@@ -30,6 +30,8 @@ import {
 import { useHistory, useParams } from 'react-router-dom';
 import { useUserInfo } from '@/store/userInfoStore';
 import getFileIcon from '@/components/file-icon';
+import { PermissionWrapper } from '@/components/PermissionGuard';
+import { DATA_MANAGEMENT_PERMISSIONS } from '@/config/permissions';
 
 function HitTest(props: { datasetName: string }) {
   const { datasetName } = props;
@@ -307,8 +309,12 @@ function HitTest(props: { datasetName: string }) {
         </div>
 
         <div className={styles.testContentButton}>
-          {!text ? (
-            <Tooltip position="top" trigger="hover" content="请先输入测试文本">
+          <PermissionWrapper permission={DATA_MANAGEMENT_PERMISSIONS.CAN_RUN}>
+            <Tooltip
+              position="top"
+              trigger="hover"
+              content={!text ? '请先输入测试文本' : ''}
+            >
               <Button
                 loading={loading1}
                 className={styles.cs}
@@ -319,16 +325,7 @@ function HitTest(props: { datasetName: string }) {
                 开始测试
               </Button>
             </Tooltip>
-          ) : (
-            <Button
-              loading={loading1}
-              className={styles.cs}
-              type="primary"
-              onClick={Functest}
-            >
-              开始测试
-            </Button>
-          )}
+          </PermissionWrapper>
           <Button
             className={styles.cl}
             type="outline"
