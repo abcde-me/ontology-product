@@ -61,6 +61,7 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = memo(
       useState<HTMLDivElement | null>(null);
     const resizeObserverRef = useRef<ResizeObserver | null>(null);
     const [resizeSize, setResizeSize] = useState<string>('500px');
+    const lastCalculatedSizeRef = useRef<number | null>(null);
     const [exampleModalVisible, setExampleModalVisible] =
       useState<boolean>(false);
     const hasUpdatePermission = useHasPermission(PYSPARK_PERMISSIONS.MODIFY);
@@ -203,8 +204,6 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = memo(
       (container: HTMLDivElement) => {
         if (!container) return;
 
-        console.log('2222222222222', container);
-
         const containerHeight = container.clientHeight;
         if (containerHeight === 0) return;
 
@@ -213,8 +212,14 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = memo(
         const offset = isPanelOpen ? 300 : 41;
         const calculatedSize = containerHeight - offset;
 
+        // 如果高度未发生变化，直接返回
+        if (lastCalculatedSizeRef.current === calculatedSize) {
+          return;
+        }
+
         // 确保 size 是正数，并转换为像素字符串
         if (calculatedSize > 0) {
+          lastCalculatedSizeRef.current = calculatedSize;
           setResizeSize(`${calculatedSize}px`);
         }
       },

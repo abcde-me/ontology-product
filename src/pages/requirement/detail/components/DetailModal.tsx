@@ -235,7 +235,7 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
     },
     {
       title: '创建人',
-      dataIndex: 'upload_user',
+      dataIndex: type === 'detail' ? 'create_by' : 'upload_user',
       ellipsis: true,
       width: 100
     }
