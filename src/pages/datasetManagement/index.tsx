@@ -106,6 +106,7 @@ export interface Dataset {
   deleted_at: null;
   tag_names?: string[];
   src_model: string;
+  src_name: string;
   latest_file_path: string;
   perms: string[];
   storage_type: datasetStorageType;
@@ -180,7 +181,7 @@ const columns = (
   sortField: string,
   sortOrder: string,
   handleTableChange: (pagination: any, sorter: any, filters: any) => void,
-  handleRetry: (id: string | number, version_id: string) => void,
+  handleRetry: (id: string | number) => void,
   setMoveDatasetVisible: (visible: boolean) => void,
   setMoveDatasetId: (ids: number[]) => void,
   getFileTypeName: (type: string) => string,
@@ -482,13 +483,15 @@ const columns = (
             </Tooltip>
           ) : null}
 
-          {status === datasetStatus.version_update_failed ? (
+          {status === datasetStatus.create_failed &&
+          record.src_name !== 'pyspark' &&
+          record.src_name !== '工作流' ? (
             <PermissionWrapper
               permission={DATA_MANAGEMENT_PERMISSIONS.CAN_UPDATE_VERSION_RETRY}
             >
               <span
                 className={styles.retryText}
-                onClick={() => handleRetry(record.id, record.latest_version)}
+                onClick={() => handleRetry(record.id)}
               >
                 重试
               </span>
@@ -1214,10 +1217,9 @@ const DatasetManagement: React.FC = () => {
   };
 
   // 重试
-  const handleRetry = async (id: number | string, version_id: string) => {
+  const handleRetry = async (id: number | string) => {
     const params = {
-      id: Number(id),
-      version_id
+      id: Number(id)
     };
     const res = await datasetVersionRebuild(params);
     if (res.status === 200 && res.code === '') {
