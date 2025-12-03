@@ -37,7 +37,7 @@ export interface DatasetListItem {
   /**
    * 最新版本大小(字节)
    */
-  latest_size: number;
+  size: number;
   /**
    * 最新版本存储表名
    */

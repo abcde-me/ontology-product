@@ -56,6 +56,7 @@ const EditSingleAssetModal: React.FC<EditSingleAssetModalProps> = ({
   useEffect(() => {
     if (visible && record) {
       const initialValues: Record<string, any> = {};
+      console.log(fields, '------fields------');
       fields.forEach((field) => {
         initialValues[field.nameEn] = record[field.nameEn];
       });
@@ -168,7 +169,7 @@ const EditSingleAssetModal: React.FC<EditSingleAssetModalProps> = ({
               </tr>
             </thead>
             <tbody>
-              {[...fields, ...fields].map((field) => {
+              {[...fields].map((field) => {
                 const isEditable = isFieldEditable(field.nameEn);
                 const fieldType = getFieldType(field.nameEn);
                 // const isEnum = isFieldEnum(field.nameEn);
