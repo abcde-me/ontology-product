@@ -2,6 +2,7 @@ import React from 'react';
 import { AnnotationTypeEmuns } from '../constants';
 import getLabelByValue from '@/utils/getLabelByValue';
 import { InfoDescription } from '@ceai-front/arco-material';
+import LabelInfo from './labelInfo';
 
 function AnnotationConfig({ requirementDetail }: { requirementDetail: any }) {
   const labelToolCode = requirementDetail?.label_tool?.label_tool_code;
@@ -34,6 +35,10 @@ function AnnotationConfig({ requirementDetail }: { requirementDetail: any }) {
         data={commonData}
         column={2}
         titleStyle={{ fontSize: '16px', fontWeight: 'normal' }}
+      />
+      <LabelInfo
+        requirementDetail={requirementDetail}
+        labelToolCode={labelToolCode}
       />
     </div>
   );
