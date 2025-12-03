@@ -624,30 +624,32 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
             allowClear
             style={{ height: '32px' }}
           />
-          <Dropdown
-            trigger="click"
-            position="bl"
-            droplist={
-              <Menu
-                onClickMenuItem={(key) => {
-                  if (key === 'folder') {
-                    startRootCreate(true);
-                  } else if (key === 'file') {
-                    startRootCreate(false);
-                  }
-                }}
-              >
-                <Menu.Item key="file">新建PySpark</Menu.Item>
-                <Menu.Item key="folder">新建文件夹</Menu.Item>
-              </Menu>
-            }
-          >
-            {isCanCreate && (
-              <Button type="text" size="small" icon={<IconPlus />}>
-                {newButtonText}
-              </Button>
-            )}
-          </Dropdown>
+          <PermissionWrapper permission={PYSPARK_PERMISSIONS.CREATE}>
+            <Dropdown
+              trigger="click"
+              position="bl"
+              droplist={
+                <Menu
+                  onClickMenuItem={(key) => {
+                    if (key === 'folder') {
+                      startRootCreate(true);
+                    } else if (key === 'file') {
+                      startRootCreate(false);
+                    }
+                  }}
+                >
+                  <Menu.Item key="file">新建PySpark</Menu.Item>
+                  <Menu.Item key="folder">新建文件夹</Menu.Item>
+                </Menu>
+              }
+            >
+              {isCanCreate && (
+                <Button type="text" size="small" icon={<IconPlus />}>
+                  {newButtonText}
+                </Button>
+              )}
+            </Dropdown>
+          </PermissionWrapper>
         </div>
 
         {loading ? (
@@ -706,7 +708,14 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
                         >
                           <IconPlus
                             onClick={() => {
-                              if (!expandedKeys.includes(node?.dataRef?.id)) {
+                              // 如果当前节点已经展开，不需要从新展开
+                              if (expandedKeys.includes(node?.dataRef?.id)) {
+                                return;
+                              } else if (
+                                !expandedKeys.includes(
+                                  node?.dataRef?.id.toString()
+                                )
+                              ) {
                                 setExpandedKeys(
                                   [...expandedKeys, node?.dataRef?.id].map(
                                     String

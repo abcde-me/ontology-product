@@ -218,7 +218,8 @@ const Python: React.FC = memo(() => {
             />
           )}
         </TabPane>
-        <TabPane
+        {/* 11.30版本暂时隐藏 */}
+        {/* <TabPane
           key="daset"
           title={
             <Popover content="数据集导出任务" position="left">
@@ -235,7 +236,7 @@ const Python: React.FC = memo(() => {
           }
         >
           {isDasetTab && <DatasetsList />}
-        </TabPane>
+        </TabPane> */}
       </Tabs>
     </Sider>
   );

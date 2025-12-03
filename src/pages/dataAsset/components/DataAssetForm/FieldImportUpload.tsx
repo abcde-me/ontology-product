@@ -5,6 +5,7 @@ import { IconUpload } from '@arco-design/web-react/icon';
 import { UploadStatus } from '../../types';
 import { downloadDataAssetFieldsTemplate } from '@/api/dataAsset';
 import { AxiosResponse } from 'axios';
+import { useUserInfoStore } from '@/store/userInfoStore';
 
 const getFileNameFromDisposition = (disposition?: string) => {
   if (!disposition) return '';
@@ -33,6 +34,7 @@ const FieldImportUpload: React.FC<FieldImportUploadProps> = ({
   onUploadingChange
 }) => {
   const [fileList, setFileList] = useState<any>([]);
+  const projectId = useUserInfoStore((state) => state.projectId);
 
   const handleUploadChange = (files: any, file: any) => {
     // 更新 fileList 状态，让 Upload 组件受控
@@ -143,6 +145,9 @@ const FieldImportUpload: React.FC<FieldImportUploadProps> = ({
         action={`${PrefixAimdp}/AnalyzeDataAssetFieldsFile`}
         onChange={handleUploadChange}
         onDrop={handleDrop}
+        data={{
+          projectID: projectId[1]
+        }}
         headers={{
           Authorization: getToken(),
           'X-Auth-Validate': 'true',

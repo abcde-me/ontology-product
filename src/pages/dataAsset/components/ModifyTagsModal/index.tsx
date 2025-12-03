@@ -49,6 +49,11 @@ const ModifyTagsModal: React.FC<ModifyTagsModalProps> = ({
       }))
     }));
   }, [tagOptions]);
+  // const renderTag = (props) => {
+  //   console.log('props', props);
+  //   const { value } = props;
+  //   return <Tag>{value.label}</Tag>;
+  // };
 
   useEffect(() => {
     if (visible) {
@@ -100,17 +105,17 @@ const ModifyTagsModal: React.FC<ModifyTagsModalProps> = ({
               count: 2,
               render: (invisibleTagCount) => {
                 const allTags = form.getFieldValue('tags') || [];
-                const remainingTags = allTags.slice(2);
+                const remainingTags = allTags?.slice(2) || [];
                 return (
                   <Tooltip
                     content={
                       <div className="ml-[-4px] flex max-w-[300px] flex-wrap gap-1">
                         {remainingTags.map((item, i) => (
                           <Tag
-                            key={i}
+                            key={item.value}
                             className="bg-[#E7ECF0] text-[14px] text-[#0F172A]"
                           >
-                            {item}
+                            {item.label}
                           </Tag>
                         ))}
                       </div>
