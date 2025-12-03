@@ -3,7 +3,6 @@ import {
   Table,
   Button,
   Tooltip,
-  Modal,
   Notification,
   Pagination,
   Progress
@@ -11,6 +10,7 @@ import {
 import { ColumnProps } from '@arco-design/web-react/es/Table';
 import { SorterInfo } from '@arco-design/web-react/es/Table/interface';
 import { IconRight } from '@arco-design/web-react/icon';
+import GenerateRecordModal from './GenerateRecordModal';
 import './index.scss';
 
 interface TaskPackage {
@@ -259,18 +259,10 @@ function RequirementProgress() {
       )}
 
       {/* 生成记录弹窗 */}
-      <Modal
-        title="生成记录"
+      <GenerateRecordModal
         visible={generateRecordModalVisible}
-        onCancel={() => setGenerateRecordModalVisible(false)}
-        footer={null}
-        style={{ width: 800 }}
-      >
-        <div className="generate-record-content">
-          <p>这里是生成记录的内容</p>
-          {/* 这里可以添加生成记录的具体内容 */}
-        </div>
-      </Modal>
+        onClose={() => setGenerateRecordModalVisible(false)}
+      />
     </div>
   );
 }
