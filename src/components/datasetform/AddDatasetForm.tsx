@@ -582,7 +582,7 @@ const DatasetForm = React.forwardRef<
             gap: '6px'
           }}
         >
-          {getFileIcon(record.type)}
+          {getFileIcon(record.file_type)}
           <span>{record.file_type}</span>
         </div>
       )
@@ -602,7 +602,7 @@ const DatasetForm = React.forwardRef<
       title="新建数据集"
       visible={visible}
       footer={null}
-      style={{ width: '960px' }}
+      style={{ width: '600px' }}
       onCancel={() => {
         onCancel();
         form.resetFields();
@@ -625,8 +625,8 @@ const DatasetForm = React.forwardRef<
         <Form
           form={form}
           autoComplete="off"
-          labelCol={{ span: 3 }}
-          wrapperCol={{ span: 21 }}
+          labelCol={{ span: 5 }}
+          wrapperCol={{ span: 18 }}
           layout="horizontal"
           labelAlign="right"
           colon={true}
@@ -818,12 +818,12 @@ const DatasetForm = React.forwardRef<
             >
               {sceneOption.map((item) => (
                 <Select.Option key={item.id} value={item.id}>
-                  <div className="flex flex-col">
-                    <div className="mt-[2px] text-[14px] leading-[22px]">
+                  <div className={`${styles.sceneWrapper} 'flex flex-col'`}>
+                    <div className="mt-[7px] text-[14px] leading-[22px]">
                       {item.name}
                     </div>
                     <EllipsisPopover
-                      className="text-[14px] leading-[22px] text-[#6E7B8D]"
+                      className="mt-[-14px] text-[14px] leading-[22px] text-[#6E7B8D]"
                       value={item.description}
                     />
                   </div>

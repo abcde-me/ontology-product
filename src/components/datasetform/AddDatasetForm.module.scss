@@ -11,6 +11,14 @@
   /* 不换行 */
 }
 
+.modalWrapper :global(.arco-cascader-list-item) {
+  font-size: 14px;
+}
+
+.sceneWrapper :global(.ellipsis-popover-div) {
+  height: 28px;
+}
+
 /* 单元格内容截断显示 */
 .cellContent {
   display: block;
