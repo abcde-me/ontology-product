@@ -176,9 +176,6 @@ const Uploads: React.FC<UploadsProps> = ({
       drag
       className="upload-file"
       multiple
-      data={{
-        projectID: projectId[1]
-      }}
       accept=".doc,.docx,.ppt,.pptx,.pdf,.jpg,.jpeg,.png,.txt,.md,.wav,.mp3,.aac,.flac,.mp4,.mov,.mkv"
       beforeUpload={(file, list) => {
         return checkFile(file, list);
@@ -189,7 +186,8 @@ const Uploads: React.FC<UploadsProps> = ({
       headers={{
         Authorization: getToken(),
         'X-Auth-Validate': 'true',
-        'X-Regionid': 'region1'
+        'X-Regionid': 'region1',
+        'x-ceai-project-id': projectId[1]
       }}
       tip={
         <>
