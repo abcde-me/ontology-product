@@ -1940,8 +1940,7 @@ const DatasetManagement: React.FC = () => {
                 }}
                 border={false}
                 scroll={{
-                  x: 1200,
-                  y: 300
+                  x: 1200
                 }}
                 onChange={handleTableChange}
               />
