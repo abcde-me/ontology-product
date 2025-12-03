@@ -5180,7 +5180,7 @@
   dependencies:
     "@types/lodash" "*"
 
-"@types/lodash@*", "@types/lodash@^4.17.0":
+"@types/lodash@*":
   version "4.17.20"
   resolved "http://npm.cestc.cn/@types/lodash/download/@types/lodash-4.17.20.tgz#1ca77361d7363432d29f5e55950d9ec1e1c6ea93"
   integrity sha1-HKdzYdc2NDLSn15VlQ2eweHG6pM=
