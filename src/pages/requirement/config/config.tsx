@@ -1999,11 +1999,6 @@ export default function RequirementConfig() {
                                             >
                                               <Checkbox
                                                 disabled={
-                                                  (type === 'edit' &&
-                                                    isAttributeGroupFromDetail(
-                                                      item?.label_id,
-                                                      attrGroup?.attribute_id
-                                                    )) ||
                                                   attrGroup?.isTemp === true
                                                 }
                                                 style={{

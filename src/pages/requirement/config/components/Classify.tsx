@@ -40,6 +40,9 @@ const Classify = (props: ClassifyComponentProps) => {
   const [formClassify] = Form.useForm();
   const Option = Select.Option;
   const FormItem = Form.Item;
+  // 判断是否为编辑模式且数据来自详情
+  const isEditModeFromDetail =
+    type === 'edit' && requirementDetail?.file_labels;
   // 文本分类内容
   const [textRelations, setTextRelations] = useState([
     {
@@ -87,13 +90,15 @@ const Classify = (props: ClassifyComponentProps) => {
       requirementDetail?.file_labels &&
       (type === 'edit' || type === 'copy')
     ) {
-      // 映射数据结构，确保有正确的 ID 字段
+      // 映射数据结构，确保有正确的 ID 字段，并标记为来自详情
       const mappedLabels = requirementDetail?.file_labels?.map((item) => ({
         ...item,
         attribute_id: item?.attribute_id || item?.order_num || uuid(),
+        isFromDetail: true, // 标记为来自详情
         file_label_attribute: item?.file_label_attribute?.map((attr) => ({
           ...attr,
-          attribute_id: attr?.attribute_id || attr?.order_num || uuid()
+          attribute_id: attr?.attribute_id || attr?.order_num || uuid(),
+          isFromDetail: true // 标记为来自详情
         }))
       }));
 
@@ -183,6 +188,9 @@ const Classify = (props: ClassifyComponentProps) => {
                     onChange={(value) => {
                       handleFieldChange(index, 'attribute_group_name', value);
                     }}
+                    disabled={
+                      isEditModeFromDetail && (item as any)?.isFromDetail
+                    }
                   />
                 </FormItem>
                 <FormItem label={null} style={{ padding: 0, marginRight: 8 }}>
@@ -208,6 +216,9 @@ const Classify = (props: ClassifyComponentProps) => {
                         );
                       }
                     }}
+                    disabled={
+                      isEditModeFromDetail && (item as any)?.isFromDetail
+                    }
                   >
                     {optionConfig?.map((item) => {
                       return (
@@ -233,6 +244,9 @@ const Classify = (props: ClassifyComponentProps) => {
                         checked ? 1 : 2
                       );
                     }}
+                    disabled={
+                      isEditModeFromDetail && (item as any)?.isFromDetail
+                    }
                   >
                     必须标注
                   </Checkbox>
@@ -264,13 +278,14 @@ const Classify = (props: ClassifyComponentProps) => {
                               currentGroup.file_label_attribute?.some(
                                 (attr) => attr.input_type === 2
                               );
-                            // 创建新属性
+                            // 创建新属性（新增的不标记isFromDetail，可编辑）
                             const newAttribute = {
                               attribute_id: uuid(),
                               order_num: 0, // 后面统一重新计算order_num
                               attribute_name_cn: '',
                               attribute_name_en: '',
-                              input_type: 1
+                              input_type: 1,
+                              isFromDetail: false // 新增项，可编辑
                             };
 
                             let updatedAttributes: any = [];
@@ -329,10 +344,29 @@ const Classify = (props: ClassifyComponentProps) => {
                   {textRelations?.length > 1 && (
                     <Tooltip content="删除">
                       <IconDelete
-                        className="icon-content"
-                        fontSize={18}
+                        className={`icon-wrapper ${
+                          isEditModeFromDetail && (item as any)?.isFromDetail
+                            ? 'is-disabled'
+                            : ''
+                        }`}
+                        fontSize={16}
                         onClick={() => {
+                          if (
+                            isEditModeFromDetail &&
+                            (item as any)?.isFromDetail
+                          )
+                            return;
                           removeArrayItem(index);
+                        }}
+                        style={{
+                          cursor:
+                            isEditModeFromDetail && (item as any)?.isFromDetail
+                              ? 'not-allowed'
+                              : 'pointer',
+                          opacity:
+                            isEditModeFromDetail && (item as any)?.isFromDetail
+                              ? 0.5
+                              : 1
                         }}
                       />
                     </Tooltip>
@@ -369,8 +403,9 @@ const Classify = (props: ClassifyComponentProps) => {
                                 newData[index].file_label_attribute.length + 1,
                               attribute_name_cn: '其他',
                               attribute_name_en: '标注时的输入内容',
-                              input_type: 2
-                            });
+                              input_type: 2,
+                              isFromDetail: false // 新增项，可编辑
+                            } as any);
                             const lastIndex =
                               newData[index].file_label_attribute.length - 1;
                             const newAttribute =
@@ -396,6 +431,9 @@ const Classify = (props: ClassifyComponentProps) => {
                             }
                           }
                         }}
+                        disabled={
+                          isEditModeFromDetail && (item as any)?.isFromDetail
+                        }
                       >
                         支持手动输入
                       </Checkbox>
@@ -461,6 +499,10 @@ const Classify = (props: ClassifyComponentProps) => {
                               ].attribute_name_en = value;
                               setTextRelations(newData);
                             }}
+                            disabled={
+                              isEditModeFromDetail &&
+                              (attr as any)?.isFromDetail
+                            }
                           />
                         </FormItem>
                         <FormItem
@@ -526,16 +568,42 @@ const Classify = (props: ClassifyComponentProps) => {
                               ].attribute_name_cn = value;
                               setTextRelations(newData);
                             }}
+                            disabled={
+                              isEditModeFromDetail &&
+                              (attr as any)?.isFromDetail
+                            }
                           />
                         </FormItem>
                         <FormItem label={null}>
                           {item?.file_label_attribute?.length > 1 && (
                             <Tooltip content="删除">
                               <IconDelete
-                                className="icon-content"
-                                fontSize={18}
+                                className={`icon-wrapper ${
+                                  isEditModeFromDetail &&
+                                  (attr as any)?.isFromDetail
+                                    ? 'is-disabled'
+                                    : ''
+                                }`}
+                                fontSize={16}
                                 onClick={() => {
+                                  if (
+                                    isEditModeFromDetail &&
+                                    (attr as any)?.isFromDetail
+                                  )
+                                    return;
                                   removeAttribute(index, attrIndex);
+                                }}
+                                style={{
+                                  cursor:
+                                    isEditModeFromDetail &&
+                                    (attr as any)?.isFromDetail
+                                      ? 'not-allowed'
+                                      : 'pointer',
+                                  opacity:
+                                    isEditModeFromDetail &&
+                                    (attr as any)?.isFromDetail
+                                      ? 0.5
+                                      : 1
                                 }}
                               />
                             </Tooltip>
@@ -558,13 +626,15 @@ const Classify = (props: ClassifyComponentProps) => {
                 attribute_group_name: '', //属性组名称
                 attribute_group_class: 1, //1单选/2多选/3输入框
                 attribute_group_type: 2, //1必选/2非必选
+                isFromDetail: false, // 新增项，可编辑
                 file_label_attribute: [
                   {
                     attribute_id: uuid(),
                     order_num: 1, // 后面统一重新计算order_num
                     attribute_name_cn: '',
                     attribute_name_en: '',
-                    input_type: 1
+                    input_type: 1,
+                    isFromDetail: false // 新增项，可编辑
                   }
                 ]
               };

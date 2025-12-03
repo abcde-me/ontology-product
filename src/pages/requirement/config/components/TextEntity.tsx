@@ -41,6 +41,10 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
   const [formLabel] = Form.useForm();
   const Option = Select.Option;
   const FormItem = Form.Item;
+  // 判断是否为编辑模式且数据来自详情
+  const isEditModeFromDetail =
+    type === 'edit' &&
+    (requirementDetail?.labels || requirementDetail?.entity_relations);
   // 实体标签内容
   const [entityRelations, setEntityRelations] = useState([
     {
@@ -125,17 +129,19 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
 
   useEffect(() => {
     if (requirementDetail?.labels && (type === 'edit' || type === 'copy')) {
-      // 映射实体标签数据结构
+      // 映射实体标签数据结构，并标记为来自详情
       const mappedLabels = requirementDetail?.labels?.map((item) => ({
         ...item,
-        label_id: item?.label_id || item?.order_num || uuid()
+        label_id: item?.label_id || item?.order_num || uuid(),
+        isFromDetail: true // 标记为来自详情
       }));
 
-      // 映射关系标签数据结构
+      // 映射关系标签数据结构，并标记为来自详情
       const mappedRelations = requirementDetail?.entity_relations?.map(
         (item) => ({
           ...item,
-          relation_id: item?.relation_id || item?.order_num || uuid()
+          relation_id: item?.relation_id || item?.order_num || uuid(),
+          isFromDetail: true // 标记为来自详情
         })
       );
 
@@ -180,7 +186,11 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
     getTextEntityData(entityRelations, relationRelations, formText, formLabel);
   }, [entityRelations, relationRelations]);
   const renderItemVal = (item, index) => {
-    formText.setFieldValue(`label_name_cn${index}`, item?.label_name_cn);
+    // 使用 label_id 而不是 index，与表单字段名保持一致
+    formText.setFieldValue(
+      `label_name_cn${item?.label_id}`,
+      item?.label_name_cn
+    );
   };
   const renderNotFoundContent = () => {
     return (
@@ -221,7 +231,7 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
           entityRelations.map((item, index) => {
             renderItemVal(item, index);
             return (
-              <div className="entity-relation-item" key={item.order_num}>
+              <div className="entity-relation-item" key={item.label_id}>
                 <FormItem
                   style={{ paddingLeft: 16, marginRight: 8, marginBottom: 0 }}
                   label="标签名称:"
@@ -264,6 +274,9 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
                     onChange={(value) => {
                       handleFieldChange(index, 'label_name_en', value);
                     }}
+                    disabled={
+                      isEditModeFromDetail && (item as any)?.isFromDetail
+                    }
                   />
                 </FormItem>
                 <FormItem
@@ -323,6 +336,9 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
                     onChange={(value) => {
                       handleFieldChange(index, 'label_name_cn', value);
                     }}
+                    disabled={
+                      isEditModeFromDetail && (item as any)?.isFromDetail
+                    }
                     onFocus={(e: any) => {
                       // 从 entityRelations 中获取最新的值
                       const currentItem = entityRelations[index];
@@ -365,6 +381,9 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
                       onChange={(value) => {
                         handleFieldChange(index, 'label_colour', value);
                       }}
+                      disabled={
+                        isEditModeFromDetail && (item as any)?.isFromDetail
+                      }
                     />
                     <IconDown
                       className="color-icon"
@@ -389,10 +408,29 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
                   {entityRelations?.length > 1 && (
                     <Tooltip content="删除">
                       <IconDelete
-                        fontSize={18}
-                        className="icon-content"
+                        className={`icon-wrapper ${
+                          isEditModeFromDetail && (item as any)?.isFromDetail
+                            ? 'is-disabled'
+                            : ''
+                        }`}
+                        fontSize={16}
                         onClick={() => {
+                          if (
+                            isEditModeFromDetail &&
+                            (item as any)?.isFromDetail
+                          )
+                            return;
                           removeArrayItem(index);
+                        }}
+                        style={{
+                          cursor:
+                            isEditModeFromDetail && (item as any)?.isFromDetail
+                              ? 'not-allowed'
+                              : 'pointer',
+                          opacity:
+                            isEditModeFromDetail && (item as any)?.isFromDetail
+                              ? 0.5
+                              : 1
                         }}
                       />
                     </Tooltip>
@@ -413,8 +451,9 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
                   order_num: entityRelations?.length + 1, // 排序
                   label_name_cn: '', //展示名称
                   label_name_en: '', //存储名称
-                  label_colour: getRandomHexColorStrict() //标签颜色（如#FFFFFF）
-                }
+                  label_colour: getRandomHexColorStrict(), //标签颜色（如#FFFFFF）
+                  isFromDetail: false // 新增项，可编辑
+                } as any
               ]);
             }}
           >
@@ -485,6 +524,9 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
                               value
                             );
                           }}
+                          disabled={
+                            isEditModeFromDetail && (item as any)?.isFromDetail
+                          }
                         />
                       </FormItem>
                       <FormItem
@@ -543,16 +585,41 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
                               value
                             );
                           }}
+                          disabled={
+                            isEditModeFromDetail && (item as any)?.isFromDetail
+                          }
                         />
                       </FormItem>
                       <FormItem label={null} style={{ marginRight: 8 }}>
                         {relationRelations?.length > 0 && (
                           <Tooltip content="删除">
                             <IconDelete
-                              fontSize={18}
-                              className="icon-content"
+                              className={`icon-wrapper ${
+                                isEditModeFromDetail &&
+                                (item as any)?.isFromDetail
+                                  ? 'is-disabled'
+                                  : ''
+                              }`}
+                              fontSize={16}
                               onClick={() => {
+                                if (
+                                  isEditModeFromDetail &&
+                                  (item as any)?.isFromDetail
+                                )
+                                  return;
                                 removeRelationArrayItem(index);
+                              }}
+                              style={{
+                                cursor:
+                                  isEditModeFromDetail &&
+                                  (item as any)?.isFromDetail
+                                    ? 'not-allowed'
+                                    : 'pointer',
+                                opacity:
+                                  isEditModeFromDetail &&
+                                  (item as any)?.isFromDetail
+                                    ? 0.5
+                                    : 1
                               }}
                             />
                           </Tooltip>
@@ -589,6 +656,10 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
                                 );
                               }}
                               value={item?.start_entity_labels}
+                              disabled={
+                                isEditModeFromDetail &&
+                                (item as any)?.isFromDetail
+                              }
                             >
                               {entityRelations &&
                                 entityRelations?.map((option) => {
@@ -648,6 +719,10 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
                                 );
                               }}
                               value={item?.target_entity_labels}
+                              disabled={
+                                isEditModeFromDetail &&
+                                (item as any)?.isFromDetail
+                              }
                             >
                               {entityRelations &&
                                 entityRelations?.length > 0 &&
@@ -693,7 +768,8 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
                     relation_name_en: '',
                     start_entity_labels: [],
                     target_entity_labels: [],
-                    colour: getRandomHexColorStrict()
+                    colour: getRandomHexColorStrict(),
+                    isFromDetail: false // 新增项，可编辑
                   }
                 ]);
               }}
