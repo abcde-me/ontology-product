@@ -301,7 +301,9 @@ export const routes: IRoute[] = [
       {
         name: 'requirementConfig',
         key: '/tenant/compute/modaforge/requirement/config',
-        component: React.lazy(async () => import('../../requirement/config')),
+        component: React.lazy(
+          async () => import('../../requirement/configuration')
+        ),
         permission: REQUIREMENT_PERMISSIONS.GET
       },
       {

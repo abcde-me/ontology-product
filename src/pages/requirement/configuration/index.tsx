@@ -1,5 +1,5 @@
 import React from 'react';
-import RequirementConfig from './config';
+import RequirementConfig from './configuration';
 import RequirementConfigProvider from './context';
 
 function RequirementDetail() {

@@ -63,12 +63,13 @@ import {
   ValidationErrors
 } from './components/TaskDistribution';
 import TextSubstanceComponent from './components/TextEntity';
-import './config.scss';
+import './configuration';
 import {
   generateInitialData,
   generateLabels,
   LABEL_MAPPING
 } from './utils/generateLabels';
+import './configuration.scss';
 const BreadcrumbItem = Breadcrumb.Item;
 
 export default function RequirementConfig() {

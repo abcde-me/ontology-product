@@ -500,8 +500,7 @@ const Classify = (props: ClassifyComponentProps) => {
                               setTextRelations(newData);
                             }}
                             disabled={
-                              isEditModeFromDetail &&
-                              (attr as any)?.isFromDetail
+                              isEditModeFromDetail && attr?.isFromDetail
                             }
                           />
                         </FormItem>
@@ -569,8 +568,7 @@ const Classify = (props: ClassifyComponentProps) => {
                               setTextRelations(newData);
                             }}
                             disabled={
-                              isEditModeFromDetail &&
-                              (attr as any)?.isFromDetail
+                              isEditModeFromDetail && attr?.isFromDetail
                             }
                           />
                         </FormItem>
@@ -579,8 +577,7 @@ const Classify = (props: ClassifyComponentProps) => {
                             <Tooltip content="删除">
                               <IconDelete
                                 className={`icon-wrapper ${
-                                  isEditModeFromDetail &&
-                                  (attr as any)?.isFromDetail
+                                  isEditModeFromDetail && attr?.isFromDetail
                                     ? 'is-disabled'
                                     : ''
                                 }`}
@@ -588,20 +585,18 @@ const Classify = (props: ClassifyComponentProps) => {
                                 onClick={() => {
                                   if (
                                     isEditModeFromDetail &&
-                                    (attr as any)?.isFromDetail
+                                    attr?.isFromDetail
                                   )
                                     return;
                                   removeAttribute(index, attrIndex);
                                 }}
                                 style={{
                                   cursor:
-                                    isEditModeFromDetail &&
-                                    (attr as any)?.isFromDetail
+                                    isEditModeFromDetail && attr?.isFromDetail
                                       ? 'not-allowed'
                                       : 'pointer',
                                   opacity:
-                                    isEditModeFromDetail &&
-                                    (attr as any)?.isFromDetail
+                                    isEditModeFromDetail && attr?.isFromDetail
                                       ? 0.5
                                       : 1
                                 }}

@@ -524,9 +524,7 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
                               value
                             );
                           }}
-                          disabled={
-                            isEditModeFromDetail && (item as any)?.isFromDetail
-                          }
+                          disabled={isEditModeFromDetail && item?.isFromDetail}
                         />
                       </FormItem>
                       <FormItem
@@ -585,9 +583,7 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
                               value
                             );
                           }}
-                          disabled={
-                            isEditModeFromDetail && (item as any)?.isFromDetail
-                          }
+                          disabled={isEditModeFromDetail && item?.isFromDetail}
                         />
                       </FormItem>
                       <FormItem label={null} style={{ marginRight: 8 }}>
@@ -595,29 +591,23 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
                           <Tooltip content="删除">
                             <IconDelete
                               className={`icon-wrapper ${
-                                isEditModeFromDetail &&
-                                (item as any)?.isFromDetail
+                                isEditModeFromDetail && item?.isFromDetail
                                   ? 'is-disabled'
                                   : ''
                               }`}
                               fontSize={16}
                               onClick={() => {
-                                if (
-                                  isEditModeFromDetail &&
-                                  (item as any)?.isFromDetail
-                                )
+                                if (isEditModeFromDetail && item?.isFromDetail)
                                   return;
                                 removeRelationArrayItem(index);
                               }}
                               style={{
                                 cursor:
-                                  isEditModeFromDetail &&
-                                  (item as any)?.isFromDetail
+                                  isEditModeFromDetail && item?.isFromDetail
                                     ? 'not-allowed'
                                     : 'pointer',
                                 opacity:
-                                  isEditModeFromDetail &&
-                                  (item as any)?.isFromDetail
+                                  isEditModeFromDetail && item?.isFromDetail
                                     ? 0.5
                                     : 1
                               }}
@@ -657,8 +647,7 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
                               }}
                               value={item?.start_entity_labels}
                               disabled={
-                                isEditModeFromDetail &&
-                                (item as any)?.isFromDetail
+                                isEditModeFromDetail && item?.isFromDetail
                               }
                             >
                               {entityRelations &&
@@ -720,8 +709,7 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
                               }}
                               value={item?.target_entity_labels}
                               disabled={
-                                isEditModeFromDetail &&
-                                (item as any)?.isFromDetail
+                                isEditModeFromDetail && item?.isFromDetail
                               }
                             >
                               {entityRelations &&

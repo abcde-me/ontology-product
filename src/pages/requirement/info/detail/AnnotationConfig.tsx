@@ -1,5 +1,5 @@
 import React from 'react';
-import { AnnotationTypeEmuns } from '../config';
+import { AnnotationTypeEmuns } from '../constants';
 import getLabelByValue from '@/utils/getLabelByValue';
 import { InfoDescription } from '@ceai-front/arco-material';
 
