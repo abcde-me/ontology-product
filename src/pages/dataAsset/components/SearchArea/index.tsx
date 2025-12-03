@@ -511,7 +511,12 @@ export default function SearchArea({
               trigger="click"
               position="bl"
               popupVisible={settingsVisible}
-              onVisibleChange={setSettingsVisible}
+              onVisibleChange={(visible) => {
+                setSettingsVisible(visible);
+                if (!visible) {
+                  setSettingsSearchKeyword('');
+                }
+              }}
             >
               <Button
                 type="text"

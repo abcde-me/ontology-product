@@ -1,5 +1,6 @@
-import React, { useMemo, useEffect, useRef } from 'react';
+import React, { useMemo, useEffect, useRef, useCallback } from 'react';
 import { Empty } from '@arco-design/web-react';
+import { useVirtualList } from 'ahooks';
 import {
   useRagDetailStore,
   type Segment,
@@ -52,29 +53,6 @@ const SegmentList: React.FC<SegmentListProps> = ({
     });
   }, [segments, segmentSearchText]);
 
-  // 按 parentTitleId 分组（使用ID作为唯一标识符，避免重复的parentTitle导致分组错误）
-  const groupedSegments = useMemo(() => {
-    const groups: { titleId: string; title: string; segments: Segment[] }[] =
-      [];
-    const titleMap = new Map<string, { title: string; segments: Segment[] }>();
-
-    filteredSegments.forEach((segment) => {
-      const titleId = segment.parentTitleId || '';
-      const title = segment.parentTitle || '';
-
-      if (!titleMap.has(titleId)) {
-        titleMap.set(titleId, { title, segments: [] });
-      }
-      titleMap.get(titleId)!.segments.push(segment);
-    });
-
-    titleMap.forEach((data, titleId) => {
-      groups.push({ titleId, title: data.title, segments: data.segments });
-    });
-
-    return groups;
-  }, [filteredSegments]);
-
   // 当选中的分段变化时，自动滚动到该分段
   useEffect(() => {
     if (selectedSegmentId && segmentRefs.current[selectedSegmentId]) {
@@ -109,88 +87,82 @@ const SegmentList: React.FC<SegmentListProps> = ({
     };
   }, []);
 
-  // 处理点击分段
-  const handleSegmentClick = (segmentId: string) => {
-    // 设置选中的分段ID，这会触发目录树的高亮
-    setSelectedSegmentId(segmentId);
+  // 容器和内容的ref
+  const containerRef = useRef<HTMLDivElement>(null);
+  const wrapperRef = useRef<HTMLDivElement>(null);
 
-    // 查找对应的segment，获取PDF坐标并高亮
-    const segment = segments.find((s) => s.id === segmentId);
-    if (
-      segment &&
-      segment.pdfCoordinates &&
-      segment.pdfCoordinates.length > 0
-    ) {
-      highlightPdfCoordinates(segment.pdfCoordinates);
-    } else {
-      clearPdfHighlight();
-    }
-  };
+  // 处理点击分段 - 使用 useCallback 缓存
+  const handleSegmentClick = useCallback(
+    (segmentId: string) => {
+      // 设置选中的分段ID，这会触发目录树的高亮
+      setSelectedSegmentId(segmentId);
 
-  // 渲染分组的分段列表
-  const segmentItems = useMemo(() => {
-    if (groupedSegments.length === 0) {
+      // 查找对应的segment，获取PDF坐标并高亮
+      const segment = filteredSegments.find((s) => s.id === segmentId);
+      if (
+        segment &&
+        segment.pdfCoordinates &&
+        segment.pdfCoordinates.length > 0
+      ) {
+        highlightPdfCoordinates(segment.pdfCoordinates);
+      } else {
+        clearPdfHighlight();
+      }
+    },
+    [
+      filteredSegments,
+      setSelectedSegmentId,
+      highlightPdfCoordinates,
+      clearPdfHighlight
+    ]
+  );
+
+  // 使用虚拟滚动 - 根据renderMode调整itemHeight
+  const itemHeight = renderMode === 'image-text' ? 280 : 120;
+  const [virtualList] = useVirtualList(filteredSegments, {
+    containerTarget: containerRef,
+    wrapperTarget: wrapperRef,
+    itemHeight,
+    overscan: 5 // 额外渲染的项数，减少滚动时的闪烁
+  });
+
+  // 渲染单个分段卡片
+  const renderSegmentCard = useCallback(
+    (segment: Segment) => {
+      if (renderMode === 'image-text') {
+        return (
+          <ImageTextSegmentCard
+            segment={segment as ImageTextSegment}
+            isSelected={selectedSegmentId === segment.id}
+            totalSegments={segments.length}
+          />
+        );
+      }
+
       return (
-        <div className="flex h-full items-center justify-center">
+        <SegmentCard
+          segment={segment}
+          isSelected={selectedSegmentId === segment.id}
+          totalSegments={segments.length}
+        />
+      );
+    },
+    [renderMode, selectedSegmentId, segments.length]
+  );
+
+  // 当filteredSegments为空时显示空状态
+  if (filteredSegments.length === 0) {
+    return (
+      <div className="flex h-full flex-col bg-white px-4">
+        {!hideHeader && (
+          <SegmentListHeader totalCount={segments.length} filteredCount={0} />
+        )}
+        <div className="flex flex-1 items-center justify-center">
           <Empty description="暂无数据" />
         </div>
-      );
-    }
-
-    return groupedSegments.map((group, groupIndex) => (
-      <div
-        key={group.titleId || `empty-${groupIndex}`}
-        className={groupIndex < 0 ? 'mt-6' : ''}
-      >
-        {/* 标题分组头部 */}
-        {group.title && (
-          <div className="rounded-md py-3">
-            <div className="text-sm font-medium text-[#0F172A]">
-              {group.title || ''}
-            </div>
-          </div>
-        )}
-
-        {/* 该标题下的分段列表 */}
-        <div className="space-y-3">
-          {group.segments.map((segment) => {
-            // 根据renderMode渲染不同的卡片
-            if (renderMode === 'image-text') {
-              return (
-                <div
-                  key={segment.id}
-                  ref={(el) => (segmentRefs.current[segment.id] = el)}
-                  onClick={() => handleSegmentClick(segment.id)}
-                  style={{ cursor: 'pointer' }}
-                >
-                  <ImageTextSegmentCard
-                    segment={segment as ImageTextSegment}
-                    isSelected={selectedSegmentId === segment.id}
-                    totalSegments={segments.length}
-                  />
-                </div>
-              );
-            }
-
-            return (
-              <div
-                key={segment.id}
-                ref={(el) => (segmentRefs.current[segment.id] = el)}
-                onClick={() => handleSegmentClick(segment.id)}
-                style={{ cursor: 'pointer' }}
-              >
-                <SegmentCard
-                  segment={segment}
-                  isSelected={selectedSegmentId === segment.id}
-                  totalSegments={segments.length}
-                />
-              </div>
-            );
-          })}
-        </div>
       </div>
-    ));
-  }, [groupedSegments, selectedSegmentId, renderMode]);
+    );
+  }
 
   return (
     <div className="flex h-full flex-col bg-white px-4">
@@ -201,10 +173,22 @@ const SegmentList: React.FC<SegmentListProps> = ({
         />
       )}
       <div
+        ref={containerRef}
         className={`flex-1 overflow-y-auto pb-4 ${styles.scrollContainer}`}
         style={{ minHeight: 0 }}
       >
-        {segmentItems}
+        <div ref={wrapperRef}>
+          {virtualList.map((item) => (
+            <div
+              key={item.data.id}
+              ref={(el) => (segmentRefs.current[item.data.id] = el)}
+              onClick={() => handleSegmentClick(item.data.id)}
+              style={{ cursor: 'pointer', marginBottom: '12px' }}
+            >
+              {renderSegmentCard(item.data)}
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );
