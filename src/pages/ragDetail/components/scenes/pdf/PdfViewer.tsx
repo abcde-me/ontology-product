@@ -31,7 +31,7 @@ const PdfViewer: React.FC<PdfViewerProps> = ({
     return (
       <div className="flex h-full w-full items-center justify-center bg-gray-50">
         <div className="text-center">
-          <p className="text-gray-600">加载PDF中...</p>
+          <p className="text-gray-600">加载文件中...</p>
         </div>
       </div>
     );
@@ -41,7 +41,7 @@ const PdfViewer: React.FC<PdfViewerProps> = ({
     return (
       <div className="flex h-full w-full items-center justify-center bg-gray-50">
         <div className="text-center">
-          <p className="text-red-600">加载PDF失败: {fileBinaryDataError}</p>
+          <p className="text-red-600">加载文件失败: {fileBinaryDataError}</p>
         </div>
       </div>
     );
@@ -51,7 +51,7 @@ const PdfViewer: React.FC<PdfViewerProps> = ({
     return (
       <div className="flex h-full w-full items-center justify-center bg-gray-50">
         <div className="text-center">
-          <p className="text-gray-600">未找到PDF文件</p>
+          <p className="text-gray-600">未找到文件</p>
         </div>
       </div>
     );
