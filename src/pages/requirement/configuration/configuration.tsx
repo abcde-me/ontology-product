@@ -1252,8 +1252,7 @@ export default function RequirementConfig() {
                 label="拆分任务包:"
                 style={{ marginBottom: 24 }}
               >
-                {selectedData?.length <= 0 &&
-                !requirementDetail?.label_count ? (
+                {selectedData?.length === 0 ? (
                   <div className="data-content-set">
                     <span style={{ color: '#86909c' }}>请先选择标注数据</span>
                   </div>

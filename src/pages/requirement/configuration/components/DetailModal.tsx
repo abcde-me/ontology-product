@@ -16,7 +16,7 @@ import {
   Tree
 } from '@arco-design/web-react';
 import dayjs from 'dayjs';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useMemo } from 'react';
 import './DetailModal.scss';
 interface TreeItem {
   id: number;
@@ -193,7 +193,6 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
                             key: `${item.id},${item.id}数据卷,${subItem.id}`,
                             id: subItem?.id,
                             level: 3,
-                            disabled: type === 'detail',
                             actionOnClick: 'select'
                           }))
                         }
@@ -263,6 +262,16 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [visible, originalTreeData.length]);
 
+  // 编辑模式已选数据不可再选
+  const disabledSelectedRowKeys = useMemo(() => {
+    if (type === 'edit') {
+      return requirementDetail?.label_data_set?.map(
+        (item) => item?.execution_id || item?.run_id || item?.id
+      );
+    }
+    return [];
+  }, [type, requirementDetail]);
+
   // 树的内容
   const renderTreeContent = () => {
     return (
@@ -271,12 +280,6 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
           <Tree
             actionOnClick={['select', 'expand']}
             blockNode={true}
-            defaultExpandedKeys={requirementDetail?.label_data_set?.[0]?.dir_name.split(
-              ','
-            )}
-            defaultSelectedKeys={[
-              requirementDetail?.label_data_set?.[0]?.dir_name
-            ]}
             autoExpandParent={false}
             treeData={treeData}
             // checkStrictly={checkStrictly}
@@ -339,18 +342,14 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
       dataIndex: 'start_time',
       width: 180,
       sorter: (a, b) => dayjs(a.start_time).unix() - dayjs(b.start_time).unix(),
-      sortDirections: ['ascend' as const, 'descend' as const],
-      render: (text, record) =>
-        type === 'detail' ? formatDateTime(record?.load_start_time) : text
+      sortDirections: ['ascend' as const, 'descend' as const]
     },
     {
       title: '载入结束时间',
       dataIndex: 'end_time',
       width: 180,
       sorter: (a, b) => dayjs(a.end_time).unix() - dayjs(b.end_time).unix(),
-      sortDirections: ['ascend' as const, 'descend' as const],
-      render: (text, record) =>
-        type === 'detail' ? formatDateTime(record?.load_end_time) : text
+      sortDirections: ['ascend' as const, 'descend' as const]
     },
     {
       title: '数据量',
@@ -426,7 +425,6 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
       render: (_: any, record: any) => {
         return (
           <Link
-            disabled={type === 'detail'}
             onClick={() => {
               handleRemoveSelected(record.execution_id);
             }}
@@ -511,9 +509,6 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
     }
   };
   useEffect(() => {
-    if (type === 'detail') {
-      return;
-    }
     if (checkedKeys?.length > 0) {
       settableLoading(true);
       getTableData();
@@ -521,25 +516,6 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
   }, [checkedKeys, current, pageSize]);
   // 处理日期范围变化
   const handleDateChange = (value) => {
-    // 暂时这么处理吧， 1230版本变了
-    if (type === 'detail') {
-      if (value && value.length === 2) {
-        const [start, end] = value;
-        const filteredData = requirementDetail?.label_data_set.filter(
-          (item) => {
-            return (
-              formatDateTime(item.load_start_time) >= start + ' 00:00:00' &&
-              formatDateTime(item.load_end_time) <= end + ' 23:59:59'
-            );
-          }
-        );
-        setTableData(filteredData);
-      }
-      if (value === null || value === undefined || value === '') {
-        setTableData(requirementDetail?.label_data_set);
-      }
-      return;
-    }
     // 当选择了完整的日期范围（开始和结束），执行筛选
     if (value && value.length === 2) {
       const [start, end] = value;
@@ -557,47 +533,6 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
     }
   };
 
-  useEffect(() => {
-    if (type === 'detail' && visible && requirementDetail?.label_data_set) {
-      const detailData = requirementDetail.label_data_set;
-      setTableData(detailData);
-
-      // 将详情数据转换为已选数据格式
-      const convertedData = detailData.map((item: any) => ({
-        execution_id: item.execution_id || item.run_id,
-        start_time: item.start_time || item.load_start_time,
-        end_time: item.end_time || item.load_end_time,
-        load_num: item.load_num,
-        upload_user: item.upload_user || item.create_by,
-        dir_name: item.dir_name
-      }));
-      setSelectedRowsContent(convertedData);
-      setSelectedRowKeys(convertedData.map((item) => item.execution_id));
-    }
-  }, [requirementDetail, type, visible]);
-
-  // 详情模式下，当树形数据加载完成后，初始化路径映射
-  useEffect(() => {
-    if (
-      type === 'detail' &&
-      requirementDetail?.label_data_set &&
-      originalTreeData.length > 0
-    ) {
-      const detailData = requirementDetail.label_data_set;
-      const newPathMap = new Map<string, string>();
-      detailData.forEach((item: any) => {
-        if (item.dir_name) {
-          const path = getDirectoryPath(item.dir_name);
-          if (path) {
-            newPathMap.set(item.execution_id || item.run_id, path);
-          }
-        }
-      });
-      if (newPathMap.size > 0) {
-        setSelectedDataPathMap(newPathMap);
-      }
-    }
-  }, [type, requirementDetail, originalTreeData.length]);
   return (
     <Modal
       title={title}
@@ -651,11 +586,7 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
                   onChange={handleDateChange}
                   style={{ width: 350 }}
                   onClear={() => {
-                    if (type === 'detail') {
-                      setTableData(requirementDetail?.label_data_set);
-                    } else {
-                      getTableData();
-                    }
+                    getTableData();
                     // setDateRange([]);
                   }}
                 />
@@ -676,9 +607,11 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
                   description: '暂无数据'
                 })}
                 rowSelection={{
-                  checkboxProps: () => {
+                  checkboxProps: (record) => {
                     return {
-                      disabled: type === 'detail'
+                      disabled: disabledSelectedRowKeys.includes(
+                        record?.execution_id || record?.run_id || record?.id
+                      )
                     };
                   },
                   selectedRowKeys: selectedRowKeys,
