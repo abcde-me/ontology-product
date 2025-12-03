@@ -477,20 +477,6 @@ export default function Step2FieldMapping({
 
   // 自动映射 - 关闭时的确认处理
   const handleCloseAutoMapping = () => {
-    // 清空所有映射值，但保留行结构
-    const clearedMappings = mappings.map((mapping) => {
-      const cleared: FieldMapping = {
-        id: mapping.id,
-        sequence: mapping.sequence,
-        nameZh: mapping.nameZh
-      };
-      // 清空所有数据来源的映射值
-      Object.keys(dataSources).forEach((sourceKey) => {
-        cleared[sourceKey] = undefined;
-      });
-      return cleared;
-    });
-    setMappings(clearedMappings);
     setAutoMapping(false);
   };
 

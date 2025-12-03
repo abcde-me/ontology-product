@@ -416,7 +416,7 @@ const RunningInfoPanel: React.FC<RunningInfoPanelProps> = memo(
                                 </div>
                               </div>
                             </Menu.Item>
-                            <Menu.Item key="2" style={{ height: 'auto' }}>
+                            {/* <Menu.Item key="2" style={{ height: 'auto' }}>
                               <div style={{ padding: '7px 12px' }}>
                                 <div
                                   style={{
@@ -439,7 +439,7 @@ const RunningInfoPanel: React.FC<RunningInfoPanelProps> = memo(
                                   已存在数据集且字段不变
                                 </div>
                               </div>
-                            </Menu.Item>
+                            </Menu.Item> */}
                           </Menu>
                         }
                       >
@@ -550,11 +550,11 @@ const RunningInfoPanel: React.FC<RunningInfoPanelProps> = memo(
           visible={formVisible}
           onCancel={handleHideForm}
         />
-        <ModalDatasetFormVersion
+        {/* <ModalDatasetFormVersion
           formOrigin={formOrigin}
           visible={versionFormVisible}
           onCancel={handleHideVersionForm}
-        />
+        /> */}
       </div>
     );
   }

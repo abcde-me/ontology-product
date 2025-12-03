@@ -28,7 +28,6 @@ const ImageElementCard: React.FC<ImageElementCardProps> = ({
 
   const handleImageClick = async () => {
     // 如果有 bucketName 和 path，调用 API 获取预览 URL
-    console.log('element', element);
     if (element.bucketName && element.path) {
       try {
         const response = await previewUrl({
