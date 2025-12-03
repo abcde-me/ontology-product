@@ -8,6 +8,7 @@ import { Message } from '@arco-design/web-react';
 import { IconCopy } from '@arco-design/web-react/icon';
 import type { ImageElement } from '../../../../types';
 import { previewUrl } from '@/api/modules/rag';
+import copy from 'copy-to-clipboard';
 import { useRagDetailStore } from '../../../../store/ragDetailStore';
 
 interface ImageElementCardProps {
@@ -22,7 +23,7 @@ const ImageElementCard: React.FC<ImageElementCardProps> = ({
   const { openImageModal } = useRagDetailStore();
 
   const handleCopy = (text: string) => {
-    navigator.clipboard.writeText(text);
+    copy(text);
     Message.success('复制成功');
   };
 
