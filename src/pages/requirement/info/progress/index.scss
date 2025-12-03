@@ -1,0 +1,88 @@
+.requirement-progress {
+  padding: 0 16px 24px;
+  background: #fff;
+  height: 100%;
+
+  .progress-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+
+    .progress-title {
+      font-size: 16px;
+      font-weight: 600;
+      margin: 0;
+      color: #1d2129;
+    }
+
+    .progress-actions {
+      display: flex;
+      align-items: center;
+    }
+  }
+
+  .progress-container {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    flex-wrap: wrap;
+
+    .progress-item {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      min-width: 140px;
+
+      .progress-text-wrapper {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        white-space: nowrap;
+      }
+
+      .progress-label {
+        font-size: 14px;
+        color: #1d2129;
+      }
+
+      .progress-text {
+        font-size: 14px;
+        color: #1d2129;
+      }
+    }
+
+    .progress-arrow {
+      color: #86909c;
+      font-size: 12px;
+      flex-shrink: 0;
+      margin: 0 4px;
+      margin-top: 12px; // 对齐到文字中间位置
+    }
+  }
+
+  .progress-pagination {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    margin-top: 16px;
+  }
+}
+
+// Toast 链接样式
+.toast-link {
+  color: #2970ff;
+  cursor: pointer;
+  text-decoration: underline;
+  margin: 0 4px;
+
+  &:hover {
+    color: #165dff;
+  }
+}
+
+// 生成记录弹窗内容
+.generate-record-content {
+  padding: 16px 0;
+  min-height: 200px;
+}

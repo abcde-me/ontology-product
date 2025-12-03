@@ -1,0 +1,38 @@
+.requirement-particular {
+  padding: 0 16px 24px;
+  background: #fff;
+  height: 100%;
+
+  .particular-header {
+    margin-bottom: 16px;
+  }
+
+  .status-indicator {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+  }
+
+  .preview-link {
+    color: #2970ff;
+    padding: 0;
+
+    &:hover {
+      color: #165dff;
+    }
+  }
+
+  .particular-pagination {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    margin-top: 16px;
+  }
+}
