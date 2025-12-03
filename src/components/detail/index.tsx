@@ -2069,7 +2069,7 @@ const DatasetDetail = (props: {
                 data={versionHistory}
                 pagination={false}
                 noDataElement={noDataElement({ description: '暂无数据' })}
-                scroll={{ x: 'max-content' }}
+                scroll={{ x: 'max-content', y: 'max-content' }}
                 border={false}
                 rowKey="version_id"
               />
