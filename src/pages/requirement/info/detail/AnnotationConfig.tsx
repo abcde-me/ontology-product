@@ -3,9 +3,17 @@ import { AnnotationTypeEmuns } from '../constants';
 import getLabelByValue from '@/utils/getLabelByValue';
 import { InfoDescription } from '@ceai-front/arco-material';
 import LabelInfo from './labelInfo';
-
+import { useGetModelList } from '../../hooks/useGetModelInfo';
 function AnnotationConfig({ requirementDetail }: { requirementDetail: any }) {
   const labelToolCode = requirementDetail?.label_tool?.label_tool_code;
+  const { data: modelList = [] } = useGetModelList(
+    { label_tool_code: labelToolCode, page: 1, page_size: 1000 },
+    {
+      enabled:
+        (labelToolCode === 'IMAGE_ANNOTATION' || labelToolCode === 'TEXT_QA') &&
+        !!requirementDetail?.model_id
+    }
+  );
   const commonData = [
     {
       title: '标注任务配置',
@@ -24,7 +32,7 @@ function AnnotationConfig({ requirementDetail }: { requirementDetail: any }) {
         },
         {
           label: '预标注模型',
-          value: requirementDetail?.model_id
+          value: getLabelByValue(modelList, requirementDetail?.model_id)
         }
       ]
     }
