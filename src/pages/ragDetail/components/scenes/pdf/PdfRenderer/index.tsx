@@ -21,212 +21,314 @@ interface PdfRendererProps {
   highlightCoordinates?: PDFCoordinate[];
   onPageChange?: (pageNumber: number) => void;
   scale?: number;
+  bgColor?: string; // 高亮背景色
+  bgTransparency?: number; // 高亮透明度
 }
 
 /**
  * PDF渲染组件 - 使用pdfjs-dist和canvas
  * 支持：
  * - Canvas渲染PDF
- * - 高亮指定区域
+ * - 高亮指定区域（使用pdf-preview的完善逻辑）
  * - 自动滚动到高亮位置
+ * - 响应式重渲染
+ * - 防止并发渲染
  */
 const PdfRenderer: React.FC<PdfRendererProps> = ({
   pdfData,
   highlightCoordinates,
   onPageChange,
-  scale = 1.3
+  scale: initialScale = 1.3,
+  bgColor = 'rgba(255, 0, 0, 0.3)',
+  bgTransparency = 0.3
 }) => {
   const [totalPages, setTotalPages] = useState(0);
   const [loading, setLoading] = useState(false);
-  const BACKGROUND_COLOR = `rgba(255, 0, 0, 0.3)`;
+  const [scale, setScale] = useState(initialScale);
+  const [allRendered, setAllRendered] = useState(false);
+
   const canvasRef = useRef<HTMLCanvasElement[]>([]);
   const pdfDocRef = useRef<pdfjsLib.PDFDocumentProxy | null>(null);
-  const originalImagesRef = useRef<{ [page: number]: ImageData }>({});
+  const originalImagesRef = useRef<Record<number, ImageData>>({});
+  const busyPageSetRef = useRef<Set<number>>(new Set()); // 防止并发渲染
+  const renderedPagesRef = useRef<Set<number>>(new Set()); // 已渲染页面
   const containerRef = useRef<HTMLDivElement>(null);
   const divRef = useRef<HTMLDivElement>(null);
+  const pendingScrollRef = useRef<Record<string, number[]> | null>(null);
+  const fileUrlRef = useRef<string | null>(null);
 
   // 加载PDF文档
   useEffect(() => {
-    if (pdfData) {
-      let docURL: string | undefined;
+    if (!pdfData) return;
 
-      const loadPdf = async () => {
-        setLoading(true);
+    let docURL: string | undefined;
+
+    const loadPdf = async () => {
+      setLoading(true);
+      setTotalPages(0);
+      setAllRendered(false);
+      renderedPagesRef.current.clear();
+      busyPageSetRef.current.clear();
+
+      try {
+        // 使用二进制数据加载PDF
+        const blob = new Blob([pdfData], {
+          type: 'application/octet-stream'
+        });
+        docURL = URL.createObjectURL(blob);
+        fileUrlRef.current = docURL;
+
+        const loadingTask = pdfjsLib.getDocument(docURL);
+        const pdf = await loadingTask.promise;
+        pdfDocRef.current = pdf;
+        setTotalPages(pdf.numPages);
+        originalImagesRef.current = {};
+        setLoading(false);
+      } catch (error) {
+        console.error('❌ Error loading PDF:', error);
         setTotalPages(0);
-        try {
-          let loadingTask: pdfjsLib.PDFDocumentLoadingTask | undefined;
+        setLoading(false);
+      }
+    };
 
-          if (pdfData) {
-            // 使用二进制数据加载PDF - 参考 test.tsx
-            const blob = new Blob([pdfData], {
-              type: 'application/octet-stream'
-            });
-            docURL = URL.createObjectURL(blob);
-            loadingTask = pdfjsLib.getDocument(docURL);
-          }
+    loadPdf();
 
-          if (loadingTask) {
-            const pdf = await loadingTask.promise;
-            pdfDocRef.current = pdf;
-            setTotalPages(pdf.numPages);
-            originalImagesRef.current = {};
-          }
-          setLoading(false);
-        } catch (error) {
-          console.error('❌ Error loading PDF:', error);
-          setTotalPages(0);
-          setLoading(false);
-        }
-      };
-      loadPdf();
-
-      // Cleanup: 释放 Object URL
-      return () => {
-        if (docURL) {
-          URL.revokeObjectURL(docURL);
-        }
-      };
-    }
+    // Cleanup: 释放 Object URL
+    return () => {
+      if (docURL) {
+        URL.revokeObjectURL(docURL);
+        fileUrlRef.current = null;
+      }
+    };
   }, [pdfData]);
 
-  // 渲染单个页面
-  const renderPage = useCallback(
-    async (pageNum: number) => {
-      if (!pdfDocRef.current || !canvasRef.current[pageNum - 1]) return;
+  // 渲染单个页面 - 使用防并发机制
+  const renderPage = useCallback(async (pageNum: number) => {
+    if (!pdfDocRef.current) return;
+
+    // 防止同一页重复并发渲染
+    if (busyPageSetRef.current.has(pageNum)) return;
+    busyPageSetRef.current.add(pageNum);
+
+    try {
+      const canvas = canvasRef.current[pageNum - 1];
+      if (!canvas) return;
 
       const page = await pdfDocRef.current.getPage(pageNum);
-      const viewport = page.getViewport({ scale });
+      const rawViewport = page.getViewport({ scale: 1 });
+      const containerWidth = divRef?.current?.offsetWidth || 0;
+      const scaleFactor = containerWidth / rawViewport.width;
+      const viewport = page.getViewport({ scale: scaleFactor });
+      setScale(scaleFactor);
 
-      const canvas = canvasRef.current[pageNum - 1];
-      if (canvas) {
-        const ctx = canvas.getContext('2d', { willReadFrequently: true })!;
+      const ctx = canvas.getContext('2d', { willReadFrequently: true })!;
+      ctx.imageSmoothingEnabled = false;
+      canvas.width = viewport.width;
+      canvas.height = viewport.height;
 
-        // 获取设备像素比，提高清晰度
-        const devicePixelRatio = window.devicePixelRatio || 1;
+      await page.render({ canvasContext: ctx, viewport }).promise;
 
-        const containerWidth = divRef?.current?.offsetWidth || 0;
-        const maxWidth = containerWidth * 1;
-        const scaleFactor = maxWidth / viewport.width;
-        const newViewport = page.getViewport({
-          scale: scaleFactor * devicePixelRatio
-        });
+      // 保存原始图像数据
+      originalImagesRef.current[pageNum] = ctx.getImageData(
+        0,
+        0,
+        canvas.width,
+        canvas.height
+      );
 
-        // 设置 Canvas 实际像素大小（高分辨率）
-        canvas.height = newViewport.height;
-        canvas.width = newViewport.width;
+      renderedPagesRef.current.add(pageNum);
 
-        // 设置 Canvas 显示大小（CSS 像素）
-        canvas.style.height = `${newViewport.height / devicePixelRatio}px`;
-        canvas.style.width = `${newViewport.width / devicePixelRatio}px`;
-
-        // 启用图像平滑以获得更好的渲染质量
-        ctx.imageSmoothingEnabled = true;
-        ctx.imageSmoothingQuality = 'high';
-
-        await page.render({ canvasContext: ctx, viewport: newViewport })
-          .promise;
-
-        // 保存原始图像数据
-        originalImagesRef.current[pageNum] = ctx.getImageData(
-          0,
-          0,
-          canvas.width,
-          canvas.height
-        );
+      // 检测是否全部渲染完成
+      if (
+        pdfDocRef.current &&
+        renderedPagesRef.current.size === pdfDocRef.current.numPages
+      ) {
+        setAllRendered(true);
       }
-    },
-    [scale]
-  );
-
-  // 渲染所有页面
-  useEffect(() => {
-    if (totalPages > 0 && pdfDocRef.current) {
-      let currentPage = 1;
-      const renderNextPage = () => {
-        if (currentPage <= totalPages) {
-          renderPage(currentPage);
-          currentPage += 1;
-          requestAnimationFrame(renderNextPage);
-        }
-      };
-      requestAnimationFrame(renderNextPage);
-
-      return () => {
-        currentPage = totalPages + 1;
-      };
+    } finally {
+      busyPageSetRef.current.delete(pageNum);
     }
+  }, []);
+
+  // 渲染所有页面 - 使用 requestIdleCallback 优化性能
+  useEffect(() => {
+    if (!pdfDocRef.current || !totalPages) return;
+
+    let current = 1;
+    let cancelled = false;
+
+    const schedule = (fn: () => void) => {
+      const requestIdleCallback = (window as any).requestIdleCallback;
+      if (typeof requestIdleCallback === 'function') {
+        requestIdleCallback(
+          (deadline: any) => {
+            if (cancelled) return;
+            fn();
+          },
+          { timeout: 200 }
+        );
+      } else {
+        requestAnimationFrame(() => {
+          if (cancelled) return;
+          fn();
+        });
+      }
+    };
+
+    const renderNextPage = () => {
+      if (cancelled) return;
+      if (current <= totalPages) {
+        renderPage(current);
+        current++;
+        schedule(renderNextPage);
+      }
+    };
+
+    schedule(renderNextPage);
+
+    return () => {
+      cancelled = true;
+    };
   }, [totalPages, renderPage]);
 
-  // 高亮指定坐标 - 支持 bbox 为空时仅定位不高亮
+  // 还原所有页面
+  const restoreAllPages = useCallback(() => {
+    if (!totalPages) return;
+    for (let page = 1; page <= totalPages; page++) {
+      const canvas = canvasRef.current[page - 1];
+      const img = originalImagesRef.current[page];
+      if (canvas && img) {
+        const ctx = canvas.getContext('2d')!;
+        ctx.putImageData(img, 0, 0);
+      }
+    }
+  }, [totalPages]);
+
+  // 滚动到第一个高亮框
+  const scrollToFirstBox = useCallback((adjusted: Record<string, number[]>) => {
+    const firstPage = Number(Object.keys(adjusted)[0]);
+    const firstCanvas = canvasRef.current[firstPage - 1];
+    if (firstCanvas && containerRef.current) {
+      const [, y1] = adjusted[firstPage];
+      const top = firstCanvas.offsetTop + y1;
+      containerRef.current.scrollTo({ top, behavior: 'smooth' });
+    }
+  }, []);
+
+  // 绘制高亮
+  const paintHighlights = useCallback(
+    (adjusted: Record<string, number[]>) => {
+      Object.keys(adjusted).forEach((k) => {
+        const pageNum = Number(k);
+        const canvas = canvasRef.current[pageNum - 1];
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d')!;
+        const [x1, y1, x2, y2] = adjusted[k];
+        const rectW = (x2 - x1) * scale;
+        const rectH = (y2 - y1) * scale;
+        const sx = x1 * scale;
+        const sy = y1 * scale;
+        ctx.save();
+        ctx.globalAlpha = bgTransparency;
+        ctx.fillStyle = bgColor;
+        ctx.fillRect(sx, sy, rectW, rectH);
+        ctx.restore();
+      });
+    },
+    [scale, bgColor, bgTransparency]
+  );
+
+  // 应用滚动与高亮
+  const applyScrollAndHighlight = useCallback(
+    (adjusted: Record<string, number[]>) => {
+      restoreAllPages();
+      scrollToFirstBox(adjusted);
+      paintHighlights(adjusted);
+    },
+    [restoreAllPages, scrollToFirstBox, paintHighlights]
+  );
+
+  // 高亮与滚动 - 支持 bbox 为空时仅定位不高亮
   useEffect(() => {
     if (
-      highlightCoordinates &&
-      highlightCoordinates.length > 0 &&
-      totalPages > 0
+      !highlightCoordinates ||
+      highlightCoordinates.length === 0 ||
+      !totalPages
     ) {
-      // 清空所有高亮
-      for (let page = 1; page <= totalPages; page++) {
-        const canvas = canvasRef.current[page - 1];
-        if (canvas && originalImagesRef.current[page]) {
-          const ctx = canvas.getContext('2d')!;
-          ctx.putImageData(originalImagesRef.current[page], 0, 0);
-        }
+      return;
+    }
+
+    // 将 PDFCoordinate[] 转换为 Record<string, number[]>
+    const adjusted: Record<string, number[]> = {};
+    highlightCoordinates.forEach((coord) => {
+      const { page, x1, y1, x2, y2 } = coord;
+      // 仅当 bbox 坐标都有效时才添加到高亮列表
+      if (
+        x1 !== undefined &&
+        y1 !== undefined &&
+        x2 !== undefined &&
+        y2 !== undefined
+      ) {
+        adjusted[page.toString()] = [x1, y1, x2, y2];
       }
+    });
 
-      // 获取第一个坐标用于滚动（仅需要 page_id）
-      const firstCoord = highlightCoordinates[0];
-      const firstPageNum = firstCoord.page;
-
-      // 绘制所有高亮区域（仅当 bbox 有数据时）
-      const devicePixelRatio = window.devicePixelRatio || 1;
-
-      highlightCoordinates.forEach((coord) => {
-        const pageNumber = coord.page;
-        const targetCanvas = canvasRef.current[pageNumber - 1];
-
-        if (targetCanvas && originalImagesRef.current[pageNumber]) {
-          const { x1, y1, x2, y2 } = coord;
-
-          // 仅当 bbox 坐标都有效时才进行高亮
-          if (
-            x1 !== undefined &&
-            y1 !== undefined &&
-            x2 !== undefined &&
-            y2 !== undefined
-          ) {
-            // 根据设备像素比调整坐标
-            const scaledX1 = x1 * devicePixelRatio;
-            const scaledY1 = y1 * devicePixelRatio;
-            const scaledX2 = x2 * devicePixelRatio;
-            const scaledY2 = y2 * devicePixelRatio;
-            const width = scaledX2 - scaledX1;
-            const height = scaledY2 - scaledY1;
-
-            const ctx = targetCanvas.getContext('2d')!;
-            ctx.save();
-            ctx.globalAlpha = 0.3;
-            ctx.fillStyle = BACKGROUND_COLOR;
-            ctx.fillRect(scaledX1, scaledY1, width, height);
-            ctx.restore();
-          }
-        }
-      });
-
-      // 滚动到第一个坐标的页面（仅需要 page_id，不需要 bbox）
-      const firstCanvas = canvasRef.current[firstPageNum - 1];
+    // 如果没有有效的高亮坐标，仅滚动到第一页
+    if (Object.keys(adjusted).length === 0) {
+      const firstPage = highlightCoordinates[0].page;
+      const firstCanvas = canvasRef.current[firstPage - 1];
       if (firstCanvas && containerRef.current) {
-        // 如果 bbox 有数据，滚动到具体位置；否则滚动到页面顶部
-        const targetOffset =
-          firstCoord.y1 !== undefined
-            ? firstCanvas.offsetTop + firstCoord.y1
-            : firstCanvas.offsetTop;
         containerRef.current.scrollTo({
-          top: targetOffset,
+          top: firstCanvas.offsetTop,
           behavior: 'smooth'
         });
       }
+      return;
     }
-  }, [highlightCoordinates, totalPages]);
+
+    if (!allRendered) {
+      pendingScrollRef.current = adjusted;
+      return;
+    }
+
+    applyScrollAndHighlight(adjusted);
+  }, [highlightCoordinates, totalPages, allRendered, applyScrollAndHighlight]);
+
+  // 全部渲染完成后的待处理
+  useEffect(() => {
+    if (!allRendered || !pendingScrollRef.current || !totalPages) return;
+    const adjusted = pendingScrollRef.current;
+    applyScrollAndHighlight(adjusted);
+    pendingScrollRef.current = null;
+  }, [allRendered, totalPages, applyScrollAndHighlight]);
+
+  // ResizeObserver：容器宽度变化时重渲染已渲染的页面
+  useEffect(() => {
+    const el = divRef.current;
+    if (!el || !('ResizeObserver' in window)) return;
+
+    let lastWidth = el.offsetWidth;
+    let timer: NodeJS.Timeout | null = null;
+
+    const ro = new ResizeObserver(() => {
+      const w = el.offsetWidth;
+      if (Math.abs(w - lastWidth) < 2) return;
+      lastWidth = w;
+      if (timer) clearTimeout(timer);
+      timer = setTimeout(() => {
+        if (!pdfDocRef.current) return;
+        renderedPagesRef.current.forEach((pageNum) => {
+          renderPage(pageNum);
+        });
+      }, 100);
+    });
+
+    ro.observe(el);
+    return () => {
+      ro.disconnect();
+      if (timer) clearTimeout(timer);
+    };
+  }, [renderPage]);
 
   return (
     <div className="relative flex h-full bg-[#ffffff]" ref={divRef}>
