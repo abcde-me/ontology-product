@@ -572,8 +572,8 @@ const DatasetDetail = (props: {
   const [currentPage, setCurrentPage] = React.useState(1); //当前页码
   const [pageSize, setPageSize] = React.useState(10); //每页条数
   const [total, setTotal] = React.useState(0); //总条数
-  const [fileCurrentPage, setFileCurrentPage] = React.useState(1); //当前页码
-  const [filePageSize, setFilePageSize] = React.useState(10); //每页条数
+  // const [fileCurrentPage, setFileCurrentPage] = React.useState(1); //当前页码
+  // const [filePageSize, setFilePageSize] = React.useState(10); //每页条数
   const [fileTotal, setFileTotal] = React.useState(0); //总条数
   const [contentColumns, setContentColumns] = React.useState<any[]>([]); //列信息
   const [contentColumnslist, setContentColumnslist] = React.useState<any[]>([]); //列数据
@@ -822,7 +822,7 @@ const DatasetDetail = (props: {
 
   useEffect(() => {
     fetchDatasetContents();
-  }, [filePageSize, fileCurrentPage]);
+  }, [pageSize, currentPage]);
 
   React.useEffect(() => {
     //@ts-expect-error
@@ -1357,8 +1357,8 @@ const DatasetDetail = (props: {
     const params = {
       id: id,
       version_id: datasetDetail.latest_version,
-      page: fileCurrentPage,
-      limit: filePageSize,
+      page: currentPage,
+      limit: pageSize,
       storage_type: datasetDetail.storage_type,
       name: searchValue,
       format_list: sortValue.filters?.file_type || [],
@@ -1966,7 +1966,21 @@ const DatasetDetail = (props: {
                 noDataElement({ description: '暂无数据' })
               )}
             </TabPane>
-          ) : datasetDetail?.storage_type === StorageType.vector ? (
+          ) : datasetDetail?.storage_type === StorageType.table ? (
+            // 数据库表数据内容
+            <TabPane key="content" title="文件列表">
+              <div className="table-scroll-container">
+                <Table
+                  columns={contentTableColumns}
+                  data={contentTableData}
+                  pagination={false}
+                  rowKey="id"
+                  border={false}
+                  noDataElement={noDataElement({ description: '暂无数据' })}
+                />
+              </div>
+            </TabPane>
+          ) : (
             <TabPane key="content" title="文件列表">
               {datasetDetail?.storage_type === StorageType.vector && (
                 <Input.Search
@@ -1976,16 +1990,16 @@ const DatasetDetail = (props: {
                   value={searchValue}
                   onChange={(value) => setSearchValue(value)}
                   onSearch={() => {
-                    setFileCurrentPage(1);
+                    setCurrentPage(1);
                     fetchDatasetContents();
                   }}
                   onClear={() => {
                     setSearchValue('');
-                    setFileCurrentPage(1);
+                    setCurrentPage(1);
                     setIsClickClear(true);
                   }}
                   onPressEnter={() => {
-                    setFileCurrentPage(1);
+                    setCurrentPage(1);
                     fetchDatasetContents();
                   }}
                 />
@@ -2021,15 +2035,15 @@ const DatasetDetail = (props: {
                   style={{
                     float: 'right'
                   }}
-                  current={fileCurrentPage}
-                  pageSize={filePageSize}
+                  current={currentPage}
+                  pageSize={pageSize}
                   total={fileTotal}
                   onChange={(filePage) => {
-                    setFileCurrentPage(filePage);
+                    setCurrentPage(filePage);
                   }}
                   onPageSizeChange={(filePageSize) => {
-                    setFilePageSize(filePageSize);
-                    setFileCurrentPage(1);
+                    setPageSize(filePageSize);
+                    setCurrentPage(1);
                   }}
                   showTotal={(total, range) =>
                     `第 ${range[0]}-${range[1]} 条，共 ${total} 条数据`
@@ -2037,20 +2051,6 @@ const DatasetDetail = (props: {
                   sizeOptions={[10, 20, 50, 100]}
                   showJumper
                   sizeCanChange={true}
-                />
-              </div>
-            </TabPane>
-          ) : (
-            // 数据库表数据内容
-            <TabPane key="content" title="文件列表">
-              <div className="table-scroll-container">
-                <Table
-                  columns={contentTableColumns}
-                  data={contentTableData}
-                  pagination={false}
-                  rowKey="id"
-                  border={false}
-                  noDataElement={noDataElement({ description: '暂无数据' })}
                 />
               </div>
             </TabPane>
