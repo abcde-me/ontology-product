@@ -34,17 +34,17 @@
     padding-top: 0px;
     background: #f0f6fe;
   }
-  :global(.arco-tabs-header-scroll) {
-    background: #f0f6fe;
-  }
+  // :global(.arco-tabs-header-scroll) {
+  // background: #f0f6fe;
+  // }
   :global(.arco-tabs) {
     overflow: visible;
   }
-  :global(.arco-tabs-header-nav) {
-    position: sticky;
-    top: 30px;
-    z-index: 3;
-  }
+  // :global(.arco-tabs-header-nav) {
+  //   position: sticky;
+  //   top: 30px;
+  //   z-index: 3;
+  // }
   .datasetManagementTabs :global(.arco-tabs-header-wrapper) {
     border-bottom: 1px solid #e2e8f0;
   }

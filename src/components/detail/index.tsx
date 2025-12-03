@@ -1966,7 +1966,21 @@ const DatasetDetail = (props: {
                 noDataElement({ description: '暂无数据' })
               )}
             </TabPane>
-          ) : datasetDetail?.storage_type === StorageType.vector ? (
+          ) : datasetDetail?.storage_type === StorageType.table ? (
+            // 数据库表数据内容
+            <TabPane key="content" title="文件列表">
+              <div className="table-scroll-container">
+                <Table
+                  columns={contentTableColumns}
+                  data={contentTableData}
+                  pagination={false}
+                  rowKey="id"
+                  border={false}
+                  noDataElement={noDataElement({ description: '暂无数据' })}
+                />
+              </div>
+            </TabPane>
+          ) : (
             <TabPane key="content" title="文件列表">
               {datasetDetail?.storage_type === StorageType.vector && (
                 <Input.Search
@@ -2037,20 +2051,6 @@ const DatasetDetail = (props: {
                   sizeOptions={[10, 20, 50, 100]}
                   showJumper
                   sizeCanChange={true}
-                />
-              </div>
-            </TabPane>
-          ) : (
-            // 数据库表数据内容
-            <TabPane key="content" title="文件列表">
-              <div className="table-scroll-container">
-                <Table
-                  columns={contentTableColumns}
-                  data={contentTableData}
-                  pagination={false}
-                  rowKey="id"
-                  border={false}
-                  noDataElement={noDataElement({ description: '暂无数据' })}
                 />
               </div>
             </TabPane>

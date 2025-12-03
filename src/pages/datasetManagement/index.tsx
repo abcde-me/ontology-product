@@ -930,7 +930,7 @@ const DatasetManagement: React.FC = () => {
 
   const lastScrollTop = React.useRef(0);
   const stickyRef = React.useRef<{ current: { offsetTop: number } }>(null);
-  const [isSticky, setIsSticky] = useState(false);
+  // const [isSticky, setIsSticky] = useState(false);
   const [datasetSceneList, setDatasetSceneList] = React.useState<
     Array<SceneType>
   >([]); //数据集场景分类列表
@@ -945,10 +945,10 @@ const DatasetManagement: React.FC = () => {
     if (!container) return;
     const handleScroll = (event) => {
       const currentScrollTop = container.scrollTop;
-      if (stickyRef.current) {
-        const stickyTop = stickyRef.current.current.offsetTop;
-        setIsSticky(stickyTop === 86);
-      }
+      // if (stickyRef.current) {
+      // const stickyTop = stickyRef.current.current.offsetTop;
+      // setIsSticky(stickyTop === 86);
+      // }
 
       if (event.deltaY > 0 && !isHiddenBaseInfo) {
         setIsHiddenBaseInfo(true);
@@ -958,7 +958,7 @@ const DatasetManagement: React.FC = () => {
         isHiddenBaseInfo
       ) {
         setIsHiddenBaseInfo(false);
-        setIsSticky(false);
+        // setIsSticky(false);
         event.preventDefault();
       }
       lastScrollTop.current = currentScrollTop;
@@ -1616,11 +1616,11 @@ const DatasetManagement: React.FC = () => {
         style={{
           fontSize: '20px',
           fontWeight: 'bold',
-          color: '#0F172A',
-          position: 'sticky',
-          top: 0,
-          zIndex: 10,
-          background: `${!isSticky ? 'unset' : '#f0f6fe'}`
+          color: '#0F172A'
+          // position: 'sticky',
+          // top: 0,
+          // zIndex: 10,
+          // background: `${!isSticky ? 'unset' : '#f0f6fe'}`
         }}
       >
         数据集市
@@ -1633,8 +1633,8 @@ const DatasetManagement: React.FC = () => {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          zIndex: 10,
-          background: `${!isSticky ? 'unset' : '#f0f6fe'}`
+          zIndex: 10
+          // background: `${!isSticky ? 'unset' : '#f0f6fe'}`
         }}
       >
         <span>
@@ -1711,7 +1711,7 @@ const DatasetManagement: React.FC = () => {
         style={{
           zIndex: 1,
           paddingTop: '20px',
-          backgroundColor: '#f0f6fe'
+          backgroundColor: `${isHiddenBaseInfo ? 'unset' : '#f0f6fe'}`
         }}
         type="card"
         // onAddTab={() => setAddSceneTypeVisible(true)}
