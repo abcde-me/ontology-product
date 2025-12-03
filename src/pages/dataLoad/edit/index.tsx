@@ -846,6 +846,9 @@ const Edit = (props) => {
     form.setFieldsValue({
       sql_process_enabled: hasInitialSql ? 'enable' : 'disable'
     });
+    form.setFieldsValue({
+      sql: props.detailData?.sql
+    });
   }, [form, props.detailData?.sql, props.detailData?.source_type]);
 
   // 当详情返回包含非空SQL时，自动发起一次校验

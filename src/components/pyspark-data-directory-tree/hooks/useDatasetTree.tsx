@@ -95,7 +95,7 @@ export const useDatasetTree = ({
         version_id: dataset.latest_version,
         icon: <DasetIcon />,
         title: dataset.name,
-        latest_size: dataset.latest_size,
+        latest_size: dataset.size,
         isLeaf: false,
         data: dataset,
         type: 'dataset',
