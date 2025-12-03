@@ -708,16 +708,17 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
                         >
                           <IconPlus
                             onClick={() => {
-                              if (!expandedKeys.includes(node?.dataRef?.id)) {
+                              // 如果当前节点已经展开，不需要从新展开
+                              if (expandedKeys.includes(node?.dataRef?.id)) {
+                                return;
+                              } else if (
+                                !expandedKeys.includes(
+                                  node?.dataRef?.id.toString()
+                                )
+                              ) {
                                 setExpandedKeys(
                                   [...expandedKeys, node?.dataRef?.id].map(
                                     String
-                                  )
-                                );
-                              } else {
-                                setExpandedKeys(
-                                  expandedKeys.filter(
-                                    (key) => key !== node?.dataRef?.id
                                   )
                                 );
                               }
