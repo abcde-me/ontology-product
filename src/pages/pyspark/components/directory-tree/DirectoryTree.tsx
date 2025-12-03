@@ -40,7 +40,6 @@ import { PermissionWrapper } from '@/components/PermissionGuard';
 import { debounce } from 'lodash-es';
 import SQLFileIcon from '@/assets/sql/sql-file-icon.svg';
 import styles from './DirectoryTree.module.scss';
-import { set } from 'immer/dist/internal';
 
 // 原始数据接口
 export type TreeNodeItem = Partial<PythonListItem> & {
