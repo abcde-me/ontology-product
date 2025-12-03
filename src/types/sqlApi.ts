@@ -641,16 +641,14 @@ export interface ListDevelopScriptParams {
 }
 
 export interface ListDevelopScriptParamsData {
-  data: {
-    /**
-     * 页大小
-     */
-    page_size?: number;
-    /**
-     * 页码
-     */
-    page?: number;
-    total: number;
-    items: [];
-  };
+  /**
+   * 页大小
+   */
+  page_size?: number;
+  /**
+   * 页码
+   */
+  page?: number;
+  total: number;
+  items: [];
 }

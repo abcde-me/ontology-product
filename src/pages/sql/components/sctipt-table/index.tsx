@@ -34,7 +34,12 @@ import { getDevelopScriptList } from '@/api/sql';
 
 const InputSearch = Input.Search;
 
-const ScriptTable: React.FC = () => {
+interface ScriptTableProps {
+  isAll: (type: boolean) => void;
+  onToScriptList: (type: string) => void;
+}
+
+const ScriptTable: React.FC<ScriptTableProps> = ({ isAll, onToScriptList }) => {
   const FormItem = Form.Item;
   const [form] = Form.useForm();
   const Option = Select.Option;
@@ -89,10 +94,10 @@ const ScriptTable: React.FC = () => {
       const res = await getDevelopScriptList(params);
       console.log(res, '123');
       if (res.status === 200 && res.data) {
-        // setDevelopScriptData(res.data.items);
+        setDevelopScriptData(res?.data?.items);
         // setCurrent(res.data.page_info?.page);
         // setPageSize(res.data.page_info?.page_size);
-        // setTotal(res.data.page_info?.total || 10);
+        setTotal(res.data?.total || 10);
       }
     } finally {
       setLoading(false);
@@ -276,20 +281,20 @@ const ScriptTable: React.FC = () => {
   const columns: ColumnProps[] = [
     {
       title: '序号',
-      dataIndex: 'id',
+      dataIndex: 'script_id',
       width: 80,
       sorter: (a, b) => a.name.length - b.name.length
     },
     {
       title: '脚本名称',
-      dataIndex: 'workflow_name',
+      dataIndex: 'script_name',
       width: 180,
       ellipsis: true,
       className: styles['hover-change'] + ' ' + styles['workflow-name'],
       render: (_, record) => {
-        return renderEmptyPlaceholder(record.workflow_name) !== '-' ? (
+        return renderEmptyPlaceholder(record.script_name) !== '-' ? (
           <EllipsisPopover
-            value={record.workflow_name}
+            value={record.script_name}
             isEdit={false}
             isLink
             handleLink={() => {
@@ -303,17 +308,15 @@ const ScriptTable: React.FC = () => {
     },
     {
       title: '最近版本号',
-      dataIndex: 'run_cycle',
-      width: 120,
-      render: (_, record) =>
-        record.run_cycle ? <span>周期运行</span> : <span>单次运行</span>
+      dataIndex: 'max_version_name',
+      width: 120
     },
     {
       title: '最新版本状态',
-      dataIndex: 'is_online',
+      dataIndex: 'max_version',
       width: 160,
       render: (_, record) => {
-        return getVersionType(record.version_type);
+        return getVersionType(record.max_version);
       },
       filters: [
         {
@@ -332,38 +335,38 @@ const ScriptTable: React.FC = () => {
     },
     {
       title: '开发人',
-      dataIndex: 'source_path',
+      dataIndex: 'create_user',
       width: 100,
       ellipsis: true,
       className: styles['hover-change']
     },
     {
       title: '调度版本',
-      dataIndex: 'target_path',
+      dataIndex: 'version_name',
       width: 100,
       ellipsis: true
     },
     {
       title: '所属任务节点',
-      dataIndex: 'user_name',
+      dataIndex: 'task_name',
       width: 160,
       ellipsis: true
     },
     {
       title: '所属工作流',
-      dataIndex: 'user_name',
+      dataIndex: 'process_name',
       width: 160,
       ellipsis: true
     },
     {
       title: '最后执行时间',
-      dataIndex: 'create_time',
+      dataIndex: 'update_time',
       width: 180,
       render: (_, record) => (
         <span>
-          {record.create_time == '' || record.create_time == null
+          {record.update_time == '' || record.update_time == null
             ? '-'
-            : new Date(record.create_time).toLocaleString()}
+            : new Date(record.update_time).toLocaleString()}
         </span>
       )
     },
@@ -380,10 +383,7 @@ const ScriptTable: React.FC = () => {
               <span
                 className={styles['operate-text']}
                 onClick={() => {
-                  viewDetailWorkflow(
-                    record.workflow_uuid,
-                    record.ds_workflow_id
-                  );
+                  onToScriptList('files');
                 }}
               >
                 详情
@@ -432,6 +432,7 @@ const ScriptTable: React.FC = () => {
   // 点击搜索按钮
   const handleSearch = () => {
     setLoading(true);
+    isAll(true);
     setTimeout(() => {
       setLoading(false);
     }, 500);
@@ -439,19 +440,13 @@ const ScriptTable: React.FC = () => {
   // 重置搜索框
   const handleReset = () => {
     setSearchValue('');
+    isAll(false);
     setIsClickClear(true);
     form.resetFields();
   };
   return (
     <div className={styles['script-table-wrapper']}>
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          width: '100%',
-          marginBottom: '16px'
-        }}
-      >
+      <div className={styles['header-form-content']}>
         <Form form={form} autoComplete="off" layout="inline">
           <FormItem label="脚本名称:" field="search_content">
             <Input style={{ width: 236 }} placeholder="输入脚本名称搜索" />

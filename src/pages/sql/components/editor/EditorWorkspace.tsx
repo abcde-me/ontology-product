@@ -12,7 +12,8 @@ import {
   IconBook,
   IconCaretRight,
   IconSave,
-  IconStorage
+  IconStorage,
+  IconTag
 } from '@arco-design/web-react/icon';
 import { sql } from '@codemirror/lang-sql';
 import { lintGutter } from '@codemirror/lint';
@@ -33,7 +34,9 @@ import { FileTab } from '../../hooks/useTabManager';
 import RunningInfoPanel from './RunningInfoPanel';
 import classNames from 'classnames';
 import ModalParamList from '../data-manager/ModalParamList';
-
+import ScriptUpBtn from '@/assets/sql/script-up-btn.svg';
+import ScriptSaveBtn from '@/assets/sql/script-save-btn.svg';
+import DrawerContent from '../drawer-content';
 interface NotebookWorkspaceProps {
   content: string;
   fileName: string;
@@ -77,6 +80,7 @@ const EditorWorkspaceContent: React.FC<{
     const hasUpdatePermission = useHasPermission(SQL_PERMISSIONS.MODIFY);
     const hasCancelRunPermission = useHasPermission(SQL_PERMISSIONS.RUN);
     const [visible, setVisible] = React.useState<boolean>(false);
+    const [drawerVisible, setDrawerVisible] = useState(false);
     const [specificationsVisible, setSpecificationsVisible] =
       React.useState<boolean>(false);
     const [specificationsContent, setSpecificationsContent] =
@@ -85,6 +89,7 @@ const EditorWorkspaceContent: React.FC<{
       React.useState<string>('');
     const [isSpecificationsValid, setIsSpecificationsValid] = useState(true);
     const [paramVisible, setParamVisible] = React.useState<boolean>(false);
+    const editorContentRef = useRef(null);
     useEffect(() => {
       form.setFieldsValue({
         fileName: fileName
@@ -287,6 +292,25 @@ const EditorWorkspaceContent: React.FC<{
                 </Space>
               </div>
             )}
+            {curActiveTab === 'files' && (
+              <>
+                <Button
+                  onClick={() => {}}
+                  className={styles['toolbar-btn']}
+                  icon={<ScriptSaveBtn />}
+                  style={{ marginRight: '8px' }}
+                >
+                  保存
+                </Button>
+                <Button
+                  onClick={() => {}}
+                  icon={<ScriptUpBtn />}
+                  className={styles['toolbar-btn']}
+                >
+                  发版
+                </Button>
+              </>
+            )}
             {curActiveTab === 'data' && (
               <Button
                 onClick={() => {
@@ -316,6 +340,7 @@ const EditorWorkspaceContent: React.FC<{
         {/* 编辑器区域 */}
 
         <div
+          ref={editorContentRef}
           className={classNames(styles['sql-editor-container'], {
             [styles['running-code-mirror']]: !hasUpdatePermission
           })}
@@ -463,6 +488,14 @@ const EditorWorkspaceContent: React.FC<{
           paramVisible={paramVisible}
           onCancel={() => setParamVisible(false)}
         />
+        <DrawerContent
+          visible={drawerVisible}
+          setVisible={setDrawerVisible}
+          // contentArr={contentArr}
+        />
+        <div className={styles['drawer-btn']}>
+          <Button icon={<IconTag onClick={() => setDrawerVisible(true)} />} />
+        </div>
       </div>
     );
   }

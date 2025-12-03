@@ -36,4 +36,37 @@
       line-height: 22px;
     }
   }
+
+  .option-btn {
+    color: rgb(0, 125, 250);
+    cursor: pointer;
+    margin-right: 16px;
+  }
+
+  .option-btn:hover {
+    color: rgba(67, 141, 251, 1);
+  }
+
+  .is-disabled {
+    color: var(--text-color-text-6, #94a3b8);
+    font-family: 'PingFang SC';
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 22px;
+  }
+
+  .is-disabled:hover {
+    color: var(--text-color-text-6, #94a3b8);
+  }
+
+  .option-header {
+    display: flex;
+    align-items: center;
+  }
+
+  .option-header-text {
+    display: inline-block;
+    margin-right: 8px;
+  }
 }

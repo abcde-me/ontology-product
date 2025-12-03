@@ -30,7 +30,8 @@ import {
   IconCopy,
   IconFolder,
   IconFile,
-  IconMore
+  IconMore,
+  IconQuestionCircle
 } from '@arco-design/web-react/icon';
 import FolderIcon from '@/assets/python/folder.svg';
 import FileIcon from '@/assets/python/file.svg';
@@ -50,7 +51,7 @@ import { PYSPARK_PERMISSIONS, SQL_PERMISSIONS } from '@/config/permissions';
 import { now } from 'lodash-es';
 import { PermissionWrapper } from '../PermissionGuard';
 import { debounce } from 'lodash-es';
-import SQLFileIcon from '@/assets/sql/sql-file-icon.svg';
+import SQLFileIcon from '@/assets/sql/spl-item-icon.svg';
 import {
   VersionType,
   VersionTypeEnum
@@ -578,7 +579,7 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
 
     const handleCopy = (node: NodeProps) => {
       try {
-        onCopy?.(`${node.dataRef?.name}_副本_${now()}`, node);
+        onCopy?.(`${node.dataRef?.name}_copy_${now()}`, node);
       } catch (e) {
         Message.error('复制失败');
       }
@@ -829,7 +830,13 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
                             key="2"
                           >
                             <IconCopy className="mr-1" />
-                            复制为新脚本
+                            <span>复制为新脚本</span>
+                            <Tooltip
+                              position="right"
+                              content="以此脚本为基础新建脚本"
+                            >
+                              <IconQuestionCircle />
+                            </Tooltip>
                           </Menu.Item>
                         </PermissionWrapper>
                         <PermissionWrapper permission={nowPermissions.DELETE}>

@@ -1,4 +1,4 @@
-import React, { memo } from 'react';
+import React, { memo, useEffect, useState } from 'react';
 import style from './processing.module.scss';
 import { Button } from '@arco-design/web-react';
 import { RadioGroup } from '@headlessui/react';
@@ -14,6 +14,12 @@ interface PaginationProps {
 const Processing: React.FC<PaginationProps> = memo(({ onToScriptList }) => {
   const [processingNum, setProcessingNum] = React.useState<number>(100);
   const [iconActive, setIconActive] = React.useState<ViewType>(ViewType.TABLE); // table表示表格，card表示卡片
+  const [isShowAll, setIsShoAll] = useState(false);
+
+  useEffect(() => {
+    setIsShoAll(isShowAll);
+  }, [isShowAll]);
+
   return (
     <div className={style['processing-wrapper']}>
       {/* 头部操作按钮 */}
@@ -22,11 +28,12 @@ const Processing: React.FC<PaginationProps> = memo(({ onToScriptList }) => {
           加工脚本({processingNum})
         </div>
         <div className={style['processing-header-icons-group']}>
-          {iconActive === ViewType.TABLE && (
-            <Button onClick={() => {}} className={style['header-btn']}>
-              下载全部
-            </Button>
-          )}
+          {(iconActive === ViewType.TABLE && isShowAll) ||
+            (iconActive === ViewType.TABLE && (
+              <Button onClick={() => {}} className={style['header-btn']}>
+                下载全部
+              </Button>
+            ))}
           <Button
             className={style['header-btn']}
             onClick={() => {
@@ -44,7 +51,7 @@ const Processing: React.FC<PaginationProps> = memo(({ onToScriptList }) => {
       </div>
       <div className={style['processing-content']}>
         {iconActive === ViewType.TABLE ? (
-          <ScriptTable />
+          <ScriptTable isAll={setIsShoAll} onToScriptList={onToScriptList} />
         ) : (
           <ScriptCard onToScriptList={onToScriptList} />
         )}

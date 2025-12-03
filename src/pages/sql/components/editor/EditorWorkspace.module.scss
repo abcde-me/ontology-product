@@ -55,6 +55,12 @@
         }
       }
     }
+
+    .toolbar-btn {
+      width: 74px;
+      height: 24px;
+      padding: 0 8px;
+    }
   }
 
   // 代码编辑器容器
@@ -181,4 +187,11 @@
   padding: 0 8px;
   width: 52px;
   height: 24px;
+}
+
+.drawer-btn {
+  position: absolute;
+  top: 160px;
+  right: 20px;
+  z-index: 10;
 }

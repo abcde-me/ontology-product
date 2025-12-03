@@ -231,10 +231,21 @@ const ScriptCard: React.FC<ScriptCardProps> = ({ onToScriptList }) => {
       </div>
       <div className={styles['script-card-content']}>
         {mockjsData.list.map((item) => (
-          <div key={item.id} className={styles['script-card-content-item']}>
+          <div
+            onClick={() => {
+              onToScriptList('files');
+            }}
+            key={item.id}
+            className={styles['script-card-content-item']}
+          >
             <div className={styles['script-card-content-item-title']}>
               <div className={styles['script-card-content-item-title-left']}>
-                <div className={styles['script-card-content-item-title-text']}>
+                <div
+                  onClick={() => {
+                    onToScriptList('files');
+                  }}
+                  className={styles['script-card-content-item-title-text']}
+                >
                   <span>{item.title}</span>
                   <span>(V{item.version})</span>
                 </div>
@@ -246,7 +257,7 @@ const ScriptCard: React.FC<ScriptCardProps> = ({ onToScriptList }) => {
                   className={styles['script-card-content-item-title-btn']}
                   icon={<IconCopy />}
                   onClick={() => {
-                    onToScriptList('script');
+                    onToScriptList('files');
                   }}
                 >
                   详情

@@ -1,4 +1,4 @@
-import { Button, Modal, Table } from '@arco-design/web-react';
+import { Button, Modal, Popover, Table, Tooltip } from '@arco-design/web-react';
 import React, { memo } from 'react';
 import mockjs from 'mockjs';
 import styles from './index.module.scss';
@@ -8,6 +8,7 @@ import {
   VersionType,
   VersionTypeEnum
 } from '../version-status';
+import { IconQuestionCircle } from '@arco-design/web-react/icon';
 
 const SctipModalTable: React.FC<{
   isVisible: boolean;
@@ -33,6 +34,7 @@ const SctipModalTable: React.FC<{
         name: '@cword(3, 5)',
         type: '@cword(2, 4)',
         status: '@pick(["released",  "scheduled"])',
+        visteon: '@pick(["true",  "false"])',
         created_at: '@datetime'
       }
     ]
@@ -62,8 +64,8 @@ const SctipModalTable: React.FC<{
     },
     {
       title: '更新人',
-      dataIndex: 'status',
-      key: 'status'
+      dataIndex: 'visteon',
+      key: 'visteon'
     },
     {
       title: '更新时间',
@@ -71,14 +73,56 @@ const SctipModalTable: React.FC<{
       key: 'created_at'
     },
     {
-      title: '操作',
+      title: (
+        <Popover
+          content="复制为新版本：以选择的脚本为基础迭代新版本"
+          trigger="hover"
+        >
+          <span
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 4,
+              cursor: 'help'
+            }}
+          >
+            操作
+            <IconQuestionCircle fontSize={16} style={{ color: '#7F8C9F' }} />
+          </span>
+        </Popover>
+      ),
       dataIndex: 'operation',
       key: 'operation',
-      render: () => (
+      render: (_, record) => (
         <>
-          <Button type="text">详情</Button>
-          <Button type="text">复制为新版本</Button>
-          <Button type="text">删除</Button>
+          <span className={styles['option-btn']}>详情</span>
+          <Tooltip
+            content={record?.visteon === 'false' ? '当前已有未发版的脚本' : ''}
+          >
+            <span
+              className={[
+                styles['option-btn'],
+                record?.visteon === 'false' && styles['is-disabled']
+              ].join(' ')}
+            >
+              复制为新版本
+            </span>
+          </Tooltip>
+          <Tooltip
+            content={
+              record?.status === VersionType.SCHEDULED ? '调度中不可删除' : ''
+            }
+          >
+            <span
+              className={[
+                styles['option-btn'],
+                record?.status === VersionType.SCHEDULED &&
+                  styles['is-disabled']
+              ].join(' ')}
+            >
+              删除
+            </span>
+          </Tooltip>
         </>
       )
     }
@@ -156,7 +200,7 @@ const SctipModalTable: React.FC<{
             </div>
           </div>
         </div>
-        <Table columns={columns} data={mockData.list} />;
+        <Table rowKey={'id'} columns={columns} data={mockData.list} />;
       </div>
     </Modal>
   );
