@@ -77,9 +77,9 @@ function HitTest(props: { datasetName: string }) {
     reranking_enable: false,
     search_method: 'Vector',
     score_threshold_enabled: true,
-    score_threshold: 0.6,
-    top_k: 6,
-    weights: 0.6
+    score_threshold: 0.1,
+    top_k: 5,
+    weights: 0
   };
   const submitEditeditPolicy = () => {
     childRef.current.submitEditeditPolicy();
