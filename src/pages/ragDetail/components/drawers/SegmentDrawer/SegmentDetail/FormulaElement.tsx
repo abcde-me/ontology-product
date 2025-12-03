@@ -8,6 +8,7 @@ import { Input } from '@arco-design/web-react';
 import type { FormulaElement } from '../../../../types';
 import { useSegmentDetailStore } from './store/segmentDetailStore';
 import MathJax from 'react-mathjax';
+import SegmentMarkdown from '../../../common/SegmentMarkdown';
 
 const { TextArea } = Input;
 
@@ -45,9 +46,13 @@ const FormulaElementCard: React.FC<FormulaElementCardProps> = ({
         />
       ) : (
         <div className="mb-3 rounded py-3 text-[14px] leading-6 text-gray-900">
-          <MathJax.Provider>
+          <SegmentMarkdown
+            content={element.content}
+            className="text-sm leading-relaxed text-gray-700"
+          />
+          {/* <MathJax.Provider>
             <MathJax.Node inline formula={element.content} />
-          </MathJax.Provider>
+          </MathJax.Provider> */}
         </div>
       )}
 
