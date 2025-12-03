@@ -9,10 +9,16 @@ function LabelInfo({
   requirementDetail: any;
   labelToolCode: string;
 }) {
-  console.log(labelToolCode, 'labelToolCode');
+  const hasModel = !!requirementDetail?.model_id;
+
   switch (labelToolCode) {
     case 'IMAGE_ANNOTATION':
-      return <ImageLabelInfo labelInfo={requirementDetail?.labels} />;
+      return (
+        <ImageLabelInfo
+          labelInfo={requirementDetail?.labels}
+          hasModel={hasModel}
+        />
+      );
     case 'TEXT_CLASSIFICATION':
       return (
         <TextClassifyLabelInfo labelInfo={requirementDetail?.file_labels} />
