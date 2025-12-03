@@ -2,6 +2,7 @@ import { Upload, Message, Tooltip } from '@arco-design/web-react';
 import React, { useState } from 'react';
 import { IconQuestionCircle } from '@arco-design/web-react/icon';
 import { PrefixAimdp } from '@/api/endpoints';
+import { useUserInfoStore } from '@/store/userInfoStore';
 
 interface UploadsProps {
   onFileChange: (fileData: any, blobURL?: string) => void;
@@ -20,6 +21,7 @@ const Uploads: React.FC<UploadsProps> = ({
 }) => {
   let hasShownFileCountError = false;
   const [fileList, setFileList] = useState<any>([]);
+  const projectId = useUserInfoStore((state) => state.projectId);
 
   // 标准化文件名用于同名比较（将后缀转为小写）
   const normalizeFileNameForComparison = (fileName: string) => {
@@ -174,6 +176,9 @@ const Uploads: React.FC<UploadsProps> = ({
       drag
       className="upload-file"
       multiple
+      data={{
+        projectID: projectId[1]
+      }}
       accept=".doc,.docx,.ppt,.pptx,.pdf,.jpg,.jpeg,.png,.txt,.md,.wav,.mp3,.aac,.flac,.mp4,.mov,.mkv"
       beforeUpload={(file, list) => {
         return checkFile(file, list);
