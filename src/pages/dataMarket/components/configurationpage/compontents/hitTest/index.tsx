@@ -21,6 +21,7 @@ import CopyNormalIconSvg from '@/assets/rag/copy-normal.svg';
 import CopyHighIconSvg from '@/assets/rag/copy-high.svg';
 import JumpToHighIconSvg from '@/assets/rag/jump-to-high.svg';
 import JumpToNormalIconSvg from '@/assets/rag/jump-to-normal.svg';
+import ImageModal from '@/pages/ragDetail/components/common/ImageModal';
 import copy from 'copy-to-clipboard';
 import {
   RunKnowledgeHitTesting,
@@ -531,6 +532,8 @@ function HitTest(props: { datasetName: string }) {
           seteditPolicy={seteditPolicy}
         ></PolicyForm>
       </Modal>
+      {/* 图片放大弹窗 */}
+      <ImageModal />
 
       <SegmentDrawer
         visible={showDrawer}
