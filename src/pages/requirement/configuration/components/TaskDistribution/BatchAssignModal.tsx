@@ -186,7 +186,6 @@ const BatchAssignModal: React.FC<BatchAssignModalProps> = ({
         getChildTreeSelectData={() => {
           // 不在选择时立即触发，只在点击确认按钮时触发
         }}
-        requirementDetail={null}
         type="create"
       />
 
@@ -204,7 +203,6 @@ const BatchAssignModal: React.FC<BatchAssignModalProps> = ({
           // 不在选择时立即触发，只在点击确认按钮时触发
         }}
         getTreeIds={() => {}}
-        requirementDetail={null}
         type="create"
       />
     </Modal>

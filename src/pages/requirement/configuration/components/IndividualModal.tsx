@@ -19,20 +19,17 @@ import { IconCaretDown } from '@arco-design/web-react/icon';
 import './IndividualModal.scss';
 
 // 树节点处理工具函数
-const processTreeNode = (node: any, isDetailMode: boolean): any => {
+const processTreeNode = (node: any): any => {
   return {
     ...node,
-    disableCheckbox: isDetailMode,
     // 递归处理子节点，将childList转换为children
-    children: node.childList?.map((child: any) =>
-      processTreeNode(child, isDetailMode)
-    )
+    children: node.childList?.map((child: any) => processTreeNode(child))
   };
 };
 
 // 处理树数据的工具函数
-const processTreeData = (data: any[], isDetailMode: boolean): any[] => {
-  return data?.map((item) => processTreeNode(item, isDetailMode)) || [];
+const processTreeData = (data: any[]): any[] => {
+  return data?.map((item) => processTreeNode(item)) || [];
 };
 
 // 只保留有权限数据的节点
@@ -69,7 +66,6 @@ interface DataSourceModalProps {
   getChildTreeSelectData: (data: any) => void;
   initialSelectedData?: any[]; // 添加初始选中数据参数
   getTreeIds: (data: any) => void;
-  requirementDetail: any;
   type: any;
   onConfirm?: (selectedIds: string[]) => void; // 新增：确认回调
   initialSelected?: string[]; // 新增：初始选中的用户ID列表
@@ -84,7 +80,6 @@ const IndividualModal: React.FC<DataSourceModalProps> = ({
   getChildTreeSelectData,
   initialSelectedData = [], // 接收初始数据
   getTreeIds,
-  requirementDetail,
   type,
   onConfirm,
   initialSelected = []
@@ -107,24 +102,14 @@ const IndividualModal: React.FC<DataSourceModalProps> = ({
   useEffect(() => {
     if (initialSelected && initialSelected.length > 0) {
       setSelectedRowKeys(initialSelected);
-    } else if (requirementDetail) {
-      setSelectedRowKeys(
-        requirementDetail?.label_operate &&
-          requirementDetail?.label_operate?.user_id?.map((item) => item)
-      );
-      setCheckedKeys(
-        requirementDetail?.label_operate &&
-          requirementDetail?.label_operate?.org_id?.map((item) => item)
-      );
     }
-  }, [requirementDetail, initialSelected]);
+  }, [initialSelected]);
   const getTreeData = () => {
     try {
       getDepartmentTreeList()
         .then((res) => {
           // 使用工具函数处理整个树结构
-          const isDetailMode = type === 'detail';
-          const newTreeData = processTreeData(res?.data || [], isDetailMode);
+          const newTreeData = processTreeData(res?.data || []);
           setTreeData(filterTreeDataByPerms(newTreeData));
           setOriginalTreeData(filterTreeDataByPerms(newTreeData));
         })
@@ -308,11 +293,6 @@ const IndividualModal: React.FC<DataSourceModalProps> = ({
             pagination={false}
             noDataElement={noDataElement({ description: '暂无数据' })}
             rowSelection={{
-              checkboxProps: () => {
-                return {
-                  disabled: type === 'detail'
-                };
-              },
               selectedRowKeys: selectedRowKeys,
               preserveSelectedRowKeys: true,
               onChange: (selectedRowKeys: any, selectedRows: any) => {

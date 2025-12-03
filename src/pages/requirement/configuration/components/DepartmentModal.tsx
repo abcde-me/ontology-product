@@ -11,21 +11,18 @@ import { getDepartmentTreeList } from '@/api/individualAndDepartment';
 import './DepartmentModal.scss';
 
 // 树节点处理工具函数
-const processTreeNode = (node: any, isDetailMode: boolean): any => {
+const processTreeNode = (node: any): any => {
   return {
     ...node,
     actionOnClick: 'check',
-    disableCheckbox: isDetailMode,
     // 递归处理子节点，将childList转换为children
-    children: node.childList?.map((child: any) =>
-      processTreeNode(child, isDetailMode)
-    )
+    children: node.childList?.map((child: any) => processTreeNode(child))
   };
 };
 
 // 处理树数据的工具函数
-const processTreeData = (data: any[], isDetailMode: boolean): any[] => {
-  return data?.map((item) => processTreeNode(item, isDetailMode)) || [];
+const processTreeData = (data: any[]): any[] => {
+  return data?.map((item) => processTreeNode(item)) || [];
 };
 
 // 只保留有权限数据的节点
@@ -59,7 +56,6 @@ interface DataSourceModalProps {
   onClose: () => void;
   title?: string;
   getChildTreeSelectData: (data: any) => void;
-  requirementDetail: any;
   type: any;
   onConfirm?: (selectedIds: string[]) => void; // 新增：确认回调
   initialSelected?: string[]; // 新增：初始选中的部门ID列表
@@ -70,7 +66,6 @@ const DepartmentModal: React.FC<DataSourceModalProps> = ({
   onClose,
   title = '数据源',
   getChildTreeSelectData,
-  requirementDetail,
   type,
   onConfirm,
   initialSelected = []
@@ -80,23 +75,18 @@ const DepartmentModal: React.FC<DataSourceModalProps> = ({
   const [originalTreeData, setOriginalTreeData] = useState<any>([]);
   const [checkedKeys, setCheckedKeys] = useState<string[]>([]);
   const [searchValue, setSearchValue] = useState<string>('');
-  const [checkedKeysDetail, setCheckedKeysDetail] = useState<string[]>([]);
 
   // 处理初始选中的数据
   useEffect(() => {
     if (initialSelected && initialSelected.length > 0) {
       setCheckedKeys(initialSelected);
-      setCheckedKeysDetail(initialSelected);
-    } else if (requirementDetail && type === 'detail') {
-      setCheckedKeysDetail(requirementDetail?.label_operate?.org_id || []);
     }
-  }, [requirementDetail, initialSelected, type]);
+  }, [initialSelected]);
   const getTreeData = () => {
     try {
       getDepartmentTreeList()
         .then((res) => {
-          const isDetailMode = type === 'detail';
-          const newTreeData = processTreeData(res?.data || [], isDetailMode);
+          const newTreeData = processTreeData(res?.data || []);
           setTreeData(filterTreeDataByPerms(newTreeData));
           setOriginalTreeData(filterTreeDataByPerms(newTreeData));
         })
@@ -220,15 +210,7 @@ const DepartmentModal: React.FC<DataSourceModalProps> = ({
             actionOnClick="check"
             checkable
             checkedStrategy="child"
-            defaultCheckedKeys={
-              type === 'detail' ? checkedKeysDetail : undefined
-            }
             autoExpandParent={false}
-            defaultExpandedKeys={
-              type === 'detail'
-                ? findParentIds(treeData, checkedKeysDetail)
-                : undefined
-            }
             style={{
               width: '300px',
               height: '592px',
