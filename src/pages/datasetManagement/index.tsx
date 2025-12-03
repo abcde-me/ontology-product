@@ -1631,7 +1631,10 @@ const DatasetManagement: React.FC = () => {
           margin: '0px',
           fontSize: '14px',
           display: 'flex',
-          justifyContent: 'space-between'
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          zIndex: 10,
+          background: `${!isSticky ? 'unset' : '#f0f6fe'}`
         }}
       >
         <span>
@@ -1650,13 +1653,13 @@ const DatasetManagement: React.FC = () => {
       {!isHiddenBaseInfo && (
         <div
           style={{
+            marginTop: '16px',
             borderRadius: '8px',
             border: '1px solid #FFF',
-            background: 'rgba(255, 255, 255, 0.48)',
+            background: 'rgba(255, 255, 255, 0.7)',
             boxShadow: '0 0 3.5px 0 rgba(0, 0, 0, 0.04)',
             display: 'flex',
             flexDirection: 'row',
-            marginBottom: '20px',
             zIndex: 1
           }}
         >
@@ -1666,7 +1669,8 @@ const DatasetManagement: React.FC = () => {
                 display: 'flex',
                 flexDirection: 'row',
                 padding: '16px 20px',
-                gap: '20px'
+                gap: '20px',
+                alignItems: 'center'
               }}
               key={index}
             >
@@ -1680,7 +1684,13 @@ const DatasetManagement: React.FC = () => {
                 >
                   {item.title}
                 </h1>
-                <span style={{ fontSize: '12px', lineHeight: '18px' }}>
+                <span
+                  style={{
+                    fontSize: '12px',
+                    lineHeight: '18px',
+                    color: '#6E7B8D'
+                  }}
+                >
                   {item.desc}
                 </span>
               </div>
@@ -1697,7 +1707,12 @@ const DatasetManagement: React.FC = () => {
       <Tabs
         // editable
         defaultActiveTab="0"
-        style={{ zIndex: 1 }}
+        className={styles.datasetManagementTabs}
+        style={{
+          zIndex: 1,
+          paddingTop: '20px',
+          backgroundColor: '#f0f6fe'
+        }}
         type="card"
         // onAddTab={() => setAddSceneTypeVisible(true)}
         ref={stickyRef}
@@ -1721,11 +1736,12 @@ const DatasetManagement: React.FC = () => {
                     flexDirection: 'column',
                     padding: '12px',
                     backgroundColor: 'rgba(255, 255, 255, 0.48)',
+                    border: '1px solid #FFF',
                     borderRadius: '8px',
                     marginTop: '20px'
                   }}
                 >
-                  <span>{item.description}</span>
+                  <span className="text-[14px]">{item.description}</span>
                   <span style={{ marginTop: '8px' }}>
                     <IconTag style={{ marginRight: '5px' }} />
                     {item.tags.map((tag, index) => (
@@ -1735,7 +1751,8 @@ const DatasetManagement: React.FC = () => {
                           marginRight: '5px',
                           background: '#FFF',
                           border: '1px solid #E2E8F0',
-                          padding: '4px'
+                          padding: '4px',
+                          borderRadius: '4px'
                         }}
                       >
                         {tag}
@@ -1923,7 +1940,8 @@ const DatasetManagement: React.FC = () => {
                 }}
                 border={false}
                 scroll={{
-                  x: 1200
+                  x: 1200,
+                  y: 300
                 }}
                 onChange={handleTableChange}
               />
