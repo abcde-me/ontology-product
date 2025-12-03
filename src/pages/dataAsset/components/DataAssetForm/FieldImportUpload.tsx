@@ -145,13 +145,11 @@ const FieldImportUpload: React.FC<FieldImportUploadProps> = ({
         action={`${PrefixAimdp}/AnalyzeDataAssetFieldsFile`}
         onChange={handleUploadChange}
         onDrop={handleDrop}
-        data={{
-          projectID: projectId[1]
-        }}
         headers={{
           Authorization: getToken(),
           'X-Auth-Validate': 'true',
-          'X-Regionid': 'region1'
+          'X-Regionid': 'region1',
+          'x-ceai-project-id': projectId[1]
         }}
         tip={
           <>
