@@ -1,5 +1,6 @@
-import React, { useMemo, useEffect, useRef } from 'react';
+import React, { useMemo, useEffect, useRef, useCallback } from 'react';
 import { Empty } from '@arco-design/web-react';
+import { useVirtualList } from 'ahooks';
 import {
   useRagDetailStore,
   type Segment,
@@ -86,73 +87,82 @@ const SegmentList: React.FC<SegmentListProps> = ({
     };
   }, []);
 
-  // 处理点击分段
-  const handleSegmentClick = (segmentId: string) => {
-    // 设置选中的分段ID，这会触发目录树的高亮
-    setSelectedSegmentId(segmentId);
+  // 容器和内容的ref
+  const containerRef = useRef<HTMLDivElement>(null);
+  const wrapperRef = useRef<HTMLDivElement>(null);
 
-    // 查找对应的segment，获取PDF坐标并高亮
-    const segment = segments.find((s) => s.id === segmentId);
-    if (
-      segment &&
-      segment.pdfCoordinates &&
-      segment.pdfCoordinates.length > 0
-    ) {
-      highlightPdfCoordinates(segment.pdfCoordinates);
-    } else {
-      clearPdfHighlight();
-    }
-  };
+  // 处理点击分段 - 使用 useCallback 缓存
+  const handleSegmentClick = useCallback(
+    (segmentId: string) => {
+      // 设置选中的分段ID，这会触发目录树的高亮
+      setSelectedSegmentId(segmentId);
 
-  // 渲染平铺的分段列表
-  const segmentItems = useMemo(() => {
-    if (filteredSegments.length === 0) {
+      // 查找对应的segment，获取PDF坐标并高亮
+      const segment = filteredSegments.find((s) => s.id === segmentId);
+      if (
+        segment &&
+        segment.pdfCoordinates &&
+        segment.pdfCoordinates.length > 0
+      ) {
+        highlightPdfCoordinates(segment.pdfCoordinates);
+      } else {
+        clearPdfHighlight();
+      }
+    },
+    [
+      filteredSegments,
+      setSelectedSegmentId,
+      highlightPdfCoordinates,
+      clearPdfHighlight
+    ]
+  );
+
+  // 使用虚拟滚动 - 根据renderMode调整itemHeight
+  const itemHeight = renderMode === 'image-text' ? 280 : 120;
+  const [virtualList] = useVirtualList(filteredSegments, {
+    containerTarget: containerRef,
+    wrapperTarget: wrapperRef,
+    itemHeight,
+    overscan: 5 // 额外渲染的项数，减少滚动时的闪烁
+  });
+
+  // 渲染单个分段卡片
+  const renderSegmentCard = useCallback(
+    (segment: Segment) => {
+      if (renderMode === 'image-text') {
+        return (
+          <ImageTextSegmentCard
+            segment={segment as ImageTextSegment}
+            isSelected={selectedSegmentId === segment.id}
+            totalSegments={segments.length}
+          />
+        );
+      }
+
       return (
-        <div className="flex h-full items-center justify-center">
+        <SegmentCard
+          segment={segment}
+          isSelected={selectedSegmentId === segment.id}
+          totalSegments={segments.length}
+        />
+      );
+    },
+    [renderMode, selectedSegmentId, segments.length]
+  );
+
+  // 当filteredSegments为空时显示空状态
+  if (filteredSegments.length === 0) {
+    return (
+      <div className="flex h-full flex-col bg-white px-4">
+        {!hideHeader && (
+          <SegmentListHeader totalCount={segments.length} filteredCount={0} />
+        )}
+        <div className="flex flex-1 items-center justify-center">
           <Empty description="暂无数据" />
         </div>
-      );
-    }
-
-    return (
-      <div className="space-y-3">
-        {filteredSegments.map((segment) => {
-          // 根据renderMode渲染不同的卡片
-          if (renderMode === 'image-text') {
-            return (
-              <div
-                key={segment.id}
-                ref={(el) => (segmentRefs.current[segment.id] = el)}
-                onClick={() => handleSegmentClick(segment.id)}
-                style={{ cursor: 'pointer' }}
-              >
-                <ImageTextSegmentCard
-                  segment={segment as ImageTextSegment}
-                  isSelected={selectedSegmentId === segment.id}
-                  totalSegments={segments.length}
-                />
-              </div>
-            );
-          }
-
-          return (
-            <div
-              key={segment.id}
-              ref={(el) => (segmentRefs.current[segment.id] = el)}
-              onClick={() => handleSegmentClick(segment.id)}
-              style={{ cursor: 'pointer' }}
-            >
-              <SegmentCard
-                segment={segment}
-                isSelected={selectedSegmentId === segment.id}
-                totalSegments={segments.length}
-              />
-            </div>
-          );
-        })}
       </div>
     );
-  }, [filteredSegments, selectedSegmentId, renderMode]);
+  }
 
   return (
     <div className="flex h-full flex-col bg-white px-4">
@@ -163,10 +173,22 @@ const SegmentList: React.FC<SegmentListProps> = ({
         />
       )}
       <div
+        ref={containerRef}
         className={`flex-1 overflow-y-auto pb-4 ${styles.scrollContainer}`}
         style={{ minHeight: 0 }}
       >
-        {segmentItems}
+        <div ref={wrapperRef}>
+          {virtualList.map((item) => (
+            <div
+              key={item.data.id}
+              ref={(el) => (segmentRefs.current[item.data.id] = el)}
+              onClick={() => handleSegmentClick(item.data.id)}
+              style={{ cursor: 'pointer', marginBottom: '12px' }}
+            >
+              {renderSegmentCard(item.data)}
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );
