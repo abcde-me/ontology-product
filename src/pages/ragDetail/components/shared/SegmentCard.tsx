@@ -63,8 +63,11 @@ const SegmentCard: React.FC<SegmentCardProps> = memo(
   },
   (prevProps, nextProps) => {
     // 自定义比较函数：返回 true 表示不需要重新渲染
+    // 需要比较 segment 的关键字段，包括 content，以确保内容更新时能重新渲染
     return (
       prevProps.segment.id === nextProps.segment.id &&
+      prevProps.segment.content === nextProps.segment.content &&
+      prevProps.segment.charCount === nextProps.segment.charCount &&
       prevProps.isSelected === nextProps.isSelected &&
       prevProps.totalSegments === nextProps.totalSegments
     );
