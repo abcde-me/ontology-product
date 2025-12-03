@@ -988,7 +988,8 @@ export enum FileType {
   wmv = 'wmv',
   flac = 'flac',
   file = 'file',
-  database = 'database'
+  database = 'database',
+  csv = 'csv'
 }
 
 export enum FileTypeLarge {
@@ -1030,5 +1031,6 @@ export enum FileTypeLarge {
   wmv = 'WMV',
   flac = 'FLAC',
   file = 'FILE',
-  database = 'DATABASE'
+  database = 'DATABASE',
+  csv = 'CSV'
 }

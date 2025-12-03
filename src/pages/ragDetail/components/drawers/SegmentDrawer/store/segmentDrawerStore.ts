@@ -70,11 +70,22 @@ interface SegmentDrawerActions {
 type SegmentDrawerStore = SegmentDrawerState & SegmentDrawerActions;
 
 /**
- * 格式化成本时间（毫秒转分钟）
+ * 格式化成本时间（毫秒转分钟和秒）
  */
 function formatCostTime(milliseconds: number): string {
-  const minutes = Math.round(milliseconds / 60000);
-  return `${minutes}min`;
+  const totalSeconds = Math.round(milliseconds / 1000);
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds % 60;
+
+  if (minutes === 0) {
+    return `${seconds}s`;
+  }
+
+  if (seconds === 0) {
+    return `${minutes}m`;
+  }
+
+  return `${minutes}m ${seconds}s`;
 }
 
 /**

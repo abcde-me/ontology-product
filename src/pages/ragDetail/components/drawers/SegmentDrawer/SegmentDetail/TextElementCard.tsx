@@ -49,7 +49,7 @@ const TextElementCard: React.FC<TextElementCardProps> = ({
         </div>
       )}
 
-      {(element.positionType ||
+      {/* {(element.positionType ||
         element.positionInfo ||
         (element as any).pageId) && (
         <div className="flex items-center gap-6 text-sm">
@@ -72,7 +72,7 @@ const TextElementCard: React.FC<TextElementCardProps> = ({
             </span>
           )}
         </div>
-      )}
+      )} */}
 
       {/* <ElementEnhancedInfo element={element} isEditing={isEditing} /> */}
     </div>

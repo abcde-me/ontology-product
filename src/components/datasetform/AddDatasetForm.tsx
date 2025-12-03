@@ -30,6 +30,7 @@ import {
 import { debounce } from 'lodash-es';
 import getFileIcon from '../file-icon';
 import { SceneType } from '@/pages/datasetManagement';
+import { formatFileSize } from '@/utils/format';
 
 interface Dataset {
   key?: string;
@@ -256,6 +257,7 @@ const DatasetForm = React.forwardRef<
       setConnectorFileInformation([]); //重置连接器文件信息
       setPreviewData(null); //重置预览数据
       setPreviewColumns([]); //重置预览表格列
+      setFileIds([]);
       setIsPreviewFile(false);
       setPreviewFileData(null);
       form.setFieldValue('dataSource', 'volume');
@@ -589,7 +591,9 @@ const DatasetForm = React.forwardRef<
       title: '文件大小',
       dataIndex: 'file_size', // 使用动态获取的文件类型筛选器
       width: 134,
-      render: (_, record) => <span>{record.file_size || '-'}</span>
+      render: (_, record) => (
+        <span>{formatFileSize(record.file_size) || '-'}</span>
+      )
     }
   ];
 
@@ -599,7 +603,12 @@ const DatasetForm = React.forwardRef<
       visible={visible}
       footer={null}
       style={{ width: '960px' }}
-      onCancel={onCancel}
+      onCancel={() => {
+        onCancel();
+        form.resetFields();
+        setFileIds([]);
+        setPreviewFileData(null);
+      }}
       maskClosable={false}
       className={styles.modalWrapper}
       // unmountOnExit={true}
@@ -891,6 +900,7 @@ const DatasetForm = React.forwardRef<
                     pagination={false}
                     rowSelection={{
                       type: 'checkbox',
+                      selectedRowKeys: fileIds,
                       onChange: (selectedRowKeys, selectedRows: FileItem[]) => {
                         const isNotJsonl = selectedRows.some(
                           (item) => item.file_type !== 'JSONL'
@@ -898,7 +908,10 @@ const DatasetForm = React.forwardRef<
                         setFilesType(
                           isNotJsonl ? StorageType.File : StorageType.Jsonl
                         );
-                        setFileIds(selectedRowKeys as string[]);
+                        const newFileIds = [
+                          ...new Set([...fileIds, ...selectedRowKeys])
+                        ];
+                        setFileIds(newFileIds as string[]);
                       }
                     }}
                   />
@@ -1125,7 +1138,16 @@ const DatasetForm = React.forwardRef<
                 // borderTop: '1px solid #f0f0f0'
               }}
             >
-              <Button onClick={onCancel}>取消</Button>
+              <Button
+                onClick={() => {
+                  onCancel();
+                  form.resetFields();
+                  setFileIds([]);
+                  setPreviewFileData(null);
+                }}
+              >
+                取消
+              </Button>
               <Button
                 type="primary"
                 loading={!canSubmit}

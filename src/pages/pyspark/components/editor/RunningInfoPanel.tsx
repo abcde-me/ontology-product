@@ -4,7 +4,8 @@ import React, {
   memo,
   useRef,
   useLayoutEffect,
-  useCallback
+  useCallback,
+  useMemo
 } from 'react';
 import {
   Collapse,
@@ -26,6 +27,7 @@ import RunFailedIcon from '@/assets/python/run-fail-icon.svg';
 import { RunningStatus } from '@/types/pythonApi';
 import './RunningInfoPanel.scss';
 import timeFormattig from '@/utils/timeFormatting';
+import { useVirtualList } from 'ahooks';
 
 const { Item: CollapseItem } = Collapse;
 const { TabPane } = Tabs;
@@ -65,8 +67,115 @@ const RunningInfoPanel: React.FC<RunningInfoPanelProps> = memo(
   }) => {
     const [isExpanded, setIsExpanded] = useState(false);
     const logContentRef = useRef<HTMLDivElement>(null);
-    const scrollContainerRef = useRef<HTMLElement | null>(null);
     const shouldAutoScrollRef = useRef(true); // 是否应该自动滚动
+    const logContainerRef = useRef<HTMLDivElement>(null);
+    const resultContainerRef = useRef<HTMLDivElement>(null);
+    const resultContentRef = useRef<HTMLDivElement>(null);
+
+    const logLines = useMemo(() => {
+      if (!runLog || runLog.trim() === '') return [];
+      return runLog.split('\n');
+    }, [runLog]);
+
+    const resultLines = useMemo(() => {
+      if (!runResult || runResult.trim() === '') return [];
+      return runResult.split('\n');
+    }, [runResult]);
+
+    const [logList, logScrollTo] = useVirtualList(logLines, {
+      containerTarget: logContainerRef,
+      wrapperTarget: logContentRef,
+      itemHeight: 20, // 每行大约20px高度
+      overscan: 5 // 额外渲染的行数，减少以提升性能
+      // 使用 Math.floor 稳定计算可见行数，避免临界点抖动
+      // 通过自定义计算函数来稳定可见区域
+    });
+
+    const logVirtualListContent = useMemo(() => {
+      // 如果有日志内容，直接显示
+      if (logLines && logLines.length > 0) {
+        return logList.map((item) => {
+          return (
+            <div
+              key={item.index}
+              style={{
+                height: '20px',
+                lineHeight: '20px',
+                padding: '0 12px',
+                whiteSpace: 'pre',
+                wordBreak: 'normal',
+                overflowWrap: 'normal'
+              }}
+            >
+              {item.data}
+            </div>
+          );
+        });
+      }
+
+      // 没有日志时，根据是否已获取过日志和运行状态显示相应提示
+      let emptyMessage = '';
+      if (!hasFetchedResult) {
+        // 还没有调用过 getRunLog，显示开始输出
+        emptyMessage = '开始输出...';
+      } else {
+        // 已经调用过 getRunLog 但日志为空
+        if (runStatus === RunningStatus.SUCCESS) {
+          emptyMessage = '运行成功，暂无日志输出';
+        } else if (runStatus === RunningStatus.FAILED) {
+          emptyMessage = '运行失败，暂无错误日志';
+        } else {
+          emptyMessage = '暂无运行日志';
+        }
+      }
+
+      return (
+        <div style={{ height: '20px', lineHeight: '20px' }}>{emptyMessage}</div>
+      );
+    }, [logList, logLines, hasFetchedResult, runStatus]);
+
+    const [resultList] = useVirtualList(resultLines, {
+      containerTarget: resultContentRef,
+      wrapperTarget: resultContainerRef,
+      itemHeight: 20, // 每行大约20px高度
+      overscan: 5 // 额外渲染的行数，减少以提升性能
+    });
+
+    const resultVirtualListContent = useMemo(() => {
+      // 如果有结果内容，直接显示
+      if (resultLines && resultLines.length > 0) {
+        return resultList.map((item) => {
+          return (
+            <div
+              key={item.index}
+              style={{ height: '20px', lineHeight: '20px', padding: '0 12px' }}
+            >
+              {item.data}
+            </div>
+          );
+        });
+      }
+
+      // 没有结果时，根据是否已获取过结果和运行状态显示相应提示
+      let emptyMessage = '';
+      if (!hasFetchedResult) {
+        // 还没有调用过 getRunResult，显示开始输出
+        emptyMessage = '开始输出...';
+      } else {
+        // 已经调用过 getRunResult 但结果为空
+        if (runStatus === RunningStatus.SUCCESS) {
+          emptyMessage = '运行成功，暂无结果输出';
+        } else if (runStatus === RunningStatus.FAILED) {
+          emptyMessage = '运行失败，请查看日志获取详细信息';
+        } else {
+          emptyMessage = '暂无运行结果';
+        }
+      }
+
+      return (
+        <div style={{ height: '20px', lineHeight: '20px' }}>{emptyMessage}</div>
+      );
+    }, [resultList, resultLines, hasFetchedResult, runStatus]);
 
     // 自定义expandIcon组件，包含popover功能
     const CustomExpandIcon = () => {
@@ -92,34 +201,25 @@ const RunningInfoPanel: React.FC<RunningInfoPanelProps> = memo(
       setIsExpanded(isPanelOpen || false);
     }, [isPanelOpen]);
 
-    // 查找滚动容器的函数
-    const findScrollContainer = useCallback((): HTMLElement | null => {
-      if (logContentRef.current) {
-        // 从日志内容元素向上查找滚动容器
-        let parent = logContentRef.current.parentElement;
-        while (parent) {
-          if (parent.classList.contains('arco-tabs-content')) {
-            return parent;
-          }
-          parent = parent.parentElement;
-        }
-      }
-      return null;
-    }, []);
-
     // 自动滚动到底部的函数
     const scrollToBottom = useCallback(() => {
       if (!shouldAutoScrollRef.current) return;
 
-      const container = scrollContainerRef.current || findScrollContainer();
-      if (container) {
-        scrollContainerRef.current = container;
-        // 使用 requestAnimationFrame 确保在浏览器重绘前执行
+      // 使用虚拟列表的 logScrollTo 方法
+      if (logScrollTo && logLines.length > 0) {
         requestAnimationFrame(() => {
-          container.scrollTop = container.scrollHeight;
+          logScrollTo(logLines.length - 1);
         });
+      } else {
+        // 降级方案：直接操作 DOM
+        const container = logContainerRef.current;
+        if (container) {
+          requestAnimationFrame(() => {
+            container.scrollTop = container.scrollHeight;
+          });
+        }
       }
-    }, [findScrollContainer]);
+    }, [scrollTo, logLines.length]);
 
     // 监听日志内容变化，自动滚动到底部
     useLayoutEffect(() => {
@@ -250,57 +350,42 @@ const RunningInfoPanel: React.FC<RunningInfoPanelProps> = memo(
                   }}
                 >
                   <TabPane key="result" title="结果">
-                    <div className="run-result-content tab-content-wrapper">
-                      {(() => {
-                        // 如果有结果内容，直接显示
-                        if (runResult && runResult.trim() !== '') {
-                          return runResult;
-                        }
-
-                        // 没有结果时，根据是否已获取过结果和运行状态显示相应提示
-                        if (!hasFetchedResult) {
-                          // 还没有调用过 getRunResult，显示开始输出
-                          return '开始输出...';
-                        } else {
-                          // 已经调用过 getRunResult 但结果为空
-                          if (runStatus === RunningStatus.SUCCESS) {
-                            return '运行成功，暂无输出结果';
-                          } else if (runStatus === RunningStatus.FAILED) {
-                            return '运行失败，请查看日志获取详细信息';
-                          } else {
-                            return '暂无运行结果';
-                          }
-                        }
-                      })()}
+                    <div
+                      ref={resultContentRef}
+                      className="run-result-content tab-content-wrapper"
+                      style={{
+                        height: '100%',
+                        overflowX: 'scroll', // 始终显示横向滚动条，避免临界点抖动
+                        overflowY: 'auto'
+                      }}
+                    >
+                      <div ref={resultContainerRef}>
+                        {resultVirtualListContent}
+                      </div>
                     </div>
                   </TabPane>
 
                   <TabPane key="log" title="日志">
                     <div
-                      ref={logContentRef}
+                      ref={logContainerRef}
                       className="runlog-content tab-content-wrapper"
+                      style={{
+                        height: '100%',
+                        overflowX: 'scroll', // 始终显示横向滚动条，避免临界点抖动
+                        overflowY: 'auto'
+                      }}
+                      onScroll={(e) => {
+                        // 检测用户是否手动滚动，如果是则停止自动滚动
+                        const target = e.target as HTMLElement;
+                        const isAtBottom =
+                          target.scrollHeight -
+                            target.scrollTop -
+                            target.clientHeight <
+                          10;
+                        shouldAutoScrollRef.current = isAtBottom;
+                      }}
                     >
-                      {(() => {
-                        // 如果有日志内容，直接显示
-                        if (runLog && runLog.trim() !== '') {
-                          return runLog;
-                        }
-
-                        // 没有日志时，根据是否已获取过日志和运行状态显示相应提示
-                        if (!hasFetchedResult) {
-                          // 还没有调用过 getRunLog，显示开始输出
-                          return '开始输出...';
-                        } else {
-                          // 已经调用过 getRunLog 但日志为空
-                          if (runStatus === RunningStatus.SUCCESS) {
-                            return '运行成功，暂无日志输出';
-                          } else if (runStatus === RunningStatus.FAILED) {
-                            return '运行失败，暂无错误日志';
-                          } else {
-                            return '暂无运行日志';
-                          }
-                        }
-                      })()}
+                      <div ref={logContentRef}>{logVirtualListContent}</div>
                     </div>
                   </TabPane>
                 </Tabs>
@@ -322,5 +407,29 @@ const RunningInfoPanel: React.FC<RunningInfoPanelProps> = memo(
 );
 
 RunningInfoPanel.displayName = 'RunningInfoPanel';
+
+{
+  /* {(() => {
+                        // 如果有日志内容，直接显示
+                        if (runLog && runLog.trim() !== '') {
+                          return runLog;
+                        }
+
+                        // 没有日志时，根据是否已获取过日志和运行状态显示相应提示
+                        if (!hasFetchedResult) {
+                          // 还没有调用过 getRunLog，显示开始输出
+                          return '开始输出...';
+                        } else {
+                          // 已经调用过 getRunLog 但日志为空
+                          if (runStatus === RunningStatus.SUCCESS) {
+                            return '运行成功，暂无日志输出';
+                          } else if (runStatus === RunningStatus.FAILED) {
+                            return '运行失败，暂无错误日志';
+                          } else {
+                            return '暂无运行日志';
+                          }
+                        }
+                      })()} */
+}
 
 export default RunningInfoPanel;

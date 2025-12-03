@@ -32,7 +32,7 @@ interface UseDatasetTreeProps {
 export const useDatasetTree = ({
   onViewDatasetDetail
 }: UseDatasetTreeProps = {}) => {
-  // 数据集相关状态
+  // 数据集市相关状态
   const [dasetList, setDasetList] = useState<DatasetListItem[]>([]);
   const [dasetFileList, setDasetFileList] = useState<DatasetVersionFileItem[]>(
     []
@@ -44,7 +44,7 @@ export const useDatasetTree = ({
   const [treeData, setTreeData] = useState<TreeNodeData[]>([]);
   const [loading, setLoading] = useState(false);
 
-  // 获取数据集目录列表
+  // 获取数据集市目录列表
   const getDasetList = async (keyword?: string) => {
     const targetParams: any = {
       storage_type_list: ['file', 'jsonl'],
@@ -59,11 +59,11 @@ export const useDatasetTree = ({
       return;
     }
 
-    // 只更新数据集列表，不直接覆盖 treeData
+    // 只更新数据集市列表，不直接覆盖 treeData
     setDasetList(res?.data?.list ?? []);
   };
 
-  // 获取数据集单个目录下的文件列表
+  // 获取数据集市单个目录下的文件列表
   const getDasetVersionFile = async (
     id: number,
     version_id: string,
@@ -86,7 +86,7 @@ export const useDatasetTree = ({
     return fileList;
   };
 
-  // 将数据集列表转换为树节点
+  // 将数据集市列表转换为树节点
   const convertDatasetToTreeNode = useCallback(
     (dataset: DatasetListItem): TreeNodeData => {
       return {
@@ -188,7 +188,7 @@ export const useDatasetTree = ({
     setTreeData(newTreeData);
   }, [dasetList, convertDatasetToTreeNode]);
 
-  // 初始化加载数据集列表
+  // 初始化加载数据集市列表
   useEffect(() => {
     setLoading(true);
     getDasetList(searchKeyword).finally(() => {
@@ -197,7 +197,7 @@ export const useDatasetTree = ({
   }, [searchKeyword]);
 
   return {
-    // 数据集相关
+    // 数据集市相关
     dasetList,
     dasetFileList,
     searchKeyword,

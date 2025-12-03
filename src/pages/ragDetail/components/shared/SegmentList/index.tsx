@@ -52,29 +52,6 @@ const SegmentList: React.FC<SegmentListProps> = ({
     });
   }, [segments, segmentSearchText]);
 
-  // 按 parentTitleId 分组（使用ID作为唯一标识符，避免重复的parentTitle导致分组错误）
-  const groupedSegments = useMemo(() => {
-    const groups: { titleId: string; title: string; segments: Segment[] }[] =
-      [];
-    const titleMap = new Map<string, { title: string; segments: Segment[] }>();
-
-    filteredSegments.forEach((segment) => {
-      const titleId = segment.parentTitleId || '';
-      const title = segment.parentTitle || '';
-
-      if (!titleMap.has(titleId)) {
-        titleMap.set(titleId, { title, segments: [] });
-      }
-      titleMap.get(titleId)!.segments.push(segment);
-    });
-
-    titleMap.forEach((data, titleId) => {
-      groups.push({ titleId, title: data.title, segments: data.segments });
-    });
-
-    return groups;
-  }, [filteredSegments]);
-
   // 当选中的分段变化时，自动滚动到该分段
   useEffect(() => {
     if (selectedSegmentId && segmentRefs.current[selectedSegmentId]) {
@@ -127,9 +104,9 @@ const SegmentList: React.FC<SegmentListProps> = ({
     }
   };
 
-  // 渲染分组的分段列表
+  // 渲染平铺的分段列表
   const segmentItems = useMemo(() => {
-    if (groupedSegments.length === 0) {
+    if (filteredSegments.length === 0) {
       return (
         <div className="flex h-full items-center justify-center">
           <Empty description="暂无数据" />
@@ -137,41 +114,11 @@ const SegmentList: React.FC<SegmentListProps> = ({
       );
     }
 
-    return groupedSegments.map((group, groupIndex) => (
-      <div
-        key={group.titleId || `empty-${groupIndex}`}
-        className={groupIndex < 0 ? 'mt-6' : ''}
-      >
-        {/* 标题分组头部 */}
-        {group.title && (
-          <div className="rounded-md py-3">
-            <div className="text-sm font-medium text-[#0F172A]">
-              {group.title || ''}
-            </div>
-          </div>
-        )}
-
-        {/* 该标题下的分段列表 */}
-        <div className="space-y-3">
-          {group.segments.map((segment) => {
-            // 根据renderMode渲染不同的卡片
-            if (renderMode === 'image-text') {
-              return (
-                <div
-                  key={segment.id}
-                  ref={(el) => (segmentRefs.current[segment.id] = el)}
-                  onClick={() => handleSegmentClick(segment.id)}
-                  style={{ cursor: 'pointer' }}
-                >
-                  <ImageTextSegmentCard
-                    segment={segment as ImageTextSegment}
-                    isSelected={selectedSegmentId === segment.id}
-                    totalSegments={segments.length}
-                  />
-                </div>
-              );
-            }
-
+    return (
+      <div className="space-y-3">
+        {filteredSegments.map((segment) => {
+          // 根据renderMode渲染不同的卡片
+          if (renderMode === 'image-text') {
             return (
               <div
                 key={segment.id}
@@ -179,18 +126,33 @@ const SegmentList: React.FC<SegmentListProps> = ({
                 onClick={() => handleSegmentClick(segment.id)}
                 style={{ cursor: 'pointer' }}
               >
-                <SegmentCard
-                  segment={segment}
+                <ImageTextSegmentCard
+                  segment={segment as ImageTextSegment}
                   isSelected={selectedSegmentId === segment.id}
                   totalSegments={segments.length}
                 />
               </div>
             );
-          })}
-        </div>
+          }
+
+          return (
+            <div
+              key={segment.id}
+              ref={(el) => (segmentRefs.current[segment.id] = el)}
+              onClick={() => handleSegmentClick(segment.id)}
+              style={{ cursor: 'pointer' }}
+            >
+              <SegmentCard
+                segment={segment}
+                isSelected={selectedSegmentId === segment.id}
+                totalSegments={segments.length}
+              />
+            </div>
+          );
+        })}
       </div>
-    ));
-  }, [groupedSegments, selectedSegmentId, renderMode]);
+    );
+  }, [filteredSegments, selectedSegmentId, renderMode]);
 
   return (
     <div className="flex h-full flex-col bg-white px-4">

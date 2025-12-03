@@ -70,6 +70,7 @@ import dataGuaranteeIcon from '@/pages/datasetManagement/assets/dataset_guarante
 import dataSceneIcon from '@/pages/datasetManagement/assets/dataset_scene.png';
 import DatasetMoveIcon from '@/pages/datasetManagement/assets/dataset_move.svg';
 import DatasetMoveActiveIcon from '@/pages/datasetManagement/assets/dataset_move_active.svg';
+import { useHasPermission } from '@/store/userInfoStore';
 import { throttle } from 'lodash-es';
 
 // 时间格式化函数
@@ -105,6 +106,7 @@ export interface Dataset {
   deleted_at: null;
   tag_names?: string[];
   src_model: string;
+  src_name: string;
   latest_file_path: string;
   perms: string[];
   storage_type: datasetStorageType;
@@ -164,17 +166,26 @@ const columns = (
   datasetList: Dataset[],
   handleExport: (record: Dataset) => void,
   tagList: { id: number; name: string }[],
+  newTagList: { id: number; name: string }[],
+  setNewTagList: (newTagList: { id: number; name: string }[]) => void,
+  fetchDatasetList: () => void,
   datasetSceneOption: Array<SceneType>,
-  selectedTagFilters: string[],
+  tagInputValue: string, //标签输入框值
+  setTagInputValue: (tagInputValue: string) => void,
+  selectedTagFilters: string[], //标签过滤
+  setSelectedTagFilters: (selectedTagFilters: string[]) => void,
+  selectedTag: string[], //标签过滤
+  setSelectedTag: (selectedTag: string[]) => void,
   selectedStorageTypeFilters: string[], //存储格式过滤
   selectedStatusFilters: string[], //状态过滤
   sortField: string,
   sortOrder: string,
   handleTableChange: (pagination: any, sorter: any, filters: any) => void,
-  handleRetry: (id: string | number, version_id: string) => void,
+  handleRetry: (id: string | number) => void,
   setMoveDatasetVisible: (visible: boolean) => void,
   setMoveDatasetId: (ids: number[]) => void,
   getFileTypeName: (type: string) => string,
+  isCanMove: boolean,
   selectedSceneFilters?: string[], //场景分类过滤
   selectedSourceFilters?: string[] //来源过滤
 ) => [
@@ -250,9 +261,66 @@ const columns = (
     title: '数据集标签',
     dataIndex: 'tag_names',
     width: 150,
-    filters: tagList.map((tag) => ({ text: tag.name, value: tag.name })),
-    filteredValue: selectedTagFilters,
-    filterMultiple: true,
+    filterDropdown: (props) => {
+      return (
+        <div className="rounded-md shadow-md">
+          <div className="flex h-80 flex-col overflow-auto bg-white p-3">
+            <Input
+              className="mb-3"
+              placeholder="请输入关键字"
+              value={tagInputValue}
+              onChange={(value) => {
+                setTagInputValue(value);
+                setNewTagList(
+                  tagList.filter((tag) => {
+                    return tag.name.toLowerCase().includes(value.toLowerCase());
+                  })
+                );
+              }}
+            ></Input>
+            <Checkbox.Group
+              className="flex flex-col gap-3"
+              options={newTagList.map((tag) => ({
+                label: tag.name,
+                value: tag.name
+              }))}
+              value={selectedTag}
+              onChange={(value) => {
+                setSelectedTag(value);
+              }}
+            />
+          </div>
+          <div
+            className={`${styles.tagButtonBox} flex justify-end gap-2 border-t border-solid border-[#E2E8F0] bg-white px-3 py-2`}
+          >
+            <Button
+              type="outline"
+              className={styles.buttonReset}
+              onClick={() => {
+                setNewTagList(tagList);
+                setTagInputValue('');
+                setSelectedTag([]);
+                setSelectedTagFilters([]);
+                props.confirm();
+              }}
+            >
+              重置
+            </Button>
+            <Button
+              type="primary"
+              className="h-7 rounded-md bg-[#007DFA] px-3 text-xs text-white"
+              onClick={() => {
+                setSelectedTagFilters(selectedTag);
+                props.confirm();
+              }}
+            >
+              确定
+            </Button>
+          </div>
+        </div>
+      );
+    },
+    filteredValue: selectedTag,
     render: (tag_names: string[]) => {
       if (!tag_names || tag_names.length === 0) return '-';
       return (
@@ -415,13 +483,15 @@ const columns = (
             </Tooltip>
           ) : null}
 
-          {status === datasetStatus.version_update_failed ? (
+          {status === datasetStatus.create_failed &&
+          record.src_name !== 'pyspark' &&
+          record.src_name !== '工作流' ? (
             <PermissionWrapper
               permission={DATA_MANAGEMENT_PERMISSIONS.CAN_UPDATE_VERSION_RETRY}
             >
               <span
                 className={styles.retryText}
-                onClick={() => handleRetry(record.id, record.latest_version)}
+                onClick={() => handleRetry(record.id)}
               >
                 重试
               </span>
@@ -584,7 +654,7 @@ const columns = (
     fixed: 'right' as const,
     render: (_: unknown, record: Dataset) => {
       const perms = record.perms;
-      return (
+      return isCanMove ? (
         <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
           {/* <Button
               type="text"
@@ -625,11 +695,11 @@ const columns = (
                     >
                       <Button
                         type="text"
-                        className={`${styles.actionButton} ${record.status === datasetStatus.normal && record.scene_id !== 2 ? styles.export : styles.disabled}`}
+                        className={`${styles.actionButton} ${record.status === datasetStatus.normal && record.storage_type !== datasetStorageType.vector ? styles.export : styles.disabled}`}
                         onClick={() => handleExport(record)}
                         disabled={
                           record.status !== datasetStatus.normal ||
-                          record.scene_id === 2
+                          record.storage_type === datasetStorageType.vector
                         }
                         style={{
                           padding: '0 8px 0 5px',
@@ -671,6 +741,68 @@ const columns = (
               更多 <IconDown />
             </Button>
           </Dropdown>
+        </div>
+      ) : (
+        <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+          {/* <Button
+              type="text"
+              className={`${styles.actionButton} ${styles.export}`}
+            >
+              编辑
+            </Button> */}
+          <Button
+            type="text"
+            disabled={record.status !== datasetStatus.normal}
+            onClick={() => {
+              record.status === datasetStatus.normal ||
+              record.status === datasetStatus.version_updating ||
+              record.status === datasetStatus.version_update_failed
+                ? handleGoToDetail(record.id)
+                : '';
+            }}
+          >
+            详情
+          </Button>
+          {record.storage_type !== datasetStorageType.table && (
+            <PermissionWrapper
+              permission={DATA_MANAGEMENT_PERMISSIONS.CAN_SEARCH}
+            >
+              <Button
+                type="text"
+                className={`${styles.actionButton} ${record.status === datasetStatus.normal && record.storage_type !== datasetStorageType.vector ? styles.export : styles.disabled}`}
+                onClick={() => handleExport(record)}
+                disabled={
+                  record.status !== datasetStatus.normal ||
+                  record.storage_type === datasetStorageType.vector
+                }
+                style={{
+                  padding: '0 8px 0 5px',
+                  height: '100%',
+                  borderTop: 'none',
+                  borderBottom: 'none'
+                }}
+              >
+                导出
+              </Button>
+            </PermissionWrapper>
+          )}
+          <PermissionWrapper
+            permission={DATA_MANAGEMENT_PERMISSIONS.CAN_DELETE}
+          >
+            <Button
+              type="text"
+              className={`${styles.actionButton} ${styles.delete}`}
+              onClick={() => handleDelete(record)}
+              style={{
+                padding: '0 8px 0 5px',
+                height: '100%',
+                borderTop: 'none',
+                borderBottom: 'none'
+              }}
+            >
+              删除
+            </Button>
+          </PermissionWrapper>
         </div>
       );
     }
@@ -721,6 +853,9 @@ const DatasetManagement: React.FC = () => {
   const [tagList, setTagList] = React.useState<{ id: number; name: string }[]>(
     []
   ); //标签列表
+  const [newTagList, setNewTagList] = React.useState<
+    { id: number; name: string }[]
+  >([]); //模糊搜索标签列表
   const [datasetList, setDatasetList] = React.useState<Dataset[]>([]); //数据集列表
   const [search, setSearch] = React.useState<string>(''); //搜索
   const [searchField, setSearchField] = React.useState<searchFieldType>(
@@ -736,10 +871,12 @@ const DatasetManagement: React.FC = () => {
   const [selectedRowKeys, setSelectedRowKeys] = React.useState<React.Key[]>([]); //选择行
   const [selectedRows, setSelectedRows] = React.useState<Array<Dataset>>([]); //选择行数据
 
+  const [tagInputValue, setTagInputValue] = React.useState<string>(''); //标签输入框值
   // 标签过滤相关状态
   const [selectedTagFilters, setSelectedTagFilters] = React.useState<string[]>(
     []
   ); //选中的标签过滤
+  const [selectedTag, setSelectedTag] = React.useState<string[]>([]); //存储选中的标签过滤
 
   // 存储格式过滤相关状态
   const [selectedStorageTypeFilters, setSelectedStorageTypeFilters] =
@@ -800,6 +937,8 @@ const DatasetManagement: React.FC = () => {
   const [datasetSceneOption, setDatasetSceneOption] = React.useState<
     Array<SceneType>
   >([]);
+
+  const isCanMove = useHasPermission(DATA_MANAGEMENT_PERMISSIONS.CAN_MOVE);
 
   useEffect(() => {
     const container = document.querySelector('.layout-detail');
@@ -1001,12 +1140,15 @@ const DatasetManagement: React.FC = () => {
       try {
         if (tagListRes.data && Array.isArray(tagListRes.data)) {
           setTagList(tagListRes.data);
+          setNewTagList(tagListRes.data);
         } else {
           console.error('标签列表数据格式错误:', tagListRes);
           setTagList([]);
+          setNewTagList([]);
         }
       } catch {
         setTagList([]);
+        setNewTagList([]);
         Message.error('获取标签列表失败');
       }
 
@@ -1075,10 +1217,9 @@ const DatasetManagement: React.FC = () => {
   };
 
   // 重试
-  const handleRetry = async (id: number | string, version_id: string) => {
+  const handleRetry = async (id: number | string) => {
     const params = {
-      id: Number(id),
-      version_id
+      id: Number(id)
     };
     const res = await datasetVersionRebuild(params);
     if (res.status === 200 && res.code === '') {
@@ -1142,7 +1283,6 @@ const DatasetManagement: React.FC = () => {
     if (selectedTagFilters.length > 0) {
       params.tag_names = selectedTagFilters;
     }
-    console.log('selectedStorageTypeFilters', selectedStorageTypeFilters);
 
     // 添加存储格式过滤参数
     if (selectedStorageTypeFilters.length > 0) {
@@ -1180,8 +1320,8 @@ const DatasetManagement: React.FC = () => {
     pageSize,
     actualSearch,
     actualSearchField,
-    selectedTagFilters,
     selectedSceneFilters,
+    selectedTagFilters,
     selectedSourceFilters,
     selectedStatusFilters,
     selectedStorageTypeFilters,
@@ -1299,14 +1439,17 @@ const DatasetManagement: React.FC = () => {
       .then((res) => {
         if (res.data && Array.isArray(res.data)) {
           setTagList(res.data);
+          setNewTagList(res.data);
         } else {
           console.error('标签列表数据格式错误:', res);
           setTagList([]);
+          setNewTagList([]);
         }
       })
       .catch((err) => {
         console.error('获取标签列表失败:', err);
         setTagList([]);
+        setNewTagList([]);
         Message.error('获取标签列表失败');
       });
     getSceneList();
@@ -1415,12 +1558,15 @@ const DatasetManagement: React.FC = () => {
     // 过滤掉storage_type为table的数据集
     const filteredRows = selectedRows.filter(
       (row) =>
-        row.storage_type !== datasetStorageType.table || row.scene_id !== 2
+        row.storage_type !== datasetStorageType.table &&
+        row.storage_type !== datasetStorageType.vector
     );
     const tableRows = selectedRows.filter(
       (row) => row.storage_type === datasetStorageType.table
     );
-    const konwledgeRows = selectedRows.filter((row) => row.scene_id === 2);
+    const konwledgeRows = selectedRows.filter(
+      (row) => row.storage_type === datasetStorageType.vector
+    );
     const filteredRowKeys = filteredRows.map((row) => row.id);
 
     // 更新选中状态，移除不能导出的数据集
@@ -1658,25 +1804,29 @@ const DatasetManagement: React.FC = () => {
                       </Button>
                     </Tooltip>
                   </PermissionWrapper>
-                  <Tooltip
-                    content={selectedRowKeys.length === 0 ? '请选择文件' : ''}
-                    disabled={selectedRowKeys.length > 0}
+                  <PermissionWrapper
+                    permission={DATA_MANAGEMENT_PERMISSIONS.CAN_MOVE}
                   >
-                    <Button
-                      icon={
-                        selectedRowKeys.length === 0 ? (
-                          <DatasetMoveIcon />
-                        ) : (
-                          <DatasetMoveActiveIcon />
-                        )
-                      }
-                      className={styles.batchDeleteBtn}
-                      disabled={selectedRowKeys.length === 0}
-                      onClick={() => setMoveDatasetVisible(true)}
+                    <Tooltip
+                      content={selectedRowKeys.length === 0 ? '请选择文件' : ''}
+                      disabled={selectedRowKeys.length > 0}
                     >
-                      批量移动
-                    </Button>
-                  </Tooltip>
+                      <Button
+                        icon={
+                          selectedRowKeys.length === 0 ? (
+                            <DatasetMoveIcon />
+                          ) : (
+                            <DatasetMoveActiveIcon />
+                          )
+                        }
+                        className={styles.batchDeleteBtn}
+                        disabled={selectedRowKeys.length === 0}
+                        onClick={() => setMoveDatasetVisible(true)}
+                      >
+                        批量移动
+                      </Button>
+                    </Tooltip>
+                  </PermissionWrapper>
                   <PermissionWrapper
                     permission={DATA_MANAGEMENT_PERMISSIONS.CAN_CREATE}
                   >
@@ -1703,8 +1853,16 @@ const DatasetManagement: React.FC = () => {
                         datasetList,
                         handleExport,
                         tagList,
+                        newTagList,
+                        setNewTagList,
+                        fetchDatasetList,
                         datasetSceneOption,
+                        tagInputValue,
+                        setTagInputValue,
                         selectedTagFilters,
+                        setSelectedTagFilters,
+                        selectedTag,
+                        setSelectedTag,
                         selectedStorageTypeFilters,
                         selectedStatusFilters,
                         sortField,
@@ -1714,6 +1872,7 @@ const DatasetManagement: React.FC = () => {
                         setMoveDatasetVisible,
                         setMoveDatasetId,
                         getFileTypeName,
+                        isCanMove,
                         selectedSceneFilters as string[],
                         selectedSourceFilters
                       )
@@ -1723,8 +1882,16 @@ const DatasetManagement: React.FC = () => {
                         datasetList,
                         handleExport,
                         tagList,
+                        newTagList,
+                        setNewTagList,
+                        fetchDatasetList,
                         datasetSceneOption,
+                        tagInputValue,
+                        setTagInputValue,
                         selectedTagFilters,
+                        setSelectedTagFilters,
+                        selectedTag,
+                        setSelectedTag,
                         selectedStorageTypeFilters,
                         selectedStatusFilters,
                         sortField,
@@ -1734,6 +1901,7 @@ const DatasetManagement: React.FC = () => {
                         setMoveDatasetVisible,
                         setMoveDatasetId,
                         getFileTypeName,
+                        isCanMove,
                         selectedSceneFilters as string[],
                         selectedSourceFilters
                       ).filter((i) => i.dataIndex !== 'scene')

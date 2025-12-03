@@ -29,6 +29,9 @@ import {
 } from '@/api/modules/rag';
 import { useHistory, useParams } from 'react-router-dom';
 import { useUserInfo } from '@/store/userInfoStore';
+import getFileIcon from '@/components/file-icon';
+import { PermissionWrapper } from '@/components/PermissionGuard';
+import { DATA_MANAGEMENT_PERMISSIONS } from '@/config/permissions';
 
 function HitTest(props: { datasetName: string }) {
   const { datasetName } = props;
@@ -201,6 +204,8 @@ function HitTest(props: { datasetName: string }) {
       setLoading2(true);
       const res = await RunKnowledgeHitTesting(params);
       if (res.code === '' && res.status === 200) {
+        if (res?.data?.length === 0)
+          Message.info('未检索到相关内容，请更换测试内容或调整检索设置');
         setsegmentationlist(res.data || []);
         setsegmentationlistFilter(res.data || []);
         init({
@@ -274,6 +279,13 @@ function HitTest(props: { datasetName: string }) {
       Message.error(res.message || '接口调用失败');
     }
   };
+  const getFileExtension = (fileName) => {
+    if (typeof fileName !== 'string' || !fileName.includes('.')) {
+      return ''; // 非字符串/无扩展名返回空
+    }
+    // 找到最后一个.的位置，截取后面的字符
+    return fileName.slice(fileName.lastIndexOf('.') + 1);
+  };
   return (
     <div className={styles.PageContentFalse}>
       <div className={styles.leftList}>
@@ -285,7 +297,7 @@ function HitTest(props: { datasetName: string }) {
           <div className={styles.testContentText}>
             <TextArea
               className={styles.inputBox}
-              placeholder="请输入文本进行召回测试"
+              placeholder="请输入文本进行命中测试"
               value={text}
               autoSize={{ minRows: 13 }}
               allowClear
@@ -297,8 +309,12 @@ function HitTest(props: { datasetName: string }) {
         </div>
 
         <div className={styles.testContentButton}>
-          {!text ? (
-            <Tooltip position="top" trigger="hover" content="请先输入测试文本">
+          <PermissionWrapper permission={DATA_MANAGEMENT_PERMISSIONS.CAN_RUN}>
+            <Tooltip
+              position="top"
+              trigger="hover"
+              content={!text ? '请先输入测试文本' : ''}
+            >
               <Button
                 loading={loading1}
                 className={styles.cs}
@@ -309,16 +325,7 @@ function HitTest(props: { datasetName: string }) {
                 开始测试
               </Button>
             </Tooltip>
-          ) : (
-            <Button
-              loading={loading1}
-              className={styles.cs}
-              type="primary"
-              onClick={Functest}
-            >
-              开始测试
-            </Button>
-          )}
+          </PermissionWrapper>
           <Button
             className={styles.cl}
             type="outline"
@@ -418,7 +425,7 @@ function HitTest(props: { datasetName: string }) {
                               handleToParagraph(
                                 e.document_id,
                                 e.chunk_id,
-                                e.position,
+                                JSON.stringify(e.positions[0]),
                                 e.parent_title_id
                               );
                             }}
@@ -469,10 +476,27 @@ function HitTest(props: { datasetName: string }) {
                     </div>
                     <div className={styles.sl}>
                       <span>
-                        <IconDriveFile />
+                        {/* <IconDriveFile /> */}
+                        {getFileIcon(getFileExtension(e.document_name))}
                       </span>
                       <Tooltip content={e.document_name}>
-                        <span className={styles.nm}>{e.document_name}</span>
+                        <div
+                          className={styles.nm}
+                          onClick={() =>
+                            handleToParagraph(
+                              e.document_id,
+                              e.chunk_id,
+                              JSON.stringify(e.positions[0]),
+                              e.parent_title_id
+                            )
+                          }
+                        >
+                          <div className="mt-[3px]">
+                            {e?.positions
+                              ? `${e.document_name} - 第${e?.positions[0]?.page_id}页`
+                              : e.document_name}
+                          </div>
+                        </div>
                       </Tooltip>
                       {/* <span className={styles.sp}>
                           分段数：{index + 1}/{segmentationlist.length}

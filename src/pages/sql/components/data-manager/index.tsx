@@ -42,7 +42,7 @@ const SQLTabContent: React.FC<DataManagerProps> = ({
     const isEditorFocused = getIsEditorFocused?.() ?? false;
     let copyText = '';
     if (nodeData.type === 'dataset') {
-      copyText = `\`${nodeData?.data?.database}\`.\`${nodeData?.data?.latest_table}\``;
+      copyText = `\`${nodeData?.data?.database}\`.\`${nodeData?.data?.table}\``;
     }
     if (nodeData.type === 'scheam') {
       // `字段名`

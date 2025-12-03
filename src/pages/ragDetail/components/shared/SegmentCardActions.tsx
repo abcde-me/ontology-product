@@ -1,5 +1,8 @@
 import React from 'react';
+import { DATA_MANAGEMENT_PERMISSIONS } from '@/config/permissions';
+import { PermissionWrapper } from '@/components/PermissionGuard';
 import { useRagDetailStore, type Segment } from '../../store/ragDetailStore';
+import { hasMarkdownImages } from '../../utils/imageUrlConverter';
 import SegDetailSvg from '@/assets/rag/seg-detail.svg';
 import SourceLogSvg from '@/assets/rag/source-log.svg';
 import EditSvg from '@/assets/rag/edit.svg';
@@ -19,6 +22,9 @@ const SegmentCardActions: React.FC<SegmentCardActionsProps> = ({
     segmentDrawerVisible,
     segmentDrawerSegmentId
   } = useRagDetailStore();
+
+  // 检查是否包含 markdown 图片
+  const containsImages = hasMarkdownImages(segment.content);
 
   const buttonBaseClass =
     'px-3 py-1 text-xs rounded transition-all border flex items-center gap-2';
@@ -40,18 +46,20 @@ const SegmentCardActions: React.FC<SegmentCardActionsProps> = ({
 
   return (
     <div className="flex items-center gap-2">
-      <button
-        onClick={(e) => {
-          e.stopPropagation();
-          startEditingSegment(segment.id);
-        }}
-        className={getButtonClass('edit')}
-        title="编辑分段"
-      >
-        <EditSvg />
-        <span className="font-medium text-[#1E293B]">编辑分段</span>
-      </button>
-
+      {/* 只有当不包含图片时，才显示编辑按钮 */}
+      <PermissionWrapper permission={DATA_MANAGEMENT_PERMISSIONS.CAN_UPDATE}>
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            startEditingSegment(segment.id);
+          }}
+          className={getButtonClass('edit')}
+          title="编辑分段"
+        >
+          <EditSvg />
+          <span className="font-medium text-[#1E293B]">编辑分段</span>
+        </button>
+      </PermissionWrapper>
       <button
         onClick={(e) => {
           e.stopPropagation();

@@ -65,6 +65,8 @@
     // overflow-y: hidden;
     overflow-wrap: normal; // 禁止自动换行
     padding: 12px;
+    // 使用 scroll 而不是 auto，避免滚动条出现/消失导致的抖动
+    overflow-x: scroll; // 始终显示横向滚动条，避免临界点抖动
   }
 
   // .tab-content-wrapper 不再需要特殊样式，因为复制按钮现在在外部
@@ -81,6 +83,20 @@
     flex: 1;
     min-height: 0;
     overflow: auto;
+
+    /** 支持虚拟列表 */
+    .arco-tabs-content-inner {
+      height: 100%;
+
+      .arco-tabs-content-item.arco-tabs-content-item-active {
+        height: 100%;
+
+        .arco-tabs-pane {
+          height: 100%;
+          overflow: auto;
+        }
+      }
+    }
   }
 
   .arco-collapse {

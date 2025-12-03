@@ -19,7 +19,7 @@ const Node: FC<NodeProps<TextParserNodeType>> = (props) => {
       const textList =
         res.data.find((d) => d.type === 'text_emb_model')?.model_data || [];
 
-      const text_emb_model_id = textList[0]?.id || '';
+      // const text_emb_model_id = textList[0]?.id || '';
 
       const fields = {} as Record<string, any>;
       // if (!props.data.text_emb_model_id) {

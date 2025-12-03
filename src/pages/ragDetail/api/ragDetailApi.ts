@@ -557,7 +557,7 @@ function transformApiMaterialToElement(material: any): Element {
       return {
         ...baseElement,
         type: 'text',
-        content: material.content,
+        content: material.content || material.text || '',
         positionType,
         positionInfo,
         pageId
@@ -576,71 +576,21 @@ function transformApiMaterialToElement(material: any): Element {
       } as ImageElement & { pageId?: number };
 
     case 'table':
-      try {
-        // 处理两种格式：
-        // 1. 新格式：多行JSON字符串，每行一个对象，用\n分隔
-        // 2. 旧格式：单个JSON对象 {headers: [...], rows: [...]}
-        let headers: string[] = [];
-        let rows: Record<string, string>[] = [];
-
-        // 尝试解析为新格式（多行JSON）
-        const lines = material.content.trim().split('\n');
-        if (lines.length > 0) {
-          try {
-            // 尝试解析第一行
-            const firstRow = JSON.parse(lines[0]);
-            if (typeof firstRow === 'object' && firstRow !== null) {
-              // 是新格式：单行对象
-              headers = Object.keys(firstRow);
-              rows = lines.map((line: string) => {
-                try {
-                  return JSON.parse(line);
-                } catch {
-                  return {};
-                }
-              });
-            }
-          } catch {
-            // 如果第一行解析失败，尝试解析整个content为旧格式
-            const tableData = JSON.parse(material.content);
-            if (tableData.headers && tableData.rows) {
-              // 旧格式
-              headers = tableData.headers;
-              rows = tableData.rows;
-            } else if (typeof tableData === 'object' && tableData !== null) {
-              // 单个对象
-              headers = Object.keys(tableData);
-              rows = [tableData];
-            }
-          }
-        }
-
-        return {
-          ...baseElement,
-          type: 'table',
-          headers,
-          rows,
-          positionType,
-          positionInfo,
-          pageId
-        } as TableElement & { pageId?: number };
-      } catch {
-        return {
-          ...baseElement,
-          type: 'table',
-          headers: [],
-          rows: [],
-          positionType,
-          positionInfo,
-          pageId
-        } as TableElement & { pageId?: number };
-      }
+      // 直接返回markdown格式的表格字符串
+      return {
+        ...baseElement,
+        type: 'table',
+        content: material.content || material.text || '',
+        positionType,
+        positionInfo,
+        pageId
+      } as TableElement & { pageId?: number };
 
     case 'formula':
       return {
         ...baseElement,
         type: 'formula',
-        content: material.content,
+        content: material.content || material.text || '',
         positionType,
         positionInfo,
         pageId
@@ -650,7 +600,7 @@ function transformApiMaterialToElement(material: any): Element {
       return {
         ...baseElement,
         type: 'text',
-        content: material.content,
+        content: material.content || material.text || '',
         positionType,
         positionInfo,
         pageId
