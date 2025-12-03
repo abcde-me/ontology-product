@@ -930,7 +930,7 @@ const DatasetManagement: React.FC = () => {
 
   const lastScrollTop = React.useRef(0);
   const stickyRef = React.useRef<{ current: { offsetTop: number } }>(null);
-  const [isSticky, setIsSticky] = useState(false);
+  // const [isSticky, setIsSticky] = useState(false);
   const [datasetSceneList, setDatasetSceneList] = React.useState<
     Array<SceneType>
   >([]); //数据集场景分类列表
@@ -945,10 +945,10 @@ const DatasetManagement: React.FC = () => {
     if (!container) return;
     const handleScroll = (event) => {
       const currentScrollTop = container.scrollTop;
-      if (stickyRef.current) {
-        const stickyTop = stickyRef.current.current.offsetTop;
-        setIsSticky(stickyTop === 86);
-      }
+      // if (stickyRef.current) {
+      // const stickyTop = stickyRef.current.current.offsetTop;
+      // setIsSticky(stickyTop === 86);
+      // }
 
       if (event.deltaY > 0 && !isHiddenBaseInfo) {
         setIsHiddenBaseInfo(true);
@@ -958,7 +958,7 @@ const DatasetManagement: React.FC = () => {
         isHiddenBaseInfo
       ) {
         setIsHiddenBaseInfo(false);
-        setIsSticky(false);
+        // setIsSticky(false);
         event.preventDefault();
       }
       lastScrollTop.current = currentScrollTop;
@@ -1616,11 +1616,11 @@ const DatasetManagement: React.FC = () => {
         style={{
           fontSize: '20px',
           fontWeight: 'bold',
-          color: '#0F172A',
-          position: 'sticky',
-          top: 0,
-          zIndex: 10,
-          background: `${!isSticky ? 'unset' : '#f0f6fe'}`
+          color: '#0F172A'
+          // position: 'sticky',
+          // top: 0,
+          // zIndex: 10,
+          // background: `${!isSticky ? 'unset' : '#f0f6fe'}`
         }}
       >
         数据集市
@@ -1631,7 +1631,10 @@ const DatasetManagement: React.FC = () => {
           margin: '0px',
           fontSize: '14px',
           display: 'flex',
-          justifyContent: 'space-between'
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          zIndex: 10
+          // background: `${!isSticky ? 'unset' : '#f0f6fe'}`
         }}
       >
         <span>
@@ -1650,13 +1653,13 @@ const DatasetManagement: React.FC = () => {
       {!isHiddenBaseInfo && (
         <div
           style={{
+            marginTop: '16px',
             borderRadius: '8px',
             border: '1px solid #FFF',
-            background: 'rgba(255, 255, 255, 0.48)',
+            background: 'rgba(255, 255, 255, 0.7)',
             boxShadow: '0 0 3.5px 0 rgba(0, 0, 0, 0.04)',
             display: 'flex',
             flexDirection: 'row',
-            marginBottom: '20px',
             zIndex: 1
           }}
         >
@@ -1666,7 +1669,8 @@ const DatasetManagement: React.FC = () => {
                 display: 'flex',
                 flexDirection: 'row',
                 padding: '16px 20px',
-                gap: '20px'
+                gap: '20px',
+                alignItems: 'center'
               }}
               key={index}
             >
@@ -1680,7 +1684,13 @@ const DatasetManagement: React.FC = () => {
                 >
                   {item.title}
                 </h1>
-                <span style={{ fontSize: '12px', lineHeight: '18px' }}>
+                <span
+                  style={{
+                    fontSize: '12px',
+                    lineHeight: '18px',
+                    color: '#6E7B8D'
+                  }}
+                >
                   {item.desc}
                 </span>
               </div>
@@ -1697,7 +1707,12 @@ const DatasetManagement: React.FC = () => {
       <Tabs
         // editable
         defaultActiveTab="0"
-        style={{ zIndex: 1 }}
+        className={styles.datasetManagementTabs}
+        style={{
+          zIndex: 1,
+          paddingTop: '20px',
+          backgroundColor: `${isHiddenBaseInfo ? 'unset' : '#f0f6fe'}`
+        }}
         type="card"
         // onAddTab={() => setAddSceneTypeVisible(true)}
         ref={stickyRef}
@@ -1721,11 +1736,12 @@ const DatasetManagement: React.FC = () => {
                     flexDirection: 'column',
                     padding: '12px',
                     backgroundColor: 'rgba(255, 255, 255, 0.48)',
+                    border: '1px solid #FFF',
                     borderRadius: '8px',
                     marginTop: '20px'
                   }}
                 >
-                  <span>{item.description}</span>
+                  <span className="text-[14px]">{item.description}</span>
                   <span style={{ marginTop: '8px' }}>
                     <IconTag style={{ marginRight: '5px' }} />
                     {item.tags.map((tag, index) => (
@@ -1735,7 +1751,8 @@ const DatasetManagement: React.FC = () => {
                           marginRight: '5px',
                           background: '#FFF',
                           border: '1px solid #E2E8F0',
-                          padding: '4px'
+                          padding: '4px',
+                          borderRadius: '4px'
                         }}
                       >
                         {tag}
