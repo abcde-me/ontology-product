@@ -969,7 +969,7 @@ export default function RequirementConfig() {
             ? generateLabels(labelDataList)
             : [],
       entity_relations:
-        annotationTypeContentCode === AnnotationTypeContentCode.ENTITY
+        annotationTypeContentVal === AnnotationTypeContentCode.ENTITY
           ? relationRelations
           : [],
       // 任务分配数据
