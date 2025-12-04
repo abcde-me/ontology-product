@@ -175,7 +175,15 @@ export default function MetaData() {
           <EllipsisPopover
             value={displayValue}
             preferTypography
-            ellipsis={{ rows: 1 }}
+            ellipsis={{
+              rows: 1,
+              showTooltip: {
+                type: 'popover',
+                props: {
+                  position: 'top'
+                }
+              }
+            }}
           />
         );
       }
