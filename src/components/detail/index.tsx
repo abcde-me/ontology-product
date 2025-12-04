@@ -550,6 +550,8 @@ const DatasetDetail = (props: {
   datasetDetailVisible?: boolean;
 }) => {
   const { isHideEdit, detailId, datasetDetailVisible } = props;
+  const url = new URL(window.location.href);
+  const sceneName = url.searchParams.get('sceneName');
   const [datasetDetail, setDatasetDetail] =
     React.useState<DatasetDetail | null>(null); //数据集详情
   const [editModalVisible, setEditModalVisible] = React.useState(false); //编辑弹窗是否显示
@@ -942,8 +944,20 @@ const DatasetDetail = (props: {
     path: string
   ) => {
     history.push(
-      `/tenant/compute/modaforge/ragDetail?datasetId=${id}&documentId=${document_id}&bucketName=${bucket_name}&path=${path}&datasetName=${datasetDetail?.name}`
+      `/tenant/compute/modaforge/ragDetail?datasetId=${id}&documentId=${document_id}&bucketName=${bucket_name}&path=${path}&datasetName=${datasetDetail?.name}&sceneName=${sceneName}`
     );
+  };
+
+  // 获取场景分类name
+  const getSceneName = (sceneId: number) => {
+    switch (sceneId) {
+      case 1:
+        return '分类';
+      case 2:
+        return '聚类';
+      default:
+        return '';
+    }
   };
 
   // 删除知识库文件
@@ -1474,7 +1488,7 @@ const DatasetDetail = (props: {
                 style={{ fontWeight: '500', fontSize: '20px' }}
                 onClick={handleGoToDatasetList}
               >
-                数据集市
+                {sceneName || '数据集市'}
               </span>
             </Breadcrumb.Item>
             <Breadcrumb.Item>

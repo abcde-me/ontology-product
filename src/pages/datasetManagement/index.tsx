@@ -192,7 +192,7 @@ const columns = (
   {
     title: '数据集名称',
     dataIndex: 'name',
-    width: 200,
+    width: 220,
     className: 'dataset-management-hover-change workflow-name',
     rowClassName: 'dataset-management-hover-change',
     render: (name: string, record: Dataset) => {
@@ -1086,8 +1086,13 @@ const DatasetManagement: React.FC = () => {
 
   // 跳转到详情页
   const handleGoToDetail = (datasetId: number) => {
+    const sceneName =
+      datasetSceneList.find(
+        (item) =>
+          Number(selectedSceneTab) !== 0 && item.id === Number(selectedSceneTab)
+      )?.name || '数据集市';
     history.push(
-      `/tenant/compute/modaforge/datasetManagement/detail/${datasetId}`
+      `/tenant/compute/modaforge/datasetManagement/detail/${datasetId}?sceneName=${sceneName}`
     );
   };
 
@@ -1120,9 +1125,9 @@ const DatasetManagement: React.FC = () => {
     //   const basePath = String(formData?.targetDataSource?.[0]?.[0] ?? '');
     //   formattedPath =
     //     basePath.length > 1 && basePath.endsWith('/')
-    //       ? `${basePath}/`
+    //       ? `${ basePath } / `
     //       : basePath;
-    //   fullPath = `${formattedPath}dst/${formData?.targetDataSource?.[0]?.[1]}/volume/${formData?.targetDataSource?.[1]?.[0] ?? ''}`;
+    //   fullPath = `${ formattedPath }dst / ${ formData?.targetDataSource?.[0]?.[1] } / volume / ${ formData?.targetDataSource?.[1]?.[0] ?? '' }`;
     // }
     const submitData = {
       name: formData.name,
@@ -1661,7 +1666,7 @@ const DatasetManagement: React.FC = () => {
           alignItems: 'center',
           justifyContent: 'space-between',
           zIndex: 10
-          // background: `${!isSticky ? 'unset' : '#f0f6fe'}`
+          // background: `${ !isSticky ? 'unset' : '#f0f6fe' } `
         }}
       >
         <span>
@@ -1738,7 +1743,7 @@ const DatasetManagement: React.FC = () => {
         style={{
           zIndex: 1,
           paddingTop: '20px',
-          backgroundColor: `${isHiddenBaseInfo ? 'unset' : '#f0f6fe'}`
+          backgroundColor: `${isHiddenBaseInfo ? 'unset' : '#f0f6fe'} `
         }}
         type="card"
         // onAddTab={() => setAddSceneTypeVisible(true)}
@@ -1966,7 +1971,7 @@ const DatasetManagement: React.FC = () => {
                   current: currentPage,
                   total: total,
                   pageSize: pageSize,
-                  showTotal: (total, range) => `共${total}条`,
+                  showTotal: (total, range) => `共${total} 条`,
                   sizeCanChange: true,
                   showJumper: true,
                   pageSizeChangeResetCurrent: true,
