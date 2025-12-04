@@ -8,6 +8,7 @@ import { Message } from '@arco-design/web-react';
 import { IconCopy } from '@arco-design/web-react/icon';
 import type { ImageElement } from '../../../../types';
 import { previewUrl } from '@/api/modules/rag';
+import copy from 'copy-to-clipboard';
 import { useRagDetailStore } from '../../../../store/ragDetailStore';
 
 interface ImageElementCardProps {
@@ -22,13 +23,12 @@ const ImageElementCard: React.FC<ImageElementCardProps> = ({
   const { openImageModal } = useRagDetailStore();
 
   const handleCopy = (text: string) => {
-    navigator.clipboard.writeText(text);
+    copy(text);
     Message.success('复制成功');
   };
 
   const handleImageClick = async () => {
     // 如果有 bucketName 和 path，调用 API 获取预览 URL
-    console.log('element', element);
     if (element.bucketName && element.path) {
       try {
         const response = await previewUrl({
@@ -53,12 +53,12 @@ const ImageElementCard: React.FC<ImageElementCardProps> = ({
 
   return (
     <>
-      <div className="mb-6 rounded-lg border border-gray-200 bg-white p-4">
+      <div className="mb-6 rounded-lg border border-gray-200 bg-white p-3">
         <div className="mb-3 flex items-center">
-          <span className="inline-flex items-center rounded bg-purple-50 px-2 py-1 text-xs font-medium text-purple-600">
+          <span className="inline-flex h-6 w-9 items-center justify-center rounded bg-blue-50 text-sm font-medium text-blue-600">
             图片
           </span>
-          <span className="ml-2 text-sm text-gray-600">
+          <span className="ml-2 text-sm text-[#0F172A]">
             元素ID: {element.id}
           </span>
         </div>

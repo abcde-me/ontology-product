@@ -37,7 +37,7 @@ export interface DatasetListItem {
   /**
    * 最新版本大小(字节)
    */
-  latest_size: number;
+  size: number;
   /**
    * 最新版本存储表名
    */
@@ -95,7 +95,7 @@ export interface DatasetVersionFileParams {
   /**
    * 数据集版本号
    */
-  version_id: string;
+  // version_id: string;
   /**
    * 页码
    */
@@ -103,7 +103,7 @@ export interface DatasetVersionFileParams {
   /**
    * 页大小
    */
-  page_size?: number;
+  limit?: number;
   /**
    * 文件名称
    */

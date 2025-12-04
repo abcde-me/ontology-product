@@ -21,11 +21,8 @@ import {
   IconArchive,
   IconEdit
 } from '@arco-design/web-react/icon';
-import { icon } from 'mermaid/dist/rendering-util/rendering-elements/shapes/icon';
-import { getCatalogList } from '@/api/dataCatalog';
 import useStore from '@/pages/dataCatalog/store';
-// 引入树节点相关API（使用时取消注释）
-// import { fetchTreeDataAPI, deleteTreeNodeAPI, createTreeNodeAPI, updateTreeNodeAPI } from '@/api/treeApi';
+import YuanShujuIcon from '@/assets/yuanshuju-icon.svg';
 
 // 原始数据结构接口
 interface RawDataNode {
@@ -1126,6 +1123,8 @@ export default function SourceDataTree(props: SourceDataTreeProps) {
                 ''
               ) : props.dataRef?.rawData?.type == 'volume' ? (
                 <IconStorage />
+              ) : props.dataRef?.rawData?.type == 'metadata' ? (
+                <YuanShujuIcon />
               ) : (
                 <IconArchive />
               );

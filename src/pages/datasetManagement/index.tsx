@@ -192,7 +192,7 @@ const columns = (
   {
     title: '数据集名称',
     dataIndex: 'name',
-    width: 200,
+    width: 220,
     className: 'dataset-management-hover-change workflow-name',
     rowClassName: 'dataset-management-hover-change',
     render: (name: string, record: Dataset) => {
@@ -245,7 +245,7 @@ const columns = (
   {
     title: '场景分类',
     dataIndex: 'scene',
-    width: 120,
+    width: 150,
     filters: datasetSceneOption.map((scene) => ({
       text: scene.name,
       value: scene.id
@@ -662,19 +662,27 @@ const columns = (
             >
               编辑
             </Button> */}
-          <Button
-            type="text"
-            disabled={record.status !== datasetStatus.normal}
-            onClick={() => {
-              record.status === datasetStatus.normal ||
-              record.status === datasetStatus.version_updating ||
-              record.status === datasetStatus.version_update_failed
-                ? handleGoToDetail(record.id)
-                : '';
-            }}
+          <Tooltip
+            content={
+              record.status !== datasetStatus.normal
+                ? '数据集状态异常，无法查看详情'
+                : ''
+            }
           >
-            详情
-          </Button>
+            <Button
+              type="text"
+              disabled={record.status !== datasetStatus.normal}
+              onClick={() => {
+                record.status === datasetStatus.normal ||
+                record.status === datasetStatus.version_updating ||
+                record.status === datasetStatus.version_update_failed
+                  ? handleGoToDetail(record.id)
+                  : '';
+              }}
+            >
+              详情
+            </Button>
+          </Tooltip>
           <Button
             type="text"
             onClick={() => {
@@ -734,11 +742,12 @@ const columns = (
                 </Menu.Item>
               </Menu>
             }
-            trigger="click"
+            trigger="hover"
             position="bl"
           >
             <Button type="text">
-              更多 <IconDown />
+              更多
+              <IconDown />
             </Button>
           </Dropdown>
         </div>
@@ -750,19 +759,27 @@ const columns = (
             >
               编辑
             </Button> */}
-          <Button
-            type="text"
-            disabled={record.status !== datasetStatus.normal}
-            onClick={() => {
-              record.status === datasetStatus.normal ||
-              record.status === datasetStatus.version_updating ||
-              record.status === datasetStatus.version_update_failed
-                ? handleGoToDetail(record.id)
-                : '';
-            }}
+          <Tooltip
+            content={
+              record.status !== datasetStatus.normal
+                ? '数据集状态异常，无法查看详情'
+                : ''
+            }
           >
-            详情
-          </Button>
+            <Button
+              type="text"
+              disabled={record.status !== datasetStatus.normal}
+              onClick={() => {
+                record.status === datasetStatus.normal ||
+                record.status === datasetStatus.version_updating ||
+                record.status === datasetStatus.version_update_failed
+                  ? handleGoToDetail(record.id)
+                  : '';
+              }}
+            >
+              详情
+            </Button>
+          </Tooltip>
           {record.storage_type !== datasetStorageType.table && (
             <PermissionWrapper
               permission={DATA_MANAGEMENT_PERMISSIONS.CAN_SEARCH}
@@ -890,7 +907,11 @@ const DatasetManagement: React.FC = () => {
   // 场景分类过滤相关状态
   const [selectedSceneFilters, setSelectedSceneFilters] = React.useState<
     (number | string)[]
-  >([]); //选中的状态过滤
+  >([]); //选中的场景分类过滤
+
+  const [selectedSceneTab, setSelectedSceneTab] = React.useState<
+    (number | string)[]
+  >([]); //选中的场景分类tab
 
   // 来源过滤相关状态
   const [selectedSourceFilters, setSelectedSourceFilters] = React.useState<
@@ -930,7 +951,7 @@ const DatasetManagement: React.FC = () => {
 
   const lastScrollTop = React.useRef(0);
   const stickyRef = React.useRef<{ current: { offsetTop: number } }>(null);
-  const [isSticky, setIsSticky] = useState(false);
+  // const [isSticky, setIsSticky] = useState(false);
   const [datasetSceneList, setDatasetSceneList] = React.useState<
     Array<SceneType>
   >([]); //数据集场景分类列表
@@ -945,10 +966,10 @@ const DatasetManagement: React.FC = () => {
     if (!container) return;
     const handleScroll = (event) => {
       const currentScrollTop = container.scrollTop;
-      if (stickyRef.current) {
-        const stickyTop = stickyRef.current.current.offsetTop;
-        setIsSticky(stickyTop === 86);
-      }
+      // if (stickyRef.current) {
+      // const stickyTop = stickyRef.current.current.offsetTop;
+      // setIsSticky(stickyTop === 86);
+      // }
 
       if (event.deltaY > 0 && !isHiddenBaseInfo) {
         setIsHiddenBaseInfo(true);
@@ -958,7 +979,7 @@ const DatasetManagement: React.FC = () => {
         isHiddenBaseInfo
       ) {
         setIsHiddenBaseInfo(false);
-        setIsSticky(false);
+        // setIsSticky(false);
         event.preventDefault();
       }
       lastScrollTop.current = currentScrollTop;
@@ -1016,25 +1037,30 @@ const DatasetManagement: React.FC = () => {
   };
 
   // 移动数据集提交
-  const handleMoveDatasetSubmit = (values: any) => {
-    const params = {
-      scene_id: values.scene_id,
-      dataset_ids: moveDatasetId || selectedRowKeys.map((key) => Number(key))
-    };
-    datasetBatchUpdateScene(params).then((res) => {
-      if (res.code === '') {
-        Message.success('移动数据集成功');
-        setSelectedRowKeys([]);
-        setSelectedRows([]);
-        fetchDatasetList();
-        getSceneList();
-      } else {
-        Message.error(res.msg || '移动数据集失败');
+  const handleMoveDatasetSubmit = () => {
+    moveDatasetForm.validate().then((values) => {
+      if (values) {
+        const params = {
+          scene_id: values.scene_id,
+          dataset_ids:
+            moveDatasetId || selectedRowKeys.map((key) => Number(key))
+        };
+        datasetBatchUpdateScene(params).then((res) => {
+          if (res.code === '') {
+            Message.success('移动数据集成功');
+            setSelectedRowKeys([]);
+            setSelectedRows([]);
+            fetchDatasetList();
+            getSceneList();
+          } else {
+            Message.error(res.msg || '移动数据集失败');
+          }
+        });
+        moveDatasetForm.resetFields();
+        setMoveDatasetId(null);
+        setMoveDatasetVisible(false);
       }
     });
-    moveDatasetForm.resetFields();
-    setMoveDatasetId(null);
-    setMoveDatasetVisible(false);
   };
   // 行选择配置
   const rowSelection = {
@@ -1060,8 +1086,13 @@ const DatasetManagement: React.FC = () => {
 
   // 跳转到详情页
   const handleGoToDetail = (datasetId: number) => {
+    const sceneName =
+      datasetSceneList.find(
+        (item) =>
+          Number(selectedSceneTab) !== 0 && item.id === Number(selectedSceneTab)
+      )?.name || '数据集市';
     history.push(
-      `/tenant/compute/modaforge/datasetManagement/detail/${datasetId}`
+      `/tenant/compute/modaforge/datasetManagement/detail/${datasetId}?sceneName=${sceneName}`
     );
   };
 
@@ -1094,9 +1125,9 @@ const DatasetManagement: React.FC = () => {
     //   const basePath = String(formData?.targetDataSource?.[0]?.[0] ?? '');
     //   formattedPath =
     //     basePath.length > 1 && basePath.endsWith('/')
-    //       ? `${basePath}/`
+    //       ? `${ basePath } / `
     //       : basePath;
-    //   fullPath = `${formattedPath}dst/${formData?.targetDataSource?.[0]?.[1]}/volume/${formData?.targetDataSource?.[1]?.[0] ?? ''}`;
+    //   fullPath = `${ formattedPath }dst / ${ formData?.targetDataSource?.[0]?.[1] } / volume / ${ formData?.targetDataSource?.[1]?.[0] ?? '' }`;
     // }
     const submitData = {
       name: formData.name,
@@ -1186,7 +1217,7 @@ const DatasetManagement: React.FC = () => {
             display: 'inline-block'
           }}
         >
-          确认删除文件吗？
+          确认删除数据集吗？
         </span>
       ),
       // 内容
@@ -1196,11 +1227,9 @@ const DatasetManagement: React.FC = () => {
             fontFamily: 'PingFang SC, sans-serif',
             fontWeight: 400,
             fontSize: 14,
-            marginTop: '10px',
             color: '#1D2129',
             height: 22,
-            display: 'inline-block',
-            marginLeft: '28px' // 左移一点
+            display: 'inline-block'
           }}
         >
           删除后，数据集不可恢复
@@ -1268,10 +1297,12 @@ const DatasetManagement: React.FC = () => {
       search: actualSearch,
       search_field: actualSearchField
     };
-
+    console.log(selectedSceneFilters, 'selectedSceneFilters');
     // 添加场景分类过滤参数
     if (selectedSceneFilters.length > 0) {
       params.scene_ids = selectedSceneFilters;
+    } else if (selectedSceneTab.length > 0) {
+      params.scene_ids = selectedSceneTab;
     }
 
     // 添加来源过滤参数
@@ -1321,6 +1352,7 @@ const DatasetManagement: React.FC = () => {
     actualSearch,
     actualSearchField,
     selectedSceneFilters,
+    selectedSceneTab,
     selectedTagFilters,
     selectedSourceFilters,
     selectedStatusFilters,
@@ -1616,11 +1648,11 @@ const DatasetManagement: React.FC = () => {
         style={{
           fontSize: '20px',
           fontWeight: 'bold',
-          color: '#0F172A',
-          position: 'sticky',
-          top: 0,
-          zIndex: 10,
-          background: `${!isSticky ? 'unset' : '#f0f6fe'}`
+          color: '#0F172A'
+          // position: 'sticky',
+          // top: 0,
+          // zIndex: 10,
+          // background: `${!isSticky ? 'unset' : '#f0f6fe'}`
         }}
       >
         数据集市
@@ -1631,7 +1663,10 @@ const DatasetManagement: React.FC = () => {
           margin: '0px',
           fontSize: '14px',
           display: 'flex',
-          justifyContent: 'space-between'
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          zIndex: 10
+          // background: `${ !isSticky ? 'unset' : '#f0f6fe' } `
         }}
       >
         <span>
@@ -1650,13 +1685,13 @@ const DatasetManagement: React.FC = () => {
       {!isHiddenBaseInfo && (
         <div
           style={{
+            marginTop: '16px',
             borderRadius: '8px',
             border: '1px solid #FFF',
-            background: 'rgba(255, 255, 255, 0.48)',
+            background: 'rgba(255, 255, 255, 0.7)',
             boxShadow: '0 0 3.5px 0 rgba(0, 0, 0, 0.04)',
             display: 'flex',
             flexDirection: 'row',
-            marginBottom: '20px',
             zIndex: 1
           }}
         >
@@ -1666,7 +1701,8 @@ const DatasetManagement: React.FC = () => {
                 display: 'flex',
                 flexDirection: 'row',
                 padding: '16px 20px',
-                gap: '20px'
+                gap: '20px',
+                alignItems: 'center'
               }}
               key={index}
             >
@@ -1680,7 +1716,13 @@ const DatasetManagement: React.FC = () => {
                 >
                   {item.title}
                 </h1>
-                <span style={{ fontSize: '12px', lineHeight: '18px' }}>
+                <span
+                  style={{
+                    fontSize: '12px',
+                    lineHeight: '18px',
+                    color: '#6E7B8D'
+                  }}
+                >
                   {item.desc}
                 </span>
               </div>
@@ -1697,13 +1739,18 @@ const DatasetManagement: React.FC = () => {
       <Tabs
         // editable
         defaultActiveTab="0"
-        style={{ zIndex: 1 }}
+        className={styles.datasetManagementTabs}
+        style={{
+          zIndex: 1,
+          paddingTop: '20px',
+          backgroundColor: `${isHiddenBaseInfo ? 'unset' : '#f0f6fe'} `
+        }}
         type="card"
         // onAddTab={() => setAddSceneTypeVisible(true)}
         ref={stickyRef}
         onChange={(value) => {
           const selectValue = value === '0' ? [] : [Number(value)];
-          setSelectedSceneFilters(selectValue);
+          setSelectedSceneTab(selectValue);
           setCurrentPage(1);
         }}
       >
@@ -1721,11 +1768,12 @@ const DatasetManagement: React.FC = () => {
                     flexDirection: 'column',
                     padding: '12px',
                     backgroundColor: 'rgba(255, 255, 255, 0.48)',
+                    border: '1px solid #FFF',
                     borderRadius: '8px',
                     marginTop: '20px'
                   }}
                 >
-                  <span>{item.description}</span>
+                  <span className="text-[14px]">{item.description}</span>
                   <span style={{ marginTop: '8px' }}>
                     <IconTag style={{ marginRight: '5px' }} />
                     {item.tags.map((tag, index) => (
@@ -1735,7 +1783,8 @@ const DatasetManagement: React.FC = () => {
                           marginRight: '5px',
                           background: '#FFF',
                           border: '1px solid #E2E8F0',
-                          padding: '4px'
+                          padding: '4px',
+                          borderRadius: '4px'
                         }}
                       >
                         {tag}
@@ -1747,7 +1796,11 @@ const DatasetManagement: React.FC = () => {
               <div className={styles.searchToolbar}>
                 <Input.Group compact>
                   <Select
-                    style={{ width: 100, height: 32 }}
+                    style={{
+                      width: 100,
+                      height: 32,
+                      borderRight: '1px solid #E2E8F0'
+                    }}
                     value={searchField}
                     onChange={(value) => setSearchField(value)}
                     options={searchOptions}
@@ -1755,7 +1808,7 @@ const DatasetManagement: React.FC = () => {
                   <Input.Search
                     allowClear
                     placeholder="输入关键字搜索"
-                    style={{ width: 160, height: 32 }}
+                    style={{ width: 160, height: 32, marginLeft: '-1px' }}
                     value={search}
                     onChange={(value) => setSearch(value)}
                     onClear={() => {
@@ -1844,6 +1897,11 @@ const DatasetManagement: React.FC = () => {
               <Table
                 rowKey="id"
                 className={styles.datasetTable}
+                style={{
+                  minHeight: isHiddenBaseInfo
+                    ? 'calc(100vh - 300px)'
+                    : 'calc(100vh - 430px)'
+                }}
                 // rowHeight="47px"
                 columns={
                   item.id === 0
@@ -1913,7 +1971,7 @@ const DatasetManagement: React.FC = () => {
                   current: currentPage,
                   total: total,
                   pageSize: pageSize,
-                  showTotal: (total, range) => `共${total}条`,
+                  showTotal: (total, range) => `共${total} 条`,
                   sizeCanChange: true,
                   showJumper: true,
                   pageSizeChangeResetCurrent: true,
@@ -1990,7 +2048,13 @@ const DatasetManagement: React.FC = () => {
         title="移动设置"
       >
         <Form form={moveDatasetForm} onSubmit={handleMoveDatasetSubmit}>
-          <Form.Item label="移动至" field="scene_id">
+          <Form.Item
+            label="移动至"
+            field="scene_id"
+            rules={[{ required: true, message: '请选择移动至场景' }]}
+            labelCol={{ span: 3 }}
+            wrapperCol={{ span: 21 }}
+          >
             <Select
               placeholder="请选择标签"
               renderFormat={(option) => {
@@ -2000,12 +2064,12 @@ const DatasetManagement: React.FC = () => {
             >
               {datasetSceneOption.map((item) => (
                 <Select.Option key={item.id} value={item.id}>
-                  <div className="flex flex-col">
-                    <div className="mt-[2px] text-[14px] leading-[22px]">
+                  <div className={`${styles.sceneWrapper} 'flex flex-col'`}>
+                    <div className="mt-[7px] text-[14px] leading-[22px]">
                       {item.name}
                     </div>
                     <EllipsisPopover
-                      className="text-[14px] leading-[22px] text-[#6E7B8D]"
+                      className="mt-[-14px] text-[14px] leading-[22px] text-[#6E7B8D]"
                       value={item.description}
                     />
                   </div>

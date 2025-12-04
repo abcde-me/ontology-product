@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import {
-  getDatasetVersionFile,
+  getPysparkDatasetFile,
   searchDatasetList
 } from '@/api/datasetManagement';
 import {
@@ -47,7 +47,7 @@ export const useDatasetTree = ({
   // 获取数据集市目录列表
   const getDasetList = async (keyword?: string) => {
     const targetParams: any = {
-      storage_type_list: ['file', 'jsonl'],
+      storage_type_list: ['image', 'video', 'audio', 'other', 'jsonl'],
       name: keyword,
       page: 1,
       limit: 1000
@@ -70,11 +70,10 @@ export const useDatasetTree = ({
     page = 1,
     page_size = 1000
   ) => {
-    const res = await getDatasetVersionFile({
+    const res = await getPysparkDatasetFile({
       id,
-      version_id,
       page,
-      page_size
+      limit: page_size
     });
 
     if (res?.status !== 200) {
@@ -95,7 +94,7 @@ export const useDatasetTree = ({
         version_id: dataset.latest_version,
         icon: <DasetIcon />,
         title: dataset.name,
-        latest_size: dataset.latest_size,
+        latest_size: dataset.size,
         isLeaf: false,
         data: dataset,
         type: 'dataset',
@@ -142,13 +141,13 @@ export const useDatasetTree = ({
       return new Promise(async (resolve) => {
         try {
           const nodeData = node.props.dataRef as TreeNodeData;
-          if (!nodeData?.id || !nodeData?.version_id) {
+          if (!nodeData?.id) {
             return resolve();
           }
 
           const fileList = await getDasetVersionFile(
             nodeData.id,
-            nodeData.version_id,
+            nodeData.version_id ?? '',
             1,
             1000
           );

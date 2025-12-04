@@ -846,6 +846,9 @@ const Edit = (props) => {
     form.setFieldsValue({
       sql_process_enabled: hasInitialSql ? 'enable' : 'disable'
     });
+    form.setFieldsValue({
+      sql: props.detailData?.sql
+    });
   }, [form, props.detailData?.sql, props.detailData?.source_type]);
 
   // 当详情返回包含非空SQL时，自动发起一次校验
@@ -1176,10 +1179,10 @@ const Edit = (props) => {
                   <div
                     className={classNames(
                       styles['sql-editor-container'],
-                      'rounded-[4px] border border-solid border-[#E2E8F0]'
+                      'rounded-[4px] border border-solid border-[#CBD5E1]'
                     )}
                   >
-                    <div className="flex items-center gap-[8px] border-b border-solid border-[#E2E8F0] p-[12px] pb-[12px]">
+                    <div className="flex items-center gap-[8px] border-b border-solid border-[#CBD5E1] p-[12px] pb-[12px]">
                       <Button
                         type="secondary"
                         disabled

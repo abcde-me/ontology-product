@@ -20236,6 +20236,11 @@ react-transition-group@^4.3.0:
     loose-envify "^1.4.0"
     prop-types "^15.6.2"
 
+react-virtuoso@^4.12.6:
+  version "4.12.6"
+  resolved "http://npm.cestc.cn/react-virtuoso/download/react-virtuoso-4.12.6.tgz#20fe374d43cce3c9821e29f4cc4d050596d06d01"
+  integrity sha1-IP43TUPM48mCHin0zE0FBZbQbQE=
+
 react@^16.13.1:
   version "16.14.0"
   resolved "http://npm.cestc.cn/react/download/react-16.14.0.tgz#94d776ddd0aaa37da3eda8fc5b6b18a4c9a3114d"

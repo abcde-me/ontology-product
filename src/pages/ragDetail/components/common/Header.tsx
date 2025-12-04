@@ -2,18 +2,20 @@ import React, { useMemo } from 'react';
 import { useHistory } from 'react-router-dom';
 import { useRagDetailStore } from '../../store/ragDetailStore';
 import BreadCrumbHeader from '@/components/breadcrumb-header';
+import { useParams } from '@/utils/url';
 
 const Header: React.FC = () => {
   const history = useHistory();
   const { filePath, documentName, datasetName, datasetId } =
     useRagDetailStore();
+  const sceneName = useParams('sceneName');
   // 解析文件路径为面包屑项
   const breadcrumbItems = useMemo(() => {
     // 优先使用 API 返回的 documentName 和 datasetName 构建面包屑
     if (documentName && datasetName) {
       return [
         {
-          name: '知识库',
+          name: sceneName || '数据集市',
           isLast: false
         },
         {
@@ -52,7 +54,7 @@ const Header: React.FC = () => {
 
   const handleBack = () => {
     history.push(
-      `/tenant/compute/modaforge/datasetManagement/detail/${datasetId}`
+      `/tenant/compute/modaforge/datasetManagement/detail/${datasetId}?sceneName=${sceneName}`
     );
   };
 

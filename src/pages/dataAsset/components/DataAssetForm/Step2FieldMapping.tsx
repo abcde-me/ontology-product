@@ -6,12 +6,13 @@ import {
   Message,
   Form,
   Select,
-  Modal,
+  Popconfirm,
   Switch,
   Grid,
   Table,
   Space
 } from '@arco-design/web-react';
+import { IconExclamationCircleFill } from '@arco-design/web-react/icon';
 // import { Download } from '@icon-park/react';
 import { FieldMapping, MetadataField } from './DataAssetFormContainer';
 import EllipsisPopover from '@/components/ellipsis-popover-com';
@@ -474,26 +475,18 @@ export default function Step2FieldMapping({
     [mappings]
   );
 
+  // 自动映射 - 关闭时的确认处理
+  const handleCloseAutoMapping = () => {
+    setAutoMapping(false);
+  };
+
   // 自动映射
   const handleAutoMapping = (v: boolean) => {
-    if (!v) {
-      Modal.confirm({
-        title: '确认关闭自动映射？',
-        content: '关闭后将不再自动根据来源字段进行映射，是否继续关闭？',
-        okText: '继续关闭',
-        cancelText: '取消',
-        onOk: () => {
-          setAutoMapping(false);
-        },
-        onCancel: () => {
-          // 保持开启状态
-          setAutoMapping(true);
-        }
-      });
-      return;
+    if (v) {
+      setAutoMapping(true);
+      runAutoMap();
     }
-    setAutoMapping(true);
-    runAutoMap();
+    // 关闭时由 Popconfirm 处理，这里不做任何操作
   };
 
   // const mappingsState = Form.useFormState('mappings', form) || {};
@@ -584,10 +577,26 @@ export default function Step2FieldMapping({
             <span className="text-[14px] text-[rgb(var(--primary-6))]">
               自动映射
             </span>
-            <Switch
-              checked={autoMapping}
-              onChange={(v) => handleAutoMapping(v)}
-            />
+            {autoMapping ? (
+              <Popconfirm
+                position="tr"
+                title="确认关闭自动映射？"
+                content="关闭后将不再自动根据来源字段进行映射，是否关闭？"
+                okText="确定"
+                cancelText="取消"
+                onOk={handleCloseAutoMapping}
+              >
+                <Switch
+                  checked={autoMapping}
+                  onChange={(v) => handleAutoMapping(v)}
+                />
+              </Popconfirm>
+            ) : (
+              <Switch
+                checked={autoMapping}
+                onChange={(v) => handleAutoMapping(v)}
+              />
+            )}
           </div>
         </div>
 

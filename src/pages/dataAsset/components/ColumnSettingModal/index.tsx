@@ -174,7 +174,7 @@ const ColumnSettingModal: React.FC<ColumnSettingModalProps> = ({
         {/* 左侧表格区（带搜索） */}
         <div className="overflow-auto pr-[16px]">
           <div className="mb-[16px] mt-[16px] flex items-center justify-between">
-            <span className="font-weight-600 font-size-[14px] text-[var(--color-text-1)]">
+            <span className="text-[14px] font-bold text-[var(--color-text-1)]">
               字段列表
             </span>
             <Input.Search
@@ -273,9 +273,9 @@ const ColumnSettingModal: React.FC<ColumnSettingModalProps> = ({
           />
         </div>
         {/* 右侧已选字段区+排序 */}
-        <div className="border-l-[1px] border-[var(--color-border-2)] p-[16px]">
-          <div className="mb-[16px] flex w-[208px] items-center justify-between text-[var(--color-text-1)]">
-            <span className="font-weight-500">
+        <div className="border-l-[1px] border-[var(--color-border-2)] pl-[8px] pr-[8px]">
+          <div className="mb-[16px] mt-[16px] flex h-[32px] w-[208px] items-center justify-between pl-[8px] pr-[8px] text-[var(--color-text-1)]">
+            <span className="font-weight-500 text-[14px]">
               已选字段 {selectedIds.length}/{fields.length}
             </span>
             {/* <IconDelete
@@ -307,7 +307,7 @@ const ColumnSettingModal: React.FC<ColumnSettingModalProps> = ({
                 <div
                   key={field.nameEn}
                   data-nameEn={field.nameEn}
-                  className="m-t-[7px] flex h-[40px] items-center"
+                  className="m-t-[7px] flex h-[40px] items-center pl-[8px] pr-[8px] text-[14px] hover:bg-[#EEF6FF]"
                 >
                   <DragIcon className="mr-[8px] h-[14px] w-[14px]"></DragIcon>
                   {/* <div className='w-[14px] h-[14px] mr-[8px]'>
