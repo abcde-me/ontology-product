@@ -22,7 +22,8 @@ import './index.css';
 import { FileType } from '@/utils/type';
 
 export default function getFileIcon(file_type: string) {
-  switch (file_type) {
+  const fileTypeLower = file_type?.toLowerCase() || '-';
+  switch (fileTypeLower) {
     case FileType.doc:
       return <DocIcon className="icon-size" />;
     case FileType.docx:

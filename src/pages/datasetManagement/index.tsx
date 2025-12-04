@@ -245,7 +245,7 @@ const columns = (
   {
     title: '场景分类',
     dataIndex: 'scene',
-    width: 120,
+    width: 150,
     filters: datasetSceneOption.map((scene) => ({
       text: scene.name,
       value: scene.id
@@ -734,7 +734,7 @@ const columns = (
                 </Menu.Item>
               </Menu>
             }
-            trigger="click"
+            trigger="hover"
             position="bl"
           >
             <Button type="text">
@@ -1861,6 +1861,11 @@ const DatasetManagement: React.FC = () => {
               <Table
                 rowKey="id"
                 className={styles.datasetTable}
+                style={{
+                  minHeight: isHiddenBaseInfo
+                    ? 'calc(100vh - 300px)'
+                    : 'calc(100vh - 430px)'
+                }}
                 // rowHeight="47px"
                 columns={
                   item.id === 0
@@ -2017,12 +2022,12 @@ const DatasetManagement: React.FC = () => {
             >
               {datasetSceneOption.map((item) => (
                 <Select.Option key={item.id} value={item.id}>
-                  <div className="flex flex-col">
-                    <div className="mt-[2px] text-[14px] leading-[22px]">
+                  <div className={`${styles.sceneWrapper} 'flex flex-col'`}>
+                    <div className="mt-[7px] text-[14px] leading-[22px]">
                       {item.name}
                     </div>
                     <EllipsisPopover
-                      className="text-[14px] leading-[22px] text-[#6E7B8D]"
+                      className="mt-[-14px] text-[14px] leading-[22px] text-[#6E7B8D]"
                       value={item.description}
                     />
                   </div>
