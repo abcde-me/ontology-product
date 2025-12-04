@@ -13,7 +13,7 @@ const Header: React.FC = () => {
     if (documentName && datasetName) {
       return [
         {
-          name: '知识库',
+          name: '数据集市',
           isLast: false
         },
         {

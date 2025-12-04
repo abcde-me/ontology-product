@@ -136,7 +136,7 @@ const Panel: FC<NodePanelProps<EndNodeType>> = ({ id, data }) => {
               value: item?.name
             }))}
             allowCreate
-            // style={{ marginLeft: 10 }}
+            style={{ width: '100%' }}
             maxTagCount={{
               count: 10,
               render: (invisibleTagCount) => {
