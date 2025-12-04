@@ -1510,7 +1510,10 @@ const DatasetDetail = (props: {
                         !datasetDetail || datasetDetail.status !== 'normal'
                       }
                       onClick={handleEdit}
+                      type="text"
+                      style={{ color: '#94A3B8' }}
                     >
+                      <IconEdit style={{ color: '#334155' }} />
                       编辑
                     </Button>
                   </Tooltip>

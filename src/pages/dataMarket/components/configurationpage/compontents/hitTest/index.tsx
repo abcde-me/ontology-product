@@ -132,9 +132,9 @@ function HitTest(props: { datasetName: string }) {
   const oncEditPolicy = () => {
     seteditPolicy(true);
   };
-  const handleCopy = (data) => {
+  const handleCopy = (data, text) => {
     copy(data);
-    Message.success(`已复制内容`);
+    Message.success(`复制${text}成功`);
   };
   const recordColumns: any = [
     {
@@ -147,7 +147,7 @@ function HitTest(props: { datasetName: string }) {
             <button
               onClick={(e) => {
                 e.stopPropagation();
-                handleCopy(record.query);
+                handleCopy(record.query, '历史测试内容');
               }}
               onMouseEnter={() => setHoveredCopyButton(true)}
               onMouseLeave={() => setHoveredCopyButton(false)}
@@ -206,7 +206,7 @@ function HitTest(props: { datasetName: string }) {
       const res = await RunKnowledgeHitTesting(params);
       if (res.code === '' && res.status === 200) {
         if (res?.data?.length === 0)
-          Message.info('未检索到相关内容，请更换测试内容或调整检索设置');
+          Message.error('未检索到相关内容，请更换测试内容或调整检索设置');
         setsegmentationlist(res.data || []);
         setsegmentationlistFilter(res.data || []);
         init({
@@ -393,29 +393,33 @@ function HitTest(props: { datasetName: string }) {
                         <div className={styles.srt}>
                           分值：{e.score.toFixed(2)}
                         </div>
-                        <span className="ml-[8px] text-[12px] leading-5">
+                        <span className="ml-[8px] text-[12px] leading-5 text-[#6E7B8D]">
                           字符数：{e?.content.length}
                         </span>
-                        <span className="ml-[8px] text-[12px] leading-5">
+                        <span
+                          className={`${styles.hoverShow} ml-[8px] text-[12px] leading-5 text-[#6E7B8D]`}
+                        >
                           |
                         </span>
-                        <span className="ml-[8px] text-[12px] leading-5">
+                        <span
+                          className={`${styles.hoverShow} ml-[8px] text-[12px] leading-5 text-[#6E7B8D]`}
+                        >
                           分段编号：{e.chunk_id}
                         </span>
                         <Tooltip content="复制">
                           <button
                             onClick={(event) => {
                               event.stopPropagation();
-                              handleCopy(e.content);
+                              handleCopy(e.content, '分段编号');
                             }}
                             onMouseEnter={() => setHoveredCopyResult(index)}
                             onMouseLeave={() => setHoveredCopyResult(null)}
-                            className="ml-[8px]"
+                            className={`${styles.hoverShow} ml-[8px]`}
                           >
                             {hoveredCopyResult === index ? (
                               <CopyHighIconSvg className="h-3 w-3" />
                             ) : (
-                              <CopyNormalIconSvg className="h-3 w-3" />
+                              <CopyNormalIconSvg className="h-3 w-3 text-[#6E7B8D]" />
                             )}
                           </button>
                         </Tooltip>
@@ -432,7 +436,7 @@ function HitTest(props: { datasetName: string }) {
                             }}
                             onMouseEnter={() => setHoveredJumpResult(index)}
                             onMouseLeave={() => setHoveredJumpResult(null)}
-                            className="ml-[8px]"
+                            className={`${styles.hoverShow} ml-[8px]`}
                           >
                             {hoveredJumpResult === index ? (
                               <JumpToHighIconSvg className="h-3 w-3" />
@@ -480,25 +484,35 @@ function HitTest(props: { datasetName: string }) {
                         {/* <IconDriveFile /> */}
                         {getFileIcon(getFileExtension(e.document_name))}
                       </span>
-                      <Tooltip content={e.document_name}>
+                      {/* <Tooltip content={e.document_name}>
                         <div
                           className={styles.nm}
-                          onClick={() =>
-                            handleToParagraph(
-                              e.document_id,
-                              e.chunk_id,
-                              JSON.stringify(e.positions[0]),
-                              e.parent_title_id
-                            )
-                          }
+
                         >
-                          <div className="mt-[3px]">
+                          <div className="mt-[3px] ml-[4px] text-[#6E7B8D]">
                             {e?.positions
                               ? `${e.document_name} - 第${e?.positions[0]?.page_id}页`
                               : e.document_name}
                           </div>
                         </div>
-                      </Tooltip>
+                      </Tooltip> */}
+                      <EllipsisPopover
+                        value={
+                          e?.positions
+                            ? `${e.document_name} - 第${e?.positions[0]?.page_id}页`
+                            : e.document_name
+                        }
+                        className={styles.nm}
+                        maxLength={100}
+                        onClick={() =>
+                          handleToParagraph(
+                            e.document_id,
+                            e.chunk_id,
+                            JSON.stringify(e.positions[0]),
+                            e.parent_title_id
+                          )
+                        }
+                      />
                       {/* <span className={styles.sp}>
                           分段数：{index + 1}/{segmentationlist.length}
                         </span> */}

@@ -2,7 +2,7 @@
   display: flex;
   height: calc(100vh - 72px);
   .leftList {
-    flex: 1;
+    flex: 0.4;
     background: #ffffff;
     border-right: 1px solid #e2e8f0;
     padding: 0px 14px 16px 16px;
@@ -85,6 +85,9 @@
         .copy {
           display: none;
         }
+      }
+      .historyTestContent:hover {
+        font-weight: 600;
       }
       .historyTestContent:hover .copy {
         margin: -5px 0 0 12px;
@@ -185,6 +188,9 @@
             .operateBtn {
               display: none;
             }
+            .hoverShow {
+              display: none;
+            }
             .sr {
               display: flex;
               justify-content: flex-end;
@@ -201,7 +207,6 @@
                 font-size: 14px;
                 color: #007dfa;
                 line-height: 20px;
-                font-weight: 500;
               }
             }
           }
@@ -215,6 +220,7 @@
               overflow: hidden; /* 超出部分隐藏 */
               text-overflow: ellipsis; /* 超出部分显示省略号 */
               cursor: pointer; /* 鼠标悬停时显示手型 */
+              margin: 2px 0 0 4px;
             }
             .sp {
               margin-left: 12px;
@@ -229,6 +235,11 @@
         }
         .segmentationBox:hover {
           border: 1px solid #007dfa;
+
+          .hoverShow {
+            display: block;
+          }
+
           .operateBtn {
             display: flex;
             flex: 1;
