@@ -157,18 +157,31 @@ export const useRagDetailStore = create<RagDetailState & RagDetailActions>(
                 foundNode.type === 'Formula' ||
                 foundNode.type === 'Table'
               ) {
-                // 如果是可选中类型，直接设置为 selectedSegmentId（会在切片列表中选中并高亮）
-                initialSelectedSegmentId = foundNode.id;
-              } else if (foundNode.type === 'Title') {
-                // 如果是 Title 类型，不设置 selectedSegmentId（切片列表不选中）
-                // 而是通过 scrollToSegment 滚动到第一个子节点
-                initialSelectedSegmentId = null;
+                // 验证 segments 中是否存在对应的切片
+                const matchedSegment = data.segments.find(
+                  (seg) => seg.id === foundNode.id
+                );
+                if (matchedSegment) {
+                  // 如果是可选中类型且在 segments 中存在，设置为 selectedSegmentId
+                  initialSelectedSegmentId = foundNode.id;
+                }
               }
+              // 如果是 Title 类型，不设置 selectedSegmentId（切片列表不选中）
 
               // 如果没有传入 positions，则使用目录树节点的 position
               if (!initialPositionsStr && foundNode.position) {
                 initialHighlightedCoordinates = foundNode.position;
               }
+            }
+          }
+
+          // 如果目录树中没有找到，尝试直接在 segments 中查找
+          if (!initialSelectedSegmentId && data.segments) {
+            const matchedSegment = data.segments.find(
+              (seg) => seg.id === initialChunkId
+            );
+            if (matchedSegment) {
+              initialSelectedSegmentId = matchedSegment.id;
             }
           }
         }
@@ -207,12 +220,8 @@ export const useRagDetailStore = create<RagDetailState & RagDetailActions>(
           loading: false
         });
 
-        // 如果 URL 中有 chunkId 且对应的是 Title 节点，则滚动到第一个子节点
-        if (
-          initialChunkId &&
-          initialSelectedSegmentId === null &&
-          data.directory
-        ) {
+        // 如果 URL 中有 chunkId，需要滚动到对应的切片
+        if (initialChunkId && data.directory) {
           const findNodeByChunkId = (
             nodes: DirectoryNode[]
           ): DirectoryNode | null => {
@@ -229,34 +238,42 @@ export const useRagDetailStore = create<RagDetailState & RagDetailActions>(
           };
 
           const foundNode = findNodeByChunkId(data.directory);
-          if (foundNode && foundNode.type === 'Title') {
-            // 查找第一个可选中的子节点
-            const findFirstSelectableChild = (
-              node: DirectoryNode
-            ): DirectoryNode | null => {
-              if (
-                node.type === 'Text' ||
-                node.type === 'Image' ||
-                node.type === 'Formula' ||
-                node.type === 'Table'
-              ) {
-                return node;
-              }
-              if (node.children && node.children.length > 0) {
-                for (const child of node.children) {
-                  const found = findFirstSelectableChild(child);
-                  if (found) return found;
+          if (foundNode) {
+            if (foundNode.type === 'Title') {
+              // 如果是 Title 类型，滚动到第一个可选中的子节点
+              const findFirstSelectableChild = (
+                node: DirectoryNode
+              ): DirectoryNode | null => {
+                if (
+                  node.type === 'Text' ||
+                  node.type === 'Image' ||
+                  node.type === 'Formula' ||
+                  node.type === 'Table'
+                ) {
+                  return node;
                 }
-              }
-              return null;
-            };
+                if (node.children && node.children.length > 0) {
+                  for (const child of node.children) {
+                    const found = findFirstSelectableChild(child);
+                    if (found) return found;
+                  }
+                }
+                return null;
+              };
 
-            const firstSelectableChild = findFirstSelectableChild(foundNode);
-            if (firstSelectableChild) {
-              // 延迟滚动到第一个子节点，确保 DOM 已经渲染完成
+              const firstSelectableChild = findFirstSelectableChild(foundNode);
+              if (firstSelectableChild) {
+                // 延迟滚动到第一个子节点，确保 DOM 和虚拟列表已经渲染完成
+                setTimeout(() => {
+                  get().scrollToSegment(firstSelectableChild.id);
+                }, 300);
+              }
+            } else if (initialSelectedSegmentId) {
+              // 如果是可选中类型（Text/Image/Formula/Table），滚动到该切片
+              // 延迟执行，确保虚拟列表已经准备好
               setTimeout(() => {
-                get().scrollToSegment(firstSelectableChild.id);
-              }, 100);
+                get().scrollToSegment(initialSelectedSegmentId);
+              }, 300);
             }
           }
         }
