@@ -106,6 +106,7 @@
     "react-slider": "^2.0.6",
     "react-sortablejs": "^6.1.4",
     "react-syntax-highlighter": "^15.6.1",
+    "react-virtuoso": "^4.12.6",
     "reactflow": "^11.11.3",
     "rehype-katex": "^7.0.1",
     "rehype-raw": "^7.0.0",
