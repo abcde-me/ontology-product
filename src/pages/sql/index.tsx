@@ -7,6 +7,7 @@ import FileManager from './components/file-manager';
 import DataManager from './components/data-manager';
 import SplScriptManagement from './components/spl-script-management';
 import EditorContent from './components/editor';
+import DevelopScriptEditor from './components/develop-script-editor';
 import DatasetsList from './components/DatasetsList';
 import { FileTab, useTabManager } from './hooks/useTabManager';
 import styles from './index.module.scss';
@@ -198,21 +199,40 @@ const SqlIndex: React.FC = memo(() => {
       <Content
         className={`${styles['sql-content']} ${isDasetTab ? styles.hidden : styles.visible}`}
       >
-        <EditorContent
-          fileTabs={fileState.fileTabs}
-          activeTab={fileState.activeTab}
-          curActiveTab={activeTab}
-          onTabChange={switchTab}
-          onAddTab={(newFileInfo?: any) => addTab(newFileInfo)}
-          onRemoveTab={removeTab}
-          onCreate={handleCreate}
-          onActiveUpdate={handleActiveUpdate}
-          onInsertContent={handleInsertContentRegister}
-          onEditorFocusChange={handleEditorFocusChange}
-          refreshDirectory={handleRefreshDirectory}
-          selectFile={selectFile}
-          onToScriptList={handleTabChange}
-        />
+        {activeTab === 'data' && (
+          <EditorContent
+            fileTabs={fileState.fileTabs}
+            activeTab={fileState.activeTab}
+            curActiveTab={activeTab}
+            onTabChange={switchTab}
+            onAddTab={(newFileInfo?: any) => addTab(newFileInfo)}
+            onRemoveTab={removeTab}
+            onCreate={handleCreate}
+            onActiveUpdate={handleActiveUpdate}
+            onInsertContent={handleInsertContentRegister}
+            onEditorFocusChange={handleEditorFocusChange}
+            refreshDirectory={handleRefreshDirectory}
+            selectFile={selectFile}
+            onToScriptList={handleTabChange}
+          />
+        )}
+        {activeTab === 'files' && (
+          <DevelopScriptEditor
+            fileTabs={fileState.fileTabs}
+            activeTab={fileState.activeTab}
+            curActiveTab={activeTab}
+            onTabChange={switchTab}
+            onAddTab={(newFileInfo?: any) => addTab(newFileInfo)}
+            onRemoveTab={removeTab}
+            onCreate={handleCreate}
+            onActiveUpdate={handleActiveUpdate}
+            onInsertContent={handleInsertContentRegister}
+            onEditorFocusChange={handleEditorFocusChange}
+            refreshDirectory={handleRefreshDirectory}
+            selectFile={selectFile}
+            onToScriptList={handleTabChange}
+          />
+        )}
       </Content>
     </Layout>
   );
