@@ -271,8 +271,9 @@ export const useRagDetailStore = create<RagDetailState & RagDetailActions>(
             } else if (initialSelectedSegmentId) {
               // 如果是可选中类型（Text/Image/Formula/Table），滚动到该切片
               // 延迟执行，确保虚拟列表已经准备好
+              const segmentIdToScroll = initialSelectedSegmentId;
               setTimeout(() => {
-                get().scrollToSegment(initialSelectedSegmentId);
+                get().scrollToSegment(segmentIdToScroll);
               }, 300);
             }
           }
