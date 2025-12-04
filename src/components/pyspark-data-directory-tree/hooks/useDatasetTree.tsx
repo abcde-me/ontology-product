@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import {
-  getDatasetVersionFile,
+  getPysparkDatasetFile,
   searchDatasetList
 } from '@/api/datasetManagement';
 import {
@@ -47,7 +47,7 @@ export const useDatasetTree = ({
   // 获取数据集市目录列表
   const getDasetList = async (keyword?: string) => {
     const targetParams: any = {
-      storage_type_list: ['file', 'jsonl'],
+      storage_type_list: ['image', 'video', 'audio', 'other', 'jsonl'],
       name: keyword,
       page: 1,
       limit: 1000
@@ -70,7 +70,7 @@ export const useDatasetTree = ({
     page = 1,
     page_size = 1000
   ) => {
-    const res = await getDatasetVersionFile({
+    const res = await getPysparkDatasetFile({
       id,
       page,
       limit: page_size
