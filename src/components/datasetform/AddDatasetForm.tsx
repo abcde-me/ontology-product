@@ -526,6 +526,13 @@ const DatasetForm = React.forwardRef<
       if (res.data && res.code === '') {
         setIsPreviewFile(true);
         setPreviewFileData(res.data.items || []);
+        const nowPageSelectedFiles = res.data.items.filter((item) => {
+          return allSelectFile.includes(item.id);
+        });
+        const nowPageSelectedFileIds = nowPageSelectedFiles.map(
+          (item) => item.id
+        );
+        setAfterPageSelectFile(nowPageSelectedFileIds);
         setTotal(res.data.total);
       } else {
         Message.error(res.message);
@@ -938,6 +945,7 @@ const DatasetForm = React.forwardRef<
                         setFilesType(
                           isNotJsonl ? StorageType.File : StorageType.Jsonl
                         );
+                        console.log(selectedRowKeys, ';selectedRowKeys');
                         setFileIds(selectedRowKeys as string[]);
                       }
                     }}
@@ -951,6 +959,13 @@ const DatasetForm = React.forwardRef<
                         setCurrent(1);
                       }}
                       onChange={(page) => {
+                        console.log(
+                          allSelectFile,
+                          fileIds,
+                          afterPageSelectFile,
+                          'allSelectFile'
+                        );
+
                         setIsPageChange(true);
                         setCurrent(page);
                       }}
