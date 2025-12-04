@@ -39,8 +39,8 @@ const SegmentCardActions: React.FC<SegmentCardActionsProps> = ({
           (action === 'detail' || action === 'trace');
     return `${buttonBaseClass} ${
       isActive
-        ? 'border-[#007DFA] bg-[#EEF6FF] text-[#007DFA]'
-        : 'border-gray-200 text-gray-600 hover:border-[#007DFA] hover:bg-gray-50'
+        ? 'border-[#CBD5E1] bg-[#EEF6FF] text-[#007DFA]'
+        : 'border-[#CBD5E1] text-gray-600 hover:border-[#007DFA] hover:bg-gray-50'
     }`;
   };
 
