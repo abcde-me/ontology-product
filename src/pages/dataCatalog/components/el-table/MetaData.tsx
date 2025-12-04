@@ -116,6 +116,10 @@ export default function MetaData() {
         setTableData(data.records || []);
         setSearchFields(data.fields || []);
         setTotal(data.total || 0);
+      } else {
+        Message.error(res?.message ?? '获取元数据列表失败');
+        setTableData([]);
+        setTotal(0);
       }
     } catch (error) {
       console.error('获取元数据列表失败:', error);
