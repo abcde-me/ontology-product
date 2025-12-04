@@ -523,7 +523,24 @@ export const ModaForgeResourceEndpoints = {
   leSaveTask: PrefixLabelService + '/saveTask',
   leGetTaskReuslt: PrefixLabelService + '/getTaskResult',
 
+  // 获取加工脚本列表
   ListDevelopScriptApi: PrefixAimdp + '/ListDevelopScript',
+  // 加工脚本下载
+  DownloadDevelopScriptApi: PrefixAimdp + '/DownloadDevelopScript',
+  // 获取加工脚本历史版本
+  GetDevelopScriptLogByScriptIdApi:
+    PrefixAimdp + '/GetDevelopScriptLogByScriptId',
+  // 删除加工脚本
+  DeleteDevelopScriptApi: PrefixAimdp + '/DeleteDevelopScript',
+  // 锁定加工脚本
+  LockDevelopScriptApi: PrefixAimdp + '/LockDevelopScript',
+  // 获取加工脚本卡片内容
+  GetDevelopScriptLogByVersionApi:
+    PrefixAimdp + '/GetDevelopScriptLogByVersion',
+  // 查询脚本列表
+  ListSqlFileApi: PrefixAimdp + '/ListSqlFile',
+  // 查询脚本删除
+  DeleteSqlFileApi: PrefixAimdp + '/DeleteSqlFile',
 
   // 数据资产接口
   // 查询数据资产表字段和映射关系

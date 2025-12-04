@@ -22,7 +22,10 @@ import {
   DatasetsOptionsParams,
   DatasetsOptionsData,
   ListDevelopScriptParams,
-  ListDevelopScriptParamsData
+  ListDevelopScriptParamsData,
+  GetDevelopScriptLogByScriptIdData,
+  GetDevelopScriptLogByVersionData,
+  ListSqlFileParams
 } from '@/types/sqlApi';
 
 /** 数据集目录 */
@@ -275,4 +278,53 @@ export async function getDevelopScriptList(
   params: ListDevelopScriptParams
 ): Promise<ApiRes<ListDevelopScriptParamsData>> {
   return await UAPI.RES.ListDevelopScriptApi({}).post(params).inRegion().do();
+}
+// 下载开发脚本
+export async function downloadDevelopScript(): Promise<ApiRes<{}>> {
+  return await UAPI.RES.DownloadDevelopScriptApi({}).post().inRegion().do();
+}
+// 获取开发脚本历史版本
+export async function getDevelopScriptLogByScriptId(
+  id: string
+): Promise<ApiRes<GetDevelopScriptLogByScriptIdData>> {
+  return await UAPI.RES.GetDevelopScriptLogByScriptIdApi({})
+    .post({ script_id: Number(id) })
+    .inRegion()
+    .do();
+}
+// 删除开发脚本
+export async function deleteDevelopScript(id: number): Promise<ApiRes<{}>> {
+  return await UAPI.RES.DeleteDevelopScriptApi({})
+    .post({ script_id: Number(id) })
+    .inRegion()
+    .do();
+}
+// 锁定开发脚本
+export async function lockDevelopScript(id: number): Promise<ApiRes<{}>> {
+  return await UAPI.RES.LockDevelopScriptApi({})
+    .post({ script_id: Number(id) })
+    .inRegion()
+    .do();
+}
+// 获取开发脚本卡片内容
+export async function getDevelopScriptLogByVersion(
+  script_context: string
+): Promise<ApiRes<GetDevelopScriptLogByVersionData>> {
+  return await UAPI.RES.GetDevelopScriptLogByVersionApi({})
+    .post({ script_context })
+    .inRegion()
+    .do();
+}
+// 查询脚本列表
+export async function listSqlFile(
+  params: ListSqlFileParams
+): Promise<ApiRes<ListSqlFileParams>> {
+  return await UAPI.RES.ListSqlFileApi({}).post(params).inRegion().do();
+}
+// 查询脚本 - 删除脚本
+export async function deleteSqlFile(id: number): Promise<ApiRes<{}>> {
+  return await UAPI.RES.DeleteSqlFileApi({})
+    .post({ script_id: Number(id) })
+    .inRegion()
+    .do();
 }

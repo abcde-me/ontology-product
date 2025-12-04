@@ -13,7 +13,9 @@ import { IconQuestionCircle } from '@arco-design/web-react/icon';
 const SctipModalTable: React.FC<{
   isVisible: boolean;
   setChildStatus: (status: boolean) => void;
-}> = memo(({ isVisible, setChildStatus }) => {
+  tableData;
+  rowData;
+}> = memo(({ isVisible, setChildStatus, tableData, rowData }) => {
   const [visible, setVisible] = React.useState<boolean>(isVisible);
   React.useEffect(() => {
     setVisible(isVisible);
@@ -148,7 +150,7 @@ const SctipModalTable: React.FC<{
               名称：
             </div>
             <div className={styles['script-modal-table-content-item-value']}>
-              script_name
+              {rowData?.script_name}
             </div>
           </div>
           <div className={styles['script-modal-table-content-item']}>
@@ -156,7 +158,7 @@ const SctipModalTable: React.FC<{
               最新版本：
             </div>
             <div className={styles['script-modal-table-content-item-value']}>
-              script_name
+              {rowData?.max_version_name}
             </div>
           </div>
           <div className={styles['script-modal-table-content-item']}>
@@ -164,7 +166,7 @@ const SctipModalTable: React.FC<{
               创建人：
             </div>
             <div className={styles['script-modal-table-content-item-value']}>
-              script_name
+              {rowData?.create_user}
             </div>
           </div>
           <div className={styles['script-modal-table-content-item']}>
@@ -172,7 +174,7 @@ const SctipModalTable: React.FC<{
               创建时间：
             </div>
             <div className={styles['script-modal-table-content-item-value']}>
-              script_name
+              {rowData?.create_time}
             </div>
           </div>
           <div className={styles['script-modal-table-content-item']}>
@@ -180,7 +182,7 @@ const SctipModalTable: React.FC<{
               所属工作流：
             </div>
             <div className={styles['script-modal-table-content-item-value']}>
-              script_name
+              {rowData?.process_name}
             </div>
           </div>
           <div className={styles['script-modal-table-content-item']}>
@@ -188,7 +190,7 @@ const SctipModalTable: React.FC<{
               所属任务节点：
             </div>
             <div className={styles['script-modal-table-content-item-value']}>
-              script_name
+              {rowData?.task_name}
             </div>
           </div>
           <div className={styles['script-modal-table-content-item']}>
@@ -196,11 +198,11 @@ const SctipModalTable: React.FC<{
               最新执行时间：
             </div>
             <div className={styles['script-modal-table-content-item-value']}>
-              script_name
+              {rowData?.update_time}
             </div>
           </div>
         </div>
-        <Table rowKey={'id'} columns={columns} data={mockData.list} />;
+        <Table rowKey={'id'} columns={columns} data={tableData} />;
       </div>
     </Modal>
   );

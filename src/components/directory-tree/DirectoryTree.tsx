@@ -56,6 +56,7 @@ import {
   VersionType,
   VersionTypeEnum
 } from '@/pages/sql/components/sctipt-card';
+import { useParams } from '@/utils/url';
 // 原始数据接口
 export type TreeNodeItem = Partial<PythonListItem> & {
   dataRef?: any;
@@ -141,6 +142,7 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
     const [expandedKeys, setExpandedKeys] = useState<string[]>([]);
     const [selectedKeys, setSelectedKeys] = useState<string[]>([]);
     const [searchValue, setSearchValue] = useState<string>('');
+    const activeTab = useParams('activeTab');
 
     // 下钻相关状态
     const [currentFolderId, setCurrentFolderId] = useState<string>('');
@@ -443,6 +445,12 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
       ]);
       focusAndSelect();
     };
+
+    useEffect(() => {
+      if (activeTab === 'file') {
+        startRootCreate(false);
+      }
+    }, [activeTab]);
 
     const handleEdit = (node: NodeProps) => {
       const currentName = node.dataRef?.name;

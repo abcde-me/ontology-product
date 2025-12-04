@@ -652,3 +652,27 @@ export interface ListDevelopScriptParamsData {
   total: number;
   items: [];
 }
+
+export interface GetDevelopScriptLogByScriptIdData {
+  script_id: number;
+  items: [];
+}
+
+export interface GetDevelopScriptLogByVersionData {
+  script_context: string;
+  items: [];
+}
+
+export interface ListSqlFileParams {
+  /**
+   * 页大小
+   */
+  page_size?: number;
+  /**
+   * 页码
+   */
+  page?: number;
+  search_content?: string;
+  items: [];
+  total: number;
+}

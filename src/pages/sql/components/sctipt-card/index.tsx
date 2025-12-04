@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import {
   Button,
+  Empty,
   Form,
   Input,
   Message,
@@ -16,12 +17,14 @@ import styles from './index.module.scss';
 import { IconCopy, IconDelete } from '@arco-design/web-react/icon';
 import { mock } from 'node:test';
 import Tool from '@/pages/workflowConfig/workflow/block-selector/tool/tool';
+import { getDevelopScriptLogByVersion } from '@/api/sql';
+import { set } from 'lodash';
 
 // 版本类型 已发版 未发版 调度中
 export const VersionType = {
-  RELEASED: 'released', // 已发版
-  UNRELEASED: 'unreleased', // 未发版
-  SCHEDULED: 'scheduled' // 调度中
+  RELEASED: 2, // 已发版
+  UNRELEASED: 1, // 未发版
+  SCHEDULED: 3 // 调度中
 } as const;
 
 export enum VersionTypeEnum {
@@ -75,18 +78,25 @@ const ScriptCard: React.FC<ScriptCardProps> = ({ onToScriptList }) => {
       getCardList();
       setIsClickClear(false);
     }
-  }, [isClickClear]);
+  }, [isClickClear, searchValue]);
 
-  const getCardList = () => {
+  const getCardList = async () => {
     setLoading(true);
     try {
       const params: any = {
-        uid: userInfo?.id,
-        search_content: searchValue,
-        page: current, //第几页
-        page_size: pageSize //每页个数
+        search_content: searchValue
       };
-      // const res = await getWorkflowList(params);
+      const res = await getDevelopScriptLogByVersion(
+        params.search_content
+      ).then((res) => {
+        console.log(res);
+        if (res.status !== 200) {
+          Message.error(res?.message);
+        }
+        if (res.status === 200 && res.code === '') {
+          setScriptCardList(res.data?.items || []);
+        }
+      });
     } finally {
       setLoading(false);
     }
@@ -121,9 +131,6 @@ const ScriptCard: React.FC<ScriptCardProps> = ({ onToScriptList }) => {
       });
       return;
     }
-    // history.push(
-    //     `/tenant/compute/modaforge/dataCatalog/list?root_type=${root_type}&id=${id}&parent_id=${parent_id}`
-    // );
   };
   // 删除脚本
   const deleteCardScript = async (workflow_uuid: number | string) => {
@@ -225,73 +232,93 @@ const ScriptCard: React.FC<ScriptCardProps> = ({ onToScriptList }) => {
           onClear={() => {
             getCardList();
           }}
+          onChange={(value) => {
+            setSearchValue(value);
+          }}
+          onPressEnter={() => {
+            getCardList();
+          }}
           style={{ width: '100%' }}
           placeholder="请输入脚本内容关键词"
         />
       </div>
       <div className={styles['script-card-content']}>
-        {mockjsData.list.map((item) => (
-          <div
-            onClick={() => {
-              onToScriptList('files');
-            }}
-            key={item.id}
-            className={styles['script-card-content-item']}
-          >
-            <div className={styles['script-card-content-item-title']}>
-              <div className={styles['script-card-content-item-title-left']}>
-                <div
-                  onClick={() => {
-                    onToScriptList('files');
-                  }}
-                  className={styles['script-card-content-item-title-text']}
-                >
-                  <span>{item.title}</span>
-                  <span>(V{item.version})</span>
-                </div>
-                {getVersionType(item.version_type)}
-              </div>
-              <div className={styles['script-card-content-item-title-right']}>
-                <Button
-                  style={{ marginRight: 8 }}
-                  className={styles['script-card-content-item-title-btn']}
-                  icon={<IconCopy />}
-                  onClick={() => {
-                    onToScriptList('files');
-                  }}
-                >
-                  详情
-                </Button>
-                <Popover
-                  content={
-                    item?.version_type === VersionType.SCHEDULED
-                      ? '调度中的脚本不可删除'
-                      : ''
-                  }
-                >
-                  <Button
-                    style={{
-                      width: '68px',
-                      height: '24px',
-                      padding: '0px 8px'
+        {scriptCardList?.length > 0 ? (
+          scriptCardList.map((item: any) => (
+            <div
+              onClick={() => {
+                onToScriptList('files');
+              }}
+              key={item.id}
+              className={styles['script-card-content-item']}
+            >
+              <div className={styles['script-card-content-item-title']}>
+                <div className={styles['script-card-content-item-title-left']}>
+                  <div
+                    onClick={() => {
+                      onToScriptList('files');
                     }}
-                    className={styles['script-card-content-item-title-btns']}
-                    icon={<IconDelete />}
-                    disabled={item.version_type === VersionType.SCHEDULED}
-                    onClick={() => deleteScript(item.id, item.version_type)}
+                    className={styles['script-card-content-item-title-text']}
                   >
-                    删除
+                    <span>{item.title}</span>
+                    <span>(V{item.version})</span>
+                  </div>
+                  {getVersionType(item.version_type)}
+                </div>
+                <div className={styles['script-card-content-item-title-right']}>
+                  <Button
+                    style={{ marginRight: 8 }}
+                    className={styles['script-card-content-item-title-btn']}
+                    icon={<IconCopy />}
+                    onClick={() => {
+                      onToScriptList('files');
+                    }}
+                  >
+                    详情
                   </Button>
-                </Popover>
+                  <Popover
+                    content={
+                      item?.version_type === VersionType.SCHEDULED
+                        ? '调度中的脚本不可删除'
+                        : ''
+                    }
+                  >
+                    <Button
+                      style={{
+                        width: '68px',
+                        height: '24px',
+                        padding: '0px 8px'
+                      }}
+                      className={styles['script-card-content-item-title-btns']}
+                      icon={<IconDelete />}
+                      disabled={item.version_type === VersionType.SCHEDULED}
+                      onClick={() => deleteScript(item.id, item.version_type)}
+                    >
+                      删除
+                    </Button>
+                  </Popover>
+                </div>
+              </div>
+              <div className={styles['script-card-content-item-content']}>
+                {item.content}
               </div>
             </div>
-            <div className={styles['script-card-content-item-content']}>
-              {item.content}
-            </div>
-          </div>
-        ))}
+          ))
+        ) : (
+          <Empty />
+        )}
       </div>
-      <Pagination total={total} showTotal showJumper />
+      {scriptCardList?.length > 0 && (
+        <Pagination
+          onChange={(current, pageSize) => {
+            setCurrent(current);
+            setPageSize(pageSize);
+          }}
+          total={total}
+          showTotal
+          showJumper
+        />
+      )}
     </div>
   );
 };
