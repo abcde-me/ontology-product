@@ -1,6 +1,6 @@
 import React, { useMemo, useEffect, useRef, useCallback } from 'react';
 import { Empty } from '@arco-design/web-react';
-import { useVirtualList } from 'ahooks';
+import { Virtuoso, VirtuosoHandle } from 'react-virtuoso';
 import {
   useRagDetailStore,
   type Segment,
@@ -32,7 +32,13 @@ const SegmentList: React.FC<SegmentListProps> = ({
     clearPdfHighlight,
     segmentSearchText
   } = useRagDetailStore();
-  const segmentRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
+
+  // Virtuoso 的 ref
+  const virtuosoRef = useRef<VirtuosoHandle>(null);
+  // 待滚动的 segmentId（当 virtuosoRef 还没准备好时暂存）
+  const pendingScrollId = useRef<string | null>(null);
+  // 标记是否已经处理过初始滚动
+  const initialScrollDone = useRef(false);
 
   // 优先使用props，如果没有则使用store中的数据
   const segments = propSegments || storeSegments;
@@ -53,25 +59,30 @@ const SegmentList: React.FC<SegmentListProps> = ({
     });
   }, [segments, segmentSearchText]);
 
-  // 当选中的分段变化时，自动滚动到该分段
-  useEffect(() => {
-    if (selectedSegmentId && segmentRefs.current[selectedSegmentId]) {
-      segmentRefs.current[selectedSegmentId]?.scrollIntoView({
-        behavior: 'smooth',
-        block: 'start'
-      });
-    }
-  }, [selectedSegmentId]);
+  // 执行滚动的函数
+  const doScrollToSegment = useCallback(
+    (segmentId: string, immediate = false) => {
+      const index = filteredSegments.findIndex((seg) => seg.id === segmentId);
+      if (index !== -1 && virtuosoRef.current) {
+        virtuosoRef.current.scrollToIndex({
+          index,
+          align: 'start',
+          behavior: immediate ? 'auto' : 'smooth'
+        });
+        return true;
+      }
+      return false;
+    },
+    [filteredSegments]
+  );
 
   // 监听目录树触发的滚动事件
   useEffect(() => {
     const handleScrollToSegment = (event: CustomEvent) => {
       const { segmentId } = event.detail;
-      if (segmentId && segmentRefs.current[segmentId]) {
-        segmentRefs.current[segmentId]?.scrollIntoView({
-          behavior: 'smooth',
-          block: 'start'
-        });
+      if (segmentId) {
+        // 点击目录树时直接滚动
+        doScrollToSegment(segmentId);
       }
     };
 
@@ -85,13 +96,17 @@ const SegmentList: React.FC<SegmentListProps> = ({
         handleScrollToSegment as EventListener
       );
     };
-  }, []);
+  }, [doScrollToSegment]);
 
-  // 容器和内容的ref
-  const containerRef = useRef<HTMLDivElement>(null);
-  const wrapperRef = useRef<HTMLDivElement>(null);
+  // URL 初始化时的滚动处理
+  useEffect(() => {
+    if (selectedSegmentId && !initialScrollDone.current) {
+      pendingScrollId.current = selectedSegmentId;
+    }
+  }, [selectedSegmentId]);
 
   // 处理点击分段 - 使用 useCallback 缓存
+  // 注意：点击切片列表时不触发滚动，只设置选中状态
   const handleSegmentClick = useCallback(
     (segmentId: string) => {
       // 设置选中的分段ID，这会触发目录树的高亮
@@ -117,37 +132,38 @@ const SegmentList: React.FC<SegmentListProps> = ({
     ]
   );
 
-  // 使用虚拟滚动 - 根据renderMode调整itemHeight
-  const itemHeight = renderMode === 'image-text' ? 280 : 120;
-  const [virtualList] = useVirtualList(filteredSegments, {
-    containerTarget: containerRef,
-    wrapperTarget: wrapperRef,
-    itemHeight,
-    overscan: 5 // 额外渲染的项数，减少滚动时的闪烁
-  });
-
   // 渲染单个分段卡片
   const renderSegmentCard = useCallback(
-    (segment: Segment) => {
+    (_index: number, segment: Segment) => {
       if (renderMode === 'image-text') {
         return (
-          <ImageTextSegmentCard
-            segment={segment as ImageTextSegment}
-            isSelected={selectedSegmentId === segment.id}
-            totalSegments={segments.length}
-          />
+          <div
+            onClick={() => handleSegmentClick(segment.id)}
+            style={{ cursor: 'pointer', paddingBottom: '12px' }}
+          >
+            <ImageTextSegmentCard
+              segment={segment as ImageTextSegment}
+              isSelected={selectedSegmentId === segment.id}
+              totalSegments={segments.length}
+            />
+          </div>
         );
       }
 
       return (
-        <SegmentCard
-          segment={segment}
-          isSelected={selectedSegmentId === segment.id}
-          totalSegments={segments.length}
-        />
+        <div
+          onClick={() => handleSegmentClick(segment.id)}
+          style={{ cursor: 'pointer', paddingBottom: '12px' }}
+        >
+          <SegmentCard
+            segment={segment}
+            isSelected={selectedSegmentId === segment.id}
+            totalSegments={segments.length}
+          />
+        </div>
       );
     },
-    [renderMode, selectedSegmentId, segments.length]
+    [renderMode, selectedSegmentId, segments.length, handleSegmentClick]
   );
 
   // 当filteredSegments为空时显示空状态
@@ -173,22 +189,33 @@ const SegmentList: React.FC<SegmentListProps> = ({
         />
       )}
       <div
-        ref={containerRef}
-        className={`flex-1 overflow-y-auto pb-4 ${styles.scrollContainer}`}
-        style={{ minHeight: 0 }}
+        className={`flex-1 ${styles.scrollContainer}`}
+        style={{ minHeight: 0, overflow: 'hidden' }}
       >
-        <div ref={wrapperRef}>
-          {virtualList.map((item) => (
-            <div
-              key={item.data.id}
-              ref={(el) => (segmentRefs.current[item.data.id] = el)}
-              onClick={() => handleSegmentClick(item.data.id)}
-              style={{ cursor: 'pointer', marginBottom: '12px' }}
-            >
-              {renderSegmentCard(item.data)}
-            </div>
-          ))}
-        </div>
+        <Virtuoso
+          ref={virtuosoRef}
+          data={filteredSegments}
+          itemContent={renderSegmentCard}
+          overscan={200}
+          style={{ height: '100%' }}
+          // 当列表渲染完成后，检查是否有待滚动的项（仅用于 URL 初始化）
+          totalListHeightChanged={() => {
+            // 只处理一次初始滚动
+            if (
+              pendingScrollId.current &&
+              !initialScrollDone.current &&
+              virtuosoRef.current
+            ) {
+              const segmentId = pendingScrollId.current;
+              pendingScrollId.current = null;
+              initialScrollDone.current = true;
+              // 使用 setTimeout 确保 Virtuoso 完全准备好
+              setTimeout(() => {
+                doScrollToSegment(segmentId, true); // 使用即时滚动
+              }, 50);
+            }
+          }}
+        />
       </div>
     </div>
   );
