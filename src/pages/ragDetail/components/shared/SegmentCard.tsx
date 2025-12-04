@@ -30,14 +30,16 @@ const SegmentCard: React.FC<SegmentCardProps> = memo(
         className={`
         cursor-pointer rounded-lg border transition-all duration-200
         ${
-          isSelected
-            ? 'border-[#007DFA] bg-[#EEF6FF]'
-            : isHovered
-              ? 'border-[#007DFA] bg-white'
-              : 'border-gray-200 bg-white'
+          isEditing
+            ? 'bg-white'
+            : isSelected
+              ? 'border-[#007DFA] bg-[#EEF6FF]'
+              : isHovered
+                ? 'border-[#007DFA] bg-white'
+                : 'border-gray-200 bg-white'
         }
       `}
-        onMouseEnter={() => setIsHovered(true)}
+        onMouseEnter={() => !isEditing && setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
         onClick={handleClick}
       >
@@ -51,10 +53,10 @@ const SegmentCard: React.FC<SegmentCardProps> = memo(
               </span>
             </div>
           </div>
-          {/* 使用 opacity 和 pointer-events 控制可见性，避免 hover 时布局抖动 */}
+          {/* 编辑态时隐藏按钮，使用 opacity 和 pointer-events 控制可见性，避免 hover 时布局抖动 */}
           <div
             className={`transition-opacity duration-200 ${
-              isSelected || isHovered
+              !isEditing && (isSelected || isHovered)
                 ? 'opacity-100'
                 : 'pointer-events-none opacity-0'
             }`}
