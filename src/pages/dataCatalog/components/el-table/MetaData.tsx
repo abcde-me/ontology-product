@@ -275,7 +275,7 @@ export default function MetaData() {
             styles['header-container']
           )}
         >
-          <div className="text-[16px] font-bold">数据湖目录({total})</div>
+          <div className="text-[16px] font-bold">数据列表({total})</div>
           <Tooltip content="刷新">
             <Button
               type="outline"
