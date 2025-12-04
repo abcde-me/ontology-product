@@ -210,9 +210,10 @@ const SegmentList: React.FC<SegmentListProps> = ({
               pendingScrollId.current = null;
               initialScrollDone.current = true;
               // 使用 setTimeout 确保 Virtuoso 完全准备好
+              // 延迟 300ms 确保虚拟列表布局完全稳定，避免滚动位置被遮挡
               setTimeout(() => {
                 doScrollToSegment(segmentId, true); // 使用即时滚动
-              }, 50);
+              }, 300);
             }
           }}
         />
