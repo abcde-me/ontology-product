@@ -258,6 +258,17 @@ export async function searchDatasetList(
   return await UAPI.RES.datasetsApi({}).post(params).inRegion().do();
 }
 
+// Pyspark获取数据集文件列表
+export async function getPysparkDatasetFile(
+  params: DatasetVersionFileParams
+): Promise<ApiRes<DatasetVersionFileRes>> {
+  // TODO: 联调
+  return await UAPI.RES.listDatasetFiles({})
+    .post({ ...params, id: Number(params.id) })
+    .inRegion()
+    .do();
+}
+
 export async function getDatasetVersionFile(
   params: DatasetVersionFileParams
 ): Promise<ApiRes<DatasetVersionFileRes>> {

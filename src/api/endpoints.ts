@@ -270,6 +270,8 @@ export const ModaForgeResourceEndpoints = {
   datasetVersionRebuildApi: PrefixAimdp + '/RenewDatasetTargetVersion',
   //数据内容文件表
   dataContentFileList: PrefixAimdp + '/ListDatasetData',
+  // Pyspark获取数据集文件列表
+  listDatasetFiles: PrefixAimdp + '/ListDatasetFiles',
   //数据内容数据库表
   dataContentTableList: PrefixAimdp + '/GetDatasetTableTargetVersion',
   // 数据集场景分类列表
