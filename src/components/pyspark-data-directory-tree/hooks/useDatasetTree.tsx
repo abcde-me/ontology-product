@@ -72,9 +72,8 @@ export const useDatasetTree = ({
   ) => {
     const res = await getDatasetVersionFile({
       id,
-      version_id,
       page,
-      page_size
+      limit: page_size
     });
 
     if (res?.status !== 200) {
@@ -142,13 +141,13 @@ export const useDatasetTree = ({
       return new Promise(async (resolve) => {
         try {
           const nodeData = node.props.dataRef as TreeNodeData;
-          if (!nodeData?.id || !nodeData?.version_id) {
+          if (!nodeData?.id) {
             return resolve();
           }
 
           const fileList = await getDasetVersionFile(
             nodeData.id,
-            nodeData.version_id,
+            nodeData.version_id ?? '',
             1,
             1000
           );

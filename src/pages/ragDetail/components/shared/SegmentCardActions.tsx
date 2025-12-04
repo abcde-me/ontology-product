@@ -39,8 +39,8 @@ const SegmentCardActions: React.FC<SegmentCardActionsProps> = ({
           (action === 'detail' || action === 'trace');
     return `${buttonBaseClass} ${
       isActive
-        ? 'border-[#007DFA] bg-[#EEF6FF] text-[#007DFA]'
-        : 'border-gray-200 text-gray-600 hover:border-[#007DFA] hover:bg-gray-50'
+        ? 'border-[#CBD5E1] bg-[#EEF6FF] text-[#007DFA]'
+        : 'border-[#CBD5E1] text-gray-600 hover:border-[#007DFA] hover:bg-gray-50'
     }`;
   };
 
@@ -54,7 +54,6 @@ const SegmentCardActions: React.FC<SegmentCardActionsProps> = ({
             startEditingSegment(segment.id);
           }}
           className={getButtonClass('edit')}
-          title="编辑分段"
         >
           <EditSvg />
           <span className="font-medium text-[#1E293B]">编辑分段</span>
@@ -66,7 +65,6 @@ const SegmentCardActions: React.FC<SegmentCardActionsProps> = ({
           openSegmentDrawer(segment.id, 'detail');
         }}
         className={getButtonClass('detail')}
-        title="分段详情"
       >
         <SegDetailSvg />
         <span className="font-medium text-[#1E293B]">分段详情</span>
@@ -78,7 +76,6 @@ const SegmentCardActions: React.FC<SegmentCardActionsProps> = ({
           openSegmentDrawer(segment.id, 'trace');
         }}
         className={getButtonClass('trace')}
-        title="溯源日志"
       >
         <SourceLogSvg />
         <span className="font-medium text-[#1E293B]">溯源日志</span>

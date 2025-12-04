@@ -80,7 +80,7 @@ const EnhancementInfo: React.FC<EnhancementInfoProps> = ({
               className="w-full"
             />
           ) : (
-            <div className="w-full whitespace-pre-wrap text-sm text-[#475569]">
+            <div className="w-full whitespace-pre-wrap text-sm text-[#0F172A]">
               {enhancement.summary}
             </div>
           )}
@@ -100,7 +100,7 @@ const EnhancementInfo: React.FC<EnhancementInfoProps> = ({
               className="w-full"
             />
           ) : (
-            <div className="w-full whitespace-pre-wrap text-sm text-[#475569]">
+            <div className="w-full whitespace-pre-wrap text-sm text-[#0F172A]">
               {enhancement.hypotheticalAnswer}
             </div>
           )}
