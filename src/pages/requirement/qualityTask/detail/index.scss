@@ -1,0 +1,31 @@
+.quality-task-detail {
+  padding: 10px;
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+
+  .arco-breadcrumb-item > .arco-icon {
+    color: #000;
+    cursor: pointer;
+  }
+
+  .head-breadcrumb-box {
+    display: flex;
+    align-items: center;
+
+    .breadcrumb-text:hover {
+      cursor: pointer;
+      color: #000;
+    }
+  }
+
+  .quality-task-detail-content {
+    flex: 1;
+    background-color: #fff;
+    border-radius: 15px;
+    padding-top: 24px;
+    padding-left: 24px;
+    margin: 16px 0;
+  }
+}

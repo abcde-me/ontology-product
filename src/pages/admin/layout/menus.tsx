@@ -177,6 +177,13 @@ export const menus: MenuModel[] = [
         key: 'taskList',
         path: '/tenant/compute/modaforge/taskList',
         permission: ANNOTATION_TASK_PERMISSIONS.LIST
+      },
+      {
+        title: '质检任务',
+        icon: <AnnotationTask className={iconClass} />,
+        key: 'qualityTaskList',
+        path: '/tenant/compute/modaforge/qualityTask',
+        permission: ANNOTATION_TASK_PERMISSIONS.LIST
       }
     ]
   },

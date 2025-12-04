@@ -1,0 +1,9 @@
+.quality-task-list {
+  background-color: white;
+  display: flex;
+  flex-direction: column;
+  margin: 20px 20px 20px 0;
+  padding: 20px 20px 20px 24px;
+  border-radius: 10px;
+  min-height: calc(100% - 40px);
+}

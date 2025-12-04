@@ -322,6 +322,25 @@ export const routes: IRoute[] = [
     permission: ANNOTATION_TASK_PERMISSIONS.LIST,
     children: []
   },
+  // 质检任务列表
+  {
+    name: 'qualityTaskList',
+    key: '/tenant/compute/modaforge/qualityTask',
+    component: React.lazy(
+      async () => import('../../requirement/qualityTask/list')
+    ),
+    permission: ANNOTATION_TASK_PERMISSIONS.LIST,
+    children: [
+      {
+        name: 'qualityTaskDetail',
+        key: '/tenant/compute/modaforge/qualityTask/detail',
+        component: React.lazy(
+          async () => import('../../requirement/qualityTask/detail')
+        ),
+        permission: ANNOTATION_TASK_PERMISSIONS.LIST
+      }
+    ]
+  },
   // 标注工具页面
   {
     name: 'labelEditor',
