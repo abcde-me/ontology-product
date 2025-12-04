@@ -945,7 +945,6 @@ const DatasetForm = React.forwardRef<
                         setFilesType(
                           isNotJsonl ? StorageType.File : StorageType.Jsonl
                         );
-                        console.log(selectedRowKeys, ';selectedRowKeys');
                         setFileIds(selectedRowKeys as string[]);
                       }
                     }}
