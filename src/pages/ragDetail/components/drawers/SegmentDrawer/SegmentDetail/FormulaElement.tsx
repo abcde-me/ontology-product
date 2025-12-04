@@ -27,7 +27,7 @@ const FormulaElementCard: React.FC<FormulaElementCardProps> = ({
   return (
     <div className="mb-6 rounded-lg border border-gray-200 bg-white p-3">
       <div className="mb-3 flex items-center">
-        <span className="inline-flex items-center rounded bg-yellow-50 px-2 py-1 text-xs font-medium text-yellow-600">
+        <span className="inline-flex h-6 w-9 items-center justify-center rounded bg-blue-50 text-sm font-medium text-blue-600">
           公式
         </span>
         <span className="ml-2 text-sm font-semibold text-[#0F172A]">
