@@ -359,7 +359,8 @@ export const useRagDetailStore = create<RagDetailState & RagDetailActions>(
     },
 
     startEditingSegment: (segmentId: string) => {
-      set({ editingSegmentId: segmentId });
+      // 进入编辑状态时，清除其他切片的选中状态
+      set({ editingSegmentId: segmentId, selectedSegmentId: null });
     },
 
     cancelEditingSegment: () => {
