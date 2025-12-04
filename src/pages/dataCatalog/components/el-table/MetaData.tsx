@@ -263,7 +263,7 @@ export default function MetaData() {
         {/* 标题和刷新按钮 */}
         <div
           className={classNames(
-            'mb-[12px] mt-[12px] flex items-center justify-between',
+            'mb-[12px] flex items-center justify-between',
             styles['header-container']
           )}
         >
