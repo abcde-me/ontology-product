@@ -1770,6 +1770,10 @@ const DatasetDetail = (props: {
               return false; // 先阻止默认跳转
             }
 
+            if (e === 'hittest') {
+              setIsHiddenBaseInfo(true);
+            }
+
             setActiveTab(e);
             // setCurrentPage(1);
           }}
