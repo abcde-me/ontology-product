@@ -961,44 +961,44 @@ const DatasetManagement: React.FC = () => {
 
   const isCanMove = useHasPermission(DATA_MANAGEMENT_PERMISSIONS.CAN_MOVE);
 
-  useEffect(() => {
-    const container = document.querySelector('.layout-detail');
-    if (!container) return;
-    const handleScroll = (event) => {
-      const currentScrollTop = container.scrollTop;
-      // if (stickyRef.current) {
-      // const stickyTop = stickyRef.current.current.offsetTop;
-      // setIsSticky(stickyTop === 86);
-      // }
+  // useEffect(() => {
+  //   const container = document.querySelector('.layout-detail');
+  //   if (!container) return;
+  //   const handleScroll = (event) => {
+  //     const currentScrollTop = container.scrollTop;
+  //     // if (stickyRef.current) {
+  //     // const stickyTop = stickyRef.current.current.offsetTop;
+  //     // setIsSticky(stickyTop === 86);
+  //     // }
 
-      if (event.deltaY > 0 && !isHiddenBaseInfo) {
-        setIsHiddenBaseInfo(true);
-      } else if (
-        currentScrollTop === 0 &&
-        event.deltaY < 0 &&
-        isHiddenBaseInfo
-      ) {
-        setIsHiddenBaseInfo(false);
-        // setIsSticky(false);
-        event.preventDefault();
-      }
-      lastScrollTop.current = currentScrollTop;
-    };
+  //     if (event.deltaY > 0 && !isHiddenBaseInfo) {
+  //       setIsHiddenBaseInfo(true);
+  //     } else if (
+  //       currentScrollTop === 0 &&
+  //       event.deltaY < 0 &&
+  //       isHiddenBaseInfo
+  //     ) {
+  //       setIsHiddenBaseInfo(false);
+  //       // setIsSticky(false);
+  //       event.preventDefault();
+  //     }
+  //     lastScrollTop.current = currentScrollTop;
+  //   };
 
-    // 节流处理滚动事件，避免频繁触发
-    const throttledHandleScroll = throttle(handleScroll, 100);
+  //   // 节流处理滚动事件，避免频繁触发
+  //   const throttledHandleScroll = throttle(handleScroll, 100);
 
-    // 监听滚轮事件
-    container.addEventListener('wheel', throttledHandleScroll, {
-      passive: false
-    });
+  //   // 监听滚轮事件
+  //   container.addEventListener('wheel', throttledHandleScroll, {
+  //     passive: false
+  //   });
 
-    // 在组件卸载时移除监听器
-    return () => {
-      container.removeEventListener('wheel', throttledHandleScroll);
-      throttledHandleScroll.cancel(); // 清除节流计时器
-    };
-  }, [isHiddenBaseInfo]);
+  //   // 在组件卸载时移除监听器
+  //   return () => {
+  //     container.removeEventListener('wheel', throttledHandleScroll);
+  //     throttledHandleScroll.cancel(); // 清除节流计时器
+  //   };
+  // }, [isHiddenBaseInfo]);
 
   // 搜索字段选项
   const searchOptions = [
