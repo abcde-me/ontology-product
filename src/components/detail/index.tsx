@@ -780,13 +780,9 @@ const DatasetDetail = (props: {
     const handleScroll = (event) => {
       const currentScrollTop = container.scrollTop;
 
-      if (event.deltaY > 0 && !isHiddenBaseInfo) {
+      if (currentScrollTop > 0 && !isHiddenBaseInfo) {
         setIsHiddenBaseInfo(true);
-      } else if (
-        currentScrollTop === 0 &&
-        event.deltaY < 0 &&
-        isHiddenBaseInfo
-      ) {
+      } else if (currentScrollTop === 0 && isHiddenBaseInfo) {
         setIsHiddenBaseInfo(false);
         event.preventDefault();
       }
@@ -797,11 +793,13 @@ const DatasetDetail = (props: {
     const throttledHandleScroll = throttle(handleScroll, 100);
 
     // 监听滚轮事件
-    container.addEventListener('wheel', handleScroll, { passive: false });
+    container.addEventListener('scroll', throttledHandleScroll, {
+      passive: false
+    });
 
     // 在组件卸载时移除监听器
     return () => {
-      container.removeEventListener('wheel', handleScroll);
+      container.removeEventListener('scroll', throttledHandleScroll);
       throttledHandleScroll.cancel(); // 清除节流计时器
     };
   }, [isHiddenBaseInfo]);
@@ -1481,6 +1479,14 @@ const DatasetDetail = (props: {
             </Breadcrumb.Item>
             <Breadcrumb.Item>
               {datasetDetail?.name || '数据集详情'}
+              <span className="ml-[8px]">
+                {renderStatusTag(
+                  datasetDetail?.status as string,
+                  datasetDetail?.error_reason,
+                  handleVersionRebuild,
+                  handlerefresh
+                )}
+              </span>
             </Breadcrumb.Item>
           </Breadcrumb>
         </div>
@@ -1542,12 +1548,6 @@ const DatasetDetail = (props: {
                             </Tooltip>
                           ) : (
                             <span>{datasetDetail.name}</span>
-                          )}
-                          {renderStatusTag(
-                            datasetDetail.status,
-                            datasetDetail.error_reason,
-                            handleVersionRebuild,
-                            handlerefresh
                           )}
                         </div>
                       )

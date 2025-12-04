@@ -178,6 +178,8 @@
           border-radius: 8px;
           /* padding: 0 8px; */
           margin-bottom: 12px;
+          max-height: 500px;
+          overflow: auto;
           .segmentationHeader {
             min-height: 40px;
             padding: 8px;
@@ -221,6 +223,8 @@
               text-overflow: ellipsis; /* 超出部分显示省略号 */
               cursor: pointer; /* 鼠标悬停时显示手型 */
               margin: 2px 0 0 4px;
+              color: #6e7b8d;
+              font-size: 14px;
             }
             .sp {
               margin-left: 12px;
@@ -247,9 +251,16 @@
             justify-content: flex-end;
             gap: 8px;
             height: 24px;
+            border-color: #cbd5e1 !important;
 
             :global(.arco-btn) {
               height: 24px;
+              padding: 0 12px;
+            }
+
+            :global(span) {
+              margin-left: 8px;
+              color: #1e293b;
             }
           }
         }

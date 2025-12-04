@@ -1,11 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import styles from './index.module.scss';
-import {
-  IconDriveFile,
-  IconMindMapping,
-  IconSettings,
-  IconStorage
-} from '@arco-design/web-react/icon';
+import { IconMindMapping, IconSettings } from '@arco-design/web-react/icon';
 import { Button, Input, Message, Modal, Tooltip } from '@arco-design/web-react';
 import { Table } from '@ccf2e/arco-material';
 import { format } from 'date-fns';
@@ -21,6 +16,7 @@ import CopyNormalIconSvg from '@/assets/rag/copy-normal.svg';
 import CopyHighIconSvg from '@/assets/rag/copy-high.svg';
 import JumpToHighIconSvg from '@/assets/rag/jump-to-high.svg';
 import JumpToNormalIconSvg from '@/assets/rag/jump-to-normal.svg';
+import SegmentDetailsIconSvg from '@/assets/rag/segment-details.svg';
 import ImageModal from '@/pages/ragDetail/components/common/ImageModal';
 import copy from 'copy-to-clipboard';
 import {
@@ -269,6 +265,7 @@ function HitTest(props: { datasetName: string }) {
     position: string,
     parent_title_id: string
   ) => {
+    console.log(position, 'sssss');
     const res = await getKnowledgeDocument({
       document_id
     });
@@ -430,7 +427,9 @@ function HitTest(props: { datasetName: string }) {
                               handleToParagraph(
                                 e.document_id,
                                 e.chunk_id,
-                                JSON.stringify(e.positions[0]),
+                                JSON.stringify(
+                                  e.positions ? e.positions[0] : {}
+                                ),
                                 e.parent_title_id
                               );
                             }}
@@ -449,7 +448,7 @@ function HitTest(props: { datasetName: string }) {
                       <div className={styles.operateBtn}>
                         <Button
                           type="outline"
-                          icon={<IconStorage />}
+                          icon={<SegmentDetailsIconSvg />}
                           onClick={() => {
                             setShowDrawer(true);
                             setDefaultTab('detail');
@@ -461,7 +460,7 @@ function HitTest(props: { datasetName: string }) {
                         </Button>
                         <Button
                           type="outline"
-                          icon={<IconMindMapping />}
+                          icon={<IconMindMapping className="text-[#1E293B]" />}
                           onClick={() => {
                             setShowDrawer(true);
                             setDefaultTab('trace');
@@ -503,12 +502,12 @@ function HitTest(props: { datasetName: string }) {
                             : e.document_name
                         }
                         className={styles.nm}
-                        maxLength={100}
-                        onClick={() =>
+                        isLink
+                        handleLink={() =>
                           handleToParagraph(
                             e.document_id,
                             e.chunk_id,
-                            JSON.stringify(e.positions[0]),
+                            JSON.stringify(e.positions ? e.positions[0] : {}),
                             e.parent_title_id
                           )
                         }
