@@ -261,7 +261,6 @@ export async function searchDatasetList(
 export async function getPysparkDatasetFile(
   params: DatasetVersionFileParams
 ): Promise<ApiRes<DatasetVersionFileRes>> {
-  // TODO: 联调
   return await UAPI.RES.listDatasetFiles({})
     .post({ ...params, id: Number(params.id) })
     .inRegion()
@@ -271,7 +270,6 @@ export async function getPysparkDatasetFile(
 export async function getDatasetVersionFile(
   params: DatasetVersionFileParams
 ): Promise<ApiRes<DatasetVersionFileRes>> {
-  // TODO: 联调
   return await UAPI.RES.dataContentFileList({})
     .post({ ...params, id: Number(params.id) })
     .inRegion()
