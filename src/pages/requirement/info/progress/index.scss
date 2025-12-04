@@ -25,14 +25,16 @@
   .progress-container {
     display: flex;
     align-items: flex-start;
-    gap: 8px;
-    flex-wrap: wrap;
+    gap: 12px;
+    flex-wrap: nowrap;
+    white-space: nowrap;
 
     .progress-item {
       display: flex;
       flex-direction: column;
       gap: 4px;
-      min-width: 140px;
+      min-width: 160px;
+      flex-shrink: 0;
 
       .progress-text-wrapper {
         display: flex;
@@ -49,6 +51,10 @@
       .progress-text {
         font-size: 14px;
         color: #1d2129;
+      }
+
+      .arco-progress {
+        min-width: 100px;
       }
     }
 

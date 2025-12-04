@@ -413,6 +413,9 @@ function RequirementParticular() {
               setPageSize(size);
               setCurrent(1);
             }}
+            selectProps={{
+              getPopupContainer: () => document.body
+            }}
           />
         </div>
       )}

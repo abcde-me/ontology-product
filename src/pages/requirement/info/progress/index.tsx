@@ -123,29 +123,28 @@ function RequirementProgress() {
     {
       title: '任务包ID',
       dataIndex: 'id',
-      width: 120
+      width: 100
     },
     {
       title: '任务数',
       dataIndex: 'taskCount',
-      width: 120
+      width: 80
     },
     {
       title: '具体进度',
       dataIndex: 'progress',
-      width: 600,
       render: (_: any, record: TaskPackage) => renderProgress(record)
     },
     {
       title: '创建时间',
       dataIndex: 'createTime',
-      width: 200,
+      width: 170,
       sorter: true
     },
     {
       title: '创建人',
       dataIndex: 'creator',
-      width: 120
+      width: 100
     }
   ];
 
@@ -237,6 +236,7 @@ function RequirementProgress() {
         }}
         pagination={false}
         onChange={handleTableChange}
+        scroll={{ x: 'max-content' }}
       />
 
       {mockData.length > 0 && (
@@ -253,6 +253,9 @@ function RequirementProgress() {
             onPageSizeChange={(size) => {
               setPageSize(size);
               setCurrent(1);
+            }}
+            selectProps={{
+              getPopupContainer: () => document.body
             }}
           />
         </div>
