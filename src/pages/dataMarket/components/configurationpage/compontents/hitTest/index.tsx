@@ -398,11 +398,15 @@ function HitTest(props: { datasetName: string }) {
                         >
                           |
                         </span>
-                        <span
+                        <EllipsisPopover
+                          className={`${styles.hoverShow} ml-[8px] text-[12px] leading-5 text-[#6E7B8D]`}
+                          value={`分段编号：${e.content}`}
+                        />
+                        {/* <span
                           className={`${styles.hoverShow} ml-[8px] text-[12px] leading-5 text-[#6E7B8D]`}
                         >
                           分段编号：{e.chunk_id}
-                        </span>
+                        </span> */}
                         <Tooltip content="复制">
                           <button
                             onClick={(event) => {
@@ -483,18 +487,6 @@ function HitTest(props: { datasetName: string }) {
                         {/* <IconDriveFile /> */}
                         {getFileIcon(getFileExtension(e.document_name))}
                       </span>
-                      {/* <Tooltip content={e.document_name}>
-                        <div
-                          className={styles.nm}
-
-                        >
-                          <div className="mt-[3px] ml-[4px] text-[#6E7B8D]">
-                            {e?.positions
-                              ? `${e.document_name} - 第${e?.positions[0]?.page_id}页`
-                              : e.document_name}
-                          </div>
-                        </div>
-                      </Tooltip> */}
                       <EllipsisPopover
                         value={
                           e?.positions
@@ -502,15 +494,15 @@ function HitTest(props: { datasetName: string }) {
                             : e.document_name
                         }
                         className={styles.nm}
-                        isLink
-                        handleLink={() =>
-                          handleToParagraph(
-                            e.document_id,
-                            e.chunk_id,
-                            JSON.stringify(e.positions ? e.positions[0] : {}),
-                            e.parent_title_id
-                          )
-                        }
+                        // isLink
+                        // handleLink={() =>
+                        //   handleToParagraph(
+                        //     e.document_id,
+                        //     e.chunk_id,
+                        //     JSON.stringify(e.positions ? e.positions[0] : {}),
+                        //     e.parent_title_id
+                        //   )
+                        // }
                       />
                       {/* <span className={styles.sp}>
                           分段数：{index + 1}/{segmentationlist.length}
