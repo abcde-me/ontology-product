@@ -20,7 +20,7 @@ export const ParagraphMetadata: React.FC<{
         {(metadata.parent_id || metadata.fatherParagraph) && (
           <div className="flex gap-2">
             <span className="w-[100px] text-sm  text-[#6E7B8D]">父分片：</span>
-            <span className="w-full whitespace-pre-wrap text-sm text-[#475569]">
+            <span className="w-full whitespace-pre-wrap text-sm text-[#0F172A]">
               {metadata.parent_id || metadata.fatherParagraph || '-'}
             </span>
           </div>
@@ -30,7 +30,7 @@ export const ParagraphMetadata: React.FC<{
             <span className="w-[100px] text-sm  text-[#6E7B8D]">
               左邻分片：
             </span>
-            <span className="w-full whitespace-pre-wrap text-sm text-[#475569]">
+            <span className="w-full whitespace-pre-wrap text-sm text-[#0F172A]">
               {metadata.left_chunk_id || metadata.leftParagraph || '-'}
             </span>
           </div>
@@ -40,7 +40,7 @@ export const ParagraphMetadata: React.FC<{
             <span className="w-[100px] text-sm  text-[#6E7B8D]">
               右邻分片：
             </span>
-            <span className="w-full whitespace-pre-wrap text-sm text-[#475569]">
+            <span className="w-full whitespace-pre-wrap text-sm text-[#0F172A]">
               {metadata.right_chunk_id || metadata.rightParagraph || '-'}
             </span>
           </div>

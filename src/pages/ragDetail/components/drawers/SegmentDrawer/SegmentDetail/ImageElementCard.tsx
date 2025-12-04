@@ -53,12 +53,12 @@ const ImageElementCard: React.FC<ImageElementCardProps> = ({
 
   return (
     <>
-      <div className="mb-6 rounded-lg border border-gray-200 bg-white p-4">
+      <div className="mb-6 rounded-lg border border-gray-200 bg-white p-3">
         <div className="mb-3 flex items-center">
           <span className="inline-flex items-center rounded bg-purple-50 px-2 py-1 text-xs font-medium text-purple-600">
             图片
           </span>
-          <span className="ml-2 text-sm text-gray-600">
+          <span className="ml-2 text-sm text-[#0F172A]">
             元素ID: {element.id}
           </span>
         </div>
