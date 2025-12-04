@@ -120,7 +120,6 @@ export const PrefixRagV2 = '/aimdp-manager/api/v1';
 export const PrefixEngine = '/metadata-service/api/v1';
 
 // 多模态数据治理平台接口
-// TODO: 代替换接口
 export const ModaForgeResourceEndpoints = {
   // 登录
   Login: PrefixUserSpace + '/Login',
@@ -414,13 +413,21 @@ export const ModaForgeResourceEndpoints = {
   sqlExportDatasetDetailApi: PrefixAimdp + '/GetSqlExportTaskInfo',
   datasetsOptionsApi: PrefixAimdp + '/ListDatasets',
 
+  // 数据加工SQL开发脚本接口
+  // 开发SQL脚本列表
+  listDevelopScriptApi: PrefixAimdp + '/ListDevelopScript',
+  // 开发SQL脚本创建
+  createDevelopScriptApi: PrefixAimdp + '/CreateDevelopScript',
+  // 开发SQL脚本保存
+  editDevelopScriptApi: PrefixAimdp + '/EditDevelopScript',
+  // 获取开发SQL脚本详情
+  getDevelopScriptInfoApi: PrefixAimdp + '/GetDevelopScriptInfo',
+
   leGetTask: PrefixLabelService + '/getTask',
   leGetTaskById: PrefixLabelService + '/getTaskById',
   leGetLabels: PrefixLabelService + '/getLabels',
   leSaveTask: PrefixLabelService + '/saveTask',
   leGetTaskReuslt: PrefixLabelService + '/getTaskResult',
-
-  ListDevelopScriptApi: PrefixAimdp + '/ListDevelopScript',
 
   // 数据资产接口
   // 查询数据资产表字段和映射关系
