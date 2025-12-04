@@ -550,6 +550,8 @@ const DatasetDetail = (props: {
   datasetDetailVisible?: boolean;
 }) => {
   const { isHideEdit, detailId, datasetDetailVisible } = props;
+  const url = new URL(window.location.href);
+  const sceneName = url.searchParams.get('sceneName');
   const [datasetDetail, setDatasetDetail] =
     React.useState<DatasetDetail | null>(null); //数据集详情
   const [editModalVisible, setEditModalVisible] = React.useState(false); //编辑弹窗是否显示
@@ -780,13 +782,9 @@ const DatasetDetail = (props: {
     const handleScroll = (event) => {
       const currentScrollTop = container.scrollTop;
 
-      if (event.deltaY > 0 && !isHiddenBaseInfo) {
+      if (currentScrollTop > 0 && !isHiddenBaseInfo) {
         setIsHiddenBaseInfo(true);
-      } else if (
-        currentScrollTop === 0 &&
-        event.deltaY < 0 &&
-        isHiddenBaseInfo
-      ) {
+      } else if (currentScrollTop === 0 && isHiddenBaseInfo) {
         setIsHiddenBaseInfo(false);
         event.preventDefault();
       }
@@ -797,11 +795,13 @@ const DatasetDetail = (props: {
     const throttledHandleScroll = throttle(handleScroll, 100);
 
     // 监听滚轮事件
-    container.addEventListener('wheel', handleScroll, { passive: false });
+    container.addEventListener('scroll', throttledHandleScroll, {
+      passive: false
+    });
 
     // 在组件卸载时移除监听器
     return () => {
-      container.removeEventListener('wheel', handleScroll);
+      container.removeEventListener('scroll', throttledHandleScroll);
       throttledHandleScroll.cancel(); // 清除节流计时器
     };
   }, [isHiddenBaseInfo]);
@@ -944,8 +944,20 @@ const DatasetDetail = (props: {
     path: string
   ) => {
     history.push(
-      `/tenant/compute/modaforge/ragDetail?datasetId=${id}&documentId=${document_id}&bucketName=${bucket_name}&path=${path}&datasetName=${datasetDetail?.name}`
+      `/tenant/compute/modaforge/ragDetail?datasetId=${id}&documentId=${document_id}&bucketName=${bucket_name}&path=${path}&datasetName=${datasetDetail?.name}&sceneName=${sceneName}`
     );
+  };
+
+  // 获取场景分类name
+  const getSceneName = (sceneId: number) => {
+    switch (sceneId) {
+      case 1:
+        return '分类';
+      case 2:
+        return '聚类';
+      default:
+        return '';
+    }
   };
 
   // 删除知识库文件
@@ -1476,11 +1488,19 @@ const DatasetDetail = (props: {
                 style={{ fontWeight: '500', fontSize: '20px' }}
                 onClick={handleGoToDatasetList}
               >
-                数据集市
+                {sceneName || '数据集市'}
               </span>
             </Breadcrumb.Item>
             <Breadcrumb.Item>
               {datasetDetail?.name || '数据集详情'}
+              <span className="ml-[8px]">
+                {renderStatusTag(
+                  datasetDetail?.status as string,
+                  datasetDetail?.error_reason,
+                  handleVersionRebuild,
+                  handlerefresh
+                )}
+              </span>
             </Breadcrumb.Item>
           </Breadcrumb>
         </div>
@@ -1510,7 +1530,10 @@ const DatasetDetail = (props: {
                         !datasetDetail || datasetDetail.status !== 'normal'
                       }
                       onClick={handleEdit}
+                      type="text"
+                      style={{ color: '#94A3B8' }}
                     >
+                      <IconEdit style={{ color: '#334155' }} />
                       编辑
                     </Button>
                   </Tooltip>
@@ -1539,12 +1562,6 @@ const DatasetDetail = (props: {
                             </Tooltip>
                           ) : (
                             <span>{datasetDetail.name}</span>
-                          )}
-                          {renderStatusTag(
-                            datasetDetail.status,
-                            datasetDetail.error_reason,
-                            handleVersionRebuild,
-                            handlerefresh
                           )}
                         </div>
                       )
@@ -1768,6 +1785,10 @@ const DatasetDetail = (props: {
                 }
               });
               return false; // 先阻止默认跳转
+            }
+
+            if (e === 'hittest') {
+              setIsHiddenBaseInfo(true);
             }
 
             setActiveTab(e);

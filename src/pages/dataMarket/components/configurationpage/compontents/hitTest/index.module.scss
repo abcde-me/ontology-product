@@ -2,10 +2,10 @@
   display: flex;
   height: calc(100vh - 72px);
   .leftList {
-    flex: 1;
+    flex: 0.4;
     background: #ffffff;
     border-right: 1px solid #e2e8f0;
-    padding: 0px 14px 16px 16px;
+    padding: 0px 14px 16px 0px;
     overflow-y: auto;
     .testHeader {
       height: 24px;
@@ -85,6 +85,9 @@
         .copy {
           display: none;
         }
+      }
+      .historyTestContent:hover {
+        font-weight: 600;
       }
       .historyTestContent:hover .copy {
         margin: -5px 0 0 12px;
@@ -185,6 +188,9 @@
             .operateBtn {
               display: none;
             }
+            .hoverShow {
+              display: none;
+            }
             .sr {
               display: flex;
               justify-content: flex-end;
@@ -193,7 +199,7 @@
                 background: #eef6ff;
                 border-radius: 6px;
                 width: 80px;
-                height: 20px;
+                height: 24px;
                 display: flex;
                 align-items: center;
                 justify-content: center;
@@ -201,20 +207,25 @@
                 font-size: 14px;
                 color: #007dfa;
                 line-height: 20px;
-                font-weight: 500;
+              }
+              .hoverShow {
+                max-width: 240px;
               }
             }
           }
           .sl {
             display: flex;
             align-items: center;
-            padding: 0 8px 8px;
+            padding: 8px;
             .nm {
               width: 240px;
               white-space: nowrap; /* 禁止换行 */
               overflow: hidden; /* 超出部分隐藏 */
               text-overflow: ellipsis; /* 超出部分显示省略号 */
-              cursor: pointer; /* 鼠标悬停时显示手型 */
+              // cursor: pointer; /* 鼠标悬停时显示手型 */
+              margin: 2px 0 0 4px;
+              color: #6e7b8d;
+              font-size: 14px;
             }
             .sp {
               margin-left: 12px;
@@ -223,12 +234,17 @@
           .segmentationContent {
             padding-bottom: 12px;
             padding: 0 8px 8px;
-            // max-height: 100px;
+            max-height: 420px;
             overflow-y: auto;
           }
         }
         .segmentationBox:hover {
           border: 1px solid #007dfa;
+
+          .hoverShow {
+            display: block;
+          }
+
           .operateBtn {
             display: flex;
             flex: 1;
@@ -236,9 +252,18 @@
             justify-content: flex-end;
             gap: 8px;
             height: 24px;
+            border-color: #cbd5e1 !important;
 
             :global(.arco-btn) {
               height: 24px;
+              padding: 0 12px;
+            }
+
+            :global(span) {
+              margin-left: 8px;
+              color: #1e293b;
+              font-size: 14px;
+              font-weight: 600;
             }
           }
         }

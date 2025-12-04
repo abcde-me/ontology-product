@@ -1,11 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import styles from './index.module.scss';
-import {
-  IconDriveFile,
-  IconMindMapping,
-  IconSettings,
-  IconStorage
-} from '@arco-design/web-react/icon';
+import { IconMindMapping, IconSettings } from '@arco-design/web-react/icon';
 import { Button, Input, Message, Modal, Tooltip } from '@arco-design/web-react';
 import { Table } from '@ccf2e/arco-material';
 import { format } from 'date-fns';
@@ -21,6 +16,7 @@ import CopyNormalIconSvg from '@/assets/rag/copy-normal.svg';
 import CopyHighIconSvg from '@/assets/rag/copy-high.svg';
 import JumpToHighIconSvg from '@/assets/rag/jump-to-high.svg';
 import JumpToNormalIconSvg from '@/assets/rag/jump-to-normal.svg';
+import SegmentDetailsIconSvg from '@/assets/rag/segment-details.svg';
 import ImageModal from '@/pages/ragDetail/components/common/ImageModal';
 import copy from 'copy-to-clipboard';
 import {
@@ -132,9 +128,9 @@ function HitTest(props: { datasetName: string }) {
   const oncEditPolicy = () => {
     seteditPolicy(true);
   };
-  const handleCopy = (data) => {
+  const handleCopy = (data, text) => {
     copy(data);
-    Message.success(`已复制内容`);
+    Message.success(`复制${text}成功`);
   };
   const recordColumns: any = [
     {
@@ -147,7 +143,7 @@ function HitTest(props: { datasetName: string }) {
             <button
               onClick={(e) => {
                 e.stopPropagation();
-                handleCopy(record.query);
+                handleCopy(record.query, '历史测试内容');
               }}
               onMouseEnter={() => setHoveredCopyButton(true)}
               onMouseLeave={() => setHoveredCopyButton(false)}
@@ -206,7 +202,7 @@ function HitTest(props: { datasetName: string }) {
       const res = await RunKnowledgeHitTesting(params);
       if (res.code === '' && res.status === 200) {
         if (res?.data?.length === 0)
-          Message.info('未检索到相关内容，请更换测试内容或调整检索设置');
+          Message.error('未检索到相关内容，请更换测试内容或调整检索设置');
         setsegmentationlist(res.data || []);
         setsegmentationlistFilter(res.data || []);
         init({
@@ -269,6 +265,7 @@ function HitTest(props: { datasetName: string }) {
     position: string,
     parent_title_id: string
   ) => {
+    console.log(position, 'sssss');
     const res = await getKnowledgeDocument({
       document_id
     });
@@ -393,29 +390,37 @@ function HitTest(props: { datasetName: string }) {
                         <div className={styles.srt}>
                           分值：{e.score.toFixed(2)}
                         </div>
-                        <span className="ml-[8px] text-[12px] leading-5">
+                        <span className="ml-[8px] text-[12px] leading-5 text-[#6E7B8D]">
                           字符数：{e?.content.length}
                         </span>
-                        <span className="ml-[8px] text-[12px] leading-5">
+                        <span
+                          className={`${styles.hoverShow} ml-[8px] text-[12px] leading-5 text-[#6E7B8D]`}
+                        >
                           |
                         </span>
-                        <span className="ml-[8px] text-[12px] leading-5">
+                        <EllipsisPopover
+                          className={`${styles.hoverShow} ml-[8px] text-[12px] leading-5 text-[#6E7B8D]`}
+                          value={`分段编号：${e.content}`}
+                        />
+                        {/* <span
+                          className={`${styles.hoverShow} ml-[8px] text-[12px] leading-5 text-[#6E7B8D]`}
+                        >
                           分段编号：{e.chunk_id}
-                        </span>
+                        </span> */}
                         <Tooltip content="复制">
                           <button
                             onClick={(event) => {
                               event.stopPropagation();
-                              handleCopy(e.content);
+                              handleCopy(e.content, '分段编号');
                             }}
                             onMouseEnter={() => setHoveredCopyResult(index)}
                             onMouseLeave={() => setHoveredCopyResult(null)}
-                            className="ml-[8px]"
+                            className={`${styles.hoverShow} ml-[8px]`}
                           >
                             {hoveredCopyResult === index ? (
                               <CopyHighIconSvg className="h-3 w-3" />
                             ) : (
-                              <CopyNormalIconSvg className="h-3 w-3" />
+                              <CopyNormalIconSvg className="h-3 w-3 text-[#6E7B8D]" />
                             )}
                           </button>
                         </Tooltip>
@@ -426,13 +431,15 @@ function HitTest(props: { datasetName: string }) {
                               handleToParagraph(
                                 e.document_id,
                                 e.chunk_id,
-                                JSON.stringify(e.positions[0]),
+                                JSON.stringify(
+                                  e.positions ? e.positions[0] : {}
+                                ),
                                 e.parent_title_id
                               );
                             }}
                             onMouseEnter={() => setHoveredJumpResult(index)}
                             onMouseLeave={() => setHoveredJumpResult(null)}
-                            className="ml-[8px]"
+                            className={`${styles.hoverShow} ml-[8px]`}
                           >
                             {hoveredJumpResult === index ? (
                               <JumpToHighIconSvg className="h-3 w-3" />
@@ -445,7 +452,7 @@ function HitTest(props: { datasetName: string }) {
                       <div className={styles.operateBtn}>
                         <Button
                           type="outline"
-                          icon={<IconStorage />}
+                          icon={<SegmentDetailsIconSvg />}
                           onClick={() => {
                             setShowDrawer(true);
                             setDefaultTab('detail');
@@ -457,7 +464,7 @@ function HitTest(props: { datasetName: string }) {
                         </Button>
                         <Button
                           type="outline"
-                          icon={<IconMindMapping />}
+                          icon={<IconMindMapping className="text-[#1E293B]" />}
                           onClick={() => {
                             setShowDrawer(true);
                             setDefaultTab('trace');
@@ -480,25 +487,23 @@ function HitTest(props: { datasetName: string }) {
                         {/* <IconDriveFile /> */}
                         {getFileIcon(getFileExtension(e.document_name))}
                       </span>
-                      <Tooltip content={e.document_name}>
-                        <div
-                          className={styles.nm}
-                          onClick={() =>
-                            handleToParagraph(
-                              e.document_id,
-                              e.chunk_id,
-                              JSON.stringify(e.positions[0]),
-                              e.parent_title_id
-                            )
-                          }
-                        >
-                          <div className="mt-[3px]">
-                            {e?.positions
-                              ? `${e.document_name} - 第${e?.positions[0]?.page_id}页`
-                              : e.document_name}
-                          </div>
-                        </div>
-                      </Tooltip>
+                      <EllipsisPopover
+                        value={
+                          e?.positions
+                            ? `${e.document_name} - 第${e?.positions[0]?.page_id}页`
+                            : e.document_name
+                        }
+                        className={styles.nm}
+                        // isLink
+                        // handleLink={() =>
+                        //   handleToParagraph(
+                        //     e.document_id,
+                        //     e.chunk_id,
+                        //     JSON.stringify(e.positions ? e.positions[0] : {}),
+                        //     e.parent_title_id
+                        //   )
+                        // }
+                      />
                       {/* <span className={styles.sp}>
                           分段数：{index + 1}/{segmentationlist.length}
                         </span> */}
