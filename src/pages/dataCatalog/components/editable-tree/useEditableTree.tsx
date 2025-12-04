@@ -27,6 +27,7 @@ import { validateName } from '@/utils/valiate';
 import { DATA_CATALOG_PERMISSIONS } from '@/config/permissions';
 import { PermissionWrapper } from '@/components/PermissionGuard';
 import styles from '../../modal.module.css';
+import YuanShujuIcon from '@/assets/yuanshuju-icon.svg';
 
 export function useEditableTree({ catalogTreeStore }) {
   const {
@@ -613,7 +614,10 @@ export function useEditableTree({ catalogTreeStore }) {
           <div className="tree-icon mr-2 w-4">
             {[CatalogTypeEnum.volume].includes(dataRef?.type) ? (
               <IconStorage className="text-base" />
-            ) : dataRef?.type === CatalogTypeEnum.db ? null : ( // <IconCaretDown style={{ fontSize: '12px' }} />
+            ) : dataRef?.type === CatalogTypeEnum.db ? null : dataRef?.type === // <IconCaretDown style={{ fontSize: '12px' }} />
+              CatalogTypeEnum.metadata ? (
+              <YuanShujuIcon className="text-base" />
+            ) : (
               <IconArchive className="text-base" />
             )}
           </div>

@@ -2,7 +2,6 @@
 .sql-editor-container {
   flex: 1;
   background-color: #fff;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
   overflow: hidden;
   position: relative;
 
@@ -18,7 +17,8 @@
   // CodeMirror 编辑器样式
   .code-editor {
     height: 100%;
-    min-height: 300px;
+    height: 450px;
+    overflow-y: auto;
 
     :global(.cm-editor) {
       height: 100%;
@@ -50,6 +50,10 @@
     background-color: unset;
     color: var(--color-text-4);
     width: 24px;
+  }
+
+  :global(.arco-collapse-item-active > .arco-collapse-item-header) {
+    border-bottom: none;
   }
 
   .sql-running-info-panel {
@@ -85,7 +89,7 @@
     bottom: 0;
     left: 0;
     right: 0;
-    padding: 20px 24px;
+    padding: 8px 24px 24px;
     background-color: #fff;
     width: 100%;
     z-index: 1;

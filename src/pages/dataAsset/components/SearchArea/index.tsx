@@ -206,7 +206,7 @@ export default function SearchArea({
 
   // 设置搜索条件的内容
   const settingsContent = (
-    <div className="flex max-h-[400px] min-w-[240px] max-w-[400px] flex-col rounded bg-white">
+    <div className="flex flex-col rounded bg-white">
       <div className="mb-[4px]">
         <Input
           placeholder="输入关键词搜索"
@@ -216,7 +216,7 @@ export default function SearchArea({
           allowClear
         />
       </div>
-      <div className="max-h-[300px] overflow-y-auto">
+      <div>
         <div
           className="flex cursor-pointer items-center pb-[7px] pt-[7px] transition-colors hover:bg-[var(--color-fill-2)]"
           onClick={() =>
@@ -486,7 +486,7 @@ export default function SearchArea({
         <div className="border-b border-[#CBD5E1] py-[24px]">
           {/* 字段搜索列表 */}
           {visibleFields.length > 0 && (
-            <div className="mb-4 grid grid-cols-4 gap-4">
+            <div className="mb-[8px] grid grid-cols-4 gap-4">
               {visibleFields.map((field) => {
                 return (
                   <div key={field.id} className="flex items-center gap-3">
@@ -510,6 +510,7 @@ export default function SearchArea({
               content={settingsContent}
               trigger="click"
               position="bl"
+              style={{ width: '240px', height: '296px' }}
               popupVisible={settingsVisible}
               onVisibleChange={(visible) => {
                 setSettingsVisible(visible);
@@ -521,7 +522,7 @@ export default function SearchArea({
               <Button
                 type="text"
                 className={classNames(
-                  'ml-auto flex items-center gap-1',
+                  'ml-auto flex items-center gap-1 px-[0px]',
                   styles['settings-button']
                 )}
               >

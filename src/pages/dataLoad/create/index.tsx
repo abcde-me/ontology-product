@@ -576,151 +576,16 @@ export default function DataLoadCreate() {
     [sourceType, selectedNodeType, processTableListWithCheckable]
   );
 
-  // 计算过滤后的表格列表（基于搜索关键词）
-  // const filteredTableList = useMemo(() => {
-  //   if (!tableSearchValue.trim()) {
-  //     return tableList;
-  //   }
-  //   const searchLower = tableSearchValue.toLowerCase();
-  //   return tableList.filter((table) =>
-  //     table.toLowerCase().includes(searchLower)
-  //   );
-  // }, [tableList, tableSearchValue]);
-
-  // 计算选中状态：'all' | 'indeterminate' | 'none'
-  // const getSelectAllStatus = useCallback(
-  //   (selectedValues: string[]): 'all' | 'indeterminate' | 'none' => {
-  //     if (!Array.isArray(selectedValues) || filteredTableList.length === 0) {
-  //       return 'none';
-  //     }
-  //     const filteredValues = selectedValues.filter((item) => item !== 'all');
-  //     const selectedCount = filteredValues.length;
-  //     if (selectedCount === 0) {
-  //       return 'none';
-  //     }
-  //     // 检查是否所有过滤后的选项都被选中
-  //     const allFilteredSelected = filteredTableList.every((option) =>
-  //       filteredValues.includes(option)
-  //     );
-  //     if (allFilteredSelected && selectedCount === filteredTableList.length) {
-  //       return 'all';
-  //     }
-  //     // 检查是否有部分选中
-  //     const someFilteredSelected = filteredTableList.some((option) =>
-  //       filteredValues.includes(option)
-  //     );
-  //     return someFilteredSelected ? 'indeterminate' : 'none';
-  //   },
-  //   [filteredTableList]
-  // );
-
-  // 处理"全部"选项的点击事件
-  // const handleAllClick = useCallback(
-  //   (e: React.MouseEvent) => {
-  //     e.stopPropagation();
-  //     const currentValue = form.getFieldValue('table_name') || [];
-  //     const filteredValue = currentValue.filter(
-  //       (item: string) => item !== 'all'
-  //     );
-
-  //     // 判断是否全选（基于过滤后的列表）
-  //     const isAllSelected =
-  //       filteredTableList.length > 0 &&
-  //       filteredTableList.every((option) => filteredValue.includes(option));
-
-  //     if (isAllSelected) {
-  //       // 当前全选，取消所有过滤后选项的选择（保留其他未过滤的选项）
-  //       const remainingValues = filteredValue.filter(
-  //         (item: string) => !filteredTableList.includes(item)
-  //       );
-  //       form.setFieldsValue({ table_name: remainingValues });
-  //     } else {
-  //       // 当前未全选或未选择，选中所有过滤后的选项
-  //       if (filteredTableList.length > 0) {
-  //         const newValues = [
-  //           ...new Set([...filteredValue, ...filteredTableList])
-  //         ];
-  //         form.setFieldsValue({ table_name: newValues });
-  //       }
-  //     }
-  //   },
-  //   [form, filteredTableList]
-  // );
-
-  // 处理表格名称选择（全部标签逻辑）
-  // const handleAllTagChange = useCallback(
-  //   (value: string | string[]) => {
-  //     // 单选模式下，value 是字符串；多选模式下，value 是数组
-  //     const isSingleMode = selectedNodeType === 'metadata';
-
-  //     if (isSingleMode) {
-  //       // 单选模式：直接设置单个值
-  //       form.setFieldsValue({ table_name: value || undefined });
-  //       return;
-  //     }
-
-  //     // 多选模式：处理数组逻辑
-  //     const currentValue = Array.isArray(value) ? value : [];
-  //     const previousValue = form.getFieldValue('table_name') || [];
-  //     const previousArray = Array.isArray(previousValue) ? previousValue : [];
-
-  //     // 检查是否点击了"全部"选项（通过比较前后值的变化）
-  //     const previousHasAll = previousArray.includes('all');
-  //     const currentHasAll = currentValue.includes('all');
-  //     const clickedAll = previousHasAll !== currentHasAll;
-
-  //     if (clickedAll && currentHasAll) {
-  //       // 如果点击了"全部"选项（当前值包含 'all'），切换全选状态
-  //       const filteredPrevious = previousArray.filter(
-  //         (item: string) => item !== 'all'
-  //       );
-  //       // 判断是否全选（基于过滤后的列表）
-  //       const isAllSelected =
-  //         filteredTableList.length > 0 &&
-  //         filteredTableList.every((option) =>
-  //           filteredPrevious.includes(option)
-  //         );
-
-  //       if (isAllSelected) {
-  //         // 当前全选，取消所有过滤后选项的选择（保留其他未过滤的选项）
-  //         const remainingValues = filteredPrevious.filter(
-  //           (item: string) => !filteredTableList.includes(item)
-  //         );
-  //         form.setFieldsValue({ table_name: remainingValues });
-  //       } else {
-  //         // 当前未全选或未选择，选中所有过滤后的选项
-  //         if (filteredTableList.length > 0) {
-  //           const newValues = [
-  //             ...new Set([...filteredPrevious, ...filteredTableList])
-  //           ];
-  //           form.setFieldsValue({ table_name: newValues });
-  //         }
-  //       }
-  //     } else {
-  //       // 正常选择，过滤掉 'all' 值
-  //       const filteredValue = currentValue.filter((item) => item !== 'all');
-  //       form.setFieldsValue({ table_name: filteredValue });
-  //     }
-  //   },
-  //   [form, filteredTableList, selectedNodeType]
-  // );
-
   // 处理文件变化
   const handleFileChange = useCallback(
     (fileData: FileData | FileData[]) => {
       if (Array.isArray(fileData)) {
         if (fileData.length === 0) {
           setUploadedFiles([]);
-          // if (sourceType === SOURCE_TYPES.LOCAL) {
-          //   // form.setFieldsValue({ connector_id: undefined });
-          // }
           return;
         }
 
         setUploadedFiles(fileData);
-        // if (sourceType === SOURCE_TYPES.LOCAL) {
-        //   // form.setFieldsValue({ connector_id: 'local_files_uploaded' });
-        // }
         return;
       }
 
@@ -733,10 +598,6 @@ export default function DataLoadCreate() {
         }
         return [...prev, fileData];
       });
-
-      // if (sourceType === SOURCE_TYPES.LOCAL) {
-      //   // form.setFieldsValue({ connector_id: 'local_files_uploaded' });
-      // }
     },
     [form, sourceType]
   );
@@ -746,9 +607,6 @@ export default function DataLoadCreate() {
     (fileName: string) => {
       setUploadedFiles((prev) => {
         const updatedFiles = prev.filter((file) => file.name !== fileName);
-        if (updatedFiles.length === 0 && sourceType === SOURCE_TYPES.LOCAL) {
-          // form.setFieldsValue({ connector_id: undefined });
-        }
         return updatedFiles;
       });
     },
@@ -838,11 +696,6 @@ export default function DataLoadCreate() {
         sourceType === SOURCE_TYPES.DB &&
         formValues.sql_process_enabled === 'disable'
       ) {
-        const tableNameValues = formValues.table_name || [];
-        // const isAllSelected =
-        //   Array.isArray(tableNameValues) &&
-        //   tableNameValues.length === tableList.length &&
-        //   tableList.every((option) => tableNameValues.includes(option));
         const processedTableNames = formValues.table_name;
 
         if (!processedTableNames || processedTableNames.length === 0) {
@@ -1015,31 +868,6 @@ export default function DataLoadCreate() {
         // 当载入位置变化时，重置选择抽取的表
         form.setFieldsValue({ table_name: undefined });
         form.setFieldsValue({ db_name: nodeData?.name });
-
-        const currentConnectorId = form.getFieldValue('connector_id');
-        const typeName = nodeData?.type_name;
-
-        // if (!currentConnectorId) {
-        //   setTableNames('');
-        // } else if (typeName === 'db' || typeName === 'metadata') {
-        //   const generateType = typeName === 'metadata' ? 'metadata' : 'db';
-
-        //   void (async () => {
-        //     try {
-        //       const tableNameRes = await getTableName({
-        //         connector_id: currentConnectorId,
-        //         generate_type: generateType
-        //       });
-        //       setTableNames(tableNameRes?.data || '');
-        //     } catch (error) {
-        //       console.error('生成数据库名称失败:', error);
-        //       setTableNames('');
-        //       Message.error('生成数据库名称失败，请重试');
-        //     }
-        //   })();
-        // } else {
-        //   setTableNames('');
-        // }
       }
     },
     [form, sourceType]
@@ -1555,10 +1383,10 @@ export default function DataLoadCreate() {
                     <div
                       className={classNames(
                         styles['sql-editor-container'],
-                        'rounded-[4px] border border-solid border-[#E2E8F0]'
+                        'rounded-[4px] border border-solid border-[#CBD5E1]'
                       )}
                     >
-                      <div className="flex items-center border-b border-solid border-[#E2E8F0] p-[12px] pb-[12px]">
+                      <div className="flex items-center border-b border-solid border-[#CBD5E1] p-[12px] pb-[12px]">
                         <Button
                           type="secondary"
                           disabled={!sqlContent || sqlContent.trim() === ''}
@@ -1684,18 +1512,14 @@ export default function DataLoadCreate() {
             </RadioGroup>
           </FormItem>
 
-          <FormItem label="">
-            {loadVal === LOAD_TYPES.CRON && (
-              // <div className={Styles.cycleLoadingBox}>
-              <SchedulerRun
-                // @ts-expect-error
-                ref={SchedulerRunRef}
-                options={{}}
-                onOptionsChange={setExpression}
-              />
-              // </div>
-            )}
-          </FormItem>
+          {loadVal === LOAD_TYPES.CRON && (
+            <SchedulerRun
+              // @ts-expect-error
+              ref={SchedulerRunRef}
+              options={{}}
+              onOptionsChange={setExpression}
+            />
+          )}
         </Form>
 
         <div className={styles['footer-btn-box']}>
