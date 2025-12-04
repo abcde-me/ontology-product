@@ -51,9 +51,16 @@ const SegmentCard: React.FC<SegmentCardProps> = memo(
               </span>
             </div>
           </div>
-          {(isSelected || isHovered) && (
+          {/* 使用 opacity 和 pointer-events 控制可见性，避免 hover 时布局抖动 */}
+          <div
+            className={`transition-opacity duration-200 ${
+              isSelected || isHovered
+                ? 'opacity-100'
+                : 'pointer-events-none opacity-0'
+            }`}
+          >
             <SegmentCardActions segment={segment} isEditing={isEditing} />
-          )}
+          </div>
         </div>
 
         {/* Content area */}
