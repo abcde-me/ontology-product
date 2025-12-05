@@ -12,16 +12,11 @@ import {
   Spin,
   Tooltip
 } from '@arco-design/web-react';
-import {
-  IconArrowLeft,
-  IconPlus,
-  IconQuestionCircle
-} from '@arco-design/web-react/icon';
+import { IconArrowLeft, IconQuestionCircle } from '@arco-design/web-react/icon';
 import { cloneDeep, isArray, isEmpty, omitBy } from 'lodash-es';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useHistory } from 'react-router';
-import { v4 as uuidV4 } from 'uuid';
-import { convertToUTCFormat, getRandomHexColorStrict } from '../common';
+import { convertToUTCFormat } from '../common';
 import {
   useGetModelLabelList,
   useGetModelList
@@ -32,15 +27,13 @@ import {
   AnnotationTypeContentCode,
   AnnotationTypeStatus,
   LabelData,
-  LabelInfoAttribute,
-  LabelInfoAttributeGroup,
-  LabelInfoAttributeGroupType,
   RequirementTypeNameMap,
   toolFileType
 } from '../type';
 import AnnotationType from './components/AnnotationType';
 import { Classify } from './components/Classify';
 import { DataSourceModal } from './components/DetailModal';
+import LabelAndAttributeForm from './components/LabelAndAttributeForm';
 import QualityConfig from './components/QualityConfig';
 import {
   formatSubmitData,
@@ -51,8 +44,7 @@ import {
   ValidationErrors
 } from './components/TaskDistribution';
 import TextSubstanceComponent from './components/TextEntity';
-import LabelAndAttributeForm from './components/LabelAndAttributeForm';
-import './configuration';
+import './configuration.scss';
 import { useLabelOperations } from './hooks/useLabelOperations';
 import {
   isAttributeFromDetail as checkAttributeFromDetail,
@@ -64,7 +56,6 @@ import {
   generateLabels,
   LABEL_MAPPING
 } from './utils/generateLabels';
-import './configuration.scss';
 const BreadcrumbItem = Breadcrumb.Item;
 
 export default function RequirementConfig() {
@@ -73,8 +64,6 @@ export default function RequirementConfig() {
   const [distributeForm] = Form.useForm();
   const [qualityTaskForm] = Form.useForm();
   const FormItem = Form.Item;
-  const RadioGroup = Radio.Group;
-  const Option = Select.Option;
   const TextArea = Input.TextArea;
 
   const type = useParams('type');
