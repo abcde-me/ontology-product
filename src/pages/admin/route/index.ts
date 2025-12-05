@@ -19,7 +19,8 @@ import {
   USER_GROUP_PERMISSIONS,
   ROLE_PERMISSIONS,
   PROJECT_PERMISSIONS,
-  API_KEY_PERMISSIONS
+  API_KEY_PERMISSIONS,
+  METADATA_MANAGEMENT_PERMISSIONS
 } from '@/config/permissions';
 
 export type IRoute = AuthParams & {
@@ -282,6 +283,13 @@ export const routes: IRoute[] = [
         permission: DATA_ASSET_PERMISSIONS.LIST
       }
     ]
+  },
+  {
+    name: 'metadataManagement',
+    key: '/tenant/compute/modaforge/metadataManagement',
+    component: React.lazy(async () => import('../../metadataManagement')),
+    permission: METADATA_MANAGEMENT_PERMISSIONS.LIST,
+    children: []
   },
   // 数据标注 - 需求管理
   {
