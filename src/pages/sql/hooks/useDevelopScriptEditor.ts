@@ -8,14 +8,19 @@ import {
   runSqlScript,
   getRunResultSqlScript,
   runCancelSqlScript,
-  getSqlScriptDetail,
   getRunLogSqlScript
 } from '@/api/sql';
+import {
+  createDevelopScript,
+  editDevelopScript,
+  getDevelopScriptInfo
+} from '@/api/sql-develop';
 import { DEFAULT_SQL_PLACEHOLDER } from '../constant';
 import { useUserInfo } from '@/store/userInfoStore';
 import { RunResult } from '@/types/sqlApi';
 import timeFormattig from '@/utils/timeFormatting';
 import { generateSqlDefaultName } from '../utils';
+import { EditDevelopScriptResponse, ScriptParam } from '@/types/sqlDevelopApi';
 
 export interface UseEditorOptions {
   activeTab?: string;
@@ -71,6 +76,9 @@ export interface UseEditorReturn {
   // 编辑器操作
   setSize: (size: string) => void;
   handleContentChange: (value: string) => void;
+  handleSaveScript: (
+    value: string
+  ) => Promise<EditDevelopScriptResponse | null>;
   handleRunCode: () => Promise<void>;
   handleStopRunCode: () => void;
   getRunResultPolling: (id: string, params: any) => void;
@@ -125,6 +133,7 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
   // 跟踪是否已获取过结果和日志
   const [hasFetchedResult, setHasFetchedResult] = useState<boolean>(false);
   const [hasFetchedLog, setHasFetchedLog] = useState<boolean>(false);
+  const [scriptParams, setScriptParams] = useState<ScriptParam[]>([]);
 
   // 获取前一个运行状态的函数
   const getPrevRunStatus = useCallback(() => {
@@ -318,72 +327,52 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
     cancelGetRunLogPolling();
   }, [cancelGetRunResultPolling, cancelGetRunLogPolling]);
 
-  // 延时自动保存 - 使用 useCallback 优化
-  const handleSaveThrottled = useThrottleFn(
+  const handleSaveScript = useCallback(
     async (content: string) => {
-      if (!currentFile?.scriptId) {
-        try {
-          const res = await createSqlScript({
-            uid: userInfo?.id ?? '32020ad2-ef56-4e20-aa0b-4399429bb34c',
-            script_name:
-              currentFile?.title ?? generateSqlDefaultName(new Date()),
-            script_file_id: currentFile?.fileId ?? '',
-            script_content: content
-          });
-
-          if (res?.status === 200) {
-            setLastAutoSave(timeFormattig(new Date(res.data.update_time)));
-
-            // 调用 refreshDirectory 方法，更新左侧目录
-            if (typeof refreshDirectory === 'function') {
-              refreshDirectory();
-            }
-
-            // 调用 selectFile 方法，选中文件
-            if (typeof selectFile === 'function') {
-              selectFile(currentFile?.fileId ?? String(res.data.script_id));
-            }
-
-            // 更新脚本ID到标签页
-            if (onTabUpdate && currentFile) {
-              onTabUpdate(currentFile.key, {
-                content,
-                fileId: currentFile.fileId,
-                scriptId: String(res.data.script_id),
-                title: currentFile.title // 保持原有标题
-              });
-            }
-            return res.data;
-          } else {
-            Message.error(`自动保存失败: ${res.message || '未知错误'}`);
-            console.error('自动保存失败:', res.message);
-          }
-          return null;
-        } catch (error) {
-          Message.error(`自动保存失败`);
-          console.error('自动保存失败:', error);
-          return null;
-        }
-      }
-
       try {
-        const res = await updateSqlScript(Number(currentFile?.scriptId), {
-          uid: userInfo?.id ?? '32020ad2-ef56-4e20-aa0b-4399429bb34c',
-          script_name: currentFile.title ?? '',
-          script_content: content
+        const res = await editDevelopScript({
+          script_name: currentFile?.title ?? generateSqlDefaultName(new Date()),
+          script_content: content,
+          script_id: Number(currentFile?.scriptId) ?? 0,
+          scriptParams: []
         });
 
-        if (res?.status === 200) {
-          setLastAutoSave(timeFormattig(new Date(res.data.update_time)));
-          return res.data;
+        if (res?.status !== 200) {
+          Message.error(res?.message ?? '保存失败');
+          return null;
         }
-        return null;
+
+        return res.data;
       } catch (error) {
-        console.error('自动保存失败:', error);
+        Message.error('保存失败');
         return null;
       }
     },
-    { wait: 5000, leading: true, trailing: true }
+    [currentFile?.scriptId]
+  );
+
+  const createScript = useCallback(
+    async (content: string) => {
+      try {
+        const res = await createDevelopScript({
+          script_name: currentFile?.title ?? generateSqlDefaultName(new Date()),
+          script_context: content,
+          script_desc: '',
+          script_params: scriptParams
+        });
+
+        if (res?.status !== 200) {
+          Message.error(res?.message ?? '创建失败');
+          return null;
+        }
+
+        return res.data;
+      } catch (error) {
+        Message.error('创建失败');
+        return null;
+      }
+    },
+    [currentFile?.scriptId]
   );
 
   // 处理内容变化 - 优化依赖项
@@ -391,9 +380,9 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
     (value: string) => {
       setEditorContent(value);
       // 自动保存
-      handleSaveThrottled.run(value);
+      // handleSaveThrottled.run(value);
     },
-    [handleSaveThrottled, clearEditorState]
+    [clearEditorState]
   );
 
   // 运行代码 - 优化依赖项
@@ -522,16 +511,18 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
     if (currentTab.scriptId) {
       const loadFileContent = async () => {
         try {
-          const response = await getSqlScriptDetail(currentTab.scriptId!);
+          const response = await getDevelopScriptInfo({
+            script_id: Number(currentTab.scriptId!)
+          });
 
           if (response.status === 200 && response.data) {
             const fileData = response.data;
-            setLastScriptRunStatus(fileData?.run_status);
+            // setLastScriptRunStatus(fileData?.run_status);
             // 更新编辑器内容
             setEditorContent(fileData.script_content);
 
             // 更新运行状态
-            setExecid(String(fileData.script_execid));
+            // setExecid(String(fileData.script_execid));
 
             setLastAutoSave(timeFormattig(new Date(response.data.update_time)));
 
@@ -557,7 +548,7 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
     }
 
     return () => {
-      handleSaveThrottled.cancel();
+      // handleSaveThrottled.cancel();
     };
   }, [activeTab]); // 只依赖 activeTab，避免不必要的重复更新
 
@@ -592,6 +583,7 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
     // 操作
     setSize,
     handleContentChange,
+    handleSaveScript,
     handleRunCode,
     handleStopRunCode,
     getRunResultPolling,

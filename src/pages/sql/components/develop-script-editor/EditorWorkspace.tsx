@@ -28,11 +28,15 @@ import SQLFormatIcon from '@/assets/sql/sql-format-ico.svg';
 import IconStop from '@/assets/sql/sql-stop-icon.svg';
 import { SQL_PERMISSIONS } from '@/config/permissions';
 import { useHasPermission } from '@/store/userInfoStore';
-import { EditorProvider, useEditorContext } from '../../contexts/EditorContext';
+import {
+  EditorProvider,
+  useEditorContext
+} from '../../contexts/DevelopScriptEditorContext';
 import { FileTab } from '../../hooks/useTabManager';
 import RunningInfoPanel from './RunningInfoPanel';
 import classNames from 'classnames';
 import ModalParamList from '../data-manager/ModalParamList';
+import ReleaseVersionModal from './ReleaseVersionModal';
 
 interface NotebookWorkspaceProps {
   content: string;
@@ -85,6 +89,8 @@ const EditorWorkspaceContent: React.FC<{
       React.useState<string>('');
     const [isSpecificationsValid, setIsSpecificationsValid] = useState(true);
     const [paramVisible, setParamVisible] = React.useState<boolean>(false);
+    const [releaseVersionVisible, setReleaseVersionVisible] =
+      React.useState<boolean>(false);
     useEffect(() => {
       form.setFieldsValue({
         fileName: fileName
@@ -100,6 +106,7 @@ const EditorWorkspaceContent: React.FC<{
       lastAutoSave,
       editorContent,
       handleContentChange,
+      handleSaveScript,
       placeholderValue,
       runResult,
       execid,
@@ -299,17 +306,26 @@ const EditorWorkspaceContent: React.FC<{
                 脚本列表
               </Button>
             )}
-            {curActiveTab === 'data' && (
-              <Button
-                className={styles['btn-save']}
-                onClick={() => {
-                  setVisible(true);
-                }}
-                icon={<IconSave />}
-              >
-                保存
-              </Button>
-            )}
+            {/* {curActiveTab === 'data' && ( */}
+            <Button
+              className={classNames(styles['btn-save'], 'mr-[8px]')}
+              onClick={() => {
+                handleSaveScript(editorContent);
+              }}
+              icon={<IconSave />}
+            >
+              保存
+            </Button>
+            <Button
+              className={styles['btn-save']}
+              onClick={() => {
+                setReleaseVersionVisible(true);
+              }}
+              icon={<IconSave />}
+            >
+              发版
+            </Button>
+            {/* )} */}
           </div>
         </div>
 
@@ -462,6 +478,22 @@ const EditorWorkspaceContent: React.FC<{
         <ModalParamList
           paramVisible={paramVisible}
           onCancel={() => setParamVisible(false)}
+        />
+        {/* 发布版本弹窗 */}
+        <ReleaseVersionModal
+          visible={releaseVersionVisible}
+          onCancel={() => setReleaseVersionVisible(false)}
+          onSubmit={(values) => {
+            // TODO: 调用发布版本API
+            console.log('发布版本数据:', values);
+            Message.success('发布版本成功');
+            setReleaseVersionVisible(false);
+          }}
+          initialValues={{
+            scriptName: fileName,
+            version: 'V1',
+            versionDesc: ''
+          }}
         />
       </div>
     );
