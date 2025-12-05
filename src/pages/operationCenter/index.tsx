@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import WujieReact from 'wujie-react';
+import { OpenNewPageForOperationCenter } from '@/utils/env';
 
 const { bus } = WujieReact;
 
@@ -50,7 +51,8 @@ function OperationCenterPage() {
           loading={document.createElement('span') as any}
           props={{
             embedBySingleApp: true,
-            appName: 'modaforge'
+            appName: 'modaforge',
+            openNewPage: OpenNewPageForOperationCenter
           }}
         ></WujieReact>
       )}
