@@ -44,7 +44,7 @@ const TextElementCard: React.FC<TextElementCardProps> = ({
           placeholder="请输入文本内容"
         />
       ) : (
-        <div className="mb-3 rounded py-3 text-[14px] leading-6 text-gray-900">
+        <div className="rounded text-[14px] leading-6 text-gray-900">
           {element.content}
         </div>
       )}
