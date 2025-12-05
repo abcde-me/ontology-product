@@ -8,10 +8,13 @@ import {
   runSqlScript,
   getRunResultSqlScript,
   runCancelSqlScript,
-  getSqlScriptDetail,
   getRunLogSqlScript
 } from '@/api/sql';
-import { createDevelopScript, editDevelopScript } from '@/api/sql-develop';
+import {
+  createDevelopScript,
+  editDevelopScript,
+  getDevelopScriptInfo
+} from '@/api/sql-develop';
 import { DEFAULT_SQL_PLACEHOLDER } from '../constant';
 import { useUserInfo } from '@/store/userInfoStore';
 import { RunResult } from '@/types/sqlApi';
@@ -508,16 +511,18 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
     if (currentTab.scriptId) {
       const loadFileContent = async () => {
         try {
-          const response = await getSqlScriptDetail(currentTab.scriptId!);
+          const response = await getDevelopScriptInfo({
+            script_id: Number(currentTab.scriptId!)
+          });
 
           if (response.status === 200 && response.data) {
             const fileData = response.data;
-            setLastScriptRunStatus(fileData?.run_status);
+            // setLastScriptRunStatus(fileData?.run_status);
             // 更新编辑器内容
             setEditorContent(fileData.script_content);
 
             // 更新运行状态
-            setExecid(String(fileData.script_execid));
+            // setExecid(String(fileData.script_execid));
 
             setLastAutoSave(timeFormattig(new Date(response.data.update_time)));
 

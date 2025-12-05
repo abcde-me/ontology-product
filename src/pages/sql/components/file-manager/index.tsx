@@ -6,7 +6,7 @@ import DirectoryTree, {
   DirectoryTreeFrom,
   DirectoryTreeRef
 } from '@/components/directory-tree/DirectoryTree';
-import { useFileManager } from '../../hooks/useFileManager';
+import { useDevelopScriptManager } from '../../hooks/useDevelopScriptManager';
 
 const { Title } = Typography;
 
@@ -41,7 +41,7 @@ const PythonTabContent: React.FC<NotebookTabContentProps> = ({
     handleFolderClick,
     handleBackToParent,
     formatData
-  } = useFileManager({
+  } = useDevelopScriptManager({
     onFileOpen,
     onFileDelete, // 传递删除文件时关闭标签页的回调
     onFileRename, // 传递重命名文件时更新标签页标题的回调

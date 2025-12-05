@@ -53,7 +53,7 @@ interface UseFileManagerReturn {
   selectFile: (fileId: string) => void; // 选中文件
 }
 
-export const useFileManager = (
+export const useDevelopScriptManager = (
   options: UseFileManagerOptions = {}
 ): UseFileManagerReturn => {
   const userInfo = useUserInfo();
