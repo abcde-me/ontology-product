@@ -301,7 +301,7 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
               );
             }}
             onSelect={(value, e: any) => {
-              if (e?.node?.props?.dataRef?.level === 3 && type !== 'detail') {
+              if (e?.node?.props?.dataRef?.level === 3) {
                 setCurrent(1);
                 setPageSize(10);
                 setCheckedKeys([value[0]?.split(',')?.[2]]);

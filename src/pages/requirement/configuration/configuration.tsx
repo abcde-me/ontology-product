@@ -26,7 +26,7 @@ import {
   IconQuestionCircle
 } from '@arco-design/web-react/icon';
 import { cloneDeep, isArray, isEmpty, omitBy } from 'lodash-es';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useHistory } from 'react-router';
 import { v4 as uuidV4 } from 'uuid';
 import {
@@ -106,6 +106,8 @@ export default function RequirementConfig() {
 
   const [labelDataList, setLabelDataList] =
     useState<LabelData[]>(generateInitialData);
+  // 用于跟踪 copy 模式下是否已完成初始化，避免切换标注类型时的重复处理
+  const copyModeInitializedRef = useRef(false);
   // 模版数据存储
   const [templateData, setTemplateData] = useState<any[]>([]);
   // 任务分配模块状态
@@ -189,6 +191,10 @@ export default function RequirementConfig() {
       )
     }));
     setLabelDataList(mappedLabels);
+    // 标记 copy 模式初始化完成
+    if (type === 'copy') {
+      copyModeInitializedRef.current = true;
+    }
   }, [requirementDetail]);
   // 监听 taskPackages 变化，自动清除已选人员的错误
   useEffect(() => {
@@ -1008,11 +1014,132 @@ export default function RequirementConfig() {
   // 图片、文本问答展示预标注
   const showPreLabeling = useMemo(() => {
     return (
-      annotationTypeContentCode ===
+      (annotationTypeContentCode ||
+        requirementDetail?.label_tool?.label_tool_code) ===
         AnnotationTypeContentCode.IMAGE_ANNOTATION ||
-      annotationTypeContentCode === AnnotationTypeContentCode.QA
+      (annotationTypeContentCode ||
+        requirementDetail?.label_tool?.label_tool_code) ===
+        AnnotationTypeContentCode.QA
     );
-  }, [annotationTypeContentCode]);
+  }, [
+    annotationTypeContentCode,
+    requirementDetail?.label_tool?.label_tool_code
+  ]);
+
+  // 判断当前标注类型是否与原始详情的标注类型一致
+  const isAnnotationTypeMatchingDetail = useMemo(() => {
+    if (!requirementDetail?.label_tool?.label_tool_code) {
+      return true; // 没有详情时默认为匹配
+    }
+    return (
+      annotationTypeContentCode ===
+      requirementDetail?.label_tool?.label_tool_code
+    );
+  }, [
+    annotationTypeContentCode,
+    requirementDetail?.label_tool?.label_tool_code
+  ]);
+
+  // 传递给子组件的有效 type
+  // 在 copy 模式下，如果标注类型与详情不匹配，则不应使用详情数据，行为应与新建模式一致
+  const effectiveType = useMemo(() => {
+    if (type === 'copy' && !isAnnotationTypeMatchingDetail) {
+      return 'create';
+    }
+    return type;
+  }, [type, isAnnotationTypeMatchingDetail]);
+
+  // 在 copy 模式下，当切换标注类型时处理标签和属性数据
+  useEffect(() => {
+    // 只在 copy 模式下且已完成初始化后处理
+    if (type !== 'copy' || !copyModeInitializedRef.current) {
+      return;
+    }
+
+    const originalLabelToolCode =
+      requirementDetail?.label_tool?.label_tool_code;
+
+    // 如果当前标注类型与原始详情不匹配，重置为初始值（与新建模式一致）
+    if (!isAnnotationTypeMatchingDetail) {
+      // 如果当前是 IMAGE_ANNOTATION 但标注类型与详情不匹配，重置 labelDataList
+      if (
+        annotationTypeContentCode === AnnotationTypeContentCode.IMAGE_ANNOTATION
+      ) {
+        setLabelDataList(generateInitialData);
+        // 清空相关表单字段
+        labelToolForm.resetFields();
+      }
+    } else if (
+      originalLabelToolCode === AnnotationTypeContentCode.IMAGE_ANNOTATION &&
+      annotationTypeContentCode ===
+        AnnotationTypeContentCode.IMAGE_ANNOTATION &&
+      requirementDetail?.labels
+    ) {
+      // 如果切回原始标注类型（IMAGE_ANNOTATION），恢复详情数据
+      const mappedLabels = requirementDetail?.labels?.map((item) => ({
+        ...item,
+        label_id: item?.label_id || item?.id,
+        label_info_attribute_groups: item?.label_info_attribute_groups?.map(
+          (group) => ({
+            ...group,
+            attribute_id: group?.attribute_id || group?.id,
+            label_info_attribute: group?.label_info_attribute?.map((attr) => ({
+              ...attr,
+              label_info_id: attr?.label_info_id || attr?.id
+            }))
+          })
+        )
+      }));
+      setLabelDataList(mappedLabels);
+      // 恢复表单字段值
+      requirementDetail?.labels?.forEach((item) => {
+        const labelId = item?.label_id || item?.id;
+        labelToolForm.setFieldValue(
+          `label_name_cn_${labelId}`,
+          item?.label_name_cn
+        );
+        labelToolForm.setFieldValue(
+          `label_name_en_${labelId}`,
+          item?.label_name_en
+        );
+        labelToolForm.setFieldValue(
+          `label_shape_${labelId}`,
+          item?.label_shape
+        );
+        labelToolForm.setFieldValue(
+          `label_colour_${labelId}`,
+          item?.label_colour
+        );
+        if (
+          !isEmpty(item?.label_mappings) &&
+          !isEmpty(item?.label_mappings[0])
+        ) {
+          labelToolForm.setFieldValue(
+            `label_mappings_${labelId}`,
+            item?.label_mappings
+          );
+        }
+        item?.label_info_attribute_groups?.forEach((group) => {
+          const groupId = group?.attribute_id || group?.id;
+          labelToolForm.setFieldValue(
+            `label_info_attribute_groups_${groupId}_attribute_group_name`,
+            group?.attribute_group_name
+          );
+          group?.label_info_attribute?.forEach((attribute) => {
+            const attrId = attribute?.label_info_id || attribute?.id;
+            labelToolForm.setFieldValue(
+              `label_info_attribute_groups_${attrId}_attribute_name_cn`,
+              attribute?.attribute_name_cn
+            );
+            labelToolForm.setFieldValue(
+              `label_info_attribute_groups_${attrId}_attribute_name_en`,
+              attribute?.attribute_name_en
+            );
+          });
+        });
+      });
+    }
+  }, [type, annotationTypeContentCode, isAnnotationTypeMatchingDetail]);
 
   useEffect(() => {
     basicForm.setFieldValue('model_id', undefined);
@@ -3057,7 +3184,7 @@ export default function RequirementConfig() {
                   {annotationTypeContentVal ===
                     AnnotationTypeContentCode.ENTITY && (
                     <TextSubstanceComponent
-                      type={type}
+                      type={effectiveType}
                       requirementDetail={requirementDetail}
                       getTextEntityData={getTextFlChildData}
                     />
@@ -3065,7 +3192,7 @@ export default function RequirementConfig() {
                   {annotationTypeContentVal ===
                     AnnotationTypeContentCode.TEXT_CLASSIFICATION && (
                     <Classify
-                      type={type}
+                      type={effectiveType}
                       requirementDetail={requirementDetail}
                       getClassIfyData={getClassIfyChildData}
                     />
