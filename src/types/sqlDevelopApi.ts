@@ -111,10 +111,6 @@ export interface CreateDevelopScriptResponse {
 
 export interface EditDevelopScriptParams {
   /**
-   * 项目id，项目id（鉴权使用）
-   */
-  projectID: string;
-  /**
    * sql脚本内容
    */
   script_content: string;
@@ -138,6 +134,12 @@ export interface EditDevelopScriptParams {
 
 export interface EditDevelopScriptResponse {
   script_id: number;
+  script_name: string;
+  script_desc: string;
+  update_time: string;
+  update_user: string;
+  create_time: string;
+  create_user: string;
 }
 
 export interface GetDevelopScriptInfoParams {
