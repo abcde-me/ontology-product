@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Breadcrumb, Tabs, Spin, Space, Button } from '@arco-design/web-react';
 import { IconArrowLeft, IconEdit, IconCopy } from '@arco-design/web-react/icon';
-import { useHistory } from 'react-router';
+import { useHistory, useLocation } from 'react-router';
 import RequirementDetail from './detail';
 import RequirementProgress from './progress';
 import RequirementParticular from './particular';
@@ -11,9 +11,43 @@ import { useGetRequirementDetail } from '../hooks/useGetRequirementDetail';
 const BreadcrumbItem = Breadcrumb.Item;
 const TabPane = Tabs.TabPane;
 import styles from './info.module.scss';
+
+type TabKey = 'detail' | 'progress' | 'particular';
+const defaultActiveTab: TabKey = 'detail';
+
 function RequirementInfo() {
   const history = useHistory();
+  const location = useLocation();
   const requirementId = useParams('id') as string;
+  const [activeTab, setActiveTab] = useState<TabKey>(defaultActiveTab);
+
+  // 从URL查询参数中解析activeTab
+  const getActiveTabFromUrl = (): TabKey => {
+    const searchParams = new URLSearchParams(location.search);
+    const tab = searchParams.get('activeTab');
+    if (tab === 'detail' || tab === 'progress' || tab === 'particular') {
+      return tab;
+    }
+    return defaultActiveTab;
+  };
+
+  useEffect(() => {
+    setActiveTab(getActiveTabFromUrl());
+  }, [location.search]);
+
+  const handleTabChange = (key: string) => {
+    setActiveTab(key as TabKey);
+    const searchParams = new URLSearchParams(location.search);
+
+    // 更新activeTab参数
+    searchParams.set('activeTab', key);
+
+    // 使用history更新URL，不触发页面重载
+    history.push({
+      pathname: location.pathname,
+      search: searchParams.toString()
+    });
+  };
 
   const { data: requirementDetail = {}, isLoading } = useGetRequirementDetail({
     requirement_id: Number(requirementId)
@@ -71,7 +105,11 @@ function RequirementInfo() {
         </div>
       </div>
       <div className={styles.requirementInfoContent}>
-        <Tabs inkBarSize={{ width: '40px' }}>
+        <Tabs
+          inkBarSize={{ width: '40px' }}
+          activeTab={activeTab}
+          onChange={handleTabChange}
+        >
           <TabPane key="detail" title="详情">
             <RequirementDetail requirementDetail={requirementDetail} />
           </TabPane>
