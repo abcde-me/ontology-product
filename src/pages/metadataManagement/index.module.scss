@@ -17,6 +17,35 @@
   .rightBox {
     width: calc(100% - 224px);
     padding: 0 4px 0 24px;
+
+    :global(.arco-form-layout-inline) {
+      width: calc((100% - 120px) / 3);
+
+      :global(.arco-form-item-wrapper) {
+        width: 100%;
+      }
+    }
+
+    :global(.arco-btn-outline:not(.arco-btn-disabled)) {
+      color: #007dfa;
+      border: 1px solid #007dfa;
+    }
+
+    :global(.arco-btn-text:not(.arco-btn-disabled)) {
+      color: #007dfa;
+    }
+
+    .settingBtn {
+      color: #1e293b !important;
+    }
+
+    .refreshBtn {
+      border: 1px solid #cbd5e1 !important;
+      :global(span) {
+        color: #1e293b;
+        font-weight: 600;
+      }
+    }
   }
 
   :global(.arco-pagination-total-text) {

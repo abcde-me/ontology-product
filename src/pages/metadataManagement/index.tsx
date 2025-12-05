@@ -1,11 +1,13 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   Button,
+  Form,
   Input,
   Menu,
   Pagination,
   PaginationProps,
-  Table
+  Table,
+  Select
 } from '@arco-design/web-react';
 import { useHistory } from 'react-router';
 import { ColumnProps } from '@arco-design/web-react/es/Table';
@@ -17,7 +19,11 @@ import { SorterInfo } from '@arco-design/web-react/es/Table/interface';
 import { PermissionWrapper } from '@/components/PermissionGuard';
 import { WORKFLOW_LIST_PERMISSIONS } from '@/config/permissions';
 import { openNewPage } from '@/utils/env';
+import SettingsIcon from '@/assets/metadata/settings.svg';
+import ColumnSettingIcon from '@/assets/metadata/column-setting.svg';
+import StorageIcon from '@/assets/metadata/storage.svg';
 import styles from './index.module.scss';
+import { IconPlus, IconRefresh } from '@arco-design/web-react/icon';
 
 const InputSearch = Input.Search;
 
@@ -25,6 +31,9 @@ export default function WorkflowList() {
   const history = useHistory();
   const userInfo = useUserInfo();
   const MenuItem = Menu.Item;
+  // 搜索表单
+  const searchForm = useRef<any>(null);
+
   // 初始化搜索框value
   const [searchValue, setSearchValue] = useState('');
   // 初始化工作流列表数据
@@ -131,6 +140,13 @@ export default function WorkflowList() {
   // table数据为空时展示-
   const renderEmptyPlaceholder = (value: string | null) => {
     return value === '' || value == null ? '-' : value;
+  };
+
+  // 搜索表单提交
+  const handleSearch = (values: any) => {
+    console.log(values, 'vvvvv');
+    // setSearchValue(values.search_content);
+    // setCurrent(1);
   };
 
   // table columns
@@ -293,48 +309,104 @@ export default function WorkflowList() {
       <div className="mt-4 flex">
         <div className={styles['leftBox']}>
           <Menu defaultSelectedKeys={['Iceberg']}>
-            <MenuItem key="Iceberg" />
-            <MenuItem key="Doris" />
-            <MenuItem key="MinIO" />
-            <MenuItem key="Milvus" />
+            <MenuItem key="Iceberg">Iceberg</MenuItem>
+            <MenuItem key="Doris">Doris</MenuItem>
+            <MenuItem key="MinIO">MinIO</MenuItem>
+            <MenuItem key="Milvus">Milvus</MenuItem>
           </Menu>
         </div>
         <div className={styles['rightBox']}>
           <div
             style={{
               display: 'flex',
-              justifyContent: 'space-between',
+              flexDirection: 'column',
               width: '100%',
-              margin: '15px 0'
+              padding: '16px 0',
+              borderRadius: '4px',
+              borderBottom: '1px solid var(--LineLine-color-border-2, #E2E8F0)'
             }}
           >
-            <InputSearch
-              placeholder="输入工作流名称搜索"
-              style={{ width: 230 }}
-              value={searchValue}
-              allowClear
-              onChange={(value) => {
-                setSearchValue(value);
+            <Form
+              ref={searchForm}
+              onSubmit={handleSearch}
+              layout="inline"
+              style={{
+                justifyContent: 'space-between'
               }}
-              onPressEnter={() => {
-                current !== 1 ? setCurrent(1) : getList();
-              }}
-              onClear={() => {
-                setCurrent(1);
-                setSearchValue('');
-                setIsClickClear(true);
-              }}
-            />
-
-            <PermissionWrapper permission={WORKFLOW_LIST_PERMISSIONS.CREATE}>
+            >
+              <Form.Item label="目录类型：" field="directory_type">
+                <Select placeholder="请选择文件类型" />
+              </Form.Item>
+              <Form.Item label="表名：" field="table_name">
+                <Input placeholder="请输入关键字搜索" />
+              </Form.Item>
+              <Form.Item label="表中文：" field="table_name_zh">
+                <Input placeholder="请输入关键字搜索" />
+              </Form.Item>
+            </Form>
+            <div className="flex items-center justify-between">
+              <div>
+                <PermissionWrapper
+                  permission={WORKFLOW_LIST_PERMISSIONS.CREATE}
+                >
+                  <Button
+                    type="outline"
+                    onClick={() => searchForm?.current?.submit()}
+                    loading={loading}
+                  >
+                    查询
+                  </Button>
+                  <Button
+                    type="text"
+                    onClick={() => searchForm?.current?.submit()}
+                    loading={loading}
+                  >
+                    重置
+                  </Button>
+                </PermissionWrapper>
+              </div>
               <Button
-                type="primary"
-                onClick={handleCreateWorkflow}
+                type="text"
+                className={styles['settingBtn']}
+                icon={<SettingsIcon />}
                 loading={loading}
               >
-                创建工作流
+                设置搜索条件
               </Button>
-            </PermissionWrapper>
+            </div>
+          </div>
+          <div className="mb-3 mt-4 flex items-center justify-between">
+            <h1 className="text-base font-semibold">数据列表(500)</h1>
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-[#6E7B8D]">
+                2025-12-12 00:00:00 更新
+              </span>
+              <Button
+                className={styles['refreshBtn']}
+                icon={<IconRefresh className="text-[#1E293B]" />}
+              />
+              <Button className={styles['refreshBtn']} icon={<StorageIcon />}>
+                表转API
+              </Button>
+              <Button
+                className={styles['refreshBtn']}
+                icon={<IconPlus className="text-[#1E293B]" />}
+              >
+                创建数据库
+              </Button>
+              <Button
+                className={styles['refreshBtn']}
+                icon={<IconPlus className="text-[#1E293B]" />}
+              >
+                创建物理表
+              </Button>
+              <Button
+                className={styles['refreshBtn']}
+                icon={<ColumnSettingIcon />}
+              >
+                列设置
+              </Button>
+            </div>
           </div>
           <Table
             border={false}
