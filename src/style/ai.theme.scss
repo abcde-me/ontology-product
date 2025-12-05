@@ -322,18 +322,18 @@ $spacing-9: 24px;
 // }
 
 // acro design < cecloud themes < 覆盖
-.arco-radio-button::after {
-  left: -3px;
-  top: -3px;
-  right: -3px;
-  bottom: -3px;
-  background-color: rgb(var(--gray-2));
-}
+// .arco-radio-button::after {
+//   left: -3px;
+//   top: -3px;
+//   right: -3px;
+//   bottom: -3px;
+//   background-color: rgb(var(--gray-2));
+// }
 
-.arco-radio-group .arco-radio-button:first-of-type {
-  border-top-left-radius: 2px;
-  border-bottom-left-radius: 2px;
-}
+// .arco-radio-group .arco-radio-button:first-of-type {
+//   border-top-left-radius: 2px;
+//   border-bottom-left-radius: 2px;
+// }
 
 // cecloud themes acro.css
 //.arco-radio-group .arco-radio-button{
@@ -343,19 +343,19 @@ $spacing-9: 24px;
 // }
 
 // acro design index.css
-.arco-radio-group .arco-radio-button {
-  display: inline-block;
-  position: relative;
-  margin: 1.5px;
-  border-radius: var(--border-radius-small);
-  font-size: 14px;
-  line-height: 26px;
-  color: var(--color-text-2);
-  background-color: transparent;
-  cursor: pointer;
-  transition: all 0.1s cubic-bezier(0, 0, 1, 1);
-  border: none;
-}
+// .arco-radio-group .arco-radio-button {
+//   display: inline-block;
+//   position: relative;
+//   margin: 1.5px;
+//   border-radius: var(--border-radius-small);
+//   font-size: 14px;
+//   line-height: 26px;
+//   color: var(--color-text-2);
+//   background-color: transparent;
+//   cursor: pointer;
+//   transition: all 0.1s cubic-bezier(0, 0, 1, 1);
+//   border: none;
+// }
 
 // cecloud themes acro.css
 // .arco-radio-group .arco-radio-button.arco-radio-checked{
@@ -366,11 +366,11 @@ $spacing-9: 24px;
 // }
 
 // acro design index.css
-.arco-radio-group .arco-radio-button.arco-radio-checked {
-  background-color: #fff;
-  color: rgb(var(--primary-6));
-  font-weight: 500;
-}
+// .arco-radio-group .arco-radio-button.arco-radio-checked {
+//   background-color: #fff;
+//   color: rgb(var(--primary-6));
+//   font-weight: 500;
+// }
 
 // cecloud themes acro.css
 // .arco-radio-group .arco-radio-button.arco-radio-checked:hover{
@@ -378,10 +378,10 @@ $spacing-9: 24px;
 // }
 
 // acro design index.css
-.arco-radio-group .arco-radio-button.arco-radio-checked:hover {
-  background-color: #fff;
-  color: rgb(var(--primary-6));
-}
+// .arco-radio-group .arco-radio-button.arco-radio-checked:hover {
+//   background-color: #fff;
+//   color: rgb(var(--primary-6));
+// }
 
 // acro design index.css
 // .arco-radio-button:hover{
@@ -398,11 +398,11 @@ $spacing-9: 24px;
 // }
 
 // acro design < cecloud themes < 覆盖
-.arco-radio-group .arco-radio-button:hover {
-  background-color: #fff;
-  color: var(--color-text-1);
-  font-weight: 500;
-}
+// .arco-radio-group .arco-radio-button:hover {
+//   background-color: #fff;
+//   color: var(--color-text-1);
+//   font-weight: 500;
+// }
 
 // acro design index.css
 // .arco-radio-button:last-of-type::after{
@@ -417,10 +417,10 @@ $spacing-9: 24px;
 // }
 
 // acro design < cecloud themes < 覆盖
-.arco-radio-group .arco-radio-button:last-of-type {
-  border-top-right-radius: 2px;
-  border-bottom-right-radius: 2px;
-}
+// .arco-radio-group .arco-radio-button:last-of-type {
+//   border-top-right-radius: 2px;
+//   border-bottom-right-radius: 2px;
+// }
 
 // acro design index.css
 // .arco-radio-button:not(:first-of-type)::before{
@@ -467,21 +467,21 @@ $spacing-9: 24px;
 // }
 
 // acro design < cecloud themes < 覆盖
-.arco-radio-button:not(:first-of-type)::before {
-  left: -2px;
-  height: 14px;
-  background-color: rgb(var(--gray-3));
-}
+// .arco-radio-button:not(:first-of-type)::before {
+//   left: -2px;
+//   height: 14px;
+//   background-color: rgb(var(--gray-3));
+// }
 
 // acro design < cecloud themes < 覆盖
-.arco-radio-button.arco-radio-checked + .arco-radio-button::before {
-  opacity: 1;
-}
+// .arco-radio-button.arco-radio-checked + .arco-radio-button::before {
+//   opacity: 1;
+// }
 
 // acro design < cecloud themes < 覆盖
-.arco-radio-button.arco-radio-checked + .arco-radio-button::before {
-  opacity: 1;
-}
+// .arco-radio-button.arco-radio-checked + .arco-radio-button::before {
+//   opacity: 1;
+// }
 
 /******** tag ********/
 /******** TODO: 视觉设计暂未提供统一组件样式 ********/

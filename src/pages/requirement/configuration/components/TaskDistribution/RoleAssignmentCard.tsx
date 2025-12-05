@@ -2,13 +2,15 @@
  * 角色分配卡片组件
  */
 
+import { Button } from '@arco-design/web-react';
 import React, { useState } from 'react';
-import { Button, Radio, Badge } from '@arco-design/web-react';
-import { RoleAssignment, AssignType } from './types';
-import { getRoleColor } from './constants';
 import { DepartmentModal } from '../DepartmentModal';
 import { IndividualModal } from '../IndividualModal';
+import { AssignType, RoleAssignment } from './types';
 
+import AnnotationUserIcon from '@/assets/annotation/annotation-user.svg';
+import QualityUserIcon from '@/assets/annotation/quality-user.svg';
+import { RadioGroupTab } from '@ceai-front/arco-material';
 interface RoleAssignmentCardProps {
   role: RoleAssignment;
   onUpdate: (data: Partial<RoleAssignment>) => void;
@@ -64,39 +66,61 @@ const RoleAssignmentCard: React.FC<RoleAssignmentCardProps> = ({
     setIndividualModalVisible(false);
   };
 
+  // 根据角色类型获取对应的图标
+  const getRoleIcon = () => {
+    if (role.roleType === 'labeler') {
+      return <AnnotationUserIcon className="role-icon" />;
+    }
+    return <QualityUserIcon className="role-icon" />;
+  };
+
   return (
     <div className={`role-assignment-card ${error ? 'has-error' : ''}`}>
       <div className="role-header">
-        <Badge color={getRoleColor(role.roleType)} />
+        {getRoleIcon()}
         <span className="role-name">{role.roleName}</span>
       </div>
 
-      <div className="assign-type-selector">
-        <Radio.Group
-          type="button"
-          value={assignType}
-          onChange={handleAssignTypeChange}
-          disabled={disabled}
-        >
-          <Radio value="department">部门</Radio>
-          <Radio value="person">个人</Radio>
-        </Radio.Group>
-      </div>
-
-      <div className="select-action">
-        <Button
-          onClick={() => {
-            if (assignType === 'department') {
-              setDepartmentModalVisible(true);
-            } else {
-              setIndividualModalVisible(true);
+      <div className="role-content">
+        <div className="assign-type-selector">
+          <RadioGroupTab
+            type="button"
+            className="assign-type-selector-radio-group"
+            options={[
+              { value: 'department', label: '部门' },
+              { value: 'person', label: '个人' }
+            ]}
+            value={assignType}
+            onChange={(value: string) =>
+              handleAssignTypeChange(value as AssignType)
             }
-          }}
-          disabled={disabled}
-        >
-          {assignType === 'department' ? '选择部门' : '选择个人'}
-        </Button>
-        <span className="selected-count">已选 {role.selectedCount}</span>
+          />
+          {/* <Radio.Group
+            type="button"
+            value={assignType}
+            onChange={handleAssignTypeChange}
+            disabled={disabled}
+          >
+            <Radio value="department">部门</Radio>
+            <Radio value="person">个人</Radio>
+          </Radio.Group> */}
+        </div>
+
+        <div className="select-action">
+          <Button
+            onClick={() => {
+              if (assignType === 'department') {
+                setDepartmentModalVisible(true);
+              } else {
+                setIndividualModalVisible(true);
+              }
+            }}
+            disabled={disabled}
+          >
+            {assignType === 'department' ? '选择部门' : '选择个人'}
+          </Button>
+          <span className="selected-count">已选 {role.selectedCount}</span>
+        </div>
       </div>
 
       {error && <div className="error-message">{error}</div>}

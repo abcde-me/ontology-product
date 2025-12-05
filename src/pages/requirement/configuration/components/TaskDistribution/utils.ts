@@ -75,9 +75,9 @@ export const generateTaskPackages = (
       );
     }
 
-    packages.push({
+    packages.unshift({
       taskId,
-      taskBId: `任务包${i}`,
+      taskBId: `${i}`,
       dataAmount:
         i === splitCount
           ? dataPerPackage + remainder // 最后一个包含剩余数据

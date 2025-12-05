@@ -2,18 +2,18 @@
  * 任务分配面板主组件 - 使用表格布局
  */
 
-import React, { useState, useCallback } from 'react';
-import { Button, Empty, Table, Checkbox } from '@arco-design/web-react';
-import { IconExclamationCircleFill } from '@arco-design/web-react/icon';
-import {
-  TaskPackage,
-  RoleAssignment,
-  ValidationErrors,
-  BatchAssignData
-} from './types';
-import RoleAssignmentCard from './RoleAssignmentCard';
+import RightArrowIcon from '@/assets/annotation/right-arrow.svg';
+import { Button, Table } from '@arco-design/web-react';
+import React, { useCallback, useState } from 'react';
 import BatchAssignModal from './BatchAssignModal';
+import RoleAssignmentCard from './RoleAssignmentCard';
 import './styles.scss';
+import {
+  BatchAssignData,
+  RoleAssignment,
+  TaskPackage,
+  ValidationErrors
+} from './types';
 
 interface TaskDistributionPanelProps {
   taskPackages: TaskPackage[];
@@ -136,6 +136,7 @@ const TaskDistributionPanel: React.FC<TaskDistributionPanelProps> = ({
         </div>
       ),
       dataIndex: 'roles',
+      width: 800,
       render: (roles: RoleAssignment[], record: TaskPackage) => (
         <div className="role-assignments-row">
           {roles.map((role, index) => (
@@ -148,9 +149,7 @@ const TaskDistributionPanel: React.FC<TaskDistributionPanelProps> = ({
                 error={validationErrors[`${record.taskId}-${role.roleType}`]}
                 disabled={disabled}
               />
-              {index < roles.length - 1 && (
-                <span className="role-arrow">▶</span>
-              )}
+              {index < roles.length - 1 && <RightArrowIcon />}
             </React.Fragment>
           ))}
         </div>
