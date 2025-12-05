@@ -3,6 +3,11 @@ import React, { useEffect, useRef, useState } from 'react';
 import './AnnotationType.scss';
 import { AnnotationTypeStatus } from '../../type';
 import { Tooltip } from '@arco-design/web-react';
+import ImageAnnotationIcon from '../../image/Image.png';
+import TextClassificationIcon from '../../image/Text-Classification.png';
+import TextEntityIcon from '../../image/Text-Entity.png';
+import TextSortIcon from '../../image/Text-Sort.png';
+import TextQAIcon from '../../image/Text-QA.png';
 
 const typeList = [
   {
@@ -23,13 +28,31 @@ const typeList = [
   }
 ];
 const btnPicData = [
-  { key: 2, value: 2, label: '图片标注', code: 'IMAGE_ANNOTATION' }
+  {
+    key: 2,
+    value: 2,
+    label: '图形标注',
+    code: 'IMAGE_ANNOTATION',
+    icon: ImageAnnotationIcon
+  }
 ];
 const btnTextData = [
-  { key: 1, value: 1, label: '实体/实体关系', code: 'TEXT_ENTITY' },
-  { key: 2, value: 2, label: '分类', code: 'TEXT_CLASSIFICATION' },
-  { key: 3, value: 3, label: '问答', code: 'TEXT_QA' },
-  { key: 4, value: 4, label: '排序', code: 'TEXT_SORT' }
+  {
+    key: 1,
+    value: 1,
+    label: '实体/实体关系',
+    code: 'TEXT_ENTITY',
+    icon: TextEntityIcon
+  },
+  {
+    key: 2,
+    value: 2,
+    label: '文本分类',
+    code: 'TEXT_CLASSIFICATION',
+    icon: TextClassificationIcon
+  },
+  { key: 3, value: 3, label: '问答', code: 'TEXT_QA', icon: TextQAIcon },
+  { key: 4, value: 4, label: '文本排序', code: 'TEXT_SORT', icon: TextSortIcon }
 ];
 interface AnnotationTypeProps {
   isDisabled: boolean;
@@ -117,9 +140,10 @@ const AnnotationType: React.FC<AnnotationTypeProps> = ({
       <div className="type-content">
         {selectedRadio === 2
           ? btnPicData.map((item) => {
+              const isActive = activeKey === item.code;
               return (
                 <div
-                  className={`mutex-btn ${activeKey === item.code ? 'active' : ''} ${isDisabled ? 'disabled-div' : ''}`}
+                  className={`annotation-card ${isActive ? 'active' : ''} ${isDisabled ? 'disabled' : ''}`}
                   onClick={() => {
                     if (isDisabled) {
                       return;
@@ -129,16 +153,21 @@ const AnnotationType: React.FC<AnnotationTypeProps> = ({
                   }}
                   key={item.value}
                 >
-                  {item.label}
+                  <div className="card-image">
+                    <img src={item.icon} alt={item.label} />
+                  </div>
+                  <div className="card-label">{item.label}</div>
                 </div>
               );
             })
           : null}
         {selectedRadio === 1
           ? btnTextData.map((item) => {
+              const isActive =
+                activeKey === item.code || activeKey === item.key;
               return (
                 <div
-                  className={`mutex-btn ${activeKey === item.code || activeKey === item.key ? 'active' : ''} ${isDisabled ? 'disabled-div' : ''}`}
+                  className={`annotation-card ${isActive ? 'active' : ''} ${isDisabled ? 'disabled' : ''}`}
                   onClick={() => {
                     if (isDisabled) {
                       return;
@@ -148,7 +177,10 @@ const AnnotationType: React.FC<AnnotationTypeProps> = ({
                   }}
                   key={item.key}
                 >
-                  {item.label}
+                  <div className="card-image">
+                    <img src={item.icon} alt={item.label} />
+                  </div>
+                  <div className="card-label">{item.label}</div>
                 </div>
               );
             })
