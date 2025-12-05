@@ -66,7 +66,6 @@ const QueryScript: React.FC<QueryScriptProps> = ({ curActiveTab }) => {
   const [isClickClear, setIsClickClear] = useState(false);
   // 初始化筛选的值
   const [sortValue, setSortValue] = useState({
-    run_cycle: '',
     sort: ''
   });
   const [queryNum, setQueryNum] = useState<number>(100);
@@ -92,7 +91,13 @@ const QueryScript: React.FC<QueryScriptProps> = ({ curActiveTab }) => {
         script_name: formData?.script_name,
         update_user: formData?.update_user,
         update_time_start: formData?.update_time?.[0],
-        update_time_end: formData?.update_time?.[1]
+        update_time_end: formData?.update_time?.[1],
+        orders: [
+          {
+            column: 'script_id',
+            order: sortValue?.sort || 'desc'
+          }
+        ]
       };
       const res = await listSqlFile(params);
       if (res.status === 200 && res.data) {
@@ -160,16 +165,12 @@ const QueryScript: React.FC<QueryScriptProps> = ({ curActiveTab }) => {
   ) => {
     setCurrent(1);
     const sortdata = {
-      run_cycle:
-        filters.run_cycle === undefined ? '' : filters.run_cycle.join(','),
-      is_online:
-        filters.is_online === undefined ? '' : filters.is_online.join(','),
       sort:
         sorter.direction === undefined
           ? ''
           : sorter.direction === 'ascend'
-            ? 'create_time:ASC'
-            : 'create_time:DESC'
+            ? 'asc'
+            : 'desc'
     };
 
     setSortValue(sortdata);

@@ -8,6 +8,7 @@ import {
   Modal,
   Pagination,
   Popover,
+  Spin,
   Tooltip
 } from '@arco-design/web-react';
 import { getWorkflowList } from '@/api/workflowList';
@@ -19,6 +20,7 @@ import { mock } from 'node:test';
 import Tool from '@/pages/workflowConfig/workflow/block-selector/tool/tool';
 import { listDevelopScriptLogByKeyApi } from '@/api/sql';
 import { set } from 'lodash';
+import noDataElement from '@/components/no-data';
 
 // 版本类型 已发版 未发版 调度中
 export const VersionType = {
@@ -86,15 +88,15 @@ const ScriptCard: React.FC<ScriptCardProps> = ({ onToScriptList }) => {
       const params: any = {
         search_content: searchValue
       };
-      const res = await listDevelopScriptLogByKeyApi(params).then((res) => {
-        console.log(res);
-        if (res.status !== 200) {
-          Message.error(res?.message);
-        }
-        if (res.status === 200 && res.code === '') {
-          setScriptCardList(res.data?.items || []);
-        }
-      });
+      const res = await listDevelopScriptLogByKeyApi(params);
+      console.log(res);
+      if (res.status !== 200) {
+        Message.error(res?.message);
+      }
+      if (res.status === 200 && res.code === '') {
+        setScriptCardList(res.data?.items || []);
+        setTotal(res.data?.total || 0);
+      }
     } finally {
       setLoading(false);
     }
@@ -240,72 +242,84 @@ const ScriptCard: React.FC<ScriptCardProps> = ({ onToScriptList }) => {
           placeholder="请输入脚本内容关键词"
         />
       </div>
-      <div className={styles['script-card-content']}>
-        {scriptCardList?.length > 0 ? (
-          scriptCardList.map((item: any) => (
-            <div
-              onClick={() => {
-                onToScriptList('files');
-              }}
-              key={item.id}
-              className={styles['script-card-content-item']}
-            >
-              <div className={styles['script-card-content-item-title']}>
-                <div className={styles['script-card-content-item-title-left']}>
-                  <div
-                    onClick={() => {
-                      onToScriptList('files');
-                    }}
-                    className={styles['script-card-content-item-title-text']}
-                  >
-                    <span>{item.title}</span>
-                    <span>(V{item.version})</span>
-                  </div>
-                  {getVersionType(item.version_type)}
-                </div>
-                <div className={styles['script-card-content-item-title-right']}>
-                  <Button
-                    style={{ marginRight: 8 }}
-                    className={styles['script-card-content-item-title-btn']}
-                    icon={<IconCopy />}
-                    onClick={() => {
-                      onToScriptList('files');
-                    }}
-                  >
-                    详情
-                  </Button>
-                  <Popover
-                    content={
-                      item?.version_type === VersionType.SCHEDULED
-                        ? '调度中的脚本不可删除'
-                        : ''
-                    }
-                  >
-                    <Button
-                      style={{
-                        width: '68px',
-                        height: '24px',
-                        padding: '0px 8px'
-                      }}
-                      className={styles['script-card-content-item-title-btns']}
-                      icon={<IconDelete />}
-                      disabled={item.version_type === VersionType.SCHEDULED}
-                      onClick={() => deleteScript(item.id, item.version_type)}
+      <Spin loading={loading} style={{ width: '100%' }}>
+        <div className={styles['script-card-content']}>
+          {scriptCardList?.length > 0
+            ? scriptCardList.map((item: any) => (
+                <div
+                  onClick={() => {
+                    onToScriptList('files');
+                  }}
+                  key={item.id}
+                  className={styles['script-card-content-item']}
+                >
+                  <div className={styles['script-card-content-item-title']}>
+                    <div
+                      className={styles['script-card-content-item-title-left']}
                     >
-                      删除
-                    </Button>
-                  </Popover>
+                      <div
+                        onClick={() => {
+                          onToScriptList('files');
+                        }}
+                        className={
+                          styles['script-card-content-item-title-text']
+                        }
+                      >
+                        <span>{item.title}</span>
+                        <span>(V{item.version})</span>
+                      </div>
+                      {getVersionType(item.version_type)}
+                    </div>
+                    <div
+                      className={styles['script-card-content-item-title-right']}
+                    >
+                      <Button
+                        style={{ marginRight: 8 }}
+                        className={styles['script-card-content-item-title-btn']}
+                        icon={<IconCopy />}
+                        onClick={() => {
+                          onToScriptList('files');
+                        }}
+                      >
+                        详情
+                      </Button>
+                      <Popover
+                        content={
+                          item?.version_type === VersionType.SCHEDULED
+                            ? '调度中的脚本不可删除'
+                            : ''
+                        }
+                      >
+                        <Button
+                          style={{
+                            width: '68px',
+                            height: '24px',
+                            padding: '0px 8px'
+                          }}
+                          className={
+                            styles['script-card-content-item-title-btns']
+                          }
+                          icon={<IconDelete />}
+                          disabled={item.version_type === VersionType.SCHEDULED}
+                          onClick={() =>
+                            deleteScript(item.id, item.version_type)
+                          }
+                        >
+                          删除
+                        </Button>
+                      </Popover>
+                    </div>
+                  </div>
+                  <div className={styles['script-card-content-item-content']}>
+                    {item.content}
+                  </div>
                 </div>
-              </div>
-              <div className={styles['script-card-content-item-content']}>
-                {item.content}
-              </div>
-            </div>
-          ))
-        ) : (
-          <Empty />
-        )}
-      </div>
+              ))
+            : noDataElement({
+                description: '暂无数据'
+              })}
+        </div>
+      </Spin>
       {scriptCardList?.length > 0 && (
         <Pagination
           onChange={(current, pageSize) => {

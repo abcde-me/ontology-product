@@ -545,7 +545,7 @@ export const ModaForgeResourceEndpoints = {
   // 开发规范查看
   GetDevelopStandardsApi: PrefixAimdp + '/GetDevelopStandards',
   // 开发规范保存
-  UpdateDevelopSystemParamApi: PrefixAimdp + '/UpdateDevelopSystemParam',
+  UpdateDevelopSystemParamApi: PrefixAimdp + '/UpdateDevelopStandards',
 
   // 数据资产接口
   // 查询数据资产表字段和映射关系

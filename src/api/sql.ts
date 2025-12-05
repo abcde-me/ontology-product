@@ -289,11 +289,10 @@ export async function downloadDevelopScript(): Promise<ApiRes<{}>> {
 }
 // 获取开发脚本历史版本
 export async function getDevelopScriptLogByScriptId(
-  id: string,
-  max_version?: string
+  id: string
 ): Promise<ApiRes<GetDevelopScriptLogByScriptIdData>> {
   return await UAPI.RES.GetDevelopScriptLogByScriptIdApi({})
-    .post({ script_id: Number(id), max_version })
+    .post({ script_id: Number(id) })
     .inRegion()
     .do();
 }

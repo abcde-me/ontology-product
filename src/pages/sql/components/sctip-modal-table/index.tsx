@@ -9,6 +9,7 @@ import {
   VersionTypeEnum
 } from '../version-status';
 import { IconQuestionCircle } from '@arco-design/web-react/icon';
+import EllipsisPopover from '@/components/ellipsis-popover-com';
 
 const SctipModalTable: React.FC<{
   isVisible: boolean;
@@ -21,38 +22,48 @@ const SctipModalTable: React.FC<{
     setVisible(isVisible);
   }, [isVisible]);
 
-  const columns = [
+  const columns: any = [
     {
       title: '版本号',
-      dataIndex: 'id',
-      key: 'id',
-      sorter: (a, b) => a.id - b.id
+      dataIndex: 'version_name',
+      key: 'version',
+      width: 100,
+      sorter: (a, b) => sort(a.version, b.version)
     },
     {
       title: '脚本状态',
-      dataIndex: 'status',
-      key: 'status',
-      render: (_, record) => getVersionType(record.status),
-      filters: [
-        { text: VersionTypeEnum.RELEASED, value: VersionType.RELEASED },
-        { text: VersionTypeEnum.SCHEDULED, value: VersionType.SCHEDULED }
-      ],
-      onFilter: (value, record) => record.status === value
+      dataIndex: 'script_desc',
+      key: 'script_desc',
+      width: 160,
+      ellipsis: true,
+      render: (_, record) => (
+        <EllipsisPopover value={record.script_desc || '-'} isEdit={false} />
+      )
     },
     {
       title: '版本说明',
-      dataIndex: 'type',
-      key: 'type'
+      dataIndex: 'state_name',
+      key: 'state_name',
+      width: 100
     },
     {
       title: '更新人',
-      dataIndex: 'visteon',
-      key: 'visteon'
+      dataIndex: 'update_user',
+      key: 'update_user',
+      width: 100
     },
     {
       title: '更新时间',
-      dataIndex: 'created_at',
-      key: 'created_at'
+      dataIndex: 'update_time',
+      key: 'update_time',
+      width: 200,
+      render: (_, record) => (
+        <span>
+          {record.update_time == '' || record.update_time == null
+            ? '-'
+            : new Date(record.update_time).toLocaleString()}
+        </span>
+      )
     },
     {
       title: (

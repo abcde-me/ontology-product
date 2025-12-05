@@ -312,25 +312,25 @@ const ScriptTable: React.FC<ScriptTableProps> = ({
     },
     {
       title: '最新版本状态',
-      dataIndex: 'status_name',
-      width: 160,
-      render: (_, record) => {
-        return getVersionType(record.status);
-      },
-      filters: [
-        {
-          text: '未发版',
-          value: 1
-        },
-        {
-          text: '已发版',
-          value: 2
-        },
-        {
-          text: '调度中',
-          value: 3
-        }
-      ]
+      dataIndex: 'max_version',
+      width: 160
+      // render: (_, record) => {
+      //   return getVersionType(record.status);
+      // },
+      // filters: [
+      //   {
+      //     text: '未发版',
+      //     value: 1
+      //   },
+      //   {
+      //     text: '已发版',
+      //     value: 2
+      //   },
+      //   {
+      //     text: '调度中',
+      //     value: 3
+      //   }
+      // ]
     },
     {
       title: '开发人',
@@ -395,10 +395,7 @@ const ScriptTable: React.FC<ScriptTableProps> = ({
                 console.log(123);
                 setVisible(true);
                 setRowData(record);
-                getDevelopScriptLogByScriptId(
-                  record.script_id,
-                  record?.max_version
-                ).then((res) => {
+                getDevelopScriptLogByScriptId(record.script_id).then((res) => {
                   console.log(res, '123');
                   setScriptLogList(res?.data?.items);
                 });

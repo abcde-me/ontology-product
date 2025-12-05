@@ -662,6 +662,9 @@ export interface GetDevelopScriptLogByScriptIdData {
 export interface ListDevelopScriptLogByKeyData {
   script_context?: string;
   items: [];
+  page?: number;
+  page_size?: number;
+  total: number;
 }
 
 export interface ListSqlFileParams {
