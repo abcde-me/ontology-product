@@ -47,7 +47,7 @@ const TableElementCard: React.FC<TableElementCardProps> = ({
           />
         </div>
       ) : (
-        <div className="mb-3 overflow-x-auto">
+        <div className="overflow-x-auto">
           <SegmentMarkdown content={element.content} />
         </div>
       )}
