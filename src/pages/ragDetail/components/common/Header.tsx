@@ -15,7 +15,7 @@ const Header: React.FC = () => {
     if (documentName && datasetName) {
       return [
         {
-          name: sceneName || '数据集市',
+          name: '数据集市',
           isLast: false
         },
         {

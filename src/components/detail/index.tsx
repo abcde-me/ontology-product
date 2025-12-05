@@ -941,7 +941,9 @@ const DatasetDetail = (props: {
 
   // 跳转到数据集管理页面
   const handleGoToDatasetList = () => {
-    history.push('/tenant/compute/modaforge/datasetManagement');
+    history.push(
+      '/tenant/compute/modaforge/datasetManagement?sceneName=' + sceneName
+    );
   };
 
   // 跳转到分段列表页面
@@ -1495,7 +1497,7 @@ const DatasetDetail = (props: {
                 style={{ fontWeight: '500', fontSize: '20px' }}
                 onClick={handleGoToDatasetList}
               >
-                {sceneName || '数据集市'}
+                数据集市
               </span>
             </Breadcrumb.Item>
             <Breadcrumb.Item>
