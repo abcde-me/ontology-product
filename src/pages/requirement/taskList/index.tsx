@@ -14,9 +14,9 @@ import { getAnnotationTaskList } from '@/api/dataAnnotation';
 import { useHasPermission, useUserInfo } from '@/store/userInfoStore';
 import { ANNOTATION_TASK_PERMISSIONS } from '@/config/permissions';
 import { openNewPage } from '@/utils/env';
-import { RequirementTypeNameMap } from './type';
+import { RequirementTypeNameMap } from '../type';
 import { SorterInfo } from '@arco-design/web-react/es/Table/interface';
-import './index.scss';
+import '../index.scss';
 
 function TaskList() {
   const [form] = Form.useForm();
