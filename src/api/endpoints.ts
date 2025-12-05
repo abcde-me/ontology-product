@@ -535,12 +535,17 @@ export const ModaForgeResourceEndpoints = {
   // 锁定加工脚本
   LockDevelopScriptApi: PrefixAimdp + '/LockDevelopScript',
   // 获取加工脚本卡片内容
-  GetDevelopScriptLogByVersionApi:
-    PrefixAimdp + '/GetDevelopScriptLogByVersion',
+  ListDevelopScriptLogByKeyApi: PrefixAimdp + '/ListDevelopScriptLogByKey',
   // 查询脚本列表
   ListSqlFileApi: PrefixAimdp + '/ListSqlFile',
   // 查询脚本删除
   DeleteSqlFileApi: PrefixAimdp + '/DeleteSqlFile',
+  // 参数列表表格
+  ListDevelopSystemParamApi: PrefixAimdp + '/ListDevelopSystemParam',
+  // 开发规范查看
+  GetDevelopStandardsApi: PrefixAimdp + '/GetDevelopStandards',
+  // 开发规范保存
+  UpdateDevelopSystemParamApi: PrefixAimdp + '/UpdateDevelopSystemParam',
 
   // 数据资产接口
   // 查询数据资产表字段和映射关系

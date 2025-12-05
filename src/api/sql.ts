@@ -24,8 +24,12 @@ import {
   ListDevelopScriptParams,
   ListDevelopScriptParamsData,
   GetDevelopScriptLogByScriptIdData,
-  GetDevelopScriptLogByVersionData,
-  ListSqlFileParams
+  ListDevelopScriptLogByKeyData,
+  ListSqlFileParams,
+  ListDevelopSystemParamParams,
+  ListDevelopSystemParamParamsData,
+  UpdateDevelopSystemParamParams,
+  getDevelopStandardsData
 } from '@/types/sqlApi';
 
 /** 数据集目录 */
@@ -281,14 +285,15 @@ export async function getDevelopScriptList(
 }
 // 下载开发脚本
 export async function downloadDevelopScript(): Promise<ApiRes<{}>> {
-  return await UAPI.RES.DownloadDevelopScriptApi({}).post().inRegion().do();
+  return await UAPI.RES.DownloadDevelopScriptApi({}).get().inRegion().do();
 }
 // 获取开发脚本历史版本
 export async function getDevelopScriptLogByScriptId(
-  id: string
+  id: string,
+  max_version?: string
 ): Promise<ApiRes<GetDevelopScriptLogByScriptIdData>> {
   return await UAPI.RES.GetDevelopScriptLogByScriptIdApi({})
-    .post({ script_id: Number(id) })
+    .post({ script_id: Number(id), max_version })
     .inRegion()
     .do();
 }
@@ -307,11 +312,11 @@ export async function lockDevelopScript(id: number): Promise<ApiRes<{}>> {
     .do();
 }
 // 获取开发脚本卡片内容
-export async function getDevelopScriptLogByVersion(
-  script_context: string
-): Promise<ApiRes<GetDevelopScriptLogByVersionData>> {
-  return await UAPI.RES.GetDevelopScriptLogByVersionApi({})
-    .post({ script_context })
+export async function listDevelopScriptLogByKeyApi(
+  params
+): Promise<ApiRes<ListDevelopScriptLogByKeyData>> {
+  return await UAPI.RES.ListDevelopScriptLogByKeyApi({})
+    .post(params)
     .inRegion()
     .do();
 }
@@ -325,6 +330,30 @@ export async function listSqlFile(
 export async function deleteSqlFile(id: number): Promise<ApiRes<{}>> {
   return await UAPI.RES.DeleteSqlFileApi({})
     .post({ script_id: Number(id) })
+    .inRegion()
+    .do();
+}
+// 参数列表表格
+export async function listDevelopSystemParam(
+  params: ListDevelopSystemParamParams
+): Promise<ApiRes<ListDevelopSystemParamParamsData>> {
+  return await UAPI.RES.ListDevelopSystemParamApi({})
+    .post(params)
+    .inRegion()
+    .do();
+}
+// 开发规范查看
+export async function getDevelopStandards(
+  params
+): Promise<ApiRes<getDevelopStandardsData>> {
+  return await UAPI.RES.GetDevelopStandardsApi({}).post().inRegion().do();
+}
+// 开发规范保存
+export async function updateDevelopSystemParam(
+  params: UpdateDevelopSystemParamParams
+): Promise<ApiRes<{}>> {
+  return await UAPI.RES.UpdateDevelopSystemParamApi({})
+    .post(params)
     .inRegion()
     .do();
 }

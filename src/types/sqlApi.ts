@@ -655,11 +655,12 @@ export interface ListDevelopScriptParamsData {
 
 export interface GetDevelopScriptLogByScriptIdData {
   script_id: number;
+  max_version?: string;
   items: [];
 }
 
-export interface GetDevelopScriptLogByVersionData {
-  script_context: string;
+export interface ListDevelopScriptLogByKeyData {
+  script_context?: string;
   items: [];
 }
 
@@ -675,4 +676,34 @@ export interface ListSqlFileParams {
   search_content?: string;
   items: [];
   total: number;
+  script_name?: string;
+  update_user?: string;
+  update_time_start?: string;
+  update_time_end?: string;
+}
+export interface ListDevelopSystemParamParams {
+  page?: number;
+  page_size?: number;
+  config_key?: string; // 参数key
+  config_demo?: string; // 状态
+  config_desc?: string; // 版本描述
+}
+export interface ListDevelopSystemParamParamsData {
+  /**
+   * 页大小
+   */
+  page_size?: number;
+  /**
+   * 页码
+   */
+  page?: number;
+  total: number;
+  items: [];
+}
+export interface UpdateDevelopSystemParamParams {
+  config_value: string; // 参数值
+}
+
+export interface getDevelopStandardsData {
+  data: string; // 参数值
 }

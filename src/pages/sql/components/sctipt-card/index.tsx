@@ -17,7 +17,7 @@ import styles from './index.module.scss';
 import { IconCopy, IconDelete } from '@arco-design/web-react/icon';
 import { mock } from 'node:test';
 import Tool from '@/pages/workflowConfig/workflow/block-selector/tool/tool';
-import { getDevelopScriptLogByVersion } from '@/api/sql';
+import { listDevelopScriptLogByKeyApi } from '@/api/sql';
 import { set } from 'lodash';
 
 // 版本类型 已发版 未发版 调度中
@@ -86,9 +86,7 @@ const ScriptCard: React.FC<ScriptCardProps> = ({ onToScriptList }) => {
       const params: any = {
         search_content: searchValue
       };
-      const res = await getDevelopScriptLogByVersion(
-        params.search_content
-      ).then((res) => {
+      const res = await listDevelopScriptLogByKeyApi(params).then((res) => {
         console.log(res);
         if (res.status !== 200) {
           Message.error(res?.message);

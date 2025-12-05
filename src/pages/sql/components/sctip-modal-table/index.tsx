@@ -20,27 +20,7 @@ const SctipModalTable: React.FC<{
   React.useEffect(() => {
     setVisible(isVisible);
   }, [isVisible]);
-  // TODO: 这里可以根据需要添加表格内容和逻辑
-  // mock数据
-  const mockData = mockjs.mock({
-    script_name: '@cword(3, 5)',
-    script_content: '@cparagraph(1, 3)',
-    create_time: '@datetime',
-    update_time: '@datetime',
-    script_type: '@cword(2, 4)',
-    script_status: '@cword(2, 4)',
-    script_description: '@cparagraph(1, 3)',
-    'list|5': [
-      {
-        'id|+1': 1,
-        name: '@cword(3, 5)',
-        type: '@cword(2, 4)',
-        status: '@pick(["released",  "scheduled"])',
-        visteon: '@pick(["true",  "false"])',
-        created_at: '@datetime'
-      }
-    ]
-  });
+
   const columns = [
     {
       title: '版本号',

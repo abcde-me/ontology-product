@@ -35,19 +35,21 @@ import { deleteSqlFile, listSqlFile } from '@/api/sql';
 
 const InputSearch = Input.Search;
 
-const QueryScript: React.FC = () => {
+interface QueryScriptProps {
+  curActiveTab: string;
+}
+
+const QueryScript: React.FC<QueryScriptProps> = ({ curActiveTab }) => {
   const FormItem = Form.Item;
   const [form] = Form.useForm();
   const Option = Select.Option;
   const options = ['全部', '已发布', '未发布', '草稿'];
 
   const [formData, setFormData] = useState({
-    search_content: '',
+    script_name: '',
     update_user: '',
-    update_time: ''
+    update_time: []
   });
-  const history = useHistory();
-  const userInfo = useUserInfo();
   // 初始化搜索框value
   const [searchValue, setSearchValue] = useState('');
   // 初始化查询脚本列表数据
@@ -67,14 +69,11 @@ const QueryScript: React.FC = () => {
     run_cycle: '',
     sort: ''
   });
-  // 控制弹窗显示隐藏
-  const [visible, setVisible] = useState<boolean>(false);
-  // 初始化查询脚本数量
   const [queryNum, setQueryNum] = useState<number>(100);
   // 组件初始化
   useEffect(() => {
-    if (userInfo) getList();
-  }, [userInfo, current, pageSize, sortValue]);
+    getList();
+  }, [current, pageSize, sortValue, curActiveTab]);
 
   // 清空搜索框
   useEffect(() => {
@@ -90,7 +89,10 @@ const QueryScript: React.FC = () => {
       const params: any = {
         page: current, //第几页
         page_size: pageSize, //每页个数
-        ...formData
+        script_name: formData?.script_name,
+        update_user: formData?.update_user,
+        update_time_start: formData?.update_time?.[0],
+        update_time_end: formData?.update_time?.[1]
       };
       const res = await listSqlFile(params);
       if (res.status === 200 && res.data) {
@@ -176,70 +178,6 @@ const QueryScript: React.FC = () => {
   // table数据为空时展示-
   const renderEmptyPlaceholder = (value: string | null) => {
     return value === '' || value == null ? '-' : value;
-  };
-  const getVersionType = (version_type) => {
-    switch (version_type) {
-      case VersionType.RELEASED:
-        return (
-          <div className={styles['script-card-content-item-title-icon']}>
-            <span
-              className={
-                version_type === VersionType.RELEASED
-                  ? styles['released-icon']
-                  : ''
-              }
-            />
-            <div className={styles['script-card-content-item-title-icon-text']}>
-              {VersionTypeEnum.RELEASED}
-            </div>
-          </div>
-        );
-      case VersionType.UNRELEASED:
-        return (
-          <div className={styles['script-card-content-item-title-icon']}>
-            <span
-              className={
-                version_type === VersionType.UNRELEASED
-                  ? styles['unreleased-icon']
-                  : ''
-              }
-            />
-            <div className={styles['script-card-content-item-title-icon-text']}>
-              {VersionTypeEnum.UNRELEASED}
-            </div>
-          </div>
-        );
-      case VersionType.SCHEDULED:
-        return (
-          <div className={styles['script-card-content-item-title-icon']}>
-            <span
-              className={
-                version_type === VersionType.SCHEDULED
-                  ? styles['scheduled-icon']
-                  : ''
-              }
-            />
-            <div className={styles['script-card-content-item-title-icon-text']}>
-              {VersionTypeEnum.SCHEDULED}
-            </div>
-          </div>
-        );
-      default:
-        return (
-          <div className={styles['script-card-content-item-title-icon']}>
-            <span
-              className={
-                version_type === VersionType.UNRELEASED
-                  ? styles['unreleased-icon']
-                  : ''
-              }
-            />
-            <div className={styles['script-card-content-item-title-icon-text']}>
-              {VersionTypeEnum.UNRELEASED}
-            </div>
-          </div>
-        );
-    }
   };
   // table columns
   const columns: ColumnProps[] = [
@@ -335,9 +273,7 @@ const QueryScript: React.FC = () => {
   // 点击搜索按钮
   const handleSearch = () => {
     setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-    }, 500);
+    getList();
   };
   // 重置搜索框
   const handleReset = () => {
@@ -346,7 +282,13 @@ const QueryScript: React.FC = () => {
     form.resetFields();
   };
   const handleFormChange = (value) => {
-    setFormData(value);
+    console.log(value, '123');
+    const allFormValues = form.getFieldsValue();
+    setFormData({
+      script_name: allFormValues?.script_name,
+      update_user: allFormValues?.update_account,
+      update_time: allFormValues?.update_time
+    });
   };
   return (
     <div className={styles['query-script-wrapper']}>
@@ -370,7 +312,7 @@ const QueryScript: React.FC = () => {
           <FormItem label="脚本名称:" field="script_name">
             <Input style={{ width: 236 }} placeholder="输入脚本名称搜索" />
           </FormItem>
-          <FormItem label="更新人:" field="update_user">
+          <FormItem label="更新人:" field="update_account">
             <Input style={{ width: 250 }} placeholder="输入关键字搜索" />
           </FormItem>
           <FormItem label="更新时间:" field="update_time">

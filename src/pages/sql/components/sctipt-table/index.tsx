@@ -40,9 +40,14 @@ import {
 interface ScriptTableProps {
   isAll: (type: boolean) => void;
   onToScriptList: (type: string) => void;
+  curActiveTab: string;
 }
 
-const ScriptTable: React.FC<ScriptTableProps> = ({ isAll, onToScriptList }) => {
+const ScriptTable: React.FC<ScriptTableProps> = ({
+  isAll,
+  onToScriptList,
+  curActiveTab
+}) => {
   const FormItem = Form.Item;
   const [form] = Form.useForm();
   const Option = Select.Option;
@@ -61,9 +66,7 @@ const ScriptTable: React.FC<ScriptTableProps> = ({ isAll, onToScriptList }) => {
     }
   ];
   const history = useHistory();
-  const userInfo = useUserInfo();
   // 初始化搜索框value
-  const [searchValue, setSearchValue] = useState('');
   const [formData, setFormData] = useState({
     script_name: '', // 脚本名称
     version_type: 0, // 版本状态
@@ -93,8 +96,8 @@ const ScriptTable: React.FC<ScriptTableProps> = ({ isAll, onToScriptList }) => {
   const [rowData, setRowData] = useState([]);
   // 组件初始化
   useEffect(() => {
-    if (userInfo) getList();
-  }, [userInfo, current, pageSize, sortValue]);
+    getList();
+  }, [current, pageSize, sortValue, curActiveTab]);
 
   // 清空搜索框
   useEffect(() => {
@@ -112,8 +115,13 @@ const ScriptTable: React.FC<ScriptTableProps> = ({ isAll, onToScriptList }) => {
         status: formData?.version_type,
         create_user: formData?.create_user,
         page: current, //第几页
-        page_size: pageSize //每页个数
-        // orders: sortValue?.sort
+        page_size: pageSize, //每页个数
+        orders: [
+          {
+            column: 'script_id',
+            order: sortValue?.sort || 'desc'
+          }
+        ]
       };
       const res = await getDevelopScriptList(params);
       console.log(res, '123');
@@ -387,7 +395,10 @@ const ScriptTable: React.FC<ScriptTableProps> = ({ isAll, onToScriptList }) => {
                 console.log(123);
                 setVisible(true);
                 setRowData(record);
-                getDevelopScriptLogByScriptId(record.script_id).then((res) => {
+                getDevelopScriptLogByScriptId(
+                  record.script_id,
+                  record?.max_version
+                ).then((res) => {
                   console.log(res, '123');
                   setScriptLogList(res?.data?.items);
                 });
