@@ -58,7 +58,7 @@ const ImageElementCard: React.FC<ImageElementCardProps> = ({
           <span className="inline-flex h-6 w-9 items-center justify-center rounded bg-blue-50 text-sm font-medium text-blue-600">
             图片
           </span>
-          <span className="ml-2 text-sm text-[#0F172A]">
+          <span className="ml-2 text-sm font-semibold text-[#0F172A]">
             元素ID: {element.id}
           </span>
         </div>
