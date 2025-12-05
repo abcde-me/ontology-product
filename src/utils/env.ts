@@ -54,3 +54,15 @@ export const openNewPage = (page: string) => {
     window.open(page, '_blank');
   }
 };
+
+export const OpenNewPageForOperationCenter = (page: string) => {
+  if (isWujie) {
+    (window as any).$wujie?.props?.openNewPage(page);
+  } else {
+    window.open(
+      '/tenant/compute/modaforge/operationCenter?url=' +
+        encodeURIComponent(page),
+      '_blank'
+    );
+  }
+};
