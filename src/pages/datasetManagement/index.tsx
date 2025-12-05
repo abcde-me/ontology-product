@@ -1539,14 +1539,12 @@ const DatasetManagement: React.FC = () => {
             fontFamily: 'PingFang SC, sans-serif',
             fontWeight: 400,
             fontSize: 14,
-            marginTop: '10px',
             color: '#1D2129',
             height: 22,
-            display: 'inline-block',
-            marginLeft: '28px' // 左移一点
+            display: 'inline-block'
           }}
         >
-          退出后，当前修改不会保存
+          确认删除数据集吗？
         </div>
       ),
       okText: '确认删除',
