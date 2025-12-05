@@ -67,7 +67,7 @@
     cursor: not-allowed;
   }
 
-  :global(tbody) .workflow-name :global(.ellipsis-text) {
+  :global(tbody) .table-name :global(.ellipsis-text) {
     font-weight: 600;
   }
 
@@ -110,20 +110,6 @@
     background: #f7f7f9;
     color: #6e7b8d;
   }
-}
-
-.workflow-list-modal-title {
-  font-weight: 500;
-  font-size: 16px;
-  height: 24px;
-}
-
-.workflow-list-modal-content {
-  font-weight: 400;
-  font-size: 14px;
-  color: #1d2129;
-  height: 22px;
-  margin: 10px 0 0 28px;
 }
 
 :global(.arco-modal-footer) :global(.arco-btn-secondary):focus {

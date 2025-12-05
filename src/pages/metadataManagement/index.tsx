@@ -163,7 +163,7 @@ export default function WorkflowList() {
       dataIndex: 'workflow_name_english',
       width: 280,
       ellipsis: true,
-      className: styles['hover-change'] + ' ' + styles['workflow-name'],
+      className: styles['hover-change'] + ' ' + styles['table-name'],
       render: (_, record) => {
         return renderEmptyPlaceholder(record.workflow_name) !== '-' ? (
           <EllipsisPopover
@@ -184,7 +184,7 @@ export default function WorkflowList() {
       dataIndex: 'workflow_name',
       width: 280,
       ellipsis: true,
-      className: styles['hover-change'] + ' ' + styles['workflow-name'],
+      className: styles['hover-change'] + ' ' + styles['table-name'],
       render: (_, record) => {
         return renderEmptyPlaceholder(record.workflow_name) !== '-' ? (
           <EllipsisPopover
