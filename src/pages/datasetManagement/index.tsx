@@ -72,6 +72,7 @@ import DatasetMoveIcon from '@/pages/datasetManagement/assets/dataset_move.svg';
 import DatasetMoveActiveIcon from '@/pages/datasetManagement/assets/dataset_move_active.svg';
 import { useHasPermission } from '@/store/userInfoStore';
 import { throttle } from 'lodash-es';
+import { useParams } from '@/utils/url';
 
 // 时间格式化函数
 const formatDateTime = (dateTimeString: string): string => {
@@ -865,6 +866,7 @@ export enum datasetStatus {
 const DatasetManagement: React.FC = () => {
   const history = useHistory();
   const TabPane = Tabs.TabPane;
+  const sceneName = useParams('sceneName');
   const [sceneTypeForm] = Form.useForm();
   const [moveDatasetForm] = Form.useForm();
   const [tagList, setTagList] = React.useState<{ id: number; name: string }[]>(
@@ -1086,11 +1088,9 @@ const DatasetManagement: React.FC = () => {
 
   // 跳转到详情页
   const handleGoToDetail = (datasetId: number) => {
-    const sceneName =
-      datasetSceneList.find(
-        (item) =>
-          Number(selectedSceneTab) !== 0 && item.id === Number(selectedSceneTab)
-      )?.name || '数据集市';
+    const sceneName = datasetSceneList.find(
+      (item) => item.id === Number(selectedSceneTab)
+    )?.id;
     history.push(
       `/tenant/compute/modaforge/datasetManagement/detail/${datasetId}?sceneName=${sceneName}`
     );
@@ -1736,7 +1736,7 @@ const DatasetManagement: React.FC = () => {
       {/* 注释内容为新建按钮 */}
       <Tabs
         // editable
-        defaultActiveTab="0"
+        defaultActiveTab={sceneName || '0'}
         className={styles.datasetManagementTabs}
         style={{
           zIndex: 1,
