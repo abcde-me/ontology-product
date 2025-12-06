@@ -88,6 +88,10 @@ const AnnotationType: React.FC<AnnotationTypeProps> = ({
   useEffect(() => {
     setSelectedRadio(label_type);
     setActiveKey(label_tool_code);
+    // 同步更新 annotationTypeContentCode
+    if (label_tool_code) {
+      setAnnotationTypeContentCode(label_tool_code);
+    }
   }, [label_type, label_tool_code]);
   useEffect(() => {
     getChildAnnotationType(selectedRadio, activeKey, annotationTypeContentCode);

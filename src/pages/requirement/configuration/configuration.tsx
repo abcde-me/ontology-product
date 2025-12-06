@@ -54,7 +54,10 @@ import {
 import {
   generateInitialData,
   generateLabels,
-  LABEL_MAPPING
+  LABEL_MAPPING,
+  generateTextFlData,
+  generateEntityRelations,
+  generateEntityLabels
 } from './utils/generateLabels';
 const BreadcrumbItem = Breadcrumb.Item;
 
@@ -66,7 +69,7 @@ export default function RequirementConfig() {
   const FormItem = Form.Item;
   const TextArea = Input.TextArea;
 
-  const type = useParams('type');
+  const type = useParams('type') || 'create';
   const requirementId = useParams('id') as string;
   const history = useHistory();
   const [selectedRadio, setSelectedRadio] = useState('');
@@ -155,11 +158,11 @@ export default function RequirementConfig() {
       requirementDetail?.label_tool?.label_tool_code
     );
     setAnnotationTypeContentVal(requirementDetail?.label_tool?.label_tool_code);
+    setAnnotationTypeVal(requirementDetail?.label_type);
     basicForm.setFieldValue('name', requirementDetail?.name);
     basicForm.setFieldValue('description', requirementDetail?.description);
     basicForm.setFieldValue('model_id', requirementDetail?.model_id);
-    // 任务分配变更， 不需要
-    // setTaskTypeVal(requirementDetail?.team_type);
+    // 渲染label数据
     requirementDetail?.labels?.map((item) => {
       // 使用 label_id 来匹配表单字段
       const labelId = item?.label_id || item?.id;
@@ -261,8 +264,7 @@ export default function RequirementConfig() {
     const splitCount =
       publishData?.split_task_package ||
       labelToolForm.getFieldValue('split_task_package');
-    const qualityRounds =
-      qualityTaskForm.getFieldValue('qualityInspectionRounds') ?? 0;
+    const qualityRounds = qualityTaskForm.getFieldValue('qc_round') ?? 0;
     const totalDataAmount = getTotal(selectedData) || 0;
 
     if (splitCount && totalDataAmount && splitCount >= 1) {
@@ -282,8 +284,7 @@ export default function RequirementConfig() {
   }, [
     publishData?.split_task_package,
     selectedData
-    // requirementDetail?.label_count
-    // qualityInspectionRounds 需要通过表单变化触发
+    // qc_round 需要通过表单变化触发
   ]);
   // 找到现有的useEffect，在其后添加一个新的useEffect来处理templateData的更新同步
   useEffect(() => {
@@ -481,7 +482,6 @@ export default function RequirementConfig() {
       label_type_code: annotationTypeContentCode
     });
   };
-
   // 有必填信息没输入
   const errorInfoContent = () => {
     return Message.error('请输入必填信息');
@@ -622,14 +622,17 @@ export default function RequirementConfig() {
   const publish = async () => {
     setPageLoading(true);
     const { entityRelations, relationRelations } = TextEntityDataContent;
-
+    const { name, description } = basicForm.getFieldsValue();
+    const label_count =
+      type === 'edit'
+        ? requirementDetail?.label_count + getTotal(selectedData)
+        : getTotal(selectedData);
     // 发布数据重置
     const new_publishData = {
-      name: publishData?.name,
-      description: publishData?.description,
+      name,
+      description,
       label_type: annotationTypeVal,
-      label_count: getTotal(selectedData), //数据量（所有数据集之和）
-      team_type: taskTypeVal,
+      label_count, //数据量（所有数据集之和）
       label_tool: {
         label_tool_name: RequirementTypeNameMap[annotationTypeVal],
         label_tool_code: annotationTypeContentCode,
@@ -639,43 +642,43 @@ export default function RequirementConfig() {
       file_labels:
         annotationTypeContentCode ===
         AnnotationTypeContentCode.TEXT_CLASSIFICATION
-          ? text_fl_data
+          ? generateTextFlData(text_fl_data, type)
           : [],
       label_data_set: selectedData,
       labels:
         annotationTypeContentVal === AnnotationTypeContentCode.ENTITY
-          ? entityRelations
+          ? generateEntityLabels(entityRelations, type)
           : annotationTypeContentCode !== AnnotationTypeContentCode.QA &&
               annotationTypeContentCode !==
                 AnnotationTypeContentCode.TEXT_SORT &&
               annotationTypeContentCode !==
                 AnnotationTypeContentCode.TEXT_CLASSIFICATION
-            ? generateLabels(labelDataList)
+            ? generateLabels(labelDataList, type)
             : [],
       entity_relations:
         annotationTypeContentVal === AnnotationTypeContentCode.ENTITY
-          ? relationRelations
+          ? generateEntityRelations(relationRelations, type)
           : [],
       // 任务分配数据
-      ...formatSubmitData(
-        taskPackages,
-        distributeForm.getFieldValue('timeoutRelease') || 30
-      ),
+      ...formatSubmitData(taskPackages),
       // 质检配置
-      quality_inspection_rounds:
-        qualityTaskForm.getFieldValue('qualityInspectionRounds') ?? 0,
-      quality_inspection_modification:
-        qualityTaskForm.getFieldValue('qualityInspectionModification') ?? 0,
-      reject_to: qualityTaskForm.getFieldValue('rejectTo') ?? 1
+      req_config: {
+        qc_round: qualityTaskForm.getFieldValue('qc_round') ?? 0,
+        is_result_modify:
+          qualityTaskForm.getFieldValue('is_result_modify') ?? 0,
+        reject_to: qualityTaskForm.getFieldValue('reject_to') ?? 1,
+        task_effective_minute:
+          distributeForm.getFieldValue('task_effective_minute') || 30
+      }
     };
     if (model_id) {
       new_publishData['model_id'] = model_id;
     }
-    const obj: any = removeEmptyArrays(new_publishData);
+    const obj = removeEmptyArrays(new_publishData);
     setLoading(true);
     // 发布数据
     try {
-      const res = await publishRequirement(obj);
+      const res = await publishRequirement(obj as any);
       if (res.code === 'success') {
         Message.success('创建成功');
         history.goBack();
@@ -1130,7 +1133,7 @@ export default function RequirementConfig() {
               className="configuration-form"
               onValuesChange={(changedValues) => {
                 // 当质检轮次变化时，重新生成任务包列表
-                if ('qualityInspectionRounds' in changedValues) {
+                if ('qc_round' in changedValues) {
                   const splitCount =
                     publishData?.split_task_package ||
                     labelToolForm.getFieldValue('split_task_package');
@@ -1143,7 +1146,7 @@ export default function RequirementConfig() {
                     // 传入现有的taskPackages，保留已选数据
                     const packages = generateTaskPackages(
                       splitCount,
-                      changedValues.qualityInspectionRounds ?? 0,
+                      changedValues.qc_round ?? 0,
                       totalDataAmount,
                       taskPackages
                     );
@@ -1168,7 +1171,7 @@ export default function RequirementConfig() {
             >
               <FormItem
                 initialValue={30}
-                field="timeoutRelease"
+                field="task_effective_minute"
                 label={
                   <span>
                     超时释放

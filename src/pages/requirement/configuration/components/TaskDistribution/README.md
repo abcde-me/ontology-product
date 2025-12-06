@@ -75,7 +75,7 @@ const handleSubmit = () => {
 ```tsx
 import { formatSubmitData } from './components/TaskDistribution';
 
-const submitData = formatSubmitData(taskPackages, timeoutRelease);
+const submitData = formatSubmitData(taskPackages, task_effective_minute);
 
 // submitData 格式：
 // {
@@ -163,7 +163,7 @@ function validateTaskAssignment(taskPackages: TaskPackage[]): ValidationErrors;
 ```tsx
 function formatSubmitData(
   taskPackages: TaskPackage[],
-  timeoutRelease: number
+  task_effective_minute: number
 ): {
   timeout_release: number;
   task_packages: Array<{...}>;

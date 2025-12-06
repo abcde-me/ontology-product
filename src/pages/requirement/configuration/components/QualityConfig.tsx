@@ -8,7 +8,7 @@ const QualityConfig = ({ form, type }) => {
     <>
       <FormItem
         label="质检轮次:"
-        field="qualityInspectionRounds"
+        field="qc_round"
         rules={[{ required: true, message: '请选择质检轮次' }]}
         initialValue={1}
         disabled={type === 'edit'}
@@ -22,7 +22,7 @@ const QualityConfig = ({ form, type }) => {
       </FormItem>
       <FormItem
         label="质检修改标注:"
-        field="qualityInspectionModification"
+        field="is_result_modify"
         rules={[{ required: true, message: '请选择质检修改标注' }]}
         initialValue={0}
       >
@@ -33,13 +33,13 @@ const QualityConfig = ({ form, type }) => {
       </FormItem>
       <FormItem
         label="驳回至:"
-        field="rejectTo"
+        field="reject_to"
         rules={[{ required: true, message: '请选择驳回至' }]}
-        initialValue={1}
+        initialValue={0}
       >
         <RadioGroup>
-          <Radio value={1}>标注员</Radio>
-          <Radio value={2}>标注公池</Radio>
+          <Radio value={0}>标注员</Radio>
+          <Radio value={1}>标注公池</Radio>
         </RadioGroup>
       </FormItem>
     </>

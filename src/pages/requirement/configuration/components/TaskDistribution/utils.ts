@@ -166,13 +166,10 @@ const formatOperateData = (role: RoleAssignment) => {
 /**
  * 格式化提交数据
  * @param taskPackages 任务包列表
- * @param timeoutRelease 超时释放时间
+ * @param task_effective_minute 超时释放时间
  * @returns 格式化后的数据
  */
-export const formatSubmitData = (
-  taskPackages: TaskPackage[],
-  timeoutRelease: number
-) => {
+export const formatSubmitData = (taskPackages: TaskPackage[]) => {
   const pkg_infos = taskPackages.map((task) => {
     // 找到标注人员
     const labelerRole = task.roles.find((role) => role.roleType === 'labeler');
@@ -197,7 +194,6 @@ export const formatSubmitData = (
   });
 
   return {
-    timeout_release: timeoutRelease,
     pkg_infos
   };
 };

@@ -33,7 +33,7 @@ export interface TaskPackage {
 
 // 表单状态数据结构
 export interface TaskDistributionForm {
-  timeoutRelease: number; // 超时释放时间（分钟）
+  task_effective_minute: number; // 超时释放时间（分钟）
   taskPackages: TaskPackage[]; // 任务包列表（动态生成）
 }
 
