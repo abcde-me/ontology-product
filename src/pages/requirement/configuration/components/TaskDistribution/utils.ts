@@ -103,13 +103,19 @@ export const validateTaskAssignment = (
     task.roles.forEach((role) => {
       const key = `${task.taskId}-${role.roleType}`;
 
+      // 根据 assignType 判断对应的选择是否为空
+      const hasSelection =
+        role.assignType === 'department'
+          ? (role.selectedDepartments?.length || 0) > 0
+          : (role.selectedPersons?.length || 0) > 0;
+
       // 标注人员必选
-      if (role.roleType === 'labeler' && role.selectedCount === 0) {
+      if (role.roleType === 'labeler' && !hasSelection) {
         errors[key] = '请选择标注人员';
       }
 
       // 质检人员根据轮次决定是否必选（如果有该轮次则必选）
-      if (role.roleType.startsWith('inspector') && role.selectedCount === 0) {
+      if (role.roleType.startsWith('inspector') && !hasSelection) {
         errors[key] = `请选择${role.roleName}`;
       }
     });

@@ -3,7 +3,7 @@
  */
 
 import { Button } from '@arco-design/web-react';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { DepartmentModal } from '../DepartmentModal';
 import { IndividualModal } from '../IndividualModal';
 import { AssignType, RoleAssignment } from './types';
@@ -30,15 +30,24 @@ const RoleAssignmentCard: React.FC<RoleAssignmentCardProps> = ({
   const [departmentModalVisible, setDepartmentModalVisible] = useState(false);
   const [individualModalVisible, setIndividualModalVisible] = useState(false);
 
+  // 同步 role.assignType 到本地状态（解决数据回显问题）
+  useEffect(() => {
+    setAssignType(role.assignType || 'department');
+  }, [role.assignType]);
+
   // 处理分配类型切换
   const handleAssignTypeChange = (value: AssignType) => {
     setAssignType(value);
-    // 切换类型时清空已选数据
+    // 切换类型时，只更新 assignType，保留两边的选择数据
+    // 只有在确认选择时才清空另一个类型的数据
+    const newSelectedCount =
+      value === 'department'
+        ? role.selectedDepartments?.length || 0
+        : role.selectedPersons?.length || 0;
+
     onUpdate({
       assignType: value,
-      selectedDepartments: [],
-      selectedPersons: [],
-      selectedCount: 0
+      selectedCount: newSelectedCount
     });
   };
 
@@ -119,7 +128,12 @@ const RoleAssignmentCard: React.FC<RoleAssignmentCardProps> = ({
           >
             {assignType === 'department' ? '选择部门' : '选择个人'}
           </Button>
-          <span className="selected-count">已选 {role.selectedCount}</span>
+          <span className="selected-count">
+            已选{' '}
+            {assignType === 'department'
+              ? role.selectedDepartments?.length || 0
+              : role.selectedPersons?.length || 0}
+          </span>
         </div>
       </div>
 

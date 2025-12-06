@@ -33,7 +33,7 @@
   border: 1px solid #e5e6eb;
   border-radius: 8px;
   background: #fff;
-  min-width: 180px;
+  width: 200px;
   flex-shrink: 0;
 
   &.has-error {
@@ -70,7 +70,7 @@
 
     .assign-type-selector-radio-group {
       .arco-radio-button-inner {
-        width: 70px;
+        width: 84px;
         font-size: 14px;
       }
     }

@@ -67,7 +67,7 @@ const TaskDistributionPanel: React.FC<TaskDistributionPanelProps> = ({
           roles: pkg.roles.map((role) => {
             const processKey = `${pkg.taskId}-${role.roleType}`;
 
-            // 如果该角色在选中的工序列表中
+            // 如果该角色在选中的工序列表中，直接覆盖更新
             if (data.selectedProcesses.includes(processKey)) {
               return {
                 ...role,
@@ -136,7 +136,6 @@ const TaskDistributionPanel: React.FC<TaskDistributionPanelProps> = ({
         </div>
       ),
       dataIndex: 'roles',
-      width: 800,
       render: (roles: RoleAssignment[], record: TaskPackage) => (
         <div className="role-assignments-row">
           {roles.map((role, index) => (
@@ -167,6 +166,7 @@ const TaskDistributionPanel: React.FC<TaskDistributionPanelProps> = ({
         pagination={false}
         className="task-distribution-table"
         border={false}
+        scroll={{ x: 'max-content' }}
       />
 
       {/* 批量分配弹窗 */}

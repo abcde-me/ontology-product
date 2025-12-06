@@ -98,12 +98,12 @@ const IndividualModal: React.FC<DataSourceModalProps> = ({
   // 在组件状态定义中添加
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
 
-  // 处理初始选中的数据
+  // 处理初始选中的数据 - 当弹窗打开或初始选中数据变化时同步
   useEffect(() => {
-    if (initialSelected && initialSelected.length > 0) {
-      setSelectedRowKeys(initialSelected);
+    if (visible) {
+      setSelectedRowKeys(initialSelected || []);
     }
-  }, [initialSelected]);
+  }, [visible, initialSelected]);
   const getTreeData = () => {
     try {
       getDepartmentTreeList()

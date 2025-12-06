@@ -76,12 +76,12 @@ const DepartmentModal: React.FC<DataSourceModalProps> = ({
   const [checkedKeys, setCheckedKeys] = useState<string[]>([]);
   const [searchValue, setSearchValue] = useState<string>('');
 
-  // 处理初始选中的数据
+  // 处理初始选中的数据 - 当弹窗打开或初始选中数据变化时同步
   useEffect(() => {
-    if (initialSelected && initialSelected.length > 0) {
-      setCheckedKeys(initialSelected);
+    if (visible) {
+      setCheckedKeys(initialSelected || []);
     }
-  }, [initialSelected]);
+  }, [visible, initialSelected]);
   const getTreeData = () => {
     try {
       getDepartmentTreeList()
@@ -211,6 +211,7 @@ const DepartmentModal: React.FC<DataSourceModalProps> = ({
             checkable
             checkedStrategy="child"
             autoExpandParent={false}
+            checkedKeys={checkedKeys}
             style={{
               width: '300px',
               height: '592px',
