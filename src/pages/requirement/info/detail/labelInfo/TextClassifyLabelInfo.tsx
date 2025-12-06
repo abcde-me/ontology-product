@@ -66,7 +66,14 @@ function TextClassifyLabelInfo({ labelInfo }: { labelInfo: FileLabelInfo[] }) {
     }
 
     return (
-      <div>
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(2, 1fr)',
+          gap: '0 24px',
+          paddingTop: 8
+        }}
+      >
         {file_label_attribute.map((attr, attrIndex) => (
           <div
             key={attr.attribute_id || attrIndex}
@@ -80,17 +87,17 @@ function TextClassifyLabelInfo({ labelInfo }: { labelInfo: FileLabelInfo[] }) {
           >
             <div
               style={{
-                fontSize: 13,
-                color: '#4e5969',
-                lineHeight: '20px'
+                fontSize: 14,
+                color: '#6E7B8D',
+                lineHeight: '22px'
               }}
             >
-              <span style={{ color: '#6E7B8D' }}>选项{attrIndex + 1}:</span>
-              <span style={{ marginLeft: 8 }}>
+              <span>选项{attrIndex + 1}:</span>
+              <span style={{ marginLeft: 8, color: '#1E293B' }}>
                 {attr.attribute_name_en || '-'}
               </span>
               {attr.attribute_name_cn && (
-                <span style={{ marginLeft: 4 }}>
+                <span style={{ marginLeft: 4, color: '#1E293B' }}>
                   ({attr.attribute_name_cn})
                 </span>
               )}

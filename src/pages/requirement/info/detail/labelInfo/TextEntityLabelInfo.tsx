@@ -81,8 +81,10 @@ function TextEntityLabelInfo({
     const { start_entity_labels, target_entity_labels } = record;
 
     if (
-      (!start_entity_labels || start_entity_labels.length === 0) &&
-      (!target_entity_labels || target_entity_labels.length === 0)
+      !start_entity_labels ||
+      start_entity_labels.length === 0 ||
+      !target_entity_labels ||
+      target_entity_labels.length === 0
     ) {
       return (
         <div style={{ padding: '16px 0', color: '#86909c' }}>
@@ -91,101 +93,78 @@ function TextEntityLabelInfo({
       );
     }
 
+    // 将起始标签和目标标签组合成表格数据（笛卡尔积）
+    const tableData: {
+      key: string;
+      startLabel: string;
+      targetLabel: string;
+    }[] = [];
+    const startLabels = start_entity_labels || [];
+    const targetLabels = target_entity_labels || [];
+
+    startLabels.forEach((startLabel, i) => {
+      targetLabels.forEach((targetLabel, j) => {
+        tableData.push({
+          key: `${i}-${j}`,
+          startLabel,
+          targetLabel
+        });
+      });
+    });
+
+    // 渲染标签单元格
+    const renderLabelCell = (labelName: string) => {
+      const entityLabel = labelInfo?.find(
+        (item) => item.label_name_en === labelName
+      );
+
+      return (
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <div
+            style={{
+              width: 20,
+              height: 20,
+              backgroundColor: entityLabel?.label_colour || '#f5f5f5',
+              borderRadius: 4,
+              flexShrink: 0
+            }}
+          />
+          <span>{entityLabel?.label_name_cn || labelName}</span>
+        </div>
+      );
+    };
+
+    const expandColumns = [
+      {
+        title: '起始标签',
+        dataIndex: 'startLabel',
+        width: '50%',
+        bodyCellStyle: { backgroundColor: '#fff' },
+        render: (value: string) => renderLabelCell(value)
+      },
+      {
+        title: '目标标签',
+        dataIndex: 'targetLabel',
+        width: '50%',
+        bodyCellStyle: { backgroundColor: '#fff' },
+        render: (value: string) => renderLabelCell(value)
+      }
+    ];
+
     return (
       <div
         style={{
           padding: '12px 10px',
-          backgroundColor: '#fff',
           borderRadius: 8
         }}
       >
-        <div
-          style={{
-            display: 'flex',
-            gap: 40,
-            fontSize: 13,
-            color: '#4e5969',
-            lineHeight: '20px'
-          }}
-        >
-          {/* 起始标签 */}
-          <div style={{ flex: 1 }}>
-            <div style={{ fontWeight: 500, marginBottom: 8 }}>起始标签</div>
-            {start_entity_labels && start_entity_labels.length > 0 ? (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                {start_entity_labels.map((label, index) => {
-                  // 从实体标签中找到对应的颜色和中文名称
-                  const entityLabel = labelInfo?.find(
-                    (item) => item.label_name_en === label
-                  );
-                  return (
-                    <div
-                      key={index}
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 8
-                      }}
-                    >
-                      <div
-                        style={{
-                          width: 20,
-                          height: 20,
-                          backgroundColor:
-                            entityLabel?.label_colour || '#f5f5f5',
-                          borderRadius: 4,
-                          flexShrink: 0
-                        }}
-                      />
-                      <span>{entityLabel?.label_name_cn || label}</span>
-                    </div>
-                  );
-                })}
-              </div>
-            ) : (
-              <span style={{ color: '#86909c' }}>-</span>
-            )}
-          </div>
-
-          {/* 目标标签 */}
-          <div style={{ flex: 1 }}>
-            <div style={{ fontWeight: 500, marginBottom: 8 }}>目标标签</div>
-            {target_entity_labels && target_entity_labels.length > 0 ? (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                {target_entity_labels.map((label, index) => {
-                  // 从实体标签中找到对应的颜色和中文名称
-                  const entityLabel = labelInfo?.find(
-                    (item) => item.label_name_en === label
-                  );
-                  return (
-                    <div
-                      key={index}
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 8
-                      }}
-                    >
-                      <div
-                        style={{
-                          width: 20,
-                          height: 20,
-                          backgroundColor:
-                            entityLabel?.label_colour || '#f5f5f5',
-                          borderRadius: 4,
-                          flexShrink: 0
-                        }}
-                      />
-                      <span>{entityLabel?.label_name_cn || label}</span>
-                    </div>
-                  );
-                })}
-              </div>
-            ) : (
-              <span style={{ color: '#86909c' }}>-</span>
-            )}
-          </div>
-        </div>
+        <Table
+          columns={expandColumns}
+          data={tableData}
+          pagination={false}
+          border={false}
+          rowKey="key"
+        />
       </div>
     );
   };

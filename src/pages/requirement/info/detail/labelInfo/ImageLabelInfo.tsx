@@ -217,21 +217,24 @@ function ImageLabelInfo({
             {/* 属性组头部信息 */}
             <div
               style={{
-                marginBottom: 8,
+                paddingBottom: 8,
                 fontSize: 14,
                 fontWeight: 400,
-                lineHeight: '22px'
+                lineHeight: '22px',
+                borderBottom: '1px solid #E2E8F0'
               }}
             >
               <span style={{ color: '#6E7B8D' }}>属性{groupIndex + 1}: </span>
               <span style={{ fontWeight: 500, color: '#1E293B' }}>
                 {group.attribute_group_name || '-'}
               </span>
-              <span style={{ marginLeft: 16 }}>
+              <span style={{ margin: '0 12px', color: '#E2E8F0' }}>|</span>
+              <span style={{ color: '#1E293B' }}>
                 {getAttributeGroupClassText(group.attribute_group_class)}
               </span>
+              <span style={{ margin: '0 12px', color: '#E2E8F0' }}>|</span>
               {group.attribute_group_type === 1 && (
-                <span style={{ marginLeft: 16 }}>必须标注</span>
+                <span style={{ color: '#1E293B' }}>必须标注</span>
               )}
             </div>
 
@@ -242,20 +245,27 @@ function ImageLabelInfo({
                   style={{
                     display: 'grid',
                     gridTemplateColumns: 'repeat(2, 1fr)',
-                    gap: '8px 24px'
+                    gap: '8px 24px',
+                    paddingTop: 8
                   }}
                 >
                   {group.label_info_attribute.map((attr, attrIndex) => (
                     <div
                       key={attr.id || attrIndex}
                       style={{
-                        fontSize: 13,
-                        color: '#4e5969',
-                        lineHeight: '20px'
+                        fontSize: 14,
+                        color: '#6E7B8D',
+                        lineHeight: '22px'
                       }}
                     >
                       <span>选项{attrIndex + 1}: </span>
-                      <span>
+                      <span
+                        style={{
+                          color: '#1E293B',
+                          fontSize: 14,
+                          lineHeight: '22px'
+                        }}
+                      >
                         {attr.attribute_name_en || '-'}
                         {attr.attribute_name_cn &&
                           ` (${attr.attribute_name_cn})`}
