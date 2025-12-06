@@ -149,6 +149,21 @@ export const generateProcessOptions = (
 };
 
 /**
+ * 格式化角色分配数据
+ * @param role 角色分配信息
+ * @returns 格式化后的操作数据
+ */
+const formatOperateData = (role: RoleAssignment) => {
+  // own_type: 1-个人, 2-部门
+  const ownType = role.assignType === 'person' ? 1 : 2;
+  return {
+    user_id: role.assignType === 'person' ? role.selectedPersons : [],
+    org_id: role.assignType === 'department' ? role.selectedDepartments : [],
+    own_type: ownType
+  };
+};
+
+/**
  * 格式化提交数据
  * @param taskPackages 任务包列表
  * @param timeoutRelease 超时释放时间
@@ -158,19 +173,32 @@ export const formatSubmitData = (
   taskPackages: TaskPackage[],
   timeoutRelease: number
 ) => {
+  const pkg_infos = taskPackages.map((task) => {
+    // 找到标注人员
+    const labelerRole = task.roles.find((role) => role.roleType === 'labeler');
+
+    // 找到所有质检人员，按轮次排序
+    const inspectorRoles = task.roles
+      .filter((role) => role.roleType.startsWith('inspector'))
+      .sort((a, b) => {
+        const aRound = parseInt(a.roleType.split('_')[1]) || 0;
+        const bRound = parseInt(b.roleType.split('_')[1]) || 0;
+        return aRound - bRound;
+      });
+
+    return {
+      front_pkg_id: parseInt(task.taskId),
+      pkg_task_cnt: task.dataAmount,
+      label_operate: labelerRole
+        ? formatOperateData(labelerRole)
+        : { user_id: [], org_id: [], own_type: 2 },
+      qc_operate: inspectorRoles.map((role) => formatOperateData(role))
+    };
+  });
+
   return {
     timeout_release: timeoutRelease,
-    task_packages: taskPackages.map((task) => ({
-      task_b_id: task.taskBId,
-      data_amount: task.dataAmount,
-      assignments: task.roles.map((role) => ({
-        role_type: role.roleType,
-        assign_type: role.assignType,
-        org_ids:
-          role.assignType === 'department' ? role.selectedDepartments : [],
-        user_ids: role.assignType === 'person' ? role.selectedPersons : []
-      }))
-    }))
+    pkg_infos
   };
 };
 
