@@ -1,0 +1,96 @@
+/**
+ * 任务分配展示模块样式
+ */
+
+// 空状态
+.task-allocation-empty {
+  padding: 20px 0;
+  color: #86909c;
+  font-size: 14px;
+}
+
+// 任务分配面板
+.task-allocation-panel {
+  width: 100%;
+
+  .task-allocation-table {
+    // 角色分配行布局
+    .role-assignments-row {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: nowrap;
+      padding: 8px 0;
+
+      .role-arrow {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #c9cdd4;
+        flex-shrink: 0;
+
+        svg {
+          width: 16px;
+          height: 16px;
+        }
+      }
+    }
+  }
+}
+
+// 角色展示卡片
+.role-display-card {
+  border: 1px solid #e5e6eb;
+  border-radius: 8px;
+  background: #fff;
+  width: 180px;
+  flex-shrink: 0;
+
+  .role-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px 0;
+    border-bottom: 1px solid #f2f3f5;
+
+    .role-icon {
+      width: 18px;
+      height: 18px;
+      flex-shrink: 0;
+    }
+
+    .role-name {
+      font-size: 14px;
+      font-weight: 500;
+      color: #1d2129;
+    }
+  }
+
+  .role-content {
+    padding: 12px 16px;
+    text-align: center;
+
+    .assignment-summary {
+      font-size: 14px;
+      color: #4e5969;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+
+      .assignment-name {
+        color: #1d2129;
+      }
+
+      .assignment-count {
+        color: #86909c;
+
+        .count-number {
+          color: #3b82f6;
+          font-weight: 500;
+        }
+      }
+    }
+  }
+}
