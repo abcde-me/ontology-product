@@ -28,6 +28,20 @@
   }
 }
 
+// 角色分配卡片容器
+.role-assignment-card-wrapper {
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+
+  .error-message {
+    color: #f53f3f;
+    font-size: 14px;
+    margin-top: 4px;
+    padding-left: 4px;
+  }
+}
+
 // 角色分配卡片
 .role-assignment-card {
   border: 1px solid #e5e6eb;
@@ -87,21 +101,25 @@
       text-align: center;
     }
   }
-
-  .error-message {
-    color: #f53f3f;
-    font-size: 14px;
-    margin-top: 8px;
-    padding: 4px 8px;
-    border-radius: 4px;
-    display: flex;
-    align-items: center;
-    gap: 4px;
-  }
 }
 
 .multiple-process-select .arco-input-tag-inner {
   input {
     min-width: 180px !important;
+  }
+}
+
+// 工序选择下拉框样式
+.process-select-dropdown {
+  .select-all-option {
+    .arco-checkbox {
+      width: 100%;
+    }
+  }
+
+  .arco-select-option {
+    .arco-checkbox {
+      margin-right: 8px;
+    }
   }
 }

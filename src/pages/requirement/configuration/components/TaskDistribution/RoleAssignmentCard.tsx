@@ -83,60 +83,53 @@ const RoleAssignmentCard: React.FC<RoleAssignmentCardProps> = ({
     return <QualityUserIcon className="role-icon" />;
   };
 
+  // 获取当前选中数量
+  const selectedCount =
+    assignType === 'department'
+      ? role.selectedDepartments?.length || 0
+      : role.selectedPersons?.length || 0;
+
   return (
-    <div className={`role-assignment-card ${error ? 'has-error' : ''}`}>
-      <div className="role-header">
-        {getRoleIcon()}
-        <span className="role-name">{role.roleName}</span>
-      </div>
-
-      <div className="role-content">
-        <div className="assign-type-selector">
-          <RadioGroupTab
-            type="button"
-            className="assign-type-selector-radio-group"
-            options={[
-              { value: 'department', label: '部门' },
-              { value: 'person', label: '个人' }
-            ]}
-            value={assignType}
-            onChange={(value: string) =>
-              handleAssignTypeChange(value as AssignType)
-            }
-          />
-          {/* <Radio.Group
-            type="button"
-            value={assignType}
-            onChange={handleAssignTypeChange}
-            disabled={disabled}
-          >
-            <Radio value="department">部门</Radio>
-            <Radio value="person">个人</Radio>
-          </Radio.Group> */}
+    <div className="role-assignment-card-wrapper">
+      <div className={`role-assignment-card ${error ? 'has-error' : ''}`}>
+        <div className="role-header">
+          {getRoleIcon()}
+          <span className="role-name">{role.roleName}</span>
         </div>
 
-        <div className="select-action">
-          <Button
-            onClick={() => {
-              if (assignType === 'department') {
-                setDepartmentModalVisible(true);
-              } else {
-                setIndividualModalVisible(true);
+        <div className="role-content">
+          <div className="assign-type-selector">
+            <RadioGroupTab
+              type="button"
+              className="assign-type-selector-radio-group"
+              options={[
+                { value: 'department', label: '部门' },
+                { value: 'person', label: '个人' }
+              ]}
+              value={assignType}
+              onChange={(value: string) =>
+                handleAssignTypeChange(value as AssignType)
               }
-            }}
-            disabled={disabled}
-          >
-            {assignType === 'department' ? '选择部门' : '选择个人'}
-          </Button>
-          <span className="selected-count">
-            已选{' '}
-            {assignType === 'department'
-              ? role.selectedDepartments?.length || 0
-              : role.selectedPersons?.length || 0}
-          </span>
+            />
+          </div>
+
+          <div className="select-action">
+            <Button
+              onClick={() => {
+                if (assignType === 'department') {
+                  setDepartmentModalVisible(true);
+                } else {
+                  setIndividualModalVisible(true);
+                }
+              }}
+              disabled={disabled}
+            >
+              {assignType === 'department' ? '选择部门' : '选择个人'}
+            </Button>
+            <span className="selected-count">已选 {selectedCount}</span>
+          </div>
         </div>
       </div>
-
       {error && <div className="error-message">{error}</div>}
 
       {/* 部门选择弹窗 */}

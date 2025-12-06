@@ -2,20 +2,23 @@
  * 批量分配弹窗组件
  */
 
-import React, { useState, useMemo } from 'react';
+import AnnotationUserIcon from '@/assets/annotation/annotation-user.svg';
+import QualityUserIcon from '@/assets/annotation/quality-user.svg';
 import {
-  Modal,
-  Form,
-  Select,
-  Radio,
   Button,
-  Message
+  Checkbox,
+  Form,
+  Message,
+  Modal,
+  Radio,
+  Select
 } from '@arco-design/web-react';
-import { TaskPackage, BatchAssignData, AssignType } from './types';
-import { generateProcessOptions } from './utils';
+import React, { useMemo, useState } from 'react';
 import { DepartmentModal } from '../DepartmentModal';
 import { IndividualModal } from '../IndividualModal';
 import './styles.scss';
+import { AssignType, BatchAssignData, TaskPackage } from './types';
+import { generateProcessOptions } from './utils';
 const FormItem = Form.Item;
 
 interface BatchAssignModalProps {
@@ -43,6 +46,63 @@ const BatchAssignModal: React.FC<BatchAssignModalProps> = ({
   const processOptions = useMemo(() => {
     return generateProcessOptions(taskPackages);
   }, [taskPackages]);
+
+  // 是否全选
+  const isAllSelected = useMemo(() => {
+    return (
+      processOptions.length > 0 &&
+      selectedProcesses.length === processOptions.length
+    );
+  }, [processOptions, selectedProcesses]);
+
+  // 是否部分选中
+  const isIndeterminate = useMemo(() => {
+    return (
+      selectedProcesses.length > 0 &&
+      selectedProcesses.length < processOptions.length
+    );
+  }, [processOptions, selectedProcesses]);
+
+  // 处理全选
+  const handleSelectAll = (checked: boolean) => {
+    const newValue = checked ? processOptions.map((opt) => opt.value) : [];
+    setSelectedProcesses(newValue);
+    form.setFieldValue('processes', newValue);
+  };
+
+  // 渲染选项图标
+  const renderOptionIcon = (roleType: string) => {
+    if (roleType === 'labeler') {
+      return <AnnotationUserIcon style={{ width: 16, height: 16 }} />;
+    }
+    return <QualityUserIcon style={{ width: 16, height: 16 }} />;
+  };
+
+  // 自定义下拉框渲染
+  const renderDropdown = (menu: React.ReactNode) => {
+    return (
+      <div className="process-select-dropdown">
+        <div
+          className="select-all-option"
+          style={{
+            padding: '8px'
+          }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <Checkbox
+            checked={isAllSelected}
+            indeterminate={isIndeterminate}
+            onChange={(checked) => {
+              handleSelectAll(checked);
+            }}
+          >
+            全选
+          </Checkbox>
+        </div>
+        {menu}
+      </div>
+    );
+  };
 
   // 重置表单
   const resetForm = () => {
@@ -106,7 +166,14 @@ const BatchAssignModal: React.FC<BatchAssignModalProps> = ({
       visible={visible}
       onCancel={handleClose}
       footer={
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            justifyContent: 'flex-end'
+          }}
+        >
           <Button onClick={handleClose}>取消</Button>
           <Button type="primary" onClick={handleConfirm}>
             确定
@@ -125,13 +192,32 @@ const BatchAssignModal: React.FC<BatchAssignModalProps> = ({
           <Select
             mode="multiple"
             className="multiple-process-select"
-            placeholder="请选择批量分配的人员角色"
+            placeholder="请选择工序"
             value={selectedProcesses}
-            onChange={setSelectedProcesses}
+            onChange={(value) => {
+              setSelectedProcesses(value);
+              form.setFieldValue('processes', value);
+            }}
             maxTagCount={2}
-            options={processOptions}
+            dropdownRender={renderDropdown}
             style={{ width: '100%' }}
-          />
+          >
+            {processOptions.map((option) => (
+              <Select.Option key={option.value} value={option.value}>
+                <div
+                  style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
+                >
+                  {renderOptionIcon(option.roleType)}
+                  <span>
+                    任务包{option.taskId}-
+                    {option.roleType === 'labeler'
+                      ? '标注'
+                      : `${option.roleType.split('_')[1]}轮质检`}
+                  </span>
+                </div>
+              </Select.Option>
+            ))}
+          </Select>
         </FormItem>
 
         <FormItem
