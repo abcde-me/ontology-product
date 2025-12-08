@@ -11,7 +11,6 @@ import {
 } from '@arco-design/web-react';
 import { useHistory } from 'react-router';
 import { ColumnProps } from '@arco-design/web-react/es/Table';
-import EllipsisPopover from '@/components/ellipsis-popover-com';
 import noDataElement from '@/components/no-data';
 import { getWorkflowList } from '@/api/workflowList';
 import { useUserInfo } from '@/store/userInfoStore';
@@ -22,12 +21,18 @@ import { openNewPage } from '@/utils/env';
 import SettingsIcon from '@/assets/metadata/settings.svg';
 import ColumnSettingIcon from '@/assets/metadata/column-setting.svg';
 import StorageIcon from '@/assets/metadata/storage.svg';
-import styles from './index.module.scss';
 import { IconPlus, IconRefresh } from '@arco-design/web-react/icon';
+import { getColumns } from './getColumns';
+import styles from './index.module.scss';
 
-const InputSearch = Input.Search;
+enum MetadataType {
+  Iceberg = 'Iceberg',
+  Doris = 'Doris',
+  MinIO = 'MinIO',
+  Milvus = 'Milvus'
+}
 
-export default function WorkflowList() {
+export default function MetadataManagement() {
   const history = useHistory();
   const userInfo = useUserInfo();
   const MenuItem = Menu.Item;
@@ -53,6 +58,10 @@ export default function WorkflowList() {
     run_cycle: '',
     sort: ''
   });
+  // 初始化筛选的元数据类型
+  const [activeMetadataType, setActiveMetadataType] = useState<
+    MetadataType | string
+  >(MetadataType.Iceberg);
 
   // 组件初始化
   useEffect(() => {
@@ -89,21 +98,6 @@ export default function WorkflowList() {
     }
   };
 
-  // 创建工作流
-  const handleCreateWorkflow = () => {
-    openNewPage('/modaforge/tenant/compute/modaforge/workflowConfig');
-  };
-
-  // 跳转目录
-  const handleToDirectoryPath = (
-    id: string,
-    parent_id: string,
-    root_type: string | number
-  ) => {
-    history.push(
-      `/tenant/compute/modaforge/dataCatalog/list?root_type=${root_type}&id=${id}&parent_id=${parent_id}`
-    );
-  };
   // 查看详情
   const viewDetailWorkflow = (
     workflow_uuid: number | string,
@@ -137,11 +131,6 @@ export default function WorkflowList() {
     setSortValue(sortdata);
   };
 
-  // table数据为空时展示-
-  const renderEmptyPlaceholder = (value: string | null) => {
-    return value === '' || value == null ? '-' : value;
-  };
-
   // 搜索表单提交
   const handleSearch = (values: any) => {
     console.log(values, 'vvvvv');
@@ -149,166 +138,20 @@ export default function WorkflowList() {
     // setCurrent(1);
   };
 
-  // table columns
-  const columns: ColumnProps[] = [
-    {
-      title: '序号',
-      dataIndex: 'index',
-      width: 60,
-      align: 'center',
-      render: (_, record, index) => index + 1
-    },
-    {
-      title: '表英文名称',
-      dataIndex: 'workflow_name_english',
-      width: 280,
-      ellipsis: true,
-      className: styles['hover-change'] + ' ' + styles['table-name'],
-      render: (_, record) => {
-        return renderEmptyPlaceholder(record.workflow_name) !== '-' ? (
-          <EllipsisPopover
-            value={record.workflow_name}
-            isEdit={false}
-            isLink
-            handleLink={() => {
-              viewDetailWorkflow(record.workflow_uuid, record.ds_workflow_id);
-            }}
-          />
-        ) : (
-          <span>-</span>
-        );
-      }
-    },
-    {
-      title: '表中文名称',
-      dataIndex: 'workflow_name',
-      width: 280,
-      ellipsis: true,
-      className: styles['hover-change'] + ' ' + styles['table-name'],
-      render: (_, record) => {
-        return renderEmptyPlaceholder(record.workflow_name) !== '-' ? (
-          <EllipsisPopover
-            value={record.workflow_name}
-            isEdit={false}
-            isLink
-            handleLink={() => {
-              viewDetailWorkflow(record.workflow_uuid, record.ds_workflow_id);
-            }}
-          />
-        ) : (
-          <span>-</span>
-        );
-      }
-    },
-    {
-      title: '所属数据库',
-      dataIndex: 'source_path',
-      width: 120,
-      ellipsis: true,
-      className: styles['hover-change'],
-      render: (_, record) => {
-        return renderEmptyPlaceholder(record.source_path) !== '-' ? (
-          <EllipsisPopover
-            value={record.source_path}
-            isEdit={false}
-            isLink
-            handleLink={() => {
-              handleToDirectoryPath(
-                record.source_path_id,
-                record.parent_source_path_id,
-                1
-              );
-            }}
-          />
-        ) : (
-          <span>-</span>
-        );
-      }
-    },
-    {
-      title: '分区字段',
-      dataIndex: 'target_path',
-      width: 120,
-      ellipsis: true,
-      className: styles['hover-change'],
-      render: (_, record) => {
-        return renderEmptyPlaceholder(record.dataset_name) !== '-' ? (
-          <EllipsisPopover value={record.dataset_name} isEdit={false} />
-        ) : (
-          <span>-</span>
-        );
-      }
-    },
-    {
-      title: '分区数',
-      dataIndex: 'partition_num',
-      width: 100,
-      ellipsis: true,
-      render: (_, record) => (
-        <EllipsisPopover
-          value={renderEmptyPlaceholder(record.user_name)}
-          isEdit={false}
-        />
-      )
-    },
-    {
-      title: '存储大小（G）',
-      dataIndex: 'storage_size',
-      width: 150,
-      ellipsis: true,
-      render: (_, record) => (
-        <EllipsisPopover
-          value={renderEmptyPlaceholder(record.user_name)}
-          isEdit={false}
-        />
-      )
-    },
-    {
-      title: '文件数',
-      dataIndex: 'user_name',
-      width: 100,
-      ellipsis: true,
-      render: (_, record) => (
-        <EllipsisPopover
-          value={renderEmptyPlaceholder(record.user_name)}
-          isEdit={false}
-        />
-      )
-    },
-    {
-      title: '更新时间',
-      dataIndex: 'create_time',
-      width: 160,
-      render: (_, record) => (
-        <span>
-          {record.create_time == '' || record.create_time == null
-            ? '-'
-            : new Date(record.create_time).toLocaleString()}
-        </span>
-      ),
-      sorter: true
-    },
-    {
-      title: '最近访问时间',
-      dataIndex: 'update_time',
-      width: 160,
-      render: (_, record) => (
-        <span>
-          {record.update_time == '' || record.update_time == null
-            ? '-'
-            : new Date(record.update_time).toLocaleString()}
-        </span>
-      ),
-      sorter: true
-    }
-  ];
+  const columns: ColumnProps[] = getColumns(
+    activeMetadataType,
+    viewDetailWorkflow
+  ) as ColumnProps[];
 
   return (
     <div className={styles['metadataManagement']}>
       <h1 style={{ fontSize: '20px', fontWeight: 'bold' }}>元数据管理</h1>
       <div className="mt-4 flex">
         <div className={styles['leftBox']}>
-          <Menu defaultSelectedKeys={['Iceberg']}>
+          <Menu
+            defaultSelectedKeys={[activeMetadataType]}
+            onClickMenuItem={(key) => setActiveMetadataType(key)}
+          >
             <MenuItem key="Iceberg">Iceberg</MenuItem>
             <MenuItem key="Doris">Doris</MenuItem>
             <MenuItem key="MinIO">MinIO</MenuItem>
@@ -334,15 +177,31 @@ export default function WorkflowList() {
                 justifyContent: 'space-between'
               }}
             >
-              <Form.Item label="目录类型：" field="directory_type">
-                <Select placeholder="请选择文件类型" />
-              </Form.Item>
-              <Form.Item label="表名：" field="table_name">
-                <Input placeholder="请输入关键字搜索" />
-              </Form.Item>
-              <Form.Item label="表中文：" field="table_name_zh">
-                <Input placeholder="请输入关键字搜索" />
-              </Form.Item>
+              {activeMetadataType === MetadataType.MinIO ? (
+                <>
+                  <Form.Item label="桶名称：" field="bucket_name">
+                    <Input placeholder="请输入关键字搜索" />
+                  </Form.Item>
+                  <Form.Item label="所属区域：" field="region">
+                    <Input placeholder="请输入关键字搜索" />
+                  </Form.Item>
+                  <Form.Item label="存储类型：" field="storage_type">
+                    <Select placeholder="请选择存储类型" />
+                  </Form.Item>
+                </>
+              ) : (
+                <>
+                  <Form.Item label="目录类型：" field="directory_type">
+                    <Select placeholder="请选择文件类型" />
+                  </Form.Item>
+                  <Form.Item label="表名：" field="table_name">
+                    <Input placeholder="请输入关键字搜索" />
+                  </Form.Item>
+                  <Form.Item label="表中文：" field="table_name_zh">
+                    <Input placeholder="请输入关键字搜索" />
+                  </Form.Item>
+                </>
+              )}
             </Form>
             <div className="flex items-center justify-between">
               <div>
@@ -385,21 +244,30 @@ export default function WorkflowList() {
                 className={styles['refreshBtn']}
                 icon={<IconRefresh className="text-[#1E293B]" />}
               />
-              <Button className={styles['refreshBtn']} icon={<StorageIcon />}>
-                表转API
-              </Button>
-              <Button
-                className={styles['refreshBtn']}
-                icon={<IconPlus className="text-[#1E293B]" />}
-              >
-                创建数据库
-              </Button>
-              <Button
-                className={styles['refreshBtn']}
-                icon={<IconPlus className="text-[#1E293B]" />}
-              >
-                创建物理表
-              </Button>
+              {(activeMetadataType === MetadataType.Iceberg ||
+                activeMetadataType === MetadataType.Doris) && (
+                <>
+                  <Button
+                    className={styles['refreshBtn']}
+                    icon={<StorageIcon />}
+                  >
+                    表转API
+                  </Button>
+
+                  <Button
+                    className={styles['refreshBtn']}
+                    icon={<IconPlus className="text-[#1E293B]" />}
+                  >
+                    创建数据库
+                  </Button>
+                  <Button
+                    className={styles['refreshBtn']}
+                    icon={<IconPlus className="text-[#1E293B]" />}
+                  >
+                    创建物理表
+                  </Button>
+                </>
+              )}
               <Button
                 className={styles['refreshBtn']}
                 icon={<ColumnSettingIcon />}
@@ -414,10 +282,8 @@ export default function WorkflowList() {
             data={workflowData}
             pagination={false}
             noDataElement={noDataElement({
-              description: '暂无工作流',
-              btnText: '创建工作流',
-              perms: WORKFLOW_LIST_PERMISSIONS.CREATE,
-              handleBtn: () => handleCreateWorkflow()
+              description: '暂无数据',
+              perms: WORKFLOW_LIST_PERMISSIONS.CREATE
             })}
             rowKey="id"
             loading={loading}
