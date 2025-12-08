@@ -173,7 +173,10 @@ module.exports = function (webpackEnv) {
         {
           loader: require.resolve(preProcessor),
           options: {
-            sourceMap: true
+            sourceMap: true,
+            sassOptions: { 
+              silenceDeprecations:['legacy-js-api'],
+            }
           }
         }
       );

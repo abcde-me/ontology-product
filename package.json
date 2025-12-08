@@ -30,6 +30,7 @@
     "@arco-themes/react-cecloud-design": "^1.0.61",
     "@babel/preset-typescript": "^7.27.0",
     "@ccf2e/arco-material": "^0.7.2",
+    "@ceai-front/arco-material": "^1.0.1",
     "@dagrejs/dagre": "^1.1.4",
     "@emoji-mart/data": "^1.1.2",
     "@floating-ui/react": "^0.26.25",
