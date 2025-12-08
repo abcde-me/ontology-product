@@ -22,7 +22,7 @@ export interface TreeNodeData {
 }
 
 export const useDatasetTree = () => {
-  // 数据集相关状态
+  // 数据集市相关状态
   const [dasetList, setDasetList] = useState<DatasetListItem[]>([]);
 
   const [searchKeyword, setSearchKeyword] = useState('');
@@ -32,7 +32,7 @@ export const useDatasetTree = () => {
   const [expandedKeys, setExpandedKeys] = useState<string[]>([]);
   const [treeData, setTreeData] = useState<TreeNodeData[]>([]);
 
-  // 获取数据集目录列表
+  // 获取数据集市目录列表
   const getDataSetList = async (keyword?: string, showLoading = true) => {
     if (showLoading) {
       setTreeDataLoading(true);
@@ -55,22 +55,22 @@ export const useDatasetTree = () => {
         return;
       }
 
-      // 只更新数据集列表，不直接覆盖 treeData
+      // 只更新数据集市列表，不直接覆盖 treeData
       setDasetList(res?.data?.list ?? []);
     } finally {
       setTreeDataLoading(false);
     }
   };
 
-  // 将数据集列表转换为树
+  // 将数据集市列表转换为树
   const convertDatasetToTreeNode = useCallback((dataset: any): TreeNodeData => {
     return {
       key: `dataset-${dataset.id}`,
       id: dataset.id,
       version_id: dataset.latest_version,
       icon: <DasetIcon />,
-      title: `${dataset.name}(${dataset.latest_table})`,
-      latest_size: dataset.latest_size,
+      title: `${dataset.name}(${dataset.table})`,
+      latest_size: dataset.size,
       isLeaf: false,
       data: dataset,
       type: 'dataset',
@@ -100,7 +100,7 @@ export const useDatasetTree = () => {
     setExpandedKeys([]);
   };
 
-  // 初始化加载数据集列表
+  // 初始化加载数据集市列表
   useEffect(() => {
     // 如果有搜索关键词，则不显示loading（搜索时不加载）
     // 如果没有搜索关键词，则显示loading（初始加载）
@@ -108,7 +108,7 @@ export const useDatasetTree = () => {
   }, [searchKeyword]);
 
   return {
-    // 数据集相关
+    // 数据集市相关
     dasetList,
     searchKeyword,
     setSearchKeyword,

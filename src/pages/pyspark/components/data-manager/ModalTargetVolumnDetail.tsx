@@ -11,8 +11,7 @@ import {
 } from '@arco-design/web-react';
 import EllipsisPopover from '@/components/ellipsis-popover-com';
 import getFileIcon from '@/components/file-icon';
-import styles from './ModalTargetVolumnDetail.module.scss';
-import classNames from 'classnames';
+import './ModalTargetVolumnDetail.scss';
 import {
   GetTargetCatalogFileListItem,
   getTargetDataFileList,
@@ -63,7 +62,7 @@ const FileList = (props) => {
   } = useTableList({ volumn });
 
   return (
-    <div className={styles['pyspark-modal-target-volumn-detail']}>
+    <div className="pyspark-modal-target-volumn-detail">
       <Form autoComplete="off" layout="inline">
         <FormItem
           field="['file_name', 'search_type']"
@@ -151,42 +150,29 @@ const WorkflowIdCell = ({ record }) => {
   const extras = record?.extras || {};
 
   return (
-    <div className={styles['unified-columns-wrapper']}>
-      <div className={styles['unified-columns']}>
-        <span className={styles['unified-columns-label']}>原文件:&nbsp;</span>
-        <span
-          className={classNames(
-            styles['unified-columns-content'],
-            styles['unified-columns-file']
-          )}
-        >
+    <div className="unified-columns-wrapper">
+      <div className="unified-columns">
+        <span className="unified-columns-label">原文件:&nbsp;</span>
+        <span className="unified-columns-content unified-columns-file">
           {extras.file_name ?? '无文件名'}
         </span>
       </div>
-      <div className={styles['unified-columns']}>
-        <span
-          className={classNames(
-            styles['unified-columns-label'],
-            styles['unified-columns-workflow']
-          )}
-        >
+      <div className="unified-columns">
+        <span className="unified-columns-label unified-columns-workflow">
           工作流ID:&nbsp;
         </span>
-        <span
-          className={styles['unified-columns-content']}
-          style={{ maxWidth: 170 }}
-        >
+        <span className="unified-columns-content" style={{ maxWidth: 170 }}>
           {extras.workflow_uuid ? (
             <>
               <a
-                className={styles['jump-workflow']}
+                className="jump-workflow"
                 target="_blank"
                 rel="noreferrer"
                 href={`/modaforge/tenant/compute/modaforge/workflowConfig?workflow_uuid=${extras.workflow_uuid}&ds_workflow_id=${extras.ds_workflow_id}`}
               >
                 {extras.workflow_uuid}
               </a>
-              <span className={styles['jump-workflow-icon']}></span>
+              <span className="jump-workflow-icon"></span>
             </>
           ) : (
             '-'

@@ -202,7 +202,6 @@ export const useTabManager = (
         try {
           // 获取当前文件夹ID，如果没有则使用根目录
           const currentFolderId = getCurrentFolderId?.() || '0';
-
           const createRes = await createPythonItem({
             path_id: Number(currentFolderId),
             type: PythonItemType.Notebook,

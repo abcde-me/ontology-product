@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import {
-  getDatasetVersionFile,
+  getPysparkDatasetFile,
   searchDatasetList
 } from '@/api/datasetManagement';
 import {
@@ -32,7 +32,7 @@ interface UseDatasetTreeProps {
 export const useDatasetTree = ({
   onViewDatasetDetail
 }: UseDatasetTreeProps = {}) => {
-  // 数据集相关状态
+  // 数据集市相关状态
   const [dasetList, setDasetList] = useState<DatasetListItem[]>([]);
   const [dasetFileList, setDasetFileList] = useState<DatasetVersionFileItem[]>(
     []
@@ -44,10 +44,10 @@ export const useDatasetTree = ({
   const [treeData, setTreeData] = useState<TreeNodeData[]>([]);
   const [loading, setLoading] = useState(false);
 
-  // 获取数据集目录列表
+  // 获取数据集市目录列表
   const getDasetList = async (keyword?: string) => {
     const targetParams: any = {
-      storage_type_list: ['file', 'jsonl'],
+      storage_type_list: ['image', 'video', 'audio', 'other', 'jsonl'],
       name: keyword,
       page: 1,
       limit: 1000
@@ -59,22 +59,21 @@ export const useDatasetTree = ({
       return;
     }
 
-    // 只更新数据集列表，不直接覆盖 treeData
+    // 只更新数据集市列表，不直接覆盖 treeData
     setDasetList(res?.data?.list ?? []);
   };
 
-  // 获取数据集单个目录下的文件列表
+  // 获取数据集市单个目录下的文件列表
   const getDasetVersionFile = async (
     id: number,
     version_id: string,
     page = 1,
     page_size = 1000
   ) => {
-    const res = await getDatasetVersionFile({
+    const res = await getPysparkDatasetFile({
       id,
-      version_id,
       page,
-      page_size
+      limit: page_size
     });
 
     if (res?.status !== 200) {
@@ -86,7 +85,7 @@ export const useDatasetTree = ({
     return fileList;
   };
 
-  // 将数据集列表转换为树节点
+  // 将数据集市列表转换为树节点
   const convertDatasetToTreeNode = useCallback(
     (dataset: DatasetListItem): TreeNodeData => {
       return {
@@ -95,7 +94,7 @@ export const useDatasetTree = ({
         version_id: dataset.latest_version,
         icon: <DasetIcon />,
         title: dataset.name,
-        latest_size: dataset.latest_size,
+        latest_size: dataset.size,
         isLeaf: false,
         data: dataset,
         type: 'dataset',
@@ -142,13 +141,13 @@ export const useDatasetTree = ({
       return new Promise(async (resolve) => {
         try {
           const nodeData = node.props.dataRef as TreeNodeData;
-          if (!nodeData?.id || !nodeData?.version_id) {
+          if (!nodeData?.id) {
             return resolve();
           }
 
           const fileList = await getDasetVersionFile(
             nodeData.id,
-            nodeData.version_id,
+            nodeData.version_id ?? '',
             1,
             1000
           );
@@ -188,7 +187,7 @@ export const useDatasetTree = ({
     setTreeData(newTreeData);
   }, [dasetList, convertDatasetToTreeNode]);
 
-  // 初始化加载数据集列表
+  // 初始化加载数据集市列表
   useEffect(() => {
     setLoading(true);
     getDasetList(searchKeyword).finally(() => {
@@ -197,7 +196,7 @@ export const useDatasetTree = ({
   }, [searchKeyword]);
 
   return {
-    // 数据集相关
+    // 数据集市相关
     dasetList,
     dasetFileList,
     searchKeyword,

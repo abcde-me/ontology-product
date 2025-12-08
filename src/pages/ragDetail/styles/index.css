@@ -1,0 +1,92 @@
+/* 导入markdown样式 */
+@import '@/pages/workflowConfig/styles/markdown.css';
+
+/* RAG Detail页面自定义样式 */
+.rag-detail-page {
+  height: 100vh !important;
+  max-height: 100vh !important;
+  overflow: hidden !important;
+}
+
+.rag-detail-page * {
+  box-sizing: border-box;
+}
+
+.rag-detail-page .markdown-body {
+  margin: 0 !important;
+  padding: 0 !important;
+  min-height: 0 !important;
+  height: auto !important;
+  max-height: none !important;
+}
+
+.rag-detail-page .markdown-body > * {
+  min-height: 0 !important;
+}
+
+.rag-detail-page .markdown-body > *:first-child {
+  margin-top: 0 !important;
+}
+
+.rag-detail-page .markdown-body > *:last-child {
+  margin-bottom: 0 !important;
+}
+
+.rag-detail-page .markdown-body p {
+  margin-top: 0.5em !important;
+  margin-bottom: 0.5em !important;
+  min-height: 0 !important;
+}
+
+/* .rag-detail-page .markdown-body img {
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  border: 2px solid #e5e7eb;
+  display: block !important;
+  max-width: 100% !important;
+  height: auto !important;
+  min-height: 0 !important;
+}
+
+.rag-detail-page .markdown-body img:hover {
+  transform: scale(1.05);
+  border-color: #007dfa;
+  box-shadow: 0 4px 12px rgba(0, 125, 250, 0.2);
+} */
+
+/* KaTeX 公式样式限制 */
+.rag-detail-page .katex-display {
+  margin: 0.5em 0 !important;
+  padding: 0 !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  min-height: 0 !important;
+  max-height: 200px !important;
+  display: block !important;
+}
+
+.rag-detail-page .katex {
+  font-size: 1em !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  display: inline-block !important;
+}
+
+.rag-detail-page .katex-html {
+  overflow: hidden !important;
+  min-height: 0 !important;
+  max-height: none !important;
+}
+
+.rag-detail-page .katex .base {
+  min-height: 0 !important;
+}
+
+.rag-detail-page .katex .strut {
+  min-height: 0 !important;
+}
+
+/* 强制限制所有 katex 相关元素 */
+.rag-detail-page [class*='katex'] {
+  min-height: 0 !important;
+}

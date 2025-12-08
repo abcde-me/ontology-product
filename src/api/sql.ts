@@ -20,7 +20,9 @@ import {
   updateSqlScriptParams,
   SqlTaskDetailData,
   DatasetsOptionsParams,
-  DatasetsOptionsData
+  DatasetsOptionsData,
+  ListDevelopScriptParams,
+  ListDevelopScriptParamsData
 } from '@/types/sqlApi';
 
 /** 数据集目录 */
@@ -168,64 +170,6 @@ export async function getExportSqlResultList(
   params: ExportSqlResultListParams
 ): Promise<ApiRes<ExportSqlResultListData>> {
   return await UAPI.RES.sqlExportDatasetList({}).post(params).inRegion().do();
-
-  // return Promise.resolve({
-  //   "message": "string",
-  //   "data": {
-  //     "items": [
-  //       {
-  //         "id": 5,
-  //         "script_id": 5,
-  //         "script_name": "string",
-  //         "dataset_name": "string",
-  //         "dataset_table_name": "string",
-  //         "export_status": 0,
-  //         "export_start_time": "string",
-  //         "export_end_time": "string",
-  //         "failed_reason": "string"
-  //       },
-  //       {
-  //         "id": 1,
-  //         "script_id": 1,
-  //         "script_name": "string",
-  //         "dataset_name": "string",
-  //         "dataset_table_name": "string",
-  //         "export_status": 1,
-  //         "export_start_time": "string",
-  //         "export_end_time": "string",
-  //         "failed_reason": "string"
-  //       },
-  //       {
-  //         "id": 2,
-  //         "script_id": 1,
-  //         "script_name": "string",
-  //         "dataset_name": "string",
-  //         "dataset_table_name": "string",
-  //         "export_status": 2,
-  //         "export_start_time": "string",
-  //         "export_end_time": "string",
-  //         "failed_reason": "错误原因"
-  //       },
-  //       {
-  //         "id": 3,
-  //         "script_id": 1,
-  //         "script_name": "string",
-  //         "dataset_name": "string",
-  //         "dataset_table_name": "string",
-  //         "export_status": 3,
-  //         "export_start_time": "string",
-  //         "export_end_time": "string",
-  //         "failed_reason": "string"
-  //       }
-  //     ],
-  //     "total": "1",
-  //     "page": "1",
-  //     "page_size": "10"
-  //   },
-  //   "status": 0,
-  //   "code": '0',
-  //   requestId: '0'
-  // })
 }
 
 /** SQL结果导出任务停止 */
@@ -266,4 +210,11 @@ export async function getDatasetsOptions(
   params: DatasetsOptionsParams
 ): Promise<ApiRes<DatasetsOptionsData>> {
   return await UAPI.RES.datasetsOptionsApi({}).post(params).inRegion().do();
+}
+
+// 获取开发脚本列表
+export async function getDevelopScriptList(
+  params: ListDevelopScriptParams
+): Promise<ApiRes<ListDevelopScriptParamsData>> {
+  return await UAPI.RES.listDevelopScriptApi({}).post(params).inRegion().do();
 }

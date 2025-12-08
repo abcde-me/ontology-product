@@ -1,16 +1,12 @@
 import React, { useEffect } from 'react';
-import { Tabs } from '@arco-design/web-react';
 import './tabs-center.css';
 import EditableTree from '../editable-tree';
 import { useDataCatalog } from '../DataCatalogProvider/Context';
 import { CatalogTypeEnum, RootTypeEnum, tabKeys } from '../../consts';
 
-const TabPane = Tabs.TabPane;
-
 export default function SourceData() {
   const dataCatalog = useDataCatalog();
   const { catalogTreeStore } = dataCatalog;
-  const { activeTab } = catalogTreeStore.useGetState(['activeTab']);
 
   const params = new URLSearchParams(window.location.search);
   const root_type = params.get('root_type');
@@ -30,35 +26,10 @@ export default function SourceData() {
     });
   }, [root_type, parent_id, id]);
 
-  const handleTabChange = (value: string) => {
-    console.log('Tab changed to:', value);
-    // 重置selectedNodeType并更新activeTab
-    catalogTreeStore.setState({
-      selectedNodeType: '',
-      selectedKey: '',
-      selectedTreeKey: '',
-      selectedPath: '',
-      selectedParentId: ''
-    });
-    catalogTreeStore.getEffect('fetchData')({
-      activeTab: value
-    });
-  };
-
   return (
-    <div className="data-catalog-left-box mr-[16px] w-[260px] overflow-auto rounded border border-solid border-[#E2E8F0]">
+    <div className="data-catalog-left-box mr-[16px] w-[260px] overflow-auto">
       <div className="h-[40px] w-full">
-        <Tabs
-          activeTab={activeTab}
-          onChange={(e) => handleTabChange(e)}
-          className="tabs-center"
-        >
-          {tabKeys.map((tab) => (
-            <TabPane key={tab.key} title={tab.title}>
-              <EditableTree />
-            </TabPane>
-          ))}
-        </Tabs>
+        <EditableTree />
       </div>
     </div>
   );

@@ -1,0 +1,143 @@
+.directory-pyspark-tree-container {
+  height: 100%;
+
+  .pyspark-tree-container {
+    height: calc(100% - var(--directory-nav-height, 40px));
+    overflow-y: auto;
+    overflow-x: auto;
+    width: 100%;
+  }
+
+  .directory-tree-nav {
+    margin-bottom: 8px;
+    padding-left: 5px;
+  }
+
+  // 多级路径导航样式
+  .directory-path-navigation {
+    .path-separator {
+      color: #666;
+      user-select: none;
+    }
+
+    .current-folder {
+      color: #334155;
+      font-weight: 500;
+    }
+  }
+
+  .directory-tree-header {
+    :global(.arco-btn-size-small) {
+      padding: 0 0 0 12px;
+    }
+  }
+
+  .directory-tree-extra {
+    display: inline-flex;
+    align-items: center;
+    display: none;
+    color: rgba(30, 41, 59, 1);
+    flex-shrink: 0; // 防止操作按钮被压缩
+  }
+
+  :global(.arco-tree-node):hover .directory-tree-extra {
+    opacity: 1;
+    display: inline-flex;
+    visibility: visible;
+  }
+
+  // 文件名样式 - 非 hover 态最大宽度 260px
+  .file-name {
+    max-width: 600px;
+    width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-weight: 400;
+  }
+
+  // 搜索结果路径样式 - 非 hover 态最大宽度 260px
+  .search-result-path {
+    font-size: 12px;
+    color: #6e7b8d;
+    line-height: 18px;
+    // overflow: hidden;
+  }
+
+  // hover 态样式
+  :global(.arco-tree-node):hover {
+    .file-name {
+      color: #007dfa;
+    }
+
+    .search-result-path {
+      max-width: 140px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+  }
+
+  :global(.arco-tree) {
+    overflow-y: auto !important;
+    overflow-x: hidden;
+    padding-top: 8px;
+    box-sizing: border-box;
+    height: calc(100% - var(--directory-nav-height, 40px));
+  }
+
+  // 空数据状态样式
+  .directory-tree-empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+
+    .empty-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+
+      .empty-icon {
+        margin-bottom: 16px;
+        color: #c9cdd4;
+      }
+
+      .empty-text {
+        font-size: 14px;
+        color: #86909c;
+        margin-bottom: 24px;
+        line-height: 1.5;
+      }
+
+      .empty-actions {
+        .create-file-btn {
+          height: 36px;
+          padding: 0 20px;
+          font-size: 14px;
+          border-radius: 6px;
+        }
+      }
+    }
+  }
+
+  // 节点样式
+  :global(.arco-tree-node) {
+    position: relative;
+    border-radius: 2px;
+    display: flex !important;
+    align-items: center !important;
+
+    :global(.arco-tree-node-indent) {
+      display: block !important;
+    }
+
+    // 让 title 占据剩余空间
+    :global(.arco-tree-node-title) {
+      flex: 1;
+      min-width: 0; // 允许 flex 子元素收缩，配合文本溢出使用
+      overflow: hidden;
+    }
+  }
+}

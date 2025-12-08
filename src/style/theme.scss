@@ -172,6 +172,7 @@ $spacing-9: 24px;
   width: 464;
   height: 142;
   padding-left: 28px;
+  font-size: 14px;
 }
 
 .arco-modal-simple .arco-modal-header {
@@ -291,6 +292,10 @@ $spacing-9: 24px;
 .arco-btn-primary:not(.arco-btn-disabled):hover {
   background-color: $color-bg-btn-normal-hover;
   color: $color-bg-btn-normal-hover;
+}
+
+.arco-btn-secondary.arco-btn-disabled {
+  border: 1px solid var(--color-text-6);
 }
 
 // 线性按钮的颜色

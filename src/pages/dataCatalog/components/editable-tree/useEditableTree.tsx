@@ -20,12 +20,14 @@ import {
   deleteVolume,
   deleteTable,
   renameCatalog,
-  addDb
+  addDb,
+  addMetaData
 } from '@/api/dataCatalog';
 import { validateName } from '@/utils/valiate';
 import { DATA_CATALOG_PERMISSIONS } from '@/config/permissions';
 import { PermissionWrapper } from '@/components/PermissionGuard';
 import styles from '../../modal.module.css';
+import YuanShujuIcon from '@/assets/yuanshuju-icon.svg';
 
 export function useEditableTree({ catalogTreeStore }) {
   const {
@@ -65,7 +67,7 @@ export function useEditableTree({ catalogTreeStore }) {
 
   const generateName = useCallback(
     (data: TreeDataType[], typeText?: string) => {
-      const baseName = `${activeTab === 'src' ? '源' : '目标'}${typeText || '目录'}`;
+      const baseName = `${typeText || '目录'}`;
       // const set = new Set(data.map((item) => item.name));
       // let x = data.length + 1;
       const name = `${baseName}_${Date.now()}`;
@@ -81,8 +83,6 @@ export function useEditableTree({ catalogTreeStore }) {
   );
 
   const genereteInputNode = useCallback((name: string, node?: NodeProps) => {
-    console.log(node, '看看看什么是node');
-
     // 生成key，避免同级节点key冲突
     const timestamp = Date.now();
     const random = Math.random().toString(36).substr(2, 9);
@@ -150,9 +150,10 @@ export function useEditableTree({ catalogTreeStore }) {
       dataRef?.type_name !== 'db'
     ) {
       catalogTreeStore.setState({
+        extendsObj: dataRef?.extends ?? {},
         selectedKey: dataRef?.id ? String(dataRef.id) : selectedKeys[0], // 存储实际的数据ID
         selectedTreeKey: selectedKeys[0], // 存储完整的树节点key用于显示选中样式
-        selectedPath: dataRef?.fullPath,
+        selectedPath: dataRef?.fullPath || '',
         selectedNodeType: dataRef?.type_name || dataRef?.type || '', // 存储节点类型
         selectedParentId: dataRef?.parent_id ? String(dataRef.parent_id) : '' // 存储父节点ID
       });
@@ -219,7 +220,7 @@ export function useEditableTree({ catalogTreeStore }) {
     focusAndSelectInput();
   };
 
-  // 删除目录 or 卷 or 数据库表
+  // 删除目录 or 卷 or 数据库表 or 元数据
   const handleDelete = async (node: NodeProps, type: string) => {
     const { _key, dataRef } = node;
 
@@ -229,6 +230,7 @@ export function useEditableTree({ catalogTreeStore }) {
     }
     let newTreeData: TreeDataType[] = [...treeData];
     let res: Partial<ApiRes<any>> = {};
+    console.log(dataRef, type, '查看dataRef');
     if (type === 'db_item') {
       const params = {
         path_id: dataRef?.parent_id,
@@ -285,6 +287,7 @@ export function useEditableTree({ catalogTreeStore }) {
 
   // 添加子级元素（数据卷或数据库）
   const addSubVolume = (node: NodeProps) => {
+    console.log(node, '123node');
     const { dataRef } = node;
 
     const rawChildrenTreeData = rawTreeData.find(
@@ -304,6 +307,11 @@ export function useEditableTree({ catalogTreeStore }) {
       targetChildrenArray =
         rawChildrenTreeData?.children?.find((child) => child.type === 'db')
           ?.children ?? [];
+    } else if (dataRef?.type === 'metadata') {
+      targetChildrenArray =
+        rawChildrenTreeData?.children?.find(
+          (child) => child.type === 'metadata'
+        )?.children ?? [];
     }
 
     const name = generateName(
@@ -407,6 +415,20 @@ export function useEditableTree({ catalogTreeStore }) {
           }
 
           break;
+
+        case CatalogTypeEnum.metadata:
+          // 新建元数据
+          res = await addMetaData({
+            name: fileName,
+            parent_id: dataRef.parent_id
+          });
+
+          if (res.status !== 200) {
+            Message.error(res?.message ?? '新建元数据失败');
+          }
+
+          break;
+
         default:
           break;
       }
@@ -472,21 +494,26 @@ export function useEditableTree({ catalogTreeStore }) {
           ) : (
             <>
               {/* 其他类型的操作按钮 */}
-              {['volume', 'db'].every((key) => dataRef?.type !== key) && (
+              {['volume', 'db', 'metadata'].every(
+                (key) => dataRef?.type !== key
+              ) && (
                 <>
                   {
-                    <PermissionWrapper
-                      permission={DATA_CATALOG_PERMISSIONS.CAN_UPDATE_DIRS}
-                    >
-                      <Tooltip color="white" content="重命名">
-                        <IconEdit
-                          className={
-                            'extra-icon mr-2 hover:text-[rgb(var(--primary-6))]'
-                          }
-                          onClick={() => handleEdit(node)}
-                        />
-                      </Tooltip>
-                    </PermissionWrapper>
+                    // 元数据节点不显示重命名按钮
+                    dataRef?.type !== CatalogTypeEnum.metadata && (
+                      <PermissionWrapper
+                        permission={DATA_CATALOG_PERMISSIONS.CAN_UPDATE_DIRS}
+                      >
+                        <Tooltip color="white" content="重命名">
+                          <IconEdit
+                            className={
+                              'extra-icon mr-2 hover:text-[rgb(var(--primary-6))]'
+                            }
+                            onClick={() => handleEdit(node)}
+                          />
+                        </Tooltip>
+                      </PermissionWrapper>
+                    )
                   }
                   {
                     <PermissionWrapper
@@ -519,8 +546,10 @@ export function useEditableTree({ catalogTreeStore }) {
                   }
                 </>
               )}
-              {/* 为数据卷和数据库都添加新建按钮 */}
-              {(dataRef?.type === 'volume' || dataRef?.type === 'db') && (
+              {/* 为数据卷、数据库和元数据都添加新建按钮 */}
+              {(dataRef?.type === 'volume' ||
+                dataRef?.type === 'db' ||
+                dataRef?.type === 'metadata') && (
                 <PermissionWrapper
                   permission={DATA_CATALOG_PERMISSIONS.CAN_CREATE_VOLUME}
                 >
@@ -541,7 +570,6 @@ export function useEditableTree({ catalogTreeStore }) {
 
   const renderTitleText = (props: NodeProps) => {
     const { dataRef, title } = props;
-
     let TitleText: ReactNode = title;
     if (searchValue.length && typeof title === 'string') {
       const index = title.indexOf(searchValue);
@@ -586,7 +614,10 @@ export function useEditableTree({ catalogTreeStore }) {
           <div className="tree-icon mr-2 w-4">
             {[CatalogTypeEnum.volume].includes(dataRef?.type) ? (
               <IconStorage className="text-base" />
-            ) : dataRef?.type === CatalogTypeEnum.db ? null : ( // <IconCaretDown style={{ fontSize: '12px' }} />
+            ) : dataRef?.type === CatalogTypeEnum.db ? null : dataRef?.type === // <IconCaretDown style={{ fontSize: '12px' }} />
+              CatalogTypeEnum.metadata ? (
+              <YuanShujuIcon className="text-base" />
+            ) : (
               <IconArchive className="text-base" />
             )}
           </div>

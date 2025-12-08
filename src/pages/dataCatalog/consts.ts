@@ -1,7 +1,8 @@
 export const subLeafKeys: { [prop: string]: string } = {
   volume: '数据卷',
   db: '数据库',
-  db_item: '数据库表'
+  db_item: '数据库表',
+  metadata: '元数据'
 };
 
 export const tabKeys = [
@@ -14,7 +15,8 @@ export enum CatalogTypeEnum {
   volume = 2,
   db = 3,
   db_item = 4,
-  table
+  table = 5,
+  metadata = 6
 }
 
 export enum RootTypeEnum {

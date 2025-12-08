@@ -2,10 +2,9 @@ import React, { useState } from 'react';
 import { Tree } from '@arco-design/web-react';
 import DataCollection from './components/daset-tree';
 import SourceTree from './components/source-tree';
-import TargetTree from './components/target-tree';
 import FileIcon from './assets/file-icon.svg';
 import { DatasetListItem } from '@/types/datasetManagement';
-import styles from './index.module.scss';
+import './index.scss';
 import { Db, FluffyVolume } from '@/api/dataCatalog';
 import { useHasPermission } from '@/store/userInfoStore';
 import { PYSPARK_PERMISSIONS } from '@/config/permissions';
@@ -14,17 +13,12 @@ import { PYSPARK_PERMISSIONS } from '@/config/permissions';
 const directoryItems = [
   {
     id: 'source',
-    label: '源数据目录',
-    icon: 'folder'
-  },
-  {
-    id: 'target',
-    label: '目标数据目录',
+    label: '数据目录',
     icon: 'folder'
   },
   {
     id: 'dataset',
-    label: '数据集',
+    label: '数据集市',
     icon: 'folder'
   }
 ];
@@ -146,19 +140,10 @@ const DataDirectoryTree: React.FC<DataDirectoryTreeProps> = ({
             isEditorFocused={getIsEditorFocused?.() ?? false}
           />
         );
-      case 'target':
-        return (
-          <TargetTree
-            onBack={handleBack}
-            onViewTargetDetail={handleTargetDetail}
-            onInsert={handleVolumeInsert}
-            isEditorFocused={getIsEditorFocused?.() ?? false}
-          />
-        );
       default:
         return (
           <Tree
-            className={styles['tree-content']}
+            className="tree-content"
             treeData={treeData}
             selectedKeys={selectedKeys}
             onSelect={handleSelect}
@@ -170,11 +155,7 @@ const DataDirectoryTree: React.FC<DataDirectoryTreeProps> = ({
     }
   };
 
-  return (
-    <div className={styles['pyspark-data-directory-tree']}>
-      {renderContent()}
-    </div>
-  );
+  return <div className="pyspark-data-directory-tree">{renderContent()}</div>;
 };
 
 export default DataDirectoryTree;

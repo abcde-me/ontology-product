@@ -50,7 +50,7 @@
 
         :global(.arco-tabs-content) {
           height: 100%;
-          overflow: hidden;
+          overflow-y: scroll;
           padding: 0px;
 
           :global(.arco-tabs-content-inner) {

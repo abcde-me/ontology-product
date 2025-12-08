@@ -1,0 +1,59 @@
+.processing-wrapper {
+  overflow: hidden;
+  scrollbar-gutter: none;
+
+  .processing-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 16px 0;
+
+    .processing-header-title {
+      color: var(--text-color-text-1, #0f172a);
+      font-family: 'PingFang SC';
+      font-size: 16px;
+      font-style: normal;
+      font-weight: 600;
+      line-height: 24px;
+    }
+
+    .processing-header-icons-group {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+
+      .header-btn {
+        width: 88px;
+        height: 32px;
+        margin-right: 8px;
+        color: var(--text-color-text-2, #1e293b) !important;
+        font-family: 'PingFang SC';
+        font-size: 14px;
+        font-style: normal;
+        font-weight: 600;
+        line-height: 22px;
+        border-color: #e2e8f0 !important;
+      }
+    }
+
+    .processing-header-icons-options {
+      border-radius: 4px;
+      display: flex;
+      overflow: hidden;
+
+      .icon {
+        border: 1px solid #e2e8f0;
+        font-size: 23px;
+        width: 32px;
+        height: 32px;
+      }
+    }
+
+    .icon-active {
+      background-color: #eef6ff;
+      color: var(--primary-6, #007aff);
+      border-color: #007aff;
+      border: 1px solid #007aff;
+    }
+  }
+}

@@ -99,10 +99,13 @@ export default function WorkflowList() {
     root_type: string | number
   ) => {
     history.push(
-      `/tenant/compute/modaforge/dataCatalog?root_type=${root_type}&id=${id}&parent_id=${parent_id}`
+      `/tenant/compute/modaforge/dataCatalog/list?root_type=${root_type}&id=${id}&parent_id=${parent_id}`
     );
   };
-
+  // 跳转目标数据 - 数据集详情
+  const handleToTargetDatasetDetail = (id: string) => {
+    history.push(`/tenant/compute/modaforge/datasetManagement/detail/${id}`);
+  };
   // 查看详情
   const viewDetailWorkflow = (
     workflow_uuid: number | string,
@@ -271,7 +274,7 @@ export default function WorkflowList() {
       ]
     },
     {
-      title: '源数据目录',
+      title: '起点',
       dataIndex: 'source_path',
       width: 280,
       ellipsis: true,
@@ -296,24 +299,20 @@ export default function WorkflowList() {
       }
     },
     {
-      title: '目标数据目录',
+      title: '终点',
       dataIndex: 'target_path',
       width: 280,
       ellipsis: true,
       className: styles['hover-change'],
       render: (_, record) => {
-        return renderEmptyPlaceholder(record.target_path) !== '-' ? (
+        return renderEmptyPlaceholder(record.dataset_name) !== '-' ? (
           <EllipsisPopover
-            value={record.target_path}
+            value={record.dataset_name}
             isEdit={false}
             isLink
-            handleLink={() => {
-              handleToDirectoryPath(
-                record.target_path_id,
-                record.parent_target_path_id,
-                2
-              );
-            }}
+            // handleLink={() => {
+            //   handleToTargetDatasetDetail(record.id);
+            // }}
           />
         ) : (
           <span>-</span>

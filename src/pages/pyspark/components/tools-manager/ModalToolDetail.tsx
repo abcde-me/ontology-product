@@ -11,7 +11,7 @@ import { IconCopy } from '@arco-design/web-react/icon';
 import { OperatorItem } from '@/types/pythonApi';
 import copy from 'copy-to-clipboard';
 import { Message } from '@arco-design/web-react';
-import styles from './ModalToolDetail.module.scss';
+import './ModalToolDetail.scss';
 
 interface ModalToolDetailProps {
   toolDetailData: OperatorItem | null;
@@ -46,43 +46,41 @@ const ModalToolDetail: React.FC<ModalToolDetailProps> = ({
       visible={toolDetailVisible}
       footer={null}
       onCancel={closeToolDetail}
-      className={styles['operator-detail-modal']}
+      className="operator-detail-modal"
     >
-      <div className={styles['operator-detail-container']}>
+      <div className="operator-detail-container">
         {/* 左侧详情面板 */}
-        <div className={styles['operator-detail-left']}>
-          <div className={styles['operator-info']}>
+        <div className="operator-detail-left">
+          <div className="operator-info">
             {/* 算子名称 */}
-            <div className={styles['operator-section']}>
+            <div className="operator-section">
               <h4>算子名称：</h4>
               <p>{toolDetailData.name}</p>
             </div>
 
             {/* 算子介绍 */}
-            <div className={styles['operator-section']}>
+            <div className="operator-section">
               <h4>算子介绍：</h4>
               <p>{toolDetailData.description}</p>
             </div>
 
             {/* 处理逻辑 */}
-            <div className={styles['operator-section']}>
+            <div className="operator-section">
               <h4>处理逻辑：</h4>
               <p>{toolDetailData.detail}</p>
             </div>
 
             {/* 输入输出 */}
-            <div className={styles['operator-section']}>
+            <div className="operator-section">
               <h4>输入输出：</h4>
-              <div className={styles['io-container']}>
-                <div className={styles['io-item']}>
-                  <span className={styles['io-label']}>输入:</span>
-                  <span className={styles['io-value']}>
-                    {toolDetailData.usage.input}
-                  </span>
+              <div className="io-container">
+                <div className="io-item">
+                  <span className="io-label">输入:</span>
+                  <span className="io-value">{toolDetailData.usage.input}</span>
                 </div>
-                <div className={styles['io-item']}>
-                  <span className={styles['io-label']}>输出:</span>
-                  <span className={styles['io-value']}>
+                <div className="io-item">
+                  <span className="io-label">输出:</span>
+                  <span className="io-value">
                     {toolDetailData.usage.output}
                   </span>
                 </div>
@@ -90,7 +88,7 @@ const ModalToolDetail: React.FC<ModalToolDetailProps> = ({
             </div>
 
             {/* 应用场景 */}
-            <div className={styles['operator-section']}>
+            <div className="operator-section">
               <h4>应用场景：</h4>
               <p>{toolDetailData.usage_scenarios}</p>
               {/* 标签 */}
@@ -113,19 +111,17 @@ const ModalToolDetail: React.FC<ModalToolDetailProps> = ({
         </div>
 
         {/* 右侧代码编辑器 */}
-        <div className={styles['operator-detail-right']}>
-          <div className={styles['code-editor-container']}>
+        <div className="operator-detail-right">
+          <div className="code-editor-container">
             <Button
               type="outline"
               icon={<IconCopy />}
               onClick={handleCopyCode}
-              className={styles['copy-button']}
+              className="copy-button"
             >
               复制代码
             </Button>
-            <div className={styles['code-textarea']}>
-              {toolDetailData.sample_code}
-            </div>
+            <div className="code-textarea">{toolDetailData.sample_code}</div>
           </div>
         </div>
       </div>

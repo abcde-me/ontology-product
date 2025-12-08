@@ -566,7 +566,7 @@ export interface DatasetsOptionsDataList {
   /**
    * 最新版本存储表
    */
-  latest_table?: string;
+  table?: string;
   /**
    * 最新版本ID
    */
@@ -627,4 +627,30 @@ export interface DatasetsOptionsData {
    * 总条数
    */
   total: number;
+}
+
+export interface ListDevelopScriptParams {
+  /**
+   * 页大小
+   */
+  page_size?: number;
+  /**
+   * 页码
+   */
+  page?: number;
+}
+
+export interface ListDevelopScriptParamsData {
+  data: {
+    /**
+     * 页大小
+     */
+    page_size?: number;
+    /**
+     * 页码
+     */
+    page?: number;
+    total: number;
+    items: [];
+  };
 }

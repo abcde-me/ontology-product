@@ -7,7 +7,7 @@ import {
   Tooltip
 } from '@arco-design/web-react';
 import React, { useEffect, useState } from 'react';
-import styles from './EditDatasetForm.module.css';
+import styles from './EditDatasetForm.module.scss';
 import { getTagList } from '@/api/datasetManagement';
 import { validateName } from '@/utils/valiate';
 interface Dataset {
@@ -148,7 +148,7 @@ const EditDatasetForm: React.FC<Props> = ({
           />
         </FormItem>
 
-        <FormItem
+        {/* <FormItem
           label="生成模型"
           field="model"
           // rules={[{ required: true, message: '请选择生成模型' }]}
@@ -160,7 +160,7 @@ const EditDatasetForm: React.FC<Props> = ({
             disabled={true}
             style={{ marginLeft: '8px' }}
           />
-        </FormItem>
+        </FormItem> */}
 
         <FormItem label="标签" field="tags">
           <Select

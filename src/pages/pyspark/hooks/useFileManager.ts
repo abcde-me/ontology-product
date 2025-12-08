@@ -80,7 +80,7 @@ export const useFileManager = (
         console.log('targetFolderId', targetFolderId);
         const res = await getPythonList(targetFolderId, {
           name: searchValue,
-          mode: 1,
+          mode: 2,
           page: 1,
           page_size: 1000
         });
@@ -145,7 +145,17 @@ export const useFileManager = (
   const handleTreeExpand = useCallback((keys: string[]) => {
     setExpandedKeys(keys);
   }, []);
-
+  const addKeyToTree = (tree) => {
+    return tree.map((node) => {
+      const currentKey = String(node.id);
+      const children = node.children ? addKeyToTree(node.children) : undefined; // 无 children 则保持 undefined
+      return {
+        ...node,
+        key: currentKey, // 新增 key 字段
+        children // 递归处理后的子节点
+      };
+    });
+  };
   // 获取原始Python列表
   const getRawPythonList = useCallback(
     async (folderId?: string) => {
@@ -154,19 +164,28 @@ export const useFileManager = (
       const targetFolderId = folderId || currentFolderId;
       setIsLoading(true);
       try {
-        const rawPythonList = await getPythonList(targetFolderId, {});
+        const rawPythonList = await getPythonList(targetFolderId, {
+          name: searchValue,
+          mode: 2
+          // page: 1,
+          // page_size: 1000
+        });
 
         if (rawPythonList.status !== 200) {
           Message.error(rawPythonList?.message ?? '获取文件列表失败');
           return [];
         }
-
-        const items = rawPythonList?.data?.items ?? [];
+        if (!rawPythonList?.data?.items) {
+          setPythonList([]);
+          return [];
+        }
+        const items = addKeyToTree(rawPythonList?.data?.items);
         setPythonList(items);
         setIsCanCreate(rawPythonList?.data?.create_perm ?? false);
         return items; // 返回获取到的数据
       } catch (error) {
         console.error('获取Python列表失败:', error);
+        console.log('object 123', error);
         Message.error('获取文件列表失败');
         return [];
       } finally {
@@ -188,7 +207,7 @@ export const useFileManager = (
         }
 
         const createRes = await createPythonItem({
-          path_id: Number(node?.dataRef?.path_id ?? currentFolderId),
+          path_id: Number(node?.dataRef?.parentKey),
           type: node?.dataRef?.type,
           name: finalName
         });
@@ -238,16 +257,18 @@ export const useFileManager = (
   const handleRename = useCallback(
     async (finalName: string, node: any) => {
       try {
-        const fileId = node?.dataRef?.id;
+        const fileId = node?.dataRef?.id || node?.id;
         const renameRes = await renamePythonItem(fileId, {
           id: fileId,
           name: finalName,
           path: node?.dataRef?.path,
-          type: node?.dataRef?.type
+          type: node?.dataRef?.type || node?.type
         });
 
         if (renameRes.status !== 200) {
           Message.error(renameRes?.message ?? '重命名失败');
+          // 返回失败状态和原始名称
+          getRawPythonList(currentFolderId);
           return null;
         }
 
@@ -260,10 +281,12 @@ export const useFileManager = (
 
         // 刷新当前文件夹列表
         await getRawPythonList(currentFolderId);
-        return renameRes.data;
+        // 返回成功状态和数据
+        return { success: true, data: renameRes.data };
       } catch (error) {
         console.error('重命名失败:', error);
         Message.error('重命名失败');
+        getRawPythonList(currentFolderId);
         return null;
       }
     },
@@ -351,7 +374,7 @@ export const useFileManager = (
 
         const res = await getPythonList(String(folderId), {
           name: searchValue,
-          mode: 0,
+          mode: 2,
           page: 1,
           page_size: 1000
         });
@@ -371,7 +394,12 @@ export const useFileManager = (
     try {
       // 更新当前文件夹ID
       setCurrentFolderId(parentId || '0');
-      const res = await getPythonList(String(parentId || ''), {} as any);
+      const res = await getPythonList(String(parentId || ''), {
+        name: searchValue,
+        mode: 2
+        // page: 1,
+        // page_size: 1000
+      } as any);
       setIsCanCreate(res?.data?.create_perm ?? false);
       return res?.data?.items || [];
     } catch (error) {

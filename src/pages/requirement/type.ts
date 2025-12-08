@@ -20,7 +20,8 @@ export enum RequirementStatus {
   Draft = 1, // 发布中
   Published = 2, // 已发布
   PublishFailed = 3, // 发布失败
-  Annotated = 4 // 标注完成
+  Annotated = 4, // 标注完成
+  PreAnnotated = 5 // 预标注中
 }
 export const RequirementStatusMap = {
   [RequirementStatus.Draft]: '发布中',
@@ -120,3 +121,27 @@ export const toolFileType = {
     'VOB'
   ]
 };
+
+export interface LabelInfoAttribute {
+  label_info_id: string;
+  attribute_name_cn: string;
+  attribute_name_en: string;
+  input_type: 1 | 2; // 1=选项，2=输入框
+}
+
+export interface LabelInfoAttributeGroup {
+  attribute_id: string;
+  attribute_group_name: string;
+  attribute_group_class: 1 | 2 | 3; // 1=单选，2=多选，3=输入框
+  attribute_group_type: 1 | 2; // 1=必选，2=非必选
+  label_info_attribute: LabelInfoAttribute[];
+}
+export interface LabelData {
+  label_id: string;
+  label_name_cn: string;
+  label_name_en: string;
+  label_shape: LabelShape; // 1=点，2=线，3=正方形，4=多边形 5=椭圆 6=立方体
+  label_colour: string;
+  label_info_attribute_groups: LabelInfoAttributeGroup[];
+  label_mappings?: string[]; // 模型映射字段（可选）
+}

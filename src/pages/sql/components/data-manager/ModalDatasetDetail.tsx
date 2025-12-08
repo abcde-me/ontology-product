@@ -17,7 +17,7 @@ const ModalDatasetDetail = ({
       footer={null}
       onCancel={closeDatasetDetail}
     >
-      <div className="sql-my-dataset-detail pb-[16px]">
+      <div className="my-dataset-detail h-[calc(686px-64px)] overflow-y-auto pb-[16px]">
         {/* TODO 先给个占位吧 */}
         <div className="h-[20px]"></div>
         <DatasetDetail

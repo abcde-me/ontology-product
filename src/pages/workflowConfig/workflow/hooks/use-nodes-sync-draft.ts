@@ -6,7 +6,7 @@ import { BlockEnum } from '../types';
 import { useWorkflowUpdate } from '../hooks';
 import { useNodesReadOnly } from './use-workflow';
 import { createWorkflowDraft } from '@/api/workflowV2';
-import { PrefixAimdp } from '@/api/endpoints';
+import { PrefixV2, PrefixAimdp } from '@/api/endpoints';
 import { updateQueryParams, useParams } from '@/utils/url';
 import { useHistory } from 'react-router';
 

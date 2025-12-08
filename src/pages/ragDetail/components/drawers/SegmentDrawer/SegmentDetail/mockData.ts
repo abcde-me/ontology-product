@@ -1,0 +1,69 @@
+/**
+ * Mock Data for Segment Detail
+ * 分段详情的模拟数据
+ */
+
+import type { SegmentDetailData } from '../../../../types';
+
+export const mockSegmentDetailData: SegmentDetailData = {
+  segmentId: 'file_001_chunk_001',
+  charCount: 426,
+  enhancement: {
+    summary:
+      '1按照本次发行前的股份数计算，对于截止本次发行前本行已经审计的最近一个审计基准日的滚存未分配利润，由本次发行前的本行老股东享有其中的 35%，其余部分由老股东和新股东共享；对于基准日之后实现的可分配利润，则全部由老股东和新股东共享。截至 2006 年 12 月 31 日，按滚存未分配利润计算的应由老',
+    hypotheticalAnswer:
+      '按照本次发行前的股份数计算，对于截止本次发行前本行已经审计的最近一个审计基准日的滚存未分配利润，由本次发行前的本行老股东享有其中的 35%，其余部分由老股东和新股东共享；对于基准日之后实现的可分配利润，则全部由老股东和新股东共享。截至 2006 年 12 月 31 日，按滚存未分配利润计算的应由老'
+  },
+  elements: [
+    {
+      id: 'element_text_001',
+      type: 'text',
+      content:
+        '2按照本次发行前的股份数计算，对于截止本次发行前本行已经审计的最近一个审计基准日的滚存未分配利润，由本次发行前的本行老股东享有其中的 35%，其余部分由老股东和新股东共享；对于基准日之后实现的可分配利润，则全部由老股东和新股东共享。截至 2006 年 12 月 31 日，按滚存未分配利润计算的应由老',
+      relatedDescription:
+        '3按照本次发行前的股份数计算，对于截止本次发行前本行已经审计的最近一个审计基准日的滚存未分配利润，由本次发行前的本行老股东享有其中的 35%，其余部分由老股东和新股东共享；对于基准日之后实现的可分配利润，则全部由老股东和新股东共享。截至 2006 年 12 月 31 日，按滚存未分配利润计算的应由老',
+      extractionEntity: ['股票市场', '金融投资', '分红'],
+      positionType: '坐标',
+      positionInfo: '坐标 (100,200)'
+    },
+    {
+      id: 'element_image_001',
+      type: 'image',
+      url: '/api/images/well-integrity-diagram.jpg',
+      relatedDescription:
+        '按照本次发行前的股份数计算，对于截止本次发行前本行已经审计的最近一个审计基准日的滚存未分配利润，由本次发行前的本行老股东享有其中的 35%，其余部分由老股东和新股东共享；对于基准日之后实现的可分配利润，则全部由老股东和新股东共享。截至 2006 年 12 月 31 日，按滚存未分配利润计算的应由老',
+      extractionEntity: ['股票市场', '金融投资', '分红'],
+      positionType: '坐标',
+      positionInfo: '坐标 (100,200)',
+      dimensions: '800 × 600 像素',
+      modifiers: ''
+    },
+    {
+      id: 'element_table_001',
+      type: 'table',
+      content: `| 员工ID | 姓名 | 部门 |
+| ------ | ---- | ---- |
+| E001   | 章三 | 技术部 |
+| E002   | 里斯 | 市场部 |`,
+      relatedDescription:
+        '按照本次发行前的股份数计算，对于截止本次发行前本行已经审计的最近一个审计基准日的滚存未分配利润，由本次发行前的本行老股东享有其中的 35%，其余部分由老股东和新股东共享；对于基准日之后实现的可分配利润，则全部由老股东和新股东共享。截至 2006 年 12 月 31 日，按滚存未分配利润计算的应由老',
+      extractionEntity: ['股票市场', '金融投资', '分红'],
+      positionType: '坐标',
+      positionInfo: '坐标 (100,200)'
+    },
+    {
+      id: 'element_formula_001',
+      type: 'formula',
+      content: `\\int_{a}^{b} f(x) \\, dx = F(b) - F(a) \\quad (1)`,
+      relatedDescription: `\\int_{a}^{b} f(x) \\, dx = F(b) - F(a) \\quad (1)`,
+      extractionEntity: ['股票市场', '金融投资', '分红'],
+      positionType: '坐标',
+      positionInfo: '坐标 (100,200)'
+    }
+  ],
+  metadata: {
+    fatherParagraph: 'file_001_chunk_001',
+    leftParagraph: 'file_001_chunk_002',
+    rightParagraph: 'file_001_chunk_003'
+  }
+};

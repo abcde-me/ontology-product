@@ -1,0 +1,7 @@
+:global(.arco-tree-node-disabled-selectable .arco-tree-node-title) {
+  color: var(--color-text-2);
+}
+
+:global(.arco-tree-node-disabled-selectable:hover .arco-tree-node-title) {
+  color: var(--color-text-2);
+}

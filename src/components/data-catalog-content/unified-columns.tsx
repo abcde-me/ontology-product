@@ -626,7 +626,10 @@ const handleDelete = (
             return;
           }
         } else {
-          const res = await deleteSourceFile(data.id);
+          const res = await deleteSourceFile({
+            id: data.id,
+            file_uuid: data.file_uuid
+          });
           if (res.status === 200) {
             Message.success('删除成功');
             const event = new CustomEvent('resetPageToFirst', {

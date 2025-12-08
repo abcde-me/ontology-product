@@ -6,6 +6,7 @@ import {
   CONNECTION_PERMISSIONS,
   DATA_LOAD_PERMISSIONS,
   SQL_PERMISSIONS,
+  DATA_ASSET_PERMISSIONS,
   PYSPARK_PERMISSIONS,
   WORKFLOW_LIST_PERMISSIONS,
   WORKFLOW_TASK_PERMISSIONS,
@@ -18,7 +19,8 @@ import {
   USER_GROUP_PERMISSIONS,
   ROLE_PERMISSIONS,
   PROJECT_PERMISSIONS,
-  API_KEY_PERMISSIONS
+  API_KEY_PERMISSIONS,
+  METADATA_MANAGEMENT_PERMISSIONS
 } from '@/config/permissions';
 
 export type IRoute = AuthParams & {
@@ -60,6 +62,20 @@ export const routes: IRoute[] = [
         key: '/tenant/compute/modaforge/dataLoad/list',
         component: React.lazy(async () => import('../../dataLoad/list/list')),
         permission: DATA_LOAD_PERMISSIONS.LIST
+      },
+      {
+        // 创建数据载入任务
+        name: 'createDataLoad',
+        key: '/tenant/compute/modaforge/dataLoad/create',
+        component: React.lazy(async () => import('../../dataLoad/create')),
+        permission: DATA_LOAD_PERMISSIONS.LIST
+      },
+      {
+        // 编辑数据载入任务
+        name: 'editDataLoad',
+        key: '/tenant/compute/modaforge/dataLoad/edit/:task_id',
+        component: React.lazy(async () => import('../../dataLoad/edit')),
+        permission: DATA_LOAD_PERMISSIONS.CAN_UPDATE
       },
       {
         name: 'dataLoadDetail',
@@ -114,6 +130,23 @@ export const routes: IRoute[] = [
     ],
     children: []
   },
+  // RAG详情页面
+  {
+    name: 'ragDetail',
+    key: '/tenant/compute/modaforge/ragDetail',
+    component: React.lazy(async () => import('../../ragDetail')),
+    permission: DATA_MANAGEMENT_PERMISSIONS.GET, // TODO： 修改为正确的权限点控制
+    children: []
+  },
+  // 文件数据对比测试页面
+  {
+    name: 'compareFileData',
+    key: '/tenant/compute/modaforge/compareFileData',
+    component: React.lazy(
+      async () => import('../../ragDetail/test/CompareFileData')
+    ),
+    children: []
+  },
   // 作业
   {
     name: 'workflowTask',
@@ -128,6 +161,30 @@ export const routes: IRoute[] = [
         permission: WORKFLOW_TASK_PERMISSIONS.LIST
       }
     ]
+  },
+  //APIKey
+  {
+    name: 'apiKey',
+    key: '/tenant/compute/modaforge/apiKey',
+    component: React.lazy(async () => import('../../apiKey')),
+    permission: 'aimdp-manager:apikey:read:list',
+    children: []
+  },
+  // 组织管理
+  {
+    name: 'organization',
+    key: '/tenant/compute/modaforge/organization',
+    component: React.lazy(async () => import('../../organization')),
+    permission: 'organizations:can_view',
+    children: []
+  },
+  // 成员管理
+  {
+    name: 'member',
+    key: '/tenant/compute/modaforge/member',
+    component: React.lazy(async () => import('../../member')),
+    permission: 'user:can_view',
+    children: []
   },
   // 登陆页面
   {
@@ -149,7 +206,31 @@ export const routes: IRoute[] = [
     key: '/tenant/compute/modaforge/dataCatalog',
     component: React.lazy(async () => import('../../dataCatalog')),
     permission: DATA_CATALOG_PERMISSIONS.LIST,
-    children: []
+    children: [
+      {
+        name: 'dataCatalogList',
+        key: '/tenant/compute/modaforge/dataCatalog/list',
+        component: React.lazy(async () => import('../../dataCatalog/list')),
+        permission: DATA_CATALOG_PERMISSIONS.LIST
+      },
+      {
+        // 创建元数据目录
+        name: 'createMetaData',
+        key: '/tenant/compute/modaforge/dataCatalog/createMetaData',
+        component: React.lazy(
+          async () => import('../../dataCatalog/createMetaData')
+        ),
+        permission: DATA_CATALOG_PERMISSIONS.LIST
+      }
+      // {
+      //   name: 'dataAssetEdit',
+      //   key: '/tenant/compute/modaforge/dataAsset/edit/:id',
+      //   component: React.lazy(
+      //     async () => import('../../dataAsset/modules/edit')
+      //   ),
+      //   permission: DATA_MANAGEMENT_PERMISSIONS.LIST
+      // }
+    ]
   },
   // 数据集详情 (需要在数据集管理之前匹配)
   {
@@ -168,6 +249,46 @@ export const routes: IRoute[] = [
     key: '/tenant/compute/modaforge/datasetManagement',
     component: React.lazy(async () => import('../../datasetManagement')),
     permission: DATA_MANAGEMENT_PERMISSIONS.LIST,
+    children: []
+  },
+  // 数据资产
+  {
+    name: 'dataAsset',
+    key: '/tenant/compute/modaforge/dataAsset',
+    component: React.lazy(async () => import('../../dataAsset')),
+    permission: DATA_ASSET_PERMISSIONS.LIST,
+    children: [
+      {
+        name: 'dataAssetList',
+        key: '/tenant/compute/modaforge/dataAsset/list',
+        component: React.lazy(
+          async () => import('../../dataAsset/modules/list')
+        ),
+        permission: DATA_ASSET_PERMISSIONS.LIST
+      },
+      {
+        name: 'dataAssetCreate',
+        key: '/tenant/compute/modaforge/dataAsset/create',
+        component: React.lazy(
+          async () => import('../../dataAsset/modules/create')
+        ),
+        permission: DATA_ASSET_PERMISSIONS.LIST
+      },
+      {
+        name: 'dataAssetEdit',
+        key: '/tenant/compute/modaforge/dataAsset/edit',
+        component: React.lazy(
+          async () => import('../../dataAsset/modules/edit')
+        ),
+        permission: DATA_ASSET_PERMISSIONS.LIST
+      }
+    ]
+  },
+  {
+    name: 'metadataManagement',
+    key: '/tenant/compute/modaforge/metadataManagement',
+    component: React.lazy(async () => import('../../metadataManagement')),
+    permission: METADATA_MANAGEMENT_PERMISSIONS.LIST,
     children: []
   },
   // 数据标注 - 需求管理

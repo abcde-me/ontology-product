@@ -20,7 +20,9 @@ export function parseJson(jsonString) {
         const repairedJson = jsonrepair(jsonString);
         return JSON.parse(repairedJson);
       } catch (error) {
-        throw new Error(`JSON 解析失败: ${error?.message}`);
+        const errorMessage =
+          error instanceof Error ? error.message : String(error);
+        throw new Error(`JSON 解析失败: ${errorMessage}`);
       }
     }
   }

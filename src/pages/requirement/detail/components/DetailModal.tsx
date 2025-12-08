@@ -11,7 +11,7 @@ import {
   Tooltip,
   Spin
 } from '@arco-design/web-react';
-import { getCatalogList } from '@/api/dataCatalog';
+import { CatalogItemType, getCatalogList } from '@/api/dataCatalog';
 import { getAnnotationTabledData } from '@/api/dataAnnotation';
 import dayjs from 'dayjs';
 import noDataElement from '@/components/no-data';
@@ -106,9 +106,7 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
     let newTreeData: any[] = [];
     try {
       setTreeLoading(true);
-      getCatalogList({
-        root_type: 1
-      }).then((res) => {
+      getCatalogList({ dir_type: CatalogItemType.Volume }).then((res) => {
         setTreeLoading(false);
         if (res.status !== 200) {
           return;
@@ -150,7 +148,9 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
     } catch (err) {}
   };
   useEffect(() => {
-    getTreeDataList();
+    if (visible) {
+      getTreeDataList();
+    }
   }, [visible]);
 
   // 树的内容
@@ -215,7 +215,8 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
       width: 180,
       sorter: (a, b) => dayjs(a.start_time).unix() - dayjs(b.start_time).unix(),
       sortDirections: ['ascend' as const, 'descend' as const],
-      render: (text) => (type === 'detail' ? formatDateTime(text) : text)
+      render: (text, record) =>
+        type === 'detail' ? formatDateTime(record?.load_start_time) : text
     },
     {
       title: '载入结束时间',
@@ -223,7 +224,8 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
       width: 180,
       sorter: (a, b) => dayjs(a.end_time).unix() - dayjs(b.end_time).unix(),
       sortDirections: ['ascend' as const, 'descend' as const],
-      render: (text) => (type === 'detail' ? formatDateTime(text) : text)
+      render: (text, record) =>
+        type === 'detail' ? formatDateTime(record?.load_end_time) : text
     },
     {
       title: '数据量',
@@ -233,7 +235,7 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
     },
     {
       title: '创建人',
-      dataIndex: 'upload_user',
+      dataIndex: type === 'detail' ? 'create_by' : 'upload_user',
       ellipsis: true,
       width: 100
     }
@@ -287,6 +289,8 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
         settableLoading(false);
       }
     } catch (error) {
+      setTableData([]);
+      setTotal(0);
       settableLoading(false);
     } finally {
       settableLoading(false);
@@ -303,6 +307,23 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
   }, [checkedKeys, current, pageSize]);
   // 处理日期范围变化
   const handleDateChange = (value) => {
+    // 暂时这么处理吧， 1230版本变了
+    if (type === 'detail') {
+      if (value && value.length === 2) {
+        const [start, end] = value;
+        const filteredData = getDetailObj?.label_data_set.filter((item) => {
+          return (
+            formatDateTime(item.load_start_time) >= start + ' 00:00:00' &&
+            formatDateTime(item.load_end_time) <= end + ' 23:59:59'
+          );
+        });
+        setTableData(filteredData);
+      }
+      if (value === null || value === undefined || value === '') {
+        setTableData(getDetailObj?.label_data_set);
+      }
+      return;
+    }
     // 当选择了完整的日期范围（开始和结束），执行筛选
     if (value && value.length === 2) {
       const [start, end] = value;
@@ -375,8 +396,12 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
               onChange={handleDateChange}
               style={{ width: 350 }}
               onClear={() => {
+                if (type === 'detail') {
+                  setTableData(getDetailObj?.label_data_set);
+                } else {
+                  getTableData();
+                }
                 // setDateRange([]);
-                getTableData();
               }}
             />
             {/* <div className="form-option">

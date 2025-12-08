@@ -117,6 +117,6 @@ export const useDasetTree = (type: 'sql' | 'python') => {
 function formatSqlDatasetList(list: DatasetListItem[]) {
   return list.map((item) => ({
     ...item,
-    name: `${item.name}(${item.latest_table})`
+    name: `${item.name}(${item.table})`
   }));
 }

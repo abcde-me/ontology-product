@@ -16,12 +16,17 @@ import {
   USER_GROUP_PERMISSIONS,
   ROLE_PERMISSIONS,
   PROJECT_PERMISSIONS,
-  API_KEY_PERMISSIONS
+  API_KEY_PERMISSIONS,
+  TAG_PERMISSIONS,
+  DATA_ASSET_PERMISSIONS,
+  METADATA_MANAGEMENT_PERMISSIONS
 } from '@/config/permissions';
 import Connection from '@/assets/sider/connection.svg';
 import DataLoad from '@/assets/sider/data-load.svg';
 import DataCatalog from '@/assets/sider/data-catalog.svg';
 import DatasetManagement from '@/assets/sider/dataset-management.svg';
+import DataAsset from '@/assets/sider/data-asset.svg';
+import DataMarket from '@/assets/sider/dataset-management.svg';
 import WorkflowList from '@/assets/sider/workflow-list.svg';
 import WorkflowTask from '@/assets/sider/workflow-task.svg';
 import OrganMenu from '@/assets/sider/organmenu.svg';
@@ -30,6 +35,7 @@ import BaseMenu from '@/assets/sider/basemenu.svg';
 import PasparkMenu from '@/assets/sider/pyspark.svg';
 import SqlMenu from '@/assets/sider/sql.svg';
 import AnnotationTask from '@/assets/sider/annotationTask.svg';
+import LabelMenu from '@/assets/label-menu.svg';
 import RequirementManagement from '@/assets/sider/requirementManagement.svg';
 
 export type MenuModel = {
@@ -101,6 +107,13 @@ export const menus: MenuModel[] = [
         path: '/tenant/compute/modaforge/dataLoad',
         key: 'dataLoad',
         permission: DATA_LOAD_PERMISSIONS.LIST
+      },
+      {
+        title: '数据目录',
+        icon: <DataCatalog className={iconClass} />,
+        key: 'dataCatalog',
+        path: '/tenant/compute/modaforge/dataCatalog',
+        permission: DATA_CATALOG_PERMISSIONS.LIST
       }
     ]
   },
@@ -173,18 +186,25 @@ export const menus: MenuModel[] = [
     key: 'DataManagement',
     children: [
       {
-        title: '数据目录',
-        icon: <DataCatalog className={iconClass} />,
-        key: 'dataCatalog',
-        path: '/tenant/compute/modaforge/dataCatalog',
-        permission: DATA_CATALOG_PERMISSIONS.LIST
-      },
-      {
-        title: '数据集管理',
+        title: '数据集市',
         icon: <DatasetManagement className={iconClass} />,
         key: 'datasetManagement',
         path: '/tenant/compute/modaforge/datasetManagement',
         permission: DATA_MANAGEMENT_PERMISSIONS.LIST
+      },
+      {
+        title: '数据资产',
+        icon: <DataAsset className={iconClass} />,
+        key: 'dataAsset',
+        path: '/tenant/compute/modaforge/dataAsset',
+        permission: DATA_ASSET_PERMISSIONS.LIST
+      },
+      {
+        title: '元数据管理',
+        icon: <DataAsset className={iconClass} />,
+        key: 'metadataManagement',
+        path: '/tenant/compute/modaforge/metadataManagement',
+        permission: METADATA_MANAGEMENT_PERMISSIONS.LIST
       }
     ]
   },
@@ -299,6 +319,22 @@ export const menus: MenuModel[] = [
           return url?.includes('apikey') ?? false;
         },
         permission: API_KEY_PERMISSIONS.MENU
+      },
+      {
+        key: 'tag',
+        title: '标签管理',
+        icon: <LabelMenu className={iconClass} />,
+        path:
+          '/tenant/compute/modaforge/operationCenter?url=' +
+          encodeURIComponent(
+            '/operationcenter/tenant/compute/operationcenter/tag'
+          ),
+        activePaths: ['/tenant/compute/modaforge/operationCenter'],
+        queryParamMatcher: (search: string) => {
+          const url = new URLSearchParams(search).get('url');
+          return url?.includes('tag') ?? false;
+        },
+        permission: TAG_PERMISSIONS.LIST
       }
     ]
   }

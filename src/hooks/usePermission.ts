@@ -26,7 +26,11 @@ export const usePermission = () => {
       if (Array.isArray(permission)) {
         return permission.every((perm) => actions && actions.includes(perm));
       }
-      return actions && actions.includes(permission);
+      return (
+        actions &&
+        (actions.includes(permission) ||
+          actions.some((item) => item.startsWith(permission)))
+      );
     },
     [userPermissions]
   );
@@ -40,7 +44,7 @@ export const usePermission = () => {
       if (Array.isArray(permission)) {
         return permission.every((perm) => actions && actions.includes(perm));
       }
-      return (
+      return !!(
         actions &&
         (actions.includes(permission) ||
           actions.some((item) => item.startsWith(permission)))
@@ -126,6 +130,8 @@ export const usePermission = () => {
       T extends {
         children?: T[];
         permission?: string;
+        anyPermission?: string[]; // 任意一个权限即可
+        allPermission?: string[]; // 必须全部权限
         external?: boolean;
       }
     >(
@@ -143,14 +149,27 @@ export const usePermission = () => {
             }
           }
           // 普通菜单项，检查是否有权限
-          else if (!item.permission || hasMenuPermission(item.permission)) {
-            result.push(item);
+          else {
+            // 优先级：allPermission > anyPermission > permission
+            let hasAccess = false;
+            if (item.allPermission) {
+              hasAccess = hasAllPermissions(item.allPermission);
+            } else if (item.anyPermission) {
+              hasAccess = hasAnyPermission(item.anyPermission);
+            } else if (!item.permission) {
+              hasAccess = true;
+            } else {
+              hasAccess = hasMenuPermission(item.permission);
+            }
+            if (hasAccess) {
+              result.push(item);
+            }
           }
 
           return result;
         }, [] as T[]);
     },
-    [hasMenuPermission]
+    [hasMenuPermission, hasAllPermissions, hasAnyPermission]
   );
 
   const setUserPermissions = async (projectId: string) => {
@@ -158,7 +177,7 @@ export const usePermission = () => {
     try {
       const response = await ResourcePermissionActions({
         projectID: projectId,
-        platforms: ['aimdp-manager', 'aisocket']
+        platforms: ['aimdp-manager', 'aisocket', 'common']
       });
 
       if (isRequestSuccess(response)) {

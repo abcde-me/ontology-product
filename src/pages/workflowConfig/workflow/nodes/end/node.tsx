@@ -6,30 +6,20 @@ import type { NodeProps } from '@/pages/workflowConfig/workflow/types';
 import './end.scss';
 
 const Node: FC<NodeProps<EndNodeType>> = ({ data }) => {
-  const { target_path_name, target_path_id } = data;
-  // console.log('target_path_id', target_path_id, target_path_name);
-  // const dirsArr: Record<string, any>[] = [];
-  // const [targetPathName, setTargetPathName] = useState(target_path_name);
-  // useEffect(() => {
-  //   getWorkflowTargetPath(2, '').then((res) => {
-  //     if (res.status === 200) {
-  //       console.log('1111', res?.data?.dst);
-  //       console.log('2222', target_path_id);
-  //       console.log('res.data.items', res?.data?.dst?.find((item) => item?.id === target_path_id));
-  //       setTargetPathName(
-  //         res?.data?.dst?.find((item) => item?.id === target_path_id)?.name
-  //       );
-  //     }
-  //   });
-  // }, [target_path_name, target_path_id, targetPathName]);
+  const { target_path_name, target_path_id, name } = data;
+  const dirsArr: Record<string, any>[] = [];
+  const [targetPathName, setTargetPathName] = useState(name);
+  useEffect(() => {
+    setTargetPathName(name);
+  }, [target_path_name, target_path_id, targetPathName, name]);
   return (
     <div className={`wk-node-content end-node-content`}>
       <div className="end-node-content-item">
-        <div className="txt">目标数据目录</div>
-        {target_path_name && target_path_name ? (
-          <div className="val">{target_path_name}</div>
+        <div className="txt">数据集名称</div>
+        {targetPathName && targetPathName ? (
+          <div className="val">{targetPathName}</div>
         ) : (
-          <div className="item-text">未配置</div>
+          <div className="item-text">暂无名称</div>
         )}
       </div>
     </div>

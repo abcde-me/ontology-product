@@ -19,7 +19,10 @@ export async function getknowledgeBaseRootList(params: any = {}) {
 }
 //知识库目录列表接口, 返回所有根目录get
 export async function getknowledgeBaseRootTree(Id?: string, params: any = {}) {
-  return UAPI.RES.knowledgeBaseRoot({ Id }).get().inRegion().do();
+  return UAPI.RES.knowledgeBaseRoot(Id ? { Id } : {})
+    .get()
+    .inRegion()
+    .do();
 }
 //知识库目录创建接口post
 export async function postknowledgeBaseRootTree(Id: string, params: any = {}) {
@@ -48,10 +51,6 @@ export async function postknowledgeBaseCreate(params: any = {}) {
 export async function deleteknowledgeBaseList(id: string, params: any = {}) {
   return UAPI.RES.knowledgeBaseList({ id }).delete().inRegion().do();
 }
-//知识库列表修改接口
-export async function putknowledgeBaseList(id: string, params: any = {}) {
-  return UAPI.RES.knowledgeBaseList({ id }).put(params).inRegion().do();
-}
 //知识库详情接口
 export async function getknowledgeBaseDetails(id: string, params: any = {}) {
   return UAPI.RES.knowledgeBaseList({ id }).get().inRegion().do();
@@ -59,6 +58,10 @@ export async function getknowledgeBaseDetails(id: string, params: any = {}) {
 //知识库文档列表接口
 export async function getdocumentList(dataset_id: string, params: any = {}) {
   return UAPI.RES.documentList({ dataset_id }).get(params).inRegion().do();
+}
+//知识库文档列表接口
+export async function postdocumentList(dataset_id: string, params: any = {}) {
+  return UAPI.RES.documentList({ dataset_id }).post(params).inRegion().do();
 }
 // 知识库策略配置， patch请求
 export async function patchknowledgeBasePolicy(id: string, params: any = {}) {
@@ -136,7 +139,7 @@ export async function postHitTest(dataset_id: string, params: any) {
 export async function deletedocsublevel(
   dataset_id: string,
   document_id: string,
-  segment_id?: string
+  segment_id: string
 ) {
   return UAPI.RES.docDeleteSublevel({ dataset_id, document_id, segment_id })
     .delete()

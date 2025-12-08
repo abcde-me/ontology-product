@@ -1,4 +1,3 @@
-import { create } from './../../integration-tests-cypress/support/index';
 import UAPI from '@/api';
 
 // 需求列表
@@ -155,4 +154,14 @@ export async function getAnnotationTabledData(params: {
     .post({ ...params })
     .inRegion()
     .do();
+}
+
+// 模型列表
+export async function getModelList(params) {
+  return await UAPI.RES.getModelList({}).post(params).inRegion().do();
+}
+
+// 获取模型标签信息
+export async function getModelLabelList(params) {
+  return await UAPI.RES.getModelLabelList({}).post(params).inRegion().do();
 }

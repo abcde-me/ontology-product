@@ -9,17 +9,16 @@ import {
 } from '@arco-design/web-react';
 import { IconPlus } from '@arco-design/web-react/icon';
 import React, { useEffect, useState } from 'react';
-import Styles from './index.module.css';
+import Styles from './index.module.scss';
 import { ITableData } from './type';
-import LoadAddModal from './load-add-modal';
 import { useHistory } from 'react-router-dom';
 import { delLoad, getLoadList } from '@/api/loadApi';
 import './index.scss';
 import EllipsisPopoverCom from '@/components/ellipsis-popover-com';
+import EllipsisPopover from '@/components/ellipsis-popover-com';
 import noDataElement from '@/components/no-data';
 import { PermissionWrapper } from '@/components/PermissionGuard';
 import { DATA_LOAD_PERMISSIONS } from '@/config/permissions';
-import { OperationColumn } from '@ccf2e/arco-material';
 import { useHasPermission } from '@/hooks/usePermission';
 import getLabelByValue from '@/utils/getLabelByValue';
 import {
@@ -36,6 +35,31 @@ const InputSearch = Input.Search;
 export default function DataLoad() {
   const history = useHistory();
   const hasPermission = useHasPermission(DATA_LOAD_PERMISSIONS.CAN_GET);
+  // 跳转目录
+  const handleToDirectoryPath = (
+    id: string,
+    parent_id: string,
+    catalogType: string
+  ) => {
+    let newCatalogTypeVal = '';
+    catalogType?.split('/').map((item) => {
+      if (item === 'metadata') {
+        newCatalogTypeVal = 'metadata';
+      }
+      if (item === 'db') {
+        newCatalogTypeVal = 'db';
+      }
+      if (item === 'volume') {
+        newCatalogTypeVal = 'volume';
+      }
+    });
+    history.push(
+      `/tenant/compute/modaforge/dataCatalog/list?id=${id}&parent_id=${parent_id}&catalog_type=${newCatalogTypeVal}`
+    );
+  };
+  const renderEmptyPlaceholder = (value: string | null) => {
+    return value === '' || value == null ? '-' : value;
+  };
   const columns = [
     {
       title: '载入任务名称',
@@ -187,15 +211,22 @@ export default function DataLoad() {
       title: '载入位置',
       width: 200,
       ellipsis: true,
-      render: (_, item) => {
-        return (
-          <div>
-            {item.data_path_name !== '' ? (
-              <EllipsisPopoverCom value={item.data_path_name} isEdit={false} />
-            ) : (
-              '-'
-            )}
-          </div>
+      render: (_, record) => {
+        return renderEmptyPlaceholder(record.data_path_name) !== '-' ? (
+          <EllipsisPopover
+            value={record.data_path_name}
+            isEdit={false}
+            isLink
+            handleLink={() => {
+              handleToDirectoryPath(
+                record.data_path_id,
+                record.parent_id,
+                record.data_path_name
+              );
+            }}
+          />
+        ) : (
+          <span>-</span>
         );
       }
     },
@@ -429,7 +460,9 @@ export default function DataLoad() {
         flexDirection: 'column',
         padding: '20px 21px 20px 20px',
         borderRadius: '10px',
-        minHeight: '100%'
+        marginTop: '20px',
+        marginRight: '20px',
+        minHeight: 'calc(100% - 40px)'
       }}
     >
       <h1
@@ -463,7 +496,7 @@ export default function DataLoad() {
             type="primary"
             icon={<IconPlus />}
             onClick={() => {
-              setVisible(true);
+              history.push('/tenant/compute/modaforge/dataLoad/create');
             }}
           >
             创建数据载入任务
@@ -506,19 +539,6 @@ export default function DataLoad() {
           />
         )}
       </div>
-      <Modal
-        style={{ width: '680px' }}
-        title="创建数据载入任务"
-        visible={visible}
-        onOk={() => setVisible(false)}
-        onCancel={() => setVisible(false)}
-        autoFocus={false}
-        focusLock={true}
-        footer={null}
-        unmountOnExit={true}
-      >
-        <LoadAddModal hideModalHan={hideEditModal} getList={getdataLoadList} />
-      </Modal>
     </div>
   );
 }

@@ -9,7 +9,8 @@ import {
   useNodesInteractions,
   useNodesSyncDraft,
   useWorkflowMoveMode,
-  useWorkflowOrganize
+  useWorkflowOrganize,
+  useWorkflowStartRun
 } from '.';
 
 export const useShortcuts = (): void => {
@@ -21,6 +22,10 @@ export const useShortcuts = (): void => {
     handleHistoryBack,
     handleHistoryForward
   } = useNodesInteractions();
+  const { handleStartWorkflowRun } = useWorkflowStartRun();
+  const { shortcutsEnabled: workflowHistoryShortcutsEnabled } =
+    useWorkflowHistoryStore();
+  const { handleSyncWorkflowDraft } = useNodesSyncDraft();
   const { handleEdgeDelete } = useEdgesInteractions();
   const workflowStore = useWorkflowStore();
   const { handleModeHand, handleModePointer } = useWorkflowMoveMode();

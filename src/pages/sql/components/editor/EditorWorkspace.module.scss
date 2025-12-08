@@ -20,6 +20,12 @@
     justify-content: space-between;
     padding: 0 16px;
 
+    .btn-running {
+      background-color: #fff;
+      color: #438dfb;
+      border-color: #438dfb;
+    }
+
     .toolbar-left {
       display: flex;
       align-items: center;
@@ -31,6 +37,10 @@
       color: #6e7b8d;
       font-size: 14px;
       line-height: 22px;
+
+      .toolbar-right-item {
+        margin-right: 12px;
+      }
 
       .run-status {
         display: flex;
@@ -45,6 +55,7 @@
         from {
           transform: rotate(0deg);
         }
+
         to {
           transform: rotate(360deg);
         }
@@ -109,4 +120,71 @@
       background-color: #f8fafd;
     }
   }
+
+  .btn-script-list {
+    width: 100px;
+    height: 24px;
+    margin-right: 12px;
+    color: var(--text-color-text-2, #1e293b) !important;
+    font-family: 'PingFang SC';
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 22px;
+    border: 1px solid var(--text-color-text-2, #cbd5e1) !important;
+
+    &:hover {
+      color: var(--text-color-text-2, #1e293b) !important;
+      border: 1px solid var(--text-color-text-2, #cbd5e1) !important;
+    }
+  }
+
+  .btn-save {
+    width: 80px;
+    height: 24px;
+  }
+}
+
+.specifications-modal-content {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+.specifications-modal-content-btn {
+  position: absolute;
+  right: 10px;
+  top: 10px;
+  display: flex;
+  align-items: flex-end;
+  z-index: 10;
+}
+
+.btn-edit {
+  color: var(--text-color-text-2, #1e293b) !important;
+  font-family: 'PingFang SC';
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: 22px;
+  border: 1px solid var(--text-color-text-2, #cbd5e1) !important;
+  padding: 0 8px;
+  width: 52px;
+  height: 24px;
+
+  &:hover {
+    color: var(--text-color-text-2, #1e293b) !important;
+    border: 1px solid var(--text-color-text-2, #cbd5e1) !important;
+  }
+}
+
+.btn-cancel {
+  margin-right: 8px;
+}
+
+.btn-save,
+.btn-cancel {
+  padding: 0 8px;
+  width: 52px;
+  height: 24px;
 }

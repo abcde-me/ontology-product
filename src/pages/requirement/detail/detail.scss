@@ -47,39 +47,18 @@
     }
   }
 
-  .label_shape_options {
-    display: flex;
-    align-items: center;
-  }
-
-  // .detail-content {
-  //   background-color: #fff;
-  //   border-radius: 15px;
-  //   padding-top: 24px;
-  //   padding-left: 24px;
-  //   margin-top: 16px;
-  // }
-
   .basic-title {
     font-family: PingFang SC;
     font-weight: 500;
     font-size: 16px;
     line-height: 24px;
-    // margin-left: -12px;
     margin-bottom: 16px;
   }
 
   .label-shape-options {
     display: flex;
     align-items: center;
-  }
-
-  .basic-configuration {
-    min-width: 1700px;
-
-    .table-container {
-      margin-left: 77px;
-    }
+    width: 110px;
   }
 
   .data-content-set {
@@ -410,7 +389,7 @@
   }
 
   .labe-and-attribute-warp {
-    width: 800px;
+    width: 900px;
     border: 1px solid #cbd5e1;
     border-radius: 4px;
 
@@ -469,9 +448,9 @@
     }
   }
 
-  .task-configuration-content {
-    min-width: 1700px;
-  }
+  // .task-configuration-content {
+  //   max-width: 1700px;
+  // }
 
   .arco-textarea-wrapper {
     width: min-content;
@@ -555,4 +534,22 @@
 
 .menu-item-content-active:hover {
   color: #007dfa;
+}
+
+.label-mapping-select .arco-input-tag-inner {
+  flex-wrap: nowrap !important;
+  input {
+    min-width: 100px !important;
+  }
+}
+
+// 有多个 tag 时才应用宽度限制
+.label-mapping-select .arco-input-tag-inner {
+  // 当有第二个 tag 时（第二个子元素也是 tag），所有 tag 都应用宽度限制
+  &:has(.arco-input-tag-tag:nth-child(2)) {
+    .arco-select-view-multiple .arco-select-view-tag,
+    .arco-input-tag-tag {
+      max-width: 80px !important;
+    }
+  }
 }
