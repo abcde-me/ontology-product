@@ -9,54 +9,12 @@ import {
   Message,
   Tooltip
 } from '@arco-design/web-react';
-import {
-  getDepartmentTreeList,
-  getIndividualList
-} from '@/api/individualAndDepartment';
+import { getIndividualList } from '@/api/individualAndDepartment';
+import { useDepartmentTree } from '../../hooks/useDepartmentTree';
 import EllipsisPopover from '@/components/ellipsis-popover-com';
 import noDataElement from '@/components/no-data';
 import { IconCaretDown } from '@arco-design/web-react/icon';
 import './IndividualModal.scss';
-
-// 树节点处理工具函数
-const processTreeNode = (node: any): any => {
-  return {
-    ...node,
-    // 递归处理子节点，将childList转换为children
-    children: node.childList?.map((child: any) => processTreeNode(child))
-  };
-};
-
-// 处理树数据的工具函数
-const processTreeData = (data: any[]): any[] => {
-  return data?.map((item) => processTreeNode(item)) || [];
-};
-
-// 只保留有权限数据的节点
-const filterTreeDataByPerms = (data: any[]): any[] => {
-  if (!data?.length) return [];
-
-  return data.reduce((result: any[], item) => {
-    // 递归过滤子节点
-    const filteredChildren = item.children?.length
-      ? filterTreeDataByPerms(item.children)
-      : undefined;
-
-    // 如果当前节点有权限，保留该节点（即使子节点被过滤为空也要保留）
-    if (item.isPermission) {
-      result.push({
-        ...item,
-        children: filteredChildren
-      });
-    } else if (filteredChildren?.length) {
-      // 如果当前节点没有权限但有过滤后的子节点，提升子节点层级
-      result.push(...filteredChildren);
-    }
-    // 既没有权限也没有有效子节点的节点被忽略
-
-    return result;
-  }, []);
-};
 
 interface DataSourceModalProps {
   visible: boolean;
@@ -85,11 +43,8 @@ const IndividualModal: React.FC<DataSourceModalProps> = ({
   initialSelected = []
 }) => {
   const tableRef = useRef<any>(null);
-  const [treeData, setTreeData] = useState<any>([]);
-  const [originalTreeData, setOriginalTreeData] = useState<any>([]);
   const [tableData, setTableData] = useState<any>([]);
   const [checkedKeys, setCheckedKeys] = useState<string[]>([]);
-  const [searchValue, setSearchValue] = useState<string>('');
   const [selectedRowsContent, setSelectedRowsContent] =
     useState<any[]>(initialSelectedData);
   const [current, setCurrent] = useState(1);
@@ -98,33 +53,15 @@ const IndividualModal: React.FC<DataSourceModalProps> = ({
   // 在组件状态定义中添加
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
 
+  const { treeData, setSearchValue, fetchTreeData } = useDepartmentTree(false);
+
   // 处理初始选中的数据 - 当弹窗打开或初始选中数据变化时同步
   useEffect(() => {
     if (visible) {
       setSelectedRowKeys(initialSelected || []);
+      fetchTreeData();
     }
   }, [visible, initialSelected]);
-  const getTreeData = () => {
-    try {
-      getDepartmentTreeList()
-        .then((res) => {
-          // 使用工具函数处理整个树结构
-          const newTreeData = processTreeData(res?.data || []);
-          setTreeData(filterTreeDataByPerms(newTreeData));
-          setOriginalTreeData(filterTreeDataByPerms(newTreeData));
-        })
-        .catch((err) => {
-          console.error(err);
-        });
-    } catch (err) {
-      console.log(err, 'err');
-    }
-  };
-  useEffect(() => {
-    if (visible) {
-      getTreeData();
-    }
-  }, [visible]);
   // 树的内容
   const renderTreeContent = () => {
     return (
@@ -181,35 +118,6 @@ const IndividualModal: React.FC<DataSourceModalProps> = ({
       )
     }
   ];
-
-  const searchData = (searchValue, originalTreeData) => {
-    const loop = (data) => {
-      const result: any = [];
-      data.forEach((item) => {
-        if (item.title.toLowerCase().indexOf(searchValue.toLowerCase()) > -1) {
-          result.push({ ...item });
-        } else if (item.children) {
-          const filterData = loop(item.children);
-
-          if (filterData.length) {
-            result.push({ ...item, children: filterData });
-          }
-        }
-      });
-      return result;
-    };
-
-    return loop(originalTreeData);
-  };
-
-  useEffect(() => {
-    if (!searchValue) {
-      setTreeData(originalTreeData);
-    } else {
-      const result = searchData(searchValue, originalTreeData);
-      setTreeData(result);
-    }
-  }, [searchValue]);
 
   // 获取表格数据
   const getTableData = async () => {
@@ -277,7 +185,7 @@ const IndividualModal: React.FC<DataSourceModalProps> = ({
               }}
               allowClear
               onClear={() => {
-                getTreeData();
+                setSearchValue('');
               }}
             />
           </div>
