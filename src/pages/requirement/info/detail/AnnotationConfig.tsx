@@ -9,7 +9,19 @@ import SelectedDataModal from './SelectedDataModal';
 
 function AnnotationConfig({ requirementDetail }: { requirementDetail: any }) {
   const [visible, setVisible] = useState(false);
-  const selectedData = requirementDetail?.label_data_set || [];
+  
+  // 从 pkg_edit_history 中提取所有 label_data_set 数据
+  const getSelectedData = () => {
+    const pkgEditHistory = requirementDetail?.pkg_edit_history || [];
+    if (pkgEditHistory.length > 0) {
+      // 合并所有 pkg_edit_history 中的 label_data_set
+      return pkgEditHistory.flatMap((pkg: any) => pkg?.label_data_set || []);
+    }
+    // 兼容旧数据结构
+    return requirementDetail?.label_data_set || [];
+  };
+  
+  const selectedData = getSelectedData();
   const labelToolCode = requirementDetail?.label_tool?.label_tool_code;
   const { data: modelList = [] } = useGetModelList(
     { label_tool_code: labelToolCode, page: 1, page_size: 1000 },

@@ -157,7 +157,18 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
   // 编辑模式已选数据不可再选
   const disabledSelectedRowKeys = useMemo(() => {
     if (type === 'edit') {
-      return requirementDetail?.label_data_set?.map(
+      // 从 pkg_edit_history 中提取所有 label_data_set 数据
+      const pkgEditHistory = requirementDetail?.pkg_edit_history || [];
+      let labelDataSet: any[] = [];
+      if (pkgEditHistory.length > 0) {
+        labelDataSet = pkgEditHistory.flatMap(
+          (pkg: any) => pkg?.label_data_set || []
+        );
+      } else {
+        // 兼容旧数据结构
+        labelDataSet = requirementDetail?.label_data_set || [];
+      }
+      return labelDataSet.map(
         (item) => item?.execution_id || item?.run_id || item?.id
       );
     }
