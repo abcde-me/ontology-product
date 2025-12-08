@@ -5,7 +5,8 @@ import {
   Pagination,
   PaginationProps,
   Table,
-  Tooltip
+  Tooltip,
+  Space
 } from '@arco-design/web-react';
 import { ColumnProps } from '@arco-design/web-react/es/Table';
 import EllipsisPopover from '@/components/ellipsis-popover-com';
@@ -16,6 +17,8 @@ import { ANNOTATION_TASK_PERMISSIONS } from '@/config/permissions';
 import { openNewPage } from '@/utils/env';
 import { RequirementTypeNameMap } from '../type';
 import { SorterInfo } from '@arco-design/web-react/es/Table/interface';
+import { CopyItemIcon } from '@ceai-front/arco-material';
+import ImageIcon from '@/assets/annotation/image-column.svg';
 import '../index.scss';
 
 function TaskList() {
@@ -121,7 +124,7 @@ function TaskList() {
   // table columns
   const columns: ColumnProps[] = [
     {
-      title: '所属需求名称',
+      title: '需求名称',
       dataIndex: 'name',
       width: 300,
       ellipsis: true,
@@ -140,7 +143,25 @@ function TaskList() {
       width: 100,
       render: (_, record) => {
         return renderEmptyPlaceholder(record.id) !== '-' ? (
-          <EllipsisPopover value={record.id} isEdit={false} />
+          <div className="flex items-center">
+            <EllipsisPopover value={record.id} isEdit={false} />
+            <CopyItemIcon className="copy-icon" value={record.id} />
+          </div>
+        ) : (
+          <span>-</span>
+        );
+      }
+    },
+    {
+      title: '任务包ID',
+      dataIndex: 'front_pkg_id',
+      width: 100,
+      render: (_, record) => {
+        return renderEmptyPlaceholder(record.front_pkg_id) !== '-' ? (
+          <div className="flex items-center">
+            <EllipsisPopover value={record.front_pkg_id} isEdit={false} />
+            <CopyItemIcon className="copy-icon" value={record.front_pkg_id} />
+          </div>
         ) : (
           <span>-</span>
         );
@@ -153,7 +174,10 @@ function TaskList() {
       width: 174,
       render: (_, record) => {
         return (
-          <div>{record?.type ? RequirementTypeNameMap[record.type] : '-'}</div>
+          <div className="flex items-center">
+            {record.type === 2 && <ImageIcon style={{ marginRight: 4 }} />}
+            {record?.type ? RequirementTypeNameMap[record.type] : '-'}
+          </div>
         );
       },
       filters: [
@@ -176,9 +200,9 @@ function TaskList() {
       ]
     },
     {
-      title: '所属部门/个人',
+      title: '所属',
       dataIndex: 'belong',
-      width: 160,
+      width: 100,
       render: (_, record) =>
         record.belong === 1 ? (
           <div className="belong-item">
@@ -203,13 +227,24 @@ function TaskList() {
     {
       // not_started_num 未领取任务数
       // task_total	任务总数
-      title: '未领取/总任务量',
+      title: '总任务量',
       dataIndex: 'task_total', // Changed from 'user_name' to unique dataIndex
       width: 160,
-      ellipsis: true,
-      render: (_, record) => (
-        <div>{`${record?.not_started_num}/${record?.task_total}`}</div>
-      )
+      ellipsis: true
+      // render: (_, record) => (
+      //   <div>{`${record?.not_started_num}/${record?.task_total}`}</div>
+      // )
+    },
+    {
+      // not_started_num 未领取任务数
+      // task_total	任务总数
+      title: '未领取',
+      dataIndex: 'not_started_num', // Changed from 'user_name' to unique dataIndex
+      width: 160,
+      ellipsis: true
+      // render: (_, record) => (
+      //   <div>{`${record?.not_started_num}/${record?.task_total}`}</div>
+      // )
     },
     {
       title: '创建时间',
@@ -228,10 +263,10 @@ function TaskList() {
       title: '操作',
       dataIndex: 'operate',
       fixed: 'right',
-      width: 75,
+      width: 120,
       render: (_, record) => {
         return (
-          <div style={{ display: 'flex' }}>
+          <Space>
             {/* {perms.includes(WORKFLOW_LIST_PERMISSIONS.CAN_GET) && ( */}
             {hasPermissionGetTask && (
               <span
@@ -240,10 +275,18 @@ function TaskList() {
                   viewDetailRequirement(record);
                 }}
               >
-                标注
+                去标注
               </span>
             )}
-          </div>
+            <span
+              className="operate-text"
+              onClick={() => {
+                viewDetailRequirement(record);
+              }}
+            >
+              改错
+            </span>
+          </Space>
         );
       }
     }
