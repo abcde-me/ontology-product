@@ -49,17 +49,22 @@ const FirstInspectModal: React.FC<FirstInspectModalProps> = ({
 
   const handleOk = async () => {
     try {
-      const params = {
+      const sample_info = {
         // 首次抽检/待质检 - uninspect; 待复核 - recheck
         task_type: 'uninspect'
       };
       const values = await form.validate();
-      params['sample_type'] = values.sample_type;
+      sample_info['sample_type'] = values.sample_type;
       if (values.sample_type === SamplingCountType.Percentage) {
-        params['sample_radio'] = values.sample_radio;
+        sample_info['sample_radio'] = values.sample_radio;
       } else if (values.sample_type === SamplingCountType.Count) {
-        params['sample_number'] = values.sample_number;
+        sample_info['sample_number'] = values.sample_number;
       }
+      const params = {
+        pkg_id: record?.pkg_id,
+        action: 'sample',
+        sample_info
+      };
       const res = await manageQCTaskBatch(params);
       if (res.code === 'success') {
         Message.success('设置成功');

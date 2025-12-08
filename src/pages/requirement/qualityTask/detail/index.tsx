@@ -17,8 +17,10 @@ import { useParams } from '@/utils/url';
 import noDataElement from '@/components/no-data';
 import SamplingModal from './SamplingModal';
 import BatchInspectModal from './BatchInspectModal';
-import FirstInspectModal from '../list/FirstInspectModal';
-import { getQualityControlTaskStatistics } from '@/api/dataAnnotation';
+import {
+  getQualityControlTaskStatistics,
+  manageQCTaskBatch
+} from '@/api/dataAnnotation';
 import './index.scss';
 
 const BreadcrumbItem = Breadcrumb.Item;
@@ -102,9 +104,7 @@ function QualityTaskDetail() {
   // 弹窗状态
   const [samplingModalVisible, setSamplingModalVisible] = useState(false);
   const [batchModalVisible, setBatchModalVisible] = useState(false);
-  const [firstInspectModalVisible, setFirstInspectModalVisible] =
-    useState(false);
-  const [currentInspectionId, setCurrentInspectionId] = useState<number>();
+  const [currentRecord, setCurrentRecord] = useState<InspectionItem>();
 
   // 获取质检任务包统计数据
   const getQualityControlTaskStatisticsData = useCallback(async () => {
@@ -118,10 +118,6 @@ function QualityTaskDetail() {
       Message.error(res.message);
     }
   }, [pkg_id, qc_round]);
-
-  useEffect(() => {
-    getQualityControlTaskStatisticsData();
-  }, [getQualityControlTaskStatisticsData]);
 
   // 获取表格数据
   const getTableData = useCallback(() => {
@@ -187,21 +183,33 @@ function QualityTaskDetail() {
     getTableData();
   }, [getTableData]);
 
+  useEffect(() => {
+    getQualityControlTaskStatisticsData();
+  }, [getQualityControlTaskStatisticsData]);
+
   // 处理抽检
   const handleSampling = () => {
     setSamplingModalVisible(true);
   };
 
   // 处理全部通过/驳回
-  const handleBatchConfirm = (type: 'pass' | 'reject') => {
+  const handleBatchConfirm = (type: 'pass_all' | 'reject_all') => {
     Modal.confirm({
-      title: `确定将未抽检的任务全部${type === 'pass' ? '通过' : '驳回'}?`,
+      title: `确定将未抽检的任务全部${type === 'pass_all' ? '通过' : '驳回'}?`,
       okText: '确定',
       cancelText: '取消',
-      onOk: () => {
-        // TODO: 调用API
-        Message.success(type === 'pass' ? '已全部通过' : '已全部驳回');
-        getTableData();
+      onOk: async () => {
+        const params = {
+          action: type,
+          pkg_id: Number(pkg_id)
+        };
+        const res = await manageQCTaskBatch(params);
+        if (res.data.code === 'success') {
+          Message.success(type === 'pass_all' ? '已全部通过' : '已全部驳回');
+          getTableData();
+        } else {
+          Message.error(res.message);
+        }
       }
     });
   };
@@ -228,26 +236,12 @@ function QualityTaskDetail() {
 
   // 去质检
   const handleGoInspect = (record: InspectionItem) => {
-    // 判断是否首次质检（进度为0时需要先设置）
-    const isFirstTime = record.progress.completed === 0;
-    if (isFirstTime) {
-      setCurrentInspectionId(record.id);
-      setFirstInspectModalVisible(true);
-    } else {
-      // TODO: 跳转到质检页面
-      Message.info(`去质检: ${record.id}`);
-    }
-  };
-
-  // 首次抽检设置成功后跳转
-  const handleFirstInspectSuccess = () => {
-    // TODO: 跳转到质检页面
-    Message.info(`首次抽检设置成功，去质检: ${currentInspectionId}`);
+    // TODO 跳转到质检页
   };
 
   // 批量质检
   const handleBatchInspect = (record: InspectionItem) => {
-    setCurrentInspectionId(record.id);
+    setCurrentRecord(record);
     setBatchModalVisible(true);
   };
 
@@ -319,11 +313,6 @@ function QualityTaskDetail() {
       render: (_, record) => (
         <div className="id-cell">
           <span>{record.id}</span>
-          {record.isRecheck && (
-            <Tag color="orange" size="small" className="recheck-tag">
-              复核
-            </Tag>
-          )}
         </div>
       )
     },
@@ -472,10 +461,10 @@ function QualityTaskDetail() {
                 <Button type="primary" onClick={handleSampling}>
                   抽检
                 </Button>
-                <Button onClick={() => handleBatchConfirm('pass')}>
+                <Button onClick={() => handleBatchConfirm('pass_all')}>
                   全部通过
                 </Button>
-                <Button onClick={() => handleBatchConfirm('reject')}>
+                <Button onClick={() => handleBatchConfirm('reject_all')}>
                   全部驳回
                 </Button>
               </div>
@@ -579,14 +568,7 @@ function QualityTaskDetail() {
         visible={batchModalVisible}
         onClose={() => setBatchModalVisible(false)}
         onSuccess={getTableData}
-        inspectionId={currentInspectionId}
-      />
-
-      {/* 首次抽检设置弹窗 */}
-      <FirstInspectModal
-        visible={firstInspectModalVisible}
-        onClose={() => setFirstInspectModalVisible(false)}
-        onSuccess={handleFirstInspectSuccess}
+        currentRecord={currentRecord}
       />
     </div>
   );

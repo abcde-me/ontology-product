@@ -361,6 +361,10 @@ export const ModaForgeResourceEndpoints = {
   // 获取质检任务包统计数据
   getQualityControlTaskStatistics:
     PrefixLabelService + '/GetQualityControlTaskStatistics',
+  // 批量处理抽检
+  batchManageQCTaskBatch: PrefixLabelService + '/BatchManageQCTaskBatch',
+  // 批量管理抽检包任务
+  manageQCTaskSampledBatch: PrefixLabelService + '/ManageQCTaskSampledBatch',
 
   // python开发
   // 获取python列表

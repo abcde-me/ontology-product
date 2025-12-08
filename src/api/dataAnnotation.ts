@@ -189,3 +189,19 @@ export async function getQualityControlTaskStatistics(params) {
     .inRegion()
     .do();
 }
+
+// 批量处理抽检
+export async function batchManageQCTaskBatch(params) {
+  return await UAPI.RES.batchManageQCTaskBatch({})
+    .post({ ...params })
+    .inRegion()
+    .do();
+}
+
+// 批量管理抽检包任务
+export async function manageQCTaskSampledBatch(params) {
+  return await UAPI.RES.manageQCTaskSampledBatch({})
+    .post({ ...params })
+    .inRegion()
+    .do();
+}
