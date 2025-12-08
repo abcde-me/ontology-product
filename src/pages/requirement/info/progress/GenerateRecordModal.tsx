@@ -3,75 +3,26 @@ import { Modal, Table, Button, Pagination } from '@arco-design/web-react';
 import { ColumnProps } from '@arco-design/web-react/es/Table';
 import { SorterInfo } from '@arco-design/web-react/es/Table/interface';
 import { IconRefresh, IconDownload } from '@arco-design/web-react/icon';
+import { useParams } from '@/utils/url';
 import './GenerateRecordModal.scss';
-
-// 状态枚举
-enum RecordStatus {
-  GENERATING = 'generating', // 生成中
-  NOT_DOWNLOADED = 'not_downloaded', // 未下载
-  DOWNLOADED = 'downloaded' // 已下载
-}
-
-// 状态配置
-const statusConfig = {
-  [RecordStatus.GENERATING]: {
-    text: '生成中',
-    color: '#2970ff' // 蓝色
-  },
-  [RecordStatus.NOT_DOWNLOADED]: {
-    text: '未下载',
-    color: '#86909c' // 灰色
-  },
-  [RecordStatus.DOWNLOADED]: {
-    text: '已下载',
-    color: '#00b42a' // 绿色
-  }
+import { downloadRecord } from '@/api/dataAnnotation';
+// 状态配置 status: 0-生成中 1-生成失败 2-未下载 3-已下载
+const statusConfig: Record<number, { text: string; color: string }> = {
+  0: { text: '生成中', color: '#2970ff' }, // 蓝色
+  1: { text: '生成失败', color: '#f53f3f' }, // 红色
+  2: { text: '未下载', color: '#86909c' }, // 灰色
+  3: { text: '已下载', color: '#00b42a' } // 绿色
 };
 
 interface GenerateRecord {
-  id: number;
-  time: string;
-  taskPackageIds: number[];
-  status: RecordStatus;
+  create_time: string; // 创建时间
+  front_pkg_ids: string; // 需求包id，使用逗号分隔
+  status: number; // 状态
 }
 
-// 模拟数据
-const mockRecords: GenerateRecord[] = [
-  {
-    id: 1,
-    time: '2025-05-05 05:05:05',
-    taskPackageIds: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
-    status: RecordStatus.GENERATING
-  },
-  {
-    id: 2,
-    time: '2025-05-04 05:05:05',
-    taskPackageIds: [11, 12, 13],
-    status: RecordStatus.NOT_DOWNLOADED
-  },
-  {
-    id: 3,
-    time: '2025-05-03 05:05:05',
-    taskPackageIds: [14, 15],
-    status: RecordStatus.DOWNLOADED
-  },
-  {
-    id: 4,
-    time: '2025-05-02 05:05:05',
-    taskPackageIds: [16],
-    status: RecordStatus.DOWNLOADED
-  },
-  {
-    id: 5,
-    time: '2025-05-01 05:05:05',
-    taskPackageIds: [17, 18, 19],
-    status: RecordStatus.DOWNLOADED
-  }
-];
-
 // 状态指示器组件
-const StatusIndicator: React.FC<{ status: RecordStatus }> = ({ status }) => {
-  const config = statusConfig[status];
+const StatusIndicator: React.FC<{ status: number }> = ({ status }) => {
+  const config = statusConfig[status] || { text: '-', color: '#86909c' };
   return (
     <div className="status-indicator">
       <div className="status-dot" style={{ backgroundColor: config.color }} />
@@ -86,58 +37,41 @@ interface GenerateRecordModalProps {
 }
 
 function GenerateRecordModal({ visible, onClose }: GenerateRecordModalProps) {
+  const id = useParams('id') as string;
+  const reqId = Number(id);
   const [records, setRecords] = useState<GenerateRecord[]>([]);
   const [current, setCurrent] = useState(1);
   const [pageSize, setPageSize] = useState(10);
-  const [total, setTotal] = useState(50);
+  const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
   const [sorter, setSorter] = useState<SorterInfo | null>(null);
 
   // 获取数据
-  const getList = () => {
+  const getList = async () => {
+    if (!reqId || isNaN(reqId)) return;
     setLoading(true);
-    // 模拟API调用
-    setTimeout(() => {
-      const sortedData = [...mockRecords];
-
-      // 排序
-      if (sorter && sorter.field) {
-        sortedData.sort((a, b) => {
-          const { field, direction } = sorter;
-          if (!field || !direction) return 0;
-
-          let aVal: any = a[field as keyof GenerateRecord];
-          let bVal: any = b[field as keyof GenerateRecord];
-
-          if (field === 'time') {
-            aVal = new Date(aVal).getTime();
-            bVal = new Date(bVal).getTime();
-          }
-
-          if (direction === 'ascend') {
-            return aVal > bVal ? 1 : -1;
-          } else {
-            return aVal < bVal ? 1 : -1;
-          }
-        });
+    try {
+      const res = await downloadRecord({
+        req_id: reqId,
+        page: current,
+        page_size: pageSize
+      });
+      if (res?.code === 'success') {
+        setRecords(res.data.items || []);
+        setTotal(res.data.total || 0);
       }
-
-      // 分页
-      const start = (current - 1) * pageSize;
-      const end = start + pageSize;
-      const paginatedData = sortedData.slice(start, end);
-
-      setRecords(paginatedData);
-      setTotal(mockRecords.length);
+    } catch (error) {
+      console.error('获取生成记录失败:', error);
+    } finally {
       setLoading(false);
-    }, 300);
+    }
   };
 
   useEffect(() => {
-    if (visible) {
+    if (visible && reqId) {
       getList();
     }
-  }, [visible, current, pageSize, sorter]);
+  }, [visible, current, pageSize, reqId]);
 
   // 处理刷新
   const handleRefresh = () => {
@@ -161,27 +95,17 @@ function GenerateRecordModal({ visible, onClose }: GenerateRecordModalProps) {
   // 处理下载
   const handleDownload = (record: GenerateRecord) => {
     // TODO: 替换为实际的下载API调用
-    // 这里模拟下载过程
     try {
       // 创建下载链接
       const link = document.createElement('a');
       // 实际应该调用API获取下载URL
       // const downloadUrl = await getAnnotationDownloadUrl(record.id);
       link.href = `#`; // 临时占位，实际应使用 downloadUrl
-      link.download = `标注结果_${record.taskPackageIds.join('_')}.zip`;
+      link.download = `标注结果_${record.front_pkg_ids}.zip`;
       link.style.display = 'none';
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-
-      // 更新状态为已下载
-      const updatedRecords = records.map((r) =>
-        r.id === record.id ? { ...r, status: RecordStatus.DOWNLOADED } : r
-      );
-      setRecords(updatedRecords);
-
-      // 同时更新mockData，以便刷新后保持状态
-      // 实际应该调用API更新状态
     } catch (error) {
       console.error('下载失败:', error);
     }
@@ -191,15 +115,13 @@ function GenerateRecordModal({ visible, onClose }: GenerateRecordModalProps) {
   const columns: ColumnProps[] = [
     {
       title: '时间',
-      dataIndex: 'time',
-      width: 180,
-      sorter: true
+      dataIndex: 'create_time',
+      width: 180
     },
     {
       title: '任务包ID',
-      dataIndex: 'taskPackageIds',
-      width: 300,
-      render: (ids: number[]) => ids.join(', ')
+      dataIndex: 'front_pkg_ids',
+      width: 300
     },
     {
       title: '状态',
@@ -215,7 +137,11 @@ function GenerateRecordModal({ visible, onClose }: GenerateRecordModalProps) {
       width: 120,
       fixed: 'right',
       render: (_: any, record: GenerateRecord) => {
-        const isDownloaded = record.status === RecordStatus.DOWNLOADED;
+        // 0-生成中 1-生成失败 不显示下载按钮
+        if (record.status === 0 || record.status === 1) {
+          return '-';
+        }
+        const isDownloaded = record.status === 3;
         return (
           <Button
             type="text"
@@ -254,7 +180,7 @@ function GenerateRecordModal({ visible, onClose }: GenerateRecordModalProps) {
           border={false}
           columns={columns}
           data={records}
-          rowKey="id"
+          rowKey="create_time"
           loading={loading}
           pagination={false}
           onChange={handleTableChange}

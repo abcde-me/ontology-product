@@ -198,6 +198,17 @@ export async function detailRequirement(params: {
     .inRegion()
     .do();
 }
+// 生成记录列表
+export async function downloadRecord(params: {
+  req_id: number; // 需求id
+  page: number; // 页码
+  page_size: number; // 每页数量
+}) {
+  return await UAPI.RES.downloadRecord({})
+    .post({ ...params })
+    .inRegion()
+    .do();
+}
 // 质检任务列表
 export async function listQualityControlTasks(params) {
   return await UAPI.RES.listQualityControlTasks({})

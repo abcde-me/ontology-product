@@ -360,6 +360,8 @@ export const ModaForgeResourceEndpoints = {
   getProgressRequirement: PrefixLabelService + '/ProgressRequirement',
   // 需求明细
   detailRequirement: PrefixLabelService + '/DetailRequirement',
+  // 生成纪录
+  downloadRecord: PrefixLabelService + '/DownloadRecord',
   // 质检任务列表
   listQualityControlTasks: PrefixLabelService + '/ListQualityControlTasks',
   // 设置抽检任务
