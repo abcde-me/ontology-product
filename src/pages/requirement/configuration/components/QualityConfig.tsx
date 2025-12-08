@@ -3,14 +3,14 @@ import { Form, Radio } from '@arco-design/web-react';
 const FormItem = Form.Item;
 const RadioGroup = Radio.Group;
 
-const QualityConfig = ({ form, type }) => {
+const QualityConfig = ({ form, type, requirementDetail }) => {
   return (
     <>
       <FormItem
         label="质检轮次:"
         field="qc_round"
         rules={[{ required: true, message: '请选择质检轮次' }]}
-        initialValue={1}
+        initialValue={requirementDetail?.req_config?.qc_round || 1}
         disabled={type === 'edit'}
       >
         <RadioGroup>
@@ -24,7 +24,7 @@ const QualityConfig = ({ form, type }) => {
         label="质检修改标注:"
         field="is_result_modify"
         rules={[{ required: true, message: '请选择质检修改标注' }]}
-        initialValue={0}
+        initialValue={requirementDetail?.req_config?.is_result_modify || 0}
       >
         <RadioGroup>
           <Radio value={1}>启用</Radio>
@@ -35,7 +35,7 @@ const QualityConfig = ({ form, type }) => {
         label="驳回至:"
         field="reject_to"
         rules={[{ required: true, message: '请选择驳回至' }]}
-        initialValue={0}
+        initialValue={requirementDetail?.req_config?.reject_to || 1}
       >
         <RadioGroup>
           <Radio value={0}>标注员</Radio>

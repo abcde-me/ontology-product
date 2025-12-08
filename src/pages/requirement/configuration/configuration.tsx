@@ -1175,7 +1175,7 @@ export default function RequirementConfig() {
                 }
               }}
             >
-              <QualityConfig form={qualityTaskForm} type={type} />
+              <QualityConfig form={qualityTaskForm} type={type} requirementDetail={requirementDetail}/>
             </Form>
           </div>
           {/* 任务分配功能 */}
