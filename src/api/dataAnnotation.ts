@@ -174,6 +174,13 @@ export async function editRequirement(params) {
     .do();
 }
 
+// 质检任务列表
+export async function listQualityControlTasks(params) {
+  return await UAPI.RES.listQualityControlTasks({})
+    .post({ ...params })
+    .inRegion()
+    .do();
+}
 // 设置抽检任务
 export async function manageQCTaskBatch(params) {
   return await UAPI.RES.manageQCTaskBatch({})

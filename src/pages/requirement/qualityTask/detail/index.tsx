@@ -95,13 +95,7 @@ function QualityTaskDetail() {
   const [publishStatus, setPublishStatus] = useState('发布成功');
 
   // 指标数据
-  const [metricData, setMetricData] = useState<MetricData>({
-    task_volume_total: 25,
-    task_volume_unsampled: 25,
-    task_volume_unreceived: 25,
-    task_volume_sampling: 25,
-    task_volume_passed: 25
-  });
+  const [metricData, setMetricData] = useState<MetricData>();
 
   // 表格数据
   const [tableData, setTableData] = useState<InspectionItem[]>([]);

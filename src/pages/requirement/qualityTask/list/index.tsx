@@ -16,7 +16,7 @@ import FirstInspectModal from './FirstInspectModal';
 import ImageIcon from '@/assets/annotation/image-column.svg';
 import { RequirementTypeNameMap } from '../../type';
 import { CopyItemIcon } from '@ceai-front/arco-material';
-
+import { listQualityControlTasks } from '@/api/dataAnnotation';
 import './index.scss';
 
 const TabPane = Tabs.TabPane;
@@ -131,51 +131,36 @@ function QualityTaskList() {
   const [tableData, setTableData] = useState<QualityTaskItem[]>([]);
 
   // 获取列表数据
-  const getList = useCallback(() => {
+  const getList = useCallback(async () => {
     setLoading(true);
     try {
+      // 构建 filters 对象，过滤掉空值
+      const filters: QualityTaskListParams['filters'] = {};
+      if (searchValue) {
+        filters.search_content = searchValue;
+      }
+      if (sortValue?.belong?.length) {
+        filters.belong = sortValue.belong;
+      }
+      if (sortValue?.type?.length) {
+        filters.type = sortValue.type;
+      }
+
       const params: QualityTaskListParams = {
-        qc_round: Number(activeTab), // 当前质检轮次
+        qc_round: Number(activeTab), // 当前质检轮次: 1-1轮质检；2-2轮质检；3-3轮质检
         page: current,
         page_size: pageSize,
-        filters: {
-          search_content: searchValue || undefined,
-          belong: sortValue?.belong,
-          type: sortValue?.type
-        },
-        order: sortValue?.order || 'desc',
-        order_filter: sortValue?.order_filter || 'create_time'
+        // 只有在 filters 有有效字段时才传递
+        ...(Object.keys(filters).length > 0 && { filters }),
+        order: sortValue?.order || 'desc', // 默认降序，asc正序，desc倒序
+        order_filter: sortValue?.order_filter || 'create_time' // 默认创建时间，create_time - 创建时间，update_time - 更新时间
       };
 
-      // TODO: 替换为实际API调用
-      // const res = await getQualityTaskList(params);
-      // if (res.code === 'success') {
-      //   setTableData(res.data?.result || []);
-      //   setTotal(res.data?.total || 0);
-      // }
-
-      // 模拟数据
-      const mockData: QualityTaskItem[] = Array.from(
-        { length: 12 },
-        (_, index) => ({
-          pkg_id: index + 1,
-          front_pkg_id: (index % 3) + 22,
-          req_id: index + 1,
-          req_name: ['智慧城市', '飞机表面缝隙', '车辆和行人检测'][index % 3],
-          type: index % 2 === 0 ? DataType.Image : DataType.Text,
-          belong: index % 3 === 0 ? BelongType.Personal : BelongType.Department,
-          task_volume_total: 120,
-          task_volume_unowned: 30,
-          task_volume_unreceived: 30,
-          started: index % 4 !== 0, // false-任务包首次被处理，需要抽检
-          create_time: '2025-05-05T05:05:05+08:00',
-          update_time: '2025-05-05T05:05:05+08:00'
-        })
-      );
-
-      console.log('请求参数:', params);
-      setTableData(mockData);
-      setTotal(50);
+      const res = await listQualityControlTasks(params);
+      if (res.code === 'success') {
+        setTableData(res.data?.result || []);
+        setTotal(res.data?.total || 0);
+      }
     } catch (error) {
       console.error('获取质检任务列表失败:', error);
     } finally {
