@@ -268,12 +268,16 @@ export default function RequirementConfig() {
     const totalDataAmount = getTotal(selectedData) || 0;
 
     if (splitCount && totalDataAmount && splitCount >= 1) {
+      // edit模式下，taskId从详情pkg_infos的长度+1开始
+      const startTaskId =
+        type === 'edit' ? (requirementDetail?.pkg_infos?.length || 0) + 1 : 1;
       // 传入现有的taskPackages，保留已选数据
       const packages = generateTaskPackages(
         splitCount,
         qualityRounds,
         totalDataAmount,
-        taskPackages
+        taskPackages,
+        startTaskId
       );
       setTaskPackages(packages);
       // 清除验证错误
@@ -283,7 +287,9 @@ export default function RequirementConfig() {
     }
   }, [
     publishData?.split_task_package,
-    selectedData
+    selectedData,
+    type,
+    requirementDetail?.pkg_infos?.length
     // qc_round 需要通过表单变化触发
   ]);
   // 找到现有的useEffect，在其后添加一个新的useEffect来处理templateData的更新同步
@@ -1143,12 +1149,18 @@ export default function RequirementConfig() {
                     0;
 
                   if (splitCount && totalDataAmount && splitCount >= 1) {
+                    // edit模式下，taskId从详情pkg_infos的长度+1开始
+                    const startTaskId =
+                      type === 'edit'
+                        ? (requirementDetail?.pkg_infos?.length || 0) + 1
+                        : 1;
                     // 传入现有的taskPackages，保留已选数据
                     const packages = generateTaskPackages(
                       splitCount,
                       changedValues.qc_round ?? 0,
                       totalDataAmount,
-                      taskPackages
+                      taskPackages,
+                      startTaskId
                     );
                     setTaskPackages(packages);
                     setTaskDistributionErrors({});

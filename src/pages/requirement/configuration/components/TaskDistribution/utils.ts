@@ -16,13 +16,15 @@ import { ROLE_NAME_MAP } from './constants';
  * @param qualityRounds 质检轮次（0/1/2/3）
  * @param totalDataAmount 总数据量
  * @param existingPackages 现有的任务包（用于保留已选数据）
+ * @param startTaskId 起始任务ID（edit模式下使用详情pkg_infos长度+1）
  * @returns 任务包列表
  */
 export const generateTaskPackages = (
   splitCount: number,
   qualityRounds: number,
   totalDataAmount: number,
-  existingPackages: TaskPackage[] = []
+  existingPackages: TaskPackage[] = [],
+  startTaskId = 1
 ): TaskPackage[] => {
   if (!splitCount || !totalDataAmount || splitCount < 1) {
     return [];
@@ -32,8 +34,8 @@ export const generateTaskPackages = (
   const dataPerPackage = Math.floor(totalDataAmount / splitCount);
   const remainder = totalDataAmount % splitCount;
 
-  for (let i = 1; i <= splitCount; i++) {
-    const taskId = String(i);
+  for (let i = 0; i < splitCount; i++) {
+    const taskId = String(startTaskId + i);
     const existingPackage = existingPackages.find(
       (pkg) => pkg.taskId === taskId
     );
@@ -77,9 +79,9 @@ export const generateTaskPackages = (
 
     packages.unshift({
       taskId,
-      taskBId: `${i}`,
+      taskBId: taskId,
       dataAmount:
-        i === splitCount
+        i === splitCount - 1
           ? dataPerPackage + remainder // 最后一个包含剩余数据
           : dataPerPackage,
       roles
