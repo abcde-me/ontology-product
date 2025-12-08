@@ -16,12 +16,7 @@ import {
 } from '@arco-design/web-react/icon';
 import { sql } from '@codemirror/lang-sql';
 import { lintGutter } from '@codemirror/lint';
-import {
-  EditorView,
-  Decoration,
-  ViewPlugin,
-  ViewUpdate
-} from '@codemirror/view';
+import { EditorView, Decoration } from '@codemirror/view';
 import { StateEffect, StateField } from '@codemirror/state';
 import { tags as t } from '@lezer/highlight';
 import createTheme from '@uiw/codemirror-themes';
@@ -45,7 +40,7 @@ import {
   EditorProvider,
   useEditorContext
 } from '../../contexts/DevelopScriptEditorContext';
-import { FileTab } from '../../hooks/useTabManager';
+import { FileTab } from '../../hooks/useDevelopScriptTabManager';
 import RunningInfoPanel from './RunningInfoPanel';
 import classNames from 'classnames';
 import ModalParamList from '../data-manager/ModalParamList';

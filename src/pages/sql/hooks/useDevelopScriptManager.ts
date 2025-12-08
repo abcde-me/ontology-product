@@ -1,5 +1,6 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { Message } from '@arco-design/web-react';
+import { useLocation, useHistory } from 'react-router-dom';
 import {
   getSqlScriptList,
   createSqlScript,
@@ -7,19 +8,23 @@ import {
   deleteSqlScript,
   copySqlScript
 } from '@/api/sql';
-import { listDevelopScript, createDevelopScript } from '@/api/sql-develop';
+import { listDevelopScript } from '@/api/sql-develop';
 import { PythonItemType } from '@/types/pythonApi';
 import { SqlScriptItem } from '@/types/sqlApi';
 import { generateSqlDefaultName } from '../utils';
 import { useUserInfo } from '@/store/userInfoStore';
 import { validateName } from '@/utils/valiate';
 import { ListDevelopScriptItem } from '@/types/sqlDevelopApi';
+import { FileTab } from './useDevelopScriptTabManager';
 
 interface UseFileManagerOptions {
   onFileOpen?: (fileId: string, scriptId: string, fileName?: string) => void;
   onFileDelete?: (fileId: string) => void; // 删除文件时关闭标签页的回调
   onFileRename?: (fileId: string, newName: string) => void; // 重命名文件时更新标签页标题的回调
   externalSelectedKeys?: string[]; // 外部传入的选中状态
+  activeTab?: string; // 当前激活的 tab，用于判断是否在 files tab
+  fileTabs?: FileTab[]; // 已打开的标签页列表
+  onSwitchTab?: (key: string) => void; // 切换标签页的回调
 }
 
 interface UseFileManagerReturn {
@@ -57,8 +62,17 @@ export const useDevelopScriptManager = (
   options: UseFileManagerOptions = {}
 ): UseFileManagerReturn => {
   const userInfo = useUserInfo();
-  const { onFileOpen, onFileDelete, onFileRename, externalSelectedKeys } =
-    options;
+  const location = useLocation();
+  const history = useHistory();
+  const {
+    onFileOpen,
+    onFileDelete,
+    onFileRename,
+    externalSelectedKeys,
+    activeTab,
+    fileTabs = [],
+    onSwitchTab
+  } = options;
 
   // 状态管理
   const [sqlScriptList, setSqlScriptList] = useState<ListDevelopScriptItem[]>(
@@ -124,24 +138,31 @@ export const useDevelopScriptManager = (
           return;
         }
 
-        // 如果点击的是文件（不是文件夹），自动打开
+        // 如果点击的是文件（不是文件夹），自动打开并更新URL
         if (dataRef && dataRef.type !== PythonItemType.Directory) {
+          const scriptId = String(dataRef.script_id);
           console.log(
             '📁 点击文件，自动打开:',
             dataRef.name,
             'ID:',
             dataRef.id,
-            dataRef.script_id
+            'ScriptId:',
+            scriptId
           );
-          onFileOpen(
-            String(dataRef.id),
-            String(dataRef.script_id),
-            dataRef.name
-          );
+
+          // 更新URL参数 activeDevelopScriptId
+          const searchParams = new URLSearchParams(location.search);
+          searchParams.set('activeDevelopScriptId', scriptId);
+          history.push({
+            pathname: location.pathname,
+            search: searchParams.toString()
+          });
+
+          onFileOpen(String(dataRef.id), scriptId, dataRef.name);
         }
       }
     },
-    [onFileOpen]
+    [onFileOpen, location.pathname, location.search, history]
   );
 
   // 树展开处理
@@ -172,7 +193,7 @@ export const useDevelopScriptManager = (
     } finally {
       setIsLoading(false);
     }
-  }, [isLoading, onFileOpen]);
+  }, []);
 
   // 创建文件/文件夹
   const handleCreate = useCallback(
@@ -205,9 +226,17 @@ export const useDevelopScriptManager = (
         // 设置选中状态
         setSelectedKeys([scriptFileId]);
 
+        // 更新URL参数 activeDevelopScriptId
+        const scriptId = String(createRes.data.script_id);
+        const searchParams = new URLSearchParams(location.search);
+        searchParams.set('activeDevelopScriptId', scriptId);
+        history.push({
+          pathname: location.pathname,
+          search: searchParams.toString()
+        });
+
         // 编辑器自动打开当前脚本
-        onFileOpen &&
-          onFileOpen(scriptFileId, String(createRes.data.script_id), finalName);
+        onFileOpen && onFileOpen(scriptFileId, scriptId, finalName);
 
         return createRes.data;
       } catch (error) {
@@ -383,6 +412,105 @@ export const useDevelopScriptManager = (
   const selectFile = useCallback((fileId: string) => {
     setSelectedKeys([String(fileId)]);
   }, []);
+
+  // 用于跟踪是否已经根据URL打开过文件，只在首次进入页面时执行一次
+  // const hasOpenedFileFromUrlRef = useRef<boolean>(false);
+
+  // 从URL查询参数中解析activeDevelopScriptId
+  const getActiveDevelopScriptTabFromUrl = useCallback(() => {
+    const searchParams = new URLSearchParams(location.search);
+    return searchParams.get('activeDevelopScriptId') || '';
+  }, [location.search]);
+
+  // 根据URL参数打开对应的文件（只在首次进入页面时执行一次）
+  useEffect(() => {
+    // 如果已经执行过，不再执行
+    // if (hasOpenedFileFromUrlRef.current) {
+    //   return;
+    // }
+
+    // 只在 files tab 激活时执行
+    if (activeTab !== 'files') {
+      return;
+    }
+
+    // 如果没有提供必要的回调函数，不执行
+    if (!onFileOpen) {
+      return;
+    }
+
+    // 如果文件列表为空，等待文件列表加载
+    if (sqlScriptList.length === 0) {
+      return;
+    }
+
+    // 处理从URL打开文件的逻辑
+    const handleOpenFileFromUrl = () => {
+      const currentActiveDevelopScriptId = getActiveDevelopScriptTabFromUrl();
+
+      // 如果URL中有activeDevelopScriptId，打开对应的文件
+      if (currentActiveDevelopScriptId) {
+        // 在文件列表中查找对应的文件
+        const targetFile = sqlScriptList.find(
+          (item) => String(item.script_id) === currentActiveDevelopScriptId
+        );
+
+        if (targetFile) {
+          // 使用 formatData 的逻辑来获取 fileId
+          const fileId = String(
+            Number((targetFile as any).script_file_id) || targetFile.script_id
+          );
+          const scriptId = String(targetFile.script_id);
+          const fileName = targetFile.script_name;
+
+          // 选中文件
+          setSelectedKeys([fileId]);
+
+          // 检查文件是否已经在标签页中打开
+          const isAlreadyOpen = fileTabs.some(
+            (tab) => tab.fileId === fileId || tab.scriptId === scriptId
+          );
+
+          if (!isAlreadyOpen) {
+            onFileOpen(fileId, scriptId, fileName);
+          } else {
+            // 如果已经打开，切换到该标签页
+            const existingTab = fileTabs.find(
+              (tab) => tab.fileId === fileId || tab.scriptId === scriptId
+            );
+            if (existingTab && onSwitchTab) {
+              onSwitchTab(existingTab.key);
+            }
+          }
+          // 标记为已执行，确保只执行一次
+          // hasOpenedFileFromUrlRef.current = true;
+          return;
+        }
+      }
+
+      // 如果URL中没有activeDevelopScriptId，且没有打开的标签页，打开第一个文件
+      if (sqlScriptList.length > 0 && fileTabs.length === 0) {
+        const firstFile = sqlScriptList[0];
+        const fileId = String(
+          Number((firstFile as any).script_file_id) || firstFile.script_id
+        );
+        const scriptId = String(firstFile.script_id);
+        const fileName = firstFile.script_name;
+        onFileOpen(fileId, scriptId, fileName);
+        // 标记为已执行，确保只执行一次
+        // hasOpenedFileFromUrlRef.current = true;
+      }
+    };
+
+    handleOpenFileFromUrl();
+  }, [
+    activeTab,
+    sqlScriptList,
+    fileTabs,
+    onFileOpen,
+    onSwitchTab,
+    getActiveDevelopScriptTabFromUrl
+  ]);
 
   // 组件挂载时获取数据
   useEffect(() => {
