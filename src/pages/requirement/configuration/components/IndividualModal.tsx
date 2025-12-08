@@ -7,7 +7,9 @@ import {
   Table,
   Pagination,
   Message,
-  Tooltip
+  Tooltip,
+  Tabs,
+  Link
 } from '@arco-design/web-react';
 import { getIndividualList } from '@/api/individualAndDepartment';
 import { useDepartmentTree } from '../../hooks/useDepartmentTree';
@@ -52,6 +54,13 @@ const IndividualModal: React.FC<DataSourceModalProps> = ({
   const [total, setTotal] = useState(10);
   // 在组件状态定义中添加
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
+  const [activeTab, setActiveTab] = useState<string>('all');
+  // 已选个人的分页状态
+  const [selectedCurrent, setSelectedCurrent] = useState(1);
+  const [selectedPageSize, setSelectedPageSize] = useState(10);
+  const [selectedTotal, setSelectedTotal] = useState(0);
+  const [selectedTableData, setSelectedTableData] = useState<any[]>([]);
+  const [selectedTableLoading, setSelectedTableLoading] = useState(false);
 
   const { treeData, setSearchValue, fetchTreeData } = useDepartmentTree(false);
 
@@ -59,9 +68,60 @@ const IndividualModal: React.FC<DataSourceModalProps> = ({
   useEffect(() => {
     if (visible) {
       setSelectedRowKeys(initialSelected || []);
+      setActiveTab('all');
+      setSelectedCurrent(1);
       fetchTreeData();
     }
   }, [visible, initialSelected]);
+
+  // 获取已选个人的表格数据
+  const getSelectedTableData = async () => {
+    if (selectedRowKeys.length === 0) {
+      setSelectedTableData([]);
+      setSelectedTotal(0);
+      return;
+    }
+    setSelectedTableLoading(true);
+    try {
+      const res = await getIndividualList({
+        pageNo: selectedCurrent,
+        pageSize: selectedPageSize,
+        ids: selectedRowKeys as string[]
+      });
+      if (res.code === 'Success') {
+        setSelectedTableData(res?.data?.result || []);
+        setSelectedTotal(res?.data?.totalCount || 0);
+      } else {
+        setSelectedTableData([]);
+        setSelectedTotal(0);
+      }
+    } catch {
+      setSelectedTableData([]);
+      setSelectedTotal(0);
+    } finally {
+      setSelectedTableLoading(false);
+    }
+  };
+
+  // 当切换到已选个人tab时，获取数据
+  useEffect(() => {
+    if (activeTab === 'selected' && selectedRowKeys.length > 0) {
+      getSelectedTableData();
+    }
+  }, [activeTab, selectedCurrent, selectedPageSize]);
+
+  // 移除已选个人
+  const handleRemoveSelected = (id: string) => {
+    const newSelectedRowKeys = selectedRowKeys.filter((key) => key !== id);
+    const newSelectedRowsContent = selectedRowsContent.filter(
+      (item) => item.id !== id
+    );
+    setSelectedRowKeys(newSelectedRowKeys);
+    setSelectedRowsContent(newSelectedRowsContent);
+    setSelectedTableData(selectedTableData.filter((item) => item.id !== id));
+    setSelectedTotal((prev) => prev - 1);
+    getChildTreeSelectData(newSelectedRowKeys);
+  };
   // 树的内容
   const renderTreeContent = () => {
     return (
@@ -119,6 +179,56 @@ const IndividualModal: React.FC<DataSourceModalProps> = ({
     }
   ];
 
+  // 已选个人的表格列定义
+  const selectedColumns = [
+    {
+      title: '姓名',
+      dataIndex: 'name',
+      ellipsis: true,
+      width: 150
+    },
+    {
+      title: '账号ID',
+      dataIndex: 'id',
+      width: 200,
+      render: (_, record) => (
+        <EllipsisPopover
+          value={renderEmptyPlaceholder(record.id)}
+          isEdit={false}
+        />
+      )
+    },
+    {
+      title: '所在部门',
+      dataIndex: 'organization',
+      ellipsis: true,
+      render: (_: any, record: any) => {
+        const fullOrgPath = record?.organization?.fullOrgPath || '-';
+        return (
+          <Tooltip content={fullOrgPath}>
+            <div
+              style={{
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap'
+              }}
+            >
+              {fullOrgPath}
+            </div>
+          </Tooltip>
+        );
+      }
+    },
+    {
+      title: '操作',
+      dataIndex: 'operation',
+      width: 80,
+      render: (_: any, record: any) => (
+        <Link onClick={() => handleRemoveSelected(record.id)}>移除</Link>
+      )
+    }
+  ];
+
   // 获取表格数据
   const getTableData = async () => {
     const sourceParams: any = {
@@ -157,8 +267,8 @@ const IndividualModal: React.FC<DataSourceModalProps> = ({
       alignCenter={true}
       escToExit={false}
       maskClosable={false}
-      className="fulscreen-modal"
-      style={{ width: '1000px', height: '800px' }}
+      className="fullscreen-modal"
+      style={{ width: '1000px', height: '800px', overflow: 'hidden' }}
       closeIcon={null}
       footer={
         <Button
@@ -174,86 +284,145 @@ const IndividualModal: React.FC<DataSourceModalProps> = ({
         </Button>
       }
     >
-      <div className="individual-modal-content">
-        <div className="content-tree">
-          <div>
-            <InputSearch
-              type="text"
-              placeholder="请输入部门搜索"
-              onChange={(value) => {
-                setSearchValue(value);
-              }}
-              allowClear
-              onClear={() => {
-                setSearchValue('');
-              }}
-            />
+      <Tabs
+        activeTab={activeTab}
+        onChange={setActiveTab}
+        type="line"
+        style={{ marginTop: '-16px' }}
+      >
+        <Tabs.TabPane title="全部个人" key="all">
+          <div className="individual-modal-content">
+            <div className="content-tree">
+              <div className="search-input">
+                <InputSearch
+                  type="text"
+                  placeholder="请输入部门搜索"
+                  onChange={(value) => {
+                    setSearchValue(value);
+                  }}
+                  allowClear
+                  onClear={() => {
+                    setSearchValue('');
+                  }}
+                />
+              </div>
+              {renderTreeContent()}
+            </div>
+            <div className="content-table">
+              <Table
+                ref={tableRef}
+                rowKey="id"
+                border={false}
+                columns={columns}
+                data={tableData}
+                pagination={false}
+                noDataElement={noDataElement({ description: '暂无数据' })}
+                rowSelection={{
+                  selectedRowKeys: selectedRowKeys,
+                  preserveSelectedRowKeys: true,
+                  onChange: (selectedRowKeys: any, selectedRows: any) => {
+                    // 合并新旧选中数据并处理取消选中
+                    const mergedMap = new Map<string, any>();
+
+                    // 1. 保留仍处于选中状态的现有数据
+                    selectedRowsContent
+                      .filter((item) => selectedRowKeys.includes(item.id))
+                      .forEach((item) => mergedMap.set(item.id, item));
+
+                    // 2. 添加当前页新选中数据
+                    selectedRows.forEach((item) =>
+                      mergedMap.set(item.id, item)
+                    );
+
+                    // 3. 更新状态
+                    const mergedRows = Array.from(mergedMap.values());
+                    if (mergedRows.length <= 200) {
+                      setSelectedRowsContent(mergedRows);
+                      setSelectedRowKeys(mergedRows.map((item) => item.id));
+                      getChildTreeSelectData(mergedRows.map((item) => item.id));
+                    } else {
+                      Message.error('选中的数量不能超过200条');
+                    }
+                  }
+                }}
+              />
+              {tableData && tableData.length > 0 && (
+                <Pagination
+                  current={current}
+                  pageSize={pageSize}
+                  onPageSizeChange={(size) => {
+                    setPageSize(size);
+                    setCurrent(1);
+                  }}
+                  onChange={(page) => {
+                    setCurrent(page);
+                  }}
+                  selectProps={{
+                    getPopupContainer: () => document.body
+                  }}
+                  sizeOptions={[10, 20, 50, 100]}
+                  showTotal
+                  total={total}
+                  showJumper
+                  sizeCanChange
+                  style={{
+                    justifyContent: 'flex-end',
+                    marginTop: '10px',
+                    marginRight: '16px'
+                  }}
+                />
+              )}
+            </div>
           </div>
-          {renderTreeContent()}
-        </div>
-        <div className="content-table">
-          <Table
-            ref={tableRef}
-            rowKey="id"
-            border={false}
-            columns={columns}
-            data={tableData}
-            pagination={false}
-            noDataElement={noDataElement({ description: '暂无数据' })}
-            rowSelection={{
-              selectedRowKeys: selectedRowKeys,
-              preserveSelectedRowKeys: true,
-              onChange: (selectedRowKeys: any, selectedRows: any) => {
-                // 合并新旧选中数据并处理取消选中
-                const mergedMap = new Map<string, any>();
-
-                // 1. 保留仍处于选中状态的现有数据
-                selectedRowsContent
-                  .filter((item) => selectedRowKeys.includes(item.id))
-                  .forEach((item) => mergedMap.set(item.id, item));
-
-                // 2. 添加当前页新选中数据
-                selectedRows.forEach((item) => mergedMap.set(item.id, item));
-
-                // 3. 更新状态
-                const mergedRows = Array.from(mergedMap.values());
-                if (mergedRows.length <= 200) {
-                  setSelectedRowsContent(mergedRows);
-                  setSelectedRowKeys(mergedRows.map((item) => item.id));
-                  getChildTreeSelectData(mergedRows.map((item) => item.id));
-                } else {
-                  Message.error('选中的数量不能超过200条');
-                }
-              }
-            }}
-          />
-          {tableData && tableData.length > 0 && (
-            <Pagination
-              current={current}
-              pageSize={pageSize}
-              onPageSizeChange={(pageSize) => {
-                setPageSize(pageSize);
-                setCurrent(1);
-                // 保留选中状态，不重置selectedRowKeys
-              }}
-              onChange={(page) => {
-                setCurrent(page);
-                // 保留选中状态，不重置selectedRowKeys
-              }}
-              sizeOptions={[10, 20, 50, 100]}
-              showTotal
-              total={total}
-              showJumper
-              sizeCanChange
-              style={{
-                justifyContent: 'flex-end',
-                marginTop: '10px',
-                marginRight: '16px'
-              }}
-            />
-          )}
-        </div>
-      </div>
+        </Tabs.TabPane>
+        <Tabs.TabPane
+          title={`已选个人 (${selectedRowKeys.length})`}
+          key="selected"
+        >
+          <div className="individual-modal-content" style={{ border: 'none' }}>
+            <div
+              className="individual-selected-content"
+              style={{ width: '100%', paddingLeft: '12px' }}
+            >
+              <Table
+                rowKey="id"
+                columns={selectedColumns}
+                data={selectedTableData}
+                loading={selectedTableLoading}
+                pagination={false}
+                border={false}
+                scroll={{ y: false }}
+                noDataElement={noDataElement({
+                  description: '暂无已选个人'
+                })}
+              />
+              {selectedTotal > 0 && (
+                <Pagination
+                  current={selectedCurrent}
+                  pageSize={selectedPageSize}
+                  onPageSizeChange={(size) => {
+                    setSelectedPageSize(size);
+                    setSelectedCurrent(1);
+                  }}
+                  onChange={(page) => {
+                    setSelectedCurrent(page);
+                  }}
+                  sizeOptions={[10, 20, 50, 100]}
+                  showTotal
+                  total={selectedTotal}
+                  showJumper
+                  sizeCanChange
+                  style={{
+                    justifyContent: 'flex-end',
+                    marginTop: '10px',
+                    marginRight: '12px'
+                  }}
+                />
+              )}
+            </div>
+          </div>
+        </Tabs.TabPane>
+      </Tabs>
     </Modal>
   );
 };

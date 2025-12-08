@@ -273,6 +273,9 @@ const DepartmentModal: React.FC<DataSourceModalProps> = ({
                   onChange={(page) => {
                     setSelectedCurrent(page);
                   }}
+                  selectProps={{
+                    getPopupContainer: () => document.body
+                  }}
                   sizeOptions={[10, 20, 50, 100]}
                   showTotal
                   total={selectedData.length}
