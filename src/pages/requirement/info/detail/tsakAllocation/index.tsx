@@ -2,16 +2,14 @@
  * 任务分配展示组件 - 只读展示
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Table } from '@arco-design/web-react';
 import AnnotationUserIcon from '@/assets/annotation/annotation-user.svg';
 import QualityUserIcon from '@/assets/annotation/quality-user.svg';
 import RightArrowIcon from '@/assets/annotation/right-arrow.svg';
+import SelectedDepartmentModal from './SelectedDepartmentModal';
+import SelectedPersonModal from './SelectedPersonModal';
 import './styles.scss';
-import { mockRequirementDetail } from './mockData';
-
-// 开发调试：设置为 true 使用 mock 数据
-const USE_MOCK = true;
 
 // 角色类型
 type RoleType = 'labeler' | 'inspector_1' | 'inspector_2' | 'inspector_3';
@@ -25,9 +23,7 @@ interface RoleAssignment {
   roleName: string;
   assignType: AssignType;
   selectedDepartments: string[];
-  selectedDepartmentNames?: string[];
   selectedPersons: string[];
-  selectedPersonNames?: string[];
   selectedCount: number;
 }
 
@@ -48,6 +44,15 @@ const ROLE_NAME_MAP: Record<RoleType, string> = {
 };
 
 /**
+ * 判断是否为个人类型
+ * own_type: 1-个人，2-部门
+ * 注意：label_operate 中是 integer，qc_operate 中是 string，需要兼容两种类型
+ */
+const isPersonOwnType = (ownType: number | string | undefined): boolean => {
+  return ownType === 1 || ownType === '1';
+};
+
+/**
  * 解析详情数据
  */
 const parseDetailData = (detailData: any): TaskPackage[] => {
@@ -61,15 +66,13 @@ const parseDetailData = (detailData: any): TaskPackage[] => {
     // 标注人员
     if (pkg.label_operate) {
       const labelOperate = pkg.label_operate;
-      const isPersonType = labelOperate.own_type === 1;
+      const isPersonType = isPersonOwnType(labelOperate.own_type);
       roles.push({
         roleType: 'labeler',
         roleName: ROLE_NAME_MAP.labeler,
         assignType: isPersonType ? 'person' : 'department',
         selectedDepartments: labelOperate.org_id || [],
-        selectedDepartmentNames: labelOperate.org_names || [],
         selectedPersons: labelOperate.user_id || [],
-        selectedPersonNames: labelOperate.user_names || [],
         selectedCount: isPersonType
           ? labelOperate.user_id?.length || 0
           : labelOperate.org_id?.length || 0
@@ -80,15 +83,13 @@ const parseDetailData = (detailData: any): TaskPackage[] => {
     if (pkg.qc_operate && Array.isArray(pkg.qc_operate)) {
       pkg.qc_operate.forEach((qcOperate: any, qcIndex: number) => {
         const roleType = `inspector_${qcIndex + 1}` as RoleType;
-        const isPersonType = qcOperate.own_type === 1;
+        const isPersonType = isPersonOwnType(qcOperate.own_type);
         roles.push({
           roleType,
           roleName: ROLE_NAME_MAP[roleType] || `${qcIndex + 1}轮质检人员`,
           assignType: isPersonType ? 'person' : 'department',
           selectedDepartments: qcOperate.org_id || [],
-          selectedDepartmentNames: qcOperate.org_names || [],
           selectedPersons: qcOperate.user_id || [],
-          selectedPersonNames: qcOperate.user_names || [],
           selectedCount: isPersonType
             ? qcOperate.user_id?.length || 0
             : qcOperate.org_id?.length || 0
@@ -98,7 +99,7 @@ const parseDetailData = (detailData: any): TaskPackage[] => {
 
     return {
       taskId: String(pkg.front_pkg_id || index + 1),
-      taskBId: pkg.pkg_name || `任务包${index + 1}`,
+      taskBId: String(pkg.front_pkg_id || index + 1),
       dataAmount: pkg.pkg_task_cnt || 0,
       roles
     };
@@ -111,6 +112,9 @@ interface RoleDisplayCardProps {
 }
 
 const RoleDisplayCard: React.FC<RoleDisplayCardProps> = ({ role }) => {
+  const [departmentModalVisible, setDepartmentModalVisible] = useState(false);
+  const [personModalVisible, setPersonModalVisible] = useState(false);
+
   // 根据角色类型获取对应的图标
   const getRoleIcon = () => {
     if (role.roleType === 'labeler') {
@@ -119,37 +123,43 @@ const RoleDisplayCard: React.FC<RoleDisplayCardProps> = ({ role }) => {
     return <QualityUserIcon className="role-icon" />;
   };
 
+  // 处理点击数字
+  const handleCountClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (role.assignType === 'department') {
+      setDepartmentModalVisible(true);
+    } else {
+      setPersonModalVisible(true);
+    }
+  };
+
   // 获取分配摘要信息
   const getAssignmentSummary = () => {
     if (role.assignType === 'department') {
-      const names = role.selectedDepartmentNames || [];
       const count = role.selectedDepartments?.length || 0;
       if (count === 0) return '未分配';
 
-      // 显示第一个部门名称，如果有多个显示"共N个"
-      const firstName = names[0] || `${count}组`;
       return (
-        <>
-          <span className="assignment-name">{firstName}</span>
-          <span className="assignment-count">
-            共<span className="count-number">{count}</span>个
-          </span>
-        </>
+        <span
+          className="assignment-count"
+          onClick={handleCountClick}
+          style={{ cursor: 'pointer' }}
+        >
+          已选<span className="count-number">{count}</span>个部门
+        </span>
       );
     } else {
-      const names = role.selectedPersonNames || [];
       const count = role.selectedPersons?.length || 0;
       if (count === 0) return '未分配';
 
-      // 显示第一个人员名称
-      const firstName = names[0] || '人员';
       return (
-        <>
-          <span className="assignment-name">{firstName}</span>
-          <span className="assignment-count">
-            共<span className="count-number">{count}</span>个
-          </span>
-        </>
+        <span
+          className="assignment-count"
+          onClick={handleCountClick}
+          style={{ cursor: 'pointer' }}
+        >
+          已选<span className="count-number">{count}</span>个人
+        </span>
       );
     }
   };
@@ -163,6 +173,20 @@ const RoleDisplayCard: React.FC<RoleDisplayCardProps> = ({ role }) => {
       <div className="role-content">
         <div className="assignment-summary">{getAssignmentSummary()}</div>
       </div>
+
+      {/* 已选部门Modal */}
+      <SelectedDepartmentModal
+        visible={departmentModalVisible}
+        onClose={() => setDepartmentModalVisible(false)}
+        departmentIds={role.selectedDepartments}
+      />
+
+      {/* 已选个人Modal */}
+      <SelectedPersonModal
+        visible={personModalVisible}
+        onClose={() => setPersonModalVisible(false)}
+        personIds={role.selectedPersons}
+      />
     </div>
   );
 };
@@ -172,9 +196,7 @@ interface TaskAllocationProps {
 }
 
 function TaskAllocation({ requirementDetail }: TaskAllocationProps) {
-  // 使用 mock 数据或真实数据
-  const dataSource = USE_MOCK ? mockRequirementDetail : requirementDetail;
-  const taskPackages = parseDetailData(dataSource);
+  const taskPackages = parseDetailData(requirementDetail);
 
   // 如果没有任务包数据，显示提示
   if (!taskPackages || taskPackages.length === 0) {

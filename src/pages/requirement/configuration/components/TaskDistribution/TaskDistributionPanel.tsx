@@ -3,10 +3,11 @@
  */
 
 import RightArrowIcon from '@/assets/annotation/right-arrow.svg';
-import { Button, Table } from '@arco-design/web-react';
+import { Button, Table, Link, Modal } from '@arco-design/web-react';
 import React, { useCallback, useState } from 'react';
 import BatchAssignModal from './BatchAssignModal';
 import RoleAssignmentCard from './RoleAssignmentCard';
+import TaskAllocation from '@/pages/requirement/info/detail/tsakAllocation';
 import './styles.scss';
 import {
   BatchAssignData,
@@ -20,15 +21,22 @@ interface TaskDistributionPanelProps {
   onUpdate: (packages: TaskPackage[]) => void;
   validationErrors?: ValidationErrors;
   disabled?: boolean;
+  /** 编辑模式下需要传入需求详情数据用于展示历史记录 */
+  requirementDetail?: any;
+  /** 是否为编辑模式 */
+  isEditMode?: boolean;
 }
 
 const TaskDistributionPanel: React.FC<TaskDistributionPanelProps> = ({
   taskPackages,
   onUpdate,
   validationErrors = {},
-  disabled = false
+  disabled = false,
+  requirementDetail,
+  isEditMode = false
 }) => {
   const [batchModalVisible, setBatchModalVisible] = useState(false);
+  const [historyModalVisible, setHistoryModalVisible] = useState(false);
 
   // 处理单个角色更新
   const handleRoleUpdate = useCallback(
@@ -99,7 +107,26 @@ const TaskDistributionPanel: React.FC<TaskDistributionPanelProps> = ({
   if (!taskPackages || taskPackages.length === 0) {
     return (
       <div className="data-content-set">
-        <span style={{ color: '#86909c' }}>请先选择标注数据</span>
+        <span style={{ color: '#86909c', fontSize: '14px' }}>
+          请先选择标注数据
+        </span>
+        {isEditMode && (
+          <>
+            <Link onClick={() => setHistoryModalVisible(true)}>历史记录</Link>
+            <Modal
+              title="历史记录"
+              visible={historyModalVisible}
+              onCancel={() => setHistoryModalVisible(false)}
+              alignCenter={true}
+              escToExit={true}
+              maskClosable={true}
+              style={{ width: '1200px' }}
+              footer={null}
+            >
+              <TaskAllocation requirementDetail={requirementDetail} />
+            </Modal>
+          </>
+        )}
       </div>
     );
   }
@@ -158,6 +185,13 @@ const TaskDistributionPanel: React.FC<TaskDistributionPanelProps> = ({
 
   return (
     <div className="task-distribution-panel">
+      {/* 编辑模式下显示历史记录按钮 */}
+      {isEditMode && (
+        <div className="history-link-container">
+          <Link onClick={() => setHistoryModalVisible(true)}>历史记录</Link>
+        </div>
+      )}
+
       {/* 表格形式展示任务包 */}
       <Table
         columns={columns}
@@ -176,6 +210,22 @@ const TaskDistributionPanel: React.FC<TaskDistributionPanelProps> = ({
         taskPackages={taskPackages}
         onConfirm={handleBatchAssign}
       />
+
+      {/* 历史记录弹窗 */}
+      {isEditMode && (
+        <Modal
+          title="历史记录"
+          visible={historyModalVisible}
+          onCancel={() => setHistoryModalVisible(false)}
+          alignCenter={true}
+          escToExit={true}
+          maskClosable={true}
+          style={{ width: '1200px' }}
+          footer={null}
+        >
+          <TaskAllocation requirementDetail={requirementDetail} />
+        </Modal>
+      )}
     </div>
   );
 };

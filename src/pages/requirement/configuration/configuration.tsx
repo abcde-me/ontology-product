@@ -1021,7 +1021,9 @@ export default function RequirementConfig() {
               >
                 {selectedData?.length === 0 ? (
                   <div className="data-content-set">
-                    <span style={{ color: '#86909c' }}>请先选择标注数据</span>
+                    <span style={{ color: '#86909c', fontSize: '14px' }}>
+                      请先选择标注数据
+                    </span>
                   </div>
                 ) : (
                   <InputNumber
@@ -1217,6 +1219,8 @@ export default function RequirementConfig() {
               </FormItem>
               <FormItem field="taskDistribution" label="分配人员:" required>
                 <TaskDistributionPanel
+                  requirementDetail={requirementDetail}
+                  isEditMode={type === 'edit'}
                   taskPackages={taskPackages}
                   onUpdate={setTaskPackages}
                   validationErrors={taskDistributionErrors}
