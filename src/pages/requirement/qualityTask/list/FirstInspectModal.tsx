@@ -7,52 +7,70 @@ import {
   Message
 } from '@arco-design/web-react';
 import './index.scss';
-
+import type { QualityTaskItem } from './index';
+import { manageQCTaskBatch } from '@/api/dataAnnotation';
 const RadioGroup = Radio.Group;
 const FormItem = Form.Item;
 
 // 抽取数量类型
 export enum SamplingCountType {
-  Percentage = 1, // 按比例
-  Count = 2, // 按数量
-  All = 3 // 全部
+  Percentage = 'radio', // 按比例
+  Count = 'number', // 按数量
+  All = 'all' // 全部
 }
 
 interface FirstInspectModalProps {
   visible: boolean;
+  record?: QualityTaskItem | null;
   onClose: () => void;
   onSuccess: () => void;
 }
 
 const FirstInspectModal: React.FC<FirstInspectModalProps> = ({
   visible,
+  record,
   onClose,
   onSuccess
 }) => {
   const [form] = Form.useForm();
-  const countType = Form.useWatch('countType', form);
+  const sample_type =
+    Form.useWatch('sample_type', form) ?? SamplingCountType.Percentage;
 
   // 弹窗打开时重置表单
   React.useEffect(() => {
     if (visible) {
       form.resetFields();
       form.setFieldsValue({
-        countType: SamplingCountType.Percentage,
-        percentage: 50
+        sample_type: SamplingCountType.Percentage,
+        sample_radio: 50,
+        sample_number: undefined
       });
     }
   }, [visible, form]);
 
   const handleOk = async () => {
     try {
+      const params = {
+        // 首次抽检/待质检 - uninspect; 待复核 - recheck
+        task_type: 'uninspect'
+      };
       const values = await form.validate();
-      console.log('首次抽检设置:', values);
-      // TODO: 调用首次抽检API
-      Message.success('设置成功');
-      onClose();
-      onSuccess();
+      params['sample_type'] = values.sample_type;
+      if (values.sample_type === SamplingCountType.Percentage) {
+        params['sample_radio'] = values.sample_radio;
+      } else if (values.sample_type === SamplingCountType.Count) {
+        params['sample_number'] = values.sample_number;
+      }
+      const res = await manageQCTaskBatch(params);
+      if (res.code === 'success') {
+        Message.success('设置成功');
+        onClose();
+        onSuccess();
+      } else {
+        Message.error(res.message);
+      }
     } catch (error) {
-      console.log('表单验证失败:', error);
+      console.log('设置失败:', error);
     }
   };
 
@@ -75,8 +93,8 @@ const FirstInspectModal: React.FC<FirstInspectModalProps> = ({
         className="first-inspect-form"
       >
         <FormItem
-          label="抽取数量"
-          field="countType"
+          label="抽取数量:"
+          field="sample_type"
           rules={[{ required: true, message: '请选择抽取方式' }]}
         >
           <RadioGroup>
@@ -84,21 +102,21 @@ const FirstInspectModal: React.FC<FirstInspectModalProps> = ({
               <span className="radio-with-input">
                 按比例
                 <FormItem
-                  field="percentage"
-                  noStyle
+                  field="sample_radio"
+                  noStyle={{ showErrorTip: true }}
                   rules={[
                     {
-                      required: countType === SamplingCountType.Percentage,
+                      required: sample_type === SamplingCountType.Percentage,
                       message: '请输入比例'
                     }
                   ]}
                 >
                   <InputNumber
                     placeholder="请输入"
-                    style={{ width: 100, marginLeft: 8 }}
+                    style={{ width: 80, marginLeft: 8 }}
                     min={1}
                     max={100}
-                    disabled={countType !== SamplingCountType.Percentage}
+                    disabled={sample_type !== SamplingCountType.Percentage}
                   />
                 </FormItem>
                 <span className="input-suffix">%</span>
@@ -108,20 +126,23 @@ const FirstInspectModal: React.FC<FirstInspectModalProps> = ({
               <span className="radio-with-input">
                 按数量
                 <FormItem
-                  field="count"
-                  noStyle
+                  field="sample_number"
+                  noStyle={{ showErrorTip: true }}
                   rules={[
                     {
-                      required: countType === SamplingCountType.Count,
+                      required: sample_type === SamplingCountType.Count,
                       message: '请输入数量'
                     }
                   ]}
                 >
                   <InputNumber
                     placeholder="请输入"
-                    style={{ width: 100, marginLeft: 8 }}
+                    style={{ width: 80, marginLeft: 8 }}
                     min={1}
-                    disabled={countType !== SamplingCountType.Count}
+                    max={record?.task_volume_total || 100}
+                    step={1}
+                    precision={0}
+                    disabled={sample_type !== SamplingCountType.Count}
                   />
                 </FormItem>
                 <span className="input-suffix">个</span>

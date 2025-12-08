@@ -7,13 +7,16 @@ import {
   PaginationProps,
   Link
 } from '@arco-design/web-react';
-import { IconImage, IconFile } from '@arco-design/web-react/icon';
 import { ColumnProps } from '@arco-design/web-react/es/Table';
 import { SorterInfo } from '@arco-design/web-react/es/Table/interface';
-import { useHistory } from 'react-router';
+import { useHistory, useLocation } from 'react-router';
 import EllipsisPopover from '@/components/ellipsis-popover-com';
 import noDataElement from '@/components/no-data';
 import FirstInspectModal from './FirstInspectModal';
+import ImageIcon from '@/assets/annotation/image-column.svg';
+import { RequirementTypeNameMap } from '../../type';
+import { CopyItemIcon } from '@ceai-front/arco-material';
+
 import './index.scss';
 
 const TabPane = Tabs.TabPane;
@@ -29,7 +32,9 @@ enum QualityRound {
 // 数据类型枚举
 enum DataType {
   Text = 1,
-  Image = 2
+  Image = 2,
+  Audio = 3,
+  Video = 4
 }
 
 // 所属类型枚举
@@ -38,15 +43,6 @@ enum BelongType {
   Department = 2
 }
 
-// 数据类型映射
-const DataTypeMap: Record<number, { label: string; icon: React.ReactNode }> = {
-  [DataType.Text]: { label: '文本', icon: null },
-  [DataType.Image]: {
-    label: '图片',
-    icon: <IconImage style={{ marginRight: 4 }} />
-  }
-};
-
 // 所属类型映射
 const BelongTypeMap: Record<number, string> = {
   [BelongType.Personal]: '个人',
@@ -54,18 +50,19 @@ const BelongTypeMap: Record<number, string> = {
 };
 
 // 质检任务数据类型
-interface QualityTaskItem {
-  id: string;
-  requirementName: string;
-  requirementId: string;
-  taskPackageId: number;
-  dataType: DataType;
-  belongType: BelongType;
-  totalTasks: number;
-  unclaimedTasks: number;
-  unsubmittedTasks: number;
-  createdAt: string;
-  isFirstInspect: boolean; // 是否首次质检
+export interface QualityTaskItem {
+  pkg_id: number; // 任务包id
+  front_pkg_id: number; // 任务展示和搜索的任务包ID
+  req_name: string; // 需求名称
+  req_id: number; // 需求ID
+  type: DataType; // 1-文本,2-图片,3-音频,4-视频
+  belong: BelongType; // 1-个人，2-部门
+  task_volume_total: number; // 总任务量
+  task_volume_unowned: number; // 未领取
+  task_volume_unreceived: number; // 未提检任务量
+  started: boolean; // true-直接跳质检详情页面；false-任务包首次被处理，需要抽检
+  create_time: string; // 创建时间
+  update_time: string; // 更新时间
 }
 
 // Tab数据类型
@@ -76,11 +73,33 @@ interface TabData {
   count: number;
 }
 
+// 搜索请求参数类型
+interface QualityTaskListParams {
+  qc_round: number; // 当前质检轮次 1-1轮质检；2-2轮质检；3-3轮质检
+  page: number;
+  page_size: number;
+  filters?: {
+    search_content?: string; // 模糊搜索输入框，任务ID或需求名称搜索
+    belong?: number[]; // 1-个人，2-部门
+    type?: number[]; // 标注内容类型:1-文本,2-图片,3-音频,4-视频
+  };
+  order?: string; // 默认降序，asc正序，desc倒序
+  order_filter?: string; // 默认创建时间，create_time - 创建时间，update_time - 更新时间
+}
+
 function QualityTaskList() {
   const history = useHistory();
+  const location = useLocation();
+
+  // 从URL获取qc_round参数，默认为1
+  const getInitialTab = () => {
+    const searchParams = new URLSearchParams(location.search);
+    const qcRound = searchParams.get('qc_round');
+    return qcRound && ['1', '2', '3'].includes(qcRound) ? qcRound : '1';
+  };
 
   // 当前选中的质检轮次
-  const [activeTab, setActiveTab] = useState<string>('1');
+  const [activeTab, setActiveTab] = useState<string>(getInitialTab);
 
   // 搜索关键词
   const [searchValue, setSearchValue] = useState<string>('');
@@ -114,41 +133,64 @@ function QualityTaskList() {
   // 获取列表数据
   const getList = useCallback(() => {
     setLoading(true);
-    // TODO: 替换为实际API调用
-    // const params = {
-    //   page: current,
-    //   page_size: pageSize,
-    //   round: activeTab,
-    //   keyword: searchValue,
-    //   ...sortValue
-    // };
-    // const res = await getQualityTaskList(params);
+    try {
+      const params: QualityTaskListParams = {
+        qc_round: Number(activeTab), // 当前质检轮次
+        page: current,
+        page_size: pageSize,
+        filters: {
+          search_content: searchValue || undefined,
+          belong: sortValue?.belong,
+          type: sortValue?.type
+        },
+        order: sortValue?.order || 'desc',
+        order_filter: sortValue?.order_filter || 'create_time'
+      };
 
-    // 模拟数据
-    const mockData: QualityTaskItem[] = Array.from(
-      { length: 12 },
-      (_, index) => ({
-        id: `${index + 1}`,
-        requirementName: ['智慧城市', '飞机表面缝隙', '车辆和行人检测'][
-          index % 3
-        ],
-        requirementId: ['123123123', '321321321', '345345345'][index % 3],
-        taskPackageId: (index % 3) + 1,
-        dataType: index % 2 === 0 ? DataType.Image : DataType.Text,
-        belongType:
-          index % 3 === 0 ? BelongType.Personal : BelongType.Department,
-        totalTasks: 120,
-        unclaimedTasks: 30,
-        unsubmittedTasks: 30,
-        createdAt: '2025-05-05 05:05:05',
-        isFirstInspect: index % 4 === 0 // 模拟部分是首次质检
-      })
-    );
+      // TODO: 替换为实际API调用
+      // const res = await getQualityTaskList(params);
+      // if (res.code === 'success') {
+      //   setTableData(res.data?.result || []);
+      //   setTotal(res.data?.total || 0);
+      // }
 
-    setTableData(mockData);
-    setTotal(50);
-    setLoading(false);
+      // 模拟数据
+      const mockData: QualityTaskItem[] = Array.from(
+        { length: 12 },
+        (_, index) => ({
+          pkg_id: index + 1,
+          front_pkg_id: (index % 3) + 22,
+          req_id: index + 1,
+          req_name: ['智慧城市', '飞机表面缝隙', '车辆和行人检测'][index % 3],
+          type: index % 2 === 0 ? DataType.Image : DataType.Text,
+          belong: index % 3 === 0 ? BelongType.Personal : BelongType.Department,
+          task_volume_total: 120,
+          task_volume_unowned: 30,
+          task_volume_unreceived: 30,
+          started: index % 4 !== 0, // false-任务包首次被处理，需要抽检
+          create_time: '2025-05-05T05:05:05+08:00',
+          update_time: '2025-05-05T05:05:05+08:00'
+        })
+      );
+
+      console.log('请求参数:', params);
+      setTableData(mockData);
+      setTotal(50);
+    } catch (error) {
+      console.error('获取质检任务列表失败:', error);
+    } finally {
+      setLoading(false);
+    }
   }, [current, pageSize, activeTab, searchValue, sortValue]);
+
+  // 初始化URL参数
+  useEffect(() => {
+    const searchParams = new URLSearchParams(location.search);
+    if (!searchParams.has('qc_round')) {
+      searchParams.set('qc_round', '1');
+      history.replace({ search: searchParams.toString() });
+    }
+  }, []);
 
   // 初始化加载
   useEffect(() => {
@@ -159,6 +201,10 @@ function QualityTaskList() {
   const handleTabChange = (key: string) => {
     setActiveTab(key);
     setCurrent(1);
+    // 更新URL参数
+    const searchParams = new URLSearchParams(location.search);
+    searchParams.set('qc_round', key);
+    history.replace({ search: searchParams.toString() });
   };
 
   // 处理搜索
@@ -175,14 +221,15 @@ function QualityTaskList() {
   ) => {
     setCurrent(1);
     const sortData = {
-      dataType: filters?.dataType,
-      belongType: filters?.belongType,
+      type: filters?.type?.map(Number), // 转为数字数组
+      belong: filters?.belong?.map(Number), // 转为数字数组
       order:
         sorter.direction === undefined
           ? 'desc'
           : sorter.direction === 'ascend'
             ? 'asc'
-            : 'desc'
+            : 'desc',
+      order_filter: 'create_time' // 默认按创建时间排序
     };
     setSortValue(sortData);
   };
@@ -200,12 +247,12 @@ function QualityTaskList() {
 
   // 跳转到质检详情页
   const handleGoToQuality = (record: QualityTaskItem) => {
-    if (record.isFirstInspect) {
-      // 首次质检需要先设置
+    if (!record.started) {
+      // started为false表示任务包首次被处理，需要抽检设置
       setCurrentTask(record);
       setFirstInspectModalVisible(true);
     } else {
-      // 直接跳转
+      // started为true直接跳质检详情页面
       goToDetailPage(record);
     }
   };
@@ -213,7 +260,7 @@ function QualityTaskList() {
   // 跳转到详情页
   const goToDetailPage = (record: QualityTaskItem) => {
     history.push(
-      `/tenant/compute/modaforge/qualityTask/detail?requirementId=${record.requirementId}&taskPackageId=${record.taskPackageId}&round=${activeTab}`
+      `/tenant/compute/modaforge/qualityTask/detail?pkgId=${record.pkg_id}&round=${activeTab}`
     );
   };
 
@@ -234,13 +281,13 @@ function QualityTaskList() {
   // 表格列定义
   const columns: ColumnProps<QualityTaskItem>[] = [
     {
-      title: '所需求名称',
-      dataIndex: 'requirementName',
+      title: '需求名称',
+      dataIndex: 'req_name',
       width: 160,
       ellipsis: true,
       render: (_, record) => {
-        return renderEmptyPlaceholder(record.requirementName) !== '-' ? (
-          <EllipsisPopover value={record.requirementName} isEdit={false} />
+        return renderEmptyPlaceholder(record.req_name) !== '-' ? (
+          <EllipsisPopover value={record.req_name} isEdit={false} />
         ) : (
           <span>-</span>
         );
@@ -248,43 +295,16 @@ function QualityTaskList() {
     },
     {
       title: '需求ID',
-      dataIndex: 'requirementId',
-      width: 120,
-      render: (_, record) => {
-        return (
-          <div className="requirement-id-cell">
-            <EllipsisPopover value={record.requirementId} isEdit={false} />
-          </div>
-        );
-      }
-    },
-    {
-      title: '任务包ID',
-      dataIndex: 'taskPackageId',
+      dataIndex: 'req_id',
       width: 100,
       render: (_, record) => {
-        return <span>{renderEmptyPlaceholder(record.taskPackageId)}</span>;
-      }
-    },
-    {
-      title: '类型',
-      dataIndex: 'dataType',
-      width: 100,
-      filters: [
-        { text: '文本', value: DataType.Text },
-        { text: '图片', value: DataType.Image }
-      ],
-      render: (_, record) => {
-        const typeInfo = DataTypeMap[record.dataType];
-        return typeInfo ? (
-          <div className="type-cell">
-            {record.dataType === DataType.Image && (
-              <IconImage className="type-icon" />
-            )}
-            {record.dataType === DataType.Text && (
-              <IconFile className="type-icon" />
-            )}
-            <span>{typeInfo.label}</span>
+        return renderEmptyPlaceholder(record.req_id) !== '-' ? (
+          <div className="flex items-center">
+            <EllipsisPopover value={record.req_id} isEdit={false} />
+            <CopyItemIcon
+              className="copy-icon"
+              value={record.req_id.toString()}
+            />
           </div>
         ) : (
           <span>-</span>
@@ -292,48 +312,95 @@ function QualityTaskList() {
       }
     },
     {
+      title: '任务包ID',
+      dataIndex: 'front_pkg_id',
+      width: 120,
+      render: (_, record) => {
+        return <span>{renderEmptyPlaceholder(record.front_pkg_id)}</span>;
+      }
+    },
+    {
+      title: '类型',
+      dataIndex: 'type',
+      width: 100,
+      filters: [
+        {
+          text: '文本',
+          value: 1
+        },
+        {
+          text: '图片',
+          value: 2
+        },
+        {
+          text: '音频',
+          value: 3
+        },
+        {
+          text: '视频',
+          value: 4
+        }
+      ],
+      render: (_, record) => {
+        return (
+          <div className="flex items-center">
+            {record.type === 2 && <ImageIcon style={{ marginRight: 4 }} />}
+            {record?.type ? RequirementTypeNameMap[record.type] : '-'}
+          </div>
+        );
+      }
+    },
+    {
       title: '所属',
-      dataIndex: 'belongType',
+      dataIndex: 'belong',
       width: 80,
       filters: [
         { text: '个人', value: BelongType.Personal },
         { text: '部门', value: BelongType.Department }
       ],
       render: (_, record) => {
-        return <span>{BelongTypeMap[record.belongType] || '-'}</span>;
+        return <span>{BelongTypeMap[record.belong] || '-'}</span>;
       }
     },
     {
       title: '总任务量',
-      dataIndex: 'totalTasks',
+      dataIndex: 'task_volume_total',
       width: 100,
       render: (_, record) => {
-        return <span>{renderEmptyPlaceholder(record.totalTasks)}</span>;
+        return <span>{renderEmptyPlaceholder(record.task_volume_total)}</span>;
       }
     },
     {
       title: '未领取',
-      dataIndex: 'unclaimedTasks',
+      dataIndex: 'task_volume_unowned',
       width: 80,
       render: (_, record) => {
-        return <span>{renderEmptyPlaceholder(record.unclaimedTasks)}</span>;
+        return (
+          <span>{renderEmptyPlaceholder(record.task_volume_unowned)}</span>
+        );
       }
     },
     {
       title: '未提检',
-      dataIndex: 'unsubmittedTasks',
+      dataIndex: 'task_volume_unreceived',
       width: 80,
       render: (_, record) => {
-        return <span>{renderEmptyPlaceholder(record.unsubmittedTasks)}</span>;
+        return (
+          <span>{renderEmptyPlaceholder(record.task_volume_unreceived)}</span>
+        );
       }
     },
     {
       title: '创建时间',
-      dataIndex: 'createdAt',
+      dataIndex: 'create_time',
       width: 170,
       sorter: true,
       render: (_, record) => {
-        return <span>{renderEmptyPlaceholder(record.createdAt)}</span>;
+        return record.create_time ? (
+          <span>{new Date(record.create_time).toLocaleString()}</span>
+        ) : (
+          <span>-</span>
+        );
       }
     },
     {
@@ -380,7 +447,7 @@ function QualityTaskList() {
         onChange={handleTabChange}
         type="line"
         className="quality-tabs"
-        inkBarSize={{ width: 80 }}
+        inkBarSize={{ width: 60 }}
       >
         {tabsData.map((tab) => (
           <TabPane
@@ -388,7 +455,7 @@ function QualityTaskList() {
             title={
               <span className="tab-title">
                 {tab.label}
-                <span className="tab-count">({tab.count})</span>
+                {/* <span className="tab-count">({tab.count})</span> */}
               </span>
             }
           />
@@ -400,7 +467,7 @@ function QualityTaskList() {
         loading={loading}
         columns={columns}
         data={tableData}
-        rowKey="id"
+        rowKey="pkg_id"
         border={false}
         pagination={false}
         noDataElement={noDataElement({ description: '暂无质检任务' })}
@@ -429,6 +496,7 @@ function QualityTaskList() {
 
       {/* 首次抽检设置弹窗 */}
       <FirstInspectModal
+        record={currentTask}
         visible={firstInspectModalVisible}
         onClose={() => setFirstInspectModalVisible(false)}
         onSuccess={handleFirstInspectSuccess}

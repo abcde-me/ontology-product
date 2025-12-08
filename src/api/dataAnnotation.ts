@@ -173,3 +173,11 @@ export async function editRequirement(params) {
     .inRegion()
     .do();
 }
+
+// 设置抽检任务
+export async function manageQCTaskBatch(params) {
+  return await UAPI.RES.manageQCTaskBatch({})
+    .post({ ...params })
+    .inRegion()
+    .do();
+}

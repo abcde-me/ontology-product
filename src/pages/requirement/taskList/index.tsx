@@ -160,7 +160,7 @@ function TaskList() {
         return renderEmptyPlaceholder(record.front_pkg_id) !== '-' ? (
           <div className="flex items-center">
             <EllipsisPopover value={record.front_pkg_id} isEdit={false} />
-            <CopyItemIcon className="copy-icon" value={record.front_pkg_id} />
+            {/* <CopyItemIcon className="copy-icon" value={record.front_pkg_id} /> */}
           </div>
         ) : (
           <span>-</span>

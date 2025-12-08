@@ -22,6 +22,16 @@
     margin-bottom: 16px;
   }
 
+  .copy-icon {
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    margin-top: 4px;
+  }
+
+  tbody .arco-table-tr:hover .copy-icon {
+    opacity: 1;
+  }
+
   .pagination-wrapper {
     display: flex;
     justify-content: flex-end;
@@ -37,7 +47,7 @@
   .arco-radio-group {
     display: flex;
     flex-wrap: wrap;
-    gap: 24px;
+    gap: 12px;
     line-height: 32px;
 
     .arco-radio {
