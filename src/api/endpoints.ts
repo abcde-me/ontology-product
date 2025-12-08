@@ -354,6 +354,8 @@ export const ModaForgeResourceEndpoints = {
   getModelList: PrefixLabelService + '/modelList',
   // 获取模型标签信息
   getModelLabelList: PrefixLabelService + '/modelLabelList',
+  // 编辑需求
+  editRequirementApi: PrefixLabelService + '/EditRequirement',
 
   // python开发
   // 获取python列表

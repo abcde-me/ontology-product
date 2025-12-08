@@ -165,3 +165,11 @@ export async function getModelList(params) {
 export async function getModelLabelList(params) {
   return await UAPI.RES.getModelLabelList({}).post(params).inRegion().do();
 }
+
+// 编辑需求
+export async function editRequirement(params) {
+  return await UAPI.RES.editRequirementApi({})
+    .post({ ...params })
+    .inRegion()
+    .do();
+}

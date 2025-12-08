@@ -1,4 +1,4 @@
-import { publishRequirement } from '@/api/dataAnnotation';
+import { publishRequirement, editRequirement } from '@/api/dataAnnotation';
 import { useParams } from '@/utils/url';
 import {
   Breadcrumb,
@@ -680,11 +680,18 @@ export default function RequirementConfig() {
     if (model_id) {
       new_publishData['model_id'] = model_id;
     }
+    // 编辑模式新增字段
+    if (type === 'edit') {
+      new_publishData['req_id'] = Number(requirementId);
+    }
     const obj = removeEmptyArrays(new_publishData);
     setLoading(true);
     // 发布数据
     try {
-      const res = await publishRequirement(obj as any);
+      const res =
+        type === 'edit'
+          ? await editRequirement(obj as any)
+          : await publishRequirement(obj as any);
       if (res.code === 'success') {
         Message.success('创建成功');
         history.goBack();
