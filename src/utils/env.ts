@@ -3,6 +3,7 @@ import {
   removeLocalStorage,
   getLocalStorage
 } from '@/utils/storage';
+import { MDPPrefix } from './const';
 
 export const isInCCloud = !!(window as any).SERVER_FLAGS?.basePath;
 
@@ -52,5 +53,18 @@ export const openNewPage = (page: string) => {
     (window as any).$wujie?.props?.openNewPage(page);
   } else {
     window.open(page, '_blank');
+  }
+};
+
+export const OpenNewPageForOperationCenter = (page: string) => {
+  if (isWujie) {
+    (window as any).$wujie?.props?.openNewPage(page);
+  } else {
+    window.open(
+      MDPPrefix +
+        '/tenant/compute/modaforge/operationCenter?url=' +
+        encodeURIComponent(page),
+      '_blank'
+    );
   }
 };

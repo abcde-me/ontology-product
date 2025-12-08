@@ -625,7 +625,7 @@ function transformApiSegmentDetail(
     enhancement = {
       summary: apiData.ai_data.summaries || '',
       hypotheticalAnswer: apiData.ai_data.questions || '',
-      extractionEntity: apiData.ai_data.keywords,
+      extractionEntity: apiData.ai_data.entities || apiData.ai_data.keywords,
       tags: apiData.ai_data.tags?.map((tag) => tag.name)
     };
   }

@@ -782,9 +782,13 @@ const DatasetDetail = (props: {
     const handleScroll = (event) => {
       const currentScrollTop = container.scrollTop;
 
-      if (currentScrollTop > 0 && !isHiddenBaseInfo) {
+      if (currentScrollTop > 0 && event.deltaY > 0 && !isHiddenBaseInfo) {
         setIsHiddenBaseInfo(true);
-      } else if (currentScrollTop === 0 && isHiddenBaseInfo) {
+      } else if (
+        currentScrollTop === 0 &&
+        event.deltaY < 0 &&
+        isHiddenBaseInfo
+      ) {
         setIsHiddenBaseInfo(false);
         event.preventDefault();
       }
@@ -798,10 +802,13 @@ const DatasetDetail = (props: {
     container.addEventListener('scroll', throttledHandleScroll, {
       passive: false
     });
-
+    container.addEventListener('wheel', throttledHandleScroll, {
+      passive: false
+    });
     // 在组件卸载时移除监听器
     return () => {
       container.removeEventListener('scroll', throttledHandleScroll);
+      container.removeEventListener('wheel', throttledHandleScroll);
       throttledHandleScroll.cancel(); // 清除节流计时器
     };
   }, [isHiddenBaseInfo]);
@@ -934,7 +941,9 @@ const DatasetDetail = (props: {
 
   // 跳转到数据集管理页面
   const handleGoToDatasetList = () => {
-    history.push('/tenant/compute/modaforge/datasetManagement');
+    history.push(
+      '/tenant/compute/modaforge/datasetManagement?sceneName=' + sceneName
+    );
   };
 
   // 跳转到分段列表页面
@@ -1488,7 +1497,7 @@ const DatasetDetail = (props: {
                 style={{ fontWeight: '500', fontSize: '20px' }}
                 onClick={handleGoToDatasetList}
               >
-                {sceneName || '数据集市'}
+                数据集市
               </span>
             </Breadcrumb.Item>
             <Breadcrumb.Item>
