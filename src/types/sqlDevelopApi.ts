@@ -129,7 +129,7 @@ export interface EditDevelopScriptParams {
   /**
    * 脚本参数
    */
-  scriptParams: ScriptParam[];
+  script_params: ScriptParam[];
 }
 
 export interface EditDevelopScriptResponse {
@@ -183,6 +183,10 @@ export interface GetDevelopScriptInfoResponse {
    * 脚本名字
    */
   script_name: string;
+  /**
+   * 脚本参数
+   */
+  script_params: ScriptParam[];
   /**
    * 最新版本状态
    */
