@@ -18,6 +18,7 @@ import noDataElement from '@/components/no-data';
 import SamplingModal from './SamplingModal';
 import BatchInspectModal from './BatchInspectModal';
 import FirstInspectModal from '../list/FirstInspectModal';
+import { getQualityControlTaskStatistics } from '@/api/dataAnnotation';
 import './index.scss';
 
 const BreadcrumbItem = Breadcrumb.Item;
@@ -36,7 +37,7 @@ const StatusMap: Record<number, { label: string; color: string }> = {
 
 // 质检结果类型
 interface QualityResult {
-  passed: number;
+  task_volume_passed: number;
   rejected: number;
   pending: number;
 }
@@ -65,18 +66,17 @@ interface InspectionItem {
 
 // 指标卡片数据类型
 interface MetricData {
-  unchecked: number; // 未抽检
-  totalTasks: number; // 总任务数
-  unsubmitted: number; // 未提检
-  inProgress: number; // 抽检中
-  passed: number; // 质检通过
+  task_volume_unsampled: number; // 未抽检
+  task_volume_total: number; // 总任务数
+  task_volume_unreceived: number; // 未提检
+  task_volume_sampling: number; // 抽检中
+  task_volume_passed: number; // 质检通过
 }
 
 function QualityTaskDetail() {
   const history = useHistory();
-  const requirementId = useParams('requirementId');
-  const taskPackageId = useParams('taskPackageId');
-  const round = useParams('round');
+  const pkg_id = useParams('pkg_id');
+  const qc_round = useParams('qc_round');
 
   // 需求名称
   const [requirementName, setRequirementName] = useState('智慧城市');
@@ -84,11 +84,11 @@ function QualityTaskDetail() {
 
   // 指标数据
   const [metricData, setMetricData] = useState<MetricData>({
-    unchecked: 25,
-    totalTasks: 25,
-    unsubmitted: 25,
-    inProgress: 25,
-    passed: 25
+    task_volume_total: 25,
+    task_volume_unsampled: 25,
+    task_volume_unreceived: 25,
+    task_volume_sampling: 25,
+    task_volume_passed: 25
   });
 
   // 表格数据
@@ -106,6 +106,23 @@ function QualityTaskDetail() {
     useState(false);
   const [currentInspectionId, setCurrentInspectionId] = useState<number>();
 
+  // 获取质检任务包统计数据
+  const getQualityControlTaskStatisticsData = useCallback(async () => {
+    const res = await getQualityControlTaskStatistics({
+      pkg_id: Number(pkg_id),
+      qc_round: Number(qc_round)
+    });
+    if (res.code === 'success') {
+      setMetricData(res.data);
+    } else {
+      Message.error(res.message);
+    }
+  }, [pkg_id, qc_round]);
+
+  useEffect(() => {
+    getQualityControlTaskStatisticsData();
+  }, [getQualityControlTaskStatisticsData]);
+
   // 获取表格数据
   const getTableData = useCallback(() => {
     setLoading(true);
@@ -113,9 +130,8 @@ function QualityTaskDetail() {
     // const params = {
     //   page: current,
     //   page_size: pageSize,
-    //   requirement_id: requirementId,
-    //   task_package_id: taskPackageId,
-    //   round,
+    //   task_package_id: pkg_id,
+    //   qc_round,
     //   ...sortValue
     // };
 
@@ -126,7 +142,7 @@ function QualityTaskDetail() {
         isRecheck: false,
         status: InspectionStatus.InProgress,
         progress: { completed: 5, total: 10 },
-        qualityResult: { passed: 2, rejected: 1, pending: 2 },
+        qualityResult: { task_volume_passed: 2, rejected: 1, pending: 2 },
         taskAccuracy: 40.0,
         checkedElements: 100,
         annotation: { extraLabel: 10 },
@@ -139,7 +155,7 @@ function QualityTaskDetail() {
         isRecheck: true,
         status: InspectionStatus.InProgress,
         progress: { completed: 5, total: 10 },
-        qualityResult: { passed: 0, rejected: 0, pending: 2 },
+        qualityResult: { task_volume_passed: 0, rejected: 0, pending: 2 },
         taskAccuracy: 40.0,
         checkedElements: 120,
         annotation: { wrongLabel: 3, missedLabel: 10 },
@@ -152,7 +168,7 @@ function QualityTaskDetail() {
         isRecheck: false,
         status: InspectionStatus.Finished,
         progress: { completed: 5, total: 10 },
-        qualityResult: { passed: 2, rejected: 0, pending: 2 },
+        qualityResult: { task_volume_passed: 2, rejected: 0, pending: 2 },
         taskAccuracy: 40.0,
         checkedElements: 100,
         annotation: { missedLabel: 20 },
@@ -165,7 +181,7 @@ function QualityTaskDetail() {
     setTableData(mockData);
     setTotal(3);
     setLoading(false);
-  }, [current, pageSize, requirementId, taskPackageId, round, sortValue]);
+  }, [current, pageSize, pkg_id, qc_round, sortValue]);
 
   useEffect(() => {
     getTableData();
@@ -238,13 +254,13 @@ function QualityTaskDetail() {
   // 渲染质检结果
   const renderQualityResult = (result: QualityResult) => {
     const items: React.ReactNode[] = [];
-    if (result.passed > 0) {
+    if (result.task_volume_passed > 0) {
       items.push(
-        <div key="passed" className="result-item">
+        <div key="task_volume_passed" className="result-item">
           <Tag color="green" size="small">
             通过
           </Tag>
-          <span className="result-count">{result.passed}</span>
+          <span className="result-count">{result.task_volume_passed}</span>
         </div>
       );
     }
@@ -444,11 +460,13 @@ function QualityTaskDetail() {
         <div className="metrics-section">
           {/* 未抽检卡片 */}
           <Tooltip content="剩余可抽检的任务数字，包括待质检和待复核">
-            <div className="metric-card unchecked-card">
-              <div className="unchecked-left">
+            <div className="metric-card task_volume_unsampled-card">
+              <div className="task_volume_unsampled-left">
                 <div className="metric-label">未抽检</div>
-                <div className="unchecked-divider" />
-                <div className="metric-value">{metricData.unchecked}</div>
+                <div className="task_volume_unsampled-divider" />
+                <div className="metric-value">
+                  {metricData?.task_volume_unsampled}
+                </div>
               </div>
               <div className="metric-actions">
                 <Button type="primary" onClick={handleSampling}>
@@ -469,7 +487,9 @@ function QualityTaskDetail() {
           <Tooltip content="总任务数">
             <div className="metric-card">
               <div className="metric-label">总任务数</div>
-              <div className="metric-value">{metricData.totalTasks}</div>
+              <div className="metric-value">
+                {metricData?.task_volume_total}
+              </div>
             </div>
           </Tooltip>
 
@@ -478,7 +498,9 @@ function QualityTaskDetail() {
           <Tooltip content="未提检任务数">
             <div className="metric-card">
               <div className="metric-label">未提检</div>
-              <div className="metric-value">{metricData.unsubmitted}</div>
+              <div className="metric-value">
+                {metricData?.task_volume_unreceived}
+              </div>
             </div>
           </Tooltip>
 
@@ -487,7 +509,9 @@ function QualityTaskDetail() {
           <Tooltip content="抽检中任务数">
             <div className="metric-card">
               <div className="metric-label">抽检中</div>
-              <div className="metric-value">{metricData.inProgress}</div>
+              <div className="metric-value">
+                {metricData?.task_volume_sampling}
+              </div>
             </div>
           </Tooltip>
 
@@ -496,7 +520,9 @@ function QualityTaskDetail() {
           <Tooltip content="质检通过任务数">
             <div className="metric-card">
               <div className="metric-label">质检通过</div>
-              <div className="metric-value">{metricData.passed}</div>
+              <div className="metric-value">
+                {metricData?.task_volume_passed}
+              </div>
             </div>
           </Tooltip>
         </div>
@@ -543,8 +569,9 @@ function QualityTaskDetail() {
       {/* 抽检设置弹窗 */}
       <SamplingModal
         visible={samplingModalVisible}
+        metricData={metricData}
         onClose={() => setSamplingModalVisible(false)}
-        onSuccess={getTableData}
+        onSuccess={getQualityControlTaskStatisticsData}
       />
 
       {/* 批量质检弹窗 */}

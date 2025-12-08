@@ -181,3 +181,11 @@ export async function manageQCTaskBatch(params) {
     .inRegion()
     .do();
 }
+
+// 获取质检任务包统计数据
+export async function getQualityControlTaskStatistics(params) {
+  return await UAPI.RES.getQualityControlTaskStatistics({})
+    .post({ ...params })
+    .inRegion()
+    .do();
+}

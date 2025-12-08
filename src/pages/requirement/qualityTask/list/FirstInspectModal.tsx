@@ -42,8 +42,7 @@ const FirstInspectModal: React.FC<FirstInspectModalProps> = ({
       form.resetFields();
       form.setFieldsValue({
         sample_type: SamplingCountType.Percentage,
-        sample_radio: 50,
-        sample_number: undefined
+        sample_radio: 50
       });
     }
   }, [visible, form]);
