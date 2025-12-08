@@ -19,7 +19,8 @@ import SamplingModal from './SamplingModal';
 import BatchInspectModal from './BatchInspectModal';
 import {
   getQualityControlTaskStatistics,
-  manageQCTaskBatch
+  manageQCTaskBatch,
+  listQualityControlTaskSamples
 } from '@/api/dataAnnotation';
 import './index.scss';
 
@@ -27,8 +28,14 @@ const BreadcrumbItem = Breadcrumb.Item;
 
 // 状态枚举
 enum InspectionStatus {
-  InProgress = 1, // 质检中
-  Finished = 2 // 已结束
+  InProgress = 0, // 进行中
+  Finished = 1 // 已结束
+}
+
+// 类型枚举
+enum InspectionType {
+  FirstInspection = 0, // 首次抽检（待质检）
+  Recheck = 1 // 待复核
 }
 
 // 状态映射
@@ -38,32 +45,35 @@ const StatusMap: Record<number, { label: string; color: string }> = {
 };
 
 // 质检结果类型
-interface QualityResult {
-  task_volume_passed: number;
-  rejected: number;
-  pending: number;
+interface InspectionDetail {
+  passed: number; // 通过任务数
+  rejected: number; // 驳回任务数
+  uninspected: number; // 未检任务数
 }
 
 // 批注类型
-interface Annotation {
-  extraLabel?: number; // 多标
-  wrongLabel?: number; // 错标
-  missedLabel?: number; // 漏标
+interface Comment {
+  more?: number; // 多标
+  less?: number; // 漏标
+  error?: number; // 错标
 }
 
 // 抽检数据类型
 interface InspectionItem {
-  id: number;
-  isRecheck: boolean; // 是否复核
-  status: InspectionStatus;
-  progress: { completed: number; total: number };
-  qualityResult: QualityResult;
-  taskAccuracy: number;
-  checkedElements: number;
-  annotation: Annotation;
-  elementAccuracy: number;
-  creator: string;
-  createdAt: string;
+  qs_id: number; // 抽检包ID
+  type: InspectionType; // 0-首次抽检（待质检），1-待复核
+  status: InspectionStatus; // 状态：0-进行中，1-已结束
+  volumn_total: number; // 本次抽取任务总数
+  volumn_inspected: number; // 已质检总数
+  task_accuracy_rate: number; // 任务准确率
+  inspection_detail: InspectionDetail; // 质检结果
+  element_accuracy_rate: number; // 元素准确率
+  element_volumn_inspected: number; // 已检元素数
+  comment: Comment; // 批注
+  creator_id: string; // 创建人id
+  creator_account: string; // 创建人账户
+  create_time: string; // 创建时间
+  update_time: string; // 更新时间
 }
 
 // 指标卡片数据类型
@@ -120,64 +130,28 @@ function QualityTaskDetail() {
   }, [pkg_id, qc_round]);
 
   // 获取表格数据
-  const getTableData = useCallback(() => {
+  const getTableData = useCallback(async () => {
     setLoading(true);
-    // TODO: 替换为实际API调用
-    // const params = {
-    //   page: current,
-    //   page_size: pageSize,
-    //   task_package_id: pkg_id,
-    //   qc_round,
-    //   ...sortValue
-    // };
-
-    // 模拟数据
-    const mockData: InspectionItem[] = [
-      {
-        id: 3,
-        isRecheck: false,
-        status: InspectionStatus.InProgress,
-        progress: { completed: 5, total: 10 },
-        qualityResult: { task_volume_passed: 2, rejected: 1, pending: 2 },
-        taskAccuracy: 40.0,
-        checkedElements: 100,
-        annotation: { extraLabel: 10 },
-        elementAccuracy: 90.0,
-        creator: '张三',
-        createdAt: '2025-05-05 05:05:05'
-      },
-      {
-        id: 2,
-        isRecheck: true,
-        status: InspectionStatus.InProgress,
-        progress: { completed: 5, total: 10 },
-        qualityResult: { task_volume_passed: 0, rejected: 0, pending: 2 },
-        taskAccuracy: 40.0,
-        checkedElements: 120,
-        annotation: { wrongLabel: 3, missedLabel: 10 },
-        elementAccuracy: 90.0,
-        creator: '李明',
-        createdAt: '2025-05-05 05:05:05'
-      },
-      {
-        id: 1,
-        isRecheck: false,
-        status: InspectionStatus.Finished,
-        progress: { completed: 5, total: 10 },
-        qualityResult: { task_volume_passed: 2, rejected: 0, pending: 2 },
-        taskAccuracy: 40.0,
-        checkedElements: 100,
-        annotation: { missedLabel: 20 },
-        elementAccuracy: 90.0,
-        creator: '王五',
-        createdAt: '2025-05-05 05:05:05'
+    try {
+      const params = {
+        page: current,
+        page_size: pageSize,
+        pkg_id: Number(pkg_id),
+        filters: sortValue
+      };
+      const res = await listQualityControlTaskSamples(params);
+      if (res.code === 'success') {
+        setTableData(res.data.items || []);
+        setTotal(res.data.total || 0);
+      } else {
+        Message.error(res.message || '获取数据失败');
       }
-    ];
-
-    setTableData(mockData);
-    setTotal(3);
-    setLoading(false);
-  }, [current, pageSize, pkg_id, qc_round, sortValue]);
+    } catch (error) {
+      console.error('获取数据失败，请稍后重试');
+    } finally {
+      setLoading(false);
+    }
+  }, [current, pageSize, pkg_id, sortValue]);
 
   useEffect(() => {
     getTableData();
@@ -206,7 +180,7 @@ function QualityTaskDetail() {
         const res = await manageQCTaskBatch(params);
         if (res.data.code === 'success') {
           Message.success(type === 'pass_all' ? '已全部通过' : '已全部驳回');
-          getTableData();
+          handleSuccess();
         } else {
           Message.error(res.message);
         }
@@ -221,16 +195,8 @@ function QualityTaskDetail() {
     filters: any
   ) => {
     setCurrent(1);
-    const sorterInfo = Array.isArray(sorter) ? sorter[0] : sorter;
     setSortValue({
-      status: filters?.status,
-      elementAccuracy: filters?.elementAccuracy,
-      order:
-        sorterInfo?.direction === undefined
-          ? 'desc'
-          : sorterInfo?.direction === 'ascend'
-            ? 'asc'
-            : 'desc'
+      status: filters?.status
     });
   };
 
@@ -245,36 +211,42 @@ function QualityTaskDetail() {
     setBatchModalVisible(true);
   };
 
+  // 设置成功处理
+  const handleSuccess = () => {
+    getTableData();
+    getQualityControlTaskStatisticsData();
+  };
+
   // 渲染质检结果
-  const renderQualityResult = (result: QualityResult) => {
+  const renderQualityResult = (result: InspectionDetail) => {
     const items: React.ReactNode[] = [];
-    if (result.task_volume_passed > 0) {
+    if (result.passed > 0) {
       items.push(
-        <div key="task_volume_passed" className="result-item">
+        <div key="passed" className="result-item">
           <Tag color="green" size="small">
             通过
           </Tag>
-          <span className="result-count">{result.task_volume_passed}</span>
+          <span className="result-count">{result.passed}</span>
         </div>
       );
     }
     if (result.rejected > 0) {
       items.push(
         <div key="rejected" className="result-item">
-          <Tag color="orangered" size="small">
+          <Tag color="red" size="small">
             驳回
           </Tag>
           <span className="result-count">{result.rejected}</span>
         </div>
       );
     }
-    if (result.pending > 0) {
+    if (result.uninspected > 0) {
       items.push(
-        <div key="pending" className="result-item">
+        <div key="uninspected" className="result-item">
           <Tag color="orange" size="small">
-            待定
+            未检
           </Tag>
-          <span className="result-count">{result.pending}</span>
+          <span className="result-count">{result.uninspected}</span>
         </div>
       );
     }
@@ -282,16 +254,16 @@ function QualityTaskDetail() {
   };
 
   // 渲染批注
-  const renderAnnotation = (annotation: Annotation) => {
+  const renderComment = (comment: Comment) => {
     const items: string[] = [];
-    if (annotation.extraLabel !== undefined) {
-      items.push(`多标: ${annotation.extraLabel}`);
+    if (comment.more !== undefined) {
+      items.push(`多标: ${comment.more}`);
     }
-    if (annotation.wrongLabel !== undefined) {
-      items.push(`错标: ${annotation.wrongLabel}`);
+    if (comment.error !== undefined) {
+      items.push(`错标: ${comment.error}`);
     }
-    if (annotation.missedLabel !== undefined) {
-      items.push(`漏标: ${annotation.missedLabel}`);
+    if (comment.less !== undefined) {
+      items.push(`漏标: ${comment.less}`);
     }
     return items.length > 0 ? (
       <div className="annotation-cell">
@@ -308,11 +280,11 @@ function QualityTaskDetail() {
   const columns: ColumnProps<InspectionItem>[] = [
     {
       title: '抽检ID',
-      dataIndex: 'id',
+      dataIndex: 'qs_id',
       width: 100,
       render: (_, record) => (
         <div className="id-cell">
-          <span>{record.id}</span>
+          <span>{record.qs_id}</span>
         </div>
       )
     },
@@ -321,7 +293,7 @@ function QualityTaskDetail() {
       dataIndex: 'status',
       width: 100,
       filters: [
-        { text: '质检中', value: InspectionStatus.InProgress },
+        { text: '进行中', value: InspectionStatus.InProgress },
         { text: '已结束', value: InspectionStatus.Finished }
       ],
       render: (_, record) => {
@@ -339,60 +311,59 @@ function QualityTaskDetail() {
     },
     {
       title: '抽检进度',
-      dataIndex: 'progress',
+      dataIndex: 'volumn_inspected',
       width: 120,
       render: (_, record) => {
         const percent =
-          record.progress.total > 0
-            ? Math.round(
-                (record.progress.completed / record.progress.total) * 100
-              )
+          record.volumn_total > 0
+            ? Math.round((record.volumn_inspected / record.volumn_total) * 100)
             : 0;
         return (
           <span>
-            {percent}% ({record.progress.completed}/{record.progress.total})
+            {percent}% ({record.volumn_inspected}/{record.volumn_total})
           </span>
         );
       }
     },
     {
       title: '质检结果',
-      dataIndex: 'qualityResult',
+      dataIndex: 'inspection_detail',
       width: 140,
-      render: (_, record) => renderQualityResult(record.qualityResult)
+      render: (_, record) => renderQualityResult(record.inspection_detail)
     },
     {
       title: '任务准确率',
-      dataIndex: 'taskAccuracy',
+      dataIndex: 'task_accuracy_rate',
       width: 100,
-      render: (_, record) => `${record.taskAccuracy.toFixed(1)}%`
+      render: (_, record) => `${(record.task_accuracy_rate * 100).toFixed(1)}%`
     },
     {
       title: '已检元素数',
-      dataIndex: 'checkedElements',
+      dataIndex: 'element_volumn_inspected',
       width: 100
     },
     {
       title: '批注',
-      dataIndex: 'annotation',
+      dataIndex: 'comment',
       width: 120,
-      render: (_, record) => renderAnnotation(record.annotation)
+      render: (_, record) => renderComment(record.comment)
     },
     {
       title: '元素准确率',
-      dataIndex: 'elementAccuracy',
+      dataIndex: 'element_accuracy_rate',
       width: 120,
-      filters: [
-        { text: '≥90%', value: 90 },
-        { text: '≥80%', value: 80 },
-        { text: '≥70%', value: 70 },
-        { text: '<70%', value: 0 }
-      ],
-      render: (_, record) => `${record.elementAccuracy.toFixed(1)}%`
+      // filters: [
+      //   { text: '≥90%', value: 90 },
+      //   { text: '≥80%', value: 80 },
+      //   { text: '≥70%', value: 70 },
+      //   { text: '<70%', value: 0 }
+      // ],
+      render: (_, record) =>
+        `${(record.element_accuracy_rate * 100).toFixed(1)}%`
     },
     {
       title: '创建人',
-      dataIndex: 'creator',
+      dataIndex: 'creator_account',
       width: 80
     },
     {
@@ -523,7 +494,7 @@ function QualityTaskDetail() {
             loading={loading}
             columns={columns}
             data={tableData}
-            rowKey="id"
+            rowKey="qs_id"
             border={false}
             pagination={false}
             noDataElement={noDataElement({ description: '暂无数据' })}
@@ -560,14 +531,14 @@ function QualityTaskDetail() {
         visible={samplingModalVisible}
         metricData={metricData}
         onClose={() => setSamplingModalVisible(false)}
-        onSuccess={getQualityControlTaskStatisticsData}
+        onSuccess={handleSuccess}
       />
 
       {/* 批量质检弹窗 */}
       <BatchInspectModal
         visible={batchModalVisible}
         onClose={() => setBatchModalVisible(false)}
-        onSuccess={getTableData}
+        onSuccess={handleSuccess}
         currentRecord={currentRecord}
       />
     </div>

@@ -365,6 +365,9 @@ export const ModaForgeResourceEndpoints = {
   batchManageQCTaskBatch: PrefixLabelService + '/BatchManageQCTaskBatch',
   // 批量管理抽检包任务
   manageQCTaskSampledBatch: PrefixLabelService + '/ManageQCTaskSampledBatch',
+  // 抽检任务列表
+  listQualityControlTaskSamples:
+    PrefixLabelService + '/ListQualityControlTaskSamples',
 
   // python开发
   // 获取python列表

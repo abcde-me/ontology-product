@@ -205,3 +205,11 @@ export async function manageQCTaskSampledBatch(params) {
     .inRegion()
     .do();
 }
+
+// 抽检任务列表
+export async function listQualityControlTaskSamples(params) {
+  return await UAPI.RES.listQualityControlTaskSamples({})
+    .post({ ...params })
+    .inRegion()
+    .do();
+}

@@ -53,7 +53,7 @@
       min-width: 100px;
       cursor: default;
 
-      &.unchecked-card {
+      &.task_volume_unsampled-card {
         flex-direction: row;
         align-items: center;
         background: #fff;
@@ -62,7 +62,7 @@
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
         gap: 24px;
 
-        .unchecked-left {
+        .task_volume_unsampled-left {
           display: flex;
           flex-direction: column;
 
@@ -70,7 +70,7 @@
             margin-bottom: 0;
           }
 
-          .unchecked-divider {
+          .task_volume_unsampled-divider {
             width: 60px;
             height: 1px;
             border-top: 1px dashed #c9cdd4;
