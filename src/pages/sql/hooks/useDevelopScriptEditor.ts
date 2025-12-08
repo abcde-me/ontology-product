@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Message } from '@arco-design/web-react';
 import { useRequest, useThrottleFn } from 'ahooks';
 import { RunLogStatus, RunningStatus } from '@/types/sqlApi';
@@ -90,6 +90,10 @@ export interface UseEditorReturn {
   isPanelOpen: boolean;
   handlePanelStateChange: (isOpen: boolean) => void;
   getPrevRunStatus: () => RunningStatus;
+
+  // 参数列表
+  scriptParams: ScriptParam[];
+  setScriptParams: React.Dispatch<React.SetStateAction<ScriptParam[]>>;
 }
 
 const defaultContent = DEFAULT_SQL_PLACEHOLDER;
@@ -334,7 +338,7 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
           script_name: currentFile?.title ?? generateSqlDefaultName(new Date()),
           script_content: content,
           script_id: Number(currentFile?.scriptId) ?? 0,
-          scriptParams: []
+          script_params: scriptParams
         });
 
         if (res?.status !== 200) {
@@ -348,7 +352,7 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
         return null;
       }
     },
-    [currentFile?.scriptId]
+    [currentFile?.scriptId, currentFile?.title, scriptParams]
   );
 
   const createScript = useCallback(
@@ -372,7 +376,7 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
         return null;
       }
     },
-    [currentFile?.scriptId]
+    [currentFile?.scriptId, currentFile?.title, scriptParams]
   );
 
   // 处理内容变化 - 优化依赖项
@@ -519,8 +523,8 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
             const fileData = response.data;
             // setLastScriptRunStatus(fileData?.run_status);
             // 更新编辑器内容
-            setEditorContent(fileData.script_content);
-
+            setEditorContent(fileData.script_content ?? '');
+            setScriptParams(fileData.script_params ?? []);
             // 更新运行状态
             // setExecid(String(fileData.script_execid));
 
@@ -529,7 +533,7 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
             // 通知父组件更新标签页内容
             if (onTabUpdate) {
               onTabUpdate(currentTab.key, {
-                content: fileData.script_content,
+                content: fileData.script_content ?? '',
                 fileId: String(currentTab.fileId),
                 scriptId: String(fileData.script_id),
                 title: currentTab.title
@@ -594,6 +598,10 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
     // 面板状态管理
     isPanelOpen,
     handlePanelStateChange,
-    getPrevRunStatus
+    getPrevRunStatus,
+
+    // 参数列表
+    scriptParams,
+    setScriptParams
   };
 };

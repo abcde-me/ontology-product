@@ -14,6 +14,11 @@ import styles from './index.module.scss';
 import { SQL_PERMISSIONS } from '@/config/permissions';
 import { useHasPermission } from '@/store/userInfoStore';
 import { useLocation, useHistory } from 'react-router-dom';
+import {
+  FileTab as DevelopScriptFileTab,
+  useDevelopScriptTabManager
+} from './hooks/useDevelopScriptTabManager';
+import { useDevelopScriptManager } from './hooks/useDevelopScriptManager';
 
 const { Content, Sider } = Layout;
 const TabPane = Tabs.TabPane;
@@ -25,12 +30,15 @@ const defaultActiveTab = 'script';
 const SqlIndex: React.FC = memo(() => {
   const location = useLocation();
   const history = useHistory();
-  const [activeTab, setActiveTab] = useState<TabKey>(defaultActiveTab);
+  const [activeTab, setActiveTab] = useState<TabKey>();
   const [insertContentFunction, setInsertContentFunction] = useState<
     ((content: string) => void) | null
   >(null);
   const [isEditorFocused, setIsEditorFocused] = useState<boolean>(false);
+  const [isDevelopScriptEditorFocused, setIsDevelopScriptEditorFocused] =
+    useState<boolean>(false);
   const isEditorFocusedRef = useRef<boolean>(false);
+  const isDevelopScriptEditorFocusedRef = useRef<boolean>(false);
 
   // 从URL查询参数中解析activeTab
   const getActiveTabFromUrl = () => {
@@ -47,10 +55,22 @@ const SqlIndex: React.FC = memo(() => {
     string[]
   >([]);
 
+  const [
+    developScriptFileManagerSelectedKeys,
+    setDevelopScriptFileManagerSelectedKeys
+  ] = useState<string[]>([]);
+
   // 选中状态变化回调
   const handleSelectedKeysChange = useCallback((selectedKeys: string[]) => {
-    setFileManagerSelectedKeys(selectedKeys);
+    setDevelopScriptFileManagerSelectedKeys(selectedKeys);
   }, []);
+
+  const handleDevelopScriptSelectedKeysChange = useCallback(
+    (selectedKeys: string[]) => {
+      setDevelopScriptFileManagerSelectedKeys(selectedKeys);
+    },
+    []
+  );
 
   const {
     fileState,
@@ -64,6 +84,32 @@ const SqlIndex: React.FC = memo(() => {
     openFile,
     updateTabTitle // 获取更新标签页标题的方法
   } = useTabManager(handleSelectedKeysChange);
+
+  const {
+    fileState: developScriptFileState,
+    directoryTreeRef: developScriptDirectoryTreeRef,
+    addTab: developScriptAddTab,
+    removeTab: developScriptRemoveTab,
+    removeTabByFileId: developScriptRemoveTabByFileId,
+    switchTab: developScriptSwitchTab,
+    handleCreate: developScriptHandleCreate,
+    updateTab: developScriptUpdateTab,
+    openFile: developScriptOpenFile,
+    updateTabTitle: developScriptUpdateTabTitle
+  } = useDevelopScriptTabManager(handleDevelopScriptSelectedKeysChange);
+
+  // 获取文件列表，用于根据URL参数打开文件
+  const {
+    sqlScriptList: developScriptList,
+    getRawSqlScriptList: getDevelopScriptList
+  } = useDevelopScriptManager({
+    onFileOpen: developScriptOpenFile,
+    onFileDelete: developScriptRemoveTabByFileId,
+    onFileRename: developScriptUpdateTabTitle,
+    activeTab,
+    fileTabs: developScriptFileState.fileTabs,
+    onSwitchTab: developScriptSwitchTab
+  });
 
   // 初始化创建一个默认SQL查询标签
   useEffect(() => addTab(), []);
@@ -107,6 +153,21 @@ const SqlIndex: React.FC = memo(() => {
     setIsEditorFocused(focused);
   };
 
+  const handleDevelopScriptEditorFocusChange = (focused: boolean) => {
+    isDevelopScriptEditorFocusedRef.current = focused;
+    setIsDevelopScriptEditorFocused(focused);
+  };
+
+  const handleDevelopScriptActiveUpdate = (tabData: DevelopScriptFileTab) => {
+    updateTab(tabData);
+  };
+
+  const handleDevelopScriptInsertContentRegister = (
+    insertFn: (content: string) => void
+  ) => {
+    setInsertContentFunction(() => insertFn);
+  };
+
   // 刷新目录的函数
   const handleRefreshDirectory = useCallback(async () => {
     if (directoryTreeRef.current?.refresh) {
@@ -114,10 +175,22 @@ const SqlIndex: React.FC = memo(() => {
     }
   }, []);
 
+  const handleDevelopScriptRefreshDirectory = useCallback(async () => {
+    if (developScriptDirectoryTreeRef.current?.refresh) {
+      await developScriptDirectoryTreeRef.current.refresh();
+    }
+  }, []);
+
   // 选中文件的方法
   const selectFile = (fileId: string) => {
     if (directoryTreeRef.current?.selectFile) {
       directoryTreeRef.current.selectFile(fileId);
+    }
+  };
+
+  const selectDevelopScriptFile = (fileId: string) => {
+    if (developScriptDirectoryTreeRef.current?.selectFile) {
+      developScriptDirectoryTreeRef.current.selectFile(fileId);
     }
   };
 
@@ -174,11 +247,11 @@ const SqlIndex: React.FC = memo(() => {
               <FileManager
                 key="files"
                 type="files"
-                ref={directoryTreeRef}
-                onFileOpen={openFile}
-                onFileDelete={removeTabByFileId} // 传递删除文件时关闭标签页的回调
-                onFileRename={updateTabTitle} // 传递重命名文件时更新标签页标题的回调
-                externalSelectedKeys={fileManagerSelectedKeys}
+                ref={developScriptDirectoryTreeRef}
+                onFileOpen={developScriptOpenFile}
+                onFileDelete={developScriptRemoveTabByFileId} // 传递删除文件时关闭标签页的回调
+                onFileRename={developScriptUpdateTabTitle} // 传递重命名文件时更新标签页标题的回调
+                externalSelectedKeys={developScriptFileManagerSelectedKeys}
               />
             )}
           </TabPane>
@@ -218,18 +291,18 @@ const SqlIndex: React.FC = memo(() => {
         )}
         {activeTab === 'files' && (
           <DevelopScriptEditor
-            fileTabs={fileState.fileTabs}
-            activeTab={fileState.activeTab}
+            fileTabs={developScriptFileState.fileTabs}
+            activeTab={developScriptFileState.activeTab}
             curActiveTab={activeTab}
-            onTabChange={switchTab}
-            onAddTab={(newFileInfo?: any) => addTab(newFileInfo)}
-            onRemoveTab={removeTab}
-            onCreate={handleCreate}
-            onActiveUpdate={handleActiveUpdate}
-            onInsertContent={handleInsertContentRegister}
-            onEditorFocusChange={handleEditorFocusChange}
-            refreshDirectory={handleRefreshDirectory}
-            selectFile={selectFile}
+            onTabChange={developScriptSwitchTab}
+            onAddTab={(newFileInfo?: any) => developScriptAddTab(newFileInfo)}
+            onRemoveTab={developScriptRemoveTab}
+            onCreate={developScriptHandleCreate}
+            onActiveUpdate={handleDevelopScriptActiveUpdate}
+            onInsertContent={handleDevelopScriptInsertContentRegister}
+            onEditorFocusChange={handleDevelopScriptEditorFocusChange}
+            refreshDirectory={handleDevelopScriptRefreshDirectory}
+            selectFile={selectDevelopScriptFile}
             onToScriptList={handleTabChange}
           />
         )}

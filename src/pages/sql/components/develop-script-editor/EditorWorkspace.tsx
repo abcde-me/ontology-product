@@ -16,17 +16,19 @@ import {
 } from '@arco-design/web-react/icon';
 import { sql } from '@codemirror/lang-sql';
 import { lintGutter } from '@codemirror/lint';
-import {
-  EditorView,
-  Decoration,
-  ViewPlugin,
-  ViewUpdate
-} from '@codemirror/view';
+import { EditorView, Decoration } from '@codemirror/view';
 import { StateEffect, StateField } from '@codemirror/state';
 import { tags as t } from '@lezer/highlight';
 import createTheme from '@uiw/codemirror-themes';
 import CodeMirror, { ReactCodeMirrorRef } from '@uiw/react-codemirror';
-import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
+import React, {
+  memo,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState
+} from 'react';
 import { format } from 'sql-formatter';
 import styles from './EditorWorkspace.module.scss';
 
@@ -38,12 +40,14 @@ import {
   EditorProvider,
   useEditorContext
 } from '../../contexts/DevelopScriptEditorContext';
-import { FileTab } from '../../hooks/useTabManager';
+import { FileTab } from '../../hooks/useDevelopScriptTabManager';
 import RunningInfoPanel from './RunningInfoPanel';
 import classNames from 'classnames';
 import ModalParamList from '../data-manager/ModalParamList';
 import ReleaseVersionModal from './ReleaseVersionModal';
-import ParameterSidebar, { Parameter } from './ParameterSidebar';
+import ParameterSidebar from './ParameterSidebar';
+import { ScriptParam } from '@/types/sqlDevelopApi';
+import ReleaseIcon from '../../assets/release-icon.svg';
 
 interface NotebookWorkspaceProps {
   content: string;
@@ -168,25 +172,10 @@ const EditorWorkspaceContent: React.FC<{
     const [paramVisible, setParamVisible] = React.useState<boolean>(false);
     const [releaseVersionVisible, setReleaseVersionVisible] =
       React.useState<boolean>(false);
-    const [parameters, setParameters] = React.useState<Parameter[]>([]);
     const [sidebarVisible, setSidebarVisible] = React.useState<boolean>(false);
     const [sidebarCollapsed, setSidebarCollapsed] =
       React.useState<boolean>(false);
 
-    // 处理参数hover事件
-    const handleParameterHover = useCallback((paramName: string | null) => {
-      if (!editorRef.current?.view) return;
-
-      const view = editorRef.current.view;
-      view.dispatch({
-        effects: highlightParameterEffect.of(paramName)
-      });
-    }, []);
-    useEffect(() => {
-      form.setFieldsValue({
-        fileName: fileName
-      });
-    }, [fileName, form]);
     // 从 Context 获取编辑器状态
     const {
       runStatus,
@@ -204,8 +193,44 @@ const EditorWorkspaceContent: React.FC<{
       isPanelOpen,
       handlePanelStateChange,
       getPrevRunStatus,
-      lastScriptRunStatus
+      lastScriptRunStatus,
+      scriptParams,
+      setScriptParams
     } = useEditorContext();
+
+    // 处理参数hover事件
+    const handleParameterHover = useCallback((paramName: string | null) => {
+      if (!editorRef.current?.view) return;
+
+      const view = editorRef.current.view;
+      view.dispatch({
+        effects: highlightParameterEffect.of(paramName)
+      });
+    }, []);
+
+    // 处理参数变化：直接更新 scriptParams
+    const handleParameterChange = useCallback(
+      (params: ScriptParam[]) => {
+        setScriptParams(params);
+      },
+      [setScriptParams]
+    );
+
+    // 使用 useMemo 稳定 initialParams 的引用，避免不必要的重新渲染
+    // 使用 JSON.stringify 来比较内容，而不是引用
+    const scriptParamsStr = useMemo(
+      () => JSON.stringify(scriptParams),
+      [scriptParams]
+    );
+    const initialParams = useMemo(() => {
+      return scriptParams;
+    }, [scriptParamsStr]);
+
+    useEffect(() => {
+      form.setFieldsValue({
+        fileName: fileName
+      });
+    }, [fileName, form]);
 
     const myTheme = createTheme({
       theme: 'light',
@@ -412,7 +437,7 @@ const EditorWorkspaceContent: React.FC<{
               onClick={() => {
                 setReleaseVersionVisible(true);
               }}
-              icon={<IconSave />}
+              icon={<ReleaseIcon />}
             >
               发版
             </Button>
@@ -473,13 +498,18 @@ const EditorWorkspaceContent: React.FC<{
           </Spin>
 
           {/* 参数侧边栏 */}
-          <ParameterSidebar
-            content={editorContent}
-            onParameterChange={setParameters}
-            onVisibleChange={setSidebarVisible}
-            onCollapsedChange={setSidebarCollapsed}
-            onParameterHover={handleParameterHover}
-          />
+          {
+            // sidebarVisible && (
+            <ParameterSidebar
+              content={editorContent}
+              onParameterChange={handleParameterChange}
+              onVisibleChange={setSidebarVisible}
+              onCollapsedChange={setSidebarCollapsed}
+              onParameterHover={handleParameterHover}
+              initialParams={initialParams}
+            />
+            // )
+          }
         </div>
 
         {/* 运行信息面板 */}

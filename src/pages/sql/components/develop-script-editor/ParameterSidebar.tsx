@@ -1,23 +1,22 @@
-import React, { memo, useEffect, useMemo, useState } from 'react';
+import React, { memo, useEffect, useMemo, useRef, useState } from 'react';
 import { Input, Button, Popover } from '@arco-design/web-react';
 import { IconCaretRight } from '@arco-design/web-react/icon';
 import classNames from 'classnames';
 import ParameterIcon from '../../assets/parameter-icon.svg';
 import ArrowRightIcon from '../../assets/arrow-right-icon.svg';
+import { ScriptParam } from '@/types/sqlDevelopApi';
 
-export interface Parameter {
-  name: string;
-  value: string;
-  order: number; // 用于保持最新参数在顶部
-}
+// 扩展 ScriptParam 以支持内部排序
+type ParameterWithOrder = ScriptParam & { _order?: number };
 
 interface ParameterSidebarProps {
   content: string;
-  onParameterChange?: (params: Parameter[]) => void;
+  onParameterChange?: (params: ScriptParam[]) => void;
   visible?: boolean;
   onVisibleChange?: (visible: boolean) => void;
   onCollapsedChange?: (collapsed: boolean) => void;
   onParameterHover?: (paramName: string | null) => void;
+  initialParams?: ScriptParam[]; // 初始参数值（从后端加载）
 }
 
 // 提取参数的正则表达式
@@ -30,10 +29,10 @@ const hasParameterPattern = (content: string): boolean => {
 };
 
 // 从内容中提取所有参数
-const extractParameters = (content: string): Parameter[] => {
+const extractParameters = (content: string): ParameterWithOrder[] => {
   // 重置正则的 lastIndex，避免全局匹配的问题
   PARAM_REGEX.lastIndex = 0;
-  const paramMap = new Map<string, Parameter>();
+  const paramMap = new Map<string, ParameterWithOrder>();
   const matches = Array.from(content.matchAll(PARAM_REGEX));
 
   matches.forEach((match, index) => {
@@ -42,19 +41,22 @@ const extractParameters = (content: string): Parameter[] => {
       // 如果参数已存在，更新 order 为最新（数字越大表示越新）
       if (paramMap.has(paramName)) {
         const existing = paramMap.get(paramName)!;
-        existing.order = matches.length - index; // 最新的在最前面，所以 order 更大
+        existing._order = matches.length - index; // 最新的在最前面，所以 order 更大
       } else {
         paramMap.set(paramName, {
-          name: paramName,
-          value: '',
-          order: matches.length - index
+          config_key: paramName,
+          config_value: '',
+          config_desc: '',
+          _order: matches.length - index
         });
       }
     }
   });
 
   // 转换为数组并按 order 降序排列（最新的在顶部）
-  return Array.from(paramMap.values()).sort((a, b) => b.order - a.order);
+  return Array.from(paramMap.values()).sort(
+    (a, b) => (b._order || 0) - (a._order || 0)
+  );
 };
 
 const ParameterSidebar: React.FC<ParameterSidebarProps> = memo(
@@ -64,10 +66,18 @@ const ParameterSidebar: React.FC<ParameterSidebarProps> = memo(
     visible: controlledVisible,
     onVisibleChange,
     onCollapsedChange,
-    onParameterHover
+    onParameterHover,
+    initialParams
   }) => {
     const [isCollapsed, setIsCollapsed] = useState(false);
-    const [localParams, setLocalParams] = useState<Parameter[]>([]);
+    const [localParams, setLocalParams] = useState<ParameterWithOrder[]>(
+      initialParams?.map((p, index) => ({
+        ...p,
+        _order: initialParams.length - index
+      })) || []
+    );
+    const initialParamsRef = useRef<ScriptParam[] | undefined>(initialParams);
+    const lastAppliedInitialParamsStrRef = useRef<string | null>(null);
 
     // 从内容中提取参数
     const extractedParams = useMemo(() => {
@@ -97,48 +107,74 @@ const ParameterSidebar: React.FC<ParameterSidebarProps> = memo(
       }
     }, [isCollapsed, onCollapsedChange]);
 
-    // 同步提取的参数到本地状态，同时保留已输入的值
+    // 当 initialParams 从外部更新时（比如从后端加载），更新 ref
+    // useEffect(() => {
+    //   // 检查 initialParams 是否真的变化了（通过比较内容，而不是引用）
+    //   const initialParamsStr = JSON.stringify(initialParams);
+    //   const currentStr = JSON.stringify(initialParamsRef.current);
+
+    //   if (initialParamsStr !== currentStr) {
+    //     initialParamsRef.current = initialParams;
+    //   }
+    // }, [initialParams]);
+
+    // 同步提取的参数到本地状态，同时保留已输入的值和初始参数值
     useEffect(() => {
       if (extractedParams.length > 0) {
         setLocalParams((prevParams) => {
           const paramMap = new Map<string, string>();
+
           // 保留已有参数的值
           prevParams.forEach((p) => {
-            if (p.name && p.value) {
-              paramMap.set(p.name, p.value);
+            if (p.config_key && p.config_value) {
+              paramMap.set(p.config_key, p.config_value);
             }
           });
 
           // 合并新提取的参数，保留已有的值
           const merged = extractedParams.map((param) => ({
             ...param,
-            value: paramMap.get(param.name) || param.value
+            config_value: paramMap.get(param.config_key) || param.config_value
           }));
 
-          // 通知外部
-          if (onParameterChange) {
-            onParameterChange(merged);
+          // 检查参数是否真的变化了，避免无限循环
+          const hasChanged =
+            prevParams.length !== merged.length ||
+            prevParams.some(
+              (prev, index) =>
+                prev.config_key !== merged[index]?.config_key ||
+                prev.config_value !== merged[index]?.config_value
+            );
+
+          // 只有当参数实际变化时才通知外部（移除内部 _order 字段）
+          if (hasChanged && onParameterChange) {
+            const paramsToNotify = merged.map(({ _order, ...param }) => param);
+            onParameterChange(paramsToNotify);
           }
 
           return merged;
         });
       } else {
         // 如果没有参数了，清空
-        setLocalParams([]);
-        if (onParameterChange) {
-          onParameterChange([]);
-        }
+        setLocalParams((prevParams) => {
+          if (prevParams.length > 0 && onParameterChange) {
+            onParameterChange([]);
+          }
+          return [];
+        });
       }
     }, [extractedParams, onParameterChange]);
 
     // 处理参数值变化
-    const handleValueChange = (paramName: string, value: string) => {
+    const handleValueChange = (paramKey: string, value: string) => {
       setLocalParams((prev) => {
         const updated = prev.map((p) =>
-          p.name === paramName ? { ...p, value } : p
+          p.config_key === paramKey ? { ...p, config_value: value } : p
         );
         if (onParameterChange) {
-          onParameterChange(updated);
+          // 移除内部 _order 字段
+          const paramsToNotify = updated.map(({ _order, ...param }) => param);
+          onParameterChange(paramsToNotify);
         }
         return updated;
       });
@@ -184,11 +220,11 @@ const ParameterSidebar: React.FC<ParameterSidebarProps> = memo(
                 <div className="flex flex-col gap-[10px]">
                   {localParams.map((param, index) => (
                     <div
-                      key={`${param.name}-${index}`}
+                      key={`${param.config_key}-${index}`}
                       className="flex flex-col rounded-[4px] border border-[#E2E8F0] p-[8px] hover:bg-[#EEF6FF]"
                       onMouseEnter={() => {
                         if (onParameterHover) {
-                          onParameterHover(param.name);
+                          onParameterHover(param.config_key);
                         }
                       }}
                       onMouseLeave={() => {
@@ -201,7 +237,7 @@ const ParameterSidebar: React.FC<ParameterSidebarProps> = memo(
                         参数名:
                       </div>
                       <Input
-                        value={param.name}
+                        value={param.config_key}
                         readOnly
                         disabled
                         className="mb-[8px] w-full"
@@ -211,9 +247,9 @@ const ParameterSidebar: React.FC<ParameterSidebarProps> = memo(
                         参数值:
                       </div>
                       <Input
-                        value={param.value}
+                        value={param.config_value}
                         onChange={(value) =>
-                          handleValueChange(param.name, value)
+                          handleValueChange(param.config_key, value)
                         }
                         className="w-full"
                         placeholder="请输入参数值"
