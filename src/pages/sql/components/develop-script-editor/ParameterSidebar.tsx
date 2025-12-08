@@ -3,6 +3,7 @@ import { Input, Button, Popover } from '@arco-design/web-react';
 import { IconCaretRight } from '@arco-design/web-react/icon';
 import classNames from 'classnames';
 import ParameterIcon from '../../assets/parameter-icon.svg';
+import ArrowRightIcon from '../../assets/arrow-right-icon.svg';
 
 export interface Parameter {
   name: string;
@@ -150,34 +151,31 @@ const ParameterSidebar: React.FC<ParameterSidebarProps> = memo(
     return (
       <div
         className={classNames(
-          'absolute right-0 top-0 z-10 flex h-full flex-col transition-transform duration-300 ease-in-out',
-          isCollapsed ? 'w-auto' : 'w-80'
+          'absolute right-0 top-0 z-10 h-full transition-transform duration-300 ease-in-out',
+          isCollapsed ? 'w-auto' : 'w-[240px]'
         )}
       >
         {isCollapsed ? (
           /* 收起状态：显示图标，hover 时显示完整信息 */
-          <div className="h-[32px] w-[32px] cursor-pointer">
+          <div className="mt-[8px] h-[32px] w-[32px] cursor-pointer">
             <Popover content="打开引用参数列表" position="left">
               <ParameterIcon onClick={() => setIsCollapsed(false)} />
             </Popover>
           </div>
         ) : (
-          <div className="h-full border-l bg-white">
+          <div className="flex h-full flex-col border-l bg-white">
             {/* 标题栏 */}
-            <div className="flex h-12 items-center justify-between border-b border-slate-200 bg-slate-50 px-4">
-              <span className="text-sm font-semibold leading-[22px] text-slate-800">
-                引用参数
-              </span>
-              <Button
-                type="text"
-                size="mini"
-                icon={<IconCaretRight />}
-                onClick={() => setIsCollapsed(true)}
-                className="flex h-6 w-6 items-center justify-center p-0 text-slate-500 hover:text-slate-700"
-              />
+            <div className="flex h-[48px] items-center justify-between p-[12px]">
+              <span className="text-[14px] font-bold">引用参数</span>
+              <Popover content="收起" position="left">
+                <ArrowRightIcon
+                  className="h-[24px] w-[18px] cursor-pointer"
+                  onClick={() => setIsCollapsed(true)}
+                />
+              </Popover>
             </div>
 
-            <div className="flex-1 overflow-y-auto p-4">
+            <div className="flex-1 overflow-y-auto px-[12px] py-[4px]">
               {localParams.length === 0 ? (
                 <div className="flex h-[200px] items-center justify-center">
                   <div className="text-sm text-slate-400">暂无参数名</div>
@@ -187,7 +185,7 @@ const ParameterSidebar: React.FC<ParameterSidebarProps> = memo(
                   {localParams.map((param, index) => (
                     <div
                       key={`${param.name}-${index}`}
-                      className="flex flex-col rounded-[4px] border border-[#E2E8F0] p-[8px]"
+                      className="flex flex-col rounded-[4px] border border-[#E2E8F0] p-[8px] hover:bg-[#EEF6FF]"
                       onMouseEnter={() => {
                         if (onParameterHover) {
                           onParameterHover(param.name);
@@ -207,7 +205,7 @@ const ParameterSidebar: React.FC<ParameterSidebarProps> = memo(
                         readOnly
                         disabled
                         className="mb-[8px] w-full"
-                        placeholder="暂无参数名"
+                        placeholder="暂无参数"
                       />
                       <div className="mb-[4px] text-[14px] text-[var(--color-text-2)]">
                         参数值:
