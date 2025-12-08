@@ -118,6 +118,13 @@
       color: var(--color-text-4);
       width: 24px;
     }
+
+    // 参数高亮样式
+    :global(.cm-parameter-highlight) {
+      background-color: #ffe5b4;
+      border-radius: 2px;
+      padding: 1px 2px;
+    }
   }
 
   .running-code-mirror {

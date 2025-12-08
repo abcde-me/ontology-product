@@ -2,6 +2,7 @@ import React, { memo, useEffect, useMemo, useState } from 'react';
 import { Input, Button, Popover } from '@arco-design/web-react';
 import { IconCaretRight } from '@arco-design/web-react/icon';
 import classNames from 'classnames';
+import ParameterIcon from '../../assets/parameter-icon.svg';
 
 export interface Parameter {
   name: string;
@@ -15,6 +16,7 @@ interface ParameterSidebarProps {
   visible?: boolean;
   onVisibleChange?: (visible: boolean) => void;
   onCollapsedChange?: (collapsed: boolean) => void;
+  onParameterHover?: (paramName: string | null) => void;
 }
 
 // 提取参数的正则表达式
@@ -60,7 +62,8 @@ const ParameterSidebar: React.FC<ParameterSidebarProps> = memo(
     onParameterChange,
     visible: controlledVisible,
     onVisibleChange,
-    onCollapsedChange
+    onCollapsedChange,
+    onParameterHover
   }) => {
     const [isCollapsed, setIsCollapsed] = useState(false);
     const [localParams, setLocalParams] = useState<Parameter[]>([]);
@@ -153,14 +156,9 @@ const ParameterSidebar: React.FC<ParameterSidebarProps> = memo(
       >
         {isCollapsed ? (
           /* 收起状态：显示图标，hover 时显示完整信息 */
-          <div>
+          <div className="h-[32px] w-[32px] cursor-pointer">
             <Popover content="打开引用参数列表" position="left">
-              <Button
-                type="text"
-                icon={<IconCaretRight />}
-                onClick={() => setIsCollapsed(false)}
-                className="flex h-[32px] w-[32px] items-center justify-center p-0 text-slate-500 hover:text-slate-700"
-              />
+              <ParameterIcon onClick={() => setIsCollapsed(false)} />
             </Popover>
           </div>
         ) : (
@@ -185,22 +183,33 @@ const ParameterSidebar: React.FC<ParameterSidebarProps> = memo(
                   <div className="text-sm text-slate-400">暂无参数名</div>
                 </div>
               ) : (
-                <div className="flex flex-col gap-4">
+                <div className="flex flex-col gap-[10px]">
                   {localParams.map((param, index) => (
                     <div
                       key={`${param.name}-${index}`}
-                      className="flex flex-col gap-2"
+                      className="flex flex-col rounded-[4px] border border-[#E2E8F0] p-[8px]"
+                      onMouseEnter={() => {
+                        if (onParameterHover) {
+                          onParameterHover(param.name);
+                        }
+                      }}
+                      onMouseLeave={() => {
+                        if (onParameterHover) {
+                          onParameterHover(null);
+                        }
+                      }}
                     >
-                      <div className="text-xs leading-5 text-slate-500">
+                      <div className="mb-[4px] text-[14px] text-[var(--color-text-2)]">
                         参数名:
                       </div>
                       <Input
                         value={param.name}
                         readOnly
-                        className="w-full [&_.arco-input-inner]:bg-slate-50 [&_.arco-input-inner]:text-sm [&_.arco-input-inner]:text-slate-500"
+                        disabled
+                        className="mb-[8px] w-full"
                         placeholder="暂无参数名"
                       />
-                      <div className="text-xs leading-5 text-slate-500">
+                      <div className="mb-[4px] text-[14px] text-[var(--color-text-2)]">
                         参数值:
                       </div>
                       <Input
@@ -208,7 +217,7 @@ const ParameterSidebar: React.FC<ParameterSidebarProps> = memo(
                         onChange={(value) =>
                           handleValueChange(param.name, value)
                         }
-                        className="w-full [&_.arco-input-inner]:text-sm"
+                        className="w-full"
                         placeholder="请输入参数值"
                       />
                     </div>

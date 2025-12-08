@@ -16,7 +16,13 @@ import {
 } from '@arco-design/web-react/icon';
 import { sql } from '@codemirror/lang-sql';
 import { lintGutter } from '@codemirror/lint';
-import { EditorView } from '@codemirror/view';
+import {
+  EditorView,
+  Decoration,
+  ViewPlugin,
+  ViewUpdate
+} from '@codemirror/view';
+import { StateEffect, StateField } from '@codemirror/state';
 import { tags as t } from '@lezer/highlight';
 import createTheme from '@uiw/codemirror-themes';
 import CodeMirror, { ReactCodeMirrorRef } from '@uiw/react-codemirror';
@@ -54,6 +60,76 @@ interface NotebookWorkspaceProps {
   onToScriptList?: (key: string) => void;
   curActiveTab: string;
 }
+
+// 定义用于高亮参数的效果
+const highlightParameterEffect = StateEffect.define<string | null>();
+
+// 创建参数高亮的装饰样式
+const parameterHighlightMark = Decoration.mark({
+  class: 'cm-parameter-highlight',
+  attributes: { style: 'background-color: #FFE5B4; border-radius: 2px;' }
+});
+
+// 存储当前高亮的参数名
+const currentHighlightedParam = StateField.define<string | null>({
+  create() {
+    return null;
+  },
+  update(value, tr) {
+    // 检查是否有高亮效果
+    for (const effect of tr.effects) {
+      if (effect.is(highlightParameterEffect)) {
+        return effect.value;
+      }
+    }
+    return value;
+  }
+});
+
+// 创建参数高亮的StateField
+const parameterHighlightField = StateField.define({
+  create(state) {
+    return Decoration.none;
+  },
+  update(decorations, tr) {
+    // 获取当前高亮的参数名
+    const paramName = tr.state.field(currentHighlightedParam);
+
+    // 如果有文档变化或参数变化，重新计算高亮
+    if (
+      tr.docChanged ||
+      tr.effects.some((e) => e.is(highlightParameterEffect))
+    ) {
+      if (!paramName) {
+        // 清除高亮
+        return Decoration.none;
+      }
+
+      // 查找所有匹配的参数引用
+      const text = tr.state.doc.toString();
+      const regex = new RegExp(
+        `\\$\\{${paramName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\}`,
+        'g'
+      );
+      const ranges: Array<{ from: number; to: number }> = [];
+      let match;
+
+      while ((match = regex.exec(text)) !== null) {
+        const from = match.index;
+        const to = from + match[0].length;
+        ranges.push({ from, to });
+      }
+
+      return Decoration.set(
+        ranges.map(({ from, to }) => parameterHighlightMark.range(from, to))
+      );
+    }
+
+    // 如果没有文档变化，只需要更新装饰位置
+    return decorations.map(tr.changes);
+  },
+  provide: (f) => EditorView.decorations.from(f)
+});
 
 // 内部组件，使用 EditorContext
 const EditorWorkspaceContent: React.FC<{
@@ -96,6 +172,16 @@ const EditorWorkspaceContent: React.FC<{
     const [sidebarVisible, setSidebarVisible] = React.useState<boolean>(false);
     const [sidebarCollapsed, setSidebarCollapsed] =
       React.useState<boolean>(false);
+
+    // 处理参数hover事件
+    const handleParameterHover = useCallback((paramName: string | null) => {
+      if (!editorRef.current?.view) return;
+
+      const view = editorRef.current.view;
+      view.dispatch({
+        effects: highlightParameterEffect.of(paramName)
+      });
+    }, []);
     useEffect(() => {
       form.setFieldsValue({
         fileName: fileName
@@ -367,6 +453,8 @@ const EditorWorkspaceContent: React.FC<{
               extensions={[
                 sql({ upperCaseKeywords: true }),
                 lintGutter(),
+                currentHighlightedParam,
+                parameterHighlightField,
                 EditorView.updateListener.of((update) => {
                   if (update.selectionSet) {
                     handleCursorChange(update.view);
@@ -390,6 +478,7 @@ const EditorWorkspaceContent: React.FC<{
             onParameterChange={setParameters}
             onVisibleChange={setSidebarVisible}
             onCollapsedChange={setSidebarCollapsed}
+            onParameterHover={handleParameterHover}
           />
         </div>
 
