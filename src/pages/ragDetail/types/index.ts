@@ -222,6 +222,7 @@ export interface ApiAiData {
   summaries?: string; // 总结
   questions?: string; // 假设性问题
   keywords?: string[]; // 实体
+  entities?: string[]; // 实体
   tags?: Array<{
     id: number;
     name: string;

@@ -72,6 +72,7 @@ import DatasetMoveIcon from '@/pages/datasetManagement/assets/dataset_move.svg';
 import DatasetMoveActiveIcon from '@/pages/datasetManagement/assets/dataset_move_active.svg';
 import { useHasPermission } from '@/store/userInfoStore';
 import { throttle } from 'lodash-es';
+import { useParams } from '@/utils/url';
 
 // 时间格式化函数
 const formatDateTime = (dateTimeString: string): string => {
@@ -865,6 +866,7 @@ export enum datasetStatus {
 const DatasetManagement: React.FC = () => {
   const history = useHistory();
   const TabPane = Tabs.TabPane;
+  const sceneName = useParams('sceneName');
   const [sceneTypeForm] = Form.useForm();
   const [moveDatasetForm] = Form.useForm();
   const [tagList, setTagList] = React.useState<{ id: number; name: string }[]>(
@@ -961,44 +963,44 @@ const DatasetManagement: React.FC = () => {
 
   const isCanMove = useHasPermission(DATA_MANAGEMENT_PERMISSIONS.CAN_MOVE);
 
-  useEffect(() => {
-    const container = document.querySelector('.layout-detail');
-    if (!container) return;
-    const handleScroll = (event) => {
-      const currentScrollTop = container.scrollTop;
-      // if (stickyRef.current) {
-      // const stickyTop = stickyRef.current.current.offsetTop;
-      // setIsSticky(stickyTop === 86);
-      // }
+  // useEffect(() => {
+  //   const container = document.querySelector('.layout-detail');
+  //   if (!container) return;
+  //   const handleScroll = (event) => {
+  //     const currentScrollTop = container.scrollTop;
+  //     // if (stickyRef.current) {
+  //     // const stickyTop = stickyRef.current.current.offsetTop;
+  //     // setIsSticky(stickyTop === 86);
+  //     // }
 
-      if (event.deltaY > 0 && !isHiddenBaseInfo) {
-        setIsHiddenBaseInfo(true);
-      } else if (
-        currentScrollTop === 0 &&
-        event.deltaY < 0 &&
-        isHiddenBaseInfo
-      ) {
-        setIsHiddenBaseInfo(false);
-        // setIsSticky(false);
-        event.preventDefault();
-      }
-      lastScrollTop.current = currentScrollTop;
-    };
+  //     if (event.deltaY > 0 && !isHiddenBaseInfo) {
+  //       setIsHiddenBaseInfo(true);
+  //     } else if (
+  //       currentScrollTop === 0 &&
+  //       event.deltaY < 0 &&
+  //       isHiddenBaseInfo
+  //     ) {
+  //       setIsHiddenBaseInfo(false);
+  //       // setIsSticky(false);
+  //       event.preventDefault();
+  //     }
+  //     lastScrollTop.current = currentScrollTop;
+  //   };
 
-    // 节流处理滚动事件，避免频繁触发
-    const throttledHandleScroll = throttle(handleScroll, 100);
+  //   // 节流处理滚动事件，避免频繁触发
+  //   const throttledHandleScroll = throttle(handleScroll, 100);
 
-    // 监听滚轮事件
-    container.addEventListener('wheel', throttledHandleScroll, {
-      passive: false
-    });
+  //   // 监听滚轮事件
+  //   container.addEventListener('wheel', throttledHandleScroll, {
+  //     passive: false
+  //   });
 
-    // 在组件卸载时移除监听器
-    return () => {
-      container.removeEventListener('wheel', throttledHandleScroll);
-      throttledHandleScroll.cancel(); // 清除节流计时器
-    };
-  }, [isHiddenBaseInfo]);
+  //   // 在组件卸载时移除监听器
+  //   return () => {
+  //     container.removeEventListener('wheel', throttledHandleScroll);
+  //     throttledHandleScroll.cancel(); // 清除节流计时器
+  //   };
+  // }, [isHiddenBaseInfo]);
 
   // 搜索字段选项
   const searchOptions = [
@@ -1086,11 +1088,9 @@ const DatasetManagement: React.FC = () => {
 
   // 跳转到详情页
   const handleGoToDetail = (datasetId: number) => {
-    const sceneName =
-      datasetSceneList.find(
-        (item) =>
-          Number(selectedSceneTab) !== 0 && item.id === Number(selectedSceneTab)
-      )?.name || '数据集市';
+    const sceneName = datasetSceneList.find(
+      (item) => item.id === Number(selectedSceneTab)
+    )?.id;
     history.push(
       `/tenant/compute/modaforge/datasetManagement/detail/${datasetId}?sceneName=${sceneName}`
     );
@@ -1539,14 +1539,12 @@ const DatasetManagement: React.FC = () => {
             fontFamily: 'PingFang SC, sans-serif',
             fontWeight: 400,
             fontSize: 14,
-            marginTop: '10px',
             color: '#1D2129',
             height: 22,
-            display: 'inline-block',
-            marginLeft: '28px' // 左移一点
+            display: 'inline-block'
           }}
         >
-          退出后，当前修改不会保存
+          确认删除数据集吗？
         </div>
       ),
       okText: '确认删除',
@@ -1738,7 +1736,7 @@ const DatasetManagement: React.FC = () => {
       {/* 注释内容为新建按钮 */}
       <Tabs
         // editable
-        defaultActiveTab="0"
+        defaultActiveTab={sceneName || '0'}
         className={styles.datasetManagementTabs}
         style={{
           zIndex: 1,

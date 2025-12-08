@@ -45,7 +45,7 @@ const FormulaElementCard: React.FC<FormulaElementCardProps> = ({
           placeholder="请输入公式内容"
         />
       ) : (
-        <div className="mb-3 rounded py-3 text-[14px] leading-6 text-gray-900">
+        <div className="rounded text-[14px] leading-6 text-gray-900">
           <SegmentMarkdown
             content={element.content}
             className="text-sm leading-relaxed text-gray-700"
