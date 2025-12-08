@@ -1,10 +1,15 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { AnnotationTypeEmuns } from '../constants';
 import getLabelByValue from '@/utils/getLabelByValue';
 import { InfoDescription } from '@ceai-front/arco-material';
 import LabelInfo from './labelInfo';
 import { useGetModelList } from '../../hooks/useGetModelInfo';
+import { Link } from '@arco-design/web-react';
+import SelectedDataModal from './SelectedDataModal';
+
 function AnnotationConfig({ requirementDetail }: { requirementDetail: any }) {
+  const [visible, setVisible] = useState(false);
+  const selectedData = requirementDetail?.label_data_set || [];
   const labelToolCode = requirementDetail?.label_tool?.label_tool_code;
   const { data: modelList = [] } = useGetModelList(
     { label_tool_code: labelToolCode, page: 1, page_size: 1000 },
@@ -24,7 +29,14 @@ function AnnotationConfig({ requirementDetail }: { requirementDetail: any }) {
         },
         {
           label: '标注数据',
-          value: requirementDetail?.label_count
+          value: (
+            <>
+              <span>已选数据量 {requirementDetail?.label_count}，</span>
+              <Link type="text" onClick={() => setVisible(true)}>
+                查看全部
+              </Link>
+            </>
+          )
         },
         {
           label: '拆分任务包',
@@ -47,6 +59,11 @@ function AnnotationConfig({ requirementDetail }: { requirementDetail: any }) {
       <LabelInfo
         requirementDetail={requirementDetail}
         labelToolCode={labelToolCode}
+      />
+      <SelectedDataModal
+        visible={visible}
+        onClose={() => setVisible(false)}
+        data={selectedData}
       />
     </div>
   );

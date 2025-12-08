@@ -18,17 +18,11 @@ import {
 import dayjs from 'dayjs';
 import React, { useEffect, useRef, useState, useMemo } from 'react';
 import './DetailModal.scss';
-interface TreeItem {
-  id: number;
-  parent_id: number;
-  type: number;
-  type_name: string;
-  name: string;
-  base_dir: string;
-  children: Record<string, TreeItem[]>; // 子类型映射（如 {volume: [], db: []}）
-  perms?: string[] | null;
-  execution_id?: string;
-}
+import {
+  formatCatalogTree,
+  transformToTreeData,
+  getDirectoryPath
+} from '../../hooks/useCatalogTree';
 interface DataSourceModalProps {
   fileType: Record<number, string[]>;
   visible: boolean;
@@ -81,89 +75,13 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
   const initializedRef = useRef(false);
   const prevInitialSelectedDataRef = useRef<any[]>([]);
   const pathMapInitializedRef = useRef(false);
-  const formatCatalogTree = (rawData: any[]): TreeItem[] => {
-    // 递归处理单个节点的子层级
-    const handleChildren = (
-      children: TreeItem['children']
-    ): TreeItem['children'] => {
-      if (!children) return {};
 
-      const newChildren: TreeItem['children'] = {};
-
-      // 遍历所有子类型（如 volume、db、db_item 等）
-      Object.entries(children).forEach(([childType, childItems]) => {
-        // 核心逻辑：将 "volume" 类型替换为 "数据卷" 作为分类名
-        const targetType = childType === 'volume' ? '数据卷' : childType;
-
-        // 递归处理子节点的子层级（确保深层 volume 也能被替换）
-        const formattedItems = childItems.map((item) => ({
-          ...item,
-          // 递归处理当前节点的子节点
-          children: handleChildren(item.children)
-        }));
-
-        // 将处理后的子项挂载到新分类下
-        newChildren[targetType] = formattedItems;
-      });
-
-      return newChildren;
-    };
-
-    // 处理最外层 catalog 节点
-    return rawData.map((catalog) => ({
-      ...catalog,
-      // 处理每个 catalog 的子层级
-      children: handleChildren(catalog.children)
-    }));
+  // 获取目录路径的辅助函数
+  const getDirPath = (dirPathKey: string): string => {
+    return getDirectoryPath(dirPathKey, originalTreeData);
   };
 
-  // 根据 dir_path key 获取完整的目录路径
-  const getDirectoryPath = (dirPathKey: string): string => {
-    if (!dirPathKey || !originalTreeData.length) return '';
-
-    const keys = dirPathKey.split(',');
-    if (keys.length < 3) return '';
-
-    const catalogId = keys[0];
-    const volumeKey = keys[1];
-    const volumeId = keys[2];
-
-    // 在树形数据中查找路径
-    const findPath = (nodes: any[], path: string[] = []): string[] | null => {
-      for (const node of nodes) {
-        const currentPath = [...path, node.title];
-
-        if (node.key === catalogId) {
-          // 找到 catalog，继续查找数据卷
-          if (node.children) {
-            for (const child of node.children) {
-              if (child.key === volumeKey) {
-                // 找到数据卷分类，继续查找具体的 volume
-                if (child.children) {
-                  for (const volume of child.children) {
-                    if (volume.id === Number(volumeId)) {
-                      return [...currentPath, child.title, volume.title];
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-
-        if (node.children) {
-          const found = findPath(node.children, currentPath);
-          if (found) return found;
-        }
-      }
-      return null;
-    };
-
-    const pathArray = findPath(originalTreeData);
-    return pathArray ? pathArray.join('/') : '';
-  };
   const getTreeDataList = () => {
-    let newTreeData: any[] = [];
     try {
       setTreeLoading(true);
       getCatalogList({ dir_type: CatalogItemType.Volume }).then((res) => {
@@ -171,35 +89,9 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
         if (res.status !== 200) {
           return;
         }
-        newTreeData = formatCatalogTree(res.data?.src).map((item) => {
-          return item.children
-            ? {
-                allowClick: false,
-                title: item.name,
-                key: String(item.id),
-                level: 1,
-                actionOnClick: 'expand',
-                children:
-                  item?.children?.数据卷 && item.children.数据卷.length > 0
-                    ? [
-                        {
-                          actionOnClick: 'expand',
-                          level: 2,
-                          title: '数据卷',
-                          key: String(item.id) + '数据卷',
-                          allowClick: false,
-                          children: item.children.数据卷.map((subItem) => ({
-                            title: subItem.name,
-                            key: `${item.id},${item.id}数据卷,${subItem.id}`,
-                            id: subItem?.id,
-                            level: 3,
-                            actionOnClick: 'select'
-                          }))
-                        }
-                      ]
-                    : undefined
-              }
-            : { title: item.name, key: item.id };
+        const formatted = formatCatalogTree(res.data?.src || []);
+        const newTreeData = transformToTreeData(formatted, {
+          includeActionProps: true
         });
         setTreeData(newTreeData);
         setOriginalTreeData(newTreeData);
@@ -249,7 +141,7 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
     initialSelectedData.forEach((item) => {
       // 如果数据中有 dir_name，尝试解析路径
       if (item.dir_name) {
-        const path = getDirectoryPath(item.dir_name);
+        const path = getDirPath(item.dir_name);
         if (path) {
           newPathMap.set(item.execution_id || item.run_id, path);
         }
@@ -307,7 +199,7 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
                 setCheckedKeys([value[0]?.split(',')?.[2]]);
                 setDir_path(value);
                 // 获取目录路径并更新映射
-                const path = getDirectoryPath(value[0] || '');
+                const path = getDirPath(value[0] || '');
                 const newPathMap = new Map(selectedDataPathMap);
                 // 更新当前选中数据的路径映射
                 const getUniqueId = (item: any) =>
@@ -619,9 +511,7 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
                   onChange: (selectedRowKeys, selectedRows) => {
                     // 合并新旧选中数据并处理取消选中
                     const mergedMap = new Map<string, any>();
-                    const currentPath = getDirectoryPath(
-                      String(dir_path[0] || '')
-                    );
+                    const currentPath = getDirPath(String(dir_path[0] || ''));
 
                     // 辅助函数：获取唯一标识符
                     const getUniqueId = (item: any) => {
