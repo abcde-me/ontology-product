@@ -37,6 +37,7 @@ import RunningInfoPanel from './RunningInfoPanel';
 import classNames from 'classnames';
 import ModalParamList from '../data-manager/ModalParamList';
 import ReleaseVersionModal from './ReleaseVersionModal';
+import ParameterSidebar, { Parameter } from './ParameterSidebar';
 
 interface NotebookWorkspaceProps {
   content: string;
@@ -90,6 +91,10 @@ const EditorWorkspaceContent: React.FC<{
     const [isSpecificationsValid, setIsSpecificationsValid] = useState(true);
     const [paramVisible, setParamVisible] = React.useState<boolean>(false);
     const [releaseVersionVisible, setReleaseVersionVisible] =
+      React.useState<boolean>(false);
+    const [parameters, setParameters] = React.useState<Parameter[]>([]);
+    const [sidebarVisible, setSidebarVisible] = React.useState<boolean>(false);
+    const [sidebarCollapsed, setSidebarCollapsed] =
       React.useState<boolean>(false);
     useEffect(() => {
       form.setFieldsValue({
@@ -333,7 +338,8 @@ const EditorWorkspaceContent: React.FC<{
 
         <div
           className={classNames(styles['sql-editor-container'], {
-            [styles['running-code-mirror']]: !hasUpdatePermission
+            [styles['running-code-mirror']]: !hasUpdatePermission,
+            [styles['with-sidebar']]: sidebarVisible && !sidebarCollapsed
           })}
         >
           <Spin
@@ -377,6 +383,14 @@ const EditorWorkspaceContent: React.FC<{
               className={styles['code-editor']}
             />
           </Spin>
+
+          {/* 参数侧边栏 */}
+          <ParameterSidebar
+            content={editorContent}
+            onParameterChange={setParameters}
+            onVisibleChange={setSidebarVisible}
+            onCollapsedChange={setSidebarCollapsed}
+          />
         </div>
 
         {/* 运行信息面板 */}

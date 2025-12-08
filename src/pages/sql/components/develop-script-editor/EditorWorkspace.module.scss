@@ -69,6 +69,7 @@
     background-color: #fff;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
     overflow: hidden;
+    position: relative;
 
     :global(.arco-spin-children) {
       height: 100%;
@@ -80,6 +81,14 @@
 
       :global(.cm-editor) {
         height: 100%;
+      }
+    }
+
+    // 当侧边栏可见且未收起时，为编辑器内容添加右边距
+    &.with-sidebar {
+      :global(.cm-scroller) {
+        padding-right: 320px;
+        transition: padding-right 0.3s ease;
       }
     }
 
