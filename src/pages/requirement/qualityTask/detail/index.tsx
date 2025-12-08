@@ -169,7 +169,8 @@ function QualityTaskDetail() {
       onOk: async () => {
         const params = {
           action: type,
-          pkg_id: Number(pkg_id)
+          pkg_id: Number(pkg_id),
+          qc_round: Number(qc_round)
         };
         const res = await manageQCTaskBatch(params);
         if (res.data.code === 'success') {
@@ -524,6 +525,7 @@ function QualityTaskDetail() {
       <SamplingModal
         visible={samplingModalVisible}
         metricData={metricData}
+        qc_round={Number(qc_round)}
         onClose={() => setSamplingModalVisible(false)}
         onSuccess={handleSuccess}
       />

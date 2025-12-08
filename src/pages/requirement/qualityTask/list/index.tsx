@@ -481,6 +481,7 @@ function QualityTaskList() {
 
       {/* 首次抽检设置弹窗 */}
       <FirstInspectModal
+        qc_round={Number(activeTab)}
         record={currentTask}
         visible={firstInspectModalVisible}
         onClose={() => setFirstInspectModalVisible(false)}

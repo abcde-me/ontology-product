@@ -22,6 +22,7 @@ export enum SamplingCountType {
 interface FirstInspectModalProps {
   visible: boolean;
   record?: QualityTaskItem | null;
+  qc_round: number;
   onClose: () => void;
   onSuccess: () => void;
 }
@@ -29,6 +30,7 @@ interface FirstInspectModalProps {
 const FirstInspectModal: React.FC<FirstInspectModalProps> = ({
   visible,
   record,
+  qc_round,
   onClose,
   onSuccess
 }) => {
@@ -51,7 +53,7 @@ const FirstInspectModal: React.FC<FirstInspectModalProps> = ({
     try {
       const sample_info = {
         // 首次抽检/待质检 - uninspect; 待复核 - recheck
-        task_type: 'uninspect'
+        task_type: 0
       };
       const values = await form.validate();
       sample_info['sample_type'] = values.sample_type;
@@ -63,6 +65,7 @@ const FirstInspectModal: React.FC<FirstInspectModalProps> = ({
       const params = {
         pkg_id: record?.pkg_id,
         action: 'sample',
+        qc_round,
         sample_info
       };
       const res = await manageQCTaskBatch(params);

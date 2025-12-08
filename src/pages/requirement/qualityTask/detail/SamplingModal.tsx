@@ -14,8 +14,8 @@ const FormItem = Form.Item;
 
 // 抽检设置类型
 export enum SamplingType {
-  ToInspect = 'uninspect', // 待质检
-  ToRecheck = 'recheck' // 待复核
+  ToInspect = 0, // 待质检
+  ToRecheck = 1 // 待复核
 }
 
 export enum SamplingCountType {
@@ -27,6 +27,7 @@ export enum SamplingCountType {
 interface SamplingModalProps {
   visible: boolean;
   metricData: any;
+  qc_round: number;
   onClose: () => void;
   onSuccess: () => void;
 }
@@ -34,6 +35,7 @@ interface SamplingModalProps {
 const SamplingModal: React.FC<SamplingModalProps> = ({
   visible,
   metricData,
+  qc_round,
   onClose,
   onSuccess
 }) => {
@@ -57,7 +59,7 @@ const SamplingModal: React.FC<SamplingModalProps> = ({
     try {
       const sample_info = {
         // 首次抽检/待质检 - uninspect; 待复核 - recheck
-        task_type: 'uninspect'
+        task_type: 0
       };
       const values = await form.validate();
       sample_info['sample_type'] = values.sample_type;
@@ -68,6 +70,7 @@ const SamplingModal: React.FC<SamplingModalProps> = ({
       }
       const params = {
         pkg_id: Number(pkg_id),
+        qc_round,
         action: 'sample',
         sample_info
       };
