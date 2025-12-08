@@ -628,3 +628,29 @@ export interface DatasetsOptionsData {
    */
   total: number;
 }
+
+export interface ListDevelopScriptParams {
+  /**
+   * 页大小
+   */
+  page_size?: number;
+  /**
+   * 页码
+   */
+  page?: number;
+}
+
+export interface ListDevelopScriptParamsData {
+  data: {
+    /**
+     * 页大小
+     */
+    page_size?: number;
+    /**
+     * 页码
+     */
+    page?: number;
+    total: number;
+    items: [];
+  };
+}

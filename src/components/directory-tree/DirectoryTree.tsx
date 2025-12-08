@@ -29,7 +29,8 @@ import {
   IconDelete,
   IconCopy,
   IconFolder,
-  IconFile
+  IconFile,
+  IconMore
 } from '@arco-design/web-react/icon';
 import FolderIcon from '@/assets/python/folder.svg';
 import FileIcon from '@/assets/python/file.svg';
@@ -50,6 +51,10 @@ import { now } from 'lodash-es';
 import { PermissionWrapper } from '../PermissionGuard';
 import { debounce } from 'lodash-es';
 import SQLFileIcon from '@/assets/sql/sql-file-icon.svg';
+import {
+  VersionType,
+  VersionTypeEnum
+} from '@/pages/sql/components/sctipt-card';
 // 原始数据接口
 export type TreeNodeItem = Partial<PythonListItem> & {
   dataRef?: any;
@@ -623,6 +628,60 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
       });
     };
 
+    const getVersionType = (version_type) => {
+      switch (version_type) {
+        case VersionType.RELEASED:
+          return (
+            <div className={'script-card-content-item-title-icon'}>
+              <span
+                className={
+                  version_type === VersionType.RELEASED ? 'released-icon' : ''
+                }
+              />
+              <div className={'script-card-content-item-title-icon-text'}>
+                {VersionTypeEnum.RELEASED}
+              </div>
+            </div>
+          );
+        case VersionType.UNRELEASED:
+          return (
+            <div className={'script-card-content-item-title-icon'}>
+              <span
+                className={
+                  version_type === VersionType.UNRELEASED
+                    ? 'unreleased-icon'
+                    : ''
+                }
+              />
+              <div className={'script-card-content-item-title-icon-text'}>
+                {VersionTypeEnum.UNRELEASED}
+              </div>
+            </div>
+          );
+        case VersionType.SCHEDULED:
+          return (
+            <div className={'script-card-content-item-title-icon'}>
+              <span
+                className={
+                  version_type === VersionType.SCHEDULED ? 'scheduled-icon' : ''
+                }
+              />
+              <div className={'script-card-content-item-title-icon-text'}>
+                {VersionTypeEnum.SCHEDULED}
+              </div>
+            </div>
+          );
+        default:
+          return (
+            <div className={'script-card-content-item-title-icon'}>
+              <span className={'unreleased-icon'} />
+              <div className={'script-card-content-item-title-icon-text'}>
+                {VersionTypeEnum.UNRELEASED}
+              </div>
+            </div>
+          );
+      }
+    };
     return (
       <div
         className="directory-tree-container"
@@ -763,36 +822,80 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
 
               return (
                 <div className="directory-tree-extra">
-                  <PermissionWrapper permission={nowPermissions.MODIFY}>
-                    <Tooltip color="white" content="重命名">
-                      <IconEdit
-                        className="mr-1 text-[14px] hover:text-[rgb(var(--primary-6))]"
-                        onClick={() => handleEdit(node)}
-                      />
-                    </Tooltip>
-                  </PermissionWrapper>
-                  <PermissionWrapper permission={nowPermissions.CREATE}>
-                    {node.dataRef?.type !== PythonItemType.Directory && (
-                      <Tooltip color="white" content="复制并粘贴">
-                        <IconCopy
+                  <Dropdown
+                    droplist={
+                      <Menu>
+                        <PermissionWrapper permission={nowPermissions.MODIFY}>
+                          <Menu.Item
+                            onClick={() => {
+                              handleEdit(node);
+                            }}
+                            key="1"
+                          >
+                            <IconEdit className="mr-1" />
+                            重命名
+                          </Menu.Item>
+                        </PermissionWrapper>
+                        <PermissionWrapper permission={nowPermissions.CREATE}>
+                          <Menu.Item
+                            onClick={() => {
+                              handleCopy(node);
+                            }}
+                            key="2"
+                          >
+                            <IconCopy className="mr-1" />
+                            复制为新脚本
+                          </Menu.Item>
+                        </PermissionWrapper>
+                        <PermissionWrapper permission={nowPermissions.DELETE}>
+                          <Menu.Item
+                            onClick={() => {
+                              handleDelete(node);
+                            }}
+                            key="3"
+                          >
+                            <IconDelete className="mr-1" />
+                            删除
+                          </Menu.Item>
+                        </PermissionWrapper>
+                      </Menu>
+                    }
+                    position="bl"
+                  >
+                    <Button type="text">
+                      <IconMore />
+                    </Button>
+                  </Dropdown>
+                  {/* <PermissionWrapper permission={nowPermissions.MODIFY}>
+                      <Tooltip color="white" content="重命名">
+                        <IconEdit
                           className="mr-1 text-[14px] hover:text-[rgb(var(--primary-6))]"
+                          onClick={() => handleEdit(node)}
+                        />
+                      </Tooltip>
+                    </PermissionWrapper>
+                    <PermissionWrapper permission={nowPermissions.CREATE}>
+                      {node.dataRef?.type !== PythonItemType.Directory && (
+                        <Tooltip color="white" content="复制并粘贴">
+                          <IconCopy
+                            className="mr-1 text-[14px] hover:text-[rgb(var(--primary-6))]"
+                            onClick={() =>
+                              handleCopy(node as unknown as NodeProps)
+                            }
+                          />
+                        </Tooltip>
+                      )}
+                    </PermissionWrapper>
+                    <PermissionWrapper permission={nowPermissions.DELETE}>
+                      <Tooltip color="white" content="删除">
+                        <IconDelete
+                          className="text-[14px] hover:text-[rgb(var(--primary-6))]"
                           onClick={() =>
-                            handleCopy(node as unknown as NodeProps)
+                            handleDelete(node as unknown as NodeProps)
                           }
                         />
                       </Tooltip>
-                    )}
-                  </PermissionWrapper>
-                  <PermissionWrapper permission={nowPermissions.DELETE}>
-                    <Tooltip color="white" content="删除">
-                      <IconDelete
-                        className="text-[14px] hover:text-[rgb(var(--primary-6))]"
-                        onClick={() =>
-                          handleDelete(node as unknown as NodeProps)
-                        }
-                      />
-                    </Tooltip>
-                  </PermissionWrapper>
+                    </PermissionWrapper> */}
                 </div>
               );
             }}
@@ -844,6 +947,7 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
                         </div>
                       )}
                   </div>
+                  <div>{getVersionType(props.dataRef?.version_type)}</div>
                 </div>
               );
             }}

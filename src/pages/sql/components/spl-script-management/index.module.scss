@@ -1,0 +1,23 @@
+.spl-script-management {
+  padding: 16px;
+
+  .spl-script-management-title {
+    font-family: 'PingFang SC';
+    font-size: 20px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 30px;
+    margin-bottom: 16px;
+  }
+
+  .spl-tabs {
+    :global(.arco-tabs-header-nav) {
+      padding: 0 !important;
+      border-right: 0 !important;
+    }
+
+    :global(.arco-tabs-content) {
+      overflow: hidden !important;
+    }
+  }
+}
