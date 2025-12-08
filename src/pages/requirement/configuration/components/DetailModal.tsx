@@ -433,7 +433,6 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
       alignCenter={true}
       escToExit={false}
       maskClosable={false}
-      className="fullscreen-modal"
       style={{ width: '960px', height: '800px', overflow: 'hidden' }}
       closeIcon={null}
       footer={

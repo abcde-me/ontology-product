@@ -1,7 +1,23 @@
 .department-modal-content {
+  height: 600px;
+  overflow-y: auto;
+  padding: 0 12px;
+
+  .search-input {
+    background-color: #fff;
+    position: sticky;
+    top: 0;
+    z-index: 30;
+    padding-bottom: 8px;
+  }
+
+  .arco-tree {
+    padding-left: 4px;
+    padding-right: 4px;
+  }
+
   .arco-tree-node-title {
     color: #0f172a !important;
-    width: 300px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -20,5 +36,18 @@
 
   .arco-tree-node.arco-tree-node-selected {
     background-color: transparent !important;
+  }
+}
+
+.department-selected-content {
+  height: 600px;
+  overflow-y: auto;
+  padding-top: 12px;
+  padding-bottom: 16px;
+
+  .arco-table {
+    .arco-table-th {
+      background-color: #f7f8fa;
+    }
   }
 }
