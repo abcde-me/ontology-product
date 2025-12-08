@@ -114,10 +114,10 @@ function RequirementInfo() {
             <RequirementDetail requirementDetail={requirementDetail} />
           </TabPane>
           <TabPane key="progress" title="进度">
-            <RequirementProgress />
+            <RequirementProgress isActive={activeTab === 'progress'} />
           </TabPane>
           <TabPane key="particular" title="明细">
-            <RequirementParticular />
+            <RequirementParticular isActive={activeTab === 'particular'} />
           </TabPane>
         </Tabs>
       </div>

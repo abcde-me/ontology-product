@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Table,
   Button,
@@ -10,58 +10,28 @@ import {
 import { ColumnProps } from '@arco-design/web-react/es/Table';
 import { SorterInfo } from '@arco-design/web-react/es/Table/interface';
 import { IconRight } from '@arco-design/web-react/icon';
+import { useParams } from '@/utils/url';
 import GenerateRecordModal from './GenerateRecordModal';
+import { getProgressRequirement } from '@/api/dataAnnotation';
 import './index.scss';
 
-interface TaskPackage {
-  id: number;
-  taskCount: number;
-  annotationProgress: {
-    completed: number;
-    total: number;
-  };
-  firstRoundQCProgress: {
-    completed: number;
-    total: number;
-  };
-  secondRoundQCProgress: {
-    completed: number;
-    total: number;
-  };
-  createTime: string;
-  creator: string;
+interface StatisticsItem {
+  passed: number | string;
+  unreceived: number | string;
+  sampling: number | string;
+  unowned: number | string;
 }
 
-// 模拟数据
-const mockData: TaskPackage[] = [
-  {
-    id: 3,
-    taskCount: 300,
-    annotationProgress: { completed: 100, total: 100 },
-    firstRoundQCProgress: { completed: 46, total: 100 },
-    secondRoundQCProgress: { completed: 36, total: 100 },
-    createTime: '2025-05-05 05:05:05',
-    creator: '李斯'
-  },
-  {
-    id: 2,
-    taskCount: 300,
-    annotationProgress: { completed: 66, total: 100 },
-    firstRoundQCProgress: { completed: 46, total: 100 },
-    secondRoundQCProgress: { completed: 36, total: 100 },
-    createTime: '2025-05-04 05:05:05',
-    creator: '王武'
-  },
-  {
-    id: 1,
-    taskCount: 300,
-    annotationProgress: { completed: 66, total: 100 },
-    firstRoundQCProgress: { completed: 46, total: 100 },
-    secondRoundQCProgress: { completed: 36, total: 100 },
-    createTime: '2025-05-03 05:05:05',
-    creator: '张三'
-  }
-];
+interface TaskPackage {
+  pkg_id: string;
+  front_pkg_id: string;
+  pkg_task_cnt: string | number;
+  label_cnt: string | number;
+  total_qc_round: string | number;
+  statistics: StatisticsItem[];
+  creator_name: string;
+  create_time: string;
+}
 
 // 进度条组件
 const ProgressBar: React.FC<{
@@ -85,30 +55,57 @@ const ProgressBar: React.FC<{
 
 // 具体进度列渲染
 const renderProgress = (record: TaskPackage) => {
+  const statistics = record.statistics || [];
+  const pkgTaskCnt = Number(record.pkg_task_cnt) || 0;
+  const totalQcRound = Number(record.total_qc_round) || 0;
+
+  // 标注进度：statistics[0].passed / pkg_task_cnt
+  const annotationPassed = statistics[0]
+    ? Number(statistics[0].passed) || 0
+    : 0;
+
+  // 构建进度项数组
+  const progressItems: { label: string; completed: number; total: number }[] = [
+    {
+      label: '标注',
+      completed: annotationPassed,
+      total: pkgTaskCnt
+    }
+  ];
+
+  // 质检进度：从statistics第二项开始，进度为当前passed / 前一个passed
+  for (let i = 1; i <= totalQcRound && i < statistics.length; i++) {
+    const currentPassed = Number(statistics[i]?.passed) || 0;
+    const prevPassed = Number(statistics[i - 1]?.passed) || 0;
+    progressItems.push({
+      label: `${i}轮质检`,
+      completed: currentPassed,
+      total: prevPassed
+    });
+  }
+
   return (
     <div className="progress-container">
-      <ProgressBar
-        label="标注"
-        completed={record.annotationProgress.completed}
-        total={record.annotationProgress.total}
-      />
-      <IconRight className="progress-arrow" />
-      <ProgressBar
-        label="1轮质检"
-        completed={record.firstRoundQCProgress.completed}
-        total={record.firstRoundQCProgress.total}
-      />
-      <IconRight className="progress-arrow" />
-      <ProgressBar
-        label="2轮质检"
-        completed={record.secondRoundQCProgress.completed}
-        total={record.secondRoundQCProgress.total}
-      />
+      {progressItems.map((item, index) => (
+        <React.Fragment key={item.label}>
+          {index > 0 && <IconRight className="progress-arrow" />}
+          <ProgressBar
+            label={item.label}
+            completed={item.completed}
+            total={item.total}
+          />
+        </React.Fragment>
+      ))}
     </div>
   );
 };
 
-function RequirementProgress() {
+interface RequirementProgressProps {
+  isActive?: boolean;
+}
+
+function RequirementProgress({ isActive }: RequirementProgressProps) {
+  const id = useParams('id') as string;
   const [selectedRowKeys, setSelectedRowKeys] = useState<(string | number)[]>(
     []
   );
@@ -117,17 +114,47 @@ function RequirementProgress() {
   const [current, setCurrent] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [sorter, setSorter] = useState<SorterInfo | null>(null);
+  const [dataList, setDataList] = useState<TaskPackage[]>([]);
+  const [total, setTotal] = useState(0);
+  const [loading, setLoading] = useState(false);
+
+  // 获取进度数据
+  const fetchProgressData = async () => {
+    if (!id) return;
+    setLoading(true);
+    try {
+      const res = await getProgressRequirement({
+        req_id: Number(id),
+        page: current,
+        page_size: pageSize
+      });
+      if (res?.code === 'success') {
+        setDataList(res.data.items || []);
+        setTotal(res.data.total || 0);
+      }
+    } catch (error) {
+      console.error('获取进度数据失败:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (isActive) {
+      fetchProgressData();
+    }
+  }, [id, current, pageSize, isActive]);
 
   // 表格列定义
   const columns: ColumnProps[] = [
     {
       title: '任务包ID',
-      dataIndex: 'id',
+      dataIndex: 'front_pkg_id',
       width: 100
     },
     {
       title: '任务数',
-      dataIndex: 'taskCount',
+      dataIndex: 'pkg_task_cnt',
       width: 80
     },
     {
@@ -137,13 +164,13 @@ function RequirementProgress() {
     },
     {
       title: '创建时间',
-      dataIndex: 'createTime',
-      width: 170,
-      sorter: true
+      dataIndex: 'create_time',
+      width: 170
+      // sorter: true
     },
     {
       title: '创建人',
-      dataIndex: 'creator',
+      dataIndex: 'creator_name',
       width: 100
     }
   ];
@@ -225,8 +252,9 @@ function RequirementProgress() {
       <Table
         border={false}
         columns={columns}
-        data={mockData}
-        rowKey="id"
+        data={dataList}
+        rowKey="pkg_id"
+        loading={loading}
         rowSelection={{
           type: 'checkbox',
           selectedRowKeys,
@@ -239,12 +267,12 @@ function RequirementProgress() {
         scroll={{ x: 'max-content' }}
       />
 
-      {mockData.length > 0 && (
+      {total > 0 && (
         <div className="progress-pagination">
           <Pagination
             current={current}
             pageSize={pageSize}
-            total={mockData.length}
+            total={total}
             showTotal
             showJumper
             sizeOptions={[10, 20, 50, 100]}

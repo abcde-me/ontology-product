@@ -356,6 +356,10 @@ export const ModaForgeResourceEndpoints = {
   getModelLabelList: PrefixLabelService + '/modelLabelList',
   // 编辑需求
   editRequirementApi: PrefixLabelService + '/EditRequirement',
+  // 需求进度
+  getProgressRequirement: PrefixLabelService + '/ProgressRequirement',
+  // 需求明细
+  detailRequirement: PrefixLabelService + '/DetailRequirement',
   // 质检任务列表
   listQualityControlTasks: PrefixLabelService + '/ListQualityControlTasks',
   // 设置抽检任务

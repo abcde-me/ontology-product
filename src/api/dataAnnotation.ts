@@ -174,6 +174,30 @@ export async function editRequirement(params) {
     .do();
 }
 
+// 需求进度
+export async function getProgressRequirement(params: {
+  req_id: number; // 需求id，从URL的id参数获取并转换为number
+  page: number; // 页码
+  page_size: number; // 每页数量
+}) {
+  return await UAPI.RES.getProgressRequirement({})
+    .post({ ...params })
+    .inRegion()
+    .do();
+}
+
+// 需求明细
+export async function detailRequirement(params: {
+  req_id: number; // 需求id，从URL的id参数获取并转换为number
+  search_content: string; // 搜索内容
+  page: number; // 页码
+  page_size: number; // 每页数量
+}) {
+  return await UAPI.RES.detailRequirement({})
+    .post({ ...params })
+    .inRegion()
+    .do();
+}
 // 质检任务列表
 export async function listQualityControlTasks(params) {
   return await UAPI.RES.listQualityControlTasks({})

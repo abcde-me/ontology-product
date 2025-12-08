@@ -28,7 +28,7 @@ function AnnotationConfig({ requirementDetail }: { requirementDetail: any }) {
         },
         {
           label: '拆分任务包',
-          value: requirementDetail?.label_count
+          value: requirementDetail?.pkg_infos?.length || 1
         },
         {
           label: '预标注模型',
