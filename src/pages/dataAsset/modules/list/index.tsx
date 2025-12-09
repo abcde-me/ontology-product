@@ -418,7 +418,6 @@ export default function DataAssetList() {
       return;
     }
     const convertedFields = convertFields(rawDisplayFields);
-    console.log(convertedFields, 'vvvvvvvv');
     setColumnSettingsFields(convertedFields);
     setSearchFields(convertedFields.filter((field) => field.displaySort > 0));
   }, [rawDisplayFields, convertFields]);
