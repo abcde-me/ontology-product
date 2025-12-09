@@ -77,7 +77,6 @@ export default function MetadataManagement() {
   useEffect(() => {
     setColumns(
       getColumns(
-        activeMetadataType,
         selectedColumns,
         viewDetailWorkflow,
         current,
@@ -192,7 +191,10 @@ export default function MetadataManagement() {
         <div className={styles['leftBox']}>
           <Menu
             defaultSelectedKeys={[activeMetadataType]}
-            onClickMenuItem={(key) => setActiveMetadataType(key)}
+            onClickMenuItem={(key) => {
+              setSelectedColumns(getColumnsSetting(key));
+              setActiveMetadataType(key);
+            }}
           >
             <MenuItem key="Iceberg">Iceberg</MenuItem>
             <MenuItem key="Doris">Doris</MenuItem>
