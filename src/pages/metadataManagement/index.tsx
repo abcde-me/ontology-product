@@ -22,7 +22,10 @@ import SettingsIcon from '@/assets/metadata/settings.svg';
 import ColumnSettingIcon from '@/assets/metadata/column-setting.svg';
 import StorageIcon from '@/assets/metadata/storage.svg';
 import { IconPlus, IconRefresh } from '@arco-design/web-react/icon';
-import { getColumns } from './getColumns';
+import { getColumns, getColumnsSetting } from './getColumns';
+import ColumnSettingModal, {
+  ColumnField
+} from '../dataAsset/components/ColumnSettingModal';
 import styles from './index.module.scss';
 
 enum MetadataType {
@@ -62,6 +65,26 @@ export default function MetadataManagement() {
   const [activeMetadataType, setActiveMetadataType] = useState<
     MetadataType | string
   >(MetadataType.Iceberg);
+  // 列设置弹窗是否打开
+  const [columnModalOpen, setColumnModalOpen] = useState(false);
+  // 初始化表格列
+  const [columns, setColumns] = useState<ColumnProps[]>([]);
+  // 列设置弹窗选中的列
+  const [selectedColumns, setSelectedColumns] = useState<ColumnField[]>(
+    getColumnsSetting(activeMetadataType)
+  );
+
+  useEffect(() => {
+    setColumns(
+      getColumns(
+        activeMetadataType,
+        selectedColumns,
+        viewDetailWorkflow,
+        current,
+        pageSize
+      ) as ColumnProps[]
+    );
+  }, [activeMetadataType, selectedColumns]);
 
   // 组件初始化
   useEffect(() => {
@@ -138,10 +161,29 @@ export default function MetadataManagement() {
     // setCurrent(1);
   };
 
-  const columns: ColumnProps[] = getColumns(
-    activeMetadataType,
-    viewDetailWorkflow
-  ) as ColumnProps[];
+  const columnSettingsFields: ColumnField[] =
+    getColumnsSetting(activeMetadataType);
+
+  // 列设置弹窗回调
+  const handleModalOk = (
+    selectedIds: string[],
+    displayFields: ColumnField[]
+  ) => {
+    const selectedFields = selectedIds
+      .map((nameEn) =>
+        displayFields.find(
+          (field) => field.nameEn === nameEn || field.id === nameEn
+        )
+      )
+      .filter(Boolean) as ColumnField[];
+    setSelectedColumns(selectedFields);
+    setColumnModalOpen(false);
+  };
+
+  const handleModalCancel = () => setColumnModalOpen(false);
+  const handleColumnChange = (list: ColumnField[]) => {
+    console.log('列设置变化:', list);
+  };
 
   return (
     <div className={styles['metadataManagement']}>
@@ -271,6 +313,7 @@ export default function MetadataManagement() {
               <Button
                 className={styles['refreshBtn']}
                 icon={<ColumnSettingIcon />}
+                onClick={() => setColumnModalOpen(true)}
               >
                 列设置
               </Button>
@@ -317,6 +360,17 @@ export default function MetadataManagement() {
           )}
         </div>
       </div>
+
+      {/* 列设置弹窗 */}
+      <ColumnSettingModal
+        visible={columnModalOpen}
+        fields={
+          columnSettingsFields.length > 0 ? columnSettingsFields : undefined
+        }
+        onOk={handleModalOk}
+        onCancel={handleModalCancel}
+        onChange={handleColumnChange}
+      />
     </div>
   );
 }
