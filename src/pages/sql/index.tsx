@@ -25,7 +25,7 @@ const TabPane = Tabs.TabPane;
 
 type TabKey = 'data' | 'files' | 'dataset' | 'script';
 
-const defaultActiveTab = 'script';
+const defaultActiveTab = 'files';
 
 const SqlIndex: React.FC = memo(() => {
   const location = useLocation();

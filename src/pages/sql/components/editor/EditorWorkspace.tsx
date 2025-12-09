@@ -12,7 +12,8 @@ import {
   IconBook,
   IconCaretRight,
   IconSave,
-  IconStorage
+  IconStorage,
+  IconTag
 } from '@arco-design/web-react/icon';
 import { sql } from '@codemirror/lang-sql';
 import { lintGutter } from '@codemirror/lint';
@@ -22,6 +23,7 @@ import createTheme from '@uiw/codemirror-themes';
 import CodeMirror, { ReactCodeMirrorRef } from '@uiw/react-codemirror';
 import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { format } from 'sql-formatter';
+import { useUserInfo } from '@/store/userInfoStore';
 import styles from './EditorWorkspace.module.scss';
 
 import SQLFormatIcon from '@/assets/sql/sql-format-ico.svg';
@@ -33,7 +35,15 @@ import { FileTab } from '../../hooks/useTabManager';
 import RunningInfoPanel from './RunningInfoPanel';
 import classNames from 'classnames';
 import ModalParamList from '../data-manager/ModalParamList';
-
+import ScriptUpBtn from '@/assets/sql/script-up-btn.svg';
+import ScriptSaveBtn from '@/assets/sql/script-save-btn.svg';
+import DrawerContent from '../drawer-content';
+import {
+  getDevelopStandards,
+  updateDevelopSystemParam,
+  updateSqlScript
+} from '@/api/sql';
+import { set } from 'lodash';
 interface NotebookWorkspaceProps {
   content: string;
   fileName: string;
@@ -53,6 +63,8 @@ interface NotebookWorkspaceProps {
 // 内部组件，使用 EditorContext
 const EditorWorkspaceContent: React.FC<{
   fileName: string;
+  scriptId?: string;
+  content: string;
   onInsertContent?: (insertFn: (content: string) => void) => void;
   onEditorFocusChange?: (isFocused: boolean) => void;
   onToScriptList?: (key: string) => void;
@@ -63,9 +75,12 @@ const EditorWorkspaceContent: React.FC<{
     onEditorFocusChange,
     fileName,
     onToScriptList,
-    curActiveTab
+    curActiveTab,
+    scriptId,
+    content
   }) => {
     const FormItem = Form.Item;
+    const userInfo = useUserInfo();
     const [form] = Form.useForm();
     const TextArea = Input.TextArea;
     const editorRef = useRef<ReactCodeMirrorRef>(null);
@@ -77,14 +92,16 @@ const EditorWorkspaceContent: React.FC<{
     const hasUpdatePermission = useHasPermission(SQL_PERMISSIONS.MODIFY);
     const hasCancelRunPermission = useHasPermission(SQL_PERMISSIONS.RUN);
     const [visible, setVisible] = React.useState<boolean>(false);
+    const [drawerVisible, setDrawerVisible] = useState(false);
     const [specificationsVisible, setSpecificationsVisible] =
       React.useState<boolean>(false);
-    const [specificationsContent, setSpecificationsContent] =
-      React.useState<string>('测试文案');
     const [newSpecificationsContent, setNewSpecificationsContent] =
-      React.useState<string>('');
+      React.useState('');
+    const [specificationsContent, setSpecificationsContent] =
+      React.useState<string>(newSpecificationsContent);
     const [isSpecificationsValid, setIsSpecificationsValid] = useState(true);
     const [paramVisible, setParamVisible] = React.useState<boolean>(false);
+    const editorContentRef = useRef(null);
     useEffect(() => {
       form.setFieldsValue({
         fileName: fileName
@@ -219,6 +236,41 @@ const EditorWorkspaceContent: React.FC<{
     const handleSpecificationsChange = (val: string) => {
       setNewSpecificationsContent(val);
     };
+    const handleSave = async () => {
+      const res = await updateSqlScript(Number(scriptId), {
+        uid: userInfo?.id ?? '32020ad2-ef56-4e20-aa0b-4399429bb34c',
+        script_name: fileName ?? '',
+        script_content: content,
+        script_desc: form.getFieldValue('fileDesc')
+      });
+      if (res?.status === 200) {
+        Message.success('保存成功');
+        setVisible(false);
+      } else {
+        Message.error('保存失败');
+      }
+    };
+    // 获取开发规范信息
+    const getDevStandards = async () => {
+      const res: any = await getDevelopStandards({});
+      console.log(res, '123');
+      if (res?.status === 200) {
+        setNewSpecificationsContent(res.data || '');
+        setSpecificationsContent(res.data || '');
+      }
+    };
+    const handleUpdateDevelopSystemParam = async (params: any) => {
+      const res = await updateDevelopSystemParam(params);
+      if (res?.status === 200) {
+        Message.success('更新成功');
+        setVisible(false);
+      } else {
+        Message.error('更新失败');
+      }
+    };
+    useEffect(() => {
+      getDevStandards();
+    }, [specificationsVisible]);
     return (
       <div className={styles['sql-content']}>
         {/* 顶部工具栏 */}
@@ -287,6 +339,25 @@ const EditorWorkspaceContent: React.FC<{
                 </Space>
               </div>
             )}
+            {curActiveTab === 'files' && (
+              <>
+                <Button
+                  onClick={() => {}}
+                  className={styles['toolbar-btn']}
+                  icon={<ScriptSaveBtn />}
+                  style={{ marginRight: '8px' }}
+                >
+                  保存
+                </Button>
+                <Button
+                  onClick={() => {}}
+                  icon={<ScriptUpBtn />}
+                  className={styles['toolbar-btn']}
+                >
+                  发版
+                </Button>
+              </>
+            )}
             {curActiveTab === 'data' && (
               <Button
                 onClick={() => {
@@ -316,6 +387,7 @@ const EditorWorkspaceContent: React.FC<{
         {/* 编辑器区域 */}
 
         <div
+          ref={editorContentRef}
           className={classNames(styles['sql-editor-container'], {
             [styles['running-code-mirror']]: !hasUpdatePermission
           })}
@@ -382,7 +454,7 @@ const EditorWorkspaceContent: React.FC<{
           footer={[
             <>
               <Button onClick={() => setVisible(false)}>取消</Button>
-              <Button type="primary" htmlType="submit">
+              <Button onClick={handleSave} type="primary" htmlType="submit">
                 保存
               </Button>
             </>
@@ -428,7 +500,6 @@ const EditorWorkspaceContent: React.FC<{
                   <Button
                     onClick={() => {
                       setIsSpecificationsValid(true);
-                      setNewSpecificationsContent(specificationsContent);
                     }}
                     className={styles['btn-cancel']}
                   >
@@ -438,6 +509,10 @@ const EditorWorkspaceContent: React.FC<{
                     onClick={() => {
                       setSpecificationsContent(newSpecificationsContent);
                       setIsSpecificationsValid(true);
+                      // 修改内容调用接口
+                      handleUpdateDevelopSystemParam({
+                        config_value: newSpecificationsContent
+                      });
                     }}
                     type="primary"
                     className={styles['btn-save']}
@@ -448,8 +523,14 @@ const EditorWorkspaceContent: React.FC<{
               )}
             </div>
             {isSpecificationsValid ? (
-              <div className="pl-2 pt-2">{newSpecificationsContent}</div>
+              <TextArea
+                placeholder="请输入开发规范"
+                style={{ width: 912, maxHeight: 590, height: 590 }}
+                defaultValue={newSpecificationsContent}
+                disabled
+              />
             ) : (
+              // <div className={styles['specifications-modal-content-text']}>{newSpecificationsContent}</div>
               <TextArea
                 placeholder="请输入开发规范"
                 style={{ width: 912, maxHeight: 590, height: 590 }}
@@ -463,6 +544,14 @@ const EditorWorkspaceContent: React.FC<{
           paramVisible={paramVisible}
           onCancel={() => setParamVisible(false)}
         />
+        <DrawerContent
+          visible={drawerVisible}
+          setVisible={setDrawerVisible}
+          // contentArr={contentArr}
+        />
+        <div className={styles['drawer-btn']}>
+          <Button icon={<IconTag onClick={() => setDrawerVisible(true)} />} />
+        </div>
       </div>
     );
   }
@@ -525,6 +614,8 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = memo(
         <EditorWorkspaceContent
           curActiveTab={curActiveTab}
           fileName={fileName}
+          scriptId={currentScriptId}
+          content={content}
           onToScriptList={onToScriptList}
           onInsertContent={onInsertContent}
           onEditorFocusChange={onEditorFocusChange}

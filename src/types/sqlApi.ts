@@ -170,9 +170,9 @@ export interface CreateSqlScriptParams {
   script_file_id?: string;
   script_content?: string;
   script_desc?: string;
-  script_name: string;
+  script_name?: string;
   /** 用户id */
-  uid: string;
+  uid?: string;
 }
 
 export interface CreateSqlScriptData {
@@ -641,16 +641,103 @@ export interface ListDevelopScriptParams {
 }
 
 export interface ListDevelopScriptParamsData {
-  data: {
-    /**
-     * 页大小
-     */
-    page_size?: number;
-    /**
-     * 页码
-     */
-    page?: number;
-    total: number;
-    items: [];
-  };
+  /**
+   * 页大小
+   */
+  page_size?: number;
+  /**
+   * 页码
+   */
+  page?: number;
+  total: number;
+  items: [];
+}
+
+export interface GetDevelopScriptLogByScriptIdData {
+  script_id: number;
+  max_version?: string;
+  items: [];
+}
+
+export interface ListDevelopScriptLogByKeyData {
+  script_context?: string;
+  items: [];
+  page?: number;
+  page_size?: number;
+  total: number;
+}
+
+export interface ListSqlFileParams {
+  /**
+   * 页大小
+   */
+  page_size?: number;
+  /**
+   * 页码
+   */
+  page?: number;
+  search_content?: string;
+  items: [];
+  total: number;
+  script_name?: string;
+  update_user?: string;
+  update_time_start?: string;
+  update_time_end?: string;
+}
+export interface ListDevelopSystemParamParams {
+  page?: number;
+  page_size?: number;
+  config_key?: string; // 参数key
+  config_demo?: string; // 状态
+  config_desc?: string; // 版本描述
+}
+export interface ListDevelopSystemParamParamsData {
+  /**
+   * 页大小
+   */
+  page_size?: number;
+  /**
+   * 页码
+   */
+  page?: number;
+  total: number;
+  items: [];
+}
+export interface UpdateDevelopSystemParamParams {
+  config_value: string; // 参数值
+}
+
+export interface getDevelopStandardsData {
+  data: string; // 参数值
+}
+
+export interface CopyDevelopScriptParams {
+  version?: number; // 版本号
+  script_id?: number; // 脚本id
+}
+
+export interface DeleteDevelopScriptParams {
+  version: number; // 版本号
+}
+
+export interface SearchDevelopScriptLogByKeyParams {
+  script_context?: string; // 脚本内容关键词
+}
+
+export interface SearchDevelopScriptLogByKeyData {
+  script_context?: string; // 脚本内容关键词
+  items: [];
+  page?: number;
+  page_size?: number;
+  total: number;
+}
+
+export interface DeleteDevelopScriptLogByVersionParams {
+  version?: number; // 版本号
+  script_id?: number; // 脚本id
+}
+
+export interface RenameDevelopScriptParams {
+  script_id?: number; // 脚本id
+  script_name?: string; // 脚本名称
 }
