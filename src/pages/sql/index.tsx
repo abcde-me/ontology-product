@@ -99,17 +99,17 @@ const SqlIndex: React.FC = memo(() => {
   } = useDevelopScriptTabManager(handleDevelopScriptSelectedKeysChange);
 
   // 获取文件列表，用于根据URL参数打开文件
-  const {
-    sqlScriptList: developScriptList,
-    getRawSqlScriptList: getDevelopScriptList
-  } = useDevelopScriptManager({
-    onFileOpen: developScriptOpenFile,
-    onFileDelete: developScriptRemoveTabByFileId,
-    onFileRename: developScriptUpdateTabTitle,
-    activeTab,
-    fileTabs: developScriptFileState.fileTabs,
-    onSwitchTab: developScriptSwitchTab
-  });
+  // const {
+  //   sqlScriptList: developScriptList,
+  //   getRawSqlScriptList: getDevelopScriptList
+  // } = useDevelopScriptManager({
+  //   onFileOpen: developScriptOpenFile,
+  //   onFileDelete: developScriptRemoveTabByFileId,
+  //   onFileRename: developScriptUpdateTabTitle,
+  //   activeTab,
+  //   fileTabs: developScriptFileState.fileTabs,
+  //   onSwitchTab: developScriptSwitchTab
+  // });
 
   // 初始化创建一个默认SQL查询标签
   useEffect(() => addTab(), []);
