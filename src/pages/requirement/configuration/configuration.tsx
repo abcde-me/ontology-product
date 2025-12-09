@@ -6,6 +6,7 @@ import {
   Form,
   Input,
   InputNumber,
+  Link,
   Message,
   Radio,
   Select,
@@ -44,6 +45,7 @@ import {
   ValidationErrors
 } from './components/TaskDistribution';
 import TextSubstanceComponent from './components/TextEntity';
+import HistoryRecordModal from './components/HistoryRecordModal';
 import './configuration.scss';
 import { useLabelOperations } from './hooks/useLabelOperations';
 import {
@@ -76,6 +78,7 @@ export default function RequirementConfig() {
   const [isShowErrorInfo, setIsShowErrorInfo] = useState(false);
   const [isShowDataErrorInfo, setIsShowDataErrorInfo] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
+  const [historyModalVisible, setHistoryModalVisible] = useState(false);
   // 类型定义
   const [taskTypeVal, setTaskTypeVal] = useState(2);
   // 发布数据集合
@@ -1006,6 +1009,24 @@ export default function RequirementConfig() {
                   <div className="data-set-text">
                     已选数据量 {getTotal(selectedData) || 0}
                   </div>
+                  {type === 'edit' && (
+                    <>
+                      <div className="data-set-text">
+                        | 历史全部数据量 {requirementDetail?.label_count || 0}
+                      </div>
+                      <Link
+                        onClick={() => setHistoryModalVisible(true)}
+                        style={{ marginLeft: 10 }}
+                      >
+                        历史记录
+                      </Link>
+                      <HistoryRecordModal
+                        visible={historyModalVisible}
+                        onClose={() => setHistoryModalVisible(false)}
+                        data={requirementDetail?.pkg_edit_history || []}
+                      />
+                    </>
+                  )}
                 </div>
                 {selectedData?.length <= 0 && isShowDataErrorInfo && (
                   <div className="data-error-info error-info-text">
