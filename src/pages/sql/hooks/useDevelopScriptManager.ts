@@ -397,7 +397,6 @@ export const useDevelopScriptManager = (
 
   // 监听外部选中状态变化，同步到内部状态
   useEffect(() => {
-    console.log('externalSelectedKeys', externalSelectedKeys);
     if (externalSelectedKeys) {
       setSelectedKeys(externalSelectedKeys);
     }
@@ -424,16 +423,6 @@ export const useDevelopScriptManager = (
 
   // 根据URL参数打开对应的文件（只在首次进入页面时执行一次）
   useEffect(() => {
-    // 如果已经执行过，不再执行
-    // if (hasOpenedFileFromUrlRef.current) {
-    //   return;
-    // }
-
-    // 只在 files tab 激活时执行
-    if (activeTab !== 'files') {
-      return;
-    }
-
     // 如果没有提供必要的回调函数，不执行
     if (!onFileOpen) {
       return;
@@ -491,9 +480,7 @@ export const useDevelopScriptManager = (
       // 如果URL中没有activeDevelopScriptId，且没有打开的标签页，打开第一个文件
       if (sqlScriptList.length > 0 && fileTabs.length === 0) {
         const firstFile = sqlScriptList[0];
-        const fileId = String(
-          Number((firstFile as any).script_file_id) || firstFile.script_id
-        );
+        const fileId = String(firstFile.script_id);
         const scriptId = String(firstFile.script_id);
         const fileName = firstFile.script_name;
         onFileOpen(fileId, scriptId, fileName);
@@ -503,14 +490,7 @@ export const useDevelopScriptManager = (
     };
 
     handleOpenFileFromUrl();
-  }, [
-    activeTab,
-    sqlScriptList,
-    fileTabs,
-    onFileOpen,
-    onSwitchTab,
-    getActiveDevelopScriptTabFromUrl
-  ]);
+  }, [sqlScriptList]);
 
   // 组件挂载时获取数据
   useEffect(() => {
