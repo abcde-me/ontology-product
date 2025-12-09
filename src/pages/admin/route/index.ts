@@ -284,12 +284,22 @@ export const routes: IRoute[] = [
       }
     ]
   },
+  // 元数据管理
   {
     name: 'metadataManagement',
     key: '/tenant/compute/modaforge/metadataManagement',
     component: React.lazy(async () => import('../../metadataManagement')),
     permission: METADATA_MANAGEMENT_PERMISSIONS.LIST,
-    children: []
+    children: [
+      {
+        name: 'metadataManagementDetail',
+        key: '/tenant/compute/modaforge/metadataManagement/detail',
+        component: React.lazy(
+          async () => import('../../metadataManagement/detail')
+        ),
+        permission: METADATA_MANAGEMENT_PERMISSIONS.LIST
+      }
+    ]
   },
   // 数据标注 - 需求管理
   {

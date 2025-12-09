@@ -1,0 +1,50 @@
+.metadataManagementDetail {
+  padding: 16px 20px;
+
+  .headBreadcrumbBox {
+    display: flex;
+    align-items: center;
+
+    .breadcrumbText:hover {
+      cursor: pointer;
+      color: #000000;
+    }
+  }
+
+  .contentBox {
+    width: 100%;
+    min-height: calc(100vh - 130px);
+    border-radius: 12px;
+    padding: 12px 24px;
+    background-color: #ffffff;
+    margin: 16px 0 0 0;
+
+    :global(.arco-tabs-header-nav-line .arco-tabs-header-title) {
+      padding: 8px 0;
+      margin: 0 16px;
+    }
+
+    .customDescriptions {
+      :global(.arco-descriptions-title) {
+        font-size: 16px;
+        font-style: normal;
+        font-weight: 600;
+        line-height: 24px;
+        color: #0f172a;
+      }
+      :global(.arco-descriptions-item-label) {
+        font-size: 14px;
+        line-height: 22px;
+        font-weight: 400;
+        color: #6e7b8d;
+      }
+      :global(.arco-descriptions-item-value) {
+        min-width: calc(50vw - 300px);
+        font-size: 14px;
+        line-height: 22px;
+        font-weight: 400;
+        color: #1e293b;
+      }
+    }
+  }
+}
