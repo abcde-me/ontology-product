@@ -43,7 +43,6 @@ import {
   updateDevelopSystemParam,
   updateSqlScript
 } from '@/api/sql';
-import { set } from 'lodash';
 interface NotebookWorkspaceProps {
   content: string;
   fileName: string;
