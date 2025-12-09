@@ -707,9 +707,9 @@ export interface UpdateDevelopSystemParamParams {
   config_value: string; // 参数值
 }
 
-export interface getDevelopStandardsData {
-  data: string; // 参数值
-}
+// export interface getDevelopStandardsData {
+//   data: string; // 参数值
+// }
 
 export interface CopyDevelopScriptParams {
   version?: number; // 版本号

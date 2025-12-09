@@ -46,8 +46,10 @@ import classNames from 'classnames';
 import ModalParamList from '../data-manager/ModalParamList';
 import ReleaseVersionModal from './ReleaseVersionModal';
 import ParameterSidebar from './ParameterSidebar';
+import SpecificationsModal from './SpecificationsModal';
 import { ScriptParam } from '@/types/sqlDevelopApi';
 import ReleaseIcon from '../../assets/release-icon.svg';
+import { listDevelopSystemParam } from '@/api/sql';
 
 interface NotebookWorkspaceProps {
   content: string;
@@ -152,7 +154,6 @@ const EditorWorkspaceContent: React.FC<{
   }) => {
     const FormItem = Form.Item;
     const [form] = Form.useForm();
-    const TextArea = Input.TextArea;
     const editorRef = useRef<ReactCodeMirrorRef>(null);
     const [lastCursorPosition, setLastCursorPosition] =
       React.useState<number>(0);
@@ -166,15 +167,15 @@ const EditorWorkspaceContent: React.FC<{
       React.useState<boolean>(false);
     const [specificationsContent, setSpecificationsContent] =
       React.useState<string>('测试文案');
-    const [newSpecificationsContent, setNewSpecificationsContent] =
-      React.useState<string>('');
-    const [isSpecificationsValid, setIsSpecificationsValid] = useState(true);
     const [paramVisible, setParamVisible] = React.useState<boolean>(false);
     const [releaseVersionVisible, setReleaseVersionVisible] =
       React.useState<boolean>(false);
     const [sidebarVisible, setSidebarVisible] = React.useState<boolean>(false);
     const [sidebarCollapsed, setSidebarCollapsed] =
       React.useState<boolean>(false);
+    const [systemParamKeys, setSystemParamKeys] = React.useState<Set<string>>(
+      new Set()
+    );
 
     // 从 Context 获取编辑器状态
     const {
@@ -231,6 +232,31 @@ const EditorWorkspaceContent: React.FC<{
         fileName: fileName
       });
     }, [fileName, form]);
+
+    // 获取系统参数列表
+    useEffect(() => {
+      const fetchSystemParams = async () => {
+        try {
+          const res = await listDevelopSystemParam({
+            page: 1,
+            page_size: 100
+          });
+          if (res.status === 200 && res.data?.items) {
+            // 提取系统参数的 config_key，支持字符串数组或对象数组
+            const keys = res.data.items
+              .map((item: any) => {
+                return typeof item === 'string' ? item : item?.config_key || '';
+              })
+              .filter((key: string) => key);
+            setSystemParamKeys(new Set(keys));
+          }
+        } catch (error) {
+          console.error('获取系统参数列表失败:', error);
+        }
+      };
+
+      fetchSystemParams();
+    }, []);
 
     const myTheme = createTheme({
       theme: 'light',
@@ -339,9 +365,11 @@ const EditorWorkspaceContent: React.FC<{
         onInsertContent(insertContentAtCursor);
       }
     }, [insertContentAtCursor, onInsertContent]);
-    const handleSpecificationsChange = (val: string) => {
-      setNewSpecificationsContent(val);
+
+    const handleSpecificationsSave = (content: string) => {
+      setSpecificationsContent(content);
     };
+
     return (
       <div className={styles['sql-content']}>
         {/* 顶部工具栏 */}
@@ -507,6 +535,7 @@ const EditorWorkspaceContent: React.FC<{
               onCollapsedChange={setSidebarCollapsed}
               onParameterHover={handleParameterHover}
               initialParams={initialParams}
+              systemParamKeys={systemParamKeys}
             />
             // )
           }
@@ -551,63 +580,14 @@ const EditorWorkspaceContent: React.FC<{
           </Form>
         </Modal>
         {/* 开发规范 */}
-        <Modal
-          title="开发规范"
-          visible={specificationsVisible}
-          onCancel={() => setSpecificationsVisible(false)}
-          footer={null}
-          style={{
-            width: 960,
-            height: 678
-          }}
-        >
-          <div className={styles['specifications-modal-content']}>
-            <div className={styles['specifications-modal-content-btn']}>
-              {isSpecificationsValid ? (
-                <Button
-                  onClick={() => {
-                    setIsSpecificationsValid(false);
-                  }}
-                  className={styles['btn-edit']}
-                >
-                  编辑
-                </Button>
-              ) : (
-                <div className={styles['btn-group-content']}>
-                  <Button
-                    onClick={() => {
-                      setIsSpecificationsValid(true);
-                      setNewSpecificationsContent(specificationsContent);
-                    }}
-                    className={styles['btn-cancel']}
-                  >
-                    取消
-                  </Button>
-                  <Button
-                    onClick={() => {
-                      setSpecificationsContent(newSpecificationsContent);
-                      setIsSpecificationsValid(true);
-                    }}
-                    type="primary"
-                    className={styles['btn-save']}
-                  >
-                    确定
-                  </Button>
-                </div>
-              )}
-            </div>
-            {isSpecificationsValid ? (
-              <div className="pl-2 pt-2">{newSpecificationsContent}</div>
-            ) : (
-              <TextArea
-                placeholder="请输入开发规范"
-                style={{ width: 912, maxHeight: 590, height: 590 }}
-                defaultValue={specificationsContent}
-                onChange={(val) => handleSpecificationsChange(val)}
-              />
-            )}
-          </div>
-        </Modal>
+        {specificationsVisible && (
+          <SpecificationsModal
+            visible={specificationsVisible}
+            onCancel={() => setSpecificationsVisible(false)}
+            initialContent={specificationsContent}
+            onSave={handleSpecificationsSave}
+          />
+        )}
         {paramVisible && (
           <ModalParamList
             paramVisible={paramVisible}
