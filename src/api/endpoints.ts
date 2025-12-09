@@ -451,6 +451,16 @@ export const ModaForgeResourceEndpoints = {
   leGetLabels: PrefixLabelService + '/getLabels',
   leSaveTask: PrefixLabelService + '/saveTask',
   leGetTaskReuslt: PrefixLabelService + '/getTaskResult',
+  leGetQualityControlTask: PrefixLabelService + '/GetQualityControlTask',
+  leGetQualityControlTaskById:
+    PrefixLabelService + '/GetQualityControlTaskById',
+  leSaveQualityControlTask: PrefixLabelService + '/SaveQualityControlTask',
+  leCreateQualityControlTaskComment:
+    PrefixLabelService + '/CreateQualityControlTaskComment',
+  leModifyQualityControlTaskComment:
+    PrefixLabelService + '/ModifyQualityControlTaskComment',
+  leDeleteQualityControlTaskComment:
+    PrefixLabelService + '/DeleteQualityControlTaskComment',
 
   // 获取加工脚本列表
   ListDevelopScriptApi: PrefixAimdp + '/ListDevelopScript',

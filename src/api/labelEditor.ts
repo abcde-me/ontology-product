@@ -58,6 +58,123 @@ export async function getLabels(requirementId: string) {
     .do();
 }
 
+// =================================== 质检任务API =======================================
+// 进入质检、获取质检任务信息（需求id、 taskid==）
+export async function getQualityControlTask(qs_id?: number) {
+  const searchParams = new URLSearchParams(location.search);
+  const qsId = qs_id || searchParams.get('qs_id');
+  return await UAPI.RES.leGetQualityControlTask({})
+    .post({ qs_id: Number(qsId) })
+    .inRegion()
+    .do();
+}
+
+// 改错、预览用，获取质检信息（评论==）
+export async function getQualityControlTaskById(taskId?: string) {
+  const searchParams = new URLSearchParams(location.search);
+  const rId = taskId || searchParams.get('rId');
+  return await UAPI.RES.leGetQualityControlTaskById({})
+    .post({ task_id: Number(rId) })
+    .inRegion()
+    .do();
+}
+
+// 提交单个质检任务, save_type: 1 - 通过；2 - 驳回
+export async function saveQualityControlTask({
+  taskId,
+  qc_round,
+  save_type
+}: {
+  taskId?: string;
+  qc_round: string;
+  save_type: number;
+}) {
+  const searchParams = new URLSearchParams(location.search);
+  const rId = taskId || searchParams.get('rId');
+  return await UAPI.RES.leSaveQualityControlTask({})
+    .post({
+      task_id: Number(rId),
+      qc_round: Number(qc_round),
+      save_type
+    })
+    .inRegion()
+    .do();
+}
+
+// 新建单个评论, comment_type: more - 多标；less - 漏标；error - 错标
+export async function createQualityControlTaskComment({
+  taskId,
+  qc_round,
+  comment_type,
+  comment_content
+}: {
+  taskId?: string;
+  qc_round: string;
+  comment_type: string;
+  comment_content: any;
+}) {
+  const searchParams = new URLSearchParams(location.search);
+  const rId = taskId || searchParams.get('rId');
+  return await UAPI.RES.leCreateQualityControlTaskComment({})
+    .post({
+      task_id: Number(rId),
+      qc_round: Number(qc_round),
+      comment_type,
+      comment_content
+    })
+    .inRegion()
+    .do();
+}
+
+// 修改单个评论
+export async function modifyQualityControlTaskComment({
+  taskId,
+  qc_round,
+  comment_id,
+  comment_type,
+  comment_content
+}: {
+  taskId?: string;
+  qc_round: string;
+  comment_id: string;
+  comment_type: string;
+  comment_content: any;
+}) {
+  const searchParams = new URLSearchParams(location.search);
+  const rId = taskId || searchParams.get('rId');
+  return await UAPI.RES.leModifyQualityControlTaskComment({})
+    .post({
+      task_id: Number(rId),
+      qc_round: Number(qc_round),
+      comment_id,
+      comment_type,
+      comment_content
+    })
+    .inRegion()
+    .do();
+}
+
+// 删除单个评论
+export async function deleteQualityControlTaskComment({
+  taskId,
+  qc_round,
+  comment_id
+}: {
+  taskId?: string;
+  qc_round: string;
+  comment_id: string;
+}) {
+  const searchParams = new URLSearchParams(location.search);
+  const rId = taskId || searchParams.get('rId');
+  return await UAPI.RES.leDeleteQualityControlTaskComment({})
+    .post({
+      task_id: Number(rId),
+      qc_round: Number(qc_round),
+      comment_id
+    })
+    .inRegion()
+    .do();
+}
 // =================================== 下面为适配CVAT图片，视频标注API ===============================
 export async function saveImgJobAnnotations(
   taskId: string,
