@@ -7,7 +7,9 @@ import {
   Pagination,
   PaginationProps,
   Table,
-  Select
+  Select,
+  Popover,
+  Checkbox
 } from '@arco-design/web-react';
 import { useHistory } from 'react-router';
 import { ColumnProps } from '@arco-design/web-react/es/Table';
@@ -21,12 +23,13 @@ import { openNewPage } from '@/utils/env';
 import SettingsIcon from '@/assets/metadata/settings.svg';
 import ColumnSettingIcon from '@/assets/metadata/column-setting.svg';
 import StorageIcon from '@/assets/metadata/storage.svg';
-import { IconPlus, IconRefresh } from '@arco-design/web-react/icon';
+import { IconPlus, IconRefresh, IconSearch } from '@arco-design/web-react/icon';
 import { getColumns, getColumnsSetting } from './getColumns';
 import ColumnSettingModal, {
   ColumnField
 } from '../dataAsset/components/ColumnSettingModal';
 import styles from './index.module.scss';
+import SearchArea from './components/SearchArea';
 
 enum MetadataType {
   Iceberg = 'Iceberg',
@@ -73,6 +76,7 @@ export default function MetadataManagement() {
   const [selectedColumns, setSelectedColumns] = useState<ColumnField[]>(
     getColumnsSetting(activeMetadataType)
   );
+  const [searchFields, setSearchFields] = useState<ColumnField[]>([]);
 
   useEffect(() => {
     setColumns(
@@ -160,6 +164,17 @@ export default function MetadataManagement() {
     // setCurrent(1);
   };
 
+  // 处理字段搜索
+  const handleFieldSearch = (fieldValues, commonSearch: string) => {
+    console.log(fieldValues, commonSearch);
+  };
+
+  // 处理重置
+  const handleReset = () => {
+    // setSearchParams({ ...searchParams, fieldSearch: [], commonSearch: '' });
+    // setCurrentPage(1);
+  };
+
   const columnSettingsFields: ColumnField[] =
     getColumnsSetting(activeMetadataType);
 
@@ -203,81 +218,12 @@ export default function MetadataManagement() {
           </Menu>
         </div>
         <div className={styles['rightBox']}>
-          <div
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              width: '100%',
-              padding: '16px 0',
-              borderRadius: '4px',
-              borderBottom: '1px solid var(--LineLine-color-border-2, #E2E8F0)'
-            }}
-          >
-            <Form
-              ref={searchForm}
-              onSubmit={handleSearch}
-              layout="inline"
-              style={{
-                justifyContent: 'space-between'
-              }}
-            >
-              {activeMetadataType === MetadataType.MinIO ? (
-                <>
-                  <Form.Item label="桶名称：" field="bucket_name">
-                    <Input placeholder="请输入关键字搜索" />
-                  </Form.Item>
-                  <Form.Item label="所属区域：" field="region">
-                    <Input placeholder="请输入关键字搜索" />
-                  </Form.Item>
-                  <Form.Item label="存储类型：" field="storage_type">
-                    <Select placeholder="请选择存储类型" />
-                  </Form.Item>
-                </>
-              ) : (
-                <>
-                  <Form.Item label="目录类型：" field="directory_type">
-                    <Select placeholder="请选择文件类型" />
-                  </Form.Item>
-                  <Form.Item label="表名：" field="table_name">
-                    <Input placeholder="请输入关键字搜索" />
-                  </Form.Item>
-                  <Form.Item label="表中文：" field="table_name_zh">
-                    <Input placeholder="请输入关键字搜索" />
-                  </Form.Item>
-                </>
-              )}
-            </Form>
-            <div className="flex items-center justify-between">
-              <div>
-                <PermissionWrapper
-                  permission={WORKFLOW_LIST_PERMISSIONS.CREATE}
-                >
-                  <Button
-                    type="outline"
-                    onClick={() => searchForm?.current?.submit()}
-                    loading={loading}
-                  >
-                    查询
-                  </Button>
-                  <Button
-                    type="text"
-                    onClick={() => searchForm?.current?.submit()}
-                    loading={loading}
-                  >
-                    重置
-                  </Button>
-                </PermissionWrapper>
-              </div>
-              <Button
-                type="text"
-                className={styles['settingBtn']}
-                icon={<SettingsIcon />}
-                loading={loading}
-              >
-                设置搜索条件
-              </Button>
-            </div>
-          </div>
+          <SearchArea
+            fields={selectedColumns}
+            onMainSearch={handleSearch}
+            onFieldSearch={handleFieldSearch}
+            onReset={handleReset}
+          />
           <div className="mb-3 mt-4 flex items-center justify-between">
             <h1 className="text-base font-semibold">数据列表(500)</h1>
             <div className="flex items-center gap-2">
