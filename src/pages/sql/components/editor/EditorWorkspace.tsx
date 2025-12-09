@@ -91,15 +91,6 @@ const EditorWorkspaceContent: React.FC<{
     const hasUpdatePermission = useHasPermission(SQL_PERMISSIONS.MODIFY);
     const hasCancelRunPermission = useHasPermission(SQL_PERMISSIONS.RUN);
     const [visible, setVisible] = React.useState<boolean>(false);
-    const [drawerVisible, setDrawerVisible] = useState(false);
-    const [specificationsVisible, setSpecificationsVisible] =
-      React.useState<boolean>(false);
-    const [newSpecificationsContent, setNewSpecificationsContent] =
-      React.useState('');
-    const [specificationsContent, setSpecificationsContent] =
-      React.useState<string>(newSpecificationsContent);
-    const [isSpecificationsValid, setIsSpecificationsValid] = useState(true);
-    const [paramVisible, setParamVisible] = React.useState<boolean>(false);
     const editorContentRef = useRef(null);
     useEffect(() => {
       form.setFieldsValue({
@@ -109,8 +100,6 @@ const EditorWorkspaceContent: React.FC<{
     // 从 Context 获取编辑器状态
     const {
       runStatus,
-      runDuration,
-      runStartTime,
       handleStopRunCode,
       handleRunCode,
       lastAutoSave,
@@ -232,9 +221,6 @@ const EditorWorkspaceContent: React.FC<{
         onInsertContent(insertContentAtCursor);
       }
     }, [insertContentAtCursor, onInsertContent]);
-    const handleSpecificationsChange = (val: string) => {
-      setNewSpecificationsContent(val);
-    };
     const handleSave = async () => {
       const res = await updateSqlScript(Number(scriptId), {
         uid: userInfo?.id ?? '32020ad2-ef56-4e20-aa0b-4399429bb34c',
@@ -249,27 +235,6 @@ const EditorWorkspaceContent: React.FC<{
         Message.error('保存失败');
       }
     };
-    // 获取开发规范信息
-    const getDevStandards = async () => {
-      const res: any = await getDevelopStandards({});
-      console.log(res, '123');
-      if (res?.status === 200) {
-        setNewSpecificationsContent(res.data || '');
-        setSpecificationsContent(res.data || '');
-      }
-    };
-    const handleUpdateDevelopSystemParam = async (params: any) => {
-      const res = await updateDevelopSystemParam(params);
-      if (res?.status === 200) {
-        Message.success('更新成功');
-        setVisible(false);
-      } else {
-        Message.error('更新失败');
-      }
-    };
-    useEffect(() => {
-      getDevStandards();
-    }, [specificationsVisible]);
     return (
       <div className={styles['sql-content']}>
         {/* 顶部工具栏 */}
@@ -306,26 +271,6 @@ const EditorWorkspaceContent: React.FC<{
               >
                 格式化
               </Button>
-              {/* {curActiveTab === 'files' && (
-                <>
-                  <Button
-                    type="text"
-                    icon={<IconBook />}
-                    onClick={() => setSpecificationsVisible(true)}
-                    className="h-[26px]"
-                  >
-                    开发规范
-                  </Button>
-                  <Button
-                    type="text"
-                    icon={<IconStorage />}
-                    onClick={() => setParamVisible(true)}
-                    className="h-[26px]"
-                  >
-                    参数列表
-                  </Button>
-                </>
-              )} */}
             </Space>
           </div>
           <div className={styles['toolbar-right']}>
@@ -472,85 +417,6 @@ const EditorWorkspaceContent: React.FC<{
             </FormItem>
           </Form>
         </Modal>
-        {/* 开发规范 */}
-        <Modal
-          title="开发规范"
-          visible={specificationsVisible}
-          onCancel={() => setSpecificationsVisible(false)}
-          footer={null}
-          style={{
-            width: 960,
-            height: 678
-          }}
-        >
-          <div className={styles['specifications-modal-content']}>
-            <div className={styles['specifications-modal-content-btn']}>
-              {isSpecificationsValid ? (
-                <Button
-                  onClick={() => {
-                    setIsSpecificationsValid(false);
-                  }}
-                  className={styles['btn-edit']}
-                >
-                  编辑
-                </Button>
-              ) : (
-                <div className={styles['btn-group-content']}>
-                  <Button
-                    onClick={() => {
-                      setIsSpecificationsValid(true);
-                    }}
-                    className={styles['btn-cancel']}
-                  >
-                    取消
-                  </Button>
-                  <Button
-                    onClick={() => {
-                      setSpecificationsContent(newSpecificationsContent);
-                      setIsSpecificationsValid(true);
-                      // 修改内容调用接口
-                      handleUpdateDevelopSystemParam({
-                        config_value: newSpecificationsContent
-                      });
-                    }}
-                    type="primary"
-                    className={styles['btn-save']}
-                  >
-                    确定
-                  </Button>
-                </div>
-              )}
-            </div>
-            {isSpecificationsValid ? (
-              <TextArea
-                placeholder="请输入开发规范"
-                style={{ width: 912, maxHeight: 590, height: 590 }}
-                defaultValue={newSpecificationsContent}
-                disabled
-              />
-            ) : (
-              // <div className={styles['specifications-modal-content-text']}>{newSpecificationsContent}</div>
-              <TextArea
-                placeholder="请输入开发规范"
-                style={{ width: 912, maxHeight: 590, height: 590 }}
-                defaultValue={specificationsContent}
-                onChange={(val) => handleSpecificationsChange(val)}
-              />
-            )}
-          </div>
-        </Modal>
-        {/* <ModalParamList
-          paramVisible={paramVisible}
-          onCancel={() => setParamVisible(false)}
-        /> */}
-        <DrawerContent
-          visible={drawerVisible}
-          setVisible={setDrawerVisible}
-          // contentArr={contentArr}
-        />
-        <div className={styles['drawer-btn']}>
-          <Button icon={<IconTag onClick={() => setDrawerVisible(true)} />} />
-        </div>
       </div>
     );
   }
