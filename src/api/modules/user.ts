@@ -11,3 +11,8 @@ export function Logout() {
 export function GetUser() {
   return UAPI.RES.GetUser({}).post().inRegion().do();
 }
+
+// 编辑个人信息
+export function UpdateMyselfInformation(params) {
+  return UAPI.RES.UpdateMyselfInformation({}).post(params).inRegion().do();
+}
