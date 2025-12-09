@@ -51,6 +51,7 @@ export interface ProcessOption {
   value: string; // 值：1-labeler
   taskId: string;
   roleType: RoleType;
+  isConfigured: boolean; // 是否已配置（已选部门或个人）
 }
 
 // 验证错误

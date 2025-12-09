@@ -11,7 +11,8 @@ import {
   Message,
   Modal,
   Radio,
-  Select
+  Select,
+  Tag
 } from '@arco-design/web-react';
 import React, { useMemo, useState } from 'react';
 import { DepartmentModal } from '../DepartmentModal';
@@ -76,6 +77,41 @@ const BatchAssignModal: React.FC<BatchAssignModalProps> = ({
       return <AnnotationUserIcon style={{ width: 16, height: 16 }} />;
     }
     return <QualityUserIcon style={{ width: 16, height: 16 }} />;
+  };
+
+  // 获取选项显示文本（不带图标和已配字样）
+  const getOptionLabel = (option: (typeof processOptions)[0]) => {
+    return `任务包${option.taskId}-${
+      option.roleType === 'labeler'
+        ? '标注'
+        : `${option.roleType.split('_')[1]}轮质检`
+    }`;
+  };
+
+  // 自定义标签渲染（只显示文本，不显示图标和已配字样）
+  const renderTag = (
+    props: {
+      value: any;
+      label: React.ReactNode;
+      closable: boolean;
+      onClose: (event: any) => void;
+    },
+    index: number,
+    values: any[]
+  ) => {
+    const option = processOptions.find((opt) => opt.value === props.value);
+    const displayLabel = option ? getOptionLabel(option) : props.label;
+
+    return (
+      <Tag
+        key={props.value}
+        closable={props.closable}
+        onClose={props.onClose}
+        style={{ margin: '2px 4px 2px 0' }}
+      >
+        {displayLabel}
+      </Tag>
+    );
   };
 
   // 自定义下拉框渲染
@@ -192,7 +228,7 @@ const BatchAssignModal: React.FC<BatchAssignModalProps> = ({
           <Select
             mode="multiple"
             className="multiple-process-select"
-            placeholder="请选择工序"
+            placeholder="请选择批量分配人员的工序"
             value={selectedProcesses}
             onChange={(value) => {
               setSelectedProcesses(value);
@@ -200,6 +236,7 @@ const BatchAssignModal: React.FC<BatchAssignModalProps> = ({
             }}
             maxTagCount={2}
             dropdownRender={renderDropdown}
+            renderTag={renderTag}
             style={{ width: '100%' }}
           >
             {processOptions.map((option) => (
@@ -214,6 +251,9 @@ const BatchAssignModal: React.FC<BatchAssignModalProps> = ({
                       ? '标注'
                       : `${option.roleType.split('_')[1]}轮质检`}
                   </span>
+                  {option.isConfigured && (
+                    <span style={{ fontSize: '14px' }}>(已配)</span>
+                  )}
                 </div>
               </Select.Option>
             ))}

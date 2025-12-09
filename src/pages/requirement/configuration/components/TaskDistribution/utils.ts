@@ -138,11 +138,17 @@ export const generateProcessOptions = (
 
   taskPackages.forEach((task) => {
     task.roles.forEach((role) => {
+      // 判断是否已配置（已选部门或个人）
+      const isConfigured =
+        (role.selectedDepartments?.length || 0) > 0 ||
+        (role.selectedPersons?.length || 0) > 0;
+
       options.push({
         label: `${task.taskBId}~${role.roleName}`,
         value: `${task.taskId}-${role.roleType}`,
         taskId: task.taskId,
-        roleType: role.roleType
+        roleType: role.roleType,
+        isConfigured
       });
     });
   });
