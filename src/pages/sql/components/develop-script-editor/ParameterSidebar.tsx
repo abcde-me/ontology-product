@@ -5,6 +5,7 @@ import classNames from 'classnames';
 import ParameterIcon from '../../assets/parameter-icon.svg';
 import ArrowRightIcon from '../../assets/arrow-right-icon.svg';
 import { ScriptParam } from '@/types/sqlDevelopApi';
+import { is } from 'immer/dist/internal';
 
 // 扩展 ScriptParam 以支持内部排序
 type ParameterWithOrder = ScriptParam & { _order?: number };
@@ -17,6 +18,7 @@ interface ParameterSidebarProps {
   onCollapsedChange?: (collapsed: boolean) => void;
   onParameterHover?: (paramName: string | null) => void;
   initialParams?: ScriptParam[]; // 初始参数值（从后端加载）
+  systemParamKeys?: Set<string>; // 系统参数名列表
 }
 
 // 提取参数的正则表达式
@@ -59,6 +61,24 @@ const extractParameters = (content: string): ParameterWithOrder[] => {
   );
 };
 
+// 检查参数名是否与系统参数冲突（支持 ${} 和 $[] 两种格式）
+const isParamNameConflict = (
+  paramName: string,
+  systemParamKeys: Set<string> | Set<unknown>
+): boolean => {
+  if (!paramName || systemParamKeys.size === 0) {
+    return false;
+  }
+
+  const formattedWithBrace = `\${${paramName}}`;
+  const formattedWithBracket = `$[${paramName}]`;
+
+  return (
+    systemParamKeys.has(formattedWithBrace) ||
+    systemParamKeys.has(formattedWithBracket)
+  );
+};
+
 const ParameterSidebar: React.FC<ParameterSidebarProps> = memo(
   ({
     content,
@@ -67,7 +87,8 @@ const ParameterSidebar: React.FC<ParameterSidebarProps> = memo(
     onVisibleChange,
     onCollapsedChange,
     onParameterHover,
-    initialParams
+    initialParams,
+    systemParamKeys = new Set()
   }) => {
     const [isCollapsed, setIsCollapsed] = useState(false);
     const [localParams, setLocalParams] = useState<ParameterWithOrder[]>(
@@ -76,8 +97,6 @@ const ParameterSidebar: React.FC<ParameterSidebarProps> = memo(
         _order: initialParams.length - index
       })) || []
     );
-    const initialParamsRef = useRef<ScriptParam[] | undefined>(initialParams);
-    const lastAppliedInitialParamsStrRef = useRef<string | null>(null);
 
     // 从内容中提取参数
     const extractedParams = useMemo(() => {
@@ -106,17 +125,6 @@ const ParameterSidebar: React.FC<ParameterSidebarProps> = memo(
         onCollapsedChange(isCollapsed);
       }
     }, [isCollapsed, onCollapsedChange]);
-
-    // 当 initialParams 从外部更新时（比如从后端加载），更新 ref
-    // useEffect(() => {
-    //   // 检查 initialParams 是否真的变化了（通过比较内容，而不是引用）
-    //   const initialParamsStr = JSON.stringify(initialParams);
-    //   const currentStr = JSON.stringify(initialParamsRef.current);
-
-    //   if (initialParamsStr !== currentStr) {
-    //     initialParamsRef.current = initialParams;
-    //   }
-    // }, [initialParams]);
 
     // 同步提取的参数到本地状态，同时保留已输入的值和初始参数值
     useEffect(() => {
@@ -242,7 +250,20 @@ const ParameterSidebar: React.FC<ParameterSidebarProps> = memo(
                         disabled
                         className="mb-[8px] w-full"
                         placeholder="暂无参数"
+                        status={
+                          isParamNameConflict(param.config_key, systemParamKeys)
+                            ? 'error'
+                            : undefined
+                        }
                       />
+                      {isParamNameConflict(
+                        param.config_key,
+                        systemParamKeys
+                      ) && (
+                        <div className="mb-[8px] text-[12px] text-[#F53F3F]">
+                          自定义参数不能和系统参数重名
+                        </div>
+                      )}
                       <div className="mb-[4px] text-[14px] text-[var(--color-text-2)]">
                         参数值:
                       </div>

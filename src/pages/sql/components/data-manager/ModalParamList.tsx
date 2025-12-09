@@ -47,19 +47,22 @@ const ModalParamList = ({ paramVisible, onCancel }) => {
   const handleSearchChange = (values: any) => {
     const allFormData = form.getFieldsValue();
     setSearchParams({
-      config_key: allFormData.param_name,
-      config_demo: allFormData.param_demo,
-      config_desc: allFormData.param_desc
+      config_key: allFormData.config_key,
+      config_demo: allFormData.config_demo,
+      config_desc: allFormData.config_desc
     });
   };
 
   // 获取表格数据
-  const getListData = async () => {
+  const getListData = async (
+    page?: number,
+    params?: ListDevelopSystemParamParams
+  ) => {
     setLoading(true);
     const res = await listDevelopSystemParam({
-      page: current,
+      page: page ?? current,
       page_size: pageSize,
-      ...searchParams
+      ...(params ?? searchParams)
     });
     setLoading(false);
     if (res.status === 200) {
@@ -71,6 +74,7 @@ const ModalParamList = ({ paramVisible, onCancel }) => {
   useEffect(() => {
     if (isReset) {
       setIsReset(false);
+      setSearchParams(undefined);
     }
     getListData();
   }, [current, pageSize, isReset]);
@@ -126,10 +130,10 @@ const ModalParamList = ({ paramVisible, onCancel }) => {
           >
             <FormItem
               label="参数名:"
-              field="param_name"
+              field="config_key"
               style={{ marginRight: 8, marginBottom: 16 }}
             >
-              <Input.Search
+              <Input
                 style={{ width: 193 }}
                 allowClear
                 placeholder="输入参数名搜索"
@@ -137,10 +141,10 @@ const ModalParamList = ({ paramVisible, onCancel }) => {
             </FormItem>
             <FormItem
               label="参数值:"
-              field="param_demo"
+              field="config_demo"
               style={{ marginRight: 8, marginBottom: 16 }}
             >
-              <Input.Search
+              <Input
                 style={{ width: 193 }}
                 allowClear
                 placeholder="输入参数值搜索"
@@ -148,10 +152,10 @@ const ModalParamList = ({ paramVisible, onCancel }) => {
             </FormItem>
             <FormItem
               label="参数说明:"
-              field="param_desc"
+              field="config_desc"
               style={{ marginRight: 8, marginBottom: 16 }}
             >
-              <Input.Search
+              <Input
                 style={{ width: 180 }}
                 allowClear
                 placeholder="输入参数说明搜索"
@@ -162,6 +166,7 @@ const ModalParamList = ({ paramVisible, onCancel }) => {
             icon={<IconRefresh />}
             onClick={() => {
               form.resetFields();
+              setCurrent(1);
               setIsReset(true);
             }}
             type="text"
@@ -170,7 +175,15 @@ const ModalParamList = ({ paramVisible, onCancel }) => {
           </Button>
           <Button
             onClick={() => {
-              getListData();
+              const allFormData = form.getFieldsValue();
+              const params = {
+                config_key: allFormData.config_key,
+                config_demo: allFormData.config_demo,
+                config_desc: allFormData.config_desc
+              };
+              setSearchParams(params);
+              setCurrent(1);
+              getListData(1, params);
             }}
             type="primary"
           >
@@ -187,21 +200,27 @@ const ModalParamList = ({ paramVisible, onCancel }) => {
           loading={loading}
           rowKey="table_id"
           scroll={{ y: 500 }}
+          pagination={false}
         />
-        <div className="pagination-content">
-          <Pagination
-            total={total}
-            current={current}
-            pageSize={pageSize}
-            onChange={(current, pageSize) => {
-              setCurrent(current);
-              setPageSize(pageSize);
-            }}
-            showTotal
-            showJumper
-            sizeCanChange
-          />
-        </div>
+        {total > pageSize && (
+          <div
+            className="pagination-content"
+            style={{ marginTop: 16, textAlign: 'right' }}
+          >
+            <Pagination
+              total={total}
+              current={current}
+              pageSize={pageSize}
+              onChange={(current, pageSize) => {
+                setCurrent(current);
+                setPageSize(pageSize);
+              }}
+              showTotal
+              showJumper
+              sizeCanChange
+            />
+          </div>
+        )}
       </div>
     </Modal>
   );

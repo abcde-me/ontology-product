@@ -48,6 +48,7 @@ import ReleaseVersionModal from './ReleaseVersionModal';
 import ParameterSidebar from './ParameterSidebar';
 import { ScriptParam } from '@/types/sqlDevelopApi';
 import ReleaseIcon from '../../assets/release-icon.svg';
+import { listDevelopSystemParam } from '@/api/sql';
 
 interface NotebookWorkspaceProps {
   content: string;
@@ -175,6 +176,9 @@ const EditorWorkspaceContent: React.FC<{
     const [sidebarVisible, setSidebarVisible] = React.useState<boolean>(false);
     const [sidebarCollapsed, setSidebarCollapsed] =
       React.useState<boolean>(false);
+    const [systemParamKeys, setSystemParamKeys] = React.useState<Set<string>>(
+      new Set()
+    );
 
     // 从 Context 获取编辑器状态
     const {
@@ -231,6 +235,31 @@ const EditorWorkspaceContent: React.FC<{
         fileName: fileName
       });
     }, [fileName, form]);
+
+    // 获取系统参数列表
+    useEffect(() => {
+      const fetchSystemParams = async () => {
+        try {
+          const res = await listDevelopSystemParam({
+            page: 1,
+            page_size: 100
+          });
+          if (res.status === 200 && res.data?.items) {
+            // 提取系统参数的 config_key，支持字符串数组或对象数组
+            const keys = res.data.items
+              .map((item: any) => {
+                return typeof item === 'string' ? item : item?.config_key || '';
+              })
+              .filter((key: string) => key);
+            setSystemParamKeys(new Set(keys));
+          }
+        } catch (error) {
+          console.error('获取系统参数列表失败:', error);
+        }
+      };
+
+      fetchSystemParams();
+    }, []);
 
     const myTheme = createTheme({
       theme: 'light',
@@ -507,6 +536,7 @@ const EditorWorkspaceContent: React.FC<{
               onCollapsedChange={setSidebarCollapsed}
               onParameterHover={handleParameterHover}
               initialParams={initialParams}
+              systemParamKeys={systemParamKeys}
             />
             // )
           }
