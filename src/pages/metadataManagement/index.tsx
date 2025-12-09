@@ -1,13 +1,10 @@
 import React, { useEffect, useRef, useState } from 'react';
 import {
   Button,
-  Form,
-  Input,
   Menu,
   Pagination,
   PaginationProps,
-  Table,
-  Select
+  Table
 } from '@arco-design/web-react';
 import { useHistory } from 'react-router';
 import { ColumnProps } from '@arco-design/web-react/es/Table';
@@ -18,11 +15,14 @@ import { SorterInfo } from '@arco-design/web-react/es/Table/interface';
 import { PermissionWrapper } from '@/components/PermissionGuard';
 import { WORKFLOW_LIST_PERMISSIONS } from '@/config/permissions';
 import { openNewPage } from '@/utils/env';
-import SettingsIcon from '@/assets/metadata/settings.svg';
 import ColumnSettingIcon from '@/assets/metadata/column-setting.svg';
 import StorageIcon from '@/assets/metadata/storage.svg';
-import { IconPlus, IconRefresh } from '@arco-design/web-react/icon';
-import { getColumns } from './getColumns';
+import { IconPlus, IconRefresh, IconSearch } from '@arco-design/web-react/icon';
+import { getColumns, getColumnsSetting } from './getColumns';
+import ColumnSettingModal, {
+  ColumnField
+} from '../dataAsset/components/ColumnSettingModal';
+import SearchArea from './components/SearchArea';
 import styles from './index.module.scss';
 
 enum MetadataType {
@@ -33,11 +33,8 @@ enum MetadataType {
 }
 
 export default function MetadataManagement() {
-  const history = useHistory();
   const userInfo = useUserInfo();
   const MenuItem = Menu.Item;
-  // 搜索表单
-  const searchForm = useRef<any>(null);
 
   // 初始化搜索框value
   const [searchValue, setSearchValue] = useState('');
@@ -62,6 +59,25 @@ export default function MetadataManagement() {
   const [activeMetadataType, setActiveMetadataType] = useState<
     MetadataType | string
   >(MetadataType.Iceberg);
+  // 列设置弹窗是否打开
+  const [columnModalOpen, setColumnModalOpen] = useState(false);
+  // 初始化表格列
+  const [columns, setColumns] = useState<ColumnProps[]>([]);
+  // 列设置弹窗选中的列
+  const [selectedColumns, setSelectedColumns] = useState<ColumnField[]>(
+    getColumnsSetting(activeMetadataType)
+  );
+
+  useEffect(() => {
+    setColumns(
+      getColumns(
+        selectedColumns,
+        viewDetailWorkflow,
+        current,
+        pageSize
+      ) as ColumnProps[]
+    );
+  }, [activeMetadataType, selectedColumns]);
 
   // 组件初始化
   useEffect(() => {
@@ -138,10 +154,40 @@ export default function MetadataManagement() {
     // setCurrent(1);
   };
 
-  const columns: ColumnProps[] = getColumns(
-    activeMetadataType,
-    viewDetailWorkflow
-  ) as ColumnProps[];
+  // 处理字段搜索
+  const handleFieldSearch = (fieldValues, commonSearch: string) => {
+    console.log(fieldValues, commonSearch);
+  };
+
+  // 处理重置
+  const handleReset = () => {
+    // setSearchParams({ ...searchParams, fieldSearch: [], commonSearch: '' });
+    // setCurrentPage(1);
+  };
+
+  const columnSettingsFields: ColumnField[] =
+    getColumnsSetting(activeMetadataType);
+
+  // 列设置弹窗回调
+  const handleModalOk = (
+    selectedIds: string[],
+    displayFields: ColumnField[]
+  ) => {
+    const selectedFields = selectedIds
+      .map((nameEn) =>
+        displayFields.find(
+          (field) => field.nameEn === nameEn || field.id === nameEn
+        )
+      )
+      .filter(Boolean) as ColumnField[];
+    setSelectedColumns(selectedFields);
+    setColumnModalOpen(false);
+  };
+
+  const handleModalCancel = () => setColumnModalOpen(false);
+  const handleColumnChange = (list: ColumnField[]) => {
+    console.log('列设置变化:', list);
+  };
 
   return (
     <div className={styles['metadataManagement']}>
@@ -150,7 +196,10 @@ export default function MetadataManagement() {
         <div className={styles['leftBox']}>
           <Menu
             defaultSelectedKeys={[activeMetadataType]}
-            onClickMenuItem={(key) => setActiveMetadataType(key)}
+            onClickMenuItem={(key) => {
+              setSelectedColumns(getColumnsSetting(key));
+              setActiveMetadataType(key);
+            }}
           >
             <MenuItem key="Iceberg">Iceberg</MenuItem>
             <MenuItem key="Doris">Doris</MenuItem>
@@ -159,81 +208,12 @@ export default function MetadataManagement() {
           </Menu>
         </div>
         <div className={styles['rightBox']}>
-          <div
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              width: '100%',
-              padding: '16px 0',
-              borderRadius: '4px',
-              borderBottom: '1px solid var(--LineLine-color-border-2, #E2E8F0)'
-            }}
-          >
-            <Form
-              ref={searchForm}
-              onSubmit={handleSearch}
-              layout="inline"
-              style={{
-                justifyContent: 'space-between'
-              }}
-            >
-              {activeMetadataType === MetadataType.MinIO ? (
-                <>
-                  <Form.Item label="桶名称：" field="bucket_name">
-                    <Input placeholder="请输入关键字搜索" />
-                  </Form.Item>
-                  <Form.Item label="所属区域：" field="region">
-                    <Input placeholder="请输入关键字搜索" />
-                  </Form.Item>
-                  <Form.Item label="存储类型：" field="storage_type">
-                    <Select placeholder="请选择存储类型" />
-                  </Form.Item>
-                </>
-              ) : (
-                <>
-                  <Form.Item label="目录类型：" field="directory_type">
-                    <Select placeholder="请选择文件类型" />
-                  </Form.Item>
-                  <Form.Item label="表名：" field="table_name">
-                    <Input placeholder="请输入关键字搜索" />
-                  </Form.Item>
-                  <Form.Item label="表中文：" field="table_name_zh">
-                    <Input placeholder="请输入关键字搜索" />
-                  </Form.Item>
-                </>
-              )}
-            </Form>
-            <div className="flex items-center justify-between">
-              <div>
-                <PermissionWrapper
-                  permission={WORKFLOW_LIST_PERMISSIONS.CREATE}
-                >
-                  <Button
-                    type="outline"
-                    onClick={() => searchForm?.current?.submit()}
-                    loading={loading}
-                  >
-                    查询
-                  </Button>
-                  <Button
-                    type="text"
-                    onClick={() => searchForm?.current?.submit()}
-                    loading={loading}
-                  >
-                    重置
-                  </Button>
-                </PermissionWrapper>
-              </div>
-              <Button
-                type="text"
-                className={styles['settingBtn']}
-                icon={<SettingsIcon />}
-                loading={loading}
-              >
-                设置搜索条件
-              </Button>
-            </div>
-          </div>
+          <SearchArea
+            fields={selectedColumns}
+            onMainSearch={handleSearch}
+            onFieldSearch={handleFieldSearch}
+            onReset={handleReset}
+          />
           <div className="mb-3 mt-4 flex items-center justify-between">
             <h1 className="text-base font-semibold">数据列表(500)</h1>
             <div className="flex items-center gap-2">
@@ -271,6 +251,7 @@ export default function MetadataManagement() {
               <Button
                 className={styles['refreshBtn']}
                 icon={<ColumnSettingIcon />}
+                onClick={() => setColumnModalOpen(true)}
               >
                 列设置
               </Button>
@@ -317,6 +298,17 @@ export default function MetadataManagement() {
           )}
         </div>
       </div>
+
+      {/* 列设置弹窗 */}
+      <ColumnSettingModal
+        visible={columnModalOpen}
+        fields={
+          columnSettingsFields.length > 0 ? columnSettingsFields : undefined
+        }
+        onOk={handleModalOk}
+        onCancel={handleModalCancel}
+        onChange={handleColumnChange}
+      />
     </div>
   );
 }
