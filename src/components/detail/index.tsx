@@ -710,7 +710,8 @@ const DatasetDetail = (props: {
                     handleGoToSegmentList(
                       record.id,
                       record.bucket_name,
-                      record.path
+                      record.path,
+                      record.name
                     )
                   }
                 >
@@ -950,10 +951,11 @@ const DatasetDetail = (props: {
   const handleGoToSegmentList = (
     document_id: string,
     bucket_name: string,
-    path: string
+    path: string,
+    name: string
   ) => {
     history.push(
-      `/tenant/compute/modaforge/ragDetail?datasetId=${id}&documentId=${document_id}&bucketName=${bucket_name}&path=${path}&datasetName=${datasetDetail?.name}&sceneName=${sceneName}`
+      `/tenant/compute/modaforge/ragDetail?datasetId=${id}&documentId=${document_id}&bucketName=${bucket_name}&path=${path}&datasetName=${datasetDetail?.name}&sceneName=${sceneName}&fileName=${name}`
     );
   };
 

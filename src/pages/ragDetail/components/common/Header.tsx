@@ -6,7 +6,7 @@ import { useParams } from '@/utils/url';
 
 const Header: React.FC = () => {
   const history = useHistory();
-  const { filePath, documentName, datasetName, datasetId } =
+  const { filePath, documentName, datasetName, datasetId, loading } =
     useRagDetailStore();
   const sceneName = useParams('sceneName');
   // 解析文件路径为面包屑项
@@ -24,6 +24,24 @@ const Header: React.FC = () => {
         },
         {
           name: documentName,
+          isLast: true
+        }
+      ];
+    }
+
+    // 如果正在加载中，显示加载占位符，避免闪烁
+    if (loading) {
+      return [
+        {
+          name: '数据集市',
+          isLast: false
+        },
+        {
+          name: '加载中...',
+          isLast: false
+        },
+        {
+          name: '加载中...',
           isLast: true
         }
       ];
@@ -50,7 +68,7 @@ const Header: React.FC = () => {
       // 最后一项是文件名，不可点击
       isLast: index === pathParts.length - 1
     }));
-  }, [filePath, documentName, datasetName]);
+  }, [filePath, documentName, datasetName, loading]);
 
   const handleBack = () => {
     history.push(
@@ -60,7 +78,12 @@ const Header: React.FC = () => {
 
   return (
     <div className="flex h-[56px] items-center px-[20px]">
-      <BreadCrumbHeader list={breadcrumbItems} onArrowClick={handleBack} />
+      <BreadCrumbHeader
+        list={breadcrumbItems}
+        onArrowClick={handleBack}
+        // 在加载中时添加加载状态样式
+        className={loading ? 'opacity-60' : ''}
+      />
     </div>
   );
 };
