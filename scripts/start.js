@@ -118,7 +118,7 @@ checkBrowsers(paths.appPath, isInteractive)
       host: HOST,
       port,
       hot: true, // 启用热替换
-      liveReload: true, // 启用实时重新加载
+      liveReload: false, // 关闭 liveReload，避免 HMR 失败时整页刷新
       client: {
         logging: 'info',
         overlay: false,

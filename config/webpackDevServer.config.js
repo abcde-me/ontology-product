@@ -78,7 +78,7 @@ module.exports = function (proxy, allowedHost) {
       }
     },
     hot: true, // 启用热模块替换
-    liveReload: true, // 启用实时重新加载
+    liveReload: false, // 关闭 liveReload，避免 HMR 失败时整页刷新
     client: {
       webSocketURL: {
         // Enable custom sockjs pathname for websocket connection to hot reloading server.
@@ -92,7 +92,7 @@ module.exports = function (proxy, allowedHost) {
       //   errors: true,
       //   warnings: false
       // }
-      overlay: false,
+      overlay: false
     },
     devMiddleware: {
       // It is important to tell WebpackDevServer to use the same "publicPath" path as
