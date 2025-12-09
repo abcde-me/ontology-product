@@ -174,8 +174,8 @@ module.exports = function (webpackEnv) {
           loader: require.resolve(preProcessor),
           options: {
             sourceMap: true,
-            sassOptions: { 
-              silenceDeprecations:['legacy-js-api'],
+            sassOptions: {
+              silenceDeprecations: ['legacy-js-api']
             }
           }
         }
@@ -222,7 +222,7 @@ module.exports = function (webpackEnv) {
       ? shouldUseSourceMap
         ? 'source-map'
         : false
-      : 'source-map',
+      : 'eval-cheap-module-source-map', // 开发环境使用更快的 source map
     // These are the "entry points" to our application.
     // This means they will be the "root" imports that are included in JS bundle.
     entry: isConsolePlugin

@@ -12,6 +12,7 @@ import {
   Tooltip
 } from '@arco-design/web-react';
 import { useUserInfo } from '@/store/userInfoStore';
+import { useUrlState } from '@/pages/sql/hooks/useUrlState';
 import Mock from 'mockjs';
 import styles from './index.module.scss';
 import { IconCopy, IconDelete } from '@arco-design/web-react/icon';
@@ -41,6 +42,7 @@ interface ScriptCardProps {
 
 const ScriptCard: React.FC<ScriptCardProps> = ({ onToScriptList }) => {
   const userInfo = useUserInfo();
+  const { updateUrlState } = useUrlState();
   // 初始化搜索框value
   const [searchValue, setSearchValue] = useState('');
   // 初始化工作流列表数据
@@ -297,7 +299,13 @@ const ScriptCard: React.FC<ScriptCardProps> = ({ onToScriptList }) => {
                         className={styles['script-card-content-item-title-btn']}
                         icon={<IconCopy />}
                         onClick={() => {
-                          onToScriptList('files');
+                          updateUrlState(
+                            {
+                              activeTab: 'files',
+                              activeDevelopScriptId: item.script_id
+                            },
+                            { method: 'push' }
+                          );
                         }}
                       >
                         详情

@@ -18,7 +18,7 @@ import { SorterInfo } from '@arco-design/web-react/es/Table/interface';
 import { PermissionWrapper } from '@/components/PermissionGuard';
 import { WORKFLOW_LIST_PERMISSIONS } from '@/config/permissions';
 import { IconRefresh } from '@arco-design/web-react/icon';
-import { openNewPage } from '@/utils/env';
+import { useUrlState } from '@/pages/sql/hooks/useUrlState';
 import styles from './index.module.scss';
 import { VersionType, VersionTypeEnum } from '../sctipt-card';
 import ScriptModalTable from '../sctip-modal-table';
@@ -43,6 +43,7 @@ const ScriptTable: React.FC<ScriptTableProps> = ({
   const FormItem = Form.Item;
   const [form] = Form.useForm();
   const Option = Select.Option;
+  const { updateUrlState } = useUrlState();
   const options = [
     {
       value: 1,
@@ -304,7 +305,13 @@ const ScriptTable: React.FC<ScriptTableProps> = ({
               <span
                 className={styles['operate-text']}
                 onClick={() => {
-                  onToScriptList('files');
+                  updateUrlState(
+                    {
+                      activeTab: 'files',
+                      activeDevelopScriptId: record.script_id
+                    },
+                    { method: 'push' }
+                  );
                 }}
               >
                 详情
