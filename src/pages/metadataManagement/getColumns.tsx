@@ -439,7 +439,7 @@ export const getColumnsSetting = (metadataType: MetadataType | string) => {
 
 export const getColumns = (
   metadataSelectedFields: ColumnField[],
-  viewDetailWorkflow: (workflowUuid: string, dsWorkflowId: string) => void,
+  viewDetail: (id: string) => void,
   page: number,
   size: number
 ) => {
@@ -450,17 +450,7 @@ export const getColumns = (
       fixed: 'left' as const,
       width: 80,
       key: 'index',
-      className: styles['hover-change'] + ' ' + styles['table-name'],
-      render: (_, record, idx: number) => (
-        <EllipsisPopover
-          value={(page - 1) * size + idx + 1}
-          isEdit={false}
-          isLink
-          handleLink={() => {
-            viewDetailWorkflow(record.workflow_uuid, record.ds_workflow_id);
-          }}
-        />
-      )
+      render: (_, _record, idx: number) => (page - 1) * size + idx + 1
     },
     // 根据 fields 生成列，保证每一列和表头一一对应
     ...(metadataSelectedFields || [])
@@ -473,7 +463,13 @@ export const getColumns = (
           key: field.nameEn,
           width: 150,
           ellipsis: true,
-          render: (value: any) => {
+          className:
+            field.id === 'collectionName' ||
+            field.id === 'tableName' ||
+            field.id === 'bucketName'
+              ? styles['hover-change'] + ' ' + styles['table-name']
+              : '',
+          render: (value: any, record: any) => {
             if (field.type.includes('date')) {
               return value ? dayjs(value).format('YYYY-MM-DD HH:mm:ss') : '-';
             }
@@ -486,6 +482,22 @@ export const getColumns = (
                 <div className="flex items-center gap-1">
                   <CloseCircleFillIcon /> 关闭
                 </div>
+              );
+            }
+            if (
+              field.id === 'collectionName' ||
+              field.id === 'tableName' ||
+              field.id === 'bucketName'
+            ) {
+              return (
+                <EllipsisPopover
+                  value={value}
+                  isEdit={false}
+                  isLink
+                  handleLink={() => {
+                    viewDetail(record.id);
+                  }}
+                />
               );
             }
             return value ?? '-';

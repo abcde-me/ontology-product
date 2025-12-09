@@ -34,6 +34,7 @@ enum MetadataType {
 
 export default function MetadataManagement() {
   const userInfo = useUserInfo();
+  const history = useHistory();
   const MenuItem = Menu.Item;
 
   // 初始化搜索框value
@@ -72,7 +73,7 @@ export default function MetadataManagement() {
     setColumns(
       getColumns(
         selectedColumns,
-        viewDetailWorkflow,
+        viewDetail,
         current,
         pageSize
       ) as ColumnProps[]
@@ -115,12 +116,9 @@ export default function MetadataManagement() {
   };
 
   // 查看详情
-  const viewDetailWorkflow = (
-    workflow_uuid: number | string,
-    ds_workflow_id: number | string
-  ) => {
-    openNewPage(
-      `/modaforge/tenant/compute/modaforge/workflowConfig?workflow_uuid=${workflow_uuid}&ds_workflow_id=${ds_workflow_id}`
+  const viewDetail = (id) => {
+    history.push(
+      `/tenant/compute/modaforge/metadataManagement/detail?id=${id}`
     );
   };
 
