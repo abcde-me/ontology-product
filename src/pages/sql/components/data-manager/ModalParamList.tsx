@@ -18,7 +18,6 @@ import { IconRefresh } from '@arco-design/web-react/icon';
 import './ModalParamList.scss';
 import { listDevelopSystemParam } from '@/api/sql';
 import { ListDevelopSystemParamParams } from '@/types/sqlApi';
-import { get } from 'lodash';
 const FormItem = Form.Item;
 
 const defaultfileTypeList = [
