@@ -1301,7 +1301,7 @@ const DatasetManagement: React.FC = () => {
     if (selectedSceneFilters.length > 0) {
       params.scene_ids = selectedSceneFilters;
     } else if (selectedSceneTab.length > 0) {
-      params.scene_ids = selectedSceneTab;
+      params.scene_ids = selectedSceneTab.filter((item) => item !== 0);
     }
 
     // 添加来源过滤参数
