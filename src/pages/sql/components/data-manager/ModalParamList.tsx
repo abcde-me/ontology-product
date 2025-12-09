@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
   Button,
   DatePicker,
@@ -16,6 +16,8 @@ import { formatDateTime } from '../../utils';
 import getLabelByValue from '@/utils/getLabelByValue';
 import { IconRefresh } from '@arco-design/web-react/icon';
 import './ModalParamList.scss';
+import { listDevelopSystemParam } from '@/api/sql';
+import { ListDevelopSystemParamParams } from '@/types/sqlApi';
 const FormItem = Form.Item;
 
 const defaultfileTypeList = [
@@ -34,14 +36,44 @@ const defaultfileTypeList = [
 // 参数详情 弹框
 const ModalParamList = ({ paramVisible, onCancel }) => {
   const [form] = Form.useForm();
-  const [searchParams, setSearchParams] = React.useState<DbTableListParamss>();
+  const [searchParams, setSearchParams] =
+    React.useState<ListDevelopSystemParamParams>();
   const [listData, setListData] = React.useState<any[]>([]);
   const [loading, setLoading] = React.useState<boolean>(false);
   const [total, setTotal] = React.useState<number>(0);
   const [current, setCurrent] = React.useState<number>(1);
   const [pageSize, setPageSize] = React.useState<number>(10);
+  const [isReset, setIsReset] = React.useState(false);
+  const handleSearchChange = (values: any) => {
+    const allFormData = form.getFieldsValue();
+    setSearchParams({
+      config_key: allFormData.param_name,
+      config_demo: allFormData.param_demo,
+      config_desc: allFormData.param_desc
+    });
+  };
 
-  const handleSearchChange = (values: any) => {};
+  // 获取表格数据
+  const getListData = async () => {
+    setLoading(true);
+    const res = await listDevelopSystemParam({
+      page: current,
+      page_size: pageSize,
+      ...searchParams
+    });
+    setLoading(false);
+    if (res.status === 200) {
+      setListData(res?.data?.items || []);
+      setTotal(res.data.total || 0);
+    }
+  };
+
+  useEffect(() => {
+    if (isReset) {
+      setIsReset(false);
+    }
+    getListData();
+  }, [current, pageSize, isReset]);
 
   const columns: TableColumnProps[] = [
     {
@@ -52,31 +84,27 @@ const ModalParamList = ({ paramVisible, onCancel }) => {
     },
     {
       title: '参数名',
-      dataIndex: 'table_name',
+      dataIndex: 'config_key',
       ellipsis: true,
       width: 174
     },
     {
       title: '参数值',
-      dataIndex: 'table_name',
+      dataIndex: 'config_value',
       ellipsis: true,
       width: 174
     },
     {
       title: '参数说明',
-      dataIndex: 'table_name',
+      dataIndex: 'config_desc',
       ellipsis: true,
       width: 174,
       // 如果没有值显示暂无参数说明
       render: (_, record) =>
-        record.table_name ? (
-          <EllipsisPopover
-            value={record.table_name}
-            isEdit={false}
-            preferTypography
-          />
+        record.config_desc ? (
+          <EllipsisPopover value={record.config_desc} isEdit={false} />
         ) : (
-          <div>暂无参数说明</div>
+          <div>--</div>
         )
     }
   ];
@@ -109,7 +137,7 @@ const ModalParamList = ({ paramVisible, onCancel }) => {
             </FormItem>
             <FormItem
               label="参数值:"
-              field="param_value"
+              field="param_demo"
               style={{ marginRight: 8, marginBottom: 16 }}
             >
               <Input.Search
@@ -134,12 +162,20 @@ const ModalParamList = ({ paramVisible, onCancel }) => {
             icon={<IconRefresh />}
             onClick={() => {
               form.resetFields();
+              setIsReset(true);
             }}
             type="text"
           >
             重置
           </Button>
-          <Button type="primary">查询</Button>
+          <Button
+            onClick={() => {
+              getListData();
+            }}
+            type="primary"
+          >
+            查询
+          </Button>
         </div>
         <Table
           style={{
@@ -157,6 +193,10 @@ const ModalParamList = ({ paramVisible, onCancel }) => {
             total={total}
             current={current}
             pageSize={pageSize}
+            onChange={(current, pageSize) => {
+              setCurrent(current);
+              setPageSize(pageSize);
+            }}
             showTotal
             showJumper
             sizeCanChange

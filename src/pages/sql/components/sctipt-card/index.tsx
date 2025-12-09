@@ -1,27 +1,32 @@
 import React, { useEffect, useState } from 'react';
 import {
   Button,
+  Empty,
   Form,
   Input,
   Message,
   Modal,
   Pagination,
   Popover,
+  Spin,
   Tooltip
 } from '@arco-design/web-react';
-import { getWorkflowList } from '@/api/workflowList';
 import { useUserInfo } from '@/store/userInfoStore';
 import Mock from 'mockjs';
 import styles from './index.module.scss';
 import { IconCopy, IconDelete } from '@arco-design/web-react/icon';
-import { mock } from 'node:test';
-import Tool from '@/pages/workflowConfig/workflow/block-selector/tool/tool';
+import {
+  deleteDevelopScriptLogByVersion,
+  listDevelopScriptLogByKeyApi,
+  getDevelopScriptLogByVersion
+} from '@/api/sql';
+import noDataElement from '@/components/no-data';
 
 // 版本类型 已发版 未发版 调度中
 export const VersionType = {
-  RELEASED: 'released', // 已发版
-  UNRELEASED: 'unreleased', // 未发版
-  SCHEDULED: 'scheduled' // 调度中
+  RELEASED: 2, // 已发版
+  UNRELEASED: 1, // 未发版
+  SCHEDULED: 3 // 调度中
 } as const;
 
 export enum VersionTypeEnum {
@@ -30,8 +35,11 @@ export enum VersionTypeEnum {
   SCHEDULED = '调度中'
 }
 
-const ScriptCard: React.FC = () => {
-  const FormItem = Form.Item;
+interface ScriptCardProps {
+  onToScriptList: (type: string) => void;
+}
+
+const ScriptCard: React.FC<ScriptCardProps> = ({ onToScriptList }) => {
   const userInfo = useUserInfo();
   // 初始化搜索框value
   const [searchValue, setSearchValue] = useState('');
@@ -71,18 +79,25 @@ const ScriptCard: React.FC = () => {
       getCardList();
       setIsClickClear(false);
     }
-  }, [isClickClear]);
+  }, [isClickClear, searchValue]);
 
-  const getCardList = () => {
+  const getCardList = async () => {
     setLoading(true);
     try {
       const params: any = {
-        uid: userInfo?.id,
         search_content: searchValue,
-        page: current, //第几页
-        page_size: pageSize //每页个数
+        page: current,
+        page_size: pageSize
       };
-      // const res = await getWorkflowList(params);
+      const res = await listDevelopScriptLogByKeyApi(params);
+      console.log(res);
+      if (res.status !== 200) {
+        Message.error(res?.message);
+      }
+      if (res.status === 200 && res.code === '') {
+        setScriptCardList(res.data?.items || []);
+        setTotal(res.data?.total || 0);
+      }
     } finally {
       setLoading(false);
     }
@@ -91,7 +106,7 @@ const ScriptCard: React.FC = () => {
   //
 
   // 删除卡片脚本
-  const deleteScript = (id: string, type) => {
+  const deleteScript = (id: number, type: number) => {
     console.log(type, '123');
     if (type === VersionType.UNRELEASED) {
       Message.error('调度中的脚本不能删除');
@@ -112,28 +127,28 @@ const ScriptCard: React.FC = () => {
         okText: '确定',
         cancelText: '取消',
         onOk: () => {
-          deleteCardScript(id);
+          deleteCardScript(id, type);
         }
       });
       return;
     }
-    // history.push(
-    //     `/tenant/compute/modaforge/dataCatalog/list?root_type=${root_type}&id=${id}&parent_id=${parent_id}`
-    // );
   };
   // 删除脚本
-  const deleteCardScript = async (workflow_uuid: number | string) => {
-    // const res = await workflowDelete(workflow_uuid);
-    // if (res.status === 200 && res.code === '') {
-    //   Message.success({
-    //     content: '删除成功'
-    //   });
-    //   getList();
-    // } else {
-    //   Message.error({
-    //     content: res?.message ?? '删除失败，请稍后重试'
-    //   });
-    // }
+  const deleteCardScript = async (id: number, type: number) => {
+    const res = await deleteDevelopScriptLogByVersion({
+      version: type,
+      script_id: Number(id)
+    });
+    if (res.status === 200 && res.code === '') {
+      Message.success({
+        content: '删除成功'
+      });
+      getCardList();
+    } else {
+      Message.error({
+        content: res?.message ?? '删除失败，请稍后重试'
+      });
+    }
   };
   // 查看脚本详情
   const handleViewScriptDetail = (id: number) => {
@@ -206,6 +221,24 @@ const ScriptCard: React.FC = () => {
         );
     }
   };
+  // 查询脚本卡片列表
+  const onToSearchScriptList = async () => {
+    try {
+      const res = await getDevelopScriptLogByVersion({
+        script_context: searchValue
+      });
+      if (res.status === 200) {
+        setScriptCardList(res.data?.items || []);
+        setTotal(res.data?.total || 0);
+      } else {
+        setScriptCardList([]);
+        setTotal(0);
+        Message.error(res?.message);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
   return (
     <div className={styles['script-card-wrapper']}>
       <div
@@ -221,59 +254,106 @@ const ScriptCard: React.FC = () => {
           onClear={() => {
             getCardList();
           }}
+          onChange={(value) => {
+            setSearchValue(value);
+          }}
+          onPressEnter={() => {
+            onToSearchScriptList();
+          }}
           style={{ width: '100%' }}
           placeholder="请输入脚本内容关键词"
         />
       </div>
-      <div className={styles['script-card-content']}>
-        {mockjsData.list.map((item) => (
-          <div key={item.id} className={styles['script-card-content-item']}>
-            <div className={styles['script-card-content-item-title']}>
-              <div className={styles['script-card-content-item-title-left']}>
-                <div className={styles['script-card-content-item-title-text']}>
-                  <span>{item.title}</span>
-                  <span>(V{item.version})</span>
+      <Spin loading={loading} style={{ width: '100%' }}>
+        <div className={styles['script-card-content']}>
+          {scriptCardList?.length > 0
+            ? scriptCardList.map((item: any) => (
+                <div
+                  key={item.script_id}
+                  className={styles['script-card-content-item']}
+                >
+                  <div className={styles['script-card-content-item-title']}>
+                    <div
+                      className={styles['script-card-content-item-title-left']}
+                    >
+                      <div
+                        onClick={() => {
+                          onToScriptList('files');
+                        }}
+                        className={
+                          styles['script-card-content-item-title-text']
+                        }
+                      >
+                        <span>{item?.script_name || ''}</span>
+                        <span>({item.version_name})</span>
+                      </div>
+                      {getVersionType(item.status)}
+                    </div>
+                    <div
+                      className={styles['script-card-content-item-title-right']}
+                    >
+                      <Button
+                        style={{ marginRight: 8 }}
+                        className={styles['script-card-content-item-title-btn']}
+                        icon={<IconCopy />}
+                        onClick={() => {
+                          onToScriptList('files');
+                        }}
+                      >
+                        详情
+                      </Button>
+                      <Popover
+                        content={
+                          item?.version_type === VersionType.SCHEDULED
+                            ? '调度中的脚本不可删除'
+                            : ''
+                        }
+                      >
+                        <Button
+                          style={{
+                            width: '68px',
+                            height: '24px',
+                            padding: '0px 8px'
+                          }}
+                          className={
+                            styles['script-card-content-item-title-btns']
+                          }
+                          icon={<IconDelete />}
+                          disabled={item.version_type === VersionType.SCHEDULED}
+                          onClick={() =>
+                            deleteScript(item.script_id, item.status)
+                          }
+                        >
+                          删除
+                        </Button>
+                      </Popover>
+                    </div>
+                  </div>
+                  <div className={styles['script-card-content-item-content']}>
+                    {item?.script_context || ''}
+                  </div>
                 </div>
-                {getVersionType(item.version_type)}
-              </div>
-              <div className={styles['script-card-content-item-title-right']}>
-                <Button
-                  style={{ marginRight: 8 }}
-                  className={styles['script-card-content-item-title-btn']}
-                  icon={<IconCopy />}
-                >
-                  详情
-                </Button>
-                <Popover
-                  content={
-                    item?.version_type === VersionType.SCHEDULED
-                      ? '调度中的脚本不可删除'
-                      : ''
-                  }
-                >
-                  <Button
-                    style={{
-                      width: '68px',
-                      height: '24px',
-                      padding: '0px 8px'
-                    }}
-                    className={styles['script-card-content-item-title-btns']}
-                    icon={<IconDelete />}
-                    disabled={item.version_type === VersionType.SCHEDULED}
-                    onClick={() => deleteScript(item.id, item.version_type)}
-                  >
-                    删除
-                  </Button>
-                </Popover>
-              </div>
-            </div>
-            <div className={styles['script-card-content-item-content']}>
-              {item.content}
-            </div>
-          </div>
-        ))}
-      </div>
-      <Pagination total={total} showTotal showJumper />
+              ))
+            : noDataElement({
+                description: '暂无数据'
+              })}
+        </div>
+      </Spin>
+      {scriptCardList?.length > 0 && (
+        <Pagination
+          style={{
+            display: 'flex',
+            justifyContent: 'flex-end'
+          }}
+          onChange={(current, pageSize) => {
+            setCurrent(current);
+            setPageSize(pageSize);
+          }}
+          total={total}
+          showTotal
+          showJumper
+        />
+      )}
     </div>
   );
 };

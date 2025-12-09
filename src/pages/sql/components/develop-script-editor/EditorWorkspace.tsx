@@ -16,11 +16,19 @@ import {
 } from '@arco-design/web-react/icon';
 import { sql } from '@codemirror/lang-sql';
 import { lintGutter } from '@codemirror/lint';
-import { EditorView } from '@codemirror/view';
+import { EditorView, Decoration } from '@codemirror/view';
+import { StateEffect, StateField } from '@codemirror/state';
 import { tags as t } from '@lezer/highlight';
 import createTheme from '@uiw/codemirror-themes';
 import CodeMirror, { ReactCodeMirrorRef } from '@uiw/react-codemirror';
-import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
+import React, {
+  memo,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState
+} from 'react';
 import { format } from 'sql-formatter';
 import styles from './EditorWorkspace.module.scss';
 
@@ -32,11 +40,14 @@ import {
   EditorProvider,
   useEditorContext
 } from '../../contexts/DevelopScriptEditorContext';
-import { FileTab } from '../../hooks/useTabManager';
+import { FileTab } from '../../hooks/useDevelopScriptTabManager';
 import RunningInfoPanel from './RunningInfoPanel';
 import classNames from 'classnames';
 import ModalParamList from '../data-manager/ModalParamList';
 import ReleaseVersionModal from './ReleaseVersionModal';
+import ParameterSidebar from './ParameterSidebar';
+import { ScriptParam } from '@/types/sqlDevelopApi';
+import ReleaseIcon from '../../assets/release-icon.svg';
 
 interface NotebookWorkspaceProps {
   content: string;
@@ -53,6 +64,76 @@ interface NotebookWorkspaceProps {
   onToScriptList?: (key: string) => void;
   curActiveTab: string;
 }
+
+// 定义用于高亮参数的效果
+const highlightParameterEffect = StateEffect.define<string | null>();
+
+// 创建参数高亮的装饰样式
+const parameterHighlightMark = Decoration.mark({
+  class: 'cm-parameter-highlight',
+  attributes: { style: 'background-color: #FFE5B4; border-radius: 2px;' }
+});
+
+// 存储当前高亮的参数名
+const currentHighlightedParam = StateField.define<string | null>({
+  create() {
+    return null;
+  },
+  update(value, tr) {
+    // 检查是否有高亮效果
+    for (const effect of tr.effects) {
+      if (effect.is(highlightParameterEffect)) {
+        return effect.value;
+      }
+    }
+    return value;
+  }
+});
+
+// 创建参数高亮的StateField
+const parameterHighlightField = StateField.define({
+  create(state) {
+    return Decoration.none;
+  },
+  update(decorations, tr) {
+    // 获取当前高亮的参数名
+    const paramName = tr.state.field(currentHighlightedParam);
+
+    // 如果有文档变化或参数变化，重新计算高亮
+    if (
+      tr.docChanged ||
+      tr.effects.some((e) => e.is(highlightParameterEffect))
+    ) {
+      if (!paramName) {
+        // 清除高亮
+        return Decoration.none;
+      }
+
+      // 查找所有匹配的参数引用
+      const text = tr.state.doc.toString();
+      const regex = new RegExp(
+        `\\$\\{${paramName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\}`,
+        'g'
+      );
+      const ranges: Array<{ from: number; to: number }> = [];
+      let match;
+
+      while ((match = regex.exec(text)) !== null) {
+        const from = match.index;
+        const to = from + match[0].length;
+        ranges.push({ from, to });
+      }
+
+      return Decoration.set(
+        ranges.map(({ from, to }) => parameterHighlightMark.range(from, to))
+      );
+    }
+
+    // 如果没有文档变化，只需要更新装饰位置
+    return decorations.map(tr.changes);
+  },
+  provide: (f) => EditorView.decorations.from(f)
+});
 
 // 内部组件，使用 EditorContext
 const EditorWorkspaceContent: React.FC<{
@@ -91,11 +172,10 @@ const EditorWorkspaceContent: React.FC<{
     const [paramVisible, setParamVisible] = React.useState<boolean>(false);
     const [releaseVersionVisible, setReleaseVersionVisible] =
       React.useState<boolean>(false);
-    useEffect(() => {
-      form.setFieldsValue({
-        fileName: fileName
-      });
-    }, [fileName, form]);
+    const [sidebarVisible, setSidebarVisible] = React.useState<boolean>(false);
+    const [sidebarCollapsed, setSidebarCollapsed] =
+      React.useState<boolean>(false);
+
     // 从 Context 获取编辑器状态
     const {
       runStatus,
@@ -113,8 +193,44 @@ const EditorWorkspaceContent: React.FC<{
       isPanelOpen,
       handlePanelStateChange,
       getPrevRunStatus,
-      lastScriptRunStatus
+      lastScriptRunStatus,
+      scriptParams,
+      setScriptParams
     } = useEditorContext();
+
+    // 处理参数hover事件
+    const handleParameterHover = useCallback((paramName: string | null) => {
+      if (!editorRef.current?.view) return;
+
+      const view = editorRef.current.view;
+      view.dispatch({
+        effects: highlightParameterEffect.of(paramName)
+      });
+    }, []);
+
+    // 处理参数变化：直接更新 scriptParams
+    const handleParameterChange = useCallback(
+      (params: ScriptParam[]) => {
+        setScriptParams(params);
+      },
+      [setScriptParams]
+    );
+
+    // 使用 useMemo 稳定 initialParams 的引用，避免不必要的重新渲染
+    // 使用 JSON.stringify 来比较内容，而不是引用
+    const scriptParamsStr = useMemo(
+      () => JSON.stringify(scriptParams),
+      [scriptParams]
+    );
+    const initialParams = useMemo(() => {
+      return scriptParams;
+    }, [scriptParamsStr]);
+
+    useEffect(() => {
+      form.setFieldsValue({
+        fileName: fileName
+      });
+    }, [fileName, form]);
 
     const myTheme = createTheme({
       theme: 'light',
@@ -321,7 +437,7 @@ const EditorWorkspaceContent: React.FC<{
               onClick={() => {
                 setReleaseVersionVisible(true);
               }}
-              icon={<IconSave />}
+              icon={<ReleaseIcon />}
             >
               发版
             </Button>
@@ -333,7 +449,8 @@ const EditorWorkspaceContent: React.FC<{
 
         <div
           className={classNames(styles['sql-editor-container'], {
-            [styles['running-code-mirror']]: !hasUpdatePermission
+            [styles['running-code-mirror']]: !hasUpdatePermission,
+            [styles['with-sidebar']]: sidebarVisible && !sidebarCollapsed
           })}
         >
           <Spin
@@ -361,6 +478,8 @@ const EditorWorkspaceContent: React.FC<{
               extensions={[
                 sql({ upperCaseKeywords: true }),
                 lintGutter(),
+                currentHighlightedParam,
+                parameterHighlightField,
                 EditorView.updateListener.of((update) => {
                   if (update.selectionSet) {
                     handleCursorChange(update.view);
@@ -377,6 +496,20 @@ const EditorWorkspaceContent: React.FC<{
               className={styles['code-editor']}
             />
           </Spin>
+
+          {/* 参数侧边栏 */}
+          {
+            // sidebarVisible && (
+            <ParameterSidebar
+              content={editorContent}
+              onParameterChange={handleParameterChange}
+              onVisibleChange={setSidebarVisible}
+              onCollapsedChange={setSidebarCollapsed}
+              onParameterHover={handleParameterHover}
+              initialParams={initialParams}
+            />
+            // )
+          }
         </div>
 
         {/* 运行信息面板 */}

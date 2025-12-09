@@ -1,4 +1,4 @@
-import React, { memo } from 'react';
+import React, { memo, useState } from 'react';
 import { Tabs } from '@arco-design/web-react';
 import Processing from './processing';
 import QueryScript from './query-script';
@@ -13,16 +13,23 @@ interface SplScriptManagementProps {
 const SplScriptManagement: React.FC<SplScriptManagementProps> = memo(
   ({ onToScriptList }) => {
     const TabPane = Tabs.TabPane;
-
+    const [curActiveTab, setCurActiveTab] = useState('processing');
     return (
       <div className={styles['spl-script-management']}>
         <div className={styles['spl-script-management-title']}>SQL脚本管理</div>
-        <Tabs defaultActiveTab="processing" className={styles['spl-tabs']}>
+        <Tabs
+          onChange={setCurActiveTab}
+          defaultActiveTab="processing"
+          className={styles['spl-tabs']}
+        >
           <TabPane key="processing" title="加工脚本">
-            <Processing onToScriptList={onToScriptList} />
+            <Processing
+              curActiveTab={curActiveTab}
+              onToScriptList={onToScriptList}
+            />
           </TabPane>
           <TabPane key="query" title="查询脚本">
-            <QueryScript />
+            <QueryScript curActiveTab={curActiveTab} />
           </TabPane>
         </Tabs>
       </div>
