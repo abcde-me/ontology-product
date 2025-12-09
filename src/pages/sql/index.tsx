@@ -13,12 +13,12 @@ import { FileTab, useTabManager } from './hooks/useTabManager';
 import styles from './index.module.scss';
 import { SQL_PERMISSIONS } from '@/config/permissions';
 import { useHasPermission } from '@/store/userInfoStore';
-import { useLocation, useHistory } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import {
   FileTab as DevelopScriptFileTab,
   useDevelopScriptTabManager
 } from './hooks/useDevelopScriptTabManager';
-import { useDevelopScriptManager } from './hooks/useDevelopScriptManager';
+import { useUrlState } from './hooks/useUrlState';
 
 const { Content, Sider } = Layout;
 const TabPane = Tabs.TabPane;
@@ -29,7 +29,7 @@ const defaultActiveTab = 'files';
 
 const SqlIndex: React.FC = memo(() => {
   const location = useLocation();
-  const history = useHistory();
+  const { urlState, updateUrlState } = useUrlState();
   const [activeTab, setActiveTab] = useState<TabKey>();
   const [insertContentFunction, setInsertContentFunction] = useState<
     ((content: string) => void) | null
@@ -39,37 +39,47 @@ const SqlIndex: React.FC = memo(() => {
     useState<boolean>(false);
   const isEditorFocusedRef = useRef<boolean>(false);
   const isDevelopScriptEditorFocusedRef = useRef<boolean>(false);
-
-  // 从URL查询参数中解析activeTab
-  const getActiveTabFromUrl = () => {
-    const searchParams = new URLSearchParams(location.search);
-    return searchParams.get('activeTab') || defaultActiveTab;
-  };
-
-  useEffect(() => {
-    setActiveTab(getActiveTabFromUrl() as TabKey);
-  }, [location.search]);
-
   // 添加状态桥接：用于同步FileManager的选中状态
+  // SQL查询脚本选中状态
   const [fileManagerSelectedKeys, setFileManagerSelectedKeys] = useState<
     string[]
   >([]);
-
+  // 添加状态桥接：用于同步FileManager的选中状态
+  // SQL加工脚本选中状态
   const [
     developScriptFileManagerSelectedKeys,
     setDevelopScriptFileManagerSelectedKeys
   ] = useState<string[]>([]);
 
+  // 从URL状态中获取activeTab
+  useEffect(() => {
+    const tab = (urlState.activeTab || defaultActiveTab) as TabKey;
+
+    setActiveTab((prev) => (prev !== tab ? tab : prev));
+
+    // 只在 files tab 时设置选中状态
+    if (tab === 'files' && urlState.activeDevelopScriptId) {
+      setDevelopScriptFileManagerSelectedKeys([urlState.activeDevelopScriptId]);
+    }
+  }, [urlState.activeTab, urlState.activeDevelopScriptId]);
+
   // 选中状态变化回调
   const handleSelectedKeysChange = useCallback((selectedKeys: string[]) => {
-    setDevelopScriptFileManagerSelectedKeys(selectedKeys);
+    setFileManagerSelectedKeys(selectedKeys);
   }, []);
 
+  // 选中SQL加工脚本变化回调
   const handleDevelopScriptSelectedKeysChange = useCallback(
     (selectedKeys: string[]) => {
-      setDevelopScriptFileManagerSelectedKeys(selectedKeys);
+      updateUrlState(
+        {
+          activeTab: 'files',
+          activeDevelopScriptId: selectedKeys[0]
+        },
+        { method: 'push' }
+      );
     },
-    []
+    [updateUrlState, location.search]
   );
 
   const {
@@ -98,36 +108,22 @@ const SqlIndex: React.FC = memo(() => {
     updateTabTitle: developScriptUpdateTabTitle
   } = useDevelopScriptTabManager(handleDevelopScriptSelectedKeysChange);
 
-  // 获取文件列表，用于根据URL参数打开文件
-  // const {
-  //   sqlScriptList: developScriptList,
-  //   getRawSqlScriptList: getDevelopScriptList
-  // } = useDevelopScriptManager({
-  //   onFileOpen: developScriptOpenFile,
-  //   onFileDelete: developScriptRemoveTabByFileId,
-  //   onFileRename: developScriptUpdateTabTitle,
-  //   activeTab,
-  //   fileTabs: developScriptFileState.fileTabs,
-  //   onSwitchTab: developScriptSwitchTab
-  // });
-
   // 初始化创建一个默认SQL查询标签
   useEffect(() => addTab(), []);
 
   const isDasetTab = activeTab === 'dataset' || activeTab === 'script';
 
   const handleTabChange = (key: string) => {
-    setActiveTab(key as TabKey);
-    const searchParams = new URLSearchParams(location.search);
-
-    // 更新activeTab参数
-    searchParams.set('activeTab', key);
-
-    // 使用history更新URL，不触发页面重载
-    history.push({
-      pathname: location.pathname,
-      search: searchParams.toString()
-    });
+    // 使用 useUrlState 更新 URL，自动保留所有现有查询参数
+    const method = key === 'files' ? 'push' : 'replace';
+    // 如果切换到非 files tab，删除 activeDevelopScriptId 参数
+    const updates: { activeTab: string; activeDevelopScriptId?: string } = {
+      activeTab: key
+    };
+    if (key !== 'files') {
+      updates.activeDevelopScriptId = '';
+    }
+    updateUrlState(updates, { method });
   };
 
   const handleActiveUpdate = (tabData: FileTab) => {
@@ -252,6 +248,8 @@ const SqlIndex: React.FC = memo(() => {
                 onFileDelete={developScriptRemoveTabByFileId} // 传递删除文件时关闭标签页的回调
                 onFileRename={developScriptUpdateTabTitle} // 传递重命名文件时更新标签页标题的回调
                 externalSelectedKeys={developScriptFileManagerSelectedKeys}
+                fileTabs={developScriptFileState.fileTabs} // 传递已打开的标签页列表
+                onSwitchTab={developScriptSwitchTab} // 传递切换标签页的回调
               />
             )}
           </TabPane>

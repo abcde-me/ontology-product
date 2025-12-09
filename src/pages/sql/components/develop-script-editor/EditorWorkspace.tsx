@@ -608,26 +608,30 @@ const EditorWorkspaceContent: React.FC<{
             )}
           </div>
         </Modal>
-        <ModalParamList
-          paramVisible={paramVisible}
-          onCancel={() => setParamVisible(false)}
-        />
+        {paramVisible && (
+          <ModalParamList
+            paramVisible={paramVisible}
+            onCancel={() => setParamVisible(false)}
+          />
+        )}
         {/* 发布版本弹窗 */}
-        <ReleaseVersionModal
-          visible={releaseVersionVisible}
-          onCancel={() => setReleaseVersionVisible(false)}
-          onSubmit={(values) => {
-            // TODO: 调用发布版本API
-            console.log('发布版本数据:', values);
-            Message.success('发布版本成功');
-            setReleaseVersionVisible(false);
-          }}
-          initialValues={{
-            scriptName: fileName,
-            version: 'V1',
-            versionDesc: ''
-          }}
-        />
+        {releaseVersionVisible && (
+          <ReleaseVersionModal
+            visible={releaseVersionVisible}
+            onCancel={() => setReleaseVersionVisible(false)}
+            onSubmit={(values) => {
+              // TODO: 调用发布版本API
+              console.log('发布版本数据:', values);
+              Message.success('发布版本成功');
+              setReleaseVersionVisible(false);
+            }}
+            initialValues={{
+              scriptName: fileName,
+              version: 'V1',
+              versionDesc: ''
+            }}
+          />
+        )}
       </div>
     );
   }

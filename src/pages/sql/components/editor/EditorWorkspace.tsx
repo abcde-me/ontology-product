@@ -306,7 +306,7 @@ const EditorWorkspaceContent: React.FC<{
               >
                 格式化
               </Button>
-              {curActiveTab === 'files' && (
+              {/* {curActiveTab === 'files' && (
                 <>
                   <Button
                     type="text"
@@ -325,7 +325,7 @@ const EditorWorkspaceContent: React.FC<{
                     参数列表
                   </Button>
                 </>
-              )}
+              )} */}
             </Space>
           </div>
           <div className={styles['toolbar-right']}>
@@ -539,10 +539,10 @@ const EditorWorkspaceContent: React.FC<{
             )}
           </div>
         </Modal>
-        <ModalParamList
+        {/* <ModalParamList
           paramVisible={paramVisible}
           onCancel={() => setParamVisible(false)}
-        />
+        /> */}
         <DrawerContent
           visible={drawerVisible}
           setVisible={setDrawerVisible}
