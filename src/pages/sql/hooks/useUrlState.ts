@@ -5,6 +5,8 @@ interface UrlState {
   folderId?: string;
   fileId?: string;
   search?: string;
+  activeTab?: string;
+  activeDevelopScriptId?: string;
 }
 
 export const useUrlState = () => {
@@ -18,7 +20,10 @@ export const useUrlState = () => {
     return {
       folderId: searchParams.get('folderId') || undefined,
       fileId: searchParams.get('fileId') || undefined,
-      search: searchParams.get('search') || undefined
+      search: searchParams.get('search') || undefined,
+      activeTab: searchParams.get('activeTab') || undefined,
+      activeDevelopScriptId:
+        searchParams.get('activeDevelopScriptId') || undefined
     };
   }, [location.search]);
 
@@ -26,7 +31,10 @@ export const useUrlState = () => {
 
   // 更新URL状态
   const updateUrlState = useCallback(
-    (newState: Partial<UrlState>) => {
+    (
+      newState: Partial<UrlState>,
+      options?: { method?: 'replace' | 'push' }
+    ) => {
       // 防止重复更新
       if (isUpdatingRef.current) return;
 
@@ -34,17 +42,47 @@ export const useUrlState = () => {
 
       const updatedState = { ...urlState, ...newState };
 
-      // 构建新的查询参数
-      const searchParams = new URLSearchParams();
+      // 从当前URL创建searchParams，保留所有现有查询参数
+      const searchParams = new URLSearchParams(location.search);
 
-      if (updatedState.folderId) {
-        searchParams.set('folderId', updatedState.folderId);
+      // 只更新需要更新的参数
+      if (updatedState.folderId !== undefined) {
+        if (updatedState.folderId) {
+          searchParams.set('folderId', updatedState.folderId);
+        } else {
+          searchParams.delete('folderId');
+        }
       }
-      if (updatedState.fileId) {
-        searchParams.set('fileId', updatedState.fileId);
+      if (updatedState.fileId !== undefined) {
+        if (updatedState.fileId) {
+          searchParams.set('fileId', updatedState.fileId);
+        } else {
+          searchParams.delete('fileId');
+        }
       }
-      if (updatedState.search) {
-        searchParams.set('search', updatedState.search);
+      if (updatedState.search !== undefined) {
+        if (updatedState.search) {
+          searchParams.set('search', updatedState.search);
+        } else {
+          searchParams.delete('search');
+        }
+      }
+      if (updatedState.activeTab !== undefined) {
+        if (updatedState.activeTab) {
+          searchParams.set('activeTab', updatedState.activeTab);
+        } else {
+          searchParams.delete('activeTab');
+        }
+      }
+      if (updatedState.activeDevelopScriptId !== undefined) {
+        if (updatedState.activeDevelopScriptId) {
+          searchParams.set(
+            'activeDevelopScriptId',
+            updatedState.activeDevelopScriptId
+          );
+        } else {
+          searchParams.delete('activeDevelopScriptId');
+        }
       }
 
       const newSearch = searchParams.toString();
@@ -54,7 +92,12 @@ export const useUrlState = () => {
 
       // 只有当URL真正改变时才更新
       if (newUrl !== location.pathname + location.search) {
-        history.replace(newUrl);
+        const method = options?.method || 'replace';
+        if (method === 'push') {
+          history.push(newUrl);
+        } else {
+          history.replace(newUrl);
+        }
         setUrlState(updatedState);
       }
 
