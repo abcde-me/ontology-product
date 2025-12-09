@@ -29,6 +29,7 @@ function RagDetail() {
     const bucketName = queryParams.get('bucketName');
     const path = queryParams.get('path');
     const datasetName = queryParams.get('datasetName');
+    const fileName = queryParams.get('fileName');
     // 保留 ragId 以支持旧的 URL 格式
     const ragId = queryParams.get('ragId');
     // 新增：从 URL 获取 chunkId 和 positions 用于初始定位
@@ -43,7 +44,8 @@ function RagDetail() {
         path,
         datasetName,
         chunkId, // 新增
-        positionsStr // 新增
+        positionsStr, // 新增
+        fileName // 新增：从 URL 获取 fileName
       );
     }
   }, [location, initializeRagDetail]);

@@ -3,6 +3,7 @@ import { useState, useRef, useEffect } from 'react';
 import { Button, Space, Avatar, Message } from '@arco-design/web-react';
 import type { FormInstance } from '@arco-design/web-react/es/Form';
 import { updatePassword, updateUser, getRoleData } from '@/api/user';
+import { UpdateMyselfInformation } from '@/api/modules/user';
 import dayjs from 'dayjs';
 import { UserEditModal } from './components/UserEditModal';
 import { PasswordModal } from './components/PasswordModal';
@@ -123,7 +124,7 @@ export default function HomePage() {
         visible={editVisible}
         onOk={async (values) => {
           // console.log('接收到的用户信息:', values);
-          const res = await updateUser(values);
+          const res = await UpdateMyselfInformation(values);
           if (res.statusCode === 0) {
             // 重置表单
             Message.success('修改成功');
