@@ -1,15 +1,10 @@
 import React, { useEffect, useRef, useState } from 'react';
 import {
   Button,
-  Form,
-  Input,
   Menu,
   Pagination,
   PaginationProps,
-  Table,
-  Select,
-  Popover,
-  Checkbox
+  Table
 } from '@arco-design/web-react';
 import { useHistory } from 'react-router';
 import { ColumnProps } from '@arco-design/web-react/es/Table';
@@ -20,7 +15,6 @@ import { SorterInfo } from '@arco-design/web-react/es/Table/interface';
 import { PermissionWrapper } from '@/components/PermissionGuard';
 import { WORKFLOW_LIST_PERMISSIONS } from '@/config/permissions';
 import { openNewPage } from '@/utils/env';
-import SettingsIcon from '@/assets/metadata/settings.svg';
 import ColumnSettingIcon from '@/assets/metadata/column-setting.svg';
 import StorageIcon from '@/assets/metadata/storage.svg';
 import { IconPlus, IconRefresh, IconSearch } from '@arco-design/web-react/icon';
@@ -28,8 +22,8 @@ import { getColumns, getColumnsSetting } from './getColumns';
 import ColumnSettingModal, {
   ColumnField
 } from '../dataAsset/components/ColumnSettingModal';
-import styles from './index.module.scss';
 import SearchArea from './components/SearchArea';
+import styles from './index.module.scss';
 
 enum MetadataType {
   Iceberg = 'Iceberg',
@@ -39,11 +33,8 @@ enum MetadataType {
 }
 
 export default function MetadataManagement() {
-  const history = useHistory();
   const userInfo = useUserInfo();
   const MenuItem = Menu.Item;
-  // 搜索表单
-  const searchForm = useRef<any>(null);
 
   // 初始化搜索框value
   const [searchValue, setSearchValue] = useState('');
@@ -76,7 +67,6 @@ export default function MetadataManagement() {
   const [selectedColumns, setSelectedColumns] = useState<ColumnField[]>(
     getColumnsSetting(activeMetadataType)
   );
-  const [searchFields, setSearchFields] = useState<ColumnField[]>([]);
 
   useEffect(() => {
     setColumns(
