@@ -503,7 +503,8 @@ export const ModaForgeResourceEndpoints = {
   sqlRenameApi: PrefixAimdp + '/RenameSqlFile',
   sqlDeleteApi: PrefixAimdp + '/DeleteSqlFile',
   sqlCopyApi: PrefixAimdp + '/CopySqlFile',
-  sqlOpenApi: PrefixAimdp + '/GetSqlFile',
+  // sqlOpenApi: PrefixAimdp + '/GetSqlFile',
+  sqlOpenApi: PrefixAimdp + '/GetDevelopScriptInfo',
   sqlSaveApi: PrefixAimdp + '/EditSqlFile',
   sqlRunApi: PrefixAimdp + '/RunSqlFile',
   sqlRunCancelApi: PrefixAimdp + '/StopSqlFile',
@@ -530,12 +531,23 @@ export const ModaForgeResourceEndpoints = {
   // 获取加工脚本历史版本
   GetDevelopScriptLogByScriptIdApi:
     PrefixAimdp + '/GetDevelopScriptLogByScriptId',
+  // 历史版本复制
+  OldGetDevelopScriptLogByVersionApi:
+    PrefixAimdp + '/GetDevelopScriptLogByVersion',
+  // 历史版本删除
+  DeleteDevelopScriptLogApi: PrefixAimdp + '/DeleteDevelopScript',
   // 删除加工脚本
   DeleteDevelopScriptApi: PrefixAimdp + '/DeleteDevelopScript',
   // 锁定加工脚本
   LockDevelopScriptApi: PrefixAimdp + '/LockDevelopScript',
   // 获取加工脚本卡片内容
   ListDevelopScriptLogByKeyApi: PrefixAimdp + '/ListDevelopScriptLogByKey',
+  // 内容卡片 - 删除卡片内容
+  DeleteDevelopScriptLogByVersionApi:
+    PrefixAimdp + '/DeleteDevelopScriptLogByVersion',
+  // 脚本内容搜索 - 查询
+  GetDevelopScriptLogByVersionApi:
+    PrefixAimdp + '/GetDevelopScriptLogByVersion',
   // 查询脚本列表
   ListSqlFileApi: PrefixAimdp + '/ListSqlFile',
   // 查询脚本删除
@@ -546,6 +558,14 @@ export const ModaForgeResourceEndpoints = {
   GetDevelopStandardsApi: PrefixAimdp + '/GetDevelopStandards',
   // 开发规范保存
   UpdateDevelopSystemParamApi: PrefixAimdp + '/UpdateDevelopStandards',
+  // 加工脚本新建
+  CreateDevelopScriptApi: PrefixAimdp + '/CreateDevelopScript',
+  // 重命名加工脚本列表  - 重命名
+  RenameDevelopScriptApi: PrefixAimdp + '/RenameDevelopScript',
+  // 复制加工脚本列表  - 复制
+  CopyDevelopScriptApi: PrefixAimdp + '/CopyDevelopScript',
+  // 删除加工脚本列表  - 删除
+  DeleteDevelopScriptNewApi: PrefixAimdp + '/DeleteDevelopScript',
 
   // 数据资产接口
   // 查询数据资产表字段和映射关系

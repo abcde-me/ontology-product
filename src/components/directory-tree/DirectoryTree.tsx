@@ -947,7 +947,7 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
                         </div>
                       )}
                   </div>
-                  <div>{getVersionType(props.dataRef?.version_type)}</div>
+                  <div>{getVersionType(props.dataRef?.max_version)}</div>
                 </div>
               );
             }}

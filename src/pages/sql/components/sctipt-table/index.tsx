@@ -13,19 +13,11 @@ import {
 } from '@arco-design/web-react';
 import { useHistory } from 'react-router';
 import { ColumnProps } from '@arco-design/web-react/es/Table';
-import EllipsisPopover from '@/components/ellipsis-popover-com';
-import Success11Icon from '@/pages/workflowConfig/styles/images/op-icons/success1.svg';
 import noDataElement from '@/components/no-data';
-import {
-  getWorkflowList,
-  workflowDelete,
-  workflowCopy
-} from '@/api/workflowList';
-import { useUserInfo } from '@/store/userInfoStore';
 import { SorterInfo } from '@arco-design/web-react/es/Table/interface';
 import { PermissionWrapper } from '@/components/PermissionGuard';
 import { WORKFLOW_LIST_PERMISSIONS } from '@/config/permissions';
-import { IconClockCircle, IconRefresh } from '@arco-design/web-react/icon';
+import { IconRefresh } from '@arco-design/web-react/icon';
 import { openNewPage } from '@/utils/env';
 import styles from './index.module.scss';
 import { VersionType, VersionTypeEnum } from '../sctipt-card';
@@ -136,23 +128,11 @@ const ScriptTable: React.FC<ScriptTableProps> = ({
     }
   };
 
-  // 创建工作流
-  const handleCreateWorkflow = () => {
-    openNewPage('/modaforge/tenant/compute/modaforge/workflowConfig');
-  };
-
-  // 跳转目标数据 - 数据集详情
-  const handleToTargetDatasetDetail = (id: string) => {
-    history.push(`/tenant/compute/modaforge/datasetManagement/detail/${id}`);
-  };
   // 查看详情
-  const viewDetailWorkflow = (
-    workflow_uuid: number | string,
-    ds_workflow_id: number | string
-  ) => {
-    openNewPage(
-      `/modaforge/tenant/compute/modaforge/workflowConfig?workflow_uuid=${workflow_uuid}&ds_workflow_id=${ds_workflow_id}`
-    );
+  const viewDetailWorkflow = () => {
+    // openNewPage(
+    //   `/modaforge/tenant/compute/modaforge/workflowConfig?workflow_uuid=${workflow_uuid}&ds_workflow_id=${ds_workflow_id}`
+    // );
   };
 
   // 点击删除操作弹窗
@@ -219,62 +199,18 @@ const ScriptTable: React.FC<ScriptTableProps> = ({
     setSortValue(sortdata);
   };
 
+  // list 点击查看历史版本
+  const handleViewHistory = (record: any) => {
+    setVisible(true);
+    setRowData(record);
+    getDevelopScriptLogByScriptId(record.script_id).then((res) => {
+      setScriptLogList(res?.data?.items || []);
+    });
+  };
+
   // table数据为空时展示-
   const renderEmptyPlaceholder = (value: string | null) => {
     return value === '' || value == null ? '-' : value;
-  };
-  const getVersionType = (version_type) => {
-    switch (version_type) {
-      case VersionType.RELEASED:
-        return (
-          <div className={styles['script-card-content-item-title-icon']}>
-            <span
-              className={
-                version_type === VersionType.RELEASED
-                  ? styles['released-icon']
-                  : ''
-              }
-            />
-            <div className={styles['script-card-content-item-title-icon-text']}>
-              {VersionTypeEnum.RELEASED}
-            </div>
-          </div>
-        );
-      case VersionType.UNRELEASED:
-        return (
-          <div className={styles['script-card-content-item-title-icon']}>
-            <span
-              className={
-                version_type === VersionType.UNRELEASED
-                  ? styles['unreleased-icon']
-                  : ''
-              }
-            />
-            <div className={styles['script-card-content-item-title-icon-text']}>
-              {VersionTypeEnum.UNRELEASED}
-            </div>
-          </div>
-        );
-      case VersionType.SCHEDULED:
-        return (
-          <div className={styles['script-card-content-item-title-icon']}>
-            <span
-              className={
-                version_type === VersionType.SCHEDULED
-                  ? styles['scheduled-icon']
-                  : ''
-              }
-            />
-            <div className={styles['script-card-content-item-title-icon-text']}>
-              {VersionTypeEnum.SCHEDULED}
-            </div>
-          </div>
-        );
-      default:
-        return (
-          <div className={styles['script-card-content-item-title-icon']}>-</div>
-        );
-    }
   };
   // table columns
   const columns: ColumnProps[] = [
@@ -290,20 +226,6 @@ const ScriptTable: React.FC<ScriptTableProps> = ({
       width: 180,
       ellipsis: true,
       className: styles['hover-change'] + ' ' + styles['workflow-name']
-      // render: (_, record) => {
-      //   return renderEmptyPlaceholder(record.script_name) !== '-' ? (
-      //     <EllipsisPopover
-      //       value={record.script_name}
-      //       isEdit={false}
-      //       isLink
-      //       handleLink={() => {
-      //         viewDetailWorkflow(record.workflow_uuid, record.ds_workflow_id);
-      //       }}
-      //     />
-      //   ) : (
-      //     <span>-</span>
-      //   );
-      // }
     },
     {
       title: '最近版本号',
@@ -395,10 +317,7 @@ const ScriptTable: React.FC<ScriptTableProps> = ({
                 console.log(123);
                 setVisible(true);
                 setRowData(record);
-                getDevelopScriptLogByScriptId(record.script_id).then((res) => {
-                  console.log(res, '123');
-                  setScriptLogList(res?.data?.items);
-                });
+                handleViewHistory(record);
               }}
             >
               历史版本
@@ -515,6 +434,7 @@ const ScriptTable: React.FC<ScriptTableProps> = ({
         tableData={scriptLogList}
         isVisible={visible}
         setChildStatus={setVisible}
+        handleViewHistory={handleViewHistory}
       />
     </div>
   );

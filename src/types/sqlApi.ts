@@ -170,9 +170,9 @@ export interface CreateSqlScriptParams {
   script_file_id?: string;
   script_content?: string;
   script_desc?: string;
-  script_name: string;
+  script_name?: string;
   /** 用户id */
-  uid: string;
+  uid?: string;
 }
 
 export interface CreateSqlScriptData {
@@ -709,4 +709,35 @@ export interface UpdateDevelopSystemParamParams {
 
 export interface getDevelopStandardsData {
   data: string; // 参数值
+}
+
+export interface CopyDevelopScriptParams {
+  version?: number; // 版本号
+  script_id?: number; // 脚本id
+}
+
+export interface DeleteDevelopScriptParams {
+  version: number; // 版本号
+}
+
+export interface SearchDevelopScriptLogByKeyParams {
+  script_context?: string; // 脚本内容关键词
+}
+
+export interface SearchDevelopScriptLogByKeyData {
+  script_context?: string; // 脚本内容关键词
+  items: [];
+  page?: number;
+  page_size?: number;
+  total: number;
+}
+
+export interface DeleteDevelopScriptLogByVersionParams {
+  version?: number; // 版本号
+  script_id?: number; // 脚本id
+}
+
+export interface RenameDevelopScriptParams {
+  script_id?: number; // 脚本id
+  script_name?: string; // 脚本名称
 }

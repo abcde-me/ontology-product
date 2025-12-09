@@ -11,15 +11,15 @@ import {
   Spin,
   Tooltip
 } from '@arco-design/web-react';
-import { getWorkflowList } from '@/api/workflowList';
 import { useUserInfo } from '@/store/userInfoStore';
 import Mock from 'mockjs';
 import styles from './index.module.scss';
 import { IconCopy, IconDelete } from '@arco-design/web-react/icon';
-import { mock } from 'node:test';
-import Tool from '@/pages/workflowConfig/workflow/block-selector/tool/tool';
-import { listDevelopScriptLogByKeyApi } from '@/api/sql';
-import { set } from 'lodash';
+import {
+  deleteDevelopScriptLogByVersion,
+  listDevelopScriptLogByKeyApi,
+  getDevelopScriptLogByVersion
+} from '@/api/sql';
 import noDataElement from '@/components/no-data';
 
 // 版本类型 已发版 未发版 调度中
@@ -40,7 +40,6 @@ interface ScriptCardProps {
 }
 
 const ScriptCard: React.FC<ScriptCardProps> = ({ onToScriptList }) => {
-  const FormItem = Form.Item;
   const userInfo = useUserInfo();
   // 初始化搜索框value
   const [searchValue, setSearchValue] = useState('');
@@ -86,7 +85,9 @@ const ScriptCard: React.FC<ScriptCardProps> = ({ onToScriptList }) => {
     setLoading(true);
     try {
       const params: any = {
-        search_content: searchValue
+        search_content: searchValue,
+        page: current,
+        page_size: pageSize
       };
       const res = await listDevelopScriptLogByKeyApi(params);
       console.log(res);
@@ -105,7 +106,7 @@ const ScriptCard: React.FC<ScriptCardProps> = ({ onToScriptList }) => {
   //
 
   // 删除卡片脚本
-  const deleteScript = (id: string, type) => {
+  const deleteScript = (id: number, type: number) => {
     console.log(type, '123');
     if (type === VersionType.UNRELEASED) {
       Message.error('调度中的脚本不能删除');
@@ -126,25 +127,28 @@ const ScriptCard: React.FC<ScriptCardProps> = ({ onToScriptList }) => {
         okText: '确定',
         cancelText: '取消',
         onOk: () => {
-          deleteCardScript(id);
+          deleteCardScript(id, type);
         }
       });
       return;
     }
   };
   // 删除脚本
-  const deleteCardScript = async (workflow_uuid: number | string) => {
-    // const res = await workflowDelete(workflow_uuid);
-    // if (res.status === 200 && res.code === '') {
-    //   Message.success({
-    //     content: '删除成功'
-    //   });
-    //   getList();
-    // } else {
-    //   Message.error({
-    //     content: res?.message ?? '删除失败，请稍后重试'
-    //   });
-    // }
+  const deleteCardScript = async (id: number, type: number) => {
+    const res = await deleteDevelopScriptLogByVersion({
+      version: type,
+      script_id: Number(id)
+    });
+    if (res.status === 200 && res.code === '') {
+      Message.success({
+        content: '删除成功'
+      });
+      getCardList();
+    } else {
+      Message.error({
+        content: res?.message ?? '删除失败，请稍后重试'
+      });
+    }
   };
   // 查看脚本详情
   const handleViewScriptDetail = (id: number) => {
@@ -217,6 +221,24 @@ const ScriptCard: React.FC<ScriptCardProps> = ({ onToScriptList }) => {
         );
     }
   };
+  // 查询脚本卡片列表
+  const onToSearchScriptList = async () => {
+    try {
+      const res = await getDevelopScriptLogByVersion({
+        script_context: searchValue
+      });
+      if (res.status === 200) {
+        setScriptCardList(res.data?.items || []);
+        setTotal(res.data?.total || 0);
+      } else {
+        setScriptCardList([]);
+        setTotal(0);
+        Message.error(res?.message);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
   return (
     <div className={styles['script-card-wrapper']}>
       <div
@@ -236,7 +258,7 @@ const ScriptCard: React.FC<ScriptCardProps> = ({ onToScriptList }) => {
             setSearchValue(value);
           }}
           onPressEnter={() => {
-            getCardList();
+            onToSearchScriptList();
           }}
           style={{ width: '100%' }}
           placeholder="请输入脚本内容关键词"
@@ -247,10 +269,7 @@ const ScriptCard: React.FC<ScriptCardProps> = ({ onToScriptList }) => {
           {scriptCardList?.length > 0
             ? scriptCardList.map((item: any) => (
                 <div
-                  onClick={() => {
-                    onToScriptList('files');
-                  }}
-                  key={item.id}
+                  key={item.script_id}
                   className={styles['script-card-content-item']}
                 >
                   <div className={styles['script-card-content-item-title']}>
@@ -265,10 +284,10 @@ const ScriptCard: React.FC<ScriptCardProps> = ({ onToScriptList }) => {
                           styles['script-card-content-item-title-text']
                         }
                       >
-                        <span>{item.title}</span>
-                        <span>(V{item.version})</span>
+                        <span>{item?.script_name || ''}</span>
+                        <span>({item.version_name})</span>
                       </div>
-                      {getVersionType(item.version_type)}
+                      {getVersionType(item.status)}
                     </div>
                     <div
                       className={styles['script-card-content-item-title-right']}
@@ -302,7 +321,7 @@ const ScriptCard: React.FC<ScriptCardProps> = ({ onToScriptList }) => {
                           icon={<IconDelete />}
                           disabled={item.version_type === VersionType.SCHEDULED}
                           onClick={() =>
-                            deleteScript(item.id, item.version_type)
+                            deleteScript(item.script_id, item.status)
                           }
                         >
                           删除
@@ -311,7 +330,7 @@ const ScriptCard: React.FC<ScriptCardProps> = ({ onToScriptList }) => {
                     </div>
                   </div>
                   <div className={styles['script-card-content-item-content']}>
-                    {item.content}
+                    {item?.script_context || ''}
                   </div>
                 </div>
               ))
@@ -322,6 +341,10 @@ const ScriptCard: React.FC<ScriptCardProps> = ({ onToScriptList }) => {
       </Spin>
       {scriptCardList?.length > 0 && (
         <Pagination
+          style={{
+            display: 'flex',
+            justifyContent: 'flex-end'
+          }}
           onChange={(current, pageSize) => {
             setCurrent(current);
             setPageSize(pageSize);

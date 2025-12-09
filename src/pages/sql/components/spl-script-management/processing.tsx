@@ -25,20 +25,20 @@ const Processing: React.FC<PaginationProps> = memo(
       setIsShoAll(isShowAll);
     }, [isShowAll]);
     const handleDownloadAll = async () => {
-      await downloadDevelopScript().then((res: any) => {
-        // 下载全部脚本 下载excel格式 创建a标签 点击下载
-        if (!res.status || res.status !== 200) {
-          Message.error({
-            content: res?.message ?? '下载失败，请稍后重试'
-          });
-          return;
-        }
+      try {
+        const res = (await downloadDevelopScript()) as unknown as Blob;
+        const url = window.URL.createObjectURL(res);
         const a = document.createElement('a');
-        a.href = res.data?.url;
-        a.download = '加工脚本.xlsx';
+        a.href = url;
+        a.download = `加工脚本.xlsx`;
+        document.body.appendChild(a);
         a.click();
-        console.log(res, '123');
-      });
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+      } catch (error) {
+        console.error('下载脚本失败', error);
+        Message.error('下载脚本失败');
+      }
     };
     return (
       <div className={style['processing-wrapper']}>
