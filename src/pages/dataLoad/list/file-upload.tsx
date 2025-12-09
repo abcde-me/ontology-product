@@ -2,6 +2,7 @@ import { Upload, Message, Tooltip } from '@arco-design/web-react';
 import React, { useState } from 'react';
 import { IconQuestionCircle } from '@arco-design/web-react/icon';
 import { PrefixAimdp } from '@/api/endpoints';
+import { useUserInfoStore } from '@/store/userInfoStore';
 
 interface UploadsProps {
   onFileChange: (fileData: any, blobURL?: string) => void;
@@ -9,6 +10,8 @@ interface UploadsProps {
   onUploadingChange?: (isUploading: boolean) => void;
   getChunkedFile?: (file: any) => void;
 }
+
+const MAX_FILE_SIZE = 500 * 1024 * 1024;
 
 const Uploads: React.FC<UploadsProps> = ({
   onFileChange,
@@ -18,6 +21,7 @@ const Uploads: React.FC<UploadsProps> = ({
 }) => {
   let hasShownFileCountError = false;
   const [fileList, setFileList] = useState<any>([]);
+  const projectId = useUserInfoStore((state) => state.projectId);
 
   // 标准化文件名用于同名比较（将后缀转为小写）
   const normalizeFileNameForComparison = (fileName: string) => {
@@ -161,8 +165,8 @@ const Uploads: React.FC<UploadsProps> = ({
     }
 
     // 检查文件大小
-    if (file.size > 100 * 1024 * 1024) {
-      Message.error('单文件大小不能超过100M');
+    if (file.size > MAX_FILE_SIZE) {
+      Message.error('单文件大小不能超过500M');
       return false;
     }
     return true;
@@ -182,11 +186,12 @@ const Uploads: React.FC<UploadsProps> = ({
       headers={{
         Authorization: getToken(),
         'X-Auth-Validate': 'true',
-        'X-Regionid': 'region1'
+        'X-Regionid': 'region1',
+        'x-ceai-project-id': projectId[1]
       }}
       tip={
         <>
-          单次上传文件总量不超过1000个文件，单个文件最大不超过100M
+          单次上传文件总量不超过1000个文件，单个文件最大不超过500M
           不支持文件夹及压缩包，只支持上传部分文件类型
           <Tooltip
             content={

@@ -9,7 +9,8 @@ import {
   Popover,
   Tag,
   Typography,
-  Switch
+  Switch,
+  Tooltip
 } from '@arco-design/web-react';
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import SchedulerRun from '../../../components/scheduler-run';
@@ -23,15 +24,16 @@ import {
 import { getdetailList } from '@/api/connectionApi';
 import './index.css';
 import { validateName } from '@/utils/valiate';
-import ComponentTree from '../create/component-tree';
-import { isNumber } from 'lodash-es';
+import ComponentTree from '../component-tree';
 import { sql } from '@codemirror/lang-sql';
 import { lintGutter } from '@codemirror/lint';
 import { tags as t } from '@lezer/highlight';
 import createTheme from '@uiw/codemirror-themes';
 import CodeMirror from '@uiw/react-codemirror';
-import { IconCaretRight, IconDown, IconUp } from '@arco-design/web-react/icon';
-import SQLFormatIcon from '@/assets/sql/sql-format-ico.svg';
+import { IconDown, IconLoading, IconUp } from '@arco-design/web-react/icon';
+import ValidateIcon from '../assets/validate-icon.svg';
+import RunFailedIcon from '@/assets/python/run-fail-icon.svg';
+import RunSuccessIcon from '@/assets/python/run-success-icon.svg';
 import classNames from 'classnames';
 import styles from '../edit/index.module.scss';
 import { useHistory, useParams as useRouteParams } from 'react-router';
@@ -151,7 +153,10 @@ function buildTreeSelectDisplayPath(
         typeof item.children === 'object' &&
         item.children.db
       ) {
-        const result = buildPath(item.children.db, target, newPath);
+        const result = buildPath(item.children.db, target, [
+          ...newPath,
+          '数据库'
+        ]);
         if (result) return result;
       }
 
@@ -160,7 +165,10 @@ function buildTreeSelectDisplayPath(
         typeof item.children === 'object' &&
         item.children.metadata
       ) {
-        const result = buildPath(item.children.metadata, target, newPath);
+        const result = buildPath(item.children.metadata, target, [
+          ...newPath,
+          '元数据'
+        ]);
         if (result) return result;
       }
 
@@ -170,7 +178,10 @@ function buildTreeSelectDisplayPath(
         typeof item.children === 'object' &&
         item.children.volume
       ) {
-        const result = buildPath(item.children.volume, target, newPath);
+        const result = buildPath(item.children.volume, target, [
+          ...newPath,
+          '数据卷'
+        ]);
         if (result) return result;
       }
     }
@@ -181,8 +192,11 @@ function buildTreeSelectDisplayPath(
   return pathArray ? pathArray.join('/') : '';
 }
 
-const placeholderValue = `如需多表关联后的表载入到系统中，请在此位置编写关联SQL语句
-SELECT filesname,B,C,D,E FROM table2,table3 WHERE t1.a=t2.a`;
+const placeholderValue = `请在此编写数据处理SQL , 处理结果必须包含id字段且id是唯一主键
+
+SELECT fileid as id, fileid ，filename， ........ 
+FROM table2 t1,table3 t2  
+WHERE t1.a=t2.a`;
 
 // 单选框实例
 const RadioGroup = Radio.Group;
@@ -299,11 +313,32 @@ const RunningInfoPanel = function ({
   const renderCheckStatus = () => {
     switch (checkStatus) {
       case CheckSQLStatus.CHECKING:
-        return <Tag color="blue">校验中</Tag>;
+        return (
+          <div className="flex items-center gap-[4px]">
+            <span className="text-[14px] text-[var(--color-text-4)]">
+              校验中
+            </span>
+            <IconLoading style={{ color: '#007DFA' }} />
+          </div>
+        );
       case CheckSQLStatus.SUCCESS:
-        return <Tag color="green">校验成功</Tag>;
+        return (
+          <div className="flex items-center gap-[4px]">
+            <span className="text-[14px] text-[var(--color-text-4)]">
+              校验成功
+            </span>
+            <RunSuccessIcon />
+          </div>
+        );
       case CheckSQLStatus.ERROR:
-        return <Tag color="red">校验失败</Tag>;
+        return (
+          <div className="flex items-center gap-[4px]">
+            <span className="text-[14px] text-[var(--color-text-4)]">
+              校验失败
+            </span>
+            <RunFailedIcon />
+          </div>
+        );
       default:
         return null;
     }
@@ -787,6 +822,21 @@ const Edit = (props) => {
   // 监听SQL处理开关状态
   const sqlProcessEnabled = Form.useWatch('sql_process_enabled', form);
 
+  const validateSQL = useCallback(
+    (value: string, callback: (error?: string) => void) => {
+      if (!value || value.trim() === '') {
+        callback('请输入SQL语句');
+        return;
+      }
+      if (checkStatus === CheckSQLStatus.ERROR) {
+        callback('运行失败，请重新检查语句');
+        return;
+      }
+      return callback();
+    },
+    [checkStatus]
+  );
+
   // 根据初始 SQL 是否有值来设置开关初始状态
   useEffect(() => {
     if (props.detailData?.source_type !== 'db') return;
@@ -795,6 +845,9 @@ const Edit = (props) => {
       props.detailData.sql.trim() !== '';
     form.setFieldsValue({
       sql_process_enabled: hasInitialSql ? 'enable' : 'disable'
+    });
+    form.setFieldsValue({
+      sql: props.detailData?.sql
     });
   }, [form, props.detailData?.sql, props.detailData?.source_type]);
 
@@ -919,7 +972,7 @@ const Edit = (props) => {
       const baseFormData: any = {
         task_id: Number(props.loadId),
         task_name: rest.name,
-        dest_path_id: pathId,
+        dest_path_id: Number(pathId),
         db_name: props.detailData?.db_name
       };
 
@@ -1112,18 +1165,28 @@ const Edit = (props) => {
               </FormItem>
 
               {sqlProcessEnabled === 'enable' && (
-                <FormItem label=" " field="sql">
+                <FormItem
+                  label=" "
+                  field="sql"
+                  rules={[
+                    {
+                      required: true,
+                      validator: (value, callback) =>
+                        validateSQL(value as string, callback)
+                    }
+                  ]}
+                >
                   <div
                     className={classNames(
                       styles['sql-editor-container'],
-                      'rounded-[4px] border border-solid border-[#E2E8F0]'
+                      'rounded-[4px] border border-solid border-[#CBD5E1]'
                     )}
                   >
-                    <div className="flex items-center gap-[8px] border-b border-solid border-[#E2E8F0] p-[12px] pb-[12px]">
+                    <div className="flex items-center gap-[8px] border-b border-solid border-[#CBD5E1] p-[12px] pb-[12px]">
                       <Button
                         type="secondary"
                         disabled
-                        icon={<IconCaretRight className="mr-[4px]" />}
+                        icon={<ValidateIcon className="mr-[4px]" />}
                         className="h-[26px]"
                         onClick={handleCheckSQL}
                         loading={checkStatus === CheckSQLStatus.CHECKING}
@@ -1185,7 +1248,35 @@ const Edit = (props) => {
                     : ('multiple' as const)
                 }
                 placeholder="请选择抽取的表"
-                maxTagCount={2}
+                maxTagCount={
+                  selectedNodeType !== 'metadata'
+                    ? {
+                        count: 2,
+                        render: (invisibleTagCount) => {
+                          const allTags = form.getFieldValue('table_id') || [];
+                          const remainingTags = allTags.slice(2);
+                          return (
+                            <Tooltip
+                              content={
+                                <div className="ml-[-4px] flex max-w-[300px] flex-wrap gap-1">
+                                  {remainingTags.map((item, i) => (
+                                    <Tag
+                                      key={i}
+                                      className="bg-[#E7ECF0] text-[14px] text-[#0F172A]"
+                                    >
+                                      {item}
+                                    </Tag>
+                                  ))}
+                                </div>
+                              }
+                            >
+                              +{invisibleTagCount}
+                            </Tooltip>
+                          );
+                        }
+                      }
+                    : undefined
+                }
                 style={{ width: '100%', minWidth: 0 }}
                 allowClear
                 allowCreate
@@ -1314,11 +1405,11 @@ export default function DataLoadEdit() {
 
   if (loading) {
     return (
-      <div className="h-full px-[20px]">
-        <div className="mb-[9px] mt-[17px] text-[20px] font-bold leading-[32px]">
+      <div className="h-full px-[20px] pt-[17px]">
+        <div className="mb-[9px] text-[20px] font-bold leading-[30px]">
           编辑数据载入任务
         </div>
-        <div className="flex h-[calc(100%-58px-17px)] flex-col items-center justify-center overflow-y-auto rounded-[16px] bg-white p-[24px]">
+        <div className="flex h-[calc(100%-39px-25px)] flex-col items-center justify-center overflow-y-auto rounded-[16px] bg-white p-[24px]">
           <div>加载中...</div>
         </div>
       </div>

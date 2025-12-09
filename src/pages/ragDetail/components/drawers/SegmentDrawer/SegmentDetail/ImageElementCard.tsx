@@ -8,6 +8,7 @@ import { Message } from '@arco-design/web-react';
 import { IconCopy } from '@arco-design/web-react/icon';
 import type { ImageElement } from '../../../../types';
 import { previewUrl } from '@/api/modules/rag';
+import copy from 'copy-to-clipboard';
 import { useRagDetailStore } from '../../../../store/ragDetailStore';
 
 interface ImageElementCardProps {
@@ -22,7 +23,7 @@ const ImageElementCard: React.FC<ImageElementCardProps> = ({
   const { openImageModal } = useRagDetailStore();
 
   const handleCopy = (text: string) => {
-    navigator.clipboard.writeText(text);
+    copy(text);
     Message.success('复制成功');
   };
 
@@ -52,12 +53,12 @@ const ImageElementCard: React.FC<ImageElementCardProps> = ({
 
   return (
     <>
-      <div className="mb-6 rounded-lg border border-gray-200 bg-white p-4">
+      <div className="mb-6 rounded-lg border border-gray-200 bg-white p-3">
         <div className="mb-3 flex items-center">
-          <span className="inline-flex items-center rounded bg-purple-50 px-2 py-1 text-xs font-medium text-purple-600">
+          <span className="inline-flex h-6 w-9 items-center justify-center rounded bg-blue-50 text-sm font-medium text-blue-600">
             图片
           </span>
-          <span className="ml-2 text-sm text-gray-600">
+          <span className="ml-2 text-sm font-semibold text-[#0F172A]">
             元素ID: {element.id}
           </span>
         </div>
@@ -78,7 +79,7 @@ const ImageElementCard: React.FC<ImageElementCardProps> = ({
         </div>
 
         <div className="flex items-center gap-6 text-sm">
-          {element.positionType && (
+          {/* {element.positionType && (
             <span className="text-gray-900">
               <span className="text-gray-500">定位类型:</span>
               {element.positionType}
@@ -89,8 +90,8 @@ const ImageElementCard: React.FC<ImageElementCardProps> = ({
               <span className="text-gray-500">位置信息:</span>
               {element.positionInfo}
             </span>
-          )}
-          {(element as any).pageId && (
+          )} */}
+          {/* {(element as any).pageId && (
             <span className="text-gray-900">
               <span className="text-gray-500">页码:</span>
               {(element as any).pageId}
@@ -107,7 +108,7 @@ const ImageElementCard: React.FC<ImageElementCardProps> = ({
               <span className="text-gray-500">修饰:</span>
               {element.modifiers}
             </span>
-          )}
+          )} */}
         </div>
 
         {/* <ElementEnhancedInfo element={element} isEditing={isEditing} /> */}

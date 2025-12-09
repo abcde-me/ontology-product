@@ -1,5 +1,5 @@
 import React, { useState, memo, useRef, useEffect } from 'react';
-import { Layout, Tabs, Popover } from '@arco-design/web-react';
+import { Layout, Tabs, Popover, ResizeBox } from '@arco-design/web-react';
 import FileManager from './components/file-manager';
 import DataManager from './components/data-manager';
 import EditorContent from './components/editor';
@@ -16,7 +16,7 @@ import { PYSPARK_PERMISSIONS } from '@/config/permissions';
 import { DirectoryTreeRef } from '@/components/directory-tree/DirectoryTree';
 import { useLocation, useHistory } from 'react-router-dom';
 
-const { Content, Sider } = Layout;
+const { Sider } = Layout;
 const TabPane = Tabs.TabPane;
 
 type TabKey = 'files' | 'tools' | 'data' | 'daset';
@@ -71,11 +71,6 @@ const Python: React.FC = memo(() => {
       // 通过 ref 调用 DirectoryTree 的选中方法
       fileManagerRef.current.selectFile?.(fileId);
     }
-  };
-
-  // 处理创建权限变化的回调
-  const handleCanCreateChange = (canCreate: boolean) => {
-    // setIsCanCreate(canCreate);
   };
 
   const {
@@ -138,130 +133,147 @@ const Python: React.FC = memo(() => {
     setIsEditorFocused(focused);
   };
 
+  const siderContent = (
+    <Sider width="100%" className="pyspark-sider">
+      <Tabs
+        activeTab={activeTab}
+        onChange={handleTabChange}
+        direction="vertical"
+        className="pyspark-tabs"
+        type="rounded"
+      >
+        <TabPane
+          key="files"
+          title={
+            <Popover content="PySpark文件" position="left">
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}
+              >
+                <PythonIcon />
+              </div>
+            </Popover>
+          }
+        >
+          {activeTab === 'files' && (
+            <FileManager
+              type="files"
+              onFileOpen={openFile}
+              onFileDelete={removeTabByFileId} // 传递删除文件时关闭标签页的回调
+              onFileRename={updateTabTitle} // 传递重命名文件时更新标签页标题的回调
+              hasOpenTabs={hasOpenTabs} // 传递检查是否有标签页打开的回调
+              ref={fileManagerRef}
+              externalSelectedKeys={fileManagerSelectedKeys}
+              onCurrentFolderChange={setCurrentFolderId} // 传递当前文件夹变化的回调
+              // onCanCreateChange={handleCanCreateChange} // 传递创建权限变化的回调
+            />
+          )}
+        </TabPane>
+        <TabPane
+          key="data"
+          title={
+            <Popover content="数据列表" position="left">
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}
+              >
+                <DataIcon />
+              </div>
+            </Popover>
+          }
+        >
+          {activeTab === 'data' && (
+            <DataManager
+              onInsertContent={insertContentToEditor}
+              getIsEditorFocused={() => isEditorFocusedRef.current}
+            />
+          )}
+        </TabPane>
+        <TabPane
+          key="tools"
+          title={
+            <Popover content="算子库" position="left">
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}
+              >
+                <SuanziIcon />
+              </div>
+            </Popover>
+          }
+        >
+          {activeTab === 'tools' && (
+            <ToolsManager
+              onInsertContent={insertContentToEditor}
+              getIsEditorFocused={() => isEditorFocusedRef.current}
+            />
+          )}
+        </TabPane>
+        {/* 11.30版本暂时隐藏 */}
+        {/* <TabPane
+          key="daset"
+          title={
+            <Popover content="数据集导出任务" position="left">
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}
+              >
+                <DasetIcon />
+              </div>
+            </Popover>
+          }
+        >
+          {isDasetTab && <DatasetsList />}
+        </TabPane> */}
+      </Tabs>
+    </Sider>
+  );
+
+  const contentPanel = (
+    <div className="pyspark-content">
+      <EditorContent
+        fileTabs={fileState.fileTabs}
+        activeTab={fileState.activeTab}
+        onTabChange={switchTab}
+        onAddTab={(newFileInfo?: any) => addTab(newFileInfo)}
+        onRemoveTab={removeTab}
+        onCreate={handleCreate}
+        onTabContentUpdate={handleTabContentUpdate}
+        onSidebarTabChange={setActiveTab}
+        onInsertContent={handleInsertContentRegister}
+        onEditorFocusChange={handleEditorFocusChange}
+        refreshDirectory={refreshDirectory}
+        selectFile={selectFile}
+        isCanCreate={isCanCreate}
+      />
+    </div>
+  );
+
   return (
     <Layout className="pyspark-layout">
-      <Sider width={isDasetTab ? '100%' : 360} className="pyspark-sider">
-        <Tabs
-          activeTab={activeTab}
-          onChange={handleTabChange}
-          direction="vertical"
-          className="pyspark-tabs"
-          type="rounded"
-        >
-          <TabPane
-            key="files"
-            title={
-              <Popover content="PySpark文件" position="left">
-                <div
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center'
-                  }}
-                >
-                  <PythonIcon />
-                </div>
-              </Popover>
-            }
-          >
-            {activeTab === 'files' && (
-              <FileManager
-                type="files"
-                onFileOpen={openFile}
-                onFileDelete={removeTabByFileId} // 传递删除文件时关闭标签页的回调
-                onFileRename={updateTabTitle} // 传递重命名文件时更新标签页标题的回调
-                hasOpenTabs={hasOpenTabs} // 传递检查是否有标签页打开的回调
-                ref={fileManagerRef}
-                externalSelectedKeys={fileManagerSelectedKeys}
-                onCurrentFolderChange={setCurrentFolderId} // 传递当前文件夹变化的回调
-                // onCanCreateChange={handleCanCreateChange} // 传递创建权限变化的回调
-              />
-            )}
-          </TabPane>
-          <TabPane
-            key="data"
-            title={
-              <Popover content="数据目录" position="left">
-                <div
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center'
-                  }}
-                >
-                  <DataIcon />
-                </div>
-              </Popover>
-            }
-          >
-            {activeTab === 'data' && (
-              <DataManager
-                onInsertContent={insertContentToEditor}
-                getIsEditorFocused={() => isEditorFocusedRef.current}
-              />
-            )}
-          </TabPane>
-          <TabPane
-            key="tools"
-            title={
-              <Popover content="算子库" position="left">
-                <div
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center'
-                  }}
-                >
-                  <SuanziIcon />
-                </div>
-              </Popover>
-            }
-          >
-            {activeTab === 'tools' && (
-              <ToolsManager
-                onInsertContent={insertContentToEditor}
-                getIsEditorFocused={() => isEditorFocusedRef.current}
-              />
-            )}
-          </TabPane>
-          <TabPane
-            key="daset"
-            title={
-              <Popover content="数据集导出任务" position="left">
-                <div
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center'
-                  }}
-                >
-                  <DasetIcon />
-                </div>
-              </Popover>
-            }
-          >
-            {isDasetTab && <DatasetsList />}
-          </TabPane>
-        </Tabs>
-      </Sider>
-      {!isDasetTab && (
-        <Content className="pyspark-content">
-          <EditorContent
-            fileTabs={fileState.fileTabs}
-            activeTab={fileState.activeTab}
-            onTabChange={switchTab}
-            onAddTab={(newFileInfo?: any) => addTab(newFileInfo)}
-            onRemoveTab={removeTab}
-            onCreate={handleCreate}
-            onTabContentUpdate={handleTabContentUpdate}
-            onSidebarTabChange={setActiveTab}
-            onInsertContent={handleInsertContentRegister}
-            onEditorFocusChange={handleEditorFocusChange}
-            refreshDirectory={refreshDirectory}
-            selectFile={selectFile}
-            isCanCreate={isCanCreate}
-          />
-        </Content>
+      {isDasetTab ? (
+        siderContent
+      ) : (
+        <ResizeBox.Split
+          direction="horizontal"
+          size={'360px'}
+          min={'300px'}
+          max={'600px'}
+          style={{ height: '100%' }}
+          panes={[siderContent, contentPanel]}
+        />
       )}
     </Layout>
   );

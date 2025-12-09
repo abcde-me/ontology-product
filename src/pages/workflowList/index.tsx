@@ -305,14 +305,14 @@ export default function WorkflowList() {
       ellipsis: true,
       className: styles['hover-change'],
       render: (_, record) => {
-        return renderEmptyPlaceholder(record.target_path) !== '-' ? (
+        return renderEmptyPlaceholder(record.dataset_name) !== '-' ? (
           <EllipsisPopover
-            value={record.target_path}
+            value={record.dataset_name}
             isEdit={false}
             isLink
-            handleLink={() => {
-              handleToTargetDatasetDetail(record.id);
-            }}
+            // handleLink={() => {
+            //   handleToTargetDatasetDetail(record.id);
+            // }}
           />
         ) : (
           <span>-</span>

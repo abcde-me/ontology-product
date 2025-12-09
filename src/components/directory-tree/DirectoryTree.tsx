@@ -537,6 +537,21 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
         const finalName = inputValue.trim();
         if (finalName === '') {
           Message.error('重命名名称不能为空');
+          // 重命名失败，重置输入框状态
+          const newTreeData = treeData.map((item) => {
+            if (String(item?.id) === String(node.dataRef?.id)) {
+              return {
+                ...item,
+                showInput: false,
+                isAdd: false,
+                dataRef: { ...item.dataRef, showInput: false, isAdd: false }
+              };
+            }
+            return item;
+          });
+          setTreeData(newTreeData);
+          setInputValue('');
+          setDefaultName('');
           return;
         }
 

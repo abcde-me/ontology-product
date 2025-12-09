@@ -18,12 +18,14 @@ import {
   PROJECT_PERMISSIONS,
   API_KEY_PERMISSIONS,
   TAG_PERMISSIONS,
-  DATA_ASSET_PERMISSIONS
+  DATA_ASSET_PERMISSIONS,
+  METADATA_MANAGEMENT_PERMISSIONS
 } from '@/config/permissions';
 import Connection from '@/assets/sider/connection.svg';
 import DataLoad from '@/assets/sider/data-load.svg';
 import DataCatalog from '@/assets/sider/data-catalog.svg';
 import DatasetManagement from '@/assets/sider/dataset-management.svg';
+import DataAsset from '@/assets/sider/data-asset.svg';
 import DataMarket from '@/assets/sider/dataset-management.svg';
 import WorkflowList from '@/assets/sider/workflow-list.svg';
 import WorkflowTask from '@/assets/sider/workflow-task.svg';
@@ -192,10 +194,17 @@ export const menus: MenuModel[] = [
       },
       {
         title: '数据资产',
-        icon: <DatasetManagement className={iconClass} />,
+        icon: <DataAsset className={iconClass} />,
         key: 'dataAsset',
         path: '/tenant/compute/modaforge/dataAsset',
         permission: DATA_ASSET_PERMISSIONS.LIST
+      },
+      {
+        title: '元数据管理',
+        icon: <DataAsset className={iconClass} />,
+        key: 'metadataManagement',
+        path: '/tenant/compute/modaforge/metadataManagement',
+        permission: METADATA_MANAGEMENT_PERMISSIONS.LIST
       }
     ]
   },

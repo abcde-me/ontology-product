@@ -566,7 +566,7 @@ export interface DatasetsOptionsDataList {
   /**
    * 最新版本存储表
    */
-  latest_table?: string;
+  table?: string;
   /**
    * 最新版本ID
    */

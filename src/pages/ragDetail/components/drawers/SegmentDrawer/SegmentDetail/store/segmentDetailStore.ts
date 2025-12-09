@@ -73,6 +73,7 @@ export const useSegmentDetailStore = create<SegmentDetailStore>((set, get) => ({
   initializeDetail: (segmentId: string, data: SegmentDetailData) => {
     // 深拷贝数据，避免引用污染
     const deepCopy = JSON.parse(JSON.stringify(data));
+    console.log('初始化分段详情数据:', deepCopy);
     set({
       segmentId,
       detailData: deepCopy,
@@ -130,13 +131,10 @@ export const useSegmentDetailStore = create<SegmentDetailStore>((set, get) => ({
               content: el.content
             };
           } else if (el.type === 'table') {
-            // 表格元素需要将 headers 和 rows 转换为字符串
+            // 表格元素直接保存markdown格式的content
             return {
               id: el.id,
-              content: JSON.stringify({
-                headers: el.headers,
-                rows: el.rows
-              })
+              content: el.content
             };
           }
           return null;
@@ -147,7 +145,7 @@ export const useSegmentDetailStore = create<SegmentDetailStore>((set, get) => ({
 
       // 调用真实 API
       await UpdateKnowledgeChunkMaterials({
-        dataset_id: datasetId,
+        dataset_id: Number(datasetId),
         chunk_id: segmentId,
         materials
       });
@@ -159,7 +157,7 @@ export const useSegmentDetailStore = create<SegmentDetailStore>((set, get) => ({
         loading: false
       });
 
-      Message.success('保存成功');
+      Message.success('修改已保存，后台正在重新索引');
 
       // 重新获取分段详情数据以确保数据同步
       try {

@@ -30,6 +30,7 @@ import {
 import { debounce } from 'lodash-es';
 import getFileIcon from '../file-icon';
 import { SceneType } from '@/pages/datasetManagement';
+import { formatFileSize } from '@/utils/format';
 
 interface Dataset {
   key?: string;
@@ -235,8 +236,13 @@ const DatasetForm = React.forwardRef<
   const [filesType, setFilesType] = useState<StorageType>(StorageType.File);
   // 选择的文件ID
   const [fileIds, setFileIds] = useState<string[]>([]);
+  // 所有选中的文件ID
+  const [allSelectFile, setAllSelectFile] = useState<string[]>([]);
+  const [afterPageSelectFile, setAfterPageSelectFile] = useState<string[]>([]);
   // 当前的第几页
   const [current, setCurrent] = useState(1);
+  // 是否是分页改变
+  const [isPageChange, setIsPageChange] = useState(false);
   // 每页展示数据的数据量
   const [pageSize, setPageSize] = useState(10);
   // 总数据量
@@ -256,6 +262,9 @@ const DatasetForm = React.forwardRef<
       setConnectorFileInformation([]); //重置连接器文件信息
       setPreviewData(null); //重置预览数据
       setPreviewColumns([]); //重置预览表格列
+      setFileIds([]);
+      setAllSelectFile([]);
+      setAfterPageSelectFile([]);
       setIsPreviewFile(false);
       setPreviewFileData(null);
       form.setFieldValue('dataSource', 'volume');
@@ -275,6 +284,26 @@ const DatasetForm = React.forwardRef<
       observer.disconnect();
     };
   }, []);
+
+  // 防止分页后表格选择内容被清空
+  useEffect(() => {
+    if (isPageChange) {
+      if (fileIds.length >= afterPageSelectFile.length) {
+        setAllSelectFile([...new Set([...allSelectFile, ...fileIds])]);
+      } else {
+        const removeFileId = afterPageSelectFile.filter(
+          (item) => !fileIds.includes(item)
+        );
+        const newSelectFile = allSelectFile.filter(
+          (item) => !removeFileId.includes(item)
+        );
+        setAllSelectFile([...new Set(newSelectFile)]);
+      }
+      setAfterPageSelectFile([...new Set(fileIds)]);
+    } else {
+      setAllSelectFile([...new Set([...fileIds])]);
+    }
+  }, [fileIds]);
 
   // 创建 MutationObserver 监听 DOM 变化
   const observer = new MutationObserver(() => {
@@ -497,6 +526,13 @@ const DatasetForm = React.forwardRef<
       if (res.data && res.code === '') {
         setIsPreviewFile(true);
         setPreviewFileData(res.data.items || []);
+        const nowPageSelectedFiles = res.data.items.filter((item) => {
+          return allSelectFile.includes(item.id);
+        });
+        const nowPageSelectedFileIds = nowPageSelectedFiles.map(
+          (item) => item.id
+        );
+        setAfterPageSelectFile(nowPageSelectedFileIds);
         setTotal(res.data.total);
       } else {
         Message.error(res.message);
@@ -531,7 +567,7 @@ const DatasetForm = React.forwardRef<
             dataSource === 'volume'
               ? values.targetDataSource
               : values.connector, //数据目录卷用targetDataSource，连接器用connector
-          path_file_ids: fileIds,
+          path_file_ids: allSelectFile,
           data_type: filesType
         };
         // setIscreateTagDisabled(true);
@@ -580,7 +616,7 @@ const DatasetForm = React.forwardRef<
             gap: '6px'
           }}
         >
-          {getFileIcon(record.type)}
+          {getFileIcon(record.file_type)}
           <span>{record.file_type}</span>
         </div>
       )
@@ -589,7 +625,9 @@ const DatasetForm = React.forwardRef<
       title: '文件大小',
       dataIndex: 'file_size', // 使用动态获取的文件类型筛选器
       width: 134,
-      render: (_, record) => <span>{record.file_size || '-'}</span>
+      render: (_, record) => (
+        <span>{formatFileSize(record.file_size) || '-'}</span>
+      )
     }
   ];
 
@@ -598,8 +636,16 @@ const DatasetForm = React.forwardRef<
       title="新建数据集"
       visible={visible}
       footer={null}
-      style={{ width: '960px' }}
-      onCancel={onCancel}
+      style={{ width: '600px' }}
+      onCancel={() => {
+        onCancel();
+        form.resetFields();
+        setFileIds([]);
+        setAllSelectFile([]);
+        setAfterPageSelectFile([]);
+        setPreviewFileData(null);
+        setIsPageChange(false);
+      }}
       maskClosable={false}
       className={styles.modalWrapper}
       // unmountOnExit={true}
@@ -616,8 +662,8 @@ const DatasetForm = React.forwardRef<
         <Form
           form={form}
           autoComplete="off"
-          labelCol={{ span: 3 }}
-          wrapperCol={{ span: 21 }}
+          labelCol={{ span: 5 }}
+          wrapperCol={{ span: 18 }}
           layout="horizontal"
           labelAlign="right"
           colon={true}
@@ -809,12 +855,12 @@ const DatasetForm = React.forwardRef<
             >
               {sceneOption.map((item) => (
                 <Select.Option key={item.id} value={item.id}>
-                  <div className="flex flex-col">
-                    <div className="mt-[2px] text-[14px] leading-[22px]">
+                  <div className={`${styles.sceneWrapper} 'flex flex-col'`}>
+                    <div className="mt-[7px] text-[14px] leading-[22px]">
                       {item.name}
                     </div>
                     <EllipsisPopover
-                      className="text-[14px] leading-[22px] text-[#6E7B8D]"
+                      className="mt-[-14px] text-[14px] leading-[22px] text-[#6E7B8D]"
                       value={item.description}
                     />
                   </div>
@@ -891,6 +937,7 @@ const DatasetForm = React.forwardRef<
                     pagination={false}
                     rowSelection={{
                       type: 'checkbox',
+                      selectedRowKeys: allSelectFile,
                       onChange: (selectedRowKeys, selectedRows: FileItem[]) => {
                         const isNotJsonl = selectedRows.some(
                           (item) => item.file_type !== 'JSONL'
@@ -911,6 +958,14 @@ const DatasetForm = React.forwardRef<
                         setCurrent(1);
                       }}
                       onChange={(page) => {
+                        console.log(
+                          allSelectFile,
+                          fileIds,
+                          afterPageSelectFile,
+                          'allSelectFile'
+                        );
+
+                        setIsPageChange(true);
                         setCurrent(page);
                       }}
                       sizeOptions={[10, 20, 50, 100]}
@@ -1125,7 +1180,19 @@ const DatasetForm = React.forwardRef<
                 // borderTop: '1px solid #f0f0f0'
               }}
             >
-              <Button onClick={onCancel}>取消</Button>
+              <Button
+                onClick={() => {
+                  onCancel();
+                  form.resetFields();
+                  setFileIds([]);
+                  setAllSelectFile([]);
+                  setAfterPageSelectFile([]);
+                  setPreviewFileData(null);
+                  setIsPageChange(false);
+                }}
+              >
+                取消
+              </Button>
               <Button
                 type="primary"
                 loading={!canSubmit}

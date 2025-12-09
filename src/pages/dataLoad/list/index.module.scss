@@ -58,44 +58,44 @@
 /* 新添加的 */
 
 /* 树组件悬浮效果样式 */
-:global(.ModelTree .arco-tree-node) {
-  :global(.arco-tree-node-title) {
-    color: black !important;
-  }
-}
+// :global(.ModelTree .arco-tree-node) {
+//   :global(.arco-tree-node-title) {
+//     color: black !important;
+//   }
+// }
 
-:global(.ModelTree .arco-tree-node-indent) {
-  background-color: white !important;
-}
+// :global(.ModelTree .arco-tree-node-indent) {
+//   background-color: white !important;
+// }
 
-:global(.ModelTree .arco-tree-node-indent:hover) {
-  background-color: transparent !important;
-}
+// :global(.ModelTree .arco-tree-node-indent:hover) {
+//   background-color: transparent !important;
+// }
 
-:global(.ModelTree .arco-tree-node.arco-tree-node-selected) {
-  :global(.arco-tree-node-title) {
-    background-color: var(--color-bg-5) !important;
-    font-weight: 500 !important;
-    color: #007dfa !important;
-  }
+// :global(.ModelTree .arco-tree-node.arco-tree-node-selected) {
+//   :global(.arco-tree-node-title) {
+//     background-color: var(--color-bg-5) !important;
+//     font-weight: 500 !important;
+//     color: #007dfa !important;
+//   }
 
-  :global(.whitespace-nowrap) {
-    color: #007dfa !important;
-  }
-}
+//   :global(.whitespace-nowrap) {
+//     color: #007dfa !important;
+//   }
+// }
 
-/* 确保选中状态的高亮显示 */
-:global(
-  .ModelTree .arco-tree-node.arco-tree-node-selected .arco-tree-node-title
-) {
-  background-color: #e8f4ff !important;
-  border-radius: 4px !important;
-}
+// /* 确保选中状态的高亮显示 */
+// :global(
+//   .ModelTree .arco-tree-node.arco-tree-node-selected .arco-tree-node-title
+// ) {
+//   // background-color: #e8f4ff !important;
+//   border-radius: 4px !important;
+// }
 
-:global(.ModelTree .arco-tree-node-indent-block:hover) {
-  background-color: transparent !important;
-}
+// :global(.ModelTree .arco-tree-node-indent-block:hover) {
+//   background-color: transparent !important;
+// }
 
-:global(.ModelTree .arco-tree-node-title arco-tree-node-title-block) {
-  margin-left: -20px !important;
-}
+// :global(.ModelTree .arco-tree-node-title arco-tree-node-title-block) {
+//   margin-left: -20px !important;
+// }

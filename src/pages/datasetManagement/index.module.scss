@@ -12,7 +12,7 @@
   background-image: url('./assets/dataset_bg.png');
   background-repeat: no-repeat;
   background-size: 100% auto; /* 宽度100%，高度自适应（不拉伸） */
-  opacity: 0.2; /* 透明度：0-1 之间，0.7 表示70%不透明 */
+  opacity: 0.15; /* 透明度：0-1 之间，0.7 表示70%不透明 */
   z-index: 0; /* 确保伪元素在内容下方（不遮挡文字等） */
 }
 
@@ -34,16 +34,31 @@
     padding-top: 0px;
     background: #f0f6fe;
   }
-  :global(.arco-tabs-header-scroll) {
-    background: #f0f6fe;
-  }
+  // :global(.arco-tabs-header-scroll) {
+  // background: #f0f6fe;
+  // }
   :global(.arco-tabs) {
     overflow: visible;
   }
-  :global(.arco-tabs-header-nav) {
-    position: sticky;
-    top: 30px;
-    z-index: 3;
+  // :global(.arco-tabs-header-nav) {
+  //   position: sticky;
+  //   top: 30px;
+  //   z-index: 3;
+  // }
+  .datasetManagementTabs :global(.arco-tabs-header-wrapper) {
+    border-bottom: 1px solid #e2e8f0;
+  }
+  .datasetManagementTabs
+    :global(.arco-tabs-header-title-active .arco-tabs-header-title-text) {
+    font-weight: 600;
+  }
+  .datasetManagementTabs
+    :global(
+      .arco-tabs-header-nav-card.arco-tabs-header-size-default
+        .arco-tabs-header-title
+    ) {
+    padding: 5px 0;
+    margin: 0 16px;
   }
 }
 
@@ -95,6 +110,9 @@
   margin: 20px 0;
   padding: 0;
   z-index: 1;
+  :global(.arco-input-group-compact .arco-select-view) {
+    border-right-width: 1px;
+  }
 }
 
 .searchGroup {
@@ -128,7 +146,7 @@
 /* 操作按钮区域 */
 .actionButtons {
   display: flex;
-  gap: 16px;
+  gap: 8px;
   align-items: center;
 }
 
@@ -191,6 +209,7 @@
   display: flex;
   flex-direction: column;
   padding: 16px;
+  min-height: 600px;
 }
 
 /* 确保表格内容区域可以滚动 */
@@ -311,10 +330,10 @@
 
 /* 标签样式 */
 .tagGreen {
-  background-color: #e2e8f0;
+  background-color: #ffffff;
   color: #000;
   border: 1px solid #e2e8f0;
-  border-radius: 2px;
+  border-radius: 4px;
   font-size: 12px;
   padding: 4px 4px;
 }
@@ -413,4 +432,25 @@
 
 .addSceneTypeModal {
   width: 620px;
+}
+
+.buttonReset {
+  height: 28px;
+  padding: 0 12px;
+  border-radius: 6px;
+  font-size: 12px;
+}
+
+.tagButtonBox :global(.arco-btn-outline) {
+  color: #007dfa;
+  border: 1px solid #007dfa;
+}
+
+.tagButtonBox :global(.arco-btn-outline):hover {
+  color: #438dfb !important;
+  border: 1px solid #438dfb !important;
+}
+
+.sceneWrapper :global(.ellipsis-popover-div) {
+  height: 28px;
 }

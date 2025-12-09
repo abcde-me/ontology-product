@@ -1,9 +1,5 @@
 .data-asset-table-card {
-  &-item {
-    border: none;
-  }
-
-  &-item:first-child {
+  &-item:hover {
     background-image: url('../../assets/card-bg.png');
     background-size: 100% 100%;
     background-repeat: no-repeat;

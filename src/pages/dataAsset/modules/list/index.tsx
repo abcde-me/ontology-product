@@ -17,17 +17,12 @@ import {
   Tag,
   Tooltip
 } from '@arco-design/web-react';
-import {
-  IconPlus,
-  IconSettings,
-  IconDelete,
-  IconEdit
-} from '@arco-design/web-react/icon';
+import { IconDelete, IconEdit } from '@arco-design/web-react/icon';
 import { useHistory } from 'react-router-dom';
 import noDataElement from '@/components/no-data';
 import DataAssetTableList from '../../components/DataAssetTableList';
 import DataAssetTableCard from '../../components/DataAssetTableCard';
-import SearchArea, { SearchField } from '../../components/SearchArea';
+import SearchArea from '../../components/SearchArea';
 import ViewToggle, { ViewType } from '../../components/ViewToggle';
 import ModifyAssetModal from '../../components/ModifyAssetModal';
 import ModifyTagsModal from '../../components/ModifyTagsModal';
@@ -56,9 +51,11 @@ import styles from './list.module.scss';
 import classNames from 'classnames';
 import { FieldSearchItem } from '@/types/dataAssetApi';
 import dayjs from 'dayjs';
-import { isDateType, isTagsField, TAGS_FIELD_EN_NAME } from '../../utils/const';
-import PermissionWrapper from '@/components/PermissionGuard';
+import { isDateTimeType, isDateType, isTagsField } from '../../utils/const';
+import { PermissionWrapper } from '@/components/PermissionGuard';
 import { DATA_ASSET_PERMISSIONS } from '@/config/permissions';
+import AssetSettingIcon from '../../assets/asset-setting.svg';
+import ColumnSettingIcon from '../../assets/column-setting.svg';
 
 interface TagValue {
   tagId: string;
@@ -146,6 +143,8 @@ export default function DataAssetList() {
         pageSize: size
       });
 
+      setHasMapping(true);
+
       if (listRes.status !== 200 || !listRes.data) {
         Message.error(listRes.message || '获取数据资产列表失败');
         return;
@@ -203,7 +202,17 @@ export default function DataAssetList() {
                   return (
                     <Space size="mini">
                       {tags[0] && (
-                        <Tag>
+                        <Tag
+                          style={{
+                            backgroundColor: '#FAFBFF',
+                            borderRadius: '4px',
+                            border: '1px solid #C3C7D4',
+                            fontSize: '14px',
+                            height: '22px',
+                            padding: '0 6px',
+                            color: '#646C85'
+                          }}
+                        >
                           {tags[0].tagValue.length > 5 ? (
                             <Tooltip content={tags[0].tagValue}>
                               {tags[0].tagValue.substring(0, 5)}...
@@ -220,13 +229,33 @@ export default function DataAssetList() {
                             .map((item: TagValue, index: number) => (
                               <Tag
                                 key={item.tagId}
-                                style={{ margin: '2px 2px' }}
+                                style={{
+                                  backgroundColor: '#FAFBFF',
+                                  borderRadius: '4px',
+                                  border: '1px solid #C3C7D4',
+                                  fontSize: '14px',
+                                  height: '22px',
+                                  padding: '0 6px',
+                                  color: '#646C85'
+                                }}
                               >
                                 {item.tagValue}
                               </Tag>
                             ))}
                         >
-                          <Tag>+{tags.length - 1}</Tag>
+                          <Tag
+                            style={{
+                              backgroundColor: '#FAFBFF',
+                              borderRadius: '4px',
+                              border: '1px solid #C3C7D4',
+                              fontSize: '14px',
+                              height: '22px',
+                              padding: '0 6px',
+                              color: '#646C85'
+                            }}
+                          >
+                            +{tags.length - 1}
+                          </Tag>
                         </Tooltip>
                       )}
                     </Space>
@@ -302,6 +331,7 @@ export default function DataAssetList() {
     } catch (err) {
       console.error('获取数据资产列表失败:', err);
     } finally {
+      setHasMapping(true);
       setLoading(false);
     }
   };
@@ -324,6 +354,9 @@ export default function DataAssetList() {
       try {
         const findDataAssetMappingRes = await findDataAssetMapping();
         if (findDataAssetMappingRes.status !== 200) {
+          Message.error(
+            findDataAssetMappingRes.message ?? '获取数据资产映射数据失败'
+          );
           setHasMapping(false);
           return;
         }
@@ -331,10 +364,10 @@ export default function DataAssetList() {
         // 获取数据资产映射数据
         const dataAssetMapping = findDataAssetMappingRes.data || [];
 
-        setHasMapping(dataAssetMapping.length > 0);
-
         if (dataAssetMapping.length > 0) {
           Promise.all([loadColumnSettings(), loadListData(1, pageSize)]);
+        } else {
+          setHasMapping(false);
         }
       } catch {
         setHasMapping(false);
@@ -349,13 +382,17 @@ export default function DataAssetList() {
       fields.map((field: ApiColumnField, index: number) => {
         // 时间类型or标签类型不能勾选为枚举类型
         const isEnumAbleForColumn =
-          isDateType(field.type) || isTagsField(field.nameEn) ? false : true;
+          isDateType(field.type) ||
+          isDateTimeType(field.type) ||
+          isTagsField(field.nameEn)
+            ? false
+            : true;
         let isEnumAble = field.isEnumAble;
 
         // 搜索时传给服务端的值，要求标签类型是true, 时间类型是false
         if (isTagsField(field.nameEn)) {
           isEnumAble = true;
-        } else if (isDateType(field.type)) {
+        } else if (isDateType(field.type) || isDateTimeType(field.type)) {
           isEnumAble = false;
         }
 
@@ -452,8 +489,15 @@ export default function DataAssetList() {
   };
 
   // 处理主搜索
-  const handleMainSearch = (value: string) => {
-    setSearchParams({ ...searchParams, commonSearch: value });
+  const handleMainSearch = (
+    fieldValues: FieldSearchItem[],
+    commonSearch: string
+  ) => {
+    setSearchParams({
+      ...searchParams,
+      fieldSearch: fieldValues,
+      commonSearch
+    });
   };
 
   // 处理字段搜索
@@ -470,7 +514,7 @@ export default function DataAssetList() {
 
   // 处理重置
   const handleReset = () => {
-    setSearchParams({ ...searchParams, fieldSearch: [] });
+    setSearchParams({ ...searchParams, fieldSearch: [], commonSearch: '' });
     setCurrentPage(1);
   };
 
@@ -606,12 +650,14 @@ export default function DataAssetList() {
     setModifyAssetModalVisible(true);
   };
 
-  // 确认修改资产
+  // 确认批量修改资产
   const handleModifyAssetConfirm = async (data: {
     modifyMethod: ModifyMethod;
     fieldEnName: string;
     separator: string;
     fieldValue: string;
+    fieldType: string;
+    fieldZhName: string;
   }) => {
     try {
       const editData: EditDataAssetData = {
@@ -620,7 +666,9 @@ export default function DataAssetList() {
         modifyContext: [
           {
             fieldEnName: data.fieldEnName,
-            fieldValue: data.fieldValue
+            fieldValue: data.fieldValue,
+            fieldType: data.fieldType,
+            fieldZhName: data.fieldZhName
           }
         ]
       };
@@ -683,17 +731,28 @@ export default function DataAssetList() {
 
     try {
       // 构建修改数据，只包含有变化的字段
-      const modifyContext: { fieldEnName: string; fieldValue: string }[] = [];
+      const modifyContext: {
+        fieldEnName: string;
+        fieldValue: string;
+        fieldType: string;
+        fieldZhName: string;
+      }[] = [];
       Object.keys(data).forEach((fieldEnName) => {
         const newValue = data[fieldEnName];
         const oldValue = editingRecord[fieldEnName];
         // 如果值有变化，添加到修改列表
         if (newValue !== oldValue) {
+          // 根据fieldEnName找到对应的字段信息
+          const selectedField = columnFields.find(
+            (field) => field.nameEn === fieldEnName
+          );
           modifyContext.push({
             fieldEnName,
             fieldValue: Array.isArray(newValue)
               ? newValue.join(',')
-              : String(newValue || '')
+              : String(newValue || ''),
+            fieldType: selectedField?.type || '',
+            fieldZhName: selectedField?.nameZh || ''
           });
         }
       });
@@ -740,8 +799,8 @@ export default function DataAssetList() {
   if (hasMapping === null) {
     return (
       <div className="h-full w-full py-5 pr-5">
-        <div className="box-border h-full w-full rounded-2xl bg-white pb-[20px] pl-[24px] pr-6 pt-[20px]">
-          {/* 可以在这里添加loading状态 */}
+        <div className="box-border flex h-full w-full items-center justify-center rounded-2xl bg-white pb-[20px] pl-[24px] pr-6 pt-[20px]">
+          <Spin />
         </div>
       </div>
     );
@@ -807,7 +866,7 @@ export default function DataAssetList() {
                   >
                     <Button
                       icon={<IconDelete />}
-                      className="mr-[20px]"
+                      className="mr-[8px]"
                       disabled={selectedRowKeys.length === 0}
                       onClick={handleBatchDelete}
                     >
@@ -821,7 +880,7 @@ export default function DataAssetList() {
                   <Popover content="请先选择资产" position="top">
                     <Button
                       icon={<IconEdit />}
-                      className="mr-[20px]"
+                      className="mr-[8px]"
                       disabled={true}
                     >
                       批量修改
@@ -829,7 +888,7 @@ export default function DataAssetList() {
                   </Popover>
                 ) : (
                   <PermissionWrapper
-                    permission={[
+                    anyPermission={[
                       DATA_ASSET_PERMISSIONS.MODIFY_TAG,
                       DATA_ASSET_PERMISSIONS.MODIFY_ASSET
                     ]}
@@ -856,7 +915,7 @@ export default function DataAssetList() {
                     >
                       <Button
                         icon={<IconEdit />}
-                        className="mr-[20px]"
+                        className="mr-[8px]"
                         disabled={false}
                       >
                         批量修改
@@ -868,8 +927,8 @@ export default function DataAssetList() {
                   permission={DATA_ASSET_PERMISSIONS.GET_TABLE}
                 >
                   <Button
-                    icon={<IconSettings />}
-                    className="mr-[20px]"
+                    icon={<AssetSettingIcon />}
+                    className="mr-[8px] flex items-center"
                     onClick={handleAssetSettings}
                   >
                     资产设置
@@ -877,8 +936,8 @@ export default function DataAssetList() {
                 </PermissionWrapper>
                 {/* </Popover> */}
                 <Button
-                  icon={<IconSettings />}
-                  className="mr-[20px]"
+                  icon={<ColumnSettingIcon />}
+                  className="mr-[8px] flex items-center"
                   onClick={() => setColumnModalOpen(true)}
                 >
                   列设置
@@ -889,9 +948,9 @@ export default function DataAssetList() {
           </div>
         </div>
 
-        <div className="px-[24px]">
+        <div className="h-full px-[24px]">
           {loading ? (
-            <div className="flex h-[calc(100%-70px)] items-center justify-center">
+            <div className="flex min-h-[200px] items-center justify-center">
               <Spin />
             </div>
           ) : viewType === ViewType.LIST ? (

@@ -8,6 +8,7 @@ import { Input } from '@arco-design/web-react';
 import type { FormulaElement } from '../../../../types';
 import { useSegmentDetailStore } from './store/segmentDetailStore';
 import MathJax from 'react-mathjax';
+import SegmentMarkdown from '../../../common/SegmentMarkdown';
 
 const { TextArea } = Input;
 
@@ -24,12 +25,12 @@ const FormulaElementCard: React.FC<FormulaElementCardProps> = ({
   const updateElement = useSegmentDetailStore((state) => state.updateElement);
 
   return (
-    <div className="mb-6 rounded-lg border border-gray-200 bg-white p-4">
+    <div className="mb-6 rounded-lg border border-gray-200 bg-white p-3">
       <div className="mb-3 flex items-center">
-        <span className="inline-flex items-center rounded bg-yellow-50 px-2 py-1 text-xs font-medium text-yellow-600">
+        <span className="inline-flex h-6 w-9 items-center justify-center rounded bg-blue-50 text-sm font-medium text-blue-600">
           公式
         </span>
-        <span className="ml-2 text-sm font-semibold text-gray-600">
+        <span className="ml-2 text-sm font-semibold text-[#0F172A]">
           元素ID: {element.id}
         </span>
       </div>
@@ -44,10 +45,14 @@ const FormulaElementCard: React.FC<FormulaElementCardProps> = ({
           placeholder="请输入公式内容"
         />
       ) : (
-        <div className="mb-3 rounded py-3 text-[14px] leading-6 text-gray-900">
-          <MathJax.Provider>
+        <div className="rounded text-[14px] leading-6 text-gray-900">
+          <SegmentMarkdown
+            content={element.content}
+            className="text-sm leading-relaxed text-gray-700"
+          />
+          {/* <MathJax.Provider>
             <MathJax.Node inline formula={element.content} />
-          </MathJax.Provider>
+          </MathJax.Provider> */}
         </div>
       )}
 
@@ -55,7 +60,7 @@ const FormulaElementCard: React.FC<FormulaElementCardProps> = ({
         element.positionInfo ||
         (element as any).pageId) && (
         <div className="flex items-center gap-6 text-sm">
-          {element.positionType && (
+          {/* {element.positionType && (
             <span className="text-gray-900">
               <span className="w-18 text-gray-500">定位类型：</span>
               {element.positionType}
@@ -66,13 +71,13 @@ const FormulaElementCard: React.FC<FormulaElementCardProps> = ({
               <span className="w-18 text-gray-500">位置信息：</span>
               {element.positionInfo}
             </span>
-          )}
-          {(element as any).pageId && (
+          )} */}
+          {/* {(element as any).pageId && (
             <span className="text-gray-900">
               <span className="w-18 text-gray-500">页码：</span>
               {(element as any).pageId}
             </span>
-          )}
+          )} */}
         </div>
       )}
 

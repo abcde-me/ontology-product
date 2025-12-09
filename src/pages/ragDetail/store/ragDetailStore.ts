@@ -70,11 +70,13 @@ export const useRagDetailStore = create<RagDetailState & RagDetailActions>(
 
     // Actions
     initializeRagDetail: async (
-      datasetId: string,
+      datasetId: number,
       documentId: string,
       bucketName?: string | null,
       path?: string | null,
-      datasetNameParam?: string | null
+      datasetNameParam?: string | null,
+      initialChunkId?: string | null,
+      initialPositionsStr?: string | null
     ) => {
       set({ loading: true, error: null });
       try {
@@ -115,9 +117,90 @@ export const useRagDetailStore = create<RagDetailState & RagDetailActions>(
             finalSceneType = 'excel';
           }
         }
+        console.log('finalSceneType', finalSceneType);
+
+        // 初始化定位参数
+        let initialSelectedSegmentId: string | null = null;
+        let initialHighlightedCoordinates: PDFCoordinate[] | undefined =
+          undefined;
+        let initialSelectedDirectoryNodeId: string | null = null;
+
+        // 如果 URL 中有 chunkId，则使用它来初始化定位
+        if (initialChunkId) {
+          // 查找对应的目录树节点（任何类型的节点，id 等于 chunkId）
+          const findNodeByChunkId = (
+            nodes: DirectoryNode[]
+          ): DirectoryNode | null => {
+            for (const node of nodes) {
+              // 匹配 id 等于 chunkId 的任何节点
+              if (node.id === initialChunkId) {
+                return node;
+              }
+              if (node.children) {
+                const found = findNodeByChunkId(node.children);
+                if (found) return found;
+              }
+            }
+            return null;
+          };
+
+          if (data.directory) {
+            const foundNode = findNodeByChunkId(data.directory);
+            if (foundNode) {
+              // 设置目录树选中节点
+              initialSelectedDirectoryNodeId = foundNode.id;
+
+              // 根据节点类型决定是否设置 selectedSegmentId
+              if (
+                foundNode.type === 'Text' ||
+                foundNode.type === 'Image' ||
+                foundNode.type === 'Formula' ||
+                foundNode.type === 'Table'
+              ) {
+                // 验证 segments 中是否存在对应的切片
+                const matchedSegment = data.segments.find(
+                  (seg) => seg.id === foundNode.id
+                );
+                if (matchedSegment) {
+                  // 如果是可选中类型且在 segments 中存在，设置为 selectedSegmentId
+                  initialSelectedSegmentId = foundNode.id;
+                }
+              }
+              // 如果是 Title 类型，不设置 selectedSegmentId（切片列表不选中）
+
+              // 如果没有传入 positions，则使用目录树节点的 position
+              if (!initialPositionsStr && foundNode.position) {
+                initialHighlightedCoordinates = foundNode.position;
+              }
+            }
+          }
+
+          // 如果目录树中没有找到，尝试直接在 segments 中查找
+          if (!initialSelectedSegmentId && data.segments) {
+            const matchedSegment = data.segments.find(
+              (seg) => seg.id === initialChunkId
+            );
+            if (matchedSegment) {
+              initialSelectedSegmentId = matchedSegment.id;
+            }
+          }
+        }
+
+        // 如果 URL 中有 positions，则解析并使用它
+        if (initialPositionsStr) {
+          try {
+            initialHighlightedCoordinates = JSON.parse(initialPositionsStr);
+            console.log(
+              '✅ 解析 URL positions 成功:',
+              initialHighlightedCoordinates
+            );
+          } catch (e) {
+            console.warn('⚠️ 解析 URL positions 失败:', e);
+          }
+        }
 
         set({
-          datasetId, // 保存 datasetId
+          datasetId: Number(datasetId), // 保存 datasetId
           ragId: documentId, // 使用 documentId 作为 ragId
           fileName: data.fileName,
           filePath: data.filePath,
@@ -130,11 +213,74 @@ export const useRagDetailStore = create<RagDetailState & RagDetailActions>(
           documentName,
           datasetName: datasetNameParam || '',
           documentFormat,
-          // 默认不选中任何分段和目录节点
-          selectedSegmentId: null,
-          selectedDirectoryNodeId: null,
+          // 根据 URL 参数设置初始定位
+          selectedSegmentId: initialSelectedSegmentId,
+          selectedDirectoryNodeId: initialSelectedDirectoryNodeId,
+          highlightedPdfCoordinates: initialHighlightedCoordinates,
           loading: false
         });
+
+        // 如果 URL 中有 chunkId，需要滚动到对应的切片
+        if (initialChunkId && data.directory) {
+          const findNodeByChunkId = (
+            nodes: DirectoryNode[]
+          ): DirectoryNode | null => {
+            for (const node of nodes) {
+              if (node.id === initialChunkId) {
+                return node;
+              }
+              if (node.children) {
+                const found = findNodeByChunkId(node.children);
+                if (found) return found;
+              }
+            }
+            return null;
+          };
+
+          const foundNode = findNodeByChunkId(data.directory);
+          if (foundNode) {
+            if (foundNode.type === 'Title') {
+              // 如果是 Title 类型，滚动到第一个可选中的子节点
+              const findFirstSelectableChild = (
+                node: DirectoryNode
+              ): DirectoryNode | null => {
+                if (
+                  node.type === 'Text' ||
+                  node.type === 'Image' ||
+                  node.type === 'Formula' ||
+                  node.type === 'Table'
+                ) {
+                  return node;
+                }
+                if (node.children && node.children.length > 0) {
+                  for (const child of node.children) {
+                    const found = findFirstSelectableChild(child);
+                    if (found) return found;
+                  }
+                }
+                return null;
+              };
+
+              const firstSelectableChild = findFirstSelectableChild(foundNode);
+              if (firstSelectableChild) {
+                // 延迟滚动到第一个子节点，确保 DOM 和虚拟列表已经渲染完成
+                setTimeout(() => {
+                  get().scrollToSegment(firstSelectableChild.id);
+                }, 300);
+              }
+            } else if (initialSelectedSegmentId) {
+              // 如果是可选中类型（Text/Image/Formula/Table），滚动到该切片
+              // 延迟执行，确保虚拟列表已经准备好
+              const segmentIdToScroll = initialSelectedSegmentId;
+              setTimeout(() => {
+                get().scrollToSegment(segmentIdToScroll);
+              }, 300);
+            }
+          }
+        }
+
+        // @ts-ignore
+        const isConvertPdf = finalSceneType === 'excel' ? false : true;
 
         // 如果有 bucket 和 path，自动加载文件二进制数据
         if (finalBucket && finalPath) {
@@ -142,7 +288,7 @@ export const useRagDetailStore = create<RagDetailState & RagDetailActions>(
             bucket: finalBucket,
             path: finalPath
           });
-          get().loadFileBinaryData(finalBucket, finalPath);
+          get().loadFileBinaryData(finalBucket, finalPath, isConvertPdf);
         } else {
           console.warn('⚠️ 缺少 bucket 或 path，无法加载文件二进制数据');
         }
@@ -162,44 +308,26 @@ export const useRagDetailStore = create<RagDetailState & RagDetailActions>(
 
       // 如果有目录树，找到对应的目录节点并高亮
       const directory = get().directory;
-      const segments = get().segments;
 
-      if (directory && segments) {
-        // 先找到被点击的分段
-        const clickedSegment = segments.find((seg) => seg.id === segmentId);
-
-        // 查找目录树节点的逻辑：
-        // 1. 如果分段有 parentTitleId，优先查找 type='text' 且 chunk_id 等于分段 id 的节点
-        // 2. 如果找不到，再查找包含该 segmentId 的节点
-        const findNodeBySegmentId = (
-          nodes: DirectoryNode[],
-          targetSegmentId: string,
-          targetParentTitleId?: string
-        ): string | null => {
+      if (directory) {
+        // 简化逻辑：直接查找 chunk_id 等于分段 id 的节点
+        const findNodeBySegmentId = (nodes: DirectoryNode[]): string | null => {
           for (const node of nodes) {
-            // 优先匹配：type='text' 且 chunk_id 等于分段 id
-            if (node.type === 'text' && node.id === targetSegmentId) {
+            // 直接匹配 chunk_id 等于分段 id 的节点
+            if (node.id === segmentId) {
               return node.id;
             }
 
             // 递归检查子节点
             if (node.children) {
-              const result = findNodeBySegmentId(
-                node.children,
-                targetSegmentId,
-                targetParentTitleId
-              );
+              const result = findNodeBySegmentId(node.children);
               if (result) return result;
             }
           }
           return null;
         };
 
-        const nodeId = findNodeBySegmentId(
-          directory,
-          segmentId,
-          clickedSegment?.parentTitleId
-        );
+        const nodeId = findNodeBySegmentId(directory);
 
         if (nodeId) {
           set({ selectedDirectoryNodeId: nodeId });
@@ -211,7 +339,8 @@ export const useRagDetailStore = create<RagDetailState & RagDetailActions>(
       set({ selectedDirectoryNodeId: nodeId });
 
       const directory = get().directory;
-      if (!directory) return;
+      const segments = get().segments;
+      if (!directory || !segments) return;
 
       // 查找被点击的节点
       const findNode = (nodes: DirectoryNode[]): DirectoryNode | null => {
@@ -235,26 +364,21 @@ export const useRagDetailStore = create<RagDetailState & RagDetailActions>(
         get().highlightPdfCoordinates(clickedNode.position);
       }
 
-      // 根据节点类型决定是否高亮分段
-      if (clickedNode.type === 'text') {
-        // type='text': 高亮对应的分段（chunk_id 就是分段的 id）
+      // 简化逻辑：直接根据 chunk_id 查找对应的切片
+      // 如果找到对应的切片，则高亮并滚动到该切片
+      const matchedSegment = segments.find((seg) => seg.id === clickedNode.id);
+      if (matchedSegment) {
         set({ selectedSegmentId: clickedNode.id });
-        // 滚动到该分段
         get().scrollToSegment(clickedNode.id);
-      } else if (clickedNode.type === 'title') {
-        // type='title': 只滚动到第一个关联的分段，不高亮
-        if (clickedNode.segmentIds && clickedNode.segmentIds.length > 0) {
-          const firstSegmentId = clickedNode.segmentIds[0];
-          // 清除分段高亮
-          set({ selectedSegmentId: null });
-          // 滚动到第一个分段
-          get().scrollToSegment(firstSegmentId);
-        }
+      } else {
+        // 如果没有找到对应的切片，清除分段高亮
+        set({ selectedSegmentId: null });
       }
     },
 
     startEditingSegment: (segmentId: string) => {
-      set({ editingSegmentId: segmentId });
+      // 进入编辑状态时，清除其他切片的选中状态
+      set({ editingSegmentId: segmentId, selectedSegmentId: null });
     },
 
     cancelEditingSegment: () => {
@@ -378,17 +502,24 @@ export const useRagDetailStore = create<RagDetailState & RagDetailActions>(
     },
 
     // File binary data actions
-    loadFileBinaryData: async (bucket: string, path: string) => {
+    loadFileBinaryData: async (
+      bucket: string,
+      path: string,
+      isConvertPdf: boolean
+    ) => {
       set({
         fileBinaryDataLoading: true,
         fileBinaryDataError: null,
         bucket,
         path
       });
-
       try {
         console.log('🔍 开始加载文件二进制数据:', { bucket, path });
-        const response = await getFileBinaryData({ bucket_name: bucket, path });
+        const response = await getFileBinaryData({
+          bucket_name: bucket,
+          path,
+          convert_pdf: isConvertPdf
+        });
         console.log('✅ 文件二进制数据加载成功:', response);
 
         set({

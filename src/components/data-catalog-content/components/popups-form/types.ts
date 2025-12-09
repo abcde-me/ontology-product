@@ -21,6 +21,7 @@ export interface SourceDataItem {
   task_load_start_time: string;
   upload_user: string;
   real_abs_data_path: string;
+  file_path: string;
 }
 
 export interface TargetDataItem {

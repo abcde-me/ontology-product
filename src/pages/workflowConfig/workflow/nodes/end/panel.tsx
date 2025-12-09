@@ -4,7 +4,14 @@ import { useTranslation } from 'react-i18next';
 import useConfig from './use-config';
 import type { EndNodeType } from './types';
 import type { NodePanelProps } from '@/pages/workflowConfig/workflow/types';
-import { Checkbox, Form, Input, Select } from '@arco-design/web-react';
+import {
+  Checkbox,
+  Form,
+  Input,
+  Select,
+  Tag,
+  Tooltip
+} from '@arco-design/web-react';
 import { getWorkflowTargetPath, knowledgeBaseNameCheck } from '@/api/workflow';
 import { useUserInfo } from '@/store/userInfoStore';
 import { getTagList, getDatasetSceneList } from '@/api/datasetManagement';
@@ -122,15 +129,49 @@ const Panel: FC<NodePanelProps<EndNodeType>> = ({ id, data }) => {
           style={{ margin: 0, paddingBottom: 24 }}
         >
           <Select
-            placeholder="请选择或添加自定义标签"
+            placeholder="请输入或选择标签"
+            mode="multiple"
+            options={knowledgeBaseNameOptions.map((item) => ({
+              label: item?.name,
+              value: item?.name
+            }))}
+            allowCreate
             style={{ width: '100%' }}
-          >
-            {knowledgeBaseNameOptions.map((option) => (
-              <Option key={option.id} value={option.id}>
-                {option.name}
-              </Option>
-            ))}
-          </Select>
+            maxTagCount={{
+              count: 10,
+              render: (invisibleTagCount) => {
+                // 从当前表单值获取完整的标签列表
+                const allTags = form.getFieldValue('tags') || [];
+                const remainingTags = allTags.slice(10);
+                // const remainingLabels = remainingTags.join(', ');
+                return (
+                  <Tooltip
+                    content={remainingTags.map((item, i) => {
+                      return (
+                        <Tag
+                          key={i}
+                          style={{
+                            height: '24px',
+                            background: '#E7ECF0',
+                            color: '#0F172A',
+                            borderRadius: '2px',
+                            fontSize: '12px',
+                            // height: '18px',
+                            alignItems: 'center',
+                            margin: '0 2px'
+                          }}
+                        >
+                          {item}
+                        </Tag>
+                      );
+                    })}
+                  >
+                    <span>+{invisibleTagCount}</span>
+                  </Tooltip>
+                );
+              }
+            }}
+          />
         </FormItem>
         <FormItem
           label="描述说明"

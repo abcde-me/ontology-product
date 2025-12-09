@@ -111,7 +111,7 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
   // 轮询获取运行结果
   const { runAsync: getRunResultPolling, cancel: cancelGetRunResultPolling } =
     useRequest(getRunResult, {
-      pollingInterval: 2000,
+      pollingInterval: 5000,
       pollingWhenHidden: true,
       manual: true,
       onSuccess: (res) => {

@@ -1,5 +1,5 @@
 import React, { useRef, memo, useCallback, useEffect, useState } from 'react';
-import { Button, Message, Space } from '@arco-design/web-react';
+import { Button, Message, Space, ResizeBox } from '@arco-design/web-react';
 import { IconUpload, IconPlayArrowFill } from '@arco-design/web-react/icon';
 import CodeMirror, { ReactCodeMirrorRef } from '@uiw/react-codemirror';
 import { python } from '@codemirror/lang-python';
@@ -57,6 +57,11 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = memo(
     onEditorFocusChange
   }) => {
     const editorRef = useRef<ReactCodeMirrorRef>(null);
+    const [resizeBoxContainer, setResizeBoxContainer] =
+      useState<HTMLDivElement | null>(null);
+    const resizeObserverRef = useRef<ResizeObserver | null>(null);
+    const [resizeSize, setResizeSize] = useState<string>('500px');
+    const lastCalculatedSizeRef = useRef<number | null>(null);
     const [exampleModalVisible, setExampleModalVisible] =
       useState<boolean>(false);
     const hasUpdatePermission = useHasPermission(PYSPARK_PERMISSIONS.MODIFY);
@@ -98,19 +103,6 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = memo(
         onSidebarTabChange('daset');
       }
     });
-
-    // console.log('看一看编辑器卡顿的事情～');
-
-    // const myTheme = createTheme({
-    //   theme: 'light',
-    //   settings: {
-    //     background: '#ffffff',
-    //     backgroundImage: '',
-    //     foreground: '#5d00ff',
-    //     lineHighlight: '#8a91991a'
-    //   },
-    //   styles: []
-    // });
 
     const myTheme = createTheme({
       theme: 'light',
@@ -207,6 +199,61 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = memo(
       });
     }, []);
 
+    // 计算尺寸的函数
+    const calculateSize = useCallback(
+      (container: HTMLDivElement) => {
+        if (!container) return;
+
+        const containerHeight = container.clientHeight;
+        if (containerHeight === 0) return;
+
+        // 当 isPanelOpen 为 true 时，size = 容器高度 - 300px
+        // 当 isPanelOpen 为 false 时，size = 容器高度 - 41px
+        const offset = isPanelOpen ? 300 : 41;
+        const calculatedSize = containerHeight - offset;
+
+        // 如果高度未发生变化，直接返回
+        if (lastCalculatedSizeRef.current === calculatedSize) {
+          return;
+        }
+
+        // 确保 size 是正数，并转换为像素字符串
+        if (calculatedSize > 0) {
+          lastCalculatedSizeRef.current = calculatedSize;
+          setResizeSize(`${calculatedSize}px`);
+        }
+      },
+      [isPanelOpen]
+    );
+
+    // 使用回调 ref：当容器 DOM 元素被设置时，立即计算尺寸并设置 ResizeObserver
+    const setResizeBoxContainerRef = useCallback(
+      (element: HTMLDivElement | null) => {
+        // 清理之前的 ResizeObserver
+        if (resizeObserverRef.current) {
+          resizeObserverRef.current.disconnect();
+          resizeObserverRef.current = null;
+        }
+
+        // 更新状态
+        setResizeBoxContainer(element);
+        console.log('11111111111111111111111111111', element);
+
+        if (element) {
+          // 立即计算尺寸（此时 DOM 已经渲染完成）
+          calculateSize(element);
+
+          // 设置 ResizeObserver 监听容器尺寸变化
+          const resizeObserver = new ResizeObserver(() => {
+            calculateSize(element);
+          });
+          resizeObserver.observe(element);
+          resizeObserverRef.current = resizeObserver;
+        }
+      },
+      [calculateSize]
+    );
+
     // 监听插入内容事件
     useEffect(() => {
       if (onInsertContent) {
@@ -215,9 +262,86 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = memo(
       }
     }, [insertContentAtCursor, onInsertContent]);
 
+    // 当 isPanelOpen 变化时，重新计算尺寸
+    useEffect(() => {
+      if (resizeBoxContainer) {
+        calculateSize(resizeBoxContainer);
+      }
+    }, [isPanelOpen, calculateSize, resizeBoxContainer]);
+
+    // 清理 ResizeObserver
+    useEffect(() => {
+      return () => {
+        if (resizeObserverRef.current) {
+          resizeObserverRef.current.disconnect();
+          resizeObserverRef.current = null;
+        }
+      };
+    }, []);
+
     // 计算编辑器是否为只读状态
     const isReadOnly =
       !hasUpdatePermission || runStatus === RunningStatus.RUNNING;
+
+    const editorPanel = (
+      <div
+        className={classNames('pyspark-editor-container', {
+          'running-code-mirror': isReadOnly
+        })}
+        style={{ height: '100%', overflow: 'auto' }}
+      >
+        <CodeMirror
+          ref={editorRef}
+          value={editorContent}
+          onChange={handleContentChange}
+          placeholder={placeholderValue}
+          readOnly={isReadOnly}
+          extensions={[
+            python(),
+            lintGutter(),
+            createPythonLinter({
+              checkSyntax: true,
+              checkStyle: true,
+              checkImports: true,
+              checkIndentation: true
+            }),
+            syntaxHighlighting(defaultHighlightStyle, { fallback: true }),
+            EditorView.updateListener.of((update) => {
+              if (update.focusChanged) {
+                handleFocusChange(update.view.hasFocus);
+              }
+            })
+          ]}
+          theme={myTheme}
+          basicSetup={{
+            lineNumbers: true,
+            highlightActiveLineGutter: false
+          }}
+          className="code-editor"
+        />
+      </div>
+    );
+
+    const runningInfoPanel = (
+      <div style={{ height: '100%', overflow: 'hidden' }}>
+        <RunningInfoPanel
+          key={currentFileId}
+          activeKey={activeKey}
+          setActiveKey={setActiveKey}
+          runResult={runResult}
+          runLog={runLog}
+          runStatus={runStatus}
+          runStartTime={runStartTime}
+          runDuration={runDuration}
+          hasFetchedResult={hasFetchedResult}
+          onGetRunLog={handleGetRunLog}
+          onGetRunResult={handleGetRunResult}
+          isPanelOpen={isPanelOpen}
+          onPanelStateChange={handlePanelStateChange}
+          getPrevRunStatus={getPrevRunStatus}
+        />
+      </div>
+    );
 
     return (
       <div className="notebook-content">
@@ -242,7 +366,7 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = memo(
                   {runStatus === RunningStatus.RUNNING ? '停止运行' : '运行'}
                 </Button>
               </PermissionWrapper>
-              <PermissionWrapper permission={PYSPARK_PERMISSIONS.EXPORT}>
+              {/* <PermissionWrapper permission={PYSPARK_PERMISSIONS.EXPORT}>
                 <Button
                   icon={<IconUpload />}
                   onClick={handleExportDataset}
@@ -251,7 +375,7 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = memo(
                 >
                   导出数据集
                 </Button>
-              </PermissionWrapper>
+              </PermissionWrapper> */}
               <Button
                 type="text"
                 icon={<SuanZiIcon />}
@@ -281,61 +405,55 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = memo(
           )}
         </div>
 
-        {/* 编辑器区域 */}
-        <div
-          className={classNames('pyspark-editor-container', {
-            'running-code-mirror': isReadOnly
-          })}
-        >
-          <CodeMirror
-            ref={editorRef}
-            value={editorContent}
-            onChange={handleContentChange}
-            placeholder={placeholderValue}
-            readOnly={isReadOnly}
-            extensions={[
-              python(),
-              lintGutter(),
-              createPythonLinter({
-                checkSyntax: true,
-                checkStyle: true,
-                checkImports: true,
-                checkIndentation: true
-              }),
-              syntaxHighlighting(defaultHighlightStyle, { fallback: true }),
-              EditorView.updateListener.of((update) => {
-                if (update.focusChanged) {
-                  handleFocusChange(update.view.hasFocus);
-                }
-              })
-            ]}
-            theme={myTheme}
-            basicSetup={{
-              lineNumbers: true,
-              highlightActiveLineGutter: false
-            }}
-            className="code-editor"
-          />
-        </div>
-
-        {/* 运行信息面板 - 只在execid不为空时展示 */}
-        {execid && (
-          <RunningInfoPanel
-            key={currentFileId}
-            activeKey={activeKey}
-            setActiveKey={setActiveKey}
-            runResult={runResult}
-            runLog={runLog}
-            runStatus={runStatus}
-            runStartTime={runStartTime}
-            runDuration={runDuration}
-            hasFetchedResult={hasFetchedResult}
-            onGetRunLog={handleGetRunLog}
-            onGetRunResult={handleGetRunResult}
-            isPanelOpen={isPanelOpen}
-            onPanelStateChange={handlePanelStateChange}
-            getPrevRunStatus={getPrevRunStatus}
-          />
+        {/* 编辑器区域和运行信息面板 - 使用ResizeBox.Split分割 */}
+        {execid ? (
+          <div className="resize-box-container" ref={setResizeBoxContainerRef}>
+            <ResizeBox.Split
+              direction="vertical"
+              size={resizeSize}
+              style={{ height: '100%', minHeight: 'max-content' }}
+              panes={[editorPanel, runningInfoPanel]}
+              disabled={!isPanelOpen}
+            />
+          </div>
+        ) : (
+          /* 没有execid时只显示编辑器 */
+          <div
+            className={classNames('pyspark-editor-container', {
+              'running-code-mirror': isReadOnly
+            })}
+            style={{ height: '100%', overflow: 'auto' }}
+          >
+            <CodeMirror
+              ref={editorRef}
+              value={editorContent}
+              onChange={handleContentChange}
+              placeholder={placeholderValue}
+              readOnly={isReadOnly}
+              extensions={[
+                python(),
+                lintGutter(),
+                createPythonLinter({
+                  checkSyntax: true,
+                  checkStyle: true,
+                  checkImports: true,
+                  checkIndentation: true
+                }),
+                syntaxHighlighting(defaultHighlightStyle, { fallback: true }),
+                EditorView.updateListener.of((update) => {
+                  if (update.focusChanged) {
+                    handleFocusChange(update.view.hasFocus);
+                  }
+                })
+              ]}
+              theme={myTheme}
+              basicSetup={{
+                lineNumbers: true,
+                highlightActiveLineGutter: false
+              }}
+              className="code-editor"
+            />
+          </div>
         )}
 
         {/* 新建数据集弹框 */}

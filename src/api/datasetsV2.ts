@@ -51,10 +51,6 @@ export async function postknowledgeBaseCreate(params: any = {}) {
 export async function deleteknowledgeBaseList(id: string, params: any = {}) {
   return UAPI.RES.knowledgeBaseList({ id }).delete().inRegion().do();
 }
-//知识库列表修改接口
-export async function putknowledgeBaseList(id: string, params: any = {}) {
-  return UAPI.RES.knowledgeBaseList({ id }).put(params).inRegion().do();
-}
 //知识库详情接口
 export async function getknowledgeBaseDetails(id: string, params: any = {}) {
   return UAPI.RES.knowledgeBaseList({ id }).get().inRegion().do();

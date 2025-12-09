@@ -92,7 +92,7 @@ const DataSetTree: React.FC<DataSetTreeProps> = ({
             className={styles['sql-dataset-tree__back-icon']}
             onClick={handleBack}
           />
-          <span className={styles['sql-dataset-tree__title']}>数据集</span>
+          <span className={styles['sql-dataset-tree__title']}>数据集市</span>
         </div>
       </div>
 

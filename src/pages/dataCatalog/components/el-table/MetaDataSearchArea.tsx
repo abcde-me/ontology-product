@@ -10,6 +10,8 @@ import {
 import { IconSearch, IconSettings } from '@arco-design/web-react/icon';
 import { FieldSearchItem } from '@/api/dataCatalog';
 import dayjs from 'dayjs';
+import styles from './MetaDataSearchArea.module.scss';
+import classNames from 'classnames';
 
 export interface SearchField {
   /** 字段唯一标识 */
@@ -52,7 +54,6 @@ export default function SearchArea({
 
   // 初始化：默认勾选前三个字段
   useEffect(() => {
-    console.log('fields-----:', fields);
     const defaultCheckedKeys = fields.slice(0, 3).map((f) => f.key);
     const defaultChecked = new Set(defaultCheckedKeys);
     setCheckedFields(defaultChecked);
@@ -169,8 +170,8 @@ export default function SearchArea({
 
   // 设置搜索条件的内容
   const settingsContent = (
-    <div className="flex max-h-[400px] min-w-[240px] max-w-[400px] flex-col rounded bg-white">
-      <div className="p-2 pb-1">
+    <div className="flex flex-col rounded bg-white">
+      <div className="pb-[4px]">
         <Input
           placeholder="输入关键词搜索"
           prefix={<IconSearch />}
@@ -179,9 +180,9 @@ export default function SearchArea({
           allowClear
         />
       </div>
-      <div className="max-h-[300px] overflow-y-auto py-1">
+      <div>
         <div
-          className="flex cursor-pointer items-center px-4 py-2 transition-colors hover:bg-[var(--color-fill-2)]"
+          className="flex cursor-pointer items-center py-[7px] transition-colors hover:bg-[var(--color-fill-2)]"
           onClick={() =>
             handleSelectAll(
               checkedFields.size !== filteredFieldsForSettings.length
@@ -204,7 +205,7 @@ export default function SearchArea({
         {filteredFieldsForSettings.map((field) => (
           <div
             key={field.key}
-            className="flex cursor-pointer items-center px-4 py-2 transition-colors hover:bg-[var(--color-fill-2)]"
+            className="flex cursor-pointer items-center py-2 transition-colors hover:bg-[var(--color-fill-2)]"
             onClick={() =>
               toggleFieldCheck(field.key, !checkedFields.has(field.key))
             }
@@ -262,7 +263,6 @@ export default function SearchArea({
             placeholder={`输入关键字搜索`}
             value={value || ''}
             onChange={(val) => handleFieldValueChange(field.key, val)}
-            suffix={<IconSearch />}
             allowClear
           />
         );
@@ -304,13 +304,13 @@ export default function SearchArea({
       <div className="flex-1 overflow-y-auto">
         {/* 字段搜索列表 */}
         {visibleFields.length > 0 && (
-          <div className="mb-4 flex flex-wrap gap-4">
+          <div className="mb-[8px] grid grid-cols-3 gap-4">
             {visibleFields.map((field) => (
-              <div key={field.key} className="flex items-center gap-3">
+              <div key={field.key} className="flex items-center gap-[8px]">
                 <span className="whitespace-nowrap text-sm text-[var(--color-text-1)]">
                   {field.label}:
                 </span>
-                <div className="min-w-[260px]">{renderFieldInput(field)}</div>
+                <div className="w-[100%]">{renderFieldInput(field)}</div>
               </div>
             ))}
           </div>
@@ -325,12 +325,19 @@ export default function SearchArea({
         </Button>
         <Popover
           content={settingsContent}
+          style={{ width: '240px', height: '296px' }}
           trigger="click"
           position="bl"
           popupVisible={settingsVisible}
           onVisibleChange={setSettingsVisible}
         >
-          <Button type="text" className="ml-auto flex items-center gap-1">
+          <Button
+            type="text"
+            className={classNames(
+              'ml-auto flex items-center gap-1 px-[0px]',
+              styles['settings-button']
+            )}
+          >
             <IconSettings />
             设置搜索条件
           </Button>

@@ -54,19 +54,24 @@ const FormComponent: React.FC<FormProps> = ({
 
       const filesArray: string[] = [];
 
-      if (downloadData?.data_path_id) {
-        filesArray.push(
-          downloadData.real_abs_data_path + '/' + downloadData.file_name
-        );
-      } else if (downloadData?.extras) {
-        filesArray.push(
-          downloadData.real_full_path + '/' + downloadData.extras.file_name
-        );
-      } else if (exportdataset?.latest_file_path) {
-        filesArray.push(exportdataset.latest_file_path);
+      // if (downloadData?.data_path_id) {
+      //   filesArray.push(
+      //     downloadData.real_abs_data_path + '/' + downloadData.file_name
+      //   );
+      // } else if (downloadData?.extras) {
+      //   filesArray.push(
+      //     downloadData.real_full_path + '/' + downloadData.extras.file_name
+      //   );
+      // } else
+      if (exportdataset?.file_path) {
+        filesArray.push(exportdataset.file_path);
       }
       if (!exportdataset && exportdatas && exportdatas?.length > 0) {
-        if (exportdatas[0].data_path_id) {
+        if (exportdatas[0].file_path) {
+          exportdatas.forEach((item: any) => {
+            filesArray.push(item.file_path);
+          });
+        } else if (exportdatas[0].data_path_id) {
           exportdatas.forEach((item: any) => {
             filesArray.push(item.real_abs_data_path + '/' + item.file_name);
           });
@@ -109,7 +114,7 @@ const FormComponent: React.FC<FormProps> = ({
       }
 
       const res = await exportFile(params);
-      console.log('这是导出返回的结果', res);
+      console.log(params, '这是导出返回的结果', res);
       if (res.status === 200) {
         form.resetFields();
         Message.success('导出任务下发成功');

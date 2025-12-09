@@ -55,6 +55,8 @@
   }
 
   .pyspark-sider {
+    height: 100%;
+
     .arco-layout-sider-children {
       .pyspark-tabs {
         height: 100%;
@@ -94,6 +96,7 @@
   }
 
   .pyspark-content {
+    height: 100%;
     background-color: #fff;
     overflow: hidden;
   }

@@ -121,7 +121,9 @@ export default function WorkflowTask() {
   const handleToTargetDatasetDetail = (id: string) => {
     history.push(`/tenant/compute/modaforge/datasetManagement/detail/${id}`);
   };
-
+  const renderEmptyPlaceholder = (value: string | null) => {
+    return value === '' || value == null ? '-' : value;
+  };
   // 筛选排序操作
   const handleTableChange = (
     _pagination: PaginationProps,
@@ -146,11 +148,6 @@ export default function WorkflowTask() {
     };
 
     setSortValue(sortdata);
-  };
-
-  // table数据为空时展示-
-  const renderEmptyPlaceholder = (value: string | null) => {
-    return value === '' || value == null ? '-' : value;
   };
 
   // 搜索条件
@@ -300,18 +297,24 @@ export default function WorkflowTask() {
     },
     {
       title: '终点',
-      dataIndex: 'target_path',
+      dataIndex: 'dataset_name',
       width: 200,
       ellipsis: true,
       className: styles['hover-change'],
-      render: (_, record) => (
-        <EllipsisPopover
-          value={renderEmptyPlaceholder(record.target_path)}
-          isEdit={false}
-          isLink
-          handleLink={() => handleToTargetDatasetDetail(record.id)}
-        />
-      )
+      render: (_, record) => {
+        return renderEmptyPlaceholder(record.dataset_name) !== '-' ? (
+          <EllipsisPopover
+            value={record.dataset_name}
+            isEdit={false}
+            isLink
+            handleLink={() => {
+              handleToTargetDatasetDetail(record.dataset_id);
+            }}
+          />
+        ) : (
+          <span>-</span>
+        );
+      }
     },
     {
       title: '开始时间',
@@ -370,7 +373,7 @@ export default function WorkflowTask() {
         <Input.Group style={{ display: 'flex' }}>
           <Select
             className={styles['task-select']}
-            style={{ width: 100 }}
+            style={{ width: 100, borderRight: '1px solid #E2E8F0' }}
             value={searchSelectValue}
             onChange={(value) => setSearchSelectValue(value)}
             options={searchOptions}
@@ -382,7 +385,7 @@ export default function WorkflowTask() {
                 : '输入作业名称搜索'
             }
             allowClear
-            style={{ width: 160 }}
+            style={{ width: 160, marginLeft: '-1px' }}
             value={searchValue}
             onChange={(value) => {
               setSearchValue(value);

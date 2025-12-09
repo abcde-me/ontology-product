@@ -3,107 +3,179 @@
  * 表格查看器
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { TableSegment } from '../../../types';
+import { useRagDetailStore } from '../../../store/ragDetailStore';
+import { parseExcelFromBinary } from './utils/excelParser';
+import { useTableScroll } from './hooks/useTableScroll';
+import TableHeader from './components/TableHeader';
+import TableBody from './components/TableBody';
+import TableNavigator from './components/TableNavigator';
+import {
+  LoadingState,
+  ErrorState,
+  EmptyState
+} from './components/LoadingStates';
 
 interface TableViewerProps {
-  segments: TableSegment[];
+  segments?: TableSegment[];
+  excelUrl?: string;
 }
 
-const TableViewer: React.FC<TableViewerProps> = ({ segments }) => {
+const TableViewer: React.FC<TableViewerProps> = ({}) => {
+  const {
+    fileBinaryData,
+    fileBinaryDataLoading,
+    fileBinaryDataError,
+    highlightedPdfCoordinates
+  } = useRagDetailStore();
   const [currentTableIndex, setCurrentTableIndex] = useState(0);
+  const [excelSheets, setExcelSheets] = useState<TableSegment[]>([]);
 
-  if (segments.length === 0 || !segments[currentTableIndex]?.tableData) {
-    return (
-      <div className="flex h-full items-center justify-center bg-gray-100">
-        <div className="text-gray-500">暂无表格数据</div>
-      </div>
-    );
-  }
+  const tableScrollRef = useRef<HTMLDivElement>(null);
+  const horizontalScrollRef = useRef<HTMLDivElement>(null);
+  const tableRef = useRef<HTMLTableElement>(null);
 
-  const currentSegment = segments[currentTableIndex];
-  const tableData = currentSegment.tableData;
+  // 使用Excel数据
+  const displaySegments = excelSheets;
+  const currentSegment = displaySegments[currentTableIndex];
+  const tableData = currentSegment?.tableData;
 
+  // 使用滚动 Hook
+  const { needsHorizontalScroll, tableWidth } = useTableScroll({
+    tableScrollRef,
+    tableRef,
+    horizontalScrollRef,
+    tableData
+  });
+
+  // 从URL加载Excel文件
+  useEffect(() => {
+    if (fileBinaryData) {
+      const sheets = parseExcelFromBinary(fileBinaryData);
+      setExcelSheets(sheets);
+      setCurrentTableIndex(0);
+    }
+  }, [fileBinaryData]);
+
+  // 根据 highlightedPdfCoordinates 切换 sheet 页
+  useEffect(() => {
+    if (
+      highlightedPdfCoordinates &&
+      highlightedPdfCoordinates.length > 0 &&
+      excelSheets.length > 0
+    ) {
+      const firstCoordinate = highlightedPdfCoordinates[0];
+      if (firstCoordinate?.page) {
+        // page 是 1-based，需要转换为 0-based 索引
+        const targetIndex = firstCoordinate.page - 1;
+        // 确保索引在有效范围内
+        if (targetIndex >= 0 && targetIndex < excelSheets.length) {
+          setCurrentTableIndex(targetIndex);
+        }
+      }
+    }
+  }, [highlightedPdfCoordinates, excelSheets.length]);
+
+  // 导航处理
   const handlePrevious = () => {
     setCurrentTableIndex((prev) => Math.max(0, prev - 1));
   };
 
   const handleNext = () => {
-    setCurrentTableIndex((prev) => Math.min(segments.length - 1, prev + 1));
+    setCurrentTableIndex((prev) =>
+      Math.min(displaySegments.length - 1, prev + 1)
+    );
   };
 
+  // 加载状态
+  if (fileBinaryDataLoading) {
+    return <LoadingState />;
+  }
+
+  // 错误状态
+  if (fileBinaryDataError) {
+    return <ErrorState />;
+  }
+
+  // 空数据状态
+  if (displaySegments.length === 0 || !tableData) {
+    return <EmptyState />;
+  }
+
   return (
-    <div className="flex h-full flex-col bg-gray-100">
+    <div className="flex h-full flex-col bg-white">
       {/* 表格显示区域 */}
-      <div className="flex-1 overflow-auto p-4">
-        <div className="overflow-hidden rounded-lg bg-white shadow-lg">
-          {/* 表格标题 */}
-          <div className="border-b border-gray-200 bg-gray-50 px-4 py-3">
-            <h3 className="text-sm font-semibold text-gray-900">
-              {currentSegment.content}
-            </h3>
-          </div>
-
-          {/* 表格内容 */}
-          <div className="overflow-x-auto">
-            <table className="w-full border-collapse">
-              <thead>
-                <tr className="border-b border-gray-200 bg-gray-50">
-                  {tableData?.headers.map((header, index) => (
-                    <th
-                      key={index}
-                      className="border-r border-gray-200 px-4 py-2 text-left text-sm font-semibold text-gray-900 last:border-r-0"
-                    >
-                      {header}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {tableData?.rows.map((row, rowIndex) => (
-                  <tr
-                    key={rowIndex}
-                    className={`border-b border-gray-200 ${
-                      rowIndex % 2 === 0 ? 'bg-white' : 'bg-gray-50'
-                    }`}
-                  >
-                    {tableData?.headers.map((header, colIndex) => (
-                      <td
-                        key={colIndex}
-                        className="border-r border-gray-200 px-4 py-2 text-sm text-gray-700 last:border-r-0"
-                      >
-                        {row[header] || '-'}
-                      </td>
-                    ))}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-
-      {/* 控制条 */}
-      <div className="flex items-center justify-between border-t border-gray-200 bg-white px-4 py-3">
-        <button
-          onClick={handlePrevious}
-          disabled={currentTableIndex === 0}
-          className="rounded bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-200 disabled:cursor-not-allowed disabled:opacity-50"
+      <div className="flex flex-1 flex-col overflow-hidden p-4">
+        <div
+          className="flex-1 overflow-y-auto overflow-x-hidden"
+          ref={tableScrollRef}
         >
-          ← 上一个
-        </button>
+          <table
+            ref={tableRef}
+            className={`border-collapse ${
+              tableData.headers.length >= 4 ? '' : 'w-full'
+            }`}
+            style={
+              tableData.headers.length >= 4
+                ? {
+                    tableLayout: 'fixed',
+                    width: `${tableData.headers.length * 200}px`
+                  }
+                : {
+                    tableLayout: 'fixed',
+                    width: '100%'
+                  }
+            }
+          >
+            {/* 表头 */}
+            {tableData?.headerRows && tableData.headerRows.length > 0 && (
+              <TableHeader
+                headerRows={tableData.headerRows}
+                headers={tableData.headers}
+                merges={tableData.merges}
+              />
+            )}
 
-        <div className="text-sm text-gray-600">
-          第 {currentTableIndex + 1} / {segments.length} 个表格
+            {/* 数据行 */}
+            {tableData?.rows && (
+              <TableBody
+                rows={tableData.rows}
+                headers={tableData.headers}
+                headerRowCount={tableData.headerRows?.length || 0}
+                merges={tableData.merges}
+              />
+            )}
+          </table>
         </div>
 
-        <button
-          onClick={handleNext}
-          disabled={currentTableIndex === segments.length - 1}
-          className="rounded bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-200 disabled:cursor-not-allowed disabled:opacity-50"
-        >
-          下一个 →
-        </button>
+        {/* 固定在底部的横向滚动条 - 仅在需要横向滚动时显示 */}
+        {needsHorizontalScroll && (
+          <div
+            ref={horizontalScrollRef}
+            className="overflow-x-scroll border-t bg-white"
+            style={{
+              height: '17px',
+              flexShrink: 0
+            }}
+          >
+            <div
+              style={{
+                height: '1px',
+                width: tableWidth > 0 ? `${tableWidth}px` : '100%'
+              }}
+            />
+          </div>
+        )}
+
+        {/* 表格导航 */}
+        <TableNavigator
+          currentIndex={currentTableIndex}
+          total={displaySegments.length}
+          currentName={currentSegment.content}
+          onPrevious={handlePrevious}
+          onNext={handleNext}
+        />
       </div>
     </div>
   );

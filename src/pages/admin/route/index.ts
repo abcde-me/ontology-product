@@ -6,6 +6,7 @@ import {
   CONNECTION_PERMISSIONS,
   DATA_LOAD_PERMISSIONS,
   SQL_PERMISSIONS,
+  DATA_ASSET_PERMISSIONS,
   PYSPARK_PERMISSIONS,
   WORKFLOW_LIST_PERMISSIONS,
   WORKFLOW_TASK_PERMISSIONS,
@@ -18,7 +19,8 @@ import {
   USER_GROUP_PERMISSIONS,
   ROLE_PERMISSIONS,
   PROJECT_PERMISSIONS,
-  API_KEY_PERMISSIONS
+  API_KEY_PERMISSIONS,
+  METADATA_MANAGEMENT_PERMISSIONS
 } from '@/config/permissions';
 
 export type IRoute = AuthParams & {
@@ -133,6 +135,7 @@ export const routes: IRoute[] = [
     name: 'ragDetail',
     key: '/tenant/compute/modaforge/ragDetail',
     component: React.lazy(async () => import('../../ragDetail')),
+    permission: DATA_MANAGEMENT_PERMISSIONS.GET, // TODO： 修改为正确的权限点控制
     children: []
   },
   // 文件数据对比测试页面
@@ -253,7 +256,7 @@ export const routes: IRoute[] = [
     name: 'dataAsset',
     key: '/tenant/compute/modaforge/dataAsset',
     component: React.lazy(async () => import('../../dataAsset')),
-    permission: DATA_MANAGEMENT_PERMISSIONS.LIST,
+    permission: DATA_ASSET_PERMISSIONS.LIST,
     children: [
       {
         name: 'dataAssetList',
@@ -261,7 +264,7 @@ export const routes: IRoute[] = [
         component: React.lazy(
           async () => import('../../dataAsset/modules/list')
         ),
-        permission: DATA_MANAGEMENT_PERMISSIONS.LIST
+        permission: DATA_ASSET_PERMISSIONS.LIST
       },
       {
         name: 'dataAssetCreate',
@@ -269,7 +272,7 @@ export const routes: IRoute[] = [
         component: React.lazy(
           async () => import('../../dataAsset/modules/create')
         ),
-        permission: DATA_MANAGEMENT_PERMISSIONS.LIST
+        permission: DATA_ASSET_PERMISSIONS.LIST
       },
       {
         name: 'dataAssetEdit',
@@ -277,9 +280,16 @@ export const routes: IRoute[] = [
         component: React.lazy(
           async () => import('../../dataAsset/modules/edit')
         ),
-        permission: DATA_MANAGEMENT_PERMISSIONS.LIST
+        permission: DATA_ASSET_PERMISSIONS.LIST
       }
     ]
+  },
+  {
+    name: 'metadataManagement',
+    key: '/tenant/compute/modaforge/metadataManagement',
+    component: React.lazy(async () => import('../../metadataManagement')),
+    permission: METADATA_MANAGEMENT_PERMISSIONS.LIST,
+    children: []
   },
   // 数据标注 - 需求管理
   {

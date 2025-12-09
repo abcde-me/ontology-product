@@ -51,7 +51,7 @@ interface SegmentDrawerActions {
   closeDrawer: () => void;
   setActiveTab: (tab: 'detail' | 'trace') => void;
   setTotalSegments: (total: number) => void;
-  setDatasetIdAndChunkId: (datasetId: string, chunkId: string) => void;
+  setDatasetIdAndChunkId: (datasetId: number, chunkId: string) => void;
   setSegments: (segments: Array<{ id: string; [key: string]: any }>) => void;
 
   // 分段导航
@@ -70,11 +70,22 @@ interface SegmentDrawerActions {
 type SegmentDrawerStore = SegmentDrawerState & SegmentDrawerActions;
 
 /**
- * 格式化成本时间（毫秒转分钟）
+ * 格式化成本时间（毫秒转分钟和秒）
  */
 function formatCostTime(milliseconds: number): string {
-  const minutes = Math.round(milliseconds / 60000);
-  return `${minutes}min`;
+  const totalSeconds = Math.round(milliseconds / 1000);
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds % 60;
+
+  if (minutes === 0) {
+    return `${seconds}s`;
+  }
+
+  if (seconds === 0) {
+    return `${minutes}m`;
+  }
+
+  return `${minutes}m ${seconds}s`;
 }
 
 /**
@@ -86,11 +97,11 @@ function formatDuration(milliseconds: number): string {
 }
 
 /**
- * 格式化时间戳（Unix 时间戳转 YYYY-MM-DD HH:MM:SS）
+ * 格式化时间戳（13位毫秒时间戳转 YYYY-MM-DD HH:MM:SS）
  */
 function formatTimestamp(timestamp: number): string {
   if (!timestamp) return '';
-  const date = new Date(timestamp * 1000);
+  const date = new Date(timestamp);
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, '0');
   const day = String(date.getDate()).padStart(2, '0');
@@ -160,8 +171,8 @@ export const useSegmentDrawerStore = create<SegmentDrawerStore>((set, get) => ({
   },
 
   // 设置 datasetId 和 chunkId
-  setDatasetIdAndChunkId: (datasetId: string, chunkId: string) => {
-    set({ datasetId, chunkId });
+  setDatasetIdAndChunkId: (datasetId: number, chunkId: string) => {
+    set({ datasetId: String(datasetId), chunkId });
   },
 
   // 设置分段列表
@@ -274,7 +285,10 @@ export const useSegmentDrawerStore = create<SegmentDrawerStore>((set, get) => ({
       });
 
       // 调用真实 API
-      const traceLogData = await fetchSegmentTraceLog(datasetId, chunkId);
+      const traceLogData = await fetchSegmentTraceLog(
+        Number(datasetId),
+        chunkId
+      );
 
       // 转换 API 返回的数据格式
       const statistics = {
@@ -286,7 +300,7 @@ export const useSegmentDrawerStore = create<SegmentDrawerStore>((set, get) => ({
       const nodes = (traceLogData.nodes || []).map(
         (node: any, index: number) => ({
           id: `node_${index}`,
-          index: node.node_index || index,
+          index: index,
           name: node.node_type || '未知节点',
           status: node.status === 1 ? 'success' : 'failed',
           duration: formatDuration(node.cost_time || 0),

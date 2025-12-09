@@ -35,18 +35,21 @@
   .directory-tree-extra {
     display: inline-flex;
     align-items: center;
-    visibility: hidden;
+    display: none;
     color: rgba(30, 41, 59, 1);
+    flex-shrink: 0; // 防止操作按钮被压缩
   }
 
   :global(.arco-tree-node):hover .directory-tree-extra {
     opacity: 1;
+    display: inline-flex;
     visibility: visible;
   }
 
   // 文件名样式 - 非 hover 态最大宽度 260px
   .file-name {
-    max-width: 260px;
+    max-width: 600px;
+    width: 100%;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -61,7 +64,7 @@
     // overflow: hidden;
   }
 
-  // hover 态样式 - 最大宽度 200px
+  // hover 态样式
   :global(.arco-tree-node):hover {
     .file-name {
       color: #007dfa;
@@ -77,6 +80,9 @@
 
   :global(.arco-tree) {
     overflow-y: auto !important;
+    overflow-x: hidden;
+    padding-top: 8px;
+    box-sizing: border-box;
     height: calc(100% - var(--directory-nav-height, 40px));
   }
 
@@ -122,10 +128,16 @@
     border-radius: 2px;
     display: flex !important;
     align-items: center !important;
-    width: 280px;
 
     :global(.arco-tree-node-indent) {
       display: block !important;
+    }
+
+    // 让 title 占据剩余空间
+    :global(.arco-tree-node-title) {
+      flex: 1;
+      min-width: 0; // 允许 flex 子元素收缩，配合文本溢出使用
+      overflow: hidden;
     }
   }
 }

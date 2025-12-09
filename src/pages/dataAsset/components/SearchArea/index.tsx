@@ -18,9 +18,10 @@ import {
 } from '@arco-design/web-react/icon';
 import { ColumnField } from '../ColumnSettingModal';
 import { FieldSearchItem, BaseTag, TagValueItem } from '@/types/dataAssetApi';
-import { isDateType, isTagsField } from '../../utils/const';
+import { isDateType, isDateTimeType, isTagsField } from '../../utils/const';
 import styles from './index.module.scss';
 import dayjs from 'dayjs';
+import classNames from 'classnames';
 
 export interface SearchField {
   /** 字段唯一标识 */
@@ -43,7 +44,7 @@ export interface SearchAreaProps {
   /** 主搜索框占位符 */
   mainSearchPlaceholder?: string;
   /** 主搜索回调 */
-  onMainSearch?: (value: string) => void;
+  onMainSearch?: (fieldValues: FieldSearchItem[], commonSearch: string) => void;
   /** 字段搜索回调 */
   onFieldSearch?: (
     fieldValues: FieldSearchItem[],
@@ -106,7 +107,7 @@ export default function SearchArea({
 
   // 处理主搜索（点击搜索图标或按Enter）
   const handleMainSearch = () => {
-    onMainSearch?.(mainSearch);
+    onMainSearch?.([], mainSearch);
   };
 
   // 处理字段值变化
@@ -146,6 +147,7 @@ export default function SearchArea({
 
   // 处理重置按钮点击
   const handleReset = () => {
+    setMainSearch('');
     setFieldValues({});
     onReset?.();
   };
@@ -204,8 +206,8 @@ export default function SearchArea({
 
   // 设置搜索条件的内容
   const settingsContent = (
-    <div className="flex max-h-[400px] min-w-[240px] max-w-[400px] flex-col rounded bg-white">
-      <div className="p-2 pb-1">
+    <div className="flex flex-col rounded bg-white">
+      <div className="mb-[4px]">
         <Input
           placeholder="输入关键词搜索"
           prefix={<IconSearch />}
@@ -214,9 +216,9 @@ export default function SearchArea({
           allowClear
         />
       </div>
-      <div className="max-h-[300px] overflow-y-auto py-1">
+      <div>
         <div
-          className="flex cursor-pointer items-center px-4 py-2 transition-colors hover:bg-[var(--color-fill-2)]"
+          className="flex cursor-pointer items-center pb-[7px] pt-[7px] transition-colors hover:bg-[var(--color-fill-2)]"
           onClick={() =>
             handleSelectAll(
               checkedFields.size !== filteredFieldsForSettings.length
@@ -239,7 +241,7 @@ export default function SearchArea({
         {filteredFieldsForSettings.map((field) => (
           <div
             key={field.id}
-            className="flex cursor-pointer items-center px-4 py-2 transition-colors hover:bg-[var(--color-fill-2)]"
+            className="flex cursor-pointer items-center pb-[7px] pt-[7px] transition-colors hover:bg-[var(--color-fill-2)]"
             onClick={() =>
               toggleFieldCheck(field.id, !checkedFields.has(field.id))
             }
@@ -279,7 +281,7 @@ export default function SearchArea({
     return button;
   };
 
-  const isBaseTagOption = (opt: string | BaseTag): opt is BaseTag => {
+  const isBaseTagOption = (opt: string | number | BaseTag): opt is BaseTag => {
     if (typeof opt !== 'object' || opt === null) {
       return false;
     }
@@ -354,7 +356,9 @@ export default function SearchArea({
     }
 
     if (isDateType(field.type)) {
-      fieldType = 'range';
+      fieldType = 'date';
+    } else if (isDateTimeType(field.type)) {
+      fieldType = 'datetime';
     } else if (field.isEnumAble && field.values?.length > 0) {
       fieldType = 'select';
     } else {
@@ -368,7 +372,6 @@ export default function SearchArea({
             placeholder={`输入关键字搜索`}
             value={value || ''}
             onChange={(val) => handleFieldValueChange(field.id, val)}
-            suffix={<IconSearch />}
             allowClear
           />
         );
@@ -407,16 +410,14 @@ export default function SearchArea({
             onChange={(val) => handleFieldValueChange(field.id, val)}
             allowClear
           >
-            {field.values
-              ?.filter((opt): opt is string => typeof opt === 'string')
-              .map((opt) => (
-                <Select.Option key={opt} value={opt}>
-                  {opt}
-                </Select.Option>
-              ))}
+            {field.values.map((opt) => (
+              <Select.Option key={String(opt)} value={String(opt)}>
+                {opt}
+              </Select.Option>
+            ))}
           </Select>
         );
-      case 'range':
+      case 'datetime':
         return (
           <DatePicker.RangePicker
             value={value}
@@ -427,6 +428,16 @@ export default function SearchArea({
             placeholder={['开始日期', '结束日期']}
           />
         );
+      case 'date':
+        return (
+          <DatePicker.RangePicker
+            value={value}
+            onChange={(val) => handleFieldValueChange(field.id, val)}
+            allowClear
+            format="YYYY-MM-DD"
+            placeholder={['开始时间', '结束时间']}
+          />
+        );
       default:
         return null;
     }
@@ -435,7 +446,7 @@ export default function SearchArea({
   return (
     <div className={`${className} ${styles['search-area']}`}>
       {/* 主搜索区域 */}
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-[4px]">
         <Input.Search
           className="w-[480px]"
           placeholder={mainSearchPlaceholder}
@@ -475,15 +486,17 @@ export default function SearchArea({
         <div className="border-b border-[#CBD5E1] py-[24px]">
           {/* 字段搜索列表 */}
           {visibleFields.length > 0 && (
-            <div className="mb-4 flex flex-wrap gap-4">
-              {visibleFields.map((field) => (
-                <div key={field.id} className="flex items-center gap-3">
-                  <span className="whitespace-nowrap text-sm text-[var(--color-text-1)]">
-                    {field.nameZh}:
-                  </span>
-                  <div className="w-[380px]">{renderFieldInput(field)}</div>
-                </div>
-              ))}
+            <div className="mb-[8px] grid grid-cols-4 gap-4">
+              {visibleFields.map((field) => {
+                return (
+                  <div key={field.id} className="flex items-center gap-3">
+                    <span className="whitespace-nowrap text-sm text-[var(--color-text-1)]">
+                      {field.nameZh}:
+                    </span>
+                    <div className="flex-1">{renderFieldInput(field)}</div>
+                  </div>
+                );
+              })}
             </div>
           )}
 
@@ -497,10 +510,22 @@ export default function SearchArea({
               content={settingsContent}
               trigger="click"
               position="bl"
+              style={{ width: '240px', height: '296px' }}
               popupVisible={settingsVisible}
-              onVisibleChange={setSettingsVisible}
+              onVisibleChange={(visible) => {
+                setSettingsVisible(visible);
+                if (!visible) {
+                  setSettingsSearchKeyword('');
+                }
+              }}
             >
-              <Button type="text" className="ml-auto flex items-center gap-1">
+              <Button
+                type="text"
+                className={classNames(
+                  'ml-auto flex items-center gap-1 px-[0px]',
+                  styles['settings-button']
+                )}
+              >
                 <IconSettings />
                 设置搜索条件
               </Button>

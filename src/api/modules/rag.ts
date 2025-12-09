@@ -6,6 +6,7 @@ import { NewSegmentData } from '@/pages/ragDetail/utils/newSegmentData';
 export interface GetFileBinaryDataParams {
   bucket_name: string;
   path: string;
+  convert_pdf?: boolean;
 }
 
 // 查询知识库文件详情
@@ -37,6 +38,17 @@ export function getFileBinaryData(params: GetFileBinaryDataParams) {
 // 查询知识库文件列表
 export function ListKnowledgeDocuments(params) {
   return UAPI.RES.ListKnowledgeDocuments({}).post(params).inRegion().do();
+}
+
+// 批量删除知识库文件列表
+export interface BatchDeleteKnowledgeDocumentParams {
+  dataset_id: number;
+  document_ids: string[];
+}
+export function BatchDeleteKnowledgeDocument(
+  params: BatchDeleteKnowledgeDocumentParams
+) {
+  return UAPI.RES.BatchDeleteKnowledgeDocument({}).post(params).inRegion().do();
 }
 
 // 查询知识库文件目录层级

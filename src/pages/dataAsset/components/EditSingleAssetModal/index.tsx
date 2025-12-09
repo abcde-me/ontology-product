@@ -1,7 +1,16 @@
 import React, { useEffect, useState } from 'react';
-import { Modal, Button, Select, Input, Form } from '@arco-design/web-react';
-import { findDataAssetMapping } from '@/api/dataAsset';
+import {
+  Modal,
+  Button,
+  Select,
+  Input,
+  Form,
+  DatePicker
+} from '@arco-design/web-react';
+import EllipsisText from '@/components/ellipsis-popover-com';
 import { FindDataAssetMappingItemRes, ColumnField } from '@/types/dataAssetApi';
+import { isDateType, isDateTimeType } from '../../utils/const';
+import dayjs from 'dayjs';
 
 interface EditSingleAssetModalProps {
   visible: boolean;
@@ -47,6 +56,7 @@ const EditSingleAssetModal: React.FC<EditSingleAssetModalProps> = ({
   useEffect(() => {
     if (visible && record) {
       const initialValues: Record<string, any> = {};
+      console.log(fields, '------fields------');
       fields.forEach((field) => {
         initialValues[field.nameEn] = record[field.nameEn];
       });
@@ -82,14 +92,55 @@ const EditSingleAssetModal: React.FC<EditSingleAssetModalProps> = ({
   // };
 
   // 格式化当前值显示
-  const formatCurrentValue = (value: any): string => {
+  const formatCurrentValue = (value: any, fieldType?: string): string => {
     if (value === null || value === undefined) {
       return '-';
+    }
+    // 如果是时间类型，进行格式化转换
+    if (fieldType) {
+      if (isDateType(fieldType)) {
+        // date 类型格式化为 YYYY-MM-DD
+        const date = dayjs(value);
+        return date.isValid() ? date.format('YYYY-MM-DD') : String(value);
+      } else if (isDateTimeType(fieldType)) {
+        // datetime 类型格式化为 YYYY-MM-DD HH:mm:ss
+        const date = dayjs(value);
+        return date.isValid()
+          ? date.format('YYYY-MM-DD HH:mm:ss')
+          : String(value);
+      }
     }
     if (Array.isArray(value)) {
       return value.join(', ');
     }
     return String(value);
+  };
+
+  const getFieldInput = (fieldType?: string) => {
+    if (!fieldType) {
+      return <Input placeholder="请输入内容" style={{ width: '100%' }} />;
+    }
+
+    if (isDateType(fieldType)) {
+      return (
+        <DatePicker
+          placeholder="请选择日期"
+          style={{ width: '100%' }}
+          format="YYYY-MM-DD"
+        />
+      );
+    } else if (isDateTimeType(fieldType)) {
+      return (
+        <DatePicker
+          placeholder="请选择时间"
+          style={{ width: '100%' }}
+          showTime={{ format: 'HH:mm:ss' }}
+          format="YYYY-MM-DD HH:mm:ss"
+        />
+      );
+    } else {
+      return <Input placeholder="请输入内容" style={{ width: '100%' }} />;
+    }
   };
 
   return (
@@ -98,27 +149,27 @@ const EditSingleAssetModal: React.FC<EditSingleAssetModalProps> = ({
       visible={visible}
       onCancel={onCancel}
       footer={null}
-      style={{ width: 800 }}
+      style={{ width: 800, maxHeight: '800px' }}
       className="edit-single-asset-modal"
     >
       <Form form={form} autoComplete="off">
-        <div className="mb-4">
+        <div className="max-h-[664px] overflow-y-auto">
           <table className="w-full border-collapse">
             <thead>
               <tr className="border-b border-[#E5E6EB]">
-                <th className="px-4 py-3 text-left text-sm font-medium text-[#1D2129]">
+                <th className="px-4 py-3 text-left text-[14px] font-medium text-[#1E293B]">
                   字段名称
                 </th>
-                <th className="px-4 py-3 text-left text-sm font-medium text-[#1D2129]">
+                <th className="max-w-[200px] px-4 py-3 text-left text-[14px] font-medium text-[#1E293B]">
                   当前值
                 </th>
-                <th className="px-4 py-3 text-left text-sm font-medium text-[#1D2129]">
+                <th className="px-4 py-3 text-left text-[14px] font-medium text-[#1E293B]">
                   修改为
                 </th>
               </tr>
             </thead>
             <tbody>
-              {fields.map((field) => {
+              {[...fields].map((field) => {
                 const isEditable = isFieldEditable(field.nameEn);
                 const fieldType = getFieldType(field.nameEn);
                 // const isEnum = isFieldEnum(field.nameEn);
@@ -126,24 +177,26 @@ const EditSingleAssetModal: React.FC<EditSingleAssetModalProps> = ({
 
                 return (
                   <tr key={field.nameEn} className="border-b border-[#E5E6EB]">
-                    <td className="px-4 py-3 text-sm text-[#1D2129]">
+                    <td className="px-4 py-3 text-[14px] text-[#0F172A]">
                       {field.nameZh}
                     </td>
-                    <td className="px-4 py-3 text-sm text-[#1D2129]">
-                      {formatCurrentValue(currentValue)}
+                    <td className="max-w-[200px] px-4 py-3 text-[14px]  text-[#0F172A]">
+                      <EllipsisText
+                        preferTypography
+                        value={formatCurrentValue(currentValue, fieldType)}
+                      />
                     </td>
                     <td className="px-4 py-3">
                       {!isEditable ? (
-                        <span className="text-sm text-[#86909C]">不可修改</span>
+                        <span className="text-[14px] text-[#7F8C9F]">
+                          不可修改
+                        </span>
                       ) : (
                         <Form.Item
                           field={field.nameEn}
                           style={{ marginBottom: 0 }}
                         >
-                          <Input
-                            placeholder="请输入内容"
-                            style={{ width: '100%' }}
-                          />
+                          {getFieldInput(fieldType)}
                         </Form.Item>
                       )}
                     </td>
@@ -154,7 +207,7 @@ const EditSingleAssetModal: React.FC<EditSingleAssetModalProps> = ({
           </table>
         </div>
         {/* 按钮 */}
-        <div className="mb-[20px] flex justify-end gap-[8px]">
+        <div className="mb-[20px] mt-[20px] flex justify-end gap-[8px]">
           <Button onClick={onCancel}>取消</Button>
           <Button type="primary" onClick={handleConfirm}>
             确定

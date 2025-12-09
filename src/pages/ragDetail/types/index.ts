@@ -9,12 +9,13 @@ export type FileType = 'pdf' | 'ppt' | 'excel';
 export type SceneType = FileType;
 
 // PDF坐标信息 - 前端使用格式
+// 支持 bbox 为空的情况：仅定位到页面，不高亮
 export interface PDFCoordinate {
   page: number; // 页码（1-based）
-  x1: number; // 左上角X坐标
-  y1: number; // 左上角Y坐标
-  x2: number; // 右下角X坐标
-  y2: number; // 右下角Y坐标
+  x1?: number; // 左上角X坐标（可选，为空时仅定位不高亮）
+  y1?: number; // 左上角Y坐标（可选，为空时仅定位不高亮）
+  x2?: number; // 右下角X坐标（可选，为空时仅定位不高亮）
+  y2?: number; // 右下角Y坐标（可选，为空时仅定位不高亮）
 }
 
 // 新的后端返回的位置数据格式
@@ -30,8 +31,8 @@ export type PositionBBox = Record<string, number[]>;
 export interface ApiSegment {
   id: string;
   document_id: string;
-  chunk_index: number;
-  positions: ApiPosition[];
+  index: number;
+  positions: ApiPosition[] | null; // 可能为 null
   content: string;
   type: 'text' | 'image' | 'table'; // 分段类型
   char_count: number;
@@ -108,11 +109,21 @@ export interface PptSegment extends Segment {
   slideContent?: string;
 }
 
+// 合并单元格信息
+export interface CellMerge {
+  startRow: number;
+  endRow: number;
+  startCol: number;
+  endCol: number;
+}
+
 // 表格分段（场景5）
 export interface TableSegment extends Segment {
   tableData?: {
     headers: string[];
     rows: Array<Record<string, string>>;
+    headerRows?: any[][]; // 多行表头数据
+    merges?: CellMerge[]; // 合并单元格信息
   };
 }
 
@@ -149,8 +160,7 @@ export interface ImageElement {
 export interface TableElement {
   id: string;
   type: 'table';
-  headers: string[];
-  rows: Array<Record<string, string>>;
+  content: string; // Markdown格式的表格字符串
   relatedDescription?: string; // 关键描述
   extractionEntity?: string[]; // 抽取实体（标签）
   positionType?: string; // 定位类型
@@ -199,7 +209,8 @@ export interface ApiPositionDetail {
 export interface ApiMaterial {
   id: string; // 元素ID
   type: 'text' | 'title' | 'table' | 'image' | 'formula'; // 元素类型
-  text: string; // 文本内容（对于image是s3路径，对于table是JSON字符串，对于formula是公式字符串）
+  text: string; // 文本内容（对于image是s3路径，对于table是Markdown格式的表格字符串，对于formula是公式字符串）
+  content?: string; // 内容字段（与text字段相同，用于兼容不同的后端返回格式）
   positions?: ApiPositionDetail[]; // 位置信息
   uri?: string; // 资源URI（如S3路径）
   bucket_name?: string; // S3 bucket 名称（图片专用）
@@ -211,6 +222,7 @@ export interface ApiAiData {
   summaries?: string; // 总结
   questions?: string; // 假设性问题
   keywords?: string[]; // 实体
+  entities?: string[]; // 实体
   tags?: Array<{
     id: number;
     name: string;
@@ -240,10 +252,10 @@ export interface SegmentDetailData {
 // 新的后端返回的目录树节点结构
 export interface ApiCatalogNode {
   level: number;
-  type: 'title' | 'text'; // title: 标题节点（不高亮分段），text: 文本节点（高亮分段）
+  type: 'Title' | 'Text' | 'Image' | 'Formula' | 'Table'; // 节点类型：Title(标题), Text(文本), Image(图片), Formula(公式), Table(表格)
   chunk_id: string; // 对应分段的 id 或 title_id
   content: string;
-  positions: ApiPosition[];
+  positions: ApiPosition[] | null; // 可能为 null
   children?: ApiCatalogNode[];
 }
 
@@ -265,7 +277,7 @@ export interface DirectoryNode {
   id: string; // 对应 chunk_id
   label: string; // 对应 content
   level: number;
-  type: 'title' | 'text'; // title: 标题节点（不高亮分段），text: 文本节点（高亮分段）
+  type: 'Title' | 'Text' | 'Image' | 'Formula' | 'Table'; // 节点类型：Title(标题), Text(文本), Image(图片), Formula(公式), Table(表格)
   children?: DirectoryNode[];
   segmentIds?: string[]; // 关联的分段ID列表（用于滚动定位）
   position?: PDFCoordinate[]; // 在PDF中的位置
@@ -295,7 +307,7 @@ export interface SegmentUpdatePayload {
 
 export interface RagDetailState {
   ragId: string | null;
-  datasetId: string | null; // 数据集ID
+  datasetId: number | null; // 数据集ID
   fileName: string;
   filePath: string;
   sceneType: SceneType;
@@ -336,11 +348,13 @@ export interface RagDetailState {
 
 export interface RagDetailActions {
   initializeRagDetail: (
-    datasetId: string,
+    datasetId: number,
     documentId: string,
     bucketName?: string | null,
     path?: string | null,
-    datasetName?: string | null
+    datasetName?: string | null,
+    initialChunkId?: string | null,
+    initialPositionsStr?: string | null
   ) => Promise<void>;
   selectSegment: (segmentId: string) => void;
   selectDirectoryNode: (nodeId: string) => void;
@@ -362,7 +376,11 @@ export interface RagDetailActions {
   // Segment search actions
   setSegmentSearchText: (text: string) => void;
   // File binary data actions
-  loadFileBinaryData: (bucket: string, path: string) => Promise<void>;
+  loadFileBinaryData: (
+    bucket: string,
+    path: string,
+    isConvertPdf: boolean
+  ) => Promise<void>;
   clearFileBinaryData: () => void;
 }
 

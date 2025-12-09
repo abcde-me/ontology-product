@@ -16,7 +16,8 @@ import {
   Input,
   Pagination,
   Tooltip,
-  TableColumnProps
+  TableColumnProps,
+  Popconfirm
 } from '@arco-design/web-react';
 import {
   IconArrowLeft,
@@ -44,15 +45,16 @@ import {
   getDataContentFileList,
   getDataContentTableList
 } from '@/api/datasetManagement';
+import { BatchDeleteKnowledgeDocument } from '@/api/modules/rag';
 import EditDatasetForm from '@/components/datasetform/EditDatasetForm';
 import { DATA_MANAGEMENT_PERMISSIONS } from '@/config/permissions';
 import './style.css';
 import noDataElement from '@/components/no-data';
 import getFileIcon from '@/components/file-icon';
 import { PermissionWrapper } from '../PermissionGuard';
-import HitTest from '@/pages/dataMarket/components/configurationpage/hit-test';
-import { throttle } from 'lodash';
-import { FileType } from '@/utils/type';
+import { throttle } from 'lodash-es';
+import { FileTypeLarge } from '@/utils/type';
+import HitTest from '@/pages/dataMarket/components/configurationpage/compontents/hitTest';
 const { Title, Text } = Typography;
 const { TabPane } = Tabs;
 
@@ -92,78 +94,51 @@ interface TableColumn {
 }
 
 enum FileStatusType {
-  success = 'success',
-  fail = 'fail'
+  success = 'Succeed',
+  fail = 'Error',
+  waiting = 'Waiting'
 }
 
 const filterFileTypes = [
   {
-    text: FileType.pdf,
-    value: FileType.pdf
+    text: FileTypeLarge.pdf,
+    value: FileTypeLarge.pdf
   },
   {
-    text: FileType.ppt,
-    value: FileType.ppt
+    text: FileTypeLarge.doc,
+    value: FileTypeLarge.doc
   },
   {
-    text: FileType.pptx,
-    value: FileType.pptx
+    text: FileTypeLarge.docx,
+    value: FileTypeLarge.docx
   },
   {
-    text: FileType.txt,
-    value: FileType.txt
+    text: FileTypeLarge.txt,
+    value: FileTypeLarge.txt
   },
   {
-    text: FileType.md,
-    value: FileType.md
+    text: FileTypeLarge.md,
+    value: FileTypeLarge.md
   },
   {
-    text: FileType.doc,
-    value: FileType.doc
+    text: FileTypeLarge.ppt,
+    value: FileTypeLarge.ppt
   },
   {
-    text: FileType.docx,
-    value: FileType.docx
+    text: FileTypeLarge.pptx,
+    value: FileTypeLarge.pptx
   },
   {
-    text: FileType.jpg,
-    value: FileType.jpg
+    text: FileTypeLarge.xls,
+    value: FileTypeLarge.xls
   },
   {
-    text: FileType.png,
-    value: FileType.png
+    text: FileTypeLarge.xlsx,
+    value: FileTypeLarge.xlsx
   },
   {
-    text: FileType.jpeg,
-    value: FileType.jpeg
-  },
-  {
-    text: FileType.wav,
-    value: FileType.wav
-  },
-  {
-    text: FileType.mp3,
-    value: FileType.mp3
-  },
-  {
-    text: FileType.aac,
-    value: FileType.aac
-  },
-  {
-    text: FileType.flac,
-    value: FileType.flac
-  },
-  {
-    text: FileType.mp4,
-    value: FileType.mp4
-  },
-  {
-    text: FileType.mov,
-    value: FileType.mov
-  },
-  {
-    text: FileType.mkv,
-    value: FileType.mkv
+    text: FileTypeLarge.csv,
+    value: FileTypeLarge.csv
   }
 ];
 
@@ -575,6 +550,8 @@ const DatasetDetail = (props: {
   datasetDetailVisible?: boolean;
 }) => {
   const { isHideEdit, detailId, datasetDetailVisible } = props;
+  const url = new URL(window.location.href);
+  const sceneName = url.searchParams.get('sceneName');
   const [datasetDetail, setDatasetDetail] =
     React.useState<DatasetDetail | null>(null); //数据集详情
   const [editModalVisible, setEditModalVisible] = React.useState(false); //编辑弹窗是否显示
@@ -597,8 +574,8 @@ const DatasetDetail = (props: {
   const [currentPage, setCurrentPage] = React.useState(1); //当前页码
   const [pageSize, setPageSize] = React.useState(10); //每页条数
   const [total, setTotal] = React.useState(0); //总条数
-  const [fileCurrentPage, setFileCurrentPage] = React.useState(1); //当前页码
-  const [filePageSize, setFilePageSize] = React.useState(10); //每页条数
+  // const [fileCurrentPage, setFileCurrentPage] = React.useState(1); //当前页码
+  // const [filePageSize, setFilePageSize] = React.useState(10); //每页条数
   const [fileTotal, setFileTotal] = React.useState(0); //总条数
   const [contentColumns, setContentColumns] = React.useState<any[]>([]); //列信息
   const [contentColumnslist, setContentColumnslist] = React.useState<any[]>([]); //列数据
@@ -641,20 +618,20 @@ const DatasetDetail = (props: {
       ? [
           {
             title: '文件名称',
-            dataIndex: 'file_name',
+            dataIndex: 'name',
             width: 250,
             render: (_, record) => (
-              <EllipsisPopover value={record.file_name || '-'} isEdit={false} />
+              <EllipsisPopover value={record.name || '-'} isEdit={false} />
             )
           },
           {
             title: '文件类型',
-            dataIndex: 'file_type',
+            dataIndex: 'format',
             width: 130,
             filters: filterFileTypes,
             render: (_, record) => (
               <div>
-                {getFileIcon(record.file_type)} {record.file_type}
+                {getFileIcon(record.format)} {record.format}
               </div>
             )
           },
@@ -669,9 +646,9 @@ const DatasetDetail = (props: {
           },
           {
             title: '分段数',
-            dataIndex: 'segment_count',
+            dataIndex: 'chunk_count',
             width: 100,
-            render: (_, record) => <span>{record.segment_count}</span>
+            render: (_, record) => <span>{record.chunk_count}</span>
           },
           {
             title: '状态',
@@ -685,6 +662,10 @@ const DatasetDetail = (props: {
               {
                 text: '处理失败',
                 value: FileStatusType.fail
+              },
+              {
+                text: '等待中',
+                value: FileStatusType.waiting
               }
             ],
             render: (_, record) => (
@@ -696,7 +677,9 @@ const DatasetDetail = (props: {
                     backgroundColor:
                       record.status === FileStatusType.success
                         ? '#10B981'
-                        : '#EF4444',
+                        : record.status === FileStatusType.waiting
+                          ? '#007DFA'
+                          : '#EF4444',
                     borderRadius: '50%',
                     marginRight: '5px'
                   }}
@@ -704,11 +687,13 @@ const DatasetDetail = (props: {
                 <span>
                   {record.status === FileStatusType.success
                     ? '处理成功'
-                    : '处理失败'}
+                    : record.status === FileStatusType.waiting
+                      ? '等待中'
+                      : '处理失败'}
                 </span>
-                <Button type="text" className="ml-[8px] pl-0">
+                {/* <Button type="text" className="ml-[8px] pl-0">
                   重试
-                </Button>
+                </Button> */}
               </div>
             )
           },
@@ -731,9 +716,20 @@ const DatasetDetail = (props: {
                 >
                   分段列表
                 </Button>
-                <Button type="text" onClick={() => {}}>
-                  删除
-                </Button>
+                <PermissionWrapper
+                  permission={DATA_MANAGEMENT_PERMISSIONS.CAN_DELETE}
+                >
+                  <Popconfirm
+                    focusLock
+                    title="删除"
+                    content="确定删除该文件吗？"
+                    onOk={() => {
+                      handleDeleteKnowledgeDocument(record.id);
+                    }}
+                  >
+                    <Button type="text">删除</Button>
+                  </Popconfirm>
+                </PermissionWrapper>
               </div>
             )
           }
@@ -786,7 +782,7 @@ const DatasetDetail = (props: {
     const handleScroll = (event) => {
       const currentScrollTop = container.scrollTop;
 
-      if (event.deltaY > 0 && !isHiddenBaseInfo) {
+      if (currentScrollTop > 0 && event.deltaY > 0 && !isHiddenBaseInfo) {
         setIsHiddenBaseInfo(true);
       } else if (
         currentScrollTop === 0 &&
@@ -803,11 +799,16 @@ const DatasetDetail = (props: {
     const throttledHandleScroll = throttle(handleScroll, 100);
 
     // 监听滚轮事件
-    container.addEventListener('wheel', handleScroll, { passive: false });
-
+    container.addEventListener('scroll', throttledHandleScroll, {
+      passive: false
+    });
+    container.addEventListener('wheel', throttledHandleScroll, {
+      passive: false
+    });
     // 在组件卸载时移除监听器
     return () => {
-      container.removeEventListener('wheel', handleScroll);
+      container.removeEventListener('scroll', throttledHandleScroll);
+      container.removeEventListener('wheel', throttledHandleScroll);
       throttledHandleScroll.cancel(); // 清除节流计时器
     };
   }, [isHiddenBaseInfo]);
@@ -825,6 +826,10 @@ const DatasetDetail = (props: {
       fetchDatasetContents();
     }
   }, [sortValue]);
+
+  useEffect(() => {
+    fetchDatasetContents();
+  }, [pageSize, currentPage]);
 
   React.useEffect(() => {
     //@ts-expect-error
@@ -936,7 +941,9 @@ const DatasetDetail = (props: {
 
   // 跳转到数据集管理页面
   const handleGoToDatasetList = () => {
-    history.push('/tenant/compute/modaforge/datasetManagement');
+    history.push(
+      '/tenant/compute/modaforge/datasetManagement?sceneName=' + sceneName
+    );
   };
 
   // 跳转到分段列表页面
@@ -946,8 +953,38 @@ const DatasetDetail = (props: {
     path: string
   ) => {
     history.push(
-      `/tenant/compute/modaforge/datasetManagement/ragDetail?datasetId=${detailId}&documentId=${document_id}&bucketName=${bucket_name}&path=${path}&datasetName=${datasetDetail?.name}`
+      `/tenant/compute/modaforge/ragDetail?datasetId=${id}&documentId=${document_id}&bucketName=${bucket_name}&path=${path}&datasetName=${datasetDetail?.name}&sceneName=${sceneName}`
     );
+  };
+
+  // 获取场景分类name
+  const getSceneName = (sceneId: number) => {
+    switch (sceneId) {
+      case 1:
+        return '分类';
+      case 2:
+        return '聚类';
+      default:
+        return '';
+    }
+  };
+
+  // 删除知识库文件
+  const handleDeleteKnowledgeDocument = async (document_id: string) => {
+    try {
+      const res = await BatchDeleteKnowledgeDocument({
+        dataset_id: Number(id),
+        document_ids: [document_id]
+      });
+      if (res.code === '' && res.status === 200) {
+        Message.success('删除成功');
+        fetchDatasetContents();
+      } else {
+        Message.error(res.message || '删除失败');
+      }
+    } catch (error) {
+      Message.error('删除失败');
+    }
   };
 
   // 获取文件类型名称
@@ -1341,8 +1378,8 @@ const DatasetDetail = (props: {
     const params = {
       id: id,
       version_id: datasetDetail.latest_version,
-      page: fileCurrentPage,
-      limit: filePageSize,
+      page: currentPage,
+      limit: pageSize,
       storage_type: datasetDetail.storage_type,
       name: searchValue,
       format_list: sortValue.filters?.file_type || [],
@@ -1431,8 +1468,7 @@ const DatasetDetail = (props: {
   const handleVersionRebuild = () => {
     if (!datasetDetail) return;
     datasetVersionRebuild({
-      id: Number(id),
-      version_id: datasetDetail.latest_version
+      id: Number(id)
     })
       .then((res) => {
         if (res?.status === 200) {
@@ -1453,9 +1489,7 @@ const DatasetDetail = (props: {
         <div className="breadcrumb-wrapper">
           <IconArrowLeft
             style={{ cursor: 'pointer', fontSize: '14px' }}
-            onClick={() => {
-              handleBack();
-            }}
+            onClick={handleGoToDatasetList}
           />
           <Breadcrumb style={{ fontSize: 20, marginLeft: '21px' }}>
             <Breadcrumb.Item>
@@ -1463,11 +1497,19 @@ const DatasetDetail = (props: {
                 style={{ fontWeight: '500', fontSize: '20px' }}
                 onClick={handleGoToDatasetList}
               >
-                数据集管理
+                数据集市
               </span>
             </Breadcrumb.Item>
             <Breadcrumb.Item>
               {datasetDetail?.name || '数据集详情'}
+              <span className="ml-[8px]">
+                {renderStatusTag(
+                  datasetDetail?.status as string,
+                  datasetDetail?.error_reason,
+                  handleVersionRebuild,
+                  handlerefresh
+                )}
+              </span>
             </Breadcrumb.Item>
           </Breadcrumb>
         </div>
@@ -1497,7 +1539,10 @@ const DatasetDetail = (props: {
                         !datasetDetail || datasetDetail.status !== 'normal'
                       }
                       onClick={handleEdit}
+                      type="text"
+                      style={{ color: '#94A3B8' }}
                     >
+                      <IconEdit style={{ color: '#334155' }} />
                       编辑
                     </Button>
                   </Tooltip>
@@ -1526,12 +1571,6 @@ const DatasetDetail = (props: {
                             </Tooltip>
                           ) : (
                             <span>{datasetDetail.name}</span>
-                          )}
-                          {renderStatusTag(
-                            datasetDetail.status,
-                            datasetDetail.error_reason,
-                            handleVersionRebuild,
-                            handlerefresh
                           )}
                         </div>
                       )
@@ -1757,6 +1796,10 @@ const DatasetDetail = (props: {
               return false; // 先阻止默认跳转
             }
 
+            if (e === 'hittest') {
+              setIsHiddenBaseInfo(true);
+            }
+
             setActiveTab(e);
             // setCurrentPage(1);
           }}
@@ -1921,6 +1964,7 @@ const DatasetDetail = (props: {
                         pagination={false}
                         // scroll={{ x: 'max-content' }}
                         border={false}
+                        rowKey="id"
                       />
                     </>
                   ) : null}
@@ -1962,6 +2006,7 @@ const DatasetDetail = (props: {
                   pagination={false}
                   rowKey="id"
                   border={false}
+                  noDataElement={noDataElement({ description: '暂无数据' })}
                 />
               </div>
             </TabPane>
@@ -1975,16 +2020,16 @@ const DatasetDetail = (props: {
                   value={searchValue}
                   onChange={(value) => setSearchValue(value)}
                   onSearch={() => {
-                    setFileCurrentPage(1);
+                    setCurrentPage(1);
                     fetchDatasetContents();
                   }}
                   onClear={() => {
                     setSearchValue('');
-                    setFileCurrentPage(1);
+                    setCurrentPage(1);
                     setIsClickClear(true);
                   }}
                   onPressEnter={() => {
-                    setFileCurrentPage(1);
+                    setCurrentPage(1);
                     fetchDatasetContents();
                   }}
                 />
@@ -2001,13 +2046,14 @@ const DatasetDetail = (props: {
                   const singleSorter = Array.isArray(sorter)
                     ? sorter[0]
                     : sorter;
+                  console.log(singleSorter, filters);
                   setSortValue({
                     sorter: {
                       field: singleSorter?.field as string,
-                      direction: singleSorter.direction as string
+                      direction: singleSorter?.direction as string
                     },
                     filters: {
-                      file_type: filters.file_type || [],
+                      file_type: filters.format || [],
                       status: filters.status || []
                     }
                   });
@@ -2019,15 +2065,15 @@ const DatasetDetail = (props: {
                   style={{
                     float: 'right'
                   }}
-                  current={fileCurrentPage}
-                  pageSize={filePageSize}
+                  current={currentPage}
+                  pageSize={pageSize}
                   total={fileTotal}
                   onChange={(filePage) => {
-                    setFileCurrentPage(filePage);
+                    setCurrentPage(filePage);
                   }}
                   onPageSizeChange={(filePageSize) => {
-                    setFilePageSize(filePageSize);
-                    setFileCurrentPage(1);
+                    setPageSize(filePageSize);
+                    setCurrentPage(1);
                   }}
                   showTotal={(total, range) =>
                     `第 ${range[0]}-${range[1]} 条，共 ${total} 条数据`
@@ -2042,7 +2088,7 @@ const DatasetDetail = (props: {
           {datasetDetail &&
             datasetDetail.storage_type === StorageType.vector && (
               <TabPane key="hittest" title="命中测试">
-                <HitTest />
+                <HitTest datasetName={datasetDetail.name} />
               </TabPane>
             )}
           {/* <TabPane key="element" title="元素搜索"></TabPane> */}
@@ -2053,7 +2099,7 @@ const DatasetDetail = (props: {
                 data={versionHistory}
                 pagination={false}
                 noDataElement={noDataElement({ description: '暂无数据' })}
-                scroll={{ x: 'max-content' }}
+                scroll={{ x: 'max-content', y: 'max-content' }}
                 border={false}
                 rowKey="version_id"
               />

@@ -96,6 +96,8 @@ export const DATA_MANAGEMENT_PERMISSIONS = {
   CAN_UPDATE_VERSION_RETRY: 'aimdp-manager:dataset:manage:modify', //重试
   CAN_UPDATE: 'aimdp-manager:dataset:manage:modify', //编辑
   CAN_UPDATE_VERSION_DATA: 'aimdp-manager:dataset:manage:modify', //编辑数据内容
+  CAN_MOVE: 'aimdp-manager:dataset:manage:modify', //移动场景分类
+  CAN_RUN: 'aimdp-manager:dataset:manage:run', // 运行
 
   LIST: 'aimdp-manager:dataset:read:list', // 菜单权限
   GET: 'aimdp-manager:dataset:read:get',
@@ -150,6 +152,11 @@ export const DATA_ASSET_PERMISSIONS = {
   MODIFY_TABLE: 'aimdp-manager:data_asset:manage:modify_table',
   CREATE_TABLE: 'aimdp-manager:data_asset:manage:create_table',
   GET_TABLE: 'aimdp-manager:data_asset:read:get_table'
+} as const;
+
+// 元数据管理
+export const METADATA_MANAGEMENT_PERMISSIONS = {
+  LIST: 'aimdp-manager:dataset:read:list' // 菜单权限 （todo：临时使用数据集权限待替换）
 } as const;
 
 // 需求管理权限

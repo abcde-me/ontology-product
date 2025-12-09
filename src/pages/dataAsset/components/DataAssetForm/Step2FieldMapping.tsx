@@ -6,15 +6,16 @@ import {
   Message,
   Form,
   Select,
-  Modal,
+  Popconfirm,
   Switch,
   Grid,
   Table,
   Space
 } from '@arco-design/web-react';
+import { IconExclamationCircleFill } from '@arco-design/web-react/icon';
 // import { Download } from '@icon-park/react';
 import { FieldMapping, MetadataField } from './DataAssetFormContainer';
-import { IconDownload } from '@arco-design/web-react/icon';
+import EllipsisPopover from '@/components/ellipsis-popover-com';
 import styles from './Step2FieldMapping.module.scss';
 import {
   CreateDataAssetAndMappingReq,
@@ -46,6 +47,7 @@ interface Step2FieldMappingProps {
   autoMapping: boolean;
   setAutoMapping: React.Dispatch<React.SetStateAction<boolean>>;
   metadataFields: MetadataField[];
+  setMetadataFields: React.Dispatch<React.SetStateAction<MetadataField[]>>;
   dataSources: Record<string, ListDataAssetSourceResItem>;
   findDataAssetMappingData: ListDataAssetSourceResItem[];
   onCancel: () => void;
@@ -61,6 +63,7 @@ export default function Step2FieldMapping({
   autoMapping,
   setAutoMapping,
   metadataFields,
+  setMetadataFields,
   dataSources,
   findDataAssetMappingData,
   onCancel,
@@ -138,29 +141,33 @@ export default function Step2FieldMapping({
     const cols: any[] = [
       {
         title: '序号',
+        fixed: 'left' as const,
         dataIndex: 'sequence',
-        width: 40,
-        align: 'center' as const
+        width: 60,
+        align: 'center' as const,
+        zIndex: 2
       },
       {
         title: '数据资产名称',
         dataIndex: 'nameZh',
+        fixed: 'left' as const,
         width: 200,
         render: (_: any, record: FieldMapping) => {
           const meta = metadataFields[record.sequence - 1];
           const isReserved =
             !!meta?.nameEn && RESERVED_FIELD_ENS.has(meta.nameEn);
-          return (
-            <Input
-              placeholder="请输入数据资产名称"
-              allowClear
-              value={record.nameZh}
-              disabled={isReserved}
-              onChange={(value) =>
-                handleUpdateMapping(record.id, { nameZh: value })
-              }
-            />
-          );
+          // return (
+          //   <Input
+          //     placeholder="请输入数据资产名称"
+          //     allowClear
+          //     value={record.nameZh}
+          //     disabled={isReserved}
+          //     onChange={(value) =>
+          //       handleUpdateMapping(record.id, { nameZh: value })
+          //     }
+          //   />
+          // );
+          return <EllipsisPopover value={record.nameZh} preferTypography />;
         }
       }
     ];
@@ -173,7 +180,8 @@ export default function Step2FieldMapping({
       if (sourceInfo) {
         const columnTitle = sourceInfo.name || sourceKey;
         cols.push({
-          title: columnTitle,
+          title: <EllipsisPopover value={columnTitle} preferTypography />,
+          ellipsis: true,
           dataIndex: sourceKey,
           width: 200,
           render: (_: any, record: FieldMapping, index: number) => {
@@ -189,10 +197,17 @@ export default function Step2FieldMapping({
               metadataField?.nameEn === 'tags' ||
               metadataField?.nameEn === 'data_source';
 
+            // 检查当前值是否在选项列表中
+            const currentValue = record[sourceKey] as string | undefined;
+            const optionValues = options.map((opt) => opt.name);
+            const isValidValue =
+              currentValue && optionValues.includes(currentValue);
+            const selectValue = isValidValue ? currentValue : undefined;
+
             return (
               <Select
                 placeholder="请选择"
-                value={record[sourceKey] as string | undefined}
+                value={selectValue}
                 disabled={disableMappingForThisRow}
                 onChange={(value) =>
                   handleUpdateMapping(record.id, { [sourceKey]: value })
@@ -210,38 +225,38 @@ export default function Step2FieldMapping({
       }
     });
 
-    cols.push({
-      title: '操作',
-      dataIndex: 'operation',
-      width: 132,
-      align: 'left' as const,
-      fixed: 'right' as const,
-      render: (_: any, record: FieldMapping) => {
-        const meta = metadataFields[record.sequence - 1];
-        const isReserved =
-          !!meta?.nameEn && RESERVED_FIELD_ENS.has(meta.nameEn);
-        return (
-          <Space>
-            {/* <Button
-              type="text"
-              onClick={() => handleAddMapping()}
-              className="cursor-pointer text-green-500"
-            >
-              添加行
-            </Button> */}
-            {mappings.length > 1 && !isReserved && (
-              <Button
-                type="text"
-                onClick={() => handleDeleteMapping(record.id)}
-                className="cursor-pointer text-red-500"
-              >
-                删除行
-              </Button>
-            )}
-          </Space>
-        );
-      }
-    });
+    // cols.push({
+    //   title: '操作',
+    //   dataIndex: 'operation',
+    //   width: 132,
+    //   align: 'left' as const,
+    //   fixed: 'right' as const,
+    //   render: (_: any, record: FieldMapping) => {
+    //     const meta = metadataFields[record.sequence - 1];
+    //     const isReserved =
+    //       !!meta?.nameEn && RESERVED_FIELD_ENS.has(meta.nameEn);
+    //     return (
+    //       <Space>
+    //         {/* <Button
+    //           type="text"
+    //           onClick={() => handleAddMapping()}
+    //           className="cursor-pointer text-green-500"
+    //         >
+    //           添加行
+    //         </Button> */}
+    //         {mappings.length > 1 && !isReserved && (
+    //           <Button
+    //             type="text"
+    //             onClick={() => handleDeleteMapping(record.id)}
+    //             className="cursor-pointer text-red-500"
+    //           >
+    //             删除行
+    //           </Button>
+    //         )}
+    //       </Space>
+    //     );
+    //   }
+    // });
 
     return cols;
   }, [
@@ -349,31 +364,6 @@ export default function Step2FieldMapping({
     }
   };
 
-  // 初始化映射
-  useEffect(() => {
-    if (metadataFields.length > 0) {
-      const initialMappings: FieldMapping[] = metadataFields.map(
-        (field, index) => {
-          const sourceKeys = {};
-          field?.mapping?.forEach((item) => {
-            const key = getDataSourceKey(
-              item as unknown as ListDataAssetSourceResItem
-            );
-            sourceKeys[key] = item.fieldName;
-          });
-          const mapping: FieldMapping = {
-            id: field.nameEn,
-            sequence: index + 1,
-            nameZh: field.nameZh,
-            ...sourceKeys
-          };
-          return mapping;
-        }
-      );
-      setMappings(initialMappings);
-    }
-  }, [metadataFields]);
-
   // 初始化表单值
   useEffect(() => {
     form.setFieldsValue({ mappings });
@@ -389,6 +379,42 @@ export default function Step2FieldMapping({
     findDataAssetMappingData,
     currentStep
   ]);
+
+  // 清理无效的映射值：如果下拉列表不存在这个值，需要去掉
+  useEffect(() => {
+    let hasInvalidValue = false;
+    const updatedMappings = mappings.map((record) => {
+      const metadataField = metadataFields.find(
+        (field) => field.nameEn === record.id
+      );
+      const fieldType = metadataField?.type;
+
+      // 检查每个数据来源的映射值是否有效
+      const updates: Partial<FieldMapping> = {};
+      Object.keys(dataSources).forEach((sourceKey) => {
+        const currentValue = record[sourceKey] as string | undefined;
+        if (currentValue) {
+          const options = getMappingOptions(fieldType, sourceKey);
+          const optionValues = options.map((opt) => opt.name);
+          // 如果当前值不在选项列表中，清除它
+          if (!optionValues.includes(currentValue)) {
+            updates[sourceKey] = undefined;
+            hasInvalidValue = true;
+          }
+        }
+      });
+
+      if (Object.keys(updates).length > 0) {
+        return { ...record, ...updates };
+      }
+      return record;
+    });
+
+    if (hasInvalidValue) {
+      setMappings(updatedMappings);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [metadataFields, dataSources, findDataAssetMappingData]);
 
   // 添加映射行
   const handleAddMapping = () => {
@@ -415,7 +441,21 @@ export default function Step2FieldMapping({
         return;
       }
     }
-    setMappings(mappings.filter((mapping) => mapping.id !== id));
+
+    // 只更新 metadataFields，mappings 的更新由父组件监听 metadataFields 变化后同步更新
+    const fieldToDelete = metadataFields.find((field) => field.nameEn === id);
+    if (fieldToDelete) {
+      // 检查是否为保留字段
+      if (
+        !fieldToDelete.nameEn ||
+        !RESERVED_FIELD_ENS.has(fieldToDelete.nameEn)
+      ) {
+        const updatedFields = metadataFields.filter(
+          (field) => field.nameEn !== id
+        );
+        setMetadataFields(updatedFields);
+      }
+    }
   };
 
   // 验证映射数据
@@ -435,26 +475,18 @@ export default function Step2FieldMapping({
     [mappings]
   );
 
+  // 自动映射 - 关闭时的确认处理
+  const handleCloseAutoMapping = () => {
+    setAutoMapping(false);
+  };
+
   // 自动映射
   const handleAutoMapping = (v: boolean) => {
-    if (!v) {
-      Modal.confirm({
-        title: '确认关闭自动映射？',
-        content: '关闭后将不再自动根据来源字段进行映射，是否继续关闭？',
-        okText: '继续关闭',
-        cancelText: '取消',
-        onOk: () => {
-          setAutoMapping(false);
-        },
-        onCancel: () => {
-          // 保持开启状态
-          setAutoMapping(true);
-        }
-      });
-      return;
+    if (v) {
+      setAutoMapping(true);
+      runAutoMap();
     }
-    setAutoMapping(true);
-    runAutoMap();
+    // 关闭时由 Popconfirm 处理，这里不做任何操作
   };
 
   // const mappingsState = Form.useFormState('mappings', form) || {};
@@ -545,10 +577,26 @@ export default function Step2FieldMapping({
             <span className="text-[14px] text-[rgb(var(--primary-6))]">
               自动映射
             </span>
-            <Switch
-              checked={autoMapping}
-              onChange={(v) => handleAutoMapping(v)}
-            />
+            {autoMapping ? (
+              <Popconfirm
+                position="tr"
+                title="确认关闭自动映射？"
+                content="关闭后将不再自动根据来源字段进行映射，是否关闭？"
+                okText="确定"
+                cancelText="取消"
+                onOk={handleCloseAutoMapping}
+              >
+                <Switch
+                  checked={autoMapping}
+                  onChange={(v) => handleAutoMapping(v)}
+                />
+              </Popconfirm>
+            ) : (
+              <Switch
+                checked={autoMapping}
+                onChange={(v) => handleAutoMapping(v)}
+              />
+            )}
           </div>
         </div>
 
@@ -562,6 +610,7 @@ export default function Step2FieldMapping({
         >
           <Table
             columns={tableColumns}
+            scroll={{ x: 'max-content' }}
             className="mt-[16px] w-full"
             data={mappings}
             rowKey="id"

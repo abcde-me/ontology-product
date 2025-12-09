@@ -22,14 +22,14 @@ const TextElementCard: React.FC<TextElementCardProps> = ({
 }) => {
   // 从 store 获取更新方法
   const updateElement = useSegmentDetailStore((state) => state.updateElement);
-
+  console.log('element', element);
   return (
-    <div className="mb-6 rounded-lg border border-gray-200 bg-white p-4">
+    <div className="mb-6 rounded-lg border border-gray-200 bg-white p-3">
       <div className="mb-3 flex items-center">
-        <span className="inline-flex items-center rounded bg-blue-50 px-2 py-1 text-xs font-medium text-blue-600">
+        <span className="inline-flex h-6 w-9 items-center justify-center rounded bg-blue-50 text-sm font-medium text-blue-600">
           文本
         </span>
-        <span className="ml-2 text-sm font-semibold text-gray-600">
+        <span className="ml-2 text-sm font-semibold text-[#0F172A]">
           元素ID: {element.id}
         </span>
       </div>
@@ -44,12 +44,12 @@ const TextElementCard: React.FC<TextElementCardProps> = ({
           placeholder="请输入文本内容"
         />
       ) : (
-        <div className="mb-3 rounded py-3 text-[14px] leading-6 text-gray-900">
+        <div className="rounded text-[14px] leading-6 text-gray-900">
           {element.content}
         </div>
       )}
 
-      {(element.positionType ||
+      {/* {(element.positionType ||
         element.positionInfo ||
         (element as any).pageId) && (
         <div className="flex items-center gap-6 text-sm">
@@ -72,7 +72,7 @@ const TextElementCard: React.FC<TextElementCardProps> = ({
             </span>
           )}
         </div>
-      )}
+      )} */}
 
       {/* <ElementEnhancedInfo element={element} isEditing={isEditing} /> */}
     </div>

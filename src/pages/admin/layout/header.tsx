@@ -23,7 +23,7 @@ import { usePathChange, usePermission } from '@/hooks';
 import { IconQuestionCircle, IconUser } from '@arco-design/web-react/icon';
 import { useUserInfo, useUserInfoStore } from '@/store/userInfoStore';
 import { handlePathName } from '@/hooks/use-path-change';
-import { logout } from '@/utils/env';
+import { logout, openNewPage } from '@/utils/env';
 import { GetProjOrg } from '@/api/modules/project';
 import { isSameArray } from '@/utils/array';
 
@@ -139,11 +139,8 @@ export default function Header({
     setProjectId(value);
   };
 
-  const goHelp = async () => {
-    // const res = await getDocContent('file-ea3d6713-147b-4b33-8488-59ddb9be4a0a');
-    // const blob = new Blob([res], { type: 'application/pdf' });
-    // const docURL = URL.createObjectURL(blob);
-    // window.open(docURL, '_blank');
+  const goHelp = () => {
+    openNewPage('/modaforge/assets/多模态数据治理平台 - 用户手册.pdf');
   };
 
   return (

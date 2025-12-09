@@ -116,6 +116,10 @@ export default function MetaData() {
         setTableData(data.records || []);
         setSearchFields(data.fields || []);
         setTotal(data.total || 0);
+      } else {
+        Message.error(res?.message ?? '获取元数据列表失败');
+        setTableData([]);
+        setTotal(0);
       }
     } catch (error) {
       console.error('获取元数据列表失败:', error);
@@ -171,7 +175,15 @@ export default function MetaData() {
           <EllipsisPopover
             value={displayValue}
             preferTypography
-            ellipsis={{ rows: 1 }}
+            ellipsis={{
+              rows: 1,
+              showTooltip: {
+                type: 'popover',
+                props: {
+                  position: 'top'
+                }
+              }
+            }}
           />
         );
       }
@@ -259,11 +271,11 @@ export default function MetaData() {
         {/* 标题和刷新按钮 */}
         <div
           className={classNames(
-            'mb-[12px] mt-[12px] flex items-center justify-between',
+            'mb-[12px] flex items-center justify-between',
             styles['header-container']
           )}
         >
-          <div className="text-[16px] font-bold">数据湖目录({total})</div>
+          <div className="text-[16px] font-bold">数据列表({total})</div>
           <Tooltip content="刷新">
             <Button
               type="outline"
