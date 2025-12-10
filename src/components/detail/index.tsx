@@ -1503,7 +1503,10 @@ const DatasetDetail = (props: {
               </span>
             </Breadcrumb.Item>
             <Breadcrumb.Item>
-              {datasetDetail?.name || '数据集详情'}
+              <EllipsisPopover
+                className="max-w-xl"
+                value={datasetDetail?.name || '数据集详情'}
+              />
               <span className="ml-[8px]">
                 {renderStatusTag(
                   datasetDetail?.status as string,
