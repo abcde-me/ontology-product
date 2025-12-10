@@ -114,11 +114,9 @@ const SegmentMarkdown: React.FC<SegmentMarkdownProps> = ({
           {...props}
           className="my-2 cursor-pointer rounded-lg shadow-md transition-all hover:shadow-lg"
           style={{
-            width: '200px',
-            height: '150px',
-            objectFit: 'cover',
-            display: 'block',
-            maxWidth: '100%'
+            maxWidth: '100%',
+            height: 'auto',
+            display: 'block'
           }}
           onClick={(e) => {
             e.stopPropagation();
