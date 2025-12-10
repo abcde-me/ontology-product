@@ -18,7 +18,7 @@ import {
   Tooltip
 } from '@arco-design/web-react';
 import { IconDelete, IconEdit } from '@arco-design/web-react/icon';
-import { useHistory } from 'react-router-dom';
+import { useHistory, useLocation } from 'react-router-dom';
 import noDataElement from '@/components/no-data';
 import DataAssetTableList from '../../components/DataAssetTableList';
 import DataAssetTableCard from '../../components/DataAssetTableCard';
@@ -66,14 +66,7 @@ export default function DataAssetList() {
   const [dataAssetList, setDataAssetList] = useState<
     ListDataAssetDataRes['records']
   >([]);
-  const [viewType, setViewType] = useState<ViewType>(ViewType.CARD);
   const [searchFields, setSearchFields] = useState<ColumnField[]>([]);
-  const [assetTags, setAssetTags] = useState<
-    Array<{ label: string; value: any }>
-  >([]);
-  const [assetSources, setAssetSources] = useState<
-    Array<{ label: string; value: any }>
-  >([]);
   const [columnModalOpen, setColumnModalOpen] = useState(false);
   const [hasMapping, setHasMapping] = useState<boolean | null>(null); // null表示加载中
   const [tableColumns, setTableColumns] = useState<any[]>([]); // 表格列配置
@@ -83,7 +76,6 @@ export default function DataAssetList() {
   const [loading, setLoading] = useState(false);
   // 分页状态
   const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(12); // 默认卡片视图，每页12个
   const [total, setTotal] = useState(0);
   const [searchParams, setSearchParams] = useState({
     commonSearch: '',
@@ -105,6 +97,53 @@ export default function DataAssetList() {
     []
   );
   const history = useHistory();
+  const location = useLocation();
+  const isUpdatingViewTypeRef = useRef(false);
+
+  // 从 URL 读取 viewType，如果没有则使用默认值
+  const getViewTypeFromUrl = useCallback((): ViewType => {
+    const searchParams = new URLSearchParams(location.search);
+    const viewTypeParam = searchParams.get('viewType');
+    if (viewTypeParam === ViewType.CARD || viewTypeParam === ViewType.LIST) {
+      return viewTypeParam;
+    }
+    return ViewType.CARD; // 默认值
+  }, [location.search]);
+
+  const [viewType, setViewType] = useState<ViewType>(() =>
+    getViewTypeFromUrl()
+  );
+  const [pageSize, setPageSize] = useState(
+    viewType === ViewType.LIST ? 10 : 12
+  );
+
+  // 初始化时，如果 URL 中没有 viewType 参数，设置默认值
+  useEffect(() => {
+    const searchParams = new URLSearchParams(location.search);
+    if (!searchParams.get('viewType')) {
+      searchParams.set('viewType', ViewType.CARD);
+      const newSearch = searchParams.toString();
+      history.replace(`${location.pathname}?${newSearch}`);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // 只在组件挂载时执行一次
+
+  // 监听 URL 变化，同步 viewType（只在外部 URL 变化时更新，避免循环）
+  useEffect(() => {
+    if (isUpdatingViewTypeRef.current) {
+      isUpdatingViewTypeRef.current = false;
+      return;
+    }
+
+    const urlViewType = getViewTypeFromUrl();
+    if (urlViewType !== viewType) {
+      setViewType(urlViewType);
+      // 同步更新 pageSize
+      const newPageSize = urlViewType === ViewType.LIST ? 10 : 12;
+      setPageSize(newPageSize);
+    }
+  }, [location.search, getViewTypeFromUrl, viewType]);
+
   // 吸顶状态
   const [isSticky, setIsSticky] = useState(false);
   const headerRef = useRef<HTMLDivElement>(null);
@@ -521,6 +560,17 @@ export default function DataAssetList() {
   // 切换视图类型
   const handleViewTypeChange = (type: ViewType) => {
     setViewType(type);
+
+    // 更新 URL 参数
+    isUpdatingViewTypeRef.current = true;
+    const searchParams = new URLSearchParams(location.search);
+    searchParams.set('viewType', type);
+    const newSearch = searchParams.toString();
+    const newUrl = newSearch
+      ? `${location.pathname}?${newSearch}`
+      : location.pathname;
+    history.replace(newUrl);
+
     // 切换视图时，重置分页并重新加载数据，清空选中状态
     const newPageSize = type === ViewType.LIST ? 10 : 12;
     setPageSize(newPageSize);
