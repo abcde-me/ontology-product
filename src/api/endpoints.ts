@@ -126,6 +126,7 @@ export const ModaForgeResourceEndpoints = {
   Logout: PrefixUserSpace + '/Logout',
   GetUser: PrefixUserSpace + '/GetUser',
   GetProjOrg: PrefixUserSpace + '/GetProjOrg',
+  UpdateMyselfInformation: PrefixUserSpace + '/UpdateMyselfInformation',
 
   // 引擎相关
   // 获取文件二进制数据 (参数通过 query string 传递: bucket, path)

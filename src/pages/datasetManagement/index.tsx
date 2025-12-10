@@ -406,10 +406,10 @@ const columns = (
     render: (status: string, record: Dataset) => {
       return (
         <div style={{ display: 'flex', alignItems: 'center' }}>
-          <div>{getFileIcon(record.storage_type ?? '-')}</div>
-          <span className="ml-[4px]">
-            {getFileTypeName(record.storage_type ?? '-')}
-          </span>
+          {/* <div>{getFileIcon(record.storage_type ?? '-')}</div> */}
+          {/* <span className="ml-[4px]"> */}
+          {getFileTypeName(record.storage_type ?? '-')}
+          {/* </span> */}
         </div>
       );
     }
@@ -913,7 +913,7 @@ const DatasetManagement: React.FC = () => {
 
   const [selectedSceneTab, setSelectedSceneTab] = React.useState<
     (number | string)[]
-  >([]); //选中的场景分类tab
+  >(sceneName ? [Number(sceneName)] : []); //选中的场景分类tab
 
   // 来源过滤相关状态
   const [selectedSourceFilters, setSelectedSourceFilters] = React.useState<
@@ -1297,12 +1297,11 @@ const DatasetManagement: React.FC = () => {
       search: actualSearch,
       search_field: actualSearchField
     };
-    console.log(selectedSceneFilters, 'selectedSceneFilters');
     // 添加场景分类过滤参数
     if (selectedSceneFilters.length > 0) {
       params.scene_ids = selectedSceneFilters;
     } else if (selectedSceneTab.length > 0) {
-      params.scene_ids = selectedSceneTab;
+      params.scene_ids = selectedSceneTab.filter((item) => item !== 0);
     }
 
     // 添加来源过滤参数
@@ -2054,7 +2053,7 @@ const DatasetManagement: React.FC = () => {
             wrapperCol={{ span: 21 }}
           >
             <Select
-              placeholder="请选择标签"
+              placeholder="请选择场景"
               renderFormat={(option) => {
                 return option?.child?.props?.children?.props?.children[0]?.props
                   ?.children;

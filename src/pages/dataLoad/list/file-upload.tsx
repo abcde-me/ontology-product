@@ -205,7 +205,6 @@ const Uploads: React.FC<UploadsProps> = ({
                 视频：MP4, MOV, MKV
               </>
             }
-            style={{ padding: '12px' }}
           >
             <IconQuestionCircle style={{ marginLeft: '1px' }} />
           </Tooltip>

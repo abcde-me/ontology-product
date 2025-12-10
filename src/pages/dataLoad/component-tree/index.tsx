@@ -1,6 +1,12 @@
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { Input, Tooltip, Message, TreeSelect } from '@arco-design/web-react';
-import { IconCaretDown, IconPlus } from '@arco-design/web-react/icon';
+import {
+  IconCaretDown,
+  IconPlus,
+  IconStorage,
+  IconArchive
+} from '@arco-design/web-react/icon';
+import YuanShujuIcon from '@/assets/yuanshuju-icon.svg';
 import {
   NodeProps,
   NodeInstance
@@ -562,13 +568,49 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
       }
       return '';
     };
+
+    // 判断是否有子节点：优先使用 hasChildren 属性，否则检查 children 数组
+    const hasChildren =
+      dataRef &&
+      (dataRef.hasChildren === true ||
+        (Array.isArray(dataRef.children) && dataRef.children.length > 0));
+
+    // 动态图标：有子节点不显示图标（使用默认文件夹图标），否则根据类型显示对应图标
+    let icon: React.ReactNode = null;
+    if (!dataRef?.showInput) {
+      const typeName = dataRef?.type_name;
+      if (
+        typeName === NODE_TYPES.VOLUME ||
+        typeName === NODE_TYPES.VOLUME_ITEM
+      ) {
+        icon = (
+          <IconStorage style={{ marginRight: 8, width: 18, height: 18 }} />
+        );
+      } else if (typeName === NODE_TYPES.METADATA) {
+        icon = (
+          <YuanShujuIcon style={{ marginRight: 4, width: 24, height: 24 }} />
+        );
+      } else if (
+        typeName === NODE_TYPES.DB ||
+        typeName === NODE_TYPES.DB_ITEM ||
+        typeName === NODE_TYPES.DATASOURCE_ITEM
+      ) {
+        icon = (
+          <IconArchive style={{ marginRight: 8, width: 18, height: 18 }} />
+        );
+      }
+    }
+
     return (
       <Tooltip color="white" content={getTooltipContent(dataRef, title)}>
-        <div
-          className={`overflow-hidden  text-ellipsis whitespace-nowrap ${dataRef?.isLastLeaf ? 'last-leaf-text' : ''} ${dataRef?.type === CatalogTypeEnum.table ? 'no-operation' : ''} ${dataRef?.type === CatalogTypeEnum.catalog ? 'catalog-title-text' : ''}`}
-          // style={{ maxWidth: '150px' }}
-        >
-          {TitleText}
+        <div className="flex items-center">
+          {icon}
+          <div
+            className={`overflow-hidden  text-ellipsis whitespace-nowrap ${dataRef?.isLastLeaf ? 'last-leaf-text' : ''} ${dataRef?.type === CatalogTypeEnum.table ? 'no-operation' : ''} ${dataRef?.type === CatalogTypeEnum.catalog ? 'catalog-title-text' : ''}`}
+            // style={{ maxWidth: '150px' }}
+          >
+            {TitleText}
+          </div>
         </div>
       </Tooltip>
     );

@@ -29,7 +29,7 @@ import {
   ListDevelopSystemParamParams,
   ListDevelopSystemParamParamsData,
   UpdateDevelopSystemParamParams,
-  getDevelopStandardsData,
+  // getDevelopStandardsData,
   CopyDevelopScriptParams,
   DeleteDevelopScriptParams,
   SearchDevelopScriptLogByKeyParams,
@@ -314,9 +314,7 @@ export async function listDevelopSystemParam(
     .do();
 }
 // 开发规范查看
-export async function getDevelopStandards(
-  params
-): Promise<ApiRes<getDevelopStandardsData>> {
+export async function getDevelopStandards(params): Promise<ApiRes<string>> {
   return await UAPI.RES.GetDevelopStandardsApi({}).post().inRegion().do();
 }
 // 开发规范保存
