@@ -28,18 +28,26 @@ export enum BlockEnum {
   Video = 'video',
   Cleaning = 'cleaning',
   Enhancement = 'enhancement',
-  Customize = 'scripting'
+  Customize = 'scripting',
+  // sql开发
+  SQL = 'spark_sql',
+  // 数据推送
+  Seatunnel = 'seatunnel',
+  // 外部前置任务
+  Dependent = 'dependent'
 }
 
 export enum ControlMode {
   Pointer = 'pointer',
   Hand = 'hand'
 }
+
 export enum ErrorHandleMode {
   Terminated = 'terminated',
   ContinueOnError = 'continue-on-error',
   RemoveAbnormalOutput = 'remove-abnormal-output'
 }
+
 export type Branch = {
   id: string;
   name: string;
@@ -67,6 +75,7 @@ export type CommonNodeType<T = {}> = {
   isInIteration?: boolean;
   iteration_id?: string;
   selected?: boolean;
+  flow_type?: string;
   title: string;
   desc: string;
   type: BlockEnum;

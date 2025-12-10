@@ -5,7 +5,8 @@ import {
   Tag,
   Select,
   Alert,
-  Divider
+  Divider,
+  Radio
 } from '@arco-design/web-react';
 import type { SelectHandle } from '@arco-design/web-react/es/Select/interface';
 import Styles from './index.module.css';
@@ -26,6 +27,7 @@ import {
 } from './constants';
 import { CycleText, CycleValues, TimeType } from './types';
 import { FormValidateFn } from '@arco-design/web-react/es/Form/interface';
+import { FORM_RADIO_SCHEMA } from '@/pages/workflowList/types';
 // 选择器的实例
 const Option = Select.Option;
 
@@ -44,6 +46,7 @@ interface CycleLoadingFormRef {
 interface CycleLoadingFormProps {
   options: CycleText;
   onOptionsChange: (options: CycleText) => void;
+  extraNode?: React.ReactNode;
 }
 
 const initFrequencyData = (options: CycleText) => {
@@ -139,7 +142,7 @@ const formatOptions = (frequencyData: CycleValues, formVals) => {
 };
 
 const CycleLoadingForm = forwardRef<CycleLoadingFormRef, CycleLoadingFormProps>(
-  ({ options, onOptionsChange }, ref) => {
+  ({ options, onOptionsChange, extraNode }, ref) => {
     const [form] = Form.useForm();
     const [popupVisible, setPopupVisible] = useState(false);
     // 频率选择器选择的数据
@@ -250,6 +253,7 @@ const CycleLoadingForm = forwardRef<CycleLoadingFormRef, CycleLoadingFormProps>(
         onChange={handleValuesChange}
       >
         <div className={Styles.cycleLoadingBox}>
+          {!!extraNode && extraNode}
           <div style={{ display: 'flex' }}>
             <Form.Item
               label="周期设置："

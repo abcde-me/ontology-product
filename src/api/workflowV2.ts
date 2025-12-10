@@ -1,5 +1,10 @@
 import UAPI from '@/api';
 import { getModels, getModelsGroupByProvider, getProviders } from './modelV2';
+import {
+  SQLScriptItem,
+  SQLVersion
+} from '@/pages/workflowConfig/workflow/nodes/sql-node/types';
+import React from 'react';
 
 export async function getWorkflowDraft(params: any = {}) {
   const searchParams = new URLSearchParams(location.search);
@@ -205,4 +210,45 @@ export async function getDifyProversList() {
   }));
   console.log('getDifyProversList', result);
   return result;
+}
+
+// SQL列表
+export async function getSQLListInSQLNode() {
+  const res = await UAPI.RES.getSQLListInSQLNode({})
+    .post({
+      page: 0,
+      page_size: 999,
+      is_release: 1
+    })
+    .inRegion()
+    .do();
+  const list = (res.data?.items || []) as SQLScriptItem[];
+  return list
+    .filter(({ process_name }) => !process_name)
+    .map(({ script_name, script_id, ...other }) => ({
+      ...other,
+      label: script_name,
+      value: script_id
+    }));
+}
+
+// SQL版本列表
+export async function getSQLVersionInSQLNode(script_id: React.Key) {
+  const res = await UAPI.RES.getSQLVersionInSQLNode({})
+    .post({
+      page: 0,
+      page_size: 999,
+      script_id
+    })
+    .inRegion()
+    .do();
+  return ((res.data?.items || []) as SQLVersion[]).map(
+    ({ version, version_name, ...other }) => ({
+      ...other,
+      value: version,
+      version_name,
+      label: [version_name, other.script_desc].join('_'),
+      isLeaf: true
+    })
+  );
 }

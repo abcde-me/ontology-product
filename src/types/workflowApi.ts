@@ -1,6 +1,9 @@
+import React from 'react';
+
 /** 新建工作流 */
 export interface CreateWorkflowParams {
   workflow_name: string;
+  workflow_type?: string;
 }
 
 /** 新建工作流 */
@@ -12,7 +15,15 @@ export interface CreateWorkflowRes {
 /** 编辑工作流 */
 export interface EditWorkflowParams {
   workflow_name: string;
-  workflow_uuid: string;
+  workflow_uuid?: React.Key;
+  description?: string;
+  params?: Record<string, any>;
+  // 运行策略
+  execution_type?: string;
+  // 失败策略
+  failure_strategy?: string;
+  // 任务优先级
+  task_priority?: string;
 }
 
 export enum IsOnline {
@@ -31,7 +42,11 @@ export interface WorkflowDetailParams {
 }
 
 /** 获取工作流详情 */
-export interface WorkflowDetailRes {
+export interface WorkflowDetailRes
+  extends Pick<
+    EditWorkflowParams,
+    'execution_type' | 'failure_strategy' | 'task_priority'
+  > {
   /** 海豚调度生成的id */
   ds_workflow_id: number;
   /** 服务端工作流唯一标识 */
@@ -40,6 +55,12 @@ export interface WorkflowDetailRes {
   workflow_version: string;
   /** 工作流名称 */
   workflow_name: string;
+  /**
+   * 工作流描述
+   */
+  description?: string;
+  /** 工作流参数 */
+  params?: Record<string, any>;
   /** 源数据目录 */
   source_path: string;
   /** 目标数据目录 */
@@ -88,6 +109,7 @@ export interface WorkflowOperationParams {
   ds_workflow_id: number;
   op: WorkflowOperation;
   cycle_text?: CycleText;
+  start_node?: string;
 }
 
 /** 工作流操作 */
