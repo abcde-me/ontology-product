@@ -16,6 +16,7 @@ import {
   ListDataAssetSourceResItem
 } from '@/types/dataAssetApi';
 import { RESERVED_FIELD_ENS, SYSTEM_FIELDS } from '../../utils/const';
+import { ViewType } from '../ViewToggle';
 
 type DisplaySortable = {
   nameEn?: string;
@@ -339,7 +340,9 @@ export default function DataAssetFormContainer({
 
   // 取消
   const handleCancel = useCallback(() => {
-    history.push('/tenant/compute/modaforge/dataAsset/list');
+    history.push(
+      `/tenant/compute/modaforge/dataAsset/list?viewType=${ViewType.LIST}`
+    );
   }, [history]);
 
   // 完成

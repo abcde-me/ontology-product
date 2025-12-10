@@ -42,6 +42,9 @@ export default function DataAssetTableCard({
     null
   );
   const [tagValues, setTagValues] = useState<Record<string, TagValue[]>>({});
+  const [originalTagValues, setOriginalTagValues] = useState<
+    Record<string, TagValue[]>
+  >({});
   const [selectVisible, setSelectVisible] = useState<Record<string, boolean>>(
     {}
   );
@@ -81,21 +84,6 @@ export default function DataAssetTableCard({
     );
   };
 
-  // 获取标签列表
-  // useEffect(() => {
-  //   getTagList()
-  //     .then((res) => {
-  //       if (res.status === 200) {
-  //         setTagList(res.data ?? []);
-  //       } else {
-  //         console.error('获取标签列表失败:', res.message);
-  //       }
-  //     })
-  //     .catch((err) => {
-  //       console.error('获取标签列表失败:', err);
-  //     });
-  // }, []);
-
   // 初始化标签值
   useEffect(() => {
     const initialTagValues: Record<string, TagValue[]> = {};
@@ -106,10 +94,8 @@ export default function DataAssetTableCard({
     });
 
     setTagValues(initialTagValues);
+    setOriginalTagValues(initialTagValues);
   }, [dataAssetList]);
-
-  // 直接使用传入的数据，不再进行客户端分页
-  // const paginatedList = dataAssetList;
 
   // 处理标签变化
   const handleTagChange = (recordId: string, values: TagValue[]) => {
@@ -120,17 +106,46 @@ export default function DataAssetTableCard({
   };
 
   const updateRecordTags = async (recordId: string, values: TagValue[]) => {
-    const tags = tagValues[recordId] ?? [];
+    try {
+      const currentTags = tagValues[recordId] ?? [];
+      const originalTags = originalTagValues[recordId] ?? [];
 
-    const res = await editDataAssetDataTagsBatch({
-      Ids: [recordId],
-      tags: tags.map((item) => ({ id: item.id, value: item.tagValue }))
-    });
+      // 比较标签是否有变化
+      const hasChanged =
+        JSON.stringify(
+          currentTags
+            .map((item) => ({ id: item.id, value: item.tagValue }))
+            .sort((a, b) => a.id.localeCompare(b.id))
+        ) !==
+        JSON.stringify(
+          originalTags
+            .map((item) => ({ id: item.id, value: item.tagValue }))
+            .sort((a, b) => a.id.localeCompare(b.id))
+        );
 
-    if (res.code === '' && res.status === 200) {
-      Message.success('标签更新成功');
-    } else {
-      Message.error(res.message ?? '标签更新失败');
+      // 如果标签没有变化，不请求接口
+      if (!hasChanged) {
+        return;
+      }
+
+      const res = await editDataAssetDataTagsBatch({
+        Ids: [recordId],
+        tags: currentTags.map((item) => ({ id: item.id, value: item.tagValue }))
+      });
+
+      if (res.code === '' && res.status === 200) {
+        Message.success('标签更新成功');
+        // 更新原始标签值
+        setOriginalTagValues((prev) => ({
+          ...prev,
+          [recordId]: currentTags
+        }));
+      } else {
+        Message.error(res.message ?? '标签更新失败');
+      }
+    } catch (error) {
+      console.error('标签更新失败:', error);
+      Message.error('标签更新失败');
     }
   };
 
