@@ -1,6 +1,12 @@
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { Input, Tooltip, Message, TreeSelect } from '@arco-design/web-react';
-import { IconCaretDown, IconPlus } from '@arco-design/web-react/icon';
+import {
+  IconCaretDown,
+  IconPlus,
+  IconStorage,
+  IconArchive
+} from '@arco-design/web-react/icon';
+import YuanShujuIcon from '@/assets/yuanshuju-icon.svg';
 import {
   NodeProps,
   NodeInstance
@@ -577,6 +583,39 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
   // 渲染树节点标题
   const renderTitle = (props: NodeProps) => {
     const { dataRef } = props;
+
+    // 判断是否有子节点：优先使用 hasChildren 属性，否则检查 children 数组
+    const hasChildren =
+      dataRef &&
+      (dataRef.hasChildren === true ||
+        (Array.isArray(dataRef.children) && dataRef.children.length > 0));
+
+    // 动态图标：有子节点不显示图标（使用默认文件夹图标），否则根据类型显示对应图标
+    let icon: React.ReactNode = null;
+    if (!hasChildren && !dataRef?.showInput) {
+      const typeName = dataRef?.type_name;
+      if (
+        typeName === NODE_TYPES.VOLUME ||
+        typeName === NODE_TYPES.VOLUME_ITEM
+      ) {
+        icon = (
+          <IconStorage style={{ marginRight: 6, width: 18, height: 18 }} />
+        );
+      } else if (typeName === NODE_TYPES.METADATA) {
+        icon = (
+          <YuanShujuIcon style={{ marginRight: 4, width: 24, height: 24 }} />
+        );
+      } else if (
+        typeName === NODE_TYPES.DB ||
+        typeName === NODE_TYPES.DB_ITEM ||
+        typeName === NODE_TYPES.DATASOURCE_ITEM
+      ) {
+        icon = (
+          <IconArchive style={{ marginRight: 6, width: 18, height: 18 }} />
+        );
+      }
+    }
+
     return (
       <div
         className="flex items-center overflow-hidden"
@@ -614,7 +653,10 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
             className={`h-8 px-[6px] py-[2px] focus:border-[rgb(var(--primary-6))] ${dataRef?.isLastLeaf ? 'last-leaf-input' : ''}`}
           />
         ) : (
-          renderTitleText(props)
+          <div className="flex items-center">
+            {icon}
+            {renderTitleText(props)}
+          </div>
         )}
       </div>
     );
