@@ -75,12 +75,14 @@ const ModalToolDetail: React.FC<ModalToolDetailProps> = ({
               <h4>输入输出：</h4>
               <div className="io-container">
                 <div className="io-item">
-                  <span className="io-label">输入:</span>
-                  <span className="io-value">{toolDetailData.usage.input}</span>
+                  <span className="io-label flex-shrink-0">输入:</span>
+                  <span className="io-value whitespace-pre-wrap break-words">
+                    {toolDetailData.usage.input}
+                  </span>
                 </div>
                 <div className="io-item">
-                  <span className="io-label">输出:</span>
-                  <span className="io-value">
+                  <span className="io-label flex-shrink-0">输出:</span>
+                  <span className="io-value whitespace-pre-wrap break-words">
                     {toolDetailData.usage.output}
                   </span>
                 </div>
