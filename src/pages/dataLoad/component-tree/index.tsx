@@ -568,21 +568,6 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
       }
       return '';
     };
-    return (
-      <Tooltip color="white" content={getTooltipContent(dataRef, title)}>
-        <div
-          className={`overflow-hidden  text-ellipsis whitespace-nowrap ${dataRef?.isLastLeaf ? 'last-leaf-text' : ''} ${dataRef?.type === CatalogTypeEnum.table ? 'no-operation' : ''} ${dataRef?.type === CatalogTypeEnum.catalog ? 'catalog-title-text' : ''}`}
-          // style={{ maxWidth: '150px' }}
-        >
-          {TitleText}
-        </div>
-      </Tooltip>
-    );
-  };
-
-  // 渲染树节点标题
-  const renderTitle = (props: NodeProps) => {
-    const { dataRef } = props;
 
     // 判断是否有子节点：优先使用 hasChildren 属性，否则检查 children 数组
     const hasChildren =
@@ -592,7 +577,7 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
 
     // 动态图标：有子节点不显示图标（使用默认文件夹图标），否则根据类型显示对应图标
     let icon: React.ReactNode = null;
-    if (!hasChildren && !dataRef?.showInput) {
+    if (!dataRef?.showInput) {
       const typeName = dataRef?.type_name;
       if (
         typeName === NODE_TYPES.VOLUME ||
@@ -616,6 +601,24 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
       }
     }
 
+    return (
+      <Tooltip color="white" content={getTooltipContent(dataRef, title)}>
+        <div className="flex items-center">
+          {icon}
+          <div
+            className={`overflow-hidden  text-ellipsis whitespace-nowrap ${dataRef?.isLastLeaf ? 'last-leaf-text' : ''} ${dataRef?.type === CatalogTypeEnum.table ? 'no-operation' : ''} ${dataRef?.type === CatalogTypeEnum.catalog ? 'catalog-title-text' : ''}`}
+            // style={{ maxWidth: '150px' }}
+          >
+            {TitleText}
+          </div>
+        </div>
+      </Tooltip>
+    );
+  };
+
+  // 渲染树节点标题
+  const renderTitle = (props: NodeProps) => {
+    const { dataRef } = props;
     return (
       <div
         className="flex items-center overflow-hidden"
@@ -653,10 +656,7 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
             className={`h-8 px-[6px] py-[2px] focus:border-[rgb(var(--primary-6))] ${dataRef?.isLastLeaf ? 'last-leaf-input' : ''}`}
           />
         ) : (
-          <div className="flex items-center">
-            {icon}
-            {renderTitleText(props)}
-          </div>
+          renderTitleText(props)
         )}
       </div>
     );
