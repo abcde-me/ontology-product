@@ -55,6 +55,7 @@ import SpecificationsModal from './SpecificationsModal';
 import { ScriptParam } from '@/types/sqlDevelopApi';
 import ReleaseIcon from '../../assets/release-icon.svg';
 import { listDevelopSystemParam } from '@/api/sql';
+import dayjs from 'dayjs';
 
 interface NotebookWorkspaceProps {
   content: string;
@@ -407,20 +408,7 @@ const EditorWorkspaceContent: React.FC<{
 
     // 格式化时间显示
     const formatTime = (timeStr?: string) => {
-      if (!timeStr) return '未保存';
-      try {
-        const date = new Date(timeStr);
-        return date.toLocaleString('zh-CN', {
-          year: 'numeric',
-          month: '2-digit',
-          day: '2-digit',
-          hour: '2-digit',
-          minute: '2-digit',
-          second: '2-digit'
-        });
-      } catch {
-        return timeStr;
-      }
+      return dayjs(timeStr).format('YYYY-MM-DD HH:mm:ss');
     };
 
     // 根据状态判断是否可编辑
