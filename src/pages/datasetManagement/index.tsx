@@ -406,10 +406,10 @@ const columns = (
     render: (status: string, record: Dataset) => {
       return (
         <div style={{ display: 'flex', alignItems: 'center' }}>
-          <div>{getFileIcon(record.storage_type ?? '-')}</div>
-          <span className="ml-[4px]">
-            {getFileTypeName(record.storage_type ?? '-')}
-          </span>
+          {/* <div>{getFileIcon(record.storage_type ?? '-')}</div> */}
+          {/* <span className="ml-[4px]"> */}
+          {getFileTypeName(record.storage_type ?? '-')}
+          {/* </span> */}
         </div>
       );
     }
@@ -2053,7 +2053,7 @@ const DatasetManagement: React.FC = () => {
             wrapperCol={{ span: 21 }}
           >
             <Select
-              placeholder="请选择标签"
+              placeholder="请选择场景"
               renderFormat={(option) => {
                 return option?.child?.props?.children?.props?.children[0]?.props
                   ?.children;
