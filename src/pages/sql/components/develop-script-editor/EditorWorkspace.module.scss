@@ -5,7 +5,7 @@
   flex-direction: column;
   background-color: #f5f5f5;
 
-  :global(.arco-btn-text):not(:global(.arco-btn-disabled)) {
+  :global(.arco-btn-text) {
     color: #0f172a;
     padding: 0px;
   }
@@ -156,7 +156,6 @@
   }
 
   .btn-save {
-    width: 80px;
     height: 24px;
   }
 }

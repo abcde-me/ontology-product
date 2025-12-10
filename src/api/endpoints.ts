@@ -447,6 +447,8 @@ export const ModaForgeResourceEndpoints = {
   DeleteDevelopScriptApi: PrefixAimdp + '/DeleteDevelopScript',
   // 锁定加工脚本
   LockDevelopScriptApi: PrefixAimdp + '/LockDevelopScript',
+  // 解锁加工脚本
+  UnlockDevelopScriptApi: PrefixAimdp + '/UnlockDevelopScript',
   // 获取加工脚本卡片内容
   ListDevelopScriptLogByKeyApi: PrefixAimdp + '/ListDevelopScriptLogByKey',
   // 内容卡片 - 删除卡片内容

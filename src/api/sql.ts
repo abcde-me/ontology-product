@@ -275,13 +275,6 @@ export async function deleteDevelopScript(id: number): Promise<ApiRes<{}>> {
     .inRegion()
     .do();
 }
-// 锁定开发脚本
-export async function lockDevelopScript(id: number): Promise<ApiRes<{}>> {
-  return await UAPI.RES.LockDevelopScriptApi({})
-    .post({ script_id: Number(id) })
-    .inRegion()
-    .do();
-}
 // 获取开发脚本卡片内容
 export async function listDevelopScriptLogByKeyApi(
   params
