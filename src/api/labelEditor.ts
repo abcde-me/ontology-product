@@ -60,11 +60,11 @@ export async function getLabels(requirementId: string) {
 
 // =================================== 质检任务API =======================================
 // 进入质检、获取质检任务信息（需求id、 taskid==）
-export async function getQualityControlTask(qs_id?: number) {
+export async function getQualityControlTask(qsId?: number) {
   const searchParams = new URLSearchParams(location.search);
-  const qsId = qs_id || searchParams.get('qs_id');
+  const qs_Id = qsId || searchParams.get('qsId');
   return await UAPI.RES.leGetQualityControlTask({})
-    .post({ qs_id: Number(qsId) })
+    .post({ qs_id: Number(qs_Id) })
     .inRegion()
     .do();
 }
