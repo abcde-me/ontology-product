@@ -599,7 +599,7 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
         typeName === NODE_TYPES.VOLUME_ITEM
       ) {
         icon = (
-          <IconStorage style={{ marginRight: 6, width: 18, height: 18 }} />
+          <IconStorage style={{ marginRight: 8, width: 18, height: 18 }} />
         );
       } else if (typeName === NODE_TYPES.METADATA) {
         icon = (
@@ -611,7 +611,7 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
         typeName === NODE_TYPES.DATASOURCE_ITEM
       ) {
         icon = (
-          <IconArchive style={{ marginRight: 6, width: 18, height: 18 }} />
+          <IconArchive style={{ marginRight: 8, width: 18, height: 18 }} />
         );
       }
     }
