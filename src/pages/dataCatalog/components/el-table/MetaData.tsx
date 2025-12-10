@@ -264,7 +264,7 @@ export default function MetaData() {
         className="flex w-full items-center justify-center"
         style={{ minHeight: 'calc(100vh - 200px)' }}
       >
-        <Spin size={32} />
+        <Spin size={32} tip={initialLoading ? '' : '数据载入中'} />
       </div>
     );
   }
