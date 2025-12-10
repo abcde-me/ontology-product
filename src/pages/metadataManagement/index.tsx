@@ -118,7 +118,7 @@ export default function MetadataManagement() {
   // 查看详情
   const viewDetail = (id) => {
     history.push(
-      `/tenant/compute/modaforge/metadataManagement/detail?id=${id}`
+      `/tenant/compute/modaforge/metadataManagement/detail?id=${id}&metadataType=${activeMetadataType}`
     );
   };
 
@@ -199,10 +199,10 @@ export default function MetadataManagement() {
               setActiveMetadataType(key);
             }}
           >
-            <MenuItem key="Iceberg">Iceberg</MenuItem>
-            <MenuItem key="Doris">Doris</MenuItem>
-            <MenuItem key="MinIO">MinIO</MenuItem>
-            <MenuItem key="Milvus">Milvus</MenuItem>
+            <MenuItem key="Iceberg">数据湖</MenuItem>
+            <MenuItem key="Doris">在线分析库</MenuItem>
+            <MenuItem key="MinIO">对象存储</MenuItem>
+            <MenuItem key="Milvus">向量数据库</MenuItem>
           </Menu>
         </div>
         <div className={styles['rightBox']}>
