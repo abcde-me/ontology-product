@@ -45,3 +45,33 @@ export const getDevelopScriptInfo = (
 ): Promise<ApiRes<GetDevelopScriptInfoResponse>> => {
   return UAPI.RES.getDevelopScriptInfoApi({}).post(params).inRegion().do();
 };
+
+// 锁定开发脚本
+export async function lockDevelopScript(id: number): Promise<ApiRes<{}>> {
+  // return Promise.resolve({
+  //   status: 200,
+  //   code: '0',
+  //   requestId: '',
+  //   message: 'success',
+  //   data: {}
+  // });
+  return await UAPI.RES.LockDevelopScriptApi({})
+    .post({ script_id: Number(id) })
+    .inRegion()
+    .do();
+}
+
+// 解锁开发脚本
+export async function unlockDevelopScript(id: number): Promise<ApiRes<{}>> {
+  // return Promise.resolve({
+  //   status: 200,
+  //   code: '0',
+  //   requestId: '',
+  //   message: 'success',
+  //   data: {}
+  // });
+  return await UAPI.RES.UnlockDevelopScriptApi({})
+    .post({ script_id: Number(id) })
+    .inRegion()
+    .do();
+}

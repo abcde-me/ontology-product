@@ -25,9 +25,10 @@ import ScriptModalTable from '../sctip-modal-table';
 import {
   deleteDevelopScript,
   getDevelopScriptList,
-  getDevelopScriptLogByScriptId,
-  lockDevelopScript
+  getDevelopScriptLogByScriptId
 } from '@/api/sql';
+import { lockDevelopScript } from '@/api/sql-develop';
+import { ScriptStatus, ScriptStatusName } from '@/types/sqlDevelopApi';
 
 interface ScriptTableProps {
   isAll: (type: boolean) => void;
@@ -44,18 +45,21 @@ const ScriptTable: React.FC<ScriptTableProps> = ({
   const [form] = Form.useForm();
   const Option = Select.Option;
   const { updateUrlState } = useUrlState();
+  // 筛选选项
+  // 注意：0（编辑中）和 1（编辑完成）在前端都显示为"未发版"
+  // 如果后端支持多值查询，可以传递 "0,1"；否则需要特殊处理
   const options = [
     {
-      value: 1,
-      label: '未发版'
+      value: ScriptStatus.EditCompleted, // 使用 1（编辑完成）作为"未发版"的代表值
+      label: ScriptStatusName.EditCompleted // '未发版'
     },
     {
-      value: 2,
-      label: '已发版'
+      value: ScriptStatus.Released, // 2
+      label: ScriptStatusName.Released // '已发版'
     },
     {
-      value: 3,
-      label: '调度中'
+      value: ScriptStatus.Scheduling, // 3
+      label: ScriptStatusName.Scheduling // '调度中'
     }
   ];
   const history = useHistory();
