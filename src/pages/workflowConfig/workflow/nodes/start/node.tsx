@@ -80,7 +80,7 @@ const Node: FC<NodeProps<StartNodeType>> = ({ id, data }) => {
     <div className={`wk-node-content`}>
       <div className={`input-section`}>
         <div className="input-header">
-          <span className="txt">数据源目录</span>
+          <span className="txt">数据目录</span>
         </div>
         <div className="input-list">
           {!!data_path_name && (

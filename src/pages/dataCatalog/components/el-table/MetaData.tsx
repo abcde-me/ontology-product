@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import {
   Table,
   Pagination,
@@ -39,6 +39,7 @@ export default function MetaData() {
   // 状态管理
   const [pollLoading, setPollLoading] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(true); // 首次加载状态
   const [tableData, setTableData] = useState<Record<string, any>[]>([]);
   const [searchFields, setSearchFields] = useState<Field[]>([]);
   const [total, setTotal] = useState(0);
@@ -46,6 +47,9 @@ export default function MetaData() {
   const [pageSize, setPageSize] = useState(10);
   const [fieldSearch, setFieldSearch] = useState<FieldSearchItem[]>([]);
   const [searchAreaResetKey, setSearchAreaResetKey] = useState(0);
+  const prevSelectedKeyRef = useRef<string | number | null | undefined>(
+    undefined
+  ); // 用于跟踪上一次的selectedKey
   const clearSearchConditions = () => {
     setFieldSearch([]);
     setCurrentPage(1);
@@ -95,10 +99,13 @@ export default function MetaData() {
   );
 
   // 获取列表数据
-  const loadData = async () => {
+  const loadData = async (isInitial = false) => {
     if (!selectedKey) return;
 
     setLoading(true);
+    if (isInitial) {
+      setInitialLoading(true);
+    }
 
     try {
       const res = await getMetaDataList({
@@ -125,6 +132,9 @@ export default function MetaData() {
       console.error('获取元数据列表失败:', error);
     } finally {
       setLoading(false);
+      if (isInitial) {
+        setInitialLoading(false);
+      }
     }
   };
 
@@ -134,7 +144,15 @@ export default function MetaData() {
       return;
     }
 
-    loadData();
+    // 判断是否是切换节点（selectedKey变化）
+    const isNodeChanged = prevSelectedKeyRef.current !== selectedKey;
+    if (isNodeChanged) {
+      setInitialLoading(true);
+      prevSelectedKeyRef.current = selectedKey;
+    }
+
+    // 如果是切换节点，显示全局loading；否则只显示表格loading
+    loadData(isNodeChanged);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentPage, pageSize, selectedKey, selectedParentId, fieldSearch]);
 
@@ -239,13 +257,14 @@ export default function MetaData() {
     clearSearchConditions();
   };
 
-  if (pollLoading) {
+  // 显示全局loading（轮询loading或初始loading）
+  if (pollLoading || initialLoading) {
     return (
       <div
         className="flex w-full items-center justify-center"
         style={{ minHeight: 'calc(100vh - 200px)' }}
       >
-        <Spin size={32} tip="数据载入中" />
+        <Spin size={32} />
       </div>
     );
   }
