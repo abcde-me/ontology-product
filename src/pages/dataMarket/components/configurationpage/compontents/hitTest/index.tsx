@@ -348,7 +348,8 @@ function HitTest(props: { datasetName: string }) {
             pagination={{
               current: pagination.page,
               pageSize: pagination.limit,
-              total: pagination.total
+              total: pagination.total,
+              showJumper: false
             }}
             onChange={onChangeTable}
             columns={recordColumns}
