@@ -270,12 +270,3 @@
     }
   }
 }
-
-// 处理小屏幕左侧区域宽度过小导致分页组件换行问题
-@media screen and (max-width: 1300px) {
-  .PageContentFalse {
-    .leftList {
-      flex: 0.6;
-    }
-  }
-}
