@@ -207,7 +207,7 @@ export interface GetDevelopScriptInfoResponse {
   /**
    * 脚本内容
    */
-  script_content: string;
+  script_context: string;
   /**
    * 脚本描述
    */

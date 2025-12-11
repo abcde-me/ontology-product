@@ -588,13 +588,13 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
             const fileData = response.data;
             // setLastScriptRunStatus(fileData?.run_status);
             // 更新编辑器内容
-            setEditorContent(fileData.script_content ?? '');
+            setEditorContent(fileData.script_context ?? '');
             setScriptParams(fileData.script_params ?? []);
 
             setScriptInfo({
               script_id: fileData.script_id,
               script_name: fileData.script_name,
-              script_content: fileData.script_content,
+              script_context: fileData.script_context,
               script_params: fileData.script_params,
               status: fileData.status,
               status_name: fileData.status_name,
