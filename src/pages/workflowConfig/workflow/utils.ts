@@ -2,16 +2,12 @@ import {
   Position,
   getConnectedEdges,
   getIncomers,
-  getOutgoers,
+  getOutgoers
 } from 'reactflow';
 import dagre from '@dagrejs/dagre';
 import { v4 as uuid4 } from 'uuid';
 import { cloneDeep, groupBy, isEqual, uniqBy } from 'lodash-es';
-import type {
-  Edge,
-  Node,
-  ValueSelector
-} from './types';
+import type { Edge, Node, ValueSelector } from './types';
 import { BlockEnum, NodeRunningStatus } from './types';
 import {
   CUSTOM_NODE,
@@ -478,20 +474,22 @@ export const getParallelInfo = (
   parentNodeId?: string
 ) => {
   let startNode;
+  const isStructFlow = nodes.some((node) => node.data.flow_type === 'struct');
 
   if (parentNodeId) {
     const parentNode = nodes.find((node) => node.id === parentNodeId);
     if (!parentNode) throw new Error('Parent node not found');
 
     startNode = nodes.find(
-      (node) =>
-        node.id ===
-        (parentNode.data as any).start_node_id
+      (node) => node.id === (parentNode.data as any).start_node_id
     );
   } else {
     startNode = nodes.find((node) => node.data.type === BlockEnum.Start);
   }
-  if (!startNode) throw new Error('Start node not found');
+  if (isStructFlow) {
+  }
+
+  if (!startNode && !isStructFlow) throw new Error('Start node not found');
 
   const parallelList = [] as ParallelInfoItem[];
   const nextNodeHandles = [{ node: startNode, handle: 'source' }];
@@ -659,8 +657,11 @@ export const getEdgeColor = (
 };
 
 export const isExceptionVariable = () => {
-
   return false;
+};
+
+export const flowIsStruct = (nods: Node[]) => {
+  return nods.some((node) => node.data.flow_type === 'struct');
 };
 
 export const MAX_NODES_NUM = 16;

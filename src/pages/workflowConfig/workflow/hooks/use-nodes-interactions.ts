@@ -1,5 +1,4 @@
-import type { MouseEvent } from 'react';
-import { useCallback, useRef } from 'react';
+import { MouseEvent, useCallback, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import produce from 'immer';
 import type {
@@ -14,7 +13,7 @@ import {
   getConnectedEdges,
   getOutgoers,
   useReactFlow,
-  useStoreApi,
+  useStoreApi
 } from 'reactflow';
 import { unionBy } from 'lodash-es';
 import type { ToolDefaultValue } from '../block-selector/types';
@@ -78,8 +77,7 @@ export const useNodesInteractions = () => {
 
       if (getNodesReadOnly()) return;
 
-      if (node.type === CUSTOM_NOTE_NODE)
-        return;
+      if (node.type === CUSTOM_NOTE_NODE) return;
 
       dragNodeStartPosition.current = {
         x: node.position.x,
@@ -117,11 +115,7 @@ export const useNodesInteractions = () => {
       });
       setNodes(newNodes);
     },
-    [
-      getNodesReadOnly,
-      store,
-      handleSetHelpline
-    ]
+    [getNodesReadOnly, store, handleSetHelpline]
   );
 
   const handleNodeDragStop = useCallback<NodeDragHandler>(
@@ -155,11 +149,9 @@ export const useNodesInteractions = () => {
     (_, node) => {
       if (getNodesReadOnly()) return;
 
-      if (node.type === CUSTOM_NOTE_NODE)
-        return;
+      if (node.type === CUSTOM_NOTE_NODE) return;
 
-      if (node.type === CUSTOM_NOTE_NODE)
-        return;
+      if (node.type === CUSTOM_NOTE_NODE) return;
 
       const { getNodes, setNodes, edges, setEdges } = store.getState();
       const nodes = getNodes();
@@ -180,8 +172,7 @@ export const useNodesInteractions = () => {
           });
 
           const newNodes = produce(nodes, (draft) => {
-            draft.forEach(() => {
-            });
+            draft.forEach(() => {});
           });
           setNodes(newNodes);
         }
@@ -233,8 +224,7 @@ export const useNodesInteractions = () => {
     (_, node) => {
       if (getNodesReadOnly()) return;
 
-      if (node.type === CUSTOM_NOTE_NODE)
-        return;
+      if (node.type === CUSTOM_NOTE_NODE) return;
 
       const { setEnteringNodePayload } = workflowStore.getState();
       setEnteringNodePayload(undefined);
@@ -371,7 +361,19 @@ export const useNodesInteractions = () => {
       const newEdges = produce(edges, (draft) => {
         draft.push(newEdge);
       });
+      // 结构化工作流画布，节点连线
+      if (
+        [sourceNode, targetNode].every(
+          (node) => node?.data?.flow_type === 'struct'
+        )
+      ) {
+        setNodes(newNodes);
+        setEdges(newEdges);
 
+        handleSyncWorkflowDraft();
+        saveStateToHistory(WorkflowHistoryEvent.NodeConnect);
+        return;
+      }
       if (checkNestedParallelLimit(newNodes, newEdges, targetNode?.parentId)) {
         setNodes(newNodes);
         setEdges(newEdges);
@@ -417,32 +419,28 @@ export const useNodesInteractions = () => {
     [store, workflowStore, getNodesReadOnly]
   );
 
-  const handleNodeConnectEnd = useCallback<OnConnectEnd>(
-    () => {
-      if (getNodesReadOnly()) return;
+  const handleNodeConnectEnd = useCallback<OnConnectEnd>(() => {
+    if (getNodesReadOnly()) return;
 
-      const {
-        connectingNodePayload,
-        setConnectingNodePayload,
-        enteringNodePayload,
-        setEnteringNodePayload
-      } = workflowStore.getState();
-      if (connectingNodePayload && enteringNodePayload) {
-        const { getNodes } = store.getState();
-        const nodes = getNodes();
-        const fromNode = nodes.find(
-          (n) => n.id === connectingNodePayload.nodeId
-        )!;
-        const toNode = nodes.find((n) => n.id === enteringNodePayload.nodeId)!;
+    const {
+      connectingNodePayload,
+      setConnectingNodePayload,
+      enteringNodePayload,
+      setEnteringNodePayload
+    } = workflowStore.getState();
+    if (connectingNodePayload && enteringNodePayload) {
+      const { getNodes } = store.getState();
+      const nodes = getNodes();
+      const fromNode = nodes.find(
+        (n) => n.id === connectingNodePayload.nodeId
+      )!;
+      const toNode = nodes.find((n) => n.id === enteringNodePayload.nodeId)!;
 
-        if (fromNode.parentId !== toNode.parentId) return;
-
-      }
-      setConnectingNodePayload(undefined);
-      setEnteringNodePayload(undefined);
-    },
-    [store, handleNodeConnect, getNodesReadOnly, workflowStore, reactflow]
-  );
+      if (fromNode.parentId !== toNode.parentId) return;
+    }
+    setConnectingNodePayload(undefined);
+    setEnteringNodePayload(undefined);
+  }, [store, handleNodeConnect, getNodesReadOnly, workflowStore, reactflow]);
 
   const handleNodeDelete = useCallback(
     (nodeId: string) => {
@@ -642,7 +640,6 @@ export const useNodesInteractions = () => {
           newNode.data.isInLoop = false;
         }
 
-
         const newEdge = {
           id: `${newNode.id}-${sourceHandle}-${nextNodeId}-${nextNodeTargetHandle}`,
           type: CUSTOM_EDGE,
@@ -774,9 +771,7 @@ export const useNodesInteractions = () => {
             targetType: nextNode.data.type,
             isInIteration: isNextNodeInIteration,
             isInLoop: isNextNodeInLoop,
-            iteration_id: isNextNodeInIteration
-              ? nextNode.parentId
-              : undefined,
+            iteration_id: isNextNodeInIteration ? nextNode.parentId : undefined,
             loop_id: isNextNodeInLoop ? nextNode.parentId : undefined,
             _connectedNodeIsSelected: true
           },
@@ -960,8 +955,7 @@ export const useNodesInteractions = () => {
 
   const handleNodeContextMenu = useCallback(
     (e: MouseEvent, node: Node) => {
-      if (node.type === CUSTOM_NOTE_NODE)
-        return;
+      if (node.type === CUSTOM_NOTE_NODE) return;
 
       e.preventDefault();
       const container = document.querySelector('#workflow-container');
@@ -991,9 +985,7 @@ export const useNodesInteractions = () => {
       if (nodeId) {
         // If nodeId is provided, copy that specific node
         const nodeToCopy = nodes.find(
-          (node) =>
-            node.id === nodeId &&
-            node.data.type !== BlockEnum.Start
+          (node) => node.id === nodeId && node.data.type !== BlockEnum.Start
         );
         if (nodeToCopy) setClipboardElements([nodeToCopy]);
       } else {
@@ -1045,25 +1037,24 @@ export const useNodesInteractions = () => {
       clipboardElements.forEach((nodeToPaste, index) => {
         const nodeType = nodeToPaste.data.type;
 
-        const { newNode } =
-          generateNewNode({
-            type: nodeToPaste.type,
-            data: {
-              ...NODES_INITIAL_DATA[nodeType],
-              ...nodeToPaste.data,
-              selected: false,
-              _isBundled: false,
-              _connectedSourceHandleIds: [],
-              _connectedTargetHandleIds: [],
-              title: genNewNodeTitleFromOld(nodeToPaste.data.title)
-            },
-            position: {
-              x: nodeToPaste.position.x + offsetX,
-              y: nodeToPaste.position.y + offsetY
-            },
-            extent: nodeToPaste.extent,
-            zIndex: nodeToPaste.zIndex
-          });
+        const { newNode } = generateNewNode({
+          type: nodeToPaste.type,
+          data: {
+            ...NODES_INITIAL_DATA[nodeType],
+            ...nodeToPaste.data,
+            selected: false,
+            _isBundled: false,
+            _connectedSourceHandleIds: [],
+            _connectedTargetHandleIds: [],
+            title: genNewNodeTitleFromOld(nodeToPaste.data.title)
+          },
+          position: {
+            x: nodeToPaste.position.x + 80,
+            y: nodeToPaste.position.y + 40
+          },
+          extent: nodeToPaste.extent,
+          zIndex: nodeToPaste.zIndex
+        });
         newNode.id = newNode.id + index;
         // This new node is movable and can be placed anywhere
         const newChildren: Node[] = [];
@@ -1102,13 +1093,12 @@ export const useNodesInteractions = () => {
     store,
     reactflow,
     saveStateToHistory,
-    handleSyncWorkflowDraft,
+    handleSyncWorkflowDraft
   ]);
 
   const handleNodesDuplicate = useCallback(
     (nodeId?: string) => {
       if (getNodesReadOnly()) return;
-
       const { getNodes } = store.getState();
       const targetNode = getNodes().find((node) => node.id === nodeId)!;
       const count = getNodes().filter(

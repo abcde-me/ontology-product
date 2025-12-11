@@ -28,18 +28,26 @@ export enum BlockEnum {
   Video = 'video',
   Cleaning = 'cleaning',
   Enhancement = 'enhancement',
-  Customize = 'scripting'
+  Customize = 'scripting',
+  // sql开发
+  SQL = 'spark_sql',
+  // 数据推送
+  Seatunnel = 'seatunnel',
+  // 外部前置任务
+  Dependent = 'dependent'
 }
 
 export enum ControlMode {
   Pointer = 'pointer',
   Hand = 'hand'
 }
+
 export enum ErrorHandleMode {
   Terminated = 'terminated',
   ContinueOnError = 'continue-on-error',
   RemoveAbnormalOutput = 'remove-abnormal-output'
 }
+
 export type Branch = {
   id: string;
   name: string;
@@ -67,6 +75,7 @@ export type CommonNodeType<T = {}> = {
   isInIteration?: boolean;
   iteration_id?: string;
   selected?: boolean;
+  flow_type?: string;
   title: string;
   desc: string;
   type: BlockEnum;
@@ -376,4 +385,84 @@ export enum VersionHistoryContextMenuOptions {
   restore = 'restore',
   edit = 'edit',
   delete = 'delete'
+}
+
+// 节点运行详情数据
+export interface NodeProcessData {
+  /**
+   * 执行类型 英文，英文
+   */
+  command_type: string;
+  /**
+   * 执行类型，手工执行，自动调度，手动运行  定时运行
+   */
+  command_type_name: string;
+  /**
+   * 运行时长
+   */
+  duration: string;
+  /**
+   * 结束时间
+   */
+  end_time: string;
+  /**
+   * 最大重试i次数
+   */
+  max_retry_times: number;
+  /**
+   * 所属工作流名称
+   */
+  process_definition_name: string;
+  /**
+   * 工作流执行ID
+   */
+  process_instance_id: string;
+  /**
+   * 工作流名称
+   */
+  process_instance_name: string;
+  /**
+   * 重试次数
+   */
+  retry_times: number;
+  /**
+   * 运行次数
+   */
+  run_times: string;
+  /**
+   * 开始时间
+   */
+  start_time: string;
+  /**
+   * 运行状态，状态英文名
+   */
+  state: string;
+  /**
+   * 运行状态名称，状态中文名
+   */
+  state_name: string;
+  /**
+   * 运行提交时间
+   */
+  submit_time: string;
+  /**
+   * 任务节点ID
+   */
+  task_code: string;
+  /**
+   * 任务模式 ，离线、实时
+   */
+  task_execute_type_name: string;
+  /**
+   * 任务名称，任务名称
+   */
+  task_name: string;
+  /**
+   * 任务类型英文名
+   */
+  task_type: string;
+  /**
+   * 任务类型中文名
+   */
+  task_type_name: string;
 }

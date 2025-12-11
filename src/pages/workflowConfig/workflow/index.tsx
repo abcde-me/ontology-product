@@ -8,7 +8,7 @@ import React, {
   useState
 } from 'react';
 import { setAutoFreeze } from 'immer';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useParams as useRouterParams } from 'react-router-dom';
 import { useEventListener } from 'ahooks';
 import ReactFlow, {
   Background,
@@ -104,6 +104,9 @@ const Workflow: FC<WorkflowProps> = memo(
 
     // 作业详情不需要显示 其他正常显示
     const location = useLocation(); // 获取当前路由信息
+    const { type: flowType = 'no_struct' } =
+      useRouterParams<Record<string, string>>();
+
     const isShowChatMode =
       location.pathname === '/tenant/compute/modaforge/workflowTaskDetail';
     const {
@@ -258,9 +261,10 @@ const Workflow: FC<WorkflowProps> = memo(
       >
         <SyncingDataModal />
         <CandidateNode />
-        {!isShowChatMode && <Header />}
+        {!isShowChatMode && <Header flowType={flowType} />}
         {!isShowChatMode && (
           <SubHeader
+            flowType={flowType}
             handleRedo={handleHistoryForward}
             handleUndo={handleHistoryBack}
           />

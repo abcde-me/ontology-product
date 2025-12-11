@@ -4,7 +4,7 @@ import { useStoreApi } from 'reactflow';
 import type { Edge, Node } from '../types';
 import { BlockEnum } from '../types';
 import { useStore } from '../store';
-import { getValidTreeNodes } from '../utils';
+import { flowIsStruct, getValidTreeNodes } from '../utils';
 import { CUSTOM_NODE, MAX_TREE_DEPTH } from '../constants';
 import { useNodesExtraData } from './use-nodes-data';
 import { useToastContext } from '@/pages/workflowConfig/components/toast';
@@ -12,6 +12,7 @@ import { useGetLanguage } from '@/pages/workflowConfig/context/i18n';
 
 export const useChecklist = (nodes: Node[], edges: Edge[]) => {
   const { t } = useTranslation('plugin__console-plugin-appforge');
+  const isStruct = flowIsStruct(nodes);
   const language = useGetLanguage();
   const nodesExtraData = useNodesExtraData();
   const isChatMode = false;
@@ -48,7 +49,9 @@ export const useChecklist = (nodes: Node[], edges: Edge[]) => {
             type: node.data.type,
             title: node.data.title,
             toolIcon,
-            unConnected: !validNodes.find((n) => n.id === node.id),
+            unConnected:
+              !validNodes.find((n) => n.id === node.id) &&
+              node.data.flow_type !== 'struct',
             errorMessage
           });
         }
@@ -57,7 +60,8 @@ export const useChecklist = (nodes: Node[], edges: Edge[]) => {
 
     if (
       !isChatMode &&
-      !nodes.find((node) => node.data.type === BlockEnum.End)
+      !nodes.find((node) => node.data.type === BlockEnum.End) &&
+      !isStruct
     ) {
       // @ts-expect-error
       list.push({

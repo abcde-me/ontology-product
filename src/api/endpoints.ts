@@ -169,10 +169,16 @@ export const ModaForgeResourceEndpoints = {
   workflowDetail: PrefixAimdp + '/GetWorkFlowInfo',
   // 工作流列表
   workflowList: PrefixAimdp + '/ListWorkFlows',
+  // 工作流列表_结构化
+  workflowListNew: PrefixAimdp + '/ListProcessPage',
+  // 获取工作流运行状态枚举
+  getProcessRunState: PrefixAimdp + '/GetProcessRunState',
   // 工作流操作
   workflowOperation: PrefixAimdp + '/ManageWorkFlow',
   // 工作流删除
   workflowDelete: PrefixAimdp + '/DeleteWorkFlow',
+  // 工作流删除
+  workflowDeleteNew: PrefixAimdp + '/DeleteProcess',
   // 工作流复制
   workflowCopy: PrefixAimdp + '/CopyWorkFlow',
   // 工作流 - 结束节点目标目录
@@ -181,6 +187,10 @@ export const ModaForgeResourceEndpoints = {
   workflowDraft: PrefixAimdp + '/GetWorkFlowDAGInfo',
   // 工作流-编辑工作流DAG信息
   editWorkFlowDraft: PrefixAimdp + '/EditWorkFlowDraft',
+  // 工作流-编辑工作流-SQL节点获取所有发版的SQL
+  getSQLListInSQLNode: PrefixAimdp + '/ListDevelopScript',
+  // 工作流-编辑工作流-SQL节点获取SQL的所有版本
+  getSQLVersionInSQLNode: PrefixAimdp + '/GetDevelopScriptLogByScriptId',
   // 工作流-脚本类型
   scriptingType: PrefixAimdp + '/ListWorkFlowScriptTypes',
   // 工作流-脚本执行器列表
@@ -457,6 +467,8 @@ export const ModaForgeResourceEndpoints = {
   // 脚本内容搜索 - 查询
   GetDevelopScriptLogByVersionApi:
     PrefixAimdp + '/GetDevelopScriptLogByVersion',
+  // 获取脚本详情
+  GetSQLInfoByIDAndVersion: PrefixAimdp + '/GetDevelopScriptLogByVersion',
   // 查询脚本列表
   ListSqlFileApi: PrefixAimdp + '/ListSqlFile',
   // 查询脚本删除
