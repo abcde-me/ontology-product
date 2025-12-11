@@ -1,9 +1,13 @@
 import React, { useEffect, useRef, useState } from 'react';
 import {
   Button,
+  Form,
+  Input,
   Menu,
+  Modal,
   Pagination,
   PaginationProps,
+  Select,
   Table
 } from '@arco-design/web-react';
 import { useHistory } from 'react-router';
@@ -36,6 +40,7 @@ export default function MetadataManagement() {
   const userInfo = useUserInfo();
   const history = useHistory();
   const MenuItem = Menu.Item;
+  const TextArea = Input.TextArea;
 
   // 初始化搜索框value
   const [searchValue, setSearchValue] = useState('');
@@ -68,6 +73,16 @@ export default function MetadataManagement() {
   const [selectedColumns, setSelectedColumns] = useState<ColumnField[]>(
     getColumnsSetting(activeMetadataType)
   );
+  // 创建数据库弹窗是否打开
+  const [createTableModalOpen, setCreateTableModalOpen] = useState(false);
+  // 创建物理数据库弹窗是否打开
+  const [createPhysicalTableModalOpen, setCreatePhysicalTableModalOpen] =
+    useState(false);
+
+  // 创建数据库弹窗表单
+  const [tableForm] = Form.useForm();
+  // 创建物理数据库弹窗表单
+  const [physicalTableForm] = Form.useForm();
 
   useEffect(() => {
     setColumns(
@@ -187,6 +202,32 @@ export default function MetadataManagement() {
     console.log('列设置变化:', list);
   };
 
+  // 筛选元数据类型操作
+  const handleTableTypeChange = (key: MetadataType | string) => {
+    console.log(key, 'kkkkkk');
+    tableForm.setFieldsValue({
+      ddl: key
+    });
+  };
+
+  // 创建数据库弹窗回调
+  const handleCreateTableModalOk = () => {
+    tableForm.validate().then((values) => {
+      console.log(values, '创建数据库');
+      setCreateTableModalOpen(false);
+      tableForm.resetFields();
+    });
+  };
+
+  // 创建物理数据库弹窗回调
+  const handleCreatePhysicalTableModalOk = () => {
+    physicalTableForm.validate().then((values) => {
+      console.log(values, '创建物理数据库');
+      setCreatePhysicalTableModalOpen(false);
+      physicalTableForm.resetFields();
+    });
+  };
+
   return (
     <div className={styles['metadataManagement']}>
       <h1 style={{ fontSize: '20px', fontWeight: 'bold' }}>元数据管理</h1>
@@ -235,12 +276,18 @@ export default function MetadataManagement() {
                   <Button
                     className={styles['refreshBtn']}
                     icon={<IconPlus className="text-[#1E293B]" />}
+                    onClick={() => {
+                      setCreateTableModalOpen(true);
+                    }}
                   >
                     创建数据库
                   </Button>
                   <Button
                     className={styles['refreshBtn']}
                     icon={<IconPlus className="text-[#1E293B]" />}
+                    onClick={() => {
+                      setCreatePhysicalTableModalOpen(true);
+                    }}
                   >
                     创建物理表
                   </Button>
@@ -307,6 +354,126 @@ export default function MetadataManagement() {
         onCancel={handleModalCancel}
         onChange={handleColumnChange}
       />
+      {/* 创建数据库弹窗 */}
+      <Modal
+        className={styles.createTableModal}
+        visible={createTableModalOpen}
+        title="创建数据库"
+        okText="执行DDL语句"
+        onOk={() => tableForm?.submit()}
+        onCancel={() => {
+          setCreateTableModalOpen(false);
+          tableForm?.resetFields();
+        }}
+      >
+        <Form
+          form={tableForm}
+          onSubmit={handleCreateTableModalOk}
+          labelCol={{ span: 3 }}
+          wrapperCol={{ span: 21 }}
+        >
+          <Form.Item
+            field="tableType"
+            label="数据库类型"
+            rules={[{ required: true, message: '请选择数据库类型' }]}
+          >
+            <Select
+              placeholder="请选择数据库类型"
+              options={[
+                { label: '数据湖', value: 'Iceberg' },
+                { label: '在线分析库', value: 'Doris' },
+                { label: '对象存储', value: 'MinIO' },
+                { label: '向量数据库', value: 'Milvus' }
+              ]}
+              onChange={handleTableTypeChange}
+            />
+          </Form.Item>
+          <Form.Item
+            field="tableName"
+            label="数据库名称"
+            rules={[{ required: true, message: '请输入数据库名称' }]}
+          >
+            <Input placeholder="请输入数据库名称" />
+          </Form.Item>
+          <Form.Item
+            field="ddl"
+            label="DDL语句"
+            disabled
+            rules={[
+              {
+                required: true,
+                message: '请先选择数据库类型，并输入数据库名称'
+              }
+            ]}
+          >
+            <TextArea
+              style={{ minHeight: 400 }}
+              placeholder="请先选择数据库类型，并输入数据库名称"
+            />
+          </Form.Item>
+        </Form>
+      </Modal>
+
+      {/* 创建物理表弹窗 */}
+      <Modal
+        className={styles.createTableModal}
+        visible={createPhysicalTableModalOpen}
+        title="创建物理表"
+        okText="执行DDL语句"
+        onOk={() => physicalTableForm?.submit()}
+        onCancel={() => {
+          setCreatePhysicalTableModalOpen(false);
+          physicalTableForm?.resetFields();
+        }}
+      >
+        <Form
+          form={physicalTableForm}
+          onSubmit={handleCreatePhysicalTableModalOk}
+          labelCol={{ span: 3 }}
+          wrapperCol={{ span: 21 }}
+        >
+          <Form.Item
+            field="tableType"
+            label="保存位置"
+            rules={[{ required: true, message: '请选择保存位置' }]}
+          >
+            <Select
+              placeholder="请选择数据库"
+              className={styles.selectTable}
+              style={{ display: 'flex', alignItems: 'center' }}
+              addBefore={
+                <Select
+                  placeholder="请选择数据库类型"
+                  style={{ width: 160 }}
+                  className={styles.selectAddBefore}
+                  options={[
+                    { label: '数据湖', value: 'Iceberg' },
+                    { label: '在线分析库', value: 'Doris' },
+                    { label: '对象存储', value: 'MinIO' },
+                    { label: '向量数据库', value: 'Milvus' }
+                  ]}
+                />
+              }
+            />
+          </Form.Item>
+          <Form.Item
+            field="ddl"
+            label="DDL语句"
+            disabled
+            rules={[
+              {
+                required: true,
+                message: '请先选择数据库类型，并输入数据库名称'
+              }
+            ]}
+          >
+            <TextArea
+              style={{ minHeight: 400 }}
+              placeholder="请先选择数据库类型，并输入数据库名称"
+            />
+          </Form.Item>
+        </Form>
+      </Modal>
     </div>
   );
 }

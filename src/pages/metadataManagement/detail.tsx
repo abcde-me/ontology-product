@@ -57,8 +57,8 @@ export default function MetadataManagementDetail() {
   ]);
   const [previewInfoData, setPreviewInfoData] = useState([]);
 
-  const fieldSearchForm = React.useRef<FormInstance>(null);
-  const partitionSearchForm = React.useRef<FormInstance>(null);
+  const [fieldSearchForm] = Form.useForm();
+  const [partitionSearchForm] = Form.useForm();
   // Iceberg/Doris基本信息数据
   const data = [
     {
@@ -341,7 +341,7 @@ export default function MetadataManagementDetail() {
             <TabPane key="fieldInfo" title="字段信息">
               <Typography.Paragraph>
                 <Form
-                  ref={fieldSearchForm}
+                  form={fieldSearchForm}
                   layout="inline"
                   colon=":"
                   labelCol={{ span: 3 }}
@@ -365,7 +365,7 @@ export default function MetadataManagementDetail() {
             <TabPane key="partitionInfo" title="分区信息">
               <Typography.Paragraph>
                 <Form
-                  ref={partitionSearchForm}
+                  form={partitionSearchForm}
                   layout="inline"
                   colon=":"
                   labelCol={{ span: 3 }}
@@ -411,7 +411,7 @@ export default function MetadataManagementDetail() {
             <TabPane key="fieldInfo" title="对象信息">
               <Typography.Paragraph>
                 <Form
-                  ref={fieldSearchForm}
+                  form={fieldSearchForm}
                   layout="inline"
                   colon=":"
                   labelCol={{ span: 3 }}
@@ -497,7 +497,7 @@ export default function MetadataManagementDetail() {
             <TabPane key="fieldInfo" title="字段信息">
               <Typography.Paragraph>
                 <Form
-                  ref={fieldSearchForm}
+                  form={fieldSearchForm}
                   layout="inline"
                   colon=":"
                   labelCol={{ span: 3 }}
@@ -521,7 +521,7 @@ export default function MetadataManagementDetail() {
             <TabPane key="partitionInfo" title="分区信息">
               <Typography.Paragraph>
                 <Form
-                  ref={partitionSearchForm}
+                  form={partitionSearchForm}
                   layout="inline"
                   colon=":"
                   labelCol={{ span: 3 }}
