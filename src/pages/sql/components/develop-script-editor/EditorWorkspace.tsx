@@ -172,7 +172,7 @@ const EditorWorkspaceContent: React.FC<{
     const [specificationsVisible, setSpecificationsVisible] =
       React.useState<boolean>(false);
     const [specificationsContent, setSpecificationsContent] =
-      React.useState<string>('测试文案');
+      React.useState<string>('');
     const [paramVisible, setParamVisible] = React.useState<boolean>(false);
     const [releaseVersionVisible, setReleaseVersionVisible] =
       React.useState<boolean>(false);
@@ -242,31 +242,6 @@ const EditorWorkspaceContent: React.FC<{
         fileName: fileName
       });
     }, [fileName, form]);
-
-    // 获取系统参数列表
-    // useEffect(() => {
-    //   const fetchSystemParams = async () => {
-    //     try {
-    //       const res = await listDevelopSystemParam({
-    //         page: 1,
-    //         page_size: 100
-    //       });
-    //       if (res.status === 200 && res.data?.items) {
-    //         // 提取系统参数的 config_key，支持字符串数组或对象数组
-    //         const keys = res.data.items
-    //           .map((item: any) => {
-    //             return typeof item === 'string' ? item : item?.config_key || '';
-    //           })
-    //           .filter((key: string) => key);
-    //         setSystemParamKeys(new Set(keys));
-    //       }
-    //     } catch (error) {
-    //       console.error('获取系统参数列表失败:', error);
-    //     }
-    //   };
-
-    //   fetchSystemParams();
-    // }, []);
 
     const myTheme = createTheme({
       theme: 'light',
