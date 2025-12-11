@@ -4,7 +4,6 @@ import { toISOStringWithMicroseconds } from '@/utils/timeFormatting';
 import { LabelShapMap, EmptyImgLabelResult } from '@/utils/constants';
 
 export async function saveTask(taskId: string, params: Record<string, any>) {
-  console.log('saveTask', taskId, params);
   return UAPI.RES.leSaveTask({})
     .post({
       task_id: taskId,
@@ -15,8 +14,8 @@ export async function saveTask(taskId: string, params: Record<string, any>) {
     .inRegion()
     .do();
 }
+
 export async function submitTask(taskId: string, params: Record<string, any>) {
-  console.log('submitTask', taskId, params);
   return UAPI.RES.leSaveTask({})
     .post({
       task_id: taskId,
@@ -82,19 +81,21 @@ export async function getQualityControlTaskById(taskId?: string) {
 // 提交单个质检任务, save_type: 1 - 通过；2 - 驳回
 export async function saveQualityControlTask({
   taskId,
-  qc_round,
+  qcRound,
   save_type
 }: {
   taskId?: string;
-  qc_round: string;
+  qcRound?: string;
   save_type: number;
 }) {
   const searchParams = new URLSearchParams(location.search);
   const rId = taskId || searchParams.get('rId');
+  const qc_Round = qcRound || searchParams.get('qcRound');
+
   return await UAPI.RES.leSaveQualityControlTask({})
     .post({
       task_id: Number(rId),
-      qc_round: Number(qc_round),
+      qc_round: Number(qc_Round),
       save_type
     })
     .inRegion()
@@ -104,21 +105,23 @@ export async function saveQualityControlTask({
 // 新建单个评论, comment_type: more - 多标；less - 漏标；error - 错标
 export async function createQualityControlTaskComment({
   taskId,
-  qc_round,
+  qcRound,
   comment_type,
   comment_content
 }: {
   taskId?: string;
-  qc_round: string;
+  qcRound?: string;
   comment_type: string;
   comment_content: any;
 }) {
   const searchParams = new URLSearchParams(location.search);
   const rId = taskId || searchParams.get('rId');
+  const qc_Round = qcRound || searchParams.get('qcRound');
+
   return await UAPI.RES.leCreateQualityControlTaskComment({})
     .post({
       task_id: Number(rId),
-      qc_round: Number(qc_round),
+      qc_round: Number(qc_Round),
       comment_type,
       comment_content
     })
@@ -129,23 +132,24 @@ export async function createQualityControlTaskComment({
 // 修改单个评论
 export async function modifyQualityControlTaskComment({
   taskId,
-  qc_round,
+  qcRound,
   comment_id,
   comment_type,
   comment_content
 }: {
   taskId?: string;
-  qc_round: string;
+  qcRound?: string;
   comment_id: string;
   comment_type: string;
   comment_content: any;
 }) {
   const searchParams = new URLSearchParams(location.search);
   const rId = taskId || searchParams.get('rId');
+  const qc_Round = qcRound || searchParams.get('qcRound');
   return await UAPI.RES.leModifyQualityControlTaskComment({})
     .post({
       task_id: Number(rId),
-      qc_round: Number(qc_round),
+      qc_round: Number(qc_Round),
       comment_id,
       comment_type,
       comment_content
@@ -157,19 +161,20 @@ export async function modifyQualityControlTaskComment({
 // 删除单个评论
 export async function deleteQualityControlTaskComment({
   taskId,
-  qc_round,
+  qcRound,
   comment_id
 }: {
   taskId?: string;
-  qc_round: string;
+  qcRound?: string;
   comment_id: string;
 }) {
   const searchParams = new URLSearchParams(location.search);
   const rId = taskId || searchParams.get('rId');
+  const qc_Round = qcRound || searchParams.get('qcRound');
   return await UAPI.RES.leDeleteQualityControlTaskComment({})
     .post({
       task_id: Number(rId),
-      qc_round: Number(qc_round),
+      qc_round: Number(qc_Round),
       comment_id
     })
     .inRegion()
@@ -198,6 +203,13 @@ export async function submitImgJobAnnotations(
   return { ...result, data: params };
 }
 
+// LABEL 标注、RELABLE 改错、REVIEW 质检、PREVIEW 预览
+const STAGE_MAP = {
+  LABLE: 'annotation',
+  RELABLE: 'annotation',
+  REVIEW: 'validation',
+  PREVIEW: 'Tag annotation'
+};
 export async function getImgJobOverview(taskId: string) {
   const searchParams = new URLSearchParams(location.search);
   const overviewTpl = {
@@ -216,7 +228,7 @@ export async function getImgJobOverview(taskId: string) {
     dimension: '2d',
     bug_tracker: '',
     status: 'annotation',
-    stage: 'annotation',
+    stage: STAGE_MAP[searchParams.get('stage')!],
     state: 'in progress',
     mode: 'annotation',
     frame_count: 1,

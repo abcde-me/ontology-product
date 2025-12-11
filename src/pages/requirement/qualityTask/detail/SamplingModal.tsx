@@ -28,6 +28,7 @@ interface SamplingModalProps {
   visible: boolean;
   metricData: any;
   qc_round: number;
+  req_id: number;
   onClose: () => void;
   onSuccess: () => void;
 }
@@ -36,10 +37,11 @@ const SamplingModal: React.FC<SamplingModalProps> = ({
   visible,
   metricData,
   qc_round,
+  req_id,
   onClose,
   onSuccess
 }) => {
-  const pkg_id = useParams('pkg_id');
+  const pkgId = useParams('pkgId');
   const [form] = Form.useForm();
   const sample_type = Form.useWatch('sample_type', form);
 
@@ -69,8 +71,9 @@ const SamplingModal: React.FC<SamplingModalProps> = ({
         sample_info['sample_number'] = values.sample_number;
       }
       const params = {
-        pkg_id: Number(pkg_id),
+        pkg_id: Number(pkgId),
         qc_round,
+        req_id,
         action: 'sample',
         sample_info
       };

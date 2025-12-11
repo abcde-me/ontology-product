@@ -245,7 +245,7 @@ function QualityTaskList() {
   // 跳转到详情页
   const goToDetailPage = (record: QualityTaskItem) => {
     history.push(
-      `/tenant/compute/modaforge/qualityTask/detail?pkg_id=${record.pkg_id}&qc_round=${activeTab}`
+      `/tenant/compute/modaforge/qualityTask/detail?pkgId=${record.pkg_id}&qcRound=${activeTab}&reqId=${record.req_id}`
     );
   };
 
@@ -397,7 +397,7 @@ function QualityTaskList() {
         return (
           <Link
             className="operation-link"
-            onClick={() => handleGoToQuality(record)}
+            onClick={() => goToDetailPage(record)}
           >
             去质检
           </Link>

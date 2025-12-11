@@ -23,6 +23,7 @@ import {
   listQualityControlTaskSamples
 } from '@/api/dataAnnotation';
 import './index.scss';
+import { openNewPage } from '@/utils/env';
 
 const BreadcrumbItem = Breadcrumb.Item;
 
@@ -87,8 +88,9 @@ interface MetricData {
 
 function QualityTaskDetail() {
   const history = useHistory();
-  const pkg_id = useParams('pkg_id');
-  const qc_round = useParams('qc_round');
+  const pkgId = useParams('pkgId');
+  const qcRound = useParams('qcRound');
+  const reqId = useParams('reqId');
 
   // 需求名称
   const [requirementName, setRequirementName] = useState('智慧城市');
@@ -113,15 +115,15 @@ function QualityTaskDetail() {
   // 获取质检任务包统计数据
   const getQualityControlTaskStatisticsData = useCallback(async () => {
     const res = await getQualityControlTaskStatistics({
-      pkg_id: Number(pkg_id),
-      qc_round: Number(qc_round)
+      pkg_id: Number(pkgId),
+      qc_round: Number(qcRound)
     });
     if (res.code === 'success') {
       setMetricData(res.data);
     } else {
       Message.error(res.message);
     }
-  }, [pkg_id, qc_round]);
+  }, [pkgId, qcRound]);
 
   // 获取表格数据
   const getTableData = useCallback(async () => {
@@ -130,7 +132,7 @@ function QualityTaskDetail() {
       const params = {
         page: current,
         page_size: pageSize,
-        pkg_id: Number(pkg_id),
+        pkg_id: Number(pkgId),
         filters: sortValue
       };
       const res = await listQualityControlTaskSamples(params);
@@ -145,7 +147,7 @@ function QualityTaskDetail() {
     } finally {
       setLoading(false);
     }
-  }, [current, pageSize, pkg_id, sortValue]);
+  }, [current, pageSize, pkgId, sortValue]);
 
   useEffect(() => {
     getTableData();
@@ -169,8 +171,9 @@ function QualityTaskDetail() {
       onOk: async () => {
         const params = {
           action: type,
-          pkg_id: Number(pkg_id),
-          qc_round: Number(qc_round)
+          pkg_id: Number(pkgId),
+          qc_round: Number(qcRound),
+          req_id: Number(reqId)
         };
         const res = await manageQCTaskBatch(params);
         if (res.data.code === 'success') {
@@ -197,7 +200,9 @@ function QualityTaskDetail() {
 
   // 去质检
   const handleGoInspect = (record: InspectionItem) => {
-    // TODO 跳转到质检页
+    openNewPage(
+      `/modaforge/tenant/compute/modaforge/labelEditor?qsId=${record.qs_id}&stage=REVIEW`
+    );
   };
 
   // 批量质检
@@ -525,7 +530,8 @@ function QualityTaskDetail() {
       <SamplingModal
         visible={samplingModalVisible}
         metricData={metricData}
-        qc_round={Number(qc_round)}
+        qc_round={Number(qcRound)}
+        req_id={Number(reqId)}
         onClose={() => setSamplingModalVisible(false)}
         onSuccess={handleSuccess}
       />

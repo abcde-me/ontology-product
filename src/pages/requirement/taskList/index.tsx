@@ -82,10 +82,10 @@ function TaskList() {
     }
   };
 
-  // 查看详情
-  const viewDetailRequirement = (record: Record<string, any>) => {
+  // 标注工具跳转
+  const toLabelEditor = (record: Record<string, any>, stage: string) => {
     openNewPage(
-      `/modaforge/tenant/compute/modaforge/labelEditor?rId=${record.id}`
+      `/modaforge/tenant/compute/modaforge/labelEditor?rId=${record.id}&stage=${stage}`
     );
   };
 
@@ -272,7 +272,7 @@ function TaskList() {
               <span
                 className="operate-text"
                 onClick={() => {
-                  viewDetailRequirement(record);
+                  toLabelEditor(record, 'LABLE');
                 }}
               >
                 去标注
@@ -281,7 +281,7 @@ function TaskList() {
             <span
               className="operate-text"
               onClick={() => {
-                viewDetailRequirement(record);
+                toLabelEditor(record, 'RELABLE');
               }}
             >
               改错
