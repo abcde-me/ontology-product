@@ -19,7 +19,8 @@ import {
   API_KEY_PERMISSIONS,
   TAG_PERMISSIONS,
   DATA_ASSET_PERMISSIONS,
-  METADATA_MANAGEMENT_PERMISSIONS
+  METADATA_MANAGEMENT_PERMISSIONS,
+  DATA_API_PERMISSIONS
 } from '@/config/permissions';
 import Connection from '@/assets/sider/connection.svg';
 import DataLoad from '@/assets/sider/data-load.svg';
@@ -205,6 +206,13 @@ export const menus: MenuModel[] = [
         key: 'metadataManagement',
         path: '/tenant/compute/modaforge/metadataManagement',
         permission: METADATA_MANAGEMENT_PERMISSIONS.LIST
+      },
+      {
+        title: '数据API',
+        icon: <DataAsset className={iconClass} />,
+        key: 'dataApi',
+        path: '/tenant/compute/modaforge/dataApi',
+        permission: DATA_API_PERMISSIONS.LIST
       }
     ]
   },
