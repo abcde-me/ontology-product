@@ -7,14 +7,8 @@ import {
   Tooltip
 } from '@arco-design/web-react';
 import React, { memo } from 'react';
-import mockjs from 'mockjs';
 import styles from './index.module.scss';
-import { sort } from 'semver';
-import {
-  getVersionType,
-  VersionType,
-  VersionTypeEnum
-} from '../version-status';
+import { VersionType } from '../version-status';
 import { IconQuestionCircle } from '@arco-design/web-react/icon';
 import EllipsisPopover from '@/components/ellipsis-popover-com';
 import { copyDevelopScript, deleteDevelopScript } from '@/api/sql-develop';
