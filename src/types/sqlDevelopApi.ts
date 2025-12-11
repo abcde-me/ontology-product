@@ -119,6 +119,60 @@ export interface ScriptParam {
   config_desc: string;
 }
 
+export interface ListDevelopSystemParamParams {
+  page?: number;
+  page_size?: number;
+  config_key?: string; // 参数key
+  config_demo?: string; // 状态
+  config_desc?: string; // 版本描述
+}
+export interface ListDevelopSystemParamParamsData {
+  /**
+   * 页大小
+   */
+  page_size?: number;
+  /**
+   * 页码
+   */
+  page?: number;
+  total: number;
+  items: [];
+}
+export interface UpdateDevelopSystemParamParams {
+  config_value: string; // 参数值
+}
+
+export interface CopyDevelopScriptParams {
+  version?: number; // 版本号
+  script_id?: number; // 脚本id
+}
+
+export interface DeleteDevelopScriptParams {
+  version: number; // 版本号
+}
+
+export interface SearchDevelopScriptLogByKeyParams {
+  script_context?: string; // 脚本内容关键词
+}
+
+export interface SearchDevelopScriptLogByKeyData {
+  script_context?: string; // 脚本内容关键词
+  items: [];
+  page?: number;
+  page_size?: number;
+  total: number;
+}
+
+export interface DeleteDevelopScriptLogByVersionParams {
+  version?: number; // 版本号
+  script_id?: number; // 脚本id
+}
+
+export interface RenameDevelopScriptParams {
+  script_id?: number; // 脚本id
+  script_name?: string; // 脚本名称
+}
+
 export interface CreateDevelopScriptParams {
   /**
    * 脚本内容
@@ -146,7 +200,7 @@ export interface EditDevelopScriptParams {
   /**
    * sql脚本内容
    */
-  script_content: string;
+  script_context: string;
   /**
    * sql脚本说明
    */
