@@ -343,6 +343,8 @@ export const ModaForgeResourceEndpoints = {
   getTableNameApi: PrefixAimdp + '/GenerateDBName',
   // 校验SQL语句
   checkSQLApi: PrefixAimdp + '/CheckSQL',
+  // 连接器预览数据
+  PreviewConnectorSampleDataApi: PrefixAimdp + '/PreviewConnectorSampleData',
 
   // 数据标注接口
   // 数据标注配置 发布
