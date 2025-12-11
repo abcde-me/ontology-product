@@ -16,11 +16,11 @@ import { useUrlState } from '@/pages/sql/hooks/useUrlState';
 import Mock from 'mockjs';
 import styles from './index.module.scss';
 import { IconCopy, IconDelete } from '@arco-design/web-react/icon';
+import { listDevelopScriptLogByKeyApi } from '@/api/sql';
 import {
   deleteDevelopScriptLogByVersion,
-  listDevelopScriptLogByKeyApi,
   getDevelopScriptLogByVersion
-} from '@/api/sql';
+} from '@/api/sql-develop';
 import noDataElement from '@/components/no-data';
 import { ScriptStatus, ScriptStatusName } from '@/types/sqlDevelopApi';
 

@@ -8,7 +8,13 @@ import {
   deleteSqlScript,
   copySqlScript
 } from '@/api/sql';
-import { listDevelopScript } from '@/api/sql-develop';
+import {
+  listDevelopScript,
+  createDevelopScript,
+  renameDevelopScript,
+  copyDevelopScript,
+  deleteDevelopScript
+} from '@/api/sql-develop';
 import { PythonItemType } from '@/types/pythonApi';
 import { SqlScriptItem } from '@/types/sqlApi';
 import { generateSqlDefaultName } from '../utils';
@@ -207,10 +213,11 @@ export const useDevelopScriptManager = (
         }
 
         const scriptFileId = String(Date.now());
-        const createRes = await createSqlScript({
-          uid: userInfo?.id ?? '',
-          script_file_id: scriptFileId,
-          script_name: finalName
+        const createRes = await createDevelopScript({
+          script_name: finalName,
+          script_context: '',
+          script_desc: '',
+          script_params: []
         });
 
         if (createRes.status !== 200) {
@@ -255,8 +262,9 @@ export const useDevelopScriptManager = (
       try {
         const scriptId = node?.dataRef?.script_id;
         const fileId = node?.dataRef?.id;
-        const renameRes = await renameSqlScript(scriptId, {
-          script_name: finalName
+        const renameRes = await renameDevelopScript({
+          script_id: scriptId,
+          script_name: finalName ?? ''
         });
 
         if (renameRes.status !== 200) {
@@ -288,10 +296,9 @@ export const useDevelopScriptManager = (
   const handleCopy = useCallback(
     async (newName: string, node: any) => {
       try {
-        const copyRes = await copySqlScript(
-          node?.dataRef?.script_id,
-          Date.now().toString()
-        );
+        const copyRes = await copyDevelopScript({
+          script_id: node?.dataRef?.script_id
+        });
 
         if (copyRes.status !== 200) {
           Message.error(copyRes.message);
@@ -317,7 +324,9 @@ export const useDevelopScriptManager = (
       try {
         const scriptId = node?.dataRef?.script_id;
         const fileId = node?.dataRef?.id;
-        const deleteRes = await deleteSqlScript(scriptId);
+        const deleteRes = await deleteDevelopScript({
+          script_id: scriptId
+        });
 
         if (deleteRes.status !== 200) {
           Message.error(deleteRes.message);

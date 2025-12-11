@@ -17,11 +17,7 @@ import {
 } from '../version-status';
 import { IconQuestionCircle } from '@arco-design/web-react/icon';
 import EllipsisPopover from '@/components/ellipsis-popover-com';
-import {
-  copyDevelopScript,
-  deleteOldDevelopScript,
-  getDevelopScriptLogByScriptId
-} from '@/api/sql';
+import { copyDevelopScript, deleteDevelopScript } from '@/api/sql-develop';
 
 const SctipModalTable: React.FC<{
   isVisible: boolean;
@@ -63,7 +59,7 @@ const SctipModalTable: React.FC<{
         script_id: record.script_id
       };
       try {
-        const res = await deleteOldDevelopScript({ ...params });
+        const res = await deleteDevelopScript({ ...params });
         if (res.status === 200) {
           Message.success({
             content: `删除成功`

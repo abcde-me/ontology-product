@@ -16,8 +16,8 @@ import { formatDateTime } from '../../utils';
 import getLabelByValue from '@/utils/getLabelByValue';
 import { IconRefresh } from '@arco-design/web-react/icon';
 import './ModalParamList.scss';
-import { listDevelopSystemParam } from '@/api/sql';
-import { ListDevelopSystemParamParams } from '@/types/sqlApi';
+import { ListDevelopSystemParamParams } from '@/types/sqlDevelopApi';
+import { listDevelopSystemParam } from '@/api/sql-develop';
 const FormItem = Form.Item;
 
 const defaultfileTypeList = [

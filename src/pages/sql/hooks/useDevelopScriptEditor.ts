@@ -401,7 +401,7 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
       try {
         const res = await editDevelopScript({
           script_name: currentFile?.title ?? generateSqlDefaultName(new Date()),
-          script_content: content,
+          script_context: content,
           script_id: Number(currentFile?.scriptId) ?? 0,
           script_params: scriptParams
         });
@@ -588,13 +588,13 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
             const fileData = response.data;
             // setLastScriptRunStatus(fileData?.run_status);
             // 更新编辑器内容
-            setEditorContent(fileData.script_content ?? '');
+            setEditorContent(fileData.script_context ?? '');
             setScriptParams(fileData.script_params ?? []);
 
             setScriptInfo({
               script_id: fileData.script_id,
               script_name: fileData.script_name,
-              script_content: fileData.script_content,
+              script_context: fileData.script_context,
               script_params: fileData.script_params,
               status: fileData.status,
               status_name: fileData.status_name,
@@ -612,7 +612,7 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
             // 通知父组件更新标签页内容
             if (onTabUpdate) {
               onTabUpdate(currentTab.key, {
-                content: fileData.script_content ?? '',
+                content: fileData.script_context ?? '',
                 fileId: String(currentTab.fileId),
                 scriptId: String(fileData.script_id),
                 title: currentTab.title
