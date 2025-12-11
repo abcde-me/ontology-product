@@ -435,17 +435,6 @@ export default function MetadataManagementDetail() {
                 />
               </Typography.Paragraph>
             </TabPane>
-            <TabPane key="partitionInfo" title="版本信息">
-              <Typography.Paragraph>
-                <Table
-                  className="mt-2"
-                  columns={partitionColumns}
-                  data={partitionData}
-                  border={false}
-                  noDataElement={noDataElement({ description: '暂无数据' })}
-                />
-              </Typography.Paragraph>
-            </TabPane>
           </Tabs>
         ) : (
           <Tabs defaultActiveTab="baseInfo">
@@ -551,17 +540,6 @@ export default function MetadataManagementDetail() {
               </Typography.Paragraph>
             </TabPane>
             <TabPane key="previewInfo" title="数据预览">
-              <Typography.Paragraph>
-                <Table
-                  className="mt-2"
-                  columns={previewInfoColumns}
-                  data={previewInfoData}
-                  border={false}
-                  noDataElement={noDataElement({ description: '暂无数据' })}
-                />
-              </Typography.Paragraph>
-            </TabPane>
-            <TabPane key="versionInfo" title="版本信息">
               <Typography.Paragraph>
                 <Table
                   className="mt-2"
