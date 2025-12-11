@@ -35,7 +35,8 @@ export const RunStateType = {
 };
 export enum Load {
   ONCE = 'once',
-  CRON = 'cron'
+  CRON = 'cron',
+  REALTIME = 'realtime'
 }
 export const LoadType = {
   [Load.ONCE]: {
@@ -45,6 +46,10 @@ export const LoadType = {
   [Load.CRON]: {
     text: '周期载入',
     value: 'cron'
+  },
+  [Load.REALTIME]: {
+    text: '实时载入',
+    value: 'realtime'
   }
 };
 export enum ConnectorType {

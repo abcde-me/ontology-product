@@ -96,3 +96,24 @@
     // border-top: 1px solid #e2e8f0;
   }
 }
+
+.previewText {
+  color: var(--text-color-text-4, #6e7b8d);
+  font-family: 'PingFang SC';
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 22px;
+  margin: 0 8px;
+}
+
+.previewBtn {
+  color: var(--primary-primary-6, #007dfa);
+  margin-left: 8px;
+  cursor: pointer;
+}
+
+.switchContent {
+  display: flex;
+  align-items: center;
+}

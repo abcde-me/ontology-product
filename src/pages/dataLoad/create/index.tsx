@@ -12,7 +12,8 @@ import {
   Tabs,
   Typography,
   Switch,
-  TreeSelect
+  TreeSelect,
+  Table
 } from '@arco-design/web-react';
 import { format } from 'sql-formatter';
 import React, {
@@ -30,7 +31,11 @@ import {
   checkSQL,
   CheckSQLStatus
 } from '@/api/loadApi';
-import { getConnectionList, getdetailList } from '@/api/connectionApi';
+import {
+  getConnectionList,
+  getdetailList,
+  PreviewConnectorSampleData
+} from '@/api/connectionApi';
 import { useHistory } from 'react-router';
 import { validateName } from '@/utils/valiate';
 import Uploads from '../list/file-upload';
@@ -48,6 +53,9 @@ import ValidateIcon from '../assets/validate-icon.svg';
 import RunFailedIcon from '@/assets/python/run-fail-icon.svg';
 import RunSuccessIcon from '@/assets/python/run-success-icon.svg';
 import classNames from 'classnames';
+import EditableTable from '../table-json';
+import PreviewModal from '../prev-modal';
+import { set } from 'immer/dist/internal';
 
 // 常量定义
 const ROUTES = {
@@ -59,12 +67,14 @@ const SOURCE_TYPES = {
   S3: 's3',
   HDFS: 'hdfs',
   DB: 'db',
-  LOCAL: 'local'
+  LOCAL: 'local',
+  MQ: 'mq'
 } as const;
 
 const LOAD_TYPES = {
   ONCE: 'once',
-  CRON: 'cron'
+  CRON: 'cron',
+  REALTIME: 'realtime'
 } as const;
 
 const SUBMIT_TYPES = {
@@ -90,6 +100,7 @@ WHERE t1.a=t2.a`;
 interface ConnectorOption {
   key: number;
   label: string;
+  subType?: string;
 }
 
 // 使用与 component-tree.tsx 兼容的类型定义
@@ -364,7 +375,12 @@ export default function DataLoadCreate() {
   const [checkMessage, setCheckMessage] = useState<string>('');
   const [selectedNodeType, setSelectedNodeType] =
     useState<TreeNodeData['type_name']>();
-
+  // 是否多选
+  const [isMultiple, setIsMultiple] = useState<boolean>(false);
+  const [previewVisible, setPreviewVisible] = useState(false);
+  const [previewData, setPreviewData]: any = useState({});
+  const [previewLoading, setPreviewLoading] = useState(false);
+  const [JSONTableData, setJSONTableData] = useState([]);
   // 处理树形数据的通用函数
   const processTreeData = useCallback(
     (
@@ -382,7 +398,6 @@ export default function DataLoadCreate() {
           console.warn('跳过无效项目:', item);
           continue;
         }
-
         const processedItem: TreeNodeData = {
           id: item.id,
           key: String(item.id),
@@ -641,6 +656,10 @@ export default function DataLoadCreate() {
       setTableSearchValue('');
       setConnectName([]);
       setSourceType(value);
+      form.setFieldsValue({
+        load_type:
+          value === SOURCE_TYPES.MQ ? LOAD_TYPES.REALTIME : LOAD_TYPES.ONCE
+      });
       // 清空绑定连接器
       form.setFieldsValue({ connector_id: undefined });
       // 清空相关状态
@@ -659,7 +678,12 @@ export default function DataLoadCreate() {
 
   // 构建表单数据
   const buildFormData = useCallback(
-    (formValues: FormValues, pathId: string | number, submitType: string) => {
+    (
+      formValues: FormValues,
+      pathId: string | number | null,
+      submitType: string,
+      currentTableData = JSONTableData
+    ) => {
       const processedTableNames = formValues.table_name || uploadedFiles;
 
       return {
@@ -679,10 +703,19 @@ export default function DataLoadCreate() {
           : [processedTableNames],
         db_name: sourceType === SOURCE_TYPES.DB ? tableNames : null,
         sql: formValues.sql_process_enabled === 'enable' ? formValues.sql : '',
-        path_type: selectedNodeType
+        path_type: selectedNodeType,
+        field_mappings: currentTableData || []
       };
     },
-    [sourceType, loadVal, expression, tableList, uploadedFiles, tableNames]
+    [
+      sourceType,
+      loadVal,
+      expression,
+      tableList,
+      uploadedFiles,
+      tableNames,
+      JSONTableData
+    ]
   );
 
   // 验证表单数据
@@ -1095,7 +1128,8 @@ export default function DataLoadCreate() {
           if (!cancelled && res.data?.items) {
             const newConnectName = res.data.items.map((item) => ({
               key: item.id,
-              label: item.name
+              label: item.name,
+              subType: item?.sub_type
             }));
             setConnectName(newConnectName);
           }
@@ -1198,6 +1232,50 @@ export default function DataLoadCreate() {
     };
   }, [form]);
 
+  // JSON开关
+  const [jsonParseEnabled, setJsonParseEnabled] = useState(false);
+  const json_parse = Form.useWatch('json_parse', form);
+  // 开关事件
+  const handleSwitchChange = (value: boolean) => {
+    setJsonParseEnabled(value);
+  };
+  const handlePreviewClick = () => {
+    setPreviewVisible(true);
+  };
+
+  const getData = (value) => {
+    setPreviewLoading(true);
+    const params = {
+      connector_id:
+        previewData?.connector_id || form.getFieldValue('connector_id'),
+      name: value.join()
+    };
+    try {
+      const res = PreviewConnectorSampleData({ ...params })
+        .then((res) => {
+          if (res?.status !== 200) {
+            Message.error(res?.message);
+          }
+          console.log(res, '123', res?.data?.columns, res?.data);
+          setPreviewData({
+            data: res?.data || [],
+            columns: res?.columns || []
+          });
+          setPreviewLoading(false);
+        })
+        .finally(() => {
+          setPreviewLoading(false);
+        });
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  const getTableData = (data) => {
+    if (data?.length > 0) {
+      setJSONTableData(data);
+    }
+  };
+
   return (
     <div className={classNames('h-full px-[20px] pt-[17px]')}>
       <div className="mb-[9px] text-[20px] font-bold leading-[30px]">
@@ -1255,6 +1333,7 @@ export default function DataLoadCreate() {
               <Radio value={SOURCE_TYPES.HDFS}>HDFS</Radio>
               <Radio value={SOURCE_TYPES.DB}>数据库</Radio>
               <Radio value={SOURCE_TYPES.LOCAL}>本地文件</Radio>
+              <Radio value={SOURCE_TYPES.MQ}>消息队列</Radio>
             </RadioGroup>
           </FormItem>
 
@@ -1269,9 +1348,23 @@ export default function DataLoadCreate() {
                 placeholder="请选择连接器"
                 showSearch
                 filterOption={filterOption}
+                onChange={(value, option: any) => {
+                  setPreviewData({
+                    ...previewData,
+                    connector_id: value
+                  });
+                  if (option?.prefixCls === 'Elasticsearch') {
+                    setIsMultiple(true);
+                  }
+                  setIsMultiple(false);
+                }}
               >
                 {connectName.map((option) => (
-                  <Option key={option.key} value={option.key}>
+                  <Option
+                    key={option.key}
+                    value={option.key}
+                    prefixCls={option.subType}
+                  >
                     {option.label}
                   </Option>
                 ))}
@@ -1440,75 +1533,130 @@ export default function DataLoadCreate() {
               </>
             )}
 
-          {sourceType === SOURCE_TYPES.DB && sqlProcessEnabled !== 'enable' && (
-            <FormItem
-              label="选择抽取的表："
-              field="table_name"
-              labelAlign="right"
-              rules={[{ required: true, message: '请选择抽取的表' }]}
-            >
-              <TreeSelect
-                onChange={(value) => {
-                  form.setFieldsValue({ table_name: value });
-                }}
-                loading={tableLoading}
-                multiple={selectedNodeType !== 'metadata'}
-                key={selectedNodeType}
-                treeCheckable={selectedNodeType !== 'metadata'}
-                maxTagCount={
-                  selectedNodeType !== 'metadata'
-                    ? {
-                        count: 2,
-                        render: (invisibleTagCount) => {
-                          const allTags =
-                            form.getFieldValue('table_name') || [];
-                          const remainingTags = allTags.slice(2);
-                          return (
-                            <Tooltip
-                              content={
-                                <div className="ml-[-4px] flex max-w-[300px] flex-wrap gap-1">
-                                  {remainingTags.map((item, i) => (
-                                    <Tag
-                                      key={i}
-                                      className="bg-[#E7ECF0] text-[14px] text-[#0F172A]"
-                                    >
-                                      {item}
-                                    </Tag>
-                                  ))}
-                                </div>
-                              }
-                            >
-                              +{invisibleTagCount}
-                            </Tooltip>
-                          );
+          {(sourceType === SOURCE_TYPES.DB || sourceType === SOURCE_TYPES.MQ) &&
+            sqlProcessEnabled !== 'enable' && (
+              <FormItem
+                label="选择抽取的表："
+                field="table_name"
+                labelAlign="right"
+                rules={[{ required: true, message: '请选择抽取的表' }]}
+              >
+                <TreeSelect
+                  onChange={(value) => {
+                    form.setFieldsValue({ table_name: value });
+                    getData(value);
+                  }}
+                  loading={tableLoading}
+                  multiple={selectedNodeType !== 'metadata'}
+                  key={selectedNodeType}
+                  treeCheckable={selectedNodeType !== 'metadata'}
+                  maxTagCount={
+                    selectedNodeType !== 'metadata'
+                      ? {
+                          count: 2,
+                          render: (invisibleTagCount) => {
+                            const allTags =
+                              form.getFieldValue('table_name') || [];
+                            const remainingTags = allTags.slice(2);
+                            return (
+                              <Tooltip
+                                content={
+                                  <div className="ml-[-4px] flex max-w-[300px] flex-wrap gap-1">
+                                    {remainingTags.map((item, i) => (
+                                      <Tag
+                                        key={i}
+                                        className="bg-[#E7ECF0] text-[14px] text-[#0F172A]"
+                                      >
+                                        {item}
+                                      </Tag>
+                                    ))}
+                                  </div>
+                                }
+                              >
+                                +{invisibleTagCount}
+                              </Tooltip>
+                            );
+                          }
                         }
-                      }
-                    : undefined
-                }
-                allowClear
-                placeholder="请选择抽取的表"
-                treeData={tableList}
-                treeProps={{
-                  virtualListProps: {
-                    height: 300
+                      : undefined
                   }
-                }}
-              />
-            </FormItem>
+                  allowClear
+                  placeholder="请选择抽取的表"
+                  treeData={tableList}
+                  treeProps={{
+                    virtualListProps: {
+                      height: 300
+                    }
+                  }}
+                />
+              </FormItem>
+            )}
+          {sourceType === SOURCE_TYPES.MQ && (
+            <div>
+              <FormItem
+                label="JSON解析："
+                initialValue={
+                  sourceType === SOURCE_TYPES.MQ
+                    ? LOAD_TYPES.REALTIME
+                    : LOAD_TYPES.ONCE
+                }
+                field="json_parse"
+                labelAlign="right"
+                rules={[{ required: true, message: '请选择载入形式' }]}
+              >
+                <div className={styles.switchContent}>
+                  {/* <Switch onChange={handleSwitchChange} /> */}
+                  <span className={styles.previewText}>
+                    以下为自动解析结果，请检查是否正确
+                    <span
+                      className={styles.previewBtn}
+                      onClick={handlePreviewClick}
+                    >
+                      预览
+                    </span>
+                  </span>
+                </div>
+              </FormItem>
+              {
+                <EditableTable
+                  getTableData={getTableData}
+                  loading={previewLoading}
+                  previewDataColumns={previewData}
+                />
+              }
+            </div>
           )}
 
           <FormItem
             label="载入形式："
-            initialValue={LOAD_TYPES.ONCE}
+            initialValue={
+              sourceType === SOURCE_TYPES.MQ
+                ? LOAD_TYPES.REALTIME
+                : LOAD_TYPES.ONCE
+            }
             field="load_type"
             labelAlign="right"
             rules={[{ required: true, message: '请选择载入形式' }]}
           >
-            <RadioGroup onChange={handleLoadTypeChange}>
-              <Radio value={LOAD_TYPES.ONCE}>单次载入</Radio>
+            <RadioGroup
+              value={sourceType === SOURCE_TYPES.MQ ? LOAD_TYPES.REALTIME : ''}
+              onChange={handleLoadTypeChange}
+            >
+              <Radio
+                disabled={sourceType === SOURCE_TYPES.MQ}
+                value={LOAD_TYPES.ONCE}
+              >
+                单次载入
+              </Radio>
               {sourceType !== SOURCE_TYPES.LOCAL && (
-                <Radio value={LOAD_TYPES.CRON}>周期载入</Radio>
+                <Radio
+                  disabled={sourceType === SOURCE_TYPES.MQ}
+                  value={LOAD_TYPES.CRON}
+                >
+                  周期载入
+                </Radio>
               )}
+              <Radio value={LOAD_TYPES.REALTIME}>实时载入</Radio>
             </RadioGroup>
           </FormItem>
 
@@ -1543,6 +1691,14 @@ export default function DataLoadCreate() {
           <Button onClick={handleCancel}>取消</Button>
         </div>
       </div>
+      <PreviewModal
+        loading={previewLoading}
+        previewData={previewData}
+        visible={previewVisible}
+        onOk={() => setPreviewVisible(false)}
+        onCancel={() => setPreviewVisible(false)}
+        setVisible={setPreviewVisible}
+      />
     </div>
   );
 }

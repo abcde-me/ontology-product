@@ -1,0 +1,29 @@
+.previewContent {
+  display: flex;
+  padding-bottom: 24px;
+
+  .jsonPreview {
+    margin-right: 24px;
+  }
+
+  .jsonTitle {
+    color: var(--text-color-text-1, #0f172a);
+    font-family: 'PingFang SC';
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 22px;
+    margin-bottom: 16px;
+  }
+
+  .jsonTextArea {
+    width: 440px;
+    height: calc(100% - 24px);
+  }
+
+  .previewCell {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}

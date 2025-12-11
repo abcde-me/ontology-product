@@ -25,3 +25,11 @@ export async function getdetailList(params) {
 export async function updataConnectionList(params: any) {
   return await UAPI.RES.editconnection({}).post(params).inRegion().do();
 }
+
+// 连接器预览数据
+export async function PreviewConnectorSampleData(params: any) {
+  return await UAPI.RES.PreviewConnectorSampleDataApi({})
+    .post(params)
+    .inRegion()
+    .do();
+}
