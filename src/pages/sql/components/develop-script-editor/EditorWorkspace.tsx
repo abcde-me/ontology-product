@@ -38,7 +38,6 @@ import copy from 'copy-to-clipboard';
 import { ScriptStatus } from '@/types/sqlDevelopApi';
 
 import SQLFormatIcon from '@/assets/sql/sql-format-ico.svg';
-import IconStop from '@/assets/sql/sql-stop-icon.svg';
 import { SQL_PERMISSIONS } from '@/config/permissions';
 import { useHasPermission } from '@/store/userInfoStore';
 import {
@@ -54,7 +53,6 @@ import ParameterSidebar from './ParameterSidebar';
 import SpecificationsModal from './SpecificationsModal';
 import { ScriptParam } from '@/types/sqlDevelopApi';
 import ReleaseIcon from '../../assets/release-icon.svg';
-// import { listDevelopSystemParam } from '@/api/sql';
 import dayjs from 'dayjs';
 
 interface NotebookWorkspaceProps {
@@ -79,7 +77,7 @@ const highlightParameterEffect = StateEffect.define<string | null>();
 // 创建参数高亮的装饰样式
 const parameterHighlightMark = Decoration.mark({
   class: 'cm-parameter-highlight',
-  attributes: { style: 'background-color: #FFE5B4; border-radius: 2px;' }
+  attributes: { style: 'background-color: rgba(0, 125, 250, 0.2);' }
 });
 
 // 存储当前高亮的参数名
@@ -183,17 +181,19 @@ const EditorWorkspaceContent: React.FC<{
       new Set()
     );
     const [editLoading, setEditLoading] = React.useState<boolean>(false);
+    const [saveLoading, setSaveLoading] = React.useState<boolean>(false);
 
     // 从 Context 获取编辑器状态
     const {
       scriptInfo,
+      setScriptInfo,
       runStatus,
       runDuration,
       runStartTime,
       handleStopRunCode,
       handleRunCode,
       lastAutoSave,
-      editorContent,
+      // editorContent,
       handleContentChange,
       handleSaveScript,
       handleEditScript,
@@ -203,10 +203,11 @@ const EditorWorkspaceContent: React.FC<{
       execid,
       isPanelOpen,
       handlePanelStateChange,
+      handleReleaseScript,
       getPrevRunStatus,
-      lastScriptRunStatus,
-      scriptParams,
-      setScriptParams
+      lastScriptRunStatus
+      // scriptParams,
+      // setScriptParams
     } = useEditorContext();
 
     // 处理参数hover事件
@@ -222,20 +223,27 @@ const EditorWorkspaceContent: React.FC<{
     // 处理参数变化：直接更新 scriptParams
     const handleParameterChange = useCallback(
       (params: ScriptParam[]) => {
-        setScriptParams(params);
+        setScriptInfo((prev) => {
+          if (!prev) return null;
+          return {
+            ...prev,
+            script_params: params
+          };
+        });
       },
-      [setScriptParams]
+      [setScriptInfo]
     );
 
     // 使用 useMemo 稳定 initialParams 的引用，避免不必要的重新渲染
     // 使用 JSON.stringify 来比较内容，而不是引用
-    const scriptParamsStr = useMemo(
-      () => JSON.stringify(scriptParams),
-      [scriptParams]
-    );
-    const initialParams = useMemo(() => {
-      return scriptParams;
-    }, [scriptParamsStr]);
+    // const scriptParamsStr = useMemo(
+    //   () => JSON.stringify(scriptParams),
+    //   [scriptParams]
+    // );
+    // const initialParams = useMemo(() => {
+    //   console.log('scriptParams-----', scriptParams);
+    //   return scriptParams;
+    // }, [scriptParamsStr]);
 
     useEffect(() => {
       form.setFieldsValue({
@@ -283,9 +291,11 @@ const EditorWorkspaceContent: React.FC<{
         return;
       }
 
-      if (editorContent) {
+      if (scriptInfo?.script_context) {
         try {
-          const formattedCode = format(editorContent, { language: 'sql' });
+          const formattedCode = format(scriptInfo?.script_context ?? '', {
+            language: 'sql'
+          });
           handleContentChange(formattedCode);
           Message.success('格式化成功');
         } catch (e) {
@@ -356,8 +366,8 @@ const EditorWorkspaceContent: React.FC<{
 
     // 处理复制脚本
     const handleCopyScript = () => {
-      if (editorContent) {
-        const success = copy(editorContent);
+      if (scriptInfo?.script_context) {
+        const success = copy(scriptInfo?.script_context ?? '');
         if (success) {
           Message.success('复制成功');
         } else {
@@ -380,10 +390,16 @@ const EditorWorkspaceContent: React.FC<{
       setEditLoading(false);
     };
 
-    // 格式化时间显示
-    const formatTime = (timeStr?: string) => {
-      return dayjs(timeStr).format('YYYY-MM-DD HH:mm:ss');
+    const handleSave = async () => {
+      setSaveLoading(true);
+      await handleSaveScript(scriptInfo?.script_context ?? '');
+      setSaveLoading(false);
     };
+
+    // 格式化时间显示
+    // const formatTime = (timeStr?: string) => {
+    //   return dayjs(timeStr).format('YYYY-MM-DD HH:mm:ss');
+    // };
 
     // 根据状态判断是否可编辑
     // 如果没有 scriptInfo，默认视为编辑状态且可编辑（新创建的脚本）
@@ -483,33 +499,23 @@ const EditorWorkspaceContent: React.FC<{
             </div>
             <div className={styles['toolbar-right']}>
               {/* 保存时间 - 始终显示 */}
-              {lastAutoSave && (
+              {scriptInfo?.update_time && (
                 <div className={styles['toolbar-right-item']}>
                   <Space size={12}>
                     <span className="text-sm text-gray-500">
-                      保存时间: {lastAutoSave || '未保存'}
+                      保存时间:{' '}
+                      {dayjs(scriptInfo?.update_time).format(
+                        'YYYY-MM-DD HH:mm:ss'
+                      ) || '未保存'}
                     </span>
                   </Space>
                 </div>
               )}
-              {curActiveTab === 'data' && (
-                <Button
-                  onClick={() => {
-                    handleSeeScriptList();
-                  }}
-                  className={styles['btn-script-list']}
-                  disabled={runStatus === RunningStatus.RUNNING}
-                  icon={<IconStorage />}
-                >
-                  脚本列表
-                </Button>
-              )}
               {/* 保存按钮 - status=0且isSelfEditing=true时可用，否则置灰 */}
               <Button
                 className={classNames(styles['btn-save'], 'mr-[8px]')}
-                onClick={() => {
-                  handleSaveScript(editorContent);
-                }}
+                loading={saveLoading}
+                onClick={handleSave}
                 disabled={!canEdit}
                 icon={<IconSave />}
               >
@@ -560,19 +566,21 @@ const EditorWorkspaceContent: React.FC<{
             <div className={styles['toolbar-left']}>
               <Space size={12}>
                 <span className="text-sm">已发版</span>
-              </Space>
-            </div>
-            <div className={styles['toolbar-right']}>
-              <Space size={12}>
                 <span className="text-sm text-gray-500">
                   发版人: {scriptInfo?.release_user || '-'}
                 </span>
                 <span className="text-sm text-gray-500">
                   发版时间:{' '}
                   {scriptInfo?.release_time
-                    ? formatTime(scriptInfo.release_time)
+                    ? dayjs(scriptInfo.release_time).format(
+                        'YYYY-MM-DD HH:mm:ss'
+                      )
                     : '-'}
                 </span>
+              </Space>
+            </div>
+            <div className={styles['toolbar-right']}>
+              <Space size={12}>
                 <Button
                   className={styles['btn-save']}
                   onClick={handleCopyScript}
@@ -593,19 +601,21 @@ const EditorWorkspaceContent: React.FC<{
             <div className={styles['toolbar-left']}>
               <Space size={12}>
                 <span className="text-sm">调度中</span>
-              </Space>
-            </div>
-            <div className={styles['toolbar-right']}>
-              <Space size={12}>
                 <span className="text-sm text-gray-500">
                   发版人: {scriptInfo?.release_user || '-'}
                 </span>
                 <span className="text-sm text-gray-500">
                   发版时间:{' '}
                   {scriptInfo?.release_time
-                    ? formatTime(scriptInfo.release_time)
+                    ? dayjs(scriptInfo.release_time).format(
+                        'YYYY-MM-DD HH:mm:ss'
+                      )
                     : '-'}
                 </span>
+              </Space>
+            </div>
+            <div className={styles['toolbar-right']}>
+              <Space size={12}>
                 <Button
                   className={styles['btn-save']}
                   onClick={handleCopyScript}
@@ -651,7 +661,7 @@ const EditorWorkspaceContent: React.FC<{
           >
             <CodeMirror
               ref={editorRef}
-              value={editorContent}
+              value={scriptInfo?.script_context ?? ''}
               onChange={handleContentChange}
               placeholder={placeholderValue}
               readOnly={
@@ -686,12 +696,13 @@ const EditorWorkspaceContent: React.FC<{
           {
             // sidebarVisible && (
             <ParameterSidebar
-              content={editorContent}
+              canEdit={scriptInfo?.isSelfEditing ?? false}
+              content={scriptInfo?.script_context ?? ''}
               onParameterChange={handleParameterChange}
               onVisibleChange={setSidebarVisible}
               onCollapsedChange={setSidebarCollapsed}
               onParameterHover={handleParameterHover}
-              initialParams={initialParams}
+              initialParams={scriptInfo?.script_params ?? []}
               systemParamKeys={systemParamKeys}
             />
             // )
@@ -756,16 +767,17 @@ const EditorWorkspaceContent: React.FC<{
           <ReleaseVersionModal
             visible={releaseVersionVisible}
             onCancel={() => setReleaseVersionVisible(false)}
-            onSubmit={(values) => {
-              // TODO: 调用发布版本API
-              console.log('发布版本数据:', values);
-              Message.success('发布版本成功');
-              setReleaseVersionVisible(false);
+            onSubmit={async (values) => {
+              const res = await handleReleaseScript(values.versionDesc ?? '');
+              if (res) {
+                // 成功再关闭弹窗
+                setReleaseVersionVisible(false);
+              }
             }}
             initialValues={{
-              scriptName: fileName,
-              version: 'V1',
-              versionDesc: ''
+              scriptName: scriptInfo?.script_name || '',
+              version: scriptInfo?.max_version_name || 'V1',
+              versionDesc: scriptInfo?.script_desc ?? ''
             }}
           />
         )}
