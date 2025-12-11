@@ -25,17 +25,7 @@ import {
   ListDevelopScriptParamsData,
   GetDevelopScriptLogByScriptIdData,
   ListDevelopScriptLogByKeyData,
-  ListSqlFileParams,
-  ListDevelopSystemParamParams,
-  ListDevelopSystemParamParamsData,
-  UpdateDevelopSystemParamParams,
-  // getDevelopStandardsData,
-  CopyDevelopScriptParams,
-  DeleteDevelopScriptParams,
-  SearchDevelopScriptLogByKeyParams,
-  SearchDevelopScriptLogByKeyData,
-  DeleteDevelopScriptLogByVersionParams,
-  RenameDevelopScriptParams
+  ListSqlFileParams
 } from '@/types/sqlApi';
 import { AxiosResponse } from 'axios';
 
@@ -250,38 +240,6 @@ export async function getDevelopScriptLogByScriptId(
     .inRegion()
     .do();
 }
-/** 历史版本复制 */
-export async function copyDevelopScript(
-  params: CopyDevelopScriptParams
-): Promise<ApiRes<{}>> {
-  return await UAPI.RES.OldGetDevelopScriptLogByVersionApi({})
-    .post({ ...params })
-    .inRegion()
-    .do();
-}
-// 历史版本删除
-export async function deleteOldDevelopScript(
-  params: DeleteDevelopScriptParams
-): Promise<ApiRes<{}>> {
-  return await UAPI.RES.DeleteDevelopScriptLogApi({})
-    .post({ ...params })
-    .inRegion()
-    .do();
-}
-// 删除开发脚本
-export async function deleteDevelopScript(id: number): Promise<ApiRes<{}>> {
-  return await UAPI.RES.DeleteDevelopScriptApi({})
-    .post({ script_id: Number(id) })
-    .inRegion()
-    .do();
-}
-// 锁定开发脚本
-export async function lockDevelopScript(id: number): Promise<ApiRes<{}>> {
-  return await UAPI.RES.LockDevelopScriptApi({})
-    .post({ script_id: Number(id) })
-    .inRegion()
-    .do();
-}
 // 获取开发脚本卡片内容
 export async function listDevelopScriptLogByKeyApi(
   params
@@ -304,74 +262,44 @@ export async function deleteSqlFile(id: number): Promise<ApiRes<{}>> {
     .inRegion()
     .do();
 }
-// 参数列表表格
-export async function listDevelopSystemParam(
-  params: ListDevelopSystemParamParams
-): Promise<ApiRes<ListDevelopSystemParamParamsData>> {
-  return await UAPI.RES.ListDevelopSystemParamApi({})
-    .post(params)
-    .inRegion()
-    .do();
-}
-// 开发规范查看
-export async function getDevelopStandards(params): Promise<ApiRes<string>> {
-  return await UAPI.RES.GetDevelopStandardsApi({}).post().inRegion().do();
-}
-// 开发规范保存
-export async function updateDevelopSystemParam(
-  params: UpdateDevelopSystemParamParams
-): Promise<ApiRes<{}>> {
-  return await UAPI.RES.UpdateDevelopSystemParamApi({})
-    .post(params)
-    .inRegion()
-    .do();
-}
+// // 参数列表表格
+// export async function listDevelopSystemParam(
+//   params: ListDevelopSystemParamParams
+// ): Promise<ApiRes<ListDevelopSystemParamParamsData>> {
+//   return await UAPI.RES.ListDevelopSystemParamApi({})
+//     .post(params)
+//     .inRegion()
+//     .do();
+// }
+// // 开发规范查看
+// export async function getDevelopStandards(params): Promise<ApiRes<string>> {
+//   return await UAPI.RES.GetDevelopfStandardsApi({}).post().inRegion().do();
+// }
+// // 开发规范保存
+// export async function updateDevelopSystemParam(
+//   params: UpdateDevelopSystemParamParams
+// ): Promise<ApiRes<{}>> {
+//   return await UAPI.RES.UpdateDevelopSystemParamApi({})
+//     .post(params)
+//     .inRegion()
+//     .do();
+// }
 
-// 脚本内容搜索
-export async function getDevelopScriptLogByVersion(
-  params: SearchDevelopScriptLogByKeyParams
-): Promise<ApiRes<SearchDevelopScriptLogByKeyData>> {
-  return await UAPI.RES.GetDevelopScriptLogByVersionApi({})
-    .post(params)
-    .inRegion()
-    .do();
-}
-// 脚本内容 删除
-export async function deleteDevelopScriptLogByVersion(
-  params: DeleteDevelopScriptLogByVersionParams
-): Promise<ApiRes<{}>> {
-  return await UAPI.RES.DeleteDevelopScriptLogByVersionApi({})
-    .post(params)
-    .inRegion()
-    .do();
-}
-// 加工脚本列表 - 新建
-export async function createDevelopSqlScript(
-  params: CreateSqlScriptParams
-): Promise<ApiRes<{}>> {
-  return await UAPI.RES.CreateDevelopScriptApi({}).post(params).inRegion().do();
-}
-// 加工脚本列表 - 重命名
-export async function renameDevelopScript(
-  params: RenameDevelopScriptParams
-): Promise<ApiRes<{}>> {
-  return await UAPI.RES.RenameDevelopScriptApi({}).post(params).inRegion().do();
-}
-// 加工脚本列表 - 复制
-export async function copyDevelopScriptList(params: {
-  script_id?: number; // 脚本id
-}): Promise<ApiRes<{}>> {
-  return await UAPI.RES.CopyDevelopScriptApi({})
-    .post({ ...params })
-    .inRegion()
-    .do();
-}
-// 加工脚本列表 - 删除
-export async function deleteDevelopScriptList(params: {
-  script_id?: number; // 脚本id
-}): Promise<ApiRes<{}>> {
-  return await UAPI.RES.DeleteDevelopScriptNewApi({})
-    .post({ ...params })
-    .inRegion()
-    .do();
-}
+// // 脚本内容搜索
+// export async function getDevelopScriptLogByVersion(
+//   params: SearchDevelopScriptLogByKeyParams
+// ): Promise<ApiRes<SearchDevelopScriptLogByKeyData>> {
+//   return await UAPI.RES.GetDevelopScriptLogByVersionApi({})
+//     .post(params)
+//     .inRegion()
+//     .do();
+// }
+// // 脚本内容 删除
+// export async function deleteDevelopScriptLogByVersion(
+//   params: DeleteDevelopScriptLogByVersionParams
+// ): Promise<ApiRes<{}>> {
+//   return await UAPI.RES.DeleteDevelopScriptLogByVersionApi({})
+//     .post(params)
+//     .inRegion()
+//     .do();
+// }

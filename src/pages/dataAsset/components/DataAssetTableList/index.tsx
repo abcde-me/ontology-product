@@ -117,7 +117,7 @@ const DataAssetTableList: React.FC<DataAssetTableListProps> = ({
             total={total}
             showTotal
             showJumper
-            sizeOptions={[10, 20, 50, 100]}
+            sizeOptions={[10, 50, 500, 1000]}
             sizeCanChange
             onChange={handlePageChange}
           />

@@ -447,6 +447,8 @@ export const ModaForgeResourceEndpoints = {
   DeleteDevelopScriptApi: PrefixAimdp + '/DeleteDevelopScript',
   // 锁定加工脚本
   LockDevelopScriptApi: PrefixAimdp + '/LockDevelopScript',
+  // 解锁加工脚本
+  UnlockDevelopScriptApi: PrefixAimdp + '/UnlockDevelopScript',
   // 获取加工脚本卡片内容
   ListDevelopScriptLogByKeyApi: PrefixAimdp + '/ListDevelopScriptLogByKey',
   // 内容卡片 - 删除卡片内容
@@ -471,8 +473,6 @@ export const ModaForgeResourceEndpoints = {
   RenameDevelopScriptApi: PrefixAimdp + '/RenameDevelopScript',
   // 复制加工脚本列表  - 复制
   CopyDevelopScriptApi: PrefixAimdp + '/CopyDevelopScript',
-  // 删除加工脚本列表  - 删除
-  DeleteDevelopScriptNewApi: PrefixAimdp + '/DeleteDevelopScript',
 
   // 数据资产接口
   // 查询数据资产表字段和映射关系

@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Modal, Button, Input, Message, Spin } from '@arco-design/web-react';
-import { getDevelopStandards, updateDevelopSystemParam } from '@/api/sql';
+import {
+  getDevelopStandards,
+  updateDevelopSystemParam
+} from '@/api/sql-develop';
 
 const { TextArea } = Input;
 
@@ -122,7 +125,7 @@ const SpecificationsModal: React.FC<SpecificationsModalProps> = ({
               <div className="flex items-center">
                 <Button
                   onClick={handleCancel}
-                  className="mr-2 h-6 w-[52px] px-2"
+                  className="mr-[8px] h-[24px] px-2"
                   disabled={saving}
                 >
                   取消
@@ -130,7 +133,7 @@ const SpecificationsModal: React.FC<SpecificationsModalProps> = ({
                 <Button
                   onClick={handleSave}
                   type="primary"
-                  className="h-6 w-[52px] px-2"
+                  className="h-[24px] px-2"
                   loading={saving}
                 >
                   确定

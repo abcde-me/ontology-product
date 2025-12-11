@@ -38,11 +38,7 @@ import ModalParamList from '../data-manager/ModalParamList';
 import ScriptUpBtn from '@/assets/sql/script-up-btn.svg';
 import ScriptSaveBtn from '@/assets/sql/script-save-btn.svg';
 import DrawerContent from '../drawer-content';
-import {
-  getDevelopStandards,
-  updateDevelopSystemParam,
-  updateSqlScript
-} from '@/api/sql';
+import { updateSqlScript } from '@/api/sql';
 interface NotebookWorkspaceProps {
   content: string;
   fileName: string;

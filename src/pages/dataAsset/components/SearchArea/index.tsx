@@ -294,54 +294,117 @@ export default function SearchArea({
     let fieldType = field.type;
     if (isTagsField(field.nameEn)) {
       const tagOptions = (field.values || []).filter(isBaseTagOption);
-      const treeData = tagOptions.map((tag) => ({
-        key: tag.id,
-        value: tag.id,
-        title: tag.name,
-        selectable: false,
-        checkable: false,
-        disableCheckbox: true,
-        children: (tag.valueList || []).map((item: TagValueItem) => ({
-          key: item.id,
-          value: item.tagValue,
-          title: item.tagValue
-        }))
-      }));
+
+      // 收集所有可勾选的子节点值
+      const allSelectableValues: string[] = [];
+      // 创建 ID 到标签名的映射
+      const idToTagValueMap: Record<string, string> = {};
+      const treeData = tagOptions.map((tag) => {
+        const children = (tag.valueList || []).map((item: TagValueItem) => {
+          allSelectableValues.push(item.id);
+          idToTagValueMap[item.id] = item.tagValue;
+          return {
+            key: item.id,
+            value: item.tagValue,
+            title: item.tagValue
+          };
+        });
+        return {
+          key: tag.id,
+          value: tag.id,
+          title: tag.name,
+          selectable: false,
+          checkable: false,
+          disableCheckbox: true,
+          children
+        };
+      });
+
+      // 添加全选节点到树数据的最前面
+      const selectAllNodeKey = `__select_all_${field.id}__`;
+      const treeDataWithSelectAll = [
+        {
+          key: selectAllNodeKey,
+          value: selectAllNodeKey,
+          title: '全选',
+          selectable: false,
+          checkable: true, // 允许显示复选框
+          disableCheckbox: false, // 启用复选框
+          isSelectAllNode: true,
+          allSelectableValues
+        },
+        ...treeData
+      ];
+
+      // 计算当前应该显示的 value（包含全选节点状态）
+      const currentValue = Array.isArray(value) ? value : [];
+      const isAllSelected =
+        allSelectableValues.length > 0 &&
+        allSelectableValues.every((val) => currentValue.includes(val));
+      const displayValue = isAllSelected
+        ? [...currentValue, selectAllNodeKey]
+        : currentValue;
 
       return (
         <TreeSelect
           placeholder={`请选择${field.nameZh}`}
           className={styles['dropdown-select']}
-          value={Array.isArray(value) ? value : []}
+          value={displayValue}
           multiple
           treeCheckable
           treeCheckedStrategy="child"
-          treeData={treeData}
+          treeData={treeDataWithSelectAll}
           onChange={(val) => {
-            const nextValue = Array.isArray(val)
-              ? val
-              : val !== undefined && val !== null
-                ? [val]
-                : [];
+            console.log('val', val);
+            const selectedValues = Array.isArray(val) ? val : [];
+            const hasSelectAll = selectedValues.includes(selectAllNodeKey);
+            const hasSelectAllBefore = displayValue.includes(selectAllNodeKey);
+
+            // 过滤掉全选节点的值，获取实际选中的子节点值
+            const actualSelectedValues = selectedValues.filter(
+              (v) => v !== selectAllNodeKey
+            );
+
+            let nextValue: string[];
+
+            if (hasSelectAll && !hasSelectAllBefore) {
+              console.log(
+                '全选节点被勾选，选中所有子节点',
+                allSelectableValues
+              );
+              // 全选节点被勾选，选中所有子节点
+              nextValue = [...allSelectableValues];
+            } else if (!hasSelectAll && hasSelectAllBefore) {
+              // 全选节点被取消勾选，取消所有子节点
+              nextValue = [];
+            } else {
+              // 其他情况（用户操作子节点），使用实际选中的子节点值
+              nextValue = actualSelectedValues;
+            }
+
             handleFieldValueChange(field.id, nextValue);
           }}
           maxTagCount={{
             count: 2,
             render: (invisibleTagCount) => {
-              const remainingTags = value.slice(2);
+              const remainingTags = Array.isArray(value) ? value.slice(2) : [];
               return (
                 <Tooltip
                   content={
                     <div className="ml-[-4px] flex max-w-[300px] flex-wrap gap-1">
-                      {remainingTags.map((item, i) => (
-                        <Tag
-                          key={i}
-                          className="bg-[#E7ECF0] text-[14px] text-[#0F172A]"
-                          // className={classNames(styles['tag'])}
-                        >
-                          {item}
-                        </Tag>
-                      ))}
+                      {remainingTags.map((itemId, i) => {
+                        // 将 ID 转换为标签名显示
+                        const tagName = idToTagValueMap[itemId] || itemId;
+                        return (
+                          <Tag
+                            key={i}
+                            className="bg-[#E7ECF0] text-[14px] text-[#0F172A]"
+                            // className={classNames(styles['tag'])}
+                          >
+                            {tagName}
+                          </Tag>
+                        );
+                      })}
                     </div>
                   }
                 >
