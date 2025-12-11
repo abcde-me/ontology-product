@@ -47,7 +47,10 @@ const ICON_CONTAINER_BG_COLOR_MAP: Record<string, string> = {
   [BlockEnum.Cleaning]: 'bg-util-colors-cyan-cyan-500',
   [BlockEnum.Enhancement]: 'bg-util-colors-cyan-cyan-500',
   [BlockEnum.Customize]: 'bg-util-colors-cyan-cyan-500',
-  [BlockEnum.End]: 'bg-util-colors-warning-warning-500'
+  [BlockEnum.End]: 'bg-util-colors-warning-warning-500',
+  [BlockEnum.SQL]: 'bg-util-colors-warning-warning-350',
+  [BlockEnum.Seatunnel]: 'bg-util-colors-blue-brand-blue-brand-450',
+  [BlockEnum.Dependent]: 'bg-util-colors-green-green-350'
 };
 const BlockIcon: FC<BlockIconProps> = ({
   type,

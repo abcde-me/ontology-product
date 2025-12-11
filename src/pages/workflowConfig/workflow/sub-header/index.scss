@@ -1,13 +1,13 @@
 .app-workflow-page {
   .app-workflow-page-sub-header {
-    top: calc(56px + 20px);
-    left: 20px;
     background: #ffffff;
     box-shadow: 0 4px 16px 0 rgba(0, 0, 0, 0.06);
     border-radius: 12px;
     padding: 8px 16px;
     display: flex;
     align-items: center;
+    pointer-events: auto;
+
     .separator {
       width: 1px;
       height: 20px;
@@ -15,6 +15,7 @@
       margin-left: 12px;
       margin-right: 12px;
     }
+
     .add-node-btn {
       width: 72px;
       height: 32px;
@@ -32,18 +33,22 @@
       line-height: 18px;
       font-weight: 600;
     }
+
     .add-node-btn-disable {
       color: #94a3b8;
       border-color: #94a3b8;
     }
+
     .add-node-btn-normal {
       color: #007dfa;
       border-color: #007dfa;
     }
+
     .add-node-btn-normal:hover {
       color: rgba(67, 141, 251, 1);
       border-color: rgba(67, 141, 251, 1);
     }
+
     .zoom-in-out-tools {
       .zoom-txt {
         font-family: PingFangSC-Medium;
@@ -55,6 +60,7 @@
         width: 30px;
       }
     }
+
     .run-action-btn {
       cursor: pointer;
       margin-left: 12px;
@@ -70,10 +76,12 @@
       line-height: 18px;
       font-weight: 600;
       border-radius: 4px;
+
       .play-icon {
         width: 16px;
         height: 16px;
       }
+
       &.is-running {
         pointer-events: none;
         opacity: 0.5;

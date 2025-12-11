@@ -205,7 +205,6 @@ const EditorWorkspaceContent: React.FC<{
       });
     }, []);
     const handleSeeScriptList = () => {
-      console.log(123, onToScriptList);
       if (onToScriptList) {
         onToScriptList('script');
       }

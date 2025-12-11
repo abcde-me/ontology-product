@@ -26,7 +26,6 @@ const BaseNode: FC<BaseNodeProps> = ({ id, data, children }) => {
   const { nodesReadOnly } = useNodesReadOnly();
   const { handleNodeIterationChildSizeChange } = useNodeIterationInteractions();
   const { handleNodeLoopChildSizeChange } = useNodeLoopInteractions();
-
   useEffect(() => {
     if (nodeRef.current && data.selected && data.isInIteration) {
       const resizeObserver = new ResizeObserver(() => {

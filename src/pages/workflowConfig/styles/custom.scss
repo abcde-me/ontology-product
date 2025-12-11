@@ -1,4 +1,6 @@
 .app-workflow-page {
+  position: relative;
+
   .app-workflow-page-footer {
     padding-left: 24px;
     bottom: 0px;
@@ -9,9 +11,10 @@
 
   .app-workflow-page-panels {
     position: fixed;
-    top: calc(10px + 56px);
+    top: 116px;
     right: 10px;
     bottom: 10px;
+    height: calc(100vh - 126px);
     box-shadow: 0 4px 16px 0 rgba(0, 0, 0, 0.06);
     border-radius: 12px;
     display: flex;
@@ -301,6 +304,7 @@
     display: none;
   }
 
+  /*这里是工作流节点的节点icon，class名需要和节点类型(BlockEnum)进行对应*/
   &.start {
     background-image: url('./images/node-icons/StartIcon.svg');
   }
@@ -335,6 +339,18 @@
 
   &.scripting {
     background-image: url('./images/node-icons/ScriptingIcon.svg');
+  }
+
+  &.spark_sql {
+    background-image: url('./images/node-icons/SQLIcon.svg');
+  }
+
+  &.seatunnel {
+    background-image: url('./images/node-icons/DataPushIcon.svg');
+  }
+
+  &.dependent {
+    background-image: url('./images/node-icons/OutTaskIcon.svg');
   }
 }
 

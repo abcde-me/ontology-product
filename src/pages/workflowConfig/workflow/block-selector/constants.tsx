@@ -51,6 +51,34 @@ export const BLOCKS: Block[] = [
   }
 ];
 
+// 结构化画布节点
+const STRUCTURED_NODES: Block[] = [
+  {
+    classification: BlockClassificationEnum.Default,
+    type: BlockEnum.SQL,
+    title: 'SQL开发'
+  },
+  {
+    classification: BlockClassificationEnum.Default,
+    type: BlockEnum.Seatunnel,
+    title: '数据推送'
+  },
+  {
+    classification: BlockClassificationEnum.Default,
+    type: BlockEnum.Dependent,
+    title: '外部前置任务'
+  }
+];
+
 export const BLOCK_CLASSIFICATIONS: string[] = [
   BlockClassificationEnum.Default
 ];
+
+/**
+ * 不同工作流类型展示不同的节点
+ * 后续可能会有其他扩展
+ */
+export const FLOW_TYPE2BLOCKS_CONF: Record<string, Block[]> = {
+  no_struct: BLOCKS,
+  struct: STRUCTURED_NODES
+};

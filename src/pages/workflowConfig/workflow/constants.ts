@@ -28,6 +28,8 @@ import VideoParserDefault from './nodes/data-video-parser/default';
 import CleaningDefault from './nodes/data-cleaning/default';
 import EnhancementDefault from './nodes/data-enhancement/default';
 import CustomizeDefault from './nodes/data-customize/default';
+import SQLNodeDefault from './nodes/sql-node/default';
+import SeatunnelNodeDefault from './nodes/seatunnel-node/default';
 
 type NodesExtraData = {
   author: string;
@@ -292,8 +294,41 @@ export const NODES_EXTRA_DATA: Record<any, NodesExtraData> = {
     getAvailablePrevNodes: CustomizeDefault.getAvailablePrevNodes,
     getAvailableNextNodes: CustomizeDefault.getAvailableNextNodes,
     checkValid: CustomizeDefault.checkValid
+  },
+  [BlockEnum.SQL]: {
+    author: 'ModaForge',
+    about: '',
+    availablePrevNodes: [],
+    availableNextNodes: [],
+    getAvailablePrevNodes: SQLNodeDefault.getAvailablePrevNodes,
+    getAvailableNextNodes: SQLNodeDefault.getAvailableNextNodes,
+    checkValid: SQLNodeDefault.checkValid
+  },
+  [BlockEnum.Seatunnel]: {
+    author: 'ModaForge',
+    about: '',
+    availablePrevNodes: [],
+    availableNextNodes: [],
+    getAvailablePrevNodes: CustomizeDefault.getAvailablePrevNodes,
+    getAvailableNextNodes: CustomizeDefault.getAvailableNextNodes,
+    checkValid: CustomizeDefault.checkValid
+  },
+  [BlockEnum.Dependent]: {
+    author: 'ModaForge',
+    about: '',
+    availablePrevNodes: [],
+    availableNextNodes: [],
+    getAvailablePrevNodes: CustomizeDefault.getAvailablePrevNodes,
+    getAvailableNextNodes: CustomizeDefault.getAvailableNextNodes,
+    checkValid: CustomizeDefault.checkValid
   }
 };
+
+export const STRUCT_FLOW_NODES = [
+  BlockEnum.SQL,
+  BlockEnum.Seatunnel,
+  BlockEnum.Dependent
+];
 
 export const NODES_INITIAL_DATA = {
   // [BlockEnum.Answer]: {
@@ -483,6 +518,24 @@ export const NODES_INITIAL_DATA = {
     title: '',
     desc: '',
     ...CustomizeDefault.defaultValue
+  },
+  [BlockEnum.SQL]: {
+    type: BlockEnum.SQL,
+    title: '',
+    desc: '',
+    ...SQLNodeDefault.defaultValue
+  },
+  [BlockEnum.Dependent]: {
+    type: BlockEnum.Dependent,
+    title: '',
+    desc: '',
+    ...SQLNodeDefault.defaultValue
+  },
+  [BlockEnum.Seatunnel]: {
+    type: BlockEnum.Seatunnel,
+    title: '',
+    desc: '',
+    ...SeatunnelNodeDefault.defaultValue
   }
 };
 export const MAX_ITERATION_PARALLEL_NUM = 10;
@@ -540,9 +593,7 @@ export const RETRIEVAL_OUTPUT_STRUCT = `{
   }
 }`;
 
-export const SUPPORT_OUTPUT_VARS_NODE = [
-  BlockEnum.Start
-];
+export const SUPPORT_OUTPUT_VARS_NODE = [BlockEnum.Start];
 
 export const LLM_OUTPUT_STRUCT: Var[] = [
   {

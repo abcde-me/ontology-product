@@ -9,6 +9,9 @@ import { createWorkflowDraft } from '@/api/workflowV2';
 import { PrefixV2, PrefixAimdp } from '@/api/endpoints';
 import { updateQueryParams, useParams } from '@/utils/url';
 import { useHistory } from 'react-router';
+import { flowIsStruct } from '@/pages/workflowConfig/workflow/utils';
+import { Message } from '@arco-design/web-react';
+import { useParams as useRouterParams } from 'react-router-dom';
 
 export const useNodesSyncDraft = () => {
   const store = useStoreApi();
@@ -24,7 +27,8 @@ export const useNodesSyncDraft = () => {
   const appId = useParams('workflow_uuid');
   const dsAppId = useParams('ds_workflow_id');
   const workflowVersion = useParams('workflow_version');
-
+  const { type: flowType = 'no_struct' } =
+    useRouterParams<Record<string, string>>();
   const getPostParams = useCallback(() => {
     const { getNodes, edges, transform } = store.getState();
     const [x, y, zoom] = transform;
@@ -40,8 +44,8 @@ export const useNodesSyncDraft = () => {
       const hasStartNode = nodes.find(
         (node) => node.data.type === BlockEnum.Start
       );
-
-      if (!hasStartNode) return;
+      const isStruct = flowIsStruct(nodes);
+      if (!hasStartNode && !isStruct) return;
 
       const features = {} as any;
       const producedNodes = produce(nodes, (draft) => {
@@ -85,7 +89,8 @@ export const useNodesSyncDraft = () => {
           },
           environment_variables: environmentVariables,
           conversation_variables: conversationVariables,
-          hash: syncWorkflowDraftHash
+          hash: syncWorkflowDraftHash,
+          workflow_type: flowType
         }
       };
     }
@@ -107,7 +112,7 @@ export const useNodesSyncDraft = () => {
     async (
       notRefreshWhenSyncError?: boolean,
       callback?: {
-        onSuccess?: () => void;
+        onSuccess?: (res: any) => void;
         onError?: () => void;
         onSettled?: () => void;
       },
@@ -117,8 +122,8 @@ export const useNodesSyncDraft = () => {
       console.log('节点是否是只读的：', isNodesReadOnly);
       if (isNodesReadOnly) return;
       const postParams = getPostParams();
-
-      if (postParams) {
+      // 当前画布存在节点时才能保存
+      if (postParams && !!postParams.params.graph.nodes.length) {
         const { setSyncWorkflowDraftHash, setDraftUpdatedAt } =
           workflowStore.getState();
         try {
@@ -133,7 +138,7 @@ export const useNodesSyncDraft = () => {
           updateQueryParams(history, {
             ds_workflow_id: res.ds_workflow_id
           });
-          callback?.onSuccess && callback.onSuccess();
+          callback?.onSuccess?.(res);
         } catch (error: any) {
           if (error && error.json && !error.bodyUsed) {
             error.json().then((err: any) => {
@@ -148,6 +153,8 @@ export const useNodesSyncDraft = () => {
         } finally {
           callback?.onSettled && callback.onSettled();
         }
+      } else {
+        Message.error('至少添加一个节点');
       }
     },
     [

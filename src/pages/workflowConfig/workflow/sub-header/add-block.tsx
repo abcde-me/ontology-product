@@ -16,6 +16,7 @@ import cn from '@/pages/workflowConfig/utils/classnames';
 import BlockSelector from '@/pages/workflowConfig/workflow/block-selector';
 import type { OnSelectBlock } from '@/pages/workflowConfig/workflow/types';
 import { BlockEnum } from '@/pages/workflowConfig/workflow/types';
+import { useParams } from 'react-router-dom';
 
 type AddBlockProps = {
   renderTrigger?: (open: boolean) => React.ReactNode;
@@ -29,6 +30,7 @@ const AddBlock = ({ renderTrigger, offset }: AddBlockProps) => {
   const { handlePaneContextmenuCancel } = usePanelInteractions();
   const [open, setOpen] = useState(false);
   const { availableNextBlocks } = useAvailableBlocks(BlockEnum.Start, false);
+  const { type: flowType } = useParams<Record<string, string>>();
 
   const handleOpenChange = useCallback(
     (open: boolean) => {
@@ -51,7 +53,8 @@ const AddBlock = ({ renderTrigger, offset }: AddBlockProps) => {
               ? `${t(`workflow.blocks.${type}`)}_${nodesWithSameType.length + 1}`
               : t(`workflow.blocks.${type}`),
           ...(toolDefaultValue || {}),
-          _isCandidate: true
+          _isCandidate: true,
+          flow_type: flowType
         },
         position: {
           x: 0,
