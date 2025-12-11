@@ -22,12 +22,8 @@ import { useUrlState } from '@/pages/sql/hooks/useUrlState';
 import styles from './index.module.scss';
 import { VersionType, VersionTypeEnum } from '../sctipt-card';
 import ScriptModalTable from '../sctip-modal-table';
-import {
-  deleteDevelopScript,
-  getDevelopScriptList,
-  getDevelopScriptLogByScriptId
-} from '@/api/sql';
-import { lockDevelopScript } from '@/api/sql-develop';
+import { getDevelopScriptList, getDevelopScriptLogByScriptId } from '@/api/sql';
+import { lockDevelopScript, deleteDevelopScript } from '@/api/sql-develop';
 import { ScriptStatus, ScriptStatusName } from '@/types/sqlDevelopApi';
 
 interface ScriptTableProps {
@@ -172,7 +168,9 @@ const ScriptTable: React.FC<ScriptTableProps> = ({
 
   // 删除工作流
   const handleDeleteScript = async (script_id: number) => {
-    const res = await deleteDevelopScript(script_id);
+    const res = await deleteDevelopScript({
+      script_id
+    });
     if (res.status === 200 && res.code === '') {
       Message.success({
         content: '删除成功'

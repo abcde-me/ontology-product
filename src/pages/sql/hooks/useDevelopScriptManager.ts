@@ -1,14 +1,14 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { Message } from '@arco-design/web-react';
 import { useLocation, useHistory } from 'react-router-dom';
+import { getSqlScriptList } from '@/api/sql';
 import {
-  getSqlScriptList,
-  createSqlScript,
-  renameSqlScript,
-  deleteSqlScript,
-  copySqlScript
-} from '@/api/sql';
-import { listDevelopScript } from '@/api/sql-develop';
+  listDevelopScript,
+  createDevelopScript,
+  renameDevelopScript,
+  copyDevelopScript,
+  deleteDevelopScript
+} from '@/api/sql-develop';
 import { PythonItemType } from '@/types/pythonApi';
 import { SqlScriptItem } from '@/types/sqlApi';
 import { generateSqlDefaultName } from '../utils';
@@ -150,14 +150,6 @@ export const useDevelopScriptManager = (
             scriptId
           );
 
-          // 更新URL参数 activeDevelopScriptId
-          // const searchParams = new URLSearchParams(location.search);
-          // searchParams.set('activeDevelopScriptId', scriptId);
-          // history.push({
-          //   pathname: location.pathname,
-          //   search: searchParams.toString()
-          // });
-
           onFileOpen(String(dataRef.id), scriptId, dataRef.name);
         }
       }
@@ -207,10 +199,11 @@ export const useDevelopScriptManager = (
         }
 
         const scriptFileId = String(Date.now());
-        const createRes = await createSqlScript({
-          uid: userInfo?.id ?? '',
-          script_file_id: scriptFileId,
-          script_name: finalName
+        const createRes = await createDevelopScript({
+          script_name: finalName,
+          script_context: '',
+          script_desc: '',
+          script_params: []
         });
 
         if (createRes.status !== 200) {
@@ -228,13 +221,6 @@ export const useDevelopScriptManager = (
 
         // 设置选中状态为 script_id
         setSelectedKeys([scriptId]);
-
-        // const searchParams = new URLSearchParams(location.search);
-        // searchParams.set('activeDevelopScriptId', scriptId);
-        // history.push({
-        //   pathname: location.pathname,
-        //   search: searchParams.toString()
-        // });
 
         // 编辑器自动打开当前脚本（fileId 使用 script_file_id，scriptId 使用 script_id）
         onFileOpen && onFileOpen(scriptFileId, scriptId, finalName);
@@ -255,8 +241,9 @@ export const useDevelopScriptManager = (
       try {
         const scriptId = node?.dataRef?.script_id;
         const fileId = node?.dataRef?.id;
-        const renameRes = await renameSqlScript(scriptId, {
-          script_name: finalName
+        const renameRes = await renameDevelopScript({
+          script_id: scriptId,
+          script_name: finalName ?? ''
         });
 
         if (renameRes.status !== 200) {
@@ -288,10 +275,9 @@ export const useDevelopScriptManager = (
   const handleCopy = useCallback(
     async (newName: string, node: any) => {
       try {
-        const copyRes = await copySqlScript(
-          node?.dataRef?.script_id,
-          Date.now().toString()
-        );
+        const copyRes = await copyDevelopScript({
+          script_id: node?.dataRef?.script_id
+        });
 
         if (copyRes.status !== 200) {
           Message.error(copyRes.message);
@@ -317,7 +303,9 @@ export const useDevelopScriptManager = (
       try {
         const scriptId = node?.dataRef?.script_id;
         const fileId = node?.dataRef?.id;
-        const deleteRes = await deleteSqlScript(scriptId);
+        const deleteRes = await deleteDevelopScript({
+          script_id: scriptId
+        });
 
         if (deleteRes.status !== 200) {
           Message.error(deleteRes.message);
@@ -480,86 +468,6 @@ export const useDevelopScriptManager = (
   const selectFile = useCallback((fileId: string) => {
     setSelectedKeys([String(fileId)]);
   }, []);
-
-  // 用于跟踪是否已经根据URL打开过文件，只在首次进入页面时执行一次
-  // const hasOpenedFileFromUrlRef = useRef<boolean>(false);
-
-  // 从URL查询参数中解析activeDevelopScriptId
-  const getActiveDevelopScriptTabFromUrl = useCallback(() => {
-    const searchParams = new URLSearchParams(location.search);
-    return searchParams.get('activeDevelopScriptId') || '';
-  }, [location.search]);
-
-  // 根据URL参数打开对应的文件（只在首次进入页面时执行一次）
-  useEffect(() => {
-    // 如果没有提供必要的回调函数，不执行
-    if (!onFileOpen) {
-      return;
-    }
-
-    // 如果文件列表为空，等待文件列表加载
-    if (sqlScriptList.length === 0) {
-      return;
-    }
-
-    // 处理从URL打开文件的逻辑
-    // const handleOpenFileFromUrl = () => {
-    //   const currentActiveDevelopScriptId = getActiveDevelopScriptTabFromUrl();
-
-    //   // 如果URL中有activeDevelopScriptId，打开对应的文件
-    //   if (currentActiveDevelopScriptId) {
-    //     // 在文件列表中查找对应的文件
-    //     const targetFile = sqlScriptList.find(
-    //       (item) => String(item.script_id) === currentActiveDevelopScriptId
-    //     );
-
-    //     if (targetFile) {
-    //       // 使用 formatData 的逻辑来获取 fileId
-    //       const fileId = String(
-    //         Number((targetFile as any).script_file_id) || targetFile.script_id
-    //       );
-    //       const scriptId = String(targetFile.script_id);
-    //       const fileName = targetFile.script_name;
-
-    //       // 选中文件
-    //       setSelectedKeys([fileId]);
-
-    //       // 检查文件是否已经在标签页中打开
-    //       const isAlreadyOpen = fileTabs.some(
-    //         (tab) => tab.fileId === fileId || tab.scriptId === scriptId
-    //       );
-
-    //       if (!isAlreadyOpen) {
-    //         onFileOpen(fileId, scriptId, fileName);
-    //       } else {
-    //         // 如果已经打开，切换到该标签页
-    //         const existingTab = fileTabs.find(
-    //           (tab) => tab.fileId === fileId || tab.scriptId === scriptId
-    //         );
-    //         if (existingTab && onSwitchTab) {
-    //           onSwitchTab(existingTab.key);
-    //         }
-    //       }
-    //       // 标记为已执行，确保只执行一次
-    //       // hasOpenedFileFromUrlRef.current = true;
-    //       return;
-    //     }
-    //   }
-
-    //   // 如果URL中没有activeDevelopScriptId，且没有打开的标签页，打开第一个文件
-    //   if (sqlScriptList.length > 0 && fileTabs.length === 0) {
-    //     const firstFile = sqlScriptList[0];
-    //     const fileId = String(firstFile.script_id);
-    //     const scriptId = String(firstFile.script_id);
-    //     const fileName = firstFile.script_name;
-    //     onFileOpen(fileId, scriptId, fileName);
-    //     // 标记为已执行，确保只执行一次
-    //     // hasOpenedFileFromUrlRef.current = true;
-    //   }
-    // };
-
-    // handleOpenFileFromUrl();
-  }, [sqlScriptList]);
 
   // 组件挂载时获取数据
   useEffect(() => {

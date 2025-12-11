@@ -7,21 +7,11 @@ import {
   Tooltip
 } from '@arco-design/web-react';
 import React, { memo } from 'react';
-import mockjs from 'mockjs';
 import styles from './index.module.scss';
-import { sort } from 'semver';
-import {
-  getVersionType,
-  VersionType,
-  VersionTypeEnum
-} from '../version-status';
+import { VersionType } from '../version-status';
 import { IconQuestionCircle } from '@arco-design/web-react/icon';
 import EllipsisPopover from '@/components/ellipsis-popover-com';
-import {
-  copyDevelopScript,
-  deleteOldDevelopScript,
-  getDevelopScriptLogByScriptId
-} from '@/api/sql';
+import { copyDevelopScript, deleteDevelopScript } from '@/api/sql-develop';
 
 const SctipModalTable: React.FC<{
   isVisible: boolean;
@@ -63,7 +53,7 @@ const SctipModalTable: React.FC<{
         script_id: record.script_id
       };
       try {
-        const res = await deleteOldDevelopScript({ ...params });
+        const res = await deleteDevelopScript({ ...params });
         if (res.status === 200) {
           Message.success({
             content: `删除成功`
