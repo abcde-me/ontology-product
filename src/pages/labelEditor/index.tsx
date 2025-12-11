@@ -43,6 +43,7 @@ function LabelEditorPage() {
   // 质检任务id
   const qsId = useParams('qsId');
   const qcRound = useParams('qcRound');
+  const pkgId = useParams('pkgId');
   // 0 表示可以不修改标注，1 表示可以修改标注
   const labelModifyEnable = useParams('labelModifyEnable');
   const deadlineTimestamp = useParams('deadlineTimestamp');
@@ -55,7 +56,7 @@ function LabelEditorPage() {
       if (['LABLE', 'RELABLE'].includes(stage!)) {
         if (taskId) {
           setLabelUrl(
-            `/labeleditor/${LabelTypeMap[labelType!]}/requirement/${requirementId}/task/${taskId}?type=${labelType}&kind=${toolKind}&tool=${labelTool}&name=${reqName}&count=${taskCount}&stage=${stage}`
+            `/labeleditor/${LabelTypeMap[labelType!]}/requirement/${requirementId}/task/${taskId}?type=${labelType}&kind=${toolKind}&tool=${labelTool}&name=${reqName}&count=${taskCount}&stage=${stage}&pkgId=${pkgId}`
           );
           setLoading(false);
         } else {
@@ -65,7 +66,7 @@ function LabelEditorPage() {
       if (['REVIEW'].includes(stage!)) {
         if (taskId) {
           setLabelUrl(
-            `/labeleditor/${LabelTypeMap[labelType!]}/requirement/${requirementId}/task/${taskId}?type=${labelType}&kind=${toolKind}&tool=${labelTool}&name=${reqName}&count=${taskCount}&stage=${stage}&qsId=${qsId}&qcRound=${qcRound}&labelModifyEnable=${labelModifyEnable}&deadlineTimestamp=${deadlineTimestamp}`
+            `/labeleditor/${LabelTypeMap[labelType!]}/requirement/${requirementId}/task/${taskId}?type=${labelType}&kind=${toolKind}&tool=${labelTool}&name=${reqName}&count=${taskCount}&stage=${stage}&qsId=${qsId}&qcRound=${qcRound}&labelModifyEnable=${labelModifyEnable}&deadlineTimestamp=${deadlineTimestamp}&pkgId=${pkgId}`
           );
           setLoading(false);
         } else {
@@ -114,7 +115,7 @@ function LabelEditorPage() {
     } = taskInfo.data;
     console.log(stage, 'stage🍉');
     history.replace(
-      `/tenant/compute/modaforge/labelEditor?rId=${req_id}&tId=${task_id}&type=${type}&kind=${TEXT_DATA[tool]}&tool=${tool}&name=${name}&count=${volumn_uninspected}&qsId=${qsId}&qcRound=${qc_round}&labelModifyEnable=${label_modify_enable}&deadlineTimestamp=${deadline_timestamp}&stage=${stage}`
+      `/tenant/compute/modaforge/labelEditor?rId=${req_id}&tId=${task_id}&type=${type}&kind=${TEXT_DATA[tool]}&tool=${tool}&name=${name}&count=${volumn_uninspected}&qsId=${qsId}&qcRound=${qc_round}&labelModifyEnable=${label_modify_enable}&deadlineTimestamp=${deadline_timestamp}&stage=${stage}&pkgId=${pkgId}`
     );
   };
 
@@ -154,7 +155,7 @@ function LabelEditorPage() {
     } = taskInfo.data;
 
     history.replace(
-      `/tenant/compute/modaforge/labelEditor?rId=${requirementId}&tId=${task_id}&type=${type}&kind=${TEXT_DATA[tool]}&tool=${tool}&name=${name}&count=${count}&stage=${stage}`
+      `/tenant/compute/modaforge/labelEditor?rId=${requirementId}&tId=${task_id}&type=${type}&kind=${TEXT_DATA[tool]}&tool=${tool}&name=${name}&count=${count}&stage=${stage}&pkgId=${pkgId}`
     );
   };
 

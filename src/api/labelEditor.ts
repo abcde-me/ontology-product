@@ -33,21 +33,34 @@ export async function getTaskResult(taskId: string) {
     .inRegion()
     .do();
 }
-export async function getTask(requirementId?: string) {
+export async function getTask(requirementId?: string, pkgId?: string) {
   const searchParams = new URLSearchParams(location.search);
   const rId = requirementId || searchParams.get('rId');
-  return await UAPI.RES.leGetTask({})
-    .post({ requirement_id: Number(rId) })
-    .inRegion()
-    .do();
+  const pkg_Id = pkgId || searchParams.get('pkgId');
+  const op = searchParams.get('stage');
+  const params: Record<string, any> = {
+    requirement_id: Number(rId),
+    pkg_id: Number(pkg_Id)
+  };
+  if (op === 'LABLE' || op === 'RELABLE') {
+    params.op = op;
+  }
+  return await UAPI.RES.leGetTask({}).post(params).inRegion().do();
 }
-export async function getTaskDetail(taskId?: string) {
+
+export async function getTaskDetail(taskId?: string, pkgId?: string) {
   const searchParams = new URLSearchParams(location.search);
   const rId = taskId || searchParams.get('rId');
-  return await UAPI.RES.leGetTaskById({})
-    .post({ task_id: Number(rId) })
-    .inRegion()
-    .do();
+  const pkg_Id = pkgId || searchParams.get('pkgId');
+  const op = searchParams.get('stage');
+  const params: Record<string, any> = {
+    requirement_id: Number(rId),
+    pkg_id: Number(pkg_Id)
+  };
+  if (op === 'LABLE' || op === 'RELABLE') {
+    params.op = op;
+  }
+  return await UAPI.RES.leGetTaskById({}).post(params).inRegion().do();
 }
 
 export async function getLabels(requirementId: string) {

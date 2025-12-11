@@ -201,7 +201,7 @@ function QualityTaskDetail() {
   // 去质检
   const handleGoInspect = (record: InspectionItem) => {
     openNewPage(
-      `/modaforge/tenant/compute/modaforge/labelEditor?qsId=${record.qs_id}&stage=REVIEW`
+      `/modaforge/tenant/compute/modaforge/labelEditor?qsId=${record.qs_id}&pkgId=${pkgId}&stage=REVIEW`
     );
   };
 

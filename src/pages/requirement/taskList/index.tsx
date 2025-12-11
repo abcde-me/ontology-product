@@ -85,7 +85,7 @@ function TaskList() {
   // 标注工具跳转
   const toLabelEditor = (record: Record<string, any>, stage: string) => {
     openNewPage(
-      `/modaforge/tenant/compute/modaforge/labelEditor?rId=${record.id}&stage=${stage}`
+      `/modaforge/tenant/compute/modaforge/labelEditor?rId=${record.id}&pkgId=${record.pkg_id}&stage=${stage}`
     );
   };
 
