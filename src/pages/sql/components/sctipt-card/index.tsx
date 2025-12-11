@@ -22,12 +22,14 @@ import {
   getDevelopScriptLogByVersion
 } from '@/api/sql';
 import noDataElement from '@/components/no-data';
+import { ScriptStatus, ScriptStatusName } from '@/types/sqlDevelopApi';
 
 // 版本类型 已发版 未发版 调度中
+// 注意：0（编辑中）和 1（编辑完成）都代表"未发版"，但为了兼容现有代码，这里保留 1 作为 UNRELEASED 的值
 export const VersionType = {
-  RELEASED: 2, // 已发版
-  UNRELEASED: 1, // 未发版
-  SCHEDULED: 3 // 调度中
+  RELEASED: ScriptStatus.Released, // 2 - 已发版
+  UNRELEASED: ScriptStatus.EditCompleted, // 1 - 未发版（编辑完成），0（编辑中）也属于未发版
+  SCHEDULED: ScriptStatus.Scheduling // 3 - 调度中
 } as const;
 
 export enum VersionTypeEnum {
@@ -35,6 +37,16 @@ export enum VersionTypeEnum {
   UNRELEASED = '未发版',
   SCHEDULED = '调度中'
 }
+
+/**
+ * 判断状态是否为"未发版"
+ * 0（编辑中）和 1（编辑完成）都代表"未发版"
+ */
+export const isUnreleasedStatus = (status: number): boolean => {
+  return (
+    status === ScriptStatus.Editing || status === ScriptStatus.EditCompleted
+  );
+};
 
 interface ScriptCardProps {
   onToScriptList: (type: string) => void;
@@ -110,8 +122,9 @@ const ScriptCard: React.FC<ScriptCardProps> = ({ onToScriptList }) => {
   // 删除卡片脚本
   const deleteScript = (id: number, type: number) => {
     console.log(type, '123');
-    if (type === VersionType.UNRELEASED) {
-      Message.error('调度中的脚本不能删除');
+    // 0（编辑中）和 1（编辑完成）都代表"未发版"
+    if (isUnreleasedStatus(type)) {
+      Message.error('未发版的脚本不能删除');
       return;
     }
     if (type === VersionType.RELEASED) {
@@ -159,7 +172,20 @@ const ScriptCard: React.FC<ScriptCardProps> = ({ onToScriptList }) => {
     // );
   };
   // 判断状态 已发版 未发版 调度中
+  // 注意：0（编辑中）和 1（编辑完成）都显示为"未发版"
   const getVersionType = (version_type) => {
+    // 判断是否为"未发版"（0 或 1）
+    if (isUnreleasedStatus(version_type)) {
+      return (
+        <div className={styles['script-card-content-item-title-icon']}>
+          <span className={styles['unreleased-icon']} />
+          <div className={styles['script-card-content-item-title-icon-text']}>
+            {VersionTypeEnum.UNRELEASED}
+          </div>
+        </div>
+      );
+    }
+
     switch (version_type) {
       case VersionType.RELEASED:
         return (
@@ -173,21 +199,6 @@ const ScriptCard: React.FC<ScriptCardProps> = ({ onToScriptList }) => {
             />
             <div className={styles['script-card-content-item-title-icon-text']}>
               {VersionTypeEnum.RELEASED}
-            </div>
-          </div>
-        );
-      case VersionType.UNRELEASED:
-        return (
-          <div className={styles['script-card-content-item-title-icon']}>
-            <span
-              className={
-                version_type === VersionType.UNRELEASED
-                  ? styles['unreleased-icon']
-                  : ''
-              }
-            />
-            <div className={styles['script-card-content-item-title-icon-text']}>
-              {VersionTypeEnum.UNRELEASED}
             </div>
           </div>
         );
@@ -207,15 +218,10 @@ const ScriptCard: React.FC<ScriptCardProps> = ({ onToScriptList }) => {
           </div>
         );
       default:
+        // 默认显示为"未发版"
         return (
           <div className={styles['script-card-content-item-title-icon']}>
-            <span
-              className={
-                version_type === VersionType.UNRELEASED
-                  ? styles['unreleased-icon']
-                  : ''
-              }
-            />
+            <span className={styles['unreleased-icon']} />
             <div className={styles['script-card-content-item-title-icon-text']}>
               {VersionTypeEnum.UNRELEASED}
             </div>
@@ -312,7 +318,7 @@ const ScriptCard: React.FC<ScriptCardProps> = ({ onToScriptList }) => {
                       </Button>
                       <Popover
                         content={
-                          item?.version_type === VersionType.SCHEDULED
+                          item?.status === VersionType.SCHEDULED
                             ? '调度中的脚本不可删除'
                             : ''
                         }
@@ -327,7 +333,7 @@ const ScriptCard: React.FC<ScriptCardProps> = ({ onToScriptList }) => {
                             styles['script-card-content-item-title-btns']
                           }
                           icon={<IconDelete />}
-                          disabled={item.version_type === VersionType.SCHEDULED}
+                          disabled={item.status === VersionType.SCHEDULED}
                           onClick={() =>
                             deleteScript(item.script_id, item.status)
                           }

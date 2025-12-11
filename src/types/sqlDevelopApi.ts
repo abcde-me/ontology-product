@@ -1,3 +1,36 @@
+/**
+ * 脚本状态枚举
+ * 0: 编辑中
+ * 1: 编辑完成
+ * 2: 已发版
+ * 3: 调度中
+ */
+export enum ScriptStatus {
+  /** 编辑中 */
+  Editing = 0,
+  /** 编辑完成 */
+  EditCompleted = 1,
+  /** 已发版 */
+  Released = 2,
+  /** 调度中 */
+  Scheduling = 3
+}
+
+/**
+ * 脚本状态名称枚举
+ * 注意：0和1在前端展示时都显示为"未发版"
+ */
+export enum ScriptStatusName {
+  /** 未发版（编辑中） */
+  Editing = '未发版',
+  /** 未发版（编辑完成） */
+  EditCompleted = '未发版',
+  /** 已发版 */
+  Released = '已发版',
+  /** 调度中 */
+  Scheduling = '调度中'
+}
+
 export interface ListDevelopScriptParams {
   page_size?: number;
   page?: number;
@@ -46,11 +79,11 @@ export interface ListDevelopScriptItem {
   /**
    * 最新版本状态
    */
-  status: number;
+  status: ScriptStatus;
   /**
    * 最新版本状态名字
    */
-  status_name: string;
+  status_name: ScriptStatusName;
   /**
    * 所属任务节点，所属任务名称
    */
@@ -156,6 +189,10 @@ export interface GetDevelopScriptInfoResponse {
    */
   max_version: number;
   /**
+   * 更新者
+   */
+  update_user: string;
+  /**
    * 最大版本名称
    */
   max_version_name: string;
@@ -190,11 +227,11 @@ export interface GetDevelopScriptInfoResponse {
   /**
    * 最新版本状态
    */
-  status: string;
+  status: ScriptStatus;
   /**
    * 最新版本状态名字
    */
-  status_name: string;
+  status_name: ScriptStatusName;
   /**
    * 更新时间
    */
