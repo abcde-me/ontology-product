@@ -22,8 +22,12 @@ import {
   DatasetsOptionsParams,
   DatasetsOptionsData,
   ListDevelopScriptParams,
-  ListDevelopScriptParamsData
+  ListDevelopScriptParamsData,
+  GetDevelopScriptLogByScriptIdData,
+  ListDevelopScriptLogByKeyData,
+  ListSqlFileParams
 } from '@/types/sqlApi';
+import { AxiosResponse } from 'axios';
 
 /** 数据集目录 */
 export async function getDatasetList(
@@ -65,7 +69,7 @@ export async function updateSqlScript(
 export async function getSqlScriptList(
   params: SqlScriptListParams
 ): Promise<ApiRes<SqlScriptListData>> {
-  return await UAPI.RES.sqlListApi({}).post(params).inRegion().do();
+  return await UAPI.RES.ListDevelopScriptApi({}).post(params).inRegion().do();
 }
 
 /** 删除SQL脚本 */
@@ -218,3 +222,84 @@ export async function getDevelopScriptList(
 ): Promise<ApiRes<ListDevelopScriptParamsData>> {
   return await UAPI.RES.listDevelopScriptApi({}).post(params).inRegion().do();
 }
+// 下载开发脚本
+export async function downloadDevelopScript(): Promise<AxiosResponse<Blob>> {
+  return (await UAPI.RES.DownloadDevelopScriptApi({})
+    .get()
+    .withConfig({ responseType: 'blob' })
+    .inRegion()
+    .do({ preCheck: false })) as AxiosResponse<Blob>;
+}
+
+// 获取开发脚本历史版本
+export async function getDevelopScriptLogByScriptId(
+  id: string
+): Promise<ApiRes<GetDevelopScriptLogByScriptIdData>> {
+  return await UAPI.RES.GetDevelopScriptLogByScriptIdApi({})
+    .post({ script_id: Number(id) })
+    .inRegion()
+    .do();
+}
+// 获取开发脚本卡片内容
+export async function listDevelopScriptLogByKeyApi(
+  params
+): Promise<ApiRes<ListDevelopScriptLogByKeyData>> {
+  return await UAPI.RES.ListDevelopScriptLogByKeyApi({})
+    .post(params)
+    .inRegion()
+    .do();
+}
+// 查询脚本列表
+export async function listSqlFile(
+  params: ListSqlFileParams
+): Promise<ApiRes<ListSqlFileParams>> {
+  return await UAPI.RES.ListSqlFileApi({}).post(params).inRegion().do();
+}
+// 查询脚本 - 删除脚本
+export async function deleteSqlFile(id: number): Promise<ApiRes<{}>> {
+  return await UAPI.RES.DeleteSqlFileApi({})
+    .post({ script_id: Number(id) })
+    .inRegion()
+    .do();
+}
+// // 参数列表表格
+// export async function listDevelopSystemParam(
+//   params: ListDevelopSystemParamParams
+// ): Promise<ApiRes<ListDevelopSystemParamParamsData>> {
+//   return await UAPI.RES.ListDevelopSystemParamApi({})
+//     .post(params)
+//     .inRegion()
+//     .do();
+// }
+// // 开发规范查看
+// export async function getDevelopStandards(params): Promise<ApiRes<string>> {
+//   return await UAPI.RES.GetDevelopfStandardsApi({}).post().inRegion().do();
+// }
+// // 开发规范保存
+// export async function updateDevelopSystemParam(
+//   params: UpdateDevelopSystemParamParams
+// ): Promise<ApiRes<{}>> {
+//   return await UAPI.RES.UpdateDevelopSystemParamApi({})
+//     .post(params)
+//     .inRegion()
+//     .do();
+// }
+
+// // 脚本内容搜索
+// export async function getDevelopScriptLogByVersion(
+//   params: SearchDevelopScriptLogByKeyParams
+// ): Promise<ApiRes<SearchDevelopScriptLogByKeyData>> {
+//   return await UAPI.RES.GetDevelopScriptLogByVersionApi({})
+//     .post(params)
+//     .inRegion()
+//     .do();
+// }
+// // 脚本内容 删除
+// export async function deleteDevelopScriptLogByVersion(
+//   params: DeleteDevelopScriptLogByVersionParams
+// ): Promise<ApiRes<{}>> {
+//   return await UAPI.RES.DeleteDevelopScriptLogByVersionApi({})
+//     .post(params)
+//     .inRegion()
+//     .do();
+// }

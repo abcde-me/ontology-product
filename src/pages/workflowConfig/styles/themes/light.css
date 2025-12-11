@@ -621,6 +621,7 @@ html {
   --color-util-colors-blue-brand-blue-brand-200: #b2caff;
   --color-util-colors-blue-brand-blue-brand-300: #84abff;
   --color-util-colors-blue-brand-blue-brand-400: #5289ff;
+  --color-util-colors-blue-brand-blue-brand-450: #4073f5;
   --color-util-colors-blue-brand-blue-brand-500: #296dff;
   --color-util-colors-blue-brand-blue-brand-600: #155aef;
   --color-util-colors-blue-brand-blue-brand-700: #004aeb;
@@ -638,6 +639,7 @@ html {
   --color-util-colors-green-green-100: #dcfae6;
   --color-util-colors-green-green-200: #abefc6;
   --color-util-colors-green-green-300: #75e0a7;
+  --color-util-colors-green-green-350: #2fcc9f;
   --color-util-colors-green-green-400: #47cd89;
   --color-util-colors-green-green-500: #17b26a;
   --color-util-colors-green-green-600: #079455;
@@ -647,6 +649,7 @@ html {
   --color-util-colors-warning-warning-100: #fef0c7;
   --color-util-colors-warning-warning-200: #fedf89;
   --color-util-colors-warning-warning-300: #fec84b;
+  --color-util-colors-warning-warning-350: #f5a041;
   --color-util-colors-warning-warning-400: #fdb022;
   --color-util-colors-warning-warning-500: #f79009;
   --color-util-colors-warning-warning-600: #dc6803;

@@ -20,7 +20,8 @@ import {
   ROLE_PERMISSIONS,
   PROJECT_PERMISSIONS,
   API_KEY_PERMISSIONS,
-  METADATA_MANAGEMENT_PERMISSIONS
+  METADATA_MANAGEMENT_PERMISSIONS,
+  DATA_API_PERMISSIONS
 } from '@/config/permissions';
 
 export type IRoute = AuthParams & {
@@ -122,7 +123,7 @@ export const routes: IRoute[] = [
   // 创建工作流
   {
     name: 'workflowConfig',
-    key: '/tenant/compute/modaforge/workflowConfig',
+    key: '/tenant/compute/modaforge/workflowConfig/:type?',
     component: React.lazy(async () => import('../../workflowConfig')),
     anyPermission: [
       WORKFLOW_LIST_PERMISSIONS.CAN_CREATE,
@@ -284,11 +285,29 @@ export const routes: IRoute[] = [
       }
     ]
   },
+  // 元数据管理
   {
     name: 'metadataManagement',
     key: '/tenant/compute/modaforge/metadataManagement',
     component: React.lazy(async () => import('../../metadataManagement')),
     permission: METADATA_MANAGEMENT_PERMISSIONS.LIST,
+    children: [
+      {
+        name: 'metadataManagementDetail',
+        key: '/tenant/compute/modaforge/metadataManagement/detail',
+        component: React.lazy(
+          async () => import('../../metadataManagement/detail')
+        ),
+        permission: METADATA_MANAGEMENT_PERMISSIONS.LIST
+      }
+    ]
+  },
+  // 数据API
+  {
+    name: 'dataApi',
+    key: '/tenant/compute/modaforge/dataApi',
+    component: React.lazy(async () => import('../../dataApi')),
+    permission: DATA_API_PERMISSIONS.LIST,
     children: []
   },
   // 数据标注 - 需求管理

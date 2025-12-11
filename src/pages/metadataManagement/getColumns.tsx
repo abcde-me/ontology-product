@@ -2,6 +2,8 @@ import React from 'react';
 import EllipsisPopover from '@/components/ellipsis-popover-com';
 import CheckCircleFillIcon from '@/assets/metadata/check-circle-fill.svg';
 import CloseCircleFillIcon from '@/assets/metadata/close-circle-fill.svg';
+import { ColumnField } from '../dataAsset/components/ColumnSettingModal';
+import dayjs from 'dayjs';
 import styles from './index.module.scss';
 
 enum MetadataType {
@@ -16,546 +18,494 @@ const renderEmptyPlaceholder = (value: string | null) => {
   return value === '' || value == null ? '-' : value;
 };
 
-export const getColumns = (
-  metadataType: MetadataType | string,
-  viewDetailWorkflow: (workflowUuid: string, dsWorkflowId: string) => void
-) => {
-  const IceDorisColumns = [
-    {
-      title: '序号',
-      dataIndex: 'index',
-      width: 60,
-      align: 'center',
-      render: (_, record, index) => index + 1
-    },
-    {
-      title: '表英文名称',
-      dataIndex: 'workflow_name_english',
-      width: 280,
-      ellipsis: true,
-      className: styles['hover-change'] + ' ' + styles['table-name'],
-      render: (_, record) => {
-        return renderEmptyPlaceholder(record.workflow_name) !== '-' ? (
-          <EllipsisPopover
-            value={record.workflow_name}
-            isEdit={false}
-            isLink
-            handleLink={() => {
-              viewDetailWorkflow(record.workflow_uuid, record.ds_workflow_id);
-            }}
-          />
-        ) : (
-          <span>-</span>
-        );
-      }
-    },
-    {
-      title: '表中文名称',
-      dataIndex: 'workflow_name',
-      width: 280,
-      ellipsis: true,
-      className: styles['hover-change'] + ' ' + styles['table-name'],
-      render: (_, record) => {
-        return renderEmptyPlaceholder(record.workflow_name) !== '-' ? (
-          <EllipsisPopover
-            value={record.workflow_name}
-            isEdit={false}
-            isLink
-            handleLink={() => {
-              viewDetailWorkflow(record.workflow_uuid, record.ds_workflow_id);
-            }}
-          />
-        ) : (
-          <span>-</span>
-        );
-      }
-    },
-    {
-      title: '所属数据库',
-      dataIndex: 'source_path',
-      width: 120,
-      ellipsis: true,
-      className: styles['hover-change'],
-      render: (_, record) => {
-        return renderEmptyPlaceholder(record.source_path) !== '-' ? (
-          <EllipsisPopover value={record.source_path} isEdit={false} />
-        ) : (
-          <span>-</span>
-        );
-      }
-    },
-    {
-      title: '分区字段',
-      dataIndex: 'target_path',
-      width: 120,
-      ellipsis: true,
-      className: styles['hover-change'],
-      render: (_, record) => {
-        return renderEmptyPlaceholder(record.dataset_name) !== '-' ? (
-          <EllipsisPopover value={record.dataset_name} isEdit={false} />
-        ) : (
-          <span>-</span>
-        );
-      }
-    },
-    {
-      title: '分区数',
-      dataIndex: 'partition_num',
-      width: 100,
-      ellipsis: true,
-      render: (_, record) => (
-        <EllipsisPopover
-          value={renderEmptyPlaceholder(record.user_name)}
-          isEdit={false}
-        />
-      )
-    },
-    {
-      title: '存储大小（G）',
-      dataIndex: 'storage_size',
-      width: 150,
-      ellipsis: true,
-      render: (_, record) => (
-        <EllipsisPopover
-          value={renderEmptyPlaceholder(record.user_name)}
-          isEdit={false}
-        />
-      )
-    },
-    {
-      title: '文件数',
-      dataIndex: 'user_name',
-      width: 100,
-      ellipsis: true,
-      render: (_, record) => (
-        <EllipsisPopover
-          value={renderEmptyPlaceholder(record.user_name)}
-          isEdit={false}
-        />
-      )
-    },
-    {
-      title: '更新时间',
-      dataIndex: 'create_time',
-      width: 160,
-      render: (_, record) => (
-        <span>
-          {record.create_time == '' || record.create_time == null
-            ? '-'
-            : new Date(record.create_time).toLocaleString()}
-        </span>
-      ),
-      sorter: true
-    },
-    {
-      title: '最近访问时间',
-      dataIndex: 'update_time',
-      width: 160,
-      render: (_, record) => (
-        <span>
-          {record.update_time == '' || record.update_time == null
-            ? '-'
-            : new Date(record.update_time).toLocaleString()}
-        </span>
-      ),
-      sorter: true
-    }
-  ];
+const IcebergFields: ColumnField[] = [
+  {
+    id: 'tableName',
+    nameEn: 'tableName',
+    nameZh: '表英文名',
+    type: 'string',
+    isEnumAbleForColumn: true,
+    isEnumAble: false,
+    enumLoading: false,
+    distinctCount: 0,
+    displaySort: 1,
+    values: []
+  },
+  {
+    id: 'description',
+    nameEn: 'description',
+    nameZh: '表中文名',
+    type: 'string',
+    isEnumAbleForColumn: true,
+    isEnumAble: false,
+    enumLoading: false,
+    distinctCount: 0,
+    displaySort: 2,
+    values: []
+  },
+  {
+    id: 'databaseName',
+    nameEn: 'databaseName',
+    nameZh: '所属数据库',
+    type: 'string',
+    isEnumAbleForColumn: true,
+    isEnumAble: false,
+    enumLoading: false,
+    distinctCount: 0,
+    displaySort: 3,
+    values: []
+  },
+  {
+    id: 'partitionKey',
+    nameEn: 'partitionKey',
+    nameZh: '分区字段',
+    type: 'string',
+    isEnumAbleForColumn: true,
+    isEnumAble: false,
+    enumLoading: false,
+    distinctCount: 0,
+    displaySort: 4,
+    values: []
+  },
+  {
+    id: 'partitionNum',
+    nameEn: 'partitionNum',
+    nameZh: '分区数',
+    type: 'int',
+    isEnumAbleForColumn: true,
+    isEnumAble: false,
+    enumLoading: false,
+    distinctCount: 0,
+    displaySort: 5,
+    values: []
+  },
+  {
+    id: 'storageSize',
+    nameEn: 'storageSize',
+    nameZh: '存储大小（G）',
+    type: 'double',
+    isEnumAbleForColumn: true,
+    isEnumAble: false,
+    enumLoading: false,
+    distinctCount: 0,
+    displaySort: 6,
+    values: []
+  },
+  {
+    id: 'fileNum',
+    nameEn: 'fileNum',
+    nameZh: '文件数',
+    type: 'int',
+    isEnumAbleForColumn: true,
+    isEnumAble: false,
+    enumLoading: false,
+    distinctCount: 0,
+    displaySort: 7,
+    values: []
+  },
+  {
+    id: 'updataTime',
+    nameEn: 'updataTime',
+    nameZh: '更新时间',
+    type: 'datetime',
+    isEnumAbleForColumn: true,
+    isEnumAble: false,
+    enumLoading: false,
+    distinctCount: 0,
+    displaySort: 8,
+    values: []
+  },
+  {
+    id: 'lastTime',
+    nameEn: 'lastTime',
+    nameZh: '最后访问时间',
+    type: 'datetime',
+    isEnumAbleForColumn: true,
+    isEnumAble: false,
+    enumLoading: false,
+    distinctCount: 0,
+    displaySort: 9,
+    values: []
+  }
+];
 
-  const MinIOColumns = [
-    {
-      title: '序号',
-      dataIndex: 'index',
-      width: 60,
-      align: 'center',
-      render: (_, record, index) => index + 1
-    },
-    {
-      title: '桶名称',
-      dataIndex: 'bucket_name',
-      width: 280,
-      ellipsis: true,
-      className: styles['hover-change'] + ' ' + styles['table-name'],
-      render: (_, record) => {
-        return renderEmptyPlaceholder(record.workflow_name) !== '-' ? (
-          <EllipsisPopover
-            value={record.workflow_name}
-            isEdit={false}
-            isLink
-            handleLink={() => {
-              viewDetailWorkflow(record.workflow_uuid, record.ds_workflow_id);
-            }}
-          />
-        ) : (
-          <span>-</span>
-        );
-      }
-    },
-    {
-      title: '对象数',
-      dataIndex: 'object_num',
-      width: 100,
-      className: styles['hover-change'] + ' ' + styles['table-name'],
-      render: (_, record) => {
-        return renderEmptyPlaceholder(record.workflow_name) !== '-' ? (
-          <EllipsisPopover
-            value={record.workflow_name}
-            isEdit={false}
-            isLink
-            handleLink={() => {
-              viewDetailWorkflow(record.workflow_uuid, record.ds_workflow_id);
-            }}
-          />
-        ) : (
-          <span>-</span>
-        );
-      },
-      sorter: true
-    },
-    {
-      title: '存储类型',
-      dataIndex: 'storage_type',
-      width: 120,
-      ellipsis: true,
-      className: styles['hover-change'],
-      render: (_, record) => {
-        return renderEmptyPlaceholder(record.source_path) !== '-' ? (
-          <EllipsisPopover value={record.source_path} isEdit={false} />
-        ) : (
-          <span>-</span>
-        );
-      }
-    },
-    {
-      title: '所属区域',
-      dataIndex: 'region',
-      width: 120,
-      ellipsis: true,
-      className: styles['hover-change'],
-      render: (_, record) => {
-        return renderEmptyPlaceholder(record.dataset_name) !== '-' ? (
-          <EllipsisPopover value={record.dataset_name} isEdit={false} />
-        ) : (
-          <span>-</span>
-        );
-      }
-    },
-    {
-      title: '存储大小（G）',
-      dataIndex: 'storage_size',
-      width: 150,
-      ellipsis: true,
-      render: (_, record) => (
-        <EllipsisPopover
-          value={renderEmptyPlaceholder(record.user_name)}
-          isEdit={false}
-        />
-      )
-    },
-    {
-      title: '版本控制',
-      dataIndex: 'version_control',
-      width: 100,
-      ellipsis: true,
-      render: (_, record) =>
-        record.version_control ? (
-          <div className="flex items-center gap-1">
-            <CheckCircleFillIcon /> 启用
-          </div>
-        ) : (
-          <div className="flex items-center gap-1">
-            <CloseCircleFillIcon /> 关闭
-          </div>
-        )
-    },
-    {
-      title: '访问策略',
-      dataIndex: 'access_policy',
-      width: 150,
-      ellipsis: true,
-      render: (_, record) => (
-        <EllipsisPopover
-          value={renderEmptyPlaceholder(record.user_name)}
-          isEdit={false}
-        />
-      )
-    },
-    {
-      title: '加密类型',
-      dataIndex: 'encryption_type',
-      width: 150,
-      ellipsis: true,
-      render: (_, record) => (
-        <EllipsisPopover
-          value={renderEmptyPlaceholder(record.user_name)}
-          isEdit={false}
-        />
-      )
-    },
-    {
-      title: '创建时间',
-      dataIndex: 'create_time',
-      width: 160,
-      render: (_, record) => (
-        <span>
-          {record.create_time == '' || record.create_time == null
-            ? '-'
-            : new Date(record.create_time).toLocaleString()}
-        </span>
-      ),
-      sorter: true
-    },
-    {
-      title: '最近访问时间',
-      dataIndex: 'update_time',
-      width: 160,
-      render: (_, record) => (
-        <span>
-          {record.update_time == '' || record.update_time == null
-            ? '-'
-            : new Date(record.update_time).toLocaleString()}
-        </span>
-      ),
-      sorter: true
-    },
-    {
-      title: '元数据更新时间',
-      dataIndex: 'metadata_update_time',
-      width: 160,
-      render: (_, record) => (
-        <span>
-          {record.update_time == '' || record.update_time == null
-            ? '-'
-            : new Date(record.update_time).toLocaleString()}
-        </span>
-      ),
-      sorter: true
-    },
-    {
-      title: '数据更新时间',
-      dataIndex: 'data_update_time',
-      width: 160,
-      render: (_, record) => (
-        <span>
-          {record.update_time == '' || record.update_time == null
-            ? '-'
-            : new Date(record.update_time).toLocaleString()}
-        </span>
-      ),
-      sorter: true
-    },
-    {
-      title: '元数据采集时间',
-      dataIndex: 'metadata_collect_time',
-      width: 160,
-      render: (_, record) => (
-        <span>
-          {record.update_time == '' || record.update_time == null
-            ? '-'
-            : new Date(record.update_time).toLocaleString()}
-        </span>
-      ),
-      sorter: true
-    }
-  ];
+const MinIOFields = [
+  {
+    id: 'bucketName',
+    nameEn: 'bucketName',
+    nameZh: '桶名称',
+    type: 'string',
+    isEnumAbleForColumn: true,
+    isEnumAble: false,
+    enumLoading: false,
+    distinctCount: 0,
+    displaySort: 1,
+    values: []
+  },
+  {
+    id: 'objectNum',
+    nameEn: 'objectNum',
+    nameZh: '对象数',
+    type: 'double',
+    isEnumAbleForColumn: true,
+    isEnumAble: false,
+    enumLoading: false,
+    distinctCount: 0,
+    displaySort: 2,
+    values: []
+  },
+  {
+    id: 'storageType',
+    nameEn: 'storageType',
+    nameZh: '存储类型',
+    type: 'string',
+    isEnumAbleForColumn: true,
+    isEnumAble: false,
+    enumLoading: false,
+    distinctCount: 0,
+    displaySort: 3,
+    values: []
+  },
+  {
+    id: 'partitionKey',
+    nameEn: 'partitionKey',
+    nameZh: '分区字段',
+    type: 'string',
+    isEnumAbleForColumn: true,
+    isEnumAble: false,
+    enumLoading: false,
+    distinctCount: 0,
+    displaySort: 4,
+    values: []
+  },
+  {
+    id: 'region',
+    nameEn: 'region',
+    nameZh: '所属区域',
+    type: 'string',
+    isEnumAbleForColumn: true,
+    isEnumAble: false,
+    enumLoading: false,
+    distinctCount: 0,
+    displaySort: 5,
+    values: []
+  },
+  {
+    id: 'storageSize',
+    nameEn: 'storageSize',
+    nameZh: '存储大小（G）',
+    type: 'double',
+    isEnumAbleForColumn: true,
+    isEnumAble: false,
+    enumLoading: false,
+    distinctCount: 0,
+    displaySort: 6,
+    values: []
+  },
+  {
+    id: 'versioning',
+    nameEn: 'versioning',
+    nameZh: '版本控制',
+    type: 'boolean',
+    isEnumAbleForColumn: true,
+    isEnumAble: false,
+    enumLoading: false,
+    distinctCount: 0,
+    displaySort: 7,
+    values: []
+  },
+  {
+    id: 'policy',
+    nameEn: 'policy',
+    nameZh: '策略',
+    type: 'string',
+    isEnumAbleForColumn: true,
+    isEnumAble: false,
+    enumLoading: false,
+    distinctCount: 0,
+    displaySort: 7,
+    values: []
+  },
+  {
+    id: 'encryptType',
+    nameEn: 'encryptType',
+    nameZh: '加密类型',
+    type: 'boolean',
+    isEnumAbleForColumn: true,
+    isEnumAble: false,
+    enumLoading: false,
+    distinctCount: 0,
+    displaySort: 7,
+    values: []
+  },
+  {
+    id: 'createTime',
+    nameEn: 'createTime',
+    nameZh: '创建时间',
+    type: 'datetime',
+    isEnumAbleForColumn: true,
+    isEnumAble: false,
+    enumLoading: false,
+    distinctCount: 0,
+    displaySort: 8,
+    values: []
+  },
+  {
+    id: 'lastTime',
+    nameEn: 'lastTime',
+    nameZh: '最新访问时间',
+    type: 'datetime',
+    isEnumAbleForColumn: true,
+    isEnumAble: false,
+    enumLoading: false,
+    distinctCount: 0,
+    displaySort: 9,
+    values: []
+  },
+  {
+    id: 'updataTime',
+    nameEn: 'updataTime',
+    nameZh: '元数据更新时间',
+    type: 'datetime',
+    isEnumAbleForColumn: true,
+    isEnumAble: false,
+    enumLoading: false,
+    distinctCount: 0,
+    displaySort: 8,
+    values: []
+  }
+];
 
-  const MilvusColumns = [
-    {
-      title: '序号',
-      dataIndex: 'index',
-      width: 60,
-      align: 'center',
-      render: (_, record, index) => index + 1
-    },
-    {
-      title: '集合英文名称',
-      dataIndex: 'collection_name',
-      width: 280,
-      ellipsis: true,
-      className: styles['hover-change'] + ' ' + styles['table-name'],
-      render: (_, record) => {
-        return renderEmptyPlaceholder(record.workflow_name) !== '-' ? (
-          <EllipsisPopover
-            value={record.workflow_name}
-            isEdit={false}
-            isLink
-            handleLink={() => {
-              viewDetailWorkflow(record.workflow_uuid, record.ds_workflow_id);
-            }}
-          />
-        ) : (
-          <span>-</span>
-        );
-      }
-    },
-    {
-      title: '集合中文名称',
-      dataIndex: 'collection_name_zh',
-      width: 280,
-      ellipsis: true,
-      className: styles['hover-change'] + ' ' + styles['table-name'],
-      render: (_, record) => {
-        return renderEmptyPlaceholder(record.workflow_name) !== '-' ? (
-          <EllipsisPopover
-            value={record.workflow_name}
-            isEdit={false}
-            isLink
-            handleLink={() => {
-              viewDetailWorkflow(record.workflow_uuid, record.ds_workflow_id);
-            }}
-          />
-        ) : (
-          <span>-</span>
-        );
-      },
-      sorter: true
-    },
-    {
-      title: '所属数据库',
-      dataIndex: 'database_name',
-      width: 120,
-      ellipsis: true,
-      className: styles['hover-change'],
-      render: (_, record) => {
-        return renderEmptyPlaceholder(record.source_path) !== '-' ? (
-          <EllipsisPopover value={record.source_path} isEdit={false} />
-        ) : (
-          <span>-</span>
-        );
-      }
-    },
-    {
-      title: '维度',
-      dataIndex: 'dimension',
-      width: 120,
-      ellipsis: true,
-      className: styles['hover-change'],
-      render: (_, record) => {
-        return renderEmptyPlaceholder(record.dataset_name) !== '-' ? (
-          <EllipsisPopover value={record.dataset_name} isEdit={false} />
-        ) : (
-          <span>-</span>
-        );
-      }
-    },
-    {
-      title: '向量数量',
-      dataIndex: 'vector_num',
-      width: 150,
-      ellipsis: true,
-      render: (_, record) => (
-        <EllipsisPopover
-          value={renderEmptyPlaceholder(record.user_name)}
-          isEdit={false}
-        />
-      )
-    },
-    {
-      title: '度量类型',
-      dataIndex: 'metric_type',
-      width: 100,
-      ellipsis: true,
-      render: (_, record) => record.metric_type || '-'
-    },
-    {
-      title: '存储大小（G）',
-      dataIndex: 'storage_size',
-      width: 150,
-      ellipsis: true,
-      render: (_, record) => (
-        <EllipsisPopover
-          value={renderEmptyPlaceholder(record.user_name)}
-          isEdit={false}
-        />
-      )
-    },
-    {
-      title: '分区字段',
-      dataIndex: 'partition_field',
-      width: 150,
-      ellipsis: true,
-      render: (_, record) => (
-        <EllipsisPopover
-          value={renderEmptyPlaceholder(record.user_name)}
-          isEdit={false}
-        />
-      )
-    },
-    {
-      title: '分区数',
-      dataIndex: 'partition_num',
-      width: 150,
-      ellipsis: true,
-      render: (_, record) => (
-        <EllipsisPopover
-          value={renderEmptyPlaceholder(record.user_name)}
-          isEdit={false}
-        />
-      )
-    },
-    {
-      title: '索引数',
-      dataIndex: 'index_num',
-      width: 150,
-      ellipsis: true,
-      render: (_, record) => (
-        <EllipsisPopover
-          value={renderEmptyPlaceholder(record.user_name)}
-          isEdit={false}
-        />
-      )
-    },
-    {
-      title: '元数据更新时间',
-      dataIndex: 'metadata_update_time',
-      width: 160,
-      render: (_, record) => (
-        <span>
-          {record.update_time == '' || record.update_time == null
-            ? '-'
-            : new Date(record.update_time).toLocaleString()}
-        </span>
-      ),
-      sorter: true
-    },
-    {
-      title: '数据更新时间',
-      dataIndex: 'data_update_time',
-      width: 160,
-      render: (_, record) => (
-        <span>
-          {record.update_time == '' || record.update_time == null
-            ? '-'
-            : new Date(record.update_time).toLocaleString()}
-        </span>
-      ),
-      sorter: true
-    },
-    {
-      title: '元数据采集时间',
-      dataIndex: 'metadata_collect_time',
-      width: 160,
-      render: (_, record) => (
-        <span>
-          {record.update_time == '' || record.update_time == null
-            ? '-'
-            : new Date(record.update_time).toLocaleString()}
-        </span>
-      ),
-      sorter: true
-    }
-  ];
+const MilvusFields = [
+  {
+    id: 'collectionName',
+    nameEn: 'collectionName',
+    nameZh: '集合英文名称',
+    type: 'string',
+    isEnumAbleForColumn: true,
+    isEnumAble: false,
+    enumLoading: false,
+    distinctCount: 0,
+    displaySort: 1,
+    values: []
+  },
+  {
+    id: 'description',
+    nameEn: 'description',
+    nameZh: '集合中文名称',
+    type: 'string',
+    isEnumAbleForColumn: true,
+    isEnumAble: false,
+    enumLoading: false,
+    distinctCount: 0,
+    displaySort: 2,
+    values: []
+  },
+  {
+    id: 'dbName',
+    nameEn: 'dbName',
+    nameZh: '所属数据库',
+    type: 'string',
+    isEnumAbleForColumn: true,
+    isEnumAble: false,
+    enumLoading: false,
+    distinctCount: 0,
+    displaySort: 3,
+    values: []
+  },
+  {
+    id: 'approxEntityCount',
+    nameEn: 'approxEntityCount',
+    nameZh: '实体数量',
+    type: 'string',
+    isEnumAbleForColumn: true,
+    isEnumAble: false,
+    enumLoading: false,
+    distinctCount: 0,
+    displaySort: 4,
+    values: []
+  },
+  {
+    id: 'status',
+    nameEn: 'status',
+    nameZh: '状态',
+    type: 'string',
+    isEnumAbleForColumn: true,
+    isEnumAble: false,
+    enumLoading: false,
+    distinctCount: 0,
+    displaySort: 5,
+    values: []
+  },
+  {
+    id: 'partitions',
+    nameEn: 'partitions',
+    nameZh: '分区数量',
+    type: 'int',
+    isEnumAbleForColumn: true,
+    isEnumAble: false,
+    enumLoading: false,
+    distinctCount: 0,
+    displaySort: 6,
+    values: []
+  },
+  {
+    id: 'aliasList',
+    nameEn: 'aliasList',
+    nameZh: '别名',
+    type: 'string',
+    isEnumAbleForColumn: true,
+    isEnumAble: false,
+    enumLoading: false,
+    distinctCount: 0,
+    displaySort: 7,
+    values: []
+  },
+  {
+    id: 'shards',
+    nameEn: 'shards',
+    nameZh: '分片数量',
+    type: 'int',
+    isEnumAbleForColumn: true,
+    isEnumAble: false,
+    enumLoading: false,
+    distinctCount: 0,
+    displaySort: 7,
+    values: []
+  },
+  {
+    id: 'consistencyLevel',
+    nameEn: 'consistencyLevel',
+    nameZh: '一致性级别',
+    type: 'string',
+    isEnumAbleForColumn: true,
+    isEnumAble: false,
+    enumLoading: false,
+    distinctCount: 0,
+    displaySort: 7,
+    values: []
+  },
+  {
+    id: 'createTime',
+    nameEn: 'createTime',
+    nameZh: '创建时间',
+    type: 'datetime',
+    isEnumAbleForColumn: true,
+    isEnumAble: false,
+    enumLoading: false,
+    distinctCount: 0,
+    displaySort: 8,
+    values: []
+  },
+  {
+    id: 'lastTime',
+    nameEn: 'lastTime',
+    nameZh: '最近访问时间',
+    type: 'datetime',
+    isEnumAbleForColumn: true,
+    isEnumAble: false,
+    enumLoading: false,
+    distinctCount: 0,
+    displaySort: 9,
+    values: []
+  },
+  {
+    id: 'updataTime',
+    nameEn: 'updataTime',
+    nameZh: '元数据更新时间',
+    type: 'datetime',
+    isEnumAbleForColumn: true,
+    isEnumAble: false,
+    enumLoading: false,
+    distinctCount: 0,
+    displaySort: 8,
+    values: []
+  }
+];
 
+export const getColumnsSetting = (metadataType: MetadataType | string) => {
   switch (metadataType) {
     case MetadataType.Iceberg:
-      return IceDorisColumns;
     case MetadataType.Doris:
-      return IceDorisColumns;
+      return IcebergFields;
     case MetadataType.MinIO:
-      return MinIOColumns;
+      return MinIOFields;
     case MetadataType.Milvus:
-      return MilvusColumns;
+      return MilvusFields;
     default:
       return [];
   }
+};
+
+export const getColumns = (
+  metadataSelectedFields: ColumnField[],
+  viewDetail: (id: string) => void,
+  page: number,
+  size: number
+) => {
+  const dynamicColumns = [
+    {
+      title: '序号',
+      dataIndex: 'index',
+      fixed: 'left' as const,
+      width: 80,
+      key: 'index',
+      render: (_, _record, idx: number) => (page - 1) * size + idx + 1
+    },
+    // 根据 fields 生成列，保证每一列和表头一一对应
+    ...(metadataSelectedFields || [])
+      .filter((field) => field.displaySort > 0)
+      .map((field) => {
+        // 其他字段使用默认渲染
+        return {
+          title: field.nameZh,
+          dataIndex: field.nameEn,
+          key: field.nameEn,
+          width: 150,
+          ellipsis: true,
+          className:
+            field.id === 'collectionName' ||
+            field.id === 'tableName' ||
+            field.id === 'bucketName'
+              ? styles['hover-change'] + ' ' + styles['table-name']
+              : '',
+          render: (value: any, record: any) => {
+            if (field.type.includes('date')) {
+              return value ? dayjs(value).format('YYYY-MM-DD HH:mm:ss') : '-';
+            }
+            if (field.id === 'versioning') {
+              return value ? (
+                <div className="flex items-center gap-1">
+                  <CheckCircleFillIcon /> 启用
+                </div>
+              ) : (
+                <div className="flex items-center gap-1">
+                  <CloseCircleFillIcon /> 关闭
+                </div>
+              );
+            }
+            if (
+              field.id === 'collectionName' ||
+              field.id === 'tableName' ||
+              field.id === 'bucketName'
+            ) {
+              return (
+                <EllipsisPopover
+                  value={value}
+                  isEdit={false}
+                  isLink
+                  handleLink={() => {
+                    viewDetail(record.id);
+                  }}
+                />
+              );
+            }
+            return value ?? '-';
+          },
+          sorter: field.type === 'datetime'
+        };
+      })
+  ];
+
+  return dynamicColumns;
 };

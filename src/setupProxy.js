@@ -146,7 +146,18 @@ module.exports = function (app) {
         changeOrigin: true,
         secure: false,
         logger: console,
-        on: {}
+        on: {},
+        proxy: [
+          {
+            context: ['/ws'],
+            target: 'ws://localhost:9050',
+            ws: true
+          },
+          {
+            context: (path) => path.endsWith('.hot-update.json'),
+            target: 'http://localhost:9050'
+          }
+        ]
       })
     );
     app.use(

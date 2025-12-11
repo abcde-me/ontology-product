@@ -1,7 +1,14 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import styles from './index.module.scss';
 import { IconMindMapping, IconSettings } from '@arco-design/web-react/icon';
-import { Button, Input, Message, Modal, Tooltip } from '@arco-design/web-react';
+import {
+  Button,
+  Empty,
+  Input,
+  Message,
+  Modal,
+  Tooltip
+} from '@arco-design/web-react';
 import { Table } from '@ccf2e/arco-material';
 import { format } from 'date-fns';
 import PolicyForm from '@/components/policy-from/index';
@@ -297,7 +304,7 @@ function HitTest(props: { datasetName: string }) {
               className={styles.inputBox}
               placeholder="请输入文本进行命中测试"
               value={text}
-              autoSize={{ minRows: 13 }}
+              autoSize={{ minRows: 8 }}
               allowClear
               maxLength={2000}
               disabled={loading1}
@@ -336,29 +343,27 @@ function HitTest(props: { datasetName: string }) {
         </div>
         <div className={styles.historyHeader}>历史记录</div>
         <div className={styles.historyContent}>
-          {recordList.length === 0 ? (
-            <NoDataEmpty description="暂无数据" />
-          ) : (
-            <Table
-              loading={loading2}
-              pagination={{
-                current: pagination.page,
-                pageSize: pagination.limit,
-                total: pagination.total
-              }}
-              onChange={onChangeTable}
-              columns={recordColumns}
-              data={recordList}
-              scroll={{ x: true }}
-              rowKey="id"
-              rowClassName={rowClassName} // 设置行的样式
-              onRow={(record: any, index) => {
-                return {
-                  onClick: () => onRowClick(record, index)
-                };
-              }}
-            />
-          )}
+          <Table
+            loading={loading2}
+            pagination={{
+              current: pagination.page,
+              pageSize: pagination.limit,
+              total: pagination.total,
+              showJumper: false
+            }}
+            onChange={onChangeTable}
+            columns={recordColumns}
+            data={recordList}
+            scroll={{ x: true }}
+            rowKey="id"
+            rowClassName={rowClassName} // 设置行的样式
+            onRow={(record: any, index) => {
+              return {
+                onClick: () => onRowClick(record, index)
+              };
+            }}
+            noDataElement={<Empty className="mt-[15px]" />}
+          />
         </div>
       </div>
       <div className={styles.rightContent}>

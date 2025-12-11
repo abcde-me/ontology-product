@@ -36,8 +36,8 @@ const WorkflowChecklist = ({ disabled }: WorkflowChecklistProps) => {
     <PortalToFollowElem
       placement="bottom-end"
       offset={{
-        mainAxis: 16,
-        crossAxis: -310
+        mainAxis: 16
+        // crossAxis: -310
       }}
       open={open}
       onOpenChange={setOpen}

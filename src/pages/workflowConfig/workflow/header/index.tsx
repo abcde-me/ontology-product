@@ -22,6 +22,7 @@ import {
 } from '@/api/workflow';
 import BackIcon from '@/pages/workflowConfig/styles/images/op-icons/back.svg';
 import {
+  EditWorkflowParams,
   IsOnline,
   WorkflowOperation,
   WorkflowOperationParams
@@ -92,10 +93,11 @@ const SuccessModal = ({ visible, params, onClose }) => {
   );
 };
 
-const Header: FC = () => {
+const Header = (props: { flowType: string }) => {
   const { t } = useTranslation('plugin__console-plugin-appforge');
   const history = useHistory();
   const [showRuningModal, setShowRuningModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
   const [editing, setEditing] = useState(false);
   const [workflowOperationRes, setWorkflowOperationRes] = useState();
   const inputRef = useRef<RefInputType>(null);
@@ -250,18 +252,24 @@ const Header: FC = () => {
     setTimeout(() => inputRef.current?.focus(), 0);
   };
 
-  const handleSave = async (workflow_name: string) => {
+  const handleSave = async (flowData: EditWorkflowParams) => {
     setEditing(false);
-
-    if (workflowName === appDetail?.workflow_name) {
-      return;
-    }
+    const { workflow_name } = flowData;
 
     // 这里可以添加保存逻辑
-    const workflowRes = await editWorkflow({
+    let editFlowParams: EditWorkflowParams = {
       workflow_uuid: workflowUuid ?? '',
       workflow_name
-    });
+    };
+
+    if (props.flowType === 'struct') {
+      editFlowParams = {
+        ...editFlowParams,
+        ...flowData
+      };
+    }
+
+    const workflowRes = await editWorkflow(editFlowParams);
 
     if (workflowRes?.status === 200) {
       appDetail &&
@@ -285,7 +293,7 @@ const Header: FC = () => {
       return;
     }
 
-    handleSave(workflow_name);
+    handleSave({ workflow_name });
   };
 
   return (
@@ -321,7 +329,8 @@ const Header: FC = () => {
               >
                 {appDetail?.workflow_name}
               </Typography.Paragraph>
-              {headerOperationDisplay && (
+              {/*当前版本只有非结构化的工作流才能单独编辑名称*/}
+              {headerOperationDisplay && props.flowType === 'no_struct' && (
                 <PermissionWrapper
                   permission={WORKFLOW_DETAIL_PERMISSIONS.UPDATE}
                 >

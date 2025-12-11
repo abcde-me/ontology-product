@@ -31,20 +31,29 @@ import { openNewPage } from '@/utils/env';
 import styles from './query-script.module.scss';
 import { VersionType, VersionTypeEnum } from '../sctipt-card';
 import ScriptModalTable from '../sctip-modal-table';
+import { deleteSqlFile, listSqlFile } from '@/api/sql';
 
 const InputSearch = Input.Search;
 
-const QueryScript: React.FC = () => {
+interface QueryScriptProps {
+  curActiveTab: string;
+}
+
+const QueryScript: React.FC<QueryScriptProps> = ({ curActiveTab }) => {
   const FormItem = Form.Item;
   const [form] = Form.useForm();
   const Option = Select.Option;
   const options = ['全部', '已发布', '未发布', '草稿'];
-  const history = useHistory();
-  const userInfo = useUserInfo();
+
+  const [formData, setFormData] = useState({
+    script_name: '',
+    update_user: '',
+    update_time: []
+  });
   // 初始化搜索框value
   const [searchValue, setSearchValue] = useState('');
-  // 初始化工作流列表数据
-  const [workflowData, setWorkflowData] = useState([]);
+  // 初始化查询脚本列表数据
+  const [queryScriptData, setQueryScriptData] = useState([]);
   // 当前的第几页
   const [current, setCurrent] = useState(1);
   // 每页展示数据的数据量
@@ -57,17 +66,13 @@ const QueryScript: React.FC = () => {
   const [isClickClear, setIsClickClear] = useState(false);
   // 初始化筛选的值
   const [sortValue, setSortValue] = useState({
-    run_cycle: '',
     sort: ''
   });
-  // 控制弹窗显示隐藏
-  const [visible, setVisible] = useState<boolean>(false);
-  // 初始化查询脚本数量
   const [queryNum, setQueryNum] = useState<number>(100);
   // 组件初始化
   useEffect(() => {
-    if (userInfo) getList();
-  }, [userInfo, current, pageSize, sortValue]);
+    getList();
+  }, [current, pageSize, sortValue, curActiveTab]);
 
   // 清空搜索框
   useEffect(() => {
@@ -81,43 +86,31 @@ const QueryScript: React.FC = () => {
     setLoading(true);
     try {
       const params: any = {
-        uid: userInfo?.id,
-        search_content: searchValue,
         page: current, //第几页
         page_size: pageSize, //每页个数
-        ...sortValue
+        script_name: formData?.script_name,
+        update_user: formData?.update_user,
+        update_time_start: formData?.update_time?.[0],
+        update_time_end: formData?.update_time?.[1],
+        orders: [
+          {
+            column: 'script_id',
+            order: sortValue?.sort || 'desc'
+          }
+        ]
       };
-      const res = await getWorkflowList(params);
+      const res = await listSqlFile(params);
       if (res.status === 200 && res.data) {
-        setWorkflowData(res.data.list);
-        setCurrent(res.data.page_info?.page);
-        setPageSize(res.data.page_info?.page_size);
-        setTotal(res.data.page_info?.total || 10);
+        setQueryScriptData(res?.data?.items);
+        // setCurrent(res.data.page_info?.page);
+        // setPageSize(res.data.page_info?.page_size);
+        setTotal(res.data?.total || 10);
       }
     } finally {
       setLoading(false);
     }
   };
 
-  // 创建工作流
-  const handleCreateWorkflow = () => {
-    openNewPage('/modaforge/tenant/compute/modaforge/workflowConfig');
-  };
-
-  // 跳转目录
-  const handleToDirectoryPath = (
-    id: string,
-    parent_id: string,
-    root_type: string | number
-  ) => {
-    history.push(
-      `/tenant/compute/modaforge/dataCatalog/list?root_type=${root_type}&id=${id}&parent_id=${parent_id}`
-    );
-  };
-  // 跳转目标数据 - 数据集详情
-  const handleToTargetDatasetDetail = (id: string) => {
-    history.push(`/tenant/compute/modaforge/datasetManagement/detail/${id}`);
-  };
   // 查看详情
   const viewDetailWorkflow = (
     workflow_uuid: number | string,
@@ -129,10 +122,7 @@ const QueryScript: React.FC = () => {
   };
 
   // 点击删除操作弹窗
-  const handleDelete = (
-    workflow_uuid: number | string,
-    workflow_version: string
-  ) => {
+  const handleDelete = (script_id: number) => {
     Modal.confirm({
       title: (
         <span className={styles['workflow-list-modal-title']}>
@@ -147,27 +137,24 @@ const QueryScript: React.FC = () => {
       okText: '确定',
       cancelText: '取消',
       onOk: () => {
-        handleDeleteWorkflow(workflow_uuid, workflow_version);
+        handleDeleteWorkflow(script_id);
       }
     });
   };
 
   // 删除工作流
-  const handleDeleteWorkflow = async (
-    workflow_uuid: number | string,
-    workflow_version: string
-  ) => {
-    // const res = await workflowDelete(workflow_uuid, workflow_version);
-    // if (res.status === 200 && res.code === '') {
-    //   Message.success({
-    //     content: '删除成功'
-    //   });
-    //   getList();
-    // } else {
-    //   Message.error({
-    //     content: res?.message ?? '删除失败，请稍后重试'
-    //   });
-    // }
+  const handleDeleteWorkflow = async (script_id: number) => {
+    const res = await deleteSqlFile(script_id);
+    if (res.status === 200 && res.code === '') {
+      Message.success({
+        content: '删除成功'
+      });
+      getList();
+    } else {
+      Message.error({
+        content: res?.message ?? '删除失败，请稍后重试'
+      });
+    }
   };
 
   // 筛选排序操作
@@ -178,16 +165,12 @@ const QueryScript: React.FC = () => {
   ) => {
     setCurrent(1);
     const sortdata = {
-      run_cycle:
-        filters.run_cycle === undefined ? '' : filters.run_cycle.join(','),
-      is_online:
-        filters.is_online === undefined ? '' : filters.is_online.join(','),
       sort:
         sorter.direction === undefined
           ? ''
           : sorter.direction === 'ascend'
-            ? 'create_time:ASC'
-            : 'create_time:DESC'
+            ? 'asc'
+            : 'desc'
     };
 
     setSortValue(sortdata);
@@ -197,122 +180,56 @@ const QueryScript: React.FC = () => {
   const renderEmptyPlaceholder = (value: string | null) => {
     return value === '' || value == null ? '-' : value;
   };
-  const getVersionType = (version_type) => {
-    switch (version_type) {
-      case VersionType.RELEASED:
-        return (
-          <div className={styles['script-card-content-item-title-icon']}>
-            <span
-              className={
-                version_type === VersionType.RELEASED
-                  ? styles['released-icon']
-                  : ''
-              }
-            />
-            <div className={styles['script-card-content-item-title-icon-text']}>
-              {VersionTypeEnum.RELEASED}
-            </div>
-          </div>
-        );
-      case VersionType.UNRELEASED:
-        return (
-          <div className={styles['script-card-content-item-title-icon']}>
-            <span
-              className={
-                version_type === VersionType.UNRELEASED
-                  ? styles['unreleased-icon']
-                  : ''
-              }
-            />
-            <div className={styles['script-card-content-item-title-icon-text']}>
-              {VersionTypeEnum.UNRELEASED}
-            </div>
-          </div>
-        );
-      case VersionType.SCHEDULED:
-        return (
-          <div className={styles['script-card-content-item-title-icon']}>
-            <span
-              className={
-                version_type === VersionType.SCHEDULED
-                  ? styles['scheduled-icon']
-                  : ''
-              }
-            />
-            <div className={styles['script-card-content-item-title-icon-text']}>
-              {VersionTypeEnum.SCHEDULED}
-            </div>
-          </div>
-        );
-      default:
-        return (
-          <div className={styles['script-card-content-item-title-icon']}>
-            <span
-              className={
-                version_type === VersionType.UNRELEASED
-                  ? styles['unreleased-icon']
-                  : ''
-              }
-            />
-            <div className={styles['script-card-content-item-title-icon-text']}>
-              {VersionTypeEnum.UNRELEASED}
-            </div>
-          </div>
-        );
-    }
-  };
   // table columns
   const columns: ColumnProps[] = [
     {
       title: '序号',
-      dataIndex: 'id',
+      dataIndex: 'script_id',
       width: 100,
-      sorter: (a, b) => a.name.length - b.name.length
+      sorter: (a, b) => a.script_id - b.script_id
     },
     {
       title: '脚本名称',
-      dataIndex: 'workflow_name',
+      dataIndex: 'script_name',
       width: 320,
       ellipsis: true,
-      className: styles['hover-change'] + ' ' + styles['workflow-name'],
-      render: (_, record) => {
-        return renderEmptyPlaceholder(record.workflow_name) !== '-' ? (
-          <EllipsisPopover
-            value={record.workflow_name}
-            isEdit={false}
-            isLink
-            handleLink={() => {
-              viewDetailWorkflow(record.workflow_uuid, record.ds_workflow_id);
-            }}
-          />
-        ) : (
-          <span>-</span>
-        );
-      }
+      className: styles['hover-change'] + ' ' + styles['workflow-name']
+      // render: (_, record) => {
+      //   return renderEmptyPlaceholder(record.workflow_name) !== '-' ? (
+      //     <EllipsisPopover
+      //       value={record.workflow_name}
+      //       isEdit={false}
+      //       isLink
+      //       handleLink={() => {
+      //         viewDetailWorkflow(record.workflow_uuid, record.ds_workflow_id);
+      //       }}
+      //     />
+      //   ) : (
+      //     <span>-</span>
+      //   );
+      // }
     },
     {
       title: '脚本说明',
-      dataIndex: 'run_cycle',
-      width: 320,
-      render: (_, record) =>
-        record.run_cycle ? <span>周期运行</span> : <span>单次运行</span>
+      dataIndex: 'script_desc',
+      width: 320
     },
     {
       title: '更新人',
-      dataIndex: 'source_path',
+      dataIndex: 'update_account',
       width: 134,
       ellipsis: true,
       className: styles['hover-change']
     },
     {
       title: '更新时间',
-      dataIndex: 'create_time',
+      dataIndex: 'update_time',
       width: 180,
       render: (_, record) => (
         <span>
-          {record.create_time == '' || record.create_time == null
+          {record.update_time == '' || record.update_time == null
             ? '-'
-            : new Date(record.create_time).toLocaleString()}
+            : new Date(record.update_time).toLocaleString()}
         </span>
       )
     },
@@ -344,9 +261,7 @@ const QueryScript: React.FC = () => {
                   ? styles['disabled-text']
                   : styles['operate-text']
               }
-              onClick={() =>
-                handleDelete(record.workflow_uuid, record.workflow_version)
-              }
+              onClick={() => handleDelete(record.script_id)}
             >
               删除
             </span>
@@ -359,15 +274,22 @@ const QueryScript: React.FC = () => {
   // 点击搜索按钮
   const handleSearch = () => {
     setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-    }, 500);
+    getList();
   };
   // 重置搜索框
   const handleReset = () => {
     setSearchValue('');
     setIsClickClear(true);
     form.resetFields();
+  };
+  const handleFormChange = (value) => {
+    console.log(value, '123');
+    const allFormValues = form.getFieldsValue();
+    setFormData({
+      script_name: allFormValues?.script_name,
+      update_user: allFormValues?.update_account,
+      update_time: allFormValues?.update_time
+    });
   };
   return (
     <div className={styles['query-script-wrapper']}>
@@ -380,11 +302,18 @@ const QueryScript: React.FC = () => {
           marginBottom: '16px'
         }}
       >
-        <Form form={form} autoComplete="off" layout="inline">
+        <Form
+          onValuesChange={(values) => {
+            handleFormChange(values);
+          }}
+          form={form}
+          autoComplete="off"
+          layout="inline"
+        >
           <FormItem label="脚本名称:" field="script_name">
             <Input style={{ width: 236 }} placeholder="输入脚本名称搜索" />
           </FormItem>
-          <FormItem label="更新人:" field="update_user">
+          <FormItem label="更新人:" field="update_account">
             <Input style={{ width: 250 }} placeholder="输入关键字搜索" />
           </FormItem>
           <FormItem label="更新时间:" field="update_time">
@@ -408,13 +337,10 @@ const QueryScript: React.FC = () => {
       <Table
         border={false}
         columns={columns}
-        data={workflowData}
+        data={queryScriptData}
         pagination={false}
         noDataElement={noDataElement({
-          description: '暂无工作流',
-          btnText: '创建工作流',
-          perms: WORKFLOW_LIST_PERMISSIONS.CREATE,
-          handleBtn: () => handleCreateWorkflow()
+          description: '暂无数据'
         })}
         rowKey="id"
         loading={loading}
@@ -424,7 +350,7 @@ const QueryScript: React.FC = () => {
         }
       />
       {/* 分页 */}
-      {workflowData && workflowData.length > 0 && (
+      {queryScriptData && queryScriptData.length > 0 && (
         <Pagination
           current={current}
           pageSize={pageSize}

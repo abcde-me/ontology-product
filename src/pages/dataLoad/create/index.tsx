@@ -668,9 +668,18 @@ export default function DataLoadCreate() {
       setCheckStatus(CheckSQLStatus.NONE);
       setCheckMessage('');
       setSelectedNodeType(undefined);
+      // 重置载入形式
+      setLoadVal(LOAD_TYPES.ONCE);
+      setExpression({});
       form.setFieldsValue({
         table_name: undefined,
-        sql_process_enabled: 'disable'
+        sql_process_enabled: 'disable',
+        load_type: LOAD_TYPES.ONCE,
+        time: undefined,
+        day: undefined,
+        weekly: undefined,
+        cycle: undefined,
+        cron_expr: undefined
       });
     },
     [form]

@@ -1,13 +1,14 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Button,
   Form,
   Input,
   Menu,
+  Modal,
   Pagination,
   PaginationProps,
-  Table,
-  Select
+  Select,
+  Table
 } from '@arco-design/web-react';
 import { useHistory } from 'react-router';
 import { ColumnProps } from '@arco-design/web-react/es/Table';
@@ -17,12 +18,14 @@ import { useUserInfo } from '@/store/userInfoStore';
 import { SorterInfo } from '@arco-design/web-react/es/Table/interface';
 import { PermissionWrapper } from '@/components/PermissionGuard';
 import { WORKFLOW_LIST_PERMISSIONS } from '@/config/permissions';
-import { openNewPage } from '@/utils/env';
-import SettingsIcon from '@/assets/metadata/settings.svg';
 import ColumnSettingIcon from '@/assets/metadata/column-setting.svg';
 import StorageIcon from '@/assets/metadata/storage.svg';
-import { IconPlus, IconRefresh } from '@arco-design/web-react/icon';
-import { getColumns } from './getColumns';
+import { IconPlus, IconRefresh, IconSearch } from '@arco-design/web-react/icon';
+import { getColumns, getColumnsSetting } from './getColumns';
+import ColumnSettingModal, {
+  ColumnField
+} from '../dataAsset/components/ColumnSettingModal';
+import SearchArea from './components/SearchArea';
 import styles from './index.module.scss';
 
 enum MetadataType {
@@ -33,11 +36,10 @@ enum MetadataType {
 }
 
 export default function MetadataManagement() {
-  const history = useHistory();
   const userInfo = useUserInfo();
+  const history = useHistory();
   const MenuItem = Menu.Item;
-  // 搜索表单
-  const searchForm = useRef<any>(null);
+  const TextArea = Input.TextArea;
 
   // 初始化搜索框value
   const [searchValue, setSearchValue] = useState('');
@@ -62,6 +64,35 @@ export default function MetadataManagement() {
   const [activeMetadataType, setActiveMetadataType] = useState<
     MetadataType | string
   >(MetadataType.Iceberg);
+  // 列设置弹窗是否打开
+  const [columnModalOpen, setColumnModalOpen] = useState(false);
+  // 初始化表格列
+  const [columns, setColumns] = useState<ColumnProps[]>([]);
+  // 列设置弹窗选中的列
+  const [selectedColumns, setSelectedColumns] = useState<ColumnField[]>(
+    getColumnsSetting(activeMetadataType)
+  );
+  // 创建数据库弹窗是否打开
+  const [createTableModalOpen, setCreateTableModalOpen] = useState(false);
+  // 创建物理数据库弹窗是否打开
+  const [createPhysicalTableModalOpen, setCreatePhysicalTableModalOpen] =
+    useState(false);
+
+  // 创建数据库弹窗表单
+  const [tableForm] = Form.useForm();
+  // 创建物理数据库弹窗表单
+  const [physicalTableForm] = Form.useForm();
+
+  useEffect(() => {
+    setColumns(
+      getColumns(
+        selectedColumns,
+        viewDetail,
+        current,
+        pageSize
+      ) as ColumnProps[]
+    );
+  }, [activeMetadataType, selectedColumns]);
 
   // 组件初始化
   useEffect(() => {
@@ -99,12 +130,9 @@ export default function MetadataManagement() {
   };
 
   // 查看详情
-  const viewDetailWorkflow = (
-    workflow_uuid: number | string,
-    ds_workflow_id: number | string
-  ) => {
-    openNewPage(
-      `/modaforge/tenant/compute/modaforge/workflowConfig?workflow_uuid=${workflow_uuid}&ds_workflow_id=${ds_workflow_id}`
+  const viewDetail = (id) => {
+    history.push(
+      `/tenant/compute/modaforge/metadataManagement/detail?id=${id}&metadataType=${activeMetadataType}`
     );
   };
 
@@ -138,10 +166,66 @@ export default function MetadataManagement() {
     // setCurrent(1);
   };
 
-  const columns: ColumnProps[] = getColumns(
-    activeMetadataType,
-    viewDetailWorkflow
-  ) as ColumnProps[];
+  // 处理字段搜索
+  const handleFieldSearch = (fieldValues, commonSearch: string) => {
+    console.log(fieldValues, commonSearch);
+  };
+
+  // 处理重置
+  const handleReset = () => {
+    // setSearchParams({ ...searchParams, fieldSearch: [], commonSearch: '' });
+    // setCurrentPage(1);
+  };
+
+  const columnSettingsFields: ColumnField[] =
+    getColumnsSetting(activeMetadataType);
+
+  // 列设置弹窗回调
+  const handleModalOk = (
+    selectedIds: string[],
+    displayFields: ColumnField[]
+  ) => {
+    const selectedFields = selectedIds
+      .map((nameEn) =>
+        displayFields.find(
+          (field) => field.nameEn === nameEn || field.id === nameEn
+        )
+      )
+      .filter(Boolean) as ColumnField[];
+    setSelectedColumns(selectedFields);
+    setColumnModalOpen(false);
+  };
+
+  const handleModalCancel = () => setColumnModalOpen(false);
+  const handleColumnChange = (list: ColumnField[]) => {
+    console.log('列设置变化:', list);
+  };
+
+  // 筛选元数据类型操作
+  const handleTableTypeChange = (key: MetadataType | string) => {
+    console.log(key, 'kkkkkk');
+    tableForm.setFieldsValue({
+      ddl: key
+    });
+  };
+
+  // 创建数据库弹窗回调
+  const handleCreateTableModalOk = () => {
+    tableForm.validate().then((values) => {
+      console.log(values, '创建数据库');
+      setCreateTableModalOpen(false);
+      tableForm.resetFields();
+    });
+  };
+
+  // 创建物理数据库弹窗回调
+  const handleCreatePhysicalTableModalOk = () => {
+    physicalTableForm.validate().then((values) => {
+      console.log(values, '创建物理数据库');
+      setCreatePhysicalTableModalOpen(false);
+      physicalTableForm.resetFields();
+    });
+  };
 
   return (
     <div className={styles['metadataManagement']}>
@@ -150,90 +234,24 @@ export default function MetadataManagement() {
         <div className={styles['leftBox']}>
           <Menu
             defaultSelectedKeys={[activeMetadataType]}
-            onClickMenuItem={(key) => setActiveMetadataType(key)}
+            onClickMenuItem={(key) => {
+              setSelectedColumns(getColumnsSetting(key));
+              setActiveMetadataType(key);
+            }}
           >
-            <MenuItem key="Iceberg">Iceberg</MenuItem>
-            <MenuItem key="Doris">Doris</MenuItem>
-            <MenuItem key="MinIO">MinIO</MenuItem>
-            <MenuItem key="Milvus">Milvus</MenuItem>
+            <MenuItem key="Iceberg">数据湖</MenuItem>
+            <MenuItem key="Doris">在线分析库</MenuItem>
+            <MenuItem key="MinIO">对象存储</MenuItem>
+            <MenuItem key="Milvus">向量数据库</MenuItem>
           </Menu>
         </div>
         <div className={styles['rightBox']}>
-          <div
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              width: '100%',
-              padding: '16px 0',
-              borderRadius: '4px',
-              borderBottom: '1px solid var(--LineLine-color-border-2, #E2E8F0)'
-            }}
-          >
-            <Form
-              ref={searchForm}
-              onSubmit={handleSearch}
-              layout="inline"
-              style={{
-                justifyContent: 'space-between'
-              }}
-            >
-              {activeMetadataType === MetadataType.MinIO ? (
-                <>
-                  <Form.Item label="桶名称：" field="bucket_name">
-                    <Input placeholder="请输入关键字搜索" />
-                  </Form.Item>
-                  <Form.Item label="所属区域：" field="region">
-                    <Input placeholder="请输入关键字搜索" />
-                  </Form.Item>
-                  <Form.Item label="存储类型：" field="storage_type">
-                    <Select placeholder="请选择存储类型" />
-                  </Form.Item>
-                </>
-              ) : (
-                <>
-                  <Form.Item label="目录类型：" field="directory_type">
-                    <Select placeholder="请选择文件类型" />
-                  </Form.Item>
-                  <Form.Item label="表名：" field="table_name">
-                    <Input placeholder="请输入关键字搜索" />
-                  </Form.Item>
-                  <Form.Item label="表中文：" field="table_name_zh">
-                    <Input placeholder="请输入关键字搜索" />
-                  </Form.Item>
-                </>
-              )}
-            </Form>
-            <div className="flex items-center justify-between">
-              <div>
-                <PermissionWrapper
-                  permission={WORKFLOW_LIST_PERMISSIONS.CREATE}
-                >
-                  <Button
-                    type="outline"
-                    onClick={() => searchForm?.current?.submit()}
-                    loading={loading}
-                  >
-                    查询
-                  </Button>
-                  <Button
-                    type="text"
-                    onClick={() => searchForm?.current?.submit()}
-                    loading={loading}
-                  >
-                    重置
-                  </Button>
-                </PermissionWrapper>
-              </div>
-              <Button
-                type="text"
-                className={styles['settingBtn']}
-                icon={<SettingsIcon />}
-                loading={loading}
-              >
-                设置搜索条件
-              </Button>
-            </div>
-          </div>
+          <SearchArea
+            fields={selectedColumns}
+            onMainSearch={handleSearch}
+            onFieldSearch={handleFieldSearch}
+            onReset={handleReset}
+          />
           <div className="mb-3 mt-4 flex items-center justify-between">
             <h1 className="text-base font-semibold">数据列表(500)</h1>
             <div className="flex items-center gap-2">
@@ -257,12 +275,18 @@ export default function MetadataManagement() {
                   <Button
                     className={styles['refreshBtn']}
                     icon={<IconPlus className="text-[#1E293B]" />}
+                    onClick={() => {
+                      setCreateTableModalOpen(true);
+                    }}
                   >
                     创建数据库
                   </Button>
                   <Button
                     className={styles['refreshBtn']}
                     icon={<IconPlus className="text-[#1E293B]" />}
+                    onClick={() => {
+                      setCreatePhysicalTableModalOpen(true);
+                    }}
                   >
                     创建物理表
                   </Button>
@@ -271,6 +295,7 @@ export default function MetadataManagement() {
               <Button
                 className={styles['refreshBtn']}
                 icon={<ColumnSettingIcon />}
+                onClick={() => setColumnModalOpen(true)}
               >
                 列设置
               </Button>
@@ -317,6 +342,137 @@ export default function MetadataManagement() {
           )}
         </div>
       </div>
+
+      {/* 列设置弹窗 */}
+      <ColumnSettingModal
+        visible={columnModalOpen}
+        fields={
+          columnSettingsFields.length > 0 ? columnSettingsFields : undefined
+        }
+        onOk={handleModalOk}
+        onCancel={handleModalCancel}
+        onChange={handleColumnChange}
+      />
+      {/* 创建数据库弹窗 */}
+      <Modal
+        className={styles.createTableModal}
+        visible={createTableModalOpen}
+        title="创建数据库"
+        okText="执行DDL语句"
+        onOk={() => tableForm?.submit()}
+        onCancel={() => {
+          setCreateTableModalOpen(false);
+          tableForm?.resetFields();
+        }}
+      >
+        <Form
+          form={tableForm}
+          onSubmit={handleCreateTableModalOk}
+          labelCol={{ span: 3 }}
+          wrapperCol={{ span: 21 }}
+        >
+          <Form.Item
+            field="tableType"
+            label="数据库类型"
+            rules={[{ required: true, message: '请选择数据库类型' }]}
+          >
+            <Select
+              placeholder="请选择数据库类型"
+              options={[
+                { label: '数据湖', value: 'Iceberg' },
+                { label: '在线分析库', value: 'Doris' },
+                { label: '对象存储', value: 'MinIO' },
+                { label: '向量数据库', value: 'Milvus' }
+              ]}
+              onChange={handleTableTypeChange}
+            />
+          </Form.Item>
+          <Form.Item
+            field="tableName"
+            label="数据库名称"
+            rules={[{ required: true, message: '请输入数据库名称' }]}
+          >
+            <Input placeholder="请输入数据库名称" />
+          </Form.Item>
+          <Form.Item
+            field="ddl"
+            label="DDL语句"
+            disabled
+            rules={[
+              {
+                required: true,
+                message: '请先选择数据库类型，并输入数据库名称'
+              }
+            ]}
+          >
+            <TextArea
+              style={{ minHeight: 400 }}
+              placeholder="请先选择数据库类型，并输入数据库名称"
+            />
+          </Form.Item>
+        </Form>
+      </Modal>
+
+      {/* 创建物理表弹窗 */}
+      <Modal
+        className={styles.createTableModal}
+        visible={createPhysicalTableModalOpen}
+        title="创建物理表"
+        okText="执行DDL语句"
+        onOk={() => physicalTableForm?.submit()}
+        onCancel={() => {
+          setCreatePhysicalTableModalOpen(false);
+          physicalTableForm?.resetFields();
+        }}
+      >
+        <Form
+          form={physicalTableForm}
+          onSubmit={handleCreatePhysicalTableModalOk}
+          labelCol={{ span: 3 }}
+          wrapperCol={{ span: 21 }}
+        >
+          <Form.Item
+            field="tableType"
+            label="保存位置"
+            rules={[{ required: true, message: '请选择保存位置' }]}
+          >
+            <Select
+              placeholder="请选择数据库"
+              className={styles.selectTable}
+              style={{ display: 'flex', alignItems: 'center' }}
+              addBefore={
+                <Select
+                  placeholder="请选择数据库类型"
+                  style={{ width: 160 }}
+                  className={styles.selectAddBefore}
+                  options={[
+                    { label: '数据湖', value: 'Iceberg' },
+                    { label: '在线分析库', value: 'Doris' },
+                    { label: '对象存储', value: 'MinIO' },
+                    { label: '向量数据库', value: 'Milvus' }
+                  ]}
+                />
+              }
+            />
+          </Form.Item>
+          <Form.Item
+            field="ddl"
+            label="DDL语句"
+            disabled
+            rules={[
+              {
+                required: true,
+                message: '请先选择数据库类型，并输入数据库名称'
+              }
+            ]}
+          >
+            <TextArea
+              style={{ minHeight: 400 }}
+              placeholder="请先选择数据库类型，并输入数据库名称"
+            />
+          </Form.Item>
+        </Form>
+      </Modal>
     </div>
   );
 }

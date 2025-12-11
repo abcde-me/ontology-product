@@ -13,14 +13,22 @@ import {
 import {
   createDevelopScript,
   editDevelopScript,
-  getDevelopScriptInfo
+  getDevelopScriptInfo,
+  lockDevelopScript,
+  unlockDevelopScript
 } from '@/api/sql-develop';
 import { DEFAULT_SQL_PLACEHOLDER } from '../constant';
 import { useUserInfo } from '@/store/userInfoStore';
 import { RunResult } from '@/types/sqlApi';
 import timeFormattig from '@/utils/timeFormatting';
 import { generateSqlDefaultName } from '../utils';
-import { EditDevelopScriptResponse, ScriptParam } from '@/types/sqlDevelopApi';
+import {
+  EditDevelopScriptResponse,
+  GetDevelopScriptInfoResponse,
+  ScriptParam,
+  ScriptStatus,
+  ScriptStatusName
+} from '@/types/sqlDevelopApi';
 
 export interface UseEditorOptions {
   activeTab?: string;
@@ -44,8 +52,17 @@ export interface UseEditorOptions {
   selectFile?: (fileId: string) => void;
 }
 
+export type ScriptInfo = Partial<GetDevelopScriptInfoResponse> & {
+  /**
+   * 是否是当前用户编辑的
+   */
+  isSelfEditing: boolean;
+};
+
 export interface UseEditorReturn {
   // 编辑器状态
+  // 脚本信息
+  scriptInfo: ScriptInfo | null;
   editorContent: string;
   placeholderValue: string;
   runStatus: RunningStatus;
@@ -85,6 +102,8 @@ export interface UseEditorReturn {
   cancelGetRunResultPolling: () => void;
   loadRunResult: (execid: string, size: string) => void;
   handleGetRunLog: () => Promise<void>;
+  handleEditScript: () => Promise<boolean>;
+  handleUnlockScript: () => Promise<boolean>;
 
   // 面板状态管理
   isPanelOpen: boolean;
@@ -109,6 +128,7 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
 
   const userInfo = useUserInfo();
   // 状态管理
+  const [scriptInfo, setScriptInfo] = useState<ScriptInfo | null>(null);
   const [editorContent, setEditorContent] = useState('');
   const [placeholderValue] = useState(defaultContent);
   const [runStatus, setRunStatus] = useState<RunningStatus>(RunningStatus.IDLE);
@@ -200,6 +220,51 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
 
   // 当前文件ID，从 activeTab 对应的标签页获取
   const currentFile = fileTabs.find((tab) => tab.key === activeTab);
+
+  // 编辑脚本
+  const handleEditScript = useCallback(async () => {
+    try {
+      const res = await lockDevelopScript(Number(currentFile?.scriptId));
+      // code==='2' 代表其他人在编辑
+      if (res?.status !== 200 || res?.code === '2') {
+        Message.error(res?.message ?? '编辑失败');
+        return false;
+      }
+
+      setScriptInfo({
+        ...scriptInfo,
+        isSelfEditing: true,
+        status: ScriptStatus.Editing
+      });
+      return true;
+    } catch (error) {
+      console.error(error);
+      Message.error('编辑失败');
+      return false;
+    }
+  }, [currentFile?.scriptId]);
+
+  // 解锁脚本
+  const handleUnlockScript = useCallback(async () => {
+    try {
+      const res = await unlockDevelopScript(Number(currentFile?.scriptId));
+      if (res?.status !== 200) {
+        Message.error(res?.message ?? '解锁失败');
+        return false;
+      }
+
+      setScriptInfo({
+        ...scriptInfo,
+        isSelfEditing: false,
+        status: ScriptStatus.EditCompleted
+      });
+      return true;
+    } catch (error) {
+      console.error(error);
+      Message.error('解锁失败');
+      return false;
+    }
+  }, [currentFile?.scriptId]);
 
   // 轮询获取运行结果
   const { runAsync: getRunResultPolling, cancel: cancelGetRunResultPolling } =
@@ -336,7 +401,7 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
       try {
         const res = await editDevelopScript({
           script_name: currentFile?.title ?? generateSqlDefaultName(new Date()),
-          script_content: content,
+          script_context: content,
           script_id: Number(currentFile?.scriptId) ?? 0,
           script_params: scriptParams
         });
@@ -523,8 +588,22 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
             const fileData = response.data;
             // setLastScriptRunStatus(fileData?.run_status);
             // 更新编辑器内容
-            setEditorContent(fileData.script_content ?? '');
+            setEditorContent(fileData.script_context ?? '');
             setScriptParams(fileData.script_params ?? []);
+
+            setScriptInfo({
+              script_id: fileData.script_id,
+              script_name: fileData.script_name,
+              script_context: fileData.script_context,
+              script_params: fileData.script_params,
+              status: fileData.status,
+              status_name: fileData.status_name,
+              update_user: fileData.update_user,
+              update_time: fileData.update_time,
+              isSelfEditing:
+                fileData.status === ScriptStatus.Editing &&
+                fileData.update_user === userInfo?.account
+            });
             // 更新运行状态
             // setExecid(String(fileData.script_execid));
 
@@ -533,7 +612,7 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
             // 通知父组件更新标签页内容
             if (onTabUpdate) {
               onTabUpdate(currentTab.key, {
-                content: fileData.script_content ?? '',
+                content: fileData.script_context ?? '',
                 fileId: String(currentTab.fileId),
                 scriptId: String(fileData.script_id),
                 title: currentTab.title
@@ -563,6 +642,7 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
 
   return {
     // 状态
+    scriptInfo,
     editorContent,
     placeholderValue,
     runStatus,
@@ -594,6 +674,8 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
     cancelGetRunResultPolling,
     loadRunResult,
     handleGetRunLog,
+    handleEditScript,
+    handleUnlockScript,
 
     // 面板状态管理
     isPanelOpen,

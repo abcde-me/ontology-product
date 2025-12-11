@@ -94,7 +94,7 @@ strategy_mode = "custom"
 
 # chunk_rule: [条件必填, 默认 'by_chapter'] 指定具体的分块方法
 #   - by_character_length：固定长度切分
-#   - by_delimiter：按分隔符切分，默认 \n\n，支持用户指定
+#   - by_delimiter：按分隔符切分，默认 \\n\\n，支持用户指定
 #   - by_sentence：按句子切分
 #   - by_chapter：按章节切分
 #   - recursive：按递归切分

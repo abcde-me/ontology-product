@@ -10,6 +10,8 @@ import { useDevelopScriptManager } from '../../hooks/useDevelopScriptManager';
 
 const { Title } = Typography;
 
+import { FileTab } from '../../hooks/useDevelopScriptTabManager';
+
 interface NotebookTabContentProps {
   type: 'files' | 'tools' | 'data';
   onFileOpen?: (fileId: string, scriptId: string, fileName?: string) => void;
@@ -17,6 +19,8 @@ interface NotebookTabContentProps {
   onFileRename?: (fileId: string, newName: string) => void; // 添加重命名文件时更新标签页标题的回调
   directoryTreeRef?: React.Ref<DirectoryTreeRef>; // 修改：使用 Ref 而不是 RefObject
   externalSelectedKeys?: string[]; // 外部传入的选中状态
+  fileTabs?: FileTab[]; // 已打开的标签页列表
+  onSwitchTab?: (key: string) => void; // 切换标签页的回调
 }
 
 const PythonTabContent: React.FC<NotebookTabContentProps> = ({
@@ -24,7 +28,9 @@ const PythonTabContent: React.FC<NotebookTabContentProps> = ({
   onFileDelete, // 接收删除文件时关闭标签页的回调
   onFileRename, // 接收重命名文件时更新标签页标题的回调
   directoryTreeRef,
-  externalSelectedKeys
+  externalSelectedKeys,
+  fileTabs = [],
+  onSwitchTab
 }) => {
   // 使用文件管理器hook
   const {
@@ -45,7 +51,9 @@ const PythonTabContent: React.FC<NotebookTabContentProps> = ({
     onFileOpen,
     onFileDelete, // 传递删除文件时关闭标签页的回调
     onFileRename, // 传递重命名文件时更新标签页标题的回调
-    externalSelectedKeys
+    externalSelectedKeys,
+    fileTabs, // 传递已打开的标签页列表
+    onSwitchTab // 传递切换标签页的回调
   });
 
   return (

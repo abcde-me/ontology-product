@@ -52,7 +52,7 @@ export const useDevelopScriptTabManager = (
 
         // 创建或更新标签页
         const existingTabIndex = fileState.fileTabs.findIndex(
-          (tab) => tab.fileId === fileId
+          (tab) => tab.scriptId === scriptId
         );
 
         let updatedTabs: FileTab[];
@@ -63,12 +63,13 @@ export const useDevelopScriptTabManager = (
             currentFileId: fileId,
             currentScriptId: scriptId,
             activeTab: fileId,
-            selectedKeys: [fileId], // 同步选中状态
+            selectedKeys: scriptId ? [scriptId] : [], // 使用 script_id 作为选中状态
             isLoading: false
           }));
 
-          // 通知外部组件更新选中状态
-          onSelectedKeysChange && onSelectedKeysChange([fileId]);
+          // 通知外部组件更新选中状态（使用 script_id）
+          onSelectedKeysChange &&
+            onSelectedKeysChange(scriptId ? [scriptId] : []);
           return;
         } else {
           // 检查标签页数量限制
@@ -96,12 +97,13 @@ export const useDevelopScriptTabManager = (
           currentFileId: fileId,
           currentScriptId: scriptId,
           activeTab: fileId,
-          selectedKeys: [fileId], // 同步选中状态
+          selectedKeys: scriptId ? [scriptId] : [], // 使用 script_id 作为选中状态
           isLoading: false
         }));
 
-        // 通知外部组件更新选中状态
-        onSelectedKeysChange && onSelectedKeysChange([fileId]);
+        // 通知外部组件更新选中状态（使用 script_id）
+        onSelectedKeysChange &&
+          onSelectedKeysChange(scriptId ? [scriptId] : []);
       } catch (error) {
         const errorObj =
           error instanceof Error ? error : new Error('打开文件失败');
@@ -177,9 +179,9 @@ export const useDevelopScriptTabManager = (
       // 如果删除的是当前活动标签页，切换到下一个
       if (key === fileState.activeTab && remainingTabs.length > 0) {
         newActiveTab = remainingTabs[0].key;
-        // 更新选中状态为新的活动标签页
-        newSelectedKeys = remainingTabs[0].fileId
-          ? [remainingTabs[0].fileId]
+        // 更新选中状态为新的活动标签页（使用 script_id）
+        newSelectedKeys = remainingTabs[0].scriptId
+          ? [remainingTabs[0].scriptId]
           : [];
         newCurrentFileId = remainingTabs[0].fileId || null;
         newCurrentScriptId = remainingTabs[0].scriptId || null;
@@ -216,13 +218,13 @@ export const useDevelopScriptTabManager = (
   const switchTab = useCallback(
     (key: string) => {
       setFileState((prev) => {
-        // 找到对应的标签页，获取其fileId
+        // 找到对应的标签页，获取其fileId和scriptId
         const targetTab = prev.fileTabs.find((tab) => tab.key === key);
         const fileId = targetTab?.fileId;
         const scriptId = targetTab?.scriptId;
-        const newSelectedKeys = fileId ? [fileId] : [];
+        const newSelectedKeys = scriptId ? [scriptId] : []; // 使用 script_id 作为选中状态
 
-        // 通知外部组件更新选中状态
+        // 通知外部组件更新选中状态（使用 script_id）
         onSelectedKeysChange && onSelectedKeysChange(newSelectedKeys);
 
         return {

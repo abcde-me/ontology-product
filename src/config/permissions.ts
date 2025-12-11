@@ -159,6 +159,11 @@ export const METADATA_MANAGEMENT_PERMISSIONS = {
   LIST: 'aimdp-manager:dataset:read:list' // 菜单权限 （todo：临时使用数据集权限待替换）
 } as const;
 
+// 数据API权限
+export const DATA_API_PERMISSIONS = {
+  LIST: 'aimdp-manager:dataset:read:list' // 菜单权限 （todo：临时使用数据集权限待替换）
+} as const;
+
 // 需求管理权限
 export const REQUIREMENT_PERMISSIONS = {
   LIST: 'aimdp-manager:label_req_manager:read:get_req_list', // 菜单权限
