@@ -4,8 +4,7 @@ import { Typography } from '@arco-design/web-react';
 import { NodeProps } from '@/pages/workflowConfig/workflow/types';
 import { SQLNodeConfig } from '@/pages/workflowConfig/workflow/nodes/sql-node/types';
 import { useRequest } from 'ahooks';
-import { getSQLListInSQLNode, getSQLVersionInSQLNode } from '@/api/workflowV2';
-import { getDevelopScriptLogByVersion } from '@/api/sql';
+import { getSQLListInSQLNode } from '@/api/workflowV2';
 
 export default memo(function SQLNode(props: NodeProps<SQLNodeConfig>) {
   const { sql_id } = props.data;
@@ -14,7 +13,6 @@ export default memo(function SQLNode(props: NodeProps<SQLNodeConfig>) {
       const slq_version = sql_id?.split('_') || [];
       const [sql, version] = slq_version;
       if (sql && version) {
-        await getDevelopScriptLogByVersion({});
         const sqlList = await getSQLListInSQLNode();
         const sql_name = sqlList.find(
           ({ value }) => value.toString() === sql
