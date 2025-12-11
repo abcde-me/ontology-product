@@ -115,3 +115,47 @@
 :global(.arco-modal-footer) :global(.arco-btn-secondary):focus {
   box-shadow: none;
 }
+
+.createTableModal {
+  width: 900px;
+
+  :global(.arco-modal-content) {
+    padding: 0 24px;
+  }
+
+  :global(.arco-textarea-disabled) {
+    background-color: #ffffff;
+  }
+
+  :global(.arco-select-addbefore) {
+    padding: 0;
+  }
+
+  .selectTable {
+    :global(.arco-select) {
+      margin-left: -2px;
+    }
+
+    :global(.arco-select):hover {
+      z-index: 100;
+    }
+
+    :global(.arco-select-focused) {
+      z-index: 100;
+    }
+
+    :global(.arco-select-addbefore) :global(.arco-select) {
+      margin-left: unset !important;
+    }
+
+    :global(.arco-select.arco-select-focused .arco-select-view) {
+      border-radius: 0 4px 4px 0;
+    }
+  }
+
+  .selectAddBefore {
+    :global(.arco-select-view) {
+      border-radius: 4px 0 0 4px !important;
+    }
+  }
+}
