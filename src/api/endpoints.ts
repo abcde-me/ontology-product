@@ -485,6 +485,8 @@ export const ModaForgeResourceEndpoints = {
   RenameDevelopScriptApi: PrefixAimdp + '/RenameDevelopScript',
   // 复制加工脚本列表  - 复制
   CopyDevelopScriptApi: PrefixAimdp + '/CopyDevelopScript',
+  // 发布加工脚本
+  NewVersionDevelopScriptApi: PrefixAimdp + '/NewVersionDevelopScript',
 
   // 数据资产接口
   // 查询数据资产表字段和映射关系

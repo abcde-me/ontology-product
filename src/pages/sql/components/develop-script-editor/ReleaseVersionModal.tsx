@@ -35,9 +35,10 @@ const ReleaseVersionModal: React.FC<ReleaseVersionModalProps> = ({
 
   useEffect(() => {
     if (visible) {
+      console.log('initialValues', initialValues);
       form.setFieldsValue({
-        scriptName: initialValues?.scriptName || '',
-        version: initialValues?.version || 'V1',
+        scriptName: initialValues?.scriptName,
+        version: initialValues?.version,
         versionDesc: initialValues?.versionDesc || ''
       });
     }
@@ -89,10 +90,10 @@ const ReleaseVersionModal: React.FC<ReleaseVersionModalProps> = ({
           field="scriptName"
           rules={[{ required: true, message: '请输入SQL脚本名称' }]}
         >
-          <Input placeholder="请输入SQL脚本名称" style={{ width: '100%' }} />
+          <span>{initialValues?.scriptName}</span>
         </FormItem>
         <FormItem label="版本号:" field="version">
-          <Input readOnly style={{ width: '100%' }} />
+          <span>{initialValues?.version}</span>
         </FormItem>
         <FormItem label="版本说明:" field="versionDesc">
           <TextArea

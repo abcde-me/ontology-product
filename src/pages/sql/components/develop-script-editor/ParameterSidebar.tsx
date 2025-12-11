@@ -12,6 +12,7 @@ type ParameterWithOrder = ScriptParam & { _order?: number };
 
 interface ParameterSidebarProps {
   content: string;
+  canEdit: boolean;
   onParameterChange?: (params: ScriptParam[]) => void;
   visible?: boolean;
   onVisibleChange?: (visible: boolean) => void;
@@ -36,20 +37,23 @@ const extractParameters = (content: string): ParameterWithOrder[] => {
   PARAM_REGEX.lastIndex = 0;
   const paramMap = new Map<string, ParameterWithOrder>();
   const matches = Array.from(content.matchAll(PARAM_REGEX));
+  const baseTimestamp = Date.now();
 
   matches.forEach((match, index) => {
     const paramName = match[1].trim();
     if (paramName) {
-      // 如果参数已存在，更新 order 为最新（数字越大表示越新）
+      // 为每个参数分配时间戳，越后面的参数时间戳越大（越新）
+      const timestamp = baseTimestamp + index;
+      // 如果参数已存在，更新 order 为最新的时间戳
       if (paramMap.has(paramName)) {
         const existing = paramMap.get(paramName)!;
-        existing._order = matches.length - index; // 最新的在最前面，所以 order 更大
+        existing._order = timestamp;
       } else {
         paramMap.set(paramName, {
           config_key: paramName,
           config_value: '',
           config_desc: '',
-          _order: matches.length - index
+          _order: timestamp
         });
       }
     }
@@ -82,6 +86,7 @@ const isParamNameConflict = (
 const ParameterSidebar: React.FC<ParameterSidebarProps> = memo(
   ({
     content,
+    canEdit,
     onParameterChange,
     visible: controlledVisible,
     onVisibleChange,
@@ -94,9 +99,13 @@ const ParameterSidebar: React.FC<ParameterSidebarProps> = memo(
     const [localParams, setLocalParams] = useState<ParameterWithOrder[]>(
       initialParams?.map((p, index) => ({
         ...p,
-        _order: initialParams.length - index
+        _order: (p as ParameterWithOrder)._order ?? Date.now() - index // 如果已有时间戳则保留，否则使用当前时间戳递减
       })) || []
     );
+    // 用于标记是否已经初始化完成（initialParams 已经设置过）
+    const isInitializedRef = useRef(false);
+    // 记录上一次 extractedParams 的长度，用于判断是否从有值变为空
+    const prevExtractedParamsLengthRef = useRef<number>(-1);
 
     // 从内容中提取参数
     const extractedParams = useMemo(() => {
@@ -126,8 +135,32 @@ const ParameterSidebar: React.FC<ParameterSidebarProps> = memo(
       }
     }, [isCollapsed, onCollapsedChange]);
 
+    // 当 initialParams 变化时，更新本地状态并标记为已初始化
+    useEffect(() => {
+      console.log('2222222', initialParams);
+      // 无论 initialParams 是否有值，都标记为已初始化（即使是空数组也表示已经初始化完成）
+      if (initialParams !== undefined) {
+        const baseTimestamp = Date.now();
+        setLocalParams(
+          initialParams.map((p, index) => ({
+            ...p,
+            _order: (p as ParameterWithOrder)._order ?? baseTimestamp - index // 如果已有时间戳则保留，否则使用当前时间戳递减
+          }))
+        );
+        isInitializedRef.current = true;
+      }
+    }, [initialParams]);
+
     // 同步提取的参数到本地状态，同时保留已输入的值和初始参数值
     useEffect(() => {
+      console.log('1111111', extractedParams);
+      // 如果还没有初始化完成，不处理 extractedParams（避免覆盖 initialParams）
+      if (!isInitializedRef.current) {
+        // 记录当前的 extractedParams 长度，但不处理
+        prevExtractedParamsLengthRef.current = extractedParams.length;
+        return;
+      }
+
       if (extractedParams.length > 0) {
         setLocalParams((prevParams) => {
           const paramMap = new Map<string, string>();
@@ -139,11 +172,13 @@ const ParameterSidebar: React.FC<ParameterSidebarProps> = memo(
             }
           });
 
-          // 合并新提取的参数，保留已有的值
-          const merged = extractedParams.map((param) => ({
-            ...param,
-            config_value: paramMap.get(param.config_key) || param.config_value
-          }));
+          // 合并新提取的参数，保留已有的值，并按时间戳排序（最新的在顶部）
+          const merged = extractedParams
+            .map((param) => ({
+              ...param,
+              config_value: paramMap.get(param.config_key) || param.config_value
+            }))
+            .sort((a, b) => (b._order || 0) - (a._order || 0));
 
           // 检查参数是否真的变化了，避免无限循环
           const hasChanged =
@@ -162,14 +197,22 @@ const ParameterSidebar: React.FC<ParameterSidebarProps> = memo(
 
           return merged;
         });
+        // 更新记录的长度
+        prevExtractedParamsLengthRef.current = extractedParams.length;
       } else {
-        // 如果没有参数了，清空
-        setLocalParams((prevParams) => {
-          if (prevParams.length > 0 && onParameterChange) {
-            onParameterChange([]);
-          }
-          return [];
-        });
+        // 只有当 extractedParams 从有值变为空时才清空（避免初始化阶段误清空）
+        const wasEmpty = prevExtractedParamsLengthRef.current <= 0;
+        if (!wasEmpty) {
+          // 从有值变为空，清空参数
+          setLocalParams((prevParams) => {
+            if (prevParams.length > 0 && onParameterChange) {
+              onParameterChange([]);
+            }
+            return [];
+          });
+        }
+        // 更新记录的长度
+        prevExtractedParamsLengthRef.current = 0;
       }
     }, [extractedParams, onParameterChange]);
 
@@ -269,6 +312,7 @@ const ParameterSidebar: React.FC<ParameterSidebarProps> = memo(
                       </div>
                       <Input
                         value={param.config_value}
+                        disabled={!canEdit}
                         onChange={(value) =>
                           handleValueChange(param.config_key, value)
                         }

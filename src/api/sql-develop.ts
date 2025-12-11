@@ -153,3 +153,14 @@ export async function updateDevelopSystemParam(
     .inRegion()
     .do();
 }
+
+// 发布加工脚本
+export async function releaseDevelopScript(params: {
+  script_id: number;
+  script_desc: string;
+}): Promise<ApiRes<{}>> {
+  return await UAPI.RES.NewVersionDevelopScriptApi({})
+    .post(params)
+    .inRegion()
+    .do();
+}
