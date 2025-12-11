@@ -1,7 +1,7 @@
 import React, { memo, useCallback, useRef, useState } from 'react';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
-import { Button, Modal } from '@arco-design/web-react';
+import { Button, Form, Modal, Radio } from '@arco-design/web-react';
 import type { PublishWorkflowParams } from '@/pages/workflowConfig/types/workflow';
 import { Space } from '@arco-design/web-react';
 import { TaskOperationProps, ModelAndParameter } from '../../types';
@@ -12,6 +12,8 @@ import PlayIcon from '@/assets/workflow-header-play.svg';
 import PlayIconDisabled from '@/assets/workflow-header-play-disabled.svg';
 import styles from './index.module.scss';
 import { IsOnline, WorkflowOperation } from '@/types/workflowApi';
+import { FORM_RADIO_SCHEMA } from '@/pages/workflowList/types';
+import { useParams } from 'react-router-dom';
 
 dayjs.extend(relativeTime);
 
@@ -24,6 +26,7 @@ const AppPublisher = ({
   const [schedulerDialogVisible, setSchedulerDialogVisible] = useState(false);
   const isOnline = workflowStatus === IsOnline.online;
   const SchedulerRunRef = useRef<HTMLFormElement>(null);
+  const { type: flowType = 'no_struct' } = useParams<Record<string, string>>();
 
   const handleOperate = useCallback(
     async (

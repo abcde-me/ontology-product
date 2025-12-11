@@ -109,7 +109,7 @@ export interface WorkflowOperationParams {
   ds_workflow_id: number;
   op: WorkflowOperation;
   cycle_text?: CycleText;
-  start_node?: string;
+  start_node?: React.Key;
 }
 
 /** 工作流操作 */

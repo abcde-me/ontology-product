@@ -19,6 +19,10 @@ import EnhancementNode from './data-enhancement/node';
 import EnhancementPanel from './data-enhancement/panel';
 import CustomizeNode from './data-customize/node';
 import CustomizePanel from './data-customize/panel';
+import SQLNode from './sql-node';
+import SQLPanel from './sql-node/panel';
+import SeatunnelNode from './seatunnel-node';
+import SeatunnelPanel from './seatunnel-node/panel';
 
 export const NodeComponentMap: Record<string, ComponentType<any>> = {
   [BlockEnum.Start]: StartNode,
@@ -29,7 +33,9 @@ export const NodeComponentMap: Record<string, ComponentType<any>> = {
   [BlockEnum.Audio]: AudioNode,
   [BlockEnum.Enhancement]: EnhancementNode,
   [BlockEnum.Cleaning]: CleaningNode,
-  [BlockEnum.Customize]: CustomizeNode
+  [BlockEnum.Customize]: CustomizeNode,
+  [BlockEnum.SQL]: SQLNode,
+  [BlockEnum.Seatunnel]: SeatunnelNode
 };
 
 export const PanelComponentMap: Record<string, ComponentType<any>> = {
@@ -41,7 +47,9 @@ export const PanelComponentMap: Record<string, ComponentType<any>> = {
   [BlockEnum.Audio]: AudioPanel,
   [BlockEnum.Cleaning]: CleaningPanel,
   [BlockEnum.Enhancement]: EnhancementPanel,
-  [BlockEnum.Customize]: CustomizePanel
+  [BlockEnum.Customize]: CustomizePanel,
+  [BlockEnum.SQL]: SQLPanel,
+  [BlockEnum.Seatunnel]: SeatunnelPanel
 };
 
 export const CUSTOM_NODE_TYPE = 'custom';

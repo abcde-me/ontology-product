@@ -29,7 +29,7 @@ export function createWorkflowDraft(params: any = {}) {
   const dsWorkflowId =
     params.dsWorkflowId || searchParams.get('ds_workflow_id');
   const workflowVersion =
-    params.workflowVersion || searchParams.get('workflow_version') || '';
+    params.workflowVersion || searchParams.get('workflow_version') || 0;
   return UAPI.RES.editWorkFlowDraft({})
     .post({
       workflow_uuid: workflowUUID,
