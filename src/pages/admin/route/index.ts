@@ -308,7 +308,14 @@ export const routes: IRoute[] = [
     key: '/tenant/compute/modaforge/dataApi',
     component: React.lazy(async () => import('../../dataApi')),
     permission: DATA_API_PERMISSIONS.LIST,
-    children: []
+    children: [
+      {
+        name: 'addApi',
+        key: '/tenant/compute/modaforge/dataApi/add',
+        component: React.lazy(async () => import('../../dataApi/addApi')),
+        permission: DATA_API_PERMISSIONS.LIST
+      }
+    ]
   },
   // 数据标注 - 需求管理
   {
