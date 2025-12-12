@@ -1,5 +1,6 @@
 import UAPI from '@/api';
 import {
+  CopyDevelopScriptResponse,
   CreateDevelopScriptParams,
   CreateDevelopScriptResponse,
   DeleteDevelopScriptLogByVersionParams,
@@ -45,7 +46,7 @@ export async function renameDevelopScript(
 // 加工脚本列表 - 复制
 export async function copyDevelopScript(params: {
   script_id?: number; // 脚本id
-}): Promise<ApiRes<{}>> {
+}): Promise<ApiRes<CopyDevelopScriptResponse>> {
   return await UAPI.RES.CopyDevelopScriptApi({})
     .post({ ...params })
     .inRegion()

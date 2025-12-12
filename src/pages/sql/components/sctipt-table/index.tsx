@@ -47,15 +47,15 @@ const ScriptTable: React.FC<ScriptTableProps> = ({
   const options = [
     {
       value: ScriptStatus.EditCompleted, // 使用 1（编辑完成）作为"未发版"的代表值
-      label: ScriptStatusName.EditCompleted // '未发版'
+      label: ScriptStatusName[ScriptStatus.EditCompleted] // '未发版'
     },
     {
       value: ScriptStatus.Released, // 2
-      label: ScriptStatusName.Released // '已发版'
+      label: ScriptStatusName[ScriptStatus.Released] // '已发版'
     },
     {
       value: ScriptStatus.Scheduling, // 3
-      label: ScriptStatusName.Scheduling // '调度中'
+      label: ScriptStatusName[ScriptStatus.Scheduling] // '调度中'
     }
   ];
   const history = useHistory();

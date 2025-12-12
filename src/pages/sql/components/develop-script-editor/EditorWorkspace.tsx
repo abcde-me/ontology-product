@@ -79,7 +79,6 @@ const highlightParameterEffect = StateEffect.define<string | null>();
 
 // 创建参数高亮的装饰样式
 const parameterHighlightMark = Decoration.mark({
-  class: 'cm-parameter-highlight',
   attributes: { style: 'background-color: rgba(0, 125, 250, 0.2);' }
 });
 
@@ -450,28 +449,25 @@ const EditorWorkspaceContent: React.FC<{
           onClickMenuItem={(key) =>
             handleCopyScript(key as 'newVersion' | 'newScript')
           }
+          className={styles['copy-dropdown']}
           selectable={false}
         >
           <Menu.Item key="newVersion">
-            <div className="flex flex-col gap-1">
-              <div className="flex items-center text-[14px] text-[var(--color-text-1)]">
-                <IconCopy className="mr-[4px]" />
-                <span className="font-bold">复制为新版本</span>
-              </div>
-              <div className="mt-[4px] text-[12px] text-[var(--color-text-3)]">
-                以此脚本为基础迭代新版本
-              </div>
+            <div className="flex h-[22px] items-center text-[14px] text-[var(--color-text-1)]">
+              <IconCopy className="mr-[4px]" />
+              <span className="font-bold">复制为新版本</span>
+            </div>
+            <div className="mt-[4px] h-[18px] text-[12px] text-[var(--color-text-3)]">
+              以此脚本为基础迭代新版本
             </div>
           </Menu.Item>
           <Menu.Item key="newScript">
-            <div className="flex flex-col gap-1">
-              <div className="flex items-center text-[14px] text-[var(--color-text-1)]">
-                <IconCopy className="mr-[4px]" />
-                <span className="font-bold">复制为新脚本</span>
-              </div>
-              <div className="mt-[4px] text-[12px] text-[var(--color-text-3)]">
-                以此脚本为基础新建脚本
-              </div>
+            <div className="flex h-[22px] items-center text-[14px] text-[var(--color-text-1)]">
+              <IconCopy className="mr-[4px]" />
+              <span className="font-bold">复制为新脚本</span>
+            </div>
+            <div className="mt-[4px] h-[18px] text-[12px] text-[var(--color-text-3)]">
+              以此脚本为基础新建脚本
             </div>
           </Menu.Item>
         </Menu>
@@ -481,7 +477,7 @@ const EditorWorkspaceContent: React.FC<{
         <Dropdown
           trigger={['hover', 'click']}
           droplist={copyMenu}
-          position="bl"
+          position="br"
           onVisibleChange={setCopyDropdownVisible}
         >
           <Button

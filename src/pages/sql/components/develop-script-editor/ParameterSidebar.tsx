@@ -137,7 +137,6 @@ const ParameterSidebar: React.FC<ParameterSidebarProps> = memo(
 
     // 当 initialParams 变化时，更新本地状态并标记为已初始化
     useEffect(() => {
-      console.log('2222222', initialParams);
       // 无论 initialParams 是否有值，都标记为已初始化（即使是空数组也表示已经初始化完成）
       if (initialParams !== undefined) {
         const baseTimestamp = Date.now();
@@ -153,7 +152,6 @@ const ParameterSidebar: React.FC<ParameterSidebarProps> = memo(
 
     // 同步提取的参数到本地状态，同时保留已输入的值和初始参数值
     useEffect(() => {
-      console.log('1111111', extractedParams);
       // 如果还没有初始化完成，不处理 extractedParams（避免覆盖 initialParams）
       if (!isInitializedRef.current) {
         // 记录当前的 extractedParams 长度，但不处理
