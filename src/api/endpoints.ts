@@ -343,6 +343,8 @@ export const ModaForgeResourceEndpoints = {
   getTableNameApi: PrefixAimdp + '/GenerateDBName',
   // 校验SQL语句
   checkSQLApi: PrefixAimdp + '/CheckSQL',
+  // 连接器预览数据
+  PreviewConnectorSampleDataApi: PrefixAimdp + '/PreviewConnectorSampleData',
 
   // 数据标注接口
   // 数据标注配置 发布
@@ -485,6 +487,8 @@ export const ModaForgeResourceEndpoints = {
   RenameDevelopScriptApi: PrefixAimdp + '/RenameDevelopScript',
   // 复制加工脚本列表  - 复制
   CopyDevelopScriptApi: PrefixAimdp + '/CopyDevelopScript',
+  // 发布加工脚本
+  NewVersionDevelopScriptApi: PrefixAimdp + '/NewVersionDevelopScript',
 
   // 数据资产接口
   // 查询数据资产表字段和映射关系

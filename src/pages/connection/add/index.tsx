@@ -17,7 +17,9 @@ const RadioGroup = Radio.Group;
 const Option = Select.Option;
 const options = [
   { text: 'MySQL', value: 'MySQL' },
-  { text: 'PostgreSQL', value: 'PostgreSQL' }
+  { text: 'PostgreSQL', value: 'PostgreSQL' },
+  { text: 'Doris', value: 'Doris' },
+  { text: 'ES', value: 'ES' }
 ];
 const add = forwardRef((props: any, ref) => {
   // 创建的表单实例
@@ -32,6 +34,7 @@ const add = forwardRef((props: any, ref) => {
   const [loading, setLoading] = useState<boolean>(false);
   //判断输入框的状态
   const [inputDisabled, setInputDisabled] = useState(false);
+  const [fromData, setFromData]: any = useState({});
   // 将方法暴露给父组件
   useImperativeHandle(ref, () => ({
     displayModalView: () => {
@@ -229,6 +232,9 @@ const add = forwardRef((props: any, ref) => {
             colon={'：'}
             labelCol={{ span: 5 }}
             wrapperCol={{ span: 19 }}
+            onValuesChange={(values: any) => {
+              setFromData(values);
+            }}
           >
             <FormItem
               label="连接器名称"
@@ -264,6 +270,7 @@ const add = forwardRef((props: any, ref) => {
                 <Radio value="s3">对象存储(S3)</Radio>
                 <Radio value="hdfs">HDFS</Radio>
                 <Radio value="db">数据库</Radio>
+                <Radio value="mq">消息队列</Radio>
               </RadioGroup>
             </FormItem>
             <span
@@ -288,17 +295,17 @@ const add = forwardRef((props: any, ref) => {
                   <Input placeholder="请输入" />
                 </FormItem>
                 <FormItem
-                  label="AccessKey ID"
+                  label="Access Key"
                   field="access_key"
-                  rules={[{ required: true, message: '请输入AccessKey ID' }]}
+                  rules={[{ required: true, message: '请输入Access Key' }]}
                 >
                   <Input placeholder="请输入" />
                 </FormItem>
                 <FormItem
-                  label="AccessKey Secret"
+                  label="Secret Access Key"
                   field="secret_key"
                   rules={[
-                    { required: true, message: '请输入AccessKey Secret' }
+                    { required: true, message: '请输入Secret Access Key' }
                   ]}
                 >
                   <Input placeholder="请输入" />
@@ -383,6 +390,29 @@ const add = forwardRef((props: any, ref) => {
                   <Input placeholder="请输入HDFS日录路径，如/user/data" />
                 </FormItem>
               </div>
+            ) : storageType == 'mq' ? (
+              <div>
+                <FormItem
+                  label="集群的入口地址列表"
+                  rules={[{ required: true, message: '请输入地址列表' }]}
+                  field="bootstrap_servers"
+                >
+                  <Input placeholder="请输入" />
+                </FormItem>
+                <FormItem
+                  label="偏移重置策略"
+                  rules={[{ required: true, message: '请选择偏移重置策略' }]}
+                  field="auto_offset_reset"
+                >
+                  <Input placeholder="请输入" />
+                </FormItem>
+                <FormItem label="用户名" field="user">
+                  <Input placeholder="请输入" />
+                </FormItem>
+                <FormItem label="密码" field="password">
+                  <Input.Password placeholder="请输入" />
+                </FormItem>
+              </div>
             ) : (
               <div>
                 <FormItem
@@ -431,14 +461,16 @@ const add = forwardRef((props: any, ref) => {
                 >
                   <Input placeholder="请输入，如3306" />
                 </FormItem>
-                <FormItem
-                  label="数据库名"
-                  field="database"
-                  rules={[{ required: true, message: '请输入数据库名' }]}
-                  disabled={inputDisabled}
-                >
-                  <Input placeholder="请输入" />
-                </FormItem>
+                {fromData?.sub_type !== 'ES' && (
+                  <FormItem
+                    label="数据库名"
+                    field="database"
+                    rules={[{ required: true, message: '请输入数据库名' }]}
+                    disabled={inputDisabled}
+                  >
+                    <Input placeholder="请输入" />
+                  </FormItem>
+                )}
                 <FormItem
                   label="用户名"
                   field="user"
