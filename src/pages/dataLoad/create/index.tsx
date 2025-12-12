@@ -656,10 +656,6 @@ export default function DataLoadCreate() {
       setTableSearchValue('');
       setConnectName([]);
       setSourceType(value);
-      form.setFieldsValue({
-        load_type:
-          value === SOURCE_TYPES.MQ ? LOAD_TYPES.REALTIME : LOAD_TYPES.ONCE
-      });
       // 清空绑定连接器
       form.setFieldsValue({ connector_id: undefined });
       // 清空相关状态
@@ -674,7 +670,7 @@ export default function DataLoadCreate() {
       form.setFieldsValue({
         table_name: undefined,
         sql_process_enabled: 'disable',
-        load_type: LOAD_TYPES.ONCE,
+        load_type: SOURCE_TYPES.MQ ? LOAD_TYPES.REALTIME : LOAD_TYPES.ONCE,
         time: undefined,
         day: undefined,
         weekly: undefined,
@@ -1648,7 +1644,11 @@ export default function DataLoadCreate() {
             rules={[{ required: true, message: '请选择载入形式' }]}
           >
             <RadioGroup
-              value={sourceType === SOURCE_TYPES.MQ ? LOAD_TYPES.REALTIME : ''}
+              value={
+                sourceType === SOURCE_TYPES.MQ
+                  ? LOAD_TYPES.REALTIME
+                  : LOAD_TYPES.ONCE
+              }
               onChange={handleLoadTypeChange}
             >
               <Radio
