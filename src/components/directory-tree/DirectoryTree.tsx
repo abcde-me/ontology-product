@@ -28,35 +28,23 @@ import {
   IconEdit,
   IconDelete,
   IconCopy,
-  IconFolder,
-  IconFile,
   IconMore,
   IconQuestionCircle
 } from '@arco-design/web-react/icon';
 import FolderIcon from '@/assets/python/folder.svg';
 import FileIcon from '@/assets/python/file.svg';
 import AddAfterIcon from '@/assets/python/add-after.svg';
-import {
-  CopyPythonItemRes,
-  CreatePythonItemRes,
-  PythonItemType,
-  PythonListItem,
-  RenamePythonItemRes
-} from '@/types/pythonApi';
+import { PythonItemType, PythonListItem } from '@/types/pythonApi';
 import EllipsisPopover from '../ellipsis-popover-com';
 import MultiLevelPathNavigation from './MultiLevelPathNavigation';
 import './DirectoryTree.scss';
-import timeFormattig from '@/utils/timeFormatting';
 import { PYSPARK_PERMISSIONS, SQL_PERMISSIONS } from '@/config/permissions';
 import { now } from 'lodash-es';
 import { PermissionWrapper } from '../PermissionGuard';
 import { debounce } from 'lodash-es';
 import SQLFileIcon from '@/assets/sql/spl-item-icon.svg';
-import {
-  VersionType,
-  VersionTypeEnum
-} from '@/pages/sql/components/sctipt-card';
 import { useParams } from '@/utils/url';
+import { ScriptStatus, ScriptStatusName } from '@/types/sqlDevelopApi';
 // 原始数据接口
 export type TreeNodeItem = Partial<PythonListItem> & {
   dataRef?: any;
@@ -637,59 +625,24 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
       });
     };
 
-    const getVersionType = (version_type) => {
-      switch (version_type) {
-        case VersionType.RELEASED:
-          return (
-            <div className={'script-card-content-item-title-icon'}>
-              <span
-                className={
-                  version_type === VersionType.RELEASED ? 'released-icon' : ''
-                }
-              />
-              <div className={'script-card-content-item-title-icon-text'}>
-                {VersionTypeEnum.RELEASED}
-              </div>
-            </div>
-          );
-        case VersionType.UNRELEASED:
-          return (
-            <div className={'script-card-content-item-title-icon'}>
-              <span
-                className={
-                  version_type === VersionType.UNRELEASED
-                    ? 'unreleased-icon'
-                    : ''
-                }
-              />
-              <div className={'script-card-content-item-title-icon-text'}>
-                {VersionTypeEnum.UNRELEASED}
-              </div>
-            </div>
-          );
-        case VersionType.SCHEDULED:
-          return (
-            <div className={'script-card-content-item-title-icon'}>
-              <span
-                className={
-                  version_type === VersionType.SCHEDULED ? 'scheduled-icon' : ''
-                }
-              />
-              <div className={'script-card-content-item-title-icon-text'}>
-                {VersionTypeEnum.SCHEDULED}
-              </div>
-            </div>
-          );
-        default:
-          return (
-            <div className={'script-card-content-item-title-icon'}>
-              <span className={'unreleased-icon'} />
-              <div className={'script-card-content-item-title-icon-text'}>
-                {VersionTypeEnum.UNRELEASED}
-              </div>
-            </div>
-          );
-      }
+    const iconClassMap: Partial<Record<ScriptStatus, string>> = {
+      [ScriptStatus.Released]: 'released-icon',
+      [ScriptStatus.Scheduling]: 'scheduled-icon',
+      [ScriptStatus.Editing]: 'unreleased-icon',
+      [ScriptStatus.EditCompleted]: 'unreleased-icon'
+    };
+
+    const getVersionType = (status: ScriptStatus) => {
+      const iconClass = iconClassMap[status] ?? 'unreleased-icon';
+
+      return (
+        <div className="flex items-center">
+          <span className={iconClass} />
+          <div className="text-[12px] leading-[22px] text-[var(--color-text-1)]">
+            {ScriptStatusName[status]}
+          </div>
+        </div>
+      );
     };
     return (
       <div
@@ -743,14 +696,6 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
           />
           {from === DirectoryTreeFrom.SQL ? (
             <PermissionWrapper permission={SQL_PERMISSIONS.CREATE}>
-              {/* <Button
-                type="text"
-                size="small"
-                icon={<IconPlus />}
-                onClick={() => startRootCreate(false)}
-              >
-                新建
-              </Button> */}
               <div
                 className="ml-1 flex w-16 cursor-pointer items-center justify-center text-xs text-[#2563EB]"
                 onClick={() => startRootCreate(false)}
@@ -829,22 +774,49 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
 
               if (isEditing) return null;
 
+              const isReleased = node.dataRef?.status === ScriptStatus.Released;
+              const isScheduling =
+                node.dataRef?.status === ScriptStatus.Scheduling;
+
               return (
-                <div className="directory-tree-extra">
+                <div className="directory-tree-extra ml-[8px] h-[36px]">
                   <Dropdown
+                    position="br"
+                    trigger={['click', 'hover']}
                     droplist={
                       <Menu>
-                        <PermissionWrapper permission={nowPermissions.MODIFY}>
-                          <Menu.Item
-                            onClick={() => {
-                              handleEdit(node);
-                            }}
-                            key="1"
-                          >
-                            <IconEdit className="mr-1" />
-                            重命名
-                          </Menu.Item>
-                        </PermissionWrapper>
+                        {!isReleased && (
+                          <PermissionWrapper permission={nowPermissions.MODIFY}>
+                            <Menu.Item
+                              onClick={() => {
+                                handleEdit(node);
+                              }}
+                              key="1"
+                            >
+                              <IconEdit className="mr-1" />
+                              重命名
+                            </Menu.Item>
+                          </PermissionWrapper>
+                        )}
+                        {isReleased && (
+                          <PermissionWrapper permission={nowPermissions.CREATE}>
+                            <Menu.Item
+                              onClick={() => {
+                                handleCopy(node);
+                              }}
+                              key="2"
+                            >
+                              <IconCopy className="mr-1" />
+                              <span className="mr-[4px]">复制为新版本</span>
+                              <Tooltip
+                                position="right"
+                                content="以此脚本为基础迭代新版本"
+                              >
+                                <IconQuestionCircle />
+                              </Tooltip>
+                            </Menu.Item>
+                          </PermissionWrapper>
+                        )}
                         <PermissionWrapper permission={nowPermissions.CREATE}>
                           <Menu.Item
                             onClick={() => {
@@ -853,7 +825,7 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
                             key="2"
                           >
                             <IconCopy className="mr-1" />
-                            <span>复制为新脚本</span>
+                            <span className="mr-[4px]">复制为新脚本</span>
                             <Tooltip
                               position="right"
                               content="以此脚本为基础新建脚本"
@@ -864,53 +836,30 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
                         </PermissionWrapper>
                         <PermissionWrapper permission={nowPermissions.DELETE}>
                           <Menu.Item
+                            disabled={isScheduling}
                             onClick={() => {
+                              if (isScheduling) return;
                               handleDelete(node);
                             }}
                             key="3"
                           >
-                            <IconDelete className="mr-1" />
-                            删除
+                            <Tooltip
+                              disabled={!isScheduling}
+                              content="调度中的脚本不可删除"
+                              position="right"
+                            >
+                              <div className="flex items-center">
+                                <IconDelete className="mr-1" />
+                                删除
+                              </div>
+                            </Tooltip>
                           </Menu.Item>
                         </PermissionWrapper>
                       </Menu>
                     }
-                    position="bl"
                   >
-                    <Button type="text">
-                      <IconMore />
-                    </Button>
+                    <IconMore className="h-full" />
                   </Dropdown>
-                  {/* <PermissionWrapper permission={nowPermissions.MODIFY}>
-                      <Tooltip color="white" content="重命名">
-                        <IconEdit
-                          className="mr-1 text-[14px] hover:text-[rgb(var(--primary-6))]"
-                          onClick={() => handleEdit(node)}
-                        />
-                      </Tooltip>
-                    </PermissionWrapper>
-                    <PermissionWrapper permission={nowPermissions.CREATE}>
-                      {node.dataRef?.type !== PythonItemType.Directory && (
-                        <Tooltip color="white" content="复制并粘贴">
-                          <IconCopy
-                            className="mr-1 text-[14px] hover:text-[rgb(var(--primary-6))]"
-                            onClick={() =>
-                              handleCopy(node as unknown as NodeProps)
-                            }
-                          />
-                        </Tooltip>
-                      )}
-                    </PermissionWrapper>
-                    <PermissionWrapper permission={nowPermissions.DELETE}>
-                      <Tooltip color="white" content="删除">
-                        <IconDelete
-                          className="text-[14px] hover:text-[rgb(var(--primary-6))]"
-                          onClick={() =>
-                            handleDelete(node as unknown as NodeProps)
-                          }
-                        />
-                      </Tooltip>
-                    </PermissionWrapper> */}
                 </div>
               );
             }}
@@ -921,11 +870,11 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
 
               // 根据节点类型选择图标
               const icon = isFolder ? (
-                <FolderIcon className="mr-2 h-4 w-4" />
+                <FolderIcon className="mr-2 h-[16px] w-[16px]" />
               ) : from === DirectoryTreeFrom.SQL ? (
-                <SQLFileIcon className="mr-2 h-4 w-4" />
+                <SQLFileIcon className="mr-2 h-[16px] w-[16px]" />
               ) : (
-                <FileIcon className="mr-2 h-4 w-4" />
+                <FileIcon className="mr-2 h-[16px] w-[16px]" />
               );
 
               if (isInput) {
@@ -950,19 +899,26 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
                 <div className="flex items-center overflow-hidden">
                   {icon}
                   <div className="flex flex-1 flex-col overflow-hidden">
-                    <div className="file-name">
+                    <div className="file-name leading-[22px]">
                       <EllipsisPopover value={titleText} />
                     </div>
                     {/* 只在搜索结果中显示路径 */}
-                    {isSearchMode &&
+                    {/* {isSearchMode &&
                       from !== DirectoryTreeFrom.SQL &&
                       props.dataRef?.path && (
                         <div className="search-result-path">
                           <EllipsisPopover value={props.dataRef.path} />
                         </div>
-                      )}
+                      )} */}
                   </div>
-                  <div>{getVersionType(props.dataRef?.max_version)}</div>
+                  <div className="flex items-center gap-2">
+                    <span
+                      className={`${iconClassMap[props.dataRef?.status] ?? 'unreleased-icon'} status-dot ml-auto`}
+                    ></span>
+                    <div className="version-status-container">
+                      {getVersionType(props.dataRef?.status)}
+                    </div>
+                  </div>
                 </div>
               );
             }}
