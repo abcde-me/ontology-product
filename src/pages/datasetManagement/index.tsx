@@ -1196,8 +1196,12 @@ const DatasetManagement: React.FC = () => {
   const deleteDatasetRecord = (record: Dataset) => {
     deleteDataset({ id: record?.id })
       .then((res) => {
-        fetchDatasetList();
-        Message.success('删除成功');
+        if (res.code === '' && res.status === 200) {
+          fetchDatasetList();
+          Message.success('删除成功');
+        } else {
+          Message.error(res.message || '删除失败，请稍候重试');
+        }
       })
       .catch((err) => {
         Message.error('删除失败，请稍候重试');
