@@ -18,6 +18,7 @@ import {
   IconDown,
   IconEdit,
   IconSave,
+  IconStop,
   IconStorage
 } from '@arco-design/web-react/icon';
 import { sql } from '@codemirror/lang-sql';
@@ -501,7 +502,7 @@ const EditorWorkspaceContent: React.FC<{
             <div className={styles['toolbar-left']}>
               <Space size={12}>
                 {/* 运行按钮 - status=0且isSelfEditing=true时可用，否则置灰 */}
-                {/* {canEdit &&
+                {canEdit &&
                   ((hasRunPermission && runStatus !== RunningStatus.RUNNING) ||
                     (hasCancelRunPermission &&
                       runStatus === RunningStatus.RUNNING)) && (
@@ -514,17 +515,19 @@ const EditorWorkspaceContent: React.FC<{
                           <IconCaretRight className="mr-[4px]" />
                         )
                       }
-                      disabled={editorContent?.trim() === ''}
+                      disabled={scriptInfo?.script_context?.trim() === ''}
                       onClick={handleRunClick}
                       className={classNames('h-[26px]', {
                         [styles['btn-running']]:
                           runStatus === RunningStatus.RUNNING
                       })}
                     >
-                      {runStatus === RunningStatus.RUNNING ? '停止运行' : '运行'}
+                      {runStatus === RunningStatus.RUNNING
+                        ? '停止运行'
+                        : '运行'}
                     </Button>
-                  )} */}
-                {canEdit && (
+                  )}
+                {/* {canEdit && (
                   <Button
                     type="primary"
                     disabled={!scriptInfo?.isSelfEditing}
@@ -533,7 +536,7 @@ const EditorWorkspaceContent: React.FC<{
                   >
                     运行
                   </Button>
-                )}
+                )} */}
 
                 {/* 格式化按钮 - status=0且isSelfEditing=true时可用，否则置灰 */}
                 <Button

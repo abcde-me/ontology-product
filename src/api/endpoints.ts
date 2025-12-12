@@ -489,6 +489,10 @@ export const ModaForgeResourceEndpoints = {
   CopyDevelopScriptApi: PrefixAimdp + '/CopyDevelopScript',
   // 发布加工脚本
   NewVersionDevelopScriptApi: PrefixAimdp + '/NewVersionDevelopScript',
+  // 开发SQL脚本运行
+  RunDevelopScriptApi: PrefixAimdp + '/RunDevelopScript',
+  // 开发SQL脚本日志
+  GetDevelopScriptRunLogApi: PrefixAimdp + '/GetDevelopScriptRunLog',
 
   // 数据资产接口
   // 查询数据资产表字段和映射关系

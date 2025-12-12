@@ -303,3 +303,54 @@ export interface CopyDevelopScriptResponse {
   script_id: number;
   script_name: string;
 }
+
+export interface RunDevelopScriptParams {
+  /**
+   * 脚本id
+   */
+  script_id: number;
+}
+
+export interface RunDevelopScriptResponse {
+  /**
+   * 执行id
+   */
+  exec_id: string;
+  /**
+   * 脚本id
+   */
+  script_id: string;
+  /**
+   * 运行时提示信息
+   */
+  warning_msg: string;
+}
+
+export interface GetDevelopScriptRunLogParams {
+  /**
+   * 脚本id
+   */
+  script_id: number;
+  /**
+   * 执行id
+   */
+  exec_id: string;
+}
+
+export enum RunLogStatus {
+  /** 继续获取日志 */
+  CONTINUE = '0',
+  /** 停止获取日志 */
+  STOP = '1'
+}
+
+export interface GetDevelopScriptRunLogResponse {
+  /**
+   * 运行日志
+   */
+  run_log: string;
+  /**
+   * 运行状态
+   */
+  run_status: RunLogStatus;
+}
