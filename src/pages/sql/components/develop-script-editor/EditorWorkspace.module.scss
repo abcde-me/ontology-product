@@ -61,6 +61,11 @@
         }
       }
     }
+
+    .copy-dropdown-container
+      :global(.arco-dropdown-popup-visible .arco-icon-down) {
+      transform: rotate(180deg);
+    }
   }
 
   // 代码编辑器容器

@@ -1,8 +1,10 @@
 import { RunningStatus } from '@/types/sqlApi';
 import {
   Button,
+  Dropdown,
   Form,
   Input,
+  Menu,
   Message,
   Modal,
   Space,
@@ -13,6 +15,7 @@ import {
   IconCaretRight,
   IconClose,
   IconCopy,
+  IconDown,
   IconEdit,
   IconSave,
   IconStorage
@@ -34,12 +37,12 @@ import React, {
 } from 'react';
 import { format } from 'sql-formatter';
 import styles from './EditorWorkspace.module.scss';
-import copy from 'copy-to-clipboard';
 import { ScriptStatus } from '@/types/sqlDevelopApi';
 
 import SQLFormatIcon from '@/assets/sql/sql-format-ico.svg';
 import { SQL_PERMISSIONS } from '@/config/permissions';
 import { useHasPermission } from '@/store/userInfoStore';
+import { copyDevelopScript } from '@/api/sql-develop';
 import {
   EditorProvider,
   useEditorContext
@@ -182,6 +185,9 @@ const EditorWorkspaceContent: React.FC<{
     );
     const [editLoading, setEditLoading] = React.useState<boolean>(false);
     const [saveLoading, setSaveLoading] = React.useState<boolean>(false);
+    const [copyLoading, setCopyLoading] = React.useState<boolean>(false);
+    const [copyDropdownVisible, setCopyDropdownVisible] =
+      React.useState<boolean>(false);
 
     // 从 Context 获取编辑器状态
     const {
@@ -364,15 +370,37 @@ const EditorWorkspaceContent: React.FC<{
       setSpecificationsContent(content);
     };
 
-    // 处理复制脚本
-    const handleCopyScript = () => {
-      if (scriptInfo?.script_context) {
-        const success = copy(scriptInfo?.script_context ?? '');
-        if (success) {
-          Message.success('复制成功');
+    // 处理复制脚本为新版本/新脚本
+    const handleCopyScript = async (type: 'newVersion' | 'newScript') => {
+      if (!scriptInfo?.script_id) {
+        Message.warning('暂无可复制的脚本');
+        return;
+      }
+
+      const params: { script_id: number; version?: number } = {
+        script_id: scriptInfo.script_id
+      };
+
+      if (type === 'newVersion' && scriptInfo?.max_version) {
+        params.version = scriptInfo.max_version;
+      }
+
+      try {
+        setCopyLoading(true);
+        const res = await copyDevelopScript(params);
+        if (res.status === 200) {
+          Message.success(
+            type === 'newVersion' ? '复制为新版本成功' : '复制为新脚本成功'
+          );
         } else {
-          Message.error('复制失败');
+          Message.error(res.message || '复制失败');
         }
+      } catch (error) {
+        console.error('复制失败:', error);
+        Message.error('复制失败');
+      } finally {
+        setCopyLoading(false);
+        setCopyDropdownVisible(false);
       }
     };
 
@@ -417,6 +445,55 @@ const EditorWorkspaceContent: React.FC<{
         scriptInfo?.status === ScriptStatus.EditCompleted;
       const isEditing = status === ScriptStatus.Editing;
       const isEditCompleted = status === ScriptStatus.EditCompleted;
+      const copyMenu = (
+        <Menu
+          onClickMenuItem={(key) =>
+            handleCopyScript(key as 'newVersion' | 'newScript')
+          }
+          selectable={false}
+        >
+          <Menu.Item key="newVersion">
+            <div className="flex flex-col gap-1">
+              <div className="flex items-center text-[14px] text-[var(--color-text-1)]">
+                <IconCopy className="mr-[4px]" />
+                <span className="font-bold">复制为新版本</span>
+              </div>
+              <div className="mt-[4px] text-[12px] text-[var(--color-text-3)]">
+                以此脚本为基础迭代新版本
+              </div>
+            </div>
+          </Menu.Item>
+          <Menu.Item key="newScript">
+            <div className="flex flex-col gap-1">
+              <div className="flex items-center text-[14px] text-[var(--color-text-1)]">
+                <IconCopy className="mr-[4px]" />
+                <span className="font-bold">复制为新脚本</span>
+              </div>
+              <div className="mt-[4px] text-[12px] text-[var(--color-text-3)]">
+                以此脚本为基础新建脚本
+              </div>
+            </div>
+          </Menu.Item>
+        </Menu>
+      );
+
+      const renderCopyDropdown = () => (
+        <Dropdown
+          trigger={['hover', 'click']}
+          droplist={copyMenu}
+          position="bl"
+          onVisibleChange={setCopyDropdownVisible}
+        >
+          <Button
+            loading={copyLoading}
+            disabled={!scriptInfo?.script_id}
+            className="h-[24px]"
+          >
+            <span>复制</span>
+            <IconDown className="text-[14px]" />
+          </Button>
+        </Dropdown>
+      );
 
       // status = 0 (编辑中) 或 status = 1 (编辑完成)
       if (
@@ -579,16 +656,13 @@ const EditorWorkspaceContent: React.FC<{
                 </span>
               </Space>
             </div>
-            <div className={styles['toolbar-right']}>
-              <Space size={12}>
-                <Button
-                  className={styles['btn-save']}
-                  onClick={handleCopyScript}
-                  icon={<IconCopy />}
-                >
-                  复制
-                </Button>
-              </Space>
+            <div
+              className={classNames(
+                styles['toolbar-right'],
+                styles['copy-dropdown-container']
+              )}
+            >
+              {renderCopyDropdown()}
             </div>
           </>
         );
@@ -614,16 +688,13 @@ const EditorWorkspaceContent: React.FC<{
                 </span>
               </Space>
             </div>
-            <div className={styles['toolbar-right']}>
-              <Space size={12}>
-                <Button
-                  className={styles['btn-save']}
-                  onClick={handleCopyScript}
-                  icon={<IconCopy />}
-                >
-                  复制
-                </Button>
-              </Space>
+            <div
+              className={classNames(
+                styles['toolbar-right'],
+                styles['copy-dropdown-container']
+              )}
+            >
+              {renderCopyDropdown()}
             </div>
           </>
         );
