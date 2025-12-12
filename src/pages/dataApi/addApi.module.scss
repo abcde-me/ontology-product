@@ -75,6 +75,48 @@
       }
     }
 
+    .addApiParam {
+      border: 1px solid #e2e8f0;
+      border-radius: 4px;
+      height: calc(100vh - 300px);
+      margin-top: 24px;
+      display: flex;
+      overflow: auto;
+
+      .lfetBox {
+        width: 240px;
+        min-height: calc(100vh - 305px);
+        padding: 12px;
+        border-right: 1px solid #e2e8f0;
+        overflow: auto;
+      }
+
+      .rightBox {
+        flex: 1;
+        :global(.cm-gutters.cm-gutters-before) {
+          border-right-width: 0px;
+        }
+        :global(.cm-scroller) {
+          height: calc(100vh - 360px) !important;
+        }
+        :global(.cm-focused) {
+          outline: unset !important;
+        }
+        :global(.cm-activeLine) {
+          background-color: unset !important;
+        }
+        :global(.cm-content) {
+          font-weight: 400;
+          font-size: 14px;
+          line-height: 24px;
+          color: #0f172a;
+        }
+        :global(.cm-gutterElement) {
+          line-height: 24px;
+        }
+      }
+    }
+
     .stepFooter {
       position: absolute;
       bottom: 24px;
