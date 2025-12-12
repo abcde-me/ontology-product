@@ -158,12 +158,15 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
     const [defaultName, setDefaultName] = useState<string>('');
 
     // 格式化数据
-    const formatTreeData = (inputData: unknown[]): TreeNodeItem[] => {
-      if (typeof props.formatData === 'function') {
-        return props.formatData(inputData);
-      }
-      return inputData as TreeNodeItem[];
-    };
+    const formatTreeData = useCallback(
+      (inputData: unknown[]): TreeNodeItem[] => {
+        if (typeof props.formatData === 'function') {
+          return props.formatData(inputData);
+        }
+        return inputData as TreeNodeItem[];
+      },
+      [props.formatData]
+    );
 
     useEffect(() => {
       setTreeData(data);
@@ -225,8 +228,10 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
       const keySet = new Set();
       const recursiveCollect = (nodes) => {
         nodes.forEach((node) => {
-          if (node?.key) {
-            keySet.add(node.key);
+          // 优先使用 key，如果没有则使用 id
+          const key = node?.key || node?.id;
+          if (key !== undefined && key !== null) {
+            keySet.add(String(key));
           }
           if (Array.isArray(node?.children) && node.children.length > 0) {
             recursiveCollect(node.children);
@@ -236,58 +241,128 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
       recursiveCollect(tree);
       return Array.from(keySet); // Set 转数组返回
     };
+    // 使用 ref 保存最新的 treeData 和 data，避免闭包问题
+    const treeDataRef = useRef<TreeNodeItem[]>(treeData);
+    const dataRef = useRef<TreeNodeItem[]>(data);
+
+    useEffect(() => {
+      treeDataRef.current = treeData;
+    }, [treeData]);
+
+    useEffect(() => {
+      dataRef.current = data;
+    }, [data]);
+
     // 本地过滤树数据函数
-    const filterTree = (inputValue: string) => {
-      const loop = (data) => {
-        const result: TreeNodeItem[] = [];
-        data.forEach((item) => {
-          if (item?.name?.indexOf(inputValue) > -1) {
-            result.push({ ...item });
-          } else if (item.children) {
-            const filterData = loop(item.children);
+    const filterTree = useCallback(
+      (inputValue: string, sourceData: TreeNodeItem[]) => {
+        // 收集所有 keys 的辅助函数
+        const collectAllKeys = (tree) => {
+          const keySet = new Set();
+          const recursiveCollect = (nodes) => {
+            nodes.forEach((node) => {
+              // 优先使用 key，如果没有则使用 id
+              const key = node?.key || node?.id;
+              if (key !== undefined && key !== null) {
+                keySet.add(String(key));
+              }
+              if (Array.isArray(node?.children) && node.children.length > 0) {
+                recursiveCollect(node.children);
+              }
+            });
+          };
+          recursiveCollect(tree);
+          return Array.from(keySet);
+        };
 
-            if (filterData.length) {
-              result.push({ ...item, children: filterData });
+        const loop = (data) => {
+          const result: TreeNodeItem[] = [];
+          data.forEach((item) => {
+            const isMatch =
+              item?.name?.toLowerCase().indexOf(inputValue.toLowerCase()) > -1;
+            let filteredChildren: TreeNodeItem[] = [];
+
+            // 如果有子节点，先递归过滤子节点
+            if (item.children && item.children.length > 0) {
+              filteredChildren = loop(item.children);
             }
-          }
-        });
-        setExpandedKeys(collectAllKeys(result).map(String));
-        return result;
-      };
 
-      return loop(treeData);
-    };
+            // 如果当前节点匹配，或者有匹配的子节点，则保留该节点
+            if (isMatch || filteredChildren.length > 0) {
+              result.push({
+                ...item,
+                // 如果当前节点匹配，保留所有子节点；否则只保留匹配的子节点
+                children: isMatch ? item.children : filteredChildren
+              });
+            }
+          });
+          return result;
+        };
+
+        const filtered = loop(sourceData);
+        // 设置展开的 keys
+        setExpandedKeys(collectAllKeys(filtered).map(String));
+        return filtered;
+      },
+      []
+    );
 
     // 处理搜索
-    const handleSearch = (value: string) => {
-      if (!value.trim()) {
-        setIsSearchMode(false);
-        setSearchResults([]);
-        // 恢复原始树数据
-        const formattedData = formatTreeData(data);
-        setTreeData(formattedData);
-        return;
-      }
+    const handleSearch = useCallback(
+      (value: string) => {
+        if (!value.trim()) {
+          setIsSearchMode(false);
+          setSearchResults([]);
+          // 恢复原始树数据
+          const formattedData = formatTreeData(dataRef.current);
+          setTreeData(formattedData);
+          setIsSearching(false);
+          return;
+        }
 
-      setIsSearching(true);
+        setIsSearchMode(true);
+        setIsSearching(true);
 
-      const filteredData = filterTree(value);
-      console.log(filteredData, '123 filteredData');
-      if (filteredData.length === 0) {
-        // Message.info('未找到匹配的结果');
-        setTreeData([]);
-      } else {
-        setTreeData(filteredData);
-      }
-    };
+        // 使用原始的 data 进行搜索，而不是 treeData（treeData 可能已经被过滤过）
+        const sourceData = formatTreeData(dataRef.current);
+        const filteredData = filterTree(value, sourceData);
+        console.log(filteredData, '123 filteredData');
+        if (filteredData.length === 0) {
+          // Message.info('未找到匹配的结果');
+          setTreeData([]);
+        } else {
+          setTreeData(filteredData);
+        }
+        setIsSearching(false);
+      },
+      [filterTree, formatTreeData]
+    );
 
     // 处理搜索框回车
     const handleSearchEnter = (value: string) => {};
 
     // 使用防抖处理输入事件
-    const debouncedSearch = useCallback(debounce(handleSearch, 500), [
-      handleSearch
-    ]);
+    // 使用 useRef 保存 handleSearch 的最新引用，避免闭包问题
+    const handleSearchRef = useRef(handleSearch);
+    useEffect(() => {
+      handleSearchRef.current = handleSearch;
+    }, [handleSearch]);
+
+    // 创建防抖函数，只创建一次
+    const debouncedSearch = useMemo(
+      () =>
+        debounce((value: string) => {
+          handleSearchRef.current(value);
+        }, 500),
+      [] // 空依赖数组，只创建一次
+    );
+
+    // 组件卸载时取消防抖
+    useEffect(() => {
+      return () => {
+        debouncedSearch.cancel();
+      };
+    }, [debouncedSearch]);
 
     // 处理搜索框清空
     const handleSearchClear = () => {
@@ -808,13 +883,13 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
                       <EllipsisPopover value={titleText} />
                     </div>
                     {/* 只在搜索结果中显示路径 */}
-                    {isSearchMode &&
+                    {/* {isSearchMode &&
                       from !== DirectoryTreeFrom.SQL &&
                       props.dataRef?.path && (
                         <div className={styles['search-result-path']}>
                           <EllipsisPopover value={props.dataRef.path} />
                         </div>
-                      )}
+                      )} */}
                   </div>
                 </div>
               );
