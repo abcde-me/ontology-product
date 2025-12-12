@@ -1,0 +1,86 @@
+.addApi {
+  padding: 20px;
+
+  .addApiContent {
+    min-height: calc(100vh - 130px);
+    margin: 8px 0 0 0;
+    background-color: #ffffff;
+    padding: 24px;
+    border-radius: 16px;
+    position: relative;
+
+    :global(.arco-steps-item-process .arco-steps-item-title) {
+      color: #0f172a;
+      font-weight: 500;
+      font-size: 16px;
+      margin-left: 8px;
+    }
+
+    :global(.arco-steps-item-wait .arco-steps-item-title),
+    :global(.arco-steps-item-finish .arco-steps-item-title) {
+      color: #1e293b;
+      font-size: 16px;
+      margin-left: 8px;
+    }
+
+    .apiPath {
+      :global(.arco-input-group-addbefore) {
+        border: 1px solid var(--color-border-1);
+        border-radius: 4px 0 0 4px;
+        padding: 0 9px 0 13px;
+        :global(.arco-input) {
+          margin-right: -10px;
+        }
+      }
+
+      :global(.arco-input-inner-wrapper) {
+        border-radius: 0 4px 4px 0;
+      }
+    }
+
+    .cacheExpire {
+      display: flex;
+      align-items: center;
+
+      :global(.arco-input-group) {
+        width: 180px;
+      }
+
+      :global(.arco-input-group-addbefore) {
+        padding: 0px;
+
+        :global(.arco-btn) {
+          border-radius: 4px 0px 0px 4px;
+          border: 1px solid #cbd5e1 !important;
+          border-right: unset !important;
+        }
+      }
+
+      :global(.arco-input-group-addafter) {
+        padding: 0px;
+
+        :global(.arco-btn) {
+          border-radius: 0px 4px 4px 0px;
+          border: 1px solid #cbd5e1 !important;
+          border-left: unset !important;
+        }
+      }
+
+      :global(.arco-input-inner-wrapper) {
+        margin-top: 1px;
+        border-radius: 0px;
+        :global(.arco-input) {
+          text-align: center;
+        }
+      }
+    }
+
+    .stepFooter {
+      position: absolute;
+      bottom: 24px;
+      left: 24px;
+      display: flex;
+      gap: 8px;
+    }
+  }
+}

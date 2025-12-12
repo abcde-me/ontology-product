@@ -18,7 +18,7 @@ import { SorterInfo } from '@arco-design/web-react/es/Table/interface';
 import { PermissionWrapper } from '@/components/PermissionGuard';
 import { WORKFLOW_TASK_PERMISSIONS } from '@/config/permissions';
 import styles from './index.module.scss';
-import { IconDown } from '@arco-design/web-react/icon';
+import { IconDown, IconPlus } from '@arco-design/web-react/icon';
 
 const InputSearch = Input.Search;
 
@@ -285,7 +285,7 @@ export default function DataApi() {
     {
       title: '操作',
       dataIndex: 'operate',
-      width: 190,
+      width: 220,
       fixed: 'right',
       render: (_, record) => (
         <div>
@@ -375,6 +375,11 @@ export default function DataApi() {
     }
   ];
 
+  // 跳转创建API页面
+  const handleToAddApi = () => {
+    history.push('/tenant/compute/modaforge/dataApi/add');
+  };
+
   return (
     <div className={styles['data-api']}>
       <h1 style={{ fontSize: '20px', fontWeight: 'bold' }}>数据API</h1>
@@ -401,6 +406,9 @@ export default function DataApi() {
             setIsClickClear(true);
           }}
         />
+        <Button type="primary" icon={<IconPlus />} onClick={handleToAddApi}>
+          创建API
+        </Button>
       </div>
       <Table
         border={false}
