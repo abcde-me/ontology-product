@@ -38,7 +38,7 @@ import React, {
 } from 'react';
 import { format } from 'sql-formatter';
 import styles from './EditorWorkspace.module.scss';
-import { ScriptStatus } from '@/types/sqlDevelopApi';
+import { RunLogStatus, ScriptStatus } from '@/types/sqlDevelopApi';
 
 import SQLFormatIcon from '@/assets/sql/sql-format-ico.svg';
 import { SQL_PERMISSIONS } from '@/config/permissions';
@@ -193,7 +193,8 @@ const EditorWorkspaceContent: React.FC<{
     const {
       scriptInfo,
       setScriptInfo,
-      runStatus,
+      // runStatus,
+      runLogStatus,
       runDuration,
       runStartTime,
       handleStopRunCode,
@@ -284,7 +285,7 @@ const EditorWorkspaceContent: React.FC<{
     });
 
     const handleRunClick = () => {
-      if (runStatus === RunningStatus.RUNNING) {
+      if (runLogStatus === RunLogStatus.RUNNING) {
         handleStopRunCode();
       } else {
         handleRunCode().catch(console.error);
@@ -292,10 +293,10 @@ const EditorWorkspaceContent: React.FC<{
     };
 
     const handleFormatCode = () => {
-      if (runStatus === RunningStatus.RUNNING) {
-        Message.warning('SQL 正在执行中，暂不支持格式化');
-        return;
-      }
+      // if (runLogStatus === RunLogStatus.RUNNING) {
+      //   Message.warning('SQL 正在执行中，暂不支持格式化');
+      //   return;
+      // }
 
       if (scriptInfo?.script_context) {
         try {
@@ -502,31 +503,28 @@ const EditorWorkspaceContent: React.FC<{
             <div className={styles['toolbar-left']}>
               <Space size={12}>
                 {/* 运行按钮 - status=0且isSelfEditing=true时可用，否则置灰 */}
-                {canEdit &&
-                  ((hasRunPermission && runStatus !== RunningStatus.RUNNING) ||
-                    (hasCancelRunPermission &&
-                      runStatus === RunningStatus.RUNNING)) && (
-                    <Button
-                      type="primary"
-                      icon={
-                        runStatus === RunningStatus.RUNNING ? (
-                          <IconStop className="mr-[4px]" />
-                        ) : (
-                          <IconCaretRight className="mr-[4px]" />
-                        )
-                      }
-                      disabled={scriptInfo?.script_context?.trim() === ''}
-                      onClick={handleRunClick}
-                      className={classNames('h-[26px]', {
-                        [styles['btn-running']]:
-                          runStatus === RunningStatus.RUNNING
-                      })}
-                    >
-                      {runStatus === RunningStatus.RUNNING
-                        ? '停止运行'
-                        : '运行'}
-                    </Button>
-                  )}
+                {
+                  <Button
+                    type="primary"
+                    icon={
+                      runLogStatus === RunLogStatus.RUNNING ? (
+                        <IconStop className="mr-[4px]" />
+                      ) : (
+                        <IconCaretRight className="mr-[4px]" />
+                      )
+                    }
+                    disabled={scriptInfo?.script_context?.trim() === ''}
+                    onClick={handleRunClick}
+                    className={classNames('h-[26px]', {
+                      [styles['btn-running']]:
+                        runLogStatus === RunLogStatus.RUNNING
+                    })}
+                  >
+                    {runLogStatus === RunLogStatus.RUNNING
+                      ? '停止运行'
+                      : '运行'}
+                  </Button>
+                }
                 {/* {canEdit && (
                   <Button
                     type="primary"
@@ -716,51 +714,51 @@ const EditorWorkspaceContent: React.FC<{
             [styles['with-sidebar']]: sidebarVisible && !sidebarCollapsed
           })}
         >
-          <Spin
+          {/* <Spin
             style={{
               width: '100%',
               height: '100%'
             }}
             tip={
               lastScriptRunStatus === RunningStatus.SUCCESS ||
-              lastScriptRunStatus === RunningStatus.FAILED
+                lastScriptRunStatus === RunningStatus.FAILED
                 ? '结果加载中...'
                 : '运行中...'
             }
             loading={runStatus === RunningStatus.RUNNING}
-          >
-            <CodeMirror
-              ref={editorRef}
-              value={scriptInfo?.script_context ?? ''}
-              onChange={handleContentChange}
-              placeholder={placeholderValue}
-              readOnly={
-                !hasUpdatePermission ||
-                runStatus === RunningStatus.RUNNING ||
-                !scriptInfo?.isSelfEditing
-              }
-              theme={myTheme}
-              extensions={[
-                sql({ upperCaseKeywords: true }),
-                lintGutter(),
-                currentHighlightedParam,
-                parameterHighlightField,
-                EditorView.updateListener.of((update) => {
-                  if (update.selectionSet) {
-                    handleCursorChange(update.view);
-                  }
-                  if (update.focusChanged) {
-                    handleFocusChange(update.view.hasFocus);
-                  }
-                })
-              ]}
-              basicSetup={{
-                lineNumbers: true,
-                highlightActiveLineGutter: false
-              }}
-              className={styles['code-editor']}
-            />
-          </Spin>
+          > */}
+          <CodeMirror
+            ref={editorRef}
+            value={scriptInfo?.script_context ?? ''}
+            onChange={handleContentChange}
+            placeholder={placeholderValue}
+            readOnly={
+              !hasUpdatePermission ||
+              runLogStatus === RunLogStatus.RUNNING ||
+              !scriptInfo?.isSelfEditing
+            }
+            theme={myTheme}
+            extensions={[
+              sql({ upperCaseKeywords: true }),
+              lintGutter(),
+              currentHighlightedParam,
+              parameterHighlightField,
+              EditorView.updateListener.of((update) => {
+                if (update.selectionSet) {
+                  handleCursorChange(update.view);
+                }
+                if (update.focusChanged) {
+                  handleFocusChange(update.view.hasFocus);
+                }
+              })
+            ]}
+            basicSetup={{
+              lineNumbers: true,
+              highlightActiveLineGutter: false
+            }}
+            className={styles['code-editor']}
+          />
+          {/* </Spin> */}
 
           {/* 参数侧边栏 */}
           {

@@ -338,10 +338,14 @@ export interface GetDevelopScriptRunLogParams {
 }
 
 export enum RunLogStatus {
-  /** 继续获取日志 */
-  CONTINUE = '0',
-  /** 停止获取日志 */
-  STOP = '1'
+  /** 失败 */
+  FAILED = 0,
+  /** 成功 */
+  SUCCESS = 1,
+  /** 运行中 */
+  RUNNING = 2,
+  /** 取消 */
+  CANCEL = 3
 }
 
 export interface GetDevelopScriptRunLogResponse {
