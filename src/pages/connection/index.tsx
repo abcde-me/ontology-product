@@ -204,7 +204,7 @@ export default function Connection() {
       dataIndex: 'type',
       render: (_, item) => (
         <div>
-          {item.type !== 'db'
+          {item.type !== 'db' && item.type !== 'mq'
             ? TYPE_CONFIG[item.type] || '未知类型'
             : TYPE_CONFIG[item.sub_type]}
         </div>
@@ -221,6 +221,10 @@ export default function Connection() {
         {
           text: '数据库',
           value: 'db'
+        },
+        {
+          text: TYPE_CONFIG[ConnectorType.MQ],
+          value: ConnectorType.MQ
         }
       ]
     },
