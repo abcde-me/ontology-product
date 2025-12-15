@@ -29,6 +29,7 @@ import { useStore } from '@/pages/workflowConfig/workflow/store';
 import { IconCaretRight } from '@arco-design/web-react/icon';
 import PanelOperator from '@/pages/workflowConfig/workflow/nodes/_base/components/panel-operator';
 import TestNode from '@/pages/workflowConfig/workflow/nodes/_base/components/test-node';
+import { Space } from '@arco-design/web-react';
 
 type BasePanelProps = {
   children: ReactElement;
@@ -101,6 +102,7 @@ const BasePanel: FC<BasePanelProps> = ({ id, data, children }) => {
           'wk-node-panel-content-scroller-container h-full rounded-[12px] border-components-panel-border bg-components-panel-bg shadow-lg',
           showSingleRunPanel ? 'overflow-hidden' : 'overflow-y-auto'
         )}
+        id={'workFlowNodeConfigPanel'}
         style={{
           width: `${panelWidth}px`
         }}
@@ -119,7 +121,7 @@ const BasePanel: FC<BasePanelProps> = ({ id, data, children }) => {
                 className="title-input"
               />
             </div>
-            <div className="flex shrink-0 items-center justify-self-end text-gray-500">
+            <div className="flex flex-1 items-center text-gray-500">
               {/* {
                 canRunBySingle(data.type) && !nodesReadOnly && (
                   <Tooltip
@@ -141,18 +143,20 @@ const BasePanel: FC<BasePanelProps> = ({ id, data, children }) => {
               <HelpLink nodeType={data.type} />
               <PanelOperator id={id} data={data} showHelpLink={false} />
               <div className='mx-3 w-[1px] h-3.5 bg-divider-regular' /> */}
-              <div className="flex h-6 cursor-pointer items-center justify-center gap-2">
+              <div className="flex h-6 flex-1 cursor-pointer items-center justify-end gap-2">
                 {data.flow_type === 'struct' && (
-                  <>
-                    <TestNode id={id} />
-                    <PanelOperator
-                      id={id}
-                      data={data}
-                      offset={0}
-                      triggerClassName="!w-5 !h-5"
-                    />
-                    <div className={'h-4 w-[1px] bg-[#CBD5E1]'}></div>
-                  </>
+                  <div className={'flex flex-1 items-center justify-end gap-2'}>
+                    <TestNode id={id} showLog />
+                    <div className={'flex flex-shrink-0 items-center gap-2'}>
+                      <PanelOperator
+                        id={id}
+                        data={data}
+                        offset={0}
+                        triggerClassName="!w-5 !h-5"
+                      />
+                      <div className={'h-4 w-[1px] bg-[#CBD5E1]'}></div>
+                    </div>
+                  </div>
                 )}
 
                 <RiCloseLine

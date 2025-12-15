@@ -465,4 +465,5 @@ export interface NodeProcessData {
    * 任务类型中文名
    */
   task_type_name: string;
+  id: string;
 }

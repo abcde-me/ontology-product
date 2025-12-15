@@ -5,6 +5,8 @@ import {
   SQLVersion
 } from '@/pages/workflowConfig/workflow/nodes/sql-node/types';
 import React from 'react';
+import { WorkflowRunTask } from '@/pages/workflowConfig/types/workflow';
+import { NodeProcessData } from '@/pages/workflowConfig/workflow/types';
 
 export async function getWorkflowDraft(params: any = {}) {
   const searchParams = new URLSearchParams(location.search);
@@ -251,4 +253,100 @@ export async function getSQLVersionInSQLNode(script_id: React.Key) {
       isLeaf: true
     })
   );
+}
+
+// 工作流-获取工作流最后一条运行记录
+export async function getWorkflowLastTask(flow_id: React.Key) {
+  const res = await UAPI.RES.getWorkflowLastTask({})
+    .post({
+      process_definition_code: flow_id,
+      orders: [
+        {
+          column: 'id',
+          asc: false
+        }
+      ],
+      page: 1,
+      page_size: 1
+    })
+    .inRegion()
+    .do();
+  return (res.data?.items || [])?.[0] as WorkflowRunTask;
+}
+
+// 工作流-获取工作流节点运行记录
+export async function getWorkflowNodeTask(task_id: React.Key) {
+  const res = await UAPI.RES.getWorkflowNodeTask({})
+    .post({
+      process_instance_id: task_id,
+      page: 1,
+      page_size: 999
+    })
+    .inRegion()
+    .do();
+  return (res.data?.items || []) as NodeProcessData[];
+}
+
+// 工作流-获取工作流运行日志
+export async function getWorkflowTaskLogs(task_id: React.Key) {
+  const res = await UAPI.RES.getWorkflowTaskLogs({})
+    .post({
+      task_instance_id: task_id,
+      limit: 1000,
+      skip_line_num: 0
+    })
+    .inRegion()
+    .do();
+  return res.data?.message || '暂无日志';
+}
+
+/**
+ *  // 工作流-结构化-数据推送-来源库
+ *   getSourceDatabaseList: PrefixAimdp + '/ListMetadataIcebergDatabaseName',
+
+ */
+export async function getSourceDatabaseList() {
+  const res = await UAPI.RES.getSourceDatabaseList({})
+    .post({
+      instanceId: 1
+    })
+    .inRegion()
+    .do();
+  return res;
+}
+
+/**
+ *   // 工作流-结构化-数据推送-来源表
+ *   getSourceTable: PrefixAimdp + '/ListMetadataIcebergTable',
+ */
+export async function getSourceTable(databaseId: React.Key) {
+  const res = await UAPI.RES.getSourceTable({})
+    .post({
+      pageNum: 1,
+      pageSize: 999,
+      filters: {
+        databaseId
+      }
+    })
+    .inRegion()
+    .do();
+  return res;
+}
+
+/**
+ *   // 工作流-结构化-数据推送-来源表字段
+ *   getSourceTableField: PrefixAimdp + '/ListMetadataIcebergField',
+ */
+export async function getSourceTableField(tableId: React.Key) {
+  const res = await UAPI.RES.getSourceTableField({})
+    .post({
+      pageNum: 1,
+      pageSize: 999,
+      filters: {
+        tableId
+      }
+    })
+    .inRegion()
+    .do();
+  return res.data?.message || '暂无日志';
 }

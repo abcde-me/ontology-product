@@ -44,13 +44,13 @@ export default memo(function FlowSetting() {
       params,
       execution_type = DEFAULT_FLOW_INFO.execution_type,
       failure_strategy = DEFAULT_FLOW_INFO.failure_strategy,
-      task_priority = DEFAULT_FLOW_INFO.process_instance_priority
+      process_instance_priority = DEFAULT_FLOW_INFO.process_instance_priority
     } = workflowDetail;
     const formData: Record<string, any> = {
       workflow_name,
       execution_type,
       failure_strategy,
-      task_priority
+      process_instance_priority
     };
     if (!!params) {
       formData.params = Object.entries(params).map(([key, value]) => ({
@@ -84,12 +84,14 @@ export default memo(function FlowSetting() {
             workflow_name,
             description,
             process_instance_priority,
-            params
+            params,
+            execution_type
           } = res;
           const saveData: EditWorkflowParams = {
             workflow_name,
-            task_priority: process_instance_priority,
-            workflow_uuid: workflowDetail?.workflow_uuid
+            process_instance_priority,
+            workflow_uuid: workflowDetail?.workflow_uuid,
+            execution_type
           };
           if (description) {
             saveData.description = description;

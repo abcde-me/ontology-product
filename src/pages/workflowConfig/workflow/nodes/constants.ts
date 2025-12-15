@@ -20,9 +20,11 @@ import EnhancementPanel from './data-enhancement/panel';
 import CustomizeNode from './data-customize/node';
 import CustomizePanel from './data-customize/panel';
 import SQLNode from './sql-node';
+import DependentNode from './dependent-node';
 import SQLPanel from './sql-node/panel';
 import SeatunnelNode from './seatunnel-node';
 import SeatunnelPanel from './seatunnel-node/panel';
+import DependentPanel from './dependent-node/panel';
 
 export const NodeComponentMap: Record<string, ComponentType<any>> = {
   [BlockEnum.Start]: StartNode,
@@ -35,7 +37,8 @@ export const NodeComponentMap: Record<string, ComponentType<any>> = {
   [BlockEnum.Cleaning]: CleaningNode,
   [BlockEnum.Customize]: CustomizeNode,
   [BlockEnum.SQL]: SQLNode,
-  [BlockEnum.Seatunnel]: SeatunnelNode
+  [BlockEnum.Seatunnel]: SeatunnelNode,
+  [BlockEnum.Dependent]: DependentNode
 };
 
 export const PanelComponentMap: Record<string, ComponentType<any>> = {
@@ -49,6 +52,7 @@ export const PanelComponentMap: Record<string, ComponentType<any>> = {
   [BlockEnum.Enhancement]: EnhancementPanel,
   [BlockEnum.Customize]: CustomizePanel,
   [BlockEnum.SQL]: SQLPanel,
+  [BlockEnum.Dependent]: DependentPanel,
   [BlockEnum.Seatunnel]: SeatunnelPanel
 };
 
@@ -78,3 +82,11 @@ export const SUB_VARIABLES = [
 export const OUTPUT_FILE_SUB_VARIABLES = SUB_VARIABLES.filter(
   (key) => key !== 'transfer_method'
 );
+
+export const CATEGORY_MAP: Record<string, string> = {
+  文档: 'text',
+  图片: 'pic',
+  音频: 'audio',
+  视频: 'video',
+  自定义: 'scripting'
+};

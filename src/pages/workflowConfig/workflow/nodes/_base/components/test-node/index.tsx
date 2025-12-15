@@ -1,71 +1,134 @@
-import React, { memo, useMemo } from 'react';
-import { IconCaretRight } from '@arco-design/web-react/icon';
-import { editWorkflow, operateWorkflow } from '@/api/workflow';
+import React, { memo, useMemo, useState } from 'react';
+import { IconCaretRight, IconRecordStop } from '@arco-design/web-react/icon';
+import { operateWorkflow } from '@/api/workflow';
 import { WorkflowOperation } from '@/types/workflowApi';
 import { useParams as useSearchParam } from '@/utils/url';
 import { useUserInfo } from '@/store/userInfoStore';
-import { Message } from '@arco-design/web-react';
+import {
+  Button,
+  Drawer,
+  Message,
+  Tooltip,
+  Typography
+} from '@arco-design/web-react';
 import { useWorkflowStore } from '@/pages/workflowConfig/workflow/store';
 import { useStore as useTaskStore } from '@/pages/workflowConfig/task/store';
 import { useShallow } from 'zustand/react/shallow';
-import { createWorkflowDraft } from '@/api/workflowV2';
-import { useNodesSyncDraft } from '@/pages/workflowConfig/workflow/hooks';
+import {
+  useNodesInteractions,
+  useNodesSyncDraft
+} from '@/pages/workflowConfig/workflow/hooks';
+import { TaskStatus } from '@/pages/workflowConfig/types/workflow';
+import styles from './index.module.scss';
+import { useRequest } from 'ahooks';
+import { getWorkflowTaskLogs } from '@/api/workflowV2';
 
-export default memo(function TestNode(props: { id: React.Key }) {
-  const workflow_uuid = useSearchParam('workflow_uuid');
-  const ds_workflow_id = useSearchParam('ds_workflow_id');
-  const { doSyncWorkflowDraft } = useNodesSyncDraft();
-  const workflowStore = useWorkflowStore();
-  const userInfo = useUserInfo();
-  const { nodesProcessDetail } = workflowStore.getState();
-  const { workflowDetail } = useTaskStore(
+export default memo(function TestNode(props: {
+  id: React.Key;
+  showLog?: boolean;
+}) {
+  const { showLog = false, id: nodeId } = props;
+  const [drawerLog, setDrawerLog] = useState(false);
+  const { handleTestNode } = useNodesInteractions();
+
+  const { nodesProcessDetail } = useTaskStore(
     useShallow((state) => ({
-      setWorkflowDetail: state.setWorkflowDetail,
-      workflowDetail: state.workflowDetail
+      nodesProcessDetail: state.nodesProcessDetail
     }))
   );
+  const userInfo = useUserInfo();
 
   const nodeProcessStatus = useMemo(() => {
-    return nodesProcessDetail.find(({ task_code }) => {
-      return task_code === props.id;
+    return nodesProcessDetail?.find(({ task_code }) => {
+      return task_code.toString() === nodeId.toString();
     });
-  }, [props.id, nodesProcessDetail]);
+  }, [nodeId, nodesProcessDetail]);
+  const { data: logs } = useRequest(
+    async () => {
+      if (!drawerLog || !nodeProcessStatus) return;
+      return await getWorkflowTaskLogs(nodeProcessStatus.id);
+    },
+    {
+      refreshDeps: [nodeProcessStatus, drawerLog],
+      ready: drawerLog
+    }
+  );
 
-  const testNode = () => {
-    doSyncWorkflowDraft(
-      false,
-      {
-        onSuccess(res) {
-          operateWorkflow({
-            op: WorkflowOperation.RUNNING,
-            start_node: props.id,
-            // 后端需要这个id是number类型，接口返回是字符串，后端改了前端也得改，所以前端强转
-            ds_workflow_id: res?.ds_workflow_id ? +res.ds_workflow_id : 0,
-            uid: userInfo?.id ?? '',
-            workflow_uuid: workflow_uuid ?? ''
-          })
-            .then((res) => {
-              if (!res.data) {
-                return Promise.reject(res.message);
-              }
-              Message.success('开始测试');
-            })
-            .catch((e) => {
-              Message.error(e);
-              console.error(e);
-            });
-        }
-      },
-      {
-        version: 'publish'
-      }
-    );
-  };
+  const handleStop = () => {};
+
+  const badgeColor = useMemo(() => {
+    const state = nodeProcessStatus?.state;
+    if (state === TaskStatus.FAILURE) return '#EF4444';
+    if (state === TaskStatus.RUNNING_EXECUTION) return '#007DFA';
+    return '#10B981';
+  }, [nodeProcessStatus]);
 
   return (
-    <IconCaretRight
-      className={'h-4 w-4 cursor-pointer text-text-tertiary'}
-      onClick={testNode}
-    />
+    <div className={'flex flex-1 items-center justify-end gap-2'}>
+      {showLog && nodeProcessStatus && (
+        <div className={'flex flex-1 flex-shrink-0 items-center gap-1'}>
+          <div
+            className={`h-2 w-2 rounded-[8px]`}
+            style={{ background: badgeColor }}
+          />
+
+          {nodeProcessStatus?.state_name && (
+            <Typography.Text>{nodeProcessStatus.state_name}</Typography.Text>
+          )}
+          {nodeProcessStatus?.duration && (
+            <Typography.Text>
+              {`(${nodeProcessStatus.duration})`}
+            </Typography.Text>
+          )}
+          <Button
+            type={'text'}
+            className={'p-0'}
+            onClick={() => setDrawerLog(true)}
+          >
+            查看日志
+          </Button>
+        </div>
+      )}
+      <Tooltip
+        content={
+          nodeProcessStatus?.state === TaskStatus.RUNNING_EXECUTION
+            ? '暂停'
+            : '运行'
+        }
+      >
+        {nodeProcessStatus?.state === TaskStatus.RUNNING_EXECUTION ? (
+          <Tooltip content={''}>
+            <IconRecordStop
+              className={
+                'h-4 w-4 cursor-pointer text-[#007DFA] text-text-tertiary'
+              }
+              onClick={handleStop}
+            />
+          </Tooltip>
+        ) : (
+          <IconCaretRight
+            className={'h-4 w-4 cursor-pointer text-text-tertiary'}
+            onClick={() => handleTestNode(nodeId)}
+          />
+        )}
+      </Tooltip>
+      <Drawer
+        title={'日志'}
+        visible={drawerLog}
+        mask={false}
+        maskClosable={false}
+        onCancel={() => setDrawerLog(false)}
+        footer={null}
+        placement={'bottom'}
+        className={styles['task-log-drawer']}
+        getPopupContainer={() => {
+          return (
+            document.querySelector('#workFlowNodeConfigPanel') || document.body
+          );
+        }}
+      >
+        <div className={`${styles['log-content']}`}>{logs}</div>
+      </Drawer>
+    </div>
   );
 });

@@ -54,9 +54,10 @@ export const TitleInput = memo(
         value={localValue}
         onChange={(e) => !getNodesReadOnly() && setLocalValue(e.target.value)}
         className={`
-        system-xl-semibold mr-2 h-7 min-w-0 appearance-none rounded-md border border-transparent px-1 text-[#1E293B]
-        text-text-primary outline-none focus:shadow-xs ${className}
+        system-xl-semibold h-7 min-w-0 appearance-none rounded-md border border-transparent px-1 text-[#1E293B]
+        text-text-primary outline-none focus:shadow-xs ${className} max-w-[240px]
       `}
+        style={{ width: ((localValue?.length || 0) + 1) * 16 }}
         placeholder={t('workflow.common.addTitle') || ''}
         onBlur={handleBlur}
       />
