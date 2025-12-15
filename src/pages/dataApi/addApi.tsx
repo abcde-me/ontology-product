@@ -50,7 +50,7 @@ export default function AddApi() {
   const [isEditorFocused, setIsEditorFocused] = useState<boolean>(false);
   const [isOpen, setIsOpen] = useState<boolean>(false); // 当前面板是否展开
 
-  const [resizeSize, setResizeSize] = useState<string>('590px');
+  const [resizeSize, setResizeSize] = useState<string>('');
   const [paneContainersSize, setPaneContainersSize] = useState<string>('220px');
   const [treeData, setTreeData] = React.useState([
     {
@@ -228,6 +228,13 @@ export default function AddApi() {
     }
   ];
 
+  useEffect(() => {
+    const tabHeight = rightBoxRef.current?.offsetHeight
+      ? rightBoxRef.current?.offsetHeight - 90
+      : 590;
+    setResizeSize(`${tabHeight}px`);
+  }, []);
+
   // 处理面板移动事件
   const handleMoving = (paneContainers) => {
     const rightBoxHeight = rightBoxRef.current?.offsetHeight;
@@ -380,7 +387,10 @@ export default function AddApi() {
       defaultActiveKey={isOpen ? ['inputOutputParams'] : []}
       onChange={(_key, keys) => {
         const isOpenNow = keys.length > 0;
-        setResizeSize(isOpenNow ? '190px' : '590px');
+        const tabHeight = rightBoxRef.current?.offsetHeight
+          ? rightBoxRef.current?.offsetHeight - 90
+          : 590;
+        setResizeSize(isOpenNow ? `190px` : `${tabHeight}px`);
         setIsOpen(isOpenNow);
       }}
       expandIcon={<IconUp />}
@@ -404,7 +414,8 @@ export default function AddApi() {
             title="输入参数"
             style={{
               height: paneContainersSize,
-              overflowY: 'auto'
+              overflowY: 'auto',
+              overflowX: 'auto'
             }}
           >
             <Form
@@ -416,7 +427,7 @@ export default function AddApi() {
                 columns={columns}
                 data={data}
                 pagination={false}
-                scroll={{ x: true }}
+                className="min-w-[1000px]"
               />
             </Form>
           </TabPane>
@@ -425,14 +436,15 @@ export default function AddApi() {
             title="输出参数"
             style={{
               height: paneContainersSize,
-              overflowY: 'auto'
+              overflowY: 'auto',
+              overflowX: 'auto'
             }}
           >
             <Table
               columns={columns}
               data={data}
               pagination={false}
-              scroll={{ x: true }}
+              className="min-w-[1000px]"
             />
           </TabPane>
         </Tabs>
