@@ -143,7 +143,7 @@ function RequirementParticular({ isActive }: RequirementParticularProps) {
     },
     {
       title: '任务ID',
-      dataIndex: 'task_id',
+      dataIndex: 'id',
       width: 180
     },
     {
@@ -204,7 +204,7 @@ function RequirementParticular({ isActive }: RequirementParticularProps) {
         border={false}
         columns={columns}
         data={tableData}
-        rowKey="task_id"
+        rowKey="id"
         loading={loading}
         pagination={false}
         onChange={handleTableChange}

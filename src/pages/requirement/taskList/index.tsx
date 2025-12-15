@@ -337,7 +337,7 @@ function TaskList() {
         noDataElement={noDataElement({
           description: '暂无任务'
         })}
-        rowKey="id"
+        rowKey="pkg_id"
         loading={loading}
         onChange={(pagination, sorter, filters) =>
           handleTableChange(pagination, sorter as SorterInfo, filters)
