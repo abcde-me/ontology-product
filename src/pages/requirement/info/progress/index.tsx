@@ -13,6 +13,7 @@ import { IconRight } from '@arco-design/web-react/icon';
 import { useParams } from '@/utils/url';
 import GenerateRecordModal from './GenerateRecordModal';
 import { getProgressRequirement } from '@/api/dataAnnotation';
+import dayjs from 'dayjs';
 import './index.scss';
 
 interface StatisticsItem {
@@ -165,7 +166,8 @@ function RequirementProgress({ isActive }: RequirementProgressProps) {
     {
       title: '创建时间',
       dataIndex: 'create_time',
-      width: 170
+      width: 170,
+      render: (text: string) => dayjs(text).format('YYYY-MM-DD HH:mm:ss')
       // sorter: true
     },
     {
