@@ -192,6 +192,11 @@ export async function detailRequirement(params: {
   search_content: string; // 搜索内容
   page: number; // 页码
   page_size: number; // 每页数量
+  sort?: Array<{ field: string; order: 'desc' | 'asc' }>; // 排序字段，可选
+  filters?: {
+    task_status_list?: number[]; // 任务状态列表
+    task_process_list?: number[]; // 任务工序列表
+  }; // 筛选条件，可选
 }) {
   return await UAPI.RES.detailRequirement({})
     .post({ ...params })
