@@ -4,27 +4,33 @@ import { toISOStringWithMicroseconds } from '@/utils/timeFormatting';
 import { LabelShapMap, EmptyImgLabelResult } from '@/utils/constants';
 
 export async function saveTask(taskId: string, params: Record<string, any>) {
-  return UAPI.RES.leSaveTask({})
-    .post({
-      task_id: taskId,
-      save_type: 1,
-      result_type: params.has_result,
-      result: params
-    })
-    .inRegion()
-    .do();
+  const searchParams = new URLSearchParams(location.search);
+  const data: Record<string, any> = {
+    task_id: taskId,
+    save_type: 1,
+    result_type: params.has_result,
+    result: params
+  };
+  const op = searchParams.get('stage');
+  if (op === 'LABEL' || op === 'RELABEL') {
+    data.op = op;
+  }
+  return UAPI.RES.leSaveTask({}).post(data).inRegion().do();
 }
 
 export async function submitTask(taskId: string, params: Record<string, any>) {
-  return UAPI.RES.leSaveTask({})
-    .post({
-      task_id: taskId,
-      save_type: 2,
-      result_type: params.has_result,
-      result: params
-    })
-    .inRegion()
-    .do();
+  const searchParams = new URLSearchParams(location.search);
+  const data: Record<string, any> = {
+    task_id: taskId,
+    save_type: 2,
+    result_type: params.has_result,
+    result: params
+  };
+  const op = searchParams.get('stage');
+  if (op === 'LABEL' || op === 'RELABEL') {
+    data.op = op;
+  }
+  return UAPI.RES.leSaveTask({}).post(data).inRegion().do();
 }
 
 export async function getTaskResult(taskId: string) {
@@ -448,5 +454,10 @@ export async function getTextEditorLabels(requirement_id: number) {
 
 // 保存结果
 export async function saveTextEditorResult(params: Record<string, any>) {
+  const searchParams = new URLSearchParams(location.search);
+  const op = searchParams.get('stage');
+  if (op === 'LABEL' || op === 'RELABEL') {
+    params.op = op;
+  }
   return UAPI.RES.leSaveTask({}).post(params).inRegion().do();
 }
