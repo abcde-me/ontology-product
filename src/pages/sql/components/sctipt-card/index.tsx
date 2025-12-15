@@ -50,9 +50,13 @@ export const isUnreleasedStatus = (status: number): boolean => {
 
 interface ScriptCardProps {
   onToScriptList: (type: string) => void;
+  onTotalChange?: (total: number) => void;
 }
 
-const ScriptCard: React.FC<ScriptCardProps> = ({ onToScriptList }) => {
+const ScriptCard: React.FC<ScriptCardProps> = ({
+  onToScriptList,
+  onTotalChange
+}) => {
   const userInfo = useUserInfo();
   const { updateUrlState } = useUrlState();
   // 初始化搜索框value
@@ -109,8 +113,10 @@ const ScriptCard: React.FC<ScriptCardProps> = ({ onToScriptList }) => {
         Message.error(res?.message);
       }
       if (res.status === 200 && res.code === '') {
+        const newTotal = res.data?.total || 0;
         setScriptCardList(res.data?.items || []);
-        setTotal(res.data?.total || 0);
+        setTotal(newTotal);
+        onTotalChange?.(newTotal);
       }
     } finally {
       setLoading(false);
@@ -236,8 +242,10 @@ const ScriptCard: React.FC<ScriptCardProps> = ({ onToScriptList }) => {
         script_context: searchValue
       });
       if (res.status === 200) {
+        const newTotal = res.data?.total || 0;
         setScriptCardList(res.data?.items || []);
-        setTotal(res.data?.total || 0);
+        setTotal(newTotal);
+        onTotalChange?.(newTotal);
       } else {
         setScriptCardList([]);
         setTotal(0);

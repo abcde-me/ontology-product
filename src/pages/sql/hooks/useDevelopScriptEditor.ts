@@ -67,7 +67,8 @@ export interface UseEditorReturn {
   scriptInfo: ScriptInfo | null;
   // editorContent: string;
   placeholderValue: string;
-  runStatus: RunningStatus;
+  runLogStatus: RunLogStatus;
+  // runStatus: RunningStatus;
   runStartTime: Date | null;
   runDuration: number;
   lastAutoSave: string;
@@ -137,7 +138,7 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
   const [placeholderValue] = useState(defaultContent);
   const [runStatus, setRunStatus] = useState<RunningStatus>(RunningStatus.IDLE);
   const [runLogStatus, setRunLogStatus] = useState<RunLogStatus>(
-    RunLogStatus.STOP
+    RunLogStatus.CANCEL
   );
   const [prevRunStatus, setPrevRunStatus] = useState<RunningStatus>(
     RunningStatus.IDLE
@@ -352,23 +353,23 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
       manual: true,
       onSuccess: (res) => {
         if (res?.status !== 200) {
-          setRunLogStatus(RunLogStatus.STOP);
+          setRunLogStatus(RunLogStatus.FAILED);
           cancelGetRunLogPolling();
           setRunLog(res?.message ?? '获取日志失败');
           setHasFetchedLog(true);
           return;
         }
 
-        setRunLogStatus(res?.data?.run_status ?? RunLogStatus.STOP);
+        setRunLogStatus(res?.data?.run_status ?? RunLogStatus.CANCEL);
         setRunLog(res?.data?.run_log ?? '');
         setHasFetchedLog(true);
 
-        if (res?.data?.run_status === RunLogStatus.STOP) {
+        if (res?.data?.run_status !== RunLogStatus.RUNNING) {
           cancelGetRunLogPolling();
         }
       },
       onError: () => {
-        setRunLogStatus(RunLogStatus.STOP);
+        setRunLogStatus(RunLogStatus.FAILED);
         cancelGetRunLogPolling();
         setRunLog('获取日志失败');
         setHasFetchedLog(true);
@@ -726,7 +727,8 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
     scriptInfo,
     // editorContent,
     placeholderValue,
-    runStatus,
+    // runStatus,
+    runLogStatus,
     runStartTime,
     runDuration,
     lastAutoSave,

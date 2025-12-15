@@ -80,9 +80,13 @@ const Processing: React.FC<PaginationProps> = memo(
               curActiveTab={curActiveTab}
               isAll={setIsShoAll}
               onToScriptList={onToScriptList}
+              onTotalChange={setProcessingNum}
             />
           ) : (
-            <ScriptCard onToScriptList={onToScriptList} />
+            <ScriptCard
+              onToScriptList={onToScriptList}
+              onTotalChange={setProcessingNum}
+            />
           )}
         </div>
       </div>
