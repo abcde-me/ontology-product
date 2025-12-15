@@ -40,7 +40,7 @@ interface UseFileManagerReturn {
   handleSearch: (
     path_id: string,
     searchValue: string
-  ) => Promise<SqlScriptItem[]>;
+  ) => Promise<ListDevelopScriptItem[]>;
   handleNew: () => void;
   handleTreeSelect: (selectedKeys: string[]) => void;
   handleTreeExpand: (keys: string[]) => void;
@@ -92,8 +92,8 @@ export const useDevelopScriptManager = (
   const handleSearch = useCallback(
     async (path_id: string, searchValue: string) => {
       try {
-        const res = await getSqlScriptList({
-          search_content: searchValue,
+        const res = await listDevelopScript({
+          script_name: searchValue,
           page: 1,
           page_size: 1000
         });
@@ -271,7 +271,7 @@ export const useDevelopScriptManager = (
     [getRawSqlScriptList, onFileRename]
   );
 
-  // 复制
+  // 复制一个新脚本
   const handleCopy = useCallback(
     async (newName: string, node: any) => {
       try {
@@ -287,6 +287,19 @@ export const useDevelopScriptManager = (
         Message.success('复制成功');
         // 刷新列表
         await getRawSqlScriptList();
+
+        // 自动打开新复制的脚本
+        const newScriptId = String(copyRes.data?.script_id ?? '');
+        const newFileId = String(
+          (copyRes.data as any)?.script_file_id ?? copyRes.data?.script_id ?? ''
+        );
+        const newFileName = copyRes.data?.script_name || newName;
+
+        if (newScriptId) {
+          setSelectedKeys([newScriptId]);
+          onFileOpen && onFileOpen(newFileId, newScriptId, newFileName);
+        }
+
         return copyRes.data;
       } catch (error) {
         console.error('复制失败:', error);
@@ -294,7 +307,7 @@ export const useDevelopScriptManager = (
         return null;
       }
     },
-    [getRawSqlScriptList]
+    [getRawSqlScriptList, onFileOpen]
   );
 
   // 删除
@@ -344,6 +357,7 @@ export const useDevelopScriptManager = (
           // 确保每个节点都有 dataRef 属性，这样 Tree 组件就能正确传递文件信息
           dataRef: {
             name: item.script_name,
+            status: item.status,
             id: String(Number(item.script_file_id) || item.script_id),
             script_id: item.script_id,
             type: PythonItemType.Notebook

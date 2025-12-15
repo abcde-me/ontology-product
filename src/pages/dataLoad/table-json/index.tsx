@@ -59,9 +59,9 @@ const EditableTable = ({
           ...item,
           id: i + 1,
           source_field: item.name,
-          source_field_type: '',
+          source_field_type: item.type,
           target_field: item.name,
-          target_field_type: '',
+          target_field_type: item.type,
           is_primary_key: item.is_primary_key
         };
       }
@@ -71,17 +71,17 @@ const EditableTable = ({
   }, [previewDataColumns]);
 
   // 添加新行
-  const handleAddRow = () => {
+  const handleAddRow = (record: TableRow) => {
     setTableData([
       ...tableData,
       {
-        id: tableData.length + 1,
-        type: '',
+        id: tableData?.length + 1,
+        type: record?.type || '',
         is_primary_key: false,
         source_field: '',
         target_field: '',
-        source_field_type: '',
-        target_field_type: ''
+        source_field_type: record?.type || '',
+        target_field_type: record?.type || ''
       }
     ]);
   };
@@ -190,7 +190,12 @@ const EditableTable = ({
       width: 132,
       render: (_: any, record: TableRow) => (
         <div className={styles.operationBtn}>
-          <span className={styles.operateText} onClick={handleAddRow}>
+          <span
+            className={styles.operateText}
+            onClick={() => {
+              handleAddRow(record);
+            }}
+          >
             添加行
           </span>
           <span

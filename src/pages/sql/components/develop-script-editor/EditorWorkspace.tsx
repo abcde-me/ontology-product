@@ -1,8 +1,10 @@
 import { RunningStatus } from '@/types/sqlApi';
 import {
   Button,
+  Dropdown,
   Form,
   Input,
+  Menu,
   Message,
   Modal,
   Space,
@@ -13,8 +15,10 @@ import {
   IconCaretRight,
   IconClose,
   IconCopy,
+  IconDown,
   IconEdit,
   IconSave,
+  IconStop,
   IconStorage
 } from '@arco-design/web-react/icon';
 import { sql } from '@codemirror/lang-sql';
@@ -34,12 +38,12 @@ import React, {
 } from 'react';
 import { format } from 'sql-formatter';
 import styles from './EditorWorkspace.module.scss';
-import copy from 'copy-to-clipboard';
-import { ScriptStatus } from '@/types/sqlDevelopApi';
+import { RunLogStatus, ScriptStatus } from '@/types/sqlDevelopApi';
 
 import SQLFormatIcon from '@/assets/sql/sql-format-ico.svg';
 import { SQL_PERMISSIONS } from '@/config/permissions';
 import { useHasPermission } from '@/store/userInfoStore';
+import { copyDevelopScript } from '@/api/sql-develop';
 import {
   EditorProvider,
   useEditorContext
@@ -76,7 +80,6 @@ const highlightParameterEffect = StateEffect.define<string | null>();
 
 // 创建参数高亮的装饰样式
 const parameterHighlightMark = Decoration.mark({
-  class: 'cm-parameter-highlight',
   attributes: { style: 'background-color: rgba(0, 125, 250, 0.2);' }
 });
 
@@ -182,12 +185,16 @@ const EditorWorkspaceContent: React.FC<{
     );
     const [editLoading, setEditLoading] = React.useState<boolean>(false);
     const [saveLoading, setSaveLoading] = React.useState<boolean>(false);
+    const [copyLoading, setCopyLoading] = React.useState<boolean>(false);
+    const [copyDropdownVisible, setCopyDropdownVisible] =
+      React.useState<boolean>(false);
 
     // 从 Context 获取编辑器状态
     const {
       scriptInfo,
       setScriptInfo,
-      runStatus,
+      // runStatus,
+      runLogStatus,
       runDuration,
       runStartTime,
       handleStopRunCode,
@@ -278,7 +285,7 @@ const EditorWorkspaceContent: React.FC<{
     });
 
     const handleRunClick = () => {
-      if (runStatus === RunningStatus.RUNNING) {
+      if (runLogStatus === RunLogStatus.RUNNING) {
         handleStopRunCode();
       } else {
         handleRunCode().catch(console.error);
@@ -286,10 +293,10 @@ const EditorWorkspaceContent: React.FC<{
     };
 
     const handleFormatCode = () => {
-      if (runStatus === RunningStatus.RUNNING) {
-        Message.warning('SQL 正在执行中，暂不支持格式化');
-        return;
-      }
+      // if (runLogStatus === RunLogStatus.RUNNING) {
+      //   Message.warning('SQL 正在执行中，暂不支持格式化');
+      //   return;
+      // }
 
       if (scriptInfo?.script_context) {
         try {
@@ -364,15 +371,37 @@ const EditorWorkspaceContent: React.FC<{
       setSpecificationsContent(content);
     };
 
-    // 处理复制脚本
-    const handleCopyScript = () => {
-      if (scriptInfo?.script_context) {
-        const success = copy(scriptInfo?.script_context ?? '');
-        if (success) {
-          Message.success('复制成功');
+    // 处理复制脚本为新版本/新脚本
+    const handleCopyScript = async (type: 'newVersion' | 'newScript') => {
+      if (!scriptInfo?.script_id) {
+        Message.warning('暂无可复制的脚本');
+        return;
+      }
+
+      const params: { script_id: number; version?: number } = {
+        script_id: scriptInfo.script_id
+      };
+
+      if (type === 'newVersion' && scriptInfo?.max_version) {
+        params.version = scriptInfo.max_version;
+      }
+
+      try {
+        setCopyLoading(true);
+        const res = await copyDevelopScript(params);
+        if (res.status === 200) {
+          Message.success(
+            type === 'newVersion' ? '复制为新版本成功' : '复制为新脚本成功'
+          );
         } else {
-          Message.error('复制失败');
+          Message.error(res.message || '复制失败');
         }
+      } catch (error) {
+        console.error('复制失败:', error);
+        Message.error('复制失败');
+      } finally {
+        setCopyLoading(false);
+        setCopyDropdownVisible(false);
       }
     };
 
@@ -417,6 +446,52 @@ const EditorWorkspaceContent: React.FC<{
         scriptInfo?.status === ScriptStatus.EditCompleted;
       const isEditing = status === ScriptStatus.Editing;
       const isEditCompleted = status === ScriptStatus.EditCompleted;
+      const copyMenu = (
+        <Menu
+          onClickMenuItem={(key) =>
+            handleCopyScript(key as 'newVersion' | 'newScript')
+          }
+          className={styles['copy-dropdown']}
+          selectable={false}
+        >
+          <Menu.Item key="newVersion">
+            <div className="flex h-[22px] items-center text-[14px] text-[var(--color-text-1)]">
+              <IconCopy className="mr-[4px]" />
+              <span className="font-bold">复制为新版本</span>
+            </div>
+            <div className="mt-[4px] h-[18px] text-[12px] text-[var(--color-text-3)]">
+              以此脚本为基础迭代新版本
+            </div>
+          </Menu.Item>
+          <Menu.Item key="newScript">
+            <div className="flex h-[22px] items-center text-[14px] text-[var(--color-text-1)]">
+              <IconCopy className="mr-[4px]" />
+              <span className="font-bold">复制为新脚本</span>
+            </div>
+            <div className="mt-[4px] h-[18px] text-[12px] text-[var(--color-text-3)]">
+              以此脚本为基础新建脚本
+            </div>
+          </Menu.Item>
+        </Menu>
+      );
+
+      const renderCopyDropdown = () => (
+        <Dropdown
+          trigger={['hover', 'click']}
+          droplist={copyMenu}
+          position="br"
+          onVisibleChange={setCopyDropdownVisible}
+        >
+          <Button
+            loading={copyLoading}
+            disabled={!scriptInfo?.script_id}
+            className="h-[24px]"
+          >
+            <span>复制</span>
+            <IconDown className="text-[14px]" />
+          </Button>
+        </Dropdown>
+      );
 
       // status = 0 (编辑中) 或 status = 1 (编辑完成)
       if (
@@ -428,30 +503,29 @@ const EditorWorkspaceContent: React.FC<{
             <div className={styles['toolbar-left']}>
               <Space size={12}>
                 {/* 运行按钮 - status=0且isSelfEditing=true时可用，否则置灰 */}
-                {/* {canEdit &&
-                  ((hasRunPermission && runStatus !== RunningStatus.RUNNING) ||
-                    (hasCancelRunPermission &&
-                      runStatus === RunningStatus.RUNNING)) && (
-                    <Button
-                      type="primary"
-                      icon={
-                        runStatus === RunningStatus.RUNNING ? (
-                          <IconStop className="mr-[4px]" />
-                        ) : (
-                          <IconCaretRight className="mr-[4px]" />
-                        )
-                      }
-                      disabled={editorContent?.trim() === ''}
-                      onClick={handleRunClick}
-                      className={classNames('h-[26px]', {
-                        [styles['btn-running']]:
-                          runStatus === RunningStatus.RUNNING
-                      })}
-                    >
-                      {runStatus === RunningStatus.RUNNING ? '停止运行' : '运行'}
-                    </Button>
-                  )} */}
-                {canEdit && (
+                {
+                  <Button
+                    type="primary"
+                    icon={
+                      runLogStatus === RunLogStatus.RUNNING ? (
+                        <IconStop className="mr-[4px]" />
+                      ) : (
+                        <IconCaretRight className="mr-[4px]" />
+                      )
+                    }
+                    disabled={scriptInfo?.script_context?.trim() === ''}
+                    onClick={handleRunClick}
+                    className={classNames('h-[26px]', {
+                      [styles['btn-running']]:
+                        runLogStatus === RunLogStatus.RUNNING
+                    })}
+                  >
+                    {runLogStatus === RunLogStatus.RUNNING
+                      ? '停止运行'
+                      : '运行'}
+                  </Button>
+                }
+                {/* {canEdit && (
                   <Button
                     type="primary"
                     disabled={!scriptInfo?.isSelfEditing}
@@ -460,7 +534,7 @@ const EditorWorkspaceContent: React.FC<{
                   >
                     运行
                   </Button>
-                )}
+                )} */}
 
                 {/* 格式化按钮 - status=0且isSelfEditing=true时可用，否则置灰 */}
                 <Button
@@ -579,16 +653,13 @@ const EditorWorkspaceContent: React.FC<{
                 </span>
               </Space>
             </div>
-            <div className={styles['toolbar-right']}>
-              <Space size={12}>
-                <Button
-                  className={styles['btn-save']}
-                  onClick={handleCopyScript}
-                  icon={<IconCopy />}
-                >
-                  复制
-                </Button>
-              </Space>
+            <div
+              className={classNames(
+                styles['toolbar-right'],
+                styles['copy-dropdown-container']
+              )}
+            >
+              {renderCopyDropdown()}
             </div>
           </>
         );
@@ -614,16 +685,13 @@ const EditorWorkspaceContent: React.FC<{
                 </span>
               </Space>
             </div>
-            <div className={styles['toolbar-right']}>
-              <Space size={12}>
-                <Button
-                  className={styles['btn-save']}
-                  onClick={handleCopyScript}
-                  icon={<IconCopy />}
-                >
-                  复制
-                </Button>
-              </Space>
+            <div
+              className={classNames(
+                styles['toolbar-right'],
+                styles['copy-dropdown-container']
+              )}
+            >
+              {renderCopyDropdown()}
             </div>
           </>
         );
@@ -646,51 +714,51 @@ const EditorWorkspaceContent: React.FC<{
             [styles['with-sidebar']]: sidebarVisible && !sidebarCollapsed
           })}
         >
-          <Spin
+          {/* <Spin
             style={{
               width: '100%',
               height: '100%'
             }}
             tip={
               lastScriptRunStatus === RunningStatus.SUCCESS ||
-              lastScriptRunStatus === RunningStatus.FAILED
+                lastScriptRunStatus === RunningStatus.FAILED
                 ? '结果加载中...'
                 : '运行中...'
             }
             loading={runStatus === RunningStatus.RUNNING}
-          >
-            <CodeMirror
-              ref={editorRef}
-              value={scriptInfo?.script_context ?? ''}
-              onChange={handleContentChange}
-              placeholder={placeholderValue}
-              readOnly={
-                !hasUpdatePermission ||
-                runStatus === RunningStatus.RUNNING ||
-                !scriptInfo?.isSelfEditing
-              }
-              theme={myTheme}
-              extensions={[
-                sql({ upperCaseKeywords: true }),
-                lintGutter(),
-                currentHighlightedParam,
-                parameterHighlightField,
-                EditorView.updateListener.of((update) => {
-                  if (update.selectionSet) {
-                    handleCursorChange(update.view);
-                  }
-                  if (update.focusChanged) {
-                    handleFocusChange(update.view.hasFocus);
-                  }
-                })
-              ]}
-              basicSetup={{
-                lineNumbers: true,
-                highlightActiveLineGutter: false
-              }}
-              className={styles['code-editor']}
-            />
-          </Spin>
+          > */}
+          <CodeMirror
+            ref={editorRef}
+            value={scriptInfo?.script_context ?? ''}
+            onChange={handleContentChange}
+            placeholder={placeholderValue}
+            readOnly={
+              !hasUpdatePermission ||
+              runLogStatus === RunLogStatus.RUNNING ||
+              !scriptInfo?.isSelfEditing
+            }
+            theme={myTheme}
+            extensions={[
+              sql({ upperCaseKeywords: true }),
+              lintGutter(),
+              currentHighlightedParam,
+              parameterHighlightField,
+              EditorView.updateListener.of((update) => {
+                if (update.selectionSet) {
+                  handleCursorChange(update.view);
+                }
+                if (update.focusChanged) {
+                  handleFocusChange(update.view.hasFocus);
+                }
+              })
+            ]}
+            basicSetup={{
+              lineNumbers: true,
+              highlightActiveLineGutter: false
+            }}
+            className={styles['code-editor']}
+          />
+          {/* </Spin> */}
 
           {/* 参数侧边栏 */}
           {

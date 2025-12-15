@@ -14,6 +14,7 @@
     width: 100%;
     padding-right: 5px;
     padding-bottom: 16px;
+    margin-top: 16px;
   }
 
   .operate-text {
@@ -22,7 +23,7 @@
   }
 
   .operate-text:hover {
-    color: rgba(67, 141, 251, 1);
+    color: rgba(67, 141, 251, 100%);
   }
 
   .disabled-text {
@@ -44,7 +45,18 @@
   }
 
   tbody .arco-table-tr:hover .hover-change .ellipsis-text:hover {
-    color: rgba(67, 141, 251, 1);
+    color: rgba(67, 141, 251, 100%);
+  }
+
+  // 复制图标默认隐藏，hover 时显示
+  .copy-icon {
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    margin-top: 4px;
+  }
+
+  tbody .arco-table-tr:hover .copy-icon {
+    opacity: 1;
   }
 
   .publish-part {

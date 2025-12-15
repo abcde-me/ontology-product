@@ -1,0 +1,263 @@
+.quality-task-detail {
+  padding: 10px;
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+
+  .arco-breadcrumb-item > .arco-icon {
+    color: #000;
+    cursor: pointer;
+  }
+
+  .head-breadcrumb-box {
+    display: flex;
+    align-items: center;
+
+    .breadcrumb-text:hover {
+      cursor: pointer;
+      color: #000;
+    }
+
+    .status-tag {
+      margin-left: 12px;
+    }
+  }
+
+  .quality-task-detail-content {
+    flex: 1;
+    background-color: #fff;
+    border-radius: 15px;
+    padding: 24px;
+    margin: 16px 0;
+    overflow: auto;
+  }
+
+  // 指标卡片区域
+  .metrics-section {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    padding: 16px 20px;
+    background: #f7f8fa;
+    border-radius: 12px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+
+    .metric-card {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 12px 24px;
+      min-width: 100px;
+      cursor: default;
+
+      &.task_volume_unsampled-card {
+        flex-direction: row;
+        align-items: center;
+        background: #fff;
+        border-radius: 12px;
+        padding: 16px 24px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+        gap: 24px;
+
+        .task_volume_unsampled-left {
+          display: flex;
+          flex-direction: column;
+
+          .metric-label {
+            margin-bottom: 0;
+          }
+
+          .task_volume_unsampled-divider {
+            width: 60px;
+            height: 1px;
+            border-top: 1px dashed #c9cdd4;
+            margin: 6px 0;
+          }
+
+          .metric-value {
+            margin-bottom: 0;
+          }
+        }
+
+        .metric-actions {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+
+          .arco-btn {
+            font-size: 14px;
+            min-width: 96px;
+            height: 40px;
+            border-radius: 8px;
+          }
+        }
+      }
+
+      .metric-label {
+        font-size: 14px;
+        color: #86909c;
+        margin-bottom: 8px;
+      }
+
+      .metric-value {
+        font-size: 28px;
+        font-weight: 600;
+        color: #1d2129;
+      }
+    }
+
+    .metric-divider {
+      font-size: 20px;
+      color: #86909c;
+      padding: 0 16px;
+    }
+  }
+
+  // 表格区域
+  .table-section {
+    .section-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: #1d2129;
+      margin: 0 0 16px 0;
+    }
+
+    // ID列样式
+    .id-cell {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+
+      .recheck-tag {
+        flex-shrink: 0;
+      }
+    }
+
+    // 状态列样式
+    .status-cell {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+
+      .status-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+      }
+    }
+
+    // 质检结果列样式
+    .quality-result-cell {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+
+      .result-item {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+
+        .result-count {
+          font-size: 14px;
+          color: #1d2129;
+        }
+      }
+    }
+
+    // 批注列样式
+    .annotation-cell {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      font-size: 14px;
+      color: #1d2129;
+    }
+
+    // 操作列样式
+    .operation-cell {
+      display: flex;
+      gap: 16px;
+
+      .operation-link {
+        color: #165dff;
+        cursor: pointer;
+        font-size: 14px;
+
+        &:hover {
+          color: #4080ff;
+        }
+
+        &.disabled {
+          color: #c9cdd4;
+          cursor: not-allowed;
+
+          &:hover {
+            color: #c9cdd4;
+          }
+        }
+      }
+    }
+  }
+
+  // 分页样式
+  .pagination-wrapper {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 16px;
+  }
+}
+
+// 抽检设置弹窗
+.sampling-form {
+  padding: 8px 0;
+
+  .arco-radio-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    line-height: 32px;
+
+    .arco-radio {
+      margin-right: 0;
+
+      .radio-with-input {
+        display: inline-flex;
+        align-items: center;
+
+        .input-suffix {
+          margin-left: 4px;
+          color: #1d2129;
+        }
+      }
+    }
+  }
+}
+
+// 首次抽检设置弹窗
+.first-inspect-form {
+  padding: 8px 0;
+
+  .arco-radio-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    line-height: 32px;
+
+    .arco-radio {
+      margin-right: 0;
+
+      .radio-with-input {
+        display: inline-flex;
+        align-items: center;
+
+        .input-suffix {
+          margin-left: 4px;
+          color: #1d2129;
+        }
+      }
+    }
+  }
+}

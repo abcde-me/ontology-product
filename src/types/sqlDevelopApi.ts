@@ -20,16 +20,23 @@ export enum ScriptStatus {
  * 脚本状态名称枚举
  * 注意：0和1在前端展示时都显示为"未发版"
  */
-export enum ScriptStatusName {
-  /** 未发版（编辑中） */
-  Editing = '未发版',
-  /** 未发版（编辑完成） */
-  EditCompleted = '未发版',
-  /** 已发版 */
-  Released = '已发版',
-  /** 调度中 */
-  Scheduling = '调度中'
-}
+// export enum ScriptStatusName {
+//   /** 未发版（编辑中） */
+//   Editing = '未发版',
+//   /** 未发版（编辑完成） */
+//   EditCompleted = '未发版',
+//   /** 已发版 */
+//   Released = '已发版',
+//   /** 调度中 */
+//   Scheduling = '调度中'
+// }
+
+export const ScriptStatusName = {
+  [ScriptStatus.Editing]: '未发版',
+  [ScriptStatus.EditCompleted]: '未发版',
+  [ScriptStatus.Released]: '已发版',
+  [ScriptStatus.Scheduling]: '调度中'
+} as const;
 
 export interface ListDevelopScriptParams {
   page_size?: number;
@@ -83,7 +90,7 @@ export interface ListDevelopScriptItem {
   /**
    * 最新版本状态名字
    */
-  status_name: ScriptStatusName;
+  status_name: (typeof ScriptStatusName)[ScriptStatus];
   /**
    * 所属任务节点，所属任务名称
    */
@@ -285,9 +292,69 @@ export interface GetDevelopScriptInfoResponse {
   /**
    * 最新版本状态名字
    */
-  status_name: ScriptStatusName;
+  status_name: (typeof ScriptStatusName)[ScriptStatus];
   /**
    * 更新时间
    */
   update_time: string;
+}
+
+export interface CopyDevelopScriptResponse {
+  script_id: number;
+  script_name: string;
+}
+
+export interface RunDevelopScriptParams {
+  /**
+   * 脚本id
+   */
+  script_id: number;
+}
+
+export interface RunDevelopScriptResponse {
+  /**
+   * 执行id
+   */
+  exec_id: string;
+  /**
+   * 脚本id
+   */
+  script_id: string;
+  /**
+   * 运行时提示信息
+   */
+  warning_msg: string;
+}
+
+export interface GetDevelopScriptRunLogParams {
+  /**
+   * 脚本id
+   */
+  script_id: number;
+  /**
+   * 执行id
+   */
+  exec_id: string;
+}
+
+export enum RunLogStatus {
+  /** 失败 */
+  FAILED = 0,
+  /** 成功 */
+  SUCCESS = 1,
+  /** 运行中 */
+  RUNNING = 2,
+  /** 取消 */
+  CANCEL = 3
+}
+
+export interface GetDevelopScriptRunLogResponse {
+  /**
+   * 运行日志
+   */
+  run_log: string;
+  /**
+   * 运行状态
+   */
+  run_status: RunLogStatus;
 }

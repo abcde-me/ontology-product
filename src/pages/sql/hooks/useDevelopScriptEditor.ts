@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Message } from '@arco-design/web-react';
 import { useRequest, useThrottleFn } from 'ahooks';
-import { RunLogStatus, RunningStatus } from '@/types/sqlApi';
+import { RunningStatus } from '@/types/sqlApi';
 import {
-  runSqlScript,
-  getRunResultSqlScript,
-  runCancelSqlScript,
-  getRunLogSqlScript
+  //   // runSqlScript,
+  //   getRunResultSqlScript,
+  runCancelSqlScript
+  //   getRunLogSqlScript
 } from '@/api/sql';
 import {
   createDevelopScript,
@@ -14,7 +14,9 @@ import {
   getDevelopScriptInfo,
   lockDevelopScript,
   unlockDevelopScript,
-  releaseDevelopScript
+  releaseDevelopScript,
+  runDevelopScript,
+  getDevelopScriptRunLog
 } from '@/api/sql-develop';
 import { DEFAULT_SQL_PLACEHOLDER } from '../constant';
 import { useUserInfo } from '@/store/userInfoStore';
@@ -26,7 +28,8 @@ import {
   GetDevelopScriptInfoResponse,
   ScriptParam,
   ScriptStatus,
-  ScriptStatusName
+  ScriptStatusName,
+  RunLogStatus
 } from '@/types/sqlDevelopApi';
 
 export interface UseEditorOptions {
@@ -64,7 +67,8 @@ export interface UseEditorReturn {
   scriptInfo: ScriptInfo | null;
   // editorContent: string;
   placeholderValue: string;
-  runStatus: RunningStatus;
+  runLogStatus: RunLogStatus;
+  // runStatus: RunningStatus;
   runStartTime: Date | null;
   runDuration: number;
   lastAutoSave: string;
@@ -98,9 +102,9 @@ export interface UseEditorReturn {
   ) => Promise<EditDevelopScriptResponse | null>;
   handleRunCode: () => Promise<void>;
   handleStopRunCode: () => void;
-  getRunResultPolling: (id: string, params: any) => void;
-  cancelGetRunResultPolling: () => void;
-  loadRunResult: (execid: string, size: string) => void;
+  // getRunResultPolling: (id: string, params: any) => void;
+  // cancelGetRunResultPolling: () => void;
+  // loadRunResult: (execid: string, size: string) => void;
   handleGetRunLog: () => Promise<void>;
   handleEditScript: () => Promise<boolean>;
   handleUnlockScript: () => Promise<boolean>;
@@ -134,7 +138,7 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
   const [placeholderValue] = useState(defaultContent);
   const [runStatus, setRunStatus] = useState<RunningStatus>(RunningStatus.IDLE);
   const [runLogStatus, setRunLogStatus] = useState<RunLogStatus>(
-    RunLogStatus.STOP
+    RunLogStatus.CANCEL
   );
   const [prevRunStatus, setPrevRunStatus] = useState<RunningStatus>(
     RunningStatus.IDLE
@@ -308,99 +312,100 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
   }, [currentFile?.scriptId]);
 
   // 轮询获取运行结果
-  const { runAsync: getRunResultPolling, cancel: cancelGetRunResultPolling } =
-    useRequest(getRunResultSqlScript, {
-      pollingInterval: 5000,
-      pollingWhenHidden: true,
-      manual: true,
-      onSuccess: (res) => {
-        if (res?.status !== 200) {
-          updateRunStatus(RunningStatus.FAILED);
-          cancelGetRunResultPolling();
-          setRunError(res?.message ?? '获取运行结果失败');
-          setRunResult([]);
-          return;
-        }
+  // const { runAsync: getRunResultPolling, cancel: cancelGetRunResultPolling } =
+  //   useRequest(getRunResultSqlScript, {
+  //     pollingInterval: 5000,
+  //     pollingWhenHidden: true,
+  //     manual: true,
+  //     onSuccess: (res) => {
+  //       if (res?.status !== 200) {
+  //         updateRunStatus(RunningStatus.FAILED);
+  //         cancelGetRunResultPolling();
+  //         setRunError(res?.message ?? '获取运行结果失败');
+  //         setRunResult([]);
+  //         return;
+  //       }
 
-        if (res.data.run_status !== RunningStatus.RUNNING) {
-          console.log('运行结束，取消轮询');
-          cancelGetRunResultPolling();
-        }
+  //       if (res.data.run_status !== RunningStatus.RUNNING) {
+  //         console.log('运行结束，取消轮询');
+  //         cancelGetRunResultPolling();
+  //       }
 
-        updateRunStatus(res.data?.run_status);
-        setRunResult(res.data?.sql_result_lists);
-        setRunError('');
-        setRunDuration(Number(res.data?.run_duration));
-        setRunStartTime(new Date(res.data?.run_end_time ?? ''));
-      },
-      onError: () => {
-        updateRunStatus(RunningStatus.FAILED);
-        cancelGetRunResultPolling();
-        setRunResult([]);
-        setRunError('获取运行结果失败');
-      }
-    });
+  //       updateRunStatus(res.data?.run_status);
+  //       setRunResult(res.data?.sql_result_lists);
+  //       setRunError('');
+  //       setRunDuration(Number(res.data?.run_duration));
+  //       setRunStartTime(new Date(res.data?.run_end_time ?? ''));
+  //     },
+  //     onError: () => {
+  //       updateRunStatus(RunningStatus.FAILED);
+  //       cancelGetRunResultPolling();
+  //       setRunResult([]);
+  //       setRunError('获取运行结果失败');
+  //     }
+  //   });
 
   // 轮询获取日志
   const { runAsync: getRunLogPolling, cancel: cancelGetRunLogPolling } =
-    useRequest(getRunLogSqlScript, {
+    useRequest(getDevelopScriptRunLog, {
       pollingInterval: 2000,
       pollingWhenHidden: true,
       manual: true,
       onSuccess: (res) => {
         if (res?.status !== 200) {
-          setRunLogStatus(RunLogStatus.STOP);
+          setRunLogStatus(RunLogStatus.FAILED);
           cancelGetRunLogPolling();
           setRunLog(res?.message ?? '获取日志失败');
           setHasFetchedLog(true);
           return;
         }
 
-        setRunLogStatus(res?.data?.status ?? RunLogStatus.STOP);
+        setRunLogStatus(res?.data?.run_status ?? RunLogStatus.CANCEL);
         setRunLog(res?.data?.run_log ?? '');
         setHasFetchedLog(true);
 
-        if (res?.data?.status === RunLogStatus.STOP) {
+        if (res?.data?.run_status !== RunLogStatus.RUNNING) {
           cancelGetRunLogPolling();
         }
       },
       onError: () => {
-        setRunLogStatus(RunLogStatus.STOP);
+        setRunLogStatus(RunLogStatus.FAILED);
         cancelGetRunLogPolling();
         setRunLog('获取日志失败');
         setHasFetchedLog(true);
       }
     });
 
-  const loadRunResult = async (execid: string, size: string) => {
-    setResultLoading(true);
-    try {
-      const res = await getRunResultSqlScript(currentFile?.scriptId || '', {
-        script_execid: execid,
-        size: size || '100'
-      });
-      if (res?.status === 200) {
-        setRunResult(res.data?.sql_result_lists);
-        setHasFetchedResult(true);
-        setRunStatus(res.data?.run_status);
-      } else {
-        setRunResult([]);
-        setHasFetchedResult(true);
-      }
+  // const loadRunResult = async (execid: string, size: string) => {
+  //   setResultLoading(true);
+  //   try {
+  //     const res = await getRunResultSqlScript(currentFile?.scriptId || '', {
+  //       script_execid: execid,
+  //       size: size || '100'
+  //     });
+  //     if (res?.status === 200) {
+  //       setRunResult(res.data?.sql_result_lists);
+  //       setHasFetchedResult(true);
+  //       setRunStatus(res.data?.run_status);
+  //     } else {
+  //       setRunResult([]);
+  //       setHasFetchedResult(true);
+  //     }
 
-      setResultLoading(false);
-    } catch (error) {
-      setResultLoading(false);
-    }
-  };
+  //     setResultLoading(false);
+  //   } catch (error) {
+  //     setResultLoading(false);
+  //   }
+  // };
 
   // 获取运行日志
   const handleGetRunLog = useCallback(async () => {
     if (!currentFile?.scriptId || !execid) {
       return;
     }
-    const res = await getRunLogSqlScript(currentFile?.scriptId || '', {
-      script_execid: execid
+    const res = await getDevelopScriptRunLog({
+      script_id: Number(currentFile?.scriptId),
+      exec_id: execid
     });
 
     if (res?.status !== 200) {
@@ -428,10 +433,10 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
     setHasFetchedResult(false);
     setHasFetchedLog(false);
     // 取消正在进行的轮询
-    cancelGetRunResultPolling();
+    // cancelGetRunResultPolling();
     // 取消正在进行的轮询获取日志
     cancelGetRunLogPolling();
-  }, [cancelGetRunResultPolling, cancelGetRunLogPolling]);
+  }, [cancelGetRunLogPolling]);
 
   const handleSaveScript = useCallback(
     async (content: string) => {
@@ -517,28 +522,30 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
       return;
     }
 
-    const saveRes = await editDevelopScript({
-      script_context: scriptInfo?.script_context ?? '',
-      script_id: Number(currentFile?.scriptId),
-      script_name: currentFile.title ?? '',
-      script_params: scriptInfo?.script_params ?? []
-    });
+    // const saveRes = await editDevelopScript({
+    //   script_context: scriptInfo?.script_context ?? '',
+    //   script_id: Number(currentFile?.scriptId),
+    //   script_name: currentFile.title ?? '',
+    //   script_params: scriptInfo?.script_params ?? []
+    // });
 
-    if (saveRes?.status !== 200) {
-      Message.error(saveRes?.message ?? '保存文件失败');
-      return;
-    }
+    // if (saveRes?.status !== 200) {
+    //   Message.error(saveRes?.message ?? '保存文件失败');
+    //   return;
+    // }
 
-    setLastAutoSave(timeFormattig(new Date(saveRes.data.update_time)));
+    // setLastAutoSave(timeFormattig(new Date(saveRes.data.update_time)));
 
     setExecid('');
 
     try {
       // 将上一次运行结果置为未运行， 重新获取结果
       setLastScriptRunStatus(RunningStatus.IDLE);
-      const res = await runSqlScript(currentFile?.scriptId ?? '');
+      const res = await runDevelopScript({
+        script_id: Number(currentFile?.scriptId)
+      });
       if (res?.status === 200) {
-        setExecid(res.data.script_execid);
+        setExecid(res.data.exec_id);
         if (res.data?.warning_msg) {
           setRunWarning(res.data.warning_msg);
         }
@@ -562,7 +569,7 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
       return;
     }
 
-    cancelGetRunResultPolling();
+    // cancelGetRunResultPolling();
     cancelGetRunLogPolling();
     updateRunStatus(RunningStatus.IDLE);
     // 将该面板的最后状态也设置为未运行
@@ -649,13 +656,14 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
     const fetchResult = () => {
       try {
         updateRunStatus(RunningStatus.RUNNING);
-        getRunResultPolling(currentFile?.scriptId ?? '', {
-          script_execid: execid,
-          size: size
-        });
+        // getRunResultPolling(currentFile?.scriptId ?? '', {
+        //   script_execid: execid,
+        //   size: size
+        // });
 
-        getRunLogPolling(currentFile?.scriptId ?? '', {
-          script_execid: execid
+        getRunLogPolling({
+          script_id: Number(currentFile?.scriptId ?? ''),
+          exec_id: execid
         });
       } catch (error) {
         console.error('获取运行结果失败:', error);
@@ -669,10 +677,10 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
   // 页面卸载时停止轮询
   useEffect(() => {
     return () => {
-      cancelGetRunResultPolling();
+      // cancelGetRunResultPolling();
       cancelGetRunLogPolling();
     };
-  }, [cancelGetRunResultPolling, cancelGetRunLogPolling]);
+  }, [cancelGetRunLogPolling]);
 
   // 监听 activeTab 变化，重新更新编辑器状态
   useEffect(() => {
@@ -719,7 +727,8 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
     scriptInfo,
     // editorContent,
     placeholderValue,
-    runStatus,
+    // runStatus,
+    runLogStatus,
     runStartTime,
     runDuration,
     lastAutoSave,
@@ -745,9 +754,9 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
     handleSaveScript,
     handleRunCode,
     handleStopRunCode,
-    getRunResultPolling,
-    cancelGetRunResultPolling,
-    loadRunResult,
+    // getRunResultPolling,
+    // cancelGetRunResultPolling,
+    // loadRunResult,
     handleGetRunLog,
     handleEditScript,
     handleUnlockScript,

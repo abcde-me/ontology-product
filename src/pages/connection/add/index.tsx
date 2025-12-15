@@ -19,7 +19,7 @@ const options = [
   { text: 'MySQL', value: 'MySQL' },
   { text: 'PostgreSQL', value: 'PostgreSQL' },
   { text: 'Doris', value: 'Doris' },
-  { text: 'ES', value: 'ES' }
+  { text: 'Elasticsearch', value: 'Elasticsearch' }
 ];
 const add = forwardRef((props: any, ref) => {
   // 创建的表单实例
@@ -57,7 +57,8 @@ const add = forwardRef((props: any, ref) => {
         path: '',
         host: undefined, // 清空 hdfs 字段
         port: undefined,
-        user: undefined
+        user: undefined,
+        sub_type: undefined
       });
     } else if (value === 'hdfs') {
       form.setFieldsValue({
@@ -68,7 +69,8 @@ const add = forwardRef((props: any, ref) => {
         endpoint: undefined, // 清空 s3 字段
         access_key: undefined,
         secret_key: undefined,
-        region: undefined
+        region: undefined,
+        sub_type: undefined
       });
     } else if (value === 'db') {
       form.setFieldsValue({
@@ -77,7 +79,16 @@ const add = forwardRef((props: any, ref) => {
         port: '',
         database: '',
         user: '',
-        password: ''
+        password: '',
+        sub_type: 'MySQL' // 数据库类型默认MySQL
+      });
+    } else if (value === 'mq') {
+      form.setFieldsValue({
+        bootstrapServers: '',
+        autoOffsetReset: 'earliest', // 设置偏移重置策略的默认值为earliest
+        user: '',
+        password: '',
+        sub_type: 'Kafka' // 消息队列类型默认Kafka
       });
     }
   };
@@ -146,7 +157,7 @@ const add = forwardRef((props: any, ref) => {
       const newfrom = {
         name,
         type,
-        sub_type: type === 'db' ? sub_type : undefined, // 只有当类型是db时才包含sub_type
+        sub_type: type === 'db' || type === 'mq' ? sub_type : undefined, // 当类型是db或mq时都包含sub_type
         config: { ...configValues }
       };
 
@@ -393,18 +404,31 @@ const add = forwardRef((props: any, ref) => {
             ) : storageType == 'mq' ? (
               <div>
                 <FormItem
+                  label="数据库类型"
+                  field="sub_type"
+                  rules={[{ required: true, message: '请选择数据库类型' }]}
+                  disabled={inputDisabled}
+                >
+                  <Select placeholder="请选择" defaultValue="Kafka">
+                    <Option value="Kafka">Kafka</Option>
+                  </Select>
+                </FormItem>
+                <FormItem
                   label="集群的入口地址列表"
                   rules={[{ required: true, message: '请输入地址列表' }]}
-                  field="bootstrap_servers"
+                  field="bootstrapServers"
                 >
                   <Input placeholder="请输入" />
                 </FormItem>
                 <FormItem
                   label="偏移重置策略"
                   rules={[{ required: true, message: '请选择偏移重置策略' }]}
-                  field="auto_offset_reset"
+                  field="autoOffsetReset"
                 >
-                  <Input placeholder="请输入" />
+                  <Select placeholder="请选择" defaultValue="earliest">
+                    <Option value="earliest">earliest</Option>
+                    <Option value="latest">latest</Option>
+                  </Select>
                 </FormItem>
                 <FormItem label="用户名" field="user">
                   <Input placeholder="请输入" />
@@ -461,7 +485,7 @@ const add = forwardRef((props: any, ref) => {
                 >
                   <Input placeholder="请输入，如3306" />
                 </FormItem>
-                {fromData?.sub_type !== 'ES' && (
+                {form.getFieldValue('sub_type') !== 'Elasticsearch' && (
                   <FormItem
                     label="数据库名"
                     field="database"
@@ -474,7 +498,30 @@ const add = forwardRef((props: any, ref) => {
                 <FormItem
                   label="用户名"
                   field="user"
-                  rules={[{ required: true, message: '请输入用户名' }]}
+                  required={
+                    form.getFieldValue('sub_type') !== 'Elasticsearch' &&
+                    form.getFieldValue('sub_type') !== 'Doris'
+                  }
+                  rules={[
+                    {
+                      validator: (value, cb) => {
+                        // 获取当前表单中的数据库类型
+                        const currentSubType = form.getFieldValue('sub_type');
+                        // 当数据库类型为ES或Doris时，用户名非必填
+                        if (
+                          currentSubType === 'Elasticsearch' ||
+                          currentSubType === 'Doris'
+                        ) {
+                          return cb();
+                        }
+                        // 其他数据库类型时，用户名必填
+                        if (!value || value.trim() === '') {
+                          return cb('请输入用户名');
+                        }
+                        return cb();
+                      }
+                    }
+                  ]}
                   disabled={inputDisabled}
                 >
                   <Input placeholder="请输入" />
@@ -482,7 +529,30 @@ const add = forwardRef((props: any, ref) => {
                 <FormItem
                   label="密码"
                   field="password"
-                  rules={[{ required: true, message: '请输入密码' }]}
+                  required={
+                    form.getFieldValue('sub_type') !== 'Elasticsearch' &&
+                    form.getFieldValue('sub_type') !== 'Doris'
+                  }
+                  rules={[
+                    {
+                      validator: (value, cb) => {
+                        // 获取当前表单中的数据库类型
+                        const currentSubType = form.getFieldValue('sub_type');
+                        // 当数据库类型为Elasticsearch或Doris时，密码非必填
+                        if (
+                          currentSubType === 'Elasticsearch' ||
+                          currentSubType === 'Doris'
+                        ) {
+                          return cb();
+                        }
+                        // 其他数据库类型时，密码必填
+                        if (!value || value.trim() === '') {
+                          return cb('请输入密码');
+                        }
+                        return cb();
+                      }
+                    }
+                  ]}
                   disabled={inputDisabled}
                 >
                   <Input.Password placeholder="请输入" />

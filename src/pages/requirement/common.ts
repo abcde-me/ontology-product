@@ -142,3 +142,41 @@ export const convertToUTCFormat = (originalTime) => {
   // 拼接成目标格式
   return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}Z`;
 };
+
+export const REQUIREMENT_STATUS_CONFIG = [
+  {
+    key: 1,
+    label: '发布中',
+    text: '发布中',
+    value: 1,
+    color: '#007dfa'
+  },
+  {
+    key: 2,
+    label: '发布成功',
+    text: '发布成功',
+    value: 2,
+    color: '#10b981'
+  },
+  {
+    key: 3,
+    label: '发布失败',
+    text: '发布失败',
+    value: 3,
+    color: '#ef4444'
+  },
+  {
+    key: 4,
+    label: '标注完成',
+    text: '标注完成',
+    value: 4,
+    color: '#e3e3e3'
+  },
+  {
+    key: 5,
+    label: '预标注中',
+    text: '预标注中',
+    value: 5,
+    color: '#007dfa'
+  }
+];

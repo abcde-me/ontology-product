@@ -13,7 +13,13 @@ import {
   getTextEditorResult,
   saveTextEditorResult,
   getTextEditorLabels,
-  getTaskDetail
+  getTaskDetail,
+  getQualityControlTask,
+  getQualityControlTaskById,
+  saveQualityControlTask,
+  createQualityControlTaskComment,
+  modifyQualityControlTaskComment,
+  deleteQualityControlTaskComment
 } from '@/api/labelEditor';
 import WujieReact from 'wujie-react';
 import { Message, Modal } from '@arco-design/web-react';
@@ -33,23 +39,85 @@ function LabelEditorPage() {
   const toolKind = useParams('kind');
   const reqName = useParams('name');
   const taskCount = useParams('count');
+  // 当前模式 LABEL 标注 RELABEL 改错 REVIEW 质检 PREVIEW 预览
+  const stage = useParams('stage');
+  // 质检任务id
+  const qsId = useParams('qsId');
+  const qcRound = useParams('qcRound');
+  const pkgId = useParams('pkgId');
+  // 0 表示可以不修改标注，1 表示可以修改标注
+  const labelModifyEnable = useParams('labelModifyEnable');
+  const deadlineTimestamp = useParams('deadlineTimestamp');
   const [labelUrl, setLabelUrl] = useState('');
   const history = useHistory();
   const hasSavePermission = useHasPermission(ANNOTATION_TASK_PERMISSIONS.SAVE);
 
   useEffect(() => {
     const init = async () => {
-      if (taskId) {
-        setLabelUrl(
-          `/labeleditor/${LabelTypeMap[labelType!]}/requirement/${requirementId}/task/${taskId}?type=${labelType}&kind=${toolKind}&tool=${labelTool}&name=${reqName}&count=${taskCount}`
-        );
-        setLoading(false);
-      } else {
-        await getAvailableTask();
+      if (['LABEL', 'RELABEL'].includes(stage!)) {
+        if (taskId) {
+          setLabelUrl(
+            `/labeleditor/${LabelTypeMap[labelType!]}/requirement/${requirementId}/task/${taskId}?type=${labelType}&kind=${toolKind}&tool=${labelTool}&name=${reqName}&count=${taskCount}&stage=${stage}&pkgId=${pkgId}`
+          );
+          setLoading(false);
+        } else {
+          await getAvailableTask();
+        }
+      }
+      if (['REVIEW'].includes(stage!)) {
+        if (taskId) {
+          setLabelUrl(
+            `/labeleditor/${LabelTypeMap[labelType!]}/requirement/${requirementId}/task/${taskId}?type=${labelType}&kind=${toolKind}&tool=${labelTool}&name=${reqName}&count=${taskCount}&stage=${stage}&qsId=${qsId}&qcRound=${qcRound}&labelModifyEnable=${labelModifyEnable}&deadlineTimestamp=${deadlineTimestamp}&pkgId=${pkgId}`
+          );
+          setLoading(false);
+        } else {
+          await getCurQualityControlTask(Number(qsId));
+        }
       }
     };
     init();
-  }, [taskId, requirementId, labelType, toolKind, labelTool, reqName]);
+  }, [
+    taskId,
+    requirementId,
+    labelType,
+    toolKind,
+    labelTool,
+    reqName,
+    qsId,
+    stage
+  ]);
+
+  // 质检跳转
+  const getCurQualityControlTask = async (qsId: number) => {
+    const qualityControlTaskInfo = await getQualityControlTask(qsId);
+    if (!qualityControlTaskInfo?.data?.task_id) {
+      Modal.destroyAll();
+      Modal.info({
+        escToExit: false,
+        maskClosable: false,
+        title: '质检任务不存在'
+      });
+    }
+    const {
+      task_id,
+      req_id,
+      qc_round,
+      label_modify_enable,
+      volumn_uninspected,
+      deadline_timestamp
+    } = qualityControlTaskInfo.data;
+    const taskInfo = await getTaskDetail(String(task_id));
+    const {
+      requirement_info: {
+        name,
+        label_type: type,
+        label_tool: { label_tool_code: tool }
+      }
+    } = taskInfo.data;
+    history.replace(
+      `/tenant/compute/modaforge/labelEditor?rId=${req_id}&tId=${task_id}&type=${type}&kind=${TEXT_DATA[tool]}&tool=${tool}&name=${name}&count=${volumn_uninspected}&qsId=${qsId}&qcRound=${qc_round}&labelModifyEnable=${label_modify_enable}&deadlineTimestamp=${deadline_timestamp}&stage=${stage}&pkgId=${pkgId}`
+    );
+  };
 
   const getAvailableTask = async () => {
     const taskInfo = await getTask(requirementId!);
@@ -87,7 +155,7 @@ function LabelEditorPage() {
     } = taskInfo.data;
 
     history.replace(
-      `/tenant/compute/modaforge/labelEditor?rId=${requirementId}&tId=${task_id}&type=${type}&kind=${TEXT_DATA[tool]}&tool=${tool}&name=${name}&count=${count}`
+      `/tenant/compute/modaforge/labelEditor?rId=${requirementId}&tId=${task_id}&type=${type}&kind=${TEXT_DATA[tool]}&tool=${tool}&name=${name}&count=${count}&stage=${stage}&pkgId=${pkgId}`
     );
   };
 
@@ -101,8 +169,13 @@ function LabelEditorPage() {
     getAvailableTask();
   };
 
+  const switchNextQualityControlTask = () => {
+    getCurQualityControlTask(Number(qsId));
+  };
+
   const saveTaskWrapper = async (...args: any[]) => {
     const result = await args[args.length - 1](...args.slice(0, -1));
+    console.log(result, 'result🍉');
     if (result.code !== 'success') {
       Message.clear();
       Modal.destroyAll();
@@ -181,7 +254,15 @@ function LabelEditorPage() {
 
             goBack,
             switchNextTask,
-            hasSavePermission
+            hasSavePermission,
+            getQualityControlTask,
+            getQualityControlTaskById,
+            createQualityControlTaskComment,
+            modifyQualityControlTaskComment,
+            deleteQualityControlTaskComment,
+            saveQualityControlTask: (...args) =>
+              saveTaskWrapper(...args, saveQualityControlTask),
+            switchNextQualityControlTask
           }}
         ></WujieReact>
       )}

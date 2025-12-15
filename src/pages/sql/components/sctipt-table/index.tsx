@@ -30,12 +30,14 @@ interface ScriptTableProps {
   isAll: (type: boolean) => void;
   onToScriptList: (type: string) => void;
   curActiveTab: string;
+  onTotalChange?: (total: number) => void;
 }
 
 const ScriptTable: React.FC<ScriptTableProps> = ({
   isAll,
   onToScriptList,
-  curActiveTab
+  curActiveTab,
+  onTotalChange
 }) => {
   const FormItem = Form.Item;
   const [form] = Form.useForm();
@@ -47,15 +49,15 @@ const ScriptTable: React.FC<ScriptTableProps> = ({
   const options = [
     {
       value: ScriptStatus.EditCompleted, // 使用 1（编辑完成）作为"未发版"的代表值
-      label: ScriptStatusName.EditCompleted // '未发版'
+      label: ScriptStatusName[ScriptStatus.EditCompleted] // '未发版'
     },
     {
       value: ScriptStatus.Released, // 2
-      label: ScriptStatusName.Released // '已发版'
+      label: ScriptStatusName[ScriptStatus.Released] // '已发版'
     },
     {
       value: ScriptStatus.Scheduling, // 3
-      label: ScriptStatusName.Scheduling // '调度中'
+      label: ScriptStatusName[ScriptStatus.Scheduling] // '调度中'
     }
   ];
   const history = useHistory();
@@ -117,12 +119,11 @@ const ScriptTable: React.FC<ScriptTableProps> = ({
         ]
       };
       const res = await getDevelopScriptList(params);
-      console.log(res, '123');
       if (res.status === 200 && res.data) {
         setDevelopScriptData(res?.data?.items);
-        // setCurrent(res.data.page_info?.page);
-        // setPageSize(res.data.page_info?.page_size);
-        setTotal(res.data?.total || 10);
+        const newTotal = res.data?.total || 10;
+        setTotal(newTotal);
+        onTotalChange?.(newTotal);
       }
     } finally {
       setLoading(false);
@@ -374,10 +375,10 @@ const ScriptTable: React.FC<ScriptTableProps> = ({
           layout="inline"
         >
           <FormItem label="脚本名称:" field="script_name">
-            <Input style={{ width: 236 }} placeholder="输入脚本名称搜索" />
+            <Input placeholder="输入脚本名称搜索" />
           </FormItem>
-          <FormItem label="版本状态:" field="version_type">
-            <Select placeholder="请选择版本状态" style={{ width: 236 }}>
+          <FormItem label="最新版本状态:" field="version_type">
+            <Select placeholder="请选择最新版本状态">
               {options.map((option, index) => (
                 <Option key={option.value} value={option.value}>
                   {option.label}
@@ -386,7 +387,7 @@ const ScriptTable: React.FC<ScriptTableProps> = ({
             </Select>
           </FormItem>
           <FormItem label="开发人:" field="create_user">
-            <Input style={{ width: 250 }} placeholder="输入关键字搜索" />
+            <Input placeholder="输入开发人搜索" />
           </FormItem>
         </Form>
         <div style={{ display: 'flex', flex: 1 }}>

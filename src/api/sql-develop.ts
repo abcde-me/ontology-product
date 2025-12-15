@@ -1,5 +1,6 @@
 import UAPI from '@/api';
 import {
+  CopyDevelopScriptResponse,
   CreateDevelopScriptParams,
   CreateDevelopScriptResponse,
   DeleteDevelopScriptLogByVersionParams,
@@ -12,6 +13,10 @@ import {
   ListDevelopSystemParamParams,
   ListDevelopSystemParamParamsData,
   RenameDevelopScriptParams,
+  RunDevelopScriptParams,
+  RunDevelopScriptResponse,
+  GetDevelopScriptRunLogParams,
+  GetDevelopScriptRunLogResponse,
   SearchDevelopScriptLogByKeyData,
   SearchDevelopScriptLogByKeyParams,
   UpdateDevelopSystemParamParams
@@ -45,7 +50,7 @@ export async function renameDevelopScript(
 // 加工脚本列表 - 复制
 export async function copyDevelopScript(params: {
   script_id?: number; // 脚本id
-}): Promise<ApiRes<{}>> {
+}): Promise<ApiRes<CopyDevelopScriptResponse>> {
   return await UAPI.RES.CopyDevelopScriptApi({})
     .post({ ...params })
     .inRegion()
@@ -160,6 +165,23 @@ export async function releaseDevelopScript(params: {
   script_desc: string;
 }): Promise<ApiRes<{}>> {
   return await UAPI.RES.NewVersionDevelopScriptApi({})
+    .post(params)
+    .inRegion()
+    .do();
+}
+
+// 运行开发脚本
+export async function runDevelopScript(
+  params: RunDevelopScriptParams
+): Promise<ApiRes<RunDevelopScriptResponse>> {
+  return await UAPI.RES.RunDevelopScriptApi({}).post(params).inRegion().do();
+}
+
+// 获取开发脚本运行日志
+export async function getDevelopScriptRunLog(
+  params: GetDevelopScriptRunLogParams
+): Promise<ApiRes<GetDevelopScriptRunLogResponse>> {
+  return await UAPI.RES.GetDevelopScriptRunLogApi({})
     .post(params)
     .inRegion()
     .do();

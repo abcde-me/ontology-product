@@ -5,6 +5,7 @@
     position: relative;
     border-radius: 2px;
     padding-left: 4px;
+    padding-right: 5px;
 
     .arco-tree-node-title {
       padding-right: 0px;
@@ -43,10 +44,6 @@
     align-items: center;
     display: none;
     color: rgba(30, 41, 59, 1);
-  }
-
-  .arco-tree-node:hover .directory-tree-extra {
-    display: block;
   }
 
   .arco-tree-node-switcher {
@@ -146,24 +143,43 @@
     }
   }
 
-  .script-card-content-item-title-icon {
-    display: flex;
-    align-items: center;
-    justify-content: flex-start;
-  }
+  // .script-card-content-item-title-icon {
+  //   display: flex;
+  //   align-items: center;
+  //   justify-content: flex-start;
+  // }
 
-  .script-card-content-item-title-icon-text {
-    color: var(--text-color-text-2, #1e293b);
-    text-align: center;
-    font-family: 'PingFang SC';
-    font-size: 12px;
-    font-style: normal;
-    font-weight: 500;
-    line-height: 24px;
+  // .script-card-content-item-title-icon-text {
+  //   color: var(--text-color-text-2, #1e293b);
+  //   text-align: center;
+  //   font-family: 'PingFang SC';
+  //   font-size: 12px;
+  //   font-style: normal;
+  //   font-weight: 500;
+  //   line-height: 24px;
+  //   display: none;
+  // }
+
+  .version-status-container {
     display: none;
   }
 
-  .arco-tree-node:hover .script-card-content-item-title-icon-text {
+  .status-dot {
+    visibility: visible;
+  }
+
+  .arco-tree-node:hover .version-status-container,
+  .arco-tree-node.arco-tree-node-selected .version-status-container {
+    display: block;
+  }
+
+  .arco-tree-node:hover .status-dot,
+  .arco-tree-node.arco-tree-node-selected .status-dot {
+    visibility: hidden;
+  }
+
+  .arco-tree-node:hover .directory-tree-extra,
+  .arco-tree-node.arco-tree-node-selected .directory-tree-extra {
     display: block;
   }
 

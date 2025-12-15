@@ -325,9 +325,17 @@ export const routes: IRoute[] = [
     permission: REQUIREMENT_PERMISSIONS.LIST,
     children: [
       {
-        name: 'requirementDetail',
-        key: '/tenant/compute/modaforge/requirementDetail',
-        component: React.lazy(async () => import('../../requirement/detail')),
+        name: 'requirementConfig',
+        key: '/tenant/compute/modaforge/requirement/config',
+        component: React.lazy(
+          async () => import('../../requirement/configuration')
+        ),
+        permission: REQUIREMENT_PERMISSIONS.GET
+      },
+      {
+        name: 'requirementInfo',
+        key: '/tenant/compute/modaforge/requirement/info',
+        component: React.lazy(async () => import('../../requirement/info')),
         permission: REQUIREMENT_PERMISSIONS.GET
       }
     ]
@@ -339,6 +347,25 @@ export const routes: IRoute[] = [
     component: React.lazy(async () => import('../../requirement/taskList')),
     permission: ANNOTATION_TASK_PERMISSIONS.LIST,
     children: []
+  },
+  // 质检任务列表
+  {
+    name: 'qualityTaskList',
+    key: '/tenant/compute/modaforge/qualityTask',
+    component: React.lazy(
+      async () => import('../../requirement/qualityTask/list')
+    ),
+    permission: ANNOTATION_TASK_PERMISSIONS.LIST,
+    children: [
+      {
+        name: 'qualityTaskDetail',
+        key: '/tenant/compute/modaforge/qualityTask/detail',
+        component: React.lazy(
+          async () => import('../../requirement/qualityTask/detail')
+        ),
+        permission: ANNOTATION_TASK_PERMISSIONS.LIST
+      }
+    ]
   },
   // 标注工具页面
   {

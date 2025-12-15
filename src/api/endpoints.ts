@@ -367,6 +367,28 @@ export const ModaForgeResourceEndpoints = {
   getModelList: PrefixLabelService + '/modelList',
   // 获取模型标签信息
   getModelLabelList: PrefixLabelService + '/modelLabelList',
+  // 编辑需求
+  editRequirementApi: PrefixLabelService + '/EditRequirement',
+  // 需求进度
+  getProgressRequirement: PrefixLabelService + '/ProgressRequirement',
+  // 需求明细
+  detailRequirement: PrefixLabelService + '/DetailRequirement',
+  // 生成纪录
+  downloadRecord: PrefixLabelService + '/DownloadRecord',
+  // 质检任务列表
+  listQualityControlTasks: PrefixLabelService + '/ListQualityControlTasks',
+  // 设置抽检任务
+  manageQCTaskBatch: PrefixLabelService + '/ManageQCTaskBatch',
+  // 获取质检任务包统计数据
+  getQualityControlTaskStatistics:
+    PrefixLabelService + '/GetQualityControlTaskStatistics',
+  // 批量处理抽检
+  batchManageQCTaskBatch: PrefixLabelService + '/BatchManageQCTaskBatch',
+  // 批量管理抽检包任务
+  manageQCTaskSampledBatch: PrefixLabelService + '/ManageQCTaskSampledBatch',
+  // 抽检任务列表
+  listQualityControlTaskSamples:
+    PrefixLabelService + '/ListQualityControlTaskSamples',
 
   // python开发
   // 获取python列表
@@ -442,6 +464,16 @@ export const ModaForgeResourceEndpoints = {
   leGetLabels: PrefixLabelService + '/getLabels',
   leSaveTask: PrefixLabelService + '/saveTask',
   leGetTaskReuslt: PrefixLabelService + '/getTaskResult',
+  leGetQualityControlTask: PrefixLabelService + '/GetQualityControlTask',
+  leGetQualityControlTaskById:
+    PrefixLabelService + '/GetQualityControlTaskById',
+  leSaveQualityControlTask: PrefixLabelService + '/SaveQualityControlTask',
+  leCreateQualityControlTaskComment:
+    PrefixLabelService + '/CreateQualityControlTaskComment',
+  leModifyQualityControlTaskComment:
+    PrefixLabelService + '/ModifyQualityControlTaskComment',
+  leDeleteQualityControlTaskComment:
+    PrefixLabelService + '/DeleteQualityControlTaskComment',
 
   // 获取加工脚本列表
   ListDevelopScriptApi: PrefixAimdp + '/ListDevelopScript',
@@ -489,6 +521,10 @@ export const ModaForgeResourceEndpoints = {
   CopyDevelopScriptApi: PrefixAimdp + '/CopyDevelopScript',
   // 发布加工脚本
   NewVersionDevelopScriptApi: PrefixAimdp + '/NewVersionDevelopScript',
+  // 开发SQL脚本运行
+  RunDevelopScriptApi: PrefixAimdp + '/RunDevelopScript',
+  // 开发SQL脚本日志
+  GetDevelopScriptRunLogApi: PrefixAimdp + '/GetDevelopScriptRunLog',
 
   // 数据资产接口
   // 查询数据资产表字段和映射关系
