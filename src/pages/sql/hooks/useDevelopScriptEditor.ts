@@ -69,7 +69,7 @@ export interface UseEditorReturn {
   placeholderValue: string;
   runLogStatus: RunLogStatus;
   // runStatus: RunningStatus;
-  runStartTime: Date | null;
+  runStartTime: string;
   runDuration: number;
   lastAutoSave: string;
   execid: string;
@@ -81,17 +81,17 @@ export interface UseEditorReturn {
   runError: string;
   runWarning: string;
   resultLoading: boolean;
-  lastScriptRunStatus: RunningStatus;
+  // lastScriptRunStatus: RunningStatus;
   hasFetchedResult: boolean;
   hasFetchedLog: boolean;
-  // 表格数据处理
-  columns: Array<{
-    title: string;
-    dataIndex: string;
-    width: number;
-    ellipsis: boolean;
-  }>;
-  data: Array<Record<string, any> & { key: string }>;
+  // // 表格数据处理
+  // columns: Array<{
+  //   title: string;
+  //   dataIndex: string;
+  //   width: number;
+  //   ellipsis: boolean;
+  // }>;
+  // data: Array<Record<string, any> & { key: string }>;
 
   // 编辑器操作
   setScriptInfo: React.Dispatch<React.SetStateAction<ScriptInfo | null>>;
@@ -136,14 +136,14 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
   const [scriptInfo, setScriptInfo] = useState<ScriptInfo | null>(null);
   // const [editorContent, setEditorContent] = useState('');
   const [placeholderValue] = useState(defaultContent);
-  const [runStatus, setRunStatus] = useState<RunningStatus>(RunningStatus.IDLE);
+  // const [runStatus, setRunStatus] = useState<RunningStatus>(RunningStatus.IDLE);
   const [runLogStatus, setRunLogStatus] = useState<RunLogStatus>(
     RunLogStatus.CANCEL
   );
   const [prevRunStatus, setPrevRunStatus] = useState<RunningStatus>(
     RunningStatus.IDLE
   ); // 添加前一个运行状态跟踪
-  const [runStartTime, setRunStartTime] = useState<Date | null>(null);
+  const [runStartTime, setRunStartTime] = useState<string>('');
   const [runDuration, setRunDuration] = useState<number>(0);
   const [lastAutoSave, setLastAutoSave] = useState<string>('');
   const [execid, setExecid] = useState<string>('');
@@ -154,9 +154,9 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
   const [runWarning, setRunWarning] = useState<string>('');
   const [resultLoading, setResultLoading] = useState(false);
   // 新增脚本最后执行结果
-  const [lastScriptRunStatus, setLastScriptRunStatus] = useState<RunningStatus>(
-    RunningStatus.IDLE
-  );
+  // const [lastScriptRunStatus, setLastScriptRunStatus] = useState<RunningStatus>(
+  //   RunningStatus.IDLE
+  // );
   // 面板状态管理
   const [isPanelOpen, setIsPanelOpen] = useState<boolean>(false);
   // 跟踪是否已获取过结果和日志
@@ -170,13 +170,13 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
   }, [prevRunStatus]);
 
   // 更新运行状态的包装函数
-  const updateRunStatus = useCallback(
-    (newStatus: RunningStatus) => {
-      setPrevRunStatus(runStatus);
-      setRunStatus(newStatus);
-    },
-    [runStatus]
-  );
+  // const updateRunStatus = useCallback(
+  //   (newStatus: RunningStatus) => {
+  //     setPrevRunStatus(runStatus);
+  //     setRunStatus(newStatus);
+  //   },
+  //   [runStatus]
+  // );
 
   // 面板状态变化处理
   const handlePanelStateChange = useCallback((isOpen: boolean) => {
@@ -184,27 +184,27 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
   }, []);
 
   // 动态生成表格列
-  const generateTableColumns = (runResult: RunResult[]) => {
-    if (
-      !runResult ||
-      runResult.length === 0 ||
-      !runResult[0]?.list ||
-      runResult[0].list.length === 0
-    ) {
-      return [];
-    }
+  // const generateTableColumns = (runResult: RunResult[]) => {
+  //   if (
+  //     !runResult ||
+  //     runResult.length === 0 ||
+  //     !runResult[0]?.list ||
+  //     runResult[0].list.length === 0
+  //   ) {
+  //     return [];
+  //   }
 
-    // 从第一行数据中获取所有的 key 作为列头
-    const firstRow = runResult[0].list[0];
-    const keys = Object.keys(firstRow);
+  //   // 从第一行数据中获取所有的 key 作为列头
+  //   const firstRow = runResult[0].list[0];
+  //   const keys = Object.keys(firstRow);
 
-    return keys.map((key) => ({
-      title: key,
-      dataIndex: key,
-      width: 240,
-      ellipsis: true
-    }));
-  };
+  //   return keys.map((key) => ({
+  //     title: key,
+  //     dataIndex: key,
+  //     width: 240,
+  //     ellipsis: true
+  //   }));
+  // };
 
   // 动态生成表格数据
   const generateTableData = (runResult: RunResult[]) => {
@@ -220,8 +220,8 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
   };
 
   // 计算表格列和数据
-  const columns = generateTableColumns(runResult);
-  const data = generateTableData(runResult);
+  // const columns = generateTableColumns(runResult);
+  // const data = generateTableData(runResult);
 
   // 当前文件ID，从 activeTab 对应的标签页获取
   const currentFile = fileTabs.find((tab) => tab.key === activeTab);
@@ -311,40 +311,6 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
     }
   }, [currentFile?.scriptId]);
 
-  // 轮询获取运行结果
-  // const { runAsync: getRunResultPolling, cancel: cancelGetRunResultPolling } =
-  //   useRequest(getRunResultSqlScript, {
-  //     pollingInterval: 5000,
-  //     pollingWhenHidden: true,
-  //     manual: true,
-  //     onSuccess: (res) => {
-  //       if (res?.status !== 200) {
-  //         updateRunStatus(RunningStatus.FAILED);
-  //         cancelGetRunResultPolling();
-  //         setRunError(res?.message ?? '获取运行结果失败');
-  //         setRunResult([]);
-  //         return;
-  //       }
-
-  //       if (res.data.run_status !== RunningStatus.RUNNING) {
-  //         console.log('运行结束，取消轮询');
-  //         cancelGetRunResultPolling();
-  //       }
-
-  //       updateRunStatus(res.data?.run_status);
-  //       setRunResult(res.data?.sql_result_lists);
-  //       setRunError('');
-  //       setRunDuration(Number(res.data?.run_duration));
-  //       setRunStartTime(new Date(res.data?.run_end_time ?? ''));
-  //     },
-  //     onError: () => {
-  //       updateRunStatus(RunningStatus.FAILED);
-  //       cancelGetRunResultPolling();
-  //       setRunResult([]);
-  //       setRunError('获取运行结果失败');
-  //     }
-  //   });
-
   // 轮询获取日志
   const { runAsync: getRunLogPolling, cancel: cancelGetRunLogPolling } =
     useRequest(getDevelopScriptRunLog, {
@@ -362,6 +328,7 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
 
         setRunLogStatus(res?.data?.run_status ?? RunLogStatus.CANCEL);
         setRunLog(res?.data?.run_log ?? '');
+        setRunStartTime(res?.data?.start_time ?? '');
         setHasFetchedLog(true);
 
         if (res?.data?.run_status !== RunLogStatus.RUNNING) {
@@ -420,16 +387,17 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
 
   // 清空编辑器状态的函数
   const clearEditorState = useCallback(() => {
-    updateRunStatus(RunningStatus.IDLE);
+    // updateRunStatus(RunningStatus.IDLE);
     setExecid('');
-    setRunStartTime(null);
+    setRunStartTime('');
     setRunDuration(0);
     setRunResult([]);
     setRunLog('');
+    setRunLogStatus(RunLogStatus.CANCEL);
     setRunError(''); /*  */
     setRunWarning('');
     // setLastAutoSave('');
-    setLastScriptRunStatus(RunningStatus.IDLE);
+    // setLastScriptRunStatus(RunningStatus.IDLE);
     setHasFetchedResult(false);
     setHasFetchedLog(false);
     // 取消正在进行的轮询
@@ -513,7 +481,7 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
 
   // 运行代码 - 优化依赖项
   const handleRunCode = useCallback(async () => {
-    if (runStatus === RunningStatus.RUNNING) {
+    if (runLogStatus === RunLogStatus.RUNNING) {
       return;
     }
 
@@ -540,7 +508,7 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
 
     try {
       // 将上一次运行结果置为未运行， 重新获取结果
-      setLastScriptRunStatus(RunningStatus.IDLE);
+      // setLastScriptRunStatus(RunningStatus.IDLE);
       const res = await runDevelopScript({
         script_id: Number(currentFile?.scriptId)
       });
@@ -554,9 +522,10 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
         Message.error(res.message);
       }
     } catch (error) {
-      updateRunStatus(RunningStatus.FAILED);
+      setRunLogStatus(RunLogStatus.FAILED);
+      // updateRunStatus(RunningStatus.FAILED);
     }
-  }, [runStatus, currentFile?.scriptId, scriptInfo]);
+  }, [runLogStatus, currentFile?.scriptId, scriptInfo]);
 
   // 停止运行
   const handleStopRunCode = async () => {
@@ -571,9 +540,10 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
 
     // cancelGetRunResultPolling();
     cancelGetRunLogPolling();
-    updateRunStatus(RunningStatus.IDLE);
+    // setRunLogStatus();
+    // updateRunStatus(RunningStatus.IDLE);
     // 将该面板的最后状态也设置为未运行
-    setLastScriptRunStatus(RunningStatus.IDLE);
+    // setLastScriptRunStatus(RunningStatus.IDLE);
   };
 
   const loadFileContent = async (scriptId: string) => {
@@ -640,22 +610,22 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
       return;
     }
 
-    if (runStatus !== RunningStatus.RUNNING) {
-      console.log('取消轮询', runStatus, execid);
+    if (runLogStatus !== RunLogStatus.RUNNING) {
+      // console.log('取消轮询', runStatus, execid);
       // cancelGetRunResultPolling();
-      // cancelGetRunLogPolling();
+      cancelGetRunLogPolling();
     }
 
-    updateRunStatus(RunningStatus.RUNNING);
+    // updateRunStatus(RunningStatus.RUNNING);
+    setRunLogStatus(RunLogStatus.RUNNING);
     setRunResult([]);
     setRunError('');
-    setRunStartTime(new Date());
     setRunDuration(0);
 
     // 运行中时，轮询获取运行结果
     const fetchResult = () => {
       try {
-        updateRunStatus(RunningStatus.RUNNING);
+        // updateRunStatus(RunningStatus.RUNNING);
         // getRunResultPolling(currentFile?.scriptId ?? '', {
         //   script_execid: execid,
         //   size: size
@@ -666,8 +636,9 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
           exec_id: execid
         });
       } catch (error) {
+        setRunLogStatus(RunLogStatus.FAILED);
         console.error('获取运行结果失败:', error);
-        updateRunStatus(RunningStatus.FAILED);
+        // updateRunStatus(RunningStatus.FAILED);
       }
     };
 
@@ -741,12 +712,12 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
     runError,
     runWarning,
     resultLoading,
-    lastScriptRunStatus,
+    // lastScriptRunStatus,
     hasFetchedResult,
     hasFetchedLog,
     // 表格数据处理
-    columns,
-    data,
+    // columns,
+    // data,
     // 操作
     setScriptInfo,
     setSize,

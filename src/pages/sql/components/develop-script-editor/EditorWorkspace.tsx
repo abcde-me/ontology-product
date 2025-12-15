@@ -18,7 +18,6 @@ import {
   IconDown,
   IconEdit,
   IconSave,
-  IconStop,
   IconStorage
 } from '@arco-design/web-react/icon';
 import { sql } from '@codemirror/lang-sql';
@@ -27,6 +26,7 @@ import { EditorView, Decoration } from '@codemirror/view';
 import { StateEffect, StateField } from '@codemirror/state';
 import { tags as t } from '@lezer/highlight';
 import createTheme from '@uiw/codemirror-themes';
+import IconStop from '@/assets/sql/sql-stop-icon.svg';
 import CodeMirror, { ReactCodeMirrorRef } from '@uiw/react-codemirror';
 import React, {
   memo,
@@ -200,7 +200,6 @@ const EditorWorkspaceContent: React.FC<{
       handleStopRunCode,
       handleRunCode,
       lastAutoSave,
-      // editorContent,
       handleContentChange,
       handleSaveScript,
       handleEditScript,
@@ -211,10 +210,7 @@ const EditorWorkspaceContent: React.FC<{
       isPanelOpen,
       handlePanelStateChange,
       handleReleaseScript,
-      getPrevRunStatus,
-      lastScriptRunStatus
-      // scriptParams,
-      // setScriptParams
+      getPrevRunStatus
     } = useEditorContext();
 
     // 处理参数hover事件
@@ -293,11 +289,6 @@ const EditorWorkspaceContent: React.FC<{
     };
 
     const handleFormatCode = () => {
-      // if (runLogStatus === RunLogStatus.RUNNING) {
-      //   Message.warning('SQL 正在执行中，暂不支持格式化');
-      //   return;
-      // }
-
       if (scriptInfo?.script_context) {
         try {
           const formattedCode = format(scriptInfo?.script_context ?? '', {
@@ -425,19 +416,6 @@ const EditorWorkspaceContent: React.FC<{
       setSaveLoading(false);
     };
 
-    // 格式化时间显示
-    // const formatTime = (timeStr?: string) => {
-    //   return dayjs(timeStr).format('YYYY-MM-DD HH:mm:ss');
-    // };
-
-    // 根据状态判断是否可编辑
-    // 如果没有 scriptInfo，默认视为编辑状态且可编辑（新创建的脚本）
-    // const canEdit = !scriptInfo || (scriptInfo?.status === ScriptStatus.Editing && scriptInfo?.isSelfEditing);
-    // const isEditing = !scriptInfo || scriptInfo?.status === ScriptStatus.Editing;
-    // const isEditCompleted = scriptInfo?.status === ScriptStatus.EditCompleted;
-    // const isReleased = scriptInfo?.status === ScriptStatus.Released;
-    // const isScheduling = scriptInfo?.status === ScriptStatus.Scheduling;
-
     // 根据 status 渲染工具栏
     const renderToolbar = () => {
       const status = scriptInfo?.status ?? ScriptStatus.Editing;
@@ -502,7 +480,6 @@ const EditorWorkspaceContent: React.FC<{
           <>
             <div className={styles['toolbar-left']}>
               <Space size={12}>
-                {/* 运行按钮 - status=0且isSelfEditing=true时可用，否则置灰 */}
                 {
                   <Button
                     type="primary"
@@ -515,28 +492,18 @@ const EditorWorkspaceContent: React.FC<{
                     }
                     disabled={scriptInfo?.script_context?.trim() === ''}
                     onClick={handleRunClick}
-                    className={classNames('h-[26px]', {
-                      [styles['btn-running']]:
-                        runLogStatus === RunLogStatus.RUNNING
-                    })}
+                    className={classNames(
+                      'h-[26px]',
+                      runLogStatus === RunLogStatus.RUNNING
+                        ? styles['btn-running']
+                        : ''
+                    )}
                   >
                     {runLogStatus === RunLogStatus.RUNNING
                       ? '停止运行'
                       : '运行'}
                   </Button>
                 }
-                {/* {canEdit && (
-                  <Button
-                    type="primary"
-                    disabled={!scriptInfo?.isSelfEditing}
-                    icon={<IconCaretRight className="mr-[4px]" />}
-                    className="h-[26px]"
-                  >
-                    运行
-                  </Button>
-                )} */}
-
-                {/* 格式化按钮 - status=0且isSelfEditing=true时可用，否则置灰 */}
                 <Button
                   type="text"
                   icon={<SQLFormatIcon />}
@@ -714,19 +681,6 @@ const EditorWorkspaceContent: React.FC<{
             [styles['with-sidebar']]: sidebarVisible && !sidebarCollapsed
           })}
         >
-          {/* <Spin
-            style={{
-              width: '100%',
-              height: '100%'
-            }}
-            tip={
-              lastScriptRunStatus === RunningStatus.SUCCESS ||
-                lastScriptRunStatus === RunningStatus.FAILED
-                ? '结果加载中...'
-                : '运行中...'
-            }
-            loading={runStatus === RunningStatus.RUNNING}
-          > */}
           <CodeMirror
             ref={editorRef}
             value={scriptInfo?.script_context ?? ''}
@@ -758,11 +712,9 @@ const EditorWorkspaceContent: React.FC<{
             }}
             className={styles['code-editor']}
           />
-          {/* </Spin> */}
 
           {/* 参数侧边栏 */}
           {
-            // sidebarVisible && (
             <ParameterSidebar
               canEdit={scriptInfo?.isSelfEditing ?? false}
               content={scriptInfo?.script_context ?? ''}
@@ -773,7 +725,6 @@ const EditorWorkspaceContent: React.FC<{
               initialParams={scriptInfo?.script_params ?? []}
               systemParamKeys={systemParamKeys}
             />
-            // )
           }
         </div>
 
