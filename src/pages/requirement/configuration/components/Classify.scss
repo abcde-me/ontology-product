@@ -1,0 +1,69 @@
+.classify-warp {
+  width: 900px;
+  border: 1px solid #cbd5e1;
+  border-radius: 4px;
+
+  .classify-item {
+    width: 100%;
+  }
+
+  .classify-relation-item {
+    display: flex;
+    margin-top: 12px;
+    width: 900px;
+    flex-wrap: wrap;
+  }
+
+  .add-btn {
+    margin-left: 16px;
+    margin-bottom: 16px;
+  }
+
+  .attribute-header-content {
+    display: flex;
+    align-items: center;
+    margin-bottom: 8px;
+
+    .attribute-title {
+      font-family: 'PingFang SC';
+      font-weight: 400;
+      font-size: 14px;
+      line-height: 22px;
+      letter-spacing: 0%;
+    }
+  }
+
+  .attribute-list {
+    background-color: #f5f9ff;
+    padding: 12px;
+    margin: 8px 16px 16px;
+  }
+
+  .attribute-item {
+    display: flex;
+
+    &:last-child {
+      .arco-form-message {
+        margin-bottom: 0;
+      }
+    }
+  }
+
+  .disabled-icon {
+    cursor: not-allowed;
+    color: #999;
+    opacity: 0.7;
+  }
+
+  .icon-content {
+    &:hover {
+      color: #007dfa;
+    }
+  }
+
+  .classify-relation-item_group_name {
+    .arco-form-message {
+      margin-bottom: 0;
+    }
+  }
+}

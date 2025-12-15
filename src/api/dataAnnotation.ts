@@ -165,3 +165,93 @@ export async function getModelList(params) {
 export async function getModelLabelList(params) {
   return await UAPI.RES.getModelLabelList({}).post(params).inRegion().do();
 }
+
+// 编辑需求
+export async function editRequirement(params) {
+  return await UAPI.RES.editRequirementApi({})
+    .post({ ...params })
+    .inRegion()
+    .do();
+}
+
+// 需求进度
+export async function getProgressRequirement(params: {
+  req_id: number; // 需求id，从URL的id参数获取并转换为number
+  page: number; // 页码
+  page_size: number; // 每页数量
+}) {
+  return await UAPI.RES.getProgressRequirement({})
+    .post({ ...params })
+    .inRegion()
+    .do();
+}
+
+// 需求明细
+export async function detailRequirement(params: {
+  req_id: number; // 需求id，从URL的id参数获取并转换为number
+  search_content: string; // 搜索内容
+  page: number; // 页码
+  page_size: number; // 每页数量
+}) {
+  return await UAPI.RES.detailRequirement({})
+    .post({ ...params })
+    .inRegion()
+    .do();
+}
+// 生成记录列表
+export async function downloadRecord(params: {
+  req_id: number; // 需求id
+  page: number; // 页码
+  page_size: number; // 每页数量
+}) {
+  return await UAPI.RES.downloadRecord({})
+    .post({ ...params })
+    .inRegion()
+    .do();
+}
+// 质检任务列表
+export async function listQualityControlTasks(params) {
+  return await UAPI.RES.listQualityControlTasks({})
+    .post({ ...params })
+    .inRegion()
+    .do();
+}
+// 设置抽检任务
+export async function manageQCTaskBatch(params) {
+  return await UAPI.RES.manageQCTaskBatch({})
+    .post({ ...params })
+    .inRegion()
+    .do();
+}
+
+// 获取质检任务包统计数据
+export async function getQualityControlTaskStatistics(params) {
+  return await UAPI.RES.getQualityControlTaskStatistics({})
+    .post({ ...params })
+    .inRegion()
+    .do();
+}
+
+// 批量处理抽检
+export async function batchManageQCTaskBatch(params) {
+  return await UAPI.RES.batchManageQCTaskBatch({})
+    .post({ ...params })
+    .inRegion()
+    .do();
+}
+
+// 批量管理抽检包任务
+export async function manageQCTaskSampledBatch(params) {
+  return await UAPI.RES.manageQCTaskSampledBatch({})
+    .post({ ...params })
+    .inRegion()
+    .do();
+}
+
+// 抽检任务列表
+export async function listQualityControlTaskSamples(params) {
+  return await UAPI.RES.listQualityControlTaskSamples({})
+    .post({ ...params })
+    .inRegion()
+    .do();
+}

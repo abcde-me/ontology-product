@@ -38,7 +38,7 @@ import SqlMenu from '@/assets/sider/sql.svg';
 import AnnotationTask from '@/assets/sider/annotationTask.svg';
 import LabelMenu from '@/assets/label-menu.svg';
 import RequirementManagement from '@/assets/sider/requirementManagement.svg';
-
+import QualityTaskMenu from '@/assets/sider/qualityTask.svg';
 export type MenuModel = {
   title: string;
   icon?: any;
@@ -177,6 +177,13 @@ export const menus: MenuModel[] = [
         icon: <AnnotationTask className={iconClass} />,
         key: 'taskList',
         path: '/tenant/compute/modaforge/taskList',
+        permission: ANNOTATION_TASK_PERMISSIONS.LIST
+      },
+      {
+        title: '质检任务',
+        icon: <QualityTaskMenu className={iconClass} />,
+        key: 'qualityTaskList',
+        path: '/tenant/compute/modaforge/qualityTask',
         permission: ANNOTATION_TASK_PERMISSIONS.LIST
       }
     ]

@@ -1,0 +1,67 @@
+.quality-task-list {
+  background-color: white;
+  display: flex;
+  flex-direction: column;
+  margin: 20px 20px 20px 0;
+  padding: 20px 24px;
+  border-radius: 10px;
+  min-height: calc(100% - 40px);
+
+  .page-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #1d2129;
+    margin: 0 0 20px 0;
+  }
+
+  .quality-tabs {
+    margin-bottom: 16px;
+  }
+
+  .search-wrapper {
+    margin-bottom: 16px;
+  }
+
+  .copy-icon {
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    margin-top: 4px;
+  }
+
+  tbody .arco-table-tr:hover .copy-icon {
+    opacity: 1;
+  }
+
+  .pagination-wrapper {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    margin-top: 16px;
+  }
+}
+
+// 首次抽检设置弹窗
+.first-inspect-form {
+  padding: 8px 0;
+
+  .arco-radio-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    line-height: 32px;
+
+    .arco-radio {
+      margin-right: 0;
+
+      .radio-with-input {
+        display: inline-flex;
+        align-items: center;
+
+        .input-suffix {
+          margin-left: 4px;
+          color: #1d2129;
+        }
+      }
+    }
+  }
+}

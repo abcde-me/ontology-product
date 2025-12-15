@@ -1,0 +1,654 @@
+import React, { useEffect, useState } from 'react';
+import {
+  Button,
+  Form,
+  Input,
+  Tooltip,
+  Select,
+  Checkbox
+} from '@arco-design/web-react';
+import {
+  IconDelete,
+  IconPlus,
+  IconQuestionCircle
+} from '@arco-design/web-react/icon';
+import { uuid } from '@/models/utils';
+import './Classify.scss';
+
+interface ClassifyComponentProps {
+  type: any;
+  requirementDetail: any;
+  getClassIfyData: any;
+}
+// 选项配置 1 单选 2 多选 3 输入框
+const optionConfig = [
+  {
+    label: '单选',
+    value: 1
+  },
+  {
+    label: '多选',
+    value: 2
+  },
+  {
+    label: '输入框',
+    value: 3
+  }
+];
+const Classify = (props: ClassifyComponentProps) => {
+  const { type, requirementDetail, getClassIfyData } = props;
+  const [formClassify] = Form.useForm();
+  const Option = Select.Option;
+  const FormItem = Form.Item;
+  // 判断是否为编辑模式且数据来自详情
+  const isEditModeFromDetail =
+    type === 'edit' && requirementDetail?.file_labels;
+  // 文本分类内容
+  const [textRelations, setTextRelations] = useState([
+    {
+      attribute_id: uuid(),
+      order_num: 1,
+      attribute_group_name: '', //属性组名称
+      attribute_group_class: 1, //1单选/2多选/3输入框
+      attribute_group_type: 2, //1必选/2非必选
+      file_label_attribute: [
+        {
+          attribute_id: uuid(),
+          order_num: 1, //排序
+          attribute_name_cn: '', //属性中文名称(展示名称)
+          attribute_name_en: '', //属性英文名称(存储名称)
+          input_type: 1 //输入类型：1选项，2输入框
+        }
+      ]
+    }
+  ]);
+  // 处理基本字段变更
+  const handleFieldChange = (index, field, value) => {
+    const newData = [...textRelations];
+    newData[index][field] = value;
+    setTextRelations(newData);
+  };
+  // 删除数组项
+  const removeArrayItem = (itemIndex) => {
+    const newTextRelations = textRelations.filter(
+      (_, index) => index !== itemIndex
+    );
+    setTextRelations(newTextRelations);
+  };
+
+  const removeAttribute = (groupIndex, attrIndex) => {
+    const newData = [...textRelations];
+    newData[groupIndex].file_label_attribute.splice(attrIndex, 1);
+    // 重新计算排序号
+    newData[groupIndex].file_label_attribute.forEach((item, idx) => {
+      item.order_num = idx + 1;
+    });
+    setTextRelations(newData);
+  };
+  useEffect(() => {
+    if (
+      requirementDetail?.file_labels &&
+      (type === 'edit' || type === 'copy')
+    ) {
+      // 映射数据结构，确保有正确的 ID 字段，并标记为来自详情
+      const mappedLabels = requirementDetail?.file_labels?.map((item) => ({
+        ...item,
+        attribute_id: item?.attribute_id || item?.order_num || uuid(),
+        isFromDetail: true, // 标记为来自详情
+        file_label_attribute: item?.file_label_attribute?.map((attr) => ({
+          ...attr,
+          attribute_id: attr?.attribute_id || attr?.order_num || uuid(),
+          isFromDetail: true // 标记为来自详情
+        }))
+      }));
+
+      // 设置表单值
+      mappedLabels?.forEach((item) => {
+        formClassify.setFieldValue(
+          `attribute_group_name${item.attribute_id}`,
+          item?.attribute_group_name
+        );
+        // 设置选项内容
+        item?.file_label_attribute?.forEach((attr) => {
+          formClassify.setFieldValue(
+            `attribute_name_en_${attr.attribute_id}`,
+            attr?.attribute_name_en
+          );
+          formClassify.setFieldValue(
+            `attribute_name_cn_${attr.attribute_id}`,
+            attr?.attribute_name_cn
+          );
+        });
+      });
+      setTextRelations(mappedLabels);
+    }
+  }, [requirementDetail, type]);
+
+  useEffect(() => {
+    getClassIfyData(textRelations, formClassify);
+  }, [textRelations]);
+
+  return (
+    <div className="classify-warp">
+      <Form
+        form={formClassify}
+        onValuesChange={(_, val) => {
+          setTextRelations({ ...textRelations, ...val });
+        }}
+        layout="inline"
+        labelAlign="right"
+        labelCol={{ flex: 'none' }}
+        wrapperCol={{ flex: 1 }}
+      >
+        {textRelations &&
+          textRelations?.map((item, index) => (
+            <div className="classify-item" key={index}>
+              <div className="classify-relation-item">
+                <FormItem
+                  style={{ paddingLeft: 16, marginRight: 8 }}
+                  label="属性名称:"
+                  field={`attribute_group_name${item.attribute_id}`}
+                  className="classify-relation-item_group_name"
+                  rules={[
+                    {
+                      required: true,
+                      validateTrigger: ['onChange', 'onBlur'],
+                      validator: (value, callback) => {
+                        // 检查内容是否为空或只包含空格
+                        if (!value || value.trim() === '') {
+                          callback('请输入属性名称');
+                        } else {
+                          // 排除当前项，检查同组其他项是否有相同的属性名称
+                          const trimmedValue = value.trim();
+                          const hasDuplicate = textRelations.some(
+                            (otherItem, otherIndex) => {
+                              return (
+                                otherIndex !== index &&
+                                otherItem.attribute_group_name &&
+                                otherItem.attribute_group_name.trim() ===
+                                  trimmedValue
+                              );
+                            }
+                          );
+
+                          if (hasDuplicate) {
+                            callback('属性名称不能重复');
+                          } else {
+                            callback();
+                          }
+                        }
+                      }
+                    }
+                  ]}
+                >
+                  <Input
+                    placeholder="请输入属性名称"
+                    style={{ width: 540 }}
+                    value={item.attribute_group_name}
+                    onChange={(value) => {
+                      handleFieldChange(index, 'attribute_group_name', value);
+                    }}
+                    disabled={
+                      isEditModeFromDetail && (item as any)?.isFromDetail
+                    }
+                  />
+                </FormItem>
+                <FormItem label={null} style={{ padding: 0, marginRight: 8 }}>
+                  <Select
+                    allowClear
+                    placeholder="请选择输入类型"
+                    style={{ width: 100 }}
+                    value={item.attribute_group_class}
+                    onChange={(value) => {
+                      handleFieldChange(index, 'attribute_group_class', value);
+                      // 切换到输入框的时候情况选项内容
+                      if (value === 3) {
+                        setTextRelations(
+                          textRelations.map((group) => {
+                            if (group.attribute_id === item.attribute_id) {
+                              return {
+                                ...group,
+                                file_label_attribute: []
+                              };
+                            }
+                            return group;
+                          })
+                        );
+                      }
+                    }}
+                    disabled={
+                      isEditModeFromDetail && (item as any)?.isFromDetail
+                    }
+                  >
+                    {optionConfig?.map((item) => {
+                      return (
+                        <Option key={item.value} value={item.value}>
+                          {item.label}
+                        </Option>
+                      );
+                    })}
+                  </Select>
+                </FormItem>
+                <FormItem label={null} style={{ padding: 0, marginRight: 8 }}>
+                  <Checkbox
+                    style={{
+                      whiteSpace: 'nowrap',
+                      paddingLeft: 0,
+                      fontSize: 14
+                    }}
+                    checked={item?.attribute_group_type === 1}
+                    onChange={(checked) => {
+                      handleFieldChange(
+                        index,
+                        'attribute_group_type',
+                        checked ? 1 : 2
+                      );
+                    }}
+                    disabled={
+                      isEditModeFromDetail && (item as any)?.isFromDetail
+                    }
+                  >
+                    必须标注
+                  </Checkbox>
+                </FormItem>
+                {item?.attribute_group_class !== 3 && (
+                  <FormItem label={null} style={{ padding: 0, marginRight: 8 }}>
+                    {/* 添加选项 */}
+                    <Tooltip content="添加选项">
+                      <IconPlus
+                        className="icon-content"
+                        fontSize={18}
+                        onClick={() => {
+                          // 添加属性逻辑补充 - 在按钮位置(数组开头)添加新属性
+                          // 修改逻辑 - 增加的时候在倒数第二个添加
+                          if (item?.attribute_group_class === 3) {
+                            return;
+                          }
+                          if (
+                            item?.attribute_group_class === 1 ||
+                            item?.attribute_group_class === 2
+                          ) {
+                            // 创建新的textRelations数组，而不是直接修改原数组
+                            const newTextRelations = [...textRelations];
+                            // 只修改当前属性组（通过index定位），不影响其他组
+                            const currentGroup = newTextRelations[index];
+
+                            // 检查当前属性组中是否有input_type为2的属性
+                            const hasInputType2 =
+                              currentGroup.file_label_attribute?.some(
+                                (attr) => attr.input_type === 2
+                              );
+                            // 创建新属性（新增的不标记isFromDetail，可编辑）
+                            const newAttribute = {
+                              attribute_id: uuid(),
+                              order_num: 0, // 后面统一重新计算order_num
+                              attribute_name_cn: '',
+                              attribute_name_en: '',
+                              input_type: 1,
+                              isFromDetail: false // 新增项，可编辑
+                            };
+
+                            let updatedAttributes: any = [];
+                            const existingAttributes =
+                              currentGroup.file_label_attribute || [];
+
+                            if (hasInputType2) {
+                              // 如果有input_type为2的属性，新属性插入到倒数第二个位置
+                              // 先找到最后一个input_type为2的属性的位置
+                              const lastInputType2Index = existingAttributes
+                                .map((attr, idx) => ({ idx, attr }))
+                                .filter((item) => item.attr.input_type === 2)
+                                .map((item) => item.idx)
+                                .pop();
+
+                              // 在最后一个input_type为2的属性前面（倒数第二个位置）插入新属性
+                              updatedAttributes = [
+                                ...existingAttributes.slice(
+                                  0,
+                                  lastInputType2Index
+                                ),
+                                newAttribute,
+                                ...existingAttributes.slice(lastInputType2Index)
+                              ];
+                            } else {
+                              // 如果没有input_type为2的属性，新属性插入到最后一个位置
+                              updatedAttributes = [
+                                ...existingAttributes,
+                                newAttribute
+                              ];
+                            }
+
+                            // 重新计算所有属性的order_num
+                            updatedAttributes = updatedAttributes.map(
+                              (attr, idx) => ({
+                                ...attr,
+                                order_num: idx + 1
+                              })
+                            );
+
+                            // 更新属性组
+                            newTextRelations[index] = {
+                              ...currentGroup,
+                              file_label_attribute: updatedAttributes
+                            };
+
+                            // 更新状态
+                            setTextRelations(newTextRelations);
+                          }
+                        }}
+                      />
+                    </Tooltip>
+                  </FormItem>
+                )}
+                <FormItem label={null}>
+                  {textRelations?.length > 1 && (
+                    <Tooltip content="删除">
+                      <IconDelete
+                        className={`icon-wrapper ${
+                          isEditModeFromDetail && (item as any)?.isFromDetail
+                            ? 'is-disabled'
+                            : ''
+                        }`}
+                        fontSize={16}
+                        onClick={() => {
+                          if (
+                            isEditModeFromDetail &&
+                            (item as any)?.isFromDetail
+                          )
+                            return;
+                          removeArrayItem(index);
+                        }}
+                        style={{
+                          cursor:
+                            isEditModeFromDetail && (item as any)?.isFromDetail
+                              ? 'not-allowed'
+                              : 'pointer',
+                          opacity:
+                            isEditModeFromDetail && (item as any)?.isFromDetail
+                              ? 0.5
+                              : 1
+                        }}
+                      />
+                    </Tooltip>
+                  )}
+                </FormItem>
+              </div>
+              {item.file_label_attribute?.length > 0 &&
+                item?.attribute_group_class !== 3 && (
+                  <div className="attribute-list">
+                    <div className="attribute-header-content">
+                      <div className="attribute-title">
+                        {item?.attribute_group_class === 1
+                          ? '单选选项'
+                          : item?.attribute_group_class === 2
+                            ? '多选选项'
+                            : ''}
+                      </div>
+                      <Checkbox
+                        style={{ whiteSpace: 'nowrap', fontSize: 14 }}
+                        checked={
+                          item.file_label_attribute.some(
+                            (item) => item.input_type === 2
+                          )
+                            ? true
+                            : false
+                        }
+                        onChange={(checked) => {
+                          // 选中的时候在数组最后一个增加一项 取消选中删除，再次选择增加
+                          if (checked) {
+                            const newData = [...textRelations];
+                            newData[index].file_label_attribute.push({
+                              attribute_id: uuid(),
+                              order_num:
+                                newData[index].file_label_attribute.length + 1,
+                              attribute_name_cn: '其他',
+                              attribute_name_en: '标注时的输入内容',
+                              input_type: 2,
+                              isFromDetail: false // 新增项，可编辑
+                            } as any);
+                            const lastIndex =
+                              newData[index].file_label_attribute.length - 1;
+                            const newAttribute =
+                              newData[index].file_label_attribute[lastIndex];
+                            if (newAttribute.input_type === 2) {
+                              const attributeId = newAttribute.attribute_id;
+                              formClassify?.setFieldValue(
+                                `attribute_name_en_${attributeId}`,
+                                '标注时的输入内容'
+                              );
+                              formClassify?.setFieldValue(
+                                `attribute_name_cn_${attributeId}`,
+                                '其他'
+                              );
+                            }
+                            setTextRelations(newData);
+                          } else {
+                            // 取消选中的时候删除增加的内容
+                            if (textRelations?.length > 0) {
+                              const newItems = [...textRelations];
+                              newItems[index]?.file_label_attribute.pop();
+                              setTextRelations(newItems);
+                            }
+                          }
+                        }}
+                        disabled={
+                          isEditModeFromDetail && (item as any)?.isFromDetail
+                        }
+                      >
+                        支持手动输入
+                      </Checkbox>
+                    </div>
+                    {item.file_label_attribute?.map((attr: any, attrIndex) => (
+                      <div key={attr.attribute_id} className="attribute-item">
+                        <FormItem
+                          field={`attribute_name_en_${attr.attribute_id}`}
+                          style={{ padding: 0, marginRight: 8 }}
+                          rules={[
+                            {
+                              required: true,
+                              validateTrigger: ['onChange', 'onBlur'],
+                              validator: (value, callback) => {
+                                // 检查内容是否为空或只包含空格
+                                if (!value || value.trim() === '') {
+                                  callback('请输入选项名称');
+                                } else {
+                                  // 排除当前项，检查同组其他项是否有相同的选项名称
+                                  const trimmedValue = value.trim();
+                                  const hasDuplicate =
+                                    item.file_label_attribute.some(
+                                      (otherAttr, otherAttrIndex) => {
+                                        return (
+                                          otherAttrIndex !== attrIndex &&
+                                          otherAttr.attribute_name_en &&
+                                          otherAttr.attribute_name_en.trim() ===
+                                            trimmedValue
+                                        );
+                                      }
+                                    );
+
+                                  if (hasDuplicate) {
+                                    callback('选项名称不能重复');
+                                  } else {
+                                    callback();
+                                  }
+                                }
+                              }
+                            }
+                          ]}
+                          label={
+                            <div style={{ color: '#6E7B8D' }}>
+                              选项{attr.order_num}:
+                            </div>
+                          }
+                          disabled={
+                            attrIndex !== 0 &&
+                            attrIndex ===
+                              item.file_label_attribute?.length - 1 &&
+                            item?.file_label_attribute[attrIndex].input_type ===
+                              2
+                          }
+                        >
+                          <Input
+                            style={{ width: 340, backgroundColor: '#fff' }}
+                            placeholder="用于存储标注结果"
+                            value={attr.attribute_name_en}
+                            onChange={(value) => {
+                              const newData = [...textRelations];
+                              newData[index].file_label_attribute[
+                                attrIndex
+                              ].attribute_name_en = value;
+                              setTextRelations(newData);
+                            }}
+                            disabled={
+                              isEditModeFromDetail && attr?.isFromDetail
+                            }
+                          />
+                        </FormItem>
+                        <FormItem
+                          field={`attribute_name_cn_${attr.attribute_id}`}
+                          style={{ padding: 0, marginRight: 8 }}
+                          label={
+                            <div style={{ color: '#6E7B8D' }}>
+                              展示名称
+                              <Tooltip
+                                content={
+                                  <div style={{ fontSize: 14 }}>
+                                    展示在标注页面的名称
+                                  </div>
+                                }
+                              >
+                                <IconQuestionCircle
+                                  style={{ color: '#6E7B8D', marginLeft: 3 }}
+                                />
+                                :
+                              </Tooltip>
+                            </div>
+                          }
+                          rules={[
+                            {
+                              validateTrigger: ['onChange', 'onBlur'],
+                              validator: (value, callback) => {
+                                // 检查内容是否为空或只包含空格
+                                if (!value || value.trim() === '') {
+                                  callback('请输入展示名称');
+                                } else {
+                                  // 排除当前项，检查同组其他项是否有相同的选项名称
+                                  const trimmedValue = value.trim();
+                                  const hasDuplicate =
+                                    item.file_label_attribute.some(
+                                      (otherAttr, otherAttrIndex) => {
+                                        return (
+                                          otherAttrIndex !== attrIndex &&
+                                          otherAttr.attribute_name_cn &&
+                                          otherAttr.attribute_name_cn.trim() ===
+                                            trimmedValue
+                                        );
+                                      }
+                                    );
+
+                                  if (hasDuplicate) {
+                                    callback('展示名称不能重复');
+                                  } else {
+                                    callback();
+                                  }
+                                }
+                              }
+                            }
+                          ]}
+                        >
+                          <Input
+                            style={{ width: 300, backgroundColor: '#fff' }}
+                            placeholder="展示在标注页面的名称"
+                            value={attr.attribute_name_cn}
+                            onChange={(value) => {
+                              const newData = [...textRelations];
+                              newData[index].file_label_attribute[
+                                attrIndex
+                              ].attribute_name_cn = value;
+                              setTextRelations(newData);
+                            }}
+                            disabled={
+                              isEditModeFromDetail && attr?.isFromDetail
+                            }
+                          />
+                        </FormItem>
+                        <FormItem label={null}>
+                          {item?.file_label_attribute?.length > 1 && (
+                            <Tooltip content="删除">
+                              <IconDelete
+                                className={`icon-wrapper ${
+                                  isEditModeFromDetail && attr?.isFromDetail
+                                    ? 'is-disabled'
+                                    : ''
+                                }`}
+                                fontSize={16}
+                                onClick={() => {
+                                  if (
+                                    isEditModeFromDetail &&
+                                    attr?.isFromDetail
+                                  )
+                                    return;
+                                  removeAttribute(index, attrIndex);
+                                }}
+                                style={{
+                                  cursor:
+                                    isEditModeFromDetail && attr?.isFromDetail
+                                      ? 'not-allowed'
+                                      : 'pointer',
+                                  opacity:
+                                    isEditModeFromDetail && attr?.isFromDetail
+                                      ? 0.5
+                                      : 1
+                                }}
+                              />
+                            </Tooltip>
+                          )}
+                        </FormItem>
+                      </div>
+                    ))}
+                  </div>
+                )}
+            </div>
+          ))}
+        <div className="add-btn">
+          <Button
+            onClick={() => {
+              // 在按钮的位置添加新数据，不在最后一行添加
+              // 修复：在当前位置插入新数据而非添加到数组末尾
+              const newItem = {
+                attribute_id: uuid(),
+                order_num: 1,
+                attribute_group_name: '', //属性组名称
+                attribute_group_class: 1, //1单选/2多选/3输入框
+                attribute_group_type: 2, //1必选/2非必选
+                isFromDetail: false, // 新增项，可编辑
+                file_label_attribute: [
+                  {
+                    attribute_id: uuid(),
+                    order_num: 1, // 后面统一重新计算order_num
+                    attribute_name_cn: '',
+                    attribute_name_en: '',
+                    input_type: 1,
+                    isFromDetail: false // 新增项，可编辑
+                  }
+                ]
+              };
+              // 创建新数组并在指定位置插入（假设按钮位置对应索引index）
+              const newTextRelations = [...textRelations];
+              newTextRelations.splice(textRelations?.length || 0, 0, newItem);
+              // 更新排序值
+              newTextRelations.forEach((item, i) => {
+                item.order_num = i + 1;
+              });
+              setTextRelations(newTextRelations);
+            }}
+          >
+            <IconPlus />
+            添加属性
+          </Button>
+        </div>
+      </Form>
+    </div>
+  );
+};
+export { Classify };

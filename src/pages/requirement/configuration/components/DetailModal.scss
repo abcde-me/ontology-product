@@ -1,0 +1,126 @@
+.detail-modal-content {
+  display: flex;
+  border: 1px solid #e2e8f0;
+  border-radius: 4px;
+
+  .content-tree {
+    padding-left: 12px;
+    height: 600px;
+    width: 220px;
+    scrollbar-width: none;
+    border-right: 1px solid #e2e8f0;
+    position: relative;
+    overflow-x: hidden;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+
+    .search-input {
+      background-color: #fff;
+      position: sticky;
+      top: 0;
+      z-index: 30;
+      padding: 16px 12px 8px 0;
+    }
+
+    .arco-tree-node {
+      width: 190px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .arco-tree {
+      width: 220px;
+      scrollbar-gutter: auto;
+      padding-left: 4px;
+      padding-right: 4px;
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
+  }
+
+  .content-table:hover {
+    scrollbar-width: auto;
+
+    /* Firefox */
+    -ms-overflow-style: auto;
+
+    /* IE 和 Edge */
+  }
+
+  .content-table {
+    flex: 1;
+    height: 600px;
+    overflow-y: scroll;
+    scrollbar-width: none;
+    scrollbar-gutter: auto;
+    padding-top: 12px;
+    padding-bottom: 16px;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+
+    .arco-table-content-inner,
+    .data-catalog-left-box {
+      scrollbar-gutter: auto;
+    }
+
+    // 表单部分只占用所需高度
+    .content-table-form {
+      flex-shrink: 0; // 不缩小
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+
+    .tree-node-name {
+      font-family: 'PingFang SC';
+      font-weight: 500;
+      font-size: 14px;
+      letter-spacing: 0%;
+      color: #0f172a;
+      width: 300px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      margin-left: 12px;
+    }
+
+    // 让 Table 组件占据剩余空间
+    .arco-table {
+      flex: 1; // 占据剩余空间
+      display: flex;
+      flex-direction: column;
+    }
+
+    .arco-table-content {
+      flex: 1;
+      overflow-y: auto; // 表格内容区域可滚动
+    }
+  }
+
+  .form-option {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    margin-bottom: 12px;
+    margin-right: 12px;
+
+    .arco-form-inline {
+      margin-right: 0;
+      flex-flow: column;
+    }
+  }
+
+  .form-inputs {
+    display: flex;
+
+    .arco-form-layout-inline {
+      margin-bottom: 12px;
+    }
+  }
+}
