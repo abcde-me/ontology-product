@@ -24,7 +24,7 @@ import {
 import WujieReact from 'wujie-react';
 import { Message, Modal } from '@arco-design/web-react';
 import { IconExclamationCircleFill } from '@arco-design/web-react/icon';
-import { TEXT_DATA, LabelTypeMap, WujiePlugins } from './const';
+import { TEXT_DATA, LabelTypeMap, WujiePlugins, STAGE_MAP } from './const';
 import { useHasPermission } from '@/store/userInfoStore';
 import { ANNOTATION_TASK_PERMISSIONS } from '@/config/permissions';
 
@@ -47,6 +47,8 @@ function LabelEditorPage() {
   const pkgId = useParams('pkgId');
   // 0 表示可以不修改标注，1 表示可以修改标注
   const labelModifyEnable = useParams('labelModifyEnable');
+  // 文本用
+  const mode = useParams('mode');
   const deadlineTimestamp = useParams('deadlineTimestamp');
   const [labelUrl, setLabelUrl] = useState('');
   const history = useHistory();
@@ -57,7 +59,7 @@ function LabelEditorPage() {
       if (['LABEL', 'RELABEL'].includes(stage!)) {
         if (taskId) {
           setLabelUrl(
-            `/labeleditor/${LabelTypeMap[labelType!]}/requirement/${requirementId}/task/${taskId}?type=${labelType}&kind=${toolKind}&tool=${labelTool}&name=${reqName}&count=${taskCount}&stage=${stage}&pkgId=${pkgId}`
+            `/labeleditor/${LabelTypeMap[labelType!]}/requirement/${requirementId}/task/${taskId}?type=${labelType}&kind=${toolKind}&mode=${mode}&tool=${labelTool}&name=${reqName}&count=${taskCount}&stage=${stage}&pkgId=${pkgId}`
           );
           setLoading(false);
         } else {
@@ -67,7 +69,7 @@ function LabelEditorPage() {
       if (['REVIEW'].includes(stage!)) {
         if (taskId) {
           setLabelUrl(
-            `/labeleditor/${LabelTypeMap[labelType!]}/requirement/${requirementId}/task/${taskId}?type=${labelType}&kind=${toolKind}&tool=${labelTool}&name=${reqName}&count=${taskCount}&stage=${stage}&qsId=${qsId}&qcRound=${qcRound}&labelModifyEnable=${labelModifyEnable}&deadlineTimestamp=${deadlineTimestamp}&pkgId=${pkgId}`
+            `/labeleditor/${LabelTypeMap[labelType!]}/requirement/${requirementId}/task/${taskId}?type=${labelType}&kind=${toolKind}&mode=${mode}&tool=${labelTool}&name=${reqName}&count=${taskCount}&stage=${stage}&qsId=${qsId}&qcRound=${qcRound}&labelModifyEnable=${labelModifyEnable}&deadlineTimestamp=${deadlineTimestamp}&pkgId=${pkgId}`
           );
           setLoading(false);
         } else {
@@ -84,7 +86,8 @@ function LabelEditorPage() {
     labelTool,
     reqName,
     qsId,
-    stage
+    stage,
+    mode
   ]);
 
   // 质检跳转
@@ -106,6 +109,7 @@ function LabelEditorPage() {
       volumn_uninspected,
       deadline_timestamp
     } = qualityControlTaskInfo.data;
+    const curMode = STAGE_MAP[`${stage!}${label_modify_enable}`];
     const taskInfo = await getTaskDetail(String(task_id));
     const {
       requirement_info: {
@@ -115,7 +119,7 @@ function LabelEditorPage() {
       }
     } = taskInfo.data;
     history.replace(
-      `/tenant/compute/modaforge/labelEditor?rId=${req_id}&tId=${task_id}&type=${type}&kind=${TEXT_DATA[tool]}&tool=${tool}&name=${name}&count=${volumn_uninspected}&qsId=${qsId}&qcRound=${qc_round}&labelModifyEnable=${label_modify_enable}&deadlineTimestamp=${deadline_timestamp}&stage=${stage}&pkgId=${pkgId}`
+      `/tenant/compute/modaforge/labelEditor?rId=${req_id}&tId=${task_id}&type=${type}&kind=${TEXT_DATA[tool]}&mode=${curMode}&tool=${tool}&name=${name}&count=${volumn_uninspected}&qsId=${qsId}&qcRound=${qc_round}&labelModifyEnable=${label_modify_enable}&deadlineTimestamp=${deadline_timestamp}&stage=${stage}&pkgId=${pkgId}`
     );
   };
 
@@ -155,7 +159,7 @@ function LabelEditorPage() {
     } = taskInfo.data;
 
     history.replace(
-      `/tenant/compute/modaforge/labelEditor?rId=${requirementId}&tId=${task_id}&type=${type}&kind=${TEXT_DATA[tool]}&tool=${tool}&name=${name}&count=${count}&stage=${stage}&pkgId=${pkgId}`
+      `/tenant/compute/modaforge/labelEditor?rId=${requirementId}&tId=${task_id}&type=${type}&kind=${TEXT_DATA[tool]}&mode=${STAGE_MAP[stage!]}&tool=${tool}&name=${name}&count=${count}&stage=${stage}&pkgId=${pkgId}`
     );
   };
 
@@ -175,7 +179,6 @@ function LabelEditorPage() {
 
   const saveTaskWrapper = async (...args: any[]) => {
     const result = await args[args.length - 1](...args.slice(0, -1));
-    console.log(result, 'result🍉');
     if (result.code !== 'success') {
       Message.clear();
       Modal.destroyAll();
