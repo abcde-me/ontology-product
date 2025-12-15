@@ -14,6 +14,9 @@ export async function saveTask(taskId: string, params: Record<string, any>) {
   const op = searchParams.get('stage');
   if (op === 'LABEL' || op === 'RELABEL') {
     data.op = op;
+    data.is_qc_modify = 0;
+  } else {
+    data.is_qc_modify = 1;
   }
   return UAPI.RES.leSaveTask({}).post(data).inRegion().do();
 }
@@ -29,6 +32,9 @@ export async function submitTask(taskId: string, params: Record<string, any>) {
   const op = searchParams.get('stage');
   if (op === 'LABEL' || op === 'RELABEL') {
     data.op = op;
+    data.is_qc_modify = 0;
+  } else {
+    data.is_qc_modify = 1;
   }
   return UAPI.RES.leSaveTask({}).post(data).inRegion().do();
 }
@@ -458,6 +464,9 @@ export async function saveTextEditorResult(params: Record<string, any>) {
   const op = searchParams.get('stage');
   if (op === 'LABEL' || op === 'RELABEL') {
     params.op = op;
+    params.is_qc_modify = 0;
+  } else {
+    params.is_qc_modify = 1;
   }
   return UAPI.RES.leSaveTask({}).post(params).inRegion().do();
 }

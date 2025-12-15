@@ -174,6 +174,7 @@ function LabelEditorPage() {
 
   const saveTaskWrapper = async (...args: any[]) => {
     const result = await args[args.length - 1](...args.slice(0, -1));
+    console.log(result, 'result🍉');
     if (result.code !== 'success') {
       Message.clear();
       Modal.destroyAll();
