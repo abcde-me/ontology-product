@@ -245,7 +245,7 @@ function QualityTaskList() {
   // 跳转到详情页
   const goToDetailPage = (record: QualityTaskItem) => {
     history.push(
-      `/tenant/compute/modaforge/qualityTask/detail?pkgId=${record.pkg_id}&qcRound=${activeTab}&reqId=${record.req_id}`
+      `/tenant/compute/modaforge/qualityTask/detail?pkgId=${record.pkg_id}&qcRound=${activeTab}&reqId=${record.req_id}&reqName=${record.req_name}`
     );
   };
 

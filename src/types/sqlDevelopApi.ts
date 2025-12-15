@@ -357,4 +357,5 @@ export interface GetDevelopScriptRunLogResponse {
    * 运行状态
    */
   run_status: RunLogStatus;
+  start_time: string;
 }
