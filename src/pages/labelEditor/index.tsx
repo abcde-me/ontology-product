@@ -38,7 +38,7 @@ function LabelEditorPage() {
   const toolKind = useParams('kind');
   const reqName = useParams('name');
   const taskCount = useParams('count');
-  // 当前模式 LABLE 标注 RELABLE 改错 REVIEW 质检 PREVIEW 预览
+  // 当前模式 LABEL 标注 RELABEL 改错 REVIEW 质检 PREVIEW 预览
   const stage = useParams('stage');
   // 质检任务id
   const qsId = useParams('qsId');
@@ -53,7 +53,7 @@ function LabelEditorPage() {
 
   useEffect(() => {
     const init = async () => {
-      if (['LABLE', 'RELABLE'].includes(stage!)) {
+      if (['LABEL', 'RELABEL'].includes(stage!)) {
         if (taskId) {
           setLabelUrl(
             `/labeleditor/${LabelTypeMap[labelType!]}/requirement/${requirementId}/task/${taskId}?type=${labelType}&kind=${toolKind}&tool=${labelTool}&name=${reqName}&count=${taskCount}&stage=${stage}&pkgId=${pkgId}`
@@ -113,7 +113,6 @@ function LabelEditorPage() {
         label_tool: { label_tool_code: tool }
       }
     } = taskInfo.data;
-    console.log(stage, 'stage🍉');
     history.replace(
       `/tenant/compute/modaforge/labelEditor?rId=${req_id}&tId=${task_id}&type=${type}&kind=${TEXT_DATA[tool]}&tool=${tool}&name=${name}&count=${volumn_uninspected}&qsId=${qsId}&qcRound=${qc_round}&labelModifyEnable=${label_modify_enable}&deadlineTimestamp=${deadline_timestamp}&stage=${stage}&pkgId=${pkgId}`
     );

@@ -158,7 +158,7 @@ function QualityTaskList() {
 
       const res = await listQualityControlTasks(params);
       if (res.code === 'success') {
-        setTableData(res.data?.result || []);
+        setTableData(res.data?.items || []);
         setTotal(res.data?.total || 0);
       }
     } catch (error) {

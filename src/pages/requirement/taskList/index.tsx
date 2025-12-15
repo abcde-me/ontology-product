@@ -272,7 +272,7 @@ function TaskList() {
               <span
                 className="operate-text"
                 onClick={() => {
-                  toLabelEditor(record, 'LABLE');
+                  toLabelEditor(record, 'LABEL');
                 }}
               >
                 去标注
@@ -281,7 +281,7 @@ function TaskList() {
             <span
               className="operate-text"
               onClick={() => {
-                toLabelEditor(record, 'RELABLE');
+                toLabelEditor(record, 'RELABEL');
               }}
             >
               改错
