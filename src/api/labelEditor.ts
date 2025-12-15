@@ -96,9 +96,9 @@ export async function getQualityControlTask(qsId?: number) {
 // 改错、预览用，获取质检信息（评论==）
 export async function getQualityControlTaskById(taskId?: string) {
   const searchParams = new URLSearchParams(location.search);
-  const rId = taskId || searchParams.get('rId');
+  const tId = taskId || searchParams.get('tId');
   return await UAPI.RES.leGetQualityControlTaskById({})
-    .post({ task_id: Number(rId) })
+    .post({ task_id: Number(tId) })
     .inRegion()
     .do();
 }
