@@ -133,7 +133,8 @@ function QualityTaskDetail() {
         page: current,
         page_size: pageSize,
         pkg_id: Number(pkgId),
-        filters: sortValue
+        filters: sortValue,
+        qc_round: Number(qcRound)
       };
       const res = await listQualityControlTaskSamples(params);
       if (res.code === 'success') {

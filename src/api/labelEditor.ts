@@ -42,7 +42,7 @@ export async function getTask(requirementId?: string, pkgId?: string) {
     requirement_id: Number(rId),
     pkg_id: Number(pkg_Id)
   };
-  if (op === 'LABLE' || op === 'RELABLE') {
+  if (op === 'LABEL' || op === 'RELABEL') {
     params.op = op;
   }
   return await UAPI.RES.leGetTask({}).post(params).inRegion().do();
@@ -50,14 +50,14 @@ export async function getTask(requirementId?: string, pkgId?: string) {
 
 export async function getTaskDetail(taskId?: string, pkgId?: string) {
   const searchParams = new URLSearchParams(location.search);
-  const rId = taskId || searchParams.get('rId');
+  const tId = taskId || searchParams.get('tId');
   const pkg_Id = pkgId || searchParams.get('pkgId');
   const op = searchParams.get('stage');
   const params: Record<string, any> = {
-    requirement_id: Number(rId),
+    task_id: Number(tId),
     pkg_id: Number(pkg_Id)
   };
-  if (op === 'LABLE' || op === 'RELABLE') {
+  if (op === 'LABEL' || op === 'RELABEL') {
     params.op = op;
   }
   return await UAPI.RES.leGetTaskById({}).post(params).inRegion().do();
@@ -218,8 +218,8 @@ export async function submitImgJobAnnotations(
 
 // LABEL 标注、RELABLE 改错、REVIEW 质检、PREVIEW 预览
 const STAGE_MAP = {
-  LABLE: 'annotation',
-  RELABLE: 'annotation',
+  LABEL: 'annotation',
+  RELABEL: 'annotation',
   REVIEW: 'validation',
   PREVIEW: 'Tag annotation'
 };
@@ -413,8 +413,22 @@ function handleImgAnnotationIds(params: Record<string, any>) {
 // ========================================== 文本标注API =================================
 
 // 获取任务
-export async function getTextEditorTask(requirement_id: number) {
-  return UAPI.RES.leGetTask({}).post({ requirement_id }).inRegion().do();
+export async function getTextEditorTask(
+  requirementId?: string,
+  pkgId?: string
+) {
+  const searchParams = new URLSearchParams(location.search);
+  const rId = requirementId || searchParams.get('rId');
+  const pkg_Id = pkgId || searchParams.get('pkgId');
+  const op = searchParams.get('stage');
+  const params: Record<string, any> = {
+    requirement_id: Number(rId),
+    pkg_id: Number(pkg_Id)
+  };
+  if (op === 'LABEL' || op === 'RELABEL') {
+    params.op = op;
+  }
+  return UAPI.RES.leGetTask({}).post(params).inRegion().do();
 }
 
 // 文本标注，获取结果
