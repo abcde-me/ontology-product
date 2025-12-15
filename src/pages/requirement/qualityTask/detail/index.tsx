@@ -91,10 +91,7 @@ function QualityTaskDetail() {
   const pkgId = useParams('pkgId');
   const qcRound = useParams('qcRound');
   const reqId = useParams('reqId');
-
-  // 需求名称
-  const [requirementName, setRequirementName] = useState('智慧城市');
-  const [publishStatus, setPublishStatus] = useState('发布成功');
+  const reqName = useParams('reqName');
 
   // 指标数据
   const [metricData, setMetricData] = useState<MetricData>();
@@ -409,11 +406,8 @@ function QualityTaskDetail() {
           >
             质检任务
           </BreadcrumbItem>
-          <BreadcrumbItem>{requirementName}</BreadcrumbItem>
+          <BreadcrumbItem>{reqName}</BreadcrumbItem>
         </Breadcrumb>
-        <Tag color="green" className="status-tag">
-          {publishStatus}
-        </Tag>
       </div>
 
       <div className="quality-task-detail-content">
