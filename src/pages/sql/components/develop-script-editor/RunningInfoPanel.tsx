@@ -17,9 +17,10 @@ import {
 import copy from 'copy-to-clipboard';
 import React, { memo, useEffect, useState, useRef } from 'react';
 import { useEditorContext } from '../../contexts/DevelopScriptEditorContext';
-import { formatDateTime } from '../../utils';
+// import { formatDateTime } from '../../utils';
 import styles from './RunningInfoPanel.module.scss';
 import { RunLogStatus } from '@/types/sqlDevelopApi';
+import dayjs from 'dayjs';
 
 const { Item: CollapseItem } = Collapse;
 
@@ -42,7 +43,7 @@ const RunningInfoPanel: React.FC<RunningInfoPanelProps> = memo(
       runStartTime,
       runLog,
       handleGetRunLog,
-      lastScriptRunStatus,
+      // lastScriptRunStatus,
       hasFetchedLog
     } = useEditorContext();
 
@@ -52,13 +53,6 @@ const RunningInfoPanel: React.FC<RunningInfoPanelProps> = memo(
         setIsExpanded(isPanelOpen);
       }
     }, [isPanelOpen]);
-
-    // 监听运行状态变化，当开始新运行时重置用户关闭状态
-    // useEffect(() => {
-    //   if (runLogStatus === RunLogStatus.RUNNING) {
-    //     setHasUserClosed(false);
-    //   }
-    // }, [runStatus]);
 
     // 监听日志内容变化，自动滚动到底部
     useEffect(() => {
@@ -78,10 +72,6 @@ const RunningInfoPanel: React.FC<RunningInfoPanelProps> = memo(
       if (runLogStatus !== RunLogStatus.CANCEL) {
         setIsExpanded(true);
         onPanelStateChange?.(true);
-        // 运行中时自动获取日志
-        // if (handleGetRunLog) {
-        //   handleGetRunLog();
-        // }
       }
     }, [runLogStatus, onPanelStateChange]);
 
@@ -97,22 +87,10 @@ const RunningInfoPanel: React.FC<RunningInfoPanelProps> = memo(
     };
 
     const renderRunStatus = (status?: RunLogStatus) => {
-      // if (
-      //   status === RunLogStatus.RUNNING &&
-      //   (lastScriptRunStatus === RunningStatus.SUCCESS ||
-      //     lastScriptRunStatus === RunningStatus.FAILED)
-      // ) {
-      //   return (
-      //     <div className={styles['run-status']}>
-      //       <span className="mr-4 text-[14px]">结果加载中</span>
-      //       <IconLoading style={{ color: '#007DFA' }} />
-      //     </div>
-      //   );
-      // }
       if (status === RunLogStatus.RUNNING) {
         return (
           <div className={styles['run-status']}>
-            <span className="mr-4 text-[14px]">运行中</span>
+            <span className="mr-[4px] text-[14px]">运行中</span>
             <IconLoading style={{ color: '#007DFA' }} />
           </div>
         );
@@ -121,10 +99,10 @@ const RunningInfoPanel: React.FC<RunningInfoPanelProps> = memo(
         return (
           <Space>
             <div className={styles['run-status']}>
-              <span className="mr-4 text-[14px]">运行成功</span>
+              <span className="mr-[4px] text-[14px]">运行成功</span>
               <RunSuccessIcon className="mr-[8px]" />
               <span className="text-[14px]">
-                {formatDateTime(runStartTime ?? '')}（
+                {dayjs(runStartTime).format('YYYY-MM-DD HH:mm:ss')}（
                 {runDuration < 1000
                   ? `${runDuration}ms`
                   : `${(runDuration / 1000).toFixed(2)}s`}
@@ -137,19 +115,15 @@ const RunningInfoPanel: React.FC<RunningInfoPanelProps> = memo(
       if (status === RunLogStatus.FAILED) {
         return (
           <div className={styles['run-status']}>
-            <span className="mr-4 text-[14px]">运行失败</span>
-            {/* {status !== RunningStatus.IDLE ? ( */}
-            <>
-              <RunFailedIcon className="mr-[8px]" />
-              <span className="text-[14px]">
-                {formatDateTime(runStartTime ?? '')}（
-                {runDuration < 1000
-                  ? `${runDuration}ms`
-                  : `${(runDuration / 1000).toFixed(2)}s`}
-                ）
-              </span>
-            </>
-            {/* ) : null} */}
+            <span className="mr-[4px] text-[14px]">运行失败</span>
+            <RunFailedIcon className="mr-[8px]" />
+            <span className="text-[14px]">
+              {dayjs(runStartTime).format('YYYY-MM-DD HH:mm:ss')}（
+              {runDuration < 1000
+                ? `${runDuration}ms`
+                : `${(runDuration / 1000).toFixed(2)}s`}
+              ）
+            </span>
           </div>
         );
       }
@@ -157,14 +131,7 @@ const RunningInfoPanel: React.FC<RunningInfoPanelProps> = memo(
     };
 
     // 复制内容到剪贴板
-    const handleCopyContent = (content: string) => {
-      const success = copy(content);
-      if (success) {
-        Message.success('复制成功');
-      } else {
-        Message.error('复制失败');
-      }
-    };
+    const handleCopyContent = (content: string) => {};
 
     // 复制按钮组件
     // const CopyButton = ({ content }: { content: string }) => (
@@ -217,6 +184,7 @@ const RunningInfoPanel: React.FC<RunningInfoPanelProps> = memo(
           }}
         >
           <CollapseItem
+            key="result"
             header={
               <div className={styles['panel-header']}>
                 <div className="flex flex-1 items-center gap-[12px]">
