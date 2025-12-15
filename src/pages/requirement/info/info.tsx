@@ -67,17 +67,21 @@ function RequirementInfo() {
     );
   };
 
+  const handleBack = () => {
+    history.push('/tenant/compute/modaforge/requirement');
+  };
+
   return (
     <div className={styles.requirementInfo}>
       <div className={styles.headBreadcrumbBox}>
         <div className={styles.headBreadcrumb}>
           <IconArrowLeft
             style={{ cursor: 'pointer', fontSize: '14px', marginRight: 12 }}
-            onClick={() => history.goBack()}
+            onClick={() => handleBack()}
           />
           <Breadcrumb style={{ fontSize: 20 }}>
             <BreadcrumbItem
-              onClick={() => history.goBack()}
+              onClick={() => handleBack()}
               className="cursor-pointer hover:text-black"
             >
               需求管理
