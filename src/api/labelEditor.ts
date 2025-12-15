@@ -9,7 +9,8 @@ export async function saveTask(taskId: string, params: Record<string, any>) {
     task_id: taskId,
     save_type: 1,
     result_type: params.has_result,
-    result: params
+    result: params,
+    element_cnt: params?.shapes?.length || 0
   };
   const op = searchParams.get('stage');
   if (op === 'LABEL' || op === 'RELABEL') {
@@ -27,7 +28,8 @@ export async function submitTask(taskId: string, params: Record<string, any>) {
     task_id: taskId,
     save_type: 2,
     result_type: params.has_result,
-    result: params
+    result: params,
+    element_cnt: params?.shapes?.length || 0
   };
   const op = searchParams.get('stage');
   if (op === 'LABEL' || op === 'RELABEL') {

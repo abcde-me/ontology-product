@@ -162,7 +162,7 @@ function RequirementParticular({ isActive }: RequirementParticularProps) {
     },
     {
       title: '当前操作人',
-      dataIndex: 'task_owner',
+      dataIndex: 'task_owner_name',
       width: 140
     },
     {
