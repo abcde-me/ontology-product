@@ -9,7 +9,6 @@ import {
 } from '@arco-design/web-react';
 import React, { memo } from 'react';
 import styles from './index.module.scss';
-import { VersionType } from '../version-status';
 import VersionStatus from '../version-status';
 import { IconQuestionCircle } from '@arco-design/web-react/icon';
 import EllipsisPopover from '@/components/ellipsis-popover-com';
@@ -20,6 +19,7 @@ import classNames from 'classnames';
 import noDataElement from '@/components/no-data';
 import dayjs from 'dayjs';
 import ScriptDetailModal from '../spl-script-management/ScriptDetailModal';
+import { useUrlState } from '../../hooks/useUrlState';
 
 const SctipModalTable: React.FC<{
   isVisible: boolean;
@@ -33,7 +33,9 @@ const SctipModalTable: React.FC<{
   const [current, setCurrent] = React.useState<number>(1);
   const [pageSize, setPageSize] = React.useState<number>(10);
   const [total, setTotal] = React.useState<number>(0);
+  const [tableLoading, setTableLoading] = React.useState<boolean>(false);
   const [statusFilter, setStatusFilter] = React.useState<number[]>([]);
+  const { updateUrlState } = useUrlState();
 
   const handleCopyVersion = async (record: any) => {
     setChildStatus(true);
@@ -58,28 +60,36 @@ const SctipModalTable: React.FC<{
       console.log(error);
     }
   };
-  const handleDeleteVersion = async (record: any) => {
-    setChildStatus(true);
-    const params = {
-      version: record.version,
-      script_id: record.script_id
-    };
-    try {
-      const res = await deleteDevelopScript({ ...params });
-      if (res.status === 200) {
-        Message.success({
-          content: `删除成功`
-        });
-        // 刷新历史版本数据
-        fetchData();
+  const handleDeleteVersion = (record: any) => {
+    Modal.confirm({
+      title: '确定删除此版本吗？',
+      content: '删除后，该版本不可恢复。',
+      okText: '确定',
+      cancelText: '取消',
+      onOk: async () => {
+        setChildStatus(true);
+        const params = {
+          version: record.version,
+          script_id: record.script_id
+        };
+        try {
+          const res = await deleteDevelopScript({ ...params });
+          if (res.status === 200) {
+            Message.success({
+              content: `删除成功`
+            });
+            // 刷新历史版本数据
+            fetchData();
+          }
+          console.log(res);
+        } catch (error) {
+          Message.error({
+            content: '删除失败'
+          });
+          console.log(error);
+        }
       }
-      console.log(res);
-    } catch (error) {
-      Message.error({
-        content: '删除失败'
-      });
-      console.log(error);
-    }
+    });
   };
 
   React.useEffect(() => {
@@ -108,20 +118,15 @@ const SctipModalTable: React.FC<{
     }
   }, [rowData?.script_id, current, pageSize, statusFilter]);
 
-  // 当弹窗打开或 rowData 变化时，重置分页并获取数据
-  React.useEffect(() => {
-    if (visible && rowData?.script_id) {
-      setCurrent(1);
-      setStatusFilter([]);
-    }
-  }, [visible, rowData?.script_id]);
-
   // 当分页或筛选变化时，重新获取数据
   React.useEffect(() => {
     if (visible && rowData?.script_id) {
-      fetchData();
+      setTableLoading(true);
+      fetchData().finally(() => {
+        setTableLoading(false);
+      });
     }
-  }, [visible, rowData?.script_id, current, pageSize, statusFilter, fetchData]);
+  }, [current, pageSize, statusFilter, fetchData]);
 
   // 处理表格筛选变化
   const handleTableChange = (
@@ -136,6 +141,16 @@ const SctipModalTable: React.FC<{
       setStatusFilter([]);
     }
     setCurrent(1); // 筛选时重置到第一页
+  };
+
+  const handleToDetail = (scriptId: number | string) => {
+    updateUrlState(
+      {
+        activeTab: 'files',
+        activeDevelopScriptId: String(scriptId)
+      },
+      { method: 'push' }
+    );
   };
 
   const columns: any = [
@@ -216,7 +231,7 @@ const SctipModalTable: React.FC<{
           >
             <span
               onClick={() => {
-                handleCopyVersion(record);
+                handleToDetail(record.script_id);
               }}
               className={[
                 styles['option-btn'],
@@ -228,21 +243,19 @@ const SctipModalTable: React.FC<{
           </Tooltip>
           <Tooltip
             content={
-              record?.status === VersionType.SCHEDULED ? '调度中不可删除' : ''
+              record?.status === ScriptStatus.Scheduling ? '调度中不可删除' : ''
             }
           >
-            <span
+            <Button
+              type="text"
               onClick={() => {
                 handleDeleteVersion(record);
               }}
-              className={[
-                styles['option-btn'],
-                record?.status === VersionType.SCHEDULED &&
-                  styles['is-disabled']
-              ].join(' ')}
+              className="p-0"
+              disabled={record?.status === ScriptStatus.Scheduling}
             >
               删除
-            </span>
+            </Button>
           </Tooltip>
         </>
       )
@@ -330,8 +343,10 @@ const SctipModalTable: React.FC<{
           </div>
         </div>
         <Table
+          scroll={{ y: 500 }}
           className="mb-[24px]"
           columns={columns}
+          loading={tableLoading}
           data={tableData}
           rowKey={(record: any) => `${rowData?.script_id}-${record.version}`}
           noDataElement={noDataElement({ description: '暂无数据' })}
