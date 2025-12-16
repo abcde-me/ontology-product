@@ -67,7 +67,7 @@ const ScriptTable: React.FC<ScriptTableProps> = ({
   // 初始化搜索框value
   const [formData, setFormData] = useState({
     script_name: '', // 脚本名称
-    status: 0, // 版本状态
+    status: undefined, // 版本状态
     create_user: '' // 开发人
   });
   // 初始化开发脚本列表数据
@@ -119,7 +119,7 @@ const ScriptTable: React.FC<ScriptTableProps> = ({
         orders: [
           {
             column: 'script_id',
-            order: sortValue?.sort || 'desc'
+            order: sortValue?.sort || ''
           }
         ]
       };
@@ -444,7 +444,7 @@ const ScriptTable: React.FC<ScriptTableProps> = ({
           >
             重置
           </Button>
-          <Button type="primary" onClick={handleSearch} loading={loading}>
+          <Button type="primary" onClick={handleSearch}>
             查询
           </Button>
         </div>
