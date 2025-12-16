@@ -22,9 +22,12 @@ const iconClassMap: Partial<Record<ScriptStatus, string>> = {
   [ScriptStatus.EditCompleted]: 'unreleased-icon'
 };
 
-export const getVersionType = (status: ScriptStatus) => {
+interface VersionStatusProps {
+  status: ScriptStatus;
+}
+
+export default function VersionStatus({ status }: VersionStatusProps) {
   const iconClass = iconClassMap[status] ?? 'unreleased-icon';
-  console.log('iconClass', iconClass);
 
   return (
     <div className="flex items-center">
@@ -34,4 +37,4 @@ export const getVersionType = (status: ScriptStatus) => {
       </div>
     </div>
   );
-};
+}

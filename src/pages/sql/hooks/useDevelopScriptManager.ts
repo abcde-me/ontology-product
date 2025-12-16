@@ -420,12 +420,12 @@ export const useDevelopScriptManager = (
     }
 
     // 先尝试使用 URL 中的 scriptId，找不到则回退到列表中的第一个文件
-    const targetFile = scriptIdFromUrl
+    const resolvedFile = scriptIdFromUrl
       ? sqlScriptList.find(
           (item) => String(item.script_id) === String(scriptIdFromUrl)
         )
-      : undefined;
-    const resolvedFile = targetFile ?? sqlScriptList[0];
+      : sqlScriptList[0];
+    // const resolvedFile = targetFile ?? sqlScriptList[0];
 
     if (!resolvedFile) {
       setSelectedKeys(scriptIdFromUrl ? [scriptIdFromUrl] : []);

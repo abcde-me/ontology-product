@@ -27,7 +27,7 @@ import { lockDevelopScript, deleteDevelopScript } from '@/api/sql-develop';
 import { ScriptStatus, ScriptStatusName } from '@/types/sqlDevelopApi';
 import EllipsisPopover from '@/components/ellipsis-popover-com';
 import classNames from 'classnames';
-import { getVersionType } from '../version-status';
+import VersionStatus from '../version-status';
 
 interface ScriptTableProps {
   isAll: (type: boolean) => void;
@@ -268,7 +268,7 @@ const ScriptTable: React.FC<ScriptTableProps> = ({
       dataIndex: 'max_version',
       width: 160,
       render: (_, record) => {
-        return getVersionType(record.status);
+        return <VersionStatus status={record.status}></VersionStatus>;
       }
       // filters: [
       //   {
@@ -453,7 +453,7 @@ const ScriptTable: React.FC<ScriptTableProps> = ({
         noDataElement={noDataElement({
           description: '暂无脚本'
         })}
-        rowKey="id"
+        rowKey="script_id"
         loading={loading}
         onChange={(pagination, sorter, filters) =>
           // @ts-expect-error

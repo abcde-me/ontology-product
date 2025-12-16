@@ -240,15 +240,6 @@ export async function getDevelopScriptLogByScriptId(
     .inRegion()
     .do();
 }
-// 获取开发脚本卡片内容
-export async function listDevelopScriptLogByKeyApi(
-  params
-): Promise<ApiRes<ListDevelopScriptLogByKeyData>> {
-  return await UAPI.RES.ListDevelopScriptLogByKeyApi({})
-    .post(params)
-    .inRegion()
-    .do();
-}
 // 查询脚本列表
 export async function listSqlFile(
   params: ListSqlFileParams
