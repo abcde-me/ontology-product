@@ -1,0 +1,25 @@
+.task-log-drawer {
+  background: white;
+  height: calc(100vh - 180px) !important;
+  position: absolute;
+  bottom: 0;
+  z-index: 999;
+  box-shadow: 0px -8px 20px 0px #0000001f;
+  border-radius: 12px;
+
+  :global(.arco-drawer-content) {
+    padding: 12px;
+  }
+
+  :global(.arco-drawer-header) {
+    border-bottom: 1px solid #e2e8f0;
+  }
+
+  .log-content {
+    padding: 8px 12px;
+    background: #f8fafd;
+    border-radius: 4px;
+    outline: 1px solid #e2e8f0;
+    word-break: break-word;
+  }
+}

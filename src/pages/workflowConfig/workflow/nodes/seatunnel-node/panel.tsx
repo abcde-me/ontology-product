@@ -2,65 +2,90 @@ import {
   Button,
   Form,
   Input,
-  Radio,
-  Select,
   Typography,
   Grid,
-  Cascader,
-  Empty,
-  Popover
+  Cascader
 } from '@arco-design/web-react';
-import React, { useEffect, useState } from 'react';
-import {
-  NodePanelProps,
-  NodeProps
-} from '@/pages/workflowConfig/workflow/types';
+import React from 'react';
+import { NodePanelProps } from '@/pages/workflowConfig/workflow/types';
+import styles from './index.module.scss';
 import {
   SQLNodeConfig,
   SQLVersion
 } from '@/pages/workflowConfig/workflow/nodes/sql-node/types';
 import { IconDelete, IconPlus } from '@arco-design/web-react/icon';
-import styled from '@emotion/styled';
-import { PRIORITY_OPTIONS } from '@/pages/workflowList/types';
 import { SqlEditor } from '@/pages/workflowConfig/workflow/nodes/sql-node/components';
 import { useRequest } from 'ahooks';
-import { getSQLListInSQLNode, getSQLVersionInSQLNode } from '@/api/workflowV2';
-import BlockIcon from '@/pages/workflowConfig/workflow/block-icon';
+import {
+  getSourceDatabaseList,
+  getSourceTable,
+  getSQLListInSQLNode,
+  getSQLVersionInSQLNode
+} from '@/api/workflowV2';
 import useConfig from '@/pages/workflowConfig/workflow/nodes/sql-node/use-config';
 import { useNodesInteractions } from '@/pages/workflowConfig/workflow/hooks';
 import {
   NodeRunSetting,
   PrevNodes
 } from '@/pages/workflowConfig/workflow/nodes/components';
+import { FieldSync } from '@/pages/workflowConfig/workflow/nodes/seatunnel-node/components';
+import { getConnectionList, getdetailList } from '@/api/connectionApi';
+import { ConnectionItem } from '@/pages/workflowConfig/workflow/nodes/seatunnel-node/types';
+import { isEmpty, isNil } from 'lodash-es';
 
-const { Item: FormItem, useForm, useWatch, List: FormList } = Form;
+const { Item: FormItem, useForm, List: FormList } = Form;
 const { Row, Col } = Grid;
 
 const loadMore = (pathValue: string[], level: number) => {
-  return getSQLVersionInSQLNode(pathValue[0]);
+  return getSourceTable(pathValue[0]);
+};
+const loadConnectionTable = (pathValue: string[], level: number) => {
+  return getdetailList({ id: pathValue[0] })
+    .then((res) => {
+      const { config = {}, table_name = {} } = res.data || {};
+      if (isEmpty(config)) return [];
+      if (!config.database) return [];
+      return [
+        {
+          ...config,
+          label: config.database,
+          value: config.database,
+          children: table_name.map(({ title }) => ({
+            label: title,
+            value: title,
+            isLeaf: true
+          }))
+        }
+      ];
+    })
+    .catch(() => {
+      return Promise.resolve([]);
+    });
 };
 
 export default React.memo(function SeatunnelPanel(
   props: NodePanelProps<SQLNodeConfig>
 ) {
   const { readOnly, onValuesChange, inputs } = useConfig(props.id, props.data);
-  const { data: allSQL, loading } = useRequest(
+  const { data: allConnections, loading: connectorLoading } = useRequest(
     async () => {
       try {
-        const sqlList = await getSQLListInSQLNode();
-        const sql_id = inputs.sql_id?.split('_') || [];
-        if (sql_id.length > 1) {
-          const sqlId = sql_id[0].toString();
-          const sqlVersions = await getSQLVersionInSQLNode(+sqlId);
-          sqlList.forEach((sql) => {
-            if (sql.value.toString() === sqlId) {
-              sql.children = sqlVersions;
-            }
-          });
-        }
-        return sqlList;
+        const res = await getConnectionList({
+          page: 1,
+          page_size: 999,
+          sub_type: 'ELasticsearch,Doris'
+        });
+        const list = (res.data.items || []) as ConnectionItem[];
+        return list.map((connection) => {
+          const { name, id } = connection;
+          return {
+            ...connection,
+            label: name,
+            value: id
+          };
+        });
       } catch (e) {
-        console.error(e);
+        console.error('load connector error', e);
         return [];
       }
     },
@@ -68,10 +93,15 @@ export default React.memo(function SeatunnelPanel(
       refreshDeps: [inputs.sql_id]
     }
   );
+  const { data: allSourceDatabase } = useRequest(async () => {
+    return await getSourceDatabaseList();
+  });
+  useRequest(async () => {});
   const [form] = useForm();
-  const { handleNodeSelect } = useNodesInteractions();
   return (
-    <PanelContainer className="panel-container wk-node-panel-content code-panel-content date-cleaning-panel mt-4">
+    <div
+      className={`${styles['panel-container']} wk-node-panel-content code-panel-content date-cleaning-panel mt-4`}
+    >
       <Typography.Text bold className={'mb-2'}>
         来源数据
       </Typography.Text>
@@ -84,31 +114,30 @@ export default React.memo(function SeatunnelPanel(
         initialValues={{ ...inputs, sql_id: inputs.sql_id?.split('_') }}
         layout="vertical"
         onValuesChange={(_, v: any) => {
-          const { local_params, sql_id, ...otherValue } = v;
-          onValuesChange({
-            ...inputs,
-            ...otherValue,
-            sql_id: sql_id?.join('_'),
-            local_params: local_params.map(({ prop, value }) => ({
-              prop,
-              value,
-              direct: 'IN',
-              type: 'VARCHAR'
-            }))
-          });
+          // const { local_params, sql_id, ...otherValue } = v;
+          // onValuesChange({
+          //   ...inputs,
+          //   ...otherValue,
+          //   sql_id: sql_id?.join('_'),
+          //   local_params: local_params.map(({ prop, value }) => ({
+          //     prop,
+          //     value,
+          //     direct: 'IN',
+          //     type: 'VARCHAR'
+          //   }))
+          // });
         }}
       >
         <FormItem
           label={'来源表'}
-          field={'sql_id'}
+          field={'source_database'}
           rules={[{ message: '请选择来源表', required: true }]}
         >
           <Cascader
             className={'w-full'}
-            disabled={readOnly || loading}
+            disabled={readOnly || allSourceDatabase}
             placeholder="请选择来源表"
-            style={{ width: 300, marginBottom: 20 }}
-            options={allSQL}
+            options={allSourceDatabase}
             onChange={(_, selectedOptions) => {
               const versionData: SQLVersion = selectedOptions?.pop() || {};
               const { script_context = '', script_params = [] } = versionData;
@@ -127,11 +156,12 @@ export default React.memo(function SeatunnelPanel(
             allowClear
           />
         </FormItem>
-        {!loading && (
+        {!connectorLoading && (
           <FormItem
             field={'raw_script'}
             dependencies={['sql_id']}
             label={'来源数据过滤'}
+            tooltip={'编写带有引用参数的sql语句以增量查询和数据条件过滤'}
           >
             <SqlEditor
               placeholder={
@@ -156,7 +186,7 @@ export default React.memo(function SeatunnelPanel(
                     }}
                   />
                 </div>
-                <Form.Item className={'add-field-action'}>
+                <Form.Item className={styles['add-field-action']}>
                   {!!fields.length &&
                     fields.map((field, index) => (
                       <div key={field.key} className={'flex flex-1'}>
@@ -206,7 +236,10 @@ export default React.memo(function SeatunnelPanel(
                           className={'w-auto flex-shrink-0'}
                           label={
                             index === 0 ? (
-                              <Typography.Text bold className={'label-hidden'}>
+                              <Typography.Text
+                                bold
+                                className={styles['label-hidden']}
+                              >
                                 删
                               </Typography.Text>
                             ) : undefined
@@ -239,16 +272,15 @@ export default React.memo(function SeatunnelPanel(
           目标数据
         </Typography.Text>
         <FormItem
-          label={'来源表'}
-          field={'sql_id'}
-          rules={[{ message: '请选择来源表', required: true }]}
+          label={'目标表'}
+          field={'target_datasource_id'}
+          rules={[{ message: '请选择目标表', required: true }]}
         >
           <Cascader
             className={'w-full'}
-            disabled={readOnly || loading}
-            placeholder="请选择来源表"
-            style={{ width: 300, marginBottom: 20 }}
-            options={allSQL}
+            disabled={readOnly || connectorLoading}
+            placeholder="请选择目标表"
+            options={allConnections}
             onChange={(_, selectedOptions) => {
               const versionData: SQLVersion = selectedOptions?.pop() || {};
               const { script_context = '', script_params = [] } = versionData;
@@ -262,32 +294,28 @@ export default React.memo(function SeatunnelPanel(
                 )
               });
             }}
-            loadMore={loadMore}
+            loadMore={loadConnectionTable}
             showSearch
             allowClear
           />
         </FormItem>
+        <FormItem noStyle shouldUpdate={true}>
+          {({ target_datasource_id, source_database }) => {
+            if ([target_datasource_id, source_database].some(isNil))
+              return null;
+            return (
+              <FormItem field={'field_sync'} label={'同步字段信息'}>
+                <FieldSync
+                  source={source_database}
+                  target={target_datasource_id}
+                />
+              </FormItem>
+            );
+          }}
+        </FormItem>
         <NodeRunSetting />
       </Form>
-      <PrevNodes node={props.id} />
-    </PanelContainer>
+      <PrevNodes node={props.id} />;
+    </div>
   );
 });
-const PanelContainer = styled.div`
-  .label-hidden {
-    visibility: hidden;
-  }
-
-  .arco-cascader {
-    width: 100% !important;
-    margin-bottom: 0 !important;
-  }
-
-  .dependent-item {
-    border: 1px solid #cbd5e1;
-
-    &:hover {
-      border: 1px solid #007dfa;
-    }
-  }
-`;

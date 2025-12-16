@@ -1,4 +1,4 @@
-import type { FC, ReactElement } from 'react';
+import { FC, ReactElement, useMemo } from 'react';
 import React, { cloneElement, memo, useEffect, useRef } from 'react';
 import {
   RiAlertFill,
@@ -6,7 +6,7 @@ import {
   RiErrorWarningFill,
   RiLoader2Line
 } from '@remixicon/react';
-import type { NodeProps } from '../../types';
+import type { NodeProcessData, NodeProps } from '../../types';
 import { BlockEnum, NodeRunningStatus } from '../../types';
 import { useNodesReadOnly } from '../../hooks';
 import { useNodeIterationInteractions } from '../iteration/use-interactions';
@@ -16,6 +16,10 @@ import NodeControl from './components/node-control';
 import cn from '@/pages/workflowConfig/utils/classnames';
 import BlockIcon from '@/pages/workflowConfig/workflow/block-icon';
 import EllipsisPopover from '@/components/ellipsis-popover-com';
+import { useStore } from '@/pages/workflowConfig/task/store';
+import { useShallow } from 'zustand/react/shallow';
+import { TaskStatus } from '@/pages/workflowConfig/types/workflow';
+import { STATUS2COLOR } from '@/pages/workflowConfig/workflow/constants';
 
 type BaseNodeProps = {
   children: ReactElement;
@@ -26,6 +30,16 @@ const BaseNode: FC<BaseNodeProps> = ({ id, data, children }) => {
   const { nodesReadOnly } = useNodesReadOnly();
   const { handleNodeIterationChildSizeChange } = useNodeIterationInteractions();
   const { handleNodeLoopChildSizeChange } = useNodeLoopInteractions();
+  const { nodesProcessData } = useStore(
+    useShallow((state) => ({ nodesProcessData: state.nodesProcessDetail }))
+  );
+
+  const nodeProcess = useMemo(() => {
+    if (!id) return;
+    return nodesProcessData?.find((process) => {
+      return process.task_code.toString() === id.toString();
+    });
+  }, [nodesProcessData, id]);
   useEffect(() => {
     if (nodeRef.current && data.selected && data.isInIteration) {
       const resizeObserver = new ResizeObserver(() => {
@@ -61,6 +75,10 @@ const BaseNode: FC<BaseNodeProps> = ({ id, data, children }) => {
 
   const showSelectedBorder =
     data.selected || data._isBundled || data._isEntering;
+  const { color = '', icon: Icon = null } = useMemo(() => {
+    if (!nodeProcess) return {};
+    return STATUS2COLOR[nodeProcess.state] || {};
+  }, [nodeProcess]);
 
   return (
     <div
@@ -76,7 +94,8 @@ const BaseNode: FC<BaseNodeProps> = ({ id, data, children }) => {
       ref={nodeRef}
       style={{
         width: 'auto',
-        height: 'auto'
+        height: 'auto',
+        border: `2px solid ${color || 'transparent'}`
       }}
     >
       <div
@@ -143,6 +162,7 @@ const BaseNode: FC<BaseNodeProps> = ({ id, data, children }) => {
               {data.title}
             </div> */}
           </div>
+          {Icon ? <Icon style={{ color: color }} /> : <></>}
           {data._iterationLength &&
             data._iterationIndex &&
             data._runningStatus === NodeRunningStatus.Running && (

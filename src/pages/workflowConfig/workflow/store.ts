@@ -194,8 +194,6 @@ type Shape = {
   ) => void;
   versionHistory: VersionHistory[];
   setVersionHistory: (versionHistory: VersionHistory[]) => void;
-  nodesProcessDetail: NodeProcessData[];
-  setNodesProcessDetail: (tasks: NodeProcessData[]) => void;
 };
 
 export const createWorkflowStore = () => {
@@ -357,10 +355,7 @@ export const createWorkflowStore = () => {
       set(() => ({ iterParallelLogMap })),
 
     versionHistory: [],
-    setVersionHistory: (versionHistory) => set(() => ({ versionHistory })),
-    nodesProcessDetail: [],
-    setNodesProcessDetail: (nodesProcessDetail) =>
-      set(() => ({ nodesProcessDetail }))
+    setVersionHistory: (versionHistory) => set(() => ({ versionHistory }))
   }));
 };
 

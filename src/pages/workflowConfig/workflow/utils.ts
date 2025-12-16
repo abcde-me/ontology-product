@@ -336,7 +336,7 @@ export const getValidTreeNodes = (nodes: Node[], edges: Edge[]) => {
 
   if (!startNode) {
     return {
-      validNodes: [],
+      validNodes: nodes,
       maxDepth: 0
     };
   }

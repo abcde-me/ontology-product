@@ -27,6 +27,7 @@ import { useLocation } from 'react-router-dom';
 import { useParams } from '@/utils/url';
 import { WORKFLOW_DETAIL_PERMISSIONS } from '@/config/permissions';
 import { useHasPermission } from '@/store/userInfoStore';
+import { Message } from '@arco-design/web-react';
 
 export const useWorkflow = () => {
   const { t } = useTranslation('plugin__console-plugin-appforge');
@@ -428,6 +429,41 @@ export const useWorkflowInit = () => {
   // 只有在作业详情的时候处理
   const isShowChatMode =
     location.pathname === '/tenant/compute/modaforge/workflowTaskDetail';
+
+  // 初次保存画布数据不正确时的兜底方法
+  const handleGetInitialWorkflowDataOnError = (params: {
+    nodes: Record<string, any>[];
+    edges: Record<string, any>[];
+  }) => {
+    const { nodes, edges } = params;
+    workflowStore.setState({ notInitialWorkflow: true });
+    const flowNodes = nodes.map((node) => {
+      return {
+        ...node,
+        selected: false,
+        data: {
+          ...node?.data,
+          selected: false
+        },
+        position: {
+          ...node.position,
+          y: node?.position?.y - 180
+        },
+        positionAbsolute: {
+          ...node.positionAbsolute,
+          y: node?.positionAbsolute?.y - 180
+        }
+      };
+    });
+    setData({
+      graph: {
+        nodes: flowNodes,
+        edges
+      }
+    } as any);
+    setIsLoading(false);
+  };
+
   const handleGetInitialWorkflowData = useCallback(async () => {
     try {
       const result = await getWorkflowDraft();
@@ -444,8 +480,16 @@ export const useWorkflowInit = () => {
           environment_variables: [],
           conversation_variables: [],
           version: 'draft'
-        }).then(({ data: res }) => {
+        }).then(({ data: res, message }) => {
           workflowStore.getState().setDraftUpdatedAt(res?.updated_at);
+          if (!res) {
+            Message.warning(message);
+            handleGetInitialWorkflowDataOnError({
+              nodes: nodesTemplate,
+              edges: edgesTemplate
+            });
+            return;
+          }
           handleGetInitialWorkflowData();
         });
       } else {

@@ -352,6 +352,10 @@
   &.dependent {
     background-image: url('./images/node-icons/OutTaskIcon.svg');
   }
+
+  &.workflow {
+    background-image: url('./images/node-icons/Workflow.svg');
+  }
 }
 
 .wk-node-wrapper {
@@ -563,7 +567,7 @@
   }
 
   &.show-selected-border {
-    border: 2px solid #007dfa;
+    border: 2px solid #007dfa !important;
     box-shadow: 0px 8px 20px 0px rgba(0, 0, 0, 0.12);
   }
 

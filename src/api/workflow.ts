@@ -3,7 +3,6 @@ import {
   CreateWorkflowRes,
   WorkflowDetailRes,
   WorkflowOperationParams,
-  WorkflowOperation,
   WorkflowDetailParams,
   EditWorkflowParams
 } from '@/types/workflowApi';
@@ -53,6 +52,7 @@ export async function getWorkflowTargetPath(
 export async function getScriptingType() {
   return await UAPI.RES.scriptingType({}).post().inRegion().do();
 }
+
 // 工作流-脚本执行器列表
 export async function getScriptingEngine(script_type: string) {
   return await UAPI.RES.scriptingEngine({})
@@ -60,6 +60,7 @@ export async function getScriptingEngine(script_type: string) {
     .inRegion()
     .do();
 }
+
 // 工作流-脚本模板
 export async function getScriptingTemplate(
   workflow_uuid: string,
@@ -73,6 +74,7 @@ export async function getScriptingTemplate(
     .inRegion()
     .do();
 }
+
 // 工作流-脚本运行
 export async function scriptingBench(
   workflow_uuid: string,
@@ -90,6 +92,7 @@ export async function scriptingBench(
     .inRegion()
     .do();
 }
+
 // 工作流-脚本运行结果
 export async function scriptingBenchResult(
   workflow_uuid: string,
