@@ -123,7 +123,6 @@ const ScriptCard: React.FC<ScriptCardProps> = ({
         return;
       }
       const newTotal = res.data?.total || 0;
-      console.log(res.data?.items, '123');
       setScriptCardList(res.data?.items || []);
       setTotal(newTotal);
       onTotalChange?.(newTotal);
@@ -136,7 +135,6 @@ const ScriptCard: React.FC<ScriptCardProps> = ({
 
   // 删除卡片脚本
   const deleteScript = (id: number, type: number) => {
-    console.log(type, '123');
     // 0（编辑中）和 1（编辑完成）都代表"未发版"
     if (isUnreleasedStatus(type)) {
       Message.error('未发版的脚本不能删除');

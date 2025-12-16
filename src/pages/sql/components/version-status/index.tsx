@@ -28,7 +28,6 @@ interface VersionStatusProps {
 
 export default function VersionStatus({ status }: VersionStatusProps) {
   const iconClass = iconClassMap[status] ?? 'unreleased-icon';
-  console.log('iconClass', iconClass);
 
   return (
     <div className="flex items-center">
