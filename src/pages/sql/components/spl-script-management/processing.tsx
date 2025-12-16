@@ -18,7 +18,7 @@ const Processing: React.FC<PaginationProps> = memo(
     const [processingNum, setProcessingNum] = React.useState<number>(100);
     const [iconActive, setIconActive] = React.useState<ViewType>(
       ViewType.TABLE
-    ); // table表示表格，card表示卡片
+    );
     const [isShowAll, setIsShoAll] = useState(false);
 
     useEffect(() => {
@@ -48,17 +48,16 @@ const Processing: React.FC<PaginationProps> = memo(
             加工脚本({processingNum})
           </div>
           <div className={style['processing-header-icons-group']}>
-            {(iconActive === ViewType.LIST && isShowAll) ||
-              (iconActive === ViewType.LIST && (
-                <Button
-                  onClick={() => {
-                    handleDownloadAll();
-                  }}
-                  className={style['header-btn']}
-                >
-                  下载全部
-                </Button>
-              ))}
+            {iconActive === ViewType.LIST && !isShowAll && (
+              <Button
+                onClick={() => {
+                  handleDownloadAll();
+                }}
+                className={style['header-btn']}
+              >
+                下载全部
+              </Button>
+            )}
             <Button
               className={style['header-btn']}
               onClick={() => {

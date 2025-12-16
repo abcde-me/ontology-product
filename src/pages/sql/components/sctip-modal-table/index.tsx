@@ -13,7 +13,10 @@ import VersionStatus from '../version-status';
 import { IconQuestionCircle } from '@arco-design/web-react/icon';
 import EllipsisPopover from '@/components/ellipsis-popover-com';
 import { ScriptStatus, ScriptStatusName } from '@/types/sqlDevelopApi';
-import { copyDevelopScript, deleteDevelopScript } from '@/api/sql-develop';
+import {
+  copyDevelopScript,
+  deleteDevelopScriptLogByVersion
+} from '@/api/sql-develop';
 import { getDevelopScriptLogByScriptId } from '@/api/sql';
 import classNames from 'classnames';
 import noDataElement from '@/components/no-data';
@@ -73,19 +76,18 @@ const SctipModalTable: React.FC<{
           script_id: record.script_id
         };
         try {
-          const res = await deleteDevelopScript({ ...params });
-          if (res.status === 200) {
-            Message.success({
-              content: `删除成功`
-            });
-            // 刷新历史版本数据
-            fetchData();
+          const res = await deleteDevelopScriptLogByVersion({ ...params });
+
+          if (res.code !== '' || res.status !== 200) {
+            Message.error(res?.message ?? '删除失败，请稍后重试');
+            return;
           }
-          console.log(res);
+
+          Message.success('删除成功');
+          // 刷新历史版本数据
+          fetchData();
         } catch (error) {
-          Message.error({
-            content: '删除失败'
-          });
+          Message.error('删除失败，请稍后重试');
           console.log(error);
         }
       }
