@@ -82,7 +82,7 @@ function HitTest(props: { datasetName: string }) {
     search_method: 'Hybrid',
     score_threshold_enabled: true,
     score_threshold: 0.1,
-    top_k: 10,
+    top_k: 50,
     weights: 0.7
   };
   const submitEditeditPolicy = () => {
