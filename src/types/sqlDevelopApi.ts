@@ -357,4 +357,43 @@ export interface GetDevelopScriptRunLogResponse {
    * 运行状态
    */
   run_status: RunLogStatus;
+  start_time: string;
+}
+
+export interface ListDevelopScriptLogByKeyItem {
+  /**
+   * 创建时间
+   */
+  create_time: string;
+  script_context: string;
+  /**
+   * 脚本说明
+   */
+  script_desc: string;
+  /**
+   * 脚本id
+   */
+  script_id: number;
+  /**
+   * 脚本名字
+   */
+  script_name: string;
+  /**
+   * 已发版、未发版
+   */
+  status_name: string;
+  /**
+   * 更新时间
+   */
+  update_time: string;
+  version: string;
+  version_name: string;
+  status: ScriptStatus;
+}
+
+export interface ListDevelopScriptLogByKeyResponse {
+  items: ListDevelopScriptLogByKeyItem[];
+  page: number;
+  page_size: number;
+  total: number;
 }

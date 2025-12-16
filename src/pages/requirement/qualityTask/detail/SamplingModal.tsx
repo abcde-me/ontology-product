@@ -66,7 +66,7 @@ const SamplingModal: React.FC<SamplingModalProps> = ({
       const values = await form.validate();
       sample_info['sample_type'] = values.sample_type;
       if (values.sample_type === SamplingCountType.Percentage) {
-        sample_info['sample_radio'] = values.sample_radio;
+        sample_info['sample_radio'] = values.sample_radio / 100;
       } else if (values.sample_type === SamplingCountType.Count) {
         sample_info['sample_number'] = values.sample_number;
       }

@@ -479,7 +479,8 @@ export const ModaForgeResourceEndpoints = {
   leGetQualityControlTask: PrefixLabelService + '/GetQualityControlTask',
   leGetQualityControlTaskById:
     PrefixLabelService + '/GetQualityControlTaskById',
-  leSaveQualityControlTask: PrefixLabelService + '/SaveQualityControlTask',
+  leSaveQualityControlTask:
+    PrefixLabelService + '/SubmmitQualityControlTaskResult',
   leCreateQualityControlTaskComment:
     PrefixLabelService + '/CreateQualityControlTaskComment',
   leModifyQualityControlTaskComment:

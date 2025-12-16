@@ -106,40 +106,6 @@
     margin: 0 8px;
   }
 
-  .released-icon {
-    width: 8px;
-    height: 8px;
-    background-color: #10b981;
-    border-radius: 50%;
-    margin-right: 8px;
-  }
-
-  .unreleased-icon {
-    width: 8px;
-    height: 8px;
-    background-color: #94a3b8;
-    border-radius: 50%;
-    margin-right: 8px;
-  }
-
-  .scheduled-icon {
-    width: 8px;
-    height: 8px;
-    background-color: #007dfa;
-    border-radius: 50%;
-    margin-right: 8px;
-  }
-
-  .script-card-content-item-title-icon-text {
-    color: var(--text-color-text-2, #1e293b);
-    text-align: center;
-    font-family: 'PingFang SC';
-    font-size: 12px;
-    font-style: normal;
-    font-weight: 500;
-    line-height: 24px;
-  }
-
   .script-card-content-item-content {
     color: var(--text-color-text-4, #6e7b8d);
     text-align: justify;
@@ -150,10 +116,10 @@
     line-height: 22px;
     margin-top: 8px;
     // 多行省略号
-    overflow: hidden;
-    text-overflow: ellipsis;
-    display: -webkit-box;
-    -webkit-line-clamp: 3;
-    -webkit-box-orient: vertical;
+    // overflow: hidden;
+    // text-overflow: ellipsis;
+    // display: -webkit-box;
+    // -webkit-line-clamp: 3;
+    // -webkit-box-orient: vertical;
   }
 }

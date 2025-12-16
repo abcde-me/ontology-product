@@ -7,6 +7,14 @@ export const TEXT_DATA = {
   TEXT_SORT: 'ranking'
 };
 
+export const STAGE_MAP = {
+  LABEL: 'annotate',
+  RELABEL: 'fix',
+  REVIEW0: 'review',
+  REVIEW1: 'review-edit',
+  PREVIEW: 'preview'
+};
+
 export const LabelTypeMap = {
   '1': 'text',
   '2': 'image'

@@ -28,6 +28,7 @@
         border: 1px solid var(--color-border-1);
         border-radius: 4px 0 0 4px;
         padding: 0 9px 0 13px;
+
         :global(.arco-input) {
           margin-right: -10px;
         }
@@ -69,6 +70,7 @@
       :global(.arco-input-inner-wrapper) {
         margin-top: 1px;
         border-radius: 0px;
+
         :global(.arco-input) {
           text-align: center;
         }
@@ -81,7 +83,6 @@
       height: calc(100vh - 300px);
       margin-top: 24px;
       display: flex;
-      overflow: auto;
 
       .lfetBox {
         width: 240px;
@@ -89,30 +90,101 @@
         padding: 12px;
         border-right: 1px solid #e2e8f0;
         overflow: auto;
+
+        .treeNode {
+          margin-top: 8px;
+        }
+
+        .insertOrCopyBtn {
+          display: none;
+        }
+
+        .treeNodeTitle {
+          width: 130px;
+        }
+
+        :global(.arco-tree-node):hover {
+          .insertOrCopyBtn {
+            display: block;
+            width: 52px; // hover态时显示按钮
+            height: 22px;
+            padding: 0 12px;
+            border-radius: 4px;
+            border: 1px solid var(--primary-primary-6, #007dfa);
+            color: var(--primary-primary-6, #007dfa);
+            font-size: 14px;
+          }
+
+          .treeNodeTitle {
+            color: var(--primary-primary-6, #007dfa);
+          }
+
+          // 根据按钮数量动态调整名称宽度
+          &:has(.insertOrCopyBtn) {
+            .treeNodeTitle {
+              max-width: 80px; // 默认1个按钮时的最大宽度
+            }
+          }
+        }
       }
 
       .rightBox {
         flex: 1;
+        max-width: calc(100% - 240px);
+        overflow: hidden;
+
         :global(.cm-gutters.cm-gutters-before) {
           border-right-width: 0px;
         }
-        :global(.cm-scroller) {
-          height: calc(100vh - 360px) !important;
-        }
+
         :global(.cm-focused) {
           outline: unset !important;
         }
+
         :global(.cm-activeLine) {
           background-color: unset !important;
         }
+
         :global(.cm-content) {
           font-weight: 400;
           font-size: 14px;
           line-height: 24px;
           color: #0f172a;
         }
+
         :global(.cm-gutterElement) {
           line-height: 24px;
+        }
+
+        .parseParamsBtn {
+          height: 24px;
+          padding: 0 12px;
+          border: 1px solid #cbd5e1 !important;
+        }
+
+        .codeMirror {
+          overflow: auto;
+          height: 100%;
+
+          :global(.cm-editor) {
+            height: 100%;
+          }
+        }
+
+        :global(.arco-collapse-item-header-title) {
+          color: #1e293b;
+          font-size: 14px;
+          font-weight: 500;
+          line-height: 22px;
+        }
+
+        :global(.arco-collapse-item-header-icon-down) {
+          transform: rotate(180deg);
+        }
+
+        :global(.arco-tabs-header-title) {
+          padding: 8px 0;
+          margin: 0 32px 0 0;
         }
       }
     }

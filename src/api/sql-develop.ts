@@ -19,7 +19,8 @@ import {
   GetDevelopScriptRunLogResponse,
   SearchDevelopScriptLogByKeyData,
   SearchDevelopScriptLogByKeyParams,
-  UpdateDevelopSystemParamParams
+  UpdateDevelopSystemParamParams,
+  ListDevelopScriptLogByKeyResponse
 } from '@/types/sqlDevelopApi';
 
 /**
@@ -182,6 +183,16 @@ export async function getDevelopScriptRunLog(
   params: GetDevelopScriptRunLogParams
 ): Promise<ApiRes<GetDevelopScriptRunLogResponse>> {
   return await UAPI.RES.GetDevelopScriptRunLogApi({})
+    .post(params)
+    .inRegion()
+    .do();
+}
+
+// 获取开发脚本卡片内容
+export async function listDevelopScriptLogByKeyApi(
+  params
+): Promise<ApiRes<ListDevelopScriptLogByKeyResponse>> {
+  return await UAPI.RES.ListDevelopScriptLogByKeyApi({})
     .post(params)
     .inRegion()
     .do();

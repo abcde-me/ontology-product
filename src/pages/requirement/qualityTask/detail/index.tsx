@@ -91,10 +91,7 @@ function QualityTaskDetail() {
   const pkgId = useParams('pkgId');
   const qcRound = useParams('qcRound');
   const reqId = useParams('reqId');
-
-  // 需求名称
-  const [requirementName, setRequirementName] = useState('智慧城市');
-  const [publishStatus, setPublishStatus] = useState('发布成功');
+  const reqName = useParams('reqName');
 
   // 指标数据
   const [metricData, setMetricData] = useState<MetricData>();
@@ -177,7 +174,7 @@ function QualityTaskDetail() {
           req_id: Number(reqId)
         };
         const res = await manageQCTaskBatch(params);
-        if (res.data.code === 'success') {
+        if (res.code === 'success') {
           Message.success(type === 'pass_all' ? '已全部通过' : '已全部驳回');
           handleSuccess();
         } else {
@@ -409,11 +406,8 @@ function QualityTaskDetail() {
           >
             质检任务
           </BreadcrumbItem>
-          <BreadcrumbItem>{requirementName}</BreadcrumbItem>
+          <BreadcrumbItem>{reqName}</BreadcrumbItem>
         </Breadcrumb>
-        <Tag color="green" className="status-tag">
-          {publishStatus}
-        </Tag>
       </div>
 
       <div className="quality-task-detail-content">

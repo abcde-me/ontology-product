@@ -408,7 +408,7 @@ export default function SearchArea({
                     </div>
                   }
                 >
-                  +{invisibleTagCount}
+                  +{remainingTags.length}
                 </Tooltip>
               );
             }

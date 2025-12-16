@@ -404,73 +404,69 @@ export const useDevelopScriptManager = (
   // 监听外部选中状态变化，同步到内部状态并自动打开文件
   // 注意：externalSelectedKeys 传入的是 script_id，直接使用即可
   useEffect(() => {
-    // 如果外部选中状态为空，清空内部选中状态
-    if (!externalSelectedKeys || externalSelectedKeys.length === 0) {
-      setSelectedKeys([]);
+    const hasExternalSelection =
+      Array.isArray(externalSelectedKeys) && externalSelectedKeys.length > 0;
+    const scriptIdFromUrl = hasExternalSelection
+      ? String(externalSelectedKeys[0])
+      : undefined;
+
+    // 如果文件列表还未加载完成，等待加载完成后再处理
+    if (sqlScriptList.length === 0) {
+      if (!hasExternalSelection) {
+        setSelectedKeys([]);
+        hasOpenedFileFromExternalRef.current = null;
+      }
+      return;
+    }
+
+    // 先尝试使用 URL 中的 scriptId，找不到则回退到列表中的第一个文件
+    const resolvedFile = scriptIdFromUrl
+      ? sqlScriptList.find(
+          (item) => String(item.script_id) === String(scriptIdFromUrl)
+        )
+      : sqlScriptList[0];
+    // const resolvedFile = targetFile ?? sqlScriptList[0];
+
+    if (!resolvedFile) {
+      setSelectedKeys(scriptIdFromUrl ? [scriptIdFromUrl] : []);
       hasOpenedFileFromExternalRef.current = null;
       return;
     }
 
-    const scriptId = externalSelectedKeys[0];
+    const resolvedScriptId = String(resolvedFile.script_id);
+    const resolvedFileId = String(
+      Number((resolvedFile as any).script_file_id) || resolvedFile.script_id
+    );
+    const resolvedFileName = resolvedFile.script_name;
 
-    // 如果文件列表还未加载，等待文件列表加载完成
-    if (sqlScriptList.length === 0) {
+    setSelectedKeys([resolvedScriptId]);
+
+    // 如果已经处理过同一个文件，则不重复打开，直接确保选中即可
+    if (hasOpenedFileFromExternalRef.current === resolvedScriptId) {
       return;
     }
 
-    // 验证 script_id 是否存在于文件列表中
-    const targetFile = sqlScriptList.find(
-      (item) => String(item.script_id) === scriptId
+    const isAlreadyOpen = fileTabs.some(
+      (tab) =>
+        tab.scriptId === resolvedScriptId || tab.fileId === resolvedFileId
     );
 
-    if (targetFile) {
-      // 直接使用 script_id 作为选中状态
-      setSelectedKeys([scriptId]);
-
-      // 如果已经打开过这个文件，不再重复打开
-      if (hasOpenedFileFromExternalRef.current === scriptId) {
-        return;
+    if (!isAlreadyOpen) {
+      // 如果未打开，则打开文件
+      onFileOpen &&
+        onFileOpen(resolvedFileId, resolvedScriptId, resolvedFileName);
+    } else {
+      // 如果已经打开，切换到该标签页
+      const existingTab = fileTabs.find(
+        (tab) =>
+          tab.scriptId === resolvedScriptId || tab.fileId === resolvedFileId
+      );
+      if (existingTab && onSwitchTab) {
+        onSwitchTab(existingTab.key);
       }
-
-      // 如果提供了 onFileOpen 回调，检查文件是否已在标签页中打开
-      if (onFileOpen) {
-        // 使用 formatData 的逻辑来获取 fileId（ListDevelopScriptItem 没有 script_file_id，直接使用 script_id）
-        const fileId = String(
-          Number((targetFile as any).script_file_id) || targetFile.script_id
-        );
-        const targetScriptId = String(targetFile.script_id);
-        const fileName = targetFile.script_name;
-
-        // 检查文件是否已经在标签页中打开
-        const isAlreadyOpen = fileTabs.some(
-          (tab) => tab.scriptId === targetScriptId || tab.fileId === fileId
-        );
-
-        if (!isAlreadyOpen) {
-          // 如果未打开，则打开文件
-          console.log(
-            '📂 从URL自动打开文件:',
-            fileName,
-            'ScriptId:',
-            targetScriptId
-          );
-          onFileOpen(fileId, targetScriptId, fileName);
-          hasOpenedFileFromExternalRef.current = scriptId;
-        } else {
-          // 如果已经打开，切换到该标签页
-          const existingTab = fileTabs.find(
-            (tab) => tab.scriptId === targetScriptId || tab.fileId === fileId
-          );
-          if (existingTab && onSwitchTab) {
-            onSwitchTab(existingTab.key);
-          }
-          hasOpenedFileFromExternalRef.current = scriptId;
-        }
-      }
-    } else if (scriptId) {
-      // 即使找不到文件，也设置选中状态（可能文件列表还在加载中）
-      setSelectedKeys([scriptId]);
     }
+
+    hasOpenedFileFromExternalRef.current = resolvedScriptId;
   }, [externalSelectedKeys, sqlScriptList, onFileOpen, fileTabs, onSwitchTab]);
 
   // 刷新当前目录

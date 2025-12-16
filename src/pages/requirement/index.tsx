@@ -432,19 +432,20 @@ export default function Requirement() {
     {
       icon: <ExportIcon />,
       title: '导出结果',
-      description: (
-        <>
-          <span>下载标注结果到本地，或在</span>
-          <Link
-            type="text"
-            onClick={() => handleCreateRequirement('create')}
-            style={{ fontSize: '12px' }}
-          >
-            数据集市
-          </Link>
-          <span>中查看</span>
-        </>
-      )
+      description: '下载标注结果到本地'
+      // (
+      //   <>
+      //     <span>下载标注结果到本地，或在</span>
+      //     <Link
+      //       type="text"
+      //       onClick={() => handleCreateRequirement('create')}
+      //       style={{ fontSize: '12px' }}
+      //     >
+      //       数据集市
+      //     </Link>
+      //     <span>中查看</span>
+      //   </>
+      // )
     }
   ];
 
