@@ -116,12 +116,12 @@ export async function saveQualityControlTask({
   save_type: number;
 }) {
   const searchParams = new URLSearchParams(location.search);
-  const rId = taskId || searchParams.get('rId');
+  const tId = taskId || searchParams.get('tId');
   const qc_Round = qcRound || searchParams.get('qcRound');
 
   return await UAPI.RES.leSaveQualityControlTask({})
     .post({
-      task_id: Number(rId),
+      task_id: Number(tId),
       qc_round: Number(qc_Round),
       save_type
     })
@@ -142,12 +142,12 @@ export async function createQualityControlTaskComment({
   comment_content: any;
 }) {
   const searchParams = new URLSearchParams(location.search);
-  const rId = taskId || searchParams.get('rId');
+  const tId = taskId || searchParams.get('tId');
   const qc_Round = qcRound || searchParams.get('qcRound');
 
   return await UAPI.RES.leCreateQualityControlTaskComment({})
     .post({
-      task_id: Number(rId),
+      task_id: Number(tId),
       qc_round: Number(qc_Round),
       comment_type,
       comment_content
@@ -171,11 +171,11 @@ export async function modifyQualityControlTaskComment({
   comment_content: any;
 }) {
   const searchParams = new URLSearchParams(location.search);
-  const rId = taskId || searchParams.get('rId');
+  const tId = taskId || searchParams.get('tId');
   const qc_Round = qcRound || searchParams.get('qcRound');
   return await UAPI.RES.leModifyQualityControlTaskComment({})
     .post({
-      task_id: Number(rId),
+      task_id: Number(tId),
       qc_round: Number(qc_Round),
       comment_id,
       comment_type,
@@ -196,11 +196,11 @@ export async function deleteQualityControlTaskComment({
   comment_id: string;
 }) {
   const searchParams = new URLSearchParams(location.search);
-  const rId = taskId || searchParams.get('rId');
+  const tId = taskId || searchParams.get('tId');
   const qc_Round = qcRound || searchParams.get('qcRound');
   return await UAPI.RES.leDeleteQualityControlTaskComment({})
     .post({
-      task_id: Number(rId),
+      task_id: Number(tId),
       qc_round: Number(qc_Round),
       comment_id
     })

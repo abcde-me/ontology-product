@@ -40,7 +40,7 @@ export const PrevNodes = ({ node }: { node: React.Key }) => {
                   handleNodeSelect(node.id);
                 }}
               >
-                <BlockIcon type={type} />
+                <BlockIcon type={type} size={'md'} />
                 <Typography.Text bold>{title}</Typography.Text>
               </div>
             );

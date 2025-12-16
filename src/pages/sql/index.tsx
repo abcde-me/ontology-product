@@ -25,7 +25,7 @@ const TabPane = Tabs.TabPane;
 
 type TabKey = 'data' | 'files' | 'dataset' | 'script';
 
-const defaultActiveTab = 'files';
+const defaultActiveTab = 'script';
 
 const SqlIndex: React.FC = memo(() => {
   const location = useLocation();
@@ -199,6 +199,7 @@ const SqlIndex: React.FC = memo(() => {
           direction="vertical"
           className={styles['sql-tabs']}
           type="rounded"
+          destroyOnHide
         >
           <TabPane
             key="script"
@@ -289,6 +290,7 @@ const SqlIndex: React.FC = memo(() => {
         )}
         {activeTab === 'files' && (
           <DevelopScriptEditor
+            key={activeTab}
             fileTabs={developScriptFileState.fileTabs}
             activeTab={developScriptFileState.activeTab}
             curActiveTab={activeTab}

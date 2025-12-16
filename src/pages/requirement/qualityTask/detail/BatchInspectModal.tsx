@@ -42,8 +42,6 @@ const BatchInspectModal: React.FC<BatchInspectModalProps> = ({
       };
       const res = await manageQCTaskSampledBatch(params);
       if (res.code === 'success') {
-        Message.success('批量质检成功');
-      } else {
         const actionText: Record<string, string> = {
           pass_all: '全部通过',
           reject_all: '全部驳回',

@@ -14,30 +14,35 @@ const nodeDefault: NodeDefault<StartNodeType> = {
       {
         id: 1,
         category: '文档',
+        category_type: 'text',
         enabled: true,
         format: ['PDF', 'PPT/PPTX', 'DOC/DOCX', 'TXT/MD']
       },
       {
         id: 2,
         category: '图片',
+        category_type: 'pic',
         enabled: true,
         format: ['JPEG', 'PNG', 'JPG']
       },
       {
         id: 3,
         category: '音频',
+        category_type: 'audio',
         enabled: true,
         format: ['WAV', 'MP3', 'AAC', 'FLAC']
       },
       {
         id: 4,
         category: '视频',
+        category_type: 'video',
         enabled: true,
         format: ['MP4', 'MOV', 'MKV']
       },
       {
         id: 999,
         category: '自定义',
+        category_type: 'scripting',
         enabled: true,
         format: []
       }

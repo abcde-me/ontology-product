@@ -74,6 +74,7 @@ import { useEventEmitterContextContext } from '@/pages/workflowConfig/context/ev
 import Confirm from '@/pages/workflowConfig/components/confirm';
 import { FILE_EXTS } from '@/pages/workflowConfig/components/prompt-editor/constants';
 import fileUploadConfigJson from '@/pages/workflowConfig/mockData/fileUploadConfig.json';
+import useInitFlowTestTask from '@/pages/workflowConfig/workflow/hooks/use-init-flow-test-task';
 
 const nodeTypes = {
   [CUSTOM_NODE]: CustomNode,
@@ -231,6 +232,7 @@ const Workflow: FC<WorkflowProps> = memo(
     const { handlePaneContextMenu, handlePaneContextmenuCancel } =
       usePanelInteractions();
     const { isValidConnection } = useWorkflow();
+    useInitFlowTestTask();
     const { exportCheck, handleExportDSL } = useDSL();
 
     useOnViewportChange({

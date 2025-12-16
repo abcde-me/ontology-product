@@ -43,6 +43,7 @@ const useConfig = (id: string, payload: ImageParserNodeType) => {
     (fields: ImageParserNodeType) => {
       const newInputs = produce(inputRef.current, (draft) => {
         draft.pic_model_id = fields.pic_model_id;
+        draft.image_model = fields.image_model;
         draft.pic_emb_model_id = fields.pic_emb_model_id;
       });
       setInputs(newInputs);

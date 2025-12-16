@@ -113,7 +113,7 @@ export const useNodesSyncDraft = () => {
       notRefreshWhenSyncError?: boolean,
       callback?: {
         onSuccess?: (res: any) => void;
-        onError?: () => void;
+        onError?: (error?: any) => void;
         onSettled?: () => void;
       },
       params = {}
@@ -127,12 +127,15 @@ export const useNodesSyncDraft = () => {
         const { setSyncWorkflowDraftHash, setDraftUpdatedAt } =
           workflowStore.getState();
         try {
-          const { data: res } = await createWorkflowDraft(
+          const { data: res, message } = await createWorkflowDraft(
             Object.assign({}, postParams.params, {
               version: 'draft',
               ...params
             })
           );
+          if (!res) {
+            throw new Error(message);
+          }
           setSyncWorkflowDraftHash(res.hash);
           setDraftUpdatedAt(res.updated_at);
           updateQueryParams(history, {
@@ -149,7 +152,7 @@ export const useNodesSyncDraft = () => {
                 handleRefreshWorkflowDraft();
             });
           }
-          callback?.onError && callback.onError();
+          callback?.onError && callback.onError(error);
         } finally {
           callback?.onSettled && callback.onSettled();
         }

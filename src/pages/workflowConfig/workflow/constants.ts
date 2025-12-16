@@ -30,6 +30,12 @@ import EnhancementDefault from './nodes/data-enhancement/default';
 import CustomizeDefault from './nodes/data-customize/default';
 import SQLNodeDefault from './nodes/sql-node/default';
 import SeatunnelNodeDefault from './nodes/seatunnel-node/default';
+import { TaskStatus } from '@/pages/workflowConfig/types/workflow';
+import {
+  IconCheckCircleFill,
+  IconCloseCircleFill,
+  IconLoading
+} from '@arco-design/web-react/icon';
 
 type NodesExtraData = {
   author: string;
@@ -309,9 +315,9 @@ export const NODES_EXTRA_DATA: Record<any, NodesExtraData> = {
     about: '',
     availablePrevNodes: [],
     availableNextNodes: [],
-    getAvailablePrevNodes: CustomizeDefault.getAvailablePrevNodes,
-    getAvailableNextNodes: CustomizeDefault.getAvailableNextNodes,
-    checkValid: CustomizeDefault.checkValid
+    getAvailablePrevNodes: SeatunnelNodeDefault.getAvailablePrevNodes,
+    getAvailableNextNodes: SeatunnelNodeDefault.getAvailableNextNodes,
+    checkValid: SeatunnelNodeDefault.checkValid
   },
   [BlockEnum.Dependent]: {
     author: 'ModaForge',
@@ -712,3 +718,9 @@ export const CUSTOM_EDGE = 'custom';
 export const DSL_EXPORT_CHECK = 'DSL_EXPORT_CHECK';
 export const DEFAULT_RETRY_MAX = 3;
 export const DEFAULT_RETRY_INTERVAL = 100;
+
+export const STATUS2COLOR = {
+  [TaskStatus.FAILURE]: { color: '#EF4444', icon: IconCloseCircleFill },
+  [TaskStatus.RUNNING_EXECUTION]: { color: '#007DFA', icon: IconLoading },
+  [TaskStatus.SUCCESS]: { color: '#10B981', icon: IconCheckCircleFill }
+};

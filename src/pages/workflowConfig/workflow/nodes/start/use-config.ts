@@ -8,6 +8,7 @@ import StartNodeDefault from './default';
 import { useStoreApi } from 'reactflow';
 import { getLoadTaskFiles } from '@/api/loadApi';
 import { useNodeDataUpdate } from '@/pages/workflowConfig/workflow/hooks';
+import { CATEGORY_MAP } from '@/pages/workflowConfig/workflow/nodes/constants';
 
 const useConfig = (id: string, payload: StartNodeType) => {
   const { nodesReadOnly: readOnly } = useNodesReadOnly();
@@ -33,7 +34,12 @@ const useConfig = (id: string, payload: StartNodeType) => {
       const newInputs = produce(inputs, (draft: any) => {
         draft.data_path_id = payload.data_path_id;
         draft.data_path_name = payload.data_path_name;
-        draft.data_category = payload.data_category;
+        draft.data_category = payload.data_category.map((category) => {
+          return {
+            ...category,
+            category_type: CATEGORY_MAP[category.category]
+          };
+        });
       });
       setInputs(newInputs);
     },

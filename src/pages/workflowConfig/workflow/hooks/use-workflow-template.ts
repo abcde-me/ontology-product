@@ -148,7 +148,7 @@ export const useWorkflowTemplate = () => {
     });
     return {
       nodes: [newNode],
-      edges: []
+      edges: [{ source: '', target: newNode.id }]
     };
   }
 
