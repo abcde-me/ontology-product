@@ -16,9 +16,7 @@ interface PaginationProps {
 const Processing: React.FC<PaginationProps> = memo(
   ({ onToScriptList, curActiveTab }) => {
     const [processingNum, setProcessingNum] = React.useState<number>(100);
-    const [iconActive, setIconActive] = React.useState<ViewType>(
-      ViewType.TABLE
-    ); // table表示表格，card表示卡片
+    const [iconActive, setIconActive] = React.useState<ViewType>(ViewType.LIST); // table表示表格，card表示卡片
     const [isShowAll, setIsShoAll] = useState(false);
 
     useEffect(() => {
@@ -48,8 +46,8 @@ const Processing: React.FC<PaginationProps> = memo(
             加工脚本({processingNum})
           </div>
           <div className={style['processing-header-icons-group']}>
-            {(iconActive === ViewType.TABLE && isShowAll) ||
-              (iconActive === ViewType.TABLE && (
+            {(iconActive === ViewType.LIST && isShowAll) ||
+              (iconActive === ViewType.LIST && (
                 <Button
                   onClick={() => {
                     handleDownloadAll();
@@ -76,14 +74,14 @@ const Processing: React.FC<PaginationProps> = memo(
         </div>
         <div className={style['processing-content']}>
           {iconActive === ViewType.TABLE ? (
-            <ScriptTable
-              curActiveTab={curActiveTab}
-              isAll={setIsShoAll}
+            <ScriptCard
               onToScriptList={onToScriptList}
               onTotalChange={setProcessingNum}
             />
           ) : (
-            <ScriptCard
+            <ScriptTable
+              curActiveTab={curActiveTab}
+              isAll={setIsShoAll}
               onToScriptList={onToScriptList}
               onTotalChange={setProcessingNum}
             />

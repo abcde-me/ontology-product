@@ -25,6 +25,9 @@ import ScriptModalTable from '../sctip-modal-table';
 import { getDevelopScriptList, getDevelopScriptLogByScriptId } from '@/api/sql';
 import { lockDevelopScript, deleteDevelopScript } from '@/api/sql-develop';
 import { ScriptStatus, ScriptStatusName } from '@/types/sqlDevelopApi';
+import EllipsisPopover from '@/components/ellipsis-popover-com';
+import classNames from 'classnames';
+import { getVersionType } from '../version-status';
 
 interface ScriptTableProps {
   isAll: (type: boolean) => void;
@@ -212,6 +215,16 @@ const ScriptTable: React.FC<ScriptTableProps> = ({
     });
   };
 
+  const handleToDetail = (scriptId: number | string) => {
+    updateUrlState(
+      {
+        activeTab: 'files',
+        activeDevelopScriptId: String(scriptId)
+      },
+      { method: 'push' }
+    );
+  };
+
   // table数据为空时展示-
   const renderEmptyPlaceholder = (value: string | null) => {
     return value === '' || value == null ? '-' : value;
@@ -229,20 +242,34 @@ const ScriptTable: React.FC<ScriptTableProps> = ({
       dataIndex: 'script_name',
       width: 180,
       ellipsis: true,
-      className: styles['hover-change'] + ' ' + styles['workflow-name']
+      className: styles['hover-change'],
+      render: (_, record) => (
+        <EllipsisPopover
+          value={record.script_name ?? '-'}
+          isEdit={false}
+          isLink
+          handleLink={() => handleToDetail(record.script_id)}
+        />
+      )
     },
     {
       title: '最近版本号',
       dataIndex: 'max_version_name',
-      width: 120
+      width: 120,
+      render: (_, record) => (
+        <EllipsisPopover
+          value={record.max_version_name || '-'}
+          preferTypography
+        ></EllipsisPopover>
+      )
     },
     {
       title: '最新版本状态',
       dataIndex: 'max_version',
-      width: 160
-      // render: (_, record) => {
-      //   return getVersionType(record.status);
-      // },
+      width: 160,
+      render: (_, record) => {
+        return getVersionType(record.status);
+      }
       // filters: [
       //   {
       //     text: '未发版',
@@ -263,37 +290,51 @@ const ScriptTable: React.FC<ScriptTableProps> = ({
       dataIndex: 'create_user',
       width: 100,
       ellipsis: true,
-      className: styles['hover-change']
+      render: (_, record) => (
+        <EllipsisPopover
+          value={record.create_user ?? '-'}
+          preferTypography
+        ></EllipsisPopover>
+      )
     },
     {
       title: '调度版本',
       dataIndex: 'version_name',
       width: 100,
-      ellipsis: true
+      render: (_, record) => (
+        <EllipsisPopover
+          value={record.version_name || '-'}
+          preferTypography
+        ></EllipsisPopover>
+      )
     },
     {
       title: '所属任务节点',
       dataIndex: 'task_name',
       width: 160,
-      ellipsis: true
+      render: (_, record) => (
+        <EllipsisPopover
+          value={record.task_name || '-'}
+          preferTypography
+        ></EllipsisPopover>
+      )
     },
     {
       title: '所属工作流',
       dataIndex: 'process_name',
       width: 160,
-      ellipsis: true
+      render: (_, record) => (
+        <EllipsisPopover
+          value={record.process_name || '-'}
+          preferTypography
+        ></EllipsisPopover>
+      )
     },
     {
       title: '最后执行时间',
       dataIndex: 'update_time',
       width: 180,
-      render: (_, record) => (
-        <span>
-          {record.update_time == '' || record.update_time == null
-            ? '-'
-            : new Date(record.update_time).toLocaleString()}
-        </span>
-      )
+      render: (_, record) => <span>{record.update_time ?? ''}</span>
     },
     {
       title: '操作',
@@ -308,13 +349,7 @@ const ScriptTable: React.FC<ScriptTableProps> = ({
               <span
                 className={styles['operate-text']}
                 onClick={() => {
-                  updateUrlState(
-                    {
-                      activeTab: 'files',
-                      activeDevelopScriptId: record.script_id
-                    },
-                    { method: 'push' }
-                  );
+                  handleToDetail(record.script_id);
                 }}
               >
                 详情
@@ -367,12 +402,18 @@ const ScriptTable: React.FC<ScriptTableProps> = ({
 
   return (
     <div className={styles['script-table-wrapper']}>
-      <div className={styles['header-form-content']}>
+      <div
+        className={classNames(
+          styles['header-form-content'],
+          'flex items-center justify-between overflow-x-auto whitespace-nowrap'
+        )}
+      >
         <Form
           onValuesChange={handleValuesChange}
           form={form}
           autoComplete="off"
           layout="inline"
+          className="flex flex-nowrap items-center whitespace-nowrap"
         >
           <FormItem label="脚本名称:" field="script_name">
             <Input placeholder="输入脚本名称搜索" />
@@ -390,7 +431,7 @@ const ScriptTable: React.FC<ScriptTableProps> = ({
             <Input placeholder="输入开发人搜索" />
           </FormItem>
         </Form>
-        <div style={{ display: 'flex', flex: 1 }}>
+        <div className="flex flex-shrink-0 items-center whitespace-nowrap">
           <Button
             type="text"
             onClick={handleReset}
