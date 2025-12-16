@@ -3,12 +3,16 @@
   display: flex;
   flex-direction: column;
 
+  :global(.arco-form-inline .arco-form-item) {
+    margin-bottom: 0;
+  }
+
   .header-form-content {
     width: 100%;
     display: flex;
     justify-content: space-between;
     margin-bottom: 16px;
-    padding-bottom: 8px;
+    padding-bottom: 16px;
     border-bottom: 1px solid #cbd5e1;
   }
 
@@ -20,6 +24,7 @@
     color: rgb(0, 125, 250);
     cursor: pointer;
     margin-right: 16px;
+    padding: 0;
   }
 
   .operate-text:hover {
