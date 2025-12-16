@@ -236,7 +236,7 @@ export async function getDevelopScriptLogByScriptId(params: {
   script_id: number;
   page: number;
   page_size: number;
-  status?: number[];
+  status_list?: number[];
 }): Promise<ApiRes<GetDevelopScriptLogByScriptIdData>> {
   return await UAPI.RES.GetDevelopScriptLogByScriptIdApi({})
     .post(params)
