@@ -1,0 +1,22 @@
+.modal-content {
+  .left {
+    border: 1px solid #e2e8f0;
+    border-radius: 8px 0 0 8px;
+
+    .task-item {
+      border-radius: 4px;
+      border: 1px solid #cbd5e1;
+      padding: 8px 16px;
+    }
+
+    .task-item-active {
+      border-color: #007dfa !important;
+    }
+  }
+
+  .right {
+    border: 1px solid #e2e8f0;
+    border-left: none;
+    border-radius: 0 8px 8px 0;
+  }
+}

@@ -27,6 +27,9 @@ const Node: FC<NodeProps<ImageParserNodeType>> = (props) => {
       const fields = {} as Record<string, any>;
       if (!props.data.pic_model_id) {
         fields.pic_model_id = pic_model_id;
+        fields.image_model =
+          picList.find((model) => model.id === props.data.pic_model_id)?.type ||
+          '';
       }
       if (!props.data.pic_emb_model_id) {
         fields.pic_emb_model_id = pic_emb_model_id;

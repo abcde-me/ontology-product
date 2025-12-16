@@ -1,4 +1,4 @@
-import type { FC } from 'react';
+import { FC, useCallback } from 'react';
 import React, { useEffect, useState } from 'react';
 import useConfig from './use-config';
 import type { ImageParserNodeType } from './types';
@@ -33,7 +33,8 @@ const Panel: FC<NodePanelProps<ImageParserNodeType>> = ({ id, data }) => {
 
       setPicModels(picList);
 
-      const { id: defaultPicId = '', typeDefaultType = '' } = picList[0] || {};
+      const { id: defaultPicId = '', type: defaultType = '' } =
+        picList[0] || {};
 
       // const defaultPicId = picList[0]?.id || '';
       const defaultPicEmbId = picEmbList[0]?.id || '';
@@ -41,12 +42,10 @@ const Panel: FC<NodePanelProps<ImageParserNodeType>> = ({ id, data }) => {
       const fields = {} as Record<string, any>;
       if (!inputs.pic_model_id) {
         fields.pic_model_id = defaultPicId;
-        fields.image_model = typeDefaultType;
-      }
-      if (fields.pic_model_id) {
+        fields.image_model = defaultType;
+      } else {
         fields.image_model =
-          picModels.find((model) => model.id === fields.pic_model_id)?.type ||
-          '';
+          picList.find((model) => model.id === inputs.pic_model_id)?.type || '';
       }
       if (!inputs.pic_emb_model_id) {
         fields.pic_emb_model_id = defaultPicEmbId;

@@ -9,7 +9,8 @@ import {
   Cascader,
   Empty,
   Popover,
-  InputNumber
+  InputNumber,
+  Divider
 } from '@arco-design/web-react';
 import React, { useEffect, useState } from 'react';
 import {
@@ -34,6 +35,10 @@ import {
   PrevNodes
 } from '@/pages/workflowConfig/workflow/nodes/components';
 import node from '@/pages/workflowConfig/workflow/nodes/end/node';
+import {
+  DependentTaskDialog,
+  DependentTaskList
+} from '@/pages/workflowConfig/workflow/nodes/dependent-node/components';
 
 const { Item: FormItem, useForm, useWatch, List: FormList } = Form;
 const { Row, Col } = Grid;
@@ -96,9 +101,17 @@ export default React.memo(function SQLPanel(
           });
         }}
       >
+        <FormItem
+          label={<Typography.Text bold>外部前置任务</Typography.Text>}
+          tooltip={'可在此处配置依赖的外部工作流或者任务节点并设置逻辑关系'}
+        >
+          <DependentTaskList />
+        </FormItem>
+        <Divider className={'mb-3 mt-3'} />
         <NodeRunSetting />
       </Form>
       <PrevNodes node={props.id} />
+      <DependentTaskDialog />
     </PanelContainer>
   );
 });
