@@ -29,7 +29,6 @@ import { WORKFLOW_LIST_PERMISSIONS } from '@/config/permissions';
 import { IconClockCircle, IconRefresh } from '@arco-design/web-react/icon';
 import { openNewPage } from '@/utils/env';
 import styles from './query-script.module.scss';
-import { VersionType, VersionTypeEnum } from '../sctipt-card';
 import ScriptModalTable from '../sctip-modal-table';
 import { deleteSqlFile, listSqlFile } from '@/api/sql';
 
