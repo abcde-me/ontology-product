@@ -19,6 +19,7 @@ import classNames from 'classnames';
 import noDataElement from '@/components/no-data';
 import dayjs from 'dayjs';
 import ScriptDetailModal from '../spl-script-management/ScriptDetailModal';
+import { useUrlState } from '../../hooks/useUrlState';
 
 const SctipModalTable: React.FC<{
   isVisible: boolean;
@@ -32,7 +33,9 @@ const SctipModalTable: React.FC<{
   const [current, setCurrent] = React.useState<number>(1);
   const [pageSize, setPageSize] = React.useState<number>(10);
   const [total, setTotal] = React.useState<number>(0);
+  const [tableLoading, setTableLoading] = React.useState<boolean>(false);
   const [statusFilter, setStatusFilter] = React.useState<number[]>([]);
+  const { updateUrlState } = useUrlState();
 
   const handleCopyVersion = async (record: any) => {
     setChildStatus(true);
@@ -118,7 +121,10 @@ const SctipModalTable: React.FC<{
   // 当分页或筛选变化时，重新获取数据
   React.useEffect(() => {
     if (visible && rowData?.script_id) {
-      fetchData();
+      setTableLoading(true);
+      fetchData().finally(() => {
+        setTableLoading(false);
+      });
     }
   }, [current, pageSize, statusFilter, fetchData]);
 
@@ -135,6 +141,16 @@ const SctipModalTable: React.FC<{
       setStatusFilter([]);
     }
     setCurrent(1); // 筛选时重置到第一页
+  };
+
+  const handleToDetail = (scriptId: number | string) => {
+    updateUrlState(
+      {
+        activeTab: 'files',
+        activeDevelopScriptId: String(scriptId)
+      },
+      { method: 'push' }
+    );
   };
 
   const columns: any = [
@@ -215,7 +231,7 @@ const SctipModalTable: React.FC<{
           >
             <span
               onClick={() => {
-                handleCopyVersion(record);
+                handleToDetail(record.script_id);
               }}
               className={[
                 styles['option-btn'],
@@ -327,8 +343,10 @@ const SctipModalTable: React.FC<{
           </div>
         </div>
         <Table
+          scroll={{ y: 500 }}
           className="mb-[24px]"
           columns={columns}
+          loading={tableLoading}
           data={tableData}
           rowKey={(record: any) => `${rowData?.script_id}-${record.version}`}
           noDataElement={noDataElement({ description: '暂无数据' })}
