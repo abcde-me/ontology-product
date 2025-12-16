@@ -6,7 +6,8 @@ import {
   Table,
   Dropdown,
   Menu,
-  Button
+  Button,
+  Modal
 } from '@arco-design/web-react';
 import { useHistory } from 'react-router';
 import { ColumnProps } from '@arco-design/web-react/es/Table';
@@ -18,7 +19,13 @@ import { SorterInfo } from '@arco-design/web-react/es/Table/interface';
 import { PermissionWrapper } from '@/components/PermissionGuard';
 import { WORKFLOW_TASK_PERMISSIONS } from '@/config/permissions';
 import styles from './index.module.scss';
-import { IconDown, IconPlus } from '@arco-design/web-react/icon';
+import {
+  IconClose,
+  IconDelete,
+  IconDown,
+  IconPlus
+} from '@arco-design/web-react/icon';
+import TestModal from './compontent/testModal';
 
 const InputSearch = Input.Search;
 
@@ -59,6 +66,17 @@ export default function DataApi() {
   const [total, setTotal] = useState(10);
   // 添加loading状态控制
   const [loading, setLoading] = useState(false);
+  // 初始化授权弹窗是否显示
+  const [authorizationModalVisible, setAuthorizationModalVisible] =
+    useState(false);
+  // 初始化授权弹窗选中的行数据
+  const [selectedRows, setSelectedRows] = useState<Record<string, any>[]>([]);
+  // 初始化选中的行key
+  const [selectedRowKeys, setSelectedRowKeys] = useState<string[]>([]);
+  // 初始化测试弹窗是否显示
+  const [testVisible, setTestVisible] = useState(false);
+  // 初始化测试弹窗数据
+  const [testDataSource, setTestDataSource] = useState([]);
   // 初始化筛选的值
   const [sortValue, setSortValue] = useState({
     status: '',
@@ -330,6 +348,7 @@ export default function DataApi() {
                       borderTop: 'none',
                       borderBottom: 'none'
                     }}
+                    onClick={() => setAuthorizationModalVisible(true)}
                   >
                     授权
                   </Button>
@@ -342,6 +361,10 @@ export default function DataApi() {
                       height: '100%',
                       borderTop: 'none',
                       borderBottom: 'none'
+                    }}
+                    onClick={() => {
+                      setTestVisible(true);
+                      setTestDataSource(record);
                     }}
                   >
                     测试
@@ -372,6 +395,88 @@ export default function DataApi() {
           </Dropdown>
         </div>
       )
+    }
+  ];
+
+  // 授权表列
+  const authorizationColumns: ColumnProps[] = [
+    {
+      title: '名称',
+      dataIndex: 'name',
+      width: 600
+    }
+  ];
+
+  // 授权表数据
+  const authorizationData = [
+    {
+      key: '1',
+      name: 'Jane Doe',
+      salary: 23000,
+      address: '32 Park Road, London',
+      email: 'jane.doe@example.com',
+      parentKey: '',
+      children: [
+        {
+          key: '1-1',
+          name: 'Christina',
+          address: '332 Park Road, London',
+          email: 'christina@example.com',
+          parentKey: '1'
+        }
+      ]
+    },
+    {
+      key: '2',
+      name: 'Alisa Ross',
+      salary: 25000,
+      address: '35 Park Road, London',
+      email: 'alisa.ross@example.com',
+      parentKey: '',
+      children: [
+        {
+          key: '2-1',
+          name: 'Ed Hellen',
+          salary: 17000,
+          address: '42 Park Road, London',
+          email: 'ed.hellen@example.com',
+          parentKey: '2',
+          children: [
+            {
+              key: '2-1-1',
+              name: 'Eric Miller',
+              salary: 23000,
+              address: '67 Park Road, London',
+              email: 'eric.miller@example.com',
+              parentKey: '2-1'
+            },
+            {
+              key: '2-1-2',
+              name: 'Tom Jerry',
+              salary: 666,
+              address: '67 Park Road, London',
+              email: 'tom.jerry@example.com',
+              parentKey: '2-1'
+            }
+          ]
+        },
+        {
+          key: '2-2',
+          name: 'William Smith',
+          salary: 27000,
+          address: '62 Park Road, London',
+          email: 'william.smith@example.com',
+          parentKey: '2'
+        },
+        {
+          key: '2-3',
+          name: 'George Bush',
+          salary: 24000,
+          address: '62 Park Road, London',
+          email: 'george.bush@example.com',
+          parentKey: '2'
+        }
+      ]
     }
   ];
 
@@ -442,6 +547,87 @@ export default function DataApi() {
           style={{ justifyContent: 'flex-end', marginTop: '10px' }}
         />
       )}
+
+      {/* 测试弹窗 */}
+      <TestModal
+        visible={testVisible}
+        dataSource={testDataSource}
+        onCancel={() => setTestVisible(false)}
+      />
+
+      {/* 授权弹窗 */}
+      <Modal
+        className={styles.authorizationModal}
+        visible={authorizationModalVisible}
+        title="授权"
+        onCancel={() => setAuthorizationModalVisible(false)}
+      >
+        <div className={styles.authorizationModalContent}>
+          <div className={styles.leftBox}>
+            <InputSearch placeholder="搜索组织或项目" />
+            <Table
+              border={false}
+              columns={authorizationColumns}
+              data={authorizationData}
+              pagination={false}
+              noDataElement={noDataElement({ description: '暂无数据' })}
+              rowKey="key"
+              loading={loading}
+              rowSelection={{
+                type: 'checkbox',
+                selectedRowKeys,
+                onChange: (selectedRowKeys, selectedRows) => {
+                  console.log(selectedRowKeys, selectedRows);
+                  // 组织下的项目全选时，只保留组织，不保留项目
+                  const allKeys = new Set(selectedRows.map((item) => item.key));
+                  const filteredArr = selectedRows.filter((item) => {
+                    // 无parentKey → 保留
+                    if (!item.parentKey) return true;
+                    // 有parentKey但不在key集合中 → 保留；否则剔除
+                    return !allKeys.has(item.parentKey);
+                  });
+                  setSelectedRowKeys(filteredArr.map((item) => item.key));
+                  setSelectedRows(filteredArr);
+                  console.log(filteredArr, 'filteredArr');
+                },
+                checkStrictly: false
+              }}
+            />
+          </div>
+          <div className={styles.rightBox}>
+            <div className={styles.title}>
+              <div className={styles.selectedCount}>
+                已选 {selectedRows.length}/50 项
+              </div>
+              <IconDelete
+                className={styles.deleteIcon}
+                onClick={() => {
+                  setSelectedRows([]);
+                  setSelectedRowKeys([]);
+                }}
+              />
+            </div>
+            <div className={styles.selectedItems}>
+              {selectedRows.map((item) => (
+                <div key={item.key} className={styles.selectedItem}>
+                  <div>{item.name}</div>
+                  <IconClose
+                    className={styles.deleteIcon}
+                    onClick={() => {
+                      setSelectedRows(
+                        selectedRows.filter((row) => row.key !== item.key)
+                      );
+                      setSelectedRowKeys(
+                        selectedRowKeys.filter((key) => key !== item.key)
+                      );
+                    }}
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }
