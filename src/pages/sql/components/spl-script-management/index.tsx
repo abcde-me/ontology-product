@@ -21,6 +21,7 @@ const SplScriptManagement: React.FC<SplScriptManagementProps> = memo(
           onChange={setCurActiveTab}
           defaultActiveTab="processing"
           className={styles['spl-tabs']}
+          destroyOnHide
         >
           <TabPane key="processing" title="加工脚本">
             <Processing
