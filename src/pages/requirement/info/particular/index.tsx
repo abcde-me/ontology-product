@@ -1,9 +1,10 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Table, Input, Pagination, Button } from '@arco-design/web-react';
 import { ColumnProps } from '@arco-design/web-react/es/Table';
 import { SorterInfo } from '@arco-design/web-react/es/Table/interface';
 import { detailRequirement } from '@/api/dataAnnotation';
 import { useParams } from '@/utils/url';
+import dayjs from 'dayjs';
 import './index.scss';
 
 const InputSearch = Input.Search;
@@ -58,27 +59,61 @@ interface RequirementParticularProps {
   isActive?: boolean;
 }
 
+// 工序筛选选项
+const processFilterOptions = Object.entries(processMap).map(([key, value]) => ({
+  text: value,
+  value: Number(key)
+}));
+
+// 状态筛选选项
+const statusFilterOptions = Object.entries(statusConfig).map(
+  ([key, value]) => ({
+    text: value.text,
+    value: Number(key)
+  })
+);
+
 function RequirementParticular({ isActive }: RequirementParticularProps) {
   const id = useParams('id') as string;
-  const [searchValue, setSearchValue] = useState<string>('');
   const [current, setCurrent] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [total, setTotal] = useState(0);
   const [tableData, setTableData] = useState<TaskDetail[]>([]);
   const [sorter, setSorter] = useState<SorterInfo | null>(null);
+  const [filters, setFilters] = useState<{
+    task_process?: number[];
+    task_status?: number[];
+  }>({});
   const [loading, setLoading] = useState(false);
-  const isFirstRender = useRef(true);
+
+  // 使用 ref 保存搜索值，避免闭包问题
+  const searchValueRef = useRef('');
 
   // 获取数据
-  const getList = async () => {
+  const getList = useCallback(async () => {
     if (!id) return;
     setLoading(true);
     try {
       const res = await detailRequirement({
         req_id: Number(id),
-        search_content: searchValue,
+        search_content: searchValueRef.current,
         page: current,
-        page_size: pageSize
+        page_size: pageSize,
+        sort: sorter?.field
+          ? [
+              {
+                field: sorter.field as string,
+                order: sorter.direction === 'descend' ? 'desc' : 'asc'
+              }
+            ]
+          : undefined,
+        filters:
+          filters.task_process?.length || filters.task_status?.length
+            ? {
+                task_process_list: filters.task_process,
+                task_status_list: filters.task_status
+              }
+            : undefined
       });
       if (res?.code === 'success') {
         setTableData(res.data.items || []);
@@ -89,42 +124,38 @@ function RequirementParticular({ isActive }: RequirementParticularProps) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [id, current, pageSize, sorter, filters]);
 
   useEffect(() => {
     if (isActive) {
       getList();
     }
-  }, [id, current, pageSize, isActive]);
+  }, [isActive, getList]);
 
-  useEffect(() => {
-    // 跳过首次渲染，避免重复调用
-    if (isFirstRender.current) {
-      isFirstRender.current = false;
-      return;
-    }
-    if (isActive) {
-      setCurrent(1);
-      getList();
-    }
-  }, [searchValue]);
-
-  // 处理搜索
+  // 搜索处理（点击搜索、回车、清空都会触发）
   const handleSearch = (value: string) => {
-    setSearchValue(value);
+    searchValueRef.current = value;
+    setCurrent(1);
+    getList();
   };
 
-  // 处理表格变化
+  // 处理表格变化（排序和筛选）
   const handleTableChange = (
     _pagination: any,
     sorterInfo: SorterInfo | SorterInfo[],
-    _filters: any
+    tableFilters: Partial<Record<string, (string | number)[]>>
   ) => {
+    // 处理排序
     if (Array.isArray(sorterInfo)) {
       setSorter(sorterInfo[0] || null);
     } else {
       setSorter(sorterInfo || null);
     }
+    // 处理筛选
+    setFilters({
+      task_process: tableFilters.task_process as number[] | undefined,
+      task_status: tableFilters.task_status as number[] | undefined
+    });
     setCurrent(1);
   };
 
@@ -150,12 +181,16 @@ function RequirementParticular({ isActive }: RequirementParticularProps) {
       title: '当前工序',
       dataIndex: 'task_process',
       width: 120,
+      filters: processFilterOptions,
+      filterMultiple: true,
       render: (process: number) => processMap[process] || '-'
     },
     {
       title: '状态',
       dataIndex: 'task_status',
       width: 140,
+      filters: statusFilterOptions,
+      filterMultiple: true,
       render: (_: any, record: TaskDetail) => (
         <StatusIndicator status={record.task_status} />
       )
@@ -169,6 +204,15 @@ function RequirementParticular({ isActive }: RequirementParticularProps) {
       title: '标注员',
       dataIndex: 'label_user',
       width: 120
+    },
+    {
+      title: '更新时间',
+      dataIndex: 'update_time',
+      width: 180,
+      sorter: true,
+      render: (_, record) => (
+        <span>{dayjs(record.update_time).format('YYYY-MM-DD HH:mm:ss')}</span>
+      )
     },
     {
       title: '操作',
@@ -192,10 +236,9 @@ function RequirementParticular({ isActive }: RequirementParticularProps) {
       <div className="particular-header" style={{ flexShrink: 0 }}>
         <InputSearch
           placeholder="输入任务包ID、当前操作人、标注员搜索"
-          value={searchValue}
-          onChange={setSearchValue}
           onSearch={handleSearch}
           allowClear
+          onClear={() => handleSearch('')}
           style={{ width: 400 }}
         />
       </div>

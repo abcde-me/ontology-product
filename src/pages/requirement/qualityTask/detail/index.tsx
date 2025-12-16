@@ -174,7 +174,7 @@ function QualityTaskDetail() {
           req_id: Number(reqId)
         };
         const res = await manageQCTaskBatch(params);
-        if (res.data.code === 'success') {
+        if (res.code === 'success') {
           Message.success(type === 'pass_all' ? '已全部通过' : '已全部驳回');
           handleSuccess();
         } else {
