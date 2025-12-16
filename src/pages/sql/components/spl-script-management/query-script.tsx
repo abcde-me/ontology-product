@@ -247,10 +247,7 @@ const QueryScript: React.FC<QueryScriptProps> = ({ curActiveTab }) => {
               <span
                 className={styles['operate-text']}
                 onClick={() => {
-                  viewDetailWorkflow(
-                    record.workflow_uuid,
-                    record.ds_workflow_id
-                  );
+                  handleToDetail(record.script_id);
                 }}
               >
                 详情
