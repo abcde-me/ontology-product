@@ -20,7 +20,6 @@ import { WORKFLOW_LIST_PERMISSIONS } from '@/config/permissions';
 import { IconRefresh } from '@arco-design/web-react/icon';
 import { useUrlState } from '@/pages/sql/hooks/useUrlState';
 import styles from './index.module.scss';
-import { VersionType, VersionTypeEnum } from '../sctipt-card';
 import ScriptModalTable from '../sctip-modal-table';
 import { getDevelopScriptList, getDevelopScriptLogByScriptId } from '@/api/sql';
 import { lockDevelopScript, deleteDevelopScript } from '@/api/sql-develop';

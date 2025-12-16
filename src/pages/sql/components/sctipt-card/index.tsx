@@ -359,10 +359,17 @@ const ScriptCard: React.FC<ScriptCardProps> = ({
                     </div>
                   </div>
                   <div className={styles['script-card-content-item-content']}>
-                    {highlightSearchKeyword(
-                      item?.script_context || '',
-                      searchValue
-                    )}
+                    <EllipsisPopover
+                      value={highlightSearchKeyword(
+                        item?.script_context || ' ',
+                        searchValue
+                      )}
+                      preferTypography
+                      ellipsis={{ rows: 3, cssEllipsis: true }}
+                      wrapperClassName={
+                        styles['script-card-content-item-content-text']
+                      }
+                    />
                   </div>
                 </div>
               ))
