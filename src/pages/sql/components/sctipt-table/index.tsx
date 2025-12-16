@@ -484,11 +484,13 @@ const ScriptTable: React.FC<ScriptTableProps> = ({
           style={{ justifyContent: 'flex-end', marginTop: '10px' }}
         />
       )}
-      <ScriptModalTable
-        rowData={rowData}
-        isVisible={visible}
-        setChildStatus={setVisible}
-      />
+      {visible && (
+        <ScriptModalTable
+          rowData={rowData}
+          isVisible={visible}
+          setChildStatus={setVisible}
+        />
+      )}
       <ScriptDetailModal
         visible={detailVisible}
         title={detailRecord?.script_name}
