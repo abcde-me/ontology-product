@@ -28,6 +28,7 @@ import { ScriptStatus, ScriptStatusName } from '@/types/sqlDevelopApi';
 import EllipsisPopover from '@/components/ellipsis-popover-com';
 import classNames from 'classnames';
 import VersionStatus from '../version-status';
+import ScriptDetailModal from '../spl-script-management/ScriptDetailModal';
 
 interface ScriptTableProps {
   isAll: (type: boolean) => void;
@@ -92,6 +93,10 @@ const ScriptTable: React.FC<ScriptTableProps> = ({
   const [scriptLogList, setScriptLogList] = useState([]);
   // 初始化当前点击的脚本数据
   const [rowData, setRowData] = useState([]);
+  // 控制详情弹窗显示隐藏
+  const [detailVisible, setDetailVisible] = useState<boolean>(false);
+  // 当前选中的脚本详情数据
+  const [detailRecord, setDetailRecord] = useState<any>(null);
   // 组件初始化
   useEffect(() => {
     getList();
@@ -225,6 +230,12 @@ const ScriptTable: React.FC<ScriptTableProps> = ({
     );
   };
 
+  // 打开详情弹窗
+  const handleOpenDetail = (record: any) => {
+    setDetailRecord(record);
+    setDetailVisible(true);
+  };
+
   // table数据为空时展示-
   const renderEmptyPlaceholder = (value: string | null) => {
     return value === '' || value == null ? '-' : value;
@@ -349,7 +360,7 @@ const ScriptTable: React.FC<ScriptTableProps> = ({
               <span
                 className={styles['operate-text']}
                 onClick={() => {
-                  handleToDetail(record.script_id);
+                  handleOpenDetail(record);
                 }}
               >
                 详情
@@ -486,6 +497,12 @@ const ScriptTable: React.FC<ScriptTableProps> = ({
         isVisible={visible}
         setChildStatus={setVisible}
         handleViewHistory={handleViewHistory}
+      />
+      <ScriptDetailModal
+        visible={detailVisible}
+        title={detailRecord?.script_name}
+        content={detailRecord?.script_context}
+        onCancel={() => setDetailVisible(false)}
       />
     </div>
   );

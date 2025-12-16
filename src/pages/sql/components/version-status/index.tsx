@@ -30,7 +30,7 @@ export default function VersionStatus({ status }: VersionStatusProps) {
   const iconClass = iconClassMap[status] ?? 'unreleased-icon';
 
   return (
-    <div className="flex items-center">
+    <div className="flex min-w-[58px] items-center">
       <span className={styles[iconClass]} />
       <div className="text-[14px] leading-[22px] text-[var(--color-text-1)]">
         {ScriptStatusName[status]}
