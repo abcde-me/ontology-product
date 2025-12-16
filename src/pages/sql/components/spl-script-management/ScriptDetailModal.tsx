@@ -3,6 +3,7 @@ import { Button, Message, Modal } from '@arco-design/web-react';
 import { IconCopy } from '@arco-design/web-react/icon';
 import CodeMirror from '@uiw/react-codemirror';
 import { sql } from '@codemirror/lang-sql';
+import copy from 'copy-to-clipboard';
 import EllipsisPopover from '@/components/ellipsis-popover-com';
 
 interface ScriptDetailModalProps {
@@ -20,16 +21,15 @@ const ScriptDetailModal: React.FC<ScriptDetailModalProps> = ({
   content,
   onCancel
 }) => {
-  const handleCopy = async () => {
+  const handleCopy = () => {
     if (!content) {
       Message.warning('暂无内容可复制');
       return;
     }
-    try {
-      await navigator.clipboard.writeText(content);
+    const success = copy(content);
+    if (success) {
       Message.success('复制成功');
-    } catch (error) {
-      console.error('复制失败', error);
+    } else {
       Message.error('复制失败，请稍后重试');
     }
   };

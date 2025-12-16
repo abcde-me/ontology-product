@@ -21,7 +21,7 @@ import { IconRefresh } from '@arco-design/web-react/icon';
 import { useUrlState } from '@/pages/sql/hooks/useUrlState';
 import styles from './index.module.scss';
 import ScriptModalTable from '../sctip-modal-table';
-import { getDevelopScriptList, getDevelopScriptLogByScriptId } from '@/api/sql';
+import { getDevelopScriptList } from '@/api/sql';
 import { lockDevelopScript, deleteDevelopScript } from '@/api/sql-develop';
 import { ScriptStatus, ScriptStatusName } from '@/types/sqlDevelopApi';
 import EllipsisPopover from '@/components/ellipsis-popover-com';
@@ -67,7 +67,7 @@ const ScriptTable: React.FC<ScriptTableProps> = ({
   // 初始化搜索框value
   const [formData, setFormData] = useState({
     script_name: '', // 脚本名称
-    version_type: 0, // 版本状态
+    status: 0, // 版本状态
     create_user: '' // 开发人
   });
   // 初始化开发脚本列表数据
@@ -88,8 +88,6 @@ const ScriptTable: React.FC<ScriptTableProps> = ({
   });
   // 控制弹窗显示隐藏
   const [visible, setVisible] = useState<boolean>(false);
-  // 初始化历史版本数据
-  const [scriptLogList, setScriptLogList] = useState([]);
   // 初始化当前点击的脚本数据
   const [rowData, setRowData] = useState([]);
   // 控制详情弹窗显示隐藏
@@ -114,7 +112,7 @@ const ScriptTable: React.FC<ScriptTableProps> = ({
     try {
       const params: any = {
         script_name: formData?.script_name,
-        status: formData?.version_type,
+        status: formData?.status,
         create_user: formData?.create_user,
         page: current, //第几页
         page_size: pageSize, //每页个数
@@ -145,31 +143,26 @@ const ScriptTable: React.FC<ScriptTableProps> = ({
   };
 
   // 点击删除操作弹窗
-  const handleDelete = (script_id: number) => {
-    // 如果当前有人在编辑不让删除
-    lockDevelopScript(script_id).then((res) => {
-      if (res.status === 200 && res.code === '') {
-        Modal.confirm({
-          title: (
-            <span className={styles['workflow-list-modal-title']}>
-              确定删除此脚本吗？
-            </span>
-          ),
-          content: (
-            <div className={styles['workflow-list-modal-content']}>
-              删除后，该脚本不可恢复。
-            </div>
-          ),
-          okText: '确定',
-          cancelText: '取消',
-          onOk: () => {
-            handleDeleteScript(script_id);
-          }
-        });
-      } else {
-        Message.error({
-          content: res?.message ?? '删除失败，请稍后重试'
-        });
+  const handleDelete = (script_id: number, status: ScriptStatus) => {
+    if (status === ScriptStatus.Scheduling) {
+      return;
+    }
+
+    Modal.confirm({
+      title: (
+        <span className={styles['workflow-list-modal-title']}>
+          确定删除此脚本吗？
+        </span>
+      ),
+      content: (
+        <div className={styles['workflow-list-modal-content']}>
+          删除后，该脚本不可恢复。
+        </div>
+      ),
+      okText: '确定',
+      cancelText: '取消',
+      onOk: () => {
+        handleDeleteScript(script_id);
       }
     });
   };
@@ -214,9 +207,6 @@ const ScriptTable: React.FC<ScriptTableProps> = ({
   const handleViewHistory = (record: any) => {
     setVisible(true);
     setRowData(record);
-    getDevelopScriptLogByScriptId(record.script_id).then((res) => {
-      setScriptLogList(res?.data?.items || []);
-    });
   };
 
   const handleToDetail = (scriptId: number | string) => {
@@ -354,7 +344,7 @@ const ScriptTable: React.FC<ScriptTableProps> = ({
       render: (_, record) => {
         const perms = record.perms || [];
         return (
-          <div style={{ display: 'flex' }}>
+          <div style={{ display: 'flex', alignItems: 'center' }}>
             <PermissionWrapper permission={WORKFLOW_LIST_PERMISSIONS.CAN_READE}>
               <span
                 className={styles['operate-text']}
@@ -369,25 +359,29 @@ const ScriptTable: React.FC<ScriptTableProps> = ({
             <span
               className={styles['operate-text']}
               onClick={() => {
-                console.log(123);
-                setVisible(true);
-                setRowData(record);
+                // setVisible(true);
+                // setRowData(record);
                 handleViewHistory(record);
               }}
             >
               历史版本
             </span>
-            {/* </PermissionWrapper> */}
-            {/* <PermissionWrapper
-              permission={WORKFLOW_LIST_PERMISSIONS.CAN_DELETE}
-            > */}
-            <span
-              className={styles['operate-text']}
-              onClick={() => handleDelete(record.script_id)}
+            <Popover
+              content={
+                record.status === ScriptStatus.Scheduling
+                  ? '调度中的脚本不可删除'
+                  : ''
+              }
             >
-              删除
-            </span>
-            {/* </PermissionWrapper> */}
+              <Button
+                type="text"
+                className={styles['operate-text']}
+                onClick={() => handleDelete(record.script_id, record.status)}
+                disabled={record.status === ScriptStatus.Scheduling}
+              >
+                删除
+              </Button>
+            </Popover>
           </div>
         );
       }
@@ -423,13 +417,13 @@ const ScriptTable: React.FC<ScriptTableProps> = ({
           form={form}
           autoComplete="off"
           layout="inline"
-          className="flex flex-nowrap items-center whitespace-nowrap"
+          className="flex items-center whitespace-nowrap"
         >
           <FormItem label="脚本名称:" field="script_name">
-            <Input placeholder="输入脚本名称搜索" />
+            <Input className="min-w-[260px]" placeholder="输入脚本名称搜索" />
           </FormItem>
-          <FormItem label="最新版本状态:" field="version_type">
-            <Select placeholder="请选择最新版本状态">
+          <FormItem label="最新版本状态:" field="status">
+            <Select className="min-w-[232px]" placeholder="请选择最新版本状态">
               {options.map((option, index) => (
                 <Option key={option.value} value={option.value}>
                   {option.label}
@@ -438,10 +432,10 @@ const ScriptTable: React.FC<ScriptTableProps> = ({
             </Select>
           </FormItem>
           <FormItem label="开发人:" field="create_user">
-            <Input placeholder="输入开发人搜索" />
+            <Input className="min-w-[260px]" placeholder="输入开发人搜索" />
           </FormItem>
         </Form>
-        <div className="flex flex-shrink-0 items-center whitespace-nowrap">
+        <div className="flex items-center whitespace-nowrap">
           <Button
             type="text"
             onClick={handleReset}
@@ -492,10 +486,8 @@ const ScriptTable: React.FC<ScriptTableProps> = ({
       )}
       <ScriptModalTable
         rowData={rowData}
-        tableData={scriptLogList}
         isVisible={visible}
         setChildStatus={setVisible}
-        handleViewHistory={handleViewHistory}
       />
       <ScriptDetailModal
         visible={detailVisible}
