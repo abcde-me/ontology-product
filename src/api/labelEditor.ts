@@ -96,11 +96,23 @@ export async function getQualityControlTask(qsId?: number) {
 }
 
 // 改错、预览用，获取质检信息（评论==）
-export async function getQualityControlTaskById(taskId?: string) {
+export async function getQualityControlTaskById(
+  taskId?: string,
+  flowId?: string
+) {
   const searchParams = new URLSearchParams(location.search);
   const tId = taskId || searchParams.get('tId');
+  const stage = taskId || searchParams.get('stage');
+  const flow_Id = flowId || searchParams.get('flowId');
+  const params: Record<string, any> = {
+    task_id: Number(tId)
+  };
+  if (stage === 'PREVIEW') {
+    params.flow_id = Number(flow_Id);
+    params.history = true;
+  }
   return await UAPI.RES.leGetQualityControlTaskById({})
-    .post({ task_id: Number(tId) })
+    .post(params)
     .inRegion()
     .do();
 }
@@ -207,6 +219,55 @@ export async function deleteQualityControlTaskComment({
     .inRegion()
     .do();
 }
+
+// 获取任务流水
+export async function getFlowListTask({
+  taskId,
+  pkgId,
+  rId
+}: {
+  taskId?: string;
+  pkgId?: string;
+  rId?: string;
+}) {
+  const searchParams = new URLSearchParams(location.search);
+  const tId = taskId || searchParams.get('tId');
+  const pkg_Id = pkgId || searchParams.get('pkgId');
+  const r_Id = rId || searchParams.get('rId');
+  const params: Record<string, any> = {
+    task_id: Number(tId),
+    pkg_id: Number(pkg_Id),
+    req_id: Number(r_Id)
+  };
+  return await UAPI.RES.getFlowListTask({}).post(params).inRegion().do();
+}
+
+// 任务预览切换
+export async function switchPreviewTask({
+  taskId,
+  pkgId,
+  op
+}: {
+  taskId?: string;
+  pkgId?: string;
+  op: string;
+}) {
+  const searchParams = new URLSearchParams(location.search);
+  const tId = taskId || searchParams.get('tId');
+  const pkg_Id = pkgId || searchParams.get('pkgId');
+  const params: Record<string, any> = {
+    task_id: Number(tId),
+    pkg_id: Number(pkg_Id),
+    op
+  };
+  return await UAPI.RES.switchPreviewTask({}).post(params).inRegion().do();
+}
+
+// 预览用标注结果，结构同getTaskResult
+export async function previewTaskResult(id: number) {
+  return await UAPI.RES.previewTaskResult({}).post({ id }).inRegion().do();
+}
+
 // =================================== 下面为适配CVAT图片，视频标注API ===============================
 export async function saveImgJobAnnotations(
   taskId: string,
@@ -235,7 +296,7 @@ const STAGE_MAP = {
   LABEL: 'annotation',
   RELABEL: 'annotation',
   REVIEW: 'validation',
-  PREVIEW: 'Tag annotation'
+  PREVIEW: 'preview'
 };
 export async function getImgJobOverview(taskId: string) {
   const searchParams = new URLSearchParams(location.search);
@@ -281,6 +342,18 @@ export async function getImgJobOverview(taskId: string) {
 
 export async function getImgJobAnnotations(taskId: string) {
   const result = await getTaskResult(taskId);
+  const annotations = result.data.result ?? cloneDeep(EmptyImgLabelResult);
+  return Promise.resolve({
+    data: {
+      ...annotations,
+      update_time: result.data.update_time,
+      has_result: result.data.result_type
+    }
+  });
+}
+
+export async function getImgJobPreviewAnnotations(id: number) {
+  const result = await previewTaskResult(id);
   const annotations = result.data.result ?? cloneDeep(EmptyImgLabelResult);
   return Promise.resolve({
     data: {

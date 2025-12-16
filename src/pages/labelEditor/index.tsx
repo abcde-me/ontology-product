@@ -19,7 +19,11 @@ import {
   saveQualityControlTask,
   createQualityControlTaskComment,
   modifyQualityControlTaskComment,
-  deleteQualityControlTaskComment
+  deleteQualityControlTaskComment,
+  getFlowListTask,
+  switchPreviewTask,
+  previewTaskResult,
+  getImgJobPreviewAnnotations
 } from '@/api/labelEditor';
 import WujieReact from 'wujie-react';
 import { Message, Modal } from '@arco-design/web-react';
@@ -50,6 +54,7 @@ function LabelEditorPage() {
   // 文本用
   const mode = useParams('mode');
   const deadlineTimestamp = useParams('deadlineTimestamp');
+  const flowId = useParams('flowId');
   const [labelUrl, setLabelUrl] = useState('');
   const history = useHistory();
   const hasSavePermission = useHasPermission(ANNOTATION_TASK_PERMISSIONS.SAVE);
@@ -76,6 +81,16 @@ function LabelEditorPage() {
           await getCurQualityControlTask(Number(qsId));
         }
       }
+      if (['PREVIEW'].includes(stage!)) {
+        if (flowId) {
+          setLabelUrl(
+            `/labeleditor/${LabelTypeMap[labelType!]}/requirement/${requirementId}/task/${taskId}?type=${labelType}&kind=${toolKind}&mode=${mode}&tool=${labelTool}&name=${reqName}&stage=${stage}&pkgId=${pkgId}&flowId=${flowId}`
+          );
+          setLoading(false);
+        } else {
+          await getCurFlowListTask();
+        }
+      }
     };
     init();
   }, [
@@ -89,6 +104,48 @@ function LabelEditorPage() {
     stage,
     mode
   ]);
+  // 预览跳转
+  const getCurFlowListTask = async () => {
+    const flowListTaskInfo = await getFlowListTask({
+      rId: requirementId!,
+      pkgId: pkgId!,
+      taskId: taskId!
+    });
+    if (!flowListTaskInfo?.data?.items?.length) {
+      Modal.destroyAll();
+      Modal.info({
+        escToExit: false,
+        maskClosable: false,
+        title: '当前任务无历史记录',
+        content: (
+          <span style={{ fontSize: '14px', color: '#1E293B' }}>
+            点击确定将返回标注列表页
+          </span>
+        ),
+        icon: (
+          <IconExclamationCircleFill
+            style={{ color: '#007DFA', fontSize: '20px' }}
+          />
+        ),
+        onOk: () => {
+          goBack();
+        }
+      });
+      return;
+    }
+    const flowId = flowListTaskInfo.data.items[0].id;
+    const taskInfo = await getTaskDetail(String(taskId));
+    const {
+      requirement_info: {
+        name,
+        label_type: type,
+        label_tool: { label_tool_code: tool }
+      }
+    } = taskInfo.data;
+    history.replace(
+      `/tenant/compute/modaforge/labelEditor?rId=${requirementId}&tId=${taskId}&type=${type}&kind=${TEXT_DATA[tool]}&mode=${STAGE_MAP[stage!]}&tool=${tool}&name=${name}&stage=${stage}&pkgId=${pkgId}&flowId=${flowId}`
+    );
+  };
 
   // 质检跳转
   const getCurQualityControlTask = async (qsId: number) => {
@@ -279,7 +336,11 @@ function LabelEditorPage() {
             deleteQualityControlTaskComment,
             saveQualityControlTask: (...args) =>
               saveTaskWrapper(...args, saveQualityControlTask),
-            switchNextQualityControlTask
+            switchNextQualityControlTask,
+            getFlowListTask,
+            switchPreviewTask,
+            previewTaskResult,
+            getImgJobPreviewAnnotations
           }}
         ></WujieReact>
       )}
