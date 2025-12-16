@@ -186,6 +186,10 @@
           padding: 8px 0;
           margin: 0 32px 0 0;
         }
+
+        :global(.arco-form-item) {
+          margin-bottom: 0;
+        }
       }
     }
 

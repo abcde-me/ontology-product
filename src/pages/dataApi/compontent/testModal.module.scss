@@ -1,0 +1,57 @@
+.testModal {
+  width: 1200px;
+  max-height: 660px;
+
+  .lfetBox {
+    width: 635px;
+    padding: 0 0 24px 0;
+
+    :global(.arco-form) {
+      max-height: 515px;
+      overflow: auto;
+    }
+
+    :global(.arco-form-item) {
+      margin-bottom: 0;
+    }
+  }
+
+  .rightBox {
+    flex: 1;
+    padding: 0 0 24px 0;
+
+    .responseBox {
+      width: 100%;
+      height: 456px;
+      overflow: auto;
+      padding: 8px 12px;
+      background-color: var(--background-color-bg-2, #f8fafd);
+    }
+
+    :global(.arco-tabs-header-title) {
+      padding: 8px 0;
+      margin: 0 32px 0 0;
+    }
+
+    :global(.arco-spin) {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 45% 0;
+
+      :global(.arco-spin-tip) {
+        font-size: 14px;
+        color: #6e7b8d;
+      }
+    }
+
+    :global(.arco-empty) {
+      padding: 45% 0;
+
+      :global(.arco-empty-image) {
+        font-size: 48px;
+        color: #94a3b8;
+      }
+    }
+  }
+}
