@@ -94,7 +94,7 @@ const SctipModalTable: React.FC<{
         script_id: rowData.script_id,
         page: current,
         page_size: pageSize,
-        status: statusFilter
+        status_list: statusFilter
       });
       if (res?.status === 200 && res?.data) {
         const items = res.data.items || [];
