@@ -32,6 +32,29 @@ export default function useInitFlowTestTask(manual = false) {
       }
     }
   );
+  const { cancel } = useRequest(
+    () => {
+      if (!lastFlowTask) return Promise.resolve([]);
+      const { id } = lastFlowTask;
+      return getNodesProcessData(id);
+    },
+    {
+      pollingInterval: 5000,
+      ready: !!lastFlowTask,
+      onSuccess(res) {
+        if (!res.length) return cancel();
+        const taskIsRunning = res.some((nodeProcess) => {
+          const { state } = nodeProcess;
+          return state === TaskStatus.RUNNING_EXECUTION;
+        });
+        if (!taskIsRunning) {
+          cancel();
+          return;
+        }
+        setNodesProcessDetail(res);
+      }
+    }
+  );
 
   const getNodesProcessData = async (task_id) => {
     const nodesProcessData = await getWorkflowNodeTask(task_id);
@@ -39,29 +62,8 @@ export default function useInitFlowTestTask(manual = false) {
   };
 
   useEffect(() => {
-    if (!lastFlowTask) return;
-    const { state, id } = lastFlowTask;
-    let timer;
-    if (state === TaskStatus.RUNNING_EXECUTION) {
-      timer = setInterval(() => {
-        getNodesProcessData(id)
-          .then((res) => {
-            const taskIsRunning = res.some((nodeProcess) => {
-              const { state } = nodeProcess;
-              return state === TaskStatus.RUNNING_EXECUTION;
-            });
-            if (!taskIsRunning) {
-              clearInterval(timer);
-              return;
-            }
-            setNodesProcessDetail(res);
-          })
-          .catch(console.error);
-      }, 5000);
-    }
-    return () => {
-      timer && clearInterval(timer);
-    };
-  }, [lastFlowTask]);
+    return cancel;
+  }, []);
+
   return [initFlowTestTask];
 }

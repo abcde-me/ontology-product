@@ -59,8 +59,8 @@ export default memo(function TestNode(props: {
   const badgeColor = useMemo(() => {
     const state = nodeProcessStatus?.state;
     if (state === TaskStatus.FAILURE) return '#EF4444';
-    if (state === TaskStatus.RUNNING_EXECUTION) return '#007DFA';
-    return '#10B981';
+    if (state === TaskStatus.SUCCESS) return '#10B981';
+    return '#007DFA';
   }, [nodeProcessStatus]);
 
   return (

@@ -3,12 +3,10 @@ import {
   CreateWorkflowRes,
   WorkflowDetailRes,
   WorkflowOperationParams,
-  WorkflowOperation,
   WorkflowDetailParams,
   EditWorkflowParams
 } from '@/types/workflowApi';
 import UAPI from '@/api';
-import React from 'react';
 
 // 创建工作流
 export async function createWorkflow(

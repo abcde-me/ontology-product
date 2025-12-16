@@ -2,6 +2,7 @@ import React from 'react';
 import {
   Button,
   Collapse,
+  Form,
   Modal,
   Tree,
   Typography
@@ -9,6 +10,11 @@ import {
 import styles from './index.module.scss';
 import BlockIcon from '@/pages/workflowConfig/workflow/block-icon';
 import { IconDelete } from '@arco-design/web-react/icon';
+import useArcoTable from '@/hooks/use-arco-table';
+import { SearchWorkflowParams } from '@/pages/workflowList/types';
+import { SorterInfo } from '@arco-design/web-react/lib/Table/interface';
+import { getStructuredWorkflowList } from '@/api/workflowList';
+import form from '@/pages/workflowConfig/components/markdown-blocks/form';
 
 const CollapseItem = Collapse.Item;
 
@@ -30,6 +36,24 @@ export const TaskItem = () => {
 };
 
 export const DependentTaskDialog = () => {
+  const [form] = Form.useForm();
+  useArcoTable(
+    ({ pagination, filters, sorter, query }) => {
+      const searchParams: SearchWorkflowParams = {
+        page: pagination.current,
+        page_size: pagination.pageSize,
+        ...query
+      };
+      return getStructuredWorkflowList(searchParams);
+    },
+    {
+      defaultPage: 1,
+      defaultPageSize: 10,
+      deps: [],
+      form
+    }
+  );
+
   return (
     <Modal visible={true} title={'外部任务设置'} style={{ width: '60vw' }}>
       <div className={`flex ${styles['modal-content']} w-full`}>
