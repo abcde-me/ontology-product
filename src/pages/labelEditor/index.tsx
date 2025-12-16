@@ -98,8 +98,22 @@ function LabelEditorPage() {
       Modal.info({
         escToExit: false,
         maskClosable: false,
-        title: '质检任务不存在'
+        title: '当前已无新质检任务',
+        content: (
+          <span style={{ fontSize: '14px', color: '#1E293B' }}>
+            点击确定将返回质检列表页
+          </span>
+        ),
+        icon: (
+          <IconExclamationCircleFill
+            style={{ color: '#007DFA', fontSize: '20px' }}
+          />
+        ),
+        onOk: () => {
+          goBack();
+        }
       });
+      return;
     }
     const {
       task_id,
