@@ -21,9 +21,13 @@ import { IconRefresh } from '@arco-design/web-react/icon';
 import { useUrlState } from '@/pages/sql/hooks/useUrlState';
 import styles from './index.module.scss';
 import ScriptModalTable from '../sctip-modal-table';
-import { getDevelopScriptList } from '@/api/sql';
+import { listDevelopScript } from '@/api/sql-develop';
 import { lockDevelopScript, deleteDevelopScript } from '@/api/sql-develop';
-import { ScriptStatus, ScriptStatusName } from '@/types/sqlDevelopApi';
+import {
+  ListDevelopScriptItem,
+  ScriptStatus,
+  ScriptStatusName
+} from '@/types/sqlDevelopApi';
 import EllipsisPopover from '@/components/ellipsis-popover-com';
 import classNames from 'classnames';
 import VersionStatus from '../version-status';
@@ -71,7 +75,9 @@ const ScriptTable: React.FC<ScriptTableProps> = ({
     create_user: '' // 开发人
   });
   // 初始化开发脚本列表数据
-  const [developScriptData, setDevelopScriptData] = useState([]);
+  const [developScriptData, setDevelopScriptData] = useState<
+    ListDevelopScriptItem[]
+  >([]);
   // 当前的第几页
   const [current, setCurrent] = useState(1);
   // 每页展示数据的数据量
@@ -116,14 +122,16 @@ const ScriptTable: React.FC<ScriptTableProps> = ({
         create_user: formData?.create_user,
         page: current, //第几页
         page_size: pageSize, //每页个数
-        orders: [
-          {
-            column: 'script_id',
-            order: sortValue?.sort || ''
-          }
-        ]
+        orders: sortValue?.sort
+          ? [
+              {
+                column: 'script_id',
+                order_flag: sortValue?.sort
+              }
+            ]
+          : []
       };
-      const res = await getDevelopScriptList(params);
+      const res = await listDevelopScript(params);
       if (res.status === 200 && res.data) {
         setDevelopScriptData(res?.data?.items);
         const newTotal = res.data?.total || 10;
@@ -169,18 +177,19 @@ const ScriptTable: React.FC<ScriptTableProps> = ({
 
   // 删除工作流
   const handleDeleteScript = async (script_id: number) => {
-    const res = await deleteDevelopScript({
-      script_id
-    });
-    if (res.status === 200 && res.code === '') {
-      Message.success({
-        content: '删除成功'
+    try {
+      const res = await deleteDevelopScript({
+        script_id
       });
-      getList();
-    } else {
-      Message.error({
-        content: res?.message ?? '删除失败，请稍后重试'
-      });
+      if (res.status === 200 && res.code === '') {
+        Message.success('删除成功');
+        getList();
+      } else {
+        Message.error(res?.message ?? '删除失败，请稍后重试');
+      }
+    } catch (error) {
+      Message.error('删除失败，请稍后重试');
+      console.log(error);
     }
   };
 
