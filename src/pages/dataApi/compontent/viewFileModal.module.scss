@@ -1,0 +1,71 @@
+.viewFileModal {
+  width: 900px;
+
+  :global(.arco-tabs-header-title) {
+    padding: 8px 0;
+    margin: 0 32px 0 0;
+  }
+
+  :global(.arco-modal-content) {
+    padding: 0;
+
+    :global(.arco-tabs) {
+      padding: 0 28px;
+    }
+  }
+
+  .viewFileContent {
+    max-height: calc(100vh - 200px);
+    overflow: auto;
+    padding: 0 28px;
+
+    :global(.arco-descriptions-title) {
+      font-size: 14px;
+      font-weight: 500;
+      line-height: 22px;
+      margin-top: 19px;
+    }
+
+    :global(.arco-descriptions-item-label) {
+      color: var(--text-color-text-4, #6e7b8d);
+      font-size: 14px;
+      line-height: 22px;
+    }
+
+    :global(.arco-descriptions-item-value) {
+      color: var(--text-color-text-2, #1e293b);
+      font-size: 14px;
+      line-height: 22px;
+
+      :global(.ellipsis-popover-div) {
+        width: 320px;
+      }
+    }
+
+    .copyButton {
+      display: flex;
+      align-items: center;
+      height: 24px;
+      padding: 2px 12px;
+      border-radius: 4px;
+      border: 1px solid var(--LineLine-color-border-1, #cbd5e1);
+      background: #fff;
+
+      :global(span) {
+        font-size: 14px;
+        font-style: normal;
+        font-weight: 400;
+        line-height: 24px;
+      }
+    }
+
+    .tableContent {
+      width: 100%;
+      padding: 12px;
+      margin: 16px 0 0 0;
+      border-radius: 4px;
+      border: 1px solid var(--LineLine-color-border-2, #e2e8f0);
+      background: var(--background-color-bg-2, #f8fafd);
+    }
+  }
+}

@@ -60,7 +60,7 @@
     display: flex;
     border: 1px solid #e2e8f0;
     border-radius: 12px;
-    padding: 0 16px;
+    padding: 0 0 0 16px;
 
     .leftBox {
       display: flex;
@@ -85,7 +85,7 @@
       max-height: 600px;
       overflow: auto;
       gap: 16px;
-      padding: 16px 0 16px 16px;
+      padding: 16px;
 
       .title {
         display: flex;
