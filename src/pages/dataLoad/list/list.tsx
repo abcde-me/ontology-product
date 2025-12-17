@@ -89,13 +89,19 @@ export default function DataLoad() {
         {
           text: LoadType[Load.CRON].text,
           value: LoadType[Load.CRON].value
+        },
+        {
+          text: LoadType[Load.REALTIME].text,
+          value: LoadType[Load.REALTIME].value
         }
       ],
       render: (_, item) => (
         <div>
           {item.load_type == LoadType[Load.ONCE].value
             ? LoadType[Load.ONCE].text
-            : LoadType[Load.CRON].text}
+            : item.load_type == LoadType[Load.REALTIME].value
+              ? LoadType[Load.REALTIME].text
+              : LoadType[Load.CRON].text}
         </div>
       )
     },

@@ -36,7 +36,8 @@ export enum SourceType {
 
 export enum LoadType {
   Cron = 'cron',
-  Once = 'once'
+  Once = 'once',
+  Realtime = 'realtime'
 }
 // 连接器类型
 interface Connector {

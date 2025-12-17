@@ -404,9 +404,9 @@ const add = forwardRef((props: any, ref) => {
             ) : storageType == 'mq' ? (
               <div>
                 <FormItem
-                  label="数据库类型"
+                  label="消息队列类型"
                   field="sub_type"
-                  rules={[{ required: true, message: '请选择数据库类型' }]}
+                  rules={[{ required: true, message: '请选择消息队列类型' }]}
                   disabled={inputDisabled}
                 >
                   <Select placeholder="请选择" defaultValue="Kafka">

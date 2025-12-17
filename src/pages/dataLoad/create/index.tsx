@@ -567,7 +567,7 @@ export default function DataLoadCreate() {
         // rawTableListRef.current = rawData;
 
         // 处理表格列表，为每个节点添加 checkable 属性
-        if (selectedNodeType !== 'metadata') {
+        if (sourceType === SOURCE_TYPES.DB && selectedNodeType !== 'metadata') {
           const processedTableList = processTableListWithCheckable(
             res?.data?.table_name ?? []
           );
@@ -588,7 +588,12 @@ export default function DataLoadCreate() {
         setTableLoading(false);
       }
     },
-    [sourceType, selectedNodeType, processTableListWithCheckable]
+    [
+      sourceType,
+      selectedNodeType,
+      processTableListWithCheckable,
+      processTableListForSingleSelect
+    ]
   );
 
   // 处理文件变化
@@ -665,12 +670,15 @@ export default function DataLoadCreate() {
       setCheckMessage('');
       setSelectedNodeType(undefined);
       // 重置载入形式
-      setLoadVal(LOAD_TYPES.ONCE);
+      setLoadVal(
+        value === SOURCE_TYPES.MQ ? LOAD_TYPES.REALTIME : LOAD_TYPES.ONCE
+      );
       setExpression({});
       form.setFieldsValue({
         table_name: undefined,
         sql_process_enabled: 'disable',
-        load_type: SOURCE_TYPES.MQ ? LOAD_TYPES.REALTIME : LOAD_TYPES.ONCE,
+        load_type:
+          value === SOURCE_TYPES.MQ ? LOAD_TYPES.REALTIME : LOAD_TYPES.ONCE,
         time: undefined,
         day: undefined,
         weekly: undefined,
@@ -697,7 +705,12 @@ export default function DataLoadCreate() {
           sourceType === SOURCE_TYPES.LOCAL ? null : formValues.connector_id,
         source_type: formValues.source_type,
         run_cycle: {
-          type: loadVal === LOAD_TYPES.ONCE ? 0 : 1,
+          type:
+            loadVal === LOAD_TYPES.ONCE
+              ? 0
+              : loadVal === LOAD_TYPES.CRON
+                ? 1
+                : 2,
           cycle_text:
             loadVal === LOAD_TYPES.ONCE ? DEFAULT_ONCE_CYCLE : expression
         },
@@ -706,7 +719,10 @@ export default function DataLoadCreate() {
         table_names: Array.isArray(processedTableNames)
           ? processedTableNames
           : [processedTableNames],
-        db_name: sourceType === SOURCE_TYPES.DB ? tableNames : null,
+        db_name:
+          sourceType === SOURCE_TYPES.DB || sourceType === SOURCE_TYPES.MQ
+            ? tableNames
+            : null,
         sql: formValues.sql_process_enabled === 'enable' ? formValues.sql : '',
         path_type: selectedNodeType,
         field_mappings: currentTableData || []
@@ -716,10 +732,10 @@ export default function DataLoadCreate() {
       sourceType,
       loadVal,
       expression,
-      tableList,
       uploadedFiles,
       tableNames,
-      JSONTableData
+      JSONTableData,
+      selectedNodeType
     ]
   );
 
@@ -736,7 +752,11 @@ export default function DataLoadCreate() {
       ) {
         const processedTableNames = formValues.table_name;
 
-        if (!processedTableNames || processedTableNames.length === 0) {
+        if (
+          !processedTableNames ||
+          (Array.isArray(processedTableNames) &&
+            processedTableNames.length === 0)
+        ) {
           return '请选择要抽取的表';
         }
       }
@@ -776,7 +796,7 @@ export default function DataLoadCreate() {
         }
 
         // 如果是周期载入，验证调度器
-        if (loadVal !== LOAD_TYPES.ONCE) {
+        if (loadVal == LOAD_TYPES.CRON) {
           const valid = await SchedulerRunRef.current?.validate();
           if (!valid) {
             return;
@@ -902,7 +922,7 @@ export default function DataLoadCreate() {
 
       setSelectedNodeType(nodeData?.type_name);
 
-      if (sourceType === SOURCE_TYPES.DB) {
+      if (sourceType === SOURCE_TYPES.DB || sourceType === SOURCE_TYPES.MQ) {
         // 当载入位置变化时，重置选择抽取的表
         form.setFieldsValue({ table_name: undefined });
         form.setFieldsValue({ db_name: nodeData?.name });
@@ -1002,7 +1022,7 @@ export default function DataLoadCreate() {
   useEffect(() => {
     if (connectorId) {
       getConnectorDetailList(connectorId);
-      if (sourceType === SOURCE_TYPES.DB) {
+      if (sourceType === SOURCE_TYPES.DB || sourceType === SOURCE_TYPES.MQ) {
         form.setFieldsValue({ table_name: undefined });
         setTableNames('');
 
@@ -1253,7 +1273,7 @@ export default function DataLoadCreate() {
     const params = {
       connector_id:
         previewData?.connector_id || form.getFieldValue('connector_id'),
-      name: value.join()
+      name: Array.isArray(value) ? value.join() : value
     };
     try {
       const res = PreviewConnectorSampleData({ ...params })
@@ -1552,9 +1572,15 @@ export default function DataLoadCreate() {
                     getData(value);
                   }}
                   loading={tableLoading}
-                  multiple={selectedNodeType !== 'metadata'}
+                  multiple={
+                    sourceType === SOURCE_TYPES.DB &&
+                    selectedNodeType !== 'metadata'
+                  }
                   key={selectedNodeType}
-                  treeCheckable={selectedNodeType !== 'metadata'}
+                  treeCheckable={
+                    sourceType === SOURCE_TYPES.DB &&
+                    selectedNodeType !== 'metadata'
+                  }
                   maxTagCount={
                     selectedNodeType !== 'metadata'
                       ? {
@@ -1665,7 +1691,12 @@ export default function DataLoadCreate() {
                   周期载入
                 </Radio>
               )}
-              <Radio value={LOAD_TYPES.REALTIME}>实时载入</Radio>
+              <Radio
+                disabled={sourceType !== SOURCE_TYPES.MQ}
+                value={LOAD_TYPES.REALTIME}
+              >
+                实时载入
+              </Radio>
             </RadioGroup>
           </FormItem>
 
