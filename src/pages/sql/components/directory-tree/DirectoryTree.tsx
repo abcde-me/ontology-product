@@ -2,7 +2,6 @@ import React, {
   useCallback,
   useEffect,
   useImperativeHandle,
-  useMemo,
   useRef,
   useState
 } from 'react';
@@ -35,12 +34,11 @@ import FolderIcon from '@/assets/python/folder.svg';
 import FileIcon from '@/assets/python/file.svg';
 import AddAfterIcon from '@/assets/python/add-after.svg';
 import { PythonItemType, PythonListItem } from '@/types/pythonApi';
-import EllipsisPopover from '../ellipsis-popover-com';
-import MultiLevelPathNavigation from './MultiLevelPathNavigation';
+import EllipsisPopover from '@/components/ellipsis-popover-com';
 import './DirectoryTree.scss';
 import { PYSPARK_PERMISSIONS, SQL_PERMISSIONS } from '@/config/permissions';
 import { now } from 'lodash-es';
-import { PermissionWrapper } from '../PermissionGuard';
+import { PermissionWrapper } from '@/components/PermissionGuard';
 import { debounce } from 'lodash-es';
 import SQLFileIcon from '@/assets/sql/spl-item-icon.svg';
 import { useParams } from '@/utils/url';
@@ -68,6 +66,7 @@ export enum DirectoryTreeFrom {
 export interface DirectoryTreeProps {
   from?: DirectoryTreeFrom;
   data: TreeNodeItem[];
+  isLoading?: boolean;
   isCanCreate?: boolean;
   selectedKeys?: string[]; // 添加外部控制的选中状态
   onSelect?: (
@@ -111,6 +110,7 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
     const {
       from = DirectoryTreeFrom.PYTHON,
       data,
+      isLoading,
       isCanCreate,
       selectedKeys: externalSelectedKeys,
       onSelect,
@@ -138,7 +138,7 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
     const [folderStack, setFolderStack] = useState<
       Array<{ id: string; name: string }>
     >([]);
-    const [loading, setLoading] = useState<boolean>(false);
+    // const [loading, setLoading] = useState<boolean>(false);
 
     // 搜索相关状态
     const [isSearchMode, setIsSearchMode] = useState<boolean>(false);
@@ -150,8 +150,6 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
       }
     }, [externalSelectedKeys]);
 
-    const [searchResults, setSearchResults] = useState<TreeNodeItem[]>([]);
-    const [isSearching, setIsSearching] = useState<boolean>(false);
     const inputRef = useRef<any>(null);
     const [inputValue, setInputValue] = useState<string>('');
     const [defaultName, setDefaultName] = useState<string>('');
@@ -167,16 +165,10 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
     useEffect(() => {
       const formattedData = formatTreeData(data);
       setTreeData(formattedData);
-      setLoading(false);
     }, [data]);
-
-    useEffect(() => {
-      setLoading(true);
-    }, []);
 
     // 刷新当前目录
     const refreshCurrentDirectory = useCallback(async () => {
-      setLoading(true);
       try {
         if (currentFolderId && onFolderClick) {
           const newData = await onFolderClick(currentFolderId);
@@ -191,7 +183,6 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
       } catch (error) {
         console.error('刷新目录失败:', error);
       } finally {
-        setLoading(false);
       }
     }, [currentFolderId, onFolderClick, onBackToParent, formatTreeData]);
 
@@ -213,144 +204,6 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
       [refreshCurrentDirectory, selectFileById]
     );
 
-    // 处理文件夹点击下钻
-    const handleFolderClick = async (node: NodeInstance) => {
-      // Arco Tree 会把节点对象挂到 node.props.dataRef，这里优先读 props.dataRef；
-      // 如果业务层已将字段打平到节点顶层（如 formatData 中），也兼容直接读取 props
-      handleSearchClear();
-      const meta = node.props.dataRef;
-      const hasChildren =
-        Array.isArray(meta?.children) && meta?.children?.length;
-      const isFolder = meta?.type === PythonItemType.Directory || hasChildren;
-
-      if (isFolder && onFolderClick) {
-        setLoading(true);
-        try {
-          const np = props as NodeProps;
-          const folderId: string = meta?.id
-            ? String(meta.id)
-            : String(np._key ?? '');
-          const folderName: string = meta?.name ?? String(np.title ?? '');
-
-          // 更新文件夹栈 - 只有当当前不在根目录时才添加到栈中
-          if (currentFolderId && currentFolderName) {
-            const newStack = [
-              ...folderStack,
-              { id: currentFolderId, name: currentFolderName }
-            ];
-            setFolderStack(newStack);
-          }
-
-          // 设置当前文件夹信息
-          setCurrentFolderId(folderId);
-          setCurrentFolderName(folderName);
-
-          // 请求新数据
-          const newData = await onFolderClick(folderId);
-          const formattedData = formatTreeData(newData as any[]);
-          setTreeData(formattedData);
-
-          // 重置选择状态
-          setSelectedKeys([]);
-          setExpandedKeys([]);
-        } catch (error) {
-          Message.error('进入文件夹失败');
-        } finally {
-          setLoading(false);
-        }
-      }
-    };
-
-    // 处理从多级路径导航跳转到指定文件夹
-    const handleNavigateToFolder = async (
-      folderId: string,
-      folderName: string,
-      newStack: Array<{ id: string; name: string }>
-    ) => {
-      handleSearchClear();
-      setLoading(true);
-      try {
-        // 更新文件夹栈
-        setFolderStack(newStack);
-
-        // 设置当前文件夹
-        setCurrentFolderId(folderId);
-        setCurrentFolderName(folderName);
-
-        // 加载该文件夹内容
-        if (onFolderClick) {
-          const newData = await onFolderClick(folderId);
-          const formattedData = formatTreeData(newData as any[]);
-          setTreeData(formattedData);
-        }
-
-        // 重置选择状态
-        setSelectedKeys([]);
-        setExpandedKeys([]);
-      } catch (error) {
-        Message.error('跳转到文件夹失败');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    // 处理返回上级目录
-    const handleBackToParent = async () => {
-      handleSearchClear();
-      setLoading(true);
-      try {
-        // 如果当前在某个文件夹中，但栈为空，说明是从根目录直接进入的，应该返回根目录
-        if (folderStack.length === 0 && currentFolderId && currentFolderName) {
-          setCurrentFolderId('');
-          setCurrentFolderName('');
-          // 重新请求根目录数据
-          if (onBackToParent) {
-            const newData = await onBackToParent('0');
-            const formattedData = formatTreeData(newData as any[]);
-            setTreeData(formattedData);
-          }
-          setSelectedKeys([]);
-          setExpandedKeys([]);
-          return;
-        }
-
-        if (folderStack.length === 0) return;
-
-        const parentFolder = folderStack[folderStack.length - 1];
-        const newStack = folderStack.slice(0, -1);
-
-        setFolderStack(newStack);
-
-        // 如果返回的是根目录（id为空），则重置为根目录状态
-        if (!parentFolder.id || parentFolder.id === '') {
-          setCurrentFolderId('');
-          setCurrentFolderName('');
-          // 重新请求根目录数据
-          if (onBackToParent) {
-            const newData = await onBackToParent('');
-            const formattedData = formatTreeData(newData as any[]);
-            setTreeData(formattedData);
-          }
-        } else {
-          setCurrentFolderId(parentFolder.id);
-          setCurrentFolderName(parentFolder.name);
-
-          if (onBackToParent) {
-            const newData = await onBackToParent(parentFolder.id);
-            const formattedData = formatTreeData(newData as any[]);
-            setTreeData(formattedData);
-          }
-        }
-
-        setSelectedKeys([]);
-        setExpandedKeys([]);
-      } catch (error) {
-        Message.error('返回上级目录失败');
-      } finally {
-        setLoading(false);
-      }
-    };
-
     const focusAndSelect = () => {
       setTimeout(() => {
         inputRef.current?.focus();
@@ -362,7 +215,7 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
     const handleSearch = async (value: string) => {
       if (!value.trim()) {
         setIsSearchMode(false);
-        setSearchResults([]);
+        // setSearchResults([]);
         // 恢复原始树数据
         const formattedData = formatTreeData(data);
         setTreeData(formattedData);
@@ -374,10 +227,10 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
         return;
       }
 
-      setIsSearching(true);
+      // setIsSearching(true);
       try {
         const results = await props.onSearch(currentFolderId, value);
-        setSearchResults(results);
+        // setSearchResults(results);
         setIsSearchMode(true);
 
         // 将搜索结果转换为树形数据
@@ -386,7 +239,7 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
       } catch (error) {
         Message.error('搜索失败');
       } finally {
-        setIsSearching(false);
+        // setIsSearching(false);
       }
     };
 
@@ -395,22 +248,10 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
       handleSearch(value);
     };
 
-    // 使用防抖处理输入事件
-    const debouncedSearch = useCallback(debounce(handleSearch, 500), [
-      handleSearch
-    ]);
-
-    // 输入变化时触发搜索
-    const handleInputChange = (value: string) => {
-      setSearchValue(value);
-      debouncedSearch(value);
-    };
-
     // 处理搜索框清空
     const handleSearchClear = () => {
       setSearchValue('');
       setIsSearchMode(false);
-      setSearchResults([]);
     };
 
     const startRootCreate = (isFolder = true) => {
@@ -616,7 +457,7 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
               return false;
             }
             // 删除成功后重新加载文件列表
-            // handleSearchClear();
+            handleSearchClear();
           } catch (e) {
             Message.error('删除失败');
             return false;
@@ -655,31 +496,6 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
             : undefined
         }
       >
-        {/* 导航栏 - 当有当前文件夹名称时显示（包括从根目录进入的第一个文件夹） */}
-        {currentFolderName && (
-          <div className="directory-tree-nav flex items-center">
-            <AddAfterIcon
-              className="ml-[4px] mr-[8px] h-4 w-4 cursor-pointer"
-              onClick={handleBackToParent}
-            />
-
-            {/* 多级路径导航 */}
-            <MultiLevelPathNavigation
-              folderStack={folderStack}
-              currentFolderName={currentFolderName}
-              onFolderClick={onFolderClick}
-              onNavigateToFolder={handleNavigateToFolder}
-            />
-
-            {/* 如果没有多级路径，只显示当前目录名 */}
-            {folderStack.length === 0 && (
-              <span className="text-[14px] font-[500] text-[#334155]">
-                {currentFolderName}
-              </span>
-            )}
-          </div>
-        )}
-
         <div className="directory-tree-header mb-2 flex items-center justify-between">
           <InputSearch
             className="directory-tree-header-search"
@@ -734,7 +550,7 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
           )}
         </div>
 
-        {loading ? (
+        {isLoading ? (
           <div className="mt-[110px] flex flex-col items-center">
             <Spin size={26} />
             <div className="text-[rgba(15, 23, 42, 1)] text-[14px]">加载中</div>
@@ -753,17 +569,6 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
             onSelect={(keys, extra) => {
               setSelectedKeys(keys);
               onSelect?.(keys, extra);
-
-              const dataRef = extra?.node?.props?.dataRef ?? null;
-
-              // 如果是文件夹并且非编辑态，触发下钻逻辑
-              if (
-                !dataRef?.showInput &&
-                dataRef?.type === PythonItemType.Directory &&
-                onFolderClick
-              ) {
-                handleFolderClick(extra.node);
-              }
             }}
             renderExtra={(node) => {
               const isEditing = node.dataRef?.showInput;
@@ -798,25 +603,6 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
                             </Menu.Item>
                           </PermissionWrapper>
                         )}
-                        {/* {isReleased && (
-                          <PermissionWrapper permission={nowPermissions.CREATE}>
-                            <Menu.Item
-                              onClick={() => {
-                                handleCopy(node);
-                              }}
-                              key="2"
-                            >
-                              <IconCopy className="mr-1" />
-                              <span className="mr-[4px]">复制为新版本</span>
-                              <Tooltip
-                                position="right"
-                                content="以此脚本为基础迭代新版本"
-                              >
-                                <IconQuestionCircle />
-                              </Tooltip>
-                            </Menu.Item>
-                          </PermissionWrapper>
-                        )} */}
                         <PermissionWrapper permission={nowPermissions.CREATE}>
                           <Menu.Item
                             onClick={() => {
@@ -902,14 +688,6 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
                     <div className="file-name leading-[22px]">
                       <EllipsisPopover preferTypography value={titleText} />
                     </div>
-                    {/* 只在搜索结果中显示路径 */}
-                    {/* {isSearchMode &&
-                      from !== DirectoryTreeFrom.SQL &&
-                      props.dataRef?.path && (
-                        <div className="search-result-path">
-                          <EllipsisPopover value={props.dataRef.path} />
-                        </div>
-                      )} */}
                   </div>
                   <div className="flex shrink-0 items-center gap-2">
                     <span

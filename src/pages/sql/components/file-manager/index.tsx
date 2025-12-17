@@ -5,7 +5,7 @@ import DirectoryTree, {
   type TreeNodeItem,
   DirectoryTreeFrom,
   DirectoryTreeRef
-} from '@/components/directory-tree/DirectoryTree';
+} from '../directory-tree/DirectoryTree';
 import { useDevelopScriptManager } from '../../hooks/useDevelopScriptManager';
 
 const { Title } = Typography;
@@ -34,6 +34,7 @@ const PythonTabContent: React.FC<NotebookTabContentProps> = ({
 }) => {
   // 使用文件管理器hook
   const {
+    isLoading,
     sqlScriptList,
     selectedKeys,
     generateDefaultName,
@@ -66,6 +67,7 @@ const PythonTabContent: React.FC<NotebookTabContentProps> = ({
         <DirectoryTree
           ref={directoryTreeRef} // 传递 ref
           from={DirectoryTreeFrom.SQL}
+          isLoading={isLoading}
           data={sqlScriptList as TreeNodeItem[]}
           selectedKeys={selectedKeys} // 传递选中状态
           generateDefaultName={generateDefaultName}
