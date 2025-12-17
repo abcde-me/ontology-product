@@ -474,7 +474,7 @@ const ScriptTable: React.FC<ScriptTableProps> = ({
         }
       />
       {/* 分页 */}
-      {developScriptData && developScriptData.length > 0 && (
+      {total > pageSize && (
         <Pagination
           current={current}
           pageSize={pageSize}

@@ -192,6 +192,7 @@ const EditorWorkspaceContent: React.FC<{
 
     // 从 Context 获取编辑器状态
     const {
+      contentLoading,
       scriptInfo,
       setScriptInfo,
       // runStatus,
@@ -419,7 +420,7 @@ const EditorWorkspaceContent: React.FC<{
 
     // 根据 status 渲染工具栏
     const renderToolbar = () => {
-      const status = scriptInfo?.status;
+      const status = scriptInfo?.status ?? ScriptStatus.Editing;
       const canEdit =
         scriptInfo?.status === ScriptStatus.Editing ||
         scriptInfo?.status === ScriptStatus.EditCompleted;
@@ -696,138 +697,140 @@ const EditorWorkspaceContent: React.FC<{
     };
 
     return (
-      <div className={styles['sql-content']}>
-        {/* 顶部工具栏 */}
-        <div className={styles['sql-toolbar']}>{renderToolbar()}</div>
+      <Spin loading={contentLoading} block className="modaforge-spin">
+        <div className={classNames(styles['sql-content'], 'h-full')}>
+          {/* 顶部工具栏 */}
+          <div className={styles['sql-toolbar']}>{renderToolbar()}</div>
 
-        {/* 编辑器区域 */}
+          {/* 编辑器区域 */}
 
-        <div
-          className={classNames(styles['sql-editor-container'], {
-            [styles['running-code-mirror']]: !hasUpdatePermission,
-            [styles['with-sidebar']]: sidebarVisible && !sidebarCollapsed
-          })}
-        >
-          <CodeMirror
-            ref={editorRef}
-            value={scriptInfo?.script_context ?? ''}
-            onChange={handleContentChange}
-            placeholder={placeholderValue}
-            readOnly={
-              !hasUpdatePermission ||
-              runLogStatus === RunLogStatus.RUNNING ||
-              !scriptInfo?.isSelfEditing
-            }
-            theme={myTheme}
-            extensions={[
-              sql({ upperCaseKeywords: true }),
-              lintGutter(),
-              currentHighlightedParam,
-              parameterHighlightField,
-              EditorView.updateListener.of((update) => {
-                if (update.selectionSet) {
-                  handleCursorChange(update.view);
-                }
-                if (update.focusChanged) {
-                  handleFocusChange(update.view.hasFocus);
-                }
-              })
-            ]}
-            basicSetup={{
-              lineNumbers: true,
-              highlightActiveLineGutter: false
-            }}
-            className={styles['code-editor']}
-          />
-
-          {/* 参数侧边栏 */}
-          {
-            <ParameterSidebar
-              canEdit={scriptInfo?.isSelfEditing ?? false}
-              content={scriptInfo?.script_context ?? ''}
-              onParameterChange={handleParameterChange}
-              onVisibleChange={setSidebarVisible}
-              onCollapsedChange={setSidebarCollapsed}
-              onParameterHover={handleParameterHover}
-              initialParams={scriptInfo?.script_params ?? []}
-              systemParamKeys={systemParamKeys}
-            />
-          }
-        </div>
-
-        {/* 运行信息面板 */}
-        {execid && (
-          <RunningInfoPanel
-            isPanelOpen={isPanelOpen}
-            onPanelStateChange={handlePanelStateChange}
-            getPrevRunStatus={getPrevRunStatus}
-          />
-        )}
-        {/* 保存查询列表 */}
-        <Modal
-          title="保存到查询脚本列表"
-          visible={visible}
-          onOk={() => setVisible(false)}
-          onCancel={() => setVisible(false)}
-          autoFocus={false}
-          focusLock={true}
-          footer={[
-            <>
-              <Button onClick={() => setVisible(false)}>取消</Button>
-              <Button type="primary" htmlType="submit">
-                保存
-              </Button>
-            </>
-          ]}
-        >
-          <Form form={form}>
-            <FormItem label="SQL脚本名称:" required={true} field="fileName">
-              <Input
-                defaultValue={fileName}
-                style={{ width: 300 }}
-                placeholder="请输入脚本名称"
-              />
-            </FormItem>
-            <FormItem label="脚本说明:" field="fileDesc">
-              <Input style={{ width: 300 }} placeholder="请输入脚本说明" />
-            </FormItem>
-          </Form>
-        </Modal>
-        {/* 开发规范 */}
-        {specificationsVisible && (
-          <SpecificationsModal
-            visible={specificationsVisible}
-            onCancel={() => setSpecificationsVisible(false)}
-            initialContent={specificationsContent}
-            onSave={handleSpecificationsSave}
-          />
-        )}
-        {paramVisible && (
-          <ModalParamList
-            paramVisible={paramVisible}
-            onCancel={() => setParamVisible(false)}
-          />
-        )}
-        {/* 发布版本弹窗 */}
-        {releaseVersionVisible && (
-          <ReleaseVersionModal
-            visible={releaseVersionVisible}
-            onCancel={() => setReleaseVersionVisible(false)}
-            onSubmit={async (values) => {
-              const res = await handleReleaseScript(values.versionDesc ?? '');
-              if (res) {
-                // 成功再关闭弹窗
-                setReleaseVersionVisible(false);
+          <div
+            className={classNames(styles['sql-editor-container'], {
+              [styles['running-code-mirror']]: !hasUpdatePermission,
+              [styles['with-sidebar']]: sidebarVisible && !sidebarCollapsed
+            })}
+          >
+            <CodeMirror
+              ref={editorRef}
+              value={scriptInfo?.script_context ?? ''}
+              onChange={handleContentChange}
+              placeholder={placeholderValue}
+              readOnly={
+                !hasUpdatePermission ||
+                runLogStatus === RunLogStatus.RUNNING ||
+                !scriptInfo?.isSelfEditing
               }
-            }}
-            initialValues={{
-              scriptName: scriptInfo?.script_name || '',
-              version: scriptInfo?.max_version_name || 'V1',
-              versionDesc: scriptInfo?.script_desc ?? ''
-            }}
-          />
-        )}
-      </div>
+              theme={myTheme}
+              extensions={[
+                sql({ upperCaseKeywords: true }),
+                lintGutter(),
+                currentHighlightedParam,
+                parameterHighlightField,
+                EditorView.updateListener.of((update) => {
+                  if (update.selectionSet) {
+                    handleCursorChange(update.view);
+                  }
+                  if (update.focusChanged) {
+                    handleFocusChange(update.view.hasFocus);
+                  }
+                })
+              ]}
+              basicSetup={{
+                lineNumbers: true,
+                highlightActiveLineGutter: false
+              }}
+              className={styles['code-editor']}
+            />
+
+            {/* 参数侧边栏 */}
+            {
+              <ParameterSidebar
+                canEdit={scriptInfo?.isSelfEditing ?? false}
+                content={scriptInfo?.script_context ?? ''}
+                onParameterChange={handleParameterChange}
+                onVisibleChange={setSidebarVisible}
+                onCollapsedChange={setSidebarCollapsed}
+                onParameterHover={handleParameterHover}
+                initialParams={scriptInfo?.script_params ?? []}
+                systemParamKeys={systemParamKeys}
+              />
+            }
+          </div>
+
+          {/* 运行信息面板 */}
+          {execid && (
+            <RunningInfoPanel
+              isPanelOpen={isPanelOpen}
+              onPanelStateChange={handlePanelStateChange}
+              getPrevRunStatus={getPrevRunStatus}
+            />
+          )}
+          {/* 保存查询列表 */}
+          <Modal
+            title="保存到查询脚本列表"
+            visible={visible}
+            onOk={() => setVisible(false)}
+            onCancel={() => setVisible(false)}
+            autoFocus={false}
+            focusLock={true}
+            footer={[
+              <>
+                <Button onClick={() => setVisible(false)}>取消</Button>
+                <Button type="primary" htmlType="submit">
+                  保存
+                </Button>
+              </>
+            ]}
+          >
+            <Form form={form}>
+              <FormItem label="SQL脚本名称:" required={true} field="fileName">
+                <Input
+                  defaultValue={fileName}
+                  style={{ width: 300 }}
+                  placeholder="请输入脚本名称"
+                />
+              </FormItem>
+              <FormItem label="脚本说明:" field="fileDesc">
+                <Input style={{ width: 300 }} placeholder="请输入脚本说明" />
+              </FormItem>
+            </Form>
+          </Modal>
+          {/* 开发规范 */}
+          {specificationsVisible && (
+            <SpecificationsModal
+              visible={specificationsVisible}
+              onCancel={() => setSpecificationsVisible(false)}
+              initialContent={specificationsContent}
+              onSave={handleSpecificationsSave}
+            />
+          )}
+          {paramVisible && (
+            <ModalParamList
+              paramVisible={paramVisible}
+              onCancel={() => setParamVisible(false)}
+            />
+          )}
+          {/* 发布版本弹窗 */}
+          {releaseVersionVisible && (
+            <ReleaseVersionModal
+              visible={releaseVersionVisible}
+              onCancel={() => setReleaseVersionVisible(false)}
+              onSubmit={async (values) => {
+                const res = await handleReleaseScript(values.versionDesc ?? '');
+                if (res) {
+                  // 成功再关闭弹窗
+                  setReleaseVersionVisible(false);
+                }
+              }}
+              initialValues={{
+                scriptName: scriptInfo?.script_name || '',
+                version: scriptInfo?.max_version_name || 'V1',
+                versionDesc: scriptInfo?.script_desc ?? ''
+              }}
+            />
+          )}
+        </div>
+      </Spin>
     );
   }
 );

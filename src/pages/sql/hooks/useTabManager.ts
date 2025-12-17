@@ -1,6 +1,6 @@
 import { useState, useCallback, useRef } from 'react';
 import { Message } from '@arco-design/web-react';
-import { DirectoryTreeRef } from '@/components/directory-tree/DirectoryTree';
+import { DirectoryTreeRef } from '../components/directory-tree/DirectoryTree';
 import { generateSqlDefaultName } from '../utils/formatDateTime';
 
 // 文件标签页类型

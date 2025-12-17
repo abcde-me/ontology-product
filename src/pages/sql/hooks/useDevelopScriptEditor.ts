@@ -1,13 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Message } from '@arco-design/web-react';
-import { useRequest, useThrottleFn } from 'ahooks';
+import { useRequest } from 'ahooks';
 import { RunningStatus } from '@/types/sqlApi';
-import {
-  //   // runSqlScript,
-  //   getRunResultSqlScript,
-  runCancelSqlScript
-  //   getRunLogSqlScript
-} from '@/api/sql';
+import { runCancelSqlScript } from '@/api/sql';
 import {
   createDevelopScript,
   editDevelopScript,
@@ -21,14 +16,11 @@ import {
 import { DEFAULT_SQL_PLACEHOLDER } from '../constant';
 import { useUserInfo } from '@/store/userInfoStore';
 import { RunResult } from '@/types/sqlApi';
-import timeFormattig from '@/utils/timeFormatting';
 import { generateSqlDefaultName } from '../utils';
 import {
   EditDevelopScriptResponse,
   GetDevelopScriptInfoResponse,
-  ScriptParam,
   ScriptStatus,
-  ScriptStatusName,
   RunLogStatus
 } from '@/types/sqlDevelopApi';
 
@@ -65,6 +57,7 @@ export interface UseEditorReturn {
   // 编辑器状态
   // 脚本信息
   scriptInfo: ScriptInfo | null;
+  contentLoading: boolean;
   // editorContent: string;
   placeholderValue: string;
   runLogStatus: RunLogStatus;
@@ -134,6 +127,7 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
   const userInfo = useUserInfo();
   // 状态管理
   const [scriptInfo, setScriptInfo] = useState<ScriptInfo | null>(null);
+  const [contentLoading, setContentLoading] = useState(false);
   // const [editorContent, setEditorContent] = useState('');
   const [placeholderValue] = useState(defaultContent);
   // const [runStatus, setRunStatus] = useState<RunningStatus>(RunningStatus.IDLE);
@@ -666,21 +660,26 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
 
     // 如果有 fileId，重新加载文件内容以获取最新状态
     if (currentTab.scriptId) {
-      loadFileContent(currentTab.scriptId).then((res) => {
-        if (!res) {
-          return;
-        }
+      setContentLoading(true);
+      loadFileContent(currentTab.scriptId)
+        .then((res) => {
+          if (!res) {
+            return;
+          }
 
-        // 通知父组件更新标签页内容
-        if (onTabUpdate) {
-          onTabUpdate(currentTab.key, {
-            content: res.script_context ?? '',
-            fileId: String(currentTab.fileId),
-            scriptId: String(res.script_id),
-            title: currentTab.title
-          });
-        }
-      });
+          // 通知父组件更新标签页内容
+          if (onTabUpdate) {
+            onTabUpdate(currentTab.key, {
+              content: res.script_context ?? '',
+              fileId: String(currentTab.fileId),
+              scriptId: String(res.script_id),
+              title: currentTab.title
+            });
+          }
+        })
+        .finally(() => {
+          setContentLoading(false);
+        });
     }
 
     // return () => {
@@ -696,6 +695,8 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
   return {
     // 状态
     scriptInfo,
+    // 脚本详情加载状态
+    contentLoading,
     // editorContent,
     placeholderValue,
     // runStatus,
