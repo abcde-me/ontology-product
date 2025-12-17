@@ -23,7 +23,13 @@ import {
   getFlowListTask,
   switchPreviewTask,
   previewTaskResult,
-  getImgJobPreviewAnnotations
+  getImgJobPreviewAnnotations,
+  CreateQualityControlTaskComment,
+  GetQualityControlTask,
+  ModifyQualityControlTaskComment,
+  DeleteQualityControlTaskComment,
+  GetQualityControlTaskById,
+  SaveQualityControlTask
 } from '@/api/labelEditor';
 import WujieReact from 'wujie-react';
 import { Message, Modal } from '@arco-design/web-react';
@@ -340,7 +346,15 @@ function LabelEditorPage() {
             getFlowListTask,
             switchPreviewTask,
             previewTaskResult,
-            getImgJobPreviewAnnotations
+            getImgJobPreviewAnnotations,
+
+            CreateQualityControlTaskComment,
+            GetQualityControlTask,
+            ModifyQualityControlTaskComment,
+            DeleteQualityControlTaskComment,
+            GetQualityControlTaskById,
+            SaveQualityControlTask: (...args) =>
+              saveTaskWrapper(...args, SaveQualityControlTask)
           }}
         ></WujieReact>
       )}
