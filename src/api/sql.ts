@@ -232,11 +232,14 @@ export async function downloadDevelopScript(): Promise<AxiosResponse<Blob>> {
 }
 
 // 获取开发脚本历史版本
-export async function getDevelopScriptLogByScriptId(
-  id: string
-): Promise<ApiRes<GetDevelopScriptLogByScriptIdData>> {
+export async function getDevelopScriptLogByScriptId(params: {
+  script_id: number;
+  page: number;
+  page_size: number;
+  status_list?: number[];
+}): Promise<ApiRes<GetDevelopScriptLogByScriptIdData>> {
   return await UAPI.RES.GetDevelopScriptLogByScriptIdApi({})
-    .post({ script_id: Number(id) })
+    .post(params)
     .inRegion()
     .do();
 }

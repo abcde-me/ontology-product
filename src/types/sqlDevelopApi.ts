@@ -111,6 +111,10 @@ export interface ListDevelopScriptItem {
    * 调度版本号名字，任务使用版本名
    */
   version_name: string;
+  /**
+   * 最新版本内容
+   */
+  script_context: string;
 }
 
 export interface ListDevelopScriptResponse {

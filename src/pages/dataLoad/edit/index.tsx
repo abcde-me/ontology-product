@@ -38,6 +38,19 @@ import classNames from 'classnames';
 import styles from '../edit/index.module.scss';
 import { useHistory, useParams as useRouteParams } from 'react-router';
 
+// 载入类型常量
+const LOAD_TYPES = {
+  ONCE: 'once',
+  CRON: 'cron',
+  REALTIME: 'realtime'
+} as const;
+
+// 数据源类型常量
+const SOURCE_TYPES = {
+  LOCAL: 'local',
+  MQ: 'mq'
+} as const;
+
 // 定义目录数据类型
 interface DirectoryItem {
   value: string | number;
@@ -990,13 +1003,16 @@ const Edit = (props) => {
       }
 
       if (props.detailData?.load_type !== 'once') {
-        const valid = await SchedulerRunRef.current?.validate();
-        if (!valid) return;
+        // 实时运行类型不需要验证SchedulerRun
+        if (props.detailData?.load_type !== 'realtime') {
+          const valid = await SchedulerRunRef.current?.validate();
+          if (!valid) return;
+        }
         const formData = {
           ...baseFormData,
           run_cycle: {
-            type: 1,
-            cycle_text: obj
+            type: props.detailData?.load_type === 'cron' ? 1 : 2,
+            cycle_text: props.detailData?.load_type === 'cron' ? obj : {}
           }
         };
         console.log(formData);
@@ -1310,6 +1326,12 @@ const Edit = (props) => {
           >
             <Radio value="once">单次载入</Radio>
             <Radio value="cron">周期载入</Radio>
+            <Radio
+              disabled={props.detailData?.source_type !== SOURCE_TYPES.MQ}
+              value="realtime"
+            >
+              实时载入
+            </Radio>
           </RadioGroup>
         </FormItem>
         {loadVal == 'cron' ? (

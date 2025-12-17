@@ -6,6 +6,7 @@ import { detailRequirement } from '@/api/dataAnnotation';
 import { useParams } from '@/utils/url';
 import dayjs from 'dayjs';
 import './index.scss';
+import { openNewPage } from '@/utils/env';
 
 const InputSearch = Input.Search;
 
@@ -36,7 +37,8 @@ const processMap: Record<number, string> = {
 
 interface TaskDetail {
   pkg_id: number; // 需求包id
-  task_id: number; // 任务id
+  id: number; // 任务id
+  req_id: number; // 需求id
   task_status: number; // 状态
   task_process: number; // 任务工序
   label_user: string; // 标注员
@@ -163,6 +165,10 @@ function RequirementParticular({ isActive }: RequirementParticularProps) {
   const handlePreview = (record: TaskDetail) => {
     // TODO: 实现预览功能
     console.log('预览任务:', record);
+    // 标注工具跳转
+    openNewPage(
+      `/modaforge/tenant/compute/modaforge/labelEditor?rId=${record.req_id}&tId=${record.id}&pkgId=${record.pkg_id}&stage=PREVIEW`
+    );
   };
 
   // 表格列定义
