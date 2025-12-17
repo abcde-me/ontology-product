@@ -659,7 +659,7 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
         {currentFolderName && (
           <div className="directory-tree-nav flex items-center">
             <AddAfterIcon
-              className="mr-2 h-4 w-4 cursor-pointer"
+              className="ml-[4px] mr-[8px] h-4 w-4 cursor-pointer"
               onClick={handleBackToParent}
             />
 
@@ -779,7 +779,7 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
                 node.dataRef?.status === ScriptStatus.Scheduling;
 
               return (
-                <div className="directory-tree-extra ml-[8px] h-[36px]">
+                <div className="directory-tree-extra ml-[8px] h-[22px]">
                   <Dropdown
                     position="br"
                     trigger={['click', 'hover']}
@@ -798,7 +798,7 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
                             </Menu.Item>
                           </PermissionWrapper>
                         )}
-                        {isReleased && (
+                        {/* {isReleased && (
                           <PermissionWrapper permission={nowPermissions.CREATE}>
                             <Menu.Item
                               onClick={() => {
@@ -816,7 +816,7 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
                               </Tooltip>
                             </Menu.Item>
                           </PermissionWrapper>
-                        )}
+                        )} */}
                         <PermissionWrapper permission={nowPermissions.CREATE}>
                           <Menu.Item
                             onClick={() => {
@@ -870,11 +870,11 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
 
               // 根据节点类型选择图标
               const icon = isFolder ? (
-                <FolderIcon className="mr-2 h-[16px] w-[16px]" />
+                <FolderIcon className="ml-[4px] h-[16px] w-[16px]" />
               ) : from === DirectoryTreeFrom.SQL ? (
-                <SQLFileIcon className="mr-2 h-[16px] w-[16px]" />
+                <SQLFileIcon className="ml-[4px] h-[16px] w-[16px]" />
               ) : (
-                <FileIcon className="mr-2 h-[16px] w-[16px]" />
+                <FileIcon className="ml-[4px] h-[16px] w-[16px]" />
               );
 
               if (isInput) {
@@ -896,11 +896,11 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
 
               const titleText = props.dataRef?.name;
               return (
-                <div className="flex items-center overflow-hidden">
-                  {icon}
-                  <div className="flex flex-1 flex-col overflow-hidden">
+                <div className="flex w-full min-w-0 items-center gap-[8px] overflow-hidden">
+                  <div className="shrink-0">{icon}</div>
+                  <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
                     <div className="file-name leading-[22px]">
-                      <EllipsisPopover value={titleText} />
+                      <EllipsisPopover preferTypography value={titleText} />
                     </div>
                     {/* 只在搜索结果中显示路径 */}
                     {/* {isSearchMode &&
@@ -911,7 +911,7 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
                         </div>
                       )} */}
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex shrink-0 items-center gap-2">
                     <span
                       className={`${iconClassMap[props.dataRef?.status] ?? 'unreleased-icon'} status-dot ml-auto`}
                     ></span>

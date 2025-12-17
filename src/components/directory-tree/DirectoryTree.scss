@@ -4,13 +4,42 @@
   .arco-tree-node {
     position: relative;
     border-radius: 2px;
-    padding-left: 4px;
+    // padding-left: 4px;
     padding-right: 5px;
+    display: flex;
+    align-items: center;
+    overflow: hidden; // 防止子元素溢出
 
     .arco-tree-node-title {
       padding-right: 0px;
       padding-left: 0px;
       margin-left: 0px;
+      flex: 1;
+      min-width: 0; // 允许 flex 子元素收缩
+      overflow: hidden; // 防止内容溢出
+      display: flex; // 确保是 flex 容器
+      align-items: center;
+
+      // 确保 renderTitle 返回的最外层 div 也能正确收缩
+      > div {
+        width: 100%;
+        min-width: 0;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+      }
+    }
+
+    .arco-tree-node-title-text {
+      width: 100%;
+    }
+
+    // Arco Design 会将 renderExtra 的内容包裹在 arco-tree-node-extra 中
+    .arco-tree-node-extra {
+      flex-shrink: 0; // 防止操作按钮被压缩
+      display: flex;
+      align-items: center;
+      padding-left: 8px;
     }
   }
 
@@ -39,11 +68,10 @@
   }
 
   .directory-tree-extra {
-    // position: absolute;
-    display: inline-flex;
     align-items: center;
     display: none;
     color: rgba(30, 41, 59, 1);
+    flex-shrink: 0; // 防止被压缩
   }
 
   .arco-tree-node-switcher {
@@ -53,29 +81,19 @@
 
   // 文件名样式 - 非 hover 态最大宽度 260px
   .file-name {
-    max-width: 220px;
+    // max-width: 220px;
+    width: 100%;
+    min-width: 0;
     overflow: hidden;
     font-weight: 400;
-  }
-
-  // 搜索结果路径样式 - 非 hover 态最大宽度 260px
-  .search-result-path {
-    font-size: 12px;
-    color: #6e7b8d;
-    line-height: 18px;
-    max-width: 220px;
-    overflow: hidden;
   }
 
   // hover 态样式 - 最大宽度 200px，只有文字变色，图标不变色
   .arco-tree-node:hover {
     .file-name {
-      max-width: 170px;
+      // max-width: 170px;
+      width: 100%;
       color: #007dfa;
-    }
-
-    .search-result-path {
-      max-width: 140px;
     }
 
     // hover时图标保持原色，不跟随文字变色
@@ -165,7 +183,7 @@
   }
 
   .status-dot {
-    visibility: visible;
+    display: block;
   }
 
   .arco-tree-node:hover .version-status-container,
@@ -175,12 +193,12 @@
 
   .arco-tree-node:hover .status-dot,
   .arco-tree-node.arco-tree-node-selected .status-dot {
-    visibility: hidden;
+    display: none;
   }
 
   .arco-tree-node:hover .directory-tree-extra,
   .arco-tree-node.arco-tree-node-selected .directory-tree-extra {
-    display: block;
+    display: flex;
   }
 
   .released-icon {

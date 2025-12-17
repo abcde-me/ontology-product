@@ -58,6 +58,7 @@ import SpecificationsModal from './SpecificationsModal';
 import { ScriptParam } from '@/types/sqlDevelopApi';
 import ReleaseIcon from '../../assets/release-icon.svg';
 import dayjs from 'dayjs';
+import VersionStatus from '../version-status';
 
 interface NotebookWorkspaceProps {
   content: string;
@@ -418,7 +419,7 @@ const EditorWorkspaceContent: React.FC<{
 
     // 根据 status 渲染工具栏
     const renderToolbar = () => {
-      const status = scriptInfo?.status ?? ScriptStatus.Editing;
+      const status = scriptInfo?.status;
       const canEdit =
         scriptInfo?.status === ScriptStatus.Editing ||
         scriptInfo?.status === ScriptStatus.EditCompleted;
@@ -432,7 +433,7 @@ const EditorWorkspaceContent: React.FC<{
           className={styles['copy-dropdown']}
           selectable={false}
         >
-          <Menu.Item key="newVersion">
+          {/* <Menu.Item key="newVersion">
             <div className="flex h-[22px] items-center text-[14px] text-[var(--color-text-1)]">
               <IconCopy className="mr-[4px]" />
               <span className="font-bold">复制为新版本</span>
@@ -440,7 +441,7 @@ const EditorWorkspaceContent: React.FC<{
             <div className="mt-[4px] h-[18px] text-[12px] text-[var(--color-text-3)]">
               以此脚本为基础迭代新版本
             </div>
-          </Menu.Item>
+          </Menu.Item> */}
           <Menu.Item key="newScript">
             <div className="flex h-[22px] items-center text-[14px] text-[var(--color-text-1)]">
               <IconCopy className="mr-[4px]" />
@@ -606,7 +607,11 @@ const EditorWorkspaceContent: React.FC<{
           <>
             <div className={styles['toolbar-left']}>
               <Space size={12}>
-                <span className="text-sm">已发版</span>
+                <VersionStatus
+                  status={status}
+                  className="text-[var(--color-text-4)]"
+                />
+                {/* <span className="text-sm">已发版</span> */}
                 <span className="text-sm text-gray-500">
                   发版人: {scriptInfo?.release_user || '-'}
                 </span>
@@ -620,13 +625,32 @@ const EditorWorkspaceContent: React.FC<{
                 </span>
               </Space>
             </div>
-            <div
-              className={classNames(
-                styles['toolbar-right'],
-                styles['copy-dropdown-container']
+            <div className={styles['toolbar-right']}>
+              <div className={classNames(styles['copy-dropdown-container'])}>
+                {renderCopyDropdown()}
+              </div>
+              {/* 取消编辑按钮 - status=0且isSelfEditing=true时显示 */}
+              {scriptInfo?.isSelfEditing && (
+                <Button
+                  className={classNames(styles['btn-save'], 'ml-[8px]')}
+                  loading={editLoading}
+                  onClick={handleCancelEdit}
+                  icon={<IconClose />}
+                >
+                  取消编辑
+                </Button>
               )}
-            >
-              {renderCopyDropdown()}
+              {/* 编辑按钮 - status=0且isSelfEditing=false或status=1时显示 */}
+              {!scriptInfo?.isSelfEditing && (
+                <Button
+                  className={classNames(styles['btn-save'], 'ml-[8px]')}
+                  onClick={handleStartEdit}
+                  loading={editLoading}
+                  icon={<IconEdit />}
+                >
+                  编辑
+                </Button>
+              )}
             </div>
           </>
         );
@@ -638,7 +662,10 @@ const EditorWorkspaceContent: React.FC<{
           <>
             <div className={styles['toolbar-left']}>
               <Space size={12}>
-                <span className="text-sm">调度中</span>
+                <VersionStatus
+                  status={status}
+                  className="text-[var(--color-text-4)]"
+                />
                 <span className="text-sm text-gray-500">
                   发版人: {scriptInfo?.release_user || '-'}
                 </span>
