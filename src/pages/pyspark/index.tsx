@@ -13,7 +13,7 @@ import DatasetsList from './components/daset-export/DatasetsList';
 import ToolsManager from './components/tools-manager';
 import { useHasPermission } from '@/store/userInfoStore';
 import { PYSPARK_PERMISSIONS } from '@/config/permissions';
-import { DirectoryTreeRef } from '@/components/directory-tree/DirectoryTree';
+import { DirectoryTreeRef } from './components/directory-tree/DirectoryTree';
 import { useLocation, useHistory } from 'react-router-dom';
 
 const { Sider } = Layout;

@@ -2,7 +2,7 @@ import { useState, useCallback, useRef } from 'react';
 import { Message } from '@arco-design/web-react';
 import { openPythonItem } from '@/api/pyspark';
 import { OpenPythonItemRes } from '@/types/pythonApi';
-import { DirectoryTreeRef } from '@/components/directory-tree/DirectoryTree';
+import { DirectoryTreeRef } from '@/pages/sql/components/directory-tree/DirectoryTree';
 
 // 文件标签页类型
 export interface FileTab {

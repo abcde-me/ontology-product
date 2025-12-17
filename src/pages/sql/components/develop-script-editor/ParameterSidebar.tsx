@@ -1,11 +1,9 @@
 import React, { memo, useEffect, useMemo, useRef, useState } from 'react';
-import { Input, Button, Popover } from '@arco-design/web-react';
-import { IconCaretRight } from '@arco-design/web-react/icon';
+import { Input, Popover } from '@arco-design/web-react';
 import classNames from 'classnames';
 import ParameterIcon from '../../assets/parameter-icon.svg';
 import ArrowRightIcon from '../../assets/arrow-right-icon.svg';
 import { ScriptParam } from '@/types/sqlDevelopApi';
-import { is } from 'immer/dist/internal';
 
 // 扩展 ScriptParam 以支持内部排序
 type ParameterWithOrder = ScriptParam & { _order?: number };
@@ -236,7 +234,7 @@ const ParameterSidebar: React.FC<ParameterSidebarProps> = memo(
     return (
       <div
         className={classNames(
-          'absolute right-0 top-0 z-10 h-full transition-transform duration-300 ease-in-out',
+          'z-1 absolute right-0 top-0 h-full transition-transform duration-300 ease-in-out',
           isCollapsed ? 'w-auto' : 'w-[240px]'
         )}
       >

@@ -25,7 +25,9 @@
     }
     .script-card-content-item-title-text {
       max-width: 180px;
-      color: #007dfa;
+      :global(.arco-typography) {
+        color: #007dfa !important;
+      }
     }
   }
 

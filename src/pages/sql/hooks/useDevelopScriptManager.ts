@@ -48,8 +48,8 @@ interface UseFileManagerReturn {
   handleRename: (finalName: string, node: any) => Promise<any>;
   handleCopy: (newName: string, node: any) => Promise<any>;
   handleDelete: (node: any) => Promise<boolean>;
-  handleFolderClick: (folderId: string) => Promise<SqlScriptItem[]>;
-  handleBackToParent: (parentId: string) => Promise<SqlScriptItem[]>;
+  handleFolderClick: (folderId: string) => Promise<ListDevelopScriptItem[]>;
+  handleBackToParent: (parentId: string) => Promise<ListDevelopScriptItem[]>;
 
   // 工具函数
   getRawSqlScriptList: () => Promise<void>;
@@ -92,11 +92,17 @@ export const useDevelopScriptManager = (
   const handleSearch = useCallback(
     async (path_id: string, searchValue: string) => {
       try {
+        if (isLoading) return [];
+
+        setIsLoading(true);
+
         const res = await listDevelopScript({
           script_name: searchValue,
           page: 1,
           page_size: 1000
         });
+
+        setIsLoading(false);
 
         if (res.status === 200) {
           return res.data?.items ?? [];
@@ -105,6 +111,7 @@ export const useDevelopScriptManager = (
       } catch (error) {
         console.error('搜索失败:', error);
         Message.error('搜索失败');
+        setIsLoading(false);
         return [];
       }
     },
@@ -165,6 +172,8 @@ export const useDevelopScriptManager = (
   // 获取原始SqlScript列表
   const getRawSqlScriptList = useCallback(async () => {
     if (isLoading) return; // 防止重复请求
+
+    console.log('getRawSqlScriptList', isLoading);
 
     setIsLoading(true);
     try {
@@ -370,8 +379,11 @@ export const useDevelopScriptManager = (
   // 文件夹点击处理
   const handleFolderClick = useCallback(async () => {
     try {
-      const res = await getSqlScriptList({
-        search_content: searchValue,
+      if (isLoading) return [];
+
+      setIsLoading(true);
+      const res = await listDevelopScript({
+        script_name: searchValue,
         page: 1,
         page_size: 1000
       });
@@ -380,13 +392,18 @@ export const useDevelopScriptManager = (
       console.error('获取文件夹内容失败:', error);
       Message.error('获取文件夹内容失败');
       return [];
+    } finally {
+      setIsLoading(false);
     }
   }, [searchValue]);
 
   // 返回父级处理
   const handleBackToParent = useCallback(async () => {
     try {
-      const res = await getSqlScriptList({
+      if (isLoading) return [];
+
+      setIsLoading(true);
+      const res = await listDevelopScript({
         page: 1,
         page_size: 1000
       });
@@ -395,8 +412,10 @@ export const useDevelopScriptManager = (
       console.error('返回父级失败:', error);
       Message.error('返回父级失败');
       return [];
+    } finally {
+      setIsLoading(false);
     }
-  }, []);
+  }, [isLoading]);
 
   // 用于跟踪是否已经根据外部选中状态打开过文件，避免重复打开
   const hasOpenedFileFromExternalRef = useRef<string | null>(null);

@@ -93,7 +93,10 @@
     .file-name {
       // max-width: 170px;
       width: 100%;
-      color: #007dfa;
+
+      .arco-typography {
+        color: #007dfa;
+      }
     }
 
     // hover时图标保持原色，不跟随文字变色
@@ -106,6 +109,10 @@
   .arco-tree-node.arco-tree-node-selected {
     .file-name {
       color: #007dfa;
+
+      .arco-typography {
+        color: #007dfa;
+      }
     }
 
     .search-result-path {

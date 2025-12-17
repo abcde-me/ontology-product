@@ -32,6 +32,7 @@ import {
 import VersionStatus from '../version-status';
 import EllipsisPopover from '@/components/ellipsis-popover-com';
 import ScriptDetailModal from '../spl-script-management/ScriptDetailModal';
+import classNames from 'classnames';
 
 // 版本类型 已发版 未发版 调度中
 // 注意：0（编辑中）和 1（编辑完成）都代表"未发版"，但为了兼容现有代码，这里保留 1 作为 UNRELEASED 的值
@@ -309,9 +310,10 @@ const ScriptCard: React.FC<ScriptCardProps> = ({
                         <EllipsisPopover
                           value={item?.script_name || ''}
                           preferTypography
-                          wrapperClassName={
-                            styles['script-card-content-item-title-text']
-                          }
+                          wrapperClassName={classNames(
+                            styles['script-card-content-item-title-text'],
+                            'cursor-pointer'
+                          )}
                         />
                       </div>
                       <VersionStatus status={item.status} />
