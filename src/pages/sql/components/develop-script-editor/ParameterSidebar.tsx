@@ -4,6 +4,7 @@ import classNames from 'classnames';
 import ParameterIcon from '../../assets/parameter-icon.svg';
 import ArrowRightIcon from '../../assets/arrow-right-icon.svg';
 import { ScriptParam } from '@/types/sqlDevelopApi';
+import { useLocalParams } from '../../hooks/useLocalParams';
 
 // 扩展 ScriptParam 以支持内部排序
 type ParameterWithOrder = ScriptParam & { _order?: number };
@@ -20,47 +21,10 @@ interface ParameterSidebarProps {
   systemParamKeys?: Set<string>; // 系统参数名列表
 }
 
-// 提取参数的正则表达式
-const PARAM_REGEX = /\$\{([^}]+)\}/g;
-
 // 检测是否有 ${} 模式（包括未完成的）
 const hasParameterPattern = (content: string): boolean => {
   // 检测是否有 ${ 或完整的 ${param}
   return /\$\{/.test(content);
-};
-
-// 从内容中提取所有参数
-const extractParameters = (content: string): ParameterWithOrder[] => {
-  // 重置正则的 lastIndex，避免全局匹配的问题
-  PARAM_REGEX.lastIndex = 0;
-  const paramMap = new Map<string, ParameterWithOrder>();
-  const matches = Array.from(content.matchAll(PARAM_REGEX));
-  const baseTimestamp = Date.now();
-
-  matches.forEach((match, index) => {
-    const paramName = match[1].trim();
-    if (paramName) {
-      // 为每个参数分配时间戳，越后面的参数时间戳越大（越新）
-      const timestamp = baseTimestamp + index;
-      // 如果参数已存在，更新 order 为最新的时间戳
-      if (paramMap.has(paramName)) {
-        const existing = paramMap.get(paramName)!;
-        existing._order = timestamp;
-      } else {
-        paramMap.set(paramName, {
-          config_key: paramName,
-          config_value: '',
-          config_desc: '',
-          _order: timestamp
-        });
-      }
-    }
-  });
-
-  // 转换为数组并按 order 降序排列（最新的在顶部）
-  return Array.from(paramMap.values()).sort(
-    (a, b) => (b._order || 0) - (a._order || 0)
-  );
 };
 
 // 检查参数名是否与系统参数冲突（支持 ${} 和 $[] 两种格式）
@@ -94,21 +58,14 @@ const ParameterSidebar: React.FC<ParameterSidebarProps> = memo(
     systemParamKeys = new Set()
   }) => {
     const [isCollapsed, setIsCollapsed] = useState(false);
-    const [localParams, setLocalParams] = useState<ParameterWithOrder[]>(
-      initialParams?.map((p, index) => ({
-        ...p,
-        _order: (p as ParameterWithOrder)._order ?? Date.now() - index // 如果已有时间戳则保留，否则使用当前时间戳递减
-      })) || []
-    );
-    // 用于标记是否已经初始化完成（initialParams 已经设置过）
-    const isInitializedRef = useRef(false);
-    // 记录上一次 extractedParams 的长度，用于判断是否从有值变为空
-    const prevExtractedParamsLengthRef = useRef<number>(-1);
+    const [isInitialized, setIsInitialized] = useState(false);
 
-    // 从内容中提取参数
-    const extractedParams = useMemo(() => {
-      return extractParameters(content);
-    }, [content]);
+    // 使用 useLocalParams hook
+    const { localParams, parseParams, updateParamValue, setLocalParams } =
+      useLocalParams({
+        initialParams,
+        regex: /\$\{([^}]+)\}/g
+      });
 
     // 检测是否有第一个 ${}（检测是否有参数模式）
     const hasFirstParam = useMemo(() => {
@@ -118,6 +75,11 @@ const ParameterSidebar: React.FC<ParameterSidebarProps> = memo(
     // 内部可见性状态（如果外部没有控制，则根据是否有参数来决定）
     const isVisible =
       controlledVisible !== undefined ? controlledVisible : hasFirstParam;
+
+    // 处理参数值变化
+    const handleValueChange = (paramKey: string, value: string) => {
+      updateParamValue(paramKey, value);
+    };
 
     // 通知外部可见性变化
     useEffect(() => {
@@ -133,99 +95,24 @@ const ParameterSidebar: React.FC<ParameterSidebarProps> = memo(
       }
     }, [isCollapsed, onCollapsedChange]);
 
-    // 当 initialParams 变化时，更新本地状态并标记为已初始化
+    // 参数列表变化时，通知外部更新 scriptParams
     useEffect(() => {
-      // 无论 initialParams 是否有值，都标记为已初始化（即使是空数组也表示已经初始化完成）
-      if (initialParams !== undefined) {
-        const baseTimestamp = Date.now();
-        setLocalParams(
-          initialParams.map((p, index) => ({
-            ...p,
-            _order: (p as ParameterWithOrder)._order ?? baseTimestamp - index // 如果已有时间戳则保留，否则使用当前时间戳递减
-          }))
-        );
-        isInitializedRef.current = true;
-      }
-    }, [initialParams]);
+      onParameterChange?.(localParams);
+    }, [localParams]);
 
-    // 同步提取的参数到本地状态，同时保留已输入的值和初始参数值
+    // 编辑器内容变化时，解析参数
     useEffect(() => {
-      // 如果还没有初始化完成，不处理 extractedParams（避免覆盖 initialParams）
-      if (!isInitializedRef.current) {
-        // 记录当前的 extractedParams 长度，但不处理
-        prevExtractedParamsLengthRef.current = extractedParams.length;
+      const parsedParams = parseParams(content);
+      setLocalParams(parsedParams);
+    }, [content]);
+
+    useEffect(() => {
+      if (isInitialized) {
         return;
       }
-
-      if (extractedParams.length > 0) {
-        setLocalParams((prevParams) => {
-          const paramMap = new Map<string, string>();
-
-          // 保留已有参数的值
-          prevParams.forEach((p) => {
-            if (p.config_key && p.config_value) {
-              paramMap.set(p.config_key, p.config_value);
-            }
-          });
-
-          // 合并新提取的参数，保留已有的值，并按时间戳排序（最新的在顶部）
-          const merged = extractedParams
-            .map((param) => ({
-              ...param,
-              config_value: paramMap.get(param.config_key) || param.config_value
-            }))
-            .sort((a, b) => (b._order || 0) - (a._order || 0));
-
-          // 检查参数是否真的变化了，避免无限循环
-          const hasChanged =
-            prevParams.length !== merged.length ||
-            prevParams.some(
-              (prev, index) =>
-                prev.config_key !== merged[index]?.config_key ||
-                prev.config_value !== merged[index]?.config_value
-            );
-
-          // 只有当参数实际变化时才通知外部（移除内部 _order 字段）
-          if (hasChanged && onParameterChange) {
-            const paramsToNotify = merged.map(({ _order, ...param }) => param);
-            onParameterChange(paramsToNotify);
-          }
-
-          return merged;
-        });
-        // 更新记录的长度
-        prevExtractedParamsLengthRef.current = extractedParams.length;
-      } else {
-        // 只有当 extractedParams 从有值变为空时才清空（避免初始化阶段误清空）
-        const wasEmpty = prevExtractedParamsLengthRef.current <= 0;
-        if (!wasEmpty) {
-          // 从有值变为空，清空参数
-          setLocalParams((prevParams) => {
-            if (prevParams.length > 0 && onParameterChange) {
-              onParameterChange([]);
-            }
-            return [];
-          });
-        }
-        // 更新记录的长度
-        prevExtractedParamsLengthRef.current = 0;
-      }
-    }, [extractedParams, onParameterChange]);
-
-    // 处理参数值变化
-    const handleValueChange = (paramKey: string, value: string) => {
-      setLocalParams((prev) => {
-        const updated = prev.map((p) =>
-          p.config_key === paramKey ? { ...p, config_value: value } : p
-        );
-        if (onParameterChange) {
-          // 移除内部 _order 字段
-          const paramsToNotify = updated.map(({ _order, ...param }) => param);
-          onParameterChange(paramsToNotify);
-        }
-        return updated;
-      });
-    };
+      setIsInitialized(true);
+      setLocalParams(initialParams || []);
+    }, [initialParams]);
 
     if (!isVisible) {
       return null;

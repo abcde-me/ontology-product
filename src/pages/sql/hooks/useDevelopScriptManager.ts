@@ -358,7 +358,7 @@ export const useDevelopScriptManager = (
     return (
       data?.map((item: any) => {
         return {
-          id: String(Number(item.script_file_id) || item.script_id),
+          id: String(item.script_id),
           script_id: item.script_id,
           name: item.script_name,
           type: PythonItemType.Notebook,

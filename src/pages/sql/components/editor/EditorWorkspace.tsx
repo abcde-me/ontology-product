@@ -76,7 +76,7 @@ const EditorWorkspaceContent: React.FC<{
   }) => {
     const FormItem = Form.Item;
     const userInfo = useUserInfo();
-    const [form] = Form.useForm();
+    const [saveForm] = Form.useForm();
     const TextArea = Input.TextArea;
     const editorRef = useRef<ReactCodeMirrorRef>(null);
     const [lastCursorPosition, setLastCursorPosition] =
@@ -89,10 +89,10 @@ const EditorWorkspaceContent: React.FC<{
     const [visible, setVisible] = React.useState<boolean>(false);
     const editorContentRef = useRef(null);
     useEffect(() => {
-      form.setFieldsValue({
+      saveForm.setFieldsValue({
         fileName: fileName
       });
-    }, [fileName, form]);
+    }, [fileName, saveForm]);
     // 从 Context 获取编辑器状态
     const {
       runStatus,
@@ -107,7 +107,8 @@ const EditorWorkspaceContent: React.FC<{
       isPanelOpen,
       handlePanelStateChange,
       getPrevRunStatus,
-      lastScriptRunStatus
+      lastScriptRunStatus,
+      handleSave
     } = useEditorContext();
 
     const myTheme = createTheme({
@@ -216,20 +217,6 @@ const EditorWorkspaceContent: React.FC<{
         onInsertContent(insertContentAtCursor);
       }
     }, [insertContentAtCursor, onInsertContent]);
-    const handleSave = async () => {
-      const res = await updateSqlScript(Number(scriptId), {
-        uid: userInfo?.id ?? '32020ad2-ef56-4e20-aa0b-4399429bb34c',
-        script_name: fileName ?? '',
-        script_content: content,
-        script_desc: form.getFieldValue('fileDesc')
-      });
-      if (res?.status === 200) {
-        Message.success('保存成功');
-        setVisible(false);
-      } else {
-        Message.error('保存失败');
-      }
-    };
     return (
       <div className={styles['sql-content']}>
         {/* 顶部工具栏 */}
@@ -278,25 +265,6 @@ const EditorWorkspaceContent: React.FC<{
                 </Space>
               </div>
             )}
-            {curActiveTab === 'files' && (
-              <>
-                <Button
-                  onClick={() => {}}
-                  className={styles['toolbar-btn']}
-                  icon={<ScriptSaveBtn />}
-                  style={{ marginRight: '8px' }}
-                >
-                  保存
-                </Button>
-                <Button
-                  onClick={() => {}}
-                  icon={<ScriptUpBtn />}
-                  className={styles['toolbar-btn']}
-                >
-                  发版
-                </Button>
-              </>
-            )}
             {curActiveTab === 'data' && (
               <Button
                 onClick={() => {
@@ -315,6 +283,7 @@ const EditorWorkspaceContent: React.FC<{
                 onClick={() => {
                   setVisible(true);
                 }}
+                disabled={editorContent?.trim() === ''}
                 icon={<IconSave />}
               >
                 保存
@@ -383,35 +352,47 @@ const EditorWorkspaceContent: React.FC<{
           />
         )}
         {/* 保存查询列表 */}
-        <Modal
-          title="保存到查询脚本列表"
-          visible={visible}
-          onOk={() => setVisible(false)}
-          onCancel={() => setVisible(false)}
-          autoFocus={false}
-          focusLock={true}
-          footer={[
-            <>
-              <Button onClick={() => setVisible(false)}>取消</Button>
-              <Button onClick={handleSave} type="primary" htmlType="submit">
-                保存
-              </Button>
-            </>
-          ]}
-        >
-          <Form form={form}>
-            <FormItem label="SQL脚本名称:" required={true} field="fileName">
-              <Input
-                defaultValue={fileName}
-                style={{ width: 300 }}
-                placeholder="请输入脚本名称"
-              />
-            </FormItem>
-            <FormItem label="脚本说明:" field="fileDesc">
-              <Input style={{ width: 300 }} placeholder="请输入脚本说明" />
-            </FormItem>
-          </Form>
-        </Modal>
+        {visible && (
+          <Modal
+            title="保存到查询脚本列表"
+            visible={visible}
+            onOk={() => setVisible(false)}
+            onCancel={() => setVisible(false)}
+            autoFocus={false}
+            focusLock={true}
+            footer={[
+              <>
+                <Button onClick={() => setVisible(false)}>取消</Button>
+                <Button
+                  onClick={() =>
+                    handleSave(saveForm).then((res) => {
+                      if (res) {
+                        setVisible(false);
+                      }
+                    })
+                  }
+                  type="primary"
+                  htmlType="submit"
+                >
+                  保存
+                </Button>
+              </>
+            ]}
+          >
+            <Form form={saveForm} className="w-full">
+              <FormItem label="SQL脚本名称:" required={true} field="fileName">
+                <Input
+                  defaultValue={fileName}
+                  disabled={!!scriptId}
+                  placeholder="请输入脚本名称"
+                />
+              </FormItem>
+              <FormItem label="脚本说明:" field="fileDesc">
+                <Input placeholder="请输入脚本说明" />
+              </FormItem>
+            </Form>
+          </Modal>
+        )}
       </div>
     );
   }
