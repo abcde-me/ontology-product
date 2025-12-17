@@ -1,4 +1,5 @@
 import React from 'react';
+import classNames from 'classnames';
 
 import styles from './index.module.scss';
 import { ScriptStatus, ScriptStatusName } from '@/types/sqlDevelopApi';
@@ -24,15 +25,24 @@ const iconClassMap: Partial<Record<ScriptStatus, string>> = {
 
 interface VersionStatusProps {
   status: ScriptStatus;
+  className?: string;
 }
 
-export default function VersionStatus({ status }: VersionStatusProps) {
+export default function VersionStatus({
+  status,
+  className
+}: VersionStatusProps) {
   const iconClass = iconClassMap[status] ?? 'unreleased-icon';
 
   return (
     <div className="flex min-w-[58px] items-center">
       <span className={styles[iconClass]} />
-      <div className="text-[14px] leading-[22px] text-[var(--color-text-1)]">
+      <div
+        className={classNames(
+          'text-[14px] leading-[22px] text-[var(--color-text-1)]',
+          className
+        )}
+      >
         {ScriptStatusName[status]}
       </div>
     </div>
