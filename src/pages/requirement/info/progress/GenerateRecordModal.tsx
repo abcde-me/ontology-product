@@ -13,7 +13,7 @@ import { useParams } from '@/utils/url';
 import './GenerateRecordModal.scss';
 import { generateRecord, downloadGenRecord } from '@/api/dataAnnotation';
 import dayjs from 'dayjs';
-import { downloadBlob, isBlob } from '../utils/downloadBlob';
+import { downloadBlob, isBlob, parseFilename } from '../utils/downloadBlob';
 // 状态配置 status: 0-生成中 1-生成失败 2-未下载 3-已下载
 const statusConfig: Record<number, { text: string; color: string }> = {
   0: { text: '生成中', color: '#2970ff' }, // 蓝色
@@ -111,9 +111,8 @@ function GenerateRecordModal({ visible, onClose }: GenerateRecordModalProps) {
         Message.error('下载失败!');
         return;
       }
-      const filename = res.headers['content-disposition']
-        .split(';')[1]
-        .split('=')[1];
+      const contentDisposition = res.headers['content-disposition'] || '';
+      const filename = parseFilename(contentDisposition);
       downloadBlob(res.data, { download: filename });
     } catch (error) {
       console.error('下载失败:', error);
