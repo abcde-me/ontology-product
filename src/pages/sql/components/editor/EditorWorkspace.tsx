@@ -39,6 +39,7 @@ import ScriptUpBtn from '@/assets/sql/script-up-btn.svg';
 import ScriptSaveBtn from '@/assets/sql/script-save-btn.svg';
 import DrawerContent from '../drawer-content';
 import { updateSqlScript } from '@/api/sql';
+import { useUrlState } from '../../hooks/useUrlState';
 interface NotebookWorkspaceProps {
   content: string;
   fileName: string;
@@ -88,6 +89,8 @@ const EditorWorkspaceContent: React.FC<{
     const hasCancelRunPermission = useHasPermission(SQL_PERMISSIONS.RUN);
     const [visible, setVisible] = React.useState<boolean>(false);
     const editorContentRef = useRef(null);
+
+    const { updateUrlState } = useUrlState();
     useEffect(() => {
       saveForm.setFieldsValue({
         fileName: fileName
@@ -205,10 +208,14 @@ const EditorWorkspaceContent: React.FC<{
         }
       });
     }, []);
-    const handleSeeScriptList = () => {
-      if (onToScriptList) {
-        onToScriptList('script');
-      }
+    const handleToScriptQueryList = () => {
+      updateUrlState(
+        {
+          activeTab: 'script',
+          scriptType: 'query'
+        },
+        { method: 'push' }
+      );
     };
     // 监听插入内容事件
     useEffect(() => {
@@ -268,10 +275,9 @@ const EditorWorkspaceContent: React.FC<{
             {curActiveTab === 'data' && (
               <Button
                 onClick={() => {
-                  handleSeeScriptList();
+                  handleToScriptQueryList();
                 }}
                 className={styles['btn-script-list']}
-                disabled={runStatus === RunningStatus.RUNNING}
                 icon={<IconStorage />}
               >
                 脚本列表

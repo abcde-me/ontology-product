@@ -1,4 +1,4 @@
-import React, { memo } from 'react';
+import React, { memo, useEffect } from 'react';
 import { Tabs, Message } from '@arco-design/web-react';
 import EditorWorkspace from './EditorWorkspace';
 import NoData from '@/components/no-data';
@@ -23,6 +23,8 @@ interface EditorContentProps {
   selectFile?: (fileId: string) => void;
   onToScriptList?: (key: string) => void;
   curActiveTab: string;
+  fileManagerSelectedKeys: string[];
+  // openFile: (scriptId: string) => void;
 }
 
 const EditorContent: React.FC<EditorContentProps> = memo(
@@ -39,7 +41,9 @@ const EditorContent: React.FC<EditorContentProps> = memo(
     refreshDirectory,
     selectFile,
     onToScriptList,
-    curActiveTab
+    curActiveTab,
+    fileManagerSelectedKeys
+    // openFile
   }) => {
     // 获取当前活动标签页
     const activeTabData = fileTabs.find((tab) => tab.key === activeTab);
@@ -75,6 +79,12 @@ const EditorContent: React.FC<EditorContentProps> = memo(
     const handleCloseTab = (key: string) => {
       onRemoveTab(key);
     };
+
+    // useEffect(() => {
+    //   if (fileManagerSelectedKeys.length > 0) {
+    //     openFile && openFile(fileManagerSelectedKeys[0]);
+    //   }
+    // }, [fileManagerSelectedKeys]);
 
     // 如果没有活动标签页，显示空状态
     if (!activeTabData) {

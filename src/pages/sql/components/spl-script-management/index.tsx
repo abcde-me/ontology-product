@@ -1,7 +1,8 @@
-import React, { memo, useState } from 'react';
+import React, { memo, useState, useEffect } from 'react';
 import { Tabs } from '@arco-design/web-react';
 import Processing from './processing';
 import QueryScript from './query-script';
+import { useUrlState } from '../../hooks/useUrlState';
 
 import styles from './index.module.scss';
 
@@ -13,12 +14,31 @@ interface SplScriptManagementProps {
 const SplScriptManagement: React.FC<SplScriptManagementProps> = memo(
   ({ onToScriptList }) => {
     const TabPane = Tabs.TabPane;
-    const [curActiveTab, setCurActiveTab] = useState('processing');
+    const { urlState, updateUrlState } = useUrlState();
+
+    // 从URL参数获取初始tab，如果没有则默认为'processing'
+    const initialTab = urlState.scriptType || 'processing';
+    const [curActiveTab, setCurActiveTab] = useState(initialTab);
+
+    // 当URL参数变化时，同步更新curActiveTab
+    useEffect(() => {
+      if (urlState.scriptType && urlState.scriptType !== curActiveTab) {
+        setCurActiveTab(urlState.scriptType);
+      }
+    }, [urlState.scriptType]);
+
+    // 当tab切换时，更新URL参数
+    const handleTabChange = (tab: string) => {
+      setCurActiveTab(tab);
+      updateUrlState({ scriptType: tab });
+    };
+
     return (
       <div className={styles['spl-script-management']}>
         <div className={styles['spl-script-management-title']}>SQL脚本管理</div>
         <Tabs
-          onChange={setCurActiveTab}
+          onChange={handleTabChange}
+          activeTab={curActiveTab}
           defaultActiveTab="processing"
           className={styles['spl-tabs']}
           destroyOnHide

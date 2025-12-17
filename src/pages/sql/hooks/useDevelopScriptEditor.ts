@@ -238,6 +238,9 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
           status: ScriptStatus.Editing
         };
       });
+
+      Message.success('已进入编辑模式，取消编辑后可释放编辑权限');
+
       return true;
     } catch (error) {
       console.error(error);

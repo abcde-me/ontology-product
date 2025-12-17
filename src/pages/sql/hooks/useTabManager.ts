@@ -2,6 +2,7 @@ import { useState, useCallback, useRef } from 'react';
 import { Message } from '@arco-design/web-react';
 import { DirectoryTreeRef } from '../components/directory-tree/DirectoryTree';
 import { generateSqlDefaultName } from '../utils/formatDateTime';
+import { getSqlScriptDetail } from '@/api/sql';
 
 // 文件标签页类型
 export interface FileTab {
@@ -43,6 +44,26 @@ export const useTabManager = (
 
   // DirectoryTree 的 ref，用于调用其新建功能
   const directoryTreeRef = useRef<DirectoryTreeRef>(null);
+
+  const openFileByScriptId = useCallback(
+    async (scriptId: string) => {
+      const existingTab = fileState.fileTabs.find(
+        (tab) => tab.scriptId === scriptId
+      );
+
+      if (existingTab) {
+        switchTab(existingTab.key);
+      } else {
+        const scriptDetail = await getSqlScriptDetail(scriptId);
+        addTab({
+          name: scriptDetail.data?.script_name,
+          fileId: scriptDetail.data?.script_file_id,
+          scriptId: scriptId
+        });
+      }
+    },
+    [fileState.fileTabs]
+  );
 
   // 文件操作
   const openFile = useCallback(
@@ -131,9 +152,9 @@ export const useTabManager = (
 
       if (newFileInfo) {
         // 如果有新文件信息，使用文件信息创建标签页
-        newTabKey = newFileInfo.fileId;
+        newTabKey = newFileInfo.fileId || newFileInfo.scriptId;
         newTabTitle = newFileInfo.name;
-        newFileId = newFileInfo.fileId;
+        newFileId = newFileInfo.fileId || newFileInfo.scriptId;
         newScriptId = newFileInfo.scriptId;
       } else {
         // 否则创建临时标签页
@@ -287,6 +308,7 @@ export const useTabManager = (
     switchTab,
     updateTab,
     handleCreate,
-    updateTabTitle // 导出更新标签页标题的函数
+    updateTabTitle, // 导出更新标签页标题的函数
+    openFileByScriptId
   };
 };

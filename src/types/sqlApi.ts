@@ -344,6 +344,10 @@ export interface SqlScriptDetailData {
    */
   script_id: number;
   /**
+   * 脚本文件id
+   */
+  script_file_id: string;
+  /**
    * 脚本名字
    */
   script_name: string;

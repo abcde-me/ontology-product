@@ -8,6 +8,7 @@ interface UrlState {
   activeTab?: string;
   activeDevelopScriptId?: string;
   activeScriptId?: string;
+  scriptType?: string;
 }
 
 export const useUrlState = () => {
@@ -25,7 +26,8 @@ export const useUrlState = () => {
       activeTab: searchParams.get('activeTab') || undefined,
       activeDevelopScriptId:
         searchParams.get('activeDevelopScriptId') || undefined,
-      activeScriptId: searchParams.get('activeScriptId') || undefined
+      activeScriptId: searchParams.get('activeScriptId') || undefined,
+      scriptType: searchParams.get('scriptType') || undefined
     };
   }, [location.search]);
 
@@ -92,6 +94,13 @@ export const useUrlState = () => {
           searchParams.set('activeScriptId', updatedState.activeScriptId);
         } else {
           searchParams.delete('activeScriptId');
+        }
+      }
+      if (updatedState.scriptType !== undefined) {
+        if (updatedState.scriptType) {
+          searchParams.set('scriptType', updatedState.scriptType);
+        } else {
+          searchParams.delete('scriptType');
         }
       }
 

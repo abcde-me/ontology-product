@@ -15,7 +15,7 @@ interface PaginationProps {
 
 const Processing: React.FC<PaginationProps> = memo(
   ({ onToScriptList, curActiveTab }) => {
-    const [processingNum, setProcessingNum] = React.useState<number>(100);
+    const [processingNum, setProcessingNum] = React.useState<number>(0);
     const [iconActive, setIconActive] = React.useState<ViewType>(
       ViewType.TABLE
     );

@@ -90,10 +90,14 @@ const ReleaseVersionModal: React.FC<ReleaseVersionModalProps> = ({
           field="scriptName"
           rules={[{ required: true, message: '请输入SQL脚本名称' }]}
         >
-          <span>{initialValues?.scriptName}</span>
+          <span className="text-[14px] text-[var(--color-text-2)]">
+            {initialValues?.scriptName}
+          </span>
         </FormItem>
         <FormItem label="版本号:" field="version">
-          <span>{initialValues?.version}</span>
+          <span className="text-[14px] text-[var(--color-text-2)]">
+            {initialValues?.version}
+          </span>
         </FormItem>
         <FormItem label="版本说明:" field="versionDesc">
           <TextArea

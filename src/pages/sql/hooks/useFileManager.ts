@@ -3,13 +3,9 @@ import { Message } from '@arco-design/web-react';
 import {
   getSqlScriptList,
   createSqlScript,
-  renameSqlScript,
   deleteSqlScript,
   copySqlScript,
-  renameDevelopScript,
-  createDevelopSqlScript,
-  copyDevelopScriptList,
-  deleteDevelopScriptList
+  renameSqlScript
 } from '@/api/sql';
 import { PythonItemType } from '@/types/pythonApi';
 import { SqlScriptItem } from '@/types/sqlApi';
@@ -185,9 +181,9 @@ export const useFileManager = (
           return;
         }
         const scriptFileId = String(Date.now());
-        const createRes = await createDevelopSqlScript({
-          // uid: userInfo?.id ?? '',
-          // script_file_id: scriptFileId,
+        const createRes = await createSqlScript({
+          uid: userInfo?.id ?? '',
+          script_file_id: scriptFileId,
           script_name: finalName
         });
 
@@ -224,8 +220,7 @@ export const useFileManager = (
       try {
         const scriptId = node?.dataRef?.script_id;
         const fileId = node?.dataRef?.id;
-        const renameRes = await renameDevelopScript({
-          script_id: scriptId,
+        const renameRes = await renameSqlScript(scriptId, {
           script_name: finalName
         });
 
@@ -258,9 +253,10 @@ export const useFileManager = (
   const handleCopy = useCallback(
     async (newName: string, node: any) => {
       try {
-        const copyRes = await copyDevelopScriptList({
-          script_id: node?.dataRef?.script_id
-        });
+        const copyRes = await copySqlScript(
+          node?.dataRef?.script_id,
+          String(node?.dataRef?.script_file_id)
+        );
 
         if (copyRes.status !== 200) {
           Message.error(copyRes.message);
@@ -286,9 +282,7 @@ export const useFileManager = (
       try {
         const scriptId = node?.dataRef?.script_id;
         const fileId = node?.dataRef?.id;
-        const deleteRes = await deleteDevelopScriptList({
-          script_id: scriptId
-        });
+        const deleteRes = await deleteSqlScript(String(scriptId));
 
         if (deleteRes.status !== 200) {
           Message.error(deleteRes.message);

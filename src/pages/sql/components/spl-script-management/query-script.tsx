@@ -62,7 +62,7 @@ const QueryScript: React.FC<QueryScriptProps> = ({ curActiveTab }) => {
   const [sortValue, setSortValue] = useState({
     sort: ''
   });
-  const [queryNum, setQueryNum] = useState<number>(100);
+  const [queryNum, setQueryNum] = useState<number>(0);
   // 组件初始化
   useEffect(() => {
     getList();

@@ -19,6 +19,8 @@ import {
   useDevelopScriptTabManager
 } from './hooks/useDevelopScriptTabManager';
 import { useUrlState } from './hooks/useUrlState';
+import { getSqlScriptDetail } from '@/api/sql';
+import { Message } from '@arco-design/web-react';
 
 const { Content, Sider } = Layout;
 const TabPane = Tabs.TabPane;
@@ -39,6 +41,7 @@ const SqlIndex: React.FC = memo(() => {
     useState<boolean>(false);
   const isEditorFocusedRef = useRef<boolean>(false);
   const isDevelopScriptEditorFocusedRef = useRef<boolean>(false);
+  const hasOpenedFileFromActiveScriptIdRef = useRef<string | null>(null);
   // 添加状态桥接：用于同步FileManager的选中状态
   // SQL查询脚本选中状态
   const [fileManagerSelectedKeys, setFileManagerSelectedKeys] = useState<
@@ -57,16 +60,24 @@ const SqlIndex: React.FC = memo(() => {
 
     setActiveTab((prev) => (prev !== tab ? tab : prev));
 
-    // 只在 files tab 时设置选中状态
+    // SQL加工脚本选中状态
     if (tab === 'files' && urlState.activeDevelopScriptId) {
       setDevelopScriptFileManagerSelectedKeys([urlState.activeDevelopScriptId]);
     }
-  }, [urlState.activeTab, urlState.activeDevelopScriptId]);
 
-  // 选中状态变化回调
-  const handleSelectedKeysChange = useCallback((selectedKeys: string[]) => {
-    setFileManagerSelectedKeys(selectedKeys);
-  }, []);
+    // SQL查询脚本选中状态
+    if (tab === 'data') {
+      if (urlState.activeScriptId) {
+        setFileManagerSelectedKeys([urlState.activeScriptId]);
+      } else if (fileState.fileTabs.length === 0) {
+        addTab();
+      }
+    }
+  }, [
+    urlState.activeTab,
+    urlState.activeDevelopScriptId,
+    urlState.activeScriptId
+  ]);
 
   // 选中SQL加工脚本变化回调
   const handleDevelopScriptSelectedKeysChange = useCallback(
@@ -91,9 +102,9 @@ const SqlIndex: React.FC = memo(() => {
     switchTab,
     handleCreate,
     updateTab,
-    openFile,
+    openFileByScriptId: openSqlQueryFileByScriptId,
     updateTabTitle // 获取更新标签页标题的方法
-  } = useTabManager(handleSelectedKeysChange);
+  } = useTabManager();
 
   const {
     fileState: developScriptFileState,
@@ -109,7 +120,14 @@ const SqlIndex: React.FC = memo(() => {
   } = useDevelopScriptTabManager(handleDevelopScriptSelectedKeysChange);
 
   // 初始化创建一个默认SQL查询标签
-  useEffect(() => addTab(), []);
+  // useEffect(() => addTab(), []);
+
+  useEffect(() => {
+    if (fileManagerSelectedKeys.length > 0) {
+      openSqlQueryFileByScriptId &&
+        openSqlQueryFileByScriptId(fileManagerSelectedKeys[0]);
+    }
+  }, [fileManagerSelectedKeys, openSqlQueryFileByScriptId]);
 
   const isDasetTab = activeTab === 'dataset' || activeTab === 'script';
 
@@ -117,11 +135,24 @@ const SqlIndex: React.FC = memo(() => {
     // 使用 useUrlState 更新 URL，自动保留所有现有查询参数
     const method = key === 'files' ? 'push' : 'replace';
     // 如果切换到非 files tab，删除 activeDevelopScriptId 参数
-    const updates: { activeTab: string; activeDevelopScriptId?: string } = {
+    // 如果切换到非 data tab，删除 activeScriptId 参数
+    // 如果切换到非 script tab，删除 scriptType 参数
+    const updates: {
+      activeTab: string;
+      activeDevelopScriptId?: string;
+      activeScriptId?: string;
+      scriptType?: string;
+    } = {
       activeTab: key
     };
     if (key !== 'files') {
       updates.activeDevelopScriptId = '';
+    }
+    if (key !== 'data') {
+      updates.activeScriptId = '';
+    }
+    if (key !== 'script') {
+      updates.scriptType = '';
     }
     updateUrlState(updates, { method });
   };
@@ -273,6 +304,7 @@ const SqlIndex: React.FC = memo(() => {
       >
         {activeTab === 'data' && (
           <EditorContent
+            key={activeTab}
             fileTabs={fileState.fileTabs}
             activeTab={fileState.activeTab}
             curActiveTab={activeTab}
@@ -286,6 +318,8 @@ const SqlIndex: React.FC = memo(() => {
             refreshDirectory={handleRefreshDirectory}
             selectFile={selectFile}
             onToScriptList={handleTabChange}
+            fileManagerSelectedKeys={fileManagerSelectedKeys}
+            // openFile={(scriptId: string) => openFile('', scriptId, '')}
           />
         )}
         {activeTab === 'files' && (
