@@ -364,40 +364,6 @@ export default function Requirement() {
             : [])
         ];
         return <OperationMenu actions={actions} />;
-        //   return (
-        //       {hasPermissionGetDownload &&
-        //         (record?.status === RequirementStatus.Annotated ||
-        //           record?.status === RequirementStatus.Published) && (
-        //           <span
-        //             className="operate-text"
-        //             onClick={() => {
-        //               setLoading(true);
-        //               try {
-        //                 getAnnotationDownload({ requirement_id: record.id })
-        //                   .then((res) => {
-        //                     if (res.code === 'success') {
-        //                       const a = document.createElement('a');
-        //                       a.href = res?.data?.download_url;
-        //                       document.body.appendChild(a);
-        //                       a.click();
-        //                     } else {
-        //                       Message.error(res.message);
-        //                     }
-        //                   })
-        //                   .catch(() => {})
-        //                   .finally(() => {
-        //                     setLoading(false);
-        //                   });
-        //               } catch {
-        //                 setLoading(false);
-        //               }
-        //             }}
-        //           >
-        //             下载结果
-        //           </span>
-        //         )}
-        //     </div>
-        //   );
       }
     }
   ];
@@ -405,7 +371,7 @@ export default function Requirement() {
   const requirementProcess: RequirementProcessStep[] = [
     {
       icon: <CreatIcon />,
-      title: '创建任务',
+      title: '创建需求',
       description: (
         <>
           <span>选择标注工序、标注数据、配置标签、分配人员，</span>
