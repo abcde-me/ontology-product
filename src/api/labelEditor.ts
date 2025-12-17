@@ -243,7 +243,7 @@ export async function getFlowListTask({
 }
 
 // 任务预览切换
-export async function switchPreviewTask({
+export async function switchPreview({
   taskId,
   pkgId,
   op
@@ -260,7 +260,7 @@ export async function switchPreviewTask({
     pkg_id: Number(pkg_Id),
     op
   };
-  return await UAPI.RES.switchPreviewTask({}).post(params).inRegion().do();
+  return await UAPI.RES.switchPreview({}).post(params).inRegion().do();
 }
 
 // 预览用标注结果，结构同getTaskResult

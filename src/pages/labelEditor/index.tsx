@@ -21,7 +21,7 @@ import {
   modifyQualityControlTaskComment,
   deleteQualityControlTaskComment,
   getFlowListTask,
-  switchPreviewTask,
+  switchPreview,
   previewTaskResult,
   getImgJobPreviewAnnotations,
   CreateQualityControlTaskComment,
@@ -88,13 +88,17 @@ function LabelEditorPage() {
         }
       }
       if (['PREVIEW'].includes(stage!)) {
-        if (flowId) {
+        if (mode) {
           setLabelUrl(
-            `/labeleditor/${LabelTypeMap[labelType!]}/requirement/${requirementId}/task/${taskId}?type=${labelType}&kind=${toolKind}&mode=${mode}&tool=${labelTool}&name=${reqName}&stage=${stage}&pkgId=${pkgId}&flowId=${flowId}`
+            `/labeleditor/${LabelTypeMap[labelType!]}/requirement/${requirementId}/task/${taskId}?type=${labelType}&kind=${toolKind}&mode=${mode}&tool=${labelTool}&name=${reqName}&stage=${stage}&pkgId=${pkgId}`
           );
           setLoading(false);
         } else {
-          await getCurFlowListTask();
+          await getCurFlowListTask({
+            rId: requirementId!,
+            pkgId: pkgId!,
+            taskId: taskId!
+          });
         }
       }
     };
@@ -111,11 +115,19 @@ function LabelEditorPage() {
     mode
   ]);
   // 预览跳转
-  const getCurFlowListTask = async () => {
+  const getCurFlowListTask = async ({
+    rId,
+    pkgId,
+    taskId
+  }: {
+    rId: string;
+    pkgId: string;
+    taskId: string;
+  }) => {
     const flowListTaskInfo = await getFlowListTask({
-      rId: requirementId!,
-      pkgId: pkgId!,
-      taskId: taskId!
+      rId,
+      pkgId,
+      taskId
     });
     if (!flowListTaskInfo?.data?.items?.length) {
       Modal.destroyAll();
@@ -139,7 +151,6 @@ function LabelEditorPage() {
       });
       return;
     }
-    const flowId = flowListTaskInfo.data.items[0].id;
     const taskInfo = await getTaskDetail(String(taskId));
     const {
       requirement_info: {
@@ -149,7 +160,7 @@ function LabelEditorPage() {
       }
     } = taskInfo.data;
     history.replace(
-      `/tenant/compute/modaforge/labelEditor?rId=${requirementId}&tId=${taskId}&type=${type}&kind=${TEXT_DATA[tool]}&mode=${STAGE_MAP[stage!]}&tool=${tool}&name=${name}&stage=${stage}&pkgId=${pkgId}&flowId=${flowId}`
+      `/tenant/compute/modaforge/labelEditor?rId=${requirementId}&tId=${taskId}&type=${type}&kind=${TEXT_DATA[tool]}&mode=${STAGE_MAP[stage!]}&tool=${tool}&name=${name}&stage=${stage}&pkgId=${pkgId}`
     );
   };
 
@@ -252,6 +263,34 @@ function LabelEditorPage() {
 
   const switchNextQualityControlTask = () => {
     getCurQualityControlTask(Number(qsId));
+  };
+
+  const switchPreviewTask = async (op: string) => {
+    const result = await switchPreview({
+      taskId: taskId!,
+      pkgId: pkgId!,
+      op
+    });
+    if (result.code !== 'success') {
+      Message.clear();
+      Modal.destroyAll();
+      Modal.info({
+        escToExit: false,
+        maskClosable: false,
+        title: '无可预览任务',
+        icon: (
+          <IconExclamationCircleFill
+            style={{ color: '#007DFA', fontSize: '20px' }}
+          />
+        )
+      });
+    }
+    const { task_id, pkg_id, req_id } = result.data;
+    getCurFlowListTask({
+      rId: req_id,
+      pkgId: pkg_id,
+      taskId: task_id
+    });
   };
 
   const saveTaskWrapper = async (...args: any[]) => {

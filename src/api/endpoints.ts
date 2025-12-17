@@ -392,7 +392,7 @@ export const ModaForgeResourceEndpoints = {
   // 获取任务流水
   getFlowListTask: PrefixLabelService + '/FlowListTask',
   // 任务预览切换
-  switchPreviewTask: PrefixLabelService + '/PreviewTask',
+  switchPreview: PrefixLabelService + '/PreviewTask',
   // 预览用标注结果
   previewTaskResult: PrefixLabelService + '/FlowDetailTask',
 
