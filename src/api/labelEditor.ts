@@ -472,3 +472,51 @@ export async function saveTextEditorResult(params: Record<string, any>) {
   }
   return UAPI.RES.leSaveTask({}).post(params).inRegion().do();
 }
+
+// 新建质检评论
+export async function CreateQualityControlTaskComment(params) {
+  return await UAPI.RES.leCreateQualityControlTaskComment({})
+    .post(params)
+    .inRegion()
+    .do();
+}
+
+// 获取质检模式的质检数据
+export async function GetQualityControlTask(params) {
+  return await UAPI.RES.leGetQualityControlTask({})
+    .post(params)
+    .inRegion()
+    .do();
+}
+
+// 修改单个评论
+export async function ModifyQualityControlTaskComment(params) {
+  return await UAPI.RES.leModifyQualityControlTaskComment({})
+    .post(params)
+    .inRegion()
+    .do();
+}
+
+// 删除单个评论
+export async function DeleteQualityControlTaskComment(params) {
+  return await UAPI.RES.leDeleteQualityControlTaskComment({})
+    .post(params)
+    .inRegion()
+    .do();
+}
+
+// 改错、预览用，获取质检信息（评论==）
+export async function GetQualityControlTaskById(params) {
+  return await UAPI.RES.leGetQualityControlTaskById({})
+    .post(params)
+    .inRegion()
+    .do();
+}
+
+// 提交单个质检任务, save_type: 1 - 通过；2 - 驳回
+export async function SaveQualityControlTask(params) {
+  return await UAPI.RES.leSaveQualityControlTask({})
+    .post(params)
+    .inRegion()
+    .do();
+}
