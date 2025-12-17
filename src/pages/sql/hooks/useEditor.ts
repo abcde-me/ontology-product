@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Message } from '@arco-design/web-react';
+import { FormInstance, Message } from '@arco-design/web-react';
 import { useRequest, useThrottleFn } from 'ahooks';
 import { RunLogStatus, RunningStatus } from '@/types/sqlApi';
 import {
@@ -77,6 +77,7 @@ export interface UseEditorReturn {
   cancelGetRunResultPolling: () => void;
   loadRunResult: (execid: string, size: string) => void;
   handleGetRunLog: () => Promise<void>;
+  handleSave: (form: FormInstance) => Promise<boolean>;
 
   // 面板状态管理
   isPanelOpen: boolean;
@@ -319,81 +320,131 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
   }, [cancelGetRunResultPolling, cancelGetRunLogPolling]);
 
   // 延时自动保存 - 使用 useCallback 优化
-  const handleSaveThrottled = useThrottleFn(
-    async (content: string) => {
-      if (!currentFile?.scriptId) {
-        try {
-          const res = await createSqlScript({
-            uid: userInfo?.id ?? '32020ad2-ef56-4e20-aa0b-4399429bb34c',
-            script_name:
-              currentFile?.title ?? generateSqlDefaultName(new Date()),
-            script_file_id: currentFile?.fileId ?? '',
-            script_content: content
-          });
+  // const handleSaveThrottled = useThrottleFn(
+  //   async (content: string) => {
+  //     if (!currentFile?.scriptId) {
+  //       try {
+  //         const res = await createSqlScript({
+  //           uid: userInfo?.id ?? '32020ad2-ef56-4e20-aa0b-4399429bb34c',
+  //           script_name:
+  //             currentFile?.title ?? generateSqlDefaultName(new Date()),
+  //           script_file_id: currentFile?.fileId ?? '',
+  //           script_content: content
+  //         });
 
-          if (res?.status === 200) {
-            setLastAutoSave(timeFormattig(new Date(res.data.update_time)));
+  //         if (res?.status === 200) {
+  //           setLastAutoSave(timeFormattig(new Date(res.data.update_time)));
 
-            // 调用 refreshDirectory 方法，更新左侧目录
-            if (typeof refreshDirectory === 'function') {
-              refreshDirectory();
-            }
+  //           // 调用 refreshDirectory 方法，更新左侧目录
+  //           if (typeof refreshDirectory === 'function') {
+  //             refreshDirectory();
+  //           }
 
-            // 调用 selectFile 方法，选中文件
-            if (typeof selectFile === 'function') {
-              selectFile(currentFile?.fileId ?? String(res.data.script_id));
-            }
+  //           // 调用 selectFile 方法，选中文件
+  //           if (typeof selectFile === 'function') {
+  //             selectFile(currentFile?.fileId ?? String(res.data.script_id));
+  //           }
 
-            // 更新脚本ID到标签页
-            if (onTabUpdate && currentFile) {
-              onTabUpdate(currentFile.key, {
-                content,
-                fileId: currentFile.fileId,
-                scriptId: String(res.data.script_id),
-                title: currentFile.title // 保持原有标题
-              });
-            }
-            return res.data;
-          } else {
-            Message.error(`自动保存失败: ${res.message || '未知错误'}`);
-            console.error('自动保存失败:', res.message);
-          }
-          return null;
-        } catch (error) {
-          Message.error(`自动保存失败`);
-          console.error('自动保存失败:', error);
-          return null;
-        }
+  //           // 更新脚本ID到标签页
+  //           if (onTabUpdate && currentFile) {
+  //             onTabUpdate(currentFile.key, {
+  //               content,
+  //               fileId: currentFile.fileId,
+  //               scriptId: String(res.data.script_id),
+  //               title: currentFile.title // 保持原有标题
+  //             });
+  //           }
+  //           return res.data;
+  //         } else {
+  //           Message.error(`自动保存失败: ${res.message || '未知错误'}`);
+  //           console.error('自动保存失败:', res.message);
+  //         }
+  //         return null;
+  //       } catch (error) {
+  //         Message.error(`自动保存失败`);
+  //         console.error('自动保存失败:', error);
+  //         return null;
+  //       }
+  //     }
+
+  //     try {
+  //       const res = await updateSqlScript(Number(currentFile?.scriptId), {
+  //         uid: userInfo?.id ?? '32020ad2-ef56-4e20-aa0b-4399429bb34c',
+  //         script_name: currentFile.title ?? '',
+  //         script_content: content
+  //       });
+
+  //       if (res?.status === 200) {
+  //         setLastAutoSave(timeFormattig(new Date(res.data.update_time)));
+  //         return res.data;
+  //       }
+  //       return null;
+  //     } catch (error) {
+  //       console.error('自动保存失败:', error);
+  //       return null;
+  //     }
+  //   },
+  //   { wait: 5000, leading: true, trailing: true }
+  // );
+
+  const handleSave = async (form) => {
+    const scriptName = form.getFieldValue('fileName');
+    const scriptDesc = form.getFieldValue('fileDesc');
+
+    if (!currentFile?.scriptId) {
+      const createRes = await createSqlScript({
+        uid: userInfo?.id ?? '32020ad2-ef56-4e20-aa0b-4399429bb34c',
+        script_name: scriptName ?? '',
+        script_content: editorContent,
+        script_desc: scriptDesc ?? '',
+        script_file_id: currentFile?.fileId ?? ''
+      });
+
+      if (createRes?.status !== 200) {
+        Message.error(createRes?.message ?? '保存文件失败');
+        return false;
       }
 
-      try {
-        const res = await updateSqlScript(Number(currentFile?.scriptId), {
-          uid: userInfo?.id ?? '32020ad2-ef56-4e20-aa0b-4399429bb34c',
-          script_name: currentFile.title ?? '',
-          script_content: content
+      Message.success('保存成功, 可前往脚本列表查看');
+
+      setLastAutoSave(timeFormattig(new Date(createRes.data.update_time)));
+
+      if (onTabUpdate) {
+        onTabUpdate(currentFile?.key ?? '', {
+          content: editorContent,
+          fileId: currentFile?.fileId ?? '',
+          scriptId: String(createRes.data.script_id),
+          title: scriptName ?? ''
         });
-
-        if (res?.status === 200) {
-          setLastAutoSave(timeFormattig(new Date(res.data.update_time)));
-          return res.data;
-        }
-        return null;
-      } catch (error) {
-        console.error('自动保存失败:', error);
-        return null;
       }
-    },
-    { wait: 5000, leading: true, trailing: true }
-  );
+
+      return true;
+    }
+    const updateRes = await updateSqlScript(Number(currentFile?.scriptId), {
+      uid: userInfo?.id ?? '32020ad2-ef56-4e20-aa0b-4399429bb34c',
+      script_name: scriptName ?? '',
+      script_content: editorContent,
+      script_desc: scriptDesc ?? ''
+    });
+
+    if (updateRes?.status !== 200) {
+      Message.error(updateRes?.message ?? '保存文件失败');
+      return false;
+    }
+
+    setLastAutoSave(timeFormattig(new Date(updateRes.data.update_time)));
+    Message.success('保存成功, 可前往脚本列表查看');
+    return true;
+  };
 
   // 处理内容变化 - 优化依赖项
   const handleContentChange = useCallback(
     (value: string) => {
       setEditorContent(value);
       // 自动保存
-      handleSaveThrottled.run(value);
+      // handleSaveThrottled.run(value);
     },
-    [handleSaveThrottled, clearEditorState]
+    [setEditorContent]
   );
 
   // 运行代码 - 优化依赖项
@@ -556,9 +607,9 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
       loadFileContent();
     }
 
-    return () => {
-      handleSaveThrottled.cancel();
-    };
+    // return () => {
+    //   handleSaveThrottled.cancel();
+    // };
   }, [activeTab]); // 只依赖 activeTab，避免不必要的重复更新
 
   // 当 currentFileId 变化时，重置运行相关状态
@@ -598,6 +649,7 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
     cancelGetRunResultPolling,
     loadRunResult,
     handleGetRunLog,
+    handleSave,
 
     // 面板状态管理
     isPanelOpen,

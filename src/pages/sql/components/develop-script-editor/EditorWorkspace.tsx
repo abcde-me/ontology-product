@@ -745,6 +745,7 @@ const EditorWorkspaceContent: React.FC<{
             {/* 参数侧边栏 */}
             {
               <ParameterSidebar
+                key={scriptInfo?.script_id}
                 canEdit={scriptInfo?.isSelfEditing ?? false}
                 content={scriptInfo?.script_context ?? ''}
                 onParameterChange={handleParameterChange}
