@@ -401,6 +401,12 @@ export const ModaForgeResourceEndpoints = {
   // 抽检任务列表
   listQualityControlTaskSamples:
     PrefixLabelService + '/ListQualityControlTaskSamples',
+  // 获取任务流水
+  getFlowListTask: PrefixLabelService + '/FlowListTask',
+  // 任务预览切换
+  switchPreview: PrefixLabelService + '/PreviewTask',
+  // 预览用标注结果
+  previewTaskResult: PrefixLabelService + '/FlowDetailTask',
 
   // python开发
   // 获取python列表
