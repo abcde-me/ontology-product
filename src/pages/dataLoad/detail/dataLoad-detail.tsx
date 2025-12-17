@@ -320,7 +320,8 @@ const DataLoadDetail = () => {
           <div style={{ fontSize: '17px', fontWeight: '600' }}>任务信息</div>
 
           {hasUpdatePermission &&
-            (listDetail?.source_type as string) !== 'local' && (
+            (listDetail?.source_type as string) !== 'local' &&
+            (listDetail?.source_type as string) !== 'mq' && (
               <div
                 className={runningFlag ? '' : 'isDisabled'}
                 style={{
@@ -501,9 +502,13 @@ const DataLoadDetail = () => {
                   alignItems: 'center'
                 }}
               >
-                {listDetail && listDetail.load_type == 'once'
-                  ? '单次载入'
-                  : '周期载入'}
+                {listDetail
+                  ? listDetail.load_type == 'once'
+                    ? '单次载入'
+                    : listDetail.load_type == 'realtime'
+                      ? '实时载入'
+                      : '周期载入'
+                  : ''}
                 {listDetail && listDetail.load_type == 'cron' && (
                   <Switch
                     className={'cronSwitch'}
