@@ -239,17 +239,6 @@ const EditorWorkspaceContent: React.FC<{
       [setScriptInfo]
     );
 
-    // 使用 useMemo 稳定 initialParams 的引用，避免不必要的重新渲染
-    // 使用 JSON.stringify 来比较内容，而不是引用
-    // const scriptParamsStr = useMemo(
-    //   () => JSON.stringify(scriptParams),
-    //   [scriptParams]
-    // );
-    // const initialParams = useMemo(() => {
-    //   console.log('scriptParams-----', scriptParams);
-    //   return scriptParams;
-    // }, [scriptParamsStr]);
-
     useEffect(() => {
       form.setFieldsValue({
         fileName: fileName
@@ -347,11 +336,7 @@ const EditorWorkspaceContent: React.FC<{
         }
       });
     }, []);
-    const handleSeeScriptList = () => {
-      if (onToScriptList) {
-        onToScriptList('script');
-      }
-    };
+
     // 监听插入内容事件
     useEffect(() => {
       if (onInsertContent) {
@@ -417,6 +402,9 @@ const EditorWorkspaceContent: React.FC<{
       await handleSaveScript(scriptInfo?.script_context ?? '');
       setSaveLoading(false);
     };
+
+    // 计算是否只读
+    const isReadOnly = !scriptInfo?.isSelfEditing;
 
     // 根据 status 渲染工具栏
     const renderToolbar = () => {
@@ -707,7 +695,8 @@ const EditorWorkspaceContent: React.FC<{
           <div
             className={classNames(styles['sql-editor-container'], {
               [styles['running-code-mirror']]: !hasUpdatePermission,
-              [styles['with-sidebar']]: sidebarVisible && !sidebarCollapsed
+              [styles['with-sidebar']]: sidebarVisible && !sidebarCollapsed,
+              [styles['readonly-editor']]: isReadOnly
             })}
           >
             <CodeMirror
@@ -715,11 +704,7 @@ const EditorWorkspaceContent: React.FC<{
               value={scriptInfo?.script_context ?? ''}
               onChange={handleContentChange}
               placeholder={placeholderValue}
-              readOnly={
-                !hasUpdatePermission ||
-                runLogStatus === RunLogStatus.RUNNING ||
-                !scriptInfo?.isSelfEditing
-              }
+              readOnly={isReadOnly}
               theme={myTheme}
               extensions={[
                 sql({ upperCaseKeywords: true }),

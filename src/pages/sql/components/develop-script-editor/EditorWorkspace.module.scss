@@ -135,6 +135,34 @@
     }
   }
 
+  // 只读模式下隐藏光标
+  .readonly-editor {
+    :global(.cm-content) {
+      caret-color: transparent !important;
+    }
+
+    :global(.cm-editor .cm-content) {
+      caret-color: transparent !important;
+    }
+
+    :global(.cm-focused .cm-cursor) {
+      display: none !important;
+      visibility: hidden !important;
+      opacity: 0 !important;
+    }
+
+    :global(.cm-cursor) {
+      display: none !important;
+      visibility: hidden !important;
+      opacity: 0 !important;
+    }
+
+    :global(.cm-line.cm-activeLine .cm-cursor) {
+      display: none !important;
+      visibility: hidden !important;
+    }
+  }
+
   .btn-script-list {
     width: 100px;
     height: 24px;
