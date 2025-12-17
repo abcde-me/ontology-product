@@ -136,10 +136,12 @@ const SqlIndex: React.FC = memo(() => {
     const method = key === 'files' ? 'push' : 'replace';
     // 如果切换到非 files tab，删除 activeDevelopScriptId 参数
     // 如果切换到非 data tab，删除 activeScriptId 参数
+    // 如果切换到非 script tab，删除 scriptType 参数
     const updates: {
       activeTab: string;
       activeDevelopScriptId?: string;
       activeScriptId?: string;
+      scriptType?: string;
     } = {
       activeTab: key
     };
@@ -148,6 +150,9 @@ const SqlIndex: React.FC = memo(() => {
     }
     if (key !== 'data') {
       updates.activeScriptId = '';
+    }
+    if (key !== 'script') {
+      updates.scriptType = '';
     }
     updateUrlState(updates, { method });
   };
@@ -299,6 +304,7 @@ const SqlIndex: React.FC = memo(() => {
       >
         {activeTab === 'data' && (
           <EditorContent
+            key={activeTab}
             fileTabs={fileState.fileTabs}
             activeTab={fileState.activeTab}
             curActiveTab={activeTab}

@@ -24,7 +24,8 @@
       display: flex;
     }
     .script-card-content-item-title-text {
-      max-width: 180px;
+      width: 100%;
+      // max-width: 180px;
       :global(.arco-typography) {
         color: #007dfa !important;
       }
@@ -32,12 +33,13 @@
   }
 
   .script-card-content-item-title-text {
-    max-width: 320px;
+    // max-width: 320px;
     cursor: pointer;
     font-weight: 500;
     font-size: 16px;
     line-height: 24px;
     margin-right: 8px;
+    width: 100%;
   }
 
   .script-card-content-item:nth-child(odd) {
@@ -53,6 +55,7 @@
   .script-card-content-item-title-left {
     display: flex;
     align-items: center;
+    flex-grow: 1;
   }
 
   .script-card-content-item-title-right {
