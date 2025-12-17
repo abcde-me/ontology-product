@@ -1,0 +1,36 @@
+.viewFileModal {
+  width: 900px;
+
+  :global(.arco-tabs-header-title) {
+    padding: 8px 0;
+    margin: 0 32px 0 0;
+  }
+
+  .viewFileContent {
+    max-height: calc(100vh - 200px);
+    overflow: auto;
+  }
+
+  :global(.arco-descriptions-title) {
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 22px;
+    margin-top: 19px;
+  }
+
+  :global(.arco-descriptions-item-label) {
+    color: var(--text-color-text-4, #6e7b8d);
+    font-size: 14px;
+    line-height: 22px;
+  }
+
+  :global(.arco-descriptions-item-value) {
+    color: var(--text-color-text-2, #1e293b);
+    font-size: 14px;
+    line-height: 22px;
+
+    :global(.ellipsis-popover-div) {
+      width: 320px;
+    }
+  }
+}

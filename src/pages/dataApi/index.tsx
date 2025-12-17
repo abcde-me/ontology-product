@@ -26,6 +26,7 @@ import {
   IconPlus
 } from '@arco-design/web-react/icon';
 import TestModal from './compontent/testModal';
+import ViewFileModal from './compontent/viewFileModal';
 
 const InputSearch = Input.Search;
 
@@ -77,6 +78,10 @@ export default function DataApi() {
   const [testVisible, setTestVisible] = useState(false);
   // 初始化测试弹窗数据
   const [testDataSource, setTestDataSource] = useState([]);
+  // 初始化查看文件弹窗是否显示
+  const [viewFileModalVisible, setViewFileModalVisible] = useState(false);
+  // 初始化查看文件弹窗id
+  const [viewFileId, setViewFileId] = useState('');
   // 初始化筛选的值
   const [sortValue, setSortValue] = useState({
     status: '',
@@ -121,17 +126,6 @@ export default function DataApi() {
     }
   };
 
-  // 跳转详情
-  const handleToTaskDeatil = (
-    id: number,
-    workflow_uuid: string,
-    ds_workflow_id: string,
-    workflow_version: string
-  ) => {
-    history.push(
-      `/tenant/compute/modaforge/workflowTaskDetail?id=${id}&workflow_uuid=${workflow_uuid}&ds_workflow_id=${ds_workflow_id}&workflow_version=${workflow_version}`
-    );
-  };
   const renderEmptyPlaceholder = (value: string | null) => {
     return value === '' || value == null ? '-' : value;
   };
@@ -311,14 +305,10 @@ export default function DataApi() {
           <PermissionWrapper permission={WORKFLOW_TASK_PERMISSIONS.CAN_UPDATE}>
             <span
               className={styles['operate-text'] + ' ml-4'}
-              onClick={() =>
-                handleToTaskDeatil(
-                  record?.id ?? '',
-                  record?.workflow_uuid ?? '',
-                  record?.ds_workflow_id ?? '',
-                  record?.workflow_version ?? ''
-                )
-              }
+              onClick={() => {
+                setViewFileModalVisible(true);
+                setViewFileId(record.id);
+              }}
             >
               查看文档
             </span>
@@ -553,6 +543,13 @@ export default function DataApi() {
         visible={testVisible}
         dataSource={testDataSource}
         onCancel={() => setTestVisible(false)}
+      />
+
+      {/* 查看文件弹窗 */}
+      <ViewFileModal
+        visible={viewFileModalVisible}
+        onCancel={() => setViewFileModalVisible(false)}
+        id={viewFileId}
       />
 
       {/* 授权弹窗 */}
