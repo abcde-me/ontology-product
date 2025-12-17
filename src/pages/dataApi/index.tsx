@@ -27,6 +27,7 @@ import {
 } from '@arco-design/web-react/icon';
 import TestModal from './compontent/testModal';
 import ViewFileModal from './compontent/viewFileModal';
+import { GetProjOrg } from '@/api/modules/project';
 
 const InputSearch = Input.Search;
 
@@ -70,10 +71,20 @@ export default function DataApi() {
   // 初始化授权弹窗是否显示
   const [authorizationModalVisible, setAuthorizationModalVisible] =
     useState(false);
+  // 初始化授权弹窗loading状态
+  const [authorizationLoading, setAuthorizationLoading] = useState(false);
+  // 初始化授权弹窗数据
+  const [authorizationData, setAuthorizationData] = useState([]);
   // 初始化授权弹窗选中的行数据
-  const [selectedRows, setSelectedRows] = useState<Record<string, any>[]>([]);
+  const [selectedAuthorizationRows, setSelectedAuthorizationRows] = useState<
+    Record<string, any>[]
+  >([]);
   // 初始化选中的行key
-  const [selectedRowKeys, setSelectedRowKeys] = useState<string[]>([]);
+  const [selectedAuthorizationRowKeys, setSelectedAuthorizationRowKeys] =
+    useState<string[]>([]);
+  // 初始化授权弹窗项目总数
+  const [itemsTotal, setItemsTotal] = useState(0);
+
   // 初始化测试弹窗是否显示
   const [testVisible, setTestVisible] = useState(false);
   // 初始化测试弹窗数据
@@ -153,6 +164,55 @@ export default function DataApi() {
     };
 
     setSortValue(sortdata);
+  };
+
+  // 遍历组织数组，将id转为key，同时处理项目列表
+  const transformOrgArray = (orgArray, keepId = true) => {
+    const transformProjects = (projects) => {
+      return projects.map((project) => {
+        const { id, ...rest } = project;
+        const newProject = {
+          key: id, // id 转为 key
+          ...rest
+        };
+        // 若不需要保留原id字段，则删除
+        if (!keepId) delete newProject.id;
+        return newProject;
+      });
+    };
+
+    // 处理顶层组织数组
+    return orgArray.map((org) => {
+      const { id, projectList, ...rest } = org;
+      const newOrg = {
+        key: id, // 顶层id转为key
+        ...rest,
+        children: projectList ? transformProjects(projectList) : [] // projectList转为children
+      };
+      // 若不需要保留原id字段，则删除
+      if (keepId) newOrg.id = id;
+      else delete newOrg.id;
+      return newOrg;
+    });
+  };
+
+  const handleAuthorization = async (record: Record<string, any>) => {
+    setAuthorizationLoading(true);
+    setAuthorizationModalVisible(true);
+    // 获取授权所有组织及项目
+    const response = await GetProjOrg({});
+    if (response.data) {
+      let itemsTotal = 0;
+      const newList = transformOrgArray(response.data);
+      newList.forEach((item) => {
+        itemsTotal += item.children.length;
+      });
+      setItemsTotal(itemsTotal);
+      setAuthorizationData(newList);
+      setAuthorizationLoading(false);
+    } else {
+      setAuthorizationLoading(false);
+    }
   };
 
   // table columns
@@ -338,7 +398,9 @@ export default function DataApi() {
                       borderTop: 'none',
                       borderBottom: 'none'
                     }}
-                    onClick={() => setAuthorizationModalVisible(true)}
+                    onClick={() => {
+                      handleAuthorization(record);
+                    }}
                   >
                     授权
                   </Button>
@@ -392,81 +454,8 @@ export default function DataApi() {
   const authorizationColumns: ColumnProps[] = [
     {
       title: '名称',
-      dataIndex: 'name',
+      dataIndex: 'title',
       width: 600
-    }
-  ];
-
-  // 授权表数据
-  const authorizationData = [
-    {
-      key: '1',
-      name: 'Jane Doe',
-      salary: 23000,
-      address: '32 Park Road, London',
-      email: 'jane.doe@example.com',
-      parentKey: '',
-      children: [
-        {
-          key: '1-1',
-          name: 'Christina',
-          address: '332 Park Road, London',
-          email: 'christina@example.com',
-          parentKey: '1'
-        }
-      ]
-    },
-    {
-      key: '2',
-      name: 'Alisa Ross',
-      salary: 25000,
-      address: '35 Park Road, London',
-      email: 'alisa.ross@example.com',
-      parentKey: '',
-      children: [
-        {
-          key: '2-1',
-          name: 'Ed Hellen',
-          salary: 17000,
-          address: '42 Park Road, London',
-          email: 'ed.hellen@example.com',
-          parentKey: '2',
-          children: [
-            {
-              key: '2-1-1',
-              name: 'Eric Miller',
-              salary: 23000,
-              address: '67 Park Road, London',
-              email: 'eric.miller@example.com',
-              parentKey: '2-1'
-            },
-            {
-              key: '2-1-2',
-              name: 'Tom Jerry',
-              salary: 666,
-              address: '67 Park Road, London',
-              email: 'tom.jerry@example.com',
-              parentKey: '2-1'
-            }
-          ]
-        },
-        {
-          key: '2-2',
-          name: 'William Smith',
-          salary: 27000,
-          address: '62 Park Road, London',
-          email: 'william.smith@example.com',
-          parentKey: '2'
-        },
-        {
-          key: '2-3',
-          name: 'George Bush',
-          salary: 24000,
-          address: '62 Park Road, London',
-          email: 'george.bush@example.com',
-          parentKey: '2'
-        }
-      ]
     }
   ];
 
@@ -569,23 +558,29 @@ export default function DataApi() {
               pagination={false}
               noDataElement={noDataElement({ description: '暂无数据' })}
               rowKey="key"
-              loading={loading}
+              loading={authorizationLoading}
               rowSelection={{
                 type: 'checkbox',
-                selectedRowKeys,
+                selectedRowKeys: selectedAuthorizationRowKeys,
                 onChange: (selectedRowKeys, selectedRows) => {
                   console.log(selectedRowKeys, selectedRows);
-                  // 组织下的项目全选时，只保留组织，不保留项目
-                  const allKeys = new Set(selectedRows.map((item) => item.key));
-                  const filteredArr = selectedRows.filter((item) => {
-                    // 无parentKey → 保留
-                    if (!item.parentKey) return true;
-                    // 有parentKey但不在key集合中 → 保留；否则剔除
-                    return !allKeys.has(item.parentKey);
+                  const orgKey = new Set();
+                  const itemKeys = new Set();
+                  selectedRows.forEach((item) => {
+                    if (item.children && item.children.length > 0) {
+                      orgKey.add(item.key);
+                    } else {
+                      itemKeys.add(item);
+                    }
                   });
-                  setSelectedRowKeys(filteredArr.map((item) => item.key));
-                  setSelectedRows(filteredArr);
-                  console.log(filteredArr, 'filteredArr');
+                  setSelectedAuthorizationRowKeys(
+                    selectedRowKeys.filter(
+                      (key) => !orgKey.has(key)
+                    ) as string[]
+                  );
+                  setSelectedAuthorizationRows(
+                    selectedRows.filter((item) => itemKeys.has(item))
+                  );
                 },
                 checkStrictly: false
               }}
@@ -594,28 +589,32 @@ export default function DataApi() {
           <div className={styles.rightBox}>
             <div className={styles.title}>
               <div className={styles.selectedCount}>
-                已选 {selectedRows.length}/50 项
+                已选 {selectedAuthorizationRows.length}/{itemsTotal} 项
               </div>
               <IconDelete
                 className={styles.deleteIcon}
                 onClick={() => {
-                  setSelectedRows([]);
-                  setSelectedRowKeys([]);
+                  setSelectedAuthorizationRows([]);
+                  setSelectedAuthorizationRowKeys([]);
                 }}
               />
             </div>
             <div className={styles.selectedItems}>
-              {selectedRows.map((item) => (
+              {selectedAuthorizationRows.map((item) => (
                 <div key={item.key} className={styles.selectedItem}>
-                  <div>{item.name}</div>
+                  <div>{item.title}</div>
                   <IconClose
                     className={styles.deleteIcon}
                     onClick={() => {
-                      setSelectedRows(
-                        selectedRows.filter((row) => row.key !== item.key)
+                      setSelectedAuthorizationRows(
+                        selectedAuthorizationRows.filter(
+                          (row) => row.key !== item.key
+                        )
                       );
-                      setSelectedRowKeys(
-                        selectedRowKeys.filter((key) => key !== item.key)
+                      setSelectedAuthorizationRowKeys(
+                        selectedAuthorizationRowKeys.filter(
+                          (key) => key !== item.key
+                        )
                       );
                     }}
                   />
