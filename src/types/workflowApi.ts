@@ -23,7 +23,7 @@ export interface EditWorkflowParams {
   // 失败策略
   failure_strategy?: string;
   // 任务优先级
-  task_priority?: string;
+  process_instance_priority?: string;
 }
 
 export enum IsOnline {
@@ -45,10 +45,12 @@ export interface WorkflowDetailParams {
 export interface WorkflowDetailRes
   extends Pick<
     EditWorkflowParams,
-    'execution_type' | 'failure_strategy' | 'task_priority'
+    'execution_type' | 'failure_strategy' | 'process_instance_priority'
   > {
   /** 海豚调度生成的id */
   ds_workflow_id: number;
+  /** 海豚调度生成的id */
+  code: number;
   /** 服务端工作流唯一标识 */
   workflow_uuid: string | number;
   /** 工作流版本 */

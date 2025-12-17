@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
   Button,
   Empty,
@@ -15,28 +15,37 @@ import { useUserInfo } from '@/store/userInfoStore';
 import { useUrlState } from '@/pages/sql/hooks/useUrlState';
 import Mock from 'mockjs';
 import styles from './index.module.scss';
-import { IconCopy, IconDelete } from '@arco-design/web-react/icon';
-import { listDevelopScriptLogByKeyApi } from '@/api/sql';
+import { IconCopy, IconDelete, IconSearch } from '@arco-design/web-react/icon';
 import {
   deleteDevelopScriptLogByVersion,
-  getDevelopScriptLogByVersion
+  getDevelopScriptLogByVersion,
+  listDevelopScript,
+  listDevelopScriptLogByKeyApi
 } from '@/api/sql-develop';
 import noDataElement from '@/components/no-data';
-import { ScriptStatus, ScriptStatusName } from '@/types/sqlDevelopApi';
+import {
+  ScriptStatus,
+  ScriptStatusName,
+  ListDevelopScriptLogByKeyItem,
+  ListDevelopScriptItem
+} from '@/types/sqlDevelopApi';
+import VersionStatus from '../version-status';
+import EllipsisPopover from '@/components/ellipsis-popover-com';
+import ScriptDetailModal from '../spl-script-management/ScriptDetailModal';
 
 // 版本类型 已发版 未发版 调度中
 // 注意：0（编辑中）和 1（编辑完成）都代表"未发版"，但为了兼容现有代码，这里保留 1 作为 UNRELEASED 的值
-export const VersionType = {
-  RELEASED: ScriptStatus.Released, // 2 - 已发版
-  UNRELEASED: ScriptStatus.EditCompleted, // 1 - 未发版（编辑完成），0（编辑中）也属于未发版
-  SCHEDULED: ScriptStatus.Scheduling // 3 - 调度中
-} as const;
+// export const VersionType = {
+//   RELEASED: ScriptStatus.Released, // 2 - 已发版
+//   UNRELEASED: ScriptStatus.EditCompleted, // 1 - 未发版（编辑完成），0（编辑中）也属于未发版
+//   SCHEDULED: ScriptStatus.Scheduling // 3 - 调度中
+// } as const;
 
-export enum VersionTypeEnum {
-  RELEASED = '已发版',
-  UNRELEASED = '未发版',
-  SCHEDULED = '调度中'
-}
+// export enum VersionTypeEnum {
+//   RELEASED = '已发版',
+//   UNRELEASED = '未发版',
+//   SCHEDULED = '调度中'
+// }
 
 /**
  * 判断状态是否为"未发版"
@@ -74,7 +83,12 @@ const ScriptCard: React.FC<ScriptCardProps> = ({
   // 区分是否点击按钮清空搜索框
   const [isClickClear, setIsClickClear] = useState(false);
   // mock数据 接口返回
-  const [scriptCardList, setScriptCardList] = useState([]);
+  const [scriptCardList, setScriptCardList] = useState<ListDevelopScriptItem[]>(
+    []
+  );
+  const [detailVisible, setDetailVisible] = useState(false);
+  const [detailTitle, setDetailTitle] = useState('');
+  const [detailContent, setDetailContent] = useState('');
   const mockjsData = Mock.mock({
     'list|100': [
       {
@@ -92,32 +106,33 @@ const ScriptCard: React.FC<ScriptCardProps> = ({
   }, [userInfo, current, pageSize]);
 
   // 清空搜索框
-  useEffect(() => {
-    if (isClickClear && searchValue === '') {
-      getCardList();
-      setIsClickClear(false);
-    }
-  }, [isClickClear, searchValue]);
+  // useEffect(() => {
+  //   if (isClickClear && searchValue === '') {
+  //     getCardList();
+  //     setIsClickClear(false);
+  //   }
+  // }, [isClickClear, searchValue]);
 
-  const getCardList = async () => {
+  const getCardList = async (searchText?: string) => {
     setLoading(true);
     try {
-      const params: any = {
-        search_content: searchValue,
+      const params = {
+        script_context: searchText !== undefined ? searchText : searchValue,
         page: current,
         page_size: pageSize
       };
-      const res = await listDevelopScriptLogByKeyApi(params);
-      console.log(res);
+      const res = await listDevelopScript(params);
       if (res.status !== 200) {
         Message.error(res?.message);
+        setScriptCardList([]);
+        setTotal(0);
+        onTotalChange?.(0);
+        return;
       }
-      if (res.status === 200 && res.code === '') {
-        const newTotal = res.data?.total || 0;
-        setScriptCardList(res.data?.items || []);
-        setTotal(newTotal);
-        onTotalChange?.(newTotal);
-      }
+      const newTotal = res.data?.total || 0;
+      setScriptCardList(res.data?.items || []);
+      setTotal(newTotal);
+      onTotalChange?.(newTotal);
     } finally {
       setLoading(false);
     }
@@ -127,32 +142,31 @@ const ScriptCard: React.FC<ScriptCardProps> = ({
 
   // 删除卡片脚本
   const deleteScript = (id: number, type: number) => {
-    console.log(type, '123');
     // 0（编辑中）和 1（编辑完成）都代表"未发版"
-    if (isUnreleasedStatus(type)) {
-      Message.error('未发版的脚本不能删除');
-      return;
-    }
-    if (type === VersionType.RELEASED) {
-      Modal.confirm({
-        title: (
-          <span className={styles['workflow-list-modal-title']}>
-            确认删除此脚本？
-          </span>
-        ),
-        content: (
-          <div className={styles['workflow-list-modal-content']}>
-            删除后，该脚本不可恢复。
-          </div>
-        ),
-        okText: '确定',
-        cancelText: '取消',
-        onOk: () => {
-          deleteCardScript(id, type);
-        }
-      });
-      return;
-    }
+    // if (isUnreleasedStatus(type)) {
+    //   Message.error('未发版的脚本不能删除');
+    //   return;
+    // }
+    // if (type === ScriptStatus.Released) {
+    Modal.confirm({
+      title: (
+        <span className={styles['workflow-list-modal-title']}>
+          确认删除此脚本？
+        </span>
+      ),
+      content: (
+        <div className={styles['workflow-list-modal-content']}>
+          删除后，该脚本不可恢复。
+        </div>
+      ),
+      okText: '确定',
+      cancelText: '取消',
+      onOk: () => {
+        deleteCardScript(id, type);
+      }
+    });
+    return;
+    // }
   };
   // 删除脚本
   const deleteCardScript = async (id: number, type: number) => {
@@ -177,64 +191,17 @@ const ScriptCard: React.FC<ScriptCardProps> = ({
     //     `/modaforge/tenant/compute/modaforge/workflowConfig?workflow_uuid=${workflow_uuid}&ds_workflow_id=${ds_workflow_id}`
     // );
   };
-  // 判断状态 已发版 未发版 调度中
-  // 注意：0（编辑中）和 1（编辑完成）都显示为"未发版"
-  const getVersionType = (version_type) => {
-    // 判断是否为"未发版"（0 或 1）
-    if (isUnreleasedStatus(version_type)) {
-      return (
-        <div className={styles['script-card-content-item-title-icon']}>
-          <span className={styles['unreleased-icon']} />
-          <div className={styles['script-card-content-item-title-icon-text']}>
-            {VersionTypeEnum.UNRELEASED}
-          </div>
-        </div>
-      );
-    }
 
-    switch (version_type) {
-      case VersionType.RELEASED:
-        return (
-          <div className={styles['script-card-content-item-title-icon']}>
-            <span
-              className={
-                version_type === VersionType.RELEASED
-                  ? styles['released-icon']
-                  : ''
-              }
-            />
-            <div className={styles['script-card-content-item-title-icon-text']}>
-              {VersionTypeEnum.RELEASED}
-            </div>
-          </div>
-        );
-      case VersionType.SCHEDULED:
-        return (
-          <div className={styles['script-card-content-item-title-icon']}>
-            <span
-              className={
-                version_type === VersionType.SCHEDULED
-                  ? styles['scheduled-icon']
-                  : ''
-              }
-            />
-            <div className={styles['script-card-content-item-title-icon-text']}>
-              {VersionTypeEnum.SCHEDULED}
-            </div>
-          </div>
-        );
-      default:
-        // 默认显示为"未发版"
-        return (
-          <div className={styles['script-card-content-item-title-icon']}>
-            <span className={styles['unreleased-icon']} />
-            <div className={styles['script-card-content-item-title-icon-text']}>
-              {VersionTypeEnum.UNRELEASED}
-            </div>
-          </div>
-        );
-    }
+  const handleToDetail = (scriptId: number | string) => {
+    updateUrlState(
+      {
+        activeTab: 'files',
+        activeDevelopScriptId: String(scriptId)
+      },
+      { method: 'push' }
+    );
   };
+
   // 查询脚本卡片列表
   const onToSearchScriptList = async () => {
     try {
@@ -255,6 +222,39 @@ const ScriptCard: React.FC<ScriptCardProps> = ({
       console.log(error);
     }
   };
+
+  // 高亮显示搜索关键词
+  const highlightSearchKeyword = useCallback(
+    (text: string, keyword: string) => {
+      if (!keyword.trim()) return text;
+
+      const lowerText = text.toLowerCase();
+      const lowerKeyword = keyword.toLowerCase();
+      const index = lowerText.indexOf(lowerKeyword);
+
+      if (index === -1) return text;
+
+      const prefix = text.substring(0, index);
+      const matchedText = text.substring(index, index + keyword.length);
+      const suffix = text.substring(index + keyword.length);
+
+      return (
+        <span>
+          {prefix}
+          <span
+            style={{
+              color: '#007DFA'
+            }}
+          >
+            {matchedText}
+          </span>
+          {suffix}
+        </span>
+      );
+    },
+    []
+  );
+
   return (
     <div className={styles['script-card-wrapper']}>
       <div
@@ -268,14 +268,23 @@ const ScriptCard: React.FC<ScriptCardProps> = ({
         <Input
           allowClear
           onClear={() => {
-            getCardList();
+            setSearchValue('');
+            getCardList('');
           }}
           onChange={(value) => {
             setSearchValue(value);
           }}
           onPressEnter={() => {
-            onToSearchScriptList();
+            getCardList();
           }}
+          suffix={
+            <IconSearch
+              style={{ cursor: 'pointer' }}
+              onClick={() => {
+                getCardList();
+              }}
+            />
+          }
           style={{ width: '100%' }}
           placeholder="请输入脚本内容关键词"
         />
@@ -283,9 +292,9 @@ const ScriptCard: React.FC<ScriptCardProps> = ({
       <Spin loading={loading} style={{ width: '100%' }}>
         <div className={styles['script-card-content']}>
           {scriptCardList?.length > 0
-            ? scriptCardList.map((item: any) => (
+            ? scriptCardList.map((item) => (
                 <div
-                  key={item.script_id}
+                  key={`${item.script_id}${item.version}`}
                   className={styles['script-card-content-item']}
                 >
                   <div className={styles['script-card-content-item-title']}>
@@ -294,16 +303,18 @@ const ScriptCard: React.FC<ScriptCardProps> = ({
                     >
                       <div
                         onClick={() => {
-                          onToScriptList('files');
+                          handleToDetail(item.script_id);
                         }}
-                        className={
-                          styles['script-card-content-item-title-text']
-                        }
                       >
-                        <span>{item?.script_name || ''}</span>
-                        <span>({item.version_name})</span>
+                        <EllipsisPopover
+                          value={item?.script_name || ''}
+                          preferTypography
+                          wrapperClassName={
+                            styles['script-card-content-item-title-text']
+                          }
+                        />
                       </div>
-                      {getVersionType(item.status)}
+                      <VersionStatus status={item.status} />
                     </div>
                     <div
                       className={styles['script-card-content-item-title-right']}
@@ -313,20 +324,16 @@ const ScriptCard: React.FC<ScriptCardProps> = ({
                         className={styles['script-card-content-item-title-btn']}
                         icon={<IconCopy />}
                         onClick={() => {
-                          updateUrlState(
-                            {
-                              activeTab: 'files',
-                              activeDevelopScriptId: item.script_id
-                            },
-                            { method: 'push' }
-                          );
+                          setDetailTitle(item?.script_name || '');
+                          setDetailContent(item?.script_context || '');
+                          setDetailVisible(true);
                         }}
                       >
                         详情
                       </Button>
                       <Popover
                         content={
-                          item?.status === VersionType.SCHEDULED
+                          item?.status === ScriptStatus.Scheduling
                             ? '调度中的脚本不可删除'
                             : ''
                         }
@@ -341,7 +348,7 @@ const ScriptCard: React.FC<ScriptCardProps> = ({
                             styles['script-card-content-item-title-btns']
                           }
                           icon={<IconDelete />}
-                          disabled={item.status === VersionType.SCHEDULED}
+                          disabled={item.status === ScriptStatus.Scheduling}
                           onClick={() =>
                             deleteScript(item.script_id, item.status)
                           }
@@ -352,7 +359,17 @@ const ScriptCard: React.FC<ScriptCardProps> = ({
                     </div>
                   </div>
                   <div className={styles['script-card-content-item-content']}>
-                    {item?.script_context || ''}
+                    <EllipsisPopover
+                      value={highlightSearchKeyword(
+                        item?.script_context || ' ',
+                        searchValue
+                      )}
+                      preferTypography
+                      ellipsis={{ rows: 3, cssEllipsis: true }}
+                      wrapperClassName={
+                        styles['script-card-content-item-content-text']
+                      }
+                    />
                   </div>
                 </div>
               ))
@@ -361,7 +378,7 @@ const ScriptCard: React.FC<ScriptCardProps> = ({
               })}
         </div>
       </Spin>
-      {scriptCardList?.length > 0 && (
+      {total > pageSize && (
         <Pagination
           style={{
             display: 'flex',
@@ -372,10 +389,18 @@ const ScriptCard: React.FC<ScriptCardProps> = ({
             setPageSize(pageSize);
           }}
           total={total}
+          sizeOptions={[10, 20, 50, 100]}
           showTotal
+          sizeCanChange
           showJumper
         />
       )}
+      <ScriptDetailModal
+        visible={detailVisible}
+        title={detailTitle || '脚本标题'}
+        content={detailContent}
+        onCancel={() => setDetailVisible(false)}
+      />
     </div>
   );
 };

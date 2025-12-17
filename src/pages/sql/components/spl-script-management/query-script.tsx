@@ -15,23 +15,17 @@ import {
 import { useHistory } from 'react-router';
 import { ColumnProps } from '@arco-design/web-react/es/Table';
 import EllipsisPopover from '@/components/ellipsis-popover-com';
-import Success11Icon from '@/pages/workflowConfig/styles/images/op-icons/success1.svg';
 import noDataElement from '@/components/no-data';
-import {
-  getWorkflowList,
-  workflowDelete,
-  workflowCopy
-} from '@/api/workflowList';
-import { useUserInfo } from '@/store/userInfoStore';
 import { SorterInfo } from '@arco-design/web-react/es/Table/interface';
 import { PermissionWrapper } from '@/components/PermissionGuard';
 import { WORKFLOW_LIST_PERMISSIONS } from '@/config/permissions';
 import { IconClockCircle, IconRefresh } from '@arco-design/web-react/icon';
 import { openNewPage } from '@/utils/env';
 import styles from './query-script.module.scss';
-import { VersionType, VersionTypeEnum } from '../sctipt-card';
 import ScriptModalTable from '../sctip-modal-table';
 import { deleteSqlFile, listSqlFile } from '@/api/sql';
+import { useUrlState } from '../../hooks/useUrlState';
+import dayjs from 'dayjs';
 
 const InputSearch = Input.Search;
 
@@ -47,7 +41,7 @@ const QueryScript: React.FC<QueryScriptProps> = ({ curActiveTab }) => {
 
   const [formData, setFormData] = useState({
     script_name: '',
-    update_user: '',
+    update_account: '',
     update_time: []
   });
   // 初始化搜索框value
@@ -74,6 +68,8 @@ const QueryScript: React.FC<QueryScriptProps> = ({ curActiveTab }) => {
     getList();
   }, [current, pageSize, sortValue, curActiveTab]);
 
+  const { updateUrlState } = useUrlState();
+
   // 清空搜索框
   useEffect(() => {
     if (isClickClear && searchValue === '') {
@@ -89,7 +85,7 @@ const QueryScript: React.FC<QueryScriptProps> = ({ curActiveTab }) => {
         page: current, //第几页
         page_size: pageSize, //每页个数
         script_name: formData?.script_name,
-        update_user: formData?.update_user,
+        update_account: formData?.update_account,
         update_time_start: formData?.update_time?.[0],
         update_time_end: formData?.update_time?.[1],
         orders: [
@@ -105,6 +101,7 @@ const QueryScript: React.FC<QueryScriptProps> = ({ curActiveTab }) => {
         // setCurrent(res.data.page_info?.page);
         // setPageSize(res.data.page_info?.page_size);
         setTotal(res.data?.total || 10);
+        setQueryNum(res.data?.total || 0);
       }
     } finally {
       setLoading(false);
@@ -180,6 +177,17 @@ const QueryScript: React.FC<QueryScriptProps> = ({ curActiveTab }) => {
   const renderEmptyPlaceholder = (value: string | null) => {
     return value === '' || value == null ? '-' : value;
   };
+
+  const handleToDetail = (scriptId: number | string) => {
+    updateUrlState(
+      {
+        activeTab: 'data',
+        activeScriptId: String(scriptId)
+      },
+      { method: 'push' }
+    );
+  };
+
   // table columns
   const columns: ColumnProps[] = [
     {
@@ -193,26 +201,23 @@ const QueryScript: React.FC<QueryScriptProps> = ({ curActiveTab }) => {
       dataIndex: 'script_name',
       width: 320,
       ellipsis: true,
-      className: styles['hover-change'] + ' ' + styles['workflow-name']
-      // render: (_, record) => {
-      //   return renderEmptyPlaceholder(record.workflow_name) !== '-' ? (
-      //     <EllipsisPopover
-      //       value={record.workflow_name}
-      //       isEdit={false}
-      //       isLink
-      //       handleLink={() => {
-      //         viewDetailWorkflow(record.workflow_uuid, record.ds_workflow_id);
-      //       }}
-      //     />
-      //   ) : (
-      //     <span>-</span>
-      //   );
-      // }
+      className: styles['hover-change'],
+      render: (_, record) => (
+        <EllipsisPopover
+          value={record.script_name || '-'}
+          isEdit={false}
+          isLink
+          handleLink={() => handleToDetail(record.script_id)}
+        />
+      )
     },
     {
       title: '脚本说明',
       dataIndex: 'script_desc',
-      width: 320
+      width: 320,
+      render: (_, record) => (
+        <EllipsisPopover value={record.script_desc || '-'} />
+      )
     },
     {
       title: '更新人',
@@ -226,11 +231,7 @@ const QueryScript: React.FC<QueryScriptProps> = ({ curActiveTab }) => {
       dataIndex: 'update_time',
       width: 180,
       render: (_, record) => (
-        <span>
-          {record.update_time == '' || record.update_time == null
-            ? '-'
-            : new Date(record.update_time).toLocaleString()}
-        </span>
+        <span>{dayjs(record.update_time).format('YYYY-MM-DD HH:mm:ss')}</span>
       )
     },
     {
@@ -246,10 +247,7 @@ const QueryScript: React.FC<QueryScriptProps> = ({ curActiveTab }) => {
               <span
                 className={styles['operate-text']}
                 onClick={() => {
-                  viewDetailWorkflow(
-                    record.workflow_uuid,
-                    record.ds_workflow_id
-                  );
+                  handleToDetail(record.script_id);
                 }}
               >
                 详情
@@ -287,21 +285,14 @@ const QueryScript: React.FC<QueryScriptProps> = ({ curActiveTab }) => {
     const allFormValues = form.getFieldsValue();
     setFormData({
       script_name: allFormValues?.script_name,
-      update_user: allFormValues?.update_account,
+      update_account: allFormValues?.update_account,
       update_time: allFormValues?.update_time
     });
   };
   return (
     <div className={styles['query-script-wrapper']}>
       <div className={styles['query-script-title']}>查询脚本({queryNum})</div>
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          width: '100%',
-          marginBottom: '16px'
-        }}
-      >
+      <div className="mb-[16px] flex items-center justify-between border-b border-[#E2E8F0] pb-[16px]">
         <Form
           onValuesChange={(values) => {
             handleFormChange(values);
@@ -311,13 +302,13 @@ const QueryScript: React.FC<QueryScriptProps> = ({ curActiveTab }) => {
           layout="inline"
         >
           <FormItem label="脚本名称:" field="script_name">
-            <Input style={{ width: 236 }} placeholder="输入脚本名称搜索" />
+            <Input style={{ width: 260 }} placeholder="输入脚本名称搜索" />
           </FormItem>
           <FormItem label="更新人:" field="update_account">
-            <Input style={{ width: 250 }} placeholder="输入关键字搜索" />
+            <Input style={{ width: 260 }} placeholder="输入更新人搜索" />
           </FormItem>
           <FormItem label="更新时间:" field="update_time">
-            <DatePicker.RangePicker style={{ width: 350 }} />
+            <DatePicker.RangePicker style={{ width: 260 }} />
           </FormItem>
         </Form>
         <div style={{ display: 'flex', flex: 1 }}>
@@ -329,7 +320,7 @@ const QueryScript: React.FC<QueryScriptProps> = ({ curActiveTab }) => {
           >
             重置
           </Button>
-          <Button type="primary" onClick={handleSearch} loading={loading}>
+          <Button type="primary" onClick={handleSearch}>
             查询
           </Button>
         </div>
@@ -342,7 +333,7 @@ const QueryScript: React.FC<QueryScriptProps> = ({ curActiveTab }) => {
         noDataElement={noDataElement({
           description: '暂无数据'
         })}
-        rowKey="id"
+        rowKey="script_id"
         loading={loading}
         onChange={(pagination, sorter, filters) =>
           // @ts-expect-error
@@ -350,7 +341,7 @@ const QueryScript: React.FC<QueryScriptProps> = ({ curActiveTab }) => {
         }
       />
       {/* 分页 */}
-      {queryScriptData && queryScriptData.length > 0 && (
+      {total > pageSize && (
         <Pagination
           current={current}
           pageSize={pageSize}

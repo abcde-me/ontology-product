@@ -1,0 +1,12 @@
+.dependent-task-list {
+  .operator {
+    top: 50%;
+    transform: translate(0, -50%);
+  }
+
+  .node-item {
+    border-radius: 4px;
+    border: 1px solid #cbd5e1;
+    padding: 8px 16px;
+  }
+}

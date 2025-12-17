@@ -1,4 +1,4 @@
-import { MouseEvent, useCallback, useRef } from 'react';
+import React, { MouseEvent, useCallback, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import produce from 'immer';
 import type {
@@ -52,11 +52,19 @@ import {
 } from './use-workflow-history';
 import { markerEnd } from '@/pages/workflowConfig/utils/var';
 import { Message } from '@arco-design/web-react';
+import { operateWorkflow } from '@/api/workflow';
+import { WorkflowOperation } from '@/types/workflowApi';
+import { useParams as useSearchParam } from '@/utils/url';
+import { useUserInfo } from '@/store/userInfoStore';
+import { useStore as useTaskStore } from '@/pages/workflowConfig/task/store';
+import { useShallow } from 'zustand/react/shallow';
+import useInitFlowTestTask from '@/pages/workflowConfig/workflow/hooks/use-init-flow-test-task';
 
 export const useNodesInteractions = () => {
   const { t } = useTranslation('plugin__console-plugin-appforge');
   const store = useStoreApi();
   const workflowStore = useWorkflowStore();
+  const [initTestTask] = useInitFlowTestTask(true);
   const reactflow = useReactFlow();
   const { store: workflowHistoryStore } = useWorkflowHistoryStore();
   const { handleSyncWorkflowDraft } = useNodesSyncDraft();
@@ -64,6 +72,15 @@ export const useNodesInteractions = () => {
   const { getNodesReadOnly } = useNodesReadOnly();
   const { getWorkflowReadOnly } = useWorkflowReadOnly();
   const { handleSetHelpline } = useHelpline();
+  const workflow_uuid = useSearchParam('workflow_uuid');
+  const { doSyncWorkflowDraft } = useNodesSyncDraft();
+  const userInfo = useUserInfo();
+  const { setNodesProcessDetail, nodesProcessDetail } = useTaskStore(
+    useShallow((state) => ({
+      setNodesProcessDetail: state.setNodesProcessDetail,
+      nodesProcessDetail: state.nodesProcessDetail
+    }))
+  );
   const dragNodeStartPosition = useRef({ x: 0, y: 0 } as {
     x: number;
     y: number;
@@ -85,6 +102,40 @@ export const useNodesInteractions = () => {
       };
     },
     [workflowStore, getNodesReadOnly]
+  );
+
+  const handleTestNode = useCallback(
+    (node: React.Key) => {
+      doSyncWorkflowDraft(
+        false,
+        {
+          onSuccess(res) {
+            operateWorkflow({
+              op: WorkflowOperation.RUNNING,
+              start_node: node,
+              // 后端需要这个id是number类型，接口返回是字符串，后端改了前端也得改，所以前端强转
+              ds_workflow_id: res?.ds_workflow_id ? +res.ds_workflow_id : 0,
+              uid: userInfo?.id ?? '',
+              workflow_uuid: workflow_uuid ?? ''
+            }).then((res) => {
+              if (!!res.data) {
+                initTestTask();
+                Message.success('开始测试');
+                return;
+              }
+              Message.warning(res.message);
+            });
+          },
+          onError(e) {
+            Message.warning(e.message);
+          }
+        },
+        {
+          version: 'publish'
+        }
+      );
+    },
+    [nodesProcessDetail, setNodesProcessDetail, workflow_uuid]
   );
 
   const handleNodeDrag = useCallback<NodeDragHandler>(
@@ -1313,6 +1364,7 @@ export const useNodesInteractions = () => {
     handleNodeResize,
     handleNodeDisconnect,
     handleHistoryBack,
-    handleHistoryForward
+    handleHistoryForward,
+    handleTestNode
   };
 };

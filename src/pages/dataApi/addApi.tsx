@@ -26,6 +26,7 @@ import { IconCaretRight, IconUp } from '@arco-design/web-react/icon';
 import ParseParametersIcon from '@/assets/metadata/parse-parameters.svg';
 import EllipsisPopoverCom from '@/components/ellipsis-popover-com';
 import copy from 'copy-to-clipboard';
+import TestModal from './compontent/testModal';
 
 export default function AddApi() {
   const Step = Steps.Step;
@@ -49,6 +50,8 @@ export default function AddApi() {
   const [value, setValue] = useState('');
   const [isEditorFocused, setIsEditorFocused] = useState<boolean>(false);
   const [isOpen, setIsOpen] = useState<boolean>(false); // 当前面板是否展开
+  const [testModalVisible, setTestModalVisible] = useState<boolean>(false);
+  const [testModalDataSource, setTestModalDataSource] = useState<string[]>([]);
 
   const [resizeSize, setResizeSize] = useState<string>('');
   const [paneContainersSize, setPaneContainersSize] = useState<string>('220px');
@@ -118,11 +121,19 @@ export default function AddApi() {
       width: 150
     },
     {
-      title: '参数中文名称',
+      title: (
+        <div>
+          <span className="mr-2 text-[#EF4444]">*</span>
+          参数中文名称
+        </div>
+      ),
       dataIndex: 'chineseName',
       width: 200,
       render: (_value, record) => (
-        <Form.Item field={`chineseName_${record.englishName}`}>
+        <Form.Item
+          field={`chineseName_${record.englishName}`}
+          rules={[{ required: true, message: '请输入参数中文名称' }]}
+        >
           <Input placeholder="请输入参数中文名称" />
         </Form.Item>
       )
@@ -132,13 +143,16 @@ export default function AddApi() {
       dataIndex: 'type',
       width: 180,
       render: (_value, record) => (
-        <Form.Item field={`type_${record.englishName}`}>
+        <Form.Item field={`type_${record.englishName}`} initialValue="STRING">
           <Select
             placeholder="请选择参数类型"
             options={[
-              { label: '字符串', value: 'string' },
-              { label: '数字', value: 'number' },
-              { label: '布尔值', value: 'boolean' }
+              { label: 'STRING', value: 'STRING' },
+              { label: 'INT', value: 'INT' },
+              { label: 'LONG', value: 'LONG' },
+              { label: 'FLOAT', value: 'FLOAT' },
+              { label: 'DOUBLE', value: 'DOUBLE' },
+              { label: 'BOOLEAN', value: 'BOOLEAN' }
             ]}
           />
         </Form.Item>
@@ -150,6 +164,16 @@ export default function AddApi() {
       width: 80,
       render: (_value, record) => (
         <Form.Item field={`isArray_${record.englishName}`}>
+          <Checkbox />
+        </Form.Item>
+      )
+    },
+    {
+      title: '必填',
+      dataIndex: 'isRequired',
+      width: 80,
+      render: (_value, record) => (
+        <Form.Item field={`isRequired_${record.englishName}`}>
           <Checkbox />
         </Form.Item>
       )
@@ -170,61 +194,37 @@ export default function AddApi() {
       key: '1',
       index: '1',
       position: 'query',
-      englishName: 'name',
-      chineseName: '姓名',
-      type: 'string',
-      isArray: false,
-      defaultValue: ''
+      englishName: 'name'
     },
     {
       key: '2',
       index: '2',
       position: 'query',
-      englishName: 'age',
-      chineseName: '年龄',
-      type: 'number',
-      isArray: false,
-      defaultValue: ''
+      englishName: 'age'
     },
     {
       key: '3',
       index: '3',
       position: 'query',
-      englishName: 'gender',
-      chineseName: '性别',
-      type: 'string',
-      isArray: false,
-      defaultValue: ''
+      englishName: 'gender'
     },
     {
       key: '4',
       index: '4',
       position: 'query',
-      englishName: 'email',
-      chineseName: '邮箱',
-      type: 'string',
-      isArray: false,
-      defaultValue: ''
+      englishName: 'email'
     },
     {
       key: '5',
       index: '5',
       position: 'query',
-      englishName: 'phone',
-      chineseName: '手机号',
-      type: 'string',
-      isArray: false,
-      defaultValue: ''
+      englishName: 'phone'
     },
     {
       key: '6',
       index: '6',
       position: 'query',
-      englishName: 'address',
-      chineseName: '地址',
-      type: 'string',
-      isArray: false,
-      defaultValue: ''
+      englishName: 'address'
     }
   ];
 
@@ -343,6 +343,28 @@ export default function AddApi() {
     }
   };
 
+  // 转换函数
+  const mergeConfigWithArray = (flatConfig, array) => {
+    return array.map((item) => {
+      const enName = item.englishName;
+      // 构建要补充的属性（支持扩展更多属性）
+      const supplementProperties = {
+        chineseName: flatConfig[`chineseName_${enName}`],
+        type: flatConfig[`type_${enName}`],
+        defaultValue: flatConfig[`defaultValue_${enName}`],
+        // 可选属性：存在则添加，不存在则忽略
+        ...(flatConfig[`isArray_${enName}`] !== undefined && {
+          isArray: flatConfig[`isArray_${enName}`]
+        }),
+        ...(flatConfig[`isRequired_${enName}`] !== undefined && {
+          isRequired: flatConfig[`isRequired_${enName}`]
+        })
+      };
+      // 合并原始属性和补充属性
+      return { ...item, ...supplementProperties };
+    });
+  };
+
   const handleSubmit = () => {
     form.validate().then((values) => {
       console.log(values, apiScenePath);
@@ -350,9 +372,13 @@ export default function AddApi() {
     });
   };
 
-  const handleSave = () => {
+  const handleTest = () => {
     inputParamsForm.validate().then((values) => {
-      console.log(values);
+      console.log(values, data);
+      // 合并配置数组
+      const mergedArray = mergeConfigWithArray(values, data);
+      setTestModalDataSource(mergedArray);
+      setTestModalVisible(true);
     });
   };
 
@@ -421,7 +447,7 @@ export default function AddApi() {
             <Form
               form={inputParamsForm}
               layout="vertical"
-              onSubmit={handleSave}
+              onSubmit={handleTest}
             >
               <Table
                 columns={columns}
@@ -657,6 +683,12 @@ export default function AddApi() {
           </div>
         </div>
       </div>
+
+      <TestModal
+        visible={testModalVisible}
+        dataSource={testModalDataSource}
+        onCancel={() => setTestModalVisible(false)}
+      />
     </div>
   );
 }

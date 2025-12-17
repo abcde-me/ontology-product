@@ -204,6 +204,18 @@ export const ModaForgeResourceEndpoints = {
   // 工作流-知识库名称校验
   knowledgeBaseNameCheck:
     API_PREFIX + '/query-service/api/v1/validKnowledgeName',
+  // 工作流-查询工作流最近一次运行记录
+  getWorkflowLastTask: PrefixAimdp + '/ListProcessInstance',
+  // 工作流-查询工作流最近一次运行记录-所有节点的记录
+  getWorkflowNodeTask: PrefixAimdp + '/ListTaskInstance',
+  // 工作流-查询运行记录日志
+  getWorkflowTaskLogs: PrefixAimdp + '/GetRunLogs',
+  // 工作流-结构化-数据推送-来源库
+  getSourceDatabaseList: PrefixAimdp + '/ListMetadataIcebergDatabaseName',
+  // 工作流-结构化-数据推送-来源表
+  getSourceTable: PrefixAimdp + '/ListMetadataIcebergTable',
+  // 工作流-结构化-数据推送-来源表字段
+  getSourceTableField: PrefixAimdp + '/ListMetadataIcebergField',
 
   // 作业列表
   taskList: PrefixAimdp + '/ListWorkflowInstances',
@@ -389,6 +401,12 @@ export const ModaForgeResourceEndpoints = {
   // 抽检任务列表
   listQualityControlTaskSamples:
     PrefixLabelService + '/ListQualityControlTaskSamples',
+  // 获取任务流水
+  getFlowListTask: PrefixLabelService + '/FlowListTask',
+  // 任务预览切换
+  switchPreview: PrefixLabelService + '/PreviewTask',
+  // 预览用标注结果
+  previewTaskResult: PrefixLabelService + '/FlowDetailTask',
 
   // python开发
   // 获取python列表

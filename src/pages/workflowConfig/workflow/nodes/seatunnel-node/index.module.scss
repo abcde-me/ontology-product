@@ -1,0 +1,39 @@
+.panel-container {
+  .label-hidden {
+    visibility: hidden;
+  }
+
+  .arco-cascader {
+    width: 100% !important;
+    margin-bottom: 0 !important;
+  }
+
+  .dependent-item {
+    border: 1px solid #cbd5e1;
+
+    &:hover {
+      border: 1px solid #007dfa;
+    }
+  }
+
+  .field-sync-table {
+    thead {
+      th {
+        background: transparent;
+        border-bottom: none !important;
+      }
+
+      :global(.arco-table-th-item) {
+        padding: 8px !important;
+      }
+    }
+
+    :global(.arco-table-td) {
+      padding: 8px !important;
+    }
+
+    :global(.arco-table-th-item-title) {
+      pointer-events: auto !important;
+    }
+  }
+}

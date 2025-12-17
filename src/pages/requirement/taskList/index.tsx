@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 import {
   Form,
   Input,
@@ -26,8 +26,6 @@ function TaskList() {
   const FormItem = Form.Item;
   const userInfo = useUserInfo();
   const InputSearch = Input.Search;
-  // 初始化搜索框value
-  const [searchValue, setSearchValue] = useState<any>(null);
   // 初始化任务列表数据
   const [taskData, setTaskData] = useState([]);
   // 当前的第几页
@@ -38,33 +36,21 @@ function TaskList() {
   const [total, setTotal] = useState(10);
   // 添加loading状态控制
   const [loading, setLoading] = useState(false);
-  // 区分是否点击按钮清空搜索框
-  const [isClickClear, setIsClickClear] = useState(false);
   // 初始化筛选的值
   const [sortValue, setSortValue] = useState<any>({});
 
-  // 组件初始化
-  useEffect(() => {
-    if (userInfo) getList();
-  }, [userInfo, current, pageSize, sortValue]);
+  // 使用 ref 保存搜索值
+  const searchValueRef = useRef('');
 
-  // 清空搜索框
-  useEffect(() => {
-    if ((isClickClear && searchValue === '') || !searchValue) {
-      getList();
-      setIsClickClear(false);
-    }
-  }, [isClickClear]);
-
-  const getList = async () => {
+  const getList = useCallback(async () => {
     setLoading(true);
     try {
       const params: any = {
-        page: current, //第几页
-        page_size: pageSize, //每页个数
+        page: current,
+        page_size: pageSize,
         order: sortValue?.order,
         filters: {
-          name: searchValue,
+          name: searchValueRef.current || null,
           type: sortValue?.type,
           belong: sortValue?.belong
         }
@@ -73,13 +59,26 @@ function TaskList() {
       if (res.code === 'success') {
         setTaskData(res?.data?.result || []);
         setTotal(res.data?.total);
-        setLoading(false);
       }
     } catch (error) {
-      setLoading(false);
+      console.error('获取任务列表失败:', error);
     } finally {
       setLoading(false);
     }
+  }, [current, pageSize, sortValue]);
+
+  // 组件初始化和依赖变化时获取数据
+  useEffect(() => {
+    if (userInfo) {
+      getList();
+    }
+  }, [userInfo, getList]);
+
+  // 搜索处理
+  const handleSearch = (value: string) => {
+    searchValueRef.current = value;
+    setCurrent(1);
+    getList();
   };
 
   // 标注工具跳转
@@ -307,22 +306,8 @@ function TaskList() {
         >
           <FormItem field="name" style={{ marginBottom: 0 }}>
             <InputSearch
-              onClear={() => {
-                setCurrent(1);
-                setSearchValue(null);
-                setIsClickClear(true);
-              }}
-              onSearch={() => {
-                getList();
-                setCurrent(1);
-              }}
-              onPressEnter={() => {
-                getList();
-                setCurrent(1);
-              }}
-              onChange={(val) => {
-                setSearchValue(val);
-              }}
+              onSearch={handleSearch}
+              onClear={() => handleSearch('')}
               placeholder="输入任务名称搜索"
               allowClear
             />

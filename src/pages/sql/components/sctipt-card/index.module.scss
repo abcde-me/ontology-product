@@ -17,25 +17,25 @@
   }
 
   .script-card-content-item:hover {
+    border-color: #007dfa;
+
     .script-card-content-item-title-right {
-      visibility: visible;
+      // visibility: visible;
+      display: flex;
+    }
+    .script-card-content-item-title-text {
+      max-width: 180px;
+      color: #007dfa;
     }
   }
 
   .script-card-content-item-title-text {
     max-width: 320px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  .script-card-content-item-title-text:hover {
     cursor: pointer;
-    color: #007dfa;
-    max-width: 240px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    font-weight: 500;
+    font-size: 16px;
+    line-height: 24px;
+    margin-right: 8px;
   }
 
   .script-card-content-item:nth-child(odd) {
@@ -54,7 +54,7 @@
   }
 
   .script-card-content-item-title-right {
-    visibility: hidden;
+    display: none;
   }
 
   .script-card-content-item-title-btn {
@@ -85,16 +85,16 @@
 
   color: #1e293b !important;
 
-  .script-card-content-item-title-text {
-    color: var(--text-color-text-2, #1e293b);
-    text-align: center;
-    font-family: 'PingFang SC';
-    font-size: 16px;
-    font-style: normal;
-    font-weight: 500;
-    line-height: 24px;
-    margin-right: 8px;
-  }
+  // .script-card-content-item-title-text {
+  //   color: var(--text-color-text-2, #1e293b);
+  //   text-align: center;
+  //   font-family: 'PingFang SC';
+  //   font-size: 16px;
+  //   font-style: normal;
+  //   font-weight: 500;
+  //   line-height: 24px;
+  //   margin-right: 8px;
+  // }
 
   .script-card-content-item-title-icon {
     display: flex;
@@ -104,40 +104,6 @@
 
   .icon-content {
     margin: 0 8px;
-  }
-
-  .released-icon {
-    width: 8px;
-    height: 8px;
-    background-color: #10b981;
-    border-radius: 50%;
-    margin-right: 8px;
-  }
-
-  .unreleased-icon {
-    width: 8px;
-    height: 8px;
-    background-color: #94a3b8;
-    border-radius: 50%;
-    margin-right: 8px;
-  }
-
-  .scheduled-icon {
-    width: 8px;
-    height: 8px;
-    background-color: #007dfa;
-    border-radius: 50%;
-    margin-right: 8px;
-  }
-
-  .script-card-content-item-title-icon-text {
-    color: var(--text-color-text-2, #1e293b);
-    text-align: center;
-    font-family: 'PingFang SC';
-    font-size: 12px;
-    font-style: normal;
-    font-weight: 500;
-    line-height: 24px;
   }
 
   .script-card-content-item-content {
@@ -150,10 +116,10 @@
     line-height: 22px;
     margin-top: 8px;
     // 多行省略号
-    overflow: hidden;
-    text-overflow: ellipsis;
-    display: -webkit-box;
-    -webkit-line-clamp: 3;
-    -webkit-box-orient: vertical;
+    // overflow: hidden;
+    // text-overflow: ellipsis;
+    // display: -webkit-box;
+    // -webkit-line-clamp: 3;
+    // -webkit-box-orient: vertical;
   }
 }
