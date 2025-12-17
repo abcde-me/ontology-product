@@ -4,7 +4,7 @@ import classNames from 'classnames';
 import ParameterIcon from '../../assets/parameter-icon.svg';
 import ArrowRightIcon from '../../assets/arrow-right-icon.svg';
 import { ScriptParam } from '@/types/sqlDevelopApi';
-import { useLocalParams } from '../../hooks/useLocalParams';
+import { useLocalParams } from '@/hooks/useLocalParams';
 
 // 扩展 ScriptParam 以支持内部排序
 type ParameterWithOrder = ScriptParam & { _order?: number };
