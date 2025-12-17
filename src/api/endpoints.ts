@@ -395,6 +395,12 @@ export const ModaForgeResourceEndpoints = {
   switchPreview: PrefixLabelService + '/PreviewTask',
   // 预览用标注结果
   previewTaskResult: PrefixLabelService + '/FlowDetailTask',
+  // 生成标注结果
+  generateResultPkg: PrefixLabelService + '/GenResultPkg',
+  // 生成纪录
+  generateResultListPkg: PrefixLabelService + '/GenResultListPkg',
+  // 下载生成纪录
+  downloadGenRecord: PrefixLabelService + '/DownloadGenRecord',
 
   // python开发
   // 获取python列表

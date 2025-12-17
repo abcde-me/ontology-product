@@ -260,3 +260,28 @@ export async function listQualityControlTaskSamples(params) {
     .inRegion()
     .do();
 }
+
+// 生成标注结果
+export async function generateAnnotationResults(params) {
+  return await UAPI.RES.generateResultPkg({})
+    .post({ ...params })
+    .inRegion()
+    .do();
+}
+
+// 生成纪录
+export async function generateRecord(params) {
+  return await UAPI.RES.generateResultListPkg({})
+    .post({ ...params })
+    .inRegion()
+    .do();
+}
+
+// 下载生成纪录
+export async function downloadGenRecord(params) {
+  return await UAPI.RES.downloadGenRecord({})
+    .post({ ...params })
+    .withConfig({ responseType: 'blob' })
+    .inRegion()
+    .do({ headers: { 'need-header-data': 'true' } });
+}

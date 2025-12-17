@@ -486,8 +486,9 @@ export default function Requirement() {
               onChange={(val) => {
                 setSearchValue(val);
               }}
-              placeholder="请输入需求名称/创建人"
+              placeholder="输入需求ID、名称、创建人搜索"
               allowClear
+              style={{ width: 260 }}
             />
           </FormItem>
         </Form>

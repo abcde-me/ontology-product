@@ -60,7 +60,6 @@ function LabelEditorPage() {
   // 文本用
   const mode = useParams('mode');
   const deadlineTimestamp = useParams('deadlineTimestamp');
-  const flowId = useParams('flowId');
   const [labelUrl, setLabelUrl] = useState('');
   const history = useHistory();
   const hasSavePermission = useHasPermission(ANNOTATION_TASK_PERMISSIONS.SAVE);

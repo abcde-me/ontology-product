@@ -97,6 +97,10 @@ UAPI_CONFIG.addResponseInterceptor(
       console.error('API返回401错误:', response.config?.url, res);
       logout(res?.data?.content);
     } else if (response.status >= 200 && response.status <= 299) {
+      // 【新增】检查是否需要返回header数据
+      if (response.config?.headers?.['need-header-data'] === 'true') {
+        return response;
+      }
       // 【新增】检查是否是二进制流响应
       const contentType = response.headers['content-type'] || '';
       const isBinaryResponse = BinaryContentTypes.some((type) =>
