@@ -5,14 +5,19 @@ import {
   Tooltip,
   Notification,
   Pagination,
-  Progress
+  Progress,
+  Message,
+  Link
 } from '@arco-design/web-react';
 import { ColumnProps } from '@arco-design/web-react/es/Table';
 import { SorterInfo } from '@arco-design/web-react/es/Table/interface';
 import { IconRight } from '@arco-design/web-react/icon';
 import { useParams } from '@/utils/url';
 import GenerateRecordModal from './GenerateRecordModal';
-import { getProgressRequirement } from '@/api/dataAnnotation';
+import {
+  getProgressRequirement,
+  generateAnnotationResults
+} from '@/api/dataAnnotation';
 import dayjs from 'dayjs';
 import './index.scss';
 
@@ -58,12 +63,8 @@ const ProgressBar: React.FC<{
 const renderProgress = (record: TaskPackage) => {
   const statistics = record.statistics || [];
   const pkgTaskCnt = Number(record.pkg_task_cnt) || 0;
-  const totalQcRound = Number(record.total_qc_round) || 0;
 
-  // 标注进度：statistics[0].passed / pkg_task_cnt
-  const annotationPassed = statistics[0]
-    ? Number(statistics[0].passed) || 0
-    : 0;
+  const annotationPassed = Number(record.label_cnt) || 0;
 
   // 构建进度项数组
   const progressItems: { label: string; completed: number; total: number }[] = [
@@ -74,16 +75,13 @@ const renderProgress = (record: TaskPackage) => {
     }
   ];
 
-  // 质检进度：从statistics第二项开始，进度为当前passed / 前一个passed
-  for (let i = 1; i <= totalQcRound && i < statistics.length; i++) {
-    const currentPassed = Number(statistics[i]?.passed) || 0;
-    const prevPassed = Number(statistics[i - 1]?.passed) || 0;
+  statistics.forEach((item, index) => {
     progressItems.push({
-      label: `${i}轮质检`,
-      completed: currentPassed,
-      total: prevPassed
+      label: `${index + 1}轮质检`,
+      completed: Number(item.passed) || 0,
+      total: pkgTaskCnt
     });
-  }
+  });
 
   return (
     <div className="progress-container">
@@ -110,6 +108,8 @@ function RequirementProgress({ isActive }: RequirementProgressProps) {
   const [selectedRowKeys, setSelectedRowKeys] = useState<(string | number)[]>(
     []
   );
+  const [selectedRows, setSelectedRows] = useState<TaskPackage[]>([]);
+  [];
   const [generateRecordModalVisible, setGenerateRecordModalVisible] =
     useState(false);
   const [current, setCurrent] = useState(1);
@@ -118,6 +118,7 @@ function RequirementProgress({ isActive }: RequirementProgressProps) {
   const [dataList, setDataList] = useState<TaskPackage[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
+  const [generateLoading, setGenerateLoading] = useState(false);
 
   // 获取进度数据
   const fetchProgressData = async () => {
@@ -191,30 +192,35 @@ function RequirementProgress({ isActive }: RequirementProgressProps) {
   };
 
   // 处理生成标注结果
-  const handleGenerateAnnotationResults = () => {
-    if (selectedRowKeys.length === 0) {
+  const handleGenerateAnnotationResults = async () => {
+    if (selectedRows.length === 0) {
       return;
     }
 
-    // 显示Toast提示
-    Notification.info({
-      content: (
-        <span>
-          标注结果生成中,可点击
-          <span
-            className="toast-link"
-            onClick={() => {
-              setGenerateRecordModalVisible(true);
-            }}
-          >
-            生成记录
-          </span>
-          查看进度
-        </span>
-      ),
-      duration: 5000,
-      style: { marginTop: 20 }
+    setGenerateLoading(true);
+    const res = await generateAnnotationResults({
+      req_id: Number(id),
+      pkg_id_list: selectedRows.map((item) => item.front_pkg_id)
+    }).finally(() => {
+      setGenerateLoading(false);
     });
+    if (res?.code === 'success') {
+      Message.success({
+        content: (
+          <span>
+            标注结果生成中，可点击
+            <Link
+              onClick={() => {
+                setGenerateRecordModalVisible(true);
+              }}
+            >
+              生成记录
+            </Link>
+            查看进度
+          </span>
+        )
+      });
+    }
   };
 
   // 处理生成记录
@@ -244,7 +250,11 @@ function RequirementProgress({ isActive }: RequirementProgressProps) {
               </Button>
             </Tooltip>
           ) : (
-            <Button type="primary" onClick={handleGenerateAnnotationResults}>
+            <Button
+              type="primary"
+              onClick={handleGenerateAnnotationResults}
+              loading={generateLoading}
+            >
               生成标注结果
             </Button>
           )}
@@ -255,13 +265,14 @@ function RequirementProgress({ isActive }: RequirementProgressProps) {
         border={false}
         columns={columns}
         data={dataList}
-        rowKey="pkg_id"
+        rowKey="id"
         loading={loading}
         rowSelection={{
           type: 'checkbox',
           selectedRowKeys,
-          onChange: (keys) => {
+          onChange: (keys, selectedRows) => {
             setSelectedRowKeys(keys);
+            setSelectedRows(selectedRows);
           }
         }}
         pagination={false}

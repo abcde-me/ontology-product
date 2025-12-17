@@ -59,11 +59,10 @@ const SamplingModal: React.FC<SamplingModalProps> = ({
 
   const handleOk = async () => {
     try {
-      const sample_info = {
-        // 首次抽检/待质检 - uninspect; 待复核 - recheck
-        task_type: 0
-      };
       const values = await form.validate();
+      const sample_info = {
+        task_type: values.task_type
+      };
       sample_info['sample_type'] = values.sample_type;
       if (values.sample_type === SamplingCountType.Percentage) {
         sample_info['sample_radio'] = values.sample_radio / 100;
@@ -117,9 +116,9 @@ const SamplingModal: React.FC<SamplingModalProps> = ({
             <Radio value={SamplingType.ToInspect}>
               待质检 (剩余: {metricData?.task_volume_unsampled}个)
             </Radio>
-            {/* <Radio value={SamplingType.ToRecheck}>
-              待复核 (剩余: {remainingToRecheck}个)
-            </Radio> */}
+            <Radio value={SamplingType.ToRecheck}>
+              待复核 (剩余: {metricData?.task_volume_unreinspected}个)
+            </Radio>
           </RadioGroup>
         </FormItem>
         <FormItem

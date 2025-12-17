@@ -49,8 +49,8 @@ function TaskList() {
         page: current,
         page_size: pageSize,
         order: sortValue?.order,
+        search_content: searchValueRef.current || '',
         filters: {
-          name: searchValueRef.current || null,
           type: sortValue?.type,
           belong: sortValue?.belong
         }
@@ -308,8 +308,9 @@ function TaskList() {
             <InputSearch
               onSearch={handleSearch}
               onClear={() => handleSearch('')}
-              placeholder="输入任务名称搜索"
+              placeholder="输入任务包ID或需求名称搜索"
               allowClear
+              style={{ width: 260 }}
             />
           </FormItem>
         </Form>

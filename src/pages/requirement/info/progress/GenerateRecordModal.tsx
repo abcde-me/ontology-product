@@ -1,11 +1,19 @@
 import React, { useState, useEffect } from 'react';
-import { Modal, Table, Button, Pagination } from '@arco-design/web-react';
+import {
+  Modal,
+  Table,
+  Button,
+  Pagination,
+  Message
+} from '@arco-design/web-react';
 import { ColumnProps } from '@arco-design/web-react/es/Table';
 import { SorterInfo } from '@arco-design/web-react/es/Table/interface';
 import { IconRefresh, IconDownload } from '@arco-design/web-react/icon';
 import { useParams } from '@/utils/url';
 import './GenerateRecordModal.scss';
-import { downloadRecord } from '@/api/dataAnnotation';
+import { generateRecord, downloadGenRecord } from '@/api/dataAnnotation';
+import dayjs from 'dayjs';
+import { downloadBlob, isBlob, parseFilename } from '../utils/downloadBlob';
 // 状态配置 status: 0-生成中 1-生成失败 2-未下载 3-已下载
 const statusConfig: Record<number, { text: string; color: string }> = {
   0: { text: '生成中', color: '#2970ff' }, // 蓝色
@@ -15,8 +23,9 @@ const statusConfig: Record<number, { text: string; color: string }> = {
 };
 
 interface GenerateRecord {
+  id: number; // 生成纪录id
   create_time: string; // 创建时间
-  front_pkg_ids: string; // 需求包id，使用逗号分隔
+  pkg_ids: string; // 需求包id，使用逗号分隔
   status: number; // 状态
 }
 
@@ -51,7 +60,7 @@ function GenerateRecordModal({ visible, onClose }: GenerateRecordModalProps) {
     if (!reqId || isNaN(reqId)) return;
     setLoading(true);
     try {
-      const res = await downloadRecord({
+      const res = await generateRecord({
         req_id: reqId,
         page: current,
         page_size: pageSize
@@ -93,19 +102,18 @@ function GenerateRecordModal({ visible, onClose }: GenerateRecordModalProps) {
   };
 
   // 处理下载
-  const handleDownload = (record: GenerateRecord) => {
+  const handleDownload = async (record: GenerateRecord) => {
     // TODO: 替换为实际的下载API调用
     try {
-      // 创建下载链接
-      const link = document.createElement('a');
       // 实际应该调用API获取下载URL
-      // const downloadUrl = await getAnnotationDownloadUrl(record.id);
-      link.href = `#`; // 临时占位，实际应使用 downloadUrl
-      link.download = `标注结果_${record.front_pkg_ids}.zip`;
-      link.style.display = 'none';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      const res = await downloadGenRecord({ id: record.id });
+      if (!isBlob(res?.data)) {
+        Message.error('下载失败!');
+        return;
+      }
+      const contentDisposition = res.headers['content-disposition'] || '';
+      const filename = parseFilename(contentDisposition);
+      downloadBlob(res.data, { download: filename });
     } catch (error) {
       console.error('下载失败:', error);
     }
@@ -116,11 +124,12 @@ function GenerateRecordModal({ visible, onClose }: GenerateRecordModalProps) {
     {
       title: '时间',
       dataIndex: 'create_time',
-      width: 180
+      width: 180,
+      render: (text: string) => dayjs(text).format('YYYY-MM-DD HH:mm:ss')
     },
     {
       title: '任务包ID',
-      dataIndex: 'front_pkg_ids',
+      dataIndex: 'pkg_ids',
       width: 300
     },
     {
