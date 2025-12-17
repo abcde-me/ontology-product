@@ -61,7 +61,7 @@ const ParameterSidebar: React.FC<ParameterSidebarProps> = memo(
     const [isInitialized, setIsInitialized] = useState(false);
 
     // 使用 useLocalParams hook
-    const { localParams, parseParams, updateParamValue, setLocalParams } =
+    const { localParams, parseAndSetParams, updateParamValue, setLocalParams } =
       useLocalParams({
         initialParams,
         regex: /\$\{([^}]+)\}/g
@@ -102,8 +102,7 @@ const ParameterSidebar: React.FC<ParameterSidebarProps> = memo(
 
     // 编辑器内容变化时，解析参数
     useEffect(() => {
-      const parsedParams = parseParams(content);
-      setLocalParams(parsedParams);
+      parseAndSetParams(content);
     }, [content]);
 
     useEffect(() => {
