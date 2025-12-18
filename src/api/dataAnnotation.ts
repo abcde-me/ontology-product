@@ -285,3 +285,11 @@ export async function downloadGenRecord(params) {
     .inRegion()
     .do({ headers: { 'need-header-data': 'true' } });
 }
+
+// 删除需求
+export async function deleteRequirement(params) {
+  return await UAPI.RES.deleteRequirement({})
+    .post({ ...params })
+    .inRegion()
+    .do();
+}

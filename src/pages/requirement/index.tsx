@@ -1,4 +1,8 @@
-import { getAnnotationDownload, getAnnotationList } from '@/api/dataAnnotation';
+import {
+  getAnnotationDownload,
+  getAnnotationList,
+  deleteRequirement
+} from '@/api/dataAnnotation';
 import CreatIcon from '@/assets/annotation/requirement-creat.svg';
 import QualityIcon from '@/assets/annotation/requirement-quality.svg';
 import AnnotationIcon from '@/assets/annotation/requirement-annotation.svg';
@@ -157,6 +161,21 @@ export default function Requirement() {
   const hasPermissionGetDownload = useHasPermission(
     REQUIREMENT_PERMISSIONS.DOWNLOAD
   );
+
+  // 删除需求
+  const handleDeleteRequirement = async (record) => {
+    try {
+      const res = await deleteRequirement({ req_id: record.id });
+      if (res.code === 'success') {
+        Message.success('删除成功');
+        getList();
+      } else {
+        Message.error(res.message);
+      }
+    } catch (error) {
+      Message.error('删除失败');
+    }
+  };
   // table columns
   const columns: ColumnProps[] = [
     {
@@ -358,7 +377,10 @@ export default function Requirement() {
                     userInfo?.name !== record.create_by
                       ? '仅需求创建人可操作'
                       : '',
-                  disabled: userInfo?.name !== record.create_by
+                  disabled: userInfo?.name !== record.create_by,
+                  onClick: () => {
+                    handleDeleteRequirement(record);
+                  }
                 }
               ]
             : [])

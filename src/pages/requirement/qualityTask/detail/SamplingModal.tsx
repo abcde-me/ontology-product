@@ -114,7 +114,7 @@ const SamplingModal: React.FC<SamplingModalProps> = ({
         >
           <RadioGroup>
             <Radio value={SamplingType.ToInspect}>
-              待质检 (剩余: {metricData?.task_volume_unsampled}个)
+              待质检 (剩余: {metricData?.task_volume_uninspected}个)
             </Radio>
             <Radio value={SamplingType.ToRecheck}>
               待复核 (剩余: {metricData?.task_volume_unreinspected}个)

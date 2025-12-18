@@ -401,6 +401,8 @@ export const ModaForgeResourceEndpoints = {
   generateResultListPkg: PrefixLabelService + '/GenResultListPkg',
   // 下载生成纪录
   downloadGenRecord: PrefixLabelService + '/DownloadGenRecord',
+  // 删除需求
+  deleteRequirement: PrefixLabelService + '/DeleteRequirement',
 
   // python开发
   // 获取python列表
