@@ -49,8 +49,8 @@ function TaskList() {
         page: current,
         page_size: pageSize,
         order: sortValue?.order,
-        search_content: searchValueRef.current || '',
         filters: {
+          search_content: searchValueRef.current || '',
           type: sortValue?.type,
           belong: sortValue?.belong
         }
