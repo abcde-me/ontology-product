@@ -1,7 +1,27 @@
 import React from 'react';
+import { Redirect, Route, Switch } from 'react-router';
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const routes = require('../admin/route').routes || [];
 
-const WorkflowTask = () => {
-  return <div>WorkflowTask</div>;
-};
-
-export default WorkflowTask;
+export default function DataAsset() {
+  return (
+    <Switch>
+      <Redirect
+        exact
+        from="/tenant/compute/modaforge/workflowTask"
+        to="/tenant/compute/modaforge/workflowTask/list"
+      />
+      {routes
+        .find((route) => route.name === 'workflowTask')
+        ?.children?.map((route) => {
+          return (
+            <Route
+              key={route.key}
+              path={route.key}
+              component={route.component}
+            />
+          );
+        })}
+    </Switch>
+  );
+}

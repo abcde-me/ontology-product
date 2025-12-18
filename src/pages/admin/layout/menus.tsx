@@ -131,7 +131,7 @@ export const menus: MenuModel[] = [
         permission: WORKFLOW_LIST_PERMISSIONS.LIST
       },
       {
-        title: '作业',
+        title: '运行记录',
         icon: <WorkflowTask className={iconClass} />,
         key: 'workflowTask',
         path: '/tenant/compute/modaforge/workflowTask',

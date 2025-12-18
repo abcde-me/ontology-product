@@ -148,21 +148,55 @@ export const routes: IRoute[] = [
     ),
     children: []
   },
-  // 工作流运行记录
+  // 运行记录
   {
     name: 'workflowTask',
     key: '/tenant/compute/modaforge/workflowTask',
-    component: React.lazy(async () => import('../../workflowTask')),
-    permission: WORKFLOW_TASK_PERMISSIONS.LIST,
+    component: React.lazy(async () => import('../../workflowTask/index')),
+    permission: DATA_ASSET_PERMISSIONS.LIST,
     children: [
       {
-        name: 'taskDetail',
-        key: '/tenant/compute/modaforge/workflowTaskDetail',
-        component: React.lazy(async () => import('../../workflowTask/detail')),
-        permission: WORKFLOW_TASK_PERMISSIONS.LIST
+        name: 'workflowTaskList',
+        key: '/tenant/compute/modaforge/workflowTask/list',
+        component: React.lazy(
+          async () => import('../../workflowTask/modules/list/index')
+        ),
+        permission: DATA_ASSET_PERMISSIONS.LIST
+      },
+      {
+        name: 'workflowTaskStructDetail',
+        key: '/tenant/compute/modaforge/workflowTask/structDetail',
+        component: React.lazy(
+          async () => import('../../workflowTask/modules/struct-detail/index')
+        ),
+        permission: DATA_ASSET_PERMISSIONS.LIST
+      },
+      {
+        name: 'workflowTaskNoStructDetail',
+        key: '/tenant/compute/modaforge/workflowTask/noStructDetail',
+        component: React.lazy(
+          async () =>
+            import('../../workflowTask/modules/no-struct-detail/index')
+        ),
+        permission: DATA_ASSET_PERMISSIONS.LIST
       }
     ]
   },
+  // 工作流运行记录
+  // {
+  //   name: 'workflowTask',
+  //   key: '/tenant/compute/modaforge/workflowTask',
+  //   component: React.lazy(async () => import('../../workflowTask')),
+  //   permission: WORKFLOW_TASK_PERMISSIONS.LIST,
+  //   children: [
+  //     {
+  //       name: 'taskDetail',
+  //       key: '/tenant/compute/modaforge/workflowTaskDetail',
+  //       component: React.lazy(async () => import('../../workflowTask/modules/struct-detail')),
+  //       permission: WORKFLOW_TASK_PERMISSIONS.LIST
+  //     }
+  //   ]
+  // },
   //APIKey
   {
     name: 'apiKey',

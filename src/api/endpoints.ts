@@ -205,6 +205,16 @@ export const ModaForgeResourceEndpoints = {
   knowledgeBaseNameCheck:
     API_PREFIX + '/query-service/api/v1/validKnowledgeName',
 
+  // 工作流运行记录
+  // 工作流运行记录列表
+  ListProcessInstanceApi: PrefixAimdp + '/ListProcessInstance',
+  // 任务节点运行记录列表
+  ListTaskInstanceApi: PrefixAimdp + '/ListTaskInstance',
+  // 工作流操作（重新运行，暂停，继续运行，结束运行，重试失败任务）
+  ExecuteProcessApi: PrefixAimdp + '/ExecuteProcess',
+  // 获取工作流运行结果列表
+  GetWorkflowInstanceInfoApi: PrefixAimdp + '/GetWorkflowInstanceInfo',
+
   // 作业列表
   taskList: PrefixAimdp + '/ListWorkflowInstances',
   // 作业详情
