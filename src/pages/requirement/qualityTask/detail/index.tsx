@@ -79,8 +79,10 @@ interface InspectionItem {
 
 // 指标卡片数据类型
 interface MetricData {
-  task_volume_unsampled: number; // 未抽检
   task_volume_total: number; // 总任务数
+  task_volume_unsampled: number; // 未抽检
+  task_volume_uninspected: number; // 待质检
+  task_volume_unreinspected: number; // 待复核
   task_volume_unreceived: number; // 未提检
   task_volume_sampling: number; // 抽检中
   task_volume_passed: number; // 质检通过
