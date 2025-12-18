@@ -336,7 +336,7 @@ function HitTest(props: { datasetName: string }) {
             type="outline"
             icon={<IconSettings />}
             onClick={oncEditPolicy}
-            disabled
+            // disabled
           >
             检索设置
           </Button>

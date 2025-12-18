@@ -5,25 +5,19 @@ import { useState } from 'react';
 
 function DemoForm(props, ref) {
   const { FuncChildFrom, seteditPolicy, initParams = {} } = props;
-  const [checkedManage, setCheckedManage] = useState(
-    initParams.reordering ?? true
-  );
-  const [checkedManagescore, setCheckedManagescore] = useState(
-    initParams.checkedManagescore ?? true
-  );
   const [form] = Form.useForm();
   const [initFromValue, setinitFromValue] = useState({
-    retrievalV: 'semantic_search',
-    weightSettings: 0.6,
-    reordering: checkedManage,
-    topK: 6,
-    scoreSwitch: checkedManagescore,
-    scoreValue: 0.6,
+    reranking_enable: false,
+    search_method: 'Hybrid',
+    score_threshold_enabled: true,
+    score_threshold: 0.1,
+    top_k: 50,
+    weights: 0.7,
     ...initParams
   });
 
   const [formvalues, setformvalues] = useState<any>({
-    retrievalV: 'semantic_search'
+    search_method: 'Hybrid'
   });
   //交互事件
   useImperativeHandle(ref, () => ({
@@ -40,19 +34,19 @@ function DemoForm(props, ref) {
   };
   const retrievalVlist = [
     {
-      value: 'semantic_search',
+      value: 'Vector',
       name: '向量检索',
       placeholder:
         '基于语义相似度的先进方法。 将数据转换为“向量”，查找语义上最相关或最相似的文本片段。'
     },
     {
-      value: 'full_text_search',
+      value: 'FullText',
       name: '全文检索',
       placeholder:
         '也称关键词检索，通过扫描文档，查找与用户查询关键词完全匹配的内容。对术语、代码等查询快速精确。'
     },
     {
-      value: 'hybrid_search',
+      value: 'Hybird',
       name: '混合检索',
       placeholder:
         '同时执行向量检索（语义）和全文检索（关键词）。 系统将两者的结果合并并重新排序，提供综合优势。'
@@ -92,7 +86,7 @@ function DemoForm(props, ref) {
       <div className={styles.headername}>检索策略</div>
       <Form.Item
         label=""
-        field="retrievalV"
+        field="search_method"
         className={styles.retrievalV}
         wrapperCol={{
           span: 24
@@ -139,7 +133,7 @@ function DemoForm(props, ref) {
       <div className={styles.headername}>重排序配置</div>
       <Form.Item
         label="Top K："
-        field="topK"
+        field="top_k"
         rules={[{ required: true, message: '请选择' }]}
         help="返回相似度最高的前K个结果(1～100)"
       >
@@ -148,7 +142,7 @@ function DemoForm(props, ref) {
 
       <Form.Item
         label="相似度阈值："
-        field="score"
+        field="score_threshold"
         rules={[{ required: true, message: '请选择' }]}
         help="过滤相似度低于此阈值的结果(0.00～1.00)"
       >
@@ -160,11 +154,11 @@ function DemoForm(props, ref) {
           step={0.01} // 设置步进值，这里设置为 0.01，可以让你得到更精确的值
         />
       </Form.Item>
-      {formvalues.retrievalV == 'hybrid_search' ? (
+      {formvalues.search_method == 'Hybird' ? (
         <>
           <Form.Item
             label="语义权重："
-            field="weightSettings"
+            field="weights"
             rules={[{ required: true, message: '请选择' }]}
             help="调高语义权重侧重于理解问题意图(0.0～1.0)"
           >
@@ -174,6 +168,9 @@ function DemoForm(props, ref) {
               min={0} // 设置最小值为 0
               max={1} // 设置最大值为 1
               step={0.1} // 设置步进值，这里设置为 0.1，可以让你得到更精确的值
+              onChange={(value) => {
+                form.setFieldValue('reordering', 1 - Number(value));
+              }}
             />
           </Form.Item>
           <Form.Item
@@ -188,6 +185,9 @@ function DemoForm(props, ref) {
               min={0} // 设置最小值为 0
               max={1} // 设置最大值为 1
               step={0.1} // 设置步进值，这里设置为 0.1，可以让你得到更精确的值
+              onChange={(value) => {
+                form.setFieldValue('weights', 1 - Number(value));
+              }}
             />
           </Form.Item>
         </>
