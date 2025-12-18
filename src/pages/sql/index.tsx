@@ -235,7 +235,7 @@ const SqlIndex: React.FC = memo(() => {
           <TabPane
             key="script"
             title={
-              <Popover content="SQL脚本管理" position="left">
+              <Popover content="脚本管理" position="left">
                 <DataIcon className={styles['sql-menu-icon']} />
               </Popover>
             }
@@ -250,7 +250,7 @@ const SqlIndex: React.FC = memo(() => {
           <TabPane
             key="data"
             title={
-              <Popover content="数据列表" position="left">
+              <Popover content="SQL查询" position="left">
                 <DataIcon className={styles['sql-menu-icon']} />
               </Popover>
             }
@@ -266,7 +266,7 @@ const SqlIndex: React.FC = memo(() => {
           <TabPane
             key="files"
             title={
-              <Popover content="加工脚本列表" position="left">
+              <Popover content="数据加工" position="left">
                 <SQLIcon className={styles['sql-menu-icon']} />
               </Popover>
             }
