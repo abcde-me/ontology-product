@@ -1252,9 +1252,9 @@ const Edit = (props) => {
         {props.detailData?.source_type === 'db' &&
           sqlProcessEnabled !== 'enable' && (
             <FormItem
-              label="选择抽取的表："
+              label="选择载入数据："
               field="table_id"
-              rules={[{ required: true, message: '请选择抽取的表' }]}
+              rules={[{ required: true, message: '请选择载入数据' }]}
               initialValue={props.detailData?.table_names}
             >
               <Select
@@ -1263,7 +1263,7 @@ const Edit = (props) => {
                     ? undefined
                     : ('multiple' as const)
                 }
-                placeholder="请选择抽取的表"
+                placeholder="请选择载入数据"
                 maxTagCount={
                   selectedNodeType !== 'metadata'
                     ? {
