@@ -95,6 +95,11 @@
     z-index: 1;
     // border-top: 1px solid #e2e8f0;
   }
+
+  :global(.arco-tree-select-size-default.arco-tree-select-multiple input) {
+    font-size: 14px;
+    width: unset !important;
+  }
 }
 
 .previewText {
@@ -116,4 +121,8 @@
 .switchContent {
   display: flex;
   align-items: center;
+
+  :global(.arco-switch-dot) {
+    top: 1.6px;
+  }
 }

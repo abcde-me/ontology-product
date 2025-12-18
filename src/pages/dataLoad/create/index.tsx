@@ -13,7 +13,8 @@ import {
   Typography,
   Switch,
   TreeSelect,
-  Table
+  Table,
+  Checkbox
 } from '@arco-design/web-react';
 import { format } from 'sql-formatter';
 import React, {
@@ -923,7 +924,7 @@ export default function DataLoadCreate() {
       setSelectedNodeType(nodeData?.type_name);
 
       if (sourceType === SOURCE_TYPES.DB || sourceType === SOURCE_TYPES.MQ) {
-        // 当载入位置变化时，重置选择抽取的表
+        // 当载入位置变化时，重置载入数据
         form.setFieldsValue({ table_name: undefined });
         form.setFieldsValue({ db_name: nodeData?.name });
       }
@@ -1561,10 +1562,10 @@ export default function DataLoadCreate() {
           {(sourceType === SOURCE_TYPES.DB || sourceType === SOURCE_TYPES.MQ) &&
             sqlProcessEnabled !== 'enable' && (
               <FormItem
-                label="选择抽取的表："
+                label="选择载入数据："
                 field="table_name"
                 labelAlign="right"
-                rules={[{ required: true, message: '请选择抽取的表' }]}
+                rules={[{ required: true, message: '请选择载入数据' }]}
               >
                 <TreeSelect
                   onChange={(value) => {
@@ -1612,7 +1613,7 @@ export default function DataLoadCreate() {
                       : undefined
                   }
                   allowClear
-                  placeholder="请选择抽取的表"
+                  placeholder="请选择载入数据"
                   treeData={tableList}
                   treeProps={{
                     virtualListProps: {
@@ -1636,25 +1637,31 @@ export default function DataLoadCreate() {
                 rules={[{ required: true, message: '请选择载入形式' }]}
               >
                 <div className={styles.switchContent}>
-                  {/* <Switch onChange={handleSwitchChange} /> */}
-                  <span className={styles.previewText}>
-                    以下为自动解析结果，请检查是否正确
-                    <span
-                      className={styles.previewBtn}
-                      onClick={handlePreviewClick}
-                    >
-                      预览
+                  <Switch
+                    checkedText="开"
+                    uncheckedText="关"
+                    onChange={handleSwitchChange}
+                  />
+                  {jsonParseEnabled && (
+                    <span className={styles.previewText}>
+                      以下为自动解析结果，请检查是否正确
+                      <span
+                        className={styles.previewBtn}
+                        onClick={handlePreviewClick}
+                      >
+                        预览
+                      </span>
                     </span>
-                  </span>
+                  )}
                 </div>
               </FormItem>
-              {
+              {jsonParseEnabled && (
                 <EditableTable
                   getTableData={getTableData}
                   loading={previewLoading}
                   previewDataColumns={previewData}
                 />
-              }
+              )}
             </div>
           )}
 

@@ -68,7 +68,6 @@ const PreviewModal = ({
       title: <div style={{ whiteSpace: 'nowrap' }}>序号</div>,
       dataIndex: 'id',
       width: 60,
-      fixed: 'left',
       key: 'id'
     },
     ...setColumns()
@@ -94,22 +93,20 @@ const PreviewModal = ({
         <div className={styles.previewContent}>
           <div className={styles.jsonPreview}>
             <div className={styles.jsonTitle}>JSON格式</div>
-            <Input.TextArea
-              value={JSON.stringify(previewData?.data?.data)}
-              readOnly
-              className={styles.jsonTextArea}
-            ></Input.TextArea>
+            <div className={styles.jsonTextArea}>
+              {JSON.stringify(previewData?.data?.data)}
+            </div>
           </div>
           <div style={{ flex: 1, minWidth: 0 }}>
             <div className={styles.jsonTitle}>储存到数据库效果</div>
             <Table
               // scroll={{ x: Math.max(tableTotalWidth, 1300) }}
               scroll={{
-                x: Math.max(600, columnCount * 120)
+                x: true
               }}
               columns={columns}
               data={previewData?.data?.data}
-              style={{ width: '100%' }}
+              style={{ flex: 1, maxWidth: 680 }}
             />
           </div>
         </div>

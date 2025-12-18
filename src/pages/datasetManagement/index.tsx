@@ -433,10 +433,7 @@ const columns = (
     title: '文件大小',
     dataIndex: 'size',
     width: 120,
-    render: (_, record: Dataset) =>
-      record.storage_type !== datasetStorageType.vector
-        ? formatFileSize(record.size || 0)
-        : '-'
+    render: (_, record: Dataset) => formatFileSize(record.size || 0)
   },
   {
     title: '数据集状态',

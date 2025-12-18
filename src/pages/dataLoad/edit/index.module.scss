@@ -1,23 +1,28 @@
 .arco-table-tr > th {
   background-color: rgb(245, 249, 255) !important;
 }
+
 .arcoPagination {
   display: flex;
   justify-content: end;
   margin-right: 20px;
 }
+
 .hoverStyle {
   cursor: pointer;
   color: rgb(0, 125, 250);
 }
+
 .hoverStyle:hover {
   color: rgba(0, 125, 250, 0.5);
 }
+
 .footerBbtnBox {
   margin: 14px 0px 20px 14px;
   display: flex;
   justify-content: flex-end;
 }
+
 .cycleLoadingBox {
   width: '100%';
   border: 0.8px solid #ccc;
@@ -25,11 +30,13 @@
   margin: 15px 0px;
   padding: 14px 10px 0px 0px;
 }
+
 .quickOptions {
   width: '100%';
   display: flex;
   flex-wrap: wrap;
 }
+
 .quickOptionsChidren {
   margin: 5px 3px;
   padding: 2px 13px;
@@ -42,9 +49,11 @@
   font-size: 13px;
   font-weight: 600;
 }
+
 .arco-timepicker-container {
   width: '100%';
 }
+
 // 代码编辑器容器
 .sql-editor-container {
   flex: 1;
@@ -54,6 +63,11 @@
 
   :global(.arco-spin-children) {
     height: 100%;
+  }
+
+  :global(.arco-tree-select-size-default.arco-tree-select-multiple input) {
+    font-size: 14px;
+    width: unset !important;
   }
 
   // CodeMirror 编辑器样式
@@ -110,6 +124,7 @@
     display: none;
   }
 }
+
 .code-mirror-disabled {
   cursor: not-allowed;
   pointer-events: none;
