@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { FormInstance, Message } from '@arco-design/web-react';
 import { useRequest, useThrottleFn } from 'ahooks';
 import { RunLogStatus, RunningStatus } from '@/types/sqlApi';
@@ -126,6 +126,12 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
   // 跟踪是否已获取过结果和日志
   const [hasFetchedResult, setHasFetchedResult] = useState<boolean>(false);
   const [hasFetchedLog, setHasFetchedLog] = useState<boolean>(false);
+  // 用于跟踪上一次的 scriptId，避免不必要的清空
+  const prevScriptIdRef = useRef<string | undefined>(undefined);
+  // 用于跟踪上一次加载的 activeTab 和 scriptId，避免重复加载
+  const prevLoadedTabRef = useRef<{ activeTab?: string; scriptId?: string }>(
+    {}
+  );
 
   // 获取前一个运行状态的函数
   const getPrevRunStatus = useCallback(() => {
@@ -232,7 +238,6 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
       onSuccess: (res) => {
         if (res?.status !== 200) {
           setRunLogStatus(RunLogStatus.STOP);
-          console.log('111111');
           cancelGetRunLogPolling();
           setRunLog(res?.message ?? '获取日志失败');
           setHasFetchedLog(true);
@@ -245,13 +250,11 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
 
         if (res?.data?.status === RunLogStatus.STOP) {
           console.log('停止轮询获取日志', res?.data?.status);
-          console.log('2222222');
           cancelGetRunLogPolling();
         }
       },
       onError: () => {
         setRunLogStatus(RunLogStatus.STOP);
-        console.log('3333333');
         cancelGetRunLogPolling();
         setRunLog('获取日志失败');
         setHasFetchedLog(true);
@@ -560,6 +563,7 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
 
   // 监听 activeTab 变化，重新更新编辑器状态
   useEffect(() => {
+    console.log('activeTab', activeTab);
     if (!activeTab || !fileTabs.length) {
       return;
     }
@@ -569,8 +573,21 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
       return;
     }
 
+    console.log('currentTab', currentTab);
+
+    // 只有当 activeTab 或 scriptId 实际发生变化时才加载文件，避免重复加载
+    const shouldLoad =
+      prevLoadedTabRef.current.activeTab !== activeTab ||
+      prevLoadedTabRef.current.scriptId !== currentTab.scriptId;
+
     // 如果有 fileId，重新加载文件内容以获取最新状态
-    if (currentTab.scriptId) {
+    if (currentTab.scriptId && shouldLoad) {
+      // 更新跟踪的引用
+      prevLoadedTabRef.current = {
+        activeTab,
+        scriptId: currentTab.scriptId
+      };
+
       const loadFileContent = async () => {
         try {
           const response = await getSqlScriptDetail(currentTab.scriptId!);
@@ -587,13 +604,22 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
             setLastAutoSave(timeFormattig(new Date(response.data.update_time)));
 
             // 通知父组件更新标签页内容
+            // 只有当数据实际发生变化时才调用 onTabUpdate，避免循环更新
             if (onTabUpdate) {
-              onTabUpdate(currentTab.key, {
-                content: fileData.script_content,
-                fileId: String(currentTab.fileId),
-                scriptId: String(fileData.script_id),
-                title: currentTab.title
-              });
+              const hasChanged =
+                currentTab.content !== fileData.script_content ||
+                currentTab.fileId !== String(currentTab.fileId) ||
+                currentTab.scriptId !== String(fileData.script_id) ||
+                currentTab.title !== String(fileData.script_name);
+
+              if (hasChanged) {
+                onTabUpdate(currentTab.key, {
+                  content: fileData.script_content,
+                  fileId: String(currentTab.fileId),
+                  scriptId: String(fileData.script_id),
+                  title: String(fileData.script_name)
+                });
+              }
             }
           } else {
             Message.error(response?.message ?? '加载文件失败');
@@ -610,12 +636,36 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
     // return () => {
     //   handleSaveThrottled.cancel();
     // };
-  }, [activeTab]); // 只依赖 activeTab，避免不必要的重复更新
+  }, [activeTab, fileTabs, onTabUpdate]); // 添加必要的依赖项
 
   // 当 currentFileId 变化时，重置运行相关状态
   useEffect(() => {
-    clearEditorState();
-  }, [currentFile?.scriptId, clearEditorState]);
+    if (prevScriptIdRef.current !== currentFile?.scriptId) {
+      prevScriptIdRef.current = currentFile?.scriptId;
+      if (prevScriptIdRef.current !== undefined) {
+        // 直接在这里清空状态，避免依赖 clearEditorState 导致的循环
+        updateRunStatus(RunningStatus.IDLE);
+        setExecid('');
+        setRunStartTime(null);
+        setRunDuration(0);
+        setRunResult([]);
+        setRunLog('');
+        setRunError('');
+        setRunWarning('');
+        setLastScriptRunStatus(RunningStatus.IDLE);
+        setHasFetchedResult(false);
+        setHasFetchedLog(false);
+        // 取消正在进行的轮询
+        cancelGetRunResultPolling();
+        cancelGetRunLogPolling();
+      }
+    }
+  }, [
+    currentFile?.scriptId,
+    cancelGetRunResultPolling,
+    cancelGetRunLogPolling,
+    updateRunStatus
+  ]);
 
   return {
     // 状态

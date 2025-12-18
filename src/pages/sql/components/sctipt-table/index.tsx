@@ -410,7 +410,12 @@ const ScriptTable: React.FC<ScriptTableProps> = ({
     form.resetFields();
   };
   const handleValuesChange = (values: any) => {
-    setFormData(values);
+    console.log(values, '123');
+    values &&
+      setFormData((prev) => ({
+        ...prev,
+        ...values
+      }));
   };
 
   return (
@@ -431,7 +436,7 @@ const ScriptTable: React.FC<ScriptTableProps> = ({
           <FormItem label="脚本名称:" field="script_name">
             <Input className="min-w-[260px]" placeholder="输入脚本名称搜索" />
           </FormItem>
-          <FormItem label="最新版本状态:" field="status">
+          <FormItem label="版本状态:" field="status">
             <Select className="min-w-[232px]" placeholder="请选择最新版本状态">
               {options.map((option, index) => (
                 <Option key={option.value} value={option.value}>
