@@ -229,6 +229,13 @@ export default function RequirementConfig() {
     if (type === 'copy') {
       copyModeInitializedRef.current = true;
     }
+    // 编辑模式需要回显超时时间
+    if (type === 'edit') {
+      distributeForm.setFieldsValue({
+        task_effective_minute:
+          requirementDetail?.req_config?.task_effective_minute
+      });
+    }
   }, [requirementDetail]);
   // 监听 taskPackages 变化，自动清除已选人员的错误
   useEffect(() => {

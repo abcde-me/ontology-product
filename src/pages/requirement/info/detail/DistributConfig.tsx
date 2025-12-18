@@ -9,7 +9,7 @@ function DistributConfig({ requirementDetail }: { requirementDetail: any }) {
       items: [
         {
           label: '超时释放',
-          value: '50分钟'
+          value: requirementDetail?.req_config?.task_effective_minute + '分钟'
         }
       ]
     }
