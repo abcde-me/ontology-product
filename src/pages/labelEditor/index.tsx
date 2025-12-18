@@ -69,7 +69,7 @@ function LabelEditorPage() {
       if (['LABEL', 'RELABEL'].includes(stage!)) {
         if (taskId) {
           setLabelUrl(
-            `/labeleditor/${LabelTypeMap[labelType!]}/requirement/${requirementId}/task/${taskId}?type=${labelType}&kind=${toolKind}&mode=${mode}&tool=${labelTool}&name=${reqName}&count=${taskCount}&stage=${stage}&pkgId=${pkgId}`
+            `/labeleditor/${LabelTypeMap[labelType!]}/requirement/${requirementId}/task/${taskId}?type=${labelType}&kind=${toolKind}&mode=${mode}&tool=${labelTool}&name=${reqName}&count=${taskCount}&stage=${stage}&pkgId=${pkgId}&deadlineTimestamp=${deadlineTimestamp}`
           );
           setLoading(false);
         } else {
@@ -237,6 +237,7 @@ function LabelEditorPage() {
 
     const {
       task_id,
+      deadline_timestamp,
       requirement_info: {
         not_started_num: count,
         name,
@@ -246,7 +247,7 @@ function LabelEditorPage() {
     } = taskInfo.data;
 
     history.replace(
-      `/tenant/compute/modaforge/labelEditor?rId=${requirementId}&tId=${task_id}&type=${type}&kind=${TEXT_DATA[tool]}&mode=${STAGE_MAP[stage!]}&tool=${tool}&name=${name}&count=${count}&stage=${stage}&pkgId=${pkgId}`
+      `/tenant/compute/modaforge/labelEditor?rId=${requirementId}&tId=${task_id}&type=${type}&kind=${TEXT_DATA[tool]}&mode=${STAGE_MAP[stage!]}&tool=${tool}&name=${name}&count=${count}&stage=${stage}&pkgId=${pkgId}&deadlineTimestamp=${deadline_timestamp}`
     );
   };
 
