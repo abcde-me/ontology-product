@@ -95,7 +95,7 @@ function EllipsisPopover(props: any, ref: any) {
     }
   };
   const renderPopover = () => {
-    const displayContent = value || value === 0 ? value : '--';
+    const displayContent = value || value === 0 ? value : '-';
     return preferTypography ? (
       <Typography.Paragraph
         ellipsis={{
