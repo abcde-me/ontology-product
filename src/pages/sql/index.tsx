@@ -93,6 +93,19 @@ const SqlIndex: React.FC = memo(() => {
     [updateUrlState, location.search]
   );
 
+  const handleSqlQueryActiveUpdate = useCallback(
+    (selectedKeys: string[]) => {
+      // updateUrlState(
+      //   {
+      //     activeTab: 'data',
+      //     activeScriptId: selectedKeys[0]
+      //   },
+      //   { method: 'push' }
+      // );
+    },
+    [updateUrlState, location.search]
+  );
+
   const {
     fileState,
     directoryTreeRef,
@@ -104,7 +117,7 @@ const SqlIndex: React.FC = memo(() => {
     updateTab,
     openFileByScriptId: openSqlQueryFileByScriptId,
     updateTabTitle // 获取更新标签页标题的方法
-  } = useTabManager();
+  } = useTabManager(handleSqlQueryActiveUpdate);
 
   const {
     fileState: developScriptFileState,

@@ -1,4 +1,7 @@
-export default function generateSqlDefaultName(value: Date | string): string {
+export default function generateSqlDefaultName(
+  value: Date | string,
+  prefix = 'SQL查询'
+): string {
   try {
     let date;
 
@@ -17,7 +20,7 @@ export default function generateSqlDefaultName(value: Date | string): string {
     const minutes = String(date.getMinutes()).padStart(2, '0');
     const seconds = String(date.getSeconds()).padStart(2, '0');
 
-    return `SQL查询${year}${month}${day}${hours}${minutes}${seconds}`;
+    return `${prefix}${year}${month}${day}${hours}${minutes}${seconds}`;
   } catch (error) {
     return value as string; // 如果格式化失败，返回原字符串
   }

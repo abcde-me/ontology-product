@@ -229,6 +229,10 @@ export async function getDevelopScriptLogByScriptId(params: {
   page: number;
   page_size: number;
   status_list?: number[];
+  orders?: {
+    column: string;
+    order_flag: 'asc' | 'desc';
+  }[];
 }): Promise<ApiRes<GetDevelopScriptLogByScriptIdData>> {
   return await UAPI.RES.GetDevelopScriptLogByScriptIdApi({})
     .post(params)

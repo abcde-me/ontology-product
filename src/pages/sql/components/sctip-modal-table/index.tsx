@@ -38,6 +38,12 @@ const SctipModalTable: React.FC<{
   const [total, setTotal] = React.useState<number>(0);
   const [tableLoading, setTableLoading] = React.useState<boolean>(false);
   const [statusFilter, setStatusFilter] = React.useState<number[]>([]);
+  const [orders, setOrders] = React.useState<
+    {
+      column: string;
+      order_flag: 'asc' | 'desc';
+    }[]
+  >([]);
   const { updateUrlState } = useUrlState();
 
   const handleCopyVersion = async (record: any) => {
@@ -106,7 +112,8 @@ const SctipModalTable: React.FC<{
         script_id: rowData.script_id,
         page: current,
         page_size: pageSize,
-        status_list: statusFilter
+        status_list: statusFilter,
+        orders
       });
       if (res?.status === 200 && res?.data) {
         const items = res.data.items || [];
@@ -118,7 +125,7 @@ const SctipModalTable: React.FC<{
       console.error('获取历史版本数据失败:', error);
       Message.error('获取历史版本数据失败');
     }
-  }, [rowData?.script_id, current, pageSize, statusFilter]);
+  }, [rowData?.script_id, current, pageSize, statusFilter, orders]);
 
   // 当分页或筛选变化时，重新获取数据
   React.useEffect(() => {
@@ -128,7 +135,7 @@ const SctipModalTable: React.FC<{
         setTableLoading(false);
       });
     }
-  }, [current, pageSize, statusFilter, fetchData]);
+  }, [current, pageSize, statusFilter, orders, fetchData]);
 
   // 处理表格筛选变化
   const handleTableChange = (
@@ -142,6 +149,19 @@ const SctipModalTable: React.FC<{
     } else {
       setStatusFilter([]);
     }
+
+    if (sorter.field && sorter.direction) {
+      setOrders((prev) => {
+        const newOrder: { column: string; order_flag: 'asc' | 'desc' } = {
+          column: sorter.field,
+          order_flag: sorter.direction === 'ascend' ? 'asc' : 'desc'
+        };
+        return [newOrder];
+      });
+    } else {
+      setOrders([]);
+    }
+
     setCurrent(1); // 筛选时重置到第一页
   };
 
@@ -197,6 +217,7 @@ const SctipModalTable: React.FC<{
       dataIndex: 'update_time',
       key: 'update_time',
       width: 200,
+      sorter: true,
       render: (_, record) => (
         <span>
           {dayjs(record.update_time).format('YYYY-MM-DD HH:mm:ss') || '-'}
@@ -205,15 +226,15 @@ const SctipModalTable: React.FC<{
     },
     {
       title: (
-        <Popover
-          content="复制为新版本：以选择的脚本为基础迭代新版本"
-          trigger={['hover', 'click']}
-        >
-          <div className="flex items-center">
-            <span className="mr-[4px]">操作</span>
-            <IconQuestionCircle fontSize={16} style={{ color: '#7F8C9F' }} />
-          </div>
-        </Popover>
+        // <Popover
+        //   content="复制为新版本：以选择的脚本为基础迭代新版本"
+        //   trigger={['hover', 'click']}
+        // >
+        <div className="flex items-center">
+          <span className="mr-[4px]">操作</span>
+          {/* <IconQuestionCircle fontSize={16} style={{ color: '#7F8C9F' }} /> */}
+        </div>
+        // </Popover>
       ),
       dataIndex: 'operation',
       key: 'operation',
@@ -228,7 +249,7 @@ const SctipModalTable: React.FC<{
           >
             详情
           </span>
-          <Tooltip
+          {/* <Tooltip
             content={record?.visteon === 'false' ? '当前已有未发版的脚本' : ''}
           >
             <span
@@ -242,7 +263,7 @@ const SctipModalTable: React.FC<{
             >
               复制为新版本
             </span>
-          </Tooltip>
+          </Tooltip> */}
           <Tooltip
             content={
               record?.status === ScriptStatus.Scheduling ? '调度中不可删除' : ''
@@ -300,7 +321,7 @@ const SctipModalTable: React.FC<{
               最新版本：
             </div>
             <div className={styles['script-modal-table-content-item-value']}>
-              {rowData?.max_version_name}
+              {rowData?.max_version_name || '-'}
             </div>
           </div>
           <div className={styles['script-modal-table-content-item']}>
