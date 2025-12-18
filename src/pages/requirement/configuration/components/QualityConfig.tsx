@@ -1,16 +1,26 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Form, Radio } from '@arco-design/web-react';
 const FormItem = Form.Item;
 const RadioGroup = Radio.Group;
 
 const QualityConfig = ({ form, type, requirementDetail }) => {
+  useEffect(() => {
+    if ((type === 'edit' || type === 'copy') && requirementDetail?.req_config) {
+      form.setFieldsValue({
+        qc_round: requirementDetail?.req_config?.qc_round,
+        is_result_modify: requirementDetail?.req_config?.is_result_modify,
+        reject_to: requirementDetail?.req_config?.reject_to
+      });
+    }
+  }, [requirementDetail, type, form]);
+
   return (
     <>
       <FormItem
         label="质检轮次:"
         field="qc_round"
         rules={[{ required: true, message: '请选择质检轮次' }]}
-        initialValue={requirementDetail?.req_config?.qc_round || 1}
+        initialValue={1}
         disabled={type === 'edit'}
       >
         <RadioGroup>
@@ -24,7 +34,7 @@ const QualityConfig = ({ form, type, requirementDetail }) => {
         label="质检修改标注:"
         field="is_result_modify"
         rules={[{ required: true, message: '请选择质检修改标注' }]}
-        initialValue={requirementDetail?.req_config?.is_result_modify || 0}
+        initialValue={0}
       >
         <RadioGroup>
           <Radio value={1}>启用</Radio>
@@ -35,7 +45,7 @@ const QualityConfig = ({ form, type, requirementDetail }) => {
         label="驳回至:"
         field="reject_to"
         rules={[{ required: true, message: '请选择驳回至' }]}
-        initialValue={requirementDetail?.req_config?.reject_to || 1}
+        initialValue={1}
       >
         <RadioGroup>
           <Radio value={0}>标注员</Radio>

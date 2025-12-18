@@ -185,7 +185,6 @@ const BatchAssignModal: React.FC<BatchAssignModalProps> = ({
 
       onConfirm(data);
       handleClose();
-      Message.success('批量分配成功');
     });
   };
 
