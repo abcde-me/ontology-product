@@ -1637,31 +1637,31 @@ export default function DataLoadCreate() {
                 rules={[{ required: true, message: '请选择载入形式' }]}
               >
                 <div className={styles.switchContent}>
-                  <Switch
+                  {/* <Switch
                     checkedText="开"
                     uncheckedText="关"
                     onChange={handleSwitchChange}
-                  />
-                  {jsonParseEnabled && (
-                    <span className={styles.previewText}>
-                      以下为自动解析结果，请检查是否正确
-                      <span
-                        className={styles.previewBtn}
-                        onClick={handlePreviewClick}
-                      >
-                        预览
-                      </span>
+                  /> */}
+                  {/* {jsonParseEnabled && ( */}
+                  <span className={styles.previewText}>
+                    以下为自动解析结果，请检查是否正确
+                    <span
+                      className={styles.previewBtn}
+                      onClick={handlePreviewClick}
+                    >
+                      预览
                     </span>
-                  )}
+                  </span>
+                  {/* )} */}
                 </div>
               </FormItem>
-              {jsonParseEnabled && (
-                <EditableTable
-                  getTableData={getTableData}
-                  loading={previewLoading}
-                  previewDataColumns={previewData}
-                />
-              )}
+              {/* {jsonParseEnabled && ( */}
+              <EditableTable
+                getTableData={getTableData}
+                loading={previewLoading}
+                previewDataColumns={previewData}
+              />
+              {/* )} */}
             </div>
           )}
 
