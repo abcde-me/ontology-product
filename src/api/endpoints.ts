@@ -415,6 +415,8 @@ export const ModaForgeResourceEndpoints = {
   downloadGenRecord: PrefixLabelService + '/DownloadGenRecord',
   // 删除需求
   deleteRequirement: PrefixLabelService + '/DeleteRequirement',
+  // 任务最新操作信息
+  getTaskLatestOperation: PrefixLabelService + '/LatestOperationMsgTask',
 
   // python开发
   // 获取python列表

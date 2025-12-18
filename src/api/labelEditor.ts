@@ -593,3 +593,13 @@ export async function SaveQualityControlTask(params) {
     .inRegion()
     .do();
 }
+
+// 获取任务流水
+export async function GetFlowListTask(params) {
+  return await UAPI.RES.getFlowListTask({}).post(params).inRegion().do();
+}
+
+// 任务最新操作信息
+export async function GetTaskLatestOperation(params) {
+  return await UAPI.RES.getTaskLatestOperation({}).post(params).inRegion().do();
+}

@@ -29,7 +29,9 @@ import {
   ModifyQualityControlTaskComment,
   DeleteQualityControlTaskComment,
   GetQualityControlTaskById,
-  SaveQualityControlTask
+  SaveQualityControlTask,
+  GetFlowListTask,
+  GetTaskLatestOperation
 } from '@/api/labelEditor';
 import WujieReact from 'wujie-react';
 import { Message, Modal } from '@arco-design/web-react';
@@ -136,7 +138,7 @@ function LabelEditorPage() {
         title: '当前任务无历史记录',
         content: (
           <span style={{ fontSize: '14px', color: '#1E293B' }}>
-            点击确定将返回标注列表页
+            点击确定将返回需求明细页
           </span>
         ),
         icon: (
@@ -174,7 +176,7 @@ function LabelEditorPage() {
         title: '当前已无新质检任务',
         content: (
           <span style={{ fontSize: '14px', color: '#1E293B' }}>
-            点击确定将返回质检列表页
+            点击确定将返回质检任务页
           </span>
         ),
         icon: (
@@ -254,7 +256,27 @@ function LabelEditorPage() {
   const goBack = () => {
     // TODO这里也加一个吧
     bus.$emit('labeleditor-deactivated');
-    history.push('/tenant/compute/modaforge/taskList');
+    switch (stage) {
+      case 'LABEL':
+        history.push('/tenant/compute/modaforge/taskList');
+        break;
+      case 'RELABEL':
+        history.push('/tenant/compute/modaforge/taskList');
+        break;
+      case 'REVIEW':
+        history.push(
+          `/tenant/compute/modaforge/qualityTask?qc_round=${qcRound}`
+        );
+        break;
+      case 'PREVIEW':
+        history.push(
+          `/tenant/compute/modaforge/taskList?id=${requirementId}&activeTab=particular`
+        );
+        break;
+      default:
+        history.push('/tenant/compute/modaforge/taskList');
+        break;
+    }
   };
 
   const switchNextTask = () => {
@@ -393,7 +415,9 @@ function LabelEditorPage() {
             DeleteQualityControlTaskComment,
             GetQualityControlTaskById,
             SaveQualityControlTask: (...args) =>
-              saveTaskWrapper(...args, SaveQualityControlTask)
+              saveTaskWrapper(...args, SaveQualityControlTask),
+            GetFlowListTask,
+            GetTaskLatestOperation
           }}
         ></WujieReact>
       )}
