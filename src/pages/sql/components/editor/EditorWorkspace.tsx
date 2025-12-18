@@ -34,11 +34,6 @@ import { EditorProvider, useEditorContext } from '../../contexts/EditorContext';
 import { FileTab } from '../../hooks/useTabManager';
 import RunningInfoPanel from './RunningInfoPanel';
 import classNames from 'classnames';
-import ModalParamList from '../data-manager/ModalParamList';
-import ScriptUpBtn from '@/assets/sql/script-up-btn.svg';
-import ScriptSaveBtn from '@/assets/sql/script-save-btn.svg';
-import DrawerContent from '../drawer-content';
-import { updateSqlScript } from '@/api/sql';
 import { useUrlState } from '../../hooks/useUrlState';
 interface NotebookWorkspaceProps {
   content: string;

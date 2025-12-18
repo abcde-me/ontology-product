@@ -93,6 +93,19 @@ const SqlIndex: React.FC = memo(() => {
     [updateUrlState, location.search]
   );
 
+  const handleSqlQueryActiveUpdate = useCallback(
+    (selectedKeys: string[]) => {
+      // updateUrlState(
+      //   {
+      //     activeTab: 'data',
+      //     activeScriptId: selectedKeys[0]
+      //   },
+      //   { method: 'push' }
+      // );
+    },
+    [updateUrlState, location.search]
+  );
+
   const {
     fileState,
     directoryTreeRef,
@@ -104,7 +117,7 @@ const SqlIndex: React.FC = memo(() => {
     updateTab,
     openFileByScriptId: openSqlQueryFileByScriptId,
     updateTabTitle // 获取更新标签页标题的方法
-  } = useTabManager();
+  } = useTabManager(handleSqlQueryActiveUpdate);
 
   const {
     fileState: developScriptFileState,
@@ -235,7 +248,7 @@ const SqlIndex: React.FC = memo(() => {
           <TabPane
             key="script"
             title={
-              <Popover content="SQL脚本管理" position="left">
+              <Popover content="脚本管理" position="left">
                 <DataIcon className={styles['sql-menu-icon']} />
               </Popover>
             }
@@ -250,7 +263,7 @@ const SqlIndex: React.FC = memo(() => {
           <TabPane
             key="data"
             title={
-              <Popover content="数据列表" position="left">
+              <Popover content="SQL查询" position="left">
                 <DataIcon className={styles['sql-menu-icon']} />
               </Popover>
             }
@@ -266,7 +279,7 @@ const SqlIndex: React.FC = memo(() => {
           <TabPane
             key="files"
             title={
-              <Popover content="加工脚本列表" position="left">
+              <Popover content="数据加工" position="left">
                 <SQLIcon className={styles['sql-menu-icon']} />
               </Popover>
             }

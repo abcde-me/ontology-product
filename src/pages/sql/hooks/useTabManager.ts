@@ -46,7 +46,7 @@ export const useTabManager = (
   const directoryTreeRef = useRef<DirectoryTreeRef>(null);
 
   const openFileByScriptId = useCallback(
-    async (scriptId: string) => {
+    (scriptId: string) => {
       const existingTab = fileState.fileTabs.find(
         (tab) => tab.scriptId === scriptId
       );
@@ -54,10 +54,8 @@ export const useTabManager = (
       if (existingTab) {
         switchTab(existingTab.key);
       } else {
-        const scriptDetail = await getSqlScriptDetail(scriptId);
+        // const scriptDetail = await getSqlScriptDetail(scriptId);
         addTab({
-          name: scriptDetail.data?.script_name,
-          fileId: scriptDetail.data?.script_file_id,
           scriptId: scriptId
         });
       }
@@ -184,7 +182,7 @@ export const useTabManager = (
         currentScriptId: newScriptId || null
       }));
     },
-    [fileState.fileTabs.length]
+    [fileState.fileTabs, fileState.activeTab]
   );
 
   const removeTab = useCallback(
@@ -271,10 +269,19 @@ export const useTabManager = (
           }
           return item;
         });
+
+        // 只有当 activeTab 实际发生变化时才更新，避免不必要的状态更新
+        const newState: Partial<FileState> = {
+          fileTabs: newFileTabs
+        };
+
+        if (prev.activeTab !== tabData.key) {
+          newState.activeTab = tabData.key;
+        }
+
         return {
           ...prev,
-          activeTab: tabData.key,
-          fileTabs: newFileTabs
+          ...newState
         };
       });
     },

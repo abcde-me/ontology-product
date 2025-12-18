@@ -222,14 +222,6 @@ export async function getDevelopScriptList(
 ): Promise<ApiRes<ListDevelopScriptParamsData>> {
   return await UAPI.RES.listDevelopScriptApi({}).post(params).inRegion().do();
 }
-// 下载开发脚本
-export async function downloadDevelopScript(): Promise<AxiosResponse<Blob>> {
-  return (await UAPI.RES.DownloadDevelopScriptApi({})
-    .get()
-    .withConfig({ responseType: 'blob' })
-    .inRegion()
-    .do({ preCheck: false })) as AxiosResponse<Blob>;
-}
 
 // 获取开发脚本历史版本
 export async function getDevelopScriptLogByScriptId(params: {
@@ -237,6 +229,10 @@ export async function getDevelopScriptLogByScriptId(params: {
   page: number;
   page_size: number;
   status_list?: number[];
+  orders?: {
+    column: string;
+    order_flag: 'asc' | 'desc';
+  }[];
 }): Promise<ApiRes<GetDevelopScriptLogByScriptIdData>> {
   return await UAPI.RES.GetDevelopScriptLogByScriptIdApi({})
     .post(params)

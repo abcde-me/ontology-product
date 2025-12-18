@@ -23,9 +23,10 @@ import { IconClockCircle, IconRefresh } from '@arco-design/web-react/icon';
 import { openNewPage } from '@/utils/env';
 import styles from './query-script.module.scss';
 import ScriptModalTable from '../sctip-modal-table';
-import { deleteSqlFile, listSqlFile } from '@/api/sql';
+import { createSqlScript, deleteSqlFile, listSqlFile } from '@/api/sql';
 import { useUrlState } from '../../hooks/useUrlState';
 import dayjs from 'dayjs';
+import generateSqlDefaultName from '../../utils/generateSqlDefaultName';
 
 const InputSearch = Input.Search;
 
@@ -63,12 +64,13 @@ const QueryScript: React.FC<QueryScriptProps> = ({ curActiveTab }) => {
     sort: ''
   });
   const [queryNum, setQueryNum] = useState<number>(0);
+  const [createScriptLoading, setCreateScriptLoading] = useState(false);
   // 组件初始化
   useEffect(() => {
     getList();
   }, [current, pageSize, sortValue, curActiveTab]);
 
-  const { updateUrlState } = useUrlState();
+  const { updateUrlState, clearUrlState } = useUrlState();
 
   // 清空搜索框
   useEffect(() => {
@@ -106,16 +108,6 @@ const QueryScript: React.FC<QueryScriptProps> = ({ curActiveTab }) => {
     } finally {
       setLoading(false);
     }
-  };
-
-  // 查看详情
-  const viewDetailWorkflow = (
-    workflow_uuid: number | string,
-    ds_workflow_id: number | string
-  ) => {
-    openNewPage(
-      `/modaforge/tenant/compute/modaforge/workflowConfig?workflow_uuid=${workflow_uuid}&ds_workflow_id=${ds_workflow_id}`
-    );
   };
 
   // 点击删除操作弹窗
@@ -173,12 +165,9 @@ const QueryScript: React.FC<QueryScriptProps> = ({ curActiveTab }) => {
     setSortValue(sortdata);
   };
 
-  // table数据为空时展示-
-  const renderEmptyPlaceholder = (value: string | null) => {
-    return value === '' || value == null ? '-' : value;
-  };
-
   const handleToDetail = (scriptId: number | string) => {
+    console.log('handleToDetail', scriptId);
+    // clearUrlState();
     updateUrlState(
       {
         activeTab: 'data',
@@ -289,9 +278,43 @@ const QueryScript: React.FC<QueryScriptProps> = ({ curActiveTab }) => {
       update_time: allFormValues?.update_time
     });
   };
+  const handleCreateQueryScript = async () => {
+    setCreateScriptLoading(true);
+    try {
+      const createRes = await createSqlScript({
+        script_name: generateSqlDefaultName(new Date()),
+        script_file_id: String(Date.now()),
+        script_content: '',
+        script_desc: ''
+      });
+      if (createRes.status !== 200) {
+        Message.error(createRes.message ?? '新建失败, 请稍后重试');
+        return;
+      }
+
+      Message.success('新建成功');
+      handleToDetail(createRes.data.script_id);
+    } catch (error) {
+      console.error('新建失败', error);
+      Message.error('新建失败,请稍后重试');
+    } finally {
+      setCreateScriptLoading(false);
+    }
+  };
   return (
     <div className={styles['query-script-wrapper']}>
-      <div className={styles['query-script-title']}>查询脚本({queryNum})</div>
+      <div className="flex items-center justify-between py-[16px]">
+        <div className="text-[16px] font-[600] text-[var(--text-color-text-1)]">
+          查询脚本({queryNum})
+        </div>
+        <Button
+          type="outline"
+          loading={createScriptLoading}
+          onClick={handleCreateQueryScript}
+        >
+          新建脚本
+        </Button>
+      </div>
       <div className="mb-[16px] flex items-center justify-between border-b border-[#E2E8F0] pb-[16px]">
         <Form
           onValuesChange={(values) => {
@@ -363,4 +386,5 @@ const QueryScript: React.FC<QueryScriptProps> = ({ curActiveTab }) => {
     </div>
   );
 };
+
 export default QueryScript;

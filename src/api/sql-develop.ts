@@ -22,6 +22,16 @@ import {
   UpdateDevelopSystemParamParams,
   ListDevelopScriptLogByKeyResponse
 } from '@/types/sqlDevelopApi';
+import { AxiosResponse } from 'axios';
+
+// 下载开发脚本
+export async function downloadDevelopScript(): Promise<AxiosResponse<Blob>> {
+  return (await UAPI.RES.DownloadDevelopScriptApi({})
+    .get()
+    .withConfig({ responseType: 'blob' })
+    .inRegion()
+    .do({ preCheck: false })) as AxiosResponse<Blob>;
+}
 
 /**
  * 获取开发SQL脚本列表
