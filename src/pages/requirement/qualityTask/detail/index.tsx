@@ -458,9 +458,18 @@ function QualityTaskDetail() {
               </div>
             </div>
             <div className="metric-actions">
-              <Button type="primary" onClick={handleSampling}>
-                抽检
-              </Button>
+              <Tooltip
+                content="暂无未抽检任务"
+                disabled={(metricData?.task_volume_unsampled || 0) > 0}
+              >
+                <Button
+                  type="primary"
+                  onClick={handleSampling}
+                  disabled={metricData?.task_volume_unsampled === 0}
+                >
+                  抽检
+                </Button>
+              </Tooltip>
               <Button
                 onClick={() => handleBatchConfirm('pass_all')}
                 style={{ width: 74, padding: '5px 0' }}
@@ -481,53 +490,45 @@ function QualityTaskDetail() {
           </div>
 
           <div className="metric-divider-equal-content">
-            <Tooltip content="总任务数">
-              <div className="metric-card">
-                <div className="metric-label">总任务数</div>
-                <div className="metric-value">
-                  {metricData?.task_volume_total}
-                </div>
+            <div className="metric-card">
+              <div className="metric-label">总任务数</div>
+              <div className="metric-value">
+                {metricData?.task_volume_total}
               </div>
-            </Tooltip>
+            </div>
 
             <div className="metric-divider">
               <MinusIcon />
             </div>
 
-            <Tooltip content="未提检任务数">
-              <div className="metric-card">
-                <div className="metric-label">未提检</div>
-                <div className="metric-value">
-                  {metricData?.task_volume_unreceived}
-                </div>
+            <div className="metric-card">
+              <div className="metric-label">未提检</div>
+              <div className="metric-value">
+                {metricData?.task_volume_unreceived}
               </div>
-            </Tooltip>
+            </div>
 
             <div className="metric-divider">
               <MinusIcon />
             </div>
 
-            <Tooltip content="抽检中任务数">
-              <div className="metric-card">
-                <div className="metric-label">抽检中</div>
-                <div className="metric-value">
-                  {metricData?.task_volume_sampling}
-                </div>
+            <div className="metric-card">
+              <div className="metric-label">抽检中</div>
+              <div className="metric-value">
+                {metricData?.task_volume_sampling}
               </div>
-            </Tooltip>
+            </div>
 
             <div className="metric-divider">
               <MinusIcon />
             </div>
 
-            <Tooltip content="质检通过任务数">
-              <div className="metric-card">
-                <div className="metric-label">质检通过</div>
-                <div className="metric-value">
-                  {metricData?.task_volume_passed}
-                </div>
+            <div className="metric-card">
+              <div className="metric-label">质检通过</div>
+              <div className="metric-value">
+                {metricData?.task_volume_passed}
               </div>
-            </Tooltip>
+            </div>
           </div>
         </div>
 

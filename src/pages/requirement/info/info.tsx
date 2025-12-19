@@ -1,19 +1,27 @@
-import React, { useState, useEffect } from 'react';
-import { Breadcrumb, Tabs, Spin, Space, Button } from '@arco-design/web-react';
-import { IconArrowLeft, IconEdit, IconCopy } from '@arco-design/web-react/icon';
-import { useHistory, useLocation } from 'react-router';
-import RequirementDetail from './detail';
-import RequirementProgress from './progress';
-import RequirementParticular from './particular';
-import { useParams } from '@/utils/url';
-import { useGetRequirementDetail } from '../hooks/useGetRequirementDetail';
-import { REQUIREMENT_STATUS_CONFIG } from '../common';
+import { useUserInfo } from '@/store/userInfoStore';
 import getLabelByValue from '@/utils/getLabelByValue';
+import { useParams } from '@/utils/url';
+import {
+  Breadcrumb,
+  Button,
+  Space,
+  Spin,
+  Tabs,
+  Tooltip
+} from '@arco-design/web-react';
+import { IconArrowLeft, IconCopy, IconEdit } from '@arco-design/web-react/icon';
 import { DotStatus } from '@ceai-front/arco-material';
+import React, { useEffect, useState } from 'react';
+import { useHistory, useLocation } from 'react-router';
+import { REQUIREMENT_STATUS_CONFIG } from '../common';
+import { useGetRequirementDetail } from '../hooks/useGetRequirementDetail';
+import RequirementDetail from './detail';
+import styles from './info.module.scss';
+import RequirementParticular from './particular';
+import RequirementProgress from './progress';
 
 const BreadcrumbItem = Breadcrumb.Item;
 const TabPane = Tabs.TabPane;
-import styles from './info.module.scss';
 
 type TabKey = 'detail' | 'progress' | 'particular';
 const defaultActiveTab: TabKey = 'detail';
@@ -23,7 +31,7 @@ function RequirementInfo() {
   const location = useLocation();
   const requirementId = useParams('id') as string;
   const [activeTab, setActiveTab] = useState<TabKey>(defaultActiveTab);
-
+  const userInfo = useUserInfo();
   // 从URL查询参数中解析activeTab
   const getActiveTabFromUrl = (): TabKey => {
     const searchParams = new URLSearchParams(location.search);
@@ -111,13 +119,21 @@ function RequirementInfo() {
         </div>
         <div className={styles.headBreadcrumbExtra}>
           <Space>
-            <Button
-              type="outline"
-              icon={<IconEdit />}
-              onClick={() => handleToConfig('edit')}
-            >
-              编辑
-            </Button>
+            {[2, 4].includes(requirementDetail?.req_status) && (
+              <Tooltip
+                content="仅需求创建人可操作"
+                disabled={userInfo?.id === requirementDetail?.creator_id}
+              >
+                <Button
+                  type="outline"
+                  disabled={userInfo?.id !== requirementDetail?.creator_id}
+                  icon={<IconEdit />}
+                  onClick={() => handleToConfig('edit')}
+                >
+                  编辑
+                </Button>
+              </Tooltip>
+            )}
             <Button
               type="outline"
               icon={<IconCopy />}
