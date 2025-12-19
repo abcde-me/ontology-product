@@ -1,11 +1,53 @@
 export enum WorkflowTaskStatus {
-  /** 成功 */
-  success = 'success',
-  /** 失败 */
-  fail = 'fail',
-  /** 终止 */
-  kill = 'kill'
+  /** 提交成功 */
+  SUBMITTED_SUCCESS = 'SUBMITTED_SUCCESS',
+  /** 正在运行 */
+  RUNNING_EXECUTION = 'RUNNING_EXECUTION',
+  /** 准备暂停 */
+  READY_PAUSE = 'READY_PAUSE',
+  /** 运行暂停 */
+  PAUSE = 'PAUSE',
+  /** 准备停止 */
+  READY_STOP = 'READY_STOP',
+  /** 运行停止 */
+  STOP = 'STOP',
+  /** 运行失败 */
+  FAILURE = 'FAILURE',
+  /** 运行成功 */
+  SUCCESS = 'SUCCESS',
+  /** 需要容错 */
+  NEED_FAULT_TOLERANCE = 'NEED_FAULT_TOLERANCE',
+  /** KILL */
+  KILL = 'KILL',
+  /** 延迟执行 */
+  DELAY_EXECUTION = 'DELAY_EXECUTION',
+  /** 串行等待 */
+  SERIAL_WAIT = 'SERIAL_WAIT',
+  /** 准备阻塞 */
+  READY_BLOCK = 'READY_BLOCK',
+  /** 运行阻塞 */
+  BLOCK = 'BLOCK',
+  /** 等待运行 */
+  WAIT_TO_RUN = 'WAIT_TO_RUN'
 }
+
+export const WorkflowTaskStatusNameMap = {
+  [WorkflowTaskStatus.SUBMITTED_SUCCESS]: '提交成功',
+  [WorkflowTaskStatus.RUNNING_EXECUTION]: '正在运行',
+  [WorkflowTaskStatus.READY_PAUSE]: '准备暂停',
+  [WorkflowTaskStatus.PAUSE]: '运行暂停',
+  [WorkflowTaskStatus.READY_STOP]: '准备停止',
+  [WorkflowTaskStatus.STOP]: '运行停止',
+  [WorkflowTaskStatus.FAILURE]: '运行失败',
+  [WorkflowTaskStatus.SUCCESS]: '运行成功',
+  [WorkflowTaskStatus.NEED_FAULT_TOLERANCE]: '需要容错',
+  [WorkflowTaskStatus.KILL]: 'KILL',
+  [WorkflowTaskStatus.DELAY_EXECUTION]: '延迟执行',
+  [WorkflowTaskStatus.SERIAL_WAIT]: '串行等待',
+  [WorkflowTaskStatus.READY_BLOCK]: '准备阻塞',
+  [WorkflowTaskStatus.BLOCK]: '运行阻塞',
+  [WorkflowTaskStatus.WAIT_TO_RUN]: '等待运行'
+} as const;
 
 export enum CommandType {
   /** 手动运行 */
@@ -23,7 +65,7 @@ export interface GetWorkflowTaskListParams {
   /**
    * 运行类型，START_PROCESS  手动运行     SCHEDULER 定时运行
    */
-  command_type: CommandType;
+  command_type_list: CommandType[];
   /**
    * 工作流实例ID
    */
@@ -46,9 +88,9 @@ export interface GetWorkflowTaskListParams {
     column: string;
   }[];
   /**
-   * 运行状态，success、fail、kill
+   * 运行状态，使用 WorkflowTaskStatus 枚举值
    */
-  state: WorkflowTaskStatus;
+  state_list: WorkflowTaskStatus[];
   /**
    * 当前页
    */
@@ -108,7 +150,7 @@ export interface WorkflowTaskItem {
    */
   start_time: string;
   /**
-   * 执行状态，success、fail、kill
+   * 执行状态，使用 WorkflowTaskStatus 枚举值
    */
   state: string;
   /**
@@ -159,11 +201,16 @@ export enum TaskExecuteType {
   REALTIME = '1'
 }
 
+export const TaskExecuteTypeNameMap = {
+  [TaskExecuteType.OFFLINE]: '离线',
+  [TaskExecuteType.REALTIME]: '实时'
+} as const;
+
 export interface GetTaskNodeListParams {
   /**
    * 运行类型，START_PROCESS  手动运行     SCHEDULER 定时运行
    */
-  command_type?: CommandType;
+  command_type_list?: CommandType[];
   /**
    * 任务实例ID
    */
@@ -194,11 +241,11 @@ export interface GetTaskNodeListParams {
   /**
    * 运行状态
    */
-  state?: string;
+  state_list?: WorkflowTaskStatus[];
   /**
    * 任务模式，0 离线、1  实时 传0或者1
    */
-  task_execute_type?: TaskExecuteType;
+  task_execute_type_list?: TaskExecuteType[];
   /**
    * 任务节点类型
    */
@@ -211,7 +258,7 @@ export interface TaskNodeItem {
    */
   command_type: CommandType;
   /**
-   * 执行类型，手工执行，自动调度，手动运行  定时运行
+   * 执行类型，手动运行，定时运行 中文
    */
   command_type_name: (typeof CommandTypeNameMap)[keyof typeof CommandTypeNameMap];
   /**
@@ -267,6 +314,10 @@ export interface TaskNodeItem {
    */
   task_code: string;
   /**
+   * 任务模式
+   */
+  task_execute_type: TaskExecuteType;
+  /**
    * 任务模式 ，离线、实时
    */
   task_execute_type_name: string;
@@ -275,7 +326,7 @@ export interface TaskNodeItem {
    */
   task_name: string;
   /**
-   * 任务类型英文名
+   * 任务类型
    */
   task_type: string;
   /**
