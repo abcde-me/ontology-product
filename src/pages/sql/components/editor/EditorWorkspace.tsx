@@ -49,6 +49,7 @@ interface NotebookWorkspaceProps {
   selectFile?: (fileId: string) => void;
   onToScriptList?: (key: string) => void;
   curActiveTab: string;
+  onHasUnsavedChangesChange?: (checkFn: (() => boolean) | null) => void;
 }
 
 // 内部组件，使用 EditorContext
@@ -60,6 +61,7 @@ const EditorWorkspaceContent: React.FC<{
   onEditorFocusChange?: (isFocused: boolean) => void;
   onToScriptList?: (key: string) => void;
   curActiveTab: string;
+  onHasUnsavedChangesChange?: (checkFn: (() => boolean) | null) => void;
 }> = memo(
   ({
     onInsertContent,
@@ -68,7 +70,8 @@ const EditorWorkspaceContent: React.FC<{
     onToScriptList,
     curActiveTab,
     scriptId,
-    content
+    content,
+    onHasUnsavedChangesChange
   }) => {
     const FormItem = Form.Item;
     const userInfo = useUserInfo();
@@ -106,8 +109,21 @@ const EditorWorkspaceContent: React.FC<{
       handlePanelStateChange,
       getPrevRunStatus,
       lastScriptRunStatus,
-      handleSave
+      handleSave,
+      hasUnsavedChanges
     } = useEditorContext();
+
+    // 将检查函数暴露给父组件
+    useEffect(() => {
+      if (onHasUnsavedChangesChange) {
+        onHasUnsavedChangesChange(hasUnsavedChanges);
+      }
+      return () => {
+        if (onHasUnsavedChangesChange) {
+          onHasUnsavedChangesChange(null);
+        }
+      };
+    }, [hasUnsavedChanges, onHasUnsavedChangesChange]);
 
     const myTheme = createTheme({
       theme: 'light',
@@ -414,7 +430,8 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = memo(
     refreshDirectory,
     selectFile,
     onToScriptList,
-    curActiveTab
+    curActiveTab,
+    onHasUnsavedChangesChange
   }) => {
     const editorOptions = {
       activeTab: tabKey,
@@ -461,6 +478,7 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = memo(
           onToScriptList={onToScriptList}
           onInsertContent={onInsertContent}
           onEditorFocusChange={onEditorFocusChange}
+          onHasUnsavedChangesChange={onHasUnsavedChangesChange}
         />
       </EditorProvider>
     );

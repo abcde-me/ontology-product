@@ -74,6 +74,7 @@ interface NotebookWorkspaceProps {
   selectFile?: (fileId: string) => void;
   onToScriptList?: (key: string) => void;
   curActiveTab: string;
+  onHasUnsavedChangesChange?: (checkFn: (() => boolean) | null) => void;
 }
 
 // 定义用于高亮参数的效果
@@ -152,13 +153,15 @@ const EditorWorkspaceContent: React.FC<{
   onEditorFocusChange?: (isFocused: boolean) => void;
   onToScriptList?: (key: string) => void;
   curActiveTab: string;
+  onHasUnsavedChangesChange?: (checkFn: (() => boolean) | null) => void;
 }> = memo(
   ({
     onInsertContent,
     onEditorFocusChange,
     fileName,
     onToScriptList,
-    curActiveTab
+    curActiveTab,
+    onHasUnsavedChangesChange
   }) => {
     const FormItem = Form.Item;
     const [form] = Form.useForm();
@@ -212,8 +215,21 @@ const EditorWorkspaceContent: React.FC<{
       isPanelOpen,
       handlePanelStateChange,
       handleReleaseScript,
-      getPrevRunStatus
+      getPrevRunStatus,
+      hasUnsavedChanges
     } = useEditorContext();
+
+    // 将检查函数暴露给父组件
+    useEffect(() => {
+      if (onHasUnsavedChangesChange) {
+        onHasUnsavedChangesChange(hasUnsavedChanges);
+      }
+      return () => {
+        if (onHasUnsavedChangesChange) {
+          onHasUnsavedChangesChange(null);
+        }
+      };
+    }, [hasUnsavedChanges, onHasUnsavedChangesChange]);
 
     // 处理参数hover事件
     const handleParameterHover = useCallback((paramName: string | null) => {
@@ -392,9 +408,27 @@ const EditorWorkspaceContent: React.FC<{
 
     // 处理取消编辑
     const handleCancelEdit = async () => {
-      setEditLoading(true);
-      await handleUnlockScript();
-      setEditLoading(false);
+      // 检查是否有未保存的更改
+      if (hasUnsavedChanges()) {
+        Modal.confirm({
+          title: '确定关闭此脚本吗?',
+          content: '关闭后,将不会保存本次编辑',
+          okText: '确定',
+          cancelText: '取消',
+          onOk: async () => {
+            setEditLoading(true);
+            await handleUnlockScript();
+            setEditLoading(false);
+          },
+          onCancel: () => {
+            // 取消操作，不做任何处理
+          }
+        });
+      } else {
+        setEditLoading(true);
+        await handleUnlockScript();
+        setEditLoading(false);
+      }
     };
 
     const handleSave = async () => {
@@ -836,7 +870,8 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = memo(
     refreshDirectory,
     selectFile,
     onToScriptList,
-    curActiveTab
+    curActiveTab,
+    onHasUnsavedChangesChange
   }) => {
     const editorOptions = {
       activeTab: tabKey,
@@ -881,6 +916,7 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = memo(
           onToScriptList={onToScriptList}
           onInsertContent={onInsertContent}
           onEditorFocusChange={onEditorFocusChange}
+          onHasUnsavedChangesChange={onHasUnsavedChangesChange}
         />
       </EditorProvider>
     );
