@@ -23,7 +23,7 @@ export interface DependItem {
   /** 依赖类型 节点，工作流*/
   dependentType: 'DEPENDENT_ON_TASK' | 'DEPENDENT_ON_WORKFLOW';
 
-  /** 当前任务 definitionCode */
+  /** 当前任务 definitionCode 工作流或者节点id*/
   definitionCode: React.Key;
 
   /** 被依赖任务 code */
