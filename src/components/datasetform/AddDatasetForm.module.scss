@@ -3,6 +3,8 @@
 /* Modal内容区域样式调整 - 只影响这个组件的Modal */
 .modalWrapper :global(.arco-modal-content) {
   padding-left: 0;
+  max-height: 700px;
+  overflow: auto;
 }
 
 .modalWrapper :global(.arco-form-label-item > label) {

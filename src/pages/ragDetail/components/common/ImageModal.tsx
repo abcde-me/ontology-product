@@ -27,8 +27,8 @@ const ImageModal: React.FC = () => {
           <img
             src={selectedImageUrl}
             alt="放大图片"
-            className="max-h-[800px] w-auto object-contain"
-            style={{ maxWidth: '90vw' }}
+            className="h-auto max-h-[90vh] w-auto min-w-[300px] max-w-[90vw] object-contain"
+            style={{ minWidth: '300px', maxWidth: '90vw', maxHeight: '90vh' }}
           />
         </div>
       )}

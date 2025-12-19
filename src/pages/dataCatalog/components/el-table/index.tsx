@@ -326,7 +326,7 @@ export default function Eltable() {
           onPressEnter={() => handleSourceSearch(inputValue)}
           onClear={handleSourceClear}
           style={{
-            width: 260,
+            maxWidth: '260px',
             height: 32,
             border: 'none',
             borderRadius: 0,
@@ -454,7 +454,7 @@ export default function Eltable() {
             {renderSearchArea()}
             {/* 通用的时间范围选择器 */}
             <DatePicker.RangePicker
-              style={{ width: 260 }}
+              style={{ maxWidth: '260px' }}
               showTime={{
                 defaultValue: ['00:00:00', '23:59:59'],
                 format: 'HH:mm:ss'

@@ -406,10 +406,10 @@ const columns = (
     render: (status: string, record: Dataset) => {
       return (
         <div style={{ display: 'flex', alignItems: 'center' }}>
-          <div>{getFileIcon(record.storage_type ?? '-')}</div>
-          <span className="ml-[4px]">
-            {getFileTypeName(record.storage_type ?? '-')}
-          </span>
+          {/* <div>{getFileIcon(record.storage_type ?? '-')}</div> */}
+          {/* <span className="ml-[4px]"> */}
+          {getFileTypeName(record.storage_type ?? '-')}
+          {/* </span> */}
         </div>
       );
     }
@@ -1196,8 +1196,12 @@ const DatasetManagement: React.FC = () => {
   const deleteDatasetRecord = (record: Dataset) => {
     deleteDataset({ id: record?.id })
       .then((res) => {
-        fetchDatasetList();
-        Message.success('删除成功');
+        if (res.code === '' && res.status === 200) {
+          fetchDatasetList();
+          Message.success('删除成功');
+        } else {
+          Message.error(res.message || '删除失败，请稍候重试');
+        }
       })
       .catch((err) => {
         Message.error('删除失败，请稍候重试');
@@ -1301,7 +1305,7 @@ const DatasetManagement: React.FC = () => {
     if (selectedSceneFilters.length > 0) {
       params.scene_ids = selectedSceneFilters;
     } else if (selectedSceneTab.length > 0) {
-      params.scene_ids = selectedSceneTab;
+      params.scene_ids = selectedSceneTab.filter((item) => item !== 0);
     }
 
     // 添加来源过滤参数
@@ -2053,7 +2057,7 @@ const DatasetManagement: React.FC = () => {
             wrapperCol={{ span: 21 }}
           >
             <Select
-              placeholder="请选择标签"
+              placeholder="请选择场景"
               renderFormat={(option) => {
                 return option?.child?.props?.children?.props?.children[0]?.props
                   ?.children;

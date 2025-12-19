@@ -76,9 +76,17 @@ export const useRagDetailStore = create<RagDetailState & RagDetailActions>(
       path?: string | null,
       datasetNameParam?: string | null,
       initialChunkId?: string | null,
-      initialPositionsStr?: string | null
+      initialPositionsStr?: string | null,
+      fileNameParam?: string | null
     ) => {
-      set({ loading: true, error: null });
+      // 立即清空旧的文档信息，避免显示上一个文档的名称
+      set({
+        loading: true,
+        error: null,
+        documentName: fileNameParam || '', // 优先使用 URL 参数中的 fileName
+        datasetName: datasetNameParam || '',
+        documentFormat: ''
+      });
       try {
         // 先调用 getKnowledgeDocument 获取文件详情
         let documentName = '';

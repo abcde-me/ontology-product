@@ -72,36 +72,30 @@ const SegmentMarkdown: React.FC<SegmentMarkdownProps> = ({
         <thead style={{ backgroundColor: '#fafafa' }}>{children}</thead>
       ),
       tbody: ({ children }: any) => <tbody>{children}</tbody>,
-      tr: ({ children }: any) => (
-        <tr
-          style={{
-            borderLeft: '1px solid #d9d9d9',
-            borderRight: '1px solid #d9d9d9'
-          }}
-        >
-          {children}
-        </tr>
-      ),
-      th: ({ children }: any) => (
+      tr: ({ children }: any) => <tr>{children}</tr>,
+      th: ({ children, align, ...props }: any) => (
         <th
           style={{
             border: '1px solid #d9d9d9',
             padding: '8px 12px',
-            textAlign: 'left',
+            textAlign: align || 'left',
             fontWeight: 600,
             color: '#000'
           }}
+          {...props}
         >
           {children}
         </th>
       ),
-      td: ({ children }: any) => (
+      td: ({ children, align, ...props }: any) => (
         <td
           style={{
             border: '1px solid #d9d9d9',
             padding: '8px 12px',
+            textAlign: align || 'left',
             color: '#666'
           }}
+          {...props}
         >
           {children}
         </td>
@@ -114,11 +108,9 @@ const SegmentMarkdown: React.FC<SegmentMarkdownProps> = ({
           {...props}
           className="my-2 cursor-pointer rounded-lg shadow-md transition-all hover:shadow-lg"
           style={{
-            width: '200px',
-            height: '150px',
-            objectFit: 'cover',
-            display: 'block',
-            maxWidth: '100%'
+            maxWidth: '100%',
+            height: 'auto',
+            display: 'block'
           }}
           onClick={(e) => {
             e.stopPropagation();

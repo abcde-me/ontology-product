@@ -114,7 +114,7 @@ const TraceLog: React.FC = () => {
         <div className="mb-3 text-base font-medium text-[#0F131F]">
           节点详情
         </div>
-        <div className="scrollbar-hide h-[calc(100%-2rem)] overflow-y-auto rounded-lg  bg-white">
+        <div className=" h-[calc(100%-2rem)] overflow-y-auto rounded-lg  bg-white">
           {nodeDetails.map((node) => (
             <CollapsibleNodePanel key={node.id} node={node} />
           ))}

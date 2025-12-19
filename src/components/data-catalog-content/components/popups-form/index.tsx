@@ -54,16 +54,15 @@ const FormComponent: React.FC<FormProps> = ({
 
       const filesArray: string[] = [];
 
-      // if (downloadData?.data_path_id) {
-      //   filesArray.push(
-      //     downloadData.real_abs_data_path + '/' + downloadData.file_name
-      //   );
-      // } else if (downloadData?.extras) {
-      //   filesArray.push(
-      //     downloadData.real_full_path + '/' + downloadData.extras.file_name
-      //   );
-      // } else
-      if (exportdataset?.file_path) {
+      if (downloadData?.data_path_id) {
+        filesArray.push(
+          downloadData.real_abs_data_path + '/' + downloadData.file_name
+        );
+      } else if (downloadData?.extras) {
+        filesArray.push(
+          downloadData.real_full_path + '/' + downloadData.extras.file_name
+        );
+      } else if (exportdataset?.file_path) {
         filesArray.push(exportdataset.file_path);
       }
       if (!exportdataset && exportdatas && exportdatas?.length > 0) {
