@@ -97,7 +97,7 @@ const ModalDetail = (props) => {
             <div className={styles['info-item']}>
               <span className={styles['item-label']}>数据源类型:</span>
               <span className={styles['item-value']}>
-                {DetailData?.type !== 'db'
+                {DetailData?.type !== 'db' && DetailData?.type !== 'mq'
                   ? (DetailData?.type && TYPE_CONFIG[DetailData.type]) ||
                     '未知类型'
                   : TYPE_CONFIG[DetailData?.sub_type]}
