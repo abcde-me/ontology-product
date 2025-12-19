@@ -171,10 +171,14 @@ export const ModaForgeResourceEndpoints = {
   workflowList: PrefixAimdp + '/ListWorkFlows',
   // 工作流列表_结构化
   workflowListNew: PrefixAimdp + '/ListProcessPage',
+  // 工作流列表_外部前置任务节点使用
+  getWorkflowList: PrefixAimdp + '/ListWorkFlowPage',
   // 获取工作流运行状态枚举
   getProcessRunState: PrefixAimdp + '/GetProcessRunState',
   // 工作流操作
   workflowOperation: PrefixAimdp + '/ManageWorkFlow',
+  // 工作流节点测试
+  testWorkflowNode: PrefixAimdp + '/RunProcess',
   // 工作流删除
   workflowDelete: PrefixAimdp + '/DeleteWorkFlow',
   // 工作流删除

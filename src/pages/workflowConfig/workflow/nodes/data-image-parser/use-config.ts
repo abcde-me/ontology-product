@@ -57,6 +57,9 @@ const useConfig = (id: string, payload: ImageParserNodeType) => {
         if (fields.pic_model_id) {
           draft.pic_model_id = fields.pic_model_id;
         }
+        if (fields.image_model) {
+          draft.image_model = fields.image_model;
+        }
         if (fields.pic_emb_model_id) {
           draft.pic_emb_model_id = fields.pic_emb_model_id;
         }

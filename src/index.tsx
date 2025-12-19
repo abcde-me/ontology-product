@@ -94,6 +94,14 @@ const hiddenTopBarRoutes = [
   '/tenant/compute/modaforge/compareFileData'
 ];
 
+/**
+ * 需要隐藏菜单的路由传参类型的地址关键字集合
+ * 路由配置类似：/a/b/:c
+ */
+const hiddenTopBarRouterParamsRouteKeyWords = [
+  'tenant/compute/modaforge/workflowConfig'
+];
+
 function App() {
   const localLayout = useSelector(
     (state: GlobalState) => state?.plugins?.consolePluginmodaforge?.localLayout
@@ -190,13 +198,17 @@ function App() {
     };
   }, [switchProject]);
 
-  const hidden = useMemo(
-    () =>
-      (location?.pathname && hiddenTopBarRoutes.includes(location?.pathname)) ||
+  const hidden = useMemo(() => {
+    const hiddenMenu =
+      (location?.pathname &&
+        (hiddenTopBarRoutes.includes(location?.pathname) ||
+          hiddenTopBarRouterParamsRouteKeyWords.some((keyWord) =>
+            location?.pathname?.includes(keyWord)
+          ))) ||
       localLayout?.hideTopBar ||
-      isInFrame,
-    [localLayout?.hideTopBar, location?.pathname]
-  );
+      isInFrame;
+    return hiddenMenu;
+  }, [localLayout?.hideTopBar, location?.pathname]);
 
   return (
     <Layout className="flex h-full flex-col">

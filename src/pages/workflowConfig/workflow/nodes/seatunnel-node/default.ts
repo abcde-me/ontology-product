@@ -5,6 +5,8 @@ import {
   ALL_CHAT_AVAILABLE_BLOCKS,
   ALL_COMPLETION_AVAILABLE_BLOCKS
 } from '@/pages/workflowConfig/workflow/blocks';
+import { isNil } from 'lodash-es';
+import { STRUCT_FLOW_NODES } from '@/pages/workflowConfig/workflow/constants';
 
 const SeatunnelNodeDefault: NodeDefault<SeatunnelConfig> = {
   defaultValue: {
@@ -14,29 +16,38 @@ const SeatunnelNodeDefault: NodeDefault<SeatunnelConfig> = {
     desc: ''
   },
   getAvailablePrevNodes(isChatMode: boolean) {
-    const nodes = isChatMode
-      ? ALL_CHAT_AVAILABLE_BLOCKS
-      : ALL_COMPLETION_AVAILABLE_BLOCKS.filter(
-          (type) => type !== BlockEnum.End
-        );
-    return nodes.filter(({}) => {});
+    return ALL_COMPLETION_AVAILABLE_BLOCKS.filter((type) =>
+      STRUCT_FLOW_NODES.includes(type)
+    );
   },
   getAvailableNextNodes(isChatMode: boolean) {
-    const nodes = isChatMode
-      ? ALL_CHAT_AVAILABLE_BLOCKS
-      : ALL_COMPLETION_AVAILABLE_BLOCKS;
-    return nodes;
+    return ALL_COMPLETION_AVAILABLE_BLOCKS.filter((type) =>
+      STRUCT_FLOW_NODES.includes(type)
+    );
   },
   checkValid(payload: SeatunnelConfig) {
-    const errorMessages = '';
-    // const { raw_script, sql_id } = payload;
-    // if (!raw_script) {
-    //   errorMessages = 'SQL脚本不可为空';
-    // }
-    //
-    // if (!sql_id?.length) {
-    //   errorMessages = '请选择SQL脚本';
-    // }
+    let errorMessages = '';
+    const {
+      primary_keys = [],
+      source_database,
+      target_datasource_id,
+      local_params,
+      field_mapping_list = []
+    } = payload;
+    if (isNil(source_database)) {
+      errorMessages = '来源表不能为空';
+    } else if (
+      !isNil(local_params) &&
+      local_params.some(({ value }) => !value?.trim())
+    ) {
+      errorMessages = '参数不能为空';
+    } else if (isNil(target_datasource_id)) {
+      errorMessages = '目标表不能为空';
+    } else if (!field_mapping_list.length) {
+      errorMessages = '请选择同步字段';
+    } else if (!primary_keys.length) {
+      errorMessages = '主键不能为空';
+    }
 
     return {
       isValid: !errorMessages,
