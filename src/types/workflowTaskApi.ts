@@ -400,7 +400,7 @@ export interface ListTaskInstanceParams {
   /**
    * 工作流实例ID
    */
-  id?: string;
+  process_instance_id?: number;
   /**
    * 当前页
    */
@@ -440,7 +440,7 @@ export interface ListTaskInstanceParams {
   state_list?: WorkflowTaskStatus[];
 }
 
-export interface WorkflowInstanceFileItem {
+export interface ListTaskInstanceItem {
   /**
    * 运行类型，手动运行，定时运行
    */
@@ -527,7 +527,7 @@ export interface ListTaskInstanceResponse {
   /**
    * 列表
    */
-  items: WorkflowInstanceFileItem[];
+  items: ListTaskInstanceItem[];
   page: string;
   page_size: string;
   total: string;
