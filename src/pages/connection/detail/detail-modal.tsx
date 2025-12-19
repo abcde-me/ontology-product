@@ -5,7 +5,7 @@ import { getdetailList } from '@/api/connectionApi';
 import { connectorDetailType } from '../type';
 import copy from 'copy-to-clipboard';
 import EllipsisPopoverCom from '@/components/ellipsis-popover-com';
-import { DATABASE_TYPE_ENUM, TYPE_CONFIG } from '../config';
+import { ConnectorType, DATABASE_TYPE_ENUM, TYPE_CONFIG } from '../config';
 import getLabelByValue from '@/utils/getLabelByValue';
 import styles from '../styles/detail.module.scss';
 
@@ -301,6 +301,89 @@ const ModalDetail = (props) => {
                   </span>
                 </div>
               </>
+            ) : DetailData?.sub_type === ConnectorType.Kafka ? (
+              <>
+                <div className={styles['info-item']}>
+                  <span className={styles['item-label']}>消息队列类型:</span>
+                  <span className={styles['item-value']}>
+                    {DetailData?.sub_type || ''}
+                    <Tooltip
+                      position="tl"
+                      trigger="hover"
+                      content={DetailData?.sub_type || ''}
+                    >
+                      <IconCopy
+                        className="ml-1 cursor-pointer"
+                        onClick={() => {
+                          copy(DetailData?.sub_type || '');
+                          Message.success('复制成功');
+                        }}
+                      />
+                    </Tooltip>
+                  </span>
+                </div>
+                <div className={styles['info-item']}>
+                  <span className={styles['item-label']}>
+                    集群的入口地址列表:
+                  </span>
+                  <span className={styles['item-value']}>
+                    {DetailData?.config.bootstrapServers}{' '}
+                    <Tooltip
+                      position="tl"
+                      trigger="hover"
+                      content={DetailData?.config.bootstrapServers}
+                    >
+                      <IconCopy
+                        className="ml-1 cursor-pointer"
+                        onClick={() => {
+                          copy(DetailData?.config.bootstrapServers || '');
+                          Message.success('复制成功');
+                        }}
+                      />
+                    </Tooltip>
+                  </span>
+                </div>
+                <div className={styles['info-item']}>
+                  <span className={styles['item-label']}>偏移重置策略:</span>
+                  <span className={styles['item-value']}>
+                    {DetailData?.config.autoOffsetReset}{' '}
+                    <Tooltip
+                      position="tl"
+                      trigger="hover"
+                      content={DetailData?.config.autoOffsetReset}
+                    >
+                      <IconCopy
+                        className="ml-1 cursor-pointer"
+                        onClick={() => {
+                          copy(DetailData?.config.autoOffsetReset || '');
+                          Message.success('复制成功');
+                        }}
+                      />
+                    </Tooltip>
+                  </span>
+                </div>
+                <div className={styles['info-item']}>
+                  <span className={styles['item-label']}>用户名:</span>
+                  <span className={styles['item-value']}>
+                    {DetailData?.config?.user || '-'}
+                    {DetailData?.config?.user && (
+                      <Tooltip
+                        position="tl"
+                        trigger="hover"
+                        content={DetailData?.config?.user || '-'}
+                      >
+                        <IconCopy
+                          className="ml-1 cursor-pointer"
+                          onClick={() => {
+                            copy(DetailData?.config?.user || '');
+                            Message.success('复制成功');
+                          }}
+                        />
+                      </Tooltip>
+                    )}
+                  </span>
+                </div>
+              </>
             ) : (
               <>
                 <div className={styles['info-item']}>
@@ -387,25 +470,27 @@ const ModalDetail = (props) => {
                     </Tooltip>
                   </span>
                 </div>
-                <div className={styles['info-item']}>
-                  <span className={styles['item-label']}>数据库名:</span>
-                  <span className={styles['item-value']}>
-                    {DetailData?.config.database}{' '}
-                    <Tooltip
-                      position="tl"
-                      trigger="hover"
-                      content={DetailData?.config.database}
-                    >
-                      <IconCopy
-                        className="ml-1 cursor-pointer"
-                        onClick={() => {
-                          copy(DetailData?.config.database || '');
-                          Message.success('复制成功');
-                        }}
-                      />
-                    </Tooltip>
-                  </span>
-                </div>
+                {DetailData?.sub_type !== ConnectorType.Elasticsearch && (
+                  <div className={styles['info-item']}>
+                    <span className={styles['item-label']}>数据库名:</span>
+                    <span className={styles['item-value']}>
+                      {DetailData?.config.database}{' '}
+                      <Tooltip
+                        position="tl"
+                        trigger="hover"
+                        content={DetailData?.config.database}
+                      >
+                        <IconCopy
+                          className="ml-1 cursor-pointer"
+                          onClick={() => {
+                            copy(DetailData?.config.database || '');
+                            Message.success('复制成功');
+                          }}
+                        />
+                      </Tooltip>
+                    </span>
+                  </div>
+                )}
                 <div className={styles['info-item']}>
                   <span className={styles['item-label']}>用户名:</span>
                   <span className={styles['item-value']}>
