@@ -140,6 +140,7 @@ const EditorContent: React.FC<EditorContentProps> = memo(
           onAddTab={handleCreateSqlQuery}
           onDeleteTab={handleCloseTab}
           editable
+          destroyOnHide
         >
           {fileTabs.map((tab) => (
             <TabPane

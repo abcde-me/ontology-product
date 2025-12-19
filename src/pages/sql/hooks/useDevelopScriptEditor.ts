@@ -177,46 +177,6 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
     setIsPanelOpen(isOpen);
   }, []);
 
-  // 动态生成表格列
-  // const generateTableColumns = (runResult: RunResult[]) => {
-  //   if (
-  //     !runResult ||
-  //     runResult.length === 0 ||
-  //     !runResult[0]?.list ||
-  //     runResult[0].list.length === 0
-  //   ) {
-  //     return [];
-  //   }
-
-  //   // 从第一行数据中获取所有的 key 作为列头
-  //   const firstRow = runResult[0].list[0];
-  //   const keys = Object.keys(firstRow);
-
-  //   return keys.map((key) => ({
-  //     title: key,
-  //     dataIndex: key,
-  //     width: 240,
-  //     ellipsis: true
-  //   }));
-  // };
-
-  // 动态生成表格数据
-  const generateTableData = (runResult: RunResult[]) => {
-    if (!runResult || runResult.length === 0 || !runResult[0]?.list) {
-      return [];
-    }
-
-    // 将 runResult[0].list 转换为表格数据格式，添加 key 字段
-    return runResult[0].list.map((row, index) => ({
-      key: `${index}`,
-      ...row
-    }));
-  };
-
-  // 计算表格列和数据
-  // const columns = generateTableColumns(runResult);
-  // const data = generateTableData(runResult);
-
   // 当前文件ID，从 activeTab 对应的标签页获取
   const currentFile = fileTabs.find((tab) => tab.key === activeTab);
 
@@ -324,6 +284,7 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
         }
 
         setRunLogStatus(res?.data?.run_status ?? RunLogStatus.CANCEL);
+        setRunDuration(res?.data?.run_duration ?? 0);
         setRunLog(res?.data?.run_log ?? '');
         setRunStartTime(res?.data?.start_time ?? '');
         setHasFetchedLog(true);
@@ -407,7 +368,9 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
     async (content: string) => {
       try {
         const res = await editDevelopScript({
-          script_name: currentFile?.title ?? generateSqlDefaultName(new Date()),
+          script_name:
+            currentFile?.title ??
+            generateSqlDefaultName(new Date(), '加工脚本'),
           script_context: content,
           script_id: Number(currentFile?.scriptId) ?? 0,
           script_params: scriptInfo?.script_params ?? []
@@ -439,7 +402,9 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
     async (content: string) => {
       try {
         const res = await createDevelopScript({
-          script_name: currentFile?.title ?? generateSqlDefaultName(new Date()),
+          script_name:
+            currentFile?.title ??
+            generateSqlDefaultName(new Date(), '加工脚本'),
           script_context: content,
           script_desc: '',
           script_params: []
@@ -487,20 +452,25 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
       return;
     }
 
-    // const saveRes = await editDevelopScript({
-    //   script_context: scriptInfo?.script_context ?? '',
-    //   script_id: Number(currentFile?.scriptId),
-    //   script_name: currentFile.title ?? '',
-    //   script_params: scriptInfo?.script_params ?? []
-    // });
+    const saveRes = await editDevelopScript({
+      script_context: scriptInfo?.script_context ?? '',
+      script_id: Number(currentFile?.scriptId),
+      script_name: currentFile.title ?? '',
+      script_params: scriptInfo?.script_params ?? []
+    });
 
-    // if (saveRes?.status !== 200) {
-    //   Message.error(saveRes?.message ?? '保存文件失败');
-    //   return;
-    // }
+    if (saveRes?.status !== 200) {
+      Message.error(saveRes?.message ?? '保存文件失败');
+      return;
+    }
 
-    // setLastAutoSave(timeFormattig(new Date(saveRes.data.update_time)));
-
+    setScriptInfo((prev) => {
+      if (!prev) return null;
+      return {
+        ...prev,
+        update_time: saveRes.data.update_time
+      };
+    });
     setExecid('');
 
     try {
@@ -610,7 +580,7 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
     if (runLogStatus !== RunLogStatus.RUNNING) {
       // console.log('取消轮询', runStatus, execid);
       // cancelGetRunResultPolling();
-      cancelGetRunLogPolling();
+      // cancelGetRunLogPolling();
     }
 
     // updateRunStatus(RunningStatus.RUNNING);

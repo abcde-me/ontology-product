@@ -11,6 +11,7 @@
     // border-radius: 4px;
     overflow: hidden;
     position: relative;
+    height: 308px; // 固定高度，确保虚拟列表能正确计算
 
     :global(.arco-tabs-header-nav) {
       background-color: #f8fafd !important;
@@ -44,11 +45,13 @@
   }
 
   .runlog-content {
-    white-space: pre-wrap;
-    word-break: break-word;
-    padding: 12px;
-    max-height: 308px;
-    overflow-y: auto;
+    white-space: pre; // 仅按换行符换行，保留空格
+    word-break: normal; // 不在单词中间断行
+    overflow-wrap: normal; // 禁止自动换行
+    padding: 12px 0; // 只保留上下 padding，左右 padding 由虚拟列表项控制
+    height: 100%; // 确保占满父容器高度
+    // 使用 scroll 而不是 auto，避免滚动条出现/消失导致的抖动
+    // overflow-x 和 overflow-y 在组件内联样式中设置
   }
 
   :global(.arco-tabs-content) {

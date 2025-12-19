@@ -198,7 +198,7 @@ const ModalParamList = ({ paramVisible, onCancel }) => {
           columns={columns}
           data={listData}
           loading={loading}
-          rowKey="table_id"
+          rowKey="id"
           scroll={{ y: 500 }}
           pagination={false}
         />
