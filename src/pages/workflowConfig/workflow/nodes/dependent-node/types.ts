@@ -1,4 +1,5 @@
-import type {
+import {
+  BlockEnum,
   CommonNodeType,
   VarType
 } from '@/pages/workflowConfig/workflow/types';
@@ -16,6 +17,41 @@ interface LocalParam {
   direct: string;
   type: string;
   value?: string;
+}
+
+export interface DependItem {
+  /** 依赖类型 节点，工作流*/
+  dependentType: 'DEPENDENT_ON_TASK' | 'DEPENDENT_ON_WORKFLOW';
+
+  /** 当前任务 definitionCode */
+  definitionCode: React.Key;
+
+  /** 被依赖任务 code */
+  depTaskCode: React.Key;
+
+  /** 是否进行参数传递 */
+  parameterPassing: boolean;
+
+  /** 节点类型 */
+  task_type?: BlockEnum;
+
+  /** 节点标题 */
+  title: string;
+
+  /** 节点描述 */
+  desc?: string;
+}
+
+export interface DependentNodeConfig extends CommonNodeType {
+  /** 依赖节点列表 */
+  depend_item_list: DependItem[];
+
+  // 失败重试次数
+  fail_retry_interval: string;
+  // 失败重试间隔
+  fail_retry_times: string;
+  // 运行优先级
+  task_priority: string;
 }
 
 export interface SQLNodeConfig extends CommonNodeType {

@@ -21,12 +21,15 @@ const Node: FC<NodeProps<ImageParserNodeType>> = (props) => {
       const picEmbList =
         res.data.find((d) => d.type === 'pic_emb_model')?.model_data || [];
 
-      const pic_model_id = picList[0]?.id || '';
       const pic_emb_model_id = picEmbList[0]?.id || '';
+      const { id: pic_model_id = '', type: defaultType = '' } =
+        picList[0] || {};
 
       const fields = {} as Record<string, any>;
       if (!props.data.pic_model_id) {
         fields.pic_model_id = pic_model_id;
+        fields.image_model = defaultType;
+      } else {
         fields.image_model =
           picList.find((model) => model.id === props.data.pic_model_id)?.type ||
           '';

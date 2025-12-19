@@ -449,3 +449,10 @@ export enum TaskStatus {
   /** 分配中 */
   DISPATCH = 'DISPATCH'
 }
+
+export interface LocalParam {
+  prop: string;
+  direct: string;
+  type: string;
+  value?: string;
+}

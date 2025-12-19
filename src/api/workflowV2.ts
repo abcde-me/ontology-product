@@ -256,10 +256,13 @@ export async function getSQLVersionInSQLNode(script_id: React.Key) {
 }
 
 // 工作流-获取工作流最后一条运行记录
-export async function getWorkflowLastTask(flow_id: React.Key) {
+export async function getWorkflowLastTask(data: {
+  process_definition_code: number;
+  id?: number;
+}) {
   const res = await UAPI.RES.getWorkflowLastTask({})
     .post({
-      process_definition_code: flow_id,
+      ...data,
       orders: [
         {
           column: 'id',
@@ -303,7 +306,6 @@ export async function getWorkflowTaskLogs(task_id: React.Key) {
 /**
  *  // 工作流-结构化-数据推送-来源库
  *   getSourceDatabaseList: PrefixAimdp + '/ListMetadataIcebergDatabaseName',
-
  */
 export async function getSourceDatabaseList() {
   const res = await UAPI.RES.getSourceDatabaseList({})
@@ -312,7 +314,7 @@ export async function getSourceDatabaseList() {
     })
     .inRegion()
     .do();
-  return res;
+  return res.data?.data || [];
 }
 
 /**
@@ -330,7 +332,7 @@ export async function getSourceTable(databaseId: React.Key) {
     })
     .inRegion()
     .do();
-  return res;
+  return res.data?.data?.list || [];
 }
 
 /**
@@ -348,5 +350,15 @@ export async function getSourceTableField(tableId: React.Key) {
     })
     .inRegion()
     .do();
-  return res.data?.message || '暂无日志';
+  return res.data?.data?.list || [];
+}
+
+// 工作流列表_外部前置任务调用
+export async function getWorkflowList(params: Record<string, any>) {
+  const res = await UAPI.RES.getWorkflowList({}).post(params).inRegion().do();
+  const { list = [], page_info = { total: 0 } } = res.data || {};
+  return {
+    items: list,
+    total: page_info.total
+  };
 }

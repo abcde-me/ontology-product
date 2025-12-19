@@ -176,7 +176,10 @@ export function StructuredWorkflowList() {
       dataIndex: 'description',
       ellipsis: true,
       tooltip: true,
-      width: 150
+      width: 150,
+      render(v) {
+        return v || '-';
+      }
     },
     {
       title: '状态',
@@ -268,12 +271,12 @@ export function StructuredWorkflowList() {
     },
     {
       title: '更新人',
-      dataIndex: 'updateUser',
+      dataIndex: 'update_user',
       ellipsis: true
     },
     {
       title: '更新时间',
-      dataIndex: 'updateTime',
+      dataIndex: 'update_time',
       width: 180,
       sorter: true
     },

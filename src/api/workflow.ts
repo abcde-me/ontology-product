@@ -34,6 +34,14 @@ export async function operateWorkflow(params: WorkflowOperationParams) {
   return UAPI.RES.workflowOperation({}).post(params).inRegion().do();
 }
 
+// 工作流-测试节点
+export async function testWorkflowNode(params: {
+  node_code_list?: string;
+  process_definition_code: number;
+}) {
+  return UAPI.RES.testWorkflowNode({}).post(params).inRegion().do();
+}
+
 // 获取结束节点目标目录
 export async function getWorkflowTargetPath(
   root_type: number, // 0: 获取所有数据目录，1: 获取源数据目录，2：获取目标数据目录

@@ -483,13 +483,14 @@ export const getParallelInfo = (
     startNode = nodes.find(
       (node) => node.id === (parentNode.data as any).start_node_id
     );
-  } else {
+  } else if (!isStructFlow) {
     startNode = nodes.find((node) => node.data.type === BlockEnum.Start);
-  }
-  if (isStructFlow) {
+  } else {
+    // 结构化工作流没有真正意义上的开始节点，默认取第一个节点为开始节点
+    startNode = nodes[0];
   }
 
-  if (!startNode && !isStructFlow) throw new Error('Start node not found');
+  if (!startNode) throw new Error('Start node not found');
 
   const parallelList = [] as ParallelInfoItem[];
   const nextNodeHandles = [{ node: startNode, handle: 'source' }];

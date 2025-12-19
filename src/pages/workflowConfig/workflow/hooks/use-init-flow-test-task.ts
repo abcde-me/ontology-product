@@ -1,6 +1,5 @@
 import { useEffect } from 'react';
 import { useParams as useSearchParam } from '@/utils/url';
-import { useWorkflowStore } from '@/pages/workflowConfig/workflow/store';
 import { useRequest } from 'ahooks';
 import { getWorkflowLastTask, getWorkflowNodeTask } from '@/api/workflowV2';
 import { TaskStatus } from '@/pages/workflowConfig/types/workflow';
@@ -15,9 +14,12 @@ export default function useInitFlowTestTask(manual = false) {
     }))
   );
   const { data: lastFlowTask, run: initFlowTestTask } = useRequest(
-    async () => {
+    async (job_id?: number) => {
       if (ds_workflow_id && ds_workflow_id !== '0')
-        return await getWorkflowLastTask(+ds_workflow_id);
+        return await getWorkflowLastTask({
+          process_definition_code: +ds_workflow_id,
+          id: job_id
+        });
     },
     {
       refreshDeps: [ds_workflow_id],
@@ -49,7 +51,6 @@ export default function useInitFlowTestTask(manual = false) {
         });
         if (!taskIsRunning) {
           cancel();
-          return;
         }
         setNodesProcessDetail(res);
       }

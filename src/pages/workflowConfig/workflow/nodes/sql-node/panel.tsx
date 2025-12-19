@@ -2,43 +2,33 @@ import {
   Button,
   Form,
   Input,
-  Radio,
-  Select,
   Typography,
-  Grid,
-  Cascader,
-  Empty,
-  Popover,
-  InputNumber
+  Cascader
 } from '@arco-design/web-react';
-import React, { useEffect, useState } from 'react';
-import {
-  NodePanelProps,
-  NodeProps
-} from '@/pages/workflowConfig/workflow/types';
+import React from 'react';
+import { NodePanelProps } from '@/pages/workflowConfig/workflow/types';
 import {
   SQLNodeConfig,
   SQLVersion
 } from '@/pages/workflowConfig/workflow/nodes/sql-node/types';
 import { IconDelete, IconPlus } from '@arco-design/web-react/icon';
 import styled from '@emotion/styled';
-import { PRIORITY_OPTIONS } from '@/pages/workflowList/types';
-import { SqlEditor } from '@/pages/workflowConfig/workflow/nodes/sql-node/components';
+import { SqlEditor } from '@/pages/workflowConfig/workflow/nodes/components';
 import { useRequest } from 'ahooks';
 import { getSQLListInSQLNode, getSQLVersionInSQLNode } from '@/api/workflowV2';
-import BlockIcon from '@/pages/workflowConfig/workflow/block-icon';
 import useConfig from '@/pages/workflowConfig/workflow/nodes/sql-node/use-config';
-import { useNodesInteractions } from '@/pages/workflowConfig/workflow/hooks';
 import {
   NodeRunSetting,
   PrevNodes
 } from '@/pages/workflowConfig/workflow/nodes/components';
-import node from '@/pages/workflowConfig/workflow/nodes/end/node';
+import {
+  parseLocalParams,
+  pickParamsFromSQL
+} from '@/pages/workflowConfig/utils';
 
-const { Item: FormItem, useForm, useWatch, List: FormList } = Form;
-const { Row, Col } = Grid;
+const { Item: FormItem, useForm, List: FormList } = Form;
 
-const loadMore = (pathValue: string[], level: number) => {
+const loadMore = (pathValue: string[]) => {
   return getSQLVersionInSQLNode(pathValue[0]);
 };
 
@@ -99,11 +89,7 @@ export default React.memo(function SQLPanel(
           });
         }}
       >
-        <FormItem
-          label={'SQL脚本语句'}
-          field={'sql_id'}
-          rules={[{ message: '请选择SQL加工脚本', required: true }]}
-        >
+        <FormItem label={'SQL脚本语句'} field={'sql_id'}>
           <Cascader
             className={'w-full'}
             disabled={readOnly || loading}
@@ -128,106 +114,158 @@ export default React.memo(function SQLPanel(
             allowClear
           />
         </FormItem>
-        {!loading && (
-          <FormItem field={'raw_script'} dependencies={['sql_id']}>
-            <SqlEditor placeholder={'请在此处编辑或选择SQL加工脚本'} />
-          </FormItem>
-        )}
-        <FormList field={'local_params'}>
-          {(fields, { add, remove }) => {
+        <FormItem
+          noStyle
+          shouldUpdate={(p, c) => p.sql_id?.toString() !== c.sql_id?.toString()}
+        >
+          {({ sql_id }, {}) => {
             return (
-              <>
-                <div className={'flex w-full items-center justify-between'}>
-                  自定义参数
-                  <Button
-                    type={'default'}
-                    size={'mini'}
-                    icon={<IconPlus />}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      add();
-                    }}
-                  />
-                </div>
-                <Form.Item className={'add-field-action'}>
-                  {!!fields.length &&
-                    fields.map((field, index) => (
-                      <div key={field.key} className={'flex flex-1'}>
-                        <div className={'fields-item flex flex-1 gap-3'}>
-                          <FormItem
-                            field={`${field.field}.prop`}
-                            label={
-                              index === 0 ? (
-                                <Form.Item noStyle>
-                                  <Typography.Text bold>参数名</Typography.Text>
-                                </Form.Item>
-                              ) : undefined
-                            }
-                            rules={[
-                              {
-                                validator(v, onInValid) {
-                                  const sameKey = form
-                                    .getFieldValue('params')
-                                    .filter(({ key }) => key === v);
-                                  if (sameKey.length > 1) {
-                                    onInValid('参数名重复');
-                                    return;
-                                  }
-                                }
-                              }
-                            ]}
-                            dependencies={fields.flatMap((f) =>
-                              field.key === f.key ? [] : `${f.field}.key`
-                            )}
-                          >
-                            <Input placeholder={'参数名'} />
-                          </FormItem>
-                          <FormItem
-                            field={`${field.field}.value`}
-                            label={
-                              index === 0 ? (
-                                <Form.Item noStyle>
-                                  <Typography.Text bold>参数值</Typography.Text>
-                                </Form.Item>
-                              ) : undefined
-                            }
-                          >
-                            <Input placeholder={'参数值'} />
-                          </FormItem>
-                        </div>
-                        <FormItem
-                          className={'w-auto flex-shrink-0'}
-                          label={
-                            index === 0 ? (
-                              <Typography.Text bold className={'label-hidden'}>
-                                删
-                              </Typography.Text>
-                            ) : undefined
-                          }
-                        >
-                          <Button
-                            type={'text'}
-                            className={'p-0'}
-                            icon={<IconDelete />}
-                            onClick={() => {
-                              remove(index);
-                              setTimeout(() => {
-                                form
-                                  .validate(
-                                    fields.map(({ field }) => `${field}.key`)
-                                  )
-                                  .catch(console.error);
-                              }, 0);
-                            }}
-                          />
-                        </FormItem>
-                      </div>
-                    ))}
-                </Form.Item>
-              </>
+              <FormItem field={'raw_script'} dependencies={['sql_id']}>
+                <SqlEditor
+                  placeholder={'请在此处编辑或选择SQL加工脚本'}
+                  readOnly={readOnly || !!sql_id}
+                  className={`${!!sql_id ? 'hover:cursor-not-allowed' : ''}`}
+                  onChange={(value) => {
+                    form.setFieldsValue({
+                      local_params: parseLocalParams(
+                        pickParamsFromSQL(value),
+                        form.getFieldValue('local_params')
+                      )
+                    });
+                  }}
+                />
+              </FormItem>
             );
           }}
-        </FormList>
+        </FormItem>
+        <FormItem
+          noStyle
+          shouldUpdate={() => {
+            return false;
+          }}
+        >
+          {({ raw_script, sql_id }, { getFieldValue }) => {
+            return (
+              <FormList field={'local_params'}>
+                {(fields, { add, remove }) => {
+                  return (
+                    <>
+                      <div
+                        className={'flex w-full items-center justify-between'}
+                      >
+                        自定义参数
+                        {!sql_id && (
+                          <Button
+                            type={'default'}
+                            size={'mini'}
+                            icon={<IconPlus />}
+                            disabled={readOnly}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              add({
+                                prop: undefined,
+                                value: undefined
+                              });
+                            }}
+                          />
+                        )}
+                      </div>
+                      <Form.Item className={'add-field-action'}>
+                        {!!fields.length &&
+                          fields.map((field, index) => (
+                            <div key={field.key} className={'flex flex-1'}>
+                              <div className={'fields-item flex flex-1 gap-3'}>
+                                <FormItem
+                                  field={`${field.field}.prop`}
+                                  label={
+                                    index === 0 ? (
+                                      <Form.Item noStyle>
+                                        <Typography.Text bold>
+                                          参数名
+                                        </Typography.Text>
+                                      </Form.Item>
+                                    ) : undefined
+                                  }
+                                  rules={[
+                                    {
+                                      validator(v, onInValid) {
+                                        const sameKey = form
+                                          .getFieldValue('params')
+                                          .filter(({ key }) => key === v);
+                                        if (sameKey.length > 1) {
+                                          onInValid('参数名重复');
+                                          return;
+                                        }
+                                      }
+                                    }
+                                  ]}
+                                  dependencies={fields.flatMap((f) =>
+                                    field.key === f.key ? [] : `${f.field}.key`
+                                  )}
+                                >
+                                  <Input
+                                    placeholder={'参数名'}
+                                    disabled={readOnly || !!sql_id}
+                                  />
+                                </FormItem>
+                                <FormItem
+                                  field={`${field.field}.value`}
+                                  label={
+                                    index === 0 ? (
+                                      <Form.Item noStyle>
+                                        <Typography.Text bold>
+                                          参数值
+                                        </Typography.Text>
+                                      </Form.Item>
+                                    ) : undefined
+                                  }
+                                >
+                                  <Input placeholder={'参数值'} />
+                                </FormItem>
+                              </div>
+                              {!sql_id && (
+                                <FormItem
+                                  className={'w-auto flex-shrink-0'}
+                                  label={
+                                    index === 0 ? (
+                                      <Typography.Text
+                                        bold
+                                        className={'label-hidden'}
+                                      >
+                                        删
+                                      </Typography.Text>
+                                    ) : undefined
+                                  }
+                                >
+                                  <Button
+                                    type={'text'}
+                                    className={'p-0'}
+                                    icon={<IconDelete />}
+                                    onClick={() => {
+                                      remove(index);
+                                      setTimeout(() => {
+                                        form
+                                          .validate(
+                                            fields.map(
+                                              ({ field }) => `${field}.key`
+                                            )
+                                          )
+                                          .catch(console.error);
+                                      }, 0);
+                                    }}
+                                  />
+                                </FormItem>
+                              )}
+                            </div>
+                          ))}
+                      </Form.Item>
+                    </>
+                  );
+                }}
+              </FormList>
+            );
+          }}
+        </FormItem>
         <NodeRunSetting />
       </Form>
       <PrevNodes node={props.id} />

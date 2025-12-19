@@ -1,4 +1,4 @@
-import React, { MouseEvent, useCallback, useRef } from 'react';
+import { MouseEvent, useCallback, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import produce from 'immer';
 import type {
@@ -15,7 +15,7 @@ import {
   useReactFlow,
   useStoreApi
 } from 'reactflow';
-import { unionBy } from 'lodash-es';
+import { isNil, unionBy } from 'lodash-es';
 import type { ToolDefaultValue } from '../block-selector/types';
 import type { Edge, Node, OnNodeAdd } from '../types';
 import { BlockEnum } from '../types';
@@ -52,13 +52,14 @@ import {
 } from './use-workflow-history';
 import { markerEnd } from '@/pages/workflowConfig/utils/var';
 import { Message } from '@arco-design/web-react';
-import { operateWorkflow } from '@/api/workflow';
+import { operateWorkflow, testWorkflowNode } from '@/api/workflow';
 import { WorkflowOperation } from '@/types/workflowApi';
 import { useParams as useSearchParam } from '@/utils/url';
 import { useUserInfo } from '@/store/userInfoStore';
 import { useStore as useTaskStore } from '@/pages/workflowConfig/task/store';
 import { useShallow } from 'zustand/react/shallow';
 import useInitFlowTestTask from '@/pages/workflowConfig/workflow/hooks/use-init-flow-test-task';
+import { useParams } from 'react-router-dom';
 
 export const useNodesInteractions = () => {
   const { t } = useTranslation('plugin__console-plugin-appforge');
@@ -74,7 +75,7 @@ export const useNodesInteractions = () => {
   const { handleSetHelpline } = useHelpline();
   const workflow_uuid = useSearchParam('workflow_uuid');
   const { doSyncWorkflowDraft } = useNodesSyncDraft();
-  const userInfo = useUserInfo();
+  const { type: flowType = 'no_struct' } = useParams<Record<string, string>>();
   const { setNodesProcessDetail, nodesProcessDetail } = useTaskStore(
     useShallow((state) => ({
       setNodesProcessDetail: state.setNodesProcessDetail,
@@ -105,25 +106,24 @@ export const useNodesInteractions = () => {
   );
 
   const handleTestNode = useCallback(
-    (node: React.Key) => {
+    (node: string) => {
       doSyncWorkflowDraft(
         false,
         {
           onSuccess(res) {
-            operateWorkflow({
-              op: WorkflowOperation.RUNNING,
-              start_node: node,
+            testWorkflowNode({
+              node_code_list: node,
               // 后端需要这个id是number类型，接口返回是字符串，后端改了前端也得改，所以前端强转
-              ds_workflow_id: res?.ds_workflow_id ? +res.ds_workflow_id : 0,
-              uid: userInfo?.id ?? '',
-              workflow_uuid: workflow_uuid ?? ''
+              process_definition_code: res?.ds_workflow_id
+                ? +res.ds_workflow_id
+                : 0
             }).then((res) => {
-              if (!!res.data) {
-                initTestTask();
-                Message.success('开始测试');
+              if ([res.data, res.data?.id].some(isNil)) {
+                Message.warning(res.message);
                 return;
               }
-              Message.warning(res.message);
+              initTestTask(res.data.id);
+              Message.success('开始测试');
             });
           },
           onError(e) {
@@ -583,7 +583,8 @@ export const useNodesInteractions = () => {
             ...(toolDefaultValue || {}),
             selected: true,
             _showAddVariablePopup: false,
-            _holdAddVariablePopup: false
+            _holdAddVariablePopup: false,
+            flow_type: flowType
           },
           position: {
             x: 0,

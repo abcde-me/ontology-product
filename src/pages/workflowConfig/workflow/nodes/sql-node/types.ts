@@ -11,7 +11,7 @@ export type OutputVar = Record<
   }
 >;
 
-interface LocalParam {
+export interface LocalParam {
   prop?: string;
   direct: string;
   type: string;
