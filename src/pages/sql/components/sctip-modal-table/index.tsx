@@ -188,17 +188,18 @@ const SctipModalTable: React.FC<{
       dataIndex: 'status',
       key: 'status',
       width: 160,
-      render: (_, record) => <VersionStatus status={record.status} />,
-      filters: [
-        {
-          text: ScriptStatusName[ScriptStatus.Released],
-          value: ScriptStatus.Released
-        },
-        {
-          text: ScriptStatusName[ScriptStatus.Scheduling],
-          value: ScriptStatus.Scheduling
-        }
-      ]
+      render: (_, record) => <VersionStatus status={record.status} />
+      // 服务端暂不支持调度中筛选
+      // filters: [
+      //   {
+      //     text: ScriptStatusName[ScriptStatus.Released],
+      //     value: ScriptStatus.Released
+      //   },
+      //   {
+      //     text: ScriptStatusName[ScriptStatus.Scheduling],
+      //     value: ScriptStatus.Scheduling
+      //   }
+      // ]
     },
     {
       title: '版本说明',
