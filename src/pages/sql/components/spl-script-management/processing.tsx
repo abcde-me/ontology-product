@@ -25,7 +25,7 @@ const Processing: React.FC<PaginationProps> = memo(
       try {
         setCreateScriptLoading(true);
         const createRes = await createDevelopScript({
-          script_name: generateSqlDefaultName(new Date()),
+          script_name: generateSqlDefaultName(new Date(), '加工脚本'),
           script_context: '',
           script_desc: '',
           script_params: []

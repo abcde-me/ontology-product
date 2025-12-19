@@ -407,7 +407,9 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
     async (content: string) => {
       try {
         const res = await editDevelopScript({
-          script_name: currentFile?.title ?? generateSqlDefaultName(new Date()),
+          script_name:
+            currentFile?.title ??
+            generateSqlDefaultName(new Date(), '加工脚本'),
           script_context: content,
           script_id: Number(currentFile?.scriptId) ?? 0,
           script_params: scriptInfo?.script_params ?? []
@@ -439,7 +441,9 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
     async (content: string) => {
       try {
         const res = await createDevelopScript({
-          script_name: currentFile?.title ?? generateSqlDefaultName(new Date()),
+          script_name:
+            currentFile?.title ??
+            generateSqlDefaultName(new Date(), '加工脚本'),
           script_context: content,
           script_desc: '',
           script_params: []

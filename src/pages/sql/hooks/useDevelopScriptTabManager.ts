@@ -1,7 +1,7 @@
 import { useState, useCallback, useRef } from 'react';
 import { Message } from '@arco-design/web-react';
 import { DirectoryTreeRef } from '../components/directory-tree/DirectoryTree';
-import { generateSqlDefaultName } from '../utils/formatDateTime';
+import generateSqlDefaultName from '../utils/generateSqlDefaultName';
 
 // 文件标签页类型
 export interface FileTab {
@@ -139,7 +139,7 @@ export const useDevelopScriptTabManager = (
         newScriptId = newFileInfo.scriptId;
       } else {
         // 否则创建临时标签页
-        const tempStr = generateSqlDefaultName(new Date());
+        const tempStr = generateSqlDefaultName(new Date(), '加工脚本');
         const tempId = `${Date.now()}`;
         newTabKey = tempId;
         newTabTitle = tempStr;
