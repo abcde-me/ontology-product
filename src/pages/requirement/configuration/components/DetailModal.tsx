@@ -16,13 +16,14 @@ import {
   Tree
 } from '@arco-design/web-react';
 import dayjs from 'dayjs';
-import React, { useEffect, useRef, useState, useMemo } from 'react';
-import './DetailModal.scss';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { EllipsisPopover } from '@ceai-front/arco-material';
 import {
   formatCatalogTree,
-  transformToTreeData,
-  getDirectoryPath
+  getDirectoryPath,
+  transformToTreeData
 } from '../../hooks/useCatalogTree';
+import './DetailModal.scss';
 interface DataSourceModalProps {
   fileType: Record<number, string[]>;
   visible: boolean;
@@ -278,19 +279,7 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
       render: (text: string, record: any) => {
         const recordId = record.execution_id || record.run_id || record.id;
         const path = selectedDataPathMap.get(recordId) || text || '';
-        return (
-          <Tooltip content={path}>
-            <div
-              style={{
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                whiteSpace: 'nowrap'
-              }}
-            >
-              {path || '未知路径'}
-            </div>
-          </Tooltip>
-        );
+        return <EllipsisPopover value={path} />;
       }
     },
     {
@@ -461,6 +450,7 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
         activeTab={activeTab}
         onChange={setActiveTab}
         type="line"
+        inkBarSize={{ width: 70 }}
         style={{ marginTop: '-16px' }}
       >
         <Tabs.TabPane title="全部数据" key="all">
@@ -486,7 +476,7 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
                 <div className="tree-node-name">{treeNodeName}</div>
                 <DatePicker.RangePicker
                   onChange={handleDateChange}
-                  style={{ width: 350 }}
+                  style={{ width: 350, marginRight: 12 }}
                   onClear={() => {
                     getTableData();
                     // setDateRange([]);

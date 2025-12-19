@@ -66,16 +66,3 @@
     display: flex;
   }
 }
-
-.individual-selected-content {
-  height: 600px;
-  overflow-y: auto;
-  padding-top: 12px;
-  padding-bottom: 16px;
-
-  .arco-table {
-    .arco-table-th {
-      background-color: #f7f8fa;
-    }
-  }
-}

@@ -1,19 +1,20 @@
-import React, { useEffect, useState } from 'react';
-import {
-  Modal,
-  Button,
-  Tree,
-  Input,
-  Empty,
-  Tooltip,
-  Tabs,
-  Table,
-  Pagination,
-  Link
-} from '@arco-design/web-react';
-import { useDepartmentTree } from '../../hooks/useDepartmentTree';
 import noDataElement from '@/components/no-data';
+import {
+  Button,
+  Empty,
+  Input,
+  Link,
+  Modal,
+  Pagination,
+  Table,
+  Tabs,
+  Tooltip,
+  Tree
+} from '@arco-design/web-react';
+import React, { useEffect, useState } from 'react';
+import { useDepartmentTree } from '../../hooks/useDepartmentTree';
 import './DepartmentModal.scss';
+import { EllipsisPopover } from '@ceai-front/arco-material';
 
 interface SelectedDepartment {
   id: string;
@@ -116,19 +117,7 @@ const DepartmentModal: React.FC<DataSourceModalProps> = ({
       title: '部门名称',
       dataIndex: 'title',
       ellipsis: true,
-      render: (text: string) => (
-        <Tooltip content={text}>
-          <div
-            style={{
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              whiteSpace: 'nowrap'
-            }}
-          >
-            {text}
-          </div>
-        </Tooltip>
-      )
+      render: (text: string) => <EllipsisPopover value={text} />
     },
     {
       title: '操作',
@@ -191,15 +180,16 @@ const DepartmentModal: React.FC<DataSourceModalProps> = ({
         activeTab={activeTab}
         onChange={setActiveTab}
         type="line"
+        inkBarSize={{ width: 70 }}
         style={{ marginTop: '-16px' }}
       >
         <Tabs.TabPane title="全部部门" key="all">
-          <div className="department-modal-content">
+          <div className="department-modal-content department-modal-content-tree">
             <div className="search-input">
               <InputSearch
                 type="text"
                 allowClear
-                placeholder="请输入名称搜索"
+                placeholder="输入搜索部门"
                 onClear={() => {
                   setSearchValue('');
                 }}
@@ -217,18 +207,7 @@ const DepartmentModal: React.FC<DataSourceModalProps> = ({
                 checkedKeys={checkedKeys}
                 renderTitle={({ title }: any) => {
                   return (
-                    <Tooltip content={title}>
-                      <div
-                        style={{
-                          width: '700px',
-                          overflow: 'hidden',
-                          textOverflow: 'ellipsis',
-                          whiteSpace: 'nowrap'
-                        }}
-                      >
-                        {title}
-                      </div>
-                    </Tooltip>
+                    <EllipsisPopover value={title} style={{ width: '700px' }} />
                   );
                 }}
                 treeData={treeData}
@@ -244,51 +223,46 @@ const DepartmentModal: React.FC<DataSourceModalProps> = ({
           key="selected"
         >
           <div className="department-modal-content" style={{ border: 'none' }}>
-            <div
-              className="department-selected-content"
-              style={{ width: '100%', paddingLeft: '12px' }}
-            >
-              <Table
-                rowKey="id"
-                columns={selectedColumns}
-                data={selectedData.slice(
-                  (selectedCurrent - 1) * selectedPageSize,
-                  selectedCurrent * selectedPageSize
-                )}
-                pagination={false}
-                border={false}
-                scroll={{ y: false }}
-                noDataElement={noDataElement({
-                  description: '暂无已选部门'
-                })}
-              />
-              {selectedData.length > 0 && (
-                <Pagination
-                  current={selectedCurrent}
-                  pageSize={selectedPageSize}
-                  onPageSizeChange={(size) => {
-                    setSelectedPageSize(size);
-                    setSelectedCurrent(1);
-                  }}
-                  onChange={(page) => {
-                    setSelectedCurrent(page);
-                  }}
-                  selectProps={{
-                    getPopupContainer: () => document.body
-                  }}
-                  sizeOptions={[10, 20, 50, 100]}
-                  showTotal
-                  total={selectedData.length}
-                  showJumper
-                  sizeCanChange
-                  style={{
-                    justifyContent: 'flex-end',
-                    marginTop: '10px',
-                    marginRight: '12px'
-                  }}
-                />
+            <Table
+              rowKey="id"
+              columns={selectedColumns}
+              data={selectedData.slice(
+                (selectedCurrent - 1) * selectedPageSize,
+                selectedCurrent * selectedPageSize
               )}
-            </div>
+              pagination={false}
+              border={false}
+              scroll={{ y: false }}
+              noDataElement={noDataElement({
+                description: '暂无已选部门'
+              })}
+            />
+            {selectedData.length > 0 && (
+              <Pagination
+                current={selectedCurrent}
+                pageSize={selectedPageSize}
+                onPageSizeChange={(size) => {
+                  setSelectedPageSize(size);
+                  setSelectedCurrent(1);
+                }}
+                onChange={(page) => {
+                  setSelectedCurrent(page);
+                }}
+                selectProps={{
+                  getPopupContainer: () => document.body
+                }}
+                sizeOptions={[10, 20, 50, 100]}
+                showTotal
+                total={selectedData.length}
+                showJumper
+                sizeCanChange
+                style={{
+                  justifyContent: 'flex-end',
+                  marginTop: '10px',
+                  marginRight: '12px'
+                }}
+              />
+            )}
           </div>
         </Tabs.TabPane>
       </Tabs>

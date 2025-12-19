@@ -1,25 +1,25 @@
-import React, { useEffect, useState, useRef, useCallback } from 'react';
+import { getAnnotationTaskList } from '@/api/dataAnnotation';
+import ImageIcon from '@/assets/annotation/image-column.svg';
+import EllipsisPopover from '@/components/ellipsis-popover-com';
+import noDataElement from '@/components/no-data';
+import { ANNOTATION_TASK_PERMISSIONS } from '@/config/permissions';
+import { useHasPermission, useUserInfo } from '@/store/userInfoStore';
+import { openNewPage } from '@/utils/env';
 import {
   Form,
   Input,
   Pagination,
   PaginationProps,
+  Space,
   Table,
-  Tooltip,
-  Space
+  Tooltip
 } from '@arco-design/web-react';
 import { ColumnProps } from '@arco-design/web-react/es/Table';
-import EllipsisPopover from '@/components/ellipsis-popover-com';
-import noDataElement from '@/components/no-data';
-import { getAnnotationTaskList } from '@/api/dataAnnotation';
-import { useHasPermission, useUserInfo } from '@/store/userInfoStore';
-import { ANNOTATION_TASK_PERMISSIONS } from '@/config/permissions';
-import { openNewPage } from '@/utils/env';
-import { RequirementTypeNameMap } from '../type';
 import { SorterInfo } from '@arco-design/web-react/es/Table/interface';
 import { CopyItemIcon } from '@ceai-front/arco-material';
-import ImageIcon from '@/assets/annotation/image-column.svg';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import '../index.scss';
+import { RequirementTypeNameMap } from '../type';
 
 function TaskList() {
   const [form] = Form.useForm();
