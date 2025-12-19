@@ -11,7 +11,7 @@ import { IconSearch, IconRefresh } from '@arco-design/web-react/icon';
 import { useParams as useRouteParams } from 'react-router';
 import { listTaskInstance } from '@/api/workflowTask';
 import type {
-  WorkflowInstanceFileItem,
+  ListTaskInstanceItem,
   ListTaskInstanceParams
 } from '@/types/workflowTaskApi';
 import {
@@ -57,7 +57,7 @@ export default function TaskNodeList() {
           : [];
 
       return {
-        id: workflowInstanceId,
+        process_instance_id: Number(workflowInstanceId),
         page: pagination.current || 1,
         page_size: pagination.pageSize || 10,
         orders,
@@ -71,10 +71,7 @@ export default function TaskNodeList() {
   );
 
   // 工作流实例文件表格hook
-  const table = useWorkflowTable<
-    WorkflowInstanceFileItem,
-    ListTaskInstanceParams
-  >({
+  const table = useWorkflowTable<ListTaskInstanceItem, ListTaskInstanceParams>({
     service: async (params) => {
       const res = await listTaskInstance(params);
       // 注意：API返回的page, page_size, total是字符串类型，需要转换为数字
@@ -94,19 +91,19 @@ export default function TaskNodeList() {
   });
 
   // 处理重试操作
-  const handleRetry = useCallback((record: WorkflowInstanceFileItem) => {
+  const handleRetry = useCallback((record: ListTaskInstanceItem) => {
     // TODO: 实现重试逻辑
     Message.info('重试功能待实现');
   }, []);
 
   // 处理日志操作
-  const handleLog = useCallback((record: WorkflowInstanceFileItem) => {
+  const handleLog = useCallback((record: ListTaskInstanceItem) => {
     // TODO: 实现日志查看逻辑
     Message.info('日志功能待实现');
   }, []);
 
   // 表格列定义
-  const columns: ColumnProps<WorkflowInstanceFileItem>[] = useMemo(
+  const columns: ColumnProps<ListTaskInstanceItem>[] = useMemo(
     () => [
       {
         title: '任务节点ID',
@@ -168,7 +165,7 @@ export default function TaskNodeList() {
           text: option.label,
           value: option.value
         })),
-        render: (state: string, record: WorkflowInstanceFileItem) => {
+        render: (state: string, record: ListTaskInstanceItem) => {
           const statusMap = TASK_NODE_RUN_STATUS_MAP[state] ||
             TASK_NODE_RUN_STATUS_MAP[record.state_name || ''] || {
               text: record.state_name || state,
@@ -210,7 +207,7 @@ export default function TaskNodeList() {
         title: '操作',
         width: 200,
         fixed: 'right' as const,
-        render: (_: any, record: WorkflowInstanceFileItem) => {
+        render: (_: any, record: ListTaskInstanceItem) => {
           return (
             <div className="flex items-center gap-2">
               <Button
