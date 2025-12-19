@@ -396,7 +396,7 @@ export interface GetWorkflowRunResultListResponse {
   workflow_version: string;
 }
 
-export interface GetWorkflowInstanceFilesParams {
+export interface ListTaskInstanceParams {
   /**
    * 工作流实例ID
    */
@@ -523,7 +523,7 @@ export interface WorkflowInstanceFileItem {
   task_type?: string;
 }
 
-export interface GetWorkflowInstanceFilesResponse {
+export interface ListTaskInstanceResponse {
   /**
    * 列表
    */

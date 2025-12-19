@@ -399,7 +399,6 @@ export default function WorkflowRunList() {
           <FormItem field="keywords" className="!m-0">
             <Input
               placeholder="输入工作流运行ID或名称搜索"
-              prefix={<IconSearch />}
               className="w-64"
               allowClear
             />

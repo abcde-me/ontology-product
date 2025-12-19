@@ -9,10 +9,10 @@ import {
 } from '@arco-design/web-react';
 import { IconSearch, IconRefresh } from '@arco-design/web-react/icon';
 import { useParams as useRouteParams } from 'react-router';
-import { getWorkflowInstanceFiles } from '@/api/workflowTask';
+import { listTaskInstance } from '@/api/workflowTask';
 import type {
   WorkflowInstanceFileItem,
-  GetWorkflowInstanceFilesParams
+  ListTaskInstanceParams
 } from '@/types/workflowTaskApi';
 import {
   CommandTypeNameMap,
@@ -45,7 +45,7 @@ export default function TaskNodeList() {
       pagination: PaginationProps,
       sorter?: SorterInfo,
       filters?: Record<string, any>
-    ): GetWorkflowInstanceFilesParams => {
+    ): ListTaskInstanceParams => {
       const orders =
         sorter?.direction && sorter.field
           ? [
@@ -73,10 +73,10 @@ export default function TaskNodeList() {
   // 工作流实例文件表格hook
   const table = useWorkflowTable<
     WorkflowInstanceFileItem,
-    GetWorkflowInstanceFilesParams
+    ListTaskInstanceParams
   >({
     service: async (params) => {
-      const res = await getWorkflowInstanceFiles(params);
+      const res = await listTaskInstance(params);
       // 注意：API返回的page, page_size, total是字符串类型，需要转换为数字
       return {
         data: {

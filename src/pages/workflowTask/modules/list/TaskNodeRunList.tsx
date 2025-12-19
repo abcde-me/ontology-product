@@ -250,7 +250,6 @@ export default function TaskNodeRunList() {
           <FormItem field="keywords" className="!m-0">
             <Input
               placeholder="输入任务节点ID或名称搜索"
-              prefix={<IconSearch />}
               className="w-64"
               allowClear
             />

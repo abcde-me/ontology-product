@@ -2,12 +2,12 @@ import UAPI from '@/api';
 import {
   GetTaskNodeListParams,
   GetTaskNodeListResponse,
-  GetWorkflowInstanceFilesParams,
-  GetWorkflowInstanceFilesResponse,
   GetWorkflowRunResultListParams,
   GetWorkflowRunResultListResponse,
   GetWorkflowTaskListParams,
   GetWorkflowTaskListResponse,
+  ListTaskInstanceParams,
+  ListTaskInstanceResponse,
   WorkflowOperationParams
 } from '@/types/workflowTaskApi';
 
@@ -43,11 +43,8 @@ export async function getWorkflowRunResultList(
 }
 
 // 获取工作流单节点运行结果
-export async function getWorkflowInstanceFiles(
-  params: GetWorkflowInstanceFilesParams
-): Promise<ApiRes<GetWorkflowInstanceFilesResponse>> {
-  return await UAPI.RES.GetWorkflowInstanceFilesApi({})
-    .post(params)
-    .inRegion()
-    .do();
+export async function listTaskInstance(
+  params: ListTaskInstanceParams
+): Promise<ApiRes<ListTaskInstanceResponse>> {
+  return await UAPI.RES.ListTaskInstanceApi({}).post(params).inRegion().do();
 }
