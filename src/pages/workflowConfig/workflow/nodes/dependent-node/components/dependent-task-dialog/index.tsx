@@ -157,7 +157,7 @@ export const DependentTaskDialog = () => {
   const onSelectNode = (data: TaskData, checked: boolean) => {};
 
   return (
-    <Modal visible={true} title={'外部任务设置'} style={{ width: '50vw' }}>
+    <Modal visible={false} title={'外部任务设置'} style={{ width: '50vw' }}>
       <div className={`flex ${styles['modal-content']} h-[60vh] w-full`}>
         <div
           className={`${styles['left']} flex h-full flex-1 flex-col gap-2 p-4`}
