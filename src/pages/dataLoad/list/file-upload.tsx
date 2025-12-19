@@ -203,6 +203,8 @@ const Uploads: React.FC<UploadsProps> = ({
                 音频：WAV, MP3, AAC, FLAC
                 <br />
                 视频：MP4, MOV, MKV
+                <br />
+                表格：XLSX, XLS
               </>
             }
           >
