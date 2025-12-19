@@ -15,11 +15,12 @@ const ExampleCodeModal: React.FC<ExampleCodeModalProps> = ({
   onCancel,
   onCopyCode
 }) => {
-  const exampleCode = `# ==============================================================================
+  const exampleCode = `
+# ==============================================================================
 #  欢迎使用多模态数据治理平台 - PySpark 开发示例代码
 # ==============================================================================
 # 
-#  场景1：知识库加工
+#  场景：知识库加工
 #
 #  1. 数据导入     ->  从数据目录中加载一篇原始的文本文档。
 #  2. 文档解析     ->  将文档解析为元素（将文档解析为图片、文本、表格、公式等基本元素）
@@ -35,7 +36,7 @@ const ExampleCodeModal: React.FC<ExampleCodeModalProps> = ({
 from core.operator.rag.load_data import load_operator
 
 # [必填] 文件或文件夹路径列表 uuid
-path_id = ["ef8b79e012b440d9aeef34b8eb522e2a"]
+path_id = ["742b363437564412becb88289e0e3918"]
 
 # [可选, 默认True] 是否递归扫描子文件夹，默认仅支持3层递归深度
 # recursive = False
@@ -44,7 +45,7 @@ path_id = ["ef8b79e012b440d9aeef34b8eb522e2a"]
 # file_extensions = ["txt", "pdf"]
 
 df = load_operator(spark, path_id, recursive=True, file_extensions=None)
-df.show()
+
 
 # -----------------------------文档解析------------------------------
 
@@ -72,18 +73,18 @@ parsing_profile = "custom"
 custom_parameters = {
     "parsing_profile": "custom",
     "text_settings": {
-        "method": "use_ocr",
+        "method": "text_layer_only",
         "ocr_languages": ["chi_sim", "eng"]
     },
     "extract_rules": {
-        "extract_tables": {"enabled": True, "output_format": "markdown"},
-        "extract_formulas": {"enabled": True, "output_format": "LaTex"},
+        "extract_tables": {"enabled": True, "output_format": "image"},
+        "extract_formulas": {"enabled": True, "output_format": "image"},
         "extract_images": {"enabled": True}
     }
 }
 
 df = parse_documents(df, parsing_profile, custom_parameters)
-df.show()
+
 
 # -----------------------------文档分块------------------------------
 from core.operator.rag.chunk import chunk
@@ -104,7 +105,7 @@ strategy_mode = "custom"
 #   - max_size: 最大块大小，硬性限制，默认800字符
 #   - overlap: 块间重叠，默认50字符
 custom_parameters_chunk = {
-    "chunk_rule": {"rule": "recursive", "delimiter": ""},
+    "chunk_rule": {"rule": "by_chapter", "delimiter": ""},
     "size_control": {
         "target_size": 600,
         "max_size": 800,
@@ -122,7 +123,7 @@ custom_parameters_chunk = {
     }
 }
 df, custom_parameters_chunk_save = chunk(df, strategy_mode, custom_parameters_chunk)
-df.show()
+
 
 # -----------------------------向量化---------------------------------
 
@@ -138,93 +139,20 @@ embedding_model_name = "text-embedding-model"
 
 # 该算子会将fields_to_embed中指定的字段拼接后进行向量化，生成的向量存储在vector列中
 df = Embedding.generate_embeddings(df, fields_to_embed, embedding_model_name)
-df.show()
+
 
 # -----------------------------数据保存---------------------------------
 
 # 场景1：将DataFrame保存为平台知识库
 from core.operator.base.save_dataset import SaveDataSet
 
-name = "示例代码知识库"
+name = "示例知识库"
 chunk_rule = custom_parameters_chunk_save['chunk_rule']['rule']
 # scene场景名称支持：RAG知识库
 # 用户设置的场景未匹配到时，自动设置成其他
 df = SaveDataSet.pyspark_save_rag(df,name, path_id, chunk_rule, description="", scene="RAG知识库", tag_names=[])
-df.show()
-
-# ==============================================================================
-#  场景2：模型微调数据集加工
-#
-#  1. 读取源数据   ->  从数据目录中加载一篇原始的文本文档。
-#  2. 文本切片     ->  将长文本智能切分为独立的句子，保留语义完整性。
-#  3. 数据清洗     ->  对切分后的句子进行基础清洗。
-#  4. 数据增强     ->  利用大语言模型(LLM)为每个句子生成一个相关问题，构建Q&A对。
-#  5. 保存数据集   ->  将处理好的高质量Q&A数据集保存，供后续模型训练使用。
-# ==============================================================================
 
 
-# 读取文本文件并解析成DataFrame
-from model.schema import reader_schema
-from core.operator.base.read import SparkRead
-from core.operator.map.read_text import ReadMap as rt
-
-payload = {'file_uuids': ['e0200e86-b028-4e01-b862-cf821e37e15b']}
-# 读取数据集的指定文件 dataset
-# 读取源目录的指定文件 src
-# 读取目标目录的指定文件 dst
-df = SparkRead.operator_reader(spark, payload, rt.read_text_map, reader_schema, "src")
-df.show() 
-
-# 按段落对文本进行切片
-from model.schema import chunk_schema
-from core.operator.atom.chunks.paragraph_chunk import paragraph_chunk_batch
-
-rdd = paragraph_chunk_batch(df.rdd)
-df = spark.createDataFrame(rdd, chunk_schema)
-df.show()
-
-
-# 过滤掉文本长度小于10个字符的数据
-from core.operator.atom.clean.data_filter import data_filter
-
-df = data_filter(df.rdd, 10).toDF(df.schema)
-df.show()
-
-# 根据生成策略对数据进行分批
-from core.operator.atom.augment.generation_strategy import generation_strategy
-
-# n_generate=10，需要生成的样本数
-df, n = generation_strategy(df, 20)  # 返回的n指单次请求大模型生成的数据条数，取值[1-5]
-df.show()
-
-# 调用大模型执行增强任务
-from core.operator.atom.llm_generate import llm_generate
-from pyspark.sql.types import StringType
-
-# 执行增强任务 (通用生成)
-task_type = "textConversation"
-# userDefined自定义提示词；generationCount单次请求大模型生成的数据条数，取值[1-5]，默认是3
-parameters = {"userDefined": None, "generationCount":n}
-
-# 添加新生成的字段
-df.schema.add("augment", StringType(), True)
-df.schema.add("instruction", StringType(), True)
-df.schema.add("context", StringType(), True)
-schema = df.schema.add("response", StringType(), True)
-
-df = llm_generate(df.rdd, task_type, parameters, url=None).toDF(schema)
-df = df.select("instruction","context","response")
-df.show()
-
-# 将DataFrame保存为平台数据集
-from core.operator.base.write import SparkWrite
-
-# 选择单列
-# df = df.select("content")
-# 选择多列
-# df = df.select("content","augment")
-df = SparkWrite.df_save_dataset(df)
-df.show()
 `;
 
   return (
