@@ -13,26 +13,40 @@ import {
 import { useHistory } from 'react-router';
 import { ColumnProps } from '@arco-design/web-react/es/Table';
 import noDataElement from '@/components/no-data';
-import { getWorkflowList } from '@/api/workflowList';
 import { useUserInfo } from '@/store/userInfoStore';
 import { SorterInfo } from '@arco-design/web-react/es/Table/interface';
 import { PermissionWrapper } from '@/components/PermissionGuard';
 import { WORKFLOW_LIST_PERMISSIONS } from '@/config/permissions';
 import ColumnSettingIcon from '@/assets/metadata/column-setting.svg';
 import StorageIcon from '@/assets/metadata/storage.svg';
-import { IconPlus, IconRefresh, IconSearch } from '@arco-design/web-react/icon';
+import { IconPlus, IconRefresh } from '@arco-design/web-react/icon';
 import { getColumns, getColumnsSetting } from './getColumns';
 import ColumnSettingModal, {
   ColumnField
 } from '../dataAsset/components/ColumnSettingModal';
 import SearchArea from './components/SearchArea';
+import {
+  listMetadataDataSource,
+  listMetadataDorisTable,
+  listMetadataIcebergTable,
+  listMetadataMilvusDatabase,
+  listMetadataMinioBucket,
+  MetadataMenuItem
+} from '@/api/metadata';
 import styles from './index.module.scss';
 
 enum MetadataType {
-  Iceberg = 'Iceberg',
-  Doris = 'Doris',
-  MinIO = 'MinIO',
-  Milvus = 'Milvus'
+  Iceberg = 'ICEBERG',
+  Doris = 'DORIS',
+  Kafka = 'KAFKA',
+  MinIO = 'MINIO',
+  Milvus = 'MILVUS'
+}
+
+interface RangeFilter {
+  field: string;
+  start: string;
+  end: string;
 }
 
 export default function MetadataManagement() {
@@ -41,10 +55,15 @@ export default function MetadataManagement() {
   const MenuItem = Menu.Item;
   const TextArea = Input.TextArea;
 
+  // 初始化元数据菜单数据
+  const [metadataMenuData, setMetadataMenuData] = useState([]);
   // 初始化搜索框value
-  const [searchValue, setSearchValue] = useState('');
-  // 初始化工作流列表数据
-  const [workflowData, setWorkflowData] = useState([]);
+  const [searchValue, setSearchValue] = useState({
+    filter: {},
+    range: [] as RangeFilter[]
+  });
+  // 初始化元数据列表数据
+  const [metadataData, setMetadataData] = useState([]);
   // 当前的第几页
   const [current, setCurrent] = useState(1);
   // 每页展示数据的数据量
@@ -53,8 +72,6 @@ export default function MetadataManagement() {
   const [total, setTotal] = useState(10);
   // 添加loading状态控制
   const [loading, setLoading] = useState(false);
-  // 区分是否点击按钮清空搜索框
-  const [isClickClear, setIsClickClear] = useState(false);
   // 初始化筛选的值
   const [sortValue, setSortValue] = useState({
     run_cycle: '',
@@ -94,35 +111,63 @@ export default function MetadataManagement() {
     );
   }, [activeMetadataType, selectedColumns]);
 
+  useEffect(() => {
+    getMenuData();
+  }, []);
+
+  const getMenuName = (type: string) => {
+    switch (type) {
+      case MetadataType.Iceberg:
+        return '数据湖';
+      case MetadataType.Doris:
+        return '在线分析库';
+      case MetadataType.Kafka:
+        return 'Kafka';
+      case MetadataType.MinIO:
+        return '对象存储';
+      case MetadataType.Milvus:
+        return '向量数据库';
+      default:
+        return type;
+    }
+  };
+
   // 组件初始化
   useEffect(() => {
     if (userInfo) getList();
-  }, [userInfo, current, pageSize, sortValue]);
+  }, [userInfo, current, pageSize, searchValue, sortValue, activeMetadataType]);
 
-  // 清空搜索框
-  useEffect(() => {
-    if (isClickClear && searchValue === '') {
-      getList();
-      setIsClickClear(false);
+  const getMenuData = async () => {
+    const res = await listMetadataDataSource();
+    if (res.status === 200 && res.data.data) {
+      setMetadataMenuData(res.data.data);
+      setActiveMetadataType(
+        res.data.data[0]?.datasourceType || MetadataType.Iceberg
+      );
     }
-  }, [isClickClear]);
+  };
 
   const getList = async () => {
     setLoading(true);
     try {
-      const params: any = {
-        uid: userInfo?.id,
-        search_content: searchValue,
-        page: current, //第几页
-        page_size: pageSize, //每页个数
-        ...sortValue
+      const params = {
+        pageNum: current,
+        pageSize: pageSize,
+        ...searchValue
       };
-      const res = await getWorkflowList(params);
-      if (res.status === 200 && res.data) {
-        setWorkflowData(res.data.list);
-        setCurrent(res.data.page_info?.page);
-        setPageSize(res.data.page_info?.page_size);
-        setTotal(res.data.page_info?.total || 10);
+      const res =
+        activeMetadataType === MetadataType.Iceberg
+          ? await listMetadataIcebergTable(params)
+          : activeMetadataType === MetadataType.MinIO
+            ? await listMetadataMinioBucket(params)
+            : activeMetadataType === MetadataType.Milvus
+              ? await listMetadataMilvusDatabase(params)
+              : await listMetadataDorisTable(params);
+      if (res.status === 200 && res.data.data) {
+        setMetadataData(res.data.data.list);
+        setCurrent(res.data.data?.pageNum);
+        setPageSize(res.data.data?.pageSize);
+        setTotal(res.data.data?.total || 10);
       }
     } finally {
       setLoading(false);
@@ -161,14 +206,30 @@ export default function MetadataManagement() {
 
   // 搜索表单提交
   const handleSearch = (values: any) => {
-    console.log(values, 'vvvvv');
-    // setSearchValue(values.search_content);
+    console.log(values, 'values');
     // setCurrent(1);
   };
 
   // 处理字段搜索
   const handleFieldSearch = (fieldValues, commonSearch: string) => {
     console.log(fieldValues, commonSearch);
+    const newSearchValue = {
+      filter: {},
+      range: [] as RangeFilter[]
+    };
+    fieldValues.forEach((item) => {
+      if (item.type === 'string') {
+        newSearchValue.filter[item.nameEn] = item.searchContent[0];
+      } else if (item.type === 'datetime') {
+        newSearchValue.range.push({
+          field: item.nameEn,
+          start: item.searchContent[0].split('_')[0],
+          end: item.searchContent[0].split('_')[1]
+        });
+      }
+    });
+    setSearchValue(newSearchValue);
+    setCurrent(1);
   };
 
   // 处理重置
@@ -239,10 +300,11 @@ export default function MetadataManagement() {
               setActiveMetadataType(key);
             }}
           >
-            <MenuItem key="Iceberg">数据湖</MenuItem>
-            <MenuItem key="Doris">在线分析库</MenuItem>
-            <MenuItem key="MinIO">对象存储</MenuItem>
-            <MenuItem key="Milvus">向量数据库</MenuItem>
+            {metadataMenuData.map((item: MetadataMenuItem) => (
+              <MenuItem key={item?.datasourceType}>
+                {getMenuName(item?.datasourceType)}
+              </MenuItem>
+            ))}
           </Menu>
         </div>
         <div className={styles['rightBox']}>
@@ -304,7 +366,7 @@ export default function MetadataManagement() {
           <Table
             border={false}
             columns={columns}
-            data={workflowData}
+            data={metadataData}
             pagination={false}
             noDataElement={noDataElement({
               description: '暂无数据',
@@ -321,7 +383,7 @@ export default function MetadataManagement() {
             }}
           />
           {/* 分页 */}
-          {workflowData && workflowData.length > 0 && (
+          {metadataData && metadataData.length > 0 && (
             <Pagination
               current={current}
               pageSize={pageSize}
@@ -379,10 +441,22 @@ export default function MetadataManagement() {
             <Select
               placeholder="请选择数据库类型"
               options={[
-                { label: '数据湖', value: 'Iceberg' },
-                { label: '在线分析库', value: 'Doris' },
-                { label: '对象存储', value: 'MinIO' },
-                { label: '向量数据库', value: 'Milvus' }
+                {
+                  label: getMenuName(MetadataType.Iceberg),
+                  value: MetadataType.Iceberg
+                },
+                {
+                  label: getMenuName(MetadataType.Doris),
+                  value: MetadataType.Doris
+                },
+                {
+                  label: getMenuName(MetadataType.MinIO),
+                  value: MetadataType.MinIO
+                },
+                {
+                  label: getMenuName(MetadataType.Milvus),
+                  value: MetadataType.Milvus
+                }
               ]}
               onChange={handleTableTypeChange}
             />
@@ -446,10 +520,22 @@ export default function MetadataManagement() {
                   style={{ width: 160 }}
                   className={styles.selectAddBefore}
                   options={[
-                    { label: '数据湖', value: 'Iceberg' },
-                    { label: '在线分析库', value: 'Doris' },
-                    { label: '对象存储', value: 'MinIO' },
-                    { label: '向量数据库', value: 'Milvus' }
+                    {
+                      label: getMenuName(MetadataType.Iceberg),
+                      value: MetadataType.Iceberg
+                    },
+                    {
+                      label: getMenuName(MetadataType.Doris),
+                      value: MetadataType.Doris
+                    },
+                    {
+                      label: getMenuName(MetadataType.MinIO),
+                      value: MetadataType.MinIO
+                    },
+                    {
+                      label: getMenuName(MetadataType.Milvus),
+                      value: MetadataType.Milvus
+                    }
                   ]}
                 />
               }

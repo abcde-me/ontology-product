@@ -7,10 +7,10 @@ import dayjs from 'dayjs';
 import styles from './index.module.scss';
 
 enum MetadataType {
-  Iceberg = 'Iceberg',
-  Doris = 'Doris',
-  MinIO = 'MinIO',
-  Milvus = 'Milvus'
+  Iceberg = 'ICEBERG',
+  Doris = 'DORIS',
+  MinIO = 'MINIO',
+  Milvus = 'MILVUS'
 }
 
 // table数据为空时展示-
@@ -104,8 +104,8 @@ const IcebergFields: ColumnField[] = [
     values: []
   },
   {
-    id: 'updataTime',
-    nameEn: 'updataTime',
+    id: 'updateTime',
+    nameEn: 'updateTime',
     nameZh: '更新时间',
     type: 'datetime',
     isEnumAbleForColumn: true,

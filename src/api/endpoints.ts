@@ -466,6 +466,18 @@ export const ModaForgeResourceEndpoints = {
   // 获取导出预览数据
   pythonExportPreviewApi: PrefixAimdp + '/PreviewPysparkExportData',
 
+  // 元数据管理
+  // 获取元数据数据源列表
+  listMetadataDataSourceApi: PrefixAimdp + '/ListMetadataDataSource',
+  // 查询iceberg的所有表
+  listMetadataIcebergTableApi: PrefixAimdp + '/ListMetadataIcebergTable',
+  // 查询minio的所有表
+  listMetadataMinioBucketApi: PrefixAimdp + '/ListMetadataMinioBucket',
+  // 查询milvus的所有表
+  listMetadataMilvusDatabaseApi: PrefixAimdp + '/ListMetadataMilvusDatabase',
+  // 查询doris的所有表
+  listMetadataDorisTableApi: PrefixAimdp + '/ListMetadataDorisTable',
+
   // SQL开发
   sqlListApi: PrefixAimdp + '/ListSqlFile',
   sqlCreateApi: PrefixAimdp + '/CreateSqlFile',
