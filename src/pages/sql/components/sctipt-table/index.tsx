@@ -61,11 +61,12 @@ const ScriptTable: React.FC<ScriptTableProps> = ({
     {
       value: ScriptStatus.Released, // 2
       label: ScriptStatusName[ScriptStatus.Released] // '已发版'
-    },
-    {
-      value: ScriptStatus.Scheduling, // 3
-      label: ScriptStatusName[ScriptStatus.Scheduling] // '调度中'
     }
+    // 服务端暂不支持调度中筛选
+    // {
+    //   value: ScriptStatus.Scheduling, // 3
+    //   label: ScriptStatusName[ScriptStatus.Scheduling] // '调度中'
+    // }
   ];
   const history = useHistory();
   // 初始化搜索框value
