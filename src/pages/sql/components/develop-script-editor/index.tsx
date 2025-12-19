@@ -1,5 +1,5 @@
-import React, { memo } from 'react';
-import { Tabs, Message } from '@arco-design/web-react';
+import React, { memo, useRef, useCallback } from 'react';
+import { Tabs, Message, Modal } from '@arco-design/web-react';
 import EditorWorkspace from './EditorWorkspace';
 import NoData from '@/components/no-data';
 import { FileTab } from '../../hooks/useDevelopScriptTabManager';
@@ -46,6 +46,23 @@ const EditorContent: React.FC<EditorContentProps> = memo(
 
     const hasCreatePermission = useHasPermission(SQL_PERMISSIONS.CREATE);
 
+    // 用于存储检查未保存更改的函数
+    const checkUnsavedChangesRef = useRef<(() => boolean) | null>(null);
+
+    // 显示确认框的通用函数
+    const showConfirmModal = useCallback((onConfirm: () => void) => {
+      Modal.confirm({
+        title: '确定关闭此脚本吗?',
+        content: '关闭后,将不会保存本次编辑',
+        okText: '确定',
+        cancelText: '取消',
+        onOk: onConfirm,
+        onCancel: () => {
+          // 取消操作，不做任何处理
+        }
+      });
+    }, []);
+
     const handleTabChange = (key: string) => {
       onTabChange(key);
     };
@@ -73,8 +90,23 @@ const EditorContent: React.FC<EditorContentProps> = memo(
     };
 
     const handleCloseTab = (key: string) => {
-      onRemoveTab(key);
+      // 检查是否有未保存的更改
+      if (checkUnsavedChangesRef.current && checkUnsavedChangesRef.current()) {
+        showConfirmModal(() => {
+          onRemoveTab(key);
+        });
+      } else {
+        onRemoveTab(key);
+      }
     };
+
+    // 处理检查函数变化
+    const handleHasUnsavedChangesChange = useCallback(
+      (checkFn: (() => boolean) | null) => {
+        checkUnsavedChangesRef.current = checkFn;
+      },
+      []
+    );
 
     // 如果没有活动标签页，显示空状态
     if (!activeTabData) {
@@ -159,6 +191,7 @@ const EditorContent: React.FC<EditorContentProps> = memo(
             selectFile={selectFile}
             onToScriptList={onToScriptList}
             curActiveTab={curActiveTab}
+            onHasUnsavedChangesChange={handleHasUnsavedChangesChange}
           />
         </div>
       </div>

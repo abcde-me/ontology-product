@@ -83,6 +83,9 @@ export interface UseEditorReturn {
   isPanelOpen: boolean;
   handlePanelStateChange: (isOpen: boolean) => void;
   getPrevRunStatus: () => RunningStatus;
+
+  // 未保存更改检查
+  hasUnsavedChanges: () => boolean;
 }
 
 const defaultContent = DEFAULT_SQL_PLACEHOLDER;
@@ -126,6 +129,8 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
   // 跟踪是否已获取过结果和日志
   const [hasFetchedResult, setHasFetchedResult] = useState<boolean>(false);
   const [hasFetchedLog, setHasFetchedLog] = useState<boolean>(false);
+  // 保存原始内容，用于判断是否有未保存的更改
+  const [originalContent, setOriginalContent] = useState<string>('');
   // 用于跟踪上一次的 scriptId，避免不必要的清空
   const prevScriptIdRef = useRef<string | undefined>(undefined);
   // 用于跟踪上一次加载的 activeTab 和 scriptId，避免重复加载
@@ -343,6 +348,8 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
       Message.success('保存成功, 可前往脚本列表查看');
 
       setLastAutoSave(timeFormattig(new Date(createRes.data.update_time)));
+      // 保存后更新原始内容
+      setOriginalContent(editorContent);
 
       if (onTabUpdate) {
         onTabUpdate(currentFile?.key ?? '', {
@@ -368,6 +375,8 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
     }
 
     setLastAutoSave(timeFormattig(new Date(updateRes.data.update_time)));
+    // 保存后更新原始内容
+    setOriginalContent(editorContent);
     Message.success('保存成功, 可前往脚本列表查看');
     return true;
   };
@@ -398,6 +407,8 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
       script_name: currentFile.title ?? '',
       script_content: editorContent
     });
+
+    setOriginalContent(editorContent);
 
     if (saveRes?.status !== 200) {
       Message.error(saveRes?.message ?? '保存文件失败');
@@ -529,6 +540,8 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
             setLastScriptRunStatus(fileData?.run_status);
             // 更新编辑器内容
             setEditorContent(fileData.script_content);
+            // 保存原始内容
+            setOriginalContent(fileData.script_content || '');
 
             // 更新运行状态
             setExecid(String(fileData.script_execid));
@@ -563,6 +576,14 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
       };
 
       loadFileContent();
+    } else if (!currentTab.scriptId && shouldLoad) {
+      // 如果是新文件（没有 scriptId），设置原始内容为当前内容
+      prevLoadedTabRef.current = {
+        activeTab,
+        scriptId: currentTab.scriptId
+      };
+      setEditorContent(currentTab.content || '');
+      setOriginalContent(currentTab.content || '');
     }
 
     // return () => {
@@ -598,6 +619,16 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
     cancelGetRunLogPolling,
     updateRunStatus
   ]);
+
+  // 检查是否有未保存的更改
+  const hasUnsavedChanges = useCallback(() => {
+    // 如果没有 scriptId，说明是新文件，如果内容不为空且与原始内容不同，则认为有未保存更改
+    if (!currentFile?.scriptId) {
+      return editorContent !== '' && editorContent !== originalContent;
+    }
+    // 如果有 scriptId，比较当前内容和原始内容
+    return editorContent !== originalContent;
+  }, [editorContent, originalContent, currentFile?.scriptId]);
 
   return {
     // 状态
@@ -636,6 +667,9 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
     // 面板状态管理
     isPanelOpen,
     handlePanelStateChange,
-    getPrevRunStatus
+    getPrevRunStatus,
+
+    // 未保存更改检查
+    hasUnsavedChanges
   };
 };
