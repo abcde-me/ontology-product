@@ -24,7 +24,13 @@ import type {
   WorkflowTaskItem,
   GetWorkflowTaskListParams
 } from '@/types/workflowTaskApi';
-import { WorkflowOperationType } from '@/types/workflowTaskApi';
+import {
+  CommandType,
+  CommandTypeNameMap,
+  WorkflowOperationType,
+  WorkflowTaskStatus,
+  WorkflowTaskStatusNameMap
+} from '@/types/workflowTaskApi';
 import { useWorkflowTable } from './hooks/useWorkflowTable';
 import { WORKFLOW_RUN_STATUS_MAP, WORKFLOW_STATUS_OPTIONS } from './constants';
 import type { ColumnProps } from '@arco-design/web-react/lib/Table';
@@ -46,23 +52,29 @@ export default function WorkflowRunList() {
     (
       formValues: any,
       pagination: PaginationProps,
-      sorter?: SorterInfo
+      sorter?: SorterInfo,
+      filters?: Record<string, any>
     ): GetWorkflowTaskListParams => {
-      const orders = sorter
-        ? [
-            {
-              asc: sorter.direction === 'ascend',
-              column: (sorter.field as string) || ''
-            }
-          ]
-        : [];
+      const orders =
+        sorter?.direction && sorter.field
+          ? [
+              {
+                asc: sorter.direction === 'ascend',
+                column: sorter.field as string
+              }
+            ]
+          : [];
+
+      // 从 filters 中获取 command_type_list 和 state_list
+      const command_type_list = filters?.command_type_name ?? [];
+      const state_list = formValues.state ? [formValues.state] : [];
 
       return {
-        command_type: formValues.command_type || ('SCHEDULER' as any),
+        command_type_list,
         id: formValues.id ? Number(formValues.id) : undefined,
         keywords: formValues.keywords || '',
         orders,
-        state: formValues.state || ('' as any),
+        state_list,
         page: pagination.current || 1,
         page_size: pagination.pageSize || 10
       };
@@ -144,10 +156,14 @@ export default function WorkflowRunList() {
       {
         title: '运行状态',
         dataIndex: 'state',
-        filters: [],
+        // filters: Object.values(WorkflowTaskStatus).map((status) => ({
+        //   text: WorkflowTaskStatusNameMap[status],
+        //   value: status
+        // })),
         width: 150,
         render: (state: string, record: WorkflowTaskItem) => {
-          const statusMap = WORKFLOW_RUN_STATUS_MAP[state.toLowerCase()] ||
+          // 使用原始状态值（新的枚举值），如果不存在则使用 stateName，最后使用默认值
+          const statusMap = WORKFLOW_RUN_STATUS_MAP[state] ||
             WORKFLOW_RUN_STATUS_MAP[record.stateName] || {
               text: record.stateName || state,
               color: '#666',
@@ -168,7 +184,16 @@ export default function WorkflowRunList() {
         title: '运行类型',
         dataIndex: 'command_type_name',
         width: 120,
-        filters: []
+        filters: [
+          {
+            text: CommandTypeNameMap[CommandType.SCHEDULER],
+            value: CommandType.SCHEDULER
+          },
+          {
+            text: CommandTypeNameMap[CommandType.START_PROCESS],
+            value: CommandType.START_PROCESS
+          }
+        ]
       },
       {
         title: '运行提交时间',
@@ -366,8 +391,8 @@ export default function WorkflowRunList() {
         border={false}
         rowKey="id"
         noDataElement={noDataElement({ description: '暂无数据' })}
-        onChange={(pagination, sorter) => {
-          table.onChange(pagination, sorter);
+        onChange={(pagination, sorter, filters) => {
+          table.onChange(pagination, sorter, filters);
         }}
       />
 

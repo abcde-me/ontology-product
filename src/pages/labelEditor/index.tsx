@@ -270,7 +270,7 @@ function LabelEditorPage() {
         break;
       case 'PREVIEW':
         history.push(
-          `/tenant/compute/modaforge/taskList?id=${requirementId}&activeTab=particular`
+          `/tenant/compute/modaforge/requirement/info?id=${requirementId}&activeTab=particular`
         );
         break;
       default:

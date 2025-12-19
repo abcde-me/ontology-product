@@ -19,6 +19,7 @@ import { Provider } from 'react-redux';
 import { ConfigProvider, Layout, Spin } from '@arco-design/web-react';
 import {} from '@ccf2e/arco-material';
 import { useHistory } from 'react-router-dom';
+import { QueryClient, QueryClientProvider } from 'react-query';
 import zhCN from '@arco-design/web-react/es/locale/zh-CN';
 import enUS from '@arco-design/web-react/es/locale/en-US';
 import PageLayout from './pages/admin/layout';
@@ -55,6 +56,16 @@ import { ProjectIdKey } from './utils/const';
 import { isSameArray } from './utils/array';
 
 initI18n();
+
+// 创建 QueryClient 实例
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+      retry: false
+    }
+  }
+});
 
 // 在应用启动时从 localStorage 恢复 projectId
 // const initProjectIdFromStorage = () => {
@@ -257,9 +268,11 @@ function Index() {
     <BrowserRouter basename="/modaforge">
       <ConfigProvider locale={getArcoLocale()}>
         <Provider store={store}>
-          <GlobalContext.Provider value={contextValue}>
-            <App />
-          </GlobalContext.Provider>
+          <QueryClientProvider client={queryClient}>
+            <GlobalContext.Provider value={contextValue}>
+              <App />
+            </GlobalContext.Provider>
+          </QueryClientProvider>
         </Provider>
       </ConfigProvider>
     </BrowserRouter>

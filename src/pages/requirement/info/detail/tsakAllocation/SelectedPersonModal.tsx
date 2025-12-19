@@ -6,6 +6,7 @@ import React, { useState, useEffect } from 'react';
 import { Table, Modal, Pagination, Tooltip } from '@arco-design/web-react';
 import { getIndividualList } from '@/api/individualAndDepartment';
 import noDataElement from '@/components/no-data';
+import { EllipsisPopover } from '@ceai-front/arco-material';
 
 export interface SelectedPersonModalProps {
   visible: boolean;
@@ -75,20 +76,7 @@ const SelectedPersonModal: React.FC<SelectedPersonModalProps> = ({
     {
       title: '账号ID',
       dataIndex: 'id',
-      width: 200,
-      render: (_: any, record: any) => (
-        <Tooltip content={record.id}>
-          <div
-            style={{
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              whiteSpace: 'nowrap'
-            }}
-          >
-            {record.id || '-'}
-          </div>
-        </Tooltip>
-      )
+      width: 200
     },
     {
       title: '所在部门',
@@ -96,19 +84,7 @@ const SelectedPersonModal: React.FC<SelectedPersonModalProps> = ({
       ellipsis: true,
       render: (_: any, record: any) => {
         const fullOrgPath = record?.organization?.fullOrgPath || '-';
-        return (
-          <Tooltip content={fullOrgPath}>
-            <div
-              style={{
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                whiteSpace: 'nowrap'
-              }}
-            >
-              {fullOrgPath}
-            </div>
-          </Tooltip>
-        );
+        return <EllipsisPopover value={fullOrgPath} />;
       }
     }
   ];
@@ -124,7 +100,7 @@ const SelectedPersonModal: React.FC<SelectedPersonModalProps> = ({
       style={{ width: '800px' }}
       footer={null}
     >
-      <div style={{ padding: '0 12px' }}>
+      <div style={{ paddingBottom: '20px' }}>
         <Table
           rowKey="id"
           columns={columns}

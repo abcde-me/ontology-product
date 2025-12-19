@@ -165,13 +165,13 @@ export const REQUIREMENT_STATUS_CONFIG = [
     value: 3,
     color: '#ef4444'
   },
-  {
-    key: 4,
-    label: '标注完成',
-    text: '标注完成',
-    value: 4,
-    color: '#e3e3e3'
-  },
+  // {
+  //   key: 4,
+  //   label: '标注完成',
+  //   text: '标注完成',
+  //   value: 4,
+  //   color: '#e3e3e3'
+  // },
   {
     key: 5,
     label: '预标注中',
@@ -180,3 +180,9 @@ export const REQUIREMENT_STATUS_CONFIG = [
     color: '#007dfa'
   }
 ];
+
+export const TYPE_MAP_TEXT = {
+  edit: '编辑',
+  create: '创建',
+  copy: '复制'
+};

@@ -7,6 +7,9 @@ import RequirementProgress from './progress';
 import RequirementParticular from './particular';
 import { useParams } from '@/utils/url';
 import { useGetRequirementDetail } from '../hooks/useGetRequirementDetail';
+import { REQUIREMENT_STATUS_CONFIG } from '../common';
+import getLabelByValue from '@/utils/getLabelByValue';
+import { DotStatus } from '@ceai-front/arco-material';
 
 const BreadcrumbItem = Breadcrumb.Item;
 const TabPane = Tabs.TabPane;
@@ -86,7 +89,24 @@ function RequirementInfo() {
             >
               需求管理
             </BreadcrumbItem>
-            <BreadcrumbItem>{requirementDetail?.name || ''}</BreadcrumbItem>
+            <BreadcrumbItem>
+              <span style={{ marginRight: '8px' }}>
+                {requirementDetail?.name || ''}
+              </span>
+              <span>
+                <DotStatus
+                  text={getLabelByValue(
+                    REQUIREMENT_STATUS_CONFIG,
+                    requirementDetail?.req_status
+                  )}
+                  color={getLabelByValue(
+                    REQUIREMENT_STATUS_CONFIG,
+                    requirementDetail?.req_status,
+                    'color'
+                  )}
+                />
+              </span>
+            </BreadcrumbItem>
           </Breadcrumb>
         </div>
         <div className={styles.headBreadcrumbExtra}>

@@ -51,18 +51,7 @@ const HistoryRecordModal: React.FC<HistoryRecordModalProps> = ({
     {
       title: '操作人',
       dataIndex: 'creator_name',
-      width: 100,
-      filterMultiple: false,
-      filters:
-        data
-          ?.map((item) => item.creator_name)
-          .filter((v, i, arr) => arr.indexOf(v) === i)
-          .map((name) => ({
-            text: name,
-            value: name
-          })) || [],
-      onFilter: (value: string, record: HistoryRecord) =>
-        record.creator_name === value
+      width: 100
     },
     {
       title: '操作',
@@ -94,6 +83,7 @@ const HistoryRecordModal: React.FC<HistoryRecordModalProps> = ({
         footer={null}
       >
         <Table
+          style={{ marginBottom: '20px' }}
           columns={columns}
           data={data || []}
           rowKey="edit_id"

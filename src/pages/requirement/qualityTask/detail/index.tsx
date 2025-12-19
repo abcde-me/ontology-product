@@ -24,6 +24,12 @@ import {
 } from '@/api/dataAnnotation';
 import './index.scss';
 import { openNewPage } from '@/utils/env';
+import { useGetRequirementDetail } from '../../hooks/useGetRequirementDetail';
+import { REQUIREMENT_STATUS_CONFIG } from '../../common';
+import getLabelByValue from '@/utils/getLabelByValue';
+import { DotStatus } from '@ceai-front/arco-material';
+import EqualIcon from '@/assets/annotation/equal-icon.svg';
+import MinusIcon from '@/assets/annotation/minus-icon.svg';
 
 const BreadcrumbItem = Breadcrumb.Item;
 
@@ -41,8 +47,8 @@ enum InspectionType {
 
 // 状态映射
 const StatusMap: Record<number, { label: string; color: string }> = {
-  [InspectionStatus.InProgress]: { label: '进行中', color: '#165DFF' },
-  [InspectionStatus.Finished]: { label: '已结束', color: '#86909C' }
+  [InspectionStatus.InProgress]: { label: '进行中', color: '#1037C9' },
+  [InspectionStatus.Finished]: { label: '已结束', color: '#94A3B8' }
 };
 
 // 质检结果类型
@@ -93,8 +99,9 @@ function QualityTaskDetail() {
   const pkgId = useParams('pkgId');
   const qcRound = useParams('qcRound');
   const reqId = useParams('reqId');
-  const reqName = useParams('reqName');
-
+  const { data: requirementDetail = {} } = useGetRequirementDetail({
+    requirement_id: Number(reqId)
+  });
   // 指标数据
   const [metricData, setMetricData] = useState<MetricData>();
 
@@ -285,6 +292,11 @@ function QualityTaskDetail() {
       render: (_, record) => (
         <div className="id-cell">
           <span>{record.qs_id}</span>
+          {record?.type === 1 && (
+            <Tag color="purple" size="small">
+              复核
+            </Tag>
+          )}
         </div>
       )
     },
@@ -408,7 +420,24 @@ function QualityTaskDetail() {
           >
             质检任务
           </BreadcrumbItem>
-          <BreadcrumbItem>{reqName}</BreadcrumbItem>
+          <BreadcrumbItem>
+            <span style={{ marginRight: '8px' }}>
+              {requirementDetail?.name || ''}
+            </span>
+            <span>
+              <DotStatus
+                text={getLabelByValue(
+                  REQUIREMENT_STATUS_CONFIG,
+                  requirementDetail?.req_status
+                )}
+                color={getLabelByValue(
+                  REQUIREMENT_STATUS_CONFIG,
+                  requirementDetail?.req_status,
+                  'color'
+                )}
+              />
+            </span>
+          </BreadcrumbItem>
         </Breadcrumb>
       </div>
 
@@ -416,72 +445,90 @@ function QualityTaskDetail() {
         {/* 指标卡片区域 */}
         <div className="metrics-section">
           {/* 未抽检卡片 */}
-          <Tooltip content="剩余可抽检的任务数字，包括待质检和待复核">
-            <div className="metric-card task_volume_unsampled-card">
-              <div className="task_volume_unsampled-left">
+          <div className="task_volume_unsampled-card">
+            <div className="task_volume_unsampled-left">
+              <Tooltip
+                content={`剩余可抽检的任务数字，包括待质检(${metricData?.task_volume_uninspected})和待复核(${metricData?.task_volume_unreinspected})`}
+              >
                 <div className="metric-label">未抽检</div>
-                <div className="task_volume_unsampled-divider" />
+              </Tooltip>
+              <div className="task_volume_unsampled-divider" />
+              <div className="metric-value">
+                {metricData?.task_volume_unsampled}
+              </div>
+            </div>
+            <div className="metric-actions">
+              <Button type="primary" onClick={handleSampling}>
+                抽检
+              </Button>
+              <Button
+                onClick={() => handleBatchConfirm('pass_all')}
+                style={{ width: 74, padding: '5px 0' }}
+              >
+                全部通过
+              </Button>
+              <Button
+                onClick={() => handleBatchConfirm('reject_all')}
+                style={{ width: 74, padding: '5px 0' }}
+              >
+                全部驳回
+              </Button>
+            </div>
+          </div>
+
+          <div className="metric-divider-equal">
+            <EqualIcon />
+          </div>
+
+          <div className="metric-divider-equal-content">
+            <Tooltip content="总任务数">
+              <div className="metric-card">
+                <div className="metric-label">总任务数</div>
                 <div className="metric-value">
-                  {metricData?.task_volume_unsampled}
+                  {metricData?.task_volume_total}
                 </div>
               </div>
-              <div className="metric-actions">
-                <Button type="primary" onClick={handleSampling}>
-                  抽检
-                </Button>
-                <Button onClick={() => handleBatchConfirm('pass_all')}>
-                  全部通过
-                </Button>
-                <Button onClick={() => handleBatchConfirm('reject_all')}>
-                  全部驳回
-                </Button>
-              </div>
+            </Tooltip>
+
+            <div className="metric-divider">
+              <MinusIcon />
             </div>
-          </Tooltip>
 
-          <div className="metric-divider">=</div>
-
-          <Tooltip content="总任务数">
-            <div className="metric-card">
-              <div className="metric-label">总任务数</div>
-              <div className="metric-value">
-                {metricData?.task_volume_total}
+            <Tooltip content="未提检任务数">
+              <div className="metric-card">
+                <div className="metric-label">未提检</div>
+                <div className="metric-value">
+                  {metricData?.task_volume_unreceived}
+                </div>
               </div>
+            </Tooltip>
+
+            <div className="metric-divider">
+              <MinusIcon />
             </div>
-          </Tooltip>
 
-          <div className="metric-divider">-</div>
-
-          <Tooltip content="未提检任务数">
-            <div className="metric-card">
-              <div className="metric-label">未提检</div>
-              <div className="metric-value">
-                {metricData?.task_volume_unreceived}
+            <Tooltip content="抽检中任务数">
+              <div className="metric-card">
+                <div className="metric-label">抽检中</div>
+                <div className="metric-value">
+                  {metricData?.task_volume_sampling}
+                </div>
               </div>
+            </Tooltip>
+
+            <div className="metric-divider">
+              <MinusIcon />
             </div>
-          </Tooltip>
 
-          <div className="metric-divider">-</div>
-
-          <Tooltip content="抽检中任务数">
-            <div className="metric-card">
-              <div className="metric-label">抽检中</div>
-              <div className="metric-value">
-                {metricData?.task_volume_sampling}
+            <Tooltip content="质检通过任务数">
+              <div className="metric-card">
+                <div className="metric-label">质检通过</div>
+                <div className="metric-value">
+                  {metricData?.task_volume_passed}
+                </div>
               </div>
-            </div>
-          </Tooltip>
-
-          <div className="metric-divider">-</div>
-
-          <Tooltip content="质检通过任务数">
-            <div className="metric-card">
-              <div className="metric-label">质检通过</div>
-              <div className="metric-value">
-                {metricData?.task_volume_passed}
-              </div>
-            </div>
-          </Tooltip>
+            </Tooltip>
+          </div>
         </div>
 
         {/* 基本信息表格 */}
