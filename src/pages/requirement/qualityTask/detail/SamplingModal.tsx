@@ -50,7 +50,10 @@ const SamplingModal: React.FC<SamplingModalProps> = ({
     if (visible) {
       form.resetFields();
       form.setFieldsValue({
-        task_type: SamplingType.ToInspect,
+        task_type:
+          metricData?.task_volume_uninspected > 0
+            ? SamplingType.ToInspect
+            : SamplingType.ToRecheck,
         sample_type: SamplingCountType.Percentage,
         sample_radio: 50
       });
@@ -113,10 +116,16 @@ const SamplingModal: React.FC<SamplingModalProps> = ({
           rules={[{ required: true, message: '请选择任务类型' }]}
         >
           <RadioGroup>
-            <Radio value={SamplingType.ToInspect}>
+            <Radio
+              value={SamplingType.ToInspect}
+              disabled={metricData?.task_volume_uninspected === 0}
+            >
               待质检 (剩余: {metricData?.task_volume_uninspected}个)
             </Radio>
-            <Radio value={SamplingType.ToRecheck}>
+            <Radio
+              value={SamplingType.ToRecheck}
+              disabled={metricData?.task_volume_unreinspected === 0}
+            >
               待复核 (剩余: {metricData?.task_volume_unreinspected}个)
             </Radio>
           </RadioGroup>

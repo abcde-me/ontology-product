@@ -17,7 +17,8 @@ import {
   Message,
   Pagination,
   PaginationProps,
-  Table
+  Table,
+  Modal
 } from '@arco-design/web-react';
 import { ColumnProps } from '@arco-design/web-react/es/Table';
 import { SorterInfo } from '@arco-design/web-react/es/Table/interface';
@@ -159,18 +160,23 @@ export default function Requirement() {
   );
 
   // 删除需求
-  const handleDeleteRequirement = async (record) => {
-    try {
-      const res = await deleteRequirement({ req_id: record.id });
-      if (res.code === 'success') {
-        Message.success('删除成功');
-        getList();
-      } else {
-        Message.error(res.message);
+  const handleDeleteRequirement = (record) => {
+    Modal.confirm({
+      title: `确定删除需求【${record.name}】吗?`,
+      okText: '确定',
+      cancelText: '取消',
+      onOk: async () => {
+        try {
+          const res = await deleteRequirement({ req_id: record.id });
+          if (res.code === 'success') {
+            Message.success('删除成功!');
+            getList();
+          }
+        } catch (error) {
+          console.error(error);
+        }
       }
-    } catch (error) {
-      Message.error('删除失败');
-    }
+    });
   };
   // table columns
   const columns: ColumnProps[] = [
@@ -327,10 +333,10 @@ export default function Requirement() {
                   name: '编辑',
                   priority: 2,
                   tips:
-                    userInfo?.name !== record.create_by
+                    userInfo?.id !== record.creator_id
                       ? '仅需求创建人可操作'
                       : '',
-                  disabled: userInfo?.name !== record.create_by,
+                  disabled: userInfo?.id !== record.creator_id,
                   onClick: () => {
                     handleCreateRequirement('edit', record.id);
                   }
