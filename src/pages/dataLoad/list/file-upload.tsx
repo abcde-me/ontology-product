@@ -91,7 +91,7 @@ const Uploads: React.FC<UploadsProps> = ({
   const checkFileType = (file: any) => {
     const fileName = file.name || '';
     const isValidFileType =
-      /\.(doc|docx|ppt|pptx|pdf|jpg|jpeg|png|txt|md|wav|mp3|aac|flac|mp4|mov|mkv)$/i.test(
+      /\.(doc|docx|ppt|pptx|pdf|jpg|jpeg|png|txt|md|wav|mp3|aac|flac|mp4|mov|mkv|xlsx|xls)$/i.test(
         fileName
       );
     return isValidFileType;
@@ -107,7 +107,7 @@ const Uploads: React.FC<UploadsProps> = ({
     if (invalidFiles.length > 0) {
       // 只显示一次错误提示
       Message.error(
-        '只能上传 .doc,.docx,.ppt,.pptx,.pdf,.jpg,.jpeg,.png,.txt,.md,.wav,.mp3,.aac,.flac,.mp4,.mov,.mkv文件'
+        '只能上传 .doc,.docx,.ppt,.pptx,.pdf,.jpg,.jpeg,.png,.txt,.md,.wav,.mp3,.aac,.flac,.mp4,.mov,.mkv,.xlsx,.xls文件'
       );
       return false;
     }
@@ -176,7 +176,7 @@ const Uploads: React.FC<UploadsProps> = ({
       drag
       className="upload-file"
       multiple
-      accept=".doc,.docx,.ppt,.pptx,.pdf,.jpg,.jpeg,.png,.txt,.md,.wav,.mp3,.aac,.flac,.mp4,.mov,.mkv"
+      accept=".doc,.docx,.ppt,.pptx,.pdf,.jpg,.jpeg,.png,.txt,.md,.wav,.mp3,.aac,.flac,.mp4,.mov,.mkv,.xlsx,.xls"
       beforeUpload={(file, list) => {
         return checkFile(file, list);
       }}
