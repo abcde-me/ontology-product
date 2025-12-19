@@ -225,13 +225,13 @@ export const ModaForgeResourceEndpoints = {
   // 工作流运行记录列表
   ListProcessInstanceApi: PrefixAimdp + '/ListProcessInstance',
   // 任务节点运行记录列表
-  ListTaskInstanceApi: PrefixAimdp + '/ListTaskInstance',
+  // ListTaskInstanceApi: PrefixAimdp + '/ListTaskInstance',
   // 工作流操作（重新运行，暂停，继续运行，结束运行，重试失败任务）
   ExecuteProcessApi: PrefixAimdp + '/ExecuteProcess',
   // 获取工作流运行结果列表
   GetWorkflowInstanceInfoApi: PrefixAimdp + '/GetWorkflowInstanceInfo',
-  // 获取工作流单节点运行结果
-  GetWorkflowInstanceFilesApi: PrefixAimdp + '/GetWorkflowInstanceFiles',
+  // 获取工作流单节点运行结果--结构化数据
+  ListTaskInstanceApi: PrefixAimdp + '/ListTaskInstance',
 
   // 作业列表
   taskList: PrefixAimdp + '/ListWorkflowInstances',

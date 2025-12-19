@@ -157,7 +157,7 @@ export default function WorkflowTaskDetail() {
 
   // 确保activeNode以及sortValue数据变化后再调用getNodeDetail
   useEffect(() => {
-    if (workflowType === WorkflowType.NO_STRUCT) return;
+    if (workflowType === WorkflowType.STRUCT) return;
 
     if (taskId && activeNode) getNodeDetail();
   }, [
@@ -595,16 +595,16 @@ export default function WorkflowTaskDetail() {
       {/* 详情顶部状态区域 */}
       {getTaskDetailTopDom()}
       {/* 工作流拓扑图区域 */}
-      {/* <div className={styles['topology-diagram']}>
+      <div className={styles['topology-diagram']}>
         <div className={styles['workflow-name']} onClick={handleClickWorkflow}>
           {workflowName}
         </div>
         <Workflow setHeight={true} />
-      </div> */}
+      </div>
       {/* 作业内容区域 */}
-      {workflowType === WorkflowType.STRUCT && getTaskContentDom()}
+      {workflowType === WorkflowType.NO_STRUCT && getTaskContentDom()}
       {/* 节点列表区域 */}
-      {workflowType === WorkflowType.NO_STRUCT && <TaskNodeList />}
+      {workflowType === WorkflowType.STRUCT && <TaskNodeList />}
     </div>
   );
 }
