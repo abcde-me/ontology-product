@@ -263,8 +263,8 @@ const MinIOFields = [
     values: []
   },
   {
-    id: 'updataTime',
-    nameEn: 'updataTime',
+    id: 'updateTime',
+    nameEn: 'updateTime',
     nameZh: '元数据更新时间',
     type: 'datetime',
     isEnumAbleForColumn: true,
@@ -410,8 +410,8 @@ const MilvusFields = [
     values: []
   },
   {
-    id: 'updataTime',
-    nameEn: 'updataTime',
+    id: 'updateTime',
+    nameEn: 'updateTime',
     nameZh: '元数据更新时间',
     type: 'datetime',
     isEnumAbleForColumn: true,
