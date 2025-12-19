@@ -164,22 +164,22 @@ export const routes: IRoute[] = [
         permission: DATA_ASSET_PERMISSIONS.LIST
       },
       {
-        name: 'workflowTaskStructDetail',
-        key: '/tenant/compute/modaforge/workflowTask/structDetail',
+        name: 'workflowTaskDetail',
+        key: '/tenant/compute/modaforge/workflowTask/detail/:id',
         component: React.lazy(
-          async () => import('../../workflowTask/modules/struct-detail/index')
-        ),
-        permission: DATA_ASSET_PERMISSIONS.LIST
-      },
-      {
-        name: 'workflowTaskNoStructDetail',
-        key: '/tenant/compute/modaforge/workflowTask/noStructDetail',
-        component: React.lazy(
-          async () =>
-            import('../../workflowTask/modules/no-struct-detail/index')
+          async () => import('../../workflowTask/modules/detail/index')
         ),
         permission: DATA_ASSET_PERMISSIONS.LIST
       }
+      // {
+      //   name: 'workflowTaskNoStructDetail',
+      //   key: '/tenant/compute/modaforge/workflowTask/noStructDetail',
+      //   component: React.lazy(
+      //     async () =>
+      //       import('../../workflowTask/modules/no-struct-detail/index')
+      //   ),
+      //   permission: DATA_ASSET_PERMISSIONS.LIST
+      // }
     ]
   },
   // 工作流运行记录
