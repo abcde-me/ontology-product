@@ -4,7 +4,8 @@ import {
   Table,
   Button,
   Pagination,
-  Message
+  Message,
+  Tooltip
 } from '@arco-design/web-react';
 import { ColumnProps } from '@arco-design/web-react/es/Table';
 import { SorterInfo } from '@arco-design/web-react/es/Table/interface';
@@ -146,19 +147,19 @@ function GenerateRecordModal({ visible, onClose }: GenerateRecordModalProps) {
       width: 120,
       fixed: 'right',
       render: (_: any, record: GenerateRecord) => {
-        // 0-生成中 1-生成失败 不显示下载按钮
-        if (record.status === 0 || record.status === 1) {
-          return '-';
-        }
+        // 0-生成中 1-生成失败
         const isDownloaded = record.status === 3;
         return (
-          <Button
-            type="text"
-            onClick={() => handleDownload(record)}
-            className="download-btn"
-          >
-            {isDownloaded ? '重新下载' : '下载'}
-          </Button>
+          <Tooltip content="标注结果生成中" disabled={record.status !== 0}>
+            <Button
+              disabled={record.status === 0 || record.status === 1}
+              type="text"
+              onClick={() => handleDownload(record)}
+              className="download-btn"
+            >
+              {isDownloaded ? '重新下载' : '下载'}
+            </Button>
+          </Tooltip>
         );
       }
     }

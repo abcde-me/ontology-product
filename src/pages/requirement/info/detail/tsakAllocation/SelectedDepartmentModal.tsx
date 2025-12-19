@@ -10,6 +10,7 @@ import {
   filterTreeDataByPerms
 } from '../../../hooks/useDepartmentTree';
 import noDataElement from '@/components/no-data';
+import { EllipsisPopover } from '@ceai-front/arco-material';
 
 // 获取部门完整路径标题
 const getFullPathTitle = (
@@ -88,19 +89,7 @@ const SelectedDepartmentModal: React.FC<SelectedDepartmentModalProps> = ({
       title: '部门名称',
       dataIndex: 'name',
       ellipsis: true,
-      render: (text: string) => (
-        <Tooltip content={text}>
-          <div
-            style={{
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              whiteSpace: 'nowrap'
-            }}
-          >
-            {text}
-          </div>
-        </Tooltip>
-      )
+      render: (text: string) => <EllipsisPopover value={text} />
     }
   ];
 
@@ -122,7 +111,7 @@ const SelectedDepartmentModal: React.FC<SelectedDepartmentModalProps> = ({
       style={{ width: '800px' }}
       footer={null}
     >
-      <div style={{ padding: '0 12px' }}>
+      <div style={{ paddingBottom: '20px' }}>
         <Table
           rowKey="id"
           columns={columns}

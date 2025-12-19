@@ -13,10 +13,11 @@ import {
 } from '@arco-design/web-react';
 import { getIndividualList } from '@/api/individualAndDepartment';
 import { useDepartmentTree } from '../../hooks/useDepartmentTree';
-import EllipsisPopover from '@/components/ellipsis-popover-com';
+// import EllipsisPopover from '@/components/ellipsis-popover-com';
 import noDataElement from '@/components/no-data';
 import { IconCaretDown } from '@arco-design/web-react/icon';
 import './IndividualModal.scss';
+import { EllipsisPopover } from '@ceai-front/arco-material';
 
 interface DataSourceModalProps {
   visible: boolean;
@@ -134,17 +135,10 @@ const IndividualModal: React.FC<DataSourceModalProps> = ({
         treeData={treeData}
         renderTitle={(node: any) => {
           return (
-            <div
-              style={{
-                width: node?.childrenData?.length > 0 ? '170px' : '120px',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                whiteSpace: 'nowrap',
-                color: '#0F172A'
-              }}
-            >
-              <Tooltip content={node.title}>{node.title}</Tooltip>
-            </div>
+            <EllipsisPopover
+              value={node.title}
+              style={{ width: '170px', color: '#0F172A' }}
+            />
           );
         }}
         onSelect={(value) => {
@@ -171,10 +165,7 @@ const IndividualModal: React.FC<DataSourceModalProps> = ({
       dataIndex: 'id',
       width: 327,
       render: (_, record) => (
-        <EllipsisPopover
-          value={renderEmptyPlaceholder(record.id)}
-          isEdit={false}
-        />
+        <EllipsisPopover value={renderEmptyPlaceholder(record.id)} />
       )
     }
   ];
@@ -192,10 +183,7 @@ const IndividualModal: React.FC<DataSourceModalProps> = ({
       dataIndex: 'id',
       width: 200,
       render: (_, record) => (
-        <EllipsisPopover
-          value={renderEmptyPlaceholder(record.id)}
-          isEdit={false}
-        />
+        <EllipsisPopover value={renderEmptyPlaceholder(record.id)} />
       )
     },
     {
@@ -204,19 +192,7 @@ const IndividualModal: React.FC<DataSourceModalProps> = ({
       ellipsis: true,
       render: (_: any, record: any) => {
         const fullOrgPath = record?.organization?.fullOrgPath || '-';
-        return (
-          <Tooltip content={fullOrgPath}>
-            <div
-              style={{
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                whiteSpace: 'nowrap'
-              }}
-            >
-              {fullOrgPath}
-            </div>
-          </Tooltip>
-        );
+        return <EllipsisPopover value={fullOrgPath} />;
       }
     },
     {
@@ -288,6 +264,7 @@ const IndividualModal: React.FC<DataSourceModalProps> = ({
         activeTab={activeTab}
         onChange={setActiveTab}
         type="line"
+        inkBarSize={{ width: 70 }}
         style={{ marginTop: '-16px' }}
       >
         <Tabs.TabPane title="全部个人" key="all">
@@ -296,7 +273,7 @@ const IndividualModal: React.FC<DataSourceModalProps> = ({
               <div className="search-input">
                 <InputSearch
                   type="text"
-                  placeholder="请输入部门搜索"
+                  placeholder="输入搜索部门"
                   onChange={(value) => {
                     setSearchValue(value);
                   }}
@@ -382,7 +359,7 @@ const IndividualModal: React.FC<DataSourceModalProps> = ({
           <div className="individual-modal-content" style={{ border: 'none' }}>
             <div
               className="individual-selected-content"
-              style={{ width: '100%', paddingLeft: '12px' }}
+              style={{ width: '100%' }}
             >
               <Table
                 rowKey="id"

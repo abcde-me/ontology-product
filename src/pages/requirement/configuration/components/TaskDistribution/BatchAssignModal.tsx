@@ -107,7 +107,14 @@ const BatchAssignModal: React.FC<BatchAssignModalProps> = ({
         key={props.value}
         closable={props.closable}
         onClose={props.onClose}
-        style={{ margin: '2px 4px 2px 0' }}
+        style={{
+          margin: '1px 4px 2px 0',
+          padding: '6px 8px',
+          fontSize: '14px',
+          backgroundColor: '#E7ECF0',
+          borderRadius: '2px',
+          color: '#0F172A'
+        }}
       >
         {displayLabel}
       </Tag>
@@ -241,7 +248,12 @@ const BatchAssignModal: React.FC<BatchAssignModalProps> = ({
             {processOptions.map((option) => (
               <Select.Option key={option.value} value={option.value}>
                 <div
-                  style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    fontWeight: 400
+                  }}
                 >
                   {renderOptionIcon(option.roleType)}
                   <span>
@@ -251,7 +263,9 @@ const BatchAssignModal: React.FC<BatchAssignModalProps> = ({
                       : `${option.roleType.split('_')[1]}轮质检`}
                   </span>
                   {option.isConfigured && (
-                    <span style={{ fontSize: '14px' }}>(已配)</span>
+                    <span style={{ fontSize: '14px', color: '#7F8C9F' }}>
+                      (已配)
+                    </span>
                   )}
                 </div>
               </Select.Option>
@@ -288,7 +302,7 @@ const BatchAssignModal: React.FC<BatchAssignModalProps> = ({
             >
               选择
             </Button>
-            <span>
+            <span style={{ fontSize: '14px', color: '#6E7B8D' }}>
               已选{' '}
               {assignType === 'department'
                 ? selectedDepartments.length

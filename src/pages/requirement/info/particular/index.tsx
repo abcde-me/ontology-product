@@ -7,6 +7,7 @@ import { useParams } from '@/utils/url';
 import dayjs from 'dayjs';
 import './index.scss';
 import { openNewPage } from '@/utils/env';
+import { EllipsisPopover } from '@ceai-front/arco-material';
 
 const InputSearch = Input.Search;
 
@@ -204,12 +205,14 @@ function RequirementParticular({ isActive }: RequirementParticularProps) {
     {
       title: '当前操作人',
       dataIndex: 'task_owner_name',
-      width: 140
+      width: 140,
+      render: (text: string) => <EllipsisPopover value={text || '-'} />
     },
     {
       title: '标注员',
       dataIndex: 'label_user',
-      width: 120
+      width: 120,
+      render: (text: string) => <EllipsisPopover value={text || '-'} />
     },
     {
       title: '更新时间',

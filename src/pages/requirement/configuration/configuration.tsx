@@ -17,7 +17,7 @@ import { IconArrowLeft, IconQuestionCircle } from '@arco-design/web-react/icon';
 import { cloneDeep, isArray, isEmpty, omitBy } from 'lodash-es';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useHistory } from 'react-router';
-import { convertToUTCFormat } from '../common';
+import { convertToUTCFormat, TYPE_MAP_TEXT } from '../common';
 import {
   useGetModelLabelList,
   useGetModelList
@@ -703,7 +703,7 @@ export default function RequirementConfig() {
           ? await editRequirement(obj as any)
           : await publishRequirement(obj as any);
       if (res.code === 'success') {
-        Message.success('创建成功');
+        Message.success(`${TYPE_MAP_TEXT[type]}成功`);
         history.goBack();
       }
       setLoading(false);

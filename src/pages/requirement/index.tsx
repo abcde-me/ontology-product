@@ -1,12 +1,8 @@
-import {
-  getAnnotationDownload,
-  getAnnotationList,
-  deleteRequirement
-} from '@/api/dataAnnotation';
-import CreatIcon from '@/assets/annotation/requirement-creat.svg';
-import QualityIcon from '@/assets/annotation/requirement-quality.svg';
+import { deleteRequirement, getAnnotationList } from '@/api/dataAnnotation';
 import AnnotationIcon from '@/assets/annotation/requirement-annotation.svg';
+import CreatIcon from '@/assets/annotation/requirement-creat.svg';
 import ExportIcon from '@/assets/annotation/requirement-export.svg';
+import QualityIcon from '@/assets/annotation/requirement-quality.svg';
 import EllipsisPopover from '@/components/ellipsis-popover-com';
 import noDataElement from '@/components/no-data';
 import { PermissionWrapper } from '@/components/PermissionGuard';
@@ -27,17 +23,17 @@ import { ColumnProps } from '@arco-design/web-react/es/Table';
 import { SorterInfo } from '@arco-design/web-react/es/Table/interface';
 import { IconPlus } from '@arco-design/web-react/icon';
 import {
+  ActionItem,
   DotStatus,
   ExpandableProcessFlow,
-  ProcessStep,
   OperationMenu,
-  ActionItem
+  ProcessStep
 } from '@ceai-front/arco-material';
 import React, { useEffect, useState } from 'react';
 import { useHistory } from 'react-router';
 import { REQUIREMENT_STATUS_CONFIG } from './common';
 import './index.scss';
-import { RequirementStatus, RequirementType, RequirementTypeMap } from './type';
+import { RequirementType, RequirementTypeMap } from './type';
 
 interface RequirementProcessStep extends Omit<ProcessStep, 'description'> {
   description: React.ReactNode;
