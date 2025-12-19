@@ -18,6 +18,7 @@ import { WorkflowDetailRes } from '@/types/workflowApi';
 import { BlockEnum, NodeProps } from '@/pages/workflowConfig/workflow/types';
 import cn from 'classnames';
 import { cloneDeep } from 'lodash-es';
+import { DependItem } from '@/pages/workflowConfig/workflow/nodes/dependent-node/types';
 
 interface IState {
   task_type: 'workflow' | BlockEnum;
@@ -98,8 +99,8 @@ export const DependentTaskDialog = () => {
   const [currentFlow, setCurrentFlow] = useState<string>('');
   // 当前选中的所有任务
   const [currentSelectTask, setCurrentSelectTask] = useState<
-    Map<React.Key, any>
-  >(new Map<React.Key, any>());
+    Map<React.Key, DependItem>
+  >(new Map<React.Key, DependItem>());
   const { tableProps, onSubmit } = useArcoTable(
     ({ pagination, query }) => {
       const searchParams = {
@@ -122,11 +123,33 @@ export const DependentTaskDialog = () => {
 
   const { data: list, loading } = tableProps;
 
+  const generateNewDependentTasks = (data: TaskData): DependItem => {
+    if ('workflow_uuid' in data) {
+      return {
+        dependentType: 'DEPENDENT_ON_WORKFLOW',
+        definitionCode: data.workflow_uuid,
+        depTaskCode: 0,
+        parameterPassing: false,
+        title: data.workflow_name,
+        desc: data.description || ''
+      };
+    }
+    return {
+      dependentType: 'DEPENDENT_ON_WORKFLOW',
+      definitionCode: data.id,
+      depTaskCode: 0,
+      parameterPassing: false,
+      title: data.data.title,
+      task_type: data.data.type,
+      desc: data.data.desc || ''
+    };
+  };
+
   const onSelectWorkflow = (data: WorkflowDetailRes, checked: boolean) => {
     setCurrentSelectTask((prevState) => {
       const map = cloneDeep(prevState);
       checked
-        ? map.set(data.workflow_uuid, data)
+        ? map.set(data.workflow_uuid, generateNewDependentTasks(data))
         : map.delete(data.workflow_uuid);
       return map;
     });
@@ -170,7 +193,7 @@ export const DependentTaskDialog = () => {
             </Spin>
           </div>
           <div className={`${styles['left-footer']} flex-end flex-shrink-0`}>
-            <Pagination {...tableProps.pagination} className={'justify-end'} />
+            {/*<Pagination {...tableProps.pagination} className={'justify-end'} />*/}
           </div>
         </div>
         <div
@@ -183,29 +206,27 @@ export const DependentTaskDialog = () => {
             <IconDelete />
           </div>
           <div className={'flex-1 overflow-auto'}>
-            <div className={'mb-2 flex items-center justify-between'}>
-              <div className={'flex items-center gap-2'}>
-                <BlockIcon size={'md'} type={'start'} />
-                <div>
-                  <Typography.Text bold className={'mb-1'}>
-                    任务节点
-                  </Typography.Text>
-                  <div>这是一条神奇的天路</div>
+            {Array.from(currentSelectTask.entries()).map(([key, item]) => {
+              const { task_type = 'workflow', desc, title } = item;
+              return (
+                <div
+                  className={'mb-2 flex items-center justify-between'}
+                  key={key}
+                >
+                  <div className={'flex items-center gap-2'}>
+                    {/*@ts-ignore*/}
+                    <BlockIcon size={'md'} type={task_type} />
+                    <div>
+                      <Typography.Text bold className={'mb-1'}>
+                        {title}
+                      </Typography.Text>
+                      {!!desc && <div>{desc}</div>}
+                    </div>
+                  </div>
+                  <IconClose />
                 </div>
-              </div>
-              <IconClose />
-            </div>
-            <div className={'mb-2 flex items-center justify-between'}>
-              <div className={'flex items-center gap-2'}>
-                <BlockIcon size={'md'} type={'start'} />
-                <div>
-                  <Typography.Text bold className={'mb-1'}>
-                    任务节点
-                  </Typography.Text>
-                </div>
-              </div>
-              <IconClose />
-            </div>
+              );
+            })}
           </div>
         </div>
       </div>
