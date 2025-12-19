@@ -10,8 +10,8 @@ import getLabelByValue from '@/utils/getLabelByValue';
 import styles from '../styles/detail.module.scss';
 
 const ModalDetail = (props) => {
+  // 默认显示对象为空
   const [DetailData, setDetailData] = useState<connectorDetailType | null>(
-    // 默认显示对象为空
     null
   );
   // 默认弹框的状态
