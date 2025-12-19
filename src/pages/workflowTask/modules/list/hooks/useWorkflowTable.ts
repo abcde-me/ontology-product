@@ -1,5 +1,5 @@
-import { useState, useCallback, useEffect, useRef } from 'react';
-import { useRequest } from 'ahooks';
+import { useState, useCallback, useEffect } from 'react';
+import { useRequest, useUpdateEffect } from 'ahooks';
 import { FormInstance } from '@arco-design/web-react';
 import { PaginationProps } from '@arco-design/web-react';
 import { SorterInfo } from '@arco-design/web-react/lib/Table/interface';
@@ -26,7 +26,8 @@ export interface UseWorkflowTableOptions<TData, TParams> {
   formatParams?: (
     formValues: any,
     pagination: PaginationProps,
-    sorter?: SorterInfo
+    sorter?: SorterInfo,
+    filters?: Record<string, any>
   ) => TParams;
 }
 
@@ -44,7 +45,7 @@ export interface UseWorkflowTableReturn<TData> {
   /** 重置搜索 */
   reset: () => void;
   /** 表格变化处理器 */
-  onChange: (pagination: any, sorter?: any) => void;
+  onChange: (pagination: any, sorter?: any, filters?: any) => void;
 }
 
 /**
@@ -69,15 +70,21 @@ export function useWorkflowTable<TData = any, TParams = any>(
   });
 
   const [sorter, setSorter] = useState<SorterInfo>();
-  const isFirstMount = useRef(true);
+  const [filters, setFilters] = useState<Record<string, any>>({});
 
   // 构建请求参数
   const buildParams = useCallback(
-    (page?: number, pageSize?: number, currentSorter?: SorterInfo) => {
+    (
+      page?: number,
+      pageSize?: number,
+      currentSorter?: SorterInfo,
+      currentFilters?: Record<string, any>
+    ) => {
       const formValues = form?.getFieldsValue() || {};
       const currentPage = page ?? pagination.current;
       const currentPageSize = pageSize ?? pagination.pageSize;
       const currentSorterValue = currentSorter ?? sorter;
+      const currentFiltersValue = currentFilters ?? filters;
 
       if (formatParams) {
         return formatParams(
@@ -86,7 +93,8 @@ export function useWorkflowTable<TData = any, TParams = any>(
             current: currentPage,
             pageSize: currentPageSize
           } as PaginationProps,
-          currentSorterValue
+          currentSorterValue,
+          currentFiltersValue
         );
       }
 
@@ -104,7 +112,14 @@ export function useWorkflowTable<TData = any, TParams = any>(
         })
       } as TParams;
     },
-    [form, pagination.current, pagination.pageSize, sorter, formatParams]
+    [
+      form,
+      pagination.current,
+      pagination.pageSize,
+      sorter,
+      filters,
+      formatParams
+    ]
   );
 
   // 请求数据
@@ -119,23 +134,20 @@ export function useWorkflowTable<TData = any, TParams = any>(
     }
   );
 
-  // 当分页、排序或依赖项变化时重新请求
-  useEffect(() => {
-    // 如果是首次挂载且manual=false，useRequest已经自动执行，不需要再次执行
-    if (isFirstMount.current) {
-      isFirstMount.current = false;
-      if (manual) {
-        // manual=true时，首次挂载不执行，等待手动触发
-        return;
-      }
-      // manual=false时，useRequest已经自动执行，这里不需要再次执行
-      return;
-    }
-    // 非首次挂载时，依赖项变化才执行
+  // 当分页、排序、过滤或依赖项变化时重新请求（跳过首次挂载）
+  useUpdateEffect(() => {
     if (!manual) {
       run();
     }
-  }, [pagination.current, pagination.pageSize, sorter, ...deps, run, manual]);
+  }, [
+    pagination.current,
+    pagination.pageSize,
+    sorter,
+    filters,
+    manual,
+    run,
+    ...deps
+  ]);
 
   // 更新分页数据
   const updatePagination = useCallback((page: number, pageSize?: number) => {
@@ -148,11 +160,20 @@ export function useWorkflowTable<TData = any, TParams = any>(
 
   // 表格变化处理器
   const onChange = useCallback(
-    (newPagination: PaginationProps, newSorter?: SorterInfo) => {
+    (
+      newPagination: PaginationProps,
+      newSorter?: SorterInfo,
+      newFilters?: Record<string, any>
+    ) => {
+      console.log('33333', newPagination, newSorter, newFilters);
       if (newSorter !== undefined) {
         setSorter(newSorter);
         setPagination((prev) => ({ ...prev, current: 1 }));
-        return;
+      }
+
+      if (newFilters !== undefined) {
+        setFilters(newFilters);
+        setPagination((prev) => ({ ...prev, current: 1 }));
       }
 
       if (
@@ -162,17 +183,16 @@ export function useWorkflowTable<TData = any, TParams = any>(
         updatePagination(newPagination.current || 1, newPagination.pageSize);
       }
     },
-    [pagination.current, pagination.pageSize, updatePagination]
+    [pagination, updatePagination, filters, sorter]
   );
 
   // 提交搜索（重置到第一页）
   const submit = useCallback(() => {
     setPagination((prev) => ({ ...prev, current: 1 }));
     setSorter(undefined);
-    if (!manual) {
-      run();
-    }
-  }, [run, manual]);
+    setFilters({});
+    // 不在这里手动调用 run()，让 useUpdateEffect 统一处理状态变化导致的请求
+  }, []);
 
   // 重置搜索
   const reset = useCallback(() => {
@@ -183,10 +203,9 @@ export function useWorkflowTable<TData = any, TParams = any>(
       total: 0
     });
     setSorter(undefined);
-    if (!manual) {
-      run();
-    }
-  }, [form, defaultPageSize, run, manual]);
+    setFilters({});
+    // 不在这里手动调用 run()，让 useUpdateEffect 统一处理状态变化导致的请求
+  }, [form, defaultPageSize]);
 
   // 刷新数据
   const handleRefresh = useCallback(() => {

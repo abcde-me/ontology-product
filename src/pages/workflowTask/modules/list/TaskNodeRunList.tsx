@@ -16,9 +16,13 @@ import {
 } from '@arco-design/web-react/icon';
 import { useUserInfoStore } from '@/store/userInfoStore';
 import { getTaskNodeList } from '@/api/workflowTask';
-import type {
-  TaskNodeItem,
-  GetTaskNodeListParams
+import {
+  type TaskNodeItem,
+  type GetTaskNodeListParams,
+  CommandTypeNameMap,
+  CommandType,
+  TaskExecuteType,
+  TaskExecuteTypeNameMap
 } from '@/types/workflowTaskApi';
 import { useWorkflowTable } from './hooks/useWorkflowTable';
 import {
@@ -42,25 +46,29 @@ export default function TaskNodeRunList() {
     (
       formValues: any,
       pagination: PaginationProps,
-      sorter?: SorterInfo
+      sorter?: SorterInfo,
+      filters?: Record<string, any>
     ): GetTaskNodeListParams => {
-      const orders = sorter
-        ? [
-            {
-              asc: sorter.direction === 'ascend',
-              column: (sorter.field as string) || ''
-            }
-          ]
-        : [];
+      const orders =
+        sorter?.direction && sorter.field
+          ? [
+              {
+                asc: sorter.direction === 'ascend',
+                column: sorter.field as string
+              }
+            ]
+          : [];
+
+      console.log('filters', filters);
 
       return {
         page: pagination.current || 1,
         page_size: pagination.pageSize || 10,
         keywords: formValues.keywords || '',
-        state: formValues.state || '',
-        command_type: formValues.command_type,
-        task_execute_type: formValues.task_execute_type,
-        task_type: formValues.task_type,
+        state_list: formValues.state ? [formValues.state] : [],
+        command_type_list: filters?.command_type_name ?? [],
+        task_execute_type_list: filters?.task_execute_type_name ?? [],
+        task_type: filters?.task_type_name ?? '',
         orders,
         id: 0,
         process_instance_id: formValues.process_instance_id
@@ -111,7 +119,16 @@ export default function TaskNodeRunList() {
         title: '任务模式',
         dataIndex: 'task_execute_type_name',
         width: 120,
-        filters: []
+        filters: [
+          {
+            text: TaskExecuteTypeNameMap[TaskExecuteType.OFFLINE],
+            value: TaskExecuteType.OFFLINE
+          },
+          {
+            text: TaskExecuteTypeNameMap[TaskExecuteType.REALTIME],
+            value: TaskExecuteType.REALTIME
+          }
+        ]
       },
       {
         title: '任务节点类型',
@@ -123,17 +140,25 @@ export default function TaskNodeRunList() {
         title: '运行类型',
         dataIndex: 'command_type_name',
         width: 120,
-        filters: []
+        filters: [
+          {
+            text: CommandTypeNameMap[CommandType.SCHEDULER],
+            value: CommandType.SCHEDULER
+          },
+          {
+            text: CommandTypeNameMap[CommandType.START_PROCESS],
+            value: CommandType.START_PROCESS
+          }
+        ]
       },
       {
         title: '运行状态',
         dataIndex: 'state',
         width: 150,
         render: (state: string, record: TaskNodeItem) => {
-          const statusMap = TASK_NODE_RUN_STATUS_MAP[state.toLowerCase()] ||
-            TASK_NODE_RUN_STATUS_MAP[
-              record.state_name?.toLowerCase() || ''
-            ] || {
+          // 使用原始状态值（新的枚举值），如果不存在则使用 state_name，最后使用默认值
+          const statusMap = TASK_NODE_RUN_STATUS_MAP[state] ||
+            TASK_NODE_RUN_STATUS_MAP[record.state_name || ''] || {
               text: record.state_name || state,
               color: '#666',
               dotColor: '#666'
@@ -262,8 +287,8 @@ export default function TaskNodeRunList() {
         border={false}
         rowKey="task_code"
         noDataElement={noDataElement({ description: '暂无数据' })}
-        onChange={(pagination, sorter) => {
-          table.onChange(pagination, sorter);
+        onChange={(pagination, sorter, filters) => {
+          table.onChange(pagination, sorter, filters);
         }}
       />
 

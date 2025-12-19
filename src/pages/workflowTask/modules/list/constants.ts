@@ -1,3 +1,8 @@
+import {
+  WorkflowTaskStatus,
+  WorkflowTaskStatusNameMap
+} from '@/types/workflowTaskApi';
+
 /**
  * 工作流运行状态映射
  */
@@ -5,13 +10,81 @@ export const WORKFLOW_RUN_STATUS_MAP: Record<
   string,
   { text: string; color: string; dotColor: string }
 > = {
-  waiting: { text: '等待运行', color: '#007DFA', dotColor: '#007DFA' },
-  running: { text: '正在运行', color: '#007DFA', dotColor: '#007DFA' },
-  paused: { text: '运行暂停', color: '#94A3B8', dotColor: '#94A3B8' },
-  success: { text: '运行结束', color: '#10B981', dotColor: '#10B981' },
-  fail: { text: '运行结束', color: '#10B981', dotColor: '#10B981' },
-  kill: { text: '手动结束', color: '#10B981', dotColor: '#10B981' },
-  stopped: { text: '运行结束', color: '#10B981', dotColor: '#10B981' }
+  [WorkflowTaskStatus.SUBMITTED_SUCCESS]: {
+    text: WorkflowTaskStatusNameMap[WorkflowTaskStatus.SUBMITTED_SUCCESS],
+    color: '#10B981',
+    dotColor: '#10B981'
+  },
+  [WorkflowTaskStatus.RUNNING_EXECUTION]: {
+    text: WorkflowTaskStatusNameMap[WorkflowTaskStatus.RUNNING_EXECUTION],
+    color: '#007DFA',
+    dotColor: '#007DFA'
+  },
+  [WorkflowTaskStatus.READY_PAUSE]: {
+    text: WorkflowTaskStatusNameMap[WorkflowTaskStatus.READY_PAUSE],
+    color: '#94A3B8',
+    dotColor: '#94A3B8'
+  },
+  [WorkflowTaskStatus.PAUSE]: {
+    text: WorkflowTaskStatusNameMap[WorkflowTaskStatus.PAUSE],
+    color: '#94A3B8',
+    dotColor: '#94A3B8'
+  },
+  [WorkflowTaskStatus.READY_STOP]: {
+    text: WorkflowTaskStatusNameMap[WorkflowTaskStatus.READY_STOP],
+    color: '#F59E0B',
+    dotColor: '#F59E0B'
+  },
+  [WorkflowTaskStatus.STOP]: {
+    text: WorkflowTaskStatusNameMap[WorkflowTaskStatus.STOP],
+    color: '#EF4444',
+    dotColor: '#EF4444'
+  },
+  [WorkflowTaskStatus.FAILURE]: {
+    text: WorkflowTaskStatusNameMap[WorkflowTaskStatus.FAILURE],
+    color: '#EF4444',
+    dotColor: '#EF4444'
+  },
+  [WorkflowTaskStatus.SUCCESS]: {
+    text: WorkflowTaskStatusNameMap[WorkflowTaskStatus.SUCCESS],
+    color: '#10B981',
+    dotColor: '#10B981'
+  },
+  [WorkflowTaskStatus.NEED_FAULT_TOLERANCE]: {
+    text: WorkflowTaskStatusNameMap[WorkflowTaskStatus.NEED_FAULT_TOLERANCE],
+    color: '#F59E0B',
+    dotColor: '#F59E0B'
+  },
+  [WorkflowTaskStatus.KILL]: {
+    text: WorkflowTaskStatusNameMap[WorkflowTaskStatus.KILL],
+    color: '#EF4444',
+    dotColor: '#EF4444'
+  },
+  [WorkflowTaskStatus.DELAY_EXECUTION]: {
+    text: WorkflowTaskStatusNameMap[WorkflowTaskStatus.DELAY_EXECUTION],
+    color: '#94A3B8',
+    dotColor: '#94A3B8'
+  },
+  [WorkflowTaskStatus.SERIAL_WAIT]: {
+    text: WorkflowTaskStatusNameMap[WorkflowTaskStatus.SERIAL_WAIT],
+    color: '#007DFA',
+    dotColor: '#007DFA'
+  },
+  [WorkflowTaskStatus.READY_BLOCK]: {
+    text: WorkflowTaskStatusNameMap[WorkflowTaskStatus.READY_BLOCK],
+    color: '#F59E0B',
+    dotColor: '#F59E0B'
+  },
+  [WorkflowTaskStatus.BLOCK]: {
+    text: WorkflowTaskStatusNameMap[WorkflowTaskStatus.BLOCK],
+    color: '#F59E0B',
+    dotColor: '#F59E0B'
+  },
+  [WorkflowTaskStatus.WAIT_TO_RUN]: {
+    text: WorkflowTaskStatusNameMap[WorkflowTaskStatus.WAIT_TO_RUN],
+    color: '#007DFA',
+    dotColor: '#007DFA'
+  }
 };
 
 /**
@@ -21,21 +94,81 @@ export const TASK_NODE_RUN_STATUS_MAP: Record<
   string,
   { text: string; color: string; dotColor: string }
 > = {
-  waiting: { text: '等待运行', color: '#007DFA', dotColor: '#007DFA' },
-  'scheduled-waiting': {
-    text: '定时待运行',
+  [WorkflowTaskStatus.SUBMITTED_SUCCESS]: {
+    text: WorkflowTaskStatusNameMap[WorkflowTaskStatus.SUBMITTED_SUCCESS],
+    color: '#10B981',
+    dotColor: '#10B981'
+  },
+  [WorkflowTaskStatus.RUNNING_EXECUTION]: {
+    text: WorkflowTaskStatusNameMap[WorkflowTaskStatus.RUNNING_EXECUTION],
     color: '#007DFA',
     dotColor: '#007DFA'
   },
-  running: { text: '正在运行', color: '#007DFA', dotColor: '#007DFA' },
-  paused: { text: '运行暂停', color: '#007DFA', dotColor: '#007DFA' },
-  success: { text: '运行成功', color: '#10B981', dotColor: '#10B981' },
-  'force-success': { text: '强制成功', color: '#10B981', dotColor: '#10B981' },
-  fail: { text: '运行失败', color: '#EF4444', dotColor: '#EF4444' },
-  failed: { text: '运行失败', color: '#EF4444', dotColor: '#EF4444' },
-  killed: { text: '运行终止', color: '#EF4444', dotColor: '#EF4444' },
-  kill: { text: 'Kill', color: '#EF4444', dotColor: '#EF4444' },
-  'risky-run': { text: '风险运行', color: '#EF4444', dotColor: '#EF4444' }
+  [WorkflowTaskStatus.READY_PAUSE]: {
+    text: WorkflowTaskStatusNameMap[WorkflowTaskStatus.READY_PAUSE],
+    color: '#94A3B8',
+    dotColor: '#94A3B8'
+  },
+  [WorkflowTaskStatus.PAUSE]: {
+    text: WorkflowTaskStatusNameMap[WorkflowTaskStatus.PAUSE],
+    color: '#94A3B8',
+    dotColor: '#94A3B8'
+  },
+  [WorkflowTaskStatus.READY_STOP]: {
+    text: WorkflowTaskStatusNameMap[WorkflowTaskStatus.READY_STOP],
+    color: '#F59E0B',
+    dotColor: '#F59E0B'
+  },
+  [WorkflowTaskStatus.STOP]: {
+    text: WorkflowTaskStatusNameMap[WorkflowTaskStatus.STOP],
+    color: '#EF4444',
+    dotColor: '#EF4444'
+  },
+  [WorkflowTaskStatus.FAILURE]: {
+    text: WorkflowTaskStatusNameMap[WorkflowTaskStatus.FAILURE],
+    color: '#EF4444',
+    dotColor: '#EF4444'
+  },
+  [WorkflowTaskStatus.SUCCESS]: {
+    text: WorkflowTaskStatusNameMap[WorkflowTaskStatus.SUCCESS],
+    color: '#10B981',
+    dotColor: '#10B981'
+  },
+  [WorkflowTaskStatus.NEED_FAULT_TOLERANCE]: {
+    text: WorkflowTaskStatusNameMap[WorkflowTaskStatus.NEED_FAULT_TOLERANCE],
+    color: '#F59E0B',
+    dotColor: '#F59E0B'
+  },
+  [WorkflowTaskStatus.KILL]: {
+    text: WorkflowTaskStatusNameMap[WorkflowTaskStatus.KILL],
+    color: '#EF4444',
+    dotColor: '#EF4444'
+  },
+  [WorkflowTaskStatus.DELAY_EXECUTION]: {
+    text: WorkflowTaskStatusNameMap[WorkflowTaskStatus.DELAY_EXECUTION],
+    color: '#94A3B8',
+    dotColor: '#94A3B8'
+  },
+  [WorkflowTaskStatus.SERIAL_WAIT]: {
+    text: WorkflowTaskStatusNameMap[WorkflowTaskStatus.SERIAL_WAIT],
+    color: '#007DFA',
+    dotColor: '#007DFA'
+  },
+  [WorkflowTaskStatus.READY_BLOCK]: {
+    text: WorkflowTaskStatusNameMap[WorkflowTaskStatus.READY_BLOCK],
+    color: '#F59E0B',
+    dotColor: '#F59E0B'
+  },
+  [WorkflowTaskStatus.BLOCK]: {
+    text: WorkflowTaskStatusNameMap[WorkflowTaskStatus.BLOCK],
+    color: '#F59E0B',
+    dotColor: '#F59E0B'
+  },
+  [WorkflowTaskStatus.WAIT_TO_RUN]: {
+    text: WorkflowTaskStatusNameMap[WorkflowTaskStatus.WAIT_TO_RUN],
+    color: '#007DFA',
+    dotColor: '#007DFA'
+  }
 };
 
 /**
@@ -52,25 +185,130 @@ export const RUN_TYPE_OPTIONS = [
  * 工作流运行状态选项
  */
 export const WORKFLOW_STATUS_OPTIONS = [
-  { label: '等待运行', value: 'waiting' },
-  { label: '正在运行', value: 'running' },
-  { label: '运行暂停', value: 'paused' },
-  { label: '运行结束', value: 'success' },
-  { label: '手动结束', value: 'kill' }
+  {
+    label: WorkflowTaskStatusNameMap[WorkflowTaskStatus.SUBMITTED_SUCCESS],
+    value: WorkflowTaskStatus.SUBMITTED_SUCCESS
+  },
+  {
+    label: WorkflowTaskStatusNameMap[WorkflowTaskStatus.RUNNING_EXECUTION],
+    value: WorkflowTaskStatus.RUNNING_EXECUTION
+  },
+  {
+    label: WorkflowTaskStatusNameMap[WorkflowTaskStatus.READY_PAUSE],
+    value: WorkflowTaskStatus.READY_PAUSE
+  },
+  {
+    label: WorkflowTaskStatusNameMap[WorkflowTaskStatus.PAUSE],
+    value: WorkflowTaskStatus.PAUSE
+  },
+  {
+    label: WorkflowTaskStatusNameMap[WorkflowTaskStatus.READY_STOP],
+    value: WorkflowTaskStatus.READY_STOP
+  },
+  {
+    label: WorkflowTaskStatusNameMap[WorkflowTaskStatus.STOP],
+    value: WorkflowTaskStatus.STOP
+  },
+  {
+    label: WorkflowTaskStatusNameMap[WorkflowTaskStatus.FAILURE],
+    value: WorkflowTaskStatus.FAILURE
+  },
+  {
+    label: WorkflowTaskStatusNameMap[WorkflowTaskStatus.SUCCESS],
+    value: WorkflowTaskStatus.SUCCESS
+  },
+  {
+    label: WorkflowTaskStatusNameMap[WorkflowTaskStatus.NEED_FAULT_TOLERANCE],
+    value: WorkflowTaskStatus.NEED_FAULT_TOLERANCE
+  },
+  {
+    label: WorkflowTaskStatusNameMap[WorkflowTaskStatus.KILL],
+    value: WorkflowTaskStatus.KILL
+  },
+  {
+    label: WorkflowTaskStatusNameMap[WorkflowTaskStatus.DELAY_EXECUTION],
+    value: WorkflowTaskStatus.DELAY_EXECUTION
+  },
+  {
+    label: WorkflowTaskStatusNameMap[WorkflowTaskStatus.SERIAL_WAIT],
+    value: WorkflowTaskStatus.SERIAL_WAIT
+  },
+  {
+    label: WorkflowTaskStatusNameMap[WorkflowTaskStatus.READY_BLOCK],
+    value: WorkflowTaskStatus.READY_BLOCK
+  },
+  {
+    label: WorkflowTaskStatusNameMap[WorkflowTaskStatus.BLOCK],
+    value: WorkflowTaskStatus.BLOCK
+  },
+  {
+    label: WorkflowTaskStatusNameMap[WorkflowTaskStatus.WAIT_TO_RUN],
+    value: WorkflowTaskStatus.WAIT_TO_RUN
+  }
 ];
 
 /**
  * 任务节点运行状态选项
  */
 export const TASK_NODE_STATUS_OPTIONS = [
-  { label: '等待运行', value: 'waiting' },
-  { label: '定时待运行', value: 'scheduled-waiting' },
-  { label: '正在运行', value: 'running' },
-  { label: '运行暂停', value: 'paused' },
-  { label: '运行成功', value: 'success' },
-  { label: '强制成功', value: 'force-success' },
-  { label: '运行失败', value: 'fail' },
-  { label: '运行终止', value: 'killed' },
-  { label: '风险运行', value: 'risky-run' },
-  { label: 'Kill', value: 'kill' }
+  {
+    label: WorkflowTaskStatusNameMap[WorkflowTaskStatus.SUBMITTED_SUCCESS],
+    value: WorkflowTaskStatus.SUBMITTED_SUCCESS
+  },
+  {
+    label: WorkflowTaskStatusNameMap[WorkflowTaskStatus.RUNNING_EXECUTION],
+    value: WorkflowTaskStatus.RUNNING_EXECUTION
+  },
+  {
+    label: WorkflowTaskStatusNameMap[WorkflowTaskStatus.READY_PAUSE],
+    value: WorkflowTaskStatus.READY_PAUSE
+  },
+  {
+    label: WorkflowTaskStatusNameMap[WorkflowTaskStatus.PAUSE],
+    value: WorkflowTaskStatus.PAUSE
+  },
+  {
+    label: WorkflowTaskStatusNameMap[WorkflowTaskStatus.READY_STOP],
+    value: WorkflowTaskStatus.READY_STOP
+  },
+  {
+    label: WorkflowTaskStatusNameMap[WorkflowTaskStatus.STOP],
+    value: WorkflowTaskStatus.STOP
+  },
+  {
+    label: WorkflowTaskStatusNameMap[WorkflowTaskStatus.FAILURE],
+    value: WorkflowTaskStatus.FAILURE
+  },
+  {
+    label: WorkflowTaskStatusNameMap[WorkflowTaskStatus.SUCCESS],
+    value: WorkflowTaskStatus.SUCCESS
+  },
+  {
+    label: WorkflowTaskStatusNameMap[WorkflowTaskStatus.NEED_FAULT_TOLERANCE],
+    value: WorkflowTaskStatus.NEED_FAULT_TOLERANCE
+  },
+  {
+    label: WorkflowTaskStatusNameMap[WorkflowTaskStatus.KILL],
+    value: WorkflowTaskStatus.KILL
+  },
+  {
+    label: WorkflowTaskStatusNameMap[WorkflowTaskStatus.DELAY_EXECUTION],
+    value: WorkflowTaskStatus.DELAY_EXECUTION
+  },
+  {
+    label: WorkflowTaskStatusNameMap[WorkflowTaskStatus.SERIAL_WAIT],
+    value: WorkflowTaskStatus.SERIAL_WAIT
+  },
+  {
+    label: WorkflowTaskStatusNameMap[WorkflowTaskStatus.READY_BLOCK],
+    value: WorkflowTaskStatus.READY_BLOCK
+  },
+  {
+    label: WorkflowTaskStatusNameMap[WorkflowTaskStatus.BLOCK],
+    value: WorkflowTaskStatus.BLOCK
+  },
+  {
+    label: WorkflowTaskStatusNameMap[WorkflowTaskStatus.WAIT_TO_RUN],
+    value: WorkflowTaskStatus.WAIT_TO_RUN
+  }
 ];
