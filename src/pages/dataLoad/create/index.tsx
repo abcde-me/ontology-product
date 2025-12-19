@@ -866,6 +866,22 @@ export default function DataLoadCreate() {
         }
         console.log('formValues', formValues);
         const formData = buildFormData(formValues, pathId, submitType);
+
+        const allIsPrimaryKeyEmpty = formData.field_mappings.every(
+          (item: { is_primary_key: string }) => {
+            return (
+              item.is_primary_key === '' ||
+              item.is_primary_key === null ||
+              item.is_primary_key === undefined
+            );
+          }
+        );
+
+        if (allIsPrimaryKeyEmpty) {
+          Message.error('请至少设置一个主键');
+          return;
+        }
+
         const res = await addLoad(formData);
 
         if (res.code === '' && res.status === 200) {

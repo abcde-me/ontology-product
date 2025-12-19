@@ -6,7 +6,8 @@ import {
   Button,
   Space,
   Typography,
-  Checkbox
+  Checkbox,
+  Message
 } from '@arco-design/web-react';
 import { divide, isBoolean } from 'lodash-es';
 import styles from './index.module.scss';
@@ -90,7 +91,7 @@ const EditableTable = ({
   const handleDeleteRow = (id: number) => {
     // 至少保留一行
     if (tableData.length <= 1) {
-      alert('至少需要保留一行数据');
+      Message.error('至少需要保留一行数据');
       return;
     }
     setTableData(tableData.filter((item) => item.id !== id));
@@ -173,7 +174,7 @@ const EditableTable = ({
       )
     },
     {
-      title: <div className={styles.title}>主建</div>,
+      title: <div className={styles.title}>主键</div>,
       dataIndex: 'is_primary_key',
       width: 60,
       render: (value: string, record: TableRow) => (
@@ -190,14 +191,14 @@ const EditableTable = ({
       width: 132,
       render: (_: any, record: TableRow) => (
         <div className={styles.operationBtn}>
-          <span
+          {/* <span
             className={styles.operateText}
             onClick={() => {
               handleAddRow(record);
             }}
           >
             添加行
-          </span>
+          </span> */}
           <span
             className={styles.operateText}
             onClick={() => handleDeleteRow(record.id)}
