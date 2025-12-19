@@ -112,7 +112,12 @@ const TaskDistributionPanel: React.FC<TaskDistributionPanelProps> = ({
         </span>
         {isEditMode && (
           <>
-            <Link onClick={() => setHistoryModalVisible(true)}>历史记录</Link>
+            <Link
+              onClick={() => setHistoryModalVisible(true)}
+              style={{ marginLeft: '4px' }}
+            >
+              历史记录
+            </Link>
             <Modal
               title="历史记录"
               visible={historyModalVisible}
@@ -120,7 +125,7 @@ const TaskDistributionPanel: React.FC<TaskDistributionPanelProps> = ({
               alignCenter={true}
               escToExit={true}
               maskClosable={true}
-              style={{ width: '1200px' }}
+              style={{ width: '1000px' }}
               footer={null}
             >
               <TaskAllocation requirementDetail={requirementDetail} />
@@ -220,7 +225,7 @@ const TaskDistributionPanel: React.FC<TaskDistributionPanelProps> = ({
           alignCenter={true}
           escToExit={true}
           maskClosable={true}
-          style={{ width: '1200px' }}
+          style={{ width: '1000px' }}
           footer={null}
         >
           <TaskAllocation requirementDetail={requirementDetail} />

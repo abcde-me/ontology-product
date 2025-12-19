@@ -11,7 +11,8 @@
 
 // 任务分配面板
 .task-allocation-panel {
-  width: 100%;
+  max-width: 1000px;
+  overflow-x: auto;
 
   .task-allocation-table {
     // 角色分配行布局
@@ -43,7 +44,7 @@
   border: 1px solid #e5e6eb;
   border-radius: 8px;
   background: #fff;
-  width: 180px;
+  width: 140px;
   flex-shrink: 0;
 
   .role-header {
@@ -84,7 +85,7 @@
       }
 
       .assignment-count {
-        color: #86909c;
+        color: #0f172a;
 
         .count-number {
           color: #3b82f6;

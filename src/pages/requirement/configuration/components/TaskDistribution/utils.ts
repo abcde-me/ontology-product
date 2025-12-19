@@ -77,7 +77,7 @@ export const generateTaskPackages = (
       );
     }
 
-    packages.unshift({
+    packages.push({
       taskId,
       taskBId: taskId,
       dataAmount:
