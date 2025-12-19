@@ -395,3 +395,140 @@ export interface GetWorkflowRunResultListResponse {
   workflow_name: string;
   workflow_version: string;
 }
+
+export interface GetWorkflowInstanceFilesParams {
+  /**
+   * 工作流实例ID
+   */
+  id?: string;
+  /**
+   * 当前页
+   */
+  page: number;
+  /**
+   * 每页条数
+   */
+  page_size: number;
+  /**
+   * 排序
+   */
+  orders?: {
+    /**
+     * 是否升序 true false
+     */
+    asc: boolean;
+    /**
+     * 排序字段名
+     */
+    column: string;
+  }[];
+  /**
+   * 任务节点类型
+   */
+  task_type_list?: string[];
+  /**
+   * 任务模式，0 离线、1  实时
+   */
+  task_execute_type_list?: TaskExecuteType[];
+  /**
+   * 运行类型，手动运行，定时运行
+   */
+  command_type_list?: CommandType[];
+  /**
+   * 运行状态，使用 WorkflowTaskStatus 枚举值
+   */
+  state_list?: WorkflowTaskStatus[];
+}
+
+export interface WorkflowInstanceFileItem {
+  /**
+   * 运行类型，手动运行，定时运行
+   */
+  command_type: CommandType;
+  /**
+   * 运行类型，手动运行，定时运行 中文
+   */
+  command_type_name: string;
+  /**
+   * 运行时长
+   */
+  duration: string;
+  /**
+   * 最大重试i次数
+   */
+  max_retry_times: number;
+  /**
+   * 所属工作流名称
+   */
+  process_definition_name: string;
+  /**
+   * 工作流执行ID
+   */
+  process_instance_id: string;
+  /**
+   * 工作流名称
+   */
+  process_instance_name: string;
+  /**
+   * 重试次数
+   */
+  retry_times: number;
+  /**
+   * 运行次数
+   */
+  run_times: string;
+  /**
+   * 开始时间
+   */
+  start_time: string;
+  /**
+   * 结束时间
+   */
+  end_time: string;
+  /**
+   * 运行状态，状态英文名
+   */
+  state: WorkflowTaskStatus;
+  /**
+   * 运行状态名称，状态中文名
+   */
+  state_name: (typeof WorkflowTaskStatusNameMap)[keyof typeof WorkflowTaskStatusNameMap];
+  /**
+   * 运行提交时间
+   */
+  submit_time: string;
+  /**
+   * 任务节点ID
+   */
+  task_code: string;
+  /**
+   * 任务模式，0 离线、1  实时
+   */
+  task_execute_type: TaskExecuteType;
+  /**
+   * 任务模式 ，离线、实时
+   */
+  task_execute_type_name: (typeof TaskExecuteTypeNameMap)[keyof typeof TaskExecuteTypeNameMap];
+  /**
+   * 任务名称，任务名称
+   */
+  task_name: string;
+  /**
+   * 任务类型中文名
+   */
+  task_type_name: string;
+  /**
+   * 任务节点类型
+   */
+  task_type?: string;
+}
+
+export interface GetWorkflowInstanceFilesResponse {
+  /**
+   * 列表
+   */
+  items: WorkflowInstanceFileItem[];
+  page: string;
+  page_size: string;
+  total: string;
+}

@@ -226,6 +226,8 @@ export const ModaForgeResourceEndpoints = {
   ExecuteProcessApi: PrefixAimdp + '/ExecuteProcess',
   // 获取工作流运行结果列表
   GetWorkflowInstanceInfoApi: PrefixAimdp + '/GetWorkflowInstanceInfo',
+  // 获取工作流单节点运行结果
+  GetWorkflowInstanceFilesApi: PrefixAimdp + '/GetWorkflowInstanceFiles',
 
   // 作业列表
   taskList: PrefixAimdp + '/ListWorkflowInstances',

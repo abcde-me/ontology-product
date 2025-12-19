@@ -165,7 +165,6 @@ export function useWorkflowTable<TData = any, TParams = any>(
       newSorter?: SorterInfo,
       newFilters?: Record<string, any>
     ) => {
-      console.log('33333', newPagination, newSorter, newFilters);
       if (newSorter !== undefined) {
         setSorter(newSorter);
         setPagination((prev) => ({ ...prev, current: 1 }));
