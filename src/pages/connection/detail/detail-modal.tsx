@@ -10,8 +10,8 @@ import getLabelByValue from '@/utils/getLabelByValue';
 import styles from '../styles/detail.module.scss';
 
 const ModalDetail = (props) => {
-  // 默认显示对象为空
   const [DetailData, setDetailData] = useState<connectorDetailType | null>(
+    // 默认显示对象为空
     null
   );
   // 默认弹框的状态
@@ -97,7 +97,7 @@ const ModalDetail = (props) => {
             <div className={styles['info-item']}>
               <span className={styles['item-label']}>数据源类型:</span>
               <span className={styles['item-value']}>
-                {DetailData?.type !== 'db'
+                {DetailData?.type !== 'db' && DetailData?.type !== 'mq'
                   ? (DetailData?.type && TYPE_CONFIG[DetailData.type]) ||
                     '未知类型'
                   : TYPE_CONFIG[DetailData?.sub_type]}
