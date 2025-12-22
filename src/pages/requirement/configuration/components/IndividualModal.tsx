@@ -213,6 +213,8 @@ const IndividualModal: React.FC<DataSourceModalProps> = ({
       organizationId: checkedKeys[0] || ''
     };
     try {
+      setTableData([]);
+      setTotal(0);
       const res = await getIndividualList({ ...sourceParams });
       if (res.code === 'Success') {
         setTableData(res?.data?.result || []);
