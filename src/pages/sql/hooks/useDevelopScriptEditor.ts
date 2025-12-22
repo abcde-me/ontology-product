@@ -555,9 +555,8 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
       return;
     }
 
-    // cancelGetRunResultPolling();
     cancelGetRunLogPolling();
-    // setRunLogStatus();
+    setRunLogStatus(RunLogStatus.CANCEL);
     // updateRunStatus(RunningStatus.IDLE);
     // 将该面板的最后状态也设置为未运行
     // setLastScriptRunStatus(RunningStatus.IDLE);
