@@ -378,6 +378,15 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
     // 保存后更新原始内容
     setOriginalContent(editorContent);
     Message.success('保存成功, 可前往脚本列表查看');
+
+    if (onTabUpdate) {
+      onTabUpdate(currentFile?.key ?? '', {
+        content: editorContent,
+        fileId: currentFile?.fileId ?? '',
+        scriptId: String(updateRes.data.script_id),
+        title: scriptName ?? ''
+      });
+    }
     return true;
   };
 

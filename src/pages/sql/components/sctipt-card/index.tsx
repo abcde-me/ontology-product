@@ -17,6 +17,7 @@ import Mock from 'mockjs';
 import styles from './index.module.scss';
 import { IconCopy, IconDelete, IconSearch } from '@arco-design/web-react/icon';
 import {
+  deleteDevelopScript,
   deleteDevelopScriptLogByVersion,
   getDevelopScriptLogByVersion,
   listDevelopScript,
@@ -171,8 +172,7 @@ const ScriptCard: React.FC<ScriptCardProps> = ({
   };
   // 删除脚本
   const deleteCardScript = async (id: number, type: number) => {
-    const res = await deleteDevelopScriptLogByVersion({
-      version: type,
+    const res = await deleteDevelopScript({
       script_id: Number(id)
     });
     if (res.status === 200 && res.code === '') {
