@@ -35,7 +35,6 @@ const ReleaseVersionModal: React.FC<ReleaseVersionModalProps> = ({
 
   useEffect(() => {
     if (visible) {
-      console.log('initialValues', initialValues);
       form.setFieldsValue({
         scriptName: initialValues?.scriptName,
         version: initialValues?.version,
