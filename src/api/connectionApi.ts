@@ -36,5 +36,5 @@ export async function PreviewConnectorSampleData(params: any) {
     .post(params)
     .inRegion()
     .do();
-  return res.data?.columns || [];
+  return res || [];
 }
