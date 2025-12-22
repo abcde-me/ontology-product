@@ -870,7 +870,7 @@ const EditorWorkspaceContent: React.FC<{
               initialValues={{
                 scriptName: scriptInfo?.script_name || '',
                 version: scriptInfo?.max_version
-                  ? `V${scriptInfo?.max_version}`
+                  ? `V${scriptInfo?.max_version + 1}`
                   : 'V1',
                 versionDesc: scriptInfo?.script_desc ?? ''
               }}
