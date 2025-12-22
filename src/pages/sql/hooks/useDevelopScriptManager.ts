@@ -288,8 +288,8 @@ export const useDevelopScriptManager = (
           script_id: node?.dataRef?.script_id
         });
 
-        if (copyRes.status !== 200) {
-          Message.error(copyRes.message);
+        if (copyRes.status !== 200 || !copyRes.data.script_id) {
+          Message.error(copyRes.message || '复制失败');
           return null;
         }
 

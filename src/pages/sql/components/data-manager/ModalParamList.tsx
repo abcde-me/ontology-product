@@ -18,6 +18,7 @@ import { IconRefresh } from '@arco-design/web-react/icon';
 import './ModalParamList.scss';
 import { ListDevelopSystemParamParams } from '@/types/sqlDevelopApi';
 import { listDevelopSystemParam } from '@/api/sql-develop';
+import noDataElement from '@/components/no-data';
 const FormItem = Form.Item;
 
 const defaultfileTypeList = [
@@ -89,19 +90,22 @@ const ModalParamList = ({ paramVisible, onCancel }) => {
     {
       title: '参数名',
       dataIndex: 'config_key',
-      ellipsis: true,
-      width: 174
+      width: 174,
+      render: (_, record) => (
+        <EllipsisPopover value={record.config_key} isEdit={false} />
+      )
     },
     {
-      title: '参数值',
-      dataIndex: 'config_value',
-      ellipsis: true,
-      width: 174
+      title: '示例',
+      dataIndex: 'config_demo',
+      width: 174,
+      render: (_, record) => (
+        <EllipsisPopover value={record.config_demo} isEdit={false} />
+      )
     },
     {
       title: '参数说明',
       dataIndex: 'config_desc',
-      ellipsis: true,
       width: 174,
       // 如果没有值显示暂无参数说明
       render: (_, record) =>
@@ -140,7 +144,7 @@ const ModalParamList = ({ paramVisible, onCancel }) => {
               />
             </FormItem>
             <FormItem
-              label="参数值:"
+              label="示例:"
               field="config_demo"
               style={{ marginRight: 8, marginBottom: 16 }}
             >
@@ -201,6 +205,7 @@ const ModalParamList = ({ paramVisible, onCancel }) => {
           rowKey="id"
           scroll={{ y: 500 }}
           pagination={false}
+          noDataElement={noDataElement({ description: '暂无数据' })}
         />
         {total > pageSize && (
           <div
