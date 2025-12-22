@@ -44,17 +44,63 @@
   }
 
   .runlog-content {
-    white-space: pre-wrap;
-    word-break: break-word;
-    padding: 12px;
-    max-height: 308px;
-    overflow-y: auto;
+    white-space: pre; // 仅按换行符换行，保留空格
+    word-break: normal; // 不在单词中间断行
+    overflow-wrap: normal; // 禁止自动换行
+    padding: 12px 0; // 只保留上下 padding，左右 padding 由虚拟列表项控制
+    // 使用 scroll 而不是 auto，避免滚动条出现/消失导致的抖动
+    overflow-x: scroll; // 始终显示横向滚动条，避免临界点抖动
   }
 
-  :global(.arco-tabs-content) {
-    padding: 0;
-    max-height: 308px;
-    overflow: hidden; // 移除外层滚动条，由内部内容控制
+  // .arco-tabs-content {
+  //   padding: 0;
+  //   flex: 1;
+  //   min-height: 0;
+  //   overflow: auto;
+
+  //   /** 支持虚拟列表 */
+  //   .arco-tabs-content-inner {
+  //     height: 100%;
+
+  //     .arco-tabs-content-item.arco-tabs-content-item-active {
+  //       height: 100%;
+
+  //       .arco-tabs-pane {
+  //         height: 100%;
+  //         overflow: auto;
+  //       }
+  //     }
+  //   }
+  // }
+
+  :global(.arco-tabs) {
+    // flex: 1;
+    display: flex;
+    flex-direction: column;
+    height: 308px;
+    overflow: hidden;
+
+    :global(.arco-tabs-content) {
+      padding: 0;
+      flex: 1;
+      min-height: 0;
+      overflow: hidden; // 改为 hidden，防止内容撑开容器
+      height: 308px; // 固定高度，确保 100% 能正确计算
+
+      /** 支持虚拟列表 - 使用嵌套选择器确保父元素有明确高度 */
+      :global(.arco-tabs-content-inner) {
+        height: 100%;
+
+        :global(.arco-tabs-content-item.arco-tabs-content-item-active) {
+          height: 100%;
+
+          :global(.arco-tabs-pane) {
+            height: 100%;
+            overflow: auto; // 在 pane 级别设置滚动
+          }
+        }
+      }
+    }
   }
 
   :global(.arco-collapse-item-header-title) {

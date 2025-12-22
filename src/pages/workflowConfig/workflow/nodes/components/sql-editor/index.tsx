@@ -22,6 +22,7 @@ const CodeEditor = (props: EditorProps) => {
     defaultValue,
     editorMode,
     changeMode,
+    className,
     ...otherProps
   } = props;
   return (
@@ -30,7 +31,7 @@ const CodeEditor = (props: EditorProps) => {
       value={value}
       onChange={onChange}
       defaultValue={defaultValue}
-      className={'code-editor '}
+      className={`code-editor ${className || ''}`}
       placeholder={props.placeholder}
       extensions={extension}
       basicSetup={{
@@ -154,8 +155,8 @@ const EditorMax = styled.div`
   pointer-events: auto;
   padding: 10px;
   position: fixed;
-  width: calc(100vw - 200px);
-  height: calc(100vh - 106px);
+  width: 100vw;
+  height: calc(100vh - 56px);
 
   .editor-header {
     border-bottom: 1px solid #e2e8f0;

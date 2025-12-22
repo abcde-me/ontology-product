@@ -108,7 +108,7 @@ export default memo(function TestNode(props: {
         ) : (
           <IconCaretRight
             className={'h-4 w-4 cursor-pointer text-text-tertiary'}
-            onClick={() => handleTestNode(nodeId)}
+            onClick={() => handleTestNode(nodeId as string)}
           />
         )}
       </Tooltip>

@@ -24,7 +24,16 @@ import {
   IconUp
 } from '@arco-design/web-react/icon';
 import copy from 'copy-to-clipboard';
-import React, { memo, useEffect, useState, useRef } from 'react';
+import React, {
+  memo,
+  useEffect,
+  useState,
+  useRef,
+  useLayoutEffect,
+  useCallback,
+  useMemo
+} from 'react';
+import { useVirtualList } from 'ahooks';
 import { useEditorContext } from '../../contexts/EditorContext';
 import { addSortToColumns, formatDateTime } from '../../utils';
 import { ModalDatasetForm, ModalDatasetFormVersion } from '../ModalDatasetForm';
@@ -49,6 +58,8 @@ const RunningInfoPanel: React.FC<RunningInfoPanelProps> = memo(
     const [isExpanded, setIsExpanded] = useState(false);
     const [hasUserClosed, setHasUserClosed] = useState(false);
     const logContentRef = useRef<HTMLDivElement>(null);
+    const shouldAutoScrollRef = useRef(true); // 是否应该自动滚动
+    const logContainerRef = useRef<HTMLDivElement>(null);
 
     const [formVisible, setFormVisible] = useState(false); // 保存为新数据集
     const [versionFormVisible, setVersionFormVisible] = useState(false); // 保存为新版本
@@ -79,6 +90,64 @@ const RunningInfoPanel: React.FC<RunningInfoPanelProps> = memo(
 
     const sortableColumns = addSortToColumns(columns);
 
+    // 将日志按行分割
+    const logLines = useMemo(() => {
+      if (!runLog || runLog.trim() === '') return [];
+      return runLog.split('\n');
+    }, [runLog]);
+
+    // 使用虚拟列表渲染日志
+    const [logList, logScrollTo] = useVirtualList(logLines, {
+      containerTarget: logContainerRef,
+      wrapperTarget: logContentRef,
+      itemHeight: 20, // 每行大约20px高度
+      overscan: 5 // 额外渲染的行数，减少以提升性能
+    });
+
+    // 虚拟列表内容
+    const logVirtualListContent = useMemo(() => {
+      // 如果有日志内容，直接显示
+      if (logLines && logLines.length > 0) {
+        return logList.map((item) => {
+          return (
+            <div
+              key={item.index}
+              style={{
+                height: '20px',
+                lineHeight: '20px',
+                padding: '0 12px',
+                whiteSpace: 'pre',
+                wordBreak: 'normal',
+                overflowWrap: 'normal'
+              }}
+            >
+              {item.data}
+            </div>
+          );
+        });
+      }
+
+      // 没有日志时，根据是否已获取过日志和运行状态显示相应提示
+      let emptyMessage = '';
+      if (!hasFetchedLog) {
+        // 还没有调用过 getRunLog，显示开始输出
+        emptyMessage = '开始输出...';
+      } else {
+        // 已经调用过 getRunLog 但日志为空
+        if (runStatus === RunningStatus.SUCCESS) {
+          emptyMessage = '运行成功，暂无日志输出';
+        } else if (runStatus === RunningStatus.FAILED) {
+          emptyMessage = '运行失败，暂无错误日志';
+        } else {
+          emptyMessage = '暂无运行日志';
+        }
+      }
+
+      return (
+        <div style={{ height: '20px', lineHeight: '20px' }}>{emptyMessage}</div>
+      );
+    }, [logList, logLines, hasFetchedLog, runStatus]);
+
     // 监听父组件传递的面板状态变化
     useEffect(() => {
       if (isPanelOpen !== undefined) {
@@ -93,23 +162,32 @@ const RunningInfoPanel: React.FC<RunningInfoPanelProps> = memo(
       }
     }, [runStatus]);
 
-    // 监听日志内容变化，自动滚动到底部
-    useEffect(() => {
-      if (
-        activeKey === 'log' &&
-        runLog &&
-        isExpanded &&
-        logContentRef.current
-      ) {
-        // 使用 ref 直接获取滚动容器，确保 DOM 更新后再滚动
+    // 自动滚动到底部的函数
+    const scrollToBottom = useCallback(() => {
+      if (!shouldAutoScrollRef.current) return;
+
+      // 使用虚拟列表的 logScrollTo 方法
+      if (logScrollTo && logLines.length > 0) {
         requestAnimationFrame(() => {
-          if (logContentRef.current) {
-            logContentRef.current.scrollTop =
-              logContentRef.current.scrollHeight;
-          }
+          logScrollTo(logLines.length - 1);
         });
+      } else {
+        // 降级方案：直接操作 DOM
+        const container = logContainerRef.current;
+        if (container) {
+          requestAnimationFrame(() => {
+            container.scrollTop = container.scrollHeight;
+          });
+        }
       }
-    }, [runLog]);
+    }, [logScrollTo, logLines.length]);
+
+    // 监听日志内容变化，自动滚动到底部
+    useLayoutEffect(() => {
+      if (activeKey === 'log' && isExpanded) {
+        scrollToBottom();
+      }
+    }, [runLog, activeKey, isExpanded, scrollToBottom]);
 
     // 监听运行状态变化，自动展开面板
     useEffect(() => {
@@ -511,28 +589,26 @@ const RunningInfoPanel: React.FC<RunningInfoPanelProps> = memo(
                   </div>
                 </TabPane>
                 <TabPane key="log" title="日志">
-                  <div ref={logContentRef} className={styles['runlog-content']}>
-                    {(() => {
-                      // 如果有日志内容，直接显示
-                      if (runLog && runLog.trim() !== '') {
-                        return runLog;
-                      }
-
-                      // 没有日志时，根据是否已获取过日志和运行状态显示相应提示
-                      if (!hasFetchedLog) {
-                        // 还没有调用过 getRunLog，显示开始输出
-                        return '开始输出...';
-                      } else {
-                        // 已经调用过 getRunLog 但日志为空
-                        if (runStatus === RunningStatus.SUCCESS) {
-                          return '运行成功，暂无日志输出';
-                        } else if (runStatus === RunningStatus.FAILED) {
-                          return '运行失败，暂无错误日志';
-                        } else {
-                          return '暂无运行日志';
-                        }
-                      }
-                    })()}
+                  <div
+                    ref={logContainerRef}
+                    className={styles['runlog-content']}
+                    style={{
+                      height: '100%',
+                      overflowX: 'scroll', // 始终显示横向滚动条，避免临界点抖动
+                      overflowY: 'auto'
+                    }}
+                    onScroll={(e) => {
+                      // 检测用户是否手动滚动，如果是则停止自动滚动
+                      const target = e.target as HTMLElement;
+                      const isAtBottom =
+                        target.scrollHeight -
+                          target.scrollTop -
+                          target.clientHeight <
+                        10;
+                      shouldAutoScrollRef.current = isAtBottom;
+                    }}
+                  >
+                    <div ref={logContentRef}>{logVirtualListContent}</div>
                   </div>
                 </TabPane>
               </Tabs>

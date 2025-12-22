@@ -362,6 +362,7 @@ export interface GetDevelopScriptRunLogResponse {
    */
   run_status: RunLogStatus;
   start_time: string;
+  run_duration: number;
 }
 
 export interface ListDevelopScriptLogByKeyItem {

@@ -1,10 +1,6 @@
-import { BlockEnum } from '../../types';
 import type { NodeDefault } from '../../types';
 import { SQLNodeConfig } from './types';
-import {
-  ALL_CHAT_AVAILABLE_BLOCKS,
-  ALL_COMPLETION_AVAILABLE_BLOCKS
-} from '@/pages/workflowConfig/workflow/blocks';
+import { ALL_COMPLETION_AVAILABLE_BLOCKS } from '@/pages/workflowConfig/workflow/blocks';
 import { STRUCT_FLOW_NODES } from '@/pages/workflowConfig/workflow/constants';
 
 const SQLNodeDefault: NodeDefault<SQLNodeConfig> = {
@@ -35,13 +31,9 @@ const SQLNodeDefault: NodeDefault<SQLNodeConfig> = {
   },
   checkValid(payload: SQLNodeConfig) {
     let errorMessages = '';
-    const { raw_script, sql_id } = payload;
+    const { raw_script } = payload;
     if (!raw_script) {
       errorMessages = 'SQL脚本不可为空';
-    }
-
-    if (!sql_id?.length) {
-      errorMessages = '请选择SQL脚本';
     }
 
     return {

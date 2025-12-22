@@ -15,8 +15,8 @@ import {
   IconExclamationCircleFill,
   IconLoading
 } from '@arco-design/web-react/icon';
-import { useParams } from '@/utils/url';
-import { useHistory } from 'react-router';
+import { useHistory, useParams as useRouteParams } from 'react-router';
+import { useParams as useQueryParams } from '@/utils/url';
 import ParseNode from '../../components/parse-node';
 import DataCleaningNode from '../../components/data-cleaning-node';
 import DataAugmentationNode from '../../components/data-augmentation-node';
@@ -35,6 +35,8 @@ import EllipsisPopover from '@/components/ellipsis-popover-com';
 import ScriptingNode from '../../components/scripting-node';
 import styles from './index.module.scss';
 import { PermissionWrapper } from '@/components/PermissionGuard';
+import { WorkflowType } from '@/types/workflowTaskApi';
+import TaskNodeList from './TaskNodeList';
 
 const BreadcrumbItem = Breadcrumb.Item;
 const TabPane = Tabs.TabPane;
@@ -92,7 +94,7 @@ interface nodeDataObject {
 }
 
 export default function WorkflowTaskDetail() {
-  const taskId = useParams('id');
+  const { id: taskId } = useRouteParams<{ id: string }>();
   const history = useHistory();
   const userInfo = useUserInfo();
   // 初始化作业详情数据
@@ -141,9 +143,10 @@ export default function WorkflowTaskDetail() {
     sort: '',
     sort_by: ''
   });
-  const workflowUuid = useParams('workflow_uuid');
-  const workflowVersion = useParams('workflow_version');
-  const workflowId = useParams('ds_workflow_id');
+  const workflowUuid = useQueryParams('workflow_uuid');
+  const workflowVersion = useQueryParams('workflow_version');
+  const workflowId = useQueryParams('ds_workflow_id');
+  const workflowType = useQueryParams('workflow_type') ?? WorkflowType.STRUCT;
   let intervalDetailData: string | number | NodeJS.Timeout | undefined;
   // 初始化详情基本数据
   useEffect(() => {
@@ -154,13 +157,20 @@ export default function WorkflowTaskDetail() {
 
   // 确保activeNode以及sortValue数据变化后再调用getNodeDetail
   useEffect(() => {
+    if (workflowType === WorkflowType.STRUCT) return;
+
     if (taskId && activeNode) getNodeDetail();
-  }, [activeNode && isChangeTab, sortValue, taskDetailData.run_status]);
+  }, [
+    workflowType,
+    activeNode && isChangeTab,
+    sortValue,
+    taskDetailData.run_status
+  ]);
 
   const getDetailData = async (isSetActiveNode = false) => {
     setLoading(true);
     try {
-      const res = await getTaskDetail(taskId!);
+      const res = await getTaskDetail(taskId);
       if (res.status === 200 && res.data) {
         setTaskDetailData(res.data.base_info);
         // 当前状态不是运行中时清空定时器
@@ -266,7 +276,7 @@ export default function WorkflowTaskDetail() {
                     title="确定重新运行吗？"
                     content="已处理数据将被覆盖"
                     onOk={() => {
-                      handleRetryWorkflow(taskId!);
+                      handleRetryWorkflow(taskId);
                     }}
                   >
                     <span className={styles['operate-text']}>重试</span>
@@ -292,7 +302,7 @@ export default function WorkflowTaskDetail() {
                     title="确定停止吗？"
                     content="未处理完的数据将停止处理"
                     onOk={() => {
-                      handleStopWorkflow(taskId!);
+                      handleStopWorkflow(taskId);
                     }}
                   >
                     <span className={styles['operate-text']}>停止</span>
@@ -592,7 +602,9 @@ export default function WorkflowTaskDetail() {
         <Workflow setHeight={true} />
       </div>
       {/* 作业内容区域 */}
-      {getTaskContentDom()}
+      {workflowType === WorkflowType.NO_STRUCT && getTaskContentDom()}
+      {/* 节点列表区域 */}
+      {workflowType === WorkflowType.STRUCT && <TaskNodeList />}
     </div>
   );
 }

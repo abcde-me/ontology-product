@@ -17,19 +17,11 @@ import {
   NodePanelProps,
   NodeProps
 } from '@/pages/workflowConfig/workflow/types';
-import {
-  SQLNodeConfig,
-  SQLVersion
-} from '@/pages/workflowConfig/workflow/nodes/sql-node/types';
-import { IconDelete, IconPlus } from '@arco-design/web-react/icon';
+import { SQLNodeConfig } from '@/pages/workflowConfig/workflow/nodes/sql-node/types';
 import styled from '@emotion/styled';
-import { PRIORITY_OPTIONS } from '@/pages/workflowList/types';
-import { SqlEditor } from '@/pages/workflowConfig/workflow/nodes/sql-node/components';
 import { useRequest } from 'ahooks';
 import { getSQLListInSQLNode, getSQLVersionInSQLNode } from '@/api/workflowV2';
-import BlockIcon from '@/pages/workflowConfig/workflow/block-icon';
 import useConfig from '@/pages/workflowConfig/workflow/nodes/sql-node/use-config';
-import { useNodesInteractions } from '@/pages/workflowConfig/workflow/hooks';
 import {
   NodeRunSetting,
   PrevNodes

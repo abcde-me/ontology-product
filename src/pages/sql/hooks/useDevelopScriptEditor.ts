@@ -108,6 +108,9 @@ export interface UseEditorReturn {
   handlePanelStateChange: (isOpen: boolean) => void;
   getPrevRunStatus: () => RunningStatus;
 
+  // 未保存更改检查
+  hasUnsavedChanges: () => boolean;
+
   // 参数列表
   // scriptParams: ScriptParam[];
   // setScriptParams: React.Dispatch<React.SetStateAction<ScriptParam[]>>;
@@ -156,6 +159,8 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
   // 跟踪是否已获取过结果和日志
   const [hasFetchedResult, setHasFetchedResult] = useState<boolean>(false);
   const [hasFetchedLog, setHasFetchedLog] = useState<boolean>(false);
+  // 保存原始内容，用于判断是否有未保存的更改
+  const [originalContent, setOriginalContent] = useState<string>('');
   // const [scriptParams, setScriptParams] = useState<ScriptParam[]>([]);
 
   // 获取前一个运行状态的函数
@@ -176,46 +181,6 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
   const handlePanelStateChange = useCallback((isOpen: boolean) => {
     setIsPanelOpen(isOpen);
   }, []);
-
-  // 动态生成表格列
-  // const generateTableColumns = (runResult: RunResult[]) => {
-  //   if (
-  //     !runResult ||
-  //     runResult.length === 0 ||
-  //     !runResult[0]?.list ||
-  //     runResult[0].list.length === 0
-  //   ) {
-  //     return [];
-  //   }
-
-  //   // 从第一行数据中获取所有的 key 作为列头
-  //   const firstRow = runResult[0].list[0];
-  //   const keys = Object.keys(firstRow);
-
-  //   return keys.map((key) => ({
-  //     title: key,
-  //     dataIndex: key,
-  //     width: 240,
-  //     ellipsis: true
-  //   }));
-  // };
-
-  // 动态生成表格数据
-  const generateTableData = (runResult: RunResult[]) => {
-    if (!runResult || runResult.length === 0 || !runResult[0]?.list) {
-      return [];
-    }
-
-    // 将 runResult[0].list 转换为表格数据格式，添加 key 字段
-    return runResult[0].list.map((row, index) => ({
-      key: `${index}`,
-      ...row
-    }));
-  };
-
-  // 计算表格列和数据
-  // const columns = generateTableColumns(runResult);
-  // const data = generateTableData(runResult);
 
   // 当前文件ID，从 activeTab 对应的标签页获取
   const currentFile = fileTabs.find((tab) => tab.key === activeTab);
@@ -249,6 +214,47 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
     }
   }, [currentFile?.scriptId]);
 
+  const loadFileContent = async (scriptId: string) => {
+    try {
+      const response = await getDevelopScriptInfo({
+        script_id: Number(scriptId)
+      });
+
+      if (response.status === 200 && response.data) {
+        const fileData = response.data;
+
+        setScriptInfo({
+          script_id: fileData.script_id,
+          script_name: fileData.script_name,
+          script_context: fileData.script_context,
+          script_params: fileData.script_params,
+          status: fileData.status,
+          status_name: fileData.status_name,
+          update_user: fileData.update_user,
+          update_time: fileData.update_time,
+          max_version_name: fileData.max_version_name,
+          max_version: fileData.max_version,
+          release_user: fileData.release_user,
+          release_time: fileData.release_time,
+          script_desc: fileData.script_desc,
+          isSelfEditing:
+            fileData.status === ScriptStatus.Editing &&
+            fileData.update_user === userInfo?.account
+        });
+
+        // 保存原始内容
+        setOriginalContent(fileData.script_context ?? '');
+
+        return fileData;
+      } else {
+        Message.error(response?.message ?? '加载文件失败');
+      }
+    } catch (error) {
+      console.error('加载文件失败:', error);
+      Message.error('加载文件失败');
+    }
+  };
+
   const handleReleaseScript = useCallback(
     async (script_desc: string) => {
       try {
@@ -264,13 +270,6 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
 
         // 发版成功重新请求接口详情获取最新脚本信息
         loadFileContent(currentFile?.scriptId ?? '');
-
-        // getDevelopScriptInfo(Number(currentFile?.scriptId));
-        // if (res?.status !== 200) {
-        //   Message.error(res?.message ?? '获取脚本信息失败');
-        //   return false;
-        // }
-        // setScriptInfo(res.data);
 
         Message.success('发布成功');
         return true;
@@ -300,6 +299,12 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
           status: ScriptStatus.EditCompleted
         };
       });
+
+      // 解锁成功后重新加载文件详情
+      if (currentFile?.scriptId) {
+        await loadFileContent(currentFile.scriptId);
+      }
+
       return true;
     } catch (error) {
       console.error(error);
@@ -324,6 +329,7 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
         }
 
         setRunLogStatus(res?.data?.run_status ?? RunLogStatus.CANCEL);
+        setRunDuration(res?.data?.run_duration ?? 0);
         setRunLog(res?.data?.run_log ?? '');
         setRunStartTime(res?.data?.start_time ?? '');
         setHasFetchedLog(true);
@@ -407,7 +413,9 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
     async (content: string) => {
       try {
         const res = await editDevelopScript({
-          script_name: currentFile?.title ?? generateSqlDefaultName(new Date()),
+          script_name:
+            currentFile?.title ??
+            generateSqlDefaultName(new Date(), '加工脚本'),
           script_context: content,
           script_id: Number(currentFile?.scriptId) ?? 0,
           script_params: scriptInfo?.script_params ?? []
@@ -426,6 +434,9 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
           };
         });
 
+        // 保存后更新原始内容
+        setOriginalContent(content);
+
         return res.data;
       } catch (error) {
         Message.error('保存失败');
@@ -439,7 +450,9 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
     async (content: string) => {
       try {
         const res = await createDevelopScript({
-          script_name: currentFile?.title ?? generateSqlDefaultName(new Date()),
+          script_name:
+            currentFile?.title ??
+            generateSqlDefaultName(new Date(), '加工脚本'),
           script_context: content,
           script_desc: '',
           script_params: []
@@ -487,20 +500,27 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
       return;
     }
 
-    // const saveRes = await editDevelopScript({
-    //   script_context: scriptInfo?.script_context ?? '',
-    //   script_id: Number(currentFile?.scriptId),
-    //   script_name: currentFile.title ?? '',
-    //   script_params: scriptInfo?.script_params ?? []
-    // });
+    const saveRes = await editDevelopScript({
+      script_context: scriptInfo?.script_context ?? '',
+      script_id: Number(currentFile?.scriptId),
+      script_name: currentFile.title ?? '',
+      script_params: scriptInfo?.script_params ?? []
+    });
 
-    // if (saveRes?.status !== 200) {
-    //   Message.error(saveRes?.message ?? '保存文件失败');
-    //   return;
-    // }
+    if (saveRes?.status !== 200) {
+      Message.error(saveRes?.message ?? '保存文件失败');
+      return;
+    }
 
-    // setLastAutoSave(timeFormattig(new Date(saveRes.data.update_time)));
+    setOriginalContent(scriptInfo?.script_context ?? '');
 
+    setScriptInfo((prev) => {
+      if (!prev) return null;
+      return {
+        ...prev,
+        update_time: saveRes.data.update_time
+      };
+    });
     setExecid('');
 
     try {
@@ -543,62 +563,6 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
     // setLastScriptRunStatus(RunningStatus.IDLE);
   };
 
-  const loadFileContent = async (scriptId: string) => {
-    try {
-      const response = await getDevelopScriptInfo({
-        script_id: Number(scriptId)
-      });
-
-      if (response.status === 200 && response.data) {
-        const fileData = response.data;
-        // setLastScriptRunStatus(fileData?.run_status);
-        // 更新编辑器内容
-        // setEditorContent(fileData.script_context ?? '');
-        // setScriptParams(fileData.script_params ?? []);
-
-        setScriptInfo({
-          script_id: fileData.script_id,
-          script_name: fileData.script_name,
-          script_context: fileData.script_context,
-          script_params: fileData.script_params,
-          status: fileData.status,
-          status_name: fileData.status_name,
-          update_user: fileData.update_user,
-          update_time: fileData.update_time,
-          max_version_name: fileData.max_version_name,
-          max_version: fileData.max_version,
-          release_user: fileData.release_user,
-          release_time: fileData.release_time,
-          script_desc: fileData.script_desc,
-          isSelfEditing:
-            fileData.status === ScriptStatus.Editing &&
-            fileData.update_user === userInfo?.account
-        });
-
-        return fileData;
-        // 更新运行状态
-        // setExecid(String(fileData.script_execid));
-
-        // setLastAutoSave(timeFormattig(new Date(response.data.update_time)));
-
-        // 通知父组件更新标签页内容
-        // if (onTabUpdate) {
-        //   onTabUpdate(currentTab.key, {
-        //     content: fileData.script_context ?? '',
-        //     fileId: String(currentTab.fileId),
-        //     scriptId: String(fileData.script_id),
-        //     title: currentTab.title
-        //   });
-        // }
-      } else {
-        Message.error(response?.message ?? '加载文件失败');
-      }
-    } catch (error) {
-      console.error('加载文件失败:', error);
-      Message.error('加载文件失败');
-    }
-  };
-
   // 获取运行日志
 
   // 监听运行状态变化，自动获取结果 - 优化依赖项
@@ -610,7 +574,7 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
     if (runLogStatus !== RunLogStatus.RUNNING) {
       // console.log('取消轮询', runStatus, execid);
       // cancelGetRunResultPolling();
-      cancelGetRunLogPolling();
+      // cancelGetRunLogPolling();
     }
 
     // updateRunStatus(RunningStatus.RUNNING);
@@ -695,6 +659,15 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
     clearEditorState();
   }, [currentFile?.scriptId, clearEditorState]);
 
+  // 检查是否有未保存的更改
+  const hasUnsavedChanges = useCallback(() => {
+    if (!scriptInfo?.isSelfEditing) {
+      return false;
+    }
+    const currentContent = scriptInfo?.script_context ?? '';
+    return currentContent !== originalContent;
+  }, [scriptInfo?.script_context, scriptInfo?.isSelfEditing, originalContent]);
+
   return {
     // 状态
     scriptInfo,
@@ -740,7 +713,10 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
     // 面板状态管理
     isPanelOpen,
     handlePanelStateChange,
-    getPrevRunStatus
+    getPrevRunStatus,
+
+    // 未保存更改检查
+    hasUnsavedChanges
 
     // 参数列表
     // scriptParams,

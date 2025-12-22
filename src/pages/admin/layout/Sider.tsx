@@ -36,7 +36,7 @@ function LayoutWithSider({ children }) {
   const lastClickPathRef = useRef<string | null>(null);
 
   const sidebarHidden = hideSidebarPaths.some(
-    (path) => path === location.pathname
+    (path) => path === location.pathname || location.pathname.includes(path)
   );
 
   const actives = useMemo(() => {

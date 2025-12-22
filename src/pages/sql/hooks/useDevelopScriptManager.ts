@@ -85,7 +85,7 @@ export const useDevelopScriptManager = (
 
   const generateDefaultName = useCallback(() => {
     // 生成默认文件名：SQL查询 + 时间戳
-    return generateSqlDefaultName(new Date());
+    return generateSqlDefaultName(new Date(), '加工脚本');
   }, []);
 
   // 搜索功能

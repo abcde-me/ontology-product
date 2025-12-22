@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
 import produce from 'immer';
-import { useStoreApi } from 'reactflow';
+import { Edge, Node, useStoreApi } from 'reactflow';
 import { useStore, useWorkflowStore } from '../store';
 import { BlockEnum } from '../types';
 import { useWorkflowUpdate } from '../hooks';
@@ -12,6 +12,36 @@ import { useHistory } from 'react-router';
 import { flowIsStruct } from '@/pages/workflowConfig/workflow/utils';
 import { Message } from '@arco-design/web-react';
 import { useParams as useRouterParams } from 'react-router-dom';
+
+/**
+ * 查找画布中没有没有前置节点的节点，并给edge中加入一条"没有source"描述的edge数据
+ * 后端需要这个东西
+ */
+function addRootEdges(nodes: Node[], edges: Edge[]): Edge[] {
+  // 1️⃣ 收集所有有入度的节点（target）
+  const targetSet = new Set<string>();
+
+  for (const edge of edges) {
+    if (edge.target) {
+      targetSet.add(edge.target);
+    }
+  }
+  // 2️⃣ 找出没有上级节点的 node
+  const newEdges: Edge[] = [];
+
+  for (const node of nodes) {
+    if (!targetSet.has(node.id)) {
+      newEdges.push({
+        source: '',
+        target: node.id,
+        id: `root-source-${node.id}-target` // 可选，保证唯一
+      });
+    }
+  }
+
+  // 3️⃣ 返回合并后的 edges
+  return edges.concat(newEdges);
+}
 
 export const useNodesSyncDraft = () => {
   const store = useStoreApi();
@@ -66,7 +96,10 @@ export const useNodesSyncDraft = () => {
         params: {
           graph: {
             nodes: producedNodes,
-            edges: producedEdges,
+            edges:
+              flowType !== 'struct'
+                ? producedEdges
+                : addRootEdges(producedNodes, producedEdges),
             viewport: {
               x,
               y,

@@ -22,7 +22,8 @@ import {
 import { getWorkflowTaskList, workflowOperation } from '@/api/workflowTask';
 import type {
   WorkflowTaskItem,
-  GetWorkflowTaskListParams
+  GetWorkflowTaskListParams,
+  WorkflowType
 } from '@/types/workflowTaskApi';
 import {
   CommandType,
@@ -31,8 +32,11 @@ import {
   WorkflowTaskStatus,
   WorkflowTaskStatusNameMap
 } from '@/types/workflowTaskApi';
-import { useWorkflowTable } from './hooks/useWorkflowTable';
-import { WORKFLOW_RUN_STATUS_MAP, WORKFLOW_STATUS_OPTIONS } from './constants';
+import { useWorkflowTable } from '../../hooks/useWorkflowTable';
+import {
+  WORKFLOW_RUN_STATUS_MAP,
+  WORKFLOW_STATUS_OPTIONS
+} from '../../common/constants';
 import type { ColumnProps } from '@arco-design/web-react/lib/Table';
 import type { PaginationProps } from '@arco-design/web-react';
 import type { SorterInfo } from '@arco-design/web-react/lib/Table/interface';
@@ -40,12 +44,32 @@ import noDataElement from '@/components/no-data';
 import ellipsisPopoverCom from '@/components/ellipsis-popover-com';
 import EllipsisPopoverCom from '@/components/ellipsis-popover-com';
 import copy from 'copy-to-clipboard';
+import { useHistory } from 'react-router';
 
 const { Option } = Select;
 const FormItem = Form.Item;
 
 export default function WorkflowRunList() {
   const [form] = Form.useForm();
+  const history = useHistory();
+
+  // 工作流详情
+  const handleWorkflowDetail = useCallback(
+    (
+      id: string,
+      params?: {
+        workflow_type?: WorkflowType;
+        workflow_uuid?: string;
+        ds_workflow_id?: string;
+      }
+    ) => {
+      console.log('id', id);
+      const url = `/tenant/compute/modaforge/workflowTask/detail/${id}`;
+      const queryParams = `?workflow_type=${params?.workflow_type}&workflow_uuid=${params?.workflow_uuid}&ds_workflow_id=${params?.ds_workflow_id}`;
+      history.push(`${url}${queryParams}`);
+    },
+    [history]
+  );
 
   // 格式化工作流运行记录请求参数
   const formatWorkflowParams = useCallback(
@@ -135,8 +159,18 @@ export default function WorkflowRunList() {
         title: '工作流运行ID',
         dataIndex: 'id',
         width: 180,
-        render: (value: string) => (
-          <EllipsisPopoverCom value={value} preferTypography />
+        render: (value: string, record: WorkflowTaskItem) => (
+          <EllipsisPopoverCom
+            value={value}
+            isLink={!!record.workflow_type}
+            handleLink={() =>
+              handleWorkflowDetail(value, {
+                workflow_type: record.workflow_type,
+                workflow_uuid: record.workflow_uuid,
+                ds_workflow_id: record.process_definition_code
+              })
+            }
+          />
         )
       },
       {
@@ -283,7 +317,18 @@ export default function WorkflowRunList() {
 
           return (
             <div className="flex items-center gap-2">
-              <Button type="text" className="px-[4px]">
+              <Button
+                type="text"
+                className="px-[4px]"
+                disabled={!record.workflow_type}
+                onClick={() =>
+                  handleWorkflowDetail(record.id, {
+                    workflow_type: record.workflow_type,
+                    workflow_uuid: record.workflow_uuid,
+                    ds_workflow_id: record.process_definition_code
+                  })
+                }
+              >
                 详情
               </Button>
               {canPause && (
@@ -339,7 +384,7 @@ export default function WorkflowRunList() {
         }
       }
     ],
-    [handleCopy, handleWorkflowOperation]
+    [handleCopy, handleWorkflowOperation, handleWorkflowDetail]
   );
 
   return (
@@ -354,7 +399,6 @@ export default function WorkflowRunList() {
           <FormItem field="keywords" className="!m-0">
             <Input
               placeholder="输入工作流运行ID或名称搜索"
-              prefix={<IconSearch />}
               className="w-64"
               allowClear
             />
