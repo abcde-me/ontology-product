@@ -877,7 +877,7 @@ export default function DataLoadCreate() {
           }
         );
 
-        if (allIsPrimaryKeyEmpty) {
+        if (allIsPrimaryKeyEmpty && sourceType === SOURCE_TYPES.MQ) {
           Message.error('请至少设置一个主键');
           return;
         }
