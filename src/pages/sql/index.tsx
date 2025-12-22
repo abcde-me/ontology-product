@@ -350,6 +350,7 @@ const SqlIndex: React.FC = memo(() => {
             refreshDirectory={handleDevelopScriptRefreshDirectory}
             selectFile={selectDevelopScriptFile}
             onToScriptList={handleTabChange}
+            onFileOpen={developScriptOpenFile}
           />
         )}
       </Content>
