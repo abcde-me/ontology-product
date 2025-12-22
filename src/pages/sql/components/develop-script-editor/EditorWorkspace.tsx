@@ -539,7 +539,7 @@ const EditorWorkspaceContent: React.FC<{
                         <IconCaretRight className="mr-[4px]" />
                       )
                     }
-                    disabled={scriptInfo?.script_context?.trim() === ''}
+                    disabled={!scriptInfo?.script_context?.trim()}
                     onClick={handleRunClick}
                     className={classNames(
                       'h-[26px]',
@@ -869,11 +869,14 @@ const EditorWorkspaceContent: React.FC<{
               }}
               initialValues={{
                 scriptName: scriptInfo?.script_name || '',
-                version: scriptInfo?.max_version_name || 'V1',
+                version: scriptInfo?.max_version
+                  ? `V${scriptInfo?.max_version}`
+                  : 'V1',
                 versionDesc: scriptInfo?.script_desc ?? ''
               }}
             />
           )}
+          {console.log('scriptInfo', scriptInfo)}
         </div>
       </Spin>
     );

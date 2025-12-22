@@ -90,12 +90,14 @@ const QueryScript: React.FC<QueryScriptProps> = ({ curActiveTab }) => {
         update_account: formData?.update_account,
         update_time_start: formData?.update_time?.[0],
         update_time_end: formData?.update_time?.[1],
-        orders: [
-          {
-            column: 'script_id',
-            order: sortValue?.sort || 'desc'
-          }
-        ]
+        orders: sortValue?.sort
+          ? [
+              {
+                column: 'script_id',
+                order_flag: sortValue?.sort
+              }
+            ]
+          : []
       };
       const res = await listSqlFile(params);
       if (res.status === 200 && res.data) {
