@@ -876,7 +876,6 @@ const EditorWorkspaceContent: React.FC<{
               }}
             />
           )}
-          {console.log('scriptInfo', scriptInfo)}
         </div>
       </Spin>
     );
