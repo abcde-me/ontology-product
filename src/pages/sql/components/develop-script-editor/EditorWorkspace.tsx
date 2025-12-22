@@ -36,7 +36,7 @@ import React, {
   useRef,
   useState
 } from 'react';
-import { format } from 'sql-formatter';
+import { formatSQL } from '@/utils/sqlFormatter';
 import styles from './EditorWorkspace.module.scss';
 import { RunLogStatus, ScriptStatus } from '@/types/sqlDevelopApi';
 
@@ -59,6 +59,7 @@ import { ScriptParam } from '@/types/sqlDevelopApi';
 import ReleaseIcon from '../../assets/release-icon.svg';
 import dayjs from 'dayjs';
 import VersionStatus from '../version-status';
+import { SQL_PARAM_PLACEHOLDER_REGEX } from '../../constant';
 
 interface NotebookWorkspaceProps {
   content: string;
@@ -303,8 +304,11 @@ const EditorWorkspaceContent: React.FC<{
     const handleFormatCode = () => {
       if (scriptInfo?.script_context) {
         try {
-          const formattedCode = format(scriptInfo?.script_context ?? '', {
-            language: 'sql'
+          const formattedCode = formatSQL(scriptInfo.script_context, {
+            formatOptions: {
+              language: 'sql',
+              placeholderRegex: SQL_PARAM_PLACEHOLDER_REGEX
+            }
           });
           handleContentChange(formattedCode);
           Message.success('格式化成功');

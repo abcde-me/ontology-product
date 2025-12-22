@@ -1,5 +1,11 @@
 export const SQL_EDITOR_HEIGHT = '300px';
 
+/**
+ * SQL 参数占位符正则表达式
+ * 用于匹配 ${paramName} 格式的参数占位符
+ */
+export const SQL_PARAM_PLACEHOLDER_REGEX = /\$\{([^}]+)\}/g;
+
 export const DATAFRAMES_LIST = [
   {
     id: 'root_001',
