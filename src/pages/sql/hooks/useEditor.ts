@@ -35,8 +35,8 @@ export interface UseEditorOptions {
       scriptId?: string;
     }
   ) => void;
-  refreshDirectory?: () => void;
-  selectFile?: (fileId: string) => void;
+  // refreshDirectory?: () => void;
+  // selectFile?: (fileId: string) => void;
 }
 
 export interface UseEditorReturn {
@@ -94,9 +94,9 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
   const {
     activeTab,
     fileTabs = [],
-    onTabUpdate,
-    refreshDirectory,
-    selectFile
+    onTabUpdate
+    // refreshDirectory,
+    // selectFile
   } = options;
 
   const userInfo = useUserInfo();

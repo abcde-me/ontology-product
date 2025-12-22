@@ -19,8 +19,8 @@ interface EditorContentProps {
   onActiveUpdate?: (tabData: any) => void;
   onInsertContent?: (insertFn: (content: string) => void) => void;
   onEditorFocusChange?: (isFocused: boolean) => void;
-  refreshDirectory?: () => void;
-  selectFile?: (fileId: string) => void;
+  // refreshDirectory?: () => void;
+  // selectFile?: (fileId: string) => void;
   onToScriptList?: (key: string) => void;
   curActiveTab: string;
   fileManagerSelectedKeys: string[];
@@ -38,8 +38,8 @@ const EditorContent: React.FC<EditorContentProps> = memo(
     onActiveUpdate,
     onInsertContent,
     onEditorFocusChange,
-    refreshDirectory,
-    selectFile,
+    // refreshDirectory,
+    // selectFile,
     onToScriptList,
     curActiveTab,
     fileManagerSelectedKeys
@@ -197,8 +197,8 @@ const EditorContent: React.FC<EditorContentProps> = memo(
             onActiveUpdate={handleActiveUpdate}
             onInsertContent={onInsertContent}
             onEditorFocusChange={onEditorFocusChange}
-            refreshDirectory={refreshDirectory}
-            selectFile={selectFile}
+            // refreshDirectory={refreshDirectory}
+            // selectFile={selectFile}
             onToScriptList={onToScriptList}
             curActiveTab={curActiveTab}
             onHasUnsavedChangesChange={handleHasUnsavedChangesChange}
