@@ -253,7 +253,7 @@ const EditorWorkspaceContent: React.FC<{
                       <IconCaretRight className="mr-[4px]" />
                     )
                   }
-                  disabled={editorContent?.trim() === ''}
+                  disabled={!editorContent?.trim()}
                   onClick={handleRunClick}
                   className={classNames('h-[26px]', {
                     [styles['btn-running']]: runStatus === RunningStatus.RUNNING
@@ -300,7 +300,6 @@ const EditorWorkspaceContent: React.FC<{
                 onClick={() => {
                   setVisible(true);
                 }}
-                disabled={editorContent?.trim() === ''}
                 icon={<IconSave />}
               >
                 保存
@@ -400,7 +399,7 @@ const EditorWorkspaceContent: React.FC<{
               <FormItem label="SQL脚本名称:" required={true} field="fileName">
                 <Input
                   defaultValue={fileName}
-                  disabled={!!scriptId}
+                  // disabled={!!scriptId}
                   placeholder="请输入脚本名称"
                 />
               </FormItem>
