@@ -23,6 +23,7 @@ import noDataElement from '@/components/no-data';
 import dayjs from 'dayjs';
 import ScriptDetailModal from '../spl-script-management/ScriptDetailModal';
 import { useUrlState } from '../../hooks/useUrlState';
+import { render } from 'katex';
 
 const SctipModalTable: React.FC<{
   isVisible: boolean;
@@ -203,15 +204,21 @@ const SctipModalTable: React.FC<{
     },
     {
       title: '版本说明',
-      dataIndex: 'state_name',
-      key: 'state_name',
-      width: 100
+      dataIndex: 'script_desc',
+      key: 'script_desc',
+      width: 200,
+      render: (_, record) => (
+        <EllipsisPopover preferTypography value={record?.script_desc} />
+      )
     },
     {
       title: '更新人',
       dataIndex: 'update_user',
       key: 'update_user',
-      width: 120
+      width: 120,
+      render: (_, record) => (
+        <EllipsisPopover preferTypography value={record?.update_user} />
+      )
     },
     {
       title: '更新时间',
