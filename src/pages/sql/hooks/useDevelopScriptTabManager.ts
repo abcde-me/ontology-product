@@ -2,6 +2,7 @@ import { useState, useCallback, useRef } from 'react';
 import { Message } from '@arco-design/web-react';
 import { DirectoryTreeRef } from '../components/directory-tree/DirectoryTree';
 import generateSqlDefaultName from '../utils/generateSqlDefaultName';
+import { createDevelopScript } from '@/api/sql-develop';
 
 // 文件标签页类型
 export interface FileTab {
@@ -123,7 +124,7 @@ export const useDevelopScriptTabManager = (
       // 检查标签页数量限制
       if (fileState.fileTabs.length >= 20) {
         Message.error('最多只能打开20个标签页，请先关闭一些标签页');
-        return;
+        return null;
       }
 
       let newTabKey: string;
@@ -164,6 +165,8 @@ export const useDevelopScriptTabManager = (
         currentFileId: newFileId || null, // 更新currentFileId
         currentScriptId: newScriptId || null
       }));
+
+      return newTab;
     },
     [fileState.fileTabs.length]
   );
@@ -262,12 +265,99 @@ export const useDevelopScriptTabManager = (
     [fileState.fileTabs, fileState.activeTab]
   );
 
-  const handleCreate = useCallback((): Promise<any> => {
-    return new Promise((resolve) => {
-      addTab();
-      resolve(null);
-    });
-  }, []);
+  const handleCreate = useCallback(async (): Promise<any> => {
+    // 检查标签页数量限制
+    if (fileState.fileTabs.length >= 20) {
+      Message.error('最多只能打开20个标签页，请先关闭一些标签页');
+      return null;
+    }
+
+    // 生成默认名称
+    const defaultName = generateSqlDefaultName(new Date(), '加工脚本');
+    // const tempId = `${Date.now()}`;
+
+    // 先创建临时标签页
+    const tempTab = addTab();
+
+    if (!tempTab) {
+      return;
+    }
+
+    try {
+      // 调用API创建脚本
+      const createRes = await createDevelopScript({
+        script_name: defaultName,
+        script_context: '',
+        script_desc: '',
+        script_params: []
+      });
+
+      if (createRes.status !== 200) {
+        Message.error(createRes.message || '创建失败');
+        // TODO: 补充创建失败移除临时tab逻辑
+        // 如果创建失败，移除刚添加的临时标签页
+        // const tempTabFind = fileState.fileTabs.find((tab) => tab.key === tempTab.fileId);
+        // console.log('-----tempTab-----111', tempTabFind, fileState.fileTabs, tempTab.fileId);
+        // if (tempTabFind) {
+        //   removeTab(tempTabFind.key);
+        // }
+        return null;
+      }
+
+      const scriptId = String(createRes.data.script_id);
+      Message.success('创建成功');
+
+      // 更新当前活动标签页的 scriptId
+      setFileState((prev) => {
+        const activeTabKey = prev.activeTab || tempTab.fileId;
+        const updatedTabs = prev.fileTabs.map((tab) => {
+          if (tab.key === activeTabKey) {
+            return {
+              ...tab,
+              scriptId: scriptId,
+              fileId: scriptId, // 使用 scriptId 作为 fileId
+              title: defaultName
+            };
+          }
+          return tab;
+        });
+
+        return {
+          ...prev,
+          fileTabs: updatedTabs,
+          currentScriptId: scriptId,
+          currentFileId: scriptId,
+          selectedKeys: [scriptId]
+        };
+      });
+
+      // 通知外部组件更新选中状态
+      onSelectedKeysChange && onSelectedKeysChange([scriptId]);
+
+      // 刷新目录
+      if (directoryTreeRef.current?.refresh) {
+        await directoryTreeRef.current.refresh();
+      }
+
+      return createRes.data;
+    } catch (error) {
+      console.error('创建失败:', error);
+      Message.error('创建失败');
+      // TODO: 补充创建失败移除临时tab逻辑
+      // const tempTabFind = fileState.fileTabs.find((tab) => tab.key === tempTab.fileId);
+      // console.log('-----tempTab-----222', tempTab);
+      // if (tempTabFind) {
+      //   removeTab(tempTabFind.key);
+      // }
+      return null;
+    }
+  }, [
+    fileState.fileTabs,
+    fileState.activeTab,
+    addTab,
+    removeTab,
+    onSelectedKeysChange
+  ]);
 
   // 更新标签页标题的函数
   const updateTabTitle = useCallback((fileId: string, newTitle: string) => {
