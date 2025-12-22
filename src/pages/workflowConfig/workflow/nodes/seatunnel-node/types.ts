@@ -1,5 +1,6 @@
 import type {
   CommonNodeType,
+  CommonStructNodeType,
   VarType
 } from '@/pages/workflowConfig/workflow/types';
 import { ReactNode, Key } from 'react';
@@ -19,7 +20,7 @@ export interface LocalParam {
   value?: string;
 }
 
-export interface SeatunnelConfig extends CommonNodeType {
+export interface SeatunnelConfig extends CommonStructNodeType {
   source_database?: string;
   source_table_name?: string;
   /**
@@ -41,9 +42,6 @@ export interface SeatunnelConfig extends CommonNodeType {
   field_mapping_list: FieldMapping[];
   primary_keys: string[];
   query?: string;
-  fail_retry_interval: string;
-  fail_retry_times: string;
-  task_priority: string;
   // 自定义参数
   local_params?: LocalParam[];
 }

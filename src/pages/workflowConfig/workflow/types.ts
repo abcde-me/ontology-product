@@ -97,6 +97,17 @@ export type CommonNodeType<T = {}> = {
     >
   >;
 
+export interface CommonStructNodeType extends CommonNodeType {
+  // 失败重试次数
+  fail_retry_interval: string;
+  // 失败重试间隔
+  fail_retry_times: string;
+  // 运行优先级
+  task_priority: string;
+  // 工作流类型
+  flow_type: string;
+}
+
 export type CommonEdgeType = {
   _hovering?: boolean;
   _connectedNodeIsHovering?: boolean;

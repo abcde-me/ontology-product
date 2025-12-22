@@ -1,5 +1,6 @@
-import type {
+import {
   CommonNodeType,
+  CommonStructNodeType,
   VarType
 } from '@/pages/workflowConfig/workflow/types';
 
@@ -18,17 +19,11 @@ export interface LocalParam {
   value?: string;
 }
 
-export interface SQLNodeConfig extends CommonNodeType {
+export interface SQLNodeConfig extends CommonStructNodeType {
   // 自定义参数
   local_params: LocalParam[];
   // SQL脚本内容
   raw_script?: string;
-  // 失败重试次数
-  fail_retry_interval: string;
-  // 失败重试间隔
-  fail_retry_times: string;
-  // 运行优先级
-  task_priority: string;
   // 选择的SQL脚本ID
   sql_id: string;
 }

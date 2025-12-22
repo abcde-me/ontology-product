@@ -36,6 +36,7 @@ import {
   IconCloseCircleFill,
   IconLoading
 } from '@arco-design/web-react/icon';
+import DependentNodeDefault from '@/pages/workflowConfig/workflow/nodes/dependent-node/default';
 
 type NodesExtraData = {
   author: string;
@@ -324,9 +325,9 @@ export const NODES_EXTRA_DATA: Record<any, NodesExtraData> = {
     about: '',
     availablePrevNodes: [],
     availableNextNodes: [],
-    getAvailablePrevNodes: CustomizeDefault.getAvailablePrevNodes,
-    getAvailableNextNodes: CustomizeDefault.getAvailableNextNodes,
-    checkValid: CustomizeDefault.checkValid
+    getAvailablePrevNodes: DependentNodeDefault.getAvailablePrevNodes,
+    getAvailableNextNodes: DependentNodeDefault.getAvailableNextNodes,
+    checkValid: DependentNodeDefault.checkValid
   }
 };
 
@@ -535,7 +536,7 @@ export const NODES_INITIAL_DATA = {
     type: BlockEnum.Dependent,
     title: '',
     desc: '',
-    ...SQLNodeDefault.defaultValue
+    ...DependentNodeDefault.defaultValue
   },
   [BlockEnum.Seatunnel]: {
     type: BlockEnum.Seatunnel,
