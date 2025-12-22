@@ -201,7 +201,7 @@ const SqlIndex: React.FC = memo(() => {
   };
 
   const handleDevelopScriptActiveUpdate = (tabData: DevelopScriptFileTab) => {
-    updateTab(tabData);
+    developScriptUpdateTab(tabData);
   };
 
   const handleDevelopScriptInsertContentRegister = (
@@ -211,11 +211,11 @@ const SqlIndex: React.FC = memo(() => {
   };
 
   // 刷新目录的函数
-  const handleRefreshDirectory = useCallback(async () => {
-    if (directoryTreeRef.current?.refresh) {
-      await directoryTreeRef.current.refresh();
-    }
-  }, []);
+  // const handleRefreshDirectory = useCallback(async () => {
+  //   if (directoryTreeRef.current?.refresh) {
+  //     await directoryTreeRef.current.refresh();
+  //   }
+  // }, []);
 
   const handleDevelopScriptRefreshDirectory = useCallback(async () => {
     if (developScriptDirectoryTreeRef.current?.refresh) {
@@ -224,11 +224,11 @@ const SqlIndex: React.FC = memo(() => {
   }, []);
 
   // 选中文件的方法
-  const selectFile = (fileId: string) => {
-    if (directoryTreeRef.current?.selectFile) {
-      directoryTreeRef.current.selectFile(fileId);
-    }
-  };
+  // const selectFile = (fileId: string) => {
+  //   if (directoryTreeRef.current?.selectFile) {
+  //     directoryTreeRef.current.selectFile(fileId);
+  //   }
+  // };
 
   const selectDevelopScriptFile = (fileId: string) => {
     if (developScriptDirectoryTreeRef.current?.selectFile) {
@@ -330,11 +330,8 @@ const SqlIndex: React.FC = memo(() => {
             onActiveUpdate={handleActiveUpdate}
             onInsertContent={handleInsertContentRegister}
             onEditorFocusChange={handleEditorFocusChange}
-            refreshDirectory={handleRefreshDirectory}
-            selectFile={selectFile}
             onToScriptList={handleTabChange}
             fileManagerSelectedKeys={fileManagerSelectedKeys}
-            // openFile={(scriptId: string) => openFile('', scriptId, '')}
           />
         )}
         {activeTab === 'files' && (
