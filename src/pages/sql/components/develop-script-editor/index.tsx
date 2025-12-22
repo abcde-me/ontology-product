@@ -23,6 +23,7 @@ interface EditorContentProps {
   selectFile?: (fileId: string) => void;
   onToScriptList?: (key: string) => void;
   curActiveTab: string;
+  onFileOpen?: (fileId: string, scriptId: string, fileName?: string) => void;
 }
 
 const EditorContent: React.FC<EditorContentProps> = memo(
@@ -39,7 +40,8 @@ const EditorContent: React.FC<EditorContentProps> = memo(
     refreshDirectory,
     selectFile,
     onToScriptList,
-    curActiveTab
+    curActiveTab,
+    onFileOpen
   }) => {
     // 获取当前活动标签页
     const activeTabData = fileTabs.find((tab) => tab.key === activeTab);
@@ -192,6 +194,7 @@ const EditorContent: React.FC<EditorContentProps> = memo(
             onToScriptList={onToScriptList}
             curActiveTab={curActiveTab}
             onHasUnsavedChangesChange={handleHasUnsavedChangesChange}
+            onFileOpen={onFileOpen}
           />
         </div>
       </div>

@@ -75,6 +75,7 @@ interface NotebookWorkspaceProps {
   onToScriptList?: (key: string) => void;
   curActiveTab: string;
   onHasUnsavedChangesChange?: (checkFn: (() => boolean) | null) => void;
+  onFileOpen?: (fileId: string, scriptId: string, fileName?: string) => void;
 }
 
 // 定义用于高亮参数的效果
@@ -154,6 +155,8 @@ const EditorWorkspaceContent: React.FC<{
   onToScriptList?: (key: string) => void;
   curActiveTab: string;
   onHasUnsavedChangesChange?: (checkFn: (() => boolean) | null) => void;
+  onFileOpen?: (fileId: string, scriptId: string, fileName?: string) => void;
+  refreshDirectory?: () => void;
 }> = memo(
   ({
     onInsertContent,
@@ -161,7 +164,9 @@ const EditorWorkspaceContent: React.FC<{
     fileName,
     onToScriptList,
     curActiveTab,
-    onHasUnsavedChangesChange
+    onHasUnsavedChangesChange,
+    onFileOpen,
+    refreshDirectory
   }) => {
     const FormItem = Form.Item;
     const [form] = Form.useForm();
@@ -383,12 +388,32 @@ const EditorWorkspaceContent: React.FC<{
       try {
         setCopyLoading(true);
         const res = await copyDevelopScript(params);
-        if (res.status === 200) {
-          Message.success(
-            type === 'newVersion' ? '复制为新版本成功' : '复制为新脚本成功'
-          );
-        } else {
+
+        if (res.status !== 200 || !res.data.script_id) {
           Message.error(res.message || '复制失败');
+          return;
+        }
+
+        Message.success(
+          type === 'newVersion' ? '复制为新版本成功' : '复制为新脚本成功'
+        );
+
+        // 如果是复制为新脚本，自动打开新脚本
+        if (type === 'newScript' && res.data) {
+          const newScriptId = String(res.data.script_id ?? '');
+          const newFileId = String(
+            (res.data as any)?.script_file_id ?? res.data.script_id ?? ''
+          );
+          const newFileName = res.data.script_name || scriptInfo.script_name;
+
+          if (newScriptId && onFileOpen) {
+            // 刷新目录列表
+            if (refreshDirectory) {
+              refreshDirectory();
+            }
+            // 打开新脚本
+            onFileOpen(newFileId, newScriptId, newFileName);
+          }
         }
       } catch (error) {
         console.error('复制失败:', error);
@@ -514,7 +539,7 @@ const EditorWorkspaceContent: React.FC<{
                         <IconCaretRight className="mr-[4px]" />
                       )
                     }
-                    disabled={scriptInfo?.script_context?.trim() === ''}
+                    disabled={!scriptInfo?.script_context?.trim()}
                     onClick={handleRunClick}
                     className={classNames(
                       'h-[26px]',
@@ -844,7 +869,9 @@ const EditorWorkspaceContent: React.FC<{
               }}
               initialValues={{
                 scriptName: scriptInfo?.script_name || '',
-                version: scriptInfo?.max_version_name || 'V1',
+                version: scriptInfo?.max_version
+                  ? `V${scriptInfo?.max_version + 1}`
+                  : 'V1',
                 versionDesc: scriptInfo?.script_desc ?? ''
               }}
             />
@@ -871,7 +898,8 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = memo(
     selectFile,
     onToScriptList,
     curActiveTab,
-    onHasUnsavedChangesChange
+    onHasUnsavedChangesChange,
+    onFileOpen
   }) => {
     const editorOptions = {
       activeTab: tabKey,
@@ -917,6 +945,8 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = memo(
           onInsertContent={onInsertContent}
           onEditorFocusChange={onEditorFocusChange}
           onHasUnsavedChangesChange={onHasUnsavedChangesChange}
+          onFileOpen={onFileOpen}
+          refreshDirectory={refreshDirectory}
         />
       </EditorProvider>
     );
