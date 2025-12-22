@@ -22,7 +22,7 @@ import { tags as t } from '@lezer/highlight';
 import createTheme from '@uiw/codemirror-themes';
 import CodeMirror, { ReactCodeMirrorRef } from '@uiw/react-codemirror';
 import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
-import { format } from 'sql-formatter';
+import { formatSQL } from '@/utils/sqlFormatter';
 import { useUserInfo } from '@/store/userInfoStore';
 import styles from './EditorWorkspace.module.scss';
 
@@ -35,6 +35,7 @@ import { FileTab } from '../../hooks/useTabManager';
 import RunningInfoPanel from './RunningInfoPanel';
 import classNames from 'classnames';
 import { useUrlState } from '../../hooks/useUrlState';
+import { SQL_PARAM_PLACEHOLDER_REGEX } from '../../constant';
 interface NotebookWorkspaceProps {
   content: string;
   fileName: string;
@@ -167,7 +168,12 @@ const EditorWorkspaceContent: React.FC<{
 
       if (editorContent) {
         try {
-          const formattedCode = format(editorContent, { language: 'sql' });
+          const formattedCode = formatSQL(editorContent, {
+            formatOptions: {
+              language: 'sql',
+              placeholderRegex: SQL_PARAM_PLACEHOLDER_REGEX
+            }
+          });
           handleContentChange(formattedCode);
           Message.success('格式化成功');
         } catch (e) {

@@ -5,6 +5,7 @@ import ParameterIcon from '../../assets/parameter-icon.svg';
 import ArrowRightIcon from '../../assets/arrow-right-icon.svg';
 import { ScriptParam } from '@/types/sqlDevelopApi';
 import { useLocalParams } from '@/hooks/useLocalParams';
+import { SQL_PARAM_PLACEHOLDER_REGEX } from '../../constant';
 
 // 扩展 ScriptParam 以支持内部排序
 type ParameterWithOrder = ScriptParam & { _order?: number };
@@ -64,7 +65,7 @@ const ParameterSidebar: React.FC<ParameterSidebarProps> = memo(
     const { localParams, parseAndSetParams, updateParamValue, setLocalParams } =
       useLocalParams({
         initialParams,
-        regex: /\$\{([^}]+)\}/g
+        regex: SQL_PARAM_PLACEHOLDER_REGEX
       });
 
     // 检测是否有第一个 ${}（检测是否有参数模式）
