@@ -341,7 +341,7 @@ const ScriptTable: React.FC<ScriptTableProps> = ({
       )
     },
     {
-      title: '最后执行时间',
+      title: '最新更新时间',
       dataIndex: 'update_time',
       width: 180,
       render: (_, record) => <span>{record.update_time ?? ''}</span>
