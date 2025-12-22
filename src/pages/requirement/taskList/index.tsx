@@ -12,7 +12,8 @@ import {
   PaginationProps,
   Space,
   Table,
-  Tooltip
+  Tooltip,
+  Link
 } from '@arco-design/web-react';
 import { ColumnProps } from '@arco-design/web-react/es/Table';
 import { SorterInfo } from '@arco-design/web-react/es/Table/interface';
@@ -266,25 +267,24 @@ function TaskList() {
       render: (_, record) => {
         return (
           <Space>
-            {/* {perms.includes(WORKFLOW_LIST_PERMISSIONS.CAN_GET) && ( */}
             {hasPermissionGetTask && (
-              <span
-                className="operate-text"
+              <Link
                 onClick={() => {
                   toLabelEditor(record, 'LABEL');
                 }}
+                disabled={record?.label_cnt === 0}
               >
-                去标注
-              </span>
+                标注
+              </Link>
             )}
-            <span
-              className="operate-text"
+            <Link
               onClick={() => {
                 toLabelEditor(record, 'RELABEL');
               }}
+              disabled={record?.re_label_cnt === 0}
             >
               改错
-            </span>
+            </Link>
           </Space>
         );
       }

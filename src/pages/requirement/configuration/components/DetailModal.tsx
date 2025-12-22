@@ -386,6 +386,9 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
       sort: 'asc'
     };
     try {
+      setTableData([]);
+      setTotal(0);
+      settableLoading(true);
       const res = await getAnnotationTabledData(sourceParams);
       if (res.status === 200) {
         setTableData(res?.data?.items);
