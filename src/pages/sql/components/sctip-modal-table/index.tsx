@@ -384,7 +384,7 @@ const SctipModalTable: React.FC<{
           pagination={false}
           onChange={handleTableChange}
         />
-        {total > 0 && (
+        {total > pageSize && (
           <Pagination
             current={current}
             pageSize={pageSize}

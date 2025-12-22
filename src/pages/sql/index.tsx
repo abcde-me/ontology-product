@@ -19,8 +19,6 @@ import {
   useDevelopScriptTabManager
 } from './hooks/useDevelopScriptTabManager';
 import { useUrlState } from './hooks/useUrlState';
-import { getSqlScriptDetail } from '@/api/sql';
-import { Message } from '@arco-design/web-react';
 
 const { Content, Sider } = Layout;
 const TabPane = Tabs.TabPane;
@@ -41,9 +39,6 @@ const SqlIndex: React.FC = memo(() => {
     useState<boolean>(false);
   const isEditorFocusedRef = useRef<boolean>(false);
   const isDevelopScriptEditorFocusedRef = useRef<boolean>(false);
-  const hasOpenedFileFromActiveScriptIdRef = useRef<string | null>(null);
-  // 用于存储检查未保存更改的函数
-  const checkUnsavedChangesRef = useRef<(() => boolean) | null>(null);
   // 添加状态桥接：用于同步FileManager的选中状态
   // SQL查询脚本选中状态
   const [fileManagerSelectedKeys, setFileManagerSelectedKeys] = useState<
