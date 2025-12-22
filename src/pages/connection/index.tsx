@@ -124,7 +124,7 @@ export default function Connection() {
       const newfrom = {
         name,
         type,
-        sub_type: type === 'db' ? sub_type : undefined, // 只有当类型是db时才包含sub_type
+        sub_type: type === 'db' || type === 'mq' ? sub_type : undefined, // 只有当类型是db时才包含sub_type
         config: { ...filteredValues }
       };
       setEditLoadingState(true);
