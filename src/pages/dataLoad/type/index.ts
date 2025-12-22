@@ -31,7 +31,8 @@ export enum ExecutionStatus {
 export enum SourceType {
   HDFS = 'HDFS',
   S3 = 'S3',
-  DB = 'db'
+  DB = 'db',
+  MQ = 'mq'
 }
 
 export enum LoadType {
