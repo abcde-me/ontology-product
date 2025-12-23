@@ -496,7 +496,7 @@ const EditorWorkspaceContent: React.FC<{
                         <IconCaretRight className="mr-[4px]" />
                       )
                     }
-                    disabled={!scriptInfo?.script_context?.trim()}
+                    disabled={!canEdit}
                     onClick={handleRunClick}
                     className={classNames(
                       'h-[26px]',
@@ -515,7 +515,10 @@ const EditorWorkspaceContent: React.FC<{
                   icon={<SQLFormatIcon />}
                   onClick={handleFormatCode}
                   disabled={!scriptInfo?.isSelfEditing}
-                  className="h-[26px]"
+                  className={classNames(
+                    'h-[26px] px-[0px]',
+                    styles['format-code-btn']
+                  )}
                 >
                   格式化
                 </Button>
@@ -527,7 +530,7 @@ const EditorWorkspaceContent: React.FC<{
                       type="text"
                       icon={<IconBook />}
                       onClick={() => setSpecificationsVisible(true)}
-                      className="h-[26px]"
+                      className="h-[26px] px-[0px] !text-[var(--color-text-2)]"
                     >
                       开发规范
                     </Button>
@@ -536,7 +539,7 @@ const EditorWorkspaceContent: React.FC<{
                       type="text"
                       icon={<IconStorage />}
                       onClick={() => setParamVisible(true)}
-                      className="h-[26px]"
+                      className="h-[26px] px-[0px] !text-[var(--color-text-2)]"
                     >
                       参数列表
                     </Button>
@@ -563,7 +566,7 @@ const EditorWorkspaceContent: React.FC<{
                 className={classNames(styles['btn-save'], 'mr-[8px]')}
                 loading={saveLoading}
                 onClick={handleSave}
-                disabled={!canEdit}
+                disabled={!scriptInfo?.isSelfEditing}
                 icon={<IconSave />}
               >
                 保存
@@ -574,7 +577,7 @@ const EditorWorkspaceContent: React.FC<{
                 onClick={() => {
                   setReleaseVersionVisible(true);
                 }}
-                disabled={!canEdit}
+                disabled={!canEdit || !scriptInfo?.isSelfEditing}
                 icon={<ReleaseIcon />}
               >
                 发版
