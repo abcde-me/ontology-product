@@ -55,7 +55,7 @@ const SamplingModal: React.FC<SamplingModalProps> = ({
             ? SamplingType.ToInspect
             : SamplingType.ToRecheck,
         sample_type: SamplingCountType.Percentage,
-        sample_radio: 50
+        sample_radio: 10
       });
     }
   }, [visible, form]);
