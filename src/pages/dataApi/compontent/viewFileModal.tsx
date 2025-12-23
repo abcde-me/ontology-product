@@ -2,42 +2,154 @@ import {
   Button,
   Checkbox,
   Descriptions,
+  Message,
   Modal,
   Table,
   Tabs
 } from '@arco-design/web-react';
-import React, { useCallback, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import noDataElement from '@/components/no-data';
 import EllipsisPopoverCom from '@/components/ellipsis-popover-com';
 import { IconCopy } from '@arco-design/web-react/icon';
 import { useScrollTo } from '@/hooks/useScrollTo';
 import styles from './viewFileModal.module.scss';
+import { openDataGetApiDoc } from '@/api/dataApi';
+import { throttle } from 'lodash-es';
 
 const TabPane = Tabs.TabPane;
 
+interface ApiDocDetailResponse {
+  apiInfo?: {
+    description?: string;
+    nameCn?: string;
+    path?: string;
+    name?: string;
+  };
+  inputParams?: [];
+  outputParams?: [];
+  example?: {
+    request?: {};
+    response?: {};
+  };
+}
+
 export default function ViewFileModal({ visible, onCancel, id }) {
+  const [viewFileDetailData, setViewFileDetailData] =
+    useState<ApiDocDetailResponse>({});
   const [dataApiData, setDataApiData] = useState([]);
-  // 查看文档输入参数分页
-  const [inputParamsCurrentPage, setInputParamsCurrentPage] = useState(1);
-  const [inputParamsTotal, setInputParamsTotal] = useState(0);
-  const [inputParamsPageSize, setInputParamsPageSize] = useState(10);
-  // 查看文档输出参数分页
-  const [outputParamsCurrentPage, setOutputParamsCurrentPage] = useState(1);
-  const [outputParamsTotal, setOutputParamsTotal] = useState(0);
-  const [outputParamsPageSize, setOutputParamsPageSize] = useState(10);
+  const [activeKey, setActiveKey] = useState('baseInfo');
+
+  // 查看文档内容区域引用
+  const viewFileContentRef = useRef<HTMLDivElement>(null);
+  // 基础信息标题引用
+  const baseInfoRef = useRef<HTMLDivElement>(null);
+  // 输入参数标题引用
+  const inputParamsRef = useRef<HTMLDivElement>(null);
+  // 输出参数标题引用
+  const outputParamsRef = useRef<HTMLDivElement>(null);
+  // 请求示例标题引用
+  const requestExampleRef = useRef<HTMLDivElement>(null);
+  // 输出示例标题引用
+  const outputExampleRef = useRef<HTMLDivElement>(null);
+  // 状态码标题引用
+  const statusCodesRef = useRef<HTMLDivElement>(null);
+
   // 定位到指定元素
   const scrollTo = useScrollTo();
+
+  useEffect(() => {
+    if (!id) {
+      return;
+    }
+    handleViewDetail(id);
+  }, [id]);
+
+  // 监听滚动事件，根据滚动位置更新选中的Tab
+  useEffect(() => {
+    const container = viewFileContentRef.current;
+
+    if (!container) return;
+    const handleScroll = () => {
+      const parentRect = container.getBoundingClientRect();
+      if (
+        getIsRefTopNumberInViewTop(parentRect, baseInfoRef) &&
+        baseInfoRef.current?.id
+      ) {
+        setActiveKey(baseInfoRef.current?.id);
+      } else if (
+        getIsRefTopNumberInViewTop(parentRect, inputParamsRef) &&
+        inputParamsRef.current?.id
+      ) {
+        setActiveKey(inputParamsRef.current?.id);
+      } else if (
+        getIsRefTopNumberInViewTop(parentRect, outputParamsRef) &&
+        outputParamsRef.current?.id
+      ) {
+        setActiveKey(outputParamsRef.current?.id);
+      } else if (
+        getIsRefTopNumberInViewTop(parentRect, requestExampleRef) &&
+        requestExampleRef.current?.id
+      ) {
+        setActiveKey(requestExampleRef.current?.id);
+      } else if (
+        getIsRefTopNumberInViewTop(parentRect, outputExampleRef) &&
+        outputExampleRef.current?.id
+      ) {
+        setActiveKey(outputExampleRef.current?.id);
+      } else if (
+        getIsRefTopNumberInViewTop(parentRect, statusCodesRef) &&
+        statusCodesRef.current?.id
+      ) {
+        setActiveKey(statusCodesRef.current?.id);
+      }
+    };
+
+    // 节流处理滚动事件，避免频繁触发
+    const throttledHandleScroll = throttle(handleScroll, 100);
+    // 监听滚轮事件
+    container.addEventListener('scroll', throttledHandleScroll, {
+      passive: false
+    });
+    // 在组件卸载时移除监听器
+    return () => {
+      container.removeEventListener('scroll', throttledHandleScroll);
+      throttledHandleScroll.cancel(); // 清除节流计时器
+    };
+  }, [viewFileContentRef.current]);
+
+  const getIsRefTopNumberInViewTop = (
+    parentRect,
+    ref: React.RefObject<HTMLDivElement>
+  ) => {
+    const childRect = ref.current?.getBoundingClientRect();
+    if (!childRect) return false;
+    return (
+      Number((childRect.top - parentRect.top).toFixed(0)) <= 0 &&
+      Number((childRect.bottom - parentRect.top).toFixed(0)) > 0
+    );
+  };
+
+  const handleViewDetail = async (id: string) => {
+    const res = await openDataGetApiDoc({ id });
+    if (res.code === '' && res.status === 200) {
+      setViewFileDetailData(res.data || {});
+    } else {
+      Message.error(res.message || '查看文档失败');
+    }
+  };
 
   // 查看文档基本信息数据
   const viewFileBaseInfoData = [
     {
       label: 'API名称',
-      value: <EllipsisPopoverCom value="BM_SS_ZY" />
+      value: (
+        <EllipsisPopoverCom value={viewFileDetailData?.apiInfo?.nameCn || ''} />
+      )
     },
     {
       label: '路径',
       value: (
-        <EllipsisPopoverCom value="BM_SS_ZYBMBM_SS_ZYBMBM_SS_ZYBM	BM_SS_ZYBM	BM_SS_ZYBM	BM_SS_ZYBM	BM_SS_ZYBM" />
+        <EllipsisPopoverCom value={viewFileDetailData?.apiInfo?.path || ''} />
       )
     },
     {
@@ -51,6 +163,18 @@ export default function ViewFileModal({ visible, onCancel, id }) {
     {
       label: '缓存过期时长',
       value: '10s'
+    },
+    {
+      label: '接口描述',
+      value: (
+        <EllipsisPopoverCom
+          value={viewFileDetailData?.apiInfo?.description || ''}
+        />
+      )
+    },
+    {
+      label: '文档更新时间',
+      value: '2025-05-05 05:05:05'
     }
   ];
 
@@ -111,17 +235,17 @@ export default function ViewFileModal({ visible, onCancel, id }) {
     },
     {
       title: '参数英文名称',
-      dataIndex: 'englishName',
+      dataIndex: 'name',
       width: 200
     },
     {
       title: '参数中文名称',
-      dataIndex: 'chineseName',
+      dataIndex: 'nameCn',
       width: 200
     },
     {
       title: '参数类型',
-      dataIndex: 'type',
+      dataIndex: 'paramType',
       width: 150
     },
     {
@@ -156,26 +280,6 @@ export default function ViewFileModal({ visible, onCancel, id }) {
     }
   ];
 
-  // 查看文档输入参数分页变化
-  const handleInputParamsPageChange = (page) => {
-    setInputParamsCurrentPage(page);
-  };
-
-  // 查看文档输入参数分页大小变化
-  const handleInputParamsPageSizeChange = (size) => {
-    setInputParamsPageSize(size);
-  };
-
-  // 查看文档输出参数分页变化
-  const handleOutputParamsPageChange = (page) => {
-    setOutputParamsCurrentPage(page);
-  };
-
-  // 查看文档输出参数分页大小变化
-  const handleOutputParamsPageSizeChange = (size) => {
-    setOutputParamsPageSize(size);
-  };
-
   return (
     <Modal
       className={styles.viewFileModal}
@@ -186,8 +290,10 @@ export default function ViewFileModal({ visible, onCancel, id }) {
     >
       <>
         <Tabs
-          defaultActiveTab="baseInfo"
+          defaultActiveTab={activeKey}
+          activeTab={activeKey}
           onChange={(key) => {
+            setActiveKey(key);
             scrollTo(`#${key}`, { smooth: true, align: 'start' });
           }}
         >
@@ -198,8 +304,8 @@ export default function ViewFileModal({ visible, onCancel, id }) {
           <TabPane key="outputExample" title="输出示例" />
           <TabPane key="statusCodes" title="状态码" />
         </Tabs>
-        <div className={styles.viewFileContent}>
-          <div id="baseInfo">
+        <div className={styles.viewFileContent} ref={viewFileContentRef}>
+          <div id="baseInfo" ref={baseInfoRef}>
             <Descriptions
               colon=" :"
               layout="horizontal"
@@ -208,109 +314,64 @@ export default function ViewFileModal({ visible, onCancel, id }) {
               column={2}
             />
           </div>
-          <h1 id="inputParams" className="mb-4 mt-3 text-sm font-medium">
-            输入参数
-          </h1>
-          <Table
-            border={false}
-            columns={inputParamsColumns}
-            data={dataApiData}
-            pagination={{
-              current: inputParamsCurrentPage,
-              total: inputParamsTotal,
-              pageSize: inputParamsPageSize,
-              showTotal: (inputParamsTotal, range) =>
-                `共${inputParamsTotal} 条`,
-              sizeCanChange: true,
-              showJumper: true,
-              pageSizeChangeResetCurrent: true,
-              onChange: handleInputParamsPageChange,
-              onPageSizeChange: handleInputParamsPageSizeChange,
-              sizeOptions: [10, 20, 50, 100]
-            }}
-            noDataElement={noDataElement({ description: '暂无数据' })}
-            rowKey="key"
-          />
-          <h1 id="outputParams" className="mb-4 mt-3 text-sm font-medium">
-            输出参数
-          </h1>
-          <Table
-            border={false}
-            columns={outputParamsColumns}
-            data={dataApiData}
-            pagination={{
-              current: inputParamsCurrentPage,
-              total: outputParamsTotal,
-              pageSize: outputParamsPageSize,
-              showTotal: (outputParamsTotal, range) =>
-                `共${outputParamsTotal} 条`,
-              sizeCanChange: true,
-              showJumper: true,
-              pageSizeChangeResetCurrent: true,
-              onChange: handleOutputParamsPageChange,
-              onPageSizeChange: handleOutputParamsPageSizeChange,
-              sizeOptions: [10, 20, 50, 100]
-            }}
-            noDataElement={noDataElement({ description: '暂无数据' })}
-            rowKey="key"
-          />
-          <div
-            id="requestExample"
-            className="mb-4 mt-3 flex items-center justify-between"
-          >
-            <h1 className="mt-[1px] text-sm font-medium">请求示例(JSON)</h1>
-            <Button
-              type="outline"
-              icon={<IconCopy />}
-              className={styles.copyButton}
-            >
-              复制代码
-            </Button>
+          <div id="inputParams" ref={inputParamsRef}>
+            <h1 className="mb-4 mt-3 text-sm font-medium">输入参数</h1>
+            <Table
+              border={false}
+              columns={inputParamsColumns}
+              data={viewFileDetailData?.inputParams || []}
+              pagination={false}
+              noDataElement={noDataElement({ description: '暂无数据' })}
+              rowKey="name"
+            />
           </div>
-          <div className={styles.tableContent}>
-            {`{
-                    "book": {
-                      "title": "示例图书",
-                      "author": "张三",
-                      "publishedYear": 2023,
-                      "isAvailable": true,
-                      "genres": ["小说", "科幻", "冒险"],
-                      "publisher": {
-                        "name": "示例出版社",
-                        "location": "北京"
-                      }
-                    }
-                  }`}
+          <div id="outputParams" ref={outputParamsRef}>
+            <h1 className="mb-4 mt-3 text-sm font-medium">输出参数</h1>
+            <Table
+              border={false}
+              columns={outputParamsColumns}
+              data={viewFileDetailData?.outputParams || []}
+              pagination={false}
+              noDataElement={noDataElement({ description: '暂无数据' })}
+              rowKey="name"
+            />
           </div>
-          <h1 id="outputExample" className="mb-4 mt-3 text-sm font-medium">
-            输出示例(JSON)
-          </h1>
-          <div className={styles.tableContent}>
-            {`{
-                    "book": {
-                      "title": "示例图书",
-                      "author": "张三",
-                      "publishedYear": 2023,
-                      "isAvailable": true,
-                      "genres": ["小说", "科幻", "冒险"],
-                      "publisher": {
-                        "name": "示例出版社",
-                        "location": "北京"
-                      }
-                    }
-                  }`}
+          <div id="requestExample" ref={requestExampleRef}>
+            <div className="mb-4 mt-3 flex items-center justify-between">
+              <h1 className="mt-[1px] text-sm font-medium">请求示例(JSON)</h1>
+              <Button
+                type="outline"
+                icon={<IconCopy />}
+                className={styles.copyButton}
+              >
+                复制代码
+              </Button>
+            </div>
+            <div className={styles.tableContent}>
+              <pre>
+                {JSON.stringify(viewFileDetailData?.example?.request, null, 2)}
+              </pre>
+            </div>
           </div>
-          <h1 id="statusCodes" className="mb-4 mt-3 text-sm font-medium">
-            状态码
-          </h1>
-          <Table
-            border={false}
-            columns={statusCodesColumns}
-            data={dataApiData}
-            pagination={false}
-            noDataElement={noDataElement({ description: '暂无数据' })}
-            rowKey="key"
-          />
+          <div id="outputExample" ref={outputExampleRef}>
+            <h1 className="mb-4 mt-3 text-sm font-medium">输出示例(JSON)</h1>
+            <div className={styles.tableContent}>
+              <pre>
+                {JSON.stringify(viewFileDetailData?.example?.response, null, 2)}
+              </pre>
+            </div>
+          </div>
+          <div id="statusCodes" ref={statusCodesRef}>
+            <h1 className="mb-4 mt-3 text-sm font-medium">状态码</h1>
+            <Table
+              border={false}
+              columns={statusCodesColumns}
+              data={dataApiData}
+              pagination={false}
+              noDataElement={noDataElement({ description: '暂无数据' })}
+              rowKey="key"
+            />
+          </div>
         </div>
       </>
     </Modal>
