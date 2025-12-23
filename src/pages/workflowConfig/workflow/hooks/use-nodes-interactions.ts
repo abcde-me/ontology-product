@@ -78,6 +78,7 @@ export const useNodesInteractions = () => {
   const workflow_uuid = useSearchParam('workflow_uuid');
   const { doSyncWorkflowDraft } = useNodesSyncDraft();
   const { type: flowType = 'no_struct' } = useParams<Record<string, string>>();
+  const userInfo = useUserInfo();
   const { setNodesProcessDetail, nodesProcessDetail } = useTaskStore(
     useShallow((state) => ({
       setNodesProcessDetail: state.setNodesProcessDetail,
@@ -113,18 +114,21 @@ export const useNodesInteractions = () => {
         false,
         {
           onSuccess(res) {
-            testWorkflowNode({
-              node_code_list: node,
+            operateWorkflow({
+              op: WorkflowOperation.RUNNING,
+              start_node: node,
               // 后端需要这个id是number类型，接口返回是字符串，后端改了前端也得改，所以前端强转
-              process_definition_code: res?.ds_workflow_id
+              ds_workflow_id: res?.ds_workflow_id?.toString()
                 ? +res.ds_workflow_id
-                : 0
+                : 0,
+              uid: userInfo?.id ?? '',
+              workflow_uuid: workflow_uuid ?? ''
             }).then((res) => {
-              if ([res.data, res.data?.id].some(isNil)) {
+              if (isNil(res.data)) {
                 Message.warning(res.message);
                 return;
               }
-              initTestTask(res.data.id);
+              initTestTask(res.data.job_id);
               Message.success('开始测试');
             });
           },
@@ -142,12 +146,10 @@ export const useNodesInteractions = () => {
 
   const handleStopTestNode = (process_instance_id: string) => {
     return workflowOperation({
-      executeType: WorkflowOperationType.EXEC_STOP,
+      execute_type: WorkflowOperationType.STOP,
       process_instance_id
     })
-      .then((res) => {
-        // debugger;
-      })
+      .then((res) => {})
       .catch(console.error);
   };
 
