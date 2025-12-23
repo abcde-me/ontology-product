@@ -131,25 +131,13 @@ const ModalParamList = ({ paramVisible, onCancel }) => {
             form={form}
             onValuesChange={(values: any) => handleSearchChange(values)}
           >
-            <FormItem
-              label="参数名:"
-              field="config_key"
-              // style={{ marginRight: 8, marginBottom: 16 }}
-            >
+            <FormItem label="参数名:" field="config_key">
               <Input allowClear placeholder="输入参数名搜索" />
             </FormItem>
-            <FormItem
-              label="示例:"
-              field="config_demo"
-              // style={{ marginRight: 8, marginBottom: 16 }}
-            >
+            <FormItem label="示例:" field="config_demo">
               <Input allowClear placeholder="输入参数值搜索" />
             </FormItem>
-            <FormItem
-              label="参数说明:"
-              field="config_desc"
-              // style={{ marginRight: 8, marginBottom: 16 }}
-            >
+            <FormItem label="参数说明:" field="config_desc">
               <Input allowClear placeholder="输入参数说明搜索" />
             </FormItem>
           </Form>

@@ -16,7 +16,7 @@ import {
   ListDataAssetSourceResItem
 } from '@/types/dataAssetApi';
 import { RESERVED_FIELD_ENS, SYSTEM_FIELDS } from '../../utils/const';
-import { ViewType } from '../../types/viewType';
+import { ViewType } from '@/components/ViewToggle';
 
 type DisplaySortable = {
   nameEn?: string;
