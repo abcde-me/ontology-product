@@ -1,5 +1,4 @@
 import UAPI from '@/api';
-import { SetStateAction } from 'react';
 
 export interface MetadataMenuItem {
   datasourceType: string;
