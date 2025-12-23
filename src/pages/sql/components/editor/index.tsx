@@ -72,7 +72,7 @@ const EditorContent: React.FC<EditorContentProps> = memo(
     };
 
     // 创建 SQL查询文件（等同于 DirectoryTree 的新建功能）
-    const handleCreateSqlQuery = () => {
+    const handleCreateSqlQuery = async () => {
       // 检查标签页数量限制
       if (fileTabs.length >= 20) {
         Message.error('最多只能打开20个标签页，请先关闭一些标签页');
@@ -86,7 +86,7 @@ const EditorContent: React.FC<EditorContentProps> = memo(
 
       try {
         // 调用父组件的创建逻辑
-        onCreate('', {}); // 传递空字符串和空对象作为默认参数
+        await onCreate('', {}); // 传递空字符串和空对象作为默认参数
       } catch (error) {
         console.error('创建 SQL查询文件失败:', error);
         Message.error('创建失败');

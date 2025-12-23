@@ -515,7 +515,6 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
 
   // 监听 activeTab 变化，重新更新编辑器状态
   useEffect(() => {
-    console.log('activeTab', activeTab);
     if (!activeTab || !fileTabs.length) {
       return;
     }
@@ -524,8 +523,6 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
     if (!currentTab) {
       return;
     }
-
-    console.log('currentTab', currentTab);
 
     // 只有当 activeTab 或 scriptId 实际发生变化时才加载文件，避免重复加载
     const shouldLoad =
@@ -598,7 +595,7 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
     // return () => {
     //   handleSaveThrottled.cancel();
     // };
-  }, [activeTab, fileTabs, onTabUpdate]); // 添加必要的依赖项
+  }, [activeTab]); // 添加必要的依赖项
 
   // 当 currentFileId 变化时，重置运行相关状态
   useEffect(() => {

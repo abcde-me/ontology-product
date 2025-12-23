@@ -298,9 +298,9 @@ export const useDevelopScriptTabManager = (
         // 如果创建失败，移除刚添加的临时标签页
         // const tempTabFind = fileState.fileTabs.find((tab) => tab.key === tempTab.fileId);
         // console.log('-----tempTab-----111', tempTabFind, fileState.fileTabs, tempTab.fileId);
-        // if (tempTabFind) {
-        //   removeTab(tempTabFind.key);
-        // }
+        if (tempTab) {
+          removeTab(tempTab.key);
+        }
         return null;
       }
 
