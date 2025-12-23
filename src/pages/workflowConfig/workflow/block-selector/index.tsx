@@ -85,7 +85,7 @@ const NodeSelector: FC<NodeSelectorProps> = ({
         count + 1 > MAX_NODES_NUM &&
         [
           BlockEnum.Text,
-          BlockEnum.Pic,
+          BlockEnum.Image,
           BlockEnum.Video,
           BlockEnum.Audio
         ].includes(type)

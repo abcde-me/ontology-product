@@ -38,7 +38,7 @@ const FieldSync = (props: {
         name: table,
         connector_id: connector
       })
-        .then((res: TargetField[]) => res)
+        .then((res) => res.data?.columns || [])
         .catch((e) => {
           console.error(e);
           return Promise.resolve(emptyRes);

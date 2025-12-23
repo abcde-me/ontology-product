@@ -24,6 +24,7 @@ export enum BlockEnum {
   End = 'end',
   Text = 'text',
   Pic = 'pic',
+  Image = 'image',
   Audio = 'audio',
   Video = 'video',
   Cleaning = 'cleaning',
@@ -96,6 +97,17 @@ export type CommonNodeType<T = {}> = {
       'provider_id' | 'provider_type' | 'provider_name' | 'tool_name'
     >
   >;
+
+export interface CommonStructNodeType extends CommonNodeType {
+  // 失败重试次数
+  fail_retry_interval: string;
+  // 失败重试间隔
+  fail_retry_times: string;
+  // 运行优先级
+  task_priority: string;
+  // 工作流类型
+  flow_type: string;
+}
 
 export type CommonEdgeType = {
   _hovering?: boolean;

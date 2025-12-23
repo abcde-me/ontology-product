@@ -1,101 +1,61 @@
-import {
-  Button,
-  Form,
-  Input,
-  Radio,
-  Select,
-  Typography,
-  Grid,
-  Cascader,
-  Empty,
-  Popover,
-  InputNumber,
-  Divider
-} from '@arco-design/web-react';
-import React, { useEffect, useState } from 'react';
-import {
-  NodePanelProps,
-  NodeProps
-} from '@/pages/workflowConfig/workflow/types';
-import { SQLNodeConfig } from '@/pages/workflowConfig/workflow/nodes/sql-node/types';
-import styled from '@emotion/styled';
-import { useRequest } from 'ahooks';
-import { getSQLListInSQLNode, getSQLVersionInSQLNode } from '@/api/workflowV2';
-import useConfig from '@/pages/workflowConfig/workflow/nodes/sql-node/use-config';
+import { Form, Typography, Divider } from '@arco-design/web-react';
+import React, { useEffect } from 'react';
+import { NodePanelProps } from '@/pages/workflowConfig/workflow/types';
+import useConfig from './use-config';
 import {
   NodeRunSetting,
   PrevNodes
 } from '@/pages/workflowConfig/workflow/nodes/components';
-import node from '@/pages/workflowConfig/workflow/nodes/end/node';
-import {
-  DependentTaskDialog,
-  DependentTaskList
-} from '@/pages/workflowConfig/workflow/nodes/dependent-node/components';
+import { DependentTaskList } from './components';
+import { DependentNodeConfig } from './types';
 
-const { Item: FormItem, useForm, useWatch, List: FormList } = Form;
-const { Row, Col } = Grid;
+const { Item: FormItem, useForm } = Form;
 
-const loadMore = (pathValue: string[], level: number) => {
-  return getSQLVersionInSQLNode(pathValue[0]);
-};
-
-export default React.memo(function SQLPanel(
-  props: NodePanelProps<SQLNodeConfig>
+export default React.memo(function DependentPanel(
+  props: NodePanelProps<DependentNodeConfig>
 ) {
   const { readOnly, onValuesChange, inputs } = useConfig(props.id, props.data);
-  const { data: allSQL, loading } = useRequest(
-    async () => {
-      try {
-        const sqlList = await getSQLListInSQLNode();
-        const sql_id = inputs.sql_id?.split('_') || [];
-        if (sql_id.length > 1) {
-          const sqlId = sql_id[0].toString();
-          const sqlVersions = await getSQLVersionInSQLNode(+sqlId);
-          sqlList.forEach((sql) => {
-            if (sql.value.toString() === sqlId) {
-              sql.children = sqlVersions;
-            }
-          });
-        }
-        return sqlList;
-      } catch (e) {
-        console.error(e);
-        return [];
-      }
-    },
-    {
-      refreshDeps: [inputs.sql_id]
-    }
-  );
   const [form] = useForm();
+
+  useEffect(() => {
+    const { relation, depend_item_list, ...other } = inputs;
+    const formData = {
+      ...other,
+      depend_item_list: {
+        relation,
+        list: depend_item_list
+      }
+    };
+    form.setFieldsValue(formData);
+  }, [inputs]);
+
   return (
-    <PanelContainer className="panel-container wk-node-panel-content code-panel-content date-cleaning-panel mt-4">
+    <div className="panel-container wk-node-panel-content code-panel-content date-cleaning-panel mt-4">
       <Form
         form={form}
         autoComplete="off"
         labelCol={{ span: 0 }}
         wrapperCol={{ span: 24 }}
         disabled={readOnly}
-        initialValues={{ ...inputs, sql_id: inputs.sql_id?.split('_') }}
         layout="vertical"
-        onValuesChange={(_, v: any) => {
-          const { local_params, sql_id, ...otherValue } = v;
+        onValuesChange={(changedValues, v: any) => {
+          if (Object.keys(changedValues).length > 1) return;
+          const {
+            depend_item_list: { relation, list: depend_item_list },
+            ...otherValue
+          } = v;
           onValuesChange({
             ...inputs,
             ...otherValue,
-            sql_id: sql_id?.join('_'),
-            local_params: local_params.map(({ prop, value }) => ({
-              prop,
-              value,
-              direct: 'IN',
-              type: 'VARCHAR'
-            }))
+            relation,
+            depend_item_list
           });
         }}
       >
         <FormItem
           label={<Typography.Text bold>外部前置任务</Typography.Text>}
           tooltip={'可在此处配置依赖的外部工作流或者任务节点并设置逻辑关系'}
+          field={'depend_item_list'}
         >
           <DependentTaskList />
         </FormItem>
@@ -103,25 +63,6 @@ export default React.memo(function SQLPanel(
         <NodeRunSetting />
       </Form>
       <PrevNodes node={props.id} />
-      <DependentTaskDialog />
-    </PanelContainer>
+    </div>
   );
 });
-const PanelContainer = styled.div`
-  .label-hidden {
-    visibility: hidden;
-  }
-
-  .arco-cascader {
-    width: 100% !important;
-    margin-bottom: 0 !important;
-  }
-
-  .dependent-item {
-    border: 1px solid #cbd5e1;
-
-    &:hover {
-      border: 1px solid #007dfa;
-    }
-  }
-`;

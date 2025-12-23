@@ -4,12 +4,7 @@ import useConfig from './use-config';
 import type { VideoParserNodeType } from './types';
 import Split from '@/pages/workflowConfig/workflow/nodes/_base/components/split';
 import type { NodePanelProps } from '@/pages/workflowConfig/workflow/types';
-import {
-  Form,
-  Select,
-  InputNumber,
-  Checkbox
-} from '@arco-design/web-react';
+import { Form, Select, InputNumber, Checkbox } from '@arco-design/web-react';
 import FileList from '../data-text-parser/file-list';
 import { getModelList } from '@/api/modelV2';
 import { FileOptions } from '../start/default';
@@ -55,7 +50,8 @@ const Panel: FC<NodePanelProps<VideoParserNodeType>> = ({ id, data }) => {
         labelCol={{ span: 0 }}
         wrapperCol={{ span: 24 }}
         initialValues={{
-          ...data
+          ...data,
+          audio_pret: data.audio_options || data.audio_pret
         }}
         layout="vertical"
         onValuesChange={(_, v: any) => {
@@ -80,11 +76,7 @@ const Panel: FC<NodePanelProps<VideoParserNodeType>> = ({ id, data }) => {
           />
         </FormItem>
         <Split className="mb-[16px]" />
-        <FormItem
-          label="字幕与音频校验："
-          field="audio_options"
-          labelAlign="left"
-        >
+        <FormItem label="字幕与音频校验：" field="audio_pret" labelAlign="left">
           <Checkbox.Group
             options={[
               { label: '支持多音轨解析', value: 'orbit', disabled: true },

@@ -9,7 +9,7 @@
       padding: 8px 16px;
 
       .task-operators {
-        visibility: hidden;
+        display: none;
       }
 
       .task-operator {
@@ -23,7 +23,7 @@
         background: #eef6ff;
 
         .task-operators {
-          visibility: visible;
+          display: flex;
         }
       }
     }
