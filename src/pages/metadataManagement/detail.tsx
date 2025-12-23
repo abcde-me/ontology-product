@@ -7,6 +7,7 @@ import {
   Form,
   FormInstance,
   Input,
+  Message,
   Pagination,
   Table,
   Tabs,
@@ -380,6 +381,8 @@ export default function MetadataManagementDetail() {
           setFieldTotal(res.data.data.total || 0);
           setFieldCurrent(res.data.data.pageNum || 1);
           setFieldPageSize(res.data.data.pageSize || 10);
+        } else {
+          Message.error(res.message || '获取Iceberg字段信息数据失败');
         }
       } else if (activeKey === 'partitionInfo') {
         const params = {
@@ -396,6 +399,8 @@ export default function MetadataManagementDetail() {
           setPartitionTotal(res.data.data.total || 0);
           setPartitionCurrent(res.data.data.pageNum || 1);
           setPartitionPageSize(res.data.data.pageSize || 10);
+        } else {
+          Message.error(res.message || '获取Iceberg分区信息数据失败');
         }
       } else if (activeKey === 'previewInfo') {
         const params = {
@@ -409,6 +414,8 @@ export default function MetadataManagementDetail() {
           }));
           setPreviewInfoColumns(newPreviewInfoColumns);
           setPreviewInfoData(res.data.data.tableData || []);
+        } else {
+          Message.error(res.message || '获取Iceberg预览数据失败');
         }
       }
     } else if (metadataType === MetadataType.Doris) {
@@ -429,6 +436,8 @@ export default function MetadataManagementDetail() {
           setFieldTotal(res.data.data.total || 0);
           setFieldCurrent(res.data.data.pageNum || 1);
           setFieldPageSize(res.data.data.pageSize || 10);
+        } else {
+          Message.error(res.message || '获取Doris字段信息数据失败');
         }
       } else if (activeKey === 'partitionInfo') {
         const params = {
@@ -445,6 +454,8 @@ export default function MetadataManagementDetail() {
           setPartitionTotal(res.data.data.total || 0);
           setPartitionCurrent(res.data.data.pageNum || 1);
           setPartitionPageSize(res.data.data.pageSize || 10);
+        } else {
+          Message.error(res.message || '获取Doris分区信息数据失败');
         }
       } else if (activeKey === 'previewInfo') {
         const params = {
@@ -458,6 +469,8 @@ export default function MetadataManagementDetail() {
           }));
           setPreviewInfoColumns(newPreviewInfoColumns);
           setPreviewInfoData(res.data.data.tableData || []);
+        } else {
+          Message.error(res.message || '获取Doris预览数据失败');
         }
       }
     } else if (metadataType === MetadataType.Milvus) {
@@ -478,6 +491,8 @@ export default function MetadataManagementDetail() {
           setFieldTotal(res.data.data.total || 0);
           setFieldCurrent(res.data.data.pageNum || 1);
           setFieldPageSize(res.data.data.pageSize || 10);
+        } else {
+          Message.error(res.message || '获取Milvus字段信息数据失败');
         }
       } else if (activeKey === 'partitionInfo') {
         const params = {
@@ -494,6 +509,8 @@ export default function MetadataManagementDetail() {
           setPartitionTotal(res.data.data.total || 0);
           setPartitionCurrent(res.data.data.pageNum || 1);
           setPartitionPageSize(res.data.data.pageSize || 10);
+        } else {
+          Message.error(res.message || '获取Milvus分区信息数据失败');
         }
       } else if (activeKey === 'previewInfo') {
         const params = {
@@ -507,6 +524,8 @@ export default function MetadataManagementDetail() {
           }));
           setPreviewInfoColumns(newPreviewInfoColumns);
           setPreviewInfoData(res.data.data.tableData || []);
+        } else {
+          Message.error(res.message || '获取Milvus预览数据失败');
         }
       }
     }
