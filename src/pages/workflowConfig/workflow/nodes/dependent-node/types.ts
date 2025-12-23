@@ -1,8 +1,10 @@
 import {
   BlockEnum,
   CommonNodeType,
+  CommonStructNodeType,
   VarType
 } from '@/pages/workflowConfig/workflow/types';
+import React from 'react';
 
 export type OutputVar = Record<
   string,
@@ -40,18 +42,15 @@ export interface DependItem {
 
   /** 节点描述 */
   desc?: string;
+
+  parentFlow?: React.Key;
 }
 
-export interface DependentNodeConfig extends CommonNodeType {
+export interface DependentNodeConfig extends CommonStructNodeType {
   /** 依赖节点列表 */
   depend_item_list: DependItem[];
 
-  // 失败重试次数
-  fail_retry_interval: string;
-  // 失败重试间隔
-  fail_retry_times: string;
-  // 运行优先级
-  task_priority: string;
+  relation: DependRelation;
 }
 
 export interface SQLNodeConfig extends CommonNodeType {
@@ -166,4 +165,9 @@ export interface ConfigItem {
   config_desc: string;
   create_time: string; // ISO 时间字符串
   update_time: string; // ISO 时间字符串
+}
+
+export enum DependRelation {
+  AND = 'AND',
+  OR = 'OR'
 }

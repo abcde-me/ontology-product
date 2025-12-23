@@ -32,9 +32,8 @@ export async function updataConnectionList(params: any) {
 
 // 连接器预览数据
 export async function PreviewConnectorSampleData(params: any) {
-  const res = await UAPI.RES.PreviewConnectorSampleDataApi({})
+  return await UAPI.RES.PreviewConnectorSampleDataApi({})
     .post(params)
     .inRegion()
     .do();
-  return res || [];
 }

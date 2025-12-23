@@ -262,6 +262,7 @@ const translation = {
     end: 'End',
     text: 'Text',
     pic: 'Pic',
+    image: 'Image',
     video: 'Video',
     audio: 'Audio',
     enhancement: 'Enhancement',

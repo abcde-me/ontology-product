@@ -66,5 +66,5 @@ export default function useInitFlowTestTask(manual = false) {
     return cancel;
   }, []);
 
-  return [initFlowTestTask];
+  return [initFlowTestTask, cancel];
 }

@@ -2,6 +2,7 @@ import type { NodeDefault } from '../../types';
 import { SQLNodeConfig } from './types';
 import { ALL_COMPLETION_AVAILABLE_BLOCKS } from '@/pages/workflowConfig/workflow/blocks';
 import { STRUCT_FLOW_NODES } from '@/pages/workflowConfig/workflow/constants';
+import { STRUCT_NODE_EXEC_DEFAULT_PARAMS } from '@/pages/workflowConfig/workflow/nodes/constants';
 
 const SQLNodeDefault: NodeDefault<SQLNodeConfig> = {
   defaultValue: {
@@ -13,11 +14,8 @@ const SQLNodeDefault: NodeDefault<SQLNodeConfig> = {
         value: undefined
       }
     ],
-    flow_type: 'struct',
     raw_script: undefined,
-    fail_retry_interval: '1',
-    fail_retry_times: '0',
-    task_priority: 'MEDIUM'
+    ...STRUCT_NODE_EXEC_DEFAULT_PARAMS
   },
   getAvailablePrevNodes(isChatMode: boolean) {
     return ALL_COMPLETION_AVAILABLE_BLOCKS.filter((type) =>

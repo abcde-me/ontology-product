@@ -126,7 +126,7 @@ const Panel: FC<NodePanelProps<StartNodeType>> = ({ id, data }) => {
   const handleImageChange = () => {
     const imageConfig = form.getFieldValue('data_category[1]');
     doFileConfigChange(
-      BlockEnum.Pic,
+      BlockEnum.Image,
       form.getFieldValue('data_path_id'),
       imageConfig
     );
