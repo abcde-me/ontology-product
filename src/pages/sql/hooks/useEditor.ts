@@ -545,7 +545,7 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
             const fileData = response.data;
             setLastScriptRunStatus(fileData?.run_status);
             // 更新编辑器内容
-            setEditorContent(fileData.script_content);
+            setEditorContent(fileData.script_content || '');
             // 保存原始内容
             setOriginalContent(fileData.script_content || '');
 
@@ -632,6 +632,9 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
     if (!currentFile?.scriptId) {
       return editorContent !== '' && editorContent !== originalContent;
     }
+
+    console.log('query------currentContent', editorContent);
+    console.log('query------originalContent', originalContent);
     // 如果有 scriptId，比较当前内容和原始内容
     return editorContent !== originalContent;
   }, [editorContent, originalContent, currentFile?.scriptId]);
