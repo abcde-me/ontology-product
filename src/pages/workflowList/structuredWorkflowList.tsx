@@ -2,7 +2,6 @@ import React from 'react';
 import {
   getStructuredWorkflowList,
   workflowCopy,
-  workflowDelete,
   workflowDeleteNew
 } from '@/api/workflowList';
 import {
@@ -36,7 +35,6 @@ import {
 import useArcoTable from '@/hooks/use-arco-table';
 import noDataElement from '@/components/no-data';
 import { WORKFLOW_LIST_PERMISSIONS } from '@/config/permissions';
-import styled from '@emotion/styled';
 import {
   IconCheckCircleFill,
   IconClockCircle,
@@ -92,14 +90,15 @@ export function StructuredWorkflowList() {
   };
 
   // 复制工作流
-  const handleCloneWorkflow = async (workflow_uuid: number | string) => {
+  const handleCloneWorkflow = async (flow: WorkFlowItem) => {
+    const { workflow_uuid, workflow_type } = flow;
     const res = await workflowCopy(workflow_uuid);
     if (res.status === 200 && res.data) {
       Message.success({
         content: '复制成功'
       });
       openNewPage(
-        `/modaforge/tenant/compute/modaforge/workflowConfig?workflow_uuid=${res.data.workflow_uuid}&ds_workflow_id=${res.data.ds_workflow_id}`
+        `/modaforge/tenant/compute/modaforge/workflowConfig/${workflow_type}?workflow_uuid=${res.data.workflow_uuid}&ds_workflow_id=${res.data.ds_workflow_id}`
       );
     } else {
       Message.error({
@@ -289,7 +288,9 @@ export function StructuredWorkflowList() {
           <Button type="text" onClick={() => viewDetailWorkflow(record)}>
             详情
           </Button>
-          <Button type="text">复制</Button>
+          <Button type="text" onClick={() => handleCloneWorkflow(record)}>
+            复制
+          </Button>
           <Button
             type="text"
             onClick={() => handleDelete(record)}
@@ -326,7 +327,7 @@ export function StructuredWorkflowList() {
   );
 
   return (
-    <FlowContainer>
+    <div className={'w-full pt-4'}>
       <Form
         form={form}
         layout={'horizontal'}
@@ -379,11 +380,6 @@ export function StructuredWorkflowList() {
         sizeCanChange
         sizeOptions={[10, 20, 50, 100]}
       ></Pagination>
-    </FlowContainer>
+    </div>
   );
 }
-
-const FlowContainer = styled.div`
-  padding-top: 15px;
-  width: 100%;
-`;

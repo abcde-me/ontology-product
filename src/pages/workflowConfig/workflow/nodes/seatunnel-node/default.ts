@@ -7,13 +7,11 @@ import {
 } from '@/pages/workflowConfig/workflow/blocks';
 import { isNil } from 'lodash-es';
 import { STRUCT_FLOW_NODES } from '@/pages/workflowConfig/workflow/constants';
+import { STRUCT_NODE_EXEC_DEFAULT_PARAMS } from '@/pages/workflowConfig/workflow/nodes/constants';
 
 const SeatunnelNodeDefault: NodeDefault<SeatunnelConfig> = {
   defaultValue: {
-    fail_retry_interval: '1',
-    fail_retry_times: '3',
-    task_priority: 'MEDIUM',
-    desc: ''
+    ...STRUCT_NODE_EXEC_DEFAULT_PARAMS
   },
   getAvailablePrevNodes(isChatMode: boolean) {
     return ALL_COMPLETION_AVAILABLE_BLOCKS.filter((type) =>

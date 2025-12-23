@@ -1,27 +1,14 @@
-import { BlockEnum } from '../../types';
 import type { NodeDefault } from '../../types';
-import { SQLNodeConfig } from './types';
-import {
-  ALL_CHAT_AVAILABLE_BLOCKS,
-  ALL_COMPLETION_AVAILABLE_BLOCKS
-} from '@/pages/workflowConfig/workflow/blocks';
+import { DependentNodeConfig, DependRelation, SQLNodeConfig } from './types';
+import { ALL_COMPLETION_AVAILABLE_BLOCKS } from '@/pages/workflowConfig/workflow/blocks';
 import { STRUCT_FLOW_NODES } from '@/pages/workflowConfig/workflow/constants';
+import { STRUCT_NODE_EXEC_DEFAULT_PARAMS } from '@/pages/workflowConfig/workflow/nodes/constants';
 
-const SQLNodeDefault: NodeDefault<SQLNodeConfig> = {
+const DependentNodeDefault: NodeDefault<DependentNodeConfig> = {
   defaultValue: {
-    local_params: [
-      {
-        prop: undefined,
-        direct: 'IN',
-        type: 'VARCHAR',
-        value: undefined
-      }
-    ],
-    flow_type: 'struct',
-    raw_script: undefined,
-    fail_retry_interval: '1',
-    fail_retry_times: '0',
-    task_priority: 'MEDIUM'
+    relation: DependRelation.AND,
+    depend_item_list: [],
+    ...STRUCT_NODE_EXEC_DEFAULT_PARAMS
   },
   getAvailablePrevNodes(isChatMode: boolean) {
     return ALL_COMPLETION_AVAILABLE_BLOCKS.filter((type) =>
@@ -33,15 +20,11 @@ const SQLNodeDefault: NodeDefault<SQLNodeConfig> = {
       STRUCT_FLOW_NODES.includes(type)
     );
   },
-  checkValid(payload: SQLNodeConfig) {
+  checkValid(payload: DependentNodeConfig) {
     let errorMessages = '';
-    const { raw_script, sql_id } = payload;
-    if (!raw_script) {
-      errorMessages = 'SQL脚本不可为空';
-    }
-
-    if (!sql_id?.length) {
-      errorMessages = '请选择SQL脚本';
+    const { depend_item_list } = payload;
+    if (!depend_item_list.length) {
+      errorMessages = '至少选择一条前置任务';
     }
 
     return {
@@ -51,4 +34,4 @@ const SQLNodeDefault: NodeDefault<SQLNodeConfig> = {
   }
 };
 
-export default SQLNodeDefault;
+export default DependentNodeDefault;

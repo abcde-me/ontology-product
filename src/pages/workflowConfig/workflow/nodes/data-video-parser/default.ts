@@ -12,7 +12,7 @@ const nodeDefault: NodeDefault<VideoParserNodeType> = {
     selected_files_num: -1,
     is_poly_orbit: 2,
     is_denoise: 0,
-    audio_options: ['orbit'],
+    audio_pret: ['orbit'],
     vad_enabled: 1,
     activity_mode: 1,
     activity_mode_num: '',
@@ -25,8 +25,8 @@ const nodeDefault: NodeDefault<VideoParserNodeType> = {
     const nodes = isChatMode
       ? ALL_CHAT_AVAILABLE_BLOCKS
       : ALL_COMPLETION_AVAILABLE_BLOCKS.filter(
-        (type) => type !== BlockEnum.End
-      );
+          (type) => type !== BlockEnum.End
+        );
     return nodes;
   },
   getAvailableNextNodes(isChatMode: boolean) {

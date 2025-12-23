@@ -1,23 +1,13 @@
-import React, { memo, useMemo, useState } from 'react';
-import { IconCaretRight, IconRecordStop } from '@arco-design/web-react/icon';
-import { operateWorkflow } from '@/api/workflow';
-import { WorkflowOperation } from '@/types/workflowApi';
-import { useParams as useSearchParam } from '@/utils/url';
-import { useUserInfo } from '@/store/userInfoStore';
+import React, { memo, useCallback, useMemo, useRef, useState } from 'react';
 import {
-  Button,
-  Drawer,
-  Message,
-  Tooltip,
-  Typography
-} from '@arco-design/web-react';
-import { useWorkflowStore } from '@/pages/workflowConfig/workflow/store';
+  IconCaretRight,
+  IconLoading,
+  IconRecordStop
+} from '@arco-design/web-react/icon';
+import { Button, Drawer, Tooltip, Typography } from '@arco-design/web-react';
 import { useStore as useTaskStore } from '@/pages/workflowConfig/task/store';
 import { useShallow } from 'zustand/react/shallow';
-import {
-  useNodesInteractions,
-  useNodesSyncDraft
-} from '@/pages/workflowConfig/workflow/hooks';
+import { useNodesInteractions } from '@/pages/workflowConfig/workflow/hooks';
 import { TaskStatus } from '@/pages/workflowConfig/types/workflow';
 import styles from './index.module.scss';
 import { useRequest } from 'ahooks';
@@ -29,32 +19,50 @@ export default memo(function TestNode(props: {
 }) {
   const { showLog = false, id: nodeId } = props;
   const [drawerLog, setDrawerLog] = useState(false);
-  const { handleTestNode } = useNodesInteractions();
+  const { handleTestNode, handleStopTestNode } = useNodesInteractions();
+  const logCache = useRef<string>();
 
   const { nodesProcessDetail } = useTaskStore(
     useShallow((state) => ({
       nodesProcessDetail: state.nodesProcessDetail
     }))
   );
-  const userInfo = useUserInfo();
 
   const nodeProcessStatus = useMemo(() => {
     return nodesProcessDetail?.find(({ task_code }) => {
       return task_code.toString() === nodeId.toString();
     });
   }, [nodeId, nodesProcessDetail]);
-  const { data: logs } = useRequest(
+
+  const {
+    data: logs,
+    loading: logLoading,
+    cancel
+  } = useRequest(
     async () => {
       if (!drawerLog || !nodeProcessStatus) return;
       return await getWorkflowTaskLogs(nodeProcessStatus.id);
     },
     {
       refreshDeps: [nodeProcessStatus, drawerLog],
-      ready: drawerLog
+      ready: drawerLog,
+      pollingInterval: 2000,
+      onSuccess(logs?: string) {
+        if (!logs) return;
+        if (logs !== logCache.current) {
+          logCache.current = logs;
+          return;
+        }
+        cancel();
+      }
     }
   );
 
-  const handleStop = () => {};
+  const handleStop = useCallback(() => {
+    if (!nodeProcessStatus) return;
+    const { process_instance_id } = nodeProcessStatus;
+    handleStopTestNode(process_instance_id);
+  }, [nodeProcessStatus]);
 
   const badgeColor = useMemo(() => {
     const state = nodeProcessStatus?.state;
@@ -62,6 +70,8 @@ export default memo(function TestNode(props: {
     if (state === TaskStatus.SUCCESS) return '#10B981';
     return '#007DFA';
   }, [nodeProcessStatus]);
+
+  console.log(123, nodesProcessDetail);
 
   return (
     <div className={'flex flex-1 items-center justify-end gap-2'}>
@@ -127,7 +137,10 @@ export default memo(function TestNode(props: {
           );
         }}
       >
-        <div className={`${styles['log-content']}`}>{logs}</div>
+        <div className={`${styles['log-content']}`}>
+          {logs}
+          {logLoading && <IconLoading />}
+        </div>
       </Drawer>
     </div>
   );
