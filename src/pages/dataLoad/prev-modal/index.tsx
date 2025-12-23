@@ -93,9 +93,12 @@ const PreviewModal = ({
         <div className={styles.previewContent}>
           <div className={styles.jsonPreview}>
             <div className={styles.jsonTitle}>JSON格式</div>
-            <div className={styles.jsonTextArea}>
-              {JSON.stringify(previewData?.data?.data)}
-            </div>
+            <Input.TextArea
+              disabled
+              autoSize={false}
+              className={styles.jsonTextArea}
+              value={JSON.stringify(previewData?.data?.data, null, 2)}
+            />
           </div>
           <div style={{ flex: 1, minWidth: 0 }}>
             <div className={styles.jsonTitle}>储存到数据库效果</div>
