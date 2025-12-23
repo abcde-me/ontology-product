@@ -51,11 +51,11 @@ const Panel: FC<NodePanelProps<AudioParserNodeType>> = ({ id, data }) => {
         wrapperCol={{ span: 24 }}
         initialValues={{
           ...data,
-          audio_pret: data.audio_pret.flatMap((type) => {
+          audio_pret: data.audio_pret.map((type) => {
             if (['1', '2'].includes(type.toString())) {
               return AUDIO_PRET_OLD2NEW[type.toString()];
             }
-            return [];
+            return type;
           })
         }}
         layout="vertical"
