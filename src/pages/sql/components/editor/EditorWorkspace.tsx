@@ -22,7 +22,7 @@ import { tags as t } from '@lezer/highlight';
 import createTheme from '@uiw/codemirror-themes';
 import CodeMirror, { ReactCodeMirrorRef } from '@uiw/react-codemirror';
 import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
-import { format } from 'sql-formatter';
+import { formatSQL } from '@/utils/sqlFormatter';
 import { useUserInfo } from '@/store/userInfoStore';
 import styles from './EditorWorkspace.module.scss';
 
@@ -35,6 +35,7 @@ import { FileTab } from '../../hooks/useTabManager';
 import RunningInfoPanel from './RunningInfoPanel';
 import classNames from 'classnames';
 import { useUrlState } from '../../hooks/useUrlState';
+import { SQL_PARAM_PLACEHOLDER_REGEX } from '../../constant';
 interface NotebookWorkspaceProps {
   content: string;
   fileName: string;
@@ -167,7 +168,12 @@ const EditorWorkspaceContent: React.FC<{
 
       if (editorContent) {
         try {
-          const formattedCode = format(editorContent, { language: 'sql' });
+          const formattedCode = formatSQL(editorContent, {
+            formatOptions: {
+              language: 'sql',
+              placeholderRegex: SQL_PARAM_PLACEHOLDER_REGEX
+            }
+          });
           handleContentChange(formattedCode);
           Message.success('格式化成功');
         } catch (e) {
@@ -253,7 +259,7 @@ const EditorWorkspaceContent: React.FC<{
                       <IconCaretRight className="mr-[4px]" />
                     )
                   }
-                  disabled={editorContent?.trim() === ''}
+                  disabled={!editorContent?.trim()}
                   onClick={handleRunClick}
                   className={classNames('h-[26px]', {
                     [styles['btn-running']]: runStatus === RunningStatus.RUNNING
@@ -300,7 +306,6 @@ const EditorWorkspaceContent: React.FC<{
                 onClick={() => {
                   setVisible(true);
                 }}
-                disabled={editorContent?.trim() === ''}
                 icon={<IconSave />}
               >
                 保存
@@ -400,7 +405,7 @@ const EditorWorkspaceContent: React.FC<{
               <FormItem label="SQL脚本名称:" required={true} field="fileName">
                 <Input
                   defaultValue={fileName}
-                  disabled={!!scriptId}
+                  // disabled={!!scriptId}
                   placeholder="请输入脚本名称"
                 />
               </FormItem>
