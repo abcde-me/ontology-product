@@ -7,14 +7,19 @@ import {
   Dropdown,
   Menu,
   Button,
-  Modal
+  Modal,
+  Message
 } from '@arco-design/web-react';
 import { useHistory } from 'react-router';
 import { ColumnProps } from '@arco-design/web-react/es/Table';
 import EllipsisPopover from '@/components/ellipsis-popover-com';
 import noDataElement from '@/components/no-data';
 import { useUserInfo } from '@/store/userInfoStore';
-import { getTaskList } from '@/api/taskList';
+import {
+  openDataList,
+  openDataPublish,
+  openDataUnpublish
+} from '@/api/dataApi';
 import { SorterInfo } from '@arco-design/web-react/es/Table/interface';
 import { PermissionWrapper } from '@/components/PermissionGuard';
 import { WORKFLOW_TASK_PERMISSIONS } from '@/config/permissions';
@@ -33,10 +38,9 @@ const InputSearch = Input.Search;
 
 // 枚举api运行状态
 enum ApiStatus {
-  running = 1,
-  success = 2,
-  fail = 3,
-  stop = 4
+  running = 0,
+  success = 1,
+  fail = 2
 }
 
 // 枚举请求方式
@@ -119,18 +123,21 @@ export default function DataApi() {
     setLoading(true);
     try {
       const params: any = {
-        uid: userInfo?.id,
-        search_value: searchValue,
+        name: searchValue,
         page: current,
-        page_size: pageSize,
+        pageSize: pageSize,
         ...sortValue
       };
-      const res = await getTaskList(params);
-      if (res.status === 200 && res.data) {
-        setDataApiData(res.data.list);
-        setCurrent(res.data.page_info.page);
-        setPageSize(res.data.page_info.page_size);
-        setTotal(res.data.page_info.total || 10);
+      const res = await openDataList(params);
+      if (res.status === 200 && res.code === '') {
+        if (res.data) {
+          setDataApiData(res.data.list);
+          setCurrent(res.data.pageNo);
+          setPageSize(res.data.pageSize);
+          setTotal(res.data.total || 10);
+        }
+      } else {
+        Message.error(res.msg || '获取数据API列表失败');
       }
     } finally {
       setLoading(false);
@@ -215,6 +222,29 @@ export default function DataApi() {
     }
   };
 
+  const handleChangeStatus = async (record) => {
+    const params = {
+      id: record.id
+    };
+    if (record.status === ApiStatus.success) {
+      const res = await openDataUnpublish(params);
+      if (res.status === 200 && res.code === '') {
+        Message.success(res.msg || '下线数据API成功');
+        getList();
+      } else {
+        Message.error(res.msg || '下线数据API失败');
+      }
+    } else {
+      const res = await openDataPublish(params);
+      if (res.status === 200 && res.code === '') {
+        Message.success(res.msg || '上线数据API成功');
+        getList();
+      } else {
+        Message.error(res.msg || '上线数据API失败');
+      }
+    }
+  };
+
   // table columns
   const columns: ColumnProps[] = [
     {
@@ -226,31 +256,31 @@ export default function DataApi() {
     },
     {
       title: 'API名称',
-      dataIndex: 'name',
+      dataIndex: 'nameCn',
       width: 200,
       ellipsis: true,
       render: (_, record) => (
         <EllipsisPopover
-          value={renderEmptyPlaceholder(record.instance_name)}
+          value={renderEmptyPlaceholder(record.nameCn)}
           isEdit={false}
         />
       )
     },
     {
       title: '请求方式',
-      dataIndex: 'name_cn',
+      dataIndex: 'requestMethod',
       width: 130,
-      render: (_, record) => record.name_cn || '-',
-      filters: [
-        {
-          text: 'GET',
-          value: RequestMethod.get
-        },
-        {
-          text: 'POST',
-          value: RequestMethod.post
-        }
-      ]
+      render: (_, record) => record.requestMethod || '-'
+      // filters: [
+      //   {
+      //     text: 'GET',
+      //     value: RequestMethod.get
+      //   },
+      //   {
+      //     text: 'POST',
+      //     value: RequestMethod.post
+      //   }
+      // ]
     },
     {
       title: 'API路径',
@@ -275,10 +305,8 @@ export default function DataApi() {
                 record.status === ApiStatus.success
                   ? '#10B981'
                   : record.status === ApiStatus.fail
-                    ? '#EF4444'
-                    : record.status === ApiStatus.running
-                      ? '#007DFA'
-                      : '#CBD5E1',
+                    ? '#CBD5E1'
+                    : '#007DFA',
               borderRadius: '50%',
               marginRight: '5px'
             }}
@@ -287,10 +315,8 @@ export default function DataApi() {
             {record.status === ApiStatus.success
               ? '使用中'
               : record.status === ApiStatus.fail
-                ? '开发失败'
-                : record.status === ApiStatus.running
-                  ? '开发中'
-                  : '已下线'}
+                ? '已下线'
+                : '开发中'}
           </div>
         </div>
       ),
@@ -300,59 +326,37 @@ export default function DataApi() {
           value: ApiStatus.success
         },
         {
-          text: '开发失败',
+          text: '已下线',
           value: ApiStatus.fail
         },
         {
           text: '开发中',
           value: ApiStatus.running
-        },
-        {
-          text: '已下线',
-          value: ApiStatus.stop
         }
       ]
     },
     {
       title: '授权数',
-      dataIndex: 'query_count',
+      dataIndex: 'queryCount',
       width: 200,
-      ellipsis: true,
-      render: (_, record) => (
-        <EllipsisPopover value={record.query_count || '-'} isEdit={false} />
-      )
+      ellipsis: true
     },
     {
       title: '总调用次数',
-      dataIndex: 'cache_time',
+      dataIndex: 'cacheTime',
       width: 180,
-      render: (_, record) => <span>{record.cache_time || '-'}</span>,
       sorter: true
     },
     {
       title: '更新时间',
-      dataIndex: 'update_time',
+      dataIndex: 'updatedTime',
       width: 180,
-      render: (_, record) => (
-        <span>{renderEmptyPlaceholder(record.update_time)}</span>
-      ),
       sorter: true
     },
     {
       title: '更新人',
-      dataIndex: 'creator_name',
-      width: 180,
-      render: (_, record) => <span>{record.creator_name || '-'}</span>,
-      filters: [
-        {
-          text: '张三',
-          value: '张三'
-        },
-        {
-          text: '李四',
-          value: '李四'
-        }
-      ]
+      dataIndex: 'creatorName',
+      width: 180
     },
     {
       title: '操作',
@@ -385,8 +389,9 @@ export default function DataApi() {
                       borderTop: 'none',
                       borderBottom: 'none'
                     }}
+                    onClick={() => handleChangeStatus(record)}
                   >
-                    上线
+                    {record.status === ApiStatus.success ? '下线' : '上线'}
                   </Button>
                 </Menu.Item>
                 <Menu.Item key="authorize">

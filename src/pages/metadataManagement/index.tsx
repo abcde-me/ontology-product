@@ -140,11 +140,13 @@ export default function MetadataManagement() {
 
   const getMenuData = async () => {
     const res = await listMetadataDataSource();
-    if (res.status === 200 && res.data.data) {
-      setMetadataMenuData(res.data.data);
-      setActiveMetadataType(
-        res.data.data[0]?.datasourceType || MetadataType.Iceberg
-      );
+    if (res.status === 200 && res.code === '') {
+      if (res.data.data) {
+        setMetadataMenuData(res.data.data);
+        setActiveMetadataType(
+          res.data.data[0]?.datasourceType || MetadataType.Iceberg
+        );
+      }
     } else {
       Message.error(res.message || '获取元数据菜单数据失败');
     }
@@ -166,11 +168,13 @@ export default function MetadataManagement() {
             : activeMetadataType === MetadataType.Milvus
               ? await listMetadataMilvusDatabase(params)
               : await listMetadataDorisTable(params);
-      if (res.status === 200 && res.data.data) {
-        setMetadataData(res.data.data.list);
-        setCurrent(res.data.data?.pageNum);
-        setPageSize(res.data.data?.pageSize);
-        setTotal(res.data.data?.total || 10);
+      if (res.status === 200 && res.code === '') {
+        if (res.data.data?.list) {
+          setMetadataData(res.data.data.list);
+          setCurrent(res.data.data?.pageNum);
+          setPageSize(res.data.data?.pageSize);
+          setTotal(res.data.data?.total || 10);
+        }
       } else {
         Message.error(res.message || '获取元数据列表数据失败');
       }
@@ -320,7 +324,7 @@ export default function MetadataManagement() {
             onReset={handleReset}
           />
           <div className="mb-3 mt-4 flex items-center justify-between">
-            <h1 className="text-base font-semibold">数据列表(500)</h1>
+            <h1 className="text-base font-semibold">{`数据列表(${total})`}</h1>
             <div className="flex items-center gap-2">
               <span className="text-sm text-[#6E7B8D]">
                 2025-12-12 00:00:00 更新
