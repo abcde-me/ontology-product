@@ -643,6 +643,9 @@ export default function MetadataManagementDetail() {
                     <Input.Search
                       onSearch={fieldSearchForm.submit}
                       allowClear
+                      onChange={(value) => {
+                        setDescription(value);
+                      }}
                       onClear={() => {
                         setFieldSearchValues({
                           filters: {
@@ -893,6 +896,9 @@ export default function MetadataManagementDetail() {
                     <Input.Search
                       onSearch={fieldSearchForm.submit}
                       allowClear
+                      onChange={(value) => {
+                        setDescription(value);
+                      }}
                       onClear={() => {
                         setFieldSearchValues({
                           filters: {
