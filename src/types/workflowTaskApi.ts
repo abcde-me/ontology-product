@@ -364,7 +364,9 @@ export enum WorkflowOperationType {
   /** 结束运行 */
   EXEC_STOP = 'EXEC_STOP',
   /** 暂停运行 */
-  EXEC_PAUSE = 'EXEC_PAUSE'
+  EXEC_PAUSE = 'EXEC_PAUSE',
+  /** 停止运行 */
+  STOP = 'STOP'
 }
 
 export interface WorkflowOperationParams {
@@ -375,11 +377,12 @@ export interface WorkflowOperationParams {
    * EXEC_STOP:                  "结束运行",
    * EXEC_PAUSE:                 "暂停运行",
    */
-  executeType: WorkflowOperationType;
+  executeType?: WorkflowOperationType;
   /**
    * 任务节点实例ID
    */
   process_instance_id: string;
+  execute_type?: WorkflowOperationType;
 }
 
 export interface GetWorkflowRunResultListParams {

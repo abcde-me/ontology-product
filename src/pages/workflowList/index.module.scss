@@ -11,6 +11,20 @@
     line-height: 32px;
   }
 
+  .workflow-name {
+    color: rgb(0, 125, 250);
+
+    .workflow-name-copy {
+      visibility: hidden;
+    }
+
+    &:hover {
+      .workflow-name-copy {
+        visibility: visible;
+      }
+    }
+  }
+
   .operate-text {
     color: rgb(0, 125, 250);
     cursor: pointer;
@@ -82,7 +96,7 @@
   font-size: 14px;
   color: #1d2129;
   height: 22px;
-  margin: 10px 0 0 28px;
+  margin: 10px 0 0;
 }
 
 :global(.arco-modal-footer) :global(.arco-btn-secondary):focus {
