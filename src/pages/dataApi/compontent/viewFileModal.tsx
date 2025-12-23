@@ -14,7 +14,7 @@ import { IconCopy } from '@arco-design/web-react/icon';
 import { useScrollTo } from '@/hooks/useScrollTo';
 import styles from './viewFileModal.module.scss';
 import { openDataGetApiDoc } from '@/api/dataApi';
-import { throttle } from 'lodash-es';
+import { useInViewport, useMemoizedFn } from 'ahooks';
 
 const TabPane = Tabs.TabPane;
 
@@ -41,18 +41,7 @@ export default function ViewFileModal({ visible, onCancel, id }) {
 
   // 查看文档内容区域引用
   const viewFileContentRef = useRef<HTMLDivElement>(null);
-  // 基础信息标题引用
-  const baseInfoRef = useRef<HTMLDivElement>(null);
-  // 输入参数标题引用
-  const inputParamsRef = useRef<HTMLDivElement>(null);
-  // 输出参数标题引用
-  const outputParamsRef = useRef<HTMLDivElement>(null);
-  // 请求示例标题引用
-  const requestExampleRef = useRef<HTMLDivElement>(null);
-  // 输出示例标题引用
-  const outputExampleRef = useRef<HTMLDivElement>(null);
-  // 状态码标题引用
-  const statusCodesRef = useRef<HTMLDivElement>(null);
+  const menuRef = useRef<HTMLDivElement[]>([]);
 
   // 定位到指定元素
   const scrollTo = useScrollTo();
@@ -64,70 +53,18 @@ export default function ViewFileModal({ visible, onCancel, id }) {
     handleViewDetail(id);
   }, [id]);
 
-  // 监听滚动事件，根据滚动位置更新选中的Tab
-  useEffect(() => {
-    const container = viewFileContentRef.current;
+  const callback = useMemoizedFn((entry) => {
+    if (entry.isIntersecting) {
+      const active = entry.target.getAttribute('id') || '';
+      setActiveKey(active);
+    }
+  });
 
-    if (!container) return;
-    const handleScroll = () => {
-      const parentRect = container.getBoundingClientRect();
-      if (
-        getIsRefTopNumberInViewTop(parentRect, baseInfoRef) &&
-        baseInfoRef.current?.id
-      ) {
-        setActiveKey(baseInfoRef.current?.id);
-      } else if (
-        getIsRefTopNumberInViewTop(parentRect, inputParamsRef) &&
-        inputParamsRef.current?.id
-      ) {
-        setActiveKey(inputParamsRef.current?.id);
-      } else if (
-        getIsRefTopNumberInViewTop(parentRect, outputParamsRef) &&
-        outputParamsRef.current?.id
-      ) {
-        setActiveKey(outputParamsRef.current?.id);
-      } else if (
-        getIsRefTopNumberInViewTop(parentRect, requestExampleRef) &&
-        requestExampleRef.current?.id
-      ) {
-        setActiveKey(requestExampleRef.current?.id);
-      } else if (
-        getIsRefTopNumberInViewTop(parentRect, outputExampleRef) &&
-        outputExampleRef.current?.id
-      ) {
-        setActiveKey(outputExampleRef.current?.id);
-      } else if (
-        getIsRefTopNumberInViewTop(parentRect, statusCodesRef) &&
-        statusCodesRef.current?.id
-      ) {
-        setActiveKey(statusCodesRef.current?.id);
-      }
-    };
-
-    // 节流处理滚动事件，避免频繁触发
-    const throttledHandleScroll = throttle(handleScroll, 100);
-    // 监听滚轮事件
-    container.addEventListener('scroll', throttledHandleScroll, {
-      passive: false
-    });
-    // 在组件卸载时移除监听器
-    return () => {
-      container.removeEventListener('scroll', throttledHandleScroll);
-      throttledHandleScroll.cancel(); // 清除节流计时器
-    };
-  }, [viewFileContentRef.current]);
-
-  const getIsRefTopNumberInViewTop = (
-    parentRect,
-    ref: React.RefObject<HTMLDivElement>
-  ) => {
-    const childRect = ref.current?.getBoundingClientRect();
-    if (!childRect) return false;
-    return (
-      Number((childRect.top - parentRect.top).toFixed(0)) <= 0 &&
-      Number((childRect.bottom - parentRect.top).toFixed(0)) > 0
-    );
-  };
+  useInViewport(menuRef.current, {
+    callback,
+    root: () => viewFileContentRef.current,
+    rootMargin: '0px 0px -95% 0px'
+  });
 
   const handleViewDetail = async (id: string) => {
     const res = await openDataGetApiDoc({ id });
@@ -143,13 +80,15 @@ export default function ViewFileModal({ visible, onCancel, id }) {
     {
       label: 'API名称',
       value: (
-        <EllipsisPopoverCom value={viewFileDetailData?.apiInfo?.nameCn || ''} />
+        <EllipsisPopoverCom
+          value={viewFileDetailData?.apiInfo?.nameCn || '-'}
+        />
       )
     },
     {
       label: '路径',
       value: (
-        <EllipsisPopoverCom value={viewFileDetailData?.apiInfo?.path || ''} />
+        <EllipsisPopoverCom value={viewFileDetailData?.apiInfo?.path || '-'} />
       )
     },
     {
@@ -168,7 +107,7 @@ export default function ViewFileModal({ visible, onCancel, id }) {
       label: '接口描述',
       value: (
         <EllipsisPopoverCom
-          value={viewFileDetailData?.apiInfo?.description || ''}
+          value={viewFileDetailData?.apiInfo?.description || '-'}
         />
       )
     },
@@ -305,7 +244,12 @@ export default function ViewFileModal({ visible, onCancel, id }) {
           <TabPane key="statusCodes" title="状态码" />
         </Tabs>
         <div className={styles.viewFileContent} ref={viewFileContentRef}>
-          <div id="baseInfo" ref={baseInfoRef}>
+          <div
+            id="baseInfo"
+            ref={(el: HTMLDivElement) => {
+              menuRef.current[0] = el;
+            }}
+          >
             <Descriptions
               colon=" :"
               layout="horizontal"
@@ -314,7 +258,12 @@ export default function ViewFileModal({ visible, onCancel, id }) {
               column={2}
             />
           </div>
-          <div id="inputParams" ref={inputParamsRef}>
+          <div
+            id="inputParams"
+            ref={(el: HTMLDivElement) => {
+              menuRef.current[1] = el;
+            }}
+          >
             <h1 className="mb-4 mt-3 text-sm font-medium">输入参数</h1>
             <Table
               border={false}
@@ -325,7 +274,12 @@ export default function ViewFileModal({ visible, onCancel, id }) {
               rowKey="name"
             />
           </div>
-          <div id="outputParams" ref={outputParamsRef}>
+          <div
+            id="outputParams"
+            ref={(el: HTMLDivElement) => {
+              menuRef.current[2] = el;
+            }}
+          >
             <h1 className="mb-4 mt-3 text-sm font-medium">输出参数</h1>
             <Table
               border={false}
@@ -336,7 +290,12 @@ export default function ViewFileModal({ visible, onCancel, id }) {
               rowKey="name"
             />
           </div>
-          <div id="requestExample" ref={requestExampleRef}>
+          <div
+            id="requestExample"
+            ref={(el: HTMLDivElement) => {
+              menuRef.current[3] = el;
+            }}
+          >
             <div className="mb-4 mt-3 flex items-center justify-between">
               <h1 className="mt-[1px] text-sm font-medium">请求示例(JSON)</h1>
               <Button
@@ -349,19 +308,41 @@ export default function ViewFileModal({ visible, onCancel, id }) {
             </div>
             <div className={styles.tableContent}>
               <pre>
-                {JSON.stringify(viewFileDetailData?.example?.request, null, 2)}
+                {viewFileDetailData?.example?.request
+                  ? JSON.stringify(
+                      viewFileDetailData?.example?.request,
+                      null,
+                      2
+                    )
+                  : '-'}
               </pre>
             </div>
           </div>
-          <div id="outputExample" ref={outputExampleRef}>
+          <div
+            id="outputExample"
+            ref={(el: HTMLDivElement) => {
+              menuRef.current[4] = el;
+            }}
+          >
             <h1 className="mb-4 mt-3 text-sm font-medium">输出示例(JSON)</h1>
             <div className={styles.tableContent}>
               <pre>
-                {JSON.stringify(viewFileDetailData?.example?.response, null, 2)}
+                {viewFileDetailData?.example?.response
+                  ? JSON.stringify(
+                      viewFileDetailData?.example?.response,
+                      null,
+                      2
+                    )
+                  : '-'}
               </pre>
             </div>
           </div>
-          <div id="statusCodes" ref={statusCodesRef}>
+          <div
+            id="statusCodes"
+            ref={(el: HTMLDivElement) => {
+              menuRef.current[5] = el;
+            }}
+          >
             <h1 className="mb-4 mt-3 text-sm font-medium">状态码</h1>
             <Table
               border={false}
