@@ -16,3 +16,13 @@ export async function openDataList(params: Record<string | number, any>) {
 export async function openDataGetApiDoc(params: Record<string | number, any>) {
   return await UAPI.RES.openDataGetApiDocApi({}).post(params).inRegion().do();
 }
+
+// 上线数据API
+export async function openDataPublish(params: Record<string | number, any>) {
+  return await UAPI.RES.openDataPublishApi({}).post(params).inRegion().do();
+}
+
+// 下线数据API
+export async function openDataUnpublish(params: Record<string | number, any>) {
+  return await UAPI.RES.openDataUnpublishApi({}).post(params).inRegion().do();
+}

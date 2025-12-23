@@ -15,7 +15,11 @@ import { ColumnProps } from '@arco-design/web-react/es/Table';
 import EllipsisPopover from '@/components/ellipsis-popover-com';
 import noDataElement from '@/components/no-data';
 import { useUserInfo } from '@/store/userInfoStore';
-import { openDataList } from '@/api/dataApi';
+import {
+  openDataList,
+  openDataPublish,
+  openDataUnpublish
+} from '@/api/dataApi';
 import { SorterInfo } from '@arco-design/web-react/es/Table/interface';
 import { PermissionWrapper } from '@/components/PermissionGuard';
 import { WORKFLOW_TASK_PERMISSIONS } from '@/config/permissions';
@@ -218,6 +222,29 @@ export default function DataApi() {
     }
   };
 
+  const handleChangeStatus = async (record) => {
+    const params = {
+      id: record.id
+    };
+    if (record.status === ApiStatus.success) {
+      const res = await openDataUnpublish(params);
+      if (res.status === 200 && res.code === '') {
+        Message.success(res.msg || '下线数据API成功');
+        getList();
+      } else {
+        Message.error(res.msg || '下线数据API失败');
+      }
+    } else {
+      const res = await openDataPublish(params);
+      if (res.status === 200 && res.code === '') {
+        Message.success(res.msg || '上线数据API成功');
+        getList();
+      } else {
+        Message.error(res.msg || '上线数据API失败');
+      }
+    }
+  };
+
   // table columns
   const columns: ColumnProps[] = [
     {
@@ -362,8 +389,9 @@ export default function DataApi() {
                       borderTop: 'none',
                       borderBottom: 'none'
                     }}
+                    onClick={() => handleChangeStatus(record)}
                   >
-                    上线
+                    {record.status === ApiStatus.success ? '下线' : '上线'}
                   </Button>
                 </Menu.Item>
                 <Menu.Item key="authorize">
