@@ -41,6 +41,7 @@ import QualityConfig from './components/QualityConfig';
 import {
   formatSubmitData,
   generateTaskPackages,
+  parseDetailPkgInfos,
   TaskDistributionPanel,
   TaskPackage,
   validateTaskAssignment,
@@ -272,7 +273,16 @@ export default function RequirementConfig() {
     }
   }, [selectedRadio, selectedData]);
 
-  // 监听表单字段变化，动态生成任务包列表
+  // 编辑模式下，解析并设置历史任务包数据
+  useEffect(() => {
+    if (type === 'edit' && requirementDetail?.pkg_infos?.length > 0) {
+      const historyPackages = parseDetailPkgInfos(requirementDetail);
+      // 初始化时设置历史数据
+      setTaskPackages(historyPackages);
+    }
+  }, [type, requirementDetail?.pkg_infos]);
+
+  // 监听表单字段变化，动态生成新增任务包列表
   useEffect(() => {
     const splitCount =
       publishData?.split_task_package ||
@@ -284,19 +294,37 @@ export default function RequirementConfig() {
       // edit模式下，taskId从详情pkg_infos的长度+1开始
       const startTaskId =
         type === 'edit' ? (requirementDetail?.pkg_infos?.length || 0) + 1 : 1;
-      // 传入现有的taskPackages，保留已选数据
-      const packages = generateTaskPackages(
+
+      // 获取历史数据（来自详情的任务包）
+      const historyPackages = taskPackages.filter((pkg) => pkg.isFromDetail);
+      // 获取当前新增的任务包（不包含历史数据）
+      const currentNewPackages = taskPackages.filter(
+        (pkg) => !pkg.isFromDetail
+      );
+
+      // 生成新增任务包，保留已选数据
+      const newPackages = generateTaskPackages(
         splitCount,
         qualityRounds,
         totalDataAmount,
-        taskPackages,
+        currentNewPackages,
         startTaskId
       );
-      setTaskPackages(packages);
+
+      // 合并历史数据和新增数据
+      const mergedPackages = [...historyPackages, ...newPackages];
+      setTaskPackages(mergedPackages);
       // 清除验证错误
       setTaskDistributionErrors({});
-    } else {
+    } else if (type !== 'edit') {
+      // 非编辑模式下，如果没有数据则清空
       setTaskPackages([]);
+    } else {
+      // 编辑模式下，保留历史数据
+      const historyPackages = taskPackages.filter((pkg) => pkg.isFromDetail);
+      if (historyPackages.length > 0) {
+        setTaskPackages(historyPackages);
+      }
     }
   }, [
     publishData?.split_task_package,
