@@ -13,7 +13,7 @@ const QualityConfig = ({ form, type, requirementDetail }) => {
       });
     }
   }, [requirementDetail, type, form]);
-
+  const qcRound = Form.useWatch('qc_round', form);
   return (
     <>
       <FormItem
@@ -30,28 +30,32 @@ const QualityConfig = ({ form, type, requirementDetail }) => {
           <Radio value={3}>3轮</Radio>
         </RadioGroup>
       </FormItem>
-      <FormItem
-        label="质检修改标注:"
-        field="is_result_modify"
-        rules={[{ required: true, message: '请选择质检修改标注' }]}
-        initialValue={0}
-      >
-        <RadioGroup>
-          <Radio value={1}>启用</Radio>
-          <Radio value={0}>禁用</Radio>
-        </RadioGroup>
-      </FormItem>
-      <FormItem
-        label="驳回至:"
-        field="reject_to"
-        rules={[{ required: true, message: '请选择驳回至' }]}
-        initialValue={1}
-      >
-        <RadioGroup>
-          <Radio value={0}>标注员</Radio>
-          <Radio value={1}>标注公池</Radio>
-        </RadioGroup>
-      </FormItem>
+      {qcRound > 0 && (
+        <>
+          <FormItem
+            label="质检修改标注:"
+            field="is_result_modify"
+            rules={[{ required: true, message: '请选择质检修改标注' }]}
+            initialValue={0}
+          >
+            <RadioGroup>
+              <Radio value={1}>启用</Radio>
+              <Radio value={0}>禁用</Radio>
+            </RadioGroup>
+          </FormItem>
+          <FormItem
+            label="驳回至:"
+            field="reject_to"
+            rules={[{ required: true, message: '请选择驳回至' }]}
+            initialValue={1}
+          >
+            <RadioGroup>
+              <Radio value={0}>标注员</Radio>
+              <Radio value={1}>标注公池</Radio>
+            </RadioGroup>
+          </FormItem>
+        </>
+      )}
     </>
   );
 };

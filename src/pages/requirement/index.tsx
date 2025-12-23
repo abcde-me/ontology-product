@@ -376,10 +376,10 @@ export default function Requirement() {
                   name: '删除',
                   priority: 6,
                   tips:
-                    userInfo?.name !== record.create_by
+                    userInfo?.id !== record.creator_id
                       ? '仅需求创建人可操作'
                       : '',
-                  disabled: userInfo?.name !== record.create_by,
+                  disabled: userInfo?.id !== record.creator_id,
                   onClick: () => {
                     handleDeleteRequirement(record);
                   }
