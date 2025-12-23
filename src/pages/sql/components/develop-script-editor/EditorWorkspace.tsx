@@ -705,6 +705,28 @@ const EditorWorkspaceContent: React.FC<{
               >
                 复制为新脚本
               </Button>
+              {/* 取消编辑按钮 - status=0且isSelfEditing=true时显示 */}
+              {scriptInfo?.isSelfEditing && (
+                <Button
+                  className={classNames(styles['btn-save'], 'ml-[8px]')}
+                  loading={editLoading}
+                  onClick={handleCancelEdit}
+                  icon={<IconClose />}
+                >
+                  取消编辑
+                </Button>
+              )}
+              {/* 编辑按钮 - status=0且isSelfEditing=false或status=1时显示 */}
+              {!scriptInfo?.isSelfEditing && (
+                <Button
+                  className={classNames(styles['btn-save'], 'ml-[8px]')}
+                  onClick={handleStartEdit}
+                  loading={editLoading}
+                  icon={<IconEdit />}
+                >
+                  编辑
+                </Button>
+              )}
             </div>
           </>
         );
