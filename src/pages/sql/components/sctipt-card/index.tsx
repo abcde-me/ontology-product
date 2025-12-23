@@ -15,21 +15,15 @@ import { useUserInfo } from '@/store/userInfoStore';
 import { useUrlState } from '@/pages/sql/hooks/useUrlState';
 import Mock from 'mockjs';
 import styles from './index.module.scss';
-import { IconCopy, IconDelete, IconSearch } from '@arco-design/web-react/icon';
+import { IconDelete, IconSearch } from '@arco-design/web-react/icon';
+import IconDetail from '../../assets/xiangqing-btn-icon.svg';
 import {
   deleteDevelopScript,
-  deleteDevelopScriptLogByVersion,
   getDevelopScriptLogByVersion,
-  listDevelopScript,
-  listDevelopScriptLogByKeyApi
+  listDevelopScript
 } from '@/api/sql-develop';
 import noDataElement from '@/components/no-data';
-import {
-  ScriptStatus,
-  ScriptStatusName,
-  ListDevelopScriptLogByKeyItem,
-  ListDevelopScriptItem
-} from '@/types/sqlDevelopApi';
+import { ScriptStatus, ListDevelopScriptItem } from '@/types/sqlDevelopApi';
 import VersionStatus from '../version-status';
 import EllipsisPopover from '@/components/ellipsis-popover-com';
 import ScriptDetailModal from '../spl-script-management/ScriptDetailModal';
@@ -319,12 +313,15 @@ const ScriptCard: React.FC<ScriptCardProps> = ({
                       <VersionStatus status={item.status} />
                     </div>
                     <div
-                      className={styles['script-card-content-item-title-right']}
+                      className={classNames(
+                        styles['script-card-content-item-title-right'],
+                        'flex items-center'
+                      )}
                     >
                       <Button
-                        style={{ marginRight: 8 }}
-                        className={styles['script-card-content-item-title-btn']}
-                        icon={<IconCopy />}
+                        type="outline"
+                        className="mr-[8px] flex h-[24px] items-center justify-center px-[12px]"
+                        icon={<IconDetail className="h-[12px] w-[12px]" />}
                         onClick={() => {
                           setDetailTitle(item?.script_name || '');
                           setDetailContent(item?.script_context || '');
@@ -341,14 +338,8 @@ const ScriptCard: React.FC<ScriptCardProps> = ({
                         }
                       >
                         <Button
-                          style={{
-                            width: '68px',
-                            height: '24px',
-                            padding: '0px 8px'
-                          }}
-                          className={
-                            styles['script-card-content-item-title-btns']
-                          }
+                          type="outline"
+                          className="mr-[8px] h-[24px] px-[12px]"
                           icon={<IconDelete />}
                           disabled={item.status === ScriptStatus.Scheduling}
                           onClick={() =>
@@ -369,7 +360,7 @@ const ScriptCard: React.FC<ScriptCardProps> = ({
                       preferTypography
                       ellipsis={{ rows: 3, cssEllipsis: true }}
                       wrapperClassName={
-                        styles['script-card-content-item-content-text']
+                        '[&_.arco-typography]:text-[var(--text-color-text-4)]'
                       }
                     />
                   </div>

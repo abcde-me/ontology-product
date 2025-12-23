@@ -38,11 +38,14 @@ import { WORKFLOW_LIST_PERMISSIONS } from '@/config/permissions';
 import {
   IconCheckCircleFill,
   IconClockCircle,
-  IconDown
+  IconCopy,
+  IconDown,
+  IconExclamationCircleFill
 } from '@arco-design/web-react/icon';
 import { SorterInfo } from '@arco-design/web-react/lib/Table/interface';
 import { openNewPage } from '@/utils/env';
 import { PermissionWrapper } from '@/components/PermissionGuard';
+import copy from 'copy-to-clipboard';
 
 const { Row, Col } = Grid;
 
@@ -113,12 +116,13 @@ export function StructuredWorkflowList() {
     Modal.confirm({
       title: (
         <span className={styles['workflow-list-modal-title']}>
-          确认删除工作流吗？
+          确定删除此工作流？
         </span>
       ),
+      icon: <IconExclamationCircleFill className={'text-[#FF7D00]'} />,
       content: (
         <div className={styles['workflow-list-modal-content']}>
-          删除该工作流后，工作流中的内容将全部清除。
+          删除后，该工作流不可恢复。
         </div>
       ),
       okText: '确定',
@@ -162,12 +166,27 @@ export function StructuredWorkflowList() {
       dataIndex: 'name',
       ellipsis: true,
       tooltip: true,
-      render: (value) => (
-        <Typography.Text
-          className={'w-full overflow-ellipsis whitespace-nowrap'}
+      render: (value, record) => (
+        <div
+          className={`${styles['workflow-name']} flex w-max items-center gap-1 hover:cursor-pointer`}
+          onClick={() => {
+            viewDetailWorkflow(record);
+          }}
         >
-          {value}
-        </Typography.Text>
+          <div className={'w-full overflow-ellipsis whitespace-nowrap'}>
+            {value}
+          </div>
+          <IconCopy
+            className={`${styles['workflow-name-copy']}`}
+            onClick={(e) => {
+              e.stopPropagation();
+              const copied = copy(value);
+              if (copied) {
+                Message.success('复制工作流名称成功');
+              }
+            }}
+          />
+        </div>
       )
     },
     {
