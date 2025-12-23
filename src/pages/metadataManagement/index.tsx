@@ -4,6 +4,7 @@ import {
   Form,
   Input,
   Menu,
+  Message,
   Modal,
   Pagination,
   PaginationProps,
@@ -59,7 +60,7 @@ export default function MetadataManagement() {
   const [metadataMenuData, setMetadataMenuData] = useState([]);
   // 初始化搜索框value
   const [searchValue, setSearchValue] = useState({
-    filter: {},
+    filters: {},
     range: [] as RangeFilter[]
   });
   // 初始化元数据列表数据
@@ -144,6 +145,8 @@ export default function MetadataManagement() {
       setActiveMetadataType(
         res.data.data[0]?.datasourceType || MetadataType.Iceberg
       );
+    } else {
+      Message.error(res.message || '获取元数据菜单数据失败');
     }
   };
 
@@ -168,6 +171,8 @@ export default function MetadataManagement() {
         setCurrent(res.data.data?.pageNum);
         setPageSize(res.data.data?.pageSize);
         setTotal(res.data.data?.total || 10);
+      } else {
+        Message.error(res.message || '获取元数据列表数据失败');
       }
     } finally {
       setLoading(false);
@@ -214,12 +219,12 @@ export default function MetadataManagement() {
   const handleFieldSearch = (fieldValues, commonSearch: string) => {
     console.log(fieldValues, commonSearch);
     const newSearchValue = {
-      filter: {},
+      filters: {},
       range: [] as RangeFilter[]
     };
     fieldValues.forEach((item) => {
       if (item.type === 'string') {
-        newSearchValue.filter[item.nameEn] = item.searchContent[0];
+        newSearchValue.filters[item.nameEn] = item.searchContent[0];
       } else if (item.type === 'datetime') {
         newSearchValue.range.push({
           field: item.nameEn,

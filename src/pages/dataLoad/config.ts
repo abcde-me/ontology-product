@@ -56,7 +56,8 @@ export enum ConnectorType {
   S3 = 's3',
   HDFS = 'hdfs',
   DB = 'db',
-  Local = 'local'
+  Local = 'local',
+  MQ = 'mq'
 }
 export const TYPE_CONFIG = {
   [ConnectorType.S3]: {
@@ -74,6 +75,10 @@ export const TYPE_CONFIG = {
   [ConnectorType.Local]: {
     text: '本地文件',
     value: 'local'
+  },
+  [ConnectorType.MQ]: {
+    text: '消息队列',
+    value: 'mq'
   }
 };
 export const DATABASE_TYPE_ENUM = [
