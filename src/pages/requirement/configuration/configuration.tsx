@@ -11,7 +11,9 @@ import {
   Radio,
   Select,
   Spin,
-  Tooltip
+  Tooltip,
+  Typography,
+  Space
 } from '@arco-design/web-react';
 import { IconArrowLeft, IconQuestionCircle } from '@arco-design/web-react/icon';
 import { cloneDeep, isArray, isEmpty, omitBy } from 'lodash-es';
@@ -62,6 +64,7 @@ import {
   generateEntityLabels
 } from './utils/generateLabels';
 const BreadcrumbItem = Breadcrumb.Item;
+const { Text } = Typography;
 
 export default function RequirementConfig() {
   const [basicForm] = Form.useForm();
@@ -1223,8 +1226,6 @@ export default function RequirementConfig() {
               className="configuration-form"
             >
               <FormItem
-                initialValue={30}
-                field="task_effective_minute"
                 label={
                   <span>
                     超时释放
@@ -1236,14 +1237,24 @@ export default function RequirementConfig() {
                     :
                   </span>
                 }
-                rules={[{ required: true, message: '请选择超时释放时间' }]}
+                required
               >
-                <InputNumber
-                  mode="button"
-                  min={1}
-                  precision={0}
-                  style={{ width: 200 }}
-                />
+                <Space>
+                  <FormItem
+                    initialValue={30}
+                    field="task_effective_minute"
+                    rules={[{ required: true, message: '请选择超时释放时间' }]}
+                    noStyle={{ showErrorTip: true }}
+                  >
+                    <InputNumber
+                      mode="button"
+                      min={1}
+                      precision={0}
+                      style={{ width: 200 }}
+                    />
+                  </FormItem>
+                  <Text>分钟</Text>
+                </Space>
               </FormItem>
               <FormItem field="taskDistribution" label="分配人员:" required>
                 <TaskDistributionPanel
