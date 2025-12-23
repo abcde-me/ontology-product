@@ -69,7 +69,7 @@ export async function updateSqlScript(
 export async function getSqlScriptList(
   params: SqlScriptListParams
 ): Promise<ApiRes<SqlScriptListData>> {
-  return await UAPI.RES.ListDevelopScriptApi({}).post(params).inRegion().do();
+  return await UAPI.RES.ListSqlFileApi({}).post(params).inRegion().do();
 }
 
 /** 删除SQL脚本 */

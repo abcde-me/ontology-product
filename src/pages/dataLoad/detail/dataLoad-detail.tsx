@@ -404,52 +404,59 @@ const DataLoadDetail = () => {
                 {listDetail && listDetail.created_at}
               </div>
             </div>
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                margin: '5px'
-              }}
-            >
+            {listDetail?.source_type !==
+              TYPE_CONFIG[ConnectorType.MQ].value && (
               <div
-                style={{ fontWeight: '500', fontSize: '14px', width: '80px' }}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  margin: '5px'
+                }}
               >
-                更新时间：
+                <div
+                  style={{ fontWeight: '500', fontSize: '14px', width: '80px' }}
+                >
+                  更新时间：
+                </div>
+                <div style={{ fontSize: '14px' }}>
+                  {listDetail && listDetail.last_run_time}
+                </div>
               </div>
-              <div style={{ fontSize: '14px' }}>
-                {listDetail && listDetail.last_run_time}
-              </div>
-            </div>
+            )}
           </div>
           <div
             className="info-column"
             style={{ justifyContent: 'space-between' }}
           >
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                margin: '5px'
-              }}
-            >
+            {listDetail?.source_type !==
+              TYPE_CONFIG[ConnectorType.MQ].value && (
               <div
-                style={{ fontWeight: '500', fontSize: '14px', width: '90px' }}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  margin: '5px'
+                }}
               >
-                数据源类型：
-              </div>
-              <div style={{ fontSize: '14px' }}>
-                {/* {listDetail && listDetail.source_type} */}
-                {listDetail?.source_type == TYPE_CONFIG[ConnectorType.S3].value
-                  ? TYPE_CONFIG[ConnectorType.S3].text
-                  : listDetail?.source_type ==
-                      TYPE_CONFIG[ConnectorType.HDFS].value
-                    ? TYPE_CONFIG[ConnectorType.HDFS].text
+                <div
+                  style={{ fontWeight: '500', fontSize: '14px', width: '90px' }}
+                >
+                  数据源类型：
+                </div>
+                <div style={{ fontSize: '14px' }}>
+                  {/* {listDetail && listDetail.source_type} */}
+                  {listDetail?.source_type ==
+                  TYPE_CONFIG[ConnectorType.S3].value
+                    ? TYPE_CONFIG[ConnectorType.S3].text
                     : listDetail?.source_type ==
-                        TYPE_CONFIG[ConnectorType.DB].value
-                      ? `${TYPE_CONFIG[ConnectorType.DB].text}-${getLabelByValue(DATABASE_TYPE_ENUM, listDetail?.sub_type || '')}`
-                      : TYPE_CONFIG[ConnectorType.Local].text}
+                        TYPE_CONFIG[ConnectorType.HDFS].value
+                      ? TYPE_CONFIG[ConnectorType.HDFS].text
+                      : listDetail?.source_type ==
+                          TYPE_CONFIG[ConnectorType.DB].value
+                        ? `${TYPE_CONFIG[ConnectorType.DB].text}-${getLabelByValue(DATABASE_TYPE_ENUM, listDetail?.sub_type || '')}`
+                        : TYPE_CONFIG[ConnectorType.Local].text}
+                </div>
               </div>
-            </div>
+            )}
             <div
               style={{
                 display: 'flex',
@@ -524,6 +531,25 @@ const DataLoadDetail = () => {
                 )}
               </div>
             </div>
+            {listDetail?.source_type ===
+              TYPE_CONFIG[ConnectorType.MQ].value && (
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  margin: '5px'
+                }}
+              >
+                <div
+                  style={{ fontWeight: '500', fontSize: '14px', width: '80px' }}
+                >
+                  更新时间：
+                </div>
+                <div style={{ fontSize: '14px' }}>
+                  {listDetail && listDetail.last_run_time}
+                </div>
+              </div>
+            )}
             {listDetail && listDetail.load_type == 'cron' && (
               <div
                 style={{

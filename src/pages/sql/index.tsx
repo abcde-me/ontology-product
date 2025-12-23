@@ -9,7 +9,10 @@ import SplScriptManagement from './components/spl-script-management';
 import EditorContent from './components/editor';
 import DevelopScriptEditor from './components/develop-script-editor';
 import DatasetsList from './components/DatasetsList';
-import { FileTab, useTabManager } from './hooks/useTabManager';
+import {
+  FileTab,
+  useQueryScriptTabManager
+} from './hooks/useQueryScriptTabManager';
 import styles from './index.module.scss';
 import { SQL_PERMISSIONS } from '@/config/permissions';
 import { useHasPermission } from '@/store/userInfoStore';
@@ -19,6 +22,7 @@ import {
   useDevelopScriptTabManager
 } from './hooks/useDevelopScriptTabManager';
 import { useUrlState } from './hooks/useUrlState';
+import { generateSqlDefaultName } from './utils';
 
 const { Content, Sider } = Layout;
 const TabPane = Tabs.TabPane;
@@ -61,20 +65,7 @@ const SqlIndex: React.FC = memo(() => {
     if (tab === 'files' && urlState.activeDevelopScriptId) {
       setDevelopScriptFileManagerSelectedKeys([urlState.activeDevelopScriptId]);
     }
-
-    // SQL查询脚本选中状态
-    if (tab === 'data') {
-      if (urlState.activeScriptId) {
-        setFileManagerSelectedKeys([urlState.activeScriptId]);
-      } else if (fileState.fileTabs.length === 0) {
-        addTab();
-      }
-    }
-  }, [
-    urlState.activeTab,
-    urlState.activeDevelopScriptId,
-    urlState.activeScriptId
-  ]);
+  }, [urlState.activeTab, urlState.activeDevelopScriptId]);
 
   // 选中SQL加工脚本变化回调
   const handleDevelopScriptSelectedKeysChange = useCallback(
@@ -91,30 +82,18 @@ const SqlIndex: React.FC = memo(() => {
   );
 
   const handleSqlQueryActiveUpdate = useCallback(
-    (selectedKeys: string[]) => {
-      // updateUrlState(
-      //   {
-      //     activeTab: 'data',
-      //     activeScriptId: selectedKeys[0]
-      //   },
-      //   { method: 'push' }
-      // );
-    },
+    (selectedKeys: string[]) => {},
     [updateUrlState, location.search]
   );
 
   const {
     fileState,
-    directoryTreeRef,
-    addTab,
+    addTab: addQueryScriptTab,
     removeTab,
-    removeTabByFileId, // 获取根据文件ID关闭标签页的方法
-    switchTab,
-    handleCreate,
+    switchTab: switchQueryScriptTab,
     updateTab,
-    openFileByScriptId: openSqlQueryFileByScriptId,
-    updateTabTitle // 获取更新标签页标题的方法
-  } = useTabManager(handleSqlQueryActiveUpdate);
+    createQueryScript
+  } = useQueryScriptTabManager(handleSqlQueryActiveUpdate);
 
   const {
     fileState: developScriptFileState,
@@ -128,16 +107,6 @@ const SqlIndex: React.FC = memo(() => {
     openFile: developScriptOpenFile,
     updateTabTitle: developScriptUpdateTabTitle
   } = useDevelopScriptTabManager(handleDevelopScriptSelectedKeysChange);
-
-  // 初始化创建一个默认SQL查询标签
-  // useEffect(() => addTab(), []);
-
-  useEffect(() => {
-    if (fileManagerSelectedKeys.length > 0) {
-      openSqlQueryFileByScriptId &&
-        openSqlQueryFileByScriptId(fileManagerSelectedKeys[0]);
-    }
-  }, [fileManagerSelectedKeys, openSqlQueryFileByScriptId]);
 
   const isDasetTab = activeTab === 'dataset' || activeTab === 'script';
 
@@ -168,8 +137,16 @@ const SqlIndex: React.FC = memo(() => {
   };
 
   const handleActiveUpdate = (tabData: FileTab) => {
-    // console.log('handleActiveUpdate tabData', tabData);
-    updateTab(tabData);
+    if (tabData.fileId || tabData.scriptId) {
+      updateTab({
+        fileId: tabData.fileId,
+        title: tabData.title ?? '',
+        scriptId: tabData.scriptId ?? '',
+        content: tabData.content ?? '',
+        lastModified: tabData.lastModified ?? undefined,
+        hasRun: tabData.hasRun ?? false
+      });
+    }
   };
 
   // 处理插入内容功能注册
@@ -205,25 +182,11 @@ const SqlIndex: React.FC = memo(() => {
     setInsertContentFunction(() => insertFn);
   };
 
-  // 刷新目录的函数
-  // const handleRefreshDirectory = useCallback(async () => {
-  //   if (directoryTreeRef.current?.refresh) {
-  //     await directoryTreeRef.current.refresh();
-  //   }
-  // }, []);
-
   const handleDevelopScriptRefreshDirectory = useCallback(async () => {
     if (developScriptDirectoryTreeRef.current?.refresh) {
       await developScriptDirectoryTreeRef.current.refresh();
     }
   }, []);
-
-  // 选中文件的方法
-  // const selectFile = (fileId: string) => {
-  //   if (directoryTreeRef.current?.selectFile) {
-  //     directoryTreeRef.current.selectFile(fileId);
-  //   }
-  // };
 
   const selectDevelopScriptFile = (fileId: string) => {
     if (developScriptDirectoryTreeRef.current?.selectFile) {
@@ -318,10 +281,12 @@ const SqlIndex: React.FC = memo(() => {
             fileTabs={fileState.fileTabs}
             activeTab={fileState.activeTab}
             curActiveTab={activeTab}
-            onTabChange={switchTab}
-            onAddTab={(newFileInfo?: any) => addTab(newFileInfo)}
+            onTabChange={switchQueryScriptTab}
+            onAddTab={(newFileInfo?: any) => addQueryScriptTab(newFileInfo)}
             onRemoveTab={removeTab}
-            onCreate={handleCreate}
+            onCreate={() =>
+              createQueryScript(generateSqlDefaultName(new Date()))
+            }
             onActiveUpdate={handleActiveUpdate}
             onInsertContent={handleInsertContentRegister}
             onEditorFocusChange={handleEditorFocusChange}
