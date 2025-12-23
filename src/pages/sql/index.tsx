@@ -1,8 +1,9 @@
 import React, { useState, memo, useEffect, useRef, useCallback } from 'react';
 import { Layout, Tabs, Popover } from '@arco-design/web-react';
-import DataIcon from '@/assets/sql/data-left-menu.svg';
-import SQLIcon from '@/assets/sql/sql-left-menu.svg';
-import DasetIcon from '@/assets/sql/daset-left-menu.svg';
+import ScriptManagementIcon from './assets/script-management-left-menu.svg';
+import QueryIcon from './assets/query-left-menu.svg';
+import DevelopIcon from './assets/develop-left-menu.svg';
+import DasetIcon from './assets/daset-left-menu.svg';
 import FileManager from './components/file-manager';
 import DataManager from './components/data-manager';
 import SplScriptManagement from './components/spl-script-management';
@@ -209,7 +210,7 @@ const SqlIndex: React.FC = memo(() => {
             key="script"
             title={
               <Popover content="脚本管理" position="left">
-                <DataIcon className={styles['sql-menu-icon']} />
+                <ScriptManagementIcon className={styles['sql-menu-icon']} />
               </Popover>
             }
           >
@@ -224,7 +225,7 @@ const SqlIndex: React.FC = memo(() => {
             key="data"
             title={
               <Popover content="SQL查询" position="left">
-                <DataIcon className={styles['sql-menu-icon']} />
+                <QueryIcon className={styles['sql-menu-icon']} />
               </Popover>
             }
           >
@@ -240,7 +241,7 @@ const SqlIndex: React.FC = memo(() => {
             key="files"
             title={
               <Popover content="数据加工" position="left">
-                <SQLIcon className={styles['sql-menu-icon']} />
+                <DevelopIcon className={styles['sql-menu-icon']} />
               </Popover>
             }
           >

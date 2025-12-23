@@ -503,6 +503,16 @@ export const ModaForgeResourceEndpoints = {
   // 查询doris表的预览数据
   listMetadataDorisDataApi: PrefixAimdp + '/ListMetadataDorisData',
 
+  // 数据API
+  // 查询数据API列表
+  openDataListApi: PrefixAimdp + '/OpenDataListApi',
+  // 查看数据API文档
+  openDataGetApiDocApi: PrefixAimdp + '/OpenDataGetApiDoc',
+  // 上线数据API
+  openDataPublishApi: PrefixAimdp + '/OpenDataPublishApi',
+  // 下线数据API
+  openDataUnpublishApi: PrefixAimdp + '/OpenDataUnpublishApi',
+
   // SQL开发
   sqlListApi: PrefixAimdp + '/ListSqlFile',
   sqlCreateApi: PrefixAimdp + '/CreateSqlFile',

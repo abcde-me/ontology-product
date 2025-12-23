@@ -10,25 +10,17 @@
   }
 
   .sql-sider {
+    .sql-menu-icon {
+      color: var(--color-text-4);
+    }
+
+    :global(.arco-tabs-header-title-active) .sql-menu-icon {
+      color: #2563eb;
+    }
+
     :global(.arco-layout-sider-children) {
       .sql-tabs {
         height: 100%;
-
-        .sql-menu-icon {
-          &:hover {
-            path {
-              fill: #2563eb;
-            }
-          }
-        }
-
-        :global(.arco-tabs-header-nav-rounded)
-          :global(.arco-tabs-header-title-active)
-          .sql-menu-icon {
-          path {
-            fill: #2563eb;
-          }
-        }
 
         :global(.arco-tabs-header-nav) {
           padding: 8px;
