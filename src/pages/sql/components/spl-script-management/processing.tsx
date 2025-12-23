@@ -1,13 +1,13 @@
 import React, { memo, useEffect, useState } from 'react';
-import style from './processing.module.scss';
 import { Button, Message } from '@arco-design/web-react';
-import ViewToggle, { ViewType } from '../ViewToggle';
+import ViewToggle, { ViewType } from '@/components/ViewToggle';
 import ScriptTable from '../sctipt-table';
 import ScriptCard from '../sctipt-card';
 import { downloadDevelopScript, createDevelopScript } from '@/api/sql-develop';
 import { useUrlState } from '../../hooks/useUrlState';
 import { generateSqlDefaultName } from '../../utils';
-
+import classNames from 'classnames';
+import styles from './processing.module.scss';
 interface PaginationProps {
   onToScriptList: (type: string) => void;
   curActiveTab: string;
@@ -72,26 +72,28 @@ const Processing: React.FC<PaginationProps> = memo(
       }
     };
     return (
-      <div className={style['processing-wrapper']}>
+      <div
+        className={classNames('overflow-hidden', styles['processing-wrapper'])}
+      >
         {/* 头部操作按钮 */}
-        <div className={style['processing-header']}>
-          <div className={style['processing-header-title']}>
+        <div className="my-[16px] flex items-center justify-between">
+          <div className="text-[16px] font-[600] leading-[24px] text-[var(--text-color-text-1)]">
             加工脚本({processingNum})
           </div>
-          <div className={style['processing-header-icons-group']}>
+          <div className="flex items-center justify-end gap-[8px]">
             {iconActive === ViewType.LIST && !isShowAll && (
               <Button
+                type="outline"
                 onClick={() => {
                   handleDownloadAll();
                 }}
-                className={style['header-btn']}
               >
                 下载全部
               </Button>
             )}
             <Button
               loading={createScriptLoading}
-              className={style['header-btn']}
+              type="outline"
               onClick={() => {
                 handleCreateScript();
               }}
@@ -99,14 +101,14 @@ const Processing: React.FC<PaginationProps> = memo(
               新建脚本
             </Button>
             <ViewToggle
-              className={style['processing-header-icons-options']}
+              className="flex overflow-hidden rounded"
               value={iconActive}
               onChange={setIconActive}
             />
           </div>
         </div>
-        <div className={style['processing-content']}>
-          {iconActive === ViewType.TABLE ? (
+        <div>
+          {iconActive === ViewType.CARD ? (
             <ScriptCard
               onToScriptList={onToScriptList}
               onTotalChange={setProcessingNum}
