@@ -32,15 +32,14 @@ import {
 } from '@arco-design/web-react/icon';
 import FolderIcon from '@/assets/python/folder.svg';
 import FileIcon from '@/assets/python/file.svg';
-import AddAfterIcon from '@/assets/python/add-after.svg';
 import { PythonItemType, PythonListItem } from '@/types/pythonApi';
 import EllipsisPopover from '@/components/ellipsis-popover-com';
 import './DirectoryTree.scss';
 import { PYSPARK_PERMISSIONS, SQL_PERMISSIONS } from '@/config/permissions';
 import { now } from 'lodash-es';
 import { PermissionWrapper } from '@/components/PermissionGuard';
-import { debounce } from 'lodash-es';
 import SQLFileIcon from '@/assets/sql/spl-item-icon.svg';
+import CopyIcon from '../../assets/copy-icon.svg';
 import { useParams } from '@/utils/url';
 import { ScriptStatus, ScriptStatusName } from '@/types/sqlDevelopApi';
 // 原始数据接口
@@ -590,7 +589,7 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
                     trigger={['click', 'hover']}
                     droplist={
                       <Menu>
-                        {!isReleased && (
+                        {!isReleased && !isScheduling && (
                           <PermissionWrapper permission={nowPermissions.MODIFY}>
                             <Menu.Item
                               onClick={() => {
@@ -598,7 +597,7 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
                               }}
                               key="1"
                             >
-                              <IconEdit className="mr-1" />
+                              <IconEdit className="mr-[8px] h-[16px] w-[16px]" />
                               重命名
                             </Menu.Item>
                           </PermissionWrapper>
@@ -610,7 +609,7 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
                             }}
                             key="2"
                           >
-                            <IconCopy className="mr-1" />
+                            <CopyIcon className="mr-[8px] h-[16px] w-[16px]" />
                             <span className="mr-[4px]">复制为新脚本</span>
                             <Tooltip
                               position="right"
@@ -635,7 +634,7 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
                               position="right"
                             >
                               <div className="flex items-center">
-                                <IconDelete className="mr-1" />
+                                <IconDelete className="mr-[8px] h-[16px] w-[16px]" />
                                 删除
                               </div>
                             </Tooltip>
@@ -674,7 +673,7 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
                       onBlur={() => handleEditFinish(props)}
                       onPressEnter={() => handleEditFinish(props)}
                       maxLength={255}
-                      className="h-8 px-[6px] py-[2px] focus:border-[rgb(var(--primary-6))]"
+                      className="ml-[4px] h-8 px-[6px] py-[2px] focus:border-[rgb(var(--primary-6))]"
                     />
                   </div>
                 );

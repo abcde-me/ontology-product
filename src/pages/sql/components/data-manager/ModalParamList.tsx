@@ -15,7 +15,6 @@ import { DbTableListParamss, getDbItemList } from '@/api/dataCatalog';
 import { formatDateTime } from '../../utils';
 import getLabelByValue from '@/utils/getLabelByValue';
 import { IconRefresh } from '@arco-design/web-react/icon';
-import './ModalParamList.scss';
 import { ListDevelopSystemParamParams } from '@/types/sqlDevelopApi';
 import { listDevelopSystemParam } from '@/api/sql-develop';
 import noDataElement from '@/components/no-data';
@@ -84,8 +83,7 @@ const ModalParamList = ({ paramVisible, onCancel }) => {
     {
       title: '序号',
       dataIndex: 'id',
-      width: 80,
-      sorter: (a, b) => a.id - b.id
+      width: 80
     },
     {
       title: '参数名',
@@ -112,7 +110,7 @@ const ModalParamList = ({ paramVisible, onCancel }) => {
         record.config_desc ? (
           <EllipsisPopover value={record.config_desc} isEdit={false} />
         ) : (
-          <div>--</div>
+          <div className="text-[var(--color-text-6)]">暂无参数说明</div>
         )
     }
   ];
@@ -124,9 +122,10 @@ const ModalParamList = ({ paramVisible, onCancel }) => {
       footer={null}
       onCancel={onCancel}
     >
-      <div className="modal-param-list-warper pb-[16px]">
-        <div className="from-search-warper">
+      <div className="pb-[16px]">
+        <div className="mb-[16px] flex items-center justify-between overflow-x-auto whitespace-nowrap">
           <Form
+            className="flex flex-1 flex-nowrap items-center gap-[16px] [&_.arco-form-item-wrapper]:flex-1 [&_.arco-form-item]:mb-0 [&_.arco-form-item]:mr-0 [&_.arco-form-item]:flex-1"
             autoComplete="off"
             layout="inline"
             form={form}
@@ -135,39 +134,28 @@ const ModalParamList = ({ paramVisible, onCancel }) => {
             <FormItem
               label="参数名:"
               field="config_key"
-              style={{ marginRight: 8, marginBottom: 16 }}
+              // style={{ marginRight: 8, marginBottom: 16 }}
             >
-              <Input
-                style={{ width: 193 }}
-                allowClear
-                placeholder="输入参数名搜索"
-              />
+              <Input allowClear placeholder="输入参数名搜索" />
             </FormItem>
             <FormItem
               label="示例:"
               field="config_demo"
-              style={{ marginRight: 8, marginBottom: 16 }}
+              // style={{ marginRight: 8, marginBottom: 16 }}
             >
-              <Input
-                style={{ width: 193 }}
-                allowClear
-                placeholder="输入参数值搜索"
-              />
+              <Input allowClear placeholder="输入参数值搜索" />
             </FormItem>
             <FormItem
               label="参数说明:"
               field="config_desc"
-              style={{ marginRight: 8, marginBottom: 16 }}
+              // style={{ marginRight: 8, marginBottom: 16 }}
             >
-              <Input
-                style={{ width: 180 }}
-                allowClear
-                placeholder="输入参数说明搜索"
-              />
+              <Input allowClear placeholder="输入参数说明搜索" />
             </FormItem>
           </Form>
           <Button
             icon={<IconRefresh />}
+            className="ml-[16px] mr-[12px] px-[0px]"
             onClick={() => {
               form.resetFields();
               setCurrent(1);
@@ -208,10 +196,7 @@ const ModalParamList = ({ paramVisible, onCancel }) => {
           noDataElement={noDataElement({ description: '暂无数据' })}
         />
         {total > pageSize && (
-          <div
-            className="pagination-content"
-            style={{ marginTop: 16, textAlign: 'right' }}
-          >
+          <div className="mt-[16px] flex items-center justify-end">
             <Pagination
               total={total}
               current={current}
