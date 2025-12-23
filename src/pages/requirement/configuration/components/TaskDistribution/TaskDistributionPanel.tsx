@@ -3,7 +3,7 @@
  */
 
 import RightArrowIcon from '@/assets/annotation/right-arrow.svg';
-import { Button, Table, Link, Modal } from '@arco-design/web-react';
+import { Button, Table, Link, Modal, Tag } from '@arco-design/web-react';
 import React, { useCallback, useState } from 'react';
 import BatchAssignModal from './BatchAssignModal';
 import RoleAssignmentCard from './RoleAssignmentCard';
@@ -141,7 +141,22 @@ const TaskDistributionPanel: React.FC<TaskDistributionPanelProps> = ({
     {
       title: '任务包ID',
       dataIndex: 'taskBId',
-      width: 120
+      width: 160,
+      render: (taskBId: string, record: TaskPackage) => (
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <span>{taskBId}</span>
+          {isEditMode && record.isFromDetail && (
+            <Tag size="small" color="arcoblue">
+              历史
+            </Tag>
+          )}
+          {isEditMode && !record.isFromDetail && (
+            <Tag size="small" color="green">
+              新增
+            </Tag>
+          )}
+        </div>
+      )
     },
     {
       title: '数据量',

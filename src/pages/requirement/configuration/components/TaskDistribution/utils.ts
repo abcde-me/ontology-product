@@ -191,7 +191,7 @@ export const formatSubmitData = (taskPackages: TaskPackage[]) => {
         return aRound - bRound;
       });
 
-    return {
+    const pkgInfo: any = {
       front_pkg_id: parseInt(task.taskId),
       pkg_task_cnt: task.dataAmount,
       label_operate: labelerRole
@@ -199,6 +199,13 @@ export const formatSubmitData = (taskPackages: TaskPackage[]) => {
         : { user_id: [], org_id: [], own_type: 2 },
       qc_operate: inspectorRoles.map((role) => formatOperateData(role))
     };
+
+    // 如果是历史数据（有 detailId），需要带上 id 字段
+    if (task.detailId) {
+      pkgInfo.id = task.detailId;
+    }
+
+    return pkgInfo;
   });
 
   return {
@@ -207,9 +214,105 @@ export const formatSubmitData = (taskPackages: TaskPackage[]) => {
 };
 
 /**
+ * 判断是否为个人类型
+ * own_type: 1-个人，2-部门
+ */
+const isPersonOwnType = (ownType: number | string | undefined): boolean => {
+  return ownType === 1 || ownType === '1';
+};
+
+/**
+ * 解析操作数据（label_operate 或 qc_operate 中的每一项）
+ * @param operateData 操作数据
+ * @param roleType 角色类型
+ * @param roleName 角色名称
+ * @returns RoleAssignment
+ */
+const parseOperateData = (
+  operateData: any,
+  roleType: string,
+  roleName: string
+): RoleAssignment => {
+  const isPersonType = isPersonOwnType(operateData?.own_type);
+  // 处理 user_id 和 org_id 可能为 null 的情况
+  const userIds = Array.isArray(operateData?.user_id)
+    ? operateData.user_id
+    : [];
+  const orgIds = Array.isArray(operateData?.org_id) ? operateData.org_id : [];
+
+  return {
+    roleType: roleType as any,
+    roleName,
+    assignType: isPersonType ? 'person' : 'department',
+    selectedDepartments: orgIds,
+    selectedPersons: userIds,
+    selectedCount: isPersonType ? userIds.length : orgIds.length
+  };
+};
+
+/**
+ * 解析详情数据中的 pkg_infos（用于编辑模式回显历史数据）
+ * 数据示例：
+ * {
+ *   "id": 112,
+ *   "front_pkg_id": 1,
+ *   "pkg_task_cnt": 1,
+ *   "label_operate": {
+ *     "user_id": null,
+ *     "org_id": ["org-dwns4mwb"],
+ *     "own_type": 2
+ *   },
+ *   "qc_operate": [
+ *     { "user_id": [], "org_id": ["org-dwns4mwb"], "own_type": 2 },
+ *     { "user_id": [], "org_id": ["org-dwns4mwb"], "own_type": 2 }
+ *   ]
+ * }
+ * @param detailData 详情数据（包含 pkg_infos 字段）
+ * @returns 任务包列表
+ */
+export const parseDetailPkgInfos = (detailData: any): TaskPackage[] => {
+  if (!detailData?.pkg_infos || !Array.isArray(detailData.pkg_infos)) {
+    return [];
+  }
+
+  return detailData.pkg_infos.map((pkg: any, index: number) => {
+    const roles: RoleAssignment[] = [];
+
+    // 标注人员
+    if (pkg.label_operate) {
+      roles.push(
+        parseOperateData(pkg.label_operate, 'labeler', ROLE_NAME_MAP.labeler)
+      );
+    }
+
+    // 质检人员
+    if (pkg.qc_operate && Array.isArray(pkg.qc_operate)) {
+      pkg.qc_operate.forEach((qcOperate: any, qcIndex: number) => {
+        const roleType = `inspector_${qcIndex + 1}`;
+        const roleName =
+          ROLE_NAME_MAP[roleType as keyof typeof ROLE_NAME_MAP] ||
+          `${qcIndex + 1}轮质检人员`;
+        roles.push(parseOperateData(qcOperate, roleType, roleName));
+      });
+    }
+
+    return {
+      taskId: String(pkg.front_pkg_id || index + 1),
+      taskBId: String(pkg.front_pkg_id || index + 1),
+      dataAmount: pkg.pkg_task_cnt || 0,
+      roles,
+      // 如果有 id 字段，说明是历史数据
+      detailId: pkg.id,
+      isFromDetail: !!pkg.id
+    };
+  });
+};
+
+/**
  * 解析详情数据（用于编辑模式回显）
  * @param detailData 详情数据
  * @returns 任务包列表
+ * @deprecated 请使用 parseDetailPkgInfos
  */
 export const parseDetailData = (detailData: any): TaskPackage[] => {
   if (!detailData?.task_packages) {
