@@ -4,6 +4,7 @@ import {
   Form,
   Input,
   Menu,
+  Message,
   Modal,
   Pagination,
   PaginationProps,
@@ -144,6 +145,8 @@ export default function MetadataManagement() {
       setActiveMetadataType(
         res.data.data[0]?.datasourceType || MetadataType.Iceberg
       );
+    } else {
+      Message.error(res.message || '获取元数据菜单数据失败');
     }
   };
 
@@ -168,6 +171,8 @@ export default function MetadataManagement() {
         setCurrent(res.data.data?.pageNum);
         setPageSize(res.data.data?.pageSize);
         setTotal(res.data.data?.total || 10);
+      } else {
+        Message.error(res.message || '获取元数据列表数据失败');
       }
     } finally {
       setLoading(false);
