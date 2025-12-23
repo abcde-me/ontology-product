@@ -135,7 +135,7 @@ const ScriptTable: React.FC<ScriptTableProps> = ({
       const res = await listDevelopScript(params);
       if (res.status === 200 && res.data) {
         setDevelopScriptData(res?.data?.items);
-        const newTotal = res.data?.total || 10;
+        const newTotal = res.data?.total || 0;
         setTotal(newTotal);
         onTotalChange?.(newTotal);
       }
