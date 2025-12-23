@@ -435,7 +435,12 @@ const ScriptTable: React.FC<ScriptTableProps> = ({
           className="flex items-center whitespace-nowrap"
         >
           <FormItem label="脚本名称:" field="script_name">
-            <Input className="min-w-[260px]" placeholder="输入脚本名称搜索" />
+            <Input
+              className="min-w-[260px]"
+              placeholder="输入脚本名称搜索"
+              normalizeTrigger={['onBlur']}
+              normalize={(v) => (v ? v.trim() : v)}
+            />
           </FormItem>
           <FormItem label="版本状态:" field="status">
             <Select className="min-w-[232px]" placeholder="请选择最新版本状态">
