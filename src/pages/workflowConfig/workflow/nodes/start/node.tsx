@@ -46,7 +46,7 @@ const Node: FC<NodeProps<StartNodeType>> = ({ id, data }) => {
         const { getNodes } = store.getState();
         const targetNodes = getNodes().filter((node: any) =>
           [
-            BlockEnum.Pic,
+            BlockEnum.Image,
             BlockEnum.Text,
             BlockEnum.Video,
             BlockEnum.Audio
@@ -68,7 +68,7 @@ const Node: FC<NodeProps<StartNodeType>> = ({ id, data }) => {
     // 如果非上线模式，已经选择了数据源，第一次加载设置文件数量为全选
     if (data_path_id && appDetail?.is_online !== IsOnline.online) {
       doFileConfigChange(BlockEnum.Text, data_path_id, data_category?.[0]);
-      doFileConfigChange(BlockEnum.Pic, data_path_id, data_category?.[1]);
+      doFileConfigChange(BlockEnum.Image, data_path_id, data_category?.[1]);
       doFileConfigChange(BlockEnum.Audio, data_path_id, data_category?.[2]);
       doFileConfigChange(BlockEnum.Video, data_path_id, data_category?.[3]);
       doFileConfigChange(BlockEnum.Customize, data_path_id, data_category?.[4]);

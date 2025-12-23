@@ -23,7 +23,7 @@ export const useWorkflowTemplate = () => {
   });
   const { newNode: picNode } = generateNewNode({
     id: `${Number(startNode.id) + 2}`,
-    data: nodesInitialData.pic,
+    data: nodesInitialData.image,
     position: {
       x: START_INITIAL_POSITION.x + 32 + 270,
       y: START_INITIAL_POSITION.y + 125

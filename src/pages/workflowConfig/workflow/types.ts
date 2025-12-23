@@ -24,6 +24,7 @@ export enum BlockEnum {
   End = 'end',
   Text = 'text',
   Pic = 'pic',
+  Image = 'image',
   Audio = 'audio',
   Video = 'video',
   Cleaning = 'cleaning',

@@ -248,7 +248,7 @@ export const NODES_EXTRA_DATA: Record<any, NodesExtraData> = {
     getAvailableNextNodes: TextParserDefault.getAvailableNextNodes,
     checkValid: TextParserDefault.checkValid
   },
-  [BlockEnum.Pic]: {
+  [BlockEnum.Image]: {
     author: 'ModaForge',
     about: '',
     availablePrevNodes: [],
@@ -490,8 +490,8 @@ export const NODES_INITIAL_DATA = {
     desc: '',
     ...TextParserDefault.defaultValue
   },
-  [BlockEnum.Pic]: {
-    type: BlockEnum.Pic,
+  [BlockEnum.Image]: {
+    type: BlockEnum.Image,
     title: '',
     desc: '',
     ...ImageParserDefault.defaultValue

@@ -1,5 +1,5 @@
 import type { ComponentType } from 'react';
-import { BlockEnum } from '../types';
+import { BlockEnum, CommonStructNodeType } from '../types';
 import StartNode from './start/node';
 import StartPanel from './start/panel';
 import EndNode from './end/node';
@@ -30,7 +30,7 @@ export const NodeComponentMap: Record<string, ComponentType<any>> = {
   [BlockEnum.Start]: StartNode,
   [BlockEnum.End]: EndNode,
   [BlockEnum.Text]: TextNode,
-  [BlockEnum.Pic]: ImageNode,
+  [BlockEnum.Image]: ImageNode,
   [BlockEnum.Video]: VideoNode,
   [BlockEnum.Audio]: AudioNode,
   [BlockEnum.Enhancement]: EnhancementNode,
@@ -45,7 +45,7 @@ export const PanelComponentMap: Record<string, ComponentType<any>> = {
   [BlockEnum.Start]: StartPanel,
   [BlockEnum.End]: EndPanel,
   [BlockEnum.Text]: TextPanel,
-  [BlockEnum.Pic]: ImagePanel,
+  [BlockEnum.Image]: ImagePanel,
   [BlockEnum.Video]: VideoPanel,
   [BlockEnum.Audio]: AudioPanel,
   [BlockEnum.Cleaning]: CleaningPanel,
@@ -89,4 +89,11 @@ export const CATEGORY_MAP: Record<string, string> = {
   音频: 'audio',
   视频: 'video',
   自定义: 'scripting'
+};
+
+export const STRUCT_NODE_EXEC_DEFAULT_PARAMS: Partial<CommonStructNodeType> = {
+  fail_retry_interval: '1',
+  fail_retry_times: '0',
+  task_priority: 'MEDIUM',
+  flow_type: 'struct'
 };

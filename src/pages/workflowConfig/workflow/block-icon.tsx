@@ -41,7 +41,7 @@ const getIcon = (type: BlockEnum | 'workflow', className: string) => {
 const ICON_CONTAINER_BG_COLOR_MAP: Record<string, string> = {
   [BlockEnum.Start]: 'bg-util-colors-blue-brand-blue-brand-500',
   [BlockEnum.Text]: 'bg-util-colors-indigo-indigo-500',
-  [BlockEnum.Pic]: 'bg-util-colors-blue-blue-500',
+  [BlockEnum.Image]: 'bg-util-colors-blue-blue-500',
   [BlockEnum.Audio]: 'bg-util-colors-warning-warning-500',
   [BlockEnum.Video]: 'bg-util-colors-cyan-cyan-500',
   [BlockEnum.Cleaning]: 'bg-util-colors-cyan-cyan-500',

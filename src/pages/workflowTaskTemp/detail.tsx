@@ -59,6 +59,7 @@ enum NodeRunStatus {
 enum NodeType {
   text = 'text',
   pic = 'pic',
+  image = 'image',
   audio = 'audio',
   video = 'video',
   cleaning = 'cleaning',

@@ -1,15 +1,10 @@
 import type { FC } from 'react';
 import React, { useEffect, useState } from 'react';
 import useConfig from './use-config';
-import type { AudioParserNodeType } from './types';
+import { AUDIO_PRET_OLD2NEW, AudioParserNodeType } from './types';
 import Split from '@/pages/workflowConfig/workflow/nodes/_base/components/split';
 import type { NodePanelProps } from '@/pages/workflowConfig/workflow/types';
-import {
-  Form,
-  Select,
-  InputNumber,
-  Checkbox
-} from '@arco-design/web-react';
+import { Form, Select, InputNumber, Checkbox } from '@arco-design/web-react';
 import FileList from '../data-text-parser/file-list';
 import { getModelList } from '@/api/modelV2';
 import { FileOptions } from '../start/default';
@@ -55,7 +50,13 @@ const Panel: FC<NodePanelProps<AudioParserNodeType>> = ({ id, data }) => {
         labelCol={{ span: 0 }}
         wrapperCol={{ span: 24 }}
         initialValues={{
-          ...data
+          ...data,
+          audio_pret: data.audio_pret.flatMap((type) => {
+            if (['1', '2'].includes(type.toString())) {
+              return AUDIO_PRET_OLD2NEW[type.toString()];
+            }
+            return [];
+          })
         }}
         layout="vertical"
         onValuesChange={(_, v: any) => {
@@ -88,8 +89,8 @@ const Panel: FC<NodePanelProps<AudioParserNodeType>> = ({ id, data }) => {
         >
           <Checkbox.Group
             options={[
-              { label: '降噪', value: 1 },
-              { label: '语音增强', value: 2 }
+              { label: '降噪', value: 'enhance' },
+              { label: '语音增强', value: 'denoist' }
             ]}
           />
         </FormItem>

@@ -16,7 +16,7 @@ export const BLOCKS: Block[] = [
   },
   {
     classification: BlockClassificationEnum.Default,
-    type: BlockEnum.Pic,
+    type: BlockEnum.Image,
     title: '图片解析'
   },
   {

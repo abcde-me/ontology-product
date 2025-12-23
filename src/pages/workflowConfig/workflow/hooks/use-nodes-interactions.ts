@@ -60,12 +60,14 @@ import { useStore as useTaskStore } from '@/pages/workflowConfig/task/store';
 import { useShallow } from 'zustand/react/shallow';
 import useInitFlowTestTask from '@/pages/workflowConfig/workflow/hooks/use-init-flow-test-task';
 import { useParams } from 'react-router-dom';
+import { workflowOperation } from '@/api/workflowTask';
+import { WorkflowOperationType } from '@/types/workflowTaskApi';
 
 export const useNodesInteractions = () => {
   const { t } = useTranslation('plugin__console-plugin-appforge');
   const store = useStoreApi();
   const workflowStore = useWorkflowStore();
-  const [initTestTask] = useInitFlowTestTask(true);
+  const [initTestTask, stopTest] = useInitFlowTestTask(true);
   const reactflow = useReactFlow();
   const { store: workflowHistoryStore } = useWorkflowHistoryStore();
   const { handleSyncWorkflowDraft } = useNodesSyncDraft();
@@ -137,6 +139,17 @@ export const useNodesInteractions = () => {
     },
     [nodesProcessDetail, setNodesProcessDetail, workflow_uuid]
   );
+
+  const handleStopTestNode = (process_instance_id: string) => {
+    return workflowOperation({
+      executeType: WorkflowOperationType.EXEC_STOP,
+      process_instance_id
+    })
+      .then((res) => {
+        // debugger;
+      })
+      .catch(console.error);
+  };
 
   const handleNodeDrag = useCallback<NodeDragHandler>(
     (e, node: Node) => {
@@ -1160,7 +1173,7 @@ export const useNodesInteractions = () => {
         count + 1 > MAX_NODES_NUM &&
         [
           BlockEnum.Text,
-          BlockEnum.Pic,
+          BlockEnum.Image,
           BlockEnum.Video,
           BlockEnum.Audio
         ].includes(targetNode.data.type)
@@ -1366,6 +1379,7 @@ export const useNodesInteractions = () => {
     handleNodeDisconnect,
     handleHistoryBack,
     handleHistoryForward,
-    handleTestNode
+    handleTestNode,
+    handleStopTestNode
   };
 };

@@ -26,6 +26,7 @@ import {
 import { useDebounceFn } from 'ahooks';
 import { editWorkflow } from '@/api/workflow';
 import { isEmpty } from 'lodash-es';
+import { useNodesReadOnly } from '@/pages/workflowConfig/workflow/hooks';
 
 export default memo(function FlowSetting() {
   const [show, setShow] = useState(true);
@@ -36,6 +37,7 @@ export default memo(function FlowSetting() {
       setWorkflowDetail: state.setWorkflowDetail
     }))
   );
+  const { nodesReadOnly } = useNodesReadOnly();
 
   useEffect(() => {
     if (!workflowDetail) return;
@@ -44,13 +46,15 @@ export default memo(function FlowSetting() {
       params,
       execution_type = DEFAULT_FLOW_INFO.execution_type,
       failure_strategy = DEFAULT_FLOW_INFO.failure_strategy,
-      process_instance_priority = DEFAULT_FLOW_INFO.process_instance_priority
+      process_instance_priority = DEFAULT_FLOW_INFO.process_instance_priority,
+      description
     } = workflowDetail;
     const formData: Record<string, any> = {
       workflow_name,
       execution_type,
       failure_strategy,
-      process_instance_priority
+      process_instance_priority,
+      description
     };
     if (!!params) {
       formData.params = Object.entries(params).map(([key, value]) => ({
@@ -108,7 +112,7 @@ export default memo(function FlowSetting() {
         .then(saveFlow)
         .catch(console.error);
     },
-    { wait: 200 }
+    { wait: 2000 }
   );
   return (
     <SettingContainer
@@ -141,6 +145,7 @@ export default memo(function FlowSetting() {
             layout={'vertical'}
             initialValues={DEFAULT_FLOW_INFO}
             onChange={onFlowChange}
+            disabled={nodesReadOnly}
           >
             <Typography.Text bold className={'mb-2'}>
               基本信息
@@ -199,6 +204,7 @@ export default memo(function FlowSetting() {
                         size={'mini'}
                         icon={<IconPlus />}
                         onClick={() => add()}
+                        disabled={nodesReadOnly}
                       />
                     </div>
                     <Form.Item className={'add-field-action'}>

@@ -1,6 +1,6 @@
 import type {
   CommonNodeType,
-  VarType,
+  VarType
 } from '@/pages/workflowConfig/workflow/types';
 
 export type OutputVar = Record<
@@ -16,7 +16,8 @@ export type VideoParserNodeType = CommonNodeType & {
   selected_files_num: number;
   is_poly_orbit: number;
   is_denoise: number;
-  audio_options: string[];
+  audio_options?: string[];
+  audio_pret: string[];
   vad_enabled: number;
   activity_mode: number;
   activity_mode_num: string | undefined | null;
