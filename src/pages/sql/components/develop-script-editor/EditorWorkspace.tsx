@@ -28,6 +28,7 @@ import { tags as t } from '@lezer/highlight';
 import createTheme from '@uiw/codemirror-themes';
 import IconStop from '@/assets/sql/sql-stop-icon.svg';
 import CodeMirror, { ReactCodeMirrorRef } from '@uiw/react-codemirror';
+import CopyIcon from '../../assets/copy-icon.svg';
 import React, {
   memo,
   useCallback,
@@ -477,54 +478,6 @@ const EditorWorkspaceContent: React.FC<{
         scriptInfo?.status === ScriptStatus.EditCompleted;
       const isEditing = status === ScriptStatus.Editing;
       const isEditCompleted = status === ScriptStatus.EditCompleted;
-      const copyMenu = (
-        <Menu
-          onClickMenuItem={(key) =>
-            handleCopyScript(key as 'newVersion' | 'newScript')
-          }
-          className={styles['copy-dropdown']}
-          selectable={false}
-        >
-          {/* <Menu.Item key="newVersion">
-            <div className="flex h-[22px] items-center text-[14px] text-[var(--color-text-1)]">
-              <IconCopy className="mr-[4px]" />
-              <span className="font-bold">复制为新版本</span>
-            </div>
-            <div className="mt-[4px] h-[18px] text-[12px] text-[var(--color-text-3)]">
-              以此脚本为基础迭代新版本
-            </div>
-          </Menu.Item> */}
-          <Menu.Item key="newScript">
-            <div className="flex h-[22px] items-center text-[14px] text-[var(--color-text-1)]">
-              <IconCopy className="mr-[4px]" />
-              <span className="font-bold">复制为新脚本</span>
-            </div>
-            <div className="mt-[4px] h-[18px] text-[12px] text-[var(--color-text-3)]">
-              以此脚本为基础新建脚本
-            </div>
-          </Menu.Item>
-        </Menu>
-      );
-
-      const renderCopyDropdown = () => (
-        <Dropdown
-          trigger={['hover', 'click']}
-          droplist={copyMenu}
-          position="br"
-          onVisibleChange={setCopyDropdownVisible}
-        >
-          <Button
-            loading={copyLoading}
-            disabled={!scriptInfo?.script_id}
-            className="h-[24px]"
-          >
-            <span>复制</span>
-            <IconDown className="text-[14px]" />
-          </Button>
-        </Dropdown>
-      );
-
-      // status = 0 (编辑中) 或 status = 1 (编辑完成)
       if (
         status === ScriptStatus.Editing ||
         status === ScriptStatus.EditCompleted
@@ -679,7 +632,14 @@ const EditorWorkspaceContent: React.FC<{
             </div>
             <div className={styles['toolbar-right']}>
               <div className={classNames(styles['copy-dropdown-container'])}>
-                {renderCopyDropdown()}
+                <Button
+                  loading={copyLoading}
+                  className={classNames(styles['btn-save'], 'ml-[8px]')}
+                  icon={<CopyIcon className="h-[14px] w-[14px]" />}
+                  onClick={() => handleCopyScript('newScript')}
+                >
+                  复制为新脚本
+                </Button>
               </div>
               {/* 取消编辑按钮 - status=0且isSelfEditing=true时显示 */}
               {scriptInfo?.isSelfEditing && (
@@ -737,7 +697,36 @@ const EditorWorkspaceContent: React.FC<{
                 styles['copy-dropdown-container']
               )}
             >
-              {renderCopyDropdown()}
+              <Button
+                loading={copyLoading}
+                className={classNames(styles['btn-save'], 'ml-[8px]')}
+                icon={<CopyIcon className="h-[14px] w-[14px]" />}
+                onClick={() => handleCopyScript('newScript')}
+              >
+                复制为新脚本
+              </Button>
+              {/* 取消编辑按钮 - status=0且isSelfEditing=true时显示 */}
+              {scriptInfo?.isSelfEditing && (
+                <Button
+                  className={classNames(styles['btn-save'], 'ml-[8px]')}
+                  loading={editLoading}
+                  onClick={handleCancelEdit}
+                  icon={<IconClose />}
+                >
+                  取消编辑
+                </Button>
+              )}
+              {/* 编辑按钮 - status=0且isSelfEditing=false或status=1时显示 */}
+              {!scriptInfo?.isSelfEditing && (
+                <Button
+                  className={classNames(styles['btn-save'], 'ml-[8px]')}
+                  onClick={handleStartEdit}
+                  loading={editLoading}
+                  icon={<IconEdit />}
+                >
+                  编辑
+                </Button>
+              )}
             </div>
           </>
         );
@@ -815,35 +804,37 @@ const EditorWorkspaceContent: React.FC<{
             />
           )}
           {/* 保存查询列表 */}
-          <Modal
-            title="保存到查询脚本列表"
-            visible={visible}
-            onOk={() => setVisible(false)}
-            onCancel={() => setVisible(false)}
-            autoFocus={false}
-            focusLock={true}
-            footer={[
-              <>
-                <Button onClick={() => setVisible(false)}>取消</Button>
-                <Button type="primary" htmlType="submit">
-                  保存
-                </Button>
-              </>
-            ]}
-          >
-            <Form form={form}>
-              <FormItem label="SQL脚本名称:" required={true} field="fileName">
-                <Input
-                  defaultValue={fileName}
-                  style={{ width: 300 }}
-                  placeholder="请输入脚本名称"
-                />
-              </FormItem>
-              <FormItem label="脚本说明:" field="fileDesc">
-                <Input style={{ width: 300 }} placeholder="请输入脚本说明" />
-              </FormItem>
-            </Form>
-          </Modal>
+          {visible && (
+            <Modal
+              title="保存到查询脚本列表"
+              visible={visible}
+              onOk={() => setVisible(false)}
+              onCancel={() => setVisible(false)}
+              autoFocus={false}
+              focusLock={true}
+              footer={[
+                <>
+                  <Button onClick={() => setVisible(false)}>取消</Button>
+                  <Button type="primary" htmlType="submit">
+                    保存
+                  </Button>
+                </>
+              ]}
+            >
+              <Form form={form}>
+                <FormItem label="SQL脚本名称:" required={true} field="fileName">
+                  <Input
+                    defaultValue={fileName}
+                    style={{ width: 300 }}
+                    placeholder="请输入脚本名称"
+                  />
+                </FormItem>
+                <FormItem label="脚本说明:" field="fileDesc">
+                  <Input style={{ width: 300 }} placeholder="请输入脚本说明" />
+                </FormItem>
+              </Form>
+            </Modal>
+          )}
           {/* 开发规范 */}
           {specificationsVisible && (
             <SpecificationsModal

@@ -23,7 +23,7 @@ import noDataElement from '@/components/no-data';
 import DataAssetTableList from '../../components/DataAssetTableList';
 import DataAssetTableCard from '../../components/DataAssetTableCard';
 import SearchArea from '../../components/SearchArea';
-import ViewToggle, { ViewType } from '../../components/ViewToggle';
+import ViewToggleBase, { ViewType } from '@/components/ViewToggle';
 import ModifyAssetModal from '../../components/ModifyAssetModal';
 import ModifyTagsModal from '../../components/ModifyTagsModal';
 import EditSingleAssetModal from '../../components/EditSingleAssetModal';
@@ -994,7 +994,7 @@ export default function DataAssetList() {
                 </Button>
               </>
             )}
-            <ViewToggle value={viewType} onChange={handleViewTypeChange} />
+            <ViewToggleBase value={viewType} onChange={handleViewTypeChange} />
           </div>
         </div>
 
