@@ -217,7 +217,10 @@ const IndividualModal: React.FC<DataSourceModalProps> = ({
       setTotal(0);
       const res = await getIndividualList({ ...sourceParams });
       if (res.code === 'Success') {
-        setTableData(res?.data?.result || []);
+        const tableData = (res?.data?.result || []).filter(
+          (item: any) => item?.status === 'active'
+        );
+        setTableData(tableData);
         setTotal(res?.data?.totalCount || 0);
       } else {
         setTableData([]);

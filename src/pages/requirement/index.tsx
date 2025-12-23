@@ -330,8 +330,27 @@ export default function Requirement() {
           ...([2, 4].includes(record.status)
             ? [
                 {
-                  name: '编辑',
+                  name: '进度',
                   priority: 2,
+                  onClick: () => {
+                    viewDetailRequirement(record.id, 'progress');
+                  }
+                },
+                {
+                  name: '明细',
+                  priority: 3,
+                  onClick: () => {
+                    viewDetailRequirement(record.id, 'particular');
+                  }
+                }
+              ]
+            : []),
+          // 发布成功、标注完成
+          ...([2, 4].includes(record.status)
+            ? [
+                {
+                  name: '编辑',
+                  priority: 4,
                   tips:
                     userInfo?.id !== record.creator_id
                       ? '仅需求创建人可操作'
@@ -345,30 +364,11 @@ export default function Requirement() {
             : []),
           {
             name: '复制',
-            priority: 3,
+            priority: 5,
             onClick: () => {
               handleCreateRequirement('copy', record.id);
             }
           },
-          // 发布成功、标注完成
-          ...([2, 4].includes(record.status)
-            ? [
-                {
-                  name: '进度',
-                  priority: 4,
-                  onClick: () => {
-                    viewDetailRequirement(record.id, 'progress');
-                  }
-                },
-                {
-                  name: '明细',
-                  priority: 5,
-                  onClick: () => {
-                    viewDetailRequirement(record.id, 'particular');
-                  }
-                }
-              ]
-            : []),
           // 标注完成
           ...(record.status !== 4
             ? [

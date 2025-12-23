@@ -42,33 +42,63 @@ const BatchAssignModal: React.FC<BatchAssignModalProps> = ({
   const [selectedPersons, setSelectedPersons] = useState<string[]>([]);
   const [departmentModalVisible, setDepartmentModalVisible] = useState(false);
   const [individualModalVisible, setIndividualModalVisible] = useState(false);
+  const [searchValue, setSearchValue] = useState<string>('');
 
   // 生成工序选项
   const processOptions = useMemo(() => {
     return generateProcessOptions(taskPackages);
   }, [taskPackages]);
 
-  // 是否全选
+  // 根据搜索值过滤选项
+  const filteredProcessOptions = useMemo(() => {
+    if (!searchValue) {
+      return processOptions;
+    }
+    const searchLower = searchValue.toLowerCase();
+    return processOptions.filter((opt) => {
+      // 内联标签生成逻辑（与 getOptionLabel 保持一致）
+      const label = `任务包${opt.taskId}-${
+        opt.roleType === 'labeler'
+          ? '标注'
+          : `${opt.roleType.split('_')[1]}轮质检`
+      }`;
+      return label.toLowerCase().includes(searchLower);
+    });
+  }, [processOptions, searchValue]);
+
+  // 是否全选（基于过滤后的选项）
   const isAllSelected = useMemo(() => {
-    return (
-      processOptions.length > 0 &&
-      selectedProcesses.length === processOptions.length
+    if (filteredProcessOptions.length === 0) return false;
+    return filteredProcessOptions.every((opt) =>
+      selectedProcesses.includes(opt.value)
     );
-  }, [processOptions, selectedProcesses]);
+  }, [filteredProcessOptions, selectedProcesses]);
 
-  // 是否部分选中
+  // 是否部分选中（基于过滤后的选项）
   const isIndeterminate = useMemo(() => {
-    return (
-      selectedProcesses.length > 0 &&
-      selectedProcesses.length < processOptions.length
-    );
-  }, [processOptions, selectedProcesses]);
+    const selectedCount = filteredProcessOptions.filter((opt) =>
+      selectedProcesses.includes(opt.value)
+    ).length;
+    return selectedCount > 0 && selectedCount < filteredProcessOptions.length;
+  }, [filteredProcessOptions, selectedProcesses]);
 
-  // 处理全选
+  // 处理全选（只选择过滤后的选项）
   const handleSelectAll = (checked: boolean) => {
-    const newValue = checked ? processOptions.map((opt) => opt.value) : [];
-    setSelectedProcesses(newValue);
-    form.setFieldValue('processes', newValue);
+    if (checked) {
+      // 全选：添加所有过滤后的选项（保留已选中的其他选项）
+      const filteredValues = filteredProcessOptions.map((opt) => opt.value);
+      const newValue = [...new Set([...selectedProcesses, ...filteredValues])];
+      setSelectedProcesses(newValue);
+      form.setFieldValue('processes', newValue);
+    } else {
+      // 取消全选：移除所有过滤后的选项（保留未过滤的选项）
+      const filteredValues = filteredProcessOptions.map((opt) => opt.value);
+      const newValue = selectedProcesses.filter(
+        (val) => !filteredValues.includes(val)
+      );
+      setSelectedProcesses(newValue);
+      form.setFieldValue('processes', newValue);
+    }
   };
 
   // 渲染选项图标
@@ -154,6 +184,7 @@ const BatchAssignModal: React.FC<BatchAssignModalProps> = ({
     setSelectedProcesses([]);
     setSelectedDepartments([]);
     setSelectedPersons([]);
+    setSearchValue('');
   };
 
   // 处理关闭
@@ -243,6 +274,19 @@ const BatchAssignModal: React.FC<BatchAssignModalProps> = ({
             maxTagCount={2}
             dropdownRender={renderDropdown}
             renderTag={renderTag}
+            showSearch
+            onSearch={(value) => {
+              setSearchValue(value);
+            }}
+            filterOption={(inputValue, option: any) => {
+              const optionValue = option?.value || option?.props?.value;
+              const optionData = processOptions.find(
+                (opt) => opt.value === optionValue
+              );
+              if (!optionData) return false;
+              const label = getOptionLabel(optionData);
+              return label.toLowerCase().includes(inputValue.toLowerCase());
+            }}
             style={{ width: '100%' }}
           >
             {processOptions.map((option) => (
