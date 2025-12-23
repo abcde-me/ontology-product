@@ -515,7 +515,6 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
 
   // 监听 activeTab 变化，重新更新编辑器状态
   useEffect(() => {
-    console.log('activeTab', activeTab);
     if (!activeTab || !fileTabs.length) {
       return;
     }
@@ -524,8 +523,6 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
     if (!currentTab) {
       return;
     }
-
-    console.log('currentTab', currentTab);
 
     // 只有当 activeTab 或 scriptId 实际发生变化时才加载文件，避免重复加载
     const shouldLoad =
@@ -548,7 +545,7 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
             const fileData = response.data;
             setLastScriptRunStatus(fileData?.run_status);
             // 更新编辑器内容
-            setEditorContent(fileData.script_content);
+            setEditorContent(fileData.script_content || '');
             // 保存原始内容
             setOriginalContent(fileData.script_content || '');
 
@@ -598,7 +595,7 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
     // return () => {
     //   handleSaveThrottled.cancel();
     // };
-  }, [activeTab, fileTabs, onTabUpdate]); // 添加必要的依赖项
+  }, [activeTab]); // 添加必要的依赖项
 
   // 当 currentFileId 变化时，重置运行相关状态
   useEffect(() => {
@@ -635,6 +632,9 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
     if (!currentFile?.scriptId) {
       return editorContent !== '' && editorContent !== originalContent;
     }
+
+    console.log('query------currentContent', editorContent);
+    console.log('query------originalContent', originalContent);
     // 如果有 scriptId，比较当前内容和原始内容
     return editorContent !== originalContent;
   }, [editorContent, originalContent, currentFile?.scriptId]);

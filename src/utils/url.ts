@@ -37,3 +37,12 @@ export const updateQueryParams = (history, newParams) => {
     search: currentSearch.toString()
   });
 };
+
+export const removeQueryParams = (history, paramName) => {
+  const currentSearch = new URLSearchParams(history.location.search);
+  currentSearch.delete(paramName);
+  history.push({
+    pathname: history.location.pathname,
+    search: currentSearch.toString()
+  });
+};
