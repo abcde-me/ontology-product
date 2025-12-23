@@ -478,33 +478,6 @@ const EditorWorkspaceContent: React.FC<{
         scriptInfo?.status === ScriptStatus.EditCompleted;
       const isEditing = status === ScriptStatus.Editing;
       const isEditCompleted = status === ScriptStatus.EditCompleted;
-      // <Menu
-      //   onClickMenuItem={(key) =>
-      //     handleCopyScript(key as 'newVersion' | 'newScript')
-      //   }
-      //   className={styles['copy-dropdown']}
-      //   selectable={false}
-      // >
-      //   {/* <Menu.Item key="newVersion">
-      //     <div className="flex h-[22px] items-center text-[14px] text-[var(--color-text-1)]">
-      //       <IconCopy className="mr-[4px]" />
-      //       <span className="font-bold">复制为新版本</span>
-      //     </div>
-      //     <div className="mt-[4px] h-[18px] text-[12px] text-[var(--color-text-3)]">
-      //       以此脚本为基础迭代新版本
-      //     </div>
-      //   </Menu.Item> */}
-      //   <Menu.Item key="newScript">
-      //     <div className="flex h-[22px] items-center text-[14px] text-[var(--color-text-1)]">
-      //       <IconCopy className="mr-[4px]" />
-      //       <span className="font-bold">复制为新脚本</span>
-      //     </div>
-      //     <div className="mt-[4px] h-[18px] text-[12px] text-[var(--color-text-3)]">
-      //       以此脚本为基础新建脚本
-      //     </div>
-      //   </Menu.Item>
-      // </Menu>
-      // status = 0 (编辑中) 或 status = 1 (编辑完成)
       if (
         status === ScriptStatus.Editing ||
         status === ScriptStatus.EditCompleted
@@ -726,6 +699,7 @@ const EditorWorkspaceContent: React.FC<{
             >
               <Button
                 loading={copyLoading}
+                className={classNames(styles['btn-save'], 'ml-[8px]')}
                 icon={<CopyIcon className="h-[14px] w-[14px]" />}
                 onClick={() => handleCopyScript('newScript')}
               >
