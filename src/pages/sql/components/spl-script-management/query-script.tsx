@@ -104,7 +104,7 @@ const QueryScript: React.FC<QueryScriptProps> = ({ curActiveTab }) => {
         setQueryScriptData(res?.data?.items);
         // setCurrent(res.data.page_info?.page);
         // setPageSize(res.data.page_info?.page_size);
-        setTotal(res.data?.total || 10);
+        setTotal(res.data?.total || 0);
         setQueryNum(res.data?.total || 0);
       }
     } finally {
