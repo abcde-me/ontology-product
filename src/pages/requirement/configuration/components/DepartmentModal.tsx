@@ -207,7 +207,9 @@ const DepartmentModal: React.FC<DataSourceModalProps> = ({
                 checkedKeys={checkedKeys}
                 renderTitle={({ title }: any) => {
                   return (
-                    <EllipsisPopover value={title} style={{ width: '700px' }} />
+                    <div style={{ width: '600px', marginTop: '-2px' }}>
+                      <EllipsisPopover value={title} />
+                    </div>
                   );
                 }}
                 treeData={treeData}

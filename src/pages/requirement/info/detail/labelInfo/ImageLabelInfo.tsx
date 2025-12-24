@@ -307,6 +307,8 @@ function ImageLabelInfo({
         标签和属性:
       </div>
       <Table
+        style={{ maxWidth: '60%' }}
+        scroll={{ x: 'max-content' }}
         columns={columns}
         data={labelInfo}
         pagination={false}

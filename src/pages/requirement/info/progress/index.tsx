@@ -167,7 +167,7 @@ function RequirementProgress({ isActive }: RequirementProgressProps) {
     {
       title: '创建时间',
       dataIndex: 'create_time',
-      width: 170,
+      width: 180,
       render: (text: string) => dayjs(text).format('YYYY-MM-DD HH:mm:ss')
       // sorter: true
     },
