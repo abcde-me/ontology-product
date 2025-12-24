@@ -443,6 +443,45 @@ export interface ListTaskInstanceParams {
   state_list?: WorkflowTaskStatus[];
 }
 
+export enum TaskNodeStatus {
+  /** 提交成功 */
+  SUBMITTED_SUCCESS = 'SUBMITTED_SUCCESS',
+  /** 正在运行 */
+  RUNNING_EXECUTION = 'RUNNING_EXECUTION',
+  /** 运行暂停 */
+  PAUSE = 'PAUSE',
+  /** 运行停止 */
+  STOP = 'STOP',
+  /** 运行失败 */
+  FAILURE = 'FAILURE',
+  /** 运行成功 */
+  SUCCESS = 'SUCCESS',
+  /** KILL */
+  KILL = 'KILL',
+  /** 需要容错 */
+  NEED_FAULT_TOLERANCE = 'NEED_FAULT_TOLERANCE',
+  /** 延迟执行 */
+  DELAY_EXECUTION = 'DELAY_EXECUTION',
+  /** 强制成功 */
+  FORCED_SUCCESS = 'FORCED_SUCCESS',
+  /** 分配中 */
+  DISPATCH = 'DISPATCH'
+}
+
+export const TaskNodeStatusNameMap = {
+  [TaskNodeStatus.SUBMITTED_SUCCESS]: '提交成功',
+  [TaskNodeStatus.RUNNING_EXECUTION]: '正在运行',
+  [TaskNodeStatus.PAUSE]: '运行暂停',
+  [TaskNodeStatus.STOP]: '运行停止',
+  [TaskNodeStatus.FAILURE]: '运行失败',
+  [TaskNodeStatus.SUCCESS]: '运行成功',
+  [TaskNodeStatus.KILL]: 'KILL',
+  [TaskNodeStatus.NEED_FAULT_TOLERANCE]: '需要容错',
+  [TaskNodeStatus.DELAY_EXECUTION]: '延迟执行',
+  [TaskNodeStatus.FORCED_SUCCESS]: '强制成功',
+  [TaskNodeStatus.DISPATCH]: '分配中'
+} as const;
+
 export interface ListTaskInstanceItem {
   /**
    * 运行类型，手动运行，定时运行
@@ -491,11 +530,11 @@ export interface ListTaskInstanceItem {
   /**
    * 运行状态，状态英文名
    */
-  state: WorkflowTaskStatus;
+  state: TaskNodeStatus;
   /**
    * 运行状态名称，状态中文名
    */
-  state_name: (typeof WorkflowTaskStatusNameMap)[keyof typeof WorkflowTaskStatusNameMap];
+  state_name: (typeof TaskExecuteTypeNameMap)[keyof typeof TaskExecuteTypeNameMap];
   /**
    * 运行提交时间
    */

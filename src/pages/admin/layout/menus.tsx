@@ -20,7 +20,8 @@ import {
   TAG_PERMISSIONS,
   DATA_ASSET_PERMISSIONS,
   METADATA_MANAGEMENT_PERMISSIONS,
-  DATA_API_PERMISSIONS
+  DATA_API_PERMISSIONS,
+  QUALITY_TASK_PERMISSIONS
 } from '@/config/permissions';
 import Connection from '@/assets/sider/connection.svg';
 import DataLoad from '@/assets/sider/data-load.svg';
@@ -184,7 +185,7 @@ export const menus: MenuModel[] = [
         icon: <QualityTaskMenu className={iconClass} />,
         key: 'qualityTaskList',
         path: '/tenant/compute/modaforge/qualityTask',
-        permission: ANNOTATION_TASK_PERMISSIONS.LIST
+        permission: QUALITY_TASK_PERMISSIONS.LIST
       }
     ]
   },

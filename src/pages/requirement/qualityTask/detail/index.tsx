@@ -30,7 +30,8 @@ import getLabelByValue from '@/utils/getLabelByValue';
 import { DotStatus } from '@ceai-front/arco-material';
 import EqualIcon from '@/assets/annotation/equal-icon.svg';
 import MinusIcon from '@/assets/annotation/minus-icon.svg';
-
+import { useHasPermission } from '@/store/userInfoStore';
+import { QUALITY_TASK_PERMISSIONS } from '@/config/permissions';
 const BreadcrumbItem = Breadcrumb.Item;
 
 // 状态枚举
@@ -99,6 +100,9 @@ function QualityTaskDetail() {
   const pkgId = useParams('pkgId');
   const qcRound = useParams('qcRound');
   const reqId = useParams('reqId');
+  const hasPermissionActionTask = useHasPermission(
+    QUALITY_TASK_PERMISSIONS.ACTION_TASK
+  );
   const { data: requirementDetail = {} } = useGetRequirementDetail({
     requirement_id: Number(reqId)
   });
@@ -387,12 +391,14 @@ function QualityTaskDetail() {
         const isFinished = record.status === InspectionStatus.Finished;
         return (
           <div className="operation-cell">
-            <span
-              className={`operation-link ${isFinished ? 'disabled' : ''}`}
-              onClick={() => !isFinished && handleGoInspect(record)}
-            >
-              去质检
-            </span>
+            {hasPermissionActionTask && (
+              <span
+                className={`operation-link ${isFinished ? 'disabled' : ''}`}
+                onClick={() => !isFinished && handleGoInspect(record)}
+              >
+                去质检
+              </span>
+            )}
             <span
               className={`operation-link ${isFinished ? 'disabled' : ''}`}
               onClick={() => !isFinished && handleBatchInspect(record)}

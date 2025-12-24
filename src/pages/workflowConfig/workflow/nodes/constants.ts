@@ -85,7 +85,7 @@ export const OUTPUT_FILE_SUB_VARIABLES = SUB_VARIABLES.filter(
 
 export const CATEGORY_MAP: Record<string, string> = {
   文档: 'text',
-  图片: 'pic',
+  图片: 'image',
   音频: 'audio',
   视频: 'video',
   自定义: 'scripting'

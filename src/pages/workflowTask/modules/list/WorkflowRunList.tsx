@@ -1,4 +1,5 @@
 import React, { useCallback, useMemo } from 'react';
+import styles from './WorkflowRunList.module.scss';
 import {
   Form,
   Input,
@@ -262,61 +263,74 @@ export default function WorkflowRunList() {
         width: 200,
         fixed: 'right' as const,
         render: (_: any, record: WorkflowTaskItem) => {
-          const state = record.state?.toLowerCase();
-          const canPause = state === 'waiting' || state === 'running';
-          const canContinue = state === 'paused';
-          const canRerun =
-            state === 'success' || state === 'kill' || state === 'stopped';
+          let tooltipTitle = '';
+
+          /**
+           * 展示逻辑
+           * 优先判断是否运行中，是提示暂未运行结束，按钮不可点击
+           * 其次判断是否运行失败，是不提示，按钮可点击
+           * 其他情况提示无任务任务，按钮不可点击
+           */
+          if (record.state === WorkflowTaskStatus.RUNNING_EXECUTION) {
+            tooltipTitle = '暂未运行结束';
+          } else if (record.state === WorkflowTaskStatus.FAILURE) {
+            tooltipTitle = '';
+          } else {
+            tooltipTitle = '无失败任务';
+          }
 
           const operationMenu = (
             <Menu>
-              {canPause && (
+              {/** 只有运行中状态展示结束运行 */}
+              {record.state === WorkflowTaskStatus.RUNNING_EXECUTION && (
                 <Menu.Item
                   key="pause"
                   className="text-[rgb(var(--primary-6))] hover:text-[rgb(var(--primary-6))]"
                   onClick={() =>
                     handleWorkflowOperation(
-                      WorkflowOperationType.EXEC_PAUSE,
+                      WorkflowOperationType.EXEC_STOP,
                       record.id
                     )
                   }
                 >
-                  暂停运行
+                  结束运行
                 </Menu.Item>
               )}
-              {canContinue && (
-                <Menu.Item
-                  key="continue"
-                  className="text-[rgb(var(--primary-6))] hover:text-[rgb(var(--primary-6))]"
-                  onClick={() =>
-                    handleWorkflowOperation(
-                      WorkflowOperationType.RECOVER_SUSPENDED_PROCESS,
-                      record.id
-                    )
-                  }
-                >
-                  继续运行
-                </Menu.Item>
-              )}
-              {canRerun && (
+              <Tooltip content={tooltipTitle} position="left">
                 <Menu.Item
                   key="rerun"
-                  className="text-[rgb(var(--primary-6))] hover:text-[rgb(var(--primary-6))]"
+                  className="text-[rgb(var(--primary-6))]"
+                  disabled={tooltipTitle !== ''}
                   onClick={() =>
                     handleWorkflowOperation(
-                      WorkflowOperationType.REPEAT_RUNNING,
+                      WorkflowOperationType.START_FAILURE_TASK_PROCESS,
                       record.id
                     )
                   }
                 >
-                  重新运行
+                  重试失败任务
                 </Menu.Item>
-              )}
+              </Tooltip>
             </Menu>
           );
 
+          /**
+           * 展示逻辑
+           * 运行状态是运行中展示暂停运行
+           * 运行状态是运行暂停展示继续运行
+           * 运行状态非上面两种情况展示重新运行
+           */
+          const canPause =
+            record.state === WorkflowTaskStatus.RUNNING_EXECUTION;
+          const canContinue = record.state === WorkflowTaskStatus.PAUSE;
+          const canRerun =
+            record.state !== WorkflowTaskStatus.RUNNING_EXECUTION &&
+            record.state !== WorkflowTaskStatus.PAUSE;
+
           return (
-            <div className="flex items-center gap-2">
+            <div
+              className={`flex items-center gap-2 ${styles['operation-container']}`}
+            >
               <Button
                 type="text"
                 className="px-[4px]"
@@ -373,7 +387,7 @@ export default function WorkflowRunList() {
                   重新运行
                 </Button>
               )}
-              <Dropdown droplist={operationMenu} trigger="click">
+              <Dropdown droplist={operationMenu} trigger="click" position="br">
                 <Button className="px-[4px]" type="text">
                   更多
                   <IconDown className="ml-[4px]" />
@@ -413,12 +427,12 @@ export default function WorkflowRunList() {
             </Select>
           </FormItem>
           <FormItem className="!m-0">
-            <Button type="primary" icon={<IconSearch />} onClick={table.submit}>
-              搜索
+            <Button type="primary" onClick={table.submit}>
+              查询
             </Button>
           </FormItem>
           <FormItem className="!m-0">
-            <Button icon={<IconRefresh />} onClick={table.reset}>
+            <Button type="outline" onClick={table.reset}>
               重置
             </Button>
           </FormItem>
