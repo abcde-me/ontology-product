@@ -12,7 +12,9 @@ function BasicInfo({ requirementDetail }: { requirementDetail: any }) {
         },
         {
           label: '描述说明',
-          value: <EllipsisPopover value={requirementDetail?.description} />
+          value: (
+            <EllipsisPopover value={requirementDetail?.description || '-'} />
+          )
         }
       ]
     }
