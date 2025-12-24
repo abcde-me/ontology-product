@@ -135,7 +135,7 @@ const ScriptTable: React.FC<ScriptTableProps> = ({
       const res = await listDevelopScript(params);
       if (res.status === 200 && res.data) {
         setDevelopScriptData(res?.data?.items);
-        const newTotal = res.data?.total || 10;
+        const newTotal = res.data?.total || 0;
         setTotal(newTotal);
         onTotalChange?.(newTotal);
       }
@@ -350,24 +350,26 @@ const ScriptTable: React.FC<ScriptTableProps> = ({
       title: '操作',
       dataIndex: 'operate',
       fixed: 'right',
-      width: 200,
+      width: 176,
       render: (_, record) => {
         const perms = record.perms || [];
         return (
           <div style={{ display: 'flex', alignItems: 'center' }}>
             <PermissionWrapper permission={WORKFLOW_LIST_PERMISSIONS.CAN_READE}>
-              <span
-                className={styles['operate-text']}
+              <Button
+                type="text"
+                className="mr-[8px] px-[0px]"
                 onClick={() => {
                   handleOpenDetail(record);
                 }}
               >
                 详情
-              </span>
+              </Button>
             </PermissionWrapper>
             {/* <PermissionWrapper permission={WORKFLOW_LIST_PERMISSIONS.CAN_COPY}> */}
-            <span
-              className={styles['operate-text']}
+            <Button
+              type="text"
+              className="mr-[8px] px-[0px]"
               onClick={() => {
                 // setVisible(true);
                 // setRowData(record);
@@ -375,7 +377,7 @@ const ScriptTable: React.FC<ScriptTableProps> = ({
               }}
             >
               历史版本
-            </span>
+            </Button>
             <Popover
               content={
                 record.status === ScriptStatus.Scheduling
@@ -385,7 +387,7 @@ const ScriptTable: React.FC<ScriptTableProps> = ({
             >
               <Button
                 type="text"
-                className={styles['operate-text']}
+                className="px-[0px] px-[8px]"
                 onClick={() => handleDelete(record.script_id, record.status)}
                 disabled={record.status === ScriptStatus.Scheduling}
               >
@@ -432,13 +434,13 @@ const ScriptTable: React.FC<ScriptTableProps> = ({
           form={form}
           autoComplete="off"
           layout="inline"
-          className="flex items-center whitespace-nowrap"
+          className="flex flex-1 flex-nowrap items-center gap-[16px] [&_.arco-form-item-wrapper]:flex-1 [&_.arco-form-item]:mr-0 [&_.arco-form-item]:flex-1"
         >
           <FormItem label="脚本名称:" field="script_name">
-            <Input className="min-w-[260px]" placeholder="输入脚本名称搜索" />
+            <Input className="w-full" placeholder="输入脚本名称搜索" />
           </FormItem>
           <FormItem label="版本状态:" field="status">
-            <Select className="min-w-[232px]" placeholder="请选择最新版本状态">
+            <Select className="w-full" placeholder="请选择最新版本状态">
               {options.map((option, index) => (
                 <Option key={option.value} value={option.value}>
                   {option.label}
@@ -447,7 +449,7 @@ const ScriptTable: React.FC<ScriptTableProps> = ({
             </Select>
           </FormItem>
           <FormItem label="开发人:" field="create_user">
-            <Input className="min-w-[260px]" placeholder="输入开发人搜索" />
+            <Input className="w-full" placeholder="输入开发人搜索" />
           </FormItem>
         </Form>
         <div className="flex items-center whitespace-nowrap">
@@ -455,7 +457,7 @@ const ScriptTable: React.FC<ScriptTableProps> = ({
             type="text"
             onClick={handleReset}
             icon={<IconRefresh />}
-            style={{ marginRight: 8 }}
+            className="ml-[16px] mr-[12px] px-[0px]"
           >
             重置
           </Button>

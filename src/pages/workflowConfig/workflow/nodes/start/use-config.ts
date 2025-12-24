@@ -9,6 +9,7 @@ import { useStoreApi } from 'reactflow';
 import { getLoadTaskFiles } from '@/api/loadApi';
 import { useNodeDataUpdate } from '@/pages/workflowConfig/workflow/hooks';
 import { CATEGORY_MAP } from '@/pages/workflowConfig/workflow/nodes/constants';
+import { cloneDeep } from 'lodash-es';
 
 const useConfig = (id: string, payload: StartNodeType) => {
   const { nodesReadOnly: readOnly } = useNodesReadOnly();
@@ -21,9 +22,15 @@ const useConfig = (id: string, payload: StartNodeType) => {
   useEffect(() => {
     const isReady = defaultConfig && Object.keys(defaultConfig).length > 0;
     if (isReady) {
+      const copyInputs = cloneDeep(inputs);
+      copyInputs.data_category.forEach((item) => {
+        if (item.category_type === 'pic') {
+          item.category_type = 'image';
+        }
+      });
       setInputs({
         ...defaultConfig,
-        ...inputs
+        ...copyInputs
       });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps

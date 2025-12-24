@@ -258,7 +258,7 @@ export async function getSQLVersionInSQLNode(script_id: React.Key) {
 // 工作流-获取工作流最后一条运行记录
 export async function getWorkflowLastTask(data: {
   process_definition_code: number;
-  id?: number;
+  trigger_code?: number;
 }) {
   const res = await UAPI.RES.getWorkflowLastTask({})
     .post({

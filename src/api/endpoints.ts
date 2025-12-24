@@ -232,6 +232,12 @@ export const ModaForgeResourceEndpoints = {
   GetWorkflowInstanceInfoApi: PrefixAimdp + '/GetWorkflowInstanceInfo',
   // 获取工作流单节点运行结果--结构化数据
   ListTaskInstanceApi: PrefixAimdp + '/ListTaskInstance',
+  // 任务节点强制成功
+  TaskForcesSuccessApi: PrefixAimdp + '/TaskForcesSuccess',
+  // 任务节点重试
+  RunTaskIntanceApi: PrefixAimdp + '/RunTaskIntance',
+  // 获取任务运行日志
+  GetRunLogsApi: PrefixAimdp + '/GetRunLogs',
 
   // 作业列表
   taskList: PrefixAimdp + '/ListWorkflowInstances',

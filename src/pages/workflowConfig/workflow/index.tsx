@@ -108,8 +108,7 @@ const Workflow: FC<WorkflowProps> = memo(
     const { type: flowType = 'no_struct' } =
       useRouterParams<Record<string, string>>();
 
-    const isShowChatMode =
-      location.pathname === '/tenant/compute/modaforge/workflowTaskDetail';
+    const isShowChatMode = location.pathname.includes('workflowTask/detail');
     const {
       setShowConfirm,
       setControlPromptEditorRerenderKey,

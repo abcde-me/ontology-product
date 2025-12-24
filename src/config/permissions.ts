@@ -182,6 +182,13 @@ export const ANNOTATION_TASK_PERMISSIONS = {
   SAVE: 'aimdp-manager:label_task:manage:save_task_result' // 保存和提交标注任务
 } as const;
 
+// 质检任务权限
+export const QUALITY_TASK_PERMISSIONS = {
+  LIST: 'aimdp-manager:label_quality:read:list_pkg', // 菜单权限
+  GET: 'aimdp-manager:label_quality:read:detail_pkg', // 获取质检任务详情
+  ACTION_TASK: 'aimdp-manager:label_quality:manage:quality_action' // 质检任务
+} as const;
+
 // 组织管理
 export const ORGANIZATION_PERMISSIONS = {
   MENU: 'aisocket:organization:read:menu'
@@ -235,7 +242,8 @@ export const ALL_PERMISSIONS = {
   PYSPARK: PYSPARK_PERMISSIONS,
   SQL: SQL_PERMISSIONS,
   REQUIREMENT: REQUIREMENT_PERMISSIONS,
-  ANNOTATION_TASK: ANNOTATION_TASK_PERMISSIONS
+  ANNOTATION_TASK: ANNOTATION_TASK_PERMISSIONS,
+  QUALITY_TASK: QUALITY_TASK_PERMISSIONS
 } as const;
 
 // 权限检查辅助函数

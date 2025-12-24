@@ -265,18 +265,16 @@ function TaskList() {
       fixed: 'right',
       width: 120,
       render: (_, record) => {
-        return (
+        return hasPermissionGetTask ? (
           <Space>
-            {hasPermissionGetTask && (
-              <Link
-                onClick={() => {
-                  toLabelEditor(record, 'LABEL');
-                }}
-                disabled={record?.label_cnt === 0}
-              >
-                标注
-              </Link>
-            )}
+            <Link
+              onClick={() => {
+                toLabelEditor(record, 'LABEL');
+              }}
+              disabled={record?.label_cnt === 0}
+            >
+              标注
+            </Link>
             <Link
               onClick={() => {
                 toLabelEditor(record, 'RELABEL');
@@ -286,6 +284,8 @@ function TaskList() {
               改错
             </Link>
           </Space>
+        ) : (
+          '-'
         );
       }
     }

@@ -355,14 +355,18 @@ export const useDevelopScriptManager = (
 
   // 数据格式化函数
   const formatData = useCallback((data: unknown[]) => {
+    if (!Array.isArray(data)) {
+      return [];
+    }
+
     return (
-      data?.map((item: any) => {
+      data?.map((item: any, index: number) => {
         return {
           id: String(item.script_id),
           script_id: item.script_id,
           name: item.script_name,
           type: PythonItemType.Notebook,
-          key: String(item.script_id), // ✅ 统一使用 script_id 作为 key，Tree组件需要这个来管理选中状态
+          key: String(item.script_id || index), // ✅ 统一使用 script_id 作为 key，Tree组件需要这个来管理选中状态
           // 确保每个节点都有 dataRef 属性，这样 Tree 组件就能正确传递文件信息
           dataRef: {
             name: item.script_name,

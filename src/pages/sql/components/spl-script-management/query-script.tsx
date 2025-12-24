@@ -104,7 +104,7 @@ const QueryScript: React.FC<QueryScriptProps> = ({ curActiveTab }) => {
         setQueryScriptData(res?.data?.items);
         // setCurrent(res.data.page_info?.page);
         // setPageSize(res.data.page_info?.page_size);
-        setTotal(res.data?.total || 10);
+        setTotal(res.data?.total || 0);
         setQueryNum(res.data?.total || 0);
       }
     } finally {
@@ -317,7 +317,7 @@ const QueryScript: React.FC<QueryScriptProps> = ({ curActiveTab }) => {
           新建脚本
         </Button>
       </div>
-      <div className="mb-[16px] flex items-center justify-between border-b border-[#E2E8F0] pb-[16px]">
+      <div className="mb-[16px] flex items-center justify-between overflow-x-auto whitespace-nowrap border-b border-[#E2E8F0] pb-[16px]">
         <Form
           onValuesChange={(values) => {
             handleFormChange(values);
@@ -325,23 +325,24 @@ const QueryScript: React.FC<QueryScriptProps> = ({ curActiveTab }) => {
           form={form}
           autoComplete="off"
           layout="inline"
+          className="flex flex-1 flex-nowrap items-center gap-[16px] [&_.arco-form-item-wrapper]:flex-1 [&_.arco-form-item]:mr-0 [&_.arco-form-item]:flex-1"
         >
           <FormItem label="脚本名称:" field="script_name">
-            <Input style={{ width: 260 }} placeholder="输入脚本名称搜索" />
+            <Input className="w-full" placeholder="输入脚本名称搜索" />
           </FormItem>
           <FormItem label="更新人:" field="update_account">
-            <Input style={{ width: 260 }} placeholder="输入更新人搜索" />
+            <Input className="w-full" placeholder="输入更新人搜索" />
           </FormItem>
           <FormItem label="更新时间:" field="update_time">
-            <DatePicker.RangePicker style={{ width: 260 }} />
+            <DatePicker.RangePicker className="w-full" />
           </FormItem>
         </Form>
-        <div style={{ display: 'flex', flex: 1 }}>
+        <div className="flex items-center whitespace-nowrap">
           <Button
             type="text"
             onClick={handleReset}
             icon={<IconRefresh />}
-            style={{ marginRight: 8 }}
+            className="ml-[16px] mr-[12px] px-[0px]"
           >
             重置
           </Button>

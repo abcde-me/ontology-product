@@ -1,4 +1,11 @@
-import React, { memo, useCallback, useMemo, useRef, useState } from 'react';
+import React, {
+  memo,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState
+} from 'react';
 import {
   IconCaretRight,
   IconLoading,
@@ -71,7 +78,12 @@ export default memo(function TestNode(props: {
     return '#007DFA';
   }, [nodeProcessStatus]);
 
-  console.log(123, nodesProcessDetail);
+  useEffect(() => {
+    if (showLog) return;
+    if (nodeProcessStatus?.state === TaskStatus.SUCCESS) {
+      setDrawerLog(true);
+    }
+  }, [nodeProcessStatus?.state]);
 
   return (
     <div className={'flex flex-1 items-center justify-end gap-2'}>
@@ -109,15 +121,13 @@ export default memo(function TestNode(props: {
         {nodeProcessStatus?.state === TaskStatus.RUNNING_EXECUTION ? (
           <Tooltip content={''}>
             <IconRecordStop
-              className={
-                'h-4 w-4 cursor-pointer text-[#007DFA] text-text-tertiary'
-              }
+              className={`h-4 w-4 ${styles['node-operator']}`}
               onClick={handleStop}
             />
           </Tooltip>
         ) : (
           <IconCaretRight
-            className={'h-4 w-4 cursor-pointer text-text-tertiary'}
+            className={`h-4 w-4 ${styles['node-operator']}`}
             onClick={() => handleTestNode(nodeId as string)}
           />
         )}

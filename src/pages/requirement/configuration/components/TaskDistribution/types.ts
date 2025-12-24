@@ -29,6 +29,10 @@ export interface TaskPackage {
   taskBId: string; // 任务包ID（格式：任务包1、任务包2...）
   dataAmount: number; // 数据量（总数据量 ÷ 任务包数）
   roles: RoleAssignment[]; // 角色分配列表（动态生成：标注人员 + N轮质检）
+  /** 详情数据ID，有值表示为历史数据，无值表示为新增数据 */
+  detailId?: number;
+  /** 是否为历史数据（来自详情的 pkg_infos） */
+  isFromDetail?: boolean;
 }
 
 // 表单状态数据结构

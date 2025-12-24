@@ -254,6 +254,10 @@ export interface GetTaskNodeListParams {
 
 export interface TaskNodeItem {
   /**
+   * 任务节点实例ID
+   */
+  id: number;
+  /**
    * 执行类型，手动运行，定时运行
    */
   command_type: CommandType;
@@ -280,7 +284,7 @@ export interface TaskNodeItem {
   /**
    * 工作流执行ID
    */
-  process_instance_id: string;
+  process_instance_id: number;
   /**
    * 工作流名称
    */
@@ -312,7 +316,7 @@ export interface TaskNodeItem {
   /**
    * 任务节点ID
    */
-  task_code: string;
+  task_code: number;
   /**
    * 任务模式
    */
@@ -364,7 +368,9 @@ export enum WorkflowOperationType {
   /** 结束运行 */
   EXEC_STOP = 'EXEC_STOP',
   /** 暂停运行 */
-  EXEC_PAUSE = 'EXEC_PAUSE'
+  EXEC_PAUSE = 'EXEC_PAUSE',
+  /** 停止运行 */
+  STOP = 'STOP'
 }
 
 export interface WorkflowOperationParams {
@@ -375,11 +381,12 @@ export interface WorkflowOperationParams {
    * EXEC_STOP:                  "结束运行",
    * EXEC_PAUSE:                 "暂停运行",
    */
-  executeType: WorkflowOperationType;
+  executeType?: WorkflowOperationType;
   /**
    * 任务节点实例ID
    */
   process_instance_id: string;
+  execute_type?: WorkflowOperationType;
 }
 
 export interface GetWorkflowRunResultListParams {
@@ -440,6 +447,45 @@ export interface ListTaskInstanceParams {
   state_list?: WorkflowTaskStatus[];
 }
 
+export enum TaskNodeStatus {
+  /** 提交成功 */
+  SUBMITTED_SUCCESS = 'SUBMITTED_SUCCESS',
+  /** 正在运行 */
+  RUNNING_EXECUTION = 'RUNNING_EXECUTION',
+  /** 运行暂停 */
+  PAUSE = 'PAUSE',
+  /** 运行停止 */
+  STOP = 'STOP',
+  /** 运行失败 */
+  FAILURE = 'FAILURE',
+  /** 运行成功 */
+  SUCCESS = 'SUCCESS',
+  /** KILL */
+  KILL = 'KILL',
+  /** 需要容错 */
+  NEED_FAULT_TOLERANCE = 'NEED_FAULT_TOLERANCE',
+  /** 延迟执行 */
+  DELAY_EXECUTION = 'DELAY_EXECUTION',
+  /** 强制成功 */
+  FORCED_SUCCESS = 'FORCED_SUCCESS',
+  /** 分配中 */
+  DISPATCH = 'DISPATCH'
+}
+
+export const TaskNodeStatusNameMap = {
+  [TaskNodeStatus.SUBMITTED_SUCCESS]: '提交成功',
+  [TaskNodeStatus.RUNNING_EXECUTION]: '正在运行',
+  [TaskNodeStatus.PAUSE]: '运行暂停',
+  [TaskNodeStatus.STOP]: '运行停止',
+  [TaskNodeStatus.FAILURE]: '运行失败',
+  [TaskNodeStatus.SUCCESS]: '运行成功',
+  [TaskNodeStatus.KILL]: 'KILL',
+  [TaskNodeStatus.NEED_FAULT_TOLERANCE]: '需要容错',
+  [TaskNodeStatus.DELAY_EXECUTION]: '延迟执行',
+  [TaskNodeStatus.FORCED_SUCCESS]: '强制成功',
+  [TaskNodeStatus.DISPATCH]: '分配中'
+} as const;
+
 export interface ListTaskInstanceItem {
   /**
    * 运行类型，手动运行，定时运行
@@ -488,11 +534,11 @@ export interface ListTaskInstanceItem {
   /**
    * 运行状态，状态英文名
    */
-  state: WorkflowTaskStatus;
+  state: TaskNodeStatus;
   /**
    * 运行状态名称，状态中文名
    */
-  state_name: (typeof WorkflowTaskStatusNameMap)[keyof typeof WorkflowTaskStatusNameMap];
+  state_name: (typeof TaskExecuteTypeNameMap)[keyof typeof TaskExecuteTypeNameMap];
   /**
    * 运行提交时间
    */
@@ -531,4 +577,42 @@ export interface ListTaskInstanceResponse {
   page: string;
   page_size: string;
   total: string;
+}
+
+export interface TaskNodeForceSuccessParams {
+  /**
+   * 任务节点实例ID
+   */
+  task_instance_id: number;
+}
+
+export interface TaskNodeRetryParams {
+  /**
+   * 工作流实例ID
+   */
+  process_instance_id: number;
+  /**
+   * 节点code
+   */
+  task_code_list: number[];
+}
+
+export interface GetRunLogsParams {
+  /**
+   * 任务节点实例ID
+   */
+  task_instance_id: number;
+  /**
+   * 每页条数
+   */
+  limit?: number;
+  /**
+   * 跳过行数
+   */
+  skip_line_num?: number;
+}
+
+export interface GetRunLogsResponse {
+  skip_line_num: number;
+  message: string;
 }

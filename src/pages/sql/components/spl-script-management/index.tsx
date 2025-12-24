@@ -5,6 +5,7 @@ import QueryScript from './query-script';
 import { useUrlState } from '../../hooks/useUrlState';
 
 import styles from './index.module.scss';
+import classNames from 'classnames';
 
 interface SplScriptManagementProps {
   onToScriptList: (type: string) => void;
@@ -34,8 +35,10 @@ const SplScriptManagement: React.FC<SplScriptManagementProps> = memo(
     };
 
     return (
-      <div className={styles['spl-script-management']}>
-        <div className={styles['spl-script-management-title']}>SQL脚本管理</div>
+      <div className={classNames('p-[16px]', styles['spl-script-management'])}>
+        <div className="mb-[16px] text-[20px] font-[500] leading-[30px] text-[var(--text-color-text-1)]">
+          SQL脚本管理
+        </div>
         <Tabs
           onChange={handleTabChange}
           activeTab={curActiveTab}

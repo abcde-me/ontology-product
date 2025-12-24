@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
   Form,
   Input,
@@ -10,19 +10,18 @@ import {
   Message
 } from '@arco-design/web-react';
 import {
-  IconSearch,
-  IconQuestionCircle,
-  IconRefresh
-} from '@arco-design/web-react/icon';
-import { useUserInfoStore } from '@/store/userInfoStore';
-import { getTaskNodeList } from '@/api/workflowTask';
+  getTaskNodeList,
+  taskNodeForcesSuccess,
+  taskNodeRetry
+} from '@/api/workflowTask';
 import {
   type TaskNodeItem,
   type GetTaskNodeListParams,
   CommandTypeNameMap,
   CommandType,
   TaskExecuteType,
-  TaskExecuteTypeNameMap
+  TaskExecuteTypeNameMap,
+  TaskNodeStatus
 } from '@/types/workflowTaskApi';
 import { useWorkflowTable } from '../../hooks/useWorkflowTable';
 import {
@@ -34,12 +33,60 @@ import type { PaginationProps } from '@arco-design/web-react';
 import type { SorterInfo } from '@arco-design/web-react/lib/Table/interface';
 import noDataElement from '@/components/no-data';
 import EllipsisPopoverCom from '@/components/ellipsis-popover-com';
+import TaskLogDrawer from '../../components/task-log-drawer';
 
 const { Option } = Select;
 const FormItem = Form.Item;
 
 export default function TaskNodeRunList() {
   const [form] = Form.useForm();
+  const [logDrawerVisible, setLogDrawerVisible] = useState(false);
+  const [currentTaskInstanceId, setCurrentTaskInstanceId] = useState<
+    number | null
+  >(null);
+  const [currentTaskName, setCurrentTaskName] = useState<string>('');
+
+  const handleTaskNodeForcesSuccess = useCallback(async (id: number) => {
+    const res = await taskNodeForcesSuccess({
+      task_instance_id: id
+    });
+
+    if (res.status === 200 && res.code === '') {
+      Message.success('强制成功成功');
+      table.refresh();
+    } else {
+      Message.error(res.message || '强制成功失败');
+    }
+  }, []);
+
+  const handleTaskNodeRetry = useCallback(
+    async (processInstanceId: number, taskCodeId: number) => {
+      const res = await taskNodeRetry({
+        process_instance_id: processInstanceId,
+        task_code_list: [taskCodeId]
+      });
+
+      if (res.status === 200 && res.code === '') {
+        Message.success('重试成功');
+        table.refresh();
+      } else {
+        Message.error(res.message || '重试失败');
+      }
+    },
+    []
+  );
+
+  const handleGetRunLogs = useCallback((id: number, taskName: string) => {
+    setCurrentTaskInstanceId(id);
+    setCurrentTaskName(taskName);
+    setLogDrawerVisible(true);
+  }, []);
+
+  const handleCloseLogDrawer = useCallback(() => {
+    setLogDrawerVisible(false);
+    setCurrentTaskInstanceId(null);
+    setCurrentTaskName('');
+  }, []);
 
   // 格式化任务节点运行记录请求参数
   const formatTaskParams = useCallback(
@@ -221,13 +268,32 @@ export default function TaskNodeRunList() {
         render: (_: any, record: TaskNodeItem) => {
           return (
             <div className="flex items-center gap-2">
-              <Button type="text" className="px-[4px]">
+              <Button
+                type="text"
+                className="px-[4px]"
+                disabled={record.state !== TaskNodeStatus.FAILURE}
+                onClick={() => handleTaskNodeForcesSuccess(record.id)}
+              >
                 强制成功
               </Button>
-              <Button type="text" className="px-[4px]">
+              <Button
+                type="text"
+                className="px-[4px]"
+                onClick={() =>
+                  handleTaskNodeRetry(
+                    record.process_instance_id,
+                    record.task_code
+                  )
+                }
+                disabled={record.state !== TaskNodeStatus.FAILURE}
+              >
                 重试
               </Button>
-              <Button type="text" className="px-[4px]">
+              <Button
+                type="text"
+                className="px-[4px]"
+                onClick={() => handleGetRunLogs(record.id, record.task_name)}
+              >
                 日志
               </Button>
             </div>
@@ -264,12 +330,12 @@ export default function TaskNodeRunList() {
             </Select>
           </FormItem>
           <FormItem className="!m-0">
-            <Button type="primary" icon={<IconSearch />} onClick={table.submit}>
-              搜索
+            <Button type="primary" onClick={table.submit}>
+              查询
             </Button>
           </FormItem>
           <FormItem className="!m-0">
-            <Button icon={<IconRefresh />} onClick={table.reset}>
+            <Button type="outline" onClick={table.reset}>
               重置
             </Button>
           </FormItem>
@@ -311,6 +377,16 @@ export default function TaskNodeRunList() {
           />
         )}
       </div>
+
+      {/* 日志Drawer */}
+      {logDrawerVisible && currentTaskInstanceId && (
+        <TaskLogDrawer
+          visible={logDrawerVisible}
+          taskInstanceId={currentTaskInstanceId}
+          taskName={currentTaskName}
+          onClose={handleCloseLogDrawer}
+        />
+      )}
     </>
   );
 }
