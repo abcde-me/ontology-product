@@ -21,7 +21,7 @@ const nodeDefault: NodeDefault<StartNodeType> = {
       {
         id: 2,
         category: '图片',
-        category_type: 'pic',
+        category_type: 'image',
         enabled: true,
         format: ['JPEG', 'PNG', 'JPG']
       },
