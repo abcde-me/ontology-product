@@ -7,7 +7,8 @@ import {
   Button,
   Pagination,
   Tooltip,
-  Message
+  Message,
+  Popconfirm
 } from '@arco-design/web-react';
 import {
   getTaskNodeList,
@@ -268,27 +269,49 @@ export default function TaskNodeRunList() {
         render: (_: any, record: TaskNodeItem) => {
           return (
             <div className="flex items-center gap-2">
-              <Button
-                type="text"
-                className="px-[4px]"
-                disabled={record.state !== TaskNodeStatus.FAILURE}
-                onClick={() => handleTaskNodeForcesSuccess(record.id)}
-              >
-                强制成功
-              </Button>
-              <Button
-                type="text"
-                className="px-[4px]"
-                onClick={() =>
-                  handleTaskNodeRetry(
-                    record.process_instance_id,
-                    record.task_code
-                  )
-                }
-                disabled={record.state !== TaskNodeStatus.FAILURE}
-              >
-                重试
-              </Button>
+              {record.state === TaskNodeStatus.FAILURE ? (
+                <Popconfirm
+                  title="确定强制成功吗？"
+                  content="强制成功后，将继续运行后续任务"
+                  onOk={() => handleTaskNodeForcesSuccess(record.id)}
+                >
+                  <Button
+                    disabled={record.state !== TaskNodeStatus.FAILURE}
+                    type="text"
+                    className="px-[4px]"
+                  >
+                    强制成功
+                  </Button>
+                </Popconfirm>
+              ) : (
+                <Button disabled={true} type="text" className="px-[4px]">
+                  强制成功
+                </Button>
+              )}
+              {record.state === TaskNodeStatus.FAILURE ? (
+                <Popconfirm
+                  title="确定重新运行吗？"
+                  content=""
+                  onOk={() =>
+                    handleTaskNodeRetry(
+                      record.process_instance_id,
+                      record.task_code
+                    )
+                  }
+                >
+                  <Button
+                    disabled={record.state !== TaskNodeStatus.FAILURE}
+                    type="text"
+                    className="px-[4px]"
+                  >
+                    重试
+                  </Button>
+                </Popconfirm>
+              ) : (
+                <Button disabled={true} type="text" className="px-[4px]">
+                  重试
+                </Button>
+              )}
               <Button
                 type="text"
                 className="px-[4px]"
