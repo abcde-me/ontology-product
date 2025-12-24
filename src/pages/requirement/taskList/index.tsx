@@ -282,22 +282,29 @@ function TaskList() {
       render: (_, record) => {
         return hasPermissionGetTask ? (
           <Space>
-            <Link
-              onClick={() => {
-                toLabelEditor(record, 'LABEL');
-              }}
-              disabled={record?.label_cnt === 0}
+            <Tooltip content="暂无标注任务" disabled={record?.label_cnt !== 0}>
+              <Link
+                onClick={() => {
+                  toLabelEditor(record, 'LABEL');
+                }}
+                disabled={record?.label_cnt === 0}
+              >
+                去标注
+              </Link>
+            </Tooltip>
+            <Tooltip
+              content="暂无改错任务"
+              disabled={record?.re_label_cnt !== 0}
             >
-              标注
-            </Link>
-            <Link
-              onClick={() => {
-                toLabelEditor(record, 'RELABEL');
-              }}
-              disabled={record?.re_label_cnt === 0}
-            >
-              改错
-            </Link>
+              <Link
+                onClick={() => {
+                  toLabelEditor(record, 'RELABEL');
+                }}
+                disabled={record?.re_label_cnt === 0}
+              >
+                改错
+              </Link>
+            </Tooltip>
           </Space>
         ) : (
           '-'
