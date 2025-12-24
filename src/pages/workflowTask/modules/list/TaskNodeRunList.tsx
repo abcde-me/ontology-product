@@ -264,12 +264,12 @@ export default function TaskNodeRunList() {
             </Select>
           </FormItem>
           <FormItem className="!m-0">
-            <Button type="primary" icon={<IconSearch />} onClick={table.submit}>
-              搜索
+            <Button type="primary" onClick={table.submit}>
+              查询
             </Button>
           </FormItem>
           <FormItem className="!m-0">
-            <Button icon={<IconRefresh />} onClick={table.reset}>
+            <Button type="outline" onClick={table.reset}>
               重置
             </Button>
           </FormItem>

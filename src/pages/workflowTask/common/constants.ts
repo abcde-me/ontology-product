@@ -1,6 +1,8 @@
 import {
   WorkflowTaskStatus,
-  WorkflowTaskStatusNameMap
+  WorkflowTaskStatusNameMap,
+  TaskNodeStatus,
+  TaskNodeStatusNameMap
 } from '@/types/workflowTaskApi';
 
 /**
@@ -94,78 +96,58 @@ export const TASK_NODE_RUN_STATUS_MAP: Record<
   string,
   { text: string; color: string; dotColor: string }
 > = {
-  [WorkflowTaskStatus.SUBMITTED_SUCCESS]: {
-    text: WorkflowTaskStatusNameMap[WorkflowTaskStatus.SUBMITTED_SUCCESS],
+  [TaskNodeStatus.SUBMITTED_SUCCESS]: {
+    text: TaskNodeStatusNameMap[TaskNodeStatus.SUBMITTED_SUCCESS],
     color: '#10B981',
     dotColor: '#10B981'
   },
-  [WorkflowTaskStatus.RUNNING_EXECUTION]: {
-    text: WorkflowTaskStatusNameMap[WorkflowTaskStatus.RUNNING_EXECUTION],
+  [TaskNodeStatus.RUNNING_EXECUTION]: {
+    text: TaskNodeStatusNameMap[TaskNodeStatus.RUNNING_EXECUTION],
     color: '#007DFA',
     dotColor: '#007DFA'
   },
-  [WorkflowTaskStatus.READY_PAUSE]: {
-    text: WorkflowTaskStatusNameMap[WorkflowTaskStatus.READY_PAUSE],
+  [TaskNodeStatus.PAUSE]: {
+    text: TaskNodeStatusNameMap[TaskNodeStatus.PAUSE],
     color: '#94A3B8',
     dotColor: '#94A3B8'
   },
-  [WorkflowTaskStatus.PAUSE]: {
-    text: WorkflowTaskStatusNameMap[WorkflowTaskStatus.PAUSE],
-    color: '#94A3B8',
-    dotColor: '#94A3B8'
-  },
-  [WorkflowTaskStatus.READY_STOP]: {
-    text: WorkflowTaskStatusNameMap[WorkflowTaskStatus.READY_STOP],
-    color: '#F59E0B',
-    dotColor: '#F59E0B'
-  },
-  [WorkflowTaskStatus.STOP]: {
-    text: WorkflowTaskStatusNameMap[WorkflowTaskStatus.STOP],
+  [TaskNodeStatus.STOP]: {
+    text: TaskNodeStatusNameMap[TaskNodeStatus.STOP],
     color: '#EF4444',
     dotColor: '#EF4444'
   },
-  [WorkflowTaskStatus.FAILURE]: {
-    text: WorkflowTaskStatusNameMap[WorkflowTaskStatus.FAILURE],
+  [TaskNodeStatus.FAILURE]: {
+    text: TaskNodeStatusNameMap[TaskNodeStatus.FAILURE],
     color: '#EF4444',
     dotColor: '#EF4444'
   },
-  [WorkflowTaskStatus.SUCCESS]: {
-    text: WorkflowTaskStatusNameMap[WorkflowTaskStatus.SUCCESS],
+  [TaskNodeStatus.SUCCESS]: {
+    text: TaskNodeStatusNameMap[TaskNodeStatus.SUCCESS],
     color: '#10B981',
     dotColor: '#10B981'
   },
-  [WorkflowTaskStatus.NEED_FAULT_TOLERANCE]: {
-    text: WorkflowTaskStatusNameMap[WorkflowTaskStatus.NEED_FAULT_TOLERANCE],
-    color: '#F59E0B',
-    dotColor: '#F59E0B'
-  },
-  [WorkflowTaskStatus.KILL]: {
-    text: WorkflowTaskStatusNameMap[WorkflowTaskStatus.KILL],
+  [TaskNodeStatus.KILL]: {
+    text: TaskNodeStatusNameMap[TaskNodeStatus.KILL],
     color: '#EF4444',
     dotColor: '#EF4444'
   },
-  [WorkflowTaskStatus.DELAY_EXECUTION]: {
-    text: WorkflowTaskStatusNameMap[WorkflowTaskStatus.DELAY_EXECUTION],
+  [TaskNodeStatus.NEED_FAULT_TOLERANCE]: {
+    text: TaskNodeStatusNameMap[TaskNodeStatus.NEED_FAULT_TOLERANCE],
+    color: '#F59E0B',
+    dotColor: '#F59E0B'
+  },
+  [TaskNodeStatus.DELAY_EXECUTION]: {
+    text: TaskNodeStatusNameMap[TaskNodeStatus.DELAY_EXECUTION],
     color: '#94A3B8',
     dotColor: '#94A3B8'
   },
-  [WorkflowTaskStatus.SERIAL_WAIT]: {
-    text: WorkflowTaskStatusNameMap[WorkflowTaskStatus.SERIAL_WAIT],
-    color: '#007DFA',
-    dotColor: '#007DFA'
+  [TaskNodeStatus.FORCED_SUCCESS]: {
+    text: TaskNodeStatusNameMap[TaskNodeStatus.FORCED_SUCCESS],
+    color: '#10B981',
+    dotColor: '#10B981'
   },
-  [WorkflowTaskStatus.READY_BLOCK]: {
-    text: WorkflowTaskStatusNameMap[WorkflowTaskStatus.READY_BLOCK],
-    color: '#F59E0B',
-    dotColor: '#F59E0B'
-  },
-  [WorkflowTaskStatus.BLOCK]: {
-    text: WorkflowTaskStatusNameMap[WorkflowTaskStatus.BLOCK],
-    color: '#F59E0B',
-    dotColor: '#F59E0B'
-  },
-  [WorkflowTaskStatus.WAIT_TO_RUN]: {
-    text: WorkflowTaskStatusNameMap[WorkflowTaskStatus.WAIT_TO_RUN],
+  [TaskNodeStatus.DISPATCH]: {
+    text: TaskNodeStatusNameMap[TaskNodeStatus.DISPATCH],
     color: '#007DFA',
     dotColor: '#007DFA'
   }
@@ -252,63 +234,47 @@ export const WORKFLOW_STATUS_OPTIONS = [
  */
 export const TASK_NODE_STATUS_OPTIONS = [
   {
-    label: WorkflowTaskStatusNameMap[WorkflowTaskStatus.SUBMITTED_SUCCESS],
-    value: WorkflowTaskStatus.SUBMITTED_SUCCESS
+    label: TaskNodeStatusNameMap[TaskNodeStatus.SUBMITTED_SUCCESS],
+    value: TaskNodeStatus.SUBMITTED_SUCCESS
   },
   {
-    label: WorkflowTaskStatusNameMap[WorkflowTaskStatus.RUNNING_EXECUTION],
-    value: WorkflowTaskStatus.RUNNING_EXECUTION
+    label: TaskNodeStatusNameMap[TaskNodeStatus.RUNNING_EXECUTION],
+    value: TaskNodeStatus.RUNNING_EXECUTION
   },
   {
-    label: WorkflowTaskStatusNameMap[WorkflowTaskStatus.READY_PAUSE],
-    value: WorkflowTaskStatus.READY_PAUSE
+    label: TaskNodeStatusNameMap[TaskNodeStatus.PAUSE],
+    value: TaskNodeStatus.PAUSE
   },
   {
-    label: WorkflowTaskStatusNameMap[WorkflowTaskStatus.PAUSE],
-    value: WorkflowTaskStatus.PAUSE
+    label: TaskNodeStatusNameMap[TaskNodeStatus.STOP],
+    value: TaskNodeStatus.STOP
   },
   {
-    label: WorkflowTaskStatusNameMap[WorkflowTaskStatus.READY_STOP],
-    value: WorkflowTaskStatus.READY_STOP
+    label: TaskNodeStatusNameMap[TaskNodeStatus.FAILURE],
+    value: TaskNodeStatus.FAILURE
   },
   {
-    label: WorkflowTaskStatusNameMap[WorkflowTaskStatus.STOP],
-    value: WorkflowTaskStatus.STOP
+    label: TaskNodeStatusNameMap[TaskNodeStatus.SUCCESS],
+    value: TaskNodeStatus.SUCCESS
   },
   {
-    label: WorkflowTaskStatusNameMap[WorkflowTaskStatus.FAILURE],
-    value: WorkflowTaskStatus.FAILURE
+    label: TaskNodeStatusNameMap[TaskNodeStatus.KILL],
+    value: TaskNodeStatus.KILL
   },
   {
-    label: WorkflowTaskStatusNameMap[WorkflowTaskStatus.SUCCESS],
-    value: WorkflowTaskStatus.SUCCESS
+    label: TaskNodeStatusNameMap[TaskNodeStatus.NEED_FAULT_TOLERANCE],
+    value: TaskNodeStatus.NEED_FAULT_TOLERANCE
   },
   {
-    label: WorkflowTaskStatusNameMap[WorkflowTaskStatus.NEED_FAULT_TOLERANCE],
-    value: WorkflowTaskStatus.NEED_FAULT_TOLERANCE
+    label: TaskNodeStatusNameMap[TaskNodeStatus.DELAY_EXECUTION],
+    value: TaskNodeStatus.DELAY_EXECUTION
   },
   {
-    label: WorkflowTaskStatusNameMap[WorkflowTaskStatus.KILL],
-    value: WorkflowTaskStatus.KILL
+    label: TaskNodeStatusNameMap[TaskNodeStatus.FORCED_SUCCESS],
+    value: TaskNodeStatus.FORCED_SUCCESS
   },
   {
-    label: WorkflowTaskStatusNameMap[WorkflowTaskStatus.DELAY_EXECUTION],
-    value: WorkflowTaskStatus.DELAY_EXECUTION
-  },
-  {
-    label: WorkflowTaskStatusNameMap[WorkflowTaskStatus.SERIAL_WAIT],
-    value: WorkflowTaskStatus.SERIAL_WAIT
-  },
-  {
-    label: WorkflowTaskStatusNameMap[WorkflowTaskStatus.READY_BLOCK],
-    value: WorkflowTaskStatus.READY_BLOCK
-  },
-  {
-    label: WorkflowTaskStatusNameMap[WorkflowTaskStatus.BLOCK],
-    value: WorkflowTaskStatus.BLOCK
-  },
-  {
-    label: WorkflowTaskStatusNameMap[WorkflowTaskStatus.WAIT_TO_RUN],
-    value: WorkflowTaskStatus.WAIT_TO_RUN
+    label: TaskNodeStatusNameMap[TaskNodeStatus.DISPATCH],
+    value: TaskNodeStatus.DISPATCH
   }
 ];
