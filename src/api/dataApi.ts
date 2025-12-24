@@ -41,6 +41,13 @@ export async function openDataListFields(params: Record<string | number, any>) {
   return await UAPI.RES.openDataListFieldsApi({}).post(params).inRegion().do();
 }
 
+// 搜索表
+export async function openDataSearchTable(
+  params: Record<string | number, any>
+) {
+  return await UAPI.RES.openDataSearchTableApi({}).post(params).inRegion().do();
+}
+
 // 解析SQL
 export async function openDataParseSql(params: Record<string | number, any>) {
   return await UAPI.RES.openDataParseSqlApi({}).post(params).inRegion().do();
@@ -54,4 +61,21 @@ export async function openDataTestApi(params: Record<string | number, any>) {
 // 创建数据API
 export async function openDataCreateApi(params: Record<string | number, any>) {
   return await UAPI.RES.openDataCreateApi({}).post(params).inRegion().do();
+}
+
+// 获取数据API详情
+export async function openDataGetApiDetail(
+  params: Record<string | number, any>
+) {
+  return await UAPI.RES.openDataGetApiDetailApi({})
+    .post(params)
+    .inRegion()
+    .do();
+}
+
+// 更新数据API
+export async function openDataUpdateDataAPI(
+  params: Record<string | number, any>
+) {
+  return await UAPI.RES.openDataUpdateDataAPI({}).post(params).inRegion().do();
 }

@@ -365,7 +365,12 @@ export default function DataApi() {
       fixed: 'right',
       render: (_, record) => (
         <div>
-          <span className={styles['operate-text']}>编辑</span>
+          <span
+            className={styles['operate-text']}
+            onClick={() => handleToAddApi('edit', record.id)}
+          >
+            编辑
+          </span>
           <PermissionWrapper permission={WORKFLOW_TASK_PERMISSIONS.CAN_UPDATE}>
             <span
               className={styles['operate-text'] + ' ml-4'}
@@ -465,8 +470,12 @@ export default function DataApi() {
   ];
 
   // 跳转创建API页面
-  const handleToAddApi = () => {
-    history.push('/tenant/compute/modaforge/dataApi/add');
+  const handleToAddApi = (type: 'add' | 'edit', id?: string) => {
+    history.push(
+      id
+        ? `/tenant/compute/modaforge/dataApi/add?type=${type}&id=${id}`
+        : `/tenant/compute/modaforge/dataApi/add?type=${type}`
+    );
   };
 
   return (
@@ -481,7 +490,7 @@ export default function DataApi() {
         }}
       >
         <InputSearch
-          placeholder="输入API名称或请求方式搜索"
+          placeholder="输入API名称搜索"
           allowClear
           style={{ width: 260 }}
           value={searchValue}
@@ -495,7 +504,11 @@ export default function DataApi() {
             setIsClickClear(true);
           }}
         />
-        <Button type="primary" icon={<IconPlus />} onClick={handleToAddApi}>
+        <Button
+          type="primary"
+          icon={<IconPlus />}
+          onClick={() => handleToAddApi('add')}
+        >
           创建API
         </Button>
       </div>

@@ -81,20 +81,6 @@ export default function TestModal({ visible, dataSource, apiId, onCancel }) {
           <Checkbox checked={record.isArray} />
         </Form.Item>
       )
-    },
-    {
-      title: '必填',
-      dataIndex: 'required',
-      width: 80,
-      render: (_value, record) => (
-        <Form.Item
-          field={`required_${record.name}`}
-          initialValue={Boolean(record.required)}
-          disabled
-        >
-          <Checkbox checked={record.required} />
-        </Form.Item>
-      )
     }
   ];
 
