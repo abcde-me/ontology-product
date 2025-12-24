@@ -670,10 +670,10 @@ export default function RequirementConfig() {
     setPageLoading(true);
     const { entityRelations, relationRelations } = TextEntityDataContent;
     const { name, description } = basicForm.getFieldsValue();
-    const label_count =
-      type === 'edit'
-        ? requirementDetail?.label_count + getTotal(selectedData)
-        : getTotal(selectedData);
+    const label_count = getTotal(selectedData) || 0;
+    // type === 'edit'
+    //   ? requirementDetail?.label_count + getTotal(selectedData)
+    //   : getTotal(selectedData);
     // 发布数据重置
     const new_publishData = {
       name,
