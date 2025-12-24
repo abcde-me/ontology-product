@@ -11,7 +11,10 @@ import {
   NodeRunSetting,
   PrevNodes
 } from '@/pages/workflowConfig/workflow/nodes/components';
-import { FieldSync } from '@/pages/workflowConfig/workflow/nodes/seatunnel-node/components';
+import {
+  FieldSync,
+  HighLightSearchCascader
+} from '@/pages/workflowConfig/workflow/nodes/seatunnel-node/components';
 import { getConnectionList, getdetailList } from '@/api/connectionApi';
 import {
   ConnectionItem,
@@ -239,7 +242,7 @@ export default React.memo(function SeatunnelPanel(
           field={'source_database'}
           rules={[{ message: '请选择来源表', required: true }]}
         >
-          <Cascader
+          <HighLightSearchCascader
             className={'w-full'}
             disabled={readOnly || loadingSource}
             loading={loadingSource}
@@ -255,7 +258,6 @@ export default React.memo(function SeatunnelPanel(
               });
             }}
             loadMore={loadSourceTable}
-            showSearch
             allowClear
           />
         </FormItem>
@@ -370,7 +372,7 @@ export default React.memo(function SeatunnelPanel(
           field={'target_datasource_id'}
           rules={[{ message: '请选择目标表', required: true }]}
         >
-          <Cascader
+          <HighLightSearchCascader
             className={'w-full'}
             disabled={readOnly || connectorLoading}
             loading={connectorLoading}

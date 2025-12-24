@@ -148,9 +148,7 @@ export const useNodesInteractions = () => {
     return workflowOperation({
       execute_type: WorkflowOperationType.STOP,
       process_instance_id
-    })
-      .then((res) => {})
-      .catch(console.error);
+    }).catch(console.error);
   };
 
   const handleNodeDrag = useCallback<NodeDragHandler>(

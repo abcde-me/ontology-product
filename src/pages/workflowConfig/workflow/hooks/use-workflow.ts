@@ -427,8 +427,7 @@ export const useWorkflowInit = () => {
 
   const location = useLocation(); // 获取当前路由信息
   // 只有在作业详情的时候处理
-  const isShowChatMode =
-    location.pathname === '/tenant/compute/modaforge/workflowTaskDetail';
+  const isShowChatMode = location.pathname.includes('workflowTask/detail');
 
   // 初次保存画布数据不正确时的兜底方法
   const handleGetInitialWorkflowDataOnError = (params: {
@@ -655,7 +654,7 @@ export const useNodesReadOnly = () => {
 
     return (
       workflowRunningData?.result.status === WorkflowRunningStatus.Running ||
-      currentUrl === '/tenant/compute/modaforge/workflowTaskDetail' ||
+      currentUrl.includes('workflowTask/detail') ||
       historyWorkflowData ||
       isRestoring ||
       appDetail?.is_online === IsOnline.online ||
@@ -667,7 +666,7 @@ export const useNodesReadOnly = () => {
   return {
     nodesReadOnly: !!(
       workflowRunningData?.result.status === WorkflowRunningStatus.Running ||
-      currentUrl === '/tenant/compute/modaforge/workflowTaskDetail' ||
+      currentUrl.includes('workflowTask/detail') ||
       historyWorkflowData ||
       isRestoring ||
       appDetail?.is_online === IsOnline.online ||
