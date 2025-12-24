@@ -140,8 +140,11 @@ export default React.memo(function SQLPanel(
         </FormItem>
         <FormItem
           noStyle
-          shouldUpdate={() => {
-            return false;
+          shouldUpdate={(prevValues, currentValues) => {
+            return (
+              prevValues.raw_script !== currentValues.raw_script ||
+              prevValues.sql_id !== currentValues.sql_id
+            );
           }}
         >
           {({ raw_script, sql_id }, { getFieldValue }) => {

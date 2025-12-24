@@ -28,7 +28,7 @@ export default memo(function DependentNode(
         {depend_item_list.length > 2 && (
           <div
             className={
-              'w-[30px] flex-shrink-0 overflow-hidden text-ellipsis whitespace-nowrap rounded-[4px] bg-[#E7ECF0] p-1 text-[#0F172A]'
+              'w-max flex-shrink-0 overflow-hidden text-ellipsis whitespace-nowrap rounded-[4px] bg-[#E7ECF0] p-1 text-[#0F172A]'
             }
           >
             +{depend_item_list.length - 2}

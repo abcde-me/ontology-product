@@ -8,6 +8,7 @@ import { useUserInfo } from '@/store/userInfoStore';
 import {
   useChecklistBeforePublish,
   useNodesInteractions,
+  useNodesReadOnly,
   useNodesSyncDraft
 } from '../hooks';
 import TaskOperation from '@/pages/workflowConfig/workflow/header/components/task-operation';
@@ -104,6 +105,7 @@ const Header = (props: { flowType: string }) => {
   const workflowUuid = useParams('workflow_uuid') ?? '';
   const workflowVersion = useParams('workflow_version');
   const { handleNodeSelect } = useNodesInteractions();
+  const { nodesReadOnly } = useNodesReadOnly();
 
   const { setWorkflowDetail } = useTaskStore(
     useShallow((state) => ({
@@ -330,18 +332,20 @@ const Header = (props: { flowType: string }) => {
                 {appDetail?.workflow_name}
               </Typography.Paragraph>
               {/*当前版本只有非结构化的工作流才能单独编辑名称*/}
-              {headerOperationDisplay && props.flowType === 'no_struct' && (
-                <PermissionWrapper
-                  permission={WORKFLOW_DETAIL_PERMISSIONS.UPDATE}
-                >
-                  <Popover trigger="hover" content="编辑">
-                    <div
-                      className={styles['edit-icon']}
-                      onClick={handleEdit}
-                    ></div>
-                  </Popover>
-                </PermissionWrapper>
-              )}
+              {headerOperationDisplay &&
+                props.flowType === 'no_struct' &&
+                !nodesReadOnly && (
+                  <PermissionWrapper
+                    permission={WORKFLOW_DETAIL_PERMISSIONS.UPDATE}
+                  >
+                    <Popover trigger="hover" content="编辑">
+                      <div
+                        className={styles['edit-icon']}
+                        onClick={handleEdit}
+                      ></div>
+                    </Popover>
+                  </PermissionWrapper>
+                )}
             </div>
           )}
           <EditingTitle />

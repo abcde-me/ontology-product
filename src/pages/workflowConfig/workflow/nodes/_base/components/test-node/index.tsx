@@ -86,7 +86,7 @@ export default memo(function TestNode(props: {
   }, [nodeProcessStatus?.state]);
 
   return (
-    <div className={'flex flex-1 items-center justify-end gap-2'}>
+    <div className={'flex flex-1 flex-shrink-0 items-center justify-end gap-2'}>
       {showLog && nodeProcessStatus && (
         <div className={'flex flex-1 flex-shrink-0 items-center gap-1'}>
           <div

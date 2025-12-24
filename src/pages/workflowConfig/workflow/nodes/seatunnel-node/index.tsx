@@ -41,7 +41,7 @@ export default memo(function SeatunnelNode(props: NodeProps<SeatunnelConfig>) {
           ? '未配置'
           : `${source_database}->${source_table_name}`}
       </div>
-      <div className={'rounded-[4px] bg-[#F5F9FF] p-2'}>
+      <div className={'break-all rounded-[4px] bg-[#F5F9FF] p-2'}>
         <div>
           <Typography.Text bold>目标表</Typography.Text>
         </div>
