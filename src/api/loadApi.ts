@@ -298,11 +298,7 @@ export async function checkSQL(params: {
 // 查询任务单个执行记录日志
 export async function getLoadTaskInstanceLog(params: {
   execution_id: number;
-}): Promise<
-  ApiRes<{
-    log: string;
-  }>
-> {
+}): Promise<ApiRes<string>> {
   return await UAPI.RES.GetLoadTaskInstanceLogApi({})
     .post(params)
     .inRegion()
