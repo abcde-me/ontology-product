@@ -261,7 +261,11 @@ function QualityTaskDetail() {
         </div>
       );
     }
-    return <div className="quality-result-cell">{items}</div>;
+    return items.length > 0 ? (
+      <div className="quality-result-cell">{items}</div>
+    ) : (
+      '-'
+    );
   };
 
   // 渲染批注
@@ -330,10 +334,17 @@ function QualityTaskDetail() {
       dataIndex: 'volumn_inspected',
       width: 120,
       render: (_, record) => {
+        if (record?.status === InspectionStatus.Finished) {
+          return (
+            <span>
+              100% ({record.volumn_inspected}/{record.volumn_total})
+            </span>
+          );
+        }
         const percent =
           record.volumn_total > 0
-            ? Math.round((record.volumn_inspected / record.volumn_total) * 100)
-            : 0;
+            ? ((record.volumn_inspected / record.volumn_total) * 100).toFixed(2)
+            : '0.00';
         return (
           <span>
             {percent}% ({record.volumn_inspected}/{record.volumn_total})
