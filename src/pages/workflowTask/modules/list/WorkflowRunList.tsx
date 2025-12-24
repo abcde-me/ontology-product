@@ -62,11 +62,11 @@ export default function WorkflowRunList() {
         workflow_type?: WorkflowType;
         workflow_uuid?: string;
         ds_workflow_id?: string;
+        workflow_version?: string;
       }
     ) => {
-      console.log('id', id);
       const url = `/tenant/compute/modaforge/workflowTask/detail/${id}`;
-      const queryParams = `?workflow_type=${params?.workflow_type}&workflow_uuid=${params?.workflow_uuid}&ds_workflow_id=${params?.ds_workflow_id}`;
+      const queryParams = `?workflow_type=${params?.workflow_type}&workflow_uuid=${params?.workflow_uuid}&ds_workflow_id=${params?.ds_workflow_id}&workflow_version=${params?.workflow_version}`;
       history.push(`${url}${queryParams}`);
     },
     [history]
@@ -339,7 +339,8 @@ export default function WorkflowRunList() {
                   handleWorkflowDetail(record.id, {
                     workflow_type: record.workflow_type,
                     workflow_uuid: record.workflow_uuid,
-                    ds_workflow_id: record.process_definition_code
+                    ds_workflow_id: record.process_definition_code,
+                    workflow_version: record.workflow_version
                   })
                 }
               >
@@ -456,24 +457,29 @@ export default function WorkflowRunList() {
 
       {/* 分页 */}
       <div className="mt-[16px] flex items-center justify-end">
-        {(table.pagination.total ?? 0) > 0 && (
-          <Pagination
-            current={table.pagination.current}
-            pageSize={table.pagination.pageSize}
-            total={table.pagination.total}
-            sizeOptions={[10, 20, 50, 100]}
-            showTotal
-            showJumper
-            sizeCanChange
-            pageSizeChangeResetCurrent
-            onChange={(page, pageSize) => {
-              table.onChange({ current: page, pageSize } as PaginationProps);
-            }}
-            onPageSizeChange={(size) => {
-              table.onChange({ current: 1, pageSize: size } as PaginationProps);
-            }}
-          />
-        )}
+        {table.pagination.total &&
+          table.pagination.pageSize &&
+          table.pagination.total > table.pagination.pageSize && (
+            <Pagination
+              current={table.pagination.current}
+              pageSize={table.pagination.pageSize}
+              total={table.pagination.total}
+              sizeOptions={[10, 20, 50, 100]}
+              showTotal
+              showJumper
+              sizeCanChange
+              pageSizeChangeResetCurrent
+              onChange={(page, pageSize) => {
+                table.onChange({ current: page, pageSize } as PaginationProps);
+              }}
+              onPageSizeChange={(size) => {
+                table.onChange({
+                  current: 1,
+                  pageSize: size
+                } as PaginationProps);
+              }}
+            />
+          )}
       </div>
     </>
   );

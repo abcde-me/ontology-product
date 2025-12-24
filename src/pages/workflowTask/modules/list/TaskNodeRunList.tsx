@@ -359,23 +359,28 @@ export default function TaskNodeRunList() {
 
       {/* 分页 */}
       <div className="mt-[16px] flex items-center justify-end">
-        {(table.pagination.total ?? 0) > 0 && (
-          <Pagination
-            current={table.pagination.current}
-            pageSize={table.pagination.pageSize}
-            total={table.pagination.total}
-            showTotal
-            showJumper
-            sizeCanChange
-            pageSizeChangeResetCurrent
-            onChange={(page, pageSize) => {
-              table.onChange({ current: page, pageSize } as PaginationProps);
-            }}
-            onPageSizeChange={(size) => {
-              table.onChange({ current: 1, pageSize: size } as PaginationProps);
-            }}
-          />
-        )}
+        {table.pagination.total &&
+          table.pagination.pageSize &&
+          table.pagination.total > table.pagination.pageSize && (
+            <Pagination
+              current={table.pagination.current}
+              pageSize={table.pagination.pageSize}
+              total={table.pagination.total}
+              showTotal
+              showJumper
+              sizeCanChange
+              pageSizeChangeResetCurrent
+              onChange={(page, pageSize) => {
+                table.onChange({ current: page, pageSize } as PaginationProps);
+              }}
+              onPageSizeChange={(size) => {
+                table.onChange({
+                  current: 1,
+                  pageSize: size
+                } as PaginationProps);
+              }}
+            />
+          )}
       </div>
 
       {/* 日志Drawer */}

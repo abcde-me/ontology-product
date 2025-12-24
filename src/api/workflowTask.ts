@@ -10,6 +10,8 @@ import {
   GetWorkflowTaskListResponse,
   ListTaskInstanceParams,
   ListTaskInstanceResponse,
+  TaskDetailParams,
+  TaskDetailResponse,
   TaskNodeForceSuccessParams,
   TaskNodeRetryParams,
   WorkflowOperationParams
@@ -72,4 +74,11 @@ export async function getRunLogs(
   params: GetRunLogsParams
 ): Promise<ApiRes<GetRunLogsResponse>> {
   return await UAPI.RES.GetRunLogsApi({}).post(params).inRegion().do();
+}
+
+// 作业详情
+export async function getTaskDetail(
+  params: TaskDetailParams
+): Promise<ApiRes<TaskDetailResponse>> {
+  return await UAPI.RES.taskDetail({}).post(params).inRegion().do();
 }
