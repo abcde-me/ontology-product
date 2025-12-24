@@ -93,6 +93,8 @@ export default function DataApi() {
   const [testVisible, setTestVisible] = useState(false);
   // 初始化测试弹窗数据
   const [testDataSource, setTestDataSource] = useState([]);
+  // 初始化测试弹窗apiId
+  const [testApiId, setTestApiId] = useState<number | null>(null);
   // 初始化查看文件弹窗是否显示
   const [viewFileModalVisible, setViewFileModalVisible] = useState(false);
   // 初始化查看文件弹窗id
@@ -426,7 +428,8 @@ export default function DataApi() {
                     }}
                     onClick={() => {
                       setTestVisible(true);
-                      setTestDataSource(record);
+                      setTestDataSource(record.paramConfig || []);
+                      setTestApiId(record.id);
                     }}
                   >
                     测试
@@ -549,7 +552,7 @@ export default function DataApi() {
       <TestModal
         visible={testVisible}
         dataSource={testDataSource}
-        apiId={0} // todo：临时赋值，待实现
+        apiId={testApiId}
         onCancel={() => setTestVisible(false)}
       />
 
