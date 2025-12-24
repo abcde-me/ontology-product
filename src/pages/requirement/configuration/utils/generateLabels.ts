@@ -21,7 +21,20 @@ export const generateLabels = (data: any[], type: string) => {
   let filteredData = data;
   if (type === 'edit') {
     // edit 模式：过滤掉 label_id 为 number 的 item
-    filteredData = data.filter((item) => typeof item.label_id !== 'number');
+    // filteredData = data.filter((item) => typeof item.label_id !== 'number');
+    filteredData = data.map((item) => {
+      const { label_id, id, ...restItem } = item;
+      if (typeof item.label_id !== 'number') {
+        return {
+          label_id,
+          ...restItem
+        };
+      }
+      return {
+        id,
+        ...restItem
+      };
+    });
   }
 
   return filteredData.map((item, itemIndex) => {
@@ -37,9 +50,22 @@ export const generateLabels = (data: any[], type: string) => {
     let filteredGroups = processedItem.label_info_attribute_groups || [];
     if (type === 'edit') {
       // edit 模式：过滤掉 attribute_id 为 number 的 group
-      filteredGroups = filteredGroups.filter(
-        (group) => typeof group.attribute_id !== 'number'
-      );
+      // filteredGroups = filteredGroups.filter(
+      //   (group) => typeof group.attribute_id !== 'number'
+      // );
+      filteredGroups = filteredGroups.map((group) => {
+        const { attribute_id, id, ...restGroup } = group;
+        if (typeof group.attribute_id !== 'number') {
+          return {
+            ...restGroup,
+            attribute_id
+          };
+        }
+        return {
+          id,
+          ...restGroup
+        };
+      });
     }
 
     return {
@@ -58,9 +84,22 @@ export const generateLabels = (data: any[], type: string) => {
         let filteredAttributes = processedGroup.label_info_attribute || [];
         if (type === 'edit') {
           // edit 模式：过滤掉 label_info_id 为 number 的 attribute
-          filteredAttributes = filteredAttributes.filter(
-            (attr) => typeof attr.label_info_id !== 'number'
-          );
+          // filteredAttributes = filteredAttributes.filter(
+          //   (attr) => typeof attr.label_info_id !== 'number'
+          // );
+          filteredAttributes = filteredAttributes.map((attr) => {
+            const { label_info_id, id, ...restAttr } = attr;
+            if (typeof attr.label_info_id !== 'number') {
+              return {
+                ...restAttr,
+                label_info_id
+              };
+            }
+            return {
+              id,
+              ...restAttr
+            };
+          });
         }
 
         return {
@@ -119,12 +158,10 @@ export const generateTextFlData = (data: any[], type: string) => {
 
   // edit 模式：删除所有 isFromDetail 为 true 的项
   if (type === 'edit') {
-    const filteredData = data.filter((item) => item.isFromDetail !== true);
-    return filteredData.map((item, index) => {
+    // const filteredData = data.filter((item) => item.isFromDetail !== true);
+    return data.map((item, index) => {
       const { isFromDetail, ...restItem } = item;
-      const filteredAttrs = (item.file_label_attribute || []).filter(
-        (attr) => attr.isFromDetail !== true
-      );
+      const filteredAttrs = item.file_label_attribute || [];
       return {
         ...restItem,
         order_num: index + 1,

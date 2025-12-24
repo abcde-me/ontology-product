@@ -78,8 +78,6 @@ function TextClassifyLabelInfo({ labelInfo }: { labelInfo: FileLabelInfo[] }) {
           <div
             key={attr.attribute_id || attrIndex}
             style={{
-              marginBottom:
-                attrIndex < file_label_attribute.length - 1 ? 16 : 0,
               padding: '12px 10px',
               backgroundColor: '#fff',
               borderRadius: 8

@@ -268,7 +268,7 @@ export default function RequirementConfig() {
     if (selectedRadio !== '') {
       setIsShowErrorInfo(false);
     }
-    if (selectedData?.length > 0) {
+    if (selectedData?.length > 0 && type !== 'edit') {
       setIsShowDataErrorInfo(false);
     }
   }, [selectedRadio, selectedData]);
@@ -582,7 +582,7 @@ export default function RequirementConfig() {
       basicForm
         .validate()
         .then(() => {
-          if (selectedData?.length <= 0) {
+          if (selectedData?.length <= 0 && type !== 'edit') {
             setIsShowDataErrorInfo(true);
             return;
           }
@@ -593,7 +593,7 @@ export default function RequirementConfig() {
           return true;
         })
         .catch(() => {
-          if (selectedData?.length <= 0) {
+          if (selectedData?.length <= 0 && type !== 'edit') {
             setIsShowDataErrorInfo(true);
           }
           if (selectedRadio === '') {
@@ -616,7 +616,7 @@ export default function RequirementConfig() {
           const errors = validateTaskAssignment(taskPackages);
           if (Object.keys(errors).length > 0) {
             setTaskDistributionErrors(errors);
-            Message.error('请完成所有必填的人员分配');
+            // Message.error('请完成所有必填的人员分配');
             return false;
           }
           return true;
@@ -670,10 +670,10 @@ export default function RequirementConfig() {
     setPageLoading(true);
     const { entityRelations, relationRelations } = TextEntityDataContent;
     const { name, description } = basicForm.getFieldsValue();
-    const label_count =
-      type === 'edit'
-        ? requirementDetail?.label_count + getTotal(selectedData)
-        : getTotal(selectedData);
+    const label_count = getTotal(selectedData) || 0;
+    // type === 'edit'
+    //   ? requirementDetail?.label_count + getTotal(selectedData)
+    //   : getTotal(selectedData);
     // 发布数据重置
     const new_publishData = {
       name,
@@ -1033,7 +1033,7 @@ export default function RequirementConfig() {
               <FormItem
                 field="dataset"
                 label="标注数据:"
-                required
+                required={type !== 'edit'}
                 style={{ marginBottom: 24 }}
               >
                 <div className="data-content-set">
@@ -1066,11 +1066,13 @@ export default function RequirementConfig() {
                     </>
                   )}
                 </div>
-                {selectedData?.length <= 0 && isShowDataErrorInfo && (
-                  <div className="data-error-info error-info-text">
-                    请选择数据
-                  </div>
-                )}
+                {selectedData?.length <= 0 &&
+                  type !== 'edit' &&
+                  isShowDataErrorInfo && (
+                    <div className="data-error-info error-info-text">
+                      请选择数据
+                    </div>
+                  )}
               </FormItem>
               <FormItem
                 initialValue={1}
