@@ -1,5 +1,7 @@
 import UAPI from '@/api';
 import {
+  GetRunLogsParams,
+  GetRunLogsResponse,
   GetTaskNodeListParams,
   GetTaskNodeListResponse,
   GetWorkflowRunResultListParams,
@@ -8,6 +10,8 @@ import {
   GetWorkflowTaskListResponse,
   ListTaskInstanceParams,
   ListTaskInstanceResponse,
+  TaskNodeForceSuccessParams,
+  TaskNodeRetryParams,
   WorkflowOperationParams
 } from '@/types/workflowTaskApi';
 
@@ -47,4 +51,25 @@ export async function listTaskInstance(
   params: ListTaskInstanceParams
 ): Promise<ApiRes<ListTaskInstanceResponse>> {
   return await UAPI.RES.ListTaskInstanceApi({}).post(params).inRegion().do();
+}
+
+// 任务节点强制成功
+export async function taskNodeForcesSuccess(
+  params: TaskNodeForceSuccessParams
+): Promise<ApiRes<{}>> {
+  return await UAPI.RES.TaskForcesSuccessApi({}).post(params).inRegion().do();
+}
+
+// 任务节点重试
+export async function taskNodeRetry(
+  params: TaskNodeRetryParams
+): Promise<ApiRes<{}>> {
+  return await UAPI.RES.RunTaskIntanceApi({}).post(params).inRegion().do();
+}
+
+// 获取任务运行日志
+export async function getRunLogs(
+  params: GetRunLogsParams
+): Promise<ApiRes<GetRunLogsResponse>> {
+  return await UAPI.RES.GetRunLogsApi({}).post(params).inRegion().do();
 }
