@@ -25,7 +25,8 @@ export async function getWorkflowDraft(params: any = {}) {
     .do();
 }
 
-export function createWorkflowDraft(params: any = {}) {
+export async function createWorkflowDraft(params: any = {}) {
+  // console.trace('save workflow draft');
   const searchParams = new URLSearchParams(location.search);
   const workflowUUID = params.workflowUUID || searchParams.get('workflow_uuid');
   const dsWorkflowId =
@@ -225,9 +226,10 @@ export async function getSQLListInSQLNode() {
     .inRegion()
     .do();
   const list = (res.data?.items || []) as SQLScriptItem[];
+  // 工作流名称不为空，脚本被引用，不展示
   return list
     .filter(({ process_name }) => !process_name)
-    .map(({ script_name, script_id, ...other }) => ({
+    .map(({ script_name, script_id, version, ...other }) => ({
       ...other,
       label: script_name,
       value: script_id
