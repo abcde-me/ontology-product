@@ -9,6 +9,8 @@ import QualityUserIcon from '@/assets/annotation/quality-user.svg';
 import RightArrowIcon from '@/assets/annotation/right-arrow.svg';
 import SelectedDepartmentModal from './SelectedDepartmentModal';
 import SelectedPersonModal from './SelectedPersonModal';
+import { CopyItemIcon } from '@ceai-front/arco-material';
+
 import './styles.scss';
 
 // 角色类型
@@ -212,7 +214,13 @@ function TaskAllocation({ requirementDetail }: TaskAllocationProps) {
     {
       title: '任务包ID',
       dataIndex: 'taskBId',
-      width: 120
+      width: 120,
+      render: (taskBId: string, record: TaskPackage) => (
+        <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+          <span>{taskBId}</span>
+          <CopyItemIcon value={taskBId} />
+        </div>
+      )
     },
     {
       title: '数据量',
