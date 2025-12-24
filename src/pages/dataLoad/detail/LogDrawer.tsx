@@ -34,7 +34,7 @@ const LogDrawer: React.FC<LogDrawerProps> = ({
     containerTarget: containerRef,
     wrapperTarget: wrapperRef,
     itemHeight: 24, // 每行大约24px高度，参考样式中的 leading-[24px]
-    overscan: 5 // 额外渲染的行数
+    overscan: 100 // 额外渲染的行数
   });
 
   // 加载日志
@@ -42,10 +42,11 @@ const LogDrawer: React.FC<LogDrawerProps> = ({
     if (!executionId) return;
 
     setLoading(true);
+    setLogContent('');
     try {
       const res = await getLoadTaskInstanceLog({ execution_id: executionId });
       if (res.status === 200 && res.data) {
-        setLogContent(res.data.log || '');
+        setLogContent(res.data || '');
       } else {
         Message.error(res.message || '获取日志失败');
         setLogContent('');
@@ -88,6 +89,7 @@ const LogDrawer: React.FC<LogDrawerProps> = ({
     <Drawer
       visible={visible}
       onCancel={onClose}
+      mask={true}
       width="720px"
       title="日志"
       footer={null}
@@ -122,7 +124,7 @@ const LogDrawer: React.FC<LogDrawerProps> = ({
       </div>
       <div
         ref={containerRef}
-        className="h-[calc(100vh-120px)] overflow-y-auto whitespace-pre-wrap break-all rounded-[4px] border border-[#E2E8F0] bg-[#F8FAFD] px-[12px] py-[8px] text-[14px] leading-[24px] text-[var(--color-text-1)]"
+        className="h-[calc(100vh-120px)] overflow-x-auto overflow-y-auto whitespace-pre rounded-[4px] border border-[#E2E8F0] bg-[#F8FAFD] px-[12px] py-[8px] text-[14px] leading-[24px] text-[var(--color-text-1)]"
       >
         {logLines.length === 0 && !loading && (
           <div className="flex h-[200px] items-center justify-center text-[14px] leading-[24px] text-[var(--color-text-1)]">
@@ -139,7 +141,7 @@ const LogDrawer: React.FC<LogDrawerProps> = ({
             {logList.map((item) => (
               <div
                 key={item.index}
-                className="text-[14px] leading-[24px] text-[var(--color-text-1)]"
+                className="whitespace-pre text-[14px] leading-[24px] text-[var(--color-text-1)]"
               >
                 {item.data}
               </div>
