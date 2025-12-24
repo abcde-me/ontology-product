@@ -122,7 +122,6 @@ export default function TestModal({ visible, dataSource, apiId, onCancel }) {
   const handleTest = () => {
     form.validate().then(async (values) => {
       const mergedConfig = mergeConfigWithArray(values, dataSource);
-      console.log(mergedConfig, 'mergedConfig');
       // 模拟接口调用
       setLoading(true);
       const params = {
@@ -137,7 +136,6 @@ export default function TestModal({ visible, dataSource, apiId, onCancel }) {
         Message.error(res.message || '测试失败');
         setLoading(false);
       }
-      console.log(res, 'rerrrr');
     });
   };
 
