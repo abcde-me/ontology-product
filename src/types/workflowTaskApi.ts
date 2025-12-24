@@ -254,6 +254,10 @@ export interface GetTaskNodeListParams {
 
 export interface TaskNodeItem {
   /**
+   * 任务节点实例ID
+   */
+  id: number;
+  /**
    * 执行类型，手动运行，定时运行
    */
   command_type: CommandType;
@@ -280,7 +284,7 @@ export interface TaskNodeItem {
   /**
    * 工作流执行ID
    */
-  process_instance_id: string;
+  process_instance_id: number;
   /**
    * 工作流名称
    */
@@ -312,7 +316,7 @@ export interface TaskNodeItem {
   /**
    * 任务节点ID
    */
-  task_code: string;
+  task_code: number;
   /**
    * 任务模式
    */
@@ -573,4 +577,42 @@ export interface ListTaskInstanceResponse {
   page: string;
   page_size: string;
   total: string;
+}
+
+export interface TaskNodeForceSuccessParams {
+  /**
+   * 任务节点实例ID
+   */
+  task_instance_id: number;
+}
+
+export interface TaskNodeRetryParams {
+  /**
+   * 工作流实例ID
+   */
+  process_instance_id: number;
+  /**
+   * 节点code
+   */
+  task_code_list: number[];
+}
+
+export interface GetRunLogsParams {
+  /**
+   * 任务节点实例ID
+   */
+  task_instance_id: number;
+  /**
+   * 每页条数
+   */
+  limit?: number;
+  /**
+   * 跳过行数
+   */
+  skip_line_num?: number;
+}
+
+export interface GetRunLogsResponse {
+  skip_line_num: number;
+  message: string;
 }

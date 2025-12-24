@@ -5,25 +5,28 @@ import {
   Empty,
   Form,
   Input,
+  Message,
   Modal,
   Spin,
   Table,
   Tabs
 } from '@arco-design/web-react';
 import styles from './testModal.module.scss';
+import { openDataTestApi } from '@/api/dataApi';
 
-export default function TestModal({ visible, dataSource, onCancel }) {
+export default function TestModal({ visible, dataSource, apiId, onCancel }) {
   const TabPane = Tabs.TabPane;
 
   const [form] = Form.useForm();
   const [requestBtnDisabled, setRequestBtnDisabled] = useState(false);
-  const [result, setResult] = useState('');
-  const [log, setLog] = useState('');
+  const [result, setResult] = useState<null | Record<string | number, any>>(
+    null
+  );
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     dataSource.forEach((item) => {
-      form.setFieldValue(`value_${item.englishName}`, item.defaultValue);
+      form.setFieldValue(`value_${item.name}`, item.defaultValue);
     });
     checkIsAllNotEmpty();
   }, [dataSource]);
@@ -32,16 +35,17 @@ export default function TestModal({ visible, dataSource, onCancel }) {
     {
       title: '序号',
       dataIndex: 'index',
-      width: 80
+      width: 80,
+      render: (_, record, index) => index + 1
     },
     {
       title: '参数位置',
-      dataIndex: 'position',
+      dataIndex: 'location',
       width: 140
     },
     {
       title: '参数英文名称',
-      dataIndex: 'englishName',
+      dataIndex: 'name',
       width: 200
     },
     {
@@ -49,7 +53,7 @@ export default function TestModal({ visible, dataSource, onCancel }) {
       dataIndex: 'value',
       width: 220,
       render: (_value, record) => (
-        <Form.Item field={`value_${record.englishName}`}>
+        <Form.Item field={`value_${record.name}`}>
           <Input
             placeholder="请输入值"
             onChange={() => {
@@ -61,7 +65,7 @@ export default function TestModal({ visible, dataSource, onCancel }) {
     },
     {
       title: '参数类型',
-      dataIndex: 'type',
+      dataIndex: 'paramType',
       width: 140
     },
     {
@@ -70,7 +74,7 @@ export default function TestModal({ visible, dataSource, onCancel }) {
       width: 80,
       render: (_value, record) => (
         <Form.Item
-          field={`isArray_${record.englishName}`}
+          field={`isArray_${record.name}`}
           initialValue={Boolean(record.isArray)}
           disabled
         >
@@ -80,15 +84,15 @@ export default function TestModal({ visible, dataSource, onCancel }) {
     },
     {
       title: '必填',
-      dataIndex: 'isRequired',
+      dataIndex: 'required',
       width: 80,
       render: (_value, record) => (
         <Form.Item
-          field={`isRequired_${record.englishName}`}
-          initialValue={Boolean(record.isRequired)}
+          field={`required_${record.name}`}
+          initialValue={Boolean(record.required)}
           disabled
         >
-          <Checkbox checked={record.isRequired} />
+          <Checkbox checked={record.required} />
         </Form.Item>
       )
     }
@@ -96,68 +100,42 @@ export default function TestModal({ visible, dataSource, onCancel }) {
 
   const checkIsAllNotEmpty = () => {
     const isAllNotEmpty = dataSource.every((item) => {
-      const value = form.getFieldValue(`value_${item.englishName}`);
+      const value = form.getFieldValue(`value_${item.name}`);
       return value && value !== '';
     });
     setRequestBtnDisabled(!isAllNotEmpty);
   };
 
   const mergeConfigWithArray = (flatConfig, array) => {
-    return array.map((item) => {
-      const enName = item.englishName;
+    const newArray = array.map((item) => {
+      const enName = item.name;
       // 构建要补充的属性（支持扩展更多属性）
       const supplementProperties = {
-        value: flatConfig[`value_${enName}`],
-        // 可选属性：存在则添加，不存在则忽略
-        ...(flatConfig[`isArray_${enName}`] !== undefined && {
-          isArray: flatConfig[`isArray_${enName}`]
-        }),
-        ...(flatConfig[`isRequired_${enName}`] !== undefined && {
-          isRequired: flatConfig[`isRequired_${enName}`]
-        })
+        [`${enName}`]: flatConfig[`value_${enName}`]
       };
       // 合并原始属性和补充属性
-      return { ...item, ...supplementProperties };
+      return { ...supplementProperties };
     });
+    return Object.assign({}, ...newArray);
   };
 
   const handleTest = () => {
-    form.validate().then((values) => {
+    form.validate().then(async (values) => {
       const mergedConfig = mergeConfigWithArray(values, dataSource);
-      console.log(mergedConfig, 'mergedConfig');
       // 模拟接口调用
       setLoading(true);
-      new Promise<void>((resolve) => {
-        setTimeout(() => {
-          setResult(
-            JSON.stringify({
-              code: 200,
-              message: 'success',
-              data: {
-                id: 123456,
-                name: '张三',
-                age: 30,
-                email: 'zhangsan@example.com'
-              }
-            })
-          );
-          setLog(
-            JSON.stringify({
-              code: 200,
-              message: 'success',
-              data: {
-                id: 123456,
-                name: '张三',
-                age: 30,
-                email: 'zhangsan@example.com'
-              }
-            })
-          );
-          resolve();
-        }, 3000);
-      }).then(() => {
+      const params = {
+        id: apiId,
+        testParams: mergedConfig
+      };
+      const res = await openDataTestApi(params);
+      if (res.code === '' && res.status === 200) {
+        if (res.data) setResult(res.data);
         setLoading(false);
-      });
+      } else {
+        Message.error(res.message || '测试失败');
+        setLoading(false);
+      }
     });
   };
 
@@ -171,8 +149,7 @@ export default function TestModal({ visible, dataSource, onCancel }) {
       onCancel={() => {
         onCancel();
         form.resetFields();
-        setResult('');
-        setLog('');
+        setResult(null);
       }}
     >
       <div className="flex gap-6">
@@ -200,10 +177,10 @@ export default function TestModal({ visible, dataSource, onCancel }) {
               <div className="mt-4 flex items-center gap-6">
                 <div>
                   <span className="text-sm font-medium text-[#0F172A]">
-                    状态码:{' '}
+                    响应状态:{' '}
                   </span>
                   <span className="text-sm font-medium text-[#0F172A]">
-                    200
+                    {result.statusCode || '-'}
                   </span>
                 </div>
                 <div>
@@ -211,16 +188,28 @@ export default function TestModal({ visible, dataSource, onCancel }) {
                     响应时间:{' '}
                   </span>
                   <span className="text-sm font-medium text-[#0F172A]">
-                    20s
+                    {result?.queryTime ? `${result?.queryTime}s` : '-'}
                   </span>
                 </div>
               </div>
               <Tabs defaultActiveTab="result">
                 <TabPane key="result" title="响应结果(已脱敏)">
-                  <div className={styles.responseBox}>{result}</div>
+                  <div className={styles.responseBox}>
+                    <pre>
+                      {result?.result
+                        ? JSON.stringify(result?.result, null, 2)
+                        : '-'}
+                    </pre>
+                  </div>
                 </TabPane>
                 <TabPane key="log" title="响应日志">
-                  <div className={styles.responseBox}>{log}</div>
+                  <div className={styles.responseBox}>
+                    <pre>
+                      {result?.errorInfo
+                        ? JSON.stringify(result?.errorInfo, null, 2)
+                        : '-'}
+                    </pre>
+                  </div>
                 </TabPane>
               </Tabs>
             </>
