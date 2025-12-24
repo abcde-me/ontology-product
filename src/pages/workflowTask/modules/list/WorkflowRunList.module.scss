@@ -1,0 +1,15 @@
+.operation-container {
+  :global(.arco-dropdown-popup-visible .arco-icon-down) {
+    transform: rotate(180deg);
+  }
+}
+
+// 只有非disabled的菜单项在hover时才显示蓝色
+:global(.arco-dropdown-menu-item:not(.arco-dropdown-menu-disabled):hover) {
+  color: rgb(var(--primary-6)) !important;
+}
+
+// disabled状态下hover时不显示蓝色，保持默认颜色
+:global(.arco-dropdown-menu-item.arco-dropdown-menu-disabled:hover) {
+  color: var(--color-text-4) !important;
+}
