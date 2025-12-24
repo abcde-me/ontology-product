@@ -52,9 +52,9 @@ enum RequestMethod {
 }
 
 // 枚举开始时间结束时间字段
-enum StartOrEnd {
-  start_time = 'start_time',
-  end_time = 'end_time'
+enum sortBy {
+  cacheTime = 'cacheTime',
+  updatedTime = 'updatedTime'
 }
 
 export default function DataApi() {
@@ -99,7 +99,7 @@ export default function DataApi() {
   const [viewFileId, setViewFileId] = useState('');
   // 初始化筛选的值
   const [sortValue, setSortValue] = useState({
-    status: '',
+    status: [] as string[],
     sort: '',
     sort_by: ''
   });
@@ -155,7 +155,7 @@ export default function DataApi() {
   ) => {
     setCurrent(1);
     const sortdata = {
-      status: filters.status === undefined ? '' : filters.status.join(','),
+      status: filters.status || [],
       sort:
         sorter.direction === undefined
           ? ''
@@ -165,9 +165,9 @@ export default function DataApi() {
       sort_by:
         sorter.field === undefined
           ? ''
-          : sorter.field === StartOrEnd.start_time
-            ? 'start_run_time'
-            : 'end_run_time'
+          : sorter.field === sortBy.cacheTime
+            ? 'cacheTime'
+            : 'updatedTime'
     };
 
     setSortValue(sortdata);
@@ -536,6 +536,7 @@ export default function DataApi() {
       <TestModal
         visible={testVisible}
         dataSource={testDataSource}
+        apiId={0}
         onCancel={() => setTestVisible(false)}
       />
 

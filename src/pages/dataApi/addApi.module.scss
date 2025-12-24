@@ -16,6 +16,15 @@
       margin-left: 8px;
     }
 
+    .inputNumber {
+      :global(.arco-form-item-control-children) {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 14px;
+      }
+    }
+
     :global(.arco-steps-item-wait .arco-steps-item-title),
     :global(.arco-steps-item-finish .arco-steps-item-title) {
       color: #1e293b;
@@ -32,6 +41,10 @@
         :global(.arco-input) {
           margin-right: -10px;
         }
+      }
+
+      :global(.arco-input:hover) {
+        z-index: 100;
       }
 
       :global(.arco-input-inner-wrapper) {

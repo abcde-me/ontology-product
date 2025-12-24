@@ -512,6 +512,16 @@ export const ModaForgeResourceEndpoints = {
   openDataPublishApi: PrefixAimdp + '/OpenDataPublishApi',
   // 下线数据API
   openDataUnpublishApi: PrefixAimdp + '/OpenDataUnpublishApi',
+  // 数据源列表
+  openDataListDatabaseApi: PrefixAimdp + '/OpenDataListDatabase',
+  // 表字段列表
+  openDataListFieldsApi: PrefixAimdp + '/OpenDataListFields',
+  // 解析SQL
+  openDataParseSqlApi: PrefixAimdp + '/OpenDataParseSql',
+  // 测试数据API
+  openDataTestApi: PrefixAimdp + '/OpenDataTestAPI',
+  // 创建数据API
+  openDataCreateApi: PrefixAimdp + '/OpenDataCreateApi',
 
   // SQL开发
   sqlListApi: PrefixAimdp + '/ListSqlFile',
