@@ -29,17 +29,25 @@ import copy from 'copy-to-clipboard';
 import TestModal from './compontent/testModal';
 import {
   openDataCreateApi,
+  openDataGetApiDetail,
   openDataListDatabase,
   openDataListFields,
-  openDataParseSql
+  openDataParseSql,
+  openDataSearchTable,
+  openDataUpdateDataAPI
 } from '@/api/dataApi';
+import { useUserInfo } from '@/store/userInfoStore';
 import { TreeDataType } from '@arco-design/web-react/es/Tree/interface';
+import { useParams } from '@/utils/url';
 
 export default function AddApi() {
   const Step = Steps.Step;
   const TextArea = Input.TextArea;
   const CollapseItem = Collapse.Item;
   const TabPane = Tabs.TabPane;
+
+  const type = useParams('type');
+  const id = useParams('id');
 
   // 编辑器实例引用
   const editorRef = useRef<ReactCodeMirrorRef>(null);
@@ -52,10 +60,13 @@ export default function AddApi() {
   const [inputParamsForm] = Form.useForm();
   const [outputParamsForm] = Form.useForm();
 
+  const userInfo = useUserInfo();
   const [current, setCurrent] = useState(1);
-  const [apiId, setApiId] = useState(null);
+  const [apiId, setApiId] = useState<number | null>(null);
   const [apiScenePath, setApiScenePath] = useState('');
-  const [apiBaseInfo, setApiBaseInfo] = useState({});
+  const [apiBaseInfo, setApiBaseInfo] = useState<Record<string, any> | null>(
+    null
+  );
   const [value, setValue] = useState('');
   const [isEditorFocused, setIsEditorFocused] = useState<boolean>(false);
   const [isOpen, setIsOpen] = useState<boolean>(false); // 当前面板是否展开
@@ -137,22 +148,22 @@ export default function AddApi() {
       )
     },
     {
-      title: '必填',
-      dataIndex: 'required',
-      width: 80,
-      render: (value, record) => (
-        <Form.Item field={`required_${record.name}`} initialValue={value}>
-          <Checkbox defaultChecked={value} />
-        </Form.Item>
-      )
-    },
-    {
       title: '默认值',
       dataIndex: 'defaultValue',
       width: 150,
       render: (value, record) => (
         <Form.Item field={`defaultValue_${record.name}`} initialValue={value}>
           <Input placeholder="请输入默认值" />
+        </Form.Item>
+      )
+    },
+    {
+      title: '描述',
+      dataIndex: 'description',
+      width: 150,
+      render: (value, record) => (
+        <Form.Item field={`description_${record.name}`} initialValue={value}>
+          <Input placeholder="请输入描述" />
         </Form.Item>
       )
     }
@@ -227,6 +238,13 @@ export default function AddApi() {
   // 输出参数配置
   const [resultData, setResultData] = useState([]);
 
+  // 是否为编辑
+  useEffect(() => {
+    if (type === 'edit') {
+      getEditApiDetail();
+    }
+  }, [type, id]);
+
   // 兼容小屏样式
   useEffect(() => {
     const tabHeight = rightBoxRef.current?.offsetHeight
@@ -250,6 +268,22 @@ export default function AddApi() {
     }
   }, [testModalDataSource && resultArray]);
 
+  const getEditApiDetail = async () => {
+    const res = await openDataGetApiDetail({ id: Number(id) });
+    if (res.code === '' && res.status === 200) {
+      form.setFieldsValue(res.data || {});
+      setValue(res.data.sql || '');
+      setParamData(res.data?.paramConfig || []);
+      setResultData(res.data?.resultConfig || []);
+      setActiveKey(['inputOutputParams']);
+      setResizeSize('190px');
+      setIsOpen(true);
+      setIsCanTest(true);
+    } else {
+      Message.error(res.message || '查看文档失败');
+    }
+  };
+
   const saveAndTestApi = async () => {
     const params = {
       ...apiBaseInfo,
@@ -258,15 +292,25 @@ export default function AddApi() {
       cacheTime: form.getFieldValue('cacheTime'),
       sql: value,
       paramConfig: testModalDataSource,
-      resultConfig: resultArray
+      resultConfig: resultArray,
+      creatorId: userInfo?.id,
+      creatorName: userInfo?.name
     };
-    const res = await openDataCreateApi(params);
+    const res =
+      type === 'add'
+        ? await openDataCreateApi(params)
+        : await openDataUpdateDataAPI({ ...params, id: Number(id) });
     if (res.code === '' && res.status === 200) {
-      if (res.data?.id) {
-        setApiId(res.data?.id);
+      if (type === 'add') {
+        if (res.data?.id) {
+          setApiId(Number(res.data?.id));
+          setTestModalVisible(true);
+        } else {
+          Message.error(res.message || '测试失败');
+        }
+      } else if (type === 'edit') {
+        setApiId(Number(id));
         setTestModalVisible(true);
-      } else {
-        Message.error(res.message || '测试失败');
       }
     } else {
       Message.error(res.message || '测试失败');
@@ -338,12 +382,12 @@ export default function AddApi() {
     return openDataListFields(params).then((res) => {
       if (res.code === '' && res.status === 200) {
         if (res.data) {
-          console.log(res.data, 'ddddddddddd');
-          // treeNode.props.dataRef.children = res.data.map((item) => ({
-          //   title: item.columnName,
-          //   key: item.columnName,
-          //   isLeaf: true
-          // }));
+          treeNode.props.dataRef.children = res.data.map((item) => ({
+            title: item.fieldName,
+            key: `${item.fieldName}_${item.id}`,
+            isLeaf: true
+          }));
+          setTreeData([...treeData]);
         }
       } else {
         Message.error(res.message || '获取字段列表失败');
@@ -383,7 +427,7 @@ export default function AddApi() {
     });
   }, []);
 
-  const handleInsertClick = (nodeContent: string | undefined) => {
+  const handleInsertClick = (nodeContent: string) => {
     const isEditorFocusedNow = isEditorFocused ?? false;
 
     if (!nodeContent) {
@@ -403,6 +447,61 @@ export default function AddApi() {
         Message.error('内容复制失败');
       }
     }
+  };
+
+  // 搜索表
+  const handleSearchTable = async (value: string) => {
+    const params = {
+      tableName: value
+    };
+    const res = await openDataSearchTable(params);
+    if (res.code === '' && res.status === 200) {
+      if (res.data) {
+        const groupMap = new Map();
+        // 正则匹配关键字（不区分大小写，如需严格匹配则去掉 i）
+        const reg = new RegExp(`(${value})`, 'gi');
+
+        res.data.forEach((item) => {
+          const { databaseType } = item;
+          if (!databaseType) return;
+
+          if (!groupMap.has(databaseType)) {
+            groupMap.set(databaseType, {
+              title: databaseType,
+              key: databaseType,
+              children: []
+            });
+          }
+
+          const childNode = {
+            title: highlightKeyword(item.tableName, value),
+            key: `${databaseType}_${item.id}`,
+            children: []
+          };
+          groupMap.get(databaseType).children.push(childNode);
+        });
+        setTreeData(Array.from(groupMap.values()));
+      }
+    } else {
+      Message.error(res.message || '搜索表失败');
+    }
+  };
+
+  // 高亮关键字
+  const highlightKeyword = (str, keyword) => {
+    // 正则匹配关键字（不区分大小写，如需严格匹配则去掉 i）
+    const reg = new RegExp(`(${keyword})`, 'gi');
+    // 分割字符串并替换关键字为带样式的span
+    return str.split(reg).map((part, index) => {
+      if (part.toLowerCase() === keyword) {
+        return (
+          <span key={index} style={{ color: '#087dfa', fontWeight: 'bold' }}>
+            {part}
+          </span>
+        );
+      }
+      return <span key={index}>{part}</span>;
+    });
   };
 
   // 转换函数
@@ -616,13 +715,13 @@ export default function AddApi() {
                 <Input
                   className={styles.apiPath}
                   placeholder="请输入端路径，以“/”开始"
-                  addBefore={
-                    <Input
-                      placeholder="请输入环境路径"
-                      value={apiScenePath}
-                      onChange={(value) => setApiScenePath(value)}
-                    />
-                  }
+                  // addBefore={
+                  //   <Input
+                  //     placeholder="请输入环境路径"
+                  //     value={apiScenePath}
+                  //     onChange={(value) => setApiScenePath(value)}
+                  //   />
+                  // }
                 />
               </Form.Item>
               <Form.Item
@@ -637,20 +736,18 @@ export default function AddApi() {
                   placeholder="请选择请求方式"
                 />
               </Form.Item>
-              {/* <Form.Item
+              <Form.Item
                 label="请求格式"
-                field="apiRequestFormat"
+                field="requestFormat"
                 required
                 rules={[{ required: true, message: '请选择API请求格式' }]}
+                initialValue={'json'}
               >
                 <Select
-                  options={[
-                    { label: 'GET', value: 'GET' },
-                    { label: 'POST', value: 'POST' }
-                  ]}
+                  options={[{ label: 'json', value: 'json' }]}
                   placeholder="请选择请求格式"
                 />
-              </Form.Item> */}
+              </Form.Item>
               <Form.Item
                 label="最大速率"
                 field="limitCount"
@@ -736,6 +833,9 @@ export default function AddApi() {
                   <Input.Search
                     placeholder="请输入搜索数据源"
                     className="ml-2 w-[160px]"
+                    onSearch={handleSearchTable}
+                    allowClear
+                    onClear={getOpenDataListData}
                   />
                 </div>
                 <Tree
@@ -745,7 +845,7 @@ export default function AddApi() {
                   actionOnClick={['expand', 'select']}
                   renderTitle={(props) => {
                     const nodeData = props.dataRef;
-                    const nodeContent = props.dataRef?.content;
+                    const nodeContent = nodeData?.isLeaf;
                     return (
                       <div className="flex items-center">
                         <EllipsisPopoverCom
@@ -757,7 +857,9 @@ export default function AddApi() {
                           <Button
                             type="outline"
                             className={styles.insertOrCopyBtn}
-                            onClick={() => handleInsertClick(nodeContent)}
+                            onClick={() =>
+                              handleInsertClick(nodeData?.title as string)
+                            }
                             onMouseDown={(e) => {
                               // 阻止按钮获得焦点，保持编辑器焦点
                               e.preventDefault();
