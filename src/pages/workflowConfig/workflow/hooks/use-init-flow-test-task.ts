@@ -6,6 +6,7 @@ import { TaskStatus } from '@/pages/workflowConfig/types/workflow';
 import { useStore as useTaskStore } from '@/pages/workflowConfig/task/store';
 import { useShallow } from 'zustand/react/shallow';
 import { isNil } from 'lodash-es';
+import { WorkflowTaskStatus } from '@/types/workflowTaskApi';
 
 export default function useInitFlowTestTask(manual = false) {
   const ds_workflow_id = useSearchParam('ds_workflow_id');
@@ -61,7 +62,22 @@ export default function useInitFlowTestTask(manual = false) {
         if (!res.length) return cancel();
         const taskIsRunning = res.some((nodeProcess) => {
           const { state } = nodeProcess;
-          return state === TaskStatus.RUNNING_EXECUTION;
+          return [
+            /** 正在运行 */
+            WorkflowTaskStatus.RUNNING_EXECUTION,
+            /** 提交成功 */
+            WorkflowTaskStatus.SUBMITTED_SUCCESS,
+            /** 等待执行 */
+            WorkflowTaskStatus.WAIT_TO_RUN,
+            /** 延迟执行 */
+            WorkflowTaskStatus.DELAY_EXECUTION,
+            /** 串行等待 */
+            WorkflowTaskStatus.SERIAL_WAIT,
+            /** 准备阻塞 */
+            WorkflowTaskStatus.READY_BLOCK,
+            /** 运行阻塞 */
+            WorkflowTaskStatus.BLOCK
+          ].includes(state as WorkflowTaskStatus);
         });
         if (!taskIsRunning) {
           cancel();

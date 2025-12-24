@@ -80,7 +80,9 @@ export default memo(function FlowSetting() {
   };
 
   const { run: onFlowChange } = useDebounceFn(
-    () => {
+    (changedValues) => {
+      // 批量赋值时不走保存逻辑
+      if (Object.keys(changedValues).length > 1) return;
       form
         .validate()
         .then((res) => {
