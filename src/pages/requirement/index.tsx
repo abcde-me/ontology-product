@@ -312,7 +312,7 @@ export default function Requirement() {
       dataIndex: 'operate',
       align: 'left',
       fixed: 'right',
-      width: 160,
+      width: 170,
       render: (_, record) => {
         const actions: ActionItem[] = [
           ...(hasPermissionGetDetail
