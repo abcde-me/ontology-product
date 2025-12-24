@@ -7,7 +7,9 @@ import {
   Modal,
   Pagination,
   Tooltip,
-  Message
+  Message,
+  Space,
+  Link
 } from '@arco-design/web-react';
 import { IconArrowLeft } from '@arco-design/web-react/icon';
 import { ColumnProps } from '@arco-design/web-react/es/Table';
@@ -234,7 +236,10 @@ function QualityTaskDetail() {
     if (result.passed > 0) {
       items.push(
         <div key="passed" className="result-item">
-          <Tag color="green" size="small">
+          <Tag
+            style={{ backgroundColor: '#ECFDF5', color: '#10B981' }}
+            size="small"
+          >
             通过
           </Tag>
           <span className="result-count">{result.passed}</span>
@@ -244,7 +249,10 @@ function QualityTaskDetail() {
     if (result.rejected > 0) {
       items.push(
         <div key="rejected" className="result-item">
-          <Tag color="red" size="small">
+          <Tag
+            style={{ backgroundColor: '#FEF2F2', color: '#EF4444' }}
+            size="small"
+          >
             驳回
           </Tag>
           <span className="result-count">{result.rejected}</span>
@@ -254,7 +262,10 @@ function QualityTaskDetail() {
     if (result.uninspected > 0) {
       items.push(
         <div key="uninspected" className="result-item">
-          <Tag color="orange" size="small">
+          <Tag
+            style={{ backgroundColor: '#FEFBEB', color: '#F7BA1E' }}
+            size="small"
+          >
             未检
           </Tag>
           <span className="result-count">{result.uninspected}</span>
@@ -301,7 +312,10 @@ function QualityTaskDetail() {
         <div className="id-cell">
           <span>{record.qs_id}</span>
           {record?.type === 1 && (
-            <Tag color="purple" size="small">
+            <Tag
+              style={{ backgroundColor: '#F5E8FF', color: '#722ED1' }}
+              size="small"
+            >
               复核
             </Tag>
           )}
@@ -396,27 +410,27 @@ function QualityTaskDetail() {
     {
       title: '操作',
       dataIndex: 'operation',
-      width: 160,
+      width: 140,
       fixed: 'right',
       render: (_, record) => {
         const isFinished = record.status === InspectionStatus.Finished;
         return (
-          <div className="operation-cell">
+          <Space>
             {hasPermissionActionTask && (
-              <span
-                className={`operation-link ${isFinished ? 'disabled' : ''}`}
-                onClick={() => !isFinished && handleGoInspect(record)}
+              <Link
+                onClick={() => handleGoInspect(record)}
+                disabled={isFinished}
               >
                 去质检
-              </span>
+              </Link>
             )}
-            <span
-              className={`operation-link ${isFinished ? 'disabled' : ''}`}
-              onClick={() => !isFinished && handleBatchInspect(record)}
+            <Link
+              onClick={() => handleBatchInspect(record)}
+              disabled={isFinished}
             >
               批量质检
-            </span>
-          </div>
+            </Link>
+          </Space>
         );
       }
     }
