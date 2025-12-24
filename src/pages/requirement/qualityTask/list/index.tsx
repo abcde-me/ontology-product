@@ -17,6 +17,8 @@ import ImageIcon from '@/assets/annotation/image-column.svg';
 import { RequirementTypeNameMap } from '../../type';
 import { CopyItemIcon } from '@ceai-front/arco-material';
 import { listQualityControlTasks } from '@/api/dataAnnotation';
+import { useHasPermission } from '@/store/userInfoStore';
+import { QUALITY_TASK_PERMISSIONS } from '@/config/permissions';
 import './index.scss';
 
 const TabPane = Tabs.TabPane;
@@ -88,6 +90,7 @@ interface QualityTaskListParams {
 }
 
 function QualityTaskList() {
+  const hasPermissionGetPkg = useHasPermission(QUALITY_TASK_PERMISSIONS.GET);
   const history = useHistory();
   const location = useLocation();
 
@@ -394,13 +397,15 @@ function QualityTaskList() {
       width: 100,
       fixed: 'right',
       render: (_, record) => {
-        return (
+        return hasPermissionGetPkg ? (
           <Link
             className="operation-link"
             onClick={() => goToDetailPage(record)}
           >
             去质检
           </Link>
+        ) : (
+          '-'
         );
       }
     }
