@@ -135,10 +135,9 @@ const IndividualModal: React.FC<DataSourceModalProps> = ({
         treeData={treeData}
         renderTitle={(node: any) => {
           return (
-            <EllipsisPopover
-              value={node.title}
-              style={{ width: '170px', color: '#0F172A' }}
-            />
+            <div style={{ width: '170px', marginTop: '-2px' }}>
+              <EllipsisPopover value={node.title} />
+            </div>
           );
         }}
         onSelect={(value) => {

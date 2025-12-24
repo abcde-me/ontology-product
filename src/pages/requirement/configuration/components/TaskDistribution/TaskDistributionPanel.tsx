@@ -3,8 +3,16 @@
  */
 
 import RightArrowIcon from '@/assets/annotation/right-arrow.svg';
-import { Button, Table, Link, Modal, Tag } from '@arco-design/web-react';
-import React, { useCallback, useState } from 'react';
+import {
+  Button,
+  Table,
+  Link,
+  Modal,
+  Tag,
+  FormInstance,
+  Form
+} from '@arco-design/web-react';
+import React, { useCallback, useState, useMemo } from 'react';
 import BatchAssignModal from './BatchAssignModal';
 import RoleAssignmentCard from './RoleAssignmentCard';
 import TaskAllocation from '@/pages/requirement/info/detail/tsakAllocation';
@@ -17,6 +25,7 @@ import {
 } from './types';
 
 interface TaskDistributionPanelProps {
+  qualityTaskForm: FormInstance;
   taskPackages: TaskPackage[];
   onUpdate: (packages: TaskPackage[]) => void;
   validationErrors?: ValidationErrors;
@@ -28,6 +37,7 @@ interface TaskDistributionPanelProps {
 }
 
 const TaskDistributionPanel: React.FC<TaskDistributionPanelProps> = ({
+  qualityTaskForm,
   taskPackages,
   onUpdate,
   validationErrors = {},
@@ -37,7 +47,10 @@ const TaskDistributionPanel: React.FC<TaskDistributionPanelProps> = ({
 }) => {
   const [batchModalVisible, setBatchModalVisible] = useState(false);
   const [historyModalVisible, setHistoryModalVisible] = useState(false);
-
+  const qcRound = Form.useWatch('qc_round', qualityTaskForm);
+  const tableWidth = useMemo(() => {
+    return Math.min(1200, 600 + qcRound * 260);
+  }, [qcRound]);
   // 处理单个角色更新
   const handleRoleUpdate = useCallback(
     (taskId: string, roleType: string, data: Partial<RoleAssignment>) => {
@@ -207,7 +220,7 @@ const TaskDistributionPanel: React.FC<TaskDistributionPanelProps> = ({
     <div className="task-distribution-panel">
       {/* 编辑模式下显示历史记录按钮 */}
       {isEditMode && (
-        <div className="history-link-container">
+        <div className="history-link-container" style={{ marginTop: '4px' }}>
           <Link onClick={() => setHistoryModalVisible(true)}>历史记录</Link>
         </div>
       )}
@@ -220,7 +233,8 @@ const TaskDistributionPanel: React.FC<TaskDistributionPanelProps> = ({
         pagination={false}
         className="task-distribution-table"
         border={false}
-        scroll={{ x: 'max-content' }}
+        scroll={{ x: tableWidth }}
+        style={{ maxWidth: tableWidth }}
       />
 
       {/* 批量分配弹窗 */}
