@@ -79,3 +79,8 @@ export async function openDataUpdateDataAPI(
 ) {
   return await UAPI.RES.openDataUpdateDataAPI({}).post(params).inRegion().do();
 }
+
+// 删除数据API
+export async function openDataDeleteApi(params: Record<string | number, any>) {
+  return await UAPI.RES.openDataDeleteApi({}).post(params).inRegion().do();
+}

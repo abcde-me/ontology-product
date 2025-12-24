@@ -16,6 +16,7 @@ import EllipsisPopover from '@/components/ellipsis-popover-com';
 import noDataElement from '@/components/no-data';
 import { useUserInfo } from '@/store/userInfoStore';
 import {
+  openDataDeleteApi,
   openDataList,
   openDataPublish,
   openDataUnpublish
@@ -139,7 +140,7 @@ export default function DataApi() {
           setTotal(res.data.total || 10);
         }
       } else {
-        Message.error(res.msg || '获取数据API列表失败');
+        Message.error(res.message || '获取数据API列表失败');
       }
     } finally {
       setLoading(false);
@@ -231,19 +232,33 @@ export default function DataApi() {
     if (record.status === ApiStatus.success) {
       const res = await openDataUnpublish(params);
       if (res.status === 200 && res.code === '') {
-        Message.success(res.msg || '下线数据API成功');
+        Message.success(res.message || '下线数据API成功');
         getList();
       } else {
-        Message.error(res.msg || '下线数据API失败');
+        Message.error(res.message || '下线数据API失败');
       }
     } else {
       const res = await openDataPublish(params);
       if (res.status === 200 && res.code === '') {
-        Message.success(res.msg || '上线数据API成功');
+        Message.success(res.message || '上线数据API成功');
         getList();
       } else {
-        Message.error(res.msg || '上线数据API失败');
+        Message.error(res.message || '上线数据API失败');
       }
+    }
+  };
+
+  // 删除数据API
+  const handleDeleteApi = async (id: string) => {
+    const params = {
+      id
+    };
+    const res = await openDataDeleteApi(params);
+    if (res.status === 200 && res.code === '') {
+      Message.success(res.message || '删除数据API成功');
+      getList();
+    } else {
+      Message.error(res.message || '删除数据API失败');
     }
   };
 
@@ -443,6 +458,9 @@ export default function DataApi() {
                       height: '100%',
                       borderTop: 'none',
                       borderBottom: 'none'
+                    }}
+                    onClick={() => {
+                      handleDeleteApi(record.id);
                     }}
                   >
                     删除
