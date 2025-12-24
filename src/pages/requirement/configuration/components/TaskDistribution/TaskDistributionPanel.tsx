@@ -23,6 +23,7 @@ import {
   TaskPackage,
   ValidationErrors
 } from './types';
+import { CopyItemIcon } from '@ceai-front/arco-material';
 
 interface TaskDistributionPanelProps {
   qualityTaskForm: FormInstance;
@@ -156,9 +157,10 @@ const TaskDistributionPanel: React.FC<TaskDistributionPanelProps> = ({
       dataIndex: 'taskBId',
       width: 160,
       render: (taskBId: string, record: TaskPackage) => (
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
           <span>{taskBId}</span>
-          {isEditMode && record.isFromDetail && (
+          <CopyItemIcon value={taskBId} />
+          {/* {isEditMode && record.isFromDetail && (
             <Tag size="small" color="arcoblue">
               历史
             </Tag>
@@ -167,7 +169,7 @@ const TaskDistributionPanel: React.FC<TaskDistributionPanelProps> = ({
             <Tag size="small" color="green">
               新增
             </Tag>
-          )}
+          )} */}
         </div>
       )
     },

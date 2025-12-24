@@ -8,7 +8,7 @@ function QualityConfig({ requirementDetail }: { requirementDetail: any }) {
       items: [
         {
           label: '质检轮次',
-          value: requirementDetail?.req_config?.qc_round || 0
+          value: `${requirementDetail?.req_config?.qc_round}轮`
         },
         {
           label: '质检修改标注',
@@ -20,7 +20,9 @@ function QualityConfig({ requirementDetail }: { requirementDetail: any }) {
         {
           label: '驳回至',
           value:
-            requirementDetail?.req_config?.reject_to === 1 ? '公池' : '标注员'
+            requirementDetail?.req_config?.reject_to === 1
+              ? '标注公池'
+              : '标注员'
         }
       ]
     }
