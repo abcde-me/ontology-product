@@ -510,7 +510,7 @@ export interface ListTaskInstanceItem {
   /**
    * 工作流执行ID
    */
-  process_instance_id: string;
+  process_instance_id: number;
   /**
    * 工作流名称
    */
@@ -546,7 +546,7 @@ export interface ListTaskInstanceItem {
   /**
    * 任务节点ID
    */
-  task_code: string;
+  task_code: number;
   /**
    * 任务模式，0 离线、1  实时
    */
@@ -615,4 +615,147 @@ export interface GetRunLogsParams {
 export interface GetRunLogsResponse {
   skip_line_num: number;
   message: string;
+}
+
+export interface TaskDetailParams {
+  /**
+   * 工作id
+   */
+  id: string;
+}
+
+/**
+ * 模型信息
+ */
+export interface ModelInfo {
+  /**
+   * 模型ID
+   */
+  id: number;
+  /**
+   * 模型名称
+   */
+  modle_name: string;
+}
+
+/**
+ * 工作流画布节点
+ */
+export interface WorkflowCanvasNode {
+  /**
+   * 任务名称
+   */
+  task_name: string;
+  /**
+   * 任务ID
+   */
+  task_id: number;
+  /**
+   * 分段方式
+   */
+  text_slice_rule: string;
+  /**
+   * 分段大小
+   */
+  slice_max_size: string;
+  /**
+   * 文本处理规则
+   */
+  text_proc_rules: number[];
+  /**
+   * OCR模型
+   */
+  text_orc_modle: ModelInfo;
+  /**
+   * 图片模型
+   */
+  pic_modle: ModelInfo;
+  /**
+   * 文本嵌入模型
+   */
+  text_emb_modle: ModelInfo;
+  /**
+   * 上一个任务
+   */
+  last_task: string;
+  /**
+   * 下一个任务
+   */
+  next_task: string;
+  /**
+   * 上传代码脚本
+   */
+  upload_code: string;
+  /**
+   * 说明
+   */
+  describe: string;
+}
+
+/**
+ * 基础信息
+ */
+export interface TaskDetailBaseInfo {
+  /**
+   * 工作流名称
+   */
+  job_name: string;
+  /**
+   * 运行状态
+   */
+  state: WorkflowTaskStatus;
+  /**
+   * 创建人
+   */
+  creater: string;
+  /**
+   * 创建时间
+   */
+  cre_time: string;
+  /**
+   * 最后修改时间
+   */
+  up_time: string;
+  /**
+   * 开始时间
+   */
+  start_time: string;
+  /**
+   * 结束时间
+   */
+  end_time: string;
+  /**
+   * 运行时长
+   */
+  time_size: string;
+  /**
+   * 错误信息
+   */
+  error_msg?: string;
+}
+
+/**
+ * 任务详情响应
+ */
+export interface TaskDetailResponse {
+  /**
+   * 基础信息
+   */
+  base_info?: TaskDetailBaseInfo;
+  /**
+   * 工作流画布
+   */
+  workflow_canvas?: WorkflowCanvasNode[];
+  /**
+   * 结果信息
+   */
+  result_info?: Record<string, any>;
+  /**
+   * 工作流名称
+   */
+  workflow_name: string;
+  /**
+   * 工作流版本
+   */
+  workflow_version: string;
 }
