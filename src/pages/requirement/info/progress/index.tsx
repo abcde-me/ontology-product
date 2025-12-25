@@ -143,6 +143,8 @@ function RequirementProgress({ isActive }: RequirementProgressProps) {
 
   useEffect(() => {
     if (isActive) {
+      setSelectedRowKeys([]);
+      setSelectedRows([]);
       fetchProgressData();
     }
   }, [id, current, pageSize, isActive]);
@@ -203,6 +205,8 @@ function RequirementProgress({ isActive }: RequirementProgressProps) {
       pkg_id_list: selectedRows.map((item) => item.front_pkg_id)
     }).finally(() => {
       setGenerateLoading(false);
+      setSelectedRowKeys([]);
+      setSelectedRows([]);
     });
     if (res?.code === 'success') {
       Message.success({
@@ -219,6 +223,10 @@ function RequirementProgress({ isActive }: RequirementProgressProps) {
             查看进度
           </span>
         )
+      });
+    } else {
+      Message.error({
+        content: res?.message || '生成标注结果失败'
       });
     }
   };
@@ -243,21 +251,20 @@ function RequirementProgress({ isActive }: RequirementProgressProps) {
           >
             生成记录
           </Button>
-          {isGenerateDisabled ? (
-            <Tooltip content="请先选择任务包" position="top">
-              <Button type="primary" disabled>
-                生成标注结果
-              </Button>
-            </Tooltip>
-          ) : (
+          <Tooltip
+            content="请先选择任务包"
+            position="top"
+            disabled={!isGenerateDisabled}
+          >
             <Button
               type="primary"
+              disabled={isGenerateDisabled}
               onClick={handleGenerateAnnotationResults}
               loading={generateLoading}
             >
               生成标注结果
             </Button>
-          )}
+          </Tooltip>
         </div>
       </div>
 
