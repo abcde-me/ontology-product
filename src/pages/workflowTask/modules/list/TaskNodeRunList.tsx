@@ -10,6 +10,7 @@ import {
   Message,
   Popconfirm
 } from '@arco-design/web-react';
+import { IconQuestionCircle } from '@arco-design/web-react/icon';
 import {
   getTaskNodeList,
   taskNodeForcesSuccess,
@@ -128,7 +129,9 @@ export default function TaskNodeRunList() {
   // 任务节点运行记录表格hook
   const table = useWorkflowTable<TaskNodeItem, GetTaskNodeListParams>({
     service: async (params) => {
+      console.log('------开始查询啦------', params);
       const res = await getTaskNodeList(params);
+      console.log('------查询结果------', res);
       return {
         data: {
           items: res.data?.items || [],
@@ -260,6 +263,33 @@ export default function TaskNodeRunList() {
         width: 180,
         render: (value: string) => (
           <EllipsisPopoverCom value={value} preferTypography />
+        )
+      },
+      {
+        title: '运行时长',
+        dataIndex: 'duration',
+        width: 180,
+        render: (value: string) => <span>{value || '-'}</span>
+      },
+      {
+        title: (
+          <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+            失败重试次数
+            <Tooltip content="格式：已重试次数/设定的总重试次数">
+              <IconQuestionCircle
+                style={{
+                  cursor: 'pointer',
+                  color: '#86909c',
+                  fontSize: '14px'
+                }}
+              />
+            </Tooltip>
+          </span>
+        ),
+        dataIndex: 'retry_times',
+        width: 180,
+        render: (value: string, record: TaskNodeItem) => (
+          <span>{`${record.retry_times ?? '-'} / ${record.max_retry_times}`}</span>
         )
       },
       {

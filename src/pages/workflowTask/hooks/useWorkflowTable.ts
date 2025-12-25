@@ -71,6 +71,7 @@ export function useWorkflowTable<TData = any, TParams = any>(
 
   const [sorter, setSorter] = useState<SorterInfo>();
   const [filters, setFilters] = useState<Record<string, any>>({});
+  const [tableData, setTableData] = useState<TData[]>([]);
 
   // 构建请求参数
   const buildParams = useCallback(
@@ -125,12 +126,19 @@ export function useWorkflowTable<TData = any, TParams = any>(
   // 请求数据
   const { data, loading, run } = useRequest(
     async () => {
+      // 请求开始时清空上次的数据
+      setTableData([]);
       const params = buildParams();
       const result = await service(params);
+      console.log('------请求结果------', result);
       return result;
     },
     {
-      manual
+      manual,
+      onBefore: () => {
+        // 在请求开始前清空数据
+        setTableData([]);
+      }
     }
   );
 
@@ -213,20 +221,23 @@ export function useWorkflowTable<TData = any, TParams = any>(
     }
   }, [run, manual]);
 
-  // 更新分页总数
+  // 更新分页总数和数据
   useEffect(() => {
     if (data?.data) {
+      const responseData = data.data;
       setPagination((prev) => ({
         ...prev,
-        total: data.data!.total,
-        current: data.data!.page,
-        pageSize: data.data!.page_size
+        total: responseData.total || 0,
+        current: responseData.page || 1,
+        pageSize: responseData.page_size || 10
       }));
+      // 更新表格数据
+      setTableData(responseData.items || []);
     }
   }, [data?.data]);
 
   return {
-    data: data?.data?.items || [],
+    data: tableData,
     loading,
     pagination: {
       ...pagination,
