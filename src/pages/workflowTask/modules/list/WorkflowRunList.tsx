@@ -137,7 +137,7 @@ export default function WorkflowRunList() {
     async (type: WorkflowOperationType, processInstanceId: string) => {
       try {
         const res = await workflowOperation({
-          executeType: type,
+          execute_type: type,
           process_instance_id: processInstanceId
         });
         if (res.status === 200) {
@@ -168,7 +168,8 @@ export default function WorkflowRunList() {
               handleWorkflowDetail(value, {
                 workflow_type: record.workflow_type,
                 workflow_uuid: record.workflow_uuid,
-                ds_workflow_id: record.process_definition_code
+                ds_workflow_id: record.process_definition_code,
+                workflow_version: record.workflow_version
               })
             }
           />

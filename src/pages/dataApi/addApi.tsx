@@ -40,6 +40,14 @@ import { useUserInfo } from '@/store/userInfoStore';
 import { TreeDataType } from '@arco-design/web-react/es/Tree/interface';
 import { useParams } from '@/utils/url';
 
+enum MetadataType {
+  Iceberg = 'iceberg',
+  Doris = 'doris',
+  Kafka = 'kafka',
+  MinIO = 'minio',
+  Milvus = 'milvus'
+}
+
 export default function AddApi() {
   const Step = Steps.Step;
   const TextArea = Input.TextArea;
@@ -251,7 +259,7 @@ export default function AddApi() {
       ? rightBoxRef.current?.offsetHeight - 90
       : 590;
     setResizeSize(`${tabHeight}px`);
-  }, []);
+  }, [current]);
 
   // 初始化数据源列表
   useEffect(() => {
@@ -322,7 +330,7 @@ export default function AddApi() {
     if (res.code === '' && res.status === 200) {
       if (res.data) {
         const newTreeData = res.data.map((item) => ({
-          title: item.databaseType,
+          title: getMenuName(item.databaseType),
           key: item.databaseType,
           children: item.database.map((db) => ({
             title: db.databaseName,
@@ -334,6 +342,23 @@ export default function AddApi() {
       }
     } else {
       Message.error(res.message || '获取数据源列表失败');
+    }
+  };
+
+  const getMenuName = (type: string) => {
+    switch (type) {
+      case MetadataType.Iceberg:
+        return '数据湖';
+      case MetadataType.Doris:
+        return '在线分析库';
+      case MetadataType.Kafka:
+        return 'Kafka';
+      case MetadataType.MinIO:
+        return '对象存储';
+      case MetadataType.Milvus:
+        return '向量数据库';
+      default:
+        return type;
     }
   };
 
@@ -374,25 +399,46 @@ export default function AddApi() {
 
   // 模拟调用接口获取子节点数据
   const loadMore = (treeNode) => {
-    const params = {
-      databaseType: treeNode.props.parentKey,
-      tableId: Number(treeNode.props.dataRef.key.split('_').pop())
-    };
-
-    return openDataListFields(params).then((res) => {
-      if (res.code === '' && res.status === 200) {
-        if (res.data) {
-          treeNode.props.dataRef.children = res.data.map((item) => ({
-            title: item.fieldName,
-            key: `${item.fieldName}_${item.id}`,
-            isLeaf: true
-          }));
-          setTreeData([...treeData]);
+    const metadataTypeArr = ['iceberg', 'doris', 'kafka', 'minio', 'milvus'];
+    if (metadataTypeArr.includes(treeNode.props.parentKey)) {
+      const params = {
+        databaseType: treeNode.props.parentKey,
+        tableId: Number(treeNode.props.dataRef.key.split('_').pop())
+      };
+      return openDataSearchTable(params).then((res) => {
+        if (res.code === '' && res.status === 200) {
+          if (res.data) {
+            treeNode.props.dataRef.children = res.data.map((item) => ({
+              title: item.tableName,
+              key: `${item.tableName}_${item.id}`,
+              children: []
+            }));
+            setTreeData([...treeData]);
+          }
+        } else {
+          Message.error(res.message || '获取字段列表失败');
         }
-      } else {
-        Message.error(res.message || '获取字段列表失败');
-      }
-    });
+      });
+    } else {
+      const params = {
+        databaseType: treeNode.props.pathParentKeys[0],
+        tableId: Number(treeNode.props.dataRef.key.split('_').pop())
+      };
+      return openDataListFields(params).then((res) => {
+        if (res.code === '' && res.status === 200) {
+          if (res.data) {
+            treeNode.props.dataRef.children = res.data.map((item) => ({
+              title: item.fieldName,
+              key: `${item.fieldName}_${item.id}`,
+              isLeaf: true
+            }));
+            setTreeData([...treeData]);
+          }
+        } else {
+          Message.error(res.message || '获取字段列表失败');
+        }
+      });
+    }
   };
 
   // 处理编辑器聚焦状态变化

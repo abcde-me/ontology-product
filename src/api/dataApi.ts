@@ -84,3 +84,15 @@ export async function openDataUpdateDataAPI(
 export async function openDataDeleteApi(params: Record<string | number, any>) {
   return await UAPI.RES.openDataDeleteApi({}).post(params).inRegion().do();
 }
+
+// 授权列表
+export async function openDataAuthList(params: Record<string | number, any>) {
+  return await UAPI.RES.openDataAuthListApi({}).post(params).inRegion().do();
+}
+
+// 授权数据API
+export async function openDataAuthorizeApi(
+  params: Record<string | number, any>
+) {
+  return await UAPI.RES.openDataAuthorizeApi({}).post(params).inRegion().do();
+}
