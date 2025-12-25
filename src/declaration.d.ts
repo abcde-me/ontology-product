@@ -41,6 +41,11 @@ declare module '*.png' {
   export default value;
 }
 
+declare module '*.jpg' {
+  const src: string;
+  export default src;
+}
+
 declare interface Window {
   __REDUX_DEVTOOLS_EXTENSION__?: () => any;
 }

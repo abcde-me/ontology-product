@@ -6,6 +6,7 @@ import {
   Form,
   Image,
   Input,
+  Link,
   Menu,
   Select,
   Tag,
@@ -17,10 +18,13 @@ import {
   IconPlus,
   IconQuestionCircle
 } from '@arco-design/web-react/icon';
-import React from 'react';
+import React, { useState } from 'react';
 import { shapeOptions } from '../../common';
 import { LabelData, LabelInfoAttributeGroupType } from '../../type';
+import AnnotationInterfaceModal from './AnnotationInterfaceModal';
+import LabelPreview from './LabelPreview';
 import TemplateAttributeForm from './TemplateAttributeForm';
+import PreviewIcon from '@/assets/annotation/preview-icon.svg';
 
 const FormItem = Form.Item;
 const Option = Select.Option;
@@ -92,6 +96,9 @@ const LabelAndAttributeForm: React.FC<LabelAndAttributeFormProps> = ({
   isAttributeFromDetail,
   curModelLabelList
 }) => {
+  const [showInterfaceModal, setShowInterfaceModal] = useState(false);
+  const [isPreviewMode, setIsPreviewMode] = useState(false);
+
   return (
     <div className="labe-and-attribute-warp">
       <div className="attribute-header">
@@ -120,8 +127,68 @@ const LabelAndAttributeForm: React.FC<LabelAndAttributeFormProps> = ({
           标签模版属性
         </div>
       </div>
-      {/* 原有的标签部分内容 */}
+      {/* 提示信息和按钮区域 */}
       {activeTab === LabelInfoAttributeGroupType.LABEL && (
+        <div
+          style={{
+            padding: '0 16px 24px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 8
+          }}
+        >
+          {!isPreviewMode && (
+            <div style={{ color: '#0F172A', fontSize: '14px' }}>
+              此处配置的标签将展示在
+              <Link onClick={() => setShowInterfaceModal(true)}>标注界面</Link>
+              的右侧
+            </div>
+          )}
+          {!isPreviewMode ? (
+            <Button
+              type="outline"
+              icon={<PreviewIcon />}
+              style={{
+                width: 130,
+                height: 26,
+                padding: '2px 12px',
+                lineHeight: 1
+              }}
+              onClick={() => setIsPreviewMode(true)}
+            >
+              预览标签配置
+            </Button>
+          ) : (
+            <Button
+              type="outline"
+              icon={<PreviewIcon />}
+              style={{
+                width: 100,
+                height: 26,
+                padding: '2px 12px',
+                lineHeight: 1
+              }}
+              onClick={() => setIsPreviewMode(false)}
+            >
+              取消预览
+            </Button>
+          )}
+        </div>
+      )}
+
+      {/* 标注界面Modal */}
+      <AnnotationInterfaceModal
+        visible={showInterfaceModal}
+        onCancel={() => setShowInterfaceModal(false)}
+      />
+
+      {/* 预览标签配置 */}
+      {activeTab === LabelInfoAttributeGroupType.LABEL && isPreviewMode && (
+        <LabelPreview labelDataList={labelDataList} />
+      )}
+
+      {/* 原有的标签部分内容 */}
+      {activeTab === LabelInfoAttributeGroupType.LABEL && !isPreviewMode && (
         <div className="attribute-content">
           {labelDataList &&
             labelDataList?.map((item: any, labelIndex) => (
