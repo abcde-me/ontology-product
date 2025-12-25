@@ -578,6 +578,7 @@ export default function WorkflowTaskDetail() {
     const isParse =
       type === NodeType.text ||
       type === NodeType.pic ||
+      type === NodeType.image ||
       type === NodeType.video ||
       type === NodeType.audio;
     setActiveNodeType(type);
