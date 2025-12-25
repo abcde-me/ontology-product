@@ -157,10 +157,12 @@ const TaskDistributionPanel: React.FC<TaskDistributionPanelProps> = ({
       dataIndex: 'taskBId',
       width: 160,
       render: (taskBId: string, record: TaskPackage) => (
-        <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-          <span>{taskBId}</span>
-          <CopyItemIcon value={taskBId} />
-          {/* {isEditMode && record.isFromDetail && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <span style={{ display: 'flex', alignItems: 'center' }}>
+            <span>{taskBId}</span>
+            <CopyItemIcon value={taskBId} />
+          </span>
+          {isEditMode && record.isFromDetail && (
             <Tag size="small" color="arcoblue">
               历史
             </Tag>
@@ -169,7 +171,7 @@ const TaskDistributionPanel: React.FC<TaskDistributionPanelProps> = ({
             <Tag size="small" color="green">
               新增
             </Tag>
-          )} */}
+          )}
         </div>
       )
     },
