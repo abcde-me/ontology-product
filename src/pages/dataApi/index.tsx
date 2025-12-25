@@ -16,6 +16,8 @@ import EllipsisPopover from '@/components/ellipsis-popover-com';
 import noDataElement from '@/components/no-data';
 import { useUserInfo } from '@/store/userInfoStore';
 import {
+  openDataAuthList,
+  openDataAuthorizeApi,
   openDataDeleteApi,
   openDataList,
   openDataPublish,
@@ -108,6 +110,8 @@ export default function DataApi() {
   });
   // 区分是否点击按钮清空搜索框
   const [isClickClear, setIsClickClear] = useState(false);
+  // 初始化授权弹窗apiId
+  const [apiId, setApiId] = useState<number | null>(null);
 
   // 组件初始化
   useEffect(() => {
@@ -209,6 +213,11 @@ export default function DataApi() {
   const handleAuthorization = async (record: Record<string, any>) => {
     setAuthorizationLoading(true);
     setAuthorizationModalVisible(true);
+    setApiId(record.id);
+    const res = await openDataAuthList({
+      id: record.id
+    });
+    console.log(res, 'resssss');
     // 获取授权所有组织及项目
     const response = await GetProjOrg({});
     if (response.data) {
@@ -223,6 +232,26 @@ export default function DataApi() {
     } else {
       setAuthorizationLoading(false);
     }
+  };
+
+  const handleAuth = async () => {
+    if (!apiId) {
+      Message.error('请选择数据API');
+      return;
+    }
+    console.log(
+      selectedAuthorizationRowKeys,
+      selectedAuthorizationRows,
+      'selectedAuthorizationRowKeys'
+    );
+    const params = {
+      apiId: apiId,
+      AuthInfo: {
+        projectId: selectedAuthorizationRowKeys
+      }
+    };
+
+    const res = await openDataAuthorizeApi(params);
   };
 
   const handleChangeStatus = async (record) => {
@@ -587,6 +616,7 @@ export default function DataApi() {
         visible={authorizationModalVisible}
         title="授权"
         onCancel={() => setAuthorizationModalVisible(false)}
+        onOk={handleAuth}
       >
         <div className={styles.authorizationModalContent}>
           <div className={styles.leftBox}>
