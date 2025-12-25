@@ -502,6 +502,8 @@ export const ModaForgeResourceEndpoints = {
   listMetadataMinioObjectApi: PrefixAimdp + '/ListMetadataMinioObject',
   // 查询milvus的所有表
   listMetadataMilvusDatabaseApi: PrefixAimdp + '/ListMetadataMilvusDatabase',
+  // 查询milvus的基本信息
+  getMetadataMilvusCollectionApi: PrefixAimdp + '/GetMetadataMilvusCollection',
   // 查询milvus表的字段信息
   listMetadataMilvusFieldApi: PrefixAimdp + '/ListMetadataMilvusField',
   // 查询milvus表的分区信息

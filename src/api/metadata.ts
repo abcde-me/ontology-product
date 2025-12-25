@@ -104,6 +104,16 @@ export async function listMetadataMilvusDatabase(
     .do();
 }
 
+// 查询doris表的基本信息
+export async function getMetadataMilvusCollection(
+  params: Record<string | number, any>
+) {
+  return await UAPI.RES.getMetadataMilvusCollectionApi({})
+    .post(params)
+    .inRegion()
+    .do();
+}
+
 // 查询milvus表的字段信息
 export async function listMetadataMilvusField(
   params: Record<string | number, any>

@@ -30,7 +30,8 @@ import {
   getMetadataIcebergTable,
   getMetadataMinioBucket,
   listMetadataMinioObject,
-  getMetadataDorisTable
+  getMetadataDorisTable,
+  getMetadataMilvusCollection
 } from '@/api/metadata';
 import { formatFileSize } from '@/utils/format';
 import EllipsisPopoverCom from '@/components/ellipsis-popover-com';
@@ -173,7 +174,7 @@ export default function MetadataManagementDetail() {
     },
     {
       label: '分区数',
-      value: baseInfoData.partitionNum
+      value: baseInfoData.partitionNum || baseInfoData.replicaNum
     },
     {
       label: '存储大小',
@@ -181,10 +182,53 @@ export default function MetadataManagementDetail() {
     },
     {
       label: '文件数',
-      value: baseInfoData.fileNum
+      value: baseInfoData.fileNum || baseInfoData.bucketNum
     },
     {
       label: '更新时间',
+      value: baseInfoData.updateTime || '-'
+    }
+  ];
+  // Milvus基本信息数据
+  const milvusData = [
+    {
+      label: '集合英文名称',
+      value: baseInfoData.collectionName || '-'
+    },
+    {
+      label: '集合中文名称',
+      value: baseInfoData.description || '-'
+    },
+    {
+      label: '存储类型',
+      value: baseInfoData.tableType || '-'
+    },
+    {
+      label: '所属数据库',
+      value: baseInfoData.dbName || '-'
+    },
+    {
+      label: '向量数量',
+      value: baseInfoData.approxEntityCount
+    },
+    {
+      label: '分区字段',
+      value: getPartitionKey(baseInfoData.partitionKey)
+    },
+    {
+      label: '分区数',
+      value: baseInfoData.partitions
+    },
+    {
+      label: '分片数',
+      value: baseInfoData.shards
+    },
+    {
+      label: '索引数',
+      value: baseInfoData.fileNum || baseInfoData.bucketNum
+    },
+    {
+      label: '元数据采集时间',
       value: baseInfoData.updateTime || '-'
     }
   ];
@@ -594,7 +638,14 @@ export default function MetadataManagementDetail() {
       }
     } else if (metadataType === MetadataType.Milvus) {
       if (activeKey === 'baseInfo') {
-        return data;
+        const res = await getMetadataMilvusCollection({
+          id: metadataId
+        });
+        if (res.code === '' && res.status === 200) {
+          setBaseInfoData(res.data.data || {});
+        } else {
+          Message.error(res.message || '获取Milvus基本信息数据失败');
+        }
       } else if (activeKey === 'fieldInfo') {
         const params = {
           pageNum: fieldCurrent,
@@ -1025,7 +1076,7 @@ export default function MetadataManagementDetail() {
                   colon=" :"
                   column={2}
                   title="基本信息"
-                  data={data}
+                  data={milvusData}
                   className={styles.customDescriptions}
                 />
               </Typography.Paragraph>
