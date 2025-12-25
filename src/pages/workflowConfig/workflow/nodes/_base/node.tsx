@@ -20,6 +20,7 @@ import { useStore } from '@/pages/workflowConfig/task/store';
 import { useShallow } from 'zustand/react/shallow';
 import { TaskStatus } from '@/pages/workflowConfig/types/workflow';
 import { STATUS2COLOR } from '@/pages/workflowConfig/workflow/constants';
+import { TASK_NODE_RUN_STATUS_MAP } from '@/pages/workflowTask/common/constants';
 
 type BaseNodeProps = {
   children: ReactElement;
@@ -77,7 +78,9 @@ const BaseNode: FC<BaseNodeProps> = ({ id, data, children }) => {
     data.selected || data._isBundled || data._isEntering;
   const { color = '', icon: Icon = null } = useMemo(() => {
     if (!nodeProcess) return {};
-    return STATUS2COLOR[nodeProcess.state] || {};
+    const { color = '' } = TASK_NODE_RUN_STATUS_MAP[nodeProcess.state] || {};
+    const { icon = null } = STATUS2COLOR[nodeProcess.state] || {};
+    return { color, icon };
   }, [nodeProcess]);
 
   return (

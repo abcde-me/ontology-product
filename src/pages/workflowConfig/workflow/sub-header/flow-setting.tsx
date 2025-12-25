@@ -159,7 +159,7 @@ export default memo(function FlowSetting() {
               rules={[{ required: true, message: '工作流名称不能为空' }]}
             >
               <Input
-                maxLength={30}
+                maxLength={100}
                 placeholder={'请输入工作流名称'}
                 showWordLimit
               />

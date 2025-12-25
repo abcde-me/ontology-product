@@ -1,4 +1,4 @@
-import { FC, useRef, useState } from 'react';
+import { FC, useEffect, useRef, useState } from 'react';
 import React, { memo, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useHistory } from 'react-router-dom';
@@ -45,15 +45,65 @@ import { RefInputType } from '@arco-design/web-react/es/Input/interface';
 import { validateName } from '@/utils/valiate';
 import { WORKFLOW_DETAIL_PERMISSIONS } from '@/config/permissions';
 import { PermissionWrapper } from '@/components/PermissionGuard';
+import { useParams as useRouterParams } from 'react-router-dom';
+import { useRequest } from 'ahooks';
+import { getWorkflowLastTask } from '@/api/workflowV2';
+import { isNil } from 'lodash-es';
 
 const SuccessModal = ({ visible, params, onClose }) => {
   const { workflow_uuid, ds_workflow_id, workflow_version, job_id } =
     params ?? {};
   const history = useHistory();
-  const handleClick = () => {
-    const jumpUrl = `/tenant/compute/modaforge/workflowTaskDetail?id=${job_id}&workflow_uuid=${workflow_uuid}&ds_workflow_id=${ds_workflow_id}&workflow_version=${workflow_version}`;
+  const searchCount = useRef(0);
+  const { type: flowType = 'no_struct' } =
+    useRouterParams<Record<string, string>>();
+
+  const route2TaskDetail = (jobId?: React.Key) => {
+    if (isNil(jobId)) {
+      history.push('/tenant/compute/modaforge/workflowTask/list');
+      return;
+    }
+    const jumpUrl = `/tenant/compute/modaforge/workflowTask/detail/${jobId}?workflow_type=${flowType}&workflow_uuid=${workflow_uuid}&ds_workflow_id=${ds_workflow_id}&workflow_version=${workflow_version}`;
     history.push(jumpUrl);
   };
+
+  useEffect(() => {
+    return () => {
+      cancel();
+      searchCount.current = 0;
+    };
+  }, []);
+
+  const {
+    data: flowTask,
+    loading,
+    cancel,
+    run: getWorkflowTask
+  } = useRequest(
+    () => {
+      return getWorkflowLastTask({
+        trigger_code: job_id,
+        process_definition_code: ds_workflow_id
+      });
+    },
+    {
+      pollingInterval: 1000,
+      manual: true,
+      refreshDeps: [job_id],
+      onSuccess(data) {
+        if (searchCount.current > 10) {
+          cancel();
+          searchCount.current = 0;
+          route2TaskDetail();
+          return;
+        }
+        searchCount.current += 1;
+        if (!data) return;
+        const { id } = data;
+        route2TaskDetail(id);
+      }
+    }
+  );
 
   return (
     <Modal
@@ -86,7 +136,7 @@ const SuccessModal = ({ visible, params, onClose }) => {
         style={{ marginBottom: 20, justifyContent: 'end', width: '100%' }}
       >
         <Button onClick={onClose}>关闭</Button>
-        <Button type="primary" onClick={handleClick}>
+        <Button type="primary" onClick={getWorkflowTask} loading={loading}>
           去查看
         </Button>
       </Space>
