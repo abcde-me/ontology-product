@@ -40,6 +40,14 @@ import { useUserInfo } from '@/store/userInfoStore';
 import { TreeDataType } from '@arco-design/web-react/es/Tree/interface';
 import { useParams } from '@/utils/url';
 
+enum MetadataType {
+  Iceberg = 'iceberg',
+  Doris = 'doris',
+  Kafka = 'kafka',
+  MinIO = 'minio',
+  Milvus = 'milvus'
+}
+
 export default function AddApi() {
   const Step = Steps.Step;
   const TextArea = Input.TextArea;
@@ -322,7 +330,7 @@ export default function AddApi() {
     if (res.code === '' && res.status === 200) {
       if (res.data) {
         const newTreeData = res.data.map((item) => ({
-          title: item.databaseType,
+          title: getMenuName(item.databaseType),
           key: item.databaseType,
           children: item.database.map((db) => ({
             title: db.databaseName,
@@ -334,6 +342,23 @@ export default function AddApi() {
       }
     } else {
       Message.error(res.message || '获取数据源列表失败');
+    }
+  };
+
+  const getMenuName = (type: string) => {
+    switch (type) {
+      case MetadataType.Iceberg:
+        return '数据湖';
+      case MetadataType.Doris:
+        return '在线分析库';
+      case MetadataType.Kafka:
+        return 'Kafka';
+      case MetadataType.MinIO:
+        return '对象存储';
+      case MetadataType.Milvus:
+        return '向量数据库';
+      default:
+        return type;
     }
   };
 
