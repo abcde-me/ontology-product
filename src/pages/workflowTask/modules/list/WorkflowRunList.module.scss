@@ -4,6 +4,52 @@
   }
 }
 
+.table-container {
+  :global(tbody) {
+    .hover-change :global(.ellipsis-text) {
+      color: #1e293b;
+    }
+
+    :global(.arco-table-tr):hover {
+      .hover-change :global(.ellipsis-text) {
+        color: rgb(0, 125, 250);
+        cursor: pointer;
+
+        &:hover {
+          color: rgba(67, 141, 251, 1);
+        }
+      }
+
+      .hover-change :global(.arco-typography) {
+        cursor: pointer;
+        color: rgb(0, 125, 250);
+
+        &:hover {
+          color: rgba(67, 141, 251, 1);
+        }
+      }
+
+      .workflow-name-container {
+        .workflow-name-copy {
+          visibility: visible;
+        }
+      }
+    }
+
+    .workflow-name-container {
+      .workflow-name-copy {
+        visibility: hidden;
+        cursor: pointer;
+        color: rgb(0, 125, 250);
+
+        &:hover {
+          color: rgba(67, 141, 251, 1);
+        }
+      }
+    }
+  }
+}
+
 // 只有非disabled的菜单项在hover时才显示蓝色
 :global(.arco-dropdown-menu-item:not(.arco-dropdown-menu-disabled):hover) {
   color: rgb(var(--primary-6)) !important;

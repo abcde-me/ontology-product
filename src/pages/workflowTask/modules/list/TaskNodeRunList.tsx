@@ -225,7 +225,7 @@ export default function TaskNodeRunList() {
       },
       {
         title: '所属工作流ID',
-        dataIndex: 'process_instance_id',
+        dataIndex: 'process_definition_code',
         width: 180,
         render: (value: string) => (
           <EllipsisPopoverCom value={value} preferTypography />
@@ -233,7 +233,7 @@ export default function TaskNodeRunList() {
       },
       {
         title: '所属工作流名称',
-        dataIndex: 'process_name',
+        dataIndex: 'process_definition_name',
         width: 200,
         render: (value: string) => (
           <EllipsisPopoverCom value={value} preferTypography />
