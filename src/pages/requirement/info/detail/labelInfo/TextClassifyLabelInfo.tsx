@@ -80,7 +80,8 @@ function TextClassifyLabelInfo({ labelInfo }: { labelInfo: FileLabelInfo[] }) {
             style={{
               padding: '12px 10px',
               backgroundColor: '#fff',
-              borderRadius: 8
+              borderRadius: 8,
+              marginBottom: 16
             }}
           >
             <div
@@ -133,6 +134,8 @@ function TextClassifyLabelInfo({ labelInfo }: { labelInfo: FileLabelInfo[] }) {
         标签和属性:
       </div>
       <Table
+        style={{ maxWidth: '60%' }}
+        scroll={{ x: 'max-content' }}
         columns={columns}
         data={labelInfo}
         pagination={false}

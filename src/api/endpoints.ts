@@ -338,6 +338,8 @@ export const ModaForgeResourceEndpoints = {
 
   // 数据载入接口
 
+  // 查询任务单个执行记录日志
+  GetLoadTaskInstanceLogApi: PrefixAimdp + '/GetLoadTaskInstanceLog',
   // 获取数据载入列表
   getLoadListApi: PrefixAimdp + '/ListLoadTasks',
   // 创建单个载入任务

@@ -169,7 +169,7 @@ const TaskLogDrawer: React.FC<TaskLogDrawerProps> = ({
       </div>
       <div
         ref={scrollContainerRef}
-        className="h-[calc(100vh-120px)] overflow-y-auto whitespace-pre-wrap break-all rounded-[4px] border border-[#E2E8F0] bg-[#F8FAFD] px-[12px] py-[8px] text-[14px] leading-[24px] text-[var(--color-text-1)]"
+        className="h-[calc(100vh-120px)] overflow-x-auto overflow-y-auto whitespace-pre rounded-[4px] border border-[#E2E8F0] bg-[#F8FAFD] px-[12px] py-[8px] text-[14px] leading-[24px] text-[var(--color-text-1)]"
       >
         {logs.length === 0 && !loading && (
           <div className="flex h-[200px] items-center justify-center text-[14px] leading-[24px] text-[var(--color-text-1)]">

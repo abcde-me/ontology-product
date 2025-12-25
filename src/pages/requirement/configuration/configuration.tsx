@@ -1288,6 +1288,7 @@ export default function RequirementConfig() {
               </FormItem>
               <FormItem field="taskDistribution" label="分配人员:" required>
                 <TaskDistributionPanel
+                  qualityTaskForm={qualityTaskForm}
                   requirementDetail={requirementDetail}
                   isEditMode={type === 'edit'}
                   taskPackages={taskPackages}

@@ -1,10 +1,13 @@
 import React, { useEffect, useState } from 'react';
+import { useRequest, useUpdateEffect } from 'ahooks';
 import {
   Breadcrumb,
   Message,
   Popconfirm,
   Tabs,
-  Typography
+  Typography,
+  Button,
+  Modal
 } from '@arco-design/web-react';
 import {
   IconArrowLeft,
@@ -20,12 +23,7 @@ import { useParams as useQueryParams } from '@/utils/url';
 import ParseNode from '../../components/parse-node';
 import DataCleaningNode from '../../components/data-cleaning-node';
 import DataAugmentationNode from '../../components/data-augmentation-node';
-import {
-  getTaskDetail,
-  getTaskDetailNode,
-  taskRerun,
-  taskStop
-} from '@/api/taskDetail';
+import { getTaskDetailNode, taskStop } from '@/api/taskDetail';
 import { useUserInfo } from '@/store/userInfoStore';
 import Workflow from '../../../workflowConfig/index';
 import { WORKFLOW_TASK_PERMISSIONS } from '@/config/permissions';
@@ -35,19 +33,30 @@ import EllipsisPopover from '@/components/ellipsis-popover-com';
 import ScriptingNode from '../../components/scripting-node';
 import styles from './index.module.scss';
 import { PermissionWrapper } from '@/components/PermissionGuard';
-import { WorkflowType } from '@/types/workflowTaskApi';
+import {
+  getTaskDetail,
+  taskNodeRetry,
+  workflowOperation
+} from '@/api/workflowTask';
+import {
+  TaskDetailBaseInfo,
+  WorkflowOperationType,
+  WorkflowTaskStatus,
+  WorkflowType
+} from '@/types/workflowTaskApi';
 import TaskNodeList from './TaskNodeList';
+import { WORKFLOW_RUN_STATUS_MAP } from '../../common/constants';
 
 const BreadcrumbItem = Breadcrumb.Item;
 const TabPane = Tabs.TabPane;
 
-// 枚举作业运行状态
-enum TaskRunStatus {
-  running = 1,
-  success = 2,
-  fail = 3,
-  stop = 4
-}
+// // 枚举作业运行状态
+// enum TaskRunStatus {
+//   running = 1,
+//   success = 2,
+//   fail = 3,
+//   stop = 4
+// }
 
 // 枚举节点运行状态
 enum NodeRunStatus {
@@ -78,7 +87,7 @@ enum StartOrEnd {
 // 定义taskDetailData值的类型
 interface TaskDetailObject {
   job_name?: string;
-  run_status?: number;
+  run_status?: WorkflowTaskStatus;
   cre_time?: string;
   time_size?: string;
   start_time?: string;
@@ -99,7 +108,8 @@ export default function WorkflowTaskDetail() {
   const history = useHistory();
   const userInfo = useUserInfo();
   // 初始化作业详情数据
-  const [taskDetailData, setTaskDetailData] = useState<TaskDetailObject>({});
+  const [taskDetailData, setTaskDetailData] =
+    useState<TaskDetailBaseInfo | null>(null);
   // 初始化工作流名称
   const [workflowName, setWorkflowName] = useState('');
   // 初始化节点数据
@@ -144,17 +154,41 @@ export default function WorkflowTaskDetail() {
     sort: '',
     sort_by: ''
   });
-  const workflowUuid = useQueryParams('workflow_uuid');
-  const workflowVersion = useQueryParams('workflow_version');
-  const workflowId = useQueryParams('ds_workflow_id');
+  const workflowUuid = useQueryParams('workflow_uuid') ?? '';
+  const workflowVersion = useQueryParams('workflow_version') ?? '';
+  const workflowId = useQueryParams('ds_workflow_id') ?? '';
   const workflowType = useQueryParams('workflow_type') ?? WorkflowType.STRUCT;
-  let intervalDetailData: string | number | NodeJS.Timeout | undefined;
+
+  // 使用 useRequest 实现轮询
+  const { run: runGetDetailData, cancel: cancelPolling } = useRequest(
+    async (isSetActiveNode = false) => {
+      return await getDetailData(isSetActiveNode);
+    },
+    {
+      pollingInterval: 180000, // 每隔3分钟轮询一次
+      pollingWhenHidden: false, // 页面隐藏时停止轮询
+      manual: true // 手动触发
+    }
+  );
+
   // 初始化详情基本数据
   useEffect(() => {
-    if (taskId) getDetailData(true);
-    intervalDetailData = setInterval(() => getDetailData(), 180000); // 每隔3分钟更新一次状态
-    return () => clearInterval(intervalDetailData); // 组件卸载时清理
-  }, [taskId]);
+    if (taskId) {
+      runGetDetailData(true); // 首次加载
+    }
+  }, [taskId, runGetDetailData]);
+
+  // 根据任务状态动态控制轮询
+  useUpdateEffect(() => {
+    if (taskDetailData?.state === WorkflowTaskStatus.RUNNING_EXECUTION) {
+      // 状态为运行中时，轮询会自动开始（pollingInterval 已设置）
+      // 如果轮询已停止，需要重新触发一次请求来启动轮询
+      runGetDetailData();
+    } else {
+      // 状态不是运行中时停止轮询
+      cancelPolling();
+    }
+  }, [taskDetailData?.state, runGetDetailData, cancelPolling]);
 
   // 确保activeNode以及sortValue数据变化后再调用getNodeDetail
   useEffect(() => {
@@ -165,34 +199,28 @@ export default function WorkflowTaskDetail() {
     workflowType,
     activeNode && isChangeTab,
     sortValue,
-    taskDetailData.run_status
+    taskDetailData?.state
   ]);
 
   const getDetailData = async (isSetActiveNode = false) => {
     setLoading(true);
     try {
-      const res = await getTaskDetail(taskId);
+      const res = await getTaskDetail({
+        id: taskId
+      });
       if (res.status === 200 && res.data) {
-        setTaskDetailData(res.data.base_info);
-        // 当前状态不是运行中时清空定时器
-        if (res.data.base_info.run_status !== TaskRunStatus.running) {
-          clearInterval(intervalDetailData);
-        }
-        // 运行中状态定时刷新防止节点数据重新渲染
-        if (
-          !isSetActiveNode &&
-          res.data.base_info.run_status === TaskRunStatus.running
-        )
-          return;
-        setWorkflowName(res.data.workflow_name);
-        setActiveNodeType(res.data.result_info.task_type);
-        setActiveNode(res.data.result_info.node_code);
+        setTaskDetailData(res.data?.base_info ?? null);
+        setWorkflowName(res.data?.workflow_name ?? '');
+        setActiveNodeType(res.data.result_info?.task_type ?? '');
+        setActiveNode(res.data.result_info?.node_code ?? '');
         // 判断第一个节点是否是解析数据节点
         const isParse =
-          res.data.result_info.task_type === NodeType.text ||
-          res.data.result_info.task_type === NodeType.pic ||
-          res.data.result_info.task_type === NodeType.video ||
-          res.data.result_info.task_type === NodeType.audio;
+          res.data.result_info?.task_type === NodeType.text ||
+          res.data.result_info?.task_type === NodeType.pic ||
+          res.data.result_info?.task_type === NodeType.image ||
+          res.data.result_info?.task_type === NodeType.video ||
+          res.data.result_info?.task_type === NodeType.audio;
+
         setIsParseNode(isParse);
         // 将节点状态列表第一个运行中后面的状态都改为未开始
         // const firstZeroIndex = res.data.result_info.task_type_list.findIndex(
@@ -207,16 +235,17 @@ export default function WorkflowTaskDetail() {
         //       ? { ...item, status: 3 }
         //       : item
         // );
-        setNodeData(res.data.result_info.task_type_list);
+        setNodeData(res.data.result_info?.task_type_list ?? []);
         if (isParse) {
-          setParseNodeData(res.data.result_info.data_parse);
+          setParseNodeData(res.data.result_info?.data_parse ?? {});
           setPagination({
-            current: res.data.result_info.data_parse.page_info.page,
-            pageSize: res.data.result_info.data_parse.page_info.page_size,
-            total: res.data.result_info.data_parse.page_info.total
+            current: res.data.result_info?.data_parse?.page_info?.page ?? 1,
+            pageSize:
+              res.data.result_info?.data_parse?.page_info?.page_size ?? 10,
+            total: res.data.result_info?.data_parse?.page_info?.total ?? 0
           });
         } else {
-          setCleaningAugmentNodeData(res.data.result_info.data_dispose);
+          setCleaningAugmentNodeData(res.data.result_info?.data_dispose ?? {});
         }
       }
     } finally {
@@ -226,142 +255,271 @@ export default function WorkflowTaskDetail() {
 
   // 获取顶部区域dom
   const getTaskDetailTopDom = () => {
+    // 使用原始状态值（新的枚举值），如果不存在则使用 stateName，最后使用默认值
+    const statusMap = taskDetailData?.state
+      ? WORKFLOW_RUN_STATUS_MAP[taskDetailData.state]
+      : {
+          text: '未知状态',
+          color: '#666',
+          dotColor: '#666'
+        };
+
+    const renderStatus = () => {
+      const statusIcon = () => {
+        if (
+          taskDetailData?.state === WorkflowTaskStatus.SUCCESS ||
+          taskDetailData?.state === WorkflowTaskStatus.FAILURE
+        ) {
+          return (
+            <IconCheckCircleFill
+              style={{
+                color: statusMap.color,
+                width: 16,
+                height: 16
+              }}
+            />
+          );
+        } else if (
+          taskDetailData?.state === WorkflowTaskStatus.RUNNING_EXECUTION
+        ) {
+          return (
+            <IconLoading
+              style={{
+                color: statusMap.color,
+                width: 16,
+                height: 16
+              }}
+            />
+          );
+        } else {
+          return (
+            <IconExclamationCircleFill
+              style={{
+                color: statusMap.color,
+                width: 16,
+                height: 16
+              }}
+            />
+          );
+        }
+      };
+      return (
+        <div className="flex items-center gap-[8px]">
+          {statusIcon()}
+          <span
+            style={{
+              fontSize: '14px',
+              color: statusMap.color,
+              lineHeight: '22px'
+            }}
+          >
+            {statusMap.text}
+          </span>
+        </div>
+      );
+    };
+
+    const bgColor = () => {
+      if (taskDetailData?.state === WorkflowTaskStatus.SUCCESS) {
+        return 'bg-[#ECFDF5] border-[#10B981]';
+      } else if (taskDetailData?.state === WorkflowTaskStatus.FAILURE) {
+        return 'bg-[#FEF2F2] border-[#EF4444]';
+      } else if (
+        taskDetailData?.state === WorkflowTaskStatus.RUNNING_EXECUTION
+      ) {
+        return 'bg-[#EEF6FF] border-[#007DFA]';
+      } else {
+        return 'bg-[transparent] border-[#CBD5E1]';
+      }
+    };
+
     return (
       <div
-        className={styles['running-box']}
-        style={
-          taskDetailData.run_status === TaskRunStatus.success
-            ? { backgroundColor: '#ECFDF5', border: '1px solid #10B981' }
-            : taskDetailData.run_status === TaskRunStatus.fail
-              ? {
-                  backgroundColor: '#FEF2F2',
-                  border: '1px solid #EF4444',
-                  minHeight: 106
-                }
-              : taskDetailData.run_status === TaskRunStatus.running
-                ? { backgroundColor: '#EEF6FF', border: '1px solid #007DFA' }
-                : { border: '1px solid #CBD5E1' }
-        }
+        className={`my-[16px] rounded-[6px] border-[1px] px-[24px] py-[12px] ${bgColor()}`}
       >
-        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-          <div className={styles['running-item']}>
-            <span className={styles['item-title']}>状态</span>
-            {taskDetailData.run_status === TaskRunStatus.success ? (
-              <div className={styles['item-content-box']}>
-                <IconCheckCircleFill
-                  style={{
-                    color: '#10B981',
-                    margin: '0 8px 0 0',
-                    width: 16,
-                    height: 16
-                  }}
-                />
-                <span className={styles['item-content']}>运行成功</span>
-              </div>
-            ) : taskDetailData.run_status === TaskRunStatus.fail ? (
-              <div className={styles['item-content-box']}>
-                <IconCloseCircleFill
-                  style={{
-                    color: '#EF4444',
-                    margin: '0 8px 0 0',
-                    width: 16,
-                    height: 16
-                  }}
-                />
-                <span className={styles['item-content']}>运行失败</span>
-                <PermissionWrapper
-                  permission={WORKFLOW_TASK_PERMISSIONS.CAN_UPDATE}
+        <div className="flex justify-between">
+          <div className="flex flex-col gap-[8px]">
+            <span className="text-[14px] font-[500] leading-[22px] text-[var(--color-text-2)]">
+              状态
+            </span>
+            <div className="flex h-[22px] items-center gap-[8px]">
+              {renderStatus()}
+              {taskDetailData?.state === WorkflowTaskStatus.FAILURE && (
+                <Popconfirm
+                  title="确定重新运行吗？"
+                  content=""
+                  onOk={() => handleRetryWorkflow(taskId)}
                 >
-                  <Popconfirm
-                    focusLock
-                    title="确定重新运行吗？"
-                    content="已处理数据将被覆盖"
-                    onOk={() => {
-                      handleRetryWorkflow(taskId);
-                    }}
-                  >
-                    <span className={styles['operate-text']}>重试</span>
-                  </Popconfirm>
-                </PermissionWrapper>
-              </div>
-            ) : taskDetailData.run_status === TaskRunStatus.running ? (
-              <div className={styles['item-content-box']}>
-                <IconLoading
-                  style={{
-                    color: '#007DFA',
-                    margin: '0 8px 0 0',
-                    width: 16,
-                    height: 16
-                  }}
-                />
-                <span className={styles['item-content']}>运行中</span>
-                <PermissionWrapper
-                  permission={WORKFLOW_TASK_PERMISSIONS.CAN_UPDATE}
+                  <Button type="text" className="px-[0px]">
+                    重试
+                  </Button>
+                </Popconfirm>
+              )}
+              {taskDetailData?.state ===
+                WorkflowTaskStatus.RUNNING_EXECUTION && (
+                <Popconfirm
+                  title="确定停止运行吗？"
+                  content="未处理完的数据将停止处理"
+                  onOk={() => handleStopWorkflow(taskId)}
                 >
-                  <Popconfirm
-                    focusLock
-                    title="确定停止吗？"
-                    content="未处理完的数据将停止处理"
-                    onOk={() => {
-                      handleStopWorkflow(taskId);
-                    }}
-                  >
-                    <span className={styles['operate-text']}>停止</span>
-                  </Popconfirm>
-                </PermissionWrapper>
-              </div>
-            ) : (
-              <div className={styles['item-content-box']}>
-                <IconExclamationCircleFill
-                  style={{
-                    color: '#6E7B8D',
-                    margin: '0 8px 0 0',
-                    width: 16,
-                    height: 16
-                  }}
-                />
-                <span className={styles['item-content']}>已停止</span>
-              </div>
-            )}
-          </div>
-          <div className={styles['running-item']}>
-            <span className={styles['item-title']}>总用时</span>
-            <div className={styles['item-content-box']}>
-              <span className={styles['item-content']}>
-                {taskDetailData?.time_size === ''
-                  ? '-'
-                  : (taskDetailData?.time_size ?? '-')}
-              </span>
+                  <Button type="text" className="px-[0px]">
+                    停止
+                  </Button>
+                </Popconfirm>
+              )}
             </div>
           </div>
-          <div className={styles['running-item']}>
-            <span className={styles['item-title']}>开始时间</span>
-            <div className={styles['item-content-box']}>
-              <span className={styles['item-content']}>
-                {taskDetailData?.start_time === ''
-                  ? '-'
-                  : (taskDetailData?.start_time ?? '-')}
-              </span>
-            </div>
+          <div className="flex flex-col gap-[8px]">
+            <span className="text-[14px] font-[500] leading-[22px] text-[var(--color-text-2)]">
+              总用时
+            </span>
+            <span className="text-[14px] leading-[22px] text-[var(--color-text-2)]">
+              {taskDetailData?.time_size ?? '-'}
+            </span>
           </div>
-          <div className={styles['running-item']}>
-            <span className={styles['item-title']}>结束时间</span>
-            <div className={styles['item-content-box']}>
-              <span className={styles['item-content']}>
-                {taskDetailData?.end_time === ''
-                  ? '-'
-                  : (taskDetailData?.end_time ?? '-')}
-              </span>
-            </div>
+          <div className="flex flex-col gap-[8px]">
+            <span className="text-[14px] font-[500] leading-[22px] text-[var(--color-text-2)]">
+              开始时间
+            </span>
+            <span className="text-[14px] leading-[22px] text-[var(--color-text-2)]">
+              {taskDetailData?.start_time ?? '-'}
+            </span>
+          </div>
+          <div className="flex flex-col gap-[8px]">
+            <span className="text-[14px] font-[500] leading-[22px] text-[var(--color-text-2)]">
+              结束时间
+            </span>
+            <span className="text-[14px] leading-[22px] text-[var(--color-text-2)]">
+              {taskDetailData?.end_time ?? '-'}
+            </span>
           </div>
         </div>
-        {taskDetailData.run_status === TaskRunStatus.fail ? (
-          <span className={styles['fail-tip']}>{taskDetailData.error_msg}</span>
-        ) : (
-          <></>
-        )}
+        {taskDetailData?.state === WorkflowTaskStatus.FAILURE &&
+          taskDetailData?.error_msg && <span>{taskDetailData.error_msg}</span>}
       </div>
     );
+
+    // return (
+    //   <div className={styles['running-box']}>
+    //     <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+    //       <div className={styles['running-item']}>
+    //         <span className={styles['item-title']}>状态</span>
+    //         {taskDetailData.run_status === TaskRunStatus.success ? (
+    //           <div className={styles['item-content-box']}>
+    //             <IconCheckCircleFill
+    //               style={{
+    //                 color: '#10B981',
+    //                 margin: '0 8px 0 0',
+    //                 width: 16,
+    //                 height: 16
+    //               }}
+    //             />
+    //             <span className={styles['item-content']}>运行成功</span>
+    //           </div>
+    //         ) : taskDetailData.run_status === TaskRunStatus.fail ? (
+    //           <div className={styles['item-content-box']}>
+    //             <IconCloseCircleFill
+    //               style={{
+    //                 color: '#EF4444',
+    //                 margin: '0 8px 0 0',
+    //                 width: 16,
+    //                 height: 16
+    //               }}
+    //             />
+    //             <span className={styles['item-content']}>运行失败</span>
+    //             <PermissionWrapper
+    //               permission={WORKFLOW_TASK_PERMISSIONS.CAN_UPDATE}
+    //             >
+    //               <Popconfirm
+    //                 focusLock
+    //                 title="确定重新运行吗？"
+    //                 content="已处理数据将被覆盖"
+    //                 onOk={() => {
+    //                   handleRetryWorkflow(taskId);
+    //                 }}
+    //               >
+    //                 <span className={styles['operate-text']}>重试</span>
+    //               </Popconfirm>
+    //             </PermissionWrapper>
+    //           </div>
+    //         ) : taskDetailData.run_status === TaskRunStatus.running ? (
+    //           <div className={styles['item-content-box']}>
+    //             <IconLoading
+    //               style={{
+    //                 color: '#007DFA',
+    //                 margin: '0 8px 0 0',
+    //                 width: 16,
+    //                 height: 16
+    //               }}
+    //             />
+    //             <span className={styles['item-content']}>运行中</span>
+    //             <PermissionWrapper
+    //               permission={WORKFLOW_TASK_PERMISSIONS.CAN_UPDATE}
+    //             >
+    //               <Popconfirm
+    //                 focusLock
+    //                 title="确定停止吗？"
+    //                 content="未处理完的数据将停止处理"
+    //                 onOk={() => {
+    //                   handleStopWorkflow(taskId);
+    //                 }}
+    //               >
+    //                 <span className={styles['operate-text']}>停止</span>
+    //               </Popconfirm>
+    //             </PermissionWrapper>
+    //           </div>
+    //         ) : (
+    //           <div className={styles['item-content-box']}>
+    //             <IconExclamationCircleFill
+    //               style={{
+    //                 color: '#6E7B8D',
+    //                 margin: '0 8px 0 0',
+    //                 width: 16,
+    //                 height: 16
+    //               }}
+    //             />
+    //             <span className={styles['item-content']}>已停止</span>
+    //           </div>
+    //         )}
+    //       </div>
+    //       <div className={styles['running-item']}>
+    //         <span className={styles['item-title']}>总用时</span>
+    //         <div className={styles['item-content-box']}>
+    //           <span className={styles['item-content']}>
+    //             {taskDetailData?.time_size === ''
+    //               ? '-'
+    //               : (taskDetailData?.time_size ?? '-')}
+    //           </span>
+    //         </div>
+    //       </div>
+    //       <div className={styles['running-item']}>
+    //         <span className={styles['item-title']}>开始时间</span>
+    //         <div className={styles['item-content-box']}>
+    //           <span className={styles['item-content']}>
+    //             {taskDetailData?.start_time === ''
+    //               ? '-'
+    //               : (taskDetailData?.start_time ?? '-')}
+    //           </span>
+    //         </div>
+    //       </div>
+    //       <div className={styles['running-item']}>
+    //         <span className={styles['item-title']}>结束时间</span>
+    //         <div className={styles['item-content-box']}>
+    //           <span className={styles['item-content']}>
+    //             {taskDetailData?.end_time === ''
+    //               ? '-'
+    //               : (taskDetailData?.end_time ?? '-')}
+    //           </span>
+    //         </div>
+    //       </div>
+    //     </div>
+    //     {taskDetailData.run_status === TaskRunStatus.fail ? (
+    //       <span className={styles['fail-tip']}>{taskDetailData.error_msg}</span>
+    //     ) : (
+    //       <></>
+    //     )}
+    //   </div>
+    // );
   };
 
   // 获取子组件的分页数据
@@ -532,45 +690,57 @@ export default function WorkflowTaskDetail() {
 
   // 运行失败状态下重试操作
   const handleRetryWorkflow = async (id: string) => {
-    const params: any = {
-      id: id,
-      uid: userInfo?.id
-    };
-    const res = await taskRerun(params);
-    if (res.status === 200 && res.code === '') {
-      Message.success({
-        content: '提交成功！'
+    try {
+      const res = await workflowOperation({
+        process_instance_id: id,
+        execute_type: WorkflowOperationType.REPEAT_RUNNING
       });
-      getDetailData();
-    } else {
+
+      if (res.status === 200) {
+        Message.success({
+          content: '重新运行成功'
+        });
+
+        runGetDetailData();
+      } else {
+        Message.error({
+          content: res.message || '重新运行失败，请稍后重试'
+        });
+      }
+    } catch (error) {
       Message.error({
-        content: res.message || '提交失败，请稍后重试'
+        content: '重新运行失败，请稍后重试'
       });
     }
   };
 
-  // 进行中状态下停止操作
   const handleStopWorkflow = async (id: string) => {
-    const params: any = {
-      id: id,
-      uid: userInfo?.id
-    };
-    const res = await taskStop(params);
-    if (res.status === 200 && res.code === '') {
-      Message.success({
-        content: '停止成功'
+    try {
+      const res = await workflowOperation({
+        process_instance_id: id,
+        execute_type: WorkflowOperationType.EXEC_STOP
       });
-      getDetailData();
-    } else {
+
+      if (res.status === 200) {
+        Message.success({
+          content: '停止成功'
+        });
+
+        runGetDetailData();
+      } else {
+        Message.error({
+          content: res.message || '停止失败，请稍后重试'
+        });
+      }
+    } catch (error) {
       Message.error({
-        content: res.message || '停止失败，请稍后重试'
+        content: '停止失败，请稍后重试'
       });
     }
   };
-
   const handleClickWorkflow = () => {
     openNewPage(
-      `/modaforge/tenant/compute/modaforge/workflowConfig?workflow_uuid=${workflowUuid}&ds_workflow_id=${workflowId}&workflow_version=${workflowVersion}`
+      `/modaforge/tenant/compute/modaforge/workflowConfig/${workflowType}?workflow_uuid=${workflowUuid}&ds_workflow_id=${workflowId}&workflow_version=${workflowVersion}`
     );
   };
 

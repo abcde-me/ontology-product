@@ -1,4 +1,4 @@
-import { Message, Modal, Popover, Table } from '@arco-design/web-react';
+import { Button, Message, Modal, Popover, Table } from '@arco-design/web-react';
 import { RunState, RunStateType } from '../config';
 import React, { useEffect, useState } from 'react';
 import './index.css';
@@ -10,6 +10,7 @@ import EllipsisPopoverCom from '@/components/ellipsis-popover-com';
 import noDataElement from '@/components/no-data';
 import { DATA_LOAD_PERMISSIONS } from '@/config/permissions';
 import { useHasPermission } from '@/hooks/usePermission';
+import LogDrawer from './LogDrawer';
 interface DataType {
   status: Array<string>;
   sort: string;
@@ -161,17 +162,30 @@ const TableDetail = (props) => {
       width: 100,
       fixed: 'right',
       render: (_, item) => (
-        <span
-          className="isDisabled"
-          style={{ color: 'rgb(0, 125, 250)', cursor: 'pointer' }}
-          onClick={() => {
-            history.push(
-              `/tenant/compute/modaforge/dataLoad/access?execution_id=${item.execution_id}&name=${encodeURIComponent(props.name)}&type=${type}`
-            );
-          }}
-        >
-          详情
-        </span>
+        <>
+          <span
+            className="isDisabled"
+            style={{ color: 'rgb(0, 125, 250)', cursor: 'pointer' }}
+            onClick={() => {
+              history.push(
+                `/tenant/compute/modaforge/dataLoad/access?execution_id=${item.execution_id}&name=${encodeURIComponent(props.name)}&type=${type}`
+              );
+            }}
+          >
+            详情
+          </span>
+          <Button
+            type="text"
+            className="px-[4px]"
+            onClick={() => {
+              setCurrentExecutionId(item.execution_id);
+              setCurrentExecutionName(item.execution_name);
+              setLogDrawerVisible(true);
+            }}
+          >
+            日志
+          </Button>
+        </>
       )
     }
   ];
@@ -197,6 +211,11 @@ const TableDetail = (props) => {
 
   // 存放id
   const [executionId, setExecutionId] = useState(0);
+
+  // 日志 Drawer 相关状态
+  const [logDrawerVisible, setLogDrawerVisible] = useState(false);
+  const [currentExecutionId, setCurrentExecutionId] = useState<number>(0);
+  const [currentExecutionName, setCurrentExecutionName] = useState<string>('');
   const stopTaskHan = (id) => {
     setVisible(true);
     setExecutionId(id);
@@ -318,6 +337,14 @@ const TableDetail = (props) => {
             该操作会停止当前数据载入运行任务，停止后将无法恢复运行，是否要继续当前操作?
           </div>
         </Modal>
+        {logDrawerVisible && (
+          <LogDrawer
+            visible={logDrawerVisible}
+            executionId={currentExecutionId}
+            executionName={currentExecutionName}
+            onClose={() => setLogDrawerVisible(false)}
+          />
+        )}
       </div>
     </div>
   );

@@ -27,7 +27,7 @@ export default memo(function SQLNode(props: NodeProps<SQLNodeConfig>) {
   );
   return (
     <NodeContainer className={'p-3 pt-0'}>
-      <div className={'rounded-[4px] bg-[#F5F9FF] p-2'}>
+      <div className={'break-all rounded-[4px] bg-[#F5F9FF] p-2'}>
         <div>
           <Typography.Text bold>SQL加工脚本</Typography.Text>
         </div>

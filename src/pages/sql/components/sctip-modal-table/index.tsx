@@ -366,7 +366,7 @@ const SctipModalTable: React.FC<{
           </div>
           <div className={styles['script-modal-table-content-item']}>
             <div className={styles['script-modal-table-content-item-label']}>
-              最新更新时间：
+              发版时间：
             </div>
             <div className={styles['script-modal-table-content-item-value']}>
               {rowData?.update_time}

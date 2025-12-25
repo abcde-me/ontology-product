@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
   Form,
   Select,
@@ -9,7 +9,7 @@ import {
 } from '@arco-design/web-react';
 import { IconSearch, IconRefresh } from '@arco-design/web-react/icon';
 import { useParams as useRouteParams } from 'react-router';
-import { listTaskInstance } from '@/api/workflowTask';
+import { listTaskInstance, taskNodeRetry } from '@/api/workflowTask';
 import type {
   ListTaskInstanceItem,
   ListTaskInstanceParams
@@ -18,7 +18,8 @@ import {
   CommandTypeNameMap,
   CommandType,
   TaskExecuteType,
-  TaskExecuteTypeNameMap
+  TaskExecuteTypeNameMap,
+  TaskNodeStatus
 } from '@/types/workflowTaskApi';
 import { useWorkflowTable } from '../../hooks/useWorkflowTable';
 import {
@@ -30,6 +31,7 @@ import type { PaginationProps } from '@arco-design/web-react';
 import type { SorterInfo } from '@arco-design/web-react/lib/Table/interface';
 import noDataElement from '@/components/no-data';
 import EllipsisPopoverCom from '@/components/ellipsis-popover-com';
+import TaskLogDrawer from '../../components/task-log-drawer';
 
 const { Option } = Select;
 const FormItem = Form.Item;
@@ -37,6 +39,11 @@ const FormItem = Form.Item;
 export default function TaskNodeList() {
   const [form] = Form.useForm();
   const { id: workflowInstanceId } = useRouteParams<{ id: string }>();
+  const [logDrawerVisible, setLogDrawerVisible] = useState(false);
+  const [currentTaskInstanceId, setCurrentTaskInstanceId] = useState<
+    number | null
+  >(null);
+  const [currentTaskName, setCurrentTaskName] = useState<string>('');
 
   // 格式化工作流实例文件请求参数
   const formatParams = useCallback(
@@ -90,17 +97,50 @@ export default function TaskNodeList() {
     manual: false
   });
 
-  // 处理重试操作
-  const handleRetry = useCallback((record: ListTaskInstanceItem) => {
-    // TODO: 实现重试逻辑
-    Message.info('重试功能待实现');
+  const handleTaskNodeRetry = useCallback(
+    async (processInstanceId: number, taskCodeId: number) => {
+      const res = await taskNodeRetry({
+        process_instance_id: processInstanceId,
+        task_code_list: [taskCodeId]
+      });
+
+      if (res.status === 200 && res.code === '') {
+        Message.success('重试成功');
+        table.refresh();
+      } else {
+        Message.error(res.message || '重试失败');
+      }
+    },
+    []
+  );
+
+  // 处理日志操作
+  const handleGetRunLogs = useCallback((id: number, taskName: string) => {
+    setCurrentTaskInstanceId(id);
+    setCurrentTaskName(taskName);
+    setLogDrawerVisible(true);
+  }, []);
+
+  const handleCloseLogDrawer = useCallback(() => {
+    setLogDrawerVisible(false);
+    setCurrentTaskInstanceId(null);
+    setCurrentTaskName('');
   }, []);
 
   // 处理日志操作
-  const handleLog = useCallback((record: ListTaskInstanceItem) => {
-    // TODO: 实现日志查看逻辑
-    Message.info('日志功能待实现');
-  }, []);
+  const handleLog = useCallback(
+    (record: ListTaskInstanceItem) => {
+      // 注意：ListTaskInstanceItem 可能没有 id 字段，需要根据实际 API 响应调整
+      // 如果 API 返回的字段名不同，请修改这里的字段名
+      const taskInstanceId = (record as any).id;
+      if (taskInstanceId) {
+        handleGetRunLogs(Number(taskInstanceId), record.task_name);
+      } else {
+        Message.error('无法获取任务实例ID');
+      }
+    },
+    [handleGetRunLogs]
+  );
 
   // 表格列定义
   const columns: ColumnProps<ListTaskInstanceItem>[] = useMemo(
@@ -205,15 +245,21 @@ export default function TaskNodeList() {
       },
       {
         title: '操作',
-        width: 200,
+        width: 104,
         fixed: 'right' as const,
         render: (_: any, record: ListTaskInstanceItem) => {
           return (
             <div className="flex items-center gap-2">
               <Button
+                disabled={record.state !== TaskNodeStatus.FAILURE}
                 type="text"
                 className="px-[4px]"
-                onClick={() => handleRetry(record)}
+                onClick={() =>
+                  handleTaskNodeRetry(
+                    record.process_instance_id,
+                    record.task_code
+                  )
+                }
               >
                 重试
               </Button>
@@ -229,8 +275,20 @@ export default function TaskNodeList() {
         }
       }
     ],
-    [handleRetry, handleLog]
+    [handleTaskNodeRetry, handleLog]
   );
+
+  const hasPagination = useMemo(() => {
+    if (!table?.pagination?.total) {
+      return false;
+    }
+
+    if (!table?.pagination?.pageSize) {
+      return false;
+    }
+
+    return table.pagination.total > table.pagination.pageSize;
+  }, [table.pagination.total, table.pagination.pageSize]);
 
   return (
     <div className="mt-[16px] rounded-[12px] bg-white p-[16px]">
@@ -251,7 +309,7 @@ export default function TaskNodeList() {
 
       {/* 分页 */}
       <div className="mt-[16px] flex items-center justify-end">
-        {(table.pagination.total ?? 0) > 0 && (
+        {hasPagination && (
           <Pagination
             current={table.pagination.current}
             pageSize={table.pagination.pageSize}
@@ -265,11 +323,24 @@ export default function TaskNodeList() {
               table.onChange({ current: page, pageSize } as PaginationProps);
             }}
             onPageSizeChange={(size) => {
-              table.onChange({ current: 1, pageSize: size } as PaginationProps);
+              table.onChange({
+                current: 1,
+                pageSize: size
+              } as PaginationProps);
             }}
           />
         )}
       </div>
+
+      {/* 日志Drawer */}
+      {logDrawerVisible && currentTaskInstanceId && (
+        <TaskLogDrawer
+          visible={logDrawerVisible}
+          taskInstanceId={currentTaskInstanceId}
+          taskName={currentTaskName}
+          onClose={handleCloseLogDrawer}
+        />
+      )}
     </div>
   );
 }
