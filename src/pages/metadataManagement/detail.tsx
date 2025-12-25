@@ -26,12 +26,17 @@ import {
   listMetadataDorisData,
   listMetadataMilvusField,
   listMetadataMilvusPartition,
-  listMetadataMilvusData
+  listMetadataMilvusData,
+  getMetadataIcebergTable,
+  getMetadataMinioBucket,
+  listMetadataMinioObject,
+  getMetadataDorisTable
 } from '@/api/metadata';
 import { formatFileSize } from '@/utils/format';
 import EllipsisPopoverCom from '@/components/ellipsis-popover-com';
 
 import styles from './detail.module.scss';
+import { SorterInfo } from '@arco-design/web-react/es/Table/interface';
 
 enum MetadataType {
   Iceberg = 'ICEBERG',
@@ -39,6 +44,20 @@ enum MetadataType {
   Kafka = 'KAFKA',
   MinIO = 'MINIO',
   Milvus = 'MILVUS'
+}
+
+interface MinIOBaseData {
+  id?: number;
+  bucketName?: string;
+  objectNum?: string;
+  region?: string;
+  storageSize?: string;
+  versioning?: number;
+  policy?: string;
+  encryptType?: string;
+  createTime?: string;
+  updateTime?: string;
+  lastTime?: string;
 }
 
 const BreadcrumbItem = Breadcrumb.Item;
@@ -55,12 +74,17 @@ export default function MetadataManagementDetail() {
   const [previewInfoColumns, setPreviewInfoColumns] = useState([]);
   const [previewInfoData, setPreviewInfoData] = useState([]);
   const [activeKey, setActiveKey] = useState('baseInfo');
+  const [minIOBaseData, setMinIOBaseData] = useState<MinIOBaseData>({});
+  const [baseInfoData, setBaseInfoData] = useState<Record<string, string>>({});
 
   // 字段分页
   const [fieldCurrent, setFieldCurrent] = useState(1);
   const [fieldPageSize, setFieldPageSize] = useState(10);
   const [fieldTotal, setFieldTotal] = useState(0);
   const [fieldName, setFieldName] = useState('');
+  const [objectKey, setObjectKey] = useState('');
+  const [contentType, setContentType] = useState('');
+  const [objectPath, setObjectPath] = useState('');
   const [description, setDescription] = useState('');
   const [fieldSearchValues, setFieldSearchValues] = useState({
     filters: {
@@ -68,6 +92,14 @@ export default function MetadataManagementDetail() {
       description: ''
     }
   });
+  const [minIoFieldSearchValues, setMinIoFieldSearchValues] = useState<{
+    filters: {
+      objectKey?: string;
+      contentType?: string;
+      objectPath?: string;
+    };
+    sorter?: {};
+  }>();
 
   // 分区分页
   const [partitionCurrent, setPartitionCurrent] = useState(1);
@@ -90,75 +122,81 @@ export default function MetadataManagementDetail() {
     fieldCurrent,
     fieldPageSize,
     fieldSearchValues,
+    minIoFieldSearchValues,
     partitionCurrent,
     partitionPageSize,
     partitionSearchValues
   ]);
 
+  // 获取分区字段
+  const getPartitionKey = (partitionKey: string) => {
+    if (!partitionKey) return '-';
+    const arr = partitionKey.split(',')?.map((item) => item);
+    if (arr.length >= 3) {
+      return (
+        <div>
+          {arr[0]}, {arr[1]} 等{' '}
+          <Tooltip content={partitionKey}>
+            <span className="text-[#007DFA]">{arr.length}</span>
+          </Tooltip>{' '}
+          个
+        </div>
+      );
+    } else return partitionKey || '-';
+  };
+
   // Iceberg/Doris基本信息数据
   const data = [
     {
       label: '英文名称',
-      value: 'BM_SS_ZYBM'
+      value: baseInfoData.tableName || '-'
     },
     {
       label: '中文名称',
-      value: '资源编目信息表（BM_SS_ZYBM）'
+      value: baseInfoData.datasourceName || '-'
     },
     {
       label: '存储类型',
-      value: '3C market'
+      value: baseInfoData.tableType || '-'
     },
     {
       label: '元数据文件位置',
-      value: 'Users\YourName\my_web_app\package.json'
+      value: <EllipsisPopoverCom value={baseInfoData.storageLocation || '-'} />
     },
     {
       label: '所属数据库',
-      value: '3C market'
+      value: metadataType || '-'
     },
     {
       label: '分区字段',
-      value: (
-        <div>
-          date, region 等{' '}
-          <Tooltip content="date，region，name">
-            <span className="text-[#007DFA]">{3}</span>
-          </Tooltip>{' '}
-          个
-        </div>
-      )
+      value: getPartitionKey(baseInfoData.partitionKey)
     },
     {
       label: '分区数',
-      value: '15'
+      value: baseInfoData.partitionNum
     },
     {
       label: '存储大小',
-      value: '45TB'
+      value: formatFileSize(Number(baseInfoData.storageSize))
     },
     {
       label: '文件数',
-      value: '16'
+      value: baseInfoData.fileNum
     },
     {
       label: '更新时间',
-      value: '2023-08-01 00:00:00'
-    },
-    {
-      label: '最新访问时间',
-      value: '2023-08-01 00:00:00'
+      value: baseInfoData.updateTime || '-'
     }
   ];
   // MinIo基本信息数据
   const minIoData = [
     {
       label: '桶名称',
-      value: 'BM_SS_ZYBM'
+      value: minIOBaseData.bucketName || '-'
     },
     {
       label: '对象数',
-      value: '16'
+      value: minIOBaseData.objectNum || '-'
     },
     {
       label: '存储类型',
@@ -166,35 +204,35 @@ export default function MetadataManagementDetail() {
     },
     {
       label: '所属区域',
-      value: 'Users\YourName\my_web_app\package.json'
+      value: minIOBaseData.region || '-'
     },
     {
       label: '存储大小',
-      value: '3C market'
+      value: minIOBaseData.storageSize || '-'
     },
     {
       label: '版本控制',
-      value: '启用'
+      value: minIOBaseData.versioning === 1 ? '启用' : '禁用'
     },
     {
       label: '访问策略',
-      value: '45TB'
+      value: minIOBaseData.policy || '-'
     },
     {
       label: '加密类型',
-      value: '16'
+      value: minIOBaseData.encryptType || '-'
     },
     {
       label: '创建时间',
-      value: '2023-08-01 00:00:00'
+      value: minIOBaseData.createTime || '-'
     },
     {
       label: '最新访问时间',
-      value: '2023-08-01 00:00:00'
+      value: minIOBaseData.lastTime || '-'
     },
     {
       label: '元数据更新时间',
-      value: '2023-08-01 00:00:00'
+      value: minIOBaseData.updateTime || '-'
     },
     {
       label: '数据更新时间',
@@ -202,7 +240,67 @@ export default function MetadataManagementDetail() {
     },
     {
       label: '元数据采集时间',
-      value: '2023-08-01 00:00:00'
+      value: minIOBaseData.createTime || '-'
+    }
+  ];
+  // MinIo对象信息列
+  const minIoObjectClumns = [
+    {
+      title: '序号',
+      dataIndex: 'index',
+      key: 'index',
+      render: (text, record, index) => index + 1
+    },
+    {
+      title: '对象名称',
+      dataIndex: 'objectKey',
+      key: 'objectKey'
+    },
+    {
+      title: '对象类型',
+      dataIndex: 'contentType',
+      key: 'contentType'
+    },
+    {
+      title: '存储类型',
+      dataIndex: 'storageClass',
+      key: 'storageClass',
+      filters: [
+        {
+          text: 'string',
+          value: 'string'
+        },
+        {
+          text: 'boolean',
+          value: 'boolean'
+        },
+        {
+          text: 'number',
+          value: 'number'
+        }
+      ]
+    },
+    {
+      title: '存储大小（G）',
+      dataIndex: 'size',
+      key: 'size'
+    },
+    {
+      title: '存储路径',
+      dataIndex: 'objectPath',
+      key: 'objectPath'
+    },
+    {
+      title: '元数据更新时间',
+      dataIndex: 'updateTime',
+      key: 'updateTime',
+      sorter: true
+    },
+    {
+      title: '元数据采集时间',
+      dataIndex: 'createTime',
+      key: 'createTime',
+      sorter: true
     }
   ];
   // 字段信息列
@@ -348,11 +446,17 @@ export default function MetadataManagementDetail() {
   // 处理字段搜索
   const handleSearch = (values) => {
     if (activeKey === 'fieldInfo') {
-      setFieldSearchValues({
-        filters: {
-          ...values
-        }
-      });
+      metadataType === MetadataType.MinIO
+        ? setMinIoFieldSearchValues({
+            filters: {
+              ...values
+            }
+          })
+        : setFieldSearchValues({
+            filters: {
+              ...values
+            }
+          });
     } else if (activeKey === 'partitionInfo') {
       setPartitionSearchValues({
         filters: {
@@ -365,7 +469,15 @@ export default function MetadataManagementDetail() {
   const getData = async () => {
     if (metadataType === MetadataType.Iceberg) {
       if (activeKey === 'baseInfo') {
-        return data;
+        const res = await getMetadataIcebergTable({
+          id: metadataId
+        });
+        console.log(res, 'ressss');
+        if (res.code === '' && res.status === 200) {
+          setBaseInfoData(res.data.data || {});
+        } else {
+          Message.error(res.message || '获取Iceberg基本信息数据失败');
+        }
       } else if (activeKey === 'fieldInfo') {
         const params = {
           pageNum: fieldCurrent,
@@ -420,7 +532,14 @@ export default function MetadataManagementDetail() {
       }
     } else if (metadataType === MetadataType.Doris) {
       if (activeKey === 'baseInfo') {
-        return data;
+        const res = await getMetadataDorisTable({
+          id: metadataId
+        });
+        if (res.code === '' && res.status === 200) {
+          setBaseInfoData(res.data.data || {});
+        } else {
+          Message.error(res.message || '获取Doris基本信息数据失败');
+        }
       } else if (activeKey === 'fieldInfo') {
         const params = {
           pageNum: fieldCurrent,
@@ -528,6 +647,38 @@ export default function MetadataManagementDetail() {
           Message.error(res.message || '获取Milvus预览数据失败');
         }
       }
+    } else if (metadataType === MetadataType.MinIO) {
+      if (activeKey === 'baseInfo') {
+        const res = await getMetadataMinioBucket({
+          id: metadataId
+        });
+        if (res.code === '' && res.status === 200) {
+          setMinIOBaseData(res.data.data || {});
+        } else {
+          Message.error(res.message || '获取MinIO桶信息数据失败');
+        }
+      } else if (activeKey === 'fieldInfo') {
+        const params = {
+          pageNum: fieldCurrent,
+          pageSize: fieldPageSize,
+          filters: {
+            bucketId: metadataId,
+            ...minIoFieldSearchValues?.filters
+          },
+          sorter: {
+            ...minIoFieldSearchValues?.sorter
+          }
+        };
+        const res = await listMetadataMinioObject(params);
+        if (res.code === '' && res.status === 200) {
+          setFieldData(res.data.data.list || []);
+          setFieldTotal(res.data.data.total || 0);
+          setFieldCurrent(res.data.data.pageNum || 1);
+          setFieldPageSize(res.data.data.pageSize || 10);
+        } else {
+          Message.error(res.message || '获取MinIO对象信息数据失败');
+        }
+      }
     }
   };
 
@@ -578,37 +729,7 @@ export default function MetadataManagementDetail() {
                     </Button>
                   </div>
                   <div className={styles.tableContent}>
-                    {`{
-                    "book": {
-                      "title": "示例图书",
-                      "author": "张三",
-                      "publishedYear": 2023,
-                      "isAvailable": true,
-                      "genres": ["小说", "科幻", "冒险"],
-                      "publisher": {
-                        "name": "示例出版社",
-                        "location": "北京"
-                      }
-                    }
-                  }`}
-                  </div>
-                </div>
-                <div className="mt-3">
-                  <h1 className={styles.title}>元数据文件内容 (JSON格式)</h1>
-                  <div className={styles.tableContent}>
-                    {`{
-                    "book": {
-                      "title": "示例图书",
-                      "author": "张三",
-                      "publishedYear": 2023,
-                      "isAvailable": true,
-                      "genres": ["小说", "科幻", "冒险"],
-                      "publisher": {
-                        "name": "示例出版社",
-                        "location": "北京"
-                      }
-                    }
-                  }`}
+                    <pre>{baseInfoData.createSql || '-'}</pre>
                   </div>
                 </div>
               </Typography.Paragraph>
@@ -765,7 +886,10 @@ export default function MetadataManagementDetail() {
             </TabPane>
           </Tabs>
         ) : metadataType === MetadataType.MinIO ? (
-          <Tabs defaultActiveTab="baseInfo">
+          <Tabs
+            defaultActiveTab="baseInfo"
+            onChange={(key) => handleTabChange(key)}
+          >
             <TabPane key="baseInfo" title="基本信息">
               <Typography.Paragraph>
                 <Descriptions
@@ -784,24 +908,109 @@ export default function MetadataManagementDetail() {
                   layout="inline"
                   colon=":"
                   labelCol={{ span: 3 }}
+                  onSubmit={handleSearch}
                 >
-                  <FormItem label="对象名称" field="fieldName">
-                    <Input.Search />
+                  <FormItem label="对象名称" field="objectKey">
+                    <Input.Search
+                      onSearch={fieldSearchForm.submit}
+                      allowClear
+                      onChange={(value) => {
+                        setObjectKey(value);
+                      }}
+                      onClear={() => {
+                        setMinIoFieldSearchValues({
+                          filters: {
+                            objectKey: '',
+                            contentType: contentType || '',
+                            objectPath: objectPath || ''
+                          }
+                        });
+                      }}
+                    />
                   </FormItem>
-                  <FormItem label="对象类型" field="fieldName_zh">
-                    <Input.Search />
+                  <FormItem label="对象类型" field="contentType">
+                    <Input.Search
+                      onSearch={fieldSearchForm.submit}
+                      allowClear
+                      onChange={(value) => {
+                        setContentType(value);
+                      }}
+                      onClear={() => {
+                        setMinIoFieldSearchValues({
+                          filters: {
+                            objectKey: objectKey || '',
+                            contentType: '',
+                            objectPath: objectPath || ''
+                          }
+                        });
+                      }}
+                    />
                   </FormItem>
                   <FormItem label="对象存储路径" field="objectPath">
-                    <Input.Search />
+                    <Input.Search
+                      onSearch={fieldSearchForm.submit}
+                      allowClear
+                      onChange={(value) => {
+                        setObjectPath(value);
+                      }}
+                      onClear={() => {
+                        setMinIoFieldSearchValues({
+                          filters: {
+                            objectKey: objectKey || '',
+                            contentType: contentType || '',
+                            objectPath: ''
+                          }
+                        });
+                      }}
+                    />
                   </FormItem>
                 </Form>
                 <Table
                   className="mt-2"
-                  columns={fieldColumns}
+                  columns={minIoObjectClumns}
                   data={fieldData}
                   border={false}
+                  pagination={false}
                   noDataElement={noDataElement({ description: '暂无数据' })}
+                  onChange={(pagination, filters, sorter) => {
+                    console.log(pagination, filters, sorter, 'fffff');
+                    setMinIoFieldSearchValues({
+                      filters: {
+                        objectKey: objectKey || '',
+                        contentType: contentType || '',
+                        objectPath: objectPath || '',
+                        ...sorter
+                      },
+                      sorter: {
+                        field: (filters as SorterInfo)?.field || '',
+                        order:
+                          (filters as SorterInfo)?.direction === 'ascend'
+                            ? 'asc'
+                            : 'desc'
+                      }
+                    });
+                  }}
                 />
+                {/* 分页 */}
+                {fieldData && fieldData.length > 0 && (
+                  <Pagination
+                    current={fieldCurrent}
+                    pageSize={fieldPageSize}
+                    onPageSizeChange={(pageSize) => {
+                      setFieldPageSize(pageSize);
+                      setFieldCurrent(1);
+                    }}
+                    onChange={(page) => {
+                      setFieldCurrent(page);
+                    }}
+                    sizeOptions={[10, 20, 50, 100]}
+                    showTotal
+                    total={fieldTotal}
+                    showJumper
+                    sizeCanChange
+                    style={{ justifyContent: 'flex-end', marginTop: '10px' }}
+                  />
+                )}
               </Typography.Paragraph>
             </TabPane>
           </Tabs>
@@ -819,51 +1028,6 @@ export default function MetadataManagementDetail() {
                   data={data}
                   className={styles.customDescriptions}
                 />
-                <div>
-                  <div className="mt-3 flex items-center justify-between">
-                    <h1 className={styles.title}>表DDL (建表SQL)</h1>
-                    <Button
-                      type="outline"
-                      icon={<IconCopy />}
-                      className={styles.copyButton}
-                    >
-                      复制代码
-                    </Button>
-                  </div>
-                  <div className={styles.tableContent}>
-                    {`{
-                    "book": {
-                      "title": "示例图书",
-                      "author": "张三",
-                      "publishedYear": 2023,
-                      "isAvailable": true,
-                      "genres": ["小说", "科幻", "冒险"],
-                      "publisher": {
-                        "name": "示例出版社",
-                        "location": "北京"
-                      }
-                    }
-                  }`}
-                  </div>
-                </div>
-                <div className="mt-3">
-                  <h1 className={styles.title}>元数据文件内容 (JSON格式)</h1>
-                  <div className={styles.tableContent}>
-                    {`{
-                    "book": {
-                      "title": "示例图书",
-                      "author": "张三",
-                      "publishedYear": 2023,
-                      "isAvailable": true,
-                      "genres": ["小说", "科幻", "冒险"],
-                      "publisher": {
-                        "name": "示例出版社",
-                        "location": "北京"
-                      }
-                    }
-                  }`}
-                  </div>
-                </div>
               </Typography.Paragraph>
             </TabPane>
             <TabPane key="fieldInfo" title="字段信息">

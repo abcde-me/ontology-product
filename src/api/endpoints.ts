@@ -485,6 +485,8 @@ export const ModaForgeResourceEndpoints = {
   listMetadataDataSourceApi: PrefixAimdp + '/ListMetadataDataSource',
   // 查询iceberg的所有表
   listMetadataIcebergTableApi: PrefixAimdp + '/ListMetadataIcebergTable',
+  // 查询iceberg表的基本信息
+  getMetadataIcebergTableApi: PrefixAimdp + '/GetMetadataIcebergTable',
   // 查询iceberg表的字段信息
   listMetadataIcebergFieldApi: PrefixAimdp + '/ListMetadataIcebergField',
   // 查询iceberg表的分区信息
@@ -494,6 +496,10 @@ export const ModaForgeResourceEndpoints = {
   listMetadataIcebergDataApi: PrefixAimdp + '/ListMetadataIcebergData',
   // 查询minio的所有表
   listMetadataMinioBucketApi: PrefixAimdp + '/ListMetadataMinioBucket',
+  // 查询minio表的基本信息
+  getMetadataMinioBucketApi: PrefixAimdp + '/GetMetadataMinioBucket',
+  // 查询minio表的对象信息
+  listMetadataMinioObjectApi: PrefixAimdp + '/ListMetadataMinioObject',
   // 查询milvus的所有表
   listMetadataMilvusDatabaseApi: PrefixAimdp + '/ListMetadataMilvusDatabase',
   // 查询milvus表的字段信息
@@ -504,6 +510,8 @@ export const ModaForgeResourceEndpoints = {
   listMetadataMilvusDataApi: PrefixAimdp + '/ListMetadataMilvusData',
   // 查询doris的所有表
   listMetadataDorisTableApi: PrefixAimdp + '/ListMetadataDorisTable',
+  // 查询doris表的基本信息
+  getMetadataDorisTableApi: PrefixAimdp + '/GetMetadataDorisTable',
   // 查询doris表的字段信息
   listMetadataDorisFieldApi: PrefixAimdp + '/ListMetadataDorisField',
   // 查询doris表的分区信息

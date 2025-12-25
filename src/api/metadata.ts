@@ -34,6 +34,36 @@ export async function listMetadataMinioBucket(
     .do();
 }
 
+// 查询minio的基本信息
+export async function getMetadataMinioBucket(
+  params: Record<string | number, any>
+) {
+  return await UAPI.RES.getMetadataMinioBucketApi({})
+    .post(params)
+    .inRegion()
+    .do();
+}
+
+// 查询minio的对象信息
+export async function listMetadataMinioObject(
+  params: Record<string | number, any>
+) {
+  return await UAPI.RES.listMetadataMinioObjectApi({})
+    .post(params)
+    .inRegion()
+    .do();
+}
+
+// 查询iceberg表的基本信息
+export async function getMetadataIcebergTable(
+  params: Record<string | number, any>
+) {
+  return await UAPI.RES.getMetadataIcebergTableApi({})
+    .post(params)
+    .inRegion()
+    .do();
+}
+
 // 查询iceberg表的字段信息
 export async function listMetadataIcebergField(
   params: Record<string | number, any>
@@ -109,6 +139,16 @@ export async function listMetadataDorisTable(
   params: Record<string | number, any>
 ) {
   return await UAPI.RES.listMetadataDorisTableApi({})
+    .post(params)
+    .inRegion()
+    .do();
+}
+
+// 查询doris表的基本信息
+export async function getMetadataDorisTable(
+  params: Record<string | number, any>
+) {
+  return await UAPI.RES.getMetadataDorisTableApi({})
     .post(params)
     .inRegion()
     .do();
