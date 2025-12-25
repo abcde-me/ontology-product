@@ -270,12 +270,14 @@ const ScriptCard: React.FC<ScriptCardProps> = ({
             setSearchValue(value);
           }}
           onPressEnter={() => {
+            setCurrent(1);
             getCardList();
           }}
           suffix={
             <IconSearch
               style={{ cursor: 'pointer' }}
               onClick={() => {
+                setCurrent(1);
                 getCardList();
               }}
             />
@@ -377,6 +379,8 @@ const ScriptCard: React.FC<ScriptCardProps> = ({
             display: 'flex',
             justifyContent: 'flex-end'
           }}
+          current={current}
+          pageSize={pageSize}
           onChange={(current, pageSize) => {
             setCurrent(current);
             setPageSize(pageSize);

@@ -258,6 +258,31 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
   const handleReleaseScript = useCallback(
     async (script_desc: string) => {
       try {
+        // 先保存当前内容
+        const saveRes = await editDevelopScript({
+          script_context: scriptInfo?.script_context ?? '',
+          script_id: Number(currentFile?.scriptId),
+          script_name: currentFile?.title ?? '',
+          script_params: scriptInfo?.script_params ?? []
+        });
+
+        if (saveRes?.status !== 200) {
+          Message.error(saveRes?.message ?? '保存失败，无法发布');
+          return false;
+        }
+
+        // 保存后更新原始内容
+        setOriginalContent(scriptInfo?.script_context ?? '');
+
+        setScriptInfo((prev) => {
+          if (!prev) return null;
+          return {
+            ...prev,
+            update_time: saveRes.data.update_time
+          };
+        });
+
+        // 保存成功后，再发布
         const res = await releaseDevelopScript({
           script_id: Number(currentFile?.scriptId),
           script_desc
@@ -279,7 +304,13 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
         return false;
       }
     },
-    [currentFile?.scriptId, scriptInfo?.script_desc]
+    [
+      currentFile?.scriptId,
+      currentFile?.title,
+      scriptInfo?.script_desc,
+      scriptInfo?.script_context,
+      scriptInfo?.script_params
+    ]
   );
 
   // 解锁脚本
@@ -436,6 +467,8 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
 
         // 保存后更新原始内容
         setOriginalContent(content);
+
+        Message.success('保存成功');
 
         return res.data;
       } catch (error) {

@@ -402,12 +402,24 @@ const ScriptTable: React.FC<ScriptTableProps> = ({
 
   // 点击搜索按钮
   const handleSearch = () => {
+    setCurrent(1);
     setLoading(true);
     getList();
-    isAll(true);
+    // 检查 Form 的选项是否不为空
+    const formValues = form.getFieldsValue();
+    const hasValue =
+      (formValues.script_name && formValues.script_name.trim() !== '') ||
+      formValues.status !== undefined ||
+      (formValues.create_user && formValues.create_user.trim() !== '');
+    if (hasValue) {
+      isAll(true);
+    } else {
+      isAll(false);
+    }
   };
   // 重置搜索框
   const handleReset = () => {
+    setCurrent(1);
     isAll(false);
     setIsClickClear(true);
     form.resetFields();
@@ -440,7 +452,11 @@ const ScriptTable: React.FC<ScriptTableProps> = ({
             <Input className="w-full" placeholder="输入脚本名称搜索" />
           </FormItem>
           <FormItem label="版本状态:" field="status">
-            <Select className="w-full" placeholder="请选择最新版本状态">
+            <Select
+              allowClear
+              className="w-full"
+              placeholder="请选择最新版本状态"
+            >
               {options.map((option, index) => (
                 <Option key={option.value} value={option.value}>
                   {option.label}
