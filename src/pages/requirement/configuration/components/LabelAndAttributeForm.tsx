@@ -187,8 +187,15 @@ const LabelAndAttributeForm: React.FC<LabelAndAttributeFormProps> = ({
         <LabelPreview labelDataList={labelDataList} />
       )}
 
-      {/* 原有的标签部分内容 */}
-      {activeTab === LabelInfoAttributeGroupType.LABEL && !isPreviewMode && (
+      {/* 原有的标签部分内容 - 使用display隐藏而非条件渲染，保证表单校验正常 */}
+      <div
+        style={{
+          display:
+            activeTab === LabelInfoAttributeGroupType.LABEL && !isPreviewMode
+              ? 'block'
+              : 'none'
+        }}
+      >
         <div className="attribute-content">
           {labelDataList &&
             labelDataList?.map((item: any, labelIndex) => (
@@ -1209,7 +1216,7 @@ const LabelAndAttributeForm: React.FC<LabelAndAttributeFormProps> = ({
               </div>
             ))}
         </div>
-      )}
+      </div>
       {activeTab === LabelInfoAttributeGroupType.TEMPLATE_ATTRIBUTE && (
         <TemplateAttributeForm
           templateData={templateData}
