@@ -3,8 +3,9 @@ export const SQL_EDITOR_HEIGHT = '300px';
 /**
  * SQL 参数占位符正则表达式
  * 用于匹配 ${paramName} 格式的参数占位符
+ * 注意：在遇到下一个 $ 时会停止匹配，用于处理嵌套情况（如 ${111 sssss ${GO}）
  */
-export const SQL_PARAM_PLACEHOLDER_REGEX = /\$\{([^}]+)\}/g;
+export const SQL_PARAM_PLACEHOLDER_REGEX = /\$\{([^$}]+)\}/g;
 
 export const DATAFRAMES_LIST = [
   {

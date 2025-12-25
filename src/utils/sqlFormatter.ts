@@ -3,7 +3,8 @@ import { format } from 'sql-formatter';
 export interface SqlFormatterOptions {
   /**
    * 占位符匹配的正则表达式
-   * @default /\$\{([^}]+)\}/g
+   * @default /\$\{([^$}]+)\}/g
+   * 注意：在遇到下一个 $ 时会停止匹配，用于处理嵌套情况
    */
   placeholderRegex?: RegExp;
   /**
@@ -53,7 +54,7 @@ export function formatSQL(
   options: SqlFormatterOptions = {}
 ): string {
   const {
-    placeholderRegex = /\$\{([^}]+)\}/g,
+    placeholderRegex = /\$\{([^$}]+)\}/g,
     tempPlaceholderTemplate = '__PLACEHOLDER_${index}__',
     formatOptions = { language: 'sql' }
   } = options;

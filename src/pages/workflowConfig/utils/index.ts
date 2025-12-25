@@ -106,7 +106,8 @@ export const canFindTool = (providerId: string, oldToolId?: string) => {
   );
 };
 
-const DEFAULT_REGEX = /\$\{([^}]+)\}/g;
+// 匹配 ${...} 格式，但在遇到下一个 $ 时停止（用于处理嵌套情况）
+const DEFAULT_REGEX = /\$\{([^$}]+)\}/g;
 
 export const pickParamsFromSQL = (content?: string) => {
   return Array.from(content?.matchAll(DEFAULT_REGEX) || []).map((item) => {

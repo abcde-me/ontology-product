@@ -18,7 +18,8 @@ interface UseLocalParamsReturn {
 }
 
 // 默认的正则表达式
-const DEFAULT_REGEX = /\$\{([^}]+)\}/g;
+// 匹配 ${...} 格式，但在遇到下一个 $ 时停止（用于处理嵌套情况）
+const DEFAULT_REGEX = /\$\{([^$}]+)\}/g;
 
 /**
  * 围绕localParams的hook
