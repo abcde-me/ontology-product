@@ -31,12 +31,12 @@ interface ApiDocDetailResponse {
     request?: {};
     response?: {};
   };
+  statusCode?: [];
 }
 
 export default function ViewFileModal({ visible, onCancel, id }) {
   const [viewFileDetailData, setViewFileDetailData] =
     useState<ApiDocDetailResponse>({});
-  const [dataApiData, setDataApiData] = useState([]);
   const [activeKey, setActiveKey] = useState('baseInfo');
 
   // 查看文档内容区域引用
@@ -127,12 +127,12 @@ export default function ViewFileModal({ visible, onCancel, id }) {
     },
     {
       title: '参数英文名称',
-      dataIndex: 'englishName',
+      dataIndex: 'name',
       width: 200
     },
     {
       title: '参数中文名称',
-      dataIndex: 'chineseName',
+      dataIndex: 'nameCn',
       width: 200
     },
     {
@@ -142,7 +142,7 @@ export default function ViewFileModal({ visible, onCancel, id }) {
     },
     {
       title: '参数类型',
-      dataIndex: 'type',
+      dataIndex: 'paramType',
       width: 150
     },
     {
@@ -153,7 +153,7 @@ export default function ViewFileModal({ visible, onCancel, id }) {
     },
     {
       title: '必填',
-      dataIndex: 'isRequired',
+      dataIndex: 'required',
       width: 80,
       render: (text, record) => <Checkbox checked={text} disabled />
     },
@@ -209,7 +209,7 @@ export default function ViewFileModal({ visible, onCancel, id }) {
     },
     {
       title: '码值英文说明',
-      dataIndex: 'statusCodeEnglish',
+      dataIndex: 'code',
       width: 300
     },
     {
@@ -347,7 +347,7 @@ export default function ViewFileModal({ visible, onCancel, id }) {
             <Table
               border={false}
               columns={statusCodesColumns}
-              data={dataApiData}
+              data={viewFileDetailData?.statusCode || []}
               pagination={false}
               noDataElement={noDataElement({ description: '暂无数据' })}
               rowKey="key"
