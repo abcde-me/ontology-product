@@ -278,6 +278,18 @@ export default function TaskNodeList() {
     [handleTaskNodeRetry, handleLog]
   );
 
+  const hasPagination = useMemo(() => {
+    if (!table?.pagination?.total) {
+      return false;
+    }
+
+    if (!table?.pagination?.pageSize) {
+      return false;
+    }
+
+    return table.pagination.total > table.pagination.pageSize;
+  }, [table.pagination.total, table.pagination.pageSize]);
+
   return (
     <div className="mt-[16px] rounded-[12px] bg-white p-[16px]">
       {/* 表格 */}
@@ -297,29 +309,27 @@ export default function TaskNodeList() {
 
       {/* 分页 */}
       <div className="mt-[16px] flex items-center justify-end">
-        {table.pagination.total &&
-          table.pagination.pageSize &&
-          table.pagination.total > table.pagination.pageSize && (
-            <Pagination
-              current={table.pagination.current}
-              pageSize={table.pagination.pageSize}
-              total={table.pagination.total}
-              sizeOptions={[10, 20, 50, 100]}
-              showTotal
-              showJumper
-              sizeCanChange
-              pageSizeChangeResetCurrent
-              onChange={(page, pageSize) => {
-                table.onChange({ current: page, pageSize } as PaginationProps);
-              }}
-              onPageSizeChange={(size) => {
-                table.onChange({
-                  current: 1,
-                  pageSize: size
-                } as PaginationProps);
-              }}
-            />
-          )}
+        {hasPagination && (
+          <Pagination
+            current={table.pagination.current}
+            pageSize={table.pagination.pageSize}
+            total={table.pagination.total}
+            sizeOptions={[10, 20, 50, 100]}
+            showTotal
+            showJumper
+            sizeCanChange
+            pageSizeChangeResetCurrent
+            onChange={(page, pageSize) => {
+              table.onChange({ current: page, pageSize } as PaginationProps);
+            }}
+            onPageSizeChange={(size) => {
+              table.onChange({
+                current: 1,
+                pageSize: size
+              } as PaginationProps);
+            }}
+          />
+        )}
       </div>
 
       {/* 日志Drawer */}
