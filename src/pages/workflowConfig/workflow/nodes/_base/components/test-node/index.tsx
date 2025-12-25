@@ -19,6 +19,7 @@ import { TaskStatus } from '@/pages/workflowConfig/types/workflow';
 import styles from './index.module.scss';
 import { useRequest } from 'ahooks';
 import { getWorkflowTaskLogs } from '@/api/workflowV2';
+import { TASK_NODE_RUN_STATUS_MAP } from '@/pages/workflowTask/common/constants';
 
 export default memo(function TestNode(props: {
   id: React.Key;
@@ -72,10 +73,11 @@ export default memo(function TestNode(props: {
   }, [nodeProcessStatus]);
 
   const badgeColor = useMemo(() => {
-    const state = nodeProcessStatus?.state;
-    if (state === TaskStatus.FAILURE) return '#EF4444';
-    if (state === TaskStatus.SUCCESS) return '#10B981';
-    return '#007DFA';
+    const defaultColor = '#666';
+    if (!nodeProcessStatus?.state) return defaultColor;
+    return (
+      TASK_NODE_RUN_STATUS_MAP[nodeProcessStatus.state]?.color || defaultColor
+    );
   }, [nodeProcessStatus]);
 
   useEffect(() => {

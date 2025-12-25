@@ -75,7 +75,8 @@ export const useNodesSyncDraft = () => {
       const hasStartNode = nodes.find(
         (node) => node.data.type === BlockEnum.Start
       );
-      const isStruct = flowIsStruct(nodes);
+      const isStruct = flowType === 'struct';
+      // 非结构化工作流才必须有开始节点
       if (!hasStartNode && !isStruct) return;
 
       const features = {} as any;
@@ -156,8 +157,7 @@ export const useNodesSyncDraft = () => {
       console.log('节点是否是只读的：', isNodesReadOnly);
       if (isNodesReadOnly) return;
       const postParams = getPostParams();
-      // 当前画布存在节点时才能保存
-      if (postParams && !!postParams.params.graph.nodes.length) {
+      if (postParams) {
         const { setSyncWorkflowDraftHash, setDraftUpdatedAt } =
           workflowStore.getState();
         try {
