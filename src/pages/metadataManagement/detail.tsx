@@ -8,6 +8,7 @@ import {
   FormInstance,
   Input,
   Message,
+  Modal,
   Pagination,
   Table,
   Tabs,
@@ -38,6 +39,9 @@ import EllipsisPopoverCom from '@/components/ellipsis-popover-com';
 
 import styles from './detail.module.scss';
 import { SorterInfo } from '@arco-design/web-react/es/Table/interface';
+import { render } from 'katex';
+import PdfRenderer from '../ragDetail/components/scenes/pdf/PdfRenderer';
+import { getFileBinaryData } from '@/api/modules/rag';
 
 enum MetadataType {
   Iceberg = 'ICEBERG',
@@ -69,6 +73,16 @@ export default function MetadataManagementDetail() {
   const history = useHistory();
   const metadataId = Number(useParams('id'));
   const metadataType = useParams('metadataType');
+  const canPreviewFileType = [
+    'pdf',
+    'doc',
+    'docx',
+    'xlsx',
+    'xls',
+    'pptx',
+    'ppt',
+    'markdown'
+  ];
 
   const [fieldData, setFieldData] = useState([]);
   const [partitionData, setPartitionData] = useState([]);
@@ -77,6 +91,8 @@ export default function MetadataManagementDetail() {
   const [activeKey, setActiveKey] = useState('baseInfo');
   const [minIOBaseData, setMinIOBaseData] = useState<MinIOBaseData>({});
   const [baseInfoData, setBaseInfoData] = useState<Record<string, string>>({});
+  const [fileBinaryData, setFileBinaryData] = useState<ArrayBuffer>();
+  const [previewVisible, setPreviewVisible] = useState(false);
 
   // 字段分页
   const [fieldCurrent, setFieldCurrent] = useState(1);
@@ -143,6 +159,17 @@ export default function MetadataManagementDetail() {
         </div>
       );
     } else return partitionKey || '-';
+  };
+
+  // 获取预览文件二进制数据
+  const handlePreview = async (record: Record<string, string>) => {
+    const res = await getFileBinaryData({
+      bucket_name: record.bucketName,
+      path: record.objectPath,
+      convert_pdf: true
+    });
+    setFileBinaryData(res);
+    setPreviewVisible(true);
   };
 
   // Iceberg/Doris基本信息数据
@@ -297,7 +324,22 @@ export default function MetadataManagementDetail() {
     {
       title: '对象名称',
       dataIndex: 'objectKey',
-      key: 'objectKey'
+      key: 'objectKey',
+      render: (text, record) => {
+        const objectPath = record.objectPath.split('.').pop();
+        const isCanPreview = canPreviewFileType.includes(objectPath);
+        return (
+          <EllipsisPopoverCom
+            className={isCanPreview ? styles.hoverChange : ''}
+            isLink={isCanPreview}
+            value={objectPath || '-'}
+            preferTypography
+            handleLink={() => {
+              handlePreview(record);
+            }}
+          />
+        );
+      }
     },
     {
       title: '对象类型',
@@ -1186,6 +1228,17 @@ export default function MetadataManagementDetail() {
           </Tabs>
         )}
       </div>
+      <Modal
+        visible={previewVisible}
+        onCancel={() => {
+          setPreviewVisible(false);
+        }}
+        title="数据预览"
+        footer={null}
+        className={styles.previewModal}
+      >
+        <PdfRenderer pdfData={fileBinaryData} scale={1.3} />
+      </Modal>
     </div>
   );
 }
