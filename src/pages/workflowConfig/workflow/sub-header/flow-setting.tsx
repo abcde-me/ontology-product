@@ -25,9 +25,26 @@ import {
 } from '@/pages/workflowList/types';
 import { useDebounceFn } from 'ahooks';
 import { editWorkflow } from '@/api/workflow';
-import { isEmpty } from 'lodash-es';
 import { useNodesReadOnly } from '@/pages/workflowConfig/workflow/hooks';
 import { LocalParam } from '@/pages/workflowConfig/types/workflow';
+
+const formatLocalParams = (params: LocalParam[]) => {
+  const localParams = params.map((item) => {
+    const { prop, value } = item;
+    const res: Partial<LocalParam> = {
+      direct: 'IN',
+      type: 'VARCHAR'
+    };
+    if (!!prop) {
+      res.prop = prop;
+    }
+    if (!!value) {
+      res.value = value;
+    }
+    return res;
+  });
+  return JSON.stringify(localParams);
+};
 
 export default memo(function FlowSetting() {
   const [show, setShow] = useState(true);
@@ -76,7 +93,8 @@ export default memo(function FlowSetting() {
       workflowDetail &&
         setWorkflowDetail({
           ...workflowDetail,
-          ...flow
+          ...flow,
+          global_params: formatLocalParams(flow.params || [])
         });
       return Promise.resolve();
     }

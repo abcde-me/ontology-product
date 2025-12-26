@@ -381,8 +381,6 @@ export default function WorkflowRunList() {
 
           /**
            * 展示逻辑
-           * 运行状态是运行中展示暂停运行
-           * 运行状态是运行暂停展示继续运行
            * 运行状态非上面两种情况展示重新运行
            */
           const canPause =
@@ -411,6 +409,7 @@ export default function WorkflowRunList() {
               >
                 详情
               </Button>
+              {/** 只有运行中状态展示暂停运行 */}
               {canPause && (
                 <Button
                   type="text"
@@ -425,6 +424,7 @@ export default function WorkflowRunList() {
                   暂停运行
                 </Button>
               )}
+              {/** 只有运行暂停状态展示继续运行 */}
               {canContinue && (
                 <Button
                   type="text"
@@ -439,6 +439,7 @@ export default function WorkflowRunList() {
                   继续运行
                 </Button>
               )}
+              {/** 其他状态展示重新运行 */}
               {canRerun && (
                 <Button
                   type="text"

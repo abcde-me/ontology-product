@@ -347,7 +347,7 @@ export default function WorkflowTaskDetail() {
               {taskDetailData?.state === WorkflowTaskStatus.FAILURE && (
                 <Popconfirm
                   title="确定重新运行吗？"
-                  content=""
+                  content="已处理数据将被覆盖"
                   onOk={() => handleRetryWorkflow(taskId)}
                 >
                   <Button type="text" className="px-[0px]">
@@ -398,128 +398,6 @@ export default function WorkflowTaskDetail() {
           taskDetailData?.error_msg && <span>{taskDetailData.error_msg}</span>}
       </div>
     );
-
-    // return (
-    //   <div className={styles['running-box']}>
-    //     <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-    //       <div className={styles['running-item']}>
-    //         <span className={styles['item-title']}>状态</span>
-    //         {taskDetailData.run_status === TaskRunStatus.success ? (
-    //           <div className={styles['item-content-box']}>
-    //             <IconCheckCircleFill
-    //               style={{
-    //                 color: '#10B981',
-    //                 margin: '0 8px 0 0',
-    //                 width: 16,
-    //                 height: 16
-    //               }}
-    //             />
-    //             <span className={styles['item-content']}>运行成功</span>
-    //           </div>
-    //         ) : taskDetailData.run_status === TaskRunStatus.fail ? (
-    //           <div className={styles['item-content-box']}>
-    //             <IconCloseCircleFill
-    //               style={{
-    //                 color: '#EF4444',
-    //                 margin: '0 8px 0 0',
-    //                 width: 16,
-    //                 height: 16
-    //               }}
-    //             />
-    //             <span className={styles['item-content']}>运行失败</span>
-    //             <PermissionWrapper
-    //               permission={WORKFLOW_TASK_PERMISSIONS.CAN_UPDATE}
-    //             >
-    //               <Popconfirm
-    //                 focusLock
-    //                 title="确定重新运行吗？"
-    //                 content="已处理数据将被覆盖"
-    //                 onOk={() => {
-    //                   handleRetryWorkflow(taskId);
-    //                 }}
-    //               >
-    //                 <span className={styles['operate-text']}>重试</span>
-    //               </Popconfirm>
-    //             </PermissionWrapper>
-    //           </div>
-    //         ) : taskDetailData.run_status === TaskRunStatus.running ? (
-    //           <div className={styles['item-content-box']}>
-    //             <IconLoading
-    //               style={{
-    //                 color: '#007DFA',
-    //                 margin: '0 8px 0 0',
-    //                 width: 16,
-    //                 height: 16
-    //               }}
-    //             />
-    //             <span className={styles['item-content']}>运行中</span>
-    //             <PermissionWrapper
-    //               permission={WORKFLOW_TASK_PERMISSIONS.CAN_UPDATE}
-    //             >
-    //               <Popconfirm
-    //                 focusLock
-    //                 title="确定停止吗？"
-    //                 content="未处理完的数据将停止处理"
-    //                 onOk={() => {
-    //                   handleStopWorkflow(taskId);
-    //                 }}
-    //               >
-    //                 <span className={styles['operate-text']}>停止</span>
-    //               </Popconfirm>
-    //             </PermissionWrapper>
-    //           </div>
-    //         ) : (
-    //           <div className={styles['item-content-box']}>
-    //             <IconExclamationCircleFill
-    //               style={{
-    //                 color: '#6E7B8D',
-    //                 margin: '0 8px 0 0',
-    //                 width: 16,
-    //                 height: 16
-    //               }}
-    //             />
-    //             <span className={styles['item-content']}>已停止</span>
-    //           </div>
-    //         )}
-    //       </div>
-    //       <div className={styles['running-item']}>
-    //         <span className={styles['item-title']}>总用时</span>
-    //         <div className={styles['item-content-box']}>
-    //           <span className={styles['item-content']}>
-    //             {taskDetailData?.time_size === ''
-    //               ? '-'
-    //               : (taskDetailData?.time_size ?? '-')}
-    //           </span>
-    //         </div>
-    //       </div>
-    //       <div className={styles['running-item']}>
-    //         <span className={styles['item-title']}>开始时间</span>
-    //         <div className={styles['item-content-box']}>
-    //           <span className={styles['item-content']}>
-    //             {taskDetailData?.start_time === ''
-    //               ? '-'
-    //               : (taskDetailData?.start_time ?? '-')}
-    //           </span>
-    //         </div>
-    //       </div>
-    //       <div className={styles['running-item']}>
-    //         <span className={styles['item-title']}>结束时间</span>
-    //         <div className={styles['item-content-box']}>
-    //           <span className={styles['item-content']}>
-    //             {taskDetailData?.end_time === ''
-    //               ? '-'
-    //               : (taskDetailData?.end_time ?? '-')}
-    //           </span>
-    //         </div>
-    //       </div>
-    //     </div>
-    //     {taskDetailData.run_status === TaskRunStatus.fail ? (
-    //       <span className={styles['fail-tip']}>{taskDetailData.error_msg}</span>
-    //     ) : (
-    //       <></>
-    //     )}
-    //   </div>
-    // );
   };
 
   // 获取子组件的分页数据
