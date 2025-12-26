@@ -259,7 +259,7 @@ const SqlIndex: React.FC = memo(() => {
               />
             )}
           </TabPane>
-          {useHasPermission(SQL_PERMISSIONS.LIST) && (
+          {useHasPermission(SQL_PERMISSIONS.QUERY_SCRIPT_LIST) && (
             <TabPane
               key="dataset"
               title={

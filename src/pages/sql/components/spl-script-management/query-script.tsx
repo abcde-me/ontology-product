@@ -12,23 +12,18 @@ import {
   Select,
   Table
 } from '@arco-design/web-react';
-import { useHistory } from 'react-router';
 import { ColumnProps } from '@arco-design/web-react/es/Table';
 import EllipsisPopover from '@/components/ellipsis-popover-com';
 import noDataElement from '@/components/no-data';
 import { SorterInfo } from '@arco-design/web-react/es/Table/interface';
 import { PermissionWrapper } from '@/components/PermissionGuard';
-import { WORKFLOW_LIST_PERMISSIONS } from '@/config/permissions';
+import { SQL_PERMISSIONS } from '@/config/permissions';
 import { IconClockCircle, IconRefresh } from '@arco-design/web-react/icon';
-import { openNewPage } from '@/utils/env';
 import styles from './query-script.module.scss';
-import ScriptModalTable from '../sctip-modal-table';
 import { createSqlScript, deleteSqlFile, listSqlFile } from '@/api/sql';
 import { useUrlState } from '../../hooks/useUrlState';
 import dayjs from 'dayjs';
 import generateSqlDefaultName from '../../utils/generateSqlDefaultName';
-
-const InputSearch = Input.Search;
 
 interface QueryScriptProps {
   curActiveTab: string;
@@ -227,7 +222,7 @@ const QueryScript: React.FC<QueryScriptProps> = ({ curActiveTab }) => {
         const perms = record.perms || [];
         return (
           <div style={{ display: 'flex' }}>
-            <PermissionWrapper permission={WORKFLOW_LIST_PERMISSIONS.CAN_READE}>
+            <PermissionWrapper permission={SQL_PERMISSIONS.QUERY_SCRIPT_GET}>
               <span
                 className={styles['operate-text']}
                 onClick={() => {
@@ -237,16 +232,18 @@ const QueryScript: React.FC<QueryScriptProps> = ({ curActiveTab }) => {
                 详情
               </span>
             </PermissionWrapper>
-            <span
-              className={
-                record.is_online
-                  ? styles['disabled-text']
-                  : styles['operate-text']
-              }
-              onClick={() => handleDelete(record.script_id)}
-            >
-              删除
-            </span>
+            <PermissionWrapper permission={SQL_PERMISSIONS.QUERY_SCRIPT_DELETE}>
+              <span
+                className={
+                  record.is_online
+                    ? styles['disabled-text']
+                    : styles['operate-text']
+                }
+                onClick={() => handleDelete(record.script_id)}
+              >
+                删除
+              </span>
+            </PermissionWrapper>
           </div>
         );
       }
@@ -304,13 +301,15 @@ const QueryScript: React.FC<QueryScriptProps> = ({ curActiveTab }) => {
         <div className="text-[16px] font-[600] text-[var(--text-color-text-1)]">
           查询脚本({queryNum})
         </div>
-        <Button
-          type="outline"
-          loading={createScriptLoading}
-          onClick={handleCreateQueryScript}
-        >
-          新建脚本
-        </Button>
+        <PermissionWrapper permission={SQL_PERMISSIONS.QUERY_SCRIPT_CREATE}>
+          <Button
+            type="outline"
+            loading={createScriptLoading}
+            onClick={handleCreateQueryScript}
+          >
+            新建脚本
+          </Button>
+        </PermissionWrapper>
       </div>
       <div className="mb-[16px] flex items-center justify-between overflow-x-auto whitespace-nowrap border-b border-[#E2E8F0] pb-[16px]">
         <Form

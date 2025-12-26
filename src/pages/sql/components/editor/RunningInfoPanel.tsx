@@ -464,7 +464,9 @@ const RunningInfoPanel: React.FC<RunningInfoPanelProps> = memo(
                         行数据
                       </span>
                     </Space>
-                    <PermissionWrapper permission={SQL_PERMISSIONS.EXPORT}>
+                    <PermissionWrapper
+                      permission={SQL_PERMISSIONS.QUERY_SCRIPT_EXPORT}
+                    >
                       <Dropdown
                         position="br"
                         disabled={runStatus !== RunningStatus.SUCCESS}

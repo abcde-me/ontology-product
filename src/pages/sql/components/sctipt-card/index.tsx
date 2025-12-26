@@ -28,6 +28,8 @@ import VersionStatus from '../version-status';
 import EllipsisPopover from '@/components/ellipsis-popover-com';
 import ScriptDetailModal from '../spl-script-management/ScriptDetailModal';
 import classNames from 'classnames';
+import { PermissionWrapper } from '@/components/PermissionGuard';
+import { SQL_PERMISSIONS } from '@/config/permissions';
 
 // 版本类型 已发版 未发版 调度中
 // 注意：0（编辑中）和 1（编辑完成）都代表"未发版"，但为了兼容现有代码，这里保留 1 作为 UNRELEASED 的值
@@ -320,37 +322,45 @@ const ScriptCard: React.FC<ScriptCardProps> = ({
                         'flex items-center'
                       )}
                     >
-                      <Button
-                        type="outline"
-                        className="mr-[8px] flex h-[24px] items-center justify-center px-[12px]"
-                        icon={<IconDetail className="h-[12px] w-[12px]" />}
-                        onClick={() => {
-                          setDetailTitle(item?.script_name || '');
-                          setDetailContent(item?.script_context || '');
-                          setDetailVisible(true);
-                        }}
-                      >
-                        详情
-                      </Button>
-                      <Popover
-                        content={
-                          item?.status === ScriptStatus.Scheduling
-                            ? '调度中的脚本不可删除'
-                            : ''
-                        }
+                      <PermissionWrapper
+                        permission={SQL_PERMISSIONS.DEVELOP_SCIPT_GET}
                       >
                         <Button
                           type="outline"
-                          className="mr-[8px] h-[24px] px-[12px]"
-                          icon={<IconDelete />}
-                          disabled={item.status === ScriptStatus.Scheduling}
-                          onClick={() =>
-                            deleteScript(item.script_id, item.status)
+                          className="mr-[8px] flex h-[24px] items-center justify-center px-[12px]"
+                          icon={<IconDetail className="h-[12px] w-[12px]" />}
+                          onClick={() => {
+                            setDetailTitle(item?.script_name || '');
+                            setDetailContent(item?.script_context || '');
+                            setDetailVisible(true);
+                          }}
+                        >
+                          详情
+                        </Button>
+                      </PermissionWrapper>
+                      <PermissionWrapper
+                        permission={SQL_PERMISSIONS.DEVELOP_SCIPT_DELETE}
+                      >
+                        <Popover
+                          content={
+                            item?.status === ScriptStatus.Scheduling
+                              ? '调度中的脚本不可删除'
+                              : ''
                           }
                         >
-                          删除
-                        </Button>
-                      </Popover>
+                          <Button
+                            type="outline"
+                            className="mr-[8px] h-[24px] px-[12px]"
+                            icon={<IconDelete />}
+                            disabled={item.status === ScriptStatus.Scheduling}
+                            onClick={() =>
+                              deleteScript(item.script_id, item.status)
+                            }
+                          >
+                            删除
+                          </Button>
+                        </Popover>
+                      </PermissionWrapper>
                     </div>
                   </div>
                   <div className={styles['script-card-content-item-content']}>
