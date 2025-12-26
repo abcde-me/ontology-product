@@ -101,7 +101,10 @@ export const routes: IRoute[] = [
     name: 'sql',
     key: '/tenant/compute/modaforge/sql',
     component: React.lazy(async () => import('../../sql')),
-    permission: SQL_PERMISSIONS.LIST,
+    anyPermission: [
+      SQL_PERMISSIONS.QUERY_SCRIPT_LIST,
+      SQL_PERMISSIONS.DEVELOP_SCIPT_LIST
+    ],
     children: []
   },
   // 工作流

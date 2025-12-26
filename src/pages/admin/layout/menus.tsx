@@ -50,7 +50,9 @@ export type MenuModel = {
   className?: string;
   type?: string;
   external?: boolean;
-  permission?: string; // 添加权限字段
+  permission?: string; // 单个权限字段
+  anyPermission?: string[]; // 任意一个权限即可（OR 逻辑）
+  allPermission?: string[]; // 必须全部权限（AND 逻辑）
   queryParamMatcher?: (search: string) => boolean; // 用于匹配查询参数
 };
 
@@ -80,8 +82,26 @@ export const filterMenusByPermissions = (
       }
 
       // 如果菜单需要权限且用户没有该权限，则过滤掉
-      if (menu.permission && !userPermissions.includes(menu.permission)) {
-        return null;
+      // 优先级：allPermission > anyPermission > permission
+      if (menu.allPermission) {
+        // 必须全部权限
+        if (
+          !menu.allPermission.every((perm) => userPermissions.includes(perm))
+        ) {
+          return null;
+        }
+      } else if (menu.anyPermission) {
+        // 任意一个权限即可
+        if (
+          !menu.anyPermission.some((perm) => userPermissions.includes(perm))
+        ) {
+          return null;
+        }
+      } else if (menu.permission) {
+        // 单个权限
+        if (!userPermissions.includes(menu.permission)) {
+          return null;
+        }
       }
 
       return menu;
@@ -157,7 +177,10 @@ export const menus: MenuModel[] = [
         icon: <SqlMenu className={iconClass} />,
         key: 'sql',
         path: '/tenant/compute/modaforge/sql',
-        permission: SQL_PERMISSIONS.LIST
+        anyPermission: [
+          SQL_PERMISSIONS.QUERY_SCRIPT_LIST,
+          SQL_PERMISSIONS.DEVELOP_SCIPT_LIST
+        ]
       }
     ]
   },

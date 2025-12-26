@@ -218,7 +218,11 @@ export default function WorkflowRunList() {
             className={`flex items-center gap-1 ${styles['workflow-name-container']}`}
           >
             <EllipsisPopoverCom
-              isLink={!!record.workflow_type}
+              isLink={
+                !!record.workflow_type &&
+                !!record.workflow_uuid &&
+                !!record.process_definition_code
+              }
               value={value}
               preferTypography
               handleLink={() => {

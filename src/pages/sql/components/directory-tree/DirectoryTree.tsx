@@ -36,13 +36,14 @@ import FileIcon from '@/assets/python/file.svg';
 import { PythonItemType, PythonListItem } from '@/types/pythonApi';
 import EllipsisPopover from '@/components/ellipsis-popover-com';
 import './DirectoryTree.scss';
-import { PYSPARK_PERMISSIONS, SQL_PERMISSIONS } from '@/config/permissions';
+import { SQL_PERMISSIONS } from '@/config/permissions';
 import { now } from 'lodash-es';
 import { PermissionWrapper } from '@/components/PermissionGuard';
 import SQLFileIcon from '@/assets/sql/spl-item-icon.svg';
 import CopyIcon from '../../assets/copy-icon.svg';
 import { useParams } from '@/utils/url';
 import { ScriptStatus, ScriptStatusName } from '@/types/sqlDevelopApi';
+
 // 原始数据接口
 export type TreeNodeItem = Partial<PythonListItem> & {
   dataRef?: any;
@@ -550,44 +551,15 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
             allowClear
             style={{ height: '32px' }}
           />
-          {from === DirectoryTreeFrom.SQL ? (
-            <PermissionWrapper permission={SQL_PERMISSIONS.CREATE}>
-              <div
-                className="ml-1 flex w-16 cursor-pointer items-center justify-center text-xs text-[#2563EB]"
-                onClick={() => startRootCreate(false)}
-              >
-                <IconPlus className="mr-1" />
-                新建
-              </div>
-            </PermissionWrapper>
-          ) : (
-            <PermissionWrapper permission={PYSPARK_PERMISSIONS.CREATE}>
-              <Dropdown
-                trigger="click"
-                position="bl"
-                droplist={
-                  <Menu
-                    onClickMenuItem={(key) => {
-                      if (key === 'folder') {
-                        startRootCreate(true);
-                      } else if (key === 'file') {
-                        startRootCreate(false);
-                      }
-                    }}
-                  >
-                    <Menu.Item key="file">新建PySpark</Menu.Item>
-                    <Menu.Item key="folder">新建文件夹</Menu.Item>
-                  </Menu>
-                }
-              >
-                {isCanCreate && (
-                  <Button type="text" size="small" icon={<IconPlus />}>
-                    {newButtonText}
-                  </Button>
-                )}
-              </Dropdown>
-            </PermissionWrapper>
-          )}
+          <PermissionWrapper permission={SQL_PERMISSIONS.DEVELOP_SCIPT_CREATE}>
+            <div
+              className="ml-1 flex w-16 cursor-pointer items-center justify-center text-xs text-[#2563EB]"
+              onClick={() => startRootCreate(false)}
+            >
+              <IconPlus className="mr-1" />
+              新建
+            </div>
+          </PermissionWrapper>
         </div>
 
         {isLoading ? (
@@ -612,10 +584,6 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
             }}
             renderExtra={(node) => {
               const isEditing = node.dataRef?.showInput;
-              const nowPermissions =
-                from === DirectoryTreeFrom.SQL
-                  ? SQL_PERMISSIONS
-                  : PYSPARK_PERMISSIONS;
 
               if (isEditing) return null;
 
@@ -631,7 +599,9 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
                     droplist={
                       <Menu>
                         {!isReleased && !isScheduling && (
-                          <PermissionWrapper permission={nowPermissions.MODIFY}>
+                          <PermissionWrapper
+                            permission={SQL_PERMISSIONS.DEVELOP_SCIPT_MODIFY}
+                          >
                             <Menu.Item
                               onClick={() => {
                                 handleEdit(node);
@@ -643,7 +613,9 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
                             </Menu.Item>
                           </PermissionWrapper>
                         )}
-                        <PermissionWrapper permission={nowPermissions.CREATE}>
+                        <PermissionWrapper
+                          permission={SQL_PERMISSIONS.DEVELOP_SCIPT_CREATE}
+                        >
                           <Menu.Item
                             onClick={() => {
                               handleCopy(node);
@@ -660,7 +632,9 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
                             </Tooltip>
                           </Menu.Item>
                         </PermissionWrapper>
-                        <PermissionWrapper permission={nowPermissions.DELETE}>
+                        <PermissionWrapper
+                          permission={SQL_PERMISSIONS.DEVELOP_SCIPT_DELETE}
+                        >
                           <Menu.Item
                             disabled={isScheduling}
                             onClick={() => {
