@@ -147,7 +147,7 @@ export const useNodesInteractions = () => {
   const handleStopTestNode = (process_instance_id: string) => {
     return workflowOperation({
       execute_type: WorkflowOperationType.STOP,
-      process_instance_id
+      process_instance_id: Number(process_instance_id)
     }).catch(console.error);
   };
 

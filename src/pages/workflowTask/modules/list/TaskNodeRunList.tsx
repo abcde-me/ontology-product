@@ -10,7 +10,7 @@ import {
   Message,
   Popconfirm
 } from '@arco-design/web-react';
-import { IconQuestionCircle } from '@arco-design/web-react/icon';
+import { IconCopy, IconQuestionCircle } from '@arco-design/web-react/icon';
 import {
   getTaskNodeList,
   taskNodeForcesSuccess,
@@ -36,6 +36,8 @@ import type { SorterInfo } from '@arco-design/web-react/lib/Table/interface';
 import noDataElement from '@/components/no-data';
 import EllipsisPopoverCom from '@/components/ellipsis-popover-com';
 import TaskLogDrawer from '../../components/task-log-drawer';
+import styles from './TaskNodeRunList.module.scss';
+import copy from 'copy-to-clipboard';
 
 const { Option } = Select;
 const FormItem = Form.Item;
@@ -90,6 +92,23 @@ export default function TaskNodeRunList() {
     setCurrentTaskName('');
   }, []);
 
+  // 复制文本
+  const handleCopy = useCallback((text: string) => {
+    const success = copy(text);
+    Message[success ? 'success' : 'error'](success ? '复制成功' : '复制失败');
+  }, []);
+
+  // 跳转到工作流配置页面
+  const handleWorkflowConfig = useCallback((record: TaskNodeItem) => {
+    // if (!record.workflow_uuid || !record.process_definition_code) {
+    //   Message.warning('工作流信息不完整，无法跳转');
+    //   return;
+    // }
+    // const url = `/modaforge/tenant/compute/modaforge/workflowConfig/${record.workflow_type || 'struct'}`;
+    // const queryParams = `?workflow_uuid=${record.workflow_uuid}&ds_workflow_id=${record.process_definition_code}&workflow_version=${record.workflow_version}`;
+    // openNewPage(`${url}${queryParams}`);
+  }, []);
+
   // 格式化任务节点运行记录请求参数
   const formatTaskParams = useCallback(
     (
@@ -107,8 +126,6 @@ export default function TaskNodeRunList() {
               }
             ]
           : [];
-
-      console.log('filters', filters);
 
       return {
         page: pagination.current || 1,
@@ -225,18 +242,38 @@ export default function TaskNodeRunList() {
       },
       {
         title: '所属工作流ID',
-        dataIndex: 'process_instance_id',
+        dataIndex: 'process_definition_code',
         width: 180,
-        render: (value: string) => (
-          <EllipsisPopoverCom value={value} preferTypography />
+        className: styles['hover-change'],
+        render: (value: string, record: TaskNodeItem) => (
+          <div
+            className={`flex items-center gap-1 ${styles['workflow-name-container']}`}
+          >
+            <EllipsisPopoverCom
+              isLink
+              value={value}
+              preferTypography
+              handleLink={() => {
+                handleWorkflowConfig(record);
+              }}
+            />
+            <IconCopy
+              className={styles['workflow-name-copy']}
+              onClick={(e) => {
+                e.stopPropagation();
+                handleCopy(value);
+              }}
+            />
+          </div>
         )
       },
       {
         title: '所属工作流名称',
-        dataIndex: 'process_name',
+        dataIndex: 'process_definition_name',
         width: 200,
+        className: styles['hover-change'],
         render: (value: string) => (
-          <EllipsisPopoverCom value={value} preferTypography />
+          <EllipsisPopoverCom isLink={true} value={value} preferTypography />
         )
       },
       {
@@ -410,6 +447,7 @@ export default function TaskNodeRunList() {
       {/* 表格 */}
       <Table
         scroll={{ x: true }}
+        className={styles['table-container']}
         columns={columns}
         data={table.data}
         loading={table.loading}

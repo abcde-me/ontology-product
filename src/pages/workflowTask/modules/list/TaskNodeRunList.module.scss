@@ -1,0 +1,45 @@
+.table-container {
+  :global(tbody) {
+    .hover-change :global(.ellipsis-text) {
+      color: #1e293b;
+    }
+
+    :global(.arco-table-tr):hover {
+      .hover-change :global(.ellipsis-text) {
+        color: rgb(0, 125, 250);
+        cursor: pointer;
+
+        &:hover {
+          color: rgba(67, 141, 251, 1);
+        }
+      }
+
+      .hover-change :global(.arco-typography) {
+        cursor: pointer;
+        color: rgb(0, 125, 250);
+
+        &:hover {
+          color: rgba(67, 141, 251, 1);
+        }
+      }
+
+      .workflow-name-container {
+        .workflow-name-copy {
+          visibility: visible;
+        }
+      }
+    }
+
+    .workflow-name-container {
+      .workflow-name-copy {
+        visibility: hidden;
+        cursor: pointer;
+        color: rgb(0, 125, 250);
+
+        &:hover {
+          color: rgba(67, 141, 251, 1);
+        }
+      }
+    }
+  }
+}

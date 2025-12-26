@@ -366,11 +366,9 @@ export enum WorkflowOperationType {
   /** 重试失败任务 */
   START_FAILURE_TASK_PROCESS = 'START_FAILURE_TASK_PROCESS',
   /** 结束运行 */
-  EXEC_STOP = 'EXEC_STOP',
+  STOP = 'STOP',
   /** 暂停运行 */
-  EXEC_PAUSE = 'EXEC_PAUSE',
-  /** 停止运行 */
-  STOP = 'STOP'
+  PAUSE = 'PAUSE'
 }
 
 export interface WorkflowOperationParams {
@@ -385,7 +383,7 @@ export interface WorkflowOperationParams {
   /**
    * 任务节点实例ID
    */
-  process_instance_id: string;
+  process_instance_id: number;
 }
 
 export interface GetWorkflowRunResultListParams {
