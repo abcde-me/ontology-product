@@ -507,8 +507,7 @@ export const getColumns = (
     {
       title: '序号',
       dataIndex: 'index',
-      fixed: 'left' as const,
-      width: 80,
+      width: 60,
       key: 'index',
       render: (_, _record, idx: number) => (page - 1) * size + idx + 1
     },
@@ -521,7 +520,7 @@ export const getColumns = (
           title: field.nameZh,
           dataIndex: field.nameEn,
           key: field.nameEn,
-          width: 150,
+          width: 180,
           className:
             field.id === 'collectionName' ||
             field.id === 'tableName' ||
