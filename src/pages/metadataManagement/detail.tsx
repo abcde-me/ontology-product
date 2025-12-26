@@ -42,6 +42,7 @@ import { SorterInfo } from '@arco-design/web-react/es/Table/interface';
 import { render } from 'katex';
 import PdfRenderer from '../ragDetail/components/scenes/pdf/PdfRenderer';
 import { getFileBinaryData } from '@/api/modules/rag';
+import TableViewer from '../ragDetail/components/scenes/table/TableViewer';
 
 enum MetadataType {
   Iceberg = 'ICEBERG',
@@ -93,6 +94,7 @@ export default function MetadataManagementDetail() {
   const [baseInfoData, setBaseInfoData] = useState<Record<string, string>>({});
   const [fileBinaryData, setFileBinaryData] = useState<ArrayBuffer>();
   const [previewVisible, setPreviewVisible] = useState(false);
+  const [selectFileType, setSelectFileType] = useState('');
 
   // 字段分页
   const [fieldCurrent, setFieldCurrent] = useState(1);
@@ -135,13 +137,11 @@ export default function MetadataManagementDetail() {
     getData();
   }, [
     activeKey,
-    fieldCurrent,
-    fieldPageSize,
-    fieldSearchValues,
-    minIoFieldSearchValues,
-    partitionCurrent,
-    partitionPageSize,
-    partitionSearchValues
+    fieldCurrent ||
+      fieldPageSize ||
+      fieldSearchValues ||
+      minIoFieldSearchValues,
+    partitionCurrent || partitionPageSize || partitionSearchValues
   ]);
 
   // 获取分区字段
@@ -162,11 +162,15 @@ export default function MetadataManagementDetail() {
   };
 
   // 获取预览文件二进制数据
-  const handlePreview = async (record: Record<string, string>) => {
+  const handlePreview = async (
+    record: Record<string, string>,
+    objectPath: string
+  ) => {
+    setSelectFileType(objectPath);
     const res = await getFileBinaryData({
       bucket_name: record.bucketName,
       path: record.objectPath,
-      convert_pdf: true
+      convert_pdf: !(selectFileType === 'xls' || selectFileType === 'xlsx')
     });
     setFileBinaryData(res);
     setPreviewVisible(true);
@@ -319,12 +323,14 @@ export default function MetadataManagementDetail() {
       title: '序号',
       dataIndex: 'index',
       key: 'index',
+      width: 80,
       render: (text, record, index) => index + 1
     },
     {
       title: '对象名称',
       dataIndex: 'objectKey',
       key: 'objectKey',
+      width: 200,
       render: (text, record) => {
         const objectPath = record.objectPath.split('.').pop();
         const isCanPreview = canPreviewFileType.includes(objectPath);
@@ -332,10 +338,10 @@ export default function MetadataManagementDetail() {
           <EllipsisPopoverCom
             className={isCanPreview ? styles.hoverChange : ''}
             isLink={isCanPreview}
-            value={objectPath || '-'}
+            value={text || '-'}
             preferTypography
             handleLink={() => {
-              handlePreview(record);
+              handlePreview(record, objectPath);
             }}
           />
         );
@@ -344,12 +350,16 @@ export default function MetadataManagementDetail() {
     {
       title: '对象类型',
       dataIndex: 'contentType',
-      key: 'contentType'
+      key: 'contentType',
+      className: styles.objectType,
+      width: 180,
+      render: (text, record) => <EllipsisPopoverCom value={text || '-'} />
     },
     {
       title: '存储类型',
       dataIndex: 'storageClass',
       key: 'storageClass',
+      width: 150,
       filters: [
         {
           text: 'string',
@@ -366,25 +376,31 @@ export default function MetadataManagementDetail() {
       ]
     },
     {
-      title: '存储大小（G）',
+      title: '存储大小',
       dataIndex: 'size',
-      key: 'size'
+      key: 'size',
+      width: 150,
+      render: (text, record) => formatFileSize(Number(text))
     },
     {
       title: '存储路径',
       dataIndex: 'objectPath',
-      key: 'objectPath'
+      key: 'objectPath',
+      width: 300,
+      render: (text, record) => <EllipsisPopoverCom value={text || '-'} />
     },
     {
       title: '元数据更新时间',
       dataIndex: 'updateTime',
       key: 'updateTime',
+      width: 220,
       sorter: true
     },
     {
       title: '元数据采集时间',
       dataIndex: 'createTime',
       key: 'createTime',
+      width: 220,
       sorter: true
     }
   ];
@@ -542,12 +558,14 @@ export default function MetadataManagementDetail() {
               ...values
             }
           });
+      setFieldCurrent(1);
     } else if (activeKey === 'partitionInfo') {
       setPartitionSearchValues({
         filters: {
           ...values
         }
       });
+      setPartitionCurrent(1);
     }
   };
 
@@ -557,7 +575,6 @@ export default function MetadataManagementDetail() {
         const res = await getMetadataIcebergTable({
           id: metadataId
         });
-        console.log(res, 'ressss');
         if (res.code === '' && res.status === 200) {
           setBaseInfoData(res.data.data || {});
         } else {
@@ -928,6 +945,7 @@ export default function MetadataManagementDetail() {
                             partitionName: ''
                           }
                         });
+                        setPartitionCurrent(1);
                       }}
                     />
                   </FormItem>
@@ -939,6 +957,7 @@ export default function MetadataManagementDetail() {
                   border={false}
                   pagination={false}
                   noDataElement={noDataElement({ description: '暂无数据' })}
+                  rowKey="id"
                 />
                 {/* 分页 */}
                 {partitionData && partitionData.length > 0 && (
@@ -970,6 +989,7 @@ export default function MetadataManagementDetail() {
                   data={previewInfoData}
                   border={false}
                   noDataElement={noDataElement({ description: '暂无数据' })}
+                  rowKey="id"
                 />
               </Typography.Paragraph>
             </TabPane>
@@ -1014,6 +1034,7 @@ export default function MetadataManagementDetail() {
                             objectPath: objectPath || ''
                           }
                         });
+                        setFieldCurrent(1);
                       }}
                     />
                   </FormItem>
@@ -1032,6 +1053,7 @@ export default function MetadataManagementDetail() {
                             objectPath: objectPath || ''
                           }
                         });
+                        setFieldCurrent(1);
                       }}
                     />
                   </FormItem>
@@ -1050,6 +1072,7 @@ export default function MetadataManagementDetail() {
                             objectPath: ''
                           }
                         });
+                        setFieldCurrent(1);
                       }}
                     />
                   </FormItem>
@@ -1060,9 +1083,9 @@ export default function MetadataManagementDetail() {
                   data={fieldData}
                   border={false}
                   pagination={false}
+                  rowKey="id"
                   noDataElement={noDataElement({ description: '暂无数据' })}
                   onChange={(pagination, filters, sorter) => {
-                    console.log(pagination, filters, sorter, 'fffff');
                     setMinIoFieldSearchValues({
                       filters: {
                         objectKey: objectKey || '',
@@ -1142,6 +1165,7 @@ export default function MetadataManagementDetail() {
                             description: description || ''
                           }
                         });
+                        setFieldCurrent(1);
                       }}
                     />
                   </FormItem>
@@ -1159,6 +1183,7 @@ export default function MetadataManagementDetail() {
                             description: ''
                           }
                         });
+                        setFieldCurrent(1);
                       }}
                     />
                   </FormItem>
@@ -1170,6 +1195,7 @@ export default function MetadataManagementDetail() {
                   border={false}
                   pagination={false}
                   noDataElement={noDataElement({ description: '暂无数据' })}
+                  rowKey="id"
                 />
                 {/* 分页 */}
                 {fieldData && fieldData.length > 0 && (
@@ -1211,6 +1237,7 @@ export default function MetadataManagementDetail() {
                   data={partitionData}
                   border={false}
                   noDataElement={noDataElement({ description: '暂无数据' })}
+                  rowKey="id"
                 />
               </Typography.Paragraph>
             </TabPane>
@@ -1222,6 +1249,7 @@ export default function MetadataManagementDetail() {
                   data={previewInfoData}
                   border={false}
                   noDataElement={noDataElement({ description: '暂无数据' })}
+                  rowKey="id"
                 />
               </Typography.Paragraph>
             </TabPane>
@@ -1237,7 +1265,11 @@ export default function MetadataManagementDetail() {
         footer={null}
         className={styles.previewModal}
       >
-        <PdfRenderer pdfData={fileBinaryData} scale={1.3} />
+        {selectFileType === 'xls' || selectFileType === 'xlsx' ? (
+          <TableViewer metadataPreviewData={fileBinaryData} />
+        ) : (
+          <PdfRenderer pdfData={fileBinaryData} scale={1.3} />
+        )}
       </Modal>
     </div>
   );

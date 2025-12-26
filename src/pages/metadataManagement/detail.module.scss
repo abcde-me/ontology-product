@@ -88,6 +88,12 @@
       max-width: 500px;
     }
 
+    .objectType {
+      :global(.ellipsis-popover-div) {
+        max-width: 180px;
+      }
+    }
+
     .hoverChange {
       color: #1e293b;
     }
