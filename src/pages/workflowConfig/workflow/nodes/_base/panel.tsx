@@ -1,4 +1,4 @@
-import { FC, ReactElement, useState } from 'react';
+import { FC, ReactElement, useMemo, useState } from 'react';
 import React, { cloneElement, memo, useCallback } from 'react';
 import { RiCloseLine } from '@remixicon/react';
 import { useShallow } from 'zustand/react/shallow';
@@ -37,9 +37,10 @@ type BasePanelProps = {
 } & Node;
 
 const BasePanel: FC<BasePanelProps> = ({ id, data, children }) => {
-  const { showMessageLogModal } = useTaskStore(
+  const { showMessageLogModal, nodesProcessData } = useTaskStore(
     useShallow((state) => ({
-      showMessageLogModal: state.showMessageLogModal
+      showMessageLogModal: state.showMessageLogModal,
+      nodesProcessData: state.nodesProcessDetail
     }))
   );
   const { nodesReadOnly } = useNodesReadOnly();

@@ -500,7 +500,8 @@ const Classify = (props: ClassifyComponentProps) => {
                               setTextRelations(newData);
                             }}
                             disabled={
-                              isEditModeFromDetail && attr?.isFromDetail
+                              attr.input_type === 2 ||
+                              (isEditModeFromDetail && attr?.isFromDetail)
                             }
                           />
                         </FormItem>

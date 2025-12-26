@@ -29,8 +29,8 @@ export default function useConfig(id: string, payload: SQLNodeConfig) {
         draft.raw_script = raw_script;
         draft.local_params = local_params;
         draft.task_priority = task_priority;
-        draft.fail_retry_times = fail_retry_times;
-        draft.fail_retry_interval = fail_retry_interval;
+        draft.fail_retry_times = fail_retry_times.toString();
+        draft.fail_retry_interval = fail_retry_interval.toString();
       });
       setInputs(newInputs);
     },

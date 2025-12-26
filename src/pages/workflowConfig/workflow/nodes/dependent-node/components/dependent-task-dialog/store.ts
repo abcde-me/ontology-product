@@ -13,7 +13,7 @@ const generateNewDependentTasks = (
   if ('workflow_uuid' in data) {
     return {
       dependentType: 'DEPENDENT_ON_WORKFLOW',
-      definitionCode: data.workflow_uuid,
+      definitionCode: data.ds_workflow_id,
       depTaskCode: 0,
       parameterPassing: false,
       title: data.workflow_name,
@@ -21,14 +21,14 @@ const generateNewDependentTasks = (
     };
   }
   return {
-    dependentType: 'DEPENDENT_ON_WORKFLOW',
-    definitionCode: data.id,
+    dependentType: 'DEPENDENT_ON_TASK',
+    definitionCode: +data.id,
     depTaskCode: 0,
     parameterPassing: false,
     title: data.data.title,
     task_type: data.data.type,
     desc: `所属工作流：${flow!.workflow_name}`,
-    parentFlow: flow!.workflow_uuid
+    parentFlow: flow!.ds_workflow_id
   };
 };
 
@@ -89,7 +89,7 @@ export const useDependentTaskStore = create<
   },
 
   selectWorkflow(flow) {
-    const flowId = flow.workflow_uuid;
+    const flowId = flow.ds_workflow_id;
 
     set((state) => {
       const flowMap = new Map(state.selectedFlowTask);
@@ -122,7 +122,7 @@ export const useDependentTaskStore = create<
       const flowMap = new Map(state.selectedFlowTask);
       const nodeMap = new Map(state.selectedNodeTask);
       const { all: allNodes } = state.nodesDataCache;
-      const { workflow_uuid: flowId } = state.currentFlow!;
+      const { ds_workflow_id: flowId } = state.currentFlow!;
 
       // 若已选 workflow，先降级
       if (flowMap.has(flowId)) {
@@ -159,7 +159,7 @@ export const useDependentTaskStore = create<
     set((state) => {
       const flowMap = new Map(state.selectedFlowTask);
       const nodeMap = new Map(state.selectedNodeTask);
-      const { workflow_uuid: flowId } = state.currentFlow!;
+      const { ds_workflow_id: flowId } = state.currentFlow!;
 
       const wasFlowSelected = flowMap.has(flowId);
 

@@ -62,6 +62,7 @@ export interface WorkflowDetailRes
    */
   description?: string;
   /** 工作流参数 */
+  global_params?: string;
   params?: Record<string, any>;
   /** 源数据目录 */
   source_path: string;

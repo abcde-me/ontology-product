@@ -20,6 +20,7 @@ import styles from './index.module.scss';
 import { useRequest } from 'ahooks';
 import { getWorkflowTaskLogs } from '@/api/workflowV2';
 import { TASK_NODE_RUN_STATUS_MAP } from '@/pages/workflowTask/common/constants';
+import { TaskNodeStatus } from '@/types/workflowTaskApi';
 
 export default memo(function TestNode(props: {
   id: React.Key;
@@ -82,7 +83,7 @@ export default memo(function TestNode(props: {
 
   useEffect(() => {
     if (showLog) return;
-    if (nodeProcessStatus?.state === TaskStatus.SUCCESS) {
+    if (nodeProcessStatus?.state === TaskNodeStatus.SUCCESS) {
       setDrawerLog(true);
     }
   }, [nodeProcessStatus?.state]);
@@ -115,12 +116,12 @@ export default memo(function TestNode(props: {
       )}
       <Tooltip
         content={
-          nodeProcessStatus?.state === TaskStatus.RUNNING_EXECUTION
-            ? '暂停'
-            : '运行'
+          nodeProcessStatus?.state === TaskNodeStatus.RUNNING_EXECUTION
+            ? '暂停测试'
+            : '测试该节点'
         }
       >
-        {nodeProcessStatus?.state === TaskStatus.RUNNING_EXECUTION ? (
+        {nodeProcessStatus?.state === TaskNodeStatus.RUNNING_EXECUTION ? (
           <Tooltip content={''}>
             <IconRecordStop
               className={`h-4 w-4 ${styles['node-operator']}`}
@@ -134,26 +135,29 @@ export default memo(function TestNode(props: {
           />
         )}
       </Tooltip>
-      <Drawer
-        title={'日志'}
-        visible={drawerLog}
-        mask={false}
-        maskClosable={false}
-        onCancel={() => setDrawerLog(false)}
-        footer={null}
-        placement={'bottom'}
-        className={styles['task-log-drawer']}
-        getPopupContainer={() => {
-          return (
-            document.querySelector('#workFlowNodeConfigPanel') || document.body
-          );
-        }}
-      >
-        <div className={`${styles['log-content']}`}>
-          {logs}
-          {logLoading && <IconLoading />}
-        </div>
-      </Drawer>
+      {showLog && (
+        <Drawer
+          title={'日志'}
+          visible={drawerLog}
+          mask={false}
+          maskClosable={false}
+          onCancel={() => setDrawerLog(false)}
+          footer={null}
+          placement={'bottom'}
+          className={styles['task-log-drawer']}
+          getPopupContainer={() => {
+            return (
+              document.querySelector('#workFlowNodeConfigPanel') ||
+              document.body
+            );
+          }}
+        >
+          <div className={`${styles['log-content']}`}>
+            {logs}
+            {logLoading && <IconLoading />}
+          </div>
+        </Drawer>
+      )}
     </div>
   );
 });

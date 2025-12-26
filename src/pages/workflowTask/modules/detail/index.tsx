@@ -719,7 +719,7 @@ export default function WorkflowTaskDetail() {
     try {
       const res = await workflowOperation({
         process_instance_id: Number(id),
-        execute_type: WorkflowOperationType.EXEC_STOP
+        execute_type: WorkflowOperationType.STOP
       });
 
       if (res.status === 200) {

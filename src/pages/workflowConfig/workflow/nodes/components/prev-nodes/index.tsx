@@ -4,6 +4,7 @@ import BlockIcon from '@/pages/workflowConfig/workflow/block-icon';
 import { NodeProps } from '@/pages/workflowConfig/workflow/types';
 import { useStoreApi } from 'reactflow';
 import { useNodesInteractions } from '@/pages/workflowConfig/workflow/hooks';
+import styles from './index.module.scss';
 
 export const PrevNodes = ({ node }: { node: React.Key }) => {
   const [prevNodes, setPrevNodes] = useState<NodeProps<Record<string, any>>[]>(
@@ -33,9 +34,7 @@ export const PrevNodes = ({ node }: { node: React.Key }) => {
             return (
               <div
                 key={node.id}
-                className={
-                  'dependent-item mb-2 mt-2 flex items-center gap-3 rounded-[12px] p-4 hover:cursor-pointer'
-                }
+                className={`dependent-item mb-2 mt-2 flex items-center gap-3 rounded-[12px] p-4 hover:cursor-pointer ${styles['node-item']}`}
                 onClick={() => {
                   handleNodeSelect(node.id);
                 }}
