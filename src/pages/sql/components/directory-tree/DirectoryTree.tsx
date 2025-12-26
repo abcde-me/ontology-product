@@ -5,6 +5,7 @@ import React, {
   useRef,
   useState
 } from 'react';
+import { useDebounceFn, useUpdateEffect } from 'ahooks';
 import {
   Button,
   Dropdown,
@@ -149,9 +150,48 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
       }
     }, [externalSelectedKeys]);
 
+    // 滚动到选中节点的函数
+    const scrollToSelectedNode = useCallback((selectedKey: string) => {
+      if (!treeContainerRef.current) return;
+
+      const treeNode = treeContainerRef.current.querySelector(
+        '.arco-tree-node-selected'
+      ) as HTMLElement;
+
+      if (treeNode) {
+        treeNode.scrollIntoView({
+          behavior: 'smooth',
+          block: 'center',
+          inline: 'nearest'
+        });
+      }
+    }, []);
+
+    // 使用 ahooks 的 useDebounceFn 优化滚动行为
+    const { run: debouncedScrollToNode } = useDebounceFn(
+      (selectedKey: string) => {
+        // 延迟执行，确保 DOM 已经渲染完成
+        setTimeout(() => {
+          scrollToSelectedNode(selectedKey);
+        }, 100);
+      },
+      { wait: 150 }
+    );
+
+    // 当选中文件变化时，自动滚动到可视区
+    useUpdateEffect(() => {
+      if (selectedKeys.length === 0) return;
+
+      const selectedKey = selectedKeys[0];
+      if (!selectedKey) return;
+
+      debouncedScrollToNode(selectedKey);
+    }, [selectedKeys, debouncedScrollToNode]);
+
     const inputRef = useRef<any>(null);
     const [inputValue, setInputValue] = useState<string>('');
     const [defaultName, setDefaultName] = useState<string>('');
+    const treeContainerRef = useRef<HTMLDivElement>(null);
 
     // 格式化数据
     const formatTreeData = (inputData: unknown[]): TreeNodeItem[] => {
@@ -486,6 +526,7 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
     };
     return (
       <div
+        ref={treeContainerRef}
         className="directory-tree-container"
         style={
           currentFolderName

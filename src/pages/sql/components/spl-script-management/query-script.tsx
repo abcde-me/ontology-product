@@ -60,9 +60,9 @@ const QueryScript: React.FC<QueryScriptProps> = ({ curActiveTab }) => {
   // 区分是否点击按钮清空搜索框
   const [isClickClear, setIsClickClear] = useState(false);
   // 初始化筛选的值
-  const [sortValue, setSortValue] = useState({
-    sort: ''
-  });
+  const [sortValue, setSortValue] = useState<
+    { order_flag: string; column: string }[]
+  >([]);
   const [queryNum, setQueryNum] = useState<number>(0);
   const [createScriptLoading, setCreateScriptLoading] = useState(false);
   // 组件初始化
@@ -90,20 +90,11 @@ const QueryScript: React.FC<QueryScriptProps> = ({ curActiveTab }) => {
         update_account: formData?.update_account,
         update_time_start: formData?.update_time?.[0],
         update_time_end: formData?.update_time?.[1],
-        orders: sortValue?.sort
-          ? [
-              {
-                column: 'script_id',
-                order_flag: sortValue?.sort
-              }
-            ]
-          : []
+        orders: sortValue
       };
       const res = await listSqlFile(params);
       if (res.status === 200 && res.data) {
         setQueryScriptData(res?.data?.items);
-        // setCurrent(res.data.page_info?.page);
-        // setPageSize(res.data.page_info?.page_size);
         setTotal(res.data?.total || 0);
         setQueryNum(res.data?.total || 0);
       }
@@ -155,16 +146,17 @@ const QueryScript: React.FC<QueryScriptProps> = ({ curActiveTab }) => {
     filters: Partial<Record<string | number | symbol, string[]>>
   ) => {
     setCurrent(1);
-    const sortdata = {
-      sort:
-        sorter.direction === undefined
-          ? ''
-          : sorter.direction === 'ascend'
-            ? 'asc'
-            : 'desc'
-    };
+    const orders =
+      sorter?.direction && sorter.field
+        ? [
+            {
+              order_flag: sorter.direction === 'ascend' ? 'asc' : 'desc',
+              column: sorter.field as string
+            }
+          ]
+        : [];
 
-    setSortValue(sortdata);
+    setSortValue(orders);
   };
 
   const handleToDetail = (scriptId: number | string) => {
@@ -184,8 +176,7 @@ const QueryScript: React.FC<QueryScriptProps> = ({ curActiveTab }) => {
     {
       title: '序号',
       dataIndex: 'script_id',
-      width: 100,
-      sorter: (a, b) => a.script_id - b.script_id
+      width: 100
     },
     {
       title: '脚本名称',
@@ -193,6 +184,7 @@ const QueryScript: React.FC<QueryScriptProps> = ({ curActiveTab }) => {
       width: 320,
       ellipsis: true,
       className: styles['hover-change'],
+      sorter: true,
       render: (_, record) => (
         <EllipsisPopover
           value={record.script_name || '-'}
@@ -221,6 +213,7 @@ const QueryScript: React.FC<QueryScriptProps> = ({ curActiveTab }) => {
       title: '更新时间',
       dataIndex: 'update_time',
       width: 180,
+      sorter: true,
       render: (_, record) => (
         <span>{dayjs(record.update_time).format('YYYY-MM-DD HH:mm:ss')}</span>
       )
@@ -262,11 +255,13 @@ const QueryScript: React.FC<QueryScriptProps> = ({ curActiveTab }) => {
 
   // 点击搜索按钮
   const handleSearch = () => {
+    setCurrent(1);
     setLoading(true);
     getList();
   };
   // 重置搜索框
   const handleReset = () => {
+    setCurrent(1);
     setSearchValue('');
     setIsClickClear(true);
     form.resetFields();

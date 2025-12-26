@@ -117,7 +117,7 @@ export const STATUS_FILTER = Object.entries(FLOW_RUN_STATUS).map(
 // 运行策略
 export const EXECUTION_TYPE_OPTIONS = [
   { label: '并行运行', value: 'PARALLEL' },
-  { label: '并行等待', value: 'SERIAL_WAIT' },
+  { label: '串行等待', value: 'SERIAL_WAIT' },
   { label: '串行抛弃', value: 'SERIAL_DISCARD' },
   { label: '串行优先', value: 'SERIAL_PRIORITY' }
 ];

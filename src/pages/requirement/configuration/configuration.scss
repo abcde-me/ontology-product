@@ -400,6 +400,11 @@
       }
     }
 
+    .attribute-content {
+      max-height: 800px;
+      overflow-y: auto;
+    }
+
     .add-btn {
       margin-left: 16px;
       margin-bottom: 16px;

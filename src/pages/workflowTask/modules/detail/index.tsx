@@ -578,6 +578,7 @@ export default function WorkflowTaskDetail() {
     const isParse =
       type === NodeType.text ||
       type === NodeType.pic ||
+      type === NodeType.image ||
       type === NodeType.video ||
       type === NodeType.audio;
     setActiveNodeType(type);
@@ -692,7 +693,7 @@ export default function WorkflowTaskDetail() {
   const handleRetryWorkflow = async (id: string) => {
     try {
       const res = await workflowOperation({
-        process_instance_id: id,
+        process_instance_id: Number(id),
         execute_type: WorkflowOperationType.REPEAT_RUNNING
       });
 
@@ -717,7 +718,7 @@ export default function WorkflowTaskDetail() {
   const handleStopWorkflow = async (id: string) => {
     try {
       const res = await workflowOperation({
-        process_instance_id: id,
+        process_instance_id: Number(id),
         execute_type: WorkflowOperationType.EXEC_STOP
       });
 

@@ -5,7 +5,7 @@ import {
   Typography,
   Cascader
 } from '@arco-design/web-react';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { NodePanelProps } from '@/pages/workflowConfig/workflow/types';
 import {
   SQLNodeConfig,
@@ -36,7 +36,11 @@ export default React.memo(function SQLPanel(
   props: NodePanelProps<SQLNodeConfig>
 ) {
   const { readOnly, onValuesChange, inputs } = useConfig(props.id, props.data);
-  const { data: allSQL, loading } = useRequest(
+  const {
+    data: allSQL,
+    loading,
+    run: getSQLList
+  } = useRequest(
     async () => {
       try {
         const sqlList = await getSQLListInSQLNode();
@@ -57,10 +61,21 @@ export default React.memo(function SQLPanel(
       }
     },
     {
-      refreshDeps: [inputs.sql_id]
+      refreshDeps: [inputs.sql_id],
+      manual: true
     }
   );
   const [form] = useForm();
+  useEffect(() => {
+    const { sql_id, ...otherData } = inputs;
+    if (!allSQL) {
+      getSQLList();
+    }
+    form.setFieldsValue({
+      sql_id: sql_id?.split('_'),
+      ...otherData
+    });
+  }, [inputs]);
   return (
     <PanelContainer className="panel-container wk-node-panel-content code-panel-content date-cleaning-panel mt-4">
       <Typography.Text bold className={'mb-2'}>
@@ -74,7 +89,8 @@ export default React.memo(function SQLPanel(
         disabled={readOnly}
         initialValues={{ ...inputs, sql_id: inputs.sql_id?.split('_') }}
         layout="vertical"
-        onValuesChange={(_, v: any) => {
+        onValuesChange={(changedValues, v: any) => {
+          if (Object.keys(changedValues).length > 2) return;
           const { local_params, sql_id, ...otherValue } = v;
           onValuesChange({
             ...inputs,

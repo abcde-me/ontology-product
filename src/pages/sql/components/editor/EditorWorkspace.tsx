@@ -36,6 +36,7 @@ import RunningInfoPanel from './RunningInfoPanel';
 import classNames from 'classnames';
 import { useUrlState } from '../../hooks/useUrlState';
 import { SQL_PARAM_PLACEHOLDER_REGEX } from '../../constant';
+import { validateName } from '@/utils/valiate';
 interface NotebookWorkspaceProps {
   content: string;
   fileName: string;
@@ -273,6 +274,7 @@ const EditorWorkspaceContent: React.FC<{
                 type="text"
                 icon={<SQLFormatIcon />}
                 onClick={handleFormatCode}
+                disabled={!editorContent?.trim()}
                 className="h-[26px]"
               >
                 格式化
@@ -386,13 +388,19 @@ const EditorWorkspaceContent: React.FC<{
               <>
                 <Button onClick={() => setVisible(false)}>取消</Button>
                 <Button
-                  onClick={() =>
-                    handleSave(saveForm).then((res) => {
+                  onClick={async () => {
+                    try {
+                      const validateResult = await saveForm.validate();
+                      console.log(validateResult, 'validateResult');
+                      const res = await handleSave(saveForm);
                       if (res) {
                         setVisible(false);
                       }
-                    })
-                  }
+                    } catch (error) {
+                      // 表单验证失败，错误信息会自动显示在表单上
+                      console.error('表单验证失败', error);
+                    }
+                  }}
                   type="primary"
                   htmlType="submit"
                 >
@@ -402,7 +410,31 @@ const EditorWorkspaceContent: React.FC<{
             ]}
           >
             <Form form={saveForm} className="w-full">
-              <FormItem label="SQL脚本名称:" required={true} field="fileName">
+              <FormItem
+                label="SQL脚本名称:"
+                required={true}
+                rules={[
+                  {
+                    required: true,
+                    validateTrigger: ['onBlur'],
+                    validator(value, cb) {
+                      if (!value) {
+                        return cb('请输入脚本名称');
+                      }
+
+                      if (!validateName(value).isValid) {
+                        return cb(
+                          validateName(value).errorMessage ??
+                            '脚本名称格式不正确'
+                        );
+                      }
+
+                      return cb();
+                    }
+                  }
+                ]}
+                field="fileName"
+              >
                 <Input
                   defaultValue={fileName}
                   // disabled={!!scriptId}

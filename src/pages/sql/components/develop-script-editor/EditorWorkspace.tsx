@@ -180,7 +180,6 @@ const EditorWorkspaceContent: React.FC<{
     const hasRunPermission = useHasPermission(SQL_PERMISSIONS.RUN);
     const hasUpdatePermission = useHasPermission(SQL_PERMISSIONS.MODIFY);
     const hasCancelRunPermission = useHasPermission(SQL_PERMISSIONS.RUN);
-    const [visible, setVisible] = React.useState<boolean>(false);
     const [specificationsVisible, setSpecificationsVisible] =
       React.useState<boolean>(false);
     const [specificationsContent, setSpecificationsContent] =
@@ -496,7 +495,7 @@ const EditorWorkspaceContent: React.FC<{
                         <IconCaretRight className="mr-[4px]" />
                       )
                     }
-                    disabled={!canEdit}
+                    disabled={!canEdit || !scriptInfo?.script_context?.trim()}
                     onClick={handleRunClick}
                     className={classNames(
                       'h-[26px]',
@@ -514,7 +513,10 @@ const EditorWorkspaceContent: React.FC<{
                   type="text"
                   icon={<SQLFormatIcon />}
                   onClick={handleFormatCode}
-                  disabled={!scriptInfo?.isSelfEditing}
+                  disabled={
+                    !scriptInfo?.isSelfEditing ||
+                    !scriptInfo?.script_context?.trim()
+                  }
                   className={classNames(
                     'h-[26px] px-[0px]',
                     styles['format-code-btn']
@@ -805,38 +807,6 @@ const EditorWorkspaceContent: React.FC<{
               onPanelStateChange={handlePanelStateChange}
               getPrevRunStatus={getPrevRunStatus}
             />
-          )}
-          {/* 保存查询列表 */}
-          {visible && (
-            <Modal
-              title="保存到查询脚本列表"
-              visible={visible}
-              onOk={() => setVisible(false)}
-              onCancel={() => setVisible(false)}
-              autoFocus={false}
-              focusLock={true}
-              footer={[
-                <>
-                  <Button onClick={() => setVisible(false)}>取消</Button>
-                  <Button type="primary" htmlType="submit">
-                    保存
-                  </Button>
-                </>
-              ]}
-            >
-              <Form form={form}>
-                <FormItem label="SQL脚本名称:" required={true} field="fileName">
-                  <Input
-                    defaultValue={fileName}
-                    style={{ width: 300 }}
-                    placeholder="请输入脚本名称"
-                  />
-                </FormItem>
-                <FormItem label="脚本说明:" field="fileDesc">
-                  <Input style={{ width: 300 }} placeholder="请输入脚本说明" />
-                </FormItem>
-              </Form>
-            </Modal>
           )}
           {/* 开发规范 */}
           {specificationsVisible && (

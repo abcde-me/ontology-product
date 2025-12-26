@@ -46,6 +46,7 @@ import ellipsisPopoverCom from '@/components/ellipsis-popover-com';
 import EllipsisPopoverCom from '@/components/ellipsis-popover-com';
 import copy from 'copy-to-clipboard';
 import { useHistory } from 'react-router';
+import { openNewPage } from '@/utils/env';
 
 const { Option } = Select;
 const FormItem = Form.Item;
@@ -71,6 +72,17 @@ export default function WorkflowRunList() {
     },
     [history]
   );
+
+  // 跳转到工作流配置页面
+  const handleWorkflowConfig = useCallback((record: WorkflowTaskItem) => {
+    if (!record.workflow_uuid || !record.process_definition_code) {
+      Message.warning('工作流信息不完整，无法跳转');
+      return;
+    }
+    const url = `/modaforge/tenant/compute/modaforge/workflowConfig/${record.workflow_type || 'struct'}`;
+    const queryParams = `?workflow_uuid=${record.workflow_uuid}&ds_workflow_id=${record.process_definition_code}&workflow_version=${record.workflow_version}`;
+    openNewPage(`${url}${queryParams}`);
+  }, []);
 
   // 格式化工作流运行记录请求参数
   const formatWorkflowParams = useCallback(
@@ -137,8 +149,8 @@ export default function WorkflowRunList() {
     async (type: WorkflowOperationType, processInstanceId: string) => {
       try {
         const res = await workflowOperation({
-          executeType: type,
-          process_instance_id: processInstanceId
+          execute_type: type,
+          process_instance_id: Number(processInstanceId)
         });
         if (res.status === 200) {
           Message.success('操作成功');
@@ -160,6 +172,7 @@ export default function WorkflowRunList() {
         title: '工作流运行ID',
         dataIndex: 'id',
         width: 180,
+        className: styles['hover-change'],
         render: (value: string, record: WorkflowTaskItem) => (
           <EllipsisPopoverCom
             value={value}
@@ -168,7 +181,8 @@ export default function WorkflowRunList() {
               handleWorkflowDetail(value, {
                 workflow_type: record.workflow_type,
                 workflow_uuid: record.workflow_uuid,
-                ds_workflow_id: record.process_definition_code
+                ds_workflow_id: record.process_definition_code,
+                workflow_version: record.workflow_version
               })
             }
           />
@@ -178,12 +192,25 @@ export default function WorkflowRunList() {
         title: '工作流名称',
         dataIndex: 'process_definition_name',
         width: 200,
-        render: (value: string) => (
-          <div className="flex items-center gap-1">
-            <EllipsisPopoverCom value={value} preferTypography />
+        className: styles['hover-change'],
+        render: (value: string, record: WorkflowTaskItem) => (
+          <div
+            className={`flex items-center gap-1 ${styles['workflow-name-container']}`}
+          >
+            <EllipsisPopoverCom
+              isLink={!!record.workflow_type}
+              value={value}
+              preferTypography
+              handleLink={() => {
+                handleWorkflowConfig(record);
+              }}
+            />
             <IconCopy
-              className="cursor-pointer"
-              onClick={() => handleCopy(value)}
+              className={styles['workflow-name-copy']}
+              onClick={(e) => {
+                e.stopPropagation();
+                handleCopy(value);
+              }}
             />
           </div>
         )
@@ -191,10 +218,6 @@ export default function WorkflowRunList() {
       {
         title: '运行状态',
         dataIndex: 'state',
-        // filters: Object.values(WorkflowTaskStatus).map((status) => ({
-        //   text: WorkflowTaskStatusNameMap[status],
-        //   value: status
-        // })),
         width: 150,
         render: (state: string, record: WorkflowTaskItem) => {
           // 使用原始状态值（新的枚举值），如果不存在则使用 stateName，最后使用默认值
@@ -399,7 +422,12 @@ export default function WorkflowRunList() {
         }
       }
     ],
-    [handleCopy, handleWorkflowOperation, handleWorkflowDetail]
+    [
+      handleCopy,
+      handleWorkflowOperation,
+      handleWorkflowDetail,
+      handleWorkflowConfig
+    ]
   );
 
   const hasPagination = useMemo(() => {
@@ -454,6 +482,7 @@ export default function WorkflowRunList() {
 
       {/* 表格 */}
       <Table
+        className={styles['table-container']}
         columns={columns}
         scroll={{ x: true }}
         data={table.data}
