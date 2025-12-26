@@ -15,12 +15,12 @@ import { Button, Drawer, Tooltip, Typography } from '@arco-design/web-react';
 import { useStore as useTaskStore } from '@/pages/workflowConfig/task/store';
 import { useShallow } from 'zustand/react/shallow';
 import { useNodesInteractions } from '@/pages/workflowConfig/workflow/hooks';
-import { TaskStatus } from '@/pages/workflowConfig/types/workflow';
 import styles from './index.module.scss';
 import { useRequest } from 'ahooks';
 import { getWorkflowTaskLogs } from '@/api/workflowV2';
 import { TASK_NODE_RUN_STATUS_MAP } from '@/pages/workflowTask/common/constants';
 import { TaskNodeStatus } from '@/types/workflowTaskApi';
+import { nodeIsRunning } from '@/pages/workflowConfig/workflow/nodes/utils';
 
 export default memo(function TestNode(props: {
   id: React.Key;
@@ -116,12 +116,10 @@ export default memo(function TestNode(props: {
       )}
       <Tooltip
         content={
-          nodeProcessStatus?.state === TaskNodeStatus.RUNNING_EXECUTION
-            ? '暂停测试'
-            : '测试该节点'
+          nodeIsRunning(nodeProcessStatus?.state) ? '暂停测试' : '测试该节点'
         }
       >
-        {nodeProcessStatus?.state === TaskNodeStatus.RUNNING_EXECUTION ? (
+        {nodeIsRunning(nodeProcessStatus?.state) ? (
           <Tooltip content={''}>
             <IconRecordStop
               className={`h-4 w-4 ${styles['node-operator']}`}
