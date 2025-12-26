@@ -27,8 +27,14 @@ import ColumnSettingModal, {
 } from '../dataAsset/components/ColumnSettingModal';
 import SearchArea from './components/SearchArea';
 import {
+  createMetadataDorisDatabase,
+  createMetadataDorisTable,
+  createMetadataIcebergDatabase,
+  createMetadataIcebergTable,
   listMetadataDataSource,
+  listMetadataDorisDatabaseName,
   listMetadataDorisTable,
+  listMetadataIcebergDatabaseName,
   listMetadataIcebergTable,
   listMetadataMilvusDatabase,
   listMetadataMinioBucket,
@@ -82,6 +88,8 @@ export default function MetadataManagement() {
   const [activeMetadataType, setActiveMetadataType] = useState<
     MetadataType | string
   >(MetadataType.Iceberg);
+  // 初始化筛选的元数据ID
+  const [activeMetadataId, setActiveMetadataId] = useState<number | null>(null);
   // 列设置弹窗是否打开
   const [columnModalOpen, setColumnModalOpen] = useState(false);
   // 初始化表格列
@@ -92,9 +100,15 @@ export default function MetadataManagement() {
   );
   // 创建数据库弹窗是否打开
   const [createTableModalOpen, setCreateTableModalOpen] = useState(false);
+  // 初始化数据库名称
+  const [databaseName, setDatabaseName] = useState('');
   // 创建物理数据库弹窗是否打开
   const [createPhysicalTableModalOpen, setCreatePhysicalTableModalOpen] =
     useState(false);
+  // 初始化iceberg数据库名称下拉列表
+  const [databaseNameOptions, setDatabaseNameOptions] = useState<
+    { databaseName: string; id: number }[]
+  >([]);
 
   // 创建数据库弹窗表单
   const [tableForm] = Form.useForm();
@@ -146,6 +160,7 @@ export default function MetadataManagement() {
         setActiveMetadataType(
           res.data.data[0]?.datasourceType || MetadataType.Iceberg
         );
+        setActiveMetadataId(Number(res.data.data[0]?.id) || null);
       }
     } else {
       Message.error(res.message || '获取元数据菜单数据失败');
@@ -271,27 +286,95 @@ export default function MetadataManagement() {
     console.log('列设置变化:', list);
   };
 
-  // 筛选元数据类型操作
-  const handleTableTypeChange = (key: MetadataType | string) => {
-    console.log(key, 'kkkkkk');
-    tableForm.setFieldsValue({
-      ddl: key
+  // 创建数据库弹窗回调
+  const handleCreateTableModalOk = () => {
+    tableForm.validate().then(async (values) => {
+      console.log(values, '创建数据库');
+      const params = {
+        instanceId: activeMetadataId,
+        databaseName: values.tableName,
+        ddl: values.ddl
+      };
+      if (activeMetadataType === MetadataType.Iceberg) {
+        const res = await createMetadataIcebergDatabase(params);
+        if (res.status === 200 && res.code === '') {
+          if (res.data.success) {
+            Message.success('创建数据库成功');
+            tableForm.resetFields();
+          } else Message.error(res.data.msg || '创建数据库失败');
+        } else {
+          Message.error(res.message || '创建数据库失败');
+        }
+      } else {
+        const res = await createMetadataDorisDatabase(params);
+        if (res.status === 200 && res.code === '') {
+          if (res.data.success) {
+            Message.success('创建数据库成功');
+            tableForm.resetFields();
+          } else Message.error(res.data.msg || '创建数据库失败');
+        } else {
+          Message.error(res.message || '创建数据库失败');
+        }
+      }
+
+      setCreateTableModalOpen(false);
     });
   };
 
-  // 创建数据库弹窗回调
-  const handleCreateTableModalOk = () => {
-    tableForm.validate().then((values) => {
-      console.log(values, '创建数据库');
-      setCreateTableModalOpen(false);
-      tableForm.resetFields();
-    });
+  const handleCreatePhysicalTable = async () => {
+    if (activeMetadataType === MetadataType.Iceberg) {
+      const res = await listMetadataIcebergDatabaseName({
+        instanceId: activeMetadataId
+      });
+      if (res.status === 200 && res.code === '') {
+        if (res.data.success) {
+          setDatabaseNameOptions(res.data?.data || []);
+        } else Message.error(res.data.msg || '获取数据库列表失败');
+      } else {
+        Message.error(res.message || '获取数据库列表失败');
+      }
+    } else {
+      const res = await listMetadataDorisDatabaseName({
+        instanceId: activeMetadataId
+      });
+      if (res.status === 200 && res.code === '') {
+        if (res.data.success) {
+          setDatabaseNameOptions(res.data?.data || []);
+        } else Message.error(res.data.msg || '获取数据库列表失败');
+      } else {
+        Message.error(res.message || '获取数据库列表失败');
+      }
+    }
+    setCreatePhysicalTableModalOpen(true);
   };
 
   // 创建物理数据库弹窗回调
   const handleCreatePhysicalTableModalOk = () => {
-    physicalTableForm.validate().then((values) => {
-      console.log(values, '创建物理数据库');
+    physicalTableForm.validate().then(async (values) => {
+      const params = {
+        databaseId: values.tableType,
+        ddl: values.ddl
+      };
+
+      if (activeMetadataType === MetadataType.Iceberg) {
+        const res = await createMetadataIcebergTable(params);
+        if (res.status === 200 && res.code === '') {
+          if (res.data.success) {
+            Message.success('创建物理表成功');
+          } else Message.error(res.data.msg || '创建物理表失败');
+        } else {
+          Message.error(res.message || '创建物理表失败');
+        }
+      } else {
+        const res = await createMetadataDorisTable(params);
+        if (res.status === 200 && res.code === '') {
+          if (res.data.success) {
+            Message.success('创建物理表成功');
+          } else Message.error(res.data.msg || '创建物理表失败');
+        } else {
+          Message.error(res.message || '创建物理表失败');
+        }
+      }
       setCreatePhysicalTableModalOpen(false);
       physicalTableForm.resetFields();
     });
@@ -304,9 +387,14 @@ export default function MetadataManagement() {
         <div className={styles['leftBox']}>
           <Menu
             defaultSelectedKeys={[activeMetadataType]}
-            onClickMenuItem={(key) => {
+            onClickMenuItem={(key, event, keyPath) => {
               setSelectedColumns(getColumnsSetting(key));
               setActiveMetadataType(key);
+              const selectMenuItem =
+                metadataMenuData.find(
+                  (item: MetadataMenuItem) => item?.datasourceType === key
+                ) || ({} as MetadataMenuItem);
+              setActiveMetadataId(selectMenuItem?.id || null);
             }}
           >
             {metadataMenuData.map((item: MetadataMenuItem) => (
@@ -356,7 +444,7 @@ export default function MetadataManagement() {
                     className={styles['refreshBtn']}
                     icon={<IconPlus className="text-[#1E293B]" />}
                     onClick={() => {
-                      setCreatePhysicalTableModalOpen(true);
+                      handleCreatePhysicalTable();
                     }}
                   >
                     创建物理表
@@ -446,6 +534,7 @@ export default function MetadataManagement() {
             field="tableType"
             label="数据库类型"
             rules={[{ required: true, message: '请选择数据库类型' }]}
+            initialValue={activeMetadataType}
           >
             <Select
               placeholder="请选择数据库类型"
@@ -457,17 +546,9 @@ export default function MetadataManagement() {
                 {
                   label: getMenuName(MetadataType.Doris),
                   value: MetadataType.Doris
-                },
-                {
-                  label: getMenuName(MetadataType.MinIO),
-                  value: MetadataType.MinIO
-                },
-                {
-                  label: getMenuName(MetadataType.Milvus),
-                  value: MetadataType.Milvus
                 }
               ]}
-              onChange={handleTableTypeChange}
+              disabled
             />
           </Form.Item>
           <Form.Item
@@ -480,11 +561,15 @@ export default function MetadataManagement() {
           <Form.Item
             field="ddl"
             label="DDL语句"
-            disabled
+            initialValue={
+              activeMetadataType === MetadataType.Iceberg
+                ? `CREATE DATABASE IF NOT EXISTS iceberg_db_example COMMENT 'Iceberg创建库示例'`
+                : `CREATE DATABASE IF NOT EXISTS db_example`
+            }
             rules={[
               {
                 required: true,
-                message: '请先选择数据库类型，并输入数据库名称'
+                message: '请输入DDL语句'
               }
             ]}
           >
@@ -528,6 +613,8 @@ export default function MetadataManagement() {
                   placeholder="请选择数据库类型"
                   style={{ width: 160 }}
                   className={styles.selectAddBefore}
+                  value={activeMetadataType}
+                  disabled
                   options={[
                     {
                       label: getMenuName(MetadataType.Iceberg),
@@ -536,34 +623,54 @@ export default function MetadataManagement() {
                     {
                       label: getMenuName(MetadataType.Doris),
                       value: MetadataType.Doris
-                    },
-                    {
-                      label: getMenuName(MetadataType.MinIO),
-                      value: MetadataType.MinIO
-                    },
-                    {
-                      label: getMenuName(MetadataType.Milvus),
-                      value: MetadataType.Milvus
                     }
                   ]}
                 />
               }
-            />
+            >
+              {databaseNameOptions.map((item) => (
+                <Select.Option key={item.id} value={item.id}>
+                  {item.databaseName}
+                </Select.Option>
+              ))}
+            </Select>
           </Form.Item>
           <Form.Item
             field="ddl"
             label="DDL语句"
-            disabled
+            initialValue={
+              activeMetadataType === MetadataType.Iceberg
+                ? `CREATE TABLE iceberg_db_example.iceberg_table_example (
+  id INT COMMENT '主键ID',
+  name STRING COMMENT '示例1',
+  create_time TIMESTAMP COMMENT '创建时间'
+)
+USING iceberg
+COMMENT '创建Iceberg表示例'`
+                : `CREATE TABLE IF NOT EXISTS db_example.table_example (
+  'id_example' BIGINT COMMENT '主键ID',
+  'name_example' VARCHAR(64) COMMENT '姓名示例',
+  'create_time' DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  'update_time' DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  'create_by' VARCHAR(64) COMMENT '创建人'
+) ENGINE=OLAP
+DUPLICATE KEY('id_example')
+COMMENT '表描述'
+DISTRIBUTED BY HASH('id_example') BUCKETS 10
+PROPERTIES (
+  "replication_allocation" = "tag.location.default: 1"
+);`
+            }
             rules={[
               {
                 required: true,
-                message: '请先选择数据库类型，并输入数据库名称'
+                message: '请输入DDL语句'
               }
             ]}
           >
             <TextArea
               style={{ minHeight: 400 }}
-              placeholder="请先选择数据库类型，并输入数据库名称"
+              placeholder="请先选择保存位置"
             />
           </Form.Item>
         </Form>
