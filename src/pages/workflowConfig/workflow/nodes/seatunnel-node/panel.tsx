@@ -224,23 +224,41 @@ export default React.memo(function SeatunnelPanel(
         wrapperCol={{ span: 24 }}
         disabled={readOnly || props.readonly}
         layout="vertical"
-        onValuesChange={(changeEd, v: any) => {
-          if (Object.keys(changeEd).length > 1) return;
-          const {
-            source,
-            target,
-            field_sync,
-            source_database,
-            target_datasource_id,
-            ...other
-          } = v;
-          onValuesChange({ ...source, ...target, ...field_sync, ...other });
+        onValuesChange={(changedValues, v: any) => {
+          const fields = Object.keys(changedValues);
+          if (fields.length > 1) return;
+          form
+            .validate(fields)
+            .then((res) => {
+              const {
+                source,
+                target,
+                field_sync,
+                source_database,
+                target_datasource_id,
+                ...other
+              } = v;
+              onValuesChange({ ...source, ...target, ...field_sync, ...other });
+            })
+            .catch(console.error);
         }}
       >
         <FormItem
           label={'来源表'}
           field={'source_database'}
-          rules={[{ message: '请选择来源表', required: true }]}
+          required
+          rules={[
+            {
+              validator(v?: React.Key[], errorCall?) {
+                if (!v) {
+                  return errorCall('来源表不能为空');
+                }
+                if (v.length <= 1) {
+                  return errorCall('请选择到来源表');
+                }
+              }
+            }
+          ]}
         >
           <HighLightSearchCascader
             className={'w-full'}
@@ -371,7 +389,19 @@ export default React.memo(function SeatunnelPanel(
         <FormItem
           label={'目标表'}
           field={'target_datasource_id'}
-          rules={[{ message: '请选择目标表', required: true }]}
+          required
+          rules={[
+            {
+              validator(v?: React.Key[], errorCall?) {
+                if (!v) {
+                  return errorCall('目标表不能为空');
+                }
+                if (v.length <= 1) {
+                  return errorCall('请选择到目标表');
+                }
+              }
+            }
+          ]}
         >
           <HighLightSearchCascader
             className={'w-full'}

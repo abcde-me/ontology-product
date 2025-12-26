@@ -3,6 +3,7 @@ import { SQLNodeConfig } from './types';
 import { ALL_COMPLETION_AVAILABLE_BLOCKS } from '@/pages/workflowConfig/workflow/blocks';
 import { STRUCT_FLOW_NODES } from '@/pages/workflowConfig/workflow/constants';
 import { STRUCT_NODE_EXEC_DEFAULT_PARAMS } from '@/pages/workflowConfig/workflow/nodes/constants';
+import { isNil } from 'lodash-es';
 
 const SQLNodeDefault: NodeDefault<SQLNodeConfig> = {
   defaultValue: {
@@ -29,9 +30,12 @@ const SQLNodeDefault: NodeDefault<SQLNodeConfig> = {
   },
   checkValid(payload: SQLNodeConfig) {
     let errorMessages = '';
-    const { raw_script } = payload;
+    const { raw_script, local_params } = payload;
     if (!raw_script) {
       errorMessages = 'SQL脚本不可为空';
+    }
+    if (local_params?.some((p) => !p.value)) {
+      errorMessages = '参数值不能为空';
     }
 
     return {
