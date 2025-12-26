@@ -8,7 +8,9 @@ import {
   Menu,
   Button,
   Modal,
-  Message
+  Message,
+  Cascader,
+  Form
 } from '@arco-design/web-react';
 import { useHistory } from 'react-router';
 import { ColumnProps } from '@arco-design/web-react/es/Table';
@@ -63,6 +65,10 @@ enum sortBy {
 export default function DataApi() {
   const history = useHistory();
   const userInfo = useUserInfo();
+
+  // 初始化授权弹窗表单
+  const [authorizationForm] = Form.useForm();
+
   // 初始化搜索框value
   const [searchValue, setSearchValue] = useState('');
   // 初始化api列表数据
@@ -82,6 +88,12 @@ export default function DataApi() {
   const [authorizationLoading, setAuthorizationLoading] = useState(false);
   // 初始化授权弹窗数据
   const [authorizationData, setAuthorizationData] = useState([]);
+  // 初始化授权弹窗项目
+  const [projects, setProjects] = useState<Record<string, any>[]>([]);
+  // 初始化授权弹窗选中的项目id
+  const [selectedProjectName, setSelectedProjectName] = useState('');
+  // 初始化已授权列表
+  const [authorizedData, setAuthorizedData] = useState([]);
   // 初始化授权弹窗选中的行数据
   const [selectedAuthorizationRows, setSelectedAuthorizationRows] = useState<
     Record<string, any>[]
@@ -217,21 +229,48 @@ export default function DataApi() {
     const res = await openDataAuthList({
       id: record.id
     });
-    console.log(res, 'resssss');
-    // 获取授权所有组织及项目
-    const response = await GetProjOrg({});
-    if (response.data) {
-      let itemsTotal = 0;
-      const newList = transformOrgArray(response.data);
-      newList.forEach((item) => {
-        itemsTotal += item.children.length;
-      });
-      setItemsTotal(itemsTotal);
-      setAuthorizationData(newList);
-      setAuthorizationLoading(false);
+    if (res.status === 200 && res.code === '') {
+      setAuthorizedData(res.data.list || []);
     } else {
-      setAuthorizationLoading(false);
+      Message.error(res.message || '获取已授权列表失败');
     }
+    if (projects.length === 0) {
+      // 获取授权所有组织及项目
+      const response = await GetProjOrg({});
+      if (response.data) {
+        let itemsTotal = 0;
+        const newList = transformOrgArray(response.data);
+        newList.forEach((item) => {
+          itemsTotal += item.children.length;
+        });
+        setItemsTotal(itemsTotal);
+        setAuthorizationData(newList);
+        setAuthorizationLoading(false);
+        setProjects(response.data || []);
+      }
+    }
+    setAuthorizationLoading(false);
+  };
+
+  const handleAuthSubmit = () => {
+    authorizationForm.validate().then(async (values) => {
+      console.log(values, 'values');
+      const params = {
+        apiId: apiId,
+        AuthInfo: {
+          projectId: values.projectId[1],
+          projectName: selectedProjectName
+        }
+      };
+
+      const res = await openDataAuthorizeApi(params);
+      if (res.status === 200 && res.code === '') {
+        Message.success(res.message || '授权数据API成功');
+        getList();
+      } else {
+        Message.error(res.message || '授权数据API失败');
+      }
+    });
   };
 
   const handleAuth = async () => {
@@ -519,6 +558,53 @@ export default function DataApi() {
     }
   ];
 
+  // 已授权列表列
+  const authorizedColumns: ColumnProps[] = [
+    {
+      title: '序号',
+      dataIndex: 'title',
+      width: 80,
+      render: (_, record, index) => index + 1
+    },
+    {
+      title: '授权KEY',
+      dataIndex: 'key',
+      width: 200,
+      ellipsis: true
+    },
+    {
+      title: '应用',
+      dataIndex: 'authorizedApp',
+      width: 180
+    },
+    {
+      title: '用途',
+      dataIndex: 'purpose',
+      width: 180
+    },
+    {
+      title: '授权时间',
+      dataIndex: 'authorizedTime',
+      width: 180
+    },
+    {
+      title: '操作',
+      dataIndex: 'operation',
+      width: 180,
+      fixed: 'right',
+      render: (_, record) => (
+        <div>
+          <span
+            className={styles['operate-text']}
+            onClick={() => handleToAddApi('edit', record.id)}
+          >
+            取消授权
+          </span>
+        </div>
+      )
+    }
+  ];
+
   // 跳转创建API页面
   const handleToAddApi = (type: 'add' | 'edit', id?: string) => {
     history.push(
@@ -615,10 +701,14 @@ export default function DataApi() {
         className={styles.authorizationModal}
         visible={authorizationModalVisible}
         title="授权"
-        onCancel={() => setAuthorizationModalVisible(false)}
-        onOk={handleAuth}
+        onCancel={() => {
+          setAuthorizationModalVisible(false);
+          authorizationForm.resetFields();
+        }}
+        onOk={authorizationForm.submit}
       >
-        <div className={styles.authorizationModalContent}>
+        {/* 目前授权仅支持单选，ue稿设计样式暂时隐藏 */}
+        {/* <div className={styles.authorizationModalContent}>
           <div className={styles.leftBox}>
             <InputSearch placeholder="搜索组织或项目" />
             <Table
@@ -692,6 +782,53 @@ export default function DataApi() {
               ))}
             </div>
           </div>
+        </div> */}
+
+        <div className={styles.projectSelector}>
+          <Form form={authorizationForm} onSubmit={handleAuthSubmit}>
+            <Form.Item
+              label="项目："
+              field="projectId"
+              rules={[{ required: true, message: '请选择项目' }]}
+              labelCol={{ span: 2 }}
+              wrapperCol={{ span: 22 }}
+            >
+              <Cascader
+                placeholder="请选择项目"
+                style={{
+                  backgroundColor: '#FFFFFF33',
+                  borderRadius: 4
+                }}
+                fieldNames={{
+                  label: 'title',
+                  value: 'id',
+                  children: 'projectList'
+                }}
+                options={projects}
+                showSearch
+                filterOption={(input, node) => {
+                  return (
+                    node.value.toLowerCase().indexOf(input.toLowerCase()) >
+                      -1 ||
+                    node.label.toLowerCase().indexOf(input.toLowerCase()) > -1
+                  );
+                }}
+                onChange={(value, option) => {
+                  setSelectedProjectName(option[1].pathLabel[1] as string);
+                }}
+              />
+            </Form.Item>
+          </Form>
+          <h1 className="mb-2 text-base font-semibold">已授权列表</h1>
+          <Table
+            border={false}
+            columns={authorizedColumns}
+            data={authorizedData}
+            pagination={false}
+            noDataElement={noDataElement({ description: '暂无数据' })}
+            rowKey="key"
+            loading={authorizationLoading}
+          />
         </div>
       </Modal>
     </div>

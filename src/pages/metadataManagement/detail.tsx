@@ -791,18 +791,23 @@ export default function MetadataManagementDetail() {
     }
   };
 
+  const handleBack = () => {
+    history.push(
+      '/tenant/compute/modaforge/metadataManagement?metadataType=' +
+        metadataType
+    );
+  };
+
   return (
     <div className={styles.metadataManagementDetail}>
       <div className={styles.headBreadcrumbBox}>
         <IconArrowLeft
           style={{ cursor: 'pointer', fontSize: '14px' }}
-          onClick={() => history.goBack()}
+          onClick={handleBack}
         />
         <Breadcrumb style={{ fontSize: 20, marginLeft: '21px' }}>
           <BreadcrumbItem
-            onClick={() =>
-              history.push('/tenant/compute/modaforge/metadataManagement')
-            }
+            onClick={handleBack}
             className={styles.breadcrumbText}
           >
             元数据管理
