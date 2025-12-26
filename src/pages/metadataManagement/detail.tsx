@@ -141,6 +141,7 @@ export default function MetadataManagementDetail() {
       fieldCurrent: fieldCurrent,
       partitionCurrent: partitionCurrent,
       fieldPageSize: fieldPageSize,
+      minIoFieldSearchValues: minIoFieldSearchValues,
       partitionPageSize: partitionPageSize,
       fieldSearchValues: fieldSearchValues,
       partitionSearchValues: partitionSearchValues
@@ -149,6 +150,7 @@ export default function MetadataManagementDetail() {
     fieldCurrent,
     partitionCurrent,
     fieldPageSize,
+    minIoFieldSearchValues,
     partitionPageSize,
     fieldSearchValues,
     partitionSearchValues
