@@ -193,9 +193,7 @@ export function useWorkflowTable<TData = any, TParams = any>(
   // 提交搜索（重置到第一页）
   const submit = useCallback(() => {
     setPagination((prev) => ({ ...prev, current: 1 }));
-    setSorter(undefined);
-    setFilters({});
-    // 不在这里手动调用 run()，让 useUpdateEffect 统一处理状态变化导致的请求
+    run();
   }, []);
 
   // 重置搜索
@@ -206,9 +204,7 @@ export function useWorkflowTable<TData = any, TParams = any>(
       pageSize: defaultPageSize,
       total: 0
     });
-    setSorter(undefined);
-    setFilters({});
-    // 不在这里手动调用 run()，让 useUpdateEffect 统一处理状态变化导致的请求
+    run();
   }, [form, defaultPageSize]);
 
   // 刷新数据
@@ -231,7 +227,7 @@ export function useWorkflowTable<TData = any, TParams = any>(
       // 更新表格数据
       setTableData(responseData.items || []);
     }
-  }, [data?.data]);
+  }, [data?.data, setTableData, setPagination]);
 
   return {
     data: tableData,
