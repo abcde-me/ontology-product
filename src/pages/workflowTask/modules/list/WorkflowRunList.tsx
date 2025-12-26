@@ -282,6 +282,28 @@ export default function WorkflowRunList() {
         )
       },
       {
+        title: '结束时间',
+        dataIndex: 'end_time',
+        width: 180,
+        sorter: true,
+        sortDirections: ['ascend', 'descend'],
+        render: (value: string) => (
+          <EllipsisPopoverCom value={value} preferTypography />
+        )
+      },
+      {
+        title: '运行时长',
+        dataIndex: 'duration',
+        width: 180,
+        render: (value: string) => <span>{value ?? '-'}</span>
+      },
+      {
+        title: '重试次数',
+        dataIndex: 'try_times',
+        width: 180,
+        render: (value: string) => <span>{value ?? '-'}</span>
+      },
+      {
         title: '操作',
         width: 200,
         fixed: 'right' as const,
