@@ -265,8 +265,11 @@ export default function MetadataManagement() {
 
   // 处理重置
   const handleReset = () => {
-    // setSearchParams({ ...searchParams, fieldSearch: [], commonSearch: '' });
-    // setCurrentPage(1);
+    setSearchValue({
+      filters: {},
+      range: [] as RangeFilter[]
+    });
+    setCurrent(1);
   };
 
   const columnSettingsFields: ColumnField[] =
