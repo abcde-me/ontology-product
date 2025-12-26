@@ -144,6 +144,26 @@ export default function WorkflowRunList() {
     Message[success ? 'success' : 'error'](success ? '复制成功' : '复制失败');
   }, []);
 
+  const getOperationSuccessMessage = useCallback(
+    (type: WorkflowOperationType) => {
+      switch (type) {
+        case WorkflowOperationType.STOP:
+          return '结束运行成功';
+        case WorkflowOperationType.PAUSE:
+          return '暂停运行成功';
+        case WorkflowOperationType.RECOVER_SUSPENDED_PROCESS:
+          return '继续运行成功';
+        case WorkflowOperationType.REPEAT_RUNNING:
+          return '重新运行成功';
+        case WorkflowOperationType.START_FAILURE_TASK_PROCESS:
+          return '重试所有失败任务成功';
+        default:
+          return '操作成功';
+      }
+    },
+    []
+  );
+
   // 工作流操作
   const handleWorkflowOperation = useCallback(
     async (type: WorkflowOperationType, processInstanceId: string) => {
@@ -153,7 +173,7 @@ export default function WorkflowRunList() {
           process_instance_id: Number(processInstanceId)
         });
         if (res.status === 200) {
-          Message.success('操作成功');
+          Message.success(getOperationSuccessMessage(type));
           table.refresh();
         } else {
           Message.error(res.message || '操作失败');
