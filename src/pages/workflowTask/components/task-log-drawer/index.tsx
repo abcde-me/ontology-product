@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Drawer, Button, Message } from '@arco-design/web-react';
 import { IconRefresh, IconCopy } from '@arco-design/web-react/icon';
-import { useInfiniteScroll } from 'ahooks';
+import { useInfiniteScroll, useRequest } from 'ahooks';
 import { getRunLogs } from '@/api/workflowTask';
 import type { GetRunLogsParams } from '@/types/workflowTaskApi';
 import copy from 'copy-to-clipboard';
@@ -23,7 +23,6 @@ const TaskLogDrawer: React.FC<TaskLogDrawerProps> = ({
 }) => {
   const [logs, setLogs] = useState<string[]>([]);
   const [isNoMore, setIsNoMore] = useState(false);
-  const [loading, setLoading] = useState(false);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const skipLineNumRef = useRef(0);
 
@@ -32,16 +31,11 @@ const TaskLogDrawer: React.FC<TaskLogDrawerProps> = ({
     setLogs([]);
     skipLineNumRef.current = 0;
     setIsNoMore(false);
-  }, []);
+  }, [setLogs, setIsNoMore, skipLineNumRef]);
 
-  // 加载日志的函数
-  const loadLogs = useCallback(async () => {
-    if (isNoMore || !visible || !taskInstanceId || loading) {
-      return;
-    }
-
-    setLoading(true);
-    try {
+  // 使用 useRequest 加载日志
+  const { loading, run: loadLogs } = useRequest(
+    async () => {
       const params: GetRunLogsParams = {
         task_instance_id: taskInstanceId,
         limit: LIMIT, // 每次加载100行
@@ -51,48 +45,60 @@ const TaskLogDrawer: React.FC<TaskLogDrawerProps> = ({
       const res = await getRunLogs(params);
 
       if (res.status !== 200) {
-        Message.error(res.message || '获取日志失败');
+        throw new Error(res.message || '获取日志失败');
+      }
+
+      return res.data;
+    },
+    {
+      manual: true,
+      onSuccess: (data) => {
+        const { skip_line_num, message } = data;
+
+        if (!message) {
+          setIsNoMore(true);
+          return;
+        }
+
+        // 更新跳过的行数
+        skipLineNumRef.current += skip_line_num;
+
+        // 将消息按行分割并追加到日志列表
+        const newLogLines = message.split('\n');
+
+        if (newLogLines.length > 0) {
+          setLogs((prevLogs) => [...prevLogs, ...newLogLines]);
+        }
+
+        // 这里数据返回的skip_line_num是当前页包含的行数，如果小于等于LIMIT，说明没有更多数据了
+        if (!message || skip_line_num < LIMIT) {
+          setIsNoMore(true);
+        }
+      },
+      onError: (error) => {
+        console.error('获取日志失败:', error);
+        Message.error(error.message || '获取日志失败');
         setIsNoMore(true);
-        return;
       }
-
-      const { skip_line_num, message } = res.data;
-
-      if (!message) {
-        setIsNoMore(true);
-        return;
-      }
-
-      // 更新跳过的行数
-      skipLineNumRef.current += skip_line_num;
-
-      // 将消息按行分割并追加到日志列表
-      const newLogLines = message.split('\n');
-
-      if (newLogLines.length > 0) {
-        setLogs((prevLogs) => [...prevLogs, ...newLogLines]);
-      }
-
-      // 这里数据返回的skip_line_num是当前页包含的行数，如果小于等于LIMIT，说明没有更多数据了
-      if (!message || skip_line_num < LIMIT) {
-        setIsNoMore(true);
-      }
-    } catch (error) {
-      console.error('获取日志失败:', error);
-      Message.error('获取日志失败');
-      setIsNoMore(true);
-    } finally {
-      setLoading(false);
     }
-  }, [isNoMore, visible, taskInstanceId, loading]);
+  );
+
+  // 包装 loadLogs 以添加条件检查
+  const handleLoadLogs = useCallback(async () => {
+    if (isNoMore || !visible || !taskInstanceId || loading) {
+      return Promise.resolve();
+    }
+    return loadLogs();
+  }, [isNoMore, visible, taskInstanceId, loading, loadLogs]);
 
   // 刷新：从第一页开始请求
   const handleRefresh = useCallback(() => {
     resetState();
-    setLogs([]);
     // 延迟一下确保状态已重置，然后触发加载
-    loadLogs();
-  }, [resetState, setLogs, loadLogs]);
+    setTimeout(() => {
+      handleLoadLogs();
+    }, 0);
+  }, [resetState, handleLoadLogs]);
 
   // 复制日志
   const handleCopy = useCallback(() => {
@@ -108,13 +114,13 @@ const TaskLogDrawer: React.FC<TaskLogDrawerProps> = ({
   // 无限滚动加载
   useInfiniteScroll(
     async () => {
-      await loadLogs();
+      await handleLoadLogs();
       return { list: [] };
     },
     {
       target: scrollContainerRef,
       isNoMore: () => isNoMore || !visible || !taskInstanceId,
-      reloadDeps: [visible, taskInstanceId]
+      reloadDeps: [visible, taskInstanceId, isNoMore]
     }
   );
 
@@ -147,7 +153,6 @@ const TaskLogDrawer: React.FC<TaskLogDrawerProps> = ({
             type="outline"
             icon={<IconRefresh />}
             onClick={handleRefresh}
-            loading={loading}
           >
             刷新
           </Button>
