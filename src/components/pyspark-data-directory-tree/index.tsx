@@ -15,12 +15,13 @@ const directoryItems = [
     id: 'source',
     label: '数据目录',
     icon: 'folder'
-  },
-  {
-    id: 'dataset',
-    label: '数据集',
-    icon: 'folder'
   }
+  // 1230版本暂时注释数据集目录入口
+  // {
+  //   id: 'dataset',
+  //   label: '数据集',
+  //   icon: 'folder'
+  // }
 ];
 
 interface DataDirectoryTreeProps {

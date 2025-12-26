@@ -337,6 +337,22 @@ export interface TaskNodeItem {
    * 任务类型中文名
    */
   task_type_name: string;
+  /**
+   * 工作流UUID
+   */
+  workflow_uuid: string;
+  /**
+   * 工作流版本
+   */
+  workflow_version: string;
+  /**
+   * 工作流类型
+   */
+  workflow_type: WorkflowType;
+  /**
+   * 工作流ID
+   */
+  process_definition_code: number;
 }
 
 export interface GetTaskNodeListResponse {
