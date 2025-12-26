@@ -49,6 +49,7 @@ import { useParams as useRouterParams } from 'react-router-dom';
 import { useRequest } from 'ahooks';
 import { getWorkflowLastTask } from '@/api/workflowV2';
 import { isNil } from 'lodash-es';
+import useInitFlowTestTask from '@/pages/workflowConfig/workflow/hooks/use-init-flow-test-task';
 
 const SuccessModal = ({ visible, params, onClose }) => {
   const { workflow_uuid, ds_workflow_id, workflow_version, job_id } =
@@ -154,12 +155,14 @@ const Header = (props: { flowType: string }) => {
   const inputRef = useRef<RefInputType>(null);
   const workflowUuid = useParams('workflow_uuid') ?? '';
   const workflowVersion = useParams('workflow_version');
-  const { handleNodeSelect } = useNodesInteractions();
+  const { handleNodeSelect, getFlowNodes, handleStopFlowTest } =
+    useNodesInteractions();
   const { nodesReadOnly } = useNodesReadOnly();
 
-  const { setWorkflowDetail } = useTaskStore(
+  const { setWorkflowDetail, setNodesProcessDetail } = useTaskStore(
     useShallow((state) => ({
-      setWorkflowDetail: state.setWorkflowDetail
+      setWorkflowDetail: state.setWorkflowDetail,
+      setNodesProcessDetail: state.setNodesProcessDetail
     }))
   );
 
@@ -219,6 +222,9 @@ const Header = (props: { flowType: string }) => {
 
       if (op === WorkflowOperation.ONLINE) {
         handleNodeSelect('', false);
+        if (!getFlowNodes().length) {
+          return Message.error('请添加节点');
+        }
         // 上线前，保存画布最新信息
         handleSyncWorkflowDraft(
           true,
@@ -236,6 +242,7 @@ const Header = (props: { flowType: string }) => {
 
               if (workflowRes?.status === 200) {
                 Message.success('上线成功');
+                handleStopFlowTest();
                 updateWorkFlowStatus();
               } else {
                 Message.error(workflowRes?.message ?? '上线失败');

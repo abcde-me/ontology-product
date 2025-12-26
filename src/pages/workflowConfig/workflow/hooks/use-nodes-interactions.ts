@@ -62,6 +62,7 @@ import useInitFlowTestTask from '@/pages/workflowConfig/workflow/hooks/use-init-
 import { useParams } from 'react-router-dom';
 import { workflowOperation } from '@/api/workflowTask';
 import { WorkflowOperationType } from '@/types/workflowTaskApi';
+import { nodeIsRunning } from '@/pages/workflowConfig/workflow/nodes/utils';
 
 export const useNodesInteractions = () => {
   const { t } = useTranslation('plugin__console-plugin-appforge');
@@ -149,6 +150,18 @@ export const useNodesInteractions = () => {
       execute_type: WorkflowOperationType.STOP,
       process_instance_id: Number(process_instance_id)
     }).catch(console.error);
+  };
+
+  const handleStopFlowTest = useCallback(() => {
+    nodesProcessDetail.forEach(({ state, process_instance_id }) => {
+      if (nodeIsRunning(state)) {
+        handleStopTestNode(process_instance_id);
+      }
+    });
+  }, [nodesProcessDetail]);
+
+  const getFlowNodes = () => {
+    return store.getState().getNodes();
   };
 
   const handleNodeDrag = useCallback<NodeDragHandler>(
@@ -1380,6 +1393,8 @@ export const useNodesInteractions = () => {
     handleHistoryBack,
     handleHistoryForward,
     handleTestNode,
-    handleStopTestNode
+    handleStopTestNode,
+    getFlowNodes,
+    handleStopFlowTest
   };
 };

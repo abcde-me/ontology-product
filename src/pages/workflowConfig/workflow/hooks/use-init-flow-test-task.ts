@@ -7,6 +7,7 @@ import { useStore as useTaskStore } from '@/pages/workflowConfig/task/store';
 import { useShallow } from 'zustand/react/shallow';
 import { isNil } from 'lodash-es';
 import { TaskNodeStatus, WorkflowTaskStatus } from '@/types/workflowTaskApi';
+import { nodeIsRunning } from '@/pages/workflowConfig/workflow/nodes/utils';
 
 export default function useInitFlowTestTask(manual = false) {
   const ds_workflow_id = useSearchParam('ds_workflow_id');
@@ -62,20 +63,7 @@ export default function useInitFlowTestTask(manual = false) {
         if (!res.length) return cancel();
         const taskIsRunning = res.some((nodeProcess) => {
           const { state } = nodeProcess;
-          return [
-            /** 正在运行 */
-            TaskNodeStatus.RUNNING_EXECUTION,
-            /** 提交成功 */
-            TaskNodeStatus.SUBMITTED_SUCCESS,
-            /** 延迟执行 */
-            TaskNodeStatus.DELAY_EXECUTION,
-            /** 分配中 */
-            TaskNodeStatus.DISPATCH,
-            /** 需要容错 */
-            TaskNodeStatus.NEED_FAULT_TOLERANCE,
-            /** 延迟执行 */
-            TaskNodeStatus.DELAY_EXECUTION
-          ].includes(state as TaskNodeStatus);
+          return nodeIsRunning(state);
         });
         if (!taskIsRunning) {
           cancel();

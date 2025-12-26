@@ -36,7 +36,7 @@ export default React.memo(function DependentPanel(
         autoComplete="off"
         labelCol={{ span: 0 }}
         wrapperCol={{ span: 24 }}
-        disabled={readOnly}
+        disabled={readOnly || props.readonly}
         layout="vertical"
         onValuesChange={(changedValues, v: any) => {
           if (Object.keys(changedValues).length > 1) return;
@@ -57,7 +57,7 @@ export default React.memo(function DependentPanel(
           tooltip={'可在此处配置依赖的外部工作流或者任务节点并设置逻辑关系'}
           field={'depend_item_list'}
         >
-          <DependentTaskList />
+          <DependentTaskList disabled={readOnly || props.readonly} />
         </FormItem>
         <Divider className={'mb-3 mt-3'} />
         <NodeRunSetting />

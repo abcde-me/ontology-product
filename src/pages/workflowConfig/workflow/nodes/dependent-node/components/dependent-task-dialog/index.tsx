@@ -248,7 +248,7 @@ export const DependentTaskDialog = (props: {
       selectWorkflow(data);
       return;
     }
-    unselectWorkflow(data.workflow_uuid);
+    unselectWorkflow(data.ds_workflow_id);
   };
 
   const onSelectNode = useCallback(
@@ -297,7 +297,7 @@ export const DependentTaskDialog = (props: {
   const isCheckAll = useMemo(() => {
     if (!selectedTask.length) return false;
     return (
-      selectedFlowTask.has(currentFlow?.workflow_uuid || '-') ||
+      selectedFlowTask.has(currentFlow?.ds_workflow_id || '-') ||
       nodesDataCache.current.every(({ id }) => selectedNodeTask.has(id))
     );
   }, [selectedTask]);
@@ -306,13 +306,13 @@ export const DependentTaskDialog = (props: {
     if (!list?.length) return <Empty />;
     return (list as WorkflowDetailRes[])?.map((item) => (
       <TaskItem
-        key={item.workflow_uuid}
+        key={item.ds_workflow_id}
         data={item}
         type={'workflow'}
         status={
-          indeterminateFlow.has(item.workflow_uuid)
+          indeterminateFlow.has(item.ds_workflow_id)
             ? 'indeterminate'
-            : !!selectedFlowTask.get(item.workflow_uuid)
+            : !!selectedFlowTask.get(item.ds_workflow_id)
               ? 'checked'
               : 'unchecked'
         }
@@ -337,7 +337,7 @@ export const DependentTaskDialog = (props: {
         type={item.data.type}
         status={
           !!selectedNodeTask.get(item.id) ||
-          selectedFlowTask.get(currentFlow!.workflow_uuid)
+          selectedFlowTask.get(currentFlow!.ds_workflow_id)
             ? 'checked'
             : 'unchecked'
         }
@@ -351,6 +351,7 @@ export const DependentTaskDialog = (props: {
   const closeModal = () => {
     form.resetFields();
     tableProps.onChange?.({ current: 1 }, {}, {}, {} as any);
+    setCurrentFlow(undefined);
     onClose();
   };
 
