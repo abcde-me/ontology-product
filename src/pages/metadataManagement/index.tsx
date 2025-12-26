@@ -521,6 +521,7 @@ export default function MetadataManagement() {
         fields={
           columnSettingsFields.length > 0 ? columnSettingsFields : undefined
         }
+        isShowEnum={false}
         onOk={handleModalOk}
         onCancel={handleModalCancel}
         onChange={handleColumnChange}
