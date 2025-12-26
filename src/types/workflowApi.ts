@@ -1,4 +1,5 @@
 import React from 'react';
+import { LocalParam } from '@/pages/workflowConfig/types/workflow';
 
 /** 新建工作流 */
 export interface CreateWorkflowParams {
@@ -17,7 +18,7 @@ export interface EditWorkflowParams {
   workflow_name: string;
   workflow_uuid?: React.Key;
   description?: string;
-  params?: Record<string, any>;
+  params?: LocalParam[];
   // 运行策略
   execution_type?: string;
   // 失败策略

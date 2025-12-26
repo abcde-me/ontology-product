@@ -144,6 +144,26 @@ export default function WorkflowRunList() {
     Message[success ? 'success' : 'error'](success ? '复制成功' : '复制失败');
   }, []);
 
+  const getOperationSuccessMessage = useCallback(
+    (type: WorkflowOperationType) => {
+      switch (type) {
+        case WorkflowOperationType.STOP:
+          return '结束运行成功';
+        case WorkflowOperationType.PAUSE:
+          return '暂停运行成功';
+        case WorkflowOperationType.RECOVER_SUSPENDED_PROCESS:
+          return '继续运行成功';
+        case WorkflowOperationType.REPEAT_RUNNING:
+          return '重新运行成功';
+        case WorkflowOperationType.START_FAILURE_TASK_PROCESS:
+          return '重试所有失败任务成功';
+        default:
+          return '操作成功';
+      }
+    },
+    []
+  );
+
   // 工作流操作
   const handleWorkflowOperation = useCallback(
     async (type: WorkflowOperationType, processInstanceId: string) => {
@@ -153,7 +173,7 @@ export default function WorkflowRunList() {
           process_instance_id: Number(processInstanceId)
         });
         if (res.status === 200) {
-          Message.success('操作成功');
+          Message.success(getOperationSuccessMessage(type));
           table.refresh();
         } else {
           Message.error(res.message || '操作失败');
@@ -361,8 +381,6 @@ export default function WorkflowRunList() {
 
           /**
            * 展示逻辑
-           * 运行状态是运行中展示暂停运行
-           * 运行状态是运行暂停展示继续运行
            * 运行状态非上面两种情况展示重新运行
            */
           const canPause =
@@ -391,6 +409,7 @@ export default function WorkflowRunList() {
               >
                 详情
               </Button>
+              {/** 只有运行中状态展示暂停运行 */}
               {canPause && (
                 <Button
                   type="text"
@@ -405,6 +424,7 @@ export default function WorkflowRunList() {
                   暂停运行
                 </Button>
               )}
+              {/** 只有运行暂停状态展示继续运行 */}
               {canContinue && (
                 <Button
                   type="text"
@@ -419,6 +439,7 @@ export default function WorkflowRunList() {
                   继续运行
                 </Button>
               )}
+              {/** 其他状态展示重新运行 */}
               {canRerun && (
                 <Button
                   type="text"

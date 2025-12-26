@@ -263,8 +263,10 @@ export default function AddApi() {
 
   // 初始化数据源列表
   useEffect(() => {
-    getOpenDataListData();
-  }, []);
+    if (current === 2) {
+      getOpenDataListData();
+    }
+  }, [current]);
 
   useEffect(() => {
     if (
@@ -296,8 +298,9 @@ export default function AddApi() {
     const params = {
       ...apiBaseInfo,
       limitTime: 60,
-      limitCount: form.getFieldValue('limitCount'),
-      cacheTime: form.getFieldValue('cacheTime'),
+      limitCount: Number(form.getFieldValue('limitCount')),
+      cacheTime: Number(form.getFieldValue('cacheTime')),
+      databaseType: Number(form.getFieldValue('databaseType')),
       sql: value,
       paramConfig: testModalDataSource,
       resultConfig: resultArray,
@@ -326,7 +329,9 @@ export default function AddApi() {
   };
 
   const getOpenDataListData = async () => {
-    const res = await openDataListDatabase({});
+    const res = await openDataListDatabase({
+      databaseType: Number(form.getFieldValue('databaseType'))
+    });
     if (res.code === '' && res.status === 200) {
       if (res.data) {
         const newTreeData = res.data.map((item) => ({
@@ -585,7 +590,8 @@ export default function AddApi() {
   // 解析参数
   const parseParameters = async () => {
     const params = {
-      sql: value
+      sql: value,
+      databaseType: Number(form.getFieldValue('databaseType'))
     };
     const res = await openDataParseSql(params);
     if (res.code === '' && res.status === 200) {
@@ -861,6 +867,21 @@ export default function AddApi() {
                   秒
                 </Form.Item>
               )}
+              <Form.Item
+                label="数据来源"
+                field="databaseType"
+                initialValue={1}
+                rules={[{ required: true, message: '请选择数据来源' }]}
+              >
+                <Select
+                  options={[
+                    { label: '数据湖', value: 1 },
+                    { label: '在线分析库', value: 2 }
+                  ]}
+                  defaultValue={1}
+                  placeholder="数据来源"
+                />
+              </Form.Item>
               <Form.Item label="API描述" field="description">
                 <TextArea
                   placeholder="请输入API描述"

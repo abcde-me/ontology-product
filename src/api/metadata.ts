@@ -2,8 +2,10 @@ import UAPI from '@/api';
 import { SetStateAction } from 'react';
 
 export interface MetadataMenuItem {
+  id: number;
   datasourceType: string;
   datasourceName: string;
+  updateTime: string;
 }
 
 // 元数据管理
@@ -84,7 +86,7 @@ export async function listMetadataIcebergPartition(
     .do();
 }
 
-//
+// 查询iceberg表的预览数据
 export async function listMetadataIcebergData(
   params: Record<string | number, any>
 ) {
@@ -94,11 +96,21 @@ export async function listMetadataIcebergData(
     .do();
 }
 
-// 查询milvus的所有表
-export async function listMetadataMilvusDatabase(
+// 创建iceberg数据库
+export async function createMetadataIcebergDatabase(
   params: Record<string | number, any>
 ) {
-  return await UAPI.RES.listMetadataMilvusDatabaseApi({})
+  return await UAPI.RES.createMetadataIcebergDatabaseApi({})
+    .post(params)
+    .inRegion()
+    .do();
+}
+
+// 查询milvus的所有表
+export async function listMetadataMilvusCollection(
+  params: Record<string | number, any>
+) {
+  return await UAPI.RES.listMetadataMilvusCollectionApi({})
     .post(params)
     .inRegion()
     .do();
@@ -189,6 +201,56 @@ export async function listMetadataDorisData(
   params: Record<string | number, any>
 ) {
   return await UAPI.RES.listMetadataDorisDataApi({})
+    .post(params)
+    .inRegion()
+    .do();
+}
+
+// 创建doris数据库
+export async function createMetadataDorisDatabase(
+  params: Record<string | number, any>
+) {
+  return await UAPI.RES.createMetadataDorisDatabaseApi({})
+    .post(params)
+    .inRegion()
+    .do();
+}
+
+// 查询iceberg数据库的下拉列表
+export async function listMetadataIcebergDatabaseName(
+  params: Record<string | number, any>
+) {
+  return await UAPI.RES.listMetadataIcebergDatabaseNameApi({})
+    .post(params)
+    .inRegion()
+    .do();
+}
+
+// 创建iceberg表
+export async function createMetadataIcebergTable(
+  params: Record<string | number, any>
+) {
+  return await UAPI.RES.createMetadataIcebergTableApi({})
+    .post(params)
+    .inRegion()
+    .do();
+}
+
+// 查询doris数据库的下拉列表
+export async function listMetadataDorisDatabaseName(
+  params: Record<string | number, any>
+) {
+  return await UAPI.RES.listMetadataDorisDatabaseNameApi({})
+    .post(params)
+    .inRegion()
+    .do();
+}
+
+// 创建doris表
+export async function createMetadataDorisTable(
+  params: Record<string | number, any>
+) {
+  return await UAPI.RES.createMetadataDorisTableApi({})
     .post(params)
     .inRegion()
     .do();
