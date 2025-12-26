@@ -221,45 +221,52 @@ const SqlIndex: React.FC = memo(() => {
               />
             )}
           </TabPane>
-          <TabPane
-            key="data"
-            title={
-              <Popover content="SQL查询" position="left">
-                <QueryIcon className={styles['sql-menu-icon']} />
-              </Popover>
-            }
-          >
-            {activeTab === 'data' && (
-              <DataManager
-                key="data"
-                onInsertContent={insertContentToEditor}
-                getIsEditorFocused={() => isEditorFocusedRef.current}
-              />
-            )}
-          </TabPane>
-          <TabPane
-            key="files"
-            title={
-              <Popover content="数据加工" position="left">
-                <DevelopIcon className={styles['sql-menu-icon']} />
-              </Popover>
-            }
-          >
-            {activeTab === 'files' && (
-              <FileManager
-                key="files"
-                type="files"
-                ref={developScriptDirectoryTreeRef}
-                onFileOpen={developScriptOpenFile}
-                onFileDelete={developScriptRemoveTabByFileId} // 传递删除文件时关闭标签页的回调
-                onFileRename={developScriptUpdateTabTitle} // 传递重命名文件时更新标签页标题的回调
-                externalSelectedKeys={developScriptFileManagerSelectedKeys}
-                fileTabs={developScriptFileState.fileTabs} // 传递已打开的标签页列表
-                onSwitchTab={developScriptSwitchTab} // 传递切换标签页的回调
-              />
-            )}
-          </TabPane>
-          {useHasPermission(SQL_PERMISSIONS.LIST) && (
+
+          {useHasPermission(SQL_PERMISSIONS.QUERY_SCRIPT_LIST) && (
+            <TabPane
+              key="data"
+              title={
+                <Popover content="SQL查询" position="left">
+                  <QueryIcon className={styles['sql-menu-icon']} />
+                </Popover>
+              }
+            >
+              {activeTab === 'data' && (
+                <DataManager
+                  key="data"
+                  onInsertContent={insertContentToEditor}
+                  getIsEditorFocused={() => isEditorFocusedRef.current}
+                />
+              )}
+            </TabPane>
+          )}
+
+          {useHasPermission(SQL_PERMISSIONS.DEVELOP_SCIPT_LIST) && (
+            <TabPane
+              key="files"
+              title={
+                <Popover content="数据加工" position="left">
+                  <DevelopIcon className={styles['sql-menu-icon']} />
+                </Popover>
+              }
+            >
+              {activeTab === 'files' && (
+                <FileManager
+                  key="files"
+                  type="files"
+                  ref={developScriptDirectoryTreeRef}
+                  onFileOpen={developScriptOpenFile}
+                  onFileDelete={developScriptRemoveTabByFileId} // 传递删除文件时关闭标签页的回调
+                  onFileRename={developScriptUpdateTabTitle} // 传递重命名文件时更新标签页标题的回调
+                  externalSelectedKeys={developScriptFileManagerSelectedKeys}
+                  fileTabs={developScriptFileState.fileTabs} // 传递已打开的标签页列表
+                  onSwitchTab={developScriptSwitchTab} // 传递切换标签页的回调
+                />
+              )}
+            </TabPane>
+          )}
+
+          {useHasPermission(SQL_PERMISSIONS.QUERY_SCRIPT_LIST) && (
             <TabPane
               key="dataset"
               title={

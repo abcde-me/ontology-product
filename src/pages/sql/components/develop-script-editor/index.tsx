@@ -46,7 +46,9 @@ const EditorContent: React.FC<EditorContentProps> = memo(
     // 获取当前活动标签页
     const activeTabData = fileTabs.find((tab) => tab.key === activeTab);
 
-    const hasCreatePermission = useHasPermission(SQL_PERMISSIONS.CREATE);
+    const hasCreatePermission = useHasPermission(
+      SQL_PERMISSIONS.DEVELOP_SCIPT_CREATE
+    );
 
     // 用于存储检查未保存更改的函数
     const checkUnsavedChangesRef = useRef<(() => boolean) | null>(null);
@@ -142,6 +144,7 @@ const EditorContent: React.FC<EditorContentProps> = memo(
               description="暂无数据"
               btnText="新建SQL加工脚本"
               handleBtn={handleCreateSqlQuery}
+              perms={SQL_PERMISSIONS.DEVELOP_SCIPT_CREATE}
             />
           </div>
         </div>

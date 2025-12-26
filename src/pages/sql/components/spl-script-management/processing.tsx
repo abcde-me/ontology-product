@@ -8,6 +8,8 @@ import { useUrlState } from '../../hooks/useUrlState';
 import { generateSqlDefaultName } from '../../utils';
 import classNames from 'classnames';
 import styles from './processing.module.scss';
+import { SQL_PERMISSIONS } from '@/config/permissions';
+import { PermissionWrapper } from '@/components/PermissionGuard';
 interface PaginationProps {
   onToScriptList: (type: string) => void;
   curActiveTab: string;
@@ -81,25 +83,34 @@ const Processing: React.FC<PaginationProps> = memo(
             加工脚本({processingNum})
           </div>
           <div className="flex items-center justify-end gap-[8px]">
-            {iconActive === ViewType.LIST && !isShowAll && (
+            <PermissionWrapper
+              permission={SQL_PERMISSIONS.DEVELOP_SCIPT_DOWNLOAD}
+            >
+              {iconActive === ViewType.LIST && !isShowAll && (
+                <Button
+                  type="outline"
+                  onClick={() => {
+                    handleDownloadAll();
+                  }}
+                >
+                  下载全部
+                </Button>
+              )}
+            </PermissionWrapper>
+            <PermissionWrapper
+              permission={SQL_PERMISSIONS.DEVELOP_SCIPT_CREATE}
+            >
               <Button
+                loading={createScriptLoading}
                 type="outline"
                 onClick={() => {
-                  handleDownloadAll();
+                  handleCreateScript();
                 }}
               >
-                下载全部
+                新建脚本
               </Button>
-            )}
-            <Button
-              loading={createScriptLoading}
-              type="outline"
-              onClick={() => {
-                handleCreateScript();
-              }}
-            >
-              新建脚本
-            </Button>
+            </PermissionWrapper>
+
             <ViewToggle
               className="flex overflow-hidden rounded"
               value={iconActive}

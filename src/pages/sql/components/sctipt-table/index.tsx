@@ -16,7 +16,10 @@ import { ColumnProps } from '@arco-design/web-react/es/Table';
 import noDataElement from '@/components/no-data';
 import { SorterInfo } from '@arco-design/web-react/es/Table/interface';
 import { PermissionWrapper } from '@/components/PermissionGuard';
-import { WORKFLOW_LIST_PERMISSIONS } from '@/config/permissions';
+import {
+  SQL_PERMISSIONS,
+  WORKFLOW_LIST_PERMISSIONS
+} from '@/config/permissions';
 import { IconRefresh } from '@arco-design/web-react/icon';
 import { useUrlState } from '@/pages/sql/hooks/useUrlState';
 import styles from './index.module.scss';
@@ -355,7 +358,7 @@ const ScriptTable: React.FC<ScriptTableProps> = ({
         const perms = record.perms || [];
         return (
           <div style={{ display: 'flex', alignItems: 'center' }}>
-            <PermissionWrapper permission={WORKFLOW_LIST_PERMISSIONS.CAN_READE}>
+            <PermissionWrapper permission={SQL_PERMISSIONS.DEVELOP_SCIPT_GET}>
               <Button
                 type="text"
                 className="mr-[8px] px-[0px]"
@@ -366,34 +369,40 @@ const ScriptTable: React.FC<ScriptTableProps> = ({
                 详情
               </Button>
             </PermissionWrapper>
-            {/* <PermissionWrapper permission={WORKFLOW_LIST_PERMISSIONS.CAN_COPY}> */}
-            <Button
-              type="text"
-              className="mr-[8px] px-[0px]"
-              onClick={() => {
-                // setVisible(true);
-                // setRowData(record);
-                handleViewHistory(record);
-              }}
-            >
-              历史版本
-            </Button>
-            <Popover
-              content={
-                record.status === ScriptStatus.Scheduling
-                  ? '调度中的脚本不可删除'
-                  : ''
-              }
-            >
+            <PermissionWrapper permission={SQL_PERMISSIONS.DEVELOP_SCIPT_LOG}>
               <Button
                 type="text"
-                className="px-[0px] px-[8px]"
-                onClick={() => handleDelete(record.script_id, record.status)}
-                disabled={record.status === ScriptStatus.Scheduling}
+                className="mr-[8px] px-[0px]"
+                onClick={() => {
+                  // setVisible(true);
+                  // setRowData(record);
+                  handleViewHistory(record);
+                }}
               >
-                删除
+                历史版本
               </Button>
-            </Popover>
+            </PermissionWrapper>
+
+            <PermissionWrapper
+              permission={SQL_PERMISSIONS.DEVELOP_SCIPT_DELETE}
+            >
+              <Popover
+                content={
+                  record.status === ScriptStatus.Scheduling
+                    ? '调度中的脚本不可删除'
+                    : ''
+                }
+              >
+                <Button
+                  type="text"
+                  className="px-[0px] px-[8px]"
+                  onClick={() => handleDelete(record.script_id, record.status)}
+                  disabled={record.status === ScriptStatus.Scheduling}
+                >
+                  删除
+                </Button>
+              </Popover>
+            </PermissionWrapper>
           </div>
         );
       }
