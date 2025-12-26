@@ -300,7 +300,7 @@ export default function TaskNodeList() {
         loading={table.loading}
         pagination={false}
         border={false}
-        rowKey="task_code"
+        rowKey="id"
         noDataElement={noDataElement({ description: '暂无数据' })}
         onChange={(pagination, sorter, filters) => {
           table.onChange(pagination, sorter, filters);
