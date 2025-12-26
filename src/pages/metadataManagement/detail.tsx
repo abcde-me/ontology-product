@@ -130,19 +130,33 @@ export default function MetadataManagementDetail() {
     }
   });
 
+  const [changeValue, setChangeValue] = useState<Record<string, any>>({});
+
   const [fieldSearchForm] = Form.useForm();
   const [partitionSearchForm] = Form.useForm();
 
+  // 整合字段，防止多次触发 getData 函数
+  useEffect(() => {
+    setChangeValue({
+      fieldCurrent: fieldCurrent,
+      partitionCurrent: partitionCurrent,
+      fieldPageSize: fieldPageSize,
+      partitionPageSize: partitionPageSize,
+      fieldSearchValues: fieldSearchValues,
+      partitionSearchValues: partitionSearchValues
+    });
+  }, [
+    fieldCurrent,
+    partitionCurrent,
+    fieldPageSize,
+    partitionPageSize,
+    fieldSearchValues,
+    partitionSearchValues
+  ]);
+
   useEffect(() => {
     getData();
-  }, [
-    activeKey,
-    fieldCurrent ||
-      fieldPageSize ||
-      fieldSearchValues ||
-      minIoFieldSearchValues,
-    partitionCurrent || partitionPageSize || partitionSearchValues
-  ]);
+  }, [activeKey, changeValue]);
 
   // 获取分区字段
   const getPartitionKey = (partitionKey: string) => {

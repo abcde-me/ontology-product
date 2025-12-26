@@ -257,7 +257,7 @@ export default function DataApi() {
       console.log(values, 'values');
       const params = {
         apiId: apiId,
-        AuthInfo: {
+        authInfo: {
           projectId: values.projectId[1],
           projectName: selectedProjectName
         }
