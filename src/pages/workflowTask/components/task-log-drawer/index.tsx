@@ -6,6 +6,8 @@ import { getRunLogs } from '@/api/workflowTask';
 import type { GetRunLogsParams } from '@/types/workflowTaskApi';
 import copy from 'copy-to-clipboard';
 
+const LIMIT = 100;
+
 export interface TaskLogDrawerProps {
   visible: boolean;
   taskInstanceId: number;
@@ -42,7 +44,7 @@ const TaskLogDrawer: React.FC<TaskLogDrawerProps> = ({
     try {
       const params: GetRunLogsParams = {
         task_instance_id: taskInstanceId,
-        limit: 1000, // 每次加载100行
+        limit: LIMIT, // 每次加载100行
         skip_line_num: skipLineNumRef.current
       };
 
@@ -62,19 +64,17 @@ const TaskLogDrawer: React.FC<TaskLogDrawerProps> = ({
       }
 
       // 更新跳过的行数
-      skipLineNumRef.current = skip_line_num;
+      skipLineNumRef.current += skip_line_num;
 
       // 将消息按行分割并追加到日志列表
-      const newLogLines = message
-        .split('\n')
-        .filter((line) => line.trim() !== '');
+      const newLogLines = message.split('\n');
 
       if (newLogLines.length > 0) {
         setLogs((prevLogs) => [...prevLogs, ...newLogLines]);
       }
 
-      // 如果返回的消息为空或行数少于limit，说明没有更多数据了
-      if (!message || newLogLines.length < 1000) {
+      // 这里数据返回的skip_line_num是当前页包含的行数，如果小于等于LIMIT，说明没有更多数据了
+      if (!message || skip_line_num < LIMIT) {
         setIsNoMore(true);
       }
     } catch (error) {
@@ -89,15 +89,10 @@ const TaskLogDrawer: React.FC<TaskLogDrawerProps> = ({
   // 刷新：从第一页开始请求
   const handleRefresh = useCallback(() => {
     resetState();
-    // 触发重新加载
-    if (scrollContainerRef.current) {
-      scrollContainerRef.current.scrollTop = 0;
-    }
+    setLogs([]);
     // 延迟一下确保状态已重置，然后触发加载
-    setTimeout(() => {
-      loadLogs();
-    }, 0);
-  }, [resetState, loadLogs]);
+    loadLogs();
+  }, [resetState, setLogs, loadLogs]);
 
   // 复制日志
   const handleCopy = useCallback(() => {

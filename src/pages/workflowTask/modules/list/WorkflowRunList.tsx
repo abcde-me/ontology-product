@@ -311,7 +311,7 @@ export default function WorkflowRunList() {
                   className="text-[rgb(var(--primary-6))] hover:text-[rgb(var(--primary-6))]"
                   onClick={() =>
                     handleWorkflowOperation(
-                      WorkflowOperationType.EXEC_STOP,
+                      WorkflowOperationType.STOP,
                       record.id
                     )
                   }
@@ -375,7 +375,7 @@ export default function WorkflowRunList() {
                   className="px-[4px]"
                   onClick={() =>
                     handleWorkflowOperation(
-                      WorkflowOperationType.EXEC_PAUSE,
+                      WorkflowOperationType.PAUSE,
                       record.id
                     )
                   }
