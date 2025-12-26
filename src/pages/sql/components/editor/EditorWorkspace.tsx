@@ -84,9 +84,13 @@ const EditorWorkspaceContent: React.FC<{
       React.useState<number>(0);
     const [isEditorFocused, setIsEditorFocused] =
       React.useState<boolean>(false);
-    const hasRunPermission = useHasPermission(SQL_PERMISSIONS.RUN);
-    const hasUpdatePermission = useHasPermission(SQL_PERMISSIONS.MODIFY);
-    const hasCancelRunPermission = useHasPermission(SQL_PERMISSIONS.RUN);
+    const hasRunPermission = useHasPermission(SQL_PERMISSIONS.QUERY_SCRIPT_RUN);
+    const hasUpdatePermission = useHasPermission(
+      SQL_PERMISSIONS.QUERY_SCRIPT_MODIFY
+    );
+    const hasCancelRunPermission = useHasPermission(
+      SQL_PERMISSIONS.QUERY_SCRIPT_RUN
+    );
     const [visible, setVisible] = React.useState<boolean>(false);
     const editorContentRef = useRef(null);
 

@@ -66,6 +66,10 @@ export const TaskItem = (props: IProps) => {
     return (data as NodeProps).data.desc || '';
   }, [type, data]);
 
+  const taskTitle =
+    type === 'workflow'
+      ? (data as WorkflowDetailRes).workflow_name
+      : (data as NodeProps).data.title;
   return (
     <label
       className={cn({
@@ -90,18 +94,18 @@ export const TaskItem = (props: IProps) => {
             className={
               'w-full overflow-hidden text-ellipsis whitespace-nowrap font-medium text-[#1E293B]'
             }
+            title={taskTitle}
           >
-            {type === 'workflow'
-              ? (data as WorkflowDetailRes).workflow_name
-              : (data as NodeProps).data.title}
+            {taskTitle}
           </div>
           {!!taskDesc && (
             <div
               className={
                 'w-full overflow-hidden text-ellipsis whitespace-nowrap text-[#94A3B8]'
               }
+              title={taskDesc}
             >
-              {(data as NodeProps).data.desc}
+              {taskDesc}
             </div>
           )}
         </div>
@@ -490,13 +494,18 @@ export const DependentTaskDialog = (props: {
                         className={'flex-shrink-0'}
                       />
                       <div className={'text-over flex-1 overflow-hidden'}>
-                        <Typography.Text bold className={'mb-1'}>
+                        <div
+                          className={
+                            'w-full overflow-hidden text-ellipsis whitespace-nowrap font-medium text-[#1E293B]'
+                          }
+                          title={title}
+                        >
                           {title}
-                        </Typography.Text>
+                        </div>
                         {!!desc && (
                           <div
                             className={
-                              'w-full overflow-hidden text-ellipsis whitespace-nowrap text-[#94A3B8]'
+                              'mt-1 w-full overflow-hidden text-ellipsis whitespace-nowrap text-[#94A3B8]'
                             }
                             title={desc}
                           >

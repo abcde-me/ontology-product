@@ -61,7 +61,6 @@ export default memo(function FlowSetting() {
     if (!workflowDetail) return;
     const {
       workflow_name,
-      params,
       global_params,
       execution_type = DEFAULT_FLOW_INFO.execution_type,
       failure_strategy = DEFAULT_FLOW_INFO.failure_strategy,
@@ -159,7 +158,6 @@ export default memo(function FlowSetting() {
             form={form}
             autoComplete={'off'}
             layout={'vertical'}
-            initialValues={DEFAULT_FLOW_INFO}
             onChange={onFlowChange}
             disabled={nodesReadOnly}
           >

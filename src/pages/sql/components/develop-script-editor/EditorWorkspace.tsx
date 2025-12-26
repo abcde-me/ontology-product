@@ -61,6 +61,7 @@ import ReleaseIcon from '../../assets/release-icon.svg';
 import dayjs from 'dayjs';
 import VersionStatus from '../version-status';
 import { SQL_PARAM_PLACEHOLDER_REGEX } from '../../constant';
+import { PermissionWrapper } from '@/components/PermissionGuard';
 
 interface NotebookWorkspaceProps {
   content: string;
@@ -170,16 +171,11 @@ const EditorWorkspaceContent: React.FC<{
     onFileOpen,
     refreshDirectory
   }) => {
-    const FormItem = Form.Item;
     const [form] = Form.useForm();
     const editorRef = useRef<ReactCodeMirrorRef>(null);
-    const [lastCursorPosition, setLastCursorPosition] =
-      React.useState<number>(0);
-    const [isEditorFocused, setIsEditorFocused] =
-      React.useState<boolean>(false);
-    const hasRunPermission = useHasPermission(SQL_PERMISSIONS.RUN);
-    const hasUpdatePermission = useHasPermission(SQL_PERMISSIONS.MODIFY);
-    const hasCancelRunPermission = useHasPermission(SQL_PERMISSIONS.RUN);
+    const hasUpdatePermission = useHasPermission(
+      SQL_PERMISSIONS.DEVELOP_SCIPT_MODIFY
+    );
     const [specificationsVisible, setSpecificationsVisible] =
       React.useState<boolean>(false);
     const [specificationsContent, setSpecificationsContent] =
@@ -320,21 +316,21 @@ const EditorWorkspaceContent: React.FC<{
     };
 
     // 处理光标位置变化
-    const handleCursorChange = useCallback((view: EditorView) => {
-      const pos = view.state.selection.main.head;
-      setLastCursorPosition(pos);
-    }, []);
+    // const handleCursorChange = useCallback((view: EditorView) => {
+    //   const pos = view.state.selection.main.head;
+    //   setLastCursorPosition(pos);
+    // }, []);
 
-    // 处理编辑器聚焦状态变化
-    const handleFocusChange = useCallback(
-      (focused: boolean) => {
-        setIsEditorFocused(focused);
-        if (onEditorFocusChange) {
-          onEditorFocusChange(focused);
-        }
-      },
-      [onEditorFocusChange]
-    );
+    // // 处理编辑器聚焦状态变化
+    // const handleFocusChange = useCallback(
+    //   (focused: boolean) => {
+    //     setIsEditorFocused(focused);
+    //     if (onEditorFocusChange) {
+    //       onEditorFocusChange(focused);
+    //     }
+    //   },
+    //   [onEditorFocusChange]
+    // );
 
     // 插入内容到光标位置
     const insertContentAtCursor = useCallback((contentToInsert: string) => {
@@ -467,7 +463,7 @@ const EditorWorkspaceContent: React.FC<{
     };
 
     // 计算是否只读
-    const isReadOnly = !scriptInfo?.isSelfEditing;
+    const isReadOnly = !scriptInfo?.isSelfEditing || !hasUpdatePermission;
 
     // 根据 status 渲染工具栏
     const renderToolbar = () => {
@@ -486,28 +482,32 @@ const EditorWorkspaceContent: React.FC<{
             <div className={styles['toolbar-left']}>
               <Space size={12}>
                 {
-                  <Button
-                    type="primary"
-                    icon={
-                      runLogStatus === RunLogStatus.RUNNING ? (
-                        <IconStop className="mr-[4px]" />
-                      ) : (
-                        <IconCaretRight className="mr-[4px]" />
-                      )
-                    }
-                    disabled={!canEdit || !scriptInfo?.script_context?.trim()}
-                    onClick={handleRunClick}
-                    className={classNames(
-                      'h-[26px]',
-                      runLogStatus === RunLogStatus.RUNNING
-                        ? styles['btn-running']
-                        : ''
-                    )}
+                  <PermissionWrapper
+                    permission={SQL_PERMISSIONS.DEVELOP_SCIPT_RUN}
                   >
-                    {runLogStatus === RunLogStatus.RUNNING
-                      ? '停止运行'
-                      : '运行'}
-                  </Button>
+                    <Button
+                      type="primary"
+                      icon={
+                        runLogStatus === RunLogStatus.RUNNING ? (
+                          <IconStop className="mr-[4px]" />
+                        ) : (
+                          <IconCaretRight className="mr-[4px]" />
+                        )
+                      }
+                      disabled={!canEdit || !scriptInfo?.script_context?.trim()}
+                      onClick={handleRunClick}
+                      className={classNames(
+                        'h-[26px]',
+                        runLogStatus === RunLogStatus.RUNNING
+                          ? styles['btn-running']
+                          : ''
+                      )}
+                    >
+                      {runLogStatus === RunLogStatus.RUNNING
+                        ? '停止运行'
+                        : '运行'}
+                    </Button>
+                  </PermissionWrapper>
                 }
                 <Button
                   type="text"
@@ -564,48 +564,66 @@ const EditorWorkspaceContent: React.FC<{
                 </div>
               )}
               {/* 保存按钮 - status=0且isSelfEditing=true时可用，否则置灰 */}
-              <Button
-                className={classNames(styles['btn-save'], 'mr-[8px]')}
-                loading={saveLoading}
-                onClick={handleSave}
-                disabled={!scriptInfo?.isSelfEditing}
-                icon={<IconSave />}
+              <PermissionWrapper
+                permission={SQL_PERMISSIONS.DEVELOP_SCIPT_MODIFY}
               >
-                保存
-              </Button>
+                <Button
+                  className={classNames(styles['btn-save'], 'mr-[8px]')}
+                  loading={saveLoading}
+                  onClick={handleSave}
+                  disabled={!scriptInfo?.isSelfEditing}
+                  icon={<IconSave />}
+                >
+                  保存
+                </Button>
+              </PermissionWrapper>
               {/* 发版按钮 - status=0且isSelfEditing=true时可用，否则置灰 */}
-              <Button
-                className={styles['btn-save']}
-                onClick={() => {
-                  setReleaseVersionVisible(true);
-                }}
-                disabled={!canEdit || !scriptInfo?.isSelfEditing}
-                icon={<ReleaseIcon />}
+              <PermissionWrapper
+                permission={SQL_PERMISSIONS.DEVELOP_SCIPT_MODIFY}
               >
-                发版
-              </Button>
+                <Button
+                  className={styles['btn-save']}
+                  onClick={() => {
+                    setReleaseVersionVisible(true);
+                  }}
+                  disabled={!canEdit || !scriptInfo?.isSelfEditing}
+                  icon={<ReleaseIcon />}
+                >
+                  发版
+                </Button>
+              </PermissionWrapper>
+
               {/* 取消编辑按钮 - status=0且isSelfEditing=true时显示 */}
-              {scriptInfo?.isSelfEditing && (
-                <Button
-                  className={classNames(styles['btn-save'], 'ml-[8px]')}
-                  loading={editLoading}
-                  onClick={handleCancelEdit}
-                  icon={<IconClose />}
-                >
-                  取消编辑
-                </Button>
-              )}
-              {/* 编辑按钮 - status=0且isSelfEditing=false或status=1时显示 */}
-              {!scriptInfo?.isSelfEditing && (
-                <Button
-                  className={classNames(styles['btn-save'], 'ml-[8px]')}
-                  onClick={handleStartEdit}
-                  loading={editLoading}
-                  icon={<IconEdit />}
-                >
-                  编辑
-                </Button>
-              )}
+              <PermissionWrapper
+                permission={SQL_PERMISSIONS.DEVELOP_SCIPT_MODIFY}
+              >
+                {scriptInfo?.isSelfEditing && (
+                  <Button
+                    className={classNames(styles['btn-save'], 'ml-[8px]')}
+                    loading={editLoading}
+                    onClick={handleCancelEdit}
+                    icon={<IconClose />}
+                  >
+                    取消编辑
+                  </Button>
+                )}
+              </PermissionWrapper>
+
+              <PermissionWrapper
+                permission={SQL_PERMISSIONS.DEVELOP_SCIPT_MODIFY}
+              >
+                {/* 编辑按钮 - status=0且isSelfEditing=false或status=1时显示 */}
+                {!scriptInfo?.isSelfEditing && (
+                  <Button
+                    className={classNames(styles['btn-save'], 'ml-[8px]')}
+                    onClick={handleStartEdit}
+                    loading={editLoading}
+                    icon={<IconEdit />}
+                  >
+                    编辑
+                  </Button>
+                )}
+              </PermissionWrapper>
             </div>
           </>
         );
@@ -637,37 +655,50 @@ const EditorWorkspaceContent: React.FC<{
             </div>
             <div className={styles['toolbar-right']}>
               <div className={classNames(styles['copy-dropdown-container'])}>
-                <Button
-                  loading={copyLoading}
-                  className={classNames(styles['btn-save'], 'ml-[8px]')}
-                  icon={<CopyIcon className="h-[14px] w-[14px]" />}
-                  onClick={() => handleCopyScript('newScript')}
+                <PermissionWrapper
+                  permission={SQL_PERMISSIONS.DEVELOP_SCIPT_CREATE}
                 >
-                  复制为新脚本
-                </Button>
+                  <Button
+                    loading={copyLoading}
+                    className={classNames(styles['btn-save'], 'ml-[8px]')}
+                    icon={<CopyIcon className="h-[14px] w-[14px]" />}
+                    onClick={() => handleCopyScript('newScript')}
+                  >
+                    复制为新脚本
+                  </Button>
+                </PermissionWrapper>
               </div>
               {/* 取消编辑按钮 - status=0且isSelfEditing=true时显示 */}
-              {scriptInfo?.isSelfEditing && (
-                <Button
-                  className={classNames(styles['btn-save'], 'ml-[8px]')}
-                  loading={editLoading}
-                  onClick={handleCancelEdit}
-                  icon={<IconClose />}
-                >
-                  取消编辑
-                </Button>
-              )}
+              <PermissionWrapper
+                permission={SQL_PERMISSIONS.DEVELOP_SCIPT_MODIFY}
+              >
+                {scriptInfo?.isSelfEditing && (
+                  <Button
+                    className={classNames(styles['btn-save'], 'ml-[8px]')}
+                    loading={editLoading}
+                    onClick={handleCancelEdit}
+                    icon={<IconClose />}
+                  >
+                    取消编辑
+                  </Button>
+                )}
+              </PermissionWrapper>
+
               {/* 编辑按钮 - status=0且isSelfEditing=false或status=1时显示 */}
-              {!scriptInfo?.isSelfEditing && (
-                <Button
-                  className={classNames(styles['btn-save'], 'ml-[8px]')}
-                  onClick={handleStartEdit}
-                  loading={editLoading}
-                  icon={<IconEdit />}
-                >
-                  编辑
-                </Button>
-              )}
+              <PermissionWrapper
+                permission={SQL_PERMISSIONS.DEVELOP_SCIPT_MODIFY}
+              >
+                {!scriptInfo?.isSelfEditing && (
+                  <Button
+                    className={classNames(styles['btn-save'], 'ml-[8px]')}
+                    onClick={handleStartEdit}
+                    loading={editLoading}
+                    icon={<IconEdit />}
+                  >
+                    编辑
+                  </Button>
+                )}
+              </PermissionWrapper>
             </div>
           </>
         );
@@ -702,36 +733,50 @@ const EditorWorkspaceContent: React.FC<{
                 styles['copy-dropdown-container']
               )}
             >
-              <Button
-                loading={copyLoading}
-                className={classNames(styles['btn-save'], 'ml-[8px]')}
-                icon={<CopyIcon className="h-[14px] w-[14px]" />}
-                onClick={() => handleCopyScript('newScript')}
+              <PermissionWrapper
+                permission={SQL_PERMISSIONS.DEVELOP_SCIPT_CREATE}
               >
-                复制为新脚本
-              </Button>
+                <Button
+                  loading={copyLoading}
+                  className={classNames(styles['btn-save'], 'ml-[8px]')}
+                  icon={<CopyIcon className="h-[14px] w-[14px]" />}
+                  onClick={() => handleCopyScript('newScript')}
+                >
+                  复制为新脚本
+                </Button>
+              </PermissionWrapper>
+
               {/* 取消编辑按钮 - status=0且isSelfEditing=true时显示 */}
-              {scriptInfo?.isSelfEditing && (
-                <Button
-                  className={classNames(styles['btn-save'], 'ml-[8px]')}
-                  loading={editLoading}
-                  onClick={handleCancelEdit}
-                  icon={<IconClose />}
-                >
-                  取消编辑
-                </Button>
-              )}
+              <PermissionWrapper
+                permission={SQL_PERMISSIONS.DEVELOP_SCIPT_MODIFY}
+              >
+                {scriptInfo?.isSelfEditing && (
+                  <Button
+                    className={classNames(styles['btn-save'], 'ml-[8px]')}
+                    loading={editLoading}
+                    onClick={handleCancelEdit}
+                    icon={<IconClose />}
+                  >
+                    取消编辑
+                  </Button>
+                )}
+              </PermissionWrapper>
+
               {/* 编辑按钮 - status=0且isSelfEditing=false或status=1时显示 */}
-              {!scriptInfo?.isSelfEditing && (
-                <Button
-                  className={classNames(styles['btn-save'], 'ml-[8px]')}
-                  onClick={handleStartEdit}
-                  loading={editLoading}
-                  icon={<IconEdit />}
-                >
-                  编辑
-                </Button>
-              )}
+              <PermissionWrapper
+                permission={SQL_PERMISSIONS.DEVELOP_SCIPT_MODIFY}
+              >
+                {!scriptInfo?.isSelfEditing && (
+                  <Button
+                    className={classNames(styles['btn-save'], 'ml-[8px]')}
+                    onClick={handleStartEdit}
+                    loading={editLoading}
+                    icon={<IconEdit />}
+                  >
+                    编辑
+                  </Button>
+                )}
+              </PermissionWrapper>
             </div>
           </>
         );
@@ -769,12 +814,12 @@ const EditorWorkspaceContent: React.FC<{
                 currentHighlightedParam,
                 parameterHighlightField,
                 EditorView.updateListener.of((update) => {
-                  if (update.selectionSet) {
-                    handleCursorChange(update.view);
-                  }
-                  if (update.focusChanged) {
-                    handleFocusChange(update.view.hasFocus);
-                  }
+                  // if (update.selectionSet) {
+                  //   handleCursorChange(update.view);
+                  // }
+                  // if (update.focusChanged) {
+                  //   handleFocusChange(update.view.hasFocus);
+                  // }
                 })
               ]}
               basicSetup={{

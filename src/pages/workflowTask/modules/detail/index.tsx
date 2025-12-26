@@ -374,7 +374,7 @@ export default function WorkflowTaskDetail() {
               总用时
             </span>
             <span className="text-[14px] leading-[22px] text-[var(--color-text-2)]">
-              {taskDetailData?.time_size ?? '-'}
+              {taskDetailData?.time_size || '-'}
             </span>
           </div>
           <div className="flex flex-col gap-[8px]">
@@ -382,7 +382,7 @@ export default function WorkflowTaskDetail() {
               开始时间
             </span>
             <span className="text-[14px] leading-[22px] text-[var(--color-text-2)]">
-              {taskDetailData?.start_time ?? '-'}
+              {taskDetailData?.start_time || '-'}
             </span>
           </div>
           <div className="flex flex-col gap-[8px]">
@@ -390,7 +390,7 @@ export default function WorkflowTaskDetail() {
               结束时间
             </span>
             <span className="text-[14px] leading-[22px] text-[var(--color-text-2)]">
-              {taskDetailData?.end_time ?? '-'}
+              {taskDetailData?.end_time || '-'}
             </span>
           </div>
         </div>

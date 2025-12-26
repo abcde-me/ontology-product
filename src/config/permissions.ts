@@ -134,13 +134,28 @@ export const PYSPARK_PERMISSIONS = {
 
 // SQL权限
 export const SQL_PERMISSIONS = {
-  LIST: 'aimdp-manager:sql_script:read:list', // 菜单权限
-  GET: 'aimdp-manager:sql_script:read:get',
-  CREATE: 'aimdp-manager:sql_script:manage:create',
-  DELETE: 'aimdp-manager:sql_script:manage:delete',
-  MODIFY: 'aimdp-manager:sql_script:manage:modify',
-  RUN: 'aimdp-manager:sql_script:manage:run',
-  EXPORT: 'aimdp-manager:sql_script:manage:export'
+  QUERY_SCRIPT_LIST: 'aimdp-manager:sql_script:read:list', // 菜单权限
+  QUERY_SCRIPT_GET: 'aimdp-manager:sql_script:read:get',
+  QUERY_SCRIPT_CREATE: 'aimdp-manager:sql_script:manage:create',
+  QUERY_SCRIPT_DELETE: 'aimdp-manager:sql_script:manage:delete',
+  QUERY_SCRIPT_MODIFY: 'aimdp-manager:sql_script:manage:modify',
+  QUERY_SCRIPT_RUN: 'aimdp-manager:sql_script:manage:run',
+  QUERY_SCRIPT_EXPORT: 'aimdp-manager:sql_script:manage:export',
+
+  DEVELOP_SCIPT_CREATE: 'aimdp-manager:sql_script:manage:develop_script_create', // 开发脚本创建
+  DEVELOP_SCIPT_DOWNLOAD:
+    'aimdp-manager:sql_script:read:develop_script_download', // 开发脚本下载
+  DEVELOP_SCIPT_LIST: 'aimdp-manager:sql_script:read:develop_script_list', // 开发脚本列表
+  DEVELOP_SCIPT_DELETE: 'aimdp-manager:sql_script:manage:develop_script_delete', // 开发脚本删除
+  DEVELOP_SCIPT_GET: 'aimdp-manager:sql_script:read:develop_script_get', // 开发脚本详情
+  // TODO: 开发脚本重命名权限待添加
+  DEVELOP_SCIPT_MODIFY: 'aimdp-manager:sql_script:manage:develop_script_modify', // 开发脚本重命名
+  DEVELOP_SCIPT_RUN: 'aimdp-manager:sql_script:manage:develop_script_run', // 开发脚本运行
+
+  DEVELOP_SCIPT_LOG: 'aimdp-manager:sql_script:read:develop_script_log', // 开发脚本历史版本
+  // TODO: 开发脚本历史版本删除权限待添加
+  DEVELOP_SCIPT_LOG_DELETE:
+    'aimdp-manager:sql_script:manage:develop_script_log_delete' // 开发脚本历史版本删除
 } as const;
 
 // 数据资产
