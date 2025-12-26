@@ -36,6 +36,7 @@ export interface ColumnField {
 export interface ColumnSettingModalProps {
   visible: boolean;
   fields?: ColumnField[]; // 外部传入的字段列表
+  isShowEnum?: boolean;
   onOk: (selectedIds: string[], displayFields: ColumnField[]) => void;
   onCancel: () => void;
   onChange: (list: ColumnField[]) => void;
@@ -47,6 +48,7 @@ const MAX_ENUM_COUNT = 1000;
 const ColumnSettingModal: React.FC<ColumnSettingModalProps> = ({
   visible,
   fields: externalFields,
+  isShowEnum = true,
   onOk,
   onCancel,
   onChange = () => {}
@@ -214,62 +216,71 @@ const ColumnSettingModal: React.FC<ColumnSettingModalProps> = ({
                 ? 'column-setting-modal-table no-border-bottom'
                 : ''
             }
-            columns={[
-              { title: '字段名称', dataIndex: 'nameZh', width: 310 },
-              { title: '类型', dataIndex: 'type', width: 100 },
-              {
-                title: '设为枚举类型',
-                dataIndex: 'isEnumAble',
-                width: 126,
-                render: (_: any, record: ColumnField) => {
-                  const isEnumCountTooLarge =
-                    record.distinctCount != null &&
-                    record.distinctCount > MAX_ENUM_COUNT;
-                  const isDisabled =
-                    !record.isEnumAbleForColumn || isEnumCountTooLarge;
+            columns={
+              isShowEnum
+                ? [
+                    { title: '字段名称', dataIndex: 'nameZh', width: 310 },
+                    { title: '类型', dataIndex: 'type', width: 100 },
+                    {
+                      title: '设为枚举类型',
+                      dataIndex: 'isEnumAble',
+                      width: 126,
+                      render: (_: any, record: ColumnField) => {
+                        const isEnumCountTooLarge =
+                          record.distinctCount != null &&
+                          record.distinctCount > MAX_ENUM_COUNT;
+                        const isDisabled =
+                          !record.isEnumAbleForColumn || isEnumCountTooLarge;
 
-                  return (
-                    <span className="flex flex-col items-center">
-                      {record.enumLoading ? (
-                        <Spin size={14} />
-                      ) : (
-                        <Tooltip
-                          content={
-                            isEnumCountTooLarge
-                              ? '枚举量过大，不可设为枚举类型'
-                              : ''
-                          }
-                          disabled={!isEnumCountTooLarge}
-                        >
-                          <Checkbox
-                            checked={
-                              record.isEnumAbleForColumn
-                                ? record.isEnumAble
-                                : false
-                            }
-                            disabled={isDisabled}
-                            onChange={(val) =>
-                              handleEnumCheck(record.nameEn, val)
-                            }
-                            style={{
-                              cursor: isDisabled ? 'not-allowed' : 'pointer',
-                              opacity: isDisabled ? 0.5 : 1
-                            }}
-                          />
-                        </Tooltip>
-                      )}
-                      {record.isEnumAble &&
-                        record.isEnumAbleForColumn &&
-                        !record.enumLoading && (
-                          <span className="text-[var(--color-text-4)]">
-                            {record.distinctCount}枚举量
+                        return (
+                          <span className="flex flex-col items-center">
+                            {record.enumLoading ? (
+                              <Spin size={14} />
+                            ) : (
+                              <Tooltip
+                                content={
+                                  isEnumCountTooLarge
+                                    ? '枚举量过大，不可设为枚举类型'
+                                    : ''
+                                }
+                                disabled={!isEnumCountTooLarge}
+                              >
+                                <Checkbox
+                                  checked={
+                                    record.isEnumAbleForColumn
+                                      ? record.isEnumAble
+                                      : false
+                                  }
+                                  disabled={isDisabled}
+                                  onChange={(val) =>
+                                    handleEnumCheck(record.nameEn, val)
+                                  }
+                                  style={{
+                                    cursor: isDisabled
+                                      ? 'not-allowed'
+                                      : 'pointer',
+                                    opacity: isDisabled ? 0.5 : 1
+                                  }}
+                                />
+                              </Tooltip>
+                            )}
+                            {record.isEnumAble &&
+                              record.isEnumAbleForColumn &&
+                              !record.enumLoading && (
+                                <span className="text-[var(--color-text-4)]">
+                                  {record.distinctCount}枚举量
+                                </span>
+                              )}
                           </span>
-                        )}
-                    </span>
-                  );
-                }
-              }
-            ]}
+                        );
+                      }
+                    }
+                  ]
+                : [
+                    { title: '字段名称', dataIndex: 'nameZh', width: 440 },
+                    { title: '类型', dataIndex: 'type', width: 100 }
+                  ]
+            }
           />
         </div>
         {/* 右侧已选字段区+排序 */}

@@ -274,30 +274,6 @@ const MinIOFields = [
     values: []
   },
   {
-    id: 'partitionKey',
-    nameEn: 'partitionKey',
-    nameZh: '分区字段',
-    type: 'string',
-    isEnumAbleForColumn: true,
-    isEnumAble: false,
-    enumLoading: false,
-    distinctCount: 0,
-    displaySort: 4,
-    values: []
-  },
-  {
-    id: 'region',
-    nameEn: 'region',
-    nameZh: '所属区域',
-    type: 'string',
-    isEnumAbleForColumn: true,
-    isEnumAble: false,
-    enumLoading: false,
-    distinctCount: 0,
-    displaySort: 5,
-    values: []
-  },
-  {
     id: 'objectsSize',
     nameEn: 'objectsSize',
     nameZh: '存储大小',
@@ -334,10 +310,10 @@ const MinIOFields = [
     values: []
   },
   {
-    id: 'encryptType',
-    nameEn: 'encryptType',
+    id: 'encryption',
+    nameEn: 'encryption',
     nameZh: '加密类型',
-    type: 'boolean',
+    type: 'string',
     isEnumAbleForColumn: true,
     isEnumAble: false,
     enumLoading: false,
@@ -583,10 +559,10 @@ export const getColumns = (
                 />
               );
             }
-            if (field.id === 'policy') {
+            if (field.id === 'policy' || field.id === 'encryption') {
               return <EllipsisPopover value={value} isEdit={false} />;
             }
-            if (field.id === 'storageSize') {
+            if (field.id === 'storageSize' || field.id === 'objectsSize') {
               return formatFileSize(value);
             }
             if (field.type === 'int') {
