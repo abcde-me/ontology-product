@@ -130,35 +130,28 @@ export default function MetadataManagementDetail() {
     }
   });
 
-  const [changeValue, setChangeValue] = useState<Record<string, any>>({});
-
   const [fieldSearchForm] = Form.useForm();
   const [partitionSearchForm] = Form.useForm();
 
-  // 整合字段，防止多次触发 getData 函数
   useEffect(() => {
-    setChangeValue({
-      fieldCurrent: fieldCurrent,
-      partitionCurrent: partitionCurrent,
-      fieldPageSize: fieldPageSize,
-      minIoFieldSearchValues: minIoFieldSearchValues,
-      partitionPageSize: partitionPageSize,
-      fieldSearchValues: fieldSearchValues,
-      partitionSearchValues: partitionSearchValues
-    });
-  }, [
-    fieldCurrent,
-    partitionCurrent,
-    fieldPageSize,
-    minIoFieldSearchValues,
-    partitionPageSize,
-    fieldSearchValues,
-    partitionSearchValues
-  ]);
+    if (fieldCurrent !== 1) {
+      setFieldCurrent(1);
+    } else if (partitionCurrent !== 1) {
+      setPartitionCurrent(1);
+    } else {
+      getData();
+    }
+  }, [minIoFieldSearchValues, fieldSearchValues, partitionSearchValues]);
 
   useEffect(() => {
     getData();
-  }, [activeKey, changeValue]);
+  }, [
+    activeKey,
+    fieldCurrent,
+    partitionCurrent,
+    fieldPageSize,
+    partitionPageSize
+  ]);
 
   // 获取分区字段
   const getPartitionKey = (partitionKey: string) => {
@@ -574,14 +567,12 @@ export default function MetadataManagementDetail() {
               ...values
             }
           });
-      setFieldCurrent(1);
     } else if (activeKey === 'partitionInfo') {
       setPartitionSearchValues({
         filters: {
           ...values
         }
       });
-      setPartitionCurrent(1);
     }
   };
 
@@ -1055,7 +1046,6 @@ export default function MetadataManagementDetail() {
                             objectPath: objectPath || ''
                           }
                         });
-                        setFieldCurrent(1);
                       }}
                     />
                   </FormItem>
@@ -1074,7 +1064,6 @@ export default function MetadataManagementDetail() {
                             objectPath: objectPath || ''
                           }
                         });
-                        setFieldCurrent(1);
                       }}
                     />
                   </FormItem>
@@ -1093,7 +1082,6 @@ export default function MetadataManagementDetail() {
                             objectPath: ''
                           }
                         });
-                        setFieldCurrent(1);
                       }}
                     />
                   </FormItem>
@@ -1186,7 +1174,6 @@ export default function MetadataManagementDetail() {
                             description: description || ''
                           }
                         });
-                        setFieldCurrent(1);
                       }}
                     />
                   </FormItem>
@@ -1204,7 +1191,6 @@ export default function MetadataManagementDetail() {
                             description: ''
                           }
                         });
-                        setFieldCurrent(1);
                       }}
                     />
                   </FormItem>
