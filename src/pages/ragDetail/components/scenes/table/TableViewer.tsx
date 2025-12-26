@@ -20,9 +20,10 @@ import {
 interface TableViewerProps {
   segments?: TableSegment[];
   excelUrl?: string;
+  metadataPreviewData?: ArrayBuffer;
 }
 
-const TableViewer: React.FC<TableViewerProps> = ({}) => {
+const TableViewer: React.FC<TableViewerProps> = ({ metadataPreviewData }) => {
   const {
     fileBinaryData,
     fileBinaryDataLoading,
@@ -55,8 +56,12 @@ const TableViewer: React.FC<TableViewerProps> = ({}) => {
       const sheets = parseExcelFromBinary(fileBinaryData);
       setExcelSheets(sheets);
       setCurrentTableIndex(0);
+    } else if (metadataPreviewData) {
+      const sheets = parseExcelFromBinary(metadataPreviewData);
+      setExcelSheets(sheets);
+      setCurrentTableIndex(0);
     }
-  }, [fileBinaryData]);
+  }, [fileBinaryData, metadataPreviewData]);
 
   // 根据 highlightedPdfCoordinates 切换 sheet 页
   useEffect(() => {
