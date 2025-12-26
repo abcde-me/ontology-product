@@ -657,18 +657,18 @@ export default function MetadataManagement() {
 USING iceberg
 COMMENT '创建Iceberg表示例'`
                 : `CREATE TABLE IF NOT EXISTS db_example.table_example (
-  'id_example' BIGINT COMMENT '主键ID',
-  'name_example' VARCHAR(64) COMMENT '姓名示例',
-  'create_time' DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-  'update_time' DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-  'create_by' VARCHAR(64) COMMENT '创建人'
+  \`id_example\` BIGINT COMMENT '主键ID',
+  \`name_example\` VARCHAR(64) COMMENT '姓名示例',
+  \`create_time\` DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  \`update_time\` DATETIME DEFAULT CURRENT_TIMESTAMP  COMMENT '更新时间',
+  \`create_by\` VARCHAR(64) COMMENT '创建人'
 ) ENGINE=OLAP
-DUPLICATE KEY('id_example')
+DUPLICATE KEY(\`id_example\`)
 COMMENT '表描述'
-DISTRIBUTED BY HASH('id_example') BUCKETS 10
+DISTRIBUTED BY HASH(\`id_example\`) BUCKETS 10
 PROPERTIES (
   "replication_allocation" = "tag.location.default: 1"
-);`
+)`
             }
             rules={[
               {
