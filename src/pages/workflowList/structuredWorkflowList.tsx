@@ -168,16 +168,19 @@ export function StructuredWorkflowList() {
       tooltip: true,
       render: (value, record) => (
         <div
-          className={`${styles['workflow-name']} flex w-max items-center gap-1 hover:cursor-pointer`}
+          className={`${styles['workflow-name']} flex w-full items-center gap-1 overflow-hidden hover:cursor-pointer`}
           onClick={() => {
             viewDetailWorkflow(record);
           }}
+          title={value}
         >
-          <div className={'w-full overflow-ellipsis whitespace-nowrap'}>
+          <div
+            className={'overflow-hidden overflow-ellipsis whitespace-nowrap'}
+          >
             {value}
           </div>
           <IconCopy
-            className={`${styles['workflow-name-copy']}`}
+            className={`${styles['workflow-name-copy']} flex-shrink-0`}
             onClick={(e) => {
               e.stopPropagation();
               const copied = copy(value);

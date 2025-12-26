@@ -80,7 +80,9 @@ export default memo(function FlowSetting() {
   };
 
   const { run: onFlowChange } = useDebounceFn(
-    () => {
+    (changedValues) => {
+      // 批量赋值时不走保存逻辑
+      if (Object.keys(changedValues).length > 1) return;
       form
         .validate()
         .then((res) => {
@@ -157,7 +159,7 @@ export default memo(function FlowSetting() {
               rules={[{ required: true, message: '工作流名称不能为空' }]}
             >
               <Input
-                maxLength={30}
+                maxLength={100}
                 placeholder={'请输入工作流名称'}
                 showWordLimit
               />

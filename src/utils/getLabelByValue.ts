@@ -11,6 +11,6 @@ const getLabelByValue = (
   labelKey = 'label'
 ) => {
   const option = options.find((item) => item.value === value);
-  return option ? option[labelKey] : '';
+  return option ? option[labelKey] : '-';
 };
 export default getLabelByValue;

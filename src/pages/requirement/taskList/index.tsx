@@ -1,5 +1,6 @@
 import { getAnnotationTaskList } from '@/api/dataAnnotation';
-import ImageIcon from '@/assets/annotation/image-column.svg';
+import ImageIcon from '@/assets/annotation/new-image-column.svg';
+import TextIcon from '@/assets/annotation/text-column.svg';
 import EllipsisPopover from '@/components/ellipsis-popover-com';
 import noDataElement from '@/components/no-data';
 import { ANNOTATION_TASK_PERMISSIONS } from '@/config/permissions';
@@ -20,7 +21,7 @@ import { SorterInfo } from '@arco-design/web-react/es/Table/interface';
 import { CopyItemIcon } from '@ceai-front/arco-material';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import '../index.scss';
-import { RequirementTypeNameMap } from '../type';
+import { RequirementType, RequirementTypeNameMap } from '../type';
 
 function TaskList() {
   const [form] = Form.useForm();
@@ -121,6 +122,15 @@ function TaskList() {
     return value === '' || value == null ? '-' : value;
   };
 
+  // 类型图标映射
+  const TypeIconMap: Record<
+    number,
+    React.ComponentType<{ style?: React.CSSProperties }>
+  > = {
+    [RequirementType.Text]: TextIcon,
+    [RequirementType.Image]: ImageIcon
+  };
+
   // table columns
   const columns: ColumnProps[] = [
     {
@@ -173,10 +183,15 @@ function TaskList() {
       dataIndex: 'type',
       width: 174,
       render: (_, record) => {
+        const IconComponent = record.type ? TypeIconMap[record.type] : null;
+        const typeName = record.type
+          ? RequirementTypeNameMap[record.type]
+          : '-';
+
         return (
           <div className="flex items-center">
-            {record.type === 2 && <ImageIcon style={{ marginRight: 4 }} />}
-            {record?.type ? RequirementTypeNameMap[record.type] : '-'}
+            {IconComponent && <IconComponent style={{ marginRight: 4 }} />}
+            <span>{typeName}</span>
           </div>
         );
       },
@@ -267,22 +282,29 @@ function TaskList() {
       render: (_, record) => {
         return hasPermissionGetTask ? (
           <Space>
-            <Link
-              onClick={() => {
-                toLabelEditor(record, 'LABEL');
-              }}
-              disabled={record?.label_cnt === 0}
+            <Tooltip content="暂无标注任务" disabled={record?.label_cnt !== 0}>
+              <Link
+                onClick={() => {
+                  toLabelEditor(record, 'LABEL');
+                }}
+                disabled={record?.label_cnt === 0}
+              >
+                去标注
+              </Link>
+            </Tooltip>
+            <Tooltip
+              content="暂无改错任务"
+              disabled={record?.re_label_cnt !== 0}
             >
-              标注
-            </Link>
-            <Link
-              onClick={() => {
-                toLabelEditor(record, 'RELABEL');
-              }}
-              disabled={record?.re_label_cnt === 0}
-            >
-              改错
-            </Link>
+              <Link
+                onClick={() => {
+                  toLabelEditor(record, 'RELABEL');
+                }}
+                disabled={record?.re_label_cnt === 0}
+              >
+                改错
+              </Link>
+            </Tooltip>
           </Space>
         ) : (
           '-'

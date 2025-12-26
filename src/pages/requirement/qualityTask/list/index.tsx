@@ -13,7 +13,8 @@ import { useHistory, useLocation } from 'react-router';
 import EllipsisPopover from '@/components/ellipsis-popover-com';
 import noDataElement from '@/components/no-data';
 import FirstInspectModal from './FirstInspectModal';
-import ImageIcon from '@/assets/annotation/image-column.svg';
+import ImageIcon from '@/assets/annotation/new-image-column.svg';
+import TextIcon from '@/assets/annotation/text-column.svg';
 import { RequirementTypeNameMap } from '../../type';
 import { CopyItemIcon } from '@ceai-front/arco-material';
 import { listQualityControlTasks } from '@/api/dataAnnotation';
@@ -49,6 +50,15 @@ enum BelongType {
 const BelongTypeMap: Record<number, string> = {
   [BelongType.Personal]: '个人',
   [BelongType.Department]: '部门'
+};
+
+// 类型图标映射
+const TypeIconMap: Record<
+  number,
+  React.ComponentType<{ style?: React.CSSProperties }>
+> = {
+  [DataType.Text]: TextIcon,
+  [DataType.Image]: ImageIcon
 };
 
 // 质检任务数据类型
@@ -330,10 +340,15 @@ function QualityTaskList() {
         }
       ],
       render: (_, record) => {
+        const IconComponent = record.type ? TypeIconMap[record.type] : null;
+        const typeName = record.type
+          ? RequirementTypeNameMap[record.type]
+          : '-';
+
         return (
           <div className="flex items-center">
-            {record.type === 2 && <ImageIcon style={{ marginRight: 4 }} />}
-            {record?.type ? RequirementTypeNameMap[record.type] : '-'}
+            {IconComponent && <IconComponent style={{ marginRight: 4 }} />}
+            <span>{typeName}</span>
           </div>
         );
       }

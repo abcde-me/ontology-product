@@ -3,6 +3,8 @@ import AnnotationIcon from '@/assets/annotation/requirement-annotation.svg';
 import CreatIcon from '@/assets/annotation/requirement-creat.svg';
 import ExportIcon from '@/assets/annotation/requirement-export.svg';
 import QualityIcon from '@/assets/annotation/requirement-quality.svg';
+import ImageIcon from '@/assets/annotation/new-image-column.svg';
+import TextIcon from '@/assets/annotation/text-column.svg';
 import EllipsisPopover from '@/components/ellipsis-popover-com';
 import noDataElement from '@/components/no-data';
 import { PermissionWrapper } from '@/components/PermissionGuard';
@@ -152,6 +154,15 @@ export default function Requirement() {
     return value === '' || value == null ? '-' : value;
   };
 
+  // 类型图标映射
+  const TypeIconMap: Record<
+    number,
+    React.ComponentType<{ style?: React.CSSProperties }>
+  > = {
+    [RequirementType.Text]: TextIcon,
+    [RequirementType.Image]: ImageIcon
+  };
+
   // 查看需求详情权限
   const hasPermissionGetDetail = useHasPermission(REQUIREMENT_PERMISSIONS.GET);
   // 查询下载结果权限
@@ -241,11 +252,18 @@ export default function Requirement() {
       dataIndex: 'label_type',
       width: 100,
       render: (_, record) => {
-        return renderEmptyPlaceholder(record.label_type) !== '-' ? (
-          <EllipsisPopover
-            value={RequirementTypeMap[record.label_type]}
-            isEdit={false}
-          />
+        const IconComponent = record.label_type
+          ? TypeIconMap[record.label_type]
+          : null;
+        const typeName = record.label_type
+          ? RequirementTypeMap[record.label_type]
+          : '-';
+
+        return typeName !== '-' ? (
+          <div className="flex items-center">
+            {IconComponent && <IconComponent style={{ marginRight: 4 }} />}
+            <span>{typeName}</span>
+          </div>
         ) : (
           <span>-</span>
         );
@@ -312,7 +330,7 @@ export default function Requirement() {
       dataIndex: 'operate',
       align: 'left',
       fixed: 'right',
-      width: 160,
+      width: 170,
       render: (_, record) => {
         const actions: ActionItem[] = [
           ...(hasPermissionGetDetail

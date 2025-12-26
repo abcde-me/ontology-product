@@ -16,6 +16,9 @@ import EllipsisPopover from '@/components/ellipsis-popover-com';
 import noDataElement from '@/components/no-data';
 import { useUserInfo } from '@/store/userInfoStore';
 import {
+  openDataAuthList,
+  openDataAuthorizeApi,
+  openDataDeleteApi,
   openDataList,
   openDataPublish,
   openDataUnpublish
@@ -52,9 +55,9 @@ enum RequestMethod {
 }
 
 // 枚举开始时间结束时间字段
-enum StartOrEnd {
-  start_time = 'start_time',
-  end_time = 'end_time'
+enum sortBy {
+  cacheTime = 'cacheTime',
+  updatedTime = 'updatedTime'
 }
 
 export default function DataApi() {
@@ -93,18 +96,22 @@ export default function DataApi() {
   const [testVisible, setTestVisible] = useState(false);
   // 初始化测试弹窗数据
   const [testDataSource, setTestDataSource] = useState([]);
+  // 初始化测试弹窗apiId
+  const [testApiId, setTestApiId] = useState<number | null>(null);
   // 初始化查看文件弹窗是否显示
   const [viewFileModalVisible, setViewFileModalVisible] = useState(false);
   // 初始化查看文件弹窗id
   const [viewFileId, setViewFileId] = useState('');
   // 初始化筛选的值
   const [sortValue, setSortValue] = useState({
-    status: '',
+    status: [] as string[],
     sort: '',
     sort_by: ''
   });
   // 区分是否点击按钮清空搜索框
   const [isClickClear, setIsClickClear] = useState(false);
+  // 初始化授权弹窗apiId
+  const [apiId, setApiId] = useState<number | null>(null);
 
   // 组件初始化
   useEffect(() => {
@@ -137,7 +144,7 @@ export default function DataApi() {
           setTotal(res.data.total || 10);
         }
       } else {
-        Message.error(res.msg || '获取数据API列表失败');
+        Message.error(res.message || '获取数据API列表失败');
       }
     } finally {
       setLoading(false);
@@ -155,7 +162,7 @@ export default function DataApi() {
   ) => {
     setCurrent(1);
     const sortdata = {
-      status: filters.status === undefined ? '' : filters.status.join(','),
+      status: filters.status || [],
       sort:
         sorter.direction === undefined
           ? ''
@@ -165,9 +172,9 @@ export default function DataApi() {
       sort_by:
         sorter.field === undefined
           ? ''
-          : sorter.field === StartOrEnd.start_time
-            ? 'start_run_time'
-            : 'end_run_time'
+          : sorter.field === sortBy.cacheTime
+            ? 'cacheTime'
+            : 'updatedTime'
     };
 
     setSortValue(sortdata);
@@ -206,6 +213,11 @@ export default function DataApi() {
   const handleAuthorization = async (record: Record<string, any>) => {
     setAuthorizationLoading(true);
     setAuthorizationModalVisible(true);
+    setApiId(record.id);
+    const res = await openDataAuthList({
+      id: record.id
+    });
+    console.log(res, 'resssss');
     // 获取授权所有组织及项目
     const response = await GetProjOrg({});
     if (response.data) {
@@ -222,6 +234,26 @@ export default function DataApi() {
     }
   };
 
+  const handleAuth = async () => {
+    if (!apiId) {
+      Message.error('请选择数据API');
+      return;
+    }
+    console.log(
+      selectedAuthorizationRowKeys,
+      selectedAuthorizationRows,
+      'selectedAuthorizationRowKeys'
+    );
+    const params = {
+      apiId: apiId,
+      AuthInfo: {
+        projectId: selectedAuthorizationRowKeys
+      }
+    };
+
+    const res = await openDataAuthorizeApi(params);
+  };
+
   const handleChangeStatus = async (record) => {
     const params = {
       id: record.id
@@ -229,19 +261,33 @@ export default function DataApi() {
     if (record.status === ApiStatus.success) {
       const res = await openDataUnpublish(params);
       if (res.status === 200 && res.code === '') {
-        Message.success(res.msg || '下线数据API成功');
+        Message.success(res.message || '下线数据API成功');
         getList();
       } else {
-        Message.error(res.msg || '下线数据API失败');
+        Message.error(res.message || '下线数据API失败');
       }
     } else {
       const res = await openDataPublish(params);
       if (res.status === 200 && res.code === '') {
-        Message.success(res.msg || '上线数据API成功');
+        Message.success(res.message || '上线数据API成功');
         getList();
       } else {
-        Message.error(res.msg || '上线数据API失败');
+        Message.error(res.message || '上线数据API失败');
       }
+    }
+  };
+
+  // 删除数据API
+  const handleDeleteApi = async (id: string) => {
+    const params = {
+      id
+    };
+    const res = await openDataDeleteApi(params);
+    if (res.status === 200 && res.code === '') {
+      Message.success(res.message || '删除数据API成功');
+      getList();
+    } else {
+      Message.error(res.message || '删除数据API失败');
     }
   };
 
@@ -365,7 +411,12 @@ export default function DataApi() {
       fixed: 'right',
       render: (_, record) => (
         <div>
-          <span className={styles['operate-text']}>编辑</span>
+          <span
+            className={styles['operate-text']}
+            onClick={() => handleToAddApi('edit', record.id)}
+          >
+            编辑
+          </span>
           <PermissionWrapper permission={WORKFLOW_TASK_PERMISSIONS.CAN_UPDATE}>
             <span
               className={styles['operate-text'] + ' ml-4'}
@@ -421,7 +472,8 @@ export default function DataApi() {
                     }}
                     onClick={() => {
                       setTestVisible(true);
-                      setTestDataSource(record);
+                      setTestDataSource(record.paramConfig || []);
+                      setTestApiId(record.id);
                     }}
                   >
                     测试
@@ -435,6 +487,9 @@ export default function DataApi() {
                       height: '100%',
                       borderTop: 'none',
                       borderBottom: 'none'
+                    }}
+                    onClick={() => {
+                      handleDeleteApi(record.id);
                     }}
                   >
                     删除
@@ -465,8 +520,12 @@ export default function DataApi() {
   ];
 
   // 跳转创建API页面
-  const handleToAddApi = () => {
-    history.push('/tenant/compute/modaforge/dataApi/add');
+  const handleToAddApi = (type: 'add' | 'edit', id?: string) => {
+    history.push(
+      id
+        ? `/tenant/compute/modaforge/dataApi/add?type=${type}&id=${id}`
+        : `/tenant/compute/modaforge/dataApi/add?type=${type}`
+    );
   };
 
   return (
@@ -481,7 +540,7 @@ export default function DataApi() {
         }}
       >
         <InputSearch
-          placeholder="输入API名称或请求方式搜索"
+          placeholder="输入API名称搜索"
           allowClear
           style={{ width: 260 }}
           value={searchValue}
@@ -495,7 +554,11 @@ export default function DataApi() {
             setIsClickClear(true);
           }}
         />
-        <Button type="primary" icon={<IconPlus />} onClick={handleToAddApi}>
+        <Button
+          type="primary"
+          icon={<IconPlus />}
+          onClick={() => handleToAddApi('add')}
+        >
           创建API
         </Button>
       </div>
@@ -536,6 +599,7 @@ export default function DataApi() {
       <TestModal
         visible={testVisible}
         dataSource={testDataSource}
+        apiId={testApiId}
         onCancel={() => setTestVisible(false)}
       />
 
@@ -552,6 +616,7 @@ export default function DataApi() {
         visible={authorizationModalVisible}
         title="授权"
         onCancel={() => setAuthorizationModalVisible(false)}
+        onOk={handleAuth}
       >
         <div className={styles.authorizationModalContent}>
           <div className={styles.leftBox}>

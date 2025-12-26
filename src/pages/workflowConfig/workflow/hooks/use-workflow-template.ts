@@ -142,12 +142,8 @@ export const useWorkflowTemplate = () => {
   };
 
   if (flowType === 'struct') {
-    const { newNode } = generateNewNode({
-      data: nodesInitialData[BlockEnum.SQL],
-      position: { x: 400, y: START_INITIAL_POSITION.y }
-    });
     return {
-      nodes: [newNode],
+      nodes: [],
       edges: []
     };
   }

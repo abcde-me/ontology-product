@@ -5,7 +5,7 @@
     min-height: calc(100vh - 130px);
     margin: 8px 0 0 0;
     background-color: #ffffff;
-    padding: 24px;
+    padding: 24px 24px 60px 24px;
     border-radius: 16px;
     position: relative;
 
@@ -14,6 +14,15 @@
       font-weight: 500;
       font-size: 16px;
       margin-left: 8px;
+    }
+
+    .inputNumber {
+      :global(.arco-form-item-control-children) {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 14px;
+      }
     }
 
     :global(.arco-steps-item-wait .arco-steps-item-title),
@@ -32,6 +41,10 @@
         :global(.arco-input) {
           margin-right: -10px;
         }
+      }
+
+      :global(.arco-input:hover) {
+        z-index: 100;
       }
 
       :global(.arco-input-inner-wrapper) {

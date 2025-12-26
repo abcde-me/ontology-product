@@ -15,7 +15,8 @@ import {
   useNodesInteractions,
   // useToolIcon,
   useWorkflow,
-  useWorkflowHistory
+  useWorkflowHistory,
+  useNodesReadOnly
 } from '@/pages/workflowConfig/workflow/hooks';
 // import {
 //   canRunBySingle,
@@ -41,6 +42,7 @@ const BasePanel: FC<BasePanelProps> = ({ id, data, children }) => {
       showMessageLogModal: state.showMessageLogModal
     }))
   );
+  const { nodesReadOnly } = useNodesReadOnly();
   const showSingleRunPanel = useStore((s) => s.showSingleRunPanel);
   const panelWidth = localStorage.getItem('workflow-node-panel-width')
     ? Number.parseFloat(localStorage.getItem('workflow-node-panel-width')!)
@@ -144,7 +146,7 @@ const BasePanel: FC<BasePanelProps> = ({ id, data, children }) => {
               <PanelOperator id={id} data={data} showHelpLink={false} />
               <div className='mx-3 w-[1px] h-3.5 bg-divider-regular' /> */}
               <div className="flex h-6 flex-1 cursor-pointer items-center justify-end gap-2">
-                {data.flow_type === 'struct' && (
+                {data.flow_type === 'struct' && !nodesReadOnly && (
                   <div className={'flex flex-1 items-center justify-end gap-2'}>
                     <TestNode id={id} showLog />
                     <div className={'flex flex-shrink-0 items-center gap-2'}>

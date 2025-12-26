@@ -93,6 +93,8 @@ export default function Header({
     const list = async () => {
       const { data: result } = await GetProjOrg({});
       setProjects(result);
+      // 设置 store 的 projectList，用于 PermissionRoute 判断加载状态
+      useUserInfoStore.setState({ projectList: result || [] });
       const fullProjectIdKey = `${ProjectIdKey}${userInfo?.id}`;
       console.log('fullProjectIdKey', fullProjectIdKey);
 

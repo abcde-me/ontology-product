@@ -7,7 +7,9 @@ import {
   Modal,
   Pagination,
   Tooltip,
-  Message
+  Message,
+  Space,
+  Link
 } from '@arco-design/web-react';
 import { IconArrowLeft } from '@arco-design/web-react/icon';
 import { ColumnProps } from '@arco-design/web-react/es/Table';
@@ -234,7 +236,10 @@ function QualityTaskDetail() {
     if (result.passed > 0) {
       items.push(
         <div key="passed" className="result-item">
-          <Tag color="green" size="small">
+          <Tag
+            style={{ backgroundColor: '#ECFDF5', color: '#10B981' }}
+            size="small"
+          >
             通过
           </Tag>
           <span className="result-count">{result.passed}</span>
@@ -244,7 +249,10 @@ function QualityTaskDetail() {
     if (result.rejected > 0) {
       items.push(
         <div key="rejected" className="result-item">
-          <Tag color="red" size="small">
+          <Tag
+            style={{ backgroundColor: '#FEF2F2', color: '#EF4444' }}
+            size="small"
+          >
             驳回
           </Tag>
           <span className="result-count">{result.rejected}</span>
@@ -254,26 +262,33 @@ function QualityTaskDetail() {
     if (result.uninspected > 0) {
       items.push(
         <div key="uninspected" className="result-item">
-          <Tag color="orange" size="small">
+          <Tag
+            style={{ backgroundColor: '#FEFBEB', color: '#F7BA1E' }}
+            size="small"
+          >
             未检
           </Tag>
           <span className="result-count">{result.uninspected}</span>
         </div>
       );
     }
-    return <div className="quality-result-cell">{items}</div>;
+    return items.length > 0 ? (
+      <div className="quality-result-cell">{items}</div>
+    ) : (
+      '-'
+    );
   };
 
   // 渲染批注
   const renderComment = (comment: Comment) => {
     const items: string[] = [];
-    if (comment.more !== undefined) {
+    if (comment?.more && comment.more > 0) {
       items.push(`多标: ${comment.more}`);
     }
-    if (comment.error !== undefined) {
+    if (comment?.error && comment.error > 0) {
       items.push(`错标: ${comment.error}`);
     }
-    if (comment.less !== undefined) {
+    if (comment?.less && comment.less > 0) {
       items.push(`漏标: ${comment.less}`);
     }
     return items.length > 0 ? (
@@ -297,7 +312,10 @@ function QualityTaskDetail() {
         <div className="id-cell">
           <span>{record.qs_id}</span>
           {record?.type === 1 && (
-            <Tag color="purple" size="small">
+            <Tag
+              style={{ backgroundColor: '#F5E8FF', color: '#722ED1' }}
+              size="small"
+            >
               复核
             </Tag>
           )}
@@ -330,10 +348,17 @@ function QualityTaskDetail() {
       dataIndex: 'volumn_inspected',
       width: 120,
       render: (_, record) => {
+        if (record?.status === InspectionStatus.Finished) {
+          return (
+            <span>
+              100% ({record.volumn_inspected}/{record.volumn_total})
+            </span>
+          );
+        }
         const percent =
           record.volumn_total > 0
-            ? Math.round((record.volumn_inspected / record.volumn_total) * 100)
-            : 0;
+            ? ((record.volumn_inspected / record.volumn_total) * 100).toFixed(2)
+            : '0.00';
         return (
           <span>
             {percent}% ({record.volumn_inspected}/{record.volumn_total})
@@ -351,7 +376,7 @@ function QualityTaskDetail() {
       title: '任务准确率',
       dataIndex: 'task_accuracy_rate',
       width: 100,
-      render: (_, record) => `${(record.task_accuracy_rate * 100).toFixed(1)}%`
+      render: (_, record) => `${(record.task_accuracy_rate * 100).toFixed(2)}%`
     },
     {
       title: '已检元素数',
@@ -375,7 +400,7 @@ function QualityTaskDetail() {
       //   { text: '<70%', value: 0 }
       // ],
       render: (_, record) =>
-        `${(record.element_accuracy_rate * 100).toFixed(1)}%`
+        `${(record.element_accuracy_rate * 100).toFixed(2)}%`
     },
     {
       title: '创建人',
@@ -385,27 +410,27 @@ function QualityTaskDetail() {
     {
       title: '操作',
       dataIndex: 'operation',
-      width: 160,
+      width: 140,
       fixed: 'right',
       render: (_, record) => {
         const isFinished = record.status === InspectionStatus.Finished;
         return (
-          <div className="operation-cell">
+          <Space>
             {hasPermissionActionTask && (
-              <span
-                className={`operation-link ${isFinished ? 'disabled' : ''}`}
-                onClick={() => !isFinished && handleGoInspect(record)}
+              <Link
+                onClick={() => handleGoInspect(record)}
+                disabled={isFinished}
               >
                 去质检
-              </span>
+              </Link>
             )}
-            <span
-              className={`operation-link ${isFinished ? 'disabled' : ''}`}
-              onClick={() => !isFinished && handleBatchInspect(record)}
+            <Link
+              onClick={() => handleBatchInspect(record)}
+              disabled={isFinished}
             >
               批量质检
-            </span>
-          </div>
+            </Link>
+          </Space>
         );
       }
     }

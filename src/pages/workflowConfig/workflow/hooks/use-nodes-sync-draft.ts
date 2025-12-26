@@ -12,6 +12,7 @@ import { useHistory } from 'react-router';
 import { flowIsStruct } from '@/pages/workflowConfig/workflow/utils';
 import { Message } from '@arco-design/web-react';
 import { useParams as useRouterParams } from 'react-router-dom';
+import { getWorkflowDetail } from '@/api/workflow';
 
 /**
  * 查找画布中没有没有前置节点的节点，并给edge中加入一条"没有source"描述的edge数据
@@ -74,7 +75,8 @@ export const useNodesSyncDraft = () => {
       const hasStartNode = nodes.find(
         (node) => node.data.type === BlockEnum.Start
       );
-      const isStruct = flowIsStruct(nodes);
+      const isStruct = flowType === 'struct';
+      // 非结构化工作流才必须有开始节点
       if (!hasStartNode && !isStruct) return;
 
       const features = {} as any;
@@ -155,11 +157,15 @@ export const useNodesSyncDraft = () => {
       console.log('节点是否是只读的：', isNodesReadOnly);
       if (isNodesReadOnly) return;
       const postParams = getPostParams();
-      // 当前画布存在节点时才能保存
-      if (postParams && !!postParams.params.graph.nodes.length) {
+      if (postParams) {
         const { setSyncWorkflowDraftHash, setDraftUpdatedAt } =
           workflowStore.getState();
         try {
+          const flowDetail = await getWorkflowDetail({
+            workflow_uuid: appId!,
+            workflow_version: workflowVersion || null
+          });
+          if (!!flowDetail?.data?.is_online) return;
           const { data: res, message } = await createWorkflowDraft(
             Object.assign({}, postParams.params, {
               version: 'draft',
