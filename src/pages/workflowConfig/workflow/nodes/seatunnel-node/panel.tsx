@@ -222,7 +222,7 @@ export default React.memo(function SeatunnelPanel(
         form={form}
         autoComplete="off"
         wrapperCol={{ span: 24 }}
-        disabled={readOnly}
+        disabled={readOnly || props.readonly}
         layout="vertical"
         onValuesChange={(changeEd, v: any) => {
           if (Object.keys(changeEd).length > 1) return;
@@ -244,7 +244,7 @@ export default React.memo(function SeatunnelPanel(
         >
           <HighLightSearchCascader
             className={'w-full'}
-            disabled={readOnly || loadingSource}
+            disabled={readOnly || loadingSource || props.readonly}
             loading={loadingSource}
             placeholder="请选择来源表"
             options={allSourceDatabase}
@@ -272,6 +272,7 @@ export default React.memo(function SeatunnelPanel(
               placeholder={
                 '只填写WHERE 后面的过滤条件(含 WHERE关键字)。\n如： WHERE  year = ${year}'
               }
+              readOnly={readOnly || props.readonly}
               onChange={(value) => {
                 form.setFieldsValue({
                   local_params: parseLocalParams(
@@ -374,7 +375,7 @@ export default React.memo(function SeatunnelPanel(
         >
           <HighLightSearchCascader
             className={'w-full'}
-            disabled={readOnly || connectorLoading}
+            disabled={readOnly || connectorLoading || props.readonly}
             loading={connectorLoading}
             placeholder="请选择目标表"
             options={allConnections}

@@ -27,6 +27,7 @@ import { useDebounceFn } from 'ahooks';
 import { editWorkflow } from '@/api/workflow';
 import { isEmpty } from 'lodash-es';
 import { useNodesReadOnly } from '@/pages/workflowConfig/workflow/hooks';
+import { LocalParam } from '@/pages/workflowConfig/types/workflow';
 
 export default memo(function FlowSetting() {
   const [show, setShow] = useState(true);
@@ -44,6 +45,7 @@ export default memo(function FlowSetting() {
     const {
       workflow_name,
       params,
+      global_params,
       execution_type = DEFAULT_FLOW_INFO.execution_type,
       failure_strategy = DEFAULT_FLOW_INFO.failure_strategy,
       process_instance_priority = DEFAULT_FLOW_INFO.process_instance_priority,
@@ -56,11 +58,13 @@ export default memo(function FlowSetting() {
       process_instance_priority,
       description
     };
-    if (!!params) {
-      formData.params = Object.entries(params).map(([key, value]) => ({
-        key,
-        value
-      }));
+    if (global_params) {
+      try {
+        formData.params = JSON.parse(global_params);
+      } catch (e) {
+        formData.params = [{ prop: undefined, value: undefined }];
+        Message.error('工作流全局参数错误');
+      }
     }
     form.setFieldsValue(formData);
   }, [workflowDetail]);
@@ -86,28 +90,20 @@ export default memo(function FlowSetting() {
       form
         .validate()
         .then((res) => {
-          const {
-            workflow_name,
-            description,
-            process_instance_priority,
-            params,
-            execution_type
-          } = res;
+          const { description, params, ...otherData } = res;
           const saveData: EditWorkflowParams = {
-            workflow_name,
-            process_instance_priority,
             workflow_uuid: workflowDetail?.workflow_uuid,
-            execution_type
+            ...otherData
           };
           if (description) {
             saveData.description = description;
           }
           if (params?.length) {
-            const paramObj: Record<string, any> = {};
-            params.forEach(({ key, value }: { key: string; value: any }) => {
-              if (key) paramObj[key] = value;
-            });
-            !isEmpty(paramObj) && (saveData.params = paramObj);
+            saveData.params = params.map((p) => ({
+              ...p,
+              direct: 'IN',
+              type: 'VARCHAR'
+            }));
           }
           return saveData;
         })
@@ -215,7 +211,7 @@ export default memo(function FlowSetting() {
                           <div key={field.key} className={'flex flex-1'}>
                             <div className={'fields-item flex gap-3'}>
                               <Form.Item
-                                field={`${field.field}.key`}
+                                field={`${field.field}.prop`}
                                 label={
                                   index === 0 ? (
                                     <Form.Item noStyle>
@@ -230,7 +226,7 @@ export default memo(function FlowSetting() {
                                     validator(v, onInValid) {
                                       const sameKey = form
                                         .getFieldValue('params')
-                                        .filter(({ key }) => key === v);
+                                        .filter(({ prop }) => prop === v);
                                       if (sameKey.length > 1) {
                                         onInValid('参数名重复');
                                         return;
@@ -282,7 +278,7 @@ export default memo(function FlowSetting() {
                                     form
                                       .validate(
                                         fields.map(
-                                          ({ field }) => `${field}.key`
+                                          ({ field }) => `${field}.prop`
                                         )
                                       )
                                       .catch(console.error);

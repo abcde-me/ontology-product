@@ -18,6 +18,7 @@ import type {
   ErrorHandleTypeEnum
 } from '@/pages/workflowConfig/workflow/nodes/_base/components/error-handle/types';
 import type { WorkflowRetryConfig } from '@/pages/workflowConfig/workflow/nodes/_base/components/retry/types';
+import { TaskNodeStatus } from '@/types/workflowTaskApi';
 
 export enum BlockEnum {
   Start = 'start',
@@ -131,6 +132,7 @@ export type NodeProps<T = unknown> = { id: string; data: CommonNodeType<T> };
 export type NodePanelProps<T> = {
   id: string;
   data: CommonNodeType<T>;
+  readonly?: boolean;
 };
 export type Edge = ReactFlowEdge<CommonEdgeType>;
 
@@ -448,7 +450,7 @@ export interface NodeProcessData {
   /**
    * 运行状态，状态英文名
    */
-  state: string;
+  state: TaskNodeStatus;
   /**
    * 运行状态名称，状态中文名
    */

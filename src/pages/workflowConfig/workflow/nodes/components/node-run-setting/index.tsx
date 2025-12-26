@@ -27,6 +27,7 @@ export const NodeRunSetting = () => {
               placeholder={'失败重试次数'}
               suffix={'次'}
               hideControl
+              min={0}
             />
           </FormItem>
         </Col>
@@ -36,6 +37,7 @@ export const NodeRunSetting = () => {
               placeholder={'失败重试间隔'}
               suffix={'分钟'}
               hideControl
+              min={0}
             />
           </FormItem>
         </Col>

@@ -86,7 +86,7 @@ export default React.memo(function SQLPanel(
         autoComplete="off"
         labelCol={{ span: 0 }}
         wrapperCol={{ span: 24 }}
-        disabled={readOnly}
+        disabled={readOnly || props.readonly}
         initialValues={{ ...inputs, sql_id: inputs.sql_id?.split('_') }}
         layout="vertical"
         onValuesChange={(changedValues, v: any) => {
@@ -108,7 +108,7 @@ export default React.memo(function SQLPanel(
         <FormItem label={'SQL脚本语句'} field={'sql_id'}>
           <Cascader
             className={'w-full'}
-            disabled={readOnly || loading}
+            disabled={readOnly || loading || props.readonly}
             placeholder="请选择SQL加工脚本"
             style={{ width: 300, marginBottom: 20 }}
             options={allSQL}
@@ -139,7 +139,7 @@ export default React.memo(function SQLPanel(
               <FormItem field={'raw_script'} dependencies={['sql_id']}>
                 <SqlEditor
                   placeholder={'请在此处编辑或选择SQL加工脚本'}
-                  readOnly={readOnly || !!sql_id}
+                  readOnly={readOnly || !!sql_id || props.readonly}
                   className={`${!!sql_id ? 'hover:cursor-not-allowed' : ''}`}
                   onChange={(value) => {
                     form.setFieldsValue({
@@ -178,7 +178,7 @@ export default React.memo(function SQLPanel(
                             type={'default'}
                             size={'mini'}
                             icon={<IconPlus />}
-                            disabled={readOnly}
+                            disabled={readOnly || props.readonly}
                             onClick={(e) => {
                               e.stopPropagation();
                               add({
@@ -259,6 +259,7 @@ export default React.memo(function SQLPanel(
                                   <Button
                                     type={'text'}
                                     className={'p-0'}
+                                    disabled={readOnly || props.readonly}
                                     icon={<IconDelete />}
                                     onClick={() => {
                                       remove(index);
