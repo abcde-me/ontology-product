@@ -106,10 +106,9 @@ export default function MetadataManagementDetail() {
   const [partitionCurrent, setPartitionCurrent] = useState(1);
   const [partitionPageSize, setPartitionPageSize] = useState(10);
   const [partitionTotal, setPartitionTotal] = useState(0);
-  const [partition, setPartition] = useState('');
   const [partitionSearchValues, setPartitionSearchValues] = useState({
     filters: {
-      partition: ''
+      partitionName: ''
     }
   });
 
@@ -881,13 +880,10 @@ export default function MetadataManagementDetail() {
                     <Input.Search
                       onSearch={partitionSearchForm.submit}
                       allowClear
-                      onChange={(value) => {
-                        setPartition(value);
-                      }}
                       onClear={() => {
                         setPartitionSearchValues({
                           filters: {
-                            partition: ''
+                            partitionName: ''
                           }
                         });
                       }}

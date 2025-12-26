@@ -5,6 +5,7 @@ export interface MetadataMenuItem {
   id: number;
   datasourceType: string;
   datasourceName: string;
+  updateTime: string;
 }
 
 // 元数据管理

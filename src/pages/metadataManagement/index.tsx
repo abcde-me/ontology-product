@@ -90,6 +90,8 @@ export default function MetadataManagement() {
   >(MetadataType.Iceberg);
   // 初始化筛选的元数据ID
   const [activeMetadataId, setActiveMetadataId] = useState<number | null>(null);
+  // 初始化更新时间
+  const [updateTime, setUpdateTime] = useState('');
   // 列设置弹窗是否打开
   const [columnModalOpen, setColumnModalOpen] = useState(false);
   // 初始化表格列
@@ -161,6 +163,7 @@ export default function MetadataManagement() {
           res.data.data[0]?.datasourceType || MetadataType.Iceberg
         );
         setActiveMetadataId(Number(res.data.data[0]?.id) || null);
+        setUpdateTime(res.data.data[0]?.updateTime || '');
       }
     } else {
       Message.error(res.message || '获取元数据菜单数据失败');
@@ -380,6 +383,10 @@ export default function MetadataManagement() {
     });
   };
 
+  const handleToDataApi = () => {
+    history.push(`/tenant/compute/modaforge/dataApi`);
+  };
+
   return (
     <div className={styles['metadataManagement']}>
       <h1 style={{ fontSize: '20px', fontWeight: 'bold' }}>元数据管理</h1>
@@ -394,6 +401,7 @@ export default function MetadataManagement() {
                 metadataMenuData.find(
                   (item: MetadataMenuItem) => item?.datasourceType === key
                 ) || ({} as MetadataMenuItem);
+              setUpdateTime(selectMenuItem?.updateTime || '');
               setActiveMetadataId(selectMenuItem?.id || null);
             }}
           >
@@ -414,19 +422,20 @@ export default function MetadataManagement() {
           <div className="mb-3 mt-4 flex items-center justify-between">
             <h1 className="text-base font-semibold">{`数据列表(${total})`}</h1>
             <div className="flex items-center gap-2">
-              <span className="text-sm text-[#6E7B8D]">
-                2025-12-12 00:00:00 更新
-              </span>
-              <Button
+              <span className="text-sm text-[#6E7B8D]">{updateTime} 更新</span>
+              {/* <Button
                 className={styles['refreshBtn']}
                 icon={<IconRefresh className="text-[#1E293B]" />}
-              />
+              /> */}
               {(activeMetadataType === MetadataType.Iceberg ||
                 activeMetadataType === MetadataType.Doris) && (
                 <>
                   <Button
                     className={styles['refreshBtn']}
                     icon={<StorageIcon />}
+                    onClick={() => {
+                      handleToDataApi();
+                    }}
                   >
                     表转API
                   </Button>
