@@ -4,6 +4,7 @@ import CheckCircleFillIcon from '@/assets/metadata/check-circle-fill.svg';
 import CloseCircleFillIcon from '@/assets/metadata/close-circle-fill.svg';
 import { ColumnField } from '../dataAsset/components/ColumnSettingModal';
 import dayjs from 'dayjs';
+import { formatFileSize } from '@/utils/format';
 import styles from './index.module.scss';
 
 enum MetadataType {
@@ -12,11 +13,6 @@ enum MetadataType {
   MinIO = 'MINIO',
   Milvus = 'MILVUS'
 }
-
-// table数据为空时展示-
-const renderEmptyPlaceholder = (value: string | null) => {
-  return value === '' || value == null ? '-' : value;
-};
 
 const IcebergFields: ColumnField[] = [
   {
@@ -82,7 +78,7 @@ const IcebergFields: ColumnField[] = [
   {
     id: 'storageSize',
     nameEn: 'storageSize',
-    nameZh: '存储大小（G）',
+    nameZh: '存储大小',
     type: 'double',
     isEnumAbleForColumn: true,
     isEnumAble: false,
@@ -116,9 +112,120 @@ const IcebergFields: ColumnField[] = [
     values: []
   },
   {
-    id: 'lastTime',
-    nameEn: 'lastTime',
-    nameZh: '最后访问时间',
+    id: 'createTime',
+    nameEn: 'createTime',
+    nameZh: '创建时间',
+    type: 'datetime',
+    isEnumAbleForColumn: true,
+    isEnumAble: false,
+    enumLoading: false,
+    distinctCount: 0,
+    displaySort: 9,
+    values: []
+  }
+];
+
+const DorisFields: ColumnField[] = [
+  {
+    id: 'tableName',
+    nameEn: 'tableName',
+    nameZh: '表英文名',
+    type: 'string',
+    isEnumAbleForColumn: true,
+    isEnumAble: false,
+    enumLoading: false,
+    distinctCount: 0,
+    displaySort: 1,
+    values: []
+  },
+  {
+    id: 'description',
+    nameEn: 'description',
+    nameZh: '表中文名',
+    type: 'string',
+    isEnumAbleForColumn: true,
+    isEnumAble: false,
+    enumLoading: false,
+    distinctCount: 0,
+    displaySort: 2,
+    values: []
+  },
+  {
+    id: 'databaseName',
+    nameEn: 'databaseName',
+    nameZh: '所属数据库',
+    type: 'string',
+    isEnumAbleForColumn: true,
+    isEnumAble: false,
+    enumLoading: false,
+    distinctCount: 0,
+    displaySort: 3,
+    values: []
+  },
+  {
+    id: 'partitionKey',
+    nameEn: 'partitionKey',
+    nameZh: '分区字段',
+    type: 'string',
+    isEnumAbleForColumn: true,
+    isEnumAble: false,
+    enumLoading: false,
+    distinctCount: 0,
+    displaySort: 4,
+    values: []
+  },
+  {
+    id: 'partitionNum',
+    nameEn: 'partitionNum',
+    nameZh: '分区数',
+    type: 'int',
+    isEnumAbleForColumn: true,
+    isEnumAble: false,
+    enumLoading: false,
+    distinctCount: 0,
+    displaySort: 5,
+    values: []
+  },
+  {
+    id: 'bucketNum',
+    nameEn: 'bucketNum',
+    nameZh: '桶数',
+    type: 'int',
+    isEnumAbleForColumn: true,
+    isEnumAble: false,
+    enumLoading: false,
+    distinctCount: 0,
+    displaySort: 6,
+    values: []
+  },
+  {
+    id: 'replicaNum',
+    nameEn: 'replicaNum',
+    nameZh: '副本数',
+    type: 'int',
+    isEnumAbleForColumn: true,
+    isEnumAble: false,
+    enumLoading: false,
+    distinctCount: 0,
+    displaySort: 7,
+    values: []
+  },
+  {
+    id: 'updateTime',
+    nameEn: 'updateTime',
+    nameZh: '更新时间',
+    type: 'datetime',
+    isEnumAbleForColumn: true,
+    isEnumAble: false,
+    enumLoading: false,
+    distinctCount: 0,
+    displaySort: 8,
+    values: []
+  },
+  {
+    id: 'createTime',
+    nameEn: 'createTime',
+    nameZh: '创建时间',
     type: 'datetime',
     isEnumAbleForColumn: true,
     isEnumAble: false,
@@ -143,10 +250,10 @@ const MinIOFields = [
     values: []
   },
   {
-    id: 'objectNum',
-    nameEn: 'objectNum',
+    id: 'objectsCount',
+    nameEn: 'objectsCount',
     nameZh: '对象数',
-    type: 'double',
+    type: 'int',
     isEnumAbleForColumn: true,
     isEnumAble: false,
     enumLoading: false,
@@ -191,9 +298,9 @@ const MinIOFields = [
     values: []
   },
   {
-    id: 'storageSize',
-    nameEn: 'storageSize',
-    nameZh: '存储大小（G）',
+    id: 'objectsSize',
+    nameEn: 'objectsSize',
+    nameZh: '存储大小',
     type: 'double',
     isEnumAbleForColumn: true,
     isEnumAble: false,
@@ -248,18 +355,6 @@ const MinIOFields = [
     enumLoading: false,
     distinctCount: 0,
     displaySort: 8,
-    values: []
-  },
-  {
-    id: 'lastTime',
-    nameEn: 'lastTime',
-    nameZh: '最新访问时间',
-    type: 'datetime',
-    isEnumAbleForColumn: true,
-    isEnumAble: false,
-    enumLoading: false,
-    distinctCount: 0,
-    displaySort: 9,
     values: []
   },
   {
@@ -398,18 +493,6 @@ const MilvusFields = [
     values: []
   },
   {
-    id: 'lastTime',
-    nameEn: 'lastTime',
-    nameZh: '最近访问时间',
-    type: 'datetime',
-    isEnumAbleForColumn: true,
-    isEnumAble: false,
-    enumLoading: false,
-    distinctCount: 0,
-    displaySort: 9,
-    values: []
-  },
-  {
     id: 'updateTime',
     nameEn: 'updateTime',
     nameZh: '元数据更新时间',
@@ -426,8 +509,9 @@ const MilvusFields = [
 export const getColumnsSetting = (metadataType: MetadataType | string) => {
   switch (metadataType) {
     case MetadataType.Iceberg:
-    case MetadataType.Doris:
       return IcebergFields;
+    case MetadataType.Doris:
+      return DorisFields;
     case MetadataType.MinIO:
       return MinIOFields;
     case MetadataType.Milvus:
@@ -462,7 +546,6 @@ export const getColumns = (
           dataIndex: field.nameEn,
           key: field.nameEn,
           width: 150,
-          ellipsis: true,
           className:
             field.id === 'collectionName' ||
             field.id === 'tableName' ||
@@ -499,6 +582,15 @@ export const getColumns = (
                   }}
                 />
               );
+            }
+            if (field.id === 'policy') {
+              return <EllipsisPopover value={value} isEdit={false} />;
+            }
+            if (field.id === 'storageSize') {
+              return formatFileSize(value);
+            }
+            if (field.type === 'int') {
+              return value;
             }
             return value ?? '-';
           },

@@ -107,10 +107,10 @@ export async function createMetadataIcebergDatabase(
 }
 
 // 查询milvus的所有表
-export async function listMetadataMilvusDatabase(
+export async function listMetadataMilvusCollection(
   params: Record<string | number, any>
 ) {
-  return await UAPI.RES.listMetadataMilvusDatabaseApi({})
+  return await UAPI.RES.listMetadataMilvusCollectionApi({})
     .post(params)
     .inRegion()
     .do();

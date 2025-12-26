@@ -36,11 +36,12 @@ import {
   listMetadataDorisTable,
   listMetadataIcebergDatabaseName,
   listMetadataIcebergTable,
-  listMetadataMilvusDatabase,
+  listMetadataMilvusCollection,
   listMetadataMinioBucket,
   MetadataMenuItem
 } from '@/api/metadata';
 import styles from './index.module.scss';
+import { useParams } from '@/utils/url';
 
 enum MetadataType {
   Iceberg = 'ICEBERG',
@@ -59,6 +60,7 @@ interface RangeFilter {
 export default function MetadataManagement() {
   const userInfo = useUserInfo();
   const history = useHistory();
+  const urlMetadataType = useParams('metadataType');
   const MenuItem = Menu.Item;
   const TextArea = Input.TextArea;
 
@@ -87,7 +89,7 @@ export default function MetadataManagement() {
   // 初始化筛选的元数据类型
   const [activeMetadataType, setActiveMetadataType] = useState<
     MetadataType | string
-  >(MetadataType.Iceberg);
+  >(urlMetadataType || MetadataType.Iceberg);
   // 初始化筛选的元数据ID
   const [activeMetadataId, setActiveMetadataId] = useState<number | null>(null);
   // 初始化更新时间
@@ -160,7 +162,9 @@ export default function MetadataManagement() {
       if (res.data.data) {
         setMetadataMenuData(res.data.data);
         setActiveMetadataType(
-          res.data.data[0]?.datasourceType || MetadataType.Iceberg
+          urlMetadataType ||
+            res.data.data[0]?.datasourceType ||
+            MetadataType.Iceberg
         );
         setActiveMetadataId(Number(res.data.data[0]?.id) || null);
         setUpdateTime(res.data.data[0]?.updateTime || '');
@@ -184,7 +188,7 @@ export default function MetadataManagement() {
           : activeMetadataType === MetadataType.MinIO
             ? await listMetadataMinioBucket(params)
             : activeMetadataType === MetadataType.Milvus
-              ? await listMetadataMilvusDatabase(params)
+              ? await listMetadataMilvusCollection(params)
               : await listMetadataDorisTable(params);
       if (res.status === 200 && res.code === '') {
         if (res.data.data?.list) {
