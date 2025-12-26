@@ -126,18 +126,15 @@ export function useWorkflowTable<TData = any, TParams = any>(
   // 请求数据
   const { data, loading, run } = useRequest(
     async () => {
-      // 请求开始时清空上次的数据
-      setTableData([]);
       const params = buildParams();
       const result = await service(params);
-      console.log('------请求结果------', result);
       return result;
     },
     {
       manual,
       onBefore: () => {
         // 在请求开始前清空数据
-        setTableData([]);
+        // setTableData([]);
       }
     }
   );

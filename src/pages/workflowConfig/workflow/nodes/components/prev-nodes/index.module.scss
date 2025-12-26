@@ -1,0 +1,11 @@
+.node-item {
+  border-radius: 4px;
+  border: 1px solid #cbd5e1;
+  padding: 8px 16px;
+
+  &:hover {
+    border-color: #007dfa !important;
+    cursor: pointer;
+    background: #eef6ff;
+  }
+}

@@ -15,6 +15,8 @@ export default function useConfig(id: string, payload: SeatunnelConfig) {
         Object.entries(value).forEach(([key, value]) => {
           draft[key] = value;
         });
+        draft.fail_retry_interval = value.fail_retry_interval.toString();
+        draft.fail_retry_times = value.fail_retry_times.toString();
       });
       setInputs(newInputs);
     },
