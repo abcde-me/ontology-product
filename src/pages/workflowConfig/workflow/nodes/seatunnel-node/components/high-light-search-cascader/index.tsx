@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Fragment } from 'react';
 import { Cascader, CascaderProps } from '@arco-design/web-react';
 
 function highlight(label: string, keyword?: string) {
@@ -26,14 +26,16 @@ export const HighLightSearchCascader = (props: CascaderProps) => {
   return (
     <Cascader
       {...props}
+      //arco 的底层设计问题，想要在远端加载模式高亮搜索只能开启选择即改变，然后自行控制值的改变逻辑
+      changeOnSelect
       showSearch={{
-        renderOption(input, option) {
+        renderOption(input, option, options) {
           return option.pathLabel?.map((item, index, array) => {
             return (
-              <>
+              <Fragment key={item}>
                 {highlight(item, input)}
                 {index !== array.length - 1 && ` > `}
-              </>
+              </Fragment>
             );
           });
         }
