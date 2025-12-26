@@ -5,7 +5,7 @@
     }
 
     :global(.arco-table-tr):hover {
-      .hover-change :global(.ellipsis-text) {
+      .hover-change :global(.arco-link) {
         color: rgb(0, 125, 250);
         cursor: pointer;
 
