@@ -6,6 +6,8 @@ import { useUrlState } from '../../hooks/useUrlState';
 
 import styles from './index.module.scss';
 import classNames from 'classnames';
+import { SQL_PERMISSIONS } from '@/config/permissions';
+import { useHasPermission } from '@/hooks/usePermission';
 
 interface SplScriptManagementProps {
   onToScriptList: (type: string) => void;
@@ -46,15 +48,19 @@ const SplScriptManagement: React.FC<SplScriptManagementProps> = memo(
           className={styles['spl-tabs']}
           destroyOnHide
         >
-          <TabPane key="processing" title="加工脚本">
-            <Processing
-              curActiveTab={curActiveTab}
-              onToScriptList={onToScriptList}
-            />
-          </TabPane>
-          <TabPane key="query" title="查询脚本">
-            <QueryScript curActiveTab={curActiveTab} />
-          </TabPane>
+          {useHasPermission(SQL_PERMISSIONS.DEVELOP_SCIPT_LIST) && (
+            <TabPane key="processing" title="加工脚本">
+              <Processing
+                curActiveTab={curActiveTab}
+                onToScriptList={onToScriptList}
+              />
+            </TabPane>
+          )}
+          {useHasPermission(SQL_PERMISSIONS.QUERY_SCRIPT_LIST) && (
+            <TabPane key="query" title="查询脚本">
+              <QueryScript curActiveTab={curActiveTab} />
+            </TabPane>
+          )}
         </Tabs>
       </div>
     );

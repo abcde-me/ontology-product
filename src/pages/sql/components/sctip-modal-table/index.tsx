@@ -24,6 +24,8 @@ import dayjs from 'dayjs';
 import ScriptDetailModal from '../spl-script-management/ScriptDetailModal';
 import { useUrlState } from '../../hooks/useUrlState';
 import { render } from 'katex';
+import { SQL_PERMISSIONS } from '@/config/permissions';
+import { PermissionWrapper } from '@/components/PermissionGuard';
 
 const SctipModalTable: React.FC<{
   isVisible: boolean;
@@ -248,15 +250,18 @@ const SctipModalTable: React.FC<{
       key: 'operation',
       render: (_, record) => (
         <>
-          <span
-            className={styles['option-btn']}
-            onClick={() => {
-              setDetailRecord(record);
-              setDetailVisible(true);
-            }}
-          >
-            详情
-          </span>
+          <PermissionWrapper permission={SQL_PERMISSIONS.DEVELOP_SCIPT_GET}>
+            <span
+              className={styles['option-btn']}
+              onClick={() => {
+                setDetailRecord(record);
+                setDetailVisible(true);
+              }}
+            >
+              详情
+            </span>
+          </PermissionWrapper>
+
           {/* <Tooltip
             content={record?.visteon === 'false' ? '当前已有未发版的脚本' : ''}
           >
@@ -272,22 +277,28 @@ const SctipModalTable: React.FC<{
               复制为新版本
             </span>
           </Tooltip> */}
-          <Tooltip
-            content={
-              record?.status === ScriptStatus.Scheduling ? '调度中不可删除' : ''
-            }
+          <PermissionWrapper
+            permission={SQL_PERMISSIONS.DEVELOP_SCIPT_LOG_DELETE}
           >
-            <Button
-              type="text"
-              onClick={() => {
-                handleDeleteVersion(record);
-              }}
-              className="p-0"
-              disabled={record?.status === ScriptStatus.Scheduling}
+            <Tooltip
+              content={
+                record?.status === ScriptStatus.Scheduling
+                  ? '调度中不可删除'
+                  : ''
+              }
             >
-              删除
-            </Button>
-          </Tooltip>
+              <Button
+                type="text"
+                onClick={() => {
+                  handleDeleteVersion(record);
+                }}
+                className="p-0"
+                disabled={record?.status === ScriptStatus.Scheduling}
+              >
+                删除
+              </Button>
+            </Tooltip>
+          </PermissionWrapper>
         </>
       )
     }
