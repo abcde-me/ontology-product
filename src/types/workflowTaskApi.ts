@@ -385,7 +385,7 @@ export interface WorkflowOperationParams {
   /**
    * 任务节点实例ID
    */
-  process_instance_id: string;
+  process_instance_id: number;
 }
 
 export interface GetWorkflowRunResultListParams {

@@ -75,7 +75,6 @@ export default function WorkflowRunList() {
 
   // 跳转到工作流配置页面
   const handleWorkflowConfig = useCallback((record: WorkflowTaskItem) => {
-    console.log('--record--', record);
     if (!record.workflow_uuid || !record.process_definition_code) {
       Message.warning('工作流信息不完整，无法跳转');
       return;
@@ -151,7 +150,7 @@ export default function WorkflowRunList() {
       try {
         const res = await workflowOperation({
           execute_type: type,
-          process_instance_id: processInstanceId
+          process_instance_id: Number(processInstanceId)
         });
         if (res.status === 200) {
           Message.success('操作成功');
@@ -203,7 +202,6 @@ export default function WorkflowRunList() {
               value={value}
               preferTypography
               handleLink={() => {
-                console.log('--record111--', record);
                 handleWorkflowConfig(record);
               }}
             />
@@ -217,17 +215,9 @@ export default function WorkflowRunList() {
           </div>
         )
       },
-      //  {/* <IconCopy
-      //       className="cursor-pointer"
-      //       onClick={() => handleCopy(value)}
-      //     /> */}
       {
         title: '运行状态',
         dataIndex: 'state',
-        // filters: Object.values(WorkflowTaskStatus).map((status) => ({
-        //   text: WorkflowTaskStatusNameMap[status],
-        //   value: status
-        // })),
         width: 150,
         render: (state: string, record: WorkflowTaskItem) => {
           // 使用原始状态值（新的枚举值），如果不存在则使用 stateName，最后使用默认值

@@ -693,7 +693,7 @@ export default function WorkflowTaskDetail() {
   const handleRetryWorkflow = async (id: string) => {
     try {
       const res = await workflowOperation({
-        process_instance_id: id,
+        process_instance_id: Number(id),
         execute_type: WorkflowOperationType.REPEAT_RUNNING
       });
 
@@ -718,7 +718,7 @@ export default function WorkflowTaskDetail() {
   const handleStopWorkflow = async (id: string) => {
     try {
       const res = await workflowOperation({
-        process_instance_id: id,
+        process_instance_id: Number(id),
         execute_type: WorkflowOperationType.EXEC_STOP
       });
 
