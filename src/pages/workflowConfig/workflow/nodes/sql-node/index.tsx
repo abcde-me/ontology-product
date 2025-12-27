@@ -1,5 +1,4 @@
 import React, { memo } from 'react';
-import styled from '@emotion/styled';
 import { Typography } from '@arco-design/web-react';
 import { NodeProps } from '@/pages/workflowConfig/workflow/types';
 import { SQLNodeConfig } from '@/pages/workflowConfig/workflow/nodes/sql-node/types';
@@ -26,14 +25,13 @@ export default memo(function SQLNode(props: NodeProps<SQLNodeConfig>) {
     }
   );
   return (
-    <NodeContainer className={'p-3 pt-0'}>
+    <div className={'p-3 pt-0'}>
       <div className={'break-all rounded-[4px] bg-[#F5F9FF] p-2'}>
         <div>
           <Typography.Text bold>SQL加工脚本</Typography.Text>
         </div>
         {sqlName || '未配置'}
       </div>
-    </NodeContainer>
+    </div>
   );
 });
-const NodeContainer = styled.div``;

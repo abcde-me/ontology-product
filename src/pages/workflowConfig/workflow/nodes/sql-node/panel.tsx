@@ -12,7 +12,6 @@ import {
   SQLVersion
 } from '@/pages/workflowConfig/workflow/nodes/sql-node/types';
 import { IconDelete, IconPlus } from '@arco-design/web-react/icon';
-import styled from '@emotion/styled';
 import { SqlEditor } from '@/pages/workflowConfig/workflow/nodes/components';
 import { useRequest } from 'ahooks';
 import { getSQLListInSQLNode, getSQLVersionInSQLNode } from '@/api/workflowV2';
@@ -25,6 +24,7 @@ import {
   parseLocalParams,
   pickParamsFromSQL
 } from '@/pages/workflowConfig/utils';
+import styles from './index.module.scss';
 
 const { Item: FormItem, useForm, List: FormList } = Form;
 
@@ -77,7 +77,9 @@ export default React.memo(function SQLPanel(
     });
   }, [inputs]);
   return (
-    <PanelContainer className="panel-container wk-node-panel-content code-panel-content date-cleaning-panel mt-4">
+    <div
+      className={`${styles['panel-container']} wk-node-panel-content code-panel-content date-cleaning-panel mt-4`}
+    >
       <Typography.Text bold className={'mb-2'}>
         SQL任务
       </Typography.Text>
@@ -249,7 +251,7 @@ export default React.memo(function SQLPanel(
                                     index === 0 ? (
                                       <Typography.Text
                                         bold
-                                        className={'label-hidden'}
+                                        className={styles['label-hidden']}
                                       >
                                         删
                                       </Typography.Text>
@@ -289,24 +291,6 @@ export default React.memo(function SQLPanel(
         <NodeRunSetting />
       </Form>
       <PrevNodes node={props.id} />
-    </PanelContainer>
+    </div>
   );
 });
-const PanelContainer = styled.div`
-  .label-hidden {
-    visibility: hidden;
-  }
-
-  .arco-cascader {
-    width: 100% !important;
-    margin-bottom: 0 !important;
-  }
-
-  .dependent-item {
-    border: 1px solid #cbd5e1;
-
-    &:hover {
-      border: 1px solid #007dfa;
-    }
-  }
-`;

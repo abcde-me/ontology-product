@@ -1,6 +1,7 @@
 import React, { memo, useEffect, useState } from 'react';
 import {
   Button,
+  Divider,
   Drawer,
   Form,
   Input,
@@ -14,7 +15,6 @@ import {
   IconMenuUnfold,
   IconPlus
 } from '@arco-design/web-react/icon';
-import styled from '@emotion/styled';
 import { useStore } from '@/pages/workflowConfig/task/store';
 import { useShallow } from 'zustand/react/shallow';
 import { EditWorkflowParams } from '@/types/workflowApi';
@@ -27,6 +27,8 @@ import { useDebounceFn } from 'ahooks';
 import { editWorkflow } from '@/api/workflow';
 import { useNodesReadOnly } from '@/pages/workflowConfig/workflow/hooks';
 import { LocalParam } from '@/pages/workflowConfig/types/workflow';
+import styles from './index.module.scss';
+import cn from 'classnames';
 
 const formatLocalParams = (params: LocalParam[]) => {
   const localParams = params.map((item) => {
@@ -130,9 +132,12 @@ export default memo(function FlowSetting() {
     { wait: 2000 }
   );
   return (
-    <SettingContainer
-      className={'app-workflow-page-sub-header'}
-      data-mode={show ? 'open' : 'close'}
+    <div
+      className={cn({
+        'app-workflow-page-sub-header': true,
+        [styles['flow-setting']]: true,
+        [styles['flow-setting-open']]: show
+      })}
     >
       {!show ? (
         <Button
@@ -153,7 +158,7 @@ export default memo(function FlowSetting() {
               onClick={() => setShow(false)}
             />
           </div>
-          <GroupLine />
+          <Divider className={'mb-2 mt-0'} />
           <Form
             form={form}
             autoComplete={'off'}
@@ -179,7 +184,7 @@ export default memo(function FlowSetting() {
             <Form.Item field={'description'} label={'工作流描述'}>
               <Input placeholder={'请输入工作流描述'} />
             </Form.Item>
-            <GroupLine />
+            <Divider className={'mb-2 mt-0'} />
             <Typography.Text bold className={'mb-2'}>
               运行配置
             </Typography.Text>
@@ -196,7 +201,7 @@ export default memo(function FlowSetting() {
                 </Form.Item>
               )
             )}
-            <GroupLine />
+            <Divider className={'mb-2 mt-0'} />
             <Typography.Text bold className={'mb-2'}>
               全局配置
             </Typography.Text>
@@ -221,7 +226,7 @@ export default memo(function FlowSetting() {
                         disabled={nodesReadOnly}
                       />
                     </div>
-                    <Form.Item className={'add-field-action'}>
+                    <Form.Item className={styles['add-field-action']}>
                       {!!fields.length &&
                         fields.map((field, index) => (
                           <div key={field.key} className={'flex flex-1'}>
@@ -277,7 +282,7 @@ export default memo(function FlowSetting() {
                                 index === 0 ? (
                                   <Typography.Text
                                     bold
-                                    className={'label-hidden'}
+                                    className={styles['label-hidden']}
                                   >
                                     删
                                   </Typography.Text>
@@ -312,38 +317,6 @@ export default memo(function FlowSetting() {
           </Form>
         </div>
       )}
-    </SettingContainer>
+    </div>
   );
 });
-const SettingContainer = styled.div`
-  height: ${(props) =>
-    props['data-mode'] === 'open' ? 'calc(100vh - 140px)' : 'auto'};
-  width: ${(props) => (props['data-mode'] === 'open' ? '360px' : 'auto')};
-  align-items: flex-start !important;
-  overflow: auto;
-  position: relative;
-
-  .label-hidden {
-    visibility: hidden;
-  }
-
-  .add-field-action {
-    .arco-form-label-item {
-      label {
-        width: 100%;
-      }
-    }
-  }
-
-  .arco-radio-group {
-    label {
-      margin-right: 10px;
-    }
-  }
-`;
-const GroupLine = styled.div`
-  width: 100%;
-  height: 1px;
-  background: #e2e8f0;
-  margin-bottom: 8px;
-`;
