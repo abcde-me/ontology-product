@@ -134,14 +134,23 @@ export default function MetadataManagementDetail() {
   const [partitionSearchForm] = Form.useForm();
 
   useEffect(() => {
+    if (fieldCurrent !== 1) {
+      setFieldCurrent(1);
+    } else if (partitionCurrent !== 1) {
+      setPartitionCurrent(1);
+    } else {
+      getData();
+    }
+  }, [minIoFieldSearchValues, fieldSearchValues, partitionSearchValues]);
+
+  useEffect(() => {
     getData();
   }, [
     activeKey,
-    fieldCurrent ||
-      fieldPageSize ||
-      fieldSearchValues ||
-      minIoFieldSearchValues,
-    partitionCurrent || partitionPageSize || partitionSearchValues
+    fieldCurrent,
+    partitionCurrent,
+    fieldPageSize,
+    partitionPageSize
   ]);
 
   // 获取分区字段
@@ -558,14 +567,12 @@ export default function MetadataManagementDetail() {
               ...values
             }
           });
-      setFieldCurrent(1);
     } else if (activeKey === 'partitionInfo') {
       setPartitionSearchValues({
         filters: {
           ...values
         }
       });
-      setPartitionCurrent(1);
     }
   };
 
@@ -1039,7 +1046,6 @@ export default function MetadataManagementDetail() {
                             objectPath: objectPath || ''
                           }
                         });
-                        setFieldCurrent(1);
                       }}
                     />
                   </FormItem>
@@ -1058,7 +1064,6 @@ export default function MetadataManagementDetail() {
                             objectPath: objectPath || ''
                           }
                         });
-                        setFieldCurrent(1);
                       }}
                     />
                   </FormItem>
@@ -1077,7 +1082,6 @@ export default function MetadataManagementDetail() {
                             objectPath: ''
                           }
                         });
-                        setFieldCurrent(1);
                       }}
                     />
                   </FormItem>
@@ -1170,7 +1174,6 @@ export default function MetadataManagementDetail() {
                             description: description || ''
                           }
                         });
-                        setFieldCurrent(1);
                       }}
                     />
                   </FormItem>
@@ -1188,7 +1191,6 @@ export default function MetadataManagementDetail() {
                             description: ''
                           }
                         });
-                        setFieldCurrent(1);
                       }}
                     />
                   </FormItem>
