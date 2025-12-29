@@ -301,6 +301,10 @@ export interface GetDevelopScriptInfoResponse {
    * 更新时间
    */
   update_time: string;
+  /**
+   * 上一次的执行id
+   */
+  exec_id: string;
 }
 
 export interface CopyDevelopScriptResponse {
