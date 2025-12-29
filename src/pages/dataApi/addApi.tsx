@@ -755,19 +755,19 @@ export default function AddApi() {
                 field="name"
                 required
                 rules={[
-                  { required: true, message: '请输入方法名' },
+                  { required: true, message: '请输入API英文名称' },
                   { validator: validateApiName }
                 ]}
               >
-                <Input placeholder="请输入方法名" />
+                <Input placeholder="请输入API英文名称" />
               </Form.Item>
               <Form.Item
                 label="API描述"
                 field="nameCn"
                 required
-                rules={[{ required: true, message: '请输入API名称' }]}
+                rules={[{ required: true, message: '请输入API描述' }]}
               >
-                <Input placeholder="输入API名称" />
+                <Input placeholder="输入API描述" />
               </Form.Item>
               <Form.Item
                 label="API路径"
