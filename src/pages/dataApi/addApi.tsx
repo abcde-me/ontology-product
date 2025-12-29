@@ -503,14 +503,13 @@ export default function AddApi() {
   // 搜索表
   const handleSearchTable = async (value: string) => {
     const params = {
-      tableName: value
+      tableName: value,
+      databaseType: Number(form.getFieldValue('databaseType'))
     };
     const res = await openDataSearchTable(params);
     if (res.code === '' && res.status === 200) {
       if (res.data) {
         const groupMap = new Map();
-        // 正则匹配关键字（不区分大小写，如需严格匹配则去掉 i）
-        const reg = new RegExp(`(${value})`, 'gi');
 
         res.data.forEach((item) => {
           const { databaseType } = item;
@@ -518,7 +517,7 @@ export default function AddApi() {
 
           if (!groupMap.has(databaseType)) {
             groupMap.set(databaseType, {
-              title: databaseType,
+              title: getMenuName(databaseType),
               key: databaseType,
               children: []
             });
