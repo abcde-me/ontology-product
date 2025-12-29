@@ -68,7 +68,7 @@ export const useNodesInteractions = () => {
   const { t } = useTranslation('plugin__console-plugin-appforge');
   const store = useStoreApi();
   const workflowStore = useWorkflowStore();
-  const [initTestTask, stopTest] = useInitFlowTestTask(true);
+  const [initTestTask] = useInitFlowTestTask();
   const reactflow = useReactFlow();
   const { store: workflowHistoryStore } = useWorkflowHistoryStore();
   const { handleSyncWorkflowDraft } = useNodesSyncDraft();
