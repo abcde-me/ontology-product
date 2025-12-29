@@ -8,10 +8,14 @@ import { useShallow } from 'zustand/react/shallow';
 import { isNil } from 'lodash-es';
 import { TaskNodeStatus, WorkflowTaskStatus } from '@/types/workflowTaskApi';
 import { nodeIsRunning } from '@/pages/workflowConfig/workflow/nodes/utils';
+import { useNodesReadOnly } from '@/pages/workflowConfig/workflow/hooks/use-workflow';
 
-export default function useInitFlowTestTask(manual = false) {
+export default function useInitFlowTestTask() {
   const ds_workflow_id = useSearchParam('ds_workflow_id');
+  // 记录当前轮询的作业
   const jobCache = useRef<number>();
+
+  const { nodesReadOnly } = useNodesReadOnly();
   const { setNodesProcessDetail } = useTaskStore(
     useShallow((state) => ({
       setNodesProcessDetail: state.setNodesProcessDetail
@@ -23,8 +27,10 @@ export default function useInitFlowTestTask(manual = false) {
     cancel: cancelQueryTask
   } = useRequest(
     async (job_id?: number) => {
-      if (ds_workflow_id && ds_workflow_id !== '0') {
+      if (ds_workflow_id && ds_workflow_id !== '0' && !nodesReadOnly) {
         jobCache.current = job_id;
+        // 运行记录不是实时产生的，需要拿着jobID去轮询查找，
+        // 只要有这个jobid就一定会查到数据，只是时间问题，后端如是说
         return await getWorkflowLastTask({
           process_definition_code: +ds_workflow_id,
           trigger_code: job_id
@@ -33,20 +39,17 @@ export default function useInitFlowTestTask(manual = false) {
     },
     {
       refreshDeps: [ds_workflow_id],
-      manual,
+      manual: true,
       ready: !!ds_workflow_id,
       pollingInterval: 500,
       pollingWhenHidden: false,
       onSuccess(flowTask) {
+        // 当前作业为空时不再轮询
         if (isNil(jobCache.current)) {
           cancelQueryTask();
         }
         if (!flowTask) return;
-        const id = flowTask?.id;
         cancelQueryTask();
-        getNodesProcessData(id)
-          .then(setNodesProcessDetail)
-          .catch(console.error);
       }
     }
   );
@@ -59,8 +62,10 @@ export default function useInitFlowTestTask(manual = false) {
     {
       pollingInterval: 5000,
       ready: !!lastFlowTask,
+      pollingWhenHidden: false,
       onSuccess(res) {
         if (!res.length) return cancel();
+        setNodesProcessDetail(res);
         const taskIsRunning = res.some((nodeProcess) => {
           const { state } = nodeProcess;
           return nodeIsRunning(state);
@@ -68,7 +73,6 @@ export default function useInitFlowTestTask(manual = false) {
         if (!taskIsRunning) {
           cancel();
         }
-        setNodesProcessDetail(res);
       }
     }
   );
@@ -82,10 +86,6 @@ export default function useInitFlowTestTask(manual = false) {
     cancel();
     cancelQueryTask();
   };
-
-  useEffect(() => {
-    return stopQueryProcess;
-  }, []);
 
   return [initFlowTestTask, stopQueryProcess];
 }
