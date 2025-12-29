@@ -1,20 +1,20 @@
 import React, { forwardRef, useEffect, useImperativeHandle } from 'react';
 import styles from './index.module.scss';
-import { Form, Radio, Space, Slider } from '@arco-design/web-react';
+import { Form, Radio, Space, Slider, Switch } from '@arco-design/web-react';
 import { useState } from 'react';
+
+const INIT_FROM_VALUE = {
+  reranking_enable: true,
+  search_method: 'Hybrid',
+  score_threshold_enabled: true,
+  score_threshold: 0.1,
+  top_k: 50,
+  weights: 0.7
+};
 
 function DemoForm(props, ref) {
   const { FuncChildFrom, seteditPolicy, initParams = {} } = props;
   const [form] = Form.useForm();
-  const [initFromValue, setinitFromValue] = useState({
-    reranking_enable: false,
-    search_method: 'Hybrid',
-    score_threshold_enabled: true,
-    score_threshold: 0.1,
-    top_k: 50,
-    weights: 0.7,
-    ...initParams
-  });
 
   const [formvalues, setformvalues] = useState<any>({
     search_method: 'Hybrid'
@@ -28,11 +28,31 @@ function DemoForm(props, ref) {
       clearEditeditPolicy();
     }
   }));
-  const onValuesChange = (changeValue, values) => {
-    console.log('onValuesChange: ', changeValue, values);
+
+  // 初始化时，如果 score_threshold_enabled 为 false，设置 score_threshold 为 0
+  useEffect(() => {
+    const initialValues = { ...INIT_FROM_VALUE, ...initParams };
+    if (!initialValues.score_threshold_enabled) {
+      form.setFieldValue('score_threshold', 0);
+    }
+  }, []);
+  const onChange = (changeValue, values) => {
+    console.log('onChange: ', changeValue, values);
+    // 当 score_threshold_enabled 为 false 时，设置 score_threshold 为 0
+    if (changeValue.hasOwnProperty('score_threshold_enabled')) {
+      if (!changeValue.score_threshold_enabled) {
+        form.setFieldValue('score_threshold', 0);
+      }
+    }
     setformvalues(values);
   };
   const retrievalVlist = [
+    {
+      value: 'Hybrid',
+      name: '混合检索',
+      placeholder:
+        '同时执行向量检索（语义）和全文检索（关键词）。 系统将两者的结果合并并重新排序，提供综合优势。'
+    },
     {
       value: 'Vector',
       name: '向量检索',
@@ -44,12 +64,6 @@ function DemoForm(props, ref) {
       name: '全文检索',
       placeholder:
         '也称关键词检索，通过扫描文档，查找与用户查询关键词完全匹配的内容。对术语、代码等查询快速精确。'
-    },
-    {
-      value: 'Hybird',
-      name: '混合检索',
-      placeholder:
-        '同时执行向量检索（语义）和全文检索（关键词）。 系统将两者的结果合并并重新排序，提供综合优势。'
     }
   ];
   const submitEditeditPolicy = async () => {
@@ -65,22 +79,21 @@ function DemoForm(props, ref) {
   const clearEditeditPolicy = () => {
     form.resetFields();
   };
-  //
-  useEffect(() => {}, []);
+
   const formItemLayout = {
     labelCol: {
       span: 4
     },
     wrapperCol: {
-      span: 20
+      span: 16
     }
   };
   return (
     <Form
       className={styles.fromstylePolicy}
       form={form}
-      onValuesChange={onValuesChange}
-      initialValues={initFromValue}
+      onValuesChange={onChange}
+      initialValues={INIT_FROM_VALUE}
       {...formItemLayout}
     >
       <div className={styles.headername}>检索策略</div>
@@ -131,66 +144,116 @@ function DemoForm(props, ref) {
         </Radio.Group>
       </Form.Item>
       <div className={styles.headername}>重排序配置</div>
+
+      <Form.Item
+        label="重排序："
+        field="reranking_enable"
+        rules={[{ required: true, message: '请选择' }]}
+        triggerPropName="checked"
+      >
+        <Switch checkedText="开" uncheckedText="关" />
+      </Form.Item>
+
       <Form.Item
         label="Top K："
         field="top_k"
         rules={[{ required: true, message: '请选择' }]}
         help="返回相似度最高的前K个结果(1～100)"
       >
-        <Slider showInput style={{ width: 480 }} min={1} max={100} step={1} />
+        <Slider showInput min={1} max={100} step={1} />
       </Form.Item>
 
       <Form.Item
-        label="相似度阈值："
-        field="score_threshold"
-        rules={[{ required: true, message: '请选择' }]}
-        help="过滤相似度低于此阈值的结果(0.00～1.00)"
+        label="Score阈值："
+        help="系统会筛选出与输⼊ Query 的匹配分 ≥ 此阈值的切⽚，低于阈值的会被过滤。(0.00～1.00)"
       >
-        <Slider
-          showInput
-          style={{ width: 480 }}
-          min={0} // 设置最小值为 0
-          max={1} // 设置最大值为 1
-          step={0.01} // 设置步进值，这里设置为 0.01，可以让你得到更精确的值
-        />
+        <div className="flex w-full items-center gap-[16px]">
+          <Form.Item
+            field="score_threshold_enabled"
+            triggerPropName="checked"
+            noStyle
+            rules={[{ required: true, message: '请选择' }]}
+          >
+            <Switch checkedText="开" uncheckedText="关" />
+          </Form.Item>
+          <Form.Item
+            shouldUpdate={(prev, next) =>
+              prev.score_threshold_enabled !== next.score_threshold_enabled
+            }
+            noStyle
+          >
+            {() => {
+              const scoreThresholdEnabled =
+                form.getFieldValue('score_threshold_enabled') ??
+                INIT_FROM_VALUE.score_threshold_enabled;
+              return (
+                <Form.Item
+                  field="score_threshold"
+                  noStyle
+                  className="flex-1"
+                  rules={[{ required: true, message: '请选择' }]}
+                >
+                  <Slider
+                    showInput
+                    min={0}
+                    max={1}
+                    step={0.1}
+                    disabled={!scoreThresholdEnabled}
+                  />
+                </Form.Item>
+              );
+            }}
+          </Form.Item>
+        </div>
       </Form.Item>
-      {formvalues.search_method == 'Hybird' ? (
-        <>
-          <Form.Item
-            label="语义权重："
-            field="weights"
-            rules={[{ required: true, message: '请选择' }]}
-            help="调高语义权重侧重于理解问题意图(0.0～1.0)"
-          >
-            <Slider
-              showInput
-              style={{ width: 480 }}
-              min={0} // 设置最小值为 0
-              max={1} // 设置最大值为 1
-              step={0.1} // 设置步进值，这里设置为 0.1，可以让你得到更精确的值
-              onChange={(value) => {
-                form.setFieldValue('reordering', 1 - Number(value));
-              }}
-            />
-          </Form.Item>
-          <Form.Item
-            label="关键词权重："
-            field="reordering"
-            rules={[{ required: true, message: '请选择' }]}
-            help="调高关键词权重侧重于文本的精确匹配(0.0～1.0)"
-          >
-            <Slider
-              showInput
-              style={{ width: 480 }}
-              min={0} // 设置最小值为 0
-              max={1} // 设置最大值为 1
-              step={0.1} // 设置步进值，这里设置为 0.1，可以让你得到更精确的值
-              onChange={(value) => {
-                form.setFieldValue('weights', 1 - Number(value));
-              }}
-            />
-          </Form.Item>
-        </>
+      {formvalues.search_method == 'Hybrid' ? (
+        <Form.Item
+          shouldUpdate={(prev, next) => prev.weights !== next.weights}
+          noStyle
+        >
+          {() => {
+            const weightsValue =
+              form.getFieldValue('weights') ?? INIT_FROM_VALUE.weights;
+            const keywordValue = 1 - weightsValue;
+            return (
+              <Form.Item
+                label="按比例分配："
+                field="weights"
+                rules={[{ required: true, message: '请选择' }]}
+                help={
+                  <>
+                    <div className="flex items-center justify-between">
+                      <span>
+                        语义{' '}
+                        <span className="text-primary-6">
+                          {weightsValue.toFixed(2)}
+                        </span>
+                      </span>
+                      <span>
+                        关键词{' '}
+                        <span className="text-primary-6">
+                          {keywordValue.toFixed(2)}
+                        </span>
+                      </span>
+                    </div>
+                    <span>通过调整分数赋权比例,决定两种检索方式的优先度。</span>
+                  </>
+                }
+              >
+                <Slider
+                  min={0}
+                  max={1}
+                  step={0.01}
+                  value={weightsValue}
+                  onChange={(value) => {
+                    form.setFieldValue('weights', value);
+                    form.setFieldValue('reordering', 1 - Number(value));
+                  }}
+                />
+              </Form.Item>
+            );
+          }}
+        </Form.Item>
       ) : null}
     </Form>
   );

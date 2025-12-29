@@ -113,6 +113,7 @@ export interface Dataset {
   storage_type: datasetStorageType;
   status: datasetStatus;
   scene_id: number;
+  can_retry: boolean;
 }
 
 export interface SceneType {
@@ -487,7 +488,8 @@ const columns = (
 
           {status === datasetStatus.create_failed &&
           record.src_name !== 'pyspark' &&
-          record.src_name !== '工作流' ? (
+          record.src_name !== '工作流' &&
+          record.can_retry ? (
             <PermissionWrapper
               permission={DATA_MANAGEMENT_PERMISSIONS.CAN_UPDATE_VERSION_RETRY}
             >
