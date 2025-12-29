@@ -312,8 +312,8 @@ export default function MetadataManagementDetail() {
       value: Number(baseInfoData.indexNum || 0)
     },
     {
-      label: '元数据采集时间',
-      value: baseInfoData.updateTime || '-'
+      label: '创建时间',
+      value: baseInfoData.createTime || '-'
     }
   ];
   // MinIo基本信息数据
@@ -985,7 +985,6 @@ export default function MetadataManagementDetail() {
                             partitionName: ''
                           }
                         });
-                        setPartitionCurrent(1);
                       }}
                     />
                   </FormItem>
@@ -1262,9 +1261,20 @@ export default function MetadataManagementDetail() {
                   layout="inline"
                   colon=":"
                   labelCol={{ span: 3 }}
+                  onSubmit={handleSearch}
                 >
                   <FormItem label="分区名称" field="partitionName">
-                    <Input.Search />
+                    <Input.Search
+                      onSearch={partitionSearchForm.submit}
+                      allowClear
+                      onClear={() => {
+                        setPartitionSearchValues({
+                          filters: {
+                            partitionName: ''
+                          }
+                        });
+                      }}
+                    />
                   </FormItem>
                 </Form>
                 <Table
