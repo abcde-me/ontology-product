@@ -317,17 +317,53 @@ export default function DataApi() {
       id: record.id
     };
     if (record.status === ApiStatus.success) {
-      const res = await openDataUnpublish(params);
-      if (res.status === 200 && res.code === '') {
-        Message.success(res.message || '下线数据API成功');
-        getList();
-      } else {
-        Message.error(res.message || '下线数据API失败');
-      }
+      Modal.confirm({
+        title: (
+          <span
+            style={{
+              fontFamily: 'PingFang SC, sans-serif',
+              fontWeight: 500,
+              fontSize: 16,
+              height: 24,
+              display: 'inline-block'
+            }}
+          >
+            确认下线API吗？
+          </span>
+        ),
+        // 内容
+        content: (
+          <div
+            style={{
+              fontFamily: 'PingFang SC, sans-serif',
+              fontWeight: 400,
+              fontSize: 14,
+              color: '#1D2129',
+              height: 22,
+              display: 'inline-block'
+            }}
+          >
+            下线后，API将不可用
+          </div>
+        ),
+        // 按钮文字
+        okText: '确定',
+        cancelText: '取消',
+        // okButtonProps: { status: 'danger' },
+        onOk: async () => {
+          const res = await openDataUnpublish(params);
+          if (res.status === 200 && res.code === '') {
+            Message.success('下线数据API成功');
+            getList();
+          } else {
+            Message.error(res.message || '下线数据API失败');
+          }
+        }
+      });
     } else {
       const res = await openDataPublish(params);
       if (res.status === 200 && res.code === '') {
-        Message.success(res.message || '上线数据API成功');
+        Message.success('上线数据API成功');
         getList();
       } else {
         Message.error(res.message || '上线数据API失败');
@@ -336,17 +372,53 @@ export default function DataApi() {
   };
 
   // 删除数据API
-  const handleDeleteApi = async (id: string) => {
-    const params = {
-      id
-    };
-    const res = await openDataDeleteApi(params);
-    if (res.status === 200 && res.code === '') {
-      Message.success(res.message || '删除数据API成功');
-      getList();
-    } else {
-      Message.error(res.message || '删除数据API失败');
-    }
+  const handleDeleteApi = (id: string) => {
+    Modal.confirm({
+      title: (
+        <span
+          style={{
+            fontFamily: 'PingFang SC, sans-serif',
+            fontWeight: 500,
+            fontSize: 16,
+            height: 24,
+            display: 'inline-block'
+          }}
+        >
+          确认删除API吗？
+        </span>
+      ),
+      // 内容
+      content: (
+        <div
+          style={{
+            fontFamily: 'PingFang SC, sans-serif',
+            fontWeight: 400,
+            fontSize: 14,
+            color: '#1D2129',
+            height: 22,
+            display: 'inline-block'
+          }}
+        >
+          删除后，API不可恢复
+        </div>
+      ),
+      // 按钮文字
+      okText: '确定',
+      cancelText: '取消',
+      // okButtonProps: { status: 'danger' },
+      onOk: async () => {
+        const params = {
+          id
+        };
+        const res = await openDataDeleteApi(params);
+        if (res.status === 200 && res.code === '') {
+          Message.success('删除数据API成功');
+          getList();
+        } else {
+          Message.error(res.message || '删除数据API失败');
+        }
+      }
+    });
   };
 
   // table columns
@@ -468,23 +540,26 @@ export default function DataApi() {
       width: 220,
       fixed: 'right',
       render: (_, record) => (
-        <div>
-          <span
-            className={styles['operate-text']}
+        <div className="flex items-center">
+          <Button
+            type="text"
+            className="pl-0"
             onClick={() => handleToAddApi('edit', record.id)}
+            disabled={record.status !== ApiStatus.running}
           >
             编辑
-          </span>
+          </Button>
           <PermissionWrapper permission={WORKFLOW_TASK_PERMISSIONS.CAN_UPDATE}>
-            <span
-              className={styles['operate-text'] + ' ml-4'}
+            <Button
+              type="text"
+              className="pl-0"
               onClick={() => {
                 setViewFileModalVisible(true);
                 setViewFileId(record.id);
               }}
             >
               查看文档
-            </span>
+            </Button>
           </PermissionWrapper>
           <Dropdown
             droplist={
@@ -515,6 +590,7 @@ export default function DataApi() {
                     onClick={() => {
                       handleAuthorization(Number(record.id));
                     }}
+                    disabled={record.status !== ApiStatus.success}
                   >
                     授权
                   </Button>
@@ -549,6 +625,7 @@ export default function DataApi() {
                     onClick={() => {
                       handleDeleteApi(record.id);
                     }}
+                    disabled={record.status === ApiStatus.success}
                   >
                     删除
                   </Button>
@@ -558,7 +635,7 @@ export default function DataApi() {
             trigger="hover"
             position="bl"
           >
-            <Button type="text">
+            <Button type="text" className="pl-0">
               更多
               <IconDown />
             </Button>
@@ -630,7 +707,9 @@ export default function DataApi() {
 
   return (
     <div className={styles['data-api']}>
-      <h1 style={{ fontSize: '20px', fontWeight: 'bold' }}>数据API</h1>
+      <h1
+        style={{ fontSize: '20px', fontWeight: 'bold' }}
+      >{`数据API(${total})`}</h1>
       <div
         style={{
           display: 'flex',

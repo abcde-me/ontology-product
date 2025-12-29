@@ -39,6 +39,7 @@ import {
 import { useUserInfo } from '@/store/userInfoStore';
 import { TreeDataType } from '@arco-design/web-react/es/Tree/interface';
 import { useParams } from '@/utils/url';
+import { validateApiName, validateApiPath } from './compontent/validate';
 
 enum MetadataType {
   Iceberg = 'iceberg',
@@ -750,7 +751,18 @@ export default function AddApi() {
               onSubmit={handleSubmit}
             >
               <Form.Item
-                label="API名称"
+                label="API英文名称"
+                field="name"
+                required
+                rules={[
+                  { required: true, message: '请输入方法名' },
+                  { validator: validateApiName }
+                ]}
+              >
+                <Input placeholder="请输入方法名" />
+              </Form.Item>
+              <Form.Item
+                label="API描述"
                 field="nameCn"
                 required
                 rules={[{ required: true, message: '请输入API名称' }]}
@@ -761,7 +773,10 @@ export default function AddApi() {
                 label="API路径"
                 field="path"
                 required
-                rules={[{ required: true, message: '请输入API路径' }]}
+                rules={[
+                  { required: true, message: '请输入API路径' },
+                  { validator: validateApiPath }
+                ]}
               >
                 <Input
                   className={styles.apiPath}
@@ -821,14 +836,6 @@ export default function AddApi() {
                   onChange={(value) => form.setFieldValue('limitCount', value)}
                 />
                 次/分钟
-              </Form.Item>
-              <Form.Item
-                label="方法名"
-                field="name"
-                required
-                rules={[{ required: true, message: '请输入方法名' }]}
-              >
-                <Input placeholder="请输入方法名" />
               </Form.Item>
               <Form.Item label="缓存方法" field="cacheMethod" initialValue={0}>
                 <Select
