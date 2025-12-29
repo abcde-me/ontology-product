@@ -245,6 +245,8 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
         // 保存原始内容
         setOriginalContent(fileData.script_context ?? '');
 
+        setExecid(fileData.exec_id ?? '');
+
         return fileData;
       } else {
         Message.error(response?.message ?? '加载文件失败');

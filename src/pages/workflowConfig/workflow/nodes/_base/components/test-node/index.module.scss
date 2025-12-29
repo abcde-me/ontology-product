@@ -18,6 +18,8 @@
   .log-content {
     padding: 8px 12px;
     background: #f8fafd;
+    overflow-y: auto;
+    height: calc(100vh - 193px) !important;
     border-radius: 4px;
     outline: 1px solid #e2e8f0;
     word-break: break-word;
