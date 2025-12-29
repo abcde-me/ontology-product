@@ -49,7 +49,6 @@ import { useParams as useRouterParams } from 'react-router-dom';
 import { useRequest } from 'ahooks';
 import { getWorkflowLastTask } from '@/api/workflowV2';
 import { isNil } from 'lodash-es';
-import useInitFlowTestTask from '@/pages/workflowConfig/workflow/hooks/use-init-flow-test-task';
 
 const SuccessModal = ({ visible, params, onClose }) => {
   const { workflow_uuid, ds_workflow_id, workflow_version, job_id } =
@@ -159,10 +158,10 @@ const Header = (props: { flowType: string }) => {
     useNodesInteractions();
   const { nodesReadOnly } = useNodesReadOnly();
 
-  const { setWorkflowDetail, setNodesProcessDetail } = useTaskStore(
+  const { setWorkflowDetail, clearNodeStatus } = useTaskStore(
     useShallow((state) => ({
       setWorkflowDetail: state.setWorkflowDetail,
-      setNodesProcessDetail: state.setNodesProcessDetail
+      clearNodeStatus: () => state.setNodesProcessDetail([])
     }))
   );
 
@@ -244,6 +243,7 @@ const Header = (props: { flowType: string }) => {
                 Message.success('上线成功');
                 handleStopFlowTest();
                 updateWorkFlowStatus();
+                clearNodeStatus();
               } else {
                 Message.error(workflowRes?.message ?? '上线失败');
               }
