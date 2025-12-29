@@ -233,6 +233,7 @@ export default memo(function FlowSetting() {
                             <div className={'fields-item flex gap-3'}>
                               <Form.Item
                                 field={`${field.field}.prop`}
+                                required
                                 label={
                                   index === 0 ? (
                                     <Form.Item noStyle>
@@ -245,6 +246,10 @@ export default memo(function FlowSetting() {
                                 rules={[
                                   {
                                     validator(v, onInValid) {
+                                      if (!v) {
+                                        onInValid('参数名不能为空');
+                                        return;
+                                      }
                                       const sameKey = form
                                         .getFieldValue('global_params')
                                         .filter(({ prop }) => prop === v);
@@ -263,6 +268,12 @@ export default memo(function FlowSetting() {
                               </Form.Item>
                               <Form.Item
                                 field={`${field.field}.value`}
+                                rules={[
+                                  {
+                                    required: true,
+                                    message: '参数值不能为空'
+                                  }
+                                ]}
                                 label={
                                   index === 0 ? (
                                     <Form.Item noStyle>
