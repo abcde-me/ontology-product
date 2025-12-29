@@ -15,8 +15,8 @@ import type {
   ListTaskInstanceParams
 } from '@/types/workflowTaskApi';
 import {
-  CommandTypeNameMap,
-  CommandType,
+  TriggerTypeNameMap,
+  TriggerType,
   TaskExecuteType,
   TaskExecuteTypeNameMap,
   TaskNodeStatus
@@ -68,7 +68,7 @@ export default function TaskNodeList() {
         page: pagination.current || 1,
         page_size: pagination.pageSize || 10,
         orders,
-        command_type_list: filters?.command_type_name,
+        trigger_type_list: filters?.trigger_type_name,
         task_execute_type_list: filters?.task_execute_type_name,
         task_type_list: filters?.task_type_name,
         state_list: filters?.state
@@ -184,16 +184,16 @@ export default function TaskNodeList() {
       },
       {
         title: '运行类型',
-        dataIndex: 'command_type_name',
+        dataIndex: 'trigger_type_name',
         width: 120,
         filters: [
           {
-            text: CommandTypeNameMap[CommandType.SCHEDULER],
-            value: CommandType.SCHEDULER
+            text: TriggerTypeNameMap[TriggerType.SCHEDULE],
+            value: TriggerType.SCHEDULE
           },
           {
-            text: CommandTypeNameMap[CommandType.START_PROCESS],
-            value: CommandType.START_PROCESS
+            text: TriggerTypeNameMap[TriggerType.MANUAL],
+            value: TriggerType.MANUAL
           }
         ]
       },
