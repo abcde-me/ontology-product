@@ -30,12 +30,12 @@ function DemoForm(props, ref) {
   }));
 
   // 初始化时，如果 score_threshold_enabled 为 false，设置 score_threshold 为 0
-  useEffect(() => {
-    const initialValues = { ...INIT_FROM_VALUE, ...initParams };
-    if (!initialValues.score_threshold_enabled) {
-      form.setFieldValue('score_threshold', 0);
-    }
-  }, []);
+  // useEffect(() => {
+  //   const initialValues = { ...INIT_FROM_VALUE, ...initParams };
+  //   if (!initialValues.score_threshold_enabled) {
+  //     form.setFieldValue('score_threshold', 0);
+  //   }
+  // }, []);
   const onChange = (changeValue, values) => {
     console.log('onChange: ', changeValue, values);
     // 当 score_threshold_enabled 为 false 时，设置 score_threshold 为 0
@@ -92,7 +92,7 @@ function DemoForm(props, ref) {
     <Form
       className={styles.fromstylePolicy}
       form={form}
-      onValuesChange={onChange}
+      onChange={onChange}
       initialValues={INIT_FROM_VALUE}
       {...formItemLayout}
     >
