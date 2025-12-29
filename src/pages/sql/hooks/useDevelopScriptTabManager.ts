@@ -52,18 +52,21 @@ export const useDevelopScriptTabManager = (
         setFileState((prev) => ({ ...prev, isLoading: true, error: null }));
 
         // 创建或更新标签页
-        const existingTabIndex = fileState.fileTabs.findIndex(
+        const existingTab = fileState.fileTabs.find(
           (tab) => tab.scriptId === scriptId
         );
 
         let updatedTabs: FileTab[];
-        if (existingTabIndex >= 0) {
+        if (existingTab) {
           // 如果标签页已存在，直接激活它
+          // 使用已存在标签页的 key 作为 activeTab，而不是传入的新 fileId
+          // 这样可以确保即使 fileId 不一致（如第一次创建时使用时间戳），也能正确激活标签页
+          const existingTabKey = existingTab.key;
           setFileState((prev) => ({
             ...prev,
-            currentFileId: fileId,
+            currentFileId: existingTab.fileId || fileId,
             currentScriptId: scriptId,
-            activeTab: fileId,
+            activeTab: existingTabKey, // 使用已存在标签页的 key
             selectedKeys: scriptId ? [scriptId] : [], // 使用 script_id 作为选中状态
             isLoading: false
           }));

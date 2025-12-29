@@ -157,6 +157,8 @@ export const useDevelopScriptManager = (
             scriptId
           );
 
+          // debugger;
+
           onFileOpen(String(dataRef.id), scriptId, dataRef.name);
         }
       }
@@ -207,7 +209,6 @@ export const useDevelopScriptManager = (
           return;
         }
 
-        const scriptFileId = String(Date.now());
         const createRes = await createDevelopScript({
           script_name: finalName,
           script_context: '',
@@ -228,10 +229,16 @@ export const useDevelopScriptManager = (
         // 更新URL参数 activeDevelopScriptId
         const scriptId = String(createRes.data.script_id);
 
+        // 使用 script_id 作为 fileId，确保与后续点击时使用的 fileId 一致
+        // 从 API 返回的数据中获取 script_file_id，如果没有则使用 script_id
+        const scriptFileId = String(
+          (createRes.data as any)?.script_file_id || scriptId
+        );
+
         // 设置选中状态为 script_id
         setSelectedKeys([scriptId]);
 
-        // 编辑器自动打开当前脚本（fileId 使用 script_file_id，scriptId 使用 script_id）
+        // 编辑器自动打开当前脚本（fileId 使用 script_file_id 或 script_id，scriptId 使用 script_id）
         onFileOpen && onFileOpen(scriptFileId, scriptId, finalName);
 
         return createRes.data;
