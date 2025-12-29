@@ -8,7 +8,7 @@ const INIT_FROM_VALUE = {
   search_method: 'Hybrid',
   score_threshold_enabled: true,
   score_threshold: 0.1,
-  top_k: 50,
+  top_k: 20,
   weights: 0.7
 };
 
@@ -158,9 +158,9 @@ function DemoForm(props, ref) {
         label="Top K："
         field="top_k"
         rules={[{ required: true, message: '请选择' }]}
-        help="返回相似度最高的前K个结果(1～100)"
+        help="返回相似度最高的前K个结果(1～50)"
       >
-        <Slider showInput min={1} max={100} step={1} />
+        <Slider showInput min={1} max={50} step={1} />
       </Form.Item>
 
       <Form.Item
