@@ -163,9 +163,9 @@ const DorisFields: ColumnField[] = [
     values: []
   },
   {
-    id: 'partitionKey',
-    nameEn: 'partitionKey',
-    nameZh: '分区字段',
+    id: 'distributionColumns',
+    nameEn: 'distributionColumns',
+    nameZh: '分桶字段',
     type: 'string',
     isEnumAbleForColumn: true,
     isEnumAble: false,
