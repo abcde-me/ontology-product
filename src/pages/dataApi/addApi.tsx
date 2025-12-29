@@ -39,6 +39,7 @@ import {
 import { useUserInfo } from '@/store/userInfoStore';
 import { TreeDataType } from '@arco-design/web-react/es/Tree/interface';
 import { useParams } from '@/utils/url';
+import { validateApiName, validateApiPath } from './compontent/validate';
 
 enum MetadataType {
   Iceberg = 'iceberg',
@@ -84,6 +85,7 @@ export default function AddApi() {
   const [resultArray, setResultArray] = useState<string[]>([]);
   const [apiCacheMethod, setApiCacheMethod] = useState(0);
   const [isCanTest, setIsCanTest] = useState<boolean>(false);
+  const [canComplete, setCanComplete] = useState<boolean>(false);
 
   const [resizeSize, setResizeSize] = useState<string>('');
   const [paneContainersSize, setPaneContainersSize] = useState<string>('220px');
@@ -121,7 +123,10 @@ export default function AddApi() {
           rules={[{ required: true, message: '请输入参数中文名称' }]}
           initialValue={value}
         >
-          <Input placeholder="请输入参数中文名称" />
+          <Input
+            placeholder="请输入参数中文名称"
+            onChange={() => setCanComplete(false)}
+          />
         </Form.Item>
       )
     },
@@ -141,6 +146,7 @@ export default function AddApi() {
               { label: 'DOUBLE', value: 'DOUBLE' },
               { label: 'BOOLEAN', value: 'BOOLEAN' }
             ]}
+            onChange={() => setCanComplete(false)}
           />
         </Form.Item>
       )
@@ -151,7 +157,10 @@ export default function AddApi() {
       width: 80,
       render: (value, record) => (
         <Form.Item field={`isArray_${record.name}`} initialValue={value}>
-          <Checkbox defaultChecked={value} />
+          <Checkbox
+            defaultChecked={value}
+            onChange={() => setCanComplete(false)}
+          />
         </Form.Item>
       )
     },
@@ -161,7 +170,10 @@ export default function AddApi() {
       width: 150,
       render: (value, record) => (
         <Form.Item field={`defaultValue_${record.name}`} initialValue={value}>
-          <Input placeholder="请输入默认值" />
+          <Input
+            placeholder="请输入默认值"
+            onChange={() => setCanComplete(false)}
+          />
         </Form.Item>
       )
     },
@@ -171,7 +183,10 @@ export default function AddApi() {
       width: 150,
       render: (value, record) => (
         <Form.Item field={`description_${record.name}`} initialValue={value}>
-          <Input placeholder="请输入描述" />
+          <Input
+            placeholder="请输入描述"
+            onChange={() => setCanComplete(false)}
+          />
         </Form.Item>
       )
     }
@@ -205,7 +220,10 @@ export default function AddApi() {
           rules={[{ required: true, message: '请输入参数中文名称' }]}
           initialValue={value}
         >
-          <Input placeholder="请输入参数中文名称" />
+          <Input
+            placeholder="请输入参数中文名称"
+            onChange={() => setCanComplete(false)}
+          />
         </Form.Item>
       )
     },
@@ -225,6 +243,7 @@ export default function AddApi() {
               { label: 'DOUBLE', value: 'DOUBLE' },
               { label: 'BOOLEAN', value: 'BOOLEAN' }
             ]}
+            onChange={() => setCanComplete(false)}
           />
         </Form.Item>
       )
@@ -235,7 +254,10 @@ export default function AddApi() {
       width: 150,
       render: (value, record) => (
         <Form.Item field={`description_${record.name}`} initialValue={value}>
-          <Input placeholder="请输入描述" />
+          <Input
+            placeholder="请输入描述"
+            onChange={() => setCanComplete(false)}
+          />
         </Form.Item>
       )
     }
@@ -503,14 +525,13 @@ export default function AddApi() {
   // 搜索表
   const handleSearchTable = async (value: string) => {
     const params = {
-      tableName: value
+      tableName: value,
+      databaseType: Number(form.getFieldValue('databaseType'))
     };
     const res = await openDataSearchTable(params);
     if (res.code === '' && res.status === 200) {
       if (res.data) {
         const groupMap = new Map();
-        // 正则匹配关键字（不区分大小写，如需严格匹配则去掉 i）
-        const reg = new RegExp(`(${value})`, 'gi');
 
         res.data.forEach((item) => {
           const { databaseType } = item;
@@ -518,7 +539,7 @@ export default function AddApi() {
 
           if (!groupMap.has(databaseType)) {
             groupMap.set(databaseType, {
-              title: databaseType,
+              title: getMenuName(databaseType),
               key: databaseType,
               children: []
             });
@@ -638,7 +659,10 @@ export default function AddApi() {
           }
         })
       ]}
-      onChange={(value) => setValue(value)}
+      onChange={(value) => {
+        setValue(value);
+        setCanComplete(false);
+      }}
       basicSetup={{
         lineNumbers: true,
         highlightActiveLineGutter: false
@@ -751,18 +775,32 @@ export default function AddApi() {
               onSubmit={handleSubmit}
             >
               <Form.Item
-                label="API名称"
+                label="API英文名称"
+                field="name"
+                required
+                rules={[
+                  { required: true, message: '请输入API英文名称' },
+                  { validator: validateApiName }
+                ]}
+              >
+                <Input placeholder="请输入API英文名称" />
+              </Form.Item>
+              <Form.Item
+                label="API描述"
                 field="nameCn"
                 required
-                rules={[{ required: true, message: '请输入API名称' }]}
+                rules={[{ required: true, message: '请输入API描述' }]}
               >
-                <Input placeholder="输入API名称" />
+                <Input placeholder="输入API描述" />
               </Form.Item>
               <Form.Item
                 label="API路径"
                 field="path"
                 required
-                rules={[{ required: true, message: '请输入API路径' }]}
+                rules={[
+                  { required: true, message: '请输入API路径' },
+                  { validator: validateApiPath }
+                ]}
               >
                 <Input
                   className={styles.apiPath}
@@ -822,14 +860,6 @@ export default function AddApi() {
                   onChange={(value) => form.setFieldValue('limitCount', value)}
                 />
                 次/分钟
-              </Form.Item>
-              <Form.Item
-                label="方法名"
-                field="name"
-                required
-                rules={[{ required: true, message: '请输入方法名' }]}
-              >
-                <Input placeholder="请输入方法名" />
               </Form.Item>
               <Form.Item label="缓存方法" field="cacheMethod" initialValue={0}>
                 <Select
@@ -971,8 +1001,14 @@ export default function AddApi() {
           )}
           <div className={styles.stepFooter}>
             <Button
-              disabled={current >= 2}
-              onClick={() => form.submit()}
+              disabled={current >= 2 && !canComplete}
+              onClick={() => {
+                if (current === 1) {
+                  form.submit();
+                } else {
+                  history.goBack();
+                }
+              }}
               type="primary"
             >
               {current === 1 ? '下一步' : '完成'}
@@ -996,6 +1032,13 @@ export default function AddApi() {
       <TestModal
         visible={testModalVisible}
         dataSource={testModalDataSource}
+        getStatusCode={(statusCode) => {
+          if (statusCode === 0) {
+            setCanComplete(true);
+          } else {
+            setCanComplete(false);
+          }
+        }}
         apiId={apiId}
         onCancel={() => setTestModalVisible(false)}
       />
