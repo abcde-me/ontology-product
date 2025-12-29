@@ -1,5 +1,4 @@
 import React, { memo } from 'react';
-import styled from '@emotion/styled';
 import { Space, Tag, Typography } from '@arco-design/web-react';
 import { NodeProps } from '@/pages/workflowConfig/workflow/types';
 import { DependentNodeConfig } from '@/pages/workflowConfig/workflow/nodes/dependent-node/types';
@@ -39,14 +38,13 @@ export default memo(function DependentNode(
   };
 
   return (
-    <NodeContainer className={'p-3 pt-0'}>
+    <div className={'p-3 pt-0'}>
       <div className={'rounded-[4px] bg-[#F5F9FF] p-2'}>
         <div>
           <Typography.Text bold>前置任务</Typography.Text>
         </div>
         {!!depend_item_list.length ? renderTaskTag() : '未配置'}
       </div>
-    </NodeContainer>
+    </div>
   );
 });
-const NodeContainer = styled.div``;
