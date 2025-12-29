@@ -43,6 +43,7 @@ import { render } from 'katex';
 import PdfRenderer from '../ragDetail/components/scenes/pdf/PdfRenderer';
 import { getFileBinaryData } from '@/api/modules/rag';
 import TableViewer from '../ragDetail/components/scenes/table/TableViewer';
+import copy from 'copy-to-clipboard';
 
 enum MetadataType {
   Iceberg = 'ICEBERG',
@@ -82,7 +83,8 @@ export default function MetadataManagementDetail() {
     'xls',
     'pptx',
     'ppt',
-    'markdown'
+    'markdown',
+    'md'
   ];
 
   const [fieldData, setFieldData] = useState([]);
@@ -185,7 +187,7 @@ export default function MetadataManagementDetail() {
     setPreviewVisible(true);
   };
 
-  // Iceberg/Doris基本信息数据
+  // Iceberg基本信息数据
   const data = [
     {
       label: '英文名称',
@@ -213,7 +215,7 @@ export default function MetadataManagementDetail() {
     },
     {
       label: '分区数',
-      value: baseInfoData.partitionNum || baseInfoData.replicaNum
+      value: Number(baseInfoData.partitionNum || 0)
     },
     {
       label: '存储大小',
@@ -221,7 +223,50 @@ export default function MetadataManagementDetail() {
     },
     {
       label: '文件数',
-      value: baseInfoData.fileNum || baseInfoData.bucketNum
+      value: Number(baseInfoData.fileNum || 0)
+    },
+    {
+      label: '更新时间',
+      value: baseInfoData.updateTime || '-'
+    }
+  ];
+  // Doris基本信息数据
+  const dorisData = [
+    {
+      label: '英文名称',
+      value: baseInfoData.tableName || '-'
+    },
+    {
+      label: '中文名称',
+      value: baseInfoData.description || '-'
+    },
+    {
+      label: '存储类型',
+      value: baseInfoData.tableType || '-'
+    },
+    {
+      label: '元数据文件位置',
+      value: <EllipsisPopoverCom value={baseInfoData.storageLocation || '-'} />
+    },
+    {
+      label: '所属数据库',
+      value: metadataType || '-'
+    },
+    {
+      label: '分桶字段',
+      value: getPartitionKey(baseInfoData.distributionColumns)
+    },
+    {
+      label: '分区数',
+      value: Number(baseInfoData.replicaNum || 0)
+    },
+    {
+      label: '桶数',
+      value: Number(baseInfoData.bucketNum || 0)
+    },
+    {
+      label: '副本数',
+      value: Number(baseInfoData.replicaNum || 0)
     },
     {
       label: '更新时间',
@@ -248,7 +293,7 @@ export default function MetadataManagementDetail() {
     },
     {
       label: '向量数量',
-      value: baseInfoData.approxEntityCount
+      value: Number(baseInfoData.approxEntityCount || 0)
     },
     {
       label: '分区字段',
@@ -256,19 +301,19 @@ export default function MetadataManagementDetail() {
     },
     {
       label: '分区数',
-      value: baseInfoData.partitions
+      value: Number(baseInfoData.partitions || 0)
     },
     {
       label: '分片数',
-      value: baseInfoData.shards
+      value: Number(baseInfoData.shards || 0)
     },
     {
       label: '索引数',
-      value: baseInfoData.fileNum || baseInfoData.bucketNum
+      value: Number(baseInfoData.indexNum || 0)
     },
     {
-      label: '元数据采集时间',
-      value: baseInfoData.updateTime || '-'
+      label: '创建时间',
+      value: baseInfoData.createTime || '-'
     }
   ];
   // MinIo基本信息数据
@@ -279,11 +324,7 @@ export default function MetadataManagementDetail() {
     },
     {
       label: '对象数',
-      value: minIOBaseData.objectNum || '-'
-    },
-    {
-      label: '存储类型',
-      value: 'MinIo'
+      value: Number(minIOBaseData.objectNum || 0)
     },
     {
       label: '所属区域',
@@ -299,7 +340,7 @@ export default function MetadataManagementDetail() {
     },
     {
       label: '访问策略',
-      value: minIOBaseData.policy || '-'
+      value: <EllipsisPopoverCom value={minIOBaseData.policy || '-'} />
     },
     {
       label: '加密类型',
@@ -307,22 +348,6 @@ export default function MetadataManagementDetail() {
     },
     {
       label: '创建时间',
-      value: minIOBaseData.createTime || '-'
-    },
-    {
-      label: '最新访问时间',
-      value: minIOBaseData.lastTime || '-'
-    },
-    {
-      label: '元数据更新时间',
-      value: minIOBaseData.updateTime || '-'
-    },
-    {
-      label: '数据更新时间',
-      value: '2023-08-01 00:00:00'
-    },
-    {
-      label: '元数据采集时间',
       value: minIOBaseData.createTime || '-'
     }
   ];
@@ -499,13 +524,6 @@ export default function MetadataManagementDetail() {
       key: 'partitionName',
       width: 500,
       render: (text, record) => <EllipsisPopoverCom value={text} />
-    },
-    {
-      title: '创建时间',
-      dataIndex: 'createTime',
-      key: 'createTime',
-      width: 300,
-      sorter: true
     },
     {
       title: '存储大小',
@@ -835,7 +853,9 @@ export default function MetadataManagementDetail() {
                   colon=" :"
                   column={2}
                   title="基本信息"
-                  data={data}
+                  data={
+                    metadataType === MetadataType.Iceberg ? data : dorisData
+                  }
                   className={styles.customDescriptions}
                 />
                 <div>
@@ -845,6 +865,14 @@ export default function MetadataManagementDetail() {
                       type="outline"
                       icon={<IconCopy />}
                       className={styles.copyButton}
+                      onClick={() => {
+                        const isSuccess = copy(baseInfoData.createSql ?? '');
+                        if (isSuccess) {
+                          Message.success('内容复制成功');
+                        } else {
+                          Message.error('内容复制失败');
+                        }
+                      }}
                     >
                       复制代码
                     </Button>
@@ -957,7 +985,6 @@ export default function MetadataManagementDetail() {
                             partitionName: ''
                           }
                         });
-                        setPartitionCurrent(1);
                       }}
                     />
                   </FormItem>
@@ -1000,6 +1027,7 @@ export default function MetadataManagementDetail() {
                   columns={previewInfoColumns}
                   data={previewInfoData}
                   border={false}
+                  pagination={false}
                   noDataElement={noDataElement({ description: '暂无数据' })}
                   rowKey="id"
                 />
@@ -1233,9 +1261,20 @@ export default function MetadataManagementDetail() {
                   layout="inline"
                   colon=":"
                   labelCol={{ span: 3 }}
+                  onSubmit={handleSearch}
                 >
                   <FormItem label="分区名称" field="partitionName">
-                    <Input.Search />
+                    <Input.Search
+                      onSearch={partitionSearchForm.submit}
+                      allowClear
+                      onClear={() => {
+                        setPartitionSearchValues({
+                          filters: {
+                            partitionName: ''
+                          }
+                        });
+                      }}
+                    />
                   </FormItem>
                 </Form>
                 <Table

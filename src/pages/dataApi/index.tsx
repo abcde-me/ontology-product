@@ -23,6 +23,7 @@ import {
   openDataDeleteApi,
   openDataList,
   openDataPublish,
+  openDataRevokeApi,
   openDataUnpublish
 } from '@/api/dataApi';
 import { SorterInfo } from '@arco-design/web-react/es/Table/interface';
@@ -222,15 +223,15 @@ export default function DataApi() {
     });
   };
 
-  const handleAuthorization = async (record: Record<string, any>) => {
+  const handleAuthorization = async (id: number) => {
     setAuthorizationLoading(true);
     setAuthorizationModalVisible(true);
-    setApiId(record.id);
+    setApiId(id);
     const res = await openDataAuthList({
-      id: record.id
+      id: id
     });
     if (res.status === 200 && res.code === '') {
-      setAuthorizedData(res.data.list || []);
+      setAuthorizedData(res.data || []);
     } else {
       Message.error(res.message || '获取已授权列表失败');
     }
@@ -265,12 +266,30 @@ export default function DataApi() {
 
       const res = await openDataAuthorizeApi(params);
       if (res.status === 200 && res.code === '') {
-        Message.success(res.message || '授权数据API成功');
-        getList();
+        Message.success('授权数据API成功');
+        handleAuthorization(Number(apiId));
       } else {
         Message.error(res.message || '授权数据API失败');
       }
     });
+  };
+
+  const handleCancelAuthorization = async (id: string) => {
+    const params = {
+      apiId: apiId,
+      authInfo: {
+        projectId: id
+      }
+    };
+    const res = await openDataRevokeApi(params);
+    if (res.status === 200 && res.code === '') {
+      Message.success('取消授权数据API成功');
+      getList();
+      authorizationForm.resetFields();
+      setAuthorizationModalVisible(false);
+    } else {
+      Message.error(res.message || '取消授权数据API失败');
+    }
   };
 
   const handleAuth = async () => {
@@ -298,17 +317,53 @@ export default function DataApi() {
       id: record.id
     };
     if (record.status === ApiStatus.success) {
-      const res = await openDataUnpublish(params);
-      if (res.status === 200 && res.code === '') {
-        Message.success(res.message || '下线数据API成功');
-        getList();
-      } else {
-        Message.error(res.message || '下线数据API失败');
-      }
+      Modal.confirm({
+        title: (
+          <span
+            style={{
+              fontFamily: 'PingFang SC, sans-serif',
+              fontWeight: 500,
+              fontSize: 16,
+              height: 24,
+              display: 'inline-block'
+            }}
+          >
+            确认下线API吗？
+          </span>
+        ),
+        // 内容
+        content: (
+          <div
+            style={{
+              fontFamily: 'PingFang SC, sans-serif',
+              fontWeight: 400,
+              fontSize: 14,
+              color: '#1D2129',
+              height: 22,
+              display: 'inline-block'
+            }}
+          >
+            下线后，API将不可用
+          </div>
+        ),
+        // 按钮文字
+        okText: '确定',
+        cancelText: '取消',
+        // okButtonProps: { status: 'danger' },
+        onOk: async () => {
+          const res = await openDataUnpublish(params);
+          if (res.status === 200 && res.code === '') {
+            Message.success('下线数据API成功');
+            getList();
+          } else {
+            Message.error(res.message || '下线数据API失败');
+          }
+        }
+      });
     } else {
       const res = await openDataPublish(params);
       if (res.status === 200 && res.code === '') {
-        Message.success(res.message || '上线数据API成功');
+        Message.success('上线数据API成功');
         getList();
       } else {
         Message.error(res.message || '上线数据API失败');
@@ -317,17 +372,53 @@ export default function DataApi() {
   };
 
   // 删除数据API
-  const handleDeleteApi = async (id: string) => {
-    const params = {
-      id
-    };
-    const res = await openDataDeleteApi(params);
-    if (res.status === 200 && res.code === '') {
-      Message.success(res.message || '删除数据API成功');
-      getList();
-    } else {
-      Message.error(res.message || '删除数据API失败');
-    }
+  const handleDeleteApi = (id: string) => {
+    Modal.confirm({
+      title: (
+        <span
+          style={{
+            fontFamily: 'PingFang SC, sans-serif',
+            fontWeight: 500,
+            fontSize: 16,
+            height: 24,
+            display: 'inline-block'
+          }}
+        >
+          确认删除API吗？
+        </span>
+      ),
+      // 内容
+      content: (
+        <div
+          style={{
+            fontFamily: 'PingFang SC, sans-serif',
+            fontWeight: 400,
+            fontSize: 14,
+            color: '#1D2129',
+            height: 22,
+            display: 'inline-block'
+          }}
+        >
+          删除后，API不可恢复
+        </div>
+      ),
+      // 按钮文字
+      okText: '确定',
+      cancelText: '取消',
+      // okButtonProps: { status: 'danger' },
+      onOk: async () => {
+        const params = {
+          id
+        };
+        const res = await openDataDeleteApi(params);
+        if (res.status === 200 && res.code === '') {
+          Message.success('删除数据API成功');
+          getList();
+        } else {
+          Message.error(res.message || '删除数据API失败');
+        }
+      }
+    });
   };
 
   // table columns
@@ -449,23 +540,26 @@ export default function DataApi() {
       width: 220,
       fixed: 'right',
       render: (_, record) => (
-        <div>
-          <span
-            className={styles['operate-text']}
+        <div className="flex items-center">
+          <Button
+            type="text"
+            className="pl-0"
             onClick={() => handleToAddApi('edit', record.id)}
+            disabled={record.status !== ApiStatus.running}
           >
             编辑
-          </span>
+          </Button>
           <PermissionWrapper permission={WORKFLOW_TASK_PERMISSIONS.CAN_UPDATE}>
-            <span
-              className={styles['operate-text'] + ' ml-4'}
+            <Button
+              type="text"
+              className="pl-0"
               onClick={() => {
                 setViewFileModalVisible(true);
                 setViewFileId(record.id);
               }}
             >
               查看文档
-            </span>
+            </Button>
           </PermissionWrapper>
           <Dropdown
             droplist={
@@ -494,8 +588,9 @@ export default function DataApi() {
                       borderBottom: 'none'
                     }}
                     onClick={() => {
-                      handleAuthorization(record);
+                      handleAuthorization(Number(record.id));
                     }}
+                    disabled={record.status !== ApiStatus.success}
                   >
                     授权
                   </Button>
@@ -530,6 +625,7 @@ export default function DataApi() {
                     onClick={() => {
                       handleDeleteApi(record.id);
                     }}
+                    disabled={record.status === ApiStatus.success}
                   >
                     删除
                   </Button>
@@ -539,7 +635,7 @@ export default function DataApi() {
             trigger="hover"
             position="bl"
           >
-            <Button type="text">
+            <Button type="text" className="pl-0">
               更多
               <IconDown />
             </Button>
@@ -568,23 +664,18 @@ export default function DataApi() {
     },
     {
       title: '授权KEY',
-      dataIndex: 'key',
+      dataIndex: 'projectId',
       width: 200,
       ellipsis: true
     },
     {
-      title: '应用',
-      dataIndex: 'authorizedApp',
-      width: 180
-    },
-    {
-      title: '用途',
-      dataIndex: 'purpose',
+      title: '项目名称',
+      dataIndex: 'projectName',
       width: 180
     },
     {
       title: '授权时间',
-      dataIndex: 'authorizedTime',
+      dataIndex: 'createdTime',
       width: 180
     },
     {
@@ -595,8 +686,8 @@ export default function DataApi() {
       render: (_, record) => (
         <div>
           <span
-            className={styles['operate-text']}
-            onClick={() => handleToAddApi('edit', record.id)}
+            className={styles.operateText}
+            onClick={() => handleCancelAuthorization(record.projectId)}
           >
             取消授权
           </span>
@@ -616,7 +707,9 @@ export default function DataApi() {
 
   return (
     <div className={styles['data-api']}>
-      <h1 style={{ fontSize: '20px', fontWeight: 'bold' }}>数据API</h1>
+      <h1
+        style={{ fontSize: '20px', fontWeight: 'bold' }}
+      >{`数据API(${total})`}</h1>
       <div
         style={{
           display: 'flex',

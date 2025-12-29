@@ -11,15 +11,6 @@
     line-height: 32px;
   }
 
-  .operate-text {
-    color: rgb(0, 125, 250);
-    cursor: pointer;
-  }
-
-  .operate-text:hover {
-    color: rgba(67, 141, 251, 1);
-  }
-
   :global(tbody) .hover-change :global(.ellipsis-text) {
     color: #1e293b;
   }
@@ -116,5 +107,10 @@
         }
       }
     }
+  }
+
+  .operateText {
+    color: rgb(0, 125, 250);
+    cursor: pointer;
   }
 }

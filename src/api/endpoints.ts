@@ -568,6 +568,8 @@ export const ModaForgeResourceEndpoints = {
   openDataAuthListApi: PrefixAimdp + '/OpenDataAuthList',
   // 授权数据API
   openDataAuthorizeApi: PrefixAimdp + '/OpenDataAuthorizeApi',
+  // 取消授权数据API
+  openDataRevokeApi: PrefixAimdp + '/OpenDataRevokeApi',
 
   // SQL开发
   sqlListApi: PrefixAimdp + '/ListSqlFile',

@@ -15,6 +15,7 @@ import { useScrollTo } from '@/hooks/useScrollTo';
 import styles from './viewFileModal.module.scss';
 import { openDataGetApiDoc } from '@/api/dataApi';
 import { useInViewport, useMemoizedFn } from 'ahooks';
+import copy from 'copy-to-clipboard';
 
 const TabPane = Tabs.TabPane;
 
@@ -302,6 +303,20 @@ export default function ViewFileModal({ visible, onCancel, id }) {
                 type="outline"
                 icon={<IconCopy />}
                 className={styles.copyButton}
+                onClick={() => {
+                  const isSuccess = copy(
+                    JSON.stringify(
+                      viewFileDetailData?.example?.request,
+                      null,
+                      2
+                    ) ?? ''
+                  );
+                  if (isSuccess) {
+                    Message.success('内容复制成功');
+                  } else {
+                    Message.error('内容复制失败');
+                  }
+                }}
               >
                 复制代码
               </Button>

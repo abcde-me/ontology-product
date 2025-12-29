@@ -310,7 +310,6 @@ export default function MetadataManagement() {
         if (res.status === 200 && res.code === '') {
           if (res.data.success) {
             Message.success('创建数据库成功');
-            tableForm.resetFields();
           } else Message.error(res.data.msg || '创建数据库失败');
         } else {
           Message.error(res.message || '创建数据库失败');
@@ -320,13 +319,13 @@ export default function MetadataManagement() {
         if (res.status === 200 && res.code === '') {
           if (res.data.success) {
             Message.success('创建数据库成功');
-            tableForm.resetFields();
           } else Message.error(res.data.msg || '创建数据库失败');
         } else {
           Message.error(res.message || '创建数据库失败');
         }
       }
 
+      tableForm.resetFields();
       setCreateTableModalOpen(false);
     });
   };
@@ -355,6 +354,30 @@ export default function MetadataManagement() {
         Message.error(res.message || '获取数据库列表失败');
       }
     }
+    physicalTableForm.setFieldsValue({
+      ddl:
+        activeMetadataType === MetadataType.Iceberg
+          ? `CREATE TABLE iceberg_db_example.iceberg_table_example (
+  id INT COMMENT '主键ID',
+  name STRING COMMENT '示例1',
+  create_time TIMESTAMP COMMENT '创建时间'
+)
+USING iceberg
+COMMENT '创建Iceberg表示例'`
+          : `CREATE TABLE IF NOT EXISTS db_example.table_example (
+  \`id_example\` BIGINT COMMENT '主键ID',
+  \`name_example\` VARCHAR(64) COMMENT '姓名示例',
+  \`create_time\` DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  \`update_time\` DATETIME DEFAULT CURRENT_TIMESTAMP  COMMENT '更新时间',
+  \`create_by\` VARCHAR(64) COMMENT '创建人'
+) ENGINE=OLAP
+DUPLICATE KEY(\`id_example\`)
+COMMENT '表描述'
+DISTRIBUTED BY HASH(\`id_example\`) BUCKETS 10
+PROPERTIES (
+  "replication_allocation" = "tag.location.default: 1"
+)`
+    });
     setCreatePhysicalTableModalOpen(true);
   };
 
@@ -451,6 +474,12 @@ export default function MetadataManagement() {
                     className={styles['refreshBtn']}
                     icon={<IconPlus className="text-[#1E293B]" />}
                     onClick={() => {
+                      tableForm.setFieldsValue({
+                        ddl:
+                          activeMetadataType === MetadataType.Iceberg
+                            ? `CREATE DATABASE IF NOT EXISTS iceberg_db_example COMMENT 'Iceberg创建库示例'`
+                            : `CREATE DATABASE IF NOT EXISTS db_example`
+                      });
                       setCreateTableModalOpen(true);
                     }}
                   >
@@ -578,11 +607,6 @@ export default function MetadataManagement() {
           <Form.Item
             field="ddl"
             label="DDL语句"
-            initialValue={
-              activeMetadataType === MetadataType.Iceberg
-                ? `CREATE DATABASE IF NOT EXISTS iceberg_db_example COMMENT 'Iceberg创建库示例'`
-                : `CREATE DATABASE IF NOT EXISTS db_example`
-            }
             rules={[
               {
                 required: true,
@@ -655,29 +679,6 @@ export default function MetadataManagement() {
           <Form.Item
             field="ddl"
             label="DDL语句"
-            initialValue={
-              activeMetadataType === MetadataType.Iceberg
-                ? `CREATE TABLE iceberg_db_example.iceberg_table_example (
-  id INT COMMENT '主键ID',
-  name STRING COMMENT '示例1',
-  create_time TIMESTAMP COMMENT '创建时间'
-)
-USING iceberg
-COMMENT '创建Iceberg表示例'`
-                : `CREATE TABLE IF NOT EXISTS db_example.table_example (
-  \`id_example\` BIGINT COMMENT '主键ID',
-  \`name_example\` VARCHAR(64) COMMENT '姓名示例',
-  \`create_time\` DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-  \`update_time\` DATETIME DEFAULT CURRENT_TIMESTAMP  COMMENT '更新时间',
-  \`create_by\` VARCHAR(64) COMMENT '创建人'
-) ENGINE=OLAP
-DUPLICATE KEY(\`id_example\`)
-COMMENT '表描述'
-DISTRIBUTED BY HASH(\`id_example\`) BUCKETS 10
-PROPERTIES (
-  "replication_allocation" = "tag.location.default: 1"
-)`
-            }
             rules={[
               {
                 required: true,
