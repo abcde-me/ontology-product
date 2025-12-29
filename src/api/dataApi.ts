@@ -96,3 +96,8 @@ export async function openDataAuthorizeApi(
 ) {
   return await UAPI.RES.openDataAuthorizeApi({}).post(params).inRegion().do();
 }
+
+// 取消授权数据API
+export async function openDataRevokeApi(params: Record<string | number, any>) {
+  return await UAPI.RES.openDataRevokeApi({}).post(params).inRegion().do();
+}

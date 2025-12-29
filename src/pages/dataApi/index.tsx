@@ -23,6 +23,7 @@ import {
   openDataDeleteApi,
   openDataList,
   openDataPublish,
+  openDataRevokeApi,
   openDataUnpublish
 } from '@/api/dataApi';
 import { SorterInfo } from '@arco-design/web-react/es/Table/interface';
@@ -222,15 +223,15 @@ export default function DataApi() {
     });
   };
 
-  const handleAuthorization = async (record: Record<string, any>) => {
+  const handleAuthorization = async (id: number) => {
     setAuthorizationLoading(true);
     setAuthorizationModalVisible(true);
-    setApiId(record.id);
+    setApiId(id);
     const res = await openDataAuthList({
-      id: record.id
+      id: id
     });
     if (res.status === 200 && res.code === '') {
-      setAuthorizedData(res.data.list || []);
+      setAuthorizedData(res.data || []);
     } else {
       Message.error(res.message || '获取已授权列表失败');
     }
@@ -265,12 +266,30 @@ export default function DataApi() {
 
       const res = await openDataAuthorizeApi(params);
       if (res.status === 200 && res.code === '') {
-        Message.success(res.message || '授权数据API成功');
-        getList();
+        Message.success('授权数据API成功');
+        handleAuthorization(Number(apiId));
       } else {
         Message.error(res.message || '授权数据API失败');
       }
     });
+  };
+
+  const handleCancelAuthorization = async (id: string) => {
+    const params = {
+      apiId: apiId,
+      authInfo: {
+        projectId: id
+      }
+    };
+    const res = await openDataRevokeApi(params);
+    if (res.status === 200 && res.code === '') {
+      Message.success('取消授权数据API成功');
+      getList();
+      authorizationForm.resetFields();
+      setAuthorizationModalVisible(false);
+    } else {
+      Message.error(res.message || '取消授权数据API失败');
+    }
   };
 
   const handleAuth = async () => {
@@ -494,7 +513,7 @@ export default function DataApi() {
                       borderBottom: 'none'
                     }}
                     onClick={() => {
-                      handleAuthorization(record);
+                      handleAuthorization(Number(record.id));
                     }}
                   >
                     授权
@@ -568,23 +587,18 @@ export default function DataApi() {
     },
     {
       title: '授权KEY',
-      dataIndex: 'key',
+      dataIndex: 'projectId',
       width: 200,
       ellipsis: true
     },
     {
-      title: '应用',
-      dataIndex: 'authorizedApp',
-      width: 180
-    },
-    {
-      title: '用途',
-      dataIndex: 'purpose',
+      title: '项目名称',
+      dataIndex: 'projectName',
       width: 180
     },
     {
       title: '授权时间',
-      dataIndex: 'authorizedTime',
+      dataIndex: 'createdTime',
       width: 180
     },
     {
@@ -595,8 +609,8 @@ export default function DataApi() {
       render: (_, record) => (
         <div>
           <span
-            className={styles['operate-text']}
-            onClick={() => handleToAddApi('edit', record.id)}
+            className={styles.operateText}
+            onClick={() => handleCancelAuthorization(record.projectId)}
           >
             取消授权
           </span>
