@@ -14,7 +14,14 @@ import {
 import styles from './testModal.module.scss';
 import { openDataTestApi } from '@/api/dataApi';
 
-export default function TestModal({ visible, dataSource, apiId, onCancel }) {
+export default function TestModal(props: {
+  visible: boolean;
+  dataSource;
+  apiId: number | null;
+  onCancel: () => void;
+  getStatusCode?: (statusCode: number | null) => void;
+}) {
+  const { visible, dataSource, apiId, onCancel, getStatusCode } = props;
   const TabPane = Tabs.TabPane;
 
   const [form] = Form.useForm();
@@ -116,7 +123,14 @@ export default function TestModal({ visible, dataSource, apiId, onCancel }) {
       };
       const res = await openDataTestApi(params);
       if (res.code === '' && res.status === 200) {
-        if (res.data) setResult(res.data);
+        if (res.data) {
+          setResult(res.data);
+          getStatusCode?.(
+            res.data.statusCode || Number(res.data.statusCode) === 0
+              ? Number(res.data.statusCode)
+              : null
+          );
+        }
         setLoading(false);
       } else {
         Message.error(res.message || '测试失败');
@@ -151,7 +165,12 @@ export default function TestModal({ visible, dataSource, apiId, onCancel }) {
             </Button>
           </div>
           <Form form={form} onSubmit={handleTest}>
-            <Table columns={columns} data={dataSource} pagination={false} />
+            <Table
+              columns={columns}
+              data={dataSource}
+              pagination={false}
+              rowKey="id"
+            />
           </Form>
         </div>
         <div className={styles.rightBox}>
@@ -166,7 +185,9 @@ export default function TestModal({ visible, dataSource, apiId, onCancel }) {
                     响应状态:{' '}
                   </span>
                   <span className="text-sm font-medium text-[#0F172A]">
-                    {result.statusCode || '-'}
+                    {result.statusCode || Number(result.statusCode) === 0
+                      ? Number(result.statusCode)
+                      : '-'}
                   </span>
                 </div>
                 <div>

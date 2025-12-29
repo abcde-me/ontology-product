@@ -85,6 +85,7 @@ export default function AddApi() {
   const [resultArray, setResultArray] = useState<string[]>([]);
   const [apiCacheMethod, setApiCacheMethod] = useState(0);
   const [isCanTest, setIsCanTest] = useState<boolean>(false);
+  const [canComplete, setCanComplete] = useState<boolean>(false);
 
   const [resizeSize, setResizeSize] = useState<string>('');
   const [paneContainersSize, setPaneContainersSize] = useState<string>('220px');
@@ -122,7 +123,10 @@ export default function AddApi() {
           rules={[{ required: true, message: '请输入参数中文名称' }]}
           initialValue={value}
         >
-          <Input placeholder="请输入参数中文名称" />
+          <Input
+            placeholder="请输入参数中文名称"
+            onChange={() => setCanComplete(false)}
+          />
         </Form.Item>
       )
     },
@@ -142,6 +146,7 @@ export default function AddApi() {
               { label: 'DOUBLE', value: 'DOUBLE' },
               { label: 'BOOLEAN', value: 'BOOLEAN' }
             ]}
+            onChange={() => setCanComplete(false)}
           />
         </Form.Item>
       )
@@ -152,7 +157,10 @@ export default function AddApi() {
       width: 80,
       render: (value, record) => (
         <Form.Item field={`isArray_${record.name}`} initialValue={value}>
-          <Checkbox defaultChecked={value} />
+          <Checkbox
+            defaultChecked={value}
+            onChange={() => setCanComplete(false)}
+          />
         </Form.Item>
       )
     },
@@ -162,7 +170,10 @@ export default function AddApi() {
       width: 150,
       render: (value, record) => (
         <Form.Item field={`defaultValue_${record.name}`} initialValue={value}>
-          <Input placeholder="请输入默认值" />
+          <Input
+            placeholder="请输入默认值"
+            onChange={() => setCanComplete(false)}
+          />
         </Form.Item>
       )
     },
@@ -172,7 +183,10 @@ export default function AddApi() {
       width: 150,
       render: (value, record) => (
         <Form.Item field={`description_${record.name}`} initialValue={value}>
-          <Input placeholder="请输入描述" />
+          <Input
+            placeholder="请输入描述"
+            onChange={() => setCanComplete(false)}
+          />
         </Form.Item>
       )
     }
@@ -206,7 +220,10 @@ export default function AddApi() {
           rules={[{ required: true, message: '请输入参数中文名称' }]}
           initialValue={value}
         >
-          <Input placeholder="请输入参数中文名称" />
+          <Input
+            placeholder="请输入参数中文名称"
+            onChange={() => setCanComplete(false)}
+          />
         </Form.Item>
       )
     },
@@ -226,6 +243,7 @@ export default function AddApi() {
               { label: 'DOUBLE', value: 'DOUBLE' },
               { label: 'BOOLEAN', value: 'BOOLEAN' }
             ]}
+            onChange={() => setCanComplete(false)}
           />
         </Form.Item>
       )
@@ -236,7 +254,10 @@ export default function AddApi() {
       width: 150,
       render: (value, record) => (
         <Form.Item field={`description_${record.name}`} initialValue={value}>
-          <Input placeholder="请输入描述" />
+          <Input
+            placeholder="请输入描述"
+            onChange={() => setCanComplete(false)}
+          />
         </Form.Item>
       )
     }
@@ -638,7 +659,10 @@ export default function AddApi() {
           }
         })
       ]}
-      onChange={(value) => setValue(value)}
+      onChange={(value) => {
+        setValue(value);
+        setCanComplete(false);
+      }}
       basicSetup={{
         lineNumbers: true,
         highlightActiveLineGutter: false
@@ -977,8 +1001,14 @@ export default function AddApi() {
           )}
           <div className={styles.stepFooter}>
             <Button
-              disabled={current >= 2}
-              onClick={() => form.submit()}
+              disabled={current >= 2 && !canComplete}
+              onClick={() => {
+                if (current === 1) {
+                  form.submit();
+                } else {
+                  history.goBack();
+                }
+              }}
               type="primary"
             >
               {current === 1 ? '下一步' : '完成'}
@@ -1002,6 +1032,13 @@ export default function AddApi() {
       <TestModal
         visible={testModalVisible}
         dataSource={testModalDataSource}
+        getStatusCode={(statusCode) => {
+          if (statusCode === 0) {
+            setCanComplete(true);
+          } else {
+            setCanComplete(false);
+          }
+        }}
         apiId={apiId}
         onCancel={() => setTestModalVisible(false)}
       />
