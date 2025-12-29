@@ -1,0 +1,73 @@
+.max-mode {
+  z-index: 999;
+  bottom: 0;
+  right: 0;
+  background: transparent;
+  pointer-events: auto;
+  padding: 10px;
+  position: fixed;
+  width: 100vw;
+  height: calc(100vh - 56px);
+
+  .editor-header {
+    border-bottom: 1px solid #e2e8f0;
+  }
+}
+
+.code-editor {
+  border: 1px solid #e2e8f0;
+  background: #fff;
+  border-radius: 8px;
+  padding: 12px 24px 12px 12px;
+  position: relative;
+  height: 100%;
+
+  &:focus-within {
+    border: 1px solid #007dfa;
+    background: #eef6ff;
+  }
+
+  :global(.cm-focused) {
+    outline: unset;
+  }
+
+  :global(.cm-editor) {
+    background: transparent !important;
+    height: 100%;
+  }
+
+  :global(.cm-content) {
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 24px;
+    color: #0f172a;
+  }
+
+  :global(.cm-placeholder) {
+    color: #94a3b8;
+  }
+
+  :global(.cm-line) {
+    padding: 0 12px;
+  }
+
+  :global(.cm-activeLine) {
+    background-color: unset;
+  }
+
+  :global(.cm-gutters) {
+    border: unset;
+    padding-top: 3px;
+    background-color: unset;
+    color: var(--color-text-4);
+    width: 24px;
+
+    .cm-gutter-lint {
+      width: 0;
+    }
+  }
+
+  :global(.cm-gutters-before) {
+    border: none;
+  }
+}
