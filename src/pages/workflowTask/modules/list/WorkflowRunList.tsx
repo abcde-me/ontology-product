@@ -27,8 +27,8 @@ import type {
   WorkflowType
 } from '@/types/workflowTaskApi';
 import {
-  CommandType,
-  CommandTypeNameMap,
+  TriggerType,
+  TriggerTypeNameMap,
   WorkflowOperationType,
   WorkflowTaskStatus,
   WorkflowTaskStatusNameMap
@@ -103,11 +103,11 @@ export default function WorkflowRunList() {
           : [];
 
       // 从 filters 中获取 command_type_list 和 state_list
-      const command_type_list = filters?.command_type_name ?? [];
+      const trigger_type_list = filters?.trigger_type_name ?? [];
       const state_list = formValues.state ? [formValues.state] : [];
 
       return {
-        command_type_list,
+        trigger_type_list,
         id: formValues.id ? Number(formValues.id) : undefined,
         keywords: formValues.keywords || '',
         orders,
@@ -264,16 +264,16 @@ export default function WorkflowRunList() {
       },
       {
         title: '运行类型',
-        dataIndex: 'command_type_name',
+        dataIndex: 'trigger_type_name',
         width: 120,
         filters: [
           {
-            text: CommandTypeNameMap[CommandType.SCHEDULER],
-            value: CommandType.SCHEDULER
+            text: TriggerTypeNameMap[TriggerType.SCHEDULE],
+            value: TriggerType.SCHEDULE
           },
           {
-            text: CommandTypeNameMap[CommandType.START_PROCESS],
-            value: CommandType.START_PROCESS
+            text: TriggerTypeNameMap[TriggerType.MANUAL],
+            value: TriggerType.MANUAL
           }
         ]
       },
@@ -321,12 +321,12 @@ export default function WorkflowRunList() {
         width: 180,
         render: (value: string) => <span>{value ?? '-'}</span>
       },
-      {
-        title: '重试次数',
-        dataIndex: 'try_times',
-        width: 180,
-        render: (value: string) => <span>{value ?? '-'}</span>
-      },
+      // {
+      //   title: '重试次数',
+      //   dataIndex: 'try_times',
+      //   width: 180,
+      //   render: (value: string) => <span>{value ?? '-'}</span>
+      // },
       {
         title: '操作',
         width: 200,

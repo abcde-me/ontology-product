@@ -49,23 +49,23 @@ export const WorkflowTaskStatusNameMap = {
   [WorkflowTaskStatus.WAIT_TO_RUN]: '等待运行'
 } as const;
 
-export enum CommandType {
+export enum TriggerType {
   /** 手动运行 */
-  START_PROCESS = 'START_PROCESS',
+  MANUAL = 'manual',
   /** 定时运行 */
-  SCHEDULER = 'SCHEDULER'
+  SCHEDULE = 'schedule'
 }
 
-export const CommandTypeNameMap = {
-  [CommandType.START_PROCESS]: '手动运行',
-  [CommandType.SCHEDULER]: '定时运行'
+export const TriggerTypeNameMap = {
+  [TriggerType.MANUAL]: '手动运行',
+  [TriggerType.SCHEDULE]: '定时运行'
 } as const;
 
 export interface GetWorkflowTaskListParams {
   /**
    * 运行类型，START_PROCESS  手动运行     SCHEDULER 定时运行
    */
-  command_type_list: CommandType[];
+  trigger_type_list: TriggerType[];
   /**
    * 工作流实例ID
    */
@@ -116,11 +116,11 @@ export interface WorkflowTaskItem {
   /**
    * 启动类型，手动运行，定时运行 英文
    */
-  command_type: CommandType;
+  trigger_type: TriggerType;
   /**
    * 启动类型，手动运行，定时运行
    */
-  command_type_name: (typeof CommandTypeNameMap)[keyof typeof CommandTypeNameMap];
+  command_type_name: (typeof TriggerTypeNameMap)[keyof typeof TriggerTypeNameMap];
   /**
    * 执行时长
    */
@@ -210,7 +210,7 @@ export interface GetTaskNodeListParams {
   /**
    * 运行类型，START_PROCESS  手动运行     SCHEDULER 定时运行
    */
-  command_type_list?: CommandType[];
+  trigger_type_list?: TriggerType[];
   /**
    * 任务实例ID
    */
@@ -260,11 +260,11 @@ export interface TaskNodeItem {
   /**
    * 执行类型，手动运行，定时运行
    */
-  command_type: CommandType;
+  trigger_type: TriggerType;
   /**
    * 执行类型，手动运行，定时运行 中文
    */
-  command_type_name: (typeof CommandTypeNameMap)[keyof typeof CommandTypeNameMap];
+  trigger_type_name: (typeof TriggerTypeNameMap)[keyof typeof TriggerTypeNameMap];
   /**
    * 运行时长
    */
@@ -453,7 +453,7 @@ export interface ListTaskInstanceParams {
   /**
    * 运行类型，手动运行，定时运行
    */
-  command_type_list?: CommandType[];
+  trigger_type_list?: TriggerType[];
   /**
    * 运行状态，使用 WorkflowTaskStatus 枚举值
    */
@@ -503,11 +503,11 @@ export interface ListTaskInstanceItem {
   /**
    * 运行类型，手动运行，定时运行
    */
-  command_type: CommandType;
+  trigger_type: TriggerType;
   /**
    * 运行类型，手动运行，定时运行 中文
    */
-  command_type_name: string;
+  trigger_type_name: (typeof TriggerTypeNameMap)[keyof typeof TriggerTypeNameMap];
   /**
    * 运行时长
    */

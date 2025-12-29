@@ -78,9 +78,9 @@ export default memo(function FlowSetting() {
     };
     if (global_params) {
       try {
-        formData.params = JSON.parse(global_params);
+        formData.global_params = JSON.parse(global_params);
       } catch (e) {
-        formData.params = [{ prop: undefined, value: undefined }];
+        formData.global_params = [{ prop: undefined, value: undefined }];
         Message.error('工作流全局参数错误');
       }
     }
@@ -95,7 +95,7 @@ export default memo(function FlowSetting() {
         setWorkflowDetail({
           ...workflowDetail,
           ...flow,
-          global_params: formatLocalParams(flow.params || [])
+          global_params: formatLocalParams(flow.global_params || [])
         });
       return Promise.resolve();
     }
@@ -109,7 +109,7 @@ export default memo(function FlowSetting() {
       form
         .validate()
         .then((res) => {
-          const { description, params, ...otherData } = res;
+          const { description, params, global_params, ...otherData } = res;
           const saveData: EditWorkflowParams = {
             workflow_uuid: workflowDetail?.workflow_uuid,
             ...otherData
@@ -117,8 +117,8 @@ export default memo(function FlowSetting() {
           if (description) {
             saveData.description = description;
           }
-          if (params?.length) {
-            saveData.params = params.map((p) => ({
+          if (global_params?.length) {
+            saveData.global_params = global_params.map((p) => ({
               ...p,
               direct: 'IN',
               type: 'VARCHAR'
@@ -212,7 +212,7 @@ export default memo(function FlowSetting() {
             >
               <Radio.Group options={EXECUTION_TYPE_OPTIONS} />
             </Form.Item>
-            <Form.List field={'params'}>
+            <Form.List field={'global_params'}>
               {(fields, { add, remove }) => {
                 return (
                   <>
@@ -246,7 +246,7 @@ export default memo(function FlowSetting() {
                                   {
                                     validator(v, onInValid) {
                                       const sameKey = form
-                                        .getFieldValue('params')
+                                        .getFieldValue('global_params')
                                         .filter(({ prop }) => prop === v);
                                       if (sameKey.length > 1) {
                                         onInValid('参数名重复');
