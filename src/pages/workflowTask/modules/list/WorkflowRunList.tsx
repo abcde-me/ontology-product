@@ -321,12 +321,12 @@ export default function WorkflowRunList() {
         width: 180,
         render: (value: string) => <span>{value ?? '-'}</span>
       },
-      {
-        title: '重试次数',
-        dataIndex: 'try_times',
-        width: 180,
-        render: (value: string) => <span>{value ?? '-'}</span>
-      },
+      // {
+      //   title: '重试次数',
+      //   dataIndex: 'try_times',
+      //   width: 180,
+      //   render: (value: string) => <span>{value ?? '-'}</span>
+      // },
       {
         title: '操作',
         width: 200,
