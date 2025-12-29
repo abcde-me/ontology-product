@@ -268,11 +268,11 @@ export default function WorkflowRunList() {
         width: 120,
         filters: [
           {
-            text: TriggerType[TriggerType.SCHEDULE],
+            text: TriggerTypeNameMap[TriggerType.SCHEDULE],
             value: TriggerType.SCHEDULE
           },
           {
-            text: TriggerType[TriggerType.MANUAL],
+            text: TriggerTypeNameMap[TriggerType.MANUAL],
             value: TriggerType.MANUAL
           }
         ]
