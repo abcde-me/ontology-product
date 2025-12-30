@@ -62,7 +62,8 @@ export const WORKFLOW_DETAIL_PERMISSIONS = {
 // 作业列表相关权限
 export const WORKFLOW_TASK_PERMISSIONS = {
   CAN_UPDATE: 'aimdp-manager:workflow:read:get',
-  LIST: 'aimdp-manager:workflow:read:list' // 菜单权限（与工作流共用）
+  LIST: 'aimdp-manager:workflow:read:list', // 菜单权限（与工作流共用）
+  MODIFY: 'aimdp-manager:workflow:manage:modify'
 } as const;
 
 // 数据目录相关权限

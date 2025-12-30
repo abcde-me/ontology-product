@@ -32,6 +32,8 @@ import type { SorterInfo } from '@arco-design/web-react/lib/Table/interface';
 import noDataElement from '@/components/no-data';
 import EllipsisPopoverCom from '@/components/ellipsis-popover-com';
 import TaskLogDrawer from '../../components/task-log-drawer';
+import { PermissionWrapper } from '@/components/PermissionGuard';
+import { WORKFLOW_TASK_PERMISSIONS } from '@/config/permissions';
 
 const { Option } = Select;
 const FormItem = Form.Item;
@@ -250,19 +252,21 @@ export default function TaskNodeList() {
         render: (_: any, record: ListTaskInstanceItem) => {
           return (
             <div className="flex items-center gap-2">
-              <Button
-                disabled={record.state !== TaskNodeStatus.FAILURE}
-                type="text"
-                className="px-[4px]"
-                onClick={() =>
-                  handleTaskNodeRetry(
-                    record.process_instance_id,
-                    record.task_code
-                  )
-                }
-              >
-                重试
-              </Button>
+              <PermissionWrapper permission={WORKFLOW_TASK_PERMISSIONS.MODIFY}>
+                <Button
+                  disabled={record.state !== TaskNodeStatus.FAILURE}
+                  type="text"
+                  className="px-[4px]"
+                  onClick={() =>
+                    handleTaskNodeRetry(
+                      record.process_instance_id,
+                      record.task_code
+                    )
+                  }
+                >
+                  重试
+                </Button>
+              </PermissionWrapper>
               <Button
                 type="text"
                 className="px-[4px]"

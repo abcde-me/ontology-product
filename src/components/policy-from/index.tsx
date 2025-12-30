@@ -135,7 +135,6 @@ function DemoForm(props, ref) {
       <Form.Item
         label="重排序："
         field="reranking_enable"
-        rules={[{ required: true, message: '请选择' }]}
         triggerPropName="checked"
       >
         <Switch checkedText="开" uncheckedText="关" />
@@ -144,7 +143,6 @@ function DemoForm(props, ref) {
       <Form.Item
         label="Top K："
         field="top_k"
-        rules={[{ required: true, message: '请选择' }]}
         help="返回相似度最高的前K个结果(1～50)"
       >
         <Slider showInput min={1} max={50} step={1} />
@@ -159,7 +157,6 @@ function DemoForm(props, ref) {
             field="score_threshold_enabled"
             triggerPropName="checked"
             noStyle
-            rules={[{ required: true, message: '请选择' }]}
           >
             <Switch checkedText="开" uncheckedText="关" />
           </Form.Item>
@@ -174,12 +171,7 @@ function DemoForm(props, ref) {
                 form.getFieldValue('score_threshold_enabled') ??
                 INIT_FROM_VALUE.score_threshold_enabled;
               return (
-                <Form.Item
-                  field="score_threshold"
-                  noStyle
-                  className="flex-1"
-                  rules={[{ required: true, message: '请选择' }]}
-                >
+                <Form.Item field="score_threshold" noStyle className="flex-1">
                   <Slider
                     showInput
                     min={0}
@@ -206,7 +198,6 @@ function DemoForm(props, ref) {
               <Form.Item
                 label="按比例分配："
                 field="weights"
-                rules={[{ required: true, message: '请选择' }]}
                 help={
                   <>
                     <div className="flex items-center justify-between">
