@@ -251,10 +251,6 @@ export default function MetadataManagementDetail() {
       value: baseInfoData.tableType || '-'
     },
     {
-      label: '元数据文件位置',
-      value: <EllipsisPopoverCom value={baseInfoData.storageLocation || '-'} />
-    },
-    {
       label: '所属数据库',
       value: metadataType || '-'
     },
@@ -532,6 +528,41 @@ export default function MetadataManagementDetail() {
       render: (text, record) => <EllipsisPopoverCom value={text} />
     }
   ];
+  // Doris分区信息列
+  const dorisPartitionColumns = [
+    {
+      title: '序号',
+      dataIndex: 'index',
+      key: 'index',
+      width: 80,
+      render: (text, record, index) => index + 1
+    },
+    {
+      title: '分区名称',
+      dataIndex: 'partitionName',
+      key: 'partitionName',
+      width: 500,
+      render: (text, record) => <EllipsisPopoverCom value={text} />
+    },
+    {
+      title: '存储大小',
+      dataIndex: 'dataSize',
+      key: 'dataSize',
+      width: 200
+    },
+    {
+      title: '行数统计',
+      dataIndex: 'rowCount',
+      key: 'rowCount',
+      width: 200
+    },
+    {
+      title: '存储介质',
+      dataIndex: 'storageMedium',
+      key: 'storageMedium',
+      width: 200
+    }
+  ];
   // milvus分区信息列
   const milvusPartitionColumns = [
     {
@@ -641,7 +672,8 @@ export default function MetadataManagementDetail() {
         if (res.code === '' && res.status === 200) {
           const newPreviewInfoColumns = res.data.data.title.map((item) => ({
             title: `${item.nameEn}（${item.nameZh}）`,
-            dataIndex: item.nameEn
+            dataIndex: item.nameEn,
+            width: 300
           }));
           setPreviewInfoColumns(newPreviewInfoColumns);
           setPreviewInfoData(res.data.data.tableData || []);
@@ -703,7 +735,8 @@ export default function MetadataManagementDetail() {
         if (res.code === '' && res.status === 200) {
           const newPreviewInfoColumns = res.data.data.title.map((item) => ({
             title: `${item.nameEn}（${item.nameZh}）`,
-            dataIndex: item.nameEn
+            dataIndex: item.nameEn,
+            width: 300
           }));
           setPreviewInfoColumns(newPreviewInfoColumns);
           setPreviewInfoData(res.data.data.tableData || []);
@@ -765,7 +798,8 @@ export default function MetadataManagementDetail() {
         if (res.code === '' && res.status === 200) {
           const newPreviewInfoColumns = res.data.data.title.map((item) => ({
             title: `${item.nameEn}（${item.nameZh}）`,
-            dataIndex: item.nameEn
+            dataIndex: item.nameEn,
+            width: 300
           }));
           setPreviewInfoColumns(newPreviewInfoColumns);
           setPreviewInfoData(res.data.data.tableData || []);
@@ -983,7 +1017,11 @@ export default function MetadataManagementDetail() {
                 </Form>
                 <Table
                   className="mt-2"
-                  columns={partitionColumns}
+                  columns={
+                    metadataType === MetadataType.Doris
+                      ? dorisPartitionColumns
+                      : partitionColumns
+                  }
                   data={partitionData}
                   border={false}
                   pagination={false}
@@ -1022,6 +1060,7 @@ export default function MetadataManagementDetail() {
                   pagination={false}
                   noDataElement={noDataElement({ description: '暂无数据' })}
                   rowKey="id"
+                  scroll={{ x: true }}
                 />
               </Typography.Paragraph>
             </TabPane>
@@ -1289,6 +1328,7 @@ export default function MetadataManagementDetail() {
                   border={false}
                   noDataElement={noDataElement({ description: '暂无数据' })}
                   rowKey="id"
+                  scroll={{ x: true }}
                 />
               </Typography.Paragraph>
             </TabPane>
