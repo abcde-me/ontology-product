@@ -316,13 +316,23 @@ export default function AddApi() {
     }
   };
 
+  const getCacheTime = () => {
+    if (!form.getFieldValue('cacheMethod')) {
+      return 0;
+    } else if (form.getFieldValue('cacheTime')) {
+      return Number(form.getFieldValue('cacheTime'));
+    } else {
+      return 1;
+    }
+  };
+
   const saveAndTestApi = async () => {
     const params = {
       ...apiBaseInfo,
       limitTime: 60,
-      limitCount: Number(form.getFieldValue('limitCount')),
-      cacheTime: Number(form.getFieldValue('cacheTime')),
-      databaseType: Number(form.getFieldValue('databaseType')),
+      limitCount: Number(form.getFieldValue('limitCount')) || 100,
+      cacheTime: getCacheTime(),
+      databaseType: Number(form.getFieldValue('databaseType')) || 1,
       sql: value,
       paramConfig: testModalDataSource,
       resultConfig: resultArray,
@@ -429,7 +439,7 @@ export default function AddApi() {
     const metadataTypeArr = ['iceberg', 'doris', 'kafka', 'minio', 'milvus'];
     if (metadataTypeArr.includes(treeNode.props.parentKey)) {
       const params = {
-        databaseType: treeNode.props.parentKey,
+        databaseType: treeNode.props.parentKey === 'iceberg' ? 1 : 2,
         tableId: Number(treeNode.props.dataRef.key.split('_').pop())
       };
       return openDataSearchTable(params).then((res) => {

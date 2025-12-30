@@ -77,7 +77,7 @@ export const TYPE_CONFIG = {
     value: 'local'
   },
   [ConnectorType.MQ]: {
-    text: '消息队列',
+    text: '消息队列-Kafka',
     value: 'mq'
   }
 };

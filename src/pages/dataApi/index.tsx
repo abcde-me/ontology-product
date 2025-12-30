@@ -513,13 +513,13 @@ export default function DataApi() {
     },
     {
       title: '授权数',
-      dataIndex: 'queryCount',
+      dataIndex: 'authCount',
       width: 200,
       ellipsis: true
     },
     {
       title: '总调用次数',
-      dataIndex: 'cacheTime',
+      dataIndex: 'queryCount',
       width: 180,
       sorter: true
     },
