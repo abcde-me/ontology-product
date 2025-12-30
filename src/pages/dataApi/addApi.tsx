@@ -316,12 +316,22 @@ export default function AddApi() {
     }
   };
 
+  const getCacheTime = () => {
+    if (!form.getFieldValue('cacheMethod')) {
+      return 0;
+    } else if (form.getFieldValue('cacheTime')) {
+      return Number(form.getFieldValue('cacheTime'));
+    } else {
+      return 1;
+    }
+  };
+
   const saveAndTestApi = async () => {
     const params = {
       ...apiBaseInfo,
       limitTime: 60,
       limitCount: Number(form.getFieldValue('limitCount')) || 100,
-      cacheTime: Number(form.getFieldValue('cacheTime')) || 60,
+      cacheTime: getCacheTime(),
       databaseType: Number(form.getFieldValue('databaseType')) || 1,
       sql: value,
       paramConfig: testModalDataSource,
