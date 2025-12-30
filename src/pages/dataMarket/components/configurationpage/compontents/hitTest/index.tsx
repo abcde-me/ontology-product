@@ -179,6 +179,7 @@ function HitTest(props: { datasetName: string }) {
     }
   ];
   const FuncChildFrom = (e) => {
+    console.log('策略配置改变了～', e);
     setfromdata(e);
   };
   const Functest = async () => {
@@ -538,6 +539,8 @@ function HitTest(props: { datasetName: string }) {
       >
         <PolicyForm
           FuncChildFrom={FuncChildFrom}
+          initParams={fromdata}
+          // onFormChange={onFormChangePolicy}
           ref={childRef}
           seteditPolicy={seteditPolicy}
         ></PolicyForm>
