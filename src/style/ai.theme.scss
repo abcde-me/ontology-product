@@ -133,6 +133,32 @@ $spacing-9: 24px;
   color: var(--color-text-5);
 }
 
+// 修复多选 Select 组件 placeholder 显示不完全的问题
+// 原因：Arco Design 的 Select 组件在 multiple 模式下，会通过 inline style 给 input 设置固定宽度（如 70px），
+// 导致中文 placeholder（如"请选择日期"）无法完全显示
+// 解决：使用 width: auto 覆盖 inline style，确保 input 有足够宽度显示 placeholder
+.arco-select-size-default.arco-select-multiple
+  .arco-input-tag-has-placeholder
+  input,
+.arco-select-size-default.arco-select-multiple
+  .arco-input-tag-has-placeholder
+  .arco-input-tag-input-mirror {
+  width: auto !important;
+}
+
+// 修复多选 TreeSelect 组件 placeholder 显示不完全的问题
+// 原因：Arco Design 的 TreeSelect 组件在 multiple 模式下，会通过 inline style 给 input 设置固定宽度（如 70px），
+// 导致中文 placeholder（如"请选择日期"）无法完全显示
+// 解决：使用 width: auto 覆盖 inline style，确保 input 有足够宽度显示 placeholder
+.arco-tree-select-size-default.arco-tree-select-multiple
+  .arco-input-tag-has-placeholder
+  input,
+.arco-tree-select-size-default.arco-tree-select-multiple
+  .arco-input-tag-has-placeholder
+  .arco-input-tag-input-mirror {
+  width: auto !important;
+}
+
 .arco-link {
   font-size: $font-size-body-3;
   font-weight: $font-weight-400;
