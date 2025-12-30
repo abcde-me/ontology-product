@@ -265,7 +265,7 @@ function LabelEditorPage() {
         break;
       case 'REVIEW':
         history.push(
-          `/tenant/compute/modaforge/qualityTask?qc_round=${qcRound}`
+          `/tenant/compute/modaforge/qualityTask/detail?qcRound=${qcRound}&pkgId=${pkgId}&reqId=${requirementId}`
         );
         break;
       case 'PREVIEW':
