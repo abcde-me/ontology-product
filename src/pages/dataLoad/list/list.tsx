@@ -179,6 +179,10 @@ export default function DataLoad() {
         {
           text: TYPE_CONFIG[ConnectorType.Local].text,
           value: TYPE_CONFIG[ConnectorType.Local].value
+        },
+        {
+          text: TYPE_CONFIG[ConnectorType.MQ].text,
+          value: TYPE_CONFIG[ConnectorType.MQ].value
         }
       ],
       render: (_, item) => (
@@ -189,7 +193,9 @@ export default function DataLoad() {
               ? TYPE_CONFIG[ConnectorType.HDFS].text
               : item.source_type == TYPE_CONFIG[ConnectorType.DB].value
                 ? `${TYPE_CONFIG[ConnectorType.DB].text}-${getLabelByValue(DATABASE_TYPE_ENUM, item?.sub_type || '')}`
-                : TYPE_CONFIG[ConnectorType.Local].text}
+                : item.source_type == TYPE_CONFIG[ConnectorType.Local].value
+                  ? TYPE_CONFIG[ConnectorType.Local].text
+                  : TYPE_CONFIG[ConnectorType.MQ].text}
         </span>
       )
     },
