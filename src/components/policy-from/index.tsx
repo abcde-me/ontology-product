@@ -41,7 +41,6 @@ function DemoForm(props, ref) {
   }));
 
   const onChange = (changeValue, values) => {
-    console.log('onChange: ', changeValue, values);
     // 通知父组件表单值变化
     if (onFormChange) {
       onFormChange(values);
