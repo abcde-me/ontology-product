@@ -345,27 +345,35 @@ export default function WorkflowTaskDetail() {
             <div className="flex h-[22px] items-center gap-[8px]">
               {renderStatus()}
               {taskDetailData?.state === WorkflowTaskStatus.FAILURE && (
-                <Popconfirm
-                  title="确定重新运行吗？"
-                  content="已处理数据将被覆盖"
-                  onOk={() => handleRetryWorkflow(taskId)}
+                <PermissionWrapper
+                  permission={WORKFLOW_TASK_PERMISSIONS.MODIFY}
                 >
-                  <Button type="text" className="px-[0px]">
-                    重试
-                  </Button>
-                </Popconfirm>
+                  <Popconfirm
+                    title="确定重新运行吗？"
+                    content="已处理数据将被覆盖"
+                    onOk={() => handleRetryWorkflow(taskId)}
+                  >
+                    <Button type="text" className="px-[0px]">
+                      重试
+                    </Button>
+                  </Popconfirm>
+                </PermissionWrapper>
               )}
               {taskDetailData?.state ===
                 WorkflowTaskStatus.RUNNING_EXECUTION && (
-                <Popconfirm
-                  title="确定停止运行吗？"
-                  content="未处理完的数据将停止处理"
-                  onOk={() => handleStopWorkflow(taskId)}
+                <PermissionWrapper
+                  permission={WORKFLOW_TASK_PERMISSIONS.MODIFY}
                 >
-                  <Button type="text" className="px-[0px]">
-                    停止
-                  </Button>
-                </Popconfirm>
+                  <Popconfirm
+                    title="确定停止运行吗？"
+                    content="未处理完的数据将停止处理"
+                    onOk={() => handleStopWorkflow(taskId)}
+                  >
+                    <Button type="text" className="px-[0px]">
+                      停止
+                    </Button>
+                  </Popconfirm>
+                </PermissionWrapper>
               )}
             </div>
           </div>
