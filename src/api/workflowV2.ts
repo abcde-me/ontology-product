@@ -15,7 +15,7 @@ export async function getWorkflowDraft(params: any = {}) {
     params.dsWorkflowId || searchParams.get('ds_workflow_id');
   const workflowVersion =
     params.workflowVersion || searchParams.get('workflow_version') || '';
-  return UAPI.RES.workflowDraft({})
+  const result = await UAPI.RES.workflowDraft({})
     .post({
       workflow_uuid: workflowUUID,
       ds_workflow_id: dsWorkflowId,
@@ -23,6 +23,43 @@ export async function getWorkflowDraft(params: any = {}) {
     })
     .inRegion()
     .do();
+
+  // 将 data.graph.nodes 中 type 为 'pic' 的节点映射成 'image'
+  if (result?.data?.graph?.nodes) {
+    result.data.graph.nodes = result.data.graph.nodes.map((node: any) => {
+      if (node?.data?.type === 'pic') {
+        return {
+          ...node,
+          data: {
+            ...node.data,
+            type: 'image'
+          }
+        };
+      }
+      return node;
+    });
+  }
+
+  // 将 data.graph.edges 中 data.sourceType 或 data.targetType 为 'pic' 的映射成 'image'
+  if (result?.data?.graph?.edges) {
+    result.data.graph.edges = result.data.graph.edges.map((edge: any) => {
+      const needsUpdate =
+        edge?.data?.sourceType === 'pic' || edge?.data?.targetType === 'pic';
+      if (needsUpdate) {
+        return {
+          ...edge,
+          data: {
+            ...edge.data,
+            ...(edge.data.sourceType === 'pic' && { sourceType: 'image' }),
+            ...(edge.data.targetType === 'pic' && { targetType: 'image' })
+          }
+        };
+      }
+      return edge;
+    });
+  }
+
+  return result;
 }
 
 export async function createWorkflowDraft(params: any = {}) {
@@ -293,16 +330,15 @@ export async function getWorkflowNodeTask(task_id: React.Key) {
 }
 
 // 工作流-获取工作流运行日志
-export async function getWorkflowTaskLogs(task_id: React.Key) {
-  const res = await UAPI.RES.getWorkflowTaskLogs({})
+export async function getWorkflowTaskLogs(task_id: React.Key, start: number) {
+  return await UAPI.RES.getWorkflowTaskLogs({})
     .post({
       task_instance_id: task_id,
-      limit: 1000,
-      skip_line_num: 0
+      limit: 100,
+      skip_line_num: start
     })
     .inRegion()
     .do();
-  return res.data?.message || '暂无日志';
 }
 
 /**

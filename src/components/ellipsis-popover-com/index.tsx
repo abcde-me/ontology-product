@@ -108,7 +108,7 @@ function EllipsisPopover(props: any, ref: any) {
           },
           ...ellipsis
         }}
-        className={`typoWrap ${className ? className : ''} ${isLink ? 'cursor-pointer' : ''}`}
+        className={`typoWrap ${className ? className : ''} ${isLink ? 'paragraph-link cursor-pointer' : ''}`}
         onClick={isLink ? handleLink : undefined}
       >
         {displayContent}

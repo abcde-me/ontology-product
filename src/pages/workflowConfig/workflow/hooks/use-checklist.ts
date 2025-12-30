@@ -37,7 +37,7 @@ export const useChecklist = (nodes: Node[], edges: Edge[]) => {
 
       if (node.type === CUSTOM_NODE) {
         // 兼容pic类型，映射到image
-        const nodeType = node.data.type === 'pic' ? 'image' : node.data.type;
+        const nodeType = node.data.type;
         const { errorMessage } = nodesExtraData[nodeType].checkValid(
           node.data,
           t,
@@ -124,8 +124,7 @@ export const useChecklistBeforePublish = () => {
       const node = nodes[i];
       let moreDataForCheckValid;
 
-      // 兼容pic类型，映射到image
-      const nodeType = node.data.type === 'pic' ? 'image' : node.data.type;
+      const nodeType = node.data.type;
       const { errorMessage } = nodesExtraData[nodeType as BlockEnum].checkValid(
         node.data,
         t,
