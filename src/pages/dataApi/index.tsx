@@ -79,7 +79,7 @@ export default function DataApi() {
   // 每页展示数据的数据量
   const [pageSize, setPageSize] = useState(10);
   // 数据总数
-  const [total, setTotal] = useState(10);
+  const [total, setTotal] = useState(0);
   // 添加loading状态控制
   const [loading, setLoading] = useState(false);
   // 初始化授权弹窗是否显示
@@ -154,7 +154,7 @@ export default function DataApi() {
           setDataApiData(res.data.list);
           setCurrent(res.data.pageNo);
           setPageSize(res.data.pageSize);
-          setTotal(res.data.total || 10);
+          setTotal(res.data.total || 0);
         }
       } else {
         Message.error(res.message || '获取数据API列表失败');
