@@ -1,6 +1,6 @@
 import { getAnnotationTabledData } from '@/api/dataAnnotation';
 import { CatalogItemType, getCatalogList } from '@/api/dataCatalog';
-import noDataElement from '@/components/no-data';
+import noDataElement from '../../components/no-data';
 import {
   Button,
   DatePicker,
@@ -189,19 +189,28 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
             // checkStrictly={checkStrictly}
             renderTitle={(node: any) => {
               return (
-                <Tooltip content={node.title}>
-                  <div
-                    style={{
-                      width: node?.childrenData?.length > 0 ? '170px' : '120px',
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                      whiteSpace: 'nowrap',
-                      color: '#0F172A'
-                    }}
-                  >
-                    {node.title}
-                  </div>
-                </Tooltip>
+                <div
+                  style={{
+                    width: node?.childrenData?.length > 0 ? '170px' : '120px',
+                    marginTop: '-2px',
+                    color: '#0F172A'
+                  }}
+                >
+                  <EllipsisPopover value={node.title} />
+                </div>
+                // <Tooltip content={node.title}>
+                //   <div
+                //     style={{
+                //       width: node?.childrenData?.length > 0 ? '170px' : '120px',
+                //       overflow: 'hidden',
+                //       textOverflow: 'ellipsis',
+                //       whiteSpace: 'nowrap',
+                //       color: '#0F172A'
+                //     }}
+                //   >
+                //     {node.title}
+                //   </div>
+                // </Tooltip>
               );
             }}
             onSelect={(value, e: any) => {
@@ -265,7 +274,8 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
       title: '创建人',
       dataIndex: type === 'detail' ? 'create_by' : 'upload_user',
       ellipsis: true,
-      width: 100
+      width: 100,
+      render: (text) => <EllipsisPopover value={text} />
     }
   ];
 
@@ -308,7 +318,8 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
       title: '创建人',
       dataIndex: 'upload_user',
       ellipsis: true,
-      width: 100
+      width: 100,
+      render: (text) => <EllipsisPopover value={text} />
     },
     {
       title: '操作',
@@ -624,7 +635,7 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
                 border={false}
                 scroll={{ y: false }}
                 noDataElement={noDataElement({
-                  description: '暂无已选数据'
+                  description: '暂无数据'
                 })}
               />
               {selectedRowsContent && selectedRowsContent.length > 0 && (

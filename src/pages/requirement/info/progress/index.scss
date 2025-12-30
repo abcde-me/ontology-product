@@ -25,32 +25,38 @@
   .progress-container {
     display: flex;
     align-items: flex-start;
-    gap: 12px;
+    gap: 10px;
     flex-wrap: nowrap;
     white-space: nowrap;
 
     .progress-item {
       display: flex;
       flex-direction: column;
-      gap: 4px;
-      min-width: 160px;
+      width: 160px;
       flex-shrink: 0;
+      padding: 8px 6px;
+      justify-content: center;
+      align-items: flex-start;
+      gap: 2px;
+      border-radius: 4px;
+      background-color: #f8fafd;
 
       .progress-text-wrapper {
+        width: 100%;
         display: flex;
         align-items: center;
-        gap: 4px;
+        justify-content: space-between;
         white-space: nowrap;
       }
 
       .progress-label {
-        font-size: 14px;
-        color: #1d2129;
+        font-size: 12px;
+        color: #334155;
+        font-weight: 500;
       }
 
       .progress-text {
-        font-size: 14px;
-        color: #1d2129;
+        color: #1e293b;
       }
 
       .arco-progress {
@@ -59,11 +65,7 @@
     }
 
     .progress-arrow {
-      color: #86909c;
-      font-size: 12px;
-      flex-shrink: 0;
-      margin: 0 4px;
-      margin-top: 12px; // 对齐到文字中间位置
+      align-self: center;
     }
   }
 

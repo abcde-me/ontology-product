@@ -25,6 +25,7 @@ import AnnotationInterfaceModal from './AnnotationInterfaceModal';
 import LabelPreview from './LabelPreview';
 import TemplateAttributeForm from './TemplateAttributeForm';
 import PreviewIcon from '@/assets/annotation/preview-icon.svg';
+import CancelPreviewIcon from '@/assets/annotation/cancel-preview-icon.svg';
 
 const FormItem = Form.Item;
 const Option = Select.Option;
@@ -131,7 +132,7 @@ const LabelAndAttributeForm: React.FC<LabelAndAttributeFormProps> = ({
       {activeTab === LabelInfoAttributeGroupType.LABEL && (
         <div
           style={{
-            padding: '0 16px 24px',
+            padding: '0 16px 20px',
             display: 'flex',
             alignItems: 'center',
             gap: 8
@@ -161,7 +162,7 @@ const LabelAndAttributeForm: React.FC<LabelAndAttributeFormProps> = ({
           ) : (
             <Button
               type="outline"
-              icon={<PreviewIcon />}
+              icon={<CancelPreviewIcon />}
               style={{
                 width: 100,
                 height: 26,

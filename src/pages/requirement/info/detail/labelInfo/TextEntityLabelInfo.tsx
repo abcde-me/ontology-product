@@ -231,6 +231,7 @@ function TextEntityLabelInfo({
               border={false}
               expandedRowRender={expandedRowRender}
               expandProps={{ width: 30 }}
+              defaultExpandAllRows={true}
               rowKey={(record) => record.relation_id || record.order_num}
             />
           ) : (

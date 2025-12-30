@@ -1,13 +1,19 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Table, Input, Pagination, Button } from '@arco-design/web-react';
+import { detailRequirement } from '@/api/dataAnnotation';
+import { openNewPage } from '@/utils/env';
+import { useParams } from '@/utils/url';
+import {
+  Input,
+  Link,
+  Pagination,
+  Table,
+  Tooltip
+} from '@arco-design/web-react';
 import { ColumnProps } from '@arco-design/web-react/es/Table';
 import { SorterInfo } from '@arco-design/web-react/es/Table/interface';
-import { detailRequirement } from '@/api/dataAnnotation';
-import { useParams } from '@/utils/url';
+import { EllipsisPopover, NoDataCard } from '@ceai-front/arco-material';
 import dayjs from 'dayjs';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import './index.scss';
-import { openNewPage } from '@/utils/env';
-import { EllipsisPopover } from '@ceai-front/arco-material';
 
 const InputSearch = Input.Search;
 
@@ -21,7 +27,7 @@ const statusConfig: Record<number, { text: string; color: string }> = {
   2: { text: '待质检', color: '#86909c' }, // 灰色
   3: { text: '质检中', color: '#2970ff' }, // 蓝色
   4: { text: '被驳回', color: '#f7a500' }, // 橙色
-  5: { text: '改正中', color: '#2970ff' }, // 蓝色
+  5: { text: '改错中', color: '#2970ff' }, // 蓝色
   6: { text: '待复核', color: '#86909c' }, // 灰色
   7: { text: '复核中', color: '#2970ff' }, // 蓝色
   8: { text: '任务完成', color: '#00b42a' } // 绿色
@@ -226,16 +232,23 @@ function RequirementParticular({ isActive }: RequirementParticularProps) {
     {
       title: '操作',
       dataIndex: 'operation',
-      width: 100,
+      width: 60,
       fixed: 'right',
+      align: 'right',
       render: (_: any, record: TaskDetail) => (
-        <Button
-          type="text"
-          onClick={() => handlePreview(record)}
-          className="preview-link"
+        <Tooltip
+          content="暂无可预览的内容"
+          position="top"
+          disabled={record.task_status !== 0}
         >
-          预览
-        </Button>
+          <Link
+            type="text"
+            onClick={() => handlePreview(record)}
+            disabled={record.task_status === 0}
+          >
+            预览
+          </Link>
+        </Tooltip>
       )
     }
   ];
@@ -260,6 +273,8 @@ function RequirementParticular({ isActive }: RequirementParticularProps) {
         loading={loading}
         pagination={false}
         onChange={handleTableChange}
+        noDataElement={<NoDataCard />}
+        scroll={{ x: 'max-content' }}
       />
 
       {total > 0 && (
