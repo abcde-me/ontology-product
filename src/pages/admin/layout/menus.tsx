@@ -247,102 +247,13 @@ export const menus: MenuModel[] = [
       }
     ]
   },
+
   {
     type: 'itemGroup',
-    title: '平台管理',
-    key: 'mgmtGroup',
+    title: '平台资源',
+    key: 'platformResource',
     external: true,
     children: [
-      {
-        title: '组织管理',
-        icon: <OrganMenu className={iconClass} />,
-        key: 'orgMgmt',
-        path:
-          '/tenant/compute/modaforge/operationCenter?url=' +
-          encodeURIComponent(
-            '/operationcenter/tenant/compute/operationcenter/organization'
-          ),
-        activePaths: ['/tenant/compute/modaforge/operationCenter'],
-        queryParamMatcher: (search: string) => {
-          const url = new URLSearchParams(search).get('url');
-          return url?.includes('organization') ?? false;
-        },
-        permission: ORGANIZATION_PERMISSIONS.MENU
-      },
-      {
-        title: '用户管理',
-        icon: <MemberMenu className={iconClass} />,
-        path:
-          '/tenant/compute/modaforge/operationCenter?url=' +
-          encodeURIComponent(
-            '/operationcenter/tenant/compute/operationcenter/user'
-          ),
-        key: 'userMgmt',
-        activePaths: ['/tenant/compute/modaforge/operationCenter'],
-        queryParamMatcher: (search: string) => {
-          const url = new URLSearchParams(search).get('url');
-          return (
-            (url?.includes('/user') && !url?.includes('user-group')) ?? false
-          );
-        },
-        permission: USER_PERMISSIONS.MENU
-      },
-      {
-        title: '用户组管理',
-        icon: <MemberMenu className={iconClass} />,
-        path:
-          '/tenant/compute/modaforge/operationCenter?url=' +
-          encodeURIComponent(
-            '/operationcenter/tenant/compute/operationcenter/user-group'
-          ),
-        key: 'userGroupMgmt',
-        activePaths: ['/tenant/compute/modaforge/operationCenter'],
-        queryParamMatcher: (search: string) => {
-          const url = new URLSearchParams(search).get('url');
-          return url?.includes('user-group') ?? false;
-        },
-        permission: USER_GROUP_PERMISSIONS.MENU
-      },
-      {
-        title: '角色管理',
-        icon: <BaseMenu className={iconClass} />,
-        path:
-          '/tenant/compute/modaforge/operationCenter?url=' +
-          encodeURIComponent(
-            '/operationcenter/tenant/compute/operationcenter/role'
-          ),
-        key: 'roleMgmt',
-        activePaths: ['/tenant/compute/modaforge/operationCenter'],
-        queryParamMatcher: (search: string) => {
-          const url = new URLSearchParams(search).get('url');
-          return url?.includes('role') ?? false;
-        },
-        permission: ROLE_PERMISSIONS.MENU
-      }
-    ]
-  },
-  {
-    type: 'itemGroup',
-    title: '工作空间',
-    key: 'workspaceGroup',
-    external: true,
-    children: [
-      {
-        title: '项目管理',
-        icon: <OrganMenu className={iconClass} />,
-        key: 'projectMgmt',
-        path:
-          '/tenant/compute/modaforge/operationCenter?url=' +
-          encodeURIComponent(
-            '/operationcenter/tenant/compute/operationcenter/project'
-          ),
-        activePaths: ['/tenant/compute/modaforge/operationCenter'],
-        queryParamMatcher: (search: string) => {
-          const url = new URLSearchParams(search).get('url');
-          return url?.includes('project') ?? false;
-        },
-        permission: PROJECT_PERMISSIONS.MENU
-      },
       {
         title: 'API Key管理',
         icon: <OrganMenu className={iconClass} />,
@@ -374,6 +285,30 @@ export const menus: MenuModel[] = [
           return url?.includes('tag') ?? false;
         },
         permission: TAG_PERMISSIONS.LIST
+      }
+    ]
+  },
+  {
+    type: 'itemGroup',
+    title: '工作空间',
+    key: 'workspaceGroup',
+    external: true,
+    children: [
+      {
+        title: '项目管理',
+        icon: <OrganMenu className={iconClass} />,
+        key: 'projectMgmt',
+        path:
+          '/tenant/compute/modaforge/operationCenter?url=' +
+          encodeURIComponent(
+            '/operationcenter/tenant/compute/operationcenter/project'
+          ),
+        activePaths: ['/tenant/compute/modaforge/operationCenter'],
+        queryParamMatcher: (search: string) => {
+          const url = new URLSearchParams(search).get('url');
+          return url?.includes('project') ?? false;
+        },
+        permission: PROJECT_PERMISSIONS.MENU
       }
     ]
   }
