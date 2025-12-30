@@ -184,13 +184,31 @@ const TemplateAttributeForm: React.FC<TemplateAttributeFormProps> = ({
           {(1 === attrGroup.attribute_group_class ||
             2 === attrGroup.attribute_group_class) && (
             <div key={labelIndex} className="attribute-group-item-template">
-              <div className="attribute-group-info-title-temp">
-                {1 === attrGroup.attribute_group_class
-                  ? '单选选项'
-                  : 2 === attrGroup.attribute_group_class
-                    ? '多选选项'
-                    : ''}
-              </div>
+              {/* 选项和展示名称的表头 */}
+              {attrGroup.label_info_attribute?.length > 0 && (
+                <div className="attribute-options-header">
+                  <div className="attribute-options-header-item">
+                    <span>选项</span>
+                    <span className="required-mark">*</span>
+                  </div>
+                  <div className="attribute-options-header-item">
+                    <span>展示名称</span>
+                    <Tooltip
+                      content={
+                        <div style={{ fontSize: 14 }}>展示在标注页面的名称</div>
+                      }
+                    >
+                      <IconQuestionCircle
+                        style={{
+                          color: '#6E7B8D',
+                          marginLeft: 4
+                        }}
+                      />
+                    </Tooltip>
+                  </div>
+                  <div className="attribute-options-header-placeholder"></div>
+                </div>
+              )}
               {attrGroup.label_info_attribute?.map((attr, attrIndex) => (
                 <div
                   key={attr.label_info_id}
@@ -199,8 +217,7 @@ const TemplateAttributeForm: React.FC<TemplateAttributeFormProps> = ({
                   <div className="attribute-info-item">
                     <FormItem
                       field={`attribute_name_en${attr?.label_info_id}`}
-                      label={`选项${attrIndex + 1}:`}
-                      style={{ color: 'red' }}
+                      label={null}
                       rules={[
                         {
                           required: true,
@@ -233,8 +250,6 @@ const TemplateAttributeForm: React.FC<TemplateAttributeFormProps> = ({
                         placeholder="用于存储标注结果"
                         value={attr.attribute_name_en}
                         style={{
-                          width: 340,
-                          height: 32,
                           backgroundColor: '#fff'
                         }}
                         onChange={(val) =>
@@ -253,21 +268,7 @@ const TemplateAttributeForm: React.FC<TemplateAttributeFormProps> = ({
                     </FormItem>
                     <FormItem
                       field={`attribute_name_cn${attr?.label_info_id}`}
-                      label={
-                        <div>
-                          <span style={{ marginRight: 2 }}>展示名称</span>
-                          <Tooltip
-                            content={
-                              <div style={{ fontSize: 14 }}>
-                                展示在标注页面的名称
-                              </div>
-                            }
-                          >
-                            <IconQuestionCircle style={{ color: '#6E7B8D' }} />
-                          </Tooltip>
-                          :
-                        </div>
-                      }
+                      label={null}
                       rules={[
                         {
                           validateTrigger: ['onChange', 'onBlur'],
@@ -298,8 +299,6 @@ const TemplateAttributeForm: React.FC<TemplateAttributeFormProps> = ({
                         placeholder="展示在标注页面的名称"
                         type="text"
                         style={{
-                          width: 340,
-                          height: 32,
                           backgroundColor: '#fff'
                         }}
                         value={attr.attribute_name_cn}
@@ -317,7 +316,7 @@ const TemplateAttributeForm: React.FC<TemplateAttributeFormProps> = ({
                         }}
                       />
                     </FormItem>
-                    <FormItem label={null} style={{ margin: 0 }}>
+                    <div className="attribute-delete-btn">
                       {attrGroup.label_info_attribute?.length > 1 && (
                         <Tooltip content="删除">
                           <IconDelete
@@ -344,7 +343,7 @@ const TemplateAttributeForm: React.FC<TemplateAttributeFormProps> = ({
                           />
                         </Tooltip>
                       )}
-                    </FormItem>
+                    </div>
                   </div>
                 </div>
               ))}
