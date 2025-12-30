@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { IconArrowLeft, IconCopy } from '@arco-design/web-react/icon';
 import {
   Breadcrumb,
@@ -39,7 +39,6 @@ import EllipsisPopoverCom from '@/components/ellipsis-popover-com';
 
 import styles from './detail.module.scss';
 import { SorterInfo } from '@arco-design/web-react/es/Table/interface';
-import { render } from 'katex';
 import PdfRenderer from '../ragDetail/components/scenes/pdf/PdfRenderer';
 import { getFileBinaryData } from '@/api/modules/rag';
 import TableViewer from '../ragDetail/components/scenes/table/TableViewer';
@@ -58,7 +57,7 @@ interface MinIOBaseData {
   bucketName?: string;
   objectNum?: string;
   region?: string;
-  storageSize?: string;
+  objectsSize?: number;
   versioning?: number;
   policy?: string;
   encryptType?: string;
@@ -132,10 +131,17 @@ export default function MetadataManagementDetail() {
     }
   });
 
+  // 创建挂载标识：标记是否为组件首次挂载
+  const isFirstMount = useRef(true);
+
   const [fieldSearchForm] = Form.useForm();
   const [partitionSearchForm] = Form.useForm();
 
   useEffect(() => {
+    if (isFirstMount.current) {
+      isFirstMount.current = false;
+      return;
+    }
     if (fieldCurrent !== 1) {
       setFieldCurrent(1);
     } else if (partitionCurrent !== 1) {
@@ -180,7 +186,7 @@ export default function MetadataManagementDetail() {
     setSelectFileType(objectPath);
     const res = await getFileBinaryData({
       bucket_name: record.bucketName,
-      path: record.objectPath,
+      path: record.objectPath.split('/').slice(1).join('/'),
       convert_pdf: !(selectFileType === 'xls' || selectFileType === 'xlsx')
     });
     setFileBinaryData(res);
@@ -332,7 +338,7 @@ export default function MetadataManagementDetail() {
     },
     {
       label: '存储大小',
-      value: minIOBaseData.storageSize || '-'
+      value: formatFileSize(Number(minIOBaseData.objectsSize || 0))
     },
     {
       label: '版本控制',
@@ -393,13 +399,7 @@ export default function MetadataManagementDetail() {
       title: '存储类型',
       dataIndex: 'storageClass',
       key: 'storageClass',
-      width: 180,
-      filters: [
-        {
-          text: 's3',
-          value: 's3'
-        }
-      ]
+      width: 150
     },
     {
       title: '存储大小',
@@ -791,9 +791,9 @@ export default function MetadataManagementDetail() {
             bucketId: metadataId,
             ...minIoFieldSearchValues?.filters
           },
-          sorter: {
-            ...minIoFieldSearchValues?.sorter
-          }
+          sort: minIoFieldSearchValues?.sorter
+            ? [{ ...minIoFieldSearchValues?.sorter }]
+            : []
         };
         const res = await listMetadataMinioObject(params);
         if (res.code === '' && res.status === 200) {
