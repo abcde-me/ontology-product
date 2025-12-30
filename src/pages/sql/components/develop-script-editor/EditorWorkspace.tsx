@@ -483,7 +483,10 @@ const EditorWorkspaceContent: React.FC<{
               <Space size={12}>
                 {
                   <PermissionWrapper
-                    permission={SQL_PERMISSIONS.DEVELOP_SCIPT_RUN}
+                    permission={[
+                      SQL_PERMISSIONS.DEVELOP_SCIPT_RUN,
+                      SQL_PERMISSIONS.DEVELOP_SCIPT_MODIFY
+                    ]}
                   >
                     <Button
                       type="primary"
@@ -518,7 +521,7 @@ const EditorWorkspaceContent: React.FC<{
                     !scriptInfo?.script_context?.trim()
                   }
                   className={classNames(
-                    'h-[26px] px-[0px]',
+                    'h-[26px] !px-0',
                     styles['format-code-btn']
                   )}
                 >

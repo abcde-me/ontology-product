@@ -7,6 +7,12 @@
   border-radius: 10px;
   min-height: calc(100% - 40px);
 
+  .requirement-process-header .flow-header {
+    .title {
+      margin-bottom: 0 !important;
+    }
+  }
+
   .requirement-form {
     display: flex;
     align-items: center;
