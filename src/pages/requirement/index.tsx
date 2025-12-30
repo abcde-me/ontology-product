@@ -467,6 +467,7 @@ export default function Requirement() {
         toggleText="数据标注流程"
         defaultExpanded={true}
         steps={requirementProcess as any}
+        headerClassName="requirement-process-header"
       />
       <div className="requirement-form">
         <Form
