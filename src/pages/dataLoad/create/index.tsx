@@ -1410,14 +1410,15 @@ export default function DataLoadCreate() {
                 showSearch
                 filterOption={filterOption}
                 onChange={(value, option: any) => {
-                  setPreviewData({
-                    ...previewData,
-                    connector_id: value
-                  });
+                  // setPreviewData({
+                  //   ...previewData,
+                  //   connector_id: value
+                  // });
                   if (option?.prefixCls === 'Elasticsearch') {
                     setIsMultiple(true);
                   }
                   setIsMultiple(false);
+                  setPreviewData([]);
                 }}
               >
                 {connectName.map((option) => (
