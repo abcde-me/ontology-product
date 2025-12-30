@@ -26,7 +26,7 @@ import LabelPreview from './LabelPreview';
 import TemplateAttributeForm from './TemplateAttributeForm';
 import PreviewIcon from '@/assets/annotation/preview-icon.svg';
 import CancelPreviewIcon from '@/assets/annotation/cancel-preview-icon.svg';
-
+import { EllipsisPopover } from '@ceai-front/arco-material';
 const FormItem = Form.Item;
 const Option = Select.Option;
 
@@ -412,7 +412,8 @@ const LabelAndAttributeForm: React.FC<LabelAndAttributeFormProps> = ({
                         {curModelLabelList(item.label_shape ?? 3)?.map(
                           (option) => (
                             <Option key={option.value} value={option.value}>
-                              {option.label}
+                              <EllipsisPopover value={option.label} />
+                              {/* {option.label} */}
                             </Option>
                           )
                         )}
