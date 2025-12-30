@@ -110,8 +110,6 @@ const FieldImportUpload: React.FC<FieldImportUploadProps> = ({
     try {
       const res = await downloadDataAssetFieldsTemplate();
 
-      console.log('res---->', res);
-
       if (res?.status !== 200 || res?.code !== '') {
         Message.error(res.message ?? '下载模板失败');
         return;
