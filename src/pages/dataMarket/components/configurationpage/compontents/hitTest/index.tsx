@@ -78,11 +78,11 @@ function HitTest(props: { datasetName: string }) {
   });
 
   const mocktest = {
-    reranking_enable: false,
+    reranking_enable: true,
     search_method: 'Hybrid',
     score_threshold_enabled: true,
     score_threshold: 0.1,
-    top_k: 50,
+    top_k: 20,
     weights: 0.7
   };
   const submitEditeditPolicy = () => {
