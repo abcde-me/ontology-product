@@ -5,6 +5,7 @@ import ExportIcon from '@/assets/annotation/requirement-export.svg';
 import QualityIcon from '@/assets/annotation/requirement-quality.svg';
 import ImageIcon from '@/assets/annotation/new-image-column.svg';
 import TextIcon from '@/assets/annotation/text-column.svg';
+import ExportPng from '@/assets/annotation/requirement-export.png';
 import EllipsisPopover from '@/components/ellipsis-popover-com';
 import noDataElement from '@/components/no-data';
 import { PermissionWrapper } from '@/components/PermissionGuard';
@@ -20,7 +21,8 @@ import {
   Pagination,
   PaginationProps,
   Table,
-  Modal
+  Modal,
+  Image
 } from '@arco-design/web-react';
 import { ColumnProps } from '@arco-design/web-react/es/Table';
 import { SorterInfo } from '@arco-design/web-react/es/Table/interface';
@@ -438,7 +440,7 @@ export default function Requirement() {
       description: '对标注结果进行质检，驳回错误数据'
     },
     {
-      icon: <ExportIcon />,
+      icon: <Image src={ExportPng} preview={false} />,
       title: '导出结果',
       description: '下载标注结果到本地'
       // (

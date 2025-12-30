@@ -3,6 +3,7 @@ import { Modal, Table, Pagination, Tooltip } from '@arco-design/web-react';
 import { useCatalogTree } from '../../hooks/useCatalogTree';
 import noDataElement from '@/components/no-data';
 import dayjs from 'dayjs';
+import { EllipsisPopover } from '@ceai-front/arco-material';
 
 interface SelectedDataModalProps {
   visible: boolean;
@@ -46,19 +47,11 @@ const SelectedDataModal: React.FC<SelectedDataModalProps> = ({
       ellipsis: true,
       width: 230,
       render: (text: string) => {
-        const path = getPath(text);
+        const path = getPath(text) || '未知路径';
         return (
-          <Tooltip content={path}>
-            <div
-              style={{
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                whiteSpace: 'nowrap'
-              }}
-            >
-              {path || '未知路径'}
-            </div>
-          </Tooltip>
+          <div style={{ width: 220 }}>
+            <EllipsisPopover value={path} />
+          </div>
         );
       }
     },
@@ -90,7 +83,8 @@ const SelectedDataModal: React.FC<SelectedDataModalProps> = ({
       title: '创建人',
       dataIndex: 'create_by',
       ellipsis: true,
-      width: 100
+      width: 100,
+      render: (text) => <EllipsisPopover value={text} />
     }
   ];
 
@@ -145,4 +139,3 @@ const SelectedDataModal: React.FC<SelectedDataModalProps> = ({
 };
 
 export default SelectedDataModal;
-

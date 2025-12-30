@@ -50,7 +50,7 @@ enum InspectionType {
 
 // 状态映射
 const StatusMap: Record<number, { label: string; color: string }> = {
-  [InspectionStatus.InProgress]: { label: '进行中', color: '#1037C9' },
+  [InspectionStatus.InProgress]: { label: '进行中', color: '#007DFA' },
   [InspectionStatus.Finished]: { label: '已结束', color: '#94A3B8' }
 };
 
@@ -259,19 +259,19 @@ function QualityTaskDetail() {
         </div>
       );
     }
-    if (result.uninspected > 0) {
-      items.push(
-        <div key="uninspected" className="result-item">
-          <Tag
-            style={{ backgroundColor: '#FEFBEB', color: '#F7BA1E' }}
-            size="small"
-          >
-            未检
-          </Tag>
-          <span className="result-count">{result.uninspected}</span>
-        </div>
-      );
-    }
+    // if (result.uninspected > 0) {
+    //   items.push(
+    //     <div key="uninspected" className="result-item">
+    //       <Tag
+    //         style={{ backgroundColor: '#FEFBEB', color: '#F7BA1E' }}
+    //         size="small"
+    //       >
+    //         未检
+    //       </Tag>
+    //       <span className="result-count">{result.uninspected}</span>
+    //     </div>
+    //   );
+    // }
     return items.length > 0 ? (
       <div className="quality-result-cell">{items}</div>
     ) : (
@@ -490,7 +490,7 @@ function QualityTaskDetail() {
             </div>
             <div className="metric-actions">
               <Tooltip
-                content="暂无未抽检任务"
+                content="没有未抽检的任务"
                 disabled={(metricData?.task_volume_unsampled || 0) > 0}
               >
                 <Button
@@ -501,18 +501,30 @@ function QualityTaskDetail() {
                   抽检
                 </Button>
               </Tooltip>
-              <Button
-                onClick={() => handleBatchConfirm('pass_all')}
-                style={{ width: 74, padding: '5px 0' }}
+              <Tooltip
+                content="没有未抽检的任务"
+                disabled={(metricData?.task_volume_unsampled || 0) > 0}
               >
-                全部通过
-              </Button>
-              <Button
-                onClick={() => handleBatchConfirm('reject_all')}
-                style={{ width: 74, padding: '5px 0' }}
+                <Button
+                  onClick={() => handleBatchConfirm('pass_all')}
+                  style={{ width: 74, padding: '5px 0' }}
+                  disabled={metricData?.task_volume_unsampled === 0}
+                >
+                  全部通过
+                </Button>
+              </Tooltip>
+              <Tooltip
+                content="没有未抽检的任务"
+                disabled={(metricData?.task_volume_unsampled || 0) > 0}
               >
-                全部驳回
-              </Button>
+                <Button
+                  onClick={() => handleBatchConfirm('reject_all')}
+                  style={{ width: 74, padding: '5px 0' }}
+                  disabled={metricData?.task_volume_unsampled === 0}
+                >
+                  全部驳回
+                </Button>
+              </Tooltip>
             </div>
           </div>
 

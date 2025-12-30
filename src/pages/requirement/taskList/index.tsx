@@ -22,6 +22,7 @@ import { CopyItemIcon } from '@ceai-front/arco-material';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import '../index.scss';
 import { RequirementType, RequirementTypeNameMap } from '../type';
+import { EllipsisPopover as EllipsisPopoverCom } from '@ceai-front/arco-material';
 
 function TaskList() {
   const [form] = Form.useForm();
@@ -140,10 +141,10 @@ function TaskList() {
       ellipsis: true,
       className: 'hover-change requirement-name',
       render: (_, record) => {
-        return renderEmptyPlaceholder(record.name) !== '-' ? (
-          <Tooltip content={record?.name}>{record?.name}</Tooltip>
-        ) : (
-          <span>-</span>
+        return (
+          <div style={{ width: 270 }}>
+            <EllipsisPopoverCom value={record?.name} />
+          </div>
         );
       }
     },
@@ -315,12 +316,11 @@ function TaskList() {
 
   return (
     <div className="requirement">
-      <h1 style={{ fontSize: '20px', fontWeight: 'bold' }}>标注任务</h1>
+      <h1 style={{ fontSize: '20px', fontWeight: 600 }}>标注任务</h1>
       <div className="requirement-form">
         <Form
           form={form}
           autoComplete="off"
-          style={{ marginTop: '16px' }}
           layout="inline"
           validateMessages={{
             required: (_, { label }) => `必须填写 ${label}`

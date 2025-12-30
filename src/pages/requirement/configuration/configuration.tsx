@@ -1283,7 +1283,7 @@ export default function RequirementConfig() {
                       style={{ width: 200 }}
                     />
                   </FormItem>
-                  <Text>分钟</Text>
+                  <Text style={{ fontSize: '14px' }}>分钟</Text>
                 </Space>
               </FormItem>
               <FormItem field="taskDistribution" label="分配人员:" required>

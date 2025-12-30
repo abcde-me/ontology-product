@@ -15,6 +15,7 @@ import './GenerateRecordModal.scss';
 import { generateRecord, downloadGenRecord } from '@/api/dataAnnotation';
 import dayjs from 'dayjs';
 import { downloadBlob, isBlob, parseFilename } from '../utils/downloadBlob';
+import { NoDataCard } from '@ceai-front/arco-material';
 // 状态配置 status: 0-生成中 1-生成失败 2-未下载 3-已下载
 const statusConfig: Record<number, { text: string; color: string }> = {
   0: { text: '生成中', color: '#2970ff' }, // 蓝色
@@ -194,6 +195,7 @@ function GenerateRecordModal({ visible, onClose }: GenerateRecordModalProps) {
           loading={loading}
           pagination={false}
           onChange={handleTableChange}
+          noDataElement={<NoDataCard type="block" />}
         />
 
         {total > 0 && (
