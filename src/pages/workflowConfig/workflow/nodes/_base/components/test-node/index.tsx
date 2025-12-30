@@ -11,16 +11,23 @@ import {
   IconLoading,
   IconRecordStop
 } from '@arco-design/web-react/icon';
-import { Button, Drawer, Tooltip, Typography } from '@arco-design/web-react';
+import {
+  Button,
+  Drawer,
+  Message,
+  Tooltip,
+  Typography
+} from '@arco-design/web-react';
 import { useStore as useTaskStore } from '@/pages/workflowConfig/task/store';
 import { useShallow } from 'zustand/react/shallow';
 import { useNodesInteractions } from '@/pages/workflowConfig/workflow/hooks';
 import styles from './index.module.scss';
-import { useRequest } from 'ahooks';
+import { useDebounceFn, useRequest } from 'ahooks';
 import { getWorkflowTaskLogs } from '@/api/workflowV2';
 import { TASK_NODE_RUN_STATUS_MAP } from '@/pages/workflowTask/common/constants';
 import { TaskNodeStatus } from '@/types/workflowTaskApi';
 import { nodeIsRunning } from '@/pages/workflowConfig/workflow/nodes/utils';
+import { isNil } from 'lodash-es';
 
 export default memo(function TestNode(props: {
   id: React.Key;
@@ -29,7 +36,8 @@ export default memo(function TestNode(props: {
   const { showLog = false, id: nodeId } = props;
   const [drawerLog, setDrawerLog] = useState(false);
   const { handleTestNode, handleStopTestNode } = useNodesInteractions();
-  const logCache = useRef<string>();
+  const logSet = useRef<Set<string>>(new Set<string>());
+  const startNum = useRef(0);
 
   const { nodesProcessDetail } = useTaskStore(
     useShallow((state) => ({
@@ -44,31 +52,51 @@ export default memo(function TestNode(props: {
   }, [nodeId, nodesProcessDetail]);
 
   const {
-    data: logs,
+    data: logsData,
     loading: logLoading,
     cancel
   } = useRequest(
     async () => {
-      if (!drawerLog || !nodeProcessStatus) return;
-      return await getWorkflowTaskLogs(nodeProcessStatus.id);
+      // 无运行状态或者抽屉没打开时不发起请求
+      if (!drawerLog || !nodeProcessStatus) {
+        cancel();
+        return;
+      }
+      const res = await getWorkflowTaskLogs(
+        nodeProcessStatus.id,
+        startNum.current
+      );
+      if (!res.data) {
+        Message.error('获取日志失败');
+        cancel();
+        return {
+          logs: Array.from(logSet.current),
+          skip_line_num: 0
+        };
+      }
+      const { message, skip_line_num } = res.data;
+      if (!logSet.current.has(message)) {
+        logSet.current.add(message);
+      }
+      startNum.current += 100;
+      if (!message) {
+        cancel();
+        startNum.current = 0;
+      }
+      return {
+        logs: Array.from(logSet.current),
+        skip_line_num
+      };
     },
     {
       refreshDeps: [nodeProcessStatus, drawerLog],
       ready: drawerLog,
-      pollingInterval: 2000,
-      onSuccess(logs?: string) {
-        if (!logs) return;
-        if (logs !== logCache.current) {
-          logCache.current = logs;
-          return;
-        }
-        cancel();
-      }
+      pollingInterval: 2000
     }
   );
 
   const handleStop = useCallback(() => {
-    if (!nodeProcessStatus) return;
+    if (!nodeProcessStatus?.process_instance_id) return;
     const { process_instance_id } = nodeProcessStatus;
     handleStopTestNode(process_instance_id);
   }, [nodeProcessStatus]);
@@ -82,11 +110,22 @@ export default memo(function TestNode(props: {
   }, [nodeProcessStatus]);
 
   useEffect(() => {
-    if (showLog) return;
+    if (!showLog) return;
     if (nodeProcessStatus?.state === TaskNodeStatus.SUCCESS) {
       setDrawerLog(true);
     }
   }, [nodeProcessStatus?.state]);
+  const startNodeTest = useCallback(() => {
+    handleTestNode(nodeId.toString());
+  }, [nodeId]);
+
+  const { run: operateNode } = useDebounceFn(
+    (type: 'test' | 'stop') => {
+      if (type === 'test') return startNodeTest();
+      return handleStop();
+    },
+    { wait: 200 }
+  );
 
   return (
     <div className={'flex flex-1 flex-shrink-0 items-center justify-end gap-2'}>
@@ -105,13 +144,15 @@ export default memo(function TestNode(props: {
               {`(${nodeProcessStatus.duration})`}
             </Typography.Text>
           )}
-          <Button
-            type={'text'}
-            className={'p-0'}
-            onClick={() => setDrawerLog(true)}
-          >
-            查看日志
-          </Button>
+          {!isNil(nodeProcessStatus?.id) && (
+            <Button
+              type={'text'}
+              className={'p-0'}
+              onClick={() => setDrawerLog(true)}
+            >
+              查看日志
+            </Button>
+          )}
         </div>
       )}
       <Tooltip
@@ -123,39 +164,47 @@ export default memo(function TestNode(props: {
           <Tooltip content={''}>
             <IconRecordStop
               className={`h-4 w-4 ${styles['node-operator']}`}
-              onClick={handleStop}
+              onClick={() => operateNode('stop')}
             />
           </Tooltip>
         ) : (
           <IconCaretRight
             className={`h-4 w-4 ${styles['node-operator']}`}
-            onClick={() => handleTestNode(nodeId as string)}
+            onClick={() => operateNode('test')}
           />
         )}
       </Tooltip>
-      {showLog && (
-        <Drawer
-          title={'日志'}
-          visible={drawerLog}
-          mask={false}
-          maskClosable={false}
-          onCancel={() => setDrawerLog(false)}
-          footer={null}
-          placement={'bottom'}
-          className={styles['task-log-drawer']}
-          getPopupContainer={() => {
+      <Drawer
+        title={'日志'}
+        visible={drawerLog && showLog}
+        mask={false}
+        maskClosable={false}
+        onCancel={() => {
+          startNum.current = 0;
+          logSet.current.clear();
+          setDrawerLog(false);
+        }}
+        closable
+        footer={null}
+        placement={'bottom'}
+        className={styles['task-log-drawer']}
+        getPopupContainer={() => {
+          return (
+            document.querySelector('#workFlowNodeConfigPanel') || document.body
+          );
+        }}
+      >
+        <div className={`${styles['log-content']}`}>
+          {logsData?.logs.map((log, index, arr) => {
             return (
-              document.querySelector('#workFlowNodeConfigPanel') ||
-              document.body
+              <div key={index}>
+                {log}
+                {logLoading && index === arr.length - 1 && <IconLoading />}
+              </div>
             );
-          }}
-        >
-          <div className={`${styles['log-content']}`}>
-            {logs}
-            {logLoading && <IconLoading />}
-          </div>
-        </Drawer>
-      )}
+          })}
+        </div>
+      </Drawer>
     </div>
   );
 });
