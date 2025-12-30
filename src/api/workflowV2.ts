@@ -293,16 +293,15 @@ export async function getWorkflowNodeTask(task_id: React.Key) {
 }
 
 // 工作流-获取工作流运行日志
-export async function getWorkflowTaskLogs(task_id: React.Key) {
-  const res = await UAPI.RES.getWorkflowTaskLogs({})
+export async function getWorkflowTaskLogs(task_id: React.Key, start: number) {
+  return await UAPI.RES.getWorkflowTaskLogs({})
     .post({
       task_instance_id: task_id,
-      limit: 1000,
-      skip_line_num: 0
+      limit: 100,
+      skip_line_num: start
     })
     .inRegion()
     .do();
-  return res.data?.message || '暂无日志';
 }
 
 /**
