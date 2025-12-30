@@ -511,11 +511,13 @@ export default function Step1MetadataFields({
   return (
     <>
       {/* 导入字段模态框 */}
-      <ImportFieldsModal
-        visible={showImportModal}
-        onClose={() => setShowImportModal(false)}
-        onConfirm={handleImportConfirm}
-      />
+      {showImportModal && (
+        <ImportFieldsModal
+          visible={showImportModal}
+          onClose={() => setShowImportModal(false)}
+          onConfirm={handleImportConfirm}
+        />
+      )}
 
       <Form
         form={form}

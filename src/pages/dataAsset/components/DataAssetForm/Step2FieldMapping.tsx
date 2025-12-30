@@ -206,7 +206,9 @@ export default function Step2FieldMapping({
 
             return (
               <Select
+                showSearch
                 placeholder="请选择"
+                allowClear
                 value={selectValue}
                 disabled={disableMappingForThisRow}
                 onChange={(value) =>
@@ -498,7 +500,7 @@ export default function Step2FieldMapping({
       const rawMappings: FieldMapping[] = form.getFieldValue('mappings') || [];
 
       // 将原始映射表单数据格式化为后端需要的结构
-      const formatted = rawMappings.map((row) => {
+      const formatted = rawMappings.map((row, index) => {
         // 通过 sequence 找到对应的元数据字段（nameEn、type、default、required、allowModify）
         const meta = metadataFields[row.sequence - 1];
 
@@ -550,7 +552,7 @@ export default function Step2FieldMapping({
           allowModify: !!meta?.allowModify,
           mapping,
           autoMap: false,
-          displaySort: meta?.displaySort || 0
+          displaySort: index + 1
         };
       });
 
