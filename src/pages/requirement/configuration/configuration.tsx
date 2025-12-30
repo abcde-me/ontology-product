@@ -1206,7 +1206,8 @@ export default function RequirementConfig() {
             <div className="basic-title">质检任务配置</div>
             <Form
               form={qualityTaskForm}
-              className="configuration-form"
+              className="quality-task-form"
+              labelAlign="left"
               onValuesChange={(changedValues) => {
                 // 当质检轮次变化时，重新生成任务包列表
                 if ('qc_round' in changedValues) {
