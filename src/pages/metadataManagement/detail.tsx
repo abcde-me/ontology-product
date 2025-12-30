@@ -393,19 +393,11 @@ export default function MetadataManagementDetail() {
       title: '存储类型',
       dataIndex: 'storageClass',
       key: 'storageClass',
-      width: 150,
+      width: 180,
       filters: [
         {
-          text: 'string',
-          value: 'string'
-        },
-        {
-          text: 'boolean',
-          value: 'boolean'
-        },
-        {
-          text: 'number',
-          value: 'number'
+          text: 's3',
+          value: 's3'
         }
       ]
     },
@@ -1139,6 +1131,7 @@ export default function MetadataManagementDetail() {
                       }
                     });
                   }}
+                  scroll={{ x: true }}
                 />
                 {/* 分页 */}
                 {fieldData && fieldData.length > 0 && (
