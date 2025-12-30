@@ -305,13 +305,12 @@ export async function analyzeDataAssetFieldsFile(params: {
 
 // 下载数据资产字段模板
 export async function downloadDataAssetFieldsTemplate(): Promise<
-  AxiosResponse<Blob>
+  ApiRes<string>
 > {
-  return (await UAPI.RES.downloadDataAssetFieldsTemplate({})
+  return await UAPI.RES.downloadDataAssetFieldsTemplate({})
     .post()
-    .withConfig({ responseType: 'blob' })
     .inRegion()
-    .do({ preCheck: false })) as AxiosResponse<Blob>;
+    .do();
 }
 
 // 查询支持的字段类型
