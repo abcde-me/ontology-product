@@ -454,12 +454,14 @@ const add = forwardRef((props: any, ref) => {
                 >
                   <Select
                     placeholder="请选择"
-                    // onChange={(value) =>
-                    //   Message.info({
-                    //     content: `You select ${value}.`,
-                    //     showIcon: true
-                    //   })
-                    // }
+                    onChange={() =>
+                      form.setFieldsValue({
+                        region: '',
+                        host: '',
+                        port: '',
+                        database: ''
+                      })
+                    }
                     defaultValue="MySQL"
                   >
                     {options.map((option, index) => (
