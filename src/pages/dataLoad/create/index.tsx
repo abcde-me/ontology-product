@@ -867,15 +867,34 @@ export default function DataLoadCreate() {
         console.log('formValues', formValues);
         const formData = buildFormData(formValues, pathId, submitType);
 
+        const isContentEmpty = formData.field_mappings.every(
+          (item: {
+            source_field: string | boolean;
+            target_field: string | boolean;
+          }) => {
+            const sourceIsValid =
+              item?.source_field !== '' && item?.source_field != null;
+            const targetIsValid =
+              item?.target_field !== '' && item?.target_field != null;
+            return sourceIsValid && targetIsValid;
+          }
+        );
+
         const allIsPrimaryKeyEmpty = formData.field_mappings.every(
-          (item: { is_primary_key: string }) => {
+          (item: { is_primary_key: string | boolean }) => {
             return (
-              item.is_primary_key === '' ||
+              item.is_primary_key === false ||
               item.is_primary_key === null ||
-              item.is_primary_key === undefined
+              item.is_primary_key === undefined ||
+              item.is_primary_key === ''
             );
           }
         );
+
+        if (!isContentEmpty) {
+          Message.error('请输入JSON字段和存储字段');
+          return;
+        }
 
         if (allIsPrimaryKeyEmpty && sourceType === SOURCE_TYPES.MQ) {
           Message.error('请至少设置一个主键');
@@ -1391,14 +1410,15 @@ export default function DataLoadCreate() {
                 showSearch
                 filterOption={filterOption}
                 onChange={(value, option: any) => {
-                  setPreviewData({
-                    ...previewData,
-                    connector_id: value
-                  });
+                  // setPreviewData({
+                  //   ...previewData,
+                  //   connector_id: value
+                  // });
                   if (option?.prefixCls === 'Elasticsearch') {
                     setIsMultiple(true);
                   }
                   setIsMultiple(false);
+                  setPreviewData([]);
                 }}
               >
                 {connectName.map((option) => (
