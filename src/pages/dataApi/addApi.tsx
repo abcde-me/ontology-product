@@ -320,9 +320,9 @@ export default function AddApi() {
     const params = {
       ...apiBaseInfo,
       limitTime: 60,
-      limitCount: Number(form.getFieldValue('limitCount')),
-      cacheTime: Number(form.getFieldValue('cacheTime')),
-      databaseType: Number(form.getFieldValue('databaseType')),
+      limitCount: Number(form.getFieldValue('limitCount')) || 100,
+      cacheTime: Number(form.getFieldValue('cacheTime')) || 60,
+      databaseType: Number(form.getFieldValue('databaseType')) || 1,
       sql: value,
       paramConfig: testModalDataSource,
       resultConfig: resultArray,
@@ -429,7 +429,7 @@ export default function AddApi() {
     const metadataTypeArr = ['iceberg', 'doris', 'kafka', 'minio', 'milvus'];
     if (metadataTypeArr.includes(treeNode.props.parentKey)) {
       const params = {
-        databaseType: treeNode.props.parentKey,
+        databaseType: treeNode.props.parentKey === 'iceberg' ? 1 : 2,
         tableId: Number(treeNode.props.dataRef.key.split('_').pop())
       };
       return openDataSearchTable(params).then((res) => {
