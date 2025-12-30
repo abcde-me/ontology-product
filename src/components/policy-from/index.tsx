@@ -1,7 +1,6 @@
 import React, { forwardRef, useEffect, useImperativeHandle } from 'react';
 import styles from './index.module.scss';
 import { Form, Radio, Space, Slider, Switch } from '@arco-design/web-react';
-import { useState } from 'react';
 
 const INIT_FROM_VALUE = {
   reranking_enable: true,
@@ -13,12 +12,24 @@ const INIT_FROM_VALUE = {
 };
 
 function DemoForm(props, ref) {
-  const { FuncChildFrom, seteditPolicy, initParams = {} } = props;
+  const { FuncChildFrom, seteditPolicy, initParams = {}, onFormChange } = props;
   const [form] = Form.useForm();
 
-  const [formvalues, setformvalues] = useState<any>({
-    search_method: 'Hybrid'
-  });
+  // 合并默认值和传入的初始参数
+  const mergedInitialValues = {
+    ...INIT_FROM_VALUE,
+    ...initParams
+  };
+
+  // 每次打开时，使用 initParams 同步表单值
+  useEffect(() => {
+    const mergedValues = {
+      ...INIT_FROM_VALUE,
+      ...initParams
+    };
+    form.setFieldsValue(mergedValues);
+  }, [initParams, form]);
+
   //交互事件
   useImperativeHandle(ref, () => ({
     submitEditeditPolicy: () => {
@@ -31,7 +42,10 @@ function DemoForm(props, ref) {
 
   const onChange = (changeValue, values) => {
     console.log('onChange: ', changeValue, values);
-    setformvalues(values);
+    // 通知父组件表单值变化
+    if (onFormChange) {
+      onFormChange(values);
+    }
   };
   const retrievalVlist = [
     {
@@ -80,7 +94,7 @@ function DemoForm(props, ref) {
       className={styles.fromstylePolicy}
       form={form}
       onChange={onChange}
-      initialValues={INIT_FROM_VALUE}
+      initialValues={mergedInitialValues}
       {...formItemLayout}
     >
       <div className={styles.headername}>检索策略</div>
@@ -169,7 +183,7 @@ function DemoForm(props, ref) {
             {() => {
               const scoreThresholdEnabled =
                 form.getFieldValue('score_threshold_enabled') ??
-                INIT_FROM_VALUE.score_threshold_enabled;
+                mergedInitialValues.score_threshold_enabled;
               return (
                 <Form.Item field="score_threshold" noStyle className="flex-1">
                   <Slider
@@ -185,54 +199,69 @@ function DemoForm(props, ref) {
           </Form.Item>
         </div>
       </Form.Item>
-      {formvalues.search_method == 'Hybrid' ? (
-        <Form.Item
-          shouldUpdate={(prev, next) => prev.weights !== next.weights}
-          noStyle
-        >
-          {() => {
-            const weightsValue =
-              form.getFieldValue('weights') ?? INIT_FROM_VALUE.weights;
-            const keywordValue = 1 - weightsValue;
-            return (
-              <Form.Item
-                label="按比例分配："
-                field="weights"
-                help={
-                  <>
-                    <div className="flex items-center justify-between">
-                      <span>
-                        语义{' '}
-                        <span className="text-primary-6">
-                          {weightsValue.toFixed(2)}
+      <Form.Item
+        shouldUpdate={(prev, next) => prev.search_method !== next.search_method}
+        noStyle
+      >
+        {() => {
+          const currentSearchMethod =
+            form.getFieldValue('search_method') ??
+            mergedInitialValues.search_method;
+          if (currentSearchMethod !== 'Hybrid') {
+            return null;
+          }
+          return (
+            <Form.Item
+              shouldUpdate={(prev, next) => prev.weights !== next.weights}
+              noStyle
+            >
+              {() => {
+                const weightsValue =
+                  form.getFieldValue('weights') ?? mergedInitialValues.weights;
+                const keywordValue = 1 - weightsValue;
+                return (
+                  <Form.Item
+                    label="按比例分配："
+                    field="weights"
+                    help={
+                      <>
+                        <div className="flex items-center justify-between">
+                          <span>
+                            语义{' '}
+                            <span className="text-primary-6">
+                              {weightsValue.toFixed(2)}
+                            </span>
+                          </span>
+                          <span>
+                            关键词{' '}
+                            <span className="text-primary-6">
+                              {keywordValue.toFixed(2)}
+                            </span>
+                          </span>
+                        </div>
+                        <span>
+                          通过调整分数赋权比例,决定两种检索方式的优先度。
                         </span>
-                      </span>
-                      <span>
-                        关键词{' '}
-                        <span className="text-primary-6">
-                          {keywordValue.toFixed(2)}
-                        </span>
-                      </span>
-                    </div>
-                    <span>通过调整分数赋权比例,决定两种检索方式的优先度。</span>
-                  </>
-                }
-              >
-                <Slider
-                  min={0}
-                  max={1}
-                  step={0.01}
-                  value={weightsValue}
-                  onChange={(value) => {
-                    form.setFieldValue('weights', value);
-                    form.setFieldValue('reordering', 1 - Number(value));
-                  }}
-                />
-              </Form.Item>
-            );
-          }}
-        </Form.Item>
-      ) : null}
+                      </>
+                    }
+                  >
+                    <Slider
+                      min={0}
+                      max={1}
+                      step={0.01}
+                      value={weightsValue}
+                      onChange={(value) => {
+                        form.setFieldValue('weights', value);
+                        form.setFieldValue('reordering', 1 - Number(value));
+                      }}
+                    />
+                  </Form.Item>
+                );
+              }}
+            </Form.Item>
+          );
+        }}
+      </Form.Item>
     </Form>
   );
 }
