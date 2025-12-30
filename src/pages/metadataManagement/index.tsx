@@ -82,10 +82,10 @@ export default function MetadataManagement() {
   // 添加loading状态控制
   const [loading, setLoading] = useState(false);
   // 初始化筛选的值
-  const [sortValue, setSortValue] = useState({
-    run_cycle: '',
-    sort: ''
-  });
+  const [sortValue, setSortValue] = useState<{
+    order: string;
+    field: string;
+  }>();
   // 初始化筛选的元数据类型
   const [activeMetadataType, setActiveMetadataType] = useState<
     MetadataType | string
@@ -180,7 +180,8 @@ export default function MetadataManagement() {
       const params = {
         pageNum: current,
         pageSize: pageSize,
-        ...searchValue
+        ...searchValue,
+        sort: sortValue ? [{ ...sortValue }] : []
       };
       const res =
         activeMetadataType === MetadataType.Iceberg
@@ -220,16 +221,13 @@ export default function MetadataManagement() {
   ) => {
     setCurrent(1);
     const sortdata = {
-      run_cycle:
-        filters.run_cycle === undefined ? '' : filters.run_cycle.join(','),
-      is_online:
-        filters.is_online === undefined ? '' : filters.is_online.join(','),
-      sort:
+      order:
         sorter.direction === undefined
           ? ''
           : sorter.direction === 'ascend'
-            ? 'create_time:ASC'
-            : 'create_time:DESC'
+            ? 'asc'
+            : 'desc',
+      field: sorter.field as string
     };
 
     setSortValue(sortdata);

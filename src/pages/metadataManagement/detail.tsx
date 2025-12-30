@@ -329,10 +329,6 @@ export default function MetadataManagementDetail() {
       value: Number(minIOBaseData.objectNum || 0)
     },
     {
-      label: '所属区域',
-      value: minIOBaseData.region || '-'
-    },
-    {
       label: '存储大小',
       value: formatFileSize(Number(minIOBaseData.objectsSize || 0))
     },
