@@ -37,6 +37,7 @@ import classNames from 'classnames';
 import { useUrlState } from '../../hooks/useUrlState';
 import { SQL_PARAM_PLACEHOLDER_REGEX } from '../../constant';
 import { validateName } from '@/utils/valiate';
+import { PermissionWrapper } from '@/components/PermissionGuard';
 interface NotebookWorkspaceProps {
   content: string;
   fileName: string;
@@ -252,9 +253,12 @@ const EditorWorkspaceContent: React.FC<{
         <div className={styles['sql-toolbar']}>
           <div className={styles['toolbar-left']}>
             <Space size={12}>
-              {((hasRunPermission && runStatus !== RunningStatus.RUNNING) ||
-                (hasCancelRunPermission &&
-                  runStatus === RunningStatus.RUNNING)) && (
+              <PermissionWrapper
+                permission={[
+                  SQL_PERMISSIONS.QUERY_SCRIPT_RUN,
+                  SQL_PERMISSIONS.QUERY_SCRIPT_MODIFY
+                ]}
+              >
                 <Button
                   type="primary"
                   icon={
@@ -272,14 +276,14 @@ const EditorWorkspaceContent: React.FC<{
                 >
                   {runStatus === RunningStatus.RUNNING ? '停止运行' : '运行'}
                 </Button>
-              )}
+              </PermissionWrapper>
 
               <Button
                 type="text"
                 icon={<SQLFormatIcon />}
                 onClick={handleFormatCode}
                 disabled={!editorContent?.trim()}
-                className="h-[26px]"
+                className="h-[26px] !px-[0px]"
               >
                 格式化
               </Button>
