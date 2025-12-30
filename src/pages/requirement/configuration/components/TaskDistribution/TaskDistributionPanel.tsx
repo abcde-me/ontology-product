@@ -186,7 +186,7 @@ const TaskDistributionPanel: React.FC<TaskDistributionPanelProps> = ({
           style={{
             display: 'flex',
             alignItems: 'center',
-            gap: 4
+            gap: 8
           }}
         >
           <span>人员分配</span>
@@ -194,6 +194,7 @@ const TaskDistributionPanel: React.FC<TaskDistributionPanelProps> = ({
             type="text"
             onClick={() => setBatchModalVisible(true)}
             disabled={disabled}
+            style={{ padding: '0' }}
           >
             批量分配
           </Button>

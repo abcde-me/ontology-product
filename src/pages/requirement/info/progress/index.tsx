@@ -1,24 +1,24 @@
-import React, { useState, useEffect } from 'react';
 import {
-  Table,
+  generateAnnotationResults,
+  getProgressRequirement
+} from '@/api/dataAnnotation';
+import RightArrowIcon from '@/assets/annotation/right-arrow.svg';
+import { useParams } from '@/utils/url';
+import {
   Button,
-  Tooltip,
-  Notification,
+  Link,
+  Message,
   Pagination,
   Progress,
-  Message,
-  Link
+  Table,
+  Tooltip
 } from '@arco-design/web-react';
 import { ColumnProps } from '@arco-design/web-react/es/Table';
 import { SorterInfo } from '@arco-design/web-react/es/Table/interface';
-import { IconRight } from '@arco-design/web-react/icon';
-import { useParams } from '@/utils/url';
-import GenerateRecordModal from './GenerateRecordModal';
-import {
-  getProgressRequirement,
-  generateAnnotationResults
-} from '@/api/dataAnnotation';
+import { NoDataCard } from '@ceai-front/arco-material';
 import dayjs from 'dayjs';
+import React, { useEffect, useState } from 'react';
+import GenerateRecordModal from './GenerateRecordModal';
 import './index.scss';
 
 interface StatisticsItem {
@@ -49,7 +49,7 @@ const ProgressBar: React.FC<{
   return (
     <div className="progress-item">
       <div className="progress-text-wrapper">
-        <span className="progress-label">{label}:</span>
+        <span className="progress-label">{label}</span>
         <span className="progress-text">
           {percent}% ({completed}/{total})
         </span>
@@ -87,7 +87,7 @@ const renderProgress = (record: TaskPackage) => {
     <div className="progress-container">
       {progressItems.map((item, index) => (
         <React.Fragment key={item.label}>
-          {index > 0 && <IconRight className="progress-arrow" />}
+          {index > 0 && <RightArrowIcon className="progress-arrow" />}
           <ProgressBar
             label={item.label}
             completed={item.completed}
@@ -244,11 +244,7 @@ function RequirementProgress({ isActive }: RequirementProgressProps) {
       <div className="progress-header">
         <h2 className="progress-title">任务包进度</h2>
         <div className="progress-actions">
-          <Button
-            type="text"
-            onClick={handleGenerateRecord}
-            style={{ marginRight: 8 }}
-          >
+          <Button type="text" onClick={handleGenerateRecord}>
             生成记录
           </Button>
           <Tooltip
@@ -285,6 +281,7 @@ function RequirementProgress({ isActive }: RequirementProgressProps) {
         pagination={false}
         onChange={handleTableChange}
         scroll={{ x: 'max-content' }}
+        noDataElement={<NoDataCard />}
       />
 
       {total > 0 && (

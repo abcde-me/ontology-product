@@ -37,10 +37,6 @@ function ImageLabelInfo({
   labelInfo: LabelInfo[];
   hasModel?: boolean;
 }) {
-  const [expandedRowKeys, setExpandedRowKeys] = useState<(string | number)[]>(
-    []
-  );
-
   // 获取标注工具显示文本
   const getLabelShapeText = (shape: number) => {
     const shapeOption = shapeOptions.find((option) => option.value === shape);
@@ -124,13 +120,11 @@ function ImageLabelInfo({
     {
       title: '标签名称',
       dataIndex: 'label_name_en',
-      width: 200,
       render: (value: string) => value || '-'
     },
     {
       title: '展示名称',
       dataIndex: 'label_name_cn',
-      width: 200,
       render: (value: string) => value || '-'
     },
     // 只有当 hasModel 为 true 时才显示模型映射列
@@ -280,11 +274,6 @@ function ImageLabelInfo({
     );
   };
 
-  // 处理展开/收起
-  const handleExpandedRowsChange = (keys: (string | number)[]) => {
-    setExpandedRowKeys(keys);
-  };
-
   if (!labelInfo || labelInfo.length === 0) {
     return (
       <div style={{ padding: '40px 0', textAlign: 'center', color: '#86909c' }}>
@@ -307,16 +296,19 @@ function ImageLabelInfo({
         标签和属性:
       </div>
       <Table
-        style={{ maxWidth: '60%' }}
-        scroll={{ x: 'max-content' }}
+        style={{ width: 1000 }}
         columns={columns}
         data={labelInfo}
         pagination={false}
         border={false}
-        expandedRowKeys={expandedRowKeys}
-        onExpandedRowsChange={handleExpandedRowsChange}
         expandedRowRender={expandedRowRender}
-        expandProps={{ width: 30 }}
+        expandProps={{
+          width: 30,
+          rowExpandable: (record: LabelInfo) =>
+            record.label_info_attribute_groups &&
+            record.label_info_attribute_groups.length > 0
+        }}
+        defaultExpandAllRows={true}
         rowKey="id"
       />
     </div>

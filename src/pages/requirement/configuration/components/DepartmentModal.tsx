@@ -198,26 +198,28 @@ const DepartmentModal: React.FC<DataSourceModalProps> = ({
                 }}
               />
             </div>
-            {treeData && treeData?.length > 0 ? (
-              <Tree
-                actionOnClick="check"
-                checkable
-                checkedStrategy="child"
-                autoExpandParent={false}
-                checkedKeys={checkedKeys}
-                renderTitle={({ title }: any) => {
-                  return (
-                    <div style={{ width: '600px', marginTop: '-2px' }}>
-                      <EllipsisPopover value={title} />
-                    </div>
-                  );
-                }}
-                treeData={treeData}
-                onCheck={handleTreeCheck}
-              />
-            ) : (
-              <Empty description="暂无数据" />
-            )}
+            <div className="tree-container">
+              {treeData && treeData?.length > 0 ? (
+                <Tree
+                  actionOnClick="check"
+                  checkable
+                  checkedStrategy="child"
+                  autoExpandParent={false}
+                  checkedKeys={checkedKeys}
+                  renderTitle={({ title }: any) => {
+                    return (
+                      <div style={{ width: '600px', marginTop: '-2px' }}>
+                        <EllipsisPopover value={title} />
+                      </div>
+                    );
+                  }}
+                  treeData={treeData}
+                  onCheck={handleTreeCheck}
+                />
+              ) : (
+                <Empty description="暂无数据" />
+              )}
+            </div>
           </div>
         </Tabs.TabPane>
         <Tabs.TabPane
