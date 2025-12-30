@@ -179,6 +179,7 @@ function HitTest(props: { datasetName: string }) {
     }
   ];
   const FuncChildFrom = (e) => {
+    console.log('策略配置改变了～', e);
     setfromdata(e);
   };
   const Functest = async () => {
@@ -525,23 +526,27 @@ function HitTest(props: { datasetName: string }) {
           </div>
         </div>
       </div>
-      <Modal
-        title="策略配置"
-        visible={editPolicy}
-        onOk={() => submitEditeditPolicy()}
-        onCancel={() => clearEditeditPolicy()}
-        autoFocus={false}
-        focusLock={true}
-        style={{
-          width: 800
-        }}
-      >
-        <PolicyForm
-          FuncChildFrom={FuncChildFrom}
-          ref={childRef}
-          seteditPolicy={seteditPolicy}
-        ></PolicyForm>
-      </Modal>
+      {editPolicy && (
+        <Modal
+          title="策略配置"
+          visible={editPolicy}
+          onOk={() => submitEditeditPolicy()}
+          onCancel={() => clearEditeditPolicy()}
+          autoFocus={false}
+          focusLock={true}
+          style={{
+            width: 800
+          }}
+        >
+          <PolicyForm
+            FuncChildFrom={FuncChildFrom}
+            initParams={fromdata}
+            // onFormChange={onFormChangePolicy}
+            ref={childRef}
+            seteditPolicy={seteditPolicy}
+          ></PolicyForm>
+        </Modal>
+      )}
       {/* 图片放大弹窗 */}
       <ImageModal />
 

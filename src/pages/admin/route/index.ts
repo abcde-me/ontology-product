@@ -156,7 +156,7 @@ export const routes: IRoute[] = [
     name: 'workflowTask',
     key: '/tenant/compute/modaforge/workflowTask',
     component: React.lazy(async () => import('../../workflowTask/index')),
-    permission: DATA_ASSET_PERMISSIONS.LIST,
+    permission: WORKFLOW_TASK_PERMISSIONS.LIST,
     children: [
       {
         name: 'workflowTaskList',
@@ -164,7 +164,7 @@ export const routes: IRoute[] = [
         component: React.lazy(
           async () => import('../../workflowTask/modules/list/index')
         ),
-        permission: DATA_ASSET_PERMISSIONS.LIST
+        permission: WORKFLOW_TASK_PERMISSIONS.LIST
       },
       {
         name: 'workflowTaskDetail',
@@ -172,34 +172,10 @@ export const routes: IRoute[] = [
         component: React.lazy(
           async () => import('../../workflowTask/modules/detail/index')
         ),
-        permission: DATA_ASSET_PERMISSIONS.LIST
+        permission: WORKFLOW_TASK_PERMISSIONS.LIST
       }
-      // {
-      //   name: 'workflowTaskNoStructDetail',
-      //   key: '/tenant/compute/modaforge/workflowTask/noStructDetail',
-      //   component: React.lazy(
-      //     async () =>
-      //       import('../../workflowTask/modules/no-struct-detail/index')
-      //   ),
-      //   permission: DATA_ASSET_PERMISSIONS.LIST
-      // }
     ]
   },
-  // 工作流运行记录
-  // {
-  //   name: 'workflowTask',
-  //   key: '/tenant/compute/modaforge/workflowTask',
-  //   component: React.lazy(async () => import('../../workflowTask')),
-  //   permission: WORKFLOW_TASK_PERMISSIONS.LIST,
-  //   children: [
-  //     {
-  //       name: 'taskDetail',
-  //       key: '/tenant/compute/modaforge/workflowTaskDetail',
-  //       component: React.lazy(async () => import('../../workflowTask/modules/struct-detail')),
-  //       permission: WORKFLOW_TASK_PERMISSIONS.LIST
-  //     }
-  //   ]
-  // },
   //APIKey
   {
     name: 'apiKey',

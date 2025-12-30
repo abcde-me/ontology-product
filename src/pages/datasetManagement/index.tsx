@@ -486,10 +486,7 @@ const columns = (
             </Tooltip>
           ) : null}
 
-          {status === datasetStatus.create_failed &&
-          record.src_name !== 'pyspark' &&
-          record.src_name !== '工作流' &&
-          record.can_retry ? (
+          {record.can_retry ? (
             <PermissionWrapper
               permission={DATA_MANAGEMENT_PERMISSIONS.CAN_UPDATE_VERSION_RETRY}
             >

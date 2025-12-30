@@ -47,6 +47,8 @@ import EllipsisPopoverCom from '@/components/ellipsis-popover-com';
 import copy from 'copy-to-clipboard';
 import { useHistory } from 'react-router';
 import { openNewPage } from '@/utils/env';
+import { PermissionWrapper } from '@/components/PermissionGuard';
+import { WORKFLOW_TASK_PERMISSIONS } from '@/config/permissions';
 
 const { Option } = Select;
 const FormItem = Form.Item;
@@ -398,72 +400,95 @@ export default function WorkflowRunList() {
             <div
               className={`flex items-center gap-2 ${styles['operation-container']}`}
             >
-              <Button
-                type="text"
-                className="px-[4px]"
-                disabled={!record.workflow_type}
-                onClick={() =>
-                  handleWorkflowDetail(record.id, {
-                    workflow_type: record.workflow_type,
-                    workflow_uuid: record.workflow_uuid,
-                    ds_workflow_id: record.process_definition_code,
-                    workflow_version: record.workflow_version
-                  })
-                }
+              <PermissionWrapper
+                permission={WORKFLOW_TASK_PERMISSIONS.CAN_UPDATE}
               >
-                详情
-              </Button>
-              {/** 只有运行中状态展示暂停运行 */}
-              {canPause && (
                 <Button
                   type="text"
                   className="px-[4px]"
+                  disabled={!record.workflow_type}
                   onClick={() =>
-                    handleWorkflowOperation(
-                      WorkflowOperationType.PAUSE,
-                      record.id
-                    )
+                    handleWorkflowDetail(record.id, {
+                      workflow_type: record.workflow_type,
+                      workflow_uuid: record.workflow_uuid,
+                      ds_workflow_id: record.process_definition_code,
+                      workflow_version: record.workflow_version
+                    })
                   }
                 >
-                  暂停运行
+                  详情
                 </Button>
+              </PermissionWrapper>
+
+              {/** 只有运行中状态展示暂停运行 */}
+              {canPause && (
+                <PermissionWrapper
+                  permission={WORKFLOW_TASK_PERMISSIONS.MODIFY}
+                >
+                  <Button
+                    type="text"
+                    className="px-[4px]"
+                    onClick={() =>
+                      handleWorkflowOperation(
+                        WorkflowOperationType.PAUSE,
+                        record.id
+                      )
+                    }
+                  >
+                    暂停运行
+                  </Button>
+                </PermissionWrapper>
               )}
               {/** 只有运行暂停状态展示继续运行 */}
               {canContinue && (
-                <Button
-                  type="text"
-                  className="px-[4px]"
-                  onClick={() =>
-                    handleWorkflowOperation(
-                      WorkflowOperationType.RECOVER_SUSPENDED_PROCESS,
-                      record.id
-                    )
-                  }
+                <PermissionWrapper
+                  permission={WORKFLOW_TASK_PERMISSIONS.MODIFY}
                 >
-                  继续运行
-                </Button>
+                  <Button
+                    type="text"
+                    className="px-[4px]"
+                    onClick={() =>
+                      handleWorkflowOperation(
+                        WorkflowOperationType.RECOVER_SUSPENDED_PROCESS,
+                        record.id
+                      )
+                    }
+                  >
+                    继续运行
+                  </Button>
+                </PermissionWrapper>
               )}
               {/** 其他状态展示重新运行 */}
               {canRerun && (
-                <Button
-                  type="text"
-                  className="px-[4px]"
-                  onClick={() =>
-                    handleWorkflowOperation(
-                      WorkflowOperationType.REPEAT_RUNNING,
-                      record.id
-                    )
-                  }
+                <PermissionWrapper
+                  permission={WORKFLOW_TASK_PERMISSIONS.MODIFY}
                 >
-                  重新运行
-                </Button>
+                  <Button
+                    type="text"
+                    className="px-[4px]"
+                    onClick={() =>
+                      handleWorkflowOperation(
+                        WorkflowOperationType.REPEAT_RUNNING,
+                        record.id
+                      )
+                    }
+                  >
+                    重新运行
+                  </Button>
+                </PermissionWrapper>
               )}
-              <Dropdown droplist={operationMenu} trigger="click" position="br">
-                <Button className="px-[4px]" type="text">
-                  更多
-                  <IconDown className="ml-[4px]" />
-                </Button>
-              </Dropdown>
+              <PermissionWrapper permission={WORKFLOW_TASK_PERMISSIONS.MODIFY}>
+                <Dropdown
+                  droplist={operationMenu}
+                  trigger="click"
+                  position="br"
+                >
+                  <Button className="px-[4px]" type="text">
+                    更多
+                    <IconDown className="ml-[4px]" />
+                  </Button>
+                </Dropdown>
+              </PermissionWrapper>
             </div>
           );
         }
