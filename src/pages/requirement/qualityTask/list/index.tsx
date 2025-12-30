@@ -11,7 +11,7 @@ import { ColumnProps } from '@arco-design/web-react/es/Table';
 import { SorterInfo } from '@arco-design/web-react/es/Table/interface';
 import { useHistory, useLocation } from 'react-router';
 import EllipsisPopover from '@/components/ellipsis-popover-com';
-import noDataElement from '@/components/no-data';
+import noDataElement from '../../components/no-data';
 import FirstInspectModal from './FirstInspectModal';
 import ImageIcon from '@/assets/annotation/new-image-column.svg';
 import TextIcon from '@/assets/annotation/text-column.svg';
@@ -356,7 +356,7 @@ function QualityTaskList() {
     {
       title: '所属',
       dataIndex: 'belong',
-      width: 80,
+      width: 100,
       filters: [
         { text: '个人', value: BelongType.Personal },
         { text: '部门', value: BelongType.Department }
@@ -475,7 +475,7 @@ function QualityTaskList() {
         rowKey="pkg_id"
         border={false}
         pagination={false}
-        noDataElement={noDataElement({ description: '暂无质检任务' })}
+        noDataElement={noDataElement({ description: '暂无数据' })}
         scroll={{ x: 'max-content' }}
         onChange={(pagination, sorter, filters) =>
           handleTableChange(pagination, sorter as SorterInfo, filters)

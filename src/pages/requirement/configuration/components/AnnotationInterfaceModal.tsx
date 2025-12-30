@@ -14,7 +14,7 @@ const AnnotationInterfaceModal: React.FC<AnnotationInterfaceModalProps> = ({
 }) => {
   return (
     <Modal
-      title="标注界面"
+      title="标注界面示意"
       visible={visible}
       onCancel={onCancel}
       footer={null}

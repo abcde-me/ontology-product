@@ -5,7 +5,7 @@
 
   .content-tree {
     padding-left: 12px;
-    height: 600px;
+    height: 618px;
     width: 220px;
     scrollbar-width: none;
     border-right: 1px solid #e2e8f0;
@@ -52,11 +52,11 @@
 
   .content-table {
     flex: 1;
-    height: 600px;
+    height: 618px;
     overflow-y: scroll;
     scrollbar-width: none;
     scrollbar-gutter: auto;
-    padding-top: 12px;
+    // padding-top: 12px;
     padding-bottom: 16px;
 
     &::-webkit-scrollbar {

@@ -1510,10 +1510,10 @@
     ahooks "^3.7.8"
     react-resizable "^3.0.4"
 
-"@ceai-front/arco-material@^1.0.1":
-  version "1.0.1"
-  resolved "http://npm.cestc.cn/@ceai-front/arco-material/download/@ceai-front/arco-material-1.0.1.tgz#b19362739ebae99c9d8bb17b26ea4c8bfae1184c"
-  integrity sha1-sZNic5666Zydi7F7JupMi/rhGEw=
+"@ceai-front/arco-material@^1.0.7":
+  version "1.0.9"
+  resolved "http://npm.cestc.cn/@ceai-front/arco-material/download/@ceai-front/arco-material-1.0.9.tgz#d2aa1bc76c50de5cc63e245e7e213cfce99b72e8"
+  integrity sha1-0qobx2xQ3lzGPiRefiE8/Ombcug=
   dependencies:
     "@ccf2e/arco-material" "^0.7.2"
     "@easyv/react-icons" "^1.0.0"
@@ -1528,6 +1528,7 @@
     intersection-observer "^0.12.2"
     is-url "^1.2.4"
     lodash "^4.17.21"
+    lottie-react "^2.4.1"
     moment "^2.30.1"
     query-string "^9.1.1"
     react-dnd "^16.0.1"
@@ -15791,6 +15792,18 @@ loose-envify@^1.0.0, loose-envify@^1.1.0, loose-envify@^1.2.0, loose-envify@^1.3
   integrity sha1-ce5R+nvkyuwaY4OffmgtgTLTDK8=
   dependencies:
     js-tokens "^3.0.0 || ^4.0.0"
+
+lottie-react@^2.4.1:
+  version "2.4.1"
+  resolved "http://npm.cestc.cn/lottie-react/download/lottie-react-2.4.1.tgz#4bd3f2a8a5e48edbd43c05ca5080fdd50f049d31"
+  integrity sha1-S9PyqKXkjtvUPAXKUID91Q8EnTE=
+  dependencies:
+    lottie-web "^5.10.2"
+
+lottie-web@^5.10.2:
+  version "5.13.0"
+  resolved "http://npm.cestc.cn/lottie-web/download/lottie-web-5.13.0.tgz#441d3df217cc8ba302338c3f168e1a3af0f221d3"
+  integrity sha1-RB098hfMi6MCM4w/Fo4aOvDyIdM=
 
 loud-rejection@^1.0.0:
   version "1.6.0"

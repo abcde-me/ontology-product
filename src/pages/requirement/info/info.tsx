@@ -129,6 +129,7 @@ function RequirementInfo() {
                   disabled={userInfo?.id !== requirementDetail?.creator_id}
                   icon={<IconEdit />}
                   onClick={() => handleToConfig('edit')}
+                  style={{ backgroundColor: '#fff' }}
                 >
                   编辑
                 </Button>
@@ -137,6 +138,7 @@ function RequirementInfo() {
             <Button
               type="outline"
               icon={<IconCopy />}
+              style={{ backgroundColor: '#fff' }}
               onClick={() => handleToConfig('copy')}
             >
               复制

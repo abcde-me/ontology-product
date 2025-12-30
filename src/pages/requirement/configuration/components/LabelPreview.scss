@@ -2,9 +2,10 @@
   padding: 0 16px;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 20px;
   max-height: 800px;
   overflow-y: auto;
+  margin-bottom: 20px;
 
   .label-preview-item {
     border: 1px solid #e5e6eb;
@@ -76,13 +77,18 @@
       width: 100%;
     }
 
+    .arco-input,
+    .arco-textarea {
+      border: 1px solid #c3c7d4 !important;
+    }
+
     .arco-radio-group,
     .arco-checkbox-group {
       display: flex;
       flex-direction: column;
       // gap: 8px;
       padding: 0 12px;
-      border: 1px solid #e5e6eb;
+      border: 1px solid #c3c7d4;
       border-radius: 4px;
       background: #fff;
       pointer-events: none;
