@@ -8,7 +8,8 @@ import {
   Pagination,
   Tooltip,
   Message,
-  Popconfirm
+  Popconfirm,
+  Popover
 } from '@arco-design/web-react';
 import { IconCopy, IconQuestionCircle } from '@arco-design/web-react/icon';
 import {
@@ -41,6 +42,7 @@ import copy from 'copy-to-clipboard';
 import { openNewPage } from '@/utils/env';
 import { WORKFLOW_TASK_PERMISSIONS } from '@/config/permissions';
 import { PermissionWrapper } from '@/components/PermissionGuard';
+import classNames from 'classnames';
 
 const { Option } = Select;
 const FormItem = Form.Item;
@@ -361,7 +363,12 @@ export default function TaskNodeRunList() {
         fixed: 'right' as const,
         render: (_: any, record: TaskNodeItem) => {
           return (
-            <div className="flex items-center gap-2">
+            <div
+              className={classNames(
+                'flex items-center gap-2',
+                styles['operation-container']
+              )}
+            >
               {record.state === TaskNodeStatus.FAILURE ? (
                 <PermissionWrapper
                   permission={WORKFLOW_TASK_PERMISSIONS.MODIFY}
@@ -374,7 +381,6 @@ export default function TaskNodeRunList() {
                     <Button
                       disabled={record.state !== TaskNodeStatus.FAILURE}
                       type="text"
-                      className="px-[4px]"
                     >
                       强制成功
                     </Button>
@@ -384,9 +390,14 @@ export default function TaskNodeRunList() {
                 <PermissionWrapper
                   permission={WORKFLOW_TASK_PERMISSIONS.MODIFY}
                 >
-                  <Button disabled={true} type="text" className="px-[4px]">
-                    强制成功
-                  </Button>
+                  <Popover
+                    content="只能强制成功已经运行失败的节点"
+                    position="top"
+                  >
+                    <Button disabled={true} type="text">
+                      强制成功
+                    </Button>
+                  </Popover>
                 </PermissionWrapper>
               )}
               {record.state === TaskNodeStatus.FAILURE ? (
@@ -406,7 +417,6 @@ export default function TaskNodeRunList() {
                     <Button
                       disabled={record.state !== TaskNodeStatus.FAILURE}
                       type="text"
-                      className="px-[4px]"
                     >
                       重试
                     </Button>
@@ -416,9 +426,11 @@ export default function TaskNodeRunList() {
                 <PermissionWrapper
                   permission={WORKFLOW_TASK_PERMISSIONS.MODIFY}
                 >
-                  <Button disabled={true} type="text" className="px-[4px]">
-                    重试
-                  </Button>
+                  <Popover content="只能重试已经运行失败的节点" position="top">
+                    <Button disabled={true} type="text">
+                      重试
+                    </Button>
+                  </Popover>
                 </PermissionWrapper>
               )}
               <PermissionWrapper
@@ -499,7 +511,7 @@ export default function TaskNodeRunList() {
         loading={table.loading}
         pagination={false}
         border={false}
-        rowKey="task_code"
+        rowKey="id"
         noDataElement={noDataElement({ description: '暂无数据' })}
         onChange={(pagination, sorter, filters) => {
           table.onChange(pagination, sorter, filters);

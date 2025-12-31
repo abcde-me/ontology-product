@@ -10,7 +10,8 @@ import {
   Tooltip,
   Dropdown,
   Menu,
-  Message
+  Message,
+  Popover
 } from '@arco-design/web-react';
 import {
   IconSearch,
@@ -158,7 +159,7 @@ export default function WorkflowRunList() {
         case WorkflowOperationType.REPEAT_RUNNING:
           return '重新运行成功';
         case WorkflowOperationType.START_FAILURE_TASK_PROCESS:
-          return '重试所有失败任务成功';
+          return '重试所有失败任务成功，可前往任务节点运行记录查看';
         default:
           return '操作成功';
       }
@@ -331,59 +332,51 @@ export default function WorkflowRunList() {
       // },
       {
         title: '操作',
-        width: 200,
+        width: 240,
         fixed: 'right' as const,
         render: (_: any, record: WorkflowTaskItem) => {
           let tooltipTitle = '';
 
-          /**
-           * 展示逻辑
-           * 优先判断是否运行中，是提示暂未运行结束，按钮不可点击
-           * 其次判断是否运行失败，是不提示，按钮可点击
-           * 其他情况提示无任务任务，按钮不可点击
-           */
-          if (record.state === WorkflowTaskStatus.RUNNING_EXECUTION) {
-            tooltipTitle = '暂未运行结束';
-          } else if (record.state === WorkflowTaskStatus.FAILURE) {
+          if (record.state === WorkflowTaskStatus.FAILURE) {
             tooltipTitle = '';
           } else {
             tooltipTitle = '无失败任务';
           }
 
-          const operationMenu = (
-            <Menu>
-              {/** 只有运行中状态展示结束运行 */}
-              {record.state === WorkflowTaskStatus.RUNNING_EXECUTION && (
-                <Menu.Item
-                  key="pause"
-                  className="text-[rgb(var(--primary-6))] hover:text-[rgb(var(--primary-6))]"
-                  onClick={() =>
-                    handleWorkflowOperation(
-                      WorkflowOperationType.STOP,
-                      record.id
-                    )
-                  }
-                >
-                  结束运行
-                </Menu.Item>
-              )}
-              <Tooltip content={tooltipTitle} position="left">
-                <Menu.Item
-                  key="rerun"
-                  className="text-[rgb(var(--primary-6))]"
-                  disabled={tooltipTitle !== ''}
-                  onClick={() =>
-                    handleWorkflowOperation(
-                      WorkflowOperationType.START_FAILURE_TASK_PROCESS,
-                      record.id
-                    )
-                  }
-                >
-                  重试失败任务
-                </Menu.Item>
-              </Tooltip>
-            </Menu>
-          );
+          // const operationMenu = (
+          //   <Menu>
+          //     {/** 只有运行中状态展示结束运行 */}
+          //     {record.state === WorkflowTaskStatus.RUNNING_EXECUTION && (
+          //       <Menu.Item
+          //         key="pause"
+          //         className="text-[rgb(var(--primary-6))] hover:text-[rgb(var(--primary-6))]"
+          //         onClick={() =>
+          //           handleWorkflowOperation(
+          //             WorkflowOperationType.STOP,
+          //             record.id
+          //           )
+          //         }
+          //       >
+          //         结束运行
+          //       </Menu.Item>
+          //     )}
+          //     <Tooltip content={tooltipTitle} position="left">
+          //       <Menu.Item
+          //         key="rerun"
+          //         className="text-[rgb(var(--primary-6))]"
+          //         disabled={tooltipTitle !== ''}
+          //         onClick={() =>
+          //           handleWorkflowOperation(
+          //             WorkflowOperationType.START_FAILURE_TASK_PROCESS,
+          //             record.id
+          //           )
+          //         }
+          //       >
+          //         重试失败任务
+          //       </Menu.Item>
+          //     </Tooltip>
+          //   </Menu>
+          // );
 
           /**
            * 展示逻辑
@@ -477,7 +470,44 @@ export default function WorkflowRunList() {
                   </Button>
                 </PermissionWrapper>
               )}
+              {/** 只有运行中状态展示结束运行 */}
+              {record.state === WorkflowTaskStatus.RUNNING_EXECUTION && (
+                <PermissionWrapper
+                  permission={WORKFLOW_TASK_PERMISSIONS.MODIFY}
+                >
+                  <Button
+                    type="text"
+                    className="px-[4px]"
+                    onClick={() =>
+                      handleWorkflowOperation(
+                        WorkflowOperationType.STOP,
+                        record.id
+                      )
+                    }
+                  >
+                    结束运行
+                  </Button>
+                </PermissionWrapper>
+              )}
               <PermissionWrapper permission={WORKFLOW_TASK_PERMISSIONS.MODIFY}>
+                {record.state !== WorkflowTaskStatus.RUNNING_EXECUTION && (
+                  <Popover content={tooltipTitle} position="top">
+                    <Button
+                      type="text"
+                      disabled={tooltipTitle !== ''}
+                      onClick={() =>
+                        handleWorkflowOperation(
+                          WorkflowOperationType.START_FAILURE_TASK_PROCESS,
+                          record.id
+                        )
+                      }
+                    >
+                      重试失败任务
+                    </Button>
+                  </Popover>
+                )}
+              </PermissionWrapper>
+              {/* <PermissionWrapper permission={WORKFLOW_TASK_PERMISSIONS.MODIFY}>
                 <Dropdown
                   droplist={operationMenu}
                   trigger="click"
@@ -488,7 +518,7 @@ export default function WorkflowRunList() {
                     <IconDown className="ml-[4px]" />
                   </Button>
                 </Dropdown>
-              </PermissionWrapper>
+              </PermissionWrapper> */}
             </div>
           );
         }
