@@ -304,9 +304,11 @@ export default function AddApi() {
     const res = await openDataGetApiDetail({ id: Number(id) });
     if (res.code === '' && res.status === 200) {
       form.setFieldsValue(res.data || {});
+      form.setFieldValue('cacheMethod', Number(res.data.cacheTime) > 0 ? 1 : 0);
       setValue(res.data.sql || '');
       setParamData(res.data?.paramConfig || []);
       setResultData(res.data?.resultConfig || []);
+      setApiCacheMethod(Number(res.data.cacheTime) > 0 ? 1 : 0);
       setActiveKey(['inputOutputParams']);
       setResizeSize('190px');
       setIsOpen(true);
@@ -871,13 +873,17 @@ export default function AddApi() {
                 />
                 次/分钟
               </Form.Item>
-              <Form.Item label="缓存方法" field="cacheMethod" initialValue={0}>
+              <Form.Item
+                label="缓存方法"
+                field="cacheMethod"
+                initialValue={apiCacheMethod}
+              >
                 <Select
                   options={[
                     { label: '开启缓存', value: 1 },
                     { label: '关闭缓存', value: 0 }
                   ]}
-                  defaultValue={0}
+                  defaultValue={apiCacheMethod}
                   placeholder="请选择缓存方法"
                   onChange={(value) => setApiCacheMethod(value)}
                 />
