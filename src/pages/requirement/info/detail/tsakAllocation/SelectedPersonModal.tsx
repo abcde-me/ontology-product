@@ -6,7 +6,7 @@ import React, { useState, useEffect } from 'react';
 import { Table, Modal, Pagination, Tooltip } from '@arco-design/web-react';
 import { getIndividualList } from '@/api/individualAndDepartment';
 import noDataElement from '@/components/no-data';
-import { EllipsisPopover } from '@ceai-front/arco-material';
+import { EllipsisPopover, NoDataCard } from '@ceai-front/arco-material';
 
 export interface SelectedPersonModalProps {
   visible: boolean;
@@ -108,7 +108,11 @@ const SelectedPersonModal: React.FC<SelectedPersonModalProps> = ({
           loading={loading}
           pagination={false}
           border={false}
-          noDataElement={noDataElement({ description: '暂无已选个人' })}
+          noDataElement={
+            <div style={{ paddingTop: '100px' }}>
+              <NoDataCard title="暂无已选个人" type="block" />
+            </div>
+          }
         />
         {total > 0 && (
           <Pagination

@@ -1,25 +1,24 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import { listQualityControlTasks } from '@/api/dataAnnotation';
+import ImageIcon from '@/assets/annotation/new-image-column.svg';
+import TextIcon from '@/assets/annotation/text-column.svg';
+import EllipsisPopover from '@/components/ellipsis-popover-com';
+import { QUALITY_TASK_PERMISSIONS } from '@/config/permissions';
+import { useHasPermission } from '@/store/userInfoStore';
 import {
   Input,
-  Tabs,
-  Table,
+  Link,
   Pagination,
   PaginationProps,
-  Link
+  Table,
+  Tabs
 } from '@arco-design/web-react';
 import { ColumnProps } from '@arco-design/web-react/es/Table';
 import { SorterInfo } from '@arco-design/web-react/es/Table/interface';
+import { CopyItemIcon, NoDataCard } from '@ceai-front/arco-material';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useHistory, useLocation } from 'react-router';
-import EllipsisPopover from '@/components/ellipsis-popover-com';
-import noDataElement from '../../components/no-data';
-import FirstInspectModal from './FirstInspectModal';
-import ImageIcon from '@/assets/annotation/new-image-column.svg';
-import TextIcon from '@/assets/annotation/text-column.svg';
 import { RequirementTypeNameMap } from '../../type';
-import { CopyItemIcon } from '@ceai-front/arco-material';
-import { listQualityControlTasks } from '@/api/dataAnnotation';
-import { useHasPermission } from '@/store/userInfoStore';
-import { QUALITY_TASK_PERMISSIONS } from '@/config/permissions';
+import FirstInspectModal from './FirstInspectModal';
 import './index.scss';
 
 const TabPane = Tabs.TabPane;
@@ -475,7 +474,11 @@ function QualityTaskList() {
         rowKey="pkg_id"
         border={false}
         pagination={false}
-        noDataElement={noDataElement({ description: '暂无数据' })}
+        noDataElement={
+          <div style={{ paddingTop: '100px' }}>
+            <NoDataCard title="暂无数据" />
+          </div>
+        }
         scroll={{ x: 'max-content' }}
         onChange={(pagination, sorter, filters) =>
           handleTableChange(pagination, sorter as SorterInfo, filters)

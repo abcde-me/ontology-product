@@ -17,7 +17,7 @@ import { useDepartmentTree } from '../../hooks/useDepartmentTree';
 import noDataElement from '@/components/no-data';
 import { IconCaretDown } from '@arco-design/web-react/icon';
 import './IndividualModal.scss';
-import { EllipsisPopover } from '@ceai-front/arco-material';
+import { EllipsisPopover, NoDataCard } from '@ceai-front/arco-material';
 
 interface DataSourceModalProps {
   visible: boolean;
@@ -297,7 +297,11 @@ const IndividualModal: React.FC<DataSourceModalProps> = ({
                 columns={columns}
                 data={tableData}
                 pagination={false}
-                noDataElement={noDataElement({ description: '暂无数据' })}
+                noDataElement={
+                  <div style={{ paddingTop: '100px' }}>
+                    <NoDataCard title="暂无数据" type="block" />
+                  </div>
+                }
                 rowSelection={{
                   selectedRowKeys: selectedRowKeys,
                   preserveSelectedRowKeys: true,
@@ -373,9 +377,7 @@ const IndividualModal: React.FC<DataSourceModalProps> = ({
                 pagination={false}
                 border={false}
                 scroll={{ y: false }}
-                noDataElement={noDataElement({
-                  description: '暂无已选个人'
-                })}
+                noDataElement={<NoDataCard title="暂无已选个人" type="block" />}
               />
               {selectedTotal > 0 && (
                 <Pagination
