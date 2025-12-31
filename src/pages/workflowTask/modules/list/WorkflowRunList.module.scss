@@ -2,6 +2,10 @@
   :global(.arco-dropdown-popup-visible .arco-icon-down) {
     transform: rotate(180deg);
   }
+
+  :global(.arco-btn-size-default) {
+    padding: 0 4px;
+  }
 }
 
 .table-container {
