@@ -195,7 +195,7 @@ function GenerateRecordModal({ visible, onClose }: GenerateRecordModalProps) {
           loading={loading}
           pagination={false}
           onChange={handleTableChange}
-          noDataElement={<NoDataCard type="block" />}
+          noDataElement={<NoDataCard />}
         />
 
         {total > 0 && (
