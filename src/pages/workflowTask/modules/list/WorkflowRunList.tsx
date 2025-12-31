@@ -216,31 +216,36 @@ export default function WorkflowRunList() {
         dataIndex: 'process_definition_name',
         width: 200,
         className: styles['hover-change'],
-        render: (value: string, record: WorkflowTaskItem) => (
-          <div
-            className={`flex items-center gap-1 ${styles['workflow-name-container']}`}
-          >
-            <EllipsisPopoverCom
-              isLink={
-                !!record.workflow_type &&
-                !!record.workflow_uuid &&
-                !!record.process_definition_code
-              }
-              value={value}
-              preferTypography
-              handleLink={() => {
-                handleWorkflowConfig(record);
-              }}
-            />
-            <IconCopy
-              className={styles['workflow-name-copy']}
-              onClick={(e) => {
-                e.stopPropagation();
-                handleCopy(value);
-              }}
-            />
-          </div>
-        )
+        render: (value: string, record: WorkflowTaskItem) => {
+          const isLink =
+            !!record.workflow_type &&
+            !!record.workflow_uuid &&
+            !!record.process_definition_code;
+
+          return (
+            <div
+              className={`flex items-center gap-1 ${styles['workflow-name-container']} ${
+                isLink ? styles['is-link'] : ''
+              }`}
+            >
+              <EllipsisPopoverCom
+                isLink={isLink}
+                value={value}
+                preferTypography
+                handleLink={() => {
+                  handleWorkflowConfig(record);
+                }}
+              />
+              <IconCopy
+                className={styles['workflow-name-copy']}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleCopy(value);
+                }}
+              />
+            </div>
+          );
+        }
       },
       {
         title: '运行状态',
