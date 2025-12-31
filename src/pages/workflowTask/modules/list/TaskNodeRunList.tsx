@@ -43,6 +43,7 @@ import { openNewPage } from '@/utils/env';
 import { WORKFLOW_TASK_PERMISSIONS } from '@/config/permissions';
 import { PermissionWrapper } from '@/components/PermissionGuard';
 import classNames from 'classnames';
+import { delay } from 'lodash-es';
 
 const { Option } = Select;
 const FormItem = Form.Item;
@@ -54,36 +55,6 @@ export default function TaskNodeRunList() {
     number | null
   >(null);
   const [currentTaskName, setCurrentTaskName] = useState<string>('');
-
-  const handleTaskNodeForcesSuccess = useCallback(async (id: number) => {
-    const res = await taskNodeForcesSuccess({
-      task_instance_id: id
-    });
-
-    if (res.status === 200 && res.code === '') {
-      Message.success('强制成功成功');
-      table.refresh();
-    } else {
-      Message.error(res.message || '强制成功失败');
-    }
-  }, []);
-
-  const handleTaskNodeRetry = useCallback(
-    async (processInstanceId: number, taskCodeId: number) => {
-      const res = await taskNodeRetry({
-        process_instance_id: processInstanceId,
-        task_code_list: [taskCodeId]
-      });
-
-      if (res.status === 200 && res.code === '') {
-        Message.success('重试成功');
-        table.refresh();
-      } else {
-        Message.error(res.message || '重试失败');
-      }
-    },
-    []
-  );
 
   const handleGetRunLogs = useCallback((id: number, taskName: string) => {
     setCurrentTaskInstanceId(id);
@@ -162,6 +133,43 @@ export default function TaskNodeRunList() {
     defaultPageSize: 10,
     manual: false
   });
+
+  const handleTaskNodeForcesSuccess = useCallback(
+    async (id: number) => {
+      const res = await taskNodeForcesSuccess({
+        task_instance_id: id
+      });
+
+      if (res.status === 200 && res.code === '') {
+        Message.success('强制成功成功');
+        delay(() => {
+          table.refresh();
+        }, 500);
+      } else {
+        Message.error(res.message || '强制成功失败');
+      }
+    },
+    [table.refresh]
+  );
+
+  const handleTaskNodeRetry = useCallback(
+    async (processInstanceId: number, taskCodeId: number) => {
+      const res = await taskNodeRetry({
+        process_instance_id: processInstanceId,
+        task_code_list: [taskCodeId]
+      });
+
+      if (res.status === 200 && res.code === '') {
+        Message.success('重试成功');
+        delay(() => {
+          table.refresh();
+        }, 500);
+      } else {
+        Message.error(res.message || '重试失败');
+      }
+    },
+    [table.refresh]
+  );
 
   // 任务节点运行记录表格列
   const columns: ColumnProps<TaskNodeItem>[] = useMemo(
