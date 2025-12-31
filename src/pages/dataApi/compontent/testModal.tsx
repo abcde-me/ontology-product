@@ -195,7 +195,7 @@ export default function TestModal(props: {
                     响应时间:{' '}
                   </span>
                   <span className="text-sm font-medium text-[#0F172A]">
-                    {result?.queryTime ? `${result?.queryTime}s` : '-'}
+                    {result?.queryTime ? `${result?.queryTime}ms` : '-'}
                   </span>
                 </div>
               </div>
