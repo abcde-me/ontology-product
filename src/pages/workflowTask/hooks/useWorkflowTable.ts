@@ -218,16 +218,18 @@ export function useWorkflowTable<TData = any, TParams = any>(
   useEffect(() => {
     if (data?.data) {
       const responseData = data.data;
+      const newItems = responseData.items || [];
+      // 同时更新分页和数据，确保原子性
       setPagination((prev) => ({
         ...prev,
         total: responseData.total || 0,
         current: responseData.page || 1,
         pageSize: responseData.page_size || 10
       }));
-      // 更新表格数据
-      setTableData(responseData.items || []);
+      // 更新表格数据，使用新数组确保引用变化
+      setTableData(newItems);
     }
-  }, [data?.data, setTableData, setPagination]);
+  }, [data]);
 
   return {
     data: tableData,
