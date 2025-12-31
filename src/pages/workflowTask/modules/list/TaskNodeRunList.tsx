@@ -19,8 +19,8 @@ import {
 import {
   type TaskNodeItem,
   type GetTaskNodeListParams,
-  CommandTypeNameMap,
-  CommandType,
+  TriggerTypeNameMap,
+  TriggerType,
   TaskExecuteType,
   TaskExecuteTypeNameMap,
   TaskNodeStatus
@@ -39,6 +39,8 @@ import TaskLogDrawer from '../../components/task-log-drawer';
 import styles from './TaskNodeRunList.module.scss';
 import copy from 'copy-to-clipboard';
 import { openNewPage } from '@/utils/env';
+import { WORKFLOW_TASK_PERMISSIONS } from '@/config/permissions';
+import { PermissionWrapper } from '@/components/PermissionGuard';
 
 const { Option } = Select;
 const FormItem = Form.Item;
@@ -129,7 +131,7 @@ export default function TaskNodeRunList() {
         page_size: pagination.pageSize || 10,
         keywords: formValues.keywords || '',
         state_list: formValues.state ? [formValues.state] : [],
-        command_type_list: filters?.command_type_name ?? [],
+        trigger_type_list: filters?.trigger_type_name ?? [],
         task_execute_type_list: filters?.task_execute_type_name ?? [],
         task_type: filters?.task_type_name ?? '',
         orders,
@@ -205,12 +207,12 @@ export default function TaskNodeRunList() {
         width: 120,
         filters: [
           {
-            text: CommandTypeNameMap[CommandType.SCHEDULER],
-            value: CommandType.SCHEDULER
+            text: TriggerTypeNameMap[TriggerType.SCHEDULE],
+            value: TriggerType.SCHEDULE
           },
           {
-            text: CommandTypeNameMap[CommandType.START_PROCESS],
-            value: CommandType.START_PROCESS
+            text: TriggerTypeNameMap[TriggerType.MANUAL],
+            value: TriggerType.MANUAL
           }
         ]
       },
@@ -322,21 +324,33 @@ export default function TaskNodeRunList() {
         title: (
           <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
             失败重试次数
-            <Tooltip content="格式：已重试次数/设定的总重试次数">
-              <span style={{ display: 'inline-flex', alignItems: 'center' }}>
-                <IconQuestionCircle
-                  style={{
-                    cursor: 'pointer',
-                    color: '#86909c',
-                    fontSize: '14px'
-                  }}
-                />
-              </span>
+            <Tooltip
+              content="格式：已重试次数/设定的总重试次数"
+              trigger="hover"
+              position="top"
+            >
+              <IconQuestionCircle
+                onMouseEnter={(e) => {
+                  e.stopPropagation();
+                  e.preventDefault();
+                }}
+                onMouseLeave={(e) => {
+                  e.stopPropagation();
+                  e.preventDefault();
+                }}
+                style={{
+                  cursor: 'pointer',
+                  color: '#86909c',
+                  fontSize: '14px',
+                  pointerEvents: 'auto'
+                }}
+              />
             </Tooltip>
           </span>
         ),
         dataIndex: 'retry_times',
         width: 180,
+        sorter: false,
         render: (value: string, record: TaskNodeItem) => (
           <span>{`${record.retry_times ?? '-'} / ${record.max_retry_times ?? '-'}`}</span>
         )
@@ -349,55 +363,75 @@ export default function TaskNodeRunList() {
           return (
             <div className="flex items-center gap-2">
               {record.state === TaskNodeStatus.FAILURE ? (
-                <Popconfirm
-                  title="确定强制成功吗？"
-                  content="强制成功后，将继续运行后续任务"
-                  onOk={() => handleTaskNodeForcesSuccess(record.id)}
+                <PermissionWrapper
+                  permission={WORKFLOW_TASK_PERMISSIONS.MODIFY}
                 >
-                  <Button
-                    disabled={record.state !== TaskNodeStatus.FAILURE}
-                    type="text"
-                    className="px-[4px]"
+                  <Popconfirm
+                    title="确定强制成功吗？"
+                    content="强制成功后，将继续运行后续任务"
+                    onOk={() => handleTaskNodeForcesSuccess(record.id)}
                   >
+                    <Button
+                      disabled={record.state !== TaskNodeStatus.FAILURE}
+                      type="text"
+                      className="px-[4px]"
+                    >
+                      强制成功
+                    </Button>
+                  </Popconfirm>
+                </PermissionWrapper>
+              ) : (
+                <PermissionWrapper
+                  permission={WORKFLOW_TASK_PERMISSIONS.MODIFY}
+                >
+                  <Button disabled={true} type="text" className="px-[4px]">
                     强制成功
                   </Button>
-                </Popconfirm>
-              ) : (
-                <Button disabled={true} type="text" className="px-[4px]">
-                  强制成功
-                </Button>
+                </PermissionWrapper>
               )}
               {record.state === TaskNodeStatus.FAILURE ? (
-                <Popconfirm
-                  title="确定重新运行吗？"
-                  content=""
-                  onOk={() =>
-                    handleTaskNodeRetry(
-                      record.process_instance_id,
-                      record.task_code
-                    )
-                  }
+                <PermissionWrapper
+                  permission={WORKFLOW_TASK_PERMISSIONS.MODIFY}
                 >
-                  <Button
-                    disabled={record.state !== TaskNodeStatus.FAILURE}
-                    type="text"
-                    className="px-[4px]"
+                  <Popconfirm
+                    title="确定重新运行吗？"
+                    content=""
+                    onOk={() =>
+                      handleTaskNodeRetry(
+                        record.process_instance_id,
+                        record.task_code
+                      )
+                    }
                   >
+                    <Button
+                      disabled={record.state !== TaskNodeStatus.FAILURE}
+                      type="text"
+                      className="px-[4px]"
+                    >
+                      重试
+                    </Button>
+                  </Popconfirm>
+                </PermissionWrapper>
+              ) : (
+                <PermissionWrapper
+                  permission={WORKFLOW_TASK_PERMISSIONS.MODIFY}
+                >
+                  <Button disabled={true} type="text" className="px-[4px]">
                     重试
                   </Button>
-                </Popconfirm>
-              ) : (
-                <Button disabled={true} type="text" className="px-[4px]">
-                  重试
-                </Button>
+                </PermissionWrapper>
               )}
-              <Button
-                type="text"
-                className="px-[4px]"
-                onClick={() => handleGetRunLogs(record.id, record.task_name)}
+              <PermissionWrapper
+                permission={WORKFLOW_TASK_PERMISSIONS.CAN_UPDATE}
               >
-                日志
-              </Button>
+                <Button
+                  type="text"
+                  className="px-[4px]"
+                  onClick={() => handleGetRunLogs(record.id, record.task_name)}
+                >
+                  日志
+                </Button>
+              </PermissionWrapper>
             </div>
           );
         }

@@ -1,0 +1,28 @@
+.flow-setting {
+  align-items: flex-start !important;
+  overflow: auto;
+  position: relative;
+
+  .label-hidden {
+    visibility: hidden;
+  }
+
+  .add-field-action {
+    :global(.arco-form-label-item) {
+      label {
+        width: 100%;
+      }
+    }
+  }
+
+  :global(.arco-radio-group) {
+    label {
+      margin-right: 10px;
+    }
+  }
+}
+
+.flow-setting-open {
+  height: calc(100vh - 140px);
+  width: 360px;
+}

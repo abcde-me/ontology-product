@@ -353,7 +353,10 @@ const Edit = forwardRef<EditRef, EditProps>((props, ref) => {
                     rules={[{ required: true, message: '请输入偏移重置策略' }]}
                     initialValue={props.editObj.config?.autoOffsetReset}
                   >
-                    <Input placeholder="请输入偏移重置策略" />
+                    <Select placeholder="请选择" defaultValue="earliest">
+                      <Option value="earliest">earliest</Option>
+                      <Option value="latest">latest</Option>
+                    </Select>
                   </FormItem>
                 </>
               )}

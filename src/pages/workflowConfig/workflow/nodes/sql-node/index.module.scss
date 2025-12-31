@@ -1,0 +1,10 @@
+.panel-container {
+  .label-hidden {
+    visibility: hidden;
+  }
+
+  :global(.arco-cascader) {
+    width: 100% !important;
+    margin-bottom: 0 !important;
+  }
+}

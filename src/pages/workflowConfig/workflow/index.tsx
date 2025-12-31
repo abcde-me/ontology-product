@@ -1,4 +1,4 @@
-import type { FC } from 'react';
+import { FC } from 'react';
 import React, {
   memo,
   useCallback,
@@ -231,7 +231,7 @@ const Workflow: FC<WorkflowProps> = memo(
     const { handlePaneContextMenu, handlePaneContextmenuCancel } =
       usePanelInteractions();
     const { isValidConnection } = useWorkflow();
-    useInitFlowTestTask();
+    const [initFlowTestTask, stopTest] = useInitFlowTestTask();
     const { exportCheck, handleExportDSL } = useDSL();
 
     useOnViewportChange({
@@ -241,6 +241,11 @@ const Workflow: FC<WorkflowProps> = memo(
     });
 
     useShortcuts();
+
+    useEffect(() => {
+      initFlowTestTask();
+      return stopTest;
+    }, []);
 
     const store = useStoreApi();
     if (process.env.NODE_ENV === 'development') {

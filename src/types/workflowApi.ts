@@ -19,6 +19,7 @@ export interface EditWorkflowParams {
   workflow_uuid?: React.Key;
   description?: string;
   params?: LocalParam[];
+  global_params?: LocalParam[];
   // 运行策略
   execution_type?: string;
   // 失败策略

@@ -111,13 +111,9 @@ export interface Dataset {
   latest_file_path: string;
   perms: string[];
   storage_type: datasetStorageType;
-  status:
-    | 'creating'
-    | 'create_failed'
-    | 'normal'
-    | 'version_updating'
-    | 'version_update_failed';
+  status: datasetStatus;
   scene_id: number;
+  can_retry: boolean;
 }
 
 export interface SceneType {
@@ -131,11 +127,17 @@ export interface SceneType {
 // 状态显示配置
 const getStatusConfig = (status: string) => {
   const statusMap = {
-    creating: { text: datasetStatusName.creating },
-    create_failed: { text: datasetStatusName.create_failed },
-    normal: { text: datasetStatusName.normal },
-    version_updating: { text: datasetStatusName.version_updating },
-    version_update_failed: { text: datasetStatusName.version_update_failed }
+    [datasetStatus.creating]: { text: datasetStatusName.creating },
+    [datasetStatus.create_failed]: { text: datasetStatusName.create_failed },
+    [datasetStatus.normal]: { text: datasetStatusName.normal },
+    [datasetStatus.updating]: { text: datasetStatusName.updating },
+    [datasetStatus.update_failed]: { text: datasetStatusName.update_failed },
+    [datasetStatus.version_updating]: {
+      text: datasetStatusName.version_updating
+    },
+    [datasetStatus.version_update_failed]: {
+      text: datasetStatusName.version_update_failed
+    }
   };
   return statusMap[status] || { text: status };
 };
@@ -148,12 +150,23 @@ const getStatusIcon = (status: string) => {
     <IconCloseCircleFill style={{ color: '#EF4444', margin: '0 5px 0 0' }} />
   ) : status === datasetStatus.normal ? (
     <IconCheckCircleFill style={{ color: '#10B981', margin: '0 5px 0 0' }} />
-  ) : status === datasetStatus.version_updating ? (
+  ) : status === datasetStatus.updating ? (
     <IconLoading style={{ color: '#007DFA', margin: '0 5px 0 0' }} />
   ) : (
     <IconExclamationCircleFill
       style={{ color: '#F97316', margin: '0 5px 0 0' }}
     />
+  );
+};
+
+// 判断是否可以跳转到详情页
+const canGoToDetail = (status: string): boolean => {
+  return (
+    status === datasetStatus.normal ||
+    status === datasetStatus.version_updating ||
+    status === datasetStatus.version_update_failed ||
+    status === datasetStatus.updating ||
+    status === datasetStatus.update_failed
   );
 };
 
@@ -200,22 +213,12 @@ const columns = (
       if (!name) return '-';
       return (
         <EllipsisPopover
-          className={
-            record.status === datasetStatus.normal ||
-            record.status === datasetStatus.version_updating ||
-            record.status === datasetStatus.version_update_failed
-              ? 'dataset-hover'
-              : ''
-          }
+          className={canGoToDetail(record.status) ? 'dataset-hover' : ''}
           value={renderEmptyPlaceholder(record.name)}
           isEdit={false}
           isLink
           handleLink={() => {
-            record.status === datasetStatus.normal ||
-            record.status === datasetStatus.version_updating ||
-            record.status === datasetStatus.version_update_failed
-              ? handleGoToDetail(record.id)
-              : '';
+            canGoToDetail(record.status) ? handleGoToDetail(record.id) : '';
           }}
         />
         // <div
@@ -443,7 +446,9 @@ const columns = (
     filters: [
       { text: '创建中', value: datasetStatus.creating },
       { text: '创建失败', value: datasetStatus.create_failed },
-      { text: '正常', value: datasetStatus.normal }
+      { text: '正常', value: datasetStatus.normal },
+      { text: '更新中', value: datasetStatus.updating },
+      { text: '更新失败', value: datasetStatus.update_failed }
       // { text: '版本更新中', value: datasetStatus.version_updating },
       // { text: '版本更新失败', value: datasetStatus.version_update_failed }
     ],
@@ -481,9 +486,7 @@ const columns = (
             </Tooltip>
           ) : null}
 
-          {status === datasetStatus.create_failed &&
-          record.src_name !== 'pyspark' &&
-          record.src_name !== '工作流' ? (
+          {record.can_retry ? (
             <PermissionWrapper
               permission={DATA_MANAGEMENT_PERMISSIONS.CAN_UPDATE_VERSION_RETRY}
             >
@@ -662,20 +665,14 @@ const columns = (
             </Button> */}
           <Tooltip
             content={
-              record.status !== datasetStatus.normal
-                ? '数据集状态异常，无法查看详情'
-                : ''
+              canGoToDetail(record.status) ? '' : '数据集状态异常，无法查看详情'
             }
           >
             <Button
               type="text"
-              disabled={record.status !== datasetStatus.normal}
+              disabled={!canGoToDetail(record.status)}
               onClick={() => {
-                record.status === datasetStatus.normal ||
-                record.status === datasetStatus.version_updating ||
-                record.status === datasetStatus.version_update_failed
-                  ? handleGoToDetail(record.id)
-                  : '';
+                canGoToDetail(record.status) ? handleGoToDetail(record.id) : '';
               }}
             >
               详情
@@ -759,20 +756,16 @@ const columns = (
             </Button> */}
           <Tooltip
             content={
-              record.status !== datasetStatus.normal
+              !canGoToDetail(record.status)
                 ? '数据集状态异常，无法查看详情'
                 : ''
             }
           >
             <Button
               type="text"
-              disabled={record.status !== datasetStatus.normal}
+              disabled={!canGoToDetail(record.status)}
               onClick={() => {
-                record.status === datasetStatus.normal ||
-                record.status === datasetStatus.version_updating ||
-                record.status === datasetStatus.version_update_failed
-                  ? handleGoToDetail(record.id)
-                  : '';
+                canGoToDetail(record.status) ? handleGoToDetail(record.id) : '';
               }}
             >
               详情
@@ -832,15 +825,6 @@ export enum searchFieldType {
   // creator_name = 'creator_name'
 }
 
-// 枚举数据集状态
-export enum datasetStatusName {
-  creating = '创建中',
-  create_failed = '创建失败',
-  normal = '正常',
-  version_updating = '版本生成中',
-  version_update_failed = '版本生成失败'
-}
-
 // 枚举数据集状态名称
 export enum datasetStorageType {
   jsonl = 'jsonl',
@@ -857,9 +841,23 @@ export enum datasetStatus {
   creating = 'creating',
   create_failed = 'create_failed',
   normal = 'normal',
+  updating = 'updating',
+  update_failed = 'update_failed',
   version_updating = 'version_updating',
   version_update_failed = 'version_update_failed'
 }
+
+// 枚举数据集状态
+export const datasetStatusName = {
+  [datasetStatus.creating]: '创建中',
+  [datasetStatus.create_failed]: '创建失败',
+  [datasetStatus.normal]: '正常',
+  [datasetStatus.updating]: '更新中',
+  [datasetStatus.update_failed]: '更新失败',
+  [datasetStatus.version_updating]: '版本生成中',
+  [datasetStatus.version_update_failed]: '版本生成失败'
+};
+
 const DatasetManagement: React.FC = () => {
   const history = useHistory();
   const TabPane = Tabs.TabPane;

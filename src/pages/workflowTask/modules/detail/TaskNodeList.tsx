@@ -15,8 +15,8 @@ import type {
   ListTaskInstanceParams
 } from '@/types/workflowTaskApi';
 import {
-  CommandTypeNameMap,
-  CommandType,
+  TriggerTypeNameMap,
+  TriggerType,
   TaskExecuteType,
   TaskExecuteTypeNameMap,
   TaskNodeStatus
@@ -32,6 +32,8 @@ import type { SorterInfo } from '@arco-design/web-react/lib/Table/interface';
 import noDataElement from '@/components/no-data';
 import EllipsisPopoverCom from '@/components/ellipsis-popover-com';
 import TaskLogDrawer from '../../components/task-log-drawer';
+import { PermissionWrapper } from '@/components/PermissionGuard';
+import { WORKFLOW_TASK_PERMISSIONS } from '@/config/permissions';
 
 const { Option } = Select;
 const FormItem = Form.Item;
@@ -68,7 +70,7 @@ export default function TaskNodeList() {
         page: pagination.current || 1,
         page_size: pagination.pageSize || 10,
         orders,
-        command_type_list: filters?.command_type_name,
+        trigger_type_list: filters?.trigger_type_name,
         task_execute_type_list: filters?.task_execute_type_name,
         task_type_list: filters?.task_type_name,
         state_list: filters?.state
@@ -184,16 +186,16 @@ export default function TaskNodeList() {
       },
       {
         title: '运行类型',
-        dataIndex: 'command_type_name',
+        dataIndex: 'trigger_type_name',
         width: 120,
         filters: [
           {
-            text: CommandTypeNameMap[CommandType.SCHEDULER],
-            value: CommandType.SCHEDULER
+            text: TriggerTypeNameMap[TriggerType.SCHEDULE],
+            value: TriggerType.SCHEDULE
           },
           {
-            text: CommandTypeNameMap[CommandType.START_PROCESS],
-            value: CommandType.START_PROCESS
+            text: TriggerTypeNameMap[TriggerType.MANUAL],
+            value: TriggerType.MANUAL
           }
         ]
       },
@@ -250,26 +252,32 @@ export default function TaskNodeList() {
         render: (_: any, record: ListTaskInstanceItem) => {
           return (
             <div className="flex items-center gap-2">
-              <Button
-                disabled={record.state !== TaskNodeStatus.FAILURE}
-                type="text"
-                className="px-[4px]"
-                onClick={() =>
-                  handleTaskNodeRetry(
-                    record.process_instance_id,
-                    record.task_code
-                  )
-                }
+              <PermissionWrapper permission={WORKFLOW_TASK_PERMISSIONS.MODIFY}>
+                <Button
+                  disabled={record.state !== TaskNodeStatus.FAILURE}
+                  type="text"
+                  className="px-[4px]"
+                  onClick={() =>
+                    handleTaskNodeRetry(
+                      record.process_instance_id,
+                      record.task_code
+                    )
+                  }
+                >
+                  重试
+                </Button>
+              </PermissionWrapper>
+              <PermissionWrapper
+                permission={WORKFLOW_TASK_PERMISSIONS.CAN_UPDATE}
               >
-                重试
-              </Button>
-              <Button
-                type="text"
-                className="px-[4px]"
-                onClick={() => handleLog(record)}
-              >
-                日志
-              </Button>
+                <Button
+                  type="text"
+                  className="px-[4px]"
+                  onClick={() => handleLog(record)}
+                >
+                  日志
+                </Button>
+              </PermissionWrapper>
             </div>
           );
         }

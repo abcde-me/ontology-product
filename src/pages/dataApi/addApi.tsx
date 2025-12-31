@@ -39,6 +39,7 @@ import {
 import { useUserInfo } from '@/store/userInfoStore';
 import { TreeDataType } from '@arco-design/web-react/es/Tree/interface';
 import { useParams } from '@/utils/url';
+import { validateApiName, validateApiPath } from './compontent/validate';
 
 enum MetadataType {
   Iceberg = 'iceberg',
@@ -84,6 +85,7 @@ export default function AddApi() {
   const [resultArray, setResultArray] = useState<string[]>([]);
   const [apiCacheMethod, setApiCacheMethod] = useState(0);
   const [isCanTest, setIsCanTest] = useState<boolean>(false);
+  const [canComplete, setCanComplete] = useState<boolean>(false);
 
   const [resizeSize, setResizeSize] = useState<string>('');
   const [paneContainersSize, setPaneContainersSize] = useState<string>('220px');
@@ -121,7 +123,10 @@ export default function AddApi() {
           rules={[{ required: true, message: '请输入参数中文名称' }]}
           initialValue={value}
         >
-          <Input placeholder="请输入参数中文名称" />
+          <Input
+            placeholder="请输入参数中文名称"
+            onChange={() => setCanComplete(false)}
+          />
         </Form.Item>
       )
     },
@@ -141,6 +146,7 @@ export default function AddApi() {
               { label: 'DOUBLE', value: 'DOUBLE' },
               { label: 'BOOLEAN', value: 'BOOLEAN' }
             ]}
+            onChange={() => setCanComplete(false)}
           />
         </Form.Item>
       )
@@ -151,7 +157,10 @@ export default function AddApi() {
       width: 80,
       render: (value, record) => (
         <Form.Item field={`isArray_${record.name}`} initialValue={value}>
-          <Checkbox defaultChecked={value} />
+          <Checkbox
+            defaultChecked={value}
+            onChange={() => setCanComplete(false)}
+          />
         </Form.Item>
       )
     },
@@ -161,7 +170,10 @@ export default function AddApi() {
       width: 150,
       render: (value, record) => (
         <Form.Item field={`defaultValue_${record.name}`} initialValue={value}>
-          <Input placeholder="请输入默认值" />
+          <Input
+            placeholder="请输入默认值"
+            onChange={() => setCanComplete(false)}
+          />
         </Form.Item>
       )
     },
@@ -171,7 +183,10 @@ export default function AddApi() {
       width: 150,
       render: (value, record) => (
         <Form.Item field={`description_${record.name}`} initialValue={value}>
-          <Input placeholder="请输入描述" />
+          <Input
+            placeholder="请输入描述"
+            onChange={() => setCanComplete(false)}
+          />
         </Form.Item>
       )
     }
@@ -205,7 +220,10 @@ export default function AddApi() {
           rules={[{ required: true, message: '请输入参数中文名称' }]}
           initialValue={value}
         >
-          <Input placeholder="请输入参数中文名称" />
+          <Input
+            placeholder="请输入参数中文名称"
+            onChange={() => setCanComplete(false)}
+          />
         </Form.Item>
       )
     },
@@ -225,6 +243,7 @@ export default function AddApi() {
               { label: 'DOUBLE', value: 'DOUBLE' },
               { label: 'BOOLEAN', value: 'BOOLEAN' }
             ]}
+            onChange={() => setCanComplete(false)}
           />
         </Form.Item>
       )
@@ -235,7 +254,10 @@ export default function AddApi() {
       width: 150,
       render: (value, record) => (
         <Form.Item field={`description_${record.name}`} initialValue={value}>
-          <Input placeholder="请输入描述" />
+          <Input
+            placeholder="请输入描述"
+            onChange={() => setCanComplete(false)}
+          />
         </Form.Item>
       )
     }
@@ -282,9 +304,11 @@ export default function AddApi() {
     const res = await openDataGetApiDetail({ id: Number(id) });
     if (res.code === '' && res.status === 200) {
       form.setFieldsValue(res.data || {});
+      form.setFieldValue('cacheMethod', Number(res.data.cacheTime) > 0 ? 1 : 0);
       setValue(res.data.sql || '');
       setParamData(res.data?.paramConfig || []);
       setResultData(res.data?.resultConfig || []);
+      setApiCacheMethod(Number(res.data.cacheTime) > 0 ? 1 : 0);
       setActiveKey(['inputOutputParams']);
       setResizeSize('190px');
       setIsOpen(true);
@@ -294,13 +318,23 @@ export default function AddApi() {
     }
   };
 
+  const getCacheTime = () => {
+    if (!form.getFieldValue('cacheMethod')) {
+      return 0;
+    } else if (form.getFieldValue('cacheTime')) {
+      return Number(form.getFieldValue('cacheTime'));
+    } else {
+      return 1;
+    }
+  };
+
   const saveAndTestApi = async () => {
     const params = {
       ...apiBaseInfo,
       limitTime: 60,
-      limitCount: Number(form.getFieldValue('limitCount')),
-      cacheTime: Number(form.getFieldValue('cacheTime')),
-      databaseType: Number(form.getFieldValue('databaseType')),
+      limitCount: Number(form.getFieldValue('limitCount')) || 100,
+      cacheTime: getCacheTime(),
+      databaseType: Number(form.getFieldValue('databaseType')) || 1,
       sql: value,
       paramConfig: testModalDataSource,
       resultConfig: resultArray,
@@ -407,7 +441,7 @@ export default function AddApi() {
     const metadataTypeArr = ['iceberg', 'doris', 'kafka', 'minio', 'milvus'];
     if (metadataTypeArr.includes(treeNode.props.parentKey)) {
       const params = {
-        databaseType: treeNode.props.parentKey,
+        databaseType: treeNode.props.parentKey === 'iceberg' ? 1 : 2,
         tableId: Number(treeNode.props.dataRef.key.split('_').pop())
       };
       return openDataSearchTable(params).then((res) => {
@@ -415,7 +449,7 @@ export default function AddApi() {
           if (res.data) {
             treeNode.props.dataRef.children = res.data.map((item) => ({
               title: item.tableName,
-              key: `${item.tableName}_${item.id}`,
+              key: `${treeNode.props.dataRef.title}_${item.tableName}_${item.id}`,
               children: []
             }));
             setTreeData([...treeData]);
@@ -434,7 +468,7 @@ export default function AddApi() {
           if (res.data) {
             treeNode.props.dataRef.children = res.data.map((item) => ({
               title: item.fieldName,
-              key: `${item.fieldName}_${item.id}`,
+              key: `${treeNode.props.dataRef.title}_${item.fieldName}_${item.id}`,
               isLeaf: true
             }));
             setTreeData([...treeData]);
@@ -503,14 +537,13 @@ export default function AddApi() {
   // 搜索表
   const handleSearchTable = async (value: string) => {
     const params = {
-      tableName: value
+      tableName: value,
+      databaseType: Number(form.getFieldValue('databaseType'))
     };
     const res = await openDataSearchTable(params);
     if (res.code === '' && res.status === 200) {
       if (res.data) {
         const groupMap = new Map();
-        // 正则匹配关键字（不区分大小写，如需严格匹配则去掉 i）
-        const reg = new RegExp(`(${value})`, 'gi');
 
         res.data.forEach((item) => {
           const { databaseType } = item;
@@ -518,7 +551,7 @@ export default function AddApi() {
 
           if (!groupMap.has(databaseType)) {
             groupMap.set(databaseType, {
-              title: databaseType,
+              title: getMenuName(databaseType),
               key: databaseType,
               children: []
             });
@@ -638,7 +671,10 @@ export default function AddApi() {
           }
         })
       ]}
-      onChange={(value) => setValue(value)}
+      onChange={(value) => {
+        setValue(value);
+        setCanComplete(false);
+      }}
       basicSetup={{
         lineNumbers: true,
         highlightActiveLineGutter: false
@@ -751,18 +787,32 @@ export default function AddApi() {
               onSubmit={handleSubmit}
             >
               <Form.Item
-                label="API名称"
+                label="API英文名称"
+                field="name"
+                required
+                rules={[
+                  { required: true, message: '请输入API英文名称' },
+                  { validator: validateApiName }
+                ]}
+              >
+                <Input placeholder="请输入API英文名称" />
+              </Form.Item>
+              <Form.Item
+                label="API描述"
                 field="nameCn"
                 required
-                rules={[{ required: true, message: '请输入API名称' }]}
+                rules={[{ required: true, message: '请输入API描述' }]}
               >
-                <Input placeholder="输入API名称" />
+                <Input placeholder="输入API描述" />
               </Form.Item>
               <Form.Item
                 label="API路径"
                 field="path"
                 required
-                rules={[{ required: true, message: '请输入API路径' }]}
+                rules={[
+                  { required: true, message: '请输入API路径' },
+                  { validator: validateApiPath }
+                ]}
               >
                 <Input
                   className={styles.apiPath}
@@ -824,20 +874,16 @@ export default function AddApi() {
                 次/分钟
               </Form.Item>
               <Form.Item
-                label="方法名"
-                field="name"
-                required
-                rules={[{ required: true, message: '请输入方法名' }]}
+                label="缓存方法"
+                field="cacheMethod"
+                initialValue={apiCacheMethod}
               >
-                <Input placeholder="请输入方法名" />
-              </Form.Item>
-              <Form.Item label="缓存方法" field="cacheMethod" initialValue={0}>
                 <Select
                   options={[
                     { label: '开启缓存', value: 1 },
                     { label: '关闭缓存', value: 0 }
                   ]}
-                  defaultValue={0}
+                  defaultValue={apiCacheMethod}
                   placeholder="请选择缓存方法"
                   onChange={(value) => setApiCacheMethod(value)}
                 />
@@ -892,7 +938,7 @@ export default function AddApi() {
           )}
           {current === 2 && (
             <div className={styles.addApiParam}>
-              <div className={styles.lfetBox}>
+              <div className={styles.leftBox}>
                 <div className="align-center flex">
                   <div className="text-sm font-semibold leading-[32px]">
                     数据源
@@ -910,6 +956,7 @@ export default function AddApi() {
                   loadMore={loadMore}
                   treeData={treeData}
                   actionOnClick={['expand', 'select']}
+                  virtualListProps={{ height: 'calc(100% - 40px)' }}
                   renderTitle={(props) => {
                     const nodeData = props.dataRef;
                     const nodeContent = nodeData?.isLeaf;
@@ -971,8 +1018,14 @@ export default function AddApi() {
           )}
           <div className={styles.stepFooter}>
             <Button
-              disabled={current >= 2}
-              onClick={() => form.submit()}
+              disabled={current >= 2 && !canComplete}
+              onClick={() => {
+                if (current === 1) {
+                  form.submit();
+                } else {
+                  history.goBack();
+                }
+              }}
               type="primary"
             >
               {current === 1 ? '下一步' : '完成'}
@@ -996,6 +1049,13 @@ export default function AddApi() {
       <TestModal
         visible={testModalVisible}
         dataSource={testModalDataSource}
+        getStatusCode={(statusCode) => {
+          if (statusCode === 0) {
+            setCanComplete(true);
+          } else {
+            setCanComplete(false);
+          }
+        }}
         apiId={apiId}
         onCancel={() => setTestModalVisible(false)}
       />

@@ -46,12 +46,13 @@ import { SorterInfo } from '@arco-design/web-react/lib/Table/interface';
 import { openNewPage } from '@/utils/env';
 import { PermissionWrapper } from '@/components/PermissionGuard';
 import copy from 'copy-to-clipboard';
+import { useHasPermission } from '@/hooks';
 
 const { Row, Col } = Grid;
 
 export function StructuredWorkflowList() {
   const [form] = Form.useForm();
-
+  const viewPermission = useHasPermission(WORKFLOW_LIST_PERMISSIONS.MODIFY);
   const { onSubmit, tableProps } = useArcoTable(
     ({ pagination, filters, sorter, query }) => {
       const searchParams: SearchWorkflowParams = {
@@ -168,8 +169,9 @@ export function StructuredWorkflowList() {
       tooltip: true,
       render: (value, record) => (
         <div
-          className={`${styles['workflow-name']} flex w-full items-center gap-1 overflow-hidden hover:cursor-pointer`}
+          className={`${styles['workflow-name']} flex w-full items-center gap-1 overflow-hidden hover:${viewPermission ? 'cursor-pointer' : 'cursor-not-allowed'}`}
           onClick={() => {
+            if (!viewPermission) return;
             viewDetailWorkflow(record);
           }}
           title={value}
@@ -307,19 +309,25 @@ export function StructuredWorkflowList() {
       fixed: 'right',
       render: (_, record) => (
         <div className={'flex gap-2'}>
-          <Button type="text" onClick={() => viewDetailWorkflow(record)}>
-            详情
-          </Button>
-          <Button type="text" onClick={() => handleCloneWorkflow(record)}>
-            复制
-          </Button>
-          <Button
-            type="text"
-            onClick={() => handleDelete(record)}
-            disabled={record.release_state === 'ONLINE'}
-          >
-            删除
-          </Button>
+          <PermissionWrapper permission={WORKFLOW_LIST_PERMISSIONS.MODIFY}>
+            <Button type="text" onClick={() => viewDetailWorkflow(record)}>
+              详情
+            </Button>
+          </PermissionWrapper>
+          <PermissionWrapper permission={WORKFLOW_LIST_PERMISSIONS.CREATE}>
+            <Button type="text" onClick={() => handleCloneWorkflow(record)}>
+              复制
+            </Button>
+          </PermissionWrapper>
+          <PermissionWrapper permission={WORKFLOW_LIST_PERMISSIONS.DELETE}>
+            <Button
+              type="text"
+              onClick={() => handleDelete(record)}
+              disabled={record.release_state === 'ONLINE'}
+            >
+              删除
+            </Button>
+          </PermissionWrapper>
         </div>
       )
     }

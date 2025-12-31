@@ -262,18 +262,6 @@ const MinIOFields = [
     values: []
   },
   {
-    id: 'storageType',
-    nameEn: 'storageType',
-    nameZh: '存储类型',
-    type: 'string',
-    isEnumAbleForColumn: true,
-    isEnumAble: false,
-    enumLoading: false,
-    distinctCount: 0,
-    displaySort: 3,
-    values: []
-  },
-  {
     id: 'objectsSize',
     nameEn: 'objectsSize',
     nameZh: '存储大小',
@@ -300,7 +288,7 @@ const MinIOFields = [
   {
     id: 'policy',
     nameEn: 'policy',
-    nameZh: '策略',
+    nameZh: '访问策略',
     type: 'string',
     isEnumAbleForColumn: true,
     isEnumAble: false,
@@ -325,18 +313,6 @@ const MinIOFields = [
     id: 'createTime',
     nameEn: 'createTime',
     nameZh: '创建时间',
-    type: 'datetime',
-    isEnumAbleForColumn: true,
-    isEnumAble: false,
-    enumLoading: false,
-    distinctCount: 0,
-    displaySort: 8,
-    values: []
-  },
-  {
-    id: 'updateTime',
-    nameEn: 'updateTime',
-    nameZh: '元数据更新时间',
     type: 'datetime',
     isEnumAbleForColumn: true,
     isEnumAble: false,

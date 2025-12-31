@@ -135,6 +135,7 @@ const EditableTable = ({
       render: (value: string, record: TableRow) => (
         <Input
           defaultValue={value}
+          value={value}
           placeholder="请输入"
           onChange={(val) =>
             handleInputChange(record, record.id, 'source_field', val)
@@ -151,6 +152,7 @@ const EditableTable = ({
       render: (value: string, record: TableRow) => (
         <Input
           defaultValue={value}
+          value={value}
           placeholder="请输入"
           onChange={(val) =>
             handleInputChange(record, record.id, 'target_field', val)
@@ -166,6 +168,7 @@ const EditableTable = ({
       render: (value: string, record: TableRow) => (
         <Select
           defaultValue={value}
+          value={value}
           placeholder="请选择分类"
           options={categoryOptions}
           onChange={(val) => handleInputChange(record, record.id, 'type', val)}
@@ -177,8 +180,9 @@ const EditableTable = ({
       title: <div className={styles.title}>主键</div>,
       dataIndex: 'is_primary_key',
       width: 60,
-      render: (value: string, record: TableRow) => (
+      render: (value: boolean | undefined, record: TableRow) => (
         <Checkbox
+          checked={value}
           onChange={(checked) =>
             handleInputChange(record, record.id, 'is_primary_key', checked)
           }

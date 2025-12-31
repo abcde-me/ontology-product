@@ -462,7 +462,7 @@ export interface NodeProcessData {
   /**
    * 任务节点ID
    */
-  task_code: string;
+  task_code: string | number;
   /**
    * 任务模式 ，离线、实时
    */
