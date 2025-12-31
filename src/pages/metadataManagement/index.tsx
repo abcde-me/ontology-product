@@ -446,6 +446,7 @@ PROPERTIES (
             onMainSearch={handleSearch}
             onFieldSearch={handleFieldSearch}
             onReset={handleReset}
+            activeMetadataType={activeMetadataType}
           />
           <div className="mb-3 mt-4 flex items-center justify-between">
             <h1 className="text-base font-semibold">{`数据列表(${total})`}</h1>
