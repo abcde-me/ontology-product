@@ -195,7 +195,11 @@ function GenerateRecordModal({ visible, onClose }: GenerateRecordModalProps) {
           loading={loading}
           pagination={false}
           onChange={handleTableChange}
-          noDataElement={<NoDataCard />}
+          noDataElement={
+            <div style={{ paddingTop: '80px' }}>
+              <NoDataCard type="block" />
+            </div>
+          }
         />
 
         {total > 0 && (

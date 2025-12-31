@@ -281,7 +281,11 @@ function RequirementProgress({ isActive }: RequirementProgressProps) {
         pagination={false}
         onChange={handleTableChange}
         scroll={{ x: 'max-content' }}
-        noDataElement={<NoDataCard />}
+        noDataElement={
+          <div style={{ paddingTop: '100px' }}>
+            <NoDataCard title="暂无数据" />
+          </div>
+        }
       />
 
       {total > 0 && (

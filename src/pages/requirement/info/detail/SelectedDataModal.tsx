@@ -3,7 +3,7 @@ import { Modal, Table, Pagination, Tooltip } from '@arco-design/web-react';
 import { useCatalogTree } from '../../hooks/useCatalogTree';
 import noDataElement from '@/components/no-data';
 import dayjs from 'dayjs';
-import { EllipsisPopover } from '@ceai-front/arco-material';
+import { EllipsisPopover, NoDataCard } from '@ceai-front/arco-material';
 
 interface SelectedDataModalProps {
   visible: boolean;
@@ -108,9 +108,7 @@ const SelectedDataModal: React.FC<SelectedDataModalProps> = ({
         loading={false}
         pagination={false}
         border={false}
-        noDataElement={noDataElement({
-          description: '暂无已选数据'
-        })}
+        noDataElement={<NoDataCard title="暂无已选数据" type="block" />}
       />
       {data && data.length > 0 && (
         <Pagination

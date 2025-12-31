@@ -34,6 +34,7 @@ import EqualIcon from '@/assets/annotation/equal-icon.svg';
 import MinusIcon from '@/assets/annotation/minus-icon.svg';
 import { useHasPermission } from '@/store/userInfoStore';
 import { QUALITY_TASK_PERMISSIONS } from '@/config/permissions';
+import { NoDataCard } from '@ceai-front/arco-material';
 const BreadcrumbItem = Breadcrumb.Item;
 
 // 状态枚举
@@ -585,7 +586,11 @@ function QualityTaskDetail() {
             rowKey="qs_id"
             border={false}
             pagination={false}
-            noDataElement={noDataElement({ description: '暂无数据' })}
+            noDataElement={
+              <div style={{ paddingTop: '100px' }}>
+                <NoDataCard title="暂无数据" />
+              </div>
+            }
             scroll={{ x: 'max-content' }}
             onChange={handleTableChange}
           />

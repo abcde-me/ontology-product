@@ -276,7 +276,11 @@ function RequirementParticular({ isActive }: RequirementParticularProps) {
         loading={loading}
         pagination={false}
         onChange={handleTableChange}
-        noDataElement={<NoDataCard />}
+        noDataElement={
+          <div style={{ paddingTop: '100px' }}>
+            <NoDataCard title="暂无数据" />
+          </div>
+        }
         scroll={{ x: 'max-content' }}
       />
 
