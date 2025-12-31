@@ -322,21 +322,33 @@ export default function TaskNodeRunList() {
         title: (
           <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
             失败重试次数
-            <Tooltip content="格式：已重试次数/设定的总重试次数">
-              <span style={{ display: 'inline-flex', alignItems: 'center' }}>
-                <IconQuestionCircle
-                  style={{
-                    cursor: 'pointer',
-                    color: '#86909c',
-                    fontSize: '14px'
-                  }}
-                />
-              </span>
+            <Tooltip
+              content="格式：已重试次数/设定的总重试次数"
+              trigger="hover"
+              position="top"
+            >
+              <IconQuestionCircle
+                onMouseEnter={(e) => {
+                  e.stopPropagation();
+                  e.preventDefault();
+                }}
+                onMouseLeave={(e) => {
+                  e.stopPropagation();
+                  e.preventDefault();
+                }}
+                style={{
+                  cursor: 'pointer',
+                  color: '#86909c',
+                  fontSize: '14px',
+                  pointerEvents: 'auto'
+                }}
+              />
             </Tooltip>
           </span>
         ),
         dataIndex: 'retry_times',
         width: 180,
+        sorter: false,
         render: (value: string, record: TaskNodeItem) => (
           <span>{`${record.retry_times ?? '-'} / ${record.max_retry_times ?? '-'}`}</span>
         )
