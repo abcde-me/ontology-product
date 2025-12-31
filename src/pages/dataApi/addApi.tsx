@@ -450,7 +450,8 @@ export default function AddApi() {
             treeNode.props.dataRef.children = res.data.map((item) => ({
               title: item.tableName,
               key: `${treeNode.props.dataRef.title}_${item.tableName}_${item.id}`,
-              children: []
+              children: [],
+              isCanCopy: true
             }));
             setTreeData([...treeData]);
           }
@@ -467,8 +468,9 @@ export default function AddApi() {
         if (res.code === '' && res.status === 200) {
           if (res.data) {
             treeNode.props.dataRef.children = res.data.map((item) => ({
-              title: item.fieldName,
+              title: `${item.fieldName} (${item.description})`,
               key: `${treeNode.props.dataRef.title}_${item.fieldName}_${item.id}`,
+              isCanCopy: true,
               isLeaf: true
             }));
             setTreeData([...treeData]);
@@ -963,7 +965,7 @@ export default function AddApi() {
                   virtualListProps={{ height: 'calc(100% - 40px)' }}
                   renderTitle={(props) => {
                     const nodeData = props.dataRef;
-                    const nodeContent = nodeData?.isLeaf;
+                    const nodeContent = nodeData?.isCanCopy;
                     return (
                       <div className="flex items-center">
                         <EllipsisPopoverCom
