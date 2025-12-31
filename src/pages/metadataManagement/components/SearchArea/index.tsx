@@ -56,6 +56,8 @@ export interface SearchAreaProps {
   ) => void;
   /** 重置回调 */
   onReset?: () => void;
+  /** 当前选中的元数据类型 */
+  activeMetadataType?: string;
   /** 样式类 */
   className?: string;
 }
@@ -88,6 +90,7 @@ export default function SearchArea({
   onMainSearch,
   onFieldSearch,
   onReset,
+  activeMetadataType,
   className = ''
 }: SearchAreaProps) {
   // 主搜索框的值
@@ -102,6 +105,10 @@ export default function SearchArea({
   const [settingsVisible, setSettingsVisible] = useState(false);
   // 设置搜索条件的搜索关键词
   const [settingsSearchKeyword, setSettingsSearchKeyword] = useState('');
+
+  useEffect(() => {
+    setFieldValues({});
+  }, [activeMetadataType]);
 
   // 初始化：默认勾选所有字段
   useEffect(() => {
