@@ -172,7 +172,7 @@ export const routes: IRoute[] = [
         component: React.lazy(
           async () => import('../../workflowTask/modules/detail/index')
         ),
-        permission: WORKFLOW_TASK_PERMISSIONS.LIST
+        permission: WORKFLOW_TASK_PERMISSIONS.CAN_UPDATE
       }
     ]
   },
