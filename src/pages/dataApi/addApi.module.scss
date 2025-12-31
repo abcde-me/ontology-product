@@ -97,10 +97,10 @@
       margin-top: 24px;
       display: flex;
 
-      .lfetBox {
+      .leftBox {
         width: 240px;
         min-height: calc(100vh - 305px);
-        padding: 12px;
+        padding: 12px 0 12px 12px;
         border-right: 1px solid #e2e8f0;
         overflow: auto;
 
