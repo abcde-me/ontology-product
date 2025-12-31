@@ -825,6 +825,35 @@ const LabelAndAttributeForm: React.FC<LabelAndAttributeFormProps> = ({
                               </Tooltip>
                             </FormItem>
                           </div>
+                          {/* 选项和展示名称的表头 */}
+                          {(1 === attrGroup.attribute_group_class ||
+                            2 === attrGroup.attribute_group_class) &&
+                            attrGroup?.label_info_attribute?.length > 0 && (
+                              <div className="attribute-options-header">
+                                <div className="attribute-options-header-item">
+                                  <span>选项</span>
+                                  <span className="required-mark">*</span>
+                                </div>
+                                <div className="attribute-options-header-item">
+                                  <span>展示名称</span>
+                                  <Tooltip
+                                    content={
+                                      <div style={{ fontSize: 14 }}>
+                                        展示在标注页面的名称
+                                      </div>
+                                    }
+                                  >
+                                    <IconQuestionCircle
+                                      style={{
+                                        color: '#6E7B8D',
+                                        marginLeft: 4
+                                      }}
+                                    />
+                                  </Tooltip>
+                                </div>
+                                <div className="attribute-options-header-placeholder"></div>
+                              </div>
+                            )}
                           {attrGroup?.label_info_attribute?.map(
                             (attr, attrIndex) => (
                               <div
@@ -835,11 +864,7 @@ const LabelAndAttributeForm: React.FC<LabelAndAttributeFormProps> = ({
                                   2 === attrGroup.attribute_group_class) && (
                                   <div className="attribute-info-item">
                                     <FormItem
-                                      label={
-                                        <div style={{ color: '#6E7B8D' }}>
-                                          选项{attrIndex + 1}：
-                                        </div>
-                                      }
+                                      label={null}
                                       field={`label_info_attribute_groups_${attr?.label_info_id}_attribute_name_en`}
                                       rules={[
                                         {
@@ -906,7 +931,6 @@ const LabelAndAttributeForm: React.FC<LabelAndAttributeFormProps> = ({
                                         placeholder="用于储存标注结果"
                                         value={attr.attribute_name_en}
                                         style={{
-                                          width: 340,
                                           backgroundColor:
                                             (type === 'edit' &&
                                               isAttributeFromDetail(
@@ -937,33 +961,7 @@ const LabelAndAttributeForm: React.FC<LabelAndAttributeFormProps> = ({
                                       />
                                     </FormItem>
                                     <FormItem
-                                      label={
-                                        <div
-                                          style={{
-                                            marginRight: 3,
-                                            color: '#6E7B8D'
-                                          }}
-                                        >
-                                          <span style={{ marginRight: 2 }}>
-                                            展示名称
-                                          </span>
-                                          <Tooltip
-                                            content={
-                                              <div style={{ fontSize: 14 }}>
-                                                展示在标注页面的名称
-                                              </div>
-                                            }
-                                          >
-                                            <IconQuestionCircle
-                                              style={{
-                                                color: '#6E7B8D',
-                                                marginRight: 2
-                                              }}
-                                            />
-                                          </Tooltip>
-                                          :
-                                        </div>
-                                      }
+                                      label={null}
                                       rules={[
                                         {
                                           validateTrigger: [
@@ -999,7 +997,6 @@ const LabelAndAttributeForm: React.FC<LabelAndAttributeFormProps> = ({
                                     >
                                       <Input
                                         style={{
-                                          width: 318,
                                           backgroundColor:
                                             (type === 'edit' &&
                                               isAttributeFromDetail(
@@ -1038,9 +1035,9 @@ const LabelAndAttributeForm: React.FC<LabelAndAttributeFormProps> = ({
                                         }
                                       />
                                     </FormItem>
-                                    {attrGroup.label_info_attribute.length >
-                                      1 && (
-                                      <FormItem>
+                                    <div className="attribute-delete-btn">
+                                      {attrGroup.label_info_attribute.length >
+                                        1 && (
                                         <Tooltip content="删除">
                                           <IconDelete
                                             className={`icon-wrapper ${
@@ -1097,8 +1094,8 @@ const LabelAndAttributeForm: React.FC<LabelAndAttributeFormProps> = ({
                                             }}
                                           />
                                         </Tooltip>
-                                      </FormItem>
-                                    )}
+                                      )}
+                                    </div>
                                   </div>
                                 )}
                               </div>

@@ -438,11 +438,36 @@ const Classify = (props: ClassifyComponentProps) => {
                         支持手动输入
                       </Checkbox>
                     </div>
+                    {/* 选项和展示名称的表头 */}
+                    <div className="attribute-options-header">
+                      <div className="attribute-options-header-item">
+                        <span>选项</span>
+                        <span className="required-mark">*</span>
+                      </div>
+                      <div className="attribute-options-header-item">
+                        <span>展示名称</span>
+                        <Tooltip
+                          content={
+                            <div style={{ fontSize: 14 }}>
+                              展示在标注页面的名称
+                            </div>
+                          }
+                        >
+                          <IconQuestionCircle
+                            style={{
+                              color: '#6E7B8D',
+                              marginLeft: 4
+                            }}
+                          />
+                        </Tooltip>
+                      </div>
+                      <div className="attribute-options-header-placeholder"></div>
+                    </div>
                     {item.file_label_attribute?.map((attr: any, attrIndex) => (
                       <div key={attr.attribute_id} className="attribute-item">
                         <FormItem
                           field={`attribute_name_en_${attr.attribute_id}`}
-                          style={{ padding: 0, marginRight: 8 }}
+                          label={null}
                           rules={[
                             {
                               required: true,
@@ -475,11 +500,6 @@ const Classify = (props: ClassifyComponentProps) => {
                               }
                             }
                           ]}
-                          label={
-                            <div style={{ color: '#6E7B8D' }}>
-                              选项{attr.order_num}:
-                            </div>
-                          }
                           disabled={
                             attrIndex !== 0 &&
                             attrIndex ===
@@ -489,7 +509,7 @@ const Classify = (props: ClassifyComponentProps) => {
                           }
                         >
                           <Input
-                            style={{ width: 340, backgroundColor: '#fff' }}
+                            style={{ backgroundColor: '#fff' }}
                             placeholder="用于存储标注结果"
                             value={attr.attribute_name_en}
                             onChange={(value) => {
@@ -507,24 +527,7 @@ const Classify = (props: ClassifyComponentProps) => {
                         </FormItem>
                         <FormItem
                           field={`attribute_name_cn_${attr.attribute_id}`}
-                          style={{ padding: 0, marginRight: 8 }}
-                          label={
-                            <div style={{ color: '#6E7B8D' }}>
-                              展示名称
-                              <Tooltip
-                                content={
-                                  <div style={{ fontSize: 14 }}>
-                                    展示在标注页面的名称
-                                  </div>
-                                }
-                              >
-                                <IconQuestionCircle
-                                  style={{ color: '#6E7B8D', marginLeft: 3 }}
-                                />
-                                :
-                              </Tooltip>
-                            </div>
-                          }
+                          label={null}
                           rules={[
                             {
                               validateTrigger: ['onChange', 'onBlur'],
@@ -558,7 +561,7 @@ const Classify = (props: ClassifyComponentProps) => {
                           ]}
                         >
                           <Input
-                            style={{ width: 300, backgroundColor: '#fff' }}
+                            style={{ backgroundColor: '#fff' }}
                             placeholder="展示在标注页面的名称"
                             value={attr.attribute_name_cn}
                             onChange={(value) => {
@@ -573,7 +576,7 @@ const Classify = (props: ClassifyComponentProps) => {
                             }
                           />
                         </FormItem>
-                        <FormItem label={null}>
+                        <div className="attribute-delete-btn">
                           {item?.file_label_attribute?.length > 1 && (
                             <Tooltip content="删除">
                               <IconDelete
@@ -604,7 +607,7 @@ const Classify = (props: ClassifyComponentProps) => {
                               />
                             </Tooltip>
                           )}
-                        </FormItem>
+                        </div>
                       </div>
                     ))}
                   </div>
