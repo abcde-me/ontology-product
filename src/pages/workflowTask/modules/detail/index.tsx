@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useRequest, useUpdateEffect } from 'ahooks';
 import {
   Breadcrumb,
@@ -159,10 +159,13 @@ export default function WorkflowTaskDetail() {
   const workflowId = useQueryParams('ds_workflow_id') ?? '';
   const workflowType = useQueryParams('workflow_type') ?? WorkflowType.STRUCT;
 
+  // TaskNodeList 组件的引用
+  const taskNodeListRef = useRef<{ refresh: () => void }>(null);
+
   // 使用 useRequest 实现轮询
   const { run: runGetDetailData, cancel: cancelPolling } = useRequest(
-    async (isSetActiveNode = false) => {
-      return await getDetailData(isSetActiveNode);
+    async (isSetActiveNode = false, isRefreshTaskNodeList = true) => {
+      return await getDetailData(isSetActiveNode, isRefreshTaskNodeList);
     },
     {
       pollingInterval: 180000, // 每隔3分钟轮询一次
@@ -174,7 +177,7 @@ export default function WorkflowTaskDetail() {
   // 初始化详情基本数据
   useEffect(() => {
     if (taskId) {
-      runGetDetailData(true); // 首次加载
+      runGetDetailData(true, false); // 首次加载
     }
   }, [taskId, runGetDetailData]);
 
@@ -202,7 +205,10 @@ export default function WorkflowTaskDetail() {
     taskDetailData?.state
   ]);
 
-  const getDetailData = async (isSetActiveNode = false) => {
+  const getDetailData = async (
+    isSetActiveNode = false,
+    isRefreshTaskNodeList = true
+  ) => {
     setLoading(true);
     try {
       const res = await getTaskDetail({
@@ -246,6 +252,11 @@ export default function WorkflowTaskDetail() {
           });
         } else {
           setCleaningAugmentNodeData(res.data.result_info?.data_dispose ?? {});
+        }
+
+        // 如果类型是 WorkflowType.STRUCT，TaskNodeList 也需要更新
+        if (workflowType === WorkflowType.STRUCT && isRefreshTaskNodeList) {
+          taskNodeListRef.current?.refresh();
         }
       }
     } finally {
@@ -662,7 +673,12 @@ export default function WorkflowTaskDetail() {
       {/* 作业内容区域 */}
       {workflowType === WorkflowType.NO_STRUCT && getTaskContentDom()}
       {/* 节点列表区域 */}
-      {workflowType === WorkflowType.STRUCT && <TaskNodeList />}
+      {workflowType === WorkflowType.STRUCT && (
+        <TaskNodeList
+          ref={taskNodeListRef}
+          onRetrySuccess={() => runGetDetailData(false, true)}
+        />
+      )}
     </div>
   );
 }

@@ -50,6 +50,7 @@ import { useHistory } from 'react-router';
 import { openNewPage } from '@/utils/env';
 import { PermissionWrapper } from '@/components/PermissionGuard';
 import { WORKFLOW_TASK_PERMISSIONS } from '@/config/permissions';
+import { delay } from 'lodash-es';
 
 const { Option } = Select;
 const FormItem = Form.Item;
@@ -177,15 +178,18 @@ export default function WorkflowRunList() {
         });
         if (res.status === 200) {
           Message.success(getOperationSuccessMessage(type));
-          table.refresh();
+          delay(() => {
+            table.refresh();
+          }, 500);
         } else {
           Message.error(res.message || '操作失败');
         }
       } catch (error) {
+        console.error('操作失败:', error);
         Message.error('操作失败，请稍后重试');
       }
     },
-    [table]
+    [table.refresh, getOperationSuccessMessage]
   );
 
   // 工作流运行记录表格列
