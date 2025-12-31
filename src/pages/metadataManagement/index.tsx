@@ -431,6 +431,8 @@ PROPERTIES (
                 ) || ({} as MetadataMenuItem);
               setUpdateTime(selectMenuItem?.updateTime || '');
               setActiveMetadataId(selectMenuItem?.id || null);
+              setCurrent(1);
+              setPageSize(10);
             }}
           >
             {metadataMenuData.map((item: MetadataMenuItem) => (
@@ -647,6 +649,12 @@ PROPERTIES (
             <Select
               placeholder="请选择数据库"
               className={styles.selectTable}
+              showSearch
+              filterOption={(inputValue, option) =>
+                option.props.children
+                  .toLowerCase()
+                  .indexOf(inputValue.toLowerCase()) >= 0
+              }
               style={{ display: 'flex', alignItems: 'center' }}
               addBefore={
                 <Select

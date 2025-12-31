@@ -53,6 +53,7 @@ interface NotebookWorkspaceProps {
   onToScriptList?: (key: string) => void;
   curActiveTab: string;
   onHasUnsavedChangesChange?: (checkFn: (() => boolean) | null) => void;
+  onRemoveTab?: (tabKey: string) => void;
 }
 
 // 内部组件，使用 EditorContext
@@ -476,7 +477,8 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = memo(
     // selectFile,
     onToScriptList,
     curActiveTab,
-    onHasUnsavedChangesChange
+    onHasUnsavedChangesChange,
+    onRemoveTab
   }) => {
     const editorOptions = {
       activeTab: tabKey,
@@ -508,7 +510,8 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = memo(
             hasRun
           });
         }
-      }
+      },
+      onRemoveTab
     };
 
     return (

@@ -34,10 +34,11 @@
       .workflow-name-copy {
         visibility: hidden;
         cursor: pointer;
-        color: rgb(0, 125, 250);
+      }
 
-        &:hover {
-          color: rgba(67, 141, 251, 1);
+      &.is-link {
+        .workflow-name-copy {
+          color: rgb(0, 125, 250);
         }
       }
     }
