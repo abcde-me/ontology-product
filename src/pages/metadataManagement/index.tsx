@@ -431,6 +431,8 @@ PROPERTIES (
                 ) || ({} as MetadataMenuItem);
               setUpdateTime(selectMenuItem?.updateTime || '');
               setActiveMetadataId(selectMenuItem?.id || null);
+              setCurrent(1);
+              setPageSize(10);
             }}
           >
             {metadataMenuData.map((item: MetadataMenuItem) => (
