@@ -216,7 +216,7 @@ export default function TestModal(props: {
                     <pre>
                       {result?.errorInfo
                         ? JSON.stringify(result?.errorInfo, null, 2)
-                        : '-'}
+                        : Number(result.statusCode) === 0 && '成功'}
                     </pre>
                   </div>
                 </TabPane>
