@@ -267,13 +267,17 @@ export default function TaskNodeList() {
                   重试
                 </Button>
               </PermissionWrapper>
-              <Button
-                type="text"
-                className="px-[4px]"
-                onClick={() => handleLog(record)}
+              <PermissionWrapper
+                permission={WORKFLOW_TASK_PERMISSIONS.CAN_UPDATE}
               >
-                日志
-              </Button>
+                <Button
+                  type="text"
+                  className="px-[4px]"
+                  onClick={() => handleLog(record)}
+                >
+                  日志
+                </Button>
+              </PermissionWrapper>
             </div>
           );
         }

@@ -10,7 +10,7 @@ import {
   filterTreeDataByPerms
 } from '../../../hooks/useDepartmentTree';
 import noDataElement from '@/components/no-data';
-import { EllipsisPopover } from '@ceai-front/arco-material';
+import { EllipsisPopover, NoDataCard } from '@ceai-front/arco-material';
 
 // 获取部门完整路径标题
 const getFullPathTitle = (
@@ -119,7 +119,11 @@ const SelectedDepartmentModal: React.FC<SelectedDepartmentModalProps> = ({
           loading={loading}
           pagination={false}
           border={false}
-          noDataElement={noDataElement({ description: '暂无已选部门' })}
+          noDataElement={
+            <div style={{ paddingTop: '100px' }}>
+              <NoDataCard title="暂无已选部门" type="block" />
+            </div>
+          }
         />
         {total > 0 && (
           <Pagination
