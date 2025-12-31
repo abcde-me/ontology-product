@@ -10,6 +10,7 @@ import {
   Message,
   Modal,
   Pagination,
+  Spin,
   Table,
   Tabs,
   Tooltip,
@@ -38,7 +39,10 @@ import { formatFileSize } from '@/utils/format';
 import EllipsisPopoverCom from '@/components/ellipsis-popover-com';
 
 import styles from './detail.module.scss';
-import { SorterInfo } from '@arco-design/web-react/es/Table/interface';
+import {
+  ColumnProps,
+  SorterInfo
+} from '@arco-design/web-react/es/Table/interface';
 import PdfRenderer from '../ragDetail/components/scenes/pdf/PdfRenderer';
 import { getFileBinaryData } from '@/api/modules/rag';
 import TableViewer from '../ragDetail/components/scenes/table/TableViewer';
@@ -95,6 +99,7 @@ export default function MetadataManagementDetail() {
   const [baseInfoData, setBaseInfoData] = useState<Record<string, string>>({});
   const [fileBinaryData, setFileBinaryData] = useState<ArrayBuffer>();
   const [previewVisible, setPreviewVisible] = useState(false);
+  const [previewLoading, setPreviewLoading] = useState(false);
   const [selectFileType, setSelectFileType] = useState('');
 
   // 字段分页
@@ -183,6 +188,8 @@ export default function MetadataManagementDetail() {
     record: Record<string, string>,
     objectPath: string
   ) => {
+    setPreviewVisible(true);
+    setPreviewLoading(true);
     setSelectFileType(objectPath);
     const res = await getFileBinaryData({
       bucket_name: record.bucketName,
@@ -190,7 +197,7 @@ export default function MetadataManagementDetail() {
       convert_pdf: !(selectFileType === 'xls' || selectFileType === 'xlsx')
     });
     setFileBinaryData(res);
-    setPreviewVisible(true);
+    setPreviewLoading(false);
   };
 
   // Iceberg基本信息数据
@@ -350,7 +357,7 @@ export default function MetadataManagementDetail() {
     }
   ];
   // MinIo对象信息列
-  const minIoObjectClumns = [
+  const minIoObjectClumns: ColumnProps[] = [
     {
       title: '序号',
       dataIndex: 'index',
@@ -364,19 +371,7 @@ export default function MetadataManagementDetail() {
       key: 'objectKey',
       width: 200,
       render: (text, record) => {
-        const objectPath = record.objectPath.split('.').pop();
-        const isCanPreview = canPreviewFileType.includes(objectPath);
-        return (
-          <EllipsisPopoverCom
-            className={isCanPreview ? styles.hoverChange : ''}
-            isLink={isCanPreview}
-            value={text || '-'}
-            preferTypography
-            handleLink={() => {
-              handlePreview(record, objectPath);
-            }}
-          />
-        );
+        return <EllipsisPopoverCom value={text || '-'} />;
       }
     },
     {
@@ -420,6 +415,28 @@ export default function MetadataManagementDetail() {
       key: 'createTime',
       width: 220,
       sorter: true
+    },
+    {
+      title: '操作',
+      dataIndex: 'operation',
+      key: 'operation',
+      width: 100,
+      align: 'center',
+      fixed: 'right',
+      render: (text, record) => (
+        <Button
+          type="text"
+          disabled={
+            !canPreviewFileType.includes(record.objectPath.split('.').pop())
+          }
+          onClick={() => {
+            const objectPath = record.objectPath.split('.').pop();
+            handlePreview(record, objectPath);
+          }}
+        >
+          预览
+        </Button>
+      )
     }
   ];
   // 字段信息列
@@ -1340,7 +1357,12 @@ export default function MetadataManagementDetail() {
         footer={null}
         className={styles.previewModal}
       >
-        {selectFileType === 'xls' || selectFileType === 'xlsx' ? (
+        {previewLoading ? (
+          <Spin
+            className="flex h-full flex-col items-center justify-center"
+            tip="文档加载中..."
+          />
+        ) : selectFileType === 'xls' || selectFileType === 'xlsx' ? (
           <TableViewer metadataPreviewData={fileBinaryData} />
         ) : (
           <PdfRenderer pdfData={fileBinaryData} scale={1.3} />
