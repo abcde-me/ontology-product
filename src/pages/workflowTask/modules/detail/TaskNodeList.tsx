@@ -5,7 +5,9 @@ import {
   Table,
   Button,
   Pagination,
-  Message
+  Message,
+  Popconfirm,
+  Popover
 } from '@arco-design/web-react';
 import { IconSearch, IconRefresh } from '@arco-design/web-react/icon';
 import { useParams as useRouteParams } from 'react-router';
@@ -34,6 +36,8 @@ import EllipsisPopoverCom from '@/components/ellipsis-popover-com';
 import TaskLogDrawer from '../../components/task-log-drawer';
 import { PermissionWrapper } from '@/components/PermissionGuard';
 import { WORKFLOW_TASK_PERMISSIONS } from '@/config/permissions';
+import classNames from 'classnames';
+import styles from './TaskNodeList.module.scss';
 
 const { Option } = Select;
 const FormItem = Form.Item;
@@ -247,26 +251,49 @@ export default function TaskNodeList() {
       },
       {
         title: '操作',
-        width: 104,
+        width: 116,
         fixed: 'right' as const,
         render: (_: any, record: ListTaskInstanceItem) => {
           return (
-            <div className="flex items-center gap-2">
-              <PermissionWrapper permission={WORKFLOW_TASK_PERMISSIONS.MODIFY}>
-                <Button
-                  disabled={record.state !== TaskNodeStatus.FAILURE}
-                  type="text"
-                  className="px-[4px]"
-                  onClick={() =>
-                    handleTaskNodeRetry(
-                      record.process_instance_id,
-                      record.task_code
-                    )
-                  }
+            <div
+              className={classNames(
+                'flex items-center gap-2',
+                styles['operation-container']
+              )}
+            >
+              {record.state === TaskNodeStatus.FAILURE ? (
+                <PermissionWrapper
+                  permission={WORKFLOW_TASK_PERMISSIONS.MODIFY}
                 >
-                  重试
-                </Button>
-              </PermissionWrapper>
+                  <Popconfirm
+                    title="确定重新运行吗？"
+                    content=""
+                    onOk={() =>
+                      handleTaskNodeRetry(
+                        record.process_instance_id,
+                        record.task_code
+                      )
+                    }
+                  >
+                    <Button
+                      disabled={record.state !== TaskNodeStatus.FAILURE}
+                      type="text"
+                    >
+                      重试
+                    </Button>
+                  </Popconfirm>
+                </PermissionWrapper>
+              ) : (
+                <PermissionWrapper
+                  permission={WORKFLOW_TASK_PERMISSIONS.MODIFY}
+                >
+                  <Popover content="只能重试已经运行失败的节点" position="top">
+                    <Button disabled={true} type="text">
+                      重试
+                    </Button>
+                  </Popover>
+                </PermissionWrapper>
+              )}
               <PermissionWrapper
                 permission={WORKFLOW_TASK_PERMISSIONS.CAN_UPDATE}
               >
