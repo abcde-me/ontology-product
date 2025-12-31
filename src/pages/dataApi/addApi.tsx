@@ -449,7 +449,7 @@ export default function AddApi() {
           if (res.data) {
             treeNode.props.dataRef.children = res.data.map((item) => ({
               title: item.tableName,
-              key: `${item.tableName}_${item.id}`,
+              key: `${treeNode.props.dataRef.title}_${item.tableName}_${item.id}`,
               children: []
             }));
             setTreeData([...treeData]);
@@ -468,7 +468,7 @@ export default function AddApi() {
           if (res.data) {
             treeNode.props.dataRef.children = res.data.map((item) => ({
               title: item.fieldName,
-              key: `${item.fieldName}_${item.id}`,
+              key: `${treeNode.props.dataRef.title}_${item.fieldName}_${item.id}`,
               isLeaf: true
             }));
             setTreeData([...treeData]);
@@ -938,7 +938,7 @@ export default function AddApi() {
           )}
           {current === 2 && (
             <div className={styles.addApiParam}>
-              <div className={styles.lfetBox}>
+              <div className={styles.leftBox}>
                 <div className="align-center flex">
                   <div className="text-sm font-semibold leading-[32px]">
                     数据源
@@ -956,6 +956,7 @@ export default function AddApi() {
                   loadMore={loadMore}
                   treeData={treeData}
                   actionOnClick={['expand', 'select']}
+                  virtualListProps={{ height: 'calc(100% - 40px)' }}
                   renderTitle={(props) => {
                     const nodeData = props.dataRef;
                     const nodeContent = nodeData?.isLeaf;
