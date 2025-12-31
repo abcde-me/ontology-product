@@ -946,7 +946,11 @@ export default function AddApi() {
                   <Input.Search
                     placeholder="请输入搜索数据源"
                     className="ml-2 w-[160px]"
-                    onSearch={handleSearchTable}
+                    onSearch={(value) =>
+                      value?.trim() !== ''
+                        ? handleSearchTable(value)
+                        : getOpenDataListData()
+                    }
                     allowClear
                     onClear={getOpenDataListData}
                   />

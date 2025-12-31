@@ -59,7 +59,7 @@ enum RequestMethod {
 
 // 枚举开始时间结束时间字段
 enum sortBy {
-  cacheTime = 'cacheTime',
+  queryCount = 'queryCount',
   updatedTime = 'updatedTime'
 }
 
@@ -119,7 +119,7 @@ export default function DataApi() {
   const [sortValue, setSortValue] = useState({
     status: [] as string[],
     sort: '',
-    sort_by: ''
+    sortBy: ''
   });
   // 区分是否点击按钮清空搜索框
   const [isClickClear, setIsClickClear] = useState(false);
@@ -182,12 +182,12 @@ export default function DataApi() {
           : sorter.direction === 'ascend'
             ? 'asc'
             : 'desc',
-      sort_by:
+      sortBy:
         sorter.field === undefined
           ? ''
-          : sorter.field === sortBy.cacheTime
-            ? 'cacheTime'
-            : 'updatedTime'
+          : sorter.field === sortBy.queryCount
+            ? 'query_count'
+            : 'updated_time'
     };
 
     setSortValue(sortdata);
