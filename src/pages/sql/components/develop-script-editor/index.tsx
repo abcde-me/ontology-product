@@ -198,6 +198,7 @@ const EditorContent: React.FC<EditorContentProps> = memo(
             curActiveTab={curActiveTab}
             onHasUnsavedChangesChange={handleHasUnsavedChangesChange}
             onFileOpen={onFileOpen}
+            onRemoveTab={onRemoveTab}
           />
         </div>
       </div>
