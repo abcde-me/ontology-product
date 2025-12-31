@@ -39,6 +39,8 @@ import TaskLogDrawer from '../../components/task-log-drawer';
 import styles from './TaskNodeRunList.module.scss';
 import copy from 'copy-to-clipboard';
 import { openNewPage } from '@/utils/env';
+import { WORKFLOW_TASK_PERMISSIONS } from '@/config/permissions';
+import { PermissionWrapper } from '@/components/PermissionGuard';
 
 const { Option } = Select;
 const FormItem = Form.Item;
@@ -361,55 +363,75 @@ export default function TaskNodeRunList() {
           return (
             <div className="flex items-center gap-2">
               {record.state === TaskNodeStatus.FAILURE ? (
-                <Popconfirm
-                  title="确定强制成功吗？"
-                  content="强制成功后，将继续运行后续任务"
-                  onOk={() => handleTaskNodeForcesSuccess(record.id)}
+                <PermissionWrapper
+                  permission={WORKFLOW_TASK_PERMISSIONS.MODIFY}
                 >
-                  <Button
-                    disabled={record.state !== TaskNodeStatus.FAILURE}
-                    type="text"
-                    className="px-[4px]"
+                  <Popconfirm
+                    title="确定强制成功吗？"
+                    content="强制成功后，将继续运行后续任务"
+                    onOk={() => handleTaskNodeForcesSuccess(record.id)}
                   >
+                    <Button
+                      disabled={record.state !== TaskNodeStatus.FAILURE}
+                      type="text"
+                      className="px-[4px]"
+                    >
+                      强制成功
+                    </Button>
+                  </Popconfirm>
+                </PermissionWrapper>
+              ) : (
+                <PermissionWrapper
+                  permission={WORKFLOW_TASK_PERMISSIONS.MODIFY}
+                >
+                  <Button disabled={true} type="text" className="px-[4px]">
                     强制成功
                   </Button>
-                </Popconfirm>
-              ) : (
-                <Button disabled={true} type="text" className="px-[4px]">
-                  强制成功
-                </Button>
+                </PermissionWrapper>
               )}
               {record.state === TaskNodeStatus.FAILURE ? (
-                <Popconfirm
-                  title="确定重新运行吗？"
-                  content=""
-                  onOk={() =>
-                    handleTaskNodeRetry(
-                      record.process_instance_id,
-                      record.task_code
-                    )
-                  }
+                <PermissionWrapper
+                  permission={WORKFLOW_TASK_PERMISSIONS.MODIFY}
                 >
-                  <Button
-                    disabled={record.state !== TaskNodeStatus.FAILURE}
-                    type="text"
-                    className="px-[4px]"
+                  <Popconfirm
+                    title="确定重新运行吗？"
+                    content=""
+                    onOk={() =>
+                      handleTaskNodeRetry(
+                        record.process_instance_id,
+                        record.task_code
+                      )
+                    }
                   >
+                    <Button
+                      disabled={record.state !== TaskNodeStatus.FAILURE}
+                      type="text"
+                      className="px-[4px]"
+                    >
+                      重试
+                    </Button>
+                  </Popconfirm>
+                </PermissionWrapper>
+              ) : (
+                <PermissionWrapper
+                  permission={WORKFLOW_TASK_PERMISSIONS.MODIFY}
+                >
+                  <Button disabled={true} type="text" className="px-[4px]">
                     重试
                   </Button>
-                </Popconfirm>
-              ) : (
-                <Button disabled={true} type="text" className="px-[4px]">
-                  重试
-                </Button>
+                </PermissionWrapper>
               )}
-              <Button
-                type="text"
-                className="px-[4px]"
-                onClick={() => handleGetRunLogs(record.id, record.task_name)}
+              <PermissionWrapper
+                permission={WORKFLOW_TASK_PERMISSIONS.CAN_UPDATE}
               >
-                日志
-              </Button>
+                <Button
+                  type="text"
+                  className="px-[4px]"
+                  onClick={() => handleGetRunLogs(record.id, record.task_name)}
+                >
+                  日志
+                </Button>
+              </PermissionWrapper>
             </div>
           );
         }
