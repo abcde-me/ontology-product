@@ -24,6 +24,7 @@ import {
   transformToTreeData
 } from '../../hooks/useCatalogTree';
 import './DetailModal.scss';
+import { NoDataCard } from '@ceai-front/arco-material';
 interface DataSourceModalProps {
   fileType: Record<number, string[]>;
   visible: boolean;
@@ -509,9 +510,11 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
                 loading={tableLoading}
                 pagination={false}
                 border={false}
-                noDataElement={noDataElement({
-                  description: '暂无数据'
-                })}
+                noDataElement={
+                  <div style={{ paddingTop: '100px' }}>
+                    <NoDataCard title="暂无数据" type="block" />
+                  </div>
+                }
                 rowSelection={{
                   checkboxProps: (record) => {
                     return {
@@ -634,9 +637,11 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
                 pagination={false}
                 border={false}
                 scroll={{ y: false }}
-                noDataElement={noDataElement({
-                  description: '暂无数据'
-                })}
+                noDataElement={
+                  <div style={{ paddingTop: '100px' }}>
+                    <NoDataCard title="暂无数据" type="block" />
+                  </div>
+                }
               />
               {selectedRowsContent && selectedRowsContent.length > 0 && (
                 <Pagination

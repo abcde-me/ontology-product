@@ -1,13 +1,11 @@
 import { deleteRequirement, getAnnotationList } from '@/api/dataAnnotation';
+import ImageIcon from '@/assets/annotation/new-image-column.svg';
 import AnnotationIcon from '@/assets/annotation/requirement-annotation.svg';
 import CreatIcon from '@/assets/annotation/requirement-creat.svg';
-import ExportIcon from '@/assets/annotation/requirement-export.svg';
-import QualityIcon from '@/assets/annotation/requirement-quality.svg';
-import ImageIcon from '@/assets/annotation/new-image-column.svg';
-import TextIcon from '@/assets/annotation/text-column.svg';
 import ExportPng from '@/assets/annotation/requirement-export.png';
+import QualityIcon from '@/assets/annotation/requirement-quality.svg';
+import TextIcon from '@/assets/annotation/text-column.svg';
 import EllipsisPopover from '@/components/ellipsis-popover-com';
-import noDataElement from '@/components/no-data';
 import { PermissionWrapper } from '@/components/PermissionGuard';
 import { REQUIREMENT_PERMISSIONS } from '@/config/permissions';
 import { useHasPermission, useUserInfo } from '@/store/userInfoStore';
@@ -15,14 +13,14 @@ import getLabelByValue from '@/utils/getLabelByValue';
 import {
   Button,
   Form,
+  Image,
   Input,
   Link,
   Message,
+  Modal,
   Pagination,
   PaginationProps,
-  Table,
-  Modal,
-  Image
+  Table
 } from '@arco-design/web-react';
 import { ColumnProps } from '@arco-design/web-react/es/Table';
 import { SorterInfo } from '@arco-design/web-react/es/Table/interface';
@@ -31,6 +29,7 @@ import {
   ActionItem,
   DotStatus,
   ExpandableProcessFlow,
+  NoDataCard,
   OperationMenu,
   ProcessStep
 } from '@ceai-front/arco-material';
@@ -167,10 +166,8 @@ export default function Requirement() {
 
   // 查看需求详情权限
   const hasPermissionGetDetail = useHasPermission(REQUIREMENT_PERMISSIONS.GET);
-  // 查询下载结果权限
-  const hasPermissionGetDownload = useHasPermission(
-    REQUIREMENT_PERMISSIONS.DOWNLOAD
-  );
+  // 新建需求权限
+  const hasPermissionCreate = useHasPermission(REQUIREMENT_PERMISSIONS.CREATE);
 
   // 删除需求
   const handleDeleteRequirement = (record) => {
@@ -519,16 +516,24 @@ export default function Requirement() {
         columns={columns}
         data={requirementData}
         pagination={false}
-        noDataElement={noDataElement({
-          description: '暂无需求',
-          btnText: (
-            <>
-              <IconPlus /> 创建需求
-            </>
-          ),
-          perms: REQUIREMENT_PERMISSIONS.CREATE,
-          handleBtn: () => handleCreateRequirement('create')
-        })}
+        noDataElement={
+          <div style={{ paddingTop: '100px' }}>
+            <NoDataCard
+              title="暂无需求"
+              primaryBtn={
+                hasPermissionCreate ? (
+                  <Link
+                    onClick={() => handleCreateRequirement('create')}
+                    icon={<IconPlus />}
+                  >
+                    创建需求
+                  </Link>
+                ) : null
+              }
+              isTextButton
+            />
+          </div>
+        }
         rowKey="id"
         loading={loading}
         onChange={(pagination, sorter, filters) =>
