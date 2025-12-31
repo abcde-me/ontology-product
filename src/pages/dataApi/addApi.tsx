@@ -342,19 +342,19 @@ export default function AddApi() {
       creatorName: userInfo?.name
     };
     const res =
-      type === 'add'
+      type === 'add' && !apiId
         ? await openDataCreateApi(params)
-        : await openDataUpdateDataAPI({ ...params, id: Number(id) });
+        : await openDataUpdateDataAPI({ ...params, id: Number(id) || apiId });
     if (res.code === '' && res.status === 200) {
-      if (type === 'add') {
+      if (type === 'add' && !apiId) {
         if (res.data?.id) {
           setApiId(Number(res.data?.id));
           setTestModalVisible(true);
         } else {
           Message.error(res.message || '测试失败');
         }
-      } else if (type === 'edit') {
-        setApiId(Number(id));
+      } else if (type === 'edit' || apiId) {
+        setApiId(Number(id) || apiId);
         setTestModalVisible(true);
       }
     } else {

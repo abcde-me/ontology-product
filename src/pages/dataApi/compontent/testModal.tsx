@@ -186,7 +186,9 @@ export default function TestModal(props: {
                   </span>
                   <span className="text-sm font-medium text-[#0F172A]">
                     {result.statusCode || Number(result.statusCode) === 0
-                      ? Number(result.statusCode)
+                      ? Number(result.statusCode) === 0
+                        ? Number(result.statusCode) + '（成功）'
+                        : Number(result.statusCode) + '（失败）'
                       : '-'}
                   </span>
                 </div>
@@ -200,7 +202,7 @@ export default function TestModal(props: {
                 </div>
               </div>
               <Tabs defaultActiveTab="result">
-                <TabPane key="result" title="响应结果(已脱敏)">
+                <TabPane key="result" title="响应结果">
                   <div className={styles.responseBox}>
                     <pre>
                       {result?.result
