@@ -19,10 +19,6 @@ interface FileLabelInfo {
 }
 
 function TextClassifyLabelInfo({ labelInfo }: { labelInfo: FileLabelInfo[] }) {
-  const [expandedRowKeys, setExpandedRowKeys] = useState<(string | number)[]>(
-    []
-  );
-
   // 获取属性组类型显示文本
   const getAttributeGroupClassText = (classType: number) => {
     const classMap: Record<number, string> = {
@@ -107,11 +103,6 @@ function TextClassifyLabelInfo({ labelInfo }: { labelInfo: FileLabelInfo[] }) {
     );
   };
 
-  // 处理展开/收起
-  const handleExpandedRowsChange = (keys: (string | number)[]) => {
-    setExpandedRowKeys(keys);
-  };
-
   if (!labelInfo || labelInfo.length === 0) {
     return (
       <div style={{ padding: '40px 0', textAlign: 'center', color: '#86909c' }}>
@@ -140,8 +131,7 @@ function TextClassifyLabelInfo({ labelInfo }: { labelInfo: FileLabelInfo[] }) {
         data={labelInfo}
         pagination={false}
         border={false}
-        expandedRowKeys={expandedRowKeys}
-        onExpandedRowsChange={handleExpandedRowsChange}
+        defaultExpandAllRows={true}
         expandedRowRender={expandedRowRender}
         expandProps={{ width: 30 }}
         rowKey={(record) => record.attribute_id || record.order_num}

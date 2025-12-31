@@ -236,19 +236,22 @@ function RequirementParticular({ isActive }: RequirementParticularProps) {
       fixed: 'right',
       align: 'right',
       render: (_: any, record: TaskDetail) => (
-        <Tooltip
-          content="暂无可预览的内容"
-          position="top"
-          disabled={record.task_status !== 0}
-        >
-          <Link
-            type="text"
-            onClick={() => handlePreview(record)}
-            disabled={record.task_status === 0}
-          >
-            预览
-          </Link>
-        </Tooltip>
+        <Link type="text" onClick={() => handlePreview(record)}>
+          预览
+        </Link>
+        // <Tooltip
+        //   content="暂无可预览的内容"
+        //   position="top"
+        //   disabled={record.task_status !== 0}
+        // >
+        //   <Link
+        //     type="text"
+        //     onClick={() => handlePreview(record)}
+        //     disabled={record.task_status === 0}
+        //   >
+        //     预览
+        //   </Link>
+        // </Tooltip>
       )
     }
   ];
