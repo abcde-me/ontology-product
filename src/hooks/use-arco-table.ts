@@ -103,6 +103,9 @@ function useArcoTable<TData = any, TParams extends any[] = any[]>(
       setPagination((p) => ({ ...p, ...pagination }));
       return;
     }
+    setPagination((prevState) => {
+      return { ...prevState, current: 1 };
+    });
     if (action === 'sort') {
       setSorter(sorter);
       return;
