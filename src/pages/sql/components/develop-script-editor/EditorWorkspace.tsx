@@ -79,6 +79,7 @@ interface NotebookWorkspaceProps {
   curActiveTab: string;
   onHasUnsavedChangesChange?: (checkFn: (() => boolean) | null) => void;
   onFileOpen?: (fileId: string, scriptId: string, fileName?: string) => void;
+  onRemoveTab?: (tabKey: string) => void;
 }
 
 // 定义用于高亮参数的效果
@@ -915,7 +916,8 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = memo(
     onToScriptList,
     curActiveTab,
     onHasUnsavedChangesChange,
-    onFileOpen
+    onFileOpen,
+    onRemoveTab
   }) => {
     const editorOptions = {
       activeTab: tabKey,
@@ -949,7 +951,8 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = memo(
         }
       },
       refreshDirectory,
-      selectFile
+      selectFile,
+      onRemoveTab
     };
 
     return (

@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Alert,
   Button,
@@ -30,6 +30,7 @@ const ReleaseVersionModal: React.FC<ReleaseVersionModalProps> = ({
   initialValues
 }) => {
   const [form] = Form.useForm();
+  const [loading, setLoading] = useState(false);
   const FormItem = Form.Item;
   const TextArea = Input.TextArea;
 
@@ -40,12 +41,14 @@ const ReleaseVersionModal: React.FC<ReleaseVersionModalProps> = ({
         version: initialValues?.version,
         versionDesc: initialValues?.versionDesc || ''
       });
+      setLoading(false);
     }
   }, [visible, initialValues, form]);
 
   const handleSubmit = async () => {
     try {
       const values = await form.validate();
+      setLoading(true);
       if (onSubmit) {
         await onSubmit(values);
       } else {
@@ -56,6 +59,8 @@ const ReleaseVersionModal: React.FC<ReleaseVersionModalProps> = ({
       }
     } catch (error) {
       console.error('表单验证失败:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -70,7 +75,12 @@ const ReleaseVersionModal: React.FC<ReleaseVersionModalProps> = ({
         <Button key="cancel" onClick={onCancel}>
           取消
         </Button>,
-        <Button key="confirm" type="primary" onClick={handleSubmit}>
+        <Button
+          key="confirm"
+          type="primary"
+          onClick={handleSubmit}
+          loading={loading}
+        >
           确定
         </Button>
       ]}
