@@ -876,7 +876,7 @@ export default function MetadataManagementDetail() {
           >
             元数据管理
           </BreadcrumbItem>
-          <BreadcrumbItem>{metadataId}</BreadcrumbItem>
+          <BreadcrumbItem>{baseInfoData.tableName || '-'}</BreadcrumbItem>
         </Breadcrumb>
       </div>
       <div className={styles.contentBox}>
