@@ -340,16 +340,17 @@ export function StructuredWorkflowList() {
           `/modaforge/tenant/compute/modaforge/workflowConfig/${key}`
         );
       }}
+      className={styles['flow-type-menu']}
     >
       {FLOW_TYPE_INFO.map(({ title, subTitle, type }) => (
         <Menu.Item key={type} style={{ height: 'auto' }}>
-          <div>
-            <Typography.Text bold>{`${title}数据处理`}</Typography.Text>
-          </div>
-          <div>
-            <Typography.Text
-              type={'secondary'}
-            >{`创建用于${subTitle}的工作流`}</Typography.Text>
+          <div
+            className={
+              'h-[30px] text-[14px] font-bold leading-[30px] text-[#0F172A]'
+            }
+          >{`${title}数据处理`}</div>
+          <div className={'text-[12px] leading-[22px] text-[#334155]'}>
+            {`创建用于${subTitle}的工作流`}
           </div>
         </Menu.Item>
       ))}
@@ -375,7 +376,12 @@ export function StructuredWorkflowList() {
           <Col span={18}>
             <div className={'mb-2 flex w-full justify-end'}>
               <PermissionWrapper permission={WORKFLOW_LIST_PERMISSIONS.CREATE}>
-                <Dropdown droplist={dropList} trigger="hover" position="br">
+                <Dropdown
+                  droplist={dropList}
+                  trigger="hover"
+                  position="br"
+                  popupVisible
+                >
                   <Button type="primary">
                     创建工作流 <IconDown />
                   </Button>
