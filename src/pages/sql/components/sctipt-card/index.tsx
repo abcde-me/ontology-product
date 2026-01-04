@@ -25,11 +25,12 @@ import {
 import noDataElement from '@/components/no-data';
 import { ScriptStatus, ListDevelopScriptItem } from '@/types/sqlDevelopApi';
 import VersionStatus from '../version-status';
-import EllipsisPopover from '@/components/ellipsis-popover-com';
+// import EllipsisPopover from '@/components/ellipsis-popover-com';
 import ScriptDetailModal from '../spl-script-management/ScriptDetailModal';
 import classNames from 'classnames';
 import { PermissionWrapper } from '@/components/PermissionGuard';
 import { SQL_PERMISSIONS } from '@/config/permissions';
+import { EllipsisPopover } from '@ceai-front/arco-material';
 
 // 版本类型 已发版 未发版 调度中
 // 注意：0（编辑中）和 1（编辑完成）都代表"未发版"，但为了兼容现有代码，这里保留 1 作为 UNRELEASED 的值
@@ -307,7 +308,7 @@ const ScriptCard: React.FC<ScriptCardProps> = ({
                       >
                         <EllipsisPopover
                           value={item?.script_name || ''}
-                          preferTypography
+                          // isLink
                           wrapperClassName={classNames(
                             styles['script-card-content-item-title-text'],
                             'cursor-pointer'
@@ -327,7 +328,12 @@ const ScriptCard: React.FC<ScriptCardProps> = ({
                       >
                         <Button
                           type="outline"
-                          className="mr-[8px] flex h-[24px] items-center justify-center px-[12px]"
+                          className="mx-[8px] flex items-center justify-center"
+                          style={{
+                            height: '24px',
+                            paddingLeft: '12px',
+                            paddingRight: '12px'
+                          }}
                           icon={<IconDetail className="h-[12px] w-[12px]" />}
                           onClick={() => {
                             setDetailTitle(item?.script_name || '');
@@ -350,7 +356,11 @@ const ScriptCard: React.FC<ScriptCardProps> = ({
                         >
                           <Button
                             type="outline"
-                            className="mr-[8px] h-[24px] px-[12px]"
+                            style={{
+                              paddingLeft: '12px',
+                              paddingRight: '12px',
+                              height: '24px'
+                            }}
                             icon={<IconDelete />}
                             disabled={item.status === ScriptStatus.Scheduling}
                             onClick={() =>

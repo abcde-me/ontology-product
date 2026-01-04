@@ -1,8 +1,8 @@
 import React, { useState, memo, useEffect, useRef, useCallback } from 'react';
 import { Layout, Tabs, Popover } from '@arco-design/web-react';
 import ScriptManagementIcon from './assets/script-management-left-menu.svg';
-import QueryIcon from './assets/query-left-menu.svg';
-import DevelopIcon from './assets/develop-left-menu.svg';
+import QueryIcon from './assets/query-menu.svg';
+import DevelopIcon from './assets/develop-menu.svg';
 import DasetIcon from './assets/daset-left-menu.svg';
 import FileManager from './components/file-manager';
 import DataManager from './components/data-manager';
@@ -222,25 +222,6 @@ const SqlIndex: React.FC = memo(() => {
             )}
           </TabPane>
 
-          {useHasPermission(SQL_PERMISSIONS.QUERY_SCRIPT_LIST) && (
-            <TabPane
-              key="data"
-              title={
-                <Popover content="SQL查询" position="left">
-                  <QueryIcon className={styles['sql-menu-icon']} />
-                </Popover>
-              }
-            >
-              {activeTab === 'data' && (
-                <DataManager
-                  key="data"
-                  onInsertContent={insertContentToEditor}
-                  getIsEditorFocused={() => isEditorFocusedRef.current}
-                />
-              )}
-            </TabPane>
-          )}
-
           {useHasPermission(SQL_PERMISSIONS.DEVELOP_SCIPT_LIST) && (
             <TabPane
               key="files"
@@ -261,6 +242,25 @@ const SqlIndex: React.FC = memo(() => {
                   externalSelectedKeys={developScriptFileManagerSelectedKeys}
                   fileTabs={developScriptFileState.fileTabs} // 传递已打开的标签页列表
                   onSwitchTab={developScriptSwitchTab} // 传递切换标签页的回调
+                />
+              )}
+            </TabPane>
+          )}
+
+          {useHasPermission(SQL_PERMISSIONS.QUERY_SCRIPT_LIST) && (
+            <TabPane
+              key="data"
+              title={
+                <Popover content="SQL查询" position="left">
+                  <QueryIcon className={styles['sql-menu-icon']} />
+                </Popover>
+              }
+            >
+              {activeTab === 'data' && (
+                <DataManager
+                  key="data"
+                  onInsertContent={insertContentToEditor}
+                  getIsEditorFocused={() => isEditorFocusedRef.current}
                 />
               )}
             </TabPane>

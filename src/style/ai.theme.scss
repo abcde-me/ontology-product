@@ -709,3 +709,12 @@ $spacing-9: 24px;
 .arco-drawer-mask {
   background-color: var(--color-mask-bg);
 }
+
+/******** tabs ********/
+.arco-tabs-header-nav::before {
+  background-color: var(--color-border-2);
+}
+.arco-tabs-header-nav-line .arco-tabs-header-title {
+  padding: 8px 0;
+  margin-right: 32px;
+}

@@ -311,7 +311,7 @@ const QueryScript: React.FC<QueryScriptProps> = ({ curActiveTab }) => {
           </Button>
         </PermissionWrapper>
       </div>
-      <div className="mb-[16px] flex items-center justify-between overflow-x-auto whitespace-nowrap border-b border-[#E2E8F0] pb-[16px]">
+      <div className="mb-[16px] flex items-center justify-between overflow-x-auto whitespace-nowrap border-b border-[var(--color-border-2)] pb-[16px]">
         <Form
           onValuesChange={(values) => {
             handleFormChange(values);

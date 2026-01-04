@@ -340,7 +340,10 @@ const SctipModalTable: React.FC<{
               最新版本：
             </div>
             <div className={styles['script-modal-table-content-item-value']}>
-              {rowData?.max_version_name || '-'}
+              {rowData?.status === ScriptStatus.Editing ||
+              rowData?.status === ScriptStatus.EditCompleted
+                ? '-'
+                : rowData?.max_version_name || '-'}
             </div>
           </div>
           <div className={styles['script-modal-table-content-item']}>
