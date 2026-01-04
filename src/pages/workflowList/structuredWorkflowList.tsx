@@ -376,12 +376,7 @@ export function StructuredWorkflowList() {
           <Col span={18}>
             <div className={'mb-2 flex w-full justify-end'}>
               <PermissionWrapper permission={WORKFLOW_LIST_PERMISSIONS.CREATE}>
-                <Dropdown
-                  droplist={dropList}
-                  trigger="hover"
-                  position="br"
-                  popupVisible
-                >
+                <Dropdown droplist={dropList} trigger="hover" position="br">
                   <Button type="primary">
                     创建工作流 <IconDown />
                   </Button>
