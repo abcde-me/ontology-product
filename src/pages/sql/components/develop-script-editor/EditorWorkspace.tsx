@@ -17,9 +17,9 @@ import {
   IconCopy,
   IconDown,
   IconEdit,
-  IconSave,
-  IconStorage
+  IconSave
 } from '@arco-design/web-react/icon';
+import QueryListIcon from '../../assets/query-list-icon.svg';
 import { sql } from '@codemirror/lang-sql';
 import { lintGutter } from '@codemirror/lint';
 import { EditorView, Decoration } from '@codemirror/view';
@@ -543,9 +543,9 @@ const EditorWorkspaceContent: React.FC<{
                     {/* 参数列表按钮 - 始终显示 */}
                     <Button
                       type="text"
-                      icon={<IconStorage />}
+                      icon={<QueryListIcon />}
                       onClick={() => setParamVisible(true)}
-                      className="h-[26px] px-[0px] !text-[var(--color-text-2)]"
+                      className="flex h-[26px] items-center px-[0px] !text-[var(--color-text-2)]"
                     >
                       参数列表
                     </Button>

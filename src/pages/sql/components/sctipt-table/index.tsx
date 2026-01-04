@@ -31,10 +31,11 @@ import {
   ScriptStatus,
   ScriptStatusName
 } from '@/types/sqlDevelopApi';
-import EllipsisPopover from '@/components/ellipsis-popover-com';
+// import EllipsisPopover from '@/components/ellipsis-popover-com';
 import classNames from 'classnames';
 import VersionStatus from '../version-status';
 import ScriptDetailModal from '../spl-script-management/ScriptDetailModal';
+import { EllipsisPopover } from '@ceai-front/arco-material';
 
 interface ScriptTableProps {
   isAll: (type: boolean) => void;
@@ -259,22 +260,27 @@ const ScriptTable: React.FC<ScriptTableProps> = ({
       render: (_, record) => (
         <EllipsisPopover
           value={record.script_name ?? '-'}
-          isEdit={false}
           isLink
           handleLink={() => handleToDetail(record.script_id)}
         />
       )
     },
     {
-      title: '最近版本号',
+      title: '最新版本号',
       dataIndex: 'max_version_name',
       width: 120,
-      render: (_, record) => (
-        <EllipsisPopover
-          value={record.max_version_name || '-'}
-          preferTypography
-        ></EllipsisPopover>
-      )
+      render: (_, record) => {
+        // 如果最新版本状态是未发版（编辑中或编辑完成），显示-
+        const isUnreleased =
+          record.status === ScriptStatus.Editing ||
+          record.status === ScriptStatus.EditCompleted;
+        return (
+          <EllipsisPopover
+            value={isUnreleased ? '-' : record.max_version_name || '-'}
+            preferTypography
+          ></EllipsisPopover>
+        );
+      }
     },
     {
       title: '最新版本状态',
@@ -361,7 +367,7 @@ const ScriptTable: React.FC<ScriptTableProps> = ({
             <PermissionWrapper permission={SQL_PERMISSIONS.DEVELOP_SCIPT_GET}>
               <Button
                 type="text"
-                className="mr-[8px] px-[0px]"
+                className="mr-[16px] px-[0px]"
                 onClick={() => {
                   handleOpenDetail(record);
                 }}
@@ -372,7 +378,7 @@ const ScriptTable: React.FC<ScriptTableProps> = ({
             <PermissionWrapper permission={SQL_PERMISSIONS.DEVELOP_SCIPT_LOG}>
               <Button
                 type="text"
-                className="mr-[8px] px-[0px]"
+                className="mr-[16px] px-[0px]"
                 onClick={() => {
                   // setVisible(true);
                   // setRowData(record);
@@ -395,7 +401,8 @@ const ScriptTable: React.FC<ScriptTableProps> = ({
               >
                 <Button
                   type="text"
-                  className="px-[0px] px-[8px]"
+                  style={{ marginRight: '16px', padding: '0px' }}
+                  className="px-[0px]"
                   onClick={() => handleDelete(record.script_id, record.status)}
                   disabled={record.status === ScriptStatus.Scheduling}
                 >

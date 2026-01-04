@@ -12,7 +12,6 @@ import {
   IconBook,
   IconCaretRight,
   IconSave,
-  IconStorage,
   IconTag
 } from '@arco-design/web-react/icon';
 import { sql } from '@codemirror/lang-sql';
@@ -25,6 +24,7 @@ import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { formatSQL } from '@/utils/sqlFormatter';
 import { useUserInfo } from '@/store/userInfoStore';
 import styles from './EditorWorkspace.module.scss';
+import QueryListIcon from '../../assets/query-list-icon.svg';
 
 import SQLFormatIcon from '@/assets/sql/sql-format-ico.svg';
 import IconStop from '@/assets/sql/sql-stop-icon.svg';
@@ -294,7 +294,7 @@ const EditorWorkspaceContent: React.FC<{
             {lastAutoSave && (
               <div className={styles['toolbar-right-item']}>
                 <Space size={12}>
-                  <span className="text-sm text-gray-500">
+                  <span className="text-[14px] text-[var(--color-text-4)]">
                     保存时间: {lastAutoSave || '未保存'}
                   </span>
                 </Space>
@@ -306,7 +306,8 @@ const EditorWorkspaceContent: React.FC<{
                   handleToScriptQueryList();
                 }}
                 className={styles['btn-script-list']}
-                icon={<IconStorage />}
+                icon={<QueryListIcon />}
+                style={{ padding: '0 12px' }}
               >
                 脚本列表
               </Button>
@@ -318,6 +319,7 @@ const EditorWorkspaceContent: React.FC<{
                   setVisible(true);
                 }}
                 icon={<IconSave />}
+                style={{ padding: '0 12px' }}
               >
                 保存
               </Button>
