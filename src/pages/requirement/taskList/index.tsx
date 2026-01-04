@@ -22,7 +22,10 @@ import { CopyItemIcon } from '@ceai-front/arco-material';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import '../index.scss';
 import { RequirementType, RequirementTypeNameMap } from '../type';
-import { EllipsisPopover as EllipsisPopoverCom } from '@ceai-front/arco-material';
+import {
+  EllipsisPopover as EllipsisPopoverCom,
+  NoDataCard
+} from '@ceai-front/arco-material';
 
 function TaskList() {
   const [form] = Form.useForm();
@@ -342,9 +345,11 @@ function TaskList() {
         columns={columns}
         data={taskData}
         pagination={false}
-        noDataElement={noDataElement({
-          description: '暂无任务'
-        })}
+        noDataElement={
+          <div style={{ paddingTop: '100px' }}>
+            <NoDataCard title="暂无任务" />
+          </div>
+        }
         rowKey="pkg_id"
         loading={loading}
         onChange={(pagination, sorter, filters) =>

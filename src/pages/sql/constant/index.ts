@@ -313,6 +313,9 @@ export const DEFAULT_SQL_PLACEHOLDER = `
 🚀 开始您的数据治理之旅！
 `;
 
+// SQL脚本错误码
+export const SQL_SCRIPT_NOT_FOUND_CODE = 'AIMDP.SQLScriptNotFound';
+
 export const SCRIPT_CODE = `import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np

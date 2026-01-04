@@ -342,19 +342,19 @@ export default function AddApi() {
       creatorName: userInfo?.name
     };
     const res =
-      type === 'add'
+      type === 'add' && !apiId
         ? await openDataCreateApi(params)
-        : await openDataUpdateDataAPI({ ...params, id: Number(id) });
+        : await openDataUpdateDataAPI({ ...params, id: Number(id) || apiId });
     if (res.code === '' && res.status === 200) {
-      if (type === 'add') {
+      if (type === 'add' && !apiId) {
         if (res.data?.id) {
           setApiId(Number(res.data?.id));
           setTestModalVisible(true);
         } else {
           Message.error(res.message || '测试失败');
         }
-      } else if (type === 'edit') {
-        setApiId(Number(id));
+      } else if (type === 'edit' || apiId) {
+        setApiId(Number(id) || apiId);
         setTestModalVisible(true);
       }
     } else {
@@ -449,8 +449,9 @@ export default function AddApi() {
           if (res.data) {
             treeNode.props.dataRef.children = res.data.map((item) => ({
               title: item.tableName,
-              key: `${item.tableName}_${item.id}`,
-              children: []
+              key: `${treeNode.props.dataRef.title}_${item.tableName}_${item.id}`,
+              children: [],
+              isCanCopy: true
             }));
             setTreeData([...treeData]);
           }
@@ -467,8 +468,9 @@ export default function AddApi() {
         if (res.code === '' && res.status === 200) {
           if (res.data) {
             treeNode.props.dataRef.children = res.data.map((item) => ({
-              title: item.fieldName,
-              key: `${item.fieldName}_${item.id}`,
+              title: `${item.fieldName} (${item.description})`,
+              key: `${treeNode.props.dataRef.title}_${item.fieldName}_${item.id}`,
+              isCanCopy: true,
               isLeaf: true
             }));
             setTreeData([...treeData]);
@@ -938,7 +940,7 @@ export default function AddApi() {
           )}
           {current === 2 && (
             <div className={styles.addApiParam}>
-              <div className={styles.lfetBox}>
+              <div className={styles.leftBox}>
                 <div className="align-center flex">
                   <div className="text-sm font-semibold leading-[32px]">
                     数据源
@@ -946,7 +948,11 @@ export default function AddApi() {
                   <Input.Search
                     placeholder="请输入搜索数据源"
                     className="ml-2 w-[160px]"
-                    onSearch={handleSearchTable}
+                    onSearch={(value) =>
+                      value?.trim() !== ''
+                        ? handleSearchTable(value)
+                        : getOpenDataListData()
+                    }
                     allowClear
                     onClear={getOpenDataListData}
                   />
@@ -956,9 +962,10 @@ export default function AddApi() {
                   loadMore={loadMore}
                   treeData={treeData}
                   actionOnClick={['expand', 'select']}
+                  virtualListProps={{ height: 'calc(100% - 40px)' }}
                   renderTitle={(props) => {
                     const nodeData = props.dataRef;
-                    const nodeContent = nodeData?.isLeaf;
+                    const nodeContent = nodeData?.isCanCopy;
                     return (
                       <div className="flex items-center">
                         <EllipsisPopoverCom

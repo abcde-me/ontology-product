@@ -431,6 +431,8 @@ PROPERTIES (
                 ) || ({} as MetadataMenuItem);
               setUpdateTime(selectMenuItem?.updateTime || '');
               setActiveMetadataId(selectMenuItem?.id || null);
+              setCurrent(1);
+              setPageSize(10);
             }}
           >
             {metadataMenuData.map((item: MetadataMenuItem) => (
@@ -446,6 +448,7 @@ PROPERTIES (
             onMainSearch={handleSearch}
             onFieldSearch={handleFieldSearch}
             onReset={handleReset}
+            activeMetadataType={activeMetadataType}
           />
           <div className="mb-3 mt-4 flex items-center justify-between">
             <h1 className="text-base font-semibold">{`数据列表(${total})`}</h1>
@@ -646,6 +649,12 @@ PROPERTIES (
             <Select
               placeholder="请选择数据库"
               className={styles.selectTable}
+              showSearch
+              filterOption={(inputValue, option) =>
+                option.props.children
+                  .toLowerCase()
+                  .indexOf(inputValue.toLowerCase()) >= 0
+              }
               style={{ display: 'flex', alignItems: 'center' }}
               addBefore={
                 <Select

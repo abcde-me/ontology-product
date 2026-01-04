@@ -13,7 +13,10 @@ import {
   runDevelopScript,
   getDevelopScriptRunLog
 } from '@/api/sql-develop';
-import { DEFAULT_SQL_PLACEHOLDER } from '../constant';
+import {
+  DEFAULT_SQL_PLACEHOLDER,
+  SQL_SCRIPT_NOT_FOUND_CODE
+} from '../constant';
 import { useUserInfo } from '@/store/userInfoStore';
 import { RunResult } from '@/types/sqlApi';
 import { generateSqlDefaultName } from '../utils';
@@ -44,6 +47,7 @@ export interface UseEditorOptions {
   ) => void;
   refreshDirectory?: () => void;
   selectFile?: (fileId: string) => void;
+  onRemoveTab?: (tabKey: string) => void;
 }
 
 export type ScriptInfo = Partial<GetDevelopScriptInfoResponse> & {
@@ -124,7 +128,8 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
     fileTabs = [],
     onTabUpdate,
     refreshDirectory,
-    selectFile
+    selectFile,
+    onRemoveTab
   } = options;
 
   const userInfo = useUserInfo();
@@ -249,6 +254,16 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
 
         return fileData;
       } else {
+        if (response?.code === SQL_SCRIPT_NOT_FOUND_CODE) {
+          // 文件不存在，关闭对应的 tab
+          const currentTab = fileTabs.find((tab) => tab.scriptId === scriptId);
+          if (currentTab && onRemoveTab) {
+            onRemoveTab(currentTab.key);
+          }
+          Message.warning('文件不存在，已自动关闭标签页');
+          return null;
+        }
+
         Message.error(response?.message ?? '加载文件失败');
       }
     } catch (error) {

@@ -2,6 +2,10 @@
   :global(.arco-dropdown-popup-visible .arco-icon-down) {
     transform: rotate(180deg);
   }
+
+  :global(.arco-btn-size-default) {
+    padding: 0 4px;
+  }
 }
 
 .table-container {
@@ -40,10 +44,11 @@
       .workflow-name-copy {
         visibility: hidden;
         cursor: pointer;
-        color: rgb(0, 125, 250);
+      }
 
-        &:hover {
-          color: rgba(67, 141, 251, 1);
+      &.is-link {
+        .workflow-name-copy {
+          color: rgb(0, 125, 250);
         }
       }
     }

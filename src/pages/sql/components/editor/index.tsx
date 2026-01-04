@@ -205,6 +205,7 @@ const EditorContent: React.FC<EditorContentProps> = memo(
             onToScriptList={onToScriptList}
             curActiveTab={curActiveTab}
             onHasUnsavedChangesChange={handleHasUnsavedChangesChange}
+            onRemoveTab={onRemoveTab}
           />
         </div>
       </div>

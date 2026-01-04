@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   Modal,
   Form,
@@ -44,6 +44,7 @@ const SamplingModal: React.FC<SamplingModalProps> = ({
   const pkgId = useParams('pkgId');
   const [form] = Form.useForm();
   const sample_type = Form.useWatch('sample_type', form);
+  const task_type = Form.useWatch('task_type', form);
 
   // 弹窗打开时重置表单
   React.useEffect(() => {
@@ -91,6 +92,15 @@ const SamplingModal: React.FC<SamplingModalProps> = ({
       console.log('表单验证失败:', error);
     }
   };
+
+  const maxInputNumber = useMemo(() => {
+    if (task_type === SamplingType.ToInspect) {
+      return metricData?.task_volume_uninspected;
+    } else if (task_type === SamplingType.ToRecheck) {
+      return metricData?.task_volume_unreinspected;
+    }
+    return 0;
+  }, [task_type, metricData]);
 
   return (
     <Modal
@@ -163,26 +173,41 @@ const SamplingModal: React.FC<SamplingModalProps> = ({
             <Radio value={SamplingCountType.Count}>
               <span className="radio-with-input">
                 按数量
-                <FormItem
-                  field="sample_number"
-                  noStyle={{ showErrorTip: true }}
-                  rules={[
-                    {
-                      required: sample_type === SamplingCountType.Count,
-                      message: '请输入数量'
-                    }
-                  ]}
-                >
-                  <InputNumber
-                    placeholder="请输入"
-                    style={{ width: 80, marginLeft: 8 }}
-                    min={1}
-                    max={metricData?.task_volume_unsampled}
-                    step={1}
-                    precision={0}
-                    disabled={sample_type !== SamplingCountType.Count}
-                  />
-                </FormItem>
+                <div className="input-with-error">
+                  <FormItem
+                    field="sample_number"
+                    noStyle={{ showErrorTip: true }}
+                    rules={[
+                      {
+                        required: sample_type === SamplingCountType.Count,
+                        message: '请输入数量'
+                      },
+                      {
+                        validator: (value, callback) => {
+                          if (sample_type !== SamplingCountType.Count) {
+                            callback();
+                            return;
+                          }
+                          if (value && value > maxInputNumber) {
+                            callback(`数量不能超过${maxInputNumber}`);
+                          } else {
+                            callback();
+                          }
+                        }
+                      }
+                    ]}
+                  >
+                    <InputNumber
+                      placeholder="请输入"
+                      style={{ width: 80, marginLeft: 8 }}
+                      min={1}
+                      max={maxInputNumber}
+                      step={1}
+                      precision={0}
+                      disabled={sample_type !== SamplingCountType.Count}
+                    />
+                  </FormItem>
+                </div>
                 <span className="input-suffix">个</span>
               </span>
             </Radio>

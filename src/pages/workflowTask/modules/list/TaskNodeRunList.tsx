@@ -8,7 +8,8 @@ import {
   Pagination,
   Tooltip,
   Message,
-  Popconfirm
+  Popconfirm,
+  Popover
 } from '@arco-design/web-react';
 import { IconCopy, IconQuestionCircle } from '@arco-design/web-react/icon';
 import {
@@ -39,6 +40,10 @@ import TaskLogDrawer from '../../components/task-log-drawer';
 import styles from './TaskNodeRunList.module.scss';
 import copy from 'copy-to-clipboard';
 import { openNewPage } from '@/utils/env';
+import { WORKFLOW_TASK_PERMISSIONS } from '@/config/permissions';
+import { PermissionWrapper } from '@/components/PermissionGuard';
+import classNames from 'classnames';
+import { delay } from 'lodash-es';
 
 const { Option } = Select;
 const FormItem = Form.Item;
@@ -50,36 +55,6 @@ export default function TaskNodeRunList() {
     number | null
   >(null);
   const [currentTaskName, setCurrentTaskName] = useState<string>('');
-
-  const handleTaskNodeForcesSuccess = useCallback(async (id: number) => {
-    const res = await taskNodeForcesSuccess({
-      task_instance_id: id
-    });
-
-    if (res.status === 200 && res.code === '') {
-      Message.success('强制成功成功');
-      table.refresh();
-    } else {
-      Message.error(res.message || '强制成功失败');
-    }
-  }, []);
-
-  const handleTaskNodeRetry = useCallback(
-    async (processInstanceId: number, taskCodeId: number) => {
-      const res = await taskNodeRetry({
-        process_instance_id: processInstanceId,
-        task_code_list: [taskCodeId]
-      });
-
-      if (res.status === 200 && res.code === '') {
-        Message.success('重试成功');
-        table.refresh();
-      } else {
-        Message.error(res.message || '重试失败');
-      }
-    },
-    []
-  );
 
   const handleGetRunLogs = useCallback((id: number, taskName: string) => {
     setCurrentTaskInstanceId(id);
@@ -158,6 +133,43 @@ export default function TaskNodeRunList() {
     defaultPageSize: 10,
     manual: false
   });
+
+  const handleTaskNodeForcesSuccess = useCallback(
+    async (id: number) => {
+      const res = await taskNodeForcesSuccess({
+        task_instance_id: id
+      });
+
+      if (res.status === 200 && res.code === '') {
+        Message.success('强制成功成功');
+        delay(() => {
+          table.refresh();
+        }, 500);
+      } else {
+        Message.error(res.message || '强制成功失败');
+      }
+    },
+    [table.refresh]
+  );
+
+  const handleTaskNodeRetry = useCallback(
+    async (processInstanceId: number, taskCodeId: number) => {
+      const res = await taskNodeRetry({
+        process_instance_id: processInstanceId,
+        task_code_list: [taskCodeId]
+      });
+
+      if (res.status === 200 && res.code === '') {
+        Message.success('重试成功');
+        delay(() => {
+          table.refresh();
+        }, 500);
+      } else {
+        Message.error(res.message || '重试失败');
+      }
+    },
+    [table.refresh]
+  );
 
   // 任务节点运行记录表格列
   const columns: ColumnProps<TaskNodeItem>[] = useMemo(
@@ -258,13 +270,13 @@ export default function TaskNodeRunList() {
                 handleWorkflowConfig(record);
               }}
             />
-            <IconCopy
+            {/* <IconCopy
               className={styles['workflow-name-copy']}
               onClick={(e) => {
                 e.stopPropagation();
                 handleCopy(value);
               }}
-            />
+            /> */}
           </div>
         )
       },
@@ -273,20 +285,36 @@ export default function TaskNodeRunList() {
         dataIndex: 'process_definition_name',
         width: 200,
         className: styles['hover-change'],
-        render: (value: string, record: TaskNodeItem) => (
-          <EllipsisPopoverCom
-            isLink={
-              !!record.workflow_type &&
-              !!record.workflow_uuid &&
-              !!record.process_definition_code
-            }
-            value={value}
-            preferTypography
-            handleLink={() => {
-              handleWorkflowConfig(record);
-            }}
-          />
-        )
+        render: (value: string, record: TaskNodeItem) => {
+          const isLink =
+            !!record.workflow_type &&
+            !!record.workflow_uuid &&
+            !!record.process_definition_code;
+
+          return (
+            <div
+              className={`flex items-center gap-1 ${styles['workflow-name-container']} ${
+                isLink ? styles['is-link'] : ''
+              }`}
+            >
+              <EllipsisPopoverCom
+                isLink={isLink}
+                value={value}
+                preferTypography
+                handleLink={() => {
+                  handleWorkflowConfig(record);
+                }}
+              />
+              <IconCopy
+                className={styles['workflow-name-copy']}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleCopy(value);
+                }}
+              />
+            </div>
+          );
+        }
       },
       {
         title: '运行提交时间',
@@ -322,21 +350,33 @@ export default function TaskNodeRunList() {
         title: (
           <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
             失败重试次数
-            <Tooltip content="格式：已重试次数/设定的总重试次数">
-              <span style={{ display: 'inline-flex', alignItems: 'center' }}>
-                <IconQuestionCircle
-                  style={{
-                    cursor: 'pointer',
-                    color: '#86909c',
-                    fontSize: '14px'
-                  }}
-                />
-              </span>
+            <Tooltip
+              content="格式：已重试次数/设定的总重试次数"
+              trigger="hover"
+              position="top"
+            >
+              <IconQuestionCircle
+                onMouseEnter={(e) => {
+                  e.stopPropagation();
+                  e.preventDefault();
+                }}
+                onMouseLeave={(e) => {
+                  e.stopPropagation();
+                  e.preventDefault();
+                }}
+                style={{
+                  cursor: 'pointer',
+                  color: '#86909c',
+                  fontSize: '14px',
+                  pointerEvents: 'auto'
+                }}
+              />
             </Tooltip>
           </span>
         ),
         dataIndex: 'retry_times',
         width: 180,
+        sorter: false,
         render: (value: string, record: TaskNodeItem) => (
           <span>{`${record.retry_times ?? '-'} / ${record.max_retry_times ?? '-'}`}</span>
         )
@@ -347,57 +387,87 @@ export default function TaskNodeRunList() {
         fixed: 'right' as const,
         render: (_: any, record: TaskNodeItem) => {
           return (
-            <div className="flex items-center gap-2">
+            <div
+              className={classNames(
+                'flex items-center gap-2',
+                styles['operation-container']
+              )}
+            >
               {record.state === TaskNodeStatus.FAILURE ? (
-                <Popconfirm
-                  title="确定强制成功吗？"
-                  content="强制成功后，将继续运行后续任务"
-                  onOk={() => handleTaskNodeForcesSuccess(record.id)}
+                <PermissionWrapper
+                  permission={WORKFLOW_TASK_PERMISSIONS.MODIFY}
                 >
-                  <Button
-                    disabled={record.state !== TaskNodeStatus.FAILURE}
-                    type="text"
-                    className="px-[4px]"
+                  <Popconfirm
+                    title="确定强制成功吗？"
+                    content="强制成功后，将继续运行后续任务"
+                    onOk={() => handleTaskNodeForcesSuccess(record.id)}
                   >
-                    强制成功
-                  </Button>
-                </Popconfirm>
+                    <Button
+                      disabled={record.state !== TaskNodeStatus.FAILURE}
+                      type="text"
+                    >
+                      强制成功
+                    </Button>
+                  </Popconfirm>
+                </PermissionWrapper>
               ) : (
-                <Button disabled={true} type="text" className="px-[4px]">
-                  强制成功
-                </Button>
+                <PermissionWrapper
+                  permission={WORKFLOW_TASK_PERMISSIONS.MODIFY}
+                >
+                  <Popover
+                    content="只能强制成功已经运行失败的节点"
+                    position="top"
+                  >
+                    <Button disabled={true} type="text">
+                      强制成功
+                    </Button>
+                  </Popover>
+                </PermissionWrapper>
               )}
               {record.state === TaskNodeStatus.FAILURE ? (
-                <Popconfirm
-                  title="确定重新运行吗？"
-                  content=""
-                  onOk={() =>
-                    handleTaskNodeRetry(
-                      record.process_instance_id,
-                      record.task_code
-                    )
-                  }
+                <PermissionWrapper
+                  permission={WORKFLOW_TASK_PERMISSIONS.MODIFY}
                 >
-                  <Button
-                    disabled={record.state !== TaskNodeStatus.FAILURE}
-                    type="text"
-                    className="px-[4px]"
+                  <Popconfirm
+                    title="确定重新运行吗？"
+                    content=""
+                    onOk={() =>
+                      handleTaskNodeRetry(
+                        record.process_instance_id,
+                        record.task_code
+                      )
+                    }
                   >
-                    重试
-                  </Button>
-                </Popconfirm>
+                    <Button
+                      disabled={record.state !== TaskNodeStatus.FAILURE}
+                      type="text"
+                    >
+                      重试
+                    </Button>
+                  </Popconfirm>
+                </PermissionWrapper>
               ) : (
-                <Button disabled={true} type="text" className="px-[4px]">
-                  重试
-                </Button>
+                <PermissionWrapper
+                  permission={WORKFLOW_TASK_PERMISSIONS.MODIFY}
+                >
+                  <Popover content="只能重试已经运行失败的节点" position="top">
+                    <Button disabled={true} type="text">
+                      重试
+                    </Button>
+                  </Popover>
+                </PermissionWrapper>
               )}
-              <Button
-                type="text"
-                className="px-[4px]"
-                onClick={() => handleGetRunLogs(record.id, record.task_name)}
+              <PermissionWrapper
+                permission={WORKFLOW_TASK_PERMISSIONS.CAN_UPDATE}
               >
-                日志
-              </Button>
+                <Button
+                  type="text"
+                  className="px-[4px]"
+                  onClick={() => handleGetRunLogs(record.id, record.task_name)}
+                >
+                  日志
+                </Button>
+              </PermissionWrapper>
             </div>
           );
         }
@@ -465,7 +535,7 @@ export default function TaskNodeRunList() {
         loading={table.loading}
         pagination={false}
         border={false}
-        rowKey="task_code"
+        rowKey="id"
         noDataElement={noDataElement({ description: '暂无数据' })}
         onChange={(pagination, sorter, filters) => {
           table.onChange(pagination, sorter, filters);

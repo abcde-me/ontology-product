@@ -14,7 +14,7 @@ import {
 import React, { useEffect, useState } from 'react';
 import { useDepartmentTree } from '../../hooks/useDepartmentTree';
 import './DepartmentModal.scss';
-import { EllipsisPopover } from '@ceai-front/arco-material';
+import { EllipsisPopover, NoDataCard } from '@ceai-front/arco-material';
 
 interface SelectedDepartment {
   id: string;
@@ -217,7 +217,9 @@ const DepartmentModal: React.FC<DataSourceModalProps> = ({
                   onCheck={handleTreeCheck}
                 />
               ) : (
-                <Empty description="暂无数据" />
+                <div style={{ paddingTop: '100px' }}>
+                  <NoDataCard title="暂无数据" type="block" />
+                </div>
               )}
             </div>
           </div>
@@ -237,9 +239,7 @@ const DepartmentModal: React.FC<DataSourceModalProps> = ({
               pagination={false}
               border={false}
               scroll={{ y: false }}
-              noDataElement={noDataElement({
-                description: '暂无已选部门'
-              })}
+              noDataElement={<NoDataCard title="暂无已选部门" type="block" />}
             />
             {selectedData.length > 0 && (
               <Pagination
