@@ -247,14 +247,14 @@ export default function MetadataManagement() {
       range: [] as RangeFilter[]
     };
     fieldValues.forEach((item) => {
-      if (item.type === 'string') {
-        newSearchValue.filters[item.nameEn] = item.searchContent[0];
-      } else if (item.type === 'datetime') {
+      if (item.type === 'datetime') {
         newSearchValue.range.push({
           field: item.nameEn,
           start: item.searchContent[0].split('_')[0],
           end: item.searchContent[0].split('_')[1]
         });
+      } else {
+        newSearchValue.filters[item.nameEn] = item.searchContent[0];
       }
     });
     setSearchValue(newSearchValue);
