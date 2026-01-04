@@ -128,11 +128,11 @@
   }
 
   .btn-script-list {
-    width: 100px;
+    display: flex;
+    align-items: center;
     height: 24px;
-    margin-right: 12px;
+    margin-right: 8px;
     color: var(--text-color-text-2, #1e293b) !important;
-    font-family: 'PingFang SC';
     font-size: 14px;
     font-style: normal;
     font-weight: 600;
@@ -146,7 +146,6 @@
   }
 
   .btn-save {
-    width: 80px;
     height: 24px;
   }
 }
@@ -175,7 +174,6 @@
   line-height: 22px;
   border: 1px solid var(--text-color-text-2, #cbd5e1) !important;
   padding: 0 8px;
-  width: 52px;
   height: 24px;
 
   &:hover {
@@ -190,8 +188,6 @@
 
 .btn-save,
 .btn-cancel {
-  padding: 0 8px;
-  width: 52px;
   height: 24px;
 }
 

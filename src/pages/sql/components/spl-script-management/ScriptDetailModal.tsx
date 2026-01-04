@@ -5,6 +5,7 @@ import CodeMirror from '@uiw/react-codemirror';
 import { sql } from '@codemirror/lang-sql';
 import copy from 'copy-to-clipboard';
 import EllipsisPopover from '@/components/ellipsis-popover-com';
+import styles from './ScriptDetailModal.module.scss';
 
 interface ScriptDetailModalProps {
   visible: boolean;
@@ -43,25 +44,28 @@ const ScriptDetailModal: React.FC<ScriptDetailModalProps> = ({
       autoFocus={false}
       maskClosable
       unmountOnExit
-      style={{ width: 900 }}
+      style={{ width: 900, height: 740 }}
+      className={styles.scriptDetailModal}
     >
-      <div className="mb-[8px] flex items-center justify-between">
-        <EllipsisPopover
-          value={title}
-          preferTypography
-          wrapperClassName="text-[16px] font-[500] text-[var(--text-color-text-2)] w-[700px]"
-        ></EllipsisPopover>
-        <Button
-          type="outline"
-          icon={<IconCopy />}
-          onClick={handleCopy}
-          className="h-[24px] pl-[12px] pr-[12px]"
-        >
-          复制
-        </Button>
-      </div>
-      <div className="border-[#E2E8F0]] mb-[24px] min-h-[200px] rounded-[8px] border p-[16px]">
-        {content}
+      <div className="flex h-full flex-col">
+        <div className="mb-[8px] flex flex-shrink-0 items-center justify-between">
+          <EllipsisPopover
+            value={title}
+            preferTypography
+            wrapperClassName="text-[16px] font-[500] text-[var(--text-color-text-2)] w-[700px]"
+          ></EllipsisPopover>
+          <Button
+            type="outline"
+            icon={<IconCopy />}
+            onClick={handleCopy}
+            className="h-[24px] pl-[12px] pr-[12px]"
+          >
+            复制
+          </Button>
+        </div>
+        <div className="flex-1 overflow-auto whitespace-pre-line rounded-[8px] border border-[#E2E8F0] p-[16px]">
+          {content}
+        </div>
       </div>
     </Modal>
   );
