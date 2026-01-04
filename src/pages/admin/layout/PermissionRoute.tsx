@@ -18,22 +18,28 @@ const PermissionRoute: React.FC<{ route: any }> = ({ route }) => {
     (Array.isArray(route.anyPermission) && route.anyPermission.length > 0) ||
     (Array.isArray(route.allPermission) && route.allPermission.length > 0);
 
+  // 记录上一次的 projectId，用于检测变化
+  const prevProjectIdRef = useRef<string | undefined>(undefined);
+
   // 当有 projectId 时，加载权限
   useEffect(() => {
-    if (projectId && projectId[1] && !permissionLoadedRef.current) {
+    const currentProjectId = projectId?.[1];
+
+    // 检测 projectId 是否变化
+    if (currentProjectId !== prevProjectIdRef.current) {
+      permissionLoadedRef.current = false;
+      prevProjectIdRef.current = currentProjectId;
+    }
+
+    if (currentProjectId && !permissionLoadedRef.current) {
       permissionLoadedRef.current = true;
       console.log(
         '🔐 PermissionRoute 触发权限初始化，projectId:',
-        projectId[1]
+        currentProjectId
       );
-      setUserPermissions(projectId[1]);
+      setUserPermissions(currentProjectId);
     }
   }, [projectId, setUserPermissions]);
-
-  // projectId 变化时重置标记
-  useEffect(() => {
-    permissionLoadedRef.current = false;
-  }, [projectId?.[1]]);
 
   // 如果路由没有权限要求，直接渲染
   if (!needPermission) {
