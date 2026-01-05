@@ -11,27 +11,11 @@ import {
   TableColumnProps
 } from '@arco-design/web-react';
 import EllipsisPopover from '@/components/ellipsis-popover-com';
-import { DbTableListParamss, getDbItemList } from '@/api/dataCatalog';
-import { formatDateTime } from '../../utils';
-import getLabelByValue from '@/utils/getLabelByValue';
 import { IconRefresh } from '@arco-design/web-react/icon';
 import { ListDevelopSystemParamParams } from '@/types/sqlDevelopApi';
 import { listDevelopSystemParam } from '@/api/sql-develop';
-import noDataElement from '@/components/no-data';
+import { NoDataCard } from '@ceai-front/arco-material';
 const FormItem = Form.Item;
-
-const defaultfileTypeList = [
-  {
-    label: 'MySQL',
-    text: 'MySQL',
-    value: 'MySQL'
-  },
-  {
-    label: 'PostgreSQL',
-    text: 'PostgreSQL',
-    value: 'PostgreSQL'
-  }
-];
 
 // 参数详情 弹框
 const ModalParamList = ({ paramVisible, onCancel }) => {
@@ -181,7 +165,7 @@ const ModalParamList = ({ paramVisible, onCancel }) => {
           rowKey="id"
           scroll={{ y: 500 }}
           pagination={false}
-          noDataElement={noDataElement({ description: '暂无数据' })}
+          noDataElement={<NoDataCard title="暂无数据" />}
         />
         {total > pageSize && (
           <div className="mt-[16px] flex items-center justify-end">

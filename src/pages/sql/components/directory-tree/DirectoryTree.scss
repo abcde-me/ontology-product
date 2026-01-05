@@ -1,5 +1,7 @@
 .directory-tree-container {
   height: 100%;
+  display: flex;
+  flex-direction: column;
 
   .arco-tree-node {
     position: relative;

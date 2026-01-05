@@ -13,7 +13,7 @@ import {
 } from '@arco-design/web-react';
 import { useHistory } from 'react-router';
 import { ColumnProps } from '@arco-design/web-react/es/Table';
-import noDataElement from '@/components/no-data';
+import { NoDataCard } from '@ceai-front/arco-material';
 import { SorterInfo } from '@arco-design/web-react/es/Table/interface';
 import { PermissionWrapper } from '@/components/PermissionGuard';
 import {
@@ -357,7 +357,7 @@ const ScriptTable: React.FC<ScriptTableProps> = ({
     },
     {
       title: '操作',
-      dataIndex: 'operate',
+      // dataIndex: 'operate',
       fixed: 'right',
       width: 176,
       render: (_, record) => {
@@ -454,7 +454,7 @@ const ScriptTable: React.FC<ScriptTableProps> = ({
       <div
         className={classNames(
           styles['header-form-content'],
-          'flex items-center justify-between overflow-x-auto whitespace-nowrap'
+          'flex w-full items-center justify-between overflow-x-auto whitespace-nowrap'
         )}
       >
         <Form
@@ -498,14 +498,19 @@ const ScriptTable: React.FC<ScriptTableProps> = ({
           </Button>
         </div>
       </div>
+      {/* <div className=""> */}
       <Table
+        className="w-full"
         border={false}
+        scroll={{ x: true }}
         columns={columns}
         data={developScriptData}
         pagination={false}
-        noDataElement={noDataElement({
-          description: '暂无脚本'
-        })}
+        noDataElement={
+          <div className="flex w-full items-center justify-center py-[100px]">
+            <NoDataCard title="暂无数据" />
+          </div>
+        }
         rowKey="script_id"
         loading={loading}
         onChange={(pagination, sorter, filters) =>
@@ -513,6 +518,7 @@ const ScriptTable: React.FC<ScriptTableProps> = ({
           handleTableChange(pagination, sorter, filters)
         }
       />
+      {/* </div> */}
       {/* 分页 */}
       {total > pageSize && (
         <Pagination

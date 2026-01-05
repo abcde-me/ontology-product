@@ -9,7 +9,6 @@ import { useDebounceFn, useUpdateEffect } from 'ahooks';
 import {
   Button,
   Dropdown,
-  Empty,
   Input,
   Menu,
   Message,
@@ -43,6 +42,7 @@ import SQLFileIcon from '@/assets/sql/spl-item-icon.svg';
 import CopyIcon from '../../assets/copy-icon.svg';
 import { useParams } from '@/utils/url';
 import { ScriptStatus, ScriptStatusName } from '@/types/sqlDevelopApi';
+import { NoDataCard } from '@ceai-front/arco-material';
 
 // 原始数据接口
 export type TreeNodeItem = Partial<PythonListItem> & {
@@ -568,7 +568,9 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
             <div className="text-[rgba(15, 23, 42, 1)] text-[14px]">加载中</div>
           </div>
         ) : treeData.length === 0 ? (
-          <Empty />
+          <div className="flex flex-1 items-center justify-center">
+            <NoDataCard title="暂无加工脚本" type="block" />
+          </div>
         ) : (
           <Tree
             className="directory-tree"

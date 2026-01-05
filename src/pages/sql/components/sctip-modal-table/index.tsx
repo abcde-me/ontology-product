@@ -19,7 +19,7 @@ import {
 } from '@/api/sql-develop';
 import { getDevelopScriptLogByScriptId } from '@/api/sql';
 import classNames from 'classnames';
-import noDataElement from '@/components/no-data';
+import { NoDataCard } from '@ceai-front/arco-material';
 import dayjs from 'dayjs';
 import ScriptDetailModal from '../spl-script-management/ScriptDetailModal';
 import { useUrlState } from '../../hooks/useUrlState';
@@ -394,7 +394,7 @@ const SctipModalTable: React.FC<{
           loading={tableLoading}
           data={tableData}
           rowKey={(record: any) => `${rowData?.script_id}-${record.version}`}
-          noDataElement={noDataElement({ description: '暂无数据' })}
+          noDataElement={<NoDataCard title="暂无数据" />}
           pagination={false}
           onChange={handleTableChange}
         />

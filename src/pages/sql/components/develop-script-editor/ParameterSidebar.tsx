@@ -151,8 +151,8 @@ const ParameterSidebar: React.FC<ParameterSidebarProps> = memo(
 
             <div className="flex-1 overflow-y-auto px-[12px] py-[4px]">
               {localParams.length === 0 ? (
-                <div className="flex h-[200px] items-center justify-center">
-                  <NoDataCard title="暂无引用参数" />
+                <div className="flex h-full items-center justify-center">
+                  <NoDataCard title="暂无引用参数" type="block" />
                 </div>
               ) : (
                 <div className="flex flex-col gap-[10px]">

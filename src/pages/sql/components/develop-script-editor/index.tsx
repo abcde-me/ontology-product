@@ -1,7 +1,7 @@
 import React, { memo, useRef, useCallback } from 'react';
 import { Tabs, Message, Modal } from '@arco-design/web-react';
 import EditorWorkspace from './EditorWorkspace';
-import NoData from '@/components/no-data';
+import { NoDataCard } from '@ceai-front/arco-material';
 import { FileTab } from '../../hooks/useDevelopScriptTabManager';
 import styles from './index.module.scss';
 import { SQL_PERMISSIONS } from '@/config/permissions';
@@ -140,11 +140,14 @@ const EditorContent: React.FC<EditorContentProps> = memo(
 
           {/* 无数据状态显示区域 */}
           <div className={styles['empty-content-area']}>
-            <NoData
-              description="暂无数据"
-              btnText="新建SQL加工脚本"
-              handleBtn={handleCreateSqlQuery}
-              perms={SQL_PERMISSIONS.DEVELOP_SCIPT_CREATE}
+            <NoDataCard
+              title="未选择加工脚本"
+              {...(hasCreatePermission && {
+                primaryBtnProps: {
+                  text: '新建加工脚本',
+                  onClick: handleCreateSqlQuery
+                }
+              })}
             />
           </div>
         </div>
