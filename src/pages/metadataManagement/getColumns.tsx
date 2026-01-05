@@ -536,7 +536,14 @@ export const getColumns = (
                 />
               );
             }
-            if (field.id === 'policy' || field.id === 'encryption') {
+            if (
+              field.id === 'policy' ||
+              field.id === 'encryption' ||
+              field.id === 'description' ||
+              field.id === 'databaseName' ||
+              field.id === 'distributionColumns' ||
+              field.id === 'partitionKey'
+            ) {
               return <EllipsisPopover value={value} isEdit={false} />;
             }
             if (field.id === 'storageSize' || field.id === 'objectsSize') {
