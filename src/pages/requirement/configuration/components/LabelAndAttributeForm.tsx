@@ -333,6 +333,9 @@ const LabelAndAttributeForm: React.FC<LabelAndAttributeFormProps> = ({
                         }
                         className="label-mapping-select"
                         mode="multiple"
+                        getPopupContainer={(triggerNode) =>
+                          triggerNode.parentNode as HTMLElement
+                        }
                         maxTagCount={{
                           count: 1,
                           render: (invisibleNumber) => {
