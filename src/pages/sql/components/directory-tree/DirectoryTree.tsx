@@ -568,7 +568,7 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
             <div className="text-[rgba(15, 23, 42, 1)] text-[14px]">加载中</div>
           </div>
         ) : treeData.length === 0 ? (
-          <div className="flex flex-1 items-center justify-center">
+          <div className="py-[100px]">
             <NoDataCard title="暂无加工脚本" type="block" />
           </div>
         ) : (

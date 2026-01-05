@@ -7,10 +7,11 @@ import { ExecutionHistory } from '../type';
 import { stopeLoad, reTryLoad } from '@/api/loadApi';
 import { IconLoading } from '@arco-design/web-react/icon';
 import EllipsisPopoverCom from '@/components/ellipsis-popover-com';
-import noDataElement from '@/components/no-data';
+// import noDataElement from '@/components/no-data';
 import { DATA_LOAD_PERMISSIONS } from '@/config/permissions';
 import { useHasPermission } from '@/hooks/usePermission';
 import LogDrawer from './LogDrawer';
+import { NoDataCard } from '@ceai-front/arco-material';
 interface DataType {
   status: Array<string>;
   sort: string;
@@ -281,7 +282,11 @@ const TableDetail = (props) => {
           data={data}
           border={false}
           pagination={false}
-          noDataElement={noDataElement({ description: '暂无数据' })}
+          noDataElement={
+            <div className="py-[100px]">
+              <NoDataCard title="暂无数据" />
+            </div>
+          }
           style={{
             width: '100%',
             padding: '1px 15px 0px 7px'
