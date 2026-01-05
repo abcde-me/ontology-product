@@ -9,7 +9,8 @@ import {
   Pagination
 } from '@arco-design/web-react';
 import { ColumnProps } from '@arco-design/web-react/es/Table';
-import noDataElement from '@/components/no-data';
+import { NoDataCard } from '@ceai-front/arco-material';
+// import noDataElement from '@/components/no-data';
 
 // 可以根据实际情况，扩展 props 以接受 columns 变动等
 export interface DataAssetTableListProps {
@@ -61,10 +62,8 @@ const DataAssetTableList: React.FC<DataAssetTableListProps> = ({
   // 空态
   if (!data || data.length === 0) {
     return (
-      <div className="flex min-h-[200px] items-center justify-center">
-        {noDataElement({
-          description: '暂无数据资产'
-        })}
+      <div className="flex items-center justify-center py-[100px]">
+        <NoDataCard title="暂无数据资产" />
       </div>
     );
   }

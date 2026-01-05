@@ -238,25 +238,13 @@ const RunningInfoPanel: React.FC<RunningInfoPanelProps> = memo(
           expandIcon={
             isExpanded ? (
               <Popover content="收起" position="top">
-                <div
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center'
-                  }}
-                >
+                <div className="flex items-center justify-center">
                   <IconDown />
                 </div>
               </Popover>
             ) : (
               <Popover content="展开" position="top">
-                <div
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center'
-                  }}
-                >
+                <div className="flex items-center justify-center">
                   <IconUp />
                 </div>
               </Popover>

@@ -6,6 +6,7 @@ import { FileTab } from '../../hooks/useTabManager';
 import styles from './index.module.scss';
 import { SQL_PERMISSIONS } from '@/config/permissions';
 import { useHasPermission } from '@/store/userInfoStore';
+import { NoDataCard } from '@ceai-front/arco-material';
 
 const { TabPane } = Tabs;
 
@@ -148,11 +149,14 @@ const EditorContent: React.FC<EditorContentProps> = memo(
 
           {/* 无数据状态显示区域 */}
           <div className={styles['empty-content-area']}>
-            <NoData
-              description="暂无数据"
-              btnText="新建SQL查询"
-              handleBtn={handleCreateSqlQuery}
-              perms={SQL_PERMISSIONS.QUERY_SCRIPT_CREATE}
+            <NoDataCard
+              title="未选择查询脚本"
+              {...(hasCreatePermission && {
+                primaryBtnProps: {
+                  text: '新建查询脚本',
+                  onClick: handleCreateSqlQuery
+                }
+              })}
             />
           </div>
         </div>

@@ -14,7 +14,7 @@ import {
 } from '@arco-design/web-react';
 import { ColumnProps } from '@arco-design/web-react/es/Table';
 import EllipsisPopover from '@/components/ellipsis-popover-com';
-import noDataElement from '@/components/no-data';
+import { NoDataCard } from '@ceai-front/arco-material';
 import { SorterInfo } from '@arco-design/web-react/es/Table/interface';
 import { PermissionWrapper } from '@/components/PermissionGuard';
 import { SQL_PERMISSIONS } from '@/config/permissions';
@@ -350,9 +350,11 @@ const QueryScript: React.FC<QueryScriptProps> = ({ curActiveTab }) => {
         columns={columns}
         data={queryScriptData}
         pagination={false}
-        noDataElement={noDataElement({
-          description: '暂无数据'
-        })}
+        noDataElement={
+          <div className="w-full py-[100px]">
+            <NoDataCard title="暂无数据" />
+          </div>
+        }
         rowKey="script_id"
         loading={loading}
         onChange={(pagination, sorter, filters) =>
