@@ -83,13 +83,17 @@ export default function ViewFileModal({ visible, onCancel, id }) {
       value: (
         <EllipsisPopoverCom
           value={viewFileDetailData?.apiInfo?.nameCn || '-'}
+          preferTypography
         />
       )
     },
     {
       label: '路径',
       value: (
-        <EllipsisPopoverCom value={viewFileDetailData?.apiInfo?.path || '-'} />
+        <EllipsisPopoverCom
+          value={viewFileDetailData?.apiInfo?.path || '-'}
+          preferTypography
+        />
       )
     },
     {
@@ -109,6 +113,7 @@ export default function ViewFileModal({ visible, onCancel, id }) {
       value: (
         <EllipsisPopoverCom
           value={viewFileDetailData?.apiInfo?.description || '-'}
+          preferTypography
         />
       )
     },

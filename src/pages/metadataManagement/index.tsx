@@ -52,8 +52,8 @@ enum MetadataType {
 
 interface RangeFilter {
   field: string;
-  start: string;
-  end: string;
+  start: string | number;
+  end: string | number;
 }
 
 export default function MetadataManagement() {
@@ -240,7 +240,7 @@ export default function MetadataManagement() {
 
   // 处理字段搜索
   const handleFieldSearch = (fieldValues, commonSearch: string) => {
-    console.log(fieldValues, commonSearch);
+    console.log(fieldValues, commonSearch, 'fieldValues, commonSearch');
     const newSearchValue = {
       filters: {},
       range: [] as RangeFilter[]
@@ -251,6 +251,12 @@ export default function MetadataManagement() {
           field: item.nameEn,
           start: item.searchContent[0].split('_')[0],
           end: item.searchContent[0].split('_')[1]
+        });
+      } else if (item.type === 'int') {
+        newSearchValue.range.push({
+          field: item.nameEn,
+          start: Number(item.searchContent[0]),
+          end: Number(item.searchContent[1])
         });
       } else {
         newSearchValue.filters[item.nameEn] = item.searchContent[0];
@@ -645,7 +651,9 @@ PROPERTIES (
             <Select
               placeholder="请选择数据库"
               className={styles.selectTable}
-              showSearch
+              showSearch={{
+                retainInputValue: true
+              }}
               filterOption={(inputValue, option) =>
                 option.props.children
                   .toLowerCase()
