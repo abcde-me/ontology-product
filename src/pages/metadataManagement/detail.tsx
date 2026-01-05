@@ -169,13 +169,40 @@ export default function MetadataManagementDetail() {
   // 获取分区字段
   const getPartitionKey = (partitionKey: string) => {
     if (!partitionKey) return '-';
-    const arr = partitionKey.split(',')?.map((item) => item);
-    if (arr.length >= 3) {
+    const result: string[] = [];
+    let currentSegment = '';
+    let bracketLevel = 0;
+
+    // 遍历字符串切割逻辑
+    for (const char of partitionKey) {
+      if (char === '(') {
+        bracketLevel++;
+        currentSegment += char;
+      } else if (char === ')') {
+        bracketLevel = Math.max(0, bracketLevel - 1);
+        currentSegment += char;
+      } else if (char === ',' && bracketLevel === 0) {
+        const trimmedSegment = currentSegment.trim();
+        if (trimmedSegment) {
+          result.push(trimmedSegment);
+        }
+        currentSegment = '';
+      } else {
+        currentSegment += char;
+      }
+    }
+
+    // 处理最后一个片段
+    const lastTrimmedSegment = currentSegment.trim();
+    if (lastTrimmedSegment) {
+      result.push(lastTrimmedSegment);
+    }
+    if (result.length >= 3) {
       return (
         <div>
-          {arr[0]}, {arr[1]} 等{' '}
+          {result[0]}, {result[1]} 等{' '}
           <Tooltip content={partitionKey}>
-            <span className="text-[#007DFA]">{arr.length}</span>
+            <span className="text-[#007DFA]">{result.length}</span>
           </Tooltip>{' '}
           个
         </div>
