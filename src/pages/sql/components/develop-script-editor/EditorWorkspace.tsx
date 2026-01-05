@@ -11,9 +11,8 @@ import {
   Spin
 } from '@arco-design/web-react';
 import {
-  IconBook,
   IconCaretRight,
-  IconClose,
+  // IconClose,
   IconCopy,
   IconDown,
   IconEdit,
@@ -29,6 +28,8 @@ import createTheme from '@uiw/codemirror-themes';
 import IconStop from '@/assets/sql/sql-stop-icon.svg';
 import CodeMirror, { ReactCodeMirrorRef } from '@uiw/react-codemirror';
 import CopyIcon from '../../assets/copy-icon.svg';
+import BookIcon from '../../assets/book-icon.svg';
+import CancelEditIcon from '../../assets/cancel-edit-icon.svg';
 import React, {
   memo,
   useCallback,
@@ -501,7 +502,7 @@ const EditorWorkspaceContent: React.FC<{
                       disabled={!canEdit || !scriptInfo?.script_context?.trim()}
                       onClick={handleRunClick}
                       className={classNames(
-                        'h-[26px]',
+                        'h-[24px]',
                         runLogStatus === RunLogStatus.RUNNING
                           ? styles['btn-running']
                           : ''
@@ -522,7 +523,7 @@ const EditorWorkspaceContent: React.FC<{
                     !scriptInfo?.script_context?.trim()
                   }
                   className={classNames(
-                    'h-[26px] !px-0',
+                    'h-[24px] !px-0',
                     styles['format-code-btn']
                   )}
                 >
@@ -534,9 +535,9 @@ const EditorWorkspaceContent: React.FC<{
                   <>
                     <Button
                       type="text"
-                      icon={<IconBook />}
+                      icon={<BookIcon />}
                       onClick={() => setSpecificationsVisible(true)}
-                      className="h-[26px] px-[0px] !text-[var(--color-text-2)]"
+                      className="flex h-[24px] items-center px-[0px] !text-[var(--color-text-2)]"
                     >
                       开发规范
                     </Button>
@@ -545,7 +546,7 @@ const EditorWorkspaceContent: React.FC<{
                       type="text"
                       icon={<QueryListIcon />}
                       onClick={() => setParamVisible(true)}
-                      className="flex h-[26px] items-center px-[0px] !text-[var(--color-text-2)]"
+                      className="flex h-[24px] items-center px-[0px] !text-[var(--color-text-2)]"
                     >
                       参数列表
                     </Button>
@@ -558,7 +559,7 @@ const EditorWorkspaceContent: React.FC<{
               {scriptInfo?.update_time && (
                 <div className={styles['toolbar-right-item']}>
                   <Space size={12}>
-                    <span className="text-sm text-gray-500">
+                    <span className="text-[14px] text-[var(--color-text-4)]">
                       保存时间:{' '}
                       {dayjs(scriptInfo?.update_time).format(
                         'YYYY-MM-DD HH:mm:ss'
@@ -572,7 +573,10 @@ const EditorWorkspaceContent: React.FC<{
                 permission={SQL_PERMISSIONS.DEVELOP_SCIPT_MODIFY}
               >
                 <Button
-                  className={classNames(styles['btn-save'], 'mr-[8px]')}
+                  className={classNames(
+                    styles['btn-save'],
+                    'ml-[8px] mr-[8px]'
+                  )}
                   loading={saveLoading}
                   onClick={handleSave}
                   disabled={!scriptInfo?.isSelfEditing}
@@ -606,7 +610,7 @@ const EditorWorkspaceContent: React.FC<{
                     className={classNames(styles['btn-save'], 'ml-[8px]')}
                     loading={editLoading}
                     onClick={handleCancelEdit}
-                    icon={<IconClose />}
+                    icon={<CancelEditIcon />}
                   >
                     取消编辑
                   </Button>
@@ -641,13 +645,13 @@ const EditorWorkspaceContent: React.FC<{
               <Space size={12}>
                 <VersionStatus
                   status={status}
-                  className="text-[var(--color-text-4)]"
+                  className="text-[var(--color-text-1)]"
                 />
                 {/* <span className="text-sm">已发版</span> */}
-                <span className="text-sm text-gray-500">
+                <span className="text-[14px] text-[var(--color-text-4)]">
                   发版人: {scriptInfo?.release_user || '-'}
                 </span>
-                <span className="text-sm text-gray-500">
+                <span className="text-[14px] text-[var(--color-text-4)]">
                   发版时间:{' '}
                   {scriptInfo?.release_time
                     ? dayjs(scriptInfo.release_time).format(
@@ -658,22 +662,20 @@ const EditorWorkspaceContent: React.FC<{
               </Space>
             </div>
             <div className={styles['toolbar-right']}>
-              <div className={classNames(styles['copy-dropdown-container'])}>
-                <PermissionWrapper
-                  permission={SQL_PERMISSIONS.DEVELOP_SCIPT_CREATE}
-                >
-                  <Button
-                    loading={copyLoading}
-                    className={classNames(styles['btn-save'], 'ml-[8px]')}
-                    icon={<CopyIcon className="h-[14px] w-[14px]" />}
-                    onClick={() => handleCopyScript('newScript')}
-                  >
-                    复制为新脚本
-                  </Button>
-                </PermissionWrapper>
-              </div>
-              {/* 取消编辑按钮 - status=0且isSelfEditing=true时显示 */}
               <PermissionWrapper
+                permission={SQL_PERMISSIONS.DEVELOP_SCIPT_CREATE}
+              >
+                <Button
+                  loading={copyLoading}
+                  className={classNames(styles['btn-save'], 'ml-[8px]')}
+                  icon={<CopyIcon className="h-[14px] w-[14px]" />}
+                  onClick={() => handleCopyScript('newScript')}
+                >
+                  复制为新脚本
+                </Button>
+              </PermissionWrapper>
+              {/* 取消编辑按钮 - status=0且isSelfEditing=true时显示 */}
+              {/* <PermissionWrapper
                 permission={SQL_PERMISSIONS.DEVELOP_SCIPT_MODIFY}
               >
                 {scriptInfo?.isSelfEditing && (
@@ -686,22 +688,20 @@ const EditorWorkspaceContent: React.FC<{
                     取消编辑
                   </Button>
                 )}
-              </PermissionWrapper>
+              </PermissionWrapper> */}
 
               {/* 编辑按钮 - status=0且isSelfEditing=false或status=1时显示 */}
               <PermissionWrapper
                 permission={SQL_PERMISSIONS.DEVELOP_SCIPT_MODIFY}
               >
-                {!scriptInfo?.isSelfEditing && (
-                  <Button
-                    className={classNames(styles['btn-save'], 'ml-[8px]')}
-                    onClick={handleStartEdit}
-                    loading={editLoading}
-                    icon={<IconEdit />}
-                  >
-                    编辑
-                  </Button>
-                )}
+                <Button
+                  className={classNames(styles['btn-save'], 'ml-[8px]')}
+                  onClick={handleStartEdit}
+                  loading={editLoading}
+                  icon={<IconEdit />}
+                >
+                  编辑
+                </Button>
               </PermissionWrapper>
             </div>
           </>
@@ -716,7 +716,7 @@ const EditorWorkspaceContent: React.FC<{
               <Space size={12}>
                 <VersionStatus
                   status={status}
-                  className="text-[var(--color-text-4)]"
+                  className="text-[var(--color-text-1)]"
                 />
                 <span className="text-sm text-gray-500">
                   发版人: {scriptInfo?.release_user || '-'}
@@ -759,7 +759,7 @@ const EditorWorkspaceContent: React.FC<{
                     className={classNames(styles['btn-save'], 'ml-[8px]')}
                     loading={editLoading}
                     onClick={handleCancelEdit}
-                    icon={<IconClose />}
+                    icon={<CancelEditIcon />}
                   >
                     取消编辑
                   </Button>

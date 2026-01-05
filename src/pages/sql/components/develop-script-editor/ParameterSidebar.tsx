@@ -129,7 +129,10 @@ const ParameterSidebar: React.FC<ParameterSidebarProps> = memo(
           /* 收起状态：显示图标，hover 时显示完整信息 */
           <div className="mt-[8px] h-[32px] w-[32px] cursor-pointer">
             <Popover content="打开引用参数列表" position="left">
-              <ParameterIcon onClick={() => setIsCollapsed(false)} />
+              <ParameterIcon
+                className="hover:text-[rgba(var(--primary-7))]"
+                onClick={() => setIsCollapsed(false)}
+              />
             </Popover>
           </div>
         ) : (
@@ -139,7 +142,7 @@ const ParameterSidebar: React.FC<ParameterSidebarProps> = memo(
               <span className="text-[14px] font-bold">引用参数</span>
               <Popover content="收起" position="left">
                 <ArrowRightIcon
-                  className="h-[24px] w-[18px] cursor-pointer"
+                  className="h-[24px] w-[18px] cursor-pointer hover:text-[rgba(var(--primary-7))]"
                   onClick={() => setIsCollapsed(true)}
                 />
               </Popover>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Message } from '@arco-design/web-react';
 import { useRequest } from 'ahooks';
 import { RunningStatus } from '@/types/sqlApi';
@@ -190,6 +190,12 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
   // 当前文件ID，从 activeTab 对应的标签页获取
   const currentFile = fileTabs.find((tab) => tab.key === activeTab);
 
+  // 获取当前标签页的 scriptId，用于监听变化
+  const currentScriptId = useMemo(() => {
+    const currentTab = fileTabs.find((tab) => tab.key === activeTab);
+    return currentTab?.scriptId;
+  }, [activeTab, fileTabs]);
+
   // 编辑脚本
   const handleEditScript = useCallback(async () => {
     try {
@@ -312,6 +318,7 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
 
         // 发版成功重新请求接口详情获取最新脚本信息
         loadFileContent(currentFile?.scriptId ?? '');
+        refreshDirectory?.();
 
         Message.success('发布成功');
         return true;
@@ -663,9 +670,9 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
     };
   }, [cancelGetRunLogPolling]);
 
-  // 监听 activeTab 变化，重新更新编辑器状态
+  // 监听 activeTab 或 currentScriptId 变化，重新更新编辑器状态
   useEffect(() => {
-    if (!activeTab || !fileTabs.length) {
+    if (!activeTab || !fileTabs.length || !currentScriptId) {
       return;
     }
 
@@ -674,34 +681,32 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
       return;
     }
 
-    // 如果有 fileId，重新加载文件内容以获取最新状态
-    if (currentTab.scriptId) {
-      setContentLoading(true);
-      loadFileContent(currentTab.scriptId)
-        .then((res) => {
-          if (!res) {
-            return;
-          }
+    // 重新加载文件内容以获取最新状态
+    setContentLoading(true);
+    loadFileContent(currentScriptId)
+      .then((res) => {
+        if (!res) {
+          return;
+        }
 
-          // 通知父组件更新标签页内容
-          if (onTabUpdate) {
-            onTabUpdate(currentTab.key, {
-              content: res.script_context ?? '',
-              fileId: String(currentTab.fileId),
-              scriptId: String(res.script_id),
-              title: currentTab.title
-            });
-          }
-        })
-        .finally(() => {
-          setContentLoading(false);
-        });
-    }
+        // 通知父组件更新标签页内容
+        if (onTabUpdate) {
+          onTabUpdate(currentTab.key, {
+            content: res.script_context ?? '',
+            fileId: String(currentTab.fileId),
+            scriptId: String(res.script_id),
+            title: currentTab.title
+          });
+        }
+      })
+      .finally(() => {
+        setContentLoading(false);
+      });
 
     // return () => {
     //   // handleSaveThrottled.cancel();
     // };
-  }, [activeTab]); // 只依赖 activeTab，避免不必要的重复更新
+  }, [activeTab, currentScriptId]); // 同时依赖 activeTab 和 currentScriptId，当标签页的 scriptId 更新时也会触发
 
   // 当 currentFileId 变化时，重置运行相关状态
   useEffect(() => {
