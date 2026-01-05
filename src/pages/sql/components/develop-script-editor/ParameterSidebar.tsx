@@ -6,6 +6,7 @@ import ArrowRightIcon from '../../assets/arrow-right-icon.svg';
 import { ScriptParam } from '@/types/sqlDevelopApi';
 import { useLocalParams } from '@/hooks/useLocalParams';
 import { SQL_PARAM_PLACEHOLDER_REGEX } from '../../constant';
+import { NoDataCard } from '@ceai-front/arco-material';
 
 // 扩展 ScriptParam 以支持内部排序
 type ParameterWithOrder = ScriptParam & { _order?: number };
@@ -151,7 +152,7 @@ const ParameterSidebar: React.FC<ParameterSidebarProps> = memo(
             <div className="flex-1 overflow-y-auto px-[12px] py-[4px]">
               {localParams.length === 0 ? (
                 <div className="flex h-[200px] items-center justify-center">
-                  <div className="text-sm text-slate-400">暂无参数名</div>
+                  <NoDataCard title="暂无引用参数" />
                 </div>
               ) : (
                 <div className="flex flex-col gap-[10px]">
