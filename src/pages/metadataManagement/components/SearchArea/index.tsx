@@ -124,7 +124,6 @@ export default function SearchArea({
 
   // 处理字段值变化
   const handleFieldValueChange = (fieldKey: string, value: any) => {
-    console.log(fieldKey, value, 'fieldKey, value, fieldType');
     setFieldValues((prev) => ({
       ...prev,
       [fieldKey]: value
@@ -138,12 +137,6 @@ export default function SearchArea({
     const fieldSearch: FieldSearchItem[] = [];
     checkedFields.forEach((fieldKey) => {
       const field = fields.find((f) => f.id === fieldKey);
-      console.log(
-        fieldValues[fieldKey],
-        fieldKey,
-        field,
-        'fieldValues[fieldKey]'
-      );
       if (field) {
         if (field.type === 'int') {
           const newFieldKeyStart = `${fieldKey}_start`;
