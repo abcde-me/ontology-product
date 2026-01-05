@@ -247,7 +247,7 @@ export default function MetadataManagementDetail() {
     },
     {
       label: '所属数据库',
-      value: metadataType || '-'
+      value: baseInfoData.tableName || metadataType || '-'
     },
     {
       label: '分区字段',
@@ -286,7 +286,7 @@ export default function MetadataManagementDetail() {
     },
     {
       label: '所属数据库',
-      value: metadataType || '-'
+      value: baseInfoData.tableName || metadataType || '-'
     },
     {
       label: '分桶字段',
