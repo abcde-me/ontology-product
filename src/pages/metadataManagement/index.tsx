@@ -78,7 +78,7 @@ export default function MetadataManagement() {
   // 每页展示数据的数据量
   const [pageSize, setPageSize] = useState(10);
   // 总数据量
-  const [total, setTotal] = useState(10);
+  const [total, setTotal] = useState(0);
   // 添加loading状态控制
   const [loading, setLoading] = useState(false);
   // 初始化筛选的值
@@ -196,7 +196,7 @@ export default function MetadataManagement() {
           setMetadataData(res.data.data.list);
           setCurrent(res.data.data?.pageNum);
           setPageSize(res.data.data?.pageSize);
-          setTotal(res.data.data?.total || 10);
+          setTotal(res.data.data?.total || 0);
         }
       } else {
         Message.error(res.message || '获取元数据列表数据失败');
