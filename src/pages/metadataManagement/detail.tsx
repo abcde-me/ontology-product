@@ -508,11 +508,6 @@ export default function MetadataManagementDetail() {
       dataIndex: 'isKey',
       key: 'isKey',
       render: (text, record) => (text === 'YES' ? '是' : '否')
-    },
-    {
-      title: '字段序号',
-      dataIndex: 'id',
-      key: 'id'
     }
   ];
   // milvus字段信息列
