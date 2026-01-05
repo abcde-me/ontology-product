@@ -6,6 +6,7 @@ import {
   Form,
   Input,
   InputNumber,
+  Link,
   Message,
   ResizeBox,
   Select,
@@ -40,6 +41,7 @@ import { useUserInfo } from '@/store/userInfoStore';
 import { TreeDataType } from '@arco-design/web-react/es/Tree/interface';
 import { useParams } from '@/utils/url';
 import { validateApiName, validateApiPath } from './compontent/validate';
+import { NoDataCard } from '@ceai-front/arco-material';
 
 enum MetadataType {
   Iceberg = 'iceberg',
@@ -736,6 +738,13 @@ export default function AddApi() {
                 pagination={false}
                 className="min-w-[1000px]"
                 rowKey="name"
+                noDataElement={
+                  <NoDataCard
+                    title="暂无数据"
+                    primaryBtn={<Link onClick={parseParameters}>解析参数</Link>}
+                    isTextButton
+                  />
+                }
               />
             </Form>
           </TabPane>
@@ -755,6 +764,13 @@ export default function AddApi() {
                 pagination={false}
                 className="min-w-[1000px]"
                 rowKey="name"
+                noDataElement={
+                  <NoDataCard
+                    title="暂无数据"
+                    primaryBtn={<Link onClick={parseParameters}>解析参数</Link>}
+                    isTextButton
+                  />
+                }
               />
             </Form>
           </TabPane>

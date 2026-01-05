@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import {
   Button,
   Checkbox,
-  Empty,
   Form,
   Input,
   Message,
@@ -13,6 +12,7 @@ import {
 } from '@arco-design/web-react';
 import styles from './testModal.module.scss';
 import { openDataTestApi } from '@/api/dataApi';
+import { NoDataCard } from '@ceai-front/arco-material';
 
 export default function TestModal(props: {
   visible: boolean;
@@ -223,7 +223,7 @@ export default function TestModal(props: {
               </Tabs>
             </>
           ) : (
-            <Empty description="暂无数据，请先发送请求" />
+            <NoDataCard title="暂无数据，请先发送请求" />
           )}
         </div>
       </div>

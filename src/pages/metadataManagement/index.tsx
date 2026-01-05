@@ -13,11 +13,10 @@ import {
 } from '@arco-design/web-react';
 import { useHistory } from 'react-router';
 import { ColumnProps } from '@arco-design/web-react/es/Table';
-import noDataElement from '@/components/no-data';
+import { NoDataCard } from '@ceai-front/arco-material';
 import { useUserInfo } from '@/store/userInfoStore';
 import { SorterInfo } from '@arco-design/web-react/es/Table/interface';
 import { PermissionWrapper } from '@/components/PermissionGuard';
-import { WORKFLOW_LIST_PERMISSIONS } from '@/config/permissions';
 import ColumnSettingIcon from '@/assets/metadata/column-setting.svg';
 import StorageIcon from '@/assets/metadata/storage.svg';
 import { IconPlus, IconRefresh } from '@arco-design/web-react/icon';
@@ -511,10 +510,7 @@ PROPERTIES (
             columns={columns}
             data={metadataData}
             pagination={false}
-            noDataElement={noDataElement({
-              description: '暂无数据',
-              perms: WORKFLOW_LIST_PERMISSIONS.CREATE
-            })}
+            noDataElement={<NoDataCard title="暂无数据" />}
             rowKey="id"
             loading={loading}
             onChange={(pagination, sorter, filters) =>
