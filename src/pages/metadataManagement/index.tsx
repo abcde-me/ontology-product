@@ -645,7 +645,9 @@ PROPERTIES (
             <Select
               placeholder="请选择数据库"
               className={styles.selectTable}
-              showSearch
+              showSearch={{
+                retainInputValue: true
+              }}
               filterOption={(inputValue, option) =>
                 option.props.children
                   .toLowerCase()
