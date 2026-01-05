@@ -15,7 +15,7 @@ import {
 import { useHistory } from 'react-router';
 import { ColumnProps } from '@arco-design/web-react/es/Table';
 import EllipsisPopover from '@/components/ellipsis-popover-com';
-import noDataElement from '@/components/no-data';
+import { NoDataCard } from '@ceai-front/arco-material';
 import { useUserInfo } from '@/store/userInfoStore';
 import {
   openDataAuthList,
@@ -746,7 +746,7 @@ export default function DataApi() {
         columns={columns}
         data={dataApiData}
         pagination={false}
-        noDataElement={noDataElement({ description: '暂无数据' })}
+        noDataElement={<NoDataCard title="暂无数据" />}
         rowKey="id"
         loading={loading}
         onChange={(pagination, sorter, filters) =>
@@ -918,7 +918,7 @@ export default function DataApi() {
             columns={authorizedColumns}
             data={authorizedData}
             pagination={false}
-            noDataElement={noDataElement({ description: '暂无数据' })}
+            noDataElement={<NoDataCard title="暂无数据" />}
             rowKey="key"
             loading={authorizationLoading}
           />

@@ -246,6 +246,10 @@
   padding: 0;
 }
 
+.datasetTable :global(.arco-table-no-data) {
+  padding: 130px;
+}
+
 /* 表格内链接样式 */
 .datasetNameLink {
   font-weight: 500;

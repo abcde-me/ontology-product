@@ -35,7 +35,7 @@ import {
   IconTag
 } from '@arco-design/web-react/icon';
 import { useHistory } from 'react-router-dom';
-import noDataElement from '@/components/no-data';
+import { NoDataCard } from '@ceai-front/arco-material';
 import {
   getDatasetList,
   createDataset,
@@ -48,7 +48,6 @@ import {
 } from '@/api/datasetManagement';
 import EllipsisPopover from '../../components/ellipsis-popover-com';
 import DatasetForm from '@/components/datasetform/AddDatasetForm';
-import NoDataEmpty from '@/components/NoDataEmpty';
 import styles from './index.module.scss';
 import FormComponent from '@/components/data-catalog-content/components/popups-form';
 // 名称显示组件 - 只有在文本被截断时才显示Tooltip
@@ -1962,7 +1961,7 @@ const DatasetManagement: React.FC = () => {
                 }
                 data={datasetList}
                 rowSelection={rowSelection}
-                noDataElement={noDataElement({ description: '暂无数据' })}
+                noDataElement={<NoDataCard title="暂无数据" />}
                 pagination={{
                   current: currentPage,
                   total: total,
