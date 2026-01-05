@@ -46,6 +46,10 @@
         font-weight: 600;
       }
     }
+
+    :global(.arco-table-no-data) {
+      padding: 130px;
+    }
   }
 
   :global(.arco-pagination-total-text) {

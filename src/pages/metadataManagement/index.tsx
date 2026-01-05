@@ -13,11 +13,10 @@ import {
 } from '@arco-design/web-react';
 import { useHistory } from 'react-router';
 import { ColumnProps } from '@arco-design/web-react/es/Table';
-import noDataElement from '@/components/no-data';
+import { NoDataCard } from '@ceai-front/arco-material';
 import { useUserInfo } from '@/store/userInfoStore';
 import { SorterInfo } from '@arco-design/web-react/es/Table/interface';
 import { PermissionWrapper } from '@/components/PermissionGuard';
-import { WORKFLOW_LIST_PERMISSIONS } from '@/config/permissions';
 import ColumnSettingIcon from '@/assets/metadata/column-setting.svg';
 import StorageIcon from '@/assets/metadata/storage.svg';
 import { IconPlus, IconRefresh } from '@arco-design/web-react/icon';
@@ -78,7 +77,7 @@ export default function MetadataManagement() {
   // 每页展示数据的数据量
   const [pageSize, setPageSize] = useState(10);
   // 总数据量
-  const [total, setTotal] = useState(10);
+  const [total, setTotal] = useState(0);
   // 添加loading状态控制
   const [loading, setLoading] = useState(false);
   // 初始化筛选的值
@@ -196,7 +195,7 @@ export default function MetadataManagement() {
           setMetadataData(res.data.data.list);
           setCurrent(res.data.data?.pageNum);
           setPageSize(res.data.data?.pageSize);
-          setTotal(res.data.data?.total || 10);
+          setTotal(res.data.data?.total || 0);
         }
       } else {
         Message.error(res.message || '获取元数据列表数据失败');
@@ -247,14 +246,14 @@ export default function MetadataManagement() {
       range: [] as RangeFilter[]
     };
     fieldValues.forEach((item) => {
-      if (item.type === 'string') {
-        newSearchValue.filters[item.nameEn] = item.searchContent[0];
-      } else if (item.type === 'datetime') {
+      if (item.type === 'datetime') {
         newSearchValue.range.push({
           field: item.nameEn,
           start: item.searchContent[0].split('_')[0],
           end: item.searchContent[0].split('_')[1]
         });
+      } else {
+        newSearchValue.filters[item.nameEn] = item.searchContent[0];
       }
     });
     setSearchValue(newSearchValue);
@@ -511,10 +510,7 @@ PROPERTIES (
             columns={columns}
             data={metadataData}
             pagination={false}
-            noDataElement={noDataElement({
-              description: '暂无数据',
-              perms: WORKFLOW_LIST_PERMISSIONS.CREATE
-            })}
+            noDataElement={<NoDataCard title="暂无数据" />}
             rowKey="id"
             loading={loading}
             onChange={(pagination, sorter, filters) =>

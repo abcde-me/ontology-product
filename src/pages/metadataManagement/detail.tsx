@@ -18,7 +18,7 @@ import {
 } from '@arco-design/web-react';
 import { useHistory } from 'react-router';
 import { useParams } from '@/utils/url';
-import noDataElement from '@/components/no-data';
+import { NoDataCard } from '@ceai-front/arco-material';
 import {
   listMetadataIcebergData,
   listMetadataIcebergField,
@@ -169,13 +169,40 @@ export default function MetadataManagementDetail() {
   // 获取分区字段
   const getPartitionKey = (partitionKey: string) => {
     if (!partitionKey) return '-';
-    const arr = partitionKey.split(',')?.map((item) => item);
-    if (arr.length >= 3) {
+    const result: string[] = [];
+    let currentSegment = '';
+    let bracketLevel = 0;
+
+    // 遍历字符串切割逻辑
+    for (const char of partitionKey) {
+      if (char === '(') {
+        bracketLevel++;
+        currentSegment += char;
+      } else if (char === ')') {
+        bracketLevel = Math.max(0, bracketLevel - 1);
+        currentSegment += char;
+      } else if (char === ',' && bracketLevel === 0) {
+        const trimmedSegment = currentSegment.trim();
+        if (trimmedSegment) {
+          result.push(trimmedSegment);
+        }
+        currentSegment = '';
+      } else {
+        currentSegment += char;
+      }
+    }
+
+    // 处理最后一个片段
+    const lastTrimmedSegment = currentSegment.trim();
+    if (lastTrimmedSegment) {
+      result.push(lastTrimmedSegment);
+    }
+    if (result.length >= 3) {
       return (
         <div>
-          {arr[0]}, {arr[1]} 等{' '}
+          {result[0]}, {result[1]} 等{' '}
           <Tooltip content={partitionKey}>
-            <span className="text-[#007DFA]">{arr.length}</span>
+            <span className="text-[#007DFA]">{result.length}</span>
           </Tooltip>{' '}
           个
         </div>
@@ -876,7 +903,7 @@ export default function MetadataManagementDetail() {
           >
             元数据管理
           </BreadcrumbItem>
-          <BreadcrumbItem>{metadataId}</BreadcrumbItem>
+          <BreadcrumbItem>{baseInfoData.tableName || '-'}</BreadcrumbItem>
         </Breadcrumb>
       </div>
       <div className={styles.contentBox}>
@@ -980,7 +1007,7 @@ export default function MetadataManagementDetail() {
                   data={fieldData}
                   border={false}
                   pagination={false}
-                  noDataElement={noDataElement({ description: '暂无数据' })}
+                  noDataElement={<NoDataCard title="暂无数据" />}
                   rowKey="id"
                 />
                 {/* 分页 */}
@@ -1038,7 +1065,7 @@ export default function MetadataManagementDetail() {
                   data={partitionData}
                   border={false}
                   pagination={false}
-                  noDataElement={noDataElement({ description: '暂无数据' })}
+                  noDataElement={<NoDataCard title="暂无数据" />}
                   rowKey="id"
                 />
                 {/* 分页 */}
@@ -1071,7 +1098,7 @@ export default function MetadataManagementDetail() {
                   data={previewInfoData}
                   border={false}
                   pagination={false}
-                  noDataElement={noDataElement({ description: '暂无数据' })}
+                  noDataElement={<NoDataCard title="暂无数据" />}
                   rowKey="id"
                   scroll={{ x: true }}
                 />
@@ -1165,7 +1192,7 @@ export default function MetadataManagementDetail() {
                   border={false}
                   pagination={false}
                   rowKey="id"
-                  noDataElement={noDataElement({ description: '暂无数据' })}
+                  noDataElement={<NoDataCard title="暂无数据" />}
                   onChange={(pagination, filters, sorter) => {
                     setMinIoFieldSearchValues({
                       filters: {
@@ -1274,7 +1301,7 @@ export default function MetadataManagementDetail() {
                   data={fieldData}
                   border={false}
                   pagination={false}
-                  noDataElement={noDataElement({ description: '暂无数据' })}
+                  noDataElement={<NoDataCard title="暂无数据" />}
                   rowKey="id"
                 />
                 {/* 分页 */}
@@ -1327,7 +1354,7 @@ export default function MetadataManagementDetail() {
                   columns={milvusPartitionColumns}
                   data={partitionData}
                   border={false}
-                  noDataElement={noDataElement({ description: '暂无数据' })}
+                  noDataElement={<NoDataCard title="暂无数据" />}
                   rowKey="id"
                 />
               </Typography.Paragraph>
@@ -1339,7 +1366,7 @@ export default function MetadataManagementDetail() {
                   columns={previewInfoColumns}
                   data={previewInfoData}
                   border={false}
-                  noDataElement={noDataElement({ description: '暂无数据' })}
+                  noDataElement={<NoDataCard title="暂无数据" />}
                   rowKey="id"
                   scroll={{ x: true }}
                 />

@@ -510,11 +510,13 @@ export const getColumns = (
             if (field.id === 'versioning') {
               return value ? (
                 <div className="flex items-center gap-1">
-                  <CheckCircleFillIcon /> 启用
+                  {/* <CheckCircleFillIcon />  */}
+                  启用
                 </div>
               ) : (
                 <div className="flex items-center gap-1">
-                  <CloseCircleFillIcon /> 关闭
+                  {/* <CloseCircleFillIcon />  */}
+                  关闭
                 </div>
               );
             }
