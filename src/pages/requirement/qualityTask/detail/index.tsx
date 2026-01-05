@@ -437,17 +437,21 @@ function QualityTaskDetail() {
     }
   ];
 
+  const handleBack = () => {
+    history.push(`/tenant/compute/modaforge/qualityTask?qc_round=${qcRound}`);
+  };
+
   return (
     <div className="quality-task-detail">
       {/* 页面头部 */}
       <div className="head-breadcrumb-box">
         <IconArrowLeft
           style={{ cursor: 'pointer', fontSize: '14px', marginRight: 12 }}
-          onClick={() => history.goBack()}
+          onClick={() => handleBack()}
         />
         <Breadcrumb style={{ fontSize: 20 }}>
           <BreadcrumbItem
-            onClick={() => history.goBack()}
+            onClick={() => handleBack()}
             className="breadcrumb-text"
           >
             质检任务
