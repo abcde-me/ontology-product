@@ -18,7 +18,7 @@ import {
 } from '@arco-design/web-react';
 import { useHistory } from 'react-router';
 import { useParams } from '@/utils/url';
-import noDataElement from '@/components/no-data';
+import { NoDataCard } from '@ceai-front/arco-material';
 import {
   listMetadataIcebergData,
   listMetadataIcebergField,
@@ -980,7 +980,7 @@ export default function MetadataManagementDetail() {
                   data={fieldData}
                   border={false}
                   pagination={false}
-                  noDataElement={noDataElement({ description: '暂无数据' })}
+                  noDataElement={<NoDataCard title="暂无数据" />}
                   rowKey="id"
                 />
                 {/* 分页 */}
@@ -1038,7 +1038,7 @@ export default function MetadataManagementDetail() {
                   data={partitionData}
                   border={false}
                   pagination={false}
-                  noDataElement={noDataElement({ description: '暂无数据' })}
+                  noDataElement={<NoDataCard title="暂无数据" />}
                   rowKey="id"
                 />
                 {/* 分页 */}
@@ -1071,7 +1071,7 @@ export default function MetadataManagementDetail() {
                   data={previewInfoData}
                   border={false}
                   pagination={false}
-                  noDataElement={noDataElement({ description: '暂无数据' })}
+                  noDataElement={<NoDataCard title="暂无数据" />}
                   rowKey="id"
                   scroll={{ x: true }}
                 />
@@ -1165,7 +1165,7 @@ export default function MetadataManagementDetail() {
                   border={false}
                   pagination={false}
                   rowKey="id"
-                  noDataElement={noDataElement({ description: '暂无数据' })}
+                  noDataElement={<NoDataCard title="暂无数据" />}
                   onChange={(pagination, filters, sorter) => {
                     setMinIoFieldSearchValues({
                       filters: {
@@ -1274,7 +1274,7 @@ export default function MetadataManagementDetail() {
                   data={fieldData}
                   border={false}
                   pagination={false}
-                  noDataElement={noDataElement({ description: '暂无数据' })}
+                  noDataElement={<NoDataCard title="暂无数据" />}
                   rowKey="id"
                 />
                 {/* 分页 */}
@@ -1327,7 +1327,7 @@ export default function MetadataManagementDetail() {
                   columns={milvusPartitionColumns}
                   data={partitionData}
                   border={false}
-                  noDataElement={noDataElement({ description: '暂无数据' })}
+                  noDataElement={<NoDataCard title="暂无数据" />}
                   rowKey="id"
                 />
               </Typography.Paragraph>
@@ -1339,7 +1339,7 @@ export default function MetadataManagementDetail() {
                   columns={previewInfoColumns}
                   data={previewInfoData}
                   border={false}
-                  noDataElement={noDataElement({ description: '暂无数据' })}
+                  noDataElement={<NoDataCard title="暂无数据" />}
                   rowKey="id"
                   scroll={{ x: true }}
                 />

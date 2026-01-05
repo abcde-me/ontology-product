@@ -8,7 +8,6 @@ import {
   Tabs
 } from '@arco-design/web-react';
 import React, { useEffect, useRef, useState } from 'react';
-import noDataElement from '@/components/no-data';
 import EllipsisPopoverCom from '@/components/ellipsis-popover-com';
 import { IconCopy } from '@arco-design/web-react/icon';
 import { useScrollTo } from '@/hooks/useScrollTo';
@@ -16,6 +15,7 @@ import styles from './viewFileModal.module.scss';
 import { openDataGetApiDoc } from '@/api/dataApi';
 import { useInViewport, useMemoizedFn } from 'ahooks';
 import copy from 'copy-to-clipboard';
+import { NoDataCard } from '@ceai-front/arco-material';
 
 const TabPane = Tabs.TabPane;
 
@@ -271,7 +271,7 @@ export default function ViewFileModal({ visible, onCancel, id }) {
               columns={inputParamsColumns}
               data={viewFileDetailData?.inputParams || []}
               pagination={false}
-              noDataElement={noDataElement({ description: '暂无数据' })}
+              noDataElement={<NoDataCard title="暂无数据" />}
               rowKey="name"
             />
           </div>
@@ -287,7 +287,7 @@ export default function ViewFileModal({ visible, onCancel, id }) {
               columns={outputParamsColumns}
               data={viewFileDetailData?.outputParams || []}
               pagination={false}
-              noDataElement={noDataElement({ description: '暂无数据' })}
+              noDataElement={<NoDataCard title="暂无数据" />}
               rowKey="name"
             />
           </div>
@@ -364,7 +364,7 @@ export default function ViewFileModal({ visible, onCancel, id }) {
               columns={statusCodesColumns}
               data={viewFileDetailData?.statusCode || []}
               pagination={false}
-              noDataElement={noDataElement({ description: '暂无数据' })}
+              noDataElement={<NoDataCard title="暂无数据" />}
               rowKey="key"
             />
           </div>

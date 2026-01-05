@@ -15,7 +15,7 @@ import PolicyForm from '@/components/policy-from/index';
 import EllipsisPopover from '@/components/ellipsis-popover-com';
 import brother from '../brother';
 import MarkdownBase from '@/components/markdownBase';
-import NoDataEmpty from '@/components/no-data';
+import { NoDataCard } from '@ceai-front/arco-material';
 import TagContent from '../tagContent';
 import SegmentDrawer from '@/pages/ragDetail/components/drawers/SegmentDrawer';
 import { useRagDetailStore } from '@/pages/ragDetail/store/ragDetailStore';
@@ -363,7 +363,7 @@ function HitTest(props: { datasetName: string }) {
                 onClick: () => onRowClick(record, index)
               };
             }}
-            noDataElement={<Empty className="mt-[15px]" />}
+            noDataElement={<NoDataCard title="暂无数据" type="block" />}
           />
         </div>
       </div>
@@ -521,7 +521,7 @@ function HitTest(props: { datasetName: string }) {
                 );
               })
             ) : (
-              <NoDataEmpty description="暂无结果" />
+              <NoDataCard title="暂无结果" />
             )}
           </div>
         </div>
