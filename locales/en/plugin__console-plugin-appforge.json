@@ -2745,7 +2745,7 @@
   "workflow.blocks.agent": "Agent",
   "workflow.blocks.loop-start": "循环开始",
   "workflow.blocks.loop": "循环",
-  "workflow.blocks.spark_sql": "SQL开发任务",
+  "workflow.blocks.spark_sql": "SQL开发",
   "workflow.blocks.seatunnel": "数据推送",
   "workflow.blocks.dependent": "外部前置任务",
   "workflow.blocksAbout.start": "定义一个 workflow 流程启动的初始参数",

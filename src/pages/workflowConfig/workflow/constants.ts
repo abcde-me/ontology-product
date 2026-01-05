@@ -37,6 +37,7 @@ import {
   IconLoading
 } from '@arco-design/web-react/icon';
 import DependentNodeDefault from '@/pages/workflowConfig/workflow/nodes/dependent-node/default';
+import { TaskNodeStatus } from '@/types/workflowTaskApi';
 
 type NodesExtraData = {
   author: string;
@@ -723,5 +724,6 @@ export const DEFAULT_RETRY_INTERVAL = 100;
 export const STATUS2COLOR = {
   [TaskStatus.FAILURE]: { color: '#EF4444', icon: IconCloseCircleFill },
   [TaskStatus.RUNNING_EXECUTION]: { color: '#007DFA', icon: IconLoading },
+  [TaskNodeStatus.LOADING]: { color: '#007DFA', icon: IconLoading },
   [TaskStatus.SUCCESS]: { color: '#10B981', icon: IconCheckCircleFill }
 };

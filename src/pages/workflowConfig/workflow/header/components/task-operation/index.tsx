@@ -52,7 +52,7 @@ const AppPublisher = ({
     <>
       <Space className={styles['task-operation']}>
         <Button
-          type="outline"
+          type="default"
           className={styles['toggle-btn']}
           onClick={() => {
             console.log('我进行了操作', isOnline);
@@ -66,7 +66,7 @@ const AppPublisher = ({
         <div>
           <Button
             className={styles['scheduler-btn']}
-            type="outline"
+            type="default"
             disabled={!isOnline}
             onClick={() => setSchedulerDialogVisible(true)}
             icon={isOnline ? <CircleIcon /> : <CircleIconDisabled />}

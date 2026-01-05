@@ -11,13 +11,7 @@ import {
   IconLoading,
   IconRecordStop
 } from '@arco-design/web-react/icon';
-import {
-  Button,
-  Drawer,
-  Message,
-  Tooltip,
-  Typography
-} from '@arco-design/web-react';
+import { Button, Drawer, Message, Tooltip } from '@arco-design/web-react';
 import { useStore as useTaskStore } from '@/pages/workflowConfig/task/store';
 import { useShallow } from 'zustand/react/shallow';
 import { useNodesInteractions } from '@/pages/workflowConfig/workflow/hooks';
@@ -28,6 +22,7 @@ import { TASK_NODE_RUN_STATUS_MAP } from '@/pages/workflowTask/common/constants'
 import { TaskNodeStatus } from '@/types/workflowTaskApi';
 import { nodeIsRunning } from '@/pages/workflowConfig/workflow/nodes/utils';
 import { isNil } from 'lodash-es';
+import { generateLoadingTask } from '@/pages/workflowConfig/workflow/utils';
 
 export default memo(function TestNode(props: {
   id: React.Key;
@@ -39,9 +34,10 @@ export default memo(function TestNode(props: {
   const logSet = useRef<Set<string>>(new Set<string>());
   const startNum = useRef(0);
 
-  const { nodesProcessDetail } = useTaskStore(
+  const { nodesProcessDetail, setNodesProcessDetail } = useTaskStore(
     useShallow((state) => ({
-      nodesProcessDetail: state.nodesProcessDetail
+      nodesProcessDetail: state.nodesProcessDetail,
+      setNodesProcessDetail: state.setNodesProcessDetail
     }))
   );
 
@@ -57,6 +53,7 @@ export default memo(function TestNode(props: {
     cancel
   } = useRequest(
     async () => {
+      if (nodeProcessStatus?.state === TaskNodeStatus.LOADING) return;
       // 无运行状态或者抽屉没打开时不发起请求
       if (!drawerLog || !nodeProcessStatus) {
         cancel();
@@ -111,6 +108,10 @@ export default memo(function TestNode(props: {
 
   useEffect(() => {
     if (!showLog) return;
+    if (nodeProcessStatus?.state === TaskNodeStatus.LOADING) {
+      setDrawerLog(false);
+      return;
+    }
     if (nodeProcessStatus?.state === TaskNodeStatus.SUCCESS) {
       setDrawerLog(true);
     }
@@ -122,6 +123,7 @@ export default memo(function TestNode(props: {
   const { run: operateNode } = useDebounceFn(
     (type: 'test' | 'stop') => {
       if (type === 'test') return startNodeTest();
+      setNodesProcessDetail([generateLoadingTask(props.id)] as any);
       return handleStop();
     },
     { wait: 200 }
@@ -137,12 +139,22 @@ export default memo(function TestNode(props: {
           />
 
           {nodeProcessStatus?.state_name && (
-            <Typography.Text>{nodeProcessStatus.state_name}</Typography.Text>
+            <div
+              className={
+                'font-PingFangSc text-[14px] font-normal leading-[22px] text-default'
+              }
+            >
+              {nodeProcessStatus.state_name}
+            </div>
           )}
           {nodeProcessStatus?.duration && (
-            <Typography.Text>
+            <div
+              className={
+                'font-PingFangSc text-[14px] font-normal leading-[22px] text-[#94A3B8]'
+              }
+            >
               {`(${nodeProcessStatus.duration})`}
-            </Typography.Text>
+            </div>
           )}
           {!isNil(nodeProcessStatus?.id) && (
             <Button
@@ -157,16 +169,22 @@ export default memo(function TestNode(props: {
       )}
       <Tooltip
         content={
-          nodeIsRunning(nodeProcessStatus?.state) ? '暂停测试' : '测试该节点'
+          nodeProcessStatus?.state === TaskNodeStatus.LOADING
+            ? '加载中'
+            : nodeIsRunning(nodeProcessStatus?.state)
+              ? '暂停测试'
+              : '测试该节点'
         }
       >
-        {nodeIsRunning(nodeProcessStatus?.state) ? (
-          <Tooltip content={''}>
-            <IconRecordStop
-              className={`h-4 w-4 ${styles['node-operator']}`}
-              onClick={() => operateNode('stop')}
-            />
-          </Tooltip>
+        {nodeProcessStatus?.state === TaskNodeStatus.LOADING ? (
+          <div style={{ width: 'max-content' }}>
+            <IconLoading className={'h-4 w-4 text-[#007DFA]'} />
+          </div>
+        ) : nodeIsRunning(nodeProcessStatus?.state) ? (
+          <IconRecordStop
+            className={`h-4 w-4 ${styles['node-operator']}`}
+            onClick={() => operateNode('stop')}
+          />
         ) : (
           <IconCaretRight
             className={`h-4 w-4 ${styles['node-operator']}`}

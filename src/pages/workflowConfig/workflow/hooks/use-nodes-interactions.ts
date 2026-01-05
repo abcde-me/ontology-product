@@ -19,7 +19,7 @@ import { isNil, unionBy } from 'lodash-es';
 import type { ToolDefaultValue } from '../block-selector/types';
 import type { Edge, Node, OnNodeAdd } from '../types';
 import { BlockEnum } from '../types';
-import { MAX_NODES_NUM } from '../utils';
+import { generateLoadingTask, MAX_NODES_NUM } from '../utils';
 import { useWorkflowStore } from '../store';
 import {
   CUSTOM_EDGE,
@@ -115,6 +115,7 @@ export const useNodesInteractions = () => {
         false,
         {
           onSuccess(res) {
+            setNodesProcessDetail([generateLoadingTask(node)] as any);
             operateWorkflow({
               op: WorkflowOperation.RUNNING,
               start_node: node,

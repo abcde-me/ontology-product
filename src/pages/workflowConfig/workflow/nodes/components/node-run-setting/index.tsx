@@ -14,15 +14,19 @@ const { Row, Col } = Grid;
 export const NodeRunSetting = () => {
   return (
     <>
-      <Typography.Text bold className={'mb-2'}>
+      <div
+        className={
+          'mb-3 font-PingFangSc text-[14px] font-[600] leading-[22px] text-default'
+        }
+      >
         运行设置
-      </Typography.Text>
-      <FormItem field={'task_priority'} label={'运行优先级'}>
+      </div>
+      <FormItem field={'task_priority'} label={'运行优先级:'}>
         <Radio.Group options={PRIORITY_OPTIONS} />
       </FormItem>
       <Row gutter={12}>
         <Col span={12}>
-          <FormItem field={'fail_retry_times'} label={'失败重试次数'}>
+          <FormItem field={'fail_retry_times'} label={'失败重试次数:'}>
             <InputNumber
               placeholder={'失败重试次数'}
               suffix={'次'}
@@ -31,8 +35,12 @@ export const NodeRunSetting = () => {
             />
           </FormItem>
         </Col>
-        <Col span={12}>
-          <FormItem field={'fail_retry_interval'} label={'失败重试间隔'}>
+        <Col span={12} className={'mb-0'}>
+          <FormItem
+            field={'fail_retry_interval'}
+            label={'失败重试间隔:'}
+            className={'mb-2'}
+          >
             <InputNumber
               placeholder={'失败重试间隔'}
               suffix={'分钟'}

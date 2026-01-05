@@ -5,6 +5,7 @@ import { NodeProps } from '@/pages/workflowConfig/workflow/types';
 import { useStoreApi } from 'reactflow';
 import { useNodesInteractions } from '@/pages/workflowConfig/workflow/hooks';
 import styles from './index.module.scss';
+import { NoDataCard } from '@ceai-front/arco-material';
 
 export const PrevNodes = ({ node }: { node: React.Key }) => {
   const [prevNodes, setPrevNodes] = useState<NodeProps<Record<string, any>>[]>(
@@ -24,9 +25,13 @@ export const PrevNodes = ({ node }: { node: React.Key }) => {
   }, [node, edges]);
   return (
     <>
-      <Typography.Text bold className={'mb-2'}>
+      <div
+        className={
+          'mb-3 font-PingFangSc text-[14px] font-[600] leading-[22px] text-default'
+        }
+      >
         前置任务节点
-      </Typography.Text>
+      </div>
       {!!prevNodes.length ? (
         <>
           {prevNodes.map((node) => {
@@ -34,19 +39,25 @@ export const PrevNodes = ({ node }: { node: React.Key }) => {
             return (
               <div
                 key={node.id}
-                className={`dependent-item mb-2 mt-2 flex items-center gap-3 rounded-[12px] p-4 hover:cursor-pointer ${styles['node-item']}`}
+                className={`dependent-item mb-2 mt-2 flex items-center gap-2 rounded-[12px] p-4 hover:cursor-pointer ${styles['node-item']}`}
                 onClick={() => {
                   handleNodeSelect(node.id);
                 }}
               >
                 <BlockIcon type={type} size={'md'} />
-                <Typography.Text bold>{title}</Typography.Text>
+                <div
+                  className={
+                    'font-PingFangSc text-[12px] font-[600] leading-[18px] text-[#1E293B]'
+                  }
+                >
+                  {title}
+                </div>
               </div>
             );
           })}
         </>
       ) : (
-        <Empty description={'暂无前置任务节点'} />
+        <NoDataCard title={'暂无前置任务节点'} type={'block'} />
       )}
     </>
   );

@@ -4,6 +4,10 @@
     transform: translate(0, -50%);
   }
 
+  .operator {
+    border: 1px solid transparent;
+  }
+
   .relation-and {
     .operator:hover {
       border: 1px solid #007dfa;
@@ -29,9 +33,9 @@
   }
 
   .node-item {
-    border-radius: 4px;
+    border-radius: 8px;
     border: 1px solid #cbd5e1;
-    padding: 8px 16px;
+    padding: 16px;
 
     &:hover {
       border-color: #007dfa !important;
@@ -39,4 +43,12 @@
       background: #eef6ff;
     }
   }
+}
+
+.add-task {
+  border: 1px solid #cbd5e1 !important;
+  color: #1e293b !important;
+  padding: 8px !important;
+  border-radius: 8px;
+  height: auto !important;
 }

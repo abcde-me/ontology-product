@@ -8,3 +8,25 @@
     margin-bottom: 0 !important;
   }
 }
+
+.add-params {
+  border-color: #cbd5e1 !important;
+}
+
+.script-cascader-render {
+  :global(.arco-cascader-list-item) {
+    height: auto !important;
+  }
+
+  :global(.arco-cascader-list-item-label) {
+    height: auto !important;
+  }
+
+  .son-label {
+    line-height: 22px !important;
+  }
+
+  .label-container {
+    padding: 8px 0;
+  }
+}

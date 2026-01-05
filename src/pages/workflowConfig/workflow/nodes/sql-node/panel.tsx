@@ -3,7 +3,7 @@ import {
   Form,
   Input,
   Typography,
-  Cascader
+  Divider
 } from '@arco-design/web-react';
 import React, { useEffect } from 'react';
 import { NodePanelProps } from '@/pages/workflowConfig/workflow/types';
@@ -25,11 +25,13 @@ import {
   pickParamsFromSQL
 } from '@/pages/workflowConfig/utils';
 import styles from './index.module.scss';
+import { NoDataCard } from '@ceai-front/arco-material';
+import { CascaderWithNoData } from '@/components/new-no-data-comps';
 
 const { Item: FormItem, useForm, List: FormList } = Form;
 
 const loadMore = (pathValue: string[]) => {
-  return getSQLVersionInSQLNode(pathValue[0]);
+  return getSQLVersionInSQLNode(+pathValue[0]);
 };
 
 export default React.memo(function SQLPanel(
@@ -43,17 +45,18 @@ export default React.memo(function SQLPanel(
   } = useRequest(
     async () => {
       try {
-        const sqlList = await getSQLListInSQLNode();
         const sql_id = inputs.sql_id?.split('_') || [];
+        const sqlList = await getSQLListInSQLNode(sql_id[0]);
         if (sql_id.length > 1) {
           const sqlId = sql_id[0].toString();
           const sqlVersions = await getSQLVersionInSQLNode(+sqlId);
           sqlList.forEach((sql) => {
-            if (sql.value.toString() === sqlId) {
+            if (sql.value === sqlId) {
               sql.children = sqlVersions;
             }
           });
         }
+        console.log(123, sqlList);
         return sqlList;
       } catch (e) {
         console.error(e);
@@ -80,9 +83,13 @@ export default React.memo(function SQLPanel(
     <div
       className={`${styles['panel-container']} wk-node-panel-content code-panel-content date-cleaning-panel mt-4`}
     >
-      <Typography.Text bold className={'mb-2'}>
-        SQL任务
-      </Typography.Text>
+      <div
+        className={
+          'font-[PingFang SC] mb-2 text-[14px] font-[600] text-[#1E293B]'
+        }
+      >
+        SQL开发
+      </div>
       <Form
         form={form}
         autoComplete="off"
@@ -107,13 +114,52 @@ export default React.memo(function SQLPanel(
           });
         }}
       >
-        <FormItem label={'SQL脚本语句'} field={'sql_id'}>
-          <Cascader
-            className={'w-full'}
+        <FormItem
+          label={
+            <div
+              className={
+                'font-[PingFang SC] text-[14px] font-[400] text-[#1E293B]'
+              }
+            >
+              SQL脚本语句:
+            </div>
+          }
+          field={'sql_id'}
+          className={'mb-2'}
+        >
+          <CascaderWithNoData
+            className={`w-full`}
             disabled={readOnly || loading || props.readonly}
+            notFoundContent={
+              <div className={'flex h-full w-full items-center justify-center'}>
+                <NoDataCard type={'block'} />
+              </div>
+            }
             placeholder="请选择SQL加工脚本"
             style={{ width: 300, marginBottom: 20 }}
             options={allSQL}
+            dropdownMenuClassName={styles['script-cascader-render']}
+            renderOption={(option, level) => {
+              if (level > 0) {
+                return (
+                  <div
+                    className={`font-[PingFang SC] text-[12px] ${styles['label-container']}`}
+                  >
+                    <div className={`text-[#0F172A] ${styles['son-label']}`}>
+                      {option.label}
+                    </div>
+                    {(option as any).script_desc && (
+                      <div
+                        className={`text-[#334155] ${styles['son-label']} w-max-[160px] overflow-hidden text-ellipsis whitespace-nowrap`}
+                      >
+                        {option.script_desc}
+                      </div>
+                    )}
+                  </div>
+                );
+              }
+              return option.label;
+            }}
             onChange={(_, selectedOptions) => {
               const versionData: SQLVersion = selectedOptions?.pop() || {};
               const { script_context = '', script_params = [] } = versionData;
@@ -141,6 +187,7 @@ export default React.memo(function SQLPanel(
               <FormItem field={'raw_script'} dependencies={['sql_id']}>
                 <SqlEditor
                   placeholder={'请在此处编辑或选择SQL加工脚本'}
+                  editorTitle={'SQL脚本语句'}
                   readOnly={readOnly || !!sql_id || props.readonly}
                   className={`${!!sql_id ? 'hover:cursor-not-allowed' : ''}`}
                   onChange={(value) => {
@@ -174,12 +221,13 @@ export default React.memo(function SQLPanel(
                       <div
                         className={'flex w-full items-center justify-between'}
                       >
-                        自定义参数
+                        自定义参数：
                         {!sql_id && (
                           <Button
-                            type={'default'}
                             size={'mini'}
-                            icon={<IconPlus />}
+                            type={'text'}
+                            className={`flex items-center justify-center ${styles['add-params']}`}
+                            icon={<IconPlus className={'text-[#1E293B]'} />}
                             disabled={readOnly || props.readonly}
                             onClick={(e) => {
                               e.stopPropagation();
@@ -191,19 +239,24 @@ export default React.memo(function SQLPanel(
                           />
                         )}
                       </div>
-                      <Form.Item className={'add-field-action'}>
+                      <FormItem className={'add-field-action'}>
                         {!!fields.length &&
                           fields.map((field, index) => (
                             <div key={field.key} className={'flex flex-1'}>
                               <div className={'fields-item flex flex-1 gap-3'}>
                                 <FormItem
+                                  className={'mb-2'}
                                   field={`${field.field}.prop`}
                                   label={
                                     index === 0 ? (
                                       <Form.Item noStyle>
-                                        <Typography.Text bold>
+                                        <div
+                                          className={
+                                            'font-[PingFang SC] text-[12px] font-[600] text-[#1E293B]'
+                                          }
+                                        >
                                           参数名
-                                        </Typography.Text>
+                                        </div>
                                       </Form.Item>
                                     ) : undefined
                                   }
@@ -231,12 +284,17 @@ export default React.memo(function SQLPanel(
                                 </FormItem>
                                 <FormItem
                                   field={`${field.field}.value`}
+                                  className={'mb-2'}
                                   label={
                                     index === 0 ? (
                                       <Form.Item noStyle>
-                                        <Typography.Text bold>
+                                        <div
+                                          className={
+                                            'font-[PingFang SC] text-[12px] font-[600] text-[#1E293B]'
+                                          }
+                                        >
                                           参数值
-                                        </Typography.Text>
+                                        </div>
                                       </Form.Item>
                                     ) : undefined
                                   }
@@ -246,7 +304,7 @@ export default React.memo(function SQLPanel(
                               </div>
                               {!sql_id && (
                                 <FormItem
-                                  className={'w-auto flex-shrink-0'}
+                                  className={'mb-2 w-auto flex-shrink-0'}
                                   label={
                                     index === 0 ? (
                                       <Typography.Text
@@ -262,7 +320,11 @@ export default React.memo(function SQLPanel(
                                     type={'text'}
                                     className={'p-0'}
                                     disabled={readOnly || props.readonly}
-                                    icon={<IconDelete />}
+                                    icon={
+                                      <IconDelete
+                                        className={'text-[#0F172A]'}
+                                      />
+                                    }
                                     onClick={() => {
                                       remove(index);
                                       setTimeout(() => {
@@ -280,7 +342,7 @@ export default React.memo(function SQLPanel(
                               )}
                             </div>
                           ))}
-                      </Form.Item>
+                      </FormItem>
                     </>
                   );
                 }}
@@ -288,7 +350,9 @@ export default React.memo(function SQLPanel(
             );
           }}
         </FormItem>
+        <Divider className={'mb-3 mt-[-4px]'} />
         <NodeRunSetting />
+        <Divider className={'mb-3 mt-0'} />
       </Form>
       <PrevNodes node={props.id} />
     </div>

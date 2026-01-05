@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import styles from '../../index.module.scss';
-import { Button, Checkbox, Typography } from '@arco-design/web-react';
+import { Button, Checkbox } from '@arco-design/web-react';
 import { IconDelete, IconPlus, IconSwap } from '@arco-design/web-react/icon';
 import BlockIcon from '@/pages/workflowConfig/workflow/block-icon';
 import { DependentTaskDialog } from '../../components';
@@ -35,7 +35,7 @@ export const DependentTaskList = (props: IProps) => {
         >
           <div className={'h-full w-1 bg-[#EEF6FF]'} />
           <div
-            className={`${styles['operator']} absolute z-[1] flex h-[30px] w-12 items-center justify-center rounded-[4px] bg-[#EEF6FF]`}
+            className={`${styles['operator']} p- absolute z-[1] flex h-[30px] w-12 items-center justify-center gap-1 rounded-[4px] bg-[#EEF6FF] px-2 py-1`}
             onClick={() => {
               const { relation = DependRelation.AND, list } = value || {};
               changeDependentTask({
@@ -103,12 +103,19 @@ export const DependentTaskList = (props: IProps) => {
                     });
                   }}
                 >
-                  参数传递
+                  <span
+                    className={
+                      'font-PingFangSc text-[12px] font-normal leading-[18px] text-[#0F172A]'
+                    }
+                  >
+                    参数传递
+                  </span>
                 </Checkbox>
               </div>
               <Button
                 type={'text'}
-                icon={<IconDelete />}
+                icon={<IconDelete className={'text-default'} />}
+                style={{ width: 'auto' }}
                 onClick={() => {
                   const { relation, list } = value!;
                   changeDependentTask({
@@ -123,15 +130,15 @@ export const DependentTaskList = (props: IProps) => {
           );
         })}
         <Button
-          type={'default'}
-          className={'w-full'}
-          icon={<IconPlus />}
+          type={'text'}
+          className={`w-full font-PingFangSc text-[14px] font-[600] leading-[22px] ${styles['add-task']}`}
+          icon={<IconPlus className={'text-default'} />}
           disabled={disabled}
           onClick={() => {
             setShowModal(true);
           }}
         >
-          <Typography.Text bold>选择工作流/任务节点</Typography.Text>
+          选择工作流/任务节点
         </Button>
       </div>
       <DependentTaskDialog
