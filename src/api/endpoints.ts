@@ -619,6 +619,8 @@ export const ModaForgeResourceEndpoints = {
     PrefixLabelService + '/ModifyQualityControlTaskComment',
   leDeleteQualityControlTaskComment:
     PrefixLabelService + '/DeleteQualityControlTaskComment',
+  // 任务文件
+  lePreviewTaskFile: PrefixLabelService + '/PreviewTaskFile',
 
   // 获取加工脚本列表
   ListDevelopScriptApi: PrefixAimdp + '/ListDevelopScript',

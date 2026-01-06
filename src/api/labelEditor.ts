@@ -603,3 +603,12 @@ export async function GetFlowListTask(params) {
 export async function GetTaskLatestOperation(params) {
   return await UAPI.RES.getTaskLatestOperation({}).post(params).inRegion().do();
 }
+
+// 任务文件
+export async function GetTaskFile(params) {
+  return await UAPI.RES.lePreviewTaskFile({})
+    .post(params)
+    .withConfig({ responseType: 'blob' })
+    .inRegion()
+    .do({ headers: { 'need-header-data': 'true' } });
+}
