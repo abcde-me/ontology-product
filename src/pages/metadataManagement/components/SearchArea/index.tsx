@@ -358,6 +358,8 @@ export default function SearchArea({
   // 渲染字段搜索输入组件
   const renderFieldInput = (field: ColumnField) => {
     const value = fieldValues[field.id];
+    const valueStart = fieldValues[`${field.id}_start`];
+    const valueEnd = fieldValues[`${field.id}_end`];
     let fieldType = field.type;
     if (isTagsField(field.nameEn)) {
       const tagOptions = (field.values || []).filter(isBaseTagOption);
@@ -515,6 +517,7 @@ export default function SearchArea({
             <InputNumber
               style={{ width: '50%', marginRight: 8 }}
               min={0}
+              value={valueStart}
               onChange={(val) =>
                 handleFieldValueChange(`${field.id}_start`, val)
               }
@@ -523,6 +526,7 @@ export default function SearchArea({
             <InputNumber
               style={{ width: '50%', marginLeft: 8 }}
               min={0}
+              value={valueEnd}
               onChange={(val) => handleFieldValueChange(`${field.id}_end`, val)}
             />
           </Input.Group>
@@ -533,6 +537,7 @@ export default function SearchArea({
             <InputNumber
               style={{ width: '35%', marginRight: 8 }}
               min={0}
+              value={valueStart}
               onChange={(val) =>
                 handleFieldValueChange(`${field.id}_start`, val)
               }
@@ -541,6 +546,7 @@ export default function SearchArea({
             <InputNumber
               style={{ width: '35%', marginLeft: 8 }}
               min={0}
+              value={valueEnd}
               onChange={(val) => handleFieldValueChange(`${field.id}_end`, val)}
             />
             <Select
