@@ -152,13 +152,19 @@ export default memo(function FlowSetting() {
       ) : (
         <div className={'mt-[-8px]'}>
           <div className={'setting-header flex justify-between pb-4 pt-4'}>
-            <Typography.Text bold>工作流配置</Typography.Text>
+            <div
+              className={
+                'font-PingFangSc font-medium leading-6 text-[#1E293B] text-[]'
+              }
+            >
+              工作流配置
+            </div>
             <IconMenuFold
               className={'text-[16px] hover:cursor-pointer'}
               onClick={() => setShow(false)}
             />
           </div>
-          <Divider className={'mb-2 mt-0'} />
+          <Divider className={'mb-4 mt-0'} />
           <Form
             form={form}
             autoComplete={'off'}
@@ -166,12 +172,16 @@ export default memo(function FlowSetting() {
             onChange={onFlowChange}
             disabled={nodesReadOnly}
           >
-            <Typography.Text bold className={'mb-2'}>
+            <div
+              className={
+                'mb-2 font-PingFangSc text-[14px] font-medium leading-[22px]'
+              }
+            >
               基本信息
-            </Typography.Text>
+            </div>
             <Form.Item
               field={'workflow_name'}
-              label={'工作流名称'}
+              label={'工作流名称:'}
               required
               rules={[{ required: true, message: '工作流名称不能为空' }]}
             >
@@ -181,13 +191,17 @@ export default memo(function FlowSetting() {
                 showWordLimit
               />
             </Form.Item>
-            <Form.Item field={'description'} label={'工作流描述'}>
+            <Form.Item field={'description'} label={'工作流描述:'}>
               <Input placeholder={'请输入工作流描述'} />
             </Form.Item>
-            <Divider className={'mb-2 mt-0'} />
-            <Typography.Text bold className={'mb-2'}>
+            <Divider className={'mb-4 mt-0'} />
+            <div
+              className={
+                'mb-2 font-PingFangSc text-[14px] font-medium leading-[22px]'
+              }
+            >
               运行配置
-            </Typography.Text>
+            </div>
             {FORM_RADIO_SCHEMA.flatMap(({ options, message, ...other }) =>
               other.field === 'execution_type' ? (
                 []
@@ -201,16 +215,29 @@ export default memo(function FlowSetting() {
                 </Form.Item>
               )
             )}
-            <Divider className={'mb-2 mt-0'} />
-            <Typography.Text bold className={'mb-2'}>
+            <Divider className={'mb-4 mt-0'} />
+            <div
+              className={
+                'mb-2 font-PingFangSc text-[14px] font-medium leading-[22px]'
+              }
+            >
               全局配置
-            </Typography.Text>
+            </div>
             <Form.Item
               label={'运行策略'}
               field={'execution_type'}
               rules={[{ required: true, message: '请选择运行策略' }]}
             >
-              <Radio.Group options={EXECUTION_TYPE_OPTIONS} />
+              <Radio.Group>
+                <div className={'flex w-full gap-4'}>
+                  <Radio value={'PARALLEL'}>并行运行</Radio>
+                  <Radio value={'SERIAL_WAIT'}>串行等待</Radio>
+                </div>
+                <div className={'flex w-full gap-4'}>
+                  <Radio value={'SERIAL_DISCARD'}>串行抛弃</Radio>
+                  <Radio value={'SERIAL_PRIORITY'}>串行优先</Radio>
+                </div>
+              </Radio.Group>
             </Form.Item>
             <Form.List field={'global_params'}>
               {(fields, { add, remove }) => {
@@ -219,9 +246,10 @@ export default memo(function FlowSetting() {
                     <div className={'flex w-full items-center justify-between'}>
                       全局参数
                       <Button
-                        type={'default'}
+                        type={'text'}
+                        className={`flex items-center justify-center ${styles['add-params']}`}
+                        icon={<IconPlus className={'text-[#1E293B]'} />}
                         size={'mini'}
-                        icon={<IconPlus />}
                         onClick={() => add()}
                         disabled={nodesReadOnly}
                       />
@@ -237,9 +265,13 @@ export default memo(function FlowSetting() {
                                 label={
                                   index === 0 ? (
                                     <Form.Item noStyle>
-                                      <Typography.Text bold>
+                                      <div
+                                        className={
+                                          'font-PingFangSc text-[12px] font-[600] leading-[18px]'
+                                        }
+                                      >
                                         参数名
-                                      </Typography.Text>
+                                      </div>
                                     </Form.Item>
                                   ) : undefined
                                 }
@@ -277,9 +309,13 @@ export default memo(function FlowSetting() {
                                 label={
                                   index === 0 ? (
                                     <Form.Item noStyle>
-                                      <Typography.Text bold>
+                                      <div
+                                        className={
+                                          'font-PingFangSc text-[12px] font-[600] leading-[18px]'
+                                        }
+                                      >
                                         参数值
-                                      </Typography.Text>
+                                      </div>
                                     </Form.Item>
                                   ) : undefined
                                 }
@@ -303,7 +339,9 @@ export default memo(function FlowSetting() {
                               <Button
                                 type={'text'}
                                 className={'p-0'}
-                                icon={<IconDelete />}
+                                icon={
+                                  <IconDelete className={'text-[#0F172A]'} />
+                                }
                                 onClick={() => {
                                   remove(index);
                                   setTimeout(() => {

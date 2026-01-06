@@ -284,7 +284,9 @@ function QualityTaskList() {
       ellipsis: true,
       render: (_, record) => {
         return renderEmptyPlaceholder(record.req_name) !== '-' ? (
-          <EllipsisPopover value={record.req_name} isEdit={false} />
+          <div style={{ fontWeight: 600 }}>
+            <EllipsisPopover value={record.req_name} isEdit={false} />
+          </div>
         ) : (
           <span>-</span>
         );

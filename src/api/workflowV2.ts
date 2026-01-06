@@ -253,7 +253,7 @@ export async function getDifyProversList() {
 }
 
 // SQL列表
-export async function getSQLListInSQLNode() {
+export async function getSQLListInSQLNode(script_id?: string) {
   const res = await UAPI.RES.getSQLListInSQLNode({})
     .post({
       page: 0,
@@ -265,11 +265,14 @@ export async function getSQLListInSQLNode() {
   const list = (res.data?.items || []) as SQLScriptItem[];
   // 工作流名称不为空，脚本被引用，不展示
   return list
-    .filter(({ process_name }) => !process_name)
+    .filter(
+      ({ process_name, script_id }) =>
+        !process_name && script_id.toString() !== (script_id || '')
+    )
     .map(({ script_name, script_id, version, ...other }) => ({
       ...other,
       label: script_name,
-      value: script_id
+      value: script_id.toString()
     }));
 }
 
@@ -286,9 +289,9 @@ export async function getSQLVersionInSQLNode(script_id: React.Key) {
   return ((res.data?.items || []) as SQLVersion[]).map(
     ({ version, version_name, ...other }) => ({
       ...other,
-      value: version,
+      value: version.toString(),
       version_name,
-      label: [version_name, other.script_desc].join('_'),
+      label: version_name,
       isLeaf: true
     })
   );

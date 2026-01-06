@@ -106,6 +106,11 @@ export const TASK_NODE_RUN_STATUS_MAP: Record<
     color: '#007DFA',
     dotColor: '#007DFA'
   },
+  [TaskNodeStatus.LOADING]: {
+    text: TaskNodeStatusNameMap[TaskNodeStatus.RUNNING_EXECUTION],
+    color: '#007DFA',
+    dotColor: '#007DFA'
+  },
   [TaskNodeStatus.PAUSE]: {
     text: TaskNodeStatusNameMap[TaskNodeStatus.PAUSE],
     color: '#94A3B8',

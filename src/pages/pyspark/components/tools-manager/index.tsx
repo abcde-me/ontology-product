@@ -143,6 +143,13 @@ const ToolsManager: React.FC<ToolsManagerProps> = ({
     );
   }, [operatorList]);
 
+  // 计算算子总数
+  const total = useMemo(() => {
+    return operatorList.reduce((sum, category) => {
+      return sum + (category?.op_items?.length || 0);
+    }, 0);
+  }, [operatorList]);
+
   // 构建Tree数据
   const treeData = useMemo(() => {
     return operatorList.map((category, categoryIndex) => ({
@@ -256,7 +263,7 @@ const ToolsManager: React.FC<ToolsManagerProps> = ({
   return (
     <div className="tools-manager sider-container">
       {/* 标题 */}
-      <div className="sider-title">算子库</div>
+      <div className="sider-title">算子库（{total}）</div>
 
       {/* 搜索框 */}
       <div className="mb-2">

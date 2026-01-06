@@ -1,13 +1,13 @@
 import {
-  Position,
   getConnectedEdges,
   getIncomers,
-  getOutgoers
+  getOutgoers,
+  Position
 } from 'reactflow';
 import dagre from '@dagrejs/dagre';
 import { v4 as uuid4 } from 'uuid';
 import { cloneDeep, groupBy, isEqual, uniqBy } from 'lodash-es';
-import type { Edge, Node, ValueSelector } from './types';
+import type { Edge, Node, NodeProcessData, ValueSelector } from './types';
 import { BlockEnum, NodeRunningStatus } from './types';
 import {
   CUSTOM_NODE,
@@ -15,6 +15,7 @@ import {
   START_INITIAL_POSITION
 } from './constants';
 import { markerEnd } from '@/pages/workflowConfig/utils/var';
+import { TaskNodeStatus } from '@/types/workflowTaskApi';
 
 const WHITE = 'WHITE';
 const GRAY = 'GRAY';
@@ -663,6 +664,16 @@ export const isExceptionVariable = () => {
 
 export const flowIsStruct = (nods: Node[]) => {
   return nods.some((node) => node.data.flow_type === 'struct');
+};
+
+export const generateLoadingTask = (
+  task_code: string | number
+): Partial<NodeProcessData> => {
+  return {
+    state: TaskNodeStatus.LOADING,
+    task_code,
+    state_name: '加载中'
+  };
 };
 
 export const MAX_NODES_NUM = 16;

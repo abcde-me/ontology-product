@@ -40,13 +40,15 @@ import {
   IconClockCircle,
   IconCopy,
   IconDown,
-  IconExclamationCircleFill
+  IconExclamationCircleFill,
+  IconSearch
 } from '@arco-design/web-react/icon';
 import { SorterInfo } from '@arco-design/web-react/lib/Table/interface';
 import { openNewPage } from '@/utils/env';
 import { PermissionWrapper } from '@/components/PermissionGuard';
 import copy from 'copy-to-clipboard';
 import { useHasPermission } from '@/hooks';
+import { NoDataCard } from '@ceai-front/arco-material';
 
 const { Row, Col } = Grid;
 
@@ -159,7 +161,6 @@ export function StructuredWorkflowList() {
       title: 'ID',
       dataIndex: 'code',
       width: 180,
-      sorter: true,
       fixed: 'left'
     },
     {
@@ -255,7 +256,7 @@ export function StructuredWorkflowList() {
       }
     },
     {
-      title: '运行时间',
+      title: '运行时间设置',
       dataIndex: 'schedule',
       width: 120,
       render: (value: Schedule) => {
@@ -307,15 +308,24 @@ export function StructuredWorkflowList() {
       title: '操作',
       dataIndex: 'action',
       fixed: 'right',
+      width: 150,
       render: (_, record) => (
-        <div className={'flex gap-2'}>
+        <div className={'flex gap-4'}>
           <PermissionWrapper permission={WORKFLOW_LIST_PERMISSIONS.MODIFY}>
-            <Button type="text" onClick={() => viewDetailWorkflow(record)}>
+            <Button
+              type="text"
+              onClick={() => viewDetailWorkflow(record)}
+              className={'p-0'}
+            >
               详情
             </Button>
           </PermissionWrapper>
           <PermissionWrapper permission={WORKFLOW_LIST_PERMISSIONS.CREATE}>
-            <Button type="text" onClick={() => handleCloneWorkflow(record)}>
+            <Button
+              type="text"
+              onClick={() => handleCloneWorkflow(record)}
+              className={'p-0'}
+            >
               复制
             </Button>
           </PermissionWrapper>
@@ -324,6 +334,7 @@ export function StructuredWorkflowList() {
               type="text"
               onClick={() => handleDelete(record)}
               disabled={record.release_state === 'ONLINE'}
+              className={'p-0'}
             >
               删除
             </Button>
@@ -343,13 +354,17 @@ export function StructuredWorkflowList() {
       className={styles['flow-type-menu']}
     >
       {FLOW_TYPE_INFO.map(({ title, subTitle, type }) => (
-        <Menu.Item key={type} style={{ height: 'auto' }}>
+        <Menu.Item key={type}>
           <div
             className={
-              'h-[30px] text-[14px] font-bold leading-[30px] text-[#0F172A]'
+              'mb-1 h-[22px] text-[14px] font-bold leading-[22px] text-[#0F172A]'
             }
           >{`${title}数据处理`}</div>
-          <div className={'text-[12px] leading-[22px] text-[#334155]'}>
+          <div
+            className={
+              'h-[18px] text-[12px] font-[400] leading-[18px] text-[#334155]'
+            }
+          >
             {`创建用于${subTitle}的工作流`}
           </div>
         </Menu.Item>
@@ -370,7 +385,11 @@ export function StructuredWorkflowList() {
         <Row>
           <Col span={6}>
             <Form.Item field="keywords" className={'w-full'}>
-              <Input placeholder="输入工作流ID或名称进行搜索" allowClear />
+              <Input
+                placeholder="输入工作流ID或名称进行搜索"
+                allowClear
+                suffix={<IconSearch />}
+              />
             </Form.Item>
           </Col>
           <Col span={18}>
@@ -391,12 +410,24 @@ export function StructuredWorkflowList() {
         columns={columns}
         rowKey="id"
         scroll={{ x: 2000 }}
-        noDataElement={noDataElement({
-          description: '暂无工作流',
-          btnText: '创建工作流',
-          perms: WORKFLOW_LIST_PERMISSIONS.CREATE,
-          handleBtn: () => {}
-        })}
+        noDataElement={
+          <div className={'py-[100px]'}>
+            <NoDataCard
+              title={'暂无工作流'}
+              primaryBtn={
+                <PermissionWrapper
+                  permission={WORKFLOW_LIST_PERMISSIONS.CREATE}
+                >
+                  <Dropdown droplist={dropList} trigger="hover" position="br">
+                    <Button type="primary">
+                      创建工作流 <IconDown />
+                    </Button>
+                  </Dropdown>
+                </PermissionWrapper>
+              }
+            />
+          </div>
+        }
         pagination={false}
         border={false}
       />

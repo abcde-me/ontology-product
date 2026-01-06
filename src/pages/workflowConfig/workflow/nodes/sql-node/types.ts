@@ -26,6 +26,7 @@ export interface SQLNodeConfig extends CommonStructNodeType {
   raw_script?: string;
   // 选择的SQL脚本ID
   sql_id: string;
+  script_type?: string;
 }
 
 export interface SQLScriptItem {
