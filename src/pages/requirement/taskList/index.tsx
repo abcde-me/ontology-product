@@ -142,10 +142,9 @@ function TaskList() {
       dataIndex: 'name',
       width: 300,
       ellipsis: true,
-      className: 'hover-change requirement-name',
       render: (_, record) => {
         return (
-          <div style={{ width: 270 }}>
+          <div style={{ width: 270, fontWeight: 600 }}>
             <EllipsisPopoverCom value={record?.name} />
           </div>
         );

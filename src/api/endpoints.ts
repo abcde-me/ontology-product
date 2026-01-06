@@ -602,6 +602,7 @@ export const ModaForgeResourceEndpoints = {
   // 获取开发SQL脚本详情
   getDevelopScriptInfoApi: PrefixAimdp + '/GetDevelopScriptInfo',
 
+  // 标注， 标注工具相关接口
   leGetTask: PrefixLabelService + '/getTask',
   leGetTaskById: PrefixLabelService + '/getTaskById',
   leGetLabels: PrefixLabelService + '/getLabels',
