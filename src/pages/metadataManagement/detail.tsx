@@ -924,7 +924,10 @@ export default function MetadataManagementDetail() {
             元数据管理
           </BreadcrumbItem>
           <BreadcrumbItem>
-            {baseInfoData.tableName || minIOBaseData.bucketName || '-'}
+            {baseInfoData.tableName ||
+              minIOBaseData.bucketName ||
+              baseInfoData.collectionName ||
+              '-'}
           </BreadcrumbItem>
         </Breadcrumb>
       </div>
