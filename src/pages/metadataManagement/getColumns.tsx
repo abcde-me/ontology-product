@@ -79,7 +79,7 @@ const IcebergFields: ColumnField[] = [
     id: 'storageSize',
     nameEn: 'storageSize',
     nameZh: '存储大小',
-    type: 'double',
+    type: 'float',
     isEnumAbleForColumn: true,
     isEnumAble: false,
     enumLoading: false,
@@ -265,7 +265,7 @@ const MinIOFields = [
     id: 'objectsSize',
     nameEn: 'objectsSize',
     nameZh: '存储大小',
-    type: 'double',
+    type: 'float',
     isEnumAbleForColumn: true,
     isEnumAble: false,
     enumLoading: false,
@@ -364,7 +364,7 @@ const MilvusFields = [
     id: 'approxEntityCount',
     nameEn: 'approxEntityCount',
     nameZh: '实体数量',
-    type: 'string',
+    type: 'int',
     isEnumAbleForColumn: true,
     isEnumAble: false,
     enumLoading: false,
@@ -536,7 +536,14 @@ export const getColumns = (
                 />
               );
             }
-            if (field.id === 'policy' || field.id === 'encryption') {
+            if (
+              field.id === 'policy' ||
+              field.id === 'encryption' ||
+              field.id === 'description' ||
+              field.id === 'databaseName' ||
+              field.id === 'distributionColumns' ||
+              field.id === 'partitionKey'
+            ) {
               return <EllipsisPopover value={value} isEdit={false} />;
             }
             if (field.id === 'storageSize' || field.id === 'objectsSize') {

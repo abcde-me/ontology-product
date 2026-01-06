@@ -1,12 +1,12 @@
 .spl-script-management {
   .spl-tabs {
-    :global(.arco-tabs-header-nav) {
-      padding: 0 !important;
-      border-right: 0 !important;
-    }
+    // :global(.arco-tabs-header-nav) {
+    //   padding: 0 !important;
+    //   border-right: 0 !important;
+    // }
 
-    :global(.arco-tabs-content) {
-      overflow: hidden !important;
-    }
+    // :global(.arco-tabs-content) {
+    //   // overflow: hidden !important;
+    // }
   }
 }

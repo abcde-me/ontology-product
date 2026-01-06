@@ -14,7 +14,8 @@ import {
   IconSearch,
   IconDown,
   IconUp,
-  IconSettings
+  IconSettings,
+  IconMinus
 } from '@arco-design/web-react/icon';
 import { ColumnField } from '@/pages/dataAsset/components/ColumnSettingModal';
 import { FieldSearchItem, BaseTag, TagValueItem } from '@/types/dataAssetApi';
@@ -136,21 +137,43 @@ export default function SearchArea({
     const fieldSearch: FieldSearchItem[] = [];
     checkedFields.forEach((fieldKey) => {
       const field = fields.find((f) => f.id === fieldKey);
-      if (
-        field &&
-        fieldValues[fieldKey] !== undefined &&
-        fieldValues[fieldKey] !== null &&
-        fieldValues[fieldKey] !== ''
-      ) {
-        const paramKey = field.id || fieldKey;
-        searchParams[paramKey] = fieldValues[fieldKey];
+      if (field) {
+        if (field.type === 'int') {
+          const newFieldKeyStart = `${fieldKey}_start`;
+          const newFieldKeyEnd = `${fieldKey}_end`;
+          if (
+            fieldValues[newFieldKeyStart] !== undefined &&
+            fieldValues[newFieldKeyStart] !== null &&
+            fieldValues[newFieldKeyStart] !== '' &&
+            fieldValues[newFieldKeyEnd] !== undefined &&
+            fieldValues[newFieldKeyEnd] !== null &&
+            fieldValues[newFieldKeyEnd] !== ''
+          ) {
+            fieldSearch.push({
+              isEnumAble: field.isEnumAble ?? false,
+              nameEn: `${field.id}`,
+              type: field.type,
+              searchContent: [
+                fieldValues[newFieldKeyStart],
+                fieldValues[newFieldKeyEnd]
+              ]
+            });
+          }
+        } else if (
+          fieldValues[fieldKey] !== undefined &&
+          fieldValues[fieldKey] !== null &&
+          fieldValues[fieldKey] !== ''
+        ) {
+          const paramKey = field.id || fieldKey;
+          searchParams[paramKey] = fieldValues[fieldKey];
 
-        fieldSearch.push({
-          isEnumAble: field.isEnumAble ?? false,
-          nameEn: field.id,
-          type: field.type,
-          searchContent: formatSearchContent(field, fieldValues[fieldKey])
-        });
+          fieldSearch.push({
+            isEnumAble: field.isEnumAble ?? false,
+            nameEn: field.id,
+            type: field.type,
+            searchContent: formatSearchContent(field, fieldValues[fieldKey])
+          });
+        }
       }
     });
     onFieldSearch?.(fieldSearch, mainSearch);
@@ -372,6 +395,10 @@ export default function SearchArea({
       fieldType = 'datetime';
     } else if (field.isEnumAble && field.values?.length > 0) {
       fieldType = 'select';
+    } else if (field.type === 'float') {
+      fieldType = 'float';
+    } else if (field.type === 'int') {
+      fieldType = 'int';
     } else {
       fieldType = 'string';
     }
@@ -448,6 +475,22 @@ export default function SearchArea({
             format="YYYY-MM-DD"
             placeholder={['开始时间', '结束时间']}
           />
+        );
+      case 'int':
+        return (
+          <Input.Group className="flex items-center">
+            <Input
+              style={{ width: '50%', marginRight: 8 }}
+              onChange={(val) =>
+                handleFieldValueChange(`${field.id}_start`, val)
+              }
+            />
+            <IconMinus style={{ color: 'var(--color-text-1)' }} />
+            <Input
+              style={{ width: '50%', marginLeft: 8 }}
+              onChange={(val) => handleFieldValueChange(`${field.id}_end`, val)}
+            />
+          </Input.Group>
         );
       default:
         return null;

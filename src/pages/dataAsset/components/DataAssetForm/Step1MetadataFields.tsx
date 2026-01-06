@@ -21,7 +21,7 @@ import {
 } from '@/types/dataAssetApi';
 import { listDataAssetFieldTypes } from '@/api/dataAsset';
 import { ImportType } from '../../types';
-import noDataElement from '@/components/no-data';
+// import noDataElement from '@/components/no-data';
 import {
   RESERVED_FIELD_ENS,
   SYSTEM_FIELDS,
@@ -31,6 +31,7 @@ import {
 } from '../../utils/const';
 import EllipsisPopoverCom from '@/components/ellipsis-popover-com';
 import dayjs from 'dayjs';
+import { NoDataCard } from '@ceai-front/arco-material';
 
 const FormItem = Form.Item;
 
@@ -551,7 +552,11 @@ export default function Step1MetadataFields({
           <div className="mt-[16px] w-full">
             <Table
               scroll={{ x: 'max-content' }}
-              noDataElement={noDataElement({ description: '暂无数据' })}
+              noDataElement={
+                <div className="py-[100px]">
+                  <NoDataCard title="暂无数据" />
+                </div>
+              }
               columns={columns}
               className="w-full"
               data={metadataFields.map((f, idx) => ({

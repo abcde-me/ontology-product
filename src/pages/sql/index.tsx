@@ -35,7 +35,7 @@ const defaultActiveTab = 'script';
 const SqlIndex: React.FC = memo(() => {
   const location = useLocation();
   const { urlState, updateUrlState } = useUrlState();
-  const [activeTab, setActiveTab] = useState<TabKey>();
+  const [activeTab, setActiveTab] = useState<TabKey>(defaultActiveTab);
   const [insertContentFunction, setInsertContentFunction] = useState<
     ((content: string) => void) | null
   >(null);

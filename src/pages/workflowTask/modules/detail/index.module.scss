@@ -1,5 +1,9 @@
 .workflow-task-detail {
   padding: 10px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
 
   :global(.arco-breadcrumb-item) > :global(.arco-icon) {
     color: #000000;

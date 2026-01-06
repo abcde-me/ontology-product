@@ -2,6 +2,11 @@
   background-color: white;
   display: flex;
   flex-direction: column;
+  width: 100%;
+
+  // :global(.arco-table-no-data) {
+  //   padding: 100px;
+  // }
 
   :global(.arco-form-inline .arco-form-item) {
     margin-bottom: 0;

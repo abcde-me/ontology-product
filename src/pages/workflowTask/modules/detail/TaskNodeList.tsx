@@ -44,6 +44,7 @@ import { PermissionWrapper } from '@/components/PermissionGuard';
 import { WORKFLOW_TASK_PERMISSIONS } from '@/config/permissions';
 import classNames from 'classnames';
 import styles from './TaskNodeList.module.scss';
+import { NoDataCard } from '@ceai-front/arco-material';
 
 const { Option } = Select;
 const FormItem = Form.Item;
@@ -362,7 +363,7 @@ const TaskNodeList = forwardRef<TaskNodeListRef, TaskNodeListProps>(
     }, [table.pagination.total, table.pagination.pageSize]);
 
     return (
-      <div className="mt-[16px] rounded-[12px] bg-white p-[16px]">
+      <div className="mt-[16px] flex-1 rounded-[12px] bg-white p-[16px]">
         {/* 表格 */}
         <Table
           scroll={{ x: true }}
@@ -372,7 +373,7 @@ const TaskNodeList = forwardRef<TaskNodeListRef, TaskNodeListProps>(
           pagination={false}
           border={false}
           rowKey="id"
-          noDataElement={noDataElement({ description: '暂无数据' })}
+          noDataElement={<NoDataCard title="暂无数据" />}
           onChange={(pagination, sorter, filters) => {
             table.onChange(pagination, sorter, filters);
           }}

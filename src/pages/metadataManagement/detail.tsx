@@ -243,11 +243,16 @@ export default function MetadataManagementDetail() {
     },
     {
       label: '元数据文件位置',
-      value: <EllipsisPopoverCom value={baseInfoData.storageLocation || '-'} />
+      value: (
+        <EllipsisPopoverCom
+          value={baseInfoData.storageLocation || '-'}
+          preferTypography
+        />
+      )
     },
     {
       label: '所属数据库',
-      value: metadataType || '-'
+      value: baseInfoData.databaseName || metadataType || '-'
     },
     {
       label: '分区字段',
@@ -286,7 +291,7 @@ export default function MetadataManagementDetail() {
     },
     {
       label: '所属数据库',
-      value: metadataType || '-'
+      value: baseInfoData.databaseName || metadataType || '-'
     },
     {
       label: '分桶字段',
@@ -372,7 +377,12 @@ export default function MetadataManagementDetail() {
     },
     {
       label: '访问策略',
-      value: <EllipsisPopoverCom value={minIOBaseData.policy || '-'} />
+      value: (
+        <EllipsisPopoverCom
+          value={minIOBaseData.policy || '-'}
+          preferTypography
+        />
+      )
     },
     {
       label: '加密类型',
@@ -398,7 +408,7 @@ export default function MetadataManagementDetail() {
       key: 'objectKey',
       width: 200,
       render: (text, record) => {
-        return <EllipsisPopoverCom value={text || '-'} />;
+        return <EllipsisPopoverCom value={text || '-'} preferTypography />;
       }
     },
     {
@@ -407,7 +417,9 @@ export default function MetadataManagementDetail() {
       key: 'contentType',
       className: styles.objectType,
       width: 180,
-      render: (text, record) => <EllipsisPopoverCom value={text || '-'} />
+      render: (text, record) => (
+        <EllipsisPopoverCom value={text || '-'} preferTypography />
+      )
     },
     {
       title: '存储类型',
@@ -427,7 +439,9 @@ export default function MetadataManagementDetail() {
       dataIndex: 'objectPath',
       key: 'objectPath',
       width: 300,
-      render: (text, record) => <EllipsisPopoverCom value={text || '-'} />
+      render: (text, record) => (
+        <EllipsisPopoverCom value={text || '-'} preferTypography />
+      )
     },
     {
       title: '元数据更新时间',
@@ -494,11 +508,6 @@ export default function MetadataManagementDetail() {
       dataIndex: 'isKey',
       key: 'isKey',
       render: (text, record) => (text === 'YES' ? '是' : '否')
-    },
-    {
-      title: '字段序号',
-      dataIndex: 'id',
-      key: 'id'
     }
   ];
   // milvus字段信息列
@@ -551,7 +560,9 @@ export default function MetadataManagementDetail() {
       dataIndex: 'partitionName',
       key: 'partitionName',
       width: 500,
-      render: (text, record) => <EllipsisPopoverCom value={text} />
+      render: (text, record) => (
+        <EllipsisPopoverCom value={text} preferTypography />
+      )
     },
     {
       title: '存储大小',
@@ -565,7 +576,9 @@ export default function MetadataManagementDetail() {
       dataIndex: 'filePath',
       key: 'filePath',
       width: 500,
-      render: (text, record) => <EllipsisPopoverCom value={text} />
+      render: (text, record) => (
+        <EllipsisPopoverCom value={text} preferTypography />
+      )
     }
   ];
   // Doris分区信息列
@@ -582,7 +595,9 @@ export default function MetadataManagementDetail() {
       dataIndex: 'partitionName',
       key: 'partitionName',
       width: 500,
-      render: (text, record) => <EllipsisPopoverCom value={text} />
+      render: (text, record) => (
+        <EllipsisPopoverCom value={text} preferTypography />
+      )
     },
     {
       title: '存储大小',
