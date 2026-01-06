@@ -411,19 +411,22 @@ export function StructuredWorkflowList() {
         rowKey="id"
         scroll={{ x: 2000 }}
         noDataElement={
-          <NoDataCard
-            type={'block'}
-            title={'暂无工作流'}
-            primaryBtn={
-              <PermissionWrapper permission={WORKFLOW_LIST_PERMISSIONS.CREATE}>
-                <Dropdown droplist={dropList} trigger="hover" position="br">
-                  <Button type="primary">
-                    创建工作流 <IconDown />
-                  </Button>
-                </Dropdown>
-              </PermissionWrapper>
-            }
-          />
+          <div className={'py-[100px]'}>
+            <NoDataCard
+              title={'暂无工作流'}
+              primaryBtn={
+                <PermissionWrapper
+                  permission={WORKFLOW_LIST_PERMISSIONS.CREATE}
+                >
+                  <Dropdown droplist={dropList} trigger="hover" position="br">
+                    <Button type="primary">
+                      创建工作流 <IconDown />
+                    </Button>
+                  </Dropdown>
+                </PermissionWrapper>
+              }
+            />
+          </div>
         }
         pagination={false}
         border={false}

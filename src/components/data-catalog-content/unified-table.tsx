@@ -208,7 +208,7 @@ const UnifiedTable = forwardRef(
         border={true}
         onRow={getRowProps}
         noDataElement={
-          <div className={'flex h-[40vh] items-center justify-center'}>
+          <div className={'flex h-[40vh] w-full items-center justify-center'}>
             <NoDataCard />
           </div>
         }

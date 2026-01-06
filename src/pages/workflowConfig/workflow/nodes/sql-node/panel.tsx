@@ -3,7 +3,8 @@ import {
   Form,
   Input,
   Typography,
-  Divider
+  Divider,
+  Radio
 } from '@arco-design/web-react';
 import React, { useEffect } from 'react';
 import { NodePanelProps } from '@/pages/workflowConfig/workflow/types';
@@ -70,12 +71,13 @@ export default React.memo(function SQLPanel(
   );
   const [form] = useForm();
   useEffect(() => {
-    const { sql_id, ...otherData } = inputs;
+    const { sql_id, script_type, ...otherData } = inputs;
     if (!allSQL) {
       getSQLList();
     }
     form.setFieldsValue({
       sql_id: sql_id?.split('_'),
+      script_type: script_type || 'select',
       ...otherData
     });
   }, [inputs]);
@@ -99,7 +101,8 @@ export default React.memo(function SQLPanel(
         initialValues={{ ...inputs, sql_id: inputs.sql_id?.split('_') }}
         layout="vertical"
         onValuesChange={(changedValues, v: any) => {
-          if (Object.keys(changedValues).length > 2) return;
+          // 首次批量进行赋值，不触发保存
+          if (Object.keys(changedValues).length >= 5) return;
           const { local_params, sql_id, ...otherValue } = v;
           onValuesChange({
             ...inputs,
@@ -124,65 +127,105 @@ export default React.memo(function SQLPanel(
               SQL脚本语句:
             </div>
           }
-          field={'sql_id'}
-          className={'mb-2'}
+          className={'mb-0'}
         >
-          <CascaderWithNoData
-            className={`w-full`}
-            disabled={readOnly || loading || props.readonly}
-            notFoundContent={
-              <div className={'flex h-full w-full items-center justify-center'}>
-                <NoDataCard type={'block'} />
-              </div>
-            }
-            placeholder="请选择SQL加工脚本"
-            style={{ width: 300, marginBottom: 20 }}
-            options={allSQL}
-            dropdownMenuClassName={styles['script-cascader-render']}
-            renderOption={(option, level) => {
-              if (level > 0) {
-                return (
-                  <div
-                    className={`font-[PingFang SC] text-[12px] ${styles['label-container']}`}
-                  >
-                    <div className={`text-[#0F172A] ${styles['son-label']}`}>
-                      {option.label}
-                    </div>
-                    {(option as any).script_desc && (
-                      <div
-                        className={`text-[#334155] ${styles['son-label']} w-max-[160px] overflow-hidden text-ellipsis whitespace-nowrap`}
-                      >
-                        {option.script_desc}
-                      </div>
-                    )}
-                  </div>
-                );
+          <FormItem field={'script_type'} className={'mb-2'}>
+            <Radio.Group
+              options={[
+                { value: 'select', label: '从已有脚本中选择' },
+                { value: 'custom', label: '手动填写脚本' }
+              ]}
+              onChange={(v) => {
+                form.setFieldsValue({
+                  sql_id: undefined,
+                  raw_script: undefined,
+                  local_params: [],
+                  script_type: v
+                });
+              }}
+            />
+          </FormItem>
+          <FormItem
+            noStyle
+            shouldUpdate={(p, c) => p.script_type !== c.script_type}
+          >
+            {({ script_type }) => {
+              if (script_type === 'custom') {
+                return null;
               }
-              return option.label;
+              return (
+                <FormItem field={'sql_id'} className={'mb-2'}>
+                  <CascaderWithNoData
+                    className={`w-full`}
+                    disabled={readOnly || loading || props.readonly}
+                    notFoundContent={
+                      <div
+                        className={
+                          'flex h-full w-full items-center justify-center'
+                        }
+                      >
+                        <NoDataCard type={'block'} />
+                      </div>
+                    }
+                    placeholder="请选择SQL加工脚本"
+                    style={{ width: 300, marginBottom: 20 }}
+                    options={allSQL}
+                    dropdownMenuClassName={styles['script-cascader-render']}
+                    renderOption={(option, level) => {
+                      if (level > 0) {
+                        return (
+                          <div
+                            className={`font-[PingFang SC] text-[12px] ${styles['label-container']}`}
+                          >
+                            <div
+                              className={`text-[#0F172A] ${styles['son-label']}`}
+                            >
+                              {option.label}
+                            </div>
+                            {(option as any).script_desc && (
+                              <div
+                                className={`text-[#334155] ${styles['son-label']} w-max-[160px] overflow-hidden text-ellipsis whitespace-nowrap`}
+                              >
+                                {option.script_desc}
+                              </div>
+                            )}
+                          </div>
+                        );
+                      }
+                      return option.label;
+                    }}
+                    onChange={(_, selectedOptions) => {
+                      const versionData: SQLVersion =
+                        selectedOptions?.pop() || {};
+                      const { script_context = '', script_params = [] } =
+                        versionData;
+                      form.setFieldsValue({
+                        raw_script: script_context || '',
+                        local_params: script_params.map(
+                          ({ config_key, config_value }) => ({
+                            prop: config_key,
+                            value: config_value
+                          })
+                        )
+                      });
+                    }}
+                    loadMore={loadMore}
+                    showSearch
+                    allowClear
+                  />
+                </FormItem>
+              );
             }}
-            onChange={(_, selectedOptions) => {
-              const versionData: SQLVersion = selectedOptions?.pop() || {};
-              const { script_context = '', script_params = [] } = versionData;
-              form.setFieldsValue({
-                raw_script: script_context || '',
-                local_params: script_params.map(
-                  ({ config_key, config_value }) => ({
-                    prop: config_key,
-                    value: config_value
-                  })
-                )
-              });
-            }}
-            loadMore={loadMore}
-            showSearch
-            allowClear
-          />
+          </FormItem>
         </FormItem>
         <FormItem
           noStyle
           shouldUpdate={(p, c) => p.sql_id?.toString() !== c.sql_id?.toString()}
         >
-          {({ sql_id }, {}) => {
+          {({ sql_id, script_type }, {}) => {
+            if (script_type === 'select' && !sql_id) {
+              return null;
+            }
             return (
               <FormItem field={'raw_script'} dependencies={['sql_id']}>
                 <SqlEditor
@@ -212,7 +255,10 @@ export default React.memo(function SQLPanel(
             );
           }}
         >
-          {({ raw_script, sql_id }, { getFieldValue }) => {
+          {({ raw_script, script_type, sql_id }, { getFieldValue }) => {
+            if (script_type !== 'custom' && !sql_id && !raw_script) {
+              return null;
+            }
             return (
               <FormList field={'local_params'}>
                 {(fields, { add, remove }) => {
@@ -222,22 +268,20 @@ export default React.memo(function SQLPanel(
                         className={'flex w-full items-center justify-between'}
                       >
                         自定义参数：
-                        {!sql_id && (
-                          <Button
-                            size={'mini'}
-                            type={'text'}
-                            className={`flex items-center justify-center ${styles['add-params']}`}
-                            icon={<IconPlus className={'text-[#1E293B]'} />}
-                            disabled={readOnly || props.readonly}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              add({
-                                prop: undefined,
-                                value: undefined
-                              });
-                            }}
-                          />
-                        )}
+                        <Button
+                          size={'mini'}
+                          type={'text'}
+                          className={`flex items-center justify-center ${styles['add-params']}`}
+                          icon={<IconPlus className={'text-[#1E293B]'} />}
+                          disabled={readOnly || props.readonly}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            add({
+                              prop: undefined,
+                              value: undefined
+                            });
+                          }}
+                        />
                       </div>
                       <FormItem className={'add-field-action'}>
                         {!!fields.length &&
@@ -350,7 +394,7 @@ export default React.memo(function SQLPanel(
             );
           }}
         </FormItem>
-        <Divider className={'mb-3 mt-[-4px]'} />
+        <Divider className={'mb-3 mt-2'} />
         <NodeRunSetting />
         <Divider className={'mb-3 mt-0'} />
       </Form>

@@ -1,8 +1,8 @@
 import React, { ReactNode } from 'react';
-import { Button, Empty } from '@arco-design/web-react';
-import emptyList from '@/assets/empty-list.png';
+import { Button } from '@arco-design/web-react';
 import './index.css';
 import { PermissionWrapper } from '../PermissionGuard';
+import { NoDataCard } from '@ceai-front/arco-material';
 
 export default function noDataElement(props: {
   description: string | ReactNode;
@@ -12,31 +12,21 @@ export default function noDataElement(props: {
 }) {
   const { description, btnText, perms, handleBtn } = props;
   return (
-    <Empty
-      className="no-data-container"
-      imgSrc={emptyList}
-      description={
-        btnText ? (
-          <div style={{ display: 'flex', flexDirection: 'column' }}>
-            {typeof description === 'string' ? (
-              <span className="description-text">{description}</span>
-            ) : (
-              description
-            )}
-            <PermissionWrapper permission={perms}>
-              <Button
-                type="primary"
-                style={{ marginTop: '10px' }}
-                onClick={handleBtn}
-              >
-                {btnText}
-              </Button>
-            </PermissionWrapper>
-          </div>
-        ) : typeof description === 'string' ? (
-          <span className="description-text">{description}</span>
+    <NoDataCard
+      title={typeof description === 'string' ? description : undefined}
+      primaryBtn={
+        !btnText ? null : typeof btnText === 'string' ? (
+          <PermissionWrapper permission={perms}>
+            <Button
+              type="primary"
+              style={{ marginTop: '10px' }}
+              onClick={handleBtn}
+            >
+              {btnText}
+            </Button>
+          </PermissionWrapper>
         ) : (
-          description
+          btnText
         )
       }
     />

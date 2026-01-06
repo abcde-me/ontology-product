@@ -15,6 +15,7 @@ const SQLNodeDefault: NodeDefault<SQLNodeConfig> = {
         value: undefined
       }
     ],
+    script_type: 'select',
     raw_script: undefined,
     ...STRUCT_NODE_EXEC_DEFAULT_PARAMS
   },
