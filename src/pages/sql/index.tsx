@@ -329,7 +329,7 @@ const SqlIndex: React.FC = memo(() => {
       ) : (
         <ResizeBox.Split
           direction="horizontal"
-          size={'400px'}
+          size={'380px'}
           min={'300px'}
           max={'600px'}
           style={{ height: '100%' }}

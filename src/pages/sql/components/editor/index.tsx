@@ -3,6 +3,7 @@ import { Tabs, Message, Modal } from '@arco-design/web-react';
 import EditorWorkspace from './EditorWorkspace';
 import NoData from '@/components/no-data';
 import { FileTab } from '../../hooks/useTabManager';
+import EllipsisPopover from '@/components/ellipsis-popover-com';
 import styles from './index.module.scss';
 import { SQL_PERMISSIONS } from '@/config/permissions';
 import { useHasPermission } from '@/store/userInfoStore';
@@ -139,7 +140,12 @@ const EditorContent: React.FC<EditorContentProps> = memo(
             {fileTabs.map((tab) => (
               <TabPane
                 key={tab.key}
-                title={tab.title}
+                title={
+                  <EllipsisPopover
+                    value={tab.title}
+                    className="tab-title-ellipsis"
+                  />
+                }
                 closable={fileTabs.length > 1}
               >
                 {/* 标签页内容为空，实际内容在工作区 */}
@@ -184,7 +190,12 @@ const EditorContent: React.FC<EditorContentProps> = memo(
           {fileTabs.map((tab) => (
             <TabPane
               key={tab.key}
-              title={tab.title}
+              title={
+                <EllipsisPopover
+                  value={tab.title}
+                  className="tab-title-ellipsis"
+                />
+              }
               closable={fileTabs.length > 1}
             >
               {/* 标签页内容为空，实际内容在工作区 */}
