@@ -258,7 +258,9 @@ const TaskNodeList = forwardRef<TaskNodeListRef, TaskNodeListProps>(
                   className="h-2 w-2 rounded-full"
                   style={{ backgroundColor: statusMap.dotColor }}
                 />
-                <span style={{ color: statusMap.color }}>{statusMap.text}</span>
+                <span className="text-var(--color-text-1)">
+                  {statusMap.text}
+                </span>
               </div>
             );
           }
@@ -270,7 +272,11 @@ const TaskNodeList = forwardRef<TaskNodeListRef, TaskNodeListProps>(
           sorter: true,
           sortDirections: ['ascend', 'descend'],
           render: (value: string) => (
-            <EllipsisPopoverCom value={value || '-'} preferTypography />
+            <EllipsisPopoverCom
+              className="w-full"
+              value={value || '-'}
+              preferTypography
+            />
           )
         },
         {

@@ -348,7 +348,7 @@ export default function WorkflowTaskDetail() {
       <div
         className={`my-[16px] rounded-[6px] border-[1px] px-[24px] py-[12px] ${bgColor()}`}
       >
-        <div className="flex justify-between">
+        <div className="flex justify-between gap-[16px]">
           <div className="flex flex-col gap-[8px]">
             <span className="text-[14px] font-[500] leading-[22px] text-[var(--color-text-2)]">
               状态
