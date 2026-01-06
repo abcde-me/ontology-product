@@ -484,7 +484,7 @@ export const getColumns = (
           title: field.nameZh,
           dataIndex: field.nameEn,
           key: field.nameEn,
-          width: 180,
+          width: 200,
           className:
             field.id === 'collectionName' ||
             field.id === 'tableName' ||
