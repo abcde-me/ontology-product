@@ -335,10 +335,6 @@ export default function MetadataManagementDetail() {
       value: baseInfoData.description || '-'
     },
     {
-      label: '存储类型',
-      value: baseInfoData.tableType || '-'
-    },
-    {
       label: '所属数据库',
       value: baseInfoData.dbName || '-'
     },
@@ -924,7 +920,10 @@ export default function MetadataManagementDetail() {
             元数据管理
           </BreadcrumbItem>
           <BreadcrumbItem>
-            {baseInfoData.tableName || minIOBaseData.bucketName || '-'}
+            {baseInfoData.tableName ||
+              minIOBaseData.bucketName ||
+              baseInfoData.collectionName ||
+              '-'}
           </BreadcrumbItem>
         </Breadcrumb>
       </div>
