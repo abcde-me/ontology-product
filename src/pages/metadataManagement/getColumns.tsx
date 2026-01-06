@@ -279,11 +279,20 @@ const MinIOFields = [
     nameZh: '版本控制',
     type: 'boolean',
     isEnumAbleForColumn: true,
-    isEnumAble: false,
+    isEnumAble: true,
     enumLoading: false,
     distinctCount: 0,
     displaySort: 7,
-    values: []
+    values: [
+      {
+        label: '开启',
+        value: 1
+      },
+      {
+        label: '关闭',
+        value: 0
+      }
+    ]
   },
   {
     id: 'policy',
