@@ -63,6 +63,7 @@ export default function useInitFlowTestTask() {
       pollingInterval: 5000,
       ready: !!lastFlowTask,
       pollingWhenHidden: false,
+      refreshDeps: [lastFlowTask],
       onSuccess(res) {
         if (!res.length) return cancel();
         setNodesProcessDetail(res);

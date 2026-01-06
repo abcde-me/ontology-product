@@ -116,6 +116,7 @@ export const pickParamsFromSQL = (content?: string) => {
 };
 
 export const parseLocalParams = (keys: string[], params: LocalParam[] = []) => {
+  if (!keys.length) return params;
   const prevParams = params.reduce<Map<string, LocalParam>>((p, c) => {
     c && p.set(c.prop, c);
     return p;

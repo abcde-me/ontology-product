@@ -1,11 +1,21 @@
 .node-item {
-  border-radius: 4px;
+  border-radius: 8px;
   border: 1px solid #cbd5e1;
-  padding: 8px 16px;
 
   &:hover {
     border-color: #007dfa !important;
     cursor: pointer;
     background: #eef6ff;
+  }
+}
+
+.empty {
+  :global(.arco-empty-description) {
+    margin-top: 8px;
+    font-family: PingFang SC;
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 22px;
+    color: #0f131f;
   }
 }

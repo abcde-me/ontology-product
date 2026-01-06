@@ -23,6 +23,7 @@ export const nodeIsRunning = (state?: TaskNodeStatus) => {
     /** 需要容错 */
     TaskNodeStatus.NEED_FAULT_TOLERANCE,
     /** 延迟执行 */
-    TaskNodeStatus.DELAY_EXECUTION
+    TaskNodeStatus.DELAY_EXECUTION,
+    TaskNodeStatus.LOADING
   ].includes(state);
 };

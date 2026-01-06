@@ -1,14 +1,7 @@
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState
-} from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import {
   Button,
   Checkbox,
-  Empty,
   Form,
   Input,
   Modal,
@@ -34,6 +27,7 @@ import { openNewPage } from '@/utils/env';
 import { useDebounceFn, useRequest } from 'ahooks';
 import { useDependentTaskStore } from '@/pages/workflowConfig/workflow/nodes/dependent-node/components/dependent-task-dialog/store';
 import { DependItem } from '@/pages/workflowConfig/workflow/nodes/dependent-node/types';
+import { NoDataCard } from '@ceai-front/arco-material';
 
 type TaskData = WorkflowDetailRes | NodeProps;
 
@@ -73,12 +67,12 @@ export const TaskItem = (props: IProps) => {
   return (
     <label
       className={cn({
-        [`mb-2 flex items-center gap-2 ${styles['task-item']} overflow-hidden`]: true,
+        [`mb-2 flex items-center gap-4 ${styles['task-item']} overflow-hidden`]: true,
         [styles['task-item-active']]: status !== 'unchecked'
       })}
     >
       <Checkbox
-        className={'mr-2 flex-shrink-0'}
+        className={'flex-shrink-0'}
         checked={status === 'checked'}
         indeterminate={status === 'indeterminate'}
         onChange={(checked) => {
@@ -89,25 +83,35 @@ export const TaskItem = (props: IProps) => {
       <div className={'flex flex-1 items-center gap-2 overflow-hidden'}>
         {/*@ts-ignore*/}
         <BlockIcon type={type} size={'md'} className={'flex-shrink-0'} />
-        <div className={'flex-1 overflow-hidden'}>
+        <div
+          className={
+            'flex-1 overflow-hidden font-PingFangSc text-[14px] leading-[22px]'
+          }
+        >
           <div
-            className={
-              'w-full overflow-hidden text-ellipsis whitespace-nowrap font-medium text-[#1E293B]'
-            }
+            className={'w-full overflow-hidden font-medium text-default'}
             title={taskTitle}
           >
-            {taskTitle}
-          </div>
-          {!!taskDesc && (
             <div
-              className={
-                'w-full overflow-hidden text-ellipsis whitespace-nowrap text-[#94A3B8]'
-              }
-              title={taskDesc}
+              className={`overflow-hidden text-ellipsis whitespace-nowrap ${styles['task-title']}`}
+              onClick={(e) => {
+                if (type !== 'workflow') return;
+                e.stopPropagation();
+                e.preventDefault();
+                onViewNodes!(data as WorkflowDetailRes);
+              }}
             >
-              {taskDesc}
+              {taskTitle}
             </div>
-          )}
+          </div>
+          <div
+            className={
+              'w-full overflow-hidden text-ellipsis whitespace-nowrap text-[#94A3B8]'
+            }
+            title={taskDesc || '暂无描述'}
+          >
+            {taskDesc || '暂无描述'}
+          </div>
         </div>
       </div>
       {type === 'workflow' && (
@@ -307,7 +311,7 @@ export const DependentTaskDialog = (props: {
   }, [selectedTask]);
 
   const renderFlowTask = () => {
-    if (!list?.length) return <Empty />;
+    if (!list?.length) return <NoDataCard type={'block'} />;
     return (list as WorkflowDetailRes[])?.map((item) => (
       <TaskItem
         key={item.ds_workflow_id}
@@ -332,7 +336,7 @@ export const DependentTaskDialog = (props: {
     ));
   };
   const renderNodeTask = () => {
-    if (!flowNodes?.current.length) return <Empty />;
+    if (!flowNodes?.current.length) return <NoDataCard type={'block'} />;
     return flowNodes.current.map((item) => (
       <TaskItem
         key={item.id}
@@ -380,23 +384,21 @@ export const DependentTaskDialog = (props: {
             className={`${styles['left-header']} flex flex-shrink-0 justify-between gap-2`}
           >
             {!!currentFlow && (
-              <div
-                className={
-                  'flex flex-1 items-center gap-2 hover:cursor-pointer'
-                }
-              >
+              <div className={'flex flex-1 items-center gap-2 overflow-hidden'}>
                 <div
                   className={
-                    'flex flex-1 items-center gap-2 hover:cursor-pointer'
+                    'flex flex-1 items-center gap-2 overflow-hidden text-default hover:cursor-pointer'
                   }
-                  onClick={() => {
-                    setCurrentFlow(undefined);
-                  }}
                 >
-                  <IconArrowLeft className={'text-[14px]'} />
+                  <IconArrowLeft
+                    className={'flex-shrink-0'}
+                    onClick={() => {
+                      setCurrentFlow(undefined);
+                    }}
+                  />
                   <div
                     className={
-                      'max-w-[140px] flex-shrink-0 overflow-hidden text-ellipsis whitespace-nowrap font-medium'
+                      'flex-1 overflow-hidden text-ellipsis whitespace-nowrap font-[600] leading-[22px]'
                     }
                     title={currentFlow.workflow_name}
                   >
@@ -404,7 +406,8 @@ export const DependentTaskDialog = (props: {
                   </div>
                 </div>
                 <Button
-                  className={'text-[#1E293B]!'}
+                  className={styles['check-all']}
+                  type={'text'}
                   onClick={() => {
                     isCheckAll ? clearCurrentNodes() : selectAll();
                   }}
@@ -502,7 +505,7 @@ export const DependentTaskDialog = (props: {
                         >
                           {title}
                         </div>
-                        {!!desc && (
+                        {!!desc && task_type !== 'workflow' && (
                           <div
                             className={
                               'mt-1 w-full overflow-hidden text-ellipsis whitespace-nowrap text-[#94A3B8]'
@@ -524,7 +527,7 @@ export const DependentTaskDialog = (props: {
                 );
               })
             ) : (
-              <Empty />
+              <NoDataCard type={'block'} />
             )}
           </div>
         </div>

@@ -357,10 +357,7 @@ const Header = (props: { flowType: string }) => {
 
   return (
     <div
-      className={
-        styles['app-workflow-page-header'] +
-        ' absolute left-0 top-0 z-10 flex h-14 w-full items-center justify-between bg-mask-top2bottom-gray-50-to-transparent px-3'
-      }
+      className={`${styles['app-workflow-page-header']} absolute left-0 top-0 z-10 flex h-14 w-full items-center justify-between bg-mask-top2bottom-gray-50-to-transparent px-3`}
     >
       <div className={styles['left-part']}>
         <div
@@ -399,7 +396,7 @@ const Header = (props: { flowType: string }) => {
                       <div
                         className={styles['edit-icon']}
                         onClick={handleEdit}
-                      ></div>
+                      />
                     </Popover>
                   </PermissionWrapper>
                 )}

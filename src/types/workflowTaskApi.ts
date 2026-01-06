@@ -482,7 +482,9 @@ export enum TaskNodeStatus {
   /** 强制成功 */
   FORCED_SUCCESS = 'FORCED_SUCCESS',
   /** 分配中 */
-  DISPATCH = 'DISPATCH'
+  DISPATCH = 'DISPATCH',
+  /** 加载中，生成运行记录之前的状态 */
+  LOADING = 'LOADING'
 }
 
 export const TaskNodeStatusNameMap = {
@@ -496,7 +498,8 @@ export const TaskNodeStatusNameMap = {
   [TaskNodeStatus.NEED_FAULT_TOLERANCE]: '需要容错',
   [TaskNodeStatus.DELAY_EXECUTION]: '延迟执行',
   [TaskNodeStatus.FORCED_SUCCESS]: '强制成功',
-  [TaskNodeStatus.DISPATCH]: '分配中'
+  [TaskNodeStatus.DISPATCH]: '分配中',
+  [TaskNodeStatus.LOADING]: '加载中'
 } as const;
 
 export interface ListTaskInstanceItem {

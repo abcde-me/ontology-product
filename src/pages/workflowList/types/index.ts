@@ -129,7 +129,7 @@ export const FAILURE_STRATEGY_OPTIONS = [
 // 优先级
 export const PRIORITY_OPTIONS = [
   { label: '最高', value: 'HIGHEST', color: 'red' },
-  { label: '高级', value: 'HIGH', color: 'orangered' },
+  { label: '较高', value: 'HIGH', color: 'orangered' },
   { label: '中等', value: 'MEDIUM', color: 'orange' },
   { label: '较低', value: 'LOW', color: 'green' },
   { label: '最低', value: 'LOWEST', color: 'gray' }
