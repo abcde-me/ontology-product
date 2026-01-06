@@ -1,5 +1,5 @@
 import React, { useState, memo, useEffect, useRef, useCallback } from 'react';
-import { Layout, Tabs, Popover } from '@arco-design/web-react';
+import { Layout, Tabs, Popover, ResizeBox } from '@arco-design/web-react';
 import ScriptManagementIcon from './assets/script-management-left-menu.svg';
 import QueryIcon from './assets/query-menu.svg';
 import DevelopIcon from './assets/develop-menu.svg';
@@ -195,133 +195,147 @@ const SqlIndex: React.FC = memo(() => {
     }
   };
 
-  return (
-    <Layout className={styles['sql-page-layout']}>
-      <Sider width={isDasetTab ? '100%' : 400} className={styles['sql-sider']}>
-        <Tabs
-          activeTab={activeTab}
-          onChange={handleTabChange}
-          direction="vertical"
-          className={styles['sql-tabs']}
-          type="rounded"
-          destroyOnHide
+  const siderContent = (
+    <Sider width="100%" className={styles['sql-sider']}>
+      <Tabs
+        activeTab={activeTab}
+        onChange={handleTabChange}
+        direction="vertical"
+        className={styles['sql-tabs']}
+        type="rounded"
+        destroyOnHide
+      >
+        <TabPane
+          key="script"
+          title={
+            <Popover content="脚本管理" position="left">
+              <ScriptManagementIcon className={styles['sql-menu-icon']} />
+            </Popover>
+          }
         >
+          {activeTab === 'script' && (
+            <SplScriptManagement
+              onToScriptList={handleTabChange}
+              key="script"
+            />
+          )}
+        </TabPane>
+
+        {useHasPermission(SQL_PERMISSIONS.DEVELOP_SCIPT_LIST) && (
           <TabPane
-            key="script"
+            key="files"
             title={
-              <Popover content="脚本管理" position="left">
-                <ScriptManagementIcon className={styles['sql-menu-icon']} />
+              <Popover content="数据加工" position="left">
+                <DevelopIcon className={styles['sql-menu-icon']} />
               </Popover>
             }
           >
-            {activeTab === 'script' && (
-              <SplScriptManagement
-                onToScriptList={handleTabChange}
-                key="script"
+            {activeTab === 'files' && (
+              <FileManager
+                key="files"
+                type="files"
+                ref={developScriptDirectoryTreeRef}
+                onFileOpen={developScriptOpenFile}
+                onFileDelete={developScriptRemoveTabByFileId} // 传递删除文件时关闭标签页的回调
+                onFileRename={developScriptUpdateTabTitle} // 传递重命名文件时更新标签页标题的回调
+                externalSelectedKeys={developScriptFileManagerSelectedKeys}
+                fileTabs={developScriptFileState.fileTabs} // 传递已打开的标签页列表
+                onSwitchTab={developScriptSwitchTab} // 传递切换标签页的回调
               />
             )}
           </TabPane>
+        )}
 
-          {useHasPermission(SQL_PERMISSIONS.DEVELOP_SCIPT_LIST) && (
-            <TabPane
-              key="files"
-              title={
-                <Popover content="数据加工" position="left">
-                  <DevelopIcon className={styles['sql-menu-icon']} />
-                </Popover>
-              }
-            >
-              {activeTab === 'files' && (
-                <FileManager
-                  key="files"
-                  type="files"
-                  ref={developScriptDirectoryTreeRef}
-                  onFileOpen={developScriptOpenFile}
-                  onFileDelete={developScriptRemoveTabByFileId} // 传递删除文件时关闭标签页的回调
-                  onFileRename={developScriptUpdateTabTitle} // 传递重命名文件时更新标签页标题的回调
-                  externalSelectedKeys={developScriptFileManagerSelectedKeys}
-                  fileTabs={developScriptFileState.fileTabs} // 传递已打开的标签页列表
-                  onSwitchTab={developScriptSwitchTab} // 传递切换标签页的回调
-                />
-              )}
-            </TabPane>
-          )}
-
-          {useHasPermission(SQL_PERMISSIONS.QUERY_SCRIPT_LIST) && (
-            <TabPane
-              key="data"
-              title={
-                <Popover content="SQL查询" position="left">
-                  <QueryIcon className={styles['sql-menu-icon']} />
-                </Popover>
-              }
-            >
-              {activeTab === 'data' && (
-                <DataManager
-                  key="data"
-                  onInsertContent={insertContentToEditor}
-                  getIsEditorFocused={() => isEditorFocusedRef.current}
-                />
-              )}
-            </TabPane>
-          )}
-
-          {useHasPermission(SQL_PERMISSIONS.QUERY_SCRIPT_LIST) && (
-            <TabPane
-              key="dataset"
-              title={
-                <Popover content="数据集导出任务" position="left">
-                  <DasetIcon className={styles['sql-menu-icon']} />
-                </Popover>
-              }
-            >
-              {activeTab === 'dataset' && <DatasetsList />}
-            </TabPane>
-          )}
-        </Tabs>
-      </Sider>
-      <Content
-        className={`${styles['sql-content']} ${isDasetTab ? styles.hidden : styles.visible}`}
-      >
-        {activeTab === 'data' && (
-          <EditorContent
-            key={activeTab}
-            fileTabs={fileState.fileTabs}
-            activeTab={fileState.activeTab}
-            curActiveTab={activeTab}
-            onTabChange={switchQueryScriptTab}
-            onAddTab={(newFileInfo?: any) => addQueryScriptTab(newFileInfo)}
-            onRemoveTab={removeTab}
-            onCreate={() =>
-              createQueryScript(generateSqlDefaultName(new Date()))
+        {useHasPermission(SQL_PERMISSIONS.QUERY_SCRIPT_LIST) && (
+          <TabPane
+            key="data"
+            title={
+              <Popover content="SQL查询" position="left">
+                <QueryIcon className={styles['sql-menu-icon']} />
+              </Popover>
             }
-            onActiveUpdate={handleActiveUpdate}
-            onInsertContent={handleInsertContentRegister}
-            onEditorFocusChange={handleEditorFocusChange}
-            onToScriptList={handleTabChange}
-            fileManagerSelectedKeys={fileManagerSelectedKeys}
-          />
+          >
+            {activeTab === 'data' && (
+              <DataManager
+                key="data"
+                onInsertContent={insertContentToEditor}
+                getIsEditorFocused={() => isEditorFocusedRef.current}
+              />
+            )}
+          </TabPane>
         )}
-        {activeTab === 'files' && (
-          <DevelopScriptEditor
-            key={activeTab}
-            fileTabs={developScriptFileState.fileTabs}
-            activeTab={developScriptFileState.activeTab}
-            curActiveTab={activeTab}
-            onTabChange={developScriptSwitchTab}
-            onAddTab={(newFileInfo?: any) => developScriptAddTab(newFileInfo)}
-            onRemoveTab={developScriptRemoveTab}
-            onCreate={developScriptHandleCreate}
-            onActiveUpdate={handleDevelopScriptActiveUpdate}
-            onInsertContent={handleDevelopScriptInsertContentRegister}
-            onEditorFocusChange={handleDevelopScriptEditorFocusChange}
-            refreshDirectory={handleDevelopScriptRefreshDirectory}
-            selectFile={selectDevelopScriptFile}
-            onToScriptList={handleTabChange}
-            onFileOpen={developScriptOpenFile}
-          />
+
+        {useHasPermission(SQL_PERMISSIONS.QUERY_SCRIPT_LIST) && (
+          <TabPane
+            key="dataset"
+            title={
+              <Popover content="数据集导出任务" position="left">
+                <DasetIcon className={styles['sql-menu-icon']} />
+              </Popover>
+            }
+          >
+            {activeTab === 'dataset' && <DatasetsList />}
+          </TabPane>
         )}
-      </Content>
+      </Tabs>
+    </Sider>
+  );
+
+  const contentPanel = (
+    <Content className={styles['sql-content']}>
+      {activeTab === 'data' && (
+        <EditorContent
+          key={activeTab}
+          fileTabs={fileState.fileTabs}
+          activeTab={fileState.activeTab}
+          curActiveTab={activeTab}
+          onTabChange={switchQueryScriptTab}
+          onAddTab={(newFileInfo?: any) => addQueryScriptTab(newFileInfo)}
+          onRemoveTab={removeTab}
+          onCreate={() => createQueryScript(generateSqlDefaultName(new Date()))}
+          onActiveUpdate={handleActiveUpdate}
+          onInsertContent={handleInsertContentRegister}
+          onEditorFocusChange={handleEditorFocusChange}
+          onToScriptList={handleTabChange}
+          fileManagerSelectedKeys={fileManagerSelectedKeys}
+        />
+      )}
+      {activeTab === 'files' && (
+        <DevelopScriptEditor
+          key={activeTab}
+          fileTabs={developScriptFileState.fileTabs}
+          activeTab={developScriptFileState.activeTab}
+          curActiveTab={activeTab}
+          onTabChange={developScriptSwitchTab}
+          onAddTab={(newFileInfo?: any) => developScriptAddTab(newFileInfo)}
+          onRemoveTab={developScriptRemoveTab}
+          onCreate={developScriptHandleCreate}
+          onActiveUpdate={handleDevelopScriptActiveUpdate}
+          onInsertContent={handleDevelopScriptInsertContentRegister}
+          onEditorFocusChange={handleDevelopScriptEditorFocusChange}
+          refreshDirectory={handleDevelopScriptRefreshDirectory}
+          selectFile={selectDevelopScriptFile}
+          onToScriptList={handleTabChange}
+          onFileOpen={developScriptOpenFile}
+        />
+      )}
+    </Content>
+  );
+
+  return (
+    <Layout className={styles['sql-page-layout']}>
+      {isDasetTab ? (
+        siderContent
+      ) : (
+        <ResizeBox.Split
+          direction="horizontal"
+          size={'400px'}
+          min={'300px'}
+          max={'600px'}
+          style={{ height: '100%' }}
+          panes={[siderContent, contentPanel]}
+        />
+      )}
     </Layout>
   );
 });

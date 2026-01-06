@@ -30,7 +30,10 @@
     font-size: 14px;
     font-weight: 500;
     color: var(--color-text-3);
-    max-width: 200px;
+    // max-width: 200px;
+    overflow: hidden;
+    flex: 1;
+    min-width: 0; // 允许 flex 子元素收缩，配合文本溢出使用
     overflow: hidden;
   }
 
@@ -60,6 +63,7 @@
       position: relative;
       align-items: center;
       padding-left: 4px;
+      padding-right: 4px;
 
       &:hover {
         background-color: var(--color-bg-5);
@@ -70,18 +74,19 @@
 
         // hover时不同节点类型的最大宽度
         .sql-source-tree__node-title-db_item {
-          max-width: 64px;
+          // max-width: 64px;
         }
         .sql-source-tree__node-title-table {
-          max-width: 44px;
+          // max-width: 44px;
         }
         .sql-source-tree__node-title-column {
-          max-width: 50px;
+          // max-width: 50px;
         }
 
         .sql-source-tree__node-actions {
-          opacity: 1;
-          visibility: visible;
+          // opacity: 1;
+          // visibility: visible;
+          display: flex;
         }
       }
     }
@@ -102,10 +107,16 @@
       font-size: 14px;
       display: flex;
       align-items: center;
+      flex: 1;
+      min-width: 0; // 允许 flex 子元素收缩，配合文本溢出使用
+      overflow: hidden;
     }
 
     :global(.arco-tree-node-title-text) {
       flex-grow: 1;
+      flex: 1;
+      min-width: 0; // 允许 flex 子元素收缩，配合文本溢出使用
+      overflow: hidden;
     }
     :global(.arco-tree-node-custom-icon) {
       margin-right: 4px;
@@ -127,32 +138,35 @@
       flex: 1;
       color: var(--color-text-2);
       font-size: 14px;
-      max-width: 150px;
+      width: 100%;
+      min-width: 0; // 允许 flex 子元素收缩，配合文本溢出使用
+      overflow: hidden;
+      // max-width: 150px;
 
       // 不同节点类型的最大宽度
-      &-catalog {
-        max-width: 250px;
-      }
-      &-db {
-        max-width: 170px;
-      }
-      &-table {
-        max-width: 130px;
-      }
-      &-column {
-        max-width: 100px;
-      }
+      // &-catalog {
+      //   max-width: 250px;
+      // }
+      // &-db {
+      //   max-width: 170px;
+      // }
+      // &-table {
+      //   max-width: 130px;
+      // }
+      // &-column {
+      //   max-width: 100px;
+      // }
     }
 
     &-actions {
-      display: flex;
+      display: none;
       align-items: center;
-      opacity: 0;
-      visibility: hidden;
-      position: absolute;
-      right: 4px;
-      top: 50%;
-      transform: translateY(-50%);
+      // opacity: 0;
+      // visibility: hidden;
+      // position: absolute;
+      // right: 4px;
+      // top: 50%;
+      // transform: translateY(-50%);
     }
   }
 

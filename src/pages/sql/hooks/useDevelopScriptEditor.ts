@@ -719,8 +719,6 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
       return false;
     }
     const currentContent = scriptInfo?.script_context ?? '';
-    console.log('develop------currentContent', currentContent);
-    console.log('develop------originalContent', originalContent);
     return currentContent !== originalContent;
   }, [scriptInfo?.script_context, scriptInfo?.isSelfEditing, originalContent]);
 
