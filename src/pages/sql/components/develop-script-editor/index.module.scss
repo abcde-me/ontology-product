@@ -24,6 +24,12 @@
     :global(.arco-tabs-content) {
       display: none;
     }
+
+    // 标签页标题样式
+    :global(.tab-title-ellipsis) {
+      max-width: 200px;
+      // display: inline-block;
+    }
   }
 
   :global(.arco-tabs)
