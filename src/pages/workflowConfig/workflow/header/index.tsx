@@ -248,8 +248,8 @@ const Header = (props: { flowType: string }) => {
                 Message.error(workflowRes?.message ?? '上线失败');
               }
             },
-            onError: () => {
-              Message.error('上线失败');
+            onError: (e) => {
+              Message.error(e?.message || '上线失败');
             }
           },
           {

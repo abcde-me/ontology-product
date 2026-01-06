@@ -194,10 +194,11 @@ export const useDependentTaskStore = create<
     });
   },
   selectAll() {
-    const { nodesDataCache, selectNode } = get();
-    nodesDataCache.current.forEach((node) => {
-      selectNode(node);
-    });
+    const { nodesDataCache, selectNode, selectWorkflow, currentFlow } = get();
+    if (!currentFlow) return;
+    if (nodesDataCache.current.length === nodesDataCache.all.length) {
+      selectWorkflow(currentFlow);
+    }
   },
   initDependentTasks(tasks?: DependItem[]) {
     set(() => {
