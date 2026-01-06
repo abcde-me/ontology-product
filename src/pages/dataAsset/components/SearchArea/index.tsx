@@ -293,6 +293,8 @@ export default function SearchArea({
     const value = fieldValues[field.id];
     let fieldType = field.type;
     if (isTagsField(field.nameEn)) {
+      // TODO: 类型错误
+      // @ts-ignore
       const tagOptions = (field.values || []).filter(isBaseTagOption);
 
       // 收集所有可勾选的子节点值
