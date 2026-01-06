@@ -37,6 +37,8 @@ const PythonTabContent: React.FC<NotebookTabContentProps> = ({
     isLoading,
     sqlScriptList,
     selectedKeys,
+    searchValue,
+    setSearchValue,
     generateDefaultName,
     handleSearch,
     handleTreeSelect,
@@ -70,6 +72,8 @@ const PythonTabContent: React.FC<NotebookTabContentProps> = ({
           isLoading={isLoading}
           data={sqlScriptList as TreeNodeItem[]}
           selectedKeys={selectedKeys} // 传递选中状态
+          searchValue={searchValue} // 传递搜索值
+          setSearchValue={setSearchValue} // 传递搜索值设置函数
           generateDefaultName={generateDefaultName}
           onSelect={handleTreeSelect} // 添加文件选择处理
           onCreate={handleCreate}
