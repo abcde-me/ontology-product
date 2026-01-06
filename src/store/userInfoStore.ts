@@ -279,3 +279,25 @@ export const useHasAnyPermission = (permissions: string[]) => {
   if (isAdmin) return true; // 管理员拥有所有权限，直接返回 true
   return permissions.some((perm) => actions && actions.includes(perm));
 };
+
+// 判断是否为超级管理员
+export const useSuperAdmin = () =>
+  useUserInfoStore((state) =>
+    state.userInfo?.roles?.some((role) => role.scope === 'global' && role.admin)
+  );
+
+// 判断是否为组织管理员
+export const useOrganizationAdmin = () =>
+  useUserInfoStore((state) =>
+    state.userInfo?.roles?.some(
+      (role) => role.scope === 'organization' && role.admin
+    )
+  );
+
+// 判断是否为项目管理员
+export const useProjectAdmin = () =>
+  useUserInfoStore((state) =>
+    state.userInfo?.roles?.some(
+      (role) => role.scope === 'project' && role.admin
+    )
+  );
