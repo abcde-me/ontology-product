@@ -53,7 +53,15 @@ export default React.memo(function DependentPanel(
         }}
       >
         <FormItem
-          label={<Typography.Text bold>外部前置任务</Typography.Text>}
+          label={
+            <div
+              className={
+                'font-PingFangSc text-[14px] font-[600] leading-[22px] text-default'
+              }
+            >
+              外部前置任务
+            </div>
+          }
           tooltip={'可在此处配置依赖的外部工作流或者任务节点并设置逻辑关系'}
           field={'depend_item_list'}
         >

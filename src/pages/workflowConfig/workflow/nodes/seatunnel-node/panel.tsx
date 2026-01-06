@@ -1,4 +1,10 @@
-import { Form, Input, Typography, Cascader } from '@arco-design/web-react';
+import {
+  Form,
+  Input,
+  Typography,
+  Cascader,
+  Divider
+} from '@arco-design/web-react';
 import React, { useEffect, useMemo, useRef } from 'react';
 import { NodePanelProps } from '@/pages/workflowConfig/workflow/types';
 import styles from './index.module.scss';
@@ -215,9 +221,11 @@ export default React.memo(function SeatunnelPanel(
     <div
       className={`${styles['panel-container']} wk-node-panel-content code-panel-content date-cleaning-panel mt-4`}
     >
-      <Typography.Text bold className={'mb-2'}>
+      <div
+        className={'mb-3 font-PingFangSc text-[14px] font-[600] leading-[22px]'}
+      >
         来源数据
-      </Typography.Text>
+      </div>
       <Form
         form={form}
         autoComplete="off"
@@ -244,7 +252,7 @@ export default React.memo(function SeatunnelPanel(
         }}
       >
         <FormItem
-          label={'来源表'}
+          label={'来源表:'}
           field={'source_database'}
           required
           rules={[
@@ -283,13 +291,14 @@ export default React.memo(function SeatunnelPanel(
           <FormItem
             field={'query'}
             dependencies={['source_database']}
-            label={'来源数据过滤'}
+            label={'来源数据过滤:'}
             tooltip={'编写带有引用参数的sql语句以增量查询和数据条件过滤'}
           >
             <SqlEditor
               placeholder={
                 '只填写WHERE 后面的过滤条件(含 WHERE关键字)。\n如： WHERE  year = ${year}'
               }
+              editorTitle={'来源数据过滤'}
               readOnly={readOnly || props.readonly}
               onChange={(value) => {
                 form.setFieldsValue({
@@ -321,7 +330,7 @@ export default React.memo(function SeatunnelPanel(
                       <div
                         className={'flex w-full items-center justify-between'}
                       >
-                        自定义参数
+                        自定义参数：
                       </div>
                       <Form.Item className={styles['add-field-action']}>
                         {!!fields.length &&
@@ -333,9 +342,13 @@ export default React.memo(function SeatunnelPanel(
                                   label={
                                     index === 0 ? (
                                       <Form.Item noStyle>
-                                        <Typography.Text bold>
-                                          参数名
-                                        </Typography.Text>
+                                        <div
+                                          className={
+                                            'font-PingFangSc text-[12px] font-[600] leading-[18px]'
+                                          }
+                                        >
+                                          参数名:
+                                        </div>
                                       </Form.Item>
                                     ) : undefined
                                   }
@@ -363,9 +376,13 @@ export default React.memo(function SeatunnelPanel(
                                   label={
                                     index === 0 ? (
                                       <Form.Item noStyle>
-                                        <Typography.Text bold>
-                                          参数值
-                                        </Typography.Text>
+                                        <div
+                                          className={
+                                            'font-PingFangSc text-[12px] font-[600] leading-[18px]'
+                                          }
+                                        >
+                                          参数值:
+                                        </div>
                                       </Form.Item>
                                     ) : undefined
                                   }
@@ -383,9 +400,14 @@ export default React.memo(function SeatunnelPanel(
             );
           }}
         </FormItem>
-        <Typography.Text bold className={'mb-2'}>
+        <Divider className={'mb-4 mt-0'} />
+        <div
+          className={
+            'mb-3 font-PingFangSc text-[14px] font-[600] leading-[22px]'
+          }
+        >
           目标数据
-        </Typography.Text>
+        </div>
         <FormItem
           label={'目标表'}
           field={'target_datasource_id'}
@@ -452,13 +474,16 @@ export default React.memo(function SeatunnelPanel(
                 <FieldSync
                   source={source_database.pop()}
                   target={target_datasource_id}
+                  disabled={readOnly || props.readonly}
                 />
               </FormItem>
             );
           }}
         </FormItem>
+        <Divider className={'mb-4 mt-0'} />
         <NodeRunSetting />
       </Form>
+      <Divider className={'mb-4 mt-0'} />
       <PrevNodes node={props.id} />
     </div>
   );

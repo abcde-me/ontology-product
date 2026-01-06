@@ -7,6 +7,7 @@ import { useDataCatalog } from '../DataCatalogProvider/Context';
 import { DATA_CATALOG_PERMISSIONS } from '@/config/permissions';
 import { PermissionWrapper } from '@/components/PermissionGuard';
 import styles from './index.module.scss';
+import { NoDataCard } from '@ceai-front/arco-material';
 
 const InputSearch = Input.Search;
 
@@ -71,7 +72,9 @@ export default function EditableTree() {
           {generatorTreeNodes(treeData)}
         </Tree>
       ) : (
-        <p className="mt-4 text-center">暂无数据</p>
+        <div className={'flex h-[40vh] items-center justify-center'}>
+          <NoDataCard type={'block'} />
+        </div>
       )}
     </div>
   );

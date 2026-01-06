@@ -86,10 +86,18 @@
 }
 
 .flow-type-menu {
+  border: none !important;
+
   :global(.arco-dropdown-menu-item) {
     &:hover {
       background: #eef6ff !important;
     }
+  }
+
+  :global(.arco-dropdown-menu-item) {
+    padding: 8px 12px !important;
+    height: auto;
+    line-height: unset !important;
   }
 }
 

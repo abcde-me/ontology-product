@@ -2,7 +2,6 @@ import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import {
   Checkbox,
   Empty,
-  Select,
   Table,
   TableColumnProps,
   Tooltip
@@ -20,12 +19,14 @@ import {
   TargetField
 } from '@/pages/workflowConfig/workflow/nodes/seatunnel-node/types';
 import produce from 'immer';
+import { SelectWithNoData } from '@/components/new-no-data-comps';
 
 const FieldSync = (props: {
   value?: SyncFieldValue;
   onChange?: (value: SyncFieldValue) => void;
   source: React.Key;
   target: React.Key[];
+  disabled?: boolean;
 }) => {
   const [tableData, setTableData] = useState<SyncField[]>([]);
 
@@ -142,7 +143,8 @@ const FieldSync = (props: {
       width: 100,
       render: (value, record, index) => {
         return (
-          <Select
+          <SelectWithNoData
+            disabled={props.disabled}
             size={'mini'}
             value={value}
             onChange={(v) => changeField({ ...record, target_field: v }, index)}
@@ -169,6 +171,7 @@ const FieldSync = (props: {
       render: (_, record, index) => (
         <Checkbox
           checked={record.sync}
+          disabled={props.disabled}
           onChange={(checked) =>
             changeField(
               {
@@ -200,7 +203,7 @@ const FieldSync = (props: {
         return (
           <Checkbox
             checked={record.sync && record.primary}
-            disabled={!record.sync}
+            disabled={!record.sync || props.disabled}
             onChange={(checked) =>
               changeField(
                 {
@@ -230,12 +233,24 @@ const FieldSync = (props: {
 };
 export default memo(FieldSync, (prevProps, nextProps) => {
   if ([prevProps, nextProps].some(isNil)) return false;
-  const { source: p_source, target: p_target, value: prev_value } = prevProps;
-  const { source: n_source, target: n_target, value: next_value } = nextProps;
+  const {
+    source: p_source,
+    target: p_target,
+    value: prev_value,
+    disabled: p_d
+  } = prevProps;
+  const {
+    source: n_source,
+    target: n_target,
+    value: next_value,
+    disabled: n_d
+  } = nextProps;
   return (
     isEqual(
       { source: n_source, target: n_target },
       { source: p_source, target: p_target }
-    ) && isEqual(prev_value, next_value)
+    ) &&
+    isEqual(prev_value, next_value) &&
+    p_d === n_d
   );
 });
