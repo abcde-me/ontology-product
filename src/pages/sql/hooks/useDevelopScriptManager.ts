@@ -31,6 +31,7 @@ interface UseFileManagerReturn {
   // 状态
   sqlScriptList: ListDevelopScriptItem[];
   searchValue: string;
+  setSearchValue: (value: string) => void;
   expandedKeys: string[];
   isLoading: boolean;
   selectedKeys: string[];
@@ -78,7 +79,7 @@ export const useDevelopScriptManager = (
   const [sqlScriptList, setSqlScriptList] = useState<ListDevelopScriptItem[]>(
     []
   );
-  const [searchValue] = useState('');
+  const [searchValue, setSearchValue] = useState('');
   const [expandedKeys, setExpandedKeys] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [selectedKeys, setSelectedKeys] = useState<string[]>([]); // 添加选中状态
@@ -95,6 +96,7 @@ export const useDevelopScriptManager = (
         if (isLoading) return [];
 
         setIsLoading(true);
+        setSearchValue(searchValue);
 
         const res = await listDevelopScript({
           script_name: searchValue,
@@ -175,11 +177,10 @@ export const useDevelopScriptManager = (
   const getRawSqlScriptList = useCallback(async () => {
     if (isLoading) return; // 防止重复请求
 
-    console.log('getRawSqlScriptList', isLoading);
-
     setIsLoading(true);
     try {
       const rawSqlScriptListRes = await listDevelopScript({
+        script_name: searchValue,
         page: 1,
         page_size: 1000
       });
@@ -196,7 +197,7 @@ export const useDevelopScriptManager = (
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [searchValue]);
 
   // 创建文件/文件夹
   const handleCreate = useCallback(
@@ -518,6 +519,7 @@ export const useDevelopScriptManager = (
     // 状态
     sqlScriptList,
     searchValue,
+    setSearchValue,
     expandedKeys,
     isLoading,
     selectedKeys,
