@@ -245,7 +245,7 @@ export default function TaskNodeRunList() {
                 className="h-2 w-2 rounded-full"
                 style={{ backgroundColor: statusMap.dotColor }}
               />
-              <span style={{ color: statusMap.color }}>{statusMap.text}</span>
+              <span className="text-var(--color-text-1)">{statusMap.text}</span>
             </div>
           );
         }
