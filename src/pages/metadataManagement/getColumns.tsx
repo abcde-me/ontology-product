@@ -211,8 +211,8 @@ const DorisFields: ColumnField[] = [
     values: []
   },
   {
-    id: 'updateTime',
-    nameEn: 'updateTime',
+    id: 'tableUpdateTime',
+    nameEn: 'tableUpdateTime',
     nameZh: '更新时间',
     type: 'datetime',
     isEnumAbleForColumn: true,
@@ -223,8 +223,8 @@ const DorisFields: ColumnField[] = [
     values: []
   },
   {
-    id: 'createTime',
-    nameEn: 'createTime',
+    id: 'tableCreateTime',
+    nameEn: 'tableCreateTime',
     nameZh: '创建时间',
     type: 'datetime',
     isEnumAbleForColumn: true,
