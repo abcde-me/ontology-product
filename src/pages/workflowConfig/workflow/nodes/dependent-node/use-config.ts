@@ -11,10 +11,14 @@ export default function useConfig(id: string, payload: DependentNodeConfig) {
 
   const handleValueChange = useCallback(
     (value: DependentNodeConfig) => {
-      const newInputs = cloneDeep(inputs);
-      newInputs.fail_retry_interval = value.fail_retry_interval.toString();
-      newInputs.fail_retry_times = value.fail_retry_times.toString();
-      setInputs({ ...newInputs, ...value });
+      let newInputs = cloneDeep(inputs);
+      newInputs = {
+        ...newInputs,
+        ...value,
+        task_priority: newInputs.task_priority.toString(),
+        fail_retry_times: newInputs.fail_retry_times.toString()
+      };
+      setInputs(newInputs);
     },
     [setInputs]
   );

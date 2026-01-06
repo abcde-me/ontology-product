@@ -128,10 +128,10 @@ export const useDependentTaskStore = create<
       if (flowMap.has(flowId)) {
         flowMap.delete(flowId);
       }
+      const nodeId = Number(node.id);
+      nodeMap.set(nodeId, generateNewDependentTasks(node, state.currentFlow));
 
-      nodeMap.set(node.id, generateNewDependentTasks(node, state.currentFlow));
-
-      const isCheckAll = allNodes.every(({ id }) => nodeMap.has(id));
+      const isCheckAll = allNodes.every(({ id }) => nodeMap.has(+id));
 
       if (isCheckAll) {
         flowMap.set(
@@ -139,13 +139,7 @@ export const useDependentTaskStore = create<
           generateNewDependentTasks(state.currentFlow as WorkflowDetailRes)
         );
 
-        allNodes.forEach(({ id }) => nodeMap.delete(id));
-      }
-
-      const set = new Set<React.Key>();
-
-      for (const [key, value] of nodeMap) {
-        set.add(value.parentFlow!);
+        allNodes.forEach(({ id }) => nodeMap.delete(+id));
       }
 
       return {
@@ -167,12 +161,12 @@ export const useDependentTaskStore = create<
         flowMap.delete(flowId);
         state.nodesDataCache.all.forEach((n) => {
           if (n.id.toString() !== nodeId.toString()) {
-            nodeMap.set(n.id, generateNewDependentTasks(n, state.currentFlow));
+            nodeMap.set(+n.id, generateNewDependentTasks(n, state.currentFlow));
           }
         });
       }
 
-      nodeMap.delete(nodeId.toString());
+      nodeMap.delete(+nodeId);
 
       return {
         selectedFlowTask: flowMap,

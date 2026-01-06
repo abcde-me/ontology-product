@@ -19,7 +19,9 @@ export default function useConfig(id: string, payload: SQLNodeConfig) {
       let newInputs = cloneDeep(inputs);
       newInputs = {
         ...newInputs,
-        ...value
+        ...value,
+        task_priority: newInputs.task_priority.toString(),
+        fail_retry_times: newInputs.fail_retry_times.toString()
       };
       setInputs(newInputs);
     },
