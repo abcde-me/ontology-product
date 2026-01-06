@@ -154,7 +154,7 @@ export default memo(function FlowSetting() {
           <div className={'setting-header flex justify-between pb-4 pt-4'}>
             <div
               className={
-                'font-PingFangSc font-medium leading-6 text-[#1E293B] text-[]'
+                'font-PingFangSc text-[16px] font-medium leading-6 text-[#1E293B]'
               }
             >
               工作流配置

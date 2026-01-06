@@ -355,7 +355,7 @@ export const DependentTaskDialog = (props: {
         data={item}
         type={item.data.type}
         status={
-          !!selectedNodeTask.get(item.id) ||
+          !!selectedNodeTask.get(+item.id) ||
           selectedFlowTask.get(currentFlow!.ds_workflow_id)
             ? 'checked'
             : 'unchecked'

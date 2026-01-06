@@ -90,6 +90,7 @@ export const DependentTaskList = (props: IProps) => {
                 <Checkbox
                   className={'flex-shrink-0'}
                   checked={parameterPassing}
+                  disabled={disabled}
                   onChange={(checked) => {
                     const { relation, list } = value!;
                     changeDependentTask({
@@ -116,6 +117,7 @@ export const DependentTaskList = (props: IProps) => {
                 type={'text'}
                 icon={<IconDelete className={'text-default'} />}
                 style={{ width: 'auto' }}
+                disabled={disabled}
                 onClick={() => {
                   const { relation, list } = value!;
                   changeDependentTask({
