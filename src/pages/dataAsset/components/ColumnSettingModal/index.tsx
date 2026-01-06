@@ -30,7 +30,9 @@ export interface ColumnField {
   enumLoading: boolean;
   distinctCount: number; // 枚举数
   displaySort: number;
-  values: Array<string | number | BaseTag>;
+  values: Array<
+    string | number | BaseTag | { label: string; value: string | number }
+  >;
 }
 
 export interface ColumnSettingModalProps {

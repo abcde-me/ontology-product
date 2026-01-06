@@ -20,11 +20,7 @@ import {
 } from '@arco-design/web-react/icon';
 import { ColumnField } from '@/pages/dataAsset/components/ColumnSettingModal';
 import { FieldSearchItem, BaseTag, TagValueItem } from '@/types/dataAssetApi';
-import {
-  isDateType,
-  isDateTimeType,
-  isTagsField
-} from '@/pages/dataAsset/utils/const';
+import { isDateType, isDateTimeType } from '@/pages/dataAsset/utils/const';
 import styles from './index.module.scss';
 import dayjs from 'dayjs';
 import classNames from 'classnames';
@@ -348,11 +344,26 @@ export default function SearchArea({
     return button;
   };
 
-  const isBaseTagOption = (opt: string | number | BaseTag): opt is BaseTag => {
-    if (typeof opt !== 'object' || opt === null) {
-      return false;
-    }
-    return Array.isArray(opt.valueList);
+  // 类型守卫函数：判断是否为目标对象类型
+  const isLabelValueObj = (
+    obj:
+      | string
+      | number
+      | BaseTag
+      | { label: string; value: string | number }
+      | null
+  ): obj is {
+    label: string;
+    value: string | number;
+  } => {
+    return (
+      typeof obj === 'object' &&
+      obj !== null &&
+      'label' in obj &&
+      'value' in obj &&
+      typeof obj.label === 'string' &&
+      (typeof obj.value === 'string' || typeof obj.value === 'number')
+    );
   };
 
   // 渲染字段搜索输入组件
@@ -361,68 +372,6 @@ export default function SearchArea({
     const valueStart = fieldValues[`${field.id}_start`];
     const valueEnd = fieldValues[`${field.id}_end`];
     let fieldType = field.type;
-    if (isTagsField(field.nameEn)) {
-      const tagOptions = (field.values || []).filter(isBaseTagOption);
-      const treeData = tagOptions.map((tag) => ({
-        key: tag.id,
-        value: tag.id,
-        title: tag.name,
-        selectable: false,
-        checkable: false,
-        disableCheckbox: true,
-        children: (tag.valueList || []).map((item: TagValueItem) => ({
-          key: item.id,
-          value: item.tagValue,
-          title: item.tagValue
-        }))
-      }));
-
-      return (
-        <TreeSelect
-          placeholder={`请选择${field.nameZh}`}
-          className={styles['dropdown-select']}
-          value={Array.isArray(value) ? value : []}
-          multiple
-          treeCheckable
-          treeCheckedStrategy="child"
-          treeData={treeData}
-          onChange={(val) => {
-            const nextValue = Array.isArray(val)
-              ? val
-              : val !== undefined && val !== null
-                ? [val]
-                : [];
-            handleFieldValueChange(field.id, nextValue);
-          }}
-          maxTagCount={{
-            count: 2,
-            render: (invisibleTagCount) => {
-              const remainingTags = value.slice(2);
-              return (
-                <Tooltip
-                  content={
-                    <div className="ml-[-4px] flex max-w-[300px] flex-wrap gap-1">
-                      {remainingTags.map((item, i) => (
-                        <Tag
-                          key={i}
-                          className="bg-[#E7ECF0] text-[14px] text-[#0F172A]"
-                          // className={classNames(styles['tag'])}
-                        >
-                          {item}
-                        </Tag>
-                      ))}
-                    </div>
-                  }
-                >
-                  +{invisibleTagCount}
-                </Tooltip>
-              );
-            }
-          }}
-          allowClear
-        />
-      );
-    }
 
     if (isDateType(field.type)) {
       fieldType = 'date';
@@ -453,41 +402,24 @@ export default function SearchArea({
           <Select
             placeholder={`请选择${field.nameZh}`}
             value={value}
-            mode="multiple"
             className={styles['dropdown-select']}
-            maxTagCount={{
-              count: 2,
-              render: (invisibleTagCount) => {
-                const remainingTags = value.slice(2);
-                return (
-                  <Tooltip
-                    content={
-                      <div className="ml-[-4px] flex max-w-[300px] flex-wrap gap-1">
-                        {remainingTags.map((item, i) => (
-                          <Tag
-                            key={i}
-                            className="bg-[#E7ECF0] text-[14px] text-[#0F172A]"
-                            // className={classNames(styles['tag'])}
-                          >
-                            {item}
-                          </Tag>
-                        ))}
-                      </div>
-                    }
-                  >
-                    +{invisibleTagCount}
-                  </Tooltip>
-                );
-              }
-            }}
             onChange={(val) => handleFieldValueChange(field.id, val)}
             allowClear
           >
-            {field.values.map((opt) => (
-              <Select.Option key={String(opt)} value={String(opt)}>
-                {opt}
-              </Select.Option>
-            ))}
+            {field.values.map((opt) => {
+              return isLabelValueObj(opt) ? (
+                <Select.Option
+                  key={String(opt.value)}
+                  value={String(opt.value)}
+                >
+                  {opt.label}
+                </Select.Option>
+              ) : (
+                <Select.Option key={String(opt)} value={String(opt)}>
+                  {opt}
+                </Select.Option>
+              );
+            })}
           </Select>
         );
       case 'datetime':
