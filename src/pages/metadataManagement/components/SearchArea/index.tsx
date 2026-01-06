@@ -8,7 +8,8 @@ import {
   Checkbox,
   Tooltip,
   Tag,
-  TreeSelect
+  TreeSelect,
+  InputNumber
 } from '@arco-design/web-react';
 import {
   IconSearch,
@@ -106,6 +107,8 @@ export default function SearchArea({
   const [settingsVisible, setSettingsVisible] = useState(false);
   // 设置搜索条件的搜索关键词
   const [settingsSearchKeyword, setSettingsSearchKeyword] = useState('');
+  // 设置搜索条件的单位
+  const [sizeUnitValue, setSizeUnitValue] = useState('KB');
 
   useEffect(() => {
     setFieldValues({});
@@ -130,6 +133,20 @@ export default function SearchArea({
     }));
   };
 
+  // 处理浮点数范围
+  const getFloatRange = (start: number, end: number): string[] | number[] => {
+    switch (sizeUnitValue) {
+      case 'KB':
+        return [start, end];
+      case 'MB':
+        return [Number(start) * 1024, Number(end) * 1024];
+      case 'GB':
+        return [Number(start) * 1024 * 1024, Number(end) * 1024 * 1024];
+      default:
+        return [start, end];
+    }
+  };
+
   // 处理查询按钮点击
   const handleQuery = () => {
     // 只传递已勾选字段的值
@@ -138,7 +155,7 @@ export default function SearchArea({
     checkedFields.forEach((fieldKey) => {
       const field = fields.find((f) => f.id === fieldKey);
       if (field) {
-        if (field.type === 'int') {
+        if (field.type === 'int' || field.type === 'float') {
           const newFieldKeyStart = `${fieldKey}_start`;
           const newFieldKeyEnd = `${fieldKey}_end`;
           if (
@@ -153,10 +170,13 @@ export default function SearchArea({
               isEnumAble: field.isEnumAble ?? false,
               nameEn: `${field.id}`,
               type: field.type,
-              searchContent: [
-                fieldValues[newFieldKeyStart],
-                fieldValues[newFieldKeyEnd]
-              ]
+              searchContent:
+                field.type === 'float'
+                  ? getFloatRange(
+                      fieldValues[newFieldKeyStart],
+                      fieldValues[newFieldKeyEnd]
+                    )
+                  : [fieldValues[newFieldKeyStart], fieldValues[newFieldKeyEnd]]
             });
           }
         } else if (
@@ -479,16 +499,47 @@ export default function SearchArea({
       case 'int':
         return (
           <Input.Group className="flex items-center">
-            <Input
+            <InputNumber
               style={{ width: '50%', marginRight: 8 }}
+              min={0}
               onChange={(val) =>
                 handleFieldValueChange(`${field.id}_start`, val)
               }
             />
             <IconMinus style={{ color: 'var(--color-text-1)' }} />
-            <Input
+            <InputNumber
               style={{ width: '50%', marginLeft: 8 }}
+              min={0}
               onChange={(val) => handleFieldValueChange(`${field.id}_end`, val)}
+            />
+          </Input.Group>
+        );
+      case 'float':
+        return (
+          <Input.Group className="flex items-center">
+            <InputNumber
+              style={{ width: '35%', marginRight: 8 }}
+              min={0}
+              onChange={(val) =>
+                handleFieldValueChange(`${field.id}_start`, val)
+              }
+            />
+            <IconMinus style={{ color: 'var(--color-text-1)' }} />
+            <InputNumber
+              style={{ width: '35%', marginLeft: 8 }}
+              min={0}
+              onChange={(val) => handleFieldValueChange(`${field.id}_end`, val)}
+            />
+            <Select
+              style={{ width: '30%', marginLeft: 8 }}
+              defaultValue={sizeUnitValue}
+              value={sizeUnitValue}
+              options={[
+                { label: 'KB', value: 'KB' },
+                { label: 'MB', value: 'MB' },
+                { label: 'GB', value: 'GB' }
+              ]}
+              onChange={(val) => setSizeUnitValue(val)}
             />
           </Input.Group>
         );

@@ -252,7 +252,7 @@ export default function MetadataManagement() {
           start: item.searchContent[0].split('_')[0],
           end: item.searchContent[0].split('_')[1]
         });
-      } else if (item.type === 'int') {
+      } else if (item.type === 'int' || item.type === 'float') {
         newSearchValue.range.push({
           field: item.nameEn,
           start: Number(item.searchContent[0]),
@@ -436,6 +436,10 @@ PROPERTIES (
                 ) || ({} as MetadataMenuItem);
               setUpdateTime(selectMenuItem?.updateTime || '');
               setActiveMetadataId(selectMenuItem?.id || null);
+              setSearchValue({
+                filters: {},
+                range: [] as RangeFilter[]
+              });
               setCurrent(1);
               setPageSize(10);
             }}
