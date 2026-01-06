@@ -22,7 +22,7 @@ import {
   getDevelopScriptLogByVersion,
   listDevelopScript
 } from '@/api/sql-develop';
-import noDataElement from '@/components/no-data';
+import { NoDataCard } from '@ceai-front/arco-material';
 import { ScriptStatus, ListDevelopScriptItem } from '@/types/sqlDevelopApi';
 import VersionStatus from '../version-status';
 // import EllipsisPopover from '@/components/ellipsis-popover-com';
@@ -291,106 +291,108 @@ const ScriptCard: React.FC<ScriptCardProps> = ({
       </div>
       <Spin loading={loading} style={{ width: '100%' }}>
         <div className={styles['script-card-content']}>
-          {scriptCardList?.length > 0
-            ? scriptCardList.map((item) => (
-                <div
-                  key={`${item.script_id}${item.version}`}
-                  className={styles['script-card-content-item']}
-                >
-                  <div className={styles['script-card-content-item-title']}>
+          {scriptCardList?.length > 0 ? (
+            scriptCardList.map((item) => (
+              <div
+                key={`${item.script_id}${item.version}`}
+                className={styles['script-card-content-item']}
+              >
+                <div className={styles['script-card-content-item-title']}>
+                  <div
+                    className={styles['script-card-content-item-title-left']}
+                  >
                     <div
-                      className={styles['script-card-content-item-title-left']}
+                      onClick={() => {
+                        handleToDetail(item.script_id);
+                      }}
                     >
-                      <div
+                      <EllipsisPopover
+                        value={item?.script_name || ''}
+                        // isLink
+                        wrapperClassName={classNames(
+                          styles['script-card-content-item-title-text'],
+                          'cursor-pointer'
+                        )}
+                      />
+                    </div>
+                    <VersionStatus status={item.status} />
+                  </div>
+                  <div
+                    className={classNames(
+                      styles['script-card-content-item-title-right'],
+                      'flex items-center'
+                    )}
+                  >
+                    <PermissionWrapper
+                      permission={SQL_PERMISSIONS.DEVELOP_SCIPT_GET}
+                    >
+                      <Button
+                        type="outline"
+                        className="mx-[8px] flex items-center justify-center"
+                        style={{
+                          height: '24px',
+                          paddingLeft: '12px',
+                          paddingRight: '12px'
+                        }}
+                        icon={<IconDetail className="h-[12px] w-[12px]" />}
                         onClick={() => {
-                          handleToDetail(item.script_id);
+                          setDetailTitle(item?.script_name || '');
+                          setDetailContent(item?.script_context || '');
+                          setDetailVisible(true);
                         }}
                       >
-                        <EllipsisPopover
-                          value={item?.script_name || ''}
-                          // isLink
-                          wrapperClassName={classNames(
-                            styles['script-card-content-item-title-text'],
-                            'cursor-pointer'
-                          )}
-                        />
-                      </div>
-                      <VersionStatus status={item.status} />
-                    </div>
-                    <div
-                      className={classNames(
-                        styles['script-card-content-item-title-right'],
-                        'flex items-center'
-                      )}
+                        详情
+                      </Button>
+                    </PermissionWrapper>
+                    <PermissionWrapper
+                      permission={SQL_PERMISSIONS.DEVELOP_SCIPT_DELETE}
                     >
-                      <PermissionWrapper
-                        permission={SQL_PERMISSIONS.DEVELOP_SCIPT_GET}
+                      <Popover
+                        content={
+                          item?.status === ScriptStatus.Scheduling
+                            ? '调度中的脚本不可删除'
+                            : ''
+                        }
                       >
                         <Button
                           type="outline"
-                          className="mx-[8px] flex items-center justify-center"
                           style={{
-                            height: '24px',
                             paddingLeft: '12px',
-                            paddingRight: '12px'
+                            paddingRight: '12px',
+                            height: '24px'
                           }}
-                          icon={<IconDetail className="h-[12px] w-[12px]" />}
-                          onClick={() => {
-                            setDetailTitle(item?.script_name || '');
-                            setDetailContent(item?.script_context || '');
-                            setDetailVisible(true);
-                          }}
-                        >
-                          详情
-                        </Button>
-                      </PermissionWrapper>
-                      <PermissionWrapper
-                        permission={SQL_PERMISSIONS.DEVELOP_SCIPT_DELETE}
-                      >
-                        <Popover
-                          content={
-                            item?.status === ScriptStatus.Scheduling
-                              ? '调度中的脚本不可删除'
-                              : ''
+                          icon={<IconDelete />}
+                          disabled={item.status === ScriptStatus.Scheduling}
+                          onClick={() =>
+                            deleteScript(item.script_id, item.status)
                           }
                         >
-                          <Button
-                            type="outline"
-                            style={{
-                              paddingLeft: '12px',
-                              paddingRight: '12px',
-                              height: '24px'
-                            }}
-                            icon={<IconDelete />}
-                            disabled={item.status === ScriptStatus.Scheduling}
-                            onClick={() =>
-                              deleteScript(item.script_id, item.status)
-                            }
-                          >
-                            删除
-                          </Button>
-                        </Popover>
-                      </PermissionWrapper>
-                    </div>
-                  </div>
-                  <div className={styles['script-card-content-item-content']}>
-                    <EllipsisPopover
-                      value={highlightSearchKeyword(
-                        item?.script_context || ' ',
-                        searchValue
-                      )}
-                      preferTypography
-                      ellipsis={{ rows: 3, cssEllipsis: true }}
-                      wrapperClassName={
-                        '[&_.arco-typography]:text-[var(--text-color-text-4)]'
-                      }
-                    />
+                          删除
+                        </Button>
+                      </Popover>
+                    </PermissionWrapper>
                   </div>
                 </div>
-              ))
-            : noDataElement({
-                description: '暂无数据'
-              })}
+                <div className={styles['script-card-content-item-content']}>
+                  <EllipsisPopover
+                    value={highlightSearchKeyword(
+                      item?.script_context || ' ',
+                      searchValue
+                    )}
+                    preferTypography
+                    ellipsis={{ rows: 3, cssEllipsis: true }}
+                    wrapperClassName={
+                      '[&_.arco-typography]:text-[var(--text-color-text-4)]'
+                    }
+                  />
+                </div>
+              </div>
+            ))
+          ) : (
+            <div className="w-full py-[100px]">
+              <NoDataCard title="暂无数据" />
+            </div>
+          )}
         </div>
       </Spin>
       {total > pageSize && (

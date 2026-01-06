@@ -25,6 +25,7 @@ import { formatDateTime } from '../utils';
 import { SQL_PERMISSIONS } from '@/config/permissions';
 import RefreshButton from '@/components/refreshButton';
 import { PermissionWrapper } from '@/components/PermissionGuard';
+import { NoDataCard } from '@ceai-front/arco-material';
 
 const FormItem = Form.Item;
 
@@ -319,6 +320,11 @@ const DatasetsList: FC = () => {
         loading={loading}
         rowKey="id"
         onChange={handleTableChange}
+        noDataElement={
+          <div className="py-[100px]">
+            <NoDataCard title="暂无数据" />
+          </div>
+        }
         scroll={{
           // y: 500,
           x: 'max-content'

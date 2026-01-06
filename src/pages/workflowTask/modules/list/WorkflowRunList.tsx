@@ -51,6 +51,7 @@ import { openNewPage } from '@/utils/env';
 import { PermissionWrapper } from '@/components/PermissionGuard';
 import { WORKFLOW_TASK_PERMISSIONS } from '@/config/permissions';
 import { delay } from 'lodash-es';
+import { NoDataCard } from '@ceai-front/arco-material';
 
 const { Option } = Select;
 const FormItem = Form.Item;
@@ -601,7 +602,11 @@ export default function WorkflowRunList() {
         pagination={false}
         border={false}
         rowKey="id"
-        noDataElement={noDataElement({ description: '暂无数据' })}
+        noDataElement={
+          <div className="py-[100px]">
+            <NoDataCard title="暂无数据" />
+          </div>
+        }
         onChange={(pagination, sorter, filters) => {
           table.onChange(pagination, sorter, filters);
         }}

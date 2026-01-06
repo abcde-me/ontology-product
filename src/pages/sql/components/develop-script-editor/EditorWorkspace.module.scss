@@ -41,9 +41,9 @@
       font-size: 14px;
       line-height: 22px;
 
-      .toolbar-right-item {
-        margin-right: 12px;
-      }
+      // .toolbar-right-item {
+      //   margin-right: 12px;
+      // }
 
       .run-status {
         display: flex;
@@ -65,10 +65,10 @@
       }
     }
 
-    .copy-dropdown-container
-      :global(.arco-dropdown-popup-visible .arco-icon-down) {
-      transform: rotate(180deg);
-    }
+    // .copy-dropdown-container
+    //   :global(.arco-dropdown-popup-visible .arco-icon-down) {
+    //   transform: rotate(180deg);
+    // }
   }
 
   // 代码编辑器容器
@@ -186,6 +186,9 @@
 
   .btn-save {
     height: 24px;
+    padding: 0 12px;
+    // 为了处理一个诡异事件，按钮包裹PermissionWrapper时，会出现动画效果，这里禁用掉
+    transition: none !important;
   }
 }
 

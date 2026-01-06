@@ -19,7 +19,7 @@ import {
 } from '@arco-design/web-react';
 import { IconDelete, IconEdit } from '@arco-design/web-react/icon';
 import { useHistory, useLocation } from 'react-router-dom';
-import noDataElement from '@/components/no-data';
+// import noDataElement from '@/components/no-data';
 import DataAssetTableList from '../../components/DataAssetTableList';
 import DataAssetTableCard from '../../components/DataAssetTableCard';
 import SearchArea from '../../components/SearchArea';
@@ -56,6 +56,8 @@ import { PermissionWrapper } from '@/components/PermissionGuard';
 import { DATA_ASSET_PERMISSIONS } from '@/config/permissions';
 import AssetSettingIcon from '../../assets/asset-setting.svg';
 import ColumnSettingIcon from '../../assets/column-setting.svg';
+import { NoDataCard } from '@ceai-front/arco-material';
+import { useHasPermission } from '@/hooks/usePermission';
 
 interface TagValue {
   tagId: string;
@@ -845,6 +847,10 @@ export default function DataAssetList() {
     history.push(`/tenant/compute/modaforge/dataAsset/edit`);
   };
 
+  const hasCreatePermission = useHasPermission(
+    DATA_ASSET_PERMISSIONS.CREATE_TABLE
+  );
+
   // 如果还在加载中，显示空内容（或可以显示loading）
   if (hasMapping === null) {
     return (
@@ -862,12 +868,17 @@ export default function DataAssetList() {
       <div className="h-full w-full py-5 pr-5">
         <div className="box-border h-full w-full rounded-2xl bg-white pb-[20px] pl-[24px] pr-6 pt-[20px]">
           <div className="flex h-full items-center justify-center">
-            {noDataElement({
-              description: '暂无数据资产',
-              btnText: '创建数据资产',
-              perms: DATA_ASSET_PERMISSIONS.CREATE_TABLE,
-              handleBtn: handleCreateDataAsset
-            })}
+            <div className="flex flex-col items-center py-[100px]">
+              <NoDataCard
+                title="暂无数据资产"
+                {...(hasCreatePermission && {
+                  primaryBtnProps: {
+                    text: '新建数据资产',
+                    onClick: handleCreateDataAsset
+                  }
+                })}
+              />
+            </div>
           </div>
         </div>
       </div>

@@ -6,6 +6,7 @@ import ArrowRightIcon from '../../assets/arrow-right-icon.svg';
 import { ScriptParam } from '@/types/sqlDevelopApi';
 import { useLocalParams } from '@/hooks/useLocalParams';
 import { SQL_PARAM_PLACEHOLDER_REGEX } from '../../constant';
+import { NoDataCard } from '@ceai-front/arco-material';
 
 // 扩展 ScriptParam 以支持内部排序
 type ParameterWithOrder = ScriptParam & { _order?: number };
@@ -129,7 +130,10 @@ const ParameterSidebar: React.FC<ParameterSidebarProps> = memo(
           /* 收起状态：显示图标，hover 时显示完整信息 */
           <div className="mt-[8px] h-[32px] w-[32px] cursor-pointer">
             <Popover content="打开引用参数列表" position="left">
-              <ParameterIcon onClick={() => setIsCollapsed(false)} />
+              <ParameterIcon
+                className="hover:text-[rgba(var(--primary-7))]"
+                onClick={() => setIsCollapsed(false)}
+              />
             </Popover>
           </div>
         ) : (
@@ -139,7 +143,7 @@ const ParameterSidebar: React.FC<ParameterSidebarProps> = memo(
               <span className="text-[14px] font-bold">引用参数</span>
               <Popover content="收起" position="left">
                 <ArrowRightIcon
-                  className="h-[24px] w-[18px] cursor-pointer"
+                  className="h-[24px] w-[18px] cursor-pointer hover:text-[rgba(var(--primary-7))]"
                   onClick={() => setIsCollapsed(true)}
                 />
               </Popover>
@@ -147,8 +151,8 @@ const ParameterSidebar: React.FC<ParameterSidebarProps> = memo(
 
             <div className="flex-1 overflow-y-auto px-[12px] py-[4px]">
               {localParams.length === 0 ? (
-                <div className="flex h-[200px] items-center justify-center">
-                  <div className="text-sm text-slate-400">暂无参数名</div>
+                <div className="flex h-full items-center justify-center">
+                  <NoDataCard title="暂无引用参数" type="block" />
                 </div>
               ) : (
                 <div className="flex flex-col gap-[10px]">

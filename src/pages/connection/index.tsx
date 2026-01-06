@@ -22,11 +22,12 @@ import { connectorDetailType } from './type';
 import { filterValues } from '@/api/filterValues';
 import { useParams } from '@/utils/url';
 import EllipsisPopover from '@/components/ellipsis-popover-com';
-import noDataElement from '@/components/no-data';
+// import noDataElement from '@/components/no-data';
 import { PermissionWrapper } from '@/components/PermissionGuard';
 import { CONNECTION_PERMISSIONS } from '@/config/permissions';
 import { OperationColumn } from '@ccf2e/arco-material';
 import { ConnectorType, TYPE_CONFIG } from './config';
+import { NoDataCard } from '@ceai-front/arco-material';
 interface ChildComponentMethods {
   displayModalView: () => void;
 }
@@ -511,7 +512,11 @@ export default function Connection() {
         border={false}
         columns={columns}
         data={ConnectionData}
-        noDataElement={noDataElement({ description: '暂无数据' })}
+        noDataElement={
+          <div className="py-[100px]">
+            <NoDataCard title="暂无数据" />
+          </div>
+        }
         style={{ padding: '16px 0px' }}
         pagination={false}
         rowKey="id"

@@ -136,7 +136,7 @@ const SpecificationsModal: React.FC<SpecificationsModalProps> = ({
                   className="h-[24px] px-2"
                   loading={saving}
                 >
-                  确定
+                  保存
                 </Button>
               </div>
             )}
