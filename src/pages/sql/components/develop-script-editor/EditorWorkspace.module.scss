@@ -40,6 +40,9 @@
       color: #6e7b8d;
       font-size: 14px;
       line-height: 22px;
+      min-width: 0;
+      flex-shrink: 1;
+      max-width: 100%;
 
       // .toolbar-right-item {
       //   margin-right: 12px;

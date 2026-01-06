@@ -1,4 +1,3 @@
-import { RunningStatus } from '@/types/sqlApi';
 import {
   Button,
   Dropdown,
@@ -10,6 +9,7 @@ import {
   Space,
   Spin
 } from '@arco-design/web-react';
+import { EllipsisPopover } from '@ceai-front/arco-material';
 import {
   IconCaretRight,
   // IconClose,
@@ -554,18 +554,23 @@ const EditorWorkspaceContent: React.FC<{
                 )}
               </Space>
             </div>
-            <div className={styles['toolbar-right']}>
+            <div
+              className={classNames(
+                styles['toolbar-right'],
+                'min-w-0 flex-shrink'
+              )}
+            >
               {/* 保存时间 - 始终显示 */}
               {scriptInfo?.update_time && (
-                <div className={styles['toolbar-right-item']}>
-                  <Space size={12}>
-                    <span className="text-[14px] text-[var(--color-text-4)]">
-                      保存时间:{' '}
-                      {dayjs(scriptInfo?.update_time).format(
+                <div className="min-w-0 max-w-full flex-shrink">
+                  <EllipsisPopover
+                    value={`保存时间: ${
+                      dayjs(scriptInfo?.update_time).format(
                         'YYYY-MM-DD HH:mm:ss'
-                      ) || '未保存'}
-                    </span>
-                  </Space>
+                      ) || '未保存'
+                    }`}
+                    wrapperClassName="text-[14px] text-[var(--color-text-4)]"
+                  />
                 </div>
               )}
               {/* 保存按钮 - status=0且isSelfEditing=true时可用，否则置灰 */}
