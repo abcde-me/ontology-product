@@ -59,7 +59,7 @@ enum MetadataType {
 interface MinIOBaseData {
   id?: number;
   bucketName?: string;
-  objectNum?: string;
+  objectsCount?: number;
   region?: string;
   objectsSize?: number;
   versioning?: number;
@@ -365,7 +365,7 @@ export default function MetadataManagementDetail() {
     },
     {
       label: '对象数',
-      value: Number(minIOBaseData.objectNum || 0)
+      value: Number(minIOBaseData.objectsCount || 0)
     },
     {
       label: '存储大小',
