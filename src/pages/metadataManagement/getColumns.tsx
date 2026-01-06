@@ -298,18 +298,6 @@ const MinIOFields = [
     values: []
   },
   {
-    id: 'encryption',
-    nameEn: 'encryption',
-    nameZh: '加密类型',
-    type: 'string',
-    isEnumAbleForColumn: true,
-    isEnumAble: false,
-    enumLoading: false,
-    distinctCount: 0,
-    displaySort: 7,
-    values: []
-  },
-  {
     id: 'createTime',
     nameEn: 'createTime',
     nameZh: '创建时间',
@@ -537,7 +525,6 @@ export const getColumns = (
               );
             }
             if (
-              field.id === 'policy' ||
               field.id === 'encryption' ||
               field.id === 'description' ||
               field.id === 'databaseName' ||
@@ -545,6 +532,14 @@ export const getColumns = (
               field.id === 'partitionKey'
             ) {
               return <EllipsisPopover value={value} isEdit={false} />;
+            }
+            if (field.id === 'policy') {
+              const pattern = /\{\s*[^}]+\s*\}/;
+              return pattern.test(value) ? (
+                <div className="flex items-center gap-1">公有</div>
+              ) : (
+                <div className="flex items-center gap-1">私有</div>
+              );
             }
             if (field.id === 'storageSize' || field.id === 'objectsSize') {
               return formatFileSize(value);
