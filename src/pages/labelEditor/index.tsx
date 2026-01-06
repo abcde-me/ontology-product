@@ -31,7 +31,8 @@ import {
   GetQualityControlTaskById,
   SaveQualityControlTask,
   GetFlowListTask,
-  GetTaskLatestOperation
+  GetTaskLatestOperation,
+  GetTaskFile
 } from '@/api/labelEditor';
 import WujieReact from 'wujie-react';
 import { Message, Modal } from '@arco-design/web-react';
@@ -417,7 +418,8 @@ function LabelEditorPage() {
             SaveQualityControlTask: (...args) =>
               saveTaskWrapper(...args, SaveQualityControlTask),
             GetFlowListTask,
-            GetTaskLatestOperation
+            GetTaskLatestOperation,
+            GetTaskFile
           }}
         ></WujieReact>
       )}
