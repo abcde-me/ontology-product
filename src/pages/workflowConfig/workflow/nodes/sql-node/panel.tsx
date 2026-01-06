@@ -57,7 +57,6 @@ export default React.memo(function SQLPanel(
             }
           });
         }
-        console.log(123, sqlList);
         return sqlList;
       } catch (e) {
         console.error(e);
