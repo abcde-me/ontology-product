@@ -137,13 +137,26 @@ export default function SearchArea({
   const getFloatRange = (start: number, end: number): string[] | number[] => {
     switch (sizeUnitValue) {
       case 'KB':
-        return [start, end];
-      case 'MB':
         return [Number(start) * 1024, Number(end) * 1024];
-      case 'GB':
+      case 'MB':
         return [Number(start) * 1024 * 1024, Number(end) * 1024 * 1024];
+      case 'GB':
+        return [
+          Number(start) * 1024 * 1024 * 1024,
+          Number(end) * 1024 * 1024 * 1024
+        ];
+      case 'TB':
+        return [
+          Number(start) * 1024 * 1024 * 1024 * 1024,
+          Number(end) * 1024 * 1024 * 1024 * 1024
+        ];
+      case 'PB':
+        return [
+          Number(start) * 1024 * 1024 * 1024 * 1024 * 1024,
+          Number(end) * 1024 * 1024 * 1024 * 1024 * 1024
+        ];
       default:
-        return [start, end];
+        return [Number(start) * 1024, Number(end) * 1024];
     }
   };
 
@@ -537,7 +550,9 @@ export default function SearchArea({
               options={[
                 { label: 'KB', value: 'KB' },
                 { label: 'MB', value: 'MB' },
-                { label: 'GB', value: 'GB' }
+                { label: 'GB', value: 'GB' },
+                { label: 'TB', value: 'TB' },
+                { label: 'PB', value: 'PB' }
               ]}
               onChange={(val) => setSizeUnitValue(val)}
             />
