@@ -8,7 +8,11 @@ import TextIcon from '@/assets/annotation/text-column.svg';
 import EllipsisPopover from '@/components/ellipsis-popover-com';
 import { PermissionWrapper } from '@/components/PermissionGuard';
 import { REQUIREMENT_PERMISSIONS } from '@/config/permissions';
-import { useHasPermission, useUserInfo } from '@/store/userInfoStore';
+import {
+  useHasPermission,
+  useUserInfo,
+  useSuperAdmin
+} from '@/store/userInfoStore';
 import getLabelByValue from '@/utils/getLabelByValue';
 import {
   Button,
@@ -49,6 +53,7 @@ export default function Requirement() {
   const history = useHistory();
   const userInfo = useUserInfo();
   const InputSearch = Input.Search;
+  const isSuperAdmin = useSuperAdmin();
   // 初始化搜索框value
   const [searchValue, setSearchValue] = useState('');
   // 初始化需求列表数据
@@ -373,10 +378,10 @@ export default function Requirement() {
                   name: '编辑',
                   priority: 4,
                   tips:
-                    userInfo?.id !== record.creator_id
+                    userInfo?.id !== record.creator_id && !isSuperAdmin
                       ? '仅需求创建人可操作'
                       : '',
-                  disabled: userInfo?.id !== record.creator_id,
+                  disabled: userInfo?.id !== record.creator_id && !isSuperAdmin,
                   onClick: () => {
                     handleCreateRequirement('edit', record.id);
                   }
@@ -397,10 +402,10 @@ export default function Requirement() {
                   name: '删除',
                   priority: 6,
                   tips:
-                    userInfo?.id !== record.creator_id
+                    userInfo?.id !== record.creator_id && !isSuperAdmin
                       ? '仅需求创建人可操作'
                       : '',
-                  disabled: userInfo?.id !== record.creator_id,
+                  disabled: userInfo?.id !== record.creator_id && !isSuperAdmin,
                   onClick: () => {
                     handleDeleteRequirement(record);
                   }
