@@ -55,7 +55,7 @@ const { Row, Col } = Grid;
 export function StructuredWorkflowList() {
   const [form] = Form.useForm();
   const viewPermission = useHasPermission(WORKFLOW_LIST_PERMISSIONS.MODIFY);
-  const { onSubmit, tableProps } = useArcoTable(
+  const { onSubmit, tableProps, refresh } = useArcoTable(
     ({ pagination, filters, sorter, query }) => {
       const searchParams: SearchWorkflowParams = {
         page: pagination.current,
@@ -149,6 +149,7 @@ export function StructuredWorkflowList() {
       Message.success({
         content: '删除成功'
       });
+      refresh();
     } else {
       Message.error({
         content: res?.message ?? '删除失败，请稍后重试'

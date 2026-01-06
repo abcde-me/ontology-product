@@ -166,13 +166,13 @@ export const useDependentTaskStore = create<
       if (wasFlowSelected) {
         flowMap.delete(flowId);
         state.nodesDataCache.all.forEach((n) => {
-          if (n.id !== nodeId) {
+          if (n.id.toString() !== nodeId.toString()) {
             nodeMap.set(n.id, generateNewDependentTasks(n, state.currentFlow));
           }
         });
       }
 
-      nodeMap.delete(nodeId);
+      nodeMap.delete(nodeId.toString());
 
       return {
         selectedFlowTask: flowMap,
