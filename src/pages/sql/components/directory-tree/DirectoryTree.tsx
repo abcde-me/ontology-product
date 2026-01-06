@@ -70,6 +70,8 @@ export interface DirectoryTreeProps {
   isLoading?: boolean;
   isCanCreate?: boolean;
   selectedKeys?: string[]; // 添加外部控制的选中状态
+  searchValue: string; // 外部控制的搜索值
+  setSearchValue: (value: string) => void; // 外部控制的搜索值设置函数
   onSelect?: (
     selectedKeys: string[],
     extra: {
@@ -114,6 +116,8 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
       isLoading,
       isCanCreate,
       selectedKeys: externalSelectedKeys,
+      searchValue,
+      setSearchValue,
       onSelect,
       onCreate,
       onRename,
@@ -130,7 +134,10 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
     const [treeData, setTreeData] = useState<TreeNodeItem[]>(data);
     const [expandedKeys, setExpandedKeys] = useState<string[]>([]);
     const [selectedKeys, setSelectedKeys] = useState<string[]>([]);
-    const [searchValue, setSearchValue] = useState<string>('');
+    // 如果外部传入了 searchValue 和 setSearchValue，使用外部的，否则使用内部状态
+    // const [internalSearchValue, setInternalSearchValue] = useState<string>('');
+    // const searchValue = externalSearchValue !== undefined ? externalSearchValue : internalSearchValue;
+    // const setSearchValue = externalSetSearchValue || setInternalSearchValue;
     const activeTab = useParams('activeTab');
 
     // 下钻相关状态
@@ -293,6 +300,30 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
       setSearchValue('');
       setIsSearchMode(false);
     };
+
+    // 高亮显示搜索关键词
+    const highlightSearchKeyword = useCallback(
+      (text: string, keyword: string) => {
+        if (!keyword) return text;
+
+        const index = text.toLowerCase().indexOf(keyword.toLowerCase());
+
+        if (index === -1) return text;
+
+        const prefix = text.substr(0, index);
+        const suffix = text.substr(index + keyword.length);
+        return (
+          <span>
+            {prefix}
+            <span style={{ color: '#007DFA' }}>
+              {text.substr(index, keyword.length)}
+            </span>
+            {suffix}
+          </span>
+        );
+      },
+      []
+    );
 
     const startRootCreate = (isFolder = true) => {
       const name = generateDefaultName(treeData, isFolder);
@@ -497,7 +528,7 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
               return false;
             }
             // 删除成功后重新加载文件列表
-            handleSearchClear();
+            // handleSearchClear();
           } catch (e) {
             Message.error('删除失败');
             return false;
@@ -542,7 +573,7 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
             className="directory-tree-header-search"
             placeholder={placeholder}
             value={searchValue}
-            onChange={(value) => setSearchValue(value)}
+            onChange={(value) => setSearchValue?.(value ?? '')}
             onSearch={handleSearchEnter}
             onClear={() => {
               handleSearchClear();
@@ -702,7 +733,13 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
                   <div className="shrink-0">{icon}</div>
                   <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
                     <div className="file-name leading-[22px]">
-                      <EllipsisPopover preferTypography value={titleText} />
+                      <EllipsisPopover
+                        value={
+                          isSearchMode && searchValue
+                            ? highlightSearchKeyword(titleText, searchValue)
+                            : titleText
+                        }
+                      />
                     </div>
                   </div>
                   <div className="flex shrink-0 items-center gap-2">
