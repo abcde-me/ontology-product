@@ -272,7 +272,11 @@ const TaskNodeList = forwardRef<TaskNodeListRef, TaskNodeListProps>(
           sorter: true,
           sortDirections: ['ascend', 'descend'],
           render: (value: string) => (
-            <EllipsisPopoverCom value={value || '-'} preferTypography />
+            <EllipsisPopoverCom
+              className="w-full"
+              value={value || '-'}
+              preferTypography
+            />
           )
         },
         {
