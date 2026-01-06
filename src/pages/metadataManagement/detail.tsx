@@ -227,6 +227,16 @@ export default function MetadataManagementDetail() {
     setPreviewLoading(false);
   };
 
+  const getPolicy = (policy: string) => {
+    const pattern = /\{\s*[^}]+\s*\}/;
+    const isPolicyValid = pattern.test(policy);
+    return isPolicyValid ? (
+      <EllipsisPopoverCom value={policy} preferTypography />
+    ) : (
+      '私有'
+    );
+  };
+
   // Iceberg基本信息数据
   const data = [
     {
@@ -377,12 +387,7 @@ export default function MetadataManagementDetail() {
     },
     {
       label: '访问策略',
-      value: (
-        <EllipsisPopoverCom
-          value={minIOBaseData.policy || '-'}
-          preferTypography
-        />
-      )
+      value: getPolicy(minIOBaseData.policy || '-')
     },
     {
       label: '加密类型',
