@@ -376,7 +376,7 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
       searchValueRef.current = searchValue;
     }, [searchValue]);
 
-    // 当数据更新时，如果存在搜索值，重新应用搜索过滤
+    // 当数据更新时，同步更新 treeData
     useEffect(() => {
       const currentSearchValue = searchValueRef.current;
       if (
@@ -384,10 +384,14 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
         currentSearchValue.trim() &&
         handleSearchRef.current
       ) {
-        // 使用 handleSearchRef 重新应用搜索，避免闭包问题
+        // 如果存在搜索值，重新应用搜索过滤
         handleSearchRef.current(currentSearchValue);
+      } else {
+        // 如果没有搜索值，直接同步 data 到 treeData
+        const formattedData = formatTreeData(data);
+        setTreeData(formattedData);
       }
-    }, [data]); // 只在 data 更新时触发，避免与用户输入搜索冲突
+    }, [data, formatTreeData]); // 只在 data 更新时触发，避免与用户输入搜索冲突
 
     // 创建防抖函数，只创建一次
     // const debouncedSearch = useMemo(
