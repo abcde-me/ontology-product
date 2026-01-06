@@ -193,7 +193,11 @@ function TaskList() {
 
         return (
           <div className="flex items-center">
-            {IconComponent && <IconComponent style={{ marginRight: 4 }} />}
+            {IconComponent && (
+              <IconComponent
+                style={{ marginRight: 4, width: 14, height: 14 }}
+              />
+            )}
             <span>{typeName}</span>
           </div>
         );

@@ -151,6 +151,7 @@ export const DependentTaskDialog = (props: {
   onOk: (tasks: DependItem[]) => void;
 }) => {
   const [form] = Form.useForm();
+  const searchContent = Form.useWatch('search_content', form);
   const { data: currentTasks, onClose, onOk, open } = props;
 
   const {
@@ -166,7 +167,6 @@ export const DependentTaskDialog = (props: {
     cacheNodes,
     indeterminateFlow,
     unselectTask,
-    nodesDataCache,
     clearCurrentNodes,
     selectAll,
     initDependentTasks
@@ -303,15 +303,20 @@ export const DependentTaskDialog = (props: {
   }, [selectedFlowTask, selectedNodeTask]);
 
   const isCheckAll = useMemo(() => {
-    if (!selectedTask.length) return false;
+    if (!selectedTask.length || !flowNodes?.current.length) return false;
     return (
       selectedFlowTask.has(currentFlow?.ds_workflow_id || '-') ||
-      nodesDataCache.current.every(({ id }) => selectedNodeTask.has(id))
+      flowNodes?.current.every(({ id }) => selectedNodeTask.has(id))
     );
-  }, [selectedTask]);
+  }, [selectedTask, searchContent, flowNodes]);
 
   const renderFlowTask = () => {
-    if (!list?.length) return <NoDataCard type={'block'} />;
+    if (!list?.length)
+      return (
+        <div className={'py-[100px]'}>
+          <NoDataCard type={'block'} />
+        </div>
+      );
     return (list as WorkflowDetailRes[])?.map((item) => (
       <TaskItem
         key={item.ds_workflow_id}
@@ -336,7 +341,13 @@ export const DependentTaskDialog = (props: {
     ));
   };
   const renderNodeTask = () => {
-    if (!flowNodes?.current.length) return <NoDataCard type={'block'} />;
+    if (!flowNodes?.current.length) {
+      return (
+        <div className={'py-[100px]'}>
+          <NoDataCard type={'block'} />
+        </div>
+      );
+    }
     return flowNodes.current.map((item) => (
       <TaskItem
         key={item.id}
@@ -408,6 +419,7 @@ export const DependentTaskDialog = (props: {
                 <Button
                   className={styles['check-all']}
                   type={'text'}
+                  disabled={!flowNodes?.current.length}
                   onClick={() => {
                     isCheckAll ? clearCurrentNodes() : selectAll();
                   }}
@@ -428,6 +440,7 @@ export const DependentTaskDialog = (props: {
                     className={'w-[200px]'}
                     suffix={<IconSearch />}
                     placeholder={'输入关键词搜索'}
+                    allowClear
                   />
                 </Form.Item>
               </Form>
@@ -527,7 +540,9 @@ export const DependentTaskDialog = (props: {
                 );
               })
             ) : (
-              <NoDataCard type={'block'} />
+              <div className={'py-[100px]'}>
+                <NoDataCard type={'block'} />
+              </div>
             )}
           </div>
         </div>
