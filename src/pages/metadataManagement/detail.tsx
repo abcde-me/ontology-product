@@ -335,10 +335,6 @@ export default function MetadataManagementDetail() {
       value: baseInfoData.description || '-'
     },
     {
-      label: '存储类型',
-      value: baseInfoData.tableType || '-'
-    },
-    {
       label: '所属数据库',
       value: baseInfoData.dbName || '-'
     },
