@@ -23,7 +23,7 @@ import { IconPlus, IconRefresh } from '@arco-design/web-react/icon';
 import { getColumns, getColumnsSetting } from './getColumns';
 import ColumnSettingModal, {
   ColumnField
-} from '../dataAsset/components/ColumnSettingModal';
+} from './components/ColumnSettingModal';
 import SearchArea from './components/SearchArea';
 import {
   createMetadataDorisDatabase,
