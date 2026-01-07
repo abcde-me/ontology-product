@@ -495,7 +495,7 @@ export default function WorkflowRunList() {
                       )
                     }
                   >
-                    结束运行
+                    KILL
                   </Button>
                 </PermissionWrapper>
               )}
