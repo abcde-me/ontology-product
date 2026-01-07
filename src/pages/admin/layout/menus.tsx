@@ -252,7 +252,6 @@ export const menus: MenuModel[] = [
     type: 'itemGroup',
     title: '平台资源',
     key: 'platformResource',
-    external: true,
     children: [
       {
         title: 'API Key管理',
