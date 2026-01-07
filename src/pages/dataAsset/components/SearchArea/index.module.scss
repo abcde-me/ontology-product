@@ -7,6 +7,10 @@
     color: var(--color-text-2);
   }
 
+  :global(.arco-checkbox) {
+    padding-left: 0;
+  }
+
   .settings-button:global(
     .arco-btn-text:not(.arco-btn-disabled):not(.arco-btn-loading):hover
   ) {
