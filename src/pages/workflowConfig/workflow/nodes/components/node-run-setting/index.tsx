@@ -1,11 +1,5 @@
 import React from 'react';
-import {
-  InputNumber,
-  Radio,
-  Typography,
-  Form,
-  Grid
-} from '@arco-design/web-react';
+import { InputNumber, Radio, Form, Grid } from '@arco-design/web-react';
 import { PRIORITY_OPTIONS } from '@/pages/workflowList/types';
 
 const FormItem = Form.Item;

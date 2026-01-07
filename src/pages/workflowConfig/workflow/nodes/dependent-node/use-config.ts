@@ -15,8 +15,8 @@ export default function useConfig(id: string, payload: DependentNodeConfig) {
       newInputs = {
         ...newInputs,
         ...value,
-        task_priority: newInputs.task_priority.toString(),
-        fail_retry_times: newInputs.fail_retry_times.toString()
+        task_priority: value.task_priority.toString(),
+        fail_retry_times: value.fail_retry_times.toString()
       };
       setInputs(newInputs);
     },
