@@ -97,6 +97,7 @@ export default function MetadataManagementDetail() {
   const [activeKey, setActiveKey] = useState('baseInfo');
   const [minIOBaseData, setMinIOBaseData] = useState<MinIOBaseData>({});
   const [baseInfoData, setBaseInfoData] = useState<Record<string, string>>({});
+  const [loading, setLoading] = useState(false);
   const [fileBinaryData, setFileBinaryData] = useState<ArrayBuffer>();
   const [previewVisible, setPreviewVisible] = useState(false);
   const [previewLoading, setPreviewLoading] = useState(false);
@@ -354,10 +355,6 @@ export default function MetadataManagementDetail() {
     {
       label: '分片数',
       value: Number(baseInfoData.shards || 0)
-    },
-    {
-      label: '索引数',
-      value: Number(baseInfoData.indexNum || 0)
     },
     {
       label: '创建时间',
@@ -711,6 +708,7 @@ export default function MetadataManagementDetail() {
   };
 
   const getData = async () => {
+    setLoading(true);
     if (metadataType === MetadataType.Iceberg) {
       if (activeKey === 'baseInfo') {
         const res = await getMetadataIcebergTable({
@@ -937,6 +935,7 @@ export default function MetadataManagementDetail() {
         }
       }
     }
+    setLoading(false);
   };
 
   const handleBack = () => {
@@ -1071,6 +1070,7 @@ export default function MetadataManagementDetail() {
                   pagination={false}
                   noDataElement={<NoDataCard title="暂无数据" />}
                   rowKey="id"
+                  loading={loading}
                   scroll={{ x: true }}
                 />
                 {/* 分页 */}
@@ -1131,6 +1131,7 @@ export default function MetadataManagementDetail() {
                   pagination={false}
                   noDataElement={<NoDataCard title="暂无数据" />}
                   rowKey="id"
+                  loading={loading}
                   scroll={{ x: true }}
                 />
                 {/* 分页 */}
@@ -1157,16 +1158,20 @@ export default function MetadataManagementDetail() {
             </TabPane>
             <TabPane key="previewInfo" title="数据预览">
               <Typography.Paragraph>
-                <Table
-                  className="mt-2"
-                  columns={previewInfoColumns}
-                  data={previewInfoData}
-                  border={false}
-                  pagination={false}
-                  noDataElement={<NoDataCard title="暂无数据" />}
-                  rowKey="id"
-                  scroll={{ x: true }}
-                />
+                {loading ? (
+                  <Spin className="flex h-[calc(100vh-300px)] flex-col items-center justify-center" />
+                ) : (
+                  <Table
+                    className="mt-2"
+                    columns={previewInfoColumns}
+                    data={previewInfoData}
+                    border={false}
+                    pagination={false}
+                    noDataElement={<NoDataCard title="暂无数据" />}
+                    rowKey="id"
+                    scroll={{ x: true }}
+                  />
+                )}
               </Typography.Paragraph>
             </TabPane>
           </Tabs>
