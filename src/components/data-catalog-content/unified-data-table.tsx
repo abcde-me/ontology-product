@@ -711,7 +711,7 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
 
   return (
     <>
-      <div style={{ height: '100%' }}>
+      <div className="flex h-full flex-col">
         {/* 使用统一的表格组件 */}
         <UnifiedTable
           ref={tableRef}
