@@ -889,6 +889,7 @@ export default function AddApi() {
                       : 100
                   }
                   min={0}
+                  max={100}
                   onChange={(value) => form.setFieldValue('limitCount', value)}
                 />
                 次/分钟
