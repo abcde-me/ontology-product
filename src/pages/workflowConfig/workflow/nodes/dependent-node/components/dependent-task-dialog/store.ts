@@ -194,11 +194,25 @@ export const useDependentTaskStore = create<
     });
   },
   selectAll() {
-    const { nodesDataCache, selectNode, selectWorkflow, currentFlow } = get();
+    const { nodesDataCache, selectWorkflow, selectedNodeTask, currentFlow } =
+      get();
     if (!currentFlow) return;
     if (nodesDataCache.current.length === nodesDataCache.all.length) {
       selectWorkflow(currentFlow);
+      return;
     }
+    const nodeMap = new Map(selectedNodeTask);
+    nodesDataCache.current.forEach((node) => {
+      nodeMap.set(+node.id, generateNewDependentTasks(node, currentFlow));
+    });
+    // 当前全选完之后检测是否所有节点都被选中，选中则升级为工作流选中
+    if (nodesDataCache.all.every(({ id }) => nodeMap.has(+id))) {
+      selectWorkflow(currentFlow);
+      return;
+    }
+    set({
+      selectedNodeTask: nodeMap
+    });
   },
   initDependentTasks(tasks?: DependItem[]) {
     set(() => {
