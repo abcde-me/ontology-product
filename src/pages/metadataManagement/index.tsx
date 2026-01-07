@@ -21,7 +21,6 @@ import ColumnSettingIcon from '@/assets/metadata/column-setting.svg';
 import StorageIcon from '@/assets/metadata/storage.svg';
 import CreateDatabaseIcon from '@/assets/metadata/create-database.svg';
 import CreateTableIcon from '@/assets/metadata/create-table.svg';
-import { IconPlus, IconRefresh } from '@arco-design/web-react/icon';
 import { getColumns, getColumnsSetting } from './getColumns';
 import ColumnSettingModal, {
   ColumnField
