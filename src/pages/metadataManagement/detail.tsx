@@ -873,9 +873,10 @@ export default function MetadataManagementDetail() {
             collectionId: metadataId,
             ...partitionSearchValues.filters
           },
-          sort: partitionSearchValues?.sorter
-            ? [{ ...partitionSearchValues?.sorter }]
-            : []
+          sort:
+            Object.keys(partitionSearchValues?.sorter || {}).length > 0
+              ? [{ ...partitionSearchValues?.sorter }]
+              : []
         };
         const res = await listMetadataMilvusPartition(params);
         if (res.code === '' && res.status === 200) {
