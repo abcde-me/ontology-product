@@ -657,12 +657,6 @@ export default function DataApi() {
   // 已授权列表列
   const authorizedColumns: ColumnProps[] = [
     {
-      title: '序号',
-      dataIndex: 'title',
-      width: 80,
-      render: (_, record, index) => index + 1
-    },
-    {
       title: '授权KEY',
       dataIndex: 'projectId',
       width: 200,
