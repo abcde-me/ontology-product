@@ -152,7 +152,7 @@ export default function TestModal(props: {
         setResult(null);
       }}
     >
-      <div className="flex gap-6">
+      <div className={styles.modalContent}>
         <div className={styles.lfetBox}>
           <div className="mb-6 flex w-full items-center justify-between">
             <span className="text-sm font-medium text-[#0F172A]">请求参数</span>
@@ -181,10 +181,10 @@ export default function TestModal(props: {
             <>
               <div className="mt-4 flex items-center gap-6">
                 <div>
-                  <span className="text-sm font-medium text-[#0F172A]">
+                  <span className="text-sm font-normal text-[#6E7B8D]">
                     响应状态:{' '}
                   </span>
-                  <span className="text-sm font-medium text-[#0F172A]">
+                  <span className="text-sm font-normal text-[#0F172A]">
                     {result.statusCode || Number(result.statusCode) === 0
                       ? Number(result.statusCode) === 0
                         ? Number(result.statusCode) + '（成功）'
@@ -193,10 +193,10 @@ export default function TestModal(props: {
                   </span>
                 </div>
                 <div>
-                  <span className="text-sm font-medium text-[#0F172A]">
+                  <span className="text-sm font-normal text-[#6E7B8D]">
                     响应时间:{' '}
                   </span>
-                  <span className="text-sm font-medium text-[#0F172A]">
+                  <span className="text-sm font-normal text-[#0F172A]">
                     {result?.queryTime ? `${result?.queryTime}ms` : '-'}
                   </span>
                 </div>
@@ -223,7 +223,7 @@ export default function TestModal(props: {
               </Tabs>
             </>
           ) : (
-            <NoDataCard title="暂无数据，请先发送请求" />
+            <NoDataCard title="暂无数据，请先发送请求" type="block" />
           )}
         </div>
       </div>

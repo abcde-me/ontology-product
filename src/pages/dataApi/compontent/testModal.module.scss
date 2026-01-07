@@ -1,6 +1,12 @@
 .testModal {
   width: 1200px;
-  max-height: 660px;
+
+  .modalContent {
+    display: flex;
+    gap: 24px;
+    min-height: 664px;
+    max-height: 864px;
+  }
 
   .lfetBox {
     width: 635px;
@@ -22,10 +28,12 @@
 
     .responseBox {
       width: 100%;
-      height: 456px;
+      min-height: 524px;
+      max-height: 700px;
       overflow: auto;
       padding: 8px 12px;
       background-color: var(--background-color-bg-2, #f8fafd);
+      border: 1px solid var(--border-color-border-2, #e2e8f0);
     }
 
     :global(.arco-tabs-header-title) {
@@ -56,6 +64,10 @@
 
     :global(.arco-tabs-content) {
       max-width: 500px;
+    }
+
+    :global(.aa-no-data-card) {
+      margin-top: 250px;
     }
   }
 }

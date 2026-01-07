@@ -431,8 +431,22 @@ export default function DataApi() {
       render: (_, _record, idx: number) => (current - 1) * pageSize + idx + 1
     },
     {
-      title: 'API名称',
+      title: 'API英文名称',
+      dataIndex: 'name',
+      className: styles.apiName,
+      width: 200,
+      ellipsis: true,
+      render: (_, record) => (
+        <EllipsisPopover
+          value={renderEmptyPlaceholder(record.name)}
+          isEdit={false}
+        />
+      )
+    },
+    {
+      title: 'API中文名称',
       dataIndex: 'nameCn',
+      className: styles.apiName,
       width: 200,
       ellipsis: true,
       render: (_, record) => (
@@ -537,7 +551,7 @@ export default function DataApi() {
     {
       title: '操作',
       dataIndex: 'operate',
-      width: 220,
+      width: 200,
       fixed: 'right',
       render: (_, record) => (
         <div className="flex items-center">
@@ -635,7 +649,7 @@ export default function DataApi() {
             trigger="hover"
             position="bl"
           >
-            <Button type="text" className="pl-0">
+            <Button type="text" className="px-0">
               更多
               <IconDown />
             </Button>

@@ -345,10 +345,6 @@ export default function MetadataManagementDetail() {
       value: Number(baseInfoData.approxEntityCount || 0)
     },
     {
-      label: '分区字段',
-      value: getPartitionKey(baseInfoData.partitionKey)
-    },
-    {
       label: '分区数',
       value: Number(baseInfoData.partitions || 0)
     },
