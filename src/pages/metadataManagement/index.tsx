@@ -488,7 +488,8 @@ PROPERTIES (
                         ddl:
                           activeMetadataType === MetadataType.Iceberg
                             ? `CREATE DATABASE IF NOT EXISTS iceberg_db_example COMMENT 'Iceberg创建库示例'`
-                            : `CREATE DATABASE IF NOT EXISTS db_example`
+                            : `CREATE DATABASE IF NOT EXISTS db_example`,
+                        tableType: activeMetadataType
                       });
                       setCreateTableModalOpen(true);
                     }}

@@ -307,8 +307,8 @@ const MinIOFields = [
     values: []
   },
   {
-    id: 'createTime',
-    nameEn: 'createTime',
+    id: 'creationDate',
+    nameEn: 'creationDate',
     nameZh: '创建时间',
     type: 'datetime',
     isEnumAbleForColumn: true,

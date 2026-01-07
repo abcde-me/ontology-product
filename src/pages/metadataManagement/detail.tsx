@@ -133,7 +133,8 @@ export default function MetadataManagementDetail() {
   const [partitionSearchValues, setPartitionSearchValues] = useState({
     filters: {
       partitionName: ''
-    }
+    },
+    sorter: {}
   });
 
   // 创建挂载标识：标记是否为组件首次挂载
@@ -492,22 +493,35 @@ export default function MetadataManagementDetail() {
     {
       title: '字段英文名称',
       dataIndex: 'fieldName',
-      key: 'fieldName'
+      key: 'fieldName',
+      width: 200,
+      render: (text, record) => (
+        <EllipsisPopoverCom value={text || '-'} preferTypography />
+      )
     },
     {
       title: '字段中文名称',
       dataIndex: 'description',
-      key: 'description'
+      key: 'description',
+      width: 200,
+      render: (text, record) => (
+        <EllipsisPopoverCom value={text || '-'} preferTypography />
+      )
     },
     {
       title: '字段类型',
       dataIndex: 'dataType',
-      key: 'dataType'
+      key: 'dataType',
+      width: 200,
+      render: (text, record) => (
+        <EllipsisPopoverCom value={text || '-'} preferTypography />
+      )
     },
     {
       title: '是否为空',
-      dataIndex: 'isKey',
-      key: 'isKey',
+      dataIndex: 'isNull',
+      key: 'isNull',
+      width: 200,
       render: (text, record) => (text === 'YES' ? '是' : '否')
     }
   ];
@@ -517,33 +531,48 @@ export default function MetadataManagementDetail() {
       title: '序号',
       dataIndex: 'index',
       key: 'index',
+      width: 80,
       render: (text, record, index) => index + 1
     },
     {
       title: '字段英文名称',
       dataIndex: 'fieldName',
-      key: 'fieldName'
+      key: 'fieldName',
+      width: 200,
+      render: (text, record) => (
+        <EllipsisPopoverCom value={text || '-'} preferTypography />
+      )
     },
     {
       title: '字段中文名称',
       dataIndex: 'description',
-      key: 'description'
+      key: 'description',
+      width: 200,
+      render: (text, record) => (
+        <EllipsisPopoverCom value={text || '-'} preferTypography />
+      )
     },
     {
       title: '字段类型',
       dataIndex: 'fieldType',
-      key: 'fieldType'
+      key: 'fieldType',
+      width: 200,
+      render: (text, record) => (
+        <EllipsisPopoverCom value={text || '-'} preferTypography />
+      )
     },
     {
       title: '是否主键',
       dataIndex: 'isPrimaryKey',
       key: 'isPrimaryKey',
+      width: 150,
       render: (text, record) => (text === 1 ? '是' : '否')
     },
     {
       title: '是否向量',
       dataIndex: 'dimension',
       key: 'dimension',
+      width: 150,
       render: (text, record) => (text ? '是' : '否')
     }
   ];
@@ -625,23 +654,30 @@ export default function MetadataManagementDetail() {
       title: '序号',
       dataIndex: 'index',
       key: 'index',
+      width: 80,
       render: (text, record, index) => index + 1
     },
     {
       title: '分区名称',
       dataIndex: 'partitionName',
-      key: 'partitionName'
+      key: 'partitionName',
+      width: 500,
+      render: (text, record) => (
+        <EllipsisPopoverCom value={text} preferTypography />
+      )
     },
     {
       title: '创建时间',
       dataIndex: 'createTime',
       key: 'createTime',
+      width: 200,
       sorter: true
     },
     {
       title: '向量数量',
       dataIndex: 'rowCount',
-      key: 'rowCount'
+      key: 'rowCount',
+      width: 100
     }
   ];
 
@@ -665,11 +701,12 @@ export default function MetadataManagementDetail() {
             }
           });
     } else if (activeKey === 'partitionInfo') {
-      setPartitionSearchValues({
+      setPartitionSearchValues((prev) => ({
+        ...prev,
         filters: {
           ...values
         }
-      });
+      }));
     }
   };
 
@@ -835,7 +872,11 @@ export default function MetadataManagementDetail() {
           filters: {
             collectionId: metadataId,
             ...partitionSearchValues.filters
-          }
+          },
+          sort:
+            Object.keys(partitionSearchValues?.sorter || {}).length > 0
+              ? [{ ...partitionSearchValues?.sorter }]
+              : []
         };
         const res = await listMetadataMilvusPartition(params);
         if (res.code === '' && res.status === 200) {
@@ -1030,6 +1071,7 @@ export default function MetadataManagementDetail() {
                   pagination={false}
                   noDataElement={<NoDataCard title="暂无数据" />}
                   rowKey="id"
+                  scroll={{ x: true }}
                 />
                 {/* 分页 */}
                 {fieldData && fieldData.length > 0 && (
@@ -1067,11 +1109,12 @@ export default function MetadataManagementDetail() {
                       onSearch={partitionSearchForm.submit}
                       allowClear
                       onClear={() => {
-                        setPartitionSearchValues({
+                        setPartitionSearchValues((prev) => ({
+                          ...prev,
                           filters: {
                             partitionName: ''
                           }
-                        });
+                        }));
                       }}
                     />
                   </FormItem>
@@ -1088,6 +1131,7 @@ export default function MetadataManagementDetail() {
                   pagination={false}
                   noDataElement={<NoDataCard title="暂无数据" />}
                   rowKey="id"
+                  scroll={{ x: true }}
                 />
                 {/* 分页 */}
                 {partitionData && partitionData.length > 0 && (
@@ -1324,6 +1368,7 @@ export default function MetadataManagementDetail() {
                   pagination={false}
                   noDataElement={<NoDataCard title="暂无数据" />}
                   rowKey="id"
+                  scroll={{ x: true }}
                 />
                 {/* 分页 */}
                 {fieldData && fieldData.length > 0 && (
@@ -1361,11 +1406,12 @@ export default function MetadataManagementDetail() {
                       onSearch={partitionSearchForm.submit}
                       allowClear
                       onClear={() => {
-                        setPartitionSearchValues({
+                        setPartitionSearchValues((prev) => ({
+                          ...prev,
                           filters: {
                             partitionName: ''
                           }
-                        });
+                        }));
                       }}
                     />
                   </FormItem>
@@ -1377,6 +1423,23 @@ export default function MetadataManagementDetail() {
                   border={false}
                   noDataElement={<NoDataCard title="暂无数据" />}
                   rowKey="id"
+                  pagination={false}
+                  scroll={{ x: true }}
+                  onChange={(pagination, sorter, filters, extra) => {
+                    const sort = sorter as SorterInfo;
+                    setPartitionSearchValues((prev) => ({
+                      ...prev,
+                      sorter: {
+                        field: sort.field,
+                        order:
+                          sort.direction === 'ascend'
+                            ? 'asc'
+                            : sort.direction === 'descend'
+                              ? 'desc'
+                              : ''
+                      }
+                    }));
+                  }}
                 />
               </Typography.Paragraph>
             </TabPane>
