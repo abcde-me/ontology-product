@@ -223,7 +223,7 @@ function LabelEditorPage() {
         title: '当前需求已无新任务',
         content: (
           <span style={{ fontSize: '14px', color: '#1E293B' }}>
-            点击确定将返回需求列表页
+            点击确定将返回标注任务页
           </span>
         ),
         icon: (
