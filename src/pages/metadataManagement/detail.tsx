@@ -485,6 +485,7 @@ export default function MetadataManagementDetail() {
       title: '序号',
       dataIndex: 'index',
       key: 'index',
+      width: 80,
       render: (text, record, index) => index + 1
     },
     {
@@ -1023,6 +1024,7 @@ export default function MetadataManagementDetail() {
                     <Input.Search
                       onSearch={fieldSearchForm.submit}
                       allowClear
+                      placeholder="输入字段英文名称"
                       onChange={(value) => {
                         setFieldName(value);
                       }}
@@ -1040,6 +1042,7 @@ export default function MetadataManagementDetail() {
                     <Input.Search
                       onSearch={fieldSearchForm.submit}
                       allowClear
+                      placeholder="输入字段中文名称"
                       onChange={(value) => {
                         setDescription(value);
                       }}
@@ -1108,6 +1111,7 @@ export default function MetadataManagementDetail() {
                     <Input.Search
                       onSearch={partitionSearchForm.submit}
                       allowClear
+                      placeholder="输入分区名称"
                       onClear={() => {
                         setPartitionSearchValues((prev) => ({
                           ...prev,
@@ -1204,6 +1208,7 @@ export default function MetadataManagementDetail() {
                     <Input.Search
                       onSearch={fieldSearchForm.submit}
                       allowClear
+                      placeholder="输入对象名称"
                       onChange={(value) => {
                         setObjectKey(value);
                       }}
@@ -1222,6 +1227,7 @@ export default function MetadataManagementDetail() {
                     <Input.Search
                       onSearch={fieldSearchForm.submit}
                       allowClear
+                      placeholder="输入对象类型"
                       onChange={(value) => {
                         setContentType(value);
                       }}
@@ -1240,6 +1246,7 @@ export default function MetadataManagementDetail() {
                     <Input.Search
                       onSearch={fieldSearchForm.submit}
                       allowClear
+                      placeholder="输入对象存储路径"
                       onChange={(value) => {
                         setObjectPath(value);
                       }}
@@ -1334,6 +1341,7 @@ export default function MetadataManagementDetail() {
                     <Input.Search
                       onSearch={fieldSearchForm.submit}
                       allowClear
+                      placeholder="输入字段英文名称"
                       onChange={(value) => {
                         setFieldName(value);
                       }}
@@ -1351,6 +1359,7 @@ export default function MetadataManagementDetail() {
                     <Input.Search
                       onSearch={fieldSearchForm.submit}
                       allowClear
+                      placeholder="输入字段中文名称"
                       onChange={(value) => {
                         setDescription(value);
                       }}
@@ -1410,6 +1419,7 @@ export default function MetadataManagementDetail() {
                     <Input.Search
                       onSearch={partitionSearchForm.submit}
                       allowClear
+                      placeholder="输入分区名称"
                       onClear={() => {
                         setPartitionSearchValues((prev) => ({
                           ...prev,
