@@ -183,7 +183,7 @@ export const DependentTaskDialog = (props: {
     };
   });
 
-  const { tableProps, onSubmit } = useArcoTable(
+  const { tableProps, onSubmit, refresh } = useArcoTable(
     ({ pagination, query }) => {
       const searchParams = {
         page: pagination.current,
@@ -306,7 +306,7 @@ export const DependentTaskDialog = (props: {
     if (!selectedTask.length || !flowNodes?.current.length) return false;
     return (
       selectedFlowTask.has(currentFlow?.ds_workflow_id || '-') ||
-      flowNodes?.current.every(({ id }) => selectedNodeTask.has(id))
+      flowNodes?.current.every(({ id }) => selectedNodeTask.has(+id))
     );
   }, [selectedTask, searchContent, flowNodes]);
 
@@ -331,6 +331,7 @@ export const DependentTaskDialog = (props: {
         }
         onView={viewDetailWorkflow}
         onViewNodes={(flow) => {
+          // 查看节点时置空搜索
           form.resetFields();
           setCurrentFlow(flow);
         }}
@@ -405,6 +406,7 @@ export const DependentTaskDialog = (props: {
                     className={'flex-shrink-0'}
                     onClick={() => {
                       setCurrentFlow(undefined);
+                      form.resetFields();
                     }}
                   />
                   <div
