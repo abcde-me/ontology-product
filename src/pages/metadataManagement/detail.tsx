@@ -133,7 +133,8 @@ export default function MetadataManagementDetail() {
   const [partitionSearchValues, setPartitionSearchValues] = useState({
     filters: {
       partitionName: ''
-    }
+    },
+    sorter: {}
   });
 
   // 创建挂载标识：标记是否为组件首次挂载
@@ -700,11 +701,12 @@ export default function MetadataManagementDetail() {
             }
           });
     } else if (activeKey === 'partitionInfo') {
-      setPartitionSearchValues({
+      setPartitionSearchValues((prev) => ({
+        ...prev,
         filters: {
           ...values
         }
-      });
+      }));
     }
   };
 
@@ -870,7 +872,10 @@ export default function MetadataManagementDetail() {
           filters: {
             collectionId: metadataId,
             ...partitionSearchValues.filters
-          }
+          },
+          sort: partitionSearchValues?.sorter
+            ? [{ ...partitionSearchValues?.sorter }]
+            : []
         };
         const res = await listMetadataMilvusPartition(params);
         if (res.code === '' && res.status === 200) {
@@ -1103,11 +1108,12 @@ export default function MetadataManagementDetail() {
                       onSearch={partitionSearchForm.submit}
                       allowClear
                       onClear={() => {
-                        setPartitionSearchValues({
+                        setPartitionSearchValues((prev) => ({
+                          ...prev,
                           filters: {
                             partitionName: ''
                           }
-                        });
+                        }));
                       }}
                     />
                   </FormItem>
@@ -1399,11 +1405,12 @@ export default function MetadataManagementDetail() {
                       onSearch={partitionSearchForm.submit}
                       allowClear
                       onClear={() => {
-                        setPartitionSearchValues({
+                        setPartitionSearchValues((prev) => ({
+                          ...prev,
                           filters: {
                             partitionName: ''
                           }
-                        });
+                        }));
                       }}
                     />
                   </FormItem>
@@ -1415,7 +1422,23 @@ export default function MetadataManagementDetail() {
                   border={false}
                   noDataElement={<NoDataCard title="暂无数据" />}
                   rowKey="id"
+                  pagination={false}
                   scroll={{ x: true }}
+                  onChange={(pagination, sorter, filters, extra) => {
+                    const sort = sorter as SorterInfo;
+                    setPartitionSearchValues((prev) => ({
+                      ...prev,
+                      sorter: {
+                        field: sort.field,
+                        order:
+                          sort.direction === 'ascend'
+                            ? 'asc'
+                            : sort.direction === 'descend'
+                              ? 'desc'
+                              : ''
+                      }
+                    }));
+                  }}
                 />
               </Typography.Paragraph>
             </TabPane>
