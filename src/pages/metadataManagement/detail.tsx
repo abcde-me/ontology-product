@@ -506,8 +506,8 @@ export default function MetadataManagementDetail() {
     },
     {
       title: '是否为空',
-      dataIndex: 'isKey',
-      key: 'isKey',
+      dataIndex: 'isNull',
+      key: 'isNull',
       render: (text, record) => (text === 'YES' ? '是' : '否')
     }
   ];
