@@ -9,7 +9,7 @@ import {
   Message
 } from '@arco-design/web-react';
 import { Input, Space } from '@arco-design/web-react';
-import './index.css';
+import indexStyles from './index.module.scss';
 import { IconDelete, IconDownload } from '@arco-design/web-react/icon';
 import FormComponent from '@/components/data-catalog-content/components/popups-form';
 // 导入统一的表格组件
@@ -348,7 +348,10 @@ export default function Eltable() {
             DATA_CATALOG_PERMISSIONS.CAN_DELETE_DST_FILE
           ]}
         >
-          <Popover content="请先选择文件" className="narrow-popover">
+          <Popover
+            content="请先选择文件"
+            className={indexStyles['narrow-popover']}
+          >
             <Button
               icon={<IconDelete />}
               type="secondary"
@@ -386,7 +389,10 @@ export default function Eltable() {
       {/* 批量导出按钮 */}
       {!hasSelectedRows ? (
         <PermissionWrapper permission={DATA_CATALOG_PERMISSIONS.CAN_SEARCH}>
-          <Popover content="请先选择文件" className="narrow-popover">
+          <Popover
+            content="请先选择文件"
+            className={indexStyles['narrow-popover']}
+          >
             <Button
               icon={<IconDownload />}
               type="secondary"
@@ -428,7 +434,7 @@ export default function Eltable() {
     return (
       <div key={selectedKey} style={{ flex: 1, overflowX: 'auto' }}>
         <div style={{ height: 'calc(100% - 50px)' }}>
-          <div className="data-catalog-content">
+          <div className={indexStyles['data-catalog-content']}>
             <MetaData />
           </div>
         </div>
@@ -437,8 +443,11 @@ export default function Eltable() {
   }
 
   return (
-    <div style={{ flex: 1, overflowX: 'auto' }}>
-      <div style={{ height: 'calc(100% - 50px)' }}>
+    <div
+      style={{ flex: 1, overflowX: 'auto' }}
+      className={indexStyles['data-catalog-content-wrapper']}
+    >
+      <div className="flex h-full flex-col">
         {/* 通用的顶部操作栏 */}
         <div
           style={{
@@ -473,7 +482,7 @@ export default function Eltable() {
         </div>
 
         {/* 使用统一的数据表格组件 */}
-        <div className="data-catalog-content">
+        <div className="flex-1">
           <UnifiedDataTable
             ref={tableRef}
             selectedNode={selectedKey}
