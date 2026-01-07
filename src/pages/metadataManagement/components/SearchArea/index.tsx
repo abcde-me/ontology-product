@@ -503,10 +503,10 @@ export default function SearchArea({
 
   return (
     <div className={`${className} ${styles['search-area']}`}>
-      <div className="border-b border-[#CBD5E1] py-[24px]">
+      <div className="border-b border-[#CBD5E1] py-[16px]">
         {/* 字段搜索列表 */}
         {visibleFields.length > 0 && (
-          <div className="mb-[8px] grid grid-cols-3 gap-4">
+          <div className="mb-[12px] grid grid-cols-3 gap-4">
             {visibleFields.map((field) => {
               return (
                 <div key={field.id} className="flex items-center gap-3">

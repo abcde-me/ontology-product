@@ -267,22 +267,27 @@ export default function DataAssetList() {
                         <Tooltip
                           content={tags
                             .slice(1)
-                            .map((item: TagValue, index: number) => (
-                              <Tag
-                                key={item.tagId}
-                                style={{
-                                  backgroundColor: '#FAFBFF',
-                                  borderRadius: '4px',
-                                  border: '1px solid #C3C7D4',
-                                  fontSize: '14px',
-                                  height: '22px',
-                                  padding: '0 6px',
-                                  color: '#646C85'
-                                }}
-                              >
-                                {item.tagValue}
-                              </Tag>
-                            ))}
+                            .map((item: TagValue, index: number) => {
+                              const slicedTags = tags.slice(1);
+                              const isLast = index === slicedTags.length - 1;
+                              return (
+                                <Tag
+                                  key={item.tagId}
+                                  style={{
+                                    backgroundColor: '#FAFBFF',
+                                    borderRadius: '4px',
+                                    border: '1px solid #C3C7D4',
+                                    fontSize: '14px',
+                                    height: '22px',
+                                    padding: '0 6px',
+                                    color: '#646C85',
+                                    marginRight: isLast ? '0px' : '4px'
+                                  }}
+                                >
+                                  {item.tagValue}
+                                </Tag>
+                              );
+                            })}
                         >
                           <Tag
                             style={{

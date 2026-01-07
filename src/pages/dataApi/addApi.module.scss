@@ -9,11 +9,57 @@
     border-radius: 16px;
     position: relative;
 
+    :global(.arco-steps-item-finish .arco-steps-icon) {
+      border: unset;
+      color: rgb(var(--primary-6));
+      background: #eef6ff;
+    }
+
+    :global(.arco-steps-icon) {
+      line-height: 24px;
+    }
+
     :global(.arco-steps-item-process .arco-steps-item-title) {
       color: #0f172a;
       font-weight: 500;
       font-size: 16px;
       margin-left: 8px;
+    }
+
+    :global(.arco-form-label-item) {
+      min-width: 150px;
+      flex: 0 0 150px;
+    }
+
+    :global(.arco-switch) {
+      display: flex;
+      height: 22px;
+      width: 44px;
+      align-items: center;
+      font-size: 14px;
+      line-height: 22px;
+      border-radius: 24px;
+
+      :global(.arco-switch-dot) {
+        top: 3px;
+        width: 16px;
+        height: 16px;
+      }
+
+      :global(.arco-switch-text) {
+        font-size: 14px;
+        top: 1px;
+      }
+
+      :global(.switchSlideText-enter-done) {
+        font-size: 14px;
+        top: 1px;
+        left: 8px;
+      }
+    }
+
+    :global(.arco-switch-checked .arco-switch-dot) {
+      left: calc(100% - 18px - 2px);
     }
 
     .inputNumber {
@@ -148,6 +194,10 @@
 
         :global(.cm-gutters.cm-gutters-before) {
           border-right-width: 0px;
+        }
+
+        :global(.cm-placeholder) {
+          color: #94a3b8;
         }
 
         :global(.cm-focused) {

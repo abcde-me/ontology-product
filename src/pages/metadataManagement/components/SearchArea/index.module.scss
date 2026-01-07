@@ -25,4 +25,9 @@
   :global(.arco-input-number-step-layer) {
     display: none;
   }
+
+  :global(.arco-btn-secondary:not(.arco-btn-disabled)) {
+    border-color: #cbd5e1 !important;
+    color: var(--color-text-2) !important;
+  }
 }

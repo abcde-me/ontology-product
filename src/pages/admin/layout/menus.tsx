@@ -28,6 +28,8 @@ import DataLoad from '@/assets/sider/data-load.svg';
 import DataCatalog from '@/assets/sider/data-catalog.svg';
 import DatasetManagement from '@/assets/sider/dataset-management.svg';
 import DataAsset from '@/assets/sider/data-asset.svg';
+import MetadataManagement from '@/assets/sider/metadata-management.svg';
+import DataApi from '@/assets/sider/data-api.svg';
 import DataMarket from '@/assets/sider/data-market.svg';
 import WorkflowList from '@/assets/sider/workflow-list.svg';
 import WorkflowTask from '@/assets/sider/workflow-task.svg';
@@ -233,14 +235,14 @@ export const menus: MenuModel[] = [
       },
       {
         title: '元数据管理',
-        icon: <DataAsset className={iconClass} />,
+        icon: <MetadataManagement className={iconClass} />,
         key: 'metadataManagement',
         path: '/tenant/compute/modaforge/metadataManagement',
         permission: METADATA_MANAGEMENT_PERMISSIONS.LIST
       },
       {
         title: '数据API',
-        icon: <DataAsset className={iconClass} />,
+        icon: <DataApi className={iconClass} />,
         key: 'dataApi',
         path: '/tenant/compute/modaforge/dataApi',
         permission: DATA_API_PERMISSIONS.LIST

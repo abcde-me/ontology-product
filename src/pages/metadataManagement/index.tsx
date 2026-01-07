@@ -19,7 +19,8 @@ import { SorterInfo } from '@arco-design/web-react/es/Table/interface';
 import { PermissionWrapper } from '@/components/PermissionGuard';
 import ColumnSettingIcon from '@/assets/metadata/column-setting.svg';
 import StorageIcon from '@/assets/metadata/storage.svg';
-import { IconPlus, IconRefresh } from '@arco-design/web-react/icon';
+import CreateDatabaseIcon from '@/assets/metadata/create-database.svg';
+import CreateTableIcon from '@/assets/metadata/create-table.svg';
 import { getColumns, getColumnsSetting } from './getColumns';
 import ColumnSettingModal, {
   ColumnField
@@ -482,7 +483,7 @@ PROPERTIES (
 
                   <Button
                     className={styles['refreshBtn']}
-                    icon={<IconPlus className="text-[#1E293B]" />}
+                    icon={<CreateDatabaseIcon />}
                     onClick={() => {
                       tableForm.setFieldsValue({
                         ddl:
@@ -498,7 +499,7 @@ PROPERTIES (
                   </Button>
                   <Button
                     className={styles['refreshBtn']}
-                    icon={<IconPlus className="text-[#1E293B]" />}
+                    icon={<CreateTableIcon />}
                     onClick={() => {
                       handleCreatePhysicalTable();
                     }}
@@ -583,6 +584,7 @@ PROPERTIES (
           onSubmit={handleCreateTableModalOk}
           labelCol={{ span: 3 }}
           wrapperCol={{ span: 21 }}
+          colon=":"
         >
           <Form.Item
             field="tableType"
@@ -647,6 +649,7 @@ PROPERTIES (
           onSubmit={handleCreatePhysicalTableModalOk}
           labelCol={{ span: 3 }}
           wrapperCol={{ span: 21 }}
+          colon=":"
         >
           <Form.Item
             field="tableType"

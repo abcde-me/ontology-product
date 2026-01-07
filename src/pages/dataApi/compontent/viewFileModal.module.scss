@@ -17,7 +17,7 @@
   .viewFileContent {
     max-height: calc(100vh - 200px);
     overflow: auto;
-    padding: 0 28px;
+    padding: 0 28px 24px 28px;
 
     :global(.arco-descriptions-title) {
       font-size: 14px;

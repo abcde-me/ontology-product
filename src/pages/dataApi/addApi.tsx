@@ -11,6 +11,7 @@ import {
   ResizeBox,
   Select,
   Steps,
+  Switch,
   Table,
   TableColumnProps,
   Tabs,
@@ -88,6 +89,7 @@ export default function AddApi() {
   const [apiCacheMethod, setApiCacheMethod] = useState(0);
   const [isCanTest, setIsCanTest] = useState<boolean>(false);
   const [canComplete, setCanComplete] = useState<boolean>(false);
+  const [expandedKeys, setExpandedKeys] = useState<string[]>([]);
 
   const [resizeSize, setResizeSize] = useState<string>('');
   const [paneContainersSize, setPaneContainersSize] = useState<string>('220px');
@@ -380,6 +382,9 @@ export default function AddApi() {
           }))
         }));
         setTreeData(newTreeData);
+        setExpandedKeys([
+          Number(form.getFieldValue('databaseType')) === 1 ? 'iceberg' : 'doris'
+        ]);
       }
     } else {
       Message.error(res.message || '获取数据源列表失败');
@@ -444,7 +449,7 @@ export default function AddApi() {
     if (metadataTypeArr.includes(treeNode.props.parentKey)) {
       const params = {
         databaseType: treeNode.props.parentKey === 'iceberg' ? 1 : 2,
-        tableId: Number(treeNode.props.dataRef.key.split('_').pop())
+        databaseId: Number(treeNode.props.dataRef.key.split('_').pop())
       };
       return openDataSearchTable(params).then((res) => {
         if (res.code === '' && res.status === 200) {
@@ -698,7 +703,13 @@ export default function AddApi() {
           ? rightBoxRef.current?.offsetHeight - 90
           : 590;
         setActiveKey(keys);
-        setResizeSize(isOpenNow ? `190px` : `${tabHeight}px`);
+        setResizeSize(
+          isOpenNow
+            ? resultData.length > 0
+              ? `190px`
+              : `390px`
+            : `${tabHeight}px`
+        );
         setIsOpen(isOpenNow);
       }}
       expandIcon={<IconUp />}
@@ -732,20 +743,25 @@ export default function AddApi() {
               layout="vertical"
               onSubmit={handleInputParams}
             >
-              <Table
-                columns={columns}
-                data={paramData}
-                pagination={false}
-                className="min-w-[1000px]"
-                rowKey="name"
-                noDataElement={
-                  <NoDataCard
-                    title="暂无数据"
-                    primaryBtn={<Link onClick={parseParameters}>解析参数</Link>}
-                    isTextButton
-                  />
-                }
-              />
+              {paramData.length > 0 ? (
+                <Table
+                  columns={columns}
+                  data={paramData}
+                  pagination={false}
+                  className="min-w-[1000px]"
+                  rowKey="name"
+                  noDataElement={
+                    <NoDataCard title="暂无数据" isTextButton type="block" />
+                  }
+                />
+              ) : (
+                <NoDataCard
+                  title="暂无数据"
+                  primaryBtn={<Link onClick={parseParameters}>解析参数</Link>}
+                  isTextButton
+                  type="block"
+                />
+              )}
             </Form>
           </TabPane>
           <TabPane
@@ -758,20 +774,25 @@ export default function AddApi() {
             }}
           >
             <Form form={outputParamsForm} layout="vertical">
-              <Table
-                columns={outparamsColumns}
-                data={resultData}
-                pagination={false}
-                className="min-w-[1000px]"
-                rowKey="name"
-                noDataElement={
-                  <NoDataCard
-                    title="暂无数据"
-                    primaryBtn={<Link onClick={parseParameters}>解析参数</Link>}
-                    isTextButton
-                  />
-                }
-              />
+              {resultData.length > 0 ? (
+                <Table
+                  columns={outparamsColumns}
+                  data={resultData}
+                  pagination={false}
+                  className="min-w-[1000px]"
+                  rowKey="name"
+                  noDataElement={
+                    <NoDataCard title="暂无数据" isTextButton type="block" />
+                  }
+                />
+              ) : (
+                <NoDataCard
+                  title="暂无数据"
+                  primaryBtn={<Link onClick={parseParameters}>解析参数</Link>}
+                  isTextButton
+                  type="block"
+                />
+              )}
             </Form>
           </TabPane>
         </Tabs>
@@ -799,10 +820,11 @@ export default function AddApi() {
             <Form
               form={form}
               layout="horizontal"
-              labelCol={{ span: 3 }}
+              autoComplete="off"
               wrapperCol={{ span: 11 }}
               className="mt-6"
               onSubmit={handleSubmit}
+              colon=":"
             >
               <Form.Item
                 label="API英文名称"
@@ -816,12 +838,12 @@ export default function AddApi() {
                 <Input placeholder="请输入API英文名称" />
               </Form.Item>
               <Form.Item
-                label="API描述"
+                label="API中文名称"
                 field="nameCn"
                 required
-                rules={[{ required: true, message: '请输入API描述' }]}
+                rules={[{ required: true, message: '请输入中文名称' }]}
               >
-                <Input placeholder="输入API描述" />
+                <Input placeholder="输入中文名称，如“查询用户详情”" />
               </Form.Item>
               <Form.Item
                 label="API路径"
@@ -887,6 +909,7 @@ export default function AddApi() {
                       : 100
                   }
                   min={0}
+                  max={100}
                   onChange={(value) => form.setFieldValue('limitCount', value)}
                 />
                 次/分钟
@@ -894,16 +917,14 @@ export default function AddApi() {
               <Form.Item
                 label="缓存方法"
                 field="cacheMethod"
-                initialValue={apiCacheMethod}
+                initialValue={apiCacheMethod !== 0}
               >
-                <Select
-                  options={[
-                    { label: '开启缓存', value: 1 },
-                    { label: '关闭缓存', value: 0 }
-                  ]}
-                  defaultValue={apiCacheMethod}
-                  placeholder="请选择缓存方法"
-                  onChange={(value) => setApiCacheMethod(value)}
+                <Switch
+                  checkedText="开"
+                  uncheckedText="关"
+                  checked={apiCacheMethod !== 0}
+                  onChange={(value) => setApiCacheMethod(value ? 1 : 0)}
+                  size="default"
                 />
               </Form.Item>
               {apiCacheMethod === 1 && (
@@ -978,6 +999,8 @@ export default function AddApi() {
                   loadMore={loadMore}
                   treeData={treeData}
                   actionOnClick={['expand', 'select']}
+                  expandedKeys={expandedKeys}
+                  onExpand={setExpandedKeys}
                   virtualListProps={{ height: 'calc(100% - 40px)' }}
                   renderTitle={(props) => {
                     const nodeData = props.dataRef;
