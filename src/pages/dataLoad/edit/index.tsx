@@ -359,7 +359,7 @@ const RunningInfoPanel = function ({
 
   return (
     <div
-      className={`running-info-panel border-t border-solid border-[#E2E8F0] ${styles['sql-running-info-panel']}`}
+      className={`border-t border-solid border-[#E2E8F0] ${styles['sql-running-info-panel']}`}
     >
       <Collapse
         activeKey={isExpanded ? ['1'] : []}

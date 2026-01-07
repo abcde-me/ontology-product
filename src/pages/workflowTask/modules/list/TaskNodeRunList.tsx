@@ -321,6 +321,8 @@ export default function TaskNodeRunList() {
         title: '运行提交时间',
         dataIndex: 'submit_time',
         width: 180,
+        sorter: true,
+        sortDirections: ['ascend', 'descend'],
         render: (value: string) => (
           <EllipsisPopoverCom value={value} preferTypography />
         )
@@ -329,6 +331,8 @@ export default function TaskNodeRunList() {
         title: '开始时间',
         dataIndex: 'start_time',
         width: 180,
+        sorter: true,
+        sortDirections: ['ascend', 'descend'],
         render: (value: string) => (
           <EllipsisPopoverCom value={value} preferTypography />
         )
@@ -337,6 +341,8 @@ export default function TaskNodeRunList() {
         title: '结束时间',
         dataIndex: 'end_time',
         width: 180,
+        sorter: true,
+        sortDirections: ['ascend', 'descend'],
         render: (value: string) => (
           <EllipsisPopoverCom value={value} preferTypography />
         )
