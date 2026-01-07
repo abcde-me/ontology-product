@@ -9,7 +9,7 @@ import {
   Radio
 } from '@arco-design/web-react';
 import type { SelectHandle } from '@arco-design/web-react/es/Select/interface';
-import Styles from './index.module.css';
+import Styles from './index.module.scss';
 import React, {
   forwardRef,
   useEffect,

@@ -304,7 +304,7 @@ export default function SearchArea({
       <div className="flex-1 overflow-y-auto">
         {/* 字段搜索列表 */}
         {visibleFields.length > 0 && (
-          <div className="mb-[8px] grid grid-cols-3 gap-4">
+          <div className="mb-[8px] grid grid-cols-3 gap-[8px]">
             {visibleFields.map((field) => (
               <div key={field.key} className="flex items-center gap-[8px]">
                 <span className="whitespace-nowrap text-sm text-[var(--color-text-1)]">
