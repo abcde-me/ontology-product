@@ -433,6 +433,7 @@ export default function DataApi() {
     {
       title: 'API英文名称',
       dataIndex: 'name',
+      className: styles.apiName,
       width: 200,
       ellipsis: true,
       render: (_, record) => (
@@ -445,6 +446,7 @@ export default function DataApi() {
     {
       title: 'API中文名称',
       dataIndex: 'nameCn',
+      className: styles.apiName,
       width: 200,
       ellipsis: true,
       render: (_, record) => (

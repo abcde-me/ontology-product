@@ -9,6 +9,16 @@
     border-radius: 16px;
     position: relative;
 
+    :global(.arco-steps-item-finish .arco-steps-icon) {
+      border: unset;
+      color: rgb(var(--primary-6));
+      background: #eef6ff;
+    }
+
+    :global(.arco-steps-icon) {
+      line-height: 24px;
+    }
+
     :global(.arco-steps-item-process .arco-steps-item-title) {
       color: #0f172a;
       font-weight: 500;
@@ -184,6 +194,10 @@
 
         :global(.cm-gutters.cm-gutters-before) {
           border-right-width: 0px;
+        }
+
+        :global(.cm-placeholder) {
+          color: #94a3b8;
         }
 
         :global(.cm-focused) {
