@@ -411,32 +411,61 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
       return;
     }
 
-    if (!currentFile?.scriptId) {
-      Message.error('请先保存文件');
-      return;
+    let scriptId = currentFile?.scriptId ?? '';
+    if (!scriptId) {
+      const scriptName = generateSqlDefaultName(new Date());
+      const createRes = await createSqlScript({
+        uid: userInfo?.id ?? '32020ad2-ef56-4e20-aa0b-4399429bb34c',
+        script_name: scriptName,
+        script_content: editorContent,
+        script_desc: '',
+        script_file_id: currentFile?.fileId ?? ''
+      });
+
+      if (createRes?.status !== 200) {
+        Message.error(createRes?.message ?? '保存文件失败');
+        return;
+      }
+
+      // Message.success('保存成功, 可前往脚本列表查看');
+
+      setLastAutoSave(timeFormattig(new Date(createRes.data.update_time)));
+      // 保存后更新原始内容
+      setOriginalContent(editorContent);
+
+      scriptId = String(createRes.data.script_id);
+
+      if (onTabUpdate) {
+        onTabUpdate(currentFile?.key ?? '', {
+          content: editorContent,
+          fileId: currentFile?.fileId ?? '',
+          scriptId: String(createRes.data.script_id),
+          title: scriptName ?? ''
+        });
+      }
+    } else {
+      const saveRes = await updateSqlScript(Number(scriptId), {
+        uid: userInfo?.id ?? '32020ad2-ef56-4e20-aa0b-4399429bb34c',
+        script_name: currentFile?.title ?? '',
+        script_content: editorContent
+      });
+
+      setOriginalContent(editorContent);
+
+      if (saveRes?.status !== 200) {
+        Message.error(saveRes?.message ?? '保存文件失败');
+        return;
+      }
+
+      setLastAutoSave(timeFormattig(new Date(saveRes.data.update_time)));
     }
-
-    const saveRes = await updateSqlScript(Number(currentFile?.scriptId), {
-      uid: userInfo?.id ?? '32020ad2-ef56-4e20-aa0b-4399429bb34c',
-      script_name: currentFile.title ?? '',
-      script_content: editorContent
-    });
-
-    setOriginalContent(editorContent);
-
-    if (saveRes?.status !== 200) {
-      Message.error(saveRes?.message ?? '保存文件失败');
-      return;
-    }
-
-    setLastAutoSave(timeFormattig(new Date(saveRes.data.update_time)));
 
     setExecid('');
 
     try {
       // 将上一次运行结果置为未运行， 重新获取结果
       setLastScriptRunStatus(RunningStatus.IDLE);
-      const res = await runSqlScript(currentFile?.scriptId ?? '');
+      const res = await runSqlScript(scriptId ?? '');
       if (res?.status === 200) {
         setExecid(res.data.script_execid);
         if (res.data?.warning_msg) {

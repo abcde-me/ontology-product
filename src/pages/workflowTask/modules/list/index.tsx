@@ -2,6 +2,7 @@ import React, { useState, useCallback } from 'react';
 import { Typography, Tabs } from '@arco-design/web-react';
 import WorkflowRunList from './WorkflowRunList';
 import TaskNodeRunList from './TaskNodeRunList';
+import styles from './index.module.scss';
 
 const { Title } = Typography;
 const { TabPane } = Tabs;
@@ -17,7 +18,9 @@ export default function WorkflowTaskList() {
   }, []);
 
   return (
-    <div className="box-sizing: border-box; h-full py-[20px] pr-[20px]">
+    <div
+      className={`${styles['workflow-task-list']} box-sizing: border-box; h-full py-[20px] pr-[20px]`}
+    >
       <div className="flex h-full flex-col rounded-[12px] bg-white p-[24px]">
         {/* 标题 */}
         <div className="text-[20px] font-[500] leading-[30px] text-[var(--color-text-1)]">
