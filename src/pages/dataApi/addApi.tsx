@@ -11,6 +11,7 @@ import {
   ResizeBox,
   Select,
   Steps,
+  Switch,
   Table,
   TableColumnProps,
   Tabs,
@@ -799,10 +800,11 @@ export default function AddApi() {
             <Form
               form={form}
               layout="horizontal"
-              labelCol={{ span: 3 }}
+              autoComplete="off"
               wrapperCol={{ span: 11 }}
               className="mt-6"
               onSubmit={handleSubmit}
+              colon=":"
             >
               <Form.Item
                 label="API英文名称"
@@ -816,12 +818,12 @@ export default function AddApi() {
                 <Input placeholder="请输入API英文名称" />
               </Form.Item>
               <Form.Item
-                label="API描述"
+                label="API中文名称"
                 field="nameCn"
                 required
-                rules={[{ required: true, message: '请输入API描述' }]}
+                rules={[{ required: true, message: '请输入中文名称' }]}
               >
-                <Input placeholder="输入API描述" />
+                <Input placeholder="输入中文名称，如“查询用户详情”" />
               </Form.Item>
               <Form.Item
                 label="API路径"
@@ -896,14 +898,12 @@ export default function AddApi() {
                 field="cacheMethod"
                 initialValue={apiCacheMethod}
               >
-                <Select
-                  options={[
-                    { label: '开启缓存', value: 1 },
-                    { label: '关闭缓存', value: 0 }
-                  ]}
-                  defaultValue={apiCacheMethod}
-                  placeholder="请选择缓存方法"
-                  onChange={(value) => setApiCacheMethod(value)}
+                <Switch
+                  checkedText="开"
+                  uncheckedText="关"
+                  defaultChecked={apiCacheMethod !== 0}
+                  onChange={(value) => setApiCacheMethod(value ? 1 : 0)}
+                  size="default"
                 />
               </Form.Item>
               {apiCacheMethod === 1 && (
