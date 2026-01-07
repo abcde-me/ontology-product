@@ -1,0 +1,16 @@
+.column-setting-modal {
+  > div {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+
+  :global(.column-setting-modal-table.no-border-bottom) td {
+    border-bottom: none !important;
+  }
+
+  :global(.arco-modal-content) {
+    overflow: auto;
+    flex: 1;
+  }
+}

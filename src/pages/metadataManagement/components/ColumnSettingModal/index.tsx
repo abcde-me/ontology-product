@@ -13,9 +13,9 @@ import { IconDelete, IconClose, IconSearch } from '@arco-design/web-react/icon';
 import './index.module.scss'; // 确保引入样式文件
 // @ts-ignore
 import { ReactSortable } from 'react-sortablejs';
-import DragIcon from '../../assets/drag-icon.svg';
+import DragIcon from '@/pages/dataAsset/assets/drag-icon.svg';
 import styles from './index.module.scss';
-import { isTagsField, RESERVED_FIELD_ENS } from '../../utils/const';
+import { isTagsField, RESERVED_FIELD_ENS } from '@/pages/dataAsset/utils/const';
 import { getDataAssetTableDistinctFieldCount } from '@/api/dataAsset';
 import { BaseTag } from '@/types/dataAssetApi';
 // const SortableAny = ReactSortable as any;
@@ -30,7 +30,7 @@ export interface ColumnField {
   enumLoading: boolean;
   distinctCount: number; // 枚举数
   displaySort: number;
-  values: Array<string | number | BaseTag>;
+  values: Array<string | number | BaseTag | { label: string; value: number }>;
 }
 
 export interface ColumnSettingModalProps {

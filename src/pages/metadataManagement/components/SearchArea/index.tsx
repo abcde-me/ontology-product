@@ -18,7 +18,7 @@ import {
   IconSettings,
   IconMinus
 } from '@arco-design/web-react/icon';
-import { ColumnField } from '@/pages/dataAsset/components/ColumnSettingModal';
+import { ColumnField } from '../ColumnSettingModal';
 import { FieldSearchItem, BaseTag, TagValueItem } from '@/types/dataAssetApi';
 import { isDateType, isDateTimeType } from '@/pages/dataAsset/utils/const';
 import styles from './index.module.scss';

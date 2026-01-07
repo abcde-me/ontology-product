@@ -2,7 +2,7 @@ import React from 'react';
 import EllipsisPopover from '@/components/ellipsis-popover-com';
 import CheckCircleFillIcon from '@/assets/metadata/check-circle-fill.svg';
 import CloseCircleFillIcon from '@/assets/metadata/close-circle-fill.svg';
-import { ColumnField } from '../dataAsset/components/ColumnSettingModal';
+import { ColumnField } from './components/ColumnSettingModal';
 import dayjs from 'dayjs';
 import { formatFileSize } from '@/utils/format';
 import styles from './index.module.scss';
