@@ -142,12 +142,14 @@ export default memo(function FlowSetting() {
       {!show ? (
         <Button
           type={'text'}
-          className={'p-0'}
+          className={
+            'p-0 font-PingFangSc text-[16px] font-medium leading-6 text-default'
+          }
           style={{ color: '#0F172A' }}
           onClick={() => setShow(true)}
         >
           工作流配置
-          <IconMenuUnfold />
+          <IconMenuUnfold className={'text-[#334155]'} />
         </Button>
       ) : (
         <div className={'mt-[-8px]'}>

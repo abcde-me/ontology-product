@@ -214,7 +214,7 @@ export const useNodesSyncDraft = () => {
       notRefreshWhenSyncError?: boolean,
       callback?: {
         onSuccess?: () => void;
-        onError?: () => void;
+        onError?: (error?: any) => void;
         onSettled?: () => void;
       },
       params = {}
