@@ -734,7 +734,7 @@ export default function DataApi() {
           onChange={(value) => {
             setSearchValue(value);
           }}
-          onPressEnter={() => getList()}
+          onSearch={() => getList()}
           onClear={() => {
             setCurrent(1);
             setSearchValue('');
