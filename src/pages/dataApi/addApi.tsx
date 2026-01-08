@@ -722,15 +722,17 @@ export default function AddApi() {
     >
       <CollapseItem
         header="输入输出参数"
+        className={styles.parseParamsBtn}
         extra={
-          <Button
-            className={styles.parseParamsBtn}
-            onClick={parseParameters}
-            disabled={!value}
-            icon={<ParseParametersIcon />}
-          >
-            <span className="text-sm text-[#1E293B]">解析参数</span>
-          </Button>
+          <Tooltip content={!value ? 'SQL编辑内容不能为空' : null}>
+            <Button
+              onClick={parseParameters}
+              disabled={!value}
+              icon={<ParseParametersIcon />}
+            >
+              <span className="text-sm text-[#1E293B]">解析参数</span>
+            </Button>
+          </Tooltip>
         }
         name="inputOutputParams"
       >
@@ -1049,13 +1051,12 @@ export default function AddApi() {
                 )}
               </div>
               <div ref={rightBoxRef} className={styles.rightBox}>
-                <div className="align-center flex h-12 justify-between border-b border-[#e2e8f0] p-3">
+                <div className={styles.sqlEditorHeader}>
                   <div className="text-sm font-semibold leading-6">
                     SQL编辑器
                   </div>
                   <Tooltip content={!isCanTest ? '未进行解析参数' : null}>
                     <Button
-                      className="h-6"
                       icon={<IconCaretRight />}
                       disabled={!isCanTest}
                       onClick={() => {
