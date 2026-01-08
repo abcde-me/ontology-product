@@ -670,6 +670,8 @@ export default function DataLoadCreate() {
       setCheckStatus(CheckSQLStatus.NONE);
       setCheckMessage('');
       setSelectedNodeType(undefined);
+      // 清空选择文件
+      setUploadedFiles([]);
       // 重置载入形式
       setLoadVal(
         value === SOURCE_TYPES.MQ ? LOAD_TYPES.REALTIME : LOAD_TYPES.ONCE
@@ -1450,6 +1452,7 @@ export default function DataLoadCreate() {
               ]}
             >
               <Uploads
+                key={sourceType}
                 onFileChange={handleFileChange}
                 onFileDelete={handleFileDelete}
                 onUploadingChange={setIsFileUploading}
