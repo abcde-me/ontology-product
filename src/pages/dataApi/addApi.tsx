@@ -94,6 +94,7 @@ export default function AddApi() {
   const [resizeSize, setResizeSize] = useState<string>('');
   const [paneContainersSize, setPaneContainersSize] = useState<string>('220px');
   const [treeData, setTreeData] = React.useState<TreeDataType[]>([]);
+  const [searchValue, setSearchValue] = useState<string>('');
 
   const columns: TableColumnProps[] = [
     {
@@ -531,9 +532,9 @@ export default function AddApi() {
 
     if (isEditorFocusedNow) {
       // 编辑器聚焦时插入内容
-      insertContentAtCursor(nodeContent ?? '');
+      insertContentAtCursor(`\`${nodeContent}\``);
     } else {
-      const isSuccess = copy(nodeContent ?? '');
+      const isSuccess = copy(`\`${nodeContent}\``);
 
       if (isSuccess) {
         Message.success('内容复制成功，请粘贴到编辑器');
@@ -565,11 +566,11 @@ export default function AddApi() {
               children: []
             });
           }
-
           const childNode = {
             title: highlightKeyword(item.tableName, value),
             key: `${databaseType}_${item.id}`,
-            children: []
+            children: [],
+            isCanCopy: true
           };
           groupMap.get(databaseType).children.push(childNode);
         });
@@ -985,11 +986,12 @@ export default function AddApi() {
                   <Input.Search
                     placeholder="请输入搜索数据源"
                     className="ml-2 w-[160px]"
-                    onSearch={(value) =>
+                    onSearch={(value) => {
+                      setSearchValue(value);
                       value?.trim() !== ''
                         ? handleSearchTable(value)
-                        : getOpenDataListData()
-                    }
+                        : getOpenDataListData();
+                    }}
                     allowClear
                     onClear={getOpenDataListData}
                   />
@@ -1008,8 +1010,12 @@ export default function AddApi() {
                     return (
                       <div className="flex items-center">
                         <EllipsisPopoverCom
-                          className={styles.treeNodeTitle}
-                          preferTypography
+                          className={
+                            searchValue
+                              ? styles.treeNodeTitleSearch
+                              : styles.treeNodeTitle
+                          }
+                          // preferTypography
                           value={nodeData?.title ?? ''}
                         />
                         {nodeContent && (

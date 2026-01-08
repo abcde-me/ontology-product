@@ -159,7 +159,11 @@
         }
 
         .treeNodeTitle {
-          width: 130px;
+          width: 145px;
+        }
+
+        .treeNodeTitleSearch {
+          width: 180px;
         }
 
         :global(.arco-tree-node):hover {
@@ -174,14 +178,18 @@
             font-size: 14px;
           }
 
-          .treeNodeTitle {
+          .treeNodeTitle,
+          .treeNodeTitleSearch {
             color: var(--primary-primary-6, #007dfa);
           }
 
           // 根据按钮数量动态调整名称宽度
           &:has(.insertOrCopyBtn) {
             .treeNodeTitle {
-              max-width: 80px; // 默认1个按钮时的最大宽度
+              max-width: 85px; // 默认1个按钮时的最大宽度
+            }
+            .treeNodeTitleSearch {
+              max-width: 125px;
             }
           }
         }
