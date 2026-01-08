@@ -94,7 +94,7 @@ export default function AddApi() {
   const [resizeSize, setResizeSize] = useState<string>('');
   const [paneContainersSize, setPaneContainersSize] = useState<string>('220px');
   const [treeData, setTreeData] = React.useState<TreeDataType[]>([]);
-  const [searchValue, setSearchValue] = useState<string>('');
+  const [isSearch, setIsSearch] = useState<boolean>(false);
 
   const columns: TableColumnProps[] = [
     {
@@ -383,6 +383,7 @@ export default function AddApi() {
           }))
         }));
         setTreeData(newTreeData);
+        setIsSearch(false);
         setExpandedKeys([
           Number(form.getFieldValue('databaseType')) === 1 ? 'iceberg' : 'doris'
         ]);
@@ -447,7 +448,7 @@ export default function AddApi() {
   // 模拟调用接口获取子节点数据
   const loadMore = (treeNode) => {
     const metadataTypeArr = ['iceberg', 'doris', 'kafka', 'minio', 'milvus'];
-    if (metadataTypeArr.includes(treeNode.props.parentKey)) {
+    if (metadataTypeArr.includes(treeNode.props.parentKey) && !isSearch) {
       const params = {
         databaseType: treeNode.props.parentKey === 'iceberg' ? 1 : 2,
         databaseId: Number(treeNode.props.dataRef.key.split('_').pop())
@@ -987,7 +988,7 @@ export default function AddApi() {
                     placeholder="请输入搜索数据源"
                     className="ml-2 w-[160px]"
                     onSearch={(value) => {
-                      setSearchValue(value);
+                      setIsSearch(value?.trim() !== '');
                       value?.trim() !== ''
                         ? handleSearchTable(value)
                         : getOpenDataListData();
@@ -1011,9 +1012,9 @@ export default function AddApi() {
                       <div className="flex items-center">
                         <EllipsisPopoverCom
                           className={
-                            searchValue
-                              ? styles.treeNodeTitleSearch
-                              : styles.treeNodeTitle
+                            !isSearch
+                              ? styles.treeNodeTitle
+                              : styles.treeNodeTitleSearch
                           }
                           // preferTypography
                           value={nodeData?.title ?? ''}
