@@ -25,6 +25,8 @@ interface ApiDocDetailResponse {
     nameCn?: string;
     path?: string;
     name?: string;
+    cacheTime?: number;
+    updatedTime?: string;
   };
   inputParams?: [];
   outputParams?: [];
@@ -102,11 +104,11 @@ export default function ViewFileModal({ visible, onCancel, id }) {
     },
     {
       label: '缓存方式',
-      value: '关闭缓存'
+      value: viewFileDetailData?.apiInfo?.cacheTime ? '开启缓存' : '关闭缓存'
     },
     {
       label: '缓存过期时长',
-      value: '10s'
+      value: `${viewFileDetailData?.apiInfo?.cacheTime}s`
     },
     {
       label: '接口描述',
@@ -119,7 +121,7 @@ export default function ViewFileModal({ visible, onCancel, id }) {
     },
     {
       label: '文档更新时间',
-      value: '2025-05-05 05:05:05'
+      value: viewFileDetailData?.apiInfo?.updatedTime || '-'
     }
   ];
 
@@ -233,7 +235,10 @@ export default function ViewFileModal({ visible, onCancel, id }) {
       className={styles.viewFileModal}
       visible={visible}
       title="API使用文档"
-      onCancel={onCancel}
+      onCancel={() => {
+        setViewFileDetailData({});
+        onCancel();
+      }}
       focusLock={false}
       footer={null}
     >
@@ -264,7 +269,13 @@ export default function ViewFileModal({ visible, onCancel, id }) {
               colon=" :"
               layout="horizontal"
               title="基础信息"
-              data={viewFileBaseInfoData}
+              data={
+                Number(viewFileDetailData?.apiInfo?.cacheTime) <= 0
+                  ? viewFileBaseInfoData.filter(
+                      (item) => item.label !== '缓存过期时长'
+                    )
+                  : viewFileBaseInfoData
+              }
               column={2}
             />
           </div>
