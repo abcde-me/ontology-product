@@ -81,7 +81,16 @@ export default function ViewFileModal({ visible, onCancel, id }) {
   // 查看文档基本信息数据
   const viewFileBaseInfoData = [
     {
-      label: 'API名称',
+      label: 'API英文名称',
+      value: (
+        <EllipsisPopoverCom
+          value={viewFileDetailData?.apiInfo?.name || '-'}
+          preferTypography
+        />
+      )
+    },
+    {
+      label: 'API中文名称',
       value: (
         <EllipsisPopoverCom
           value={viewFileDetailData?.apiInfo?.nameCn || '-'}
