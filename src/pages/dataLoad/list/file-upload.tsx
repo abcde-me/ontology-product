@@ -51,9 +51,15 @@ const Uploads: React.FC<UploadsProps> = ({
       const deletedFiles = fileList.filter(
         (prevFile) => !files.some((newFile) => newFile.name === prevFile.name)
       );
-      // 通知父组件文件被删除
+      // 通知父组件文件被删除（只有真正上传成功的文件才需要通知删除）
       deletedFiles.forEach((file) => {
-        if (onFileDelete && file.response && file.response.data) {
+        if (
+          onFileDelete &&
+          file.response &&
+          file.response.data &&
+          file.response.code === '' &&
+          file.response.status === 200
+        ) {
           onFileDelete(file.response.data.name);
         }
       });
@@ -67,8 +73,14 @@ const Uploads: React.FC<UploadsProps> = ({
       }
 
       // 处理所有上传完成的文件
+      // 只有当 status === 'done' 且 code === '' 且 status === 200 时才认为上传成功
       const completedFiles = files.filter(
-        (file) => file.status === 'done' && file.response && file.response.data
+        (file) =>
+          file.status === 'done' &&
+          file.response &&
+          file.response.data &&
+          file.response.code === '' &&
+          file.response.status === 200
       );
 
       // 一次性传递所有已完成的文件数据
