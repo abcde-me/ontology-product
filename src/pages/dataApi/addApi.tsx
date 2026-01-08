@@ -15,6 +15,7 @@ import {
   Table,
   TableColumnProps,
   Tabs,
+  Tooltip,
   Tree
 } from '@arco-design/web-react';
 import { useHistory } from 'react-router';
@@ -458,7 +459,8 @@ export default function AddApi() {
           if (res.data) {
             treeNode.props.dataRef.children = res.data.map((item) => ({
               title: item.tableName,
-              key: `${treeNode.props.dataRef.title}_${item.tableName}_${item.id}`,
+              key: `${item.databaseName}_${item.tableName}_${item.id}`,
+              content: `${item.databaseName}.${item.tableName}`,
               children: [],
               isCanCopy: true
             }));
@@ -479,6 +481,7 @@ export default function AddApi() {
             treeNode.props.dataRef.children = res.data.map((item) => ({
               title: `${item.fieldName} (${item.description})`,
               key: `${treeNode.props.dataRef.title}_${item.fieldName}_${item.id}`,
+              content: item.fieldName,
               isCanCopy: true,
               isLeaf: true
             }));
@@ -571,7 +574,8 @@ export default function AddApi() {
             title: highlightKeyword(item.tableName, value),
             key: `${databaseType}_${item.id}`,
             children: [],
-            isCanCopy: true
+            isCanCopy: true,
+            content: `${item.databaseName}.${item.tableName}`
           };
           groupMap.get(databaseType).children.push(childNode);
         });
@@ -997,64 +1001,71 @@ export default function AddApi() {
                     onClear={getOpenDataListData}
                   />
                 </div>
-                <Tree
-                  className={styles.treeNode}
-                  loadMore={loadMore}
-                  treeData={treeData}
-                  actionOnClick={['expand', 'select']}
-                  expandedKeys={expandedKeys}
-                  onExpand={setExpandedKeys}
-                  virtualListProps={{ height: 'calc(100% - 40px)' }}
-                  renderTitle={(props) => {
-                    const nodeData = props.dataRef;
-                    const nodeContent = nodeData?.isCanCopy;
-                    return (
-                      <div className="flex items-center">
-                        <EllipsisPopoverCom
-                          className={
-                            !isSearch
-                              ? styles.treeNodeTitle
-                              : styles.treeNodeTitleSearch
-                          }
-                          // preferTypography
-                          value={nodeData?.title ?? ''}
-                        />
-                        {nodeContent && (
-                          <Button
-                            type="outline"
-                            className={styles.insertOrCopyBtn}
-                            onClick={() =>
-                              handleInsertClick(nodeData?.title as string)
+                {treeData.length > 0 ? (
+                  <Tree
+                    className={styles.treeNode}
+                    loadMore={loadMore}
+                    treeData={treeData}
+                    actionOnClick={['expand', 'select']}
+                    expandedKeys={expandedKeys}
+                    onExpand={setExpandedKeys}
+                    virtualListProps={{ height: 'calc(100% - 40px)' }}
+                    renderTitle={(props) => {
+                      const nodeData = props.dataRef;
+                      const nodeContent = nodeData?.isCanCopy;
+                      return (
+                        <div className="flex items-center">
+                          <EllipsisPopoverCom
+                            className={
+                              !isSearch
+                                ? styles.treeNodeTitle
+                                : styles.treeNodeTitleSearch
                             }
-                            onMouseDown={(e) => {
-                              // 阻止按钮获得焦点，保持编辑器焦点
-                              e.preventDefault();
-                            }}
-                          >
-                            {isEditorFocused ? '插入' : '复制'}
-                          </Button>
-                        )}
-                      </div>
-                    );
-                  }}
-                ></Tree>
+                            // preferTypography
+                            value={nodeData?.title ?? ''}
+                          />
+                          {nodeContent && (
+                            <Button
+                              type="outline"
+                              className={styles.insertOrCopyBtn}
+                              onClick={() => {
+                                console.log(nodeData, 'nodede');
+                                handleInsertClick(nodeData?.content as string);
+                              }}
+                              onMouseDown={(e) => {
+                                // 阻止按钮获得焦点，保持编辑器焦点
+                                e.preventDefault();
+                              }}
+                            >
+                              {isEditorFocused ? '插入' : '复制'}
+                            </Button>
+                          )}
+                        </div>
+                      );
+                    }}
+                  />
+                ) : (
+                  <NoDataCard type="block" />
+                )}
               </div>
               <div ref={rightBoxRef} className={styles.rightBox}>
                 <div className="align-center flex h-12 justify-between border-b border-[#e2e8f0] p-3">
                   <div className="text-sm font-semibold leading-6">
                     SQL编辑器
                   </div>
-                  <Button
-                    className="h-6"
-                    icon={<IconCaretRight />}
-                    disabled={!isCanTest}
-                    onClick={() => {
-                      outputParamsForm.submit();
-                      inputParamsForm.submit();
-                    }}
-                  >
-                    测试代码和参数
-                  </Button>
+                  <Tooltip content={!isCanTest ? '未进行解析参数' : null}>
+                    <Button
+                      className="h-6"
+                      icon={<IconCaretRight />}
+                      disabled={!isCanTest}
+                      onClick={() => {
+                        outputParamsForm.submit();
+                        inputParamsForm.submit();
+                      }}
+                    >
+                      测试代码和参数
+                    </Button>
+                  </Tooltip>
                 </div>
                 <ResizeBox.Split
                   direction="vertical"
@@ -1069,19 +1080,25 @@ export default function AddApi() {
             </div>
           )}
           <div className={styles.stepFooter}>
-            <Button
-              disabled={current >= 2 && !canComplete}
-              onClick={() => {
-                if (current === 1) {
-                  form.submit();
-                } else {
-                  history.goBack();
-                }
-              }}
-              type="primary"
+            <Tooltip
+              content={
+                current >= 2 && !canComplete ? '未进行测试代码和参数' : null
+              }
             >
-              {current === 1 ? '下一步' : '完成'}
-            </Button>
+              <Button
+                disabled={current >= 2 && !canComplete}
+                onClick={() => {
+                  if (current === 1) {
+                    form.submit();
+                  } else {
+                    history.goBack();
+                  }
+                }}
+                type="primary"
+              >
+                {current === 1 ? '下一步' : '完成'}
+              </Button>
+            </Tooltip>
             {current === 2 && (
               <Button
                 type="secondary"
