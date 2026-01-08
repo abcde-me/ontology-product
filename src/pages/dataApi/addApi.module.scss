@@ -9,11 +9,57 @@
     border-radius: 16px;
     position: relative;
 
+    :global(.arco-steps-item-finish .arco-steps-icon) {
+      border: unset;
+      color: rgb(var(--primary-6));
+      background: #eef6ff;
+    }
+
+    :global(.arco-steps-icon) {
+      line-height: 24px;
+    }
+
     :global(.arco-steps-item-process .arco-steps-item-title) {
       color: #0f172a;
       font-weight: 500;
       font-size: 16px;
       margin-left: 8px;
+    }
+
+    :global(.arco-form-label-item) {
+      min-width: 150px;
+      flex: 0 0 150px;
+    }
+
+    :global(.arco-switch) {
+      display: flex;
+      height: 22px;
+      width: 44px;
+      align-items: center;
+      font-size: 14px;
+      line-height: 22px;
+      border-radius: 24px;
+
+      :global(.arco-switch-dot) {
+        top: 3px;
+        width: 16px;
+        height: 16px;
+      }
+
+      :global(.arco-switch-text) {
+        font-size: 14px;
+        top: 1px;
+      }
+
+      :global(.switchSlideText-enter-done) {
+        font-size: 14px;
+        top: 1px;
+        left: 8px;
+      }
+    }
+
+    :global(.arco-switch-checked .arco-switch-dot) {
+      left: calc(100% - 18px - 2px);
     }
 
     .inputNumber {
@@ -113,7 +159,11 @@
         }
 
         .treeNodeTitle {
-          width: 130px;
+          width: 145px;
+        }
+
+        .treeNodeTitleSearch {
+          width: 150px;
         }
 
         :global(.arco-tree-node):hover {
@@ -128,16 +178,24 @@
             font-size: 14px;
           }
 
-          .treeNodeTitle {
+          .treeNodeTitle,
+          .treeNodeTitleSearch {
             color: var(--primary-primary-6, #007dfa);
           }
 
           // 根据按钮数量动态调整名称宽度
           &:has(.insertOrCopyBtn) {
             .treeNodeTitle {
-              max-width: 80px; // 默认1个按钮时的最大宽度
+              max-width: 85px; // 默认1个按钮时的最大宽度
+            }
+            .treeNodeTitleSearch {
+              max-width: 105px;
             }
           }
+        }
+
+        :global(.aa-no-data-card) {
+          margin-top: 250px;
         }
       }
 
@@ -146,8 +204,27 @@
         max-width: calc(100% - 240px);
         overflow: hidden;
 
+        .sqlEditorHeader {
+          display: flex;
+          align-items: center;
+          height: 48px;
+          justify-content: space-between;
+          border-bottom: 1px solid #e2e8f0;
+          padding: 12px;
+
+          :global(.arco-btn) {
+            height: 24px;
+            padding: 0 12px;
+            border: 1px solid #cbd5e1 !important;
+          }
+        }
+
         :global(.cm-gutters.cm-gutters-before) {
           border-right-width: 0px;
+        }
+
+        :global(.cm-placeholder) {
+          color: #94a3b8;
         }
 
         :global(.cm-focused) {
@@ -170,9 +247,11 @@
         }
 
         .parseParamsBtn {
-          height: 24px;
-          padding: 0 12px;
-          border: 1px solid #cbd5e1 !important;
+          :global(.arco-btn) {
+            height: 24px;
+            padding: 0 12px;
+            border: 1px solid #cbd5e1 !important;
+          }
         }
 
         .codeMirror {

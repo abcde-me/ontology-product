@@ -311,7 +311,7 @@ export default function MetadataManagementDetail() {
     },
     {
       label: '分区数',
-      value: Number(baseInfoData.replicaNum || 0)
+      value: Number(baseInfoData.partitionNum || 0)
     },
     {
       label: '桶数',
@@ -343,10 +343,6 @@ export default function MetadataManagementDetail() {
     {
       label: '向量数量',
       value: Number(baseInfoData.approxEntityCount || 0)
-    },
-    {
-      label: '分区字段',
-      value: getPartitionKey(baseInfoData.partitionKey)
     },
     {
       label: '分区数',
@@ -895,7 +891,10 @@ export default function MetadataManagementDetail() {
           const newPreviewInfoColumns = res.data.data.title.map((item) => ({
             title: `${item.nameEn}（${item.nameZh}）`,
             dataIndex: item.nameEn,
-            width: 300
+            width: 300,
+            render: (text, record) => (
+              <EllipsisPopoverCom value={text} preferTypography />
+            )
           }));
           setPreviewInfoColumns(newPreviewInfoColumns);
           setPreviewInfoData(res.data.data.tableData || []);

@@ -254,7 +254,8 @@ export default React.memo(function SQLPanel(
             );
           }}
         >
-          {({ raw_script, script_type, sql_id }, { getFieldValue }) => {
+          {({ raw_script, script_type, sql_id }) => {
+            // 未来选择已有脚本且脚本内容为空时，不允许编辑参数
             if (script_type !== 'custom' && !sql_id && !raw_script) {
               return null;
             }
@@ -267,20 +268,23 @@ export default React.memo(function SQLPanel(
                         className={'flex w-full items-center justify-between'}
                       >
                         自定义参数：
-                        <Button
-                          size={'mini'}
-                          type={'text'}
-                          className={`flex items-center justify-center ${styles['add-params']}`}
-                          icon={<IconPlus className={'text-[#1E293B]'} />}
-                          disabled={readOnly || props.readonly}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            add({
-                              prop: undefined,
-                              value: undefined
-                            });
-                          }}
-                        />
+                        {/*只有自定义脚本的时候才允许新增参数*/}
+                        {script_type === 'custom' && (
+                          <Button
+                            size={'mini'}
+                            type={'text'}
+                            className={`flex items-center justify-center ${styles['add-params']}`}
+                            icon={<IconPlus className={'text-[#1E293B]'} />}
+                            disabled={readOnly || props.readonly}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              add({
+                                prop: undefined,
+                                value: undefined
+                              });
+                            }}
+                          />
+                        )}
                       </div>
                       <FormItem className={'add-field-action'}>
                         {!!fields.length &&

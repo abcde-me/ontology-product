@@ -144,7 +144,10 @@ export default function ViewFileModal({ visible, onCancel, id }) {
     {
       title: '默认值',
       dataIndex: 'defaultValue',
-      width: 100
+      width: 100,
+      render: (text, record) => (
+        <EllipsisPopoverCom value={text || '-'} preferTypography />
+      )
     },
     {
       title: '参数类型',
@@ -232,6 +235,7 @@ export default function ViewFileModal({ visible, onCancel, id }) {
       title="API使用文档"
       onCancel={onCancel}
       focusLock={false}
+      footer={null}
     >
       <>
         <Tabs
@@ -286,7 +290,7 @@ export default function ViewFileModal({ visible, onCancel, id }) {
               menuRef.current[2] = el;
             }}
           >
-            <h1 className="mb-4 mt-3 text-sm font-medium">输出参数</h1>
+            <h1 className="mb-4 mt-6 text-sm font-medium">输出参数</h1>
             <Table
               border={false}
               columns={outputParamsColumns}
@@ -302,7 +306,7 @@ export default function ViewFileModal({ visible, onCancel, id }) {
               menuRef.current[3] = el;
             }}
           >
-            <div className="mb-4 mt-3 flex items-center justify-between">
+            <div className="mb-4 mt-6 flex items-center justify-between">
               <h1 className="mt-[1px] text-sm font-medium">请求示例(JSON)</h1>
               <Button
                 type="outline"
@@ -344,7 +348,7 @@ export default function ViewFileModal({ visible, onCancel, id }) {
               menuRef.current[4] = el;
             }}
           >
-            <h1 className="mb-4 mt-3 text-sm font-medium">输出示例(JSON)</h1>
+            <h1 className="mb-4 mt-6 text-sm font-medium">输出示例(JSON)</h1>
             <div className={styles.tableContent}>
               <pre>
                 {viewFileDetailData?.example?.response
@@ -363,7 +367,7 @@ export default function ViewFileModal({ visible, onCancel, id }) {
               menuRef.current[5] = el;
             }}
           >
-            <h1 className="mb-4 mt-3 text-sm font-medium">状态码</h1>
+            <h1 className="mb-4 mt-6 text-sm font-medium">状态码</h1>
             <Table
               border={false}
               columns={statusCodesColumns}

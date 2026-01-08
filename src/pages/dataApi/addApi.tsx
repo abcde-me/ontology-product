@@ -11,9 +11,11 @@ import {
   ResizeBox,
   Select,
   Steps,
+  Switch,
   Table,
   TableColumnProps,
   Tabs,
+  Tooltip,
   Tree
 } from '@arco-design/web-react';
 import { useHistory } from 'react-router';
@@ -88,10 +90,12 @@ export default function AddApi() {
   const [apiCacheMethod, setApiCacheMethod] = useState(0);
   const [isCanTest, setIsCanTest] = useState<boolean>(false);
   const [canComplete, setCanComplete] = useState<boolean>(false);
+  const [expandedKeys, setExpandedKeys] = useState<string[]>([]);
 
   const [resizeSize, setResizeSize] = useState<string>('');
   const [paneContainersSize, setPaneContainersSize] = useState<string>('220px');
   const [treeData, setTreeData] = React.useState<TreeDataType[]>([]);
+  const [isSearch, setIsSearch] = useState<boolean>(false);
 
   const columns: TableColumnProps[] = [
     {
@@ -380,6 +384,10 @@ export default function AddApi() {
           }))
         }));
         setTreeData(newTreeData);
+        setIsSearch(false);
+        setExpandedKeys([
+          Number(form.getFieldValue('databaseType')) === 1 ? 'iceberg' : 'doris'
+        ]);
       }
     } else {
       Message.error(res.message || '获取数据源列表失败');
@@ -441,17 +449,18 @@ export default function AddApi() {
   // 模拟调用接口获取子节点数据
   const loadMore = (treeNode) => {
     const metadataTypeArr = ['iceberg', 'doris', 'kafka', 'minio', 'milvus'];
-    if (metadataTypeArr.includes(treeNode.props.parentKey)) {
+    if (metadataTypeArr.includes(treeNode.props.parentKey) && !isSearch) {
       const params = {
         databaseType: treeNode.props.parentKey === 'iceberg' ? 1 : 2,
-        tableId: Number(treeNode.props.dataRef.key.split('_').pop())
+        databaseId: Number(treeNode.props.dataRef.key.split('_').pop())
       };
       return openDataSearchTable(params).then((res) => {
         if (res.code === '' && res.status === 200) {
           if (res.data) {
             treeNode.props.dataRef.children = res.data.map((item) => ({
               title: item.tableName,
-              key: `${treeNode.props.dataRef.title}_${item.tableName}_${item.id}`,
+              key: `${item.databaseName}_${item.tableName}_${item.id}`,
+              content: `${item.databaseName}.${item.tableName}`,
               children: [],
               isCanCopy: true
             }));
@@ -472,6 +481,7 @@ export default function AddApi() {
             treeNode.props.dataRef.children = res.data.map((item) => ({
               title: `${item.fieldName} (${item.description})`,
               key: `${treeNode.props.dataRef.title}_${item.fieldName}_${item.id}`,
+              content: item.fieldName,
               isCanCopy: true,
               isLeaf: true
             }));
@@ -526,9 +536,9 @@ export default function AddApi() {
 
     if (isEditorFocusedNow) {
       // 编辑器聚焦时插入内容
-      insertContentAtCursor(nodeContent ?? '');
+      insertContentAtCursor(`\`${nodeContent}\``);
     } else {
-      const isSuccess = copy(nodeContent ?? '');
+      const isSuccess = copy(`\`${nodeContent}\``);
 
       if (isSuccess) {
         Message.success('内容复制成功，请粘贴到编辑器');
@@ -560,11 +570,12 @@ export default function AddApi() {
               children: []
             });
           }
-
           const childNode = {
             title: highlightKeyword(item.tableName, value),
             key: `${databaseType}_${item.id}`,
-            children: []
+            children: [],
+            isCanCopy: true,
+            content: `${item.databaseName}.${item.tableName}`
           };
           groupMap.get(databaseType).children.push(childNode);
         });
@@ -698,22 +709,30 @@ export default function AddApi() {
           ? rightBoxRef.current?.offsetHeight - 90
           : 590;
         setActiveKey(keys);
-        setResizeSize(isOpenNow ? `190px` : `${tabHeight}px`);
+        setResizeSize(
+          isOpenNow
+            ? resultData.length > 0
+              ? `190px`
+              : `390px`
+            : `${tabHeight}px`
+        );
         setIsOpen(isOpenNow);
       }}
       expandIcon={<IconUp />}
     >
       <CollapseItem
         header="输入输出参数"
+        className={styles.parseParamsBtn}
         extra={
-          <Button
-            className={styles.parseParamsBtn}
-            onClick={parseParameters}
-            disabled={!value}
-            icon={<ParseParametersIcon />}
-          >
-            <span className="text-sm text-[#1E293B]">解析参数</span>
-          </Button>
+          <Tooltip content={!value ? 'SQL编辑内容不能为空' : null}>
+            <Button
+              onClick={parseParameters}
+              disabled={!value}
+              icon={<ParseParametersIcon />}
+            >
+              <span className="text-sm text-[#1E293B]">解析参数</span>
+            </Button>
+          </Tooltip>
         }
         name="inputOutputParams"
       >
@@ -732,20 +751,25 @@ export default function AddApi() {
               layout="vertical"
               onSubmit={handleInputParams}
             >
-              <Table
-                columns={columns}
-                data={paramData}
-                pagination={false}
-                className="min-w-[1000px]"
-                rowKey="name"
-                noDataElement={
-                  <NoDataCard
-                    title="暂无数据"
-                    primaryBtn={<Link onClick={parseParameters}>解析参数</Link>}
-                    isTextButton
-                  />
-                }
-              />
+              {paramData.length > 0 ? (
+                <Table
+                  columns={columns}
+                  data={paramData}
+                  pagination={false}
+                  className="min-w-[1000px]"
+                  rowKey="name"
+                  noDataElement={
+                    <NoDataCard title="暂无数据" isTextButton type="block" />
+                  }
+                />
+              ) : (
+                <NoDataCard
+                  title="暂无数据"
+                  primaryBtn={<Link onClick={parseParameters}>解析参数</Link>}
+                  isTextButton
+                  type="block"
+                />
+              )}
             </Form>
           </TabPane>
           <TabPane
@@ -758,20 +782,25 @@ export default function AddApi() {
             }}
           >
             <Form form={outputParamsForm} layout="vertical">
-              <Table
-                columns={outparamsColumns}
-                data={resultData}
-                pagination={false}
-                className="min-w-[1000px]"
-                rowKey="name"
-                noDataElement={
-                  <NoDataCard
-                    title="暂无数据"
-                    primaryBtn={<Link onClick={parseParameters}>解析参数</Link>}
-                    isTextButton
-                  />
-                }
-              />
+              {resultData.length > 0 ? (
+                <Table
+                  columns={outparamsColumns}
+                  data={resultData}
+                  pagination={false}
+                  className="min-w-[1000px]"
+                  rowKey="name"
+                  noDataElement={
+                    <NoDataCard title="暂无数据" isTextButton type="block" />
+                  }
+                />
+              ) : (
+                <NoDataCard
+                  title="暂无数据"
+                  primaryBtn={<Link onClick={parseParameters}>解析参数</Link>}
+                  isTextButton
+                  type="block"
+                />
+              )}
             </Form>
           </TabPane>
         </Tabs>
@@ -799,10 +828,11 @@ export default function AddApi() {
             <Form
               form={form}
               layout="horizontal"
-              labelCol={{ span: 3 }}
+              autoComplete="off"
               wrapperCol={{ span: 11 }}
               className="mt-6"
               onSubmit={handleSubmit}
+              colon=":"
             >
               <Form.Item
                 label="API英文名称"
@@ -816,12 +846,12 @@ export default function AddApi() {
                 <Input placeholder="请输入API英文名称" />
               </Form.Item>
               <Form.Item
-                label="API描述"
+                label="API中文名称"
                 field="nameCn"
                 required
-                rules={[{ required: true, message: '请输入API描述' }]}
+                rules={[{ required: true, message: '请输入中文名称' }]}
               >
-                <Input placeholder="输入API描述" />
+                <Input placeholder="输入中文名称，如“查询用户详情”" />
               </Form.Item>
               <Form.Item
                 label="API路径"
@@ -887,6 +917,7 @@ export default function AddApi() {
                       : 100
                   }
                   min={0}
+                  max={100}
                   onChange={(value) => form.setFieldValue('limitCount', value)}
                 />
                 次/分钟
@@ -894,16 +925,14 @@ export default function AddApi() {
               <Form.Item
                 label="缓存方法"
                 field="cacheMethod"
-                initialValue={apiCacheMethod}
+                initialValue={apiCacheMethod !== 0}
               >
-                <Select
-                  options={[
-                    { label: '开启缓存', value: 1 },
-                    { label: '关闭缓存', value: 0 }
-                  ]}
-                  defaultValue={apiCacheMethod}
-                  placeholder="请选择缓存方法"
-                  onChange={(value) => setApiCacheMethod(value)}
+                <Switch
+                  checkedText="开"
+                  uncheckedText="关"
+                  checked={apiCacheMethod !== 0}
+                  onChange={(value) => setApiCacheMethod(value ? 1 : 0)}
+                  size="default"
                 />
               </Form.Item>
               {apiCacheMethod === 1 && (
@@ -964,67 +993,80 @@ export default function AddApi() {
                   <Input.Search
                     placeholder="请输入搜索数据源"
                     className="ml-2 w-[160px]"
-                    onSearch={(value) =>
+                    onSearch={(value) => {
+                      setIsSearch(value?.trim() !== '');
                       value?.trim() !== ''
                         ? handleSearchTable(value)
-                        : getOpenDataListData()
-                    }
+                        : getOpenDataListData();
+                    }}
                     allowClear
                     onClear={getOpenDataListData}
                   />
                 </div>
-                <Tree
-                  className={styles.treeNode}
-                  loadMore={loadMore}
-                  treeData={treeData}
-                  actionOnClick={['expand', 'select']}
-                  virtualListProps={{ height: 'calc(100% - 40px)' }}
-                  renderTitle={(props) => {
-                    const nodeData = props.dataRef;
-                    const nodeContent = nodeData?.isCanCopy;
-                    return (
-                      <div className="flex items-center">
-                        <EllipsisPopoverCom
-                          className={styles.treeNodeTitle}
-                          preferTypography
-                          value={nodeData?.title ?? ''}
-                        />
-                        {nodeContent && (
-                          <Button
-                            type="outline"
-                            className={styles.insertOrCopyBtn}
-                            onClick={() =>
-                              handleInsertClick(nodeData?.title as string)
+                {treeData.length > 0 ? (
+                  <Tree
+                    className={styles.treeNode}
+                    loadMore={loadMore}
+                    treeData={treeData}
+                    actionOnClick={['expand', 'select']}
+                    expandedKeys={expandedKeys}
+                    onExpand={setExpandedKeys}
+                    virtualListProps={{ height: 'calc(100% - 40px)' }}
+                    renderTitle={(props) => {
+                      const nodeData = props.dataRef;
+                      const nodeContent = nodeData?.isCanCopy;
+                      return (
+                        <div className="flex items-center">
+                          <EllipsisPopoverCom
+                            className={
+                              !isSearch
+                                ? styles.treeNodeTitle
+                                : styles.treeNodeTitleSearch
                             }
-                            onMouseDown={(e) => {
-                              // 阻止按钮获得焦点，保持编辑器焦点
-                              e.preventDefault();
-                            }}
-                          >
-                            {isEditorFocused ? '插入' : '复制'}
-                          </Button>
-                        )}
-                      </div>
-                    );
-                  }}
-                ></Tree>
+                            // preferTypography
+                            value={nodeData?.title ?? ''}
+                          />
+                          {nodeContent && (
+                            <Button
+                              type="outline"
+                              className={styles.insertOrCopyBtn}
+                              onClick={() => {
+                                console.log(nodeData, 'nodede');
+                                handleInsertClick(nodeData?.content as string);
+                              }}
+                              onMouseDown={(e) => {
+                                // 阻止按钮获得焦点，保持编辑器焦点
+                                e.preventDefault();
+                              }}
+                            >
+                              {isEditorFocused ? '插入' : '复制'}
+                            </Button>
+                          )}
+                        </div>
+                      );
+                    }}
+                  />
+                ) : (
+                  <NoDataCard type="block" />
+                )}
               </div>
               <div ref={rightBoxRef} className={styles.rightBox}>
-                <div className="align-center flex h-12 justify-between border-b border-[#e2e8f0] p-3">
+                <div className={styles.sqlEditorHeader}>
                   <div className="text-sm font-semibold leading-6">
                     SQL编辑器
                   </div>
-                  <Button
-                    className="h-6"
-                    icon={<IconCaretRight />}
-                    disabled={!isCanTest}
-                    onClick={() => {
-                      outputParamsForm.submit();
-                      inputParamsForm.submit();
-                    }}
-                  >
-                    测试代码和参数
-                  </Button>
+                  <Tooltip content={!isCanTest ? '未进行解析参数' : null}>
+                    <Button
+                      icon={<IconCaretRight />}
+                      disabled={!isCanTest}
+                      onClick={() => {
+                        outputParamsForm.submit();
+                        inputParamsForm.submit();
+                      }}
+                    >
+                      测试代码和参数
+                    </Button>
+                  </Tooltip>
                 </div>
                 <ResizeBox.Split
                   direction="vertical"
@@ -1039,19 +1081,25 @@ export default function AddApi() {
             </div>
           )}
           <div className={styles.stepFooter}>
-            <Button
-              disabled={current >= 2 && !canComplete}
-              onClick={() => {
-                if (current === 1) {
-                  form.submit();
-                } else {
-                  history.goBack();
-                }
-              }}
-              type="primary"
+            <Tooltip
+              content={
+                current >= 2 && !canComplete ? '未进行测试代码和参数' : null
+              }
             >
-              {current === 1 ? '下一步' : '完成'}
-            </Button>
+              <Button
+                disabled={current >= 2 && !canComplete}
+                onClick={() => {
+                  if (current === 1) {
+                    form.submit();
+                  } else {
+                    history.goBack();
+                  }
+                }}
+                type="primary"
+              >
+                {current === 1 ? '下一步' : '完成'}
+              </Button>
+            </Tooltip>
             {current === 2 && (
               <Button
                 type="secondary"
