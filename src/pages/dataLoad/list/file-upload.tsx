@@ -34,41 +34,90 @@ const Uploads: React.FC<UploadsProps> = ({
   };
 
   const handleUploadChange = (files: any) => {
-    console.log('files', files);
     const prevLength = fileList.length;
-    setFileList(files);
+
+    // 过滤文件：只保留上传中的文件和上传成功的文件（成功条件：status === 'done' && code === '' && status === 200）
+    // 过滤掉上传失败或错误状态的文件
+    const filteredFiles = files.filter((file: any) => {
+      // 保留即将的文件
+      if (file.status === 'init') {
+        return true;
+      }
+      // 保留上传中的文件
+      if (file.status === 'uploading') {
+        return true;
+      }
+      // 保留上传成功的文件
+      if (
+        file.status === 'done' &&
+        file.response &&
+        file.response.data &&
+        file.response.code === '' &&
+        file.response.status === 200
+      ) {
+        return true;
+      }
+      // 如果是上传失败的文件，显示错误提示并过滤掉
+      if (file.status === 'done' && file.response) {
+        if (file.response.code !== '' || file.response.status !== 200) {
+          Message.error(
+            file.response.message || `${file.name} 上传失败，请重试`
+          );
+          return false;
+        }
+      }
+      // 其他状态（如 error）也过滤掉
+      return false;
+    });
+
+    setFileList(filteredFiles);
     if (getChunkedFile) {
-      getChunkedFile(files);
+      getChunkedFile(filteredFiles);
     }
     // 检查是否有文件正在上传
-    const isUploading = files.some((file: any) => file.status === 'uploading');
+    const isUploading = filteredFiles.some(
+      (file: any) => file.status === 'uploading'
+    );
     if (onUploadingChange) {
       onUploadingChange(isUploading);
     }
 
     // 检查是否有文件被删除
-    if (prevLength > files.length) {
+    if (prevLength > filteredFiles.length) {
       const deletedFiles = fileList.filter(
-        (prevFile) => !files.some((newFile) => newFile.name === prevFile.name)
+        (prevFile) =>
+          !filteredFiles.some((newFile) => newFile.name === prevFile.name)
       );
-      // 通知父组件文件被删除
+      // 通知父组件文件被删除（只有真正上传成功的文件才需要通知删除）
       deletedFiles.forEach((file) => {
-        if (onFileDelete && file.response && file.response.data) {
+        if (
+          onFileDelete &&
+          file.response &&
+          file.response.data &&
+          file.response.code === '' &&
+          file.response.status === 200
+        ) {
           onFileDelete(file.response.data.name);
         }
       });
     }
 
     if (onFileChange) {
-      if (files.length === 0) {
+      if (filteredFiles.length === 0) {
         // 清空文件列表
         onFileChange([]);
         return;
       }
 
       // 处理所有上传完成的文件
-      const completedFiles = files.filter(
-        (file) => file.status === 'done' && file.response && file.response.data
+      // 只有当 status === 'done' 且 code === '' 且 status === 200 时才认为上传成功
+      const completedFiles = filteredFiles.filter(
+        (file) =>
+          file.status === 'done' &&
+          file.response &&
+          file.response.data &&
+          file.response.code === '' &&
+          file.response.status === 200
       );
 
       // 一次性传递所有已完成的文件数据
@@ -171,17 +220,59 @@ const Uploads: React.FC<UploadsProps> = ({
     }
     return true;
   };
+
+  const handleRemove = (file: any) => {
+    const newFileList = fileList.filter((item: any) => item.uid !== file.uid);
+    setFileList(newFileList);
+
+    // 通知父组件文件被删除（只有真正上传成功的文件才需要通知删除）
+    if (
+      onFileDelete &&
+      file.response &&
+      file.response.data &&
+      file.response.code === '' &&
+      file.response.status === 200
+    ) {
+      onFileDelete(file.response.data.name);
+    }
+
+    // 更新已完成文件列表
+    if (onFileChange) {
+      const completedFiles = newFileList.filter(
+        (f: any) =>
+          f.status === 'done' &&
+          f.response &&
+          f.response.data &&
+          f.response.code === '' &&
+          f.response.status === 200
+      );
+      if (completedFiles.length > 0) {
+        const allFilesData = completedFiles.map((f: any) => f.response.data);
+        onFileChange(allFilesData);
+      } else {
+        onFileChange([]);
+      }
+    }
+
+    if (getChunkedFile) {
+      getChunkedFile(newFileList);
+    }
+  };
+
   return (
     <Upload
       drag
       className="upload-file"
       multiple
       accept=".doc,.docx,.ppt,.pptx,.pdf,.jpg,.jpeg,.png,.txt,.md,.wav,.mp3,.aac,.flac,.mp4,.mov,.mkv,.xlsx,.xls"
+      fileList={fileList}
+      showUploadList={fileList.length > 0 ? true : false}
       beforeUpload={(file, list) => {
         return checkFile(file, list);
       }}
       action={`${PrefixAimdp}/UploadLoadTaskFile`}
       onChange={handleUploadChange}
+      onRemove={handleRemove}
       onDrop={handleDrop}
       headers={{
         Authorization: getToken(),

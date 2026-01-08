@@ -494,7 +494,7 @@ export default function RequirementConfig() {
   const handleChildData = (data: any, key) => {
     const newSetDataContent = data?.map((item) => {
       return {
-        dir_name: String(key),
+        dir_name: item?.dir_name || String(key), // 优先使用数据自身的 dir_name
         load_start_time: convertToUTCFormat(item?.start_time),
         load_end_time: convertToUTCFormat(item?.end_time),
         load_num: item?.load_num,

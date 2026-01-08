@@ -4,25 +4,7 @@ import { PrefixAimdp } from '@/api/endpoints';
 import { IconUpload } from '@arco-design/web-react/icon';
 import { UploadStatus } from '../../types';
 import { downloadDataAssetFieldsTemplate } from '@/api/dataAsset';
-import { AxiosResponse } from 'axios';
 import { useUserInfoStore } from '@/store/userInfoStore';
-
-const getFileNameFromDisposition = (disposition?: string) => {
-  if (!disposition) return '';
-
-  const utf8Match = disposition.match(/filename\*=UTF-8''([^;]+)/i);
-  if (utf8Match?.[1]) {
-    try {
-      return decodeURIComponent(utf8Match[1]);
-    } catch (error) {
-      console.error('decode filename error', error);
-      return utf8Match[1];
-    }
-  }
-
-  const asciiMatch = disposition.match(/filename="?([^"]+)"?/i);
-  return asciiMatch?.[1] ?? '';
-};
 
 interface FieldImportUploadProps {
   onFileChange: (fileData: any) => void;
