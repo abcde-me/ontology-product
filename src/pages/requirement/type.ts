@@ -45,7 +45,15 @@ export enum AnnotationChildType {
   /** 文本排序 */
   TEXT_SORT = 4,
   /** 图片标注 */
-  IMAGE_ANNOTATION = 1
+  IMAGE_ANNOTATION = 1,
+  // 音频分类
+  AUDIO_CLASSIFICATION = 1,
+  // 音频分割
+  AUDIO_SPLIT = 2,
+  // 视频分类
+  VIDEO_CLASSIFICATION = 1,
+  // 视频分割
+  VIDEO_SPLIT = 2
 }
 
 export enum AnnotationTypeContentCode {
@@ -58,7 +66,15 @@ export enum AnnotationTypeContentCode {
   /** 文本排序 */
   TEXT_SORT = 'TEXT_SORT',
   /** 图片标注 */
-  IMAGE_ANNOTATION = 'IMAGE_ANNOTATION'
+  IMAGE_ANNOTATION = 'IMAGE_ANNOTATION',
+  // 音频分类
+  AUDIO_CLASSIFICATION = 'AUDIO_CLASSIFICATION',
+  // 音频分割
+  AUDIO_SPLIT = 'AUDIO_SPLIT',
+  // 视频分类
+  VIDEO_CLASSIFICATION = 'VIDEO_CLASSIFICATION',
+  // 视频分割
+  VIDEO_SPLIT = 'VIDEO_SPLIT'
 }
 
 export enum LabelShape {
