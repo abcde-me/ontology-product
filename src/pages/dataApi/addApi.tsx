@@ -460,7 +460,7 @@ export default function AddApi() {
             treeNode.props.dataRef.children = res.data.map((item) => ({
               title: item.tableName,
               key: `${item.databaseName}_${item.tableName}_${item.id}`,
-              content: `${item.databaseName}.${item.tableName}`,
+              content: `${item.databaseName}\`.\`${item.tableName}`,
               children: [],
               isCanCopy: true
             }));
@@ -575,7 +575,7 @@ export default function AddApi() {
             key: `${databaseType}_${item.id}`,
             children: [],
             isCanCopy: true,
-            content: `${item.databaseName}.${item.tableName}`
+            content: `${item.databaseName}\`.\`${item.tableName}`
           };
           groupMap.get(databaseType).children.push(childNode);
         });
@@ -1031,7 +1031,6 @@ export default function AddApi() {
                               type="outline"
                               className={styles.insertOrCopyBtn}
                               onClick={() => {
-                                console.log(nodeData, 'nodede');
                                 handleInsertClick(nodeData?.content as string);
                               }}
                               onMouseDown={(e) => {
