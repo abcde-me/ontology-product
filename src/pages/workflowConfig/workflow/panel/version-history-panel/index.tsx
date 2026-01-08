@@ -21,7 +21,7 @@ import Empty from './empty';
 import { useSelector as useAppContextSelector } from '@/pages/workflowConfig/context/app-context';
 import RestoreConfirmModal from './restore-confirm-modal';
 import DeleteConfirmModal from './delete-confirm-modal';
-import VersionInfoModal from '@/pages/workflowConfig/app/app-publisher/version-info-modal';
+// import VersionInfoModal from '@/pages/workflowConfig/app/app-publisher/version-info-modal';
 import Toast from '@/pages/workflowConfig/components/toast';
 import {
   getWorkflowPublishHistory,
@@ -361,7 +361,7 @@ const VersionHistoryPanel = () => {
           onDelete={handleDelete}
         />
       )}
-      {editModalOpen && (
+      {/* {editModalOpen && (
         <VersionInfoModal
           isOpen={editModalOpen}
           versionInfo={operatedItem}
@@ -371,7 +371,7 @@ const VersionHistoryPanel = () => {
           )}
           onPublish={handleUpdateWorkflow}
         />
-      )}
+      )} */}
     </div>
   );
 };
