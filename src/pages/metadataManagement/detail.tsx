@@ -564,10 +564,10 @@ export default function MetadataManagementDetail() {
     },
     {
       title: '是否向量',
-      dataIndex: 'dimension',
-      key: 'dimension',
+      dataIndex: 'isVector',
+      key: 'isVector',
       width: 150,
-      render: (text, record) => (text ? '是' : '否')
+      render: (text, record) => (text === 1 ? '是' : '否')
     }
   ];
   // 分区信息列
