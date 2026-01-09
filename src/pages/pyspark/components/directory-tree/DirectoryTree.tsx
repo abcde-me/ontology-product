@@ -35,11 +35,11 @@ import AddAfterIcon from '@/assets/python/add-after.svg';
 import { PythonItemType, PythonListItem } from '@/types/pythonApi';
 import EllipsisPopover from '@/components/ellipsis-popover-com';
 import { PYSPARK_PERMISSIONS, SQL_PERMISSIONS } from '@/config/permissions';
-import { now } from 'lodash-es';
 import { PermissionWrapper } from '@/components/PermissionGuard';
 import { debounce } from 'lodash-es';
 import SQLFileIcon from '@/assets/sql/sql-file-icon.svg';
 import styles from './DirectoryTree.module.scss';
+import { validateName } from '@/utils/valiate';
 
 // 原始数据接口
 export type TreeNodeItem = Partial<PythonListItem> & {
@@ -105,8 +105,22 @@ export interface DirectoryTreeProps {
 
 const InputSearch = Input.Search;
 
+// 生成 yymmddhhmmss 格式的日期字符串
+function getYymmddhhmmss(): string {
+  const now = new Date();
+  const yy = String(now.getFullYear()).slice(-2);
+  const mm = String(now.getMonth() + 1).padStart(2, '0');
+  const dd = String(now.getDate()).padStart(2, '0');
+  const hh = String(now.getHours()).padStart(2, '0');
+  const min = String(now.getMinutes()).padStart(2, '0');
+  const ss = String(now.getSeconds()).padStart(2, '0');
+  return `${yy}${mm}${dd}${hh}${min}${ss}`;
+}
+
 function defaultNameGenerator(siblings: TreeDataType[], isFolder = true) {
-  return isFolder ? `新建文件夹_${now()}` : `新建PySpark_${now()}`;
+  return isFolder
+    ? `新建文件夹_${getYymmddhhmmss()}`
+    : `新建PySpark_${getYymmddhhmmss()}`;
 }
 
 export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
@@ -588,7 +602,7 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
     };
     const handleCopy = (node: NodeProps) => {
       try {
-        onCopy?.(`${node.dataRef?.name}_副本_${now()}`, node);
+        onCopy?.(`${node.dataRef?.name}_副本_${getYymmddhhmmss()}`, node);
       } catch (e) {
         Message.error('复制失败');
       }

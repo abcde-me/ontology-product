@@ -257,6 +257,13 @@ export const useFileManager = (
   const handleRename = useCallback(
     async (finalName: string, node: any) => {
       try {
+        if (!validateName(finalName).isValid) {
+          Message.error(
+            validateName(finalName)?.errorMessage ?? '命名不符合规则'
+          );
+          return null;
+        }
+
         const fileId = node?.dataRef?.id || node?.id;
         const renameRes = await renamePythonItem(fileId, {
           id: fileId,
