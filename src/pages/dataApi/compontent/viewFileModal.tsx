@@ -53,8 +53,12 @@ export default function ViewFileModal({ visible, onCancel, id }) {
     if (!id) {
       return;
     }
-    handleViewDetail(id);
-  }, [id]);
+    if (visible) {
+      handleViewDetail(id);
+    } else {
+      setViewFileDetailData({});
+    }
+  }, [visible]);
 
   const callback = useMemoizedFn((entry) => {
     if (entry.isIntersecting) {
