@@ -843,7 +843,11 @@ export default function AddApi() {
                   { validator: validateApiName }
                 ]}
               >
-                <Input placeholder="请输入API英文名称" />
+                <Input
+                  maxLength={30}
+                  showWordLimit
+                  placeholder="请输入API英文名称"
+                />
               </Form.Item>
               <Form.Item
                 label="API中文名称"
@@ -865,6 +869,8 @@ export default function AddApi() {
                 <Input
                   className={styles.apiPath}
                   placeholder="请输入端路径，以“/”开始"
+                  maxLength={40}
+                  showWordLimit
                   // addBefore={
                   //   <Input
                   //     placeholder="请输入环境路径"
