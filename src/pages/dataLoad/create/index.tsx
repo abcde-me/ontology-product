@@ -1611,6 +1611,7 @@ export default function DataLoadCreate() {
                     form.setFieldsValue({ table_name: value });
                     getData(value);
                   }}
+                  disabled={previewLoading}
                   loading={tableLoading}
                   multiple={
                     sourceType === SOURCE_TYPES.DB &&

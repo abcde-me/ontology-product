@@ -68,7 +68,8 @@ const PreviewModal = ({
       title: <div style={{ whiteSpace: 'nowrap' }}>序号</div>,
       dataIndex: 'id',
       width: 60,
-      key: 'id'
+      key: 'id',
+      render: (value: string, record: any, index: number) => index + 1
     },
     ...setColumns()
   ];
