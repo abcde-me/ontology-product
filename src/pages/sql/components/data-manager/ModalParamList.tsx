@@ -167,7 +167,7 @@ const ModalParamList = ({ paramVisible, onCancel }) => {
           pagination={false}
           noDataElement={<NoDataCard title="暂无数据" />}
         />
-        {total > pageSize && (
+        {total > 0 && (
           <div className="mt-[16px] flex items-center justify-end">
             <Pagination
               total={total}

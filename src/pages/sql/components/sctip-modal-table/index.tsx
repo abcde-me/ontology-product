@@ -223,7 +223,7 @@ const SctipModalTable: React.FC<{
       )
     },
     {
-      title: '更新时间',
+      title: '发版时间',
       dataIndex: 'update_time',
       key: 'update_time',
       width: 200,
@@ -380,7 +380,7 @@ const SctipModalTable: React.FC<{
           </div>
           <div className={styles['script-modal-table-content-item']}>
             <div className={styles['script-modal-table-content-item-label']}>
-              发版时间：
+              最新发版时间：
             </div>
             <div className={styles['script-modal-table-content-item-value']}>
               {rowData?.update_time}
@@ -398,7 +398,7 @@ const SctipModalTable: React.FC<{
           pagination={false}
           onChange={handleTableChange}
         />
-        {total > pageSize && (
+        {total > 0 && (
           <Pagination
             current={current}
             pageSize={pageSize}

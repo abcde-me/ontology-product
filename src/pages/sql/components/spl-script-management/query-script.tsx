@@ -363,7 +363,7 @@ const QueryScript: React.FC<QueryScriptProps> = ({ curActiveTab }) => {
         }
       />
       {/* 分页 */}
-      {total > pageSize && (
+      {total > 0 && (
         <Pagination
           current={current}
           pageSize={pageSize}
