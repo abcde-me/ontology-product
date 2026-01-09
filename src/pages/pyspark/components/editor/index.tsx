@@ -7,6 +7,18 @@ import './index.scss';
 
 const { TabPane } = Tabs;
 
+// 生成 yymmddhhmmss 格式的日期字符串
+function getYymmddhhmmss(): string {
+  const now = new Date();
+  const yy = String(now.getFullYear()).slice(-2);
+  const mm = String(now.getMonth() + 1).padStart(2, '0');
+  const dd = String(now.getDate()).padStart(2, '0');
+  const hh = String(now.getHours()).padStart(2, '0');
+  const min = String(now.getMinutes()).padStart(2, '0');
+  const ss = String(now.getSeconds()).padStart(2, '0');
+  return `${yy}${mm}${dd}${hh}${min}${ss}`;
+}
+
 // 简化的props接口
 interface EditorContentProps {
   fileTabs: Array<{
@@ -58,7 +70,7 @@ const EditorContent: React.FC<EditorContentProps> = memo(
 
       try {
         // 生成默认文件名
-        const defaultName = `新建PySpark_${Date.now()}`;
+        const defaultName = `新建PySpark_${getYymmddhhmmss()}`;
 
         // 调用父组件的创建逻辑，传递默认文件名和根目录信息
         // handleCreate 方法内部已经包含了刷新目录、选中文件和打开文件的逻辑
