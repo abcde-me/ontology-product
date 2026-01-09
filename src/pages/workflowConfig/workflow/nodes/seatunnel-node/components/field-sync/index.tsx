@@ -33,13 +33,12 @@ const FieldSync = (props: {
   const { data: targetFields = [], loading: loadingTarget } = useRequest(
     () => {
       const emptyRes: TargetField[] = [];
-      if (isNil(props.target)) return Promise.resolve(emptyRes);
-      const [connector, database, table] = props.target;
+      if (!props.target?.length) return Promise.resolve(emptyRes);
       return PreviewConnectorSampleData({
-        name: table,
-        connector_id: connector
+        name: props.target.at(-1),
+        connector_id: props.target[0]
       })
-        .then((res) => res.data?.columns || [])
+        .then((res) => (res.data?.columns || []) as TargetField[])
         .catch((e) => {
           console.error(e);
           return Promise.resolve(emptyRes);
@@ -77,20 +76,21 @@ const FieldSync = (props: {
       p.set(field.source_field, field);
       return p;
     }, new Map<string, SyncField>());
+    const targetMap = targetFields.reduce((p, c) => {
+      p.set(c.name, c);
+      return p;
+    }, new Map<string, TargetField>());
     // 遍历查找来源和目标字段中重名的字段
-    const datasource = targetFields.flatMap(
-      ({ name: t_name, type: t_type }) => {
-        const sourceField = sourceFields.get(t_name);
-        if (!sourceField) {
-          return [];
-        }
-        const { fieldName: s_name, dataType: s_type } = sourceField;
+    const datasource: SyncField[] = Array.from(sourceFields.values()).map(
+      ({ fieldName: s_name, dataType: s_type }) => {
         const sourceFromValue = source2TargetMap?.get(s_name);
+        const targetField = targetMap?.get(s_name);
         return {
           source_field: s_name,
           source_field_type: s_type,
-          target_field: sourceFromValue?.target_field || t_name,
-          target_field_type: t_type,
+          target_field: sourceFromValue?.target_field || targetField?.name,
+          target_field_type:
+            sourceFromValue?.target_field_type || targetField?.type,
           sync: !!sourceFromValue,
           primary: primary_keys?.includes(s_name)
         };
@@ -129,13 +129,21 @@ const FieldSync = (props: {
       title: '源字段名',
       dataIndex: 'source_field',
       width: 60,
-      ellipsis: true
+      ellipsis: true,
+      render(t) {
+        if (!t) return '-';
+        return <Tooltip content={t}>{t}</Tooltip>;
+      }
     },
     {
       title: '源字段类型',
       dataIndex: 'source_field_type',
       ellipsis: true,
-      width: 80
+      width: 80,
+      render(t) {
+        if (!t) return '-';
+        return <Tooltip content={t}>{t}</Tooltip>;
+      }
     },
     {
       title: '目标字段名',
@@ -144,12 +152,24 @@ const FieldSync = (props: {
       render: (value, record, index) => {
         return (
           <SelectWithNoData
-            disabled={props.disabled}
+            disabled={props.disabled || !record.sync}
             size={'mini'}
             value={value}
-            onChange={(v) => changeField({ ...record, target_field: v }, index)}
+            showSearch
+            onChange={(v, option: any) =>
+              changeField(
+                {
+                  ...record,
+                  target_field: v,
+                  target_field_type: option.extra.type
+                },
+                index,
+                'target_field'
+              )
+            }
             className={'w-full'}
             options={targetFields.map((t) => ({
+              extra: t,
               value: t.name,
               label: t.name
             }))}
@@ -161,7 +181,11 @@ const FieldSync = (props: {
       title: '目标字段类型',
       dataIndex: 'target_field_type',
       ellipsis: true,
-      width: 80
+      width: 80,
+      render(t) {
+        if (!t) return '-';
+        return <Tooltip content={t}>{t}</Tooltip>;
+      }
     },
     {
       title: '同步',
@@ -179,7 +203,8 @@ const FieldSync = (props: {
                 sync: checked,
                 primary: !checked ? false : record.primary
               },
-              index
+              index,
+              'sync'
             )
           }
         />
@@ -210,7 +235,8 @@ const FieldSync = (props: {
                   ...record,
                   primary: checked
                 },
-                index
+                index,
+                'primary'
               )
             }
           />

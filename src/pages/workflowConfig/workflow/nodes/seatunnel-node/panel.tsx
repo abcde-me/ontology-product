@@ -60,22 +60,12 @@ const loadConnectionTable = (pathValue?: React.Key[]) => {
   }
   return getdetailList({ id: pathValue[0] })
     .then((res) => {
-      const { config = {}, table_name = {} } = res.data || {};
-      if (isEmpty(config)) return [];
-      if (!config.database) return [];
       // 库主键为id，表主键为表名
-      return [
-        {
-          ...config,
-          label: config.database,
-          value: config.database,
-          children: table_name.map(({ title }) => ({
-            label: title,
-            value: title,
-            isLeaf: true
-          }))
-        }
-      ];
+      return res.data?.table_name.map(({ title }) => ({
+        label: title,
+        value: title,
+        isLeaf: true
+      }));
     })
     .catch(() => {
       return Promise.resolve([]);
@@ -206,11 +196,9 @@ export default React.memo(function SeatunnelPanel(
           const connection = targetData.find(
             ({ value }) => value === target_datasource_id
           );
-          const database = connection?.children?.[0]?.value;
-          formData.target_datasource_id =
-            isNil(connection) || isNil(database)
-              ? undefined
-              : [target_datasource_id, database, target_table_name];
+          formData.target_datasource_id = isNil(connection)
+            ? undefined
+            : [target_datasource_id, target_table_name];
         }
       }
       form.setFieldsValue(formData);
@@ -432,14 +420,13 @@ export default React.memo(function SeatunnelPanel(
             placeholder="请选择目标表"
             options={allConnections}
             onChange={(_, selectedOptions) => {
-              const [connector, database, table] = selectedOptions || [];
-              const { name, id } = connector as ConnectionItem;
+              const { name, id } = selectedOptions?.[0] || {};
+              const table = selectedOptions.at(-1);
               form.setFieldsValue({
                 target: {
                   target_datasource_id: id,
                   target_table_name: table.value,
-                  target_datasource_name: name,
-                  target_datasource_table: (database as DatabaseConfig).database
+                  target_datasource_name: name
                 }
               });
             }}
