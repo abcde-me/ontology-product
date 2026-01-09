@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Message } from '@arco-design/web-react';
-import { useRequest } from 'ahooks';
+import { useAsyncEffect, useRequest } from 'ahooks';
 import { RunningStatus } from '@/types/sqlApi';
 import { runCancelSqlScript } from '@/api/sql';
 import {
@@ -188,13 +188,15 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
   }, []);
 
   // 当前文件ID，从 activeTab 对应的标签页获取
-  const currentFile = fileTabs.find((tab) => tab.key === activeTab);
+  const currentFile = useMemo(() => {
+    return fileTabs.find((tab) => tab.key === activeTab);
+  }, [activeTab, fileTabs]);
 
   // 获取当前标签页的 scriptId，用于监听变化
-  const currentScriptId = useMemo(() => {
-    const currentTab = fileTabs.find((tab) => tab.key === activeTab);
-    return currentTab?.scriptId;
-  }, [activeTab, fileTabs]);
+  // const currentScriptId = useMemo(() => {
+  //   const currentTab = fileTabs.find((tab) => tab.key === activeTab);
+  //   return currentTab?.scriptId;
+  // }, [activeTab, fileTabs]);
 
   // 编辑脚本
   const handleEditScript = useCallback(async () => {
@@ -225,9 +227,17 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
     }
   }, [currentFile?.scriptId]);
 
+  // 使用 useRequest 管理 getDevelopScriptInfo 请求，自动处理取消
+  const {
+    runAsync: getDevelopScriptInfoRequest,
+    cancel: cancelGetDevelopScriptInfo
+  } = useRequest(getDevelopScriptInfo, {
+    manual: true
+  });
+
   const loadFileContent = async (scriptId: string) => {
     try {
-      const response = await getDevelopScriptInfo({
+      const response = await getDevelopScriptInfoRequest({
         script_id: Number(scriptId)
       });
 
@@ -271,10 +281,16 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
         }
 
         Message.error(response?.message ?? '加载文件失败');
+        return null;
       }
-    } catch (error) {
+    } catch (error: any) {
+      // 请求取消时，不显示错误消息
+      if (error?.name === 'AbortError' || error?.message?.includes('aborted')) {
+        return null;
+      }
       console.error('加载文件失败:', error);
       Message.error('加载文件失败');
+      return null;
     }
   };
 
@@ -662,51 +678,52 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
     fetchResult();
   }, [execid]);
 
-  // 页面卸载时停止轮询
+  // 页面卸载时停止轮询和取消请求
   useEffect(() => {
     return () => {
       // cancelGetRunResultPolling();
       cancelGetRunLogPolling();
+      // 取消 getDevelopScriptInfo 请求（useRequest 会自动处理）
+      cancelGetDevelopScriptInfo();
     };
-  }, [cancelGetRunLogPolling]);
+  }, [cancelGetRunLogPolling, cancelGetDevelopScriptInfo]);
 
   // 监听 activeTab 或 currentScriptId 变化，重新更新编辑器状态
   useEffect(() => {
-    if (!activeTab || !fileTabs.length || !currentScriptId) {
+    if (!fileTabs.length) {
       return;
     }
 
-    const currentTab = fileTabs.find((tab) => tab.key === activeTab);
-    if (!currentTab) {
+    if (!currentFile?.scriptId) {
       return;
     }
 
     // 重新加载文件内容以获取最新状态
     setContentLoading(true);
-    loadFileContent(currentScriptId)
+
+    loadFileContent(currentFile?.scriptId ?? '')
       .then((res) => {
         if (!res) {
           return;
         }
 
         // 通知父组件更新标签页内容
-        if (onTabUpdate) {
-          onTabUpdate(currentTab.key, {
+        if (
+          onTabUpdate &&
+          String(res.script_id) === String(currentFile?.scriptId)
+        ) {
+          onTabUpdate(currentFile?.key, {
             content: res.script_context ?? '',
-            fileId: String(currentTab.fileId),
+            fileId: String(currentFile.fileId),
             scriptId: String(res.script_id),
-            title: currentTab.title
+            title: currentFile.title
           });
         }
       })
       .finally(() => {
         setContentLoading(false);
       });
-
-    // return () => {
-    //   // handleSaveThrottled.cancel();
-    // };
-  }, [activeTab, currentScriptId]); // 同时依赖 activeTab 和 currentScriptId，当标签页的 scriptId 更新时也会触发
+  }, [currentFile?.scriptId]);
 
   // 当 currentFileId 变化时，重置运行相关状态
   useEffect(() => {
