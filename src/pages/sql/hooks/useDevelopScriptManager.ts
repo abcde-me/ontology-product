@@ -256,6 +256,13 @@ export const useDevelopScriptManager = (
   const handleRename = useCallback(
     async (finalName: string, node: any) => {
       try {
+        if (!validateName(finalName).isValid) {
+          Message.error(
+            validateName(finalName)?.errorMessage ?? '命名不符合规则'
+          );
+          return;
+        }
+
         const scriptId = node?.dataRef?.script_id;
         const fileId = node?.dataRef?.id;
         const renameRes = await renameDevelopScript({
