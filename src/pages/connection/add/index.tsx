@@ -459,7 +459,9 @@ const add = forwardRef((props: any, ref) => {
                         region: '',
                         host: '',
                         port: '',
-                        database: ''
+                        database: '',
+                        user: '',
+                        password: ''
                       })
                     }
                     defaultValue="MySQL"
