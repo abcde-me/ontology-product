@@ -24,7 +24,7 @@ export default memo(function SeatunnelNode(props: NodeProps<SeatunnelConfig>) {
       const res = await getdetailList({ id: target_datasource_id });
       const { config = {}, name = '' } = (res.data as ConnectionItem) || {};
       if (isEmpty(config) || !name) return;
-      return `${name}->${(config as DatabaseConfig).database}`;
+      return name;
     },
     {
       refreshDeps: [target_datasource_id]
