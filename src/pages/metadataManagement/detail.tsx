@@ -247,7 +247,7 @@ export default function MetadataManagementDetail() {
     },
     {
       label: '中文名称',
-      value: baseInfoData.datasourceName || '-'
+      value: baseInfoData.description || '-'
     },
     {
       label: '存储类型',
