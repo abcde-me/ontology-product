@@ -488,12 +488,8 @@ export default function TaskNodeRunList() {
       return false;
     }
 
-    if (!table?.pagination?.pageSize) {
-      return false;
-    }
-
-    return table.pagination.total > table.pagination.pageSize;
-  }, [table.pagination.total, table.pagination.pageSize]);
+    return table.pagination.total > 0;
+  }, [table.pagination.total]);
 
   return (
     <>

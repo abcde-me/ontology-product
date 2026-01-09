@@ -23,7 +23,7 @@ import Badge from '@/pages/workflowConfig/components/badge';
 import Loading from '@/pages/workflowConfig/components/loading';
 import { userInputsFormToPromptVariables } from '@/pages/workflowConfig/utils/model-config';
 import Res from './result';
-import SavedItems from '@/pages/workflowConfig/app/text-generate/saved-items';
+// import SavedItems from '@/pages/workflowConfig/app/text-generate/saved-items';
 import type { InstalledApp } from '@/pages/workflowConfig/models/explore';
 import {
   DEFAULT_VALUE_MAX_LEN,
@@ -729,7 +729,7 @@ const TextGeneration: FC<IMainProps> = ({
               isAllFinished={allTasksRun}
             />
           </div>
-          {currentTab === 'saved' && (
+          {/* {currentTab === 'saved' && (
             <SavedItems
               className={cn(isPC ? 'mt-6' : 'mt-4')}
               isShowTextToSpeech={textToSpeechConfig?.enabled}
@@ -737,7 +737,7 @@ const TextGeneration: FC<IMainProps> = ({
               onRemove={handleRemoveSavedMessage}
               onStartCreateContent={() => setCurrentTab('create')}
             />
-          )}
+          )} */}
         </div>
         {/* powered by */}
         {/* {!customConfig?.remove_webapp_brand && (

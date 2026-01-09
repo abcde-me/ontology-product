@@ -77,7 +77,7 @@ const ScriptTable: React.FC<ScriptTableProps> = ({
   const [formData, setFormData] = useState({
     script_name: '', // 脚本名称
     status: undefined, // 版本状态
-    create_user: '' // 开发人
+    update_user: '' // 修改人
   });
   // 初始化开发脚本列表数据
   const [developScriptData, setDevelopScriptData] = useState<
@@ -124,7 +124,7 @@ const ScriptTable: React.FC<ScriptTableProps> = ({
       const params: any = {
         script_name: formData?.script_name,
         status: formData?.status,
-        create_user: formData?.create_user,
+        update_user: formData?.update_user,
         page: current, //第几页
         page_size: pageSize, //每页个数
         orders: sortValue?.sort
@@ -305,8 +305,8 @@ const ScriptTable: React.FC<ScriptTableProps> = ({
       // ]
     },
     {
-      title: '开发人',
-      dataIndex: 'create_user',
+      title: '修改人',
+      dataIndex: 'update_user',
       width: 100,
       ellipsis: true,
       render: (_, record) => (
@@ -480,8 +480,8 @@ const ScriptTable: React.FC<ScriptTableProps> = ({
               ))}
             </Select>
           </FormItem>
-          <FormItem label="开发人:" field="create_user">
-            <Input className="w-full" placeholder="输入开发人搜索" />
+          <FormItem label="修改人:" field="update_user">
+            <Input className="w-full" placeholder="输入修改人搜索" />
           </FormItem>
         </Form>
         <div className="flex items-center whitespace-nowrap">
@@ -520,7 +520,7 @@ const ScriptTable: React.FC<ScriptTableProps> = ({
       />
       {/* </div> */}
       {/* 分页 */}
-      {total > pageSize && (
+      {total > 0 && (
         <Pagination
           current={current}
           pageSize={pageSize}
