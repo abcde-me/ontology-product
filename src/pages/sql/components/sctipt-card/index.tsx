@@ -395,7 +395,7 @@ const ScriptCard: React.FC<ScriptCardProps> = ({
           )}
         </div>
       </Spin>
-      {total > pageSize && (
+      {total > 0 && (
         <Pagination
           style={{
             display: 'flex',
