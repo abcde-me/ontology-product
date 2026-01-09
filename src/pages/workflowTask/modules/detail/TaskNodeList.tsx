@@ -361,12 +361,8 @@ const TaskNodeList = forwardRef<TaskNodeListRef, TaskNodeListProps>(
         return false;
       }
 
-      if (!table?.pagination?.pageSize) {
-        return false;
-      }
-
-      return table.pagination.total > table.pagination.pageSize;
-    }, [table.pagination.total, table.pagination.pageSize]);
+      return table.pagination.total > 0;
+    }, [table.pagination.total]);
 
     return (
       <div className="mt-[16px] flex-1 rounded-[12px] bg-white p-[16px]">

@@ -59,9 +59,6 @@ import {
   SourceDataItem,
   TargetDataItem
 } from '@/components/data-catalog-content/components/popups-form/types';
-import style from 'react-syntax-highlighter/dist/esm/styles/hljs/a11y-dark';
-import { color } from 'echarts';
-import getFileIcon from '@/components/file-icon';
 import { formatFileSize } from '@/utils/format';
 import dataTypesIcon from '@/pages/datasetManagement/assets/dataset_dataType.png';
 import dataRelationIcon from '@/pages/datasetManagement/assets/dataset_relation.png';
@@ -70,7 +67,6 @@ import dataSceneIcon from '@/pages/datasetManagement/assets/dataset_scene.png';
 import DatasetMoveIcon from '@/pages/datasetManagement/assets/dataset_move.svg';
 import DatasetMoveActiveIcon from '@/pages/datasetManagement/assets/dataset_move_active.svg';
 import { useHasPermission } from '@/store/userInfoStore';
-import { throttle } from 'lodash-es';
 import { useParams } from '@/utils/url';
 
 // 时间格式化函数
