@@ -323,7 +323,7 @@ export default function MetadataManagementDetail() {
     },
     {
       label: '更新时间',
-      value: baseInfoData.updateTime || '-'
+      value: baseInfoData.tableUpdateTime || '-'
     }
   ];
   // Milvus基本信息数据
