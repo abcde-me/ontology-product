@@ -573,27 +573,31 @@ export const useEditor = (options: UseEditorOptions = {}): UseEditorReturn => {
       return;
     }
 
-    const saveRes = await editDevelopScript({
-      script_context: scriptInfo?.script_context ?? '',
-      script_id: Number(currentFile?.scriptId),
-      script_name: currentFile.title ?? '',
-      script_params: scriptInfo?.script_params ?? []
-    });
+    // 如果当前脚本正在编辑，则先保存
+    if (scriptInfo?.isSelfEditing) {
+      const saveRes = await editDevelopScript({
+        script_context: scriptInfo?.script_context ?? '',
+        script_id: Number(currentFile?.scriptId),
+        script_name: currentFile.title ?? '',
+        script_params: scriptInfo?.script_params ?? []
+      });
 
-    if (saveRes?.status !== 200) {
-      Message.error(saveRes?.message ?? '保存文件失败');
-      return;
+      if (saveRes?.status !== 200) {
+        Message.error(saveRes?.message ?? '保存文件失败');
+        return;
+      }
+
+      setOriginalContent(scriptInfo?.script_context ?? '');
+
+      setScriptInfo((prev) => {
+        if (!prev) return null;
+        return {
+          ...prev,
+          update_time: saveRes.data.update_time
+        };
+      });
     }
 
-    setOriginalContent(scriptInfo?.script_context ?? '');
-
-    setScriptInfo((prev) => {
-      if (!prev) return null;
-      return {
-        ...prev,
-        update_time: saveRes.data.update_time
-      };
-    });
     setExecid('');
 
     try {
