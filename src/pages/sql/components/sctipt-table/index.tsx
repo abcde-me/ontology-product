@@ -311,7 +311,7 @@ const ScriptTable: React.FC<ScriptTableProps> = ({
       ellipsis: true,
       render: (_, record) => (
         <EllipsisPopover
-          value={record.create_user ?? '-'}
+          value={record.update_user ?? '-'}
           preferTypography
         ></EllipsisPopover>
       )
@@ -426,7 +426,7 @@ const ScriptTable: React.FC<ScriptTableProps> = ({
     const hasValue =
       (formValues.script_name && formValues.script_name.trim() !== '') ||
       formValues.status !== undefined ||
-      (formValues.create_user && formValues.create_user.trim() !== '');
+      (formValues.update_user && formValues.update_user.trim() !== '');
     if (hasValue) {
       isAll(true);
     } else {
