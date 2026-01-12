@@ -322,6 +322,8 @@ export const ModaForgeResourceEndpoints = {
   datasetSceneListApi: PrefixAimdp + '/ListScenes',
   // 数据集场景分类批量更新
   datasetBatchUpdateSceneApi: PrefixAimdp + '/BatchUpdateScene',
+  // 创建数据集场景分类
+  createSceneApi: PrefixAimdp + '/CreateScene',
 
   // 连接器接口
 

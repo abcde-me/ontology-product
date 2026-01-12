@@ -291,3 +291,12 @@ export async function datasetBatchUpdateScene(params: {
     .inRegion()
     .do();
 }
+
+// 批量更新数据集场景分类
+export async function createScene(params: {
+  name: string;
+  tags?: string[];
+  description?: string;
+}) {
+  return await UAPI.RES.createSceneApi({}).post(params).inRegion().do();
+}

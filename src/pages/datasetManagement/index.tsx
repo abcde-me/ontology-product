@@ -44,7 +44,8 @@ import {
   datasetVersionRebuild,
   getTagList,
   getDatasetSceneList,
-  datasetBatchUpdateScene
+  datasetBatchUpdateScene,
+  createScene
 } from '@/api/datasetManagement';
 import EllipsisPopover from '../../components/ellipsis-popover-com';
 import DatasetForm from '@/components/datasetform/AddDatasetForm';
@@ -1027,8 +1028,20 @@ const DatasetManagement: React.FC = () => {
   ];
 
   // 新增场景类型提交
-  const handleAddSceneTypeSubmit = (values: any) => {
+  const handleAddSceneTypeSubmit = async (values: any) => {
     console.log('新增场景类型:', values);
+    const params = {
+      name: values.sceneTypeName,
+      tags: values.sceneTypeTag,
+      description: values.sceneTypeDesc
+    };
+    const res = await createScene(params);
+    if (res.code === '' && res.status === 200) {
+      Message.success('新增场景类型成功');
+      getSceneList();
+    } else {
+      Message.error(res.msg || '新增场景类型失败');
+    }
     setAddSceneTypeVisible(false);
   };
 
