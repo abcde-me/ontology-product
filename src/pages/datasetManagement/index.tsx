@@ -1730,9 +1730,8 @@ const DatasetManagement: React.FC = () => {
           ))}
         </div>
       )}
-      {/* 注释内容为新建按钮 */}
       <Tabs
-        // editable
+        editable
         defaultActiveTab={sceneName || '0'}
         className={styles.datasetManagementTabs}
         style={{
@@ -1741,7 +1740,7 @@ const DatasetManagement: React.FC = () => {
           backgroundColor: `${isHiddenBaseInfo ? 'unset' : '#f0f6fe'} `
         }}
         type="card"
-        // onAddTab={() => setAddSceneTypeVisible(true)}
+        onAddTab={() => setAddSceneTypeVisible(true)}
         ref={stickyRef}
         onChange={(value) => {
           const selectValue = value === '0' ? [] : [Number(value)];
@@ -2022,7 +2021,14 @@ const DatasetManagement: React.FC = () => {
             <Input placeholder="请输入名称" />
           </Form.Item>
           <Form.Item label="场景分类标签：" field="sceneTypeTag">
-            <Select placeholder="请选择标签" />
+            <Select
+              mode="multiple"
+              placeholder="请选择标签"
+              options={newTagList.map((item) => ({
+                label: item.name,
+                value: item.name
+              }))}
+            />
           </Form.Item>
           <Form.Item label="描述说明：" field="sceneTypeDesc">
             <Input.TextArea placeholder="可以描述数据集的用途、特点或其他相关信息" />
