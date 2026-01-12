@@ -1039,7 +1039,9 @@ export default function AddApi() {
                             <Button
                               type="outline"
                               className={styles.insertOrCopyBtn}
-                              onClick={() => {
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
                                 handleInsertClick(nodeData?.content as string);
                               }}
                               onMouseDown={(e) => {
