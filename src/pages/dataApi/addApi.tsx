@@ -87,6 +87,7 @@ export default function AddApi() {
   const [testModalVisible, setTestModalVisible] = useState<boolean>(false);
   const [testModalDataSource, setTestModalDataSource] = useState<string[]>([]);
   const [resultArray, setResultArray] = useState<string[]>([]);
+  const [limitCountValue, setLimitCountValue] = useState<number>(100);
   const [apiCacheMethod, setApiCacheMethod] = useState(0);
   const [isCanTest, setIsCanTest] = useState<boolean>(false);
   const [canComplete, setCanComplete] = useState<boolean>(false);
@@ -281,6 +282,15 @@ export default function AddApi() {
     }
   }, [type, id]);
 
+  // 限制次数
+  useEffect(() => {
+    setLimitCountValue(
+      form.getFieldValue('limitCount')
+        ? Number(form.getFieldValue('limitCount'))
+        : 100
+    );
+  }, [form.getFieldValue('limitCount')]);
+
   // 兼容小屏样式
   useEffect(() => {
     const tabHeight = rightBoxRef.current?.offsetHeight
@@ -338,7 +348,7 @@ export default function AddApi() {
     const params = {
       ...apiBaseInfo,
       limitTime: 60,
-      limitCount: Number(form.getFieldValue('limitCount')) || 100,
+      limitCount: limitCountValue || 100,
       cacheTime: getCacheTime(),
       databaseType: Number(form.getFieldValue('databaseType')) || 1,
       sql: value,
@@ -907,24 +917,15 @@ export default function AddApi() {
               <Form.Item
                 label="最大速率"
                 field="limitCount"
-                initialValue={
-                  form.getFieldValue('limitCount')
-                    ? form.getFieldValue('limitCount')
-                    : 100
-                }
                 className={styles.inputNumber}
               >
                 <InputNumber
                   mode="button"
                   style={{ width: 160 }}
-                  value={
-                    form.getFieldValue('limitCount')
-                      ? form.getFieldValue('limitCount')
-                      : 100
-                  }
+                  value={limitCountValue}
                   min={1}
                   max={100}
-                  onChange={(value) => form.setFieldValue('limitCount', value)}
+                  onChange={(value) => setLimitCountValue(value)}
                 />
                 次/分钟
               </Form.Item>
@@ -961,7 +962,9 @@ export default function AddApi() {
                         : 1
                     }
                     min={1}
-                    onChange={(value) => form.setFieldValue('cacheTime', value)}
+                    onChange={(value) => {
+                      form.setFieldValue('cacheTime', value);
+                    }}
                   />
                   秒
                 </Form.Item>
