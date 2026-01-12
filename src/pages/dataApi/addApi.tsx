@@ -917,12 +917,12 @@ export default function AddApi() {
                 <InputNumber
                   mode="button"
                   style={{ width: 160 }}
-                  defaultValue={
+                  value={
                     form.getFieldValue('limitCount')
                       ? form.getFieldValue('limitCount')
                       : 100
                   }
-                  min={0}
+                  min={1}
                   max={100}
                   onChange={(value) => form.setFieldValue('limitCount', value)}
                 />
