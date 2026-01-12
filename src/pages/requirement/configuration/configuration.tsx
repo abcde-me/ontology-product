@@ -979,7 +979,7 @@ export default function RequirementConfig() {
               >
                 <Input
                   placeholder="请输入需求名称"
-                  style={{ width: 900 }}
+                  style={{ width: 640 }}
                   showWordLimit
                   maxLength={50}
                 />
@@ -1004,7 +1004,7 @@ export default function RequirementConfig() {
               >
                 <TextArea
                   placeholder="请输入描述内容"
-                  style={{ width: 900 }}
+                  style={{ width: 640 }}
                   showWordLimit
                   maxLength={200}
                 />
@@ -1116,7 +1116,7 @@ export default function RequirementConfig() {
                   <Select
                     allowClear
                     options={modelList}
-                    style={{ width: 900 }}
+                    style={{ width: 640 }}
                     placeholder="请选择预标注模型"
                   />
                 </FormItem>
