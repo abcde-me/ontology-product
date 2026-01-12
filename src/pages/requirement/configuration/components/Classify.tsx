@@ -91,13 +91,14 @@ const Classify = (props: ClassifyComponentProps) => {
       (type === 'edit' || type === 'copy')
     ) {
       // 映射数据结构，确保有正确的 ID 字段，并标记为来自详情
+      // 注意：接口返回的数据中可能使用 id 字段而非 attribute_id，需要兼容处理
       const mappedLabels = requirementDetail?.file_labels?.map((item) => ({
         ...item,
-        attribute_id: item?.attribute_id || item?.order_num || uuid(),
+        attribute_id: item?.attribute_id || item?.id || uuid(),
         isFromDetail: true, // 标记为来自详情
         file_label_attribute: item?.file_label_attribute?.map((attr) => ({
           ...attr,
-          attribute_id: attr?.attribute_id || attr?.order_num || uuid(),
+          attribute_id: attr?.attribute_id || attr?.id || uuid(),
           isFromDetail: true // 标记为来自详情
         }))
       }));
