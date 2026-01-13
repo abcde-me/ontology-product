@@ -172,7 +172,7 @@ export default function TestModal(props: {
               columns={columns}
               data={dataSource}
               pagination={false}
-              rowKey="id"
+              rowKey="name"
             />
           </Form>
         </div>
