@@ -6,6 +6,7 @@ import noDataElement from '@/components/no-data';
 import { ANNOTATION_TASK_PERMISSIONS } from '@/config/permissions';
 import { useHasPermission, useUserInfo } from '@/store/userInfoStore';
 import { openNewPage } from '@/utils/env';
+import getLabelByValue from '@/utils/getLabelByValue';
 import {
   Form,
   Input,
@@ -21,7 +22,7 @@ import { SorterInfo } from '@arco-design/web-react/es/Table/interface';
 import { CopyItemIcon } from '@ceai-front/arco-material';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import '../index.scss';
-import { RequirementType, RequirementTypeNameMap } from '../type';
+import { LABEL_TOOL_CODE_ENUM } from '../type';
 import {
   EllipsisPopover as EllipsisPopoverCom,
   NoDataCard
@@ -57,7 +58,7 @@ function TaskList() {
         order: sortValue?.order,
         filters: {
           search_content: searchValueRef.current || '',
-          type: sortValue?.type,
+          label_tool_codes: sortValue?.label_tool_code,
           belong: sortValue?.belong
         }
       };
@@ -103,7 +104,7 @@ function TaskList() {
     setCurrent(1);
     const sortdata: any = {
       name: '',
-      type: filters?.type,
+      label_tool_code: filters?.label_tool_code,
       belong: filters?.belong,
       order:
         sorter.direction === undefined
@@ -128,11 +129,18 @@ function TaskList() {
 
   // 类型图标映射
   const TypeIconMap: Record<
-    number,
+    string,
     React.ComponentType<{ style?: React.CSSProperties }>
   > = {
-    [RequirementType.Text]: TextIcon,
-    [RequirementType.Image]: ImageIcon
+    TEXT_ENTITY: TextIcon,
+    TEXT_CLASSIFICATION: TextIcon,
+    TEXT_QA: TextIcon,
+    TEXT_SORT: TextIcon,
+    IMAGE_ANNOTATION: ImageIcon,
+    AUDIO_CLASSIFICATION: TextIcon,
+    AUDIO_SPLIT: TextIcon,
+    VIDEO_CLASSIFICATION: TextIcon,
+    VIDEO_SPLIT: TextIcon
   };
 
   // table columns
@@ -183,13 +191,16 @@ function TaskList() {
 
     {
       title: '类型',
-      dataIndex: 'type',
-      width: 174,
+      dataIndex: 'label_tool_code',
+      width: 160,
       render: (_, record) => {
-        const IconComponent = record.type ? TypeIconMap[record.type] : null;
-        const typeName = record.type
-          ? RequirementTypeNameMap[record.type]
-          : '-';
+        const IconComponent = record.label_tool_code
+          ? TypeIconMap[record.label_tool_code]
+          : null;
+        const typeName = getLabelByValue(
+          LABEL_TOOL_CODE_ENUM,
+          record.label_tool_code
+        );
 
         return (
           <div className="flex items-center">
@@ -202,24 +213,7 @@ function TaskList() {
           </div>
         );
       },
-      filters: [
-        {
-          text: '文本',
-          value: 1
-        },
-        {
-          text: '图片',
-          value: 2
-        },
-        {
-          text: '音频',
-          value: 3
-        },
-        {
-          text: '视频',
-          value: 4
-        }
-      ]
+      filters: LABEL_TOOL_CODE_ENUM
     },
     {
       title: '所属',

@@ -77,6 +77,18 @@ export enum AnnotationTypeContentCode {
   VIDEO_SPLIT = 'VIDEO_SPLIT'
 }
 
+export const LABEL_TOOL_CODE_ENUM = [
+  { label: '图形标注', value: 'IMAGE_ANNOTATION', text: '图形标注' },
+  { label: '文本分类', value: 'TEXT_CLASSIFICATION', text: '文本分类' },
+  { label: '文本问答', value: 'TEXT_QA', text: '文本问答' },
+  { label: '文本排序', value: 'TEXT_SORT', text: '文本排序' },
+  { label: '文本实体', value: 'TEXT_ENTITY', text: '文本实体' },
+  { label: '音频分类', value: 'AUDIO_CLASSIFICATION', text: '音频分类' },
+  { label: '音频分割', value: 'AUDIO_SPLIT', text: '音频分割' },
+  { label: '视频分类', value: 'VIDEO_CLASSIFICATION', text: '视频分类' },
+  { label: '视频分割', value: 'VIDEO_SPLIT', text: '视频分割' }
+];
+
 export enum LabelShape {
   /** 矩形 */
   RECTANGLE = 3,

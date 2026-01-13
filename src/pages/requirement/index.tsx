@@ -10,8 +10,8 @@ import { PermissionWrapper } from '@/components/PermissionGuard';
 import { REQUIREMENT_PERMISSIONS } from '@/config/permissions';
 import {
   useHasPermission,
-  useUserInfo,
-  useSuperAdmin
+  useSuperAdmin,
+  useUserInfo
 } from '@/store/userInfoStore';
 import getLabelByValue from '@/utils/getLabelByValue';
 import {
@@ -41,7 +41,7 @@ import React, { useEffect, useState } from 'react';
 import { useHistory } from 'react-router';
 import { REQUIREMENT_STATUS_CONFIG } from './common';
 import './index.scss';
-import { RequirementType, RequirementTypeMap } from './type';
+import { LABEL_TOOL_CODE_ENUM } from './type';
 
 interface RequirementProcessStep extends Omit<ProcessStep, 'description'> {
   description: React.ReactNode;
@@ -91,7 +91,7 @@ export default function Requirement() {
         order: string;
         filters: {
           keyword: string;
-          label_type: number | string;
+          label_tool_codes: number | string;
           status: number | string;
         };
       } = {
@@ -100,7 +100,7 @@ export default function Requirement() {
         order: sortValue.order,
         filters: {
           keyword: searchValue,
-          label_type: sortValue.label_type,
+          label_tool_codes: sortValue.label_tool_code,
           status: sortValue.status
         }
       };
@@ -143,7 +143,7 @@ export default function Requirement() {
     setCurrent(1);
     const sortdata = {
       status: filters?.status,
-      label_type: filters?.label_type,
+      label_tool_code: filters?.label_tool_code,
       order:
         sorter.direction === undefined
           ? 'desc'
@@ -162,11 +162,18 @@ export default function Requirement() {
 
   // 类型图标映射
   const TypeIconMap: Record<
-    number,
+    string,
     React.ComponentType<{ style?: React.CSSProperties }>
   > = {
-    [RequirementType.Text]: TextIcon,
-    [RequirementType.Image]: ImageIcon
+    TEXT_ENTITY: TextIcon,
+    TEXT_CLASSIFICATION: TextIcon,
+    TEXT_QA: TextIcon,
+    TEXT_SORT: TextIcon,
+    IMAGE_ANNOTATION: ImageIcon,
+    AUDIO_CLASSIFICATION: TextIcon,
+    AUDIO_SPLIT: TextIcon,
+    VIDEO_CLASSIFICATION: TextIcon,
+    VIDEO_SPLIT: TextIcon
   };
 
   // 查看需求详情权限
@@ -253,17 +260,18 @@ export default function Requirement() {
     },
     {
       title: '类型',
-      dataIndex: 'label_type',
-      width: 100,
+      dataIndex: 'label_tool_code',
+      width: 160,
       render: (_, record) => {
-        const IconComponent = record.label_type
-          ? TypeIconMap[record.label_type]
+        const IconComponent = record.label_tool_code
+          ? TypeIconMap[record.label_tool_code]
           : null;
-        const typeName = record.label_type
-          ? RequirementTypeMap[record.label_type]
-          : '-';
+        const typeName = getLabelByValue(
+          LABEL_TOOL_CODE_ENUM,
+          record.label_tool_code
+        );
 
-        return typeName !== '-' ? (
+        return (
           <div className="flex items-center">
             {IconComponent && (
               <IconComponent
@@ -272,28 +280,9 @@ export default function Requirement() {
             )}
             <span>{typeName}</span>
           </div>
-        ) : (
-          <span>-</span>
         );
       },
-      filters: [
-        {
-          text: '文本',
-          value: RequirementType.Text
-        },
-        {
-          text: '图片',
-          value: RequirementType.Image
-        },
-        {
-          text: '音频',
-          value: RequirementType.Audio
-        },
-        {
-          text: '视频',
-          value: RequirementType.Video
-        }
-      ]
+      filters: LABEL_TOOL_CODE_ENUM
     },
     {
       title: '数据量',

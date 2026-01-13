@@ -1174,7 +1174,11 @@ export default function RequirementConfig() {
             annotationTypeContentVal ===
               AnnotationTypeContentCode.AUDIO_CLASSIFICATION ||
             annotationTypeContentVal ===
-              AnnotationTypeContentCode.AUDIO_SPLIT) && (
+              AnnotationTypeContentCode.AUDIO_SPLIT ||
+            annotationTypeContentVal ===
+              AnnotationTypeContentCode.VIDEO_CLASSIFICATION ||
+            annotationTypeContentVal ===
+              AnnotationTypeContentCode.VIDEO_SPLIT) && (
             <div className="tool-annotation-config">
               <Form
                 form={labelToolForm}
@@ -1229,7 +1233,11 @@ export default function RequirementConfig() {
                     annotationTypeContentVal ===
                       AnnotationTypeContentCode.AUDIO_CLASSIFICATION ||
                     annotationTypeContentVal ===
-                      AnnotationTypeContentCode.AUDIO_SPLIT) && (
+                      AnnotationTypeContentCode.AUDIO_SPLIT ||
+                    annotationTypeContentVal ===
+                      AnnotationTypeContentCode.VIDEO_CLASSIFICATION ||
+                    annotationTypeContentVal ===
+                      AnnotationTypeContentCode.VIDEO_SPLIT) && (
                     <Classify
                       type={effectiveType}
                       requirementDetail={requirementDetail}
