@@ -94,6 +94,7 @@ export default function AddApi() {
   const [expandedKeys, setExpandedKeys] = useState<string[]>([]);
 
   const [resizeSize, setResizeSize] = useState<string>('');
+  const [isSmallHeight, setIsSmallHeight] = useState<boolean>(false);
   const [paneContainersSize, setPaneContainersSize] = useState<string>('220px');
   const [treeData, setTreeData] = React.useState<TreeDataType[]>([]);
   const [isSearch, setIsSearch] = useState<boolean>(false);
@@ -296,6 +297,10 @@ export default function AddApi() {
     const tabHeight = rightBoxRef.current?.offsetHeight
       ? rightBoxRef.current?.offsetHeight - 90
       : 590;
+    const isSmallHeight = rightBoxRef.current?.offsetHeight
+      ? rightBoxRef.current?.offsetHeight < 400
+      : false;
+    setIsSmallHeight(isSmallHeight);
     setResizeSize(`${tabHeight}px`);
   }, [current]);
 
@@ -326,7 +331,7 @@ export default function AddApi() {
       setResultData(res.data?.resultConfig || []);
       setApiCacheMethod(Number(res.data.cacheTime) > 0 ? 1 : 0);
       setActiveKey(['inputOutputParams']);
-      setResizeSize('190px');
+      setResizeSize(isSmallHeight ? '40px' : '190px');
       setIsOpen(true);
       setIsCanTest(true);
     } else {
@@ -658,7 +663,7 @@ export default function AddApi() {
         setResultData(res.data.resultConfig || []);
 
         setActiveKey(['inputOutputParams']);
-        setResizeSize('190px');
+        setResizeSize(isSmallHeight ? '40px' : '190px');
         setIsOpen(true);
         setIsCanTest(true);
       }
@@ -721,9 +726,11 @@ export default function AddApi() {
         setActiveKey(keys);
         setResizeSize(
           isOpenNow
-            ? resultData.length > 0
-              ? `190px`
-              : `390px`
+            ? isSmallHeight
+              ? `40px`
+              : resultData.length > 0
+                ? `190px`
+                : `390px`
             : `${tabHeight}px`
         );
         setIsOpen(isOpenNow);
