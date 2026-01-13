@@ -912,6 +912,7 @@ const DatasetManagement: React.FC = () => {
   const [selectedSceneTab, setSelectedSceneTab] = React.useState<
     (number | string)[]
   >(sceneName ? [Number(sceneName)] : []); //选中的场景分类tab
+  const [activeTab, setActiveTab] = React.useState<string>('0'); //选中的场景分类tab
 
   // 来源过滤相关状态
   const [selectedSourceFilters, setSelectedSourceFilters] = React.useState<
@@ -1279,6 +1280,8 @@ const DatasetManagement: React.FC = () => {
           .then((res) => {
             if (res.code === '' && res.status === 200) {
               getSceneList();
+              setActiveTab('0');
+              setSelectedSceneTab([]);
               Message.success('删除成功');
             } else {
               Message.error(res.message || '删除失败，请稍候重试');
@@ -1830,10 +1833,12 @@ const DatasetManagement: React.FC = () => {
           backgroundColor: `${isHiddenBaseInfo ? 'unset' : '#f0f6fe'} `
         }}
         type="card"
+        activeTab={activeTab}
         onAddTab={() => setAddSceneTypeVisible(true)}
         ref={stickyRef}
         onChange={(value) => {
           const selectValue = value === '0' ? [] : [Number(value)];
+          setActiveTab(value);
           setSelectedSceneTab(selectValue);
           setCurrentPage(1);
         }}
@@ -1881,23 +1886,25 @@ const DatasetManagement: React.FC = () => {
                       )}
                     </div>
                   </div>
-                  <span style={{ marginTop: '8px' }}>
-                    <IconTag style={{ marginRight: '5px' }} />
-                    {item.tags.map((tag, index) => (
-                      <Tag
-                        key={index}
-                        style={{
-                          marginRight: '5px',
-                          background: '#FFF',
-                          border: '1px solid #E2E8F0',
-                          padding: '4px',
-                          borderRadius: '4px'
-                        }}
-                      >
-                        {tag}
-                      </Tag>
-                    ))}
-                  </span>
+                  {item?.tags?.length > 0 && (
+                    <span style={{ marginTop: '8px' }}>
+                      <IconTag style={{ marginRight: '5px' }} />
+                      {item.tags.map((tag, index) => (
+                        <Tag
+                          key={index}
+                          style={{
+                            marginRight: '5px',
+                            background: '#FFF',
+                            border: '1px solid #E2E8F0',
+                            padding: '4px',
+                            borderRadius: '4px'
+                          }}
+                        >
+                          {tag}
+                        </Tag>
+                      ))}
+                    </span>
+                  )}
                 </div>
               )}
               <div className={styles.searchToolbar}>
