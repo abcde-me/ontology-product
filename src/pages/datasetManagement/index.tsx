@@ -44,7 +44,10 @@ import {
   datasetVersionRebuild,
   getTagList,
   getDatasetSceneList,
-  datasetBatchUpdateScene
+  datasetBatchUpdateScene,
+  createScene,
+  updateScene,
+  deleteScene
 } from '@/api/datasetManagement';
 import EllipsisPopover from '../../components/ellipsis-popover-com';
 import DatasetForm from '@/components/datasetform/AddDatasetForm';
@@ -116,6 +119,7 @@ export interface Dataset {
 }
 
 export interface SceneType {
+  type: string;
   name: string;
   id: number;
   description: string;
@@ -908,6 +912,7 @@ const DatasetManagement: React.FC = () => {
   const [selectedSceneTab, setSelectedSceneTab] = React.useState<
     (number | string)[]
   >(sceneName ? [Number(sceneName)] : []); //选中的场景分类tab
+  const [activeTab, setActiveTab] = React.useState<string>('0'); //选中的场景分类tab
 
   // 来源过滤相关状态
   const [selectedSourceFilters, setSelectedSourceFilters] = React.useState<
@@ -923,6 +928,8 @@ const DatasetManagement: React.FC = () => {
   const [tabData, setTabData] = React.useState<string[]>([]);
   const [addSceneTypeVisible, setAddSceneTypeVisible] =
     React.useState<boolean>(false);
+  const [isEdit, setIsEdit] = React.useState<boolean>(false);
+  const [editSceneId, setEditSceneId] = React.useState<number | null>(null);
   const [moveDatasetVisible, setMoveDatasetVisible] =
     React.useState<boolean>(false);
   const [moveDatasetId, setMoveDatasetId] = React.useState<number[] | null>(
@@ -1027,9 +1034,40 @@ const DatasetManagement: React.FC = () => {
   ];
 
   // 新增场景类型提交
-  const handleAddSceneTypeSubmit = (values: any) => {
+  const handleAddSceneTypeSubmit = async (values: any) => {
     console.log('新增场景类型:', values);
-    setAddSceneTypeVisible(false);
+    if (isEdit) {
+      const params = {
+        id: Number(editSceneId),
+        name: values.sceneTypeName,
+        tags: values.sceneTypeTag,
+        description: values.sceneTypeDesc
+      };
+      const res = await updateScene(params);
+      if (res.code === '' && res.status === 200) {
+        Message.success('更新场景类型成功');
+        getSceneList();
+      } else {
+        Message.error(res.msg || '更新场景类型失败');
+      }
+      setIsEdit(false);
+      setEditSceneId(null);
+      setAddSceneTypeVisible(false);
+    } else {
+      const params = {
+        name: values.sceneTypeName,
+        tags: values.sceneTypeTag,
+        description: values.sceneTypeDesc
+      };
+      const res = await createScene(params);
+      if (res.code === '' && res.status === 200) {
+        Message.success('新增场景类型成功');
+        getSceneList();
+      } else {
+        Message.error(res.msg || '新增场景类型失败');
+      }
+      setAddSceneTypeVisible(false);
+    }
   };
 
   // 移动数据集提交
@@ -1200,6 +1238,60 @@ const DatasetManagement: React.FC = () => {
       .catch((err) => {
         Message.error('删除失败，请稍候重试');
       });
+  };
+
+  // 删除场景分类
+  const handleDeleteScene = (sceneId: number) => {
+    Modal.confirm({
+      title: (
+        <span
+          style={{
+            fontFamily: 'PingFang SC, sans-serif',
+            fontWeight: 500,
+            fontSize: 16,
+            height: 24,
+            display: 'inline-block'
+          }}
+        >
+          确认删除场景分类吗？
+        </span>
+      ),
+      // 内容
+      content: (
+        <div
+          style={{
+            fontFamily: 'PingFang SC, sans-serif',
+            fontWeight: 400,
+            fontSize: 14,
+            color: '#1D2129',
+            height: 22,
+            display: 'inline-block'
+          }}
+        >
+          删除后，场景分类不可恢复
+        </div>
+      ),
+      // 按钮文字
+      okText: '确定',
+      cancelText: '取消',
+      // okButtonProps: { status: 'danger' },
+      onOk: () => {
+        deleteScene({ id: sceneId })
+          .then((res) => {
+            if (res.code === '' && res.status === 200) {
+              getSceneList();
+              setActiveTab('0');
+              setSelectedSceneTab([]);
+              Message.success('删除成功');
+            } else {
+              Message.error(res.message || '删除失败，请稍候重试');
+            }
+          })
+          .catch((err) => {
+            Message.error('删除失败，请稍候重试');
+          });
+      }
+    });
   };
 
   // 删除数据集
@@ -1497,7 +1589,8 @@ const DatasetManagement: React.FC = () => {
           id: 0,
           dataset_count: total,
           description: '',
-          tags: []
+          tags: [],
+          type: ''
         };
         const newSceneList = [allSceneTab, ...res.data];
         setDatasetSceneList(newSceneList);
@@ -1730,9 +1823,8 @@ const DatasetManagement: React.FC = () => {
           ))}
         </div>
       )}
-      {/* 注释内容为新建按钮 */}
       <Tabs
-        // editable
+        editable
         defaultActiveTab={sceneName || '0'}
         className={styles.datasetManagementTabs}
         style={{
@@ -1741,10 +1833,12 @@ const DatasetManagement: React.FC = () => {
           backgroundColor: `${isHiddenBaseInfo ? 'unset' : '#f0f6fe'} `
         }}
         type="card"
-        // onAddTab={() => setAddSceneTypeVisible(true)}
+        activeTab={activeTab}
+        onAddTab={() => setAddSceneTypeVisible(true)}
         ref={stickyRef}
         onChange={(value) => {
           const selectValue = value === '0' ? [] : [Number(value)];
+          setActiveTab(value);
           setSelectedSceneTab(selectValue);
           setCurrentPage(1);
         }}
@@ -1768,24 +1862,49 @@ const DatasetManagement: React.FC = () => {
                     marginTop: '20px'
                   }}
                 >
-                  <span className="text-[14px]">{item.description}</span>
-                  <span style={{ marginTop: '8px' }}>
-                    <IconTag style={{ marginRight: '5px' }} />
-                    {item.tags.map((tag, index) => (
-                      <Tag
-                        key={index}
-                        style={{
-                          marginRight: '5px',
-                          background: '#FFF',
-                          border: '1px solid #E2E8F0',
-                          padding: '4px',
-                          borderRadius: '4px'
+                  <div className="flex items-center justify-between">
+                    <span className="text-[14px]">{item.description}</span>
+                    <div className="flex items-center gap-2">
+                      <IconEdit
+                        className="cursor-pointer"
+                        onClick={() => {
+                          sceneTypeForm.setFieldsValue({
+                            sceneTypeName: item.name,
+                            sceneTypeDesc: item.description,
+                            sceneTypeTag: item.tags
+                          });
+                          setIsEdit(true);
+                          setEditSceneId(item.id);
+                          setAddSceneTypeVisible(true);
                         }}
-                      >
-                        {tag}
-                      </Tag>
-                    ))}
-                  </span>
+                      />
+                      {item.type === 'user' && (
+                        <IconDelete
+                          className="cursor-pointer"
+                          onClick={() => handleDeleteScene(item.id)}
+                        />
+                      )}
+                    </div>
+                  </div>
+                  {item?.tags?.length > 0 && (
+                    <span style={{ marginTop: '8px' }}>
+                      <IconTag style={{ marginRight: '5px' }} />
+                      {item.tags.map((tag, index) => (
+                        <Tag
+                          key={index}
+                          style={{
+                            marginRight: '5px',
+                            background: '#FFF',
+                            border: '1px solid #E2E8F0',
+                            padding: '4px',
+                            borderRadius: '4px'
+                          }}
+                        >
+                          {tag}
+                        </Tag>
+                      ))}
+                    </span>
+                  )}
                 </div>
               )}
               <div className={styles.searchToolbar}>
@@ -2022,7 +2141,14 @@ const DatasetManagement: React.FC = () => {
             <Input placeholder="请输入名称" />
           </Form.Item>
           <Form.Item label="场景分类标签：" field="sceneTypeTag">
-            <Select placeholder="请选择标签" />
+            <Select
+              mode="multiple"
+              placeholder="请选择标签"
+              options={newTagList.map((item) => ({
+                label: item.name,
+                value: item.name
+              }))}
+            />
           </Form.Item>
           <Form.Item label="描述说明：" field="sceneTypeDesc">
             <Input.TextArea placeholder="可以描述数据集的用途、特点或其他相关信息" />
