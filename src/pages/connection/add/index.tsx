@@ -258,8 +258,8 @@ const add = forwardRef((props: any, ref) => {
                     if (!trimmedValue) {
                       return cb('请输入连接器名称');
                     }
-                    if (validateName(trimmedValue).isValid == false) {
-                      return cb(validateName(trimmedValue).errorMessage);
+                    if (validateName(value).isValid == false) {
+                      return cb(validateName(value).errorMessage);
                     }
                     return cb();
                   }
