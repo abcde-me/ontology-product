@@ -496,10 +496,16 @@ export default function DataLoad() {
       >
         <InputSearch
           allowClear
+          onSearch={() => {
+            if (current !== 1) {
+              setCurrent(1);
+            } else {
+              getdataLoadList();
+            }
+          }}
           onClear={clearHan}
           placeholder="输入关键词搜索"
           style={{ width: 220 }}
-          onPressEnter={handlePressEnter}
           onChange={(value) => {
             setSearchValue(value);
           }}
