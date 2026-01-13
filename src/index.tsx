@@ -223,7 +223,7 @@ function App() {
             component={Login}
             exact
           />
-          {flattenRoutes.map((route) => {
+          {/*{flattenRoutes.map((route) => {
             return (
               <Route
                 key={route.key}
@@ -232,7 +232,7 @@ function App() {
                 exact
               />
             );
-          })}
+          })}*/}
           <Redirect from="/login" to="/tenant/compute/modaforge/login" exact />
           <Redirect
             from="/modaforge"
@@ -240,7 +240,11 @@ function App() {
             exact
           />
           <Redirect from="/" to="/tenant/compute/modaforge/connection" exact />
-          <Route key="*" path="*" component={Page404} />
+          <Route
+            path={'/'}
+            render={({ history }) => <PageLayout history={history} />}
+          />
+          {/*<Route key="*" path="*" component={Page404} />*/}
         </Switch>
       </Layout.Content>
     </Layout>
