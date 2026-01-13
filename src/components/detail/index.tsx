@@ -94,8 +94,8 @@ interface TableColumn {
 }
 
 enum FileStatusType {
-  success = 'Succeed',
-  fail = 'Error',
+  success = 'Succeeded',
+  fail = 'Failed',
   waiting = 'Waiting'
 }
 
