@@ -13,24 +13,15 @@ import {
   WorkflowHistoryEvent,
   useNodeDataUpdate,
   useNodesInteractions,
-  // useToolIcon,
   useWorkflow,
   useWorkflowHistory,
   useNodesReadOnly
 } from '@/pages/workflowConfig/workflow/hooks';
-// import {
-//   canRunBySingle,
-//   hasErrorHandleNode,
-//   hasRetryNode,
-// } from '@/pages/workflowConfig/workflow/utils'
-// import Tooltip from '@/pages/workflowConfig/components/tooltip'
 import type { Node } from '@/pages/workflowConfig/workflow/types';
 import { useStore as useTaskStore } from '@/pages/workflowConfig/task/store';
 import { useStore } from '@/pages/workflowConfig/workflow/store';
-import { IconCaretRight } from '@arco-design/web-react/icon';
 import PanelOperator from '@/pages/workflowConfig/workflow/nodes/_base/components/panel-operator';
 import TestNode from '@/pages/workflowConfig/workflow/nodes/_base/components/test-node';
-import { Space } from '@arco-design/web-react';
 
 type BasePanelProps = {
   children: ReactElement;

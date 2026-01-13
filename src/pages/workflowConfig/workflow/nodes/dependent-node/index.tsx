@@ -1,5 +1,5 @@
 import React, { memo } from 'react';
-import { Space, Tag, Typography } from '@arco-design/web-react';
+import { Space, Tag, Tooltip, Typography } from '@arco-design/web-react';
 import { NodeProps } from '@/pages/workflowConfig/workflow/types';
 import { DependentNodeConfig } from '@/pages/workflowConfig/workflow/nodes/dependent-node/types';
 
@@ -20,7 +20,7 @@ export default memo(function DependentNode(
                 'flex-1 flex-shrink-0 overflow-hidden text-ellipsis whitespace-nowrap rounded-[4px] bg-[#E7ECF0] p-1 text-[#0F172A]'
               }
             >
-              {task.title}
+              <Tooltip content={task.title}>{task.title}</Tooltip>
             </div>
           );
         })}
@@ -30,7 +30,14 @@ export default memo(function DependentNode(
               'w-max flex-shrink-0 overflow-hidden text-ellipsis whitespace-nowrap rounded-[4px] bg-[#E7ECF0] p-1 text-[#0F172A]'
             }
           >
-            +{depend_item_list.length - 2}
+            <Tooltip
+              content={depend_item_list
+                .slice(2)
+                .map(({ title }) => title)
+                .join('、')}
+            >
+              +{depend_item_list.length - 2}
+            </Tooltip>
           </div>
         )}
       </div>
