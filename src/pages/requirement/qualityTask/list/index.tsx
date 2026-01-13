@@ -1,6 +1,8 @@
 import { listQualityControlTasks } from '@/api/dataAnnotation';
 import ImageIcon from '@/assets/annotation/new-image-column.svg';
 import TextIcon from '@/assets/annotation/text-column.svg';
+import AudioIcon from '@/assets/annotation/audio-column.svg';
+import VideoIcon from '@/assets/annotation/video-column.svg';
 import EllipsisPopover from '@/components/ellipsis-popover-com';
 import { QUALITY_TASK_PERMISSIONS } from '@/config/permissions';
 import { useHasPermission } from '@/store/userInfoStore';
@@ -62,10 +64,10 @@ const TypeIconMap: Record<
   TEXT_QA: TextIcon,
   TEXT_SORT: TextIcon,
   IMAGE_ANNOTATION: ImageIcon,
-  AUDIO_CLASSIFICATION: TextIcon,
-  AUDIO_SPLIT: TextIcon,
-  VIDEO_CLASSIFICATION: TextIcon,
-  VIDEO_SPLIT: TextIcon
+  AUDIO_CLASSIFICATION: AudioIcon,
+  AUDIO_SPLIT: AudioIcon,
+  VIDEO_CLASSIFICATION: VideoIcon,
+  VIDEO_SPLIT: VideoIcon
 };
 
 // 质检任务数据类型

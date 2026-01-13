@@ -5,6 +5,8 @@ import CreatIcon from '@/assets/annotation/requirement-creat.svg';
 import ExportPng from '@/assets/annotation/requirement-export.png';
 import QualityIcon from '@/assets/annotation/requirement-quality.svg';
 import TextIcon from '@/assets/annotation/text-column.svg';
+import AudioIcon from '@/assets/annotation/audio-column.svg';
+import VideoIcon from '@/assets/annotation/video-column.svg';
 import EllipsisPopover from '@/components/ellipsis-popover-com';
 import { PermissionWrapper } from '@/components/PermissionGuard';
 import { REQUIREMENT_PERMISSIONS } from '@/config/permissions';
@@ -170,10 +172,10 @@ export default function Requirement() {
     TEXT_QA: TextIcon,
     TEXT_SORT: TextIcon,
     IMAGE_ANNOTATION: ImageIcon,
-    AUDIO_CLASSIFICATION: TextIcon,
-    AUDIO_SPLIT: TextIcon,
-    VIDEO_CLASSIFICATION: TextIcon,
-    VIDEO_SPLIT: TextIcon
+    AUDIO_CLASSIFICATION: AudioIcon,
+    AUDIO_SPLIT: AudioIcon,
+    VIDEO_CLASSIFICATION: VideoIcon,
+    VIDEO_SPLIT: VideoIcon
   };
 
   // 查看需求详情权限

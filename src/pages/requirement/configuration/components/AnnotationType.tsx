@@ -8,6 +8,10 @@ import TextClassificationIcon from '../../image/Text-Classification.png';
 import TextEntityIcon from '../../image/Text-Entity.png';
 import TextSortIcon from '../../image/Text-Sort.png';
 import TextQAIcon from '../../image/Text-QA.png';
+import AudioClassificationIcon from '../../image/Audio-Classification.png';
+import AudioSplitIcon from '../../image/Audio-Split.png';
+import VideoClassificationIcon from '../../image/Video-Classification.png';
+import VideoSplitIcon from '../../image/Video-Split.png';
 
 const typeList = [
   {
@@ -60,14 +64,14 @@ const btnAudioData = [
     value: 1,
     label: '音频分类',
     code: 'AUDIO_CLASSIFICATION',
-    icon: TextEntityIcon
+    icon: AudioClassificationIcon
   },
   {
     key: 2,
     value: 2,
     label: '音频分割',
     code: 'AUDIO_SPLIT',
-    icon: TextEntityIcon
+    icon: AudioSplitIcon
   }
 ];
 const btnVideoData = [
@@ -76,14 +80,14 @@ const btnVideoData = [
     value: 1,
     label: '视频分类',
     code: 'VIDEO_CLASSIFICATION',
-    icon: TextEntityIcon
+    icon: VideoClassificationIcon
   },
   {
     key: 2,
     value: 2,
     label: '视频分割',
     code: 'VIDEO_SPLIT',
-    icon: TextEntityIcon
+    icon: VideoSplitIcon
   }
 ];
 interface AnnotationTypeProps {
