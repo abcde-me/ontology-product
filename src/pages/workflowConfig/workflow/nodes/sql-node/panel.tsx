@@ -292,7 +292,7 @@ export default React.memo(function SQLPanel(
                             <div key={field.key} className={'flex flex-1'}>
                               <div className={'fields-item flex flex-1 gap-3'}>
                                 <FormItem
-                                  className={'mb-2'}
+                                  className={'mb-0'}
                                   field={`${field.field}.prop`}
                                   label={
                                     index === 0 ? (
@@ -331,7 +331,7 @@ export default React.memo(function SQLPanel(
                                 </FormItem>
                                 <FormItem
                                   field={`${field.field}.value`}
-                                  className={'mb-2'}
+                                  className={'mb-0'}
                                   label={
                                     index === 0 ? (
                                       <Form.Item noStyle>
@@ -351,7 +351,7 @@ export default React.memo(function SQLPanel(
                               </div>
                               {!sql_id && (
                                 <FormItem
-                                  className={'mb-2 w-auto flex-shrink-0'}
+                                  className={'mb-0 w-auto flex-shrink-0'}
                                   label={
                                     index === 0 ? (
                                       <Typography.Text
