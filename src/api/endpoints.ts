@@ -367,6 +367,8 @@ export const ModaForgeResourceEndpoints = {
   // 查询目录卷路径关联的载入任务
   // getLoadTaskApi: PrefixAimdp + '/load_tasks/load_tasks/files',
   getLoadTaskFiles: PrefixAimdp + '/ListSourceDirFiles',
+  // 查询已选目录文件数量
+  queryDataDirFilesApi: PrefixAimdp + '/QueryDataDirFiles',
   // 停止单个载入任务
   stopLoadApi: PrefixAimdp + '/StopLoadTaskInstance',
   // 查询个人载入记录列表
