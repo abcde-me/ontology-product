@@ -424,8 +424,12 @@ export default function WorkflowList() {
           onChange={(value) => {
             setSearchValue(value);
           }}
-          onPressEnter={() => {
-            current !== 1 ? setCurrent(1) : getList();
+          onSearch={() => {
+            if (current !== 1) {
+              setCurrent(1);
+            } else {
+              getList();
+            }
           }}
           onClear={() => {
             setCurrent(1);
