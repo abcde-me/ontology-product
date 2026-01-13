@@ -189,7 +189,7 @@ function DemoForm(props, ref) {
                     showInput
                     min={0}
                     max={1}
-                    step={0.1}
+                    step={0.01}
                     disabled={!scoreThresholdEnabled}
                   />
                 </Form.Item>
