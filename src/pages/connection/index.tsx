@@ -489,8 +489,17 @@ export default function Connection() {
           allowClear
           placeholder="输入关键词搜索"
           style={{ width: 220 }}
-          onPressEnter={handlePressEnter}
           defaultValue={searchValue}
+          onSearch={() => {
+            if (pagination.current !== 1) {
+              setPagination((prev) => ({
+                ...prev,
+                current: 1
+              }));
+            } else {
+              getlist();
+            }
+          }}
           onChange={(value) => setSearchValue(value)}
           onClear={() => {
             clearHan();
