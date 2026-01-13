@@ -369,7 +369,7 @@ export const enrichTreeNodeForTreeSelect = (
   // 确保 key、title、value 是字符串格式
   const treeNode: TreeSelectNodeData = {
     ...node,
-    key: uniqueKey,
+    key: `${uniqueKey}-${node.id}`,
     title: node.name || node.label || node.title || '',
     label: uniqueKey,
     value: String(node.id), // value 仍然使用原始 id，用于业务逻辑
