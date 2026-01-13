@@ -123,7 +123,7 @@ export default React.memo(function SQLPanel(
                 'font-[PingFang SC] text-[14px] font-[400] text-[#1E293B]'
               }
             >
-              SQL脚本语句:
+              SQL脚本语句：
             </div>
           }
           className={'mb-0'}
@@ -397,7 +397,7 @@ export default React.memo(function SQLPanel(
             );
           }}
         </FormItem>
-        <Divider className={'mb-3 mt-2'} />
+        <Divider className={'mb-3 mt-0'} />
         <NodeRunSetting />
         <Divider className={'mb-3 mt-0'} />
       </Form>
