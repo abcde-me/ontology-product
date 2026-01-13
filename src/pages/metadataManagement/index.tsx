@@ -128,7 +128,7 @@ export default function MetadataManagement() {
         pageSize
       ) as ColumnProps[]
     );
-  }, [activeMetadataType, selectedColumns]);
+  }, [activeMetadataType, selectedColumns, current, pageSize]);
 
   useEffect(() => {
     getMenuData();
