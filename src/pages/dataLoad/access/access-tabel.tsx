@@ -298,8 +298,12 @@ const AccessTable = (props) => {
         allowClear
         placeholder={check_type == 'db' ? '搜索表名' : '搜索文件名'}
         style={{ width: 220, marginLeft: '24px' }}
-        onPressEnter={(e) => {
-          getRecordingList();
+        onSearch={() => {
+          if (current !== 1) {
+            setCurrent(1);
+          } else {
+            getRecordingList();
+          }
         }}
         onChange={(value) => {
           setSearchValue(value);
