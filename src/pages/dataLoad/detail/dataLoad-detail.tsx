@@ -572,8 +572,12 @@ const DataLoadDetail = () => {
             allowClear
             placeholder="搜索运行名称"
             style={{ width: 220 }}
-            onPressEnter={() => {
-              getDetailList();
+            onSearch={() => {
+              if (current !== 1) {
+                setCurrent(1);
+              } else {
+                getDetailList();
+              }
             }}
             onChange={(value) => {
               setSearchValue(value);
