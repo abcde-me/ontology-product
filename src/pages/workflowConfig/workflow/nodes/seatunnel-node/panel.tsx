@@ -3,7 +3,8 @@ import {
   Input,
   Typography,
   Cascader,
-  Divider
+  Divider,
+  Tooltip
 } from '@arco-design/web-react';
 import React, { useEffect, useMemo, useRef } from 'react';
 import { NodePanelProps } from '@/pages/workflowConfig/workflow/types';
@@ -32,6 +33,7 @@ import {
   parseLocalParams,
   pickParamsFromSQL
 } from '@/pages/workflowConfig/utils';
+import { IconQuestionCircle } from '@arco-design/web-react/icon';
 
 const { Item: FormItem, useForm, List: FormList } = Form;
 
@@ -240,7 +242,7 @@ export default React.memo(function SeatunnelPanel(
         }}
       >
         <FormItem
-          label={'来源表:'}
+          label={'来源表：'}
           field={'source_database'}
           required
           rules={[
@@ -279,8 +281,21 @@ export default React.memo(function SeatunnelPanel(
           <FormItem
             field={'query'}
             dependencies={['source_database']}
-            label={'来源数据过滤:'}
-            tooltip={'编写带有引用参数的sql语句以增量查询和数据条件过滤'}
+            label={
+              <div className={'flex items-center justify-center'}>
+                来源数据过滤
+                <Tooltip
+                  content={'编写带有引用参数的sql语句以增量查询和数据条件过滤'}
+                >
+                  <IconQuestionCircle
+                    className={
+                      'mx-[2px] text-xs text-[#94A3B8] hover:cursor-pointer'
+                    }
+                  />
+                </Tooltip>
+                ：
+              </div>
+            }
           >
             <SqlEditor
               placeholder={

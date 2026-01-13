@@ -3,6 +3,10 @@
   overflow: auto;
   position: relative;
 
+  .setting-header {
+    border-bottom: 1px solid #e2e8f0;
+  }
+
   .label-hidden {
     visibility: hidden;
   }
@@ -43,10 +47,12 @@
 
 .flow-setting-open {
   height: calc(100vh - 140px);
-  overflow: auto;
+  overflow: hidden;
   width: 360px;
 
-  &::-webkit-scrollbar {
-    display: none;
+  .setting-content {
+    &::-webkit-scrollbar {
+      display: none;
+    }
   }
 }

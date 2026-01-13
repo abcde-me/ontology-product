@@ -64,12 +64,25 @@ export const TitleInput = memo(
         //   !getNodesReadOnly() && setLocalValue(e.target.innerText);
         // }}
         className={`
-        system-xl-semibold h-7 min-w-0 appearance-none rounded-md border border-transparent px-1 text-[#1E293B]
+        system-xl-semibold h-7 min-w-0 appearance-none rounded-md border border-transparent px-1
+        text-[#1E293B]
         text-text-primary outline-none focus:shadow-xs ${className} max-w-[280px] overflow-x-auto overflow-y-hidden whitespace-nowrap
       `}
         // style={{ width: ((localValue?.length || 0) + 1) * 16 }}
+        style={{ fontWeight: 500 }}
         placeholder={t('workflow.common.addTitle') || ''}
         onBlur={handleBlur}
+        onBeforeInput={(e) => {
+          // @ts-ignore
+          if (e.inputType === 'insertParagraph') {
+            e.preventDefault();
+          }
+        }}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+          }
+        }}
       >
         {localValue || value}
       </div>
