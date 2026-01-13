@@ -292,11 +292,26 @@ export async function datasetBatchUpdateScene(params: {
     .do();
 }
 
-// 批量更新数据集场景分类
+// 创建数据集场景分类
 export async function createScene(params: {
   name: string;
   tags?: string[];
   description?: string;
 }) {
   return await UAPI.RES.createSceneApi({}).post(params).inRegion().do();
+}
+
+// 更新数据集场景分类
+export async function updateScene(params: {
+  id: number;
+  name: string;
+  tags?: string[];
+  description?: string;
+}) {
+  return await UAPI.RES.updateSceneApi({}).post(params).inRegion().do();
+}
+
+// 删除数据集场景分类
+export async function deleteScene(params: { id: number }) {
+  return await UAPI.RES.deleteSceneApi({}).post(params).inRegion().do();
 }

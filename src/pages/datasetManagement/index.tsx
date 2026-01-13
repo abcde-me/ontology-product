@@ -45,7 +45,9 @@ import {
   getTagList,
   getDatasetSceneList,
   datasetBatchUpdateScene,
-  createScene
+  createScene,
+  updateScene,
+  deleteScene
 } from '@/api/datasetManagement';
 import EllipsisPopover from '../../components/ellipsis-popover-com';
 import DatasetForm from '@/components/datasetform/AddDatasetForm';
@@ -117,6 +119,7 @@ export interface Dataset {
 }
 
 export interface SceneType {
+  type: string;
   name: string;
   id: number;
   description: string;
@@ -924,6 +927,8 @@ const DatasetManagement: React.FC = () => {
   const [tabData, setTabData] = React.useState<string[]>([]);
   const [addSceneTypeVisible, setAddSceneTypeVisible] =
     React.useState<boolean>(false);
+  const [isEdit, setIsEdit] = React.useState<boolean>(false);
+  const [editSceneId, setEditSceneId] = React.useState<number | null>(null);
   const [moveDatasetVisible, setMoveDatasetVisible] =
     React.useState<boolean>(false);
   const [moveDatasetId, setMoveDatasetId] = React.useState<number[] | null>(
@@ -1030,19 +1035,38 @@ const DatasetManagement: React.FC = () => {
   // 新增场景类型提交
   const handleAddSceneTypeSubmit = async (values: any) => {
     console.log('新增场景类型:', values);
-    const params = {
-      name: values.sceneTypeName,
-      tags: values.sceneTypeTag,
-      description: values.sceneTypeDesc
-    };
-    const res = await createScene(params);
-    if (res.code === '' && res.status === 200) {
-      Message.success('新增场景类型成功');
-      getSceneList();
+    if (isEdit) {
+      const params = {
+        id: Number(editSceneId),
+        name: values.sceneTypeName,
+        tags: values.sceneTypeTag,
+        description: values.sceneTypeDesc
+      };
+      const res = await updateScene(params);
+      if (res.code === '' && res.status === 200) {
+        Message.success('更新场景类型成功');
+        getSceneList();
+      } else {
+        Message.error(res.msg || '更新场景类型失败');
+      }
+      setIsEdit(false);
+      setEditSceneId(null);
+      setAddSceneTypeVisible(false);
     } else {
-      Message.error(res.msg || '新增场景类型失败');
+      const params = {
+        name: values.sceneTypeName,
+        tags: values.sceneTypeTag,
+        description: values.sceneTypeDesc
+      };
+      const res = await createScene(params);
+      if (res.code === '' && res.status === 200) {
+        Message.success('新增场景类型成功');
+        getSceneList();
+      } else {
+        Message.error(res.msg || '新增场景类型失败');
+      }
+      setAddSceneTypeVisible(false);
     }
-    setAddSceneTypeVisible(false);
   };
 
   // 移动数据集提交
@@ -1213,6 +1237,58 @@ const DatasetManagement: React.FC = () => {
       .catch((err) => {
         Message.error('删除失败，请稍候重试');
       });
+  };
+
+  // 删除场景分类
+  const handleDeleteScene = (sceneId: number) => {
+    Modal.confirm({
+      title: (
+        <span
+          style={{
+            fontFamily: 'PingFang SC, sans-serif',
+            fontWeight: 500,
+            fontSize: 16,
+            height: 24,
+            display: 'inline-block'
+          }}
+        >
+          确认删除场景分类吗？
+        </span>
+      ),
+      // 内容
+      content: (
+        <div
+          style={{
+            fontFamily: 'PingFang SC, sans-serif',
+            fontWeight: 400,
+            fontSize: 14,
+            color: '#1D2129',
+            height: 22,
+            display: 'inline-block'
+          }}
+        >
+          删除后，场景分类不可恢复
+        </div>
+      ),
+      // 按钮文字
+      okText: '确定',
+      cancelText: '取消',
+      // okButtonProps: { status: 'danger' },
+      onOk: () => {
+        deleteScene({ id: sceneId })
+          .then((res) => {
+            if (res.code === '' && res.status === 200) {
+              getSceneList();
+              Message.success('删除成功');
+            } else {
+              Message.error(res.message || '删除失败，请稍候重试');
+            }
+          })
+          .catch((err) => {
+            Message.error('删除失败，请稍候重试');
+          });
+      }
+    });
   };
 
   // 删除数据集
@@ -1510,7 +1586,8 @@ const DatasetManagement: React.FC = () => {
           id: 0,
           dataset_count: total,
           description: '',
-          tags: []
+          tags: [],
+          type: ''
         };
         const newSceneList = [allSceneTab, ...res.data];
         setDatasetSceneList(newSceneList);
@@ -1780,7 +1857,30 @@ const DatasetManagement: React.FC = () => {
                     marginTop: '20px'
                   }}
                 >
-                  <span className="text-[14px]">{item.description}</span>
+                  <div className="flex items-center justify-between">
+                    <span className="text-[14px]">{item.description}</span>
+                    <div className="flex items-center gap-2">
+                      <IconEdit
+                        className="cursor-pointer"
+                        onClick={() => {
+                          sceneTypeForm.setFieldsValue({
+                            sceneTypeName: item.name,
+                            sceneTypeDesc: item.description,
+                            sceneTypeTag: item.tags
+                          });
+                          setIsEdit(true);
+                          setEditSceneId(item.id);
+                          setAddSceneTypeVisible(true);
+                        }}
+                      />
+                      {item.type === 'user' && (
+                        <IconDelete
+                          className="cursor-pointer"
+                          onClick={() => handleDeleteScene(item.id)}
+                        />
+                      )}
+                    </div>
+                  </div>
                   <span style={{ marginTop: '8px' }}>
                     <IconTag style={{ marginRight: '5px' }} />
                     {item.tags.map((tag, index) => (
