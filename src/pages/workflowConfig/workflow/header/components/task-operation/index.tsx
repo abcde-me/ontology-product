@@ -1,7 +1,7 @@
 import React, { memo, useCallback, useRef, useState } from 'react';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
-import { Button, Form, Modal, Radio } from '@arco-design/web-react';
+import { Button, Form, Modal, Radio, Tooltip } from '@arco-design/web-react';
 import type { PublishWorkflowParams } from '@/pages/workflowConfig/types/workflow';
 import { Space } from '@arco-design/web-react';
 import { TaskOperationProps, ModelAndParameter } from '../../types';
@@ -64,15 +64,17 @@ const AppPublisher = ({
           {isOnline ? '下线' : '上线'}
         </Button>
         <div>
-          <Button
-            className={styles['scheduler-btn']}
-            type="default"
-            disabled={!isOnline}
-            onClick={() => setSchedulerDialogVisible(true)}
-            icon={isOnline ? <CircleIcon /> : <CircleIconDisabled />}
-          >
-            定时运行
-          </Button>
+          <Tooltip content={!isOnline ? '请先上线' : null}>
+            <Button
+              className={styles['scheduler-btn']}
+              type="default"
+              disabled={!isOnline}
+              onClick={() => setSchedulerDialogVisible(true)}
+              icon={isOnline ? <CircleIcon /> : <CircleIconDisabled />}
+            >
+              定时运行
+            </Button>
+          </Tooltip>
           <Modal
             title="定时任务设置"
             style={{ width: '640px' }}
@@ -98,15 +100,17 @@ const AppPublisher = ({
             ></SchedulerRun>
           </Modal>
         </div>
-        <Button
-          className={styles['run-btn']}
-          type="primary"
-          disabled={!isOnline}
-          onClick={() => handleOperate(WorkflowOperation.RUNNING)}
-          icon={isOnline ? <PlayIcon /> : <PlayIconDisabled />}
-        >
-          运行
-        </Button>
+        <Tooltip content={!isOnline ? '请先上线' : null}>
+          <Button
+            className={styles['run-btn']}
+            type="primary"
+            disabled={!isOnline}
+            onClick={() => handleOperate(WorkflowOperation.RUNNING)}
+            icon={isOnline ? <PlayIcon /> : <PlayIconDisabled />}
+          >
+            运行
+          </Button>
+        </Tooltip>
       </Space>
     </>
   );

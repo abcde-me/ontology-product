@@ -21,7 +21,7 @@ const hideSidebarPaths = [
 ];
 const collapseSidebarPaths = [];
 
-function LayoutWithSider({ children }) {
+export function LayoutWithSider({ children }) {
   const { createPermissionFilter } = usePermission();
 
   const [collapsed, setCollapsed] = useState(false);
