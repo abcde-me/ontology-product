@@ -245,9 +245,9 @@ const Classify = (props: ClassifyComponentProps) => {
                         checked ? 1 : 2
                       );
                     }}
-                    disabled={
-                      isEditModeFromDetail && (item as any)?.isFromDetail
-                    }
+                    // disabled={
+                    //   isEditModeFromDetail && (item as any)?.isFromDetail
+                    // }
                   >
                     必须标注
                   </Checkbox>
