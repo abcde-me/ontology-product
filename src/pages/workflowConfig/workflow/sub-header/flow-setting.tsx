@@ -30,6 +30,7 @@ import { useNodesReadOnly } from '@/pages/workflowConfig/workflow/hooks';
 import { LocalParam } from '@/pages/workflowConfig/types/workflow';
 import styles from './index.module.scss';
 import cn from 'classnames';
+import { getStructuredWorkflowList } from '@/api/workflowList';
 
 const formatLocalParams = (params: LocalParam[]) => {
   const localParams = params.map((item) => {
@@ -100,7 +101,7 @@ export default memo(function FlowSetting() {
         });
       return Promise.resolve();
     }
-    return Promise.reject();
+    return Promise.reject(workflowRes.message || '');
   };
 
   const { run: onFlowChange } = useDebounceFn(
@@ -128,7 +129,10 @@ export default memo(function FlowSetting() {
           return saveData;
         })
         .then(saveFlow)
-        .catch(console.error);
+        .catch((e) => {
+          console.error(e);
+          typeof e === 'string' && Message.error(e);
+        });
     },
     { wait: 2000 }
   );
@@ -184,6 +188,7 @@ export default memo(function FlowSetting() {
               layout={'vertical'}
               onChange={onFlowChange}
               disabled={nodesReadOnly}
+              validateTrigger={'onFinish'}
             >
               <div
                 className={
@@ -196,12 +201,34 @@ export default memo(function FlowSetting() {
                 field={'workflow_name'}
                 label={'工作流名称：'}
                 required
-                rules={[{ required: true, message: '工作流名称不能为空' }]}
+                rules={[
+                  {
+                    validator(value, onError) {
+                      if (!value?.trim()) {
+                        onError('工作流名称不能为空');
+                        return;
+                      }
+                      return getStructuredWorkflowList({
+                        keywords: value,
+                        page: 1,
+                        page_size: 1
+                      })
+                        .then((res) => {
+                          if (res.items.length >= 1) {
+                            onError('工作流名称已存在');
+                          }
+                          return Promise.resolve();
+                        })
+                        .catch(console.error);
+                    }
+                  }
+                ]}
               >
                 <Input
                   maxLength={100}
                   placeholder={'请输入工作流名称'}
                   showWordLimit
+                  allowClear
                 />
               </Form.Item>
               <Form.Item field={'description'} label={'工作流描述：'}>

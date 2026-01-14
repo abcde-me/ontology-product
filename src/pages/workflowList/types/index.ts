@@ -1,5 +1,9 @@
 export interface SearchWorkflowParams {
   /**
+   * 关键词搜索
+   */
+  keywords?: string;
+  /**
    * 工作流ID
    */
   code?: string;
