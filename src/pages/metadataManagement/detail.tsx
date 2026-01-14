@@ -298,7 +298,7 @@ export default function MetadataManagementDetail() {
       value: baseInfoData.description || '-'
     },
     {
-      label: '存储类型',
+      label: '表类型',
       value: baseInfoData.tableType || '-'
     },
     {
