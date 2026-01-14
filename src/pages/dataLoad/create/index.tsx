@@ -1766,7 +1766,7 @@ export default function DataLoadCreate() {
           >
             保存并执行
           </Button>
-          {/* {sourceType !== SOURCE_TYPES.LOCAL && (
+          {sourceType !== SOURCE_TYPES.LOCAL && (
             <Button
               onClick={() => handleSubmit(SUBMIT_TYPES.KEEP)}
               disabled={loading}
@@ -1774,7 +1774,7 @@ export default function DataLoadCreate() {
             >
               仅保存
             </Button>
-          )} */}
+          )}
           <Button onClick={handleCancel}>取消</Button>
         </div>
       </div>
