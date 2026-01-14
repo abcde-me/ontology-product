@@ -156,37 +156,37 @@ const DataLoadDetail = () => {
   useInterval(judgmentTask, 5000);
 
   // 停止中的过程
-  const StopeJudgmentTask = async () => {
-    try {
-      setDetailListLoading(true);
-      const res = await getLoadRecordList({
-        task_id: Number(loadId),
-        page: current,
-        page_size: pageSize,
-        execution_name: searchValue.trim(),
-        ...directoryObj
-      });
-      if (res?.data?.items?.[0]?.status === 'stopped') {
-        Message.success('任务已停止');
-      } else {
-        if (res?.data?.items?.[0]?.status === 'failed') {
-          Message.error(res?.data?.items?.[0]?.error_msg);
-        } else {
-          Message.error('任务停止失败');
-        }
-      }
-      setTotal(res?.data?.total ?? 0);
-      setDetailList(res?.data?.items ?? []);
-      const boo = detailList?.findIndex(
-        (item) => item.status == 'succeed' || item.status == 'stopping'
-      );
-      setRunningFlag(boo == -1 ? false : true);
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setDetailListLoading(false);
-    }
-  };
+  // const StopeJudgmentTask = async () => {
+  //   try {
+  //     setDetailListLoading(true);
+  //     const res = await getLoadRecordList({
+  //       task_id: Number(loadId),
+  //       page: current,
+  //       page_size: pageSize,
+  //       execution_name: searchValue.trim(),
+  //       ...directoryObj
+  //     });
+  //     if (res?.data?.items?.[0]?.status === 'stopped') {
+  //       Message.success('任务已停止');
+  //     } else {
+  //       if (res?.data?.items?.[0]?.status === 'failed') {
+  //         Message.error(res?.data?.items?.[0]?.error_msg);
+  //       } else {
+  //         Message.error('任务停止失败');
+  //       }
+  //     }
+  //     setTotal(res?.data?.total ?? 0);
+  //     setDetailList(res?.data?.items ?? []);
+  //     const boo = detailList?.findIndex(
+  //       (item) => item.status == 'succeed' || item.status == 'stopping'
+  //     );
+  //     setRunningFlag(boo == -1 ? false : true);
+  //   } catch (err) {
+  //     console.error(err);
+  //   } finally {
+  //     setDetailListLoading(false);
+  //   }
+  // };
   // 启停任务
   const startAndStoponchange = async (val) => {
     try {
@@ -639,7 +639,7 @@ const DataLoadDetail = () => {
           <TableDetail
             taskId={listDetail && listDetail.task_id}
             judgmentTaskHan={judgmentTask}
-            TimedStops={StopeJudgmentTask}
+            // TimedStops={StopeJudgmentTask}
             {...detailList}
             datalist={detailList}
             loading={detailListLoading}
