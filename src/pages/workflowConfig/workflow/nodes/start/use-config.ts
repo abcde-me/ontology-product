@@ -89,6 +89,7 @@ const useConfig = (id: string, payload: StartNodeType) => {
           const files = n.data?.files || [];
 
           // 统一使用 queryDataDirFiles 获取排除已选文件后的数量
+          // 解决此问题：https://cdp.cestc.cn/product/#/defect/detail?projectId=1909193124970778626&itemId=10468912
           const result = await queryDataDirFiles({
             data_path_id: sourcePath,
             file_type: formats,

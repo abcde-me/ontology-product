@@ -152,6 +152,8 @@ function FileList({
         //     total: 100
         //   }
         // };
+        // 如果存在黑名单文件，需要单独请求接口获取数量，原因是黑名单的数据可能没有更新，导致直接使用total-files.length计算会不准确
+        // 解决此问题：https://cdp.cestc.cn/product/#/defect/detail?projectId=1909193124970778626&itemId=10468912
         if (files.length > 0) {
           const [result1, result2] = await Promise.all([
             getLoadTaskFiles({
