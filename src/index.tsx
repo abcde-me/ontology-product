@@ -18,6 +18,7 @@ import ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
 import { ConfigProvider, Layout, Spin } from '@arco-design/web-react';
 import {} from '@ccf2e/arco-material';
+import { patchHistoryForLocationChange } from '@ceai-front/arco-material';
 import { useHistory } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import zhCN from '@arco-design/web-react/es/locale/zh-CN';
@@ -56,6 +57,7 @@ import { ProjectIdKey } from './utils/const';
 import { isSameArray } from './utils/array';
 
 initI18n();
+patchHistoryForLocationChange();
 
 // 创建 QueryClient 实例
 const queryClient = new QueryClient({

@@ -1510,10 +1510,10 @@
     ahooks "^3.7.8"
     react-resizable "^3.0.4"
 
-"@ceai-front/arco-material@^1.0.7":
-  version "1.0.9"
-  resolved "http://npm.cestc.cn/@ceai-front/arco-material/download/@ceai-front/arco-material-1.0.9.tgz#d2aa1bc76c50de5cc63e245e7e213cfce99b72e8"
-  integrity sha1-0qobx2xQ3lzGPiRefiE8/Ombcug=
+"@ceai-front/arco-material@^1.0.14":
+  version "1.0.14"
+  resolved "http://npm.cestc.cn/@ceai-front/arco-material/download/@ceai-front/arco-material-1.0.14.tgz#fc234234f63e00ee78906ee84a38c02759bcf598"
+  integrity sha1-/CNCNPY+AO54kG7oSjjAJ1m89Zg=
   dependencies:
     "@ccf2e/arco-material" "^0.7.2"
     "@easyv/react-icons" "^1.0.0"
@@ -1533,6 +1533,7 @@
     query-string "^9.1.1"
     react-dnd "^16.0.1"
     react-dnd-html5-backend "^16.0.1"
+    react-draggable "^4.5.0"
     react-easy-crop "^5.0.7"
     react-resizable "^3.0.5"
     react-sortable-hoc "^2.0.0"
@@ -19914,7 +19915,7 @@ react-dom@^17.0.1:
     object-assign "^4.1.1"
     scheduler "^0.20.2"
 
-react-draggable@^4.0.3:
+react-draggable@^4.0.3, react-draggable@^4.5.0:
   version "4.5.0"
   resolved "http://npm.cestc.cn/react-draggable/download/react-draggable-4.5.0.tgz#0b274ccb6965fcf97ed38fcf7e3cc223bc48cdf5"
   integrity sha1-CydMy2ll/Pl+04/PfjzCI7xIzfU=
