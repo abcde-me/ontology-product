@@ -444,7 +444,7 @@ const MilvusFields = [
   {
     id: 'updateTime',
     nameEn: 'updateTime',
-    nameZh: '元数据采集时间',
+    nameZh: '元数据更新时间',
     type: 'datetime',
     isEnumAbleForColumn: true,
     isEnumAble: false,
