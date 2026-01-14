@@ -490,7 +490,6 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
 
   // 添加根级目录
   const onCatalogAdd = () => {
-    console.log(123);
     const name = `源目录_${Date.now()}`;
     const newNode = genereteInputNode(name);
     setInputNode('catalog', newNode.key, newNode);
@@ -705,7 +704,7 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
                 onClick={() => addSubItem(node)}
               >
                 <IconPlus />
-                <span className="ml-1 text-xs">新建111</span>
+                <span className="ml-1 text-xs">新建</span>
               </div>
             </Tooltip>
           )}
