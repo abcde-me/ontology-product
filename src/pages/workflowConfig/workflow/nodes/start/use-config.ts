@@ -103,14 +103,17 @@ const useConfig = (id: string, payload: StartNodeType) => {
         })
       ).then((results) => {
         results.forEach(({ node, selected_files_num }) => {
-          handleNodeDataUpdateWithSyncDraft({
-            id: node.id,
-            data: {
-              ...node.data,
-              selected_files_num,
-              files: node.data?.files || []
-            }
-          });
+          handleNodeDataUpdateWithSyncDraft(
+            {
+              id: node.id,
+              data: {
+                ...node.data,
+                selected_files_num,
+                files: node.data?.files || []
+              }
+            },
+            true
+          );
         });
       });
     }

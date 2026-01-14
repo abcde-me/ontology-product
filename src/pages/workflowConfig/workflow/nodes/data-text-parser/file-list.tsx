@@ -6,7 +6,7 @@ import EllipsisPopover from '@/components/ellipsis-popover-com';
 import EmptyIcon from '@/assets/empty.svg';
 import { IconSearch } from '@arco-design/web-react/icon';
 import { StartNodeType } from '../start/types';
-import { getLoadTaskFiles } from '@/api/loadApi';
+import { getLoadTaskFiles, queryDataDirFiles } from '@/api/loadApi';
 import { useUnmountedRef } from 'ahooks';
 import { formatFileSize } from '@/utils/format';
 import noDataElement from '@/components/no-data';
@@ -152,24 +152,59 @@ function FileList({
         //     total: 100
         //   }
         // };
-        result = await getLoadTaskFiles({
-          data_path_id: sourcePath,
-          file_type: params?.file_type ?? formats,
-          file_size: 2 * 1024 * 1024 * 1024 - 1, // 过滤掉2G以上文件
-          page_size: pagination.limit,
-          page: params.page,
-          sort: params.sort
-        });
+        if (files.length > 0) {
+          const [result1, result2] = await Promise.all([
+            getLoadTaskFiles({
+              data_path_id: sourcePath,
+              file_type: params?.file_type ?? formats,
+              file_size: 2 * 1024 * 1024 * 1024 - 1, // 过滤掉2G以上文件
+              page_size: pagination.limit,
+              page: params.page,
+              sort: params.sort
+            }),
+            queryDataDirFiles({
+              data_path_id: sourcePath,
+              file_type: params?.file_type ?? formats,
+              file_size: 2 * 1024 * 1024 * 1024 - 1, // 过滤掉2G以上文件
+              exclude_file_ids: files
+            })
+          ]);
+
+          result = {
+            data: {
+              items: [...(result1.data?.items || [])],
+              total: result1.data?.total,
+              selected_files_num: result2.data?.selected_cnt
+            }
+          };
+        } else {
+          const result3 = await getLoadTaskFiles({
+            data_path_id: sourcePath,
+            file_type: params?.file_type ?? formats,
+            file_size: 2 * 1024 * 1024 * 1024 - 1, // 过滤掉2G以上文件
+            page_size: pagination.limit,
+            page: params.page,
+            sort: params.sort
+          });
+          result = {
+            data: {
+              items: [...(result3.data?.items || [])],
+              total: result3.data?.total,
+              selected_files_num: result3.data?.total
+            }
+          };
+        }
       } else {
         result = {
           data: {
             items: [],
-            total: 0
+            total: 0,
+            selected_files_num: 0
           }
         };
       }
       if (unmountedRef.current) return;
-      const { items = [], total = 0 } = result.data;
+      const { items = [], total = 0, selected_files_num = 0 } = result.data;
       setFilesData(items || []);
       setPagination((prevPagination) => ({
         ...prevPagination,
@@ -184,7 +219,7 @@ function FileList({
         });
       setSelectedRowKeys(Array.from(keysSet));
       console.log('loadFiles', total, files);
-      handleFilesChange(files, total - files.length);
+      handleFilesChange(files, selected_files_num);
     } catch (error) {
       console.log('获取文件列表失败:', error);
       setFilesData([]);
