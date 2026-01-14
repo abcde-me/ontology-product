@@ -1,4 +1,10 @@
-import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState
+} from 'react';
 import { Input, Tooltip, Message, TreeSelect } from '@arco-design/web-react';
 import {
   IconCaretDown,
@@ -97,6 +103,7 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
   value,
   onChange
 }) => {
+  const [isAdding, setIsAdding] = useState(false);
   // 使用自定义Hook管理输入节点状态
   const {
     inputNodes,
@@ -367,7 +374,10 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
   // 编辑完成处理
   const onEditFinish = async (props: NodeProps) => {
     const { dataRef } = props;
-    if (!dataRef) return;
+    if (!dataRef) {
+      setIsAdding(false);
+      return;
+    }
 
     const fileName = inputValue.trim();
     const inputType = getInputNodeType(dataRef);
@@ -376,6 +386,7 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
     if (!fileName) {
       Message.error('文件名不能为空');
       clearInputState(dataRef);
+      setIsAdding(false);
       return;
     }
 
@@ -383,6 +394,7 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
     const validateResult = validateName(fileName);
     if (!validateResult.isValid && validateResult.errorMessage) {
       Message.error(validateResult.errorMessage);
+      setIsAdding(false);
       return;
     }
 
@@ -395,12 +407,14 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
         inputType
       );
       if (!success) {
+        setIsAdding(false);
         return;
       }
     } else {
       // 编辑现有节点
       const success = await handleUpdateNode(fileName, dataRef);
       if (!success) {
+        setIsAdding(false);
         return;
       }
     }
@@ -409,9 +423,11 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
     if (inputType) {
       // 对于输入节点，刷新数据并清理输入状态
       await refreshData();
+      setIsAdding(false);
     } else {
       // 普通节点使用原有的刷新逻辑
       await refreshData();
+      setIsAdding(false);
     }
   };
 
@@ -474,6 +490,7 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
 
   // 添加根级目录
   const onCatalogAdd = () => {
+    console.log(123);
     const name = `源目录_${Date.now()}`;
     const newNode = genereteInputNode(name);
     setInputNode('catalog', newNode.key, newNode);
@@ -688,7 +705,7 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
                 onClick={() => addSubItem(node)}
               >
                 <IconPlus />
-                <span className="ml-1 text-xs">新建</span>
+                <span className="ml-1 text-xs">新建111</span>
               </div>
             </Tooltip>
           )}
@@ -756,6 +773,7 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
     if (!showAddTree) return null;
 
     const handleAddClick = () => {
+      setIsAdding(true);
       if (onAddTree) {
         onAddTree();
       } else if (enableRootAdd) {
@@ -773,13 +791,13 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
         <div
           style={{
             padding: '8px 12px 12px 0',
-            cursor: 'pointer',
-            color: '#1890ff',
+            cursor: isAdding ? 'default' : 'pointer',
+            color: isAdding ? '#94A3B8' : '#1890ff',
             transition: 'background-color 0.2s',
             borderRadius: '0 0 6px 6px',
             backgroundColor: '#fff'
           }}
-          onClick={handleAddClick}
+          onClick={!isAdding ? handleAddClick : undefined}
         >
           <div
             style={{
