@@ -704,7 +704,7 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
                 onClick={() => addSubItem(node)}
               >
                 <IconPlus />
-                <span className="ml-1 text-xs">新建111</span>
+                <span className="ml-1 text-xs">新建</span>
               </div>
             </Tooltip>
           )}
