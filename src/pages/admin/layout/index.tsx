@@ -12,11 +12,9 @@ import { Route, Switch } from 'react-router-dom';
 import { SWRConfig } from 'swr';
 import { getFlatRoutes, routes } from '../route';
 import Bread from './Bread';
-import { LayoutWithSider, withSider } from './Sider';
+import { LayoutWithSider } from './Sider';
 import { useUserInfoStore } from '@/store/userInfoStore';
 import { Page403, Page404 } from '@/pages/errorPages';
-import { usePermission } from '@/hooks';
-import AuthLoad from '@/pages/errorPages/authLoad';
 import PermissionRoute from './PermissionRoute';
 
 type LayoutPageProps = {

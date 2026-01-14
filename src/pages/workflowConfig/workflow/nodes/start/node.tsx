@@ -66,7 +66,7 @@ const Node: FC<NodeProps<StartNodeType>> = ({ id, data }) => {
     });
 
     // 如果非上线模式，已经选择了数据源，第一次加载设置文件数量为全选
-    if (data_path_id && appDetail?.is_online !== IsOnline.online) {
+    if (data_path_id) {
       doFileConfigChange(BlockEnum.Text, data_path_id, data_category?.[0]);
       doFileConfigChange(BlockEnum.Image, data_path_id, data_category?.[1]);
       doFileConfigChange(BlockEnum.Audio, data_path_id, data_category?.[2]);

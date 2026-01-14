@@ -1,6 +1,6 @@
 import { Layout, Menu } from '@arco-design/web-react';
 import cn from 'classnames';
-import React, { useEffect, useMemo, useState, useRef } from 'react';
+import React, { useEffect, useMemo, useState, useRef, memo } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import { menus, type MenuModel } from './menus';
 import './sider.scss';
@@ -21,7 +21,7 @@ const hideSidebarPaths = [
 ];
 const collapseSidebarPaths = [];
 
-export function LayoutWithSider({ children }) {
+export const LayoutWithSider = memo(function LayoutWithSider({ children }) {
   const { createPermissionFilter } = usePermission();
 
   const [collapsed, setCollapsed] = useState(false);
@@ -197,7 +197,7 @@ export function LayoutWithSider({ children }) {
       {children}
     </Layout>
   );
-}
+});
 
 export function withSider(Content) {
   return function () {
