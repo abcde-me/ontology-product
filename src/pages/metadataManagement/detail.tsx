@@ -66,6 +66,7 @@ interface MinIOBaseData {
   policy?: string;
   encryptType?: string;
   createTime?: string;
+  creationDate?: string;
   updateTime?: string;
   lastTime?: string;
 }
@@ -385,7 +386,7 @@ export default function MetadataManagementDetail() {
     },
     {
       label: '创建时间',
-      value: minIOBaseData.createTime || '-'
+      value: minIOBaseData.creationDate || '-'
     }
   ];
   // MinIo对象信息列
