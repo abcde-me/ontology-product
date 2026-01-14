@@ -537,6 +537,7 @@ export const getColumns = (
               field.id === 'encryption' ||
               field.id === 'description' ||
               field.id === 'databaseName' ||
+              field.id === 'dbName' ||
               field.id === 'distributionColumns' ||
               field.id === 'partitionKey'
             ) {
