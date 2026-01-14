@@ -463,7 +463,20 @@ PROPERTIES (
           <div className="mb-3 mt-4 flex items-center justify-between">
             <h1 className="text-base font-semibold">{`数据列表(${total})`}</h1>
             <div className="flex items-center gap-2">
-              <span className="text-sm text-[#6E7B8D]">{updateTime} 更新</span>
+              <span
+                className="text-sm text-[#6E7B8D]"
+                style={{ fontFamily: 'PingFang SC' }}
+              >
+                {updateTime} 更新
+              </span>
+              {activeMetadataType === MetadataType.MinIO && (
+                <span
+                  className="text-sm text-[#6E7B8D]"
+                  style={{ fontFamily: 'PingFang SC' }}
+                >
+                  数据更新五分钟一次
+                </span>
+              )}
               {/* <Button
                 className={styles['refreshBtn']}
                 icon={<IconRefresh className="text-[#1E293B]" />}

@@ -213,7 +213,7 @@ const DorisFields: ColumnField[] = [
   {
     id: 'tableUpdateTime',
     nameEn: 'tableUpdateTime',
-    nameZh: '更新时间',
+    nameZh: '表数据更新时间',
     type: 'datetime',
     isEnumAbleForColumn: true,
     isEnumAble: false,
