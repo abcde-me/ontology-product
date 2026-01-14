@@ -418,7 +418,7 @@ const add = forwardRef((props: any, ref) => {
                   rules={[{ required: true, message: '请输入地址列表' }]}
                   field="bootstrapServers"
                 >
-                  <Input placeholder="请输入" />
+                  <Input placeholder="请输入，多个地址用逗号分隔如lhost1:port1,host2:port2" />
                 </FormItem>
                 <FormItem
                   label="偏移重置策略"
