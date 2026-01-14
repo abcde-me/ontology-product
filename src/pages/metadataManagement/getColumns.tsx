@@ -100,8 +100,8 @@ const IcebergFields: ColumnField[] = [
     values: []
   },
   {
-    id: 'updateTime',
-    nameEn: 'updateTime',
+    id: 'tableDataUpdateTime',
+    nameEn: 'tableDataUpdateTime',
     nameZh: '更新时间',
     type: 'datetime',
     isEnumAbleForColumn: true,
@@ -112,8 +112,8 @@ const IcebergFields: ColumnField[] = [
     values: []
   },
   {
-    id: 'createTime',
-    nameEn: 'createTime',
+    id: 'tableCreateTime',
+    nameEn: 'tableCreateTime',
     nameZh: '创建时间',
     type: 'datetime',
     isEnumAbleForColumn: true,
@@ -211,8 +211,8 @@ const DorisFields: ColumnField[] = [
     values: []
   },
   {
-    id: 'tableUpdateTime',
-    nameEn: 'tableUpdateTime',
+    id: 'tableDataUpdateTime',
+    nameEn: 'tableDataUpdateTime',
     nameZh: '表数据更新时间',
     type: 'datetime',
     isEnumAbleForColumn: true,
@@ -537,6 +537,7 @@ export const getColumns = (
               field.id === 'encryption' ||
               field.id === 'description' ||
               field.id === 'databaseName' ||
+              field.id === 'dbName' ||
               field.id === 'distributionColumns' ||
               field.id === 'partitionKey'
             ) {
