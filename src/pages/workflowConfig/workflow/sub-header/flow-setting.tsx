@@ -209,12 +209,22 @@ export default memo(function FlowSetting() {
                         return;
                       }
                       return getStructuredWorkflowList({
-                        keywords: value,
+                        name: value,
                         page: 1,
                         page_size: 1
                       })
                         .then((res) => {
-                          if (res.items.length >= 1) {
+                          // 排除同名且当前工作流本身
+                          const hasSameName = res.items.some(
+                            ({ name, workflow_uuid }) => {
+                              return (
+                                workflow_uuid !==
+                                  workflowDetail?.workflow_uuid &&
+                                name === value
+                              );
+                            }
+                          );
+                          if (hasSameName) {
                             onError('工作流名称已存在');
                           }
                           return Promise.resolve();
