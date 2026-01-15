@@ -48,6 +48,7 @@ import {
   useTreeUIState,
   useApiOperations
 } from './hooks';
+import { useRequest } from 'ahooks';
 import classNames from 'classnames';
 import styles from './index.module.scss';
 
@@ -431,6 +432,12 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
     }
   };
 
+  // 防抖触发编辑事件
+  const { run: runEditFinish } = useRequest(onEditFinish, {
+    debounceWait: 1000,
+    manual: true
+  });
+
   // 生成新的目录名称
   const generateName = useCallback(
     (typeText?: string) => {
@@ -662,10 +669,10 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
               e.stopPropagation();
             }}
             onBlur={() => {
-              onEditFinish(props);
+              runEditFinish(props);
             }}
             onPressEnter={() => {
-              onEditFinish(props);
+              runEditFinish(props);
             }}
             autoFocus={dataRef?.isNew}
             maxLength={255}
