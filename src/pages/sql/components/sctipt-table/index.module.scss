@@ -4,10 +4,6 @@
   flex-direction: column;
   width: 100%;
 
-  // :global(.arco-table-no-data) {
-  //   padding: 100px;
-  // }
-
   :global(.arco-form-inline .arco-form-item) {
     margin-bottom: 0;
   }
@@ -25,17 +21,6 @@
     line-height: 32px;
   }
 
-  // .operate-text {
-  //   color: rgb(0, 125, 250);
-  //   cursor: pointer;
-  //   margin-right: 16px;
-  //   padding: 0;
-  // }
-
-  // .operate-text:hover {
-  //   color: rgba(67, 141, 251, 1);
-  // }
-
   .disabled-text {
     color: #94a3b8;
     cursor: not-allowed;
@@ -47,6 +32,7 @@
 
   :global(tbody) .hover-change :global(.ellipsis-text) {
     color: #1e293b;
+    font-weight: 600;
   }
 
   :global(tbody)

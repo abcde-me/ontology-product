@@ -562,7 +562,7 @@ const EditorWorkspaceContent: React.FC<{
             >
               {/* 保存时间 - 始终显示 */}
               {scriptInfo?.update_time && (
-                <div className="min-w-0 max-w-full flex-shrink">
+                <div className="ml-[12px] min-w-0 max-w-full flex-shrink">
                   <EllipsisPopover
                     value={`保存时间: ${
                       dayjs(scriptInfo?.update_time).format(
