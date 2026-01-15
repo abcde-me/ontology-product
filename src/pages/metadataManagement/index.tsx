@@ -134,6 +134,15 @@ export default function MetadataManagement() {
     getMenuData();
   }, []);
 
+  useEffect(() => {
+    const selectMenuItem =
+      metadataMenuData.find(
+        (item: MetadataMenuItem) => item?.datasourceType === activeMetadataType
+      ) || ({} as MetadataMenuItem);
+    setUpdateTime(selectMenuItem?.updateTime || '');
+    setActiveMetadataId(selectMenuItem?.id || null);
+  }, [metadataMenuData, activeMetadataType]);
+
   const getMenuName = (type: string) => {
     switch (type) {
       case MetadataType.Iceberg:
@@ -167,7 +176,6 @@ export default function MetadataManagement() {
             MetadataType.Iceberg
         );
         setActiveMetadataId(Number(res.data.data[0]?.id) || null);
-        setUpdateTime(res.data.data[0]?.updateTime || '');
       }
     } else {
       Message.error(res.message || '获取元数据菜单数据失败');
@@ -431,12 +439,6 @@ PROPERTIES (
             onClickMenuItem={(key, event, keyPath) => {
               setSelectedColumns(getColumnsSetting(key));
               setActiveMetadataType(key);
-              const selectMenuItem =
-                metadataMenuData.find(
-                  (item: MetadataMenuItem) => item?.datasourceType === key
-                ) || ({} as MetadataMenuItem);
-              setUpdateTime(selectMenuItem?.updateTime || '');
-              setActiveMetadataId(selectMenuItem?.id || null);
               setSearchValue({
                 filters: {},
                 range: [] as RangeFilter[]
