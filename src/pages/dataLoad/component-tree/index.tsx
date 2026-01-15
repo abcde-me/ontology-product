@@ -435,6 +435,8 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
   // 防抖触发编辑事件
   const { run: runEditFinish } = useRequest(onEditFinish, {
     debounceWait: 1000,
+    debounceLeading: true,
+    debounceTrailing: false,
     manual: true
   });
 
