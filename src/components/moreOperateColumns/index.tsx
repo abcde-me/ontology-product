@@ -1,6 +1,19 @@
+import React from 'react';
 import { Button, Dropdown, Menu } from '@arco-design/web-react';
 import { IconDown } from '@arco-design/web-react/icon';
-import React, { useState } from 'react';
+
+/**
+ * 更多操作列组件
+ * 用于展示更多操作列，如删除、测试等操作。
+ * 操作列配置列表中，前两个操作列会展示为按钮，后续操作列会展示为下拉菜单。
+ * 使用场景:
+ * 1. 表格中需要展示更多操作列，如删除、测试等操作。
+ * 2. 前两个操作列无权限时，需要将更多内的操作列提出。
+ *
+ * @param props 组件属性
+ * @param props.columnsConfigList 操作列配置列表
+ * @returns
+ */
 
 export default function MoreOperateColumns(props: {
   columnsConfigList: {
