@@ -27,8 +27,7 @@ import {
   openDataUnpublish
 } from '@/api/dataApi';
 import { SorterInfo } from '@arco-design/web-react/es/Table/interface';
-import { PermissionWrapper } from '@/components/PermissionGuard';
-import { WORKFLOW_TASK_PERMISSIONS } from '@/config/permissions';
+import MoreOperateColumns from '@/components/moreOperateColumns';
 import styles from './index.module.scss';
 import {
   IconClose,
@@ -552,109 +551,59 @@ export default function DataApi() {
       dataIndex: 'operate',
       width: 200,
       fixed: 'right',
-      render: (_, record) => (
-        <div className="flex items-center">
-          <Button
-            type="text"
-            className="pl-0"
-            onClick={() => handleToAddApi('edit', record.id)}
-            disabled={record.status !== ApiStatus.running}
-          >
-            编辑
-          </Button>
-          <PermissionWrapper permission={WORKFLOW_TASK_PERMISSIONS.CAN_UPDATE}>
-            <Button
-              type="text"
-              className="pl-0"
-              onClick={() => {
-                setViewFileModalVisible(true);
-                setViewFileId(record.id);
-              }}
-            >
-              查看文档
-            </Button>
-          </PermissionWrapper>
-          <Dropdown
-            droplist={
-              <Menu>
-                <Menu.Item key="export">
-                  <Button
-                    type="text"
-                    style={{
-                      padding: '0 8px 0 5px',
-                      height: '100%',
-                      borderTop: 'none',
-                      borderBottom: 'none'
-                    }}
-                    onClick={() => handleChangeStatus(record)}
-                  >
-                    {record.status === ApiStatus.success ? '下线' : '上线'}
-                  </Button>
-                </Menu.Item>
-                <Menu.Item key="authorize">
-                  <Button
-                    type="text"
-                    style={{
-                      padding: '0 8px 0 5px',
-                      height: '100%',
-                      borderTop: 'none',
-                      borderBottom: 'none'
-                    }}
-                    onClick={() => {
-                      handleAuthorization(Number(record.id));
-                    }}
-                    disabled={record.status !== ApiStatus.success}
-                  >
-                    授权
-                  </Button>
-                </Menu.Item>
-                <Menu.Item key="test">
-                  <Button
-                    type="text"
-                    style={{
-                      padding: '0 8px 0 5px',
-                      height: '100%',
-                      borderTop: 'none',
-                      borderBottom: 'none'
-                    }}
-                    onClick={() => {
-                      setTestVisible(true);
-                      setTestDataSource(record.paramConfig || []);
-                      setTestApiId(record.id);
-                    }}
-                  >
-                    测试
-                  </Button>
-                </Menu.Item>
-                <Menu.Item key="delete">
-                  <Button
-                    type="text"
-                    style={{
-                      padding: '0 8px 0 5px',
-                      height: '100%',
-                      borderTop: 'none',
-                      borderBottom: 'none'
-                    }}
-                    onClick={() => {
-                      handleDeleteApi(record.id);
-                    }}
-                    disabled={record.status === ApiStatus.success}
-                  >
-                    删除
-                  </Button>
-                </Menu.Item>
-              </Menu>
-            }
-            trigger="hover"
-            position="bl"
-          >
-            <Button type="text" className="px-0">
-              更多
-              <IconDown />
-            </Button>
-          </Dropdown>
-        </div>
-      )
+      render: (_, record) => {
+        const columnsConfigList = [
+          {
+            title: '编辑',
+            method: () => handleToAddApi('edit', record.id),
+            disabled: record.status !== ApiStatus.running,
+            permission: true
+          },
+          {
+            title: '查看文档',
+            method: () => {
+              setViewFileModalVisible(true);
+              setViewFileId(record.id);
+            },
+            permission: true
+          },
+          {
+            title: record.status === ApiStatus.success ? '下线' : '上线',
+            method: () => handleChangeStatus(record),
+            permission: true
+          },
+          {
+            title: '授权',
+            method: () => {
+              handleAuthorization(Number(record.id));
+            },
+            disabled: record.status !== ApiStatus.success,
+            permission: true
+          },
+          {
+            title: '测试',
+            method: () => {
+              setTestVisible(true);
+              setTestDataSource(record.paramConfig || []);
+              setTestApiId(record.id);
+            },
+            permission: true
+          },
+          {
+            title: '删除',
+            method: () => handleDeleteApi(record.id),
+            disabled: record.status === ApiStatus.success,
+            permission: true
+          }
+        ];
+        return (
+          <MoreOperateColumns
+            columnsConfigList={columnsConfigList.filter(
+              (item) => item.permission
+            )}
+          />
+        );
+      }
     }
   ];
 
