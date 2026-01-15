@@ -171,9 +171,7 @@ export function StructuredWorkflowList() {
           title={value}
         >
           <div
-            className={
-              'overflow-hidden overflow-ellipsis whitespace-nowrap font-PingFangSc text-[14px] font-medium leading-[22px]'
-            }
+            className={`workflow-name-content overflow-hidden overflow-ellipsis whitespace-nowrap font-PingFangSc text-[14px] font-medium leading-[22px]`}
           >
             {value}
           </div>
