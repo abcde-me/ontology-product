@@ -482,7 +482,7 @@ export const getColumns = (
       dataIndex: 'index',
       width: 60,
       key: 'index',
-      render: (_, _record, idx: number) => (page - 1) * size + idx + 1
+      render: (_, _record, idx: number) => idx + 1
     },
     // 根据 fields 生成列，保证每一列和表头一一对应
     ...(metadataSelectedFields || [])
