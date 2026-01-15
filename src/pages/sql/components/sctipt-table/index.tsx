@@ -246,12 +246,6 @@ const ScriptTable: React.FC<ScriptTableProps> = ({
   // table columns
   const columns: ColumnProps[] = [
     {
-      title: '脚本ID',
-      dataIndex: 'script_id',
-      width: 200,
-      sorter: (a, b) => a.length - b.length
-    },
-    {
       title: '脚本名称',
       dataIndex: 'script_name',
       width: 180,
@@ -264,6 +258,12 @@ const ScriptTable: React.FC<ScriptTableProps> = ({
           handleLink={() => handleToDetail(record.script_id)}
         />
       )
+    },
+    {
+      title: '脚本ID',
+      dataIndex: 'script_id',
+      width: 200,
+      sorter: (a, b) => a.length - b.length
     },
     {
       title: '最新版本号',

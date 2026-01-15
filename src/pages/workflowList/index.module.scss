@@ -13,6 +13,24 @@ $primary-color: rgb(0, 125, 250);
     line-height: 32px;
   }
 
+  :global(.arco-table-tr) {
+    &:hover {
+      :global(.workflow-name-content) {
+        color: $primary-color !important;
+      }
+
+      .workflow-name-copy {
+        visibility: visible;
+
+        &:hover {
+          visibility: visible;
+          color: $primary-color;
+          cursor: pointer;
+        }
+      }
+    }
+  }
+
   .workflow-name {
     .workflow-name-copy {
       visibility: hidden;
@@ -124,10 +142,8 @@ $primary-color: rgb(0, 125, 250);
 .content-with-copy {
   .workflow-name-copy {
     visibility: hidden;
-  }
 
-  &:hover {
-    .workflow-name-copy {
+    &:hover {
       visibility: visible;
       color: $primary-color;
       cursor: pointer;
