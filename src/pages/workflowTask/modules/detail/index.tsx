@@ -276,54 +276,13 @@ export default function WorkflowTaskDetail() {
         };
 
     const renderStatus = () => {
-      const statusIcon = () => {
-        if (
-          taskDetailData?.state === WorkflowTaskStatus.SUCCESS ||
-          taskDetailData?.state === WorkflowTaskStatus.FAILURE
-        ) {
-          return (
-            <IconCheckCircleFill
-              style={{
-                color: statusMap.color,
-                width: 16,
-                height: 16
-              }}
-            />
-          );
-        } else if (
-          taskDetailData?.state === WorkflowTaskStatus.RUNNING_EXECUTION
-        ) {
-          return (
-            <IconLoading
-              style={{
-                color: statusMap.color,
-                width: 16,
-                height: 16
-              }}
-            />
-          );
-        } else {
-          return (
-            <IconExclamationCircleFill
-              style={{
-                color: statusMap.color,
-                width: 16,
-                height: 16
-              }}
-            />
-          );
-        }
-      };
       return (
-        <div className="flex items-center gap-[8px]">
-          {statusIcon()}
-          <span
-            style={{
-              fontSize: '14px',
-              color: statusMap.color,
-              lineHeight: '22px'
-            }}
-          >
+        <div className="flex items-center gap-2">
+          <div
+            className="h-2 w-2 rounded-full"
+            style={{ backgroundColor: statusMap.dotColor }}
+          />
+          <span className="text-var(--color-text-1) text-[14px] leading-[22px]">
             {statusMap.text}
           </span>
         </div>
