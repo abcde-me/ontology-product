@@ -529,6 +529,9 @@ export default function RequirementConfig() {
       label_type_code: annotationTypeContentCode
     });
   };
+  useEffect(() => {
+    setSelectedData([]);
+  }, [annotationTypeVal]);
   // 有必填信息没输入
   const errorInfoContent = () => {
     return Message.error('请输入必填信息');
@@ -1139,6 +1142,7 @@ export default function RequirementConfig() {
               )}
             </Form>
             <DataSourceModal
+              key={annotationTypeVal}
               fileType={toolFileType[Number(annotationTypeVal)]}
               visible={modalVisible}
               type={type}
