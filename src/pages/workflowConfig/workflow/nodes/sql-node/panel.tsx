@@ -286,10 +286,10 @@ export default React.memo(function SQLPanel(
                           />
                         )}
                       </div>
-                      <FormItem className={'add-field-action'}>
+                      <FormItem className={'add-field-action mb-2'}>
                         {!!fields.length &&
                           fields.map((field, index) => (
-                            <div key={field.key} className={'flex flex-1'}>
+                            <div key={field.key} className={'mb-2 flex flex-1'}>
                               <div className={'fields-item flex flex-1 gap-3'}>
                                 <FormItem
                                   className={'mb-0'}
