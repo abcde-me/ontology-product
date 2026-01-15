@@ -196,6 +196,7 @@
 
         :global(.aa-no-data-card) {
           margin-top: 250px;
+          display: flex;
         }
       }
 
@@ -281,6 +282,10 @@
 
         :global(.arco-form-item) {
           margin-bottom: 0;
+        }
+
+        :global(.aa-no-data-card) {
+          display: flex;
         }
       }
     }
