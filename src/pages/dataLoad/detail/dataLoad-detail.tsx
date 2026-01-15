@@ -26,7 +26,12 @@ import { parseCron } from './parseCron';
 import EllipsisPopoverCom from '@/components/ellipsis-popover-com';
 import { DATA_LOAD_PERMISSIONS } from '@/config/permissions';
 import { useHistory } from 'react-router';
-import { ConnectorType, TYPE_CONFIG, DATABASE_TYPE_ENUM } from '../config';
+import {
+  ConnectorType,
+  TYPE_CONFIG,
+  DATABASE_TYPE_ENUM,
+  RunState
+} from '../config';
 import getLabelByValue from '@/utils/getLabelByValue';
 import { useInterval } from '@/utils/useInterval';
 import { useHasPermission } from '@/hooks/usePermission';
@@ -148,7 +153,7 @@ const DataLoadDetail = () => {
   const judgmentTask = () => {
     getDetailList();
     // const boo = detailList?.findIndex(
-    //   (item) => item.status == 'succeed' || item.status == 'stopping'
+    //   (item) => item.status == RunState.SUCCEED || item.status == RunState.STOPPED
     // );
     // setRunningFlag(boo == -1 ? false : true);
   };
@@ -166,10 +171,10 @@ const DataLoadDetail = () => {
   //       execution_name: searchValue.trim(),
   //       ...directoryObj
   //     });
-  //     if (res?.data?.items?.[0]?.status === 'stopped') {
+  //     if (res?.data?.items?.[0]?.status === RunState.STOPPED) {
   //       Message.success('任务已停止');
   //     } else {
-  //       if (res?.data?.items?.[0]?.status === 'failed') {
+  //       if (res?.data?.items?.[0]?.status === RunState.FAILURE) {
   //         Message.error(res?.data?.items?.[0]?.error_msg);
   //       } else {
   //         Message.error('任务停止失败');
@@ -178,7 +183,7 @@ const DataLoadDetail = () => {
   //     setTotal(res?.data?.total ?? 0);
   //     setDetailList(res?.data?.items ?? []);
   //     const boo = detailList?.findIndex(
-  //       (item) => item.status == 'succeed' || item.status == 'stopping'
+  //       (item) => item.status == RunState.SUCCEED || item.status == RunState.STOPPED
   //     );
   //     setRunningFlag(boo == -1 ? false : true);
   //   } catch (err) {
@@ -258,7 +263,8 @@ const DataLoadDetail = () => {
   useEffect(() => {
     if (detailList) {
       const hasRunningTask = detailList.some(
-        (item) => item.status === 'running' || item.status === 'stopping'
+        (item) =>
+          item.status === RunState.RUNNING || item.status === RunState.STOPPED
       );
       console.log(hasRunningTask);
 
