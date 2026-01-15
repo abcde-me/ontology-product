@@ -66,6 +66,7 @@ interface MinIOBaseData {
   policy?: string;
   encryptType?: string;
   createTime?: string;
+  creationDate?: string;
   updateTime?: string;
   lastTime?: string;
 }
@@ -284,7 +285,7 @@ export default function MetadataManagementDetail() {
     },
     {
       label: '更新时间',
-      value: baseInfoData.updateTime || '-'
+      value: baseInfoData.tableDataUpdateTime || '-'
     }
   ];
   // Doris基本信息数据
@@ -323,7 +324,7 @@ export default function MetadataManagementDetail() {
     },
     {
       label: '更新时间',
-      value: baseInfoData.tableUpdateTime || '-'
+      value: baseInfoData.tableDataUpdateTime || '-'
     }
   ];
   // Milvus基本信息数据
@@ -385,7 +386,7 @@ export default function MetadataManagementDetail() {
     },
     {
       label: '创建时间',
-      value: minIOBaseData.createTime || '-'
+      value: minIOBaseData.creationDate || '-'
     }
   ];
   // MinIo对象信息列

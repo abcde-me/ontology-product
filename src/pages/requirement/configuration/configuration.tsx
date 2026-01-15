@@ -1078,7 +1078,23 @@ export default function RequirementConfig() {
                 initialValue={1}
                 field="split_task_package"
                 label="拆分任务包:"
+                required
                 style={{ marginBottom: 24 }}
+                rules={[
+                  {
+                    required: true,
+                    type: 'number',
+                    validateTrigger: ['onChange', 'onBlur'],
+                    validator: (value, callback) => {
+                      if (!value) {
+                        callback('请输入拆分任务包数量');
+                      } else if (value < 1) {
+                        callback('拆分任务包数量不能小于1');
+                      }
+                      return true;
+                    }
+                  }
+                ]}
               >
                 {selectedData?.length === 0 ? (
                   <div className="data-content-set">

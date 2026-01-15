@@ -266,7 +266,7 @@ export const menus: MenuModel[] = [
           ),
         activePaths: ['/tenant/compute/modaforge/operationCenter'],
         queryParamMatcher: (search: string) => {
-          const url = new URLSearchParams(search).get('url');
+          const url = new URLSearchParams(search).get('mdp_operation_center');
           return url?.includes('apikey') ?? false;
         },
         permission: API_KEY_PERMISSIONS.MENU
@@ -282,7 +282,7 @@ export const menus: MenuModel[] = [
           ),
         activePaths: ['/tenant/compute/modaforge/operationCenter'],
         queryParamMatcher: (search: string) => {
-          const url = new URLSearchParams(search).get('url');
+          const url = new URLSearchParams(search).get('mdp_operation_center');
           return url?.includes('tag') ?? false;
         },
         permission: TAG_PERMISSIONS.LIST
@@ -306,7 +306,7 @@ export const menus: MenuModel[] = [
           ),
         activePaths: ['/tenant/compute/modaforge/operationCenter'],
         queryParamMatcher: (search: string) => {
-          const url = new URLSearchParams(search).get('url');
+          const url = new URLSearchParams(search).get('mdp_operation_center');
           return url?.includes('organization') ?? false;
         },
         permission: ORGANIZATION_PERMISSIONS.MENU
@@ -322,7 +322,7 @@ export const menus: MenuModel[] = [
         key: 'userMgmt',
         activePaths: ['/tenant/compute/modaforge/operationCenter'],
         queryParamMatcher: (search: string) => {
-          const url = new URLSearchParams(search).get('url');
+          const url = new URLSearchParams(search).get('mdp_operation_center');
           return (
             (url?.includes('/user') && !url?.includes('user-group')) ?? false
           );
@@ -340,7 +340,7 @@ export const menus: MenuModel[] = [
         key: 'userGroupMgmt',
         activePaths: ['/tenant/compute/modaforge/operationCenter'],
         queryParamMatcher: (search: string) => {
-          const url = new URLSearchParams(search).get('url');
+          const url = new URLSearchParams(search).get('mdp_operation_center');
           return url?.includes('user-group') ?? false;
         },
         permission: USER_GROUP_PERMISSIONS.MENU
@@ -356,7 +356,7 @@ export const menus: MenuModel[] = [
         key: 'roleMgmt',
         activePaths: ['/tenant/compute/modaforge/operationCenter'],
         queryParamMatcher: (search: string) => {
-          const url = new URLSearchParams(search).get('url');
+          const url = new URLSearchParams(search).get('mdp_operation_center');
           return url?.includes('role') ?? false;
         },
         permission: ROLE_PERMISSIONS.MENU
@@ -380,7 +380,7 @@ export const menus: MenuModel[] = [
           ),
         activePaths: ['/tenant/compute/modaforge/operationCenter'],
         queryParamMatcher: (search: string) => {
-          const url = new URLSearchParams(search).get('url');
+          const url = new URLSearchParams(search).get('mdp_operation_center');
           return url?.includes('project') ?? false;
         },
         permission: PROJECT_PERMISSIONS.MENU
