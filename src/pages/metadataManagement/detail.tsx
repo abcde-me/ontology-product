@@ -441,8 +441,8 @@ export default function MetadataManagementDetail() {
     },
     {
       title: '元数据更新时间',
-      dataIndex: 'updateTime',
-      key: 'updateTime',
+      dataIndex: 'lastModified',
+      key: 'lastModified',
       width: 220,
       sorter: true
     },
