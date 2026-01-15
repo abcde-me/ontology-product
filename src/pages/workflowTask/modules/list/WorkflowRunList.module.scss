@@ -33,21 +33,33 @@
         }
       }
 
-      .workflow-name-container {
-        .workflow-name-copy {
+      .workflow-name-container,
+      .workflow-id-container {
+        .workflow-name-copy,
+        .workflow-id-copy {
           visibility: visible;
+          color: rgb(0, 125, 250);
         }
       }
     }
 
     .workflow-name-container {
-      .workflow-name-copy {
+      :global(.typoWrap),
+      :global(.ellipsis-text) {
+        font-weight: 500;
+      }
+    }
+
+    .workflow-name-container,
+    .workflow-id-container {
+      .workflow-name-copy,
+      .workflow-id-copy {
         visibility: hidden;
         cursor: pointer;
 
-        &:hover {
-          color: rgb(0, 125, 250);
-        }
+        // &:hover {
+        //   color: rgb(0, 125, 250);
+        // }
       }
     }
   }

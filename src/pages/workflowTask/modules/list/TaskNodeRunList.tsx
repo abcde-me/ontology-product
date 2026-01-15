@@ -176,19 +176,31 @@ export default function TaskNodeRunList() {
   const columns: ColumnProps<TaskNodeItem>[] = useMemo(
     () => [
       {
-        title: '任务节点ID',
-        dataIndex: 'task_code',
-        width: 180,
+        title: '任务节点名称',
+        dataIndex: 'task_name',
+        width: 200,
+        className: styles['task-name-column'],
         render: (value: string) => (
           <EllipsisPopoverCom value={value} preferTypography />
         )
       },
       {
-        title: '任务节点名称',
-        dataIndex: 'task_name',
-        width: 200,
+        title: '任务节点ID',
+        dataIndex: 'task_code',
+        width: 180,
         render: (value: string) => (
-          <EllipsisPopoverCom value={value} preferTypography />
+          <div
+            className={`flex items-center gap-1 ${styles['task-code-id-container']}`}
+          >
+            <EllipsisPopoverCom value={value} />
+            <IconCopy
+              className={styles['task-code-id-copy']}
+              onClick={(e) => {
+                e.stopPropagation();
+                handleCopy(value);
+              }}
+            />
+          </div>
         )
       },
       {
