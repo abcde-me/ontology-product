@@ -211,7 +211,7 @@ export default memo(function FlowSetting() {
                       return getStructuredWorkflowList({
                         name: value,
                         page: 1,
-                        page_size: 1
+                        page_size: 10
                       })
                         .then((res) => {
                           // 排除同名且当前工作流本身
