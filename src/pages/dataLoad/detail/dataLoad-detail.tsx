@@ -153,7 +153,7 @@ const DataLoadDetail = () => {
   const judgmentTask = () => {
     getDetailList();
     // const boo = detailList?.findIndex(
-    //   (item) => item.status == RunState.RUNNING || item.status == RunState.STOPPED
+    //   (item) => item.status == RunState.SUCCEED || item.status == RunState.STOPPED
     // );
     // setRunningFlag(boo == -1 ? false : true);
   };
@@ -183,7 +183,7 @@ const DataLoadDetail = () => {
   //     setTotal(res?.data?.total ?? 0);
   //     setDetailList(res?.data?.items ?? []);
   //     const boo = detailList?.findIndex(
-  //       (item) => item.status == RunState.RUNNING || item.status == RunState.STOPPED
+  //       (item) => item.status == RunState.SUCCEED || item.status == RunState.STOPPED
   //     );
   //     setRunningFlag(boo == -1 ? false : true);
   //   } catch (err) {
