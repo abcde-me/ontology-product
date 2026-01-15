@@ -428,7 +428,7 @@ export default function DataApi() {
       dataIndex: 'index',
       width: 80,
       align: 'center',
-      render: (_, _record, idx: number) => (current - 1) * pageSize + idx + 1
+      render: (_, _record, idx: number) => idx + 1
     },
     {
       title: 'API英文名称',
