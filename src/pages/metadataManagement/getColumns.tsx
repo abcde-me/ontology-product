@@ -418,8 +418,8 @@ const MilvusFields = [
     values: []
   },
   {
-    id: 'createTime',
-    nameEn: 'createTime',
+    id: 'createdTimestamp',
+    nameEn: 'createdTimestamp',
     nameZh: '创建时间',
     type: 'datetime',
     isEnumAbleForColumn: true,
