@@ -130,7 +130,7 @@ const ScriptTable: React.FC<ScriptTableProps> = ({
         orders: sortValue?.sort
           ? [
               {
-                column: 'script_id',
+                column: 'script_name',
                 order_flag: sortValue?.sort
               }
             ]
@@ -250,6 +250,7 @@ const ScriptTable: React.FC<ScriptTableProps> = ({
       dataIndex: 'script_name',
       width: 180,
       ellipsis: true,
+      sorter: true,
       className: styles['hover-change'],
       render: (_, record) => (
         <EllipsisPopover
@@ -262,8 +263,7 @@ const ScriptTable: React.FC<ScriptTableProps> = ({
     {
       title: '脚本ID',
       dataIndex: 'script_id',
-      width: 200,
-      sorter: (a, b) => a.length - b.length
+      width: 200
     },
     {
       title: '最新版本号',
