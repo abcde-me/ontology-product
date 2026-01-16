@@ -1226,7 +1226,10 @@ const DatasetManagement: React.FC = () => {
             display: 'inline-block'
           }}
         >
-          删除后，数据集不可恢复
+          <div>删除后，本平台中使用到此知识库的地方将自动取消引用，</div>
+          <div>
+            如果此知识库也被应用开发平台引用，则也会取消引用，此操作不可撤回。
+          </div>
         </div>
       ),
       // 按钮文字
