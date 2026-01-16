@@ -430,9 +430,22 @@ const RunningInfoPanel: React.FC<RunningInfoPanelProps> = memo(
                           style={{ width: 52, height: 22 }}
                           size="mini"
                           value={String(size)}
-                          maxLength={1000}
                           disabled={runStatus !== RunningStatus.SUCCESS}
-                          onChange={(value) => setSize(value)}
+                          onChange={(value) => {
+                            // 只允许输入数字
+                            const numericValue = value.replace(/[^\d]/g, '');
+                            if (numericValue === '') {
+                              setSize('');
+                              return;
+                            }
+                            // 限制最大值为1000
+                            const numValue = parseInt(numericValue, 10);
+                            if (numValue > 1000) {
+                              setSize('1000');
+                            } else {
+                              setSize(numericValue);
+                            }
+                          }}
                           onPressEnter={(event) => {
                             event.stopPropagation();
                             // 按回车键时触发轮询获取新结果
@@ -444,11 +457,22 @@ const RunningInfoPanel: React.FC<RunningInfoPanelProps> = memo(
                             }
                           }}
                           onBlur={() => {
+                            // 失焦时格式化：如果值超过1000，自动格式化为1000
+                            const numValue = parseInt(String(size), 10);
+                            let finalSize = size;
+                            if (!isNaN(numValue) && numValue > 1000) {
+                              setSize('1000');
+                              finalSize = '1000';
+                            } else if (isNaN(numValue) || size === '') {
+                              // 如果为空或不是数字，设置为默认值1
+                              setSize('1');
+                              finalSize = '1';
+                            }
                             // 失去焦点时也触发查询
                             if (execid) {
                               // 避异步没更新结束获取不到正确size
                               setTimeout(() => {
-                                loadRunResult(execid, size);
+                                loadRunResult(execid, finalSize);
                               }, 50);
                             }
                           }}
