@@ -272,12 +272,12 @@ export async function getSQLListInSQLNode(scriptID?: string) {
     .inRegion()
     .do();
   const list = (res.data?.items || []) as SQLScriptItem[];
-  if (isNil(scriptID)) return formatSqlScript(list);
   // 过滤当前查询的脚本和未被引用的脚本
   return formatSqlScript(
-    list.filter(
-      ({ process_name, script_id }) =>
-        !process_name || script_id.toString() === scriptID.toString()
+    list.filter(({ process_name, script_id }) =>
+      isNil(scriptID)
+        ? !process_name
+        : !process_name || script_id.toString() === scriptID.toString()
     )
   );
 }
