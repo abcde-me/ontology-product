@@ -172,7 +172,16 @@ export const DATA_ASSET_PERMISSIONS = {
 
 // 元数据管理
 export const METADATA_MANAGEMENT_PERMISSIONS = {
-  LIST: 'aimdp-manager:dataset:read:list' // 菜单权限 （todo：临时使用数据集权限待替换）
+  LIST: 'aimdp-manager:metadata_manage:read:list_data',
+  DETAIL: 'aimdp-manager:metadata_manage:read:get_data',
+  CREATE_ICEBERG_TABLE:
+    'aimdp-manager:metadata_manage:manage:create_metadata_iceberg_table',
+  CREATE_ICEBERG_DATABASE:
+    'aimdp-manager:metadata_manage:manage:create_metadata_iceberg_database',
+  CREATE_DORIS_TABLE:
+    'aimdp-manager:metadata_manage:manage:create_metadata_doris_table',
+  CREATE_DORIS_DATABASE:
+    'aimdp-manager:metadata_manage:manage:create_metadata_doris_database'
 } as const;
 
 // 数据API权限
