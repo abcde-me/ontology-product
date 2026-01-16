@@ -263,8 +263,7 @@ const DataLoadDetail = () => {
   useEffect(() => {
     if (detailList) {
       const hasRunningTask = detailList.some(
-        (item) =>
-          item.status === RunState.RUNNING || item.status === RunState.STOPPED
+        (item) => item.status === RunState.RUNNING
       );
       console.log(hasRunningTask);
 
