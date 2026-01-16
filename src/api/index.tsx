@@ -187,8 +187,11 @@ UAPI_CONFIG.addResponseInterceptor(
       } else {
         const errorMsg = res.message;
         if (errorMsg) {
-          Message.error(errorMsg);
-          console.error(errorMsg);
+          Message.error({ id: 'api-error-msg', content: errorMsg });
+          console.error('api error message', errorMsg);
+        }
+        if (res?.statusCode === 100401) {
+          logout(res?.data?.content);
         }
         return Promise.reject(errorMsg);
       }
