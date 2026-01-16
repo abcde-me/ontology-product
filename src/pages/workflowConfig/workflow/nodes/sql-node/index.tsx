@@ -17,7 +17,7 @@ export default memo(function SQLNode(props: NodeProps<SQLNodeConfig>) {
       const slq_version = sql_id.split('_') || [];
       const [sql, version] = slq_version;
       if (sql && version) {
-        const sqlList = await getSQLListInSQLNode();
+        const sqlList = await getSQLListInSQLNode(sql);
         const sql_name = sqlList.find(
           ({ value }) => value.toString() === sql
         )?.label;
