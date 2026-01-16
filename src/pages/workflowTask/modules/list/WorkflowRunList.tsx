@@ -317,9 +317,13 @@ export default function WorkflowRunList() {
         title: '提交人',
         dataIndex: 'operator',
         width: 120,
-        render: (value: string) => (
-          <EllipsisPopoverCom value={value} preferTypography />
-        )
+        render: (value: string, record: WorkflowTaskItem) => {
+          const displayValue =
+            record.trigger_type === TriggerType.SCHEDULE
+              ? '系统自动执行'
+              : value;
+          return <EllipsisPopoverCom value={displayValue} preferTypography />;
+        }
       },
       {
         title: '开始时间',

@@ -461,6 +461,7 @@ export const getColumnsSetting = (metadataType: MetadataType | string) => {
 export const getColumns = (
   metadataSelectedFields: ColumnField[],
   viewDetail: (id: string) => void,
+  isDetailPermission: boolean,
   page: number,
   size: number
 ) => {
@@ -481,7 +482,7 @@ export const getColumns = (
           title: field.nameZh,
           dataIndex: field.nameEn,
           key: field.nameEn,
-          width: 200,
+          width: 220,
           className:
             field.id === 'collectionName' ||
             field.id === 'tableName' ||
@@ -510,7 +511,7 @@ export const getColumns = (
               field.id === 'tableName' ||
               field.id === 'bucketName'
             ) {
-              return (
+              return isDetailPermission ? (
                 <EllipsisPopover
                   value={value}
                   isEdit={false}
@@ -519,6 +520,8 @@ export const getColumns = (
                     viewDetail(record.id);
                   }}
                 />
+              ) : (
+                <EllipsisPopover value={value} isEdit={false} />
               );
             }
             if (
@@ -534,9 +537,9 @@ export const getColumns = (
             if (field.id === 'policy') {
               const pattern = /\{\s*[^}]+\s*\}/;
               return pattern.test(value) ? (
-                <div className="flex items-center gap-1">公有</div>
+                <div className="flex items-center gap-1"> 公有 </div>
               ) : (
-                <div className="flex items-center gap-1">私有</div>
+                <div className="flex items-center gap-1"> 私有 </div>
               );
             }
             if (field.id === 'storageSize' || field.id === 'objectsSize') {
