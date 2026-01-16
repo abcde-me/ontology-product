@@ -40,8 +40,10 @@ import {
   listMetadataMinioBucket,
   MetadataMenuItem
 } from '@/api/metadata';
-import styles from './index.module.scss';
 import { useParams } from '@/utils/url';
+import { METADATA_MANAGEMENT_PERMISSIONS } from '@/config/permissions';
+import { useHasPermission } from '@/store/userInfoStore';
+import styles from './index.module.scss';
 
 enum MetadataType {
   Iceberg = 'ICEBERG',
@@ -63,6 +65,11 @@ export default function MetadataManagement() {
   const urlMetadataType = useParams('metadataType');
   const MenuItem = Menu.Item;
   const TextArea = Input.TextArea;
+
+  // 初始化是否有详情权限
+  const isDetailPermission = useHasPermission(
+    METADATA_MANAGEMENT_PERMISSIONS.DETAIL
+  );
 
   // 初始化元数据菜单数据
   const [metadataMenuData, setMetadataMenuData] = useState([]);
@@ -124,6 +131,7 @@ export default function MetadataManagement() {
       getColumns(
         selectedColumns,
         viewDetail,
+        isDetailPermission,
         current,
         pageSize
       ) as ColumnProps[]
@@ -496,31 +504,47 @@ PROPERTIES (
                     表转API
                   </Button>
 
-                  <Button
-                    className={styles['refreshBtn']}
-                    icon={<CreateDatabaseIcon />}
-                    onClick={() => {
-                      tableForm.setFieldsValue({
-                        ddl:
-                          activeMetadataType === MetadataType.Iceberg
-                            ? `CREATE DATABASE IF NOT EXISTS iceberg_db_example COMMENT 'Iceberg创建库示例'`
-                            : `CREATE DATABASE IF NOT EXISTS db_example`,
-                        tableType: activeMetadataType
-                      });
-                      setCreateTableModalOpen(true);
-                    }}
+                  <PermissionWrapper
+                    permission={
+                      activeMetadataType === MetadataType.Iceberg
+                        ? METADATA_MANAGEMENT_PERMISSIONS.CREATE_ICEBERG_DATABASE
+                        : METADATA_MANAGEMENT_PERMISSIONS.CREATE_DORIS_DATABASE
+                    }
                   >
-                    创建数据库
-                  </Button>
-                  <Button
-                    className={styles['refreshBtn']}
-                    icon={<CreateTableIcon />}
-                    onClick={() => {
-                      handleCreatePhysicalTable();
-                    }}
+                    <Button
+                      className={styles['refreshBtn']}
+                      icon={<CreateDatabaseIcon />}
+                      onClick={() => {
+                        tableForm.setFieldsValue({
+                          ddl:
+                            activeMetadataType === MetadataType.Iceberg
+                              ? `CREATE DATABASE IF NOT EXISTS iceberg_db_example COMMENT 'Iceberg创建库示例'`
+                              : `CREATE DATABASE IF NOT EXISTS db_example`,
+                          tableType: activeMetadataType
+                        });
+                        setCreateTableModalOpen(true);
+                      }}
+                    >
+                      创建数据库
+                    </Button>
+                  </PermissionWrapper>
+                  <PermissionWrapper
+                    permission={
+                      activeMetadataType === MetadataType.Iceberg
+                        ? METADATA_MANAGEMENT_PERMISSIONS.CREATE_ICEBERG_TABLE
+                        : METADATA_MANAGEMENT_PERMISSIONS.CREATE_DORIS_TABLE
+                    }
                   >
-                    创建物理表
-                  </Button>
+                    <Button
+                      className={styles['refreshBtn']}
+                      icon={<CreateTableIcon />}
+                      onClick={() => {
+                        handleCreatePhysicalTable();
+                      }}
+                    >
+                      创建物理表
+                    </Button>
+                  </PermissionWrapper>
                 </>
               )}
               <Button
