@@ -38,6 +38,9 @@ import {
 import TestModal from './compontent/testModal';
 import ViewFileModal from './compontent/viewFileModal';
 import { GetProjOrg } from '@/api/modules/project';
+import PermissionWrapper from '@/components/PermissionGuard/PermissionWrapper';
+import { useHasPermission } from '@/store/userInfoStore';
+import { DATA_API_PERMISSIONS } from '@/config/permissions';
 
 const InputSearch = Input.Search;
 
@@ -65,6 +68,12 @@ enum sortBy {
 export default function DataApi() {
   const history = useHistory();
   const userInfo = useUserInfo();
+
+  // 初始化权限
+  const hasModifyPermission = useHasPermission(DATA_API_PERMISSIONS.MODIFY);
+  const hasDeletePermission = useHasPermission(DATA_API_PERMISSIONS.DELETE);
+  const hasCreatePermission = useHasPermission(DATA_API_PERMISSIONS.CREATE);
+  const hasDetailPermission = useHasPermission(DATA_API_PERMISSIONS.DETAIL);
 
   // 初始化授权弹窗表单
   const [authorizationForm] = Form.useForm();
@@ -557,7 +566,7 @@ export default function DataApi() {
             title: '编辑',
             method: () => handleToAddApi('edit', record.id),
             disabled: record.status !== ApiStatus.running,
-            permission: true
+            permission: hasModifyPermission
           },
           {
             title: '查看文档',
@@ -565,12 +574,12 @@ export default function DataApi() {
               setViewFileModalVisible(true);
               setViewFileId(record.id);
             },
-            permission: true
+            permission: hasDetailPermission
           },
           {
             title: record.status === ApiStatus.success ? '下线' : '上线',
             method: () => handleChangeStatus(record),
-            permission: true
+            permission: hasCreatePermission
           },
           {
             title: '授权',
@@ -578,7 +587,7 @@ export default function DataApi() {
               handleAuthorization(Number(record.id));
             },
             disabled: record.status !== ApiStatus.success,
-            permission: true
+            permission: hasCreatePermission
           },
           {
             title: '测试',
@@ -587,13 +596,13 @@ export default function DataApi() {
               setTestDataSource(record.paramConfig || []);
               setTestApiId(record.id);
             },
-            permission: true
+            permission: hasCreatePermission
           },
           {
             title: '删除',
             method: () => handleDeleteApi(record.id),
             disabled: record.status === ApiStatus.success,
-            permission: true
+            permission: hasDeletePermission
           }
         ];
         return (
@@ -689,13 +698,15 @@ export default function DataApi() {
             setIsClickClear(true);
           }}
         />
-        <Button
-          type="primary"
-          icon={<IconPlus />}
-          onClick={() => handleToAddApi('add')}
-        >
-          创建API
-        </Button>
+        <PermissionWrapper permission={DATA_API_PERMISSIONS.CREATE}>
+          <Button
+            type="primary"
+            icon={<IconPlus />}
+            onClick={() => handleToAddApi('add')}
+          >
+            创建API
+          </Button>
+        </PermissionWrapper>
       </div>
       <Table
         border={false}

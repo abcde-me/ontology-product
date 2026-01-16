@@ -177,7 +177,11 @@ export const METADATA_MANAGEMENT_PERMISSIONS = {
 
 // 数据API权限
 export const DATA_API_PERMISSIONS = {
-  LIST: 'aimdp-manager:dataset:read:list' // 菜单权限 （todo：临时使用数据集权限待替换）
+  LIST: 'aimdp-manager:openapi:read:list',
+  CREATE: 'aimdp-manager:openapi:manager:create',
+  DELETE: 'aimdp-manager:openapi:manager:delete',
+  MODIFY: 'aimdp-manager:openapi:manager:modify',
+  DETAIL: 'aimdp-manager:openapi:read:detail'
 } as const;
 
 // 需求管理权限

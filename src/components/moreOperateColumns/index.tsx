@@ -45,37 +45,49 @@ export default function MoreOperateColumns(props: {
       >
         {columnsConfigList[1]?.title}
       </Button>
-      {moreColumnsConfigList.length > 0 && (
-        <Dropdown
-          droplist={
-            <Menu>
-              {moreColumnsConfigList.map((item, index) => (
-                <Menu.Item key={item.title}>
-                  <Button
-                    type="text"
-                    style={{
-                      padding: '0 8px 0 5px',
-                      height: '100%',
-                      borderTop: 'none',
-                      borderBottom: 'none'
-                    }}
-                    disabled={item.disabled}
-                    onClick={() => item.method()}
-                  >
-                    {item.title}
-                  </Button>
-                </Menu.Item>
-              ))}
-            </Menu>
-          }
-          trigger="hover"
-          position="bl"
+      {moreColumnsConfigList.length === 1 ? (
+        <Button
+          key={moreColumnsConfigList[0]?.title}
+          type="text"
+          className="pl-0"
+          onClick={() => moreColumnsConfigList[0].method()}
+          disabled={moreColumnsConfigList[0]?.disabled}
         >
-          <Button type="text" className="px-0">
-            更多
-            <IconDown />
-          </Button>
-        </Dropdown>
+          {moreColumnsConfigList[0]?.title}
+        </Button>
+      ) : (
+        moreColumnsConfigList.length > 1 && (
+          <Dropdown
+            droplist={
+              <Menu>
+                {moreColumnsConfigList.map((item, index) => (
+                  <Menu.Item key={item.title}>
+                    <Button
+                      type="text"
+                      style={{
+                        padding: '0 8px 0 5px',
+                        height: '100%',
+                        borderTop: 'none',
+                        borderBottom: 'none'
+                      }}
+                      disabled={item.disabled}
+                      onClick={() => item.method()}
+                    >
+                      {item.title}
+                    </Button>
+                  </Menu.Item>
+                ))}
+              </Menu>
+            }
+            trigger="hover"
+            position="bl"
+          >
+            <Button type="text" className="px-0">
+              更多
+              <IconDown />
+            </Button>
+          </Dropdown>
+        )
       )}
     </div>
   );
