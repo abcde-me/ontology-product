@@ -365,10 +365,6 @@ export default function MetadataManagementDetail() {
       value: minIOBaseData.bucketName || '-'
     },
     {
-      label: '对象数',
-      value: Number(minIOBaseData.objectsCount || 0)
-    },
-    {
       label: '存储大小',
       value: formatFileSize(Number(minIOBaseData.objectsSize || 0))
     },

@@ -250,18 +250,6 @@ const MinIOFields = [
     values: []
   },
   {
-    id: 'objectsCount',
-    nameEn: 'objectsCount',
-    nameZh: '对象数',
-    type: 'int',
-    isEnumAbleForColumn: true,
-    isEnumAble: false,
-    enumLoading: false,
-    distinctCount: 0,
-    displaySort: 2,
-    values: []
-  },
-  {
     id: 'objectsSize',
     nameEn: 'objectsSize',
     nameZh: '存储大小',
