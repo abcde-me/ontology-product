@@ -44,7 +44,7 @@ const ScriptDetailModal: React.FC<ScriptDetailModalProps> = ({
       autoFocus={false}
       maskClosable
       unmountOnExit
-      style={{ width: 900, height: 740 }}
+      style={{ width: 900, height: 600 }}
       className={styles.scriptDetailModal}
     >
       <div className="flex h-full flex-col">
