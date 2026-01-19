@@ -526,6 +526,7 @@ const DataLoadDetail = () => {
                     className={'cronSwitch'}
                     size="default"
                     defaultChecked={listDetail && listDetail.cron_enable}
+                    disabled
                     checkedText="启用"
                     uncheckedText="停止"
                     style={{ marginLeft: '10px' }}
