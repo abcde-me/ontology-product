@@ -41,7 +41,10 @@ import {
   MetadataMenuItem
 } from '@/api/metadata';
 import { useParams } from '@/utils/url';
-import { METADATA_MANAGEMENT_PERMISSIONS } from '@/config/permissions';
+import {
+  DATA_API_PERMISSIONS,
+  METADATA_MANAGEMENT_PERMISSIONS
+} from '@/config/permissions';
 import { useHasPermission } from '@/store/userInfoStore';
 import styles from './index.module.scss';
 
@@ -494,15 +497,17 @@ PROPERTIES (
               {(activeMetadataType === MetadataType.Iceberg ||
                 activeMetadataType === MetadataType.Doris) && (
                 <>
-                  <Button
-                    className={styles['refreshBtn']}
-                    icon={<StorageIcon />}
-                    onClick={() => {
-                      handleToDataApi();
-                    }}
-                  >
-                    表转API
-                  </Button>
+                  <PermissionWrapper permission={DATA_API_PERMISSIONS.LIST}>
+                    <Button
+                      className={styles['refreshBtn']}
+                      icon={<StorageIcon />}
+                      onClick={() => {
+                        handleToDataApi();
+                      }}
+                    >
+                      表转API
+                    </Button>
+                  </PermissionWrapper>
 
                   <PermissionWrapper
                     permission={

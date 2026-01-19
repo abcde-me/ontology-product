@@ -355,7 +355,7 @@ export default function MetadataManagementDetail() {
     },
     {
       label: '创建时间',
-      value: baseInfoData.createTime || '-'
+      value: baseInfoData.createdTimestamp || '-'
     }
   ];
   // MinIo基本信息数据
