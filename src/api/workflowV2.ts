@@ -7,6 +7,15 @@ import {
 import React from 'react';
 import { WorkflowRunTask } from '@/pages/workflowConfig/types/workflow';
 import { NodeProcessData } from '@/pages/workflowConfig/workflow/types';
+import { isNil } from 'lodash-es';
+
+const formatSqlScript = (scripts: SQLScriptItem[]) => {
+  return scripts.map(({ script_name, script_id, version, ...other }) => ({
+    ...other,
+    label: script_name,
+    value: script_id.toString()
+  }));
+};
 
 export async function getWorkflowDraft(params: any = {}) {
   const searchParams = new URLSearchParams(location.search);
@@ -253,7 +262,7 @@ export async function getDifyProversList() {
 }
 
 // SQL列表
-export async function getSQLListInSQLNode(script_id?: string) {
+export async function getSQLListInSQLNode(scriptID?: string) {
   const res = await UAPI.RES.getSQLListInSQLNode({})
     .post({
       page: 0,
@@ -263,17 +272,14 @@ export async function getSQLListInSQLNode(script_id?: string) {
     .inRegion()
     .do();
   const list = (res.data?.items || []) as SQLScriptItem[];
-  // 工作流名称不为空，脚本被引用，不展示
-  return list
-    .filter(
-      ({ process_name, script_id }) =>
-        !process_name && script_id.toString() !== (script_id || '')
+  // 过滤当前查询的脚本和未被引用的脚本
+  return formatSqlScript(
+    list.filter(({ process_name, script_id }) =>
+      isNil(scriptID)
+        ? !process_name
+        : !process_name || script_id.toString() === scriptID.toString()
     )
-    .map(({ script_name, script_id, version, ...other }) => ({
-      ...other,
-      label: script_name,
-      value: script_id.toString()
-    }));
+  );
 }
 
 // SQL版本列表
