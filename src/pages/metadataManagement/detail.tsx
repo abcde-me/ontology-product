@@ -221,7 +221,6 @@ export default function MetadataManagementDetail() {
     setPreviewVisible(true);
     setPreviewLoading(true);
     setSelectFileType(objectPath);
-    console.log(selectFileType, record, objectPath, 'rrrrr');
     const res = await getFileBinaryData({
       bucket_name: record.bucketName,
       path: record.objectPath.split('/').slice(1).join('/'),
