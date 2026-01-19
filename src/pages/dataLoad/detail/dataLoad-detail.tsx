@@ -620,10 +620,11 @@ const DataLoadDetail = () => {
               setSearchValue(value);
             }}
           />
-          {hasStartPermission &&
-            (listDetail?.source_type as string) !== 'local' &&
-            listDetail?.source_type !== 'mq' &&
-            listDetail?.submit_type === 2 && (
+          {(hasStartPermission &&
+            (listDetail?.source_type as string) !== 'local') ||
+            (!(
+              listDetail?.source_type === 'mq' && listDetail?.submit_type === 2
+            ) && (
               <Button
                 type="primary"
                 icon={<IconPlus />}
@@ -635,7 +636,7 @@ const DataLoadDetail = () => {
               >
                 新建运行
               </Button>
-            )}
+            ))}
         </div>
         <div
           style={{
