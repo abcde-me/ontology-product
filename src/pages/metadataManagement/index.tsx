@@ -95,7 +95,7 @@ export default function MetadataManagement() {
   const [sortValue, setSortValue] = useState<{
     order: string;
     field: string;
-  }>();
+  } | null>(null);
   // 初始化筛选的元数据类型
   const [activeMetadataType, setActiveMetadataType] = useState<
     MetadataType | string
@@ -454,6 +454,7 @@ PROPERTIES (
                 filters: {},
                 range: [] as RangeFilter[]
               });
+              setSortValue(null);
               setCurrent(1);
               setPageSize(10);
             }}

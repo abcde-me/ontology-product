@@ -75,6 +75,7 @@ export interface TaskInfo {
       week: string;
     };
   };
+  submit_type: number;
   perms: string[];
 }
 
