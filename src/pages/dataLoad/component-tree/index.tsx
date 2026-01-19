@@ -709,8 +709,11 @@ const ComponentTree: React.FC<ComponentTreeProps> = ({
             <Tooltip color="white" content="新建">
               <div
                 className="flex items-center opacity-100 transition-opacity duration-200"
-                style={{ color: '#2563EB' }}
-                onClick={() => addSubItem(node)}
+                style={{
+                  cursor: isAdding ? 'default' : 'pointer',
+                  color: isAdding ? '#94A3B8' : '#1890ff'
+                }}
+                onClick={() => !isAdding && addSubItem(node)}
               >
                 <IconPlus />
                 <span className="ml-1 text-xs">新建</span>
