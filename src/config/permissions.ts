@@ -187,9 +187,9 @@ export const METADATA_MANAGEMENT_PERMISSIONS = {
 // 数据API权限
 export const DATA_API_PERMISSIONS = {
   LIST: 'aimdp-manager:openapi:read:list',
-  CREATE: 'aimdp-manager:openapi:manager:create',
-  DELETE: 'aimdp-manager:openapi:manager:delete',
-  MODIFY: 'aimdp-manager:openapi:manager:modify',
+  CREATE: 'aimdp-manager:openapi:manage:create',
+  DELETE: 'aimdp-manager:openapi:manage:delete',
+  MODIFY: 'aimdp-manager:openapi:manage:modify',
   DETAIL: 'aimdp-manager:openapi:read:detail'
 } as const;
 

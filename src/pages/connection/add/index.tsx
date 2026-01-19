@@ -376,7 +376,7 @@ const add = forwardRef((props: any, ref) => {
                   rules={[{ required: true, message: '请输入用户名' }]}
                   field="user"
                 >
-                  <Input placeholder="请输入" />
+                  <Input placeholder="请输入" autoComplete="new-username" />
                 </FormItem>
                 <FormItem
                   label="目录路径"
@@ -431,10 +431,13 @@ const add = forwardRef((props: any, ref) => {
                   </Select>
                 </FormItem>
                 <FormItem label="用户名" field="user">
-                  <Input placeholder="请输入" />
+                  <Input placeholder="请输入" autoComplete="new-username" />
                 </FormItem>
                 <FormItem label="密码" field="password">
-                  <Input.Password placeholder="请输入" />
+                  <Input.Password
+                    placeholder="请输入"
+                    autoComplete="new-password"
+                  />
                 </FormItem>
               </div>
             ) : (
@@ -528,7 +531,7 @@ const add = forwardRef((props: any, ref) => {
                   ]}
                   disabled={inputDisabled}
                 >
-                  <Input placeholder="请输入" />
+                  <Input placeholder="请输入" autoComplete="new-username" />
                 </FormItem>
                 <FormItem
                   label="密码"
@@ -559,7 +562,10 @@ const add = forwardRef((props: any, ref) => {
                   ]}
                   disabled={inputDisabled}
                 >
-                  <Input.Password placeholder="请输入" />
+                  <Input.Password
+                    placeholder="请输入"
+                    autoComplete="new-password"
+                  />
                 </FormItem>
               </div>
             )}
