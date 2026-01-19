@@ -38,7 +38,11 @@ const PreviewModal = ({
       data.forEach((item: any) => {
         for (const [key, value] of Object.entries(item)) {
           if (typeof value === 'object' && value !== null) {
-            item[key] = JSON.stringify(value);
+            try {
+              item[key] = JSON.stringify(value);
+            } catch (error) {
+              console.error(`${key}:`, error);
+            }
           } else {
             item[key] = value;
           }
