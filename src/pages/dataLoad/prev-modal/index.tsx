@@ -29,7 +29,7 @@ const PreviewModal = ({
   previewData,
   loading
 }: PreviewModalProps) => {
-  // 将非字符串的数据转为字符串
+  // 将非字符串的数据转为JSON
   const convertNonStrToStr = (data) => {
     if (!data) {
       return data;
