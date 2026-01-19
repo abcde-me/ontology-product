@@ -659,8 +659,8 @@ export default function MetadataManagementDetail() {
     },
     {
       title: '创建时间',
-      dataIndex: 'createTime',
-      key: 'createTime',
+      dataIndex: 'createdTimestamp',
+      key: 'createdTimestamp',
       width: 200,
       sorter: true
     },
