@@ -8,6 +8,7 @@ import {
   Tooltip
 } from '@arco-design/web-react';
 import styles from './index.module.scss';
+import { EllipsisPopover } from '@ceai-front/arco-material';
 
 interface PreviewModalProps {
   visible: boolean;
@@ -28,7 +29,27 @@ const PreviewModal = ({
   previewData,
   loading
 }: PreviewModalProps) => {
-  console.log(previewData, '123', String(previewData?.data?.data));
+  // 将非字符串的数据转为字符串
+  const convertNonStrToStr = (data) => {
+    if (!data) {
+      return data;
+    }
+    if (data?.length > 0) {
+      data.forEach((item: any) => {
+        for (const [key, value] of Object.entries(item)) {
+          if (typeof value === 'object' && value !== null) {
+            item[key] = JSON.stringify(value);
+          } else {
+            item[key] = value;
+          }
+        }
+      });
+    }
+  };
+
+  useEffect(() => {
+    convertNonStrToStr(previewData?.data?.data);
+  }, [previewData?.data?.data]);
 
   // 定义列标题
   const allKeys = [
@@ -56,9 +77,7 @@ const PreviewModal = ({
       width: otherColumnWidth,
       key: title,
       render: (value: string, record: any) => (
-        <Tooltip content={title === 'address' ? value : ''}>
-          <div className={styles.previewCell}>{value}</div>
-        </Tooltip>
+        <EllipsisPopover value={value} preferTypography />
       )
     }));
   };
