@@ -125,7 +125,9 @@ export default function DataLoad() {
                       ? RunStateType[RunState.RUNNING].color
                       : item.status == RunState.STOPPED
                         ? RunStateType[RunState.STOPPED].color
-                        : undefined,
+                        : item.status == RunState.SAVED
+                          ? RunStateType[RunState.SAVED].color
+                          : undefined,
               borderRadius: '50%'
             }}
           ></div>
@@ -138,6 +140,7 @@ export default function DataLoad() {
               RunStateType[RunState.RUNNING].text}
             {item.status == RunState.STOPPED &&
               RunStateType[RunState.STOPPED].text}
+            {item.status == RunState.SAVED && RunStateType[RunState.SAVED].text}
           </div>
         </div>
       ),
@@ -157,6 +160,10 @@ export default function DataLoad() {
         {
           text: RunStateType[RunState.STOPPED].text,
           value: RunStateType[RunState.STOPPED].value
+        },
+        {
+          text: RunStateType[RunState.SAVED].text,
+          value: RunStateType[RunState.SAVED].value
         }
       ]
     },
