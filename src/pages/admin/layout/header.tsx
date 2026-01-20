@@ -5,6 +5,7 @@ import {
   Link,
   Cascader
 } from '@arco-design/web-react';
+import WujieReact from 'wujie-react';
 import React, {
   type CSSProperties,
   useCallback,
@@ -27,6 +28,7 @@ import { logout, openNewPage } from '@/utils/env';
 import { GetProjOrg } from '@/api/modules/project';
 import { isSameArray } from '@/utils/array';
 
+const { bus } = WujieReact;
 export default function Header({
   className,
   style
@@ -139,6 +141,8 @@ export default function Header({
     // 重置权限状态，这样下次初始化时会重新加载权限
     setUserActions({ isAdmin: false, actions: null });
     setProjectId(value);
+
+    bus.$emit('switchProject', value);
   };
 
   const goHelp = () => {
