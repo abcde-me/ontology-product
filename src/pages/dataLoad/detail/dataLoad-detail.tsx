@@ -621,11 +621,10 @@ const DataLoadDetail = () => {
             }}
           />
           {hasStartPermission &&
-            ((listDetail?.source_type as string) !== 'local' ||
-              !(
-                listDetail?.source_type === 'mq' &&
-                listDetail?.submit_type === 2
-              )) && (
+            (listDetail?.source_type as string) !== 'local' &&
+            !(
+              listDetail?.source_type === 'mq' && listDetail?.submit_type === 2
+            ) && (
               <Button
                 type="primary"
                 icon={<IconPlus />}
