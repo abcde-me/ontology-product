@@ -4,6 +4,13 @@
       color: #1e293b;
     }
 
+    .task-name-column {
+      :global(.typoWrap),
+      :global(.ellipsis-text) {
+        font-weight: 500;
+      }
+    }
+
     :global(.arco-table-tr):hover {
       .hover-change :global(.arco-link) {
         color: rgb(0, 125, 250);
@@ -23,21 +30,21 @@
         }
       }
 
-      .workflow-name-container {
-        .workflow-name-copy {
+      .task-code-id-container {
+        .task-code-id-copy {
           visibility: visible;
         }
       }
     }
 
-    .workflow-name-container {
-      .workflow-name-copy {
+    .task-code-id-container {
+      .task-code-id-copy {
         visibility: hidden;
         cursor: pointer;
 
-        &:hover {
-          color: rgb(0, 125, 250);
-        }
+        // &:hover {
+        //   color: rgb(0, 125, 250);
+        // }
       }
     }
   }

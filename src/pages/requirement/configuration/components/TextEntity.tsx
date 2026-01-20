@@ -132,7 +132,7 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
       // 映射实体标签数据结构，并标记为来自详情
       const mappedLabels = requirementDetail?.labels?.map((item) => ({
         ...item,
-        label_id: item?.label_id || item?.order_num || uuid(),
+        label_id: item?.label_id || item?.id || uuid(),
         isFromDetail: true // 标记为来自详情
       }));
 
@@ -140,7 +140,7 @@ const TextSubstanceComponent = (props: TextSubstanceComponentProps) => {
       const mappedRelations = requirementDetail?.entity_relations?.map(
         (item) => ({
           ...item,
-          relation_id: item?.relation_id || item?.order_num || uuid(),
+          relation_id: item?.relation_id || item?.id || uuid(),
           isFromDetail: true // 标记为来自详情
         })
       );

@@ -27,8 +27,8 @@
     }
 
     :global(.arco-form-label-item) {
-      min-width: 150px;
-      flex: 0 0 150px;
+      min-width: 125px;
+      flex: 0 0 125px;
     }
 
     :global(.arco-switch) {
@@ -196,6 +196,7 @@
 
         :global(.aa-no-data-card) {
           margin-top: 250px;
+          display: flex;
         }
       }
 
@@ -281,6 +282,10 @@
 
         :global(.arco-form-item) {
           margin-bottom: 0;
+        }
+
+        :global(.aa-no-data-card) {
+          display: flex;
         }
       }
     }

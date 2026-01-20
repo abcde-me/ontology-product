@@ -197,26 +197,6 @@ export default function WorkflowRunList() {
   const columns: ColumnProps<WorkflowTaskItem>[] = useMemo(
     () => [
       {
-        title: '工作流运行ID',
-        dataIndex: 'id',
-        width: 180,
-        className: styles['hover-change'],
-        render: (value: string, record: WorkflowTaskItem) => (
-          <EllipsisPopoverCom
-            value={value}
-            isLink={!!record.workflow_type}
-            handleLink={() =>
-              handleWorkflowDetail(value, {
-                workflow_type: record.workflow_type,
-                workflow_uuid: record.workflow_uuid,
-                ds_workflow_id: record.process_definition_code,
-                workflow_version: record.workflow_version
-              })
-            }
-          />
-        )
-      },
-      {
         title: '工作流名称',
         dataIndex: 'process_definition_name',
         width: 200,
@@ -251,6 +231,39 @@ export default function WorkflowRunList() {
             </div>
           );
         }
+      },
+      {
+        title: '工作流运行ID',
+        dataIndex: 'id',
+        width: 180,
+        className: styles['hover-change'],
+        render: (value: string, record: WorkflowTaskItem) => (
+          <div
+            className={`flex items-center gap-1 ${styles['workflow-id-container']} ${
+              !!record.workflow_type ? styles['is-link'] : ''
+            }`}
+          >
+            <EllipsisPopoverCom
+              value={value}
+              isLink={!!record.workflow_type}
+              handleLink={() =>
+                handleWorkflowDetail(value, {
+                  workflow_type: record.workflow_type,
+                  workflow_uuid: record.workflow_uuid,
+                  ds_workflow_id: record.process_definition_code,
+                  workflow_version: record.workflow_version
+                })
+              }
+            />
+            <IconCopy
+              className={styles['workflow-id-copy']}
+              onClick={(e) => {
+                e.stopPropagation();
+                handleCopy(value);
+              }}
+            />
+          </div>
+        )
       },
       {
         title: '运行状态',
@@ -304,9 +317,13 @@ export default function WorkflowRunList() {
         title: '提交人',
         dataIndex: 'operator',
         width: 120,
-        render: (value: string) => (
-          <EllipsisPopoverCom value={value} preferTypography />
-        )
+        render: (value: string, record: WorkflowTaskItem) => {
+          const displayValue =
+            record.trigger_type === TriggerType.SCHEDULE
+              ? '系统自动执行'
+              : value;
+          return <EllipsisPopoverCom value={displayValue} preferTypography />;
+        }
       },
       {
         title: '开始时间',
@@ -547,12 +564,8 @@ export default function WorkflowRunList() {
       return false;
     }
 
-    if (!table?.pagination?.pageSize) {
-      return false;
-    }
-
-    return table.pagination.total > table.pagination.pageSize;
-  }, [table.pagination.total, table.pagination.pageSize]);
+    return table.pagination.total > 0;
+  }, [table.pagination.total]);
 
   return (
     <>

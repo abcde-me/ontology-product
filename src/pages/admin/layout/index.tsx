@@ -12,11 +12,9 @@ import { Route, Switch } from 'react-router-dom';
 import { SWRConfig } from 'swr';
 import { getFlatRoutes, routes } from '../route';
 import Bread from './Bread';
-import { withSider } from './Sider';
+import { LayoutWithSider } from './Sider';
 import { useUserInfoStore } from '@/store/userInfoStore';
-import { Page403 } from '@/pages/errorPages';
-import { usePermission } from '@/hooks';
-import AuthLoad from '@/pages/errorPages/authLoad';
+import { Page403, Page404 } from '@/pages/errorPages';
 import PermissionRoute from './PermissionRoute';
 
 type LayoutPageProps = {
@@ -109,32 +107,36 @@ const LayoutPage: React.FC<LayoutPageProps> = () => {
   // 轮训刷新token，续约token
 
   return (
-    <Layout className="flex h-full overflow-auto">
-      <Bread />
-      <Layout.Content className="flex-auto overflow-auto">
-        <div
-          className="layout-detail h-full overflow-auto text-[var(--color-text-2)]"
-          data-user-loaded
-        >
-          <SWRConfig value={{ revalidateOnFocus: false }}>
-            <Switch>
-              {flattenRoutes.map((route) => {
-                return (
-                  <Route
-                    key={route.key}
-                    path={route.key}
-                    render={() => <PermissionRoute route={route} />}
-                    // render={() => <PermissionRoute route={route} />}
-                    exact={route.exact !== false} // 默认加exact， 除非显示关闭
-                  />
-                );
-              })}
-            </Switch>
-          </SWRConfig>
-        </div>
-      </Layout.Content>
-    </Layout>
+    <LayoutWithSider>
+      <Layout className="flex h-full overflow-auto">
+        <Bread />
+        <Layout.Content className="flex-auto overflow-auto">
+          <div
+            className="layout-detail h-full overflow-auto text-[var(--color-text-2)]"
+            data-user-loaded
+          >
+            <SWRConfig value={{ revalidateOnFocus: false }}>
+              <Switch>
+                {flattenRoutes.map((route) => {
+                  return (
+                    <Route
+                      key={route.key}
+                      path={route.key}
+                      render={() => <PermissionRoute route={route} />}
+                      // render={() => <PermissionRoute route={route} />}
+                      exact={route.exact !== false} // 默认加exact， 除非显示关闭
+                    />
+                  );
+                })}
+                <Route key="*" path="*" component={Page404} />
+              </Switch>
+            </SWRConfig>
+          </div>
+        </Layout.Content>
+      </Layout>
+    </LayoutWithSider>
   );
 };
 
-export default withSider(LayoutPage);
+// export default withSider(LayoutPage);
+export default LayoutPage;

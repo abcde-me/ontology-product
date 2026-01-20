@@ -4,8 +4,7 @@
   .modalContent {
     display: flex;
     gap: 24px;
-    min-height: 664px;
-    max-height: 864px;
+    height: 536px;
   }
 
   .lfetBox {
@@ -13,7 +12,7 @@
     padding: 0 0 24px 0;
 
     :global(.arco-form) {
-      max-height: 515px;
+      max-height: 460px;
       overflow: auto;
     }
 
@@ -28,8 +27,7 @@
 
     .responseBox {
       width: 100%;
-      min-height: 524px;
-      max-height: 700px;
+      height: 400px;
       overflow: auto;
       padding: 8px 12px;
       background-color: var(--background-color-bg-2, #f8fafd);
@@ -68,6 +66,7 @@
 
     :global(.aa-no-data-card) {
       margin-top: 250px;
+      display: flex;
     }
   }
 }

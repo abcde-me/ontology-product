@@ -26,7 +26,12 @@ import { parseCron } from './parseCron';
 import EllipsisPopoverCom from '@/components/ellipsis-popover-com';
 import { DATA_LOAD_PERMISSIONS } from '@/config/permissions';
 import { useHistory } from 'react-router';
-import { ConnectorType, TYPE_CONFIG, DATABASE_TYPE_ENUM } from '../config';
+import {
+  ConnectorType,
+  TYPE_CONFIG,
+  DATABASE_TYPE_ENUM,
+  RunState
+} from '../config';
 import getLabelByValue from '@/utils/getLabelByValue';
 import { useInterval } from '@/utils/useInterval';
 import { useHasPermission } from '@/hooks/usePermission';
@@ -148,7 +153,7 @@ const DataLoadDetail = () => {
   const judgmentTask = () => {
     getDetailList();
     // const boo = detailList?.findIndex(
-    //   (item) => item.status == 'succeed' || item.status == 'stopping'
+    //   (item) => item.status == RunState.SUCCEED || item.status == RunState.STOPPED
     // );
     // setRunningFlag(boo == -1 ? false : true);
   };
@@ -156,37 +161,37 @@ const DataLoadDetail = () => {
   useInterval(judgmentTask, 5000);
 
   // 停止中的过程
-  const StopeJudgmentTask = async () => {
-    try {
-      setDetailListLoading(true);
-      const res = await getLoadRecordList({
-        task_id: Number(loadId),
-        page: current,
-        page_size: pageSize,
-        execution_name: searchValue.trim(),
-        ...directoryObj
-      });
-      if (res?.data?.items?.[0]?.status === 'stopped') {
-        Message.success('任务已停止');
-      } else {
-        if (res?.data?.items?.[0]?.status === 'failed') {
-          Message.error(res?.data?.items?.[0]?.error_msg);
-        } else {
-          Message.error('任务停止失败');
-        }
-      }
-      setTotal(res?.data?.total ?? 0);
-      setDetailList(res?.data?.items ?? []);
-      const boo = detailList?.findIndex(
-        (item) => item.status == 'succeed' || item.status == 'stopping'
-      );
-      setRunningFlag(boo == -1 ? false : true);
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setDetailListLoading(false);
-    }
-  };
+  // const StopeJudgmentTask = async () => {
+  //   try {
+  //     setDetailListLoading(true);
+  //     const res = await getLoadRecordList({
+  //       task_id: Number(loadId),
+  //       page: current,
+  //       page_size: pageSize,
+  //       execution_name: searchValue.trim(),
+  //       ...directoryObj
+  //     });
+  //     if (res?.data?.items?.[0]?.status === RunState.STOPPED) {
+  //       Message.success('任务已停止');
+  //     } else {
+  //       if (res?.data?.items?.[0]?.status === RunState.FAILURE) {
+  //         Message.error(res?.data?.items?.[0]?.error_msg);
+  //       } else {
+  //         Message.error('任务停止失败');
+  //       }
+  //     }
+  //     setTotal(res?.data?.total ?? 0);
+  //     setDetailList(res?.data?.items ?? []);
+  //     const boo = detailList?.findIndex(
+  //       (item) => item.status == RunState.SUCCEED || item.status == RunState.STOPPED
+  //     );
+  //     setRunningFlag(boo == -1 ? false : true);
+  //   } catch (err) {
+  //     console.error(err);
+  //   } finally {
+  //     setDetailListLoading(false);
+  //   }
+  // };
   // 启停任务
   const startAndStoponchange = async (val) => {
     try {
@@ -258,7 +263,7 @@ const DataLoadDetail = () => {
   useEffect(() => {
     if (detailList) {
       const hasRunningTask = detailList.some(
-        (item) => item.status === 'running' || item.status === 'stopping'
+        (item) => item.status === RunState.RUNNING
       );
       console.log(hasRunningTask);
 
@@ -521,6 +526,7 @@ const DataLoadDetail = () => {
                     className={'cronSwitch'}
                     size="default"
                     defaultChecked={listDetail && listDetail.cron_enable}
+                    disabled
                     checkedText="启用"
                     uncheckedText="停止"
                     style={{ marginLeft: '10px' }}
@@ -603,8 +609,12 @@ const DataLoadDetail = () => {
             allowClear
             placeholder="搜索运行名称"
             style={{ width: 220 }}
-            onPressEnter={() => {
-              getDetailList();
+            onSearch={() => {
+              if (current !== 1) {
+                setCurrent(1);
+              } else {
+                getDetailList();
+              }
             }}
             onChange={(value) => {
               setSearchValue(value);
@@ -612,7 +622,9 @@ const DataLoadDetail = () => {
           />
           {hasStartPermission &&
             (listDetail?.source_type as string) !== 'local' &&
-            listDetail?.source_type !== 'mq' && (
+            !(
+              listDetail?.source_type === 'mq' && listDetail?.submit_type === 2
+            ) && (
               <Button
                 type="primary"
                 icon={<IconPlus />}
@@ -635,7 +647,7 @@ const DataLoadDetail = () => {
           <TableDetail
             taskId={listDetail && listDetail.task_id}
             judgmentTaskHan={judgmentTask}
-            TimedStops={StopeJudgmentTask}
+            // TimedStops={StopeJudgmentTask}
             {...detailList}
             datalist={detailList}
             loading={detailListLoading}

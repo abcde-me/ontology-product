@@ -345,7 +345,7 @@ const Edit = forwardRef<EditRef, EditProps>((props, ref) => {
                     ]}
                     initialValue={props.editObj.config?.bootstrapServers}
                   >
-                    <Input placeholder="请输入集群的入口地址列表" />
+                    <Input placeholder="请输入,多个地址用逗号分隔如lhost1:port1,host2:port2" />
                   </FormItem>
                   <FormItem
                     label="偏移重置策略"

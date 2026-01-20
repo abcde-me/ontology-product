@@ -22,7 +22,6 @@ import {
   Grid,
   Table,
   TableColumnProps,
-  Typography,
   Tag,
   Button,
   Pagination,
@@ -33,7 +32,6 @@ import {
   Menu
 } from '@arco-design/web-react';
 import useArcoTable from '@/hooks/use-arco-table';
-import noDataElement from '@/components/no-data';
 import { WORKFLOW_LIST_PERMISSIONS } from '@/config/permissions';
 import {
   IconCheckCircleFill,
@@ -159,12 +157,6 @@ export function StructuredWorkflowList() {
 
   const columns: TableColumnProps<WorkFlowItem>[] = [
     {
-      title: 'ID',
-      dataIndex: 'code',
-      width: 180,
-      fixed: 'left'
-    },
-    {
       title: '工作流名称',
       dataIndex: 'name',
       ellipsis: true,
@@ -179,7 +171,7 @@ export function StructuredWorkflowList() {
           title={value}
         >
           <div
-            className={'overflow-hidden overflow-ellipsis whitespace-nowrap'}
+            className={`workflow-name-content overflow-hidden overflow-ellipsis whitespace-nowrap font-PingFangSc text-[14px] font-medium leading-[22px]`}
           >
             {value}
           </div>
@@ -195,6 +187,36 @@ export function StructuredWorkflowList() {
           />
         </div>
       )
+    },
+    {
+      title: 'ID',
+      dataIndex: 'code',
+      width: 180,
+      fixed: 'left',
+      render(value, record) {
+        return (
+          <div
+            className={`flex w-full items-center gap-1 overflow-hidden ${styles['content-with-copy']} text-default`}
+            title={value}
+          >
+            <div
+              className={'overflow-hidden overflow-ellipsis whitespace-nowrap'}
+            >
+              {value}
+            </div>
+            <IconCopy
+              className={`${styles['workflow-name-copy']} flex-shrink-0`}
+              onClick={(e) => {
+                e.stopPropagation();
+                const copied = copy(value);
+                if (copied) {
+                  Message.success('复制工作流ID成功');
+                }
+              }}
+            />
+          </div>
+        );
+      }
     },
     {
       title: '工作流描述',

@@ -3,6 +3,7 @@ import '@arco-design/web-react/icon';
 import '@arco-themes/react-cecloud-design/css/arco.css';
 import '@ccf2e/arco-material/dist/css/index.css';
 import '@ccf2e/arco-material/lib/style/css.js';
+import '@ceai-front/arco-material/dist/index.css';
 import '@ccf2e/arco-material';
 import './index.css';
 import './style/ai.theme.scss';
@@ -18,6 +19,7 @@ import ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
 import { ConfigProvider, Layout, Spin } from '@arco-design/web-react';
 import {} from '@ccf2e/arco-material';
+import { patchHistoryForLocationChange } from '@ceai-front/arco-material';
 import { useHistory } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import zhCN from '@arco-design/web-react/es/locale/zh-CN';
@@ -56,6 +58,7 @@ import { ProjectIdKey } from './utils/const';
 import { isSameArray } from './utils/array';
 
 initI18n();
+patchHistoryForLocationChange();
 
 // 创建 QueryClient 实例
 const queryClient = new QueryClient({
@@ -223,7 +226,7 @@ function App() {
             component={Login}
             exact
           />
-          {flattenRoutes.map((route) => {
+          {/*{flattenRoutes.map((route) => {
             return (
               <Route
                 key={route.key}
@@ -232,7 +235,7 @@ function App() {
                 exact
               />
             );
-          })}
+          })}*/}
           <Redirect from="/login" to="/tenant/compute/modaforge/login" exact />
           <Redirect
             from="/modaforge"
@@ -240,7 +243,11 @@ function App() {
             exact
           />
           <Redirect from="/" to="/tenant/compute/modaforge/connection" exact />
-          <Route key="*" path="*" component={Page404} />
+          <Route
+            path={'/'}
+            render={({ history }) => <PageLayout history={history} />}
+          />
+          {/*<Route key="*" path="*" component={Page404} />*/}
         </Switch>
       </Layout.Content>
     </Layout>

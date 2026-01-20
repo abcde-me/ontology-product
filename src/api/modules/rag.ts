@@ -30,7 +30,10 @@ export function previewUrl(params: PreviewUrlParams) {
 export function getFileBinaryData(params: GetFileBinaryDataParams) {
   return UAPI.RES.GetFileBinaryData({})
     .get(params)
-    .withConfig({ responseType: 'arraybuffer' })
+    .withConfig({
+      timeout: 300000,
+      responseType: 'arraybuffer'
+    })
     .inRegion()
     .do();
 }

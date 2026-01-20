@@ -40,8 +40,13 @@ import {
   listMetadataMinioBucket,
   MetadataMenuItem
 } from '@/api/metadata';
-import styles from './index.module.scss';
 import { useParams } from '@/utils/url';
+import {
+  DATA_API_PERMISSIONS,
+  METADATA_MANAGEMENT_PERMISSIONS
+} from '@/config/permissions';
+import { useHasPermission } from '@/store/userInfoStore';
+import styles from './index.module.scss';
 
 enum MetadataType {
   Iceberg = 'ICEBERG',
@@ -64,6 +69,11 @@ export default function MetadataManagement() {
   const MenuItem = Menu.Item;
   const TextArea = Input.TextArea;
 
+  // 初始化是否有详情权限
+  const isDetailPermission = useHasPermission(
+    METADATA_MANAGEMENT_PERMISSIONS.DETAIL
+  );
+
   // 初始化元数据菜单数据
   const [metadataMenuData, setMetadataMenuData] = useState([]);
   // 初始化搜索框value
@@ -85,7 +95,7 @@ export default function MetadataManagement() {
   const [sortValue, setSortValue] = useState<{
     order: string;
     field: string;
-  }>();
+  } | null>(null);
   // 初始化筛选的元数据类型
   const [activeMetadataType, setActiveMetadataType] = useState<
     MetadataType | string
@@ -124,6 +134,7 @@ export default function MetadataManagement() {
       getColumns(
         selectedColumns,
         viewDetail,
+        isDetailPermission,
         current,
         pageSize
       ) as ColumnProps[]
@@ -133,6 +144,15 @@ export default function MetadataManagement() {
   useEffect(() => {
     getMenuData();
   }, []);
+
+  useEffect(() => {
+    const selectMenuItem =
+      metadataMenuData.find(
+        (item: MetadataMenuItem) => item?.datasourceType === activeMetadataType
+      ) || ({} as MetadataMenuItem);
+    setUpdateTime(selectMenuItem?.updateTime || '');
+    setActiveMetadataId(selectMenuItem?.id || null);
+  }, [metadataMenuData, activeMetadataType]);
 
   const getMenuName = (type: string) => {
     switch (type) {
@@ -167,7 +187,6 @@ export default function MetadataManagement() {
             MetadataType.Iceberg
         );
         setActiveMetadataId(Number(res.data.data[0]?.id) || null);
-        setUpdateTime(res.data.data[0]?.updateTime || '');
       }
     } else {
       Message.error(res.message || '获取元数据菜单数据失败');
@@ -431,16 +450,11 @@ PROPERTIES (
             onClickMenuItem={(key, event, keyPath) => {
               setSelectedColumns(getColumnsSetting(key));
               setActiveMetadataType(key);
-              const selectMenuItem =
-                metadataMenuData.find(
-                  (item: MetadataMenuItem) => item?.datasourceType === key
-                ) || ({} as MetadataMenuItem);
-              setUpdateTime(selectMenuItem?.updateTime || '');
-              setActiveMetadataId(selectMenuItem?.id || null);
               setSearchValue({
                 filters: {},
                 range: [] as RangeFilter[]
               });
+              setSortValue(null);
               setCurrent(1);
               setPageSize(10);
             }}
@@ -463,7 +477,20 @@ PROPERTIES (
           <div className="mb-3 mt-4 flex items-center justify-between">
             <h1 className="text-base font-semibold">{`数据列表(${total})`}</h1>
             <div className="flex items-center gap-2">
-              <span className="text-sm text-[#6E7B8D]">{updateTime} 更新</span>
+              <span
+                className="text-sm text-[#6E7B8D]"
+                style={{ fontFamily: 'PingFang SC' }}
+              >
+                {updateTime} 更新
+              </span>
+              {activeMetadataType === MetadataType.MinIO && (
+                <span
+                  className="text-sm text-[#6E7B8D]"
+                  style={{ fontFamily: 'PingFang SC' }}
+                >
+                  数据更新五分钟一次
+                </span>
+              )}
               {/* <Button
                 className={styles['refreshBtn']}
                 icon={<IconRefresh className="text-[#1E293B]" />}
@@ -471,41 +498,59 @@ PROPERTIES (
               {(activeMetadataType === MetadataType.Iceberg ||
                 activeMetadataType === MetadataType.Doris) && (
                 <>
-                  <Button
-                    className={styles['refreshBtn']}
-                    icon={<StorageIcon />}
-                    onClick={() => {
-                      handleToDataApi();
-                    }}
-                  >
-                    表转API
-                  </Button>
+                  <PermissionWrapper permission={DATA_API_PERMISSIONS.LIST}>
+                    <Button
+                      className={styles['refreshBtn']}
+                      icon={<StorageIcon />}
+                      onClick={() => {
+                        handleToDataApi();
+                      }}
+                    >
+                      表转API
+                    </Button>
+                  </PermissionWrapper>
 
-                  <Button
-                    className={styles['refreshBtn']}
-                    icon={<CreateDatabaseIcon />}
-                    onClick={() => {
-                      tableForm.setFieldsValue({
-                        ddl:
-                          activeMetadataType === MetadataType.Iceberg
-                            ? `CREATE DATABASE IF NOT EXISTS iceberg_db_example COMMENT 'Iceberg创建库示例'`
-                            : `CREATE DATABASE IF NOT EXISTS db_example`,
-                        tableType: activeMetadataType
-                      });
-                      setCreateTableModalOpen(true);
-                    }}
+                  <PermissionWrapper
+                    permission={
+                      activeMetadataType === MetadataType.Iceberg
+                        ? METADATA_MANAGEMENT_PERMISSIONS.CREATE_ICEBERG_DATABASE
+                        : METADATA_MANAGEMENT_PERMISSIONS.CREATE_DORIS_DATABASE
+                    }
                   >
-                    创建数据库
-                  </Button>
-                  <Button
-                    className={styles['refreshBtn']}
-                    icon={<CreateTableIcon />}
-                    onClick={() => {
-                      handleCreatePhysicalTable();
-                    }}
+                    <Button
+                      className={styles['refreshBtn']}
+                      icon={<CreateDatabaseIcon />}
+                      onClick={() => {
+                        tableForm.setFieldsValue({
+                          ddl:
+                            activeMetadataType === MetadataType.Iceberg
+                              ? `CREATE DATABASE IF NOT EXISTS iceberg_db_example COMMENT 'Iceberg创建库示例'`
+                              : `CREATE DATABASE IF NOT EXISTS db_example`,
+                          tableType: activeMetadataType
+                        });
+                        setCreateTableModalOpen(true);
+                      }}
+                    >
+                      创建数据库
+                    </Button>
+                  </PermissionWrapper>
+                  <PermissionWrapper
+                    permission={
+                      activeMetadataType === MetadataType.Iceberg
+                        ? METADATA_MANAGEMENT_PERMISSIONS.CREATE_ICEBERG_TABLE
+                        : METADATA_MANAGEMENT_PERMISSIONS.CREATE_DORIS_TABLE
+                    }
                   >
-                    创建物理表
-                  </Button>
+                    <Button
+                      className={styles['refreshBtn']}
+                      icon={<CreateTableIcon />}
+                      onClick={() => {
+                        handleCreatePhysicalTable();
+                      }}
+                    >
+                      创建物理表
+                    </Button>
+                  </PermissionWrapper>
                 </>
               )}
               <Button

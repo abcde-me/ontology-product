@@ -123,7 +123,7 @@ export default React.memo(function SQLPanel(
                 'font-[PingFang SC] text-[14px] font-[400] text-[#1E293B]'
               }
             >
-              SQL脚本语句:
+              SQL脚本语句：
             </div>
           }
           className={'mb-0'}
@@ -286,13 +286,13 @@ export default React.memo(function SQLPanel(
                           />
                         )}
                       </div>
-                      <FormItem className={'add-field-action'}>
+                      <FormItem className={'add-field-action mb-2'}>
                         {!!fields.length &&
                           fields.map((field, index) => (
-                            <div key={field.key} className={'flex flex-1'}>
+                            <div key={field.key} className={'mb-2 flex flex-1'}>
                               <div className={'fields-item flex flex-1 gap-3'}>
                                 <FormItem
-                                  className={'mb-2'}
+                                  className={'mb-0'}
                                   field={`${field.field}.prop`}
                                   label={
                                     index === 0 ? (
@@ -331,7 +331,7 @@ export default React.memo(function SQLPanel(
                                 </FormItem>
                                 <FormItem
                                   field={`${field.field}.value`}
-                                  className={'mb-2'}
+                                  className={'mb-0'}
                                   label={
                                     index === 0 ? (
                                       <Form.Item noStyle>
@@ -351,7 +351,7 @@ export default React.memo(function SQLPanel(
                               </div>
                               {!sql_id && (
                                 <FormItem
-                                  className={'mb-2 w-auto flex-shrink-0'}
+                                  className={'mb-0 w-auto flex-shrink-0'}
                                   label={
                                     index === 0 ? (
                                       <Typography.Text
@@ -397,7 +397,7 @@ export default React.memo(function SQLPanel(
             );
           }}
         </FormItem>
-        <Divider className={'mb-3 mt-2'} />
+        <Divider className={'mb-3 mt-0'} />
         <NodeRunSetting />
         <Divider className={'mb-3 mt-0'} />
       </Form>

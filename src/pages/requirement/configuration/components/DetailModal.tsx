@@ -549,6 +549,8 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
                     // 2. 添加当前页新选中数据 - 统一数据格式并确保有 execution_id
                     selectedRows.forEach((item: any) => {
                       const itemId = getUniqueId(item);
+                      // 检查是否已存在（从 selectedRowsContent 保留的数据）
+                      const existingItem = mergedMap.get(itemId);
                       // 统一数据格式，确保有 execution_id 字段
                       const normalizedItem = {
                         ...item,
@@ -557,7 +559,10 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
                         start_time: item.start_time || item.load_start_time,
                         end_time: item.end_time || item.load_end_time,
                         load_num: item.load_num,
-                        upload_user: item.upload_user || item.create_by
+                        upload_user: item.upload_user || item.create_by,
+                        // 优先使用已有的 dir_name，避免覆盖之前选中数据的目录路径
+                        dir_name:
+                          existingItem?.dir_name || String(dir_path[0] || '')
                       };
                       mergedMap.set(itemId, normalizedItem);
                     });

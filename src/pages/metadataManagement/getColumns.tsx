@@ -100,8 +100,8 @@ const IcebergFields: ColumnField[] = [
     values: []
   },
   {
-    id: 'updateTime',
-    nameEn: 'updateTime',
+    id: 'tableDataUpdateTime',
+    nameEn: 'tableDataUpdateTime',
     nameZh: '更新时间',
     type: 'datetime',
     isEnumAbleForColumn: true,
@@ -112,8 +112,8 @@ const IcebergFields: ColumnField[] = [
     values: []
   },
   {
-    id: 'createTime',
-    nameEn: 'createTime',
+    id: 'tableCreateTime',
+    nameEn: 'tableCreateTime',
     nameZh: '创建时间',
     type: 'datetime',
     isEnumAbleForColumn: true,
@@ -211,9 +211,9 @@ const DorisFields: ColumnField[] = [
     values: []
   },
   {
-    id: 'tableUpdateTime',
-    nameEn: 'tableUpdateTime',
-    nameZh: '更新时间',
+    id: 'tableDataUpdateTime',
+    nameEn: 'tableDataUpdateTime',
+    nameZh: '表数据更新时间',
     type: 'datetime',
     isEnumAbleForColumn: true,
     isEnumAble: false,
@@ -247,18 +247,6 @@ const MinIOFields = [
     enumLoading: false,
     distinctCount: 0,
     displaySort: 1,
-    values: []
-  },
-  {
-    id: 'objectsCount',
-    nameEn: 'objectsCount',
-    nameZh: '对象数',
-    type: 'int',
-    isEnumAbleForColumn: true,
-    isEnumAble: false,
-    enumLoading: false,
-    distinctCount: 0,
-    displaySort: 2,
     values: []
   },
   {
@@ -430,8 +418,8 @@ const MilvusFields = [
     values: []
   },
   {
-    id: 'createTime',
-    nameEn: 'createTime',
+    id: 'createdTimestamp',
+    nameEn: 'createdTimestamp',
     nameZh: '创建时间',
     type: 'datetime',
     isEnumAbleForColumn: true,
@@ -444,7 +432,7 @@ const MilvusFields = [
   {
     id: 'updateTime',
     nameEn: 'updateTime',
-    nameZh: '元数据更新时间',
+    nameZh: '元数据采集时间',
     type: 'datetime',
     isEnumAbleForColumn: true,
     isEnumAble: false,
@@ -473,6 +461,7 @@ export const getColumnsSetting = (metadataType: MetadataType | string) => {
 export const getColumns = (
   metadataSelectedFields: ColumnField[],
   viewDetail: (id: string) => void,
+  isDetailPermission: boolean,
   page: number,
   size: number
 ) => {
@@ -482,7 +471,7 @@ export const getColumns = (
       dataIndex: 'index',
       width: 60,
       key: 'index',
-      render: (_, _record, idx: number) => (page - 1) * size + idx + 1
+      render: (_, _record, idx: number) => idx + 1
     },
     // 根据 fields 生成列，保证每一列和表头一一对应
     ...(metadataSelectedFields || [])
@@ -493,7 +482,7 @@ export const getColumns = (
           title: field.nameZh,
           dataIndex: field.nameEn,
           key: field.nameEn,
-          width: 200,
+          width: 220,
           className:
             field.id === 'collectionName' ||
             field.id === 'tableName' ||
@@ -522,7 +511,7 @@ export const getColumns = (
               field.id === 'tableName' ||
               field.id === 'bucketName'
             ) {
-              return (
+              return isDetailPermission ? (
                 <EllipsisPopover
                   value={value}
                   isEdit={false}
@@ -531,12 +520,15 @@ export const getColumns = (
                     viewDetail(record.id);
                   }}
                 />
+              ) : (
+                <EllipsisPopover value={value} isEdit={false} />
               );
             }
             if (
               field.id === 'encryption' ||
               field.id === 'description' ||
               field.id === 'databaseName' ||
+              field.id === 'dbName' ||
               field.id === 'distributionColumns' ||
               field.id === 'partitionKey'
             ) {
@@ -545,9 +537,9 @@ export const getColumns = (
             if (field.id === 'policy') {
               const pattern = /\{\s*[^}]+\s*\}/;
               return pattern.test(value) ? (
-                <div className="flex items-center gap-1">公有</div>
+                <div className="flex items-center gap-1"> 公有 </div>
               ) : (
-                <div className="flex items-center gap-1">私有</div>
+                <div className="flex items-center gap-1"> 私有 </div>
               );
             }
             if (field.id === 'storageSize' || field.id === 'objectsSize') {

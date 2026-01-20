@@ -32,11 +32,14 @@ export default function TestModal(props: {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
+    if (!visible) {
+      return;
+    }
     dataSource.forEach((item) => {
       form.setFieldValue(`value_${item.name}`, item.defaultValue);
     });
     checkIsAllNotEmpty();
-  }, [dataSource]);
+  }, [visible]);
 
   const columns = [
     {
@@ -169,7 +172,7 @@ export default function TestModal(props: {
               columns={columns}
               data={dataSource}
               pagination={false}
-              rowKey="id"
+              rowKey="name"
             />
           </Form>
         </div>

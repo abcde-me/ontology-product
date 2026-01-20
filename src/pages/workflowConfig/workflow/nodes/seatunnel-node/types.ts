@@ -107,8 +107,8 @@ export interface SourceField {
 export interface SyncField {
   source_field: string;
   source_field_type: string;
-  target_field: string;
-  target_field_type: string;
+  target_field?: string;
+  target_field_type?: string;
   sync?: boolean;
   primary?: boolean;
 }

@@ -66,6 +66,7 @@ interface MinIOBaseData {
   policy?: string;
   encryptType?: string;
   createTime?: string;
+  creationDate?: string;
   updateTime?: string;
   lastTime?: string;
 }
@@ -223,7 +224,7 @@ export default function MetadataManagementDetail() {
     const res = await getFileBinaryData({
       bucket_name: record.bucketName,
       path: record.objectPath.split('/').slice(1).join('/'),
-      convert_pdf: !(selectFileType === 'xls' || selectFileType === 'xlsx')
+      convert_pdf: !(objectPath === 'xls' || objectPath === 'xlsx')
     });
     setFileBinaryData(res);
     setPreviewLoading(false);
@@ -247,7 +248,7 @@ export default function MetadataManagementDetail() {
     },
     {
       label: '中文名称',
-      value: baseInfoData.datasourceName || '-'
+      value: baseInfoData.description || '-'
     },
     {
       label: '存储类型',
@@ -284,7 +285,7 @@ export default function MetadataManagementDetail() {
     },
     {
       label: '更新时间',
-      value: baseInfoData.updateTime || '-'
+      value: baseInfoData.tableDataUpdateTime || '-'
     }
   ];
   // Doris基本信息数据
@@ -298,7 +299,7 @@ export default function MetadataManagementDetail() {
       value: baseInfoData.description || '-'
     },
     {
-      label: '存储类型',
+      label: '表类型',
       value: baseInfoData.tableType || '-'
     },
     {
@@ -323,7 +324,7 @@ export default function MetadataManagementDetail() {
     },
     {
       label: '更新时间',
-      value: baseInfoData.updateTime || '-'
+      value: baseInfoData.tableDataUpdateTime || '-'
     }
   ];
   // Milvus基本信息数据
@@ -354,7 +355,7 @@ export default function MetadataManagementDetail() {
     },
     {
       label: '创建时间',
-      value: baseInfoData.createTime || '-'
+      value: baseInfoData.createdTimestamp || '-'
     }
   ];
   // MinIo基本信息数据
@@ -362,10 +363,6 @@ export default function MetadataManagementDetail() {
     {
       label: '桶名称',
       value: minIOBaseData.bucketName || '-'
-    },
-    {
-      label: '对象数',
-      value: Number(minIOBaseData.objectsCount || 0)
     },
     {
       label: '存储大小',
@@ -385,7 +382,7 @@ export default function MetadataManagementDetail() {
     },
     {
       label: '创建时间',
-      value: minIOBaseData.createTime || '-'
+      value: minIOBaseData.creationDate || '-'
     }
   ];
   // MinIo对象信息列
@@ -440,8 +437,8 @@ export default function MetadataManagementDetail() {
     },
     {
       title: '元数据更新时间',
-      dataIndex: 'updateTime',
-      key: 'updateTime',
+      dataIndex: 'lastModified',
+      key: 'lastModified',
       width: 220,
       sorter: true
     },
@@ -564,10 +561,10 @@ export default function MetadataManagementDetail() {
     },
     {
       title: '是否向量',
-      dataIndex: 'dimension',
-      key: 'dimension',
+      dataIndex: 'isVector',
+      key: 'isVector',
       width: 150,
-      render: (text, record) => (text ? '是' : '否')
+      render: (text, record) => (text === 1 ? '是' : '否')
     }
   ];
   // 分区信息列

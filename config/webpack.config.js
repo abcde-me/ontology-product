@@ -24,7 +24,6 @@ const ReactRefreshWebpackPlugin = require('@pmmmwh/react-refresh-webpack-plugin'
 
 const createEnvironmentHash = require('./webpack/persistentCache/createEnvironmentHash');
 const { Cfg, isConsolePlugin } = require('./config.addition');
-const MonacoWebpackPlugin = require('monaco-editor-webpack-plugin');
 const OnlyWebpackErrorsInForkTsCheckerWebpackPlugin = require('./OnlyWebpackErrorsInForkTsCheckerWebpackPlugin');
 const tailwindcss = require('tailwindcss');
 // Source maps are resource heavy and can cause out of memory issue for large source files.
@@ -319,7 +318,125 @@ module.exports = function (webpackEnv) {
         }),
         // This is only used in production mode
         new CssMinimizerPlugin()
-      ]
+      ],
+      // 代码分割配置 - 将大型库分离为独立 chunk，提升缓存命中率和并行加载能力
+      splitChunks: isEnvProduction
+        ? {
+            chunks: 'all',
+            cacheGroups: {
+              // React 框架代码（React, ReactDOM, React Router等）
+              framework: {
+                name: 'framework',
+                test: /[\\/]node_modules[\\/](react|react-dom|react-router|react-router-dom|scheduler|react-refresh)[\\/]/,
+                priority: 40,
+                enforce: true,
+                reuseExistingChunk: true
+              },
+              // Arco Design UI 组件库
+              arcoDesign: {
+                name: 'arco-design',
+                test: /[\\/]node_modules[\\/]@arco-design[\\/]/,
+                priority: 35,
+                enforce: true,
+                reuseExistingChunk: true
+              },
+              // Arco Material 组件库
+              arcoMaterial: {
+                name: 'arco-material',
+                test: /[\\/]node_modules[\\/]@ccf2e[\\/]arco-material[\\/]/,
+                priority: 35,
+                enforce: true,
+                reuseExistingChunk: true
+              },
+              // 编辑器相关库（Monaco, Lexical, CodeMirror等）
+              editors: {
+                name: 'editors',
+                test: /[\\/]node_modules[\\/](@monaco-editor|monaco-editor|lexical|@lexical|@uiw\/react-codemirror|@uiw\/codemirror)[\\/]/,
+                priority: 30,
+                enforce: true,
+                reuseExistingChunk: true
+              },
+              // 图表库（ECharts, BizCharts等）
+              charts: {
+                name: 'charts',
+                test: /[\\/]node_modules[\\/](echarts|echarts-for-react|bizcharts|@antv)[\\/]/,
+                priority: 30,
+                enforce: true,
+                reuseExistingChunk: true
+              },
+              // Markdown 可视化库（Mermaid, Markmap等）
+              markdownViz: {
+                name: 'markdown-viz',
+                test: /[\\/]node_modules[\\/](mermaid|markmap|markmap-lib|markmap-view|markmap-common)[\\/]/,
+                priority: 30,
+                enforce: true,
+                reuseExistingChunk: true
+              },
+              // Markdown 相关库（KaTeX, Highlight.js等）
+              markdownLibs: {
+                name: 'markdown-libs',
+                test: /[\\/]node_modules[\\/](katex|highlight\.js|rehype|remark|react-markdown)[\\/]/,
+                priority: 25,
+                enforce: true,
+                reuseExistingChunk: true
+              },
+              // 可视化图形库（D3, ReactFlow等）
+              visualization: {
+                name: 'visualization',
+                test: /[\\/]node_modules[\\/](d3|reactflow|@dagrejs|elkjs|cytoscape|@turf)[\\/]/,
+                priority: 25,
+                enforce: true,
+                reuseExistingChunk: true
+              },
+              // PDF 相关库
+              pdf: {
+                name: 'pdf',
+                test: /[\\/]node_modules[\\/](pdfjs-dist|react-pdf)[\\/]/,
+                priority: 25,
+                enforce: true,
+                reuseExistingChunk: true
+              },
+              // Excel 处理库
+              excel: {
+                name: 'excel',
+                test: /[\\/]node_modules[\\/]xlsx[\\/]/,
+                priority: 25,
+                enforce: true,
+                reuseExistingChunk: true
+              },
+              // 工具库（Lodash, Dayjs等）
+              utils: {
+                name: 'utils',
+                test: /[\\/]node_modules[\\/](lodash-es|dayjs|axios|ky|classnames|immer)[\\/]/,
+                priority: 20,
+                minChunks: 2,
+                reuseExistingChunk: true
+              },
+              // 状态管理库
+              stateManagement: {
+                name: 'state-management',
+                test: /[\\/]node_modules[\\/](mobx|mobx-react-lite|mobx-state-tree|zustand|redux)[\\/]/,
+                priority: 20,
+                minChunks: 2,
+                reuseExistingChunk: true
+              },
+              // 其他公共依赖
+              vendors: {
+                name: 'vendors',
+                test: /[\\/]node_modules[\\/]/,
+                priority: 10,
+                minChunks: 2,
+                reuseExistingChunk: true
+              }
+            }
+          }
+        : undefined,
+      // 将 webpack runtime 代码分离，避免业务代码变更导致 runtime 缓存失效
+      runtimeChunk: isEnvProduction
+        ? {
+            name: 'runtime'
+          }
+        : false
     },
     resolve: {
       // This allows you to set a fallback for where webpack should look for modules.
@@ -611,12 +728,6 @@ module.exports = function (webpackEnv) {
       ].filter(Boolean)
     },
     plugins: [
-      new MonacoWebpackPlugin({
-        // available options are documented at https://github.com/microsoft/monaco-editor/blob/main/webpack-plugin/README.md#options
-        languages: ['json', 'javascript', 'typescript', 'python']
-      }),
-      // Generates an `index.html` file with the <script> injected.
-
       ...(!isConsolePlugin ? cfg.overrideApp().plugins.html : []),
       // This gives some necessary context to module not found errors, such as
       // the requesting resource.
@@ -745,6 +856,14 @@ module.exports = function (webpackEnv) {
               })
             }
           }
+        }),
+      // Bundle analyzer (only in analyze mode)
+      process.env.ANALYZE &&
+        isEnvProduction &&
+        new (require('webpack-bundle-analyzer').BundleAnalyzerPlugin)({
+          analyzerMode: 'static',
+          openAnalyzer: true,
+          reportFilename: 'bundle-report.html'
         })
     ].filter(Boolean),
     // Turn off performance processing because we utilize

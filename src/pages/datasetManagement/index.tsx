@@ -62,9 +62,6 @@ import {
   SourceDataItem,
   TargetDataItem
 } from '@/components/data-catalog-content/components/popups-form/types';
-import style from 'react-syntax-highlighter/dist/esm/styles/hljs/a11y-dark';
-import { color } from 'echarts';
-import getFileIcon from '@/components/file-icon';
 import { formatFileSize } from '@/utils/format';
 import dataTypesIcon from '@/pages/datasetManagement/assets/dataset_dataType.png';
 import dataRelationIcon from '@/pages/datasetManagement/assets/dataset_relation.png';
@@ -73,7 +70,6 @@ import dataSceneIcon from '@/pages/datasetManagement/assets/dataset_scene.png';
 import DatasetMoveIcon from '@/pages/datasetManagement/assets/dataset_move.svg';
 import DatasetMoveActiveIcon from '@/pages/datasetManagement/assets/dataset_move_active.svg';
 import { useHasPermission } from '@/store/userInfoStore';
-import { throttle } from 'lodash-es';
 import { useParams } from '@/utils/url';
 
 // 时间格式化函数
@@ -1322,7 +1318,10 @@ const DatasetManagement: React.FC = () => {
             display: 'inline-block'
           }}
         >
-          删除后，数据集不可恢复
+          <div>删除后，本平台中使用到此知识库的地方将自动取消引用，</div>
+          <div>
+            如果此知识库也被应用开发平台引用，则也会取消引用，此操作不可撤回。
+          </div>
         </div>
       ),
       // 按钮文字

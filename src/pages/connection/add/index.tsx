@@ -258,8 +258,8 @@ const add = forwardRef((props: any, ref) => {
                     if (!trimmedValue) {
                       return cb('请输入连接器名称');
                     }
-                    if (validateName(trimmedValue).isValid == false) {
-                      return cb(validateName(trimmedValue).errorMessage);
+                    if (validateName(value).isValid == false) {
+                      return cb(validateName(value).errorMessage);
                     }
                     return cb();
                   }
@@ -376,7 +376,7 @@ const add = forwardRef((props: any, ref) => {
                   rules={[{ required: true, message: '请输入用户名' }]}
                   field="user"
                 >
-                  <Input placeholder="请输入" />
+                  <Input placeholder="请输入" autoComplete="new-username" />
                 </FormItem>
                 <FormItem
                   label="目录路径"
@@ -418,7 +418,7 @@ const add = forwardRef((props: any, ref) => {
                   rules={[{ required: true, message: '请输入地址列表' }]}
                   field="bootstrapServers"
                 >
-                  <Input placeholder="请输入" />
+                  <Input placeholder="请输入，多个地址用逗号分隔如lhost1:port1,host2:port2" />
                 </FormItem>
                 <FormItem
                   label="偏移重置策略"
@@ -431,10 +431,13 @@ const add = forwardRef((props: any, ref) => {
                   </Select>
                 </FormItem>
                 <FormItem label="用户名" field="user">
-                  <Input placeholder="请输入" />
+                  <Input placeholder="请输入" autoComplete="new-username" />
                 </FormItem>
                 <FormItem label="密码" field="password">
-                  <Input.Password placeholder="请输入" />
+                  <Input.Password
+                    placeholder="请输入"
+                    autoComplete="new-password"
+                  />
                 </FormItem>
               </div>
             ) : (
@@ -459,7 +462,9 @@ const add = forwardRef((props: any, ref) => {
                         region: '',
                         host: '',
                         port: '',
-                        database: ''
+                        database: '',
+                        user: '',
+                        password: ''
                       })
                     }
                     defaultValue="MySQL"
@@ -526,7 +531,7 @@ const add = forwardRef((props: any, ref) => {
                   ]}
                   disabled={inputDisabled}
                 >
-                  <Input placeholder="请输入" />
+                  <Input placeholder="请输入" autoComplete="new-username" />
                 </FormItem>
                 <FormItem
                   label="密码"
@@ -557,7 +562,10 @@ const add = forwardRef((props: any, ref) => {
                   ]}
                   disabled={inputDisabled}
                 >
-                  <Input.Password placeholder="请输入" />
+                  <Input.Password
+                    placeholder="请输入"
+                    autoComplete="new-password"
+                  />
                 </FormItem>
               </div>
             )}

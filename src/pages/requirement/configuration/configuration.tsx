@@ -494,7 +494,7 @@ export default function RequirementConfig() {
   const handleChildData = (data: any, key) => {
     const newSetDataContent = data?.map((item) => {
       return {
-        dir_name: String(key),
+        dir_name: item?.dir_name || String(key), // 优先使用数据自身的 dir_name
         load_start_time: convertToUTCFormat(item?.start_time),
         load_end_time: convertToUTCFormat(item?.end_time),
         load_num: item?.load_num,
@@ -529,6 +529,9 @@ export default function RequirementConfig() {
       label_type_code: annotationTypeContentCode
     });
   };
+  useEffect(() => {
+    setSelectedData([]);
+  }, [annotationTypeVal]);
   // 有必填信息没输入
   const errorInfoContent = () => {
     return Message.error('请输入必填信息');
@@ -979,7 +982,7 @@ export default function RequirementConfig() {
               >
                 <Input
                   placeholder="请输入需求名称"
-                  style={{ width: 900 }}
+                  style={{ width: 640 }}
                   showWordLimit
                   maxLength={50}
                 />
@@ -1004,7 +1007,7 @@ export default function RequirementConfig() {
               >
                 <TextArea
                   placeholder="请输入描述内容"
-                  style={{ width: 900 }}
+                  style={{ width: 640 }}
                   showWordLimit
                   maxLength={200}
                 />
@@ -1078,7 +1081,23 @@ export default function RequirementConfig() {
                 initialValue={1}
                 field="split_task_package"
                 label="拆分任务包:"
+                required
                 style={{ marginBottom: 24 }}
+                rules={[
+                  {
+                    required: true,
+                    type: 'number',
+                    validateTrigger: ['onChange', 'onBlur'],
+                    validator: (value, callback) => {
+                      if (!value) {
+                        callback('请输入拆分任务包数量');
+                      } else if (value < 1) {
+                        callback('拆分任务包数量不能小于1');
+                      }
+                      return true;
+                    }
+                  }
+                ]}
               >
                 {selectedData?.length === 0 ? (
                   <div className="data-content-set">
@@ -1116,13 +1135,14 @@ export default function RequirementConfig() {
                   <Select
                     allowClear
                     options={modelList}
-                    style={{ width: 900 }}
+                    style={{ width: 640 }}
                     placeholder="请选择预标注模型"
                   />
                 </FormItem>
               )}
             </Form>
             <DataSourceModal
+              key={annotationTypeVal}
               fileType={toolFileType[Number(annotationTypeVal)]}
               visible={modalVisible}
               type={type}

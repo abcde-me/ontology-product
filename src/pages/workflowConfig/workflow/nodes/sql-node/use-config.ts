@@ -20,7 +20,7 @@ export default function useConfig(id: string, payload: SQLNodeConfig) {
       newInputs = {
         ...newInputs,
         ...value,
-        task_priority: value.task_priority.toString(),
+        fail_retry_interval: value.fail_retry_interval.toString(),
         fail_retry_times: value.fail_retry_times.toString()
       };
       setInputs(newInputs);

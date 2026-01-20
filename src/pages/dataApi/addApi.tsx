@@ -87,12 +87,14 @@ export default function AddApi() {
   const [testModalVisible, setTestModalVisible] = useState<boolean>(false);
   const [testModalDataSource, setTestModalDataSource] = useState<string[]>([]);
   const [resultArray, setResultArray] = useState<string[]>([]);
+  const [limitCountValue, setLimitCountValue] = useState<number>(100);
   const [apiCacheMethod, setApiCacheMethod] = useState(0);
   const [isCanTest, setIsCanTest] = useState<boolean>(false);
   const [canComplete, setCanComplete] = useState<boolean>(false);
   const [expandedKeys, setExpandedKeys] = useState<string[]>([]);
 
   const [resizeSize, setResizeSize] = useState<string>('');
+  const [isSmallHeight, setIsSmallHeight] = useState<boolean>(false);
   const [paneContainersSize, setPaneContainersSize] = useState<string>('220px');
   const [treeData, setTreeData] = React.useState<TreeDataType[]>([]);
   const [isSearch, setIsSearch] = useState<boolean>(false);
@@ -281,11 +283,24 @@ export default function AddApi() {
     }
   }, [type, id]);
 
+  // 限制次数
+  useEffect(() => {
+    setLimitCountValue(
+      form.getFieldValue('limitCount')
+        ? Number(form.getFieldValue('limitCount'))
+        : 100
+    );
+  }, [form.getFieldValue('limitCount')]);
+
   // 兼容小屏样式
   useEffect(() => {
     const tabHeight = rightBoxRef.current?.offsetHeight
       ? rightBoxRef.current?.offsetHeight - 90
       : 590;
+    const isSmallHeight = rightBoxRef.current?.offsetHeight
+      ? rightBoxRef.current?.offsetHeight < 400
+      : false;
+    setIsSmallHeight(isSmallHeight);
     setResizeSize(`${tabHeight}px`);
   }, [current]);
 
@@ -316,7 +331,7 @@ export default function AddApi() {
       setResultData(res.data?.resultConfig || []);
       setApiCacheMethod(Number(res.data.cacheTime) > 0 ? 1 : 0);
       setActiveKey(['inputOutputParams']);
-      setResizeSize('190px');
+      setResizeSize(isSmallHeight ? '40px' : '190px');
       setIsOpen(true);
       setIsCanTest(true);
     } else {
@@ -338,7 +353,7 @@ export default function AddApi() {
     const params = {
       ...apiBaseInfo,
       limitTime: 60,
-      limitCount: Number(form.getFieldValue('limitCount')) || 100,
+      limitCount: limitCountValue || 100,
       cacheTime: getCacheTime(),
       databaseType: Number(form.getFieldValue('databaseType')) || 1,
       sql: value,
@@ -460,7 +475,7 @@ export default function AddApi() {
             treeNode.props.dataRef.children = res.data.map((item) => ({
               title: item.tableName,
               key: `${item.databaseName}_${item.tableName}_${item.id}`,
-              content: `${item.databaseName}.${item.tableName}`,
+              content: `${item.databaseName}\`.\`${item.tableName}`,
               children: [],
               isCanCopy: true
             }));
@@ -575,7 +590,7 @@ export default function AddApi() {
             key: `${databaseType}_${item.id}`,
             children: [],
             isCanCopy: true,
-            content: `${item.databaseName}.${item.tableName}`
+            content: `${item.databaseName}\`.\`${item.tableName}`
           };
           groupMap.get(databaseType).children.push(childNode);
         });
@@ -648,7 +663,7 @@ export default function AddApi() {
         setResultData(res.data.resultConfig || []);
 
         setActiveKey(['inputOutputParams']);
-        setResizeSize('190px');
+        setResizeSize(isSmallHeight ? '40px' : '190px');
         setIsOpen(true);
         setIsCanTest(true);
       }
@@ -711,9 +726,11 @@ export default function AddApi() {
         setActiveKey(keys);
         setResizeSize(
           isOpenNow
-            ? resultData.length > 0
-              ? `190px`
-              : `390px`
+            ? isSmallHeight
+              ? `40px`
+              : resultData.length > 0
+                ? `190px`
+                : `390px`
             : `${tabHeight}px`
         );
         setIsOpen(isOpenNow);
@@ -843,7 +860,11 @@ export default function AddApi() {
                   { validator: validateApiName }
                 ]}
               >
-                <Input placeholder="请输入API英文名称" />
+                <Input
+                  maxLength={30}
+                  showWordLimit
+                  placeholder="请输入API英文名称"
+                />
               </Form.Item>
               <Form.Item
                 label="API中文名称"
@@ -865,6 +886,8 @@ export default function AddApi() {
                 <Input
                   className={styles.apiPath}
                   placeholder="请输入端路径，以“/”开始"
+                  maxLength={40}
+                  showWordLimit
                   // addBefore={
                   //   <Input
                   //     placeholder="请输入环境路径"
@@ -901,24 +924,15 @@ export default function AddApi() {
               <Form.Item
                 label="最大速率"
                 field="limitCount"
-                initialValue={
-                  form.getFieldValue('limitCount')
-                    ? form.getFieldValue('limitCount')
-                    : 100
-                }
                 className={styles.inputNumber}
               >
                 <InputNumber
                   mode="button"
                   style={{ width: 160 }}
-                  defaultValue={
-                    form.getFieldValue('limitCount')
-                      ? form.getFieldValue('limitCount')
-                      : 100
-                  }
-                  min={0}
+                  value={limitCountValue}
+                  min={1}
                   max={100}
-                  onChange={(value) => form.setFieldValue('limitCount', value)}
+                  onChange={(value) => setLimitCountValue(value)}
                 />
                 次/分钟
               </Form.Item>
@@ -955,7 +969,9 @@ export default function AddApi() {
                         : 1
                     }
                     min={1}
-                    onChange={(value) => form.setFieldValue('cacheTime', value)}
+                    onChange={(value) => {
+                      form.setFieldValue('cacheTime', value);
+                    }}
                   />
                   秒
                 </Form.Item>
@@ -1030,8 +1046,9 @@ export default function AddApi() {
                             <Button
                               type="outline"
                               className={styles.insertOrCopyBtn}
-                              onClick={() => {
-                                console.log(nodeData, 'nodede');
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
                                 handleInsertClick(nodeData?.content as string);
                               }}
                               onMouseDown={(e) => {

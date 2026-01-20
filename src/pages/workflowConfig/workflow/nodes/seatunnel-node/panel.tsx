@@ -3,7 +3,8 @@ import {
   Input,
   Typography,
   Cascader,
-  Divider
+  Divider,
+  Tooltip
 } from '@arco-design/web-react';
 import React, { useEffect, useMemo, useRef } from 'react';
 import { NodePanelProps } from '@/pages/workflowConfig/workflow/types';
@@ -32,6 +33,7 @@ import {
   parseLocalParams,
   pickParamsFromSQL
 } from '@/pages/workflowConfig/utils';
+import { IconQuestionCircle } from '@arco-design/web-react/icon';
 
 const { Item: FormItem, useForm, List: FormList } = Form;
 
@@ -60,22 +62,12 @@ const loadConnectionTable = (pathValue?: React.Key[]) => {
   }
   return getdetailList({ id: pathValue[0] })
     .then((res) => {
-      const { config = {}, table_name = {} } = res.data || {};
-      if (isEmpty(config)) return [];
-      if (!config.database) return [];
       // 库主键为id，表主键为表名
-      return [
-        {
-          ...config,
-          label: config.database,
-          value: config.database,
-          children: table_name.map(({ title }) => ({
-            label: title,
-            value: title,
-            isLeaf: true
-          }))
-        }
-      ];
+      return res.data?.table_name.map(({ title }) => ({
+        label: title,
+        value: title,
+        isLeaf: true
+      }));
     })
     .catch(() => {
       return Promise.resolve([]);
@@ -206,11 +198,9 @@ export default React.memo(function SeatunnelPanel(
           const connection = targetData.find(
             ({ value }) => value === target_datasource_id
           );
-          const database = connection?.children?.[0]?.value;
-          formData.target_datasource_id =
-            isNil(connection) || isNil(database)
-              ? undefined
-              : [target_datasource_id, database, target_table_name];
+          formData.target_datasource_id = isNil(connection)
+            ? undefined
+            : [target_datasource_id, target_table_name];
         }
       }
       form.setFieldsValue(formData);
@@ -252,7 +242,7 @@ export default React.memo(function SeatunnelPanel(
         }}
       >
         <FormItem
-          label={'来源表:'}
+          label={'来源表：'}
           field={'source_database'}
           required
           rules={[
@@ -291,8 +281,21 @@ export default React.memo(function SeatunnelPanel(
           <FormItem
             field={'query'}
             dependencies={['source_database']}
-            label={'来源数据过滤:'}
-            tooltip={'编写带有引用参数的sql语句以增量查询和数据条件过滤'}
+            label={
+              <div className={'flex items-center justify-center'}>
+                来源数据过滤
+                <Tooltip
+                  content={'编写带有引用参数的sql语句以增量查询和数据条件过滤'}
+                >
+                  <IconQuestionCircle
+                    className={
+                      'mx-[2px] text-xs text-[#94A3B8] hover:cursor-pointer'
+                    }
+                  />
+                </Tooltip>
+                ：
+              </div>
+            }
           >
             <SqlEditor
               placeholder={
@@ -432,14 +435,13 @@ export default React.memo(function SeatunnelPanel(
             placeholder="请选择目标表"
             options={allConnections}
             onChange={(_, selectedOptions) => {
-              const [connector, database, table] = selectedOptions || [];
-              const { name, id } = connector as ConnectionItem;
+              const { name, id } = selectedOptions?.[0] || {};
+              const table = selectedOptions.at(-1);
               form.setFieldsValue({
                 target: {
                   target_datasource_id: id,
                   target_table_name: table.value,
-                  target_datasource_name: name,
-                  target_datasource_table: (database as DatabaseConfig).database
+                  target_datasource_name: name
                 }
               });
             }}

@@ -1,6 +1,6 @@
 import { Layout, Menu } from '@arco-design/web-react';
 import cn from 'classnames';
-import React, { useEffect, useMemo, useState, useRef } from 'react';
+import React, { useEffect, useMemo, useState, useRef, memo } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import { menus, type MenuModel } from './menus';
 import './sider.scss';
@@ -21,9 +21,10 @@ const hideSidebarPaths = [
 ];
 const collapseSidebarPaths = [];
 
-function LayoutWithSider({ children }) {
+export const LayoutWithSider = memo(function LayoutWithSider({ children }) {
   const { createPermissionFilter } = usePermission();
 
+  const [locSearch, setLocSearch] = useState('');
   const [collapsed, setCollapsed] = useState(false);
   const [showMenus, setShowMenus] = useState(menus);
   const { userMenus } = useUserInfoStore();
@@ -53,7 +54,10 @@ function LayoutWithSider({ children }) {
           if (path) {
             // 如果有查询参数匹配器，使用它来进一步判断
             if (menu.queryParamMatcher) {
-              if (menu.queryParamMatcher(location.search)) {
+              if (
+                menu.queryParamMatcher(location.search) ||
+                menu.queryParamMatcher(locSearch)
+              ) {
                 return [menu.key];
               }
               continue;
@@ -66,7 +70,15 @@ function LayoutWithSider({ children }) {
       return null;
     };
     return findMatch(showMenus);
-  }, [location.pathname, location.search, showMenus]);
+  }, [location.pathname, location.search, showMenus, locSearch]);
+
+  useEffect(() => {
+    const handler = () => {
+      setLocSearch(window.location.search);
+    };
+    window.addEventListener('locationchange', handler);
+    return () => window.removeEventListener('locationchange', handler);
+  }, []);
 
   const [openKeys, setopenKeys] = useState(actives || []);
 
@@ -87,7 +99,6 @@ function LayoutWithSider({ children }) {
       }
 
       lastClickPathRef.current = path;
-
       // 直接导航，不需要销毁 wujie 应用
       // operationCenter 页面会通过 useLocation 监听 URL 变化并自动重新加载
       history.push(path);
@@ -197,7 +208,7 @@ function LayoutWithSider({ children }) {
       {children}
     </Layout>
   );
-}
+});
 
 export function withSider(Content) {
   return function () {

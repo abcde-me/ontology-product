@@ -43,6 +43,12 @@ const SeatunnelNodeDefault: NodeDefault<SeatunnelConfig> = {
       errorMessages = '目标表不能为空';
     } else if (!field_mapping_list.length) {
       errorMessages = '请选择同步字段';
+    } else if (
+      field_mapping_list.some(({ target_field }) => {
+        return !target_field;
+      })
+    ) {
+      errorMessages = '目标字段不能为空';
     } else if (!primary_keys.length) {
       errorMessages = '主键不能为空';
     }

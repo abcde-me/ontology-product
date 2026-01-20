@@ -19,12 +19,14 @@ import { getWorkflowDetail } from '@/api/workflow';
  * 后端需要这个东西
  */
 function addRootEdges(nodes: Node[], edges: Edge[]): Edge[] {
+  // 先对连线数据进行清理，清除source为空的连线
+  const relations = edges.filter(({ source }) => !!source);
   // 1️⃣ 收集所有有入度的节点（target）
   const targetSet = new Set<string>();
 
-  for (const edge of edges) {
-    if (edge.target) {
-      targetSet.add(edge.target);
+  for (const relation of relations) {
+    if (relation.target) {
+      targetSet.add(relation.target);
     }
   }
   // 2️⃣ 找出没有上级节点的 node
@@ -41,7 +43,7 @@ function addRootEdges(nodes: Node[], edges: Edge[]): Edge[] {
   }
 
   // 3️⃣ 返回合并后的 edges
-  return edges.concat(newEdges);
+  return relations.concat(newEdges);
 }
 
 export const useNodesSyncDraft = () => {

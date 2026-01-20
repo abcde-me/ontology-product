@@ -101,7 +101,7 @@ export const useDevelopScriptManager = (
         const res = await listDevelopScript({
           script_name: searchValue,
           page: 1,
-          page_size: 1000
+          page_size: 9999
         });
 
         setIsLoading(false);
@@ -182,7 +182,7 @@ export const useDevelopScriptManager = (
       const rawSqlScriptListRes = await listDevelopScript({
         script_name: searchValue,
         page: 1,
-        page_size: 1000
+        page_size: 9999
       });
 
       if (rawSqlScriptListRes.status !== 200) {
@@ -256,6 +256,13 @@ export const useDevelopScriptManager = (
   const handleRename = useCallback(
     async (finalName: string, node: any) => {
       try {
+        if (!validateName(finalName).isValid) {
+          Message.error(
+            validateName(finalName)?.errorMessage ?? '命名不符合规则'
+          );
+          return;
+        }
+
         const scriptId = node?.dataRef?.script_id;
         const fileId = node?.dataRef?.id;
         const renameRes = await renameDevelopScript({
@@ -397,7 +404,7 @@ export const useDevelopScriptManager = (
       const res = await listDevelopScript({
         script_name: searchValue,
         page: 1,
-        page_size: 1000
+        page_size: 9999
       });
       return res?.data?.items ?? [];
     } catch (error) {
@@ -417,7 +424,7 @@ export const useDevelopScriptManager = (
       setIsLoading(true);
       const res = await listDevelopScript({
         page: 1,
-        page_size: 1000
+        page_size: 9999
       });
       return res?.data?.items || [];
     } catch (error) {
