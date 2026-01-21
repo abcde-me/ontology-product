@@ -176,6 +176,31 @@ export const routes: IRoute[] = [
       }
     ]
   },
+  // 本体场景库
+  {
+    name: 'ontologyScene',
+    key: '/tenant/compute/modaforge/ontologyScene',
+    component: React.lazy(async () => import('../../ontologyScene')),
+    permission: DATA_MANAGEMENT_PERMISSIONS.LIST,
+    children: [
+      {
+        name: 'ontologySceneList',
+        key: '/tenant/compute/modaforge/ontologyScene/list',
+        component: React.lazy(
+          async () => import('../../ontologyScene/modules/list/index')
+        ),
+        permission: DATA_MANAGEMENT_PERMISSIONS.LIST
+      },
+      {
+        name: 'ontologySceneCreate',
+        key: '/tenant/compute/modaforge/ontologyScene/detail',
+        component: React.lazy(
+          async () => import('../../ontologyScene/modules/detail/index')
+        ),
+        permission: DATA_MANAGEMENT_PERMISSIONS.LIST
+      }
+    ]
+  },
   //APIKey
   {
     name: 'apiKey',
