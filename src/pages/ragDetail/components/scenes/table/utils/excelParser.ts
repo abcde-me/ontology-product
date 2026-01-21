@@ -42,8 +42,21 @@ export const parseExcelFromBinary = (
       };
     }
 
-    // 计算最大列数
-    const maxCols = Math.max(...jsonData.map((row) => row.length), 0);
+    // 从工作表范围获取实际的列数，而不是依赖 jsonData
+    const range = worksheet['!ref'];
+    let maxCols = 0;
+
+    if (range) {
+      const rangeObj = XLSX.utils.decode_range(range);
+      maxCols = rangeObj.e.c + 1; // 结束列索引 + 1 = 总列数
+    } else {
+      // 如果没有范围信息，回退到计算最大列数
+      maxCols = Math.max(...jsonData.map((row) => row.length), 0);
+    }
+
+    console.log(
+      `Sheet: ${sheetName}, 实际列数: ${maxCols}, jsonData最大列数: ${Math.max(...jsonData.map((row) => row.length), 0)}`
+    );
 
     // 检查第一行是否有跨行的合并单元格
     // 如果有，说明第一行可能包含数据区域的合并单元格，不应该作为表头
@@ -55,9 +68,16 @@ export const parseExcelFromBinary = (
     // 否则，第一行作为表头
     const headerRowCount = hasFirstRowVerticalMerge ? 0 : 1;
 
-    // 提取表头行数据
+    // 提取表头行数据，确保填充到 maxCols 长度
     const headerRows =
-      headerRowCount > 0 ? jsonData.slice(0, headerRowCount) : [];
+      headerRowCount > 0
+        ? [
+            Array.from(
+              { length: maxCols },
+              (_, idx) => jsonData[0]?.[idx] ?? ''
+            )
+          ]
+        : [];
 
     // 使用第一行作为列标识（用于数据行的键）
     // 如果第一行是数据的一部分，使用列索引作为键
@@ -75,7 +95,7 @@ export const parseExcelFromBinary = (
     const dataStartRow = headerRowCount;
     const dataRows = jsonData.slice(dataStartRow);
 
-    // 将数据行转换为对象格式
+    // 将数据行转换为对象格式，确保每行都填充到 maxCols 长度
     const rows = dataRows.map((row, rowIndex) => {
       const rowObj: Record<string, string> = {};
       headers.forEach((header, idx) => {
