@@ -456,13 +456,14 @@ export default function WorkflowTaskDetail() {
       ...sortValue
     };
     const res = await getTaskDetailNode(params);
-    if (!res?.data) return;
+    if (!res?.data || !res.data.data_parse) return;
     if (isParseNode) {
-      setParseNodeData(res.data.data_parse);
+      const dataParse = res.data.data_parse ?? {};
+      setParseNodeData(dataParse);
       setPagination({
-        current: res.data.data_parse.page_info.page,
-        pageSize: res.data.data_parse.page_info.page_size,
-        total: res.data.data_parse.page_info.total
+        current: Number(dataParse.page_info?.page ?? 1),
+        pageSize: Number(dataParse.page_info?.page_size ?? 10),
+        total: Number(dataParse.page_info?.total ?? 0)
       });
     } else if (activeNodeType === NodeType.scripting) {
       setScriptingNodeData(res.data.data_scripting);

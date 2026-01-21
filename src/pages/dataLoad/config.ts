@@ -3,7 +3,8 @@ export enum RunState {
   FAILURE = 'FAILURE',
   RUNNING = 'RUNNING_EXECUTION',
   STOPPED = 'STOP',
-  FAILED = 'FAILED'
+  FAILED = 'FAILED',
+  SAVED = 'SAVED'
 }
 
 export const RunStateType = {
@@ -31,6 +32,11 @@ export const RunStateType = {
     text: '运行失败',
     value: 'FAILED',
     color: '#EF4444'
+  },
+  [RunState.SAVED]: {
+    text: '未运行',
+    value: 'SAVED',
+    color: '#94A3B8'
   }
 };
 export enum Load {
