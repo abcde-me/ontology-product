@@ -344,6 +344,9 @@ export interface RagDetailState {
   documentName: string; // 文件名称（来自API）
   datasetName: string; // 数据集名称（来自URL）
   documentFormat: string; // 文件格式（来自API，对应sceneType）
+  // Scroll trigger state - 使用 store 代替 CustomEvent
+  scrollToSegmentId: string | null; // 需要滚动到的分段ID
+  scrollToSegmentTimestamp: number; // 滚动触发时间戳，用于触发 useEffect
 }
 
 export interface RagDetailActions {
@@ -371,6 +374,7 @@ export interface RagDetailActions {
   setError: (error: string | null) => void;
   setSelectedSegmentId: (segmentId: string | null) => void;
   scrollToSegment: (segmentId: string) => void;
+  clearScrollToSegment: () => void; // 新增：清除滚动状态
   // Segment Drawer actions
   openSegmentDrawer: (segmentId: string, tab: 'detail' | 'trace') => void;
   closeSegmentDrawer: () => void;
