@@ -5,7 +5,12 @@ import { useHistory, useLocation } from 'react-router-dom';
 import { menus, type MenuModel } from './menus';
 import './sider.scss';
 import { usePermission } from '@/hooks/usePermission';
-import { useUserInfoStore } from '@/store/userInfoStore';
+import { useUserInfo, useUserInfoStore } from '@/store/userInfoStore';
+import { ProjectSelect } from '@ceai-front/arco-material';
+import { GetProjOrg } from '@/api/modules/project';
+import { isSameArray } from '@/utils/array';
+import { setLocalStorage } from '@/utils/storage';
+import { ProjectIdKey } from '@/utils/const';
 
 const MenuItem = Menu.Item;
 const SubMenu = Menu.SubMenu;
@@ -31,6 +36,21 @@ export const LayoutWithSider = memo(function LayoutWithSider({ children }) {
 
   const history = useHistory();
   const location = useLocation();
+
+  // 从全局 store 获取用户信息
+  const userInfo = useUserInfo();
+  const { id: userId } = userInfo || {};
+  const {
+    clearUserInfo,
+    setUserActions,
+    projectId,
+    setProjectId,
+    isInitialized,
+    fetchUserInfo
+  } = useUserInfoStore();
+  const [projects, setProjects] = useState([]);
+  const FullStorageKey = useMemo(() => `${ProjectIdKey}${userId}`, [userId]);
+  const [value, setValue] = useState<string[] | undefined>([]);
 
   // 用于防抖的 ref
   const clickTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -182,6 +202,36 @@ export const LayoutWithSider = memo(function LayoutWithSider({ children }) {
     };
   }, []);
 
+  useEffect(() => {
+    const list = async () => {
+      const { data: result } = await GetProjOrg({});
+      const newResult = result.map((item) => ({
+        ...item,
+        name: item.title,
+        projectList: item.projectList.map((project) => ({
+          ...project,
+          name: project.title
+        }))
+      }));
+      console.log(newResult, 'newResult');
+      setProjects(newResult);
+    };
+
+    if (userInfo?.id) {
+      list();
+    }
+  }, [userInfo?.id]);
+
+  const changeProject = (value: string[]) => {
+    if (!userId || !userId.length) return;
+    if (isSameArray(value, projectId)) return;
+
+    setLocalStorage(FullStorageKey, value);
+    // 重置权限状态，这样下次初始化时会重新加载权限
+    setUserActions({ isAdmin: false, actions: null });
+    setProjectId(value);
+  };
+
   return (
     <Layout className="h-full flex-auto overflow-auto">
       {sidebarHidden ? null : (
@@ -193,6 +243,16 @@ export const LayoutWithSider = memo(function LayoutWithSider({ children }) {
             collapsed ? 'mr-[24px] !w-[44px] bg-white' : ''
           )}
         >
+          <ProjectSelect
+            style={{ width: 180, margin: 8 }}
+            treeData={projects}
+            value={value}
+            showAddButton={false}
+            onChange={(v) => {
+              console.log('🚀 ~ BasicDemo ~ v:', v);
+              v ? changeProject(v) : setValue([]);
+            }}
+          />
           <Menu
             className={'ai-menu'}
             selectedKeys={actives || []}
