@@ -105,7 +105,7 @@ export default function TaskNodeRunList() {
         page_size: pagination.pageSize || 10,
         keywords: formValues.keywords || '',
         state_list: formValues.state ? [formValues.state] : [],
-        trigger_type_list: filters?.command_type_name ?? [],
+        trigger_type_list: filters?.trigger_type_name ?? [],
         task_execute_type_list: filters?.task_execute_type_name ?? [],
         task_type: filters?.task_type_name ?? '',
         orders,
@@ -226,7 +226,7 @@ export default function TaskNodeRunList() {
       },
       {
         title: '运行类型',
-        dataIndex: 'command_type_name',
+        dataIndex: 'trigger_type_name',
         width: 120,
         filters: [
           {
