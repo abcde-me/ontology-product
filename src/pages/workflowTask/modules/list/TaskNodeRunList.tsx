@@ -226,7 +226,7 @@ export default function TaskNodeRunList() {
       },
       {
         title: '运行类型',
-        dataIndex: 'command_type_name',
+        dataIndex: 'trigger_type_name',
         width: 120,
         filters: [
           {
