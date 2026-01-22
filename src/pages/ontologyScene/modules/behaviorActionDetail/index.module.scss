@@ -1,0 +1,61 @@
+.behavior-action-detail {
+  background: white;
+  overflow: hidden;
+
+  .page-header {
+    padding: 24px;
+    font-family: PingFang SC;
+    font-weight: 600;
+    font-size: 20px;
+    line-height: 30px;
+    border-bottom: 1px solid #ebeef5;
+    flex-shrink: 0;
+  }
+
+  .page-body {
+    flex: 1;
+    overflow: auto;
+    padding: 0 24px 16px;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+
+    :global(.arco-form-label-item) {
+      width: 114px !important;
+      flex-basis: 114px !important;
+      flex-shrink: 0 !important;
+
+      label {
+        align-items: center;
+
+        &:after {
+          content: '：';
+          margin-left: 4px;
+        }
+      }
+    }
+
+    :global(.arco-form-item-wrapper) {
+      flex-basis: 640px !important;
+      max-width: 640px !important;
+    }
+
+    :global(.module-title) {
+      padding: 16px 0;
+      font-family: PingFang SC;
+      font-weight: 500;
+      font-size: 16px;
+      line-height: 24px;
+      color: #0f131f;
+    }
+  }
+
+  .page-footer {
+    padding: 20px 24px;
+    gap: 10px;
+    flex-shrink: 0;
+    border-top: 1px solid #ebeef5;
+    display: flex;
+  }
+}

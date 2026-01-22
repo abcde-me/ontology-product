@@ -13,6 +13,7 @@ import { useLocation, useHistory } from 'react-router-dom';
 import { updateQueryParams } from '@/utils/url';
 import cls from 'classnames';
 import Header from './components/Header';
+import BehaviorActionDetail from '@/pages/ontologyScene/modules/behaviorActionDetail';
 
 // 懒加载各个模块
 const OntologySceneGraph = lazy(() => import('../graph'));
@@ -20,6 +21,7 @@ const OntologySceneObjectType = lazy(() => import('../objectType'));
 const OntologySceneAttributes = lazy(() => import('../attributes'));
 const OntologySceneLinks = lazy(() => import('../links'));
 const OntologySceneBehaviorActions = lazy(() => import('../behaviorActions'));
+const BehaviorActionDetailPage = lazy(() => import('../behaviorActionDetail'));
 const OntologySceneFunctions = lazy(() => import('../functions'));
 const OntologySceneBehaviorLog = lazy(() => import('../behaviorLog'));
 
@@ -154,7 +156,7 @@ export default function OntologySceneDetail() {
       objectType: OntologySceneObjectType,
       attributes: OntologySceneAttributes,
       links: OntologySceneLinks,
-      behaviorActions: OntologySceneBehaviorActions,
+      behaviorActions: BehaviorActionDetailPage,
       functions: OntologySceneFunctions,
       behaviorLog: OntologySceneBehaviorLog
     };
