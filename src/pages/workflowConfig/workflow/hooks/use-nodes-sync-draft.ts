@@ -60,7 +60,7 @@ export const useNodesSyncDraft = () => {
   const appId = useParams('workflow_uuid');
   const dsAppId = useParams('ds_workflow_id');
   const workflowVersion = useParams('workflow_version');
-  const { type: flowType = 'no_struct' } =
+  const { type: flowType = 'noStruct' } =
     useRouterParams<Record<string, string>>();
   const getPostParams = useCallback(() => {
     const { getNodes, edges, transform } = store.getState();
