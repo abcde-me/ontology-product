@@ -1831,6 +1831,11 @@ const DatasetManagement: React.FC = () => {
           paddingTop: '20px',
           backgroundColor: `${isHiddenBaseInfo ? 'unset' : '#f0f6fe'} `
         }}
+        addButton={
+          <Tooltip content="新建场景分类">
+            <IconPlus />
+          </Tooltip>
+        }
         type="card"
         activeTab={activeTab}
         onAddTab={() => setAddSceneTypeVisible(true)}
@@ -1864,24 +1869,28 @@ const DatasetManagement: React.FC = () => {
                   <div className="flex items-center justify-between">
                     <span className="text-[14px]">{item.description}</span>
                     <div className="flex items-center gap-2">
-                      <IconEdit
-                        className="cursor-pointer"
-                        onClick={() => {
-                          sceneTypeForm.setFieldsValue({
-                            sceneTypeName: item.name,
-                            sceneTypeDesc: item.description,
-                            sceneTypeTag: item.tags
-                          });
-                          setIsEdit(true);
-                          setEditSceneId(item.id);
-                          setAddSceneTypeVisible(true);
-                        }}
-                      />
-                      {item.type === 'user' && (
-                        <IconDelete
+                      <Tooltip content="编辑">
+                        <IconEdit
                           className="cursor-pointer"
-                          onClick={() => handleDeleteScene(item.id)}
+                          onClick={() => {
+                            sceneTypeForm.setFieldsValue({
+                              sceneTypeName: item.name,
+                              sceneTypeDesc: item.description,
+                              sceneTypeTag: item.tags
+                            });
+                            setIsEdit(true);
+                            setEditSceneId(item.id);
+                            setAddSceneTypeVisible(true);
+                          }}
                         />
+                      </Tooltip>
+                      {item.type === 'user' && (
+                        <Tooltip content="删除">
+                          <IconDelete
+                            className="cursor-pointer"
+                            onClick={() => handleDeleteScene(item.id)}
+                          />
+                        </Tooltip>
                       )}
                     </div>
                   </div>
