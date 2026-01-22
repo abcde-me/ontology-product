@@ -198,80 +198,6 @@ export const routes: IRoute[] = [
           async () => import('../../ontologyScene/modules/detail/index')
         ),
         permission: DATA_MANAGEMENT_PERMISSIONS.LIST
-        // children: [
-        //   // 本体图谱
-        //   {
-        //     name: 'ontologySceneGraph',
-        //     key: '/tenant/compute/modaforge/ontologyScene/detail/:id/graph',
-        //     component: React.lazy(
-        //       async () => import('../../ontologyScene/modules/graph/index')
-        //     ),
-        //     permission: DATA_MANAGEMENT_PERMISSIONS.LIST
-        //   },
-        //   // 对象类型
-        //   {
-        //     name: 'ontologySceneObjectType',
-        //     key: '/tenant/compute/modaforge/ontologyScene/detail/:id/objectType',
-        //     component: React.lazy(
-        //       async () => import('../../ontologyScene/modules/objectType/index')
-        //     ),
-        //     permission: DATA_MANAGEMENT_PERMISSIONS.LIST
-        //   },
-        //   // 属性
-        //   {
-        //     name: 'ontologySceneAttributes',
-        //     key: '/tenant/compute/modaforge/ontologyScene/detail/:id/attributes',
-        //     component: React.lazy(
-        //       async () => import('../../ontologyScene/modules/attributes/index')
-        //     ),
-        //     permission: DATA_MANAGEMENT_PERMISSIONS.LIST
-        //   },
-        //   // 链接
-        //   {
-        //     name: 'ontologySceneLinks',
-        //     key: '/tenant/compute/modaforge/ontologyScene/detail/:id/links',
-        //     component: React.lazy(
-        //       async () => import('../../ontologyScene/modules/links/index')
-        //     ),
-        //     permission: DATA_MANAGEMENT_PERMISSIONS.LIST
-        //   },
-        //   // 行为动作
-        //   {
-        //     name: 'ontologySceneBehaviorActions',
-        //     key: '/tenant/compute/modaforge/ontologyScene/detail/:id/behaviorActions',
-        //     component: React.lazy(
-        //       async () => import('../../ontologyScene/modules/behaviorActions/index')
-        //     ),
-        //     permission: DATA_MANAGEMENT_PERMISSIONS.LIST
-        //   },
-        //   // 函数
-        //   {
-        //     name: 'ontologySceneFunctions',
-        //     key: '/tenant/compute/modaforge/ontologyScene/detail/:id/functions',
-        //     component: React.lazy(
-        //       async () => import('../../ontologyScene/modules/functions/index')
-        //     ),
-        //     permission: DATA_MANAGEMENT_PERMISSIONS.LIST
-        //   },
-        //   // 行为日志
-        //   {
-        //     name: 'ontologySceneBehaviorLog',
-        //     key: '/tenant/compute/modaforge/ontologyScene/detail/:id/behaviorLog',
-        //     component: React.lazy(
-        //       async () => import('../../ontologyScene/modules/behaviorLog/index')
-        //     ),
-        //     permission: DATA_MANAGEMENT_PERMISSIONS.LIST
-        //   },
-        //   // 本体测试
-        //   {
-        //     name: 'ontologySceneTest',
-        //     key: '/tenant/compute/modaforge/ontologyScene/detail/:id/test',
-        //     component: React.lazy(
-        //       async () => import('../../ontologyScene/modules/test/index')
-        //     ),
-        //     permission: DATA_MANAGEMENT_PERMISSIONS.LIST
-        //   }
-        // ]
       }
     ]
   },
@@ -335,14 +261,6 @@ export const routes: IRoute[] = [
         ),
         permission: DATA_CATALOG_PERMISSIONS.LIST
       }
-      // {
-      //   name: 'dataAssetEdit',
-      //   key: '/tenant/compute/modaforge/dataAsset/edit/:id',
-      //   component: React.lazy(
-      //     async () => import('../../dataAsset/modules/edit')
-      //   ),
-      //   permission: DATA_MANAGEMENT_PERMISSIONS.LIST
-      // }
     ]
   },
   // 数据集详情 (需要在数据集管理之前匹配)

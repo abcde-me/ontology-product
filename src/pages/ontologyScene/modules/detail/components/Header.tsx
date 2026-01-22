@@ -39,7 +39,7 @@ export default function Header({
   const [searchValue, setSearchValue] = useState('');
 
   const handleBack = () => {
-    history.goBack();
+    history.push('/tenant/compute/modaforge/ontologyScene/list');
   };
 
   const handleEdit = () => {
