@@ -13,6 +13,9 @@ import { useLocation, useHistory } from 'react-router-dom';
 import { updateQueryParams } from '@/utils/url';
 import cls from 'classnames';
 import Header from './components/Header';
+import { MENU_GROUP_KEYS, MENU_ITEM_KEYS } from '../../common/constants';
+import styles from './index.module.scss';
+import DataApi from '@/assets/sider/data-api.svg';
 
 // 懒加载各个模块
 const OntologySceneGraph = lazy(() => import('../graph'));
@@ -33,7 +36,7 @@ export default function OntologySceneDetail() {
   // 从URL参数中获取activeTab作为初始值
   const getInitialActiveTab = () => {
     const searchParams = new URLSearchParams(location.search);
-    return searchParams.get('activeTab') || 'graph';
+    return searchParams.get('activeTab') || MENU_ITEM_KEYS.GRAPH;
   };
 
   const [activeTab, setActiveTab] = useState(getInitialActiveTab);
@@ -52,57 +55,57 @@ export default function OntologySceneDetail() {
   const menuData = [
     {
       title: '实体与关系',
-      key: 'entities',
+      key: MENU_GROUP_KEYS.ENTITIES,
       type: 'group',
       children: [
         {
-          key: 'graph',
+          key: MENU_ITEM_KEYS.GRAPH,
           title: '本体图谱',
-          icon: <IconApps />
+          icon: <IconApps fontSize={20} />
         },
         {
-          key: 'objectType',
+          key: MENU_ITEM_KEYS.OBJECT_TYPE,
           title: '对象类型',
-          icon: <IconSettings />
+          icon: <IconSettings fontSize={20} />
         },
         {
-          key: 'attributes',
+          key: MENU_ITEM_KEYS.ATTRIBUTES,
           title: '属性',
-          icon: <IconSettings />
+          icon: <IconSettings fontSize={20} />
         },
         {
-          key: 'links',
+          key: MENU_ITEM_KEYS.LINKS,
           title: '链接',
-          icon: <IconLink />
+          icon: <IconLink fontSize={20} />
         }
       ]
     },
     {
       title: '逻辑与行为',
-      key: 'logic',
+      key: MENU_GROUP_KEYS.LOGIC,
       type: 'group',
       children: [
         {
-          key: 'behaviorActions',
+          key: MENU_ITEM_KEYS.BEHAVIOR_ACTIONS,
           title: '行为动作',
-          icon: <IconThunderbolt />
+          icon: <IconThunderbolt fontSize={20} />
         },
         {
-          key: 'functions',
+          key: MENU_ITEM_KEYS.FUNCTIONS,
           title: '函数',
-          icon: <IconCode />
+          icon: <IconCode fontSize={20} />
         }
       ]
     },
     {
       title: '运行与调试',
-      key: 'debug',
+      key: MENU_GROUP_KEYS.DEBUG,
       type: 'group',
       children: [
         {
-          key: 'behaviorLog',
+          key: MENU_ITEM_KEYS.BEHAVIOR_LOG,
           title: '行为日志',
-          icon: <IconFile />
+          icon: <IconFile fontSize={20} />
         }
       ]
     }
@@ -150,13 +153,13 @@ export default function OntologySceneDetail() {
       string,
       React.LazyExoticComponent<React.ComponentType<any>>
     > = {
-      graph: OntologySceneGraph,
-      objectType: OntologySceneObjectType,
-      attributes: OntologySceneAttributes,
-      links: OntologySceneLinks,
-      behaviorActions: OntologySceneBehaviorActions,
-      functions: OntologySceneFunctions,
-      behaviorLog: OntologySceneBehaviorLog
+      [MENU_ITEM_KEYS.GRAPH]: OntologySceneGraph,
+      [MENU_ITEM_KEYS.OBJECT_TYPE]: OntologySceneObjectType,
+      [MENU_ITEM_KEYS.ATTRIBUTES]: OntologySceneAttributes,
+      [MENU_ITEM_KEYS.LINKS]: OntologySceneLinks,
+      [MENU_ITEM_KEYS.BEHAVIOR_ACTIONS]: OntologySceneBehaviorActions,
+      [MENU_ITEM_KEYS.FUNCTIONS]: OntologySceneFunctions,
+      [MENU_ITEM_KEYS.BEHAVIOR_LOG]: OntologySceneBehaviorLog
     };
 
     const Component = componentMap[activeTab] || OntologySceneGraph;
@@ -175,45 +178,25 @@ export default function OntologySceneDetail() {
   };
 
   return (
-    <Layout className="h-full">
+    <Layout className={cls('h-full', styles['ontology-scene-detail'])}>
       <Header
         title={sceneTitle}
         status="未发布"
         onTitleEdit={handleTitleEdit}
         onPublish={handlePublish}
       />
-      <Layout>
-        <Layout.Sider
-          collapsed={collapsed}
-          onCollapse={setCollapsed}
+      <Layout className="flex flex-row">
+        <Menu
+          selectedKeys={[activeTab]}
           className={cls(
-            'relative border-r border-gray-200 bg-white',
-            collapsed && '!w-[64px]'
+            styles['ontology-scene-detail-menu'],
+            'max-w-[200px] border-r border-[var(--color-border-2)] bg-white'
           )}
-          width={240}
-          collapsible
-          trigger={null}
+          hasCollapseButton
         >
-          <div className="flex h-full flex-col">
-            <Menu
-              selectedKeys={[activeTab]}
-              className={cls('flex-1 border-none pb-[56px]')}
-              style={{ backgroundColor: 'transparent' }}
-            >
-              {renderMenu()}
-            </Menu>
+          {renderMenu()}
+        </Menu>
 
-            {/* 底部汉堡菜单 */}
-            <div className="absolute bottom-0 left-0 right-0 border-t border-gray-200 bg-white p-[12px]">
-              <div
-                className="flex cursor-pointer items-center justify-center"
-                onClick={() => setCollapsed(!collapsed)}
-              >
-                <IconMenu className="text-[20px] text-gray-600" />
-              </div>
-            </div>
-          </div>
-        </Layout.Sider>
         <Layout.Content className="bg-gray-50">
           {renderContent()}
         </Layout.Content>
