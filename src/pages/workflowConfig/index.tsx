@@ -21,7 +21,7 @@ function WorkflowConfig({ setHeight }) {
   const appId = useParams('workflow_uuid');
   const workflowVersion = useParams('workflow_version');
   const history = useHistory();
-  const { type: flowType = 'no_struct' } =
+  const { type: flowType = 'noStruct' } =
     useRouterParams<Record<string, string>>();
 
   useEffect(() => {

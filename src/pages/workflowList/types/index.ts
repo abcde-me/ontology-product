@@ -82,7 +82,7 @@ export interface WorkFlowItem {
   /**
    * 工作流类型
    * struct 结构化
-   * no_struct 非结构化
+   * noStruct 非结构化
    */
   workflow_type: string;
   /**
@@ -173,7 +173,7 @@ export const FLOW_TYPE_INFO = [
   {
     title: '非结构化',
     subTitle: '数据治理',
-    type: 'no_struct'
+    type: 'noStruct'
   }
 ];
 
