@@ -1064,6 +1064,7 @@ const DatasetManagement: React.FC = () => {
       }
       setAddSceneTypeVisible(false);
     }
+    sceneTypeForm.resetFields();
   };
 
   // 移动数据集提交
@@ -2137,7 +2138,10 @@ const DatasetManagement: React.FC = () => {
         className={styles.addSceneTypeModal}
         visible={addSceneTypeVisible}
         onOk={() => sceneTypeForm.submit()}
-        onCancel={() => setAddSceneTypeVisible(false)}
+        onCancel={() => {
+          sceneTypeForm.resetFields();
+          setAddSceneTypeVisible(false);
+        }}
         title="新增场景类型"
       >
         <Form form={sceneTypeForm} onSubmit={handleAddSceneTypeSubmit}>
