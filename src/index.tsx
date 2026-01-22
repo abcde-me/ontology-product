@@ -94,7 +94,8 @@ const hiddenTopBarRoutes = [
   '/tenant/compute/modaforge/agentCreate',
   '/tenant/compute/modaforge/labelEditor',
   '/tenant/compute/modaforge/ragDetail',
-  '/tenant/compute/modaforge/compareFileData'
+  '/tenant/compute/modaforge/compareFileData',
+  '/tenant/compute/modaforge/ontologyScene/detail'
 ];
 
 /**

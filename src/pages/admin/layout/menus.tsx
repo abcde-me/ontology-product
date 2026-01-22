@@ -216,6 +216,20 @@ export const menus: MenuModel[] = [
   },
   {
     type: 'itemGroup',
+    title: '本体管理',
+    key: 'OntologyManagement',
+    children: [
+      {
+        title: '本体场景库',
+        icon: <DataMarket className={iconClass} />,
+        key: 'OntologySceneLibrary',
+        path: '/tenant/compute/modaforge/ontologyScene',
+        permission: DATA_MANAGEMENT_PERMISSIONS.LIST
+      }
+    ]
+  },
+  {
+    type: 'itemGroup',
     title: '数据管理',
     key: 'DataManagement',
     children: [
