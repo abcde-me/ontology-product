@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Layout, Menu } from '@arco-design/web-react';
+import React, { useState, useEffect, Suspense, lazy } from 'react';
+import { Layout, Menu, Spin } from '@arco-design/web-react';
 import {
   IconApps,
   IconSettings,
@@ -9,16 +9,45 @@ import {
   IconFile,
   IconMenu
 } from '@arco-design/web-react/icon';
+import { useLocation, useHistory } from 'react-router-dom';
+import { updateQueryParams } from '@/utils/url';
 import cls from 'classnames';
 import Header from './components/Header';
+
+// 懒加载各个模块
+const OntologySceneGraph = lazy(() => import('../graph'));
+const OntologySceneObjectType = lazy(() => import('../objectType'));
+const OntologySceneAttributes = lazy(() => import('../attributes'));
+const OntologySceneLinks = lazy(() => import('../links'));
+const OntologySceneBehaviorActions = lazy(() => import('../behaviorActions'));
+const OntologySceneFunctions = lazy(() => import('../functions'));
+const OntologySceneBehaviorLog = lazy(() => import('../behaviorLog'));
 
 const MenuItem = Menu.Item;
 const MenuGroup = Menu.ItemGroup;
 
 export default function OntologySceneDetail() {
-  const [selectedMenuKey, setSelectedMenuKey] = useState('ontologyGraph');
+  const location = useLocation();
+  const history = useHistory();
+
+  // 从URL参数中获取activeTab作为初始值
+  const getInitialActiveTab = () => {
+    const searchParams = new URLSearchParams(location.search);
+    return searchParams.get('activeTab') || 'graph';
+  };
+
+  const [activeTab, setActiveTab] = useState(getInitialActiveTab);
   const [sceneTitle, setSceneTitle] = useState('新建本体场景');
   const [collapsed, setCollapsed] = useState(false);
+
+  // 从URL参数中获取activeTab并设置选中状态（监听URL变化）
+  useEffect(() => {
+    const searchParams = new URLSearchParams(location.search);
+    const activeTabFromUrl = searchParams.get('activeTab');
+    if (activeTabFromUrl) {
+      setActiveTab(activeTabFromUrl);
+    }
+  }, [location.search]);
 
   const menuData = [
     {
@@ -27,7 +56,7 @@ export default function OntologySceneDetail() {
       type: 'group',
       children: [
         {
-          key: 'ontologyGraph',
+          key: 'graph',
           title: '本体图谱',
           icon: <IconApps />
         },
@@ -80,7 +109,9 @@ export default function OntologySceneDetail() {
   ];
 
   const handleMenuSelect = (key: string) => {
-    setSelectedMenuKey(key);
+    setActiveTab(key);
+    // 更新URL参数
+    updateQueryParams(history, { activeTab: key });
   };
 
   const handleTitleEdit = (title: string) => {
@@ -113,6 +144,36 @@ export default function OntologySceneDetail() {
     });
   };
 
+  // 根据activeTab渲染对应的模块组件
+  const renderContent = () => {
+    const componentMap: Record<
+      string,
+      React.LazyExoticComponent<React.ComponentType<any>>
+    > = {
+      graph: OntologySceneGraph,
+      objectType: OntologySceneObjectType,
+      attributes: OntologySceneAttributes,
+      links: OntologySceneLinks,
+      behaviorActions: OntologySceneBehaviorActions,
+      functions: OntologySceneFunctions,
+      behaviorLog: OntologySceneBehaviorLog
+    };
+
+    const Component = componentMap[activeTab] || OntologySceneGraph;
+
+    return (
+      <Suspense
+        fallback={
+          <div className="flex h-full items-center justify-center">
+            <Spin />
+          </div>
+        }
+      >
+        <Component />
+      </Suspense>
+    );
+  };
+
   return (
     <Layout className="h-full">
       <Header
@@ -135,7 +196,7 @@ export default function OntologySceneDetail() {
         >
           <div className="flex h-full flex-col">
             <Menu
-              selectedKeys={[selectedMenuKey]}
+              selectedKeys={[activeTab]}
               className={cls('flex-1 border-none pb-[56px]')}
               style={{ backgroundColor: 'transparent' }}
             >
@@ -153,7 +214,9 @@ export default function OntologySceneDetail() {
             </div>
           </div>
         </Layout.Sider>
-        <Layout.Content className="bg-gray-50">Content</Layout.Content>
+        <Layout.Content className="bg-gray-50">
+          {renderContent()}
+        </Layout.Content>
       </Layout>
     </Layout>
   );
