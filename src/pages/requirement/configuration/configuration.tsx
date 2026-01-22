@@ -576,7 +576,10 @@ export default function RequirementConfig() {
         AnnotationTypeContentCode.TEXT_CLASSIFICATION ||
       annotationTypeContentVal ===
         AnnotationTypeContentCode.AUDIO_CLASSIFICATION ||
-      annotationTypeContentVal === AnnotationTypeContentCode.AUDIO_SPLIT
+      annotationTypeContentVal === AnnotationTypeContentCode.AUDIO_SPLIT ||
+      annotationTypeContentVal ===
+        AnnotationTypeContentCode.VIDEO_CLASSIFICATION ||
+      annotationTypeContentVal === AnnotationTypeContentCode.VIDEO_SPLIT
         ? formType
             .validate()
             .then(() => {
@@ -698,7 +701,10 @@ export default function RequirementConfig() {
           AnnotationTypeContentCode.TEXT_CLASSIFICATION ||
         annotationTypeContentCode ===
           AnnotationTypeContentCode.AUDIO_CLASSIFICATION ||
-        annotationTypeContentCode === AnnotationTypeContentCode.AUDIO_SPLIT
+        annotationTypeContentCode === AnnotationTypeContentCode.AUDIO_SPLIT ||
+        annotationTypeContentCode ===
+          AnnotationTypeContentCode.VIDEO_CLASSIFICATION ||
+        annotationTypeContentCode === AnnotationTypeContentCode.VIDEO_SPLIT
           ? generateTextFlData(text_fl_data, type)
           : [],
       label_data_set: selectedData,
@@ -713,7 +719,11 @@ export default function RequirementConfig() {
               annotationTypeContentCode !==
                 AnnotationTypeContentCode.AUDIO_CLASSIFICATION &&
               annotationTypeContentCode !==
-                AnnotationTypeContentCode.AUDIO_SPLIT
+                AnnotationTypeContentCode.AUDIO_SPLIT &&
+              annotationTypeContentCode !==
+                AnnotationTypeContentCode.VIDEO_CLASSIFICATION &&
+              annotationTypeContentCode !==
+                AnnotationTypeContentCode.VIDEO_SPLIT
             ? generateLabels(labelDataList, type)
             : [],
       entity_relations:
