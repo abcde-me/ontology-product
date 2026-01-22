@@ -13,7 +13,7 @@ import { useParams } from 'react-router-dom';
 
 export const useChecklist = (nodes: Node[], edges: Edge[]) => {
   const { t } = useTranslation('plugin__console-plugin-appforge');
-  const { type: flowType = 'no_struct' } = useParams<Record<string, string>>();
+  const { type: flowType = 'noStruct' } = useParams<Record<string, string>>();
   const language = useGetLanguage();
   const nodesExtraData = useNodesExtraData();
   const isChatMode = false;
@@ -64,7 +64,7 @@ export const useChecklist = (nodes: Node[], edges: Edge[]) => {
     if (
       !isChatMode &&
       !nodes.find((node) => node.data.type === BlockEnum.End) &&
-      flowType === 'no_struct'
+      flowType === 'noStruct'
     ) {
       // @ts-expect-error
       list.push({
@@ -102,7 +102,7 @@ export const useChecklistBeforePublish = () => {
   const nodesExtraData = useNodesExtraData();
   // const { data: strategyProviders } = useStrategyProviders()
   const strategyProviders = [] as any;
-  const { type: flowType = 'no_struct' } = useParams<Record<string, string>>();
+  const { type: flowType = 'noStruct' } = useParams<Record<string, string>>();
 
   const handleCheckBeforePublish = useCallback(() => {
     const { getNodes, edges } = store.getState();
@@ -150,7 +150,7 @@ export const useChecklistBeforePublish = () => {
 
     if (
       !nodes.find((node) => node.data.type === BlockEnum.End) &&
-      flowType === 'no_struct'
+      flowType === 'noStruct'
     ) {
       notify({ type: 'error', message: t('workflow.common.needEndNode') });
       return false;

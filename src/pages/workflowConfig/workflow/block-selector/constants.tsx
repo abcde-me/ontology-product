@@ -79,6 +79,6 @@ export const BLOCK_CLASSIFICATIONS: string[] = [
  * 后续可能会有其他扩展
  */
 export const FLOW_TYPE2BLOCKS_CONF: Record<string, Block[]> = {
-  no_struct: BLOCKS,
+  noStruct: BLOCKS,
   struct: STRUCTURED_NODES
 };

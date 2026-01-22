@@ -105,7 +105,7 @@ const Workflow: FC<WorkflowProps> = memo(
 
     // 作业详情不需要显示 其他正常显示
     const location = useLocation(); // 获取当前路由信息
-    const { type: flowType = 'no_struct' } =
+    const { type: flowType = 'noStruct' } =
       useRouterParams<Record<string, string>>();
 
     const isShowChatMode = location.pathname.includes('workflowTask/detail');
