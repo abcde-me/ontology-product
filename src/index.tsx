@@ -103,7 +103,8 @@ const hiddenTopBarRoutes = [
  * 路由配置类似：/a/b/:c
  */
 const hiddenTopBarRouterParamsRouteKeyWords = [
-  'tenant/compute/modaforge/workflowConfig'
+  'tenant/compute/modaforge/workflowConfig',
+  'tenant/compute/modaforge/ontologyScene/detail'
 ];
 
 function App() {
