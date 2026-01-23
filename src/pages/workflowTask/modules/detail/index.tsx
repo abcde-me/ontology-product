@@ -155,8 +155,8 @@ export default function WorkflowTaskDetail() {
     sort_by: ''
   });
   const workflowUuid = useQueryParams('workflow_uuid') ?? '';
-  const workflowVersion = useQueryParams('workflow_version') ?? '';
   const workflowId = useQueryParams('ds_workflow_id') ?? '';
+  const workflowVersion = useQueryParams('workflow_version') ?? '';
   const workflowType = useQueryParams('workflow_type') ?? WorkflowType.STRUCT;
 
   // TaskNodeList 组件的引用
@@ -598,7 +598,7 @@ export default function WorkflowTaskDetail() {
   };
   const handleClickWorkflow = () => {
     openNewPage(
-      `/modaforge/tenant/compute/modaforge/workflowConfig/${workflowType}?workflow_uuid=${workflowUuid}&ds_workflow_id=${workflowId}&workflow_version=${workflowVersion}`
+      `/modaforge/tenant/compute/modaforge/workflowConfig/${workflowType === 'struct' ? 'struct' : 'noStruct'}?workflow_uuid=${workflowUuid}&ds_workflow_id=${workflowId}&workflow_version=${workflowVersion}`
     );
   };
 
@@ -618,6 +618,7 @@ export default function WorkflowTaskDetail() {
           >
             作业详情
           </BreadcrumbItem>
+          ```
           <BreadcrumbItem>{taskId}</BreadcrumbItem>
         </Breadcrumb>
       </div>

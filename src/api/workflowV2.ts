@@ -84,7 +84,8 @@ export async function createWorkflowDraft(params: any = {}) {
       workflow_uuid: workflowUUID,
       ds_workflow_id: dsWorkflowId,
       workflow_version: workflowVersion,
-      ...(params ?? {})
+      ...(params ?? {}),
+      workflow_type: params.workflow_type === 'struct' ? 'struct' : 'no_struct'
     })
     .inRegion()
     .do();

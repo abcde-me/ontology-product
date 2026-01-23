@@ -77,7 +77,7 @@ export default function TaskNodeRunList() {
 
   // 跳转到工作流配置页面
   const handleWorkflowConfig = useCallback((record: TaskNodeItem) => {
-    const url = `/modaforge/tenant/compute/modaforge/workflowConfig/${record.workflow_type || 'struct'}`;
+    const url = `/modaforge/tenant/compute/modaforge/workflowConfig/${record.workflow_type === 'struct' ? 'struct' : 'noStruct'}`;
     const queryParams = `?workflow_uuid=${record.workflow_uuid}&ds_workflow_id=${record.process_definition_code}&workflow_version=${record.workflow_version}`;
     openNewPage(`${url}${queryParams}`);
   }, []);
