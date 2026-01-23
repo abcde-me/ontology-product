@@ -78,7 +78,7 @@ export const useNodesInteractions = () => {
   const { handleSetHelpline } = useHelpline();
   const workflow_uuid = useSearchParam('workflow_uuid');
   const { doSyncWorkflowDraft } = useNodesSyncDraft();
-  const { type: flowType = 'noStruct' } = useParams<Record<string, string>>();
+  const { type: flowType = 'no_struct' } = useParams<Record<string, string>>();
   const userInfo = useUserInfo();
   const { setNodesProcessDetail, nodesProcessDetail } = useTaskStore(
     useShallow((state) => ({

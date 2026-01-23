@@ -6,9 +6,9 @@ import { useMemo } from 'react';
 
 export const useBlocks = () => {
   const { t } = useTranslation('plugin__console-plugin-appforge');
-  const { type: flowType = 'noStruct' } = useParams<Record<string, string>>();
+  const { type: flowType = 'no_struct' } = useParams<Record<string, string>>();
   const allBlocks = useMemo(() => {
-    return FLOW_TYPE2BLOCKS_CONF[flowType || 'noStruct'];
+    return FLOW_TYPE2BLOCKS_CONF[flowType || 'no_struct'];
   }, [flowType]);
   return allBlocks;
 };

@@ -87,9 +87,9 @@ export function StructuredWorkflowList() {
 
   // 查看详情
   const viewDetailWorkflow = (flow: WorkFlowItem) => {
-    const { workflow_uuid, workflow_type = 'noStruct', code } = flow;
+    const { workflow_uuid, workflow_type = 'no_struct', code } = flow;
     openNewPage(
-      `/modaforge/tenant/compute/modaforge/workflowConfig/${workflow_type === 'struct' ? 'struct' : 'noStruct'}?workflow_uuid=${workflow_uuid}&ds_workflow_id=${code}`
+      `/modaforge/tenant/compute/modaforge/workflowConfig/${workflow_type}?workflow_uuid=${workflow_uuid}&ds_workflow_id=${code}`
     );
   };
 

@@ -8,11 +8,7 @@ import React, {
   useState
 } from 'react';
 import { setAutoFreeze } from 'immer';
-import {
-  useHistory,
-  useLocation,
-  useParams as useRouterParams
-} from 'react-router-dom';
+import { useLocation, useParams as useRouterParams } from 'react-router-dom';
 import { useEventListener } from 'ahooks';
 import ReactFlow, {
   Background,
@@ -79,9 +75,6 @@ import Confirm from '@/pages/workflowConfig/components/confirm';
 import { FILE_EXTS } from '@/pages/workflowConfig/components/prompt-editor/constants';
 import fileUploadConfigJson from '@/pages/workflowConfig/mockData/fileUploadConfig.json';
 import useInitFlowTestTask from '@/pages/workflowConfig/workflow/hooks/use-init-flow-test-task';
-import { useParams as useQueryParams } from '@/utils/url';
-import { isNil } from 'lodash-es';
-import { getWorkflowDetail } from '@/api/workflow';
 
 const nodeTypes = {
   [CUSTOM_NODE]: CustomNode,
@@ -112,26 +105,8 @@ const Workflow: FC<WorkflowProps> = memo(
 
     // 作业详情不需要显示 其他正常显示
     const location = useLocation(); // 获取当前路由信息
-    const history = useHistory();
-    const { type: flowType } = useRouterParams<Record<string, string>>();
-    const workflowUuid = useQueryParams('workflow_uuid') ?? '';
-    const workflowId = useQueryParams('ds_workflow_id') ?? '';
-    const workflow_version = useQueryParams('workflow_version') ?? '';
-
-    useEffect(() => {
-      if (!workflowUuid || !workflowId) return;
-      if (isNil(flowType)) {
-        getWorkflowDetail({
-          workflow_uuid: workflowUuid,
-          workflow_version
-        }).then((res) => {
-          const { workflow_type } = res.data;
-          history.replace(
-            `/tenant/compute/modaforge/workflowConfig/${workflow_type === 'struct' ? 'struct' : 'noStruct'}?workflow_uuid=${workflowUuid}&ds_workflow_id=${workflowId}`
-          );
-        });
-      }
-    }, [flowType, workflowUuid, workflowId]);
+    const { type: flowType = 'no_struct' } =
+      useRouterParams<Record<string, string>>();
 
     const isShowChatMode = location.pathname.includes('workflowTask/detail');
     const {
