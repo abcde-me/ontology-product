@@ -2163,7 +2163,11 @@ const DatasetManagement: React.FC = () => {
               }))}
             />
           </Form.Item>
-          <Form.Item label="描述说明：" field="sceneTypeDesc">
+          <Form.Item
+            label="描述说明："
+            field="sceneTypeDesc"
+            rules={[{ required: true, message: '请输入描述说明' }]}
+          >
             <Input.TextArea placeholder="可以描述数据集的用途、特点或其他相关信息" />
           </Form.Item>
         </Form>
