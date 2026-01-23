@@ -1193,6 +1193,7 @@ const DatasetManagement: React.FC = () => {
       // 刷新数据列表
       fetchDatasetList();
       closeModal();
+      getSceneList();
 
       //获取标签
       const tagListRes = await getTagList();
