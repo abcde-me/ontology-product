@@ -63,7 +63,7 @@ const SuccessModal = ({ visible, params, onClose }) => {
       history.push('/tenant/compute/modaforge/workflowTask/list');
       return;
     }
-    const jumpUrl = `/tenant/compute/modaforge/workflowTask/detail/${jobId}?workflow_type=${flowType === 'struct' ? 'struct' : 'no_struct'}&workflow_uuid=${workflow_uuid}&ds_workflow_id=${ds_workflow_id}&workflow_version=${workflow_version}`;
+    const jumpUrl = `/tenant/compute/modaforge/workflowTask/detail/${jobId}?workflow_type=${flowType}&workflow_uuid=${workflow_uuid}&ds_workflow_id=${ds_workflow_id}&workflow_version=${workflow_version}`;
     history.push(jumpUrl);
   };
 

@@ -102,7 +102,7 @@ export function StructuredWorkflowList() {
         content: '复制成功'
       });
       openNewPage(
-        `/modaforge/tenant/compute/modaforge/workflowConfig/${workflow_type === 'struct' ? 'struct' : 'noStruct'}?workflow_uuid=${res.data.workflow_uuid}&ds_workflow_id=${res.data.ds_workflow_id}`
+        `/modaforge/tenant/compute/modaforge/workflowConfig/${workflow_type}?workflow_uuid=${res.data.workflow_uuid}&ds_workflow_id=${res.data.ds_workflow_id}`
       );
     } else {
       Message.error({

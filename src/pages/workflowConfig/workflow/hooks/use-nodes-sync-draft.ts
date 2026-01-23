@@ -11,7 +11,7 @@ import { updateQueryParams, useParams } from '@/utils/url';
 import { useHistory } from 'react-router';
 import { flowIsStruct } from '@/pages/workflowConfig/workflow/utils';
 import { Message } from '@arco-design/web-react';
-import { useLocation, useParams as useRouterParams } from 'react-router-dom';
+import { useParams as useRouterParams } from 'react-router-dom';
 import { getWorkflowDetail } from '@/api/workflow';
 
 /**
@@ -127,11 +127,11 @@ export const useNodesSyncDraft = () => {
           environment_variables: environmentVariables,
           conversation_variables: conversationVariables,
           hash: syncWorkflowDraftHash,
-          workflow_type: flowType === 'struct' ? 'struct' : 'no_struct'
+          workflow_type: flowType
         }
       };
     }
-  }, [store, workflowStore, flowType]);
+  }, [store, workflowStore]);
 
   const syncWorkflowDraftWhenPageClose = useCallback(() => {
     if (getNodesReadOnly()) return;
@@ -143,14 +143,7 @@ export const useNodesSyncDraft = () => {
         // new Blob([JSON.stringify({...postParams.params, version: "draft"})], {type: 'application/json'})
       );
     }
-  }, [
-    getPostParams,
-    flowType,
-    appId,
-    dsAppId,
-    workflowVersion,
-    getNodesReadOnly
-  ]);
+  }, [getPostParams, appId, dsAppId, workflowVersion, getNodesReadOnly]);
 
   const doSyncWorkflowDraft = useCallback(
     async (
