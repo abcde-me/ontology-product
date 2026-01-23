@@ -194,7 +194,7 @@ export const routes: IRoute[] = [
       },
       {
         name: 'ontologySceneDetail',
-        key: '/tenant/compute/modaforge/ontologyScene/detail/:id',
+        key: '/tenant/compute/modaforge/ontologyScene/detail/:id/:moduleType?',
         component: React.lazy(
           async () => import('../../ontologyScene/modules/detail/index')
         ),
