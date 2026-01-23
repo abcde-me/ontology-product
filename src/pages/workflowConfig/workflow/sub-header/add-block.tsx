@@ -54,7 +54,7 @@ const AddBlock = ({ renderTrigger, offset }: AddBlockProps) => {
               : t(`workflow.blocks.${type}`),
           ...(toolDefaultValue || {}),
           _isCandidate: true,
-          flow_type: flowType
+          flow_type: flowType === 'struct' ? 'struct' : 'no_struct'
         },
         position: {
           x: 0,
@@ -65,7 +65,7 @@ const AddBlock = ({ renderTrigger, offset }: AddBlockProps) => {
         candidateNode: newNode
       });
     },
-    [store, workflowStore, t]
+    [store, workflowStore, t, flowType]
   );
 
   const renderTriggerElement = useCallback(
