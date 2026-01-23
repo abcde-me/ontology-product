@@ -1,21 +1,27 @@
-import React, { useState, useEffect, Suspense, lazy } from 'react';
-import { Layout, Menu, Spin } from '@arco-design/web-react';
+import React, { useState, Suspense, lazy } from 'react';
+import { Layout, Menu } from '@arco-design/web-react';
 import {
   IconApps,
   IconSettings,
   IconLink,
   IconThunderbolt,
   IconCode,
-  IconFile,
-  IconMenu
+  IconFile
 } from '@arco-design/web-react/icon';
-import { useLocation, useHistory } from 'react-router-dom';
-import { updateQueryParams } from '@/utils/url';
+import {
+  useHistory,
+  useParams,
+  useRouteMatch,
+  useLocation
+} from 'react-router-dom';
+import { Switch, Route, Redirect } from 'react-router';
 import cls from 'classnames';
 import Header from './components/Header';
-import { MENU_GROUP_KEYS, MENU_ITEM_KEYS } from '../../common/constants';
+import {
+  ONTOLOGY_SCENE_MENU_GROUP_KEYS,
+  ONTOLOGY_SCENE_MENU_ITEM_KEYS
+} from '@/common/constants';
 import styles from './index.module.scss';
-import DataApi from '@/assets/sider/data-api.svg';
 
 // 懒加载各个模块
 const OntologySceneGraph = lazy(() => import('../graph'));
@@ -30,51 +36,45 @@ const MenuItem = Menu.Item;
 const MenuGroup = Menu.ItemGroup;
 
 export default function OntologySceneDetail() {
-  const location = useLocation();
   const history = useHistory();
+  const location = useLocation();
+  const params = useParams<{ id: string }>();
+  const match = useRouteMatch();
 
-  // 从URL参数中获取activeTab作为初始值
-  const getInitialActiveTab = () => {
-    const searchParams = new URLSearchParams(location.search);
-    return searchParams.get('activeTab') || MENU_ITEM_KEYS.GRAPH;
-  };
-
-  const [activeTab, setActiveTab] = useState(getInitialActiveTab);
   const [sceneTitle, setSceneTitle] = useState('新建本体场景');
-  const [collapsed, setCollapsed] = useState(false);
 
-  // 从URL参数中获取activeTab并设置选中状态（监听URL变化）
-  useEffect(() => {
-    const searchParams = new URLSearchParams(location.search);
-    const activeTabFromUrl = searchParams.get('activeTab');
-    if (activeTabFromUrl) {
-      setActiveTab(activeTabFromUrl);
-    }
-  }, [location.search]);
+  // 从当前路径中提取子路由名称，用于菜单选中状态
+  const activeTab = React.useMemo(() => {
+    const pathname = location.pathname;
+    const routeMatch = pathname.match(
+      /\/tenant\/compute\/modaforge\/ontologyScene\/detail\/[^/]+\/([^/]+)$/
+    );
+    return routeMatch ? routeMatch[1] : ONTOLOGY_SCENE_MENU_ITEM_KEYS.GRAPH;
+  }, [location.pathname]);
 
   const menuData = [
     {
       title: '实体与关系',
-      key: MENU_GROUP_KEYS.ENTITIES,
+      key: ONTOLOGY_SCENE_MENU_GROUP_KEYS.ENTITIES,
       type: 'group',
       children: [
         {
-          key: MENU_ITEM_KEYS.GRAPH,
+          key: ONTOLOGY_SCENE_MENU_ITEM_KEYS.GRAPH,
           title: '本体图谱',
           icon: <IconApps fontSize={20} />
         },
         {
-          key: MENU_ITEM_KEYS.OBJECT_TYPE,
+          key: ONTOLOGY_SCENE_MENU_ITEM_KEYS.OBJECT_TYPE,
           title: '对象类型',
           icon: <IconSettings fontSize={20} />
         },
         {
-          key: MENU_ITEM_KEYS.ATTRIBUTES,
+          key: ONTOLOGY_SCENE_MENU_ITEM_KEYS.ATTRIBUTES,
           title: '属性',
           icon: <IconSettings fontSize={20} />
         },
         {
-          key: MENU_ITEM_KEYS.LINKS,
+          key: ONTOLOGY_SCENE_MENU_ITEM_KEYS.LINKS,
           title: '链接',
           icon: <IconLink fontSize={20} />
         }
@@ -82,16 +82,16 @@ export default function OntologySceneDetail() {
     },
     {
       title: '逻辑与行为',
-      key: MENU_GROUP_KEYS.LOGIC,
+      key: ONTOLOGY_SCENE_MENU_GROUP_KEYS.LOGIC,
       type: 'group',
       children: [
         {
-          key: MENU_ITEM_KEYS.BEHAVIOR_ACTIONS,
+          key: ONTOLOGY_SCENE_MENU_ITEM_KEYS.BEHAVIOR_ACTIONS,
           title: '行为动作',
           icon: <IconThunderbolt fontSize={20} />
         },
         {
-          key: MENU_ITEM_KEYS.FUNCTIONS,
+          key: ONTOLOGY_SCENE_MENU_ITEM_KEYS.FUNCTIONS,
           title: '函数',
           icon: <IconCode fontSize={20} />
         }
@@ -99,11 +99,11 @@ export default function OntologySceneDetail() {
     },
     {
       title: '运行与调试',
-      key: MENU_GROUP_KEYS.DEBUG,
+      key: ONTOLOGY_SCENE_MENU_GROUP_KEYS.DEBUG,
       type: 'group',
       children: [
         {
-          key: MENU_ITEM_KEYS.BEHAVIOR_LOG,
+          key: ONTOLOGY_SCENE_MENU_ITEM_KEYS.BEHAVIOR_LOG,
           title: '行为日志',
           icon: <IconFile fontSize={20} />
         }
@@ -112,9 +112,9 @@ export default function OntologySceneDetail() {
   ];
 
   const handleMenuSelect = (key: string) => {
-    setActiveTab(key);
-    // 更新URL参数
-    updateQueryParams(history, { activeTab: key });
+    // 导航到对应的子路由
+    const basePath = `${match.url}`;
+    history.push(`${basePath}/${key}`);
   };
 
   const handleTitleEdit = (title: string) => {
@@ -147,36 +147,6 @@ export default function OntologySceneDetail() {
     });
   };
 
-  // 根据activeTab渲染对应的模块组件
-  const renderContent = () => {
-    const componentMap: Record<
-      string,
-      React.LazyExoticComponent<React.ComponentType<any>>
-    > = {
-      [MENU_ITEM_KEYS.GRAPH]: OntologySceneGraph,
-      [MENU_ITEM_KEYS.OBJECT_TYPE]: OntologySceneObjectType,
-      [MENU_ITEM_KEYS.ATTRIBUTES]: OntologySceneAttributes,
-      [MENU_ITEM_KEYS.LINKS]: OntologySceneLinks,
-      [MENU_ITEM_KEYS.BEHAVIOR_ACTIONS]: OntologySceneBehaviorActions,
-      [MENU_ITEM_KEYS.FUNCTIONS]: OntologySceneFunctions,
-      [MENU_ITEM_KEYS.BEHAVIOR_LOG]: OntologySceneBehaviorLog
-    };
-
-    const Component = componentMap[activeTab] || OntologySceneGraph;
-
-    return (
-      <Suspense
-        fallback={
-          <div className="flex h-full items-center justify-center">
-            <Spin />
-          </div>
-        }
-      >
-        <Component />
-      </Suspense>
-    );
-  };
-
   return (
     <Layout className={cls('h-full', styles['ontology-scene-detail'])}>
       <Header
@@ -198,7 +168,49 @@ export default function OntologySceneDetail() {
         </Menu>
 
         <Layout.Content className="bg-gray-50">
-          {renderContent()}
+          <Suspense
+            fallback={
+              <div className="flex h-full items-center justify-center">
+                <div>加载中...</div>
+              </div>
+            }
+          >
+            <Switch>
+              <Redirect
+                exact
+                from={match.path}
+                to={`${match.url}/${ONTOLOGY_SCENE_MENU_ITEM_KEYS.GRAPH}`}
+              />
+              <Route
+                path={`${match.path}/${ONTOLOGY_SCENE_MENU_ITEM_KEYS.GRAPH}`}
+                component={OntologySceneGraph}
+              />
+              <Route
+                path={`${match.path}/${ONTOLOGY_SCENE_MENU_ITEM_KEYS.OBJECT_TYPE}`}
+                component={OntologySceneObjectType}
+              />
+              <Route
+                path={`${match.path}/${ONTOLOGY_SCENE_MENU_ITEM_KEYS.ATTRIBUTES}`}
+                component={OntologySceneAttributes}
+              />
+              <Route
+                path={`${match.path}/${ONTOLOGY_SCENE_MENU_ITEM_KEYS.LINKS}`}
+                component={OntologySceneLinks}
+              />
+              <Route
+                path={`${match.path}/${ONTOLOGY_SCENE_MENU_ITEM_KEYS.BEHAVIOR_ACTIONS}`}
+                component={OntologySceneBehaviorActions}
+              />
+              <Route
+                path={`${match.path}/${ONTOLOGY_SCENE_MENU_ITEM_KEYS.FUNCTIONS}`}
+                component={OntologySceneFunctions}
+              />
+              <Route
+                path={`${match.path}/${ONTOLOGY_SCENE_MENU_ITEM_KEYS.BEHAVIOR_LOG}`}
+                component={OntologySceneBehaviorLog}
+              />
+            </Switch>
+          </Suspense>
         </Layout.Content>
       </Layout>
     </Layout>

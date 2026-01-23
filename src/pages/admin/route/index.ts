@@ -23,6 +23,7 @@ import {
   METADATA_MANAGEMENT_PERMISSIONS,
   DATA_API_PERMISSIONS
 } from '@/config/permissions';
+import { ONTOLOGY_SCENE_MENU_ITEM_KEYS } from '@/common/constants';
 
 export type IRoute = AuthParams & {
   name: string;
@@ -198,11 +199,12 @@ export const routes: IRoute[] = [
           async () => import('../../ontologyScene/modules/detail/index')
         ),
         permission: DATA_MANAGEMENT_PERMISSIONS.LIST,
+        exact: false, // 设置为 false，以便匹配子路由
         children: [
           // 本体图谱
           {
             name: 'ontologySceneGraph',
-            key: '/tenant/compute/modaforge/ontologyScene/detail/:id/graph',
+            key: `/tenant/compute/modaforge/ontologyScene/detail/:id/${ONTOLOGY_SCENE_MENU_ITEM_KEYS.GRAPH}`,
             component: React.lazy(
               async () => import('../../ontologyScene/modules/graph/index')
             ),
@@ -211,7 +213,7 @@ export const routes: IRoute[] = [
           // 对象类型
           {
             name: 'ontologySceneObjectType',
-            key: '/tenant/compute/modaforge/ontologyScene/detail/:id/objectType',
+            key: `/tenant/compute/modaforge/ontologyScene/detail/:id/${ONTOLOGY_SCENE_MENU_ITEM_KEYS.OBJECT_TYPE}`,
             component: React.lazy(
               async () => import('../../ontologyScene/modules/objectType/index')
             ),
@@ -220,7 +222,7 @@ export const routes: IRoute[] = [
           // 属性
           {
             name: 'ontologySceneAttributes',
-            key: '/tenant/compute/modaforge/ontologyScene/detail/:id/attributes',
+            key: `/tenant/compute/modaforge/ontologyScene/detail/:id/${ONTOLOGY_SCENE_MENU_ITEM_KEYS.ATTRIBUTES}`,
             component: React.lazy(
               async () => import('../../ontologyScene/modules/attributes/index')
             ),
@@ -229,7 +231,7 @@ export const routes: IRoute[] = [
           // 链接
           {
             name: 'ontologySceneLinks',
-            key: '/tenant/compute/modaforge/ontologyScene/detail/:id/links',
+            key: `/tenant/compute/modaforge/ontologyScene/detail/:id/${ONTOLOGY_SCENE_MENU_ITEM_KEYS.LINKS}`,
             component: React.lazy(
               async () => import('../../ontologyScene/modules/links/index')
             ),
@@ -238,7 +240,7 @@ export const routes: IRoute[] = [
           // 行为动作
           {
             name: 'ontologySceneBehaviorActions',
-            key: '/tenant/compute/modaforge/ontologyScene/detail/:id/behaviorActions',
+            key: `/tenant/compute/modaforge/ontologyScene/detail/:id/${ONTOLOGY_SCENE_MENU_ITEM_KEYS.BEHAVIOR_ACTIONS}`,
             component: React.lazy(
               async () =>
                 import('../../ontologyScene/modules/behaviorActions/index')
@@ -248,7 +250,7 @@ export const routes: IRoute[] = [
           // 函数
           {
             name: 'ontologySceneFunctions',
-            key: '/tenant/compute/modaforge/ontologyScene/detail/:id/functions',
+            key: `/tenant/compute/modaforge/ontologyScene/detail/:id/${ONTOLOGY_SCENE_MENU_ITEM_KEYS.FUNCTIONS}`,
             component: React.lazy(
               async () => import('../../ontologyScene/modules/functions/index')
             ),
@@ -257,7 +259,7 @@ export const routes: IRoute[] = [
           // 行为日志
           {
             name: 'ontologySceneBehaviorLog',
-            key: '/tenant/compute/modaforge/ontologyScene/detail/:id/behaviorLog',
+            key: `/tenant/compute/modaforge/ontologyScene/detail/:id/${ONTOLOGY_SCENE_MENU_ITEM_KEYS.BEHAVIOR_LOG}`,
             component: React.lazy(
               async () =>
                 import('../../ontologyScene/modules/behaviorLog/index')
@@ -501,6 +503,11 @@ export const getFlatRoutes = (routesArr: IRoute[]): IRoute[] => {
       child.map((item) => {
         return (item['parentKey'] = cur.key);
       });
+      // 对于 ontologySceneDetail，其子路由由父组件内部处理，不添加到扁平化路由中
+      if (cur.name === 'ontologySceneDetail') {
+        // 不添加子路由到扁平化数组
+        return flatArr;
+      }
       const res = getFlatRoutes(child);
       // TODO: ts错误
       // @ts-expect-error
