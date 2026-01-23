@@ -1,7 +1,12 @@
 import React from 'react';
 import styles from './index.module.scss';
-import { Form, Input } from '@arco-design/web-react';
+import { Form, Input, Select } from '@arco-design/web-react';
 import { ProButton } from '@ceai-front/arco-material';
+import {
+  FunctionsSelect,
+  ParamsSetting,
+  ValidRules
+} from '@/pages/ontologyScene/modules/behaviorActionDetail/components';
 
 const FormItem = Form.Item;
 const { TextArea } = Input;
@@ -49,6 +54,18 @@ export default function BehaviorActionDetailPage() {
             />
           </FormItem>
           <div className={'module-title'}>函数与校验</div>
+          <FormItem label="所属对象类型" field="description" required>
+            <Select options={[]} placeholder={'请选择所属对象类型'} />
+          </FormItem>
+          <FormItem label="函数" field="description" required>
+            <FunctionsSelect />
+          </FormItem>
+          <FormItem label="参数配置" field="description" required>
+            <ParamsSetting />
+          </FormItem>
+          <FormItem label="校验规则" field="description" required>
+            <ValidRules />
+          </FormItem>
         </Form>
       </div>
       <div className={`${styles['page-footer']}`}>
