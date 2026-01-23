@@ -105,7 +105,7 @@ export enum WorkflowType {
   /** 结构化工作流 */
   STRUCT = 'struct',
   /** 非结构化工作流 */
-  NO_STRUCT = 'no_struct'
+  NO_STRUCT = 'noStruct'
 }
 
 export interface WorkflowTaskItem {
