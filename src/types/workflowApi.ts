@@ -1,6 +1,5 @@
 import React from 'react';
 import { LocalParam } from '@/pages/workflowConfig/types/workflow';
-import { WorkflowType } from '@/types/workflowTaskApi';
 
 /** 新建工作流 */
 export interface CreateWorkflowParams {
@@ -87,7 +86,6 @@ export interface WorkflowDetailRes
   cycle_text?: CycleText;
   /** 权限列表 */
   perms: string[];
-  workflow_type: WorkflowType;
 }
 
 export enum WorkflowOperation {
