@@ -67,6 +67,9 @@ export const useRagDetailStore = create<RagDetailState & RagDetailActions>(
     documentName: '',
     datasetName: '',
     documentFormat: '',
+    // Scroll trigger state
+    scrollToSegmentId: null,
+    scrollToSegmentTimestamp: 0,
 
     // Actions
     initializeRagDetail: async (
@@ -344,11 +347,27 @@ export const useRagDetailStore = create<RagDetailState & RagDetailActions>(
     },
 
     selectDirectoryNode: (nodeId: string) => {
+      console.log('🎯 ========== Store.selectDirectoryNode 开始 ==========');
+      console.log('📍 nodeId:', nodeId);
+
       set({ selectedDirectoryNodeId: nodeId });
+      console.log('✅ 已设置 selectedDirectoryNodeId:', nodeId);
 
       const directory = get().directory;
       const segments = get().segments;
-      if (!directory || !segments) return;
+
+      console.log('📊 当前状态:', {
+        hasDirectory: !!directory,
+        directoryLength: directory?.length || 0,
+        hasSegments: !!segments,
+        segmentsLength: segments?.length || 0
+      });
+
+      if (!directory || !segments) {
+        console.warn('⚠️ directory 或 segments 不存在，终止操作');
+        console.log('================================================\n');
+        return;
+      }
 
       // 查找被点击的节点
       const findNode = (nodes: DirectoryNode[]): DirectoryNode | null => {
@@ -365,23 +384,74 @@ export const useRagDetailStore = create<RagDetailState & RagDetailActions>(
       };
 
       const clickedNode = findNode(directory);
-      if (!clickedNode) return;
+
+      if (!clickedNode) {
+        console.error('❌ 未找到节点:', nodeId);
+        console.log('================================================\n');
+        return;
+      }
+
+      console.log('🔍 找到的节点:', {
+        id: clickedNode.id,
+        label: clickedNode.label,
+        type: clickedNode.type,
+        level: clickedNode.level,
+        hasPosition: !!clickedNode.position,
+        positionCount: clickedNode.position?.length || 0
+      });
 
       // 高亮 PDF 坐标（无论是 title 还是 text 类型）
       if (clickedNode.position && clickedNode.position.length > 0) {
+        console.log('📍 高亮 PDF 坐标:', clickedNode.position);
         get().highlightPdfCoordinates(clickedNode.position);
+        console.log('✅ PDF 坐标高亮完成');
+      } else {
+        console.log('⚠️ 节点没有 position 信息，跳过 PDF 高亮');
       }
 
       // 简化逻辑：直接根据 chunk_id 查找对应的切片
       // 如果找到对应的切片，则高亮并滚动到该切片
+      console.log('🔎 查找匹配的切片...');
+      console.log('   查找条件: segment.id === clickedNode.id');
+      console.log('   clickedNode.id:', clickedNode.id);
+
       const matchedSegment = segments.find((seg) => seg.id === clickedNode.id);
+
+      console.log('🔍 查找结果:', {
+        found: !!matchedSegment,
+        matchedSegmentId: matchedSegment?.id,
+        clickedNodeId: clickedNode.id,
+        clickedNodeType: clickedNode.type
+      });
+
       if (matchedSegment) {
+        console.log('✅ 找到匹配的切片，准备滚动');
+        console.log('   切片详情:', {
+          id: matchedSegment.id,
+          content: matchedSegment.content.substring(0, 50) + '...',
+          charCount: matchedSegment.charCount,
+          segmentIndex: matchedSegment.segmentIndex
+        });
+
         set({ selectedSegmentId: clickedNode.id });
+        console.log('✅ 已设置 selectedSegmentId:', clickedNode.id);
+
+        console.log('🚀 调用 scrollToSegment...');
         get().scrollToSegment(clickedNode.id);
+        console.log('✅ scrollToSegment 调用完成');
       } else {
+        console.log('⚠️ 未找到匹配的切片');
+        console.log('   可能原因:');
+        console.log('   1. 节点类型是 Title（标题节点没有对应的切片）');
+        console.log('   2. 切片数据中不存在该 ID');
+        console.log('   3. 切片被搜索过滤掉了');
+
         // 如果没有找到对应的切片，清除分段高亮
         set({ selectedSegmentId: null });
+        console.log('✅ 已清除 selectedSegmentId');
       }
+
+      console.log('================================================\n');
     },
 
     startEditingSegment: (segmentId: string) => {
@@ -479,13 +549,35 @@ export const useRagDetailStore = create<RagDetailState & RagDetailActions>(
       set({ selectedSegmentId: segmentId });
     },
 
-    // 滚动到指定分段
+    // 滚动到指定分段 - 使用 store 状态代替 CustomEvent
     scrollToSegment: (segmentId: string) => {
-      // 触发滚动事件，由SegmentList组件监听
-      const event = new CustomEvent('scrollToSegment', {
-        detail: { segmentId }
+      console.log('🚀 ========== Store.scrollToSegment 开始 ==========');
+      console.log('📍 segmentId:', segmentId);
+
+      const timestamp = Date.now();
+      console.log('⏰ timestamp:', timestamp);
+
+      console.log('📤 准备更新 store 状态...');
+      set({
+        scrollToSegmentId: segmentId,
+        scrollToSegmentTimestamp: timestamp
       });
-      window.dispatchEvent(event);
+
+      console.log('✅ Store 状态已更新:', {
+        scrollToSegmentId: segmentId,
+        scrollToSegmentTimestamp: timestamp
+      });
+
+      console.log('💡 SegmentList 的 useEffect 应该会监听到这个变化');
+      console.log('================================================\n');
+    },
+
+    // 清除滚动状态
+    clearScrollToSegment: () => {
+      console.log('🧹 清除滚动状态');
+      set({
+        scrollToSegmentId: null
+      });
     },
 
     // Segment Drawer actions

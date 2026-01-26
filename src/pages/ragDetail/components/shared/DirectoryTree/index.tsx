@@ -210,11 +210,40 @@ const DirectoryTree: React.FC<DirectoryTreeProps> = ({ nodes }) => {
   };
 
   const handleSelect = (selectedKeys: string[]) => {
+    console.log('🌲 ========== DirectoryTree 点击事件 ==========');
+    console.log('📋 selectedKeys:', selectedKeys);
+
     if (selectedKeys.length > 0) {
       const nodeId = selectedKeys[0];
+      console.log('📂 选中的节点 ID:', nodeId);
+
+      // 查找节点详情
+      const node = findNode(nodeId, nodes);
+      if (node) {
+        console.log('📊 节点详情:', {
+          id: node.id,
+          label: node.label,
+          type: node.type,
+          level: node.level,
+          hasPosition: !!node.position,
+          positionCount: node.position?.length || 0,
+          hasChildren: !!node.children,
+          childrenCount: node.children?.length || 0,
+          segmentIds: node.segmentIds
+        });
+      } else {
+        console.warn('⚠️ 未找到节点:', nodeId);
+      }
+
+      console.log('🎯 调用 selectDirectoryNode...');
       // 调用 store 中的 selectDirectoryNode，它会处理所有逻辑
       selectDirectoryNode(nodeId);
+      console.log('✅ selectDirectoryNode 调用完成');
+    } else {
+      console.log('⚠️ selectedKeys 为空，不执行任何操作');
     }
+
+    console.log('================================================\n');
   };
 
   return (

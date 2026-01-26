@@ -5,3 +5,11 @@ interface ApiRes<T> {
   requestId: string;
   status: number;
 }
+
+interface CustomFormCompProps<T = Record<string, any>> {
+  value?: T;
+  disabled?: boolean;
+  onChange?: (v: T) => any;
+  id?: React.Key;
+  ref?: React.Ref<any>;
+}

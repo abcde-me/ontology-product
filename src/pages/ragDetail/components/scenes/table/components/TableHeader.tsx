@@ -25,7 +25,7 @@ const TableHeader: React.FC<TableHeaderProps> = ({
     <thead>
       {headerRows.map((headerRow, rowIndex) => (
         <tr key={rowIndex} className="bg-white">
-          {headerRow.map((cell, colIndex) => {
+          {headers.map((header, colIndex) => {
             if (!shouldRenderHeaderCell(rowIndex, colIndex, merges)) {
               return null;
             }
@@ -34,17 +34,15 @@ const TableHeader: React.FC<TableHeaderProps> = ({
               colIndex,
               merges
             );
+            // 使用 colIndex 从 headerRow 中获取单元格内容，确保列对齐
+            const cell = headerRow[colIndex];
             const cellContent = cell != null ? String(cell) : '';
             return (
               <th
                 key={colIndex}
-                className="h-10 px-4 text-left text-sm font-semibold text-gray-900"
+                className="h-10 whitespace-nowrap px-4 text-left text-sm font-semibold text-gray-900"
                 style={{
-                  ...(headers.length >= 4
-                    ? { width: '200px', minWidth: '200px' }
-                    : {
-                        width: `${100 / headers.length}%`
-                      }),
+                  minWidth: '100px',
                   borderTop: rowIndex === 0 ? '1px solid #e5e7eb' : 'none',
                   borderBottom: '1px solid #e5e7eb',
                   verticalAlign: 'middle'

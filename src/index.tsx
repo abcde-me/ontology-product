@@ -95,7 +95,8 @@ const hiddenTopBarRoutes = [
   '/tenant/compute/modaforge/agentCreate',
   '/tenant/compute/modaforge/labelEditor',
   '/tenant/compute/modaforge/ragDetail',
-  '/tenant/compute/modaforge/compareFileData'
+  '/tenant/compute/modaforge/compareFileData',
+  '/tenant/compute/modaforge/ontologyScene/detail'
 ];
 
 /**
@@ -103,7 +104,8 @@ const hiddenTopBarRoutes = [
  * 路由配置类似：/a/b/:c
  */
 const hiddenTopBarRouterParamsRouteKeyWords = [
-  'tenant/compute/modaforge/workflowConfig'
+  'tenant/compute/modaforge/workflowConfig',
+  'tenant/compute/modaforge/ontologyScene/detail'
 ];
 
 function App() {
