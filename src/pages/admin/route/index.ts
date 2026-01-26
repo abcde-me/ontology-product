@@ -217,25 +217,7 @@ export const routes: IRoute[] = [
             component: React.lazy(
               async () => import('../../ontologyScene/modules/objectType/index')
             ),
-            permission: DATA_MANAGEMENT_PERMISSIONS.LIST,
-            children: [
-              {
-                name: 'ontologySceneObjectTypeDetail',
-                key: `/tenant/compute/modaforge/ontologyScene/detail/:id/${ONTOLOGY_SCENE_MENU_ITEM_KEYS.OBJECT_TYPE}/list`,
-                component: React.lazy(
-                  async () =>
-                    import('../../ontologyScene/modules/objectType/list')
-                )
-              },
-              {
-                name: 'ontologySceneObjectTypeCreate',
-                key: `/tenant/compute/modaforge/ontologyScene/detail/:id/${ONTOLOGY_SCENE_MENU_ITEM_KEYS.OBJECT_TYPE}/create`,
-                component: React.lazy(
-                  async () =>
-                    import('../../ontologyScene/modules/objectType/create')
-                )
-              }
-            ]
+            permission: DATA_MANAGEMENT_PERMISSIONS.LIST
           },
           // 属性
           {
