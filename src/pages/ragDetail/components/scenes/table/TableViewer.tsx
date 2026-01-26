@@ -112,26 +112,14 @@ const TableViewer: React.FC<TableViewerProps> = ({ metadataPreviewData }) => {
     <div className="flex h-full flex-col bg-white">
       {/* 表格显示区域 */}
       <div className="flex flex-1 flex-col overflow-hidden p-4">
-        <div
-          className="flex-1 overflow-y-auto overflow-x-hidden"
-          ref={tableScrollRef}
-        >
+        <div className="flex-1 overflow-auto" ref={tableScrollRef}>
           <table
             ref={tableRef}
-            className={`border-collapse ${
-              tableData.headers.length >= 4 ? '' : 'w-full'
-            }`}
-            style={
-              tableData.headers.length >= 4
-                ? {
-                    tableLayout: 'fixed',
-                    width: `${tableData.headers.length * 200}px`
-                  }
-                : {
-                    tableLayout: 'fixed',
-                    width: '100%'
-                  }
-            }
+            className="border-collapse"
+            style={{
+              tableLayout: 'auto',
+              minWidth: '100%'
+            }}
           >
             {/* 表头 */}
             {tableData?.headerRows && tableData.headerRows.length > 0 && (
@@ -153,25 +141,6 @@ const TableViewer: React.FC<TableViewerProps> = ({ metadataPreviewData }) => {
             )}
           </table>
         </div>
-
-        {/* 固定在底部的横向滚动条 - 仅在需要横向滚动时显示 */}
-        {needsHorizontalScroll && (
-          <div
-            ref={horizontalScrollRef}
-            className="overflow-x-scroll border-t bg-white"
-            style={{
-              height: '17px',
-              flexShrink: 0
-            }}
-          >
-            <div
-              style={{
-                height: '1px',
-                width: tableWidth > 0 ? `${tableWidth}px` : '100%'
-              }}
-            />
-          </div>
-        )}
 
         {/* 表格导航 */}
         <TableNavigator
