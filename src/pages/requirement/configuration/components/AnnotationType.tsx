@@ -8,6 +8,10 @@ import TextClassificationIcon from '../../image/Text-Classification.png';
 import TextEntityIcon from '../../image/Text-Entity.png';
 import TextSortIcon from '../../image/Text-Sort.png';
 import TextQAIcon from '../../image/Text-QA.png';
+import AudioClassificationIcon from '../../image/Audio-Classification.png';
+import AudioSplitIcon from '../../image/Audio-Split.png';
+import VideoClassificationIcon from '../../image/Video-Classification.png';
+import VideoSplitIcon from '../../image/Video-Split.png';
 
 const typeList = [
   {
@@ -53,6 +57,38 @@ const btnTextData = [
   },
   { key: 3, value: 3, label: '问答', code: 'TEXT_QA', icon: TextQAIcon },
   { key: 4, value: 4, label: '文本排序', code: 'TEXT_SORT', icon: TextSortIcon }
+];
+const btnAudioData = [
+  {
+    key: 1,
+    value: 1,
+    label: '音频分类',
+    code: 'AUDIO_CLASSIFICATION',
+    icon: AudioClassificationIcon
+  },
+  {
+    key: 2,
+    value: 2,
+    label: '音频分割',
+    code: 'AUDIO_SPLIT',
+    icon: AudioSplitIcon
+  }
+];
+const btnVideoData = [
+  {
+    key: 1,
+    value: 1,
+    label: '视频分类',
+    code: 'VIDEO_CLASSIFICATION',
+    icon: VideoClassificationIcon
+  },
+  {
+    key: 2,
+    value: 2,
+    label: '视频分割',
+    code: 'VIDEO_SPLIT',
+    icon: VideoSplitIcon
+  }
 ];
 interface AnnotationTypeProps {
   isDisabled: boolean;
@@ -108,6 +144,14 @@ const AnnotationType: React.FC<AnnotationTypeProps> = ({
       setActiveKey('TEXT_ENTITY');
       setAnnotationTypeContentCode('TEXT_ENTITY');
     }
+    if (item?.value === 3) {
+      setActiveKey('AUDIO_CLASSIFICATION');
+      setAnnotationTypeContentCode('AUDIO_CLASSIFICATION');
+    }
+    if (item?.value === 4) {
+      setActiveKey('VIDEO_CLASSIFICATION');
+      setAnnotationTypeContentCode('VIDEO_CLASSIFICATION');
+    }
   };
   return (
     <div className="annotation-type-warp">
@@ -120,17 +164,17 @@ const AnnotationType: React.FC<AnnotationTypeProps> = ({
               className={[
                 'item-base-class',
                 selectedRadio === item.value ? 'active' : '',
-                item.value > 2 || isDisabled ? 'disabled-div' : ''
+                item.value > 4 || isDisabled ? 'disabled-div' : ''
               ].join(' ')}
               onClick={() => {
-                if (item?.value > 2 || isDisabled) {
+                if (item?.value > 4 || isDisabled) {
                   return;
                 }
                 headerItemClick(item);
               }}
               key={item.value}
             >
-              {item?.value > 2 ? (
+              {item?.value > 4 ? (
                 <Tooltip content="功能开发中，敬请期待">
                   <div>{item?.label}</div>
                 </Tooltip>
@@ -142,6 +186,54 @@ const AnnotationType: React.FC<AnnotationTypeProps> = ({
         })}
       </div>
       <div className="type-content">
+        {selectedRadio === 4
+          ? btnVideoData.map((item) => {
+              const isActive =
+                activeKey === item.code || activeKey === item.key;
+              return (
+                <div
+                  className={`annotation-card ${isActive ? 'active' : ''} ${isDisabled ? 'disabled' : ''}`}
+                  onClick={() => {
+                    if (isDisabled) {
+                      return;
+                    }
+                    handleBtnClick(item.code);
+                    setAnnotationTypeContentCode(item.code);
+                  }}
+                  key={item.key}
+                >
+                  <div className="card-image">
+                    <img src={item.icon} alt={item.label} />
+                  </div>
+                  <div className="card-label">{item.label}</div>
+                </div>
+              );
+            })
+          : null}
+        {selectedRadio === 3
+          ? btnAudioData.map((item) => {
+              const isActive =
+                activeKey === item.code || activeKey === item.key;
+              return (
+                <div
+                  className={`annotation-card ${isActive ? 'active' : ''} ${isDisabled ? 'disabled' : ''}`}
+                  onClick={() => {
+                    if (isDisabled) {
+                      return;
+                    }
+                    handleBtnClick(item.code);
+                    setAnnotationTypeContentCode(item.code);
+                  }}
+                  key={item.key}
+                >
+                  <div className="card-image">
+                    <img src={item.icon} alt={item.label} />
+                  </div>
+                  <div className="card-label">{item.label}</div>
+                </div>
+              );
+            })
+          : null}
         {selectedRadio === 2
           ? btnPicData.map((item) => {
               const isActive = activeKey === item.code;

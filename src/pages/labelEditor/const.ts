@@ -4,7 +4,11 @@ export const TEXT_DATA = {
   TEXT_ENTITY: 'entity-relation',
   TEXT_CLASSIFICATION: 'classification',
   TEXT_QA: 'qa',
-  TEXT_SORT: 'ranking'
+  TEXT_SORT: 'ranking',
+  AUDIO_CLASSIFICATION: 'classification',
+  AUDIO_SPLIT: 'split',
+  VIDEO_CLASSIFICATION: 'classification',
+  VIDEO_SPLIT: 'split'
 };
 
 export const STAGE_MAP = {
@@ -17,7 +21,9 @@ export const STAGE_MAP = {
 
 export const LabelTypeMap = {
   '1': 'text',
-  '2': 'image'
+  '2': 'image',
+  '3': 'audio',
+  '4': 'video'
 };
 
 export const WujiePlugins = navigator.userAgent.includes('Firefox')

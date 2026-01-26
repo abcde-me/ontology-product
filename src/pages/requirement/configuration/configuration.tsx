@@ -572,7 +572,14 @@ export default function RequirementConfig() {
               return false;
             })
         : true,
-      annotationTypeContentVal === AnnotationTypeContentCode.TEXT_CLASSIFICATION
+      annotationTypeContentVal ===
+        AnnotationTypeContentCode.TEXT_CLASSIFICATION ||
+      annotationTypeContentVal ===
+        AnnotationTypeContentCode.AUDIO_CLASSIFICATION ||
+      annotationTypeContentVal === AnnotationTypeContentCode.AUDIO_SPLIT ||
+      annotationTypeContentVal ===
+        AnnotationTypeContentCode.VIDEO_CLASSIFICATION ||
+      annotationTypeContentVal === AnnotationTypeContentCode.VIDEO_SPLIT
         ? formType
             .validate()
             .then(() => {
@@ -691,7 +698,13 @@ export default function RequirementConfig() {
       // 配置文件分类标签
       file_labels:
         annotationTypeContentCode ===
-        AnnotationTypeContentCode.TEXT_CLASSIFICATION
+          AnnotationTypeContentCode.TEXT_CLASSIFICATION ||
+        annotationTypeContentCode ===
+          AnnotationTypeContentCode.AUDIO_CLASSIFICATION ||
+        annotationTypeContentCode === AnnotationTypeContentCode.AUDIO_SPLIT ||
+        annotationTypeContentCode ===
+          AnnotationTypeContentCode.VIDEO_CLASSIFICATION ||
+        annotationTypeContentCode === AnnotationTypeContentCode.VIDEO_SPLIT
           ? generateTextFlData(text_fl_data, type)
           : [],
       label_data_set: selectedData,
@@ -702,7 +715,15 @@ export default function RequirementConfig() {
               annotationTypeContentCode !==
                 AnnotationTypeContentCode.TEXT_SORT &&
               annotationTypeContentCode !==
-                AnnotationTypeContentCode.TEXT_CLASSIFICATION
+                AnnotationTypeContentCode.TEXT_CLASSIFICATION &&
+              annotationTypeContentCode !==
+                AnnotationTypeContentCode.AUDIO_CLASSIFICATION &&
+              annotationTypeContentCode !==
+                AnnotationTypeContentCode.AUDIO_SPLIT &&
+              annotationTypeContentCode !==
+                AnnotationTypeContentCode.VIDEO_CLASSIFICATION &&
+              annotationTypeContentCode !==
+                AnnotationTypeContentCode.VIDEO_SPLIT
             ? generateLabels(labelDataList, type)
             : [],
       entity_relations:
@@ -1159,7 +1180,15 @@ export default function RequirementConfig() {
             AnnotationTypeContentCode.IMAGE_ANNOTATION ||
             annotationTypeContentVal === AnnotationTypeContentCode.ENTITY ||
             annotationTypeContentVal ===
-              AnnotationTypeContentCode.TEXT_CLASSIFICATION) && (
+              AnnotationTypeContentCode.TEXT_CLASSIFICATION ||
+            annotationTypeContentVal ===
+              AnnotationTypeContentCode.AUDIO_CLASSIFICATION ||
+            annotationTypeContentVal ===
+              AnnotationTypeContentCode.AUDIO_SPLIT ||
+            annotationTypeContentVal ===
+              AnnotationTypeContentCode.VIDEO_CLASSIFICATION ||
+            annotationTypeContentVal ===
+              AnnotationTypeContentCode.VIDEO_SPLIT) && (
             <div className="tool-annotation-config">
               <Form
                 form={labelToolForm}
@@ -1209,8 +1238,16 @@ export default function RequirementConfig() {
                       getTextEntityData={getTextFlChildData}
                     />
                   )}
-                  {annotationTypeContentVal ===
-                    AnnotationTypeContentCode.TEXT_CLASSIFICATION && (
+                  {(annotationTypeContentVal ===
+                    AnnotationTypeContentCode.TEXT_CLASSIFICATION ||
+                    annotationTypeContentVal ===
+                      AnnotationTypeContentCode.AUDIO_CLASSIFICATION ||
+                    annotationTypeContentVal ===
+                      AnnotationTypeContentCode.AUDIO_SPLIT ||
+                    annotationTypeContentVal ===
+                      AnnotationTypeContentCode.VIDEO_CLASSIFICATION ||
+                    annotationTypeContentVal ===
+                      AnnotationTypeContentCode.VIDEO_SPLIT) && (
                     <Classify
                       type={effectiveType}
                       requirementDetail={requirementDetail}

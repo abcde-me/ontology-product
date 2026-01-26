@@ -133,7 +133,12 @@ function TextClassifyLabelInfo({ labelInfo }: { labelInfo: FileLabelInfo[] }) {
         border={false}
         defaultExpandAllRows={true}
         expandedRowRender={expandedRowRender}
-        expandProps={{ width: 30 }}
+        expandProps={{
+          width: 30,
+          rowExpandable: (record) =>
+            record.file_label_attribute &&
+            record.file_label_attribute.length > 0
+        }}
         rowKey={(record) => record.attribute_id || record.order_num}
       />
     </div>

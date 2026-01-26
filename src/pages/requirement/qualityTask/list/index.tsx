@@ -1,9 +1,12 @@
 import { listQualityControlTasks } from '@/api/dataAnnotation';
 import ImageIcon from '@/assets/annotation/new-image-column.svg';
 import TextIcon from '@/assets/annotation/text-column.svg';
+import AudioIcon from '@/assets/annotation/audio-column.svg';
+import VideoIcon from '@/assets/annotation/video-column.svg';
 import EllipsisPopover from '@/components/ellipsis-popover-com';
 import { QUALITY_TASK_PERMISSIONS } from '@/config/permissions';
 import { useHasPermission } from '@/store/userInfoStore';
+import getLabelByValue from '@/utils/getLabelByValue';
 import {
   Input,
   Link,
@@ -17,7 +20,7 @@ import { SorterInfo } from '@arco-design/web-react/es/Table/interface';
 import { CopyItemIcon, NoDataCard } from '@ceai-front/arco-material';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useHistory, useLocation } from 'react-router';
-import { RequirementTypeNameMap } from '../../type';
+import { LABEL_TOOL_CODE_ENUM } from '../../type';
 import FirstInspectModal from './FirstInspectModal';
 import './index.scss';
 
@@ -53,11 +56,18 @@ const BelongTypeMap: Record<number, string> = {
 
 // 类型图标映射
 const TypeIconMap: Record<
-  number,
+  string,
   React.ComponentType<{ style?: React.CSSProperties }>
 > = {
-  [DataType.Text]: TextIcon,
-  [DataType.Image]: ImageIcon
+  TEXT_ENTITY: TextIcon,
+  TEXT_CLASSIFICATION: TextIcon,
+  TEXT_QA: TextIcon,
+  TEXT_SORT: TextIcon,
+  IMAGE_ANNOTATION: ImageIcon,
+  AUDIO_CLASSIFICATION: AudioIcon,
+  AUDIO_SPLIT: AudioIcon,
+  VIDEO_CLASSIFICATION: VideoIcon,
+  VIDEO_SPLIT: VideoIcon
 };
 
 // 质检任务数据类型
@@ -66,7 +76,7 @@ export interface QualityTaskItem {
   front_pkg_id: number; // 任务展示和搜索的任务包ID
   req_name: string; // 需求名称
   req_id: number; // 需求ID
-  type: DataType; // 1-文本,2-图片,3-音频,4-视频
+  label_tool_code: string; // 标注工具代码
   belong: BelongType; // 1-个人，2-部门
   task_volume_total: number; // 总任务量
   task_volume_unowned: number; // 未领取
@@ -92,7 +102,7 @@ interface QualityTaskListParams {
   filters?: {
     search_content?: string; // 模糊搜索输入框，任务ID或需求名称搜索
     belong?: number[]; // 1-个人，2-部门
-    type?: number[]; // 标注内容类型:1-文本,2-图片,3-音频,4-视频
+    label_tool_codes?: string[]; // 标注工具代码
   };
   order?: string; // 默认降序，asc正序，desc倒序
   order_filter?: string; // 默认创建时间，create_time - 创建时间，update_time - 更新时间
@@ -154,8 +164,8 @@ function QualityTaskList() {
       if (sortValue?.belong?.length) {
         filters.belong = sortValue.belong;
       }
-      if (sortValue?.type?.length) {
-        filters.type = sortValue.type;
+      if (sortValue?.label_tool_code?.length) {
+        filters.label_tool_codes = sortValue.label_tool_code;
       }
 
       const params: QualityTaskListParams = {
@@ -218,7 +228,7 @@ function QualityTaskList() {
   ) => {
     setCurrent(1);
     const sortData = {
-      type: filters?.type?.map(Number), // 转为数字数组
+      label_tool_code: filters?.label_tool_code, // 标注工具代码数组
       belong: filters?.belong?.map(Number), // 转为数字数组
       order:
         sorter.direction === undefined
@@ -320,31 +330,17 @@ function QualityTaskList() {
     },
     {
       title: '类型',
-      dataIndex: 'type',
-      width: 100,
-      filters: [
-        {
-          text: '文本',
-          value: 1
-        },
-        {
-          text: '图片',
-          value: 2
-        },
-        {
-          text: '音频',
-          value: 3
-        },
-        {
-          text: '视频',
-          value: 4
-        }
-      ],
+      dataIndex: 'label_tool_code',
+      width: 160,
+      filters: LABEL_TOOL_CODE_ENUM,
       render: (_, record) => {
-        const IconComponent = record.type ? TypeIconMap[record.type] : null;
-        const typeName = record.type
-          ? RequirementTypeNameMap[record.type]
-          : '-';
+        const IconComponent = record.label_tool_code
+          ? TypeIconMap[record.label_tool_code]
+          : null;
+        const typeName = getLabelByValue(
+          LABEL_TOOL_CODE_ENUM,
+          record.label_tool_code
+        );
 
         return (
           <div className="flex items-center">
