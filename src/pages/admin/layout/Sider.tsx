@@ -245,7 +245,7 @@ export const LayoutWithSider = memo(function LayoutWithSider({ children }) {
           )}
         >
           <ProjectSelect
-            style={{ width: 180, margin: 8 }}
+            style={{ width: 178, margin: 8 }}
             treeData={projects}
             value={value}
             showAddButton={false}
