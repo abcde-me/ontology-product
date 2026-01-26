@@ -315,3 +315,31 @@ export async function updateScene(params: {
 export async function deleteScene(params: { id: number }) {
   return await UAPI.RES.deleteSceneApi({}).post(params).inRegion().do();
 }
+
+export enum DatasetSource {
+  Workflow = 2,
+  Pyspark = 3
+}
+
+export enum ValidateDatasetStatus {
+  Success = 1,
+  Failed = 2
+}
+
+// 数据集校验
+export async function validateDatasetForSave(params: {
+  name: string;
+  src: DatasetSource;
+  // 来源标识列表：工作流UUID/pyspark脚本ID
+  src_key: string;
+}): Promise<
+  ApiRes<{
+    status: ValidateDatasetStatus;
+    reason: string;
+  }>
+> {
+  return await UAPI.RES.validateDatasetForSaveApi({})
+    .post(params)
+    .inRegion()
+    .do();
+}

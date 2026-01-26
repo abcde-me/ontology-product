@@ -46,11 +46,9 @@ const TableBody: React.FC<TableBodyProps> = ({
             return (
               <td
                 key={colIndex}
-                className="h-10 px-4 text-sm"
+                className="h-10 whitespace-nowrap px-4 text-sm"
                 style={{
-                  ...(headers.length >= 4
-                    ? { width: '200px', minWidth: '200px' }
-                    : { width: `${100 / headers.length}%` }),
+                  minWidth: '100px',
                   borderBottom: '1px solid #e5e7eb',
                   verticalAlign: 'middle'
                 }}
