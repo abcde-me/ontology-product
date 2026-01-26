@@ -158,14 +158,14 @@ export default function OntologySceneDetail() {
           selectedKeys={[moduleType]}
           className={cls(
             styles['ontology-scene-detail-menu'],
-            'max-w-[200px] border-r border-[var(--color-border-2)] bg-white'
+            'max-w-[200px] flex-shrink-0 border-r border-[var(--color-border-2)] bg-white'
           )}
           hasCollapseButton
         >
           {renderMenu()}
         </Menu>
 
-        <Layout.Content className="bg-gray-50">
+        <Layout.Content className="flex-1 overflow-auto bg-gray-50">
           <Suspense
             fallback={
               <div className="flex h-full items-center justify-center">
