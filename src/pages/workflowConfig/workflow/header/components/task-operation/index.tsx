@@ -26,6 +26,7 @@ const AppPublisher = ({
   const [schedulerDialogVisible, setSchedulerDialogVisible] = useState(false);
   const isOnline = workflowStatus === IsOnline.online;
   const SchedulerRunRef = useRef<HTMLFormElement>(null);
+  const { type: flowType = 'no_struct' } = useParams<Record<string, string>>();
 
   const handleOperate = useCallback(
     async (

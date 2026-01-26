@@ -55,7 +55,7 @@ const SuccessModal = ({ visible, params, onClose }) => {
     params ?? {};
   const history = useHistory();
   const searchCount = useRef(0);
-  const { type: flowType = 'noStruct' } =
+  const { type: flowType = 'no_struct' } =
     useRouterParams<Record<string, string>>();
 
   const route2TaskDetail = (jobId?: React.Key) => {
@@ -387,7 +387,7 @@ const Header = (props: { flowType: string }) => {
               </Typography.Paragraph>
               {/*当前版本只有非结构化的工作流才能单独编辑名称*/}
               {headerOperationDisplay &&
-                props.flowType === 'noStruct' &&
+                props.flowType === 'no_struct' &&
                 !nodesReadOnly && (
                   <PermissionWrapper
                     permission={WORKFLOW_DETAIL_PERMISSIONS.UPDATE}

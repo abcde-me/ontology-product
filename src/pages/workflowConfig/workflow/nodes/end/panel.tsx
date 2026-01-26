@@ -1,5 +1,5 @@
 import type { FC } from 'react';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import useConfig from './use-config';
 import type { EndNodeType } from './types';
@@ -14,7 +14,13 @@ import {
 } from '@arco-design/web-react';
 import { getWorkflowTargetPath, knowledgeBaseNameCheck } from '@/api/workflow';
 import { useUserInfo } from '@/store/userInfoStore';
-import { getTagList, getDatasetSceneList } from '@/api/datasetManagement';
+import {
+  getTagList,
+  getDatasetSceneList,
+  validateDatasetForSave,
+  DatasetSource,
+  ValidateDatasetStatus
+} from '@/api/datasetManagement';
 import './end.scss';
 import { validateName } from '@/utils/valiate';
 
@@ -32,6 +38,7 @@ const Panel: FC<NodePanelProps<EndNodeType>> = ({ id, data }) => {
   const [knowledgeBaseName, setKnowledgeBaseName] = useState(
     inputs?.knowledge_base_name || ''
   );
+  const hasValidatedRef = useRef(false);
   // 数据集标签
   const [knowledgeBaseNameOptions, setKnowledgeBaseNameOptions] = useState<
     Record<string, any>[]
@@ -60,10 +67,28 @@ const Panel: FC<NodePanelProps<EndNodeType>> = ({ id, data }) => {
     }
   }, [sceneCategoryOptions, form, inputs?.scene_id]);
 
-  // 初始化时名称已回退为上一次输入合法名称，将名称校验设为true
   useEffect(() => {
-    onValuesChange({ ...inputs, isKnowledgeBaseNameValid: true }, dataSource);
+    // 当名称校验状态变化时，更新 payload
+    onValuesChange(
+      { ...inputs, isKnowledgeBaseNameValid: knowledgeBaseNameValid },
+      dataSource
+    );
+  }, [knowledgeBaseNameValid]);
+
+  // 进入页面时自动校验一次数据集名称
+  useEffect(() => {
+    if (!hasValidatedRef.current && form && inputs?.name) {
+      // 延迟执行，确保表单已完全初始化
+      const timer = setTimeout(() => {
+        form.validate(['name']).catch(() => {
+          // 校验失败时静默处理，错误信息会显示在表单上
+        });
+        hasValidatedRef.current = true;
+      }, 0);
+      return () => clearTimeout(timer);
+    }
   }, []);
+
   return (
     <div className="wk-node-panel-content end-panel-content mt-[16px]">
       <Form
@@ -99,15 +124,50 @@ const Panel: FC<NodePanelProps<EndNodeType>> = ({ id, data }) => {
           rules={[
             {
               required: true,
-              validator: (value, callback) => {
+              validateTrigger: ['onBlur'],
+              validator: async (value, callback) => {
+                // 基本校验
                 if (value === '' || value === undefined) {
+                  setKnowledgeBaseNameValid(false);
                   return callback('请输入数据集名称');
                 }
+
                 if (!validateName(value).isValid) {
+                  setKnowledgeBaseNameValid(false);
                   return callback(
                     validateName(value).errorMessage ?? '数据集名称格式不正确'
                   );
-                } else {
+                }
+
+                if (!workflow_uuid) {
+                  setKnowledgeBaseNameValid(true);
+                  return callback();
+                }
+
+                try {
+                  const res = await validateDatasetForSave({
+                    name: value.trim(),
+                    src: DatasetSource.Workflow,
+                    src_key: workflow_uuid
+                  });
+
+                  // 接口失败，跳过数据集名称重名校验
+                  if (res.status !== 200) {
+                    setKnowledgeBaseNameValid(true);
+                    return callback();
+                  }
+
+                  if (res.data.status === ValidateDatasetStatus.Failed) {
+                    setKnowledgeBaseNameValid(false);
+                    return callback(res.data.reason);
+                  } else {
+                    setKnowledgeBaseNameValid(true);
+                    return callback();
+                  }
+                } catch (error) {
+                  console.log('数据集名称重名校验失败-----', error);
+                  setKnowledgeBaseNameValid(true);
+                  // 接口校验失败，跳过数据集名称重名校验
                   return callback();
                 }
               }
