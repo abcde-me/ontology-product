@@ -1033,7 +1033,7 @@ export default function RequirementConfig() {
                   maxLength={200}
                 />
               </FormItem>
-              <div className="basic-title">任务配置</div>
+              <div className="basic-title">标注配置</div>
               <FormItem
                 label="标注类型:"
                 required
@@ -1260,7 +1260,7 @@ export default function RequirementConfig() {
           )}
           {/* 质检任务配置 */}
           <div className="quality-task-configuration">
-            <div className="basic-title">质检任务配置</div>
+            <div className="basic-title">质检配置</div>
             <Form
               form={qualityTaskForm}
               className="quality-task-form"

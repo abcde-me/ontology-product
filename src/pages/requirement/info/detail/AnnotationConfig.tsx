@@ -33,7 +33,7 @@ function AnnotationConfig({ requirementDetail }: { requirementDetail: any }) {
   );
   const commonData = [
     {
-      title: '标注任务配置',
+      title: '标注配置',
       items: [
         {
           label: '标注类型',
