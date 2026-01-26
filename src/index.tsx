@@ -51,12 +51,14 @@ import { Page404 } from './pages/errorPages';
 import { Header } from '@ceai-front/arco-material';
 import { isInFrame, isWujie } from './utils/env';
 import { useUserInfo, useUserInfoStore } from './store/userInfoStore';
-import { usePermission } from '@/hooks';
+import { usePathChange, usePermission } from '@/hooks';
 import { menus } from '@/pages/admin/layout/menus';
 import { is } from 'immer/dist/internal';
 import { getLocalStorage } from './utils/storage';
 import { ProjectIdKey } from './utils/const';
 import { isSameArray } from './utils/array';
+import { logout, openNewPage } from '@/utils/env';
+import { handlePathName } from '@/hooks/use-path-change';
 
 initI18n();
 patchHistoryForLocationChange();
@@ -151,6 +153,8 @@ function App() {
       }
     ]
   };
+
+  const { pushPath } = usePathChange();
 
   // 用于追踪是否已经初始化过权限
   const permissionInitializedRef = useRef(false);
@@ -255,11 +259,15 @@ function App() {
           <Header
             title="多模态数据治理平台"
             openHelpLink={(linkInfo) => {
-              console.log(linkInfo);
+              openNewPage(
+                '/modaforge/assets/多模态数据治理平台 - 用户手册.pdf'
+              );
             }}
             userInfo={userInfo}
-            logout={async () => {}}
-            accountCallback={() => {}}
+            logout={logout}
+            accountCallback={() => {
+              pushPath(handlePathName('/userinfo'));
+            }}
           />
         )}
       </Layout.Header>
