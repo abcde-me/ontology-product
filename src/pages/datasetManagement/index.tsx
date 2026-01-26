@@ -1064,6 +1064,7 @@ const DatasetManagement: React.FC = () => {
       }
       setAddSceneTypeVisible(false);
     }
+    sceneTypeForm.resetFields();
   };
 
   // 移动数据集提交
@@ -1192,6 +1193,7 @@ const DatasetManagement: React.FC = () => {
       // 刷新数据列表
       fetchDatasetList();
       closeModal();
+      getSceneList();
 
       //获取标签
       const tagListRes = await getTagList();
@@ -1831,6 +1833,11 @@ const DatasetManagement: React.FC = () => {
           paddingTop: '20px',
           backgroundColor: `${isHiddenBaseInfo ? 'unset' : '#f0f6fe'} `
         }}
+        addButton={
+          <Tooltip content="新建场景分类">
+            <IconPlus />
+          </Tooltip>
+        }
         type="card"
         activeTab={activeTab}
         onAddTab={() => setAddSceneTypeVisible(true)}
@@ -1864,24 +1871,28 @@ const DatasetManagement: React.FC = () => {
                   <div className="flex items-center justify-between">
                     <span className="text-[14px]">{item.description}</span>
                     <div className="flex items-center gap-2">
-                      <IconEdit
-                        className="cursor-pointer"
-                        onClick={() => {
-                          sceneTypeForm.setFieldsValue({
-                            sceneTypeName: item.name,
-                            sceneTypeDesc: item.description,
-                            sceneTypeTag: item.tags
-                          });
-                          setIsEdit(true);
-                          setEditSceneId(item.id);
-                          setAddSceneTypeVisible(true);
-                        }}
-                      />
-                      {item.type === 'user' && (
-                        <IconDelete
+                      <Tooltip content="编辑">
+                        <IconEdit
                           className="cursor-pointer"
-                          onClick={() => handleDeleteScene(item.id)}
+                          onClick={() => {
+                            sceneTypeForm.setFieldsValue({
+                              sceneTypeName: item.name,
+                              sceneTypeDesc: item.description,
+                              sceneTypeTag: item.tags
+                            });
+                            setIsEdit(true);
+                            setEditSceneId(item.id);
+                            setAddSceneTypeVisible(true);
+                          }}
                         />
+                      </Tooltip>
+                      {item.type === 'user' && (
+                        <Tooltip content="删除">
+                          <IconDelete
+                            className="cursor-pointer"
+                            onClick={() => handleDeleteScene(item.id)}
+                          />
+                        </Tooltip>
                       )}
                     </div>
                   </div>
@@ -2128,7 +2139,10 @@ const DatasetManagement: React.FC = () => {
         className={styles.addSceneTypeModal}
         visible={addSceneTypeVisible}
         onOk={() => sceneTypeForm.submit()}
-        onCancel={() => setAddSceneTypeVisible(false)}
+        onCancel={() => {
+          sceneTypeForm.resetFields();
+          setAddSceneTypeVisible(false);
+        }}
         title="新增场景类型"
       >
         <Form form={sceneTypeForm} onSubmit={handleAddSceneTypeSubmit}>
@@ -2149,7 +2163,11 @@ const DatasetManagement: React.FC = () => {
               }))}
             />
           </Form.Item>
-          <Form.Item label="描述说明：" field="sceneTypeDesc">
+          <Form.Item
+            label="描述说明："
+            field="sceneTypeDesc"
+            rules={[{ required: true, message: '请输入描述说明' }]}
+          >
             <Input.TextArea placeholder="可以描述数据集的用途、特点或其他相关信息" />
           </Form.Item>
         </Form>

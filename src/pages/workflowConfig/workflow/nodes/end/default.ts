@@ -24,26 +24,16 @@ const nodeDefault: NodeDefault<EndNodeType> = {
   checkValid(payload: EndNodeType) {
     let isValid = true;
     let errorMessages = '';
-    // if (
-    //   payload.is_embedding === true &&
-    //   (payload.knowledge_base_name === undefined ||
-    //     payload.knowledge_base_name === '')
-    // ) {
-    //   isValid = true;
-    //   errorMessages = '知识库名称未配置';
-    // }
-    // if (payload.is_embedding === true && !payload.isKnowledgeBaseNameValid) {
-    //   isValid = true;
-    //   errorMessages = payload.knowledge_base_name_msg || '知识库名称未配置';
-    // }
-    // if (payload.target_path_id === undefined) {
-    //   isValid = true;
-    //   errorMessages = '目标数据目录未配置';
-    // }
     if (payload.name === undefined || payload.name === '') {
       isValid = true;
       errorMessages = '数据集名称未配置';
     }
+
+    if (!payload.isKnowledgeBaseNameValid) {
+      isValid = true;
+      errorMessages = '数据集名称校验失败';
+    }
+
     return {
       isValid,
       errorMessage: errorMessages

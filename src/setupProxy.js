@@ -29,7 +29,7 @@ const targets = {
   qa: 'http://10.252.216.13:9030',
   prod: 'http://10.252.216.19:9040'
 };
-const currentTarget = targets['dev'];
+const currentTarget = targets['qa'];
 // https://create-react-app.dev/docs/proxying-api-requests-in-development/
 module.exports = function (app) {
   if (process.env.SINGLE_APP === 'true') {

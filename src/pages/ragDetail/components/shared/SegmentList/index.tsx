@@ -10,6 +10,7 @@ import {
 import SegmentCard from '../SegmentCard';
 import ImageTextSegmentCard from '../ImageTextSegmentCard';
 import SegmentListHeader from '../SegmentListHeader';
+import { doScrollToSegment as doScrollToSegmentUtil } from './doScrollToSegment';
 import styles from './SegmentList.module.scss';
 
 interface SegmentListProps {
@@ -31,7 +32,10 @@ const SegmentList: React.FC<SegmentListProps> = ({
     setSelectedSegmentId,
     highlightPdfCoordinates,
     clearPdfHighlight,
-    segmentSearchText
+    segmentSearchText,
+    scrollToSegmentId,
+    scrollToSegmentTimestamp,
+    clearScrollToSegment
   } = useRagDetailStore();
 
   // Virtuoso 的 ref
@@ -60,44 +64,105 @@ const SegmentList: React.FC<SegmentListProps> = ({
     });
   }, [segments, segmentSearchText]);
 
-  // 执行滚动的函数
+  // 执行滚动的函数 - 使用独立的工具函数
   const doScrollToSegment = useCallback(
     (segmentId: string, immediate = false) => {
-      const index = filteredSegments.findIndex((seg) => seg.id === segmentId);
-      if (index !== -1 && virtuosoRef.current) {
-        virtuosoRef.current.scrollToIndex({
-          index,
-          align: 'start',
-          behavior: immediate ? 'auto' : 'smooth'
-        });
-        return true;
-      }
-      return false;
+      return doScrollToSegmentUtil(
+        segmentId,
+        filteredSegments,
+        virtuosoRef,
+        immediate
+      );
     },
     [filteredSegments]
   );
 
-  // 监听目录树触发的滚动事件
+  // 使用 store 状态监听滚动触发 - 代替 CustomEvent
   useEffect(() => {
-    const handleScrollToSegment = (event: CustomEvent) => {
-      const { segmentId } = event.detail;
-      if (segmentId) {
-        // 点击目录树时直接滚动
-        doScrollToSegment(segmentId);
-      }
-    };
+    console.log('👂 ========== SegmentList useEffect 触发 ==========');
+    console.log('📊 当前状态:', {
+      scrollToSegmentId,
+      scrollToSegmentTimestamp,
+      hasScrollToSegmentId: !!scrollToSegmentId,
+      timestampValid: scrollToSegmentTimestamp > 0
+    });
 
-    window.addEventListener(
-      'scrollToSegment',
-      handleScrollToSegment as EventListener
-    );
-    return () => {
-      window.removeEventListener(
-        'scrollToSegment',
-        handleScrollToSegment as EventListener
+    if (scrollToSegmentId && scrollToSegmentTimestamp > 0) {
+      console.log('🎯 检测到滚动请求!');
+      console.log('   目标 segmentId:', scrollToSegmentId);
+      console.log('   时间戳:', scrollToSegmentTimestamp);
+      console.log(
+        '   时间:',
+        new Date(scrollToSegmentTimestamp).toLocaleTimeString()
       );
-    };
-  }, [doScrollToSegment]);
+
+      console.log('📋 当前 filteredSegments 信息:', {
+        总数: filteredSegments.length,
+        前5个ID: filteredSegments.slice(0, 5).map((s) => s.id)
+      });
+
+      console.log('🔍 检查 virtuosoRef:', {
+        存在: !!virtuosoRef.current,
+        类型: virtuosoRef.current ? typeof virtuosoRef.current : 'undefined'
+      });
+
+      console.log('🚀 开始执行滚动...');
+
+      // 执行滚动
+      const success = doScrollToSegment(scrollToSegmentId);
+
+      if (success) {
+        console.log('✅ 滚动成功！');
+        console.log('🧹 清除滚动状态...');
+        // 清除滚动状态，避免重复触发
+        clearScrollToSegment();
+        console.log('✅ 滚动状态已清除');
+      } else {
+        console.log('⏰ 滚动失败，将在 100ms 后重试...');
+        console.log('   失败可能原因:');
+        console.log('   1. virtuosoRef.current 为 null');
+        console.log('   2. 目标切片不在 filteredSegments 中');
+        console.log('   3. 虚拟列表还没完全初始化');
+
+        // 如果失败（可能是 virtuosoRef 还没准备好），延迟重试
+        setTimeout(() => {
+          console.log('🔄 ========== 开始重试滚动 ==========');
+          console.log('📍 重试目标:', scrollToSegmentId);
+          console.log('🔍 重试时 virtuosoRef 状态:', !!virtuosoRef.current);
+
+          const retrySuccess = doScrollToSegment(scrollToSegmentId);
+
+          if (retrySuccess) {
+            console.log('✅ 重试滚动成功！');
+          } else {
+            console.error('❌ 重试滚动仍然失败');
+            console.log('   请检查:');
+            console.log('   1. 目标切片是否在列表中');
+            console.log('   2. 搜索框是否有内容（可能过滤了切片）');
+            console.log('   3. virtuosoRef 是否正确绑定');
+          }
+
+          console.log('🧹 清除滚动状态...');
+          clearScrollToSegment();
+          console.log('================================================\n');
+        }, 100);
+      }
+    } else {
+      if (scrollToSegmentId) {
+        console.log('⚠️ scrollToSegmentId 存在但 timestamp 无效');
+      }
+      if (scrollToSegmentTimestamp > 0) {
+        console.log('⚠️ timestamp 有效但 scrollToSegmentId 为空');
+      }
+    }
+
+    console.log('================================================\n');
+  }, [
+    scrollToSegmentId,
+    scrollToSegmentTimestamp,
+    doScrollToSegment,
+    clearScrollToSegment
+  ]);
 
   // URL 初始化时的滚动处理
   useEffect(() => {
@@ -139,6 +204,7 @@ const SegmentList: React.FC<SegmentListProps> = ({
       if (renderMode === 'image-text') {
         return (
           <div
+            data-segment-id={segment.id}
             onClick={() => handleSegmentClick(segment.id)}
             style={{ cursor: 'pointer', paddingBottom: '12px' }}
           >
@@ -153,6 +219,7 @@ const SegmentList: React.FC<SegmentListProps> = ({
 
       return (
         <div
+          data-segment-id={segment.id}
           onClick={() => handleSegmentClick(segment.id)}
           style={{ cursor: 'pointer', paddingBottom: '12px' }}
         >
@@ -192,6 +259,7 @@ const SegmentList: React.FC<SegmentListProps> = ({
       <div
         className={`flex-1 ${styles.scrollContainer}`}
         style={{ minHeight: 0, overflow: 'hidden' }}
+        data-virtuoso-container="segment-list"
       >
         <Virtuoso
           ref={virtuosoRef}

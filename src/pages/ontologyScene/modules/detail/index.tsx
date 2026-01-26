@@ -29,6 +29,9 @@ const OntologySceneObjectType = lazy(() => import('../objectType'));
 const OntologySceneAttributes = lazy(() => import('../attributes'));
 const OntologySceneLinks = lazy(() => import('../links'));
 const OntologySceneBehaviorActions = lazy(() => import('../behaviorActions'));
+const OntologySceneBehaviorActionDetail = lazy(
+  () => import('../behaviorActionDetail')
+);
 const OntologySceneFunctions = lazy(() => import('../functions'));
 const OntologySceneBehaviorLog = lazy(() => import('../behaviorLog'));
 
@@ -38,19 +41,14 @@ const MenuGroup = Menu.ItemGroup;
 export default function OntologySceneDetail() {
   const history = useHistory();
   const location = useLocation();
-  const params = useParams<{ id: string }>();
-  const match = useRouteMatch();
+  const { id: OSId, moduleType = ONTOLOGY_SCENE_MENU_ITEM_KEYS.GRAPH } =
+    useParams<{
+      id: string;
+      moduleType: string;
+    }>();
+  // const match = useRouteMatch();
 
   const [sceneTitle, setSceneTitle] = useState('新建本体场景');
-
-  // 从当前路径中提取子路由名称，用于菜单选中状态
-  const activeTab = React.useMemo(() => {
-    const pathname = location.pathname;
-    const routeMatch = pathname.match(
-      /\/tenant\/compute\/modaforge\/ontologyScene\/detail\/[^/]+\/([^/]+)$/
-    );
-    return routeMatch ? routeMatch[1] : ONTOLOGY_SCENE_MENU_ITEM_KEYS.GRAPH;
-  }, [location.pathname]);
 
   const menuData = [
     {
@@ -110,10 +108,10 @@ export default function OntologySceneDetail() {
       ]
     }
   ];
+  const basePath = `/tenant/compute/modaforge/ontologyScene/detail/${OSId}`;
 
   const handleMenuSelect = (key: string) => {
     // 导航到对应的子路由
-    const basePath = `${match.url}`;
     history.push(`${basePath}/${key}`);
   };
 
@@ -157,7 +155,7 @@ export default function OntologySceneDetail() {
       />
       <Layout className="flex flex-row">
         <Menu
-          selectedKeys={[activeTab]}
+          selectedKeys={[moduleType]}
           className={cls(
             styles['ontology-scene-detail-menu'],
             'max-w-[200px] border-r border-[var(--color-border-2)] bg-white'
@@ -178,35 +176,40 @@ export default function OntologySceneDetail() {
             <Switch>
               <Redirect
                 exact
-                from={match.path}
-                to={`${match.url}/${ONTOLOGY_SCENE_MENU_ITEM_KEYS.GRAPH}`}
+                from={basePath}
+                to={`${basePath}/${ONTOLOGY_SCENE_MENU_ITEM_KEYS.GRAPH}`}
               />
               <Route
-                path={`${match.path}/${ONTOLOGY_SCENE_MENU_ITEM_KEYS.GRAPH}`}
+                path={`${basePath}/${ONTOLOGY_SCENE_MENU_ITEM_KEYS.GRAPH}`}
                 component={OntologySceneGraph}
               />
               <Route
-                path={`${match.path}/${ONTOLOGY_SCENE_MENU_ITEM_KEYS.OBJECT_TYPE}`}
+                path={`${basePath}/${ONTOLOGY_SCENE_MENU_ITEM_KEYS.OBJECT_TYPE}`}
                 component={OntologySceneObjectType}
               />
               <Route
-                path={`${match.path}/${ONTOLOGY_SCENE_MENU_ITEM_KEYS.ATTRIBUTES}`}
+                path={`${basePath}/${ONTOLOGY_SCENE_MENU_ITEM_KEYS.ATTRIBUTES}`}
                 component={OntologySceneAttributes}
               />
               <Route
-                path={`${match.path}/${ONTOLOGY_SCENE_MENU_ITEM_KEYS.LINKS}`}
+                path={`${basePath}/${ONTOLOGY_SCENE_MENU_ITEM_KEYS.LINKS}`}
                 component={OntologySceneLinks}
               />
               <Route
-                path={`${match.path}/${ONTOLOGY_SCENE_MENU_ITEM_KEYS.BEHAVIOR_ACTIONS}`}
+                path={`${basePath}/${ONTOLOGY_SCENE_MENU_ITEM_KEYS.BEHAVIOR_ACTIONS}`}
                 component={OntologySceneBehaviorActions}
+                exact
               />
               <Route
-                path={`${match.path}/${ONTOLOGY_SCENE_MENU_ITEM_KEYS.FUNCTIONS}`}
+                path={`${basePath}/${ONTOLOGY_SCENE_MENU_ITEM_KEYS.BEHAVIOR_ACTIONS}/:pageMode`}
+                component={OntologySceneBehaviorActionDetail}
+              />
+              <Route
+                path={`${basePath}/${ONTOLOGY_SCENE_MENU_ITEM_KEYS.FUNCTIONS}`}
                 component={OntologySceneFunctions}
               />
               <Route
-                path={`${match.path}/${ONTOLOGY_SCENE_MENU_ITEM_KEYS.BEHAVIOR_LOG}`}
+                path={`${basePath}/${ONTOLOGY_SCENE_MENU_ITEM_KEYS.BEHAVIOR_LOG}`}
                 component={OntologySceneBehaviorLog}
               />
             </Switch>
