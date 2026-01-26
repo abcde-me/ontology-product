@@ -1,0 +1,11 @@
+.behavior {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.behavior-content {
+  padding: 0 24px 24px;
+  flex: 1;
+  overflow: hidden;
+}

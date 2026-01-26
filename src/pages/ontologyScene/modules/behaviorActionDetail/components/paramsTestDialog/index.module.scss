@@ -1,0 +1,79 @@
+.params-dialog {
+  :global(.arco-modal-header) {
+    padding: 20px 24px !important;
+  }
+
+  :global(.arco-modal-content) {
+    padding: 0 24px 24px !important;
+  }
+
+  .params-dialog-content {
+    display: flex;
+    max-height: 80vh;
+    overflow: hidden;
+
+    .header {
+      padding: 8px 16px;
+      border-top-left-radius: 12px;
+      border: 1px solid #c3c7d4;
+      border-bottom-color: #e2e8f0;
+    }
+
+    .left {
+      .header {
+        border-radius: 12px 0 0 0;
+        flex-shrink: 0;
+      }
+
+      .body {
+        flex: 1;
+        border: 1px solid #c3c7d4;
+        border-top: none;
+        border-bottom: none;
+      }
+
+      .footer {
+        padding: 16px;
+        border: 1px solid #c3c7d4;
+        border-top-color: #e2e8f0;
+        border-radius: 0 0 0 12px;
+      }
+    }
+
+    .right {
+      .header {
+        border-radius: 0 12px 0 0;
+        border-left: none;
+      }
+
+      .body {
+        flex: 1;
+        border: 1px solid #c3c7d4;
+        border-top: none;
+        border-left: none;
+        border-radius: 0 0 12px 0;
+      }
+    }
+
+    .left,
+    .right {
+      display: flex;
+      flex-direction: column;
+      flex-basis: 50%;
+      flex-shrink: 0;
+
+      .body {
+        padding: 12px 16px;
+        overflow-y: auto;
+
+        &::-webkit-scrollbar {
+          display: none;
+        }
+
+        :global(.aa-no-data-card) {
+          margin-top: 80px;
+        }
+      }
+    }
+  }
+}
