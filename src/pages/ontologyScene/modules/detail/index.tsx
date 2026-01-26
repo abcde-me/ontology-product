@@ -1,5 +1,5 @@
 import React, { useState, Suspense, lazy } from 'react';
-import { Layout, Menu } from '@arco-design/web-react';
+import { Layout, Menu, Spin } from '@arco-design/web-react';
 import {
   IconApps,
   IconSettings,
@@ -171,7 +171,7 @@ export default function OntologySceneDetail() {
           <Suspense
             fallback={
               <div className="flex h-full items-center justify-center">
-                <div>加载中...</div>
+                <Spin />
               </div>
             }
           >
