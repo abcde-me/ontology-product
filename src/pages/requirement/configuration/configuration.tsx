@@ -286,7 +286,7 @@ export default function RequirementConfig() {
   useEffect(() => {
     const splitCount =
       publishData?.split_task_package ||
-      labelToolForm.getFieldValue('split_task_package');
+      distributeForm.getFieldValue('split_task_package');
     const qualityRounds = qualityTaskForm.getFieldValue('qc_round') ?? 0;
     const totalDataAmount = getTotal(selectedData) || 0;
 
@@ -1033,7 +1033,7 @@ export default function RequirementConfig() {
                   maxLength={200}
                 />
               </FormItem>
-              <div className="basic-title">任务配置</div>
+              <div className="basic-title">标注配置</div>
               <FormItem
                 label="标注类型:"
                 required
@@ -1054,98 +1054,7 @@ export default function RequirementConfig() {
                   getChildAnnotationType={getAnnotationType}
                 />
               </FormItem>
-              <FormItem
-                field="dataset"
-                label="标注数据:"
-                required={type !== 'edit'}
-                style={{ marginBottom: 24 }}
-              >
-                <div className="data-content-set">
-                  <Button
-                    onClick={() => {
-                      setModalVisible(true);
-                    }}
-                  >
-                    {type === 'edit' ? '新增数据' : '选择数据'}
-                  </Button>
-                  <div className="data-set-text">
-                    已选数据量 {getTotal(selectedData) || 0}
-                  </div>
-                  {type === 'edit' && (
-                    <>
-                      <div className="data-set-text">
-                        | 历史全部数据量 {requirementDetail?.label_count || 0}
-                      </div>
-                      <Link
-                        onClick={() => setHistoryModalVisible(true)}
-                        style={{ marginLeft: 10 }}
-                      >
-                        历史记录
-                      </Link>
-                      <HistoryRecordModal
-                        visible={historyModalVisible}
-                        onClose={() => setHistoryModalVisible(false)}
-                        data={requirementDetail?.pkg_edit_history || []}
-                      />
-                    </>
-                  )}
-                </div>
-                {selectedData?.length <= 0 &&
-                  type !== 'edit' &&
-                  isShowDataErrorInfo && (
-                    <div className="data-error-info error-info-text">
-                      请选择数据
-                    </div>
-                  )}
-              </FormItem>
-              <FormItem
-                initialValue={1}
-                field="split_task_package"
-                label="拆分任务包:"
-                required
-                style={{ marginBottom: 24 }}
-                rules={[
-                  {
-                    required: true,
-                    type: 'number',
-                    validateTrigger: ['onChange', 'onBlur'],
-                    validator: (value, callback) => {
-                      if (!value) {
-                        callback('请输入拆分任务包数量');
-                      } else if (value < 1) {
-                        callback('拆分任务包数量不能小于1');
-                      }
-                      return true;
-                    }
-                  }
-                ]}
-              >
-                {selectedData?.length === 0 ? (
-                  <div className="data-content-set">
-                    <span style={{ color: '#86909c', fontSize: '14px' }}>
-                      请先选择标注数据
-                    </span>
-                  </div>
-                ) : (
-                  <InputNumber
-                    mode="button"
-                    onChange={(value) => {
-                      setPublishData({
-                        ...publishData,
-                        split_task_package: value
-                      });
-                    }}
-                    min={1}
-                    max={
-                      getTotal(selectedData) ||
-                      requirementDetail?.label_count ||
-                      1
-                    }
-                    precision={0}
-                    style={{ width: 200 }}
-                  />
-                )}
-              </FormItem>
+
               {showPreLabeling && (
                 <FormItem
                   field="model_id"
@@ -1162,18 +1071,6 @@ export default function RequirementConfig() {
                 </FormItem>
               )}
             </Form>
-            <DataSourceModal
-              key={annotationTypeVal}
-              fileType={toolFileType[Number(annotationTypeVal)]}
-              visible={modalVisible}
-              type={type}
-              onClose={() => {
-                setModalVisible(false);
-              }}
-              title="选择数据"
-              getChildTableSelectData={handleChildData}
-              requirementDetail={requirementDetail}
-            />
           </div>
           {/* 工具配置部分 */}
           {(annotationTypeContentVal ===
@@ -1260,7 +1157,7 @@ export default function RequirementConfig() {
           )}
           {/* 质检任务配置 */}
           <div className="quality-task-configuration">
-            <div className="basic-title">质检任务配置</div>
+            <div className="basic-title">质检配置</div>
             <Form
               form={qualityTaskForm}
               className="quality-task-form"
@@ -1270,7 +1167,7 @@ export default function RequirementConfig() {
                 if ('qc_round' in changedValues) {
                   const splitCount =
                     publishData?.split_task_package ||
-                    labelToolForm.getFieldValue('split_task_package');
+                    distributeForm.getFieldValue('split_task_package');
                   const totalDataAmount =
                     getTotal(selectedData) ||
                     requirementDetail?.label_count ||
@@ -1344,6 +1241,98 @@ export default function RequirementConfig() {
                   <Text style={{ fontSize: '14px' }}>分钟</Text>
                 </Space>
               </FormItem>
+              <FormItem
+                field="dataset"
+                label="标注数据:"
+                required={type !== 'edit'}
+                // style={{ marginBottom: 24 }}
+              >
+                <div className="data-content-set">
+                  <Button
+                    onClick={() => {
+                      setModalVisible(true);
+                    }}
+                  >
+                    {type === 'edit' ? '新增数据' : '选择数据'}
+                  </Button>
+                  <div className="data-set-text">
+                    已选数据量 {getTotal(selectedData) || 0}
+                  </div>
+                  {type === 'edit' && (
+                    <>
+                      <div className="data-set-text">
+                        | 历史全部数据量 {requirementDetail?.label_count || 0}
+                      </div>
+                      <Link
+                        onClick={() => setHistoryModalVisible(true)}
+                        style={{ marginLeft: 10 }}
+                      >
+                        历史记录
+                      </Link>
+                      <HistoryRecordModal
+                        visible={historyModalVisible}
+                        onClose={() => setHistoryModalVisible(false)}
+                        data={requirementDetail?.pkg_edit_history || []}
+                      />
+                    </>
+                  )}
+                </div>
+                {selectedData?.length <= 0 &&
+                  type !== 'edit' &&
+                  isShowDataErrorInfo && (
+                    <div className="data-error-info error-info-text">
+                      请选择数据
+                    </div>
+                  )}
+              </FormItem>
+              <FormItem
+                initialValue={1}
+                field="split_task_package"
+                label="拆分任务包:"
+                required
+                // style={{ marginBottom: 24 }}
+                rules={[
+                  {
+                    required: true,
+                    type: 'number',
+                    validateTrigger: ['onChange', 'onBlur'],
+                    validator: (value, callback) => {
+                      if (!value) {
+                        callback('请输入拆分任务包数量');
+                      } else if (value < 1) {
+                        callback('拆分任务包数量不能小于1');
+                      }
+                      return true;
+                    }
+                  }
+                ]}
+              >
+                {selectedData?.length === 0 ? (
+                  <div className="data-content-set">
+                    <span style={{ color: '#86909c', fontSize: '14px' }}>
+                      请先选择标注数据
+                    </span>
+                  </div>
+                ) : (
+                  <InputNumber
+                    mode="button"
+                    onChange={(value) => {
+                      setPublishData({
+                        ...publishData,
+                        split_task_package: value
+                      });
+                    }}
+                    min={1}
+                    max={
+                      getTotal(selectedData) ||
+                      requirementDetail?.label_count ||
+                      1
+                    }
+                    precision={0}
+                    style={{ width: 200 }}
+                  />
+                )}
+              </FormItem>
               <FormItem field="taskDistribution" label="分配人员:" required>
                 <TaskDistributionPanel
                   qualityTaskForm={qualityTaskForm}
@@ -1378,6 +1367,18 @@ export default function RequirementConfig() {
           </div>
         </div>
       </Spin>
+      <DataSourceModal
+        key={annotationTypeVal}
+        fileType={toolFileType[Number(annotationTypeVal)]}
+        visible={modalVisible}
+        type={type}
+        onClose={() => {
+          setModalVisible(false);
+        }}
+        title="选择数据"
+        getChildTableSelectData={handleChildData}
+        requirementDetail={requirementDetail}
+      />
     </div>
   );
 }

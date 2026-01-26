@@ -4,7 +4,7 @@ import { InfoDescription } from '@ceai-front/arco-material';
 function QualityConfig({ requirementDetail }: { requirementDetail: any }) {
   const qualityConfigData = [
     {
-      title: '质检任务配置',
+      title: '质检配置',
       items: [
         {
           label: '质检轮次',
