@@ -4,6 +4,9 @@
 
   .page-header {
     padding: 24px;
+    display: flex;
+    gap: 12px;
+    align-items: center;
     font-family: PingFang SC;
     font-weight: 600;
     font-size: 20px;

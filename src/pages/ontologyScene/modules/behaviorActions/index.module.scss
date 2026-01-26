@@ -1,27 +1,11 @@
-.action-list {
-  .search {
-    border-radius: 0 4px 4px 0;
-  }
+.behavior {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
 
-  .action-table {
-    :global(.arco-table-tr) {
-      &:hover {
-        background: #f2f8ff !important;
-
-        :global(.hover-blue) {
-          color: #184ff2 !important;
-        }
-      }
-    }
-
-    :global(.arco-table-td) {
-      color: #23293b;
-    }
-  }
-
-  :global(.hover-blue) {
-    &:hover {
-      cursor: pointer;
-    }
-  }
+.behavior-content {
+  padding: 0 24px 24px;
+  flex: 1;
+  overflow: hidden;
 }
