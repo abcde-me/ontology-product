@@ -47,15 +47,18 @@ import {
 } from 'react-router-dom';
 import Login from './pages/login';
 import { Page404 } from './pages/errorPages';
-import Header from './pages/admin/layout/header';
+// import Header from './pages/admin/layout/header';
+import { Header } from '@ceai-front/arco-material';
 import { isInFrame, isWujie } from './utils/env';
 import { useUserInfo, useUserInfoStore } from './store/userInfoStore';
-import { usePermission } from '@/hooks';
+import { usePathChange, usePermission } from '@/hooks';
 import { menus } from '@/pages/admin/layout/menus';
 import { is } from 'immer/dist/internal';
 import { getLocalStorage } from './utils/storage';
 import { ProjectIdKey } from './utils/const';
 import { isSameArray } from './utils/array';
+import { logout, openNewPage } from '@/utils/env';
+import { handlePathName } from '@/hooks/use-path-change';
 
 initI18n();
 patchHistoryForLocationChange();
@@ -117,7 +120,41 @@ function App() {
   const { userActions, setUserMenus, setUserActions, projectId, setProjectId } =
     useUserInfoStore();
   const { createPermissionFilter, setUserPermissions } = usePermission();
-  const userInfo = useUserInfo();
+  const userInfo = useUserInfo() || {
+    id: '',
+    name: '',
+    account: '',
+    phone: '',
+    description: '',
+    position: '',
+    organization: {
+      id: '',
+      name: '',
+      description: '',
+      fullOrgPath: ''
+    },
+    status: '',
+    createdAt: '',
+    roles: [
+      {
+        subjectRoleId: '',
+        id: '',
+        name: '',
+        description: '',
+        scope: '',
+        builtin: true,
+        admin: true,
+        organizationId: '',
+        organizations: null,
+        projects: null,
+        createdBy: '',
+        createdByName: '',
+        createdAt: ''
+      }
+    ]
+  };
+
+  const { pushPath } = usePathChange();
 
   // 用于追踪是否已经初始化过权限
   const permissionInitializedRef = useRef(false);
@@ -218,7 +255,21 @@ function App() {
   return (
     <Layout className="flex h-full flex-col">
       <Layout.Header className={cls({ hidden })}>
-        {!hidden && <Header />}
+        {!hidden && (
+          <Header
+            title="多模态数据治理平台"
+            openHelpLink={(linkInfo) => {
+              openNewPage(
+                '/modaforge/assets/多模态数据治理平台 - 用户手册.pdf'
+              );
+            }}
+            userInfo={userInfo}
+            logout={logout}
+            accountCallback={() => {
+              pushPath(handlePathName('/userinfo'));
+            }}
+          />
+        )}
       </Layout.Header>
       <Layout.Content className="flex-auto overflow-auto bg-[var(--color-bg-4)]">
         <Switch>

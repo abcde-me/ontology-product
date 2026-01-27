@@ -1510,10 +1510,10 @@
     ahooks "^3.7.8"
     react-resizable "^3.0.4"
 
-"@ceai-front/arco-material@^1.1.3":
-  version "1.1.3"
-  resolved "http://npm.cestc.cn/@ceai-front/arco-material/download/@ceai-front/arco-material-1.1.3.tgz#bec04815fbee844ceabeb8a603d7039438565e28"
-  integrity sha1-vsBIFfvuhEzqvrimA9cDlDhWXig=
+"@ceai-front/arco-material@^1.1.4":
+  version "1.1.4"
+  resolved "http://npm.cestc.cn/@ceai-front/arco-material/download/@ceai-front/arco-material-1.1.4.tgz#99c16fe5301afee458d4e91376c9a8e569b14f17"
+  integrity sha1-mcFv5TAa/uRY1OkTdsmo5WmxTxc=
   dependencies:
     "@ccf2e/arco-material" "^0.7.2"
     "@easyv/react-icons" "^1.0.0"
