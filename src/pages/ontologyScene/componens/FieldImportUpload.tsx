@@ -2,7 +2,7 @@ import { Upload, Message } from '@arco-design/web-react';
 import React, { useState } from 'react';
 import { PrefixAimdp } from '@/api/endpoints';
 import { IconUpload, IconDownload } from '@arco-design/web-react/icon';
-import { UploadStatus } from '../../../types/objectType';
+import { UploadStatus } from '../types/objectType';
 import { downloadDataAssetFieldsTemplate } from '@/api/dataAsset';
 import { useUserInfoStore } from '@/store/userInfoStore';
 
