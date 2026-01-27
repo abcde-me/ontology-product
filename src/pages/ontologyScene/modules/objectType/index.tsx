@@ -11,6 +11,7 @@ import { Spin } from '@arco-design/web-react';
 // 懒加载子组件
 const OntologySceneObjectTypeList = lazy(() => import('./list'));
 const OntologySceneObjectTypeCreate = lazy(() => import('./create'));
+const OntologySceneObjectTypeEdit = lazy(() => import('./edit'));
 
 // 对象类型
 export default function OntologySceneObjectType() {
@@ -34,6 +35,10 @@ export default function OntologySceneObjectType() {
         <Route
           path={`${match.path}/create`}
           component={OntologySceneObjectTypeCreate}
+        />
+        <Route
+          path={`${match.path}/edit/:objectTypeId`}
+          component={OntologySceneObjectTypeEdit}
         />
       </Switch>
     </Suspense>
