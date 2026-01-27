@@ -895,7 +895,6 @@ const DatasetForm = React.forwardRef<
                   icon={<IconPlus />}
                   className={styles.addSceneBtn}
                   onClick={() => {
-                    console.log(tagList, 'tttt');
                     setAddSceneTypeVisible(true);
                   }}
                 >

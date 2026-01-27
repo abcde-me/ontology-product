@@ -2174,6 +2174,7 @@ const DatasetManagement: React.FC = () => {
                 return option?.child?.props?.children?.props?.children[0]?.props
                   ?.children;
               }}
+              dropdownMenuClassName="pb-8"
             >
               {datasetSceneOption.map((item) => (
                 <Select.Option key={item.id} value={item.id}>
@@ -2188,6 +2189,16 @@ const DatasetManagement: React.FC = () => {
                   </div>
                 </Select.Option>
               ))}
+              <Button
+                type="text"
+                icon={<IconPlus />}
+                className={styles.addSceneBtn}
+                onClick={() => {
+                  setAddSceneTypeVisible(true);
+                }}
+              >
+                新建场景分类
+              </Button>
             </Select>
           </Form.Item>
         </Form>
