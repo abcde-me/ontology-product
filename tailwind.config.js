@@ -56,6 +56,7 @@ module.exports = {
           800: '#2D31A6'
         },
         default: '#1E293B',
+        'blue-primary': '#184FF2',
         ...tailwindThemeVarDefine
       },
       screens: {
