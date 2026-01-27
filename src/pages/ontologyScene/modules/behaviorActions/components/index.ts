@@ -1,2 +1,2 @@
-export * from './action-list';
-export * from './behavior-detail';
+export * from './ActionList';
+export * from './BehaviorDetail';

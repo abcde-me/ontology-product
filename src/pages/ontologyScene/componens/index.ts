@@ -1,1 +1,1 @@
-export * from './os-drawer';
+export * from './OSDrawer';
