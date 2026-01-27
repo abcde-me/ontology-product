@@ -20,6 +20,10 @@ function LabelInfo({
         />
       );
     case 'TEXT_CLASSIFICATION':
+    case 'AUDIO_CLASSIFICATION':
+    case 'AUDIO_SPLIT':
+    case 'VIDEO_CLASSIFICATION':
+    case 'VIDEO_SPLIT':
       return (
         <TextClassifyLabelInfo labelInfo={requirementDetail?.file_labels} />
       );
