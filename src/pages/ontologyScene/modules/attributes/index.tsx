@@ -10,7 +10,6 @@ import { Spin } from '@arco-design/web-react';
 
 // 懒加载子组件
 const OntologySceneAttributesList = lazy(() => import('./list'));
-const OntologySceneAttributesCreate = lazy(() => import('./createPublic'));
 
 // 对象类型
 export default function OntologySceneObjectType() {
@@ -30,10 +29,6 @@ export default function OntologySceneObjectType() {
         <Route
           path={`${match.path}/list`}
           component={OntologySceneAttributesList}
-        />
-        <Route
-          path={`${match.path}/create`}
-          component={OntologySceneAttributesCreate}
         />
       </Switch>
     </Suspense>
