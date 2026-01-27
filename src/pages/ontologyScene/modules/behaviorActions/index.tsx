@@ -2,11 +2,13 @@ import React, { useState } from 'react';
 import { Drawer, Tabs } from '@arco-design/web-react';
 import styles from './index.module.scss';
 import { ActionList, BehaviorDetail } from './components';
+import { BehaviorActionItem } from '@/pages/ontologyScene/types/behavior_actions';
 
 // 行为动作
 export default function OntologySceneBehaviorActions() {
   const [activeTab, setActiveTab] = useState('list');
   const [showDetail, setShowDetail] = useState(false);
+  const [behaviorData, setBehaviorData] = useState<BehaviorActionItem>();
 
   return (
     <div
@@ -21,9 +23,24 @@ export default function OntologySceneBehaviorActions() {
         <Tabs.TabPane title={'行为测试'} key={'test'} />
       </Tabs>
       <div className={styles['behavior-content']}>
-        {activeTab === 'list' ? <ActionList /> : <div>这里写行为测试</div>}
+        {activeTab === 'list' ? (
+          <ActionList
+            onViewDetail={(data) => {
+              setShowDetail(true);
+            }}
+          />
+        ) : (
+          <div>这里写行为测试</div>
+        )}
       </div>
-      <BehaviorDetail />
+      <BehaviorDetail
+        show={showDetail}
+        onClose={() => {
+          setShowDetail(false);
+          setBehaviorData(undefined);
+        }}
+        data={behaviorData}
+      />
     </div>
   );
 }

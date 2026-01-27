@@ -71,7 +71,9 @@ const OBJECT_TYPE_FILTERS = Array.from(
   value: type
 }));
 
-export const ActionList = (props: {}) => {
+export const ActionList = (props: {
+  onViewDetail: (data: BehaviorActionItem) => void;
+}) => {
   const [keyword, setKeyword] = useState('');
   const [form] = Form.useForm();
   const [data] = useState<BehaviorActionItem[]>(MOCK_ACTIONS);
@@ -116,7 +118,7 @@ export const ActionList = (props: {}) => {
             'hover-blue font-PingFangSc text-[14px] font-medium leading-[22px] '
           }
           onClick={() => {
-            route2ActionDetail('view', value);
+            props.onViewDetail(record);
           }}
         >
           {value}

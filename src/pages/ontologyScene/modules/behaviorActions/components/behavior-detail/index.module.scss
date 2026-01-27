@@ -1,0 +1,59 @@
+.behavior-detail {
+  .base-info-item {
+    flex-basis: 50%;
+    flex-shrink: 0;
+    margin-bottom: 12px;
+    padding-right: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    overflow: hidden;
+    font-family: PingFang SC;
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 22px;
+
+    .item-field {
+      width: 98px;
+      color: #646c85;
+      flex-shrink: 0;
+    }
+
+    .item-value {
+      flex: 1;
+      color: #0f131f;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      display: flex;
+      gap: 4px;
+      align-items: center;
+
+      .icon-content {
+        width: 16px;
+        height: 16px;
+        border-radius: 2px;
+        background: #0ab58d;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+    }
+  }
+
+  .behavior-other-info {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+
+    :global(.arco-tabs-header-title) {
+      padding: 0 0 8px;
+      margin-right: 32px;
+      color: #184ff2;
+    }
+
+    :global(.arco-tabs-header-ink) {
+      background: #184ff2;
+    }
+  }
+}
