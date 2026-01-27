@@ -71,6 +71,7 @@ import DatasetMoveIcon from '@/pages/datasetManagement/assets/dataset_move.svg';
 import DatasetMoveActiveIcon from '@/pages/datasetManagement/assets/dataset_move_active.svg';
 import { useHasPermission } from '@/store/userInfoStore';
 import { useParams } from '@/utils/url';
+import AddSceneFormModal from '@/components/datasetform/AddSceneForm';
 
 // 时间格式化函数
 const formatDateTime = (dateTimeString: string): string => {
@@ -2120,6 +2121,10 @@ const DatasetManagement: React.FC = () => {
         onSubmit={handleSubmit}
         onCancel={closeModal}
         sceneOption={datasetSceneOption}
+        sceneTypeForm={sceneTypeForm}
+        handleAddSceneTypeSubmit={handleAddSceneTypeSubmit}
+        addSceneTypeVisible={addSceneTypeVisible}
+        setAddSceneTypeVisible={setAddSceneTypeVisible}
         ref={childRef}
       />
       {/* 导出数据集弹窗 */}
@@ -2135,43 +2140,13 @@ const DatasetManagement: React.FC = () => {
       />
 
       {/* 新增场景类型弹窗 */}
-      <Modal
-        className={styles.addSceneTypeModal}
-        visible={addSceneTypeVisible}
-        onOk={() => sceneTypeForm.submit()}
-        onCancel={() => {
-          sceneTypeForm.resetFields();
-          setAddSceneTypeVisible(false);
-        }}
-        title="新增场景类型"
-      >
-        <Form form={sceneTypeForm} onSubmit={handleAddSceneTypeSubmit}>
-          <Form.Item
-            label="场景分类名称："
-            field="sceneTypeName"
-            rules={[{ required: true, message: '请输入场景类型名称' }]}
-          >
-            <Input placeholder="请输入名称" />
-          </Form.Item>
-          <Form.Item label="场景分类标签：" field="sceneTypeTag">
-            <Select
-              mode="multiple"
-              placeholder="请选择标签"
-              options={newTagList.map((item) => ({
-                label: item.name,
-                value: item.name
-              }))}
-            />
-          </Form.Item>
-          <Form.Item
-            label="描述说明："
-            field="sceneTypeDesc"
-            rules={[{ required: true, message: '请输入描述说明' }]}
-          >
-            <Input.TextArea placeholder="可以描述数据集的用途、特点或其他相关信息" />
-          </Form.Item>
-        </Form>
-      </Modal>
+      <AddSceneFormModal
+        addSceneTypeVisible={addSceneTypeVisible}
+        sceneTypeForm={sceneTypeForm}
+        setAddSceneTypeVisible={setAddSceneTypeVisible}
+        handleAddSceneTypeSubmit={handleAddSceneTypeSubmit}
+        newTagList={newTagList}
+      />
 
       {/* 移动数据集弹窗 */}
       <Modal
@@ -2199,6 +2174,7 @@ const DatasetManagement: React.FC = () => {
                 return option?.child?.props?.children?.props?.children[0]?.props
                   ?.children;
               }}
+              dropdownMenuClassName="pb-8"
             >
               {datasetSceneOption.map((item) => (
                 <Select.Option key={item.id} value={item.id}>
@@ -2213,6 +2189,16 @@ const DatasetManagement: React.FC = () => {
                   </div>
                 </Select.Option>
               ))}
+              <Button
+                type="text"
+                icon={<IconPlus />}
+                className={styles.addSceneBtn}
+                onClick={() => {
+                  setAddSceneTypeVisible(true);
+                }}
+              >
+                新建场景分类
+              </Button>
             </Select>
           </Form.Item>
         </Form>
