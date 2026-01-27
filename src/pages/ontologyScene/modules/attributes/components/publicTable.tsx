@@ -173,7 +173,7 @@ export default function PublicTable() {
       width: 200
     },
     {
-      title: '所属对象类型?',
+      title: '所属对象类型',
       dataIndex: 'objectTypes',
       width: 200,
       render: (value) => {
@@ -223,7 +223,7 @@ export default function PublicTable() {
       )
     },
     {
-      title: '引用计数 :',
+      title: '引用计数',
       dataIndex: 'referenceCount',
       width: 120,
       sorter: true,
@@ -234,7 +234,7 @@ export default function PublicTable() {
       )
     },
     {
-      title: '最新修改时间 :',
+      title: '最新修改时间',
       dataIndex: 'lastModifiedTime',
       width: 180,
       sorter: true,
