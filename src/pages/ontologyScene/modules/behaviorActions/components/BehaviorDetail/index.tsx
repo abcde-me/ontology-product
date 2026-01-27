@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { BehaviorActionItem } from '@/pages/ontologyScene/types/behavior_actions';
+import { BehaviorActionItem } from '@/pages/ontologyScene/types/behaviorActions';
 import styles from './index.module.scss';
 import { OsDrawer } from '@/pages/ontologyScene/componens';
 import { Tabs } from '@arco-design/web-react';
