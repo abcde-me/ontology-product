@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Tabs } from '@arco-design/web-react';
 import { useHistory, useLocation } from 'react-router-dom';
-import NormalTable from './components/normalTable';
-import PublicTable from './components/publicTable';
+import NormalTable from './components/NormalTable';
+import PublicTable from './components/PublicTable';
 import styles from './list.module.scss';
 
 export default function OntologySceneAttributesList() {
