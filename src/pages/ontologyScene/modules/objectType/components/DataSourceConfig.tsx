@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Radio, Select, Button } from '@arco-design/web-react';
-import FieldImportUpload from './FieldImportUpload';
+import FieldImportUpload from '../../../componens/FieldImportUpload';
 
 export type DataSourceType = 'local_csv' | 'data_directory_sync';
 

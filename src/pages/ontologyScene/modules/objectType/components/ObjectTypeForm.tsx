@@ -21,7 +21,7 @@ import {
   IconLink
 } from '@arco-design/web-react/icon';
 import ArchiveIcon from '../../../assets/archive.svg';
-import FieldImportUpload from './FieldImportUpload';
+import FieldImportUpload from '../../../componens/FieldImportUpload';
 import BindPublicAttributeModal, {
   PublicAttribute
 } from './BindPublicAttributeModal';

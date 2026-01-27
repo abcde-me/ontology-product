@@ -1,0 +1,16 @@
+.local-csv-form-item {
+  :global(.arco-form-label-item .arco-form-item-symbol) {
+    display: none;
+  }
+}
+
+.table-select-group {
+  &:global(.arco-input-group) {
+    width: unset !important;
+  }
+  .table-select-wrapper {
+    :global(.arco-select-view) {
+      border-right-width: 1px !important;
+    }
+  }
+}
