@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Button,
   Form,
@@ -15,9 +15,11 @@ import {
   ProButton,
   SearchTable
 } from '@ceai-front/arco-material';
-import { useHistory, useParams } from 'react-router-dom';
 import { useWorkflowTable } from '../../../hooks/useTable';
 import styles from '../list.module.scss';
+import PublicAttributeModal, {
+  PublicAttributeFormData
+} from './PublicAttributeModal';
 
 // 公共属性数据接口
 export interface PublicAttributeItem {
@@ -94,8 +96,13 @@ const MOCK_DATA: PublicAttributeItem[] = [
 
 export default function PublicTable() {
   const [form] = Form.useForm();
-  const history = useHistory();
-  const { id: OSId } = useParams<{ id: string }>();
+
+  // 弹窗相关状态
+  const [modalVisible, setModalVisible] = useState(false);
+  const [modalMode, setModalMode] = useState<'create' | 'edit'>('create');
+  const [editingRecord, setEditingRecord] =
+    useState<PublicAttributeItem | null>(null);
+  const [submitLoading, setSubmitLoading] = useState(false);
 
   // 使用 useTable hook
   const { data, loading, pagination, refresh, submit, onChange } =
@@ -134,17 +141,46 @@ export default function PublicTable() {
       defaultPageSize: 10
     });
 
-  // 跳转到创建页面
+  // 打开创建弹窗
   const handleCreate = () => {
-    history.push(
-      `/tenant/compute/modaforge/ontologyScene/detail/${OSId}/attributes/create`
-    );
+    setModalMode('create');
+    setEditingRecord(null);
+    setModalVisible(true);
   };
 
-  // 处理编辑
+  // 打开编辑弹窗
   const handleEdit = (record: PublicAttributeItem) => {
-    // TODO: 实现跳转到编辑页面
-    console.log('Edit:', record);
+    setModalMode('edit');
+    setEditingRecord(record);
+    setModalVisible(true);
+  };
+
+  // 处理弹窗提交
+  const handleModalSubmit = async (formData: PublicAttributeFormData) => {
+    setSubmitLoading(true);
+    try {
+      if (modalMode === 'create') {
+        // TODO: 调用创建API
+        await new Promise((resolve) => setTimeout(resolve, 500));
+        Message.success('创建成功');
+      } else {
+        // TODO: 调用编辑API
+        await new Promise((resolve) => setTimeout(resolve, 500));
+        Message.success('编辑成功');
+      }
+      setModalVisible(false);
+      refresh(); // 刷新表格数据
+    } catch (error) {
+      Message.error(modalMode === 'create' ? '创建失败' : '编辑失败');
+    } finally {
+      setSubmitLoading(false);
+    }
+  };
+
+  // 关闭弹窗
+  const handleModalCancel = () => {
+    setModalVisible(false);
+    setEditingRecord(null);
   };
 
   // 处理删除
@@ -324,6 +360,16 @@ export default function PublicTable() {
           />
         </div>
       )}
+
+      {/* 公共属性创建/编辑弹窗 */}
+      <PublicAttributeModal
+        visible={modalVisible}
+        mode={modalMode}
+        initialValues={editingRecord || undefined}
+        onCancel={handleModalCancel}
+        onSubmit={handleModalSubmit}
+        loading={submitLoading}
+      />
     </div>
   );
 }
