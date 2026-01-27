@@ -9,9 +9,13 @@
 
   .leftBox {
     width: 224px;
-    padding: 0 8px 0 4px;
+    padding: 0 8px 0 0;
     min-height: calc(100vh - 150px);
     border-right: 1px solid #e4e7ed;
+
+    :global(.arco-menu-vertical .arco-menu-inner) {
+      padding: 4px 8px 4px 0;
+    }
   }
 
   .rightBox {
@@ -45,6 +49,10 @@
         color: #1e293b;
         font-weight: 600;
       }
+    }
+
+    :global(.arco-table-no-data) {
+      padding: 130px;
     }
   }
 
@@ -114,4 +122,48 @@
 
 :global(.arco-modal-footer) :global(.arco-btn-secondary):focus {
   box-shadow: none;
+}
+
+.createTableModal {
+  width: 900px;
+
+  :global(.arco-modal-content) {
+    padding: 0 24px;
+  }
+
+  :global(.arco-textarea-disabled) {
+    background-color: #ffffff;
+  }
+
+  :global(.arco-select-addbefore) {
+    padding: 0;
+  }
+
+  .selectTable {
+    :global(.arco-select) {
+      margin-left: -2px;
+    }
+
+    :global(.arco-select):hover {
+      z-index: 100;
+    }
+
+    :global(.arco-select-focused) {
+      z-index: 100;
+    }
+
+    :global(.arco-select-addbefore) :global(.arco-select) {
+      margin-left: unset !important;
+    }
+
+    :global(.arco-select.arco-select-focused .arco-select-view) {
+      border-radius: 0 4px 4px 0;
+    }
+  }
+
+  .selectAddBefore {
+    :global(.arco-select-view) {
+      border-radius: 4px 0 0 4px !important;
+    }
+  }
 }

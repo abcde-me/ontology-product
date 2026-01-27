@@ -4,14 +4,16 @@ import { useStoreApi } from 'reactflow';
 import type { Edge, Node } from '../types';
 import { BlockEnum } from '../types';
 import { useStore } from '../store';
-import { getValidTreeNodes } from '../utils';
+import { flowIsStruct, getValidTreeNodes } from '../utils';
 import { CUSTOM_NODE, MAX_TREE_DEPTH } from '../constants';
 import { useNodesExtraData } from './use-nodes-data';
 import { useToastContext } from '@/pages/workflowConfig/components/toast';
 import { useGetLanguage } from '@/pages/workflowConfig/context/i18n';
+import { useParams } from 'react-router-dom';
 
 export const useChecklist = (nodes: Node[], edges: Edge[]) => {
   const { t } = useTranslation('plugin__console-plugin-appforge');
+  const { type: flowType = 'no_struct' } = useParams<Record<string, string>>();
   const language = useGetLanguage();
   const nodesExtraData = useNodesExtraData();
   const isChatMode = false;
@@ -34,7 +36,9 @@ export const useChecklist = (nodes: Node[], edges: Edge[]) => {
       let moreDataForCheckValid;
 
       if (node.type === CUSTOM_NODE) {
-        const { errorMessage } = nodesExtraData[node.data.type].checkValid(
+        // 兼容pic类型，映射到image
+        const nodeType = node.data.type;
+        const { errorMessage } = nodesExtraData[nodeType].checkValid(
           node.data,
           t,
           moreDataForCheckValid
@@ -48,7 +52,9 @@ export const useChecklist = (nodes: Node[], edges: Edge[]) => {
             type: node.data.type,
             title: node.data.title,
             toolIcon,
-            unConnected: !validNodes.find((n) => n.id === node.id),
+            unConnected:
+              !validNodes.find((n) => n.id === node.id) &&
+              node.data.flow_type !== 'struct',
             errorMessage
           });
         }
@@ -57,7 +63,8 @@ export const useChecklist = (nodes: Node[], edges: Edge[]) => {
 
     if (
       !isChatMode &&
-      !nodes.find((node) => node.data.type === BlockEnum.End)
+      !nodes.find((node) => node.data.type === BlockEnum.End) &&
+      flowType === 'no_struct'
     ) {
       // @ts-expect-error
       list.push({
@@ -81,7 +88,6 @@ export const useChecklist = (nodes: Node[], edges: Edge[]) => {
     t,
     strategyProviders
   ]);
-
   return needWarningNodes;
 };
 
@@ -96,6 +102,7 @@ export const useChecklistBeforePublish = () => {
   const nodesExtraData = useNodesExtraData();
   // const { data: strategyProviders } = useStrategyProviders()
   const strategyProviders = [] as any;
+  const { type: flowType = 'no_struct' } = useParams<Record<string, string>>();
 
   const handleCheckBeforePublish = useCallback(() => {
     const { getNodes, edges } = store.getState();
@@ -117,9 +124,12 @@ export const useChecklistBeforePublish = () => {
       const node = nodes[i];
       let moreDataForCheckValid;
 
-      const { errorMessage } = nodesExtraData[
-        node.data.type as BlockEnum
-      ].checkValid(node.data, t, moreDataForCheckValid);
+      const nodeType = node.data.type;
+      const { errorMessage } = nodesExtraData[nodeType as BlockEnum].checkValid(
+        node.data,
+        t,
+        moreDataForCheckValid
+      );
 
       if (errorMessage) {
         notify({
@@ -138,7 +148,10 @@ export const useChecklistBeforePublish = () => {
       }
     }
 
-    if (!nodes.find((node) => node.data.type === BlockEnum.End)) {
+    if (
+      !nodes.find((node) => node.data.type === BlockEnum.End) &&
+      flowType === 'no_struct'
+    ) {
       notify({ type: 'error', message: t('workflow.common.needEndNode') });
       return false;
     }

@@ -11,6 +11,7 @@ import NoData from '../no-data';
 import noDataElement from '@/components/no-data';
 import NoDataEmpty from '@/components/NoDataEmpty';
 import styles from '../../pages/dataCatalog/modal.module.css';
+import { NoDataCard } from '@ceai-front/arco-material';
 
 // 表格引用类型定义
 export interface UnifiedTableRef {
@@ -206,7 +207,11 @@ const UnifiedTable = forwardRef(
         pagination={false}
         border={true}
         onRow={getRowProps}
-        noDataElement={noDataElement({ description: '暂无数据' })}
+        noDataElement={
+          <div className={'flex h-[40vh] w-full items-center justify-center'}>
+            <NoDataCard />
+          </div>
+        }
         onChange={handleTableChange}
         className={styles['tableWrapper']}
         {...restProps}

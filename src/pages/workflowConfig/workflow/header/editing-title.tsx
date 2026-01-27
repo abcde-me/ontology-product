@@ -7,6 +7,7 @@ import Success11Icon from '@/pages/workflowConfig/styles/images/op-icons/success
 import { useStore as useTaskStore } from '@/pages/workflowConfig/task/store';
 import { IsOnline } from '@/types/workflowApi';
 import { IconClockCircle } from '@arco-design/web-react/icon';
+import styles from './index.module.scss';
 
 const EditingTitle = () => {
   const { t } = useTranslation('plugin__console-plugin-appforge');
@@ -18,15 +19,17 @@ const EditingTitle = () => {
   const workflowDetail = useTaskStore((s) => s.workflowDetail);
 
   return (
-    <div className="system-xs-regular save-info flex h-[18px] items-center text-text-tertiary">
+    <div
+      className={`system-xs-regular ${styles['save-info']} flex h-[18px] items-center text-text-tertiary`}
+    >
       {!!draftUpdatedAt && (
-        <div className="auto-save-part">
+        <div className={styles['auto-save-part']}>
           {t('workflow.common.autoSaved')}{' '}
           {formatTime(draftUpdatedAt / 1000, 'HH:mm:ss')}
         </div>
       )}
       <div
-        className={`publish-part ${workflowDetail?.is_online === IsOnline.online ? 'published' : 'not-published'}`}
+        className={`${styles['publish-part']} ${styles[workflowDetail?.is_online === IsOnline.online ? 'published' : 'not-published']}`}
       >
         {workflowDetail?.is_online === IsOnline.online ? (
           <Success11Icon className="mr-[6px] size-[16px]" />

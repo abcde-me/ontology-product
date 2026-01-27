@@ -49,7 +49,7 @@ import { BatchDeleteKnowledgeDocument } from '@/api/modules/rag';
 import EditDatasetForm from '@/components/datasetform/EditDatasetForm';
 import { DATA_MANAGEMENT_PERMISSIONS } from '@/config/permissions';
 import './style.css';
-import noDataElement from '@/components/no-data';
+import { NoDataCard } from '@ceai-front/arco-material';
 import getFileIcon from '@/components/file-icon';
 import { PermissionWrapper } from '../PermissionGuard';
 import { throttle } from 'lodash-es';
@@ -95,8 +95,8 @@ interface TableColumn {
 
 enum FileStatusType {
   success = 'Succeeded',
-  fail = 'Failed',
-  waiting = 'Waiting'
+  fail = 'Failed'
+  // waiting = 'Waiting'
 }
 
 const filterFileTypes = [
@@ -662,11 +662,11 @@ const DatasetDetail = (props: {
               {
                 text: '处理失败',
                 value: FileStatusType.fail
-              },
-              {
-                text: '等待中',
-                value: FileStatusType.waiting
               }
+              // {
+              //   text: '等待中',
+              //   value: FileStatusType.waiting
+              // }
             ],
             render: (_, record) => (
               <div style={{ display: 'flex', alignItems: 'center' }}>
@@ -677,9 +677,9 @@ const DatasetDetail = (props: {
                     backgroundColor:
                       record.status === FileStatusType.success
                         ? '#10B981'
-                        : record.status === FileStatusType.waiting
-                          ? '#007DFA'
-                          : '#EF4444',
+                        : // : record.status === FileStatusType.waiting
+                          //   ? '#007DFA'
+                          '#EF4444',
                     borderRadius: '50%',
                     marginRight: '5px'
                   }}
@@ -687,9 +687,9 @@ const DatasetDetail = (props: {
                 <span>
                   {record.status === FileStatusType.success
                     ? '处理成功'
-                    : record.status === FileStatusType.waiting
-                      ? '等待中'
-                      : '处理失败'}
+                    : // : record.status === FileStatusType.waiting
+                      //   ? '等待中'
+                      '处理失败'}
                 </span>
                 {/* <Button type="text" className="ml-[8px] pl-0">
                   重试
@@ -1963,9 +1963,7 @@ const DatasetDetail = (props: {
                       <Table
                         columns={contentColumns}
                         data={contentData}
-                        noDataElement={noDataElement({
-                          description: '暂无数据'
-                        })}
+                        noDataElement={<NoDataCard title="暂无数据" />}
                         pagination={false}
                         // scroll={{ x: 'max-content' }}
                         border={false}
@@ -1998,7 +1996,7 @@ const DatasetDetail = (props: {
                   </div>
                 </>
               ) : (
-                noDataElement({ description: '暂无数据' })
+                <NoDataCard title="暂无数据" />
               )}
             </TabPane>
           ) : datasetDetail?.storage_type === StorageType.table ? (
@@ -2011,7 +2009,7 @@ const DatasetDetail = (props: {
                   pagination={false}
                   rowKey="id"
                   border={false}
-                  noDataElement={noDataElement({ description: '暂无数据' })}
+                  noDataElement={<NoDataCard title="暂无数据" />}
                 />
               </div>
             </TabPane>
@@ -2044,7 +2042,7 @@ const DatasetDetail = (props: {
                 data={contentFileData}
                 pagination={false}
                 rowKey="id"
-                noDataElement={noDataElement({ description: '暂无数据' })}
+                noDataElement={<NoDataCard title="暂无数据" />}
                 scroll={{ x: 'max-content' }}
                 border={false}
                 onChange={(pagination, sorter, filters) => {
@@ -2103,7 +2101,7 @@ const DatasetDetail = (props: {
                 columns={versionColumns}
                 data={versionHistory}
                 pagination={false}
-                noDataElement={noDataElement({ description: '暂无数据' })}
+                noDataElement={<NoDataCard title="暂无数据" />}
                 scroll={{ x: 'max-content', y: 'max-content' }}
                 border={false}
                 rowKey="version_id"

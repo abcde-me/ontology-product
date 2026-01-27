@@ -16,7 +16,7 @@ import { delLoad, getLoadList } from '@/api/loadApi';
 import './index.scss';
 import EllipsisPopoverCom from '@/components/ellipsis-popover-com';
 import EllipsisPopover from '@/components/ellipsis-popover-com';
-import noDataElement from '@/components/no-data';
+// import noDataElement from '@/components/no-data';
 import { PermissionWrapper } from '@/components/PermissionGuard';
 import { DATA_LOAD_PERMISSIONS } from '@/config/permissions';
 import { useHasPermission } from '@/hooks/usePermission';
@@ -30,6 +30,7 @@ import {
   TYPE_CONFIG,
   DATABASE_TYPE_ENUM
 } from '../config';
+import { NoDataCard } from '@ceai-front/arco-material';
 
 const InputSearch = Input.Search;
 export default function DataLoad() {
@@ -89,13 +90,19 @@ export default function DataLoad() {
         {
           text: LoadType[Load.CRON].text,
           value: LoadType[Load.CRON].value
+        },
+        {
+          text: LoadType[Load.REALTIME].text,
+          value: LoadType[Load.REALTIME].value
         }
       ],
       render: (_, item) => (
         <div>
           {item.load_type == LoadType[Load.ONCE].value
             ? LoadType[Load.ONCE].text
-            : LoadType[Load.CRON].text}
+            : item.load_type == LoadType[Load.REALTIME].value
+              ? LoadType[Load.REALTIME].text
+              : LoadType[Load.CRON].text}
         </div>
       )
     },
@@ -118,7 +125,9 @@ export default function DataLoad() {
                       ? RunStateType[RunState.RUNNING].color
                       : item.status == RunState.STOPPED
                         ? RunStateType[RunState.STOPPED].color
-                        : undefined,
+                        : item.status == RunState.SAVED
+                          ? RunStateType[RunState.SAVED].color
+                          : undefined,
               borderRadius: '50%'
             }}
           ></div>
@@ -131,6 +140,7 @@ export default function DataLoad() {
               RunStateType[RunState.RUNNING].text}
             {item.status == RunState.STOPPED &&
               RunStateType[RunState.STOPPED].text}
+            {item.status == RunState.SAVED && RunStateType[RunState.SAVED].text}
           </div>
         </div>
       ),
@@ -150,6 +160,10 @@ export default function DataLoad() {
         {
           text: RunStateType[RunState.STOPPED].text,
           value: RunStateType[RunState.STOPPED].value
+        },
+        {
+          text: RunStateType[RunState.SAVED].text,
+          value: RunStateType[RunState.SAVED].value
         }
       ]
     },
@@ -173,6 +187,10 @@ export default function DataLoad() {
         {
           text: TYPE_CONFIG[ConnectorType.Local].text,
           value: TYPE_CONFIG[ConnectorType.Local].value
+        },
+        {
+          text: TYPE_CONFIG[ConnectorType.MQ].text,
+          value: TYPE_CONFIG[ConnectorType.MQ].value
         }
       ],
       render: (_, item) => (
@@ -183,7 +201,9 @@ export default function DataLoad() {
               ? TYPE_CONFIG[ConnectorType.HDFS].text
               : item.source_type == TYPE_CONFIG[ConnectorType.DB].value
                 ? `${TYPE_CONFIG[ConnectorType.DB].text}-${getLabelByValue(DATABASE_TYPE_ENUM, item?.sub_type || '')}`
-                : TYPE_CONFIG[ConnectorType.Local].text}
+                : item.source_type == TYPE_CONFIG[ConnectorType.Local].value
+                  ? TYPE_CONFIG[ConnectorType.Local].text
+                  : TYPE_CONFIG[ConnectorType.MQ].text}
         </span>
       )
     },
@@ -513,7 +533,11 @@ export default function DataLoad() {
         loading={loadloading}
         columns={columns}
         data={data}
-        noDataElement={noDataElement({ description: '暂无数据' })}
+        noDataElement={
+          <div className="py-[100px]">
+            <NoDataCard title="暂无数据" />
+          </div>
+        }
         style={{ padding: '16px 0px' }}
         pagination={false}
         rowKey="task_id"

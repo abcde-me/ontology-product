@@ -135,6 +135,7 @@ const Edit = forwardRef<EditRef, EditProps>((props, ref) => {
             <Radio value="s3">对象存储(S3)</Radio>
             <Radio value="hdfs">HDFS</Radio>
             <Radio value="db">数据库</Radio>
+            <Radio value="mq">消息队列</Radio>
           </RadioGroup>
         </FormItem>
         <span
@@ -258,64 +259,119 @@ const Edit = forwardRef<EditRef, EditProps>((props, ref) => {
         ) : (
           <>
             <div>
-              <FormItem
-                label="所属系统"
-                field="system"
-                initialValue={props.editObj.config?.system}
-              >
-                <Input placeholder="请输入" />
-              </FormItem>
-              <FormItem
-                label="数据库类型"
-                field="sub_type"
-                rules={[{ required: true, message: '请选择数据库类型' }]}
-                initialValue={props.editObj.sub_type}
-              >
-                <Select
-                  placeholder="请选择数据库类型"
-                  onChange={(value) =>
-                    Message.info({
-                      content: `You select ${value}.`,
-                      showIcon: true
-                    })
-                  }
-                  disabled={true}
-                >
-                  {options.map((option, index) => (
-                    <Option key={option.value} value={option.value}>
-                      {option.text}
-                    </Option>
-                  ))}
-                </Select>
-              </FormItem>
-              <FormItem
-                label="主机名"
-                field="host"
-                rules={[{ required: true, message: '请输入主机名' }]}
-                initialValue={props.editObj.config?.host}
-              >
-                <Input placeholder="请输入，如localhost，10.2.2.1" />
-              </FormItem>
-              <FormItem
-                label="端口"
-                field="port"
-                rules={[{ required: true, message: '请输入端口' }]}
-                initialValue={props.editObj.config?.port}
-              >
-                <Input placeholder="请输入，如3306" />
-              </FormItem>
-              <FormItem
-                label="数据库名"
-                field="database"
-                rules={[{ required: true, message: '请输入数据库名' }]}
-                initialValue={props.editObj.config?.database}
-              >
-                <Input placeholder="请输入" />
-              </FormItem>
+              {props.editObj.sub_type !== 'Kafka' ? (
+                <>
+                  <FormItem
+                    label="所属系统"
+                    field="system"
+                    initialValue={props.editObj.config?.system}
+                  >
+                    <Input placeholder="请输入" />
+                  </FormItem>
+                  <FormItem
+                    label="数据库类型"
+                    field="sub_type"
+                    rules={[{ required: true, message: '请选择数据库类型' }]}
+                    initialValue={props.editObj.sub_type}
+                  >
+                    <Select
+                      placeholder="请选择数据库类型"
+                      onChange={(value) =>
+                        Message.info({
+                          content: `You select ${value}.`,
+                          showIcon: true
+                        })
+                      }
+                      disabled={true}
+                    >
+                      {options.map((option, index) => (
+                        <Option key={option.value} value={option.value}>
+                          {option.text}
+                        </Option>
+                      ))}
+                    </Select>
+                  </FormItem>
+                  <FormItem
+                    label="主机名"
+                    field="host"
+                    rules={[{ required: true, message: '请输入主机名' }]}
+                    initialValue={props.editObj.config?.host}
+                  >
+                    <Input placeholder="请输入，如localhost，10.2.2.1" />
+                  </FormItem>
+                  <FormItem
+                    label="端口"
+                    field="port"
+                    rules={[{ required: true, message: '请输入端口' }]}
+                    initialValue={props.editObj.config?.port}
+                  >
+                    <Input placeholder="请输入，如3306" />
+                  </FormItem>
+                  {props.editObj.sub_type !== 'Elasticsearch' && (
+                    <FormItem
+                      label="数据库名"
+                      field="database"
+                      rules={[{ required: true, message: '请输入数据库名' }]}
+                      initialValue={props.editObj.config?.database}
+                    >
+                      <Input placeholder="请输入" />
+                    </FormItem>
+                  )}
+                </>
+              ) : (
+                <>
+                  <FormItem
+                    label="消息队列类型"
+                    field="sub_type"
+                    rules={[{ required: true, message: '请选择消息队列类型' }]}
+                    initialValue={props.editObj.sub_type}
+                  >
+                    <Select
+                      placeholder="请选择数据库类型"
+                      onChange={(value) =>
+                        Message.info({
+                          content: `You select ${value}.`,
+                          showIcon: true
+                        })
+                      }
+                      disabled={true}
+                    ></Select>
+                  </FormItem>
+                  <FormItem
+                    label="集群的入口地址列表"
+                    field="bootstrapServers"
+                    rules={[
+                      { required: true, message: '请输入集群的入口地址列表' }
+                    ]}
+                    initialValue={props.editObj.config?.bootstrapServers}
+                  >
+                    <Input placeholder="请输入,多个地址用逗号分隔如lhost1:port1,host2:port2" />
+                  </FormItem>
+                  <FormItem
+                    label="偏移重置策略"
+                    field="autoOffsetReset"
+                    rules={[{ required: true, message: '请输入偏移重置策略' }]}
+                    initialValue={props.editObj.config?.autoOffsetReset}
+                  >
+                    <Select placeholder="请选择" defaultValue="earliest">
+                      <Option value="earliest">earliest</Option>
+                      <Option value="latest">latest</Option>
+                    </Select>
+                  </FormItem>
+                </>
+              )}
               <FormItem
                 label="用户名"
                 field="user"
-                rules={[{ required: true, message: '请输入用户名' }]}
+                rules={[
+                  {
+                    required:
+                      props.editObj.sub_type !== 'Doris' &&
+                      props.editObj.sub_type !== 'Elasticsearch' &&
+                      props.editObj.sub_type !== 'Kafka',
+                    message: '请输入用户名'
+                  }
+                ]}
                 initialValue={props.editObj.config?.user}
               >
                 <Input placeholder="请输入" />
@@ -323,7 +379,15 @@ const Edit = forwardRef<EditRef, EditProps>((props, ref) => {
               <FormItem
                 label="密码"
                 field="password"
-                rules={[{ required: true, message: '请输入密码' }]}
+                rules={[
+                  {
+                    required:
+                      props.editObj.sub_type !== 'Doris' &&
+                      props.editObj.sub_type !== 'Elasticsearch' &&
+                      props.editObj.sub_type !== 'Kafka',
+                    message: '请输入密码'
+                  }
+                ]}
                 initialValue="****"
               >
                 <Input.Password

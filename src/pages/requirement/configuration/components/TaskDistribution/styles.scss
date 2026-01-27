@@ -1,0 +1,125 @@
+/**
+ * 任务分配模块样式
+ */
+
+// 任务分配面板
+.task-distribution-panel {
+  width: 100%;
+
+  .task-distribution-table {
+    .arco-table-th-item-title {
+      pointer-events: unset !important;
+    }
+
+    .role-assignments-row {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: nowrap;
+      min-height: 120px;
+
+      .role-arrow {
+        color: #c9cdd4;
+        font-size: 16px;
+        margin: 40px 0;
+        flex-shrink: 0;
+      }
+    }
+  }
+}
+
+// 角色分配卡片容器
+.role-assignment-card-wrapper {
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+
+  .error-message {
+    color: #f53f3f;
+    font-size: 14px;
+    margin-top: 4px;
+    padding-left: 4px;
+  }
+}
+
+// 角色分配卡片
+.role-assignment-card {
+  border: 1px solid #e5e6eb;
+  border-radius: 8px;
+  background: #fff;
+  width: 200px;
+  flex-shrink: 0;
+
+  &.has-error {
+    border-color: #f53f3f;
+  }
+
+  .role-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 8px 0;
+    border-bottom: 1px solid #f2f3f5;
+
+    .role-icon {
+      width: 18px;
+      height: 18px;
+      flex-shrink: 0;
+    }
+
+    .role-name {
+      font-size: 14px;
+      font-weight: 500;
+      color: #1d2129;
+    }
+  }
+
+  .role-content {
+    padding: 12px 16px;
+  }
+
+  .assign-type-selector {
+    margin-bottom: 8px;
+
+    .assign-type-selector-radio-group {
+      .arco-radio-button-inner {
+        width: 84px;
+        font-size: 14px;
+      }
+    }
+  }
+
+  .select-action {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    .selected-count {
+      font-size: 14px;
+      color: #86909c;
+      text-align: center;
+    }
+  }
+}
+
+.multiple-process-select .arco-input-tag-inner {
+  input {
+    min-width: 180px !important;
+  }
+}
+
+// 工序选择下拉框样式
+.process-select-dropdown {
+  .select-all-option {
+    .arco-checkbox {
+      width: 100%;
+    }
+  }
+
+  .arco-select-option {
+    .arco-checkbox {
+      margin-right: 8px;
+    }
+  }
+}

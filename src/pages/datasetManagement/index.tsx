@@ -35,7 +35,7 @@ import {
   IconTag
 } from '@arco-design/web-react/icon';
 import { useHistory } from 'react-router-dom';
-import noDataElement from '@/components/no-data';
+import { NoDataCard } from '@ceai-front/arco-material';
 import {
   getDatasetList,
   createDataset,
@@ -48,7 +48,6 @@ import {
 } from '@/api/datasetManagement';
 import EllipsisPopover from '../../components/ellipsis-popover-com';
 import DatasetForm from '@/components/datasetform/AddDatasetForm';
-import NoDataEmpty from '@/components/NoDataEmpty';
 import styles from './index.module.scss';
 import FormComponent from '@/components/data-catalog-content/components/popups-form';
 // 名称显示组件 - 只有在文本被截断时才显示Tooltip
@@ -60,9 +59,6 @@ import {
   SourceDataItem,
   TargetDataItem
 } from '@/components/data-catalog-content/components/popups-form/types';
-import style from 'react-syntax-highlighter/dist/esm/styles/hljs/a11y-dark';
-import { color } from 'echarts';
-import getFileIcon from '@/components/file-icon';
 import { formatFileSize } from '@/utils/format';
 import dataTypesIcon from '@/pages/datasetManagement/assets/dataset_dataType.png';
 import dataRelationIcon from '@/pages/datasetManagement/assets/dataset_relation.png';
@@ -71,7 +67,6 @@ import dataSceneIcon from '@/pages/datasetManagement/assets/dataset_scene.png';
 import DatasetMoveIcon from '@/pages/datasetManagement/assets/dataset_move.svg';
 import DatasetMoveActiveIcon from '@/pages/datasetManagement/assets/dataset_move_active.svg';
 import { useHasPermission } from '@/store/userInfoStore';
-import { throttle } from 'lodash-es';
 import { useParams } from '@/utils/url';
 
 // 时间格式化函数
@@ -111,13 +106,9 @@ export interface Dataset {
   latest_file_path: string;
   perms: string[];
   storage_type: datasetStorageType;
-  status:
-    | 'creating'
-    | 'create_failed'
-    | 'normal'
-    | 'version_updating'
-    | 'version_update_failed';
+  status: datasetStatus;
   scene_id: number;
+  can_retry: boolean;
 }
 
 export interface SceneType {
@@ -131,11 +122,17 @@ export interface SceneType {
 // 状态显示配置
 const getStatusConfig = (status: string) => {
   const statusMap = {
-    creating: { text: datasetStatusName.creating },
-    create_failed: { text: datasetStatusName.create_failed },
-    normal: { text: datasetStatusName.normal },
-    version_updating: { text: datasetStatusName.version_updating },
-    version_update_failed: { text: datasetStatusName.version_update_failed }
+    [datasetStatus.creating]: { text: datasetStatusName.creating },
+    [datasetStatus.create_failed]: { text: datasetStatusName.create_failed },
+    [datasetStatus.normal]: { text: datasetStatusName.normal },
+    [datasetStatus.updating]: { text: datasetStatusName.updating },
+    [datasetStatus.update_failed]: { text: datasetStatusName.update_failed },
+    [datasetStatus.version_updating]: {
+      text: datasetStatusName.version_updating
+    },
+    [datasetStatus.version_update_failed]: {
+      text: datasetStatusName.version_update_failed
+    }
   };
   return statusMap[status] || { text: status };
 };
@@ -148,12 +145,23 @@ const getStatusIcon = (status: string) => {
     <IconCloseCircleFill style={{ color: '#EF4444', margin: '0 5px 0 0' }} />
   ) : status === datasetStatus.normal ? (
     <IconCheckCircleFill style={{ color: '#10B981', margin: '0 5px 0 0' }} />
-  ) : status === datasetStatus.version_updating ? (
+  ) : status === datasetStatus.updating ? (
     <IconLoading style={{ color: '#007DFA', margin: '0 5px 0 0' }} />
   ) : (
     <IconExclamationCircleFill
       style={{ color: '#F97316', margin: '0 5px 0 0' }}
     />
+  );
+};
+
+// 判断是否可以跳转到详情页
+const canGoToDetail = (status: string): boolean => {
+  return (
+    status === datasetStatus.normal ||
+    status === datasetStatus.version_updating ||
+    status === datasetStatus.version_update_failed ||
+    status === datasetStatus.updating ||
+    status === datasetStatus.update_failed
   );
 };
 
@@ -200,22 +208,12 @@ const columns = (
       if (!name) return '-';
       return (
         <EllipsisPopover
-          className={
-            record.status === datasetStatus.normal ||
-            record.status === datasetStatus.version_updating ||
-            record.status === datasetStatus.version_update_failed
-              ? 'dataset-hover'
-              : ''
-          }
+          className={canGoToDetail(record.status) ? 'dataset-hover' : ''}
           value={renderEmptyPlaceholder(record.name)}
           isEdit={false}
           isLink
           handleLink={() => {
-            record.status === datasetStatus.normal ||
-            record.status === datasetStatus.version_updating ||
-            record.status === datasetStatus.version_update_failed
-              ? handleGoToDetail(record.id)
-              : '';
+            canGoToDetail(record.status) ? handleGoToDetail(record.id) : '';
           }}
         />
         // <div
@@ -433,10 +431,7 @@ const columns = (
     title: '文件大小',
     dataIndex: 'size',
     width: 120,
-    render: (_, record: Dataset) =>
-      record.storage_type !== datasetStorageType.vector
-        ? formatFileSize(record.size || 0)
-        : '-'
+    render: (_, record: Dataset) => formatFileSize(record.size || 0)
   },
   {
     title: '数据集状态',
@@ -446,7 +441,9 @@ const columns = (
     filters: [
       { text: '创建中', value: datasetStatus.creating },
       { text: '创建失败', value: datasetStatus.create_failed },
-      { text: '正常', value: datasetStatus.normal }
+      { text: '正常', value: datasetStatus.normal },
+      { text: '更新中', value: datasetStatus.updating },
+      { text: '更新失败', value: datasetStatus.update_failed }
       // { text: '版本更新中', value: datasetStatus.version_updating },
       // { text: '版本更新失败', value: datasetStatus.version_update_failed }
     ],
@@ -484,9 +481,7 @@ const columns = (
             </Tooltip>
           ) : null}
 
-          {status === datasetStatus.create_failed &&
-          record.src_name !== 'pyspark' &&
-          record.src_name !== '工作流' ? (
+          {record.can_retry ? (
             <PermissionWrapper
               permission={DATA_MANAGEMENT_PERMISSIONS.CAN_UPDATE_VERSION_RETRY}
             >
@@ -665,20 +660,14 @@ const columns = (
             </Button> */}
           <Tooltip
             content={
-              record.status !== datasetStatus.normal
-                ? '数据集状态异常，无法查看详情'
-                : ''
+              canGoToDetail(record.status) ? '' : '数据集状态异常，无法查看详情'
             }
           >
             <Button
               type="text"
-              disabled={record.status !== datasetStatus.normal}
+              disabled={!canGoToDetail(record.status)}
               onClick={() => {
-                record.status === datasetStatus.normal ||
-                record.status === datasetStatus.version_updating ||
-                record.status === datasetStatus.version_update_failed
-                  ? handleGoToDetail(record.id)
-                  : '';
+                canGoToDetail(record.status) ? handleGoToDetail(record.id) : '';
               }}
             >
               详情
@@ -762,20 +751,16 @@ const columns = (
             </Button> */}
           <Tooltip
             content={
-              record.status !== datasetStatus.normal
+              !canGoToDetail(record.status)
                 ? '数据集状态异常，无法查看详情'
                 : ''
             }
           >
             <Button
               type="text"
-              disabled={record.status !== datasetStatus.normal}
+              disabled={!canGoToDetail(record.status)}
               onClick={() => {
-                record.status === datasetStatus.normal ||
-                record.status === datasetStatus.version_updating ||
-                record.status === datasetStatus.version_update_failed
-                  ? handleGoToDetail(record.id)
-                  : '';
+                canGoToDetail(record.status) ? handleGoToDetail(record.id) : '';
               }}
             >
               详情
@@ -835,15 +820,6 @@ export enum searchFieldType {
   // creator_name = 'creator_name'
 }
 
-// 枚举数据集状态
-export enum datasetStatusName {
-  creating = '创建中',
-  create_failed = '创建失败',
-  normal = '正常',
-  version_updating = '版本生成中',
-  version_update_failed = '版本生成失败'
-}
-
 // 枚举数据集状态名称
 export enum datasetStorageType {
   jsonl = 'jsonl',
@@ -860,9 +836,23 @@ export enum datasetStatus {
   creating = 'creating',
   create_failed = 'create_failed',
   normal = 'normal',
+  updating = 'updating',
+  update_failed = 'update_failed',
   version_updating = 'version_updating',
   version_update_failed = 'version_update_failed'
 }
+
+// 枚举数据集状态
+export const datasetStatusName = {
+  [datasetStatus.creating]: '创建中',
+  [datasetStatus.create_failed]: '创建失败',
+  [datasetStatus.normal]: '正常',
+  [datasetStatus.updating]: '更新中',
+  [datasetStatus.update_failed]: '更新失败',
+  [datasetStatus.version_updating]: '版本生成中',
+  [datasetStatus.version_update_failed]: '版本生成失败'
+};
+
 const DatasetManagement: React.FC = () => {
   const history = useHistory();
   const TabPane = Tabs.TabPane;
@@ -1236,7 +1226,10 @@ const DatasetManagement: React.FC = () => {
             display: 'inline-block'
           }}
         >
-          删除后，数据集不可恢复
+          <div>删除后，本平台中使用到此知识库的地方将自动取消引用，</div>
+          <div>
+            如果此知识库也被应用开发平台引用，则也会取消引用，此操作不可撤回。
+          </div>
         </div>
       ),
       // 按钮文字
@@ -1967,7 +1960,7 @@ const DatasetManagement: React.FC = () => {
                 }
                 data={datasetList}
                 rowSelection={rowSelection}
-                noDataElement={noDataElement({ description: '暂无数据' })}
+                noDataElement={<NoDataCard title="暂无数据" />}
                 pagination={{
                   current: currentPage,
                   total: total,

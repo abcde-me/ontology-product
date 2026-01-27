@@ -12,7 +12,7 @@ import {
   IconBook,
   IconCaretRight,
   IconSave,
-  IconStorage
+  IconTag
 } from '@arco-design/web-react/icon';
 import { sql } from '@codemirror/lang-sql';
 import { lintGutter } from '@codemirror/lint';
@@ -21,8 +21,10 @@ import { tags as t } from '@lezer/highlight';
 import createTheme from '@uiw/codemirror-themes';
 import CodeMirror, { ReactCodeMirrorRef } from '@uiw/react-codemirror';
 import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
-import { format } from 'sql-formatter';
+import { formatSQL } from '@/utils/sqlFormatter';
+import { useUserInfo } from '@/store/userInfoStore';
 import styles from './EditorWorkspace.module.scss';
+import QueryListIcon from '../../assets/query-list-icon.svg';
 
 import SQLFormatIcon from '@/assets/sql/sql-format-ico.svg';
 import IconStop from '@/assets/sql/sql-stop-icon.svg';
@@ -32,8 +34,10 @@ import { EditorProvider, useEditorContext } from '../../contexts/EditorContext';
 import { FileTab } from '../../hooks/useTabManager';
 import RunningInfoPanel from './RunningInfoPanel';
 import classNames from 'classnames';
-import ModalParamList from '../data-manager/ModalParamList';
-
+import { useUrlState } from '../../hooks/useUrlState';
+import { SQL_PARAM_PLACEHOLDER_REGEX } from '../../constant';
+import { validateName } from '@/utils/valiate';
+import { PermissionWrapper } from '@/components/PermissionGuard';
 interface NotebookWorkspaceProps {
   content: string;
   fileName: string;
@@ -44,57 +48,63 @@ interface NotebookWorkspaceProps {
   onActiveUpdate?: (tabData: FileTab) => void;
   onInsertContent?: (insertFn: (content: string) => void) => void;
   onEditorFocusChange?: (isFocused: boolean) => void;
-  refreshDirectory?: () => void;
-  selectFile?: (fileId: string) => void;
+  // refreshDirectory?: () => void;
+  // selectFile?: (fileId: string) => void;
   onToScriptList?: (key: string) => void;
   curActiveTab: string;
+  onHasUnsavedChangesChange?: (checkFn: (() => boolean) | null) => void;
+  onRemoveTab?: (tabKey: string) => void;
 }
 
 // 内部组件，使用 EditorContext
 const EditorWorkspaceContent: React.FC<{
   fileName: string;
+  scriptId?: string;
+  content: string;
   onInsertContent?: (insertFn: (content: string) => void) => void;
   onEditorFocusChange?: (isFocused: boolean) => void;
   onToScriptList?: (key: string) => void;
   curActiveTab: string;
+  onHasUnsavedChangesChange?: (checkFn: (() => boolean) | null) => void;
 }> = memo(
   ({
     onInsertContent,
     onEditorFocusChange,
     fileName,
     onToScriptList,
-    curActiveTab
+    curActiveTab,
+    scriptId,
+    content,
+    onHasUnsavedChangesChange
   }) => {
     const FormItem = Form.Item;
-    const [form] = Form.useForm();
+    const userInfo = useUserInfo();
+    const [saveForm] = Form.useForm();
     const TextArea = Input.TextArea;
     const editorRef = useRef<ReactCodeMirrorRef>(null);
     const [lastCursorPosition, setLastCursorPosition] =
       React.useState<number>(0);
     const [isEditorFocused, setIsEditorFocused] =
       React.useState<boolean>(false);
-    const hasRunPermission = useHasPermission(SQL_PERMISSIONS.RUN);
-    const hasUpdatePermission = useHasPermission(SQL_PERMISSIONS.MODIFY);
-    const hasCancelRunPermission = useHasPermission(SQL_PERMISSIONS.RUN);
+    const hasRunPermission = useHasPermission(SQL_PERMISSIONS.QUERY_SCRIPT_RUN);
+    const hasUpdatePermission = useHasPermission(
+      SQL_PERMISSIONS.QUERY_SCRIPT_MODIFY
+    );
+    const hasCancelRunPermission = useHasPermission(
+      SQL_PERMISSIONS.QUERY_SCRIPT_RUN
+    );
     const [visible, setVisible] = React.useState<boolean>(false);
-    const [specificationsVisible, setSpecificationsVisible] =
-      React.useState<boolean>(false);
-    const [specificationsContent, setSpecificationsContent] =
-      React.useState<string>('测试文案');
-    const [newSpecificationsContent, setNewSpecificationsContent] =
-      React.useState<string>('');
-    const [isSpecificationsValid, setIsSpecificationsValid] = useState(true);
-    const [paramVisible, setParamVisible] = React.useState<boolean>(false);
+    const editorContentRef = useRef(null);
+
+    const { updateUrlState } = useUrlState();
     useEffect(() => {
-      form.setFieldsValue({
+      saveForm.setFieldsValue({
         fileName: fileName
       });
-    }, [fileName, form]);
+    }, [fileName, saveForm]);
     // 从 Context 获取编辑器状态
     const {
       runStatus,
-      runDuration,
-      runStartTime,
       handleStopRunCode,
       handleRunCode,
       lastAutoSave,
@@ -106,8 +116,22 @@ const EditorWorkspaceContent: React.FC<{
       isPanelOpen,
       handlePanelStateChange,
       getPrevRunStatus,
-      lastScriptRunStatus
+      lastScriptRunStatus,
+      handleSave,
+      hasUnsavedChanges
     } = useEditorContext();
+
+    // 将检查函数暴露给父组件
+    useEffect(() => {
+      if (onHasUnsavedChangesChange) {
+        onHasUnsavedChangesChange(hasUnsavedChanges);
+      }
+      return () => {
+        if (onHasUnsavedChangesChange) {
+          onHasUnsavedChangesChange(null);
+        }
+      };
+    }, [hasUnsavedChanges, onHasUnsavedChangesChange]);
 
     const myTheme = createTheme({
       theme: 'light',
@@ -151,7 +175,12 @@ const EditorWorkspaceContent: React.FC<{
 
       if (editorContent) {
         try {
-          const formattedCode = format(editorContent, { language: 'sql' });
+          const formattedCode = formatSQL(editorContent, {
+            formatOptions: {
+              language: 'sql',
+              placeholderRegex: SQL_PARAM_PLACEHOLDER_REGEX
+            }
+          });
           handleContentChange(formattedCode);
           Message.success('格式化成功');
         } catch (e) {
@@ -203,11 +232,14 @@ const EditorWorkspaceContent: React.FC<{
         }
       });
     }, []);
-    const handleSeeScriptList = () => {
-      console.log(123, onToScriptList);
-      if (onToScriptList) {
-        onToScriptList('script');
-      }
+    const handleToScriptQueryList = () => {
+      updateUrlState(
+        {
+          activeTab: 'script',
+          scriptType: 'query'
+        },
+        { method: 'push' }
+      );
     };
     // 监听插入内容事件
     useEffect(() => {
@@ -216,18 +248,18 @@ const EditorWorkspaceContent: React.FC<{
         onInsertContent(insertContentAtCursor);
       }
     }, [insertContentAtCursor, onInsertContent]);
-    const handleSpecificationsChange = (val: string) => {
-      setNewSpecificationsContent(val);
-    };
     return (
       <div className={styles['sql-content']}>
         {/* 顶部工具栏 */}
         <div className={styles['sql-toolbar']}>
           <div className={styles['toolbar-left']}>
             <Space size={12}>
-              {((hasRunPermission && runStatus !== RunningStatus.RUNNING) ||
-                (hasCancelRunPermission &&
-                  runStatus === RunningStatus.RUNNING)) && (
+              <PermissionWrapper
+                permission={[
+                  SQL_PERMISSIONS.QUERY_SCRIPT_RUN,
+                  SQL_PERMISSIONS.QUERY_SCRIPT_MODIFY
+                ]}
+              >
                 <Button
                   type="primary"
                   icon={
@@ -237,7 +269,7 @@ const EditorWorkspaceContent: React.FC<{
                       <IconCaretRight className="mr-[4px]" />
                     )
                   }
-                  disabled={editorContent?.trim() === ''}
+                  disabled={!editorContent?.trim()}
                   onClick={handleRunClick}
                   className={classNames('h-[26px]', {
                     [styles['btn-running']]: runStatus === RunningStatus.RUNNING
@@ -245,43 +277,24 @@ const EditorWorkspaceContent: React.FC<{
                 >
                   {runStatus === RunningStatus.RUNNING ? '停止运行' : '运行'}
                 </Button>
-              )}
+              </PermissionWrapper>
 
               <Button
                 type="text"
                 icon={<SQLFormatIcon />}
                 onClick={handleFormatCode}
-                className="h-[26px]"
+                disabled={!editorContent?.trim()}
+                className="h-[26px] !px-[0px]"
               >
                 格式化
               </Button>
-              {curActiveTab === 'files' && (
-                <>
-                  <Button
-                    type="text"
-                    icon={<IconBook />}
-                    onClick={() => setSpecificationsVisible(true)}
-                    className="h-[26px]"
-                  >
-                    开发规范
-                  </Button>
-                  <Button
-                    type="text"
-                    icon={<IconStorage />}
-                    onClick={() => setParamVisible(true)}
-                    className="h-[26px]"
-                  >
-                    参数列表
-                  </Button>
-                </>
-              )}
             </Space>
           </div>
           <div className={styles['toolbar-right']}>
             {lastAutoSave && (
               <div className={styles['toolbar-right-item']}>
                 <Space size={12}>
-                  <span className="text-sm text-gray-500">
+                  <span className="text-[14px] text-[var(--color-text-4)]">
                     保存时间: {lastAutoSave || '未保存'}
                   </span>
                 </Space>
@@ -290,11 +303,11 @@ const EditorWorkspaceContent: React.FC<{
             {curActiveTab === 'data' && (
               <Button
                 onClick={() => {
-                  handleSeeScriptList();
+                  handleToScriptQueryList();
                 }}
                 className={styles['btn-script-list']}
-                disabled={runStatus === RunningStatus.RUNNING}
-                icon={<IconStorage />}
+                icon={<QueryListIcon />}
+                style={{ padding: '0 12px' }}
               >
                 脚本列表
               </Button>
@@ -306,6 +319,7 @@ const EditorWorkspaceContent: React.FC<{
                   setVisible(true);
                 }}
                 icon={<IconSave />}
+                style={{ padding: '0 12px' }}
               >
                 保存
               </Button>
@@ -316,6 +330,7 @@ const EditorWorkspaceContent: React.FC<{
         {/* 编辑器区域 */}
 
         <div
+          ref={editorContentRef}
           className={classNames(styles['sql-editor-container'], {
             [styles['running-code-mirror']]: !hasUpdatePermission
           })}
@@ -372,97 +387,77 @@ const EditorWorkspaceContent: React.FC<{
           />
         )}
         {/* 保存查询列表 */}
-        <Modal
-          title="保存到查询脚本列表"
-          visible={visible}
-          onOk={() => setVisible(false)}
-          onCancel={() => setVisible(false)}
-          autoFocus={false}
-          focusLock={true}
-          footer={[
-            <>
-              <Button onClick={() => setVisible(false)}>取消</Button>
-              <Button type="primary" htmlType="submit">
-                保存
-              </Button>
-            </>
-          ]}
-        >
-          <Form form={form}>
-            <FormItem label="SQL脚本名称:" required={true} field="fileName">
-              <Input
-                defaultValue={fileName}
-                style={{ width: 300 }}
-                placeholder="请输入脚本名称"
-              />
-            </FormItem>
-            <FormItem label="脚本说明:" field="fileDesc">
-              <Input style={{ width: 300 }} placeholder="请输入脚本说明" />
-            </FormItem>
-          </Form>
-        </Modal>
-        {/* 开发规范 */}
-        <Modal
-          title="开发规范"
-          visible={specificationsVisible}
-          onCancel={() => setSpecificationsVisible(false)}
-          footer={null}
-          style={{
-            width: 960,
-            height: 678
-          }}
-        >
-          <div className={styles['specifications-modal-content']}>
-            <div className={styles['specifications-modal-content-btn']}>
-              {isSpecificationsValid ? (
+        {visible && (
+          <Modal
+            title="保存到查询脚本列表"
+            visible={visible}
+            onOk={() => setVisible(false)}
+            onCancel={() => setVisible(false)}
+            autoFocus={false}
+            focusLock={true}
+            footer={[
+              <>
+                <Button onClick={() => setVisible(false)}>取消</Button>
                 <Button
-                  onClick={() => {
-                    setIsSpecificationsValid(false);
+                  onClick={async () => {
+                    try {
+                      const validateResult = await saveForm.validate();
+                      console.log(validateResult, 'validateResult');
+                      const res = await handleSave(saveForm);
+                      if (res) {
+                        setVisible(false);
+                      }
+                    } catch (error) {
+                      // 表单验证失败，错误信息会自动显示在表单上
+                      console.error('表单验证失败', error);
+                    }
                   }}
-                  className={styles['btn-edit']}
+                  type="primary"
+                  htmlType="submit"
                 >
-                  编辑
+                  保存
                 </Button>
-              ) : (
-                <div className={styles['btn-group-content']}>
-                  <Button
-                    onClick={() => {
-                      setIsSpecificationsValid(true);
-                      setNewSpecificationsContent(specificationsContent);
-                    }}
-                    className={styles['btn-cancel']}
-                  >
-                    取消
-                  </Button>
-                  <Button
-                    onClick={() => {
-                      setSpecificationsContent(newSpecificationsContent);
-                      setIsSpecificationsValid(true);
-                    }}
-                    type="primary"
-                    className={styles['btn-save']}
-                  >
-                    确定
-                  </Button>
-                </div>
-              )}
-            </div>
-            {isSpecificationsValid ? (
-              <div className="pl-2 pt-2">{newSpecificationsContent}</div>
-            ) : (
-              <TextArea
-                placeholder="请输入开发规范"
-                style={{ width: 912, maxHeight: 590, height: 590 }}
-                defaultValue={specificationsContent}
-                onChange={(val) => handleSpecificationsChange(val)}
-              />
-            )}
-          </div>
-        </Modal>
-        <ModalParamList
-          paramVisible={paramVisible}
-          onCancel={() => setParamVisible(false)}
-        />
+              </>
+            ]}
+          >
+            <Form form={saveForm} className="w-full">
+              <FormItem
+                label="SQL脚本名称:"
+                required={true}
+                rules={[
+                  {
+                    required: true,
+                    validateTrigger: ['onBlur'],
+                    validator(value, cb) {
+                      if (!value) {
+                        return cb('请输入脚本名称');
+                      }
+
+                      if (!validateName(value).isValid) {
+                        return cb(
+                          validateName(value).errorMessage ??
+                            '脚本名称格式不正确'
+                        );
+                      }
+
+                      return cb();
+                    }
+                  }
+                ]}
+                field="fileName"
+              >
+                <Input
+                  defaultValue={fileName}
+                  // disabled={!!scriptId}
+                  placeholder="请输入脚本名称"
+                />
+              </FormItem>
+              <FormItem label="脚本说明:" field="fileDesc">
+                <Input placeholder="请输入脚本说明" />
+              </FormItem>
+            </Form>
+          </Modal>
+        )}
       </div>
     );
   }
@@ -480,10 +475,12 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = memo(
     tabKey,
     onInsertContent,
     onEditorFocusChange,
-    refreshDirectory,
-    selectFile,
+    // refreshDirectory,
+    // selectFile,
     onToScriptList,
-    curActiveTab
+    curActiveTab,
+    onHasUnsavedChangesChange,
+    onRemoveTab
   }) => {
     const editorOptions = {
       activeTab: tabKey,
@@ -516,8 +513,7 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = memo(
           });
         }
       },
-      refreshDirectory,
-      selectFile
+      onRemoveTab
     };
 
     return (
@@ -525,9 +521,12 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = memo(
         <EditorWorkspaceContent
           curActiveTab={curActiveTab}
           fileName={fileName}
+          scriptId={currentScriptId}
+          content={content}
           onToScriptList={onToScriptList}
           onInsertContent={onInsertContent}
           onEditorFocusChange={onEditorFocusChange}
+          onHasUnsavedChangesChange={onHasUnsavedChangesChange}
         />
       </EditorProvider>
     );

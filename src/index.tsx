@@ -3,6 +3,7 @@ import '@arco-design/web-react/icon';
 import '@arco-themes/react-cecloud-design/css/arco.css';
 import '@ccf2e/arco-material/dist/css/index.css';
 import '@ccf2e/arco-material/lib/style/css.js';
+import '@ceai-front/arco-material/dist/index.css';
 import '@ccf2e/arco-material';
 import './index.css';
 import './style/ai.theme.scss';
@@ -18,7 +19,9 @@ import ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
 import { ConfigProvider, Layout, Spin } from '@arco-design/web-react';
 import {} from '@ccf2e/arco-material';
+import { patchHistoryForLocationChange } from '@ceai-front/arco-material';
 import { useHistory } from 'react-router-dom';
+import { QueryClient, QueryClientProvider } from 'react-query';
 import zhCN from '@arco-design/web-react/es/locale/zh-CN';
 import enUS from '@arco-design/web-react/es/locale/en-US';
 import PageLayout from './pages/admin/layout';
@@ -55,6 +58,17 @@ import { ProjectIdKey } from './utils/const';
 import { isSameArray } from './utils/array';
 
 initI18n();
+patchHistoryForLocationChange();
+
+// 创建 QueryClient 实例
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+      retry: false
+    }
+  }
+});
 
 // 在应用启动时从 localStorage 恢复 projectId
 // const initProjectIdFromStorage = () => {
@@ -81,6 +95,14 @@ const hiddenTopBarRoutes = [
   '/tenant/compute/modaforge/labelEditor',
   '/tenant/compute/modaforge/ragDetail',
   '/tenant/compute/modaforge/compareFileData'
+];
+
+/**
+ * 需要隐藏菜单的路由传参类型的地址关键字集合
+ * 路由配置类似：/a/b/:c
+ */
+const hiddenTopBarRouterParamsRouteKeyWords = [
+  'tenant/compute/modaforge/workflowConfig'
 ];
 
 function App() {
@@ -179,13 +201,17 @@ function App() {
     };
   }, [switchProject]);
 
-  const hidden = useMemo(
-    () =>
-      (location?.pathname && hiddenTopBarRoutes.includes(location?.pathname)) ||
+  const hidden = useMemo(() => {
+    const hiddenMenu =
+      (location?.pathname &&
+        (hiddenTopBarRoutes.includes(location?.pathname) ||
+          hiddenTopBarRouterParamsRouteKeyWords.some((keyWord) =>
+            location?.pathname?.includes(keyWord)
+          ))) ||
       localLayout?.hideTopBar ||
-      isInFrame,
-    [localLayout?.hideTopBar, location?.pathname]
-  );
+      isInFrame;
+    return hiddenMenu;
+  }, [localLayout?.hideTopBar, location?.pathname]);
 
   return (
     <Layout className="flex h-full flex-col">
@@ -200,7 +226,7 @@ function App() {
             component={Login}
             exact
           />
-          {flattenRoutes.map((route) => {
+          {/*{flattenRoutes.map((route) => {
             return (
               <Route
                 key={route.key}
@@ -209,7 +235,7 @@ function App() {
                 exact
               />
             );
-          })}
+          })}*/}
           <Redirect from="/login" to="/tenant/compute/modaforge/login" exact />
           <Redirect
             from="/modaforge"
@@ -217,7 +243,11 @@ function App() {
             exact
           />
           <Redirect from="/" to="/tenant/compute/modaforge/connection" exact />
-          <Route key="*" path="*" component={Page404} />
+          <Route
+            path={'/'}
+            render={({ history }) => <PageLayout history={history} />}
+          />
+          {/*<Route key="*" path="*" component={Page404} />*/}
         </Switch>
       </Layout.Content>
     </Layout>
@@ -257,9 +287,11 @@ function Index() {
     <BrowserRouter basename="/modaforge">
       <ConfigProvider locale={getArcoLocale()}>
         <Provider store={store}>
-          <GlobalContext.Provider value={contextValue}>
-            <App />
-          </GlobalContext.Provider>
+          <QueryClientProvider client={queryClient}>
+            <GlobalContext.Provider value={contextValue}>
+              <App />
+            </GlobalContext.Provider>
+          </QueryClientProvider>
         </Provider>
       </ConfigProvider>
     </BrowserRouter>

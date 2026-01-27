@@ -11,7 +11,8 @@ import { editDataAssetDataTagsBatch } from '@/api/dataAsset';
 import EllipsisPopoverCom from '@/components/ellipsis-popover-com';
 import classNames from 'classnames';
 import styles from './index.module.scss';
-import noDataElement from '@/components/no-data';
+import { NoDataCard } from '@ceai-front/arco-material';
+// import noDataElement from '@/components/no-data';
 
 interface TagValue {
   id: string;
@@ -187,9 +188,9 @@ export default function DataAssetTableCard({
   if (dataAssetList.length === 0) {
     return (
       <div className="flex min-h-[200px] items-center justify-center">
-        {noDataElement({
-          description: '暂无数据资产'
-        })}
+        <div className="py-[100px]">
+          <NoDataCard title="暂无数据资产" />
+        </div>
       </div>
     );
   }

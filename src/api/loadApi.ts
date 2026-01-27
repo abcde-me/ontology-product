@@ -241,6 +241,9 @@ export async function getLoadTaskFiles(params: any = {}) {
   return await UAPI.RES.getLoadTaskFiles({}).post(params).inRegion().do();
   // return await UAPI.RES.getLoadTaskFiles({}).post({...params, data_path_id: 122, file_type: ['jsonl']}).inRegion().do();
 }
+export async function queryDataDirFiles(params: any = {}) {
+  return await UAPI.RES.queryDataDirFilesApi({}).post(params).inRegion().do();
+}
 // 查询单个任务已加载文件列表分页
 export async function getLoadRecordLists(params: any = {}) {
   return await UAPI.RES.getLoadRecordListApi({}).post(params).inRegion().do();
@@ -293,4 +296,14 @@ export async function checkSQL(params: {
   }>
 > {
   return await UAPI.RES.checkSQLApi({}).post(params).inRegion().do();
+}
+
+// 查询任务单个执行记录日志
+export async function getLoadTaskInstanceLog(params: {
+  execution_id: number;
+}): Promise<ApiRes<string>> {
+  return await UAPI.RES.GetLoadTaskInstanceLogApi({})
+    .post(params)
+    .inRegion()
+    .do();
 }

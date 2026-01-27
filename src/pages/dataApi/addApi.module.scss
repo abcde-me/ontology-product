@@ -1,0 +1,301 @@
+.addApi {
+  padding: 20px;
+
+  .addApiContent {
+    min-height: calc(100vh - 130px);
+    margin: 8px 0 0 0;
+    background-color: #ffffff;
+    padding: 24px 24px 60px 24px;
+    border-radius: 16px;
+    position: relative;
+
+    :global(.arco-steps-item-finish .arco-steps-icon) {
+      border: unset;
+      color: rgb(var(--primary-6));
+      background: #eef6ff;
+    }
+
+    :global(.arco-steps-icon) {
+      line-height: 24px;
+    }
+
+    :global(.arco-steps-item-process .arco-steps-item-title) {
+      color: #0f172a;
+      font-weight: 500;
+      font-size: 16px;
+      margin-left: 8px;
+    }
+
+    :global(.arco-form-label-item) {
+      min-width: 125px;
+      flex: 0 0 125px;
+    }
+
+    :global(.arco-switch) {
+      display: flex;
+      height: 22px;
+      width: 44px;
+      align-items: center;
+      font-size: 14px;
+      line-height: 22px;
+      border-radius: 24px;
+
+      :global(.arco-switch-dot) {
+        top: 3px;
+        width: 16px;
+        height: 16px;
+      }
+
+      :global(.arco-switch-text) {
+        font-size: 14px;
+        top: 1px;
+      }
+
+      :global(.switchSlideText-enter-done) {
+        font-size: 14px;
+        top: 1px;
+        left: 8px;
+      }
+    }
+
+    :global(.arco-switch-checked .arco-switch-dot) {
+      left: calc(100% - 18px - 2px);
+    }
+
+    .inputNumber {
+      :global(.arco-form-item-control-children) {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 14px;
+      }
+    }
+
+    :global(.arco-steps-item-wait .arco-steps-item-title),
+    :global(.arco-steps-item-finish .arco-steps-item-title) {
+      color: #1e293b;
+      font-size: 16px;
+      margin-left: 8px;
+    }
+
+    .apiPath {
+      :global(.arco-input-group-addbefore) {
+        border: 1px solid var(--color-border-1);
+        border-radius: 4px 0 0 4px;
+        padding: 0 9px 0 13px;
+
+        :global(.arco-input) {
+          margin-right: -10px;
+        }
+      }
+
+      :global(.arco-input:hover) {
+        z-index: 100;
+      }
+
+      :global(.arco-input-inner-wrapper) {
+        border-radius: 0 4px 4px 0;
+      }
+    }
+
+    .cacheExpire {
+      display: flex;
+      align-items: center;
+
+      :global(.arco-input-group) {
+        width: 180px;
+      }
+
+      :global(.arco-input-group-addbefore) {
+        padding: 0px;
+
+        :global(.arco-btn) {
+          border-radius: 4px 0px 0px 4px;
+          border: 1px solid #cbd5e1 !important;
+          border-right: unset !important;
+        }
+      }
+
+      :global(.arco-input-group-addafter) {
+        padding: 0px;
+
+        :global(.arco-btn) {
+          border-radius: 0px 4px 4px 0px;
+          border: 1px solid #cbd5e1 !important;
+          border-left: unset !important;
+        }
+      }
+
+      :global(.arco-input-inner-wrapper) {
+        margin-top: 1px;
+        border-radius: 0px;
+
+        :global(.arco-input) {
+          text-align: center;
+        }
+      }
+    }
+
+    .addApiParam {
+      border: 1px solid #e2e8f0;
+      border-radius: 4px;
+      height: calc(100vh - 300px);
+      margin-top: 24px;
+      display: flex;
+
+      .leftBox {
+        width: 240px;
+        min-height: calc(100vh - 305px);
+        padding: 12px 0 12px 12px;
+        border-right: 1px solid #e2e8f0;
+        overflow: auto;
+
+        .treeNode {
+          margin-top: 8px;
+        }
+
+        .insertOrCopyBtn {
+          display: none;
+        }
+
+        .treeNodeTitle {
+          width: 145px;
+        }
+
+        .treeNodeTitleSearch {
+          width: 150px;
+        }
+
+        :global(.arco-tree-node):hover {
+          .insertOrCopyBtn {
+            display: block;
+            width: 52px; // hover态时显示按钮
+            height: 22px;
+            padding: 0 12px;
+            border-radius: 4px;
+            border: 1px solid var(--primary-primary-6, #007dfa);
+            color: var(--primary-primary-6, #007dfa);
+            font-size: 14px;
+          }
+
+          .treeNodeTitle,
+          .treeNodeTitleSearch {
+            color: var(--primary-primary-6, #007dfa);
+          }
+
+          // 根据按钮数量动态调整名称宽度
+          &:has(.insertOrCopyBtn) {
+            .treeNodeTitle {
+              max-width: 85px; // 默认1个按钮时的最大宽度
+            }
+            .treeNodeTitleSearch {
+              max-width: 105px;
+            }
+          }
+        }
+
+        :global(.aa-no-data-card) {
+          margin-top: 250px;
+          display: flex;
+        }
+      }
+
+      .rightBox {
+        flex: 1;
+        max-width: calc(100% - 240px);
+        overflow: hidden;
+
+        .sqlEditorHeader {
+          display: flex;
+          align-items: center;
+          height: 48px;
+          justify-content: space-between;
+          border-bottom: 1px solid #e2e8f0;
+          padding: 12px;
+
+          :global(.arco-btn) {
+            height: 24px;
+            padding: 0 12px;
+            border: 1px solid #cbd5e1 !important;
+          }
+        }
+
+        :global(.cm-gutters.cm-gutters-before) {
+          border-right-width: 0px;
+        }
+
+        :global(.cm-placeholder) {
+          color: #94a3b8;
+        }
+
+        :global(.cm-focused) {
+          outline: unset !important;
+        }
+
+        :global(.cm-activeLine) {
+          background-color: unset !important;
+        }
+
+        :global(.cm-content) {
+          font-weight: 400;
+          font-size: 14px;
+          line-height: 24px;
+          color: #0f172a;
+        }
+
+        :global(.cm-gutterElement) {
+          line-height: 24px;
+        }
+
+        .parseParamsBtn {
+          :global(.arco-btn) {
+            height: 24px;
+            padding: 0 12px;
+            border: 1px solid #cbd5e1 !important;
+          }
+        }
+
+        .codeMirror {
+          overflow: auto;
+          height: 100%;
+
+          :global(.cm-editor) {
+            height: 100%;
+          }
+        }
+
+        :global(.arco-collapse-item-header-title) {
+          color: #1e293b;
+          font-size: 14px;
+          font-weight: 500;
+          line-height: 22px;
+        }
+
+        :global(.arco-collapse-item-header-icon-down) {
+          transform: rotate(180deg);
+        }
+
+        :global(.arco-tabs-header-title) {
+          padding: 8px 0;
+          margin: 0 32px 0 0;
+        }
+
+        :global(.arco-form-item) {
+          margin-bottom: 0;
+        }
+
+        :global(.aa-no-data-card) {
+          display: flex;
+        }
+      }
+    }
+
+    .stepFooter {
+      position: absolute;
+      bottom: 24px;
+      left: 24px;
+      display: flex;
+      gap: 8px;
+    }
+  }
+}

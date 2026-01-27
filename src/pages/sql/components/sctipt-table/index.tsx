@@ -13,38 +13,76 @@ import {
 } from '@arco-design/web-react';
 import { useHistory } from 'react-router';
 import { ColumnProps } from '@arco-design/web-react/es/Table';
-import EllipsisPopover from '@/components/ellipsis-popover-com';
-import Success11Icon from '@/pages/workflowConfig/styles/images/op-icons/success1.svg';
-import noDataElement from '@/components/no-data';
-import {
-  getWorkflowList,
-  workflowDelete,
-  workflowCopy
-} from '@/api/workflowList';
-import { useUserInfo } from '@/store/userInfoStore';
+import { NoDataCard } from '@ceai-front/arco-material';
 import { SorterInfo } from '@arco-design/web-react/es/Table/interface';
 import { PermissionWrapper } from '@/components/PermissionGuard';
-import { WORKFLOW_LIST_PERMISSIONS } from '@/config/permissions';
-import { IconClockCircle, IconRefresh } from '@arco-design/web-react/icon';
-import { openNewPage } from '@/utils/env';
+import {
+  SQL_PERMISSIONS,
+  WORKFLOW_LIST_PERMISSIONS
+} from '@/config/permissions';
+import { IconRefresh } from '@arco-design/web-react/icon';
+import { useUrlState } from '@/pages/sql/hooks/useUrlState';
 import styles from './index.module.scss';
-import { VersionType, VersionTypeEnum } from '../sctipt-card';
 import ScriptModalTable from '../sctip-modal-table';
-import { getDevelopScriptList } from '@/api/sql';
+import { listDevelopScript } from '@/api/sql-develop';
+import { lockDevelopScript, deleteDevelopScript } from '@/api/sql-develop';
+import {
+  ListDevelopScriptItem,
+  ScriptStatus,
+  ScriptStatusName
+} from '@/types/sqlDevelopApi';
+// import EllipsisPopover from '@/components/ellipsis-popover-com';
+import classNames from 'classnames';
+import VersionStatus from '../version-status';
+import ScriptDetailModal from '../spl-script-management/ScriptDetailModal';
+import { EllipsisPopover } from '@ceai-front/arco-material';
 
-const InputSearch = Input.Search;
+interface ScriptTableProps {
+  isAll: (type: boolean) => void;
+  onToScriptList: (type: string) => void;
+  curActiveTab: string;
+  onTotalChange?: (total: number) => void;
+}
 
-const ScriptTable: React.FC = () => {
+const ScriptTable: React.FC<ScriptTableProps> = ({
+  isAll,
+  onToScriptList,
+  curActiveTab,
+  onTotalChange
+}) => {
   const FormItem = Form.Item;
   const [form] = Form.useForm();
   const Option = Select.Option;
-  const options = ['全部', '已发布', '未发布', '草稿'];
+  const { updateUrlState } = useUrlState();
+  // 筛选选项
+  // 注意：0（编辑中）和 1（编辑完成）在前端都显示为"未发版"
+  // 如果后端支持多值查询，可以传递 "0,1"；否则需要特殊处理
+  const options = [
+    {
+      value: ScriptStatus.EditCompleted, // 使用 1（编辑完成）作为"未发版"的代表值
+      label: ScriptStatusName[ScriptStatus.EditCompleted] // '未发版'
+    },
+    {
+      value: ScriptStatus.Released, // 2
+      label: ScriptStatusName[ScriptStatus.Released] // '已发版'
+    }
+    // 服务端暂不支持调度中筛选
+    // {
+    //   value: ScriptStatus.Scheduling, // 3
+    //   label: ScriptStatusName[ScriptStatus.Scheduling] // '调度中'
+    // }
+  ];
   const history = useHistory();
-  const userInfo = useUserInfo();
   // 初始化搜索框value
-  const [searchValue, setSearchValue] = useState('');
+  const [formData, setFormData] = useState({
+    script_name: '', // 脚本名称
+    status: undefined, // 版本状态
+    update_user: '' // 修改人
+  });
   // 初始化开发脚本列表数据
-  const [developScriptData, setDevelopScriptData] = useState([]);
+  const [developScriptData, setDevelopScriptData] = useState<
+    ListDevelopScriptItem[]
+  >([]);
   // 当前的第几页
   const [current, setCurrent] = useState(1);
   // 每页展示数据的数据量
@@ -57,20 +95,24 @@ const ScriptTable: React.FC = () => {
   const [isClickClear, setIsClickClear] = useState(false);
   // 初始化筛选的值
   const [sortValue, setSortValue] = useState({
-    run_cycle: '',
     sort: ''
   });
   // 控制弹窗显示隐藏
   const [visible, setVisible] = useState<boolean>(false);
-
+  // 初始化当前点击的脚本数据
+  const [rowData, setRowData] = useState([]);
+  // 控制详情弹窗显示隐藏
+  const [detailVisible, setDetailVisible] = useState<boolean>(false);
+  // 当前选中的脚本详情数据
+  const [detailRecord, setDetailRecord] = useState<any>(null);
   // 组件初始化
   useEffect(() => {
-    if (userInfo) getList();
-  }, [userInfo, current, pageSize, sortValue]);
+    getList();
+  }, [current, pageSize, sortValue, curActiveTab]);
 
   // 清空搜索框
   useEffect(() => {
-    if (isClickClear && searchValue === '') {
+    if (isClickClear) {
       getList();
       setIsClickClear(false);
     }
@@ -80,104 +122,79 @@ const ScriptTable: React.FC = () => {
     setLoading(true);
     try {
       const params: any = {
-        // uid: userInfo?.id,
-        // search_content: searchValue,
+        script_name: formData?.script_name,
+        status: formData?.status,
+        update_user: formData?.update_user,
         page: current, //第几页
-        page_size: pageSize //每页个数
-        // ...sortValue
+        page_size: pageSize, //每页个数
+        orders: sortValue?.sort
+          ? [
+              {
+                column: 'script_name',
+                order_flag: sortValue?.sort
+              }
+            ]
+          : []
       };
-      const res = await getDevelopScriptList(params);
-      console.log(res, '123');
+      const res = await listDevelopScript(params);
       if (res.status === 200 && res.data) {
-        // setDevelopScriptData(res.data.items);
-        // setCurrent(res.data.page_info?.page);
-        // setPageSize(res.data.page_info?.page_size);
-        // setTotal(res.data.page_info?.total || 10);
+        setDevelopScriptData(res?.data?.items);
+        const newTotal = res.data?.total || 0;
+        setTotal(newTotal);
+        onTotalChange?.(newTotal);
       }
     } finally {
       setLoading(false);
     }
   };
 
-  // 创建工作流
-  const handleCreateWorkflow = () => {
-    openNewPage('/modaforge/tenant/compute/modaforge/workflowConfig');
-  };
-
-  // 跳转目录
-  const handleToDirectoryPath = (
-    id: string,
-    parent_id: string,
-    root_type: string | number
-  ) => {
-    history.push(
-      `/tenant/compute/modaforge/dataCatalog/list?root_type=${root_type}&id=${id}&parent_id=${parent_id}`
-    );
-  };
-  // 跳转目标数据 - 数据集详情
-  const handleToTargetDatasetDetail = (id: string) => {
-    history.push(`/tenant/compute/modaforge/datasetManagement/detail/${id}`);
-  };
   // 查看详情
-  const viewDetailWorkflow = (
-    workflow_uuid: number | string,
-    ds_workflow_id: number | string
-  ) => {
-    openNewPage(
-      `/modaforge/tenant/compute/modaforge/workflowConfig?workflow_uuid=${workflow_uuid}&ds_workflow_id=${ds_workflow_id}`
-    );
+  const viewDetailWorkflow = () => {
+    // openNewPage(
+    //   `/modaforge/tenant/compute/modaforge/workflowConfig?workflow_uuid=${workflow_uuid}&ds_workflow_id=${ds_workflow_id}`
+    // );
   };
 
   // 点击删除操作弹窗
-  const handleDelete = (
-    workflow_uuid: number | string,
-    workflow_version: string
-  ) => {
-    // 如果当前有人在编辑不让删除
-    if (
-      developScriptData.some(
-        (item: any) => item.version_type === VersionType.RELEASED
-      )
-    ) {
-      Message.error({
-        content: `${VersionTypeEnum.RELEASED}正在本地编辑，不可删除`
-      });
+  const handleDelete = (script_id: number, status: ScriptStatus) => {
+    if (status === ScriptStatus.Scheduling) {
       return;
     }
+
     Modal.confirm({
       title: (
         <span className={styles['workflow-list-modal-title']}>
-          确认删除工作流吗？
+          确定删除此脚本吗？
         </span>
       ),
       content: (
         <div className={styles['workflow-list-modal-content']}>
-          删除该工作流后，工作流中的内容将全部清除。
+          删除后，该脚本不可恢复。
         </div>
       ),
       okText: '确定',
       cancelText: '取消',
       onOk: () => {
-        handleDeleteWorkflow(workflow_uuid, workflow_version);
+        handleDeleteScript(script_id);
       }
     });
   };
 
   // 删除工作流
-  const handleDeleteWorkflow = async (
-    workflow_uuid: number | string,
-    workflow_version: string
-  ) => {
-    const res = await workflowDelete(workflow_uuid, workflow_version);
-    if (res.status === 200 && res.code === '') {
-      Message.success({
-        content: '删除成功'
+  const handleDeleteScript = async (script_id: number) => {
+    try {
+      const res = await deleteDevelopScript({
+        script_id
       });
-      getList();
-    } else {
-      Message.error({
-        content: res?.message ?? '删除失败，请稍后重试'
-      });
+      if (res.status === 200 && res.code === '') {
+        Message.success('删除成功');
+        getList();
+      } else {
+        Message.error(res?.message ?? '删除失败，请稍后重试');
+      }
+    } catch (error) {
+      Message.error('删除失败，请稍后重试');
+      console.log(error);
     }
   };
 
@@ -189,240 +206,210 @@ const ScriptTable: React.FC = () => {
   ) => {
     setCurrent(1);
     const sortdata = {
-      run_cycle:
-        filters.run_cycle === undefined ? '' : filters.run_cycle.join(','),
-      is_online:
-        filters.is_online === undefined ? '' : filters.is_online.join(','),
       sort:
         sorter.direction === undefined
           ? ''
           : sorter.direction === 'ascend'
-            ? 'create_time:ASC'
-            : 'create_time:DESC'
+            ? 'asc'
+            : 'desc'
     };
 
     setSortValue(sortdata);
+  };
+
+  // list 点击查看历史版本
+  const handleViewHistory = (record: any) => {
+    setVisible(true);
+    setRowData(record);
+  };
+
+  const handleToDetail = (scriptId: number | string) => {
+    updateUrlState(
+      {
+        activeTab: 'files',
+        activeDevelopScriptId: String(scriptId)
+      },
+      { method: 'push' }
+    );
+  };
+
+  // 打开详情弹窗
+  const handleOpenDetail = (record: any) => {
+    setDetailRecord(record);
+    setDetailVisible(true);
   };
 
   // table数据为空时展示-
   const renderEmptyPlaceholder = (value: string | null) => {
     return value === '' || value == null ? '-' : value;
   };
-  const getVersionType = (version_type) => {
-    switch (version_type) {
-      case VersionType.RELEASED:
-        return (
-          <div className={styles['script-card-content-item-title-icon']}>
-            <span
-              className={
-                version_type === VersionType.RELEASED
-                  ? styles['released-icon']
-                  : ''
-              }
-            />
-            <div className={styles['script-card-content-item-title-icon-text']}>
-              {VersionTypeEnum.RELEASED}
-            </div>
-          </div>
-        );
-      case VersionType.UNRELEASED:
-        return (
-          <div className={styles['script-card-content-item-title-icon']}>
-            <span
-              className={
-                version_type === VersionType.UNRELEASED
-                  ? styles['unreleased-icon']
-                  : ''
-              }
-            />
-            <div className={styles['script-card-content-item-title-icon-text']}>
-              {VersionTypeEnum.UNRELEASED}
-            </div>
-          </div>
-        );
-      case VersionType.SCHEDULED:
-        return (
-          <div className={styles['script-card-content-item-title-icon']}>
-            <span
-              className={
-                version_type === VersionType.SCHEDULED
-                  ? styles['scheduled-icon']
-                  : ''
-              }
-            />
-            <div className={styles['script-card-content-item-title-icon-text']}>
-              {VersionTypeEnum.SCHEDULED}
-            </div>
-          </div>
-        );
-      default:
-        return (
-          <div className={styles['script-card-content-item-title-icon']}>
-            <span
-              className={
-                version_type === VersionType.UNRELEASED
-                  ? styles['unreleased-icon']
-                  : ''
-              }
-            />
-            <div className={styles['script-card-content-item-title-icon-text']}>
-              {VersionTypeEnum.UNRELEASED}
-            </div>
-          </div>
-        );
-    }
-  };
   // table columns
   const columns: ColumnProps[] = [
     {
-      title: '序号',
-      dataIndex: 'id',
-      width: 80,
-      sorter: (a, b) => a.name.length - b.name.length
-    },
-    {
       title: '脚本名称',
-      dataIndex: 'workflow_name',
+      dataIndex: 'script_name',
       width: 180,
       ellipsis: true,
-      className: styles['hover-change'] + ' ' + styles['workflow-name'],
+      sorter: true,
+      className: styles['hover-change'],
+      render: (_, record) => (
+        <EllipsisPopover
+          value={record.script_name ?? '-'}
+          isLink
+          handleLink={() => handleToDetail(record.script_id)}
+        />
+      )
+    },
+    {
+      title: '脚本ID',
+      dataIndex: 'script_id',
+      width: 200
+    },
+    {
+      title: '最新版本号',
+      dataIndex: 'max_version_name',
+      width: 120,
       render: (_, record) => {
-        return renderEmptyPlaceholder(record.workflow_name) !== '-' ? (
+        // 如果最新版本状态是未发版（编辑中或编辑完成），显示-
+        const isUnreleased =
+          record.status === ScriptStatus.Editing ||
+          record.status === ScriptStatus.EditCompleted;
+        return (
           <EllipsisPopover
-            value={record.workflow_name}
-            isEdit={false}
-            isLink
-            handleLink={() => {
-              viewDetailWorkflow(record.workflow_uuid, record.ds_workflow_id);
-            }}
-          />
-        ) : (
-          <span>-</span>
+            value={isUnreleased ? '-' : record.max_version_name || '-'}
+            preferTypography
+          ></EllipsisPopover>
         );
       }
     },
     {
-      title: '最近版本号',
-      dataIndex: 'run_cycle',
-      width: 120,
-      render: (_, record) =>
-        record.run_cycle ? <span>周期运行</span> : <span>单次运行</span>
-    },
-    {
       title: '最新版本状态',
-      dataIndex: 'is_online',
+      dataIndex: 'max_version',
       width: 160,
       render: (_, record) => {
-        return getVersionType(record.version_type);
-      },
-      filters: [
-        {
-          text: '未发版',
-          value: 0
-        },
-        {
-          text: '已发版',
-          value: 1
-        },
-        {
-          text: '调度中',
-          value: 2
-        }
-      ]
+        return <VersionStatus status={record.status}></VersionStatus>;
+      }
+      // filters: [
+      //   {
+      //     text: '未发版',
+      //     value: 1
+      //   },
+      //   {
+      //     text: '已发版',
+      //     value: 2
+      //   },
+      //   {
+      //     text: '调度中',
+      //     value: 3
+      //   }
+      // ]
     },
     {
-      title: '开发人',
-      dataIndex: 'source_path',
+      title: '修改人',
+      dataIndex: 'update_user',
       width: 100,
       ellipsis: true,
-      className: styles['hover-change']
-    },
-    {
-      title: '调度版本',
-      dataIndex: 'target_path',
-      width: 100,
-      ellipsis: true
-    },
-    {
-      title: '所属任务节点',
-      dataIndex: 'user_name',
-      width: 160,
-      ellipsis: true
-    },
-    {
-      title: '所属工作流',
-      dataIndex: 'user_name',
-      width: 160,
-      ellipsis: true
-    },
-    {
-      title: '最后执行时间',
-      dataIndex: 'create_time',
-      width: 180,
       render: (_, record) => (
-        <span>
-          {record.create_time == '' || record.create_time == null
-            ? '-'
-            : new Date(record.create_time).toLocaleString()}
-        </span>
+        <EllipsisPopover
+          value={record.update_user ?? '-'}
+          preferTypography
+        ></EllipsisPopover>
       )
     },
     {
+      title: '调度版本',
+      dataIndex: 'version_name',
+      width: 100,
+      render: (_, record) => (
+        <EllipsisPopover
+          value={record.version_name || '-'}
+          preferTypography
+        ></EllipsisPopover>
+      )
+    },
+    {
+      title: '所属任务节点',
+      dataIndex: 'task_name',
+      width: 160,
+      render: (_, record) => (
+        <EllipsisPopover
+          value={record.task_name || '-'}
+          preferTypography
+        ></EllipsisPopover>
+      )
+    },
+    {
+      title: '所属工作流',
+      dataIndex: 'process_name',
+      width: 160,
+      render: (_, record) => (
+        <EllipsisPopover
+          value={record.process_name || '-'}
+          preferTypography
+        ></EllipsisPopover>
+      )
+    },
+    {
+      title: '最新更新时间',
+      dataIndex: 'update_time',
+      width: 180,
+      render: (_, record) => <span>{record.update_time ?? ''}</span>
+    },
+    {
       title: '操作',
-      dataIndex: 'operate',
+      // dataIndex: 'operate',
       fixed: 'right',
-      width: 200,
+      width: 176,
       render: (_, record) => {
         const perms = record.perms || [];
         return (
-          <div style={{ display: 'flex' }}>
-            <PermissionWrapper permission={WORKFLOW_LIST_PERMISSIONS.CAN_READE}>
-              <span
-                className={styles['operate-text']}
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            <PermissionWrapper permission={SQL_PERMISSIONS.DEVELOP_SCIPT_GET}>
+              <Button
+                type="text"
+                className="mr-[16px] px-[0px]"
                 onClick={() => {
-                  viewDetailWorkflow(
-                    record.workflow_uuid,
-                    record.ds_workflow_id
-                  );
+                  handleOpenDetail(record);
                 }}
               >
                 详情
-              </span>
+              </Button>
             </PermissionWrapper>
-            {/* <PermissionWrapper permission={WORKFLOW_LIST_PERMISSIONS.CAN_COPY}> */}
-            <span
-              className={styles['operate-text']}
-              onClick={() => {
-                console.log(123);
-                setVisible(true);
-              }}
+            <PermissionWrapper permission={SQL_PERMISSIONS.DEVELOP_SCIPT_LOG}>
+              <Button
+                type="text"
+                className="mr-[16px] px-[0px]"
+                onClick={() => {
+                  // setVisible(true);
+                  // setRowData(record);
+                  handleViewHistory(record);
+                }}
+              >
+                历史版本
+              </Button>
+            </PermissionWrapper>
+
+            <PermissionWrapper
+              permission={SQL_PERMISSIONS.DEVELOP_SCIPT_DELETE}
             >
-              历史版本
-            </span>
-            {/* </PermissionWrapper> */}
-            {/* <PermissionWrapper
-              permission={WORKFLOW_LIST_PERMISSIONS.CAN_DELETE}
-            > */}
-            <Popover
-              trigger="hover"
-              content="请先下线工作流"
-              position="top"
-              disabled={!record.is_online}
-            >
-              <span
-                className={
-                  record.is_online
-                    ? styles['disabled-text']
-                    : styles['operate-text']
-                }
-                onClick={() =>
-                  handleDelete(record.workflow_uuid, record.workflow_version)
+              <Popover
+                content={
+                  record.status === ScriptStatus.Scheduling
+                    ? '调度中的脚本不可删除'
+                    : ''
                 }
               >
-                删除
-              </span>
-            </Popover>
-            {/* </PermissionWrapper> */}
+                <Button
+                  type="text"
+                  style={{ marginRight: '16px', padding: '0px' }}
+                  className="px-[0px]"
+                  onClick={() => handleDelete(record.script_id, record.status)}
+                  disabled={record.status === ScriptStatus.Scheduling}
+                >
+                  删除
+                </Button>
+              </Popover>
+            </PermissionWrapper>
           </div>
         );
       }
@@ -431,84 +418,109 @@ const ScriptTable: React.FC = () => {
 
   // 点击搜索按钮
   const handleSearch = () => {
+    setCurrent(1);
     setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-    }, 500);
+    getList();
+    // 检查 Form 的选项是否不为空
+    const formValues = form.getFieldsValue();
+    const hasValue =
+      (formValues.script_name && formValues.script_name.trim() !== '') ||
+      formValues.status !== undefined ||
+      (formValues.update_user && formValues.update_user.trim() !== '');
+    if (hasValue) {
+      isAll(true);
+    } else {
+      isAll(false);
+    }
   };
   // 重置搜索框
   const handleReset = () => {
-    setSearchValue('');
+    setCurrent(1);
+    isAll(false);
     setIsClickClear(true);
     form.resetFields();
   };
+  const handleValuesChange = (values: any) => {
+    console.log(values, '123');
+    values &&
+      setFormData((prev) => ({
+        ...prev,
+        ...values
+      }));
+  };
+
   return (
     <div className={styles['script-table-wrapper']}>
       <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          width: '100%',
-          marginBottom: '16px'
-        }}
+        className={classNames(
+          styles['header-form-content'],
+          'flex w-full items-center justify-between overflow-x-auto whitespace-nowrap'
+        )}
       >
-        <Form form={form} autoComplete="off" layout="inline">
-          <FormItem label="脚本名称:" field="search_content">
-            <Input style={{ width: 236 }} placeholder="输入脚本名称搜索" />
+        <Form
+          onValuesChange={handleValuesChange}
+          form={form}
+          autoComplete="off"
+          layout="inline"
+          className="flex flex-1 flex-nowrap items-center gap-[16px] [&_.arco-form-item-wrapper]:flex-1 [&_.arco-form-item]:mr-0 [&_.arco-form-item]:flex-1"
+        >
+          <FormItem label="脚本名称:" field="script_name">
+            <Input className="w-full" placeholder="输入脚本名称搜索" />
           </FormItem>
-          <FormItem label="版本状态:" field="version_status">
+          <FormItem label="版本状态:" field="status">
             <Select
-              placeholder="请选择版本状态"
-              style={{ width: 236 }}
-              onChange={(value) =>
-                Message.info({
-                  content: `You select ${value}.`,
-                  showIcon: true
-                })
-              }
+              allowClear
+              className="w-full"
+              placeholder="请选择最新版本状态"
             >
               {options.map((option, index) => (
-                <Option key={option} value={option}>
-                  {option}
+                <Option key={option.value} value={option.value}>
+                  {option.label}
                 </Option>
               ))}
             </Select>
           </FormItem>
-          <FormItem label="开发人:" field="developer">
-            <Input style={{ width: 250 }} placeholder="输入关键字搜索" />
+          <FormItem label="修改人:" field="update_user">
+            <Input className="w-full" placeholder="输入修改人搜索" />
           </FormItem>
         </Form>
-        <div style={{ display: 'flex', flex: 1 }}>
+        <div className="flex items-center whitespace-nowrap">
           <Button
             type="text"
             onClick={handleReset}
             icon={<IconRefresh />}
-            style={{ marginRight: 8 }}
+            className="ml-[16px] mr-[12px] px-[0px]"
           >
             重置
           </Button>
-          <Button type="primary" onClick={handleSearch} loading={loading}>
+          <Button type="primary" onClick={handleSearch}>
             查询
           </Button>
         </div>
       </div>
+      {/* <div className=""> */}
       <Table
+        className="w-full"
         border={false}
+        scroll={{ x: true }}
         columns={columns}
         data={developScriptData}
         pagination={false}
-        noDataElement={noDataElement({
-          description: '暂无脚本'
-        })}
-        rowKey="id"
+        noDataElement={
+          <div className="flex w-full items-center justify-center py-[100px]">
+            <NoDataCard title="暂无数据" />
+          </div>
+        }
+        rowKey="script_id"
         loading={loading}
         onChange={(pagination, sorter, filters) =>
           // @ts-expect-error
           handleTableChange(pagination, sorter, filters)
         }
       />
+      {/* </div> */}
       {/* 分页 */}
-      {developScriptData && developScriptData.length > 0 && (
+      {total > 0 && (
         <Pagination
           current={current}
           pageSize={pageSize}
@@ -527,7 +539,19 @@ const ScriptTable: React.FC = () => {
           style={{ justifyContent: 'flex-end', marginTop: '10px' }}
         />
       )}
-      <ScriptModalTable isVisible={visible} setChildStatus={setVisible} />
+      {visible && (
+        <ScriptModalTable
+          rowData={rowData}
+          isVisible={visible}
+          setChildStatus={setVisible}
+        />
+      )}
+      <ScriptDetailModal
+        visible={detailVisible}
+        title={detailRecord?.script_name}
+        content={detailRecord?.script_context}
+        onCancel={() => setDetailVisible(false)}
+      />
     </div>
   );
 };

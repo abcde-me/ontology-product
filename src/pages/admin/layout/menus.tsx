@@ -19,13 +19,17 @@ import {
   API_KEY_PERMISSIONS,
   TAG_PERMISSIONS,
   DATA_ASSET_PERMISSIONS,
-  METADATA_MANAGEMENT_PERMISSIONS
+  METADATA_MANAGEMENT_PERMISSIONS,
+  DATA_API_PERMISSIONS,
+  QUALITY_TASK_PERMISSIONS
 } from '@/config/permissions';
 import Connection from '@/assets/sider/connection.svg';
 import DataLoad from '@/assets/sider/data-load.svg';
 import DataCatalog from '@/assets/sider/data-catalog.svg';
 import DatasetManagement from '@/assets/sider/dataset-management.svg';
 import DataAsset from '@/assets/sider/data-asset.svg';
+import MetadataManagement from '@/assets/sider/metadata-management.svg';
+import DataApi from '@/assets/sider/data-api.svg';
 import DataMarket from '@/assets/sider/data-market.svg';
 import WorkflowList from '@/assets/sider/workflow-list.svg';
 import WorkflowTask from '@/assets/sider/workflow-task.svg';
@@ -37,7 +41,7 @@ import SqlMenu from '@/assets/sider/sql.svg';
 import AnnotationTask from '@/assets/sider/annotationTask.svg';
 import LabelMenu from '@/assets/label-menu.svg';
 import RequirementManagement from '@/assets/sider/requirementManagement.svg';
-
+import QualityTaskMenu from '@/assets/sider/qualityTask.svg';
 export type MenuModel = {
   title: string;
   icon?: any;
@@ -48,7 +52,9 @@ export type MenuModel = {
   className?: string;
   type?: string;
   external?: boolean;
-  permission?: string; // 添加权限字段
+  permission?: string; // 单个权限字段
+  anyPermission?: string[]; // 任意一个权限即可（OR 逻辑）
+  allPermission?: string[]; // 必须全部权限（AND 逻辑）
   queryParamMatcher?: (search: string) => boolean; // 用于匹配查询参数
 };
 
@@ -78,8 +84,26 @@ export const filterMenusByPermissions = (
       }
 
       // 如果菜单需要权限且用户没有该权限，则过滤掉
-      if (menu.permission && !userPermissions.includes(menu.permission)) {
-        return null;
+      // 优先级：allPermission > anyPermission > permission
+      if (menu.allPermission) {
+        // 必须全部权限
+        if (
+          !menu.allPermission.every((perm) => userPermissions.includes(perm))
+        ) {
+          return null;
+        }
+      } else if (menu.anyPermission) {
+        // 任意一个权限即可
+        if (
+          !menu.anyPermission.some((perm) => userPermissions.includes(perm))
+        ) {
+          return null;
+        }
+      } else if (menu.permission) {
+        // 单个权限
+        if (!userPermissions.includes(menu.permission)) {
+          return null;
+        }
       }
 
       return menu;
@@ -130,7 +154,7 @@ export const menus: MenuModel[] = [
         permission: WORKFLOW_LIST_PERMISSIONS.LIST
       },
       {
-        title: '作业',
+        title: '运行记录',
         icon: <WorkflowTask className={iconClass} />,
         key: 'workflowTask',
         path: '/tenant/compute/modaforge/workflowTask',
@@ -155,7 +179,10 @@ export const menus: MenuModel[] = [
         icon: <SqlMenu className={iconClass} />,
         key: 'sql',
         path: '/tenant/compute/modaforge/sql',
-        permission: SQL_PERMISSIONS.LIST
+        anyPermission: [
+          SQL_PERMISSIONS.QUERY_SCRIPT_LIST,
+          SQL_PERMISSIONS.DEVELOP_SCIPT_LIST
+        ]
       }
     ]
   },
@@ -177,6 +204,13 @@ export const menus: MenuModel[] = [
         key: 'taskList',
         path: '/tenant/compute/modaforge/taskList',
         permission: ANNOTATION_TASK_PERMISSIONS.LIST
+      },
+      {
+        title: '质检任务',
+        icon: <QualityTaskMenu className={iconClass} />,
+        key: 'qualityTaskList',
+        path: '/tenant/compute/modaforge/qualityTask',
+        permission: QUALITY_TASK_PERMISSIONS.LIST
       }
     ]
   },
@@ -201,10 +235,57 @@ export const menus: MenuModel[] = [
       },
       {
         title: '元数据管理',
-        icon: <DataAsset className={iconClass} />,
+        icon: <MetadataManagement className={iconClass} />,
         key: 'metadataManagement',
         path: '/tenant/compute/modaforge/metadataManagement',
         permission: METADATA_MANAGEMENT_PERMISSIONS.LIST
+      },
+      {
+        title: '数据API',
+        icon: <DataApi className={iconClass} />,
+        key: 'dataApi',
+        path: '/tenant/compute/modaforge/dataApi',
+        permission: DATA_API_PERMISSIONS.LIST
+      }
+    ]
+  },
+
+  {
+    type: 'itemGroup',
+    title: '平台资源',
+    key: 'platformResource',
+    children: [
+      {
+        title: 'API Key管理',
+        icon: <OrganMenu className={iconClass} />,
+        key: 'apiKeyMgmt',
+        path:
+          '/tenant/compute/modaforge/operationCenter?url=' +
+          encodeURIComponent(
+            '/operationcenter/tenant/compute/operationcenter/apikey'
+          ),
+        activePaths: ['/tenant/compute/modaforge/operationCenter'],
+        queryParamMatcher: (search: string) => {
+          const url = new URLSearchParams(search).get('mdp_operation_center');
+          return url?.includes('apikey') ?? false;
+        },
+        permission: API_KEY_PERMISSIONS.MENU
+      },
+      {
+        key: 'tag',
+        title: '标签管理',
+        icon: <LabelMenu className={iconClass} />,
+        path:
+          '/tenant/compute/modaforge/operationCenter?url=' +
+          encodeURIComponent(
+            '/operationcenter/tenant/compute/operationcenter/tag'
+          ),
+        activePaths: ['/tenant/compute/modaforge/operationCenter'],
+        queryParamMatcher: (search: string) => {
+          const url = new URLSearchParams(search).get('mdp_operation_center');
+          return url?.includes('tag') ?? false;
+        },
+        permission: TAG_PERMISSIONS.LIST
       }
     ]
   },
@@ -225,7 +306,7 @@ export const menus: MenuModel[] = [
           ),
         activePaths: ['/tenant/compute/modaforge/operationCenter'],
         queryParamMatcher: (search: string) => {
-          const url = new URLSearchParams(search).get('url');
+          const url = new URLSearchParams(search).get('mdp_operation_center');
           return url?.includes('organization') ?? false;
         },
         permission: ORGANIZATION_PERMISSIONS.MENU
@@ -241,7 +322,7 @@ export const menus: MenuModel[] = [
         key: 'userMgmt',
         activePaths: ['/tenant/compute/modaforge/operationCenter'],
         queryParamMatcher: (search: string) => {
-          const url = new URLSearchParams(search).get('url');
+          const url = new URLSearchParams(search).get('mdp_operation_center');
           return (
             (url?.includes('/user') && !url?.includes('user-group')) ?? false
           );
@@ -259,7 +340,7 @@ export const menus: MenuModel[] = [
         key: 'userGroupMgmt',
         activePaths: ['/tenant/compute/modaforge/operationCenter'],
         queryParamMatcher: (search: string) => {
-          const url = new URLSearchParams(search).get('url');
+          const url = new URLSearchParams(search).get('mdp_operation_center');
           return url?.includes('user-group') ?? false;
         },
         permission: USER_GROUP_PERMISSIONS.MENU
@@ -275,7 +356,7 @@ export const menus: MenuModel[] = [
         key: 'roleMgmt',
         activePaths: ['/tenant/compute/modaforge/operationCenter'],
         queryParamMatcher: (search: string) => {
-          const url = new URLSearchParams(search).get('url');
+          const url = new URLSearchParams(search).get('mdp_operation_center');
           return url?.includes('role') ?? false;
         },
         permission: ROLE_PERMISSIONS.MENU
@@ -299,42 +380,10 @@ export const menus: MenuModel[] = [
           ),
         activePaths: ['/tenant/compute/modaforge/operationCenter'],
         queryParamMatcher: (search: string) => {
-          const url = new URLSearchParams(search).get('url');
+          const url = new URLSearchParams(search).get('mdp_operation_center');
           return url?.includes('project') ?? false;
         },
         permission: PROJECT_PERMISSIONS.MENU
-      },
-      {
-        title: 'API Key管理',
-        icon: <OrganMenu className={iconClass} />,
-        key: 'apiKeyMgmt',
-        path:
-          '/tenant/compute/modaforge/operationCenter?url=' +
-          encodeURIComponent(
-            '/operationcenter/tenant/compute/operationcenter/apikey'
-          ),
-        activePaths: ['/tenant/compute/modaforge/operationCenter'],
-        queryParamMatcher: (search: string) => {
-          const url = new URLSearchParams(search).get('url');
-          return url?.includes('apikey') ?? false;
-        },
-        permission: API_KEY_PERMISSIONS.MENU
-      },
-      {
-        key: 'tag',
-        title: '标签管理',
-        icon: <LabelMenu className={iconClass} />,
-        path:
-          '/tenant/compute/modaforge/operationCenter?url=' +
-          encodeURIComponent(
-            '/operationcenter/tenant/compute/operationcenter/tag'
-          ),
-        activePaths: ['/tenant/compute/modaforge/operationCenter'],
-        queryParamMatcher: (search: string) => {
-          const url = new URLSearchParams(search).get('url');
-          return url?.includes('tag') ?? false;
-        },
-        permission: TAG_PERMISSIONS.LIST
       }
     ]
   }

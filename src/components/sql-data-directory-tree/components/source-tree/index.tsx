@@ -9,6 +9,7 @@ import classNames from 'classnames';
 import React, { useCallback } from 'react';
 import { useSourceTree } from '../../hooks/useSourceTree';
 import styles from './index.module.scss';
+import { NoDataCard } from '@ceai-front/arco-material';
 
 interface SourceTreeProps {
   isEditorFocused?: boolean;
@@ -128,7 +129,9 @@ const SourceTree: React.FC<SourceTreeProps> = ({
             <div className="text-[rgba(15, 23, 42, 1)] text-[14px]">加载中</div>
           </div>
         ) : treeDataFiltered.length === 0 ? (
-          <Empty />
+          <div className="py-[100px]">
+            <NoDataCard title="暂无数据" type="block" />
+          </div>
         ) : (
           <Tree
             loadMore={loadMore}

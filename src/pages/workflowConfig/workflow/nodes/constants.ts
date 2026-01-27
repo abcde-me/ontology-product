@@ -1,5 +1,5 @@
 import type { ComponentType } from 'react';
-import { BlockEnum } from '../types';
+import { BlockEnum, CommonStructNodeType } from '../types';
 import StartNode from './start/node';
 import StartPanel from './start/panel';
 import EndNode from './end/node';
@@ -19,29 +19,41 @@ import EnhancementNode from './data-enhancement/node';
 import EnhancementPanel from './data-enhancement/panel';
 import CustomizeNode from './data-customize/node';
 import CustomizePanel from './data-customize/panel';
+import SQLNode from './sql-node';
+import DependentNode from './dependent-node';
+import SQLPanel from './sql-node/panel';
+import SeatunnelNode from './seatunnel-node';
+import SeatunnelPanel from './seatunnel-node/panel';
+import DependentPanel from './dependent-node/panel';
 
 export const NodeComponentMap: Record<string, ComponentType<any>> = {
   [BlockEnum.Start]: StartNode,
   [BlockEnum.End]: EndNode,
   [BlockEnum.Text]: TextNode,
-  [BlockEnum.Pic]: ImageNode,
+  [BlockEnum.Image]: ImageNode,
   [BlockEnum.Video]: VideoNode,
   [BlockEnum.Audio]: AudioNode,
   [BlockEnum.Enhancement]: EnhancementNode,
   [BlockEnum.Cleaning]: CleaningNode,
-  [BlockEnum.Customize]: CustomizeNode
+  [BlockEnum.Customize]: CustomizeNode,
+  [BlockEnum.SQL]: SQLNode,
+  [BlockEnum.Seatunnel]: SeatunnelNode,
+  [BlockEnum.Dependent]: DependentNode
 };
 
 export const PanelComponentMap: Record<string, ComponentType<any>> = {
   [BlockEnum.Start]: StartPanel,
   [BlockEnum.End]: EndPanel,
   [BlockEnum.Text]: TextPanel,
-  [BlockEnum.Pic]: ImagePanel,
+  [BlockEnum.Image]: ImagePanel,
   [BlockEnum.Video]: VideoPanel,
   [BlockEnum.Audio]: AudioPanel,
   [BlockEnum.Cleaning]: CleaningPanel,
   [BlockEnum.Enhancement]: EnhancementPanel,
-  [BlockEnum.Customize]: CustomizePanel
+  [BlockEnum.Customize]: CustomizePanel,
+  [BlockEnum.SQL]: SQLPanel,
+  [BlockEnum.Dependent]: DependentPanel,
+  [BlockEnum.Seatunnel]: SeatunnelPanel
 };
 
 export const CUSTOM_NODE_TYPE = 'custom';
@@ -70,3 +82,18 @@ export const SUB_VARIABLES = [
 export const OUTPUT_FILE_SUB_VARIABLES = SUB_VARIABLES.filter(
   (key) => key !== 'transfer_method'
 );
+
+export const CATEGORY_MAP: Record<string, string> = {
+  文档: 'text',
+  图片: 'image',
+  音频: 'audio',
+  视频: 'video',
+  自定义: 'scripting'
+};
+
+export const STRUCT_NODE_EXEC_DEFAULT_PARAMS: Partial<CommonStructNodeType> = {
+  fail_retry_interval: '1',
+  fail_retry_times: '0',
+  task_priority: 'MEDIUM',
+  flow_type: 'struct'
+};

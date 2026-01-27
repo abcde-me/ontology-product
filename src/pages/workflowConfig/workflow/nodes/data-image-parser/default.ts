@@ -11,14 +11,15 @@ const nodeDefault: NodeDefault<ImageParserNodeType> = {
     files: [],
     selected_files_num: -1,
     pic_model_id: '',
+    image_model: '',
     pic_emb_model_id: ''
   },
   getAvailablePrevNodes(isChatMode: boolean) {
     const nodes = isChatMode
       ? ALL_CHAT_AVAILABLE_BLOCKS
       : ALL_COMPLETION_AVAILABLE_BLOCKS.filter(
-        (type) => type !== BlockEnum.End
-      );
+          (type) => type !== BlockEnum.End
+        );
     return nodes;
   },
   getAvailableNextNodes(isChatMode: boolean) {

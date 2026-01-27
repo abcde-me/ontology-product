@@ -1,4 +1,7 @@
-import type { CommonNodeType, VarType } from '@/pages/workflowConfig/workflow/types';
+import type {
+  CommonNodeType,
+  VarType
+} from '@/pages/workflowConfig/workflow/types';
 
 export type OutputVar = Record<
   string,
@@ -13,4 +16,5 @@ export type ImageParserNodeType = CommonNodeType & {
   pic_model_id: string | number;
   pic_emb_model_id: string | number;
   selected_files_num: number | number;
+  image_model?: string;
 };

@@ -1,4 +1,4 @@
-import type { FC } from 'react';
+import { FC } from 'react';
 import React, {
   memo,
   useCallback,
@@ -8,7 +8,7 @@ import React, {
   useState
 } from 'react';
 import { setAutoFreeze } from 'immer';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useParams as useRouterParams } from 'react-router-dom';
 import { useEventListener } from 'ahooks';
 import ReactFlow, {
   Background,
@@ -74,6 +74,7 @@ import { useEventEmitterContextContext } from '@/pages/workflowConfig/context/ev
 import Confirm from '@/pages/workflowConfig/components/confirm';
 import { FILE_EXTS } from '@/pages/workflowConfig/components/prompt-editor/constants';
 import fileUploadConfigJson from '@/pages/workflowConfig/mockData/fileUploadConfig.json';
+import useInitFlowTestTask from '@/pages/workflowConfig/workflow/hooks/use-init-flow-test-task';
 
 const nodeTypes = {
   [CUSTOM_NODE]: CustomNode,
@@ -104,8 +105,10 @@ const Workflow: FC<WorkflowProps> = memo(
 
     // 作业详情不需要显示 其他正常显示
     const location = useLocation(); // 获取当前路由信息
-    const isShowChatMode =
-      location.pathname === '/tenant/compute/modaforge/workflowTaskDetail';
+    const { type: flowType = 'no_struct' } =
+      useRouterParams<Record<string, string>>();
+
+    const isShowChatMode = location.pathname.includes('workflowTask/detail');
     const {
       setShowConfirm,
       setControlPromptEditorRerenderKey,
@@ -228,6 +231,7 @@ const Workflow: FC<WorkflowProps> = memo(
     const { handlePaneContextMenu, handlePaneContextmenuCancel } =
       usePanelInteractions();
     const { isValidConnection } = useWorkflow();
+    const [initFlowTestTask, stopTest] = useInitFlowTestTask();
     const { exportCheck, handleExportDSL } = useDSL();
 
     useOnViewportChange({
@@ -237,6 +241,11 @@ const Workflow: FC<WorkflowProps> = memo(
     });
 
     useShortcuts();
+
+    useEffect(() => {
+      initFlowTestTask();
+      return stopTest;
+    }, []);
 
     const store = useStoreApi();
     if (process.env.NODE_ENV === 'development') {
@@ -258,9 +267,10 @@ const Workflow: FC<WorkflowProps> = memo(
       >
         <SyncingDataModal />
         <CandidateNode />
-        {!isShowChatMode && <Header />}
+        {!isShowChatMode && <Header flowType={flowType} />}
         {!isShowChatMode && (
           <SubHeader
+            flowType={flowType}
             handleRedo={handleHistoryForward}
             handleUndo={handleHistoryBack}
           />

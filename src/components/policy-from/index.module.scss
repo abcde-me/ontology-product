@@ -1,22 +1,18 @@
 .fromstylePolicy {
-  input[name='button-radio-group']:focus-visible + .arco-btn {
-    box-shadow: 0 0 0 2px var(--color-primary-light-3);
-  }
-
   .custom-radio-card {
-    padding: 10px 16px;
+    padding: 16px;
     border: 1px solid var(--color-border-2);
     border-radius: 4px;
     width: 240px;
-    height: 140px;
+    height: 118px;
     box-sizing: border-box;
   }
   .headername {
     font-family: PingFangSC-Medium;
     font-size: 14px;
-    color: #000000;
-    font-weight: 600;
-    margin-bottom: 10px;
+    color: var(--color-text-1);
+    font-weight: 500;
+    margin-bottom: 8px;
   }
   .custom-radio-card-mask {
     height: 14px;
@@ -36,13 +32,9 @@
 
   .custom-radio-card-title {
     color: var(--color-text-1);
-    font-size: 14px;
-    font-weight: bold;
+    font-size: 16px;
+    font-weight: 500;
     margin-bottom: 8px;
-  }
-
-  input[name='card-radio-group']:focus-visible + .custom-radio-card {
-    box-shadow: 0 0 0 2px var(--color-primary-light-3);
   }
 
   .custom-radio-card:hover,
@@ -64,24 +56,20 @@
   .custom-radio-card-checked .custom-radio-card-mask-dot {
     background-color: rgb(var(--primary-6));
   }
-  /* .policybox {
-    width: 240px;
-    height: 140px;
-  } */
+
   :global(.arco-radio-group) :global(.arco-radio) {
+    margin-right: 12px;
+    padding-left: 0;
+  }
+
+  :global(.arco-radio-group) :global(.arco-radio:last-child) {
     margin-right: 0;
+    padding-left: 0;
   }
   .policy-text {
-    height: 80px;
     overflow: auto; /* 超出部分隐藏 */
-  }
-  :global(.arco-form-label-item) {
-    font-family: PingFangSC-Semibold;
-    font-size: 14px;
-    color: #0f172a;
-    letter-spacing: 0;
-    line-height: 22px;
-    font-weight: 600;
+    font-size: 12px;
+    color: var(--color-text-4);
   }
   :global(.arco-form-item-control-children) {
     display: flex;

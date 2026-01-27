@@ -12,7 +12,9 @@ import {
   Tabs,
   Typography,
   Switch,
-  TreeSelect
+  TreeSelect,
+  Table,
+  Checkbox
 } from '@arco-design/web-react';
 import { format } from 'sql-formatter';
 import React, {
@@ -30,7 +32,11 @@ import {
   checkSQL,
   CheckSQLStatus
 } from '@/api/loadApi';
-import { getConnectionList, getdetailList } from '@/api/connectionApi';
+import {
+  getConnectionList,
+  getdetailList,
+  PreviewConnectorSampleData
+} from '@/api/connectionApi';
 import { useHistory } from 'react-router';
 import { validateName } from '@/utils/valiate';
 import Uploads from '../list/file-upload';
@@ -48,6 +54,9 @@ import ValidateIcon from '../assets/validate-icon.svg';
 import RunFailedIcon from '@/assets/python/run-fail-icon.svg';
 import RunSuccessIcon from '@/assets/python/run-success-icon.svg';
 import classNames from 'classnames';
+import EditableTable from '../table-json';
+import PreviewModal from '../prev-modal';
+import { set } from 'immer/dist/internal';
 
 // 常量定义
 const ROUTES = {
@@ -59,12 +68,14 @@ const SOURCE_TYPES = {
   S3: 's3',
   HDFS: 'hdfs',
   DB: 'db',
-  LOCAL: 'local'
+  LOCAL: 'local',
+  MQ: 'mq'
 } as const;
 
 const LOAD_TYPES = {
   ONCE: 'once',
-  CRON: 'cron'
+  CRON: 'cron',
+  REALTIME: 'realtime'
 } as const;
 
 const SUBMIT_TYPES = {
@@ -90,6 +101,7 @@ WHERE t1.a=t2.a`;
 interface ConnectorOption {
   key: number;
   label: string;
+  subType?: string;
 }
 
 // 使用与 component-tree.tsx 兼容的类型定义
@@ -235,7 +247,7 @@ const RunningInfoPanel = function ({
 
   return (
     <div
-      className={`running-info-panel border-t border-solid border-[#E2E8F0] ${styles['sql-running-info-panel']}`}
+      className={`border-t border-solid border-[#E2E8F0] ${styles['sql-running-info-panel']}`}
     >
       <Collapse
         activeKey={isExpanded ? ['1'] : []}
@@ -364,7 +376,12 @@ export default function DataLoadCreate() {
   const [checkMessage, setCheckMessage] = useState<string>('');
   const [selectedNodeType, setSelectedNodeType] =
     useState<TreeNodeData['type_name']>();
-
+  // 是否多选
+  const [isMultiple, setIsMultiple] = useState<boolean>(false);
+  const [previewVisible, setPreviewVisible] = useState(false);
+  const [previewData, setPreviewData]: any = useState({});
+  const [previewLoading, setPreviewLoading] = useState(false);
+  const [JSONTableData, setJSONTableData] = useState([]);
   // 处理树形数据的通用函数
   const processTreeData = useCallback(
     (
@@ -382,7 +399,6 @@ export default function DataLoadCreate() {
           console.warn('跳过无效项目:', item);
           continue;
         }
-
         const processedItem: TreeNodeData = {
           id: item.id,
           key: String(item.id),
@@ -552,7 +568,7 @@ export default function DataLoadCreate() {
         // rawTableListRef.current = rawData;
 
         // 处理表格列表，为每个节点添加 checkable 属性
-        if (selectedNodeType !== 'metadata') {
+        if (sourceType === SOURCE_TYPES.DB && selectedNodeType !== 'metadata') {
           const processedTableList = processTableListWithCheckable(
             res?.data?.table_name ?? []
           );
@@ -573,7 +589,12 @@ export default function DataLoadCreate() {
         setTableLoading(false);
       }
     },
-    [sourceType, selectedNodeType, processTableListWithCheckable]
+    [
+      sourceType,
+      selectedNodeType,
+      processTableListWithCheckable,
+      processTableListForSingleSelect
+    ]
   );
 
   // 处理文件变化
@@ -649,13 +670,18 @@ export default function DataLoadCreate() {
       setCheckStatus(CheckSQLStatus.NONE);
       setCheckMessage('');
       setSelectedNodeType(undefined);
+      // 清空选择文件
+      setUploadedFiles([]);
       // 重置载入形式
-      setLoadVal(LOAD_TYPES.ONCE);
+      setLoadVal(
+        value === SOURCE_TYPES.MQ ? LOAD_TYPES.REALTIME : LOAD_TYPES.ONCE
+      );
       setExpression({});
       form.setFieldsValue({
         table_name: undefined,
         sql_process_enabled: 'disable',
-        load_type: LOAD_TYPES.ONCE,
+        load_type:
+          value === SOURCE_TYPES.MQ ? LOAD_TYPES.REALTIME : LOAD_TYPES.ONCE,
         time: undefined,
         day: undefined,
         weekly: undefined,
@@ -668,7 +694,12 @@ export default function DataLoadCreate() {
 
   // 构建表单数据
   const buildFormData = useCallback(
-    (formValues: FormValues, pathId: string | number, submitType: string) => {
+    (
+      formValues: FormValues,
+      pathId: string | number | null,
+      submitType: string,
+      currentTableData = JSONTableData
+    ) => {
       const processedTableNames = formValues.table_name || uploadedFiles;
 
       return {
@@ -677,7 +708,12 @@ export default function DataLoadCreate() {
           sourceType === SOURCE_TYPES.LOCAL ? null : formValues.connector_id,
         source_type: formValues.source_type,
         run_cycle: {
-          type: loadVal === LOAD_TYPES.ONCE ? 0 : 1,
+          type:
+            loadVal === LOAD_TYPES.ONCE
+              ? 0
+              : loadVal === LOAD_TYPES.CRON
+                ? 1
+                : 2,
           cycle_text:
             loadVal === LOAD_TYPES.ONCE ? DEFAULT_ONCE_CYCLE : expression
         },
@@ -686,12 +722,24 @@ export default function DataLoadCreate() {
         table_names: Array.isArray(processedTableNames)
           ? processedTableNames
           : [processedTableNames],
-        db_name: sourceType === SOURCE_TYPES.DB ? tableNames : null,
+        db_name:
+          sourceType === SOURCE_TYPES.DB || sourceType === SOURCE_TYPES.MQ
+            ? tableNames
+            : null,
         sql: formValues.sql_process_enabled === 'enable' ? formValues.sql : '',
-        path_type: selectedNodeType
+        path_type: selectedNodeType,
+        field_mappings: currentTableData || []
       };
     },
-    [sourceType, loadVal, expression, tableList, uploadedFiles, tableNames]
+    [
+      sourceType,
+      loadVal,
+      expression,
+      uploadedFiles,
+      tableNames,
+      JSONTableData,
+      selectedNodeType
+    ]
   );
 
   // 验证表单数据
@@ -707,7 +755,11 @@ export default function DataLoadCreate() {
       ) {
         const processedTableNames = formValues.table_name;
 
-        if (!processedTableNames || processedTableNames.length === 0) {
+        if (
+          !processedTableNames ||
+          (Array.isArray(processedTableNames) &&
+            processedTableNames.length === 0)
+        ) {
           return '请选择要抽取的表';
         }
       }
@@ -747,7 +799,7 @@ export default function DataLoadCreate() {
         }
 
         // 如果是周期载入，验证调度器
-        if (loadVal !== LOAD_TYPES.ONCE) {
+        if (loadVal == LOAD_TYPES.CRON) {
           const valid = await SchedulerRunRef.current?.validate();
           if (!valid) {
             return;
@@ -816,6 +868,41 @@ export default function DataLoadCreate() {
         }
         console.log('formValues', formValues);
         const formData = buildFormData(formValues, pathId, submitType);
+
+        const isContentEmpty = formData.field_mappings.every(
+          (item: {
+            source_field: string | boolean;
+            target_field: string | boolean;
+          }) => {
+            const sourceIsValid =
+              item?.source_field !== '' && item?.source_field != null;
+            const targetIsValid =
+              item?.target_field !== '' && item?.target_field != null;
+            return sourceIsValid && targetIsValid;
+          }
+        );
+
+        const allIsPrimaryKeyEmpty = formData.field_mappings.every(
+          (item: { is_primary_key: string | boolean }) => {
+            return (
+              item.is_primary_key === false ||
+              item.is_primary_key === null ||
+              item.is_primary_key === undefined ||
+              item.is_primary_key === ''
+            );
+          }
+        );
+
+        if (!isContentEmpty) {
+          Message.error('请输入JSON字段和存储字段');
+          return;
+        }
+
+        if (allIsPrimaryKeyEmpty && sourceType === SOURCE_TYPES.MQ) {
+          Message.error('请至少设置一个主键');
+          return;
+        }
+
         const res = await addLoad(formData);
 
         if (res.code === '' && res.status === 200) {
@@ -873,8 +960,8 @@ export default function DataLoadCreate() {
 
       setSelectedNodeType(nodeData?.type_name);
 
-      if (sourceType === SOURCE_TYPES.DB) {
-        // 当载入位置变化时，重置选择抽取的表
+      if (sourceType === SOURCE_TYPES.DB || sourceType === SOURCE_TYPES.MQ) {
+        // 当载入位置变化时，重置载入数据
         form.setFieldsValue({ table_name: undefined });
         form.setFieldsValue({ db_name: nodeData?.name });
       }
@@ -973,7 +1060,7 @@ export default function DataLoadCreate() {
   useEffect(() => {
     if (connectorId) {
       getConnectorDetailList(connectorId);
-      if (sourceType === SOURCE_TYPES.DB) {
+      if (sourceType === SOURCE_TYPES.DB || sourceType === SOURCE_TYPES.MQ) {
         form.setFieldsValue({ table_name: undefined });
         setTableNames('');
 
@@ -1104,7 +1191,8 @@ export default function DataLoadCreate() {
           if (!cancelled && res.data?.items) {
             const newConnectName = res.data.items.map((item) => ({
               key: item.id,
-              label: item.name
+              label: item.name,
+              subType: item?.sub_type
             }));
             setConnectName(newConnectName);
           }
@@ -1207,6 +1295,50 @@ export default function DataLoadCreate() {
     };
   }, [form]);
 
+  // JSON开关
+  const [jsonParseEnabled, setJsonParseEnabled] = useState(false);
+  const json_parse = Form.useWatch('json_parse', form);
+  // 开关事件
+  const handleSwitchChange = (value: boolean) => {
+    setJsonParseEnabled(value);
+  };
+  const handlePreviewClick = () => {
+    setPreviewVisible(true);
+  };
+
+  const getData = (value) => {
+    setPreviewLoading(true);
+    const params = {
+      connector_id:
+        previewData?.connector_id || form.getFieldValue('connector_id'),
+      name: Array.isArray(value) ? value.join() : value
+    };
+    try {
+      const res = PreviewConnectorSampleData({ ...params })
+        .then((res) => {
+          if (res?.status !== 200) {
+            Message.error(res?.message);
+          }
+          console.log(res, '123', res?.data?.columns, res?.data);
+          setPreviewData({
+            data: res?.data || [],
+            columns: res?.columns || []
+          });
+          setPreviewLoading(false);
+        })
+        .finally(() => {
+          setPreviewLoading(false);
+        });
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  const getTableData = (data) => {
+    if (data?.length > 0) {
+      setJSONTableData(data);
+    }
+  };
+
   return (
     <div className={classNames('h-full px-[20px] pt-[17px]')}>
       <div className="mb-[9px] text-[20px] font-bold leading-[30px]">
@@ -1264,6 +1396,7 @@ export default function DataLoadCreate() {
               <Radio value={SOURCE_TYPES.HDFS}>HDFS</Radio>
               <Radio value={SOURCE_TYPES.DB}>数据库</Radio>
               <Radio value={SOURCE_TYPES.LOCAL}>本地文件</Radio>
+              <Radio value={SOURCE_TYPES.MQ}>消息队列</Radio>
             </RadioGroup>
           </FormItem>
 
@@ -1278,9 +1411,24 @@ export default function DataLoadCreate() {
                 placeholder="请选择连接器"
                 showSearch
                 filterOption={filterOption}
+                onChange={(value, option: any) => {
+                  // setPreviewData({
+                  //   ...previewData,
+                  //   connector_id: value
+                  // });
+                  if (option?.prefixCls === 'Elasticsearch') {
+                    setIsMultiple(true);
+                  }
+                  setIsMultiple(false);
+                  setPreviewData([]);
+                }}
               >
                 {connectName.map((option) => (
-                  <Option key={option.key} value={option.key}>
+                  <Option
+                    key={option.key}
+                    value={option.key}
+                    prefixCls={option.subType}
+                  >
                     {option.label}
                   </Option>
                 ))}
@@ -1304,6 +1452,7 @@ export default function DataLoadCreate() {
               ]}
             >
               <Uploads
+                key={sourceType}
                 onFileChange={handleFileChange}
                 onFileDelete={handleFileDelete}
                 onUploadingChange={setIsFileUploading}
@@ -1449,75 +1598,152 @@ export default function DataLoadCreate() {
               </>
             )}
 
-          {sourceType === SOURCE_TYPES.DB && sqlProcessEnabled !== 'enable' && (
-            <FormItem
-              label="选择抽取的表："
-              field="table_name"
-              labelAlign="right"
-              rules={[{ required: true, message: '请选择抽取的表' }]}
-            >
-              <TreeSelect
-                onChange={(value) => {
-                  form.setFieldsValue({ table_name: value });
-                }}
-                loading={tableLoading}
-                multiple={selectedNodeType !== 'metadata'}
-                key={selectedNodeType}
-                treeCheckable={selectedNodeType !== 'metadata'}
-                maxTagCount={
-                  selectedNodeType !== 'metadata'
-                    ? {
-                        count: 2,
-                        render: (invisibleTagCount) => {
-                          const allTags =
-                            form.getFieldValue('table_name') || [];
-                          const remainingTags = allTags.slice(2);
-                          return (
-                            <Tooltip
-                              content={
-                                <div className="ml-[-4px] flex max-w-[300px] flex-wrap gap-1">
-                                  {remainingTags.map((item, i) => (
-                                    <Tag
-                                      key={i}
-                                      className="bg-[#E7ECF0] text-[14px] text-[#0F172A]"
-                                    >
-                                      {item}
-                                    </Tag>
-                                  ))}
-                                </div>
-                              }
-                            >
-                              +{invisibleTagCount}
-                            </Tooltip>
-                          );
-                        }
-                      }
-                    : undefined
-                }
-                allowClear
-                placeholder="请选择抽取的表"
-                treeData={tableList}
-                treeProps={{
-                  virtualListProps: {
-                    height: 300
+          {(sourceType === SOURCE_TYPES.DB || sourceType === SOURCE_TYPES.MQ) &&
+            sqlProcessEnabled !== 'enable' && (
+              <FormItem
+                label="选择载入数据："
+                field="table_name"
+                labelAlign="right"
+                rules={[{ required: true, message: '请选择载入数据' }]}
+              >
+                <TreeSelect
+                  onChange={(value) => {
+                    form.setFieldsValue({ table_name: value });
+                    getData(value);
+                  }}
+                  disabled={previewLoading}
+                  loading={tableLoading}
+                  multiple={
+                    sourceType === SOURCE_TYPES.DB &&
+                    selectedNodeType !== 'metadata'
                   }
-                }}
+                  key={selectedNodeType}
+                  treeCheckable={
+                    sourceType === SOURCE_TYPES.DB &&
+                    selectedNodeType !== 'metadata'
+                  }
+                  maxTagCount={
+                    selectedNodeType !== 'metadata'
+                      ? {
+                          count: 2,
+                          render: (invisibleTagCount) => {
+                            const allTags =
+                              form.getFieldValue('table_name') || [];
+                            const remainingTags = allTags.slice(2);
+                            return (
+                              <Tooltip
+                                content={
+                                  <div className="ml-[-4px] flex max-w-[300px] flex-wrap gap-1">
+                                    {remainingTags.map((item, i) => (
+                                      <Tag
+                                        key={i}
+                                        className="bg-[#E7ECF0] text-[14px] text-[#0F172A]"
+                                      >
+                                        {item}
+                                      </Tag>
+                                    ))}
+                                  </div>
+                                }
+                              >
+                                +{invisibleTagCount}
+                              </Tooltip>
+                            );
+                          }
+                        }
+                      : undefined
+                  }
+                  allowClear
+                  placeholder="请选择载入数据"
+                  treeData={tableList}
+                  treeProps={{
+                    virtualListProps: {
+                      height: 300
+                    }
+                  }}
+                />
+              </FormItem>
+            )}
+          {sourceType === SOURCE_TYPES.MQ && (
+            <div>
+              <FormItem
+                label="JSON解析："
+                initialValue={
+                  sourceType === SOURCE_TYPES.MQ
+                    ? LOAD_TYPES.REALTIME
+                    : LOAD_TYPES.ONCE
+                }
+                field="json_parse"
+                labelAlign="right"
+                rules={[{ required: true, message: '请选择载入形式' }]}
+              >
+                <div className={styles.switchContent}>
+                  {/* <Switch
+                    checkedText="开"
+                    uncheckedText="关"
+                    onChange={handleSwitchChange}
+                  /> */}
+                  {/* {jsonParseEnabled && ( */}
+                  <span className={styles.previewText}>
+                    以下为自动解析结果，请检查是否正确
+                    <span
+                      className={styles.previewBtn}
+                      onClick={handlePreviewClick}
+                    >
+                      预览
+                    </span>
+                  </span>
+                  {/* )} */}
+                </div>
+              </FormItem>
+              {/* {jsonParseEnabled && ( */}
+              <EditableTable
+                getTableData={getTableData}
+                loading={previewLoading}
+                previewDataColumns={previewData}
               />
-            </FormItem>
+              {/* )} */}
+            </div>
           )}
 
           <FormItem
             label="载入形式："
-            initialValue={LOAD_TYPES.ONCE}
+            initialValue={
+              sourceType === SOURCE_TYPES.MQ
+                ? LOAD_TYPES.REALTIME
+                : LOAD_TYPES.ONCE
+            }
             field="load_type"
             labelAlign="right"
             rules={[{ required: true, message: '请选择载入形式' }]}
           >
-            <RadioGroup onChange={handleLoadTypeChange}>
-              <Radio value={LOAD_TYPES.ONCE}>单次载入</Radio>
+            <RadioGroup
+              value={
+                sourceType === SOURCE_TYPES.MQ
+                  ? LOAD_TYPES.REALTIME
+                  : LOAD_TYPES.ONCE
+              }
+              onChange={handleLoadTypeChange}
+            >
+              <Radio
+                disabled={sourceType === SOURCE_TYPES.MQ}
+                value={LOAD_TYPES.ONCE}
+              >
+                单次载入
+              </Radio>
               {sourceType !== SOURCE_TYPES.LOCAL && (
-                <Radio value={LOAD_TYPES.CRON}>周期载入</Radio>
+                <Radio
+                  disabled={sourceType === SOURCE_TYPES.MQ}
+                  value={LOAD_TYPES.CRON}
+                >
+                  周期载入
+                </Radio>
               )}
+              <Radio
+                disabled={sourceType !== SOURCE_TYPES.MQ}
+                value={LOAD_TYPES.REALTIME}
+              >
+                实时载入
+              </Radio>
             </RadioGroup>
           </FormItem>
 
@@ -1552,6 +1778,14 @@ export default function DataLoadCreate() {
           <Button onClick={handleCancel}>取消</Button>
         </div>
       </div>
+      <PreviewModal
+        loading={previewLoading}
+        previewData={previewData}
+        visible={previewVisible}
+        onOk={() => setPreviewVisible(false)}
+        onCancel={() => setPreviewVisible(false)}
+        setVisible={setPreviewVisible}
+      />
     </div>
   );
 }

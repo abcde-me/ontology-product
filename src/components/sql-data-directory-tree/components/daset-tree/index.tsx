@@ -11,6 +11,7 @@ import classNames from 'classnames';
 import React, { useCallback } from 'react';
 import { useDatasetTree } from '../../hooks/useDatasetTree';
 import styles from './index.module.scss';
+import { NoDataCard } from '@ceai-front/arco-material';
 
 interface DataSetTreeProps {
   isEditorFocused?: boolean;
@@ -123,7 +124,9 @@ const DataSetTree: React.FC<DataSetTreeProps> = ({
             <div className="text-[rgba(15, 23, 42, 1)] text-[14px]">加载中</div>
           </div>
         ) : treeData.length === 0 ? (
-          <Empty />
+          <div className="py-[100px]">
+            <NoDataCard title="暂无数据" type="block" />
+          </div>
         ) : (
           <Tree
             showLine

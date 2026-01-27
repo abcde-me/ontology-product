@@ -1,16 +1,16 @@
 import { useTranslation } from 'react-i18next';
-import { BLOCKS } from './constants';
+import { BLOCKS, FLOW_TYPE2BLOCKS_CONF } from './constants';
 import { TabsEnum, ToolTypeEnum } from './types';
+import { useParams } from 'react-router-dom';
+import { useMemo } from 'react';
 
 export const useBlocks = () => {
   const { t } = useTranslation('plugin__console-plugin-appforge');
-
-  return BLOCKS.map((block) => {
-    return {
-      ...block
-      // title: t(`workflow.blocks.${block.type}`)
-    };
-  });
+  const { type: flowType = 'no_struct' } = useParams<Record<string, string>>();
+  const allBlocks = useMemo(() => {
+    return FLOW_TYPE2BLOCKS_CONF[flowType || 'no_struct'];
+  }, [flowType]);
+  return allBlocks;
 };
 
 export const useTabs = () => {

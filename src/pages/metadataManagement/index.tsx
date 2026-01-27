@@ -1,116 +1,234 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Button,
   Form,
   Input,
   Menu,
+  Message,
+  Modal,
   Pagination,
   PaginationProps,
-  Table,
-  Select
+  Select,
+  Table
 } from '@arco-design/web-react';
 import { useHistory } from 'react-router';
 import { ColumnProps } from '@arco-design/web-react/es/Table';
-import EllipsisPopover from '@/components/ellipsis-popover-com';
-import noDataElement from '@/components/no-data';
-import { getWorkflowList } from '@/api/workflowList';
+import { NoDataCard } from '@ceai-front/arco-material';
 import { useUserInfo } from '@/store/userInfoStore';
 import { SorterInfo } from '@arco-design/web-react/es/Table/interface';
 import { PermissionWrapper } from '@/components/PermissionGuard';
-import { WORKFLOW_LIST_PERMISSIONS } from '@/config/permissions';
-import { openNewPage } from '@/utils/env';
-import SettingsIcon from '@/assets/metadata/settings.svg';
 import ColumnSettingIcon from '@/assets/metadata/column-setting.svg';
 import StorageIcon from '@/assets/metadata/storage.svg';
+import CreateDatabaseIcon from '@/assets/metadata/create-database.svg';
+import CreateTableIcon from '@/assets/metadata/create-table.svg';
+import { getColumns, getColumnsSetting } from './getColumns';
+import ColumnSettingModal, {
+  ColumnField
+} from './components/ColumnSettingModal';
+import SearchArea from './components/SearchArea';
+import {
+  createMetadataDorisDatabase,
+  createMetadataDorisTable,
+  createMetadataIcebergDatabase,
+  createMetadataIcebergTable,
+  listMetadataDataSource,
+  listMetadataDorisDatabaseName,
+  listMetadataDorisTable,
+  listMetadataIcebergDatabaseName,
+  listMetadataIcebergTable,
+  listMetadataMilvusCollection,
+  listMetadataMinioBucket,
+  MetadataMenuItem
+} from '@/api/metadata';
+import { useParams } from '@/utils/url';
+import {
+  DATA_API_PERMISSIONS,
+  METADATA_MANAGEMENT_PERMISSIONS
+} from '@/config/permissions';
+import { useHasPermission } from '@/store/userInfoStore';
 import styles from './index.module.scss';
-import { IconPlus, IconRefresh } from '@arco-design/web-react/icon';
 
-const InputSearch = Input.Search;
+enum MetadataType {
+  Iceberg = 'ICEBERG',
+  Doris = 'DORIS',
+  Kafka = 'KAFKA',
+  MinIO = 'MINIO',
+  Milvus = 'MILVUS'
+}
 
-export default function WorkflowList() {
-  const history = useHistory();
+interface RangeFilter {
+  field: string;
+  start: string | number;
+  end: string | number;
+}
+
+export default function MetadataManagement() {
   const userInfo = useUserInfo();
+  const history = useHistory();
+  const urlMetadataType = useParams('metadataType');
   const MenuItem = Menu.Item;
-  // 搜索表单
-  const searchForm = useRef<any>(null);
+  const TextArea = Input.TextArea;
 
+  // 初始化是否有详情权限
+  const isDetailPermission = useHasPermission(
+    METADATA_MANAGEMENT_PERMISSIONS.DETAIL
+  );
+
+  // 初始化元数据菜单数据
+  const [metadataMenuData, setMetadataMenuData] = useState([]);
   // 初始化搜索框value
-  const [searchValue, setSearchValue] = useState('');
-  // 初始化工作流列表数据
-  const [workflowData, setWorkflowData] = useState([]);
+  const [searchValue, setSearchValue] = useState({
+    filters: {},
+    range: [] as RangeFilter[]
+  });
+  // 初始化元数据列表数据
+  const [metadataData, setMetadataData] = useState([]);
   // 当前的第几页
   const [current, setCurrent] = useState(1);
   // 每页展示数据的数据量
   const [pageSize, setPageSize] = useState(10);
   // 总数据量
-  const [total, setTotal] = useState(10);
+  const [total, setTotal] = useState(0);
   // 添加loading状态控制
   const [loading, setLoading] = useState(false);
-  // 区分是否点击按钮清空搜索框
-  const [isClickClear, setIsClickClear] = useState(false);
   // 初始化筛选的值
-  const [sortValue, setSortValue] = useState({
-    run_cycle: '',
-    sort: ''
-  });
+  const [sortValue, setSortValue] = useState<{
+    order: string;
+    field: string;
+  } | null>(null);
+  // 初始化筛选的元数据类型
+  const [activeMetadataType, setActiveMetadataType] = useState<
+    MetadataType | string
+  >(urlMetadataType || MetadataType.Iceberg);
+  // 初始化筛选的元数据ID
+  const [activeMetadataId, setActiveMetadataId] = useState<number | null>(null);
+  // 初始化更新时间
+  const [updateTime, setUpdateTime] = useState('');
+  // 列设置弹窗是否打开
+  const [columnModalOpen, setColumnModalOpen] = useState(false);
+  // 初始化表格列
+  const [columns, setColumns] = useState<ColumnProps[]>([]);
+  // 列设置弹窗选中的列
+  const [selectedColumns, setSelectedColumns] = useState<ColumnField[]>(
+    getColumnsSetting(activeMetadataType)
+  );
+  // 创建数据库弹窗是否打开
+  const [createTableModalOpen, setCreateTableModalOpen] = useState(false);
+  // 初始化数据库名称
+  const [databaseName, setDatabaseName] = useState('');
+  // 创建物理数据库弹窗是否打开
+  const [createPhysicalTableModalOpen, setCreatePhysicalTableModalOpen] =
+    useState(false);
+  // 初始化iceberg数据库名称下拉列表
+  const [databaseNameOptions, setDatabaseNameOptions] = useState<
+    { databaseName: string; id: number }[]
+  >([]);
+
+  // 创建数据库弹窗表单
+  const [tableForm] = Form.useForm();
+  // 创建物理数据库弹窗表单
+  const [physicalTableForm] = Form.useForm();
+
+  useEffect(() => {
+    setColumns(
+      getColumns(
+        selectedColumns,
+        viewDetail,
+        isDetailPermission,
+        current,
+        pageSize
+      ) as ColumnProps[]
+    );
+  }, [activeMetadataType, selectedColumns]);
+
+  useEffect(() => {
+    getMenuData();
+  }, []);
+
+  useEffect(() => {
+    const selectMenuItem =
+      metadataMenuData.find(
+        (item: MetadataMenuItem) => item?.datasourceType === activeMetadataType
+      ) || ({} as MetadataMenuItem);
+    setUpdateTime(selectMenuItem?.updateTime || '');
+    setActiveMetadataId(selectMenuItem?.id || null);
+  }, [metadataMenuData, activeMetadataType]);
+
+  const getMenuName = (type: string) => {
+    switch (type) {
+      case MetadataType.Iceberg:
+        return '数据湖';
+      case MetadataType.Doris:
+        return '在线分析库';
+      case MetadataType.Kafka:
+        return 'Kafka';
+      case MetadataType.MinIO:
+        return '对象存储';
+      case MetadataType.Milvus:
+        return '向量数据库';
+      default:
+        return type;
+    }
+  };
 
   // 组件初始化
   useEffect(() => {
     if (userInfo) getList();
-  }, [userInfo, current, pageSize, sortValue]);
+  }, [userInfo, current, pageSize, searchValue, sortValue, activeMetadataType]);
 
-  // 清空搜索框
-  useEffect(() => {
-    if (isClickClear && searchValue === '') {
-      getList();
-      setIsClickClear(false);
+  const getMenuData = async () => {
+    const res = await listMetadataDataSource();
+    if (res.status === 200 && res.code === '') {
+      if (res.data.data) {
+        setMetadataMenuData(res.data.data);
+        setActiveMetadataType(
+          urlMetadataType ||
+            res.data.data[0]?.datasourceType ||
+            MetadataType.Iceberg
+        );
+        setActiveMetadataId(Number(res.data.data[0]?.id) || null);
+      }
+    } else {
+      Message.error(res.message || '获取元数据菜单数据失败');
     }
-  }, [isClickClear]);
+  };
 
   const getList = async () => {
     setLoading(true);
     try {
-      const params: any = {
-        uid: userInfo?.id,
-        search_content: searchValue,
-        page: current, //第几页
-        page_size: pageSize, //每页个数
-        ...sortValue
+      const params = {
+        pageNum: current,
+        pageSize: pageSize,
+        ...searchValue,
+        sort: sortValue ? [{ ...sortValue }] : []
       };
-      const res = await getWorkflowList(params);
-      if (res.status === 200 && res.data) {
-        setWorkflowData(res.data.list);
-        setCurrent(res.data.page_info?.page);
-        setPageSize(res.data.page_info?.page_size);
-        setTotal(res.data.page_info?.total || 10);
+      const res =
+        activeMetadataType === MetadataType.Iceberg
+          ? await listMetadataIcebergTable(params)
+          : activeMetadataType === MetadataType.MinIO
+            ? await listMetadataMinioBucket(params)
+            : activeMetadataType === MetadataType.Milvus
+              ? await listMetadataMilvusCollection(params)
+              : await listMetadataDorisTable(params);
+      if (res.status === 200 && res.code === '') {
+        if (res.data.data?.list) {
+          setMetadataData(res.data.data.list);
+          setCurrent(res.data.data?.pageNum);
+          setPageSize(res.data.data?.pageSize);
+          setTotal(res.data.data?.total || 0);
+        }
+      } else {
+        Message.error(res.message || '获取元数据列表数据失败');
       }
     } finally {
       setLoading(false);
     }
   };
 
-  // 创建工作流
-  const handleCreateWorkflow = () => {
-    openNewPage('/modaforge/tenant/compute/modaforge/workflowConfig');
-  };
-
-  // 跳转目录
-  const handleToDirectoryPath = (
-    id: string,
-    parent_id: string,
-    root_type: string | number
-  ) => {
-    history.push(
-      `/tenant/compute/modaforge/dataCatalog/list?root_type=${root_type}&id=${id}&parent_id=${parent_id}`
-    );
-  };
   // 查看详情
-  const viewDetailWorkflow = (
-    workflow_uuid: number | string,
-    ds_workflow_id: number | string
-  ) => {
-    openNewPage(
-      `/modaforge/tenant/compute/modaforge/workflowConfig?workflow_uuid=${workflow_uuid}&ds_workflow_id=${ds_workflow_id}`
+  const viewDetail = (id) => {
+    history.push(
+      `/tenant/compute/modaforge/metadataManagement/detail?id=${id}&metadataType=${activeMetadataType}`
     );
   };
 
@@ -122,287 +240,323 @@ export default function WorkflowList() {
   ) => {
     setCurrent(1);
     const sortdata = {
-      run_cycle:
-        filters.run_cycle === undefined ? '' : filters.run_cycle.join(','),
-      is_online:
-        filters.is_online === undefined ? '' : filters.is_online.join(','),
-      sort:
+      order:
         sorter.direction === undefined
           ? ''
           : sorter.direction === 'ascend'
-            ? 'create_time:ASC'
-            : 'create_time:DESC'
+            ? 'asc'
+            : 'desc',
+      field: sorter.field as string
     };
 
     setSortValue(sortdata);
   };
 
-  // table数据为空时展示-
-  const renderEmptyPlaceholder = (value: string | null) => {
-    return value === '' || value == null ? '-' : value;
-  };
-
   // 搜索表单提交
   const handleSearch = (values: any) => {
-    console.log(values, 'vvvvv');
-    // setSearchValue(values.search_content);
+    console.log(values, 'values');
     // setCurrent(1);
   };
 
-  // table columns
-  const columns: ColumnProps[] = [
-    {
-      title: '序号',
-      dataIndex: 'index',
-      width: 60,
-      align: 'center',
-      render: (_, record, index) => index + 1
-    },
-    {
-      title: '表英文名称',
-      dataIndex: 'workflow_name_english',
-      width: 280,
-      ellipsis: true,
-      className: styles['hover-change'] + ' ' + styles['table-name'],
-      render: (_, record) => {
-        return renderEmptyPlaceholder(record.workflow_name) !== '-' ? (
-          <EllipsisPopover
-            value={record.workflow_name}
-            isEdit={false}
-            isLink
-            handleLink={() => {
-              viewDetailWorkflow(record.workflow_uuid, record.ds_workflow_id);
-            }}
-          />
-        ) : (
-          <span>-</span>
-        );
+  // 处理字段搜索
+  const handleFieldSearch = (fieldValues, commonSearch: string) => {
+    console.log(fieldValues, commonSearch, 'fieldValues, commonSearch');
+    const newSearchValue = {
+      filters: {},
+      range: [] as RangeFilter[]
+    };
+    fieldValues.forEach((item) => {
+      if (item.type === 'datetime') {
+        newSearchValue.range.push({
+          field: item.nameEn,
+          start: item.searchContent[0].split('_')[0],
+          end: item.searchContent[0].split('_')[1]
+        });
+      } else if (item.type === 'int' || item.type === 'float') {
+        newSearchValue.range.push({
+          field: item.nameEn,
+          start: Number(item.searchContent[0]),
+          end: Number(item.searchContent[1])
+        });
+      } else {
+        newSearchValue.filters[item.nameEn] = item.searchContent[0];
       }
-    },
-    {
-      title: '表中文名称',
-      dataIndex: 'workflow_name',
-      width: 280,
-      ellipsis: true,
-      className: styles['hover-change'] + ' ' + styles['table-name'],
-      render: (_, record) => {
-        return renderEmptyPlaceholder(record.workflow_name) !== '-' ? (
-          <EllipsisPopover
-            value={record.workflow_name}
-            isEdit={false}
-            isLink
-            handleLink={() => {
-              viewDetailWorkflow(record.workflow_uuid, record.ds_workflow_id);
-            }}
-          />
-        ) : (
-          <span>-</span>
-        );
-      }
-    },
-    {
-      title: '所属数据库',
-      dataIndex: 'source_path',
-      width: 120,
-      ellipsis: true,
-      className: styles['hover-change'],
-      render: (_, record) => {
-        return renderEmptyPlaceholder(record.source_path) !== '-' ? (
-          <EllipsisPopover
-            value={record.source_path}
-            isEdit={false}
-            isLink
-            handleLink={() => {
-              handleToDirectoryPath(
-                record.source_path_id,
-                record.parent_source_path_id,
-                1
-              );
-            }}
-          />
-        ) : (
-          <span>-</span>
-        );
-      }
-    },
-    {
-      title: '分区字段',
-      dataIndex: 'target_path',
-      width: 120,
-      ellipsis: true,
-      className: styles['hover-change'],
-      render: (_, record) => {
-        return renderEmptyPlaceholder(record.dataset_name) !== '-' ? (
-          <EllipsisPopover value={record.dataset_name} isEdit={false} />
-        ) : (
-          <span>-</span>
-        );
-      }
-    },
-    {
-      title: '分区数',
-      dataIndex: 'partition_num',
-      width: 100,
-      ellipsis: true,
-      render: (_, record) => (
-        <EllipsisPopover
-          value={renderEmptyPlaceholder(record.user_name)}
-          isEdit={false}
-        />
+    });
+    setSearchValue(newSearchValue);
+    setCurrent(1);
+  };
+
+  // 处理重置
+  const handleReset = () => {
+    setSearchValue({
+      filters: {},
+      range: [] as RangeFilter[]
+    });
+    setCurrent(1);
+  };
+
+  const columnSettingsFields: ColumnField[] =
+    getColumnsSetting(activeMetadataType);
+
+  // 列设置弹窗回调
+  const handleModalOk = (
+    selectedIds: string[],
+    displayFields: ColumnField[]
+  ) => {
+    const selectedFields = selectedIds
+      .map((nameEn) =>
+        displayFields.find(
+          (field) => field.nameEn === nameEn || field.id === nameEn
+        )
       )
-    },
-    {
-      title: '存储大小（G）',
-      dataIndex: 'storage_size',
-      width: 150,
-      ellipsis: true,
-      render: (_, record) => (
-        <EllipsisPopover
-          value={renderEmptyPlaceholder(record.user_name)}
-          isEdit={false}
-        />
-      )
-    },
-    {
-      title: '文件数',
-      dataIndex: 'user_name',
-      width: 100,
-      ellipsis: true,
-      render: (_, record) => (
-        <EllipsisPopover
-          value={renderEmptyPlaceholder(record.user_name)}
-          isEdit={false}
-        />
-      )
-    },
-    {
-      title: '更新时间',
-      dataIndex: 'create_time',
-      width: 160,
-      render: (_, record) => (
-        <span>
-          {record.create_time == '' || record.create_time == null
-            ? '-'
-            : new Date(record.create_time).toLocaleString()}
-        </span>
-      ),
-      sorter: true
-    },
-    {
-      title: '最近访问时间',
-      dataIndex: 'update_time',
-      width: 160,
-      render: (_, record) => (
-        <span>
-          {record.update_time == '' || record.update_time == null
-            ? '-'
-            : new Date(record.update_time).toLocaleString()}
-        </span>
-      ),
-      sorter: true
+      .filter(Boolean) as ColumnField[];
+    setSelectedColumns(selectedFields);
+    setColumnModalOpen(false);
+  };
+
+  const handleModalCancel = () => setColumnModalOpen(false);
+  const handleColumnChange = (list: ColumnField[]) => {
+    console.log('列设置变化:', list);
+  };
+
+  // 创建数据库弹窗回调
+  const handleCreateTableModalOk = () => {
+    tableForm.validate().then(async (values) => {
+      console.log(values, '创建数据库');
+      const params = {
+        instanceId: activeMetadataId,
+        databaseName: values.tableName,
+        ddl: values.ddl
+      };
+      if (activeMetadataType === MetadataType.Iceberg) {
+        const res = await createMetadataIcebergDatabase(params);
+        if (res.status === 200 && res.code === '') {
+          if (res.data.success) {
+            Message.success('创建数据库成功');
+          } else Message.error(res.data.msg || '创建数据库失败');
+        } else {
+          Message.error(res.message || '创建数据库失败');
+        }
+      } else {
+        const res = await createMetadataDorisDatabase(params);
+        if (res.status === 200 && res.code === '') {
+          if (res.data.success) {
+            Message.success('创建数据库成功');
+          } else Message.error(res.data.msg || '创建数据库失败');
+        } else {
+          Message.error(res.message || '创建数据库失败');
+        }
+      }
+
+      tableForm.resetFields();
+      setCreateTableModalOpen(false);
+    });
+  };
+
+  const handleCreatePhysicalTable = async () => {
+    if (activeMetadataType === MetadataType.Iceberg) {
+      const res = await listMetadataIcebergDatabaseName({
+        instanceId: activeMetadataId
+      });
+      if (res.status === 200 && res.code === '') {
+        if (res.data.success) {
+          setDatabaseNameOptions(res.data?.data || []);
+        } else Message.error(res.data.msg || '获取数据库列表失败');
+      } else {
+        Message.error(res.message || '获取数据库列表失败');
+      }
+    } else {
+      const res = await listMetadataDorisDatabaseName({
+        instanceId: activeMetadataId
+      });
+      if (res.status === 200 && res.code === '') {
+        if (res.data.success) {
+          setDatabaseNameOptions(res.data?.data || []);
+        } else Message.error(res.data.msg || '获取数据库列表失败');
+      } else {
+        Message.error(res.message || '获取数据库列表失败');
+      }
     }
-  ];
+    physicalTableForm.setFieldsValue({
+      ddl:
+        activeMetadataType === MetadataType.Iceberg
+          ? `CREATE TABLE iceberg_db_example.iceberg_table_example (
+  id INT COMMENT '主键ID',
+  name STRING COMMENT '示例1',
+  create_time TIMESTAMP COMMENT '创建时间'
+)
+USING iceberg
+COMMENT '创建Iceberg表示例'`
+          : `CREATE TABLE IF NOT EXISTS db_example.table_example (
+  \`id_example\` BIGINT COMMENT '主键ID',
+  \`name_example\` VARCHAR(64) COMMENT '姓名示例',
+  \`create_time\` DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  \`update_time\` DATETIME DEFAULT CURRENT_TIMESTAMP  COMMENT '更新时间',
+  \`create_by\` VARCHAR(64) COMMENT '创建人'
+) ENGINE=OLAP
+DUPLICATE KEY(\`id_example\`)
+COMMENT '表描述'
+DISTRIBUTED BY HASH(\`id_example\`) BUCKETS 10
+PROPERTIES (
+  "replication_allocation" = "tag.location.default: 1"
+)`
+    });
+    setCreatePhysicalTableModalOpen(true);
+  };
+
+  // 创建物理数据库弹窗回调
+  const handleCreatePhysicalTableModalOk = () => {
+    physicalTableForm.validate().then(async (values) => {
+      const params = {
+        databaseId: values.tableType,
+        ddl: values.ddl
+      };
+
+      if (activeMetadataType === MetadataType.Iceberg) {
+        const res = await createMetadataIcebergTable(params);
+        if (res.status === 200 && res.code === '') {
+          if (res.data.success) {
+            Message.success('创建物理表成功');
+          } else Message.error(res.data.msg || '创建物理表失败');
+        } else {
+          Message.error(res.message || '创建物理表失败');
+        }
+      } else {
+        const res = await createMetadataDorisTable(params);
+        if (res.status === 200 && res.code === '') {
+          if (res.data.success) {
+            Message.success('创建物理表成功');
+          } else Message.error(res.data.msg || '创建物理表失败');
+        } else {
+          Message.error(res.message || '创建物理表失败');
+        }
+      }
+      setCreatePhysicalTableModalOpen(false);
+      physicalTableForm.resetFields();
+    });
+  };
+
+  const handleToDataApi = () => {
+    history.push(`/tenant/compute/modaforge/dataApi`);
+  };
 
   return (
     <div className={styles['metadataManagement']}>
       <h1 style={{ fontSize: '20px', fontWeight: 'bold' }}>元数据管理</h1>
       <div className="mt-4 flex">
         <div className={styles['leftBox']}>
-          <Menu defaultSelectedKeys={['Iceberg']}>
-            <MenuItem key="Iceberg">Iceberg</MenuItem>
-            <MenuItem key="Doris">Doris</MenuItem>
-            <MenuItem key="MinIO">MinIO</MenuItem>
-            <MenuItem key="Milvus">Milvus</MenuItem>
+          <Menu
+            defaultSelectedKeys={[activeMetadataType]}
+            onClickMenuItem={(key, event, keyPath) => {
+              setSelectedColumns(getColumnsSetting(key));
+              setActiveMetadataType(key);
+              setSearchValue({
+                filters: {},
+                range: [] as RangeFilter[]
+              });
+              setSortValue(null);
+              setCurrent(1);
+              setPageSize(10);
+            }}
+          >
+            {metadataMenuData.map((item: MetadataMenuItem) => (
+              <MenuItem key={item?.datasourceType}>
+                {getMenuName(item?.datasourceType)}
+              </MenuItem>
+            ))}
           </Menu>
         </div>
         <div className={styles['rightBox']}>
-          <div
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              width: '100%',
-              padding: '16px 0',
-              borderRadius: '4px',
-              borderBottom: '1px solid var(--LineLine-color-border-2, #E2E8F0)'
-            }}
-          >
-            <Form
-              ref={searchForm}
-              onSubmit={handleSearch}
-              layout="inline"
-              style={{
-                justifyContent: 'space-between'
-              }}
-            >
-              <Form.Item label="目录类型：" field="directory_type">
-                <Select placeholder="请选择文件类型" />
-              </Form.Item>
-              <Form.Item label="表名：" field="table_name">
-                <Input placeholder="请输入关键字搜索" />
-              </Form.Item>
-              <Form.Item label="表中文：" field="table_name_zh">
-                <Input placeholder="请输入关键字搜索" />
-              </Form.Item>
-            </Form>
-            <div className="flex items-center justify-between">
-              <div>
-                <PermissionWrapper
-                  permission={WORKFLOW_LIST_PERMISSIONS.CREATE}
-                >
-                  <Button
-                    type="outline"
-                    onClick={() => searchForm?.current?.submit()}
-                    loading={loading}
-                  >
-                    查询
-                  </Button>
-                  <Button
-                    type="text"
-                    onClick={() => searchForm?.current?.submit()}
-                    loading={loading}
-                  >
-                    重置
-                  </Button>
-                </PermissionWrapper>
-              </div>
-              <Button
-                type="text"
-                className={styles['settingBtn']}
-                icon={<SettingsIcon />}
-                loading={loading}
-              >
-                设置搜索条件
-              </Button>
-            </div>
-          </div>
+          <SearchArea
+            fields={selectedColumns}
+            onMainSearch={handleSearch}
+            onFieldSearch={handleFieldSearch}
+            onReset={handleReset}
+            activeMetadataType={activeMetadataType}
+          />
           <div className="mb-3 mt-4 flex items-center justify-between">
-            <h1 className="text-base font-semibold">数据列表(500)</h1>
+            <h1 className="text-base font-semibold">{`数据列表(${total})`}</h1>
             <div className="flex items-center gap-2">
-              <span className="text-sm text-[#6E7B8D]">
-                2025-12-12 00:00:00 更新
+              <span
+                className="text-sm text-[#6E7B8D]"
+                style={{ fontFamily: 'PingFang SC' }}
+              >
+                {updateTime} 更新
               </span>
-              <Button
+              {activeMetadataType === MetadataType.MinIO && (
+                <span
+                  className="text-sm text-[#6E7B8D]"
+                  style={{ fontFamily: 'PingFang SC' }}
+                >
+                  数据更新五分钟一次
+                </span>
+              )}
+              {/* <Button
                 className={styles['refreshBtn']}
                 icon={<IconRefresh className="text-[#1E293B]" />}
-              />
-              <Button className={styles['refreshBtn']} icon={<StorageIcon />}>
-                表转API
-              </Button>
-              <Button
-                className={styles['refreshBtn']}
-                icon={<IconPlus className="text-[#1E293B]" />}
-              >
-                创建数据库
-              </Button>
-              <Button
-                className={styles['refreshBtn']}
-                icon={<IconPlus className="text-[#1E293B]" />}
-              >
-                创建物理表
-              </Button>
+              /> */}
+              {(activeMetadataType === MetadataType.Iceberg ||
+                activeMetadataType === MetadataType.Doris) && (
+                <>
+                  <PermissionWrapper permission={DATA_API_PERMISSIONS.LIST}>
+                    <Button
+                      className={styles['refreshBtn']}
+                      icon={<StorageIcon />}
+                      onClick={() => {
+                        handleToDataApi();
+                      }}
+                    >
+                      表转API
+                    </Button>
+                  </PermissionWrapper>
+
+                  <PermissionWrapper
+                    permission={
+                      activeMetadataType === MetadataType.Iceberg
+                        ? METADATA_MANAGEMENT_PERMISSIONS.CREATE_ICEBERG_DATABASE
+                        : METADATA_MANAGEMENT_PERMISSIONS.CREATE_DORIS_DATABASE
+                    }
+                  >
+                    <Button
+                      className={styles['refreshBtn']}
+                      icon={<CreateDatabaseIcon />}
+                      onClick={() => {
+                        tableForm.setFieldsValue({
+                          ddl:
+                            activeMetadataType === MetadataType.Iceberg
+                              ? `CREATE DATABASE IF NOT EXISTS iceberg_db_example COMMENT 'Iceberg创建库示例'`
+                              : `CREATE DATABASE IF NOT EXISTS db_example`,
+                          tableType: activeMetadataType
+                        });
+                        setCreateTableModalOpen(true);
+                      }}
+                    >
+                      创建数据库
+                    </Button>
+                  </PermissionWrapper>
+                  <PermissionWrapper
+                    permission={
+                      activeMetadataType === MetadataType.Iceberg
+                        ? METADATA_MANAGEMENT_PERMISSIONS.CREATE_ICEBERG_TABLE
+                        : METADATA_MANAGEMENT_PERMISSIONS.CREATE_DORIS_TABLE
+                    }
+                  >
+                    <Button
+                      className={styles['refreshBtn']}
+                      icon={<CreateTableIcon />}
+                      onClick={() => {
+                        handleCreatePhysicalTable();
+                      }}
+                    >
+                      创建物理表
+                    </Button>
+                  </PermissionWrapper>
+                </>
+              )}
               <Button
                 className={styles['refreshBtn']}
                 icon={<ColumnSettingIcon />}
+                onClick={() => setColumnModalOpen(true)}
               >
                 列设置
               </Button>
@@ -411,14 +565,9 @@ export default function WorkflowList() {
           <Table
             border={false}
             columns={columns}
-            data={workflowData}
+            data={metadataData}
             pagination={false}
-            noDataElement={noDataElement({
-              description: '暂无工作流',
-              btnText: '创建工作流',
-              perms: WORKFLOW_LIST_PERMISSIONS.CREATE,
-              handleBtn: () => handleCreateWorkflow()
-            })}
+            noDataElement={<NoDataCard title="暂无数据" />}
             rowKey="id"
             loading={loading}
             onChange={(pagination, sorter, filters) =>
@@ -430,7 +579,7 @@ export default function WorkflowList() {
             }}
           />
           {/* 分页 */}
-          {workflowData && workflowData.length > 0 && (
+          {metadataData && metadataData.length > 0 && (
             <Pagination
               current={current}
               pageSize={pageSize}
@@ -451,6 +600,163 @@ export default function WorkflowList() {
           )}
         </div>
       </div>
+
+      {/* 列设置弹窗 */}
+      <ColumnSettingModal
+        visible={columnModalOpen}
+        fields={
+          columnSettingsFields.length > 0 ? columnSettingsFields : undefined
+        }
+        isShowEnum={false}
+        onOk={handleModalOk}
+        onCancel={handleModalCancel}
+        onChange={handleColumnChange}
+      />
+      {/* 创建数据库弹窗 */}
+      <Modal
+        className={styles.createTableModal}
+        visible={createTableModalOpen}
+        title="创建数据库"
+        okText="执行DDL语句"
+        onOk={() => tableForm?.submit()}
+        onCancel={() => {
+          setCreateTableModalOpen(false);
+          tableForm?.resetFields();
+        }}
+      >
+        <Form
+          form={tableForm}
+          onSubmit={handleCreateTableModalOk}
+          labelCol={{ span: 3 }}
+          wrapperCol={{ span: 21 }}
+          colon=":"
+        >
+          <Form.Item
+            field="tableType"
+            label="数据库类型"
+            rules={[{ required: true, message: '请选择数据库类型' }]}
+            initialValue={activeMetadataType}
+          >
+            <Select
+              placeholder="请选择数据库类型"
+              options={[
+                {
+                  label: getMenuName(MetadataType.Iceberg),
+                  value: MetadataType.Iceberg
+                },
+                {
+                  label: getMenuName(MetadataType.Doris),
+                  value: MetadataType.Doris
+                }
+              ]}
+              disabled
+            />
+          </Form.Item>
+          <Form.Item
+            field="tableName"
+            label="数据库名称"
+            rules={[{ required: true, message: '请输入数据库名称' }]}
+          >
+            <Input placeholder="请输入数据库名称" />
+          </Form.Item>
+          <Form.Item
+            field="ddl"
+            label="DDL语句"
+            rules={[
+              {
+                required: true,
+                message: '请输入DDL语句'
+              }
+            ]}
+          >
+            <TextArea
+              style={{ minHeight: 400 }}
+              placeholder="请先选择数据库类型，并输入数据库名称"
+            />
+          </Form.Item>
+        </Form>
+      </Modal>
+
+      {/* 创建物理表弹窗 */}
+      <Modal
+        className={styles.createTableModal}
+        visible={createPhysicalTableModalOpen}
+        title="创建物理表"
+        okText="执行DDL语句"
+        onOk={() => physicalTableForm?.submit()}
+        onCancel={() => {
+          setCreatePhysicalTableModalOpen(false);
+          physicalTableForm?.resetFields();
+        }}
+      >
+        <Form
+          form={physicalTableForm}
+          onSubmit={handleCreatePhysicalTableModalOk}
+          labelCol={{ span: 3 }}
+          wrapperCol={{ span: 21 }}
+          colon=":"
+        >
+          <Form.Item
+            field="tableType"
+            label="保存位置"
+            rules={[{ required: true, message: '请选择保存位置' }]}
+          >
+            <Select
+              placeholder="请选择数据库"
+              className={styles.selectTable}
+              showSearch={{
+                retainInputValue: true
+              }}
+              filterOption={(inputValue, option) =>
+                option.props.children
+                  .toLowerCase()
+                  .indexOf(inputValue.toLowerCase()) >= 0
+              }
+              style={{ display: 'flex', alignItems: 'center' }}
+              addBefore={
+                <Select
+                  placeholder="请选择数据库类型"
+                  style={{ width: 160 }}
+                  className={styles.selectAddBefore}
+                  value={activeMetadataType}
+                  disabled
+                  options={[
+                    {
+                      label: getMenuName(MetadataType.Iceberg),
+                      value: MetadataType.Iceberg
+                    },
+                    {
+                      label: getMenuName(MetadataType.Doris),
+                      value: MetadataType.Doris
+                    }
+                  ]}
+                />
+              }
+            >
+              {databaseNameOptions.map((item) => (
+                <Select.Option key={item.id} value={item.id}>
+                  {item.databaseName}
+                </Select.Option>
+              ))}
+            </Select>
+          </Form.Item>
+          <Form.Item
+            field="ddl"
+            label="DDL语句"
+            rules={[
+              {
+                required: true,
+                message: '请输入DDL语句'
+              }
+            ]}
+          >
+            <TextArea
+              style={{ minHeight: 400 }}
+              placeholder="请先选择保存位置"
+            />
+          </Form.Item>
+        </Form>
+      </Modal>
     </div>
   );
 }

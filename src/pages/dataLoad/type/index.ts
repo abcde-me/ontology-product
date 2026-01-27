@@ -31,12 +31,14 @@ export enum ExecutionStatus {
 export enum SourceType {
   HDFS = 'HDFS',
   S3 = 'S3',
-  DB = 'db'
+  DB = 'db',
+  MQ = 'mq'
 }
 
 export enum LoadType {
   Cron = 'cron',
-  Once = 'once'
+  Once = 'once',
+  Realtime = 'realtime'
 }
 // 连接器类型
 interface Connector {
@@ -73,6 +75,7 @@ export interface TaskInfo {
       week: string;
     };
   };
+  submit_type: number;
   perms: string[];
 }
 

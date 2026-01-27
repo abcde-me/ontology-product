@@ -11,6 +11,9 @@
   /******** 主色 *******/
   --primary-1: #eef6ff;
   --primary-6: #007dfa;
+
+  /******** 边框颜色 *******/
+  --color-border-2: #e2e8f0;
 }
 
 /******** fontSize *******/
@@ -384,6 +387,10 @@ $spacing-9: 24px;
 .data-catalog-left-box:hover::-webkit-scrollbar-thumb {
   background: rgba(0, 0, 0, 0.3);
 }
+
+// .arco-table-no-data {
+//   padding: 100px;
+// }
 
 // alert
 .arco-alert {

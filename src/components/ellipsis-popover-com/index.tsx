@@ -95,7 +95,7 @@ function EllipsisPopover(props: any, ref: any) {
     }
   };
   const renderPopover = () => {
-    const displayContent = value || value === 0 ? value : '--';
+    const displayContent = value || value === 0 ? value : '-';
     return preferTypography ? (
       <Typography.Paragraph
         ellipsis={{
@@ -108,7 +108,8 @@ function EllipsisPopover(props: any, ref: any) {
           },
           ...ellipsis
         }}
-        className={`typoWrap ${className ? className : ''}`}
+        className={`typoWrap ${className ? className : ''} ${isLink ? 'paragraph-link cursor-pointer' : ''}`}
+        onClick={isLink ? handleLink : undefined}
       >
         {displayContent}
       </Typography.Paragraph>

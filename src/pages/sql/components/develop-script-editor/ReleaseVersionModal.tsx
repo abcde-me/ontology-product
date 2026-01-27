@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Alert,
   Button,
@@ -30,22 +30,25 @@ const ReleaseVersionModal: React.FC<ReleaseVersionModalProps> = ({
   initialValues
 }) => {
   const [form] = Form.useForm();
+  const [loading, setLoading] = useState(false);
   const FormItem = Form.Item;
   const TextArea = Input.TextArea;
 
   useEffect(() => {
     if (visible) {
       form.setFieldsValue({
-        scriptName: initialValues?.scriptName || '',
-        version: initialValues?.version || 'V1',
+        scriptName: initialValues?.scriptName,
+        version: initialValues?.version,
         versionDesc: initialValues?.versionDesc || ''
       });
+      setLoading(false);
     }
   }, [visible, initialValues, form]);
 
   const handleSubmit = async () => {
     try {
       const values = await form.validate();
+      setLoading(true);
       if (onSubmit) {
         await onSubmit(values);
       } else {
@@ -56,6 +59,8 @@ const ReleaseVersionModal: React.FC<ReleaseVersionModalProps> = ({
       }
     } catch (error) {
       console.error('表单验证失败:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -70,7 +75,12 @@ const ReleaseVersionModal: React.FC<ReleaseVersionModalProps> = ({
         <Button key="cancel" onClick={onCancel}>
           取消
         </Button>,
-        <Button key="confirm" type="primary" onClick={handleSubmit}>
+        <Button
+          key="confirm"
+          type="primary"
+          onClick={handleSubmit}
+          loading={loading}
+        >
           确定
         </Button>
       ]}
@@ -89,10 +99,14 @@ const ReleaseVersionModal: React.FC<ReleaseVersionModalProps> = ({
           field="scriptName"
           rules={[{ required: true, message: '请输入SQL脚本名称' }]}
         >
-          <Input placeholder="请输入SQL脚本名称" style={{ width: '100%' }} />
+          <span className="text-[14px] text-[var(--color-text-2)]">
+            {initialValues?.scriptName}
+          </span>
         </FormItem>
         <FormItem label="版本号:" field="version">
-          <Input readOnly style={{ width: '100%' }} />
+          <span className="text-[14px] text-[var(--color-text-2)]">
+            {initialValues?.version}
+          </span>
         </FormItem>
         <FormItem label="版本说明:" field="versionDesc">
           <TextArea

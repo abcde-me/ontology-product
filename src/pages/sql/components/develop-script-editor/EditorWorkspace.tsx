@@ -1,49 +1,68 @@
-import { RunningStatus } from '@/types/sqlApi';
 import {
   Button,
+  Dropdown,
   Form,
   Input,
+  Menu,
   Message,
   Modal,
   Space,
   Spin
 } from '@arco-design/web-react';
+import { EllipsisPopover } from '@ceai-front/arco-material';
 import {
-  IconBook,
   IconCaretRight,
-  IconSave,
-  IconStorage
+  // IconClose,
+  IconCopy,
+  IconDown,
+  IconEdit,
+  IconSave
 } from '@arco-design/web-react/icon';
+import QueryListIcon from '../../assets/query-list-icon.svg';
 import { sql } from '@codemirror/lang-sql';
 import { lintGutter } from '@codemirror/lint';
-import {
-  EditorView,
-  Decoration,
-  ViewPlugin,
-  ViewUpdate
-} from '@codemirror/view';
+import { EditorView, Decoration } from '@codemirror/view';
 import { StateEffect, StateField } from '@codemirror/state';
 import { tags as t } from '@lezer/highlight';
 import createTheme from '@uiw/codemirror-themes';
+import IconStop from '@/assets/sql/sql-stop-icon.svg';
 import CodeMirror, { ReactCodeMirrorRef } from '@uiw/react-codemirror';
-import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
-import { format } from 'sql-formatter';
+import CopyIcon from '../../assets/copy-icon.svg';
+import BookIcon from '../../assets/book-icon.svg';
+import CancelEditIcon from '../../assets/cancel-edit-icon.svg';
+import React, {
+  memo,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState
+} from 'react';
+import { formatSQL } from '@/utils/sqlFormatter';
 import styles from './EditorWorkspace.module.scss';
+import { RunLogStatus, ScriptStatus } from '@/types/sqlDevelopApi';
 
 import SQLFormatIcon from '@/assets/sql/sql-format-ico.svg';
-import IconStop from '@/assets/sql/sql-stop-icon.svg';
 import { SQL_PERMISSIONS } from '@/config/permissions';
 import { useHasPermission } from '@/store/userInfoStore';
+import { copyDevelopScript } from '@/api/sql-develop';
 import {
   EditorProvider,
   useEditorContext
 } from '../../contexts/DevelopScriptEditorContext';
-import { FileTab } from '../../hooks/useTabManager';
+import { FileTab } from '../../hooks/useDevelopScriptTabManager';
 import RunningInfoPanel from './RunningInfoPanel';
 import classNames from 'classnames';
 import ModalParamList from '../data-manager/ModalParamList';
 import ReleaseVersionModal from './ReleaseVersionModal';
-import ParameterSidebar, { Parameter } from './ParameterSidebar';
+import ParameterSidebar from './ParameterSidebar';
+import SpecificationsModal from './SpecificationsModal';
+import { ScriptParam } from '@/types/sqlDevelopApi';
+import ReleaseIcon from '../../assets/release-icon.svg';
+import dayjs from 'dayjs';
+import VersionStatus from '../version-status';
+import { SQL_PARAM_PLACEHOLDER_REGEX } from '../../constant';
+import { PermissionWrapper } from '@/components/PermissionGuard';
 
 interface NotebookWorkspaceProps {
   content: string;
@@ -59,6 +78,9 @@ interface NotebookWorkspaceProps {
   selectFile?: (fileId: string) => void;
   onToScriptList?: (key: string) => void;
   curActiveTab: string;
+  onHasUnsavedChangesChange?: (checkFn: (() => boolean) | null) => void;
+  onFileOpen?: (fileId: string, scriptId: string, fileName?: string) => void;
+  onRemoveTab?: (tabKey: string) => void;
 }
 
 // 定义用于高亮参数的效果
@@ -66,8 +88,7 @@ const highlightParameterEffect = StateEffect.define<string | null>();
 
 // 创建参数高亮的装饰样式
 const parameterHighlightMark = Decoration.mark({
-  class: 'cm-parameter-highlight',
-  attributes: { style: 'background-color: #FFE5B4; border-radius: 2px;' }
+  attributes: { style: 'background-color: rgba(0, 125, 250, 0.2);' }
 });
 
 // 存储当前高亮的参数名
@@ -138,40 +159,81 @@ const EditorWorkspaceContent: React.FC<{
   onEditorFocusChange?: (isFocused: boolean) => void;
   onToScriptList?: (key: string) => void;
   curActiveTab: string;
+  onHasUnsavedChangesChange?: (checkFn: (() => boolean) | null) => void;
+  onFileOpen?: (fileId: string, scriptId: string, fileName?: string) => void;
+  refreshDirectory?: () => void;
 }> = memo(
   ({
     onInsertContent,
     onEditorFocusChange,
     fileName,
     onToScriptList,
-    curActiveTab
+    curActiveTab,
+    onHasUnsavedChangesChange,
+    onFileOpen,
+    refreshDirectory
   }) => {
-    const FormItem = Form.Item;
     const [form] = Form.useForm();
-    const TextArea = Input.TextArea;
     const editorRef = useRef<ReactCodeMirrorRef>(null);
-    const [lastCursorPosition, setLastCursorPosition] =
-      React.useState<number>(0);
-    const [isEditorFocused, setIsEditorFocused] =
-      React.useState<boolean>(false);
-    const hasRunPermission = useHasPermission(SQL_PERMISSIONS.RUN);
-    const hasUpdatePermission = useHasPermission(SQL_PERMISSIONS.MODIFY);
-    const hasCancelRunPermission = useHasPermission(SQL_PERMISSIONS.RUN);
-    const [visible, setVisible] = React.useState<boolean>(false);
+    const hasUpdatePermission = useHasPermission(
+      SQL_PERMISSIONS.DEVELOP_SCIPT_MODIFY
+    );
     const [specificationsVisible, setSpecificationsVisible] =
       React.useState<boolean>(false);
     const [specificationsContent, setSpecificationsContent] =
-      React.useState<string>('测试文案');
-    const [newSpecificationsContent, setNewSpecificationsContent] =
       React.useState<string>('');
-    const [isSpecificationsValid, setIsSpecificationsValid] = useState(true);
     const [paramVisible, setParamVisible] = React.useState<boolean>(false);
     const [releaseVersionVisible, setReleaseVersionVisible] =
       React.useState<boolean>(false);
-    const [parameters, setParameters] = React.useState<Parameter[]>([]);
     const [sidebarVisible, setSidebarVisible] = React.useState<boolean>(false);
     const [sidebarCollapsed, setSidebarCollapsed] =
       React.useState<boolean>(false);
+    const [systemParamKeys, setSystemParamKeys] = React.useState<Set<string>>(
+      new Set()
+    );
+    const [editLoading, setEditLoading] = React.useState<boolean>(false);
+    const [saveLoading, setSaveLoading] = React.useState<boolean>(false);
+    const [copyLoading, setCopyLoading] = React.useState<boolean>(false);
+    const [copyDropdownVisible, setCopyDropdownVisible] =
+      React.useState<boolean>(false);
+
+    // 从 Context 获取编辑器状态
+    const {
+      contentLoading,
+      scriptInfo,
+      setScriptInfo,
+      // runStatus,
+      runLogStatus,
+      runDuration,
+      runStartTime,
+      handleStopRunCode,
+      handleRunCode,
+      lastAutoSave,
+      handleContentChange,
+      handleSaveScript,
+      handleEditScript,
+      handleUnlockScript,
+      placeholderValue,
+      runResult,
+      execid,
+      isPanelOpen,
+      handlePanelStateChange,
+      handleReleaseScript,
+      getPrevRunStatus,
+      hasUnsavedChanges
+    } = useEditorContext();
+
+    // 将检查函数暴露给父组件
+    useEffect(() => {
+      if (onHasUnsavedChangesChange) {
+        onHasUnsavedChangesChange(hasUnsavedChanges);
+      }
+      return () => {
+        if (onHasUnsavedChangesChange) {
+          onHasUnsavedChangesChange(null);
+        }
+      };
+    }, [hasUnsavedChanges, onHasUnsavedChangesChange]);
 
     // 处理参数hover事件
     const handleParameterHover = useCallback((paramName: string | null) => {
@@ -182,30 +244,26 @@ const EditorWorkspaceContent: React.FC<{
         effects: highlightParameterEffect.of(paramName)
       });
     }, []);
+
+    // 处理参数变化：直接更新 scriptParams
+    const handleParameterChange = useCallback(
+      (params: ScriptParam[]) => {
+        setScriptInfo((prev) => {
+          if (!prev) return null;
+          return {
+            ...prev,
+            script_params: params
+          };
+        });
+      },
+      [setScriptInfo]
+    );
+
     useEffect(() => {
       form.setFieldsValue({
         fileName: fileName
       });
     }, [fileName, form]);
-    // 从 Context 获取编辑器状态
-    const {
-      runStatus,
-      runDuration,
-      runStartTime,
-      handleStopRunCode,
-      handleRunCode,
-      lastAutoSave,
-      editorContent,
-      handleContentChange,
-      handleSaveScript,
-      placeholderValue,
-      runResult,
-      execid,
-      isPanelOpen,
-      handlePanelStateChange,
-      getPrevRunStatus,
-      lastScriptRunStatus
-    } = useEditorContext();
 
     const myTheme = createTheme({
       theme: 'light',
@@ -234,7 +292,7 @@ const EditorWorkspaceContent: React.FC<{
     });
 
     const handleRunClick = () => {
-      if (runStatus === RunningStatus.RUNNING) {
+      if (runLogStatus === RunLogStatus.RUNNING) {
         handleStopRunCode();
       } else {
         handleRunCode().catch(console.error);
@@ -242,14 +300,14 @@ const EditorWorkspaceContent: React.FC<{
     };
 
     const handleFormatCode = () => {
-      if (runStatus === RunningStatus.RUNNING) {
-        Message.warning('SQL 正在执行中，暂不支持格式化');
-        return;
-      }
-
-      if (editorContent) {
+      if (scriptInfo?.script_context) {
         try {
-          const formattedCode = format(editorContent, { language: 'sql' });
+          const formattedCode = formatSQL(scriptInfo.script_context, {
+            formatOptions: {
+              language: 'sql',
+              placeholderRegex: SQL_PARAM_PLACEHOLDER_REGEX
+            }
+          });
           handleContentChange(formattedCode);
           Message.success('格式化成功');
         } catch (e) {
@@ -260,21 +318,21 @@ const EditorWorkspaceContent: React.FC<{
     };
 
     // 处理光标位置变化
-    const handleCursorChange = useCallback((view: EditorView) => {
-      const pos = view.state.selection.main.head;
-      setLastCursorPosition(pos);
-    }, []);
+    // const handleCursorChange = useCallback((view: EditorView) => {
+    //   const pos = view.state.selection.main.head;
+    //   setLastCursorPosition(pos);
+    // }, []);
 
-    // 处理编辑器聚焦状态变化
-    const handleFocusChange = useCallback(
-      (focused: boolean) => {
-        setIsEditorFocused(focused);
-        if (onEditorFocusChange) {
-          onEditorFocusChange(focused);
-        }
-      },
-      [onEditorFocusChange]
-    );
+    // // 处理编辑器聚焦状态变化
+    // const handleFocusChange = useCallback(
+    //   (focused: boolean) => {
+    //     setIsEditorFocused(focused);
+    //     if (onEditorFocusChange) {
+    //       onEditorFocusChange(focused);
+    //     }
+    //   },
+    //   [onEditorFocusChange]
+    // );
 
     // 插入内容到光标位置
     const insertContentAtCursor = useCallback((contentToInsert: string) => {
@@ -301,12 +359,7 @@ const EditorWorkspaceContent: React.FC<{
         }
       });
     }, []);
-    const handleSeeScriptList = () => {
-      console.log(123, onToScriptList);
-      if (onToScriptList) {
-        onToScriptList('script');
-      }
-    };
+
     // 监听插入内容事件
     useEffect(() => {
       if (onInsertContent) {
@@ -314,141 +367,455 @@ const EditorWorkspaceContent: React.FC<{
         onInsertContent(insertContentAtCursor);
       }
     }, [insertContentAtCursor, onInsertContent]);
-    const handleSpecificationsChange = (val: string) => {
-      setNewSpecificationsContent(val);
+
+    const handleSpecificationsSave = (content: string) => {
+      setSpecificationsContent(content);
     };
-    return (
-      <div className={styles['sql-content']}>
-        {/* 顶部工具栏 */}
-        <div className={styles['sql-toolbar']}>
-          <div className={styles['toolbar-left']}>
-            <Space size={12}>
-              {((hasRunPermission && runStatus !== RunningStatus.RUNNING) ||
-                (hasCancelRunPermission &&
-                  runStatus === RunningStatus.RUNNING)) && (
-                <Button
-                  type="primary"
-                  icon={
-                    runStatus === RunningStatus.RUNNING ? (
-                      <IconStop className="mr-[4px]" />
-                    ) : (
-                      <IconCaretRight className="mr-[4px]" />
-                    )
-                  }
-                  disabled={editorContent?.trim() === ''}
-                  onClick={handleRunClick}
-                  className={classNames('h-[26px]', {
-                    [styles['btn-running']]: runStatus === RunningStatus.RUNNING
-                  })}
-                >
-                  {runStatus === RunningStatus.RUNNING ? '停止运行' : '运行'}
-                </Button>
-              )}
 
-              <Button
-                type="text"
-                icon={<SQLFormatIcon />}
-                onClick={handleFormatCode}
-                className="h-[26px]"
-              >
-                格式化
-              </Button>
-              {curActiveTab === 'files' && (
-                <>
-                  <Button
-                    type="text"
-                    icon={<IconBook />}
-                    onClick={() => setSpecificationsVisible(true)}
-                    className="h-[26px]"
-                  >
-                    开发规范
-                  </Button>
-                  <Button
-                    type="text"
-                    icon={<IconStorage />}
-                    onClick={() => setParamVisible(true)}
-                    className="h-[26px]"
-                  >
-                    参数列表
-                  </Button>
-                </>
-              )}
-            </Space>
-          </div>
-          <div className={styles['toolbar-right']}>
-            {lastAutoSave && (
-              <div className={styles['toolbar-right-item']}>
-                <Space size={12}>
-                  <span className="text-sm text-gray-500">
-                    保存时间: {lastAutoSave || '未保存'}
-                  </span>
-                </Space>
-              </div>
-            )}
-            {curActiveTab === 'data' && (
-              <Button
-                onClick={() => {
-                  handleSeeScriptList();
-                }}
-                className={styles['btn-script-list']}
-                disabled={runStatus === RunningStatus.RUNNING}
-                icon={<IconStorage />}
-              >
-                脚本列表
-              </Button>
-            )}
-            {/* {curActiveTab === 'data' && ( */}
-            <Button
-              className={classNames(styles['btn-save'], 'mr-[8px]')}
-              onClick={() => {
-                handleSaveScript(editorContent);
-              }}
-              icon={<IconSave />}
-            >
-              保存
-            </Button>
-            <Button
-              className={styles['btn-save']}
-              onClick={() => {
-                setReleaseVersionVisible(true);
-              }}
-              icon={<IconSave />}
-            >
-              发版
-            </Button>
-            {/* )} */}
-          </div>
-        </div>
+    // 处理复制脚本为新版本/新脚本
+    const handleCopyScript = async (type: 'newVersion' | 'newScript') => {
+      if (!scriptInfo?.script_id) {
+        Message.warning('暂无可复制的脚本');
+        return;
+      }
 
-        {/* 编辑器区域 */}
+      const params: { script_id: number; version?: number } = {
+        script_id: scriptInfo.script_id
+      };
 
-        <div
-          className={classNames(styles['sql-editor-container'], {
-            [styles['running-code-mirror']]: !hasUpdatePermission,
-            [styles['with-sidebar']]: sidebarVisible && !sidebarCollapsed
-          })}
-        >
-          <Spin
-            style={{
-              width: '100%',
-              height: '100%'
-            }}
-            tip={
-              lastScriptRunStatus === RunningStatus.SUCCESS ||
-              lastScriptRunStatus === RunningStatus.FAILED
-                ? '结果加载中...'
-                : '运行中...'
+      if (type === 'newVersion' && scriptInfo?.max_version) {
+        params.version = scriptInfo.max_version;
+      }
+
+      try {
+        setCopyLoading(true);
+        const res = await copyDevelopScript(params);
+
+        if (res.status !== 200 || !res.data.script_id) {
+          Message.error(res.message || '复制失败');
+          return;
+        }
+
+        Message.success(
+          type === 'newVersion' ? '复制为新版本成功' : '复制为新脚本成功'
+        );
+
+        // 如果是复制为新脚本，自动打开新脚本
+        if (type === 'newScript' && res.data) {
+          const newScriptId = String(res.data.script_id ?? '');
+          const newFileId = String(
+            (res.data as any)?.script_file_id ?? res.data.script_id ?? ''
+          );
+          const newFileName = res.data.script_name || scriptInfo.script_name;
+
+          if (newScriptId && onFileOpen) {
+            // 刷新目录列表
+            if (refreshDirectory) {
+              refreshDirectory();
             }
-            loading={runStatus === RunningStatus.RUNNING}
+            // 打开新脚本
+            onFileOpen(newFileId, newScriptId, newFileName);
+          }
+        }
+      } catch (error) {
+        console.error('复制失败:', error);
+        Message.error('复制失败');
+      } finally {
+        setCopyLoading(false);
+        setCopyDropdownVisible(false);
+      }
+    };
+
+    // 处理开始编辑
+    const handleStartEdit = async () => {
+      setEditLoading(true);
+      await handleEditScript();
+      setEditLoading(false);
+    };
+
+    // 处理取消编辑
+    const handleCancelEdit = async () => {
+      // 检查是否有未保存的更改
+      if (hasUnsavedChanges()) {
+        Modal.confirm({
+          title: '确定关闭此脚本吗?',
+          content: '关闭后,将不会保存本次编辑',
+          okText: '确定',
+          cancelText: '取消',
+          onOk: async () => {
+            setEditLoading(true);
+            await handleUnlockScript();
+            setEditLoading(false);
+          },
+          onCancel: () => {
+            // 取消操作，不做任何处理
+          }
+        });
+      } else {
+        setEditLoading(true);
+        await handleUnlockScript();
+        setEditLoading(false);
+      }
+    };
+
+    const handleSave = async () => {
+      setSaveLoading(true);
+      await handleSaveScript(scriptInfo?.script_context ?? '');
+      setSaveLoading(false);
+    };
+
+    // 计算是否只读
+    const isReadOnly = !scriptInfo?.isSelfEditing || !hasUpdatePermission;
+
+    // 根据 status 渲染工具栏
+    const renderToolbar = () => {
+      const status = scriptInfo?.status ?? ScriptStatus.Editing;
+      const canEdit =
+        scriptInfo?.status === ScriptStatus.Editing ||
+        scriptInfo?.status === ScriptStatus.EditCompleted;
+      const isEditing = status === ScriptStatus.Editing;
+      const isEditCompleted = status === ScriptStatus.EditCompleted;
+      if (
+        status === ScriptStatus.Editing ||
+        status === ScriptStatus.EditCompleted
+      ) {
+        return (
+          <>
+            <div className={styles['toolbar-left']}>
+              <Space size={12}>
+                {
+                  <PermissionWrapper
+                    permission={[
+                      SQL_PERMISSIONS.DEVELOP_SCIPT_RUN,
+                      SQL_PERMISSIONS.DEVELOP_SCIPT_MODIFY
+                    ]}
+                  >
+                    <Button
+                      type="primary"
+                      icon={
+                        runLogStatus === RunLogStatus.RUNNING ? (
+                          <IconStop className="mr-[4px]" />
+                        ) : (
+                          <IconCaretRight className="mr-[4px]" />
+                        )
+                      }
+                      disabled={!canEdit || !scriptInfo?.script_context?.trim()}
+                      onClick={handleRunClick}
+                      className={classNames(
+                        'h-[24px]',
+                        runLogStatus === RunLogStatus.RUNNING
+                          ? styles['btn-running']
+                          : ''
+                      )}
+                    >
+                      {runLogStatus === RunLogStatus.RUNNING
+                        ? '停止运行'
+                        : '运行'}
+                    </Button>
+                  </PermissionWrapper>
+                }
+                <Button
+                  type="text"
+                  icon={<SQLFormatIcon />}
+                  onClick={handleFormatCode}
+                  disabled={
+                    !scriptInfo?.isSelfEditing ||
+                    !scriptInfo?.script_context?.trim()
+                  }
+                  className={classNames(
+                    'h-[24px] !px-0',
+                    styles['format-code-btn']
+                  )}
+                >
+                  格式化
+                </Button>
+
+                {/* 开发规范按钮 - 始终显示 */}
+                {curActiveTab === 'files' && (
+                  <>
+                    <Button
+                      type="text"
+                      icon={<BookIcon />}
+                      onClick={() => setSpecificationsVisible(true)}
+                      className="flex h-[24px] items-center px-[0px] !text-[var(--color-text-2)]"
+                    >
+                      开发规范
+                    </Button>
+                    {/* 参数列表按钮 - 始终显示 */}
+                    <Button
+                      type="text"
+                      icon={<QueryListIcon />}
+                      onClick={() => setParamVisible(true)}
+                      className="flex h-[24px] items-center px-[0px] !text-[var(--color-text-2)]"
+                    >
+                      参数列表
+                    </Button>
+                  </>
+                )}
+              </Space>
+            </div>
+            <div
+              className={classNames(
+                styles['toolbar-right'],
+                'min-w-0 flex-shrink'
+              )}
+            >
+              {/* 保存时间 - 始终显示 */}
+              {scriptInfo?.update_time && (
+                <div className="ml-[12px] min-w-0 max-w-full flex-shrink">
+                  <EllipsisPopover
+                    value={`保存时间: ${
+                      dayjs(scriptInfo?.update_time).format(
+                        'YYYY-MM-DD HH:mm:ss'
+                      ) || '未保存'
+                    }`}
+                    wrapperClassName="text-[14px] text-[var(--color-text-4)]"
+                  />
+                </div>
+              )}
+              {/* 保存按钮 - status=0且isSelfEditing=true时可用，否则置灰 */}
+              <PermissionWrapper
+                permission={SQL_PERMISSIONS.DEVELOP_SCIPT_MODIFY}
+              >
+                <Button
+                  className={classNames(
+                    styles['btn-save'],
+                    'ml-[8px] mr-[8px]'
+                  )}
+                  loading={saveLoading}
+                  onClick={handleSave}
+                  disabled={!scriptInfo?.isSelfEditing}
+                  icon={<IconSave />}
+                >
+                  保存
+                </Button>
+              </PermissionWrapper>
+              {/* 发版按钮 - status=0且isSelfEditing=true时可用，否则置灰 */}
+              <PermissionWrapper
+                permission={SQL_PERMISSIONS.DEVELOP_SCIPT_MODIFY}
+              >
+                <Button
+                  className={styles['btn-save']}
+                  onClick={() => {
+                    setReleaseVersionVisible(true);
+                  }}
+                  disabled={!canEdit || !scriptInfo?.isSelfEditing}
+                  icon={<ReleaseIcon />}
+                >
+                  发版
+                </Button>
+              </PermissionWrapper>
+
+              {/* 取消编辑按钮 - status=0且isSelfEditing=true时显示 */}
+              <PermissionWrapper
+                permission={SQL_PERMISSIONS.DEVELOP_SCIPT_MODIFY}
+              >
+                {scriptInfo?.isSelfEditing && (
+                  <Button
+                    className={classNames(styles['btn-save'], 'ml-[8px]')}
+                    loading={editLoading}
+                    onClick={handleCancelEdit}
+                    icon={<CancelEditIcon />}
+                  >
+                    取消编辑
+                  </Button>
+                )}
+              </PermissionWrapper>
+
+              <PermissionWrapper
+                permission={SQL_PERMISSIONS.DEVELOP_SCIPT_MODIFY}
+              >
+                {/* 编辑按钮 - status=0且isSelfEditing=false或status=1时显示 */}
+                {!scriptInfo?.isSelfEditing && (
+                  <Button
+                    className={classNames(styles['btn-save'], 'ml-[8px]')}
+                    onClick={handleStartEdit}
+                    loading={editLoading}
+                    icon={<IconEdit />}
+                  >
+                    编辑
+                  </Button>
+                )}
+              </PermissionWrapper>
+            </div>
+          </>
+        );
+      }
+
+      // status = 2 (已发版)
+      if (status === ScriptStatus.Released) {
+        return (
+          <>
+            <div className={styles['toolbar-left']}>
+              <Space size={12}>
+                <VersionStatus
+                  status={status}
+                  className="text-[var(--color-text-1)]"
+                />
+                {/* <span className="text-sm">已发版</span> */}
+                <span className="text-[14px] text-[var(--color-text-4)]">
+                  发版人: {scriptInfo?.release_user || '-'}
+                </span>
+                <span className="text-[14px] text-[var(--color-text-4)]">
+                  发版时间:{' '}
+                  {scriptInfo?.release_time
+                    ? dayjs(scriptInfo.release_time).format(
+                        'YYYY-MM-DD HH:mm:ss'
+                      )
+                    : '-'}
+                </span>
+              </Space>
+            </div>
+            <div className={styles['toolbar-right']}>
+              <PermissionWrapper
+                permission={SQL_PERMISSIONS.DEVELOP_SCIPT_CREATE}
+              >
+                <Button
+                  loading={copyLoading}
+                  className={classNames(styles['btn-save'], 'ml-[8px]')}
+                  icon={<CopyIcon className="h-[14px] w-[14px]" />}
+                  onClick={() => handleCopyScript('newScript')}
+                >
+                  复制为新脚本
+                </Button>
+              </PermissionWrapper>
+              {/* 取消编辑按钮 - status=0且isSelfEditing=true时显示 */}
+              {/* <PermissionWrapper
+                permission={SQL_PERMISSIONS.DEVELOP_SCIPT_MODIFY}
+              >
+                {scriptInfo?.isSelfEditing && (
+                  <Button
+                    className={classNames(styles['btn-save'], 'ml-[8px]')}
+                    loading={editLoading}
+                    onClick={handleCancelEdit}
+                    icon={<IconClose />}
+                  >
+                    取消编辑
+                  </Button>
+                )}
+              </PermissionWrapper> */}
+
+              {/* 编辑按钮 - status=0且isSelfEditing=false或status=1时显示 */}
+              <PermissionWrapper
+                permission={SQL_PERMISSIONS.DEVELOP_SCIPT_MODIFY}
+              >
+                <Button
+                  className={classNames(styles['btn-save'], 'ml-[8px]')}
+                  onClick={handleStartEdit}
+                  loading={editLoading}
+                  icon={<IconEdit />}
+                >
+                  编辑
+                </Button>
+              </PermissionWrapper>
+            </div>
+          </>
+        );
+      }
+
+      // status = 3 (调度中)
+      if (status === ScriptStatus.Scheduling) {
+        return (
+          <>
+            <div className={styles['toolbar-left']}>
+              <Space size={12}>
+                <VersionStatus
+                  status={status}
+                  className="text-[var(--color-text-1)]"
+                />
+                <span className="text-sm text-gray-500">
+                  发版人: {scriptInfo?.release_user || '-'}
+                </span>
+                <span className="text-sm text-gray-500">
+                  发版时间:{' '}
+                  {scriptInfo?.release_time
+                    ? dayjs(scriptInfo.release_time).format(
+                        'YYYY-MM-DD HH:mm:ss'
+                      )
+                    : '-'}
+                </span>
+              </Space>
+            </div>
+            <div
+              className={classNames(
+                styles['toolbar-right'],
+                styles['copy-dropdown-container']
+              )}
+            >
+              <PermissionWrapper
+                permission={SQL_PERMISSIONS.DEVELOP_SCIPT_CREATE}
+              >
+                <Button
+                  loading={copyLoading}
+                  className={classNames(styles['btn-save'], 'ml-[8px]')}
+                  icon={<CopyIcon className="h-[14px] w-[14px]" />}
+                  onClick={() => handleCopyScript('newScript')}
+                >
+                  复制为新脚本
+                </Button>
+              </PermissionWrapper>
+
+              {/* 取消编辑按钮 - status=0且isSelfEditing=true时显示 */}
+              <PermissionWrapper
+                permission={SQL_PERMISSIONS.DEVELOP_SCIPT_MODIFY}
+              >
+                {scriptInfo?.isSelfEditing && (
+                  <Button
+                    className={classNames(styles['btn-save'], 'ml-[8px]')}
+                    loading={editLoading}
+                    onClick={handleCancelEdit}
+                    icon={<CancelEditIcon />}
+                  >
+                    取消编辑
+                  </Button>
+                )}
+              </PermissionWrapper>
+
+              {/* 编辑按钮 - status=0且isSelfEditing=false或status=1时显示 */}
+              <PermissionWrapper
+                permission={SQL_PERMISSIONS.DEVELOP_SCIPT_MODIFY}
+              >
+                {!scriptInfo?.isSelfEditing && (
+                  <Button
+                    className={classNames(styles['btn-save'], 'ml-[8px]')}
+                    onClick={handleStartEdit}
+                    loading={editLoading}
+                    icon={<IconEdit />}
+                  >
+                    编辑
+                  </Button>
+                )}
+              </PermissionWrapper>
+            </div>
+          </>
+        );
+      }
+
+      // 默认情况（不应该到达这里，但为了安全起见）
+      return null;
+    };
+
+    return (
+      <Spin loading={contentLoading} block className="modaforge-spin">
+        <div className={classNames(styles['sql-content'], 'h-full')}>
+          {/* 顶部工具栏 */}
+          <div className={styles['sql-toolbar']}>{renderToolbar()}</div>
+
+          {/* 编辑器区域 */}
+
+          <div
+            className={classNames(styles['sql-editor-container'], {
+              [styles['running-code-mirror']]: !hasUpdatePermission,
+              [styles['with-sidebar']]: sidebarVisible && !sidebarCollapsed,
+              [styles['readonly-editor']]: isReadOnly
+            })}
           >
             <CodeMirror
               ref={editorRef}
-              value={editorContent}
+              value={scriptInfo?.script_context ?? ''}
               onChange={handleContentChange}
               placeholder={placeholderValue}
-              readOnly={
-                !hasUpdatePermission || runStatus === RunningStatus.RUNNING
-              }
+              readOnly={isReadOnly}
               theme={myTheme}
               extensions={[
                 sql({ upperCaseKeywords: true }),
@@ -456,12 +823,12 @@ const EditorWorkspaceContent: React.FC<{
                 currentHighlightedParam,
                 parameterHighlightField,
                 EditorView.updateListener.of((update) => {
-                  if (update.selectionSet) {
-                    handleCursorChange(update.view);
-                  }
-                  if (update.focusChanged) {
-                    handleFocusChange(update.view.hasFocus);
-                  }
+                  // if (update.selectionSet) {
+                  //   handleCursorChange(update.view);
+                  // }
+                  // if (update.focusChanged) {
+                  //   handleFocusChange(update.view.hasFocus);
+                  // }
                 })
               ]}
               basicSetup={{
@@ -470,135 +837,69 @@ const EditorWorkspaceContent: React.FC<{
               }}
               className={styles['code-editor']}
             />
-          </Spin>
 
-          {/* 参数侧边栏 */}
-          <ParameterSidebar
-            content={editorContent}
-            onParameterChange={setParameters}
-            onVisibleChange={setSidebarVisible}
-            onCollapsedChange={setSidebarCollapsed}
-            onParameterHover={handleParameterHover}
-          />
-        </div>
-
-        {/* 运行信息面板 */}
-        {execid && (
-          <RunningInfoPanel
-            isPanelOpen={isPanelOpen}
-            onPanelStateChange={handlePanelStateChange}
-            getPrevRunStatus={getPrevRunStatus}
-          />
-        )}
-        {/* 保存查询列表 */}
-        <Modal
-          title="保存到查询脚本列表"
-          visible={visible}
-          onOk={() => setVisible(false)}
-          onCancel={() => setVisible(false)}
-          autoFocus={false}
-          focusLock={true}
-          footer={[
-            <>
-              <Button onClick={() => setVisible(false)}>取消</Button>
-              <Button type="primary" htmlType="submit">
-                保存
-              </Button>
-            </>
-          ]}
-        >
-          <Form form={form}>
-            <FormItem label="SQL脚本名称:" required={true} field="fileName">
-              <Input
-                defaultValue={fileName}
-                style={{ width: 300 }}
-                placeholder="请输入脚本名称"
+            {/* 参数侧边栏 */}
+            {
+              <ParameterSidebar
+                key={scriptInfo?.script_id}
+                canEdit={scriptInfo?.isSelfEditing ?? false}
+                content={scriptInfo?.script_context ?? ''}
+                onParameterChange={handleParameterChange}
+                onVisibleChange={setSidebarVisible}
+                onCollapsedChange={setSidebarCollapsed}
+                onParameterHover={handleParameterHover}
+                initialParams={scriptInfo?.script_params ?? []}
+                systemParamKeys={systemParamKeys}
               />
-            </FormItem>
-            <FormItem label="脚本说明:" field="fileDesc">
-              <Input style={{ width: 300 }} placeholder="请输入脚本说明" />
-            </FormItem>
-          </Form>
-        </Modal>
-        {/* 开发规范 */}
-        <Modal
-          title="开发规范"
-          visible={specificationsVisible}
-          onCancel={() => setSpecificationsVisible(false)}
-          footer={null}
-          style={{
-            width: 960,
-            height: 678
-          }}
-        >
-          <div className={styles['specifications-modal-content']}>
-            <div className={styles['specifications-modal-content-btn']}>
-              {isSpecificationsValid ? (
-                <Button
-                  onClick={() => {
-                    setIsSpecificationsValid(false);
-                  }}
-                  className={styles['btn-edit']}
-                >
-                  编辑
-                </Button>
-              ) : (
-                <div className={styles['btn-group-content']}>
-                  <Button
-                    onClick={() => {
-                      setIsSpecificationsValid(true);
-                      setNewSpecificationsContent(specificationsContent);
-                    }}
-                    className={styles['btn-cancel']}
-                  >
-                    取消
-                  </Button>
-                  <Button
-                    onClick={() => {
-                      setSpecificationsContent(newSpecificationsContent);
-                      setIsSpecificationsValid(true);
-                    }}
-                    type="primary"
-                    className={styles['btn-save']}
-                  >
-                    确定
-                  </Button>
-                </div>
-              )}
-            </div>
-            {isSpecificationsValid ? (
-              <div className="pl-2 pt-2">{newSpecificationsContent}</div>
-            ) : (
-              <TextArea
-                placeholder="请输入开发规范"
-                style={{ width: 912, maxHeight: 590, height: 590 }}
-                defaultValue={specificationsContent}
-                onChange={(val) => handleSpecificationsChange(val)}
-              />
-            )}
+            }
           </div>
-        </Modal>
-        <ModalParamList
-          paramVisible={paramVisible}
-          onCancel={() => setParamVisible(false)}
-        />
-        {/* 发布版本弹窗 */}
-        <ReleaseVersionModal
-          visible={releaseVersionVisible}
-          onCancel={() => setReleaseVersionVisible(false)}
-          onSubmit={(values) => {
-            // TODO: 调用发布版本API
-            console.log('发布版本数据:', values);
-            Message.success('发布版本成功');
-            setReleaseVersionVisible(false);
-          }}
-          initialValues={{
-            scriptName: fileName,
-            version: 'V1',
-            versionDesc: ''
-          }}
-        />
-      </div>
+
+          {/* 运行信息面板 */}
+          {execid && (
+            <RunningInfoPanel
+              isPanelOpen={isPanelOpen}
+              onPanelStateChange={handlePanelStateChange}
+              getPrevRunStatus={getPrevRunStatus}
+            />
+          )}
+          {/* 开发规范 */}
+          {specificationsVisible && (
+            <SpecificationsModal
+              visible={specificationsVisible}
+              onCancel={() => setSpecificationsVisible(false)}
+              initialContent={specificationsContent}
+              onSave={handleSpecificationsSave}
+            />
+          )}
+          {paramVisible && (
+            <ModalParamList
+              paramVisible={paramVisible}
+              onCancel={() => setParamVisible(false)}
+            />
+          )}
+          {/* 发布版本弹窗 */}
+          {releaseVersionVisible && (
+            <ReleaseVersionModal
+              visible={releaseVersionVisible}
+              onCancel={() => setReleaseVersionVisible(false)}
+              onSubmit={async (values) => {
+                const res = await handleReleaseScript(values.versionDesc ?? '');
+                if (res) {
+                  // 成功再关闭弹窗
+                  setReleaseVersionVisible(false);
+                }
+              }}
+              initialValues={{
+                scriptName: scriptInfo?.script_name || '',
+                version: scriptInfo?.max_version
+                  ? `V${scriptInfo?.max_version + 1}`
+                  : 'V1',
+                versionDesc: scriptInfo?.script_desc ?? ''
+              }}
+            />
+          )}
+        </div>
+      </Spin>
     );
   }
 );
@@ -618,7 +919,10 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = memo(
     refreshDirectory,
     selectFile,
     onToScriptList,
-    curActiveTab
+    curActiveTab,
+    onHasUnsavedChangesChange,
+    onFileOpen,
+    onRemoveTab
   }) => {
     const editorOptions = {
       activeTab: tabKey,
@@ -652,7 +956,8 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = memo(
         }
       },
       refreshDirectory,
-      selectFile
+      selectFile,
+      onRemoveTab
     };
 
     return (
@@ -663,6 +968,9 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = memo(
           onToScriptList={onToScriptList}
           onInsertContent={onInsertContent}
           onEditorFocusChange={onEditorFocusChange}
+          onHasUnsavedChangesChange={onHasUnsavedChangesChange}
+          onFileOpen={onFileOpen}
+          refreshDirectory={refreshDirectory}
         />
       </EditorProvider>
     );

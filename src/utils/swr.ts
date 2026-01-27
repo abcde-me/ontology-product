@@ -8,7 +8,7 @@ import {
   Model,
   Tool
 } from './type';
-import { getLLMList, getLLMParams } from '@/api/llm';
+// import { getLLMList, getLLMParams } from '@/api/llm';
 import {
   getBuiltInToolList,
   getCustomToolList,
@@ -126,11 +126,11 @@ export function useInstalledAppDetail(appId: string) {
   return res;
 }
 
-/**大模型列表 */
-export function useLLMs() {
-  const res = useSWR<Model[]>('/llms', () => getLLMList());
-  return res;
-}
+// /**大模型列表 */
+// export function useLLMs() {
+//   const res = useSWR<Model[]>('/llms', () => getLLMList());
+//   return res;
+// }
 /**大模型参数 */
 export function useLLMParams(provider: string, modelId: string) {
   const res = useSWR(

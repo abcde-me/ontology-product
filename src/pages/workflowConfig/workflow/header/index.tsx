@@ -1,4 +1,4 @@
-import { FC, useRef, useState } from 'react';
+import { FC, useEffect, useRef, useState } from 'react';
 import React, { memo, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useHistory } from 'react-router-dom';
@@ -8,6 +8,7 @@ import { useUserInfo } from '@/store/userInfoStore';
 import {
   useChecklistBeforePublish,
   useNodesInteractions,
+  useNodesReadOnly,
   useNodesSyncDraft
 } from '../hooks';
 import TaskOperation from '@/pages/workflowConfig/workflow/header/components/task-operation';
@@ -22,6 +23,7 @@ import {
 } from '@/api/workflow';
 import BackIcon from '@/pages/workflowConfig/styles/images/op-icons/back.svg';
 import {
+  EditWorkflowParams,
   IsOnline,
   WorkflowOperation,
   WorkflowOperationParams
@@ -43,15 +45,65 @@ import { RefInputType } from '@arco-design/web-react/es/Input/interface';
 import { validateName } from '@/utils/valiate';
 import { WORKFLOW_DETAIL_PERMISSIONS } from '@/config/permissions';
 import { PermissionWrapper } from '@/components/PermissionGuard';
+import { useParams as useRouterParams } from 'react-router-dom';
+import { useRequest } from 'ahooks';
+import { getWorkflowLastTask } from '@/api/workflowV2';
+import { isNil } from 'lodash-es';
 
 const SuccessModal = ({ visible, params, onClose }) => {
   const { workflow_uuid, ds_workflow_id, workflow_version, job_id } =
     params ?? {};
   const history = useHistory();
-  const handleClick = () => {
-    const jumpUrl = `/tenant/compute/modaforge/workflowTaskDetail?id=${job_id}&workflow_uuid=${workflow_uuid}&ds_workflow_id=${ds_workflow_id}&workflow_version=${workflow_version}`;
+  const searchCount = useRef(0);
+  const { type: flowType = 'no_struct' } =
+    useRouterParams<Record<string, string>>();
+
+  const route2TaskDetail = (jobId?: React.Key) => {
+    if (isNil(jobId)) {
+      history.push('/tenant/compute/modaforge/workflowTask/list');
+      return;
+    }
+    const jumpUrl = `/tenant/compute/modaforge/workflowTask/detail/${jobId}?workflow_type=${flowType}&workflow_uuid=${workflow_uuid}&ds_workflow_id=${ds_workflow_id}&workflow_version=${workflow_version}`;
     history.push(jumpUrl);
   };
+
+  useEffect(() => {
+    return () => {
+      cancel();
+      searchCount.current = 0;
+    };
+  }, []);
+
+  const {
+    data: flowTask,
+    loading,
+    cancel,
+    run: getWorkflowTask
+  } = useRequest(
+    () => {
+      return getWorkflowLastTask({
+        trigger_code: job_id,
+        process_definition_code: ds_workflow_id
+      });
+    },
+    {
+      pollingInterval: 1000,
+      manual: true,
+      refreshDeps: [job_id],
+      onSuccess(data) {
+        if (searchCount.current > 10) {
+          cancel();
+          searchCount.current = 0;
+          route2TaskDetail();
+          return;
+        }
+        searchCount.current += 1;
+        if (!data) return;
+        const { id } = data;
+        route2TaskDetail(id);
+      }
+    }
+  );
 
   return (
     <Modal
@@ -84,7 +136,7 @@ const SuccessModal = ({ visible, params, onClose }) => {
         style={{ marginBottom: 20, justifyContent: 'end', width: '100%' }}
       >
         <Button onClick={onClose}>关闭</Button>
-        <Button type="primary" onClick={handleClick}>
+        <Button type="primary" onClick={getWorkflowTask} loading={loading}>
           去查看
         </Button>
       </Space>
@@ -92,20 +144,24 @@ const SuccessModal = ({ visible, params, onClose }) => {
   );
 };
 
-const Header: FC = () => {
+const Header = (props: { flowType: string }) => {
   const { t } = useTranslation('plugin__console-plugin-appforge');
   const history = useHistory();
   const [showRuningModal, setShowRuningModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
   const [editing, setEditing] = useState(false);
   const [workflowOperationRes, setWorkflowOperationRes] = useState();
   const inputRef = useRef<RefInputType>(null);
   const workflowUuid = useParams('workflow_uuid') ?? '';
   const workflowVersion = useParams('workflow_version');
-  const { handleNodeSelect } = useNodesInteractions();
+  const { handleNodeSelect, getFlowNodes, handleStopFlowTest } =
+    useNodesInteractions();
+  const { nodesReadOnly } = useNodesReadOnly();
 
-  const { setWorkflowDetail } = useTaskStore(
+  const { setWorkflowDetail, clearNodeStatus } = useTaskStore(
     useShallow((state) => ({
-      setWorkflowDetail: state.setWorkflowDetail
+      setWorkflowDetail: state.setWorkflowDetail,
+      clearNodeStatus: () => state.setNodesProcessDetail([])
     }))
   );
 
@@ -165,6 +221,9 @@ const Header: FC = () => {
 
       if (op === WorkflowOperation.ONLINE) {
         handleNodeSelect('', false);
+        if (!getFlowNodes().length) {
+          return Message.error('请添加节点');
+        }
         // 上线前，保存画布最新信息
         handleSyncWorkflowDraft(
           true,
@@ -182,13 +241,15 @@ const Header: FC = () => {
 
               if (workflowRes?.status === 200) {
                 Message.success('上线成功');
+                handleStopFlowTest();
                 updateWorkFlowStatus();
+                clearNodeStatus();
               } else {
                 Message.error(workflowRes?.message ?? '上线失败');
               }
             },
-            onError: () => {
-              Message.error('上线失败');
+            onError: (e) => {
+              Message.error(e?.message || '上线失败');
             }
           },
           {
@@ -250,18 +311,24 @@ const Header: FC = () => {
     setTimeout(() => inputRef.current?.focus(), 0);
   };
 
-  const handleSave = async (workflow_name: string) => {
+  const handleSave = async (flowData: EditWorkflowParams) => {
     setEditing(false);
-
-    if (workflowName === appDetail?.workflow_name) {
-      return;
-    }
+    const { workflow_name } = flowData;
 
     // 这里可以添加保存逻辑
-    const workflowRes = await editWorkflow({
+    let editFlowParams: EditWorkflowParams = {
       workflow_uuid: workflowUuid ?? '',
       workflow_name
-    });
+    };
+
+    if (props.flowType === 'struct') {
+      editFlowParams = {
+        ...editFlowParams,
+        ...flowData
+      };
+    }
+
+    const workflowRes = await editWorkflow(editFlowParams);
 
     if (workflowRes?.status === 200) {
       appDetail &&
@@ -285,15 +352,12 @@ const Header: FC = () => {
       return;
     }
 
-    handleSave(workflow_name);
+    handleSave({ workflow_name });
   };
 
   return (
     <div
-      className={
-        styles['app-workflow-page-header'] +
-        ' absolute left-0 top-0 z-10 flex h-14 w-full items-center justify-between bg-mask-top2bottom-gray-50-to-transparent px-3'
-      }
+      className={`${styles['app-workflow-page-header']} absolute left-0 top-0 z-10 flex h-14 w-full items-center justify-between bg-mask-top2bottom-gray-50-to-transparent px-3`}
     >
       <div className={styles['left-part']}>
         <div
@@ -321,18 +385,21 @@ const Header: FC = () => {
               >
                 {appDetail?.workflow_name}
               </Typography.Paragraph>
-              {headerOperationDisplay && (
-                <PermissionWrapper
-                  permission={WORKFLOW_DETAIL_PERMISSIONS.UPDATE}
-                >
-                  <Popover trigger="hover" content="编辑">
-                    <div
-                      className={styles['edit-icon']}
-                      onClick={handleEdit}
-                    ></div>
-                  </Popover>
-                </PermissionWrapper>
-              )}
+              {/*当前版本只有非结构化的工作流才能单独编辑名称*/}
+              {headerOperationDisplay &&
+                props.flowType === 'no_struct' &&
+                !nodesReadOnly && (
+                  <PermissionWrapper
+                    permission={WORKFLOW_DETAIL_PERMISSIONS.UPDATE}
+                  >
+                    <Popover trigger="hover" content="编辑">
+                      <div
+                        className={styles['edit-icon']}
+                        onClick={handleEdit}
+                      />
+                    </Popover>
+                  </PermissionWrapper>
+                )}
             </div>
           )}
           <EditingTitle />

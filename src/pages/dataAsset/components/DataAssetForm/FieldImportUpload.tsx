@@ -4,25 +4,7 @@ import { PrefixAimdp } from '@/api/endpoints';
 import { IconUpload } from '@arco-design/web-react/icon';
 import { UploadStatus } from '../../types';
 import { downloadDataAssetFieldsTemplate } from '@/api/dataAsset';
-import { AxiosResponse } from 'axios';
 import { useUserInfoStore } from '@/store/userInfoStore';
-
-const getFileNameFromDisposition = (disposition?: string) => {
-  if (!disposition) return '';
-
-  const utf8Match = disposition.match(/filename\*=UTF-8''([^;]+)/i);
-  if (utf8Match?.[1]) {
-    try {
-      return decodeURIComponent(utf8Match[1]);
-    } catch (error) {
-      console.error('decode filename error', error);
-      return utf8Match[1];
-    }
-  }
-
-  const asciiMatch = disposition.match(/filename="?([^"]+)"?/i);
-  return asciiMatch?.[1] ?? '';
-};
 
 interface FieldImportUploadProps {
   onFileChange: (fileData: any) => void;
@@ -108,8 +90,32 @@ const FieldImportUpload: React.FC<FieldImportUploadProps> = ({
 
   const handleDownloadTemplate = async () => {
     try {
-      const res = (await downloadDataAssetFieldsTemplate()) as unknown as Blob;
-      const url = window.URL.createObjectURL(res);
+      const res = await downloadDataAssetFieldsTemplate();
+
+      if (res?.status !== 200 || res?.code !== '') {
+        Message.error(res.message ?? '下载模板失败');
+        return;
+      }
+
+      // 处理base64下载
+      const base64Data = res?.data;
+      if (!base64Data) {
+        Message.error('下载模板失败：数据为空');
+        return;
+      }
+
+      // 移除base64前缀（如果有的话）
+      const base64String = base64Data.includes(',')
+        ? base64Data.split(',')[1]
+        : base64Data;
+
+      // 使用fetch配合data URL，更简洁的方法
+      const blob = await fetch(
+        `data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,${base64String}`
+      ).then((r) => r.blob());
+
+      // 创建下载链接并触发下载
+      const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
       a.download = `数据资产表模板.xlsx`;

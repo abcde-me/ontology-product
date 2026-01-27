@@ -2,14 +2,14 @@ import { usePermission } from '@/hooks';
 import { Page403 } from '@/pages/errorPages';
 import AuthLoad from '@/pages/errorPages/authLoad';
 import { useUserInfoStore } from '@/store/userInfoStore';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef } from 'react';
 
 // 带权限检查的路由组件
 const PermissionRoute: React.FC<{ route: any }> = ({ route }) => {
-  const { userActions, projectId } = useUserInfoStore();
+  const { userActions, projectId, isInitialized } = useUserInfoStore();
   const { setUserPermissions, hasAnyPermission, hasAllPermissions } =
     usePermission();
-  const [isInitializing, setIsInitializing] = useState(false);
+  const permissionLoadedRef = useRef(false);
 
   const Component = route.component;
 
@@ -18,36 +18,37 @@ const PermissionRoute: React.FC<{ route: any }> = ({ route }) => {
     (Array.isArray(route.anyPermission) && route.anyPermission.length > 0) ||
     (Array.isArray(route.allPermission) && route.allPermission.length > 0);
 
-  // 如果需要权限但权限未加载，则触发加载
+  // 记录上一次的 projectId，用于检测变化
+  const prevProjectIdRef = useRef<string | undefined>(undefined);
+
+  // 当有 projectId 时，加载权限
   useEffect(() => {
-    if (
-      needPermission &&
-      userActions.actions === null &&
-      projectId &&
-      projectId[1] &&
-      !isInitializing
-    ) {
-      setIsInitializing(true);
+    const currentProjectId = projectId?.[1];
+
+    // 检测 projectId 是否变化
+    if (currentProjectId !== prevProjectIdRef.current) {
+      permissionLoadedRef.current = false;
+      prevProjectIdRef.current = currentProjectId;
+    }
+
+    if (currentProjectId && !permissionLoadedRef.current) {
+      permissionLoadedRef.current = true;
       console.log(
         '🔐 PermissionRoute 触发权限初始化，projectId:',
-        projectId[1]
+        currentProjectId
       );
-
-      setUserPermissions(projectId[1]).finally(() => {
-        setIsInitializing(false);
-      });
+      setUserPermissions(currentProjectId);
     }
-  }, [
-    needPermission,
-    userActions.actions,
-    projectId,
-    isInitializing,
-    setUserPermissions
-  ]);
+  }, [projectId, setUserPermissions]);
 
   // 如果路由没有权限要求，直接渲染
   if (!needPermission) {
     return <Component />;
+  }
+
+  // 如果用户信息还未初始化完成，显示加载页面
+  if (!isInitialized) {
+    return <AuthLoad />;
   }
 
   // 如果是管理员，直接渲染
@@ -55,8 +56,13 @@ const PermissionRoute: React.FC<{ route: any }> = ({ route }) => {
     return <Component />;
   }
 
-  // 如果正在初始化权限，显示加载中页面
-  if (isInitializing || userActions.actions === null) {
+  // 如果没有项目ID，显示403页面
+  if (!projectId || !projectId[1]) {
+    return <Page403 />;
+  }
+
+  // 如果权限还未加载完成（actions 为 null），显示加载页面
+  if (userActions.actions === null) {
     return <AuthLoad />;
   }
 
@@ -64,13 +70,10 @@ const PermissionRoute: React.FC<{ route: any }> = ({ route }) => {
   let hasPermission = true;
 
   if (route.allPermission) {
-    // allPermission: 需要全部命中（优先级最高）
     hasPermission = hasAllPermissions(route.allPermission);
   } else if (route.anyPermission) {
-    // anyPermission: 只要命中任意一个
     hasPermission = hasAnyPermission(route.anyPermission);
   } else if (route.permission) {
-    // 单一权限（优先级最低）
     hasPermission = userActions.actions.includes(route.permission);
   }
 

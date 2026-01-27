@@ -4,28 +4,41 @@ import { toISOStringWithMicroseconds } from '@/utils/timeFormatting';
 import { LabelShapMap, EmptyImgLabelResult } from '@/utils/constants';
 
 export async function saveTask(taskId: string, params: Record<string, any>) {
-  console.log('saveTask', taskId, params);
-  return UAPI.RES.leSaveTask({})
-    .post({
-      task_id: taskId,
-      save_type: 1,
-      result_type: params.has_result,
-      result: params
-    })
-    .inRegion()
-    .do();
+  const searchParams = new URLSearchParams(location.search);
+  const data: Record<string, any> = {
+    task_id: taskId,
+    save_type: 1,
+    result_type: params.has_result,
+    result: params,
+    element_cnt: params?.shapes?.length || 0
+  };
+  const op = searchParams.get('stage');
+  if (op === 'LABEL' || op === 'RELABEL') {
+    data.op = op;
+    data.is_qc_modify = 0;
+  } else {
+    data.is_qc_modify = 1;
+  }
+  return UAPI.RES.leSaveTask({}).post(data).inRegion().do();
 }
+
 export async function submitTask(taskId: string, params: Record<string, any>) {
-  console.log('submitTask', taskId, params);
-  return UAPI.RES.leSaveTask({})
-    .post({
-      task_id: taskId,
-      save_type: 2,
-      result_type: params.has_result,
-      result: params
-    })
-    .inRegion()
-    .do();
+  const searchParams = new URLSearchParams(location.search);
+  const data: Record<string, any> = {
+    task_id: taskId,
+    save_type: 2,
+    result_type: params.has_result,
+    result: params,
+    element_cnt: params?.shapes?.length || 0
+  };
+  const op = searchParams.get('stage');
+  if (op === 'LABEL' || op === 'RELABEL') {
+    data.op = op;
+    data.is_qc_modify = 0;
+  } else {
+    data.is_qc_modify = 1;
+  }
+  return UAPI.RES.leSaveTask({}).post(data).inRegion().do();
 }
 
 export async function getTaskResult(taskId: string) {
@@ -34,21 +47,34 @@ export async function getTaskResult(taskId: string) {
     .inRegion()
     .do();
 }
-export async function getTask(requirementId?: string) {
+export async function getTask(requirementId?: string, pkgId?: string) {
   const searchParams = new URLSearchParams(location.search);
   const rId = requirementId || searchParams.get('rId');
-  return await UAPI.RES.leGetTask({})
-    .post({ requirement_id: Number(rId) })
-    .inRegion()
-    .do();
+  const pkg_Id = pkgId || searchParams.get('pkgId');
+  const op = searchParams.get('stage');
+  const params: Record<string, any> = {
+    requirement_id: Number(rId),
+    pkg_id: Number(pkg_Id)
+  };
+  if (op === 'LABEL' || op === 'RELABEL') {
+    params.op = op;
+  }
+  return await UAPI.RES.leGetTask({}).post(params).inRegion().do();
 }
-export async function getTaskDetail(taskId?: string) {
+
+export async function getTaskDetail(taskId?: string, pkgId?: string) {
   const searchParams = new URLSearchParams(location.search);
-  const rId = taskId || searchParams.get('rId');
-  return await UAPI.RES.leGetTaskById({})
-    .post({ task_id: Number(rId) })
-    .inRegion()
-    .do();
+  const tId = taskId || searchParams.get('tId');
+  const pkg_Id = pkgId || searchParams.get('pkgId');
+  const op = searchParams.get('stage');
+  const params: Record<string, any> = {
+    task_id: Number(tId),
+    pkg_id: Number(pkg_Id)
+  };
+  if (op === 'LABEL' || op === 'RELABEL') {
+    params.op = op;
+  }
+  return await UAPI.RES.leGetTaskById({}).post(params).inRegion().do();
 }
 
 export async function getLabels(requirementId: string) {
@@ -56,6 +82,190 @@ export async function getLabels(requirementId: string) {
     .post({ requirement_id: +requirementId })
     .inRegion()
     .do();
+}
+
+// =================================== 质检任务API =======================================
+// 进入质检、获取质检任务信息（需求id、 taskid==）
+export async function getQualityControlTask(qsId?: number) {
+  const searchParams = new URLSearchParams(location.search);
+  const qs_Id = qsId || searchParams.get('qsId');
+  return await UAPI.RES.leGetQualityControlTask({})
+    .post({ qs_id: Number(qs_Id) })
+    .inRegion()
+    .do();
+}
+
+// 改错、预览用，获取质检信息（评论==）
+export async function getQualityControlTaskById(
+  taskId?: string,
+  flowId?: string
+) {
+  const searchParams = new URLSearchParams(location.search);
+  const tId = taskId || searchParams.get('tId');
+  const stage = taskId || searchParams.get('stage');
+  const flow_Id = flowId || searchParams.get('flowId');
+  const params: Record<string, any> = {
+    task_id: Number(tId)
+  };
+  if (stage === 'PREVIEW') {
+    params.flow_id = Number(flow_Id);
+    params.history = true;
+  }
+  return await UAPI.RES.leGetQualityControlTaskById({})
+    .post(params)
+    .inRegion()
+    .do();
+}
+
+// 提交单个质检任务, save_type: 1 - 通过；2 - 驳回
+export async function saveQualityControlTask({
+  taskId,
+  qcRound,
+  save_type
+}: {
+  taskId?: string;
+  qcRound?: string;
+  save_type: number;
+}) {
+  const searchParams = new URLSearchParams(location.search);
+  const tId = taskId || searchParams.get('tId');
+  const qc_Round = qcRound || searchParams.get('qcRound');
+
+  return await UAPI.RES.leSaveQualityControlTask({})
+    .post({
+      task_id: Number(tId),
+      qc_round: Number(qc_Round),
+      save_type
+    })
+    .inRegion()
+    .do();
+}
+
+// 新建单个评论, comment_type: more - 多标；less - 漏标；error - 错标
+export async function createQualityControlTaskComment({
+  taskId,
+  qcRound,
+  comment_type,
+  comment_content
+}: {
+  taskId?: string;
+  qcRound?: string;
+  comment_type: string;
+  comment_content: any;
+}) {
+  const searchParams = new URLSearchParams(location.search);
+  const tId = taskId || searchParams.get('tId');
+  const qc_Round = qcRound || searchParams.get('qcRound');
+
+  return await UAPI.RES.leCreateQualityControlTaskComment({})
+    .post({
+      task_id: Number(tId),
+      qc_round: Number(qc_Round),
+      comment_type,
+      comment_content
+    })
+    .inRegion()
+    .do();
+}
+
+// 修改单个评论
+export async function modifyQualityControlTaskComment({
+  taskId,
+  qcRound,
+  comment_id,
+  comment_type,
+  comment_content
+}: {
+  taskId?: string;
+  qcRound?: string;
+  comment_id: string;
+  comment_type: string;
+  comment_content: any;
+}) {
+  const searchParams = new URLSearchParams(location.search);
+  const tId = taskId || searchParams.get('tId');
+  const qc_Round = qcRound || searchParams.get('qcRound');
+  return await UAPI.RES.leModifyQualityControlTaskComment({})
+    .post({
+      task_id: Number(tId),
+      qc_round: Number(qc_Round),
+      comment_id,
+      comment_type,
+      comment_content
+    })
+    .inRegion()
+    .do();
+}
+
+// 删除单个评论
+export async function deleteQualityControlTaskComment({
+  taskId,
+  qcRound,
+  comment_id
+}: {
+  taskId?: string;
+  qcRound?: string;
+  comment_id: string;
+}) {
+  const searchParams = new URLSearchParams(location.search);
+  const tId = taskId || searchParams.get('tId');
+  const qc_Round = qcRound || searchParams.get('qcRound');
+  return await UAPI.RES.leDeleteQualityControlTaskComment({})
+    .post({
+      task_id: Number(tId),
+      qc_round: Number(qc_Round),
+      comment_id
+    })
+    .inRegion()
+    .do();
+}
+
+// 获取任务流水
+export async function getFlowListTask({
+  taskId,
+  pkgId,
+  rId
+}: {
+  taskId?: string;
+  pkgId?: string;
+  rId?: string;
+}) {
+  const searchParams = new URLSearchParams(location.search);
+  const tId = taskId || searchParams.get('tId');
+  const pkg_Id = pkgId || searchParams.get('pkgId');
+  const r_Id = rId || searchParams.get('rId');
+  const params: Record<string, any> = {
+    task_id: Number(tId),
+    pkg_id: Number(pkg_Id),
+    req_id: Number(r_Id)
+  };
+  return await UAPI.RES.getFlowListTask({}).post(params).inRegion().do();
+}
+
+// 任务预览切换
+export async function switchPreview({
+  taskId,
+  pkgId,
+  op
+}: {
+  taskId?: string;
+  pkgId?: string;
+  op: string;
+}) {
+  const searchParams = new URLSearchParams(location.search);
+  const tId = taskId || searchParams.get('tId');
+  const pkg_Id = pkgId || searchParams.get('pkgId');
+  const params: Record<string, any> = {
+    task_id: Number(tId),
+    pkg_id: Number(pkg_Id),
+    op
+  };
+  return await UAPI.RES.switchPreview({}).post(params).inRegion().do();
+}
+
+// 预览用标注结果，结构同getTaskResult
+export async function previewTaskResult(id: number) {
+  return await UAPI.RES.previewTaskResult({}).post({ id }).inRegion().do();
 }
 
 // =================================== 下面为适配CVAT图片，视频标注API ===============================
@@ -81,6 +291,13 @@ export async function submitImgJobAnnotations(
   return { ...result, data: params };
 }
 
+// LABEL 标注、RELABLE 改错、REVIEW 质检、PREVIEW 预览
+const STAGE_MAP = {
+  LABEL: 'annotation',
+  RELABEL: 'annotation',
+  REVIEW: 'validation',
+  PREVIEW: 'preview'
+};
 export async function getImgJobOverview(taskId: string) {
   const searchParams = new URLSearchParams(location.search);
   const overviewTpl = {
@@ -99,7 +316,7 @@ export async function getImgJobOverview(taskId: string) {
     dimension: '2d',
     bug_tracker: '',
     status: 'annotation',
-    stage: 'annotation',
+    stage: STAGE_MAP[searchParams.get('stage')!],
     state: 'in progress',
     mode: 'annotation',
     frame_count: 1,
@@ -125,6 +342,18 @@ export async function getImgJobOverview(taskId: string) {
 
 export async function getImgJobAnnotations(taskId: string) {
   const result = await getTaskResult(taskId);
+  const annotations = result.data.result ?? cloneDeep(EmptyImgLabelResult);
+  return Promise.resolve({
+    data: {
+      ...annotations,
+      update_time: result.data.update_time,
+      has_result: result.data.result_type
+    }
+  });
+}
+
+export async function getImgJobPreviewAnnotations(id: number) {
+  const result = await previewTaskResult(id);
   const annotations = result.data.result ?? cloneDeep(EmptyImgLabelResult);
   return Promise.resolve({
     data: {
@@ -271,8 +500,22 @@ function handleImgAnnotationIds(params: Record<string, any>) {
 // ========================================== 文本标注API =================================
 
 // 获取任务
-export async function getTextEditorTask(requirement_id: number) {
-  return UAPI.RES.leGetTask({}).post({ requirement_id }).inRegion().do();
+export async function getTextEditorTask(
+  requirementId?: string,
+  pkgId?: string
+) {
+  const searchParams = new URLSearchParams(location.search);
+  const rId = requirementId || searchParams.get('rId');
+  const pkg_Id = pkgId || searchParams.get('pkgId');
+  const op = searchParams.get('stage');
+  const params: Record<string, any> = {
+    requirement_id: Number(rId),
+    pkg_id: Number(pkg_Id)
+  };
+  if (op === 'LABEL' || op === 'RELABEL') {
+    params.op = op;
+  }
+  return UAPI.RES.leGetTask({}).post(params).inRegion().do();
 }
 
 // 文本标注，获取结果
@@ -292,5 +535,80 @@ export async function getTextEditorLabels(requirement_id: number) {
 
 // 保存结果
 export async function saveTextEditorResult(params: Record<string, any>) {
+  const searchParams = new URLSearchParams(location.search);
+  const op = searchParams.get('stage');
+  if (op === 'LABEL' || op === 'RELABEL') {
+    params.op = op;
+    params.is_qc_modify = 0;
+  } else {
+    params.is_qc_modify = 1;
+  }
   return UAPI.RES.leSaveTask({}).post(params).inRegion().do();
+}
+
+// 新建质检评论
+export async function CreateQualityControlTaskComment(params) {
+  return await UAPI.RES.leCreateQualityControlTaskComment({})
+    .post(params)
+    .inRegion()
+    .do();
+}
+
+// 获取质检模式的质检数据
+export async function GetQualityControlTask(params) {
+  return await UAPI.RES.leGetQualityControlTask({})
+    .post(params)
+    .inRegion()
+    .do();
+}
+
+// 修改单个评论
+export async function ModifyQualityControlTaskComment(params) {
+  return await UAPI.RES.leModifyQualityControlTaskComment({})
+    .post(params)
+    .inRegion()
+    .do();
+}
+
+// 删除单个评论
+export async function DeleteQualityControlTaskComment(params) {
+  return await UAPI.RES.leDeleteQualityControlTaskComment({})
+    .post(params)
+    .inRegion()
+    .do();
+}
+
+// 改错、预览用，获取质检信息（评论==）
+export async function GetQualityControlTaskById(params) {
+  return await UAPI.RES.leGetQualityControlTaskById({})
+    .post(params)
+    .inRegion()
+    .do();
+}
+
+// 提交单个质检任务, save_type: 1 - 通过；2 - 驳回
+export async function SaveQualityControlTask(params) {
+  return await UAPI.RES.leSaveQualityControlTask({})
+    .post(params)
+    .inRegion()
+    .do();
+}
+
+// 获取任务流水
+export async function GetFlowListTask(params) {
+  return await UAPI.RES.getFlowListTask({}).post(params).inRegion().do();
+}
+
+// 任务最新操作信息
+export async function GetTaskLatestOperation(params) {
+  return await UAPI.RES.getTaskLatestOperation({}).post(params).inRegion().do();
+}
+
+// 任务文件
+export async function GetTaskFile(params) {
+  return await UAPI.RES.lePreviewTaskFile({})
+    .post(params)
+    .withConfig({ responseType: 'blob' })
+    .inRegion()
+    .do({ headers: { 'need-header-data': 'true' } });
 }

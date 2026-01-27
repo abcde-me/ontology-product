@@ -1,5 +1,12 @@
 export const SQL_EDITOR_HEIGHT = '300px';
 
+/**
+ * SQL 参数占位符正则表达式
+ * 用于匹配 ${paramName} 格式的参数占位符
+ * 注意：在遇到下一个 $ 时会停止匹配，用于处理嵌套情况（如 ${111 sssss ${GO}）
+ */
+export const SQL_PARAM_PLACEHOLDER_REGEX = /\$\{([^$}]+)\}/g;
+
 export const DATAFRAMES_LIST = [
   {
     id: 'root_001',
@@ -305,6 +312,9 @@ export const DEFAULT_SQL_PLACEHOLDER = `
 
 🚀 开始您的数据治理之旅！
 `;
+
+// SQL脚本错误码
+export const SQL_SCRIPT_NOT_FOUND_CODE = 'AIMDP.SQLScriptNotFound';
 
 export const SCRIPT_CODE = `import pandas as pd
 import matplotlib.pyplot as plt

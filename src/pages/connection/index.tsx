@@ -22,11 +22,12 @@ import { connectorDetailType } from './type';
 import { filterValues } from '@/api/filterValues';
 import { useParams } from '@/utils/url';
 import EllipsisPopover from '@/components/ellipsis-popover-com';
-import noDataElement from '@/components/no-data';
+// import noDataElement from '@/components/no-data';
 import { PermissionWrapper } from '@/components/PermissionGuard';
 import { CONNECTION_PERMISSIONS } from '@/config/permissions';
 import { OperationColumn } from '@ccf2e/arco-material';
 import { ConnectorType, TYPE_CONFIG } from './config';
+import { NoDataCard } from '@ceai-front/arco-material';
 interface ChildComponentMethods {
   displayModalView: () => void;
 }
@@ -124,7 +125,7 @@ export default function Connection() {
       const newfrom = {
         name,
         type,
-        sub_type: type === 'db' ? sub_type : undefined, // 只有当类型是db时才包含sub_type
+        sub_type: type === 'db' || type === 'mq' ? sub_type : undefined, // 只有当类型是db时才包含sub_type
         config: { ...filteredValues }
       };
       setEditLoadingState(true);
@@ -204,7 +205,7 @@ export default function Connection() {
       dataIndex: 'type',
       render: (_, item) => (
         <div>
-          {item.type !== 'db'
+          {item.type !== 'db' && item.type !== 'mq'
             ? TYPE_CONFIG[item.type] || '未知类型'
             : TYPE_CONFIG[item.sub_type]}
         </div>
@@ -221,6 +222,10 @@ export default function Connection() {
         {
           text: '数据库',
           value: 'db'
+        },
+        {
+          text: TYPE_CONFIG[ConnectorType.MQ],
+          value: ConnectorType.MQ
         }
       ]
     },
@@ -516,7 +521,11 @@ export default function Connection() {
         border={false}
         columns={columns}
         data={ConnectionData}
-        noDataElement={noDataElement({ description: '暂无数据' })}
+        noDataElement={
+          <div className="py-[100px]">
+            <NoDataCard title="暂无数据" />
+          </div>
+        }
         style={{ padding: '16px 0px' }}
         pagination={false}
         rowKey="id"

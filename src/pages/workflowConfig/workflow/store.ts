@@ -13,6 +13,7 @@ import type {
   EnvironmentVariable,
   HistoryWorkflowData,
   Node,
+  NodeProcessData,
   RunFile,
   ToolWithProvider,
   WorkflowRunningData

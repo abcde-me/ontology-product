@@ -1,84 +1,304 @@
-import { Button, Modal, Table } from '@arco-design/web-react';
-import React, { memo } from 'react';
-import mockjs from 'mockjs';
-import styles from './index.module.scss';
-import { sort } from 'semver';
 import {
-  getVersionType,
-  VersionType,
-  VersionTypeEnum
-} from '../version-status';
+  Button,
+  Message,
+  Modal,
+  Pagination,
+  Popover,
+  Table,
+  Tooltip
+} from '@arco-design/web-react';
+import React, { memo } from 'react';
+import styles from './index.module.scss';
+import VersionStatus from '../version-status';
+import { IconQuestionCircle } from '@arco-design/web-react/icon';
+import EllipsisPopover from '@/components/ellipsis-popover-com';
+import { ScriptStatus, ScriptStatusName } from '@/types/sqlDevelopApi';
+import {
+  copyDevelopScript,
+  deleteDevelopScriptLogByVersion
+} from '@/api/sql-develop';
+import { getDevelopScriptLogByScriptId } from '@/api/sql';
+import classNames from 'classnames';
+import { NoDataCard } from '@ceai-front/arco-material';
+import dayjs from 'dayjs';
+import ScriptDetailModal from '../spl-script-management/ScriptDetailModal';
+import { useUrlState } from '../../hooks/useUrlState';
+import { render } from 'katex';
+import { SQL_PERMISSIONS } from '@/config/permissions';
+import { PermissionWrapper } from '@/components/PermissionGuard';
 
 const SctipModalTable: React.FC<{
   isVisible: boolean;
   setChildStatus: (status: boolean) => void;
-}> = memo(({ isVisible, setChildStatus }) => {
+  rowData;
+}> = memo(({ isVisible, setChildStatus, rowData }) => {
   const [visible, setVisible] = React.useState<boolean>(isVisible);
+  const [detailVisible, setDetailVisible] = React.useState<boolean>(false);
+  const [detailRecord, setDetailRecord] = React.useState<any>(null);
+  const [tableData, setTableData] = React.useState<any[]>([]);
+  const [current, setCurrent] = React.useState<number>(1);
+  const [pageSize, setPageSize] = React.useState<number>(10);
+  const [total, setTotal] = React.useState<number>(0);
+  const [tableLoading, setTableLoading] = React.useState<boolean>(false);
+  const [statusFilter, setStatusFilter] = React.useState<number[]>([]);
+  const [orders, setOrders] = React.useState<
+    {
+      column: string;
+      order_flag: 'asc' | 'desc';
+    }[]
+  >([]);
+  const { updateUrlState } = useUrlState();
+
+  const handleCopyVersion = async (record: any) => {
+    setChildStatus(true);
+    const params = {
+      version: record.version,
+      script_id: record.script_id
+    };
+    try {
+      const res = await copyDevelopScript({ ...params });
+      if (res.status === 200) {
+        Message.success({
+          content: `复制成功`
+        });
+        // 刷新数据
+        setChildStatus(false);
+      }
+      console.log(res);
+    } catch (error) {
+      Message.error({
+        content: '复制失败'
+      });
+      console.log(error);
+    }
+  };
+  const handleDeleteVersion = (record: any) => {
+    Modal.confirm({
+      title: '确定删除此版本吗？',
+      content: '删除后，该版本不可恢复。',
+      okText: '确定',
+      cancelText: '取消',
+      onOk: async () => {
+        setChildStatus(true);
+        const params = {
+          version: record.version,
+          script_id: record.script_id
+        };
+        try {
+          const res = await deleteDevelopScriptLogByVersion({ ...params });
+
+          if (res.code !== '' || res.status !== 200) {
+            Message.error(res?.message ?? '删除失败，请稍后重试');
+            return;
+          }
+
+          Message.success('删除成功');
+          // 刷新历史版本数据
+          fetchData();
+        } catch (error) {
+          Message.error('删除失败，请稍后重试');
+          console.log(error);
+        }
+      }
+    });
+  };
+
   React.useEffect(() => {
     setVisible(isVisible);
   }, [isVisible]);
-  // TODO: 这里可以根据需要添加表格内容和逻辑
-  // mock数据
-  const mockData = mockjs.mock({
-    script_name: '@cword(3, 5)',
-    script_content: '@cparagraph(1, 3)',
-    create_time: '@datetime',
-    update_time: '@datetime',
-    script_type: '@cword(2, 4)',
-    script_status: '@cword(2, 4)',
-    script_description: '@cparagraph(1, 3)',
-    'list|5': [
-      {
-        'id|+1': 1,
-        name: '@cword(3, 5)',
-        type: '@cword(2, 4)',
-        status: '@pick(["released",  "scheduled"])',
-        created_at: '@datetime'
+
+  // 获取历史版本数据
+  const fetchData = React.useCallback(async () => {
+    if (!rowData?.script_id) return;
+    try {
+      const res = await getDevelopScriptLogByScriptId({
+        script_id: rowData.script_id,
+        page: current,
+        page_size: pageSize,
+        status_list: statusFilter,
+        orders
+      });
+      if (res?.status === 200 && res?.data) {
+        const items = res.data.items || [];
+        setTableData(items);
+        // 如果 API 返回了 total，使用它；否则使用 items.length
+        setTotal((res.data as any).total ?? items.length);
       }
-    ]
-  });
-  const columns = [
+    } catch (error) {
+      console.error('获取历史版本数据失败:', error);
+      Message.error('获取历史版本数据失败');
+    }
+  }, [rowData?.script_id, current, pageSize, statusFilter, orders]);
+
+  // 当分页或筛选变化时，重新获取数据
+  React.useEffect(() => {
+    if (visible && rowData?.script_id) {
+      setTableLoading(true);
+      fetchData().finally(() => {
+        setTableLoading(false);
+      });
+    }
+  }, [current, pageSize, statusFilter, orders, fetchData]);
+
+  // 处理表格筛选变化
+  const handleTableChange = (
+    pagination: any,
+    sorter: any,
+    filters: Partial<Record<string | number | symbol, string[]>>
+  ) => {
+    if (filters.status && filters.status.length > 0) {
+      // 如果有筛选，取第一个值并转换为字符串
+      setStatusFilter(filters.status.map(Number));
+    } else {
+      setStatusFilter([]);
+    }
+
+    if (sorter.field && sorter.direction) {
+      setOrders((prev) => {
+        const newOrder: { column: string; order_flag: 'asc' | 'desc' } = {
+          column: sorter.field,
+          order_flag: sorter.direction === 'ascend' ? 'asc' : 'desc'
+        };
+        return [newOrder];
+      });
+    } else {
+      setOrders([]);
+    }
+
+    setCurrent(1); // 筛选时重置到第一页
+  };
+
+  const handleToDetail = (scriptId: number | string) => {
+    updateUrlState(
+      {
+        activeTab: 'files',
+        activeDevelopScriptId: String(scriptId)
+      },
+      { method: 'push' }
+    );
+  };
+
+  const columns: any = [
     {
       title: '版本号',
-      dataIndex: 'id',
-      key: 'id',
-      sorter: (a, b) => a.id - b.id
+      dataIndex: 'version_name',
+      key: 'version',
+      width: 100,
+      sorter: true
     },
     {
       title: '脚本状态',
       dataIndex: 'status',
       key: 'status',
-      render: (_, record) => getVersionType(record.status),
-      filters: [
-        { text: VersionTypeEnum.RELEASED, value: VersionType.RELEASED },
-        { text: VersionTypeEnum.SCHEDULED, value: VersionType.SCHEDULED }
-      ],
-      onFilter: (value, record) => record.status === value
+      width: 160,
+      render: (_, record) => <VersionStatus status={record.status} />
+      // 服务端暂不支持调度中筛选
+      // filters: [
+      //   {
+      //     text: ScriptStatusName[ScriptStatus.Released],
+      //     value: ScriptStatus.Released
+      //   },
+      //   {
+      //     text: ScriptStatusName[ScriptStatus.Scheduling],
+      //     value: ScriptStatus.Scheduling
+      //   }
+      // ]
     },
     {
       title: '版本说明',
-      dataIndex: 'type',
-      key: 'type'
+      dataIndex: 'script_desc',
+      key: 'script_desc',
+      width: 200,
+      render: (_, record) => (
+        <EllipsisPopover preferTypography value={record?.script_desc} />
+      )
     },
     {
       title: '更新人',
-      dataIndex: 'status',
-      key: 'status'
+      dataIndex: 'update_user',
+      key: 'update_user',
+      width: 120,
+      render: (_, record) => (
+        <EllipsisPopover preferTypography value={record?.update_user} />
+      )
     },
     {
-      title: '更新时间',
-      dataIndex: 'created_at',
-      key: 'created_at'
+      title: '发版时间',
+      dataIndex: 'update_time',
+      key: 'update_time',
+      width: 200,
+      sorter: true,
+      render: (_, record) => (
+        <span>
+          {dayjs(record.update_time).format('YYYY-MM-DD HH:mm:ss') || '-'}
+        </span>
+      )
     },
     {
-      title: '操作',
+      title: (
+        // <Popover
+        //   content="复制为新版本：以选择的脚本为基础迭代新版本"
+        //   trigger={['hover', 'click']}
+        // >
+        <div className="flex items-center">
+          <span className="mr-[4px]">操作</span>
+          {/* <IconQuestionCircle fontSize={16} style={{ color: '#7F8C9F' }} /> */}
+        </div>
+        // </Popover>
+      ),
       dataIndex: 'operation',
       key: 'operation',
-      render: () => (
+      render: (_, record) => (
         <>
-          <Button type="text">详情</Button>
-          <Button type="text">复制为新版本</Button>
-          <Button type="text">删除</Button>
+          <PermissionWrapper permission={SQL_PERMISSIONS.DEVELOP_SCIPT_GET}>
+            <span
+              className={styles['option-btn']}
+              onClick={() => {
+                setDetailRecord(record);
+                setDetailVisible(true);
+              }}
+            >
+              详情
+            </span>
+          </PermissionWrapper>
+
+          {/* <Tooltip
+            content={record?.visteon === 'false' ? '当前已有未发版的脚本' : ''}
+          >
+            <span
+              onClick={() => {
+                handleToDetail(record.script_id);
+              }}
+              className={[
+                styles['option-btn'],
+                record?.visteon === 'false' && styles['is-disabled']
+              ].join(' ')}
+            >
+              复制为新版本
+            </span>
+          </Tooltip> */}
+          <PermissionWrapper
+            permission={SQL_PERMISSIONS.DEVELOP_SCIPT_LOG_DELETE}
+          >
+            <Tooltip
+              content={
+                record?.status === ScriptStatus.Scheduling
+                  ? '调度中不可删除'
+                  : ''
+              }
+            >
+              <Button
+                type="text"
+                onClick={() => {
+                  handleDeleteVersion(record);
+                }}
+                className="p-0"
+                disabled={record?.status === ScriptStatus.Scheduling}
+              >
+                删除
+              </Button>
+            </Tooltip>
+          </PermissionWrapper>
         </>
       )
     }
@@ -103,8 +323,16 @@ const SctipModalTable: React.FC<{
             <div className={styles['script-modal-table-content-item-label']}>
               名称：
             </div>
-            <div className={styles['script-modal-table-content-item-value']}>
-              script_name
+            <div
+              className={classNames(
+                styles['script-modal-table-content-item-value'],
+                'w-[326px]'
+              )}
+            >
+              <EllipsisPopover
+                preferTypography
+                value={rowData?.script_name || '-'}
+              />
             </div>
           </div>
           <div className={styles['script-modal-table-content-item']}>
@@ -112,7 +340,10 @@ const SctipModalTable: React.FC<{
               最新版本：
             </div>
             <div className={styles['script-modal-table-content-item-value']}>
-              script_name
+              {rowData?.status === ScriptStatus.Editing ||
+              rowData?.status === ScriptStatus.EditCompleted
+                ? '-'
+                : rowData?.max_version_name || '-'}
             </div>
           </div>
           <div className={styles['script-modal-table-content-item']}>
@@ -120,7 +351,7 @@ const SctipModalTable: React.FC<{
               创建人：
             </div>
             <div className={styles['script-modal-table-content-item-value']}>
-              script_name
+              {rowData?.create_user}
             </div>
           </div>
           <div className={styles['script-modal-table-content-item']}>
@@ -128,7 +359,7 @@ const SctipModalTable: React.FC<{
               创建时间：
             </div>
             <div className={styles['script-modal-table-content-item-value']}>
-              script_name
+              {rowData?.create_time}
             </div>
           </div>
           <div className={styles['script-modal-table-content-item']}>
@@ -136,7 +367,7 @@ const SctipModalTable: React.FC<{
               所属工作流：
             </div>
             <div className={styles['script-modal-table-content-item-value']}>
-              script_name
+              {rowData?.process_name || '-'}
             </div>
           </div>
           <div className={styles['script-modal-table-content-item']}>
@@ -144,20 +375,55 @@ const SctipModalTable: React.FC<{
               所属任务节点：
             </div>
             <div className={styles['script-modal-table-content-item-value']}>
-              script_name
+              {rowData?.task_name || '-'}
             </div>
           </div>
           <div className={styles['script-modal-table-content-item']}>
             <div className={styles['script-modal-table-content-item-label']}>
-              最新执行时间：
+              最新发版时间：
             </div>
             <div className={styles['script-modal-table-content-item-value']}>
-              script_name
+              {rowData?.update_time}
             </div>
           </div>
         </div>
-        <Table columns={columns} data={mockData.list} />;
+        <Table
+          scroll={{ y: 500 }}
+          className="mb-[24px]"
+          columns={columns}
+          loading={tableLoading}
+          data={tableData}
+          rowKey={(record: any) => `${rowData?.script_id}-${record.version}`}
+          noDataElement={<NoDataCard title="暂无数据" />}
+          pagination={false}
+          onChange={handleTableChange}
+        />
+        {total > 0 && (
+          <Pagination
+            current={current}
+            pageSize={pageSize}
+            total={total}
+            onChange={(page) => setCurrent(page)}
+            onPageSizeChange={(size) => {
+              setPageSize(size);
+              setCurrent(1);
+            }}
+            className="mb-[24px] mt-[-12px] justify-end"
+            showJumper
+            showTotal
+            sizeCanChange
+            sizeOptions={[10, 20, 50, 100]}
+          />
+        )}
       </div>
+      {detailVisible && (
+        <ScriptDetailModal
+          visible={detailVisible}
+          title={detailRecord?.script_name || rowData?.script_name}
+          content={detailRecord?.script_context}
+          onCancel={() => setDetailVisible(false)}
+        />
+      )}
     </Modal>
   );
 });

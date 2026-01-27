@@ -237,7 +237,6 @@ const NotebookWorkspace: React.FC<NotebookWorkspaceProps> = memo(
 
         // 更新状态
         setResizeBoxContainer(element);
-        console.log('11111111111111111111111111111', element);
 
         if (element) {
           // 立即计算尺寸（此时 DOM 已经渲染完成）

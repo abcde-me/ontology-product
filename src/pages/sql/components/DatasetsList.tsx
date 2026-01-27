@@ -25,6 +25,7 @@ import { formatDateTime } from '../utils';
 import { SQL_PERMISSIONS } from '@/config/permissions';
 import RefreshButton from '@/components/refreshButton';
 import { PermissionWrapper } from '@/components/PermissionGuard';
+import { NoDataCard } from '@ceai-front/arco-material';
 
 const FormItem = Form.Item;
 
@@ -134,7 +135,9 @@ const DatasetsList: FC = () => {
             text = '导出中';
             color = '#007DFA';
             actionBtn = (
-              <PermissionWrapper permission={SQL_PERMISSIONS.EXPORT}>
+              <PermissionWrapper
+                permission={SQL_PERMISSIONS.QUERY_SCRIPT_EXPORT}
+              >
                 <Link onClick={() => handleStopTask(item)}> 终止 </Link>
               </PermissionWrapper>
             );
@@ -147,7 +150,9 @@ const DatasetsList: FC = () => {
             text = '导出失败';
             color = '#EF4444';
             actionBtn = (
-              <PermissionWrapper permission={SQL_PERMISSIONS.EXPORT}>
+              <PermissionWrapper
+                permission={SQL_PERMISSIONS.QUERY_SCRIPT_EXPORT}
+              >
                 <Tooltip content={item.failed_reason}>
                   <IconInfoCircle />
                 </Tooltip>
@@ -162,7 +167,9 @@ const DatasetsList: FC = () => {
             text = '导出终止';
             color = '#FB923C';
             actionBtn = (
-              <PermissionWrapper permission={SQL_PERMISSIONS.EXPORT}>
+              <PermissionWrapper
+                permission={SQL_PERMISSIONS.QUERY_SCRIPT_EXPORT}
+              >
                 <Link href="#" onClick={() => handleRetryTask(item)}>
                   {' '}
                   重试{' '}
@@ -313,6 +320,11 @@ const DatasetsList: FC = () => {
         loading={loading}
         rowKey="id"
         onChange={handleTableChange}
+        noDataElement={
+          <div className="py-[100px]">
+            <NoDataCard title="暂无数据" />
+          </div>
+        }
         scroll={{
           // y: 500,
           x: 'max-content'

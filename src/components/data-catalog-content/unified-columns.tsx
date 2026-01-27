@@ -267,6 +267,21 @@ export const DATABASE_TYPE_ENUM = [
     label: 'PostgreSQL',
     text: 'PostgreSQL',
     value: 'PostgreSQL'
+  },
+  // {
+  //   label: 'Doirs',
+  //   text: 'Doirs',
+  //   value: 'Doirs'
+  // },
+  // {
+  //   label: 'Elasticsearch',
+  //   text: 'Elasticsearch',
+  //   value: 'Elasticsearch'
+  // },
+  {
+    label: 'Kafka',
+    text: 'Kafka',
+    value: 'Kafka'
   }
 ];
 

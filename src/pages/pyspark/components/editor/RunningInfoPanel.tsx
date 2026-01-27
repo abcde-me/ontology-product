@@ -356,7 +356,8 @@ const RunningInfoPanel: React.FC<RunningInfoPanelProps> = memo(
                       style={{
                         height: '100%',
                         overflowX: 'scroll', // 始终显示横向滚动条，避免临界点抖动
-                        overflowY: 'auto'
+                        overflowY: 'auto',
+                        overflowAnchor: 'none' // 防止滚动条抖动
                       }}
                     >
                       <div ref={resultContainerRef}>
@@ -372,7 +373,8 @@ const RunningInfoPanel: React.FC<RunningInfoPanelProps> = memo(
                       style={{
                         height: '100%',
                         overflowX: 'scroll', // 始终显示横向滚动条，避免临界点抖动
-                        overflowY: 'auto'
+                        overflowY: 'auto',
+                        overflowAnchor: 'none' // 防止滚动条抖动
                       }}
                       onScroll={(e) => {
                         // 检测用户是否手动滚动，如果是则停止自动滚动

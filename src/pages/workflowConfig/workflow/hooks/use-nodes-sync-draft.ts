@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
 import produce from 'immer';
-import { useStoreApi } from 'reactflow';
+import { Edge, Node, useStoreApi } from 'reactflow';
 import { useStore, useWorkflowStore } from '../store';
 import { BlockEnum } from '../types';
 import { useWorkflowUpdate } from '../hooks';
@@ -9,6 +9,42 @@ import { createWorkflowDraft } from '@/api/workflowV2';
 import { PrefixV2, PrefixAimdp } from '@/api/endpoints';
 import { updateQueryParams, useParams } from '@/utils/url';
 import { useHistory } from 'react-router';
+import { flowIsStruct } from '@/pages/workflowConfig/workflow/utils';
+import { Message } from '@arco-design/web-react';
+import { useParams as useRouterParams } from 'react-router-dom';
+import { getWorkflowDetail } from '@/api/workflow';
+
+/**
+ * 查找画布中没有没有前置节点的节点，并给edge中加入一条"没有source"描述的edge数据
+ * 后端需要这个东西
+ */
+function addRootEdges(nodes: Node[], edges: Edge[]): Edge[] {
+  // 先对连线数据进行清理，清除source为空的连线
+  const relations = edges.filter(({ source }) => !!source);
+  // 1️⃣ 收集所有有入度的节点（target）
+  const targetSet = new Set<string>();
+
+  for (const relation of relations) {
+    if (relation.target) {
+      targetSet.add(relation.target);
+    }
+  }
+  // 2️⃣ 找出没有上级节点的 node
+  const newEdges: Edge[] = [];
+
+  for (const node of nodes) {
+    if (!targetSet.has(node.id)) {
+      newEdges.push({
+        source: '',
+        target: node.id,
+        id: `root-source-${node.id}-target` // 可选，保证唯一
+      });
+    }
+  }
+
+  // 3️⃣ 返回合并后的 edges
+  return relations.concat(newEdges);
+}
 
 export const useNodesSyncDraft = () => {
   const store = useStoreApi();
@@ -24,7 +60,8 @@ export const useNodesSyncDraft = () => {
   const appId = useParams('workflow_uuid');
   const dsAppId = useParams('ds_workflow_id');
   const workflowVersion = useParams('workflow_version');
-
+  const { type: flowType = 'no_struct' } =
+    useRouterParams<Record<string, string>>();
   const getPostParams = useCallback(() => {
     const { getNodes, edges, transform } = store.getState();
     const [x, y, zoom] = transform;
@@ -40,8 +77,9 @@ export const useNodesSyncDraft = () => {
       const hasStartNode = nodes.find(
         (node) => node.data.type === BlockEnum.Start
       );
-
-      if (!hasStartNode) return;
+      const isStruct = flowType === 'struct';
+      // 非结构化工作流才必须有开始节点
+      if (!hasStartNode && !isStruct) return;
 
       const features = {} as any;
       const producedNodes = produce(nodes, (draft) => {
@@ -62,7 +100,10 @@ export const useNodesSyncDraft = () => {
         params: {
           graph: {
             nodes: producedNodes,
-            edges: producedEdges,
+            edges:
+              flowType !== 'struct'
+                ? producedEdges
+                : addRootEdges(producedNodes, producedEdges),
             viewport: {
               x,
               y,
@@ -85,7 +126,8 @@ export const useNodesSyncDraft = () => {
           },
           environment_variables: environmentVariables,
           conversation_variables: conversationVariables,
-          hash: syncWorkflowDraftHash
+          hash: syncWorkflowDraftHash,
+          workflow_type: flowType
         }
       };
     }
@@ -107,8 +149,8 @@ export const useNodesSyncDraft = () => {
     async (
       notRefreshWhenSyncError?: boolean,
       callback?: {
-        onSuccess?: () => void;
-        onError?: () => void;
+        onSuccess?: (res: any) => void;
+        onError?: (error?: any) => void;
         onSettled?: () => void;
       },
       params = {}
@@ -117,23 +159,30 @@ export const useNodesSyncDraft = () => {
       console.log('节点是否是只读的：', isNodesReadOnly);
       if (isNodesReadOnly) return;
       const postParams = getPostParams();
-
       if (postParams) {
         const { setSyncWorkflowDraftHash, setDraftUpdatedAt } =
           workflowStore.getState();
         try {
-          const { data: res } = await createWorkflowDraft(
+          const flowDetail = await getWorkflowDetail({
+            workflow_uuid: appId!,
+            workflow_version: workflowVersion || null
+          });
+          if (!!flowDetail?.data?.is_online) return;
+          const { data: res, message } = await createWorkflowDraft(
             Object.assign({}, postParams.params, {
               version: 'draft',
               ...params
             })
           );
+          if (!res) {
+            throw new Error(message);
+          }
           setSyncWorkflowDraftHash(res.hash);
           setDraftUpdatedAt(res.updated_at);
           updateQueryParams(history, {
             ds_workflow_id: res.ds_workflow_id
           });
-          callback?.onSuccess && callback.onSuccess();
+          callback?.onSuccess?.(res);
         } catch (error: any) {
           if (error && error.json && !error.bodyUsed) {
             error.json().then((err: any) => {
@@ -144,10 +193,12 @@ export const useNodesSyncDraft = () => {
                 handleRefreshWorkflowDraft();
             });
           }
-          callback?.onError && callback.onError();
+          callback?.onError && callback.onError(error);
         } finally {
           callback?.onSettled && callback.onSettled();
         }
+      } else {
+        Message.error('至少添加一个节点');
       }
     },
     [
@@ -165,7 +216,7 @@ export const useNodesSyncDraft = () => {
       notRefreshWhenSyncError?: boolean,
       callback?: {
         onSuccess?: () => void;
-        onError?: () => void;
+        onError?: (error?: any) => void;
         onSettled?: () => void;
       },
       params = {}

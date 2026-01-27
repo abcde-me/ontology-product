@@ -290,7 +290,10 @@ const translation = {
     start: '定义一个 workflow 流程启动的初始参数',
     end: '定义一个 workflow 流程的结束和结果类型',
     text: '用于将原始文本文件解析成结构化的数据集',
-    pic: '用于将原始文本文件解析成结构化的数据集'
+    pic: '用于将原始文本文件解析成结构化的数据集',
+    spark_sql: ' 可选择或开发用于数据加工处理的SQL加工脚本。 ',
+    seatunnel: ' 用于将数据开发产生的表推送到外部数据库中。',
+    dependent: ' 用于配置当前工作流的外部前置任务以及逻辑关系。'
   },
   operator: {
     zoomIn: '放大',

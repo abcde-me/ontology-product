@@ -26,6 +26,7 @@ import StartNodeDefault, { FileOptions } from './default';
 import { getCatalogList } from '@/api/dataCatalog';
 import { useHistory } from 'react-router-dom';
 import { IconPlus } from '@arco-design/web-react/icon';
+import { CATEGORY_MAP } from '@/pages/workflowConfig/workflow/nodes/constants';
 
 const FormItem = Form.Item;
 
@@ -60,7 +61,8 @@ const Panel: FC<NodePanelProps<StartNodeType>> = ({ id, data }) => {
 
   const handleChanged = (values: any) => {
     const name = srcDirs.find((s) => s.id === values.data_path_id)?.name;
-    updateInputs({ ...values, data_path_name: name });
+    const saveData = { ...values, data_path_name: name };
+    updateInputs(saveData);
   };
 
   // const doFileConfigChange = (nodeType: BlockEnum, config: any) => {
@@ -124,7 +126,7 @@ const Panel: FC<NodePanelProps<StartNodeType>> = ({ id, data }) => {
   const handleImageChange = () => {
     const imageConfig = form.getFieldValue('data_category[1]');
     doFileConfigChange(
-      BlockEnum.Pic,
+      BlockEnum.Image,
       form.getFieldValue('data_path_id'),
       imageConfig
     );

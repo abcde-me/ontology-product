@@ -3,7 +3,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useBoolean } from 'ahooks';
 import { useTranslation } from 'react-i18next';
 import produce from 'immer';
-import TextGenerationRes from '@/pages/workflowConfig/app/text-generate/item';
+// import TextGenerationRes from '@/pages/workflowConfig/app/text-generate/item';
 import NoData from '@/pages/workflowPublic/no-data';
 import Toast from '@/pages/workflowConfig/components/toast';
 import {
@@ -521,7 +521,7 @@ const Result: FC<IResultProps> = ({
 
   const renderTextGenerationRes = () => (
     <>
-      <TextGenerationRes
+      {/* <TextGenerationRes
         isWorkflow={isWorkflow}
         workflowProcessData={workflowProcessData}
         isError={isError}
@@ -548,7 +548,8 @@ const Result: FC<IResultProps> = ({
         isShowTextToSpeech={isShowTextToSpeech}
         hideProcessDetail
         siteInfo={siteInfo}
-      />
+      /> */}
+      <div>TextGenerationRes component removed</div>
       {isCallBatchAPI && (
         <div className="batch-item-sepatator mb-[16px] w-full border-b-[0.5px] border-divider-regular" />
       )}

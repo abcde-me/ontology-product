@@ -28,6 +28,16 @@ import VideoParserDefault from './nodes/data-video-parser/default';
 import CleaningDefault from './nodes/data-cleaning/default';
 import EnhancementDefault from './nodes/data-enhancement/default';
 import CustomizeDefault from './nodes/data-customize/default';
+import SQLNodeDefault from './nodes/sql-node/default';
+import SeatunnelNodeDefault from './nodes/seatunnel-node/default';
+import { TaskStatus } from '@/pages/workflowConfig/types/workflow';
+import {
+  IconCheckCircleFill,
+  IconCloseCircleFill,
+  IconLoading
+} from '@arco-design/web-react/icon';
+import DependentNodeDefault from '@/pages/workflowConfig/workflow/nodes/dependent-node/default';
+import { TaskNodeStatus } from '@/types/workflowTaskApi';
 
 type NodesExtraData = {
   author: string;
@@ -239,7 +249,7 @@ export const NODES_EXTRA_DATA: Record<any, NodesExtraData> = {
     getAvailableNextNodes: TextParserDefault.getAvailableNextNodes,
     checkValid: TextParserDefault.checkValid
   },
-  [BlockEnum.Pic]: {
+  [BlockEnum.Image]: {
     author: 'ModaForge',
     about: '',
     availablePrevNodes: [],
@@ -292,8 +302,41 @@ export const NODES_EXTRA_DATA: Record<any, NodesExtraData> = {
     getAvailablePrevNodes: CustomizeDefault.getAvailablePrevNodes,
     getAvailableNextNodes: CustomizeDefault.getAvailableNextNodes,
     checkValid: CustomizeDefault.checkValid
+  },
+  [BlockEnum.SQL]: {
+    author: 'ModaForge',
+    about: '',
+    availablePrevNodes: [],
+    availableNextNodes: [],
+    getAvailablePrevNodes: SQLNodeDefault.getAvailablePrevNodes,
+    getAvailableNextNodes: SQLNodeDefault.getAvailableNextNodes,
+    checkValid: SQLNodeDefault.checkValid
+  },
+  [BlockEnum.Seatunnel]: {
+    author: 'ModaForge',
+    about: '',
+    availablePrevNodes: [],
+    availableNextNodes: [],
+    getAvailablePrevNodes: SeatunnelNodeDefault.getAvailablePrevNodes,
+    getAvailableNextNodes: SeatunnelNodeDefault.getAvailableNextNodes,
+    checkValid: SeatunnelNodeDefault.checkValid
+  },
+  [BlockEnum.Dependent]: {
+    author: 'ModaForge',
+    about: '',
+    availablePrevNodes: [],
+    availableNextNodes: [],
+    getAvailablePrevNodes: DependentNodeDefault.getAvailablePrevNodes,
+    getAvailableNextNodes: DependentNodeDefault.getAvailableNextNodes,
+    checkValid: DependentNodeDefault.checkValid
   }
 };
+
+export const STRUCT_FLOW_NODES = [
+  BlockEnum.SQL,
+  BlockEnum.Seatunnel,
+  BlockEnum.Dependent
+];
 
 export const NODES_INITIAL_DATA = {
   // [BlockEnum.Answer]: {
@@ -448,8 +491,8 @@ export const NODES_INITIAL_DATA = {
     desc: '',
     ...TextParserDefault.defaultValue
   },
-  [BlockEnum.Pic]: {
-    type: BlockEnum.Pic,
+  [BlockEnum.Image]: {
+    type: BlockEnum.Image,
     title: '',
     desc: '',
     ...ImageParserDefault.defaultValue
@@ -483,6 +526,24 @@ export const NODES_INITIAL_DATA = {
     title: '',
     desc: '',
     ...CustomizeDefault.defaultValue
+  },
+  [BlockEnum.SQL]: {
+    type: BlockEnum.SQL,
+    title: '',
+    desc: '',
+    ...SQLNodeDefault.defaultValue
+  },
+  [BlockEnum.Dependent]: {
+    type: BlockEnum.Dependent,
+    title: '',
+    desc: '',
+    ...DependentNodeDefault.defaultValue
+  },
+  [BlockEnum.Seatunnel]: {
+    type: BlockEnum.Seatunnel,
+    title: '',
+    desc: '',
+    ...SeatunnelNodeDefault.defaultValue
   }
 };
 export const MAX_ITERATION_PARALLEL_NUM = 10;
@@ -540,9 +601,7 @@ export const RETRIEVAL_OUTPUT_STRUCT = `{
   }
 }`;
 
-export const SUPPORT_OUTPUT_VARS_NODE = [
-  BlockEnum.Start
-];
+export const SUPPORT_OUTPUT_VARS_NODE = [BlockEnum.Start];
 
 export const LLM_OUTPUT_STRUCT: Var[] = [
   {
@@ -661,3 +720,10 @@ export const CUSTOM_EDGE = 'custom';
 export const DSL_EXPORT_CHECK = 'DSL_EXPORT_CHECK';
 export const DEFAULT_RETRY_MAX = 3;
 export const DEFAULT_RETRY_INTERVAL = 100;
+
+export const STATUS2COLOR = {
+  [TaskStatus.FAILURE]: { color: '#EF4444', icon: IconCloseCircleFill },
+  [TaskStatus.RUNNING_EXECUTION]: { color: '#007DFA', icon: IconLoading },
+  [TaskNodeStatus.LOADING]: { color: '#007DFA', icon: IconLoading },
+  [TaskStatus.SUCCESS]: { color: '#10B981', icon: IconCheckCircleFill }
+};

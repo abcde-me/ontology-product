@@ -1,17 +1,13 @@
 import {
-  Position,
   getConnectedEdges,
   getIncomers,
   getOutgoers,
+  Position
 } from 'reactflow';
 import dagre from '@dagrejs/dagre';
 import { v4 as uuid4 } from 'uuid';
 import { cloneDeep, groupBy, isEqual, uniqBy } from 'lodash-es';
-import type {
-  Edge,
-  Node,
-  ValueSelector
-} from './types';
+import type { Edge, Node, NodeProcessData, ValueSelector } from './types';
 import { BlockEnum, NodeRunningStatus } from './types';
 import {
   CUSTOM_NODE,
@@ -19,6 +15,7 @@ import {
   START_INITIAL_POSITION
 } from './constants';
 import { markerEnd } from '@/pages/workflowConfig/utils/var';
+import { TaskNodeStatus } from '@/types/workflowTaskApi';
 
 const WHITE = 'WHITE';
 const GRAY = 'GRAY';
@@ -340,7 +337,7 @@ export const getValidTreeNodes = (nodes: Node[], edges: Edge[]) => {
 
   if (!startNode) {
     return {
-      validNodes: [],
+      validNodes: nodes,
       maxDepth: 0
     };
   }
@@ -478,19 +475,22 @@ export const getParallelInfo = (
   parentNodeId?: string
 ) => {
   let startNode;
+  const isStructFlow = nodes.some((node) => node.data.flow_type === 'struct');
 
   if (parentNodeId) {
     const parentNode = nodes.find((node) => node.id === parentNodeId);
     if (!parentNode) throw new Error('Parent node not found');
 
     startNode = nodes.find(
-      (node) =>
-        node.id ===
-        (parentNode.data as any).start_node_id
+      (node) => node.id === (parentNode.data as any).start_node_id
     );
-  } else {
+  } else if (!isStructFlow) {
     startNode = nodes.find((node) => node.data.type === BlockEnum.Start);
+  } else {
+    // 结构化工作流没有真正意义上的开始节点，默认取第一个节点为开始节点
+    startNode = nodes[0];
   }
+
   if (!startNode) throw new Error('Start node not found');
 
   const parallelList = [] as ParallelInfoItem[];
@@ -659,8 +659,21 @@ export const getEdgeColor = (
 };
 
 export const isExceptionVariable = () => {
-
   return false;
+};
+
+export const flowIsStruct = (nods: Node[]) => {
+  return nods.some((node) => node.data.flow_type === 'struct');
+};
+
+export const generateLoadingTask = (
+  task_code: string | number
+): Partial<NodeProcessData> => {
+  return {
+    state: TaskNodeStatus.LOADING,
+    task_code,
+    state_name: '加载中'
+  };
 };
 
 export const MAX_NODES_NUM = 16;

@@ -114,26 +114,6 @@ const ZoomInOut: FC = () => {
         >
           <div className={cn('flex items-center justify-between gap-x-[8px]')}>
             <TipPopup
-              title={t('workflow.operator.zoomOut')}
-              // shortcuts={['ctrl', '-']}
-            >
-              <div
-                className={`op-icon ${zoom <= 0.25 ? 'cursor-not-allowed' : 'cursor-pointer'}`}
-                onClick={(e) => {
-                  if (zoom <= 0.25) return;
-
-                  e.stopPropagation();
-                  zoomOut();
-                }}
-              >
-                {/* <RiCheckboxIndeterminateLine className='size-[16px]'/> */}
-                <RiZoomInLine className="size-[16px]" />
-              </div>
-            </TipPopup>
-            <div onClick={handleTrigger} className={cn('zoom-txt')}>
-              {parseFloat(`${zoom * 100}`).toFixed(0)}%
-            </div>
-            <TipPopup
               title={t('workflow.operator.zoomIn')}
               // shortcuts={['ctrl', '+']}
             >
@@ -147,6 +127,26 @@ const ZoomInOut: FC = () => {
                 }}
               >
                 {/* <RiAddBoxLine className='size-[16px]'/> */}
+                <RiZoomInLine className="size-[16px]" />
+              </div>
+            </TipPopup>
+            <div onClick={handleTrigger} className={cn('zoom-txt')}>
+              {parseFloat(`${zoom * 100}`).toFixed(0)}%
+            </div>
+            <TipPopup
+              title={t('workflow.operator.zoomOut')}
+              // shortcuts={['ctrl', '-']}
+            >
+              <div
+                className={`op-icon ${zoom <= 0.25 ? 'cursor-not-allowed' : 'cursor-pointer'}`}
+                onClick={(e) => {
+                  if (zoom <= 0.25) return;
+
+                  e.stopPropagation();
+                  zoomOut();
+                }}
+              >
+                {/* <RiCheckboxIndeterminateLine className='size-[16px]'/> */}
                 <RiZoomOutLine className="size-[16px]" />
               </div>
             </TipPopup>

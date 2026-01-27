@@ -12,39 +12,38 @@ import {
   Select,
   Table
 } from '@arco-design/web-react';
-import { useHistory } from 'react-router';
 import { ColumnProps } from '@arco-design/web-react/es/Table';
 import EllipsisPopover from '@/components/ellipsis-popover-com';
-import Success11Icon from '@/pages/workflowConfig/styles/images/op-icons/success1.svg';
-import noDataElement from '@/components/no-data';
-import {
-  getWorkflowList,
-  workflowDelete,
-  workflowCopy
-} from '@/api/workflowList';
-import { useUserInfo } from '@/store/userInfoStore';
+import { NoDataCard } from '@ceai-front/arco-material';
 import { SorterInfo } from '@arco-design/web-react/es/Table/interface';
 import { PermissionWrapper } from '@/components/PermissionGuard';
-import { WORKFLOW_LIST_PERMISSIONS } from '@/config/permissions';
+import { SQL_PERMISSIONS } from '@/config/permissions';
 import { IconClockCircle, IconRefresh } from '@arco-design/web-react/icon';
-import { openNewPage } from '@/utils/env';
 import styles from './query-script.module.scss';
-import { VersionType, VersionTypeEnum } from '../sctipt-card';
-import ScriptModalTable from '../sctip-modal-table';
+import { createSqlScript, deleteSqlFile, listSqlFile } from '@/api/sql';
+import { useUrlState } from '../../hooks/useUrlState';
+import dayjs from 'dayjs';
+import generateSqlDefaultName from '../../utils/generateSqlDefaultName';
 
-const InputSearch = Input.Search;
+interface QueryScriptProps {
+  curActiveTab: string;
+}
 
-const QueryScript: React.FC = () => {
+const QueryScript: React.FC<QueryScriptProps> = ({ curActiveTab }) => {
   const FormItem = Form.Item;
   const [form] = Form.useForm();
   const Option = Select.Option;
   const options = ['全部', '已发布', '未发布', '草稿'];
-  const history = useHistory();
-  const userInfo = useUserInfo();
+
+  const [formData, setFormData] = useState({
+    script_name: '',
+    update_account: '',
+    update_time: []
+  });
   // 初始化搜索框value
   const [searchValue, setSearchValue] = useState('');
-  // 初始化工作流列表数据
-  const [workflowData, setWorkflowData] = useState([]);
+  // 初始化查询脚本列表数据
+  const [queryScriptData, setQueryScriptData] = useState([]);
   // 当前的第几页
   const [current, setCurrent] = useState(1);
   // 每页展示数据的数据量
@@ -56,18 +55,17 @@ const QueryScript: React.FC = () => {
   // 区分是否点击按钮清空搜索框
   const [isClickClear, setIsClickClear] = useState(false);
   // 初始化筛选的值
-  const [sortValue, setSortValue] = useState({
-    run_cycle: '',
-    sort: ''
-  });
-  // 控制弹窗显示隐藏
-  const [visible, setVisible] = useState<boolean>(false);
-  // 初始化查询脚本数量
-  const [queryNum, setQueryNum] = useState<number>(100);
+  const [sortValue, setSortValue] = useState<
+    { order_flag: string; column: string }[]
+  >([]);
+  const [queryNum, setQueryNum] = useState<number>(0);
+  const [createScriptLoading, setCreateScriptLoading] = useState(false);
   // 组件初始化
   useEffect(() => {
-    if (userInfo) getList();
-  }, [userInfo, current, pageSize, sortValue]);
+    getList();
+  }, [current, pageSize, sortValue, curActiveTab]);
+
+  const { updateUrlState, clearUrlState } = useUrlState();
 
   // 清空搜索框
   useEffect(() => {
@@ -81,58 +79,27 @@ const QueryScript: React.FC = () => {
     setLoading(true);
     try {
       const params: any = {
-        uid: userInfo?.id,
-        search_content: searchValue,
         page: current, //第几页
         page_size: pageSize, //每页个数
-        ...sortValue
+        script_name: formData?.script_name,
+        update_account: formData?.update_account,
+        update_time_start: formData?.update_time?.[0],
+        update_time_end: formData?.update_time?.[1],
+        orders: sortValue
       };
-      const res = await getWorkflowList(params);
+      const res = await listSqlFile(params);
       if (res.status === 200 && res.data) {
-        setWorkflowData(res.data.list);
-        setCurrent(res.data.page_info?.page);
-        setPageSize(res.data.page_info?.page_size);
-        setTotal(res.data.page_info?.total || 10);
+        setQueryScriptData(res?.data?.items);
+        setTotal(res.data?.total || 0);
+        setQueryNum(res.data?.total || 0);
       }
     } finally {
       setLoading(false);
     }
   };
 
-  // 创建工作流
-  const handleCreateWorkflow = () => {
-    openNewPage('/modaforge/tenant/compute/modaforge/workflowConfig');
-  };
-
-  // 跳转目录
-  const handleToDirectoryPath = (
-    id: string,
-    parent_id: string,
-    root_type: string | number
-  ) => {
-    history.push(
-      `/tenant/compute/modaforge/dataCatalog/list?root_type=${root_type}&id=${id}&parent_id=${parent_id}`
-    );
-  };
-  // 跳转目标数据 - 数据集详情
-  const handleToTargetDatasetDetail = (id: string) => {
-    history.push(`/tenant/compute/modaforge/datasetManagement/detail/${id}`);
-  };
-  // 查看详情
-  const viewDetailWorkflow = (
-    workflow_uuid: number | string,
-    ds_workflow_id: number | string
-  ) => {
-    openNewPage(
-      `/modaforge/tenant/compute/modaforge/workflowConfig?workflow_uuid=${workflow_uuid}&ds_workflow_id=${ds_workflow_id}`
-    );
-  };
-
   // 点击删除操作弹窗
-  const handleDelete = (
-    workflow_uuid: number | string,
-    workflow_version: string
-  ) => {
+  const handleDelete = (script_id: number) => {
     Modal.confirm({
       title: (
         <span className={styles['workflow-list-modal-title']}>
@@ -147,27 +114,24 @@ const QueryScript: React.FC = () => {
       okText: '确定',
       cancelText: '取消',
       onOk: () => {
-        handleDeleteWorkflow(workflow_uuid, workflow_version);
+        handleDeleteWorkflow(script_id);
       }
     });
   };
 
   // 删除工作流
-  const handleDeleteWorkflow = async (
-    workflow_uuid: number | string,
-    workflow_version: string
-  ) => {
-    // const res = await workflowDelete(workflow_uuid, workflow_version);
-    // if (res.status === 200 && res.code === '') {
-    //   Message.success({
-    //     content: '删除成功'
-    //   });
-    //   getList();
-    // } else {
-    //   Message.error({
-    //     content: res?.message ?? '删除失败，请稍后重试'
-    //   });
-    // }
+  const handleDeleteWorkflow = async (script_id: number) => {
+    const res = await deleteSqlFile(script_id);
+    if (res.status === 200 && res.code === '') {
+      Message.success({
+        content: '删除成功'
+      });
+      getList();
+    } else {
+      Message.error({
+        content: res?.message ?? '删除失败，请稍后重试'
+      });
+    }
   };
 
   // 筛选排序操作
@@ -177,143 +141,76 @@ const QueryScript: React.FC = () => {
     filters: Partial<Record<string | number | symbol, string[]>>
   ) => {
     setCurrent(1);
-    const sortdata = {
-      run_cycle:
-        filters.run_cycle === undefined ? '' : filters.run_cycle.join(','),
-      is_online:
-        filters.is_online === undefined ? '' : filters.is_online.join(','),
-      sort:
-        sorter.direction === undefined
-          ? ''
-          : sorter.direction === 'ascend'
-            ? 'create_time:ASC'
-            : 'create_time:DESC'
-    };
+    const orders =
+      sorter?.direction && sorter.field
+        ? [
+            {
+              order_flag: sorter.direction === 'ascend' ? 'asc' : 'desc',
+              column: sorter.field as string
+            }
+          ]
+        : [];
 
-    setSortValue(sortdata);
+    setSortValue(orders);
   };
 
-  // table数据为空时展示-
-  const renderEmptyPlaceholder = (value: string | null) => {
-    return value === '' || value == null ? '-' : value;
+  const handleToDetail = (scriptId: number | string) => {
+    console.log('handleToDetail', scriptId);
+    // clearUrlState();
+    updateUrlState(
+      {
+        activeTab: 'data',
+        activeScriptId: String(scriptId)
+      },
+      { method: 'push' }
+    );
   };
-  const getVersionType = (version_type) => {
-    switch (version_type) {
-      case VersionType.RELEASED:
-        return (
-          <div className={styles['script-card-content-item-title-icon']}>
-            <span
-              className={
-                version_type === VersionType.RELEASED
-                  ? styles['released-icon']
-                  : ''
-              }
-            />
-            <div className={styles['script-card-content-item-title-icon-text']}>
-              {VersionTypeEnum.RELEASED}
-            </div>
-          </div>
-        );
-      case VersionType.UNRELEASED:
-        return (
-          <div className={styles['script-card-content-item-title-icon']}>
-            <span
-              className={
-                version_type === VersionType.UNRELEASED
-                  ? styles['unreleased-icon']
-                  : ''
-              }
-            />
-            <div className={styles['script-card-content-item-title-icon-text']}>
-              {VersionTypeEnum.UNRELEASED}
-            </div>
-          </div>
-        );
-      case VersionType.SCHEDULED:
-        return (
-          <div className={styles['script-card-content-item-title-icon']}>
-            <span
-              className={
-                version_type === VersionType.SCHEDULED
-                  ? styles['scheduled-icon']
-                  : ''
-              }
-            />
-            <div className={styles['script-card-content-item-title-icon-text']}>
-              {VersionTypeEnum.SCHEDULED}
-            </div>
-          </div>
-        );
-      default:
-        return (
-          <div className={styles['script-card-content-item-title-icon']}>
-            <span
-              className={
-                version_type === VersionType.UNRELEASED
-                  ? styles['unreleased-icon']
-                  : ''
-              }
-            />
-            <div className={styles['script-card-content-item-title-icon-text']}>
-              {VersionTypeEnum.UNRELEASED}
-            </div>
-          </div>
-        );
-    }
-  };
+
   // table columns
   const columns: ColumnProps[] = [
     {
       title: '序号',
-      dataIndex: 'id',
-      width: 100,
-      sorter: (a, b) => a.name.length - b.name.length
+      dataIndex: 'script_id',
+      width: 100
     },
     {
       title: '脚本名称',
-      dataIndex: 'workflow_name',
+      dataIndex: 'script_name',
       width: 320,
       ellipsis: true,
-      className: styles['hover-change'] + ' ' + styles['workflow-name'],
-      render: (_, record) => {
-        return renderEmptyPlaceholder(record.workflow_name) !== '-' ? (
-          <EllipsisPopover
-            value={record.workflow_name}
-            isEdit={false}
-            isLink
-            handleLink={() => {
-              viewDetailWorkflow(record.workflow_uuid, record.ds_workflow_id);
-            }}
-          />
-        ) : (
-          <span>-</span>
-        );
-      }
+      className: styles['hover-change'],
+      sorter: true,
+      render: (_, record) => (
+        <EllipsisPopover
+          value={record.script_name || '-'}
+          isEdit={false}
+          isLink
+          handleLink={() => handleToDetail(record.script_id)}
+        />
+      )
     },
     {
       title: '脚本说明',
-      dataIndex: 'run_cycle',
+      dataIndex: 'script_desc',
       width: 320,
-      render: (_, record) =>
-        record.run_cycle ? <span>周期运行</span> : <span>单次运行</span>
+      render: (_, record) => (
+        <EllipsisPopover value={record.script_desc || '-'} />
+      )
     },
     {
       title: '更新人',
-      dataIndex: 'source_path',
+      dataIndex: 'update_account',
       width: 134,
       ellipsis: true,
       className: styles['hover-change']
     },
     {
       title: '更新时间',
-      dataIndex: 'create_time',
+      dataIndex: 'update_time',
       width: 180,
+      sorter: true,
       render: (_, record) => (
-        <span>
-          {record.create_time == '' || record.create_time == null
-            ? '-'
-            : new Date(record.create_time).toLocaleString()}
-        </span>
+        <span>{dayjs(record.update_time).format('YYYY-MM-DD HH:mm:ss')}</span>
       )
     },
     {
@@ -325,31 +222,28 @@ const QueryScript: React.FC = () => {
         const perms = record.perms || [];
         return (
           <div style={{ display: 'flex' }}>
-            <PermissionWrapper permission={WORKFLOW_LIST_PERMISSIONS.CAN_READE}>
+            <PermissionWrapper permission={SQL_PERMISSIONS.QUERY_SCRIPT_GET}>
               <span
                 className={styles['operate-text']}
                 onClick={() => {
-                  viewDetailWorkflow(
-                    record.workflow_uuid,
-                    record.ds_workflow_id
-                  );
+                  handleToDetail(record.script_id);
                 }}
               >
                 详情
               </span>
             </PermissionWrapper>
-            <span
-              className={
-                record.is_online
-                  ? styles['disabled-text']
-                  : styles['operate-text']
-              }
-              onClick={() =>
-                handleDelete(record.workflow_uuid, record.workflow_version)
-              }
-            >
-              删除
-            </span>
+            <PermissionWrapper permission={SQL_PERMISSIONS.QUERY_SCRIPT_DELETE}>
+              <span
+                className={
+                  record.is_online
+                    ? styles['disabled-text']
+                    : styles['operate-text']
+                }
+                onClick={() => handleDelete(record.script_id)}
+              >
+                删除
+              </span>
+            </PermissionWrapper>
           </div>
         );
       }
@@ -358,49 +252,95 @@ const QueryScript: React.FC = () => {
 
   // 点击搜索按钮
   const handleSearch = () => {
+    setCurrent(1);
     setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-    }, 500);
+    getList();
   };
   // 重置搜索框
   const handleReset = () => {
+    setCurrent(1);
     setSearchValue('');
     setIsClickClear(true);
     form.resetFields();
   };
+  const handleFormChange = (value) => {
+    console.log(value, '123');
+    const allFormValues = form.getFieldsValue();
+    setFormData({
+      script_name: allFormValues?.script_name,
+      update_account: allFormValues?.update_account,
+      update_time: allFormValues?.update_time
+    });
+  };
+  const handleCreateQueryScript = async () => {
+    setCreateScriptLoading(true);
+    try {
+      const createRes = await createSqlScript({
+        script_name: generateSqlDefaultName(new Date()),
+        script_file_id: String(Date.now()),
+        script_content: '',
+        script_desc: ''
+      });
+      if (createRes.status !== 200) {
+        Message.error(createRes.message ?? '新建失败, 请稍后重试');
+        return;
+      }
+
+      Message.success('新建成功');
+      handleToDetail(createRes.data.script_id);
+    } catch (error) {
+      console.error('新建失败', error);
+      Message.error('新建失败,请稍后重试');
+    } finally {
+      setCreateScriptLoading(false);
+    }
+  };
   return (
     <div className={styles['query-script-wrapper']}>
-      <div className={styles['query-script-title']}>查询脚本({queryNum})</div>
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          width: '100%',
-          marginBottom: '16px'
-        }}
-      >
-        <Form form={form} autoComplete="off" layout="inline">
+      <div className="flex items-center justify-between py-[16px]">
+        <div className="text-[16px] font-[600] text-[var(--text-color-text-1)]">
+          查询脚本({queryNum})
+        </div>
+        <PermissionWrapper permission={SQL_PERMISSIONS.QUERY_SCRIPT_CREATE}>
+          <Button
+            type="outline"
+            loading={createScriptLoading}
+            onClick={handleCreateQueryScript}
+          >
+            新建脚本
+          </Button>
+        </PermissionWrapper>
+      </div>
+      <div className="mb-[16px] flex items-center justify-between overflow-x-auto whitespace-nowrap border-b border-[var(--color-border-2)] pb-[16px]">
+        <Form
+          onValuesChange={(values) => {
+            handleFormChange(values);
+          }}
+          form={form}
+          autoComplete="off"
+          layout="inline"
+          className="flex flex-1 flex-nowrap items-center gap-[16px] [&_.arco-form-item-wrapper]:flex-1 [&_.arco-form-item]:mr-0 [&_.arco-form-item]:flex-1"
+        >
           <FormItem label="脚本名称:" field="script_name">
-            <Input style={{ width: 236 }} placeholder="输入脚本名称搜索" />
+            <Input className="w-full" placeholder="输入脚本名称搜索" />
           </FormItem>
-          <FormItem label="更新人:" field="update_user">
-            <Input style={{ width: 250 }} placeholder="输入关键字搜索" />
+          <FormItem label="更新人:" field="update_account">
+            <Input className="w-full" placeholder="输入更新人搜索" />
           </FormItem>
           <FormItem label="更新时间:" field="update_time">
-            <DatePicker.RangePicker style={{ width: 350 }} />
+            <DatePicker.RangePicker className="w-full" />
           </FormItem>
         </Form>
-        <div style={{ display: 'flex', flex: 1 }}>
+        <div className="flex items-center whitespace-nowrap">
           <Button
             type="text"
             onClick={handleReset}
             icon={<IconRefresh />}
-            style={{ marginRight: 8 }}
+            className="ml-[16px] mr-[12px] px-[0px]"
           >
             重置
           </Button>
-          <Button type="primary" onClick={handleSearch} loading={loading}>
+          <Button type="primary" onClick={handleSearch}>
             查询
           </Button>
         </div>
@@ -408,15 +348,14 @@ const QueryScript: React.FC = () => {
       <Table
         border={false}
         columns={columns}
-        data={workflowData}
+        data={queryScriptData}
         pagination={false}
-        noDataElement={noDataElement({
-          description: '暂无工作流',
-          btnText: '创建工作流',
-          perms: WORKFLOW_LIST_PERMISSIONS.CREATE,
-          handleBtn: () => handleCreateWorkflow()
-        })}
-        rowKey="id"
+        noDataElement={
+          <div className="w-full py-[100px]">
+            <NoDataCard title="暂无数据" />
+          </div>
+        }
+        rowKey="script_id"
         loading={loading}
         onChange={(pagination, sorter, filters) =>
           // @ts-expect-error
@@ -424,7 +363,7 @@ const QueryScript: React.FC = () => {
         }
       />
       {/* 分页 */}
-      {workflowData && workflowData.length > 0 && (
+      {total > 0 && (
         <Pagination
           current={current}
           pageSize={pageSize}
@@ -446,4 +385,5 @@ const QueryScript: React.FC = () => {
     </div>
   );
 };
+
 export default QueryScript;

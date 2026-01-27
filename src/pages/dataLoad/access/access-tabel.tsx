@@ -13,7 +13,8 @@ import { useParams } from '@/utils/url';
 import './index.css';
 import { RunState } from '../config';
 import EllipsisPopoverCom from '@/components/ellipsis-popover-com';
-import noDataElement from '@/components/no-data';
+import { NoDataCard } from '@ceai-front/arco-material';
+// import noDataElement from '@/components/no-data';
 const InputSearch = Input.Search;
 enum StatusType {
   SYCCESS = 'succeed',
@@ -316,7 +317,11 @@ const AccessTable = (props) => {
           data={data ?? []}
           style={{ padding: '15px 24px', width: '100%' }}
           border={false}
-          noDataElement={noDataElement({ description: '暂无数据' })}
+          noDataElement={
+            <div className="py-[100px]">
+              <NoDataCard title="暂无数据" />
+            </div>
+          }
           pagination={false}
           rowKey={(record) => record.id}
           loading={loading}

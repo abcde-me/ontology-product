@@ -3,7 +3,8 @@ export enum RunState {
   FAILURE = 'FAILURE',
   RUNNING = 'RUNNING_EXECUTION',
   STOPPED = 'STOP',
-  FAILED = 'FAILED'
+  FAILED = 'FAILED',
+  SAVED = 'SAVED'
 }
 
 export const RunStateType = {
@@ -31,11 +32,17 @@ export const RunStateType = {
     text: '运行失败',
     value: 'FAILED',
     color: '#EF4444'
+  },
+  [RunState.SAVED]: {
+    text: '未运行',
+    value: 'SAVED',
+    color: '#94A3B8'
   }
 };
 export enum Load {
   ONCE = 'once',
-  CRON = 'cron'
+  CRON = 'cron',
+  REALTIME = 'realtime'
 }
 export const LoadType = {
   [Load.ONCE]: {
@@ -45,13 +52,18 @@ export const LoadType = {
   [Load.CRON]: {
     text: '周期载入',
     value: 'cron'
+  },
+  [Load.REALTIME]: {
+    text: '实时载入',
+    value: 'realtime'
   }
 };
 export enum ConnectorType {
   S3 = 's3',
   HDFS = 'hdfs',
   DB = 'db',
-  Local = 'local'
+  Local = 'local',
+  MQ = 'mq'
 }
 export const TYPE_CONFIG = {
   [ConnectorType.S3]: {
@@ -69,6 +81,10 @@ export const TYPE_CONFIG = {
   [ConnectorType.Local]: {
     text: '本地文件',
     value: 'local'
+  },
+  [ConnectorType.MQ]: {
+    text: '消息队列-Kafka',
+    value: 'mq'
   }
 };
 export const DATABASE_TYPE_ENUM = [

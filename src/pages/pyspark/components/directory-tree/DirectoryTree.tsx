@@ -35,11 +35,11 @@ import AddAfterIcon from '@/assets/python/add-after.svg';
 import { PythonItemType, PythonListItem } from '@/types/pythonApi';
 import EllipsisPopover from '@/components/ellipsis-popover-com';
 import { PYSPARK_PERMISSIONS, SQL_PERMISSIONS } from '@/config/permissions';
-import { now } from 'lodash-es';
 import { PermissionWrapper } from '@/components/PermissionGuard';
 import { debounce } from 'lodash-es';
 import SQLFileIcon from '@/assets/sql/sql-file-icon.svg';
 import styles from './DirectoryTree.module.scss';
+import { validateName } from '@/utils/valiate';
 
 // 原始数据接口
 export type TreeNodeItem = Partial<PythonListItem> & {
@@ -105,8 +105,22 @@ export interface DirectoryTreeProps {
 
 const InputSearch = Input.Search;
 
+// 生成 yymmddhhmmss 格式的日期字符串
+function getYymmddhhmmss(): string {
+  const now = new Date();
+  const yy = String(now.getFullYear()).slice(-2);
+  const mm = String(now.getMonth() + 1).padStart(2, '0');
+  const dd = String(now.getDate()).padStart(2, '0');
+  const hh = String(now.getHours()).padStart(2, '0');
+  const min = String(now.getMinutes()).padStart(2, '0');
+  const ss = String(now.getSeconds()).padStart(2, '0');
+  return `${yy}${mm}${dd}${hh}${min}${ss}`;
+}
+
 function defaultNameGenerator(siblings: TreeDataType[], isFolder = true) {
-  return isFolder ? `新建文件夹_${now()}` : `新建PySpark_${now()}`;
+  return isFolder
+    ? `新建文件夹_${getYymmddhhmmss()}`
+    : `新建PySpark_${getYymmddhhmmss()}`;
 }
 
 export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
@@ -156,6 +170,7 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
     const inputRef = useRef<any>(null);
     const [inputValue, setInputValue] = useState<string>('');
     const [defaultName, setDefaultName] = useState<string>('');
+    const searchValueRef = useRef<string>(''); // 保存最新的搜索值
 
     // 格式化数据
     const formatTreeData = useCallback(
@@ -167,15 +182,6 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
       },
       [props.formatData]
     );
-
-    useEffect(() => {
-      setTreeData(data);
-      setLoading(false);
-    }, [data]);
-
-    useEffect(() => {
-      setLoading(false);
-    }, []);
 
     // 刷新当前目录
     const refreshCurrentDirectory = useCallback(async () => {
@@ -339,7 +345,38 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
     );
 
     // 处理搜索框回车
-    const handleSearchEnter = (value: string) => {};
+    const handleSearchEnter = (value: string) => {
+      if (isSearching) {
+        return;
+      }
+
+      setSearchValue(value);
+      handleSearch(value);
+    };
+
+    // 高亮显示搜索关键词
+    const highlightSearchKeyword = useCallback(
+      (text: string, keyword: string) => {
+        if (!keyword) return text;
+
+        const index = text.toLowerCase().indexOf(keyword.toLowerCase());
+
+        if (index === -1) return text;
+
+        const prefix = text.substr(0, index);
+        const suffix = text.substr(index + keyword.length);
+        return (
+          <span>
+            {prefix}
+            <span style={{ color: '#007DFA' }}>
+              {text.substr(index, keyword.length)}
+            </span>
+            {suffix}
+          </span>
+        );
+      },
+      []
+    );
 
     // 使用防抖处理输入事件
     // 使用 useRef 保存 handleSearch 的最新引用，避免闭包问题
@@ -348,21 +385,43 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
       handleSearchRef.current = handleSearch;
     }, [handleSearch]);
 
+    // 同步更新 searchValueRef
+    useEffect(() => {
+      searchValueRef.current = searchValue;
+    }, [searchValue]);
+
+    // 当数据更新时，同步更新 treeData
+    useEffect(() => {
+      const currentSearchValue = searchValueRef.current;
+      if (
+        currentSearchValue &&
+        currentSearchValue.trim() &&
+        handleSearchRef.current
+      ) {
+        // 如果存在搜索值，重新应用搜索过滤
+        handleSearchRef.current(currentSearchValue);
+      } else {
+        // 如果没有搜索值，直接同步 data 到 treeData
+        const formattedData = formatTreeData(data);
+        setTreeData(formattedData);
+      }
+    }, [data, formatTreeData]); // 只在 data 更新时触发，避免与用户输入搜索冲突
+
     // 创建防抖函数，只创建一次
-    const debouncedSearch = useMemo(
-      () =>
-        debounce((value: string) => {
-          handleSearchRef.current(value);
-        }, 500),
-      [] // 空依赖数组，只创建一次
-    );
+    // const debouncedSearch = useMemo(
+    //   () =>
+    //     debounce((value: string) => {
+    //       handleSearchRef.current(value);
+    //     }, 500),
+    //   [] // 空依赖数组，只创建一次
+    // );
 
     // 组件卸载时取消防抖
-    useEffect(() => {
-      return () => {
-        debouncedSearch.cancel();
-      };
-    }, [debouncedSearch]);
+    // useEffect(() => {
+    //   return () => {
+    //     debouncedSearch.cancel();
+    //   };
+    // }, [debouncedSearch]);
 
     // 处理搜索框清空
     const handleSearchClear = () => {
@@ -543,7 +602,7 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
     };
     const handleCopy = (node: NodeProps) => {
       try {
-        onCopy?.(`${node.dataRef?.name}_副本_${now()}`, node);
+        onCopy?.(`${node.dataRef?.name}_副本_${getYymmddhhmmss()}`, node);
       } catch (e) {
         Message.error('复制失败');
       }
@@ -689,9 +748,8 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
             value={searchValue}
             onChange={(value) => {
               setSearchValue(value);
-              debouncedSearch(value);
             }}
-            onSearch={handleSearchEnter}
+            onSearch={handleSearch}
             onClear={() => {
               handleSearchClear();
               refreshCurrentDirectory();
@@ -880,11 +938,17 @@ export default React.forwardRef<DirectoryTreeRef, DirectoryTreeProps>(
                   {icon}
                   <div className="flex flex-1 flex-col overflow-hidden">
                     <div className={styles['file-name']}>
-                      <EllipsisPopover value={titleText} />
+                      <EllipsisPopover
+                        // preferTypography
+                        value={
+                          isSearchMode && searchValue
+                            ? highlightSearchKeyword(titleText, searchValue)
+                            : titleText
+                        }
+                      />
                     </div>
                     {/* 只在搜索结果中显示路径 */}
                     {/* {isSearchMode &&
-                      from !== DirectoryTreeFrom.SQL &&
                       props.dataRef?.path && (
                         <div className={styles['search-result-path']}>
                           <EllipsisPopover value={props.dataRef.path} />

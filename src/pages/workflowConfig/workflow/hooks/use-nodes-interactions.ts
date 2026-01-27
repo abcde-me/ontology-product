@@ -1,5 +1,4 @@
-import type { MouseEvent } from 'react';
-import { useCallback, useRef } from 'react';
+import { MouseEvent, useCallback, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import produce from 'immer';
 import type {
@@ -14,13 +13,13 @@ import {
   getConnectedEdges,
   getOutgoers,
   useReactFlow,
-  useStoreApi,
+  useStoreApi
 } from 'reactflow';
-import { unionBy } from 'lodash-es';
+import { isNil, unionBy } from 'lodash-es';
 import type { ToolDefaultValue } from '../block-selector/types';
 import type { Edge, Node, OnNodeAdd } from '../types';
 import { BlockEnum } from '../types';
-import { MAX_NODES_NUM } from '../utils';
+import { generateLoadingTask, MAX_NODES_NUM } from '../utils';
 import { useWorkflowStore } from '../store';
 import {
   CUSTOM_EDGE,
@@ -53,11 +52,23 @@ import {
 } from './use-workflow-history';
 import { markerEnd } from '@/pages/workflowConfig/utils/var';
 import { Message } from '@arco-design/web-react';
+import { operateWorkflow, testWorkflowNode } from '@/api/workflow';
+import { WorkflowOperation } from '@/types/workflowApi';
+import { useParams as useSearchParam } from '@/utils/url';
+import { useUserInfo } from '@/store/userInfoStore';
+import { useStore as useTaskStore } from '@/pages/workflowConfig/task/store';
+import { useShallow } from 'zustand/react/shallow';
+import useInitFlowTestTask from '@/pages/workflowConfig/workflow/hooks/use-init-flow-test-task';
+import { useParams } from 'react-router-dom';
+import { workflowOperation } from '@/api/workflowTask';
+import { WorkflowOperationType } from '@/types/workflowTaskApi';
+import { nodeIsRunning } from '@/pages/workflowConfig/workflow/nodes/utils';
 
 export const useNodesInteractions = () => {
   const { t } = useTranslation('plugin__console-plugin-appforge');
   const store = useStoreApi();
   const workflowStore = useWorkflowStore();
+  const [initTestTask] = useInitFlowTestTask();
   const reactflow = useReactFlow();
   const { store: workflowHistoryStore } = useWorkflowHistoryStore();
   const { handleSyncWorkflowDraft } = useNodesSyncDraft();
@@ -65,6 +76,16 @@ export const useNodesInteractions = () => {
   const { getNodesReadOnly } = useNodesReadOnly();
   const { getWorkflowReadOnly } = useWorkflowReadOnly();
   const { handleSetHelpline } = useHelpline();
+  const workflow_uuid = useSearchParam('workflow_uuid');
+  const { doSyncWorkflowDraft } = useNodesSyncDraft();
+  const { type: flowType = 'no_struct' } = useParams<Record<string, string>>();
+  const userInfo = useUserInfo();
+  const { setNodesProcessDetail, nodesProcessDetail } = useTaskStore(
+    useShallow((state) => ({
+      setNodesProcessDetail: state.setNodesProcessDetail,
+      nodesProcessDetail: state.nodesProcessDetail
+    }))
+  );
   const dragNodeStartPosition = useRef({ x: 0, y: 0 } as {
     x: number;
     y: number;
@@ -78,8 +99,7 @@ export const useNodesInteractions = () => {
 
       if (getNodesReadOnly()) return;
 
-      if (node.type === CUSTOM_NOTE_NODE)
-        return;
+      if (node.type === CUSTOM_NOTE_NODE) return;
 
       dragNodeStartPosition.current = {
         x: node.position.x,
@@ -88,6 +108,62 @@ export const useNodesInteractions = () => {
     },
     [workflowStore, getNodesReadOnly]
   );
+
+  const handleTestNode = useCallback(
+    (node: string) => {
+      doSyncWorkflowDraft(
+        false,
+        {
+          onSuccess(res) {
+            setNodesProcessDetail([generateLoadingTask(node)] as any);
+            operateWorkflow({
+              op: WorkflowOperation.RUNNING,
+              start_node: node,
+              // 后端需要这个id是number类型，接口返回是字符串，后端改了前端也得改，所以前端强转
+              ds_workflow_id: res?.ds_workflow_id?.toString()
+                ? +res.ds_workflow_id
+                : 0,
+              uid: userInfo?.id ?? '',
+              workflow_uuid: workflow_uuid ?? ''
+            }).then((res) => {
+              if (isNil(res.data)) {
+                Message.warning(res.message);
+                return;
+              }
+              initTestTask(res.data.job_id);
+              Message.success('开始测试');
+            });
+          },
+          onError(e) {
+            Message.warning(e.message);
+          }
+        },
+        {
+          version: 'publish'
+        }
+      );
+    },
+    [nodesProcessDetail, setNodesProcessDetail, workflow_uuid]
+  );
+
+  const handleStopTestNode = (process_instance_id: string) => {
+    return workflowOperation({
+      execute_type: WorkflowOperationType.STOP,
+      process_instance_id: Number(process_instance_id)
+    }).catch(console.error);
+  };
+
+  const handleStopFlowTest = useCallback(() => {
+    nodesProcessDetail.forEach(({ state, process_instance_id }) => {
+      if (nodeIsRunning(state)) {
+        handleStopTestNode(process_instance_id);
+      }
+    });
+  }, [nodesProcessDetail]);
+
+  const getFlowNodes = () => {
+    return store.getState().getNodes();
+  };
 
   const handleNodeDrag = useCallback<NodeDragHandler>(
     (e, node: Node) => {
@@ -117,11 +193,7 @@ export const useNodesInteractions = () => {
       });
       setNodes(newNodes);
     },
-    [
-      getNodesReadOnly,
-      store,
-      handleSetHelpline
-    ]
+    [getNodesReadOnly, store, handleSetHelpline]
   );
 
   const handleNodeDragStop = useCallback<NodeDragHandler>(
@@ -155,11 +227,9 @@ export const useNodesInteractions = () => {
     (_, node) => {
       if (getNodesReadOnly()) return;
 
-      if (node.type === CUSTOM_NOTE_NODE)
-        return;
+      if (node.type === CUSTOM_NOTE_NODE) return;
 
-      if (node.type === CUSTOM_NOTE_NODE)
-        return;
+      if (node.type === CUSTOM_NOTE_NODE) return;
 
       const { getNodes, setNodes, edges, setEdges } = store.getState();
       const nodes = getNodes();
@@ -180,8 +250,7 @@ export const useNodesInteractions = () => {
           });
 
           const newNodes = produce(nodes, (draft) => {
-            draft.forEach(() => {
-            });
+            draft.forEach(() => {});
           });
           setNodes(newNodes);
         }
@@ -233,8 +302,7 @@ export const useNodesInteractions = () => {
     (_, node) => {
       if (getNodesReadOnly()) return;
 
-      if (node.type === CUSTOM_NOTE_NODE)
-        return;
+      if (node.type === CUSTOM_NOTE_NODE) return;
 
       const { setEnteringNodePayload } = workflowStore.getState();
       setEnteringNodePayload(undefined);
@@ -371,7 +439,19 @@ export const useNodesInteractions = () => {
       const newEdges = produce(edges, (draft) => {
         draft.push(newEdge);
       });
+      // 结构化工作流画布，节点连线
+      if (
+        [sourceNode, targetNode].every(
+          (node) => node?.data?.flow_type === 'struct'
+        )
+      ) {
+        setNodes(newNodes);
+        setEdges(newEdges);
 
+        handleSyncWorkflowDraft();
+        saveStateToHistory(WorkflowHistoryEvent.NodeConnect);
+        return;
+      }
       if (checkNestedParallelLimit(newNodes, newEdges, targetNode?.parentId)) {
         setNodes(newNodes);
         setEdges(newEdges);
@@ -417,32 +497,28 @@ export const useNodesInteractions = () => {
     [store, workflowStore, getNodesReadOnly]
   );
 
-  const handleNodeConnectEnd = useCallback<OnConnectEnd>(
-    () => {
-      if (getNodesReadOnly()) return;
+  const handleNodeConnectEnd = useCallback<OnConnectEnd>(() => {
+    if (getNodesReadOnly()) return;
 
-      const {
-        connectingNodePayload,
-        setConnectingNodePayload,
-        enteringNodePayload,
-        setEnteringNodePayload
-      } = workflowStore.getState();
-      if (connectingNodePayload && enteringNodePayload) {
-        const { getNodes } = store.getState();
-        const nodes = getNodes();
-        const fromNode = nodes.find(
-          (n) => n.id === connectingNodePayload.nodeId
-        )!;
-        const toNode = nodes.find((n) => n.id === enteringNodePayload.nodeId)!;
+    const {
+      connectingNodePayload,
+      setConnectingNodePayload,
+      enteringNodePayload,
+      setEnteringNodePayload
+    } = workflowStore.getState();
+    if (connectingNodePayload && enteringNodePayload) {
+      const { getNodes } = store.getState();
+      const nodes = getNodes();
+      const fromNode = nodes.find(
+        (n) => n.id === connectingNodePayload.nodeId
+      )!;
+      const toNode = nodes.find((n) => n.id === enteringNodePayload.nodeId)!;
 
-        if (fromNode.parentId !== toNode.parentId) return;
-
-      }
-      setConnectingNodePayload(undefined);
-      setEnteringNodePayload(undefined);
-    },
-    [store, handleNodeConnect, getNodesReadOnly, workflowStore, reactflow]
-  );
+      if (fromNode.parentId !== toNode.parentId) return;
+    }
+    setConnectingNodePayload(undefined);
+    setEnteringNodePayload(undefined);
+  }, [store, handleNodeConnect, getNodesReadOnly, workflowStore, reactflow]);
 
   const handleNodeDelete = useCallback(
     (nodeId: string) => {
@@ -534,7 +610,8 @@ export const useNodesInteractions = () => {
             ...(toolDefaultValue || {}),
             selected: true,
             _showAddVariablePopup: false,
-            _holdAddVariablePopup: false
+            _holdAddVariablePopup: false,
+            flow_type: flowType
           },
           position: {
             x: 0,
@@ -641,7 +718,6 @@ export const useNodesInteractions = () => {
           newNode.data.isInIteration = false;
           newNode.data.isInLoop = false;
         }
-
 
         const newEdge = {
           id: `${newNode.id}-${sourceHandle}-${nextNodeId}-${nextNodeTargetHandle}`,
@@ -774,9 +850,7 @@ export const useNodesInteractions = () => {
             targetType: nextNode.data.type,
             isInIteration: isNextNodeInIteration,
             isInLoop: isNextNodeInLoop,
-            iteration_id: isNextNodeInIteration
-              ? nextNode.parentId
-              : undefined,
+            iteration_id: isNextNodeInIteration ? nextNode.parentId : undefined,
             loop_id: isNextNodeInLoop ? nextNode.parentId : undefined,
             _connectedNodeIsSelected: true
           },
@@ -960,8 +1034,7 @@ export const useNodesInteractions = () => {
 
   const handleNodeContextMenu = useCallback(
     (e: MouseEvent, node: Node) => {
-      if (node.type === CUSTOM_NOTE_NODE)
-        return;
+      if (node.type === CUSTOM_NOTE_NODE) return;
 
       e.preventDefault();
       const container = document.querySelector('#workflow-container');
@@ -991,9 +1064,7 @@ export const useNodesInteractions = () => {
       if (nodeId) {
         // If nodeId is provided, copy that specific node
         const nodeToCopy = nodes.find(
-          (node) =>
-            node.id === nodeId &&
-            node.data.type !== BlockEnum.Start
+          (node) => node.id === nodeId && node.data.type !== BlockEnum.Start
         );
         if (nodeToCopy) setClipboardElements([nodeToCopy]);
       } else {
@@ -1045,25 +1116,24 @@ export const useNodesInteractions = () => {
       clipboardElements.forEach((nodeToPaste, index) => {
         const nodeType = nodeToPaste.data.type;
 
-        const { newNode } =
-          generateNewNode({
-            type: nodeToPaste.type,
-            data: {
-              ...NODES_INITIAL_DATA[nodeType],
-              ...nodeToPaste.data,
-              selected: false,
-              _isBundled: false,
-              _connectedSourceHandleIds: [],
-              _connectedTargetHandleIds: [],
-              title: genNewNodeTitleFromOld(nodeToPaste.data.title)
-            },
-            position: {
-              x: nodeToPaste.position.x + offsetX,
-              y: nodeToPaste.position.y + offsetY
-            },
-            extent: nodeToPaste.extent,
-            zIndex: nodeToPaste.zIndex
-          });
+        const { newNode } = generateNewNode({
+          type: nodeToPaste.type,
+          data: {
+            ...NODES_INITIAL_DATA[nodeType],
+            ...nodeToPaste.data,
+            selected: false,
+            _isBundled: false,
+            _connectedSourceHandleIds: [],
+            _connectedTargetHandleIds: [],
+            title: genNewNodeTitleFromOld(nodeToPaste.data.title)
+          },
+          position: {
+            x: nodeToPaste.position.x + 80,
+            y: nodeToPaste.position.y + 40
+          },
+          extent: nodeToPaste.extent,
+          zIndex: nodeToPaste.zIndex
+        });
         newNode.id = newNode.id + index;
         // This new node is movable and can be placed anywhere
         const newChildren: Node[] = [];
@@ -1102,13 +1172,12 @@ export const useNodesInteractions = () => {
     store,
     reactflow,
     saveStateToHistory,
-    handleSyncWorkflowDraft,
+    handleSyncWorkflowDraft
   ]);
 
   const handleNodesDuplicate = useCallback(
     (nodeId?: string) => {
       if (getNodesReadOnly()) return;
-
       const { getNodes } = store.getState();
       const targetNode = getNodes().find((node) => node.id === nodeId)!;
       const count = getNodes().filter(
@@ -1118,7 +1187,7 @@ export const useNodesInteractions = () => {
         count + 1 > MAX_NODES_NUM &&
         [
           BlockEnum.Text,
-          BlockEnum.Pic,
+          BlockEnum.Image,
           BlockEnum.Video,
           BlockEnum.Audio
         ].includes(targetNode.data.type)
@@ -1323,6 +1392,10 @@ export const useNodesInteractions = () => {
     handleNodeResize,
     handleNodeDisconnect,
     handleHistoryBack,
-    handleHistoryForward
+    handleHistoryForward,
+    handleTestNode,
+    handleStopTestNode,
+    getFlowNodes,
+    handleStopFlowTest
   };
 };

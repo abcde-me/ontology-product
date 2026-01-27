@@ -1,0 +1,28 @@
+.spinContainer {
+  height: 100%;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.requirementInfo {
+  height: 100%;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+}
+
+.headBreadcrumbBox {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.requirementInfoContent {
+  background-color: #fff;
+  border-radius: 16px;
+  flex: 1 1;
+  padding: 12px 24px 24px;
+  margin: 16px 0;
+}

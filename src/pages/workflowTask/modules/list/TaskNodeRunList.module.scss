@@ -1,0 +1,57 @@
+.table-container {
+  :global(tbody) {
+    .hover-change :global(.ellipsis-text) {
+      color: #1e293b;
+    }
+
+    .task-name-column {
+      :global(.typoWrap),
+      :global(.ellipsis-text) {
+        font-weight: 500;
+      }
+    }
+
+    :global(.arco-table-tr):hover {
+      .hover-change :global(.arco-link) {
+        color: rgb(0, 125, 250);
+        cursor: pointer;
+
+        &:hover {
+          color: rgba(67, 141, 251, 1);
+        }
+      }
+
+      .hover-change :global(.paragraph-link) {
+        cursor: pointer;
+        color: rgb(0, 125, 250);
+
+        &:hover {
+          color: rgba(67, 141, 251, 1);
+        }
+      }
+
+      .task-code-id-container {
+        .task-code-id-copy {
+          visibility: visible;
+        }
+      }
+    }
+
+    .task-code-id-container {
+      .task-code-id-copy {
+        visibility: hidden;
+        cursor: pointer;
+
+        // &:hover {
+        //   color: rgb(0, 125, 250);
+        // }
+      }
+    }
+  }
+
+  .operation-container {
+    :global(.arco-btn-size-default) {
+      padding: 0 4px;
+    }
+  }
+}

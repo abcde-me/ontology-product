@@ -1,0 +1,20 @@
+.table {
+  .title {
+    white-space: nowrap;
+  }
+
+  .operationBtn {
+    display: flex;
+  }
+
+  .operateText {
+    color: rgb(0, 125, 250);
+    cursor: pointer;
+    margin-right: 16px;
+    white-space: nowrap;
+  }
+
+  .operateText:hover {
+    color: rgba(67, 141, 251, 1);
+  }
+}

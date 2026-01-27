@@ -1,6 +1,8 @@
 import React from 'react';
+import classNames from 'classnames';
 
 import styles from './index.module.scss';
+import { ScriptStatus, ScriptStatusName } from '@/types/sqlDevelopApi';
 // 版本类型 已发版 未发版 调度中
 export const VersionType = {
   RELEASED: 'released', // 已发版
@@ -14,67 +16,35 @@ export enum VersionTypeEnum {
   SCHEDULED = '调度中'
 }
 
-export const getVersionType = (version_type) => {
-  switch (version_type) {
-    case VersionType.RELEASED:
-      return (
-        <div className={styles['script-card-content-item-title-icon']}>
-          <span
-            className={
-              version_type === VersionType.RELEASED
-                ? styles['released-icon']
-                : ''
-            }
-          />
-          <div className={styles['script-card-content-item-title-icon-text']}>
-            {VersionTypeEnum.RELEASED}
-          </div>
-        </div>
-      );
-    case VersionType.UNRELEASED:
-      return (
-        <div className={styles['script-card-content-item-title-icon']}>
-          <span
-            className={
-              version_type === VersionType.UNRELEASED
-                ? styles['unreleased-icon']
-                : ''
-            }
-          />
-          <div className={styles['script-card-content-item-title-icon-text']}>
-            {VersionTypeEnum.UNRELEASED}
-          </div>
-        </div>
-      );
-    case VersionType.SCHEDULED:
-      return (
-        <div className={styles['script-card-content-item-title-icon']}>
-          <span
-            className={
-              version_type === VersionType.SCHEDULED
-                ? styles['scheduled-icon']
-                : ''
-            }
-          />
-          <div className={styles['script-card-content-item-title-icon-text']}>
-            {VersionTypeEnum.SCHEDULED}
-          </div>
-        </div>
-      );
-    default:
-      return (
-        <div className={styles['script-card-content-item-title-icon']}>
-          <span
-            className={
-              version_type === VersionType.UNRELEASED
-                ? styles['unreleased-icon']
-                : ''
-            }
-          />
-          <div className={styles['script-card-content-item-title-icon-text']}>
-            {VersionTypeEnum.UNRELEASED}
-          </div>
-        </div>
-      );
-  }
+const iconClassMap: Partial<Record<ScriptStatus, string>> = {
+  [ScriptStatus.Released]: 'released-icon',
+  [ScriptStatus.Scheduling]: 'scheduled-icon',
+  [ScriptStatus.Editing]: 'unreleased-icon',
+  [ScriptStatus.EditCompleted]: 'unreleased-icon'
 };
+
+interface VersionStatusProps {
+  status: ScriptStatus;
+  className?: string;
+}
+
+export default function VersionStatus({
+  status,
+  className
+}: VersionStatusProps) {
+  const iconClass = iconClassMap[status] ?? 'unreleased-icon';
+
+  return (
+    <div className="flex min-w-[58px] items-center">
+      <span className={styles[iconClass]} />
+      <div
+        className={classNames(
+          'text-[14px] leading-[22px] text-[var(--color-text-1)]',
+          className
+        )}
+      >
+        {ScriptStatusName[status]}
+      </div>
+    </div>
+  );
+}

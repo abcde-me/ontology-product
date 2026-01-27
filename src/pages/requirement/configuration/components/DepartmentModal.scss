@@ -1,0 +1,46 @@
+.department-modal-content {
+  height: 600px;
+  overflow-y: auto;
+  border: 1px solid #e2e8f0;
+  border-radius: 4px;
+
+  &-tree {
+    padding: 0 12px;
+  }
+
+  .search-input {
+    background-color: #fff;
+    position: sticky;
+    top: 0;
+    z-index: 30;
+    padding-top: 12px;
+    padding-bottom: 8px;
+  }
+
+  .arco-tree {
+    padding-left: 4px;
+    padding-right: 4px;
+  }
+
+  .arco-tree-node-title {
+    color: #0f172a !important;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .arco-tree-node-selected .arco-tree-node-title,
+  .arco-tree-node-selected .arco-tree-node-title:hover {
+    color: #0f172a !important;
+    background-color: transparent !important;
+  }
+
+  .arco-tree-node-title:hover,
+  .arco-tree-node:hover {
+    background-color: transparent !important;
+  }
+
+  .arco-tree-node.arco-tree-node-selected {
+    background-color: transparent !important;
+  }
+}

@@ -16,7 +16,14 @@ export const TitleInput = memo(
     const { t } = useTranslation('plugin__console-plugin-appforge');
     const [localValue, setLocalValue] = useState(value);
 
-    const handleBlur = () => {
+    const handleBlur = (e) => {
+      const localValue = e.target.innerText;
+      if (!localValue.trim()) {
+        Message.error('标题不能为空');
+        setLocalValue('');
+        onBlur(value);
+        return;
+      }
       // 正则表达式：只允许中文、英文、数字、下划线和连字符
       const validPattern = /^[\u4e00-\u9fa5a-zA-Z0-9_-]*$/;
       if (!validPattern.test(localValue)) {
@@ -50,16 +57,35 @@ export const TitleInput = memo(
     };
 
     return (
-      <input
-        value={localValue}
-        onChange={(e) => !getNodesReadOnly() && setLocalValue(e.target.value)}
+      <div
+        contentEditable={!getNodesReadOnly()}
+        // onInput={(e) => {
+        //   // @ts-ignore
+        //   !getNodesReadOnly() && setLocalValue(e.target.innerText);
+        // }}
         className={`
-        system-xl-semibold mr-2 h-7 min-w-0 grow appearance-none rounded-md border border-transparent px-1 text-[#1E293B]
-        text-text-primary outline-none focus:shadow-xs ${className}
+        system-xl-semibold h-7 min-w-0 appearance-none rounded-md border border-transparent px-1
+        text-[#1E293B]
+        text-text-primary outline-none focus:shadow-xs ${className} max-w-[280px] overflow-x-auto overflow-y-hidden whitespace-nowrap
       `}
+        // style={{ width: ((localValue?.length || 0) + 1) * 16 }}
+        style={{ fontWeight: 500 }}
         placeholder={t('workflow.common.addTitle') || ''}
         onBlur={handleBlur}
-      />
+        onBeforeInput={(e) => {
+          // @ts-ignore
+          if (e.inputType === 'insertParagraph') {
+            e.preventDefault();
+          }
+        }}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+          }
+        }}
+      >
+        {localValue || value}
+      </div>
     );
   }
 );

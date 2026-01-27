@@ -15,7 +15,7 @@ import PolicyForm from '@/components/policy-from/index';
 import EllipsisPopover from '@/components/ellipsis-popover-com';
 import brother from '../brother';
 import MarkdownBase from '@/components/markdownBase';
-import NoDataEmpty from '@/components/no-data';
+import { NoDataCard } from '@ceai-front/arco-material';
 import TagContent from '../tagContent';
 import SegmentDrawer from '@/pages/ragDetail/components/drawers/SegmentDrawer';
 import { useRagDetailStore } from '@/pages/ragDetail/store/ragDetailStore';
@@ -78,11 +78,11 @@ function HitTest(props: { datasetName: string }) {
   });
 
   const mocktest = {
-    reranking_enable: false,
+    reranking_enable: true,
     search_method: 'Hybrid',
     score_threshold_enabled: true,
     score_threshold: 0.1,
-    top_k: 50,
+    top_k: 20,
     weights: 0.7
   };
   const submitEditeditPolicy = () => {
@@ -179,6 +179,7 @@ function HitTest(props: { datasetName: string }) {
     }
   ];
   const FuncChildFrom = (e) => {
+    console.log('策略配置改变了～', e);
     setfromdata(e);
   };
   const Functest = async () => {
@@ -336,7 +337,7 @@ function HitTest(props: { datasetName: string }) {
             type="outline"
             icon={<IconSettings />}
             onClick={oncEditPolicy}
-            disabled
+            // disabled
           >
             检索设置
           </Button>
@@ -362,7 +363,7 @@ function HitTest(props: { datasetName: string }) {
                 onClick: () => onRowClick(record, index)
               };
             }}
-            noDataElement={<Empty className="mt-[15px]" />}
+            noDataElement={<NoDataCard title="暂无数据" type="block" />}
           />
         </div>
       </div>
@@ -520,28 +521,32 @@ function HitTest(props: { datasetName: string }) {
                 );
               })
             ) : (
-              <NoDataEmpty description="暂无结果" />
+              <NoDataCard title="暂无结果" />
             )}
           </div>
         </div>
       </div>
-      <Modal
-        title="策略配置"
-        visible={editPolicy}
-        onOk={() => submitEditeditPolicy()}
-        onCancel={() => clearEditeditPolicy()}
-        autoFocus={false}
-        focusLock={true}
-        style={{
-          width: 800
-        }}
-      >
-        <PolicyForm
-          FuncChildFrom={FuncChildFrom}
-          ref={childRef}
-          seteditPolicy={seteditPolicy}
-        ></PolicyForm>
-      </Modal>
+      {editPolicy && (
+        <Modal
+          title="策略配置"
+          visible={editPolicy}
+          onOk={() => submitEditeditPolicy()}
+          onCancel={() => clearEditeditPolicy()}
+          autoFocus={false}
+          focusLock={true}
+          style={{
+            width: 800
+          }}
+        >
+          <PolicyForm
+            FuncChildFrom={FuncChildFrom}
+            initParams={fromdata}
+            // onFormChange={onFormChangePolicy}
+            ref={childRef}
+            seteditPolicy={seteditPolicy}
+          ></PolicyForm>
+        </Modal>
+      )}
       {/* 图片放大弹窗 */}
       <ImageModal />
 

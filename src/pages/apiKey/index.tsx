@@ -294,7 +294,7 @@ function ApiKey(props) {
     // setformvalues(values);
   };
   return (
-    <div className="appforge-spin">
+    <div className="modaforge-spin">
       <div className="h-full overflow-auto py-[20px] pr-[20px]">
         <div className="min-h-full rounded-[12px] bg-white px-[24px] py-[20px]">
           <div className="mb-[20px] flex items-center justify-between">

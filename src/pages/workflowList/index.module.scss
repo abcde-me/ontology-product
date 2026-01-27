@@ -1,3 +1,5 @@
+$primary-color: rgb(0, 125, 250);
+
 .workflow {
   background-color: white;
   display: flex;
@@ -11,8 +13,40 @@
     line-height: 32px;
   }
 
+  :global(.arco-table-tr) {
+    &:hover {
+      :global(.workflow-name-content) {
+        color: $primary-color !important;
+      }
+
+      .workflow-name-copy {
+        visibility: visible;
+
+        &:hover {
+          visibility: visible;
+          color: $primary-color;
+          cursor: pointer;
+        }
+      }
+    }
+  }
+
+  .workflow-name {
+    .workflow-name-copy {
+      visibility: hidden;
+    }
+
+    &:hover {
+      color: $primary-color !important;
+
+      .workflow-name-copy {
+        visibility: visible;
+      }
+    }
+  }
+
   .operate-text {
-    color: rgb(0, 125, 250);
+    color: $primary-color;
     cursor: pointer;
     margin-right: 16px;
   }
@@ -38,7 +72,7 @@
     :global(.arco-table-tr):hover
     .hover-change
     :global(.ellipsis-text) {
-    color: rgb(0, 125, 250);
+    color: $primary-color;
     cursor: pointer;
   }
 
@@ -71,6 +105,22 @@
   }
 }
 
+.flow-type-menu {
+  border: none !important;
+
+  :global(.arco-dropdown-menu-item) {
+    &:hover {
+      background: #eef6ff !important;
+    }
+  }
+
+  :global(.arco-dropdown-menu-item) {
+    padding: 8px 12px !important;
+    height: auto;
+    line-height: unset !important;
+  }
+}
+
 .workflow-list-modal-title {
   font-weight: 500;
   font-size: 16px;
@@ -82,9 +132,21 @@
   font-size: 14px;
   color: #1d2129;
   height: 22px;
-  margin: 10px 0 0 28px;
+  margin: 10px 0 0;
 }
 
 :global(.arco-modal-footer) :global(.arco-btn-secondary):focus {
   box-shadow: none;
+}
+
+.content-with-copy {
+  .workflow-name-copy {
+    visibility: hidden;
+
+    &:hover {
+      visibility: visible;
+      color: $primary-color;
+      cursor: pointer;
+    }
+  }
 }

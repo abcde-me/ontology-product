@@ -1,6 +1,7 @@
 import React, { useMemo, useEffect, useRef, useCallback } from 'react';
 import { Empty } from '@arco-design/web-react';
 import { Virtuoso, VirtuosoHandle } from 'react-virtuoso';
+import { NoDataCard } from '@ceai-front/arco-material';
 import {
   useRagDetailStore,
   type Segment,
@@ -241,7 +242,7 @@ const SegmentList: React.FC<SegmentListProps> = ({
           <SegmentListHeader totalCount={segments.length} filteredCount={0} />
         )}
         <div className="flex flex-1 items-center justify-center">
-          <Empty description="暂无数据" />
+          <NoDataCard type="block" />
         </div>
       </div>
     );

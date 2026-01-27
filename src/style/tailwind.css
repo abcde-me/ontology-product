@@ -11,7 +11,7 @@
     @apply appforge-icon cursor-pointer hover:text-[rgb(var(--link-6))];
   }
 
-  .appforge-spin {
+  .modaforge-spin {
     @apply block h-full;
 
     > .arco-spin-children {

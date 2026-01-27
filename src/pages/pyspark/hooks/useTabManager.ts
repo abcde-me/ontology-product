@@ -1,6 +1,6 @@
 import { useState, useCallback, useRef } from 'react';
 import { Message } from '@arco-design/web-react';
-import { DirectoryTreeRef } from '@/components/directory-tree/DirectoryTree';
+import { DirectoryTreeRef } from '../components/directory-tree/DirectoryTree';
 import { createPythonItem } from '@/api/pyspark';
 import { PythonItemType } from '@/types/pythonApi';
 

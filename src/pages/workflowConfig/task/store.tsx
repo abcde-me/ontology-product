@@ -3,6 +3,7 @@ import type { App, AppSSO } from '@/pages/workflowConfig/types/app';
 import type { IChatItem } from '@/pages/workflowConfig/chat/chat/type';
 // import appDetailJson from '@/pages/workflowConfig/mockData/appDetail.json'
 import { WorkflowDetailRes } from '@/types/workflowApi';
+import type { NodeProcessData } from '@/pages/workflowConfig/workflow/types';
 
 interface State {
   workflowDetail?: WorkflowDetailRes & Partial<AppSSO>;
@@ -13,6 +14,7 @@ interface State {
   showAgentLogModal: boolean;
   showMessageLogModal: boolean;
   showAppConfigureFeaturesModal: boolean;
+  nodesProcessDetail: NodeProcessData[];
 }
 
 interface Action {
@@ -23,6 +25,7 @@ interface Action {
   setShowPromptLogModal: (showPromptLogModal: boolean) => void;
   setShowAgentLogModal: (showAgentLogModal: boolean) => void;
   setShowMessageLogModal: (showMessageLogModal: boolean) => void;
+  setNodesProcessDetail: (tasks: NodeProcessData[]) => void;
   setShowAppConfigureFeaturesModal: (
     showAppConfigureFeaturesModal: boolean
   ) => void;
@@ -59,5 +62,8 @@ export const useStore = create<State & Action>((set) => ({
     }),
   showAppConfigureFeaturesModal: false,
   setShowAppConfigureFeaturesModal: (showAppConfigureFeaturesModal) =>
-    set(() => ({ showAppConfigureFeaturesModal }))
+    set(() => ({ showAppConfigureFeaturesModal })),
+  nodesProcessDetail: [],
+  setNodesProcessDetail: (nodesProcessDetail) =>
+    set(() => ({ nodesProcessDetail }))
 }));

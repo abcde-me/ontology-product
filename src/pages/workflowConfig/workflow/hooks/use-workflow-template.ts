@@ -1,10 +1,13 @@
 import { generateNewNode } from '../utils';
 import { START_INITIAL_POSITION } from '../constants';
 import { useNodesInitialData } from './use-nodes-data';
+import { useParams } from 'react-router-dom';
+import { BlockEnum } from '@/pages/workflowConfig/workflow/types';
 
 export const useWorkflowTemplate = () => {
   const isChatMode = false;
   const nodesInitialData = useNodesInitialData();
+  const { type: flowType } = useParams<Record<string, string>>();
 
   const { newNode: startNode } = generateNewNode({
     data: nodesInitialData.start,
@@ -20,7 +23,7 @@ export const useWorkflowTemplate = () => {
   });
   const { newNode: picNode } = generateNewNode({
     id: `${Number(startNode.id) + 2}`,
-    data: nodesInitialData.pic,
+    data: nodesInitialData.image,
     position: {
       x: START_INITIAL_POSITION.x + 32 + 270,
       y: START_INITIAL_POSITION.y + 125
@@ -137,6 +140,13 @@ export const useWorkflowTemplate = () => {
     target: endNode.id,
     targetHandle: 'target'
   };
+
+  if (flowType === 'struct') {
+    return {
+      nodes: [],
+      edges: []
+    };
+  }
 
   if (isChatMode) {
     // const { newNode: llmNode } = generateNewNode({

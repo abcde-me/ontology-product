@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
   Button,
   DatePicker,
@@ -11,72 +11,90 @@ import {
   TableColumnProps
 } from '@arco-design/web-react';
 import EllipsisPopover from '@/components/ellipsis-popover-com';
-import { DbTableListParamss, getDbItemList } from '@/api/dataCatalog';
-import { formatDateTime } from '../../utils';
-import getLabelByValue from '@/utils/getLabelByValue';
 import { IconRefresh } from '@arco-design/web-react/icon';
-import './ModalParamList.scss';
+import { ListDevelopSystemParamParams } from '@/types/sqlDevelopApi';
+import { listDevelopSystemParam } from '@/api/sql-develop';
+import { NoDataCard } from '@ceai-front/arco-material';
 const FormItem = Form.Item;
-
-const defaultfileTypeList = [
-  {
-    label: 'MySQL',
-    text: 'MySQL',
-    value: 'MySQL'
-  },
-  {
-    label: 'PostgreSQL',
-    text: 'PostgreSQL',
-    value: 'PostgreSQL'
-  }
-];
 
 // 参数详情 弹框
 const ModalParamList = ({ paramVisible, onCancel }) => {
   const [form] = Form.useForm();
-  const [searchParams, setSearchParams] = React.useState<DbTableListParamss>();
+  const [searchParams, setSearchParams] =
+    React.useState<ListDevelopSystemParamParams>();
   const [listData, setListData] = React.useState<any[]>([]);
   const [loading, setLoading] = React.useState<boolean>(false);
   const [total, setTotal] = React.useState<number>(0);
   const [current, setCurrent] = React.useState<number>(1);
   const [pageSize, setPageSize] = React.useState<number>(10);
+  const [isReset, setIsReset] = React.useState(false);
+  const handleSearchChange = (values: any) => {
+    const allFormData = form.getFieldsValue();
+    setSearchParams({
+      config_key: allFormData.config_key,
+      config_demo: allFormData.config_demo,
+      config_desc: allFormData.config_desc
+    });
+  };
 
-  const handleSearchChange = (values: any) => {};
+  // 获取表格数据
+  const getListData = async (
+    page?: number,
+    params?: ListDevelopSystemParamParams
+  ) => {
+    setLoading(true);
+    const res = await listDevelopSystemParam({
+      page: page ?? current,
+      page_size: pageSize,
+      ...(params ?? searchParams)
+    });
+    setLoading(false);
+    if (res.status === 200) {
+      setListData(res?.data?.items || []);
+      setTotal(res.data.total || 0);
+    }
+  };
+
+  useEffect(() => {
+    if (isReset) {
+      setIsReset(false);
+      setSearchParams(undefined);
+    }
+    getListData();
+  }, [current, pageSize, isReset]);
 
   const columns: TableColumnProps[] = [
     {
       title: '序号',
       dataIndex: 'id',
-      width: 80,
-      sorter: (a, b) => a.id - b.id
+      width: 80
     },
     {
       title: '参数名',
-      dataIndex: 'table_name',
-      ellipsis: true,
-      width: 174
+      dataIndex: 'config_key',
+      width: 174,
+      render: (_, record) => (
+        <EllipsisPopover value={record.config_key} isEdit={false} />
+      )
     },
     {
-      title: '参数值',
-      dataIndex: 'table_name',
-      ellipsis: true,
-      width: 174
+      title: '示例',
+      dataIndex: 'config_demo',
+      width: 174,
+      render: (_, record) => (
+        <EllipsisPopover value={record.config_demo} isEdit={false} />
+      )
     },
     {
       title: '参数说明',
-      dataIndex: 'table_name',
-      ellipsis: true,
+      dataIndex: 'config_desc',
       width: 174,
       // 如果没有值显示暂无参数说明
       render: (_, record) =>
-        record.table_name ? (
-          <EllipsisPopover
-            value={record.table_name}
-            isEdit={false}
-            preferTypography
-          />
+        record.config_desc ? (
+          <EllipsisPopover value={record.config_desc} isEdit={false} />
         ) : (
-          <div>暂无参数说明</div>
+          <div className="text-[var(--color-text-6)]">暂无参数说明</div>
         )
     }
   ];
@@ -88,58 +106,53 @@ const ModalParamList = ({ paramVisible, onCancel }) => {
       footer={null}
       onCancel={onCancel}
     >
-      <div className="modal-param-list-warper pb-[16px]">
-        <div className="from-search-warper">
+      <div className="pb-[16px]">
+        <div className="mb-[16px] flex items-center justify-between overflow-x-auto whitespace-nowrap">
           <Form
+            className="flex flex-1 flex-nowrap items-center gap-[16px] [&_.arco-form-item-wrapper]:flex-1 [&_.arco-form-item]:mb-0 [&_.arco-form-item]:mr-0 [&_.arco-form-item]:flex-1"
             autoComplete="off"
             layout="inline"
             form={form}
             onValuesChange={(values: any) => handleSearchChange(values)}
           >
-            <FormItem
-              label="参数名:"
-              field="param_name"
-              style={{ marginRight: 8, marginBottom: 16 }}
-            >
-              <Input.Search
-                style={{ width: 193 }}
-                allowClear
-                placeholder="输入参数名搜索"
-              />
+            <FormItem label="参数名:" field="config_key">
+              <Input allowClear placeholder="输入参数名搜索" />
             </FormItem>
-            <FormItem
-              label="参数值:"
-              field="param_value"
-              style={{ marginRight: 8, marginBottom: 16 }}
-            >
-              <Input.Search
-                style={{ width: 193 }}
-                allowClear
-                placeholder="输入参数值搜索"
-              />
+            <FormItem label="示例:" field="config_demo">
+              <Input allowClear placeholder="输入参数值搜索" />
             </FormItem>
-            <FormItem
-              label="参数说明:"
-              field="param_desc"
-              style={{ marginRight: 8, marginBottom: 16 }}
-            >
-              <Input.Search
-                style={{ width: 180 }}
-                allowClear
-                placeholder="输入参数说明搜索"
-              />
+            <FormItem label="参数说明:" field="config_desc">
+              <Input allowClear placeholder="输入参数说明搜索" />
             </FormItem>
           </Form>
           <Button
             icon={<IconRefresh />}
+            className="ml-[16px] mr-[12px] px-[0px]"
             onClick={() => {
               form.resetFields();
+              setCurrent(1);
+              setIsReset(true);
             }}
             type="text"
           >
             重置
           </Button>
-          <Button type="primary">查询</Button>
+          <Button
+            onClick={() => {
+              const allFormData = form.getFieldsValue();
+              const params = {
+                config_key: allFormData.config_key,
+                config_demo: allFormData.config_demo,
+                config_desc: allFormData.config_desc
+              };
+              setSearchParams(params);
+              setCurrent(1);
+              getListData(1, params);
+            }}
+            type="primary"
+          >
+            查询
+          </Button>
         </div>
         <Table
           style={{
@@ -149,19 +162,27 @@ const ModalParamList = ({ paramVisible, onCancel }) => {
           columns={columns}
           data={listData}
           loading={loading}
-          rowKey="table_id"
+          rowKey="id"
           scroll={{ y: 500 }}
+          pagination={false}
+          noDataElement={<NoDataCard title="暂无数据" />}
         />
-        <div className="pagination-content">
-          <Pagination
-            total={total}
-            current={current}
-            pageSize={pageSize}
-            showTotal
-            showJumper
-            sizeCanChange
-          />
-        </div>
+        {total > 0 && (
+          <div className="mt-[16px] flex items-center justify-end">
+            <Pagination
+              total={total}
+              current={current}
+              pageSize={pageSize}
+              onChange={(current, pageSize) => {
+                setCurrent(current);
+                setPageSize(pageSize);
+              }}
+              showTotal
+              showJumper
+              sizeCanChange
+            />
+          </div>
+        )}
       </div>
     </Modal>
   );

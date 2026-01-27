@@ -1,27 +1,27 @@
-import React, { memo, useEffect, useMemo, useState } from 'react';
-import { Input, Button, Popover } from '@arco-design/web-react';
-import { IconCaretRight } from '@arco-design/web-react/icon';
+import React, { memo, useEffect, useMemo, useRef, useState } from 'react';
+import { Input, Popover } from '@arco-design/web-react';
 import classNames from 'classnames';
 import ParameterIcon from '../../assets/parameter-icon.svg';
 import ArrowRightIcon from '../../assets/arrow-right-icon.svg';
+import { ScriptParam } from '@/types/sqlDevelopApi';
+import { useLocalParams } from '@/hooks/useLocalParams';
+import { SQL_PARAM_PLACEHOLDER_REGEX } from '../../constant';
+import { NoDataCard } from '@ceai-front/arco-material';
 
-export interface Parameter {
-  name: string;
-  value: string;
-  order: number; // 用于保持最新参数在顶部
-}
+// 扩展 ScriptParam 以支持内部排序
+type ParameterWithOrder = ScriptParam & { _order?: number };
 
 interface ParameterSidebarProps {
   content: string;
-  onParameterChange?: (params: Parameter[]) => void;
+  canEdit: boolean;
+  onParameterChange?: (params: ScriptParam[]) => void;
   visible?: boolean;
   onVisibleChange?: (visible: boolean) => void;
   onCollapsedChange?: (collapsed: boolean) => void;
   onParameterHover?: (paramName: string | null) => void;
+  initialParams?: ScriptParam[]; // 初始参数值（从后端加载）
+  systemParamKeys?: Set<string>; // 系统参数名列表
 }
-
-// 提取参数的正则表达式
-const PARAM_REGEX = /\$\{([^}]+)\}/g;
 
 // 检测是否有 ${} 模式（包括未完成的）
 const hasParameterPattern = (content: string): boolean => {
@@ -29,50 +29,45 @@ const hasParameterPattern = (content: string): boolean => {
   return /\$\{/.test(content);
 };
 
-// 从内容中提取所有参数
-const extractParameters = (content: string): Parameter[] => {
-  // 重置正则的 lastIndex，避免全局匹配的问题
-  PARAM_REGEX.lastIndex = 0;
-  const paramMap = new Map<string, Parameter>();
-  const matches = Array.from(content.matchAll(PARAM_REGEX));
+// 检查参数名是否与系统参数冲突（支持 ${} 和 $[] 两种格式）
+const isParamNameConflict = (
+  paramName: string,
+  systemParamKeys: Set<string> | Set<unknown>
+): boolean => {
+  if (!paramName || systemParamKeys.size === 0) {
+    return false;
+  }
 
-  matches.forEach((match, index) => {
-    const paramName = match[1].trim();
-    if (paramName) {
-      // 如果参数已存在，更新 order 为最新（数字越大表示越新）
-      if (paramMap.has(paramName)) {
-        const existing = paramMap.get(paramName)!;
-        existing.order = matches.length - index; // 最新的在最前面，所以 order 更大
-      } else {
-        paramMap.set(paramName, {
-          name: paramName,
-          value: '',
-          order: matches.length - index
-        });
-      }
-    }
-  });
+  const formattedWithBrace = `\${${paramName}}`;
+  const formattedWithBracket = `$[${paramName}]`;
 
-  // 转换为数组并按 order 降序排列（最新的在顶部）
-  return Array.from(paramMap.values()).sort((a, b) => b.order - a.order);
+  return (
+    systemParamKeys.has(formattedWithBrace) ||
+    systemParamKeys.has(formattedWithBracket)
+  );
 };
 
 const ParameterSidebar: React.FC<ParameterSidebarProps> = memo(
   ({
     content,
+    canEdit,
     onParameterChange,
     visible: controlledVisible,
     onVisibleChange,
     onCollapsedChange,
-    onParameterHover
+    onParameterHover,
+    initialParams,
+    systemParamKeys = new Set()
   }) => {
     const [isCollapsed, setIsCollapsed] = useState(false);
-    const [localParams, setLocalParams] = useState<Parameter[]>([]);
+    const [isInitialized, setIsInitialized] = useState(false);
 
-    // 从内容中提取参数
-    const extractedParams = useMemo(() => {
-      return extractParameters(content);
-    }, [content]);
+    // 使用 useLocalParams hook
+    const { localParams, parseAndSetParams, updateParamValue, setLocalParams } =
+      useLocalParams({
+        initialParams,
+        regex: SQL_PARAM_PLACEHOLDER_REGEX
+      });
 
     // 检测是否有第一个 ${}（检测是否有参数模式）
     const hasFirstParam = useMemo(() => {
@@ -82,6 +77,11 @@ const ParameterSidebar: React.FC<ParameterSidebarProps> = memo(
     // 内部可见性状态（如果外部没有控制，则根据是否有参数来决定）
     const isVisible =
       controlledVisible !== undefined ? controlledVisible : hasFirstParam;
+
+    // 处理参数值变化
+    const handleValueChange = (paramKey: string, value: string) => {
+      updateParamValue(paramKey, value);
+    };
 
     // 通知外部可见性变化
     useEffect(() => {
@@ -97,52 +97,23 @@ const ParameterSidebar: React.FC<ParameterSidebarProps> = memo(
       }
     }, [isCollapsed, onCollapsedChange]);
 
-    // 同步提取的参数到本地状态，同时保留已输入的值
+    // 参数列表变化时，通知外部更新 scriptParams
     useEffect(() => {
-      if (extractedParams.length > 0) {
-        setLocalParams((prevParams) => {
-          const paramMap = new Map<string, string>();
-          // 保留已有参数的值
-          prevParams.forEach((p) => {
-            if (p.name && p.value) {
-              paramMap.set(p.name, p.value);
-            }
-          });
+      onParameterChange?.(localParams);
+    }, [localParams]);
 
-          // 合并新提取的参数，保留已有的值
-          const merged = extractedParams.map((param) => ({
-            ...param,
-            value: paramMap.get(param.name) || param.value
-          }));
+    // 编辑器内容变化时，解析参数
+    useEffect(() => {
+      parseAndSetParams(content);
+    }, [content]);
 
-          // 通知外部
-          if (onParameterChange) {
-            onParameterChange(merged);
-          }
-
-          return merged;
-        });
-      } else {
-        // 如果没有参数了，清空
-        setLocalParams([]);
-        if (onParameterChange) {
-          onParameterChange([]);
-        }
+    useEffect(() => {
+      if (isInitialized) {
+        return;
       }
-    }, [extractedParams, onParameterChange]);
-
-    // 处理参数值变化
-    const handleValueChange = (paramName: string, value: string) => {
-      setLocalParams((prev) => {
-        const updated = prev.map((p) =>
-          p.name === paramName ? { ...p, value } : p
-        );
-        if (onParameterChange) {
-          onParameterChange(updated);
-        }
-        return updated;
-      });
-    };
+      setIsInitialized(true);
+      setLocalParams(initialParams || []);
+    }, [initialParams]);
 
     if (!isVisible) {
       return null;
@@ -151,7 +122,7 @@ const ParameterSidebar: React.FC<ParameterSidebarProps> = memo(
     return (
       <div
         className={classNames(
-          'absolute right-0 top-0 z-10 h-full transition-transform duration-300 ease-in-out',
+          'z-1 absolute right-0 top-0 h-full transition-transform duration-300 ease-in-out',
           isCollapsed ? 'w-auto' : 'w-[240px]'
         )}
       >
@@ -159,7 +130,10 @@ const ParameterSidebar: React.FC<ParameterSidebarProps> = memo(
           /* 收起状态：显示图标，hover 时显示完整信息 */
           <div className="mt-[8px] h-[32px] w-[32px] cursor-pointer">
             <Popover content="打开引用参数列表" position="left">
-              <ParameterIcon onClick={() => setIsCollapsed(false)} />
+              <ParameterIcon
+                className="hover:text-[rgba(var(--primary-7))]"
+                onClick={() => setIsCollapsed(false)}
+              />
             </Popover>
           </div>
         ) : (
@@ -169,7 +143,7 @@ const ParameterSidebar: React.FC<ParameterSidebarProps> = memo(
               <span className="text-[14px] font-bold">引用参数</span>
               <Popover content="收起" position="left">
                 <ArrowRightIcon
-                  className="h-[24px] w-[18px] cursor-pointer"
+                  className="h-[24px] w-[18px] cursor-pointer hover:text-[rgba(var(--primary-7))]"
                   onClick={() => setIsCollapsed(true)}
                 />
               </Popover>
@@ -177,18 +151,18 @@ const ParameterSidebar: React.FC<ParameterSidebarProps> = memo(
 
             <div className="flex-1 overflow-y-auto px-[12px] py-[4px]">
               {localParams.length === 0 ? (
-                <div className="flex h-[200px] items-center justify-center">
-                  <div className="text-sm text-slate-400">暂无参数名</div>
+                <div className="flex h-full items-center justify-center">
+                  <NoDataCard title="暂无引用参数" type="block" />
                 </div>
               ) : (
                 <div className="flex flex-col gap-[10px]">
                   {localParams.map((param, index) => (
                     <div
-                      key={`${param.name}-${index}`}
+                      key={`${param.config_key}-${index}`}
                       className="flex flex-col rounded-[4px] border border-[#E2E8F0] p-[8px] hover:bg-[#EEF6FF]"
                       onMouseEnter={() => {
                         if (onParameterHover) {
-                          onParameterHover(param.name);
+                          onParameterHover(param.config_key);
                         }
                       }}
                       onMouseLeave={() => {
@@ -201,19 +175,33 @@ const ParameterSidebar: React.FC<ParameterSidebarProps> = memo(
                         参数名:
                       </div>
                       <Input
-                        value={param.name}
+                        value={param.config_key}
                         readOnly
                         disabled
                         className="mb-[8px] w-full"
                         placeholder="暂无参数"
+                        status={
+                          isParamNameConflict(param.config_key, systemParamKeys)
+                            ? 'error'
+                            : undefined
+                        }
                       />
+                      {isParamNameConflict(
+                        param.config_key,
+                        systemParamKeys
+                      ) && (
+                        <div className="mb-[8px] text-[12px] text-[#F53F3F]">
+                          自定义参数不能和系统参数重名
+                        </div>
+                      )}
                       <div className="mb-[4px] text-[14px] text-[var(--color-text-2)]">
                         参数值:
                       </div>
                       <Input
-                        value={param.value}
+                        value={param.config_value}
+                        disabled={!canEdit}
                         onChange={(value) =>
-                          handleValueChange(param.name, value)
+                          handleValueChange(param.config_key, value)
                         }
                         className="w-full"
                         placeholder="请输入参数值"

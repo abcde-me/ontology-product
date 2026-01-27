@@ -50,6 +50,8 @@ export interface connectorDetailType {
     database?: string; // 数据库名
     password?: string; // 密码
     region?: string;
+    autoOffsetReset?: string; // 偏移重置策略
+    bootstrapServers?: string; // 集群的入口地址列表
   };
   creator: string;
   created_at: string;

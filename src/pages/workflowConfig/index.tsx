@@ -5,7 +5,7 @@ import Workflow from '@/pages/workflowConfig/workflow';
 import { useStore } from '@/pages/workflowConfig/task/store';
 import { createWorkflow, getWorkflowDetail } from '@/api/workflow';
 import { useParams } from '@/utils/url';
-import { useHistory } from 'react-router-dom';
+import { useHistory, useParams as useRouterParams } from 'react-router-dom';
 import { Message } from '@arco-design/web-react';
 import Cookies from 'js-cookie';
 import './styles/index.css';
@@ -21,6 +21,8 @@ function WorkflowConfig({ setHeight }) {
   const appId = useParams('workflow_uuid');
   const workflowVersion = useParams('workflow_version');
   const history = useHistory();
+  const { type: flowType = 'no_struct' } =
+    useRouterParams<Record<string, string>>();
 
   useEffect(() => {
     const init = async () => {
@@ -29,7 +31,6 @@ function WorkflowConfig({ setHeight }) {
           workflow_version: workflowVersion,
           workflow_uuid: appId
         });
-
         if (workflowDetailRes?.data) {
           setWorkflowDetail(workflowDetailRes.data);
           setLoading(false);
@@ -38,14 +39,15 @@ function WorkflowConfig({ setHeight }) {
         }
       } else {
         const workflowInfo = await createWorkflow({
-          workflow_name: `新建工作流_${Date.now()}`
+          workflow_name: `新建工作流_${Date.now()}`,
+          workflow_type: flowType
         });
 
         if (workflowInfo?.data?.workflow_uuid) {
           const { workflow_uuid, ds_workflow_id } = workflowInfo.data;
 
           history.push(
-            `/tenant/compute/modaforge/workflowConfig?workflow_uuid=${workflow_uuid}&ds_workflow_id=${ds_workflow_id}`
+            `/tenant/compute/modaforge/workflowConfig/${flowType}?workflow_uuid=${workflow_uuid}&ds_workflow_id=${ds_workflow_id}`
           );
         } else {
           Message.error(workflowInfo?.message ?? '创建工作流失败');

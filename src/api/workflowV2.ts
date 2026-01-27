@@ -1,5 +1,21 @@
 import UAPI from '@/api';
 import { getModels, getModelsGroupByProvider, getProviders } from './modelV2';
+import {
+  SQLScriptItem,
+  SQLVersion
+} from '@/pages/workflowConfig/workflow/nodes/sql-node/types';
+import React from 'react';
+import { WorkflowRunTask } from '@/pages/workflowConfig/types/workflow';
+import { NodeProcessData } from '@/pages/workflowConfig/workflow/types';
+import { isNil } from 'lodash-es';
+
+const formatSqlScript = (scripts: SQLScriptItem[]) => {
+  return scripts.map(({ script_name, script_id, version, ...other }) => ({
+    ...other,
+    label: script_name,
+    value: script_id.toString()
+  }));
+};
 
 export async function getWorkflowDraft(params: any = {}) {
   const searchParams = new URLSearchParams(location.search);
@@ -8,7 +24,7 @@ export async function getWorkflowDraft(params: any = {}) {
     params.dsWorkflowId || searchParams.get('ds_workflow_id');
   const workflowVersion =
     params.workflowVersion || searchParams.get('workflow_version') || '';
-  return UAPI.RES.workflowDraft({})
+  const result = await UAPI.RES.workflowDraft({})
     .post({
       workflow_uuid: workflowUUID,
       ds_workflow_id: dsWorkflowId,
@@ -16,15 +32,53 @@ export async function getWorkflowDraft(params: any = {}) {
     })
     .inRegion()
     .do();
+
+  // 将 data.graph.nodes 中 type 为 'pic' 的节点映射成 'image'
+  if (result?.data?.graph?.nodes) {
+    result.data.graph.nodes = result.data.graph.nodes.map((node: any) => {
+      if (node?.data?.type === 'pic') {
+        return {
+          ...node,
+          data: {
+            ...node.data,
+            type: 'image'
+          }
+        };
+      }
+      return node;
+    });
+  }
+
+  // 将 data.graph.edges 中 data.sourceType 或 data.targetType 为 'pic' 的映射成 'image'
+  if (result?.data?.graph?.edges) {
+    result.data.graph.edges = result.data.graph.edges.map((edge: any) => {
+      const needsUpdate =
+        edge?.data?.sourceType === 'pic' || edge?.data?.targetType === 'pic';
+      if (needsUpdate) {
+        return {
+          ...edge,
+          data: {
+            ...edge.data,
+            ...(edge.data.sourceType === 'pic' && { sourceType: 'image' }),
+            ...(edge.data.targetType === 'pic' && { targetType: 'image' })
+          }
+        };
+      }
+      return edge;
+    });
+  }
+
+  return result;
 }
 
-export function createWorkflowDraft(params: any = {}) {
+export async function createWorkflowDraft(params: any = {}) {
+  // console.trace('save workflow draft');
   const searchParams = new URLSearchParams(location.search);
   const workflowUUID = params.workflowUUID || searchParams.get('workflow_uuid');
   const dsWorkflowId =
     params.dsWorkflowId || searchParams.get('ds_workflow_id');
   const workflowVersion =
-    params.workflowVersion || searchParams.get('workflow_version') || '';
+    params.workflowVersion || searchParams.get('workflow_version') || 0;
   return UAPI.RES.editWorkFlowDraft({})
     .post({
       workflow_uuid: workflowUUID,
@@ -205,4 +259,153 @@ export async function getDifyProversList() {
   }));
   console.log('getDifyProversList', result);
   return result;
+}
+
+// SQL列表
+export async function getSQLListInSQLNode(scriptID?: string) {
+  const res = await UAPI.RES.getSQLListInSQLNode({})
+    .post({
+      page: 0,
+      page_size: 999,
+      is_release: 1
+    })
+    .inRegion()
+    .do();
+  const list = (res.data?.items || []) as SQLScriptItem[];
+  // 过滤当前查询的脚本和未被引用的脚本
+  return formatSqlScript(
+    list.filter(({ process_name, script_id }) =>
+      isNil(scriptID)
+        ? !process_name
+        : !process_name || script_id.toString() === scriptID.toString()
+    )
+  );
+}
+
+// SQL版本列表
+export async function getSQLVersionInSQLNode(script_id: React.Key) {
+  const res = await UAPI.RES.getSQLVersionInSQLNode({})
+    .post({
+      page: 0,
+      page_size: 999,
+      script_id
+    })
+    .inRegion()
+    .do();
+  return ((res.data?.items || []) as SQLVersion[]).map(
+    ({ version, version_name, ...other }) => ({
+      ...other,
+      value: version.toString(),
+      version_name,
+      label: version_name,
+      isLeaf: true
+    })
+  );
+}
+
+// 工作流-获取工作流最后一条运行记录
+export async function getWorkflowLastTask(data: {
+  process_definition_code: number;
+  trigger_code?: number;
+}) {
+  const res = await UAPI.RES.getWorkflowLastTask({})
+    .post({
+      ...data,
+      orders: [
+        {
+          column: 'id',
+          asc: false
+        }
+      ],
+      page: 1,
+      page_size: 1
+    })
+    .inRegion()
+    .do();
+  return (res.data?.items || [])?.[0] as WorkflowRunTask;
+}
+
+// 工作流-获取工作流节点运行记录
+export async function getWorkflowNodeTask(task_id: React.Key) {
+  const res = await UAPI.RES.getWorkflowNodeTask({})
+    .post({
+      process_instance_id: task_id,
+      page: 1,
+      page_size: 999
+    })
+    .inRegion()
+    .do();
+  return (res.data?.items || []) as NodeProcessData[];
+}
+
+// 工作流-获取工作流运行日志
+export async function getWorkflowTaskLogs(task_id: React.Key, start: number) {
+  return await UAPI.RES.getWorkflowTaskLogs({})
+    .post({
+      task_instance_id: task_id,
+      limit: 100,
+      skip_line_num: start
+    })
+    .inRegion()
+    .do();
+}
+
+/**
+ *  // 工作流-结构化-数据推送-来源库
+ *   getSourceDatabaseList: PrefixAimdp + '/ListMetadataIcebergDatabaseName',
+ */
+export async function getSourceDatabaseList() {
+  const res = await UAPI.RES.getSourceDatabaseList({})
+    .post({
+      instanceId: 1
+    })
+    .inRegion()
+    .do();
+  return res.data?.data || [];
+}
+
+/**
+ *   // 工作流-结构化-数据推送-来源表
+ *   getSourceTable: PrefixAimdp + '/ListMetadataIcebergTable',
+ */
+export async function getSourceTable(databaseId: React.Key) {
+  const res = await UAPI.RES.getSourceTable({})
+    .post({
+      pageNum: 1,
+      pageSize: 999,
+      filters: {
+        databaseId
+      }
+    })
+    .inRegion()
+    .do();
+  return res.data?.data?.list || [];
+}
+
+/**
+ *   // 工作流-结构化-数据推送-来源表字段
+ *   getSourceTableField: PrefixAimdp + '/ListMetadataIcebergField',
+ */
+export async function getSourceTableField(tableId: React.Key) {
+  const res = await UAPI.RES.getSourceTableField({})
+    .post({
+      pageNum: 1,
+      pageSize: 999,
+      filters: {
+        tableId
+      }
+    })
+    .inRegion()
+    .do();
+  return res.data?.data?.list || [];
+}
+
+// 工作流列表_外部前置任务调用
+export async function getWorkflowList(params: Record<string, any>) {
+  const res = await UAPI.RES.getWorkflowList({}).post(params).inRegion().do();
+  const { list = [], page_info = { total: 0 } } = res.data || {};
+  return {
+    items: list,
+    total: page_info.total
+  };
 }

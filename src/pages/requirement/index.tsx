@@ -1,26 +1,51 @@
-import React, { useEffect, useState } from 'react';
+import { deleteRequirement, getAnnotationList } from '@/api/dataAnnotation';
+import ImageIcon from '@/assets/annotation/new-image-column.svg';
+import AnnotationIcon from '@/assets/annotation/requirement-annotation.svg';
+import CreatIcon from '@/assets/annotation/requirement-creat.svg';
+import ExportPng from '@/assets/annotation/requirement-export.png';
+import QualityIcon from '@/assets/annotation/requirement-quality.svg';
+import TextIcon from '@/assets/annotation/text-column.svg';
+import EllipsisPopover from '@/components/ellipsis-popover-com';
+import { PermissionWrapper } from '@/components/PermissionGuard';
+import { REQUIREMENT_PERMISSIONS } from '@/config/permissions';
+import {
+  useHasPermission,
+  useUserInfo,
+  useSuperAdmin
+} from '@/store/userInfoStore';
+import getLabelByValue from '@/utils/getLabelByValue';
 import {
   Button,
   Form,
+  Image,
   Input,
+  Link,
+  Message,
+  Modal,
   Pagination,
   PaginationProps,
-  Table,
-  Message
+  Table
 } from '@arco-design/web-react';
-import { useHistory } from 'react-router';
 import { ColumnProps } from '@arco-design/web-react/es/Table';
-import EllipsisPopover from '@/components/ellipsis-popover-com';
-import noDataElement from '@/components/no-data';
-import { useUserInfo } from '@/store/userInfoStore';
-import { PermissionWrapper } from '@/components/PermissionGuard';
-import { IconPlus } from '@arco-design/web-react/icon';
-import { getAnnotationList, getAnnotationDownload } from '@/api/dataAnnotation';
-import { RequirementStatus, RequirementType, RequirementTypeMap } from './type';
 import { SorterInfo } from '@arco-design/web-react/es/Table/interface';
-import { useHasPermission } from '@/store/userInfoStore';
-import { REQUIREMENT_PERMISSIONS } from '@/config/permissions';
+import { IconPlus } from '@arco-design/web-react/icon';
+import {
+  ActionItem,
+  DotStatus,
+  ExpandableProcessFlow,
+  NoDataCard,
+  OperationMenu,
+  ProcessStep
+} from '@ceai-front/arco-material';
+import React, { useEffect, useState } from 'react';
+import { useHistory } from 'react-router';
+import { REQUIREMENT_STATUS_CONFIG } from './common';
 import './index.scss';
+import { RequirementType, RequirementTypeMap } from './type';
+
+interface RequirementProcessStep extends Omit<ProcessStep, 'description'> {
+  description: React.ReactNode;
+}
 
 export default function Requirement() {
   const [form] = Form.useForm();
@@ -28,6 +53,7 @@ export default function Requirement() {
   const history = useHistory();
   const userInfo = useUserInfo();
   const InputSearch = Input.Search;
+  const isSuperAdmin = useSuperAdmin();
   // 初始化搜索框value
   const [searchValue, setSearchValue] = useState('');
   // 初始化需求列表数据
@@ -48,7 +74,6 @@ export default function Requirement() {
   useEffect(() => {
     if (userInfo) getList();
   }, [userInfo, current, pageSize, sortValue]);
-
   // 清空搜索框
   useEffect(() => {
     if (isClickClear && searchValue === '') {
@@ -92,15 +117,20 @@ export default function Requirement() {
     }
   };
 
-  // 创建工作流
-  const handleCreateRequirement = () => {
-    history.push(`/tenant/compute/modaforge/requirementDetail?type=create`);
+  // 创建需求
+  const handleCreateRequirement = (
+    type: 'create' | 'copy' | 'edit',
+    id?: number | string
+  ) => {
+    history.push(
+      `/tenant/compute/modaforge/requirement/config?type=${type}${id ? `&id=${id}` : ''}`
+    );
   };
 
   // 查看详情
-  const viewDetailRequirement = (id: number | string) => {
+  const viewDetailRequirement = (id: number | string, activeTab = 'detail') => {
     history.push(
-      `/tenant/compute/modaforge/requirementDetail?id=${id}&type=detail`
+      `/tenant/compute/modaforge/requirement/info?id=${id}&activeTab=${activeTab}`
     );
   };
 
@@ -129,58 +159,46 @@ export default function Requirement() {
   const renderEmptyPlaceholder = (value: string | null) => {
     return value === '' || value == null ? '-' : value;
   };
-  // 状态列表内容
-  const StatusContent = (status: RequirementStatus) => {
-    switch (status) {
-      case RequirementStatus.Draft:
-        return (
-          <div className="status-item">
-            <span className="status-draft-icon" />
-            <span className="status-text">发布中</span>
-          </div>
-        );
-      case RequirementStatus.Published:
-        return (
-          <div className="status-item">
-            <span className="status-published-icon" />
-            <span className="status-text">发布成功</span>
-          </div>
-        );
-      case RequirementStatus.PublishFailed:
-        return (
-          <div className="status-item">
-            <span className="status-publishFailed-icon" />
-            <span className="status-text">发布失败</span>
-          </div>
-        );
-      case RequirementStatus.Annotated:
-        return (
-          <div className="status-item">
-            <span className="status-annotated-icon" />
-            <span className="status-text">标注完成</span>
-          </div>
-        );
-      case RequirementStatus.PreAnnotated:
-        return (
-          <div className="status-item">
-            <span className="status-draft-icon" />
-            <span className="status-text">预标注中</span>
-          </div>
-        );
-    }
+
+  // 类型图标映射
+  const TypeIconMap: Record<
+    number,
+    React.ComponentType<{ style?: React.CSSProperties }>
+  > = {
+    [RequirementType.Text]: TextIcon,
+    [RequirementType.Image]: ImageIcon
   };
+
   // 查看需求详情权限
   const hasPermissionGetDetail = useHasPermission(REQUIREMENT_PERMISSIONS.GET);
-  // 查询下载结果权限
-  const hasPermissionGetDownload = useHasPermission(
-    REQUIREMENT_PERMISSIONS.DOWNLOAD
-  );
+  // 新建需求权限
+  const hasPermissionCreate = useHasPermission(REQUIREMENT_PERMISSIONS.CREATE);
+
+  // 删除需求
+  const handleDeleteRequirement = (record) => {
+    Modal.confirm({
+      title: `确定删除需求【${record.name}】吗?`,
+      okText: '确定',
+      cancelText: '取消',
+      onOk: async () => {
+        try {
+          const res = await deleteRequirement({ req_id: record.id });
+          if (res.code === 'success') {
+            Message.success('删除成功!');
+            getList();
+          }
+        } catch (error) {
+          console.error(error);
+        }
+      }
+    });
+  };
   // table columns
   const columns: ColumnProps[] = [
     {
       title: '需求名称',
       dataIndex: 'name',
-      width: 280,
+      width: 250,
       ellipsis: true,
       className: 'hover-change requirement-name',
       render: (_, record) => {
@@ -192,7 +210,7 @@ export default function Requirement() {
               isEdit={false}
               isLink
               handleLink={() => {
-                viewDetailRequirement(record.id);
+                viewDetailRequirement(record.id, 'detail');
               }}
             />
           ) : (
@@ -215,17 +233,45 @@ export default function Requirement() {
         );
       }
     },
-
+    {
+      title: '状态',
+      dataIndex: 'status',
+      width: 130,
+      filters: REQUIREMENT_STATUS_CONFIG,
+      render: (_, record) => {
+        return (
+          <DotStatus
+            text={getLabelByValue(REQUIREMENT_STATUS_CONFIG, record.status)}
+            color={getLabelByValue(
+              REQUIREMENT_STATUS_CONFIG,
+              record.status,
+              'color'
+            )}
+          />
+        );
+      }
+    },
     {
       title: '类型',
       dataIndex: 'label_type',
       width: 100,
       render: (_, record) => {
-        return renderEmptyPlaceholder(record.label_type) !== '-' ? (
-          <EllipsisPopover
-            value={RequirementTypeMap[record.label_type]}
-            isEdit={false}
-          />
+        const IconComponent = record.label_type
+          ? TypeIconMap[record.label_type]
+          : null;
+        const typeName = record.label_type
+          ? RequirementTypeMap[record.label_type]
+          : '-';
+
+        return typeName !== '-' ? (
+          <div className="flex items-center">
+            {IconComponent && (
+              <IconComponent
+                style={{ marginRight: 4, width: 14, height: 14 }}
+              />
+            )}
+            <span>{typeName}</span>
+          </div>
         ) : (
           <span>-</span>
         );
@@ -262,40 +308,6 @@ export default function Requirement() {
       )
     },
     {
-      title: '状态',
-      dataIndex: 'status',
-      width: 130,
-      render: (_, record) => {
-        return renderEmptyPlaceholder(record.status) !== '-' ? (
-          StatusContent(record.status)
-        ) : (
-          <span>-</span>
-        );
-      },
-      filters: [
-        {
-          text: '发布中',
-          value: RequirementStatus.Draft
-        },
-        {
-          text: '发布成功',
-          value: RequirementStatus.Published
-        },
-        {
-          text: '发布失败',
-          value: RequirementStatus.PublishFailed
-        },
-        {
-          text: '标注完成',
-          value: RequirementStatus.Annotated
-        },
-        {
-          text: '预标注中',
-          value: RequirementStatus.PreAnnotated
-        }
-      ]
-    },
-    {
       title: '创建时间',
       dataIndex: 'create_time',
       width: 220,
@@ -326,65 +338,143 @@ export default function Requirement() {
       dataIndex: 'operate',
       align: 'left',
       fixed: 'right',
-      width: 130,
+      width: 170,
       render: (_, record) => {
-        const perms = record.perms || [];
-        return (
-          <div style={{ marginLeft: 4 }} className="option-content">
-            {/* 查看需求详情权限判断 */}
-            {hasPermissionGetDetail && (
-              <span
-                className="operate-text"
-                style={{ marginRight: 8 }}
-                onClick={() => {
-                  viewDetailRequirement(record.id);
-                }}
-              >
-                详情
-              </span>
-            )}
-            {hasPermissionGetDownload &&
-              (record?.status === RequirementStatus.Annotated ||
-                record?.status === RequirementStatus.Published) && (
-                <span
-                  className="operate-text"
-                  onClick={() => {
-                    setLoading(true);
-                    try {
-                      getAnnotationDownload({ requirement_id: record.id })
-                        .then((res) => {
-                          if (res.code === 'success') {
-                            const a = document.createElement('a');
-                            a.href = res?.data?.download_url;
-                            document.body.appendChild(a);
-                            a.click();
-                          } else {
-                            Message.error(res.message);
-                          }
-                        })
-                        .catch(() => {})
-                        .finally(() => {
-                          setLoading(false);
-                        });
-                    } catch {
-                      setLoading(false);
-                    }
-                  }}
-                >
-                  下载结果
-                </span>
-              )}
-          </div>
-        );
+        const actions: ActionItem[] = [
+          ...(hasPermissionGetDetail
+            ? [
+                {
+                  name: '详情',
+                  priority: 1,
+                  onClick: () => {
+                    viewDetailRequirement(record.id, 'detail');
+                  }
+                }
+              ]
+            : []),
+          // 发布成功、标注完成
+          ...([2, 4].includes(record.status)
+            ? [
+                {
+                  name: '进度',
+                  priority: 2,
+                  onClick: () => {
+                    viewDetailRequirement(record.id, 'progress');
+                  }
+                },
+                {
+                  name: '明细',
+                  priority: 3,
+                  onClick: () => {
+                    viewDetailRequirement(record.id, 'particular');
+                  }
+                }
+              ]
+            : []),
+          // 发布成功、标注完成
+          ...([2, 4].includes(record.status)
+            ? [
+                {
+                  name: '编辑',
+                  priority: 4,
+                  tips:
+                    userInfo?.id !== record.creator_id && !isSuperAdmin
+                      ? '仅需求创建人可操作'
+                      : '',
+                  disabled: userInfo?.id !== record.creator_id && !isSuperAdmin,
+                  onClick: () => {
+                    handleCreateRequirement('edit', record.id);
+                  }
+                }
+              ]
+            : []),
+          {
+            name: '复制',
+            priority: 5,
+            onClick: () => {
+              handleCreateRequirement('copy', record.id);
+            }
+          },
+          // 标注完成
+          ...(record.status !== 4
+            ? [
+                {
+                  name: '删除',
+                  priority: 6,
+                  tips:
+                    userInfo?.id !== record.creator_id && !isSuperAdmin
+                      ? '仅需求创建人可操作'
+                      : '',
+                  disabled: userInfo?.id !== record.creator_id && !isSuperAdmin,
+                  onClick: () => {
+                    handleDeleteRequirement(record);
+                  }
+                }
+              ]
+            : [])
+        ];
+        return <OperationMenu actions={actions} />;
       }
+    }
+  ];
+
+  const requirementProcess: RequirementProcessStep[] = [
+    {
+      icon: <CreatIcon />,
+      title: '创建需求',
+      description: (
+        <>
+          <span>选择标注工序、标注数据、配置标签、分配人员，</span>
+          <Link
+            type="text"
+            onClick={() => handleCreateRequirement('create')}
+            style={{ fontSize: '12px' }}
+          >
+            创建需求{'>'}
+          </Link>
+        </>
+      )
+    },
+    {
+      icon: <AnnotationIcon />,
+      title: '数据标注',
+      description: '对图、文、音、视等数据进行标注'
+    },
+    {
+      icon: <QualityIcon />,
+      title: '数据质检',
+      description: '对标注结果进行质检，驳回错误数据'
+    },
+    {
+      icon: <Image src={ExportPng} preview={false} />,
+      title: '导出结果',
+      description: '下载标注结果到本地'
+      // (
+      //   <>
+      //     <span>下载标注结果到本地，或在</span>
+      //     <Link
+      //       type="text"
+      //       onClick={() => handleCreateRequirement('create')}
+      //       style={{ fontSize: '12px' }}
+      //     >
+      //       数据集市
+      //     </Link>
+      //     <span>中查看</span>
+      //   </>
+      // )
     }
   ];
 
   return (
     <div className="requirement">
-      <h1 style={{ fontSize: '20px', fontWeight: 'bold', marginBottom: 16 }}>
-        需求管理
-      </h1>
+      <ExpandableProcessFlow
+        title="需求管理"
+        description=""
+        toggleText="数据标注流程"
+        defaultExpanded={true}
+        steps={requirementProcess as any}
+        headerClassName="requirement-process-header"
+      />
       <div className="requirement-form">
         <Form
           form={form}
@@ -413,8 +503,9 @@ export default function Requirement() {
               onChange={(val) => {
                 setSearchValue(val);
               }}
-              placeholder="请输入需求名称/创建人"
+              placeholder="输入需求ID、名称、创建人搜索"
               allowClear
+              style={{ width: 260 }}
             />
           </FormItem>
         </Form>
@@ -422,7 +513,7 @@ export default function Requirement() {
         <PermissionWrapper permission={REQUIREMENT_PERMISSIONS.CREATE}>
           <Button
             type="primary"
-            onClick={handleCreateRequirement}
+            onClick={() => handleCreateRequirement('create')}
             loading={loading}
           >
             <IconPlus /> 创建需求
@@ -434,16 +525,24 @@ export default function Requirement() {
         columns={columns}
         data={requirementData}
         pagination={false}
-        noDataElement={noDataElement({
-          description: '暂无需求',
-          btnText: (
-            <>
-              <IconPlus /> 创建需求
-            </>
-          ),
-          perms: REQUIREMENT_PERMISSIONS.CREATE,
-          handleBtn: () => handleCreateRequirement()
-        })}
+        noDataElement={
+          <div style={{ paddingTop: '100px' }}>
+            <NoDataCard
+              title="暂无需求"
+              primaryBtn={
+                hasPermissionCreate ? (
+                  <Link
+                    onClick={() => handleCreateRequirement('create')}
+                    icon={<IconPlus />}
+                  >
+                    创建需求
+                  </Link>
+                ) : null
+              }
+              isTextButton
+            />
+          </div>
+        }
         rowKey="id"
         loading={loading}
         onChange={(pagination, sorter, filters) =>

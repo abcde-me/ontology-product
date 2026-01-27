@@ -97,6 +97,10 @@ UAPI_CONFIG.addResponseInterceptor(
       console.error('API返回401错误:', response.config?.url, res);
       logout(res?.data?.content);
     } else if (response.status >= 200 && response.status <= 299) {
+      // 【新增】检查是否需要返回header数据
+      if (response.config?.headers?.['need-header-data'] === 'true') {
+        return response;
+      }
       // 【新增】检查是否是二进制流响应
       const contentType = response.headers['content-type'] || '';
       const isBinaryResponse = BinaryContentTypes.some((type) =>
@@ -183,8 +187,11 @@ UAPI_CONFIG.addResponseInterceptor(
       } else {
         const errorMsg = res.message;
         if (errorMsg) {
-          Message.error(errorMsg);
-          console.error(errorMsg);
+          Message.error({ id: 'api-error-msg', content: errorMsg });
+          console.error('api error message', errorMsg);
+        }
+        if (res?.statusCode === 100401) {
+          logout(res?.data?.content);
         }
         return Promise.reject(errorMsg);
       }

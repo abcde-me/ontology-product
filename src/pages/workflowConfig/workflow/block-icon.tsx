@@ -25,7 +25,7 @@ import { RiApps2Fill } from '@remixicon/react';
 import AppIcon from '@/pages/workflowConfig/components/app-icon';
 
 type BlockIconProps = {
-  type: BlockEnum;
+  type: BlockEnum | 'workflow';
   size?: string;
   className?: string;
   toolIcon?: string | { content: string; background: string };
@@ -35,19 +35,23 @@ const ICON_CONTAINER_CLASSNAME_SIZE_MAP: Record<string, string> = {
   sm: 'w-5 h-5 rounded-md shadow-xs',
   md: 'w-6 h-6 rounded-[4px] shadow-md'
 };
-const getIcon = (type: BlockEnum, className: string) => {
+const getIcon = (type: BlockEnum | 'workflow', className: string) => {
   return <RiApps2Fill className={className} />;
 };
 const ICON_CONTAINER_BG_COLOR_MAP: Record<string, string> = {
   [BlockEnum.Start]: 'bg-util-colors-blue-brand-blue-brand-500',
   [BlockEnum.Text]: 'bg-util-colors-indigo-indigo-500',
-  [BlockEnum.Pic]: 'bg-util-colors-blue-blue-500',
+  [BlockEnum.Image]: 'bg-util-colors-blue-blue-500',
   [BlockEnum.Audio]: 'bg-util-colors-warning-warning-500',
   [BlockEnum.Video]: 'bg-util-colors-cyan-cyan-500',
   [BlockEnum.Cleaning]: 'bg-util-colors-cyan-cyan-500',
   [BlockEnum.Enhancement]: 'bg-util-colors-cyan-cyan-500',
   [BlockEnum.Customize]: 'bg-util-colors-cyan-cyan-500',
-  [BlockEnum.End]: 'bg-util-colors-warning-warning-500'
+  [BlockEnum.End]: 'bg-util-colors-warning-warning-500',
+  [BlockEnum.SQL]: 'bg-util-colors-warning-warning-350',
+  [BlockEnum.Seatunnel]: 'bg-util-colors-blue-brand-blue-brand-450',
+  [BlockEnum.Dependent]: 'bg-util-colors-green-green-350',
+  workflow: 'bg-[#2FCC9F]'
 };
 const BlockIcon: FC<BlockIconProps> = ({
   type,

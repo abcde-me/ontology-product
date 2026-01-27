@@ -1,4 +1,4 @@
-import type { FC, ReactElement } from 'react';
+import { FC, ReactElement, useMemo, useState } from 'react';
 import React, { cloneElement, memo, useCallback } from 'react';
 import { RiCloseLine } from '@remixicon/react';
 import { useShallow } from 'zustand/react/shallow';
@@ -13,30 +13,28 @@ import {
   WorkflowHistoryEvent,
   useNodeDataUpdate,
   useNodesInteractions,
-  // useToolIcon,
   useWorkflow,
-  useWorkflowHistory
+  useWorkflowHistory,
+  useNodesReadOnly
 } from '@/pages/workflowConfig/workflow/hooks';
-// import {
-//   canRunBySingle,
-//   hasErrorHandleNode,
-//   hasRetryNode,
-// } from '@/pages/workflowConfig/workflow/utils'
-// import Tooltip from '@/pages/workflowConfig/components/tooltip'
 import type { Node } from '@/pages/workflowConfig/workflow/types';
 import { useStore as useTaskStore } from '@/pages/workflowConfig/task/store';
 import { useStore } from '@/pages/workflowConfig/workflow/store';
+import PanelOperator from '@/pages/workflowConfig/workflow/nodes/_base/components/panel-operator';
+import TestNode from '@/pages/workflowConfig/workflow/nodes/_base/components/test-node';
 
 type BasePanelProps = {
   children: ReactElement;
 } & Node;
 
 const BasePanel: FC<BasePanelProps> = ({ id, data, children }) => {
-  const { showMessageLogModal } = useTaskStore(
+  const { showMessageLogModal, nodesProcessData } = useTaskStore(
     useShallow((state) => ({
-      showMessageLogModal: state.showMessageLogModal
+      showMessageLogModal: state.showMessageLogModal,
+      nodesProcessData: state.nodesProcessDetail
     }))
   );
+  const { nodesReadOnly } = useNodesReadOnly();
   const showSingleRunPanel = useStore((s) => s.showSingleRunPanel);
   const panelWidth = localStorage.getItem('workflow-node-panel-width')
     ? Number.parseFloat(localStorage.getItem('workflow-node-panel-width')!)
@@ -62,8 +60,7 @@ const BasePanel: FC<BasePanelProps> = ({ id, data, children }) => {
 
   const { saveStateToHistory } = useWorkflowHistory();
 
-  const { handleNodeDataUpdateWithSyncDraft } =
-    useNodeDataUpdate();
+  const { handleNodeDataUpdateWithSyncDraft } = useNodeDataUpdate();
 
   const handleTitleBlur = useCallback(
     (title: string) => {
@@ -85,7 +82,7 @@ const BasePanel: FC<BasePanelProps> = ({ id, data, children }) => {
       className={cn(
         'wk-node-config-panel-wrapper relative mr-0 h-full',
         showMessageLogModal &&
-        '!absolute -top-[5px] right-[416px] z-0 !mr-0 w-[384px] overflow-hidden rounded-2xl border-[0.5px] border-components-panel-border shadow-lg transition-all'
+          '!absolute -top-[5px] right-[416px] z-0 !mr-0 w-[384px] overflow-hidden rounded-2xl border-[0.5px] border-components-panel-border shadow-lg transition-all'
       )}
     >
       {/* <div
@@ -99,24 +96,26 @@ const BasePanel: FC<BasePanelProps> = ({ id, data, children }) => {
           'wk-node-panel-content-scroller-container h-full rounded-[12px] border-components-panel-border bg-components-panel-bg shadow-lg',
           showSingleRunPanel ? 'overflow-hidden' : 'overflow-y-auto'
         )}
+        id={'workFlowNodeConfigPanel'}
         style={{
           width: `${panelWidth}px`
         }}
       >
         <div className="sticky top-0 z-10 bg-components-panel-bg">
-          <div className="title-wrapper flex items-center px-[16px] pb-[8px] pt-[20px]">
-            <BlockIcon
-              className="mr-[8px] size-[20px] shrink-0"
-              type={data.type}
-              // toolIcon={toolIcon}
-              size="md"
-            />
-            <TitleInput
-              value={data.title || ''}
-              onBlur={handleTitleBlur}
-              className="title-input"
-            />
-            <div className="flex shrink-0 items-center text-gray-500">
+          <div className="title-wrapper flex items-center justify-between px-[16px] pb-[8px] pt-[20px]">
+            <div className={'flex items-center justify-between'}>
+              <BlockIcon
+                className="mr-[8px] size-[20px] shrink-0"
+                type={data.type}
+                size="md"
+              />
+              <TitleInput
+                value={data.title || ''}
+                onBlur={handleTitleBlur}
+                className="title-input"
+              />
+            </div>
+            <div className="flex flex-1 items-center text-gray-500">
               {/* {
                 canRunBySingle(data.type) && !nodesReadOnly && (
                   <Tooltip
@@ -138,11 +137,26 @@ const BasePanel: FC<BasePanelProps> = ({ id, data, children }) => {
               <HelpLink nodeType={data.type} />
               <PanelOperator id={id} data={data} showHelpLink={false} />
               <div className='mx-3 w-[1px] h-3.5 bg-divider-regular' /> */}
-              <div
-                className="flex h-6 w-6 cursor-pointer items-center justify-center"
-                onClick={() => handleNodeSelect(id, true)}
-              >
-                <RiCloseLine className="h-[16px] w-[16px]" />
+              <div className="flex h-6 flex-1 cursor-pointer items-center justify-end gap-2">
+                {data.flow_type === 'struct' && !nodesReadOnly && (
+                  <div className={'flex flex-1 items-center justify-end gap-2'}>
+                    <TestNode id={id} showLog />
+                    <div className={'flex flex-shrink-0 items-center gap-2'}>
+                      <PanelOperator
+                        id={id}
+                        data={data}
+                        offset={0}
+                        triggerClassName="!w-5 !h-5"
+                      />
+                      <div className={'h-4 w-[1px] bg-[#CBD5E1]'}></div>
+                    </div>
+                  </div>
+                )}
+
+                <RiCloseLine
+                  className="h-[16px] w-[16px]"
+                  onClick={() => handleNodeSelect(id, true)}
+                />
               </div>
             </div>
           </div>

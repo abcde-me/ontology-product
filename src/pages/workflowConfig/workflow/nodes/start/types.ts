@@ -10,6 +10,7 @@ export type StartNodeType = CommonNodeType & {
   data_category: Array<{
     id: number;
     category: string;
+    category_type?: string;
     enabled: boolean;
     format: string[];
   }>;

@@ -18,17 +18,11 @@ export const RequirementTypeNameMap = {
 };
 export enum RequirementStatus {
   Draft = 1, // 发布中
-  Published = 2, // 已发布
+  Published = 2, // 发布成功
   PublishFailed = 3, // 发布失败
   Annotated = 4, // 标注完成
   PreAnnotated = 5 // 预标注中
 }
-export const RequirementStatusMap = {
-  [RequirementStatus.Draft]: '发布中',
-  [RequirementStatus.Published]: '已发布',
-  [RequirementStatus.PublishFailed]: '发布失败',
-  [RequirementStatus.Annotated]: '标注完成'
-};
 
 // 标注类型
 export enum AnnotationTypeStatus {

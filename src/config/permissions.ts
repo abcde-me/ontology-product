@@ -62,7 +62,8 @@ export const WORKFLOW_DETAIL_PERMISSIONS = {
 // 作业列表相关权限
 export const WORKFLOW_TASK_PERMISSIONS = {
   CAN_UPDATE: 'aimdp-manager:workflow:read:get',
-  LIST: 'aimdp-manager:workflow:read:list' // 菜单权限（与工作流共用）
+  LIST: 'aimdp-manager:workflow:read:list', // 菜单权限（与工作流共用）
+  MODIFY: 'aimdp-manager:workflow:manage:instance_operator'
 } as const;
 
 // 数据目录相关权限
@@ -134,13 +135,28 @@ export const PYSPARK_PERMISSIONS = {
 
 // SQL权限
 export const SQL_PERMISSIONS = {
-  LIST: 'aimdp-manager:sql_script:read:list', // 菜单权限
-  GET: 'aimdp-manager:sql_script:read:get',
-  CREATE: 'aimdp-manager:sql_script:manage:create',
-  DELETE: 'aimdp-manager:sql_script:manage:delete',
-  MODIFY: 'aimdp-manager:sql_script:manage:modify',
-  RUN: 'aimdp-manager:sql_script:manage:run',
-  EXPORT: 'aimdp-manager:sql_script:manage:export'
+  QUERY_SCRIPT_LIST: 'aimdp-manager:sql_script:read:list', // 菜单权限
+  QUERY_SCRIPT_GET: 'aimdp-manager:sql_script:read:get',
+  QUERY_SCRIPT_CREATE: 'aimdp-manager:sql_script:manage:create',
+  QUERY_SCRIPT_DELETE: 'aimdp-manager:sql_script:manage:delete',
+  QUERY_SCRIPT_MODIFY: 'aimdp-manager:sql_script:manage:modify',
+  QUERY_SCRIPT_RUN: 'aimdp-manager:sql_script:manage:run',
+  QUERY_SCRIPT_EXPORT: 'aimdp-manager:sql_script:manage:export',
+
+  DEVELOP_SCIPT_CREATE: 'aimdp-manager:sql_script:manage:develop_script_create', // 开发脚本创建
+  DEVELOP_SCIPT_DOWNLOAD:
+    'aimdp-manager:sql_script:read:develop_script_download', // 开发脚本下载
+  DEVELOP_SCIPT_LIST: 'aimdp-manager:sql_script:read:develop_script_list', // 开发脚本列表
+  DEVELOP_SCIPT_DELETE: 'aimdp-manager:sql_script:manage:develop_script_delete', // 开发脚本删除
+  DEVELOP_SCIPT_GET: 'aimdp-manager:sql_script:read:develop_script_get', // 开发脚本详情
+  // TODO: 开发脚本重命名权限待添加
+  DEVELOP_SCIPT_MODIFY: 'aimdp-manager:sql_script:manage:develop_script_modify', // 开发脚本重命名
+  DEVELOP_SCIPT_RUN: 'aimdp-manager:sql_script:manage:develop_script_run', // 开发脚本运行
+
+  DEVELOP_SCIPT_LOG: 'aimdp-manager:sql_script:read:develop_script_log', // 开发脚本历史版本
+  // TODO: 开发脚本历史版本删除权限待添加
+  DEVELOP_SCIPT_LOG_DELETE:
+    'aimdp-manager:sql_script:manage:develop_script_log_delete' // 开发脚本历史版本删除
 } as const;
 
 // 数据资产
@@ -156,7 +172,25 @@ export const DATA_ASSET_PERMISSIONS = {
 
 // 元数据管理
 export const METADATA_MANAGEMENT_PERMISSIONS = {
-  LIST: 'aimdp-manager:dataset:read:list' // 菜单权限 （todo：临时使用数据集权限待替换）
+  LIST: 'aimdp-manager:metadata_manage:read:list_data',
+  DETAIL: 'aimdp-manager:metadata_manage:read:get_data',
+  CREATE_ICEBERG_TABLE:
+    'aimdp-manager:metadata_manage:manage:create_metadata_iceberg_table',
+  CREATE_ICEBERG_DATABASE:
+    'aimdp-manager:metadata_manage:manage:create_metadata_iceberg_database',
+  CREATE_DORIS_TABLE:
+    'aimdp-manager:metadata_manage:manage:create_metadata_doris_table',
+  CREATE_DORIS_DATABASE:
+    'aimdp-manager:metadata_manage:manage:create_metadata_doris_database'
+} as const;
+
+// 数据API权限
+export const DATA_API_PERMISSIONS = {
+  LIST: 'aimdp-manager:openapi:read:list',
+  CREATE: 'aimdp-manager:openapi:manage:create',
+  DELETE: 'aimdp-manager:openapi:manage:delete',
+  MODIFY: 'aimdp-manager:openapi:manage:modify',
+  DETAIL: 'aimdp-manager:openapi:read:detail'
 } as const;
 
 // 需求管理权限
@@ -175,6 +209,13 @@ export const ANNOTATION_TASK_PERMISSIONS = {
   GET_ID_TASK: 'aimdp-manager:label_task:read:get_task_by_id', // 获取某标注任务详情
   GET: 'aimdp-manager:label_task:read:get_task', // 获取一个标注任务
   SAVE: 'aimdp-manager:label_task:manage:save_task_result' // 保存和提交标注任务
+} as const;
+
+// 质检任务权限
+export const QUALITY_TASK_PERMISSIONS = {
+  LIST: 'aimdp-manager:label_quality:read:list_pkg', // 菜单权限
+  GET: 'aimdp-manager:label_quality:read:detail_pkg', // 获取质检任务详情
+  ACTION_TASK: 'aimdp-manager:label_quality:manage:quality_action' // 质检任务
 } as const;
 
 // 组织管理
@@ -230,7 +271,8 @@ export const ALL_PERMISSIONS = {
   PYSPARK: PYSPARK_PERMISSIONS,
   SQL: SQL_PERMISSIONS,
   REQUIREMENT: REQUIREMENT_PERMISSIONS,
-  ANNOTATION_TASK: ANNOTATION_TASK_PERMISSIONS
+  ANNOTATION_TASK: ANNOTATION_TASK_PERMISSIONS,
+  QUALITY_TASK: QUALITY_TASK_PERMISSIONS
 } as const;
 
 // 权限检查辅助函数

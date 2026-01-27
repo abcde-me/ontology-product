@@ -10,25 +10,17 @@
   }
 
   .sql-sider {
+    .sql-menu-icon {
+      color: var(--color-text-4);
+    }
+
+    :global(.arco-tabs-header-title-active) .sql-menu-icon {
+      color: #2563eb;
+    }
+
     :global(.arco-layout-sider-children) {
       .sql-tabs {
         height: 100%;
-
-        .sql-menu-icon {
-          &:hover {
-            path {
-              fill: #2563eb;
-            }
-          }
-        }
-
-        :global(.arco-tabs-header-nav-rounded)
-          :global(.arco-tabs-header-title-active)
-          .sql-menu-icon {
-          path {
-            fill: #2563eb;
-          }
-        }
 
         :global(.arco-tabs-header-nav) {
           padding: 8px;
@@ -50,7 +42,7 @@
 
         :global(.arco-tabs-content) {
           height: 100%;
-          overflow-y: scroll;
+          // overflow-y: scroll;
           padding: 0px;
 
           :global(.arco-tabs-content-inner) {
@@ -87,4 +79,5 @@
   transition: none;
   box-shadow: none;
   border-right: 1px solid #e2e8f0;
+  height: 100%;
 }
