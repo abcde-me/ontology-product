@@ -2,7 +2,7 @@ import React from 'react';
 import { Form, Input, Modal, Select } from '@arco-design/web-react';
 import styles from '@/pages/datasetManagement/index.module.scss';
 
-export default function AddSceneForm({
+export default function AddSceneFormModal({
   addSceneTypeVisible,
   sceneTypeForm,
   setAddSceneTypeVisible,
