@@ -209,12 +209,16 @@ export const LayoutWithSider = memo(function LayoutWithSider({ children }) {
       const newResult = result.map((item) => ({
         ...item,
         name: item.title,
-        projectList: item.projectList.map((project) => ({
+        isPermission: true,
+        projList: item.projectList.map((project) => ({
           ...project,
-          name: project.title
+          name: project.title,
+          organization: {
+            id: item.id,
+            name: item.title
+          }
         }))
       }));
-      console.log(newResult, 'newResult');
       setProjects(newResult);
     };
 
@@ -247,11 +251,11 @@ export const LayoutWithSider = memo(function LayoutWithSider({ children }) {
           <ProjectSelect
             style={{ width: 178, margin: 8 }}
             treeData={projects}
-            value={value}
+            value={projectId}
             showAddButton={false}
             onChange={(v) => {
               console.log('🚀 ~ BasicDemo ~ v:', v);
-              v ? changeProject(v) : setValue([]);
+              v ? changeProject(v) : setProjectId([]);
             }}
           />
           <Menu
