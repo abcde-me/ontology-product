@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Drawer, Tabs } from '@arco-design/web-react';
 import styles from './index.module.scss';
 import { ActionList, BehaviorDetail } from './components';
-import { BehaviorActionItem } from '@/pages/ontologyScene/types/behavior_actions';
+import { BehaviorActionItem } from '@/pages/ontologyScene/types/behaviorActions';
 
 // 行为动作
 export default function OntologySceneBehaviorActions() {

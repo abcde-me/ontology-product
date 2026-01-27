@@ -2,6 +2,16 @@
   display: flex;
   flex-direction: column;
   gap: 16px;
+
+  :global(.arco-tabs-header) {
+    padding-left: 24px;
+  }
+
+  :global(.arco-tabs-header-title) {
+    padding-left: 0;
+    padding-right: 0;
+    margin-right: 32px;
+  }
 }
 
 .behavior-content {

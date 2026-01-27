@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { BehaviorActionItem } from '@/pages/ontologyScene/types/behavior_actions';
+import { BehaviorActionItem } from '@/pages/ontologyScene/types/behaviorActions';
 import {
   Button,
   Form,
@@ -187,6 +187,7 @@ export const ActionList = (props: {
     {
       title: '参数',
       dataIndex: 'params',
+      sorter: true,
       render: (value) => (
         <div
           className={
