@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Form,
   Input,
@@ -11,6 +11,7 @@ import { IconSearch, IconLink, IconCheck } from '@arco-design/web-react/icon';
 import { CopyItemIcon, SearchTable } from '@ceai-front/arco-material';
 import { useWorkflowTable } from '../../../hooks/useTable';
 import styles from '../list.module.scss';
+import ObjectTypeDetailDrawer from '@/pages/ontologyScene/componens/ObjectTypeDetailDrawer';
 
 // 属性数据接口
 export interface AttributeItem {
@@ -68,6 +69,13 @@ const MOCK_DATA: AttributeItem[] = [
 
 export default function NormalTable() {
   const [form] = Form.useForm();
+  const [detailDrawerVisible, setDetailDrawerVisible] = useState(false);
+  const [selectedObjectType, setSelectedObjectType] = useState<{
+    id: string;
+  } | null>(null);
+  const [activeTab, setActiveTab] = useState<
+    'instances' | 'attributes' | 'links'
+  >('attributes');
 
   // 使用 useTable hook
   const { data, loading, pagination, refresh, submit, onChange } =
@@ -107,10 +115,12 @@ export default function NormalTable() {
       defaultPageSize: 10
     });
 
-  // 处理查看详情
+  // 处理查看详情：打开对象类型详情抽屉
   const handleViewDetail = (record: AttributeItem) => {
-    // TODO: 实现跳转到详情页
-    console.log('View detail:', record);
+    // 目前使用属性 id 作为对象类型 id 的占位，后续联调可替换为真实 objectTypeId
+    setSelectedObjectType({ id: record.id });
+    setActiveTab('instances');
+    setDetailDrawerVisible(true);
   };
 
   // 表格列定义
@@ -120,19 +130,14 @@ export default function NormalTable() {
       dataIndex: 'name',
       width: 150,
       render: (value, record) => (
-        <div
-          className="hover-blue font-PingFangSc text-[14px] font-medium leading-[22px]"
-          onClick={() => handleViewDetail(record)}
-        >
-          {value}
-        </div>
+        <div className="text-[14px] font-medium leading-[22px]">{value}</div>
       )
     },
     {
       title: '所属对象类型',
       dataIndex: 'objectType',
       width: 180,
-      render: (value) => (
+      render: (value, record) => (
         <div className="flex items-center gap-2">
           <div
             className="flex h-6 w-6 items-center justify-center rounded text-white"
@@ -142,7 +147,10 @@ export default function NormalTable() {
           >
             <IconCheck style={{ fontSize: '14px' }} />
           </div>
-          <div className="font-PingFangSc text-[14px] font-normal leading-[22px] text-[#23293b]">
+          <div
+            className="hover-blue text-[14px] font-normal leading-[22px] text-[#23293b]"
+            onClick={() => handleViewDetail(record)}
+          >
             {value.name}
           </div>
         </div>
@@ -246,6 +254,19 @@ export default function NormalTable() {
             }}
           />
         </div>
+      )}
+
+      {/* 对象类型详情抽屉 */}
+      {selectedObjectType && detailDrawerVisible && (
+        <ObjectTypeDetailDrawer
+          visible={detailDrawerVisible}
+          onClose={() => {
+            setDetailDrawerVisible(false);
+            setSelectedObjectType(null);
+          }}
+          objectTypeId={selectedObjectType?.id}
+          defaultActiveTab={activeTab}
+        />
       )}
     </div>
   );

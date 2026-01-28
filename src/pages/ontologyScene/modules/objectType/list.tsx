@@ -423,7 +423,7 @@ export default function OntologySceneObjectTypeList() {
       )}
 
       {/* 对象类型详情抽屉 */}
-      {selectedObjectType && (
+      {selectedObjectType && detailDrawerVisible && (
         <ObjectTypeDetailDrawer
           visible={detailDrawerVisible}
           onClose={() => {
