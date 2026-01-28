@@ -60,13 +60,13 @@ export default function Header({
   return (
     <LayoutHeader
       className={cls(
-        'flex h-[56px] items-center justify-between border-b border-gray-200 bg-white px-[20px]'
+        'flex h-[56px] items-center justify-between border-b border-[var(--color-border-2)] bg-white px-[16px]'
       )}
     >
       {/* 左侧区域 */}
-      <div className="flex items-center gap-x-[16px]">
+      <div className="flex items-center">
         <IconArrowLeft
-          className="cursor-pointer text-[16px] text-gray-700 hover:text-primary-600"
+          className="mx-[9px] cursor-pointer text-[14px] text-[var(--color-text-2)]"
           onClick={handleBack}
         />
         {isEditing ? (
@@ -80,40 +80,42 @@ export default function Header({
           />
         ) : (
           <>
-            <span className="text-[16px] font-medium text-gray-900">
+            <span className="ml-[12px] mr-[8px] text-[16px] font-medium text-gray-900">
               {title}
             </span>
             <Popover trigger="hover" content="编辑">
               <IconEdit
-                className="cursor-pointer text-[16px] text-gray-500 hover:text-primary-600"
+                className="cursor-pointer text-[16px] text-[var(--color-text-2)] hover:text-primary-600"
                 onClick={handleEdit}
               />
             </Popover>
-            <span className="text-[14px] text-gray-500">{status}</span>
           </>
         )}
       </div>
 
       {/* 右侧区域 */}
-      <div className="flex items-center gap-x-[16px]">
-        <Input.Group compact>
-          <Select defaultValue="all" style={{ width: '76px' }}>
-            <Select.Option value="all">全部</Select.Option>
-          </Select>
-          <Input.Search
-            placeholder="请输入名称或唯一标识"
-            style={{ width: '284px' }}
-          />
-        </Input.Group>
-
-        <Button
-          type="primary"
-          icon={<IconPlus />}
-          onClick={onPublish}
-          className="bg-primary-600 hover:bg-primary-700"
+      <div className="flex items-center gap-x-[18px]">
+        <div
+          className="flex cursor-pointer items-center text-[var(--color-text-3)] transition-colors hover:text-[var(--color-text-1)]"
+          onClick={() => {
+            // 搜索功能处理
+            console.log('搜索');
+          }}
         >
-          发布更新
-        </Button>
+          <IconSearch className="mr-[7px] text-[15px]" />
+          <span className="text-[14px]">搜索</span>
+        </div>
+
+        <div
+          className="flex cursor-pointer items-center text-[var(--color-text-3)] transition-colors hover:text-[var(--color-text-1)]"
+          onClick={() => {
+            // 开发者资源功能处理
+            console.log('开发者资源');
+          }}
+        >
+          <IconCode className="mr-[7px] text-[15px]" />
+          <span className="text-[14px]">开发者资源</span>
+        </div>
       </div>
     </LayoutHeader>
   );
