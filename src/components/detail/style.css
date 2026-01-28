@@ -1,6 +1,6 @@
 /* 数据集详情页面样式 - 百分百还原设计稿 */
 .dataset-detail {
-  padding: 16px 20px 0 0;
+  padding: 24px;
   min-height: calc(100vh - 64px);
 
   /* background-color: #f5f5f5; */
@@ -51,10 +51,11 @@
 /* 基本信息卡片样式 - 严格按照设计稿 */
 .basic-info-card {
   background: white;
-  border-radius: 8px;
+  border: unset;
+  /* border-radius: 8px; */
   padding: 0;
-  margin-bottom: 20px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 10%);
+  /* margin-bottom: 20px; */
+  /* box-shadow: 0 1px 3px rgba(0, 0, 0, 10%); */
   overflow: hidden;
   width: 100%;
   max-width: 100%;
@@ -63,8 +64,7 @@
 }
 
 .basic-info-card .arco-card-body {
-  padding: 24px;
-  gap: 20px;
+  padding: unset;
 }
 
 .custom-tabs .arco-tabs-header-nav-line .arco-tabs-header-title {
