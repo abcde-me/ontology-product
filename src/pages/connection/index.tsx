@@ -459,13 +459,13 @@ export default function Connection() {
   return (
     <div
       style={{
-        minHeight: 'calc(100% - 40px)',
+        minHeight: '100%',
         backgroundColor: 'white',
         display: 'flex',
         flexDirection: 'column',
-        margin: '20px 20px 20px 0',
-        padding: '20px',
-        borderRadius: '10px'
+        // margin: '20px 20px 20px 0',
+        padding: '24px'
+        // borderRadius: '10px'
       }}
     >
       <h1

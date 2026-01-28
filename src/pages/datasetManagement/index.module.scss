@@ -60,6 +60,9 @@
     padding: 5px 0;
     margin: 0 16px;
   }
+  .datasetManagementTabs :global(.arco-tabs-content-item) {
+    background-color: #ffffff;
+  }
 }
 
 .datasetManagement {

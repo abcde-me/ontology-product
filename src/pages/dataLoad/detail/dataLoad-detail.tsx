@@ -272,11 +272,11 @@ const DataLoadDetail = () => {
   }, [detailList]);
 
   return (
-    <div>
+    <div className="p-6">
       <div
         className="crumbs"
         style={{
-          margin: '14px 0px',
+          // margin: '14px 0px',
           fontSize: '20px',
           display: 'flex',
           alignItems: 'center'
@@ -317,8 +317,8 @@ const DataLoadDetail = () => {
           flexDirection: 'column',
           // margin: '10px 10px 20px 10px',
           borderRadius: '10px',
-          minHeight: '87vh',
-          marginRight: '20px'
+          minHeight: '87vh'
+          // marginRight: '20px'
         }}
       >
         <div className="box">

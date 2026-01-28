@@ -427,7 +427,7 @@ export default function DataAssetFormContainer({
   return (
     <>
       {/* 标题 */}
-      <div className="mb-[8px] mt-[16px] h-[32px] w-full leading-[32px]">
+      <div className="mb-[8px] ml-[24px] mt-[24px] h-[32px] w-[calc(100%-24px)] leading-[32px]">
         <p className="text-xl font-bold">{pageTitle}</p>
       </div>
       <div className="h-[calc(100%-32px-24px-20px)] w-full pr-5">

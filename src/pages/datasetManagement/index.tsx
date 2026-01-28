@@ -1831,7 +1831,7 @@ const DatasetManagement: React.FC = () => {
         style={{
           zIndex: 1,
           paddingTop: '20px',
-          backgroundColor: `${isHiddenBaseInfo ? 'unset' : '#f0f6fe'} `
+          backgroundColor: `${isHiddenBaseInfo ? 'unset' : '#FFFFFF'} `
         }}
         addButton={
           <Tooltip content="新建场景分类">

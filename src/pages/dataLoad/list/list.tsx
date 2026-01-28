@@ -478,11 +478,11 @@ export default function DataLoad() {
         backgroundColor: 'white',
         display: 'flex',
         flexDirection: 'column',
-        padding: '20px 21px 20px 20px',
-        borderRadius: '10px',
-        marginTop: '20px',
-        marginRight: '20px',
-        minHeight: 'calc(100% - 40px)'
+        padding: '24px',
+        // borderRadius: '10px',
+        // marginTop: '20px',
+        // marginRight: '20px',
+        minHeight: '100%'
       }}
     >
       <h1
