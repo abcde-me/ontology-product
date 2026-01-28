@@ -960,6 +960,9 @@ const DatasetManagement: React.FC = () => {
   >([]);
 
   const isCanMove = useHasPermission(DATA_MANAGEMENT_PERMISSIONS.CAN_MOVE);
+  const isCanCreateScene = useHasPermission(
+    DATA_MANAGEMENT_PERMISSIONS.CREATE_SCENE
+  );
 
   // useEffect(() => {
   //   const container = document.querySelector('.layout-detail');
@@ -1826,7 +1829,7 @@ const DatasetManagement: React.FC = () => {
         </div>
       )}
       <Tabs
-        editable
+        editable={isCanCreateScene}
         defaultActiveTab={sceneName || '0'}
         className={styles.datasetManagementTabs}
         style={{
@@ -1872,28 +1875,36 @@ const DatasetManagement: React.FC = () => {
                   <div className="flex items-center justify-between">
                     <span className="text-[14px]">{item.description}</span>
                     <div className="flex items-center gap-2">
-                      <Tooltip content="编辑">
-                        <IconEdit
-                          className="cursor-pointer"
-                          onClick={() => {
-                            sceneTypeForm.setFieldsValue({
-                              sceneTypeName: item.name,
-                              sceneTypeDesc: item.description,
-                              sceneTypeTag: item.tags
-                            });
-                            setIsEdit(true);
-                            setEditSceneId(item.id);
-                            setAddSceneTypeVisible(true);
-                          }}
-                        />
-                      </Tooltip>
-                      {item.type === 'user' && (
-                        <Tooltip content="删除">
-                          <IconDelete
+                      <PermissionWrapper
+                        permission={DATA_MANAGEMENT_PERMISSIONS.MODIFY_SCENE}
+                      >
+                        <Tooltip content="编辑">
+                          <IconEdit
                             className="cursor-pointer"
-                            onClick={() => handleDeleteScene(item.id)}
+                            onClick={() => {
+                              sceneTypeForm.setFieldsValue({
+                                sceneTypeName: item.name,
+                                sceneTypeDesc: item.description,
+                                sceneTypeTag: item.tags
+                              });
+                              setIsEdit(true);
+                              setEditSceneId(item.id);
+                              setAddSceneTypeVisible(true);
+                            }}
                           />
                         </Tooltip>
+                      </PermissionWrapper>
+                      {item.type === 'user' && (
+                        <PermissionWrapper
+                          permission={DATA_MANAGEMENT_PERMISSIONS.DELETE_SCENE}
+                        >
+                          <Tooltip content="删除">
+                            <IconDelete
+                              className="cursor-pointer"
+                              onClick={() => handleDeleteScene(item.id)}
+                            />
+                          </Tooltip>
+                        </PermissionWrapper>
                       )}
                     </div>
                   </div>
