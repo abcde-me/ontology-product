@@ -31,11 +31,13 @@ export default function AddSceneFormModal({
         <Form.Item label="场景分类标签：" field="sceneTypeTag">
           <Select
             mode="multiple"
-            placeholder="请选择标签"
-            options={newTagList.map((item) => ({
-              label: item.name,
-              value: item.name
-            }))}
+            placeholder="请输入标签"
+            allowCreate
+            allowClear
+            // options={newTagList.map((item) => ({
+            //   label: item.name,
+            //   value: item.name
+            // }))}
           />
         </Form.Item>
         <Form.Item
