@@ -1912,7 +1912,7 @@ const DatasetManagement: React.FC = () => {
                       )}
                     </div>
                   </div>
-                  {item.tags?.length > 3 ? (
+                  {item?.tags?.length > 3 ? (
                     <span style={{ marginTop: '8px' }}>
                       <IconTag style={{ marginRight: '5px' }} />
                       {item.tags.slice(0, 3).map((tag, index) => (
