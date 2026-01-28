@@ -462,9 +462,9 @@ export default function Connection() {
         minHeight: '100%',
         backgroundColor: 'white',
         display: 'flex',
-        flexDirection: 'column'
+        flexDirection: 'column',
         // margin: '20px 20px 20px 0',
-        // padding: '20px',
+        padding: '24px'
         // borderRadius: '10px'
       }}
     >

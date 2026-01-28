@@ -1340,7 +1340,7 @@ export default function DataLoadCreate() {
   };
 
   return (
-    <div className={classNames('h-full')}>
+    <div className={classNames('h-full p-6')}>
       <div className="mb-[9px] text-[20px] font-bold leading-[30px]">
         创建数据载入任务
       </div>

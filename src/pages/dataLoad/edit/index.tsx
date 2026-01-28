@@ -1427,7 +1427,7 @@ export default function DataLoadEdit() {
 
   if (loading) {
     return (
-      <div className="h-full">
+      <div className="h-full p-6">
         <div className="mb-[9px] text-[20px] font-bold leading-[30px]">
           编辑数据载入任务
         </div>
@@ -1440,8 +1440,8 @@ export default function DataLoadEdit() {
 
   if (!detailData) {
     return (
-      <div className="h-full px-[20px]">
-        <div className="mb-[9px] mt-[17px] text-[20px] font-bold leading-[32px]">
+      <div className="h-full p-6">
+        <div className="mb-[9px] text-[20px] font-bold leading-[32px]">
           编辑数据载入任务
         </div>
         <div className="flex h-[calc(100%-58px-17px)] flex-col items-center justify-center overflow-y-auto rounded-[16px] bg-white p-[24px]">
@@ -1452,8 +1452,8 @@ export default function DataLoadEdit() {
   }
 
   return (
-    <div className="h-full px-[20px]">
-      <div className="mb-[9px] mt-[17px] text-[20px] font-bold leading-[32px]">
+    <div className="h-full p-6">
+      <div className="mb-[9px] text-[20px] font-bold leading-[32px]">
         编辑数据载入任务
       </div>
       <div className="flex h-[calc(100%-58px-17px)] flex-col items-start justify-start overflow-y-auto rounded-[16px] bg-white">

@@ -67,7 +67,7 @@ const AccessDetail = () => {
     getDetail();
   }, []);
   return (
-    <div>
+    <div className="p-6">
       <div
         className="crumbs"
         style={{

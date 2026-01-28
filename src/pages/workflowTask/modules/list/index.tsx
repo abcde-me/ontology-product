@@ -19,7 +19,7 @@ export default function WorkflowTaskList() {
 
   return (
     <div
-      className={`${styles['workflow-task-list']} box-sizing: border-box; h-full py-[20px] pr-[20px]`}
+      className={`${styles['workflow-task-list']} box-sizing: border-box; h-full`}
     >
       <div className="flex h-full flex-col rounded-[12px] bg-white p-[24px]">
         {/* 标题 */}
