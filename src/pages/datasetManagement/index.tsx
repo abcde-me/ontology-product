@@ -1923,7 +1923,10 @@ const DatasetManagement: React.FC = () => {
                       <Tooltip
                         content={() =>
                           item.tags.slice(3).map((tag, index) => (
-                            <Tag key={index} className={styles.sceneTag}>
+                            <Tag
+                              key={index}
+                              className={`${styles.sceneTag} mb-1`}
+                            >
                               <EllipsisPopover value={tag} preferTypography />
                             </Tag>
                           ))
