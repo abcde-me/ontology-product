@@ -23,6 +23,7 @@ import FieldImportUpload from '../../../componens/FieldImportUpload';
 import classNames from 'classnames';
 import LinkCheckIcon from '../../../assets/link-check.svg';
 import OneWayArrowIcon from '../../../assets/one-way-arrow.svg';
+import TwoWayArrowIcon from '../../../assets/double-headed-arrow.svg';
 import styles from './LinkForm.module.scss';
 import { LinkType } from '../../../types/link';
 
@@ -271,18 +272,13 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
 
     const handleLinkTypeChange = (type: LinkType) => {
       setLinkType(type);
+      // 切换链接类型时清空整个表单
+      form.resetFields();
       form.setFieldValue('linkType', type);
-      // 切换链接类型时清空相关字段
-      if (type !== LinkType.MANY_TO_MANY) {
-        setIntermediateTable({ type: 'local_csv' });
-        setAttributeFields([]);
-        form.setFieldValue('attributeFields', []);
-        setFileUploaded(false);
-        form.setFieldsValue({
-          sourceAttribute: undefined,
-          targetAttribute: undefined
-        });
-      }
+      // 重置所有相关状态
+      setIntermediateTable({ type: 'local_csv' });
+      setAttributeFields([]);
+      setFileUploaded(false);
     };
 
     const handleIntermediateTableTypeChange = (
@@ -372,8 +368,9 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
       submit: handleSubmit
     }));
 
-    const sourceObjectType = form.getFieldValue('sourceObjectType');
-    const targetObjectType = form.getFieldValue('targetObjectType');
+    const sourceObjectType = Form.useWatch('sourceObjectType', form);
+    const targetObjectType = Form.useWatch('targetObjectType', form);
+    const targetObjectAttribute = Form.useWatch('targetObjectAttribute', form);
 
     return (
       <div
@@ -519,10 +516,8 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
 
                 {linkType === 'N:N' ? (
                   <>
-                    <div className="flex flex-col items-center gap-[8px]">
-                      <span className="mx-[8px] text-[14px] text-[var(--color-text-2)]">
-                        中间表
-                      </span>
+                    <div className="flex flex-col items-center">
+                      <TwoWayArrowIcon />
                     </div>
                     <div className="flex-1 flex-1 rounded-[4px] bg-[#FAFBFF] p-[12px]">
                       <div className="mb-[8px] text-[14px] text-[var(--color-text-2)]">
@@ -587,7 +582,7 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
                           placeholder={
                             targetObjectType ? '请选择属性' : '请先选择对象类型'
                           }
-                          value={form.getFieldValue('targetObjectAttribute')}
+                          value={targetObjectAttribute}
                           onChange={(val) => {
                             form.setFieldValue('targetObjectAttribute', val);
                           }}
@@ -696,7 +691,7 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
                     }
                   ]}
                 >
-                  <div className="flex items-center gap-[16px]">
+                  <div className="flex items-center">
                     <div className="flex-1 rounded-[4px] bg-[#FAFBFF] p-[12px]">
                       <div className="mb-[8px] flex items-center gap-[4px]">
                         <span className="text-[14px] text-[var(--color-text-2)]">
@@ -726,10 +721,8 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
                       </Select>
                     </div>
 
-                    <div className="flex flex-col items-center gap-[8px]">
-                      <span className="text-[14px] text-[var(--color-text-2)]">
-                        中间表
-                      </span>
+                    <div className="flex flex-col items-center">
+                      <TwoWayArrowIcon />
                     </div>
 
                     <div className="flex-1 rounded-[4px] bg-[#FAFBFF] p-[12px]">

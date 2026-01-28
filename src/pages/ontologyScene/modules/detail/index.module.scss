@@ -2,8 +2,6 @@
   &-menu {
     :global {
       .arco-menu-inner {
-        // padding: 24px 12px;
-
         .arco-menu-item {
           padding: 0 8px;
 
@@ -12,7 +10,6 @@
             align-items: center;
 
             > span {
-              margin-right: 0;
               display: flex;
               align-items: center;
               justify-content: center;
@@ -22,10 +19,33 @@
 
         .arco-menu-group-title {
           margin: 0;
+          color: var(--color-text-4);
         }
 
         .arco-menu-indent {
           width: 0;
+        }
+      }
+
+      .arco-menu-collapse-button {
+        background-color: transparent;
+      }
+    }
+  }
+
+  &-create-dropdown {
+    min-width: 176px;
+    max-height: unset;
+    border-radius: 12px;
+
+    :global {
+      .arco-dropdown-menu-item {
+        padding: 8px 12px;
+        height: auto;
+        line-height: normal;
+
+        &:hover {
+          background-color: #f2f8ff;
         }
       }
     }

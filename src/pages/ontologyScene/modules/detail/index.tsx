@@ -1,12 +1,14 @@
 import React, { useState, Suspense, lazy } from 'react';
-import { Layout, Menu, Spin } from '@arco-design/web-react';
+import { Layout, Menu, Spin, Dropdown, Button } from '@arco-design/web-react';
 import {
   IconApps,
   IconSettings,
   IconLink,
   IconThunderbolt,
   IconCode,
-  IconFile
+  IconFile,
+  IconPlus,
+  IconDown
 } from '@arco-design/web-react/icon';
 import {
   useHistory,
@@ -21,6 +23,7 @@ import {
   ONTOLOGY_SCENE_MENU_GROUP_KEYS,
   ONTOLOGY_SCENE_MENU_ITEM_KEYS
 } from '@/common/constants';
+import MenuIcon from '../../assets/menu.svg';
 import styles from './index.module.scss';
 
 // 懒加载各个模块
@@ -59,22 +62,22 @@ export default function OntologySceneDetail() {
         {
           key: ONTOLOGY_SCENE_MENU_ITEM_KEYS.GRAPH,
           title: '本体图谱',
-          icon: <IconApps fontSize={20} />
+          icon: <MenuIcon fontSize={20} />
         },
         {
           key: ONTOLOGY_SCENE_MENU_ITEM_KEYS.OBJECT_TYPE,
           title: '对象类型',
-          icon: <IconSettings fontSize={20} />
+          icon: <MenuIcon fontSize={20} />
         },
         {
           key: ONTOLOGY_SCENE_MENU_ITEM_KEYS.ATTRIBUTES,
           title: '属性',
-          icon: <IconSettings fontSize={20} />
+          icon: <MenuIcon fontSize={20} />
         },
         {
           key: ONTOLOGY_SCENE_MENU_ITEM_KEYS.LINKS,
           title: '链接',
-          icon: <IconLink fontSize={20} />
+          icon: <MenuIcon fontSize={20} />
         }
       ]
     },
@@ -86,12 +89,12 @@ export default function OntologySceneDetail() {
         {
           key: ONTOLOGY_SCENE_MENU_ITEM_KEYS.BEHAVIOR_ACTIONS,
           title: '行为动作',
-          icon: <IconThunderbolt fontSize={20} />
+          icon: <MenuIcon fontSize={20} />
         },
         {
           key: ONTOLOGY_SCENE_MENU_ITEM_KEYS.FUNCTIONS,
           title: '函数',
-          icon: <IconCode fontSize={20} />
+          icon: <MenuIcon fontSize={20} />
         }
       ]
     },
@@ -103,7 +106,7 @@ export default function OntologySceneDetail() {
         {
           key: ONTOLOGY_SCENE_MENU_ITEM_KEYS.BEHAVIOR_LOG,
           title: '行为日志',
-          icon: <IconFile fontSize={20} />
+          icon: <MenuIcon fontSize={20} />
         }
       ]
     }
@@ -122,6 +125,69 @@ export default function OntologySceneDetail() {
   const handlePublish = () => {
     // TODO: 实现发布逻辑
     console.log('发布更新');
+  };
+
+  const handleCreate = (type: string) => {
+    // 根据类型导航到对应的创建页面
+    const createPaths: Record<string, string> = {
+      [ONTOLOGY_SCENE_MENU_ITEM_KEYS.OBJECT_TYPE]: `${basePath}/${type}/create`,
+      [ONTOLOGY_SCENE_MENU_ITEM_KEYS.LINKS]: `${basePath}/${type}/create`,
+      [ONTOLOGY_SCENE_MENU_ITEM_KEYS.BEHAVIOR_ACTIONS]: `${basePath}/${type}/create/_NEW_`,
+      [ONTOLOGY_SCENE_MENU_ITEM_KEYS.FUNCTIONS]: `${basePath}/${type}/create`
+    };
+    const path = createPaths[type];
+    if (path) {
+      history.push(path);
+    }
+  };
+
+  const createMenuItems = [
+    {
+      key: ONTOLOGY_SCENE_MENU_ITEM_KEYS.OBJECT_TYPE,
+      title: '对象类型',
+      description: '解释文案',
+      icon: <IconSettings fontSize={20} />
+    },
+    {
+      key: ONTOLOGY_SCENE_MENU_ITEM_KEYS.LINKS,
+      title: '链接',
+      description: '解释文案',
+      icon: <IconLink fontSize={20} />
+    },
+    {
+      key: ONTOLOGY_SCENE_MENU_ITEM_KEYS.BEHAVIOR_ACTIONS,
+      title: '行为',
+      description: '解释文案',
+      icon: <IconThunderbolt fontSize={20} />
+    },
+    {
+      key: ONTOLOGY_SCENE_MENU_ITEM_KEYS.FUNCTIONS,
+      title: '函数',
+      description: '解释文案',
+      icon: <IconCode fontSize={20} />
+    }
+  ];
+
+  const renderCreateDropdown = () => {
+    return (
+      <Menu className={styles['ontology-scene-detail-create-dropdown']}>
+        {createMenuItems.map((item) => (
+          <MenuItem key={item.key} onClick={() => handleCreate(item.key)}>
+            <div className="flex items-center gap-[8px]">
+              <div className="h-[36px] w-[36px] bg-[#DCDCDC]"></div>
+              <div className="flex flex-col">
+                <span className="text-[14px] font-[600] leading-[22px] text-[var(--color-text-1)]">
+                  {item.title}
+                </span>
+                <span className="mt-[4px] text-[12px] leading-[18px] text-[var(--color-text-4)]">
+                  {item.description}
+                </span>
+              </div>
+            </div>
+          </MenuItem>
+        ))}
+      </Menu>
+    );
   };
 
   const renderMenu = () => {
@@ -154,16 +220,31 @@ export default function OntologySceneDetail() {
         onPublish={handlePublish}
       />
       <Layout className="flex flex-row">
-        <Menu
-          selectedKeys={[moduleType]}
-          className={cls(
-            styles['ontology-scene-detail-menu'],
-            'max-w-[200px] flex-shrink-0 border-r border-[var(--color-border-2)] bg-white'
-          )}
-          hasCollapseButton
-        >
-          {renderMenu()}
-        </Menu>
+        <div className="flex min-w-[200px] flex-shrink-0 flex-col border-r border-[var(--color-border-2)] bg-white">
+          <div className="px-[12px] pt-[24px]">
+            <Dropdown
+              droplist={renderCreateDropdown()}
+              trigger="click"
+              position="bl"
+            >
+              <Button
+                type="primary"
+                className="flex w-full items-center justify-center"
+              >
+                <IconPlus className="mr-[4px]" />
+                创建
+                <IconDown className="ml-[4px]" />
+              </Button>
+            </Dropdown>
+          </div>
+          <Menu
+            selectedKeys={[moduleType]}
+            className={cls(styles['ontology-scene-detail-menu'], 'flex-1')}
+            // hasCollapseButton
+          >
+            {renderMenu()}
+          </Menu>
+        </div>
 
         <Layout.Content className="flex-1 overflow-auto bg-gray-50">
           <Suspense
