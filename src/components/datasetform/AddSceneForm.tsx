@@ -31,7 +31,7 @@ export default function AddSceneFormModal({
         <Form.Item label="场景分类标签：" field="sceneTypeTag">
           <Select
             mode="multiple"
-            placeholder="请选择或添加自定义标签"
+            placeholder="请选择标签"
             allowCreate
             allowClear
             options={newTagList.map((item) => ({
