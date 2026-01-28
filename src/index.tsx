@@ -271,7 +271,7 @@ function App() {
           />
         )}
       </Layout.Header>
-      <Layout.Content className="flex-auto overflow-auto bg-[var(--color-bg-4)]">
+      <Layout.Content className="flex-auto overflow-auto bg-[#F5F7FC]">
         <Switch>
           <Route
             key="login"

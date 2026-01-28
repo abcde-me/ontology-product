@@ -71,7 +71,7 @@ const AccessDetail = () => {
       <div
         className="crumbs"
         style={{
-          margin: '14px 0px',
+          // margin: '14px 0px',
           fontSize: '20px',
           display: 'flex',
           alignItems: 'center'
