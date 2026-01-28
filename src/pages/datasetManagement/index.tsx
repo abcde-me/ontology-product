@@ -1873,7 +1873,11 @@ const DatasetManagement: React.FC = () => {
                   }}
                 >
                   <div className="flex items-center justify-between">
-                    <span className="text-[14px]">{item.description}</span>
+                    <EllipsisPopover
+                      value={item.description}
+                      className="text-[14px]"
+                      preferTypography
+                    />
                     <div className="flex items-center gap-2">
                       <PermissionWrapper
                         permission={DATA_MANAGEMENT_PERMISSIONS.MODIFY_SCENE}
@@ -1908,24 +1912,42 @@ const DatasetManagement: React.FC = () => {
                       )}
                     </div>
                   </div>
-                  {item?.tags?.length > 0 && (
+                  {item?.tags?.length > 3 ? (
                     <span style={{ marginTop: '8px' }}>
                       <IconTag style={{ marginRight: '5px' }} />
-                      {item.tags.map((tag, index) => (
-                        <Tag
-                          key={index}
-                          style={{
-                            marginRight: '5px',
-                            background: '#FFF',
-                            border: '1px solid #E2E8F0',
-                            padding: '4px',
-                            borderRadius: '4px'
-                          }}
-                        >
-                          {tag}
+                      {item.tags.slice(0, 3).map((tag, index) => (
+                        <Tag key={index} className={styles.sceneTag}>
+                          <EllipsisPopover value={tag} preferTypography />
                         </Tag>
                       ))}
+                      <Tooltip
+                        content={() =>
+                          item.tags.slice(3).map((tag, index) => (
+                            <Tag
+                              key={index}
+                              className={`${styles.sceneTag} mb-1`}
+                            >
+                              <EllipsisPopover value={tag} preferTypography />
+                            </Tag>
+                          ))
+                        }
+                      >
+                        <Tag key={item.tags.length} className={styles.sceneTag}>
+                          +{item.tags.length - 3}
+                        </Tag>
+                      </Tooltip>
                     </span>
+                  ) : (
+                    item.tags?.length > 0 && (
+                      <span style={{ marginTop: '8px' }}>
+                        <IconTag style={{ marginRight: '5px' }} />
+                        {item.tags.map((tag, index) => (
+                          <Tag key={index} className={styles.sceneTag}>
+                            <EllipsisPopover value={tag} preferTypography />
+                          </Tag>
+                        ))}
+                      </span>
+                    )
                   )}
                 </div>
               )}
