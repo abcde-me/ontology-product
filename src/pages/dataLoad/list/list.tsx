@@ -356,8 +356,12 @@ export default function DataLoad() {
         ...loadSiftObject
       });
       if (res.message == 'ok') {
-        setData(res.data.items);
-        setLoadTotal(res.data.total);
+        if (res.data.items.length === 0 && current > 1) {
+          setCurrent(current - 1);
+        } else {
+          setData(res.data.items);
+          setLoadTotal(res.data.total);
+        }
       }
     } catch (error) {
       console.log(error);
