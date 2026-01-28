@@ -17,6 +17,7 @@ import {
 } from '@arco-design/web-react/icon';
 import {
   CopyItemIcon,
+  NoDataCard,
   ProButton,
   SearchTable
 } from '@ceai-front/arco-material';
@@ -170,8 +171,9 @@ export default function OntologySceneObjectTypeList() {
 
   // 处理编辑
   const handleEdit = (record: ObjectTypeItem) => {
-    // TODO: 实现跳转到编辑页面
-    console.log('Edit:', record);
+    history.push(
+      `/tenant/compute/modaforge/ontologyScene/detail/${OSId}/objectType/edit/${record.id}`
+    );
   };
 
   // 处理删除

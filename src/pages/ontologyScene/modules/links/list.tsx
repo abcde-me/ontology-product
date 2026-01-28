@@ -192,8 +192,9 @@ export default function OntologySceneLinksList() {
 
   // 处理编辑
   const handleEdit = (record: LinkItem) => {
-    // TODO: 实现跳转到编辑页面
-    console.log('Edit:', record);
+    history.push(
+      `/tenant/compute/modaforge/ontologyScene/detail/${OSId}/links/edit/${record.id}`
+    );
   };
 
   // 处理删除
