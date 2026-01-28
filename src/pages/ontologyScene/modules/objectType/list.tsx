@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Button,
   Form,
@@ -23,6 +23,12 @@ import {
 } from '@ceai-front/arco-material';
 import { useHistory, useParams } from 'react-router-dom';
 import { useWorkflowTable } from '../../hooks/useTable';
+import ObjectTypeDetailDrawer, {
+  ObjectTypeDetailData,
+  InstanceItem,
+  AttributeItem,
+  LinkItem
+} from '../../componens/ObjectTypeDetailDrawer';
 import styles from './list.module.scss';
 
 // 对象类型数据接口
@@ -106,6 +112,12 @@ export default function OntologySceneObjectTypeList() {
   const [form] = Form.useForm();
   const history = useHistory();
   const { id: OSId } = useParams<{ id: string }>();
+  const [detailDrawerVisible, setDetailDrawerVisible] = useState(false);
+  const [selectedObjectType, setSelectedObjectType] =
+    useState<ObjectTypeItem | null>(null);
+  const [activeTab, setActiveTab] = useState<
+    'instances' | 'attributes' | 'links'
+  >('instances');
 
   // 使用 useTable hook
   const { data, loading, pagination, refresh, submit, onChange } =
@@ -152,21 +164,25 @@ export default function OntologySceneObjectTypeList() {
   };
 
   // 跳转到详情/编辑页面
-  const handleViewDetail = (record: ObjectTypeItem) => {
-    // TODO: 实现跳转到详情页
-    console.log('View detail:', record);
+  const handleViewDetail = (
+    record: ObjectTypeItem,
+    tab?: 'instances' | 'attributes' | 'links'
+  ) => {
+    setSelectedObjectType(record);
+    if (tab) {
+      setActiveTab(tab);
+    }
+    setDetailDrawerVisible(true);
   };
 
   // 处理链接点击
   const handleLinkClick = (record: ObjectTypeItem) => {
-    // TODO: 实现跳转到链接列表
-    console.log('View links:', record);
+    handleViewDetail(record, 'links');
   };
 
   // 处理实例数量点击
   const handleInstanceCountClick = (record: ObjectTypeItem) => {
-    // TODO: 实现跳转到实例列表
-    console.log('View instances:', record);
+    handleViewDetail(record, 'instances');
   };
 
   // 处理编辑
@@ -404,6 +420,19 @@ export default function OntologySceneObjectTypeList() {
             }}
           />
         </div>
+      )}
+
+      {/* 对象类型详情抽屉 */}
+      {selectedObjectType && (
+        <ObjectTypeDetailDrawer
+          visible={detailDrawerVisible}
+          onClose={() => {
+            setDetailDrawerVisible(false);
+            setSelectedObjectType(null);
+          }}
+          objectTypeId={selectedObjectType?.id}
+          defaultActiveTab={activeTab}
+        />
       )}
     </div>
   );

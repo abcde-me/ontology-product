@@ -26,9 +26,11 @@ export const OsDrawer = (props: IProps) => {
             >
               {title}
             </div>
-            <ProButton type={'outline'} size={'small'}>
-              编辑
-            </ProButton>
+            {onEdit && (
+              <ProButton type={'outline'} size={'small'} onClick={onEdit}>
+                编辑
+              </ProButton>
+            )}
           </div>
           <div className={'flex gap-4'}>
             <div className={'h-[16px] w-[1px] bg-[#CBD5E1]'} />
