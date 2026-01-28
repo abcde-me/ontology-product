@@ -3,8 +3,6 @@
  * 统一管理所有权限标识符，避免硬编码
  */
 
-import { DELETE } from 'mobx/dist/internal';
-
 // 连接器相关权限
 export const CONNECTION_PERMISSIONS = {
   CAN_CREATE: 'aimdp-manager:connector:manage:create',
