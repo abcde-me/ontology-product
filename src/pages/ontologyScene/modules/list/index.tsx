@@ -30,6 +30,7 @@ import LinkCreateIcon from '../../assets/link-create.svg';
 import BehaviorCreateIcon from '../../assets/behavior-create.svg';
 import TestCreateIcon from '../../assets/test-create.svg';
 import { ONTOLOGY_SCENE_MENU_ITEM_KEYS } from '@/common/constants';
+import SceneModal, { SceneFormData } from './components/SceneModal';
 
 // 扩展 ProcessStep 类型，使 description 支持 ReactNode
 interface SceneProcessStep extends Omit<ProcessStep, 'description'> {
@@ -95,7 +96,7 @@ interface SceneCardProps {
   onCardClick?: (item: SceneCardItem) => void;
   onIconClick?: (
     item: SceneCardItem,
-    iconType: ValueOf<typeof ONTOLOGY_SCENE_MENU_ITEM_KEYS>
+    iconType: (typeof ONTOLOGY_SCENE_MENU_ITEM_KEYS)[keyof typeof ONTOLOGY_SCENE_MENU_ITEM_KEYS]
   ) => void;
 }
 
@@ -132,7 +133,7 @@ const SceneCard: React.FC<SceneCardProps> = ({
   const handleIconClick = useCallback(
     (
       e: React.MouseEvent,
-      iconType: ValueOf<typeof ONTOLOGY_SCENE_MENU_ITEM_KEYS>
+      iconType: (typeof ONTOLOGY_SCENE_MENU_ITEM_KEYS)[keyof typeof ONTOLOGY_SCENE_MENU_ITEM_KEYS]
     ) => {
       e.stopPropagation();
       history.push(
@@ -161,14 +162,18 @@ const SceneCard: React.FC<SceneCardProps> = ({
             <EllipsisPopover className="hover-blue" value={item.name} />
 
             <div className="flex items-center gap-[8px]">
-              <IconEdit
-                className="h-4 w-4 cursor-pointer text-[#4e5969] transition-colors hover:text-[#165dff]"
-                onClick={handleEdit}
-              />
-              <IconDelete
-                className="h-4 w-4 cursor-pointer text-[#4e5969] transition-colors hover:text-[#165dff]"
-                onClick={handleDelete}
-              />
+              <Popover content="编辑">
+                <IconEdit
+                  className="h-4 w-4 cursor-pointer text-[#4e5969] transition-colors hover:text-[#165dff]"
+                  onClick={handleEdit}
+                />
+              </Popover>
+              <Popover content="删除">
+                <IconDelete
+                  className="h-4 w-4 cursor-pointer text-[#4e5969] transition-colors hover:text-[#165dff]"
+                  onClick={handleDelete}
+                />
+              </Popover>
             </div>
           </div>
           {/* 更新日期 */}
@@ -251,6 +256,10 @@ export default function OntologySceneList() {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(12);
   const [loading, setLoading] = useState(false);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [modalMode, setModalMode] = useState<'create' | 'edit'>('create');
+  const [editingScene, setEditingScene] = useState<SceneCardItem | null>(null);
+  const [submitLoading, setSubmitLoading] = useState(false);
 
   useEffect(() => {
     // TODO: 替换为实际API调用
@@ -259,14 +268,73 @@ export default function OntologySceneList() {
 
   // 处理创建场景
   const handleCreate = () => {
-    // TODO: 跳转到创建场景页面
-    history.push('/tenant/compute/modaforge/ontologyScene/detail/create');
+    setModalMode('create');
+    setEditingScene(null);
+    setModalVisible(true);
   };
 
   // 处理编辑场景
   const handleEdit = (item: SceneCardItem) => {
-    // TODO: 打开编辑弹窗或跳转到编辑页面
-    Message.info(`编辑场景: ${item.name}`);
+    setModalMode('edit');
+    setEditingScene(item);
+    setModalVisible(true);
+  };
+
+  // 处理弹窗提交
+  const handleModalSubmit = async (data: SceneFormData) => {
+    setSubmitLoading(true);
+    try {
+      // TODO: 调用实际API
+      await new Promise((resolve) => setTimeout(resolve, 300)); // 模拟API调用
+
+      if (modalMode === 'create') {
+        const newSceneId = Date.now().toString();
+        const newScene: SceneCardItem & { icon?: string } = {
+          id: newSceneId,
+          name: data.name,
+          uniqueId: `scene-${Date.now()}`,
+          description: data.description || '',
+          updateTime: new Date().toISOString().split('T')[0],
+          viewCount: 0,
+          editCount: 0,
+          likeCount: 0,
+          imageCount: 0,
+          icon: data.icon
+        };
+        setSceneList([newScene, ...sceneList]);
+        Message.success('创建成功');
+        // 创建成功后跳转到详情页
+        history.push(
+          `/tenant/compute/modaforge/ontologyScene/detail/${newSceneId}`
+        );
+      } else if (editingScene) {
+        setSceneList(
+          sceneList.map((scene) =>
+            scene.id === editingScene.id
+              ? {
+                  ...scene,
+                  name: data.name,
+                  description: data.description || '',
+                  icon: data.icon
+                }
+              : scene
+          )
+        );
+        Message.success('修改成功');
+      }
+      setModalVisible(false);
+    } catch (error) {
+      Message.error(modalMode === 'create' ? '创建失败' : '修改失败');
+      console.error('提交失败:', error);
+    } finally {
+      setSubmitLoading(false);
+    }
+  };
+
+  // 处理弹窗取消
+  const handleModalCancel = () => {
+    setModalVisible(false);
+    setEditingScene(null);
   };
 
   // 处理删除场景
@@ -495,6 +563,27 @@ export default function OntologySceneList() {
           />
         </div>
       )}
+
+      {/* 创建/编辑弹窗 */}
+      <SceneModal
+        visible={modalVisible}
+        mode={modalMode}
+        initialValues={
+          editingScene
+            ? {
+                name: editingScene.name,
+                description: editingScene.description,
+                icon: (editingScene as any).icon || 'object-type-1' // TODO: 从编辑的场景中获取图标
+              }
+            : undefined
+        }
+        onSubmit={handleModalSubmit}
+        onCancel={handleModalCancel}
+        loading={submitLoading}
+        existingSceneIcons={sceneList
+          .map((scene) => (scene as any).icon)
+          .filter((icon): icon is string => !!icon)}
+      />
     </div>
   );
 }
