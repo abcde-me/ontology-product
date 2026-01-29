@@ -31,6 +31,8 @@ import BehaviorCreateIcon from '../../assets/behavior-create.svg';
 import TestCreateIcon from '../../assets/test-create.svg';
 import { ONTOLOGY_SCENE_MENU_ITEM_KEYS } from '@/common/constants';
 import SceneModal, { SceneFormData } from './components/SceneModal';
+import styles from './index.module.scss';
+import classNames from 'classnames';
 
 // 扩展 ProcessStep 类型，使 description 支持 ReactNode
 interface SceneProcessStep extends Omit<ProcessStep, 'description'> {
@@ -488,7 +490,12 @@ export default function OntologySceneList() {
   }
 
   return (
-    <div className="flex min-h-full flex-col bg-white p-[24px]">
+    <div
+      className={classNames(
+        'flex min-h-full flex-col bg-white p-[24px]',
+        styles['ontology-scene-list']
+      )}
+    >
       {/* 头部流程 */}
       <ExpandableProcessFlow
         title="本体场景库"
