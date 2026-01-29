@@ -77,10 +77,14 @@ export default function WorkflowList() {
       };
       const res = await getWorkflowList(params);
       if (res.status === 200 && res.data) {
-        setWorkflowData(res.data.list);
-        setCurrent(res.data.page_info?.page);
-        setPageSize(res.data.page_info?.page_size);
-        setTotal(res.data.page_info?.total || 10);
+        if (res.data?.list?.length === 0 && current > 1) {
+          setCurrent(current - 1);
+        } else {
+          setWorkflowData(res.data.list);
+          setCurrent(res.data.page_info?.page);
+          setPageSize(res.data.page_info?.page_size);
+          setTotal(res.data.page_info?.total || 10);
+        }
       }
     } finally {
       setLoading(false);
