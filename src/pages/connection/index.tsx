@@ -409,13 +409,18 @@ export default function Connection() {
 
       if (res.status !== 200) {
         return;
+      } else if (res.data?.items?.length === 0 && pagination?.current > 1) {
+        setPagination((prev) => ({
+          ...prev,
+          current: prev.current - 1
+        }));
+      } else {
+        setConnectionData(res.data.items);
+        setPagination((prev) => ({
+          ...prev,
+          total: res.data.total
+        }));
       }
-
-      setConnectionData(res.data.items);
-      setPagination((prev) => ({
-        ...prev,
-        total: res.data.total
-      }));
     } catch (error) {
       console.error('获取连接器列表失败:', error);
     } finally {
