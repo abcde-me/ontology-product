@@ -61,12 +61,8 @@
     margin: 0 16px;
   }
 
-  .datasetManagementTabs :global(.ellipsis-popover-div) {
+  .datasetManagementTabs .sceneDesc :global(.ellipsis-popover-div) {
     width: calc(100% - 60px);
-  }
-
-  .sceneTag :global(.ellipsis-popover-div) {
-    width: 100%;
   }
 }
 
@@ -77,10 +73,6 @@
   padding: 4px;
   border-radius: 4px;
   max-width: 140px;
-
-  :global(.ellipsis-popover-div) {
-    width: 100%;
-  }
 }
 
 .datasetManagement {

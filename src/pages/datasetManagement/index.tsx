@@ -1872,7 +1872,9 @@ const DatasetManagement: React.FC = () => {
                     marginTop: '20px'
                   }}
                 >
-                  <div className="flex items-center justify-between">
+                  <div
+                    className={`${styles.sceneDesc} flex items-center justify-between`}
+                  >
                     <EllipsisPopover
                       value={item.description}
                       className="text-[14px]"
