@@ -1785,23 +1785,25 @@ const DatasetManagement: React.FC = () => {
                   }}
                 >
                   <span className="text-[14px]">{item.description}</span>
-                  <span style={{ marginTop: '8px' }}>
-                    <IconTag style={{ marginRight: '5px' }} />
-                    {item.tags.map((tag, index) => (
-                      <Tag
-                        key={index}
-                        style={{
-                          marginRight: '5px',
-                          background: '#FFF',
-                          border: '1px solid #E2E8F0',
-                          padding: '4px',
-                          borderRadius: '4px'
-                        }}
-                      >
-                        {tag}
-                      </Tag>
-                    ))}
-                  </span>
+                  {item.tags?.length > 0 && (
+                    <span style={{ marginTop: '8px' }}>
+                      <IconTag style={{ marginRight: '5px' }} />
+                      {item.tags.map((tag, index) => (
+                        <Tag
+                          key={index}
+                          style={{
+                            marginRight: '5px',
+                            background: '#FFF',
+                            border: '1px solid #E2E8F0',
+                            padding: '4px',
+                            borderRadius: '4px'
+                          }}
+                        >
+                          {tag}
+                        </Tag>
+                      ))}
+                    </span>
+                  )}
                 </div>
               )}
               <div className={styles.searchToolbar}>

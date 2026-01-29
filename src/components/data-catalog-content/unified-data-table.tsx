@@ -333,8 +333,12 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
             ...item,
             id: item.table_id || item.id
           }));
-          setTableData(tableData);
-          setTotal(res.data.total || res.data.list.length || 0);
+          if (tableData && tableData?.length === 0 && currentPage > 1) {
+            setCurrentPage(currentPage - 1);
+          } else {
+            setTableData(tableData);
+            setTotal(res.data.total || res.data.list.length || 0);
+          }
           // console.log(`获取${tableType}表格数据成功:`, res.data);
         }
         // 再检查有没有items数据结构
@@ -348,7 +352,13 @@ const UnifiedDataTable = forwardRef((props: UnifiedDataTableProps, ref) => {
           // console.log(`获取${tableType}表格数据成功:`, res.data);
         }
         // 无数据的情况
-        else {
+        else if (
+          res.data.items &&
+          res.data.items.length === 0 &&
+          currentPage > 1
+        ) {
+          setCurrentPage(currentPage - 1);
+        } else {
           // 无数据情况，设置为空数组
           setTableData([]);
           setTotal(0);
