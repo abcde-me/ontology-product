@@ -14,15 +14,21 @@ function OperationCenterPage() {
   }, [url]);
   // const lastUrl = useRef(pageUrl);
 
+  const refreshOperationCenter = (search: string) => {
+    const params = new URLSearchParams(search);
+    const curUrl = params.get('url');
+    const mdpUrl = params.get('mdp_operation_center');
+    if (curUrl && !mdpUrl && curUrl.startsWith('/operationcenter/')) {
+      bus.$emit('refresh', curUrl.replace('/operationcenter', ''));
+    }
+  };
+
   useEffect(() => {
+    console.log('URL before:', history);
+    refreshOperationCenter(history.location.search);
     const unlisten = history.listen((location, action) => {
-      console.log('URL 变动:', location.search);
-      const params = new URLSearchParams(location.search);
-      const curUrl = params.get('url');
-      const mdpUrl = params.get('mdp_operation_center');
-      if (curUrl && !mdpUrl) {
-        bus.$emit('refresh', curUrl.replace('/operationcenter', ''));
-      }
+      console.log('URL after:', location.search);
+      refreshOperationCenter(location.search);
     });
 
     return () => unlisten();
