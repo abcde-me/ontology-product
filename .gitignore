@@ -52,3 +52,5 @@ yarn-error.log*
 .stylelintcache
 
 gui_test_screenshots
+
+.claude
