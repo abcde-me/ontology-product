@@ -471,7 +471,7 @@ const DataSourceModal: React.FC<DataSourceModalProps> = ({
         <Tabs.TabPane title="全部数据" key="all">
           <div className="detail-modal-content">
             <div className="content-tree">
-              <div className="search-input">
+              <div className="department-search-input">
                 <InputSearch
                   type="text"
                   placeholder="请输入名称搜索"

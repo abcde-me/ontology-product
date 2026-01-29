@@ -185,7 +185,7 @@ const DepartmentModal: React.FC<DataSourceModalProps> = ({
       >
         <Tabs.TabPane title="全部部门" key="all">
           <div className="department-modal-content department-modal-content-tree">
-            <div className="search-input">
+            <div className="department-search-input">
               <InputSearch
                 type="text"
                 allowClear

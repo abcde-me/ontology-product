@@ -274,7 +274,7 @@ const IndividualModal: React.FC<DataSourceModalProps> = ({
         <Tabs.TabPane title="全部个人" key="all">
           <div className="individual-modal-content">
             <div className="content-tree">
-              <div className="search-input">
+              <div className="department-search-input">
                 <InputSearch
                   type="text"
                   placeholder="输入搜索部门"
