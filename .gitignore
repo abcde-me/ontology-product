@@ -53,4 +53,4 @@ yarn-error.log*
 
 gui_test_screenshots
 
-.claude
+.claude/** 
