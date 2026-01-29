@@ -409,7 +409,9 @@ export default function Connection() {
 
       if (res.status !== 200) {
         return;
-      } else if (res.data?.items?.length === 0 && pagination?.current > 1) {
+      }
+
+      if (res.data?.items?.length === 0 && pagination?.current > 1) {
         setPagination((prev) => ({
           ...prev,
           current: prev.current - 1
