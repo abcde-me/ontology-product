@@ -190,8 +190,13 @@ export default function DataAssetList() {
       }
 
       const { fields, records, total: totalCount } = listRes.data;
-      setDataAssetList(records || []);
-      setTotal(totalCount || 0);
+      console.log(records, 'fields');
+      if ((records || []).length === 0 && page > 1) {
+        handlePageChange(page - 1, size);
+      } else {
+        setDataAssetList(records || []);
+        setTotal(totalCount || 0);
+      }
 
       // 保存字段列表用于修改资产弹窗
       const fieldsForModifyList = (fields || [])
