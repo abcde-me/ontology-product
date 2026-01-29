@@ -6,7 +6,7 @@ import { useColumns } from './hooks/useColumns';
 import { PageHeader, SearchForm, DetailDrawer } from './components';
 import { BehaviorLogItem, SearchParams } from './types';
 import { MOCK_BEHAVIOR_LOGS, mockDelay } from './mocks';
-import styles from './list.module.scss';
+import styles from './index.module.scss';
 
 export default function BehaviorLogList() {
   const [form] = Form.useForm();
