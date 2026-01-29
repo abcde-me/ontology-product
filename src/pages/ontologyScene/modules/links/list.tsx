@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   Button,
   Form,
@@ -23,6 +23,7 @@ import {
 import { useHistory, useParams } from 'react-router-dom';
 import { useWorkflowTable } from '../../hooks/useTable';
 import styles from './list.module.scss';
+import LinkDetailDrawer from './components/LinkDetailDrawer';
 
 // 链接数据接口
 export interface LinkItem {
@@ -132,6 +133,11 @@ export default function OntologySceneLinksList() {
   const [form] = Form.useForm();
   const history = useHistory();
   const { id: OSId } = useParams<{ id: string }>();
+  const [detailDrawerVisible, setDetailDrawerVisible] = useState(false);
+  const [detailActiveTab, setDetailActiveTab] = useState<
+    'instances' | 'attributes'
+  >('instances');
+  const [selectedLink, setSelectedLink] = useState<LinkItem | null>(null);
 
   // 使用 useTable hook
   const { data, loading, pagination, refresh, submit, onChange } =
@@ -180,14 +186,16 @@ export default function OntologySceneLinksList() {
 
   // 处理属性点击
   const handleAttributesClick = (record: LinkItem) => {
-    // TODO: 实现跳转到属性详情
-    console.log('View attributes:', record);
+    setSelectedLink(record);
+    setDetailActiveTab('attributes');
+    setDetailDrawerVisible(true);
   };
 
   // 处理链接数点击
   const handleLinkCountClick = (record: LinkItem) => {
-    // TODO: 实现跳转到链接详情
-    console.log('View link details:', record);
+    setSelectedLink(record);
+    setDetailActiveTab('instances');
+    setDetailDrawerVisible(true);
   };
 
   // 处理编辑
@@ -203,14 +211,24 @@ export default function OntologySceneLinksList() {
     Message.info(`删除 ${record.name}`);
   };
 
+  // 处理查看详情（点击链接名称）
+  const handleViewDetail = (record: LinkItem) => {
+    setSelectedLink(record);
+    setDetailActiveTab('instances');
+    setDetailDrawerVisible(true);
+  };
+
   // 表格列定义
   const columns: TableColumnProps<LinkItem>[] = [
     {
       title: '链接名称',
       dataIndex: 'name',
       width: 150,
-      render: (value) => (
-        <div className="hover-blue font-PingFangSc text-[14px] font-normal leading-[22px] text-[#23293b]">
+      render: (value, record) => (
+        <div
+          className="hover-blue font-PingFangSc text-[14px] font-normal leading-[22px] text-[#23293b]"
+          onClick={() => handleViewDetail(record)}
+        >
           {value}
         </div>
       )
@@ -379,6 +397,31 @@ export default function OntologySceneLinksList() {
     }
   ];
 
+  const drawerData = useMemo(() => {
+    if (!selectedLink) return undefined;
+    const attributeCount =
+      typeof selectedLink.attributes === 'string'
+        ? 0
+        : Number(selectedLink.attributes?.count) || 0;
+
+    return {
+      id: selectedLink.id,
+      name: selectedLink.name,
+      syncStatus: selectedLink.syncStatus,
+      linkType: selectedLink.linkType,
+      sourceObjectType: {
+        name: selectedLink.sourceObjectType.name,
+        iconColor: selectedLink.sourceObjectType.iconColor
+      },
+      targetObjectType: {
+        name: selectedLink.targetObjectType.name,
+        iconColor: selectedLink.targetObjectType.iconColor
+      },
+      instanceCount: Number(selectedLink.linkCount) || 0,
+      attributeCount
+    };
+  }, [selectedLink]);
+
   return (
     <div className={styles['links-list']}>
       <div>
@@ -440,6 +483,20 @@ export default function OntologySceneLinksList() {
             }}
           />
         </div>
+      )}
+
+      {/* 链接详情抽屉 */}
+      {detailDrawerVisible && (
+        <LinkDetailDrawer
+          visible={detailDrawerVisible}
+          onClose={() => {
+            setDetailDrawerVisible(false);
+            setSelectedLink(null);
+          }}
+          linkId={selectedLink?.id}
+          data={drawerData as any}
+          defaultActiveTab={detailActiveTab}
+        />
       )}
     </div>
   );
