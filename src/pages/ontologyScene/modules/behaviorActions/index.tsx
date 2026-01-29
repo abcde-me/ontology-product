@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { Drawer, Tabs } from '@arco-design/web-react';
+import { Tabs } from '@arco-design/web-react';
 import styles from './index.module.scss';
 import { ActionList, BehaviorDetail } from './components';
+import BehaviorTest from './components/BehaviorTest';
 import { BehaviorActionItem } from '@/pages/ontologyScene/types/behaviorActions';
 
 // 行为动作
@@ -12,7 +13,9 @@ export default function OntologySceneBehaviorActions() {
 
   return (
     <div
-      className={`flex h-full w-full flex-col gap-4 overflow-hidden bg-white ${styles['behavior']}`}
+      className={`flex h-full w-full flex-col overflow-hidden bg-white ${
+        styles['behavior']
+      } ${activeTab === 'test' ? '!gap-0' : ''}`}
     >
       <Tabs
         className={'flex-shrink-0'}
@@ -22,15 +25,20 @@ export default function OntologySceneBehaviorActions() {
         <Tabs.TabPane title={'行为列表'} key={'list'} />
         <Tabs.TabPane title={'行为测试'} key={'test'} />
       </Tabs>
-      <div className={styles['behavior-content']}>
+      <div
+        className={`${styles['behavior-content']} ${
+          activeTab === 'test' ? 'relative !p-0' : ''
+        }`}
+      >
         {activeTab === 'list' ? (
           <ActionList
             onViewDetail={(data) => {
               setShowDetail(true);
+              setBehaviorData(data);
             }}
           />
         ) : (
-          <div>这里写行为测试</div>
+          <BehaviorTest />
         )}
       </div>
       <BehaviorDetail
