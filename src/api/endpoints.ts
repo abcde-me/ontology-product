@@ -722,7 +722,17 @@ export const ModaForgeResourceEndpoints = {
   editDataAssetDataTagsBatch: PrefixAimdp + '/EditDataAssetDataTagsBatch',
   // 下载数据资产字段模板
   downloadDataAssetFieldsTemplate:
-    PrefixAimdp + '/DownloadDataAssetFieldsTemplate'
+    PrefixAimdp + '/DownloadDataAssetFieldsTemplate',
+
+  // 🆕 行为测试相关端点
+  // 获取行为列表
+  behaviorList: PrefixAimdp + '/ListBehaviors',
+  // 执行行为测试
+  behaviorTest: PrefixAimdp + '/ExecuteBehaviorTest',
+  // 保存编排方案（可选）
+  behaviorOrchestration: PrefixAimdp + '/SaveBehaviorOrchestration',
+  // 获取历史记录（可选）
+  behaviorHistory: PrefixAimdp + '/ListBehaviorHistory'
 };
 
 /**
