@@ -190,7 +190,6 @@ export default function DataAssetList() {
       }
 
       const { fields, records, total: totalCount } = listRes.data;
-      console.log(records, 'fields');
       if ((records || []).length === 0 && page > 1) {
         handlePageChange(page - 1, size);
       } else {
