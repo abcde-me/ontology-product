@@ -5,7 +5,7 @@ import { useTable } from './hooks/useTable';
 import { useColumns } from './hooks/useColumns';
 import { PageHeader, SearchForm, DetailDrawer } from './components';
 import { BehaviorLogItem, SearchParams } from './types';
-import { MOCK_BEHAVIOR_LOGS, mockDelay } from './mocks';
+import { fetchBehaviorLogList } from './services/behaviorLogApi';
 import styles from './index.module.scss';
 
 export default function BehaviorLogList() {
@@ -36,35 +36,15 @@ export default function BehaviorLogList() {
     SearchParams
   >({
     service: async (params) => {
-      // TODO: 替换为实际API调用
-      await mockDelay(300);
-
-      // 模拟筛选和分页
-      let filteredData = [...MOCK_BEHAVIOR_LOGS];
-
-      if (params.keyword) {
-        const keyword = params.keyword.toLowerCase();
-        filteredData = filteredData.filter(
-          (item) =>
-            item.name.toLowerCase().includes(keyword) ||
-            item.id.toLowerCase().includes(keyword) ||
-            item.type.toLowerCase().includes(keyword) ||
-            item.objectType?.toLowerCase().includes(keyword) ||
-            item.operator?.toLowerCase().includes(keyword)
-        );
-      }
-
-      const page = params.page || 1;
-      const pageSize = params.page_size || 10;
-      const start = (page - 1) * pageSize;
-      const end = start + pageSize;
+      // 调用 API 服务
+      const result = await fetchBehaviorLogList(params);
 
       return {
         data: {
-          items: filteredData.slice(start, end),
-          total: filteredData.length,
-          page,
-          page_size: pageSize
+          items: result.list,
+          total: result.total,
+          page: params.page || 1,
+          page_size: params.page_size || 10
         }
       };
     },

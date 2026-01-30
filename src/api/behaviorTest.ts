@@ -42,3 +42,63 @@ export function getBehaviorHistory(params: {
 }) {
   return UAPI.RES.behaviorHistory({}).get(params).inRegion().do();
 }
+
+// ==================== 执行记录相关接口 ====================
+
+/**
+ * 获取执行记录列表
+ */
+export function getBehaviorLogList(params: {
+  keyword?: string;
+  page?: number;
+  page_size?: number;
+}) {
+  // @ts-ignore - UAPI 资源待后端配置
+  return UAPI.RES.behaviorLogList({}).post(params).inRegion().do();
+}
+
+/**
+ * 获取执行记录详情
+ */
+export function getBehaviorLogDetail(params: { id: string }) {
+  // @ts-ignore - UAPI 资源待后端配置
+  return UAPI.RES.behaviorLogDetail({ id: params.id }).get().inRegion().do();
+}
+
+/**
+ * 获取入参详情
+ */
+export function getBehaviorLogInputParams(params: { id: string }) {
+  // @ts-ignore - UAPI 资源待后端配置
+  return UAPI.RES.behaviorLogInputParams({ id: params.id })
+    .get()
+    .inRegion()
+    .do();
+}
+
+/**
+ * 获取执行详情（SQL/代码）
+ */
+export function getBehaviorLogExecutionDetail(params: { id: string }) {
+  // @ts-ignore - UAPI 资源待后端配置
+  return UAPI.RES.behaviorLogExecutionDetail({ id: params.id })
+    .get()
+    .inRegion()
+    .do();
+}
+
+/**
+ * 删除执行记录
+ */
+export function deleteBehaviorLog(params: { id: string }) {
+  // @ts-ignore - UAPI 资源待后端配置
+  return UAPI.RES.behaviorLog({ id: params.id }).delete().inRegion().do();
+}
+
+/**
+ * 批量删除执行记录
+ */
+export function batchDeleteBehaviorLogs(params: { ids: string[] }) {
+  // @ts-ignore - UAPI 资源待后端配置
+  return UAPI.RES.behaviorLogBatchDelete({}).post(params).inRegion().do();
+}

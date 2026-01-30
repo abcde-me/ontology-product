@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Tabs, Tag, Table } from '@arco-design/web-react';
+import { InfoDescription } from '@ceai-front/arco-material';
 import { OsDrawer } from '@/pages/ontologyScene/componens/OSDrawer';
-import { BehaviorItem } from '../../types';
 import { useUIStore } from '../../store/uiStore';
 import { useBusinessStore } from '../../store/businessStore';
 
@@ -26,6 +26,46 @@ export const BehaviorDetailDrawer: React.FC = () => {
     // TODO: 跳转到行为编辑页面
     console.log('编辑行为:', currentBehaviorDetail?.id);
   };
+
+  // 基本信息数据
+  const detailData = useMemo(() => {
+    if (!currentBehaviorDetail) return [];
+    return [
+      {
+        title: '基本信息',
+        items: [
+          {
+            label: '行为名称',
+            value: currentBehaviorDetail.name
+          },
+          {
+            label: '所属对象类型',
+            value: (
+              <Tag color="purple" size="small">
+                {currentBehaviorDetail.objectType}
+              </Tag>
+            )
+          },
+          {
+            label: '描述说明',
+            value: currentBehaviorDetail.description
+          },
+          {
+            label: '函数',
+            value: currentBehaviorDetail.functionName
+          },
+          {
+            label: 'ID',
+            value: (
+              <span className="font-mono">
+                {currentBehaviorDetail.identifier}
+              </span>
+            )
+          }
+        ]
+      }
+    ];
+  }, [currentBehaviorDetail]);
 
   if (!currentBehaviorDetail) return null;
 
@@ -88,47 +128,12 @@ export const BehaviorDetailDrawer: React.FC = () => {
     >
       <div className="flex h-full flex-col">
         {/* 基本信息 */}
-        <div className="flex-shrink-0 space-y-4 border-b border-[#e5e6eb] px-6 py-4">
-          <div className="flex items-start gap-3">
-            <span className="w-24 flex-shrink-0 text-sm text-[#4e5969]">
-              行为名称:
-            </span>
-            <span className="flex-1 text-sm text-[#1d2129]">
-              {behavior.name}
-            </span>
-          </div>
-          <div className="flex items-start gap-3">
-            <span className="w-24 flex-shrink-0 text-sm text-[#4e5969]">
-              所属对象类型:
-            </span>
-            <Tag color="purple" size="small">
-              {behavior.objectType}
-            </Tag>
-          </div>
-          <div className="flex items-start gap-3">
-            <span className="w-24 flex-shrink-0 text-sm text-[#4e5969]">
-              描述说明:
-            </span>
-            <span className="flex-1 text-sm text-[#1d2129]">
-              {behavior.description}
-            </span>
-          </div>
-          <div className="flex items-start gap-3">
-            <span className="w-24 flex-shrink-0 text-sm text-[#4e5969]">
-              函数:
-            </span>
-            <span className="flex-1 text-sm text-[#1d2129]">
-              {behavior.functionName}
-            </span>
-          </div>
-          <div className="flex items-start gap-3">
-            <span className="w-24 flex-shrink-0 text-sm text-[#4e5969]">
-              ID:
-            </span>
-            <span className="flex-1 font-mono text-sm text-[#1d2129]">
-              {behavior.identifier}
-            </span>
-          </div>
+        <div className="flex-shrink-0">
+          <InfoDescription
+            data={detailData}
+            column={2}
+            titleStyle={{ fontSize: '14px', fontWeight: 500 }}
+          />
         </div>
 
         {/* Tab 切换 */}
