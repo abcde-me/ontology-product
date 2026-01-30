@@ -9951,7 +9951,7 @@ dagre-d3-es@7.0.11:
     d3 "^7.9.0"
     lodash-es "^4.17.21"
 
-dagre@^0.8.2:
+dagre@^0.8.2, dagre@^0.8.5:
   version "0.8.5"
   resolved "http://npm.cestc.cn/dagre/download/dagre-0.8.5.tgz#ba30b0055dac12b6c1fcc247817442777d06afee"
   integrity sha1-ujCwBV2sErbB/MJHgXRCd30Gr+4=
