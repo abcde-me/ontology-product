@@ -283,7 +283,7 @@ function TaskList() {
       fixed: 'right',
       width: 120,
       render: (_, record) => {
-        return hasPermissionGetTask ? (
+        return (
           <Space>
             <Tooltip content="暂无标注任务" disabled={record?.label_cnt !== 0}>
               <Link
@@ -309,8 +309,6 @@ function TaskList() {
               </Link>
             </Tooltip>
           </Space>
-        ) : (
-          '-'
         );
       }
     }

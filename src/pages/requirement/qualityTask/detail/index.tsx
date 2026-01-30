@@ -417,14 +417,9 @@ function QualityTaskDetail() {
         const isFinished = record.status === InspectionStatus.Finished;
         return (
           <Space>
-            {hasPermissionActionTask && (
-              <Link
-                onClick={() => handleGoInspect(record)}
-                disabled={isFinished}
-              >
-                去质检
-              </Link>
-            )}
+            <Link onClick={() => handleGoInspect(record)} disabled={isFinished}>
+              去质检
+            </Link>
             <Link
               onClick={() => handleBatchInspect(record)}
               disabled={isFinished}
