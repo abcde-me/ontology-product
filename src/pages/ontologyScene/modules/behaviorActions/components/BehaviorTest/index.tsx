@@ -13,26 +13,8 @@ import { useBusinessStore } from './store/businessStore';
 export const BehaviorTest: React.FC = () => {
   const isEmpty = useUIStore((state) => state.isEmpty);
   const setIsEmpty = useUIStore((state) => state.setIsEmpty);
-  const setLoadingBehaviors = useUIStore((state) => state.setLoadingBehaviors);
 
-  const fetchBehaviors = useBusinessStore((state) => state.fetchBehaviors);
   const behaviorList = useBusinessStore((state) => state.behaviorList);
-
-  // 初始化：加载行为列表
-  useEffect(() => {
-    const loadBehaviors = async () => {
-      setLoadingBehaviors(true);
-      try {
-        await fetchBehaviors();
-        setLoadingBehaviors(false);
-      } catch (error) {
-        setLoadingBehaviors(false);
-        Message.error('获取行为列表失败，请稍后重试');
-      }
-    };
-
-    loadBehaviors();
-  }, [fetchBehaviors, setLoadingBehaviors]);
 
   // 监听行为列表变化，更新空状态（只有行为列表为空时才显示空状态）
   useEffect(() => {
