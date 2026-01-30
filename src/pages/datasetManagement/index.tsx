@@ -1876,7 +1876,7 @@ const DatasetManagement: React.FC = () => {
                     className={`${styles.sceneDesc} flex items-center justify-between`}
                   >
                     <EllipsisPopover
-                      value={item.description}
+                      value={item.description || '-'}
                       className="text-[14px]"
                       preferTypography
                     />

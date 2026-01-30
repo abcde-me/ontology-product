@@ -64,6 +64,10 @@
   .datasetManagementTabs .sceneDesc :global(.ellipsis-popover-div) {
     width: calc(100% - 60px);
   }
+
+  .datasetManagementTabs :global(.arco-tabs-add-icon):hover {
+    color: #007dfa;
+  }
 }
 
 .sceneTag {
