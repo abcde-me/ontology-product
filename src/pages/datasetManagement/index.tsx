@@ -1876,7 +1876,7 @@ const DatasetManagement: React.FC = () => {
                     className={`${styles.sceneDesc} flex items-center justify-between`}
                   >
                     <EllipsisPopover
-                      value={item.description}
+                      value={item.description || '-'}
                       className="text-[14px]"
                       preferTypography
                     />
@@ -1886,7 +1886,7 @@ const DatasetManagement: React.FC = () => {
                       >
                         <Tooltip content="编辑">
                           <IconEdit
-                            className="cursor-pointer"
+                            className="cursor-pointer hover:text-[#007DFA]"
                             onClick={() => {
                               sceneTypeForm.setFieldsValue({
                                 sceneTypeName: item.name,
@@ -1906,7 +1906,7 @@ const DatasetManagement: React.FC = () => {
                         >
                           <Tooltip content="删除">
                             <IconDelete
-                              className="cursor-pointer"
+                              className="cursor-pointer hover:text-[#007DFA]"
                               onClick={() => handleDeleteScene(item.id)}
                             />
                           </Tooltip>
