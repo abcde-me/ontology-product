@@ -13,33 +13,13 @@ import { useBusinessStore } from './store/businessStore';
 export const BehaviorTest: React.FC = () => {
   const isEmpty = useUIStore((state) => state.isEmpty);
   const setIsEmpty = useUIStore((state) => state.setIsEmpty);
-  const setLoadingBehaviors = useUIStore((state) => state.setLoadingBehaviors);
 
-  const fetchBehaviors = useBusinessStore((state) => state.fetchBehaviors);
-  const orchestrationNodes = useBusinessStore(
-    (state) => state.orchestrationNodes
-  );
+  const behaviorList = useBusinessStore((state) => state.behaviorList);
 
-  // 初始化：加载行为列表
+  // 监听行为列表变化，更新空状态（只有行为列表为空时才显示空状态）
   useEffect(() => {
-    const loadBehaviors = async () => {
-      setLoadingBehaviors(true);
-      try {
-        await fetchBehaviors();
-        setLoadingBehaviors(false);
-      } catch (error) {
-        setLoadingBehaviors(false);
-        Message.error('获取行为列表失败，请稍后重试');
-      }
-    };
-
-    loadBehaviors();
-  }, [fetchBehaviors, setLoadingBehaviors]);
-
-  // 监听编排节点变化，更新空状态
-  useEffect(() => {
-    setIsEmpty(orchestrationNodes.length === 0);
-  }, [orchestrationNodes.length, setIsEmpty]);
+    setIsEmpty(behaviorList.length === 0);
+  }, [behaviorList.length, setIsEmpty]);
 
   // 创建行为按钮点击
   const handleCreateBehavior = () => {
