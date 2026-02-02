@@ -17,6 +17,7 @@ import { getOntologyTopology } from '@/api/ontologyScene/graph';
 import dagre from '@dagrejs/dagre';
 import type { GetOntologyTopologyResponse } from '@/types/graphApi';
 import styles from './index.module.scss';
+import { CustomEdge } from './edges';
 
 const nodesConfig = [
   {
@@ -32,6 +33,10 @@ const nodesConfig = [
     nodeControlPanel: MyNodeControlPanel
   }
 ];
+
+const edgeTypes = {
+  'custom-edge': CustomEdge
+};
 
 const NODE_WIDTH = 200;
 const NODE_HEIGHT = 80;
@@ -106,7 +111,23 @@ function layoutNodesWithDagre(
         source: sourceId ?? String(topologyEdge.sourceId),
         sourceHandle: 'source',
         target: targetId ?? String(topologyEdge.targetId),
-        targetHandle: 'target'
+        targetHandle: 'target',
+        type: 'custom-edge',
+        data: {
+          // 可以在这里添加 edge 的自定义数据
+          label: topologyEdge.name || '',
+          labelIcon: '🔗', // 链式图标
+          labelColor: '#f1f5f9' // 浅灰色背景
+        },
+        style: {
+          stroke: '#94a3b8', // 灰色
+          strokeWidth: 2,
+          strokeDasharray: '5,5' // 虚线样式
+        },
+        markerEnd: {
+          type: 'arrowclosed',
+          color: '#94a3b8'
+        }
       };
     });
 
