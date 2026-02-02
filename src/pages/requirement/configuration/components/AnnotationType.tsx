@@ -35,7 +35,7 @@ const btnPicData = [
   {
     key: 2,
     value: 2,
-    label: '图形标注',
+    label: '图形',
     code: 'IMAGE_ANNOTATION',
     icon: ImageAnnotationIcon
   }
@@ -51,25 +51,25 @@ const btnTextData = [
   {
     key: 2,
     value: 2,
-    label: '文本分类',
+    label: '分类',
     code: 'TEXT_CLASSIFICATION',
     icon: TextClassificationIcon
   },
   { key: 3, value: 3, label: '问答', code: 'TEXT_QA', icon: TextQAIcon },
-  { key: 4, value: 4, label: '文本排序', code: 'TEXT_SORT', icon: TextSortIcon }
+  { key: 4, value: 4, label: '排序', code: 'TEXT_SORT', icon: TextSortIcon }
 ];
 const btnAudioData = [
   {
     key: 1,
     value: 1,
-    label: '音频分类',
+    label: '分类',
     code: 'AUDIO_CLASSIFICATION',
     icon: AudioClassificationIcon
   },
   {
     key: 2,
     value: 2,
-    label: '音频分割',
+    label: '分割',
     code: 'AUDIO_SPLIT',
     icon: AudioSplitIcon
   }
@@ -78,14 +78,14 @@ const btnVideoData = [
   {
     key: 1,
     value: 1,
-    label: '视频分类',
+    label: '分类',
     code: 'VIDEO_CLASSIFICATION',
     icon: VideoClassificationIcon
   },
   {
     key: 2,
     value: 2,
-    label: '视频分割',
+    label: '分割',
     code: 'VIDEO_SPLIT',
     icon: VideoSplitIcon
   }
