@@ -69,7 +69,8 @@ function layoutNodesWithDagre(
     const { newNode: workflowNode } = newNode({
       id: nodeId,
       data: {
-        type: BlockEnum.HttpRequest,
+        // @ts-expect-error
+        type: 'default',
         desc: topologyNode.description ?? '',
         title: topologyNode.name ?? topologyNode.code ?? '未命名节点',
         ...MyNodeDefault.defaultValue
@@ -148,7 +149,11 @@ const createInitWorkflow = (
       };
     }
 
-    return layoutNodesWithDagre(topologyData, newNode);
+    const ttt = layoutNodesWithDagre(topologyData, newNode);
+
+    console.log('--------------', ttt);
+
+    return ttt;
   };
 };
 
@@ -191,7 +196,6 @@ export default function OntologySceneGraph() {
     <AIWorkflowProvider
       nodes={nodesConfig}
       initWorkflow={initWorkflow}
-      // api={{}}
       api={{
         workflowNotExistedMarks: ['ResourceNotFound', '资源不存在'],
         getWorkflow,

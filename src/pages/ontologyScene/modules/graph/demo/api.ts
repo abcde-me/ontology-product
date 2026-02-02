@@ -34,6 +34,7 @@ const getWorkflow = () => {
 };
 const createWorkflow = (args: any) => {
   draft = { ...args, updated_at: Math.ceil(Date.now() / 1000) };
+  // @ts-expect-error
   draft.hash = computeHashSync(draft);
   console.log('createWorkflow', draft);
   return Promise.resolve({ data: draft as any });
@@ -41,6 +42,7 @@ const createWorkflow = (args: any) => {
 
 const updateWorkflow = (args: any) => {
   draft = { ...args, updated_at: Math.ceil(Date.now() / 1000) };
+  // @ts-expect-error
   draft.hash = computeHashSync(draft);
   console.log('updateWorkflow', draft);
   return Promise.resolve({ data: draft as any });
