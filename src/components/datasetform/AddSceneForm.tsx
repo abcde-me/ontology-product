@@ -18,6 +18,7 @@ export default function AddSceneFormModal({
         sceneTypeForm.resetFields();
         setAddSceneTypeVisible(false);
       }}
+      maskClosable={false}
       title="新增场景类型"
     >
       <Form form={sceneTypeForm} onSubmit={handleAddSceneTypeSubmit}>
