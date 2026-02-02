@@ -1270,7 +1270,7 @@ const DatasetManagement: React.FC = () => {
             display: 'inline-block'
           }}
         >
-          删除后，场景分类不可恢复
+          {`删除后该场景不可恢复，该场景下的数据集会移到"其他"下`}
         </div>
       ),
       // 按钮文字
