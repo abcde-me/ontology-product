@@ -167,6 +167,8 @@ export const DetailDrawer: React.FC<DetailDrawerProps> = ({
       onCancel={onClose}
       width={720}
       placement="right"
+      mask={false} // 不显示遮罩层
+      maskClosable={false}
     >
       <div className="flex h-full flex-col">
         {/* 基本信息和执行信息 */}
