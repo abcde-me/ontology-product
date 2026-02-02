@@ -1,6 +1,4 @@
-import workflowDraft from './workflowDraft.json';
-
-let draft = workflowDraft;
+let draft = null;
 
 const computeHashSync = (jsonObject: any) => {
   // 将对象序列化为标准JSON字符串
@@ -26,24 +24,26 @@ const setDraft = (d) => {
 
 const getWorkflow = () => {
   console.log('getWorkflow', draft);
-  return Promise.resolve({ data: draft as any });
+  return !draft
+    ? Promise.resolve({
+        code: 'ResourceNotFound',
+        data: null,
+        message: '资源不存在'
+      })
+    : Promise.resolve({ data: draft as any });
 };
 const createWorkflow = (args: any) => {
-  draft = {
-    ...args,
-    hash: computeHashSync(draft),
-    updated_at: Math.ceil(Date.now() / 1000)
-  };
+  draft = { ...args, updated_at: Math.ceil(Date.now() / 1000) };
+  // @ts-expect-error
+  draft.hash = computeHashSync(draft);
   console.log('createWorkflow', draft);
   return Promise.resolve({ data: draft as any });
 };
 
 const updateWorkflow = (args: any) => {
-  draft = {
-    ...args,
-    hash: computeHashSync(draft),
-    updated_at: Math.ceil(Date.now() / 1000)
-  };
+  draft = { ...args, updated_at: Math.ceil(Date.now() / 1000) };
+  // @ts-expect-error
+  draft.hash = computeHashSync(draft);
   console.log('updateWorkflow', draft);
   return Promise.resolve({ data: draft as any });
 };
