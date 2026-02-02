@@ -19,15 +19,15 @@ function OperationCenterPage() {
     const curUrl = params.get('url');
     const mdpUrl = params.get('mdp_operation_center');
     if (curUrl && !mdpUrl && curUrl.startsWith('/operationcenter/')) {
-      bus.$emit('refresh', curUrl.replace('/operationcenter', ''));
+      bus.$emit('refresh', curUrl.replace('/operationcenter', ''), 'modaforge');
     }
   };
 
   useEffect(() => {
-    console.log('URL before:', history);
+    console.log('modaforge URL before:', history);
     refreshOperationCenter(history.location.search);
     const unlisten = history.listen((location, action) => {
-      console.log('URL after:', location.search);
+      console.log('modaforge URL after:', location.search);
       refreshOperationCenter(location.search);
     });
 
