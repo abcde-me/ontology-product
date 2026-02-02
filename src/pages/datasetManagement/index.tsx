@@ -1048,7 +1048,7 @@ const DatasetManagement: React.FC = () => {
         Message.success('更新场景类型成功');
         getSceneList();
       } else {
-        Message.error(res.msg || '更新场景类型失败');
+        Message.error(res.message || '更新场景类型失败');
       }
       setIsEdit(false);
       setEditSceneId(null);
@@ -1064,7 +1064,7 @@ const DatasetManagement: React.FC = () => {
         Message.success('新增场景类型成功');
         getSceneList();
       } else {
-        Message.error(res.msg || '新增场景类型失败');
+        Message.error(res.message || '新增场景类型失败');
       }
       setAddSceneTypeVisible(false);
     }
@@ -1088,7 +1088,7 @@ const DatasetManagement: React.FC = () => {
             fetchDatasetList();
             getSceneList();
           } else {
-            Message.error(res.msg || '移动数据集失败');
+            Message.error(res.message || '移动数据集失败');
           }
         });
         moveDatasetForm.resetFields();
