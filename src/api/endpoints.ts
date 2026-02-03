@@ -736,7 +736,14 @@ export const ModaForgeResourceEndpoints = {
 
   // 本体拓扑
   // 获取本体拓扑
-  GetOntologyTopologyApi: PrefixAimdp + '/GetOntologyTopology'
+  GetOntologyTopologyApi: PrefixAimdp + '/GetOntologyTopology',
+  // 分页查询对象类型实例数据
+  ListOntologyObjectTypeDataApi: PrefixAimdp + '/ListOntologyObjectTypeData',
+  // 获取物理属性列表
+  ListOntologyPhysicalPropertiesApi:
+    PrefixAimdp + '/ListOntologyPhysicalProperties',
+  // 获取链接类型列表
+  ListOntologyLinkTypeApi: PrefixAimdp + '/ListOntologyLinkType'
 };
 
 /**
