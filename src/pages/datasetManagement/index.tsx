@@ -1333,8 +1333,18 @@ const DatasetManagement: React.FC = () => {
 
     try {
       const res = await getDatasetList(params);
-      setDatasetList(res.data?.list || []);
-      setTotal(res.data?.total || 0);
+      if (res.code === '' && res.status === 200) {
+        if (
+          (res.data?.list?.length === 0 || !res.data?.list) &&
+          currentPage > 1 &&
+          res.data?.total > 0
+        ) {
+          setCurrentPage(currentPage - 1);
+        } else {
+          setDatasetList(res.data?.list || []);
+          setTotal(res.data?.total || 0);
+        }
+      }
       return res;
     } catch (err) {
       console.error('获取数据失败:', err);
@@ -1768,23 +1778,25 @@ const DatasetManagement: React.FC = () => {
                   }}
                 >
                   <span className="text-[14px]">{item.description}</span>
-                  <span style={{ marginTop: '8px' }}>
-                    <IconTag style={{ marginRight: '5px' }} />
-                    {item.tags.map((tag, index) => (
-                      <Tag
-                        key={index}
-                        style={{
-                          marginRight: '5px',
-                          background: '#FFF',
-                          border: '1px solid #E2E8F0',
-                          padding: '4px',
-                          borderRadius: '4px'
-                        }}
-                      >
-                        {tag}
-                      </Tag>
-                    ))}
-                  </span>
+                  {item.tags?.length > 0 && (
+                    <span style={{ marginTop: '8px' }}>
+                      <IconTag style={{ marginRight: '5px' }} />
+                      {item.tags.map((tag, index) => (
+                        <Tag
+                          key={index}
+                          style={{
+                            marginRight: '5px',
+                            background: '#FFF',
+                            border: '1px solid #E2E8F0',
+                            padding: '4px',
+                            borderRadius: '4px'
+                          }}
+                        >
+                          {tag}
+                        </Tag>
+                      ))}
+                    </span>
+                  )}
                 </div>
               )}
               <div className={styles.searchToolbar}>

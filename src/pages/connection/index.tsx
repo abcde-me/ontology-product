@@ -416,11 +416,18 @@ export default function Connection() {
         return;
       }
 
-      setConnectionData(res.data.items);
-      setPagination((prev) => ({
-        ...prev,
-        total: res.data.total
-      }));
+      if (res.data?.items?.length === 0 && pagination?.current > 1) {
+        setPagination((prev) => ({
+          ...prev,
+          current: prev.current - 1
+        }));
+      } else {
+        setConnectionData(res.data.items);
+        setPagination((prev) => ({
+          ...prev,
+          total: res.data.total
+        }));
+      }
     } catch (error) {
       console.error('获取连接器列表失败:', error);
     } finally {
