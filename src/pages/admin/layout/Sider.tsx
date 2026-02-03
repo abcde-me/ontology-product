@@ -41,6 +41,7 @@ export const LayoutWithSider = memo(function LayoutWithSider({ children }) {
   );
 
   const actives = useMemo(() => {
+    // console.log('modaforge actives', location.pathname, location.search, locSearch);
     const findMatch = (menus: MenuModel[]): string[] | null => {
       for (const menu of menus) {
         if (menu.children?.length && menu.children?.length > 0) {
@@ -55,8 +56,8 @@ export const LayoutWithSider = memo(function LayoutWithSider({ children }) {
             // 如果有查询参数匹配器，使用它来进一步判断
             if (menu.queryParamMatcher) {
               if (
-                menu.queryParamMatcher(location.search) ||
-                menu.queryParamMatcher(locSearch)
+                menu.queryParamMatcher(locSearch || location.search)
+                // menu.queryParamMatcher(location.search)
               ) {
                 return [menu.key];
               }
@@ -74,7 +75,10 @@ export const LayoutWithSider = memo(function LayoutWithSider({ children }) {
 
   useEffect(() => {
     const handler = () => {
-      setLocSearch(window.location.search);
+      const isModaforge = (top ?? window).location.pathname.includes(
+        '/modaforge'
+      );
+      isModaforge && setLocSearch(window.location.search);
     };
     window.addEventListener('locationchange', handler);
     return () => window.removeEventListener('locationchange', handler);
