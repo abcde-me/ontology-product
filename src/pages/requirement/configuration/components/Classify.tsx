@@ -202,7 +202,7 @@ const Classify = (props: ClassifyComponentProps) => {
                     value={item.attribute_group_class}
                     onChange={(value) => {
                       handleFieldChange(index, 'attribute_group_class', value);
-                      // 切换到输入框的时候情况选项内容
+                      // 切换到输入框的时候清空选项内容
                       if (value === 3) {
                         setTextRelations(
                           textRelations.map((group) => {
@@ -215,6 +215,36 @@ const Classify = (props: ClassifyComponentProps) => {
                             return group;
                           })
                         );
+                      } else if (value === 1 || value === 2) {
+                        // 从输入框切换到单选/多选时，如果file_label_attribute为空，重新初始化
+                        const currentGroup = textRelations.find(
+                          (group) => group.attribute_id === item.attribute_id
+                        );
+                        if (
+                          !currentGroup?.file_label_attribute ||
+                          currentGroup?.file_label_attribute.length === 0
+                        ) {
+                          setTextRelations(
+                            textRelations.map((group) => {
+                              if (group.attribute_id === item.attribute_id) {
+                                return {
+                                  ...group,
+                                  file_label_attribute: [
+                                    {
+                                      attribute_id: uuid(),
+                                      order_num: 1,
+                                      attribute_name_cn: '',
+                                      attribute_name_en: '',
+                                      input_type: 1,
+                                      isFromDetail: false
+                                    }
+                                  ]
+                                };
+                              }
+                              return group;
+                            })
+                          );
+                        }
                       }
                     }}
                     disabled={
