@@ -14,7 +14,7 @@ import {
   listOntologyObjectTypeData,
   listOntologyPhysicalProperties,
   listOntologyLinkType
-} from '@/api/ontologyScene/graph';
+} from '@/api/ontologySceneLibrary/graph';
 import type {
   ListOntologyObjectTypeDataRes,
   ListOntologyPhysicalPropertiesRes,

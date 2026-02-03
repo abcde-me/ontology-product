@@ -1,17 +1,16 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { useHistory } from 'react-router-dom';
 import {
   Button,
   Input,
-  Select,
   Message,
   Modal,
   Pagination,
-  Popover
+  Popover,
+  Spin
 } from '@arco-design/web-react';
 import {
   IconPlus,
-  IconSearch,
   IconEdit,
   IconDelete,
   IconEye,
@@ -21,7 +20,9 @@ import {
 import {
   ExpandableProcessFlow,
   EllipsisPopover,
-  ProcessStep
+  ProcessStep,
+  NoDataCard,
+  NoResultCard
 } from '@ceai-front/arco-material';
 import { Link } from '@arco-design/web-react';
 import initialBg from '../../assets/initial-bg.png';
@@ -33,62 +34,22 @@ import { ONTOLOGY_SCENE_MENU_ITEM_KEYS } from '@/common/constants';
 import SceneModal, { SceneFormData } from './components/SceneModal';
 import styles from './index.module.scss';
 import classNames from 'classnames';
+import {
+  listOntologyModel,
+  createOntologyModel,
+  updateOntologyModel,
+  deleteOntologyModel
+} from '@/api/ontologySceneLibrary/ontologyScene';
+import { OntologScene } from '@/types/ontologySceneApi';
+import { ICON_OPTIONS } from '../../common/constants';
 
 // 扩展 ProcessStep 类型，使 description 支持 ReactNode
 interface SceneProcessStep extends Omit<ProcessStep, 'description'> {
   description: React.ReactNode;
 }
 
-// 场景卡片数据接口
-export interface SceneCardItem {
-  id: string;
-  name: string;
-  uniqueId: string;
-  description: string;
-  updateTime: string;
-  viewCount: number;
-  editCount: number;
-  likeCount: number;
-  imageCount: number;
-  icon?: React.ReactNode;
-}
-
-// 模拟数据
-const MOCK_SCENE_DATA: SceneCardItem[] = [
-  {
-    id: '1',
-    name: '海上态势感知OODA闭环演示',
-    uniqueId: 'maritime-ooda-demo',
-    description: '用于演示从环境研判、装备调度到目标识别的全链路作战场景。',
-    updateTime: '2026-01-01',
-    viewCount: 12,
-    editCount: 12,
-    likeCount: 12,
-    imageCount: 12
-  },
-  {
-    id: '2',
-    name: '海上态势感知OODA闭环演示',
-    uniqueId: 'maritime-ooda-demo-2',
-    description: '用于演示从环境研判、装备调度到目标识别的全链路作战场景。',
-    updateTime: '2026-01-01',
-    viewCount: 12,
-    editCount: 12,
-    likeCount: 12,
-    imageCount: 12
-  },
-  {
-    id: '3',
-    name: '海上态势感知OODA闭环演示',
-    uniqueId: 'maritime-ooda-demo-3',
-    description: '用于演示从环境研判、装备调度到目标识别的全链路作战场景。',
-    updateTime: '2026-01-01',
-    viewCount: 12,
-    editCount: 12,
-    likeCount: 12,
-    imageCount: 12
-  }
-];
+// 场景卡片数据接口，直接使用 OntologScene
+export type SceneCardItem = OntologScene;
 
 // 场景卡片组件
 interface SceneCardProps {
@@ -139,11 +100,17 @@ const SceneCard: React.FC<SceneCardProps> = ({
     ) => {
       e.stopPropagation();
       history.push(
-        `/tenant/compute/modaforge/ontologyScene/detail/${item.id}/${iconType}`
+        `/tenant/compute/modaforge/ontologyScene/detail/${item.id || ''}/${iconType}`
       );
     },
     [item, onIconClick]
   );
+
+  const getIconComponent = (icon: string) => {
+    const matchedIcon = ICON_OPTIONS.find((option) => option.value === icon);
+    const IconComponent = matchedIcon?.icon;
+    return IconComponent ? <IconComponent /> : null;
+  };
 
   return (
     <div
@@ -158,10 +125,15 @@ const SceneCard: React.FC<SceneCardProps> = ({
     >
       {/* 卡片头部 */}
       <div className="flex items-start gap-[12px]">
-        <div className="flex h-[56px] w-[56px] flex-shrink-0 items-center justify-center bg-[#DCDCDC]"></div>
-        <div className="flex flex-1 flex-col">
-          <div className="mb-[4px] mt-[6px] flex flex-1 justify-between text-[14px] font-[600] leading-[22px] text-[var(--color-text-1)]">
-            <EllipsisPopover className="hover-blue" value={item.name} />
+        <div className="flex h-[56px] w-[56px] flex-shrink-0 items-center justify-center">
+          {getIconComponent(item.icon ?? '')}
+        </div>
+        <div className="flex min-w-0 flex-1 flex-col">
+          <div className="mb-[4px] mt-[6px] flex min-w-0 flex-1 justify-between text-[14px] font-[600] leading-[22px] text-[var(--color-text-1)]">
+            <EllipsisPopover
+              wrapperClassName="flex-1 min-w-0"
+              value={item.name}
+            />
 
             <div className="flex items-center gap-[8px]">
               <Popover content="编辑">
@@ -208,7 +180,7 @@ const SceneCard: React.FC<SceneCardProps> = ({
             }
           >
             <IconEye className="h-4 w-4" />
-            <span>{item.viewCount}</span>
+            <span>{item.ontologyObjectTypeCounts || 0}</span>
           </div>
         </Popover>
 
@@ -220,7 +192,7 @@ const SceneCard: React.FC<SceneCardProps> = ({
             }
           >
             <IconEdit className="h-4 w-4" />
-            <span>{item.editCount}</span>
+            <span>{item.ontologyLinkTypeCounts || 0}</span>
           </div>
         </Popover>
         <Popover content="行为">
@@ -231,7 +203,7 @@ const SceneCard: React.FC<SceneCardProps> = ({
             }
           >
             <IconThumbUp className="h-4 w-4" />
-            <span>{item.likeCount}</span>
+            <span>{item.ontologyActionCounts || 0}</span>
           </div>
         </Popover>
         <Popover content="函数">
@@ -242,7 +214,7 @@ const SceneCard: React.FC<SceneCardProps> = ({
             }
           >
             <IconImage className="h-4 w-4" />
-            <span>{item.imageCount}</span>
+            <span>{item.ontologyFunctionCounts || 0}</span>
           </div>
         </Popover>
       </div>
@@ -252,21 +224,65 @@ const SceneCard: React.FC<SceneCardProps> = ({
 
 export default function OntologySceneList() {
   const history = useHistory();
-  const [searchValue, setSearchValue] = useState('');
-  const [filterValue, setFilterValue] = useState('all');
+  const [filter, setFilter] = useState('');
   const [sceneList, setSceneList] = useState<SceneCardItem[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(12);
+  const [pageSize, setPageSize] = useState(9999);
   const [loading, setLoading] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(true);
+  const [noData, setNoData] = useState(false);
+  const [totalCount, setTotalCount] = useState(0);
   const [modalVisible, setModalVisible] = useState(false);
   const [modalMode, setModalMode] = useState<'create' | 'edit'>('create');
   const [editingScene, setEditingScene] = useState<SceneCardItem | null>(null);
   const [submitLoading, setSubmitLoading] = useState(false);
+  const isFirstLoadRef = useRef(true);
+
+  // 加载场景列表
+  const loadSceneList = useCallback(async () => {
+    const isFirstLoad = isFirstLoadRef.current;
+    if (isFirstLoad) {
+      setInitialLoading(true);
+      isFirstLoadRef.current = false;
+    } else {
+      setLoading(true);
+    }
+    try {
+      const response = await listOntologyModel({
+        pageNo: currentPage,
+        pageSize: pageSize,
+        filter: filter ?? ''
+      });
+
+      if (response.status === 200 && response.code === '') {
+        const result = response.data?.result || [];
+        setSceneList(result);
+        setTotalCount(response.data?.totalCount || 0);
+        // 只在首次加载且数据为空时设置 noData
+        if (isFirstLoad && result.length === 0) {
+          setNoData(true);
+        } else if (result.length > 0) {
+          // 如果有数据了，重置 noData
+          setNoData(false);
+        }
+      } else {
+        Message.error(response.message || '加载失败');
+      }
+    } catch (error) {
+      console.error('加载场景列表失败:', error);
+      Message.error('加载场景列表失败');
+    } finally {
+      if (isFirstLoad) {
+        setInitialLoading(false);
+      } else {
+        setLoading(false);
+      }
+    }
+  }, [currentPage, pageSize, filter]);
 
   useEffect(() => {
-    // TODO: 替换为实际API调用
-    setSceneList(MOCK_SCENE_DATA);
-  }, []);
+    loadSceneList();
+  }, [loadSceneList]);
 
   // 处理创建场景
   const handleCreate = () => {
@@ -286,43 +302,37 @@ export default function OntologySceneList() {
   const handleModalSubmit = async (data: SceneFormData) => {
     setSubmitLoading(true);
     try {
-      // TODO: 调用实际API
-      await new Promise((resolve) => setTimeout(resolve, 300)); // 模拟API调用
-
       if (modalMode === 'create') {
-        const newSceneId = Date.now().toString();
-        const newScene: SceneCardItem & { icon?: string } = {
-          id: newSceneId,
+        const response = await createOntologyModel({
           name: data.name,
-          uniqueId: `scene-${Date.now()}`,
           description: data.description || '',
-          updateTime: new Date().toISOString().split('T')[0],
-          viewCount: 0,
-          editCount: 0,
-          likeCount: 0,
-          imageCount: 0,
-          icon: data.icon
-        };
-        setSceneList([newScene, ...sceneList]);
-        Message.success('创建成功');
-        // 创建成功后跳转到详情页
-        history.push(
-          `/tenant/compute/modaforge/ontologyScene/detail/${newSceneId}`
-        );
-      } else if (editingScene) {
-        setSceneList(
-          sceneList.map((scene) =>
-            scene.id === editingScene.id
-              ? {
-                  ...scene,
-                  name: data.name,
-                  description: data.description || '',
-                  icon: data.icon
-                }
-              : scene
-          )
-        );
-        Message.success('修改成功');
+          icon: data.icon || ''
+        });
+
+        if (response.status === 200 && response.code === '') {
+          Message.success('创建成功');
+          // 创建成功后跳转到详情页
+          history.push(
+            `/tenant/compute/modaforge/ontologyScene/detail/${response.data.id}`
+          );
+        } else {
+          Message.error(response.message || '创建失败');
+        }
+      } else if (editingScene && editingScene.id) {
+        const response = await updateOntologyModel({
+          id: editingScene.id,
+          name: data.name,
+          description: data.description || '',
+          icon: data.icon || ''
+        });
+
+        if (response.status === 200 && response.code === '') {
+          Message.success('修改成功');
+          // 重新加载列表
+          await loadSceneList();
+        } else {
+          Message.error(response.message || '修改失败');
+        }
       }
       setModalVisible(false);
     } catch (error) {
@@ -343,39 +353,55 @@ export default function OntologySceneList() {
   const handleDelete = (item: SceneCardItem) => {
     Modal.confirm({
       title: '确认删除',
-      content: `确定要删除场景"${item.name}"吗？`,
-      onOk: () => {
-        setSceneList(sceneList.filter((scene) => scene.id !== item.id));
-        Message.success('删除成功');
+      content: `确定要删除场景"${item.name || ''}"吗？`,
+      onOk: async () => {
+        try {
+          if (!item.id) {
+            Message.error('场景ID无效');
+            return;
+          }
+
+          const response = await deleteOntologyModel({ id: item.id });
+
+          if (response.status === 200 && response.code === '') {
+            Message.success('删除成功');
+            // 重新加载列表
+            await loadSceneList();
+          } else {
+            Message.error(response.message || '删除失败');
+          }
+        } catch (error) {
+          Message.error('删除失败');
+          console.error('删除失败:', error);
+        }
       }
     });
   };
 
   // 处理卡片点击
   const handleCardClick = (item: SceneCardItem) => {
-    history.push(`/tenant/compute/modaforge/ontologyScene/detail/${item.id}`);
+    history.push(
+      `/tenant/compute/modaforge/ontologyScene/detail/${item.id || ''}`
+    );
   };
 
-  // 处理搜索
+  // 处理搜索（回车或点击搜索图标时触发）
   const handleSearch = (value: string) => {
-    setSearchValue(value);
-    // TODO: 实现搜索逻辑
+    setFilter(value);
+    setCurrentPage(1); // 搜索时重置到第一页
   };
 
-  // 过滤后的场景列表
-  const filteredSceneList = sceneList.filter((scene) => {
-    if (searchValue) {
-      return (
-        scene.name.includes(searchValue) || scene.uniqueId.includes(searchValue)
-      );
-    }
-    return true;
-  });
+  // 处理清除搜索
+  const handleClear = () => {
+    setFilter('');
+    setCurrentPage(1); // 清除时重置到第一页
+  };
 
-  // 分页数据
-  const startIndex = (currentPage - 1) * pageSize;
-  const endIndex = startIndex + pageSize;
-  const paginatedList = filteredSceneList.slice(startIndex, endIndex);
+  // 处理分页变化
+  // const handlePageChange = (page: number, size: number) => {
+  //   setCurrentPage(page);
+  //   setPageSize(size);
+  // };
 
   // 流程步骤配置
   const processSteps: SceneProcessStep[] = [
@@ -473,8 +499,22 @@ export default function OntologySceneList() {
     }
   ];
 
-  // 无数据时显示初始背景图
-  if (filteredSceneList.length === 0) {
+  // 首次加载时显示全页 loading
+  if (initialLoading) {
+    return (
+      <div
+        className={classNames(
+          'flex min-h-full flex-col items-center justify-center bg-white p-[24px]',
+          styles['ontology-scene-list']
+        )}
+      >
+        <Spin />
+      </div>
+    );
+  }
+
+  // 只在第一次进入页面请求接口并且返回数据是空的时候展示无数据背景图
+  if (noData && sceneList.length === 0) {
     return (
       <div className="flex h-full items-center justify-center">
         <img
@@ -507,30 +547,15 @@ export default function OntologySceneList() {
 
       {/* 搜索和创建区域 */}
       <div className="flex items-center justify-between gap-4 rounded-lg bg-white py-[16px]">
-        <Input.Group compact>
-          <Select
-            value={filterValue}
-            onChange={setFilterValue}
-            style={{
-              width: 100,
-              borderRight: '1px solid #E2E8F0'
-            }}
-          >
-            <Select.Option value="all">全部</Select.Option>
-            {/* TODO: 添加更多筛选选项 */}
-          </Select>
-          <Input.Search
-            placeholder="请输入名称或唯一标识"
-            value={searchValue}
-            onChange={handleSearch}
-            onSearch={handleSearch}
-            allowClear
-            style={{
-              width: 300,
-              marginLeft: '-1px'
-            }}
-          />
-        </Input.Group>
+        <Input.Search
+          placeholder="请输入名称或描述"
+          onClear={handleClear}
+          onSearch={handleSearch}
+          allowClear
+          style={{
+            width: 200
+          }}
+        />
         <Button
           type="primary"
           icon={<IconPlus />}
@@ -541,35 +566,41 @@ export default function OntologySceneList() {
         </Button>
       </div>
 
-      {/* 场景卡片网格 */}
-      <div className="grid grid-cols-[repeat(auto-fill,minmax(384px,1fr))] gap-[20px]">
-        {paginatedList.map((item) => (
-          <SceneCard
-            key={item.id}
-            item={item}
-            onEdit={handleEdit}
-            onDelete={handleDelete}
-            onCardClick={handleCardClick}
-          />
-        ))}
-      </div>
+      {loading ? (
+        <div className="flex h-full w-full flex-1 items-center justify-center">
+          <Spin />
+        </div>
+      ) : sceneList.length > 0 ? (
+        <div className="grid grid-cols-[repeat(auto-fill,minmax(384px,1fr))] gap-[20px]">
+          {sceneList.map((item) => (
+            <SceneCard
+              key={item.id}
+              item={item}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+              onCardClick={handleCardClick}
+            />
+          ))}
+        </div>
+      ) : (
+        <div className="flex h-full w-full flex-1 items-center justify-center">
+          <NoResultCard title="暂无搜索结果" />
+        </div>
+      )}
 
       {/* 分页 */}
-      {filteredSceneList.length > pageSize && (
-        <div className="flex justify-end py-4">
+      {/* {totalCount > pageSize && (
+        <div className="flex justify-end py-4 items-center">
           <Pagination
             current={currentPage}
             pageSize={pageSize}
-            total={filteredSceneList.length}
-            onChange={(page, size) => {
-              setCurrentPage(page);
-              setPageSize(size);
-            }}
+            total={totalCount}
+            onChange={handlePageChange}
             showTotal
             showJumper
           />
         </div>
-      )}
+      )} */}
 
       {/* 创建/编辑弹窗 */}
       <SceneModal
@@ -578,9 +609,9 @@ export default function OntologySceneList() {
         initialValues={
           editingScene
             ? {
-                name: editingScene.name,
-                description: editingScene.description,
-                icon: (editingScene as any).icon || 'object-type-1' // TODO: 从编辑的场景中获取图标
+                name: editingScene.name || '',
+                description: editingScene.description || '',
+                icon: editingScene.icon || ''
               }
             : undefined
         }
@@ -588,7 +619,7 @@ export default function OntologySceneList() {
         onCancel={handleModalCancel}
         loading={submitLoading}
         existingSceneIcons={sceneList
-          .map((scene) => (scene as any).icon)
+          .map((scene) => scene.icon)
           .filter((icon): icon is string => !!icon)}
       />
     </div>

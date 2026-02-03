@@ -8,7 +8,7 @@ import {
 import '@ceai-front/workflow/dist/es/ai-workflow.css';
 import { MyNode, MyNodePanel, MyNodeDefault } from './nodes';
 import { getWorkflow, createWorkflow, updateWorkflow } from './demo/api';
-import { getOntologyTopology } from '@/api/ontologyScene/graph';
+import { getOntologyTopology } from '@/api/ontologySceneLibrary/graph';
 import dagre from '@dagrejs/dagre';
 import type { GetOntologyTopologyResponse } from '@/types/graphApi';
 import styles from './index.module.scss';
