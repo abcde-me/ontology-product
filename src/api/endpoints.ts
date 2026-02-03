@@ -743,7 +743,17 @@ export const ModaForgeResourceEndpoints = {
   ListOntologyPhysicalPropertiesApi:
     PrefixAimdp + '/ListOntologyPhysicalProperties',
   // 获取链接类型列表
-  ListOntologyLinkTypeApi: PrefixAimdp + '/ListOntologyLinkType'
+  ListOntologyLinkTypeApi: PrefixAimdp + '/ListOntologyLinkType',
+
+  // 本体场景
+  // 获取本体场景列表
+  ListOntologyModelApi: PrefixAimdp + '/ListOntologyModel',
+  // 创建本体场景
+  CreateOntologyModelApi: PrefixAimdp + '/CreateOntologyModel',
+  // 更新本体场景
+  UpdateOntologyModelApi: PrefixAimdp + '/UpdateOntologyModel',
+  // 删除本体场景
+  DeleteOntologyModelApi: PrefixAimdp + '/DeleteOntologyModel'
 };
 
 /**
