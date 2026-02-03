@@ -1,0 +1,219 @@
+/**
+ * GetOntologyFunctionResponse
+ *
+ * OntologyFunction，函数对象
+ */
+export interface OnFunctionDetail {
+  /**
+   * 函数唯一编码
+   */
+  code?: string;
+  /**
+   * 函数代码内容
+   */
+  content?: string;
+  /**
+   * 创建时间
+   */
+  createdAt?: Date;
+  /**
+   * 创建人
+   */
+  createUser?: string;
+  /**
+   * 函数描述
+   */
+  description?: string;
+  /**
+   * 函数ID
+   */
+  id?: number;
+  /**
+   * 函数名称
+   */
+  name?: string;
+  /**
+   * 所属本体场景模型ID
+   */
+  ontologyModelId?: number;
+  /**
+   * 函数参数列表
+   */
+  params?: OntologyFunctionParam[];
+  /**
+   * 更新时间
+   */
+  updatedAt?: Date;
+  /**
+   * 更新人
+   */
+  updateUser?: string;
+}
+
+/**
+ * OntologyFunctionParam，函数参数对象
+ */
+export interface OntologyFunctionParam {
+  /**
+   * 参数唯一标识
+   */
+  code?: string;
+  /**
+   * 创建时间
+   */
+  createdAt?: Date;
+  /**
+   * 所属函数ID
+   */
+  functionId?: number;
+  /**
+   * 参数ID
+   */
+  id?: number;
+  /**
+   * 参数方向 出、入参
+   */
+  inputType?: InputType;
+  /**
+   * 参数名称
+   */
+  name?: string;
+  /**
+   * 参数类型
+   */
+  type: ParamType;
+  /**
+   * 更新时间
+   */
+  updatedAt?: Date;
+  /**
+   * 参数值
+   */
+  value?: any;
+}
+
+/**
+ * 参数方向
+ */
+export enum InputType {
+  Input = 'input',
+  Output = 'output'
+}
+
+/**
+ * 参数类型
+ * String
+ * Integer
+ * Double
+ * Boolean
+ * Date
+ * Timestamp
+ * Geopoint
+ * Object (One)
+ * Object (Set)
+ * Attachment
+ * void (仅出参)
+ */
+export enum ParamType {
+  String = 'String',
+  Integer = 'Integer',
+  Double = 'Double',
+  Boolean = 'Boolean',
+  Date = 'Date',
+  Timestamp = 'Timestamp',
+  Geopoint = 'Geopoint',
+  ObjectOne = 'ObjectOne',
+  Attachment = 'Attachment',
+  ObjectSet = 'ObjectSet'
+}
+
+export const InputTypeOptions = Object.values(ParamType).map((value) => ({
+  label: value,
+  value
+}));
+
+export const OutputTypeOptions = [
+  ...InputTypeOptions,
+  {
+    label: 'Void',
+    value: 'Void'
+  }
+];
+
+export const TYPE_MAP: Record<string, string> = {
+  [ParamType.String]: 'str',
+  [ParamType.Integer]: 'int',
+  [ParamType.Double]: 'float',
+  [ParamType.Boolean]: 'bool',
+  [ParamType.Date]: 'date',
+  [ParamType.Timestamp]: 'datetime',
+  [ParamType.ObjectOne]: 'ObjectOne',
+  [ParamType.ObjectSet]: 'ObjectSet',
+  [ParamType.Geopoint]: 'GeoPoint',
+  [ParamType.Attachment]: 'Attachment',
+  Void: 'None'
+};
+export const DEFAULT_FUNCTION_CONTENT = `@Action()
+def my_function(arg1: str) -> str:
+  # 在此编写函数逻辑
+  result = ""
+  return result`;
+
+/**
+ * OntologyFunction，函数对象
+ */
+export interface OnFunctionItem {
+  /**
+   * 函数唯一编码
+   */
+  code?: string;
+  /**
+   * 函数代码内容
+   */
+  content?: string;
+  /**
+   * 创建时间
+   */
+  createdAt?: Date;
+  /**
+   * 创建人
+   */
+  createUser?: string;
+  /**
+   * 函数描述
+   */
+  description?: string;
+  /**
+   * 函数ID
+   */
+  id?: number;
+  /**
+   * 函数名称
+   */
+  name?: string;
+  /**
+   * 所属本体场景模型ID
+   */
+  ontologyModelId?: number;
+  /**
+   * 函数参数列表
+   */
+  params?: OntologyFunctionParam[];
+  /**
+   * 更新时间
+   */
+  updatedAt?: Date;
+  /**
+   * 更新人
+   */
+  updateUser?: string;
+}
+
+export interface OnFunctionSchema {
+  code?: string;
+  name?: string;
+  description?: string;
+  input?: OntologyFunctionParam[];
+  output?: OntologyFunctionParam[];
+  content?: string;
+}

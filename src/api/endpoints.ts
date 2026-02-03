@@ -753,7 +753,20 @@ export const ModaForgeResourceEndpoints = {
   // 更新本体场景
   UpdateOntologyModelApi: PrefixAimdp + '/UpdateOntologyModel',
   // 删除本体场景
-  DeleteOntologyModelApi: PrefixAimdp + '/DeleteOntologyModel'
+  DeleteOntologyModelApi: PrefixAimdp + '/DeleteOntologyModel',
+  GetOntologyTopologyApi: PrefixAimdp + '/GetOntologyTopology',
+  // ===================== 本体函数相关 =====================
+  // 函数列表
+  GetOntologyFunctionListApi: PrefixAimdp + '/ListOntologyFunction',
+  // 函数详情
+  GetOntologyFunctionDetailApi: PrefixAimdp + '/GetOntologyFunction',
+  // 创建函数
+  CreateOntologyFunctionApi: PrefixAimdp + '/CreateOntologyFunction',
+  // 更新函数
+  UpdateOntologyFunctionApi: PrefixAimdp + '/UpdateOntologyFunction',
+  // 删除函数
+  DeleteOntologyFunctionListApi: PrefixAimdp + '/DeleteOntologyFunction'
+  // ===================== 本体函数相关 =====================
 };
 
 /**

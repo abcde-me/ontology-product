@@ -5,7 +5,7 @@ import { Button } from '@arco-design/web-react';
 import { IconPlayArrowFill } from '@arco-design/web-react/icon';
 import { ParamsTestDialog } from '../../components';
 
-export const ParamsSetting = (props: CustomFormCompProps<any>) => {
+export const ParamsSetting = (props: CustomFormItemCompProps<any>) => {
   const [paramsTest, setParamsTest] = useState(false);
   const [currentPrams, setCurrentPrams] = useState<any>();
   const testParams = () => {

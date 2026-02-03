@@ -15,18 +15,28 @@
     flex-shrink: 0;
   }
 
+  :global {
+    .arco-form-item-tooltip {
+      color: #7f8c9f;
+    }
+  }
+
   .page-body {
     flex: 1;
     overflow: auto;
-    padding: 0 24px 16px;
+    padding: 0 24px;
 
     &::-webkit-scrollbar {
       display: none;
     }
 
+    :global(.arco-form-message) {
+      margin-bottom: 0;
+    }
+
     :global(.arco-form-label-item) {
-      width: 114px !important;
-      flex-basis: 114px !important;
+      width: 140px !important;
+      flex-basis: 140px !important;
       flex-shrink: 0 !important;
 
       label {
@@ -35,12 +45,10 @@
         &:after {
           content: '：';
           margin-left: 4px;
+          padding-top: 2px;
+          line-height: 16px;
         }
       }
-    }
-
-    :global(.arco-form-message) {
-      margin-bottom: 0;
     }
 
     :global(.module-title) {
@@ -50,6 +58,7 @@
       font-size: 16px;
       line-height: 24px;
       color: #0f131f;
+      flex-shrink: 0;
     }
   }
 
@@ -60,4 +69,31 @@
     border-top: 1px solid #ebeef5;
     display: flex;
   }
+}
+
+.function-form {
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+.function {
+  overflow-y: hidden;
+
+  :global {
+    .arco-form-item-wrapper,
+    .arco-form-item-control-wrapper,
+    .arco-form-item-control,
+    .arco-form-item-control-children {
+      height: 100%;
+    }
+  }
+}
+
+.params-setting-container {
+  height: calc(100vh - 210px);
+  max-height: calc(100vh - 210px);
+  display: flex;
+  flex-direction: column;
+  overflow-y: hidden;
 }

@@ -7,30 +7,35 @@ import {
   ParamsSetting,
   ValidRules
 } from '@/pages/ontologyScene/modules/behaviorActionDetail/components';
-import { IconArrowLeft, IconLeft } from '@arco-design/web-react/icon';
 import { useHistory, useParams } from 'react-router-dom';
-import { ONTOLOGY_SCENE_MENU_ITEM_KEYS } from '@/common/constants';
+import { FormItem } from '@/pages/ontologyScene/componens';
 
-const FormItem = Form.Item;
 const { TextArea } = Input;
 
 export default function BehaviorActionDetailPage() {
-  const saveAction = async () => {};
   const history = useHistory();
+  const [form] = Form.useForm();
   const { id: OSId, pageMode, actionId } = useParams<Record<string, string>>();
+
+  const saveAction = async () => {
+    const values = await form.validate();
+    console.log(values);
+  };
+
   return (
     <div
       className={`${styles['behavior-action-detail']} flex h-full w-full flex-col `}
     >
       <div className={`${styles['page-header']} text-default`}>
-        {`${pageMode === 'view' ? '查看' : pageMode === 'edit' ? '编辑' : '创建'}行为动作`}
+        {`${pageMode === 'edit' ? '编辑' : '创建'}行为`}
       </div>
       <div className={`${styles['page-body']}`}>
-        <Form>
+        <Form autoComplete={'off'} form={form} labelAlign={'left'}>
           <div className={'module-title'}>基本信息</div>
           <FormItem
             label="行为动作名称"
             field="name"
+            required
             rules={[
               { required: true, message: '请输入行为动作名称' },
               { maxLength: 50, message: '最多 50 个字符' }
@@ -45,13 +50,14 @@ export default function BehaviorActionDetailPage() {
 
           <FormItem
             label="唯一标识"
+            required
             field="code"
             rules={[{ required: true, message: '请输入唯一标识' }]}
           >
             <Input placeholder="请输入唯一标识" />
           </FormItem>
 
-          <FormItem label="描述说明" field="description">
+          <FormItem label="描述说明" field="description" required={false}>
             <TextArea
               placeholder="请输入描述说明"
               autoSize={{ minRows: 3, maxRows: 6 }}

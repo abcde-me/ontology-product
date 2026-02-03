@@ -24,7 +24,7 @@ export const ParamsTestDialog = (props: IProps) => {
     >
       <div className={styles['params-dialog-content']}>
         <div className={styles['left']}>
-          <div className={styles['header']}></div>
+          <div className={styles['header']}>参数配置</div>
           <div className={styles['body']}>
             <Form layout={'vertical'}>
               <Form.Item label={'测试'}>
@@ -55,7 +55,7 @@ export const ParamsTestDialog = (props: IProps) => {
           </div>
         </div>
         <div className={styles['right']}>
-          <div className={styles['header']}></div>
+          <div className={styles['header']}>运行结果</div>
           <div className={styles['body']}>
             <NoDataCard type={'block'} title={'请先在左侧配置参数'} />
           </div>
