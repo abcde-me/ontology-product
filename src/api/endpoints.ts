@@ -732,7 +732,11 @@ export const ModaForgeResourceEndpoints = {
   // 保存编排方案（可选）
   behaviorOrchestration: PrefixAimdp + '/SaveBehaviorOrchestration',
   // 获取历史记录（可选）
-  behaviorHistory: PrefixAimdp + '/ListBehaviorHistory'
+  behaviorHistory: PrefixAimdp + '/ListBehaviorHistory',
+
+  // 本体拓扑
+  // 获取本体拓扑
+  GetOntologyTopologyApi: PrefixAimdp + '/GetOntologyTopology'
 };
 
 /**
