@@ -6,35 +6,36 @@ import {
   GenerateNewNode
 } from '@ceai-front/workflow';
 import '@ceai-front/workflow/dist/es/ai-workflow.css';
-import {
-  MyNode,
-  MyNodePanel,
-  MyNodeDefault,
-  MyNodeControlPanel
-} from './nodes';
+import { MyNode, MyNodePanel, MyNodeDefault } from './nodes';
 import { getWorkflow, createWorkflow, updateWorkflow } from './demo/api';
 import { getOntologyTopology } from '@/api/ontologyScene/graph';
 import dagre from '@dagrejs/dagre';
 import type { GetOntologyTopologyResponse } from '@/types/graphApi';
 import styles from './index.module.scss';
+import { CustomEdge } from './edges';
+import { Spin } from '@arco-design/web-react';
+import SubHeader from './subHeader';
 
 const nodesConfig = [
   {
-    type: 'default',
-    node: MyNode,
-    panel: MyNodePanel,
-    nodeDefault: MyNodeDefault,
-    classification: 'ontology',
-    title: '本体节点',
-    showDefaultSourceHandle: true,
-    showDefaultTargetHandle: true,
-    showNodeControl: true,
-    nodeControlPanel: MyNodeControlPanel
+    type: 'default', // 节点类型
+    node: MyNode, // 画布展示的节点
+    panel: MyNodePanel, // 节点配置面板
+    nodeDefault: MyNodeDefault, // 节点默认配置
+    classification: 'ontology', // 节点分类
+    title: '本体节点', // 节点标题
+    showDefaultSourceHandle: true, // 是否显示默认的源连接点
+    showDefaultTargetHandle: true, // 是否显示默认的目标连接点
+    showNodeControl: false // 是否显示节点控制按钮
   }
 ];
 
-const NODE_WIDTH = 200;
-const NODE_HEIGHT = 80;
+const edgeTypes = {
+  'custom-edge': CustomEdge
+};
+
+const NODE_WIDTH = 256;
+const NODE_HEIGHT = 112;
 
 // 使用 dagre 进行布局计算
 function layoutNodesWithDagre(
@@ -69,11 +70,12 @@ function layoutNodesWithDagre(
     const { newNode: workflowNode } = newNode({
       id: nodeId,
       data: {
+        ...MyNodeDefault.defaultValue,
         // @ts-expect-error
         type: 'default',
         desc: topologyNode.description ?? '',
-        title: topologyNode.name ?? topologyNode.code ?? '未命名节点',
-        ...MyNodeDefault.defaultValue
+        title: topologyNode.name || '未命名节点',
+        attributes: topologyNode.attributes || []
       },
       position: { x: 0, y: 0 } // 临时位置，稍后由 dagre 计算
     });
@@ -106,7 +108,23 @@ function layoutNodesWithDagre(
         source: sourceId ?? String(topologyEdge.sourceId),
         sourceHandle: 'source',
         target: targetId ?? String(topologyEdge.targetId),
-        targetHandle: 'target'
+        targetHandle: 'target',
+        type: 'custom-edge',
+        data: {
+          // 可以在这里添加 edge 的自定义数据
+          label: topologyEdge.name || '',
+          labelIcon: '🔗', // 链式图标
+          labelColor: '#f1f5f9' // 浅灰色背景
+        },
+        style: {
+          stroke: '#94a3b8', // 灰色
+          strokeWidth: 2,
+          strokeDasharray: '5,5' // 虚线样式
+        },
+        markerEnd: {
+          type: 'arrowclosed',
+          color: '#94a3b8'
+        }
       };
     });
 
@@ -189,7 +207,11 @@ export default function OntologySceneGraph() {
   ]);
 
   if (loading) {
-    return <div>加载中...</div>;
+    return (
+      <div className="flex h-full w-full items-center justify-center">
+        <Spin block />
+      </div>
+    );
   }
 
   return (
