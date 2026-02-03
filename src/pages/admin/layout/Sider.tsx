@@ -120,8 +120,7 @@ export const LayoutWithSider = memo(function LayoutWithSider({ children }) {
       }
 
       lastClickPathRef.current = path;
-      // 直接导航，不需要销毁 wujie 应用
-      // operationCenter 页面会通过 useLocation 监听 URL 变化并自动重新加载
+      console.log('clickMenu', path);
       history.push(path);
 
       // 设置超时，300ms 后重置防抖状态

@@ -413,15 +413,13 @@ function QualityTaskList() {
       width: 100,
       fixed: 'right',
       render: (_, record) => {
-        return hasPermissionGetPkg ? (
+        return (
           <Link
             className="operation-link"
             onClick={() => goToDetailPage(record)}
           >
             去质检
           </Link>
-        ) : (
-          '-'
         );
       }
     }

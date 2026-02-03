@@ -1411,8 +1411,12 @@ const DatasetDetail = (props: {
             setContentTableColumnsList(res.data?.columns || []);
             setContentTableData(res.data?.data || []);
           } else {
-            setContentFileData(res.data?.list || []);
-            setFileTotal(res.data?.total || 0);
+            if (res.data?.list?.length === 0 && currentPage > 1) {
+              setCurrentPage(currentPage - 1);
+            } else {
+              setContentFileData(res.data?.list || []);
+              setFileTotal(res.data?.total || 0);
+            }
           }
         }
       })
@@ -2062,30 +2066,32 @@ const DatasetDetail = (props: {
                   });
                 }}
               />
-              <div className="pagination-wrapper">
-                <Pagination
-                  disabled={updateStatus}
-                  style={{
-                    float: 'right'
-                  }}
-                  current={currentPage}
-                  pageSize={pageSize}
-                  total={fileTotal}
-                  onChange={(filePage) => {
-                    setCurrentPage(filePage);
-                  }}
-                  onPageSizeChange={(filePageSize) => {
-                    setPageSize(filePageSize);
-                    setCurrentPage(1);
-                  }}
-                  showTotal={(total, range) =>
-                    `第 ${range[0]}-${range[1]} 条，共 ${total} 条数据`
-                  }
-                  sizeOptions={[10, 20, 50, 100]}
-                  showJumper
-                  sizeCanChange={true}
-                />
-              </div>
+              {contentFileData && contentFileData?.length > 0 && (
+                <div className="pagination-wrapper">
+                  <Pagination
+                    disabled={updateStatus}
+                    style={{
+                      float: 'right'
+                    }}
+                    current={currentPage}
+                    pageSize={pageSize}
+                    total={fileTotal}
+                    onChange={(filePage) => {
+                      setCurrentPage(filePage);
+                    }}
+                    onPageSizeChange={(filePageSize) => {
+                      setPageSize(filePageSize);
+                      setCurrentPage(1);
+                    }}
+                    showTotal={(total, range) =>
+                      `第 ${range[0]}-${range[1]} 条，共 ${total} 条数据`
+                    }
+                    sizeOptions={[10, 20, 50, 100]}
+                    showJumper
+                    sizeCanChange={true}
+                  />
+                </div>
+              )}
             </TabPane>
           )}
           {datasetDetail &&

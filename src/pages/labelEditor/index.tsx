@@ -65,7 +65,7 @@ function LabelEditorPage() {
   const deadlineTimestamp = useParams('deadlineTimestamp');
   const [labelUrl, setLabelUrl] = useState('');
   const history = useHistory();
-  const hasSavePermission = useHasPermission(ANNOTATION_TASK_PERMISSIONS.SAVE);
+  const hasSavePermission = true;
 
   useEffect(() => {
     const init = async () => {

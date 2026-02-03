@@ -71,6 +71,7 @@ import DatasetMoveIcon from '@/pages/datasetManagement/assets/dataset_move.svg';
 import DatasetMoveActiveIcon from '@/pages/datasetManagement/assets/dataset_move_active.svg';
 import { useHasPermission } from '@/store/userInfoStore';
 import { useParams } from '@/utils/url';
+import AddSceneFormModal from '@/components/datasetform/AddSceneForm';
 
 // 时间格式化函数
 const formatDateTime = (dateTimeString: string): string => {
@@ -959,6 +960,9 @@ const DatasetManagement: React.FC = () => {
   >([]);
 
   const isCanMove = useHasPermission(DATA_MANAGEMENT_PERMISSIONS.CAN_MOVE);
+  const isCanCreateScene = useHasPermission(
+    DATA_MANAGEMENT_PERMISSIONS.CREATE_SCENE
+  );
 
   // useEffect(() => {
   //   const container = document.querySelector('.layout-detail');
@@ -1044,7 +1048,7 @@ const DatasetManagement: React.FC = () => {
         Message.success('更新场景类型成功');
         getSceneList();
       } else {
-        Message.error(res.msg || '更新场景类型失败');
+        Message.error(res.message || '更新场景类型失败');
       }
       setIsEdit(false);
       setEditSceneId(null);
@@ -1060,7 +1064,7 @@ const DatasetManagement: React.FC = () => {
         Message.success('新增场景类型成功');
         getSceneList();
       } else {
-        Message.error(res.msg || '新增场景类型失败');
+        Message.error(res.message || '新增场景类型失败');
       }
       setAddSceneTypeVisible(false);
     }
@@ -1084,7 +1088,7 @@ const DatasetManagement: React.FC = () => {
             fetchDatasetList();
             getSceneList();
           } else {
-            Message.error(res.msg || '移动数据集失败');
+            Message.error(res.message || '移动数据集失败');
           }
         });
         moveDatasetForm.resetFields();
@@ -1266,7 +1270,7 @@ const DatasetManagement: React.FC = () => {
             display: 'inline-block'
           }}
         >
-          删除后，场景分类不可恢复
+          {`删除后该场景不可恢复，该场景下的数据集会移到"其他"下`}
         </div>
       ),
       // 按钮文字
@@ -1427,8 +1431,18 @@ const DatasetManagement: React.FC = () => {
 
     try {
       const res = await getDatasetList(params);
-      setDatasetList(res.data?.list || []);
-      setTotal(res.data?.total || 0);
+      if (res.code === '' && res.status === 200) {
+        if (
+          (res.data?.list?.length === 0 || !res.data?.list) &&
+          currentPage > 1 &&
+          res.data?.total > 0
+        ) {
+          setCurrentPage(currentPage - 1);
+        } else {
+          setDatasetList(res.data?.list || []);
+          setTotal(res.data?.total || 0);
+        }
+      }
       return res;
     } catch (err) {
       console.error('获取数据失败:', err);
@@ -1825,7 +1839,7 @@ const DatasetManagement: React.FC = () => {
         </div>
       )}
       <Tabs
-        editable
+        editable={isCanCreateScene}
         defaultActiveTab={sceneName || '0'}
         className={styles.datasetManagementTabs}
         style={{
@@ -1868,52 +1882,84 @@ const DatasetManagement: React.FC = () => {
                     marginTop: '20px'
                   }}
                 >
-                  <div className="flex items-center justify-between">
-                    <span className="text-[14px]">{item.description}</span>
+                  <div
+                    className={`${styles.sceneDesc} flex items-center justify-between`}
+                  >
+                    <EllipsisPopover
+                      value={item.description || '-'}
+                      className="text-[14px]"
+                      preferTypography
+                    />
                     <div className="flex items-center gap-2">
-                      <Tooltip content="编辑">
-                        <IconEdit
-                          className="cursor-pointer"
-                          onClick={() => {
-                            sceneTypeForm.setFieldsValue({
-                              sceneTypeName: item.name,
-                              sceneTypeDesc: item.description,
-                              sceneTypeTag: item.tags
-                            });
-                            setIsEdit(true);
-                            setEditSceneId(item.id);
-                            setAddSceneTypeVisible(true);
-                          }}
-                        />
-                      </Tooltip>
-                      {item.type === 'user' && (
-                        <Tooltip content="删除">
-                          <IconDelete
-                            className="cursor-pointer"
-                            onClick={() => handleDeleteScene(item.id)}
+                      <PermissionWrapper
+                        permission={DATA_MANAGEMENT_PERMISSIONS.MODIFY_SCENE}
+                      >
+                        <Tooltip content="编辑">
+                          <IconEdit
+                            className="cursor-pointer hover:text-[#007DFA]"
+                            onClick={() => {
+                              sceneTypeForm.setFieldsValue({
+                                sceneTypeName: item.name,
+                                sceneTypeDesc: item.description,
+                                sceneTypeTag: item.tags
+                              });
+                              setIsEdit(true);
+                              setEditSceneId(item.id);
+                              setAddSceneTypeVisible(true);
+                            }}
                           />
                         </Tooltip>
+                      </PermissionWrapper>
+                      {item.type === 'user' && (
+                        <PermissionWrapper
+                          permission={DATA_MANAGEMENT_PERMISSIONS.DELETE_SCENE}
+                        >
+                          <Tooltip content="删除">
+                            <IconDelete
+                              className="cursor-pointer hover:text-[#007DFA]"
+                              onClick={() => handleDeleteScene(item.id)}
+                            />
+                          </Tooltip>
+                        </PermissionWrapper>
                       )}
                     </div>
                   </div>
-                  {item?.tags?.length > 0 && (
+                  {item?.tags?.length > 3 ? (
                     <span style={{ marginTop: '8px' }}>
                       <IconTag style={{ marginRight: '5px' }} />
-                      {item.tags.map((tag, index) => (
-                        <Tag
-                          key={index}
-                          style={{
-                            marginRight: '5px',
-                            background: '#FFF',
-                            border: '1px solid #E2E8F0',
-                            padding: '4px',
-                            borderRadius: '4px'
-                          }}
-                        >
-                          {tag}
+                      {item.tags.slice(0, 3).map((tag, index) => (
+                        <Tag key={index} className={styles.sceneTag}>
+                          <EllipsisPopover value={tag} preferTypography />
                         </Tag>
                       ))}
+                      <Tooltip
+                        content={() =>
+                          item.tags.slice(3).map((tag, index) => (
+                            <Tag
+                              key={index}
+                              className={`${styles.sceneTag} mb-1`}
+                            >
+                              <EllipsisPopover value={tag} preferTypography />
+                            </Tag>
+                          ))
+                        }
+                      >
+                        <Tag key={item.tags.length} className={styles.sceneTag}>
+                          +{item.tags.length - 3}
+                        </Tag>
+                      </Tooltip>
                     </span>
+                  ) : (
+                    item.tags?.length > 0 && (
+                      <span style={{ marginTop: '8px' }}>
+                        <IconTag style={{ marginRight: '5px' }} />
+                        {item.tags.map((tag, index) => (
+                          <Tag key={index} className={styles.sceneTag}>
+                            <EllipsisPopover value={tag} preferTypography />
+                          </Tag>
+                        ))}
+                      </span>
+                    )
                   )}
                 </div>
               )}
@@ -2120,6 +2166,10 @@ const DatasetManagement: React.FC = () => {
         onSubmit={handleSubmit}
         onCancel={closeModal}
         sceneOption={datasetSceneOption}
+        sceneTypeForm={sceneTypeForm}
+        handleAddSceneTypeSubmit={handleAddSceneTypeSubmit}
+        addSceneTypeVisible={addSceneTypeVisible}
+        setAddSceneTypeVisible={setAddSceneTypeVisible}
         ref={childRef}
       />
       {/* 导出数据集弹窗 */}
@@ -2135,43 +2185,13 @@ const DatasetManagement: React.FC = () => {
       />
 
       {/* 新增场景类型弹窗 */}
-      <Modal
-        className={styles.addSceneTypeModal}
-        visible={addSceneTypeVisible}
-        onOk={() => sceneTypeForm.submit()}
-        onCancel={() => {
-          sceneTypeForm.resetFields();
-          setAddSceneTypeVisible(false);
-        }}
-        title="新增场景类型"
-      >
-        <Form form={sceneTypeForm} onSubmit={handleAddSceneTypeSubmit}>
-          <Form.Item
-            label="场景分类名称："
-            field="sceneTypeName"
-            rules={[{ required: true, message: '请输入场景类型名称' }]}
-          >
-            <Input placeholder="请输入名称" />
-          </Form.Item>
-          <Form.Item label="场景分类标签：" field="sceneTypeTag">
-            <Select
-              mode="multiple"
-              placeholder="请选择标签"
-              options={newTagList.map((item) => ({
-                label: item.name,
-                value: item.name
-              }))}
-            />
-          </Form.Item>
-          <Form.Item
-            label="描述说明："
-            field="sceneTypeDesc"
-            rules={[{ required: true, message: '请输入描述说明' }]}
-          >
-            <Input.TextArea placeholder="可以描述数据集的用途、特点或其他相关信息" />
-          </Form.Item>
-        </Form>
-      </Modal>
+      <AddSceneFormModal
+        addSceneTypeVisible={addSceneTypeVisible}
+        sceneTypeForm={sceneTypeForm}
+        setAddSceneTypeVisible={setAddSceneTypeVisible}
+        handleAddSceneTypeSubmit={handleAddSceneTypeSubmit}
+        newTagList={newTagList}
+      />
 
       {/* 移动数据集弹窗 */}
       <Modal
@@ -2199,6 +2219,7 @@ const DatasetManagement: React.FC = () => {
                 return option?.child?.props?.children?.props?.children[0]?.props
                   ?.children;
               }}
+              dropdownMenuClassName="pb-8"
             >
               {datasetSceneOption.map((item) => (
                 <Select.Option key={item.id} value={item.id}>
@@ -2213,6 +2234,16 @@ const DatasetManagement: React.FC = () => {
                   </div>
                 </Select.Option>
               ))}
+              <Button
+                type="text"
+                icon={<IconPlus />}
+                className={styles.addSceneBtn}
+                onClick={() => {
+                  setAddSceneTypeVisible(true);
+                }}
+              >
+                新建场景分类
+              </Button>
             </Select>
           </Form.Item>
         </Form>

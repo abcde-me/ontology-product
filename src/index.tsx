@@ -171,7 +171,7 @@ function App() {
       if (!userActions.isAdmin) {
         finalMenus = createPermissionFilter(menus);
       }
-      console.log('finalMenus', finalMenus);
+      // console.log('finalMenus', finalMenus);
       setUserMenus(finalMenus);
 
       // 只有当项目刚刚切换过时，才跳转到第一个有权限的路由

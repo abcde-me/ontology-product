@@ -104,7 +104,10 @@ export const DATA_MANAGEMENT_PERMISSIONS = {
   GET: 'aimdp-manager:dataset:read:get',
   CREATE: 'aimdp-manager:dataset:manage:create',
   DELETE: 'aimdp-manager:dataset:manage:delete',
-  MODIFY: 'aimdp-manager:dataset:manage:modify'
+  MODIFY: 'aimdp-manager:dataset:manage:modify',
+  CREATE_SCENE: 'aimdp-manager:dataset:manage:create_scene', // 创建场景分类
+  DELETE_SCENE: 'aimdp-manager:dataset:manage:delete_scene', // 删除场景分类
+  MODIFY_SCENE: 'aimdp-manager:dataset:manage:modify_scene' // 修改场景分类
 } as const;
 
 // 新工作流与作业

@@ -53,7 +53,7 @@ UAPI_CONFIG.addRequestInterceptor(
     const commonParams = {
       projectID: !shouldExclude && hasValidProjectId ? projectId[1] : undefined
     };
-    console.log('commonParams', commonParams);
+    // console.log('commonParams', commonParams);
 
     // 对于 POST/PUT/PATCH 请求，参数在 request body 中
     if (
