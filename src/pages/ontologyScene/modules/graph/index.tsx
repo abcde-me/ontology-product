@@ -167,11 +167,7 @@ const createInitWorkflow = (
       };
     }
 
-    const ttt = layoutNodesWithDagre(topologyData, newNode);
-
-    console.log('--------------', ttt);
-
-    return ttt;
+    return layoutNodesWithDagre(topologyData, newNode);
   };
 };
 
@@ -185,7 +181,7 @@ export default function OntologySceneGraph() {
     // 获取本体拓扑数据
     getOntologyTopology({})
       .then((res) => {
-        if (res.code === 0 && res.data) {
+        if (res.status === 200 && res.code === '' && res.data) {
           setTopologyData(res.data);
         }
       })

@@ -8,7 +8,7 @@ import {
   Tag,
   Spin
 } from '@arco-design/web-react';
-import { IconCopy } from '@arco-design/web-react/icon';
+import { IconCopy, IconFile } from '@arco-design/web-react/icon';
 import copy from 'copy-to-clipboard';
 import {
   listOntologyObjectTypeData,
@@ -28,6 +28,7 @@ import {
   EllipsisPopover,
   NoDataCard
 } from '@ceai-front/arco-material';
+import { OBJECT_TYPE_ICON_OPTIONS } from '@/pages/ontologyScene/common/constants';
 
 const Panel: FC<any> = ({ id, data }) => {
   const [activeTab, setActiveTab] = useState('instances');
@@ -74,7 +75,7 @@ const Panel: FC<any> = ({ id, data }) => {
         page,
         pageSize
       });
-      if (res.code === 0 && res.data) {
+      if (res.status === 200 && res.code === '' && res.data) {
         setInstancesData(res.data.result || []);
         setInstancesTotal(res.data.totalCount || 0);
       }
@@ -94,7 +95,7 @@ const Panel: FC<any> = ({ id, data }) => {
         pageNo: page,
         pageSize
       });
-      if (res.code === 0 && res.data) {
+      if (res.code === '' && res.status === 200 && res.data) {
         setPropertiesData(res.data.result || []);
         setPropertiesTotal(res.data.totalCount || 0);
       }
@@ -115,7 +116,7 @@ const Panel: FC<any> = ({ id, data }) => {
         pageNo: page,
         pageSize
       });
-      if (res.code === 0 && res.data) {
+      if (res.code === '' && res.status === 200 && res.data) {
         setLinksData(res.data.result || []);
         setLinksTotal(res.data.totalCount || 0);
       }
@@ -276,6 +277,43 @@ const Panel: FC<any> = ({ id, data }) => {
       : 'purple';
   };
 
+  // 渲染链接卡片（参考 ObjectTypeDetailDrawer.tsx 的实现）
+  const renderLinkCard = (
+    objectType: { name: string; icon?: string; iconColor?: string },
+    isSource: boolean
+  ) => {
+    // 根据 icon 字段匹配对应的图标
+    const iconOption = objectType.icon
+      ? OBJECT_TYPE_ICON_OPTIONS.find(
+          (option) => option.value === objectType.icon
+        )
+      : null;
+    const IconComponent = iconOption?.icon;
+
+    const color = objectType.iconColor || '#165dff';
+    const isGreen = color === '#00b42a' || color === 'green';
+    return (
+      <div
+        className={`flex items-center gap-2 rounded border px-3 py-2 ${
+          isGreen
+            ? 'border-green-200 bg-green-50'
+            : 'border-purple-200 bg-purple-50'
+        }`}
+      >
+        <div className="flex h-6 w-6 flex-shrink-0 items-center justify-center">
+          {IconComponent ? (
+            <IconComponent className="h-6 w-6" />
+          ) : (
+            <IconFile className="h-6 w-6" />
+          )}
+        </div>
+        <span className="text-sm font-medium text-gray-700">
+          {objectType.name}
+        </span>
+      </div>
+    );
+  };
+
   return (
     <div className="bg-white">
       {/* 基本信息 */}
@@ -383,18 +421,28 @@ const Panel: FC<any> = ({ id, data }) => {
                 // 判断当前节点是源节点还是目标节点
                 const isSource = link.sourceObjectTypeID === nodeId;
                 // 确定左侧（当前节点）和右侧（关联节点）的显示
-                const leftName = isSource
-                  ? link.sourceObjectTypeName || '未知'
-                  : link.targetObjectTypeName || '未知';
-                const rightName = isSource
-                  ? link.targetObjectTypeName || '未知'
-                  : link.sourceObjectTypeName || '未知';
-                const leftColor = isSource
-                  ? getObjectTypeColor(link.sourceObjectTypeIcon)
-                  : getObjectTypeColor(link.targetObjectTypeIcon);
-                const rightColor = isSource
-                  ? getObjectTypeColor(link.targetObjectTypeIcon)
-                  : getObjectTypeColor(link.sourceObjectTypeIcon);
+                const leftObjectType = {
+                  name: isSource
+                    ? link.sourceObjectTypeName || '未知'
+                    : link.targetObjectTypeName || '未知',
+                  icon: isSource
+                    ? link.sourceObjectTypeIcon
+                    : link.targetObjectTypeIcon,
+                  iconColor: isSource
+                    ? getObjectTypeColor(link.sourceObjectTypeIcon)
+                    : getObjectTypeColor(link.targetObjectTypeIcon)
+                };
+                const rightObjectType = {
+                  name: isSource
+                    ? link.targetObjectTypeName || '未知'
+                    : link.sourceObjectTypeName || '未知',
+                  icon: isSource
+                    ? link.targetObjectTypeIcon
+                    : link.sourceObjectTypeIcon,
+                  iconColor: isSource
+                    ? getObjectTypeColor(link.targetObjectTypeIcon)
+                    : getObjectTypeColor(link.sourceObjectTypeIcon)
+                };
                 const linkType = getLinkTypeText(link.type);
 
                 return (
@@ -430,31 +478,7 @@ const Panel: FC<any> = ({ id, data }) => {
                     {/* 关系图 */}
                     <div className="flex items-center rounded-[4px] bg-[#F2F8FF] p-[12px]">
                       {/* 左侧对象（当前节点） */}
-                      <div
-                        className={`flex items-center gap-2 rounded border px-3 py-2 ${
-                          leftColor === 'green'
-                            ? 'border-green-200 bg-green-50'
-                            : 'border-purple-200 bg-purple-50'
-                        }`}
-                      >
-                        <div
-                          className={`h-2 w-2 rounded-full ${
-                            leftColor === 'green'
-                              ? 'bg-green-500'
-                              : 'bg-purple-500'
-                          }`}
-                        ></div>
-                        <span className="text-sm font-medium text-gray-700">
-                          {leftName}
-                        </span>
-                        <div
-                          className={`h-2 w-2 rounded-full ${
-                            leftColor === 'green'
-                              ? 'bg-green-500'
-                              : 'bg-purple-500'
-                          }`}
-                        ></div>
-                      </div>
+                      {renderLinkCard(leftObjectType, true)}
 
                       {/* 箭头和关系类型 */}
                       <div className="flex flex-1 items-center gap-1">
@@ -467,31 +491,7 @@ const Panel: FC<any> = ({ id, data }) => {
                       </div>
 
                       {/* 右侧对象（关联节点） */}
-                      <div
-                        className={`flex items-center gap-2 rounded border px-3 py-2 ${
-                          rightColor === 'green'
-                            ? 'border-green-200 bg-green-50'
-                            : 'border-purple-200 bg-purple-50'
-                        }`}
-                      >
-                        <div
-                          className={`h-2 w-2 rounded-full ${
-                            rightColor === 'green'
-                              ? 'bg-green-500'
-                              : 'bg-purple-500'
-                          }`}
-                        ></div>
-                        <span className="text-sm font-medium text-gray-700">
-                          {rightName}
-                        </span>
-                        <div
-                          className={`h-2 w-2 rounded-full ${
-                            rightColor === 'green'
-                              ? 'bg-green-500'
-                              : 'bg-purple-500'
-                          }`}
-                        ></div>
-                      </div>
+                      {renderLinkCard(rightObjectType, false)}
                     </div>
                   </div>
                 );
