@@ -27,7 +27,13 @@ function AnnotationConfig({ requirementDetail }: { requirementDetail: any }) {
     { label_tool_code: labelToolCode, page: 1, page_size: 1000 },
     {
       enabled:
-        (labelToolCode === 'IMAGE_ANNOTATION' || labelToolCode === 'TEXT_QA') &&
+        (labelToolCode === 'IMAGE_ANNOTATION' ||
+          labelToolCode === 'TEXT_QA' ||
+          labelToolCode === 'IMAGE_CLASSIFICATION' ||
+          labelToolCode === 'AUDIO_CLASSIFICATION' ||
+          labelToolCode === 'AUDIO_SPLIT' ||
+          labelToolCode === 'VIDEO_CLASSIFICATION' ||
+          labelToolCode === 'VIDEO_SPLIT') &&
         !!requirementDetail?.model_id
     }
   );

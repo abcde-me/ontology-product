@@ -783,7 +783,22 @@ export default function RequirementConfig() {
         AnnotationTypeContentCode.IMAGE_ANNOTATION ||
       (annotationTypeContentCode ||
         requirementDetail?.label_tool?.label_tool_code) ===
-        AnnotationTypeContentCode.QA
+        AnnotationTypeContentCode.QA ||
+      (annotationTypeContentCode ||
+        requirementDetail?.label_tool?.label_tool_code) ===
+        AnnotationTypeContentCode.IMAGE_CLASSIFICATION ||
+      (annotationTypeContentCode ||
+        requirementDetail?.label_tool?.label_tool_code) ===
+        AnnotationTypeContentCode.AUDIO_CLASSIFICATION ||
+      (annotationTypeContentCode ||
+        requirementDetail?.label_tool?.label_tool_code) ===
+        AnnotationTypeContentCode.AUDIO_SPLIT ||
+      (annotationTypeContentCode ||
+        requirementDetail?.label_tool?.label_tool_code) ===
+        AnnotationTypeContentCode.VIDEO_CLASSIFICATION ||
+      (annotationTypeContentCode ||
+        requirementDetail?.label_tool?.label_tool_code) ===
+        AnnotationTypeContentCode.VIDEO_SPLIT
     );
   }, [
     annotationTypeContentCode,
@@ -1159,6 +1174,8 @@ export default function RequirementConfig() {
                       type={effectiveType}
                       requirementDetail={requirementDetail}
                       getClassIfyData={getClassIfyChildData}
+                      model_id={model_id}
+                      annotationTypeContentVal={annotationTypeContentVal}
                     />
                   )}
                 </FormItem>
