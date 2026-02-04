@@ -4,6 +4,7 @@ import './AnnotationType.scss';
 import { AnnotationTypeStatus } from '../../type';
 import { Tooltip } from '@arco-design/web-react';
 import ImageAnnotationIcon from '../../image/Image.png';
+import ImageClassificationIcon from '../../image/Image-Classification.jpg';
 import TextClassificationIcon from '../../image/Text-Classification.png';
 import TextEntityIcon from '../../image/Text-Entity.png';
 import TextSortIcon from '../../image/Text-Sort.png';
@@ -33,18 +34,18 @@ const typeList = [
 ];
 const btnPicData = [
   {
-    key: 1,
-    value: 1,
-    label: '分类',
-    code: 'IMAGE_CLASSIFICATION',
-    icon: ImageAnnotationIcon
-  },
-  {
     key: 2,
     value: 2,
     label: '图形',
     code: 'IMAGE_ANNOTATION',
     icon: ImageAnnotationIcon
+  },
+  {
+    key: 1,
+    value: 1,
+    label: '分类',
+    code: 'IMAGE_CLASSIFICATION',
+    icon: ImageClassificationIcon
   }
 ];
 const btnTextData = [
