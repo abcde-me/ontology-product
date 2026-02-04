@@ -114,6 +114,18 @@ const Classify = (props: ClassifyComponentProps) => {
       prevAnnotationTypeContentVal.current = currVal;
     }
   }, [annotationTypeContentVal]);
+
+  // 当 model_id 没有值时，ai_type 设置为 0
+  useEffect(() => {
+    if (!model_id) {
+      setTextRelations((prev) =>
+        prev.map((item) => ({
+          ...item,
+          ai_type: 0
+        }))
+      );
+    }
+  }, [model_id]);
   // 文本分类内容
   const [textRelations, setTextRelations] = useState([
     {
