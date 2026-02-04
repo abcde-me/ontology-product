@@ -575,6 +575,8 @@ export default function RequirementConfig() {
       annotationTypeContentVal ===
         AnnotationTypeContentCode.TEXT_CLASSIFICATION ||
       annotationTypeContentVal ===
+        AnnotationTypeContentCode.IMAGE_CLASSIFICATION ||
+      annotationTypeContentVal ===
         AnnotationTypeContentCode.AUDIO_CLASSIFICATION ||
       annotationTypeContentVal === AnnotationTypeContentCode.AUDIO_SPLIT ||
       annotationTypeContentVal ===
@@ -700,6 +702,8 @@ export default function RequirementConfig() {
         annotationTypeContentCode ===
           AnnotationTypeContentCode.TEXT_CLASSIFICATION ||
         annotationTypeContentCode ===
+          AnnotationTypeContentCode.IMAGE_CLASSIFICATION ||
+        annotationTypeContentCode ===
           AnnotationTypeContentCode.AUDIO_CLASSIFICATION ||
         annotationTypeContentCode === AnnotationTypeContentCode.AUDIO_SPLIT ||
         annotationTypeContentCode ===
@@ -716,6 +720,8 @@ export default function RequirementConfig() {
                 AnnotationTypeContentCode.TEXT_SORT &&
               annotationTypeContentCode !==
                 AnnotationTypeContentCode.TEXT_CLASSIFICATION &&
+              annotationTypeContentCode !==
+                AnnotationTypeContentCode.IMAGE_CLASSIFICATION &&
               annotationTypeContentCode !==
                 AnnotationTypeContentCode.AUDIO_CLASSIFICATION &&
               annotationTypeContentCode !==
@@ -1079,6 +1085,8 @@ export default function RequirementConfig() {
             annotationTypeContentVal ===
               AnnotationTypeContentCode.TEXT_CLASSIFICATION ||
             annotationTypeContentVal ===
+              AnnotationTypeContentCode.IMAGE_CLASSIFICATION ||
+            annotationTypeContentVal ===
               AnnotationTypeContentCode.AUDIO_CLASSIFICATION ||
             annotationTypeContentVal ===
               AnnotationTypeContentCode.AUDIO_SPLIT ||
@@ -1144,7 +1152,9 @@ export default function RequirementConfig() {
                     annotationTypeContentVal ===
                       AnnotationTypeContentCode.VIDEO_CLASSIFICATION ||
                     annotationTypeContentVal ===
-                      AnnotationTypeContentCode.VIDEO_SPLIT) && (
+                      AnnotationTypeContentCode.VIDEO_SPLIT ||
+                    annotationTypeContentVal ===
+                      AnnotationTypeContentCode.IMAGE_CLASSIFICATION) && (
                     <Classify
                       type={effectiveType}
                       requirementDetail={requirementDetail}

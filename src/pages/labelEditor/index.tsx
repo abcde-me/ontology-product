@@ -66,13 +66,18 @@ function LabelEditorPage() {
   const [labelUrl, setLabelUrl] = useState('');
   const history = useHistory();
   const hasSavePermission = true;
-
+  const labelTypeCode = (labelType: string, labelTool: string) => {
+    if (labelType === '2' && labelTool === 'IMAGE_CLASSIFICATION') {
+      return 'audio';
+    }
+    return LabelTypeMap[labelType];
+  };
   useEffect(() => {
     const init = async () => {
       if (['LABEL', 'RELABEL'].includes(stage!)) {
         if (taskId) {
           setLabelUrl(
-            `/labeleditor/${LabelTypeMap[labelType!]}/requirement/${requirementId}/task/${taskId}?type=${labelType}&kind=${toolKind}&mode=${mode}&tool=${labelTool}&name=${reqName}&count=${taskCount}&stage=${stage}&pkgId=${pkgId}&deadlineTimestamp=${deadlineTimestamp}`
+            `/labeleditor/${labelTypeCode(labelType!, labelTool!)}/requirement/${requirementId}/task/${taskId}?type=${labelType}&kind=${toolKind}&mode=${mode}&tool=${labelTool}&name=${reqName}&count=${taskCount}&stage=${stage}&pkgId=${pkgId}&deadlineTimestamp=${deadlineTimestamp}`
           );
           setLoading(false);
         } else {
@@ -82,7 +87,7 @@ function LabelEditorPage() {
       if (['REVIEW'].includes(stage!)) {
         if (taskId) {
           setLabelUrl(
-            `/labeleditor/${LabelTypeMap[labelType!]}/requirement/${requirementId}/task/${taskId}?type=${labelType}&kind=${toolKind}&mode=${mode}&tool=${labelTool}&name=${reqName}&count=${taskCount}&stage=${stage}&qsId=${qsId}&qcRound=${qcRound}&labelModifyEnable=${labelModifyEnable}&deadlineTimestamp=${deadlineTimestamp}&pkgId=${pkgId}`
+            `/labeleditor/${labelTypeCode(labelType!, labelTool!)}/requirement/${requirementId}/task/${taskId}?type=${labelType}&kind=${toolKind}&mode=${mode}&tool=${labelTool}&name=${reqName}&count=${taskCount}&stage=${stage}&qsId=${qsId}&qcRound=${qcRound}&labelModifyEnable=${labelModifyEnable}&deadlineTimestamp=${deadlineTimestamp}&pkgId=${pkgId}`
           );
           setLoading(false);
         } else {
@@ -92,7 +97,7 @@ function LabelEditorPage() {
       if (['PREVIEW'].includes(stage!)) {
         if (mode) {
           setLabelUrl(
-            `/labeleditor/${LabelTypeMap[labelType!]}/requirement/${requirementId}/task/${taskId}?type=${labelType}&kind=${toolKind}&mode=${mode}&tool=${labelTool}&name=${reqName}&stage=${stage}&pkgId=${pkgId}`
+            `/labeleditor/${labelTypeCode(labelType!, toolKind!)}/requirement/${requirementId}/task/${taskId}?type=${labelType}&kind=${toolKind}&mode=${mode}&tool=${labelTool}&name=${reqName}&stage=${stage}&pkgId=${pkgId}`
           );
           setLoading(false);
         } else {

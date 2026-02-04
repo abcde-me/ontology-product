@@ -172,6 +172,7 @@ export default function Requirement() {
     TEXT_QA: TextIcon,
     TEXT_SORT: TextIcon,
     IMAGE_ANNOTATION: ImageIcon,
+    IMAGE_CLASSIFICATION: ImageIcon,
     AUDIO_CLASSIFICATION: AudioIcon,
     AUDIO_SPLIT: AudioIcon,
     VIDEO_CLASSIFICATION: VideoIcon,

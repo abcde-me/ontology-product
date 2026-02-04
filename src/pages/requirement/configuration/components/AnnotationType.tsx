@@ -33,6 +33,13 @@ const typeList = [
 ];
 const btnPicData = [
   {
+    key: 1,
+    value: 1,
+    label: '分类',
+    code: 'IMAGE_CLASSIFICATION',
+    icon: ImageAnnotationIcon
+  },
+  {
     key: 2,
     value: 2,
     label: '图形',
