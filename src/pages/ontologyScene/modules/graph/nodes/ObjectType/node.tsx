@@ -4,8 +4,6 @@ import copy from 'copy-to-clipboard';
 import React from 'react';
 
 const Node = ({ id, data }) => {
-  console.log('node', id, data);
-
   // 获取属性列表，如果data中有attributes则使用，否则根据propertyCount生成mock数据
   const attributes = data.attributes || [];
 
