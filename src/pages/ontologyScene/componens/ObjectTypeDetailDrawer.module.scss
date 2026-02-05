@@ -1,0 +1,6 @@
+.object-type-detail-drawer {
+  :global(.arco-drawer-content) {
+    /* 确保内容区域出现Popover时，不会被裁剪 */
+    overflow: visible;
+  }
+}

@@ -628,10 +628,10 @@ const handleDelete = (
           });
           if (res.status === 200) {
             Message.success('删除成功');
-            const event = new CustomEvent('resetPageToFirst', {
-              detail: { tableType }
-            });
-            window.dispatchEvent(event);
+            // const event = new CustomEvent('resetPageToFirst', {
+            //   detail: { tableType }
+            // });
+            // window.dispatchEvent(event);
             setTimeout(() => {
               handAllReset();
               refreshData();
@@ -647,10 +647,10 @@ const handleDelete = (
           });
           if (res.status === 200) {
             Message.success('删除成功');
-            const event = new CustomEvent('resetPageToFirst', {
-              detail: { tableType }
-            });
-            window.dispatchEvent(event);
+            // const event = new CustomEvent('resetPageToFirst', {
+            //   detail: { tableType }
+            // });
+            // window.dispatchEvent(event);
             setTimeout(() => {
               handAllReset();
               refreshData();

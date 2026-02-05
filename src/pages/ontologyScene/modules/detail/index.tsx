@@ -218,6 +218,7 @@ export default function OntologySceneDetail() {
         status="未发布"
         onTitleEdit={handleTitleEdit}
         onPublish={handlePublish}
+        sceneId={Number(OSId)}
       />
       <Layout className="flex flex-row">
         <div className="flex min-w-[200px] flex-shrink-0 flex-col border-r border-[var(--color-border-2)] bg-white">

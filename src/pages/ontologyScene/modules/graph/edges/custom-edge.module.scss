@@ -1,0 +1,23 @@
+.edge-label {
+  user-select: none;
+  white-space: nowrap;
+
+  &:hover {
+    transform: translate(-50%, -50%) scale(1.05);
+    transition: transform 0.2s ease;
+  }
+}
+
+.edge-label-icon {
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+}
+
+.edge-label-text {
+  font-weight: 500;
+}
+
+.edge-label-dot {
+  flex-shrink: 0;
+}

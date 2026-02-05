@@ -3,8 +3,8 @@
 /* Modal内容区域样式调整 - 只影响这个组件的Modal */
 .modalWrapper :global(.arco-modal-content) {
   padding-left: 0;
-  max-height: 700px;
-  overflow: auto;
+  // max-height: 700px;
+  // overflow: auto;
 }
 
 .modalWrapper :global(.arco-form-label-item > label) {
@@ -19,6 +19,17 @@
 
 .sceneWrapper :global(.ellipsis-popover-div) {
   height: 28px;
+}
+
+.addSceneBtn {
+  width: 100%;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  background-color: #fff !important;
+  text-align: left;
+  padding: 0 12px;
+  box-shadow: 2px 0 8px 0 rgba(0, 0, 0, 0.08);
 }
 
 /* 单元格内容截断显示 */

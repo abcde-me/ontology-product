@@ -1,10 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Modal, Form, Input, Button, Trigger } from '@arco-design/web-react';
 import { IconDown } from '@arco-design/web-react/icon';
-import ObjectTypeCreateIcon from '../../../assets/object-type-create.svg';
-import LinkCreateIcon from '../../../assets/link-create.svg';
-import BehaviorCreateIcon from '../../../assets/behavior-create.svg';
-import TestCreateIcon from '../../../assets/test-create.svg';
+import { ICON_OPTIONS } from '@/pages/ontologyScene/common/constants';
 
 const { TextArea } = Input;
 
@@ -23,16 +20,6 @@ interface SceneModalProps {
   loading?: boolean;
   existingSceneIcons?: string[]; // 已存在的场景图标列表，用于随机选择时避免重复
 }
-
-// 预定义图标选项（6个图标，用于2行3列网格布局）
-const ICON_OPTIONS = [
-  { value: 'object-type-1', icon: ObjectTypeCreateIcon },
-  { value: 'link-1', icon: LinkCreateIcon },
-  { value: 'behavior-1', icon: BehaviorCreateIcon },
-  { value: 'test-1', icon: TestCreateIcon },
-  { value: 'object-type-2', icon: ObjectTypeCreateIcon },
-  { value: 'link-2', icon: LinkCreateIcon }
-];
 
 // 获取随机图标（排除已使用的图标）
 const getRandomIcon = (excludeIcons: string[] = []): string => {

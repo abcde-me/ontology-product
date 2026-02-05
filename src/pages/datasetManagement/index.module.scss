@@ -60,9 +60,23 @@
     padding: 5px 0;
     margin: 0 16px;
   }
-  .datasetManagementTabs :global(.arco-tabs-content-item) {
-    background-color: #ffffff;
+
+  .datasetManagementTabs .sceneDesc :global(.ellipsis-popover-div) {
+    width: calc(100% - 60px);
   }
+
+  .datasetManagementTabs :global(.arco-tabs-add-icon):hover {
+    color: #007dfa;
+  }
+}
+
+.sceneTag {
+  margin-right: 5px;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  padding: 4px;
+  border-radius: 4px;
+  max-width: 140px;
 }
 
 .datasetManagement {
@@ -439,6 +453,10 @@
 
 .addSceneTypeModal {
   width: 620px;
+
+  :global(.arco-input-tag-input) {
+    width: 100% !important;
+  }
 }
 
 .buttonReset {
@@ -460,4 +478,15 @@
 
 .sceneWrapper :global(.ellipsis-popover-div) {
   height: 28px;
+}
+
+.addSceneBtn {
+  width: 100%;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  background-color: #fff !important;
+  text-align: left;
+  padding: 0 12px;
+  box-shadow: 2px 0 8px 0 rgba(0, 0, 0, 0.08);
 }

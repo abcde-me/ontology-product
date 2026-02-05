@@ -736,7 +736,38 @@ export const ModaForgeResourceEndpoints = {
 
   // 本体拓扑
   // 获取本体拓扑
-  GetOntologyTopologyApi: PrefixAimdp + '/GetOntologyTopology'
+  GetOntologyTopologyApi: PrefixAimdp + '/GetOntologyTopology',
+  // 分页查询对象类型实例数据
+  ListOntologyObjectTypeDataApi: PrefixAimdp + '/ListOntologyObjectTypeData',
+  // 获取物理属性列表
+  ListOntologyPhysicalPropertiesApi:
+    PrefixAimdp + '/ListOntologyPhysicalProperties',
+  // 获取链接类型列表
+  ListOntologyLinkTypeApi: PrefixAimdp + '/ListOntologyLinkType',
+
+  // 本体场景
+  // 获取本体场景列表
+  ListOntologyModelApi: PrefixAimdp + '/ListOntologyModel',
+  // 创建本体场景
+  CreateOntologyModelApi: PrefixAimdp + '/CreateOntologyModel',
+  // 更新本体场景
+  UpdateOntologyModelApi: PrefixAimdp + '/UpdateOntologyModel',
+  // 删除本体场景
+  DeleteOntologyModelApi: PrefixAimdp + '/DeleteOntologyModel',
+  // 获取本体场景详情
+  GetOntologyModelDetailApi: PrefixAimdp + '/GetOntologyModelDetail',
+
+  // 对象类型
+  // 获取对象类型列表
+  ListOntologyObjectTypeApi: PrefixAimdp + '/ListOntologyObjectType',
+  // 创建对象类型
+  CreateOntologyObjectTypeApi: PrefixAimdp + '/CreateOntologyObjectType',
+  // 更新对象类型
+  UpdateOntologyObjectTypeApi: PrefixAimdp + '/UpdateOntologyObjectType',
+  // 删除对象类型
+  DeleteOntologyObjectTypeApi: PrefixAimdp + '/DeleteOntologyObjectType',
+  // 获取对象类型详情
+  GetOntologyObjectTypeApi: PrefixAimdp + '/GetOntologyObjectType'
 };
 
 /**

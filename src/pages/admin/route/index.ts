@@ -14,6 +14,7 @@ import {
   DATA_MANAGEMENT_PERMISSIONS,
   REQUIREMENT_PERMISSIONS,
   ANNOTATION_TASK_PERMISSIONS,
+  QUALITY_TASK_PERMISSIONS,
   ORGANIZATION_PERMISSIONS,
   USER_PERMISSIONS,
   USER_GROUP_PERMISSIONS,
@@ -454,7 +455,7 @@ export const routes: IRoute[] = [
     component: React.lazy(
       async () => import('../../requirement/qualityTask/list')
     ),
-    permission: ANNOTATION_TASK_PERMISSIONS.LIST,
+    permission: QUALITY_TASK_PERMISSIONS.LIST,
     children: [
       {
         name: 'qualityTaskDetail',
@@ -462,7 +463,7 @@ export const routes: IRoute[] = [
         component: React.lazy(
           async () => import('../../requirement/qualityTask/detail')
         ),
-        permission: ANNOTATION_TASK_PERMISSIONS.LIST
+        permission: QUALITY_TASK_PERMISSIONS.LIST
       }
     ]
   },
@@ -471,7 +472,10 @@ export const routes: IRoute[] = [
     name: 'labelEditor',
     key: '/tenant/compute/modaforge/labelEditor',
     component: React.lazy(async () => import('../../labelEditor')),
-    permission: ANNOTATION_TASK_PERMISSIONS.GET_ID_TASK,
+    anyPermission: [
+      ANNOTATION_TASK_PERMISSIONS.LIST,
+      QUALITY_TASK_PERMISSIONS.LIST
+    ],
     children: []
   },
   // 运营中心页面
