@@ -37,7 +37,7 @@ export const LayoutWithSider = memo(function LayoutWithSider({ children }) {
   const clickTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const lastClickPathRef = useRef<string | null>(null);
 
-  // 如果是在iframe中，并且不是wujie，则隐藏侧边栏
+  // 如果是在iframe中，并且不是wujie，则隐藏侧边栏，临时以iframe的形式嵌入数据平台
   const sidebarHidden =
     hideSidebarPaths.some(
       (path) => path === location.pathname || location.pathname.includes(path)
