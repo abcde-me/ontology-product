@@ -5,6 +5,11 @@ import ObjectTypeForm, {
   ObjectTypeFormData,
   ObjectTypeFormRef
 } from './components/ObjectTypeForm';
+import {
+  getOntologyObjectTypeDetail,
+  updateOntologyObjectType
+} from '@/api/ontologySceneLibrary/objectType';
+import { SourceType } from '@/types/objectType';
 
 export default function OntologySceneObjectTypeEdit() {
   const history = useHistory();
@@ -18,40 +23,120 @@ export default function OntologySceneObjectTypeEdit() {
   const formRef = useRef<ObjectTypeFormRef>(null);
 
   useEffect(() => {
-    // TODO: 调用API获取对象类型详情
     const loadData = async () => {
+      if (!objectTypeId) {
+        Message.error('对象类型ID不能为空');
+        return;
+      }
+
+      setLoading(true);
       try {
-        // 模拟API调用
-        await new Promise((resolve) => setTimeout(resolve, 500));
-        // 模拟数据
-        setInitialValues({
-          name: '示例对象类型',
-          id: 'example_id',
-          description: '这是一个示例描述',
-          dataSource: {
-            type: 'local_csv',
-            file: null
-          },
-          attributeFields: []
+        const objectTypeIdNum = parseInt(objectTypeId, 10);
+        if (isNaN(objectTypeIdNum)) {
+          Message.error('无效的对象类型ID');
+          return;
+        }
+
+        // 获取对象类型详情
+        const detailRes = await getOntologyObjectTypeDetail({
+          id: objectTypeIdNum
         });
+
+        if (detailRes.status !== 200 || !detailRes.data) {
+          Message.error('获取对象类型详情失败');
+          return;
+        }
+
+        const objectType = detailRes.data;
+
+        // 直接使用详情接口返回的物理属性列表
+        const physicalPropertiesList =
+          objectType.ontologyPhysicalPropertiesList || [];
+
+        // 根据 sourceType 确定数据源类型
+        const dataSourceType =
+          objectType.sourceType === SourceType.FILE_UPLOAD
+            ? 'local_csv'
+            : 'data_directory_sync';
+
+        // 转换为表单数据格式
+        const formData: Partial<ObjectTypeFormData> = {
+          code: objectType.code || '',
+          name: objectType.name || '',
+          description: objectType.description,
+          icon: objectType.icon || '',
+          ontologyModelID: objectType.ontologyModelID || 0,
+          filePath: objectType.filePath,
+          originalDbName: objectType.originalDbName || '',
+          originalTableName: objectType.originalTableName || '',
+          sourceType: objectType.sourceType,
+          ontologyPhysicalPropertiesList: physicalPropertiesList,
+          _dataSource: {
+            type: dataSourceType,
+            database:
+              dataSourceType === 'data_directory_sync'
+                ? objectType.originalDbName
+                : undefined,
+            table:
+              dataSourceType === 'data_directory_sync'
+                ? objectType.originalTableName
+                : undefined
+          }
+        };
+
+        setInitialValues(formData);
       } catch (error) {
-        Message.error('加载数据失败');
+        console.error('加载数据失败:', error);
+        Message.error('加载数据失败，请重试');
+      } finally {
+        setLoading(false);
       }
     };
     loadData();
   }, [objectTypeId]);
 
   const handleSubmit = async (data: ObjectTypeFormData) => {
+    if (!objectTypeId) {
+      Message.error('对象类型ID不能为空');
+      return;
+    }
+
+    const objectTypeIdNum = parseInt(objectTypeId, 10);
+    if (isNaN(objectTypeIdNum)) {
+      Message.error('无效的对象类型ID');
+      return;
+    }
+
     setLoading(true);
     try {
-      // TODO: 调用更新API
-      console.log('Update object type:', data);
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      // 构建更新请求参数
+      const updateParams = {
+        id: objectTypeIdNum,
+        code: data.code,
+        name: data.name,
+        description: data.description,
+        icon: data.icon,
+        ontologyModelID: data.ontologyModelID,
+        filePath: data.filePath,
+        originalDbName: data.originalDbName,
+        originalTableName: data.originalTableName,
+        sourceType: data.sourceType,
+        ontologyPhysicalPropertiesList: data.ontologyPhysicalPropertiesList
+      };
+
+      const res = await updateOntologyObjectType(updateParams);
+
+      if (res.status !== 200) {
+        Message.error(res.message || '更新失败，请重试');
+        return;
+      }
+
       Message.success('更新成功');
       history.push(
         `/tenant/compute/modaforge/ontologyScene/detail/${OSId}/objectType/list`
       );
     } catch (error) {
+      console.error('更新失败:', error);
       Message.error('更新失败，请重试');
     } finally {
       setLoading(false);

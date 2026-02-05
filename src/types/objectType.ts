@@ -216,8 +216,9 @@ export interface UpdateOntologyObjectTypeReq
   id: number;
 }
 
-export interface GetOntologyObjectTypeDetailRes {
-  data: ObjectType;
+export interface GetOntologyObjectTypeDetailRes
+  extends CreateOntologyObjectTypeReq {
+  id: number;
 }
 
 export interface UploadOntologyCSVFileAndParseRes {
