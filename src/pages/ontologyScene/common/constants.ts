@@ -57,3 +57,17 @@ export const OBJECT_TYPE_SYNC_STATUS_FILTERS = [
   { text: '成功', value: SyncStatus.SUCCESS },
   { text: '失败', value: SyncStatus.FAILED }
 ];
+
+// 字段类型选项列表
+export const COLUMN_TYPE_OPTIONS = [
+  'STRING',
+  'DOUBLE',
+  'INTEGER',
+  'BOOLEAN',
+  'TIMESTAMP',
+  'DATE',
+  'BIGINT',
+  'FLOAT',
+  'DECIMAL',
+  'TEXT'
+];

@@ -20,7 +20,10 @@ import {
   listOntologyPhysicalProperties,
   listOntologyLinkType
 } from '@/api/ontologySceneLibrary/graph';
-import type { ObjectType } from '@/types/objectType';
+import type {
+  ObjectType,
+  GetOntologyObjectTypeDetailRes
+} from '@/types/objectType';
 import type { PhysicalProperties, LinkInfo } from '@/types/graphApi';
 import { LinkType, SyncStatus } from '@/types/graphApi';
 import {
@@ -114,6 +117,27 @@ const convertObjectTypeToDetailData = (
     description: objectType.description || '',
     syncStatus: objectType.syncStatus,
     icon: objectType.icon,
+    instanceCount,
+    attributeCount,
+    linkCount
+  };
+};
+
+// 将 GetOntologyObjectTypeDetailRes 转换为 ObjectTypeDetailData
+const convertDetailResToDetailData = (
+  detailRes: GetOntologyObjectTypeDetailRes,
+  instanceCount = 0,
+  attributeCount = 0,
+  linkCount = 0,
+  syncStatus: SyncStatus = SyncStatus.SUCCESS
+): ObjectTypeDetailData => {
+  return {
+    code: String(detailRes.code || ''),
+    id: detailRes.id,
+    name: detailRes.name || '',
+    description: detailRes.description || '',
+    syncStatus,
+    icon: detailRes.icon,
     instanceCount,
     attributeCount,
     linkCount
@@ -335,8 +359,8 @@ export default function ObjectTypeDetailDrawer({
           const res = await getOntologyObjectTypeDetail({
             id: resolvedObjectTypeIdNum
           });
-          if (res.status === 200 && res.code === '' && res.data?.data) {
-            const objectType = res.data.data;
+          if (res.status === 200 && res.code === '' && res.data) {
+            const detailRes = res.data;
             // 先获取统计数据（从其他接口获取总数）
             const [instancesRes, attributesRes, linksRes] = await Promise.all([
               listOntologyObjectTypeData({
@@ -370,11 +394,14 @@ export default function ObjectTypeDetailDrawer({
                 ? linksRes.data.totalCount || 0
                 : 0;
 
-            const detailData = convertObjectTypeToDetailData(
-              objectType,
+            // 使用 GetOntologyObjectTypeDetailRes 转换函数
+            // 注意：GetOntologyObjectTypeDetailRes 不包含 syncStatus，使用默认值
+            const detailData = convertDetailResToDetailData(
+              detailRes,
               instanceCount,
               attributeCount,
-              linkCount
+              linkCount,
+              SyncStatus.SUCCESS // 默认同步状态为成功
             );
             setBasicInfo(detailData);
           }

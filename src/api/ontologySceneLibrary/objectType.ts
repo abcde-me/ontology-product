@@ -1,13 +1,16 @@
 import {
   CreateOntologyObjectTypeReq,
+  CreateOntologyPhysicalProperty,
   GetOntologyObjectTypeDetailRes,
   ListOntologyObjectTypeReq,
   ListOntologyObjectTypeRes,
   ObjectType,
   SourceType,
-  UpdateOntologyObjectTypeReq
+  UpdateOntologyObjectTypeReq,
+  UploadOntologyCSVFileAndParseRes
 } from '@/types/objectType';
 import { SyncStatus } from '@/types/graphApi';
+import { sleep } from '@/pages/workflowConfig/utils';
 
 export const listOntologyObjectType = async (
   params: ListOntologyObjectTypeReq
@@ -247,31 +250,117 @@ export const deleteOntologyObjectType = async (params: {
 export const getOntologyObjectTypeDetail = async (params: {
   id: number;
 }): Promise<ApiRes<GetOntologyObjectTypeDetailRes>> => {
-  // Mock 数据
-  const mockObjectType: ObjectType = {
+  await sleep(1000);
+
+  // Mock 物理属性列表数据
+  const mockPhysicalProperties: CreateOntologyPhysicalProperty[] = [
+    {
+      id: '1',
+      name: 'media_id',
+      comment: '情报ID',
+      columnType: 'STRING',
+      isPrimary: 1,
+      publicPropertyID: 101,
+      isSelected: 1,
+      isStoreAsPublic: 0
+    },
+    {
+      id: '2',
+      name: 'type',
+      comment: '类别',
+      columnType: 'STRING',
+      isPrimary: 0,
+      publicPropertyID: 102,
+      isSelected: 1,
+      isStoreAsPublic: 0
+    },
+    {
+      id: '3',
+      name: 'source',
+      comment: '来源',
+      columnType: 'STRING',
+      isPrimary: 0,
+      publicPropertyID: 103,
+      isSelected: 1,
+      isStoreAsPublic: 0
+    },
+    {
+      id: '4',
+      name: 'content',
+      comment: '内容',
+      columnType: 'TEXT',
+      isPrimary: 0,
+      publicPropertyID: 104,
+      isSelected: 1,
+      isStoreAsPublic: 0
+    },
+    {
+      id: '5',
+      name: 'create_time',
+      comment: '创建时间',
+      columnType: 'TIMESTAMP',
+      isPrimary: 0,
+      publicPropertyID: 105,
+      isSelected: 1,
+      isStoreAsPublic: 0
+    },
+    {
+      id: '6',
+      name: 'update_time',
+      comment: '更新时间',
+      columnType: 'TIMESTAMP',
+      isPrimary: 0,
+      publicPropertyID: 106,
+      isSelected: 1,
+      isStoreAsPublic: 0
+    }
+  ];
+
+  // Mock 对象类型详情数据
+  const mockData: GetOntologyObjectTypeDetailRes = {
     id: params.id,
     code: 'RAW_INTELLIGENCE',
     name: '原始情报原始情报原始情报原始情报原始情报原始情报',
     description: '原始情报对象类型，包含6项属性。这是详细的对象类型描述信息。',
     icon: 'object-type-1',
     ontologyModelID: 1,
-    ontologyDbName: 'ontology_db_1',
-    ontologyTableName: 'raw_intelligence',
     originalDbName: 'source_db_1',
     originalTableName: 'raw_intelligence_source',
     sourceType: SourceType.ICEBERG,
-    syncStatus: SyncStatus.SUCCESS,
-    syncTime: '2024-01-15 10:30:00',
-    createTime: '2024-01-10 09:00:00',
-    createUser: 'admin',
-    updateTime: '2024-01-15 10:30:00',
-    updateUser: 'admin',
-    isDeleted: 0,
-    filePath: undefined
+    filePath: undefined,
+    ontologyPhysicalPropertiesList: mockPhysicalProperties
   };
 
-  const mockData: GetOntologyObjectTypeDetailRes = {
-    data: mockObjectType
+  return Promise.resolve({
+    code: '',
+    data: mockData,
+    message: 'mock success',
+    requestId: 'mock-request-id',
+    status: 200
+  });
+};
+
+export const uploadOntologyCSVFileAndParse = async (params: {
+  file: File;
+}): Promise<ApiRes<UploadOntologyCSVFileAndParseRes>> => {
+  // 保留 params 参数以避免未使用告警
+  void params;
+
+  // Mock 数据：模拟 CSV 文件解析结果
+  const mockData: UploadOntologyCSVFileAndParseRes = {
+    data: {
+      columnList: [
+        'id',
+        'name',
+        'code',
+        'description',
+        'type',
+        'status',
+        'createTime',
+        'updateTime'
+      ],
+      path: `/minio/bucket/ontology/${params.file.name || 'uploaded_file.csv'}`
+    }
   };
 
   return Promise.resolve({

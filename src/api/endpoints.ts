@@ -769,7 +769,21 @@ export const ModaForgeResourceEndpoints = {
   // 删除对象类型
   DeleteOntologyObjectTypeApi: PrefixAimdp + '/DeleteOntologyObjectType',
   // 获取对象类型详情
-  GetOntologyObjectTypeApi: PrefixAimdp + '/GetOntologyObjectType'
+  GetOntologyObjectTypeApi: PrefixAimdp + '/GetOntologyObjectType',
+  // 上传CSV文件并解析
+  UploadOntologyEntityDataFileApi:
+    PrefixAimdp + '/UploadOntologyEntityDataFile',
+
+  //属性
+  // 获取公共属性列表
+  ListOntologyPublicPropertiesApi:
+    PrefixAimdp + '/ListOntologyPublicProperties',
+  // 创建公共属性
+  CreateOntologyPublicPropertiesApi:
+    PrefixAimdp + '/CreateOntologyPublicProperties',
+  // 删除公共属性
+  DeleteOntologyPublicPropertiesApi:
+    PrefixAimdp + '/DeleteOntologyPublicProperties'
 };
 
 /**

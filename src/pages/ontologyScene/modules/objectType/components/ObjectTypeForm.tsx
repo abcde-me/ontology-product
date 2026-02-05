@@ -21,41 +21,56 @@ import {
   IconLink
 } from '@arco-design/web-react/icon';
 import ArchiveIcon from '../../../assets/archive.svg';
+import CancelArchiveIcon from '../../../assets/cancel-archive.svg';
 import FieldImportUpload from '../../../componens/FieldImportUpload';
 import BindPublicAttributeModal, {
   PublicAttribute
 } from './BindPublicAttributeModal';
 import classNames from 'classnames';
 import styles from './ObjectTypeForm.module.scss';
+import { CreateOntologyPhysicalProperty, SourceType } from '@/types/objectType';
+import { uploadOntologyCSVFileAndParse } from '@/api/ontologySceneLibrary/objectType';
+import {
+  createOntologyPublicProperties,
+  deleteOntologyPublicProperties
+} from '@/api/ontologySceneLibrary/attributes';
+import {
+  COLUMN_TYPE_OPTIONS,
+  OBJECT_TYPE_ICON_OPTIONS
+} from '@/pages/ontologyScene/common/constants';
+import IconSelector from '@/pages/ontologyScene/componens/IconSelector';
 
 const FormItem = Form.Item;
 const { TextArea } = Input;
 
 export type DataSourceType = 'local_csv' | 'data_directory_sync';
 
-export interface AttributeField {
-  tableField: string;
-  selected: boolean;
-  isPrimaryKey: boolean;
-  attributeName: string;
-  storeAsPublic: boolean;
-  fieldType: string;
-  publicAttributeId?: string; // 绑定的公共属性ID
-  publicAttributeName?: string; // 绑定的公共属性名称
+// 使用接口定义的字段名
+export interface AttributeField extends CreateOntologyPhysicalProperty {
+  // 为了UI显示，保留一些临时字段
+  _tableField?: string; // 用于显示表字段名（对应 name）
+  _attributeName?: string; // 用于显示属性名称（对应 comment）
+  _storedPublicPropertyId?: number; // 存入公共属性时创建的ID（与publicPropertyID区分，publicPropertyID用于绑定已有公共属性）
 }
 
 export interface ObjectTypeFormData {
+  code: string;
   name: string;
-  id: string;
-  description: string;
-  icon?: string;
-  dataSource: {
+  description?: string;
+  icon: string;
+  ontologyModelID: number;
+  filePath?: string;
+  originalDbName: string;
+  originalTableName: string;
+  sourceType?: SourceType;
+  ontologyPhysicalPropertiesList?: CreateOntologyPhysicalProperty[];
+  // 内部使用的字段
+  _dataSource?: {
     type: DataSourceType;
     database?: string;
     table?: string;
     file?: any;
   };
-  attributeFields: AttributeField[];
 }
 
 interface ObjectTypeFormProps {
@@ -76,10 +91,16 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
     ref
   ) => {
     const [form] = Form.useForm();
-    const [iconFile, setIconFile] = useState<any[]>([]);
-    const [dataSource, setDataSource] = useState<
-      ObjectTypeFormData['dataSource']
-    >({
+    const [selectedIcon, setSelectedIcon] = useState<string>(
+      initialValues?.icon || OBJECT_TYPE_ICON_OPTIONS[0]?.value || ''
+    );
+    const [dataSource, setDataSource] = useState<{
+      type: DataSourceType;
+      database?: string;
+      table?: string;
+      file?: any;
+      filePath?: string;
+    }>({
       type: 'local_csv'
     });
     const [selectedDatabase, setSelectedDatabase] = useState<
@@ -93,26 +114,44 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
     const [fileUploaded, setFileUploaded] = useState(false);
     const [bindModalVisible, setBindModalVisible] = useState(false);
     const [currentFieldIndex, setCurrentFieldIndex] = useState<number>(-1);
+    const [storeAsPublicLoading, setStoreAsPublicLoading] = useState<
+      Record<number, boolean>
+    >({});
 
     useEffect(() => {
       if (initialValues) {
         form.setFieldsValue({
           name: initialValues.name,
-          id: initialValues.id,
+          code: initialValues.code,
           description: initialValues.description,
-          dataSourceType: initialValues.dataSource?.type || 'local_csv',
-          database: initialValues.dataSource?.database,
-          table: initialValues.dataSource?.table,
-          attributeFields: initialValues.attributeFields || []
+          icon: initialValues.icon,
+          ontologyModelID: initialValues.ontologyModelID,
+          filePath: initialValues.filePath,
+          originalDbName: initialValues.originalDbName,
+          originalTableName: initialValues.originalTableName,
+          sourceType: initialValues.sourceType,
+          dataSourceType: initialValues._dataSource?.type || 'local_csv',
+          database: initialValues._dataSource?.database,
+          table: initialValues._dataSource?.table
         });
-        if (initialValues.dataSource) {
-          setDataSource(initialValues.dataSource);
-          setSelectedDatabase(initialValues.dataSource.database || '');
-          setSelectedTable(initialValues.dataSource.table || '');
-          setFileUploaded(!!initialValues.dataSource.file);
+        if (initialValues.icon) {
+          setSelectedIcon(initialValues.icon);
         }
-        if (initialValues.attributeFields) {
-          setAttributeFields(initialValues.attributeFields);
+        if (initialValues._dataSource) {
+          setDataSource(initialValues._dataSource);
+          setSelectedDatabase(initialValues._dataSource.database || '');
+          setSelectedTable(initialValues._dataSource.table || '');
+          setFileUploaded(!!initialValues._dataSource.file);
+        }
+        if (initialValues.ontologyPhysicalPropertiesList) {
+          const fields = initialValues.ontologyPhysicalPropertiesList.map(
+            (prop) => ({
+              ...prop,
+              _tableField: prop.name,
+              _attributeName: prop.comment
+            })
+          );
+          setAttributeFields(fields);
         }
       } else {
         // 初始化默认值，确保第一个选项被选中
@@ -122,7 +161,7 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
       }
     }, [initialValues, form]);
 
-    // 模拟从文件或数据库获取字段列表
+    // 从文件或数据库获取字段列表
     const loadAttributeFields = async (
       file?: any,
       database?: string,
@@ -130,82 +169,63 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
     ) => {
       setFieldsLoading(true);
       try {
-        // TODO: 调用实际API获取字段列表
-        await new Promise((resolve) => setTimeout(resolve, 1000));
+        if (dataSource.type === 'local_csv' && file) {
+          // 调用 uploadOntologyCSVFileAndParse 接口
+          const response = await uploadOntologyCSVFileAndParse({ file });
+          if (response.status === 200 && response.code === '') {
+            const columnList = response.data.data.columnList;
+            const filePath = response.data.data.path;
 
-        // 模拟返回的字段数据
-        const mockFields: AttributeField[] = [
-          {
-            tableField: 'id',
-            selected: true,
-            isPrimaryKey: true,
-            attributeName: 'id',
-            storeAsPublic: false,
-            fieldType: 'STRING'
-          },
-          {
-            tableField: 'field_1',
-            selected: true,
-            isPrimaryKey: false,
-            attributeName: 'field_1',
-            storeAsPublic: false,
-            fieldType: 'STRING'
-          },
-          {
-            tableField: 'field_2',
-            selected: true,
-            isPrimaryKey: false,
-            attributeName: 'field_2',
-            storeAsPublic: false,
-            fieldType: 'STRING'
-          },
-          {
-            tableField: 'field_3',
-            selected: true,
-            isPrimaryKey: false,
-            attributeName: 'field_3',
-            storeAsPublic: false,
-            fieldType: 'STRING'
-          },
-          {
-            tableField: 'field_4',
-            selected: true,
-            isPrimaryKey: false,
-            attributeName: 'field_4',
-            storeAsPublic: false,
-            fieldType: 'STRING'
-          },
-          {
-            tableField: 'field_5',
-            selected: true,
-            isPrimaryKey: false,
-            attributeName: 'field_5',
-            storeAsPublic: false,
-            fieldType: 'STRING'
-          },
-          {
-            tableField: 'field_6',
-            selected: true,
-            isPrimaryKey: false,
-            attributeName: 'field_6',
-            storeAsPublic: false,
-            fieldType: 'STRING'
-          },
-          {
-            tableField: 'field_7',
-            selected: true,
-            isPrimaryKey: false,
-            attributeName: 'field_7',
-            storeAsPublic: false,
-            fieldType: 'STRING'
+            // 保存文件路径
+            setDataSource((prev) => ({ ...prev, filePath }));
+
+            // 将 columnList 转换为 AttributeField 格式
+            const fields: AttributeField[] = columnList.map(
+              (column, index) => ({
+                name: column, // 表字段名
+                comment: column, // 属性名称，默认与表字段名相同
+                columnType: 'STRING', // 默认类型
+                isPrimary: index === 0 ? 1 : 0, // 第一个字段默认为主键
+                isSelected: 1, // 默认选中
+                isStoreAsPublic: 0, // 默认不存入公共属性
+                publicPropertyID: 0, // 默认未绑定公共属性
+                _tableField: column,
+                _attributeName: column
+              })
+            );
+
+            setAttributeFields(fields);
+            setFileUploaded(true);
+          } else {
+            Message.error(response.message || '上传文件失败');
           }
-        ];
-
-        setAttributeFields(mockFields);
-        form.setFieldValue('attributeFields', mockFields);
-        setFileUploaded(true);
+        } else if (
+          dataSource.type === 'data_directory_sync' &&
+          database &&
+          table
+        ) {
+          // TODO: 调用数据库表字段获取接口
+          await new Promise((resolve) => setTimeout(resolve, 1000));
+          // 模拟返回的字段数据
+          const mockFields: AttributeField[] = [
+            {
+              name: 'id',
+              comment: 'id',
+              columnType: 'STRING',
+              isPrimary: 1,
+              isSelected: 1,
+              isStoreAsPublic: 0,
+              publicPropertyID: 0,
+              _tableField: 'id',
+              _attributeName: 'id'
+            }
+          ];
+          setAttributeFields(mockFields);
+          setFileUploaded(true);
+        }
       } catch (error) {
         Message.error('加载字段列表失败');
+        console.error('加载字段列表失败:', error);
       } finally {
         setFieldsLoading(false);
       }
@@ -223,21 +243,19 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
     };
 
     const handleSelectAll = (checked: boolean) => {
-      const newFields = attributeFields.map((field) => ({
+      const newFields: AttributeField[] = attributeFields.map((field) => ({
         ...field,
-        selected: checked
+        isSelected: checked ? 1 : 0
       }));
       setAttributeFields(newFields);
-      form.setFieldValue('attributeFields', newFields);
     };
 
     const handlePrimaryKeyChange = (index: number) => {
-      const newFields = attributeFields.map((field, i) => ({
+      const newFields: AttributeField[] = attributeFields.map((field, i) => ({
         ...field,
-        isPrimaryKey: i === index
+        isPrimary: i === index ? 1 : 0
       }));
       setAttributeFields(newFields);
-      form.setFieldValue('attributeFields', newFields);
     };
 
     const handleDeleteField = (index: number) => {
@@ -253,28 +271,102 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
 
     const handleUnbindPublicAttribute = (index: number) => {
       handleFieldChange(index, {
-        publicAttributeId: undefined,
-        publicAttributeName: undefined,
-        storeAsPublic: false
+        publicPropertyID: 0,
+        isStoreAsPublic: 0
       });
     };
 
     const handleBindConfirm = (attribute: PublicAttribute) => {
       if (currentFieldIndex >= 0) {
         handleFieldChange(currentFieldIndex, {
-          attributeName: attribute.name,
-          publicAttributeId: attribute.id,
-          publicAttributeName: attribute.name,
-          storeAsPublic: false // 绑定后禁用存入公共属性
+          comment: attribute.name, // 使用公共属性的名称（comment字段）作为属性名称
+          publicPropertyID: attribute.id, // 使用公共属性的ID
+          isStoreAsPublic: 0, // 绑定后禁用存入公共属性
+          _attributeName: attribute.name // 用于UI显示
         });
         setBindModalVisible(false);
         setCurrentFieldIndex(-1);
       }
     };
 
+    // 处理存入公共属性开关变化
+    const handleStoreAsPublicChange = async (
+      index: number,
+      checked: boolean
+    ) => {
+      const field = attributeFields[index];
+      if (!field) return;
+
+      setStoreAsPublicLoading((prev) => ({ ...prev, [index]: true }));
+
+      try {
+        if (checked) {
+          // 打开开关：创建公共属性
+          if (!field.name || !field.comment || !field.columnType) {
+            Message.warning('请先填写表字段、属性名称和字段类型');
+            setStoreAsPublicLoading((prev) => ({ ...prev, [index]: false }));
+            return;
+          }
+
+          const response = await createOntologyPublicProperties({
+            name: field.name,
+            comment: field.comment,
+            columnType: field.columnType,
+            description: ''
+          });
+
+          if (response.status === 200 && response.code === '') {
+            const publicPropertyId = response.data.data.id;
+            handleFieldChange(index, {
+              isStoreAsPublic: 1,
+              _storedPublicPropertyId: publicPropertyId // 存入公共属性时创建的ID
+            });
+            Message.success('已存入公共属性库');
+          } else {
+            Message.error(response.message || '存入公共属性库失败');
+            setStoreAsPublicLoading((prev) => ({ ...prev, [index]: false }));
+          }
+        } else {
+          // 关闭开关：删除公共属性
+          if (
+            field._storedPublicPropertyId &&
+            field._storedPublicPropertyId > 0
+          ) {
+            const response = await deleteOntologyPublicProperties({
+              id: field._storedPublicPropertyId
+            });
+
+            if (response.status === 200 && response.code === '') {
+              handleFieldChange(index, {
+                isStoreAsPublic: 0,
+                _storedPublicPropertyId: undefined // 清除存入公共属性时创建的ID
+              });
+              Message.success('已从公共属性库移除');
+            } else {
+              Message.error(response.message || '从公共属性库移除失败');
+              setStoreAsPublicLoading((prev) => ({ ...prev, [index]: false }));
+            }
+          } else {
+            // 如果没有 _storedPublicPropertyId，直接更新状态
+            handleFieldChange(index, {
+              isStoreAsPublic: 0,
+              _storedPublicPropertyId: undefined
+            });
+          }
+        }
+      } catch (error) {
+        Message.error(checked ? '存入公共属性库失败' : '从公共属性库移除失败');
+        console.error('操作失败:', error);
+        setStoreAsPublicLoading((prev) => ({ ...prev, [index]: false }));
+      } finally {
+        setStoreAsPublicLoading((prev) => ({ ...prev, [index]: false }));
+      }
+    };
+
     const allSelected =
-      attributeFields.length > 0 && attributeFields.every((f) => f.selected);
-    const someSelected = attributeFields.some((f) => f.selected);
+      attributeFields.length > 0 &&
+      attributeFields.every((f) => f.isSelected === 1);
+    const someSelected = attributeFields.some((f) => f.isSelected === 1);
 
     // 属性字段映射表格列定义
     const attributeColumns: TableColumnProps<AttributeField>[] = [
@@ -289,18 +381,18 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
             <span>表字段</span>
           </div>
         ),
-        dataIndex: 'tableField',
-        width: 150,
+        dataIndex: 'name',
+        width: 365,
         render: (value, record, index) => (
           <div className="flex items-center gap-[12px]">
             <Checkbox
-              disabled={!!record.isPrimaryKey}
-              checked={record.selected}
+              disabled={record.isPrimary === 1}
+              checked={record.isSelected === 1}
               onChange={(checked) =>
-                handleFieldChange(index, { selected: checked })
+                handleFieldChange(index, { isSelected: checked ? 1 : 0 })
               }
             />
-            <span>{value}</span>
+            <span>{record._tableField || value}</span>
           </div>
         )
       },
@@ -313,39 +405,41 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
             </Tooltip>
           </div>
         ),
-        dataIndex: 'isPrimaryKey',
-        width: 100,
+        dataIndex: 'isPrimary',
+        width: 84,
         render: (_, record, index) => (
           <Radio
-            checked={record.isPrimaryKey}
+            checked={record.isPrimary === 1}
             onChange={() => handlePrimaryKeyChange(index)}
           />
         )
       },
       {
         title: '属性名称',
-        dataIndex: 'attributeName',
+        dataIndex: 'comment',
         width: 365,
         render: (value, record, index) => (
           <div className="flex items-center gap-[12px]">
             <div className="relative w-full">
               <Input
-                value={value}
+                value={record._attributeName || value}
                 className="w-full"
                 onChange={(val) =>
-                  handleFieldChange(index, { attributeName: val })
+                  handleFieldChange(index, {
+                    comment: val,
+                    _attributeName: val
+                  })
                 }
                 placeholder="请输入属性名称"
-                // disabled={!!record.publicAttributeId}
+                // disabled={!!record.publicPropertyID}
               />
-              {record.publicAttributeId && (
-                <Button
-                  className="absolute right-0 top-1/2 -translate-y-1/2"
-                  type="text"
-                  onClick={() => handleUnbindPublicAttribute(index)}
-                >
-                  取消绑定
-                </Button>
+              {record.publicPropertyID > 0 && (
+                <Tooltip content="取消绑定">
+                  <CancelArchiveIcon
+                    className="absolute right-[12px] top-1/2 -translate-y-1/2 hover:cursor-pointer hover:text-[#184FF2]"
+                    onClick={() => handleUnbindPublicAttribute(index)}
+                  />
+                </Tooltip>
               )}
             </div>
             <Tooltip content="绑定公共属性">
@@ -366,35 +460,37 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
             </Tooltip>
           </div>
         ),
-        dataIndex: 'storeAsPublic',
-        width: 160,
-        render: (value, record, index) => (
-          <Switch
-            checked={value}
-            onChange={(checked) =>
-              handleFieldChange(index, { storeAsPublic: checked })
-            }
-            disabled={!!record.publicAttributeId}
-          />
-        )
+        dataIndex: 'isStoreAsPublic',
+        width: 140,
+        render: (value, record, index) => {
+          return (
+            <Switch
+              checked={record.isStoreAsPublic === 1}
+              loading={storeAsPublicLoading[index]}
+              onChange={(checked) => handleStoreAsPublicChange(index, checked)}
+            />
+          );
+        }
       },
       {
         title: '字段类型',
-        dataIndex: 'fieldType',
-        width: 120,
-        render: (value) => <span>{value}</span>
+        dataIndex: 'columnType',
+        width: 200,
+        render: (value, record, index) => (
+          <Select
+            value={value}
+            placeholder="请选择字段类型"
+            onChange={(val) => handleFieldChange(index, { columnType: val })}
+            style={{ width: '100%' }}
+          >
+            {COLUMN_TYPE_OPTIONS.map((type) => (
+              <Select.Option key={type} value={type}>
+                {type}
+              </Select.Option>
+            ))}
+          </Select>
+        )
       }
-      // {
-      //     title: '操作',
-      //     dataIndex: 'action',
-      //     width: 80,
-      //     render: (_, record, index) => (
-      //         <IconDelete
-      //             className="cursor-pointer text-[#86909C] hover:text-[#F53F3F]"
-      //             onClick={() => handleDeleteField(index)}
-      //         />
-      //     )
-      // }
     ];
 
     // 模拟数据库列表
@@ -424,11 +520,12 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
           table: undefined
         });
       }
-      const newDataSource: ObjectTypeFormData['dataSource'] = {
+      const newDataSource = {
         type,
         database: type === 'data_directory_sync' ? selectedDatabase : undefined,
         table: type === 'data_directory_sync' ? selectedTable : undefined,
-        file: type === 'local_csv' ? dataSource.file : undefined
+        file: type === 'local_csv' ? dataSource.file : undefined,
+        filePath: type === 'local_csv' ? dataSource.filePath : undefined
       };
       setDataSource(newDataSource);
       // 切换数据源类型时清空属性字段映射
@@ -484,7 +581,7 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
       });
     };
 
-    const handleDataSourceFileChange = (fileData: any) => {
+    const handleDataSourceFileChange = async (fileData: any) => {
       const file =
         Array.isArray(fileData) && fileData.length > 0 ? fileData[0] : fileData;
       // 切换文件时清空数据库和表
@@ -494,12 +591,13 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
         database: undefined,
         table: undefined
       });
-      const newDataSource: ObjectTypeFormData['dataSource'] = {
+      const newDataSource = {
         ...dataSource,
         type: 'local_csv' as DataSourceType,
         file,
         database: undefined,
-        table: undefined
+        table: undefined,
+        filePath: undefined // 上传新文件时清空路径
       };
       setDataSource(newDataSource);
       // 切换文件时先清空属性字段映射
@@ -509,12 +607,13 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
 
       if (file) {
         // 新文件上传后重新加载字段
-        loadAttributeFields(file);
+        await loadAttributeFields(file);
       }
     };
 
-    const handleIconChange = (fileList: any[]) => {
-      setIconFile(fileList);
+    const handleIconChange = (iconValue: string) => {
+      setSelectedIcon(iconValue);
+      form.setFieldValue('icon', iconValue);
     };
 
     const handleSubmit = async () => {
@@ -539,11 +638,44 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
           return;
         }
 
+        // 过滤出选中的字段，并转换为接口格式（移除临时字段）
+        const selectedFields = attributeFields
+          .filter((field) => field.isSelected === 1)
+          .map(
+            ({
+              _tableField,
+              _attributeName,
+              _storedPublicPropertyId,
+              ...field
+            }) => field
+          );
+
         const formData: ObjectTypeFormData = {
-          ...values,
-          icon: iconFile[0]?.url || iconFile[0]?.response?.data?.url,
-          dataSource,
-          attributeFields
+          code: values.code,
+          name: values.name,
+          description: values.description,
+          icon:
+            selectedIcon ||
+            values.icon ||
+            OBJECT_TYPE_ICON_OPTIONS[0]?.value ||
+            '',
+          ontologyModelID:
+            values.ontologyModelID || initialValues?.ontologyModelID || 0,
+          filePath: dataSource.filePath,
+          originalDbName:
+            dataSource.type === 'data_directory_sync'
+              ? dataSource.database || ''
+              : 'upload_db',
+          originalTableName:
+            dataSource.type === 'data_directory_sync'
+              ? dataSource.table || ''
+              : 'upload_table',
+          sourceType:
+            dataSource.type === 'local_csv'
+              ? SourceType.FILE_UPLOAD
+              : SourceType.ICEBERG,
+          ontologyPhysicalPropertiesList: selectedFields,
+          _dataSource: dataSource
         };
 
         onSubmit(formData);
@@ -568,9 +700,10 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
           <Form
             form={form}
             autoComplete="off"
-            labelCol={{ span: 3 }}
-            wrapperCol={{ span: 18 }}
+            labelCol={{ span: 2 }}
+            wrapperCol={{ span: 22 }}
             labelAlign="left"
+            className={styles['object-type-form']}
           >
             {/* 基本信息 */}
             <div className="my-[16px] text-[16px] font-[500] leading-[24px] text-[var(--color-text-1)]">
@@ -586,28 +719,35 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
               ]}
             >
               <Input
-                placeholder="请输入本体名称用于在界面上展示,如传感器"
+                placeholder="请输入对象类型名称。用于在界面上展示，如：传感器"
                 maxLength={50}
                 showWordLimit
               />
             </FormItem>
 
             <FormItem
-              label="id："
-              field="id"
-              rules={[{ required: true, message: '请输入唯一标识' }]}
+              label="对象类型id："
+              field="code"
+              rules={[{ required: true, message: '请输入id' }]}
             >
-              <Input placeholder="请输入唯一标识" />
+              <Input placeholder="请输入id。用于 API 调用，全局唯一" />
             </FormItem>
 
             <FormItem label="描述说明：" field="description">
               <TextArea
-                placeholder="请输入描述说明"
+                placeholder="请输入描述说明，详述该实体的业务边界与逻辑范围"
                 autoSize={{ minRows: 3, maxRows: 6 }}
               />
             </FormItem>
 
-            <FormItem label="图标：" field="icon"></FormItem>
+            <FormItem label="图标：" field="icon">
+              <IconSelector
+                value={selectedIcon}
+                onChange={handleIconChange}
+                options={OBJECT_TYPE_ICON_OPTIONS}
+                defaultIcon={OBJECT_TYPE_ICON_OPTIONS[0]?.value}
+              />
+            </FormItem>
 
             {/* 数据源 */}
             <div className="my-[16px] text-[16px] font-[500] leading-[24px] text-[var(--color-text-1)]">
@@ -645,15 +785,60 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
                   }
                 ]}
               >
-                <FieldImportUpload
+                <Upload
+                  drag
                   accept=".csv"
-                  fileType="csv"
-                  maxSize={500}
-                  onFileChange={handleDataSourceFileChange}
-                  onUploadingChange={(isUploading) => {
-                    // Handle uploading state if needed
+                  fileList={
+                    dataSource.file
+                      ? [
+                          {
+                            uid: '1',
+                            name: dataSource.file.name || 'uploaded_file.csv',
+                            status: 'done'
+                          }
+                        ]
+                      : []
+                  }
+                  beforeUpload={(file) => {
+                    // 检查文件类型
+                    if (!/\.(csv)$/i.test(file.name)) {
+                      Message.error('只能上传CSV格式文件');
+                      return false;
+                    }
+                    // 检查文件大小 (500MB)
+                    const maxSizeBytes = 500 * 1024 * 1024;
+                    if (file.size > maxSizeBytes) {
+                      Message.error('单文件大小不能超过500MB');
+                      return false;
+                    }
+                    // 阻止默认上传，手动处理
+                    handleDataSourceFileChange(file);
+                    return false;
                   }}
-                />
+                  onRemove={() => {
+                    setDataSource((prev) => ({
+                      ...prev,
+                      file: undefined,
+                      filePath: undefined
+                    }));
+                    setAttributeFields([]);
+                    setFileUploaded(false);
+                  }}
+                  tip="仅支持上传UTF-8编码格式的文件,文件大小不超过500MB"
+                >
+                  <div className="flex h-[210px] w-full flex-col items-center justify-center rounded-[2px] border border-dashed border-[#CBD5E1]">
+                    <IconUpload
+                      className="mb-[24px] size-[24px]"
+                      style={{ color: 'var(--text-color-text-1)' }}
+                    />
+                    <span className="text-[14px] text-[var(--color-text-1)]">
+                      点击或拖拽文件到此处上传
+                    </span>
+                    <span className="text-[12px] text-[var(--color-text-4)]">
+                      仅支持上传UTF-8编码格式的文件,文件大小不超过500MB
+                    </span>
+                  </div>
+                </Upload>
               </FormItem>
             ) : (
               <>
@@ -734,6 +919,7 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
               属性字段映射
             </div>
             <FormItem
+              className={styles['attribute-fields-form-item']}
               field="attributeFields"
               rules={[
                 {
@@ -756,14 +942,16 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
                   </span>
                 </div>
               ) : attributeFields.length === 0 ? (
-                <div className="py-8 text-center text-[14px] text-[#86909C]">
+                <div className="py-[16px] text-left text-[14px] text-[var(--color-text-5)]">
                   请先上传文件
                 </div>
               ) : (
                 <Table
                   columns={attributeColumns}
                   data={attributeFields}
-                  rowKey={(record) => record.tableField}
+                  rowKey={(record) =>
+                    record.name || record.id || `field-${record.name}`
+                  }
                   border={false}
                   pagination={false}
                 />
@@ -789,10 +977,13 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
           <BindPublicAttributeModal
             visible={bindModalVisible}
             initialSelectedId={
-              currentFieldIndex >= 0
-                ? attributeFields[currentFieldIndex]?.publicAttributeId
+              currentFieldIndex >= 0 &&
+              attributeFields[currentFieldIndex]?.publicPropertyID &&
+              attributeFields[currentFieldIndex]!.publicPropertyID > 0
+                ? attributeFields[currentFieldIndex]!.publicPropertyID
                 : undefined
             }
+            columnType={attributeFields[currentFieldIndex]?.columnType}
             onCancel={() => {
               setBindModalVisible(false);
               setCurrentFieldIndex(-1);

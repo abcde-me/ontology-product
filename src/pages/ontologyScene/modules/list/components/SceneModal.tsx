@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { Modal, Form, Input, Button, Trigger } from '@arco-design/web-react';
-import { IconDown } from '@arco-design/web-react/icon';
+import { Modal, Form, Input, Button } from '@arco-design/web-react';
 import { ICON_OPTIONS } from '@/pages/ontologyScene/common/constants';
+import IconSelector from '@/pages/ontologyScene/componens/IconSelector';
 
 const { TextArea } = Input;
 
@@ -46,7 +46,6 @@ const SceneModal: React.FC<SceneModalProps> = ({
   const [selectedIcon, setSelectedIcon] = useState<string>(
     initialValues?.icon || ICON_OPTIONS[0].value
   );
-  const [iconDropdownVisible, setIconDropdownVisible] = useState(false);
 
   useEffect(() => {
     if (visible) {
@@ -85,12 +84,8 @@ const SceneModal: React.FC<SceneModalProps> = ({
   const handleCancel = () => {
     form.resetFields();
     setSelectedIcon(ICON_OPTIONS[0].value);
-    setIconDropdownVisible(false);
     onCancel();
   };
-
-  const selectedIconOption =
-    ICON_OPTIONS.find((opt) => opt.value === selectedIcon) || ICON_OPTIONS[0];
 
   return (
     <Modal
@@ -134,103 +129,12 @@ const SceneModal: React.FC<SceneModalProps> = ({
         </Form.Item>
 
         <Form.Item label="图标：" field="icon">
-          <Trigger
-            popupVisible={iconDropdownVisible}
-            onVisibleChange={setIconDropdownVisible}
-            popup={() => (
-              <div
-                style={{
-                  background: '#fff',
-                  borderRadius: 4,
-                  boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
-                  padding: 12,
-                  width: 200
-                }}
-              >
-                <div
-                  style={{
-                    display: 'grid',
-                    gridTemplateColumns: 'repeat(3, 1fr)',
-                    gap: '4px'
-                  }}
-                >
-                  {ICON_OPTIONS.map((option) => (
-                    <div
-                      key={option.value}
-                      onClick={() => {
-                        setSelectedIcon(option.value);
-                        setIconDropdownVisible(false);
-                      }}
-                      style={{
-                        width: 56,
-                        height: 56,
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        cursor: 'pointer',
-                        borderRadius: 4,
-                        border:
-                          selectedIcon === option.value
-                            ? '1px solid #165dff'
-                            : '1px solid transparent',
-                        backgroundColor:
-                          selectedIcon === option.value
-                            ? '#f0f5ff'
-                            : 'transparent',
-                        transition: 'all 0.2s'
-                      }}
-                      onMouseEnter={(e) => {
-                        if (selectedIcon !== option.value) {
-                          e.currentTarget.style.backgroundColor = '#f7f8fa';
-                          e.currentTarget.style.borderColor = '#e5e6eb';
-                        }
-                      }}
-                      onMouseLeave={(e) => {
-                        if (selectedIcon !== option.value) {
-                          e.currentTarget.style.backgroundColor = 'transparent';
-                          e.currentTarget.style.borderColor = 'transparent';
-                        }
-                      }}
-                    >
-                      <option.icon
-                        style={{
-                          width: 32,
-                          height: 32
-                        }}
-                      />
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-            trigger="click"
-            position="bl"
-          >
-            <div
-              className="flex h-[56px] w-[72px] items-center justify-between gap-[4px]"
-              onMouseEnter={(e) => {
-                e.currentTarget.style.borderColor = '#165dff';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.borderColor = '#d9d9d9';
-              }}
-              onClick={() => setIconDropdownVisible(!iconDropdownVisible)}
-            >
-              <div className="flex h-[56px] w-[56px] items-center justify-center rounded-[4px] bg-[#f0f5ff]">
-                <selectedIconOption.icon style={{ width: 32, height: 32 }} />
-              </div>
-              <IconDown
-                style={{
-                  fontSize: 12,
-                  color: '#86909c',
-                  transform: iconDropdownVisible
-                    ? 'rotate(180deg)'
-                    : 'rotate(0deg)',
-                  transition: 'transform 0.2s'
-                }}
-              />
-            </div>
-          </Trigger>
+          <IconSelector
+            value={selectedIcon}
+            onChange={setSelectedIcon}
+            options={ICON_OPTIONS}
+            defaultIcon={ICON_OPTIONS[0].value}
+          />
         </Form.Item>
       </Form>
     </Modal>
