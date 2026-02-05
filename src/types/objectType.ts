@@ -150,6 +150,14 @@ export interface CreateOntologyPhysicalProperty {
    * 关联公共属性ID
    */
   publicPropertyID: number;
+  /**
+   * 是否选中
+   */
+  isSelected: 1 | 0;
+  /**
+   * 是否存入公共属性库
+   */
+  isStoreAsPublic: 1 | 0;
 }
 
 export enum SourceType {
@@ -210,4 +218,11 @@ export interface UpdateOntologyObjectTypeReq
 
 export interface GetOntologyObjectTypeDetailRes {
   data: ObjectType;
+}
+
+export interface UploadOntologyCSVFileAndParseRes {
+  data: {
+    columnList: string[];
+    path: string;
+  };
 }

@@ -14,3 +14,15 @@
     }
   }
 }
+
+.object-type-form {
+  :global(.arco-form-item-wrapper) {
+    max-width: 640px;
+  }
+}
+
+.attribute-fields-form-item {
+  :global(.arco-form-item-wrapper) {
+    max-width: 100%;
+  }
+}

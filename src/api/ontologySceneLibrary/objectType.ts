@@ -5,7 +5,8 @@ import {
   ListOntologyObjectTypeRes,
   ObjectType,
   SourceType,
-  UpdateOntologyObjectTypeReq
+  UpdateOntologyObjectTypeReq,
+  UploadOntologyCSVFileAndParseRes
 } from '@/types/objectType';
 import { SyncStatus } from '@/types/graphApi';
 
@@ -272,6 +273,38 @@ export const getOntologyObjectTypeDetail = async (params: {
 
   const mockData: GetOntologyObjectTypeDetailRes = {
     data: mockObjectType
+  };
+
+  return Promise.resolve({
+    code: '',
+    data: mockData,
+    message: 'mock success',
+    requestId: 'mock-request-id',
+    status: 200
+  });
+};
+
+export const uploadOntologyCSVFileAndParse = async (params: {
+  file: File;
+}): Promise<ApiRes<UploadOntologyCSVFileAndParseRes>> => {
+  // 保留 params 参数以避免未使用告警
+  void params;
+
+  // Mock 数据：模拟 CSV 文件解析结果
+  const mockData: UploadOntologyCSVFileAndParseRes = {
+    data: {
+      columnList: [
+        'id',
+        'name',
+        'code',
+        'description',
+        'type',
+        'status',
+        'createTime',
+        'updateTime'
+      ],
+      path: `/minio/bucket/ontology/${params.file.name || 'uploaded_file.csv'}`
+    }
   };
 
   return Promise.resolve({
