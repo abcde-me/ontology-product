@@ -257,7 +257,7 @@ export const routes: IRoute[] = [
             ),
             permission: DATA_MANAGEMENT_PERMISSIONS.LIST
           },
-          // 行为日志
+          // 执行记录
           {
             name: 'ontologySceneBehaviorLog',
             key: `/tenant/compute/modaforge/ontologyScene/detail/:id/${ONTOLOGY_SCENE_MENU_ITEM_KEYS.BEHAVIOR_LOG}`,

@@ -35,4 +35,15 @@
       cursor: pointer;
     }
   }
+
+  // Tabs 样式调整
+  :global(.arco-tabs-header) {
+    padding-left: 16px;
+  }
+
+  :global(.arco-tabs-header-title) {
+    padding-left: 0;
+    padding-right: 0;
+    margin-right: 24px;
+  }
 }
