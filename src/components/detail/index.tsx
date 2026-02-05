@@ -391,7 +391,7 @@ const versionColumns: any[] = [
     render: (time: string) => formatDate(time)
   },
   {
-    title: '更变记录',
+    title: '变更记录',
     minWidth: 100,
     maxWidth: 470,
     dataIndex: 'description',
