@@ -105,7 +105,7 @@ export default function OntologySceneDetail() {
       children: [
         {
           key: ONTOLOGY_SCENE_MENU_ITEM_KEYS.BEHAVIOR_LOG,
-          title: '行为日志',
+          title: '执行记录',
           icon: <MenuIcon fontSize={20} />
         }
       ]

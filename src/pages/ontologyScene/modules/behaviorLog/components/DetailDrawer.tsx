@@ -1,13 +1,9 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { Tabs, Tag, Button, Message, Spin } from '@arco-design/web-react';
+import { Tabs, Button, Message, Spin } from '@arco-design/web-react';
 import { IconCopy, IconFullscreen } from '@arco-design/web-react/icon';
-import {
-  InfoDescription,
-  DotStatus,
-  copyToClipboard
-} from '@ceai-front/arco-material';
+import { InfoDescription, DotStatus } from '@ceai-front/arco-material';
 import { OsDrawer } from '@/pages/ontologyScene/componens/OSDrawer';
-import { BehaviorLogItem, STATUS_CONFIG } from '../types';
+import { BehaviorLogItem, RUN_STATUS_MAP } from '../types';
 import {
   fetchBehaviorLogInputParams,
   fetchBehaviorLogExecutionDetail
@@ -56,8 +52,8 @@ export const DetailDrawer: React.FC<DetailDrawerProps> = ({
       setLoading(true);
       try {
         const [inputData, executionData] = await Promise.all([
-          fetchBehaviorLogInputParams(data.id),
-          fetchBehaviorLogExecutionDetail(data.id)
+          fetchBehaviorLogInputParams(String(data.id)),
+          fetchBehaviorLogExecutionDetail(String(data.id))
         ]);
         setInputParams(inputData);
         setExecutionDetail(executionData);
@@ -70,22 +66,37 @@ export const DetailDrawer: React.FC<DetailDrawerProps> = ({
     };
 
     loadData();
-  }, [visible, data]);
+  }, [visible, data?.id]); // 监听 data.id 而不是整个 data 对象
 
+  // 根据 run_status 获取状态配置
   const statusConfig = data
-    ? STATUS_CONFIG[data.status]
-    : STATUS_CONFIG.success;
+    ? RUN_STATUS_MAP[data.run_status as 1 | 2 | 3] || RUN_STATUS_MAP[1]
+    : RUN_STATUS_MAP[1];
 
   // InfoDescription 数据
   const detailData = useMemo(() => {
     if (!data) return [];
+
+    // 计算耗时
+    const duration =
+      data.end_time === '-'
+        ? '-'
+        : formatDuration(
+            new Date(data.end_time).getTime() -
+              new Date(data.start_time).getTime()
+          );
+
     return [
       {
         title: '基本信息',
         items: [
           {
-            label: '行为名称',
-            value: data.type
+            label: 'Session ID',
+            value: data.session_id
+          },
+          {
+            label: 'Action ID',
+            value: data.action_id
           },
           {
             label: '状态',
@@ -96,23 +107,8 @@ export const DetailDrawer: React.FC<DetailDrawerProps> = ({
             )
           },
           {
-            label: '描述说明',
-            value: '分布在边界区域的实时气象采集设备信息流映射'
-          },
-          {
-            label: 'id',
-            value: (
-              <div className="flex items-center gap-1">
-                <span className="font-mono">Action</span>
-                <IconCopy
-                  className="cursor-pointer text-sm text-[#86909c] hover:text-[#165dff]"
-                  onClick={() => {
-                    copyToClipboard('Action');
-                  }}
-                />
-              </div>
-            ),
-            isCopy: false
+            label: '操作人',
+            value: data.created_by || '-'
           }
         ]
       },
@@ -120,17 +116,20 @@ export const DetailDrawer: React.FC<DetailDrawerProps> = ({
         title: '执行信息',
         items: [
           {
-            label: '触发时间',
-            value: data.startTime
+            label: '开始时间',
+            value: data.start_time
+          },
+          {
+            label: '结束时间',
+            value: data.end_time
           },
           {
             label: '执行耗时',
-            value:
-              data.status === 'running' ? '-' : formatDuration(data.duration)
+            value: duration
           },
           {
-            label: '完成时间',
-            value: data.endTime
+            label: '更新时间',
+            value: data.updated_at
           }
         ]
       }
@@ -167,8 +166,9 @@ export const DetailDrawer: React.FC<DetailDrawerProps> = ({
       onCancel={onClose}
       width={720}
       placement="right"
-      mask={false} // 不显示遮罩层
+      mask={false} // 不显示遮罩层，允许点击表格
       maskClosable={false}
+      key={data.id} // 使用 key 确保数据变化时重新渲染
     >
       <div className="flex h-full flex-col">
         {/* 基本信息和执行信息 */}

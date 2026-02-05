@@ -733,6 +733,8 @@ export const ModaForgeResourceEndpoints = {
   behaviorOrchestration: PrefixAimdp + '/SaveBehaviorOrchestration',
   // 获取历史记录（可选）
   behaviorHistory: PrefixAimdp + '/ListBehaviorHistory',
+  // 执行记录
+  PageExecuteTestLog: PrefixAimdp + '/PageExecuteTestLog',
 
   // 本体拓扑
   // 获取本体拓扑
