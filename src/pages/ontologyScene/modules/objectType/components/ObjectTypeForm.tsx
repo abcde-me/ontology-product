@@ -4,7 +4,6 @@ import {
   Input,
   Button,
   Message,
-  Upload,
   Radio,
   Select,
   Table,
@@ -12,10 +11,10 @@ import {
   Checkbox,
   Switch,
   Tooltip,
-  Spin
+  Spin,
+  Cascader
 } from '@arco-design/web-react';
 import {
-  IconUpload,
   IconQuestionCircle,
   IconDelete,
   IconLink
@@ -28,8 +27,17 @@ import BindPublicAttributeModal, {
 } from './BindPublicAttributeModal';
 import classNames from 'classnames';
 import styles from './ObjectTypeForm.module.scss';
-import { CreateOntologyPhysicalProperty, SourceType } from '@/types/objectType';
-import { uploadOntologyCSVFileAndParse } from '@/api/ontologySceneLibrary/objectType';
+import {
+  CreateOntologyPhysicalProperty,
+  SourceType,
+  MetadataMenuItem,
+  IcebergTableItem
+} from '@/types/objectType';
+import {
+  uploadOntologyCSVFileAndParse,
+  listMetadataIcebergDatabaseName,
+  listMetadataIcebergTable
+} from '@/api/ontologySceneLibrary/objectType';
 import {
   createOntologyPublicProperties,
   deleteOntologyPublicProperties
@@ -39,6 +47,7 @@ import {
   OBJECT_TYPE_ICON_OPTIONS
 } from '@/pages/ontologyScene/common/constants';
 import IconSelector from '@/pages/ontologyScene/componens/IconSelector';
+import { EllipsisPopover } from '@ceai-front/arco-material';
 
 const FormItem = Form.Item;
 const { TextArea } = Input;
@@ -107,6 +116,23 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
       string | undefined
     >();
     const [selectedTable, setSelectedTable] = useState<string | undefined>();
+    // 级联选择器相关状态
+    const [cascaderOptions, setCascaderOptions] = useState<
+      Array<{
+        label: string;
+        value: string;
+        children?: Array<{ label: string; value: string }>;
+        isLeaf?: boolean;
+      }>
+    >([]);
+    const [cascaderValue, setCascaderValue] = useState<string[]>([]);
+    const [databaseList, setDatabaseList] = useState<MetadataMenuItem[]>([]);
+    const [tableListMap, setTableListMap] = useState<
+      Record<number, IcebergTableItem[]>
+    >({});
+    const [loadingTables, setLoadingTables] = useState<Record<number, boolean>>(
+      {}
+    );
     const [attributeFields, setAttributeFields] = useState<AttributeField[]>(
       []
     );
@@ -117,6 +143,33 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
     const [storeAsPublicLoading, setStoreAsPublicLoading] = useState<
       Record<number, boolean>
     >({});
+
+    // 加载数据库列表
+    const loadDatabaseList = async () => {
+      try {
+        const response = await listMetadataIcebergDatabaseName({
+          instanceId: 1 // 固定值
+        });
+        if (response.status === 200 && response.code === '') {
+          const databases = response.data.data || [];
+          setDatabaseList(databases);
+          // 转换为级联选择器格式
+          const options = databases.map((db) => ({
+            label: db.databaseName,
+            value: String(db.id),
+            isLeaf: false
+            // children: []
+          }));
+          console.log('options', options);
+          setCascaderOptions(options);
+        } else {
+          Message.error(response.message || '加载数据库列表失败');
+        }
+      } catch (error) {
+        console.error('加载数据库列表失败:', error);
+        Message.error('加载数据库列表失败');
+      }
+    };
 
     useEffect(() => {
       if (initialValues) {
@@ -142,6 +195,19 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
           setSelectedDatabase(initialValues._dataSource.database || '');
           setSelectedTable(initialValues._dataSource.table || '');
           setFileUploaded(!!initialValues._dataSource.file);
+
+          // 如果有初始值，设置级联选择器的值
+          if (
+            initialValues._dataSource.database &&
+            initialValues._dataSource.table
+          ) {
+            // 需要找到对应的数据库ID和表ID
+            // 这里先设置，等数据库列表加载后再更新
+            setCascaderValue([
+              initialValues._dataSource.database,
+              initialValues._dataSource.table
+            ]);
+          }
         }
         if (initialValues.ontologyPhysicalPropertiesList) {
           const fields = initialValues.ontologyPhysicalPropertiesList.map(
@@ -160,6 +226,13 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
         });
       }
     }, [initialValues, form]);
+
+    // 当数据源类型为 data_directory_sync 时，加载数据库列表
+    useEffect(() => {
+      if (dataSource.type === 'data_directory_sync') {
+        loadDatabaseList();
+      }
+    }, [dataSource.type]);
 
     // 从文件或数据库获取字段列表
     const loadAttributeFields = async (
@@ -493,21 +566,77 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
       }
     ];
 
-    // 模拟数据库列表
-    const databaseOptions = [
-      { label: '数据库1', value: 'db1' },
-      { label: '数据库2', value: 'db2' },
-      { label: '数据库3', value: 'db3' }
-    ];
+    const handleCascaderChange = (value: string[]) => {
+      setCascaderValue(Array.isArray(value) ? value : [value]);
+      form.setFieldValue('database', value[0]);
+      form.setFieldValue('table', value[1]);
+    };
 
-    // 模拟表列表（根据选择的数据库动态变化）
-    const tableOptions = selectedDatabase
-      ? [
-          { label: '表1', value: 'table1' },
-          { label: '表2', value: 'table2' },
-          { label: '表3', value: 'table3' }
-        ]
-      : [];
+    // 级联选择器的 loadMore 函数，用于动态加载表列表
+    const handleCascaderLoadMore = async (
+      pathValue: string[],
+      level: number
+    ): Promise<any[]> => {
+      if (level === 1 && pathValue.length > 0) {
+        const databaseId = Number(pathValue[0]);
+        if (!isNaN(databaseId) && !tableListMap[databaseId]) {
+          try {
+            setLoadingTables((prev) => ({ ...prev, [databaseId]: true }));
+            const response = await listMetadataIcebergTable({
+              pageNum: 1,
+              pageSize: 1000, // 加载所有表
+              filters: {
+                databaseId
+              }
+            });
+
+            if (response.status === 200 && response.code === '') {
+              const tables = response.data.data?.list || [];
+              setTableListMap((prev) => ({ ...prev, [databaseId]: tables }));
+
+              // 更新级联选择器的选项
+              setCascaderOptions((prevOptions) =>
+                prevOptions.map((option) => {
+                  if (option.value === String(databaseId)) {
+                    return {
+                      ...option,
+                      children: tables.map((table) => ({
+                        label: table.tableName,
+                        value: String(table.id),
+                        isLeaf: true
+                      }))
+                    };
+                  }
+                  return option;
+                })
+              );
+
+              // 返回更新后的选项
+              return tables.map((table) => ({
+                label: table.tableName,
+                value: String(table.id)
+              }));
+            } else {
+              Message.error(response.message || '加载表列表失败');
+              return [];
+            }
+          } catch (error) {
+            console.error('加载表列表失败:', error);
+            Message.error('加载表列表失败');
+            return [];
+          } finally {
+            setLoadingTables((prev) => ({ ...prev, [databaseId]: false }));
+          }
+        } else if (tableListMap[databaseId]) {
+          return tableListMap[databaseId].map((table) => ({
+            label: table.tableName,
+            value: String(table.id),
+            isLeaf: true
+          }));
+        }
+      }
+      return [];
+    };
 
     const handleDataSourceTypeChange = (type: DataSourceType) => {
       form.setFieldValue('dataSourceType', type);
@@ -515,70 +644,27 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
       if (type === 'local_csv') {
         setSelectedDatabase(undefined);
         setSelectedTable(undefined);
+        setCascaderValue([]);
         form.setFieldsValue({
           database: undefined,
           table: undefined
         });
       }
+      // 切换数据源类型时，清空上传的本地文件
       const newDataSource = {
         type,
         database: type === 'data_directory_sync' ? selectedDatabase : undefined,
         table: type === 'data_directory_sync' ? selectedTable : undefined,
-        file: type === 'local_csv' ? dataSource.file : undefined,
-        filePath: type === 'local_csv' ? dataSource.filePath : undefined
+        file: undefined, // 切换类型时清空文件
+        filePath: undefined // 切换类型时清空文件路径
       };
       setDataSource(newDataSource);
+      // 同步清空表单的文件字段
+      form.setFieldValue('file', undefined);
       // 切换数据源类型时清空属性字段映射
       setAttributeFields([]);
       form.setFieldValue('attributeFields', []);
       setFileUploaded(false);
-    };
-
-    const handleDatabaseChange = (database: string) => {
-      setSelectedDatabase(database);
-      setSelectedTable(''); // 清空表选择
-      form.setFieldsValue({
-        database,
-        table: undefined
-      });
-      const newDataSource = {
-        ...dataSource,
-        type: dataSource.type,
-        database,
-        table: undefined
-      };
-      setDataSource(newDataSource);
-      // 切换数据库时清空属性字段映射
-      setAttributeFields([]);
-      form.setFieldValue('attributeFields', []);
-      setFileUploaded(false);
-    };
-
-    const handleTableChange = (table: string) => {
-      setSelectedTable(table);
-      form.setFieldValue('table', table);
-      const newDataSource = {
-        ...dataSource,
-        type: dataSource.type,
-        database: selectedDatabase,
-        table
-      };
-      setDataSource(newDataSource);
-      if (
-        dataSource.type === 'data_directory_sync' &&
-        selectedDatabase &&
-        table
-      ) {
-        loadAttributeFields(undefined, selectedDatabase, table);
-      }
-    };
-
-    const handlePreview = () => {
-      // TODO: 实现预览功能
-      console.log('Preview:', {
-        database: selectedDatabase,
-        table: selectedTable
-      });
     };
 
     const handleDataSourceFileChange = async (fileData: any) => {
@@ -589,7 +675,8 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
       setSelectedTable(undefined);
       form.setFieldsValue({
         database: undefined,
-        table: undefined
+        table: undefined,
+        file: file // 同步到表单字段
       });
       const newDataSource = {
         ...dataSource,
@@ -722,15 +809,46 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
                 placeholder="请输入对象类型名称。用于在界面上展示，如：传感器"
                 maxLength={50}
                 showWordLimit
+                allowClear
               />
             </FormItem>
 
             <FormItem
               label="对象类型id："
               field="code"
-              rules={[{ required: true, message: '请输入id' }]}
+              rules={[
+                { required: true, message: '请输入id' },
+                {
+                  validator: (value, callback) => {
+                    console.log('---value', value);
+                    if (!value) {
+                      callback();
+                      return;
+                    }
+                    // 首字符必须为英文字母
+                    if (!/^[a-zA-Z]/.test(value)) {
+                      callback('首字符必须为英文字母');
+                      return;
+                    }
+                    // 仅允许英文字母与数字（不允许下划线及特殊符号）
+                    if (!/^[a-zA-Z0-9]+$/.test(value)) {
+                      callback('仅允许英文字母与数字(不允许下划线及特殊符号)');
+                      return;
+                    }
+                    callback();
+                  }
+                }
+              ]}
+              extra={
+                <div className="text-[12px] text-[var(--color-text-4)]">
+                  首字符必须为英文字母;仅允许英文字母与数字(不允许下划线及特殊符号)
+                </div>
+              }
             >
-              <Input placeholder="请输入id。用于 API 调用，全局唯一" />
+              <Input
+                placeholder="请输入id。用于 API 调用，全局唯一"
+                allowClear
+              />
             </FormItem>
 
             <FormItem label="描述说明：" field="description">
@@ -785,60 +903,31 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
                   }
                 ]}
               >
-                <Upload
-                  drag
+                <FieldImportUpload
                   accept=".csv"
-                  fileList={
-                    dataSource.file
-                      ? [
-                          {
-                            uid: '1',
-                            name: dataSource.file.name || 'uploaded_file.csv',
-                            status: 'done'
-                          }
-                        ]
-                      : []
-                  }
-                  beforeUpload={(file) => {
-                    // 检查文件类型
-                    if (!/\.(csv)$/i.test(file.name)) {
-                      Message.error('只能上传CSV格式文件');
-                      return false;
+                  fileType="csv"
+                  maxSize={500}
+                  manualUpload={true}
+                  value={dataSource.file}
+                  onFileChange={(file) => {
+                    if (file === undefined) {
+                      // 文件被移除
+                      setDataSource((prev) => ({
+                        ...prev,
+                        file: undefined,
+                        filePath: undefined
+                      }));
+                      form.setFieldValue('file', undefined); // 同步到表单字段
+                      setAttributeFields([]);
+                      setFileUploaded(false);
+                    } else {
+                      handleDataSourceFileChange(file);
                     }
-                    // 检查文件大小 (500MB)
-                    const maxSizeBytes = 500 * 1024 * 1024;
-                    if (file.size > maxSizeBytes) {
-                      Message.error('单文件大小不能超过500MB');
-                      return false;
-                    }
-                    // 阻止默认上传，手动处理
-                    handleDataSourceFileChange(file);
-                    return false;
                   }}
-                  onRemove={() => {
-                    setDataSource((prev) => ({
-                      ...prev,
-                      file: undefined,
-                      filePath: undefined
-                    }));
-                    setAttributeFields([]);
-                    setFileUploaded(false);
+                  onUploadingChange={(isUploading) => {
+                    // Handle uploading state if needed
                   }}
-                  tip="仅支持上传UTF-8编码格式的文件,文件大小不超过500MB"
-                >
-                  <div className="flex h-[210px] w-full flex-col items-center justify-center rounded-[2px] border border-dashed border-[#CBD5E1]">
-                    <IconUpload
-                      className="mb-[24px] size-[24px]"
-                      style={{ color: 'var(--text-color-text-1)' }}
-                    />
-                    <span className="text-[14px] text-[var(--color-text-1)]">
-                      点击或拖拽文件到此处上传
-                    </span>
-                    <span className="text-[12px] text-[var(--color-text-4)]">
-                      仅支持上传UTF-8编码格式的文件,文件大小不超过500MB
-                    </span>
-                  </div>
-                </Upload>
+                />
               </FormItem>
             ) : (
               <>
@@ -851,9 +940,9 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
                       validator: (value, callback) => {
                         if (
                           dataSource.type === 'data_directory_sync' &&
-                          !value
+                          cascaderValue.length === 0
                         ) {
-                          callback('请选择数据库');
+                          callback('请选择数据库/表');
                         } else {
                           callback();
                         }
@@ -862,53 +951,43 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
                   ]}
                 >
                   <div className="flex items-center">
-                    <Input.Group
-                      compact
-                      className={styles['table-select-group']}
-                    >
-                      <Select
-                        placeholder="请选择数据库"
-                        value={selectedDatabase}
-                        onChange={handleDatabaseChange}
-                        style={{ width: 302 }}
-                        allowClear
-                      >
-                        {databaseOptions.map((option) => (
-                          <Select.Option
-                            key={option.value}
-                            value={option.value}
-                          >
-                            {option.label}
-                          </Select.Option>
-                        ))}
-                      </Select>
-                      <Select
-                        className={styles['table-select-wrapper']}
-                        placeholder={
-                          selectedDatabase ? '请选择表' : '请先选择数据库'
+                    <Cascader
+                      placeholder="请选择数据库/表"
+                      value={
+                        cascaderValue.length > 0 ? cascaderValue : undefined
+                      }
+                      options={cascaderOptions}
+                      onChange={(value) => {
+                        handleCascaderChange(value as string[]);
+                      }}
+                      loadMore={handleCascaderLoadMore}
+                      allowClear
+                      dropdownMenuClassName={
+                        styles['object-type-cascader-dropdown']
+                      }
+                      renderFormat={(valueShow) => {
+                        if (valueShow.length === 0) return '';
+                        if (valueShow.length === 1) {
+                          return valueShow[0];
                         }
-                        value={selectedTable}
-                        onChange={handleTableChange}
-                        style={{ width: 302 }}
-                        allowClear
-                      >
-                        {tableOptions.map((option) => (
-                          <Select.Option
-                            key={option.value}
-                            value={option.value}
-                          >
-                            {option.label}
-                          </Select.Option>
-                        ))}
-                      </Select>
-                    </Input.Group>
-                    <Button
-                      type="text"
-                      onClick={handlePreview}
-                      disabled={!selectedDatabase || !selectedTable}
-                    >
-                      预览
-                    </Button>
+                        // 显示格式：数据库名/表名
+                        return `${valueShow[0]}/${valueShow[1]}`;
+                      }}
+                      renderOption={(option) => {
+                        return (
+                          <EllipsisPopover
+                            preferTypography
+                            value={option.label}
+                          />
+                        );
+                      }}
+                      showSearch
+                      dropdownMenuColumnStyle={{
+                        whiteSpace: 'nowrap',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis'
+                      }}
+                    />
                   </div>
                 </FormItem>
               </>
