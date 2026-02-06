@@ -2,6 +2,9 @@ import {
   CreateOntologyObjectTypeReq,
   CreateOntologyPhysicalProperty,
   GetOntologyObjectTypeDetailRes,
+  ListMetadataIcebergDatabaseNameRes,
+  ListMetadataIcebergTableReq,
+  ListMetadataIcebergTableRes,
   ListOntologyObjectTypeReq,
   ListOntologyObjectTypeRes,
   ObjectType,
@@ -11,6 +14,7 @@ import {
 } from '@/types/objectType';
 import { SyncStatus } from '@/types/graphApi';
 import { sleep } from '@/pages/workflowConfig/utils';
+import UAPI from '@/api';
 
 export const listOntologyObjectType = async (
   params: ListOntologyObjectTypeReq
@@ -370,4 +374,24 @@ export const uploadOntologyCSVFileAndParse = async (params: {
     requestId: 'mock-request-id',
     status: 200
   });
+};
+
+// 创建iceberg表时-数据库下拉列表
+export const listMetadataIcebergDatabaseName = async (params: {
+  instanceId: number;
+}): Promise<ApiRes<ListMetadataIcebergDatabaseNameRes>> => {
+  return await UAPI.RES.listMetadataIcebergDatabaseNameApi({})
+    .post(params)
+    .inRegion()
+    .do();
+};
+
+// 查询iceberg的所有表
+export const listMetadataIcebergTable = async (
+  params: ListMetadataIcebergTableReq
+): Promise<ApiRes<ListMetadataIcebergTableRes>> => {
+  return await UAPI.RES.listMetadataIcebergTableApi({})
+    .post(params)
+    .inRegion()
+    .do();
 };

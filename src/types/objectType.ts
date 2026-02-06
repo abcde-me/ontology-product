@@ -227,3 +227,160 @@ export interface UploadOntologyCSVFileAndParseRes {
     path: string;
   };
 }
+
+export interface MetadataMenuItem {
+  id: number;
+  databaseName: string;
+}
+
+export interface ListMetadataIcebergDatabaseNameRes {
+  data: MetadataMenuItem[];
+}
+
+export interface ListMetadataIcebergTableReq {
+  pageNum?: number;
+  pageSize?: number;
+  filters?: {
+    databaseId: number;
+  };
+}
+
+export interface IcebergTableItem {
+  /**
+   * 表ID
+   */
+  id: number;
+  /**
+   * 表名
+   */
+  tableName: string;
+  /**
+   * 表中文名/描述
+   */
+  description: string;
+  /**
+   * 数据库ID
+   */
+  databaseId: number;
+  /**
+   * 数据库名称
+   */
+  databaseName: string;
+  /**
+   * 分区字段,多个分区字段的话,英文逗号分隔
+   */
+  partitionKey: string;
+  /**
+   * 分区数量
+   */
+  partitionNum: number;
+  /**
+   * 存储大小
+   */
+  storageSize: string;
+  /**
+   * 文件存储位置
+   */
+  storageLocation: string;
+  /**
+   * 表类型
+   */
+  tableType: string;
+  /**
+   * 文件数
+   */
+  fileNum: string;
+  /**
+   * 创建时间
+   */
+  createTime: string;
+  /**
+   * 更新时间
+   */
+  updataTime: string;
+  /**
+   * 最近访问时间
+   */
+  lastTime: string;
+  /**
+   * 表创建语句
+   */
+  createSql: string;
+}
+
+export interface ListMetadataIcebergTableRes {
+  data: {
+    /**
+     * 总记录数
+     */
+    total: number;
+    /**
+     * 当前页码
+     */
+    pageNum: number;
+    /**
+     * 每页大小
+     */
+    pageSize: number;
+    /**
+     * 当前页记录数
+     */
+    size: number;
+    /**
+     * 起始行号
+     */
+    startRow: number;
+    /**
+     * 结束行号
+     */
+    endRow: number;
+    /**
+     * 总页数
+     */
+    pages: number;
+    /**
+     * 上一页页码
+     */
+    prePage: number;
+    /**
+     * 下一页页码
+     */
+    nextPage: number;
+    /**
+     * 是否第一页
+     */
+    isFirstPage: boolean;
+    /**
+     * 是否最后一页
+     */
+    isLastPage: boolean;
+    /**
+     * 是否有上一页
+     */
+    hasPreviousPage: boolean;
+    /**
+     * 是否有下一页
+     */
+    hasNextPage: boolean;
+    /**
+     * 导航页码数
+     */
+    navigatePages: number;
+    /**
+     * 导航页码数组
+     */
+    navigatepageNums: number[];
+    /**
+     * 导航第一页
+     */
+    navigateFirstPage: number;
+    /**
+     * 导航最后一页
+     */
+    navigateLastPage: number;
+    /**
+     * 表列表
+     */
+    list: IcebergTableItem[];
+  };
+}
