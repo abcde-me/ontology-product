@@ -7,14 +7,17 @@ import {
 } from '@ceai-front/workflow';
 import '@ceai-front/workflow/dist/es/ai-workflow.css';
 import { MyNode, MyNodePanel, MyNodeDefault } from './nodes';
-import { getWorkflow, createWorkflow, updateWorkflow } from './demo/api';
+import { getWorkflow, createWorkflow, updateWorkflow } from './common/api';
 import { getOntologyTopology } from '@/api/ontologySceneLibrary/graph';
 import dagre from '@dagrejs/dagre';
 import type { GetOntologyTopologyResponse } from '@/types/graphApi';
 import styles from './index.module.scss';
-import { CustomEdge } from './edges';
+import { CustomLabel, EdgePanel } from './edges';
 import { Spin } from '@arco-design/web-react';
 import SubHeader from './subHeader';
+import classNames from 'classnames';
+import { MarkerType } from 'reactflow';
+import { useDemoStore } from './common/store';
 
 const nodesConfig = [
   {
@@ -29,10 +32,6 @@ const nodesConfig = [
     showNodeControl: false // 是否显示节点控制按钮
   }
 ];
-
-const edgeTypes = {
-  'custom-edge': CustomEdge
-};
 
 const NODE_WIDTH = 256;
 const NODE_HEIGHT = 112;
@@ -52,7 +51,7 @@ function layoutNodesWithDagre(
   // 创建 dagre 图
   const g = new dagre.graphlib.Graph();
   g.setDefaultEdgeLabel(() => ({}));
-  g.setGraph({ rankdir: 'LR', nodesep: 60, ranksep: 100 });
+  g.setGraph({ rankdir: 'LR', nodesep: 60, ranksep: 200 });
 
   // 创建节点映射，用于后续查找
   const nodeIdMap = new Map<number, string>();
@@ -75,7 +74,8 @@ function layoutNodesWithDagre(
         type: 'default',
         desc: topologyNode.description ?? '',
         title: topologyNode.name || '未命名节点',
-        attributes: topologyNode.attributes || []
+        attributes: topologyNode.attributes || [],
+        syncStatus: topologyNode.syncStatus
       },
       position: { x: 0, y: 0 } // 临时位置，稍后由 dagre 计算
     });
@@ -111,19 +111,9 @@ function layoutNodesWithDagre(
         targetHandle: 'target',
         type: 'custom-edge',
         data: {
-          // 可以在这里添加 edge 的自定义数据
-          label: topologyEdge.name || '',
-          labelIcon: '🔗', // 链式图标
-          labelColor: '#f1f5f9' // 浅灰色背景
-        },
-        style: {
-          stroke: '#94a3b8', // 灰色
-          strokeWidth: 2,
-          strokeDasharray: '5,5' // 虚线样式
-        },
-        markerEnd: {
-          type: 'arrowclosed',
-          color: '#94a3b8'
+          id: topologyEdge.id, // 保存原始的数字ID
+          name: topologyEdge.name || '',
+          syncStatus: topologyEdge.syncStatus
         }
       };
     });
@@ -176,6 +166,7 @@ export default function OntologySceneGraph() {
   const [topologyData, setTopologyData] =
     useState<GetOntologyTopologyResponse | null>(null);
   const [loading, setLoading] = useState(true);
+  const showCustomEdgePanel = useDemoStore((s) => s.showCustomEdgePanel);
 
   useEffect(() => {
     // 获取本体拓扑数据
@@ -222,8 +213,28 @@ export default function OntologySceneGraph() {
       }}
       nodesReadonlyChecker={nodesReadonlyChecker}
       headerHeight={0}
+      edge={{
+        markerEnd: {
+          type: MarkerType.ArrowClosed,
+          width: 14,
+          height: 14,
+          color: '#C3C7D4'
+        },
+        targetXOffset: -8,
+        labelRenderer: CustomLabel
+      }}
+      subHeader={{ fullyCustomSubheader: <SubHeader /> }}
+      rightPanels={[
+        {
+          id: 'custom-edge-panel',
+          isShow: showCustomEdgePanel,
+          panel: EdgePanel
+        }
+      ]}
     >
-      <AIWorflow className={styles['ai-workflow']} />
+      <AIWorflow
+        className={classNames(styles['ai-workflow'], styles['edge-style'])}
+      />
     </AIWorkflowProvider>
   );
 }

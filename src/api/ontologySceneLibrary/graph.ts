@@ -33,7 +33,8 @@ export async function getOntologyTopology(
             name: '属性2',
             type: 'string'
           }
-        ]
+        ],
+        syncStatus: SyncStatus.FAILED
       },
       {
         id: 2,
@@ -62,7 +63,8 @@ export async function getOntologyTopology(
             name: '属性4',
             type: 'string'
           }
-        ]
+        ],
+        syncStatus: SyncStatus.FAILED
       },
       {
         id: 3,
@@ -76,7 +78,8 @@ export async function getOntologyTopology(
             name: '属性1',
             type: 'string'
           }
-        ]
+        ],
+        syncStatus: SyncStatus.SUCCESS
       },
       {
         id: 4,
@@ -90,35 +93,40 @@ export async function getOntologyTopology(
             name: '属性1',
             type: 'string'
           }
-        ]
+        ],
+        syncStatus: SyncStatus.SUCCESS
       },
       {
         id: 5,
         name: '行动方案',
         code: 'COURSE_OF_ACTION',
         description: '行动方案 - 5项属性',
-        type: 'entity'
+        type: 'entity',
+        syncStatus: SyncStatus.NOT_SYNC
       },
       {
         id: 6,
         name: '作战任务',
         code: 'MISSION',
         description: '作战任务 - 3项属性',
-        type: 'entity'
+        type: 'entity',
+        syncStatus: SyncStatus.NOT_SYNC
       },
       {
         id: 7,
         name: '作战资源',
         code: 'MILITARY_ASSET',
         description: '作战资源 - 10项属性',
-        type: 'entity'
+        type: 'entity',
+        syncStatus: SyncStatus.SYNCING
       },
       {
         id: 8,
         name: '部队编制',
         code: 'ORGANIZATION',
         description: '部队编制 - 5项属性',
-        type: 'entity'
+        type: 'entity',
+        syncStatus: SyncStatus.SUCCESS
       }
     ],
     edges: [
@@ -129,7 +137,8 @@ export async function getOntologyTopology(
         description: '原始情报 -> 意图研判 (研判支撑)',
         sourceId: 1,
         targetId: 2,
-        type: 1
+        type: 1,
+        syncStatus: SyncStatus.FAILED
       },
       {
         id: 102,
@@ -138,7 +147,8 @@ export async function getOntologyTopology(
         description: '原始情报 -> 作战事件',
         sourceId: 1,
         targetId: 3,
-        type: 1
+        type: 1,
+        syncStatus: SyncStatus.FAILED
       },
       {
         id: 103,
@@ -147,7 +157,8 @@ export async function getOntologyTopology(
         description: '意图研判 -> 作战事件',
         sourceId: 2,
         targetId: 3,
-        type: 1
+        type: 1,
+        syncStatus: SyncStatus.SUCCESS
       },
       {
         id: 104,
@@ -156,7 +167,8 @@ export async function getOntologyTopology(
         description: '原始情报 -> 传感器航迹',
         sourceId: 1,
         targetId: 4,
-        type: 1
+        type: 1,
+        syncStatus: SyncStatus.FAILED
       },
       {
         id: 105,
@@ -165,7 +177,8 @@ export async function getOntologyTopology(
         description: '作战事件 -> 行动方案 (推荐方案)',
         sourceId: 3,
         targetId: 5,
-        type: 1
+        type: 1,
+        syncStatus: SyncStatus.FAILED
       },
       {
         id: 106,
@@ -174,7 +187,8 @@ export async function getOntologyTopology(
         description: '传感器航迹 -> 作战资源',
         sourceId: 4,
         targetId: 7,
-        type: 1
+        type: 1,
+        syncStatus: SyncStatus.NOT_SYNC
       },
       {
         id: 107,
@@ -183,7 +197,8 @@ export async function getOntologyTopology(
         description: '行动方案 -> 作战任务',
         sourceId: 5,
         targetId: 6,
-        type: 1
+        type: 1,
+        syncStatus: SyncStatus.SYNCING
       },
       {
         id: 108,
@@ -192,7 +207,8 @@ export async function getOntologyTopology(
         description: '作战任务 -> 作战资源',
         sourceId: 6,
         targetId: 7,
-        type: 1
+        type: 1,
+        syncStatus: SyncStatus.SUCCESS
       },
       {
         id: 109,
@@ -201,7 +217,8 @@ export async function getOntologyTopology(
         description: '作战资源 -> 部队编制 (下)',
         sourceId: 7,
         targetId: 8,
-        type: 1
+        type: 1,
+        syncStatus: SyncStatus.SUCCESS
       }
     ]
   };
