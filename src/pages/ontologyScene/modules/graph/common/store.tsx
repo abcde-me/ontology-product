@@ -34,6 +34,21 @@ export const useDemoStore = create<any>()(
       readonly: false,
       setReadonly: (readonly: boolean) => {
         set({ readonly: readonly });
+      },
+
+      sourceNode: null,
+      setSourceNode: (node: any) => {
+        set({ sourceNode: node });
+      },
+
+      targetNode: null,
+      setTargetNode: (node: any) => {
+        set({ targetNode: node });
+      },
+
+      selectedEdgeId: null as number | null,
+      setSelectedEdgeId: (edgeId: number | null) => {
+        set({ selectedEdgeId: edgeId });
       }
     }),
     {

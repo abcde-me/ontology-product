@@ -111,6 +111,7 @@ function layoutNodesWithDagre(
         targetHandle: 'target',
         type: 'custom-edge',
         data: {
+          id: topologyEdge.id, // 保存原始的数字ID
           name: topologyEdge.name || '',
           syncStatus: topologyEdge.syncStatus
         }
@@ -166,8 +167,6 @@ export default function OntologySceneGraph() {
     useState<GetOntologyTopologyResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const showCustomEdgePanel = useDemoStore((s) => s.showCustomEdgePanel);
-
-  console.log('showCustomEdgePanel', showCustomEdgePanel);
 
   useEffect(() => {
     // 获取本体拓扑数据

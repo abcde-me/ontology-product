@@ -783,7 +783,15 @@ export const ModaForgeResourceEndpoints = {
     PrefixAimdp + '/CreateOntologyPublicProperties',
   // 删除公共属性
   DeleteOntologyPublicPropertiesApi:
-    PrefixAimdp + '/DeleteOntologyPublicProperties'
+    PrefixAimdp + '/DeleteOntologyPublicProperties',
+
+  // 链接
+  // 获取链接的属性列表
+  ListOntologyLinkTypeColumnApi: PrefixAimdp + '/ListOntologyLinkTypeColumn',
+  // 获取链接的实例列表
+  ListOntologyLinkTypeDataApi: PrefixAimdp + '/ListOntologyLinkTypeData',
+  // 获取链接类型详细信息
+  GetOntologyLinkTypeApi: PrefixAimdp + '/GetOntologyLinkType'
 };
 
 /**

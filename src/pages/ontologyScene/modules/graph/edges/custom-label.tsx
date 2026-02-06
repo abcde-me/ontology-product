@@ -9,21 +9,23 @@ import { DotStatus } from '@ceai-front/arco-material';
 import { OBJECT_TYPE_SYNC_STATUS_CONFIG } from '@/pages/ontologyScene/common/constants';
 
 export default function CustomLabel(props: any) {
-  const { labelX, labelY, defaultLabelRenderer, source, target, data } = props;
+  const { labelX, labelY, defaultLabelRenderer, source, target, data, id } =
+    props;
 
   const setShowCustomEdgePanel = useDemoStore((s) => s.setShowCustomEdgePanel);
   const setSourceNode = useDemoStore((s) => s.setSourceNode);
   const setTargetNode = useDemoStore((s) => s.setTargetNode);
+  const setSelectedEdgeId = useDemoStore((s) => s.setSelectedEdgeId);
   const { nodesReadOnly } = useNodesReadOnly();
   const nodes = useNodes<any>();
 
   const sourceNode = useMemo(() => {
     return nodes.find((node) => node.id === source);
-  }, [nodes]);
+  }, [nodes, source]);
 
   const targetNode = useMemo(() => {
     return nodes.find((node) => node.id === target);
-  }, [nodes]);
+  }, [nodes, target]);
 
   return (
     <>
@@ -37,6 +39,17 @@ export default function CustomLabel(props: any) {
             pointerEvents: 'all'
           }}
           onClick={() => {
+            // 保存边的ID（链接ID）和节点信息
+            // 边的 id 是字符串格式的链接ID，需要转换为数字
+            let edgeId: number | null = null;
+            if (id) {
+              edgeId = Number(id);
+            } else if (data?.id) {
+              edgeId = typeof data.id === 'number' ? data.id : Number(data.id);
+            }
+            setSelectedEdgeId(edgeId);
+            setSourceNode(sourceNode);
+            setTargetNode(targetNode);
             setShowCustomEdgePanel((s) => !s);
           }}
         >
