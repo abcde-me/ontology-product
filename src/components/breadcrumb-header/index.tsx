@@ -1,5 +1,5 @@
 import React from 'react';
-import { Breadcrumb } from '@arco-design/web-react';
+import { Breadcrumb, Tooltip } from '@arco-design/web-react';
 import type { BreadcrumbProps } from '@arco-design/web-react';
 import { LeftArrow, Separator } from '@/assets';
 import { useHistory } from 'react-router-dom';
@@ -36,23 +36,25 @@ const BreadCrumbHeader: React.FC<BreadCrumbHeaderProps> = ({
   const history = useHistory();
 
   return (
-    <div className={`flex items-center ${className}`}>
-      {/* 左箭头 */}
+    <div className={`flex items-center overflow-hidden ${className}`}>
+      {/* 左箭头 - 固定不收缩 */}
       {showArrow && (
         <LeftArrow
-          className="mr-[21px] cursor-pointer text-base"
+          className="mr-[21px] flex-shrink-0 cursor-pointer text-base"
           onClick={onArrowClick}
         />
       )}
 
-      {/* 面包屑部分 */}
-      <div className="shrink-0">
+      {/* 面包屑部分 - 允许收缩但不超出容器 */}
+      <div className="min-w-0 flex-1 overflow-hidden">
         <Breadcrumb
-          separator={<Separator />}
+          separator={<Separator className="flex-shrink-0" />}
           className="flex h-full items-center text-xl"
           {...breadcrumbProps}
         >
           {list.map((item, index: number) => {
+            const isLast = index === list.length - 1;
+
             return (
               <Breadcrumb.Item
                 key={index}
@@ -61,11 +63,23 @@ const BreadCrumbHeader: React.FC<BreadCrumbHeaderProps> = ({
                     ? 'cursor-pointer hover:text-[#438DFB] active:text-[#2563EB]'
                     : ''
                 }
+                style={isLast ? { minWidth: 0, flex: 1 } : undefined}
                 onClick={() => {
                   if (item.href) history.push(item.href);
                 }}
               >
-                {item.name}
+                {isLast ? (
+                  <Tooltip content={item.name} position="bottom">
+                    <span
+                      className="inline-block w-full overflow-hidden text-ellipsis whitespace-nowrap"
+                      style={{ verticalAlign: 'bottom' }}
+                    >
+                      {item.name}
+                    </span>
+                  </Tooltip>
+                ) : (
+                  <span className="flex-shrink-0">{item.name}</span>
+                )}
               </Breadcrumb.Item>
             );
           })}
@@ -73,7 +87,7 @@ const BreadCrumbHeader: React.FC<BreadCrumbHeaderProps> = ({
       </div>
 
       {/* 额外内容 */}
-      {extra}
+      {extra && <div className="ml-4 flex-shrink-0">{extra}</div>}
     </div>
   );
 };
