@@ -3,3 +3,25 @@
     border-radius: 0px !important;
   }
 }
+
+.edge-style {
+  // 基础边的样式
+  :global(.react-flow__edge.react-flow__edge-custom .react-flow__edge-path) {
+    stroke: #c3c7d4 !important;
+    stroke-dasharray: 4 4 !important;
+    stroke-linecap: round;
+    animation: edge-flow 2s linear infinite !important;
+  }
+}
+
+// 流动动画 - 使用 :global 确保动画名称是全局的
+:global {
+  @keyframes edge-flow {
+    0% {
+      stroke-dashoffset: 0;
+    }
+    100% {
+      stroke-dashoffset: -15; // 移动距离，匹配 strokeDasharray 的总长度 (10 + 5)
+    }
+  }
+}

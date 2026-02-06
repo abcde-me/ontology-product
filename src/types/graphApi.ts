@@ -44,6 +44,10 @@ export interface Ontologymetadataservicev1TopologyEdge {
    * 边类型
    */
   type?: number;
+  /**
+   * 同步状态
+   */
+  syncStatus?: SyncStatus;
 }
 
 /**
@@ -78,6 +82,10 @@ export interface Ontologymetadataservicev1TopologyNode {
     name: string;
     type: string;
   }[];
+  /**
+   * 同步状态
+   */
+  syncStatus?: SyncStatus;
 }
 
 export interface ListOntologyObjectTypeDataRes {

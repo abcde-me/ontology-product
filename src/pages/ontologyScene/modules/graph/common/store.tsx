@@ -11,6 +11,11 @@ export const useDemoStore = create<any>()(
         set({ showPanel: show });
       },
 
+      showCustomEdgePanel: false,
+      setShowCustomEdgePanel: (show: boolean) => {
+        set({ showCustomEdgePanel: show });
+      },
+
       showRightPanel1: false,
       setShowRightPanel1: (show: boolean) => {
         set({ showRightPanel1: show });
