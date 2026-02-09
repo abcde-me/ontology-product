@@ -1,6 +1,7 @@
 import { IconClose, IconCopy, IconLink } from '@arco-design/web-react/icon';
 import { useDemoStore } from '../common/store';
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
+import { useHideNodePanel } from '../common/useHideNodePanel';
 import {
   Button,
   Message,
@@ -33,6 +34,15 @@ function EdgePanel() {
   const { id: OSId } = useParams<{ id: string }>();
   const setShowCustomEdgePanel = useDemoStore((s) => s.setShowCustomEdgePanel);
   const selectedEdgeId = useDemoStore((s) => s.selectedEdgeId);
+  const showCustomEdgePanel = useDemoStore((s) => s.showCustomEdgePanel);
+  const { hideNodePanel } = useHideNodePanel();
+
+  // 当 EdgePanel 显示时，隐藏节点面板
+  useEffect(() => {
+    if (showCustomEdgePanel) {
+      hideNodePanel();
+    }
+  }, [showCustomEdgePanel]);
 
   const [basicInfo, setBasicInfo] = useState<GetOntologyLinkTypeRes | null>(
     null
@@ -139,7 +149,6 @@ function EdgePanel() {
   );
 
   useEffect(() => {
-    console.log('----selectedEdgeId----', selectedEdgeId);
     if (selectedEdgeId) {
       // 重置状态
       setBasicInfo(null);
@@ -186,6 +195,7 @@ function EdgePanel() {
   };
 
   const handleEdit = () => {
+    console.log('------------handleEdit------------', selectedEdgeId, OSId);
     if (!selectedEdgeId || !OSId) return;
     history.push(
       `/tenant/compute/modaforge/ontologyScene/detail/${OSId}/links/edit/${selectedEdgeId}`
@@ -319,9 +329,9 @@ function EdgePanel() {
   }
 
   return (
-    <div className="flex h-full w-[400px] flex-col overflow-auto overflow-y-auto rounded-[12px] bg-white">
+    <div className="flex h-full w-[400px] flex-col rounded-[12px] bg-white">
       {/* 头部 */}
-      <div className="flex items-center justify-between border-b border-[var(--color-border-2)] border-gray-300 px-[16px] pb-[8px] pt-[20px]">
+      <div className="mx-[16px] flex items-center justify-between border-b border-[var(--color-border-2)] border-gray-300 pb-[8px] pt-[20px]">
         <div className="flex items-center gap-2">
           <IconLink className="h-4 w-4 text-gray-500" />
           <span className="text-[16px]/[24px] font-semibold text-[#1E293B]">
@@ -346,7 +356,7 @@ function EdgePanel() {
         </div>
       </div>
 
-      <div className="w-full flex-1 px-[16px] py-[20px]">
+      <div className="w-full flex-1 overflow-y-auto px-[16px] py-[20px]">
         <Spin loading={basicInfoLoading} className="w-full">
           {/* 基本信息 */}
           <div className="mb-[24px] flex flex-col gap-[12px]">

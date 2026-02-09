@@ -167,6 +167,7 @@ export default function OntologySceneGraph() {
     useState<GetOntologyTopologyResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const showCustomEdgePanel = useDemoStore((s) => s.showCustomEdgePanel);
+  const setShowCustomEdgePanel = useDemoStore((s) => s.setShowCustomEdgePanel);
 
   useEffect(() => {
     // 获取本体拓扑数据
@@ -222,6 +223,11 @@ export default function OntologySceneGraph() {
         },
         targetXOffset: -8,
         labelRenderer: CustomLabel
+      }}
+      events={{
+        onNodeClick: (node) => {
+          setShowCustomEdgePanel(false);
+        }
       }}
       subHeader={{ fullyCustomSubheader: <SubHeader /> }}
       rightPanels={[

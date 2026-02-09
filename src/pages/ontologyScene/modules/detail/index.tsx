@@ -45,12 +45,11 @@ const MenuGroup = Menu.ItemGroup;
 export default function OntologySceneDetail() {
   const history = useHistory();
   const location = useLocation();
-  const { id: OSId, moduleType = ONTOLOGY_SCENE_MENU_ITEM_KEYS.GRAPH } =
-    useParams<{
-      id: string;
-      moduleType: string;
-    }>();
-  // const match = useRouteMatch();
+  const match = useRouteMatch();
+  const { id: OSId, moduleType = '' } = useParams<{
+    id: string;
+    moduleType: string;
+  }>();
 
   const [sceneTitle, setSceneTitle] = useState('新建本体场景');
 
@@ -112,11 +111,34 @@ export default function OntologySceneDetail() {
       ]
     }
   ];
-  const basePath = `/tenant/compute/modaforge/ontologyScene/detail/${OSId}`;
+  const basePath = match.path;
+  const baseUrl = match.url;
+
+  const activeTab = React.useMemo(() => {
+    const pathname = location.pathname;
+    // 匹配第一个子路由段（菜单项 key），而不是最后一个
+    // 例如：/tenant/compute/modaforge/ontologyScene/detail/123/behaviorActions/create/_NEW_
+    // 应该匹配到 behaviorActions，而不是 _NEW_
+    const routeMatch = pathname.match(
+      /\/tenant\/compute\/modaforge\/ontologyScene\/detail\/[^/]+\/([^/]+)/
+    );
+    const matchedKey = routeMatch ? routeMatch[1] : '';
+    // 验证匹配到的 key 是否是有效的菜单项 key
+    const validKeys = Object.values(ONTOLOGY_SCENE_MENU_ITEM_KEYS);
+    if (validKeys.includes(matchedKey as any)) {
+      return matchedKey;
+    }
+    // 如果没有匹配到有效的 key，使用 moduleType 参数（如果存在）
+    if (moduleType && validKeys.includes(moduleType as any)) {
+      return moduleType;
+    }
+    // 默认返回 GRAPH
+    return ONTOLOGY_SCENE_MENU_ITEM_KEYS.GRAPH;
+  }, [location.pathname, moduleType]);
 
   const handleMenuSelect = (key: string) => {
     // 导航到对应的子路由
-    history.push(`${basePath}/${key}`);
+    history.push(`${baseUrl}/${key}`);
   };
 
   const handleTitleEdit = (title: string) => {
@@ -131,10 +153,10 @@ export default function OntologySceneDetail() {
   const handleCreate = (type: string) => {
     // 根据类型导航到对应的创建页面
     const createPaths: Record<string, string> = {
-      [ONTOLOGY_SCENE_MENU_ITEM_KEYS.OBJECT_TYPE]: `${basePath}/${type}/create`,
-      [ONTOLOGY_SCENE_MENU_ITEM_KEYS.LINKS]: `${basePath}/${type}/create`,
-      [ONTOLOGY_SCENE_MENU_ITEM_KEYS.BEHAVIOR_ACTIONS]: `${basePath}/${type}/create/_NEW_`,
-      [ONTOLOGY_SCENE_MENU_ITEM_KEYS.FUNCTIONS]: `${basePath}/${type}/create`
+      [ONTOLOGY_SCENE_MENU_ITEM_KEYS.OBJECT_TYPE]: `${baseUrl}/${type}/create`,
+      [ONTOLOGY_SCENE_MENU_ITEM_KEYS.LINKS]: `${baseUrl}/${type}/create`,
+      [ONTOLOGY_SCENE_MENU_ITEM_KEYS.BEHAVIOR_ACTIONS]: `${baseUrl}/${type}/create/_NEW_`,
+      [ONTOLOGY_SCENE_MENU_ITEM_KEYS.FUNCTIONS]: `${baseUrl}/${type}/create`
     };
     const path = createPaths[type];
     if (path) {
@@ -240,7 +262,7 @@ export default function OntologySceneDetail() {
             </Dropdown>
           </div>
           <Menu
-            selectedKeys={[moduleType]}
+            selectedKeys={[activeTab]}
             className={cls(styles['ontology-scene-detail-menu'], 'flex-1')}
             // hasCollapseButton
           >

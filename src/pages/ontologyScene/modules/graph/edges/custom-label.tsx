@@ -41,13 +41,8 @@ export default function CustomLabel(props: any) {
           onClick={() => {
             // 保存边的ID（链接ID）和节点信息
             // 边的 id 是字符串格式的链接ID，需要转换为数字
-            let edgeId: number | null = null;
-            if (id) {
-              edgeId = Number(id);
-            } else if (data?.id) {
-              edgeId = typeof data.id === 'number' ? data.id : Number(data.id);
-            }
-            setSelectedEdgeId(edgeId);
+            console.log('------------id------------', data?.id);
+            setSelectedEdgeId(data?.id ?? null);
             setSourceNode(sourceNode);
             setTargetNode(targetNode);
             setShowCustomEdgePanel((s) => !s);
