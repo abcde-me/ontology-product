@@ -20,6 +20,7 @@ function LabelInfo({
         />
       );
     case 'TEXT_CLASSIFICATION':
+    case 'IMAGE_CLASSIFICATION':
     case 'AUDIO_CLASSIFICATION':
     case 'AUDIO_SPLIT':
     case 'VIDEO_CLASSIFICATION':
