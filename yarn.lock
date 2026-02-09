@@ -1540,10 +1540,10 @@
     react-sticky "^6.0.3"
     zustand "^4.5.2"
 
-"@ceai-front/workflow@^0.1.1":
-  version "0.1.1"
-  resolved "http://npm.cestc.cn/@ceai-front/workflow/download/@ceai-front/workflow-0.1.1.tgz#e74255b3487494360b5c2086d5131e569228be8d"
-  integrity sha1-50JVs0h0lDYLXCCG1RMeVpIovo0=
+"@ceai-front/workflow@^0.1.2":
+  version "0.1.2"
+  resolved "http://npm.cestc.cn/@ceai-front/workflow/download/@ceai-front/workflow-0.1.2.tgz#1803acaec3b9a7e6def86daf4c1e42f19ce32004"
+  integrity sha1-GAOsrsO5p+be+G2vTB5C8ZzjIAQ=
   dependencies:
     "@arco-design/web-react" ">=2.66.5"
     "@dagrejs/dagre" "^1.1.4"
