@@ -77,7 +77,7 @@ export interface Ontologymetadataservicev1TopologyNode {
   /**
    * 节点属性
    */
-  attributes?: {
+  ontologyPhysicalPropertiesList?: {
     id: number;
     name: string;
     type: string;

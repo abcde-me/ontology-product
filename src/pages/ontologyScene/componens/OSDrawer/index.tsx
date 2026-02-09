@@ -15,6 +15,7 @@ export const OsDrawer = (props: IProps) => {
     <Drawer
       {...otherProps}
       closeIcon={null}
+      mask={false}
       className={classNames(styles['os-drawer'], className)}
       title={
         <div className={'flex items-center justify-between gap-4'}>

@@ -1,0 +1,12 @@
+.search-dropdown {
+  :global {
+    .arco-select .arco-select-view {
+      background-color: #f5f7fc;
+    }
+
+    .arco-input-group > .arco-input-inner-wrapper {
+      border-bottom-left-radius: 0px;
+      border-top-left-radius: 0;
+    }
+  }
+}
