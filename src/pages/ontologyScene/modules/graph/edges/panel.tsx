@@ -195,7 +195,6 @@ function EdgePanel() {
   };
 
   const handleEdit = () => {
-    console.log('------------handleEdit------------', selectedEdgeId, OSId);
     if (!selectedEdgeId || !OSId) return;
     history.push(
       `/tenant/compute/modaforge/ontologyScene/detail/${OSId}/links/edit/${selectedEdgeId}`
