@@ -22,7 +22,7 @@ export async function getOntologyTopology(
         code: 'RAW_INTELLIGENCE',
         description: '原始情报 - 6项属性',
         type: 'entity',
-        attributes: [
+        ontologyPhysicalPropertiesList: [
           {
             id: 1,
             name: '属性1',
@@ -42,7 +42,7 @@ export async function getOntologyTopology(
         code: 'INTENT_HYPOTHESIS',
         description: '意图研判 - 4项属性',
         type: 'entity',
-        attributes: [
+        ontologyPhysicalPropertiesList: [
           {
             id: 1,
             name: '属性1',
@@ -72,7 +72,7 @@ export async function getOntologyTopology(
         code: 'MILITARY_EVENT',
         description: '作战事件 - 6项属性',
         type: 'entity',
-        attributes: [
+        ontologyPhysicalPropertiesList: [
           {
             id: 1,
             name: '属性1',
@@ -87,7 +87,7 @@ export async function getOntologyTopology(
         code: 'SENSOR_TRACK',
         description: '传感器航迹 - 6项属性',
         type: 'entity',
-        attributes: [
+        ontologyPhysicalPropertiesList: [
           {
             id: 1,
             name: '属性1',
@@ -223,6 +223,114 @@ export async function getOntologyTopology(
     ]
   };
 
+  // const mockData: GetOntologyTopologyResponse = {
+  //   "nodes": [
+  //     {
+  //       "id": 14,
+  //       "name": "用户信息",
+  //       "code": "user_info_code",
+  //       "description": "这是用户信息描述。",
+  //       "type": "ObjectType",
+  //       "syncStatus": 0,
+  //       "attributes": [
+  //         {
+  //           "column_type": "varchar(1024)",
+  //           "comment": "主键",
+  //           "id": 0,
+  //           "is_primary": 1,
+  //           "is_use": 1,
+  //           "name": "id"
+  //         },
+  //         {
+  //           "column_type": "varchar(1024)",
+  //           "comment": "用户名",
+  //           "id": 0,
+  //           "is_primary": 0,
+  //           "is_use": 1,
+  //           "name": "username"
+  //         },
+  //         {
+  //           "column_type": "varchar(1024)",
+  //           "comment": "年龄",
+  //           "id": 0,
+  //           "is_primary": 0,
+  //           "is_use": 1,
+  //           "name": "age"
+  //         },
+  //         {
+  //           "column_type": "varchar(1024)",
+  //           "comment": "岗位",
+  //           "id": 0,
+  //           "is_primary": 0,
+  //           "is_use": 1,
+  //           "name": "occupation"
+  //         }
+  //       ]
+  //     },
+  //     {
+  //       "id": 19,
+  //       "name": "用户信息(新)2",
+  //       "code": "user_info_dev_new_code",
+  //       "description": "这是用户信息描述ya。",
+  //       "type": "ObjectType",
+  //       "syncStatus": 2,
+  //       "attributes": [
+  //         {
+  //           "column_type": "varchar(500)",
+  //           "comment": "主键",
+  //           "id": 129,
+  //           "is_primary": 1,
+  //           "is_use": 1,
+  //           "name": "id"
+  //         },
+  //         {
+  //           "column_type": "varchar(1024)",
+  //           "comment": "用户名",
+  //           "id": 130,
+  //           "is_primary": 0,
+  //           "is_use": 1,
+  //           "name": "username"
+  //         },
+  //         {
+  //           "column_type": "varchar(1024)",
+  //           "comment": "年龄",
+  //           "id": 131,
+  //           "is_primary": 0,
+  //           "is_use": 1,
+  //           "name": "age"
+  //         },
+  //         {
+  //           "column_type": "varchar(1024)",
+  //           "comment": "岗位",
+  //           "id": 133,
+  //           "is_primary": 0,
+  //           "is_use": 1,
+  //           "name": "occupation"
+  //         },
+  //         {
+  //           "column_type": "varchar(1024)",
+  //           "comment": "身高",
+  //           "id": 134,
+  //           "is_primary": 0,
+  //           "is_use": 1,
+  //           "name": "height"
+  //         }
+  //       ]
+  //     }
+  //   ],
+  //   "edges": [
+  //     {
+  //       "id": 15,
+  //       "name": "链接类型3",
+  //       "code": "LINK_TYPE_001",
+  //       "description": "string1",
+  //       "type": 3,
+  //       "syncStatus": 0,
+  //       "sourceId": 14,
+  //       "targetId": 19
+  //     }
+  //   ]
+  // };
   const res: ApiRes<GetOntologyTopologyResponse> = {
     code: '',
     data: mockData,
