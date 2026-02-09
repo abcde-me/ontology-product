@@ -98,7 +98,7 @@ function LabelEditorPage() {
       if (['PREVIEW'].includes(stage!)) {
         if (mode) {
           setLabelUrl(
-            `/labeleditor/${labelTypeCode(labelType!, toolKind!)}/requirement/${requirementId}/task/${taskId}?type=${labelType}&kind=${toolKind}&mode=${mode}&tool=${labelTool}&name=${reqName}&stage=${stage}&pkgId=${pkgId}`
+            `/labeleditor/${labelTypeCode(labelType!, labelTool!)}/requirement/${requirementId}/task/${taskId}?type=${labelType}&kind=${toolKind}&mode=${mode}&tool=${labelTool}&name=${reqName}&stage=${stage}&pkgId=${pkgId}`
           );
           setLoading(false);
         } else {
