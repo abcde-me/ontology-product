@@ -1,5 +1,5 @@
 import { Upload, Message } from '@arco-design/web-react';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { PrefixAimdp } from '@/api/endpoints';
 import { IconUpload, IconDownload } from '@arco-design/web-react/icon';
 import { UploadStatus } from '../types/objectType';
@@ -9,22 +9,57 @@ import { useUserInfoStore } from '@/store/userInfoStore';
 interface FieldImportUploadProps {
   onFileChange: (fileData: any) => void;
   onUploadingChange?: (isUploading: boolean) => void;
-  accept?: string; // 支持的文件类型，默认为 .xlsx,.xls
+  accept?: string; // 支持的文件类型，默认为 .csv
   fileType?: 'excel' | 'csv'; // 文件类型，用于不同的验证和提示
   maxSize?: number; // 文件大小限制（MB），默认50MB
+  manualUpload?: boolean; // 是否手动上传，如果为true，则阻止自动上传，直接调用onFileChange传递文件对象
+  customAction?: string; // 自定义上传接口地址
+  value?: any; // 受控的文件对象，用于手动上传模式下同步外部状态
 }
 
 const FieldImportUpload: React.FC<FieldImportUploadProps> = ({
   onFileChange,
   onUploadingChange,
-  accept = '.xlsx,.xls',
-  fileType = 'excel',
-  maxSize = 50
+  accept = '.csv',
+  fileType = 'csv',
+  maxSize = 50,
+  manualUpload = false,
+  customAction,
+  value
 }) => {
   const [fileList, setFileList] = useState<any>([]);
   const projectId = useUserInfoStore((state) => state.projectId);
 
+  // 在手动上传模式下，同步外部 value 到 fileList
+  useEffect(() => {
+    if (manualUpload && value) {
+      const file = value;
+      setFileList([
+        {
+          name: file.name || 'uploaded_file',
+          status: 'done' as const
+        }
+      ]);
+    } else if (manualUpload && !value) {
+      setFileList([]);
+    }
+  }, [manualUpload, value]);
+
   const handleUploadChange = (files: any, file: any) => {
+    // 如果是手动上传模式，删除操作已经在 handleRemove 中处理，这里不需要处理
+    if (manualUpload) {
+      // 手动上传模式下，onChange 主要用于自动上传的情况
+      // 删除操作已经在 onRemove 中处理，这里可以忽略
+      return;
+    }
+
+    // 检查是否是删除操作：files 为空但 file 存在，说明是删除
+    if (files.length === 0 && file) {
+      // 删除操作已经在 handleRemove 中处理，这里不需要重复处理
+      setFileList([]);
+      return;
+    }
+
     // 更新 fileList 状态，让 Upload 组件受控
     setFileList(files);
 
@@ -133,7 +168,7 @@ const FieldImportUpload: React.FC<FieldImportUploadProps> = ({
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `数据资产表模板.xlsx`;
+      a.download = `标准模板.csv`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
@@ -146,9 +181,33 @@ const FieldImportUpload: React.FC<FieldImportUploadProps> = ({
   };
 
   const handleRemove = (file: any) => {
-    const newFileList = fileList.filter((item: any) => item.uid !== file.uid);
-    setFileList(newFileList);
-    onFileChange([]);
+    setFileList([]);
+    // 如果是手动上传模式，传递 undefined 表示文件被移除
+    if (manualUpload) {
+      onFileChange(undefined);
+    } else {
+      onFileChange([]);
+    }
+  };
+
+  const handleBeforeUpload = (file: any) => {
+    if (!checkFile(file)) {
+      return false;
+    }
+
+    // 如果是手动上传模式，阻止自动上传，直接调用onFileChange传递文件对象
+    if (manualUpload) {
+      // 更新fileList以显示文件
+      const newFile = {
+        name: file.name,
+        status: 'done' as const
+      };
+      setFileList([newFile]);
+      onFileChange(file);
+      return false;
+    }
+
+    return true;
   };
 
   return (
@@ -160,10 +219,8 @@ const FieldImportUpload: React.FC<FieldImportUploadProps> = ({
         fileList={fileList}
         showUploadList={fileList.length > 0 ? true : false}
         onRemove={handleRemove}
-        beforeUpload={(file) => {
-          return checkFile(file);
-        }}
-        action={`${PrefixAimdp}/AnalyzeDataAssetFieldsFile`}
+        beforeUpload={handleBeforeUpload}
+        action={customAction || `${PrefixAimdp}/AnalyzeDataAssetFieldsFile`}
         onChange={handleUploadChange}
         onDrop={handleDrop}
         headers={{
@@ -177,7 +234,7 @@ const FieldImportUpload: React.FC<FieldImportUploadProps> = ({
             <>仅支持上传UTF-8编码格式的文件,文件大小不超过{maxSize}MB</>
           ) : (
             <>
-              支持Excel格式（.xlsx,.xls）文件
+              支持CSV格式文件
               <br />
               最多上传1个文件，文件/压缩包源文件大小不超过{maxSize}MB
             </>
@@ -196,7 +253,7 @@ const FieldImportUpload: React.FC<FieldImportUploadProps> = ({
             <span className="text-[12px] text-[var(--color-text-4)]">
               {fileType === 'csv'
                 ? '仅支持上传UTF-8编码格式的文件,文件大小不超过500MB'
-                : '支持Excel格式（.xlsx,.xls）文件'}
+                : '支持CSV格式文件'}
             </span>
             {fileType === 'excel' && (
               <span className="text-[12px] text-[var(--color-text-4)]">

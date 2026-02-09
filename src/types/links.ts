@@ -1,0 +1,259 @@
+import { SyncStatus } from './graphApi';
+import { ObjectType } from './objectType';
+
+export interface ListOntologyLinkTypeColumnReq {
+  /**
+   * 搜索内容
+   */
+  filter?: string;
+  /**
+   * 是否使用（1：是，0：否）
+   */
+  isUse?: number;
+  /**
+   * 链接类型ID
+   */
+  linkTypeID?: number;
+  /**
+   * 排序规则: asc: 升序, desc: 倒序, 默认倒序
+   *
+   * Example: desc
+   */
+  order?: 'asc' | 'desc';
+  /**
+   * 排序依据
+   *
+   * Example: name
+   */
+  orderBy?: string;
+  /**
+   * mongo 排序规则
+   *
+   * Example: []string{ "{order: desc}", "{id:asc}" }
+   */
+  orders?: string[];
+  /**
+   * 页码
+   *
+   * Example: 1
+   */
+  pageNo?: number;
+  /**
+   * 每页的大小
+   *
+   * Example: 10
+   */
+  pageSize?: number;
+}
+
+export interface LinkTypeAttributeInfo {
+  /**
+   * 字段类型
+   */
+  columnType?: string;
+  /**
+   * 属性名称
+   */
+  comment?: string;
+  /**
+   * 创建时间
+   */
+  createTime?: string;
+  /**
+   * 创建人
+   */
+  createUser?: string;
+  /**
+   * ID,唯一标识
+   */
+  id?: number;
+  /**
+   * 删除标识（1：是，0：否）
+   */
+  isDeleted?: number;
+  /**
+   * 是否主键（1：是，0：否）
+   */
+  isPrimary?: number;
+  /**
+   * 是否使用（1：是，0：否）
+   */
+  isUse?: number;
+  /**
+   * 链接类型ID
+   */
+  linkTypeID?: number;
+  /**
+   * 表字段
+   */
+  name?: string;
+  /**
+   * 更新时间
+   */
+  updateTime?: string;
+  /**
+   * 修改人
+   */
+  updateUser?: string;
+}
+
+export interface ListOntologyLinkTypeColumnRes {
+  /**
+   * 当前页结果
+   */
+  result?: LinkTypeAttributeInfo[];
+  /**
+   * 总数
+   */
+  totalCount?: number;
+}
+
+export interface ListOntologyLinkTypeDataReq {
+  /**
+   * 链接类型ID
+   */
+  id: number;
+  /**
+   * 页码
+   */
+  page: number;
+  /**
+   * 每页大小
+   */
+  pageSize: number;
+}
+
+export interface ListOntologyLinkTypeDataRes {
+  /**
+   * 当前页结果
+   */
+  result?: Record<string, any>[];
+  /**
+   * 总数
+   */
+  totalCount?: number;
+}
+
+export enum LinkType {
+  /** 1:1 一对一 */
+  ONE_TO_ONE = '1:1',
+  /** 1:N 一对多 */
+  ONE_TO_MANY = '1:N',
+  /** N:N 多对多 */
+  MANY_TO_MANY = 'N:N'
+}
+
+export interface GetOntologyLinkTypeRes {
+  /**
+   * 链接id
+   */
+  code?: string;
+  /**
+   * 创建时间
+   */
+  createTime?: string;
+  /**
+   * 创建人
+   */
+  createUser?: string;
+  /**
+   * 描述
+   */
+  description?: string;
+  /**
+   * minio文件地址
+   */
+  filePath?: string;
+  /**
+   * ID,唯一标识
+   */
+  id?: number;
+  /**
+   * 删除标识（1：是，0：否）
+   */
+  isDeleted?: number;
+  /**
+   * 链接数据库名称
+   */
+  linkDBName?: string;
+  /**
+   * 链接源属性ID
+   */
+  linkSourceColumnID?: number;
+  /**
+   * 来源类型 1 来自iceberg  2 文件上传
+   */
+  linkSourceType?: number;
+  /**
+   * 链接表名称
+   */
+  linkTableName?: string;
+  /**
+   * 链接目标属性ID
+   */
+  linkTargetColumnID?: number;
+  /**
+   * 名称
+   */
+  name?: string;
+  /**
+   * 根据关系在tidb生成关系表的库
+   */
+  ontologyDbName?: string;
+  /**
+   * 链接类型列信息
+   */
+  ontologyLinkTypeColumnList?: LinkTypeAttributeInfo[];
+  /**
+   * 本体模型ID
+   */
+  ontologyModelID?: number;
+  /**
+   * 根据关系在tidb生成关系表名
+   */
+  ontologyTableName?: string;
+  /**
+   * 源对象类型ID
+   */
+  sourceObjectTypeID?: number;
+  /**
+   * 源对象类型信息
+   */
+  sourceObjectTypeInfo?: ObjectType;
+  /**
+   * 源属性ID
+   */
+  sourcePropertyID?: number;
+  /**
+   * 同步状态（0：未同步，1：同步中，2：成功，3：失败）
+   */
+  syncStatus?: SyncStatus;
+  /**
+   * 同步时间
+   */
+  syncTime?: string;
+  /**
+   * 目标对象类型ID
+   */
+  targetObjectTypeID?: number;
+  /**
+   * 目标对象类型信息
+   */
+  targetObjectTypeInfo?: ObjectType;
+  /**
+   * 目标属性ID
+   */
+  targetPropertyID?: number;
+  /**
+   * 链接类型
+   */
+  type?: LinkType;
+  /**
+   * 更新时间
+   */
+  updateTime?: string;
+  /**
+   * 修改人
+   */
+  updateUser?: string;
+}

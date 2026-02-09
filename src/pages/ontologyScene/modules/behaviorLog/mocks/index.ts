@@ -1,4 +1,8 @@
-import { BehaviorLogItem, SearchParams } from '../types';
+import {
+  BehaviorLogItem,
+  BehaviorLogListParams,
+  BehaviorLogListResponse
+} from '../types';
 
 // 🔧 Mock 开关（开发时设为 true，接口就绪后设为 false）
 export const USE_MOCK = true;
@@ -10,12 +14,8 @@ const delay = (ms = 300) => new Promise((resolve) => setTimeout(resolve, ms));
 const randomDuration = () => Math.floor(Math.random() * 4900) + 100;
 
 // 生成随机状态
-const randomStatus = (): 'success' | 'running' | 'failed' => {
-  const statuses: Array<'success' | 'running' | 'failed'> = [
-    'success',
-    'running',
-    'failed'
-  ];
+const randomStatus = (): 1 | 2 | 3 => {
+  const statuses: Array<1 | 2 | 3> = [1, 2, 3];
   const weights = [0.7, 0.2, 0.1]; // 70% 成功, 20% 运行中, 10% 失败
   const random = Math.random();
   let sum = 0;
@@ -23,7 +23,7 @@ const randomStatus = (): 'success' | 'running' | 'failed' => {
     sum += weights[i];
     if (random < sum) return statuses[i];
   }
-  return 'success';
+  return 1;
 };
 
 // 生成时间字符串
@@ -78,24 +78,26 @@ export const generateMockData = (count = 50): BehaviorLogItem[] => {
     const startTimeOffset = i * 60000; // 每条记录间隔1分钟
     const startTime = generateTime(baseTime, startTimeOffset);
     const endTime =
-      status === 'running'
-        ? '-'
-        : generateTime(baseTime, startTimeOffset + duration);
+      status === 2 ? '-' : generateTime(baseTime, startTimeOffset + duration);
 
     data.push({
-      id: `log_${String(i + 1).padStart(4, '0')}`,
-      type: behaviorTypes[Math.floor(Math.random() * behaviorTypes.length)],
-      name: `${behaviorTypes[Math.floor(Math.random() * behaviorTypes.length)]}_${i + 1}`,
-      startTime,
-      endTime,
-      duration,
-      status,
-      objectType: objectTypes[Math.floor(Math.random() * objectTypes.length)],
-      operator: operators[Math.floor(Math.random() * operators.length)],
-      errorMessage:
-        status === 'failed'
+      id: i + 1,
+      session_id: `session_${String(i + 1).padStart(6, '0')}`,
+      action_id: Math.floor(Math.random() * 100),
+      start_time: startTime,
+      end_time: endTime,
+      run_status: status,
+      operator_time: startTime,
+      run_log:
+        status === 3
           ? errorMessages[Math.floor(Math.random() * errorMessages.length)]
-          : undefined
+          : 'method execute success',
+      input_params: JSON.stringify({ id: i + 1, age: 20 + i }),
+      execute_code: '#!/usr/bin/env python3\nprint("Hello World")',
+      created_at: startTime,
+      updated_at: endTime === '-' ? startTime : endTime,
+      created_by: operators[Math.floor(Math.random() * operators.length)],
+      updated_by: operators[Math.floor(Math.random() * operators.length)]
     });
   }
 
@@ -159,27 +161,26 @@ LIMIT 100;`;
 export const mockApi = {
   // 获取执行记录列表
   getBehaviorLogList: async (
-    params: SearchParams
-  ): Promise<{
-    list: BehaviorLogItem[];
-    total: number;
-  }> => {
+    params: BehaviorLogListParams
+  ): Promise<BehaviorLogListResponse> => {
     await delay(500);
     let list = [...MOCK_BEHAVIOR_LOGS];
 
     // 关键词搜索
-    if (params.keyword) {
-      const keyword = params.keyword.toLowerCase();
+    if (params.query) {
+      const keyword = params.query.toLowerCase();
       list = list.filter(
         (item) =>
-          item.name.toLowerCase().includes(keyword) ||
-          item.type.toLowerCase().includes(keyword) ||
-          item.id.toLowerCase().includes(keyword)
+          item.session_id.toLowerCase().includes(keyword) ||
+          String(item.id).includes(keyword)
       );
     }
 
+    // 根据类型筛选（这里 Mock 数据不区分，实际应该区分）
+    // 实际项目中应该根据 params.type 返回不同的数据
+
     // 分页
-    const page = params.page || 1;
+    const page = params.page_num || 1;
     const pageSize = params.page_size || 20;
     const total = list.length;
     const start = (page - 1) * pageSize;
@@ -187,15 +188,17 @@ export const mockApi = {
     const paginatedList = list.slice(start, end);
 
     return {
-      list: paginatedList,
-      total
+      items: paginatedList,
+      total,
+      page,
+      page_size: pageSize
     };
   },
 
   // 获取执行记录详情
   getBehaviorLogDetail: async (id: string): Promise<BehaviorLogItem> => {
     await delay(300);
-    const item = MOCK_BEHAVIOR_LOGS.find((log) => log.id === id);
+    const item = MOCK_BEHAVIOR_LOGS.find((log) => log.id === Number(id));
     if (!item) {
       throw new Error(`执行记录 ${id} 不存在`);
     }

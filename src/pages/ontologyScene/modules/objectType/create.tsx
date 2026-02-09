@@ -5,6 +5,7 @@ import ObjectTypeForm, {
   ObjectTypeFormData,
   ObjectTypeFormRef
 } from './components/ObjectTypeForm';
+import { createOntologyObjectType } from '@/api/ontologySceneLibrary/objectType';
 
 export default function OntologySceneObjectTypeCreate() {
   const history = useHistory();
@@ -15,15 +16,31 @@ export default function OntologySceneObjectTypeCreate() {
   const handleSubmit = async (data: ObjectTypeFormData) => {
     setLoading(true);
     try {
-      // TODO: 调用创建API
-      console.log('Create object type:', data);
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      Message.success('创建成功');
-      history.push(
-        `/tenant/compute/modaforge/ontologyScene/detail/${OSId}/objectType/list`
-      );
+      // 调用创建API
+      const response = await createOntologyObjectType({
+        code: data.code,
+        name: data.name,
+        description: data.description,
+        icon: data.icon,
+        ontologyModelID: Number(OSId),
+        filePath: data.filePath,
+        originalDbName: data.originalDbName,
+        originalTableName: data.originalTableName,
+        sourceType: data.sourceType,
+        ontologyPhysicalPropertiesList: data.ontologyPhysicalPropertiesList
+      });
+
+      if (response.status === 200 && response.code === '') {
+        Message.success('创建成功');
+        history.push(
+          `/tenant/compute/modaforge/ontologyScene/detail/${OSId}/objectType/list`
+        );
+      } else {
+        Message.error(response.message || '创建失败，请重试');
+      }
     } catch (error) {
       Message.error('创建失败，请重试');
+      console.error('创建对象类型失败:', error);
     } finally {
       setLoading(false);
     }
@@ -44,6 +61,9 @@ export default function OntologySceneObjectTypeCreate() {
         <div className="overflow-y-auto">
           <ObjectTypeForm
             ref={formRef}
+            initialValues={{
+              ontologyModelID: Number(OSId)
+            }}
             onSubmit={handleSubmit}
             onCancel={handleCancel}
             loading={loading}

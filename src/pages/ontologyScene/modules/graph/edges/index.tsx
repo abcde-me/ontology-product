@@ -1,1 +1,2 @@
-export { default as CustomEdge } from './custom-edge';
+export { default as CustomLabel } from './custom-label';
+export { default as EdgePanel } from './panel';

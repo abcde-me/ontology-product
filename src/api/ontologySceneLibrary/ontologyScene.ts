@@ -150,3 +150,38 @@ export const deleteOntologyModel = (params: {
     requestId: 'mock-request-id'
   });
 };
+
+export const getOntologyModelDetail = async (params: {
+  id: number;
+}): Promise<ApiRes<OntologScene>> => {
+  await sleep(1000);
+  // Mock 数据：根据 id 返回对应的详情
+  const mockData: OntologScene = {
+    id: params.id,
+    name: '作战本体场景',
+    description:
+      '用于作战场景的本体模型用于作战场景的本体模型用于作战场景的本体模型用于作战场景的本体模型用于作战场景的本体模型用于作战场景的本体模型用于作战场景的本体模型用于作战场景的本体模型用于作战场景的本体模型用于作战场景的本体模型用于作战场景的本体模型用于作战场景的本体模型',
+    icon: 'ontology-scene-1',
+    createTime: '2024-01-15 10:00:00',
+    createUser: 'admin',
+    updateTime: '2024-01-20 14:30:00',
+    updateUser: 'admin',
+    isDeleted: 0,
+    ontologyLinkTypeCounts: 15,
+    ontologyObjectTypeCounts: 8,
+    ontologyActionCounts: 12,
+    ontologyFunctionCounts: 6,
+    tagList: [
+      { id: 1, name: '作战' },
+      { id: 2, name: '军事' }
+    ]
+  };
+
+  return Promise.resolve({
+    code: '',
+    status: 200,
+    data: mockData,
+    message: 'success',
+    requestId: 'mock-request-id'
+  });
+};

@@ -49,12 +49,13 @@ export function getBehaviorHistory(params: {
  * 获取执行记录列表
  */
 export function getBehaviorLogList(params: {
-  keyword?: string;
-  page?: number;
-  page_size?: number;
+  page_num: number;
+  page_size: number;
+  query: string;
+  type: 'action' | 'function';
 }) {
   // @ts-ignore - UAPI 资源待后端配置
-  return UAPI.RES.behaviorLogList({}).post(params).inRegion().do();
+  return UAPI.RES.PageExecuteTestLog({}).post(params).inRegion().do();
 }
 
 /**
@@ -102,3 +103,5 @@ export function batchDeleteBehaviorLogs(params: { ids: string[] }) {
   // @ts-ignore - UAPI 资源待后端配置
   return UAPI.RES.behaviorLogBatchDelete({}).post(params).inRegion().do();
 }
+
+// 获取执行记录

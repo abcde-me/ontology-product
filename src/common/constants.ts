@@ -13,7 +13,7 @@ export const ONTOLOGY_SCENE_MENU_ITEM_KEYS = {
   LINKS: 'links', // 链接
   BEHAVIOR_ACTIONS: 'behaviorActions', // 行为动作
   FUNCTIONS: 'functions', // 函数
-  BEHAVIOR_LOG: 'behaviorLog' // 行为日志
+  BEHAVIOR_LOG: 'behaviorLog' // 执行记录
 } as const;
 
 // 本体场景菜单 key

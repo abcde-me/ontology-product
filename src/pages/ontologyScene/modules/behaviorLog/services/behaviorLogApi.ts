@@ -1,16 +1,17 @@
 import * as api from '@/api/behaviorTest';
 import { USE_MOCK, mockApi } from '../mocks';
-import { BehaviorLogItem, SearchParams } from '../types';
+import {
+  BehaviorLogItem,
+  BehaviorLogListParams,
+  BehaviorLogListResponse
+} from '../types';
 
 /**
  * 获取执行记录列表
  */
 export const fetchBehaviorLogList = async (
-  params: SearchParams
-): Promise<{
-  list: BehaviorLogItem[];
-  total: number;
-}> => {
+  params: BehaviorLogListParams
+): Promise<BehaviorLogListResponse> => {
   if (USE_MOCK) {
     return mockApi.getBehaviorLogList(params);
   }
@@ -19,16 +20,7 @@ export const fetchBehaviorLogList = async (
   const response = await api.getBehaviorLogList(params);
 
   // 适配响应格式
-  if (response.data?.list) {
-    return {
-      list: response.data.list,
-      total: response.data.total || response.data.list.length
-    };
-  }
-  return {
-    list: response.data || [],
-    total: 0
-  };
+  return response.data;
 };
 
 /**

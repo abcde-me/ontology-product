@@ -106,7 +106,7 @@ export default function OntologySceneDetail() {
       children: [
         {
           key: ONTOLOGY_SCENE_MENU_ITEM_KEYS.BEHAVIOR_LOG,
-          title: '行为日志',
+          title: '执行记录',
           icon: <MenuIcon fontSize={20} />
         }
       ]
@@ -219,6 +219,7 @@ export default function OntologySceneDetail() {
         status="未发布"
         onTitleEdit={handleTitleEdit}
         onPublish={handlePublish}
+        sceneId={Number(OSId)}
       />
       <Layout className="flex flex-row overflow-hidden">
         <div className="flex min-w-[200px] flex-shrink-0 flex-col border-r border-[var(--color-border-2)] bg-white">

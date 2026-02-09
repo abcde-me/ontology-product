@@ -733,6 +733,8 @@ export const ModaForgeResourceEndpoints = {
   behaviorOrchestration: PrefixAimdp + '/SaveBehaviorOrchestration',
   // 获取历史记录（可选）
   behaviorHistory: PrefixAimdp + '/ListBehaviorHistory',
+  // 执行记录
+  PageExecuteTestLog: PrefixAimdp + '/PageExecuteTestLog',
 
   // 本体拓扑
   // 获取本体拓扑
@@ -753,6 +755,43 @@ export const ModaForgeResourceEndpoints = {
   // 更新本体场景
   UpdateOntologyModelApi: PrefixAimdp + '/UpdateOntologyModel',
   // 删除本体场景
+  DeleteOntologyModelApi: PrefixAimdp + '/DeleteOntologyModel',
+  // 获取本体场景详情
+  GetOntologyModelDetailApi: PrefixAimdp + '/GetOntologyModelDetail',
+
+  // 对象类型
+  // 获取对象类型列表
+  ListOntologyObjectTypeApi: PrefixAimdp + '/ListOntologyObjectType',
+  // 创建对象类型
+  CreateOntologyObjectTypeApi: PrefixAimdp + '/CreateOntologyObjectType',
+  // 更新对象类型
+  UpdateOntologyObjectTypeApi: PrefixAimdp + '/UpdateOntologyObjectType',
+  // 删除对象类型
+  DeleteOntologyObjectTypeApi: PrefixAimdp + '/DeleteOntologyObjectType',
+  // 获取对象类型详情
+  GetOntologyObjectTypeApi: PrefixAimdp + '/GetOntologyObjectType',
+  // 上传CSV文件并解析
+  UploadOntologyEntityDataFileApi:
+    PrefixAimdp + '/UploadOntologyEntityDataFile',
+
+  //属性
+  // 获取公共属性列表
+  ListOntologyPublicPropertiesApi:
+    PrefixAimdp + '/ListOntologyPublicProperties',
+  // 创建公共属性
+  CreateOntologyPublicPropertiesApi:
+    PrefixAimdp + '/CreateOntologyPublicProperties',
+  // 删除公共属性
+  DeleteOntologyPublicPropertiesApi:
+    PrefixAimdp + '/DeleteOntologyPublicProperties',
+
+  // 链接
+  // 获取链接的属性列表
+  ListOntologyLinkTypeColumnApi: PrefixAimdp + '/ListOntologyLinkTypeColumn',
+  // 获取链接的实例列表
+  ListOntologyLinkTypeDataApi: PrefixAimdp + '/ListOntologyLinkTypeData',
+  // 获取链接类型详细信息
+  GetOntologyLinkTypeApi: PrefixAimdp + '/GetOntologyLinkType',
   DeleteOntologyModelApi: PrefixAimdp + '/DeleteOntologyModel',
   GetOntologyTopologyApi: PrefixAimdp + '/GetOntologyTopology',
   // ===================== 本体函数相关 =====================

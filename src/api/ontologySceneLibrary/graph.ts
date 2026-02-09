@@ -33,7 +33,8 @@ export async function getOntologyTopology(
             name: '属性2',
             type: 'string'
           }
-        ]
+        ],
+        syncStatus: SyncStatus.FAILED
       },
       {
         id: 2,
@@ -62,7 +63,8 @@ export async function getOntologyTopology(
             name: '属性4',
             type: 'string'
           }
-        ]
+        ],
+        syncStatus: SyncStatus.FAILED
       },
       {
         id: 3,
@@ -76,7 +78,8 @@ export async function getOntologyTopology(
             name: '属性1',
             type: 'string'
           }
-        ]
+        ],
+        syncStatus: SyncStatus.SUCCESS
       },
       {
         id: 4,
@@ -90,35 +93,40 @@ export async function getOntologyTopology(
             name: '属性1',
             type: 'string'
           }
-        ]
+        ],
+        syncStatus: SyncStatus.SUCCESS
       },
       {
         id: 5,
         name: '行动方案',
         code: 'COURSE_OF_ACTION',
         description: '行动方案 - 5项属性',
-        type: 'entity'
+        type: 'entity',
+        syncStatus: SyncStatus.NOT_SYNC
       },
       {
         id: 6,
         name: '作战任务',
         code: 'MISSION',
         description: '作战任务 - 3项属性',
-        type: 'entity'
+        type: 'entity',
+        syncStatus: SyncStatus.NOT_SYNC
       },
       {
         id: 7,
         name: '作战资源',
         code: 'MILITARY_ASSET',
         description: '作战资源 - 10项属性',
-        type: 'entity'
+        type: 'entity',
+        syncStatus: SyncStatus.SYNCING
       },
       {
         id: 8,
         name: '部队编制',
         code: 'ORGANIZATION',
         description: '部队编制 - 5项属性',
-        type: 'entity'
+        type: 'entity',
+        syncStatus: SyncStatus.SUCCESS
       }
     ],
     edges: [
@@ -129,7 +137,8 @@ export async function getOntologyTopology(
         description: '原始情报 -> 意图研判 (研判支撑)',
         sourceId: 1,
         targetId: 2,
-        type: 1
+        type: 1,
+        syncStatus: SyncStatus.FAILED
       },
       {
         id: 102,
@@ -138,7 +147,8 @@ export async function getOntologyTopology(
         description: '原始情报 -> 作战事件',
         sourceId: 1,
         targetId: 3,
-        type: 1
+        type: 1,
+        syncStatus: SyncStatus.FAILED
       },
       {
         id: 103,
@@ -147,7 +157,8 @@ export async function getOntologyTopology(
         description: '意图研判 -> 作战事件',
         sourceId: 2,
         targetId: 3,
-        type: 1
+        type: 1,
+        syncStatus: SyncStatus.SUCCESS
       },
       {
         id: 104,
@@ -156,7 +167,8 @@ export async function getOntologyTopology(
         description: '原始情报 -> 传感器航迹',
         sourceId: 1,
         targetId: 4,
-        type: 1
+        type: 1,
+        syncStatus: SyncStatus.FAILED
       },
       {
         id: 105,
@@ -165,7 +177,8 @@ export async function getOntologyTopology(
         description: '作战事件 -> 行动方案 (推荐方案)',
         sourceId: 3,
         targetId: 5,
-        type: 1
+        type: 1,
+        syncStatus: SyncStatus.FAILED
       },
       {
         id: 106,
@@ -174,7 +187,8 @@ export async function getOntologyTopology(
         description: '传感器航迹 -> 作战资源',
         sourceId: 4,
         targetId: 7,
-        type: 1
+        type: 1,
+        syncStatus: SyncStatus.NOT_SYNC
       },
       {
         id: 107,
@@ -183,7 +197,8 @@ export async function getOntologyTopology(
         description: '行动方案 -> 作战任务',
         sourceId: 5,
         targetId: 6,
-        type: 1
+        type: 1,
+        syncStatus: SyncStatus.SYNCING
       },
       {
         id: 108,
@@ -192,7 +207,8 @@ export async function getOntologyTopology(
         description: '作战任务 -> 作战资源',
         sourceId: 6,
         targetId: 7,
-        type: 1
+        type: 1,
+        syncStatus: SyncStatus.SUCCESS
       },
       {
         id: 109,
@@ -201,13 +217,14 @@ export async function getOntologyTopology(
         description: '作战资源 -> 部队编制 (下)',
         sourceId: 7,
         targetId: 8,
-        type: 1
+        type: 1,
+        syncStatus: SyncStatus.SUCCESS
       }
     ]
   };
 
   const res: ApiRes<GetOntologyTopologyResponse> = {
-    code: 0,
+    code: '',
     data: mockData,
     message: 'mock success',
     requestId: 'mock-request-id',
@@ -227,7 +244,7 @@ export async function listOntologyObjectTypeData(params: {
   pageSize: number;
 }): Promise<ApiRes<ListOntologyObjectTypeDataRes>> {
   return Promise.resolve({
-    code: 0,
+    code: '',
     data: {
       result: [
         {
@@ -300,7 +317,7 @@ export async function listOntologyPhysicalProperties(
   params: ListOntologyPhysicalPropertiesReq
 ): Promise<ApiRes<ListOntologyPhysicalPropertiesRes>> {
   return Promise.resolve({
-    code: 0,
+    code: '',
     data: {
       result: [
         {
@@ -434,10 +451,10 @@ export async function listOntologyLinkType(
       description: '原始情报 -> 意图研判 (研判支撑)',
       sourceObjectTypeID: 1,
       sourceObjectTypeName: nodeNameMap[1],
-      sourceObjectTypeIcon: 'intelligence',
+      sourceObjectTypeIcon: 'object-type-1',
       targetObjectTypeID: 2,
       targetObjectTypeName: nodeNameMap[2],
-      targetObjectTypeIcon: 'hypothesis',
+      targetObjectTypeIcon: 'object-type-2',
       type: LinkType.ONE_TO_MANY,
       syncStatus: SyncStatus.SUCCESS,
       syncTime: '2024-01-01 10:00:00',
@@ -464,10 +481,10 @@ export async function listOntologyLinkType(
       description: '原始情报 -> 作战事件',
       sourceObjectTypeID: 1,
       sourceObjectTypeName: nodeNameMap[1],
-      sourceObjectTypeIcon: 'intelligence',
+      sourceObjectTypeIcon: 'object-type-1',
       targetObjectTypeID: 3,
       targetObjectTypeName: nodeNameMap[3],
-      targetObjectTypeIcon: 'event',
+      targetObjectTypeIcon: 'object-type-3',
       type: LinkType.ONE_TO_MANY,
       syncStatus: SyncStatus.SUCCESS,
       syncTime: '2024-01-01 10:30:00',
@@ -494,10 +511,10 @@ export async function listOntologyLinkType(
       description: '意图研判 -> 作战事件',
       sourceObjectTypeID: 2,
       sourceObjectTypeName: nodeNameMap[2],
-      sourceObjectTypeIcon: 'hypothesis',
+      sourceObjectTypeIcon: 'object-type-2',
       targetObjectTypeID: 3,
       targetObjectTypeName: nodeNameMap[3],
-      targetObjectTypeIcon: 'event',
+      targetObjectTypeIcon: 'object-type-3',
       type: LinkType.MANY_TO_MANY,
       syncStatus: SyncStatus.SUCCESS,
       syncTime: '2024-01-01 11:00:00',
@@ -524,10 +541,10 @@ export async function listOntologyLinkType(
       description: '原始情报 -> 传感器航迹',
       sourceObjectTypeID: 1,
       sourceObjectTypeName: nodeNameMap[1],
-      sourceObjectTypeIcon: 'intelligence',
+      sourceObjectTypeIcon: 'object-type-1',
       targetObjectTypeID: 4,
       targetObjectTypeName: nodeNameMap[4],
-      targetObjectTypeIcon: 'track',
+      targetObjectTypeIcon: 'object-type-4',
       type: LinkType.ONE_TO_MANY,
       syncStatus: SyncStatus.SUCCESS,
       syncTime: '2024-01-01 11:30:00',
@@ -554,10 +571,10 @@ export async function listOntologyLinkType(
       description: '作战事件 -> 行动方案 (推荐方案)',
       sourceObjectTypeID: 3,
       sourceObjectTypeName: nodeNameMap[3],
-      sourceObjectTypeIcon: 'event',
+      sourceObjectTypeIcon: 'object-type-3',
       targetObjectTypeID: 5,
       targetObjectTypeName: nodeNameMap[5],
-      targetObjectTypeIcon: 'action',
+      targetObjectTypeIcon: 'object-type-5',
       type: LinkType.ONE_TO_MANY,
       syncStatus: SyncStatus.SUCCESS,
       syncTime: '2024-01-01 12:00:00',
@@ -584,10 +601,10 @@ export async function listOntologyLinkType(
       description: '传感器航迹 -> 作战资源',
       sourceObjectTypeID: 4,
       sourceObjectTypeName: nodeNameMap[4],
-      sourceObjectTypeIcon: 'track',
+      sourceObjectTypeIcon: 'object-type-4',
       targetObjectTypeID: 7,
       targetObjectTypeName: nodeNameMap[7],
-      targetObjectTypeIcon: 'asset',
+      targetObjectTypeIcon: 'object-type-6',
       type: LinkType.MANY_TO_MANY,
       syncStatus: SyncStatus.SUCCESS,
       syncTime: '2024-01-01 12:30:00',
@@ -614,10 +631,10 @@ export async function listOntologyLinkType(
       description: '行动方案 -> 作战任务',
       sourceObjectTypeID: 5,
       sourceObjectTypeName: nodeNameMap[5],
-      sourceObjectTypeIcon: 'action',
+      sourceObjectTypeIcon: 'object-type-5',
       targetObjectTypeID: 6,
       targetObjectTypeName: nodeNameMap[6],
-      targetObjectTypeIcon: 'mission',
+      targetObjectTypeIcon: 'object-type-6',
       type: LinkType.ONE_TO_MANY,
       syncStatus: SyncStatus.SUCCESS,
       syncTime: '2024-01-01 13:00:00',
@@ -644,10 +661,10 @@ export async function listOntologyLinkType(
       description: '作战任务 -> 作战资源',
       sourceObjectTypeID: 6,
       sourceObjectTypeName: nodeNameMap[6],
-      sourceObjectTypeIcon: 'mission',
+      sourceObjectTypeIcon: 'object-type-6',
       targetObjectTypeID: 7,
       targetObjectTypeName: nodeNameMap[7],
-      targetObjectTypeIcon: 'asset',
+      targetObjectTypeIcon: 'object-type-6',
       type: LinkType.MANY_TO_MANY,
       syncStatus: SyncStatus.SUCCESS,
       syncTime: '2024-01-01 13:30:00',
@@ -674,10 +691,10 @@ export async function listOntologyLinkType(
       description: '作战资源 -> 部队编制 (下)',
       sourceObjectTypeID: 7,
       sourceObjectTypeName: nodeNameMap[7],
-      sourceObjectTypeIcon: 'asset',
+      sourceObjectTypeIcon: 'object-type-6',
       targetObjectTypeID: 8,
       targetObjectTypeName: nodeNameMap[8],
-      targetObjectTypeIcon: 'organization',
+      targetObjectTypeIcon: 'object-type-5',
       type: LinkType.ONE_TO_MANY,
       syncStatus: SyncStatus.SUCCESS,
       syncTime: '2024-01-01 14:00:00',
@@ -700,7 +717,7 @@ export async function listOntologyLinkType(
   ];
 
   return Promise.resolve({
-    code: 0,
+    code: '',
     data: {
       result: mockLinkData,
       totalCount: mockLinkData.length

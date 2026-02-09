@@ -7,16 +7,14 @@ import {
   Table,
   TableColumnProps,
   Pagination,
-  Message
+  Message,
+  Modal
 } from '@arco-design/web-react';
-import {
-  IconPlus,
-  IconSearch,
-  IconInfoCircle,
-  IconFile
-} from '@arco-design/web-react/icon';
+import { IconPlus, IconSearch, IconFile } from '@arco-design/web-react/icon';
 import {
   CopyItemIcon,
+  DotStatus,
+  EllipsisPopover,
   NoDataCard,
   ProButton,
   SearchTable
@@ -29,128 +27,85 @@ import ObjectTypeDetailDrawer, {
   AttributeItem,
   LinkItem
 } from '../../componens/ObjectTypeDetailDrawer';
+import {
+  listOntologyObjectType,
+  deleteOntologyObjectType
+} from '@/api/ontologySceneLibrary/objectType';
+import { ObjectType } from '@/types/objectType';
+import { SyncStatus } from '@/types/graphApi';
 import styles from './list.module.scss';
-
-// 对象类型数据接口
-export interface ObjectTypeItem {
-  id: string;
-  resourceId: string;
-  name: string;
-  description: string;
-  syncStatus: 'success' | 'running' | 'failed';
-  syncTime: string;
-  linkCount: number;
-  instanceCount: number;
-  lastModifiedTime: string;
-  iconColor?: string;
-}
-
-// 同步状态配置
-const SYNC_STATUS_CONFIG = {
-  success: {
-    text: '成功',
-    color: '#00b42a'
-  },
-  running: {
-    text: '运行中',
-    color: '#165dff'
-  },
-  failed: {
-    text: '失败',
-    color: '#f53f3f'
-  }
-};
-
-// 模拟数据
-const MOCK_DATA: ObjectTypeItem[] = [
-  {
-    id: 'media_id',
-    resourceId: 'media_id',
-    name: '气象站',
-    description: '占位文字占位文字占位文字占位文字占位文字占位文字',
-    syncStatus: 'success',
-    syncTime: '2026-10-10 20:10:00',
-    linkCount: 2,
-    instanceCount: 100,
-    lastModifiedTime: '2026-10-10 20:10:00',
-    iconColor: 'orangered'
-  },
-  {
-    id: 'type',
-    resourceId: 'type',
-    name: '战斗机',
-    description: '占位文字占位文字占位文字占位文字占位文字占位文字',
-    syncStatus: 'running',
-    syncTime: '2026-10-10 20:10:00',
-    linkCount: 1,
-    instanceCount: 324,
-    lastModifiedTime: '2026-10-10 20:10:00',
-    iconColor: 'arcoblue'
-  },
-  {
-    id: 'source',
-    resourceId: 'source',
-    name: '无人机',
-    description: '占位文字占位文字占位文字占位文字占位文字占位文字',
-    syncStatus: 'failed',
-    syncTime: '2026-10-10 20:10:00',
-    linkCount: 2,
-    instanceCount: 123,
-    lastModifiedTime: '2026-10-10 20:10:00',
-    iconColor: 'green'
-  }
-];
-
-// 同步状态筛选选项
-const SYNC_STATUS_FILTERS = [
-  { text: '成功', value: 'success' },
-  { text: '运行中', value: 'running' },
-  { text: '失败', value: 'failed' }
-];
+import {
+  OBJECT_TYPE_SYNC_STATUS_CONFIG,
+  OBJECT_TYPE_SYNC_STATUS_FILTERS,
+  OBJECT_TYPE_ICON_OPTIONS
+} from '../../common/constants';
 
 export default function OntologySceneObjectTypeList() {
   const [form] = Form.useForm();
   const history = useHistory();
-  const { id: OSId } = useParams<{ id: string }>();
+  const { id: ontologyModelID } = useParams<{ id: string }>();
   const [detailDrawerVisible, setDetailDrawerVisible] = useState(false);
   const [selectedObjectType, setSelectedObjectType] =
-    useState<ObjectTypeItem | null>(null);
+    useState<ObjectType | null>(null);
   const [activeTab, setActiveTab] = useState<
     'instances' | 'attributes' | 'links'
   >('instances');
 
   // 使用 useTable hook
   const { data, loading, pagination, refresh, submit, onChange } =
-    useWorkflowTable<ObjectTypeItem, any>({
+    useWorkflowTable<ObjectType, any>({
       service: async (params) => {
-        // TODO: 替换为实际API调用
-        // 模拟API延迟
-        await new Promise((resolve) => setTimeout(resolve, 300));
+        try {
+          const requestParams: any = {
+            filter: params.keyword,
+            ontologyModelID: ontologyModelID
+              ? Number(ontologyModelID)
+              : undefined,
+            pageNo: params.page || 1,
+            pageSize: params.page_size || 10
+          };
 
-        // 模拟筛选和分页
-        let filteredData = [...MOCK_DATA];
-        if (params.keyword) {
-          filteredData = filteredData.filter(
-            (item) =>
-              item.name.includes(params.keyword) ||
-              item.id.includes(params.keyword) ||
-              item.resourceId.includes(params.keyword)
-          );
-        }
-
-        const page = params.page || 1;
-        const pageSize = params.page_size || 10;
-        const start = (page - 1) * pageSize;
-        const end = start + pageSize;
-
-        return {
-          data: {
-            items: filteredData.slice(start, end),
-            total: filteredData.length,
-            page,
-            page_size: pageSize
+          // 如果有排序参数，添加排序信息
+          if (params.orders && params.orders.length > 0) {
+            requestParams.order = params.orders[0].asc ? 'asc' : 'desc';
+            requestParams.orderBy = params.orders[0].column;
           }
-        };
+
+          const response = await listOntologyObjectType(requestParams);
+
+          if (response.status === 200 && response.code === '') {
+            const items = response.data?.result || [];
+
+            return {
+              data: {
+                items,
+                total: response.data?.totalCount || 0,
+                page: params.page || 1,
+                page_size: params.page_size || 10
+              }
+            };
+          } else {
+            Message.error(response.message || '获取列表失败');
+            return {
+              data: {
+                items: [],
+                total: 0,
+                page: params.page || 1,
+                page_size: params.page_size || 10
+              }
+            };
+          }
+        } catch (error) {
+          Message.error('获取列表失败');
+          return {
+            data: {
+              items: [],
+              total: 0,
+              page: params.page || 1,
+              page_size: params.page_size || 10
+            }
+          };
+        }
       },
       form,
       defaultPageSize: 10
@@ -159,13 +114,13 @@ export default function OntologySceneObjectTypeList() {
   // 跳转到创建页面
   const handleCreate = () => {
     history.push(
-      `/tenant/compute/modaforge/ontologyScene/detail/${OSId}/objectType/create`
+      `/tenant/compute/modaforge/ontologyScene/detail/${ontologyModelID}/objectType/create`
     );
   };
 
   // 跳转到详情/编辑页面
   const handleViewDetail = (
-    record: ObjectTypeItem,
+    record: ObjectType,
     tab?: 'instances' | 'attributes' | 'links'
   ) => {
     setSelectedObjectType(record);
@@ -176,76 +131,101 @@ export default function OntologySceneObjectTypeList() {
   };
 
   // 处理链接点击
-  const handleLinkClick = (record: ObjectTypeItem) => {
+  const handleLinkClick = (record: ObjectType) => {
     handleViewDetail(record, 'links');
   };
 
   // 处理实例数量点击
-  const handleInstanceCountClick = (record: ObjectTypeItem) => {
+  const handleInstanceCountClick = (record: ObjectType) => {
     handleViewDetail(record, 'instances');
   };
 
   // 处理编辑
-  const handleEdit = (record: ObjectTypeItem) => {
+  const handleEdit = (record: ObjectType) => {
+    if (!record.id) {
+      Message.error('对象类型ID无效');
+      return;
+    }
     history.push(
-      `/tenant/compute/modaforge/ontologyScene/detail/${OSId}/objectType/edit/${record.id}`
+      `/tenant/compute/modaforge/ontologyScene/detail/${ontologyModelID}/objectType/edit/${record.id}`
     );
   };
 
   // 处理删除
-  const handleDelete = (record: ObjectTypeItem) => {
-    // TODO: 实现删除功能
-    Message.info(`删除 ${record.name}`);
+  const handleDelete = (record: ObjectType) => {
+    Modal.confirm({
+      title: '确认删除',
+      content: `确定要删除对象类型"${record.name || ''}"吗？`,
+      onOk: async () => {
+        try {
+          if (!record.id) {
+            Message.error('对象类型ID无效');
+            return;
+          }
+
+          const response = await deleteOntologyObjectType({ id: record.id });
+
+          if (response.status === 200 && response.code === '') {
+            Message.success('删除成功');
+            // 重新加载列表
+            refresh();
+          } else {
+            Message.error(response.message || '删除失败');
+          }
+        } catch (error) {
+          Message.error('删除失败');
+        }
+      }
+    });
   };
 
   // 表格列定义
-  const columns: TableColumnProps<ObjectTypeItem>[] = [
+  const columns: TableColumnProps<ObjectType>[] = [
     {
       title: '对象类型名称',
       dataIndex: 'name',
       width: 200,
-      render: (value, record) => (
-        <div className="flex items-center gap-2">
+      ellipsis: true,
+      fixed: 'left',
+      render: (value, record) => {
+        // 根据 icon 字段匹配对应的图标
+        const iconOption = OBJECT_TYPE_ICON_OPTIONS.find(
+          (option) => option.value === record.icon
+        );
+        const IconComponent = iconOption?.icon;
+
+        return (
           <div
-            className="flex h-6 w-6 items-center justify-center rounded text-white"
-            style={{
-              backgroundColor: record.iconColor || '#165dff'
-            }}
-          >
-            <IconFile />
-          </div>
-          <div
-            className="hover-blue font-PingFangSc text-[14px] font-medium leading-[22px]"
+            className="flex items-center gap-[8px]"
             onClick={() => handleViewDetail(record)}
           >
-            {value}
+            <div className="flex h-6 w-6 items-center justify-center rounded text-white">
+              {IconComponent ? (
+                <IconComponent className="h-6 w-6" />
+              ) : (
+                <IconFile className="h-6 w-6" />
+              )}
+            </div>
+            <EllipsisPopover
+              className="hover-blue text-[14px] font-[500] leading-[22px]"
+              value={value}
+              isEdit={false}
+              preferTypography
+            />
           </div>
-        </div>
-      )
+        );
+      }
     },
     {
-      title: 'id',
-      dataIndex: 'id',
-      width: 150,
+      title: '对象类型id',
+      dataIndex: 'code',
+      width: 200,
       render: (value) => (
         <div className="flex items-center gap-2">
-          <div className="font-PingFangSc text-[14px] font-normal leading-[22px] text-[#23293b]">
-            {value}
-          </div>
-          <CopyItemIcon className="hidden flex-shrink-0" value={value} />
-        </div>
-      )
-    },
-    {
-      title: '资源id',
-      dataIndex: 'resourceId',
-      width: 150,
-      render: (value) => (
-        <div className="flex items-center gap-2">
-          <div className="font-PingFangSc text-[14px] font-normal leading-[22px] text-[#23293b]">
-            {value}
-          </div>
-          <CopyItemIcon className="hidden flex-shrink-0" value={value} />
+          <EllipsisPopover value={value} isEdit={false} preferTypography />
+          {value && (
+            <CopyItemIcon className="hidden flex-shrink-0" value={value} />
+          )}
         </div>
       )
     },
@@ -260,27 +240,14 @@ export default function OntologySceneObjectTypeList() {
       title: '同步状态',
       dataIndex: 'syncStatus',
       width: 120,
-      filters: SYNC_STATUS_FILTERS,
+      filters: OBJECT_TYPE_SYNC_STATUS_FILTERS,
       onFilter: (value, record) => record.syncStatus === value,
-      render: (value) => {
-        const config = SYNC_STATUS_CONFIG[value];
-        return (
-          <div className="flex items-center gap-2">
-            <div
-              className="h-2 w-2 rounded-full"
-              style={{ backgroundColor: config.color }}
-            />
-            <span className="font-PingFangSc text-[14px] font-normal leading-[22px]">
-              {config.text}
-            </span>
-            {value === 'failed' && (
-              <IconInfoCircle
-                className="cursor-pointer text-[#f53f3f]"
-                style={{ fontSize: '14px' }}
-              />
-            )}
-          </div>
-        );
+      render: (value: SyncStatus) => {
+        if (value === undefined || value === null) {
+          return null;
+        }
+        const config = OBJECT_TYPE_SYNC_STATUS_CONFIG[value];
+        return <DotStatus text={config.text} color={config.color} />;
       }
     },
     {
@@ -295,36 +262,8 @@ export default function OntologySceneObjectTypeList() {
       )
     },
     {
-      title: '链接',
-      dataIndex: 'linkCount',
-      width: 100,
-      sorter: true,
-      render: (value, record) => (
-        <div
-          className="hover-blue font-PingFangSc text-[14px] font-normal leading-[22px]"
-          onClick={() => handleLinkClick(record)}
-        >
-          {value}
-        </div>
-      )
-    },
-    {
-      title: '实例数量',
-      dataIndex: 'instanceCount',
-      width: 120,
-      sorter: true,
-      render: (value, record) => (
-        <div
-          className="hover-blue font-PingFangSc text-[14px] font-normal leading-[22px]"
-          onClick={() => handleInstanceCountClick(record)}
-        >
-          {value}
-        </div>
-      )
-    },
-    {
       title: '最新修改时间',
-      dataIndex: 'lastModifiedTime',
+      dataIndex: 'updateTime',
       width: 180,
       sorter: true,
       render: (value) => (
@@ -394,7 +333,7 @@ export default function OntologySceneObjectTypeList() {
           columns,
           data,
           loading,
-          rowKey: 'id',
+          rowKey: (record) => record.id?.toString() || '',
           border: false,
           pagination: false,
           scroll: { x: true },
@@ -430,7 +369,7 @@ export default function OntologySceneObjectTypeList() {
             setDetailDrawerVisible(false);
             setSelectedObjectType(null);
           }}
-          objectTypeId={selectedObjectType?.id}
+          objectTypeId={selectedObjectType?.id?.toString() || ''}
           defaultActiveTab={activeTab}
         />
       )}
