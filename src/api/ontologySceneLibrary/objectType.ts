@@ -145,11 +145,11 @@ export const listOntologyObjectType = async (
   }
 
   // 根据 ontologyModelID 筛选
-  if (params.ontologyModelID) {
-    filteredList = filteredList.filter(
-      (item) => item.ontologyModelID === params.ontologyModelID
-    );
-  }
+  // if (params.ontologyModelID) {
+  //   filteredList = filteredList.filter(
+  //     (item) => item.ontologyModelID === params.ontologyModelID
+  //   );
+  // }
 
   // 模拟分页
   const pageNo = params.pageNo || 1;
