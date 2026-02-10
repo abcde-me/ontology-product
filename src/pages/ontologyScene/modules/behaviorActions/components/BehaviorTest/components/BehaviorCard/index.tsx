@@ -39,6 +39,7 @@ export const BehaviorCard: React.FC<BehaviorCardProps> = ({
       <div className="flex min-w-0 flex-1 flex-col gap-2 p-3">
         {/* 头部 */}
         <div className="flex items-center justify-between gap-2">
+          {/*@ts-ignore*/}
           <Tooltip content={behavior.name}>
             <div className="flex-1 overflow-hidden text-ellipsis whitespace-nowrap text-sm font-medium text-[#1d2129]">
               {behavior.name}
@@ -61,7 +62,8 @@ export const BehaviorCard: React.FC<BehaviorCardProps> = ({
 
         {/* 底部标签 */}
         <div className="flex flex-wrap items-center gap-2">
-          <ObjectTypeTag type={behavior.objectType} />
+          {/*@ts-ignore*/}
+          <ObjectTypeTag type={behavior.objectTypeName!} />
         </div>
       </div>
     </div>

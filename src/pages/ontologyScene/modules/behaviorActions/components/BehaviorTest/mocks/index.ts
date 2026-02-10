@@ -15,7 +15,7 @@ export const mockBehaviorList: BehaviorItem[] = [
     objectType: '多媒体情报',
     functionName: 'entityRecognition',
     identifier: 'entity_recognition',
-    params: 3,
+    params: [],
     color: '#722ED1',
     icon: '🔍',
     configSchema: {
@@ -81,7 +81,7 @@ export const mockBehaviorList: BehaviorItem[] = [
     objectType: '作战单元',
     functionName: 'correlationAnalysis',
     identifier: 'correlation_analysis',
-    params: 4,
+    params: [],
     color: '#FA8C16',
     icon: '🔗',
     configSchema: {
@@ -156,7 +156,7 @@ export const mockBehaviorList: BehaviorItem[] = [
     objectType: '作战编队',
     functionName: 'threatAssessment',
     identifier: 'threat_assessment',
-    params: 4,
+    params: [],
     color: '#EB2F96',
     icon: '⚠️',
     configSchema: {
@@ -233,7 +233,7 @@ export const mockBehaviorList: BehaviorItem[] = [
     objectType: '战术预案',
     functionName: 'executePlan',
     identifier: 'execute_plan',
-    params: 4,
+    params: [],
     color: '#13C2C2',
     icon: '🚀',
     configSchema: {

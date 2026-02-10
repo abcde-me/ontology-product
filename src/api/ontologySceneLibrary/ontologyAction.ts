@@ -12,7 +12,7 @@ const MockList: BehaviorActionItem[] = [
     code: 'ACTION_ENTITY_EXTRACT',
     name: '实体识别',
     description: '从文本中识别实体并返回结构化结果',
-    functionId: 5,
+    functionId: 1,
     functionName: 'entity_extract',
     objectTypeId: 201,
     objectTypeName: '多媒体情报',
@@ -42,7 +42,7 @@ const MockList: BehaviorActionItem[] = [
     code: 'ACTION_RELATION_INFER',
     name: '关联推理',
     description: '基于输入实体推理关系',
-    functionId: 102,
+    functionId: 2,
     functionName: 'relation_infer',
     objectTypeId: 202,
     objectTypeName: '战斗机',
@@ -52,14 +52,14 @@ const MockList: BehaviorActionItem[] = [
         code: 'entity_a',
         name: '实体A',
         type: ParamType.String,
-        uiType: 'Input',
+        uiType: UiType.Input,
         enabledValidation: false
       },
       {
         code: 'entity_b',
         name: '实体B',
         type: ParamType.String,
-        uiType: 'Input',
+        uiType: UiType.Input,
         enabledValidation: false
       }
     ],
@@ -72,7 +72,7 @@ const MockList: BehaviorActionItem[] = [
     code: 'ACTION_THREAT_ASSESS',
     name: '威胁研判',
     description: '对目标威胁等级进行评估',
-    functionId: 103,
+    functionId: 3,
     functionName: 'threat_assess',
     objectTypeId: 203,
     objectTypeName: '无人机',
@@ -82,21 +82,21 @@ const MockList: BehaviorActionItem[] = [
         code: 'target_id',
         name: '目标ID',
         type: ParamType.String,
-        uiType: 'Input',
+        uiType: UiType.Input,
         enabledValidation: false
       },
       {
         code: 'score',
         name: '评估得分',
         type: ParamType.Float,
-        uiType: 'InputNumber',
+        uiType: UiType.InputNumber,
         enabledValidation: true
       },
       {
         code: 'level',
         name: '威胁等级',
         type: ParamType.String,
-        uiType: 'Select',
+        uiType: UiType.Input,
         enabledValidation: true
       }
     ],
@@ -109,7 +109,7 @@ const MockList: BehaviorActionItem[] = [
     code: 'ACTION_ROUTE_PLAN',
     name: '路径规划',
     description: '根据起止点规划最优路径',
-    functionId: 104,
+    functionId: 4,
     functionName: 'route_plan',
     objectTypeId: 204,
     objectTypeName: '作战任务',
@@ -119,14 +119,14 @@ const MockList: BehaviorActionItem[] = [
         code: 'start',
         name: '起点',
         type: ParamType.String,
-        uiType: 'Input',
+        uiType: UiType.Input,
         enabledValidation: false
       },
       {
         code: 'end',
         name: '终点',
         type: ParamType.String,
-        uiType: 'Input',
+        uiType: UiType.Input,
         enabledValidation: false
       }
     ],

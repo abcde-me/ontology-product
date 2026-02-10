@@ -1,10 +1,13 @@
 import React, { useState } from 'react';
 import { BehaviorActionItem } from '@/pages/ontologyScene/types/behaviorActions';
 import styles from './index.module.scss';
-import { OsDrawer } from '@/pages/ontologyScene/componens';
+import { OsDrawer, PyCodeContent } from '@/pages/ontologyScene/componens';
 import { Tabs } from '@arco-design/web-react';
 import { IconEdit } from '@arco-design/web-react/icon';
 import { useHistory } from 'react-router-dom';
+import { useRequest } from 'ahooks';
+import { getFunctionDetail } from '@/api/ontologySceneLibrary/ontologyFunction';
+import { isNil } from 'lodash-es';
 
 interface IProps {
   show: boolean;
@@ -16,6 +19,18 @@ export const BehaviorDetail = (props: IProps) => {
   const { data, onClose, show } = props;
   const history = useHistory();
   const [activeTab, setActiveTab] = useState('');
+  const { data: functionInfo } = useRequest(
+    () => {
+      if (isNil(data)) return Promise.resolve(undefined);
+      return getFunctionDetail(data.functionId!);
+    },
+    {
+      refreshDeps: [data?.functionId]
+    }
+  );
+
+  console.log(123, data);
+
   return (
     <OsDrawer
       visible={show}
@@ -76,7 +91,9 @@ export const BehaviorDetail = (props: IProps) => {
             <Tabs.TabPane title={'校验规则（5）'} key={'rules'} />
             <Tabs.TabPane title={'函数'} key={'function'} />
           </Tabs>
-          <div>正文</div>
+          {activeTab === 'function' && (
+            <PyCodeContent value={functionInfo?.content} readOnly />
+          )}
         </div>
       </div>
     </OsDrawer>
