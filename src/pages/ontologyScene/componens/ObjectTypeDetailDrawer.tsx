@@ -603,18 +603,14 @@ export default function ObjectTypeDetailDrawer({
           (option) => option.value === objectType.icon
         )
       : null;
-    const IconComponent = iconOption?.icon;
+    const IconComponent = iconOption?.icon ?? OBJECT_TYPE_ICON_OPTIONS[0].icon;
 
     return (
       <div
         className={`flex items-center gap-2 rounded border border-green-200 bg-green-50 px-3 py-2`}
       >
         <div className="flex h-6 w-6 flex-shrink-0 items-center justify-center">
-          {IconComponent ? (
-            <IconComponent className="h-6 w-6" />
-          ) : (
-            <IconFile className="h-6 w-6" />
-          )}
+          <IconComponent className="h-6 w-6" />
         </div>
         <span className="text-sm font-medium text-gray-700">
           {objectType.name}
@@ -677,15 +673,12 @@ export default function ObjectTypeDetailDrawer({
                           (option) => option.value === displayData.icon
                         )
                       : null;
-                    const IconComponent = iconOption?.icon;
+                    const IconComponent =
+                      iconOption?.icon ?? OBJECT_TYPE_ICON_OPTIONS[0].icon;
 
                     return (
                       <div className="flex h-[14px] w-[14px] flex-shrink-0 items-center justify-center">
-                        {IconComponent ? (
-                          <IconComponent className="h-[14px] w-[14px]" />
-                        ) : (
-                          <IconFile className="h-[14px] w-[14px]" />
-                        )}
+                        <IconComponent className="h-[14px] w-[14px]" />
                       </div>
                     );
                   })()}

@@ -33,7 +33,7 @@ const ObjectTypeTag: React.FC<ObjectTypeTagProps> = ({
         (option) => option.value === ontologyObjectTypeIcon
       )
     : null;
-  const IconComponent = iconOption?.icon;
+  const IconComponent = iconOption?.icon ?? OBJECT_TYPE_ICON_OPTIONS[0].icon;
 
   return (
     <div
@@ -44,14 +44,10 @@ const ObjectTypeTag: React.FC<ObjectTypeTagProps> = ({
     >
       {/* 图标区域 */}
       <div className="flex h-[12px] w-[12px] flex-shrink-0 items-center justify-center">
-        {IconComponent ? (
-          <IconComponent className="h-[12px] w-[12px] text-white" />
-        ) : (
-          <IconFile className="h-[12px] w-[12px] text-white" />
-        )}
+        <IconComponent className="h-[12px] w-[12px] text-white" />
       </div>
       {/* 名称区域 */}
-      <div className="min-w-0 flex-shrink-0">
+      <div className="flex-shrink-1 min-w-0">
         <EllipsisPopover
           value={ontologyObjectTypeName}
           className="text-[14px] leading-[26px] text-[var(--color-text-1)]"

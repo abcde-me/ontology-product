@@ -192,7 +192,8 @@ export default function OntologySceneObjectTypeList() {
         const iconOption = OBJECT_TYPE_ICON_OPTIONS.find(
           (option) => option.value === record.icon
         );
-        const IconComponent = iconOption?.icon;
+        const IconComponent =
+          iconOption?.icon ?? OBJECT_TYPE_ICON_OPTIONS[0].icon;
 
         return (
           <div
@@ -200,11 +201,7 @@ export default function OntologySceneObjectTypeList() {
             onClick={() => handleViewDetail(record)}
           >
             <div className="flex h-6 w-6 items-center justify-center rounded text-white">
-              {IconComponent ? (
-                <IconComponent className="h-6 w-6" />
-              ) : (
-                <IconFile className="h-6 w-6" />
-              )}
+              <IconComponent className="h-6 w-6" />
             </div>
             <EllipsisPopover
               className="hover-blue text-[14px] font-[500] leading-[22px]"
