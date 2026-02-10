@@ -1,11 +1,12 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo, useRef } from 'react';
 import {
   Button,
   Form,
   Input,
   Tooltip,
   Select,
-  Checkbox
+  Checkbox,
+  Radio
 } from '@arco-design/web-react';
 import {
   IconDelete,
@@ -14,11 +15,14 @@ import {
 } from '@arco-design/web-react/icon';
 import { uuid } from '@/models/utils';
 import './Classify.scss';
+import { AnnotationTypeContentCode } from '../../type';
 
 interface ClassifyComponentProps {
   type: any;
   requirementDetail: any;
   getClassIfyData: any;
+  model_id?: string;
+  annotationTypeContentVal: string;
 }
 // 选项配置 1 单选 2 多选 3 输入框
 const optionConfig = [
@@ -36,13 +40,92 @@ const optionConfig = [
   }
 ];
 const Classify = (props: ClassifyComponentProps) => {
-  const { type, requirementDetail, getClassIfyData } = props;
+  const {
+    type,
+    requirementDetail,
+    getClassIfyData,
+    model_id,
+    annotationTypeContentVal
+  } = props;
   const [formClassify] = Form.useForm();
   const Option = Select.Option;
   const FormItem = Form.Item;
   // 判断是否为编辑模式且数据来自详情
   const isEditModeFromDetail =
     type === 'edit' && requirementDetail?.file_labels;
+  // 判断是否需要展示AI识别
+  const showAiRecognition = useMemo(() => {
+    return (
+      !!model_id &&
+      (annotationTypeContentVal ===
+        AnnotationTypeContentCode.AUDIO_CLASSIFICATION ||
+        annotationTypeContentVal === AnnotationTypeContentCode.AUDIO_SPLIT ||
+        annotationTypeContentVal ===
+          AnnotationTypeContentCode.VIDEO_CLASSIFICATION ||
+        annotationTypeContentVal === AnnotationTypeContentCode.VIDEO_SPLIT)
+    );
+  }, [model_id, annotationTypeContentVal]);
+
+  // 保存之前的 annotationTypeContentVal 值
+  const prevAnnotationTypeContentVal = useRef(annotationTypeContentVal);
+
+  // 定义视频类型和音频类型
+  const isVideoType = (val: string) =>
+    val === AnnotationTypeContentCode.VIDEO_CLASSIFICATION ||
+    val === AnnotationTypeContentCode.VIDEO_SPLIT;
+
+  const isAudioType = (val: string) =>
+    val === AnnotationTypeContentCode.AUDIO_CLASSIFICATION ||
+    val === AnnotationTypeContentCode.AUDIO_SPLIT;
+
+  const isVideoOrAudioType = (val: string) =>
+    isVideoType(val) || isAudioType(val);
+
+  // 监听 annotationTypeContentVal 变化，更新 ai_type
+  useEffect(() => {
+    const prevVal = prevAnnotationTypeContentVal.current;
+    const currVal = annotationTypeContentVal;
+
+    // 如果值发生了变化
+    if (prevVal !== currVal) {
+      const wasVideoOrAudio = isVideoOrAudioType(prevVal);
+      const isNowVideoOrAudio = isVideoOrAudioType(currVal);
+
+      // 从视频类型切换到音频类型，ai_type 为 2 则改为 1
+      if (isVideoType(prevVal) && isAudioType(currVal)) {
+        setTextRelations((prev) =>
+          prev.map((item) => ({
+            ...item,
+            ai_type: item.ai_type === 2 ? 1 : item.ai_type
+          }))
+        );
+      }
+      // 从这4个类型切换到其他类型，ai_type 变为 0
+      else if (wasVideoOrAudio && !isNowVideoOrAudio) {
+        setTextRelations((prev) =>
+          prev.map((item) => ({
+            ...item,
+            ai_type: 0
+          }))
+        );
+      }
+
+      // 更新 ref
+      prevAnnotationTypeContentVal.current = currVal;
+    }
+  }, [annotationTypeContentVal]);
+
+  // 当 model_id 没有值时，ai_type 设置为 0
+  useEffect(() => {
+    if (!model_id) {
+      setTextRelations((prev) =>
+        prev.map((item) => ({
+          ...item,
+          ai_type: 0
+        }))
+      );
+    }
+  }, [model_id]);
   // 文本分类内容
   const [textRelations, setTextRelations] = useState([
     {
@@ -51,6 +134,7 @@ const Classify = (props: ClassifyComponentProps) => {
       attribute_group_name: '', //属性组名称
       attribute_group_class: 1, //1单选/2多选/3输入框
       attribute_group_type: 2, //1必选/2非必选
+      ai_type: 0, //AI识别文字：0不使用/1音频转文字/2视频字幕提取
       file_label_attribute: [
         {
           attribute_id: uuid(),
@@ -202,7 +286,7 @@ const Classify = (props: ClassifyComponentProps) => {
                     value={item.attribute_group_class}
                     onChange={(value) => {
                       handleFieldChange(index, 'attribute_group_class', value);
-                      // 切换到输入框的时候情况选项内容
+                      // 切换到输入框的时候清空选项内容
                       if (value === 3) {
                         setTextRelations(
                           textRelations.map((group) => {
@@ -215,6 +299,36 @@ const Classify = (props: ClassifyComponentProps) => {
                             return group;
                           })
                         );
+                      } else if (value === 1 || value === 2) {
+                        // 从输入框切换到单选/多选时，如果file_label_attribute为空，重新初始化
+                        const currentGroup = textRelations.find(
+                          (group) => group.attribute_id === item.attribute_id
+                        );
+                        if (
+                          !currentGroup?.file_label_attribute ||
+                          currentGroup?.file_label_attribute.length === 0
+                        ) {
+                          setTextRelations(
+                            textRelations.map((group) => {
+                              if (group.attribute_id === item.attribute_id) {
+                                return {
+                                  ...group,
+                                  file_label_attribute: [
+                                    {
+                                      attribute_id: uuid(),
+                                      order_num: 1,
+                                      attribute_name_cn: '',
+                                      attribute_name_en: '',
+                                      input_type: 1,
+                                      isFromDetail: false
+                                    }
+                                  ]
+                                };
+                              }
+                              return group;
+                            })
+                          );
+                        }
                       }
                     }}
                     disabled={
@@ -374,6 +488,31 @@ const Classify = (props: ClassifyComponentProps) => {
                   )}
                 </FormItem>
               </div>
+              {/* AI识别文字配置 - 仅在有model_id且为输入框类型时显示 */}
+              {showAiRecognition && item?.attribute_group_class === 3 && (
+                <div className="ai-recognition-config">
+                  <FormItem
+                    label="AI识别文字:"
+                    style={{ paddingLeft: 16, marginBottom: 0 }}
+                  >
+                    <Radio.Group
+                      value={item?.ai_type ?? 0}
+                      onChange={(value) => {
+                        handleFieldChange(index, 'ai_type', value);
+                      }}
+                    >
+                      <Radio value={0}>不使用</Radio>
+                      <Radio value={1}>音频转文字</Radio>
+                      {(annotationTypeContentVal ===
+                        AnnotationTypeContentCode.VIDEO_CLASSIFICATION ||
+                        annotationTypeContentVal ===
+                          AnnotationTypeContentCode.VIDEO_SPLIT) && (
+                        <Radio value={2}>视频字幕提取</Radio>
+                      )}
+                    </Radio.Group>
+                  </FormItem>
+                </div>
+              )}
               {item.file_label_attribute?.length > 0 &&
                 item?.attribute_group_class !== 3 && (
                   <div className="attribute-list">
@@ -626,6 +765,7 @@ const Classify = (props: ClassifyComponentProps) => {
                 attribute_group_name: '', //属性组名称
                 attribute_group_class: 1, //1单选/2多选/3输入框
                 attribute_group_type: 2, //1必选/2非必选
+                ai_type: 0,
                 isFromDetail: false, // 新增项，可编辑
                 file_label_attribute: [
                   {

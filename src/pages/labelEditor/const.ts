@@ -8,7 +8,8 @@ export const TEXT_DATA = {
   AUDIO_CLASSIFICATION: 'classification',
   AUDIO_SPLIT: 'split',
   VIDEO_CLASSIFICATION: 'classification',
-  VIDEO_SPLIT: 'split'
+  VIDEO_SPLIT: 'split',
+  IMAGE_CLASSIFICATION: 'classification'
 };
 
 export const STAGE_MAP = {

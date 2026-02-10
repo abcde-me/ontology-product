@@ -4,6 +4,10 @@ export const AnnotationTypeEmuns = [
     value: 'IMAGE_ANNOTATION'
   },
   {
+    label: '图片-分类',
+    value: 'IMAGE_CLASSIFICATION'
+  },
+  {
     label: '文本-实体关系',
     value: 'TEXT_ENTITY'
   },

@@ -15,17 +15,28 @@ interface FileLabelInfo {
   attribute_group_name: string; // 属性组名称
   attribute_group_class: number; // 1单选/2多选/3输入框
   attribute_group_type: number; // 1必选/2非必选
+  ai_type?: number; //AI识别文字：0不使用/1音频转文字/2视频字幕提取
   file_label_attribute: FileLabelAttribute[];
 }
 
 function TextClassifyLabelInfo({ labelInfo }: { labelInfo: FileLabelInfo[] }) {
   // 获取属性组类型显示文本
-  const getAttributeGroupClassText = (classType: number) => {
+  const getAttributeGroupClassText = (
+    classType: number,
+    record: FileLabelInfo
+  ) => {
     const classMap: Record<number, string> = {
       1: '单选',
       2: '多选',
       3: '输入框'
     };
+    const aiTypeMap: Record<number, string> = {
+      1: '音频转文字',
+      2: '视频字幕提取'
+    };
+    if (record?.ai_type && record?.ai_type > 0) {
+      return `${classMap[classType]}（${aiTypeMap[record.ai_type]}）`;
+    }
     return classMap[classType] || '未知';
   };
 
@@ -41,7 +52,8 @@ function TextClassifyLabelInfo({ labelInfo }: { labelInfo: FileLabelInfo[] }) {
       title: '状态',
       dataIndex: 'attribute_group_class',
       width: 150,
-      render: (value: number) => getAttributeGroupClassText(value)
+      render: (value: number, record: FileLabelInfo) =>
+        getAttributeGroupClassText(value, record)
     },
     {
       title: '必须标注',

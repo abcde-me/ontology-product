@@ -11,6 +11,7 @@ import { GetProjOrg } from '@/api/modules/project';
 import { isSameArray } from '@/utils/array';
 import { setLocalStorage } from '@/utils/storage';
 import { ProjectIdKey } from '@/utils/const';
+import { isInFrame, isWujie } from '@/utils/env';
 
 const MenuItem = Menu.Item;
 const SubMenu = Menu.SubMenu;
@@ -57,11 +58,15 @@ export const LayoutWithSider = memo(function LayoutWithSider({ children }) {
   const clickTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const lastClickPathRef = useRef<string | null>(null);
 
-  const sidebarHidden = hideSidebarPaths.some(
-    (path) => path === location.pathname || location.pathname.includes(path)
-  );
+  // 如果是在iframe中，并且不是wujie，则隐藏侧边栏，临时以iframe的形式嵌入数据平台
+  const sidebarHidden =
+    hideSidebarPaths.some(
+      (path) => path === location.pathname || location.pathname.includes(path)
+    ) ||
+    (isInFrame && !isWujie);
 
   const actives = useMemo(() => {
+    // console.log('modaforge actives', location.pathname, location.search, locSearch);
     const findMatch = (menus: MenuModel[]): string[] | null => {
       for (const menu of menus) {
         if (menu.children?.length && menu.children?.length > 0) {
@@ -76,8 +81,8 @@ export const LayoutWithSider = memo(function LayoutWithSider({ children }) {
             // 如果有查询参数匹配器，使用它来进一步判断
             if (menu.queryParamMatcher) {
               if (
-                menu.queryParamMatcher(location.search) ||
-                menu.queryParamMatcher(locSearch)
+                menu.queryParamMatcher(locSearch || location.search)
+                // menu.queryParamMatcher(location.search)
               ) {
                 return [menu.key];
               }
@@ -95,7 +100,10 @@ export const LayoutWithSider = memo(function LayoutWithSider({ children }) {
 
   useEffect(() => {
     const handler = () => {
-      setLocSearch(window.location.search);
+      const isModaforge = (top ?? window).location.pathname.includes(
+        '/modaforge'
+      );
+      isModaforge && setLocSearch(window.location.search);
     };
     window.addEventListener('locationchange', handler);
     return () => window.removeEventListener('locationchange', handler);

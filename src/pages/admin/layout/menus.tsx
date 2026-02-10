@@ -112,6 +112,11 @@ export const filterMenusByPermissions = (
 };
 
 const iconClass = 'appforge-sider-icon flex-none text-[20px]';
+const hasActiveMenu = (name: string, search: string) => {
+  const params = new URLSearchParams(search);
+  const url = params.get('mdp_operation_center') || params.get('url');
+  return url?.includes(name) ?? false;
+};
 export const menus: MenuModel[] = [
   {
     type: 'itemGroup',
@@ -279,10 +284,7 @@ export const menus: MenuModel[] = [
             '/operationcenter/tenant/compute/operationcenter/apikey'
           ),
         activePaths: ['/tenant/compute/modaforge/operationCenter'],
-        queryParamMatcher: (search: string) => {
-          const url = new URLSearchParams(search).get('mdp_operation_center');
-          return url?.includes('apikey') ?? false;
-        },
+        queryParamMatcher: hasActiveMenu.bind(null, 'apikey'),
         permission: API_KEY_PERMISSIONS.MENU
       },
       {
@@ -295,10 +297,7 @@ export const menus: MenuModel[] = [
             '/operationcenter/tenant/compute/operationcenter/tag'
           ),
         activePaths: ['/tenant/compute/modaforge/operationCenter'],
-        queryParamMatcher: (search: string) => {
-          const url = new URLSearchParams(search).get('mdp_operation_center');
-          return url?.includes('tag') ?? false;
-        },
+        queryParamMatcher: hasActiveMenu.bind(null, 'tag'),
         permission: TAG_PERMISSIONS.LIST
       }
     ]
@@ -319,10 +318,7 @@ export const menus: MenuModel[] = [
             '/operationcenter/tenant/compute/operationcenter/organization'
           ),
         activePaths: ['/tenant/compute/modaforge/operationCenter'],
-        queryParamMatcher: (search: string) => {
-          const url = new URLSearchParams(search).get('mdp_operation_center');
-          return url?.includes('organization') ?? false;
-        },
+        queryParamMatcher: hasActiveMenu.bind(null, 'organization'),
         permission: ORGANIZATION_PERMISSIONS.MENU
       },
       {
@@ -353,10 +349,7 @@ export const menus: MenuModel[] = [
           ),
         key: 'userGroupMgmt',
         activePaths: ['/tenant/compute/modaforge/operationCenter'],
-        queryParamMatcher: (search: string) => {
-          const url = new URLSearchParams(search).get('mdp_operation_center');
-          return url?.includes('user-group') ?? false;
-        },
+        queryParamMatcher: hasActiveMenu.bind(null, 'user-group'),
         permission: USER_GROUP_PERMISSIONS.MENU
       },
       {
@@ -369,10 +362,7 @@ export const menus: MenuModel[] = [
           ),
         key: 'roleMgmt',
         activePaths: ['/tenant/compute/modaforge/operationCenter'],
-        queryParamMatcher: (search: string) => {
-          const url = new URLSearchParams(search).get('mdp_operation_center');
-          return url?.includes('role') ?? false;
-        },
+        queryParamMatcher: hasActiveMenu.bind(null, 'role'),
         permission: ROLE_PERMISSIONS.MENU
       }
     ]
@@ -393,19 +383,9 @@ export const menus: MenuModel[] = [
             '/operationcenter/tenant/compute/operationcenter/project'
           ),
         activePaths: ['/tenant/compute/modaforge/operationCenter'],
-        queryParamMatcher: (search: string) => {
-          const url = new URLSearchParams(search).get('mdp_operation_center');
-          return url?.includes('project') ?? false;
-        },
+        queryParamMatcher: hasActiveMenu.bind(null, 'project'),
         permission: PROJECT_PERMISSIONS.MENU
       }
     ]
   }
 ];
-
-/*
-集成到AI平台不显示运营中心菜单
-嵌入运营中心页面示例
-path: '/tenant/compute/modaforge/operationCenter?url=' + encodeURIComponent('/operationcenter/tenant/compute/operationcenter/organization'),
-path: '/tenant/compute/modaforge/operationCenter?url=' + encodeURIComponent('/operationcenter/tenant/compute/operationcenter/user'),
-*/

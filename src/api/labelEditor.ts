@@ -612,3 +612,8 @@ export async function GetTaskFile(params) {
     .inRegion()
     .do({ headers: { 'need-header-data': 'true' } });
 }
+
+// AI识别
+export async function AIRecognition(params) {
+  return await UAPI.RES.leAIRecognition({}).post(params).inRegion().do();
+}

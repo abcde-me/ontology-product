@@ -46,6 +46,8 @@ export enum AnnotationChildType {
   TEXT_SORT = 4,
   /** 图片标注 */
   IMAGE_ANNOTATION = 1,
+  // 图片分类
+  IMAGE_CLASSIFICATION = 2,
   // 音频分类
   AUDIO_CLASSIFICATION = 1,
   // 音频分割
@@ -67,6 +69,8 @@ export enum AnnotationTypeContentCode {
   TEXT_SORT = 'TEXT_SORT',
   /** 图片标注 */
   IMAGE_ANNOTATION = 'IMAGE_ANNOTATION',
+  // 图片分类
+  IMAGE_CLASSIFICATION = 'IMAGE_CLASSIFICATION',
   // 音频分类
   AUDIO_CLASSIFICATION = 'AUDIO_CLASSIFICATION',
   // 音频分割
@@ -79,6 +83,7 @@ export enum AnnotationTypeContentCode {
 
 export const LABEL_TOOL_CODE_ENUM = [
   { label: '图形标注', value: 'IMAGE_ANNOTATION', text: '图形标注' },
+  { label: '图片分类', value: 'IMAGE_CLASSIFICATION', text: '图片分类' },
   { label: '文本分类', value: 'TEXT_CLASSIFICATION', text: '文本分类' },
   { label: '文本问答', value: 'TEXT_QA', text: '文本问答' },
   { label: '文本排序', value: 'TEXT_SORT', text: '文本排序' },
