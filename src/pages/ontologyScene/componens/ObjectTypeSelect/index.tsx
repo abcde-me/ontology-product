@@ -37,7 +37,7 @@ const ObjectTypeSelect: React.FC<ObjectTypeSelectProps> = ({
   className = '',
   ontologyModelID,
   allowClear = true,
-  label = '源对象类型:'
+  label = ''
 }) => {
   const [loading, setLoading] = useState(false);
   const [objectTypeList, setObjectTypeList] = useState<ObjectType[]>([]);
