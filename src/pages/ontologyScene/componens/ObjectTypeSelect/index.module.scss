@@ -1,0 +1,13 @@
+.object-type-select-dropdown {
+  // 移除选项的默认 padding
+  :global {
+    .arco-select-option {
+      padding: 0 !important;
+    }
+
+    // 兼容不同的类名结构
+    .arco-select-option-wrapper {
+      padding: 0 !important;
+    }
+  }
+}

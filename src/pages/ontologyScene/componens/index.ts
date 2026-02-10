@@ -9,3 +9,5 @@ export * from './ObjectOne';
 export * from './ObjectSet';
 export * from './ResizeBoxWithCursorChange';
 export * from './PyCodeContent';
+export { default as ObjectTypeSelect } from './ObjectTypeSelect';
+export type { ObjectTypeSelectProps } from './ObjectTypeSelect';

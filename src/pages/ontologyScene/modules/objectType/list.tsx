@@ -73,6 +73,8 @@ export default function OntologySceneObjectTypeList() {
 
           const response = await listOntologyObjectType(requestParams);
 
+          console.log('------response------', response);
+
           if (response.status === 200 && response.code === '') {
             const items = response.data?.result || [];
 
