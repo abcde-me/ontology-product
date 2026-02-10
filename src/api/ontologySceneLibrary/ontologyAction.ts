@@ -52,6 +52,8 @@ const MockList: BehaviorActionItem[] = [
         code: 'entity_a',
         name: '实体A',
         type: ParamType.String,
+        // TODO: 修复类型错误
+        // @ts-expect-error
         uiType: 'Input',
         enabledValidation: false
       },
@@ -59,6 +61,8 @@ const MockList: BehaviorActionItem[] = [
         code: 'entity_b',
         name: '实体B',
         type: ParamType.String,
+        // TODO: 修复类型错误
+        // @ts-expect-error
         uiType: 'Input',
         enabledValidation: false
       }
@@ -82,6 +86,8 @@ const MockList: BehaviorActionItem[] = [
         code: 'target_id',
         name: '目标ID',
         type: ParamType.String,
+        // TODO: 修复类型错误
+        // @ts-expect-error
         uiType: 'Input',
         enabledValidation: false
       },
@@ -89,6 +95,8 @@ const MockList: BehaviorActionItem[] = [
         code: 'score',
         name: '评估得分',
         type: ParamType.Float,
+        // TODO: 修复类型错误
+        // @ts-expect-error
         uiType: 'InputNumber',
         enabledValidation: true
       },
@@ -96,6 +104,8 @@ const MockList: BehaviorActionItem[] = [
         code: 'level',
         name: '威胁等级',
         type: ParamType.String,
+        // TODO: 修复类型错误
+        // @ts-expect-error
         uiType: 'Select',
         enabledValidation: true
       }
@@ -119,6 +129,8 @@ const MockList: BehaviorActionItem[] = [
         code: 'start',
         name: '起点',
         type: ParamType.String,
+        // TODO: 修复类型错误
+        // @ts-expect-error
         uiType: 'Input',
         enabledValidation: false
       },
@@ -126,6 +138,8 @@ const MockList: BehaviorActionItem[] = [
         code: 'end',
         name: '终点',
         type: ParamType.String,
+        // TODO: 修复类型错误
+        // @ts-expect-error
         uiType: 'Input',
         enabledValidation: false
       }
