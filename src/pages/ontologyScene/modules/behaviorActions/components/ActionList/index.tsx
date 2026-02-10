@@ -18,65 +18,13 @@ import {
 import { ONTOLOGY_SCENE_MENU_ITEM_KEYS } from '@/common/constants';
 import { useHistory, useParams } from 'react-router-dom';
 import useArcoTable from '@/hooks/use-arco-table';
-
-const MOCK_ACTIONS: BehaviorActionItem[] = [
-  {
-    id: 'action-1',
-    name: '实体识别',
-    description: '占位文字占位文字占位文字占位文字占位文字占位文字',
-    objectType: '多媒体情报',
-    functionName: '关联推理',
-    identifier: 'ActionIdentify',
-    params: 32
-  },
-  {
-    id: 'action-2',
-    name: '关联分析与印证',
-    description: '占位文字占位文字占位文字占位文字占位文字占位文字',
-    objectType: '战斗机',
-    functionName: '多源情报融合',
-    identifier: 'type',
-    params: 24
-  },
-  {
-    id: 'action-3',
-    name: '威胁研判',
-    description: '占位文字占位文字占位文字占位文字占位文字占位文字',
-    objectType: '无人机',
-    functionName: '威胁空间分析',
-    identifier: 'source',
-    params: 67
-  },
-  {
-    id: 'action-4',
-    name: '威胁研判',
-    description: '占位文字占位文字占位文字占位文字占位文字占位文字',
-    objectType: '无人机',
-    functionName: '关联推理',
-    identifier: 'source',
-    params: 67
-  }
-];
-
-const OBJECT_TYPE_COLORS: Record<string, string> = {
-  多媒体情报: 'orangered',
-  战斗机: 'arcoblue',
-  无人机: 'green'
-};
-
-const OBJECT_TYPE_FILTERS = Array.from(
-  new Set(MOCK_ACTIONS.map((item) => item.objectType))
-).map((type) => ({
-  text: type,
-  value: type
-}));
+import { getActionList } from '@/api/ontologySceneLibrary/ontologyAction';
 
 export const ActionList = (props: {
   onViewDetail: (data: BehaviorActionItem) => void;
 }) => {
   const [keyword, setKeyword] = useState('');
   const [form] = Form.useForm();
-  const [data] = useState<BehaviorActionItem[]>(MOCK_ACTIONS);
   const { id: OSId, moduleType = ONTOLOGY_SCENE_MENU_ITEM_KEYS.GRAPH } =
     useParams<{
       id: string;
@@ -87,10 +35,7 @@ export const ActionList = (props: {
 
   const { tableProps, onSubmit, refresh } = useArcoTable(
     () => {
-      return Promise.resolve({
-        items: MOCK_ACTIONS,
-        total: MOCK_ACTIONS.length
-      });
+      return getActionList({});
     },
     {
       defaultPageSize: 10,
@@ -110,7 +55,7 @@ export const ActionList = (props: {
 
   const columns: TableColumnProps<BehaviorActionItem>[] = [
     {
-      title: '行为动作名称',
+      title: '行为名称',
       dataIndex: 'name',
       render: (value, record) => (
         <div
@@ -133,9 +78,9 @@ export const ActionList = (props: {
       width: 200
     },
     {
-      title: '所属对象类型',
-      dataIndex: 'objectType',
-      filters: OBJECT_TYPE_FILTERS,
+      title: '绑定对象类型',
+      dataIndex: 'objectTypeName',
+      filters: [],
       width: 200,
       onFilter: (value, record) => record.objectType === value,
       render: (value) => (
@@ -166,8 +111,8 @@ export const ActionList = (props: {
       )
     },
     {
-      title: '唯一标识',
-      dataIndex: 'identifier',
+      title: '行为id',
+      dataIndex: 'id',
       render: (value, record) => {
         if (!value) return '-';
         return (
@@ -185,8 +130,8 @@ export const ActionList = (props: {
       }
     },
     {
-      title: '参数',
-      dataIndex: 'params',
+      title: '资源id',
+      dataIndex: 'code',
       sorter: true,
       render: (value) => (
         <div
@@ -229,11 +174,8 @@ export const ActionList = (props: {
   return (
     <div className={styles['action-list']}>
       <div>
-        <div className="mb-1 font-PingFangSc text-[20px] font-[600] leading-[30px] text-default">
-          行为动作
-        </div>
         <div className="font-PingFangSc text-[14px] font-normal leading-[22px] text-[#334155]">
-          定义可在对象上执行的操作，封装业务逻辑与状态流转
+          行为定义可在对象上执行的操作，封装业务逻辑与状态流转
         </div>
       </div>
       <SearchTable

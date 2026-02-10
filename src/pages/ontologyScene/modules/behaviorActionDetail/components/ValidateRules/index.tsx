@@ -1,34 +1,186 @@
 import React from 'react';
 import styles from './index.module.scss';
-import { Button, Switch } from '@arco-design/web-react';
+import {
+  Button,
+  Form,
+  Input,
+  Select,
+  Switch,
+  Tag
+} from '@arco-design/web-react';
 import { IconPlayArrowFill } from '@arco-design/web-react/icon';
 import { NoDataCard } from '@ceai-front/arco-material';
+import {
+  FormItem,
+  NumberRange,
+  NumberRangeValue
+} from '@/pages/ontologyScene/componens';
+import { isNil } from 'lodash-es';
+import { TYPE2RULE_TYPES } from '@/pages/ontologyScene/types/behaviorActions';
+import { SelectWithNoData } from '@/components/new-no-data-comps';
 
-export const ValidRules = () => {
+export const ValidateRules = () => {
+  const { form, disabled } = Form.useFormContext();
+
   return (
-    <div className={styles['validate-rules']}>
-      <div className={styles['comp-header']}>
-        <div
-          className={
-            'font-PingFangSc text-[14px] font-medium leading-[22px] text-black'
-          }
-        >
-          参数配置列表
-        </div>
-        <div className={'flex w-max flex-shrink-0 items-center gap-1'}>
-          <div
-            className={
-              'font-PingFangSc text-[14px] font-normal leading-[22px] text-black'
-            }
-          >
-            启用校验
-          </div>
-          <Switch />
-        </div>
-      </div>
-      <div className={styles['comp-content']}>
-        <NoDataCard type={'block'} title={'请先选择函数'} />
-      </div>
-    </div>
+    <Form.List field={'validationRules'}>
+      {(fields) => {
+        if (fields.length === 0)
+          return <p className={'text-[#7D859C]'}>暂无校验规则</p>;
+        return fields.map(({ key, field }) => {
+          const paramName = form.getFieldValue(`${field}.name`);
+          const paramType = form.getFieldValue(`${field}.type`);
+          return (
+            <div className={styles['validate-rules']} key={key}>
+              <div className={styles['comp-header']}>
+                <div
+                  className={
+                    'font-PingFangSc text-[14px] font-medium leading-[22px] text-black'
+                  }
+                >
+                  {paramName}
+                  <Tag className={'ml-3'}>{paramType}</Tag>
+                </div>
+                <div className={'flex w-max flex-shrink-0 items-center gap-1'}>
+                  <div
+                    className={
+                      'w-max font-PingFangSc text-[14px] font-normal leading-[22px] text-black'
+                    }
+                  >
+                    启用校验
+                  </div>
+                  <FormItem
+                    field={`${field}.enabledValidation`}
+                    className={'mb-0 w-[30px]'}
+                    triggerPropName={'checked'}
+                  >
+                    <Switch disabled={disabled} />
+                  </FormItem>
+                </div>
+              </div>
+              <div className={styles['comp-content']}>
+                <Form.Item field={`${field}.name`} className={'hidden'}>
+                  <Input />
+                </Form.Item>
+                <FormItem
+                  label={'校验类型'}
+                  field={`${field}.rule_name`}
+                  required
+                >
+                  <SelectWithNoData
+                    options={TYPE2RULE_TYPES?.[paramType] || []}
+                  />
+                </FormItem>
+                <Form.Item
+                  noStyle
+                  shouldUpdate={(prevValues, currentValues) => {
+                    return true;
+                  }}
+                >
+                  {(values, form) => {
+                    const ruleName = form.getFieldValue(`${field}.rule_name`);
+                    if (ruleName === 'range_rule') {
+                      return (
+                        <FormItem
+                          label={'数值范围'}
+                          field={`${field}.ruleConfig`}
+                          required
+                          rules={[
+                            {
+                              validator(v, onError) {
+                                if (isNil(v)) return onError('请填写数值范围');
+                                const value = v as NumberRangeValue;
+                                if (isNil(value.minValue)) {
+                                  return onError('请填写最小值');
+                                }
+                                if (isNil(value.maxValue)) {
+                                  return onError('请填写最大值');
+                                }
+                              }
+                            }
+                          ]}
+                        >
+                          <NumberRange
+                            disabled={disabled}
+                            minField={'minValue'}
+                            maxField={'maxValue'}
+                          />
+                        </FormItem>
+                      );
+                    }
+                    if (ruleName === 'length_rule') {
+                      return (
+                        <FormItem
+                          label={'长度限制'}
+                          field={`${field}.ruleConfig`}
+                          required
+                          rules={[
+                            {
+                              validator(v, onError) {
+                                if (isNil(v)) return onError('请填写数值范围');
+                                const value = v as NumberRangeValue;
+                                if (isNil(value.minLength)) {
+                                  return onError('请填写最小值');
+                                }
+                                if (isNil(value.maxLength)) {
+                                  return onError('请填写最大值');
+                                }
+                              }
+                            }
+                          ]}
+                        >
+                          <NumberRange
+                            disabled={disabled}
+                            minField={'minLength'}
+                            maxField={'maxLength'}
+                          />
+                        </FormItem>
+                      );
+                    }
+                    if (ruleName === 'enum_rule') {
+                      return (
+                        <FormItem
+                          label={'枚举限制'}
+                          field={`${field}.ruleConfig`}
+                          required
+                          rules={[
+                            {
+                              required: true,
+                              message: '请输入限制的枚举值，用逗号分隔'
+                            }
+                          ]}
+                        >
+                          <Input
+                            placeholder={'请输入限制的枚举值，用逗号分隔'}
+                            disabled={disabled}
+                          />
+                        </FormItem>
+                      );
+                    }
+                    return null;
+                  }}
+                </Form.Item>
+                <FormItem
+                  label={'报错文案'}
+                  field={`${field}.failMessage`}
+                  required
+                  rules={[
+                    {
+                      required: true,
+                      message: '请输入当参数错误时，界面展示的报错文案'
+                    }
+                  ]}
+                >
+                  <Input
+                    placeholder={'请输入当参数错误时，界面展示的报错文案'}
+                    disabled={disabled}
+                  />
+                </FormItem>
+              </div>
+            </div>
+          );
+        });
+      }}
+    </Form.List>
   );
 };

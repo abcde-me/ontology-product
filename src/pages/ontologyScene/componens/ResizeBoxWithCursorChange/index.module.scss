@@ -1,0 +1,64 @@
+.x-min {
+  :global {
+    .arco-resizebox-direction-right {
+      cursor: e-resize;
+    }
+
+    .arco-resizebox-direction-left {
+      cursor: w-resize;
+    }
+  }
+}
+
+.y-min {
+  :global {
+    .arco-resizebox-direction-bottom {
+      cursor: s-resize;
+    }
+
+    .arco-resizebox-direction-top {
+      cursor: n-resize;
+    }
+  }
+}
+
+.x-max {
+  :global {
+    .arco-resizebox-direction-right {
+      cursor: w-resize;
+    }
+
+    .arco-resizebox-direction-left {
+      cursor: e-resize;
+    }
+  }
+}
+
+.y-max {
+  :global {
+    .arco-resizebox-direction-bottom {
+      cursor: n-resize;
+    }
+
+    .arco-resizebox-direction-top {
+      cursor: s-resize;
+    }
+  }
+}
+
+.resize-trigger {
+  width: 8px;
+  background: transparent;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+
+  div {
+    width: 1px;
+    background: #dfe2eb;
+  }
+}
+
+.resize-box {
+  padding: 0 !important;
+}

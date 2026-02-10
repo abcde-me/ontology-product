@@ -1,0 +1,31 @@
+.upload {
+  background-color: #f5f5f5;
+
+  :global {
+    .arco-upload-trigger {
+      button {
+        width: 108px;
+        height: 32px;
+        gap: 4px;
+        padding: 6px 16px;
+        border-radius: 4px;
+        font-family: PingFang SC;
+        font-weight: 500;
+        font-size: 14px;
+        line-height: 22px;
+        color: #0f131f;
+        border: 1px solid #c3c7d4;
+        background: white;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+
+        &:hover {
+          background: white !important;
+          color: rgba(15, 19, 31, 1) !important;
+          border-color: #007dfa !important;
+        }
+      }
+    }
+  }
+}

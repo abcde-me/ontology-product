@@ -35,6 +35,7 @@ const OntologySceneBehaviorActions = lazy(() => import('../behaviorActions'));
 const OntologySceneBehaviorActionDetail = lazy(
   () => import('../behaviorActionDetail')
 );
+const OSFunctionDetail = lazy(() => import('../functionDetail'));
 const OntologySceneFunctions = lazy(() => import('../functions'));
 const OntologySceneBehaviorLog = lazy(() => import('../behaviorLog'));
 
@@ -242,7 +243,7 @@ export default function OntologySceneDetail() {
         onPublish={handlePublish}
         sceneId={Number(OSId)}
       />
-      <Layout className="flex flex-row">
+      <Layout className="flex flex-row overflow-hidden">
         <div className="flex min-w-[200px] flex-shrink-0 flex-col border-r border-[var(--color-border-2)] bg-white">
           <div className="px-[12px] pt-[24px]">
             <Dropdown
@@ -311,6 +312,11 @@ export default function OntologySceneDetail() {
               <Route
                 path={`${basePath}/${ONTOLOGY_SCENE_MENU_ITEM_KEYS.FUNCTIONS}`}
                 component={OntologySceneFunctions}
+                exact
+              />
+              <Route
+                path={`${basePath}/${ONTOLOGY_SCENE_MENU_ITEM_KEYS.FUNCTIONS}/:pageMode/:id`}
+                component={OSFunctionDetail}
               />
               <Route
                 path={`${basePath}/${ONTOLOGY_SCENE_MENU_ITEM_KEYS.BEHAVIOR_LOG}`}

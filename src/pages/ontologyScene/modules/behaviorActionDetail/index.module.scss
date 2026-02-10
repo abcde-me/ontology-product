@@ -39,6 +39,10 @@
       }
     }
 
+    :global(.arco-form-message) {
+      margin-bottom: 0;
+    }
+
     :global(.module-title) {
       padding: 16px 0;
       font-family: PingFang SC;
