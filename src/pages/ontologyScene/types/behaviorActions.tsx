@@ -19,7 +19,7 @@ export interface BehaviorActionItem {
   /**
    * 行为描述说明
    */
-  description?: string;
+  description: string;
   /**
    * 关联的函数ID
    */
@@ -35,7 +35,7 @@ export interface BehaviorActionItem {
   /**
    * 行为名称
    */
-  name?: string;
+  name: string;
   /**
    * 绑定的对象类型ID
    */
@@ -64,6 +64,7 @@ export interface BehaviorActionItem {
    * 更新人
    */
   updateUser?: string;
+  objectType?: string;
 }
 
 /**

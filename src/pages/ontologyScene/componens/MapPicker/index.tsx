@@ -94,7 +94,6 @@ export const MapPicker: React.FC<MapPickerProps> = ({
   const [mapReady, setMapReady] = useState(false);
   const [loadingMap, setLoadingMap] = useState(false);
   const [searchLoading, setSearchLoading] = useState(false);
-  const [searchKeyword, setSearchKeyword] = useState();
   const [searchOptions, setSearchOptions] = useState<SearchOption[]>([]);
   const [currentPoint, setCurrentPoint] = useState<GeoPoint | undefined>(value);
 
@@ -237,7 +236,7 @@ export const MapPicker: React.FC<MapPickerProps> = ({
   // 远程搜索 POI，结果注入 Select options
   const handleSearch = useCallback((keyword: string) => {
     const q = keyword?.trim();
-    setSearchKeyword(keyword);
+    // setSearchKeyword(keyword);
     if (!q) {
       setSearchOptions([]);
       return;
@@ -362,11 +361,7 @@ export const MapPicker: React.FC<MapPickerProps> = ({
               arrowIcon={<IconSearch />}
               onSearch={handleSearch}
               onChange={(val: string, option) => {
-                if (!val) return setSearchKeyword(undefined);
-                const label = (option as any)?.children as string;
-                if (label) {
-                  setSearchKeyword(label);
-                }
+                if (!val) return;
                 const [lng, lat] = val.split(',');
                 handleSelectPoi({
                   name: '',

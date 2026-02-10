@@ -1,5 +1,6 @@
 .py-code {
   position: relative;
+  height: 100%;
 
   .code-mask {
     position: absolute;
@@ -7,6 +8,8 @@
     height: 100%;
     z-index: 10;
     cursor: not-allowed;
+    border-radius: 4px;
+    border: 1px solid var(--LineLine-color-border-2, #e2e8f0);
   }
 
   :global {
