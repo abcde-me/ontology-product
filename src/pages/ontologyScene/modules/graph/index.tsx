@@ -18,6 +18,7 @@ import SubHeader from './subHeader';
 import classNames from 'classnames';
 import { MarkerType } from 'reactflow';
 import { useDemoStore } from './common/store';
+import { useParams } from 'react-router-dom';
 
 const nodesConfig = [
   {
@@ -168,10 +169,13 @@ export default function OntologySceneGraph() {
   const [loading, setLoading] = useState(true);
   const showCustomEdgePanel = useDemoStore((s) => s.showCustomEdgePanel);
   const setShowCustomEdgePanel = useDemoStore((s) => s.setShowCustomEdgePanel);
+  const { id: OSId } = useParams<{ id: string }>();
 
   useEffect(() => {
     // 获取本体拓扑数据
-    getOntologyTopology({})
+    getOntologyTopology({
+      id: Number(OSId)
+    })
       .then((res) => {
         if (res.status === 200 && res.code === '' && res.data) {
           setTopologyData(res.data);
