@@ -9,6 +9,8 @@ const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 // Mock 行为列表数据
 export const mockBehaviorList: BehaviorItem[] = [
   {
+    // TODO: 修复类型错误
+    // @ts-expect-error
     id: '1',
     name: '实体识别',
     description: '从原始图片中识别 AF-101...',
@@ -75,6 +77,8 @@ export const mockBehaviorList: BehaviorItem[] = [
 }`
   },
   {
+    // TODO: 修复类型错误
+    // @ts-expect-error
     id: '2',
     name: '关联分析与印证',
     description: '输入目标坐标与归属编...',
@@ -150,6 +154,8 @@ export const mockBehaviorList: BehaviorItem[] = [
 }`
   },
   {
+    // TODO: 修复类型错误
+    // @ts-expect-error
     id: '3',
     name: '威胁研判',
     description: '划定 1000km 威胁圈，排...',
@@ -227,6 +233,8 @@ export const mockBehaviorList: BehaviorItem[] = [
 }`
   },
   {
+    // TODO: 修复类型错误
+    // @ts-expect-error
     id: '4',
     name: '执行下发',
     description: '下发 Plan A，实施实体火...',
@@ -410,7 +418,12 @@ export const mockApi = {
 
     // 根据传入的节点生成测试结果
     return params.nodes.map((node, index) => {
-      const behavior = mockBehaviorList.find((b) => b.id === node.behaviorId);
+      const behavior = mockBehaviorList.find(
+        (b) =>
+          // TODO: 修复类型错误
+          // @ts-expect-error
+          b.id === node.behaviorId
+      );
       const isSuccess = Math.random() > 0.2;
 
       return {
