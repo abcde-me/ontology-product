@@ -1,0 +1,19 @@
+.function-content {
+  :global {
+    .arco-modal-header {
+      padding: 20px 24px !important;
+
+      .arco-modal-title {
+        font-family: PingFang SC;
+        font-weight: 500;
+        font-size: 16px;
+        line-height: 24px;
+        color: var(--text-color-text-1, #0f131f);
+      }
+    }
+
+    .arco-modal-content {
+      padding: 0 24px 24px;
+    }
+  }
+}

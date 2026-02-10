@@ -1,0 +1,8 @@
+.form-item {
+}
+
+.item-partial {
+  :global(.arco-form-item-symbol) {
+    color: transparent !important;
+  }
+}

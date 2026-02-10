@@ -6,7 +6,7 @@ interface ApiRes<T> {
   status: number;
 }
 
-interface CustomFormCompProps<T = Record<string, any>> {
+interface CustomFormItemCompProps<T = Record<string, any>> {
   value?: T;
   disabled?: boolean;
   onChange?: (v: T) => any;

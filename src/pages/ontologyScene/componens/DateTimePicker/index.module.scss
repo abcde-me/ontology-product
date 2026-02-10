@@ -1,0 +1,45 @@
+.wrapper {
+  display: inline-flex;
+  align-items: stretch;
+  border: 1px solid var(--line-color-border-1, #c3c7d4);
+  border-radius: 4px;
+  overflow: hidden;
+  background: #fff;
+
+  :global {
+    .arco-picker {
+      border: none;
+      box-shadow: none;
+      height: 32px;
+    }
+
+    .arco-picker-input {
+      padding-left: 12px;
+      padding-right: 12px;
+    }
+
+    .arco-picker:hover,
+    .arco-picker-focused {
+      box-shadow: none;
+    }
+  }
+}
+
+.datePicker {
+  border-right: 1px solid #c3c7d4 !important;
+  border-radius: 4px 0 0 4px;
+
+  :global {
+    .arco-picker {
+      border-radius: 0;
+    }
+  }
+}
+
+.timePicker {
+  :global {
+    .arco-picker {
+      border-radius: 0;
+    }
+  }
+}

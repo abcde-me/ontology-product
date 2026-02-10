@@ -1,0 +1,20 @@
+.number-input {
+  :global {
+    .arco-input-inner-wrapper {
+      padding-left: 0;
+    }
+
+    .arco-input-group-prefix {
+      padding-left: 12px;
+      padding-right: 12px;
+      border-right: 1px solid var(--line-color-border-1, #c3c7d4);
+      font-family: PingFang SC;
+      font-weight: 400;
+      font-size: 14px;
+      line-height: 22px;
+      color: var(--text-color-text-1, #0f131f);
+      background: var(--fill-color-fill-2, #f5f7fc);
+      border-radius: 4px 0 0 4px;
+    }
+  }
+}

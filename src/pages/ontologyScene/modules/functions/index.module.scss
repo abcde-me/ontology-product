@@ -1,0 +1,57 @@
+.function {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+
+  :global(.arco-tabs-header) {
+    padding-left: 24px;
+  }
+
+  :global(.arco-tabs-header-title) {
+    padding-left: 0;
+    padding-right: 0;
+    margin-right: 32px;
+  }
+}
+
+.function-content {
+  padding: 24px;
+  flex: 1;
+  overflow: hidden;
+}
+
+.function-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+
+  .search {
+    border-radius: 0 4px 4px 0;
+  }
+
+  .function-table {
+    :global(.arco-table-tr) {
+      &:hover {
+        background: #f2f8ff !important;
+
+        :global(.hover-blue) {
+          color: #184ff2 !important;
+        }
+
+        :global(.aa-copy-item) {
+          display: block;
+        }
+      }
+    }
+
+    :global(.arco-table-td) {
+      color: #23293b;
+    }
+  }
+
+  :global(.hover-blue) {
+    &:hover {
+      cursor: pointer;
+    }
+  }
+}

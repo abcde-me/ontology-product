@@ -1,0 +1,45 @@
+.py-code {
+  position: relative;
+
+  .code-mask {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    z-index: 10;
+    cursor: not-allowed;
+  }
+
+  :global {
+    .cm-editor {
+      background: var(--background-color-bg-2, #f8fafd);
+      border-bottom: 1px solid var(--line-color-border-2, #dfe2eb);
+    }
+
+    .cm-focused {
+      outline: none !important;
+    }
+
+    .cm-gutter-lint {
+      width: 0 !important;
+    }
+
+    .cm-gutters-before {
+      border: none;
+      background: transparent;
+    }
+
+    .cm-line {
+      font-family: Monaco;
+      font-weight: 400;
+      font-size: 14px;
+      line-height: 24px;
+      color: black !important;
+    }
+
+    .cm-gutterElement {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+  }
+}
