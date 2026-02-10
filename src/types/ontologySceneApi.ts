@@ -106,6 +106,7 @@ export interface CreateOntologyModelReq {
   name: string;
   description: string;
   icon: string;
+  tagIdList: string[];
 }
 
 export interface CreateOntologyModelRes {

@@ -17,6 +17,7 @@ export default function OntologySceneAttributesList() {
   };
 
   const [activeTab, setActiveTab] = useState<string>(getTabFromUrl);
+  const [normalTableTotal, setNormalTableTotal] = useState<number>(0);
 
   // 当 URL 变化时，同步 tab 状态
   useEffect(() => {
@@ -56,11 +57,15 @@ export default function OntologySceneAttributesList() {
         activeTab={activeTab}
         onChange={handleTabChange}
       >
-        <Tabs.TabPane title="属性 (500)" key="normal" />
+        <Tabs.TabPane title={`属性 (${normalTableTotal})`} key="normal" />
         <Tabs.TabPane title="公共属性 (20)" key="public" />
       </Tabs>
       <div className={styles['attributes-content']}>
-        {activeTab === 'normal' ? <NormalTable /> : <PublicTable />}
+        {activeTab === 'normal' ? (
+          <NormalTable onTotalChange={setNormalTableTotal} />
+        ) : (
+          <PublicTable />
+        )}
       </div>
     </div>
   );

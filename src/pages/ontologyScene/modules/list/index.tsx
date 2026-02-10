@@ -236,6 +236,7 @@ export default function OntologySceneList() {
   const [modalMode, setModalMode] = useState<'create' | 'edit'>('create');
   const [editingScene, setEditingScene] = useState<SceneCardItem | null>(null);
   const [submitLoading, setSubmitLoading] = useState(false);
+  const [createInitialLoading, setCreateInitialLoading] = useState(false);
   const isFirstLoadRef = useRef(true);
 
   // 加载场景列表
@@ -306,7 +307,8 @@ export default function OntologySceneList() {
         const response = await createOntologyModel({
           name: data.name,
           description: data.description || '',
-          icon: data.icon || ''
+          icon: data.icon || '',
+          tagIdList: []
         });
 
         if (response.status === 200 && response.code === '') {
@@ -513,18 +515,50 @@ export default function OntologySceneList() {
     );
   }
 
+  // 处理初始背景图点击创建场景
+  const handleInitialBgClick = async () => {
+    if (createInitialLoading) return;
+
+    setCreateInitialLoading(true);
+    try {
+      const response = await createOntologyModel({
+        name: '新建本体场景',
+        description: '',
+        icon: ICON_OPTIONS[0]?.value || 'ontology-scene-1',
+        tagIdList: []
+      });
+
+      if (response.status === 200 && response.code === '') {
+        Message.success('创建成功');
+        // 创建成功后跳转到详情页
+        history.push(
+          `/tenant/compute/modaforge/ontologyScene/detail/${response.data.id}`
+        );
+      } else {
+        Message.error(response.message || '创建失败');
+      }
+    } catch (error) {
+      Message.error('创建失败');
+      console.error('创建场景失败:', error);
+    } finally {
+      setCreateInitialLoading(false);
+    }
+  };
+
   // 只在第一次进入页面请求接口并且返回数据是空的时候展示无数据背景图
   if (noData && sceneList.length === 0) {
     return (
       <div className="flex h-full items-center justify-center">
-        <img
-          src={initialBg}
-          alt="initialBg"
-          className="cursor-pointer"
-          onClick={() => {
-            history.push('/tenant/compute/modaforge/ontologyScene/detail/1');
-          }}
-        />
+        {createInitialLoading ? (
+          <Spin />
+        ) : (
+          <img
+            src={initialBg}
+            alt="initialBg"
+            className="cursor-pointer"
+            onClick={handleInitialBgClick}
+          />
+        )}
       </div>
     );
   }

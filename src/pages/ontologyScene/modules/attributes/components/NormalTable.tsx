@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Form,
   Input,
@@ -7,11 +7,18 @@ import {
   Pagination,
   Message
 } from '@arco-design/web-react';
-import { IconSearch, IconLink, IconCheck } from '@arco-design/web-react/icon';
-import { CopyItemIcon, SearchTable } from '@ceai-front/arco-material';
+import { IconSearch } from '@arco-design/web-react/icon';
+import {
+  CopyItemIcon,
+  EllipsisPopover,
+  SearchTable
+} from '@ceai-front/arco-material';
 import { useWorkflowTable } from '../../../hooks/useTable';
 import styles from '../list.module.scss';
 import ObjectTypeDetailDrawer from '@/pages/ontologyScene/componens/ObjectTypeDetailDrawer';
+import { ObjectTypeTag } from '@/pages/ontologyScene/componens';
+import { listOntologyPhysicalProperties } from '@/api/ontologySceneLibrary/graph';
+import type { PhysicalProperties } from '@/types/graphApi';
 
 // 属性数据接口
 export interface AttributeItem {
@@ -21,6 +28,7 @@ export interface AttributeItem {
     name: string;
     color: string;
     icon?: string;
+    id?: string; // 对象类型ID，用于查看详情
   };
   tableField: string;
   dataSource: string;
@@ -28,46 +36,51 @@ export interface AttributeItem {
   fieldType: string;
 }
 
-// 模拟数据
-const MOCK_DATA: AttributeItem[] = [
-  {
-    id: 'media_id',
-    name: '情报ID',
-    objectType: {
-      name: '多媒体情报',
-      color: '#00b42a'
-    },
-    tableField: 'media_id',
-    dataSource: 'Media_DATA_SET',
-    publicAttribute: '多媒体情报',
-    fieldType: 'STRING'
-  },
-  {
-    id: 'type',
-    name: '类别',
-    objectType: {
-      name: '战斗机',
-      color: '#f53f3f'
-    },
-    tableField: 'type',
-    dataSource: 'Media_DATA_SET',
-    fieldType: 'STRING'
-  },
-  {
-    id: 'source',
-    name: '来源',
-    objectType: {
-      name: '无人机',
-      color: '#ff7d00'
-    },
-    tableField: 'source',
-    dataSource: 'Media_DATA_SET',
-    publicAttribute: '无人机',
-    fieldType: 'STRING'
+// 根据对象类型名称生成颜色（简单哈希）
+const getColorByObjectTypeName = (name: string): string => {
+  const colors = [
+    '#00b42a',
+    '#f53f3f',
+    '#ff7d00',
+    '#165dff',
+    '#722ED1',
+    '#f7ba1e',
+    '#3491fa',
+    '#9fdb1d'
+  ];
+  let hash = 0;
+  for (let i = 0; i < name.length; i++) {
+    hash = name.charCodeAt(i) + ((hash << 5) - hash);
   }
-];
+  return colors[Math.abs(hash) % colors.length];
+};
 
-export default function NormalTable() {
+// 将 PhysicalProperties 转换为 AttributeItem
+const convertPhysicalPropertiesToAttributeItem = (
+  item: PhysicalProperties
+): AttributeItem => {
+  return {
+    id: String(item.id || ''),
+    name: item.name || '',
+    objectType: {
+      name: item.ontologyObjectTypeName || '',
+      color: getColorByObjectTypeName(item.ontologyObjectTypeName || ''),
+      icon: item.ontologyObjectTypeIcon,
+      id: String(item.ontologyObjectTypeId || item.objectTypeID || '')
+    },
+    tableField: item.tableField || '',
+    dataSource: '', // 接口中没有此字段，设为空字符串
+    publicAttribute: item.ontologyPublicPropertiesName || undefined,
+    fieldType: item.columnType || ''
+  };
+};
+
+export interface NormalTableProps {
+  /** total 变化时的回调函数 */
+  onTotalChange?: (total: number) => void;
+}
+
+export default function NormalTable({ onTotalChange }: NormalTableProps = {}) {
   const [form] = Form.useForm();
   const [detailDrawerVisible, setDetailDrawerVisible] = useState(false);
   const [selectedObjectType, setSelectedObjectType] = useState<{
@@ -81,44 +94,70 @@ export default function NormalTable() {
   const { data, loading, pagination, refresh, submit, onChange } =
     useWorkflowTable<AttributeItem, any>({
       service: async (params) => {
-        // TODO: 替换为实际API调用
-        // 模拟API延迟
-        await new Promise((resolve) => setTimeout(resolve, 300));
+        try {
+          // 调用 listOntologyPhysicalProperties 接口
+          const response = await listOntologyPhysicalProperties({
+            filter: params.keyword || '',
+            pageNo: params.page || 1,
+            pageSize: params.page_size || 10,
+            order: params.order || '',
+            orderBy: params.orderBy || ''
+          });
 
-        // 模拟筛选和分页
-        let filteredData = [...MOCK_DATA];
-        if (params.keyword) {
-          filteredData = filteredData.filter(
-            (item) =>
-              item.name.includes(params.keyword) ||
-              item.id.includes(params.keyword) ||
-              item.tableField.includes(params.keyword) ||
-              item.dataSource.includes(params.keyword)
-          );
-        }
+          if (response.status === 200 && response.data) {
+            // 将 PhysicalProperties 转换为 AttributeItem
+            const items = (response.data.result || []).map(
+              convertPhysicalPropertiesToAttributeItem
+            );
 
-        const page = params.page || 1;
-        const pageSize = params.page_size || 10;
-        const start = (page - 1) * pageSize;
-        const end = start + pageSize;
-
-        return {
-          data: {
-            items: filteredData.slice(start, end),
-            total: filteredData.length,
-            page,
-            page_size: pageSize
+            return {
+              data: {
+                items,
+                total: response.data.totalCount || 0,
+                page: params.page || 1,
+                page_size: params.page_size || 10
+              }
+            };
           }
-        };
+
+          // 如果接口调用失败，返回空数据
+          return {
+            data: {
+              items: [],
+              total: 0,
+              page: params.page || 1,
+              page_size: params.page_size || 10
+            }
+          };
+        } catch (error) {
+          console.error('获取属性列表失败:', error);
+          Message.error('获取属性列表失败');
+          return {
+            data: {
+              items: [],
+              total: 0,
+              page: params.page || 1,
+              page_size: params.page_size || 10
+            }
+          };
+        }
       },
       form,
       defaultPageSize: 10
     });
 
+  // 当 total 变化时，通知父组件
+  useEffect(() => {
+    if (onTotalChange && pagination?.total !== undefined) {
+      onTotalChange(pagination.total);
+    }
+  }, [pagination?.total, onTotalChange]);
+
   // 处理查看详情：打开对象类型详情抽屉
   const handleViewDetail = (record: AttributeItem) => {
-    // 目前使用属性 id 作为对象类型 id 的占位，后续联调可替换为真实 objectTypeId
-    setSelectedObjectType({ id: record.id });
+    // 使用对象类型ID打开详情抽屉
+    const objectTypeId = record.objectType.id || record.id;
+    setSelectedObjectType({ id: objectTypeId });
     setActiveTab('instances');
     setDetailDrawerVisible(true);
   };
@@ -130,7 +169,7 @@ export default function NormalTable() {
       dataIndex: 'name',
       width: 150,
       render: (value, record) => (
-        <div className="text-[14px] font-medium leading-[22px]">{value}</div>
+        <EllipsisPopover value={value || '-'} className="font-[600]" />
       )
     },
     {
@@ -138,40 +177,17 @@ export default function NormalTable() {
       dataIndex: 'objectType',
       width: 180,
       render: (value, record) => (
-        <div className="flex items-center gap-2">
-          <div
-            className="flex h-6 w-6 items-center justify-center rounded text-white"
-            style={{
-              backgroundColor: value.color || '#165dff'
-            }}
-          >
-            <IconCheck style={{ fontSize: '14px' }} />
-          </div>
-          <div
-            className="hover-blue text-[14px] font-normal leading-[22px] text-[#23293b]"
-            onClick={() => handleViewDetail(record)}
-          >
-            {value.name}
-          </div>
-        </div>
+        <ObjectTypeTag
+          ontologyObjectTypeIcon={value.icon}
+          ontologyObjectTypeName={value.name}
+          ontologyObjectTypeId={value.id}
+          onClick={() => handleViewDetail(record)}
+        />
       )
     },
     {
-      title: 'id',
+      title: '属性id',
       dataIndex: 'id',
-      width: 150,
-      render: (value) => (
-        <div className="flex items-center gap-2">
-          <div className="font-PingFangSc text-[14px] font-normal leading-[22px] text-[#23293b]">
-            {value}
-          </div>
-          <CopyItemIcon className="hidden flex-shrink-0" value={value} />
-        </div>
-      )
-    },
-    {
-      title: '表字段',
-      dataIndex: 'tableField',
       width: 150,
       render: (value) => (
         <div className="flex items-center gap-2">
@@ -185,18 +201,15 @@ export default function NormalTable() {
     {
       title: '数据源',
       dataIndex: 'dataSource',
-      width: 180
+      width: 180,
+      render: (value) => <EllipsisPopover value={value || '-'} />
     },
     {
       title: '关联公共属性',
       dataIndex: 'publicAttribute',
       width: 150,
       render: (value) => (
-        <div className="flex items-center gap-2">
-          <div className="hover-blue font-PingFangSc text-[14px] font-normal leading-[22px] text-[#23293b]">
-            {value}
-          </div>
-        </div>
+        <EllipsisPopover value={value || '-'} className="hover-blue" />
       )
     },
     {

@@ -211,13 +211,17 @@ export interface PhysicalProperties {
    */
   ontologyModelID?: number;
   /**
-   * 新增字段
+   * 对象类型ID
    */
   ontologyObjectTypeId?: number;
   /**
    * 对象类型名称
    */
   ontologyObjectTypeName?: string;
+  /**
+   * 对象类型图标
+   */
+  ontologyObjectTypeIcon?: string;
   /**
    * 公共属性ID
    */
