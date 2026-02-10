@@ -167,6 +167,7 @@ export default function NormalTable({ onTotalChange }: NormalTableProps = {}) {
     {
       title: '属性名称',
       dataIndex: 'name',
+      fixed: 'left',
       width: 150,
       render: (value, record) => (
         <EllipsisPopover value={value || '-'} className="font-[600]" />

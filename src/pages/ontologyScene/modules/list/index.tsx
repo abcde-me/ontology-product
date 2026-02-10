@@ -108,8 +108,8 @@ const SceneCard: React.FC<SceneCardProps> = ({
 
   const getIconComponent = (icon: string) => {
     const matchedIcon = ICON_OPTIONS.find((option) => option.value === icon);
-    const IconComponent = matchedIcon?.icon;
-    return IconComponent ? <IconComponent /> : null;
+    const IconComponent = matchedIcon?.icon ?? ICON_OPTIONS[0].icon;
+    return <IconComponent />;
   };
 
   return (

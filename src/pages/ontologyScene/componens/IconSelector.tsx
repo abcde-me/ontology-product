@@ -53,7 +53,7 @@ const IconSelector: React.FC<IconSelectorProps> = ({
             }}
           >
             {options.map((option) => {
-              const IconComponent = option.icon;
+              const IconComponent = option.icon ?? options[0].icon;
               return (
                 <div
                   key={option.value}

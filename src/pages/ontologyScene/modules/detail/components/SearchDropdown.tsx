@@ -191,7 +191,7 @@ const SearchDropdown: React.FC<SearchDropdownProps> = ({
     const iconOption = item.icon
       ? OBJECT_TYPE_ICON_OPTIONS.find((option) => option.value === item.icon)
       : null;
-    const IconComponent = iconOption?.icon;
+    const IconComponent = iconOption?.icon ?? OBJECT_TYPE_ICON_OPTIONS[0].icon;
 
     return (
       <div
@@ -200,11 +200,7 @@ const SearchDropdown: React.FC<SearchDropdownProps> = ({
       >
         {/* Icon */}
         <div className="flex h-[36px] w-[36px] flex-shrink-0 items-center justify-center">
-          {IconComponent ? (
-            <IconComponent className="h-[36px] w-[36px]" />
-          ) : (
-            <IconFile className="h-[36px] w-[36px] text-[var(--color-text-3)]" />
-          )}
+          <IconComponent className="h-[36px] w-[36px]" />
         </div>
         <div className="min-w-0 flex-1">
           <div className="mb-[4px] flex items-center gap-[8px]">

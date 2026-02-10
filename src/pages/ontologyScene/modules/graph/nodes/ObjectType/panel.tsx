@@ -288,7 +288,7 @@ const Panel: FC<any> = ({ id, data }) => {
           (option) => option.value === objectType.icon
         )
       : null;
-    const IconComponent = iconOption?.icon;
+    const IconComponent = iconOption?.icon ?? OBJECT_TYPE_ICON_OPTIONS[0].icon;
 
     const color = objectType.iconColor || '#165dff';
     const isGreen = color === '#00b42a' || color === 'green';
@@ -301,11 +301,7 @@ const Panel: FC<any> = ({ id, data }) => {
         }`}
       >
         <div className="flex h-6 w-6 flex-shrink-0 items-center justify-center">
-          {IconComponent ? (
-            <IconComponent className="h-6 w-6" />
-          ) : (
-            <IconFile className="h-6 w-6" />
-          )}
+          <IconComponent className="h-6 w-6" />
         </div>
         <span className="text-sm font-medium text-gray-700">
           {objectType.name}
