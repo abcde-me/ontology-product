@@ -74,7 +74,7 @@ function layoutNodesWithDagre(
         type: 'default',
         desc: topologyNode.description ?? '',
         title: topologyNode.name || '未命名节点',
-        attributes: topologyNode.attributes || [],
+        attributes: topologyNode.ontologyPhysicalPropertiesList || [],
         syncStatus: topologyNode.syncStatus
       },
       position: { x: 0, y: 0 } // 临时位置，稍后由 dagre 计算

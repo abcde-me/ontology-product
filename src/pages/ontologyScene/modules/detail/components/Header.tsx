@@ -24,6 +24,7 @@ import {
   getOntologyModelDetail,
   updateOntologyModel
 } from '@/api/ontologySceneLibrary/ontologyScene';
+import SearchDropdown from './SearchDropdown';
 
 const { Header: LayoutHeader } = Layout;
 
@@ -47,7 +48,7 @@ export default function Header({
   const history = useHistory();
   const [isEditing, setIsEditing] = useState(false);
   const [editTitle, setEditTitle] = useState(title);
-  const [searchValue, setSearchValue] = useState('');
+  const [searchHovered, setSearchHovered] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   const [editLoading, setEditLoading] = useState(false);
   const [submitLoading, setSubmitLoading] = useState(false);
@@ -187,14 +188,24 @@ export default function Header({
       {/* 右侧区域 */}
       <div className="flex items-center gap-x-[18px]">
         <div
-          className="flex cursor-pointer items-center text-[var(--color-text-3)] transition-colors hover:text-[var(--color-text-1)]"
-          onClick={() => {
-            // 搜索功能处理
-            console.log('搜索');
+          className="relative"
+          onMouseEnter={() => setSearchHovered(true)}
+          onMouseLeave={() => {
+            console.log('onMouseLeave111');
+            // setSearchHovered(false)
           }}
         >
-          <IconSearch className="mr-[7px] text-[15px]" />
-          <span className="text-[14px]">搜索</span>
+          {searchHovered ? (
+            <SearchDropdown
+              visible={searchHovered}
+              onVisibleChange={setSearchHovered}
+            />
+          ) : (
+            <div className="flex cursor-pointer items-center text-[var(--color-text-3)] transition-colors hover:text-[var(--color-text-1)]">
+              <IconSearch className="mr-[7px] text-[15px]" />
+              <span className="text-[14px]">搜索</span>
+            </div>
+          )}
         </div>
 
         <div

@@ -461,7 +461,7 @@ export const getOntologyLinkType = async (params: {
   const mockData: GetOntologyLinkTypeRes = {
     id: params.id,
     code: 'LINK_RELATION',
-    name: '关联关系',
+    name: params.id === 101 ? '研判支撑' : '任务分配',
     description: '原始情报与意图研判之间的关联关系，用于描述两者之间的业务联系',
     type: LinkType.ONE_TO_MANY,
     ontologyModelID: 1,
