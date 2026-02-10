@@ -1,12 +1,12 @@
 import UAPI from '@/api';
 import {
   InputType,
-  OnFunctionDetail,
-  OnFunctionItem,
+  OntologyFunctionDetail,
+  OntologyFunctionItem,
   ParamType
-} from '@/pages/ontologyScene/types/osFunction';
+} from '@/pages/ontologyScene/types/ontologyFunction';
 
-const MockList: OnFunctionItem[] = [
+const MockList: OntologyFunctionItem[] = [
   {
     id: 1,
     code: 'entity_extract',
@@ -60,7 +60,7 @@ def threat_assess(target_id: str, score: float) -> str:
     updatedAt: new Date('2024-06-12T09:40:00'),
     params: [
       { name: 'target_id', type: ParamType.String, inputType: InputType.Input },
-      { name: 'score', type: ParamType.Double, inputType: InputType.Input },
+      { name: 'score', type: ParamType.Float, inputType: InputType.Input },
       { name: 'result', type: ParamType.String, inputType: InputType.Output }
     ]
   },
@@ -82,11 +82,114 @@ def route_plan(start: str, end: str) -> str:
       { name: 'end', type: ParamType.String, inputType: InputType.Input },
       { name: 'result', type: ParamType.String, inputType: InputType.Output }
     ]
+  },
+  {
+    id: 5,
+    code: 'FUNC_ALL_INPUT_TYPES',
+    name: '全入参类型覆盖',
+    description: '覆盖所有入参类型，便于验证表单控件',
+    content: `@Action()
+def full_input_types(
+  text: str,
+  count: int,
+  ratio: float,
+  is_active: bool,
+  start_date: date,
+  event_time: datetime,
+  location: GeoPoint,
+  profile: ObjectOne,
+  attachments: Attachment,
+  tags: ObjectSet
+) -> dict:
+  # 覆盖所有入参类型
+  return {
+    "text": text,
+    "count": count,
+    "ratio": ratio,
+    "is_active": is_active,
+    "start_date": start_date,
+    "event_time": event_time,
+    "location": location,
+    "profile": profile,
+    "attachments": attachments,
+    "tags": tags
+  }`,
+    createUser: 'tester',
+    createdAt: new Date('2024-06-15T12:00:00'),
+    updatedAt: new Date('2024-06-15T12:00:00'),
+    params: [
+      {
+        name: 'text',
+        type: ParamType.String,
+        inputType: InputType.Input,
+        idx: 0
+      },
+      {
+        name: 'count',
+        type: ParamType.Integer,
+        inputType: InputType.Input,
+        idx: 1
+      },
+      {
+        name: 'ratio',
+        type: ParamType.Float,
+        inputType: InputType.Input,
+        idx: 2
+      },
+      {
+        name: 'is_active',
+        type: ParamType.Boolean,
+        inputType: InputType.Input,
+        idx: 3
+      },
+      {
+        name: 'start_date',
+        type: ParamType.Date,
+        inputType: InputType.Input,
+        idx: 4
+      },
+      {
+        name: 'event_time',
+        type: ParamType.Timestamp,
+        inputType: InputType.Input,
+        idx: 5
+      },
+      {
+        name: 'location',
+        type: ParamType.Geopoint,
+        inputType: InputType.Input,
+        idx: 6
+      },
+      {
+        name: 'profile',
+        type: ParamType.ObjectOne,
+        inputType: InputType.Input,
+        idx: 7
+      },
+      {
+        name: 'attachments',
+        type: ParamType.Attachment,
+        inputType: InputType.Input,
+        idx: 8
+      },
+      {
+        name: 'tags',
+        type: ParamType.ObjectSet,
+        inputType: InputType.Input,
+        idx: 9
+      },
+      {
+        name: 'result',
+        type: ParamType.ObjectOne,
+        inputType: InputType.Output,
+        idx: 10
+      }
+    ]
   }
 ];
 
 // 保存函数（新增/更新）
-export const saveFunction = (data: OnFunctionDetail) => {
+export const saveFunction = (data: OntologyFunctionDetail) => {
   // 有 id 走更新，无 id 走新增
   const api = data?.id
     ? UAPI.RES.UpdateOntologyFunctionApi
@@ -104,7 +207,7 @@ export const deleteFunction = (id: string | number) => {
 
 // 获取函数详情
 export const getFunctionDetail = (id: string | number) => {
-  return Promise.resolve(MockList[0]);
+  return Promise.resolve(MockList.find((item) => item.id === id));
   // return UAPI.RES.GetOntologyFunctionDetailApi({}).post({ id }).inRegion().do();
 };
 

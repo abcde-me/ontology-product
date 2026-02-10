@@ -792,8 +792,6 @@ export const ModaForgeResourceEndpoints = {
   ListOntologyLinkTypeDataApi: PrefixAimdp + '/ListOntologyLinkTypeData',
   // 获取链接类型详细信息
   GetOntologyLinkTypeApi: PrefixAimdp + '/GetOntologyLinkType',
-  DeleteOntologyModelApi: PrefixAimdp + '/DeleteOntologyModel',
-  GetOntologyTopologyApi: PrefixAimdp + '/GetOntologyTopology',
   // ===================== 本体函数相关 =====================
   // 函数列表
   GetOntologyFunctionListApi: PrefixAimdp + '/ListOntologyFunction',
@@ -804,8 +802,20 @@ export const ModaForgeResourceEndpoints = {
   // 更新函数
   UpdateOntologyFunctionApi: PrefixAimdp + '/UpdateOntologyFunction',
   // 删除函数
-  DeleteOntologyFunctionListApi: PrefixAimdp + '/DeleteOntologyFunction'
-  // ===================== 本体函数相关 =====================
+  DeleteOntologyFunctionListApi: PrefixAimdp + '/DeleteOntologyFunction',
+  // 本体函数SDK
+  GetOntologyFunctionSDKDocApi: PrefixAimdp + '/GetOntologyFunctionSDKDoc',
+  // ===================== 本体行为相关 =====================
+  // 创建本体行为
+  CreateOntologyActionApi: PrefixAimdp + '/CreateOntologyAction',
+  // 获取本体行为列表
+  GetListOntologyActionApi: PrefixAimdp + '/ListOntologyAction',
+  // 获取本体行为详情
+  GetOntologyActionApi: PrefixAimdp + '/GetOntologyAction',
+  // 删除本体行为
+  DeleteOntologyActionApi: PrefixAimdp + '/DeleteOntologyAction',
+  // 更新本体行为
+  UpdateOntologyActionApi: PrefixAimdp + '/UpdateOntologyAction'
 };
 
 /**

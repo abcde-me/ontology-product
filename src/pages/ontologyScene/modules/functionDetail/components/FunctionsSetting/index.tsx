@@ -30,9 +30,10 @@ import {
   OntologyFunctionParam,
   OutputTypeOptions,
   ParamType
-} from '@/pages/ontologyScene/types/osFunction';
+} from '@/pages/ontologyScene/types/ontologyFunction';
 import classNames from 'classnames';
-import { getFunctionSDK } from '@/api/ontologyScene/onFunction';
+import { getFunctionSDK } from '@/api/ontologySceneLibrary/ontologyFunction';
+import { ResizeBoxWithCursorChange } from '@/pages/ontologyScene/componens';
 
 export const FunctionsSetting = () => {
   const { form, disabled, isSubmitting } = Form.useFormContext();
@@ -65,9 +66,12 @@ export const FunctionsSetting = () => {
   };
   return (
     <div className={styles['function-setting']} ref={ref}>
-      <ResizeBox
+      <ResizeBoxWithCursorChange
+        minWidth={520}
+        maxWidth={isFullscreen ? 597 : 845}
         directions={['right']}
-        className={'h-full w-1/2 min-w-[500px]'}
+        className={`h-full w-1/2 min-w-[520px]`}
+        style={{ maxWidth: isFullscreen ? '597px' : '845px' }}
       >
         <div className={styles['left']}>
           <div className={styles['header']}>
@@ -156,7 +160,7 @@ export const FunctionsSetting = () => {
                     <div
                       className={`${styles['params-item']} ${styles['output-params-item']}`}
                     >
-                      <p>出参序号</p>
+                      <p>出参定义</p>
                       <p>出参类型</p>
                       <div className={'w-4'} />
                     </div>
@@ -170,8 +174,11 @@ export const FunctionsSetting = () => {
                             className={`mb-0 flex-1 ${styles['output-item']}`}
                             field={`${field}.name`}
                             rules={getInputAndOutputRules('output')}
+                            dependencies={fields.flatMap((f) =>
+                              key === f.key ? [] : `${f.field}.name`
+                            )}
                           >
-                            <Input placeholder={''} disabled />
+                            <Input placeholder={''} />
                           </Form.Item>
                           <Form.Item
                             className={`mb-0  flex-1 ${styles['output-item']}`}
@@ -187,16 +194,11 @@ export const FunctionsSetting = () => {
                             onClick={() => {
                               remove(index);
                               setTimeout(() => {
-                                const value: OntologyFunctionParam[] =
-                                  form.getFieldValue('output');
-                                form.setFieldsValue({
-                                  output: value.map(({ type }, index) => {
-                                    return {
-                                      type,
-                                      name: `result${index + 1}`
-                                    };
-                                  })
-                                });
+                                form
+                                  .validate(
+                                    fields.map(({ field }) => `${field}.name`)
+                                  )
+                                  .catch(console.error);
                               }, 0);
                             }}
                           />
@@ -209,7 +211,7 @@ export const FunctionsSetting = () => {
                       className={'h-auto pl-0'}
                       onClick={() => {
                         add({
-                          name: `result${fields.length + 1}`,
+                          name: `var_${fields.length + 1}`,
                           type: ParamType.String
                         });
                       }}
@@ -222,7 +224,7 @@ export const FunctionsSetting = () => {
             </Form.List>
           </div>
         </div>
-      </ResizeBox>
+      </ResizeBoxWithCursorChange>
       <div
         className={classNames({
           [styles['right']]: true,
@@ -270,9 +272,12 @@ export const FunctionsSetting = () => {
         </Form.Item>
       </div>
       {showDoc && (
-        <ResizeBox
+        <ResizeBoxWithCursorChange
           directions={['left']}
-          className={'h-full w-[300px] min-w-[250px]'}
+          className={'h-full w-[300px] min-w-[300px] '}
+          minWidth={300}
+          maxWidth={isFullscreen ? 377 : 625}
+          style={{ maxWidth: isFullscreen ? '377px' : '625px' }}
         >
           <div className={styles['sdk']}>
             <div className={`${styles['header']} text-[16px] `}>
@@ -290,7 +295,7 @@ export const FunctionsSetting = () => {
             </div>
             <SdkDocumentation content={content} />
           </div>
-        </ResizeBox>
+        </ResizeBoxWithCursorChange>
       )}
     </div>
   );

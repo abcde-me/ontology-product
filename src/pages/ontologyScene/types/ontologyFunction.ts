@@ -3,7 +3,7 @@
  *
  * OntologyFunction，函数对象
  */
-export interface OnFunctionDetail {
+export interface OntologyFunctionDetail {
   /**
    * 函数唯一编码
    */
@@ -90,6 +90,10 @@ export interface OntologyFunctionParam {
    * 参数值
    */
   value?: any;
+  /**
+   * 参数序号
+   */
+  idx?: number;
 }
 
 /**
@@ -117,7 +121,7 @@ export enum InputType {
 export enum ParamType {
   String = 'String',
   Integer = 'Integer',
-  Double = 'Double',
+  Float = 'Float',
   Boolean = 'Boolean',
   Date = 'Date',
   Timestamp = 'Timestamp',
@@ -143,7 +147,7 @@ export const OutputTypeOptions = [
 export const TYPE_MAP: Record<string, string> = {
   [ParamType.String]: 'str',
   [ParamType.Integer]: 'int',
-  [ParamType.Double]: 'float',
+  [ParamType.Float]: 'float',
   [ParamType.Boolean]: 'bool',
   [ParamType.Date]: 'date',
   [ParamType.Timestamp]: 'datetime',
@@ -153,16 +157,32 @@ export const TYPE_MAP: Record<string, string> = {
   [ParamType.Attachment]: 'Attachment',
   Void: 'None'
 };
-export const DEFAULT_FUNCTION_CONTENT = `@Action()
-def my_function(arg1: str) -> str:
-  # 在此编写函数逻辑
-  result = ""
-  return result`;
+export const DEFAULT_FUNCTION_CONTENT = `# 请先修改函数名称
+# 修改左侧的输入参数、输出参数，编辑区变量会自动修改
+# 在右侧sdk开发指南中查看代码示例，编写函数逻辑
+# 在参数值中通过控件输入数据
+# 点击运行可以在下方日志区看到运行结果
+
+def my_function(arg1: str) -> dict: # 只读
+    # 在此编写函数逻辑
+    var_1 = 1.0
+    var_2 = 1.0
+    return {"var_1": var_1, "var_2": var_2} # 只读`;
+
+export const DEFAULT_FUNCTION_SCHEMA: OntologyFunctionSchema = {
+  content: DEFAULT_FUNCTION_CONTENT,
+  input: [{ name: 'arg1', type: ParamType.String }],
+  output: [
+    { name: 'var_1', type: ParamType.Float },
+    { name: 'var_2', type: ParamType.Float }
+  ],
+  code: 'my_function'
+};
 
 /**
  * OntologyFunction，函数对象
  */
-export interface OnFunctionItem {
+export interface OntologyFunctionItem {
   /**
    * 函数唯一编码
    */
@@ -209,7 +229,7 @@ export interface OnFunctionItem {
   updateUser?: string;
 }
 
-export interface OnFunctionSchema {
+export interface OntologyFunctionSchema {
   code?: string;
   name?: string;
   description?: string;

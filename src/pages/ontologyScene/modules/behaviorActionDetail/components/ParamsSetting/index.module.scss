@@ -1,4 +1,6 @@
 .params-setting {
+  width: 100%;
+
   .comp-header {
     justify-content: space-between;
     align-items: center;
@@ -25,6 +27,24 @@
     :global(.arco-btn) {
       display: flex;
       align-items: center;
+    }
+  }
+
+  .params-item {
+    display: flex;
+    border-bottom: 1px solid #dfe2eb;
+    gap: 16px;
+    margin-bottom: 8px;
+
+    .field {
+      padding: 8px 0 8px 16px;
+      flex: 1;
+      flex-shrink: 0;
+      font-family: PingFang SC;
+      font-weight: 500;
+      font-size: 14px;
+      line-height: 22px;
+      color: #0f131f;
     }
   }
 }

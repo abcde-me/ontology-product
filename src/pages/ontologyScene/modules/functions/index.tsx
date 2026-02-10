@@ -20,54 +20,8 @@ import {
   SearchTable
 } from '@ceai-front/arco-material';
 import { SafeTableCell } from '@/components/SafeTableCell';
-import { OnFunctionItem } from '@/pages/ontologyScene/types/osFunction';
-import { getFunctionList } from '@/api/ontologyScene/onFunction';
-
-const MOCK_ACTIONS: BehaviorActionItem[] = [
-  {
-    id: 'action-1',
-    name: '实体识别',
-    description: '占位文字占位文字占位文字占位文字占位文字占位文字',
-    objectType: '多媒体情报',
-    functionName: '关联推理',
-    identifier: 'ActionIdentify',
-    params: 32
-  },
-  {
-    id: 'action-2',
-    name: '关联分析与印证',
-    description: '占位文字占位文字占位文字占位文字占位文字占位文字',
-    objectType: '战斗机',
-    functionName: '多源情报融合',
-    identifier: 'type',
-    params: 24
-  },
-  {
-    id: 'action-3',
-    name: '威胁研判',
-    description: '占位文字占位文字占位文字占位文字占位文字占位文字',
-    objectType: '无人机',
-    functionName: '威胁空间分析',
-    identifier: 'source',
-    params: 67
-  },
-  {
-    id: 'action-4',
-    name: '威胁研判',
-    description: '占位文字占位文字占位文字占位文字占位文字占位文字',
-    objectType: '无人机',
-    functionName: '关联推理',
-    identifier: 'source',
-    params: 67
-  }
-];
-
-const OBJECT_TYPE_FILTERS = Array.from(
-  new Set(MOCK_ACTIONS.map((item) => item.objectType))
-).map((type) => ({
-  text: type,
-  value: type
-}));
+import { OntologyFunctionItem } from '@/pages/ontologyScene/types/ontologyFunction';
+import { getFunctionList } from '@/api/ontologySceneLibrary/ontologyFunction';
 
 // 函数
 export default function OntologySceneFunctions() {
@@ -92,7 +46,7 @@ export default function OntologySceneFunctions() {
 
   const route2FunctionDetail = (
     type?: 'view' | 'edit' | 'create',
-    data?: OnFunctionItem
+    data?: OntologyFunctionItem
   ) => {
     const baseUrl = '/tenant/compute/modaforge/ontologyScene/detail';
     history.push(
@@ -100,7 +54,7 @@ export default function OntologySceneFunctions() {
     );
   };
 
-  const columns: TableColumnProps<OnFunctionItem>[] = [
+  const columns: TableColumnProps<OntologyFunctionItem>[] = [
     {
       title: '显示名称',
       dataIndex: 'name',

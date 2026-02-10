@@ -14,10 +14,10 @@ import { ExternalChange } from '@uiw/react-codemirror';
 import {
   InputType,
   OntologyFunctionParam,
-  OnFunctionDetail,
-  OnFunctionSchema,
+  OntologyFunctionDetail,
+  OntologyFunctionSchema,
   TYPE_MAP
-} from '@/pages/ontologyScene/types/osFunction';
+} from '@/pages/ontologyScene/types/ontologyFunction';
 
 export const bypassFrozenRange = Annotation.define<boolean>();
 
@@ -191,21 +191,13 @@ const buildFUnctionSignature = (data: {
   output: OntologyFunctionParam[];
 }) => {
   const { name, input, output } = data;
-  const signature = `def ${name}(${input?.map(({ name: p_name, type }) => `${p_name}:${TYPE_MAP[type]}`).join(',')})`;
-  const returnType =
-    output.length > 0
-      ? output.length > 1
-        ? `Tuple[${output?.map((item) => TYPE_MAP[item.type] || 'None').join(',')}]`
-        : TYPE_MAP[output[0].type] || 'None'
-      : 'None';
+  const signature = `def ${name}(${input?.map(({ name: p_name, type }) => `${p_name} : ${TYPE_MAP[type]}`).join(',')})`;
+  const returnType = output.length > 0 ? 'dict' : 'None';
   return `${signature} -> ${returnType}:`;
 };
 const buildReturnCode = (outputs: OntologyFunctionParam[]) => {
   if (outputs.length === 0) return 'return None';
-  if (outputs.length > 1) {
-    return `return (${outputs.map((item) => item.name || 'None').join(',')})`;
-  }
-  return `return ${outputs[0].name || 'None'}`;
+  return `return {${outputs.map((item) => `"${item.name}":${item.name}`).join(',')}}`;
 };
 
 /**
@@ -296,16 +288,19 @@ export function getFreezeRanges(code: string) {
   ];
 }
 
-export function buildFunctionSchema(meta: OnFunctionDetail): OnFunctionSchema {
+export function buildFunctionSchema(
+  meta: OntologyFunctionDetail
+): OntologyFunctionSchema {
   const { name, code, params = [], description, content } = meta;
   const paramsSetting = params.reduce<
     Record<InputType, OntologyFunctionParam[]>
   >(
     (p, c) => {
-      const { name, type, inputType, value } = c;
+      const { name, type, inputType, value, idx } = c;
       const base: OntologyFunctionParam = {
         name,
-        type
+        type,
+        idx
       };
       if (inputType === InputType.Input) {
         base.value = value;
@@ -318,32 +313,40 @@ export function buildFunctionSchema(meta: OnFunctionDetail): OnFunctionSchema {
       output: []
     }
   );
+  const { input, output } = paramsSetting;
   return {
     code,
     name,
     description,
-    ...paramsSetting,
+    input: input.sort((a, b) => {
+      return a.idx! - b.idx!;
+    }),
+    output: output.sort((a, b) => {
+      return a.idx! - b.idx!;
+    }),
     content
   };
 }
 
 export function buildFunctionDetail(
-  meta: OnFunctionSchema
-): Partial<OnFunctionDetail> {
+  meta: OntologyFunctionSchema
+): Partial<OntologyFunctionDetail> {
   const { name, description, input, output, content } = meta;
   return {
     name,
     description,
     content,
     params: [
-      ...(input || []).map((item) => ({
+      ...(input || []).map((item, idx) => ({
         ...item,
         code: item.name,
+        idx,
         inputType: InputType.Input
       })),
-      ...(output || []).map((item) => ({
+      ...(output || []).map((item, idx) => ({
         ...item,
         code: item.name,
+        idx,
         inputType: InputType.Output
       }))
     ]

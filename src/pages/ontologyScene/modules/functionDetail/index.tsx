@@ -8,10 +8,12 @@ import { FunctionsSetting } from '@/pages/ontologyScene/modules/functionDetail/c
 import { useRequest } from 'ahooks';
 import {
   DEFAULT_FUNCTION_CONTENT,
-  OnFunctionDetail,
-  OnFunctionItem,
-  OnFunctionSchema
-} from '@/pages/ontologyScene/types/osFunction';
+  DEFAULT_FUNCTION_SCHEMA,
+  OntologyFunctionDetail,
+  OntologyFunctionItem,
+  OntologyFunctionSchema,
+  ParamType
+} from '@/pages/ontologyScene/types/ontologyFunction';
 import {
   buildFunctionDetail,
   buildFunctionSchema,
@@ -21,7 +23,7 @@ import { isNil } from 'lodash-es';
 import {
   getFunctionDetail,
   saveFunction
-} from '@/api/ontologyScene/onFunction';
+} from '@/api/ontologySceneLibrary/ontologyFunction';
 
 const { TextArea } = Input;
 
@@ -47,7 +49,7 @@ export default function OSFunctionDetailPage() {
 
   const saveAction = async () => {
     try {
-      const values: OnFunctionSchema = await form.validate();
+      const values: OntologyFunctionSchema = await form.validate();
       await saveFunction({
         ...functionDetail,
         ...buildFunctionDetail(values)
@@ -60,12 +62,7 @@ export default function OSFunctionDetailPage() {
 
   useEffect(() => {
     if (!functionDetail) {
-      form.setFieldsValue({
-        content: DEFAULT_FUNCTION_CONTENT,
-        input: [{ name: 'arg1', type: 'String' }],
-        output: [{ name: 'result', type: 'String' }],
-        code: 'my_function'
-      });
+      form.setFieldsValue(DEFAULT_FUNCTION_SCHEMA);
       return;
     }
     form.setFieldsValue(buildFunctionSchema(functionDetail));

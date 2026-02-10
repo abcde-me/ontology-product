@@ -1,18 +1,24 @@
 import React from 'react';
-import { Form, Input, Modal } from '@arco-design/web-react';
+import { Form, Modal } from '@arco-design/web-react';
 import styles from '././index.module.scss';
 import { NoDataCard, ProButton } from '@ceai-front/arco-material';
 import { IconPlayArrowFill } from '@arco-design/web-react/icon';
+import {
+  OntologyActionParam,
+  UiType
+} from '@/pages/ontologyScene/types/behaviorActions';
+import { renderComponentByUiType } from '@/pages/ontologyScene/utils';
 
 interface IProps {
   visible: boolean;
-  data: any;
+  data: OntologyActionParam[];
   onOk?: () => void;
   onClose?: () => void;
 }
 
 export const ParamsTestDialog = (props: IProps) => {
   const { data, visible, onClose, onOk } = props;
+  const [form] = Form.useForm();
   return (
     <Modal
       title={'参数测试'}
@@ -26,22 +32,24 @@ export const ParamsTestDialog = (props: IProps) => {
         <div className={styles['left']}>
           <div className={styles['header']}>参数配置</div>
           <div className={styles['body']}>
-            <Form layout={'vertical'}>
-              <Form.Item label={'测试'}>
-                <Input />
-              </Form.Item>
-              <Form.Item label={'测试'}>
-                <Input />
-              </Form.Item>
-              <Form.Item label={'测试'}>
-                <Input />
-              </Form.Item>
-              <Form.Item label={'测试'}>
-                <Input />
-              </Form.Item>
-              <Form.Item label={'测试'}>
-                <Input />
-              </Form.Item>
+            <Form autoComplete={'off'} layout={'vertical'}>
+              {data?.map((param) => {
+                const { name, code, uiType } = param;
+                return (
+                  <Form.Item
+                    required
+                    key={code}
+                    label={name}
+                    field={code}
+                    rules={[{ required: true, message: '请输入参数值' }]}
+                    triggerPropName={
+                      uiType === UiType.Switch ? 'checked' : 'value'
+                    }
+                  >
+                    {renderComponentByUiType(uiType)}
+                  </Form.Item>
+                );
+              })}
             </Form>
           </div>
           <div className={styles['footer']}>
