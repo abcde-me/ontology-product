@@ -17,9 +17,7 @@ export const mockBehaviorList: BehaviorItem[] = [
     objectType: '多媒体情报',
     functionName: 'entityRecognition',
     identifier: 'entity_recognition',
-    // TODO: 修复类型错误
-    // @ts-expect-error
-    params: 3,
+    params: [],
     color: '#722ED1',
     icon: '🔍',
     configSchema: {
@@ -87,9 +85,7 @@ export const mockBehaviorList: BehaviorItem[] = [
     objectType: '作战单元',
     functionName: 'correlationAnalysis',
     identifier: 'correlation_analysis',
-    // TODO: 修复类型错误
-    // @ts-expect-error
-    params: 4,
+    params: [],
     color: '#FA8C16',
     icon: '🔗',
     configSchema: {
@@ -166,9 +162,7 @@ export const mockBehaviorList: BehaviorItem[] = [
     objectType: '作战编队',
     functionName: 'threatAssessment',
     identifier: 'threat_assessment',
-    // TODO: 修复类型错误
-    // @ts-expect-error
-    params: 4,
+    params: [],
     color: '#EB2F96',
     icon: '⚠️',
     configSchema: {
@@ -247,9 +241,7 @@ export const mockBehaviorList: BehaviorItem[] = [
     objectType: '战术预案',
     functionName: 'executePlan',
     identifier: 'execute_plan',
-    // TODO: 修复类型错误
-    // @ts-expect-error
-    params: 4,
+    params: [],
     color: '#13C2C2',
     icon: '🚀',
     configSchema: {
@@ -402,23 +394,14 @@ export const mockApi = {
     if (params.keyword) {
       list = list.filter(
         (item) =>
-          // TODO: 修复类型错误
-          // @ts-expect-error
           item.name.includes(params.keyword!) ||
-          // TODO: 修复类型错误
-          // @ts-expect-error
           item.description.includes(params.keyword!)
       );
     }
 
     // 筛选
     if (params.objectType) {
-      list = list.filter(
-        (item) =>
-          // TODO: 修复类型错误
-          // @ts-expect-error
-          item.objectType === params.objectType
-      );
+      list = list.filter((item) => item.objectType === params.objectType);
     }
 
     return list;

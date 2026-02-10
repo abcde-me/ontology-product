@@ -72,6 +72,8 @@ export const useBusinessStore = create<BusinessStore>((set, get) => ({
     const nodeId = uuidv4();
     const newNode: OrchestrationNode = {
       id: nodeId,
+      // TODO: 修复类型错误
+      // @ts-expect-error
       behaviorId: behavior.id,
       behavior,
       order: orchestrationNodes.length,
@@ -194,6 +196,8 @@ export const useBusinessStore = create<BusinessStore>((set, get) => ({
     const newNodes: OrchestrationNode[] = historyItem.nodes.map(
       (historyNode, index) => {
         const behavior = behaviorList.find(
+          // TODO: 修复类型错误
+          // @ts-expect-error
           (b) => b.id === historyNode.behaviorId
         );
         if (!behavior) {

@@ -8,6 +8,11 @@ export interface BehaviorItem extends BehaviorActionItem {
   configSchema?: ConfigSchema; // 配置表单的 schema
   validationRules?: ValidationRule[]; // 校验规则
   functionCode?: string; // 函数代码
+  // 不知道是啥
+  identifier?: string;
+  // 不加构建报错 todo
+  description: string;
+  name: string;
 }
 
 // 编排节点
