@@ -20,6 +20,7 @@ import {
   IconRight
 } from '@arco-design/web-react/icon';
 import FieldImportUpload from '../../../componens/FieldImportUpload';
+import { ObjectTypeSelect } from '../../../componens';
 import classNames from 'classnames';
 import LinkCheckIcon from '../../../assets/link-check.svg';
 import OneWayArrowIcon from '../../../assets/one-way-arrow.svg';
@@ -40,8 +41,8 @@ export interface LinkFormData {
   linkType: LinkType;
   name: string;
   id: string;
-  sourceObjectType: string;
-  targetObjectType: string;
+  sourceObjectType: number;
+  targetObjectType: number;
   targetObjectAttribute?: string; // 仅1:1和1:N需要
   intermediateTable?: {
     type: 'local_csv' | 'data_lake_sync';
@@ -83,16 +84,9 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
     const [fieldsLoading, setFieldsLoading] = useState(false);
     const [fileUploaded, setFileUploaded] = useState(false);
 
-    // 模拟对象类型列表
-    const objectTypeOptions = [
-      { label: '对象类型1', value: 'type1' },
-      { label: '对象类型2', value: 'type2' },
-      { label: '对象类型3', value: 'type3' }
-    ];
-
     // 模拟属性列表（根据选择的对象类型动态变化）
-    const getAttributeOptions = (objectType?: string) => {
-      if (!objectType) return [];
+    const getAttributeOptions = (objectTypeId?: number) => {
+      if (!objectTypeId) return [];
       return [
         { label: '属性1', value: 'attr1' },
         { label: '属性2', value: 'attr2' },
@@ -495,23 +489,15 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
             >
               <div className="flex items-center">
                 <div className="flex-1 rounded-[4px] bg-[#FAFBFF] p-[12px]">
-                  <div className="mb-[8px] text-[14px] text-[var(--color-text-2)]">
-                    源对象类型：
-                  </div>
-                  <Select
-                    placeholder="请选择对象类型"
+                  <ObjectTypeSelect
+                    label="源对象类型："
                     value={sourceObjectType}
                     onChange={(val) => {
                       form.setFieldValue('sourceObjectType', val);
                     }}
+                    placeholder="请选择对象类型"
                     allowClear
-                  >
-                    {objectTypeOptions.map((option) => (
-                      <Select.Option key={option.value} value={option.value}>
-                        {option.label}
-                      </Select.Option>
-                    ))}
-                  </Select>
+                  />
                 </div>
 
                 {linkType === 'N:N' ? (
@@ -520,26 +506,15 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
                       <TwoWayArrowIcon />
                     </div>
                     <div className="flex-1 flex-1 rounded-[4px] bg-[#FAFBFF] p-[12px]">
-                      <div className="mb-[8px] text-[14px] text-[var(--color-text-2)]">
-                        目标对象类型：
-                      </div>
-                      <Select
-                        placeholder="请选择属性"
+                      <ObjectTypeSelect
+                        label="目标对象类型："
                         value={targetObjectType}
                         onChange={(val) => {
                           form.setFieldValue('targetObjectType', val);
                         }}
+                        placeholder="请选择对象类型"
                         allowClear
-                      >
-                        {objectTypeOptions.map((option) => (
-                          <Select.Option
-                            key={option.value}
-                            value={option.value}
-                          >
-                            {option.label}
-                          </Select.Option>
-                        ))}
-                      </Select>
+                      />
                     </div>
                   </>
                 ) : (
@@ -555,28 +530,22 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
                         compact
                         className={styles['table-select-group']}
                       >
-                        <Select
-                          placeholder="请选择对象类型"
-                          value={targetObjectType}
-                          onChange={(val) => {
-                            form.setFieldValue('targetObjectType', val);
-                            form.setFieldValue(
-                              'targetObjectAttribute',
-                              undefined
-                            );
-                          }}
-                          style={{ width: 302 }}
-                          allowClear
-                        >
-                          {objectTypeOptions.map((option) => (
-                            <Select.Option
-                              key={option.value}
-                              value={option.value}
-                            >
-                              {option.label}
-                            </Select.Option>
-                          ))}
-                        </Select>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <ObjectTypeSelect
+                            value={targetObjectType}
+                            onChange={(val) => {
+                              form.setFieldValue('targetObjectType', val);
+                              form.setFieldValue(
+                                'targetObjectAttribute',
+                                undefined
+                              );
+                            }}
+                            placeholder="请选择对象类型"
+                            allowClear
+                            label=""
+                            className="mb-0"
+                          />
+                        </div>
                         <Select
                           className={styles['table-select-wrapper']}
                           placeholder={

@@ -25,8 +25,8 @@ export default function OntologySceneLinksEdit() {
           name: '示例链接',
           id: 'example_link_id',
           linkType: LinkType.ONE_TO_ONE,
-          sourceObjectType: 'type1',
-          targetObjectType: 'type2',
+          sourceObjectType: 1,
+          targetObjectType: 2,
           targetObjectAttribute: 'attr1',
           attributeFields: []
         });

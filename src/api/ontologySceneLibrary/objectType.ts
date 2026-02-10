@@ -19,157 +19,157 @@ import UAPI from '@/api';
 export const listOntologyObjectType = async (
   params: ListOntologyObjectTypeReq
 ): Promise<ApiRes<ListOntologyObjectTypeRes>> => {
-  return UAPI.RES.ListOntologyObjectTypeApi({}).post(params).inRegion().do();
+  // return UAPI.RES.ListOntologyObjectTypeApi({}).post(params).inRegion().do();
   // Mock 数据
-  // const mockObjectTypes: ObjectType[] = [
-  //   {
-  //     id: 1,
-  //     code: 'RAW_INTELLIGENCE',
-  //     name: '原始情报原始情报原始情报原始情报原始情报原始情报原始情报原始情报原始情报原始情报原始情报原始情报',
-  //     description:
-  //       '原始情报对象类型，包含6项属性原始情报对象类型，包含6项属性原始情报对象类型，包含6项属性原始情报对象类型，包含6项属性',
-  //     icon: 'object-type-1',
-  //     ontologyModelID: 1,
-  //     ontologyDbName: 'ontology_db_1',
-  //     ontologyTableName: 'raw_intelligence',
-  //     originalDbName: 'source_db_1',
-  //     originalTableName: 'raw_intelligence_source',
-  //     sourceType: SourceType.ICEBERG,
-  //     syncStatus: SyncStatus.SUCCESS,
-  //     syncTime: '2024-01-15 10:30:00',
-  //     createTime: '2024-01-10 09:00:00',
-  //     createUser: 'admin',
-  //     updateTime: '2024-01-15 10:30:00',
-  //     updateUser: 'admin',
-  //     isDeleted: 0,
-  //     filePath: undefined
-  //   },
-  //   {
-  //     id: 2,
-  //     code: 'INTENT_HYPOTHESIS',
-  //     name: '意图研判',
-  //     description: '意图研判对象类型，包含4项属性',
-  //     icon: 'object-type-2',
-  //     ontologyModelID: 1,
-  //     ontologyDbName: 'ontology_db_1',
-  //     ontologyTableName: 'intent_hypothesis',
-  //     originalDbName: 'source_db_1',
-  //     originalTableName: 'intent_hypothesis_source',
-  //     sourceType: SourceType.ICEBERG,
-  //     syncStatus: SyncStatus.SUCCESS,
-  //     syncTime: '2024-01-15 10:35:00',
-  //     createTime: '2024-01-10 09:05:00',
-  //     createUser: 'admin',
-  //     updateTime: '2024-01-15 10:35:00',
-  //     updateUser: 'admin',
-  //     isDeleted: 0,
-  //     filePath: undefined
-  //   },
-  //   {
-  //     id: 3,
-  //     code: 'MILITARY_EVENT',
-  //     name: '作战事件',
-  //     description: '作战事件对象类型，包含6项属性',
-  //     icon: 'object-type-3',
-  //     ontologyModelID: 1,
-  //     ontologyDbName: 'ontology_db_1',
-  //     ontologyTableName: 'military_event',
-  //     originalDbName: 'source_db_1',
-  //     originalTableName: 'military_event_source',
-  //     sourceType: SourceType.ICEBERG,
-  //     syncStatus: SyncStatus.SYNCING,
-  //     syncTime: '2024-01-15 11:00:00',
-  //     createTime: '2024-01-10 09:10:00',
-  //     createUser: 'admin',
-  //     updateTime: '2024-01-15 11:00:00',
-  //     updateUser: 'admin',
-  //     isDeleted: 0,
-  //     filePath: undefined
-  //   },
-  //   {
-  //     id: 4,
-  //     code: 'FILE_UPLOAD_TYPE',
-  //     name: '文件上传类型',
-  //     description: '通过文件上传创建的对象类型',
-  //     icon: 'object-type-4',
-  //     ontologyModelID: 1,
-  //     ontologyDbName: 'ontology_db_1',
-  //     ontologyTableName: 'file_upload_type',
-  //     originalDbName: 'upload_db',
-  //     originalTableName: 'upload_table',
-  //     sourceType: SourceType.FILE_UPLOAD,
-  //     syncStatus: SyncStatus.SUCCESS,
-  //     syncTime: '2024-01-14 15:20:00',
-  //     createTime: '2024-01-14 15:00:00',
-  //     createUser: 'user1',
-  //     updateTime: '2024-01-14 15:20:00',
-  //     updateUser: 'user1',
-  //     isDeleted: 0,
-  //     filePath: '/minio/bucket/file_upload_type.csv'
-  //   },
-  //   {
-  //     id: 5,
-  //     code: 'SENSOR_TRACK',
-  //     name: '传感器航迹',
-  //     description: '传感器航迹对象类型，包含6项属性',
-  //     icon: 'object-type-5',
-  //     ontologyModelID: 1,
-  //     ontologyDbName: 'ontology_db_1',
-  //     ontologyTableName: 'sensor_track',
-  //     originalDbName: 'source_db_1',
-  //     originalTableName: 'sensor_track_source',
-  //     sourceType: SourceType.ICEBERG,
-  //     syncStatus: SyncStatus.FAILED,
-  //     syncTime: '2024-01-15 09:00:00',
-  //     createTime: '2024-01-10 09:15:00',
-  //     createUser: 'admin',
-  //     updateTime: '2024-01-15 09:00:00',
-  //     updateUser: 'admin',
-  //     isDeleted: 0,
-  //     filePath: undefined
-  //   }
-  // ];
+  const mockObjectTypes: ObjectType[] = [
+    {
+      id: 1,
+      code: 'RAW_INTELLIGENCE',
+      name: '原始情报原始情报原始情报原始情报原始情报原始情报原始情报原始情报原始情报原始情报原始情报原始情报',
+      description:
+        '原始情报对象类型，包含6项属性原始情报对象类型，包含6项属性原始情报对象类型，包含6项属性原始情报对象类型，包含6项属性',
+      icon: 'object-type-1',
+      ontologyModelID: 1,
+      ontologyDbName: 'ontology_db_1',
+      ontologyTableName: 'raw_intelligence',
+      originalDbName: 'source_db_1',
+      originalTableName: 'raw_intelligence_source',
+      sourceType: SourceType.ICEBERG,
+      syncStatus: SyncStatus.SUCCESS,
+      syncTime: '2024-01-15 10:30:00',
+      createTime: '2024-01-10 09:00:00',
+      createUser: 'admin',
+      updateTime: '2024-01-15 10:30:00',
+      updateUser: 'admin',
+      isDeleted: 0,
+      filePath: undefined
+    },
+    {
+      id: 2,
+      code: 'INTENT_HYPOTHESIS',
+      name: '意图研判',
+      description: '意图研判对象类型，包含4项属性',
+      icon: 'object-type-2',
+      ontologyModelID: 1,
+      ontologyDbName: 'ontology_db_1',
+      ontologyTableName: 'intent_hypothesis',
+      originalDbName: 'source_db_1',
+      originalTableName: 'intent_hypothesis_source',
+      sourceType: SourceType.ICEBERG,
+      syncStatus: SyncStatus.SUCCESS,
+      syncTime: '2024-01-15 10:35:00',
+      createTime: '2024-01-10 09:05:00',
+      createUser: 'admin',
+      updateTime: '2024-01-15 10:35:00',
+      updateUser: 'admin',
+      isDeleted: 0,
+      filePath: undefined
+    },
+    {
+      id: 3,
+      code: 'MILITARY_EVENT',
+      name: '作战事件',
+      description: '作战事件对象类型，包含6项属性',
+      icon: 'object-type-3',
+      ontologyModelID: 1,
+      ontologyDbName: 'ontology_db_1',
+      ontologyTableName: 'military_event',
+      originalDbName: 'source_db_1',
+      originalTableName: 'military_event_source',
+      sourceType: SourceType.ICEBERG,
+      syncStatus: SyncStatus.SYNCING,
+      syncTime: '2024-01-15 11:00:00',
+      createTime: '2024-01-10 09:10:00',
+      createUser: 'admin',
+      updateTime: '2024-01-15 11:00:00',
+      updateUser: 'admin',
+      isDeleted: 0,
+      filePath: undefined
+    },
+    {
+      id: 4,
+      code: 'FILE_UPLOAD_TYPE',
+      name: '文件上传类型',
+      description: '通过文件上传创建的对象类型',
+      icon: 'object-type-4',
+      ontologyModelID: 1,
+      ontologyDbName: 'ontology_db_1',
+      ontologyTableName: 'file_upload_type',
+      originalDbName: 'upload_db',
+      originalTableName: 'upload_table',
+      sourceType: SourceType.FILE_UPLOAD,
+      syncStatus: SyncStatus.SUCCESS,
+      syncTime: '2024-01-14 15:20:00',
+      createTime: '2024-01-14 15:00:00',
+      createUser: 'user1',
+      updateTime: '2024-01-14 15:20:00',
+      updateUser: 'user1',
+      isDeleted: 0,
+      filePath: '/minio/bucket/file_upload_type.csv'
+    },
+    {
+      id: 5,
+      code: 'SENSOR_TRACK',
+      name: '传感器航迹',
+      description: '传感器航迹对象类型，包含6项属性',
+      icon: 'object-type-5',
+      ontologyModelID: 1,
+      ontologyDbName: 'ontology_db_1',
+      ontologyTableName: 'sensor_track',
+      originalDbName: 'source_db_1',
+      originalTableName: 'sensor_track_source',
+      sourceType: SourceType.ICEBERG,
+      syncStatus: SyncStatus.FAILED,
+      syncTime: '2024-01-15 09:00:00',
+      createTime: '2024-01-10 09:15:00',
+      createUser: 'admin',
+      updateTime: '2024-01-15 09:00:00',
+      updateUser: 'admin',
+      isDeleted: 0,
+      filePath: undefined
+    }
+  ];
 
-  // // 模拟分页和筛选
-  // let filteredList = [...mockObjectTypes];
+  // 模拟分页和筛选
+  let filteredList = [...mockObjectTypes];
 
-  // // 根据 filter 参数筛选
-  // if (params.filter) {
-  //   const filterLower = params.filter.toLowerCase();
-  //   filteredList = filteredList.filter(
-  //     (item) =>
-  //       item.name?.toLowerCase().includes(filterLower) ||
-  //       item.code?.toLowerCase().includes(filterLower) ||
-  //       item.description?.toLowerCase().includes(filterLower)
-  //   );
-  // }
+  // 根据 filter 参数筛选
+  if (params.filter) {
+    const filterLower = params.filter.toLowerCase();
+    filteredList = filteredList.filter(
+      (item) =>
+        item.name?.toLowerCase().includes(filterLower) ||
+        item.code?.toLowerCase().includes(filterLower) ||
+        item.description?.toLowerCase().includes(filterLower)
+    );
+  }
 
-  // // 根据 ontologyModelID 筛选
-  // if (params.ontologyModelID) {
-  //   filteredList = filteredList.filter(
-  //     (item) => item.ontologyModelID === params.ontologyModelID
-  //   );
-  // }
+  // 根据 ontologyModelID 筛选
+  if (params.ontologyModelID) {
+    filteredList = filteredList.filter(
+      (item) => item.ontologyModelID === params.ontologyModelID
+    );
+  }
 
-  // // 模拟分页
-  // const pageNo = params.pageNo || 1;
-  // const pageSize = params.pageSize || 10;
-  // const startIndex = (pageNo - 1) * pageSize;
-  // const endIndex = startIndex + pageSize;
-  // const paginatedList = filteredList.slice(startIndex, endIndex);
+  // 模拟分页
+  const pageNo = params.pageNo || 1;
+  const pageSize = params.pageSize || 10;
+  const startIndex = (pageNo - 1) * pageSize;
+  const endIndex = startIndex + pageSize;
+  const paginatedList = filteredList.slice(startIndex, endIndex);
 
-  // const mockData: ListOntologyObjectTypeRes = {
-  //   result: paginatedList,
-  //   totalCount: filteredList.length
-  // };
+  const mockData: ListOntologyObjectTypeRes = {
+    result: paginatedList,
+    totalCount: filteredList.length
+  };
 
-  // return Promise.resolve({
-  //   code: '',
-  //   data: mockData,
-  //   message: 'mock success',
-  //   requestId: 'mock-request-id',
-  //   status: 200
-  // });
+  return Promise.resolve({
+    code: '',
+    data: mockData,
+    message: 'mock success',
+    requestId: 'mock-request-id',
+    status: 200
+  });
 };
 
 export const createOntologyObjectType = async (
