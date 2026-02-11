@@ -935,7 +935,11 @@ export default function RequirementConfig() {
 
   const { data: modelLabelList = [] } = useGetModelLabelList(
     { model_id },
-    { enabled: !!model_id }
+    {
+      enabled:
+        !!model_id &&
+        annotationTypeContentCode === AnnotationTypeContentCode.IMAGE_ANNOTATION
+    }
   );
 
   // 监听预标注模型变化，清空所有模型映射字段
