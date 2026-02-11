@@ -1162,12 +1162,14 @@ const DatasetManagement: React.FC = () => {
     //       : basePath;
     //   fullPath = `${ formattedPath }dst / ${ formData?.targetDataSource?.[0]?.[1] } / volume / ${ formData?.targetDataSource?.[1]?.[0] ?? '' }`;
     // }
+
     const submitData = {
       name: formData.name,
       description: formData.description,
       tag_names: formData.tags || [],
       storage_type: formData.storageType,
       src: formData.dataSource === 'volume' ? 1 : 2, // 1-目标数据目录，2-连接器
+      source_name: `${formData.targetDataSource?.[0]?.[1]}/${formData.targetDataSource?.[1]?.[0]}`,
       src_extra:
         formData.dataSource === 'volume'
           ? {

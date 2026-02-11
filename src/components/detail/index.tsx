@@ -347,34 +347,67 @@ const versionColumns: any[] = [
   //   )
   // },
   {
-    title: '修改类型',
+    title: '操作类型',
     dataIndex: 'type',
     width: 226,
     filters: [
-      { text: '手动创建', value: 1 },
-      { text: '手动编辑', value: 2 },
-      { text: 'SQL脚本创建', value: 3 },
-      { text: 'SQL脚本覆盖更新', value: 4 },
-      { text: 'PySpark脚本创建', value: 5 },
-      { text: 'PySpark脚本覆盖更新', value: 6 },
-      { text: '工作流创建', value: 7 },
-      { text: '工作流增量更新', value: 8 },
-      { text: '工作流覆盖更新', value: 9 }
+      { text: '创建', value: 'create' },
+      { text: '编辑', value: 'edit' },
+      { text: '覆盖更新', value: 'overwrite' },
+      { text: '增量更新', value: 'incremental' }
     ],
-    onFilter: (value: number, record: any) => record.type === value,
+    onFilter: (value: string, record: any) => {
+      const createTypes = [1, 3, 5, 7];
+      const editTypes = [2];
+      const overwriteTypes = [4, 6, 9];
+      const incrementalTypes = [8];
+
+      if (value === 'create') return createTypes.includes(record.type);
+      if (value === 'edit') return editTypes.includes(record.type);
+      if (value === 'overwrite') return overwriteTypes.includes(record.type);
+      if (value === 'incremental')
+        return incrementalTypes.includes(record.type);
+      return false;
+    },
     render: (type: number) => {
-      const typeMap = {
-        1: '手动创建',
-        2: '手动编辑',
-        3: 'SQL脚本创建',
-        4: 'SQL脚本覆盖更新',
-        5: 'PySpark脚本创建',
-        6: 'PySpark脚本覆盖更新',
-        7: '工作流创建',
-        8: '工作流增量更新',
-        9: '工作流覆盖更新'
+      const typeMap: { [key: number]: string } = {
+        1: '创建',
+        2: '编辑',
+        3: '创建',
+        4: '覆盖更新',
+        5: '创建',
+        6: '覆盖更新',
+        7: '创建',
+        8: '增量更新',
+        9: '覆盖更新'
       };
       return <div style={{ whiteSpace: 'nowrap' }}>{typeMap[type] || '-'}</div>;
+    }
+  },
+  {
+    title: '来源类型',
+    dataIndex: 'source_type',
+    width: 226,
+    render: (value: string) => {
+      const sourceTypeMap: { [key: string]: string } = {
+        1: '数据目录',
+        2: '工作流',
+        3: 'Pyspark脚本',
+        4: 'SQL脚本'
+      };
+      return (
+        <div style={{ whiteSpace: 'nowrap' }}>
+          {sourceTypeMap[value] || '-'}
+        </div>
+      );
+    }
+  },
+  {
+    title: '来源名称',
+    dataIndex: 'source_name',
+    width: 200,
+    render: (value: string) => {
+      return <div style={{ whiteSpace: 'nowrap' }}>{value || '-'}</div>;
     }
   },
   {
@@ -391,14 +424,22 @@ const versionColumns: any[] = [
     render: (time: string) => formatDate(time)
   },
   {
-    title: '变更记录',
-    minWidth: 100,
-    maxWidth: 470,
-    dataIndex: 'description',
-    render: (description: string) => {
-      return <div style={{ whiteSpace: 'nowrap' }}>{description}</div>;
+    title: '创建人',
+    dataIndex: 'creator_name',
+    width: 226,
+    render: (value: string) => {
+      return <div style={{ whiteSpace: 'nowrap' }}>{value || '-'}</div>;
     }
   }
+  // {
+  //   title: '变更记录',
+  //   minWidth: 100,
+  //   maxWidth: 470,
+  //   dataIndex: 'description',
+  //   render: (description: string) => {
+  //     return <div style={{ whiteSpace: 'nowrap' }}>{description}</div>;
+  //   }
+  // }
 ];
 
 // 转换数据类型
