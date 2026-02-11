@@ -7,7 +7,7 @@ import {
   Button,
   Message
 } from '@arco-design/web-react';
-import { PublicAttributeItem } from './PublicTable';
+import { PublicProperty } from '@/types/attributes';
 
 const FormItem = Form.Item;
 const { TextArea } = Input;
@@ -25,15 +25,15 @@ const FIELD_TYPE_OPTIONS = [
 
 export interface PublicAttributeFormData {
   name: string;
-  id: string;
-  fieldType: string;
+  comment: string;
+  columnType: string;
   description?: string;
 }
 
 interface PublicAttributeModalProps {
   visible: boolean;
   mode: 'create' | 'edit'; // 创建或编辑模式
-  initialValues?: Partial<PublicAttributeItem>; // 编辑时的初始值
+  initialValues?: Partial<PublicProperty>; // 编辑时的初始值
   onCancel: () => void;
   onSubmit: (data: PublicAttributeFormData) => Promise<void> | void;
   loading?: boolean;
@@ -54,9 +54,9 @@ const PublicAttributeModal: React.FC<PublicAttributeModalProps> = ({
       if (mode === 'edit' && initialValues) {
         // 编辑模式：填充初始值
         form.setFieldsValue({
-          name: initialValues.name,
-          id: initialValues.id,
-          fieldType: initialValues.fieldType,
+          name: initialValues.name || '',
+          comment: initialValues.comment || '',
+          columnType: initialValues.columnType || '',
           description: initialValues.description || ''
         });
       } else {
@@ -104,7 +104,7 @@ const PublicAttributeModal: React.FC<PublicAttributeModalProps> = ({
       <Form form={form} autoComplete="off" labelAlign="left">
         <FormItem
           label="公共属性名称："
-          field="name"
+          field="comment"
           rules={[
             { required: true, message: '请输入公共属性名称' },
             { maxLength: 50, message: '名称不能超过50个字符' }
@@ -118,8 +118,8 @@ const PublicAttributeModal: React.FC<PublicAttributeModalProps> = ({
         </FormItem>
 
         <FormItem
-          label="id："
-          field="id"
+          label="公共属性id："
+          field="name"
           rules={[
             { required: true, message: '请输入唯一标识' },
             { maxLength: 50, message: 'id不能超过50个字符' }
@@ -135,7 +135,7 @@ const PublicAttributeModal: React.FC<PublicAttributeModalProps> = ({
 
         <FormItem
           label="支持字段类型："
-          field="fieldType"
+          field="columnType"
           rules={[{ required: true, message: '请选择字段类型' }]}
         >
           <Select placeholder="请选择字段类型" allowClear>

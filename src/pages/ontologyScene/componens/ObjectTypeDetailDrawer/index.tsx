@@ -31,7 +31,7 @@ import {
   OBJECT_TYPE_ICON_OPTIONS
 } from '@/pages/ontologyScene/common/constants';
 import { IconFile } from '@arco-design/web-react/icon';
-import styles from './ObjectTypeDetailDrawer.module.scss';
+import styles from './index.module.scss';
 
 const TabPane = Tabs.TabPane;
 

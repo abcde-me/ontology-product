@@ -2,7 +2,8 @@ import {
   CreateOntologyPublicPropertiesReq,
   ListOntologyPublicPropertiesReq,
   ListOntologyPublicPropertiesRes,
-  PublicProperty
+  PublicProperty,
+  UpdateOntologyPublicPropertiesReq
 } from '@/types/attributes';
 import UAPI from '@/api';
 
@@ -277,4 +278,13 @@ export const deleteOntologyPublicProperties = async (params: {
   //   requestId: 'mock-request-id',
   //   status: 200
   // });
+};
+
+export const updateOntologyPublicProperties = async (
+  params: UpdateOntologyPublicPropertiesReq
+): Promise<ApiRes<string>> => {
+  return UAPI.RES.UpdateOntologyPublicPropertiesApi({})
+    .post(params)
+    .inRegion()
+    .do();
 };

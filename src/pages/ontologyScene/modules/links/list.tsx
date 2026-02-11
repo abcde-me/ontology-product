@@ -12,8 +12,7 @@ import {
 import {
   IconPlus,
   IconSearch,
-  IconInfoCircle,
-  IconFile
+  IconInfoCircle
 } from '@arco-design/web-react/icon';
 import {
   CopyItemIcon,
@@ -24,18 +23,23 @@ import { useHistory, useParams } from 'react-router-dom';
 import { useWorkflowTable } from '../../hooks/useTable';
 import styles from './list.module.scss';
 import LinkDetailDrawer from './components/LinkDetailDrawer';
+import { listOntologyLinkType } from '@/api/ontologySceneLibrary/graph';
+import { LinkInfo, LinkType, SyncStatus } from '@/types/graphApi';
+import ObjectTypeTag from '@/pages/ontologyScene/componens/ObjectTypeTag';
 
 // 链接数据接口
 export interface LinkItem {
   id: string;
   name: string;
   sourceObjectType: {
+    id?: string | number;
     name: string;
-    iconColor: string;
+    icon?: string;
   };
   targetObjectType: {
+    id?: string | number;
     name: string;
-    iconColor: string;
+    icon?: string;
   };
   linkType: '1:1' | '1:N' | 'N:N';
   syncStatus: 'success' | 'running' | 'failed';
@@ -60,60 +64,60 @@ const SYNC_STATUS_CONFIG = {
   }
 };
 
-// 模拟数据
-const MOCK_DATA: LinkItem[] = [
-  {
-    id: 'media_id',
-    name: '类别',
-    sourceObjectType: {
-      name: '多媒体情报',
-      iconColor: '#00b42a'
-    },
-    targetObjectType: {
-      name: '无人机',
-      iconColor: '#ffb400'
-    },
-    linkType: '1:N',
-    syncStatus: 'success',
-    syncTime: '2026-10-10 20:10:00',
-    attributes: { count: 3, first: 'time' },
-    linkCount: 32
-  },
-  {
-    id: 'type',
-    name: '情报ID',
-    sourceObjectType: {
-      name: '战斗机',
-      iconColor: '#f53f3f'
-    },
-    targetObjectType: {
-      name: '战斗机',
-      iconColor: '#f53f3f'
-    },
-    linkType: '1:1',
-    syncStatus: 'running',
-    syncTime: '2026-10-10 20:10:00',
-    attributes: 'properties',
-    linkCount: 24
-  },
-  {
-    id: 'source',
-    name: '来源',
-    sourceObjectType: {
-      name: '操作员',
-      iconColor: '#722ed1'
-    },
-    targetObjectType: {
-      name: '无人机',
-      iconColor: '#ffb400'
-    },
-    linkType: 'N:N',
-    syncStatus: 'failed',
-    syncTime: '2026-10-10 20:10:00',
-    attributes: 'properties',
-    linkCount: 67
+// 将 LinkType 枚举转换为字符串
+const getLinkTypeText = (type?: LinkType): '1:1' | '1:N' | 'N:N' => {
+  switch (type) {
+    case LinkType.ONE_TO_ONE:
+      return '1:1';
+    case LinkType.ONE_TO_MANY:
+      return '1:N';
+    case LinkType.MANY_TO_MANY:
+      return 'N:N';
+    default:
+      return '1:1';
   }
-];
+};
+
+// 将 SyncStatus 枚举转换为字符串
+const getSyncStatusText = (
+  status?: SyncStatus
+): 'success' | 'running' | 'failed' => {
+  switch (status) {
+    case SyncStatus.SUCCESS:
+      return 'success';
+    case SyncStatus.SYNCING:
+      return 'running';
+    case SyncStatus.FAILED:
+      return 'failed';
+    case SyncStatus.NOT_SYNC:
+      return 'running';
+    default:
+      return 'success';
+  }
+};
+
+// 将 LinkInfo 转换为 LinkItem
+const convertLinkInfoToLinkItem = (linkInfo: LinkInfo): LinkItem => {
+  return {
+    id: String(linkInfo.id || linkInfo.code || ''),
+    name: linkInfo.name || '',
+    sourceObjectType: {
+      id: linkInfo.sourceObjectTypeID,
+      name: linkInfo.sourceObjectTypeName || '',
+      icon: linkInfo.sourceObjectTypeIcon
+    },
+    targetObjectType: {
+      id: linkInfo.targetObjectTypeID,
+      name: linkInfo.targetObjectTypeName || '',
+      icon: linkInfo.targetObjectTypeIcon
+    },
+    linkType: getLinkTypeText(linkInfo.type),
+    syncStatus: getSyncStatusText(linkInfo.syncStatus),
+    syncTime: linkInfo.syncTime || '',
+    attributes: 'properties', // 暂时使用固定值，后续可以从其他接口获取
+    linkCount: 0 // 暂时使用固定值，后续可以从其他接口获取
+  };
+};
 
 // 链接类型筛选选项
 const LINK_TYPE_FILTERS = [
@@ -143,35 +147,42 @@ export default function OntologySceneLinksList() {
   const { data, loading, pagination, refresh, submit, onChange } =
     useWorkflowTable<LinkItem, any>({
       service: async (params) => {
-        // TODO: 替换为实际API调用
-        // 模拟API延迟
-        await new Promise((resolve) => setTimeout(resolve, 300));
+        try {
+          const order = params.orders?.[0]?.asc ? 'asc' : 'desc';
+          const orderBy = params.orders?.[0]?.column;
 
-        // 模拟筛选和分页
-        let filteredData = [...MOCK_DATA];
-        if (params.keyword) {
-          filteredData = filteredData.filter(
-            (item) =>
-              item.name.includes(params.keyword) ||
-              item.id.includes(params.keyword) ||
-              item.sourceObjectType.name.includes(params.keyword) ||
-              item.targetObjectType.name.includes(params.keyword)
-          );
+          const response = await listOntologyLinkType({
+            filter: params.keyword || undefined,
+            pageNo: params.page || 1,
+            pageSize: params.page_size || 10,
+            ...(orderBy && { order, orderBy })
+          });
+
+          const linkInfos = response.data?.result || [];
+          const totalCount = response.data?.totalCount || 0;
+
+          // 转换为 LinkItem 格式
+          const items = linkInfos.map(convertLinkInfoToLinkItem);
+
+          return {
+            data: {
+              items,
+              total: totalCount,
+              page: params.page || 1,
+              page_size: params.page_size || 10
+            }
+          };
+        } catch (error) {
+          Message.error('获取链接列表失败');
+          return {
+            data: {
+              items: [],
+              total: 0,
+              page: params.page || 1,
+              page_size: params.page_size || 10
+            }
+          };
         }
-
-        const page = params.page || 1;
-        const pageSize = params.page_size || 10;
-        const start = (page - 1) * pageSize;
-        const end = start + pageSize;
-
-        return {
-          data: {
-            items: filteredData.slice(start, end),
-            total: filteredData.length,
-            page,
-            page_size: pageSize
-          }
-        };
       },
       form,
       defaultPageSize: 10
@@ -250,41 +261,41 @@ export default function OntologySceneLinksList() {
       title: '源对象类型',
       dataIndex: 'sourceObjectType',
       width: 180,
-      render: (value: LinkItem['sourceObjectType']) => (
-        <div className="flex items-center gap-2">
-          <div
-            className="flex h-6 w-6 items-center justify-center rounded-full text-white"
-            style={{
-              backgroundColor: value.iconColor
-            }}
-          >
-            <IconFile style={{ fontSize: '12px' }} />
+      render: (value: LinkItem['sourceObjectType']) => {
+        return (
+          <div>
+            {value?.name ? (
+              <ObjectTypeTag
+                ontologyObjectTypeIcon={value.icon}
+                ontologyObjectTypeName={value.name}
+                ontologyObjectTypeId={value.id}
+              />
+            ) : (
+              <span>-</span>
+            )}
           </div>
-          <div className="font-PingFangSc text-[14px] font-normal leading-[22px] text-[#23293b]">
-            {value.name}
-          </div>
-        </div>
-      )
+        );
+      }
     },
     {
       title: '目标对象类型',
       dataIndex: 'targetObjectType',
       width: 180,
-      render: (value: LinkItem['targetObjectType']) => (
-        <div className="flex items-center gap-2">
-          <div
-            className="flex h-6 w-6 items-center justify-center rounded-full text-white"
-            style={{
-              backgroundColor: value.iconColor
-            }}
-          >
-            <IconFile style={{ fontSize: '12px' }} />
+      render: (value: LinkItem['targetObjectType']) => {
+        return (
+          <div>
+            {value?.name ? (
+              <ObjectTypeTag
+                ontologyObjectTypeIcon={value.icon}
+                ontologyObjectTypeName={value.name}
+                ontologyObjectTypeId={value.id}
+              />
+            ) : (
+              <span>-</span>
+            )}
           </div>
-          <div className="font-PingFangSc text-[14px] font-normal leading-[22px] text-[#23293b]">
-            {value.name}
-          </div>
-        </div>
-      )
+        );
+      }
     },
     {
       title: '链接类型',
@@ -410,12 +421,14 @@ export default function OntologySceneLinksList() {
       syncStatus: selectedLink.syncStatus,
       linkType: selectedLink.linkType,
       sourceObjectType: {
+        id: selectedLink.sourceObjectType.id,
         name: selectedLink.sourceObjectType.name,
-        iconColor: selectedLink.sourceObjectType.iconColor
+        iconColor: undefined // ObjectTypeTag 使用 icon 而不是 iconColor
       },
       targetObjectType: {
+        id: selectedLink.targetObjectType.id,
         name: selectedLink.targetObjectType.name,
-        iconColor: selectedLink.targetObjectType.iconColor
+        iconColor: undefined // ObjectTypeTag 使用 icon 而不是 iconColor
       },
       instanceCount: Number(selectedLink.linkCount) || 0,
       attributeCount

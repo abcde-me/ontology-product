@@ -785,6 +785,9 @@ export const ModaForgeResourceEndpoints = {
   // 删除公共属性
   DeleteOntologyPublicPropertiesApi:
     PrefixAimdp + '/DeleteOntologyPublicProperties',
+  // 更新公共属性
+  UpdateOntologyPublicPropertiesApi:
+    PrefixAimdp + '/UpdateOntologyPublicProperties',
 
   // 链接
   // 获取链接的属性列表

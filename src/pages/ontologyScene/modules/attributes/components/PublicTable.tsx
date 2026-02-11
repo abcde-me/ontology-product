@@ -9,7 +9,7 @@ import {
   Pagination,
   Message
 } from '@arco-design/web-react';
-import { IconPlus, IconSearch, IconFile } from '@arco-design/web-react/icon';
+import { IconPlus, IconSearch } from '@arco-design/web-react/icon';
 import {
   CopyItemIcon,
   ProButton,
@@ -20,8 +20,17 @@ import styles from '../list.module.scss';
 import PublicAttributeModal, {
   PublicAttributeFormData
 } from './PublicAttributeModal';
+import {
+  listOntologyPublicProperties,
+  createOntologyPublicProperties,
+  updateOntologyPublicProperties
+} from '@/api/ontologySceneLibrary/attributes';
+import { PublicProperty } from '@/types/attributes';
+import { ListOntologyPublicPropertiesReq } from '@/types/attributes';
+import { ObjectTypeTagList } from '@/pages/ontologyScene/componens';
+import ObjectTypeDetailDrawer from '@/pages/ontologyScene/componens/ObjectTypeDetailDrawer';
 
-// 公共属性数据接口
+// 公共属性数据接口（保留用于兼容性）
 export interface PublicAttributeItem {
   id: string;
   name: string;
@@ -36,106 +45,81 @@ export interface PublicAttributeItem {
   lastModifiedTime: string;
 }
 
-// 模拟数据
-const MOCK_DATA: PublicAttributeItem[] = [
-  {
-    id: 'media_id',
-    name: '情报ID',
-    description: '占位文字占位文字占位文字占位文字占位文字占位文字',
-    objectTypes: [
-      {
-        name: '多媒体情报',
-        color: '#00b42a'
-      },
-      {
-        name: '其他类型1',
-        color: '#165dff'
-      },
-      {
-        name: '其他类型2',
-        color: '#ff7d00'
-      },
-      {
-        name: '其他类型3',
-        color: '#f53f3f'
-      }
-    ],
-    fieldType: 'STRING',
-    referenceCount: 32,
-    lastModifiedTime: '2026-10-10 20:10'
-  },
-  {
-    id: 'type',
-    name: '类别',
-    description: '占位文字占位文字占位文字占位文字占位文字占位文字',
-    objectTypes: [
-      {
-        name: '战斗机',
-        color: '#f53f3f'
-      }
-    ],
-    fieldType: 'STRING',
-    referenceCount: 24,
-    lastModifiedTime: '2026-10-10 20:10'
-  },
-  {
-    id: 'source',
-    name: '来源',
-    description: '占位文字占位文字占位文字占位文字占位文字占位文字',
-    objectTypes: [
-      {
-        name: '无人机',
-        color: '#ff7d00'
-      }
-    ],
-    fieldType: 'STRING',
-    referenceCount: 67,
-    lastModifiedTime: '2026-10-10 20:10'
-  }
-];
-
 export default function PublicTable() {
   const [form] = Form.useForm();
 
   // 弹窗相关状态
   const [modalVisible, setModalVisible] = useState(false);
   const [modalMode, setModalMode] = useState<'create' | 'edit'>('create');
-  const [editingRecord, setEditingRecord] =
-    useState<PublicAttributeItem | null>(null);
+  const [editingRecord, setEditingRecord] = useState<PublicProperty | null>(
+    null
+  );
   const [submitLoading, setSubmitLoading] = useState(false);
+
+  // 详情抽屉相关状态
+  const [detailDrawerVisible, setDetailDrawerVisible] = useState(false);
+  const [selectedObjectType, setSelectedObjectType] = useState<{
+    id: string;
+  } | null>(null);
+  const [activeTab, setActiveTab] = useState<
+    'instances' | 'attributes' | 'links'
+  >('attributes');
 
   // 使用 useTable hook
   const { data, loading, pagination, refresh, submit, onChange } =
-    useWorkflowTable<PublicAttributeItem, any>({
-      service: async (params) => {
-        // TODO: 替换为实际API调用
-        // 模拟API延迟
-        await new Promise((resolve) => setTimeout(resolve, 300));
+    useWorkflowTable<PublicProperty, ListOntologyPublicPropertiesReq>({
+      service: async (params: ListOntologyPublicPropertiesReq) => {
+        try {
+          const response = await listOntologyPublicProperties({
+            filter: params.filter,
+            pageNo: params.pageNo || 1,
+            pageSize: params.pageSize || 10,
+            orderBy: params.orderBy,
+            order: params.order
+          });
 
-        // 模拟筛选和分页
-        let filteredData = [...MOCK_DATA];
-        if (params.keyword) {
-          filteredData = filteredData.filter(
-            (item) =>
-              item.name.includes(params.keyword) ||
-              item.id.includes(params.keyword) ||
-              item.description.includes(params.keyword)
-          );
-        }
-
-        const page = params.page || 1;
-        const pageSize = params.page_size || 10;
-        const start = (page - 1) * pageSize;
-        const end = start + pageSize;
-
-        return {
-          data: {
-            items: filteredData.slice(start, end),
-            total: filteredData.length,
-            page,
-            page_size: pageSize
+          if (response.status === 200 && response.data) {
+            return {
+              data: {
+                items: response.data.result || [],
+                total: response.data.totalCount || 0,
+                page: params.pageNo || 1,
+                page_size: params.pageSize || 10
+              }
+            };
           }
-        };
+
+          return {
+            data: {
+              items: [],
+              total: 0,
+              page: params.pageNo || 1,
+              page_size: params.pageSize || 10
+            }
+          };
+        } catch (error) {
+          console.error('获取公共属性列表失败:', error);
+          Message.error('获取公共属性列表失败');
+          return {
+            data: {
+              items: [],
+              total: 0,
+              page: params.pageNo || 1,
+              page_size: params.pageSize || 10
+            }
+          };
+        }
+      },
+      formatParams: (formValues, pagination, sorter) => {
+        return {
+          filter: formValues.keyword,
+          pageNo: pagination.current || 1,
+          pageSize: pagination.pageSize || 10,
+          ...(sorter && {
+            orderBy: sorter.field as string,
+            order: sorter.direction === 'ascend' ? 'asc' : 'desc'
+          })
+        } as ListOntologyPublicPropertiesReq;
       },
       form,
       defaultPageSize: 10
@@ -149,10 +133,17 @@ export default function PublicTable() {
   };
 
   // 打开编辑弹窗
-  const handleEdit = (record: PublicAttributeItem) => {
+  const handleEdit = (record: PublicProperty) => {
     setModalMode('edit');
     setEditingRecord(record);
     setModalVisible(true);
+  };
+
+  // 处理查看对象类型详情：打开对象类型详情抽屉
+  const handleViewObjectTypeDetail = (objectTypeId: string | number) => {
+    setSelectedObjectType({ id: String(objectTypeId) });
+    setActiveTab('attributes');
+    setDetailDrawerVisible(true);
   };
 
   // 处理弹窗提交
@@ -160,17 +151,46 @@ export default function PublicTable() {
     setSubmitLoading(true);
     try {
       if (modalMode === 'create') {
-        // TODO: 调用创建API
-        await new Promise((resolve) => setTimeout(resolve, 500));
-        Message.success('创建成功');
+        // 调用创建API
+        const response = await createOntologyPublicProperties({
+          name: formData.name,
+          comment: formData.comment,
+          columnType: formData.columnType,
+          description: formData.description
+        });
+
+        if (response.status === 200 && response.code === '') {
+          Message.success('创建成功');
+          setModalVisible(false);
+          refresh(); // 刷新表格数据
+        } else {
+          Message.error(response.message || '创建失败');
+        }
       } else {
-        // TODO: 调用编辑API
-        await new Promise((resolve) => setTimeout(resolve, 500));
-        Message.success('编辑成功');
+        // 调用编辑API
+        if (!editingRecord?.id) {
+          Message.error('编辑失败：缺少ID');
+          return;
+        }
+
+        const response = await updateOntologyPublicProperties({
+          id: editingRecord.id,
+          name: formData.name,
+          comment: formData.comment,
+          columnType: formData.columnType,
+          description: formData.description
+        });
+
+        if (response.status === 200 && response.code === '') {
+          Message.success('编辑成功');
+          setModalVisible(false);
+          refresh(); // 刷新表格数据
+        } else {
+          Message.error(response.message || '编辑失败');
+        }
       }
-      setModalVisible(false);
-      refresh(); // 刷新表格数据
     } catch (error) {
+      console.error('提交失败:', error);
       Message.error(modalMode === 'create' ? '创建失败' : '编辑失败');
     } finally {
       setSubmitLoading(false);
@@ -184,20 +204,20 @@ export default function PublicTable() {
   };
 
   // 处理删除
-  const handleDelete = (record: PublicAttributeItem) => {
+  const handleDelete = (record: PublicProperty) => {
     // TODO: 实现删除功能
-    Message.info(`删除 ${record.name}`);
+    Message.info(`删除 ${record.comment || record.name}`);
   };
 
   // 表格列定义
-  const columns: TableColumnProps<PublicAttributeItem>[] = [
+  const columns: TableColumnProps<PublicProperty>[] = [
     {
       title: '公共属性名称',
-      dataIndex: 'name',
+      dataIndex: 'comment',
       width: 150,
       render: (value) => (
         <div className="font-PingFangSc text-[14px] font-medium leading-[22px] text-[#23293b]">
-          {value}
+          {value || '-'}
         </div>
       )
     },
@@ -206,77 +226,74 @@ export default function PublicTable() {
       dataIndex: 'description',
       ellipsis: true,
       tooltip: true,
-      width: 200
+      width: 200,
+      render: (value) => value || '-'
     },
     {
       title: '所属对象类型',
-      dataIndex: 'objectTypes',
+      dataIndex: 'ontologyObjectTypeList',
       width: 200,
-      render: (value) => {
-        if (!value || value.length === 0) {
+      render: (value, record) => {
+        const objectTypeList = record.ontologyObjectTypeList || [];
+        if (objectTypeList.length === 0) {
           return <span className="text-[#86909c]">-</span>;
         }
-        const firstType = value[0];
-        const remainingCount = value.length - 1;
-        return (
-          <div className="flex items-center gap-2">
-            <div
-              className="flex h-6 items-center gap-1 rounded px-2 text-white"
-              style={{
-                backgroundColor: firstType.color || '#165dff'
-              }}
-            >
-              <IconFile style={{ fontSize: '12px' }} />
-              <span className="font-PingFangSc text-[12px] font-normal leading-[20px]">
-                {firstType.name}
-              </span>
-            </div>
-            {remainingCount > 0 && (
-              <span className="font-PingFangSc text-[14px] font-normal leading-[22px] text-[#165dff]">
-                +{remainingCount}
-              </span>
-            )}
-          </div>
-        );
+
+        // 转换为 ObjectTypeTagList 需要的格式
+        const tags = objectTypeList.map((item) => ({
+          ontologyObjectTypeName: item.name || '',
+          ontologyObjectTypeId: item.id,
+          ontologyObjectTypeIcon: undefined, // API 返回的数据中没有 icon，使用默认图标
+          onClick: () => {
+            if (item.id) {
+              handleViewObjectTypeDetail(item.id);
+            }
+          }
+        }));
+
+        return <ObjectTypeTagList tags={tags} />;
       }
     },
     {
       title: '支持字段类型',
-      dataIndex: 'fieldType',
-      width: 150
+      dataIndex: 'columnType',
+      width: 150,
+      render: (value) => value || '-'
     },
     {
       title: 'id',
-      dataIndex: 'id',
+      dataIndex: 'name',
       width: 150,
       render: (value) => (
         <div className="flex items-center gap-2">
           <div className="font-PingFangSc text-[14px] font-normal leading-[22px] text-[#23293b]">
-            {value}
+            {value || '-'}
           </div>
-          <CopyItemIcon className="hidden flex-shrink-0" value={value} />
+          {value && (
+            <CopyItemIcon className="hidden flex-shrink-0" value={value} />
+          )}
         </div>
       )
     },
     {
       title: '引用计数',
-      dataIndex: 'referenceCount',
+      dataIndex: 'ontologyObjectTypeCounts',
       width: 120,
       sorter: true,
       render: (value) => (
         <div className="font-PingFangSc text-[14px] font-normal leading-[22px] text-[#23293b]">
-          {value}
+          {value || 0}
         </div>
       )
     },
     {
       title: '最新修改时间',
-      dataIndex: 'lastModifiedTime',
+      dataIndex: 'updateTime',
       width: 180,
       sorter: true,
       render: (value) => (
         <div className="font-PingFangSc text-[14px] font-normal leading-[22px] text-[#23293b]">
-          {value}
+          {value || '-'}
         </div>
       )
     },
@@ -285,7 +302,7 @@ export default function PublicTable() {
       dataIndex: 'actions',
       width: 120,
       fixed: 'right',
-      render: (_, record) => (
+      render: (_, record: PublicProperty) => (
         <Space size={16}>
           <Button
             type="text"
@@ -333,7 +350,7 @@ export default function PublicTable() {
           columns,
           data,
           loading,
-          rowKey: 'id',
+          rowKey: (record) => record.id?.toString() || record.name || '',
           border: false,
           pagination: false,
           scroll: { x: true },
@@ -370,6 +387,19 @@ export default function PublicTable() {
         onSubmit={handleModalSubmit}
         loading={submitLoading}
       />
+
+      {/* 对象类型详情抽屉 */}
+      {selectedObjectType && detailDrawerVisible && (
+        <ObjectTypeDetailDrawer
+          visible={detailDrawerVisible}
+          onClose={() => {
+            setDetailDrawerVisible(false);
+            setSelectedObjectType(null);
+          }}
+          objectTypeId={selectedObjectType?.id}
+          defaultActiveTab={activeTab}
+        />
+      )}
     </div>
   );
 }

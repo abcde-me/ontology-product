@@ -178,12 +178,17 @@ export default function NormalTable({ onTotalChange }: NormalTableProps = {}) {
       dataIndex: 'objectType',
       width: 180,
       render: (value, record) => (
-        <ObjectTypeTag
-          ontologyObjectTypeIcon={value.icon}
-          ontologyObjectTypeName={value.name}
-          ontologyObjectTypeId={value.id}
-          onClick={() => handleViewDetail(record)}
-        />
+        <div>
+          {value?.name ? (
+            <ObjectTypeTag
+              ontologyObjectTypeIcon={value.icon}
+              ontologyObjectTypeName={value.name}
+              ontologyObjectTypeId={value.id}
+            />
+          ) : (
+            <span>-</span>
+          )}
+        </div>
       )
     },
     {

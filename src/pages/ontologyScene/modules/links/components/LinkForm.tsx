@@ -528,7 +528,7 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
                       </div>
                       <Input.Group
                         compact
-                        className={styles['table-select-group']}
+                        className={`${styles['table-select-group']} w-full`}
                       >
                         <div style={{ flex: 1, minWidth: 0 }}>
                           <ObjectTypeSelect
@@ -556,7 +556,7 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
                             form.setFieldValue('targetObjectAttribute', val);
                           }}
                           disabled={!targetObjectType}
-                          style={{ width: 302 }}
+                          style={{ width: '50%' }}
                           allowClear
                         >
                           {getAttributeOptions(targetObjectType).map(

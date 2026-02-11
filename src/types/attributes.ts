@@ -122,3 +122,26 @@ export interface CreateOntologyPublicPropertiesReq {
    */
   name: string;
 }
+
+export interface UpdateOntologyPublicPropertiesReq {
+  /**
+   * 支持字段类型
+   */
+  columnType?: string;
+  /**
+   * 公共属性名称
+   */
+  comment?: string;
+  /**
+   * 描述说明
+   */
+  description?: string;
+  /**
+   * 唯一标识
+   */
+  id: number;
+  /**
+   * 公共属性id
+   */
+  name?: string;
+}
