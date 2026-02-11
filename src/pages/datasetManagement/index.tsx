@@ -1232,6 +1232,7 @@ const DatasetManagement: React.FC = () => {
       .then((res) => {
         if (res.code === '' && res.status === 200) {
           fetchDatasetList();
+          getSceneList();
           Message.success('删除成功');
         } else {
           Message.error(res.message || '删除失败，请稍候重试');
@@ -1667,6 +1668,7 @@ const DatasetManagement: React.FC = () => {
               setSelectedRowKeys([]);
               setSelectedRows([]);
               fetchDatasetList();
+              getSceneList();
             } else {
               Message.error('批量删除失败！');
             }
