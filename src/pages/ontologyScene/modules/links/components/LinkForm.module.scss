@@ -5,9 +5,9 @@
 }
 
 .table-select-group {
-  &:global(.arco-input-group) {
-    width: unset !important;
-  }
+  // &:global(.arco-input-group) {
+  //   // width: unset !important;
+  // }
   .table-select-wrapper {
     :global(.arco-select-view) {
       border-right-width: 1px !important;

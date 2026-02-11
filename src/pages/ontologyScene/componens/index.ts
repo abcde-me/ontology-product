@@ -1,6 +1,8 @@
 export * from './OSDrawer';
 export { default as ObjectTypeTag } from './ObjectTypeTag';
 export type { ObjectTypeTagProps } from './ObjectTypeTag';
+export { default as ObjectTypeTagList } from './ObjectTypeTagList';
+export type { ObjectTypeTagListProps } from './ObjectTypeTagList';
 export * from './FormItem';
 export * from './NumberRange';
 export * from './MapPicker';
@@ -11,3 +13,4 @@ export * from './ResizeBoxWithCursorChange';
 export * from './PyCodeContent';
 export { default as ObjectTypeSelect } from './ObjectTypeSelect';
 export type { ObjectTypeSelectProps } from './ObjectTypeSelect';
+export { default as ObjectTypeDetailDrawer } from './ObjectTypeDetailDrawer';
