@@ -14,6 +14,14 @@ export const DATABASE_TYPE_ENUM = [
   {
     label: 'Doris',
     value: 'Doris'
+  },
+  {
+    label: 'GaussDB',
+    value: 'GaussDB'
+  },
+  {
+    label: '达梦数据库',
+    value: 'DM'
   }
 ];
 // 连接器类型枚举
