@@ -227,7 +227,7 @@ export default function OntologySceneList() {
   const [filter, setFilter] = useState('');
   const [sceneList, setSceneList] = useState<SceneCardItem[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(9999);
+  const [pageSize, setPageSize] = useState(200);
   const [loading, setLoading] = useState(false);
   const [initialLoading, setInitialLoading] = useState(true);
   const [noData, setNoData] = useState(false);
