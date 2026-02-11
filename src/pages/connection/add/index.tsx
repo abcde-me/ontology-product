@@ -19,7 +19,9 @@ const options = [
   { text: 'MySQL', value: 'MySQL' },
   { text: 'PostgreSQL', value: 'PostgreSQL' },
   { text: 'Doris', value: 'Doris' },
-  { text: 'Elasticsearch', value: 'Elasticsearch' }
+  { text: 'Elasticsearch', value: 'Elasticsearch' },
+  { text: 'GaussDB', value: 'GaussDB' },
+  { text: '达梦数据库', value: 'DM' }
 ];
 const add = forwardRef((props: any, ref) => {
   // 创建的表单实例
