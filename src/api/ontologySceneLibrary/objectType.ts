@@ -5,6 +5,8 @@ import {
   ListMetadataIcebergDatabaseNameRes,
   ListMetadataIcebergTableReq,
   ListMetadataIcebergTableRes,
+  ListMetadataIcebergTiDBTableReq,
+  ListMetadataIcebergTiDBTableRes,
   ListOntologyObjectTypeReq,
   ListOntologyObjectTypeRes,
   ObjectType,
@@ -415,6 +417,16 @@ export const listMetadataIcebergTable = async (
   params: ListMetadataIcebergTableReq
 ): Promise<ApiRes<ListMetadataIcebergTableRes>> => {
   return await UAPI.RES.listMetadataIcebergTableApi({})
+    .post(params)
+    .inRegion()
+    .do();
+};
+
+// 本体查询iceberg表的字段信息
+export const listMetadataIcebergTiDBTable = async (
+  params: ListMetadataIcebergTiDBTableReq
+): Promise<ApiRes<ListMetadataIcebergTiDBTableRes>> => {
+  return await UAPI.RES.ListMetadataIcebergTiDBTableApi({})
     .post(params)
     .inRegion()
     .do();

@@ -44,7 +44,7 @@ const SceneModal: React.FC<SceneModalProps> = ({
 }) => {
   const [form] = Form.useForm();
   const [selectedIcon, setSelectedIcon] = useState<string>(
-    initialValues?.icon || ICON_OPTIONS[0].value
+    ICON_OPTIONS[0].value
   );
 
   useEffect(() => {
@@ -130,10 +130,9 @@ const SceneModal: React.FC<SceneModalProps> = ({
 
         <Form.Item label="图标：" field="icon">
           <IconSelector
-            value={selectedIcon}
+            initialValue={selectedIcon}
             onChange={setSelectedIcon}
             options={ICON_OPTIONS}
-            defaultIcon={ICON_OPTIONS[0].value}
           />
         </Form.Item>
       </Form>

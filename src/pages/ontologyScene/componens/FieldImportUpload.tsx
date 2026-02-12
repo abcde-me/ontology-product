@@ -1,5 +1,5 @@
 import { Upload, Message } from '@arco-design/web-react';
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { PrefixAimdp } from '@/api/endpoints';
 import { IconUpload, IconDownload } from '@arco-design/web-react/icon';
 import { UploadStatus } from '../types/objectType';
@@ -12,9 +12,7 @@ interface FieldImportUploadProps {
   accept?: string; // 支持的文件类型，默认为 .csv
   fileType?: 'excel' | 'csv'; // 文件类型，用于不同的验证和提示
   maxSize?: number; // 文件大小限制（MB），默认50MB
-  manualUpload?: boolean; // 是否手动上传，如果为true，则阻止自动上传，直接调用onFileChange传递文件对象
   customAction?: string; // 自定义上传接口地址
-  value?: any; // 受控的文件对象，用于手动上传模式下同步外部状态
 }
 
 const FieldImportUpload: React.FC<FieldImportUploadProps> = ({
@@ -23,36 +21,13 @@ const FieldImportUpload: React.FC<FieldImportUploadProps> = ({
   accept = '.csv',
   fileType = 'csv',
   maxSize = 50,
-  manualUpload = false,
-  customAction,
-  value
+  customAction
 }) => {
   const [fileList, setFileList] = useState<any>([]);
   const projectId = useUserInfoStore((state) => state.projectId);
 
-  // 在手动上传模式下，同步外部 value 到 fileList
-  useEffect(() => {
-    if (manualUpload && value) {
-      const file = value;
-      setFileList([
-        {
-          name: file.name || 'uploaded_file',
-          status: 'done' as const
-        }
-      ]);
-    } else if (manualUpload && !value) {
-      setFileList([]);
-    }
-  }, [manualUpload, value]);
-
   const handleUploadChange = (files: any, file: any) => {
-    // 如果是手动上传模式，删除操作已经在 handleRemove 中处理，这里不需要处理
-    if (manualUpload) {
-      // 手动上传模式下，onChange 主要用于自动上传的情况
-      // 删除操作已经在 onRemove 中处理，这里可以忽略
-      return;
-    }
-
+    console.log('---handleUploadChange', files, file);
     // 检查是否是删除操作：files 为空但 file 存在，说明是删除
     if (files.length === 0 && file) {
       // 删除操作已经在 handleRemove 中处理，这里不需要重复处理
@@ -182,28 +157,11 @@ const FieldImportUpload: React.FC<FieldImportUploadProps> = ({
 
   const handleRemove = (file: any) => {
     setFileList([]);
-    // 如果是手动上传模式，传递 undefined 表示文件被移除
-    if (manualUpload) {
-      onFileChange(undefined);
-    } else {
-      onFileChange([]);
-    }
+    onFileChange([]);
   };
 
   const handleBeforeUpload = (file: any) => {
     if (!checkFile(file)) {
-      return false;
-    }
-
-    // 如果是手动上传模式，阻止自动上传，直接调用onFileChange传递文件对象
-    if (manualUpload) {
-      // 更新fileList以显示文件
-      const newFile = {
-        name: file.name,
-        status: 'done' as const
-      };
-      setFileList([newFile]);
-      onFileChange(file);
       return false;
     }
 

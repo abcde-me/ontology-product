@@ -10,6 +10,7 @@ import {
   updateOntologyObjectType
 } from '@/api/ontologySceneLibrary/objectType';
 import { SourceType } from '@/types/objectType';
+import { DATA_SOURCE_TYPE } from '@/pages/ontologyScene/common/constants';
 
 export default function OntologySceneObjectTypeEdit() {
   const history = useHistory();
@@ -56,8 +57,8 @@ export default function OntologySceneObjectTypeEdit() {
         // 根据 sourceType 确定数据源类型
         const dataSourceType =
           objectType.sourceType === SourceType.FILE_UPLOAD
-            ? 'local_csv'
-            : 'data_directory_sync';
+            ? DATA_SOURCE_TYPE.LOCAL_CSV
+            : DATA_SOURCE_TYPE.DATA_DIRECTORY_SYNC;
 
         // 转换为表单数据格式
         const formData: Partial<ObjectTypeFormData> = {
@@ -74,11 +75,11 @@ export default function OntologySceneObjectTypeEdit() {
           _dataSource: {
             type: dataSourceType,
             database:
-              dataSourceType === 'data_directory_sync'
+              dataSourceType === DATA_SOURCE_TYPE.DATA_DIRECTORY_SYNC
                 ? objectType.originalDbName
                 : undefined,
             table:
-              dataSourceType === 'data_directory_sync'
+              dataSourceType === DATA_SOURCE_TYPE.DATA_DIRECTORY_SYNC
                 ? objectType.originalTableName
                 : undefined
           }

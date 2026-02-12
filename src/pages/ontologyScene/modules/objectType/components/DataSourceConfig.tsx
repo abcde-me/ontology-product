@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { Radio, Select, Button } from '@arco-design/web-react';
 import FieldImportUpload from '../../../componens/FieldImportUpload';
-
-export type DataSourceType = 'local_csv' | 'data_directory_sync';
+import {
+  DATA_SOURCE_TYPE,
+  DataSourceType
+} from '@/pages/ontologyScene/common/constants';
 
 interface DataSourceConfigProps {
   value?: {
@@ -22,13 +24,13 @@ interface DataSourceConfigProps {
 }
 
 const DataSourceConfig: React.FC<DataSourceConfigProps> = ({
-  value = { type: 'local_csv' },
+  value = { type: DATA_SOURCE_TYPE.LOCAL_CSV },
   onChange,
   onFileChange,
   onFieldsLoad
 }) => {
   const [dataSourceType, setDataSourceType] = useState<DataSourceType>(
-    value.type || 'local_csv'
+    value.type || DATA_SOURCE_TYPE.LOCAL_CSV
   );
   const [selectedDatabase, setSelectedDatabase] = useState<string>(
     value.database || ''
@@ -55,9 +57,15 @@ const DataSourceConfig: React.FC<DataSourceConfigProps> = ({
     setDataSourceType(type);
     const newValue = {
       type,
-      database: type === 'data_directory_sync' ? selectedDatabase : undefined,
-      table: type === 'data_directory_sync' ? selectedTable : undefined,
-      file: type === 'local_csv' ? value.file : undefined
+      database:
+        type === DATA_SOURCE_TYPE.DATA_DIRECTORY_SYNC
+          ? selectedDatabase
+          : undefined,
+      table:
+        type === DATA_SOURCE_TYPE.DATA_DIRECTORY_SYNC
+          ? selectedTable
+          : undefined,
+      file: type === DATA_SOURCE_TYPE.LOCAL_CSV ? value.file : undefined
     };
     onChange?.(newValue);
   };
@@ -114,12 +122,14 @@ const DataSourceConfig: React.FC<DataSourceConfigProps> = ({
           onChange={handleTypeChange}
           type="button"
         >
-          <Radio value="local_csv">本地CSV导入</Radio>
-          <Radio value="data_directory_sync">数据目录同步</Radio>
+          <Radio value={DATA_SOURCE_TYPE.LOCAL_CSV}>本地CSV导入</Radio>
+          <Radio value={DATA_SOURCE_TYPE.DATA_DIRECTORY_SYNC}>
+            数据目录同步
+          </Radio>
         </Radio.Group>
       </div>
 
-      {dataSourceType === 'local_csv' ? (
+      {dataSourceType === DATA_SOURCE_TYPE.LOCAL_CSV ? (
         <div>
           <FieldImportUpload
             accept=".csv"

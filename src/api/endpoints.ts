@@ -774,6 +774,8 @@ export const ModaForgeResourceEndpoints = {
   // 上传CSV文件并解析
   UploadOntologyEntityDataFileApi:
     PrefixAimdp + '/UploadOntologyEntityDataFile',
+  // 本体查询iceberg表的字段信息
+  ListMetadataIcebergTiDBTableApi: PrefixAimdp + '/ListMetadataIcebergTiDB',
 
   //属性
   // 获取公共属性列表

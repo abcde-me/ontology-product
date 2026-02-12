@@ -487,6 +487,9 @@ export default function ObjectTypeDetailDrawer({
   };
 
   const handleViewPublicAttribute = (record: AttributeItem) => {
+    if (!record.ontologyPublicPropertiesName) {
+      return;
+    }
     const url = `/tenant/compute/modaforge/ontologyScene/detail/${ontologyModelID}/attributes/list?tab=public&search=${encodeURIComponent(record.ontologyPublicPropertiesName || '')}`;
     window.location.href = url;
   };
@@ -549,12 +552,14 @@ export default function ObjectTypeDetailDrawer({
         }
         return (
           <span
-            className="cursor-pointer group-hover:text-[#184FF2]"
             onClick={() => {
               handleViewPublicAttribute(record);
             }}
           >
-            <EllipsisPopover value={value || '-'} />
+            <EllipsisPopover
+              value={value || '-'}
+              className={value ? 'hover-blue' : ''}
+            />
           </span>
         );
       }
