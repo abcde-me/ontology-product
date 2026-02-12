@@ -6,7 +6,7 @@ import { menus, type MenuModel } from './menus';
 import './sider.scss';
 import { usePermission } from '@/hooks/usePermission';
 import { useUserInfo, useUserInfoStore } from '@/store/userInfoStore';
-import { ProjectSelect } from '@ceai-front/arco-material';
+import { ProjectSelect, SiderMenu } from '@ceai-front/arco-material';
 import { GetProjOrg } from '@/api/modules/project';
 import { isSameArray } from '@/utils/array';
 import { setLocalStorage } from '@/utils/storage';
@@ -245,37 +245,64 @@ export const LayoutWithSider = memo(function LayoutWithSider({ children }) {
   };
 
   return (
-    <Layout className="h-full flex-auto overflow-auto">
+    <Layout className="flex h-full flex-auto flex-row  overflow-auto">
       {sidebarHidden ? null : (
-        <Sider
+        // <Sider
+        //   collapsed={collapsed}
+        //   onCollapse={handleCollapsed}
+        //   className={cn(
+        //     'modaforge-sider bg-transparent shadow-none',
+        //     collapsed ? 'mr-[24px] !w-[44px] bg-white' : ''
+        //   )}
+        // >
+        //   <ProjectSelect
+        //     style={{ width: 178, margin: 8 }}
+        //     treeData={projects}
+        //     value={projectId}
+        //     showAddButton={false}
+        //     onChange={(v) => {
+        //       console.log('🚀 ~ BasicDemo ~ v:', v);
+        //       v ? changeProject(v) : setProjectId([]);
+        //     }}
+        //   />
+        //   <Menu
+        //     className={'ai-menu'}
+        //     selectedKeys={actives || []}
+        //     openKeys={openKeys || []}
+        //     onClickSubMenu={(key, openKeys) => {
+        //       console.log(key, openKeys, 'keyyyyyyyyyy');
+        //       setopenKeys(openKeys);
+        //     }}
+        //   >
+        //     {getMenu(createPermissionFilter(showMenus))}
+        //   </Menu>
+        // </Sider>
+
+        <SiderMenu
+          className={cn('h-full')}
+          isFixedMenuTopExtra
+          menus={createPermissionFilter(showMenus)}
+          selectedKeys={actives || []}
           collapsed={collapsed}
-          onCollapse={handleCollapsed}
-          className={cn(
-            'modaforge-sider bg-transparent shadow-none',
-            collapsed ? 'mr-[24px] !w-[44px] bg-white' : ''
-          )}
-        >
-          <ProjectSelect
-            style={{ width: 178, margin: 8 }}
-            treeData={projects}
-            value={projectId}
-            showAddButton={false}
-            onChange={(v) => {
-              console.log('🚀 ~ BasicDemo ~ v:', v);
-              v ? changeProject(v) : setProjectId([]);
-            }}
-          />
-          <Menu
-            className={'ai-menu'}
-            selectedKeys={actives || []}
-            openKeys={openKeys || []}
-            onClickSubMenu={(key, openKeys) => {
-              setopenKeys(openKeys);
-            }}
-          >
-            {getMenu(createPermissionFilter(showMenus))}
-          </Menu>
-        </Sider>
+          onCollapse={setCollapsed}
+          onMenuClick={(menu) => {
+            // 添加页面跳转逻辑
+            if (menu.path) {
+              clickMenu(menu.path);
+            }
+          }}
+          menuTopExtra={
+            <ProjectSelect
+              treeData={projects}
+              value={projectId}
+              showAddButton={false}
+              onChange={(v) => {
+                console.log('🚀 ~ BasicDemo ~ v:', v);
+                v ? changeProject(v) : setProjectId([]);
+              }}
+            />
+          }
+        />
       )}
       {children}
     </Layout>
