@@ -95,5 +95,13 @@ export const DATABASE_TYPE_ENUM = [
   {
     label: 'PostgreSQL',
     value: 'PostgreSQL'
+  },
+  {
+    label: '达梦',
+    value: 'DM'
+  },
+  {
+    label: 'GaussDB',
+    value: 'GaussDB'
   }
 ];
