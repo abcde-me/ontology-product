@@ -125,6 +125,11 @@ export default function RequirementConfig() {
     setActiveTab
   });
 
+  // 返回需求列表页
+  const handleBack = () => {
+    history.push('/tenant/compute/modaforge/requirement');
+  };
+
   // 使用 editModeHelpers 创建判断函数
   const isLabelFromDetail = (labelId: string) =>
     checkLabelFromDetail(type, requirementDetail, labelId);
@@ -765,7 +770,7 @@ export default function RequirementConfig() {
           : await publishRequirement(obj as any);
       if (res.code === 'success') {
         Message.success(`${TYPE_MAP_TEXT[type]}成功`);
-        history.goBack();
+        handleBack();
       }
       setLoading(false);
       setPageLoading(false);
@@ -969,7 +974,7 @@ export default function RequirementConfig() {
           <div>
             <Breadcrumb style={{ fontSize: 20 }}>
               <BreadcrumbItem
-                onClick={() => history.goBack()}
+                onClick={() => handleBack()}
                 className={'breadcrumb-text'}
               >
                 创建需求
@@ -980,11 +985,11 @@ export default function RequirementConfig() {
           <div>
             <IconArrowLeft
               style={{ cursor: 'pointer', fontSize: '14px', marginRight: 12 }}
-              onClick={() => history.goBack()}
+              onClick={() => handleBack()}
             />
             <Breadcrumb style={{ fontSize: 20 }}>
               <BreadcrumbItem
-                onClick={() => history.goBack()}
+                onClick={() => handleBack()}
                 className={'breadcrumb-text'}
               >
                 需求管理
@@ -1387,12 +1392,7 @@ export default function RequirementConfig() {
             >
               确认
             </Button>
-            <Button
-              type="secondary"
-              onClick={() => {
-                history.goBack();
-              }}
-            >
+            <Button type="secondary" onClick={() => handleBack()}>
               取消
             </Button>
           </div>
