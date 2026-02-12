@@ -227,7 +227,7 @@ export default function OntologySceneList() {
   const [filter, setFilter] = useState('');
   const [sceneList, setSceneList] = useState<SceneCardItem[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(200);
+  const [pageSize, setPageSize] = useState(16);
   const [loading, setLoading] = useState(false);
   const [initialLoading, setInitialLoading] = useState(true);
   const [noData, setNoData] = useState(false);
@@ -623,39 +623,45 @@ export default function OntologySceneList() {
       )}
 
       {/* 分页 */}
-      {/* {totalCount > pageSize && (
-        <div className="flex justify-end py-4 items-center">
+      {totalCount > pageSize && (
+        <div className="flex items-center justify-end py-4">
           <Pagination
             current={currentPage}
             pageSize={pageSize}
             total={totalCount}
-            onChange={handlePageChange}
+            sizeOptions={[16, 32, 64, 128]}
+            onChange={(page, pageSize) => {
+              setCurrentPage(page);
+              setPageSize(pageSize);
+            }}
             showTotal
             showJumper
           />
         </div>
-      )} */}
+      )}
 
       {/* 创建/编辑弹窗 */}
-      <SceneModal
-        visible={modalVisible}
-        mode={modalMode}
-        initialValues={
-          editingScene
-            ? {
-                name: editingScene.name || '',
-                description: editingScene.description || '',
-                icon: editingScene.icon || ''
-              }
-            : undefined
-        }
-        onSubmit={handleModalSubmit}
-        onCancel={handleModalCancel}
-        loading={submitLoading}
-        existingSceneIcons={sceneList
-          .map((scene) => scene.icon)
-          .filter((icon): icon is string => !!icon)}
-      />
+      {modalVisible && (
+        <SceneModal
+          visible={modalVisible}
+          mode={modalMode}
+          initialValues={
+            editingScene
+              ? {
+                  name: editingScene.name || '',
+                  description: editingScene.description || '',
+                  icon: editingScene.icon || ''
+                }
+              : undefined
+          }
+          onSubmit={handleModalSubmit}
+          onCancel={handleModalCancel}
+          loading={submitLoading}
+          existingSceneIcons={sceneList
+            .map((scene) => scene.icon)
+            .filter((icon): icon is string => !!icon)}
+        />
+      )}
     </div>
   );
 }

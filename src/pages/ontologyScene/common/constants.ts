@@ -58,6 +58,17 @@ export const OBJECT_TYPE_SYNC_STATUS_FILTERS = [
   { text: '失败', value: SyncStatus.FAILED }
 ];
 
+// 数据源类型枚举
+export const DATA_SOURCE_TYPE = {
+  /** 本地CSV导入 */
+  LOCAL_CSV: 'local_csv',
+  /** 数据目录同步 */
+  DATA_DIRECTORY_SYNC: 'data_directory_sync'
+} as const;
+
+export type DataSourceType =
+  (typeof DATA_SOURCE_TYPE)[keyof typeof DATA_SOURCE_TYPE];
+
 // 字段类型选项列表
 export const COLUMN_TYPE_OPTIONS = [
   'STRING',

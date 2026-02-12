@@ -388,3 +388,115 @@ export interface ListMetadataIcebergTableRes {
     list: IcebergTableItem[];
   };
 }
+
+export interface ListMetadataIcebergTiDBTableReq {
+  pageNum?: number;
+  pageSize?: number;
+  filters?: {
+    tableId: number;
+  };
+}
+
+export interface TiDBTableFieldItem {
+  /**
+   * 字段ID
+   */
+  id: number;
+  /**
+   * 表字段
+   */
+  fieldName: string;
+  /**
+   * 表中文名/描述
+   */
+  description: string;
+  /**
+   * 字段类型
+   */
+  dataType: string;
+  /**
+   * 创建时间
+   */
+  createTime: string;
+  /**
+   * 更新时间
+   */
+  updataTime: string;
+}
+
+export interface ListMetadataIcebergTiDBTableRes {
+  data: {
+    /**
+     * 总记录数
+     */
+    total: number;
+    /**
+     * 表字段列表
+     */
+    list: TiDBTableFieldItem[];
+    /**
+     * 当前页码
+     */
+    pageNum: number;
+    /**
+     * 每页大小
+     */
+    pageSize: number;
+    /**
+     * 当前页记录数
+     */
+    size: number;
+    /**
+     * 起始行号
+     */
+    startRow: number;
+    /**
+     * 结束行号
+     */
+    endRow: number;
+    /**
+     * 总页数
+     */
+    pages: number;
+    /**
+     * 上一页页码
+     */
+    prePage: number;
+    /**
+     * 下一页页码
+     */
+    nextPage: number;
+    /**
+     * 是否第一页
+     */
+    isFirstPage: boolean;
+    /**
+     * 是否最后一页
+     */
+    isLastPage: boolean;
+    /**
+     * 是否有上一页
+     */
+    hasPreviousPage: boolean;
+    /**
+     * 是否有下一页
+     */
+    hasNextPage: boolean;
+    /**
+     * 导航页码数
+     */
+    navigatePages: number;
+    /**
+     * 导航页码数组
+     */
+    navigatepageNums: number[];
+    /**
+     * 导航第一页
+     */
+    navigateFirstPage: number;
+    /**
+     * 导航最后一页
+     */
+    navigateLastPage: number;
+  };
+}

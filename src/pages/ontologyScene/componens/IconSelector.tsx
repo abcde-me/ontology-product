@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Trigger } from '@arco-design/web-react';
 import { IconDown } from '@arco-design/web-react/icon';
 
@@ -8,25 +8,53 @@ export interface IconOption {
 }
 
 interface IconSelectorProps {
-  value?: string;
+  initialValue?: string;
   onChange?: (value: string) => void;
   options: IconOption[];
-  defaultIcon?: string; // 默认图标值
 }
 
 const IconSelector: React.FC<IconSelectorProps> = ({
-  value,
+  initialValue,
   onChange,
-  options,
-  defaultIcon
+  options
 }) => {
   const [iconDropdownVisible, setIconDropdownVisible] = useState(false);
 
-  const selectedIconValue = value || defaultIcon || options[0]?.value;
-  const selectedIconOption =
-    options.find((opt) => opt.value === selectedIconValue) || options[0];
+  const getSelectedIconValue = (
+    value: string | undefined,
+    iconOptions: IconOption[]
+  ): string | undefined => {
+    if (value) {
+      const existsInOptions = iconOptions.some((opt) => opt.value === value);
+      if (existsInOptions) {
+        return value;
+      }
+      return iconOptions[0]?.value;
+    }
+    const randomIndex = Math.floor(Math.random() * iconOptions.length);
+    return iconOptions[randomIndex]?.value;
+  };
+
+  const [selectedIconValue, setSelectedIconValue] = useState<
+    string | undefined
+  >();
+  const [selectedIconOption, setSelectedIconOption] = useState<
+    IconOption | undefined
+  >();
+
+  useEffect(() => {
+    const newValue = getSelectedIconValue(initialValue, options);
+    setSelectedIconValue(newValue);
+    setSelectedIconOption(
+      options.find((opt) => opt.value === newValue) || options[0]
+    );
+  }, [initialValue, options]);
 
   const handleIconSelect = (iconValue: string) => {
+    setSelectedIconValue(iconValue);
+    setSelectedIconOption(
+      options.find((opt) => opt.value === iconValue) || options[0]
+    );
     onChange?.(iconValue);
     setIconDropdownVisible(false);
   };

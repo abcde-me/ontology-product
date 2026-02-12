@@ -19,61 +19,7 @@ import ObjectTypeDetailDrawer from '@/pages/ontologyScene/componens/ObjectTypeDe
 import { ObjectTypeTag } from '@/pages/ontologyScene/componens';
 import { listOntologyPhysicalProperties } from '@/api/ontologySceneLibrary/graph';
 import type { PhysicalProperties } from '@/types/graphApi';
-
-// 属性数据接口
-export interface AttributeItem {
-  id: string;
-  name: string;
-  objectType: {
-    name: string;
-    color: string;
-    icon?: string;
-    id?: string; // 对象类型ID，用于查看详情
-  };
-  tableField: string;
-  dataSource: string;
-  publicAttribute?: string;
-  fieldType: string;
-}
-
-// 根据对象类型名称生成颜色（简单哈希）
-const getColorByObjectTypeName = (name: string): string => {
-  const colors = [
-    '#00b42a',
-    '#f53f3f',
-    '#ff7d00',
-    '#165dff',
-    '#722ED1',
-    '#f7ba1e',
-    '#3491fa',
-    '#9fdb1d'
-  ];
-  let hash = 0;
-  for (let i = 0; i < name.length; i++) {
-    hash = name.charCodeAt(i) + ((hash << 5) - hash);
-  }
-  return colors[Math.abs(hash) % colors.length];
-};
-
-// 将 PhysicalProperties 转换为 AttributeItem
-const convertPhysicalPropertiesToAttributeItem = (
-  item: PhysicalProperties
-): AttributeItem => {
-  return {
-    id: String(item.id || ''),
-    name: item.name || '',
-    objectType: {
-      name: item.ontologyObjectTypeName || '',
-      color: getColorByObjectTypeName(item.ontologyObjectTypeName || ''),
-      icon: item.ontologyObjectTypeIcon,
-      id: String(item.ontologyObjectTypeId || item.objectTypeID || '')
-    },
-    tableField: item.tableField || '',
-    dataSource: '', // 接口中没有此字段，设为空字符串
-    publicAttribute: item.ontologyPublicPropertiesName || undefined,
-    fieldType: item.columnType || ''
-  };
-};
+import { useParams } from 'react-router';
 
 export interface NormalTableProps {
   /** total 变化时的回调函数 */
@@ -82,6 +28,7 @@ export interface NormalTableProps {
 
 export default function NormalTable({ onTotalChange }: NormalTableProps = {}) {
   const [form] = Form.useForm();
+  const { id: ontologyModelID } = useParams<{ id: string }>();
   const [detailDrawerVisible, setDetailDrawerVisible] = useState(false);
   const [selectedObjectType, setSelectedObjectType] = useState<{
     id: string;
@@ -92,7 +39,7 @@ export default function NormalTable({ onTotalChange }: NormalTableProps = {}) {
 
   // 使用 useTable hook
   const { data, loading, pagination, refresh, submit, onChange } =
-    useWorkflowTable<AttributeItem, any>({
+    useWorkflowTable<PhysicalProperties, any>({
       service: async (params) => {
         try {
           // 调用 listOntologyPhysicalProperties 接口
@@ -105,14 +52,9 @@ export default function NormalTable({ onTotalChange }: NormalTableProps = {}) {
           });
 
           if (response.status === 200 && response.data) {
-            // 将 PhysicalProperties 转换为 AttributeItem
-            const items = (response.data.result || []).map(
-              convertPhysicalPropertiesToAttributeItem
-            );
-
             return {
               data: {
-                items,
+                items: response.data.result || [],
                 total: response.data.totalCount || 0,
                 page: params.page || 1,
                 page_size: params.page_size || 10
@@ -154,16 +96,27 @@ export default function NormalTable({ onTotalChange }: NormalTableProps = {}) {
   }, [pagination?.total, onTotalChange]);
 
   // 处理查看详情：打开对象类型详情抽屉
-  const handleViewDetail = (record: AttributeItem) => {
+  const handleViewDetail = (record: PhysicalProperties) => {
     // 使用对象类型ID打开详情抽屉
-    const objectTypeId = record.objectType.id || record.id;
+    const objectTypeId = String(
+      record.ontologyObjectTypeId || record.objectTypeID || record.id || ''
+    );
     setSelectedObjectType({ id: objectTypeId });
     setActiveTab('instances');
     setDetailDrawerVisible(true);
   };
 
+  const handleViewPublicAttribute = (record: PhysicalProperties) => {
+    if (!record.ontologyPublicPropertiesName) {
+      return;
+    }
+
+    const url = `/tenant/compute/modaforge/ontologyScene/detail/${ontologyModelID}/attributes/list?tab=public&search=${encodeURIComponent(record.ontologyPublicPropertiesName || '')}`;
+    window.location.href = url;
+  };
+
   // 表格列定义
-  const columns: TableColumnProps<AttributeItem>[] = [
+  const columns: TableColumnProps<PhysicalProperties>[] = [
     {
       title: '属性名称',
       dataIndex: 'name',
@@ -175,15 +128,17 @@ export default function NormalTable({ onTotalChange }: NormalTableProps = {}) {
     },
     {
       title: '所属对象类型',
-      dataIndex: 'objectType',
+      dataIndex: 'ontologyObjectTypeName',
       width: 180,
       render: (value, record) => (
         <div>
-          {value?.name ? (
+          {value ? (
             <ObjectTypeTag
-              ontologyObjectTypeIcon={value.icon}
-              ontologyObjectTypeName={value.name}
-              ontologyObjectTypeId={value.id}
+              ontologyObjectTypeIcon={record.ontologyObjectTypeIcon}
+              ontologyObjectTypeName={value}
+              ontologyObjectTypeId={String(
+                record.ontologyObjectTypeId || record.objectTypeID || ''
+              )}
               onClick={() => handleViewDetail(record)}
             />
           ) : (
@@ -201,7 +156,10 @@ export default function NormalTable({ onTotalChange }: NormalTableProps = {}) {
           <div className="font-PingFangSc text-[14px] font-normal leading-[22px] text-[#23293b]">
             {value}
           </div>
-          <CopyItemIcon className="hidden flex-shrink-0" value={value} />
+          <CopyItemIcon
+            className="hidden flex-shrink-0"
+            value={String(value || '')}
+          />
         </div>
       )
     },
@@ -209,19 +167,24 @@ export default function NormalTable({ onTotalChange }: NormalTableProps = {}) {
       title: '数据源',
       dataIndex: 'dataSource',
       width: 180,
-      render: (value) => <EllipsisPopover value={value || '-'} />
+      render: () => <EllipsisPopover value="-" />
     },
     {
       title: '关联公共属性',
-      dataIndex: 'publicAttribute',
+      dataIndex: 'ontologyPublicPropertiesName',
       width: 150,
-      render: (value) => (
-        <EllipsisPopover value={value || '-'} className="hover-blue" />
+      render: (value, record) => (
+        <span onClick={() => handleViewPublicAttribute(record)}>
+          <EllipsisPopover
+            value={value || '-'}
+            className={value ? 'hover-blue' : ''}
+          />
+        </span>
       )
     },
     {
       title: '字段类型',
-      dataIndex: 'fieldType',
+      dataIndex: 'columnType',
       width: 120
     }
   ];
@@ -248,7 +211,7 @@ export default function NormalTable({ onTotalChange }: NormalTableProps = {}) {
           columns,
           data,
           loading,
-          rowKey: 'id',
+          rowKey: (record) => String(record.id || ''),
           border: false,
           pagination: false,
           scroll: { x: true },
