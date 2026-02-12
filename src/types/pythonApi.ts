@@ -184,14 +184,20 @@ export enum OperatorCatalog {
 }
 
 export interface GetOperatorListItem {
+  /** 子分类 */
+  sub_level: SubLevelItem[];
   /** 算子分类 */
   catalog: string;
   /** 算子分类id */
   catalog_id: number;
-  /** 算子列表 */
-  op_items: OperatorItem[];
   /** 算子分类图标 */
   catalog_icon: React.ReactNode;
+}
+
+export interface SubLevelItem {
+  catalog: string;
+  /** 算子列表 */
+  op_items: OperatorItem[];
 }
 
 export interface OperatorItem {

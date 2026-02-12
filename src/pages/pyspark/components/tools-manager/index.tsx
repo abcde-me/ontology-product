@@ -14,13 +14,11 @@ import EllipsisPopover from '@/components/ellipsis-popover-com';
 import copy from 'copy-to-clipboard';
 import './index.scss';
 import ModalToolDetail from './ModalToolDetail';
-import SuziRead from '@/assets/python/suanzi-read.svg';
-import SuziQiePian from '@/assets/python/suanzi-qiepian.svg';
-import SuziVideo from '@/assets/python/suanzi-video.svg';
-import SuziClean from '@/assets/python/suanzi-clean.svg';
-import SuziStrong from '@/assets/python/suanzi-strong.svg';
-import SuziVector from '@/assets/python/suanzi-xiangliang.svg';
-import SuziSave from '@/assets/python/suanzi-save.svg';
+import SuziGeneral from '@/assets/python/general.svg';
+import SuziText from '@/assets/python/text-processing.svg';
+import SuziImage from '@/assets/python/image-processing.svg';
+import SuziAudio from '@/assets/python/audio-processing.svg';
+import SuziVideo from '@/assets/python/video-processing.svg';
 import SuziIcon from '@/assets/python/suanzi-icon.svg';
 
 // 算子图标映射类型
@@ -48,30 +46,39 @@ interface ToolsManagerProps {
 }
 
 enum OperatorCatalogId {
-  /** 读取解析 */
-  READ_PARSING = 0,
-  /** 分片分块 */
-  CHUNK_PROCESSING = 1,
-  /** 音视频处理 */
-  VIDEO_PROCESSING = 2,
-  /** 数据清洗 */
-  DATA_CLEANING = 3,
-  /** 数据增强 */
-  DATA_AUGMENTATION = 4,
-  /** 向量化 */
-  VECTORIZATION = 5,
-  /** 数据保存 */
-  DATA_SAVING = 6
+  // /** 读取解析 */
+  // READ_PARSING = 0,
+  // /** 分片分块 */
+  // CHUNK_PROCESSING = 1,
+  // /** 音视频处理 */
+  // VIDEO_PROCESSING = 2,
+  // /** 数据清洗 */
+  // DATA_CLEANING = 3,
+  // /** 数据增强 */
+  // DATA_AUGMENTATION = 4,
+  // /** 向量化 */
+  // VECTORIZATION = 5,
+  // /** 数据保存 */
+  // DATA_SAVING = 6
+
+  /** 通用 */
+  GENERAL = 0,
+  /** 文本处理 */
+  TEXT_PROCESSING = 1,
+  /** 图片处理 */
+  IMAGE_PROCESSING = 2,
+  /** 音频处理 */
+  AUDIO_PROCESSING = 3,
+  /** 视频处理 */
+  VIDEO_PROCESSING = 4
 }
 
 const ICON_MAP = {
-  [OperatorCatalogId.READ_PARSING]: <SuziRead></SuziRead>,
-  [OperatorCatalogId.CHUNK_PROCESSING]: <SuziQiePian></SuziQiePian>,
-  [OperatorCatalogId.VIDEO_PROCESSING]: <SuziVideo></SuziVideo>,
-  [OperatorCatalogId.DATA_CLEANING]: <SuziClean></SuziClean>,
-  [OperatorCatalogId.DATA_AUGMENTATION]: <SuziStrong></SuziStrong>,
-  [OperatorCatalogId.VECTORIZATION]: <SuziVector></SuziVector>,
-  [OperatorCatalogId.DATA_SAVING]: <SuziSave></SuziSave>
+  [OperatorCatalogId.GENERAL]: <SuziGeneral></SuziGeneral>,
+  [OperatorCatalogId.TEXT_PROCESSING]: <SuziText></SuziText>,
+  [OperatorCatalogId.IMAGE_PROCESSING]: <SuziImage></SuziImage>,
+  [OperatorCatalogId.AUDIO_PROCESSING]: <SuziAudio></SuziAudio>,
+  [OperatorCatalogId.VIDEO_PROCESSING]: <SuziVideo></SuziVideo>
 };
 
 const ToolsManager: React.FC<ToolsManagerProps> = ({
@@ -139,14 +146,23 @@ const ToolsManager: React.FC<ToolsManagerProps> = ({
   const hasData = useMemo(() => {
     return (
       operatorList.length > 0 &&
-      operatorList.some((category) => category.op_items.length > 0)
+      operatorList.some((category) => {
+        return (category?.sub_level || []).some((sub) => {
+          return sub?.op_items?.length > 0;
+        });
+      })
     );
   }, [operatorList]);
 
   // 计算算子总数
   const total = useMemo(() => {
-    return operatorList.reduce((sum, category) => {
-      return sum + (category?.op_items?.length || 0);
+    return operatorList.reduce((sum, catalog) => {
+      return (
+        sum +
+        (catalog?.sub_level || []).reduce((subSum, sub) => {
+          return subSum + (sub?.op_items?.length || 0);
+        }, 0)
+      );
     }, 0);
   }, [operatorList]);
 
@@ -161,84 +177,89 @@ const ToolsManager: React.FC<ToolsManagerProps> = ({
           </span>
         </div>
       ),
-      children: category.op_items.map((item, itemIndex) => ({
-        key: `operator-${categoryIndex}-${itemIndex}`,
-        title: (
-          <div
-            className={`tools-manager__operator ${hoveredItem === `operator-${categoryIndex}-${itemIndex}` ? 'tools-manager__operator--hovered' : ''}`}
-            onMouseEnter={() =>
-              setHoveredItem(`operator-${categoryIndex}-${itemIndex}`)
-            }
-            onMouseLeave={() => setHoveredItem(null)}
-          >
-            {/* 算子图标 */}
-
+      children: category?.sub_level?.map((sub, subIndex) => ({
+        key: `sub-${category?.catalog_id}-${subIndex}`,
+        title: sub.catalog,
+        className: 'sub-node',
+        children: sub.op_items.map((item, itemIndex) => ({
+          key: `operator-${category?.catalog_id}-${subIndex}-${itemIndex}`,
+          title: (
             <div
-              className="tools-manager__operator-icon"
-              style={{ backgroundColor: getOperatorIconBgColor(item.name) }}
+              className={`tools-manager__operator ${hoveredItem === `operator-${category?.catalog_id}-${itemIndex}` ? 'tools-manager__operator--hovered' : ''}`}
+              onMouseEnter={() =>
+                setHoveredItem(`operator-${category?.catalog_id}-${itemIndex}`)
+              }
+              onMouseLeave={() => setHoveredItem(null)}
             >
-              {ICON_MAP[category.catalog_id] || <SuziIcon />}
-            </div>
+              {/* 算子图标 */}
 
-            {/* 算子信息 */}
-            <div className="tools-manager__operator-info">
-              <div className="tools-manager__operator-title">
-                <EllipsisPopover
-                  value={item.name}
-                  className="tools-manager__operator-name"
-                  ellipsis={{
-                    rows: 1,
-                    cssEllipsis: true
-                  }}
-                />
+              <div
+                className="tools-manager__operator-icon"
+                style={{ backgroundColor: getOperatorIconBgColor(item.name) }}
+              >
+                {ICON_MAP[category.catalog_id] || <SuziIcon />}
               </div>
-              <div className="tools-manager__operator-description">
-                <EllipsisPopover
-                  value={item.description}
-                  className="tools-manager__operator-desc"
-                  ellipsis={{
-                    rows: 1,
-                    cssEllipsis: true
-                  }}
-                />
-              </div>
-            </div>
 
-            {/* 操作按钮 - 仅在hover时显示 */}
-            {
-              <div className="tools-manager__operator-actions">
-                <Button
-                  type="text"
-                  size="small"
-                  className="tools-manager__action-btn tools-manager__action-btn--detail"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleDetailClick(item);
-                  }}
-                >
-                  详情
-                </Button>
-                <Button
-                  type="outline"
-                  size="small"
-                  className="tools-manager__action-btn tools-manager__action-btn--insert"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleInsertClick(item);
-                  }}
-                  onMouseDown={(e) => {
-                    // 阻止按钮获得焦点，保持编辑器焦点
-                    e.preventDefault();
-                  }}
-                >
-                  {getIsEditorFocused?.() ? '插入' : '复制'}
-                </Button>
+              {/* 算子信息 */}
+              <div className="tools-manager__operator-info">
+                <div className="tools-manager__operator-title">
+                  <EllipsisPopover
+                    value={item.name}
+                    className="tools-manager__operator-name"
+                    ellipsis={{
+                      rows: 1,
+                      cssEllipsis: true
+                    }}
+                  />
+                </div>
+                <div className="tools-manager__operator-description">
+                  <EllipsisPopover
+                    value={item.description}
+                    className="tools-manager__operator-desc"
+                    ellipsis={{
+                      rows: 1,
+                      cssEllipsis: true
+                    }}
+                  />
+                </div>
               </div>
-            }
-          </div>
-        ),
-        isLeaf: true,
-        operator: item
+
+              {/* 操作按钮 - 仅在hover时显示 */}
+              {
+                <div className="tools-manager__operator-actions">
+                  <Button
+                    type="text"
+                    size="small"
+                    className="tools-manager__action-btn tools-manager__action-btn--detail"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDetailClick(item);
+                    }}
+                  >
+                    详情
+                  </Button>
+                  <Button
+                    type="outline"
+                    size="small"
+                    className="tools-manager__action-btn tools-manager__action-btn--insert"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleInsertClick(item);
+                    }}
+                    onMouseDown={(e) => {
+                      // 阻止按钮获得焦点，保持编辑器焦点
+                      e.preventDefault();
+                    }}
+                  >
+                    {getIsEditorFocused?.() ? '插入' : '复制'}
+                  </Button>
+                </div>
+              }
+            </div>
+          ),
+          isLeaf: true,
+          operator: item
+        }))
       }))
     }));
   }, [operatorList, hoveredItem]);
@@ -246,7 +267,7 @@ const ToolsManager: React.FC<ToolsManagerProps> = ({
   // 初始化展开所有分类
   React.useEffect(() => {
     const keys = operatorList.map((_, index) => `category-${index}`);
-    setExpandedKeys(keys);
+    // setExpandedKeys(keys);
   }, [operatorList]);
 
   // 处理Tree展开/折叠
@@ -287,9 +308,7 @@ const ToolsManager: React.FC<ToolsManagerProps> = ({
         ) : hasData ? (
           <Tree
             treeData={treeData}
-            expandedKeys={expandedKeys}
             selectedKeys={[]}
-            onExpand={handleExpand}
             onSelect={handleSelect}
             showLine={false}
             blockNode={true}
