@@ -33,7 +33,9 @@ export enum ConnectorType {
   Elasticsearch = 'Elasticsearch',
   Doris = 'Doris',
   Kafka = 'Kafka',
-  MQ = 'mq'
+  MQ = 'mq',
+  DM = 'DM',
+  GaussDB = 'GaussDB'
 }
 
 export const TYPE_CONFIG = {
@@ -44,5 +46,7 @@ export const TYPE_CONFIG = {
   [ConnectorType.Elasticsearch]: '数据库-Elasticsearch',
   [ConnectorType.Doris]: '数据库-Doris',
   [ConnectorType.Kafka]: '消息队列-Kafka',
-  [ConnectorType.MQ]: '消息队列'
+  [ConnectorType.MQ]: '消息队列',
+  [ConnectorType.DM]: '数据库-达梦',
+  [ConnectorType.GaussDB]: '数据库-GaussDB'
 };
