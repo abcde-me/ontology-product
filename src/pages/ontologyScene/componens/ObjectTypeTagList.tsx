@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { Popover } from '@arco-design/web-react';
 import ObjectTypeTag, { ObjectTypeTagProps } from './ObjectTypeTag';
 
@@ -17,6 +17,8 @@ const ObjectTypeTagList: React.FC<ObjectTypeTagListProps> = ({
   tags,
   className = ''
 }) => {
+  const containerRef = useRef<HTMLDivElement>(null);
+
   // 如果标签数量小于 2，直接显示所有标签
   if (tags.length < 2) {
     return (
@@ -44,7 +46,10 @@ const ObjectTypeTagList: React.FC<ObjectTypeTagListProps> = ({
   );
 
   return (
-    <div className={`flex flex-wrap items-center gap-[4px] ${className}`}>
+    <div
+      ref={containerRef}
+      className={`flex flex-wrap items-center gap-[4px] ${className}`}
+    >
       {/* 第一个标签 */}
       <ObjectTypeTag {...firstTag} />
 

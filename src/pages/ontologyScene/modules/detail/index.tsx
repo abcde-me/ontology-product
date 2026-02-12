@@ -270,7 +270,7 @@ export default function OntologySceneDetail() {
           </Menu>
         </div>
 
-        <Layout.Content className="flex-1 overflow-auto bg-gray-50">
+        <Layout.Content className="flex-1 overflow-auto">
           <Suspense
             fallback={
               <div className="flex h-full items-center justify-center">

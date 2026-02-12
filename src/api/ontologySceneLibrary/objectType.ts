@@ -19,7 +19,10 @@ import UAPI from '@/api';
 export const listOntologyObjectType = async (
   params: ListOntologyObjectTypeReq
 ): Promise<ApiRes<ListOntologyObjectTypeRes>> => {
-  return UAPI.RES.ListOntologyObjectTypeApi({}).post(params).inRegion().do();
+  return await UAPI.RES.ListOntologyObjectTypeApi({})
+    .post(params)
+    .inRegion()
+    .do();
   // Mock 数据
   // const mockObjectTypes: ObjectType[] = [
   //   {
@@ -181,7 +184,10 @@ export const createOntologyObjectType = async (
     };
   }>
 > => {
-  return UAPI.RES.CreateOntologyObjectTypeApi({}).post(params).inRegion().do();
+  return await UAPI.RES.CreateOntologyObjectTypeApi({})
+    .post(params)
+    .inRegion()
+    .do();
   // 保留 params 参数以避免未使用告警
   // void params;
 
@@ -210,7 +216,10 @@ export const updateOntologyObjectType = async (
     };
   }>
 > => {
-  return UAPI.RES.UpdateOntologyObjectTypeApi({}).post(params).inRegion().do();
+  return await UAPI.RES.UpdateOntologyObjectTypeApi({})
+    .post(params)
+    .inRegion()
+    .do();
   // // 保留 params 参数以避免未使用告警
   // void params;
 
@@ -237,7 +246,10 @@ export const deleteOntologyObjectType = async (params: {
     data: string;
   }>
 > => {
-  return UAPI.RES.DeleteOntologyObjectTypeApi({}).post(params).inRegion().do();
+  return await UAPI.RES.DeleteOntologyObjectTypeApi({})
+    .post(params)
+    .inRegion()
+    .do();
   // 保留 params 参数以避免未使用告警
   // void params;
 
@@ -258,7 +270,10 @@ export const deleteOntologyObjectType = async (params: {
 export const getOntologyObjectTypeDetail = async (params: {
   id: number;
 }): Promise<ApiRes<GetOntologyObjectTypeDetailRes>> => {
-  return UAPI.RES.GetOntologyObjectTypeApi({}).post(params).inRegion().do();
+  return await UAPI.RES.GetOntologyObjectTypeApi({})
+    .post(params)
+    .inRegion()
+    .do();
   // await sleep(1000);
 
   // // Mock 物理属性列表数据
@@ -352,7 +367,7 @@ export const getOntologyObjectTypeDetail = async (params: {
 export const uploadOntologyCSVFileAndParse = async (params: {
   file: File;
 }): Promise<ApiRes<UploadOntologyCSVFileAndParseRes>> => {
-  return UAPI.RES.UploadOntologyEntityDataFileApi({})
+  return await UAPI.RES.UploadOntologyEntityDataFileApi({})
     .post(params)
     .inRegion()
     .do();

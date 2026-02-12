@@ -128,15 +128,14 @@ const convertDetailResToDetailData = (
   detailRes: GetOntologyObjectTypeDetailRes,
   instanceCount = 0,
   attributeCount = 0,
-  linkCount = 0,
-  syncStatus: SyncStatus = SyncStatus.SUCCESS
+  linkCount = 0
 ): ObjectTypeDetailData => {
   return {
     code: String(detailRes.code || ''),
     id: detailRes.id,
     name: detailRes.name || '',
     description: detailRes.description || '',
-    syncStatus,
+    syncStatus: detailRes.syncStatus,
     icon: detailRes.icon,
     instanceCount,
     attributeCount,
@@ -265,7 +264,7 @@ export default function ObjectTypeDetailDrawer({
             page,
             pageSize
           });
-          if (res.code === '' && res.status === 200 && res.data) {
+          if (res.code === '' && res.status === 200) {
             // 确保每个实例都有 id 字段
             const instances = (res.data.result || []).map(
               (item: Record<string, unknown>) => {
@@ -274,11 +273,11 @@ export default function ObjectTypeDetailDrawer({
                   return item as InstanceItem;
                 }
                 // 尝试从其他可能的 id 字段获取
-                const id =
-                  item.id || item.ID || item._id || String(Math.random());
-                return { ...item, id: String(id) } as InstanceItem;
+                const id = String(Math.random());
+                return { ...item, id: String(id) };
               }
             );
+
             setInstancesData(instances);
             setInstancesPagination({
               current: page,
@@ -361,48 +360,9 @@ export default function ObjectTypeDetailDrawer({
           });
           if (res.status === 200 && res.code === '' && res.data) {
             const detailRes = res.data;
-            // 先获取统计数据（从其他接口获取总数）
-            const [instancesRes, attributesRes, linksRes] = await Promise.all([
-              listOntologyObjectTypeData({
-                id: resolvedObjectTypeIdNum,
-                page: 1,
-                pageSize: 1
-              }).catch(() => ({ code: 0, data: { totalCount: 0 } })),
-              listOntologyPhysicalProperties({
-                objectTypeIdList: [resolvedObjectTypeIdNum],
-                pageNo: 1,
-                pageSize: 1
-              }).catch(() => ({ code: 0, data: { totalCount: 0 } })),
-              listOntologyLinkType({
-                sourceObjectTypeIDList: [resolvedObjectTypeIdNum],
-                targetObjectTypeIDList: [resolvedObjectTypeIdNum],
-                pageNo: 1,
-                pageSize: 1
-              }).catch(() => ({ code: 0, data: { totalCount: 0 } }))
-            ]);
-
-            const instanceCount =
-              instancesRes.code === '' && instancesRes.data
-                ? instancesRes.data.totalCount || 0
-                : 0;
-            const attributeCount =
-              attributesRes.code === '' && attributesRes.data
-                ? attributesRes.data.totalCount || 0
-                : 0;
-            const linkCount =
-              linksRes.code === '' && linksRes.data
-                ? linksRes.data.totalCount || 0
-                : 0;
-
             // 使用 GetOntologyObjectTypeDetailRes 转换函数
             // 注意：GetOntologyObjectTypeDetailRes 不包含 syncStatus，使用默认值
-            const detailData = convertDetailResToDetailData(
-              detailRes,
-              instanceCount,
-              attributeCount,
-              linkCount,
-              SyncStatus.SUCCESS // 默认同步状态为成功
-            );
+            const detailData = convertDetailResToDetailData(detailRes);
             setBasicInfo(detailData);
           }
         }
@@ -505,13 +465,13 @@ export default function ObjectTypeDetailDrawer({
 
     // 计算列宽
     const columnCount = keys.length;
-    const fixedWidth = 150; // 固定列宽（当列数 > 4 时使用）
+    const fixedWidth = 140; // 固定列宽（当列数 > 6 时使用）
     // 假设表格总宽度，可以根据实际情况调整（drawer 宽度通常较大，这里估算为 800px）
     const tableWidth = 852;
     const averageWidth = Math.floor(tableWidth / columnCount);
 
-    // 根据列数决定列宽策略：<= 4 列时均分，> 4 列时固定宽度 150
-    const shouldUseFixedWidth = columnCount > 4;
+    // 根据列数决定列宽策略：<= 6 列时均分，> 6 列时固定宽度 150
+    const shouldUseFixedWidth = columnCount > 6;
     const columnWidth = shouldUseFixedWidth ? fixedWidth : averageWidth;
 
     // 生成列配置
@@ -526,17 +486,23 @@ export default function ObjectTypeDetailDrawer({
     }));
   };
 
+  const handleViewPublicAttribute = (record: AttributeItem) => {
+    const url = `/tenant/compute/modaforge/ontologyScene/detail/${ontologyModelID}/attributes/list?tab=public&search=${encodeURIComponent(record.ontologyPublicPropertiesName || '')}`;
+    window.location.href = url;
+  };
+
   // 属性表格列定义 - 直接使用接口定义的字段名
   const attributeColumns: TableColumnProps<AttributeItem>[] = [
     {
       title: '属性名称',
-      dataIndex: 'name',
-      width: 200,
+      dataIndex: 'comment',
+      width: 140,
       render: (value, record) => (
         <div className="flex items-center gap-2">
-          <span className="text-[14px] font-medium leading-[22px] text-[#23293b]">
-            {value}
-          </span>
+          <EllipsisPopover
+            className="text-[14px] font-[600] leading-[22px] text-[var(--color-text-1)]"
+            value={value || '-'}
+          />
           {record.isPrimary === 1 && (
             <Tag size="small" color="blue">
               主键
@@ -546,12 +512,12 @@ export default function ObjectTypeDetailDrawer({
       )
     },
     {
-      title: 'id',
-      dataIndex: 'id',
-      width: 200,
+      title: '属性id',
+      dataIndex: 'name',
+      width: 140,
       render: (value) => (
         <div className="flex items-center gap-2">
-          <span>{value}</span>
+          <EllipsisPopover value={value || '-'} />
           <Popover content="复制">
             <IconCopy
               fontSize={14}
@@ -568,19 +534,27 @@ export default function ObjectTypeDetailDrawer({
     {
       title: '表字段',
       dataIndex: 'tableField',
-      width: 150
+      width: 140,
+      render: (value) => {
+        return <EllipsisPopover value={value || '-'} />;
+      }
     },
     {
       title: '关联公共属性',
       dataIndex: 'ontologyPublicPropertiesName',
-      width: 200,
-      render: (value) => {
+      width: 140,
+      render: (value, record) => {
         if (!value) {
           return <span className="text-[#86909C]">-</span>;
         }
         return (
-          <span className="cursor-pointer group-hover:text-[#184FF2]">
-            {value}
+          <span
+            className="cursor-pointer group-hover:text-[#184FF2]"
+            onClick={() => {
+              handleViewPublicAttribute(record);
+            }}
+          >
+            <EllipsisPopover value={value || '-'} />
           </span>
         );
       }
@@ -588,7 +562,10 @@ export default function ObjectTypeDetailDrawer({
     {
       title: '字段类型',
       dataIndex: 'columnType',
-      width: 120
+      width: 140,
+      render: (value) => {
+        return <EllipsisPopover value={value || '-'} />;
+      }
     }
   ];
 
@@ -619,30 +596,11 @@ export default function ObjectTypeDetailDrawer({
     );
   };
 
-  const displayData: ObjectTypeDetailData | undefined = basicInfo || data;
-  const syncStatusConfig = displayData
-    ? OBJECT_TYPE_SYNC_STATUS_CONFIG[
-        displayData?.syncStatus || SyncStatus.SUCCESS
-      ]
-    : OBJECT_TYPE_SYNC_STATUS_CONFIG[SyncStatus.SUCCESS];
-
-  const instanceCount = useMemo(() => {
-    return (
-      Number(displayData?.instanceCount) ||
-      Number(instancesPagination.total) ||
-      0
-    );
-  }, [displayData?.instanceCount, instancesPagination.total]);
-  const attributeCount = useMemo(() => {
-    return (
-      Number(displayData?.attributeCount) ||
-      Number(attributesPagination.total) ||
-      0
-    );
-  }, [attributesPagination.total, displayData?.attributeCount]);
-  const linkCount = useMemo(() => {
-    return Number(displayData?.linkCount) || Number(linksData.length) || 0;
-  }, [displayData?.linkCount, linksData.length]);
+  const displayData: ObjectTypeDetailData | undefined = basicInfo;
+  const syncStatusConfig =
+    OBJECT_TYPE_SYNC_STATUS_CONFIG[
+      displayData?.syncStatus ?? SyncStatus.NOT_SYNC
+    ];
 
   return (
     <OsDrawer
@@ -692,7 +650,7 @@ export default function ObjectTypeDetailDrawer({
                 </div>
               </div>
               <div className="flex gap-[8px]">
-                <div className="w-[70px] text-sm font-normal leading-[22px] text-[#86909c]">
+                <div className="w-[90px] text-sm font-normal leading-[22px] text-[#86909c]">
                   同步状态：
                 </div>
                 <div className="flex items-center gap-2 text-sm font-normal leading-[22px] text-[#23293b]">
@@ -722,14 +680,14 @@ export default function ObjectTypeDetailDrawer({
                 </div>
               </div>
               <div className="flex gap-[8px]">
-                <div className="w-[70px] text-[14px] leading-[22px] text-[var(--color-text-4)]">
-                  id:
+                <div className="w-[90px] text-[14px] leading-[22px] text-[var(--color-text-4)]">
+                  对象类型id:
                 </div>
                 <div className="flex items-center gap-[4px]">
                   <span className="text-[14px] leading-[22px] text-[var(--color-text-1)]">
-                    {displayData?.id || resolvedObjectTypeId || '-'}
+                    {displayData?.code ?? '-'}
                   </span>
-                  {(displayData?.id || resolvedObjectTypeId) && (
+                  {displayData?.code && (
                     <IconCopy
                       fontSize={14}
                       className="hover:cursor-pointer"
@@ -753,25 +711,31 @@ export default function ObjectTypeDetailDrawer({
           onChange={setActiveTab}
           className="[&_.arco-tabs-content]:p-0 [&_.arco-tabs-nav]:mb-4"
         >
-          <TabPane key="instances" title={`实例(${instanceCount})`}>
+          <TabPane key="instances" title={`实例(${instancesPagination.total})`}>
             <div className="mt-[16px] flex flex-col gap-[16px]">
-              <Table
-                loading={instancesLoading}
-                columns={getInstanceColumns(instancesData)}
-                data={instancesData}
-                rowKey="id"
-                border={false}
-                pagination={false}
-                className="[&_.arco-table-th]:bg-[#f7f8fa]"
-                noDataElement={<NoDataCard title="暂无数据" />}
-                scroll={
-                  instancesData.length > 0 &&
-                  Object.keys(instancesData[0] || {}).length > 4
-                    ? { x: Object.keys(instancesData[0] || {}).length * 150 }
-                    : undefined
-                }
-              />
-              {instancesPagination.total > 0 && (
+              {instancesPagination.total === 0 ? (
+                <div className="flex justify-center py-[100px]">
+                  <NoDataCard title="暂无数据" />
+                </div>
+              ) : (
+                <Table
+                  loading={instancesLoading}
+                  columns={getInstanceColumns(instancesData)}
+                  data={instancesData}
+                  rowKey="id"
+                  border={false}
+                  pagination={false}
+                  className="[&_.arco-table-th]:bg-[#f7f8fa]"
+                  noDataElement={<NoDataCard title="暂无数据" />}
+                  scroll={
+                    instancesData.length > 0 &&
+                    Object.keys(instancesData[0] || {}).length > 6
+                      ? { x: Object.keys(instancesData[0] || {}).length * 150 }
+                      : undefined
+                  }
+                />
+              )}
+              {instancesPagination.total > defaultInstancesPageSize && (
                 <div className="flex justify-end pt-[16px]">
                   <Pagination
                     current={instancesPagination.current}
@@ -787,7 +751,10 @@ export default function ObjectTypeDetailDrawer({
               )}
             </div>
           </TabPane>
-          <TabPane key="attributes" title={`属性(${attributeCount})`}>
+          <TabPane
+            key="attributes"
+            title={`属性(${attributesPagination.total})`}
+          >
             <div className="mt-[16px] flex flex-col gap-[16px]">
               <Table
                 loading={attributesLoading}
@@ -800,7 +767,7 @@ export default function ObjectTypeDetailDrawer({
                 className="[&_.arco-table-th]:bg-[#f7f8fa]"
                 rowClassName={() => 'group'}
               />
-              {attributesPagination.total > 0 && (
+              {attributesPagination.total > defaultAttributesPageSize && (
                 <div className="flex justify-end pt-[16px]">
                   <Pagination
                     current={attributesPagination.current}
@@ -816,7 +783,7 @@ export default function ObjectTypeDetailDrawer({
               )}
             </div>
           </TabPane>
-          <TabPane key="links" title={`链接(${linkCount})`}>
+          <TabPane key="links" title={`链接(${linksData.length})`}>
             <div className="mt-[16px] flex flex-col gap-[16px]">
               {linksLoading ? (
                 <div className="flex justify-center py-[100px]">

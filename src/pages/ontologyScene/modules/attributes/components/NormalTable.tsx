@@ -184,6 +184,7 @@ export default function NormalTable({ onTotalChange }: NormalTableProps = {}) {
               ontologyObjectTypeIcon={value.icon}
               ontologyObjectTypeName={value.name}
               ontologyObjectTypeId={value.id}
+              onClick={() => handleViewDetail(record)}
             />
           ) : (
             <span>-</span>
