@@ -15,7 +15,7 @@ import UAPI from '@/api';
 export const listOntologyLinkTypeColumn = async (
   params: ListOntologyLinkTypeColumnReq
 ): Promise<ApiRes<ListOntologyLinkTypeColumnRes>> => {
-  return UAPI.RES.ListOntologyLinkTypeColumnApi({})
+  return await UAPI.RES.ListOntologyLinkTypeColumnApi({})
     .post(params)
     .inRegion()
     .do();
@@ -202,7 +202,10 @@ export const listOntologyLinkTypeColumn = async (
 export const listOntologyLinkTypeData = async (
   params: ListOntologyLinkTypeDataReq
 ): Promise<ApiRes<ListOntologyLinkTypeDataRes>> => {
-  return UAPI.RES.ListOntologyLinkTypeDataApi({}).post(params).inRegion().do();
+  return await UAPI.RES.ListOntologyLinkTypeDataApi({})
+    .post(params)
+    .inRegion()
+    .do();
 
   // Mock 数据：链接实例列表
   // const mockLinkInstances: Record<string, any>[] = [
@@ -333,7 +336,7 @@ export const listOntologyLinkTypeData = async (
 export const getOntologyLinkType = async (params: {
   id: number;
 }): Promise<ApiRes<GetOntologyLinkTypeRes>> => {
-  return UAPI.RES.GetOntologyLinkTypeApi({}).post(params).inRegion().do();
+  return await UAPI.RES.GetOntologyLinkTypeApi({}).post(params).inRegion().do();
 
   // Mock 链接类型列信息
   // const mockLinkTypeColumns: LinkTypeAttributeInfo[] = [

@@ -14,7 +14,7 @@ import UAPI from '@/api';
 export async function getOntologyTopology(params: {
   id: number;
 }): Promise<ApiRes<GetOntologyTopologyResponse>> {
-  return UAPI.RES.GetOntologyTopologyApi({}).post(params).inRegion().do();
+  return await UAPI.RES.GetOntologyTopologyApi({}).post(params).inRegion().do();
 
   // const mockData: GetOntologyTopologyResponse = {
   //   nodes: [
@@ -245,7 +245,7 @@ export async function listOntologyObjectTypeData(params: {
   page: number;
   pageSize: number;
 }): Promise<ApiRes<ListOntologyObjectTypeDataRes>> {
-  return UAPI.RES.ListOntologyObjectTypeDataApi({})
+  return await UAPI.RES.ListOntologyObjectTypeDataApi({})
     .post(params)
     .inRegion()
     .do();
@@ -323,7 +323,7 @@ export async function listOntologyObjectTypeData(params: {
 export async function listOntologyPhysicalProperties(
   params: ListOntologyPhysicalPropertiesReq
 ): Promise<ApiRes<ListOntologyPhysicalPropertiesRes>> {
-  return UAPI.RES.ListOntologyPhysicalPropertiesApi({})
+  return await UAPI.RES.ListOntologyPhysicalPropertiesApi({})
     .post(params)
     .inRegion()
     .do();
@@ -448,7 +448,10 @@ export async function listOntologyPhysicalProperties(
 export async function listOntologyLinkType(
   params: ListOntologyLinkTypeReq
 ): Promise<ApiRes<ListOntologyLinkTypeRes>> {
-  return UAPI.RES.ListOntologyLinkTypeApi({}).post(params).inRegion().do();
+  return await UAPI.RES.ListOntologyLinkTypeApi({})
+    .post(params)
+    .inRegion()
+    .do();
 
   // 节点名称映射
   // const nodeNameMap: Record<number, string> = {

@@ -11,7 +11,7 @@ import {
 export const listOntologyModel = async (
   params: ListOntologyModelReq
 ): Promise<ApiRes<ListOntologyModelRes>> => {
-  return UAPI.RES.ListOntologyModelApi({}).post(params).inRegion().do();
+  return await UAPI.RES.ListOntologyModelApi({}).post(params).inRegion().do();
   // await sleep(1000);
   // // Mock 数据
   // const mockData: OntologScene[] = [
@@ -158,7 +158,10 @@ export const deleteOntologyModel = (params: {
 export const getOntologyModelDetail = async (params: {
   id: number;
 }): Promise<ApiRes<OntologScene>> => {
-  return UAPI.RES.GetOntologyModelDetailApi({}).post(params).inRegion().do();
+  return await UAPI.RES.GetOntologyModelDetailApi({})
+    .post(params)
+    .inRegion()
+    .do();
   // await sleep(1000);
   // // Mock 数据：根据 id 返回对应的详情
   // const mockData: OntologScene = {
