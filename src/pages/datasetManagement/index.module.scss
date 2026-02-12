@@ -68,6 +68,10 @@
   .datasetManagementTabs :global(.arco-tabs-add-icon):hover {
     color: #007dfa;
   }
+
+  .datasetManagementTabs :global(.arco-typography) {
+    margin: unset;
+  }
 }
 
 .sceneTag {
