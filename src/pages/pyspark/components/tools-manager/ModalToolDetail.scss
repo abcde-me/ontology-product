@@ -63,7 +63,7 @@
   .arco-btn-outline:not(.arco-btn-disabled):hover {
     color: #007dfa;
     border-color: #007dfa;
-    background-color: transparent;
+    background-color: #ffffff;
   }
 
   .code-editor-header {
@@ -94,6 +94,9 @@
       z-index: 10;
       opacity: 0;
       transition: opacity 0.2s;
+      color: #184ff2;
+      border-color: #184ff2;
+      background-color: #ffffff;
     }
 
     &:hover .copy-button {

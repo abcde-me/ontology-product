@@ -75,6 +75,10 @@
     flex-direction: column;
     flex: 1;
     overflow-y: auto;
+
+    .sub-node {
+      padding-left: 20px;
+    }
   }
 
   &__loading {
