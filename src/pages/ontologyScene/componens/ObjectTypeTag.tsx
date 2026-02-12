@@ -14,6 +14,8 @@ export interface ObjectTypeTagProps {
   onClick?: () => void;
   /** 自定义类名 */
   className?: string;
+  /** 悬浮类名 */
+  hoverClassName?: string;
 }
 
 /**
@@ -25,7 +27,8 @@ const ObjectTypeTag: React.FC<ObjectTypeTagProps> = ({
   ontologyObjectTypeName,
   ontologyObjectTypeId,
   onClick,
-  className = ''
+  className = '',
+  hoverClassName = 'hover-blue'
 }) => {
   // 根据 icon 字段匹配对应的图标
   const iconOption = ontologyObjectTypeIcon
@@ -51,7 +54,7 @@ const ObjectTypeTag: React.FC<ObjectTypeTagProps> = ({
         <EllipsisPopover
           value={ontologyObjectTypeName}
           className={`text-[14px] leading-[26px] text-[var(--color-text-1)] ${
-            onClick ? 'hover-blue' : ''
+            onClick ? `${hoverClassName}` : ''
           }`}
         />
       </div>

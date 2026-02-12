@@ -10,7 +10,7 @@ import UAPI from '@/api';
 export const listOntologyPublicProperties = async (
   params: ListOntologyPublicPropertiesReq
 ): Promise<ApiRes<ListOntologyPublicPropertiesRes>> => {
-  return UAPI.RES.ListOntologyPublicPropertiesApi({})
+  return await UAPI.RES.ListOntologyPublicPropertiesApi({})
     .post(params)
     .inRegion()
     .do();
@@ -229,7 +229,7 @@ export const createOntologyPublicProperties = async (
     };
   }>
 > => {
-  return UAPI.RES.CreateOntologyPublicPropertiesApi({})
+  return await UAPI.RES.CreateOntologyPublicPropertiesApi({})
     .post(params)
     .inRegion()
     .do();
@@ -259,7 +259,7 @@ export const deleteOntologyPublicProperties = async (params: {
     data: string;
   }>
 > => {
-  return UAPI.RES.DeleteOntologyPublicPropertiesApi({})
+  return await UAPI.RES.DeleteOntologyPublicPropertiesApi({})
     .post(params)
     .inRegion()
     .do();
@@ -283,7 +283,7 @@ export const deleteOntologyPublicProperties = async (params: {
 export const updateOntologyPublicProperties = async (
   params: UpdateOntologyPublicPropertiesReq
 ): Promise<ApiRes<string>> => {
-  return UAPI.RES.UpdateOntologyPublicPropertiesApi({})
+  return await UAPI.RES.UpdateOntologyPublicPropertiesApi({})
     .post(params)
     .inRegion()
     .do();

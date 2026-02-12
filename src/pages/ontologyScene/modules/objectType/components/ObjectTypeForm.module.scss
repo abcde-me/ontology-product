@@ -19,6 +19,9 @@
   :global(.arco-form-item-wrapper) {
     max-width: 640px;
   }
+  :global(.arco-form-label-item) {
+    min-width: 130px;
+  }
 }
 
 // Cascader 下拉菜单样式（通过 dropdownMenuClassName 应用）

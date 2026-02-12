@@ -1,3 +1,13 @@
+// 全局样式，用于 Popover 内部的内容（Popover 通过 Portal 渲染到 body，需要全局样式）
+:global {
+  .hover-text-blue {
+    &:hover {
+      color: #184ff2 !important;
+      cursor: pointer;
+    }
+  }
+}
+
 .attributes-list {
   display: flex;
   flex-direction: column;
@@ -13,12 +23,12 @@
     overflow: hidden;
   }
 
-  .normal-table-wrapper,
-  .public-table-wrapper {
+  .normal-table-wrapper {
     width: 100%;
   }
 
-  .attributes-table {
+  .attributes-table,
+  .public-table-wrapper {
     width: 100%;
 
     :global(.arco-table-tr) {

@@ -219,6 +219,10 @@ export interface UpdateOntologyObjectTypeReq
 export interface GetOntologyObjectTypeDetailRes
   extends CreateOntologyObjectTypeReq {
   id: number;
+  /**
+   * 同步状态
+   */
+  syncStatus: SyncStatus;
 }
 
 export interface UploadOntologyCSVFileAndParseRes {

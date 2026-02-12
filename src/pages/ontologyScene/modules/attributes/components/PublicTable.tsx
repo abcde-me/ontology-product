@@ -29,6 +29,7 @@ import { PublicProperty } from '@/types/attributes';
 import { ListOntologyPublicPropertiesReq } from '@/types/attributes';
 import { ObjectTypeTagList } from '@/pages/ontologyScene/componens';
 import ObjectTypeDetailDrawer from '@/pages/ontologyScene/componens/ObjectTypeDetailDrawer';
+import dayjs from 'dayjs';
 
 // 公共属性数据接口（保留用于兼容性）
 export interface PublicAttributeItem {
@@ -226,29 +227,29 @@ export default function PublicTable() {
       dataIndex: 'description',
       ellipsis: true,
       tooltip: true,
-      width: 200,
-      render: (value) => value || '-'
+      width: 200
     },
     {
-      title: '所属对象类型',
+      title: '绑定对象类型',
       dataIndex: 'ontologyObjectTypeList',
       width: 200,
       render: (value, record) => {
         const objectTypeList = record.ontologyObjectTypeList || [];
         if (objectTypeList.length === 0) {
-          return <span className="text-[#86909c]">-</span>;
+          return <span>-</span>;
         }
 
         // 转换为 ObjectTypeTagList 需要的格式
         const tags = objectTypeList.map((item) => ({
           ontologyObjectTypeName: item.name || '',
           ontologyObjectTypeId: item.id,
-          ontologyObjectTypeIcon: undefined, // API 返回的数据中没有 icon，使用默认图标
+          ontologyObjectTypeIcon: item.icon, // API 返回的数据中没有 icon，使用默认图标
           onClick: () => {
             if (item.id) {
               handleViewObjectTypeDetail(item.id);
             }
-          }
+          },
+          hoverClassName: 'hover-text-blue'
         }));
 
         return <ObjectTypeTagList tags={tags} />;
@@ -261,7 +262,7 @@ export default function PublicTable() {
       render: (value) => value || '-'
     },
     {
-      title: 'id',
+      title: '公共属性id',
       dataIndex: 'name',
       width: 150,
       render: (value) => (
@@ -293,7 +294,7 @@ export default function PublicTable() {
       sorter: true,
       render: (value) => (
         <div className="font-PingFangSc text-[14px] font-normal leading-[22px] text-[#23293b]">
-          {value || '-'}
+          {value ? dayjs(value).format('YYYY-MM-DD HH:mm:ss') : '-'}
         </div>
       )
     },

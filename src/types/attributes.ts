@@ -77,6 +77,10 @@ export interface PublicProperty {
    */
   ontologyObjectTypeList?: {
     /**
+     * 对象类型图标
+     */
+    icon?: string;
+    /**
      * 对象类型ID
      */
     id?: number;
