@@ -13,6 +13,7 @@ import {
   EllipsisPopover,
   SearchTable
 } from '@ceai-front/arco-material';
+import useUrlState from '@ahooksjs/use-url-state';
 import { useWorkflowTable } from '../../../hooks/useTable';
 import styles from '../list.module.scss';
 import ObjectTypeDetailDrawer from '@/pages/ontologyScene/componens/ObjectTypeDetailDrawer';
@@ -20,6 +21,7 @@ import { ObjectTypeTag } from '@/pages/ontologyScene/componens';
 import { listOntologyPhysicalProperties } from '@/api/ontologySceneLibrary/graph';
 import type { PhysicalProperties } from '@/types/graphApi';
 import { useParams } from 'react-router';
+import { useHistory } from 'react-router-dom';
 
 export interface NormalTableProps {
   /** total 变化时的回调函数 */
@@ -29,6 +31,7 @@ export interface NormalTableProps {
 export default function NormalTable({ onTotalChange }: NormalTableProps = {}) {
   const [form] = Form.useForm();
   const { id: ontologyModelID } = useParams<{ id: string }>();
+  const [urlState, setUrlState] = useUrlState({ search: '' });
   const [detailDrawerVisible, setDetailDrawerVisible] = useState(false);
   const [selectedObjectType, setSelectedObjectType] = useState<{
     id: string;
@@ -36,6 +39,7 @@ export default function NormalTable({ onTotalChange }: NormalTableProps = {}) {
   const [activeTab, setActiveTab] = useState<
     'instances' | 'attributes' | 'links'
   >('attributes');
+  const history = useHistory();
 
   // 使用 useTable hook
   const { data, loading, pagination, refresh, submit, onChange } =
@@ -88,6 +92,20 @@ export default function NormalTable({ onTotalChange }: NormalTableProps = {}) {
       defaultPageSize: 10
     });
 
+  // 从 URL 的 search 参数同步到表单
+  useEffect(() => {
+    const currentKeyword = form.getFieldValue('keyword');
+    const searchValue = urlState.search || '';
+    if (searchValue !== currentKeyword) {
+      form.setFieldsValue({ keyword: searchValue });
+      // 延迟提交，确保表单值已设置
+      setTimeout(() => {
+        submit();
+      }, 0);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [urlState.search]);
+
   // 当 total 变化时，通知父组件
   useEffect(() => {
     if (onTotalChange && pagination?.total !== undefined) {
@@ -112,7 +130,7 @@ export default function NormalTable({ onTotalChange }: NormalTableProps = {}) {
     }
 
     const url = `/tenant/compute/modaforge/ontologyScene/detail/${ontologyModelID}/attributes/list?tab=public&search=${encodeURIComponent(record.ontologyPublicPropertiesName || '')}`;
-    window.location.href = url;
+    history.push(url);
   };
 
   // 表格列定义
@@ -201,8 +219,14 @@ export default function NormalTable({ onTotalChange }: NormalTableProps = {}) {
                 placeholder="请输入关键词"
                 suffix={<IconSearch />}
                 allowClear
-                onClear={() => submit()}
-                onSearch={() => submit()}
+                onClear={() => {
+                  setUrlState({ search: '' });
+                  submit();
+                }}
+                onSearch={(value) => {
+                  setUrlState({ search: value || '' });
+                  submit();
+                }}
               />
             </Form.Item>
           </Form>

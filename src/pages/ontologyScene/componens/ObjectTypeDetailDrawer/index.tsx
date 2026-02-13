@@ -491,7 +491,7 @@ export default function ObjectTypeDetailDrawer({
       return;
     }
     const url = `/tenant/compute/modaforge/ontologyScene/detail/${ontologyModelID}/attributes/list?tab=public&search=${encodeURIComponent(record.ontologyPublicPropertiesName || '')}`;
-    window.location.href = url;
+    history.push(url);
   };
 
   // 属性表格列定义 - 直接使用接口定义的字段名

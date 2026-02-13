@@ -195,17 +195,37 @@ export default function Header({
             // setSearchHovered(false)
           }}
         >
-          {searchHovered ? (
+          {/* 搜索图标，绝对定位 */}
+          <div
+            className="top-50% absolute right-0 flex -translate-y-1/2 cursor-pointer items-center text-[var(--color-text-3)] transition-all duration-300 ease-in-out hover:text-[var(--color-text-1)]"
+            style={{
+              opacity: searchHovered ? 0 : 1,
+              visibility: searchHovered ? 'hidden' : 'visible',
+              pointerEvents: searchHovered ? 'none' : 'auto',
+              whiteSpace: 'nowrap',
+              transition:
+                'opacity 0.3s ease-in-out, visibility 0.3s ease-in-out'
+            }}
+          >
+            <IconSearch className="mr-[7px] text-[15px]" />
+            <span className="text-[14px] leading-[22px]">搜索</span>
+          </div>
+          {/* SearchDropdown，绝对定位，可以超出容器 */}
+          <div
+            className="top-50% absolute right-0 z-10 -translate-y-1/2"
+            style={{
+              opacity: searchHovered ? 1 : 0,
+              visibility: searchHovered ? 'visible' : 'hidden',
+              pointerEvents: searchHovered ? 'auto' : 'none',
+              transition:
+                'opacity 0.3s ease-in-out, visibility 0.3s ease-in-out'
+            }}
+          >
             <SearchDropdown
               visible={searchHovered}
               onVisibleChange={setSearchHovered}
             />
-          ) : (
-            <div className="flex cursor-pointer items-center text-[var(--color-text-3)] transition-colors hover:text-[var(--color-text-1)]">
-              <IconSearch className="mr-[7px] text-[15px]" />
-              <span className="text-[14px]">搜索</span>
-            </div>
-          )}
+          </div>
         </div>
 
         <div
