@@ -19,8 +19,11 @@ import { isNil } from 'lodash-es';
 import { TYPE2RULE_TYPES } from '@/pages/ontologyScene/types/behaviorActions';
 import { SelectWithNoData } from '@/components/new-no-data-comps';
 
-export const ValidateRules = () => {
-  const { form, disabled } = Form.useFormContext();
+export const ValidateRules = (props: { readonly?: boolean }) => {
+  const { form, disabled: fieldsDisabled } = Form.useFormContext();
+  const { readonly } = props;
+  const disabled = fieldsDisabled || readonly;
+  const required = readonly;
 
   return (
     <Form.List field={'validationRules'}>
@@ -69,6 +72,7 @@ export const ValidateRules = () => {
                 >
                   <SelectWithNoData
                     options={TYPE2RULE_TYPES?.[paramType] || []}
+                    disabled={disabled}
                   />
                 </FormItem>
                 <Form.Item

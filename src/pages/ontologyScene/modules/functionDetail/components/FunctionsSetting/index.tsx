@@ -15,32 +15,46 @@ import {
   Button,
   Form,
   Input,
+  Message,
   ResizeBox,
+  Select,
   Tooltip
 } from '@arco-design/web-react';
 import { SelectWithNoData } from '@/components/new-no-data-comps';
 import { useFullscreen, useRequest } from 'ahooks';
 import {
+  DataWithUiSelect,
   FunctionScript,
   SdkDocumentation
 } from '@/pages/ontologyScene/modules/functionDetail/components';
 import {
-  InputType,
-  InputTypeOptions,
   OntologyFunctionParam,
   OutputTypeOptions,
-  ParamType
+  ParamType,
+  UiType
 } from '@/pages/ontologyScene/types/ontologyFunction';
 import classNames from 'classnames';
 import { getFunctionSDK } from '@/api/ontologySceneLibrary/ontologyFunction';
 import { ResizeBoxWithCursorChange } from '@/pages/ontologyScene/componens';
+import { isNil } from 'lodash-es';
 
 export const FunctionsSetting = () => {
-  const { form, disabled, isSubmitting } = Form.useFormContext();
+  const { form, disabled: readonly, isSubmitting } = Form.useFormContext();
   const ref = useRef(null);
   const [isFullscreen, { enterFullscreen, exitFullscreen }] =
     useFullscreen(ref);
   const [showDoc, setShowDoc] = useState(false);
+  const [testIng, setTestIng] = useState(false);
+
+  const disabled = readonly || testIng;
+
+  const inputParams: OntologyFunctionParam[] = Form.useWatch('input', form);
+
+  const testAble = useMemo(() => {
+    return inputParams?.every(
+      ({ uiTypeAndValue }) => !isNil(uiTypeAndValue?.paramValue)
+    );
+  }, [inputParams]);
 
   const { data: content, loading: SDKLoading } = useRequest(() => {
     return getFunctionSDK();
@@ -64,6 +78,17 @@ export const FunctionsSetting = () => {
       }
     ];
   };
+
+  const handleTest = () => {
+    Message.success('开始测试');
+    setTestIng(true);
+  };
+  const handleStopTest = () => {
+    setTimeout(() => {
+      setTestIng(false);
+    }, 2000);
+  };
+
   return (
     <div className={styles['function-setting']} ref={ref}>
       <ResizeBoxWithCursorChange
@@ -82,43 +107,40 @@ export const FunctionsSetting = () => {
               {(fields, { add, remove }) => {
                 return (
                   <>
-                    <div className={styles['params-item']}>
-                      <p>入参名称</p>
-                      <p>入参类型</p>
-                      <p>参数值</p>
+                    <div
+                      className={styles['params-item']}
+                      style={{
+                        borderBottom: '1px solid #DFE2EB',
+                        marginBottom: '8px'
+                      }}
+                    >
+                      <p className={styles['param-name-item']}>入参名称</p>
+                      <p>类型与试运行值</p>
                       <div className={'w-4'} />
                     </div>
                     {fields.map(({ field, key }, index) => {
                       return (
                         <div className={styles['params-item']} key={index}>
                           <Form.Item
-                            className={'mb-0 flex-1'}
+                            className={`mb-0 flex-1 ${styles['param-name-item']}`}
                             field={`${field}.name`}
                             rules={getInputAndOutputRules('input')}
                             dependencies={fields.flatMap((f) =>
                               key === f.key ? [] : `${f.field}.name`
                             )}
                           >
-                            <Input placeholder={''} />
+                            <Input placeholder={''} disabled={disabled} />
                           </Form.Item>
                           <Form.Item
                             className={'mb-0 flex-1'}
-                            field={`${field}.type`}
+                            field={`${field}.uiTypeAndValue`}
                           >
-                            <SelectWithNoData
-                              placeholder={''}
-                              options={InputTypeOptions}
-                            />
-                          </Form.Item>
-                          <Form.Item
-                            className={'mb-0 flex-1'}
-                            field={`${field}.value`}
-                          >
-                            <Input placeholder={'参数值'} />
+                            <DataWithUiSelect disabled={disabled} />
                           </Form.Item>
                           <IconDelete
                             className={`mt-2 text-[16px] hover:cursor-pointer`}
                             onClick={() => {
+                              if (disabled) return;
                               remove(index);
                               setTimeout(() => {
                                 form
@@ -140,7 +162,9 @@ export const FunctionsSetting = () => {
                       onClick={() =>
                         add({
                           name: `arg${fields.length + 1}`,
-                          type: ParamType.String
+                          uiTypeAndValue: {
+                            uiType: `${ParamType.String}_${UiType.Input}`
+                          }
                         })
                       }
                     >
@@ -158,10 +182,14 @@ export const FunctionsSetting = () => {
                 return (
                   <>
                     <div
-                      className={`${styles['params-item']} ${styles['output-params-item']}`}
+                      className={`${styles['params-item']}`}
+                      style={{
+                        borderBottom: '1px solid #DFE2EB',
+                        marginBottom: '8px'
+                      }}
                     >
-                      <p>出参定义</p>
-                      <p>出参类型</p>
+                      <p className={styles['param-name-item']}>出参名称</p>
+                      <p>数据类型</p>
                       <div className={'w-4'} />
                     </div>
                     {fields.map(({ field, key }, index) => {
@@ -171,7 +199,7 @@ export const FunctionsSetting = () => {
                           key={index}
                         >
                           <Form.Item
-                            className={`mb-0 flex-1 ${styles['output-item']}`}
+                            className={`mb-0 flex-1 ${styles['param-name-item']}`}
                             field={`${field}.name`}
                             rules={getInputAndOutputRules('output')}
                             dependencies={fields.flatMap((f) =>
@@ -181,7 +209,7 @@ export const FunctionsSetting = () => {
                             <Input placeholder={''} />
                           </Form.Item>
                           <Form.Item
-                            className={`mb-0  flex-1 ${styles['output-item']}`}
+                            className={`mb-0  flex-1`}
                             field={`${field}.type`}
                           >
                             <SelectWithNoData
@@ -262,8 +290,13 @@ export const FunctionsSetting = () => {
               SDK开发文档
             </ProButton>
           )}
-          <Button icon={<IconRecordStop />} size={'mini'}>
-            停止运行
+          <Button
+            icon={testIng ? <IconRecordStop /> : <IconPlayArrowFill />}
+            size={'mini'}
+            disabled={!testAble}
+            onClick={testIng ? handleStopTest : handleTest}
+          >
+            {testIng ? '停止运行' : '运行'}
           </Button>
         </div>
         <div className={`w-max ${styles['fullscreen-statue']}`}></div>

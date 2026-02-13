@@ -1,5 +1,5 @@
 import React from 'react';
-import { UiType } from '@/pages/ontologyScene/types/behaviorActions';
+import { UiType } from '@/pages/ontologyScene/types/ontologyFunction';
 import {
   DatePicker,
   Input,
@@ -12,7 +12,8 @@ import {
   DateTimePicker,
   MapPicker,
   ObjectOne,
-  ObjectSet
+  ObjectSet,
+  ObjectTypeSelect
 } from '@/pages/ontologyScene/componens';
 import styles from '../styles/index.module.scss';
 
@@ -45,7 +46,7 @@ export const renderComponentByUiType = (type: UiType) => {
     case UiType.Timestamp:
       return <DateTimePicker />;
     case UiType.ObjectOne:
-      return <ObjectOne />;
+      return <ObjectTypeSelect placeholder={'请选择对象类型'} />;
     case UiType.ObjectSet:
       return <ObjectSet />;
     default:

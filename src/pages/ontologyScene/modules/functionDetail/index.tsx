@@ -32,29 +32,42 @@ export default function OSFunctionDetailPage() {
   const [form] = Form.useForm();
   const bodyRef = useRef<HTMLDivElement>(null);
   const {
-    id: OnFunctionId,
+    id: OSId,
     pageMode,
-    actionId
+    functionId
   } = useParams<Record<string, string>>();
 
   const { data: functionDetail, loading } = useRequest(
     () => {
-      if (OnFunctionId === '_NEW_') return Promise.resolve(null);
-      return getFunctionDetail(OnFunctionId);
+      if (functionId === '_NEW_') return Promise.resolve(null);
+      return getFunctionDetail(functionId);
     },
     {
-      refreshDeps: [OnFunctionId, actionId]
+      refreshDeps: [OSId, functionId]
     }
   );
+
+  const goBack = () => {
+    history.replace(
+      `/tenant/compute/modaforge/ontologyScene/detail/${OSId}/functions`
+    );
+  };
 
   const saveAction = async () => {
     try {
       const values: OntologyFunctionSchema = await form.validate();
       await saveFunction({
-        ...functionDetail,
-        ...buildFunctionDetail(values)
+        ...(functionDetail || {}),
+        ...buildFunctionDetail(values),
+        ontologyModelID: +OSId
       });
-      Message.success('保存成功');
+      Message.success({
+        content: '保存成功',
+        duration: 0.5,
+        onClose() {
+          goBack();
+        }
+      });
     } catch (e) {
       console.error(e);
     }

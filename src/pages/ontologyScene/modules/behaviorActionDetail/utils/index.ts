@@ -33,17 +33,22 @@ export function buildActionSchema(action: BehaviorActionDetail): ActionSchema {
           type,
           uiType
         });
-        p.validationRules?.push({
-          enabledValidation: enabledValidation!,
-          failMessage: validationRule?.failMessage || '',
-          rule_name: validationRule?.ruleName || TYPE2RULE_TYPES[type][0].value,
-          ruleConfig:
-            validationRule?.ruleName === RuleName.EnumRule
-              ? param.validationRule?.ruleConfig?.options.toString()
-              : param.validationRule?.ruleConfig,
-          name,
-          type
-        });
+        if (
+          [ParamType.Float, ParamType.String, ParamType.Integer].includes(type)
+        ) {
+          p.validationRules?.push({
+            enabledValidation: enabledValidation!,
+            failMessage: validationRule?.failMessage || '',
+            rule_name:
+              validationRule?.ruleName || TYPE2RULE_TYPES[type][0].value,
+            ruleConfig:
+              validationRule?.ruleName === RuleName.EnumRule
+                ? param.validationRule?.ruleConfig?.options.toString()
+                : param.validationRule?.ruleConfig,
+            name,
+            type
+          });
+        }
         return p;
       },
       {
@@ -73,7 +78,7 @@ export function buildFunctionSchema(
           [ParamType.Float, ParamType.String, ParamType.Integer].includes(type)
         ) {
           p.validationRules!.push({
-            name: name!,
+            name,
             type,
             enabledValidation: true,
             failMessage: undefined,

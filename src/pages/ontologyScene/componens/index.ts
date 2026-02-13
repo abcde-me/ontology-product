@@ -13,4 +13,5 @@ export * from './ResizeBoxWithCursorChange';
 export * from './PyCodeContent';
 export { default as ObjectTypeSelect } from './ObjectTypeSelect';
 export type { ObjectTypeSelectProps } from './ObjectTypeSelect';
+export * from './ObjectInterfaceSelect';
 export { default as ObjectTypeDetailDrawer } from './ObjectTypeDetailDrawer';

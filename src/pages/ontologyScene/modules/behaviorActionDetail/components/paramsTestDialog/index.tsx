@@ -3,11 +3,9 @@ import { Form, Modal } from '@arco-design/web-react';
 import styles from '././index.module.scss';
 import { NoDataCard, ProButton } from '@ceai-front/arco-material';
 import { IconPlayArrowFill } from '@arco-design/web-react/icon';
-import {
-  OntologyActionParam,
-  UiType
-} from '@/pages/ontologyScene/types/behaviorActions';
+import { OntologyActionParam } from '@/pages/ontologyScene/types/behaviorActions';
 import { renderComponentByUiType } from '@/pages/ontologyScene/utils';
+import { UiType } from '@/pages/ontologyScene/types/ontologyFunction';
 
 interface IProps {
   visible: boolean;

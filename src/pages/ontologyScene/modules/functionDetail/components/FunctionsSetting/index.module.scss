@@ -40,13 +40,16 @@ $border-color: #dfe2eb;
     .params-item {
       display: flex;
       gap: 8px;
-      margin-bottom: 8px;
+      padding-bottom: 8px;
 
       p {
         font-family: PingFang SC;
         font-weight: 400;
         font-size: 14px;
         line-height: 22px;
+      }
+
+      p:nth-child(2) {
         flex: 1;
       }
 
@@ -57,18 +60,6 @@ $border-color: #dfe2eb;
         .arco-form-item-control-children {
           height: auto !important;
         }
-      }
-    }
-
-    .output-params-item {
-      p {
-        flex-basis: calc(33.33% - 12px) !important;
-        flex-grow: 0;
-      }
-
-      .output-item {
-        flex-basis: calc(33.33% - 12px) !important;
-        flex-grow: 0;
       }
     }
   }
@@ -86,6 +77,12 @@ $border-color: #dfe2eb;
       border-bottom-left-radius: 4px;
       border-top: none;
       border-right: none;
+    }
+
+    .param-name-item {
+      flex-basis: calc(33.33% - 12px) !important;
+      flex-shrink: 0;
+      flex-grow: 0;
     }
   }
 

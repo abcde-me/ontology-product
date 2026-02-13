@@ -212,12 +212,16 @@ export const getFunctionDetail = (id: string | number) => {
 };
 
 // 获取函数列表
-export const getFunctionList = (params: Record<string | number, any>) => {
-  return Promise.resolve({
-    items: MockList,
-    total: MockList.length
-  });
-  // return UAPI.RES.GetOntologyFunctionListApi({}).post(params).inRegion().do();
+export const getFunctionList = async (params: Record<string | number, any>) => {
+  // return Promise.resolve({
+  //   items: MockList,
+  //   total: MockList.length
+  // });
+  const res = await UAPI.RES.GetOntologyFunctionListApi({})
+    .post(params)
+    .inRegion()
+    .do();
+  return res.data;
 };
 // 函数测试
 export const testFunction = (params: Record<string | number, any>) => {

@@ -39,7 +39,8 @@ export const FunctionScript = (props: CustomFormItemCompProps<string>) => {
             lineNumbers: true,
             highlightActiveLineGutter: false,
             foldGutter: false,
-            highlightActiveLine: false
+            highlightActiveLine: false,
+            tabSize: 2
           }}
           value={value}
           onCreateEditor={(view) => {

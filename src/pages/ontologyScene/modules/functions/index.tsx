@@ -22,25 +22,36 @@ import {
 import { SafeTableCell } from '@/components/SafeTableCell';
 import { OntologyFunctionItem } from '@/pages/ontologyScene/types/ontologyFunction';
 import { getFunctionList } from '@/api/ontologySceneLibrary/ontologyFunction';
+import { isNil } from 'lodash-es';
 
 // 函数
 export default function OntologySceneFunctions() {
   const [form] = Form.useForm();
-  const { id: OSId, moduleType = ONTOLOGY_SCENE_MENU_ITEM_KEYS.GRAPH } =
-    useParams<{
-      id: string;
-      moduleType: string;
-    }>();
+  const { id: ontologyModelID } = useParams<{
+    id: string;
+    moduleType: string;
+  }>();
 
   const history = useHistory();
 
   const { tableProps, onSubmit, refresh } = useArcoTable(
     ({ pagination, query, filters, sorter }) => {
-      return getFunctionList({});
+      if (isNil(ontologyModelID))
+        return Promise.resolve({
+          items: [],
+          total: 0
+        });
+      return getFunctionList({
+        ontologyModelID,
+        pageNum: pagination.current,
+        pageSize: pagination.pageSize,
+        ...query
+      });
     },
     {
       defaultPageSize: 10,
-      form
+      form,
+      deps: [ontologyModelID]
     }
   );
 
@@ -50,7 +61,7 @@ export default function OntologySceneFunctions() {
   ) => {
     const baseUrl = '/tenant/compute/modaforge/ontologyScene/detail';
     history.push(
-      `${baseUrl}/${OSId}/functions/${type}/${data ? data.id : '_NEW_'}`
+      `${baseUrl}/${ontologyModelID}/functions/${type}/${data ? data.id : '_NEW_'}`
     );
   };
 
@@ -149,7 +160,7 @@ export default function OntologySceneFunctions() {
           <SearchTable
             searchForm={
               <Form form={form}>
-                <Form.Item noStyle>
+                <Form.Item noStyle field={'filter'}>
                   <Input
                     className={'w-[220px]'}
                     placeholder={'请输入关键字'}

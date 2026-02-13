@@ -16,8 +16,10 @@ import {
   OntologyFunctionParam,
   OntologyFunctionDetail,
   OntologyFunctionSchema,
-  TYPE_MAP
+  TYPE_MAP,
+  ParamType
 } from '@/pages/ontologyScene/types/ontologyFunction';
+import { UiType } from '@/pages/ontologyScene/types/ontologyFunction';
 
 export const bypassFrozenRange = Annotation.define<boolean>();
 
@@ -191,7 +193,12 @@ const buildFUnctionSignature = (data: {
   output: OntologyFunctionParam[];
 }) => {
   const { name, input, output } = data;
-  const signature = `def ${name}(${input?.map(({ name: p_name, type }) => `${p_name} : ${TYPE_MAP[type]}`).join(',')})`;
+  const signature = `def ${name}(${input
+    ?.map(
+      ({ name: p_name, type, uiTypeAndValue }) =>
+        `${p_name} : ${TYPE_MAP[uiTypeAndValue!.uiType!.split('_')[0]]}`
+    )
+    .join(',')})`;
   const returnType = output.length > 0 ? 'dict' : 'None';
   return `${signature} -> ${returnType}:`;
 };
@@ -304,6 +311,10 @@ export function buildFunctionSchema(
       };
       if (inputType === InputType.Input) {
         base.value = value;
+        // todo 需要删除代码
+        base.uiTypeAndValue = {
+          uiType: `${ParamType.String}_${UiType.Input}`
+        };
       }
       p[inputType === InputType.Input ? 'input' : 'output'].push(base);
       return p;
@@ -331,24 +342,37 @@ export function buildFunctionSchema(
 export function buildFunctionDetail(
   meta: OntologyFunctionSchema
 ): Partial<OntologyFunctionDetail> {
-  const { name, description, input, output, content } = meta;
+  const { name, description, input, output, content, code } = meta;
+
+  const inputParams = (input || []).map((item, idx) => {
+    const { name, code, uiTypeAndValue } = item;
+    const [type, ui] = uiTypeAndValue!.uiType!.split('_');
+    return {
+      name,
+      code: name,
+      type,
+      inputType: InputType.Output,
+      uiType: ui,
+      idx
+    };
+  });
+  const outputParams = (output || []).map((item, idx) => {
+    const { name, code, type } = item;
+    return {
+      name,
+      code: name,
+      type,
+      inputType: InputType.Output,
+      idx
+    };
+  });
+
   return {
     name,
     description,
     content,
-    params: [
-      ...(input || []).map((item, idx) => ({
-        ...item,
-        code: item.name,
-        idx,
-        inputType: InputType.Input
-      })),
-      ...(output || []).map((item, idx) => ({
-        ...item,
-        code: item.name,
-        idx,
-        inputType: InputType.Output
-      }))
-    ]
+    code,
+    // @ts-ignore
+    params: [...inputParams, ...outputParams]
   };
 }
