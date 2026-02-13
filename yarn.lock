@@ -2,6 +2,15 @@
 # yarn lockfile v1
 
 
+"@ahooksjs/use-url-state@^3.5.1":
+  version "3.5.1"
+  resolved "http://npm.cestc.cn/@ahooksjs/use-url-state/download/@ahooksjs/use-url-state-3.5.1.tgz#c3ad04e98cbcbc8f9eba476bcbd3237e9809aa5b"
+  integrity sha1-w60E6Yy8vI+eukdry9MjfpgJqls=
+  dependencies:
+    ahooks "^3.4.1"
+    query-string "^6.9.0"
+    tslib "^2.4.1"
+
 "@alloc/quick-lru@^5.2.0":
   version "5.2.0"
   resolved "http://npm.cestc.cn/@alloc/quick-lru/download/@alloc/quick-lru-5.2.0.tgz#7bf68b20c0a350f936915fcae06f58e32007ce30"
@@ -6488,7 +6497,7 @@ agentkeepalive@^3.4.1:
   dependencies:
     humanize-ms "^1.2.1"
 
-ahooks@^3.7.8, ahooks@^3.8.1:
+ahooks@^3.4.1, ahooks@^3.7.8, ahooks@^3.8.1:
   version "3.9.5"
   resolved "http://npm.cestc.cn/ahooks/download/ahooks-3.9.5.tgz#de9bb2233ae8e95ac2b2d2ba1dd716eb6adf4228"
   integrity sha1-3puyIzro6VrCstK6HdcW62rfQig=
@@ -19772,7 +19781,7 @@ quansync@^0.2.11:
   resolved "http://npm.cestc.cn/quansync/download/quansync-0.2.11.tgz#f9c3adda2e1272e4f8cf3f1457b04cbdb4ee692a"
   integrity sha1-+cOt2i4ScuT4zz8UV7BMvbTuaSo=
 
-query-string@^6.13.8:
+query-string@^6.13.8, query-string@^6.9.0:
   version "6.14.1"
   resolved "http://npm.cestc.cn/query-string/download/query-string-6.14.1.tgz#7ac2dca46da7f309449ba0f86b1fd28255b0c86a"
   integrity sha1-esLcpG2n8wlEm6D4ax/SglWwyGo=

@@ -9,4 +9,19 @@
       border-top-left-radius: 0;
     }
   }
+
+  :global {
+    .object-type-tag {
+      height: 18px !important;
+    }
+
+    .object-type-tag-icon {
+      width: 12px !important;
+      height: 12px !important;
+    }
+
+    .object-type-tag-name .ellipsis-text {
+      font-size: 12px !important;
+    }
+  }
 }

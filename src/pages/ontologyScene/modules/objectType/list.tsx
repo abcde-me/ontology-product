@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Button,
   Form,
@@ -19,6 +19,7 @@ import {
   ProButton,
   SearchTable
 } from '@ceai-front/arco-material';
+import useUrlState from '@ahooksjs/use-url-state';
 import { useHistory, useParams } from 'react-router-dom';
 import { useWorkflowTable } from '../../hooks/useTable';
 import ObjectTypeDetailDrawer, {
@@ -44,6 +45,7 @@ export default function OntologySceneObjectTypeList() {
   const [form] = Form.useForm();
   const history = useHistory();
   const { id: ontologyModelID } = useParams<{ id: string }>();
+  const [urlState, setUrlState] = useUrlState({ search: '' });
   const [detailDrawerVisible, setDetailDrawerVisible] = useState(false);
   const [selectedObjectType, setSelectedObjectType] =
     useState<ObjectType | null>(null);
@@ -110,6 +112,20 @@ export default function OntologySceneObjectTypeList() {
       form,
       defaultPageSize: 10
     });
+
+  // 从 URL 的 search 参数同步到表单
+  useEffect(() => {
+    const currentKeyword = form.getFieldValue('keyword');
+    const searchValue = urlState.search || '';
+    if (searchValue !== currentKeyword) {
+      form.setFieldsValue({ keyword: searchValue });
+      // 延迟提交，确保表单值已设置
+      setTimeout(() => {
+        submit();
+      }, 0);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [urlState.search]);
 
   // 跳转到创建页面
   const handleCreate = () => {
@@ -315,8 +331,14 @@ export default function OntologySceneObjectTypeList() {
                 placeholder="请输入关键词"
                 suffix={<IconSearch />}
                 allowClear
-                onClear={() => submit()}
-                onSearch={() => submit()}
+                onClear={() => {
+                  setUrlState({ search: '' });
+                  submit();
+                }}
+                onSearch={(value) => {
+                  setUrlState({ search: value || '' });
+                  submit();
+                }}
               />
             </Form.Item>
           </Form>
