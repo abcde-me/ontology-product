@@ -22,6 +22,7 @@ import { listOntologyPhysicalProperties } from '@/api/ontologySceneLibrary/graph
 import type { PhysicalProperties } from '@/types/graphApi';
 import { useParams } from 'react-router';
 import { useHistory } from 'react-router-dom';
+import { isNil } from 'lodash-es';
 
 export interface NormalTableProps {
   /** total 变化时的回调函数 */
@@ -96,7 +97,7 @@ export default function NormalTable({ onTotalChange }: NormalTableProps = {}) {
   useEffect(() => {
     const currentKeyword = form.getFieldValue('keyword');
     const searchValue = urlState.search || '';
-    if (searchValue !== currentKeyword) {
+    if (searchValue !== '' && searchValue !== currentKeyword) {
       form.setFieldsValue({ keyword: searchValue });
       // 延迟提交，确保表单值已设置
       setTimeout(() => {

@@ -27,6 +27,8 @@ import LinkDetailDrawer from './components/LinkDetailDrawer';
 import { listOntologyLinkType } from '@/api/ontologySceneLibrary/graph';
 import { LinkInfo, LinkType, SyncStatus } from '@/types/graphApi';
 import ObjectTypeTag from '@/pages/ontologyScene/componens/ObjectTypeTag';
+import dayjs from 'dayjs';
+import { isNil } from 'lodash-es';
 
 // 链接数据接口
 export interface LinkItem {
@@ -194,7 +196,7 @@ export default function OntologySceneLinksList() {
   useEffect(() => {
     const currentKeyword = form.getFieldValue('keyword');
     const searchValue = urlState.search || '';
-    if (searchValue !== currentKeyword) {
+    if (searchValue !== '' && searchValue !== currentKeyword) {
       form.setFieldsValue({ keyword: searchValue });
       // 延迟提交，确保表单值已设置
       setTimeout(() => {
@@ -280,7 +282,7 @@ export default function OntologySceneLinksList() {
       render: (value: LinkItem['sourceObjectType']) => {
         return (
           <div>
-            {value?.name ? (
+            {value?.id ? (
               <ObjectTypeTag
                 ontologyObjectTypeIcon={value.icon}
                 ontologyObjectTypeName={value.name}
@@ -300,7 +302,7 @@ export default function OntologySceneLinksList() {
       render: (value: LinkItem['targetObjectType']) => {
         return (
           <div>
-            {value?.name ? (
+            {value?.id ? (
               <ObjectTypeTag
                 ontologyObjectTypeIcon={value.icon}
                 ontologyObjectTypeName={value.name}
@@ -357,9 +359,7 @@ export default function OntologySceneLinksList() {
       dataIndex: 'syncTime',
       width: 180,
       render: (value) => (
-        <div className="font-PingFangSc text-[14px] font-normal leading-[22px] text-[#23293b]">
-          {value}
-        </div>
+        <div>{value ? dayjs(value).format('YYYY-MM-DD HH:mm:ss') : '-'}</div>
       )
     },
     {
