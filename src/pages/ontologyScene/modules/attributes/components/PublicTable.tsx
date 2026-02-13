@@ -31,6 +31,7 @@ import { ListOntologyPublicPropertiesReq } from '@/types/attributes';
 import { ObjectTypeTagList } from '@/pages/ontologyScene/componens';
 import ObjectTypeDetailDrawer from '@/pages/ontologyScene/componens/ObjectTypeDetailDrawer';
 import dayjs from 'dayjs';
+import { isNil } from 'lodash-es';
 
 // 公共属性数据接口（保留用于兼容性）
 export interface PublicAttributeItem {
@@ -132,7 +133,7 @@ export default function PublicTable() {
   useEffect(() => {
     const currentKeyword = form.getFieldValue('keyword');
     const searchValue = urlState.search || '';
-    if (searchValue !== currentKeyword) {
+    if (searchValue !== '' && searchValue !== currentKeyword) {
       form.setFieldsValue({ keyword: searchValue });
       // 延迟提交，确保表单值已设置
       setTimeout(() => {
