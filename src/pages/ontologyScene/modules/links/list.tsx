@@ -16,6 +16,7 @@ import {
 } from '@arco-design/web-react/icon';
 import {
   CopyItemIcon,
+  EllipsisPopover,
   ProButton,
   SearchTable
 } from '@ceai-front/arco-material';
@@ -254,12 +255,11 @@ export default function OntologySceneLinksList() {
       dataIndex: 'name',
       width: 150,
       render: (value, record) => (
-        <div
-          className="hover-blue font-PingFangSc text-[14px] font-normal leading-[22px] text-[#23293b]"
+        <EllipsisPopover
+          wrapperClassName="min-w-0 hover-blue font-[600]"
+          value={value}
           onClick={() => handleViewDetail(record)}
-        >
-          {value}
-        </div>
+        />
       )
     },
     {

@@ -239,7 +239,7 @@ export default function OntologySceneObjectTypeList() {
       width: 200,
       render: (value) => (
         <div className="flex items-center gap-2">
-          <EllipsisPopover value={value} isEdit={false} preferTypography />
+          <EllipsisPopover wrapperClassName="min-w-0" value={value} />
           {value && (
             <CopyItemIcon className="hidden flex-shrink-0" value={value} />
           )}
@@ -254,11 +254,7 @@ export default function OntologySceneObjectTypeList() {
       width: 200,
       render: (value) => (
         <div>
-          {value ? (
-            <EllipsisPopover value={value} isEdit={false} preferTypography />
-          ) : (
-            '-'
-          )}
+          {value ? <EllipsisPopover value={value} isEdit={false} /> : '-'}
         </div>
       )
     },
