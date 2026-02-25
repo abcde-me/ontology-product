@@ -11,6 +11,8 @@ import {
 import { useUIStore } from '../../store/uiStore';
 import { useBusinessStore } from '../../store/businessStore';
 import { ConfigField } from '../../types';
+import BehaviorConfigSvg from '@/assets/benti/behaviorConfig.svg';
+import BehaviorTestSvg from '@/assets/benti/behaviorTest.svg';
 
 const { TextArea } = Input;
 
@@ -188,8 +190,12 @@ export const RightPanel: React.FC = () => {
   if (!selectedNodeId || !selectedNode) {
     return (
       <div className="flex h-full w-full flex-col">
-        <div className="flex h-14 flex-shrink-0 items-center justify-between border-b border-[#e5e6eb] pl-4 pr-4">
-          <span className="text-sm font-medium text-[#1d2129]">参数配置</span>
+        <div className="flex h-14 flex-shrink-0 items-center justify-between border-b border-[#e5e6eb] px-6">
+          <div className="flex items-center gap-1">
+            <BehaviorConfigSvg className="h-3.5 w-3.5" />
+            <span className="text-base font-medium text-[#000]">参数配置</span>
+          </div>
+          <BehaviorTestSvg className="h-4 w-4 cursor-pointer" />
         </div>
         <div className="flex flex-1 flex-col items-center justify-center gap-3 px-5">
           <svg
@@ -216,8 +222,12 @@ export const RightPanel: React.FC = () => {
   return (
     <div className="flex h-full w-full flex-col">
       {/* 头部 */}
-      <div className="flex h-14 flex-shrink-0 items-center justify-between border-b border-[#e5e6eb] pl-4 pr-4">
-        <span className="text-sm font-medium text-[#1d2129]">参数配置</span>
+      <div className="flex h-14 flex-shrink-0 items-center justify-between border-b border-[#e5e6eb] px-6">
+        <div className="flex items-center gap-1">
+          <BehaviorConfigSvg className="h-3.5 w-3.5" />
+          <span className="text-base font-medium text-[#000]">参数配置</span>
+        </div>
+        <BehaviorTestSvg className="h-4 w-4 cursor-pointer" />
       </div>
 
       {/* 表单内容 */}

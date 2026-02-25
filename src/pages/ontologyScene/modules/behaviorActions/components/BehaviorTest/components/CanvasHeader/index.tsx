@@ -1,19 +1,14 @@
 import React from 'react';
 import { Button, Tooltip, Modal, Message } from '@arco-design/web-react';
-import {
-  IconRefresh,
-  IconHistory,
-  IconPlayArrow
-} from '@arco-design/web-react/icon';
 import { useUIStore } from '../../store/uiStore';
 import { useBusinessStore } from '../../store/businessStore';
+import BehaviorScheduleSvg from '@/assets/benti/behaviorSchedule.svg';
+import BehaviorRefreshSvg from '@/assets/benti/behaviorRefresh.svg';
+import BehaviorTestSvg from '@/assets/benti/behaviorTest.svg';
 
 export const CanvasHeader: React.FC = () => {
   const isTestRunning = useUIStore((state) => state.isTestRunning);
   const setIsTestRunning = useUIStore((state) => state.setIsTestRunning);
-  const setTestHistoryVisible = useUIStore(
-    (state) => state.setTestHistoryVisible
-  );
 
   const canExecuteTest = useBusinessStore((state) => state.canExecuteTest);
   const executeTest = useBusinessStore((state) => state.executeTest);
@@ -34,10 +29,6 @@ export const CanvasHeader: React.FC = () => {
     });
   };
 
-  const handleHistory = () => {
-    setTestHistoryVisible(true);
-  };
-
   const handleTest = async () => {
     setIsTestRunning(true);
     try {
@@ -51,24 +42,28 @@ export const CanvasHeader: React.FC = () => {
   };
 
   return (
-    <div className="flex h-14 flex-shrink-0 items-center justify-between border-b border-[#e5e6eb]  pl-4 pr-4">
-      <div className="text-sm font-medium text-[#1d2129]">行为编排</div>
+    <div className="flex h-14 flex-shrink-0 items-center justify-between border-b border-[#e5e6eb]  px-6">
+      <div className="flex items-center gap-1">
+        <BehaviorScheduleSvg className="h-4 w-4" />
+        <div className="text-base font-medium text-[#000]">行为编排</div>
+      </div>
       <div className="flex items-center gap-3">
         <Tooltip content="刷新">
-          <IconRefresh
-            className="cursor-pointer text-lg text-[#4e5969] transition-colors duration-200 hover:text-[#1d2129]"
+          <BehaviorRefreshSvg
+            className="cursor-pointer transition-colors duration-200 hover:opacity-70"
             onClick={handleRefresh}
           />
         </Tooltip>
-        <Tooltip content="历史记录">
-          <IconHistory
-            className="cursor-pointer text-lg text-[#4e5969] transition-colors duration-200 hover:text-[#1d2129]"
-            onClick={handleHistory}
-          />
-        </Tooltip>
+        <div className="h-4 w-px bg-[#e5e6eb]" />
         <Button
           type="primary"
-          icon={<IconPlayArrow />}
+          style={{
+            backgroundColor: '#184FF2',
+            borderColor: '#184FF2',
+            color: '#fff'
+          }}
+          className="flex items-center justify-center"
+          icon={<BehaviorTestSvg style={{ stroke: 'white' }} />}
           onClick={handleTest}
           disabled={!canExecuteTest()}
           loading={isTestRunning}

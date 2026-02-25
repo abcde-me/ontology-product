@@ -25,7 +25,7 @@ export const OrchestrationCanvas: React.FC = () => {
   };
 
   return (
-    <div className="mx-auto flex max-w-[600px] flex-col gap-3">
+    <div className="mx-auto flex w-[480px] flex-col gap-3">
       {orchestrationNodes.map((node) => (
         <OrchestrationNode
           key={node.id}

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Empty } from '@arco-design/web-react';
+import { NoDataCard } from '@ceai-front/arco-material';
 import { BehaviorCard } from '../BehaviorCard';
 import { BehaviorItem } from '../../types';
 import { useBusinessStore } from '../../store/businessStore';
@@ -33,14 +33,14 @@ export const BehaviorCardList: React.FC<BehaviorCardListProps> = ({
 
   if (behaviors.length === 0) {
     return (
-      <div className="py-15 flex items-center justify-center px-5">
-        <Empty description="暂无行为数据" />
+      <div className="flex items-center justify-center px-5 pt-32">
+        <NoDataCard title="暂无行为数据" />
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col gap-3 px-5 py-4">
+    <div className="flex flex-col gap-3 px-4 py-4">
       {behaviors.map((behavior) => (
         <BehaviorCard
           key={behavior.id}

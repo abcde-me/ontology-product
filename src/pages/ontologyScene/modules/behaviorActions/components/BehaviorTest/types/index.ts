@@ -13,6 +13,10 @@ export interface BehaviorItem extends BehaviorActionItem {
   // 不加构建报错 todo
   description: string;
   name: string;
+  // 对象类型相关字段
+  ontologyObjectTypeIcon?: string;
+  ontologyObjectTypeName?: string;
+  objectTypeIcon?: string;
 }
 
 // 编排节点
