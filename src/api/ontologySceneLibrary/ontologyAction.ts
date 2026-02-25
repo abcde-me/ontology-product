@@ -1,10 +1,12 @@
 import UAPI from '@/api';
 import {
   BehaviorActionDetail,
-  BehaviorActionItem,
-  UiType
+  BehaviorActionItem
 } from '@/pages/ontologyScene/types/behaviorActions';
-import { ParamType } from '@/pages/ontologyScene/types/ontologyFunction';
+import {
+  ParamType,
+  UiType
+} from '@/pages/ontologyScene/types/ontologyFunction';
 
 const MockList: BehaviorActionItem[] = [
   {
@@ -12,25 +14,111 @@ const MockList: BehaviorActionItem[] = [
     code: 'ACTION_ENTITY_EXTRACT',
     name: '实体识别',
     description: '从文本中识别实体并返回结构化结果',
-    functionId: 1,
+    functionId: 5,
     functionName: 'entity_extract',
     objectTypeId: 201,
     objectTypeName: '多媒体情报',
     paramCount: 2,
     params: [
       {
+        type: 'String',
+        name: 'text',
         code: 'text',
-        name: '文本内容',
-        type: ParamType.String,
-        uiType: UiType.Input,
-        enabledValidation: false
+        uiType: 'input',
+        enabledValidation: true,
+        validationRule: {
+          ruleName: 'enum_rule',
+          failMessage: '4546465',
+          ruleConfig: {
+            options: ['123132132']
+          }
+        }
       },
       {
-        code: 'threshold',
-        name: '置信度阈值',
-        type: ParamType.Float,
-        uiType: UiType.InputNumberFloat,
-        enabledValidation: true
+        type: 'Integer',
+        name: 'count',
+        code: 'count',
+        uiType: 'inputNumber',
+        enabledValidation: true,
+        validationRule: {
+          ruleName: 'range_rule',
+          failMessage: '45646546',
+          ruleConfig: {
+            minValue: 1,
+            maxValue: 2
+          }
+        }
+      },
+      {
+        type: 'Float',
+        name: 'ratio',
+        code: 'ratio',
+        uiType: 'inputNumberFloat',
+        enabledValidation: true,
+        validationRule: {
+          ruleName: 'range_rule',
+          failMessage: '456465465',
+          ruleConfig: {
+            minValue: 1,
+            maxValue: 2
+          }
+        }
+      },
+      {
+        type: 'Boolean',
+        name: 'is_active',
+        code: 'is_active',
+        uiType: 'switch',
+        enabledValidation: false,
+        validationRule: {}
+      },
+      {
+        type: 'Date',
+        name: 'start_date',
+        code: 'start_date',
+        uiType: 'date',
+        enabledValidation: false,
+        validationRule: {}
+      },
+      {
+        type: 'Timestamp',
+        name: 'event_time',
+        code: 'event_time',
+        uiType: 'dateTime',
+        enabledValidation: false,
+        validationRule: {}
+      },
+      {
+        type: 'Geopoint',
+        name: 'location',
+        code: 'location',
+        uiType: 'geopoint',
+        enabledValidation: false,
+        validationRule: {}
+      },
+      {
+        type: 'ObjectOne',
+        name: 'profile',
+        code: 'profile',
+        uiType: 'objectOne',
+        enabledValidation: false,
+        validationRule: {}
+      },
+      {
+        type: 'Attachment',
+        name: 'attachments',
+        code: 'attachments',
+        uiType: 'upload',
+        enabledValidation: false,
+        validationRule: {}
+      },
+      {
+        type: 'ObjectSet',
+        name: 'tags',
+        code: 'tags',
+        uiType: 'objectSet',
+        enabledValidation: false,
+        validationRule: {}
       }
     ],
     createUser: 'admin',
@@ -136,13 +224,32 @@ const MockList: BehaviorActionItem[] = [
   }
 ];
 
+interface IActionListParams {
+  /**
+   * 搜索关键字，支持按行为名称、编码模糊搜索
+   */
+  filter?: string;
+  /**
+   * 本体场景ID
+   */
+  ontologyModelID?: number | string;
+  /**
+   * 页码，从1开始
+   */
+  pageNum?: number;
+  /**
+   * 每页数量
+   */
+  pageSize?: number;
+}
+
 // 获取行为列表
-export const getActionList = (params: Record<string | number, any>) => {
-  return Promise.resolve({
-    items: MockList,
-    total: MockList.length
-  });
-  // return UAPI.RES.GetListOntologyActionApi({}).post(params).inRegion().do();
+export const getActionList = async (params: IActionListParams) => {
+  const res = await UAPI.RES.GetListOntologyActionApi({})
+    .post(params)
+    .inRegion()
+    .do();
+  return res.data;
 };
 
 // 获取行为详情

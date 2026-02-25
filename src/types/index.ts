@@ -12,4 +12,6 @@ interface CustomFormItemCompProps<T = Record<string, any>> {
   onChange?: (v: T) => any;
   id?: React.Key;
   ref?: React.Ref<any>;
+  className?: string;
+  style?: React.CSSProperties;
 }

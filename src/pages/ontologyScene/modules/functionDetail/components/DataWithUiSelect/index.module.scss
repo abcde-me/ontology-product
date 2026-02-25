@@ -1,0 +1,54 @@
+.comp-wrapper {
+  display: flex;
+
+  &:focus-within,
+  &:hover {
+    :global {
+      .aa-pro-button {
+        border-top-color: rgb(var(--primary-6)) !important;
+        border-left-color: rgb(var(--primary-6)) !important;
+        border-bottom-color: rgb(var(--primary-6)) !important;
+      }
+    }
+  }
+
+  .textarea-comp {
+    box-sizing: border-box;
+    padding: 4px 12px;
+    max-height: 100px !important;
+  }
+
+  :global {
+    .arco-select {
+      margin-left: -1px;
+    }
+
+    .arco-select-view,
+    .arco-input-group-addbefore,
+    .arco-input-number-step-button,
+    .arco-input-inner-wrapper {
+      border-top-left-radius: 0 !important;
+      border-bottom-left-radius: 0 !important;
+    }
+
+    .arco-input {
+      text-align: left;
+    }
+
+    .aa-input-number-with-label {
+      //flex: 1;
+      width: 160px;
+    }
+
+    .input-number-label {
+      display: none;
+    }
+  }
+
+  .ui-comp {
+    margin-left: -1px;
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+    width: 100%;
+  }
+}

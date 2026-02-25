@@ -8,7 +8,7 @@ import {
   ValidateRules
 } from '@/pages/ontologyScene/modules/behaviorActionDetail/components';
 import { useHistory, useParams } from 'react-router-dom';
-import { FormItem } from '@/pages/ontologyScene/componens';
+import { FormItem, ObjectTypeSelect } from '@/pages/ontologyScene/componens';
 import { useRequest } from 'ahooks';
 import {
   getActionDetail,
@@ -22,18 +22,19 @@ import {
 import { isNil } from 'lodash-es';
 import { getFunctionDetail } from '@/api/ontologySceneLibrary/ontologyFunction';
 import { InputType } from '@/pages/ontologyScene/types/ontologyFunction';
+import { IconLeft } from '@arco-design/web-react/icon';
 
 const { TextArea } = Input;
 
 export default function BehaviorActionDetailPage() {
   const history = useHistory();
   const [form] = Form.useForm();
-  const { id: ONId, pageMode, actionId } = useParams<Record<string, string>>();
+  const { id: OSId, pageMode, actionId } = useParams<Record<string, string>>();
   const currentFunction = Form.useWatch('functionId', form);
 
   const goBack = () => {
     history.replace(
-      `/tenant/compute/modaforge/ontologyScene/detail/${ONId}/behaviorActions`
+      `/tenant/compute/modaforge/ontologyScene/detail/${OSId}/behaviorActions`
     );
   };
 
@@ -50,8 +51,9 @@ export default function BehaviorActionDetailPage() {
   const saveAction = async () => {
     const values = await form.validate();
     saveBehaviorAction({
-      ...actionDetail,
-      ...buildActionDetail(values)
+      ...(actionDetail || {}),
+      ...buildActionDetail(values),
+      ontologyModelID: +OSId
     }).then((res) => {
       Message.success({
         content: '保存成功',
@@ -92,6 +94,12 @@ export default function BehaviorActionDetailPage() {
       className={`${styles['behavior-action-detail']} flex h-full w-full flex-col `}
     >
       <div className={`${styles['page-header']} text-default`}>
+        <ProButton
+          icon={<IconLeft />}
+          size={'default'}
+          type={'outline'}
+          onClick={goBack}
+        />
         {`${pageMode === 'edit' ? '编辑' : '创建'}行为`}
       </div>
       <div className={`${styles['page-body']}`}>
@@ -132,7 +140,7 @@ export default function BehaviorActionDetailPage() {
           </FormItem>
           <div className={'module-title'}>函数与校验</div>
           <FormItem label="绑定对象类型" field="objectTypeId" required>
-            <Select options={[]} placeholder={'请选择绑定对象类型'} />
+            <ObjectTypeSelect placeholder={'请选择绑定对象类型'} />
           </FormItem>
           <FormItem label="函数" field="functionId" required>
             <FunctionsSelect />
@@ -153,7 +161,7 @@ export default function BehaviorActionDetailPage() {
                       <p className={'text-[#7D859C]'}>暂无入参配置</p>
                     )}
                   </FormItem>
-                  <FormItem label="校验规则" field="validate_rules" required>
+                  <FormItem label="校验规则" required>
                     {isNil(functionId) ? (
                       <p className={'text-[#7D859C]'}>请先选择函数</p>
                     ) : functionHasParam ? (
