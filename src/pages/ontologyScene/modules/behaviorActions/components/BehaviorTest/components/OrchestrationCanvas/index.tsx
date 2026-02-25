@@ -26,16 +26,19 @@ export const OrchestrationCanvas: React.FC = () => {
 
   return (
     <div className="mx-auto flex w-[480px] flex-col gap-3">
-      {orchestrationNodes.map((node) => (
-        <OrchestrationNode
-          key={node.id}
-          node={node}
-          isSelected={selectedNodeId === node.id}
-          onClick={() => handleNodeClick(node.id)}
-          onDelete={() => handleNodeDelete(node.id)}
-        />
-      ))}
-      <AddNodePlaceholder />
+      {orchestrationNodes.length === 0 ? (
+        <AddNodePlaceholder />
+      ) : (
+        orchestrationNodes.map((node) => (
+          <OrchestrationNode
+            key={node.id}
+            node={node}
+            isSelected={selectedNodeId === node.id}
+            onClick={() => handleNodeClick(node.id)}
+            onDelete={() => handleNodeDelete(node.id)}
+          />
+        ))
+      )}
     </div>
   );
 };
