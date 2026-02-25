@@ -25,6 +25,7 @@ import {
   updateOntologyModel
 } from '@/api/ontologySceneLibrary/ontologyScene';
 import SearchDropdown from './SearchDropdown';
+import { EllipsisPopover } from '@ceai-front/arco-material';
 
 const { Header: LayoutHeader } = Layout;
 
@@ -152,10 +153,12 @@ export default function Header({
     >
       {/* 左侧区域 */}
       <div className="flex items-center">
-        <IconArrowLeft
-          className="mx-[9px] cursor-pointer text-[14px] text-[var(--color-text-2)]"
-          onClick={handleBack}
-        />
+        <Popover trigger="hover" content="返回">
+          <IconArrowLeft
+            className="mx-[9px] cursor-pointer text-[14px] text-[var(--color-text-2)] hover:text-primary-600"
+            onClick={handleBack}
+          />
+        </Popover>
         {isEditing ? (
           <Input
             value={editTitle}
@@ -167,9 +170,10 @@ export default function Header({
           />
         ) : (
           <>
-            <span className="ml-[12px] mr-[8px] text-[16px] font-medium text-gray-900">
-              {title}
-            </span>
+            <EllipsisPopover
+              value={title}
+              className="ml-[12px] mr-[8px] max-w-[455px] text-[16px] font-[600] text-[var(--color-text-1)]"
+            />
 
             {editLoading ? (
               <Spin style={{ display: 'inline-block' }} />
