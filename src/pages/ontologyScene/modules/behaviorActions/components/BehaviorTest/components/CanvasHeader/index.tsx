@@ -4,18 +4,26 @@ import { useUIStore } from '../../store/uiStore';
 import { useBusinessStore } from '../../store/businessStore';
 import BehaviorScheduleSvg from '@/assets/benti/behaviorSchedule.svg';
 import BehaviorRefreshSvg from '@/assets/benti/behaviorRefresh.svg';
-import BehaviorTestSvg from '@/assets/benti/behaviorTest.svg';
 
 export const CanvasHeader: React.FC = () => {
   const isTestRunning = useUIStore((state) => state.isTestRunning);
   const setIsTestRunning = useUIStore((state) => state.setIsTestRunning);
 
-  const canExecuteTest = useBusinessStore((state) => state.canExecuteTest);
+  const orchestrationNodes = useBusinessStore(
+    (state) => state.orchestrationNodes
+  );
+  const canExecute = useBusinessStore((state) => state.canExecuteTest());
   const executeTest = useBusinessStore((state) => state.executeTest);
   const clearOrchestration = useBusinessStore(
     (state) => state.clearOrchestration
   );
   const selectNode = useUIStore((state) => state.selectNode);
+
+  console.log('CanvasHeader render:', {
+    nodesCount: orchestrationNodes.length,
+    canExecute,
+    isTestRunning
+  });
 
   const handleRefresh = () => {
     Modal.confirm({
@@ -58,14 +66,28 @@ export const CanvasHeader: React.FC = () => {
         <Button
           type="primary"
           style={{
-            backgroundColor: '#184FF2',
-            borderColor: '#184FF2',
-            color: '#fff'
+            backgroundColor: canExecute ? '#184FF2' : '#F5F7FC',
+            borderColor: canExecute ? '#184FF2' : '#C3C7D4',
+            color: canExecute ? '#fff' : '#9CA3B8'
           }}
           className="flex items-center justify-center"
-          icon={<BehaviorTestSvg style={{ stroke: 'white' }} />}
+          icon={
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 16 16"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M4.44512 5.3787V0.75L10.6808 0.750125V5.37882L14.19 11.5874C14.8653 12.7821 14.0087 14.2628 12.6364 14.273L2.56664 14.348C1.19138 14.3582 0.313147 12.8848 0.976377 11.68L4.44512 5.3787Z"
+                stroke={canExecute ? 'white' : '#9CA3B8'}
+                strokeWidth="1.5"
+              />
+            </svg>
+          }
           onClick={handleTest}
-          disabled={!canExecuteTest()}
+          disabled={!canExecute}
           loading={isTestRunning}
         >
           测试
