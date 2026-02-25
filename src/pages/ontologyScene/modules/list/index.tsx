@@ -25,7 +25,7 @@ import {
   NoResultCard
 } from '@ceai-front/arco-material';
 import { Link } from '@arco-design/web-react';
-import initialBg from '../../assets/initial-bg.png';
+// import initialBg from '../../assets/initial-bg.png';
 import ObjectSmallIcon from '../../assets/object-small.svg';
 import LinkSmallIcon from '../../assets/link-small.svg';
 import BehaviorSmallIcon from '../../assets/behavior-small.svg';
@@ -585,7 +585,7 @@ export default function OntologySceneList() {
     return (
       <div
         className={classNames(
-          styles['initial-page'],
+          styles['ontology-scene-list-initial-page'],
           'flex h-full w-full overflow-hidden bg-white'
         )}
       >
