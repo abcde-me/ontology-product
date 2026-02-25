@@ -3,62 +3,66 @@ import { Form, Pagination, Tabs } from '@arco-design/web-react';
 import { SearchTable } from '@ceai-front/arco-material';
 import { useTable } from './hooks/useTable';
 import { useColumns } from './hooks/useColumns';
-import { PageHeader, SearchForm, DetailDrawer } from './components';
+import { PageHeader, SearchForm } from './components';
 import { BehaviorLogItem } from './types';
 import { fetchBehaviorLogList } from './services/behaviorLogApi';
+import ObjectTypeDetailDrawer from '@/pages/ontologyScene/componens/ObjectTypeDetailDrawer';
 import styles from './index.module.scss';
 
 export default function BehaviorLogList() {
   const [form] = Form.useForm();
   const [activeTab, setActiveTab] = useState<'action' | 'function'>('action');
-  const [detailDrawerVisible, setDetailDrawerVisible] = useState(false);
-  const [selectedRecord, setSelectedRecord] = useState<BehaviorLogItem | null>(
-    null
-  );
   const [actionTotal, setActionTotal] = useState(0);
   const [functionTotal, setFunctionTotal] = useState(0);
+  const [sourcesFilter, setSourcesFilter] = useState<string[]>([]); // 来源过滤
+  const [statusFilter, setStatusFilter] = useState<number[]>([]); // 执行状态过滤
+  const [detailDrawerVisible, setDetailDrawerVisible] = useState(false);
+  const [selectedObjectType, setSelectedObjectType] = useState<{
+    id: string;
+  } | null>(null);
+  const [objectTypeActiveTab, setObjectTypeActiveTab] = useState<
+    'instances' | 'attributes' | 'links'
+  >('instances');
 
-  // 初始化时获取两个 tab 的总数
+  // 初始化时获取另一个 tab 的总数（当前 tab 的 total 会由 useTable 自动获取）
   React.useEffect(() => {
-    const fetchTotals = async () => {
+    const fetchOtherTabTotal = async () => {
       try {
-        const [actionResult, functionResult] = await Promise.all([
-          fetchBehaviorLogList({
-            page_num: 1,
-            page_size: 1,
-            query: '',
-            type: 'action'
-          }),
-          fetchBehaviorLogList({
-            page_num: 1,
-            page_size: 1,
-            query: '',
-            type: 'function'
-          })
-        ]);
-        setActionTotal(actionResult.total);
-        setFunctionTotal(functionResult.total);
+        // 只获取非当前 tab 的 total
+        const otherType = activeTab === 'action' ? 'function' : 'action';
+        const result = await fetchBehaviorLogList({
+          page_num: 1,
+          page_size: 1,
+          query: '',
+          type: otherType
+        });
+
+        if (otherType === 'action') {
+          setActionTotal(result.total);
+        } else {
+          setFunctionTotal(result.total);
+        }
       } catch (error) {
         console.error('获取总数失败:', error);
       }
     };
-    fetchTotals();
-  }, []);
+    fetchOtherTabTotal();
+  }, []); // 只在初始化时执行一次
 
-  // 处理查看详情
-  const handleViewDetail = (record: BehaviorLogItem) => {
-    setSelectedRecord(record);
-    setDetailDrawerVisible(true);
-  };
-
-  // 关闭详情抽屉
-  const handleCloseDetail = () => {
-    setDetailDrawerVisible(false);
-    setSelectedRecord(null);
+  // 处理查看对象类型详情
+  const handleViewObjectTypeDetail = (record: BehaviorLogItem) => {
+    const objectTypeId = String(
+      record.ontologyObjectTypeId || record.objectTypeID || ''
+    );
+    if (objectTypeId) {
+      setSelectedObjectType({ id: objectTypeId });
+      setObjectTypeActiveTab('instances');
+      setDetailDrawerVisible(true);
+    }
   };
 
   // 根据当前 tab 获取对应的列配置
-  const columns = useColumns(activeTab, handleViewDetail);
+  const columns = useColumns(activeTab, handleViewObjectTypeDetail);
 
   // 使用 useTable hook
   const { data, loading, pagination, submit, onChange } = useTable<
@@ -66,15 +70,17 @@ export default function BehaviorLogList() {
     any
   >({
     service: async (params) => {
-      // 调用 API 服务，带上当前 activeTab
+      // 调用 API 服务，带上当前 activeTab 和过滤条件
       const result = await fetchBehaviorLogList({
         page_num: params.page || 1,
         page_size: params.page_size || 10,
         query: params.keyword || '',
-        type: activeTab // 搜索时会带上当前 tab 的类型
+        type: activeTab, // 搜索时会带上当前 tab 的类型
+        sources: sourcesFilter.length > 0 ? sourcesFilter : undefined, // 来源过滤
+        run_status: statusFilter.length > 0 ? statusFilter : undefined // 执行状态过滤
       });
 
-      // 更新对应 tab 的总数（搜索时可能会变化）
+      // 更新对应 tab 的总数
       if (activeTab === 'action') {
         setActionTotal(result.total);
       } else {
@@ -97,11 +103,33 @@ export default function BehaviorLogList() {
   // Tab 切换时重新加载数据
   const handleTabChange = (key: string) => {
     setActiveTab(key as 'action' | 'function');
-    // 重置表单并重新提交
+    // 重置表单和过滤条件
     form.resetFields();
+    setSourcesFilter([]);
+    setStatusFilter([]);
     setTimeout(() => {
       submit();
     }, 0);
+  };
+
+  // 处理表格变化（包括过滤）
+  const handleTableChange = (pag: any, sorter: any, filters: any) => {
+    // 处理来源过滤
+    if (filters && filters.sources) {
+      setSourcesFilter(filters.sources);
+    } else {
+      setSourcesFilter([]);
+    }
+
+    // 处理执行状态过滤
+    if (filters && filters.run_status) {
+      setStatusFilter(filters.run_status);
+    } else {
+      setStatusFilter([]);
+    }
+
+    // 调用原有的 onChange
+    onChange(pag, sorter, filters);
   };
 
   return (
@@ -131,9 +159,7 @@ export default function BehaviorLogList() {
           border: false,
           pagination: false,
           scroll: { x: true },
-          onChange: (pagination, sorter, filters) => {
-            onChange(pagination, sorter, filters);
-          }
+          onChange: handleTableChange
         }}
       />
 
@@ -157,12 +183,18 @@ export default function BehaviorLogList() {
         </div>
       )}
 
-      {/* 详情抽屉 */}
-      <DetailDrawer
-        visible={detailDrawerVisible}
-        data={selectedRecord}
-        onClose={handleCloseDetail}
-      />
+      {/* 对象类型详情抽屉 */}
+      {selectedObjectType && detailDrawerVisible && (
+        <ObjectTypeDetailDrawer
+          visible={detailDrawerVisible}
+          onClose={() => {
+            setDetailDrawerVisible(false);
+            setSelectedObjectType(null);
+          }}
+          objectTypeId={selectedObjectType?.id}
+          defaultActiveTab={objectTypeActiveTab}
+        />
+      )}
     </div>
   );
 }

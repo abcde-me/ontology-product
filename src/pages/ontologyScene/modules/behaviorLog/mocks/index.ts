@@ -10,20 +10,17 @@ export const USE_MOCK = true;
 // 延迟函数（模拟网络请求）
 const delay = (ms = 300) => new Promise((resolve) => setTimeout(resolve, ms));
 
-// 生成随机耗时（100ms - 5000ms）
-const randomDuration = () => Math.floor(Math.random() * 4900) + 100;
-
 // 生成随机状态
-const randomStatus = (): 1 | 2 | 3 => {
-  const statuses: Array<1 | 2 | 3> = [1, 2, 3];
-  const weights = [0.7, 0.2, 0.1]; // 70% 成功, 20% 运行中, 10% 失败
+const randomStatus = (): 1 | 2 | 3 | 4 => {
+  const statuses: Array<1 | 2 | 3 | 4> = [1, 2, 3, 4];
+  const weights = [0.1, 0.7, 0.15, 0.05]; // 10% 处理中, 70% 成功, 15% 失败, 5% kill
   const random = Math.random();
   let sum = 0;
   for (let i = 0; i < weights.length; i++) {
     sum += weights[i];
     if (random < sum) return statuses[i];
   }
-  return 1;
+  return 2;
 };
 
 // 生成时间字符串
@@ -32,8 +29,8 @@ const generateTime = (baseTime: Date, offsetMs: number): string => {
   return time.toISOString().replace('T', ' ').substring(0, 19);
 };
 
-// 行为类型列表
-const behaviorTypes = [
+// 行为/函数名称列表
+const actionNames = [
   '实体识别',
   '关联分析',
   '威胁研判',
@@ -44,60 +41,89 @@ const behaviorTypes = [
   '异常检测'
 ];
 
-// 对象类型列表
-const objectTypes = [
-  '多媒体情报',
-  '作战单元',
-  '作战编队',
-  '战术预案',
-  '情报源',
-  '目标对象'
+const functionNames = [
+  '数据清洗',
+  '特征提取',
+  '模型推理',
+  '结果聚合',
+  '数据转换',
+  '格式校验',
+  '数据加密',
+  '日志记录'
 ];
 
-// 操作人列表
-const operators = ['张三', '李四', '王五', '赵六', '系统管理员', '数据分析师'];
+// 描述说明列表
+const descriptions = [
+  '分布在边界区域的实时气象采集设备信息流映射',
+  '自动识别文本中的关键实体信息',
+  '基于规则引擎的智能匹配分析',
+  '多维度数据关联分析处理',
+  '实时数据流处理与转换',
+  '异常行为模式识别与告警'
+];
 
-// 错误信息列表
-const errorMessages = [
-  '网络连接超时',
-  '参数验证失败',
-  '数据源不可用',
-  '权限不足',
-  '系统资源不足',
-  '依赖服务异常'
+// 来源列表
+const sources = ['manual', 'auto', 'api'];
+
+// 对象类型列表
+const objectTypes = [
+  { id: '1001', name: '设备', icon: 'icon-device' },
+  { id: '1002', name: '人员', icon: 'icon-person' },
+  { id: '1003', name: '车辆', icon: 'icon-car' },
+  { id: '1004', name: '事件', icon: 'icon-event' },
+  { id: '1005', name: '地点', icon: 'icon-location' },
+  { id: '1006', name: '组织', icon: 'icon-organization' }
 ];
 
 // 生成 Mock 数据
-export const generateMockData = (count = 50): BehaviorLogItem[] => {
+export const generateMockData = (
+  count = 50,
+  type: 'action' | 'function' = 'action'
+): BehaviorLogItem[] => {
   const data: BehaviorLogItem[] = [];
-  const baseTime = new Date('2026-01-29T10:00:00');
+  const baseTime = new Date('2026-10-10T20:10:00');
+  const names = type === 'action' ? actionNames : functionNames;
 
   for (let i = 0; i < count; i++) {
-    const duration = randomDuration();
     const status = randomStatus();
     const startTimeOffset = i * 60000; // 每条记录间隔1分钟
     const startTime = generateTime(baseTime, startTimeOffset);
-    const endTime =
-      status === 2 ? '-' : generateTime(baseTime, startTimeOffset + duration);
+
+    // 根据状态生成耗时和结束时间
+    let duration = '-';
+    let endTime = '-';
+    if (status === 2 || status === 3 || status === 4) {
+      const durationMs = Math.floor(Math.random() * 5000) + 100; // 100ms - 5s
+      if (durationMs < 1000) {
+        duration = `${durationMs}ms`;
+      } else {
+        duration = `${(durationMs / 1000).toFixed(2)}s`;
+      }
+      endTime = generateTime(baseTime, startTimeOffset + durationMs);
+    }
+
+    // 随机选择一个对象类型
+    const objectType =
+      objectTypes[Math.floor(Math.random() * objectTypes.length)];
 
     data.push({
-      id: i + 1,
-      session_id: `session_${String(i + 1).padStart(6, '0')}`,
-      action_id: Math.floor(Math.random() * 100),
+      id: String(i + 1).padStart(3, '0'),
+      name: names[Math.floor(Math.random() * names.length)],
+      code: `${type === 'action' ? 'Action' : 'Function'}_${String(Math.floor(Math.random() * 100)).padStart(2, '0')}`,
+      description:
+        descriptions[Math.floor(Math.random() * descriptions.length)],
+      sources: sources[Math.floor(Math.random() * sources.length)],
+      run_status: status,
+      duration,
       start_time: startTime,
       end_time: endTime,
-      run_status: status,
-      operator_time: startTime,
-      run_log:
-        status === 3
-          ? errorMessages[Math.floor(Math.random() * errorMessages.length)]
-          : 'method execute success',
-      input_params: JSON.stringify({ id: i + 1, age: 20 + i }),
-      execute_code: '#!/usr/bin/env python3\nprint("Hello World")',
+      ontologyObjectTypeName: objectType.name,
+      ontologyObjectTypeIcon: objectType.icon,
+      ontologyObjectTypeId: objectType.id,
       created_at: startTime,
       updated_at: endTime === '-' ? startTime : endTime,
-      created_by: operators[Math.floor(Math.random() * operators.length)],
-      updated_by: operators[Math.floor(Math.random() * operators.length)]
+      created_by: '系统管理员',
+      updated_by: '系统管理员'
     });
   }
 
@@ -105,7 +131,8 @@ export const generateMockData = (count = 50): BehaviorLogItem[] => {
 };
 
 // 导出 Mock 数据
-export const MOCK_BEHAVIOR_LOGS = generateMockData(50);
+export const MOCK_ACTION_LOGS = generateMockData(30, 'action');
+export const MOCK_FUNCTION_LOGS = generateMockData(20, 'function');
 
 // Mock API 延迟
 export const mockDelay = (ms = 300) =>
@@ -164,20 +191,29 @@ export const mockApi = {
     params: BehaviorLogListParams
   ): Promise<BehaviorLogListResponse> => {
     await delay(500);
-    let list = [...MOCK_BEHAVIOR_LOGS];
+
+    // 根据类型选择数据源
+    let list =
+      params.type === 'action'
+        ? [...MOCK_ACTION_LOGS]
+        : [...MOCK_FUNCTION_LOGS];
 
     // 关键词搜索
     if (params.query) {
       const keyword = params.query.toLowerCase();
       list = list.filter(
         (item) =>
-          item.session_id.toLowerCase().includes(keyword) ||
-          String(item.id).includes(keyword)
+          item.id.toLowerCase().includes(keyword) ||
+          item.name.toLowerCase().includes(keyword) ||
+          item.code.toLowerCase().includes(keyword) ||
+          item.description.toLowerCase().includes(keyword)
       );
     }
 
-    // 根据类型筛选（这里 Mock 数据不区分，实际应该区分）
-    // 实际项目中应该根据 params.type 返回不同的数据
+    // 来源过滤
+    if (params.sources && params.sources.length > 0) {
+      list = list.filter((item) => params.sources!.includes(item.sources));
+    }
 
     // 分页
     const page = params.page_num || 1;
@@ -198,7 +234,8 @@ export const mockApi = {
   // 获取执行记录详情
   getBehaviorLogDetail: async (id: string): Promise<BehaviorLogItem> => {
     await delay(300);
-    const item = MOCK_BEHAVIOR_LOGS.find((log) => log.id === Number(id));
+    const allLogs = [...MOCK_ACTION_LOGS, ...MOCK_FUNCTION_LOGS];
+    const item = allLogs.find((log) => log.id === id);
     if (!item) {
       throw new Error(`执行记录 ${id} 不存在`);
     }
@@ -223,13 +260,11 @@ export const mockApi = {
   deleteBehaviorLog: async (id: string): Promise<void> => {
     await delay(300);
     console.log(`[Mock] 删除执行记录: ${id}`);
-    // 实际项目中这里可以从 MOCK_BEHAVIOR_LOGS 中移除
   },
 
   // 批量删除执行记录
   batchDeleteBehaviorLogs: async (ids: string[]): Promise<void> => {
     await delay(500);
     console.log(`[Mock] 批量删除执行记录: ${ids.join(', ')}`);
-    // 实际项目中这里可以从 MOCK_BEHAVIOR_LOGS 中批量移除
   }
 };
