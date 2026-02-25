@@ -22,8 +22,10 @@ import {
 import { isNil } from 'lodash-es';
 import {
   getFunctionDetail,
+  getFunctionList,
   saveFunction
 } from '@/api/ontologySceneLibrary/ontologyFunction';
+import { BehaviorLogItem } from '@/pages/ontologyScene/modules/behaviorLog/types';
 
 const { TextArea } = Input;
 
@@ -40,7 +42,9 @@ export default function OSFunctionDetailPage() {
   const { data: functionDetail, loading } = useRequest(
     () => {
       if (functionId === '_NEW_') return Promise.resolve(null);
-      return getFunctionDetail(functionId);
+      return getFunctionDetail(functionId).then((res) => {
+        return res.data || null;
+      });
     },
     {
       refreshDeps: [OSId, functionId]
@@ -125,6 +129,22 @@ export default function OSFunctionDetailPage() {
                   if (value.trim().length < 2) {
                     return onError('显示名称至少2字符');
                   }
+                  getFunctionList({
+                    ontologyModelID: +OSId,
+                    pageNum: 1,
+                    pageSize: 10,
+                    filter: value
+                  }).then((res) => {
+                    if (
+                      res.items.filter(
+                        (item: OntologyFunctionItem) =>
+                          item.name === value &&
+                          item.id!.toString() !== functionId
+                      ).length
+                    ) {
+                      onError('显示名称已存在');
+                    }
+                  });
                 }
               }
             ]}
@@ -154,6 +174,23 @@ export default function OSFunctionDetailPage() {
                   if (value.trim().length < 2) {
                     return onError('函数名称至少2字符');
                   }
+                  return getFunctionList({
+                    ontologyModelID: +OSId,
+                    pageNum: 1,
+                    pageSize: 10,
+                    filter: value
+                  }).then((res) => {
+                    if (
+                      res.items?.filter(
+                        (item: OntologyFunctionItem) =>
+                          item.code === value &&
+                          item.id!.toString() !== functionId
+                      ).length
+                    ) {
+                      onError('函数名称(id)已存在');
+                      return Promise.resolve();
+                    }
+                  });
                 }
               }
             ]}

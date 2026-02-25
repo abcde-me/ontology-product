@@ -249,7 +249,6 @@ export const getActionList = async (params: IActionListParams) => {
     .post(params)
     .inRegion()
     .do();
-  debugger;
   return res.data;
 };
 

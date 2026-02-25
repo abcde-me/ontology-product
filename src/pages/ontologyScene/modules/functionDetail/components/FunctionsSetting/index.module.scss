@@ -19,7 +19,6 @@ $border-color: #dfe2eb;
     padding: 8px 16px;
     border: 1px solid $border-color;
     border-bottom: 1px solid #ebeef5;
-    border-right: none;
     flex-shrink: 0;
     display: flex;
     align-items: center;
@@ -27,7 +26,6 @@ $border-color: #dfe2eb;
   }
 
   .body {
-    border: #dfe2eb;
     padding: 16px;
     flex: 1;
     overflow: auto;
@@ -69,6 +67,7 @@ $border-color: #dfe2eb;
 
     .header {
       border-top-left-radius: 4px;
+      border-right: none;
       background: #fafbff;
       justify-content: space-between;
     }
@@ -112,11 +111,18 @@ $border-color: #dfe2eb;
     .body {
       border-left: none;
     }
+
+    :global {
+      .hidden-border {
+        border-right: none !important;
+      }
+    }
   }
 
   .show-sdk {
     .header {
       border-top-right-radius: 0;
+      border-right: none;
     }
   }
 

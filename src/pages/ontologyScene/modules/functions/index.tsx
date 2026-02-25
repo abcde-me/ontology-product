@@ -22,7 +22,8 @@ import {
 import { SafeTableCell } from '@/components/SafeTableCell';
 import { OntologyFunctionItem } from '@/pages/ontologyScene/types/ontologyFunction';
 import { getFunctionList } from '@/api/ontologySceneLibrary/ontologyFunction';
-import { isNil } from 'lodash-es';
+import { isEmpty, isNil } from 'lodash-es';
+import { OsEmptyStatusWrapper } from '@/pages/ontologyScene/componens';
 
 // 函数
 export default function OntologySceneFunctions() {
@@ -33,7 +34,7 @@ export default function OntologySceneFunctions() {
   }>();
 
   const history = useHistory();
-
+  const [functionsEmpty, setFunctionsEmpty] = useState(true);
   const { tableProps, onSubmit, refresh } = useArcoTable(
     ({ pagination, query, filters, sorter }) => {
       if (isNil(ontologyModelID))
@@ -42,10 +43,13 @@ export default function OntologySceneFunctions() {
           total: 0
         });
       return getFunctionList({
-        ontologyModelID,
+        ontologyModelID: +ontologyModelID,
         pageNum: pagination.current,
         pageSize: pagination.pageSize,
         ...query
+      }).then((res) => {
+        setFunctionsEmpty(isEmpty(query) && !res.items.length);
+        return res;
       });
     },
     {
@@ -144,8 +148,14 @@ export default function OntologySceneFunctions() {
   ];
 
   return (
-    <div
+    <OsEmptyStatusWrapper
       className={`flex h-full w-full flex-col gap-4 overflow-hidden bg-white ${styles['function']}`}
+      onCreate={() => {
+        route2FunctionDetail('create');
+      }}
+      title={'函数'}
+      description={'函数的描述'}
+      empty={functionsEmpty}
     >
       <div className={styles['function-content']}>
         <div className={styles['function-list']}>
@@ -159,16 +169,18 @@ export default function OntologySceneFunctions() {
           </div>
           <SearchTable
             searchForm={
-              <Form form={form}>
+              <Form form={form} autoComplete={'off'}>
                 <Form.Item noStyle field={'filter'}>
                   <Input
                     className={'w-[220px]'}
                     placeholder={'请输入关键字'}
+                    onChange={onSubmit}
+                    allowClear
                     suffix={
                       <div
                         className={`mr-[-12px] flex h-full items-center border-l-[1px] border-solid border-l-[#C3C7D4] bg-[#F5F7FC] px-3 ${styles['search']}`}
                       >
-                        <IconSearch />
+                        <IconSearch onClick={onSubmit} />
                       </div>
                     }
                   />
@@ -191,6 +203,6 @@ export default function OntologySceneFunctions() {
           />
         </div>
       </div>
-    </div>
+    </OsEmptyStatusWrapper>
   );
 }

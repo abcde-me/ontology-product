@@ -22,6 +22,7 @@ import {
 import { isNil } from 'lodash-es';
 import { getFunctionDetail } from '@/api/ontologySceneLibrary/ontologyFunction';
 import { InputType } from '@/pages/ontologyScene/types/ontologyFunction';
+import { IconLeft } from '@arco-design/web-react/icon';
 
 const { TextArea } = Input;
 
@@ -93,6 +94,12 @@ export default function BehaviorActionDetailPage() {
       className={`${styles['behavior-action-detail']} flex h-full w-full flex-col `}
     >
       <div className={`${styles['page-header']} text-default`}>
+        <ProButton
+          icon={<IconLeft />}
+          size={'default'}
+          type={'outline'}
+          onClick={goBack}
+        />
         {`${pageMode === 'edit' ? '编辑' : '创建'}行为`}
       </div>
       <div className={`${styles['page-body']}`}>

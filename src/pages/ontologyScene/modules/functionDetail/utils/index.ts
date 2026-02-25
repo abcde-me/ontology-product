@@ -343,7 +343,6 @@ export function buildFunctionDetail(
   meta: OntologyFunctionSchema
 ): Partial<OntologyFunctionDetail> {
   const { name, description, input, output, content, code } = meta;
-
   const inputParams = (input || []).map((item, idx) => {
     const { name, code, uiTypeAndValue } = item;
     const [type, ui] = uiTypeAndValue!.uiType!.split('_');
@@ -351,7 +350,7 @@ export function buildFunctionDetail(
       name,
       code: name,
       type,
-      inputType: InputType.Output,
+      inputType: InputType.Input,
       uiType: ui,
       idx
     };

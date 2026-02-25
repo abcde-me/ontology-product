@@ -301,7 +301,11 @@ export const FunctionsSetting = () => {
         </div>
         <div className={`w-max ${styles['fullscreen-statue']}`}></div>
         <Form.Item noStyle field={'content'}>
-          <FunctionScript />
+          <FunctionScript
+            className={classNames({
+              'hidden-border': showDoc
+            })}
+          />
         </Form.Item>
       </div>
       {showDoc && (
