@@ -33,17 +33,22 @@ export function buildActionSchema(action: BehaviorActionDetail): ActionSchema {
           type,
           uiType
         });
-        p.validationRules?.push({
-          enabledValidation: enabledValidation!,
-          failMessage: validationRule?.failMessage || '',
-          rule_name: validationRule?.ruleName || TYPE2RULE_TYPES[type][0].value,
-          ruleConfig:
-            validationRule?.ruleName === RuleName.EnumRule
-              ? param.validationRule?.ruleConfig?.options.toString()
-              : param.validationRule?.ruleConfig,
-          name,
-          type
-        });
+        if (
+          [ParamType.Float, ParamType.String, ParamType.Integer].includes(type)
+        ) {
+          p.validationRules?.push({
+            enabledValidation: enabledValidation!,
+            failMessage: validationRule?.failMessage || '',
+            rule_name:
+              validationRule?.ruleName || TYPE2RULE_TYPES[type][0].value,
+            ruleConfig:
+              validationRule?.ruleName === RuleName.EnumRule
+                ? param.validationRule?.ruleConfig?.options.toString()
+                : param.validationRule?.ruleConfig,
+            name,
+            type
+          });
+        }
         return p;
       },
       {
@@ -67,17 +72,17 @@ export function buildFunctionSchema(
           name,
           code: code ?? name,
           type,
-          uiType: TYPE2COMP_OPTIONS[type][0].value
+          uiType: TYPE2COMP_OPTIONS[type!][0].value
         });
         if (
-          [ParamType.Float, ParamType.String, ParamType.Integer].includes(type)
+          [ParamType.Float, ParamType.String, ParamType.Integer].includes(type!)
         ) {
           p.validationRules!.push({
-            name: name!,
-            type,
+            name,
+            type: type!,
             enabledValidation: true,
             failMessage: undefined,
-            rule_name: TYPE2RULE_TYPES[type][0].value,
+            rule_name: TYPE2RULE_TYPES[type!][0].value,
             ruleConfig: undefined
           });
         }

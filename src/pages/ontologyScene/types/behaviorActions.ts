@@ -1,4 +1,5 @@
-import { ParamType } from './ontologyFunction';
+import { ParamType, UiType } from './ontologyFunction';
+import { IconCodeBlock } from '@arco-design/web-react/icon';
 
 /**
  * OntologyAction，行为对象
@@ -55,7 +56,7 @@ export interface BehaviorActionItem {
   /**
    * 参数配置列表
    */
-  params?: OntologyActionParam[];
+  params: OntologyActionParam[];
   /**
    * 更新时间
    */
@@ -71,6 +72,10 @@ export interface BehaviorActionItem {
  * CreateOntologyActionRequest
  */
 export interface BehaviorActionDetail {
+  /**
+   * 本体ID
+   */
+  ontologyModelID?: number;
   /**
    * 行为唯一编码
    */
@@ -238,39 +243,46 @@ export interface ActionSchema {
   functionId?: number;
   function_params?: Partial<OntologyActionParam>[];
   validationRules?: ValidateRule[];
-}
-
-// 函数参数界面控件 类型
-export enum UiType {
-  Input = 'input',
-  TextArea = 'textArea',
-  InputNumber = 'inputNumber',
-  InputNumberFloat = 'inputNumberFloat',
-  Switch = 'switch',
-  Date = 'date',
-  Timestamp = 'dateTime',
-  Geopoint = 'geopoint',
-  ObjectOne = 'objectOne',
-  ObjectSet = 'objectSet',
-  Uploader = 'upload'
+  type?: ParamType;
+  uiType?: UiType;
 }
 
 export const TYPE2COMP_OPTIONS = {
   [ParamType.String]: [
-    { label: '单行文本框', value: UiType.Input },
-    { label: '文本域', value: UiType.TextArea }
+    { label: '单行文本框', value: UiType.Input, icon: IconCodeBlock },
+    { label: '文本域', value: UiType.TextArea, icon: IconCodeBlock }
   ],
-  [ParamType.Integer]: [{ label: '数字步进器', value: UiType.InputNumber }],
+  [ParamType.Integer]: [
+    { label: '数字步进器', value: UiType.InputNumber, icon: IconCodeBlock }
+  ],
   [ParamType.Float]: [
-    { label: '高精度数字输入框', value: UiType.InputNumberFloat }
+    {
+      label: '高精度数字输入框',
+      value: UiType.InputNumberFloat,
+      icon: IconCodeBlock
+    }
   ],
-  [ParamType.Boolean]: [{ label: '切换开关', value: UiType.Switch }],
-  [ParamType.Date]: [{ label: '日期选择器', value: UiType.Date }],
-  [ParamType.Timestamp]: [{ label: '日期时间选择器', value: UiType.Timestamp }],
-  [ParamType.Geopoint]: [{ label: '地图选择器', value: UiType.Geopoint }],
-  [ParamType.ObjectOne]: [{ label: '对象搜索选择器', value: UiType.ObjectOne }],
-  [ParamType.ObjectSet]: [{ label: '对象集选择器', value: UiType.ObjectSet }],
-  [ParamType.Attachment]: [{ label: '文件上传', value: UiType.Uploader }]
+  [ParamType.Boolean]: [
+    { label: '切换开关', value: UiType.Switch, icon: IconCodeBlock }
+  ],
+  [ParamType.Date]: [
+    { label: '日期选择器', value: UiType.Date, icon: IconCodeBlock }
+  ],
+  [ParamType.Timestamp]: [
+    { label: '日期时间选择器', value: UiType.Timestamp, icon: IconCodeBlock }
+  ],
+  [ParamType.Geopoint]: [
+    { label: '地图选择器', value: UiType.Geopoint, icon: IconCodeBlock }
+  ],
+  [ParamType.ObjectOne]: [
+    { label: '对象搜索选择器', value: UiType.ObjectOne, icon: IconCodeBlock }
+  ],
+  [ParamType.ObjectSet]: [
+    { label: '对象集选择器', value: UiType.ObjectSet, icon: IconCodeBlock }
+  ],
+  [ParamType.Attachment]: [
+    { label: '文件上传', value: UiType.Uploader, icon: IconCodeBlock }
+  ]
 };
 
 export const TYPE2RULE_TYPES = {
@@ -284,3 +296,11 @@ export const TYPE2RULE_TYPES = {
     { label: '枚举值', value: RuleName.EnumRule }
   ]
 };
+export const TYPE_UI_OPTIONS = Object.entries(TYPE2COMP_OPTIONS).reduce<
+  Record<string, any>
+>((previousValue, [type, options]) => {
+  options.forEach(({ label, value, icon }) => {
+    previousValue[`${type}_${value}`] = icon;
+  });
+  return previousValue;
+}, {});

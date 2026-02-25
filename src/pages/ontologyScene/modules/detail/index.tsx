@@ -382,7 +382,7 @@ export default function OntologySceneDetail() {
                 exact
               />
               <Route
-                path={`${basePath}/${ONTOLOGY_SCENE_MENU_ITEM_KEYS.FUNCTIONS}/:pageMode/:id`}
+                path={`${basePath}/${ONTOLOGY_SCENE_MENU_ITEM_KEYS.FUNCTIONS}/:pageMode/:functionId`}
                 component={OSFunctionDetail}
               />
               <Route

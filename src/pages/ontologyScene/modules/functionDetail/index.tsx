@@ -5,7 +5,7 @@ import { ProButton } from '@ceai-front/arco-material';
 import { useHistory, useParams } from 'react-router-dom';
 import { FormItem } from '@/pages/ontologyScene/componens';
 import { FunctionsSetting } from '@/pages/ontologyScene/modules/functionDetail/components';
-import { useRequest } from 'ahooks';
+import { useDebounceFn, useRequest } from 'ahooks';
 import {
   DEFAULT_FUNCTION_CONTENT,
   DEFAULT_FUNCTION_SCHEMA,
@@ -22,8 +22,10 @@ import {
 import { isNil } from 'lodash-es';
 import {
   getFunctionDetail,
+  getFunctionList,
   saveFunction
 } from '@/api/ontologySceneLibrary/ontologyFunction';
+import { BehaviorLogItem } from '@/pages/ontologyScene/modules/behaviorLog/types';
 
 const { TextArea } = Input;
 
@@ -32,29 +34,44 @@ export default function OSFunctionDetailPage() {
   const [form] = Form.useForm();
   const bodyRef = useRef<HTMLDivElement>(null);
   const {
-    id: OnFunctionId,
+    id: OSId,
     pageMode,
-    actionId
+    functionId
   } = useParams<Record<string, string>>();
 
   const { data: functionDetail, loading } = useRequest(
     () => {
-      if (OnFunctionId === '_NEW_') return Promise.resolve(null);
-      return getFunctionDetail(OnFunctionId);
+      if (functionId === '_NEW_') return Promise.resolve(null);
+      return getFunctionDetail(functionId).then((res) => {
+        return res.data || null;
+      });
     },
     {
-      refreshDeps: [OnFunctionId, actionId]
+      refreshDeps: [OSId, functionId]
     }
   );
+
+  const goBack = () => {
+    history.replace(
+      `/tenant/compute/modaforge/ontologyScene/detail/${OSId}/functions`
+    );
+  };
 
   const saveAction = async () => {
     try {
       const values: OntologyFunctionSchema = await form.validate();
       await saveFunction({
-        ...functionDetail,
-        ...buildFunctionDetail(values)
+        ...(functionDetail || {}),
+        ...buildFunctionDetail(values),
+        ontologyModelID: +OSId
       });
-      Message.success('保存成功');
+      Message.success({
+        content: '保存成功',
+        duration: 0.5,
+        onClose() {
+          goBack();
+        }
+      });
     } catch (e) {
       console.error(e);
     }
@@ -84,8 +101,10 @@ export default function OSFunctionDetailPage() {
           className={`overflow-auto ${styles['function-form']}`}
           onValuesChange={(c, values) => {
             if ('content' in c) return;
-            form.setFieldsValue({
-              content: buildPythonFunctionScript(values as any)
+            form.validate().then((res) => {
+              form.setFieldsValue({
+                content: buildPythonFunctionScript(res)
+              });
             });
           }}
         >
@@ -112,6 +131,22 @@ export default function OSFunctionDetailPage() {
                   if (value.trim().length < 2) {
                     return onError('显示名称至少2字符');
                   }
+                  getFunctionList({
+                    ontologyModelID: +OSId,
+                    pageNum: 1,
+                    pageSize: 10,
+                    filter: value
+                  }).then((res) => {
+                    if (
+                      res.items?.filter(
+                        (item: OntologyFunctionItem) =>
+                          item.name === value &&
+                          item.id!.toString() !== functionId
+                      ).length
+                    ) {
+                      onError('显示名称已存在');
+                    }
+                  });
                 }
               }
             ]}
@@ -141,6 +176,23 @@ export default function OSFunctionDetailPage() {
                   if (value.trim().length < 2) {
                     return onError('函数名称至少2字符');
                   }
+                  return getFunctionList({
+                    ontologyModelID: +OSId,
+                    pageNum: 1,
+                    pageSize: 10,
+                    filter: value
+                  }).then((res) => {
+                    if (
+                      res.items?.filter(
+                        (item: OntologyFunctionItem) =>
+                          item.code === value &&
+                          item.id!.toString() !== functionId
+                      ).length
+                    ) {
+                      onError('函数名称(id)已存在');
+                      return Promise.resolve();
+                    }
+                  });
                 }
               }
             ]}

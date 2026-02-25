@@ -57,6 +57,13 @@
     width: 1px;
     background: #dfe2eb;
   }
+
+  &:hover,
+  &:active {
+    div {
+      background: #184ff2;
+    }
+  }
 }
 
 .resize-box {

@@ -1,13 +1,19 @@
 import React, { useState } from 'react';
-import { BehaviorActionItem } from '@/pages/ontologyScene/types/behaviorActions';
+import {
+  BehaviorActionItem,
+  RuleName,
+  TYPE2RULE_TYPES
+} from '@/pages/ontologyScene/types/behaviorActions';
 import styles from './index.module.scss';
 import { OsDrawer, PyCodeContent } from '@/pages/ontologyScene/componens';
-import { Tabs } from '@arco-design/web-react';
+import { Form, Tabs } from '@arco-design/web-react';
 import { IconEdit } from '@arco-design/web-react/icon';
 import { useHistory } from 'react-router-dom';
 import { useRequest } from 'ahooks';
 import { getFunctionDetail } from '@/api/ontologySceneLibrary/ontologyFunction';
 import { isNil } from 'lodash-es';
+import { ValidateRules } from '@/pages/ontologyScene/componens/ValidateRules';
+import { ParamType } from '@/pages/ontologyScene/types/ontologyFunction';
 
 interface IProps {
   show: boolean;
@@ -19,6 +25,7 @@ export const BehaviorDetail = (props: IProps) => {
   const { data, onClose, show } = props;
   const history = useHistory();
   const [activeTab, setActiveTab] = useState('');
+  const [form] = Form.useForm();
   const { data: functionInfo } = useRequest(
     () => {
       if (isNil(data)) return Promise.resolve(undefined);
@@ -28,8 +35,6 @@ export const BehaviorDetail = (props: IProps) => {
       refreshDeps: [data?.functionId]
     }
   );
-
-  console.log(123, data);
 
   return (
     <OsDrawer
@@ -86,13 +91,53 @@ export const BehaviorDetail = (props: IProps) => {
           </div>
         </div>
         <div className={styles['behavior-other-info']}>
-          <Tabs activeTab={activeTab} onChange={setActiveTab}>
+          <Tabs
+            activeTab={activeTab}
+            onChange={(key) => {
+              setActiveTab(key);
+              if (key === 'rules') {
+                debugger;
+                form.setFieldsValue({
+                  validationRules: data?.params.flatMap((param) => {
+                    const { name, type, enabledValidation, validationRule } =
+                      param;
+                    if (
+                      ![
+                        ParamType.Integer,
+                        ParamType.String,
+                        ParamType.Float
+                      ].includes(type)
+                    )
+                      return [];
+                    return {
+                      enabledValidation: enabledValidation!,
+                      failMessage: validationRule?.failMessage || '',
+                      rule_name:
+                        validationRule?.ruleName ||
+                        TYPE2RULE_TYPES[type][0].value,
+                      ruleConfig:
+                        validationRule?.ruleName === RuleName.EnumRule
+                          ? param.validationRule?.ruleConfig?.options.toString()
+                          : param.validationRule?.ruleConfig,
+                      name,
+                      type
+                    };
+                  })
+                });
+              }
+            }}
+          >
             <Tabs.TabPane title={'参数配置（5）'} key={'params'} />
             <Tabs.TabPane title={'校验规则（5）'} key={'rules'} />
             <Tabs.TabPane title={'函数'} key={'function'} />
           </Tabs>
           {activeTab === 'function' && (
             <PyCodeContent value={functionInfo?.content} readOnly />
+          )}
+          {activeTab === 'rules' && (
+            <Form form={form} disabled>
+              <ValidateRules readonly />
+            </Form>
           )}
         </div>
       </div>

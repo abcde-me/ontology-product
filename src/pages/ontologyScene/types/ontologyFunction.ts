@@ -5,6 +5,10 @@
  */
 export interface OntologyFunctionDetail {
   /**
+   * 本体
+   */
+  ontologyModelID?: number;
+  /**
    * 函数唯一编码
    */
   code?: string;
@@ -77,11 +81,19 @@ export interface OntologyFunctionParam {
   /**
    * 参数名称
    */
-  name?: string;
+  name: string;
   /**
    * 参数类型
    */
-  type: ParamType;
+  type?: ParamType;
+  /**
+   * 控件类型
+   */
+  uiType?: string;
+  uiTypeAndValue?: {
+    uiType?: string;
+    paramValue?: any;
+  };
   /**
    * 更新时间
    */
@@ -131,6 +143,21 @@ export enum ParamType {
   ObjectSet = 'ObjectSet'
 }
 
+// 函数参数界面控件 类型
+export enum UiType {
+  Input = 'input',
+  TextArea = 'textArea',
+  InputNumber = 'inputNumber',
+  InputNumberFloat = 'inputNumberFloat',
+  Switch = 'switch',
+  Date = 'date',
+  Timestamp = 'dateTime',
+  Geopoint = 'geopoint',
+  ObjectOne = 'objectOne',
+  ObjectSet = 'objectSet',
+  Uploader = 'upload'
+}
+
 export const InputTypeOptions = Object.values(ParamType).map((value) => ({
   label: value,
   value
@@ -164,14 +191,19 @@ export const DEFAULT_FUNCTION_CONTENT = `# 请先修改函数名称
 # 点击运行可以在下方日志区看到运行结果
 
 def my_function(arg1: str) -> dict: # 只读
-    # 在此编写函数逻辑
-    var_1 = 1.0
-    var_2 = 1.0
-    return {"var_1": var_1, "var_2": var_2} # 只读`;
+  # 在此编写函数逻辑
+  var_1 = 1.0
+  var_2 = 1.0
+  return {"var_1": var_1, "var_2": var_2} # 只读`;
 
 export const DEFAULT_FUNCTION_SCHEMA: OntologyFunctionSchema = {
   content: DEFAULT_FUNCTION_CONTENT,
-  input: [{ name: 'arg1', type: ParamType.String }],
+  input: [
+    {
+      name: 'arg1',
+      uiTypeAndValue: { uiType: `${ParamType.String}_${UiType.Input}` }
+    }
+  ],
   output: [
     { name: 'var_1', type: ParamType.Float },
     { name: 'var_2', type: ParamType.Float }

@@ -18,6 +18,7 @@ import {
 } from '@/pages/ontologyScene/modules/functionDetail/utils';
 import { EditorView } from '@codemirror/view';
 import { Transaction } from '@codemirror/state';
+import classNames from 'classnames';
 
 const extension = [python(), lintGutter()];
 
@@ -32,14 +33,15 @@ export const FunctionScript = (props: CustomFormItemCompProps<string>) => {
 
   return (
     <>
-      <div className={styles['function-body']}>
+      <div className={classNames([styles['function-body'], props.className])}>
         <CodeMirror
           extensions={extensions}
           basicSetup={{
             lineNumbers: true,
             highlightActiveLineGutter: false,
             foldGutter: false,
-            highlightActiveLine: false
+            highlightActiveLine: false,
+            tabSize: 2
           }}
           value={value}
           onCreateEditor={(view) => {

@@ -19,9 +19,15 @@ import { ONTOLOGY_SCENE_MENU_ITEM_KEYS } from '@/common/constants';
 import { useHistory, useParams } from 'react-router-dom';
 import useArcoTable from '@/hooks/use-arco-table';
 import { getActionList } from '@/api/ontologySceneLibrary/ontologyAction';
+import { isEmpty, isNil } from 'lodash-es';
 
 export const ActionList = (props: {
   onViewDetail: (data: BehaviorActionItem) => void;
+  /**
+   * 改变页面状态
+   * @param status true:初始无数据，false:有数据
+   */
+  changePageStatus: (status: boolean) => void;
 }) => {
   const [keyword, setKeyword] = useState('');
   const [form] = Form.useForm();
@@ -34,12 +40,29 @@ export const ActionList = (props: {
   const history = useHistory();
 
   const { tableProps, onSubmit, refresh } = useArcoTable(
-    () => {
-      return getActionList({});
+    ({ pagination, query = {} }) => {
+      if (isNil(OSId)) {
+        props.changePageStatus(true);
+        return Promise.resolve({
+          data: [],
+          total: 0
+        });
+      }
+      const search = {
+        pageNum: pagination.current || 1,
+        pageSize: pagination.pageSize || 10,
+        ontologyModelID: +OSId,
+        ...(query as any)
+      };
+      return getActionList(search).then((res) => {
+        props.changePageStatus(isEmpty(query) && isEmpty(res));
+        return res;
+      });
     },
     {
       defaultPageSize: 10,
-      form
+      form,
+      deps: [OSId]
     }
   );
 

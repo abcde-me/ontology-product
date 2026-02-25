@@ -4,6 +4,8 @@ import {
   Drawer,
   Form,
   Input,
+  Message,
+  Modal,
   Space,
   TableColumnProps,
   Tabs
@@ -21,26 +23,44 @@ import {
 } from '@ceai-front/arco-material';
 import { SafeTableCell } from '@/components/SafeTableCell';
 import { OntologyFunctionItem } from '@/pages/ontologyScene/types/ontologyFunction';
-import { getFunctionList } from '@/api/ontologySceneLibrary/ontologyFunction';
+import {
+  deleteFunction,
+  getFunctionList
+} from '@/api/ontologySceneLibrary/ontologyFunction';
+import { isEmpty, isNil } from 'lodash-es';
+import { OsEmptyStatusWrapper } from '@/pages/ontologyScene/componens';
 
 // 函数
 export default function OntologySceneFunctions() {
   const [form] = Form.useForm();
-  const { id: OSId, moduleType = ONTOLOGY_SCENE_MENU_ITEM_KEYS.GRAPH } =
-    useParams<{
-      id: string;
-      moduleType: string;
-    }>();
+  const { id: ontologyModelID } = useParams<{
+    id: string;
+    moduleType: string;
+  }>();
 
   const history = useHistory();
-
+  const [functionsEmpty, setFunctionsEmpty] = useState(true);
   const { tableProps, onSubmit, refresh } = useArcoTable(
     ({ pagination, query, filters, sorter }) => {
-      return getFunctionList({});
+      if (isNil(ontologyModelID))
+        return Promise.resolve({
+          items: [],
+          total: 0
+        });
+      return getFunctionList({
+        ontologyModelID: +ontologyModelID,
+        pageNum: pagination.current,
+        pageSize: pagination.pageSize,
+        ...query
+      }).then((res) => {
+        setFunctionsEmpty(!query?.filter && !res.items?.length);
+        return res;
+      });
     },
     {
       defaultPageSize: 10,
-      form
+      form,
+      deps: [ontologyModelID]
     }
   );
 
@@ -50,8 +70,24 @@ export default function OntologySceneFunctions() {
   ) => {
     const baseUrl = '/tenant/compute/modaforge/ontologyScene/detail';
     history.push(
-      `${baseUrl}/${OSId}/functions/${type}/${data ? data.id : '_NEW_'}`
+      `${baseUrl}/${ontologyModelID}/functions/${type}/${data ? data.id : '_NEW_'}`
     );
+  };
+
+  const handleDelete = (record: OntologyFunctionItem) => {
+    Modal.confirm({
+      title: `确定删除${record.name}吗？`,
+      content: '删除后，不可恢复',
+      onOk: () => {
+        deleteFunction(record.id!).then((res) => {
+          Message.success({
+            content: '删除成功',
+            duration: 0.5,
+            onClose: refresh
+          });
+        });
+      }
+    });
   };
 
   const columns: TableColumnProps<OntologyFunctionItem>[] = [
@@ -124,6 +160,9 @@ export default function OntologySceneFunctions() {
             className={
               'p-0 font-PingFangSc text-[14px] font-normal leading-[22px] text-blue-primary'
             }
+            onClick={() => {
+              handleDelete(record);
+            }}
           >
             删除
           </Button>
@@ -133,8 +172,14 @@ export default function OntologySceneFunctions() {
   ];
 
   return (
-    <div
+    <OsEmptyStatusWrapper
       className={`flex h-full w-full flex-col gap-4 overflow-hidden bg-white ${styles['function']}`}
+      onCreate={() => {
+        route2FunctionDetail('create');
+      }}
+      title={'函数'}
+      description={'函数的描述'}
+      empty={functionsEmpty}
     >
       <div className={styles['function-content']}>
         <div className={styles['function-list']}>
@@ -148,16 +193,18 @@ export default function OntologySceneFunctions() {
           </div>
           <SearchTable
             searchForm={
-              <Form form={form}>
-                <Form.Item noStyle>
+              <Form form={form} autoComplete={'off'}>
+                <Form.Item noStyle field={'filter'}>
                   <Input
                     className={'w-[220px]'}
                     placeholder={'请输入关键字'}
+                    onChange={onSubmit}
+                    allowClear
                     suffix={
                       <div
                         className={`mr-[-12px] flex h-full items-center border-l-[1px] border-solid border-l-[#C3C7D4] bg-[#F5F7FC] px-3 ${styles['search']}`}
                       >
-                        <IconSearch />
+                        <IconSearch onClick={onSubmit} />
                       </div>
                     }
                   />
@@ -180,6 +227,6 @@ export default function OntologySceneFunctions() {
           />
         </div>
       </div>
-    </div>
+    </OsEmptyStatusWrapper>
   );
 }

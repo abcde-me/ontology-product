@@ -207,17 +207,24 @@ export const deleteFunction = (id: string | number) => {
 
 // 获取函数详情
 export const getFunctionDetail = (id: string | number) => {
-  return Promise.resolve(MockList.find((item) => item.id === id));
-  // return UAPI.RES.GetOntologyFunctionDetailApi({}).post({ id }).inRegion().do();
+  // return Promise.resolve(MockList.find((item) => item.id === id));
+  return UAPI.RES.GetOntologyFunctionDetailApi({})
+    .post({ id: +id })
+    .inRegion()
+    .do();
 };
 
 // 获取函数列表
-export const getFunctionList = (params: Record<string | number, any>) => {
-  return Promise.resolve({
-    items: MockList,
-    total: MockList.length
-  });
-  // return UAPI.RES.GetOntologyFunctionListApi({}).post(params).inRegion().do();
+export const getFunctionList = async (params: Record<string | number, any>) => {
+  const res = await UAPI.RES.GetOntologyFunctionListApi({})
+    .post(params)
+    .inRegion()
+    .do();
+  const { result: items = [], totalCount: total = 0 } = res.data || {};
+  return {
+    items: items ?? [],
+    total
+  };
 };
 // 函数测试
 export const testFunction = (params: Record<string | number, any>) => {
