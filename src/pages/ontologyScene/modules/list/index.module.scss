@@ -4,3 +4,61 @@
     flex-direction: column;
   }
 }
+
+.initial-page {
+  background-image: url('../../assets/initial-bg.png');
+  background-size: 100% auto;
+  background-position: top;
+  background-repeat: no-repeat;
+  background-color: #ebf0fa !important;
+
+  .primary-color {
+    background: linear-gradient(86deg, #184ff2 23.82%, #733ff5 61.19%);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  // 入场动效关键帧
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  // 入场动效类
+  .fade-in-up {
+    opacity: 0;
+    transform: translateY(10px);
+    animation: fadeInUp 200ms ease-out forwards;
+  }
+
+  // 创建按钮样式覆盖 Arco Design 默认样式
+  .create-button {
+    &:global(.arco-btn) {
+      border-color: var(--color-text-1) !important;
+      background-color: var(--color-text-1) !important;
+      color: #ffffff !important;
+      border-radius: 6px !important;
+      padding: 12px 24px !important;
+      font-size: 16px !important;
+      font-weight: 500 !important;
+      height: auto !important;
+      transition: all 200ms ease !important;
+
+      &:hover {
+        border-color: #2d3139 !important;
+        background-color: #2d3139 !important;
+      }
+
+      &:active {
+        transform: scale(0.98) !important;
+      }
+    }
+  }
+}
