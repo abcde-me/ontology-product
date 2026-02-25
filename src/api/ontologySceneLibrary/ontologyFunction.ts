@@ -222,7 +222,7 @@ export const getFunctionList = async (params: Record<string | number, any>) => {
     .do();
   const { result: items = [], totalCount: total = 0 } = res.data || {};
   return {
-    items,
+    items: items ?? [],
     total
   };
 };

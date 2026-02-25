@@ -5,7 +5,7 @@ import { ProButton } from '@ceai-front/arco-material';
 import { useHistory, useParams } from 'react-router-dom';
 import { FormItem } from '@/pages/ontologyScene/componens';
 import { FunctionsSetting } from '@/pages/ontologyScene/modules/functionDetail/components';
-import { useRequest } from 'ahooks';
+import { useDebounceFn, useRequest } from 'ahooks';
 import {
   DEFAULT_FUNCTION_CONTENT,
   DEFAULT_FUNCTION_SCHEMA,
@@ -101,8 +101,10 @@ export default function OSFunctionDetailPage() {
           className={`overflow-auto ${styles['function-form']}`}
           onValuesChange={(c, values) => {
             if ('content' in c) return;
-            form.setFieldsValue({
-              content: buildPythonFunctionScript(values as any)
+            form.validate().then((res) => {
+              form.setFieldsValue({
+                content: buildPythonFunctionScript(res)
+              });
             });
           }}
         >
@@ -136,7 +138,7 @@ export default function OSFunctionDetailPage() {
                     filter: value
                   }).then((res) => {
                     if (
-                      res.items.filter(
+                      res.items?.filter(
                         (item: OntologyFunctionItem) =>
                           item.name === value &&
                           item.id!.toString() !== functionId

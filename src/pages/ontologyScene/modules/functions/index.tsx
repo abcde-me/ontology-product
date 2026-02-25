@@ -4,6 +4,8 @@ import {
   Drawer,
   Form,
   Input,
+  Message,
+  Modal,
   Space,
   TableColumnProps,
   Tabs
@@ -21,7 +23,10 @@ import {
 } from '@ceai-front/arco-material';
 import { SafeTableCell } from '@/components/SafeTableCell';
 import { OntologyFunctionItem } from '@/pages/ontologyScene/types/ontologyFunction';
-import { getFunctionList } from '@/api/ontologySceneLibrary/ontologyFunction';
+import {
+  deleteFunction,
+  getFunctionList
+} from '@/api/ontologySceneLibrary/ontologyFunction';
 import { isEmpty, isNil } from 'lodash-es';
 import { OsEmptyStatusWrapper } from '@/pages/ontologyScene/componens';
 
@@ -48,7 +53,7 @@ export default function OntologySceneFunctions() {
         pageSize: pagination.pageSize,
         ...query
       }).then((res) => {
-        setFunctionsEmpty(isEmpty(query) && !res.items.length);
+        setFunctionsEmpty(!query?.filter && !res.items?.length);
         return res;
       });
     },
@@ -67,6 +72,22 @@ export default function OntologySceneFunctions() {
     history.push(
       `${baseUrl}/${ontologyModelID}/functions/${type}/${data ? data.id : '_NEW_'}`
     );
+  };
+
+  const handleDelete = (record: OntologyFunctionItem) => {
+    Modal.confirm({
+      title: `确定删除${record.name}吗？`,
+      content: '删除后，不可恢复',
+      onOk: () => {
+        deleteFunction(record.id!).then((res) => {
+          Message.success({
+            content: '删除成功',
+            duration: 0.5,
+            onClose: refresh
+          });
+        });
+      }
+    });
   };
 
   const columns: TableColumnProps<OntologyFunctionItem>[] = [
@@ -139,6 +160,9 @@ export default function OntologySceneFunctions() {
             className={
               'p-0 font-PingFangSc text-[14px] font-normal leading-[22px] text-blue-primary'
             }
+            onClick={() => {
+              handleDelete(record);
+            }}
           >
             删除
           </Button>
