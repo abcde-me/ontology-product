@@ -38,7 +38,12 @@ export default function OntologySceneBehaviorActions() {
             }}
           />
         ) : (
-          <BehaviorTest />
+          <BehaviorTest
+            onViewDetail={(data) => {
+              setShowDetail(true);
+              setBehaviorData(data);
+            }}
+          />
         )}
       </div>
       <BehaviorDetail

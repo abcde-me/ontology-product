@@ -8,6 +8,7 @@ import {
   Upload,
   Form
 } from '@arco-design/web-react';
+import { NoDataCard } from '@ceai-front/arco-material';
 import { useUIStore } from '../../store/uiStore';
 import { useBusinessStore } from '../../store/businessStore';
 import { ConfigField } from '../../types';
@@ -197,23 +198,8 @@ export const RightPanel: React.FC = () => {
           </div>
           <BehaviorTestSvg className="h-4 w-4 cursor-pointer" />
         </div>
-        <div className="flex flex-1 flex-col items-center justify-center gap-3 px-5">
-          <svg
-            width="80"
-            height="80"
-            viewBox="0 0 80 80"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <circle cx="40" cy="40" r="35" fill="#F7F8FA" />
-            <path
-              d="M40 28V52M28 40H52"
-              stroke="#C9CDD4"
-              strokeWidth="3"
-              strokeLinecap="round"
-            />
-          </svg>
-          <span className="text-sm text-[#86909c]">请先选择行为</span>
+        <div className="flex flex-1 items-center justify-center px-5">
+          <NoDataCard title="请先选择行为" />
         </div>
       </div>
     );
