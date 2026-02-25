@@ -4,13 +4,14 @@ import {
   CopyItemIcon,
   EllipsisPopover
 } from '@ceai-front/arco-material';
-import { TableColumnProps, Tag } from '@arco-design/web-react';
+import { TableColumnProps } from '@arco-design/web-react';
 import { ObjectTypeTag } from '@/pages/ontologyScene/componens';
 import { BehaviorLogItem, RUN_STATUS_MAP } from '../types';
 
 export const useColumns = (
   type: 'action' | 'function',
-  onViewObjectTypeDetail?: (record: BehaviorLogItem) => void
+  onViewObjectTypeDetail?: (record: BehaviorLogItem) => void,
+  onViewBehaviorDetail?: (record: BehaviorLogItem) => void
 ): TableColumnProps<BehaviorLogItem>[] => {
   return useMemo(() => {
     // 行为 tab 的列配置
@@ -52,11 +53,19 @@ export const useColumns = (
           dataIndex: 'name',
           width: 180,
           ellipsis: true,
-          render: (value) => (
-            <div className="font-PingFangSc text-[14px] font-normal leading-[22px] text-[#4e5969]">
-              {value || '-'}
-            </div>
-          )
+          render: (value, record) =>
+            value ? (
+              <div
+                onClick={() => {
+                  onViewBehaviorDetail?.(record);
+                }}
+                className="hover-blue cursor-pointer font-PingFangSc text-[14px] font-normal leading-[22px] text-[#4e5969]"
+              >
+                {value}
+              </div>
+            ) : (
+              '-'
+            )
         },
         {
           title: '行为id',
@@ -282,5 +291,5 @@ export const useColumns = (
         )
       }
     ];
-  }, [type, onViewObjectTypeDetail]);
+  }, [type, onViewObjectTypeDetail, onViewBehaviorDetail]);
 };

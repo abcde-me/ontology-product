@@ -7,6 +7,8 @@ import { PageHeader, SearchForm } from './components';
 import { BehaviorLogItem } from './types';
 import { fetchBehaviorLogList } from './services/behaviorLogApi';
 import ObjectTypeDetailDrawer from '@/pages/ontologyScene/componens/ObjectTypeDetailDrawer';
+import { BehaviorDetail } from '@/pages/ontologyScene/modules/behaviorActions/components';
+import { BehaviorActionItem } from '@/pages/ontologyScene/types/behaviorActions';
 import styles from './index.module.scss';
 
 export default function BehaviorLogList() {
@@ -23,6 +25,8 @@ export default function BehaviorLogList() {
   const [objectTypeActiveTab, setObjectTypeActiveTab] = useState<
     'instances' | 'attributes' | 'links'
   >('instances');
+  const [showBehaviorDetail, setShowBehaviorDetail] = useState(false);
+  const [behaviorData, setBehaviorData] = useState<BehaviorActionItem>();
 
   // 初始化时获取另一个 tab 的总数（当前 tab 的 total 会由 useTable 自动获取）
   React.useEffect(() => {
@@ -61,8 +65,28 @@ export default function BehaviorLogList() {
     }
   };
 
+  // 处理查看行为详情
+  const handleViewBehaviorDetail = (record: BehaviorLogItem) => {
+    // 将 BehaviorLogItem 转换为 BehaviorActionItem
+    // 注意：这里需要根据实际的数据结构进行映射
+    const behaviorActionData: BehaviorActionItem = {
+      id: Number(record.id),
+      name: record.name,
+      code: record.code,
+      description: record.description,
+      objectTypeName: record.ontologyObjectTypeName,
+      objectTypeId: Number(record.ontologyObjectTypeId || 0)
+    };
+    setBehaviorData(behaviorActionData);
+    setShowBehaviorDetail(true);
+  };
+
   // 根据当前 tab 获取对应的列配置
-  const columns = useColumns(activeTab, handleViewObjectTypeDetail);
+  const columns = useColumns(
+    activeTab,
+    handleViewObjectTypeDetail,
+    handleViewBehaviorDetail
+  );
 
   // 使用 useTable hook
   const { data, loading, pagination, submit, onChange } = useTable<
@@ -195,6 +219,16 @@ export default function BehaviorLogList() {
           defaultActiveTab={objectTypeActiveTab}
         />
       )}
+
+      {/* 行为详情抽屉 */}
+      <BehaviorDetail
+        show={showBehaviorDetail}
+        onClose={() => {
+          setShowBehaviorDetail(false);
+          setBehaviorData(undefined);
+        }}
+        data={behaviorData}
+      />
     </div>
   );
 }
