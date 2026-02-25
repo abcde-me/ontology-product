@@ -243,6 +243,8 @@ export interface ActionSchema {
   functionId?: number;
   function_params?: Partial<OntologyActionParam>[];
   validationRules?: ValidateRule[];
+  type?: ParamType;
+  uiType?: UiType;
 }
 
 export const TYPE2COMP_OPTIONS = {

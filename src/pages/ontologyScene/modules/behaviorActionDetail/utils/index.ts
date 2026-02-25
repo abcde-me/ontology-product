@@ -72,17 +72,17 @@ export function buildFunctionSchema(
           name,
           code: code ?? name,
           type,
-          uiType: TYPE2COMP_OPTIONS[type][0].value
+          uiType: TYPE2COMP_OPTIONS[type!][0].value
         });
         if (
-          [ParamType.Float, ParamType.String, ParamType.Integer].includes(type)
+          [ParamType.Float, ParamType.String, ParamType.Integer].includes(type!)
         ) {
           p.validationRules!.push({
             name,
-            type,
+            type: type!,
             enabledValidation: true,
             failMessage: undefined,
-            rule_name: TYPE2RULE_TYPES[type][0].value,
+            rule_name: TYPE2RULE_TYPES[type!][0].value,
             ruleConfig: undefined
           });
         }

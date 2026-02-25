@@ -65,14 +65,13 @@ export const FunctionsSetting = () => {
       {
         validator(v, onInValid) {
           if (!v) {
-            return;
+            return onInValid('请输入参数名称');
           }
           const sameKey = form
             .getFieldValue(field)
             .filter(({ name }) => name === v);
           if (sameKey.length > 1) {
-            onInValid('参数名重复');
-            return;
+            return onInValid('参数名重复');
           }
         }
       }
