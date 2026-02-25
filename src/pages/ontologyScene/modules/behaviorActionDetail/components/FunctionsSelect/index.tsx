@@ -56,7 +56,7 @@ export const FunctionsSelect = (props: CustomFormItemCompProps<string>) => {
           return (
             <Select.Option
               key={value}
-              value={value!}
+              value={value as string}
               className={styles['select-option']}
             >
               <div
