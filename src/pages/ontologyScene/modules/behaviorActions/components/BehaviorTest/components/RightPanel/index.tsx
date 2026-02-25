@@ -8,9 +8,12 @@ import {
   Upload,
   Form
 } from '@arco-design/web-react';
+import { NoDataCard } from '@ceai-front/arco-material';
 import { useUIStore } from '../../store/uiStore';
 import { useBusinessStore } from '../../store/businessStore';
 import { ConfigField } from '../../types';
+import BehaviorConfigSvg from '@/assets/benti/behaviorConfig.svg';
+import BehaviorTestSvg from '@/assets/benti/behaviorTest.svg';
 
 const { TextArea } = Input;
 
@@ -188,26 +191,15 @@ export const RightPanel: React.FC = () => {
   if (!selectedNodeId || !selectedNode) {
     return (
       <div className="flex h-full w-full flex-col">
-        <div className="flex h-14 flex-shrink-0 items-center justify-between border-b border-[#e5e6eb] pl-4 pr-4">
-          <span className="text-sm font-medium text-[#1d2129]">参数配置</span>
+        <div className="flex h-14 flex-shrink-0 items-center justify-between border-b border-[#e5e6eb] px-6">
+          <div className="flex items-center gap-1">
+            <BehaviorConfigSvg className="h-3.5 w-3.5" />
+            <span className="text-base font-medium text-[#000]">参数配置</span>
+          </div>
+          <BehaviorTestSvg className="h-4 w-4 cursor-pointer" />
         </div>
-        <div className="flex flex-1 flex-col items-center justify-center gap-3 px-5">
-          <svg
-            width="80"
-            height="80"
-            viewBox="0 0 80 80"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <circle cx="40" cy="40" r="35" fill="#F7F8FA" />
-            <path
-              d="M40 28V52M28 40H52"
-              stroke="#C9CDD4"
-              strokeWidth="3"
-              strokeLinecap="round"
-            />
-          </svg>
-          <span className="text-sm text-[#86909c]">请先选择行为</span>
+        <div className="flex flex-1 items-center justify-center px-5">
+          <NoDataCard title="请先选择行为" />
         </div>
       </div>
     );
@@ -216,8 +208,12 @@ export const RightPanel: React.FC = () => {
   return (
     <div className="flex h-full w-full flex-col">
       {/* 头部 */}
-      <div className="flex h-14 flex-shrink-0 items-center justify-between border-b border-[#e5e6eb] pl-4 pr-4">
-        <span className="text-sm font-medium text-[#1d2129]">参数配置</span>
+      <div className="flex h-14 flex-shrink-0 items-center justify-between border-b border-[#e5e6eb] px-6">
+        <div className="flex items-center gap-1">
+          <BehaviorConfigSvg className="h-3.5 w-3.5" />
+          <span className="text-base font-medium text-[#000]">参数配置</span>
+        </div>
+        <BehaviorTestSvg className="h-4 w-4 cursor-pointer" />
       </div>
 
       {/* 表单内容 */}

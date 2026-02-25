@@ -13,7 +13,8 @@ export const mockBehaviorList: BehaviorItem[] = [
     // @ts-expect-error
     id: '1',
     name: '实体识别',
-    description: '从原始图片中识别 AF-101...',
+    description:
+      '从原始图片中识别 AF-101从原始图片中识别 AF-101从原始图片中识别 AF-101从原始图片中识别 AF-101',
     objectType: '多媒体情报',
     functionName: 'entityRecognition',
     identifier: 'entity_recognition',

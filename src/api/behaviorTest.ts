@@ -54,7 +54,6 @@ export function getBehaviorLogList(params: {
   query: string;
   type: 'action' | 'function';
 }) {
-  // @ts-ignore - UAPI 资源待后端配置
   return UAPI.RES.PageExecuteTestLog({}).post(params).inRegion().do();
 }
 

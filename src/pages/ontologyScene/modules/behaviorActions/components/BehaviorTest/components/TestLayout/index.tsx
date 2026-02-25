@@ -12,7 +12,7 @@ export const TestLayout: React.FC<TestLayoutProps> = ({
   rightPanel
 }) => {
   return (
-    <div className="grid h-full w-full grid-cols-[320px_1fr_360px] gap-0 overflow-hidden">
+    <div className="grid h-full w-full grid-cols-[280px_1fr_400px] gap-0 overflow-hidden">
       <div className="flex flex-col overflow-hidden border-r border-[#e5e6eb] bg-white">
         {leftPanel}
       </div>
