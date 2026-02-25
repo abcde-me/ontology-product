@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Button,
   Form,
@@ -19,6 +19,7 @@ import {
   ProButton,
   SearchTable
 } from '@ceai-front/arco-material';
+import useUrlState from '@ahooksjs/use-url-state';
 import { useHistory, useParams } from 'react-router-dom';
 import { useWorkflowTable } from '../../hooks/useTable';
 import ObjectTypeDetailDrawer, {
@@ -39,11 +40,14 @@ import {
   OBJECT_TYPE_SYNC_STATUS_FILTERS,
   OBJECT_TYPE_ICON_OPTIONS
 } from '../../common/constants';
+import dayjs from 'dayjs';
+import { isNil } from 'lodash-es';
 
 export default function OntologySceneObjectTypeList() {
   const [form] = Form.useForm();
   const history = useHistory();
   const { id: ontologyModelID } = useParams<{ id: string }>();
+  const [urlState, setUrlState] = useUrlState({ search: '' });
   const [detailDrawerVisible, setDetailDrawerVisible] = useState(false);
   const [selectedObjectType, setSelectedObjectType] =
     useState<ObjectType | null>(null);
@@ -110,6 +114,22 @@ export default function OntologySceneObjectTypeList() {
       form,
       defaultPageSize: 10
     });
+
+  // 从 URL 的 search 参数同步到表单
+  useEffect(() => {
+    const currentKeyword = form.getFieldValue('keyword');
+    const searchValue = urlState.search || '';
+    console.log('searchValue1111', searchValue);
+    if (searchValue !== '' && searchValue !== currentKeyword) {
+      form.setFieldsValue({ keyword: searchValue });
+      // 延迟提交，确保表单值已设置
+      console.log('submit222');
+      setTimeout(() => {
+        submit();
+      }, 0);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [urlState.search]);
 
   // 跳转到创建页面
   const handleCreate = () => {
@@ -231,7 +251,16 @@ export default function OntologySceneObjectTypeList() {
       dataIndex: 'description',
       ellipsis: true,
       tooltip: true,
-      width: 200
+      width: 200,
+      render: (value) => (
+        <div>
+          {value ? (
+            <EllipsisPopover value={value} isEdit={false} preferTypography />
+          ) : (
+            '-'
+          )}
+        </div>
+      )
     },
     {
       title: '同步状态',
@@ -253,9 +282,7 @@ export default function OntologySceneObjectTypeList() {
       width: 180,
       sorter: true,
       render: (value) => (
-        <div className="font-PingFangSc text-[14px] font-normal leading-[22px] text-[#23293b]">
-          {value}
-        </div>
+        <div>{value ? dayjs(value).format('YYYY-MM-DD HH:mm:ss') : '-'}</div>
       )
     },
     {
@@ -264,9 +291,7 @@ export default function OntologySceneObjectTypeList() {
       width: 180,
       sorter: true,
       render: (value) => (
-        <div className="font-PingFangSc text-[14px] font-normal leading-[22px] text-[#23293b]">
-          {value}
-        </div>
+        <div>{value ? dayjs(value).format('YYYY-MM-DD HH:mm:ss') : '-'}</div>
       )
     },
     {
@@ -315,8 +340,14 @@ export default function OntologySceneObjectTypeList() {
                 placeholder="请输入关键词"
                 suffix={<IconSearch />}
                 allowClear
-                onClear={() => submit()}
-                onSearch={() => submit()}
+                onClear={() => {
+                  setUrlState({ search: '' });
+                  submit();
+                }}
+                onSearch={(value) => {
+                  setUrlState({ search: value || '' });
+                  submit();
+                }}
               />
             </Form.Item>
           </Form>

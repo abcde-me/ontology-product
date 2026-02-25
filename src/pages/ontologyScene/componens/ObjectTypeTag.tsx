@@ -40,17 +40,17 @@ const ObjectTypeTag: React.FC<ObjectTypeTagProps> = ({
 
   return (
     <div
-      className={`inline-flex h-[26px] min-w-0 max-w-[96px] items-center gap-[4px] overflow-hidden rounded border border-[#EBEEF5] bg-[#F5F7FC] px-[4px] ${
+      className={`object-type-tag inline-flex h-[26px] min-w-0 max-w-[96px] items-center gap-[4px] overflow-hidden rounded border border-[#EBEEF5] bg-[#F5F7FC] px-[4px] ${
         onClick ? 'cursor-pointer' : ''
       } ${className}`}
       onClick={onClick}
     >
       {/* 图标区域 */}
-      <div className="flex h-[12px] w-[12px] flex-shrink-0 items-center justify-center">
-        <IconComponent className="h-[12px] w-[12px] text-white" />
+      <div className="object-type-tag-icon flex h-[12px] w-[12px] flex-shrink-0 items-center justify-center">
+        <IconComponent className="h-[100%] w-[100%] text-white" />
       </div>
       {/* 名称区域 */}
-      <div className="flex-shrink-1 min-w-0">
+      <div className="flex-shrink-1 object-type-tag-name min-w-0">
         <EllipsisPopover
           value={ontologyObjectTypeName}
           className={`text-[14px] leading-[26px] text-[var(--color-text-1)] ${

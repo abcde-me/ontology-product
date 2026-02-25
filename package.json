@@ -34,6 +34,7 @@
     "analyze": "cross-env ANALYZE=true yarn build"
   },
   "dependencies": {
+    "@ahooksjs/use-url-state": "^3.5.1",
     "@amap/amap-jsapi-loader": "^1.0.1",
     "@antv/data-set": "^0.11.8",
     "@arco-design/web-react": "2.66.5",

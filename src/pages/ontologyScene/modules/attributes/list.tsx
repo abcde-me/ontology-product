@@ -1,45 +1,26 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Tabs } from '@arco-design/web-react';
-import { useHistory, useLocation } from 'react-router-dom';
+import useUrlState from '@ahooksjs/use-url-state';
 import NormalTable from './components/NormalTable';
 import PublicTable from './components/PublicTable';
 import styles from './list.module.scss';
 
 export default function OntologySceneAttributesList() {
-  const history = useHistory();
-  const location = useLocation();
-
-  // 从 URL 读取 tab 参数，默认为 'normal'
-  const getTabFromUrl = () => {
-    const searchParams = new URLSearchParams(location.search);
-    const tab = searchParams.get('tab');
-    return tab === 'public' ? 'public' : 'normal';
-  };
-
-  const [activeTab, setActiveTab] = useState<string>(getTabFromUrl);
+  const [urlState, setUrlState] = useUrlState({ tab: 'normal', search: '' });
   const [normalTableTotal, setNormalTableTotal] = useState<number>(0);
 
-  // 当 URL 变化时，同步 tab 状态
-  useEffect(() => {
-    const tab = getTabFromUrl();
-    setActiveTab(tab);
-  }, [location.search]);
+  // 从 URL 的 tab 参数获取当前 tab，默认为 'normal'
+  const activeTab = urlState.tab === 'public' ? 'public' : 'normal';
 
-  // 处理 tab 切换，更新 URL
+  // 处理 tab 切换，更新 URL 并清空 search 参数
   const handleTabChange = (tab: string) => {
-    setActiveTab(tab);
-    const searchParams = new URLSearchParams(location.search);
     if (tab === 'normal') {
-      // 如果是默认 tab，从 URL 中移除参数
-      searchParams.delete('tab');
+      // 如果是默认 tab，从 URL 中移除参数，并清空 search
+      setUrlState({ tab: '', search: '' });
     } else {
-      searchParams.set('tab', tab);
+      // 切换 tab 时清空 search 参数
+      setUrlState({ tab, search: '' });
     }
-    const newSearch = searchParams.toString();
-    history.replace({
-      ...location,
-      search: newSearch ? `?${newSearch}` : ''
-    });
   };
 
   return (
@@ -57,16 +38,17 @@ export default function OntologySceneAttributesList() {
         activeTab={activeTab}
         onChange={handleTabChange}
       >
-        <Tabs.TabPane title={`属性 (${normalTableTotal})`} key="normal" />
-        <Tabs.TabPane title="公共属性 (20)" key="public" />
+        <Tabs.TabPane title={`属性 (${normalTableTotal})`} key="normal">
+          <div className={styles['attributes-content']}>
+            <NormalTable onTotalChange={setNormalTableTotal} />
+          </div>
+        </Tabs.TabPane>
+        <Tabs.TabPane title="公共属性 (20)" key="public">
+          <div className={styles['attributes-content']}>
+            <PublicTable />
+          </div>
+        </Tabs.TabPane>
       </Tabs>
-      <div className={styles['attributes-content']}>
-        {activeTab === 'normal' ? (
-          <NormalTable onTotalChange={setNormalTableTotal} />
-        ) : (
-          <PublicTable />
-        )}
-      </div>
     </div>
   );
 }

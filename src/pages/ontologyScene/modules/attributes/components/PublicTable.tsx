@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Button,
   Form,
@@ -15,6 +15,7 @@ import {
   ProButton,
   SearchTable
 } from '@ceai-front/arco-material';
+import useUrlState from '@ahooksjs/use-url-state';
 import { useWorkflowTable } from '../../../hooks/useTable';
 import styles from '../list.module.scss';
 import PublicAttributeModal, {
@@ -30,6 +31,7 @@ import { ListOntologyPublicPropertiesReq } from '@/types/attributes';
 import { ObjectTypeTagList } from '@/pages/ontologyScene/componens';
 import ObjectTypeDetailDrawer from '@/pages/ontologyScene/componens/ObjectTypeDetailDrawer';
 import dayjs from 'dayjs';
+import { isNil } from 'lodash-es';
 
 // 公共属性数据接口（保留用于兼容性）
 export interface PublicAttributeItem {
@@ -48,6 +50,7 @@ export interface PublicAttributeItem {
 
 export default function PublicTable() {
   const [form] = Form.useForm();
+  const [urlState, setUrlState] = useUrlState({ search: '' });
 
   // 弹窗相关状态
   const [modalVisible, setModalVisible] = useState(false);
@@ -125,6 +128,20 @@ export default function PublicTable() {
       form,
       defaultPageSize: 10
     });
+
+  // 从 URL 的 search 参数同步到表单
+  useEffect(() => {
+    const currentKeyword = form.getFieldValue('keyword');
+    const searchValue = urlState.search || '';
+    if (searchValue !== '' && searchValue !== currentKeyword) {
+      form.setFieldsValue({ keyword: searchValue });
+      // 延迟提交，确保表单值已设置
+      setTimeout(() => {
+        submit();
+      }, 0);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [urlState.search]);
 
   // 打开创建弹窗
   const handleCreate = () => {
@@ -336,8 +353,14 @@ export default function PublicTable() {
                 placeholder="请输入关键词"
                 suffix={<IconSearch />}
                 allowClear
-                onClear={() => submit()}
-                onSearch={() => submit()}
+                onClear={() => {
+                  setUrlState({ search: '' });
+                  submit();
+                }}
+                onSearch={(value) => {
+                  setUrlState({ search: value || '' });
+                  submit();
+                }}
               />
             </Form.Item>
           </Form>

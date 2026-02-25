@@ -5,13 +5,17 @@ import { IconSearch, IconDown, IconFile } from '@arco-design/web-react/icon';
 import { EllipsisPopover, NoDataCard } from '@ceai-front/arco-material';
 import { debounce } from 'lodash-es';
 import { listOntologyObjectType } from '@/api/ontologySceneLibrary/objectType';
-import { listOntologyPublicProperties } from '@/api/ontologySceneLibrary/attributes';
+import { listOntologyPhysicalProperties } from '@/api/ontologySceneLibrary/graph';
 import { listOntologyLinkType } from '@/api/ontologySceneLibrary/graph';
 import { ObjectType } from '@/types/objectType';
-import { PublicProperty } from '@/types/attributes';
-import { LinkInfo } from '@/types/graphApi';
+import { LinkInfo, PhysicalProperties } from '@/types/graphApi';
 import { OBJECT_TYPE_ICON_OPTIONS } from '@/pages/ontologyScene/common/constants';
+import ObjectTypeTagList from '@/pages/ontologyScene/componens/ObjectTypeTagList';
+import ObjectTypeTag, {
+  ObjectTypeTagProps
+} from '@/pages/ontologyScene/componens/ObjectTypeTag';
 import styles from './SearchDropdown.module.scss';
+import { useHistory, useParams } from 'react-router-dom';
 
 const { Option } = Select;
 
@@ -46,10 +50,12 @@ const SearchDropdown: React.FC<SearchDropdownProps> = ({
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const leaveTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const { id: OSId } = useParams<{ id: string }>();
   const [searchType, setSearchType] = useState<SearchType>('objectType');
   const [searchValue, setSearchValue] = useState('');
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState<any[]>([]);
+  const history = useHistory();
 
   // 搜索类型选项
   const searchTypeOptions = [
@@ -62,6 +68,7 @@ const SearchDropdown: React.FC<SearchDropdownProps> = ({
 
   // 搜索函数
   const performSearch = useCallback(async (value: string, type: SearchType) => {
+    console.log('performSearch----->', value, type);
     if (!value.trim()) {
       setResults([]);
       setLoading(false);
@@ -85,7 +92,7 @@ const SearchDropdown: React.FC<SearchDropdownProps> = ({
           break;
 
         case 'attribute':
-          const attributeRes = await listOntologyPublicProperties({
+          const attributeRes = await listOntologyPhysicalProperties({
             filter: value,
             pageNo: 1,
             pageSize: 10
@@ -192,11 +199,19 @@ const SearchDropdown: React.FC<SearchDropdownProps> = ({
       ? OBJECT_TYPE_ICON_OPTIONS.find((option) => option.value === item.icon)
       : null;
     const IconComponent = iconOption?.icon ?? OBJECT_TYPE_ICON_OPTIONS[0].icon;
+    const handleObjectTypeResultClick = () => {
+      console.log('handleObjectTypeResultClick----->', item);
+      // 跳转到对象类型详情页面
+      history.push(
+        `/tenant/compute/modaforge/ontologyScene/detail/${OSId}/objectType/list?search=${encodeURIComponent(item?.name ?? '')}`
+      );
+    };
 
     return (
       <div
         key={item.id}
         className="flex cursor-pointer items-center gap-[8px] px-[12px] py-[8px] transition-colors hover:bg-[#F2F8FF]"
+        onClick={handleObjectTypeResultClick}
       >
         {/* Icon */}
         <div className="flex h-[36px] w-[36px] flex-shrink-0 items-center justify-center">
@@ -227,46 +242,20 @@ const SearchDropdown: React.FC<SearchDropdownProps> = ({
   const renderLinkResult = (item: LinkInfo) => {
     const name = item.name || '';
     const id = item.id || 0;
-    const sourceIcon = item.sourceObjectTypeIcon;
-    const targetIcon = item.targetObjectTypeIcon;
-    const sourceName = item.sourceObjectTypeName || '-';
-    const targetName = item.targetObjectTypeName || '-';
 
-    // 获取源对象类型图标
-    const sourceIconOption = sourceIcon
-      ? OBJECT_TYPE_ICON_OPTIONS.find((option) => option.value === sourceIcon)
-      : null;
-    const SourceIconComponent = sourceIconOption?.icon;
-
-    // 获取目标对象类型图标
-    const targetIconOption = targetIcon
-      ? OBJECT_TYPE_ICON_OPTIONS.find((option) => option.value === targetIcon)
-      : null;
-    const TargetIconComponent = targetIconOption?.icon;
-
-    // 根据图标类型确定颜色
-    const getIconColor = (icon?: string) => {
-      if (!icon) return '#165dff';
-      // 根据图标值映射到不同颜色
-      // 可以根据实际业务需求调整颜色映射
-      const colorMap: Record<string, string> = {
-        'object-type-1': '#FF6B35', // 橙色
-        'object-type-2': '#722ED1', // 紫色
-        'object-type-3': '#00b42a', // 绿色
-        'object-type-4': '#FF6B35', // 橙色
-        'object-type-5': '#722ED1', // 紫色
-        'object-type-6': '#00b42a' // 绿色
-      };
-      return colorMap[icon] || '#165dff';
+    const handleLinkResultClick = () => {
+      console.log('handleLinkResultClick----->', item);
+      // 跳转到链接详情页面
+      history.push(
+        `/tenant/compute/modaforge/ontologyScene/detail/${OSId}/links/list?search=${encodeURIComponent(item?.name ?? '')}`
+      );
     };
-
-    const sourceColor = getIconColor(sourceIcon);
-    const targetColor = getIconColor(targetIcon);
 
     return (
       <div
         key={id}
         className="flex cursor-pointer flex-col items-start gap-[4px] px-[12px] py-[8px] transition-colors hover:bg-[#F2F8FF]"
+        onClick={handleLinkResultClick}
       >
         {/* 标题和ID */}
         <div className="flex items-center gap-[8px]">
@@ -285,44 +274,24 @@ const SearchDropdown: React.FC<SearchDropdownProps> = ({
             链接对:
           </span>
           {/* 源对象类型 */}
-          <div className="max-w-[98px]] flex items-center gap-[4px] rounded-[4px] border border-[##EBEEF5] bg-[#F5F7FC] px-[4px]">
-            <div className="flex h-[12px] w-[12px] flex-shrink-0 items-center justify-center">
-              {SourceIconComponent ? (
-                <SourceIconComponent className="h-[12px] w-[12px] text-white" />
-              ) : (
-                <IconFile className="h-[12px] w-[12px] text-white" />
-              )}
-            </div>
-            <span className="text-[12px] leading-[18px] text-[var(--color-text-1)]">
-              <EllipsisPopover
-                preferTypography
-                value={sourceName || '-'}
-                className="text-[12px] leading-[18px] text-[var(--color-text-1)]"
-              />
-            </span>
-          </div>
+          <ObjectTypeTag
+            ontologyObjectTypeId={item.sourceObjectTypeID}
+            ontologyObjectTypeName={item.sourceObjectTypeName || '-'}
+            ontologyObjectTypeIcon={item.sourceObjectTypeIcon}
+            className="max-w-[98px]"
+          />
           {/* 虚线箭头 */}
-          <div className="mx-[2px] mx-[4px] flex items-center">
-            <div className="h-[1px] w-[20px] border-t border-dashed border-[var(--color-border-1)]"></div>
-            <div className="h-0 w-0 border-b-[4px] border-l-[6px] border-t-[4px] border-b-transparent border-l-[var(--color-border-1)] border-t-transparent"></div>
+          <div className="relative mx-[2px] flex w-[20px] items-center">
+            <div className="absolute left-0 top-[50%] h-[1px] w-[20px] translate-y-[-50%] border-t border-dashed border-[var(--color-border-1)]"></div>
+            <div className="absolute right-0 top-[50%] h-0 w-0 translate-y-[-50%] border-b-[4px] border-l-[6px] border-t-[4px] border-b-transparent border-l-[var(--color-border-1)] border-t-transparent"></div>
           </div>
           {/* 目标对象类型 */}
-          <div className="flex max-w-[98px] items-center gap-[4px] rounded-[4px] border border-[##EBEEF5] bg-[#F5F7FC] px-[4px]">
-            <div className="flex h-[12px] w-[12px] flex-shrink-0 items-center justify-center">
-              {TargetIconComponent ? (
-                <TargetIconComponent className="h-[12px] w-[12px] text-white" />
-              ) : (
-                <IconFile className="h-[12px] w-[12px] text-white" />
-              )}
-            </div>
-            <span className="text-[12px] leading-[18px] text-[var(--color-text-1)]">
-              <EllipsisPopover
-                preferTypography
-                value={targetName || '-'}
-                className="text-[12px] leading-[18px] text-[var(--color-text-1)]"
-              />
-            </span>
-          </div>
+          <ObjectTypeTag
+            ontologyObjectTypeId={item.targetObjectTypeID}
+            ontologyObjectTypeName={item.targetObjectTypeName || '-'}
+            ontologyObjectTypeIcon={item.targetObjectTypeIcon}
+            className="max-w-[98px]"
+          />
         </div>
       </div>
     );
@@ -330,39 +299,58 @@ const SearchDropdown: React.FC<SearchDropdownProps> = ({
 
   // 渲染属性/行为搜索结果
   const renderAttributeLinkResult = (
-    item: PublicProperty | BehaviorItem,
+    item: PhysicalProperties | BehaviorItem,
     type: 'attribute' | 'behavior'
   ) => {
     let name = '';
     let id: number | string = 0;
-    let objectTypeList: { id: number; name: string }[] = [];
+    let objectTypeTags: ObjectTypeTagProps[] = [];
 
     if (type === 'attribute') {
-      const attr = item as PublicProperty;
+      // PhysicalProperties 类型
+      const attr = item as PhysicalProperties;
       name = attr.name || '';
       id = attr.id || 0;
-      objectTypeList =
-        attr.ontologyObjectTypeList?.map((item) => ({
-          id: item.id || 0,
-          name: item.name || ''
-        })) || [];
+      // PhysicalProperties 只有单个对象类型信息，转换为标签格式
+      if (attr.ontologyObjectTypeId && attr.ontologyObjectTypeName) {
+        objectTypeTags = [
+          {
+            ontologyObjectTypeId: attr.ontologyObjectTypeId,
+            ontologyObjectTypeName: attr.ontologyObjectTypeName,
+            ontologyObjectTypeIcon: attr.ontologyObjectTypeIcon
+          }
+        ];
+      }
     } else {
       // behavior
       const behavior = item as BehaviorItem;
-      name = behavior.name;
-      id = behavior.id;
-      objectTypeList = behavior.objectTypeList || [];
+      name = behavior.name || '';
+      id = behavior.id || 0;
+      // 将 behavior 的 objectTypeList 转换为标签格式
+      objectTypeTags = (behavior.objectTypeList || []).map((objType) => ({
+        ontologyObjectTypeId: objType.id,
+        ontologyObjectTypeName: objType.name,
+        ontologyObjectTypeIcon: undefined // behavior 的 objectTypeList 没有图标信息
+      }));
     }
 
-    // 限制显示的 tag 数量，超过 2 个显示 +n
-    const maxVisibleTags = 2;
-    const visibleTags = objectTypeList.slice(0, maxVisibleTags);
-    const hiddenCount = objectTypeList.length - maxVisibleTags;
+    const handleAttributeLinkResultClick = () => {
+      console.log('handleAttributeLinkResultClick----->', item);
+
+      if (type === 'attribute') {
+        // 跳转到属性列表页面
+        history.push(
+          `/tenant/compute/modaforge/ontologyScene/detail/${OSId}/attributes/list?search=${encodeURIComponent(item?.name ?? '')}`
+        );
+      } else {
+      }
+    };
 
     return (
       <div
         key={id}
         className="flex cursor-pointer flex-col items-start gap-[4px] px-[12px] py-[8px] transition-colors hover:bg-[#F2F8FF]"
+        onClick={handleAttributeLinkResultClick}
       >
         <div className="flex items-center gap-[8px]">
           <EllipsisPopover
@@ -376,36 +364,9 @@ const SearchDropdown: React.FC<SearchDropdownProps> = ({
         </div>
         <div className="flex flex-wrap items-center gap-[8px]">
           <span className="text-[12px] leading-[18px] text-[var(--color-text-4)]">
-            所属对象类型
+            所属对象类型：
           </span>
-          {visibleTags.map((objType) => (
-            <Tag color="#EBEEF5" key={objType.id} size="small">
-              {objType.name}
-            </Tag>
-          ))}
-          {hiddenCount > 0 && (
-            <Popover
-              content={
-                <div className="flex max-w-[300px] flex-wrap gap-[8px]">
-                  {objectTypeList.slice(maxVisibleTags).map((objType) => (
-                    <Tag key={objType.id} color="#EBEEF5" size="small">
-                      {objType.name}
-                    </Tag>
-                  ))}
-                </div>
-              }
-              position="bottom"
-            >
-              <Tag
-                color="#EBEEF5"
-                size="small"
-                className="cursor-pointer"
-                style={{ margin: 0 }}
-              >
-                +{hiddenCount}
-              </Tag>
-            </Popover>
-          )}
+          <ObjectTypeTagList tags={objectTypeTags} />
         </div>
       </div>
     );
