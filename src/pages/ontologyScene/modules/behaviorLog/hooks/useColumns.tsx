@@ -8,18 +8,24 @@ import { TableColumnProps } from '@arco-design/web-react';
 import { ObjectTypeTag } from '@/pages/ontologyScene/componens';
 import { BehaviorLogItem, RUN_STATUS_MAP } from '../types';
 
+interface ObjectTypeFilter {
+  text: string;
+  value: string;
+}
+
 export const useColumns = (
   type: 'action' | 'function',
   onViewObjectTypeDetail?: (record: BehaviorLogItem) => void,
   onViewBehaviorDetail?: (record: BehaviorLogItem) => void,
-  onViewExecutionDetail?: (record: BehaviorLogItem) => void
+  onViewExecutionDetail?: (record: BehaviorLogItem) => void,
+  objectTypeFilters?: ObjectTypeFilter[]
 ): TableColumnProps<BehaviorLogItem>[] => {
   return useMemo(() => {
     // 行为 tab 的列配置
     if (type === 'action') {
       return [
         {
-          title: '执行ID',
+          title: '执行id',
           dataIndex: 'id',
           width: 120,
           ellipsis: true,
@@ -113,6 +119,7 @@ export const useColumns = (
           title: '所属对象类型',
           dataIndex: 'ontologyObjectTypeName',
           width: 180,
+          filters: objectTypeFilters || [],
           render: (value, record) => (
             <div>
               {value ? (
@@ -138,7 +145,7 @@ export const useColumns = (
             { text: '处理中', value: 1 },
             { text: '成功', value: 2 },
             { text: '失败', value: 3 },
-            { text: 'Kill', value: 4 }
+            { text: '已停止', value: 4 }
           ],
           render: (value: 1 | 2 | 3 | 4) => {
             const config = RUN_STATUS_MAP[value];
@@ -166,6 +173,7 @@ export const useColumns = (
           title: '开始时间',
           dataIndex: 'start_time',
           width: 180,
+          sorter: true,
           render: (value) => (
             <div className="font-PingFangSc text-[14px] font-normal leading-[22px] text-[#4e5969]">
               {value || '-'}
@@ -176,6 +184,7 @@ export const useColumns = (
           title: '结束时间',
           dataIndex: 'end_time',
           width: 180,
+          sorter: true,
           render: (value) => (
             <div className="font-PingFangSc text-[14px] font-normal leading-[22px] text-[#4e5969]">
               {value || '-'}
@@ -257,7 +266,7 @@ export const useColumns = (
           { text: '处理中', value: 1 },
           { text: '成功', value: 2 },
           { text: '失败', value: 3 },
-          { text: 'Kill', value: 4 }
+          { text: '已停止', value: 4 }
         ],
         render: (value: 1 | 2 | 3 | 4) => {
           const config = RUN_STATUS_MAP[value];
@@ -285,6 +294,7 @@ export const useColumns = (
         title: '开始时间',
         dataIndex: 'start_time',
         width: 180,
+        sorter: true,
         render: (value) => (
           <div className="font-PingFangSc text-[14px] font-normal leading-[22px] text-[#4e5969]">
             {value || '-'}
@@ -295,6 +305,7 @@ export const useColumns = (
         title: '结束时间',
         dataIndex: 'end_time',
         width: 180,
+        sorter: true,
         render: (value) => (
           <div className="font-PingFangSc text-[14px] font-normal leading-[22px] text-[#4e5969]">
             {value || '-'}
@@ -306,6 +317,7 @@ export const useColumns = (
     type,
     onViewObjectTypeDetail,
     onViewBehaviorDetail,
-    onViewExecutionDetail
+    onViewExecutionDetail,
+    objectTypeFilters
   ]);
 };
