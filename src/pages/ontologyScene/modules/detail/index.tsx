@@ -1,5 +1,12 @@
-import React, { useState, Suspense, lazy } from 'react';
-import { Layout, Menu, Spin, Dropdown, Button } from '@arco-design/web-react';
+import React, { useState, useEffect, Suspense, lazy } from 'react';
+import {
+  Layout,
+  Menu,
+  Spin,
+  Dropdown,
+  Button,
+  Message
+} from '@arco-design/web-react';
 import {
   IconApps,
   IconSettings,
@@ -23,6 +30,8 @@ import {
   ONTOLOGY_SCENE_MENU_GROUP_KEYS,
   ONTOLOGY_SCENE_MENU_ITEM_KEYS
 } from '@/common/constants';
+import { getOntologyModelDetail } from '@/api/ontologySceneLibrary/ontologyScene';
+import { OntologScene } from '@/types/ontologySceneApi';
 import MenuIcon from '../../assets/menu.svg';
 import styles from './index.module.scss';
 
@@ -52,6 +61,42 @@ export default function OntologySceneDetail() {
   }>();
 
   const [sceneTitle, setSceneTitle] = useState('新建本体场景');
+  const [sceneDetail, setSceneDetail] = useState<OntologScene | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  // 页面进入时请求场景详情
+  useEffect(() => {
+    const fetchSceneDetail = async () => {
+      if (!OSId) {
+        return;
+      }
+
+      setLoading(true);
+      try {
+        const response = await getOntologyModelDetail({
+          id: Number(OSId)
+        });
+
+        if (response.status === 200 && response.code === '' && response.data) {
+          const sceneData = response.data;
+          setSceneDetail(sceneData);
+          // 更新标题
+          if (sceneData.name) {
+            setSceneTitle(sceneData.name);
+          }
+        } else {
+          Message.error(response.message || '获取场景详情失败');
+        }
+      } catch (error) {
+        Message.error('获取场景详情失败');
+        console.error('获取场景详情失败:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchSceneDetail();
+  }, [OSId]);
 
   const menuData = [
     {
@@ -242,6 +287,28 @@ export default function OntologySceneDetail() {
         onTitleEdit={handleTitleEdit}
         onPublish={handlePublish}
         sceneId={Number(OSId)}
+        sceneDetail={sceneDetail}
+        onSceneUpdate={() => {
+          // 重新获取场景详情
+          if (OSId) {
+            getOntologyModelDetail({ id: Number(OSId) })
+              .then((response) => {
+                if (
+                  response.status === 200 &&
+                  response.code === '' &&
+                  response.data
+                ) {
+                  setSceneDetail(response.data);
+                  if (response.data.name) {
+                    setSceneTitle(response.data.name);
+                  }
+                }
+              })
+              .catch((error) => {
+                console.error('更新场景详情失败:', error);
+              });
+          }
+        }}
       />
       <Layout className="flex flex-row overflow-hidden">
         <div className="flex min-w-[200px] flex-shrink-0 flex-col border-r border-[var(--color-border-2)] bg-white">
