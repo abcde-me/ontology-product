@@ -11,7 +11,8 @@ import { BehaviorLogItem, RUN_STATUS_MAP } from '../types';
 export const useColumns = (
   type: 'action' | 'function',
   onViewObjectTypeDetail?: (record: BehaviorLogItem) => void,
-  onViewBehaviorDetail?: (record: BehaviorLogItem) => void
+  onViewBehaviorDetail?: (record: BehaviorLogItem) => void,
+  onViewExecutionDetail?: (record: BehaviorLogItem) => void
 ): TableColumnProps<BehaviorLogItem>[] => {
   return useMemo(() => {
     // 行为 tab 的列配置
@@ -23,8 +24,13 @@ export const useColumns = (
           width: 120,
           ellipsis: true,
           fixed: 'left',
-          render: (value) => (
-            <div className="font-PingFangSc text-[14px] font-normal leading-[22px] text-[#23293b]">
+          render: (value, record) => (
+            <div
+              className="hover-blue cursor-pointer font-PingFangSc text-[14px] font-normal leading-[22px] text-[#23293b]"
+              onClick={() => {
+                onViewExecutionDetail?.(record);
+              }}
+            >
               {value || '-'}
             </div>
           )
@@ -187,8 +193,13 @@ export const useColumns = (
         width: 120,
         ellipsis: true,
         fixed: 'left',
-        render: (value) => (
-          <div className="font-PingFangSc text-[14px] font-normal leading-[22px] text-[#23293b]">
+        render: (value, record) => (
+          <div
+            className="hover-blue cursor-pointer font-PingFangSc text-[14px] font-normal leading-[22px] text-[#23293b]"
+            onClick={() => {
+              onViewExecutionDetail?.(record);
+            }}
+          >
             {value || '-'}
           </div>
         )
@@ -291,5 +302,10 @@ export const useColumns = (
         )
       }
     ];
-  }, [type, onViewObjectTypeDetail, onViewBehaviorDetail]);
+  }, [
+    type,
+    onViewObjectTypeDetail,
+    onViewBehaviorDetail,
+    onViewExecutionDetail
+  ]);
 };

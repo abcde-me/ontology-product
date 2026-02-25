@@ -3,7 +3,7 @@ import { Form, Pagination, Tabs } from '@arco-design/web-react';
 import { SearchTable } from '@ceai-front/arco-material';
 import { useTable } from './hooks/useTable';
 import { useColumns } from './hooks/useColumns';
-import { PageHeader, SearchForm } from './components';
+import { PageHeader, SearchForm, ExecutionDetailDrawer } from './components';
 import { BehaviorLogItem } from './types';
 import { fetchBehaviorLogList } from './services/behaviorLogApi';
 import ObjectTypeDetailDrawer from '@/pages/ontologyScene/componens/ObjectTypeDetailDrawer';
@@ -27,6 +27,8 @@ export default function BehaviorLogList() {
   >('instances');
   const [showBehaviorDetail, setShowBehaviorDetail] = useState(false);
   const [behaviorData, setBehaviorData] = useState<BehaviorActionItem>();
+  const [showExecutionDetail, setShowExecutionDetail] = useState(false);
+  const [selectedExecutionId, setSelectedExecutionId] = useState<string>();
 
   // 初始化时获取另一个 tab 的总数（当前 tab 的 total 会由 useTable 自动获取）
   React.useEffect(() => {
@@ -81,11 +83,18 @@ export default function BehaviorLogList() {
     setShowBehaviorDetail(true);
   };
 
+  // 处理查看执行详情
+  const handleViewExecutionDetail = (record: BehaviorLogItem) => {
+    setSelectedExecutionId(record.id);
+    setShowExecutionDetail(true);
+  };
+
   // 根据当前 tab 获取对应的列配置
   const columns = useColumns(
     activeTab,
     handleViewObjectTypeDetail,
-    handleViewBehaviorDetail
+    handleViewBehaviorDetail,
+    handleViewExecutionDetail
   );
 
   // 使用 useTable hook
@@ -228,6 +237,17 @@ export default function BehaviorLogList() {
           setBehaviorData(undefined);
         }}
         data={behaviorData}
+      />
+
+      {/* 执行详情抽屉 */}
+      <ExecutionDetailDrawer
+        visible={showExecutionDetail}
+        onClose={() => {
+          setShowExecutionDetail(false);
+          setSelectedExecutionId(undefined);
+        }}
+        executionId={selectedExecutionId}
+        mode={activeTab}
       />
     </div>
   );

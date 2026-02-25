@@ -1,0 +1,112 @@
+.execution-detail-drawer {
+  :global {
+    .arco-drawer-body {
+      padding: 24px;
+    }
+  }
+}
+
+.status-card {
+  display: flex;
+  gap: 16px;
+  padding: 12px 16px;
+  border-radius: 8px;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+}
+
+.status-item {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 100px;
+  flex-shrink: 0;
+
+  .label {
+    font-size: 14px;
+    line-height: 22px;
+    color: #1e293b;
+    font-weight: 500;
+    white-space: nowrap;
+  }
+
+  .value {
+    font-size: 14px;
+    line-height: 22px;
+    color: #1e293b;
+    font-weight: 400;
+    white-space: nowrap;
+  }
+}
+
+.basic-info {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.section-title {
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 22px;
+  color: #0f131f;
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.info-item {
+  display: flex;
+  gap: 8px;
+
+  &.full-width {
+    grid-column: 1 / -1;
+  }
+
+  .info-label {
+    flex-shrink: 0;
+    width: 100px;
+    font-size: 14px;
+    line-height: 22px;
+    color: #86909c;
+  }
+
+  .info-value {
+    flex: 1;
+    min-width: 0;
+    font-size: 14px;
+    line-height: 22px;
+    color: #1d2129;
+  }
+}
+
+.tabs-container {
+  :global {
+    .arco-tabs-nav {
+      margin-bottom: 16px;
+    }
+  }
+}
+
+.logs-container {
+  margin-top: 16px;
+  background: #f7f8fa;
+  border-radius: 4px;
+  padding: 16px;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.logs-content {
+  font-family:
+    'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', 'source-code-pro', monospace;
+  font-size: 12px;
+  line-height: 20px;
+  color: #1d2129;
+  margin: 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
