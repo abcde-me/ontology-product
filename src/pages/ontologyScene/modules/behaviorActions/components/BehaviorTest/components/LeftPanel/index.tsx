@@ -3,6 +3,7 @@ import { Spin, Message } from '@arco-design/web-react';
 import { BehaviorCardList } from '../BehaviorCardList';
 import { useUIStore } from '../../store/uiStore';
 import { useBusinessStore } from '../../store/businessStore';
+import BehaviorCardSvg from '@/assets/benti/behaviorCard.svg';
 
 export const LeftPanel: React.FC = () => {
   const loadingBehaviors = useUIStore((state) => state.loadingBehaviors);
@@ -28,8 +29,9 @@ export const LeftPanel: React.FC = () => {
 
   return (
     <div className="flex h-full w-full flex-col">
-      <div className="flex h-14 flex-shrink-0 items-center border-b border-[#e5e6eb] px-4">
-        <span className="text-sm font-medium text-[#1d2129]">行为卡片</span>
+      <div className="flex h-14 flex-shrink-0 items-center gap-1 border-b border-[#e5e6eb] px-6">
+        <BehaviorCardSvg className="h-4 w-4" />
+        <span className="text-base font-medium text-[#000]">行为卡片</span>
       </div>
       <div className="scrollbar-hide flex-1 overflow-y-auto overflow-x-hidden">
         <Spin loading={loadingBehaviors} style={{ width: '100%' }}>
