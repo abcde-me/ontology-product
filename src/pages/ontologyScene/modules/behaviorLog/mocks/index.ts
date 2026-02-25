@@ -140,15 +140,71 @@ export const mockDelay = (ms = 300) =>
 
 // Mock 入参数据
 const getMockInputParams = (id: string) => {
-  return {
-    media_id: 'IMG_RECON_001',
-    location: '19.2, 122.5',
-    confidence_threshold: 0.85,
-    enable_cache: true,
-    target_team: 'team_123',
-    analysis_depth: 3,
-    description: `执行记录 ${id} 的入参数据`
-  };
+  return [
+    {
+      name: 'arg1',
+      type: 'ObjectSet',
+      value: ['beijing / Chaoyang', 'beijing / Haidian', 'shanghai / Jingansi']
+    },
+    {
+      name: 'arg2',
+      type: 'Attachment',
+      value: ['我的文我的文件文件111...', '我的文件111...']
+    },
+    {
+      name: 'arg3',
+      type: 'Timestamp',
+      value: '2023-12-25 14:30:00'
+    },
+    {
+      name: 'arg4',
+      type: 'GeoPoint',
+      value: '[116.4074, 39.9042]'
+    },
+    {
+      name: 'arg5',
+      type: 'ObjectReference',
+      value: '多媒体情报'
+    },
+    {
+      name: 'arg6',
+      type: 'Boolean',
+      value: 'true'
+    }
+  ];
+};
+
+// Mock 出参数据
+const getMockOutputParams = (id: string) => {
+  return [
+    {
+      name: 'var_1',
+      type: 'String',
+      value: null
+    },
+    {
+      name: 'var_2',
+      type: 'Number',
+      value: null
+    }
+  ];
+};
+
+// Mock 运行日志
+const getMockRunLogs = (id: string) => {
+  return `[信息] 沙箱环境就绪。
+[信息] 注入参数: {"arg1":"","arg2":""}
+[输出] 正在计算结果...
+[输出] 处理逻辑节点 [Main]
+返回值 RETURN VALUE:
+74.28
+[信息] 执行统计: 18ms, 4MB Mem
+进程已退出, 代码 0
+    -- 年收入大于1000万元
+    AND annual_revenue > 1000
+ORDER BY
+    annual_revenue DESC  -- 按年收入从高到低排序
+LIMIT 10;  -- 只返回前10条结果`;
 };
 
 // Mock 执行详情（SQL）
@@ -243,14 +299,24 @@ export const mockApi = {
   },
 
   // 获取入参详情
-  getBehaviorLogInputParams: async (
-    id: string
-  ): Promise<Record<string, any>> => {
+  getBehaviorLogInputParams: async (id: string): Promise<any[]> => {
     await delay(300);
     return getMockInputParams(id);
   },
 
-  // 获取执行详情
+  // 获取出参详情
+  getBehaviorLogOutputParams: async (id: string): Promise<any[]> => {
+    await delay(300);
+    return getMockOutputParams(id);
+  },
+
+  // 获取运行日志
+  getBehaviorLogRunLogs: async (id: string): Promise<string> => {
+    await delay(300);
+    return getMockRunLogs(id);
+  },
+
+  // 获取执行详情（函数代码）
   getBehaviorLogExecutionDetail: async (id: string): Promise<string> => {
     await delay(300);
     return getMockExecutionDetail(id);

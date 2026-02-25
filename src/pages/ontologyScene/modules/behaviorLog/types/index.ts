@@ -21,10 +21,10 @@ export interface BehaviorLogItem {
 
 // 执行状态映射
 export const RUN_STATUS_MAP = {
-  1: { text: '处理中', color: '#165dff', bgColor: '#e8f3ff' },
+  1: { text: '运行中', color: '#165dff', bgColor: '#e8f3ff' },
   2: { text: '成功', color: '#00b42a', bgColor: '#e8ffea' },
   3: { text: '失败', color: '#f53f3f', bgColor: '#ffece8' },
-  4: { text: 'Kill', color: '#86909c', bgColor: '#f7f8fa' }
+  4: { text: '已停止', color: '#86909c', bgColor: '#f7f8fa' }
 } as const;
 
 // 执行状态配置（兼容旧代码）
@@ -51,6 +51,9 @@ export interface BehaviorLogListParams {
   type: 'action' | 'function';
   sources?: string[]; // 来源过滤
   run_status?: number[]; // 执行状态过滤
+  ontology_object_type_ids?: string[]; // 对象类型过滤
+  sort_field?: string; // 排序字段
+  sort_order?: 'ascend' | 'descend'; // 排序方向
 }
 
 // API 响应

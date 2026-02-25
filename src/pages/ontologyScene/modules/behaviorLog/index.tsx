@@ -3,12 +3,13 @@ import { Form, Pagination, Tabs } from '@arco-design/web-react';
 import { SearchTable } from '@ceai-front/arco-material';
 import { useTable } from './hooks/useTable';
 import { useColumns } from './hooks/useColumns';
-import { PageHeader, SearchForm } from './components';
+import { PageHeader, SearchForm, ExecutionDetailDrawer } from './components';
 import { BehaviorLogItem } from './types';
 import { fetchBehaviorLogList } from './services/behaviorLogApi';
 import ObjectTypeDetailDrawer from '@/pages/ontologyScene/componens/ObjectTypeDetailDrawer';
 import { BehaviorDetail } from '@/pages/ontologyScene/modules/behaviorActions/components';
 import { BehaviorActionItem } from '@/pages/ontologyScene/types/behaviorActions';
+import { listOntologyObjectType } from '@/api/ontologySceneLibrary/objectType';
 import styles from './index.module.scss';
 
 export default function BehaviorLogList() {
@@ -18,6 +19,12 @@ export default function BehaviorLogList() {
   const [functionTotal, setFunctionTotal] = useState(0);
   const [sourcesFilter, setSourcesFilter] = useState<string[]>([]); // 来源过滤
   const [statusFilter, setStatusFilter] = useState<number[]>([]); // 执行状态过滤
+  const [objectTypeFilter, setObjectTypeFilter] = useState<string[]>([]); // 对象类型过滤
+  const [objectTypeFilters, setObjectTypeFilters] = useState<
+    Array<{ text: string; value: string }>
+  >([]); // 对象类型过滤选项
+  const [sortField, setSortField] = useState<string>(); // 排序字段
+  const [sortOrder, setSortOrder] = useState<'ascend' | 'descend'>(); // 排序方向
   const [detailDrawerVisible, setDetailDrawerVisible] = useState(false);
   const [selectedObjectType, setSelectedObjectType] = useState<{
     id: string;
@@ -27,6 +34,30 @@ export default function BehaviorLogList() {
   >('instances');
   const [showBehaviorDetail, setShowBehaviorDetail] = useState(false);
   const [behaviorData, setBehaviorData] = useState<BehaviorActionItem>();
+  const [showExecutionDetail, setShowExecutionDetail] = useState(false);
+  const [selectedExecutionId, setSelectedExecutionId] = useState<string>();
+
+  // 获取对象类型列表用于过滤
+  React.useEffect(() => {
+    const fetchObjectTypes = async () => {
+      try {
+        const response = await listOntologyObjectType({
+          pageNo: 1,
+          pageSize: 100 // 获取所有对象类型
+        });
+        if (response.data?.result) {
+          const filters = response.data.result.map((item) => ({
+            text: item.name || '',
+            value: String(item.id)
+          }));
+          setObjectTypeFilters(filters);
+        }
+      } catch (error) {
+        console.error('获取对象类型列表失败:', error);
+      }
+    };
+    fetchObjectTypes();
+  }, []);
 
   // 初始化时获取另一个 tab 的总数（当前 tab 的 total 会由 useTable 自动获取）
   React.useEffect(() => {
@@ -81,11 +112,19 @@ export default function BehaviorLogList() {
     setShowBehaviorDetail(true);
   };
 
+  // 处理查看执行详情
+  const handleViewExecutionDetail = (record: BehaviorLogItem) => {
+    setSelectedExecutionId(record.id);
+    setShowExecutionDetail(true);
+  };
+
   // 根据当前 tab 获取对应的列配置
   const columns = useColumns(
     activeTab,
     handleViewObjectTypeDetail,
-    handleViewBehaviorDetail
+    handleViewBehaviorDetail,
+    handleViewExecutionDetail,
+    objectTypeFilters
   );
 
   // 使用 useTable hook
@@ -101,7 +140,11 @@ export default function BehaviorLogList() {
         query: params.keyword || '',
         type: activeTab, // 搜索时会带上当前 tab 的类型
         sources: sourcesFilter.length > 0 ? sourcesFilter : undefined, // 来源过滤
-        run_status: statusFilter.length > 0 ? statusFilter : undefined // 执行状态过滤
+        run_status: statusFilter.length > 0 ? statusFilter : undefined, // 执行状态过滤
+        ontology_object_type_ids:
+          objectTypeFilter.length > 0 ? objectTypeFilter : undefined, // 对象类型过滤
+        sort_field: sortField, // 排序字段
+        sort_order: sortOrder // 排序方向
       });
 
       // 更新对应 tab 的总数
@@ -131,12 +174,15 @@ export default function BehaviorLogList() {
     form.resetFields();
     setSourcesFilter([]);
     setStatusFilter([]);
+    setObjectTypeFilter([]);
+    setSortField(undefined);
+    setSortOrder(undefined);
     setTimeout(() => {
       submit();
     }, 0);
   };
 
-  // 处理表格变化（包括过滤）
+  // 处理表格变化（包括过滤和排序）
   const handleTableChange = (pag: any, sorter: any, filters: any) => {
     // 处理来源过滤
     if (filters && filters.sources) {
@@ -150,6 +196,22 @@ export default function BehaviorLogList() {
       setStatusFilter(filters.run_status);
     } else {
       setStatusFilter([]);
+    }
+
+    // 处理对象类型过滤
+    if (filters && filters.ontologyObjectTypeName) {
+      setObjectTypeFilter(filters.ontologyObjectTypeName);
+    } else {
+      setObjectTypeFilter([]);
+    }
+
+    // 处理排序
+    if (sorter && sorter.field && sorter.direction) {
+      setSortField(sorter.field);
+      setSortOrder(sorter.direction);
+    } else {
+      setSortField(undefined);
+      setSortOrder(undefined);
     }
 
     // 调用原有的 onChange
@@ -228,6 +290,17 @@ export default function BehaviorLogList() {
           setBehaviorData(undefined);
         }}
         data={behaviorData}
+      />
+
+      {/* 执行详情抽屉 */}
+      <ExecutionDetailDrawer
+        visible={showExecutionDetail}
+        onClose={() => {
+          setShowExecutionDetail(false);
+          setSelectedExecutionId(undefined);
+        }}
+        executionId={selectedExecutionId}
+        mode={activeTab}
       />
     </div>
   );
