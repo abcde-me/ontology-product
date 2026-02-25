@@ -287,6 +287,8 @@ export default function OntologySceneList() {
         pageNo: currentPage,
         pageSize: pageSize,
         filter: filter ?? ''
+        // orderBy: 'createTime',
+        // order: 'desc'
       });
 
       if (response.status === 200 && response.code === '') {
@@ -763,7 +765,7 @@ export default function OntologySceneList() {
           <Spin />
         </div>
       ) : sceneList.length > 0 ? (
-        <div className="grid grid-cols-2 gap-[20px] [@media(min-width:1440px)]:grid-cols-3 [@media(min-width:1920px)]:grid-cols-4">
+        <div className="grid grid-cols-4 gap-[20px] [@media(max-width:1440px)]:grid-cols-2 [@media(min-width:1440px)]:grid-cols-3 [@media(min-width:1920px)]:grid-cols-4">
           {sceneList.map((item) => (
             <SceneCard
               key={item.id}

@@ -48,29 +48,18 @@ const SceneModal: React.FC<SceneModalProps> = ({
   );
 
   useEffect(() => {
-    if (visible) {
-      if (initialValues && initialValues.icon) {
-        form.setFieldsValue({
-          name: initialValues.name || '',
-          description: initialValues.description || ''
-        });
-        setSelectedIcon(initialValues.icon);
-      } else if (mode === 'create') {
-        // 创建模式：随机选择一个与其他场景不同的图标
-        form.resetFields();
-        const randomIcon = getRandomIcon(existingSceneIcons);
-        setSelectedIcon(randomIcon);
-      } else {
-        form.resetFields();
-        setSelectedIcon(ICON_OPTIONS[0].value);
-      }
-    } else {
-      console.log('Modal 关闭时重置表单');
-      // Modal 关闭时重置表单
-      form.resetFields();
-      setSelectedIcon(ICON_OPTIONS[0].value);
+    if (mode === 'create') {
+      // 创建模式：随机选择一个与其他场景不同的图标
+      const randomIcon = getRandomIcon(existingSceneIcons);
+      setSelectedIcon(randomIcon);
+    } else if (mode === 'edit' && initialValues) {
+      form.setFieldsValue({
+        name: initialValues.name || '',
+        description: initialValues.description || ''
+      });
+      setSelectedIcon(initialValues.icon || '');
     }
-  }, [visible, initialValues, form, mode, existingSceneIcons]);
+  }, [mode]);
 
   const handleSubmit = async () => {
     try {
