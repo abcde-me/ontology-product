@@ -4,22 +4,19 @@ import { BehaviorCard } from '../BehaviorCard';
 import { BehaviorItem } from '../../types';
 import { useBusinessStore } from '../../store/businessStore';
 import { useUIStore } from '../../store/uiStore';
+import { BehaviorActionItem } from '@/pages/ontologyScene/types/behaviorActions';
 
 interface BehaviorCardListProps {
   behaviors: BehaviorItem[];
+  onViewDetail?: (data: BehaviorActionItem) => void;
 }
 
 export const BehaviorCardList: React.FC<BehaviorCardListProps> = ({
-  behaviors
+  behaviors,
+  onViewDetail
 }) => {
   const addNode = useBusinessStore((state) => state.addNode);
-  const setCurrentBehaviorDetail = useBusinessStore(
-    (state) => state.setCurrentBehaviorDetail
-  );
   const selectNode = useUIStore((state) => state.selectNode);
-  const setBehaviorDetailVisible = useUIStore(
-    (state) => state.setBehaviorDetailVisible
-  );
 
   const handleCardClick = (behavior: BehaviorItem) => {
     const nodeId = addNode(behavior);
@@ -27,8 +24,8 @@ export const BehaviorCardList: React.FC<BehaviorCardListProps> = ({
   };
 
   const handleViewDetail = (behavior: BehaviorItem) => {
-    setCurrentBehaviorDetail(behavior);
-    setBehaviorDetailVisible(true);
+    // 调用父组件传递的回调
+    onViewDetail?.(behavior as BehaviorActionItem);
   };
 
   if (behaviors.length === 0) {

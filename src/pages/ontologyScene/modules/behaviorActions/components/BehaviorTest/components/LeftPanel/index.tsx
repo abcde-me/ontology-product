@@ -4,8 +4,13 @@ import { BehaviorCardList } from '../BehaviorCardList';
 import { useUIStore } from '../../store/uiStore';
 import { useBusinessStore } from '../../store/businessStore';
 import BehaviorCardSvg from '@/assets/benti/behaviorCard.svg';
+import { BehaviorActionItem } from '@/pages/ontologyScene/types/behaviorActions';
 
-export const LeftPanel: React.FC = () => {
+interface LeftPanelProps {
+  onViewDetail?: (data: BehaviorActionItem) => void;
+}
+
+export const LeftPanel: React.FC<LeftPanelProps> = ({ onViewDetail }) => {
   const loadingBehaviors = useUIStore((state) => state.loadingBehaviors);
   const setLoadingBehaviors = useUIStore((state) => state.setLoadingBehaviors);
   const behaviorList = useBusinessStore((state) => state.behaviorList);
@@ -35,7 +40,10 @@ export const LeftPanel: React.FC = () => {
       </div>
       <div className="scrollbar-hide flex-1 overflow-y-auto overflow-x-hidden">
         <Spin loading={loadingBehaviors} style={{ width: '100%' }}>
-          <BehaviorCardList behaviors={behaviorList} />
+          <BehaviorCardList
+            behaviors={behaviorList}
+            onViewDetail={onViewDetail}
+          />
         </Spin>
       </div>
     </div>
