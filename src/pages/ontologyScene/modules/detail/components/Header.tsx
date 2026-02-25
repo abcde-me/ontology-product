@@ -20,10 +20,8 @@ import {
 } from '@arco-design/web-react/icon';
 import cls from 'classnames';
 import SceneModal, { SceneFormData } from '../../list/components/SceneModal';
-import {
-  getOntologyModelDetail,
-  updateOntologyModel
-} from '@/api/ontologySceneLibrary/ontologyScene';
+import { updateOntologyModel } from '@/api/ontologySceneLibrary/ontologyScene';
+import { OntologScene } from '@/types/ontologySceneApi';
 import SearchDropdown from './SearchDropdown';
 import { EllipsisPopover } from '@ceai-front/arco-material';
 
@@ -35,6 +33,7 @@ interface HeaderProps {
   onTitleEdit?: (title: string) => void;
   onPublish?: () => void;
   sceneId?: number;
+  sceneDetail?: OntologScene | null;
   onSceneUpdate?: () => void;
 }
 
@@ -44,6 +43,7 @@ export default function Header({
   onTitleEdit,
   onPublish,
   sceneId,
+  sceneDetail,
   onSceneUpdate
 }: HeaderProps) {
   const history = useHistory();
@@ -51,45 +51,24 @@ export default function Header({
   const [editTitle, setEditTitle] = useState(title);
   const [searchHovered, setSearchHovered] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
-  const [editLoading, setEditLoading] = useState(false);
   const [submitLoading, setSubmitLoading] = useState(false);
-  const [sceneFormData, setSceneFormData] = useState<SceneFormData | null>(
-    null
-  );
 
   const handleBack = () => {
     history.push('/tenant/compute/modaforge/ontologyScene/list');
   };
 
-  const handleEdit = async () => {
+  const handleEdit = () => {
     if (!sceneId) {
       Message.warning('场景ID不存在');
       return;
     }
 
-    setEditLoading(true);
-    try {
-      const response = await getOntologyModelDetail({
-        id: sceneId
-      });
-
-      if (response.status === 200 && response.code === '' && response.data) {
-        const sceneData = response.data;
-        setSceneFormData({
-          name: sceneData.name || '',
-          description: sceneData.description || '',
-          icon: sceneData.icon || ''
-        });
-        setModalVisible(true);
-      } else {
-        Message.error(response.message || '获取场景详情失败');
-      }
-    } catch (error) {
-      Message.error('获取场景详情失败');
-      console.error('获取场景详情失败:', error);
-    } finally {
-      setEditLoading(false);
+    if (!sceneDetail) {
+      Message.warning('场景数据未加载完成，请稍候再试');
+      return;
     }
+
+    setModalVisible(true);
   };
 
   const handleModalSubmit = async (data: SceneFormData) => {
@@ -131,7 +110,6 @@ export default function Header({
 
   const handleModalCancel = () => {
     setModalVisible(false);
-    setSceneFormData(null);
   };
 
   const handleTitleBlur = () => {
@@ -175,16 +153,12 @@ export default function Header({
               className="ml-[12px] mr-[8px] max-w-[455px] text-[16px] font-[600] text-[var(--color-text-1)]"
             />
 
-            {editLoading ? (
-              <Spin style={{ display: 'inline-block' }} />
-            ) : (
-              <Popover trigger="hover" content="编辑">
-                <IconEdit
-                  className="cursor-pointer text-[16px] text-[var(--color-text-2)] hover:text-primary-600"
-                  onClick={handleEdit}
-                />
-              </Popover>
-            )}
+            <Popover trigger="hover" content="编辑">
+              <IconEdit
+                className="cursor-pointer text-[16px] text-[var(--color-text-2)] hover:text-primary-600"
+                onClick={handleEdit}
+              />
+            </Popover>
           </>
         )}
       </div>
@@ -244,11 +218,15 @@ export default function Header({
         </div>
       </div>
 
-      {modalVisible && (
+      {modalVisible && sceneDetail && (
         <SceneModal
           visible={modalVisible}
           mode="edit"
-          initialValues={sceneFormData || undefined}
+          initialValues={{
+            name: sceneDetail.name || '',
+            description: sceneDetail.description || '',
+            icon: sceneDetail.icon || ''
+          }}
           onSubmit={handleModalSubmit}
           onCancel={handleModalCancel}
           loading={submitLoading}

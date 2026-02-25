@@ -64,6 +64,11 @@ const SceneModal: React.FC<SceneModalProps> = ({
         form.resetFields();
         setSelectedIcon(ICON_OPTIONS[0].value);
       }
+    } else {
+      console.log('Modal 关闭时重置表单');
+      // Modal 关闭时重置表单
+      form.resetFields();
+      setSelectedIcon(ICON_OPTIONS[0].value);
     }
   }, [visible, initialValues, form, mode, existingSceneIcons]);
 
@@ -74,8 +79,7 @@ const SceneModal: React.FC<SceneModalProps> = ({
         ...values,
         icon: selectedIcon
       });
-      form.resetFields();
-      setSelectedIcon(ICON_OPTIONS[0].value);
+      // 不在提交成功后立即重置表单，等待 Modal 关闭时由 useEffect 处理
     } catch (error) {
       console.error('表单验证失败:', error);
     }
