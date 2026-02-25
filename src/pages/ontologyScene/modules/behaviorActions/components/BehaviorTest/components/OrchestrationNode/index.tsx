@@ -1,8 +1,8 @@
 import React from 'react';
-import { Modal, Message } from '@arco-design/web-react';
-import { IconDelete, IconPlayArrow } from '@arco-design/web-react/icon';
+import { Modal, Message, Tooltip } from '@arco-design/web-react';
 import { OrchestrationNode as OrchestrationNodeType } from '../../types';
 import { useBusinessStore } from '../../store/businessStore';
+import DeleteSvg from '@/assets/benti/delete.svg';
 
 interface OrchestrationNodeProps {
   node: OrchestrationNodeType;
@@ -17,6 +17,7 @@ export const OrchestrationNode: React.FC<OrchestrationNodeProps> = ({
   onClick,
   onDelete
 }) => {
+  const [isDeleteHovered, setIsDeleteHovered] = React.useState(false);
   const nodeConfigs = useBusinessStore((state) => state.nodeConfigs);
 
   const config = nodeConfigs[node.id] || {};
@@ -30,99 +31,88 @@ export const OrchestrationNode: React.FC<OrchestrationNodeProps> = ({
     });
   };
 
-  const handleRun = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (!node.isConfigured) {
-      Message.warning('请先完成参数配置');
-      return;
-    }
-    Message.info(`执行节点: ${node.behavior.name}`);
-    // TODO: 实现单个节点执行逻辑
-  };
-
-  const borderColor = node.isConfigured
-    ? 'border-[#00b42a]'
-    : isSelected
-      ? 'border-[#165dff]'
-      : 'border-[#e5e6eb]';
-
-  const shadowClass = isSelected
-    ? 'shadow-[0_0_0_3px_rgba(22,93,255,0.1)]'
-    : '';
+  const borderColor = isSelected
+    ? 'border-[#184FF2]'
+    : 'border-[rgba(236,240,243,1)]';
 
   return (
     <div
-      className={`cursor-pointer rounded-lg border-2 bg-white transition-all duration-200 hover:border-[#c9cdd4] hover:shadow-md ${borderColor} ${shadowClass}`}
+      className={`cursor-pointer rounded-lg border-2 bg-white px-4 pb-4 pt-3 shadow-[0_2px_8px_rgba(0,0,0,0.08)] transition-all duration-200 ${borderColor}`}
       onClick={onClick}
     >
-      {/* 节点头部 */}
-      <div className="flex items-center justify-between gap-3 border-b border-[#e5e6eb] px-4 py-3">
-        <span className="flex-1 overflow-hidden text-ellipsis whitespace-nowrap text-sm font-medium text-[#1d2129]">
-          {node.behavior.name}
-        </span>
-        <div className="flex flex-shrink-0 items-center gap-2">
-          <div
-            className="flex h-6 w-6 cursor-pointer items-center justify-center rounded transition-colors duration-200 hover:bg-[#f2f3f5]"
-            onClick={handleRun}
-            title="运行"
-          >
-            <IconPlayArrow className="text-base text-[#165dff]" />
+      {/* 节点头部：编号 + 行为名称 + 删除 */}
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2">
+          {/* 编号 */}
+          <div className="flex h-4 w-4 flex-shrink-0 items-center justify-center rounded border border-[rgba(190,213,253,1)] bg-[rgba(242,248,255,1)] text-[10px] font-bold leading-none text-[rgba(64,115,245,1)]">
+            {String(node.order + 1).padStart(2, '0')}
           </div>
-          <div
-            className="flex h-6 w-6 cursor-pointer items-center justify-center rounded transition-colors duration-200 hover:bg-[#f2f3f5]"
-            onClick={handleDelete}
-            title="删除"
-          >
-            <IconDelete className="text-base text-[#86909c] hover:text-[#f53f3f]" />
-          </div>
+          {/* 行为名称 */}
+          <span className="overflow-hidden text-ellipsis whitespace-nowrap text-sm font-semibold text-[#1d2129]">
+            {node.behavior.name}
+          </span>
         </div>
+        {/* 删除图标 */}
+        <Tooltip content="删除">
+          <div
+            className="flex-shrink-0 cursor-pointer"
+            onMouseEnter={() => setIsDeleteHovered(true)}
+            onMouseLeave={() => setIsDeleteHovered(false)}
+            onClick={handleDelete}
+          >
+            <DeleteSvg
+              className="transition-colors duration-200"
+              style={{
+                fill: isDeleteHovered ? '#F53F3F' : '#4A5169'
+              }}
+            />
+          </div>
+        </Tooltip>
       </div>
 
-      {/* 节点参数列表 */}
-      <div className="flex flex-col gap-2 px-4 py-3">
-        {node.behavior.configSchema?.fields.map((field) => {
-          const value = config[field.name];
+      {/* 表单项列表 */}
+      {node.behavior.configSchema?.fields &&
+        node.behavior.configSchema.fields.length > 0 && (
+          <div className="mt-2 flex flex-col gap-3">
+            {node.behavior.configSchema.fields.map((field) => {
+              const value = config[field.name];
 
-          // 判断是否已配置
-          let isUnconfigured =
-            value === undefined || value === null || value === '';
+              // 判断是否已配置
+              let isUnconfigured =
+                value === undefined || value === null || value === '';
 
-          // 对于布尔值，false 也是有效配置
-          if (field.type === 'switch' || field.widget === '切换开关') {
-            isUnconfigured = value === undefined || value === null;
-          }
+              // 对于布尔值，false 也是有效配置
+              if (field.type === 'switch' || field.widget === '切换开关') {
+                isUnconfigured = value === undefined || value === null;
+              }
 
-          // 格式化显示值
-          let displayValue = '未配置';
-          if (!isUnconfigured) {
-            if (typeof value === 'boolean') {
-              displayValue = value ? '是' : '否';
-            } else if (Array.isArray(value)) {
-              displayValue = value.join(', ');
-            } else {
-              displayValue = String(value);
-            }
-          }
+              // 格式化显示值
+              let displayValue = '未配置';
+              if (!isUnconfigured) {
+                if (typeof value === 'boolean') {
+                  displayValue = value ? '是' : '否';
+                } else if (Array.isArray(value)) {
+                  displayValue = value.join(', ');
+                } else {
+                  displayValue = String(value);
+                }
+              }
 
-          return (
-            <div
-              key={field.name}
-              className="flex items-baseline gap-2 text-[13px]"
-            >
-              <span className="flex-shrink-0 text-[#4e5969]">
-                {field.label}:
-              </span>
-              <span
-                className={`flex-1 break-all ${
-                  isUnconfigured ? 'text-[#86909c]' : 'text-[#1d2129]'
-                }`}
-              >
-                {displayValue}
-              </span>
-            </div>
-          );
-        })}
-      </div>
+              return (
+                <div key={field.name} className="flex flex-col gap-1">
+                  {/* Label */}
+                  <span className="text-[13px] font-semibold text-[rgba(15,19,31,1)]">
+                    {field.label}
+                  </span>
+                  {/* Value */}
+                  <div className="rounded bg-[#F7F8FA] px-3 py-2 text-[13px] font-normal text-[#86909C]">
+                    {displayValue}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
     </div>
   );
 };

@@ -4,7 +4,7 @@ import { IconDown } from '@arco-design/web-react/icon';
 
 export interface IconOption {
   value: string;
-  icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
+  icon: React.ComponentType<React.SVGProps<SVGSVGElement>> | string;
 }
 
 interface IconSelectorProps {
@@ -68,40 +68,36 @@ const IconSelector: React.FC<IconSelectorProps> = ({
           style={{
             background: '#fff',
             borderRadius: 4,
-            boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
-            padding: 12,
-            width: 200
+            boxShadow: '0 4px 12px 0 rgba(0, 0, 0, 0.10)',
+            padding: 16
           }}
         >
           <div
             style={{
               display: 'grid',
-              gridTemplateColumns: 'repeat(3, 1fr)',
-              gap: '4px'
+              gridTemplateColumns: 'repeat(5, 1fr)',
+              gap: '8px'
             }}
           >
             {options.map((option) => {
-              const IconComponent = option.icon ?? options[0].icon;
+              const iconSource = option.icon ?? options[0].icon;
               return (
                 <div
                   key={option.value}
                   onClick={() => handleIconSelect(option.value)}
                   style={{
-                    width: 56,
-                    height: 56,
+                    width: 49,
+                    height: 49,
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
                     cursor: 'pointer',
+                    overflow: 'hidden',
                     borderRadius: 4,
                     border:
                       selectedIconValue === option.value
-                        ? '1px solid #165dff'
-                        : '1px solid transparent',
-                    backgroundColor:
-                      selectedIconValue === option.value
-                        ? '#f0f5ff'
-                        : 'transparent',
+                        ? '1px solid #184FF2'
+                        : '1px solid #E2E8F0',
                     transition: 'all 0.2s'
                   }}
                   onMouseEnter={(e) => {
@@ -117,12 +113,21 @@ const IconSelector: React.FC<IconSelectorProps> = ({
                     }
                   }}
                 >
-                  <IconComponent
-                    style={{
-                      width: 32,
-                      height: 32
-                    }}
-                  />
+                  {typeof iconSource === 'string' ? (
+                    <img
+                      src={iconSource}
+                      alt=""
+                      style={{
+                        width: 51,
+                        height: 51,
+                        objectFit: 'cover'
+                      }}
+                    />
+                  ) : iconSource ? (
+                    React.createElement(iconSource, {
+                      style: { width: 51, height: 51 }
+                    })
+                  ) : null}
                 </div>
               );
             })}
@@ -133,9 +138,8 @@ const IconSelector: React.FC<IconSelectorProps> = ({
       position="bl"
     >
       <div
-        className="flex h-[56px] w-[72px] items-center justify-between gap-[4px]"
+        className="flex h-[56px] w-[64px] items-center justify-between gap-[4px]"
         style={{
-          padding: '0 4px',
           cursor: 'pointer',
           transition: 'border-color 0.2s'
         }}
@@ -147,10 +151,17 @@ const IconSelector: React.FC<IconSelectorProps> = ({
         }}
         onClick={() => setIconDropdownVisible(!iconDropdownVisible)}
       >
-        <div className="flex h-[56px] w-[56px] items-center justify-center rounded-[4px] bg-[#f0f5ff]">
-          {selectedIconOption && (
-            <selectedIconOption.icon style={{ width: 32, height: 32 }} />
-          )}
+        <div className="flex h-[49px] w-[49px] items-center justify-center rounded-[4px] bg-[#f0f5ff]">
+          {selectedIconOption &&
+            (typeof selectedIconOption.icon === 'string' ? (
+              <img
+                src={selectedIconOption.icon}
+                alt=""
+                style={{ width: 49, height: 49, objectFit: 'contain' }}
+              />
+            ) : (
+              <selectedIconOption.icon style={{ width: 49, height: 49 }} />
+            ))}
         </div>
         <IconDown
           style={{

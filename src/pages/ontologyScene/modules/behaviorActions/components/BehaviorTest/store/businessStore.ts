@@ -237,29 +237,70 @@ export const useBusinessStore = create<BusinessStore>((set, get) => ({
   // 检查节点是否已配置
   isNodeConfigured: (nodeId: string): boolean => {
     const { nodeConfigs, orchestrationNodes } = get();
-    const config = nodeConfigs[nodeId];
     const node = orchestrationNodes.find((n) => n.id === nodeId);
 
-    if (!config || !node) return false;
+    if (!node) {
+      console.log('isNodeConfigured: node not found', nodeId);
+      return false;
+    }
 
-    // 检查所有必填字段是否已填写
+    // 检查所有必填字段
     const requiredFields =
       node.behavior.configSchema?.fields.filter((f) => f.required) || [];
 
-    return requiredFields.every((field) => {
+    console.log('isNodeConfigured:', {
+      nodeId,
+      behaviorName: node.behavior.name,
+      requiredFieldsCount: requiredFields.length,
+      hasConfig: !!nodeConfigs[nodeId],
+      configSchema: node.behavior.configSchema
+    });
+
+    // 如果没有必填字段，认为已配置
+    if (requiredFields.length === 0) {
+      console.log('isNodeConfigured: no required fields, returning true');
+      return true;
+    }
+
+    const config = nodeConfigs[nodeId];
+    if (!config) {
+      console.log('isNodeConfigured: no config found, returning false');
+      return false;
+    }
+
+    const result = requiredFields.every((field) => {
       const value = config[field.name];
       return value !== undefined && value !== null && value !== '';
     });
+
+    console.log('isNodeConfigured: checking required fields, result:', result);
+    return result;
   },
 
   // 检查是否可以执行测试
   canExecuteTest: (): boolean => {
     const { orchestrationNodes } = get();
 
-    if (orchestrationNodes.length === 0) return false;
+    console.log('canExecuteTest called:', {
+      nodesCount: orchestrationNodes.length,
+      nodes: orchestrationNodes.map((n) => ({
+        id: n.id,
+        name: n.behavior.name,
+        isConfigured: get().isNodeConfigured(n.id)
+      }))
+    });
+
+    if (orchestrationNodes.length === 0) {
+      console.log('canExecuteTest: no nodes, returning false');
+      return false;
+    }
 
     // 所有节点都必须已配置
-    return orchestrationNodes.every((node) => get().isNodeConfigured(node.id));
+    const result = orchestrationNodes.every((node) =>
+      get().isNodeConfigured(node.id)
+    );
+    console.log('canExecuteTest result:', result);
+    return result;
   },
 
   // 根据 ID 获取节点

@@ -43,7 +43,7 @@ export const fetchBehaviorLogDetail = async (
  */
 export const fetchBehaviorLogInputParams = async (
   id: string
-): Promise<Record<string, any>> => {
+): Promise<any[]> => {
   if (USE_MOCK) {
     return mockApi.getBehaviorLogInputParams(id);
   }
@@ -54,7 +54,37 @@ export const fetchBehaviorLogInputParams = async (
 };
 
 /**
- * 获取执行记录的执行详情（SQL/代码）
+ * 获取执行记录的出参详情
+ */
+export const fetchBehaviorLogOutputParams = async (
+  id: string
+): Promise<any[]> => {
+  if (USE_MOCK) {
+    return mockApi.getBehaviorLogOutputParams(id);
+  }
+
+  // 真实 API 调用（如果接口还未实现，暂时使用 mock）
+  // TODO: 等待后端接口实现后替换
+  // const response = await api.getBehaviorLogOutputParams({ id });
+  // return response.data;
+  return mockApi.getBehaviorLogOutputParams(id);
+};
+
+/**
+ * 获取执行记录的运行日志
+ */
+export const fetchBehaviorLogRunLogs = async (id: string): Promise<string> => {
+  if (USE_MOCK) {
+    return mockApi.getBehaviorLogRunLogs(id);
+  }
+
+  // 真实 API 调用（如果接口还未实现，暂时使用 mock）
+  // TODO: 等待后端接口实现后替换
+  return mockApi.getBehaviorLogRunLogs(id);
+};
+
+/**
+ * 获取执行记录的函数代码
  */
 export const fetchBehaviorLogExecutionDetail = async (
   id: string

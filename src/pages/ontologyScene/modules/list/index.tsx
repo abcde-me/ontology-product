@@ -13,9 +13,9 @@ import {
   IconPlus,
   IconEdit,
   IconDelete,
-  IconEye,
-  IconThumbUp,
-  IconImage
+  IconStorage,
+  IconSwap,
+  IconFolder
 } from '@arco-design/web-react/icon';
 import {
   ExpandableProcessFlow,
@@ -26,6 +26,10 @@ import {
 } from '@ceai-front/arco-material';
 import { Link } from '@arco-design/web-react';
 import initialBg from '../../assets/initial-bg.png';
+import ObjectSmallIcon from '../../assets/object-small.svg';
+import LinkSmallIcon from '../../assets/link-small.svg';
+import BehaviorSmallIcon from '../../assets/behavior-small.svg';
+import FunctionSmallIcon from '../../assets/function-small.svg';
 import ObjectTypeCreateIcon from '../../assets/object-type-create.svg';
 import LinkCreateIcon from '../../assets/link-create.svg';
 import BehaviorCreateIcon from '../../assets/behavior-create.svg';
@@ -42,6 +46,7 @@ import {
 } from '@/api/ontologySceneLibrary/ontologyScene';
 import { OntologScene } from '@/types/ontologySceneApi';
 import { ICON_OPTIONS } from '../../common/constants';
+import dayjs from 'dayjs';
 
 // 扩展 ProcessStep 类型，使 description 支持 ReactNode
 interface SceneProcessStep extends Omit<ProcessStep, 'description'> {
@@ -108,13 +113,24 @@ const SceneCard: React.FC<SceneCardProps> = ({
 
   const getIconComponent = (icon: string) => {
     const matchedIcon = ICON_OPTIONS.find((option) => option.value === icon);
-    const IconComponent = matchedIcon?.icon ?? ICON_OPTIONS[0].icon;
-    return <IconComponent />;
+    const iconSource = matchedIcon?.icon ?? ICON_OPTIONS[0].icon;
+
+    // 如果是字符串（图片路径），使用 img 标签
+    if (typeof iconSource === 'string') {
+      return (
+        <img src={iconSource} alt="" className="h-full w-full object-contain" />
+      );
+    }
+
+    // 如果是 React 组件（SVG），直接使用组件
+    return iconSource
+      ? React.createElement(iconSource, { style: { width: 49, height: 49 } })
+      : null;
   };
 
   return (
     <div
-      className={`relative flex h-full cursor-pointer flex-col gap-[12px] rounded-lg border border-[#EBEEF5] bg-white p-4 transition-all duration-200 ${
+      className={`relative flex h-full cursor-pointer flex-col gap-[12px] rounded-lg border border-[#EBEEF5] bg-white p-[24px] transition-all duration-200 ${
         isHovered
           ? 'border-[#165dff] shadow-[0_4px_12px_rgba(22,93,255,0.1)]'
           : ''
@@ -125,11 +141,11 @@ const SceneCard: React.FC<SceneCardProps> = ({
     >
       {/* 卡片头部 */}
       <div className="flex items-start gap-[12px]">
-        <div className="flex h-[56px] w-[56px] flex-shrink-0 items-center justify-center">
+        <div className="flex h-[49px] w-[49px] flex-shrink-0 items-center justify-center">
           {getIconComponent(item.icon ?? '')}
         </div>
         <div className="flex min-w-0 flex-1 flex-col">
-          <div className="mb-[4px] mt-[6px] flex min-w-0 flex-1 justify-between text-[14px] font-[600] leading-[22px] text-[var(--color-text-1)]">
+          <div className="mb-[4px] flex min-w-0 flex-1 justify-between text-[18px] font-[500] leading-[24px] text-[var(--color-text-1)]">
             <EllipsisPopover
               wrapperClassName="flex-1 min-w-0"
               value={item.name}
@@ -150,73 +166,91 @@ const SceneCard: React.FC<SceneCardProps> = ({
               </Popover>
             </div>
           </div>
-          {/* 更新日期 */}
-          <div className="text-[14px] leading-[22px] text-[var(--color-text-4)]">
-            更新于 {item.updateTime}
+
+          {/* 描述说明 */}
+          <div className="flex-1 text-[14px] leading-[22px] text-[var(--color-text-5)]">
+            {item.description ? (
+              <EllipsisPopover value={item.description} />
+            ) : (
+              '-'
+            )}
           </div>
         </div>
       </div>
 
-      {/* 描述说明 */}
-      <div className="flex-1">
-        <EllipsisPopover
-          value={item.description}
-          preferTypography
-          ellipsis={{
-            rows: 2,
-            cssEllipsis: true
-          }}
-          wrapperClassName="[&_.arco-typography]:text-sm [&_.arco-typography]:text-[#4e5969] [&_.arco-typography]:leading-[22px] [&_.arco-typography]:m-0"
-        />
-      </div>
-
       {/* 底部图标和数字 */}
-      <div className="flex items-center justify-between">
-        <Popover content="对象类型">
-          <div
-            className="flex cursor-pointer items-center gap-1 text-[14px] text-[var(--color-text-1)] transition-colors hover:text-[rgba(var(--primary-6))] [&:hover]:cursor-pointer"
-            onClick={(e) =>
-              handleIconClick(e, ONTOLOGY_SCENE_MENU_ITEM_KEYS.OBJECT_TYPE)
-            }
-          >
-            <IconEye className="h-4 w-4" />
-            <span>{item.ontologyObjectTypeCounts || 0}</span>
+      <div className="flex items-center justify-between gap-[8px]">
+        <div
+          className="flex flex-1 cursor-pointer flex-col gap-[3px] rounded-[4px] border border-[var(--color-border-2)] p-[8px] text-[14px] text-[var(--color-text-1)] [&:hover]:cursor-pointer"
+          onClick={(e) =>
+            handleIconClick(e, ONTOLOGY_SCENE_MENU_ITEM_KEYS.OBJECT_TYPE)
+          }
+        >
+          <ObjectSmallIcon className="h-[16px] w-[16px]" />
+          <div className="flex items-center justify-between">
+            <span className="text-[12px] leading-[18px] text-[var(--color-text-3)]">
+              对象
+            </span>
+            <span className="text-[14px] font-[500] leading-[22px] text-[var(--color-text-1)]">
+              {item.ontologyObjectTypeCounts || 0}
+            </span>
           </div>
-        </Popover>
+        </div>
 
-        <Popover content="链接">
-          <div
-            className="flex cursor-pointer items-center gap-1 text-[14px] text-[var(--color-text-1)] transition-colors hover:text-[rgba(var(--primary-6))]"
-            onClick={(e) =>
-              handleIconClick(e, ONTOLOGY_SCENE_MENU_ITEM_KEYS.LINKS)
-            }
-          >
-            <IconEdit className="h-4 w-4" />
-            <span>{item.ontologyLinkTypeCounts || 0}</span>
+        <div
+          className="hover:text-[rgba(var(--primary-6)) flex flex-1 cursor-pointer flex-col gap-[3px] rounded-[4px] border border-[var(--color-border-2)] p-[8px] text-[14px] text-[var(--color-text-1)] transition-colors"
+          onClick={(e) =>
+            handleIconClick(e, ONTOLOGY_SCENE_MENU_ITEM_KEYS.LINKS)
+          }
+        >
+          <LinkSmallIcon className="h-[16px] w-[16px]" />
+          <div className="flex items-center justify-between">
+            <span className="text-[12px] leading-[18px] text-[var(--color-text-3)]">
+              链接
+            </span>
+            <span className="text-[14px] font-[500] leading-[22px] text-[var(--color-text-1)]">
+              {item.ontologyLinkTypeCounts || 0}
+            </span>
           </div>
-        </Popover>
-        <Popover content="行为">
-          <div
-            className="flex cursor-pointer items-center gap-1 text-[14px] text-[var(--color-text-1)] transition-colors hover:text-[rgba(var(--primary-6))]"
-            onClick={(e) =>
-              handleIconClick(e, ONTOLOGY_SCENE_MENU_ITEM_KEYS.BEHAVIOR_ACTIONS)
-            }
-          >
-            <IconThumbUp className="h-4 w-4" />
-            <span>{item.ontologyActionCounts || 0}</span>
+        </div>
+
+        <div
+          className="hover:text-[rgba(var(--primary-6)) flex flex-1 cursor-pointer flex-col gap-[3px] rounded-[4px] border border-[var(--color-border-2)] p-[8px] text-[14px] text-[var(--color-text-1)] transition-colors"
+          onClick={(e) =>
+            handleIconClick(e, ONTOLOGY_SCENE_MENU_ITEM_KEYS.BEHAVIOR_ACTIONS)
+          }
+        >
+          <BehaviorSmallIcon className="h-[16px] w-[16px]" />
+          <div className="flex items-center justify-between">
+            <span className="text-[12px] leading-[18px] text-[var(--color-text-3)]">
+              行为
+            </span>
+            <span className="text-[14px] font-[500] leading-[22px] text-[var(--color-text-1)]">
+              {item.ontologyActionCounts || 0}
+            </span>
           </div>
-        </Popover>
-        <Popover content="函数">
-          <div
-            className="flex cursor-pointer items-center gap-1 text-[14px] text-[var(--color-text-1)] transition-colors hover:text-[rgba(var(--primary-6))]"
-            onClick={(e) =>
-              handleIconClick(e, ONTOLOGY_SCENE_MENU_ITEM_KEYS.FUNCTIONS)
-            }
-          >
-            <IconImage className="h-4 w-4" />
-            <span>{item.ontologyFunctionCounts || 0}</span>
+        </div>
+
+        <div
+          className="hover:text-[rgba(var(--primary-6)) flex flex-1 cursor-pointer flex-col gap-[3px] rounded-[4px] border border-[var(--color-border-2)] p-[8px] text-[14px] text-[var(--color-text-1)] transition-colors"
+          onClick={(e) =>
+            handleIconClick(e, ONTOLOGY_SCENE_MENU_ITEM_KEYS.FUNCTIONS)
+          }
+        >
+          <FunctionSmallIcon className="h-[16px] w-[16px]" />
+          <div className="flex items-center justify-between">
+            <span className="text-[12px] leading-[18px] text-[var(--color-text-3)]">
+              函数
+            </span>
+            <span className="text-[14px] font-[500] leading-[22px] text-[var(--color-text-1)]">
+              {item.ontologyFunctionCounts || 0}
+            </span>
           </div>
-        </Popover>
+        </div>
+      </div>
+      {/* 更新日期 */}
+      <div className="text-[14px] leading-[22px] text-[var(--color-text-4)]">
+        更新于 {dayjs(item.updateTime).format('YYYY-MM-DD HH:mm:ss')}
       </div>
     </div>
   );
@@ -227,7 +261,7 @@ export default function OntologySceneList() {
   const [filter, setFilter] = useState('');
   const [sceneList, setSceneList] = useState<SceneCardItem[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(16);
+  const [pageSize, setPageSize] = useState(20);
   const [loading, setLoading] = useState(false);
   const [initialLoading, setInitialLoading] = useState(true);
   const [noData, setNoData] = useState(false);
@@ -287,6 +321,7 @@ export default function OntologySceneList() {
 
   // 处理创建场景
   const handleCreate = () => {
+    console.log('handleCreate');
     setModalMode('create');
     setEditingScene(null);
     setModalVisible(true);
@@ -516,47 +551,170 @@ export default function OntologySceneList() {
   }
 
   // 处理初始背景图点击创建场景
-  const handleInitialBgClick = async () => {
-    if (createInitialLoading) return;
+  // const handleInitialBgClick = async () => {
+  //   if (createInitialLoading) return;
 
-    setCreateInitialLoading(true);
-    try {
-      const response = await createOntologyModel({
-        name: '新建本体场景',
-        description: '',
-        icon: ICON_OPTIONS[0]?.value || 'ontology-scene-1',
-        tagIdList: []
-      });
+  //   setCreateInitialLoading(true);
+  //   try {
+  //     const response = await createOntologyModel({
+  //       name: '新建本体场景',
+  //       description: '',
+  //       icon: ICON_OPTIONS[0]?.value || 'ontology-scene-1',
+  //       tagIdList: []
+  //     });
 
-      if (response.status === 200 && response.code === '') {
-        Message.success('创建成功');
-        // 创建成功后跳转到详情页
-        history.push(
-          `/tenant/compute/modaforge/ontologyScene/detail/${response.data.id}`
-        );
-      } else {
-        Message.error(response.message || '创建失败');
-      }
-    } catch (error) {
-      Message.error('创建失败');
-      console.error('创建场景失败:', error);
-    } finally {
-      setCreateInitialLoading(false);
-    }
-  };
+  //     if (response.status === 200 && response.code === '') {
+  //       Message.success('创建成功');
+  //       // 创建成功后跳转到详情页
+  //       history.push(
+  //         `/tenant/compute/modaforge/ontologyScene/detail/${response.data.id}`
+  //       );
+  //     } else {
+  //       Message.error(response.message || '创建失败');
+  //     }
+  //   } catch (error) {
+  //     Message.error('创建失败');
+  //     console.error('创建场景失败:', error);
+  //   } finally {
+  //     setCreateInitialLoading(false);
+  //   }
+  // };
 
   // 只在第一次进入页面请求接口并且返回数据是空的时候展示无数据背景图
   if (noData && sceneList.length === 0) {
     return (
-      <div className="flex h-full items-center justify-center">
+      <div
+        className={classNames(
+          styles['initial-page'],
+          'flex h-full w-full overflow-hidden bg-white'
+        )}
+      >
         {createInitialLoading ? (
-          <Spin />
+          <div className="flex h-full items-center justify-center">
+            <Spin />
+          </div>
         ) : (
-          <img
-            src={initialBg}
-            alt="initialBg"
-            className="cursor-pointer"
-            onClick={handleInitialBgClick}
+          <>
+            {/* 内容区域 */}
+            <div className="relative mx-auto flex h-full w-full min-w-[1000px] max-w-[1220px] flex-1 flex-col items-center">
+              <div className="mt-[118px] w-full">
+                {/* 大标题 - 入场动效 */}
+                <h1
+                  className={classNames(
+                    'mb-[12px] text-[40px] font-[600] leading-[54px] text-[var(--color-text-1)]',
+                    styles['fade-in-up']
+                  )}
+                  style={{
+                    animationDelay: '0ms'
+                  }}
+                >
+                  企业级{' '}
+                  <span className={classNames(styles['primary-color'])}>
+                    本体
+                  </span>{' '}
+                  构建中心
+                </h1>
+
+                {/* 说明文字 - 入场动效 */}
+                <p
+                  className={classNames(
+                    'mb-[36px] w-[429px] text-[16px] leading-[24px] text-[var(--color-text-3)]',
+                    styles['fade-in-up']
+                  )}
+                  style={{
+                    animationDelay: '50ms'
+                  }}
+                >
+                  将离散的底层数据映射为可视、可管、可执行的业务对象, 构建面向
+                  AI 时代的语义基础设施
+                </p>
+
+                {/* 按钮 - 入场动效和悬停动效 */}
+                <div
+                  className={classNames(styles['fade-in-up'])}
+                  style={{
+                    animationDelay: '100ms'
+                  }}
+                >
+                  <Button
+                    type="primary"
+                    size="large"
+                    className={classNames(styles['create-button'])}
+                    onClick={handleCreate}
+                  >
+                    <span className="mr-2 inline-block transition-transform duration-200 group-hover:translate-x-1">
+                      立即创建本体场景
+                    </span>
+                    <span className="inline-block">→</span>
+                  </Button>
+                </div>
+
+                {/* 本体介绍 */}
+                <div
+                  className={classNames(
+                    'absolute bottom-[16px] left-0 right-0 flex w-full gap-[20px] rounded-[4px] bg-white p-[32px]',
+                    styles['fade-in-up']
+                  )}
+                  style={{ animationDelay: '150ms' }}
+                >
+                  {/* 统一数据语言 */}
+                  <div className="flex flex-1 gap-[12px]">
+                    <div className="flex h-[76px] w-[76px] flex-shrink-0 items-center justify-center rounded-lg bg-[#EBF0FA]">
+                      <IconStorage className="h-6 w-6 text-[#165dff]" />
+                    </div>
+                    <div className="flex flex-col gap-[8px]">
+                      <h3 className="text-[16px] font-[600] leading-[24px] text-[var(--color-text-1)]">
+                        统一数据语言
+                      </h3>
+                      <p className="text-[12px] leading-[22px] text-[var(--color-text-4)]">
+                        打通底层数据孤岛,将晦涩的数据与代码转化为统一的业务语言,让业务人员无需懂技术也能看懂数据、使用数据。
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* 构筑可信AI */}
+                  <div className="flex flex-1 gap-[12px]">
+                    <div className="flex h-[76px] w-[76px] flex-shrink-0 items-center justify-center rounded-lg bg-[#EBF0FA]">
+                      <IconSwap className="h-6 w-6 text-[#165dff]" />
+                    </div>
+                    <div className="flex flex-col gap-[8px]">
+                      <h3 className="text-[16px] font-[600] leading-[24px] text-[var(--color-text-1)]">
+                        构筑可信AI
+                      </h3>
+                      <p className="text-[12px] leading-[22px] text-[var(--color-text-4)]">
+                        为大模型建立严谨的知识围栏,确保AI在业务场景中回答精准、可控、无虚假,让企业放心应用生成式
+                        AI。
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* 经验资产数字化 */}
+                  <div className="flex flex-1 gap-[12px]">
+                    <div className="flex h-[76px] w-[76px] flex-shrink-0 items-center justify-center rounded-lg bg-[#EBF0FA]">
+                      <IconFolder className="h-6 w-6 text-[#165dff]" />
+                    </div>
+                    <div className="flex flex-col gap-[8px]">
+                      <h3 className="text-[16px] font-[600] leading-[24px] text-[var(--color-text-1)]">
+                        经验资产数字化
+                      </h3>
+                      <p className="text-[12px] leading-[22px] text-[var(--color-text-4)]">
+                        将原本在专家脑中的行业经验,固化为可复用的数字资产,支持在各类业务场景中随时调用,降低重复建设成本。
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </>
+        )}
+        {/* 创建/编辑弹窗 */}
+        {modalVisible && (
+          <SceneModal
+            visible={modalVisible}
+            mode={modalMode}
+            onSubmit={handleModalSubmit}
+            onCancel={handleModalCancel}
+            loading={submitLoading}
           />
         )}
       </div>
@@ -605,7 +763,7 @@ export default function OntologySceneList() {
           <Spin />
         </div>
       ) : sceneList.length > 0 ? (
-        <div className="grid grid-cols-[repeat(auto-fill,minmax(384px,1fr))] gap-[20px]">
+        <div className="grid grid-cols-2 gap-[20px] [@media(min-width:1440px)]:grid-cols-3 [@media(min-width:1920px)]:grid-cols-4">
           {sceneList.map((item) => (
             <SceneCard
               key={item.id}
@@ -629,7 +787,7 @@ export default function OntologySceneList() {
             current={currentPage}
             pageSize={pageSize}
             total={totalCount}
-            sizeOptions={[16, 32, 64, 128]}
+            sizeOptions={[20, 40, 60, 80]}
             onChange={(page, pageSize) => {
               setCurrentPage(page);
               setPageSize(pageSize);
