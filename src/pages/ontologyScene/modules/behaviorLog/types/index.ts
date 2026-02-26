@@ -62,10 +62,10 @@ export interface BehaviorLogListParams {
   filter: string;
   type: 'action' | 'function';
   sources?: string[]; // 来源过滤
-  run_status?: number[]; // 执行状态过滤
+  run_status_list?: number[]; // 执行状态过滤列表
   ontology_object_type_ids?: string[]; // 对象类型过滤
-  sort_field?: string; // 排序字段
-  sort_order?: 'ascend' | 'descend'; // 排序方向
+  sort_by?: string; // 排序字段
+  sort?: 'asc' | 'desc'; // 排序方向
 }
 
 // API 响应

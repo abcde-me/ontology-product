@@ -34,7 +34,7 @@ export const OsDrawer = (props: OSDrawerProps) => {
             )}
           </div>
           <div className={'flex gap-4'}>
-            <div className={'h-[16px] w-[1px] bg-[#CBD5E1]'} />
+            {onEdit && <div className={'h-[16px] w-[1px] bg-[#CBD5E1]'} />}
             <IconClose
               onClick={onCancel}
               className={'text-[16px] text-[#23293B] hover:cursor-pointer'}

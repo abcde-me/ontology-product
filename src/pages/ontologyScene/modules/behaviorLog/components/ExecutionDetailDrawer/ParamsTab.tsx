@@ -49,19 +49,6 @@ export const ParamsTab: React.FC<ParamsTabProps> = ({
       title: '出参类型',
       dataIndex: 'type',
       width: 150
-    },
-    {
-      title: '值',
-      dataIndex: 'value',
-      render: (value) => {
-        if (!value) return '-';
-        if (typeof value === 'object') {
-          return (
-            <pre className="text-xs">{JSON.stringify(value, null, 2)}</pre>
-          );
-        }
-        return String(value);
-      }
     }
   ];
 

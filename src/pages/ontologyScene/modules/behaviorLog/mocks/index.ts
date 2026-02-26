@@ -274,6 +274,51 @@ export const mockApi = {
       });
     }
 
+    // 执行状态过滤
+    if (params.run_status_list && params.run_status_list.length > 0) {
+      list = list.filter((item) =>
+        params.run_status_list!.includes(item.run_status)
+      );
+    }
+
+    // 对象类型过滤
+    if (
+      params.ontology_object_type_ids &&
+      params.ontology_object_type_ids.length > 0
+    ) {
+      list = list.filter(
+        (item) =>
+          item.ontologyObjectTypeId &&
+          params.ontology_object_type_ids!.includes(
+            String(item.ontologyObjectTypeId)
+          )
+      );
+    }
+
+    // 排序
+    if (params.sort_by && params.sort) {
+      list.sort((a, b) => {
+        let aValue: any;
+        let bValue: any;
+
+        if (params.sort_by === 'start_time') {
+          aValue = new Date(a.start_time).getTime();
+          bValue = new Date(b.start_time).getTime();
+        } else if (params.sort_by === 'end_time') {
+          aValue = new Date(a.end_time).getTime();
+          bValue = new Date(b.end_time).getTime();
+        } else {
+          return 0;
+        }
+
+        if (params.sort === 'asc') {
+          return aValue - bValue;
+        } else {
+          return bValue - aValue;
+        }
+      });
+    }
+
     // 分页
     const page = params.pageNo || 1;
     const pageSize = params.pageSize || 20;
