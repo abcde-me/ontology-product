@@ -8,6 +8,9 @@ import BehaviorRefreshSvg from '@/assets/benti/behaviorRefresh.svg';
 export const CanvasHeader: React.FC = () => {
   const isTestRunning = useUIStore((state) => state.isTestRunning);
   const setIsTestRunning = useUIStore((state) => state.setIsTestRunning);
+  const setTestResultVisible = useUIStore(
+    (state) => state.setTestResultVisible
+  );
 
   const orchestrationNodes = useBusinessStore(
     (state) => state.orchestrationNodes
@@ -39,6 +42,7 @@ export const CanvasHeader: React.FC = () => {
 
   const handleTest = async () => {
     setIsTestRunning(true);
+    setTestResultVisible(true); // 打开测试结果抽屉
     try {
       await executeTest();
       Message.success('测试执行成功');
@@ -56,7 +60,7 @@ export const CanvasHeader: React.FC = () => {
         <div className="text-base font-medium text-[#000]">行为编排</div>
       </div>
       <div className="flex items-center gap-3">
-        <Tooltip content="刷新">
+        <Tooltip content="重置">
           <BehaviorRefreshSvg
             className="cursor-pointer transition-colors duration-200 hover:opacity-70"
             onClick={handleRefresh}

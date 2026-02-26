@@ -84,7 +84,7 @@ export const RightPanel: React.FC = () => {
             <BehaviorConfigSvg className="h-3.5 w-3.5" />
             <span className="text-base font-medium text-[#000]">参数配置</span>
           </div>
-          <BehaviorTestSvg className="h-4 w-4 cursor-pointer" />
+          {/* <BehaviorTestSvg className="h-4 w-4 cursor-pointer" /> */}
         </div>
         <div className="flex flex-1 items-center justify-center px-5">
           <NoDataCard title="请先选择行为" />
@@ -101,7 +101,7 @@ export const RightPanel: React.FC = () => {
           <BehaviorConfigSvg className="h-3.5 w-3.5" />
           <span className="text-base font-medium text-[#000]">参数配置</span>
         </div>
-        <BehaviorTestSvg className="h-4 w-4 cursor-pointer" />
+        {/* <BehaviorTestSvg className="h-4 w-4 cursor-pointer" /> */}
       </div>
 
       {/* 表单内容 */}

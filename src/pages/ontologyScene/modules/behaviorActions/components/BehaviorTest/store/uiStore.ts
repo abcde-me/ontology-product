@@ -30,6 +30,8 @@ interface UIStore {
   setBehaviorDetailVisible: (visible: boolean) => void;
   testHistoryVisible: boolean;
   setTestHistoryVisible: (visible: boolean) => void;
+  testResultVisible: boolean;
+  setTestResultVisible: (visible: boolean) => void;
 
   // ===== 重置 =====
   resetUI: () => void;
@@ -46,6 +48,7 @@ export const useUIStore = create<UIStore>((set) => ({
   isEmpty: true,
   behaviorDetailVisible: false,
   testHistoryVisible: false,
+  testResultVisible: false,
 
   // Actions
   selectNode: (nodeId) => set({ selectedNodeId: nodeId }),
@@ -76,6 +79,8 @@ export const useUIStore = create<UIStore>((set) => ({
 
   setTestHistoryVisible: (visible) => set({ testHistoryVisible: visible }),
 
+  setTestResultVisible: (visible) => set({ testResultVisible: visible }),
+
   resetUI: () =>
     set({
       selectedNodeId: null,
@@ -86,6 +91,7 @@ export const useUIStore = create<UIStore>((set) => ({
       isTestRunning: false,
       isEmpty: true,
       behaviorDetailVisible: false,
-      testHistoryVisible: false
+      testHistoryVisible: false,
+      testResultVisible: false
     })
 }));
