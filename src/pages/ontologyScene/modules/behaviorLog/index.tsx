@@ -66,9 +66,9 @@ export default function BehaviorLogList() {
         // 只获取非当前 tab 的 total
         const otherType = activeTab === 'action' ? 'function' : 'action';
         const result = await fetchBehaviorLogList({
-          page_num: 1,
-          page_size: 1,
-          query: '',
+          pageNo: 1,
+          pageSize: 1,
+          filter: '',
           type: otherType
         });
 
@@ -104,11 +104,12 @@ export default function BehaviorLogList() {
     // @ts-expect-error
     const behaviorActionData: BehaviorActionItem = {
       id: Number(record.id),
-      name: record.name,
+      name: record.name || '',
       code: record.code,
-      description: record.description,
+      description: record.description || '',
       objectTypeName: record.ontologyObjectTypeName,
-      objectTypeId: Number(record.ontologyObjectTypeId || 0)
+      objectTypeId: Number(record.ontologyObjectTypeId || 0),
+      params: [] // BehaviorActionItem 要求 params 是必需字段
     };
     setBehaviorData(behaviorActionData);
     setShowBehaviorDetail(true);
@@ -116,7 +117,7 @@ export default function BehaviorLogList() {
 
   // 处理查看执行详情
   const handleViewExecutionDetail = (record: BehaviorLogItem) => {
-    setSelectedExecutionId(record.id);
+    setSelectedExecutionId(String(record.id));
     setShowExecutionDetail(true);
   };
 
@@ -137,9 +138,9 @@ export default function BehaviorLogList() {
     service: async (params) => {
       // 调用 API 服务，带上当前 activeTab 和过滤条件
       const result = await fetchBehaviorLogList({
-        page_num: params.page || 1,
-        page_size: params.page_size || 10,
-        query: params.keyword || '',
+        pageNo: params.page || 1,
+        pageSize: params.pageSize || 10,
+        filter: params.keyword || '',
         type: activeTab, // 搜索时会带上当前 tab 的类型
         sources: sourcesFilter.length > 0 ? sourcesFilter : undefined, // 来源过滤
         run_status: statusFilter.length > 0 ? statusFilter : undefined, // 执行状态过滤
@@ -161,7 +162,7 @@ export default function BehaviorLogList() {
           items: result.items,
           total: result.total,
           page: result.page,
-          page_size: result.page_size
+          pageSize: result.pageSize
         }
       };
     },

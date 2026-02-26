@@ -13,6 +13,14 @@ interface ObjectTypeFilter {
   value: string;
 }
 
+// 将毫秒转换为秒的辅助函数
+const formatDuration = (duration: string | number | undefined): string => {
+  if (!duration) return '-';
+  const ms = typeof duration === 'string' ? parseFloat(duration) : duration;
+  if (isNaN(ms)) return '-';
+  return `${(ms / 1000).toFixed(2)}s`;
+};
+
 export const useColumns = (
   type: 'action' | 'function',
   onViewObjectTypeDetail?: (record: BehaviorLogItem) => void,
@@ -43,21 +51,10 @@ export const useColumns = (
         },
         {
           title: '来源',
-          dataIndex: 'sources',
+          dataIndex: 'source',
           width: 120,
-          filters: [
-            { text: '手动触发', value: 'manual' },
-            { text: '自动触发', value: 'auto' },
-            { text: 'API调用', value: 'api' }
-          ],
           render: (value) => {
-            const sourceMap: Record<string, { text: string }> = {
-              manual: { text: '手动触发' },
-              auto: { text: '自动触发' },
-              api: { text: 'API调用' }
-            };
-            const config = sourceMap[value] || { text: value };
-            return <div>{config.text}</div>;
+            return <div>{value}</div>;
           }
         },
         {
@@ -165,7 +162,7 @@ export const useColumns = (
           width: 120,
           render: (value) => (
             <div className="font-PingFangSc text-[14px] font-normal leading-[22px] text-[#4e5969]">
-              {value || '-'}
+              {formatDuration(value)}
             </div>
           )
         },
@@ -286,7 +283,7 @@ export const useColumns = (
         width: 120,
         render: (value) => (
           <div className="font-PingFangSc text-[14px] font-normal leading-[22px] text-[#4e5969]">
-            {value || '-'}
+            {formatDuration(value)}
           </div>
         )
       },

@@ -49,10 +49,15 @@ export function getBehaviorHistory(params: {
  * 获取执行记录列表
  */
 export function getBehaviorLogList(params: {
-  page_num: number;
-  page_size: number;
-  query: string;
+  pageNo: number;
+  pageSize: number;
+  filter: string;
   type: 'action' | 'function';
+  sources?: string[];
+  run_status?: number[];
+  ontology_object_type_ids?: string[];
+  sort_field?: string;
+  sort_order?: 'ascend' | 'descend';
 }) {
   return UAPI.RES.PageExecuteTestLog({}).post(params).inRegion().do();
 }
@@ -60,9 +65,8 @@ export function getBehaviorLogList(params: {
 /**
  * 获取执行记录详情
  */
-export function getBehaviorLogDetail(params: { id: string }) {
-  // @ts-ignore - UAPI 资源待后端配置
-  return UAPI.RES.behaviorLogDetail({ id: params.id }).get().inRegion().do();
+export function getBehaviorLogDetail(params: { id: number }) {
+  return UAPI.RES.GetExecuteTestLog({}).post(params).inRegion().do();
 }
 
 /**

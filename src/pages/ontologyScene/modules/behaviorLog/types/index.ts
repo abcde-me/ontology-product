@@ -1,14 +1,26 @@
 // 执行记录数据接口（真实 API 返回的字段）
 export interface BehaviorLogItem {
-  id: string; // 函数/行为的执行id
+  id: string | number; // 函数/行为的执行id
+  type?: string; // 类型
   name: string; // 行为/函数名称
   code: string; // 行为/函数id
-  description: string; // 描述说明
-  sources: string; // 来源
-  run_status: 1 | 2 | 3 | 4; // 执行状态：1-处理中 2-成功 3-失败 4-kill
-  duration: string; // 执行耗时
+  description?: string; // 描述说明
+  session_id?: string; // 会话ID
+  pk?: number; // 主键
+  script_path?: string; // 脚本路径
+  sources?: string; // 来源（复数形式，兼容旧版）
+  source?: string; // 来源（单数形式，新版API）
+  run_status: 1 | 2 | 3 | 4 | 0; // 执行状态：0-未知 1-处理中 2-成功 3-失败 4-kill
+  duration: string | number; // 执行耗时（可能是字符串或数字）
   start_time: string; // 开始时间
   end_time: string; // 结束时间
+  operator_time?: string; // 操作时间
+  run_log?: string; // 运行日志
+  input_params?: string; // 入参（JSON字符串）
+  return_params?: string; // 出参（JSON字符串）
+  execute_code?: string; // 执行代码
+  execute_command?: string; // 执行命令
+  associated_object_type?: string; // 关联对象类型
   ontologyObjectTypeName?: string; // 所属对象类型名称
   ontologyObjectTypeIcon?: string; // 所属对象类型图标
   ontologyObjectTypeId?: string | number; // 所属对象类型ID
@@ -39,15 +51,15 @@ export const STATUS_CONFIG = {
 export interface SearchParams {
   keyword?: string;
   page?: number;
-  page_size?: number;
+  pageSize?: number;
   type?: 'action' | 'function'; // 类型：行为或函数
 }
 
 // API 请求参数
 export interface BehaviorLogListParams {
-  page_num: number;
-  page_size: number;
-  query: string;
+  pageNo: number;
+  pageSize: number;
+  filter: string;
   type: 'action' | 'function';
   sources?: string[]; // 来源过滤
   run_status?: number[]; // 执行状态过滤
@@ -61,5 +73,5 @@ export interface BehaviorLogListResponse {
   items: BehaviorLogItem[];
   total: number;
   page: number;
-  page_size: number;
+  pageSize: number;
 }

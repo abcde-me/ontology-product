@@ -27,10 +27,10 @@ export const fetchBehaviorLogList = async (
  * 获取执行记录详情
  */
 export const fetchBehaviorLogDetail = async (
-  id: string
+  id: number
 ): Promise<BehaviorLogItem> => {
   if (USE_MOCK) {
-    return mockApi.getBehaviorLogDetail(id);
+    return mockApi.getBehaviorLogDetail(String(id));
   }
 
   // 真实 API 调用
@@ -44,13 +44,15 @@ export const fetchBehaviorLogDetail = async (
 export const fetchBehaviorLogInputParams = async (
   id: string
 ): Promise<any[]> => {
-  if (USE_MOCK) {
-    return mockApi.getBehaviorLogInputParams(id);
-  }
+  // 暂时使用 mock 数据，等待后端接口配置
+  // TODO: 等待后端接口实现后替换
+  return mockApi.getBehaviorLogInputParams(id);
 
-  // 真实 API 调用
-  const response = await api.getBehaviorLogInputParams({ id });
-  return response.data;
+  // if (USE_MOCK) {
+  //   return mockApi.getBehaviorLogInputParams(id);
+  // }
+  // const response = await api.getBehaviorLogInputParams({ id });
+  // return response.data;
 };
 
 /**
@@ -59,14 +61,8 @@ export const fetchBehaviorLogInputParams = async (
 export const fetchBehaviorLogOutputParams = async (
   id: string
 ): Promise<any[]> => {
-  if (USE_MOCK) {
-    return mockApi.getBehaviorLogOutputParams(id);
-  }
-
-  // 真实 API 调用（如果接口还未实现，暂时使用 mock）
+  // 暂时使用 mock 数据，等待后端接口配置
   // TODO: 等待后端接口实现后替换
-  // const response = await api.getBehaviorLogOutputParams({ id });
-  // return response.data;
   return mockApi.getBehaviorLogOutputParams(id);
 };
 
@@ -74,11 +70,7 @@ export const fetchBehaviorLogOutputParams = async (
  * 获取执行记录的运行日志
  */
 export const fetchBehaviorLogRunLogs = async (id: string): Promise<string> => {
-  if (USE_MOCK) {
-    return mockApi.getBehaviorLogRunLogs(id);
-  }
-
-  // 真实 API 调用（如果接口还未实现，暂时使用 mock）
+  // 暂时使用 mock 数据，等待后端接口配置
   // TODO: 等待后端接口实现后替换
   return mockApi.getBehaviorLogRunLogs(id);
 };
@@ -89,13 +81,15 @@ export const fetchBehaviorLogRunLogs = async (id: string): Promise<string> => {
 export const fetchBehaviorLogExecutionDetail = async (
   id: string
 ): Promise<string> => {
-  if (USE_MOCK) {
-    return mockApi.getBehaviorLogExecutionDetail(id);
-  }
+  // 暂时使用 mock 数据，等待后端接口配置
+  // TODO: 等待后端接口实现后替换
+  return mockApi.getBehaviorLogExecutionDetail(id);
 
-  // 真实 API 调用
-  const response = await api.getBehaviorLogExecutionDetail({ id });
-  return response.data?.detail || response.data || '';
+  // if (USE_MOCK) {
+  //   return mockApi.getBehaviorLogExecutionDetail(id);
+  // }
+  // const response = await api.getBehaviorLogExecutionDetail({ id });
+  // return response.data?.detail || response.data || '';
 };
 
 /**

@@ -119,6 +119,9 @@ export const PrefixRagV2 = '/aimdp-manager/api/v1';
 // 引擎
 export const PrefixEngine = '/metadata-service/api/v1';
 
+// 本体行为服务
+export const PrefixOntology = API_PREFIX + '/ontology-action/api/v1';
+
 // 多模态数据治理平台接口
 export const ModaForgeResourceEndpoints = {
   // 登录
@@ -736,6 +739,8 @@ export const ModaForgeResourceEndpoints = {
   behaviorHistory: PrefixAimdp + '/ListBehaviorHistory',
   // 执行记录
   PageExecuteTestLog: PrefixAimdp + '/PageExecuteTestLog',
+  // 执行记录详情
+  GetExecuteTestLog: PrefixAimdp + '/GetExecuteTestLog',
 
   // 本体拓扑
   // 获取本体拓扑
