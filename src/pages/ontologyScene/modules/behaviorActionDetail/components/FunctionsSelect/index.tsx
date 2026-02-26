@@ -9,12 +9,18 @@ import {
 import styles from './index.module.scss';
 import { IconInfoCircle } from '@arco-design/web-react/icon';
 import { FunctionContentDialog } from '@/pages/ontologyScene/modules/behaviorActionDetail/components';
+import { useParams } from 'react-router-dom';
 
 export const FunctionsSelect = (props: CustomFormItemCompProps<string>) => {
   const { value, onChange, disabled } = props;
+  const { id: OSId } = useParams<Record<string, string>>();
   const { data: allFunctions = [], loading: functionsLoading } = useRequest(
     () => {
-      return getFunctionList({}).then((res) =>
+      return getFunctionList({
+        ontologyModelID: +OSId,
+        pageNum: 1,
+        pageSize: 10
+      }).then((res) =>
         res.items.map((f) => {
           return {
             ...f,

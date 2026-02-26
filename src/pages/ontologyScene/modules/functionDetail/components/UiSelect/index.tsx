@@ -15,13 +15,11 @@ import classNames from 'classnames';
 
 export const UiSelect = (props: CustomFormItemCompProps<string>) => {
   const { value, onChange, disabled } = props;
-
   const currentIcon = useMemo(() => {
     const key = value ?? `${ParamType.String}_${UiType.Input}`;
     const Icon = TYPE_UI_OPTIONS[key];
     return <Icon />;
   }, [value]);
-  console.log(123, value);
 
   const dropList = (
     <Menu

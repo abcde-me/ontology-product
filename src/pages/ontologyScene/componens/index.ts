@@ -16,3 +16,4 @@ export type { ObjectTypeSelectProps } from './ObjectTypeSelect';
 export * from './ObjectInterfaceSelect';
 export { default as ObjectTypeDetailDrawer } from './ObjectTypeDetailDrawer';
 export * from './OSEmptyStatus';
+export * from './FunctionFileParam';

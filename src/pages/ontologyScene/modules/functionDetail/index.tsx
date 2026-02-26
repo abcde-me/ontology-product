@@ -11,6 +11,7 @@ import {
   DEFAULT_FUNCTION_SCHEMA,
   OntologyFunctionDetail,
   OntologyFunctionItem,
+  OntologyFunctionParam,
   OntologyFunctionSchema,
   ParamType
 } from '@/pages/ontologyScene/types/ontologyFunction';
@@ -85,6 +86,19 @@ export default function OSFunctionDetailPage() {
     form.setFieldsValue(buildFunctionSchema(functionDetail));
   }, [functionDetail]);
 
+  const getParamNames = () => {
+    const { input, output } = form.getFieldsValue(['input', 'output']);
+    return (input as OntologyFunctionParam[])
+      .map((p, i) => {
+        return `input[${i}].name`;
+      })
+      .concat(
+        (output as OntologyFunctionParam[]).map((p, i) => {
+          return `output[${i}].name`;
+        })
+      );
+  };
+
   return (
     <div
       className={`${styles['behavior-action-detail']} flex h-full w-full flex-col `}
@@ -101,11 +115,16 @@ export default function OSFunctionDetailPage() {
           className={`overflow-auto ${styles['function-form']}`}
           onValuesChange={(c, values) => {
             if ('content' in c) return;
-            form.validate().then((res) => {
-              form.setFieldsValue({
-                content: buildPythonFunctionScript(res)
-              });
-            });
+            // 触发表单校验
+            form
+              .validate(getParamNames())
+              .then((res) => {
+                // 参数合法，构建py代码
+                form.setFieldsValue({
+                  content: buildPythonFunctionScript(values as any)
+                });
+              })
+              .catch(console.error);
           }}
         >
           <div className={'module-title'}>基本信息</div>
@@ -201,6 +220,7 @@ export default function OSFunctionDetailPage() {
               placeholder="请输入id用于唯一标识符，如infer_affiliation"
               maxLength={32}
               showWordLimit
+              disabled={pageMode === 'edit'}
             />
           </FormItem>
 

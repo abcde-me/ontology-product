@@ -1,0 +1,98 @@
+.function-detail-drawer {
+  :global {
+    .arco-drawer-body {
+      padding: 16px 20px;
+      background: #f5f7fb;
+    }
+  }
+}
+
+.drawer-content {
+  background: #ffffff;
+  border-radius: 6px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.section-title {
+  font-family: PingFang SC;
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 22px;
+  color: #23293b;
+}
+
+.section-divider {
+  height: 1px;
+  width: 100%;
+  background: #e5e6eb;
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px 24px;
+}
+
+.info-item {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+}
+
+.info-label {
+  font-family: PingFang SC;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 22px;
+  color: #86909c;
+  flex-shrink: 0;
+  min-width: 70px;
+}
+
+.info-value {
+  font-family: PingFang SC;
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 22px;
+  color: #0f131f;
+  word-break: break-all;
+}
+
+.detail-table {
+  :global {
+    .arco-table-container {
+      border: none;
+      border-radius: 4px;
+      background: #ffffff;
+    }
+
+    .arco-table-th {
+      background: #fafbff;
+      font-weight: 600;
+      color: #23293b;
+    }
+
+    .arco-table-td,
+    .arco-table-th {
+      border-bottom: 1px solid #f2f3f5;
+    }
+
+    .arco-table-tr:last-child .arco-table-td {
+      border-bottom: none;
+    }
+  }
+}
+
+.pagination-wrapper {
+  display: flex;
+  justify-content: flex-end;
+}

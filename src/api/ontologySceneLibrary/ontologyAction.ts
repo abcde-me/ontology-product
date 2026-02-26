@@ -29,7 +29,11 @@ export const getActionList = async (params: IActionListParams) => {
     .post(params)
     .inRegion()
     .do();
-  return res.data;
+  const { result: items = [], total = 0 } = res.data;
+  return {
+    items: (items ?? []) as BehaviorActionItem[],
+    total: (total ?? 0) as number
+  };
 };
 
 // 获取行为详情

@@ -10,7 +10,7 @@ import {
 } from '@/pages/ontologyScene/types/behaviorActions';
 
 export const ParamsSetting = (props: CustomFormItemCompProps<any>) => {
-  const [paramsTest, setParamsTest] = useState(true);
+  const [paramsTest, setParamsTest] = useState(false);
   const [currentPrams, setCurrentPrams] = useState<any>();
   const { form, disabled } = Form.useFormContext();
   const functionParams: OntologyActionParam[] = Form.useWatch(

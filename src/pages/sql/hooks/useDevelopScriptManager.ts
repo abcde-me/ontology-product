@@ -158,9 +158,6 @@ export const useDevelopScriptManager = (
             'ScriptId:',
             scriptId
           );
-
-          // debugger;
-
           onFileOpen(String(dataRef.id), scriptId, dataRef.name);
         }
       }
