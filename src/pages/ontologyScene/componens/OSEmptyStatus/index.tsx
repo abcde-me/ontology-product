@@ -8,9 +8,10 @@ interface IProps {
   children?: React.ReactNode;
   className?: string;
   style?: React.CSSProperties;
-  onCreate: () => void;
-  title: React.ReactNode;
-  description: React.ReactNode;
+  onCreate?: () => void;
+  title?: React.ReactNode;
+  description?: React.ReactNode;
+  isShowCard?: boolean;
   empty?: boolean;
 }
 
@@ -22,6 +23,7 @@ export const OsEmptyStatusWrapper = (props: IProps) => {
     onCreate,
     title,
     description,
+    isShowCard = true,
     children = <></>
   } = props;
   return (
@@ -29,17 +31,21 @@ export const OsEmptyStatusWrapper = (props: IProps) => {
       className={classNames([className, styles['os-empty-wrapper']])}
       style={style}
     >
-      {empty ? (
-        <div className={styles['create-card']}>
-          <p>{title}</p>
-          <p>{description}</p>
-          <Button icon={<IconPlus />} onClick={onCreate} className={'w-auto'}>
-            去创建
-          </Button>
-        </div>
-      ) : (
-        children
-      )}
+      {empty
+        ? isShowCard && (
+            <div className={styles['create-card']}>
+              <p>{title}</p>
+              <p>{description}</p>
+              <Button
+                icon={<IconPlus />}
+                onClick={onCreate}
+                className={'w-auto'}
+              >
+                去创建
+              </Button>
+            </div>
+          )
+        : children}
     </div>
   );
 };
