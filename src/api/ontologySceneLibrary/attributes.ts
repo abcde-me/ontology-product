@@ -14,6 +14,10 @@ export const listOntologyPublicProperties = async (
     .post(params)
     .inRegion()
     .do();
+  // return await UAPI.RES.ListOntologyPublicPropertiesApi({})
+  //   .post(params)
+  //   .inRegion()
+  //   .do();
 
   // 保留 params 参数以避免未使用告警
   // void params;

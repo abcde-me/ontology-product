@@ -481,6 +481,7 @@ export default function OntologySceneLinksList() {
           <Form form={form}>
             <Form.Item noStyle field="keyword">
               <Input.Search
+                autoComplete="off"
                 className="w-[220px]"
                 placeholder="请输入关键词"
                 suffix={<IconSearch />}
