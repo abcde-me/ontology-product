@@ -66,15 +66,41 @@ export const useExecutionDetailStore = create<ExecutionDetailStore>(
     loadExecutionDetail: async (id: string) => {
       set({ loading: true });
       try {
-        // 并行请求所有数据
-        const [detail, params, outputParams, logs, functionCode] =
-          await Promise.all([
-            fetchBehaviorLogDetail(id),
-            fetchBehaviorLogInputParams(id),
-            fetchBehaviorLogOutputParams(id),
-            fetchBehaviorLogRunLogs(id),
-            fetchBehaviorLogExecutionDetail(id)
-          ]);
+        console.log('开始加载执行详情，ID:', id);
+
+        // 只调用详情接口，所有数据都从这个接口获取
+        const detail = await fetchBehaviorLogDetail(Number(id));
+
+        console.log('执行详情加载成功:', detail);
+
+        // 解析入参（JSON字符串转数组）
+        let params: ParamItem[] = [];
+        try {
+          params = detail.input_params ? JSON.parse(detail.input_params) : [];
+        } catch (e) {
+          console.error('解析入参失败:', e);
+          params = [];
+        }
+
+        // 解析出参（JSON字符串转对象）
+        let outputParams: OutputParamItem[] = [];
+        try {
+          const returnData = detail.return_params
+            ? JSON.parse(detail.return_params)
+            : {};
+          // 将对象转换为数组格式 [{name: 'var1', type: 'ObjectRef', value: 'ObjectRef'}, ...]
+          outputParams = Object.entries(returnData).map(([name, type]) => ({
+            name,
+            type: type as string,
+            value: type as string
+          }));
+        } catch (e) {
+          console.error('解析出参失败:', e);
+          outputParams = [];
+        }
+
+        const logs = detail.run_log || '';
+        const functionCode = detail.execute_code || '';
 
         set({
           detailData: detail,
@@ -87,6 +113,7 @@ export const useExecutionDetailStore = create<ExecutionDetailStore>(
       } catch (error) {
         console.error('加载执行详情失败:', error);
         set({ loading: false });
+        // 可以在这里添加错误提示
       }
     },
 

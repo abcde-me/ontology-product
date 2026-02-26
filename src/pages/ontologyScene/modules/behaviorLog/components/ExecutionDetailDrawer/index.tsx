@@ -42,10 +42,6 @@ export const ExecutionDetailDrawer: React.FC<ExecutionDetailDrawerProps> = ({
     }
   }, [visible, executionId, setExecutionId]);
 
-  if (!detailData) {
-    return null;
-  }
-
   const sourceMap: Record<string, string> = {
     manual: '手动触发',
     auto: '自动触发',
@@ -53,6 +49,19 @@ export const ExecutionDetailDrawer: React.FC<ExecutionDetailDrawerProps> = ({
   };
 
   const title = mode === 'action' ? '行为执行详情' : '函数执行详情';
+
+  // 兼容 source 和 sources 字段
+  const sourceValue = detailData?.source || detailData?.sources || '';
+  // 确保 run_status 有效，如果是 0 则默认为 1（处理中）
+  const runStatus = detailData?.run_status || 1;
+
+  // 格式化执行耗时（毫秒转秒）
+  const formatDuration = (duration: string | number | undefined): string => {
+    if (!duration) return '0s';
+    const ms = typeof duration === 'string' ? parseFloat(duration) : duration;
+    if (isNaN(ms)) return '0s';
+    return `${(ms / 1000).toFixed(2)}s`;
+  };
 
   return (
     <OsDrawer
@@ -62,55 +71,61 @@ export const ExecutionDetailDrawer: React.FC<ExecutionDetailDrawerProps> = ({
       footer={null}
       className={styles['execution-detail-drawer']}
     >
-      <div className="flex flex-col gap-6">
-        {/* 状态卡片 */}
-        <StatusCard
-          status={detailData.run_status}
-          executionId={detailData.id}
-          source={sourceMap[detailData.sources] || detailData.sources}
-          duration={detailData.duration}
-          startTime={detailData.start_time}
-          endTime={detailData.end_time}
-        />
-
-        {/* 基本信息 */}
-        <BasicInfo
-          mode={mode}
-          name={detailData.name}
-          code={detailData.code}
-          description={detailData.description}
-          ontologyObjectTypeName={detailData.ontologyObjectTypeName}
-          ontologyObjectTypeIcon={detailData.ontologyObjectTypeIcon}
-          ontologyObjectTypeId={String(detailData.ontologyObjectTypeId || '')}
-        />
-
-        {/* Tab 内容 */}
-        <div className={styles['tabs-container']}>
-          <Tabs
-            activeTab={activeTab}
-            onChange={setActiveTab}
-            className="[&_.arco-tabs-content]:p-0"
-          >
-            <TabPane key="logs" title="运行日志">
-              <LogsTab logs={logs} loading={loading} />
-            </TabPane>
-            <TabPane
-              key="params"
-              title={`参数(${params.length + outputParams.length})`}
-            >
-              <ParamsTab
-                params={params}
-                outputParams={outputParams}
-                loading={loading}
-              />
-            </TabPane>
-
-            <TabPane key="function" title="函数">
-              <FunctionTab code={functionCode} loading={loading} />
-            </TabPane>
-          </Tabs>
+      {!detailData || detailData.id === undefined || detailData.id === null ? (
+        <div className="flex items-center justify-center py-20">
+          <div>加载中...</div>
         </div>
-      </div>
+      ) : (
+        <div className="flex flex-col gap-6">
+          {/* 状态卡片 */}
+          <StatusCard
+            status={runStatus}
+            executionId={String(detailData.id)}
+            source={sourceMap[sourceValue] || sourceValue || '未知'}
+            duration={formatDuration(detailData.duration)}
+            startTime={detailData.start_time || '-'}
+            endTime={detailData.end_time || '-'}
+          />
+
+          {/* 基本信息 */}
+          <BasicInfo
+            mode={mode}
+            name={detailData.name}
+            code={detailData.code}
+            description={detailData.description}
+            ontologyObjectTypeName={detailData.ontologyObjectTypeName}
+            ontologyObjectTypeIcon={detailData.ontologyObjectTypeIcon}
+            ontologyObjectTypeId={String(detailData.ontologyObjectTypeId || '')}
+          />
+
+          {/* Tab 内容 */}
+          <div className={styles['tabs-container']}>
+            <Tabs
+              activeTab={activeTab}
+              onChange={setActiveTab}
+              className="[&_.arco-tabs-content]:p-0"
+            >
+              <TabPane key="logs" title="运行日志">
+                <LogsTab logs={logs} loading={loading} />
+              </TabPane>
+              <TabPane
+                key="params"
+                title={`参数(${params.length + outputParams.length})`}
+              >
+                <ParamsTab
+                  params={params}
+                  outputParams={outputParams}
+                  loading={loading}
+                />
+              </TabPane>
+
+              <TabPane key="function" title="函数">
+                <FunctionTab code={functionCode} loading={loading} />
+              </TabPane>
+            </Tabs>
+          </div>
+        </div>
+      )}
     </OsDrawer>
   );
 };

@@ -5,7 +5,7 @@ import {
 } from '../types';
 
 // 🔧 Mock 开关（开发时设为 true，接口就绪后设为 false）
-export const USE_MOCK = true;
+export const USE_MOCK = false;
 
 // 延迟函数（模拟网络请求）
 const delay = (ms = 300) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -255,25 +255,28 @@ export const mockApi = {
         : [...MOCK_FUNCTION_LOGS];
 
     // 关键词搜索
-    if (params.query) {
-      const keyword = params.query.toLowerCase();
+    if (params.filter) {
+      const keyword = params.filter.toLowerCase();
       list = list.filter(
         (item) =>
-          item.id.toLowerCase().includes(keyword) ||
+          String(item.id).toLowerCase().includes(keyword) ||
           item.name.toLowerCase().includes(keyword) ||
           item.code.toLowerCase().includes(keyword) ||
-          item.description.toLowerCase().includes(keyword)
+          (item.description?.toLowerCase() || '').includes(keyword)
       );
     }
 
     // 来源过滤
     if (params.sources && params.sources.length > 0) {
-      list = list.filter((item) => params.sources!.includes(item.sources));
+      list = list.filter((item) => {
+        const itemSource = item.sources || item.source;
+        return itemSource && params.sources!.includes(itemSource);
+      });
     }
 
     // 分页
-    const page = params.page_num || 1;
-    const pageSize = params.page_size || 20;
+    const page = params.pageNo || 1;
+    const pageSize = params.pageSize || 20;
     const total = list.length;
     const start = (page - 1) * pageSize;
     const end = start + pageSize;
@@ -283,7 +286,7 @@ export const mockApi = {
       items: paginatedList,
       total,
       page,
-      page_size: pageSize
+      pageSize
     };
   },
 

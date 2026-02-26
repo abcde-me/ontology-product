@@ -11,7 +11,7 @@ export interface UseTableOptions<TData, TParams> {
       items: TData[];
       total: number;
       page: number;
-      page_size: number;
+      pageSize: number;
     };
   }>;
   /** 表单实例 */
@@ -102,7 +102,7 @@ export function useTable<TData = any, TParams = any>(
       return {
         ...formValues,
         page: currentPage,
-        page_size: currentPageSize,
+        pageSize: currentPageSize,
         ...(currentSorterValue && {
           orders: [
             {
@@ -224,7 +224,7 @@ export function useTable<TData = any, TParams = any>(
         ...prev,
         total: responseData.total || 0,
         current: responseData.page || 1,
-        pageSize: responseData.page_size || 10
+        pageSize: responseData.pageSize || 10
       }));
       // 更新表格数据，使用新数组确保引用变化
       setTableData(newItems);

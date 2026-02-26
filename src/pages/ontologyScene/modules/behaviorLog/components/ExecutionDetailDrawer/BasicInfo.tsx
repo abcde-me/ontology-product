@@ -7,7 +7,7 @@ interface BasicInfoProps {
   mode: 'action' | 'function';
   name: string;
   code: string;
-  description: string;
+  description?: string;
   ontologyObjectTypeName?: string;
   ontologyObjectTypeIcon?: string;
   ontologyObjectTypeId?: string;
