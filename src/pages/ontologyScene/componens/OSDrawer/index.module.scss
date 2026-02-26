@@ -1,6 +1,4 @@
 .os-drawer {
-  width: 900px !important;
-
   :global(.arco-drawer-header) {
     height: max-content;
     padding: 20px 24px;
@@ -13,4 +11,8 @@
   :global(.arco-drawer-header-title) {
     width: 100%;
   }
+}
+
+.os-drawer-default-width {
+  width: 900px !important;
 }
