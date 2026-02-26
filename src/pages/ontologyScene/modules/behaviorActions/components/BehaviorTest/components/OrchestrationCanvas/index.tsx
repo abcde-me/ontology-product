@@ -23,7 +23,7 @@ export const OrchestrationCanvas: React.FC = () => {
       selectNode(null);
     }
   };
-
+  console.log('orchestrationNodes', orchestrationNodes);
   return (
     <div className="mx-auto flex w-[480px] flex-col gap-3">
       {orchestrationNodes.length === 0 ? (
