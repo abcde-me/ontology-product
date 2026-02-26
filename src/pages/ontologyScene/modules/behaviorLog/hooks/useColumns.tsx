@@ -139,7 +139,7 @@ export const useColumns = (
           dataIndex: 'run_status',
           width: 120,
           filters: [
-            { text: '处理中', value: 1 },
+            { text: '运行中', value: 1 },
             { text: '成功', value: 2 },
             { text: '失败', value: 3 },
             { text: '已停止', value: 4 }
