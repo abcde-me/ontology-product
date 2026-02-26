@@ -49,7 +49,8 @@ const ObjectTypeSelect: React.FC<ObjectTypeSelectProps> = ({
       const response = await listOntologyObjectType({
         ontologyModelID,
         pageNo: 1,
-        pageSize: 1000 // 获取所有数据
+        // todo 参数太大会报错，先这么着
+        pageSize: 100 // 获取所有数据
       });
       if (response.status === 200 && response.data) {
         setObjectTypeList(response.data.result || []);

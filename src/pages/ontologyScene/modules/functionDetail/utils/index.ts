@@ -303,7 +303,7 @@ export function buildFunctionSchema(
     Record<InputType, OntologyFunctionParam[]>
   >(
     (p, c) => {
-      const { name, type, inputType, value, idx } = c;
+      const { name, type, inputType, value, idx, uiType } = c;
       const base: OntologyFunctionParam = {
         name,
         type,
@@ -311,9 +311,8 @@ export function buildFunctionSchema(
       };
       if (inputType === InputType.Input) {
         base.value = value;
-        // todo 需要删除代码
         base.uiTypeAndValue = {
-          uiType: `${ParamType.String}_${UiType.Input}`
+          uiType: `${type}_${uiType}`
         };
       }
       p[inputType === InputType.Input ? 'input' : 'output'].push(base);

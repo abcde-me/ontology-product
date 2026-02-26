@@ -44,7 +44,7 @@ export const ActionList = (props: {
       if (isNil(OSId)) {
         props.changePageStatus(true);
         return Promise.resolve({
-          data: [],
+          items: [] as BehaviorActionItem[],
           total: 0
         });
       }

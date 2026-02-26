@@ -96,7 +96,6 @@ export const BehaviorDetail = (props: IProps) => {
             onChange={(key) => {
               setActiveTab(key);
               if (key === 'rules') {
-                debugger;
                 form.setFieldsValue({
                   validationRules: data?.params.flatMap((param) => {
                     const { name, type, enabledValidation, validationRule } =

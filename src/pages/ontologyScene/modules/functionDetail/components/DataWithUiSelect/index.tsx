@@ -13,6 +13,7 @@ import {
 import { InputNumberWithLabel } from '@ceai-front/arco-material';
 import {
   DateTimePicker,
+  FunctionFileParam,
   MapPicker,
   ObjectInterfaceSelect,
   ObjectSet,
@@ -25,7 +26,6 @@ type IValue = {
 };
 export const DataWithUiSelect = (props: CustomFormItemCompProps<IValue>) => {
   const { value, onChange, disabled } = props;
-
   const renderComponentByUiType = (type: UiType) => {
     switch (type) {
       case UiType.TextArea:
@@ -37,6 +37,7 @@ export const DataWithUiSelect = (props: CustomFormItemCompProps<IValue>) => {
               minRows: 1,
               maxRows: 5
             }}
+            onChange={(value) => changeValue({ paramValue: value })}
           />
         );
       case UiType.InputNumber:
@@ -44,6 +45,7 @@ export const DataWithUiSelect = (props: CustomFormItemCompProps<IValue>) => {
           <InputNumberWithLabel
             placeholder={'请输入'}
             className={`${styles['ui-comp']} w-[160px]`}
+            onChange={(value) => changeValue({ paramValue: value })}
           />
         );
       case UiType.InputNumberFloat:
@@ -54,6 +56,7 @@ export const DataWithUiSelect = (props: CustomFormItemCompProps<IValue>) => {
             style={{
               width: '160px'
             }}
+            onChange={(value) => changeValue({ paramValue: value })}
           />
         );
       case UiType.Switch:
@@ -61,6 +64,7 @@ export const DataWithUiSelect = (props: CustomFormItemCompProps<IValue>) => {
           <Select
             className={styles['ui-comp']}
             placeholder={'请选择'}
+            onChange={(value) => changeValue({ paramValue: value })}
             options={[
               {
                 label: 'true',
@@ -78,16 +82,14 @@ export const DataWithUiSelect = (props: CustomFormItemCompProps<IValue>) => {
           <DatePicker
             className={`min-w-[160px] ${styles['ui-comp']}`}
             showTime={false}
+            onChange={(value) => changeValue({ paramValue: value })}
           />
         );
       case UiType.Uploader:
         return (
-          <Upload
-            multiple
-            className={styles['upload']}
-            action={'/'}
-            //图片和pdf格式
-            accept={'.jpg,.jpeg,.png,.pdf'}
+          <FunctionFileParam
+            onChange={(value) => changeValue({ paramValue: value })}
+            value={value?.paramValue}
           />
         );
       case UiType.Geopoint:

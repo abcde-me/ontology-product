@@ -1,0 +1,48 @@
+.function-file-param {
+  width: 100%;
+  border-radius: 4px;
+  border: 1px solid #cbd5e1;
+  padding: 2px 4px;
+  max-height: 100px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+
+  .upload {
+    flex-shrink: 0;
+    width: max-content;
+
+    .uploader {
+      height: 24px;
+      background: white;
+      border: 1px solid var(--LineLine-color-border-1, #cbd5e1) !important;
+      color: #1e293b !important;
+      text-align: center;
+      font-weight: 600;
+      font-size: 14px;
+      line-height: 22px;
+    }
+  }
+
+  .file-list {
+    flex: 1;
+    overflow: auto;
+    padding-top: 4px;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+
+    .file-item {
+      flex-basis: 24px;
+      border-radius: 4px;
+      padding: 2px 4px;
+      align-items: center;
+      gap: 4px;
+      display: flex;
+      overflow: hidden;
+      background: #e7ecf0;
+      margin-bottom: 4px;
+    }
+  }
+}

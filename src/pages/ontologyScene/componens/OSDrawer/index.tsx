@@ -5,11 +5,11 @@ import { IconClose } from '@arco-design/web-react/icon';
 import classNames from 'classnames';
 import { ProButton } from '@ceai-front/arco-material';
 
-interface IProps extends DrawerProps {
+export interface OSDrawerProps extends DrawerProps {
   onEdit?: () => void;
 }
 
-export const OsDrawer = (props: IProps) => {
+export const OsDrawer = (props: OSDrawerProps) => {
   const { className, onEdit, title, onCancel, ...otherProps } = props;
   return (
     <Drawer

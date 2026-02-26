@@ -67,6 +67,9 @@ export const FunctionsSetting = () => {
           if (!v) {
             return onInValid('请输入参数名称');
           }
+          if (!/^[A-Za-z_][A-Za-z0-9_]*$/.test(v)) {
+            return onInValid('请输入正确的参数名称');
+          }
           const sameKey = form
             .getFieldValue(field)
             .filter(({ name }) => name === v);
