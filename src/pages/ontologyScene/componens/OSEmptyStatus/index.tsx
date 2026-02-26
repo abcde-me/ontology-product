@@ -13,6 +13,8 @@ interface IProps {
   description?: React.ReactNode;
   isShowCard?: boolean;
   empty?: boolean;
+  /** 当 empty 为 true 时，可以传入额外的隐藏 DOM（用于确保某些组件始终挂载，如 ref 绑定） */
+  hiddenContent?: React.ReactNode;
 }
 
 export const OsEmptyStatusWrapper = (props: IProps) => {
@@ -24,7 +26,8 @@ export const OsEmptyStatusWrapper = (props: IProps) => {
     title,
     description,
     isShowCard = true,
-    children = <></>
+    children = <></>,
+    hiddenContent
   } = props;
   return (
     <div
@@ -46,6 +49,21 @@ export const OsEmptyStatusWrapper = (props: IProps) => {
             </div>
           )
         : children}
+      {/* 当 empty 为 true 时，渲染隐藏的额外内容，确保组件始终挂载 */}
+      {empty && hiddenContent && (
+        <div
+          style={{
+            position: 'absolute',
+            visibility: 'hidden',
+            pointerEvents: 'none',
+            width: 0,
+            height: 0,
+            overflow: 'hidden'
+          }}
+        >
+          {hiddenContent}
+        </div>
+      )}
     </div>
   );
 };

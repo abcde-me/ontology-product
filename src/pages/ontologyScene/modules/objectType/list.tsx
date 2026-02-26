@@ -333,87 +333,85 @@ export default function OntologySceneObjectTypeList() {
       description={'核心数据模型的原子单位,描述系统中可独立存在的实体'}
       empty={isEmpty}
     >
-      <div className={styles['object-type-list']}>
-        <div>
-          <div className="mb-1 font-PingFangSc text-[20px] font-[600] leading-[30px] text-default">
-            对象类型
-          </div>
-          <div className="font-PingFangSc text-[14px] font-normal leading-[22px] text-[#334155]">
-            核心数据模型的原子单位,描述系统中可独立存在的实体
-          </div>
+      <div>
+        <div className="mb-1 font-PingFangSc text-[20px] font-[600] leading-[30px] text-default">
+          对象类型
         </div>
-        <SearchTable
-          className={styles['object-type-table']}
-          searchForm={
-            <Form form={form}>
-              <Form.Item noStyle field="keyword">
-                <Input.Search
-                  className="w-[230px]"
-                  placeholder="请输入对象类型名称或id搜索"
-                  suffix={<IconSearch />}
-                  allowClear
-                  onClear={() => {
-                    setUrlState({ search: '' });
-                    submit();
-                  }}
-                  onSearch={(value) => {
-                    setUrlState({ search: value || '' });
-                    submit();
-                  }}
-                />
-              </Form.Item>
-            </Form>
-          }
-          addButton={
-            <ProButton icon={<IconPlus />} onClick={handleCreate}>
-              创建对象类型
-            </ProButton>
-          }
-          tableProps={{
-            columns,
-            data,
-            loading,
-            rowKey: (record) => record.id?.toString() || '',
-            border: false,
-            pagination: false,
-            scroll: { x: true },
-            onChange: (pagination, sorter, filters) => {
-              onChange(pagination, sorter, filters);
-            }
-          }}
-        />
-        {Number(pagination?.total) > 0 && (
-          <div className="mt-4 flex items-center justify-end">
-            <Pagination
-              {...pagination}
-              onChange={(page, pageSize) => {
-                onChange(
-                  {
-                    ...pagination,
-                    current: page,
-                    pageSize
-                  } as any,
-                  undefined,
-                  undefined
-                );
-              }}
-            />
-          </div>
-        )}
-
-        {/* 对象类型详情抽屉 */}
-        {selectedObjectType && detailDrawerVisible && (
-          <ObjectTypeDetailDrawer
-            visible={detailDrawerVisible}
-            onClose={() => {
-              setDetailDrawerVisible(false);
-              setSelectedObjectType(null);
-            }}
-            objectTypeId={selectedObjectType?.id?.toString() || ''}
-            defaultActiveTab={activeTab}
-          />
-        )}
+        <div className="font-PingFangSc text-[14px] font-normal leading-[22px] text-[#334155]">
+          核心数据模型的原子单位,描述系统中可独立存在的实体
+        </div>
       </div>
+      <SearchTable
+        className={styles['object-type-table']}
+        searchForm={
+          <Form form={form}>
+            <Form.Item noStyle field="keyword">
+              <Input.Search
+                className="w-[230px]"
+                placeholder="请输入对象类型名称或id搜索"
+                suffix={<IconSearch />}
+                allowClear
+                onClear={() => {
+                  setUrlState({ search: '' });
+                  submit();
+                }}
+                onSearch={(value) => {
+                  setUrlState({ search: value || '' });
+                  submit();
+                }}
+              />
+            </Form.Item>
+          </Form>
+        }
+        addButton={
+          <ProButton icon={<IconPlus />} onClick={handleCreate}>
+            创建对象类型
+          </ProButton>
+        }
+        tableProps={{
+          columns,
+          data,
+          loading,
+          rowKey: (record) => record.id?.toString() || '',
+          border: false,
+          pagination: false,
+          scroll: { x: true },
+          onChange: (pagination, sorter, filters) => {
+            onChange(pagination, sorter, filters);
+          }
+        }}
+      />
+      {Number(pagination?.total) > 0 && (
+        <div className="mt-4 flex items-center justify-end">
+          <Pagination
+            {...pagination}
+            onChange={(page, pageSize) => {
+              onChange(
+                {
+                  ...pagination,
+                  current: page,
+                  pageSize
+                } as any,
+                undefined,
+                undefined
+              );
+            }}
+          />
+        </div>
+      )}
+
+      {/* 对象类型详情抽屉 */}
+      {selectedObjectType && detailDrawerVisible && (
+        <ObjectTypeDetailDrawer
+          visible={detailDrawerVisible}
+          onClose={() => {
+            setDetailDrawerVisible(false);
+            setSelectedObjectType(null);
+          }}
+          objectTypeId={selectedObjectType?.id?.toString() || ''}
+          defaultActiveTab={activeTab}
+        />
+      )}
     </OsEmptyStatusWrapper>
   );
 }
