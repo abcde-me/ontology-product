@@ -1,6 +1,7 @@
 import React from 'react';
 import { Table, TableColumnProps } from '@arco-design/web-react';
-import { NoDataCard } from '@ceai-front/arco-material';
+import { NoDataCard, EllipsisPopover } from '@ceai-front/arco-material';
+import { ObjectTypeTagList } from '@/pages/ontologyScene/componens';
 import { ParamItem, OutputParamItem } from './types';
 
 interface ParamsTabProps {
@@ -28,13 +29,40 @@ export const ParamsTab: React.FC<ParamsTabProps> = ({
     {
       title: '值',
       dataIndex: 'value',
-      render: (value) => {
+      render: (value, record) => {
+        // 如果数据类型是 ObjectSet 或 Attachment，使用 ObjectTypeTagList 渲染
+        if (record.type === 'ObjectSet' || record.type === 'Attachment') {
+          // value 应该是一个对象类型列表数组
+          const objectTypeList = Array.isArray(value) ? value : [];
+
+          if (objectTypeList.length === 0) {
+            return <span>-</span>;
+          }
+
+          // 转换为 ObjectTypeTagList 需要的格式
+          const tags = objectTypeList.map((item: any) => ({
+            ontologyObjectTypeName:
+              item.name || item.ontologyObjectTypeName || '',
+            ontologyObjectTypeId: item.id || item.ontologyObjectTypeId,
+            ontologyObjectTypeIcon: item.icon || item.ontologyObjectTypeIcon,
+            onClick: () => {
+              // 可以添加点击事件，跳转到对象类型详情
+              console.log('Click object type:', item);
+            }
+          }));
+
+          return <ObjectTypeTagList tags={tags} />;
+        }
+
+        // 其他类型的值渲染
         if (typeof value === 'object') {
           return (
             <pre className="text-xs">{JSON.stringify(value, null, 2)}</pre>
           );
         }
-        return String(value);
+
+        const stringValue = String(value);
+        return <EllipsisPopover value={stringValue} isEdit={false} />;
       }
     }
   ];
