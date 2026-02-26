@@ -1185,7 +1185,12 @@ export default function DataLoadCreate() {
         if (sourceType) {
           const res = await getConnectionList({
             type: sourceType,
-            status: '1'
+            status: '1',
+            // 数据库类型过滤，其他服务端不支持载入
+            sub_type:
+              sourceType === SOURCE_TYPES.DB
+                ? 'Mysql,PostgreSQL,DM,GaussDB'
+                : undefined
           });
 
           if (!cancelled && res.data?.items) {

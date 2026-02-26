@@ -268,20 +268,20 @@ export const DATABASE_TYPE_ENUM = [
     text: 'PostgreSQL',
     value: 'PostgreSQL'
   },
-  // {
-  //   label: 'Doirs',
-  //   text: 'Doirs',
-  //   value: 'Doirs'
-  // },
-  // {
-  //   label: 'Elasticsearch',
-  //   text: 'Elasticsearch',
-  //   value: 'Elasticsearch'
-  // },
   {
     label: 'Kafka',
     text: 'Kafka',
     value: 'Kafka'
+  },
+  {
+    label: '达梦',
+    text: '达梦',
+    value: 'DM'
+  },
+  {
+    label: 'GaussDB',
+    text: 'GaussDB',
+    value: 'GaussDB'
   }
 ];
 
