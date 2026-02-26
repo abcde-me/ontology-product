@@ -8,10 +8,11 @@ import {
   HistoryItem
 } from '../types';
 import {
-  fetchBehaviorList,
   executeBehaviorTest,
   getBehaviorHistory
 } from '../services/behaviorTestApi';
+import { getActionList } from '@/api/ontologySceneLibrary/ontologyAction';
+import { UiType } from '@/pages/ontologyScene/types/ontologyFunction';
 
 interface BusinessStore {
   // ===== 数据 =====
@@ -21,11 +22,22 @@ interface BusinessStore {
   testResults: TestResult[];
   historyList: HistoryItem[];
   currentBehaviorDetail: BehaviorItem | null;
+  // 分页相关
+  currentPage: number;
+  totalCount: number;
+  hasMore: boolean;
 
   // ===== 业务操作 =====
   fetchBehaviors: (params?: {
     keyword?: string;
     objectType?: string;
+    ontologyModelID?: number;
+    reset?: boolean; // 是否重置列表
+  }) => Promise<void>;
+  loadMoreBehaviors: (params?: {
+    keyword?: string;
+    objectType?: string;
+    ontologyModelID?: number;
   }) => Promise<void>;
   addNode: (behavior: BehaviorItem) => string;
   removeNode: (nodeId: string) => void;
@@ -54,14 +66,59 @@ export const useBusinessStore = create<BusinessStore>((set, get) => ({
   testResults: [],
   historyList: [],
   currentBehaviorDetail: null,
+  currentPage: 1,
+  totalCount: 0,
+  hasMore: true,
 
   // 获取行为列表
   fetchBehaviors: async (params = {}) => {
     try {
-      const list = await fetchBehaviorList(params);
-      set({ behaviorList: list });
+      const { ontologyModelID, keyword, reset = true } = params;
+      const pageNum = reset ? 1 : get().currentPage;
+
+      // 调用真实 API
+      const response = await getActionList({
+        ontologyModelID,
+        filter: keyword,
+        pageNum,
+        pageSize: 100 // 后端限制最大 100
+      });
+
+      // 将 API 返回的数据转换为 BehaviorItem 格式
+      const newItems: BehaviorItem[] = response.items.map((item) => ({
+        ...item,
+        description: item.description || '',
+        name: item.name || '',
+        ontologyObjectTypeName: item.objectTypeName
+      }));
+
+      set({
+        behaviorList: reset ? newItems : [...get().behaviorList, ...newItems],
+        currentPage: pageNum,
+        totalCount: response.total,
+        hasMore:
+          newItems.length === 100 &&
+          get().behaviorList.length + newItems.length < response.total
+      });
     } catch (error) {
       console.error('Failed to fetch behaviors:', error);
+      throw error;
+    }
+  },
+
+  // 加载更多行为
+  loadMoreBehaviors: async (params = {}) => {
+    const { hasMore, currentPage } = get();
+    if (!hasMore) return;
+
+    try {
+      await get().fetchBehaviors({
+        ...params,
+        reset: false
+      });
+      set({ currentPage: currentPage + 1 });
+    } catch (error) {
+      console.error('Failed to load more behaviors:', error);
       throw error;
     }
   },
@@ -124,11 +181,15 @@ export const useBusinessStore = create<BusinessStore>((set, get) => ({
     const node = orchestrationNodes.find((n) => n.id === nodeId);
     if (!node) return;
 
-    // 检查所有必填字段是否已填写
-    const requiredFields =
-      node.behavior.configSchema?.fields.filter((f) => f.required) || [];
-    const isConfigured = requiredFields.every((field) => {
-      const value = config[field.name];
+    // 检查所有必填参数是否已填写
+    const requiredParams =
+      node.behavior.params?.filter((p) => p.enabledValidation) || [];
+    const isConfigured = requiredParams.every((param) => {
+      const value = config[param.code];
+      // 对于 Switch 类型，false 也是有效值
+      if (param.uiType === UiType.Switch) {
+        return value !== undefined && value !== null;
+      }
       return value !== undefined && value !== null && value !== '';
     });
 
@@ -244,21 +305,21 @@ export const useBusinessStore = create<BusinessStore>((set, get) => ({
       return false;
     }
 
-    // 检查所有必填字段
-    const requiredFields =
-      node.behavior.configSchema?.fields.filter((f) => f.required) || [];
+    // 检查所有必填参数（enabledValidation 为 true 的参数）
+    const requiredParams =
+      node.behavior.params?.filter((p) => p.enabledValidation) || [];
 
     console.log('isNodeConfigured:', {
       nodeId,
       behaviorName: node.behavior.name,
-      requiredFieldsCount: requiredFields.length,
+      requiredParamsCount: requiredParams.length,
       hasConfig: !!nodeConfigs[nodeId],
-      configSchema: node.behavior.configSchema
+      params: node.behavior.params
     });
 
-    // 如果没有必填字段，认为已配置
-    if (requiredFields.length === 0) {
-      console.log('isNodeConfigured: no required fields, returning true');
+    // 如果没有必填参数，认为已配置
+    if (requiredParams.length === 0) {
+      console.log('isNodeConfigured: no required params, returning true');
       return true;
     }
 
@@ -268,12 +329,16 @@ export const useBusinessStore = create<BusinessStore>((set, get) => ({
       return false;
     }
 
-    const result = requiredFields.every((field) => {
-      const value = config[field.name];
+    const result = requiredParams.every((param) => {
+      const value = config[param.code];
+      // 对于 Switch 类型，false 也是有效值
+      if (param.uiType === UiType.Switch) {
+        return value !== undefined && value !== null;
+      }
       return value !== undefined && value !== null && value !== '';
     });
 
-    console.log('isNodeConfigured: checking required fields, result:', result);
+    console.log('isNodeConfigured: checking required params, result:', result);
     return result;
   },
 
@@ -317,7 +382,10 @@ export const useBusinessStore = create<BusinessStore>((set, get) => ({
       nodeConfigs: {},
       testResults: [],
       historyList: [],
-      currentBehaviorDetail: null
+      currentBehaviorDetail: null,
+      currentPage: 1,
+      totalCount: 0,
+      hasMore: true
     }),
 
   // 清空编排（保留行为列表）
