@@ -8,6 +8,7 @@ import styles from './list.module.scss';
 export default function OntologySceneAttributesList() {
   const [urlState, setUrlState] = useUrlState({ tab: 'normal', search: '' });
   const [normalTableTotal, setNormalTableTotal] = useState<number>(0);
+  const [publicTableTotal, setPublicTableTotal] = useState<number>(0);
 
   // 从 URL 的 tab 参数获取当前 tab，默认为 'normal'
   const activeTab = urlState.tab === 'public' ? 'public' : 'normal';
@@ -43,9 +44,9 @@ export default function OntologySceneAttributesList() {
             <NormalTable onTotalChange={setNormalTableTotal} />
           </div>
         </Tabs.TabPane>
-        <Tabs.TabPane title="公共属性 (20)" key="public">
+        <Tabs.TabPane title={`公共属性 (${publicTableTotal})`} key="public">
           <div className={styles['attributes-content']}>
-            <PublicTable />
+            <PublicTable onTotalChange={setPublicTableTotal} />
           </div>
         </Tabs.TabPane>
       </Tabs>

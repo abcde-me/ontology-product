@@ -16,6 +16,63 @@ export async function getOntologyTopology(params: {
 }): Promise<ApiRes<GetOntologyTopologyResponse>> {
   return await UAPI.RES.GetOntologyTopologyApi({}).post(params).inRegion().do();
 
+  // return Promise.resolve({
+  //   "code": "",
+  //   "message": "ok",
+  //   "data": {
+  //     "edges": [
+  //       {
+  //         "code": "LINK_TYPE_001",
+  //         "description": "string1",
+  //         "id": 15,
+  //         "name": "链接类型3",
+  //         "sourceId": 14,
+  //         "targetId": 19,
+  //         "type": 3
+  //       }
+  //     ],
+  //     "nodes": [
+  //       {
+  //         "code": "user_info_code",
+  //         "description": "这是用户信息描述。",
+  //         "id": 14,
+  //         "name": "用户信息",
+  //         "type": "ObjectType"
+  //       },
+  //       {
+  //         "code": "user_info_dev_new_code",
+  //         "description": "这是用户信息描述ya。",
+  //         "id": 19,
+  //         "name": "用户信息(新)2",
+  //         "type": "ObjectType"
+  //       },
+  //       {
+  //         "code": "dim_store",
+  //         "description": "这是用户信息描述。",
+  //         "id": 20,
+  //         "name": "本体门店维度表",
+  //         "type": "ObjectType"
+  //       },
+  //       {
+  //         "code": "dim_store_1",
+  //         "description": "这是用户信息描述。",
+  //         "id": 21,
+  //         "name": "本体门店维度表",
+  //         "type": "ObjectType"
+  //       },
+  //       {
+  //         "code": "test001",
+  //         "description": "",
+  //         "id": 25,
+  //         "name": "sy测试001",
+  //         "type": "ObjectType"
+  //       }
+  //     ]
+  //   },
+  //   "requestId": "AIMDP-f4c2eae3-d37d-462e-8e64-31ba52244adc",
+  //   "status": 200
+  // });
+
   // const mockData: GetOntologyTopologyResponse = {
   //   nodes: [
   //     {

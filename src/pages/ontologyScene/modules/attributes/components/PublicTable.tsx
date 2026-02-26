@@ -48,9 +48,14 @@ export interface PublicAttributeItem {
   lastModifiedTime: string;
 }
 
-export default function PublicTable() {
+export interface PublicTableProps {
+  /** total 变化时的回调函数 */
+  onTotalChange?: (total: number) => void;
+}
+
+export default function PublicTable({ onTotalChange }: PublicTableProps = {}) {
   const [form] = Form.useForm();
-  const [urlState, setUrlState] = useUrlState({ search: '' });
+  const [urlState, setUrlState] = useUrlState({ search: '', tab: '' });
 
   // 弹窗相关状态
   const [modalVisible, setModalVisible] = useState(false);
@@ -131,17 +136,34 @@ export default function PublicTable() {
 
   // 从 URL 的 search 参数同步到表单
   useEffect(() => {
+    // if (urlState?.tab !== 'public') {
+    //   form.setFieldsValue({ keyword: '' });
+    //   submit();
+    //   return;
+    // }
+
     const currentKeyword = form.getFieldValue('keyword');
     const searchValue = urlState.search || '';
-    if (searchValue !== '' && searchValue !== currentKeyword) {
+    // Only sync from URL if searchValue is not empty, different, and (tab is public or tab is undefined)
+    if (
+      searchValue !== '' &&
+      searchValue !== currentKeyword &&
+      urlState?.tab === 'public'
+    ) {
       form.setFieldsValue({ keyword: searchValue });
       // 延迟提交，确保表单值已设置
       setTimeout(() => {
         submit();
       }, 0);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [urlState.search]);
+  }, [urlState.search, urlState.tab]);
+
+  // 当 total 变化时，通知父组件
+  useEffect(() => {
+    if (onTotalChange && pagination?.total !== undefined) {
+      onTotalChange(pagination.total);
+    }
+  }, [pagination?.total, onTotalChange]);
 
   // 打开创建弹窗
   const handleCreate = () => {
@@ -350,7 +372,7 @@ export default function PublicTable() {
             <Form.Item noStyle field="keyword">
               <Input.Search
                 className="w-[220px]"
-                placeholder="请输入关键词"
+                placeholder="请输入公共属性id搜索"
                 suffix={<IconSearch />}
                 allowClear
                 onClear={() => {

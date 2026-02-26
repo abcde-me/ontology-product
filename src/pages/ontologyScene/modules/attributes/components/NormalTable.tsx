@@ -32,7 +32,7 @@ export interface NormalTableProps {
 export default function NormalTable({ onTotalChange }: NormalTableProps = {}) {
   const [form] = Form.useForm();
   const { id: ontologyModelID } = useParams<{ id: string }>();
-  const [urlState, setUrlState] = useUrlState({ search: '' });
+  const [urlState, setUrlState] = useUrlState({ search: '', tab: 'normal' });
   const [detailDrawerVisible, setDetailDrawerVisible] = useState(false);
   const [selectedObjectType, setSelectedObjectType] = useState<{
     id: string;
@@ -95,17 +95,26 @@ export default function NormalTable({ onTotalChange }: NormalTableProps = {}) {
 
   // 从 URL 的 search 参数同步到表单
   useEffect(() => {
+    // if (urlState?.tab !== 'normal') {
+    //   form.setFieldsValue({ keyword: '' });
+    //   submit();
+    //   return;
+    // }
+
     const currentKeyword = form.getFieldValue('keyword');
     const searchValue = urlState.search || '';
-    if (searchValue !== '' && searchValue !== currentKeyword) {
+    if (
+      searchValue !== '' &&
+      searchValue !== currentKeyword &&
+      urlState?.tab === 'normal'
+    ) {
       form.setFieldsValue({ keyword: searchValue });
       // 延迟提交，确保表单值已设置
       setTimeout(() => {
         submit();
       }, 0);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [urlState.search]);
+  }, [urlState.search, urlState.tab]);
 
   // 当 total 变化时，通知父组件
   useEffect(() => {
@@ -138,7 +147,7 @@ export default function NormalTable({ onTotalChange }: NormalTableProps = {}) {
   const columns: TableColumnProps<PhysicalProperties>[] = [
     {
       title: '属性名称',
-      dataIndex: 'name',
+      dataIndex: 'comment',
       fixed: 'left',
       width: 150,
       render: (value, record) => (
@@ -168,7 +177,7 @@ export default function NormalTable({ onTotalChange }: NormalTableProps = {}) {
     },
     {
       title: '属性id',
-      dataIndex: 'id',
+      dataIndex: 'name',
       width: 150,
       render: (value) => (
         <div className="flex items-center gap-2">
@@ -184,7 +193,7 @@ export default function NormalTable({ onTotalChange }: NormalTableProps = {}) {
     },
     {
       title: '数据源',
-      dataIndex: 'dataSource',
+      dataIndex: 'dataSourceName',
       width: 180,
       render: () => <EllipsisPopover value="-" />
     },
@@ -217,7 +226,7 @@ export default function NormalTable({ onTotalChange }: NormalTableProps = {}) {
             <Form.Item noStyle field="keyword">
               <Input.Search
                 className="w-[220px]"
-                placeholder="请输入关键词"
+                placeholder="请输入属性id搜索"
                 suffix={<IconSearch />}
                 allowClear
                 onClear={() => {
