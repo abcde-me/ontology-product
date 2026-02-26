@@ -12,7 +12,8 @@ import {
   Table,
   TableColumnProps,
   Pagination,
-  Message
+  Message,
+  Modal
 } from '@arco-design/web-react';
 import { IconPlus, IconSearch } from '@arco-design/web-react/icon';
 import {
@@ -29,7 +30,8 @@ import PublicAttributeModal, {
 import {
   listOntologyPublicProperties,
   createOntologyPublicProperties,
-  updateOntologyPublicProperties
+  updateOntologyPublicProperties,
+  deleteOntologyPublicProperties
 } from '@/api/ontologySceneLibrary/attributes';
 import { PublicProperty } from '@/types/attributes';
 import { ListOntologyPublicPropertiesReq } from '@/types/attributes';
@@ -154,18 +156,22 @@ const PublicTable = React.forwardRef<PublicTableRef, PublicTableProps>(
       });
 
     // 从 URL 的 search 参数同步到表单
-    // useEffect(() => {
-    //   const currentKeyword = form.getFieldValue('keyword');
-    //   const searchValue = urlState.search || '';
-    //   if (searchValue !== '' && searchValue !== currentKeyword && urlState.tab === 'public') {
-    //     form.setFieldsValue({ keyword: searchValue });
-    //     // 延迟提交，确保表单值已设置
-    //     setTimeout(() => {
-    //       submit();
-    //     }, 0);
-    //   }
-    //   // eslint-disable-next-line react-hooks/exhaustive-deps
-    // }, [urlState.search]);
+    useEffect(() => {
+      const currentKeyword = form.getFieldValue('keyword');
+      const searchValue = urlState.search || '';
+      if (
+        searchValue !== '' &&
+        searchValue !== currentKeyword &&
+        urlState.tab === 'public'
+      ) {
+        form.setFieldsValue({ keyword: searchValue });
+        // 延迟提交，确保表单值已设置
+        setTimeout(() => {
+          submit();
+        }, 0);
+      }
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [urlState.search]);
 
     // 计算空态并通知父组件
     useEffect(() => {
@@ -280,8 +286,32 @@ const PublicTable = React.forwardRef<PublicTableRef, PublicTableProps>(
 
     // 处理删除
     const handleDelete = (record: PublicProperty) => {
-      // TODO: 实现删除功能
-      Message.info(`删除 ${record.comment || record.name}`);
+      Modal.confirm({
+        title: '删除公共属性',
+        content: `确定删除公共属性 ${record.comment || record.name} 吗？`,
+        onOk: async () => {
+          try {
+            if (!record.id) {
+              Message.error('删除失败：缺少ID');
+              return;
+            }
+
+            const response = await deleteOntologyPublicProperties({
+              id: record.id
+            });
+
+            if (response.status === 200 && response.code === '') {
+              Message.success('删除成功');
+              refresh(); // 刷新表格数据
+            } else {
+              Message.error(response.message || '删除失败');
+            }
+          } catch (error) {
+            console.error('删除失败:', error);
+            Message.error('删除失败');
+          }
+        }
+      });
     };
 
     // 表格列定义
@@ -410,6 +440,7 @@ const PublicTable = React.forwardRef<PublicTableRef, PublicTableProps>(
                   placeholder="请输入公共属性id搜索"
                   suffix={<IconSearch />}
                   allowClear
+                  autoComplete="off"
                   onClear={() => {
                     setUrlState({ search: '' });
                     submit();

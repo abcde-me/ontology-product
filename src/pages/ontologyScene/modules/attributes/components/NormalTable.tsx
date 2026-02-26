@@ -239,6 +239,8 @@ export default function NormalTable({
             <Form.Item noStyle field="keyword">
               <Input.Search
                 className="w-[220px]"
+                autoComplete="off"
+                key="normal-search"
                 placeholder="请输入属性id搜索"
                 suffix={<IconSearch />}
                 allowClear
