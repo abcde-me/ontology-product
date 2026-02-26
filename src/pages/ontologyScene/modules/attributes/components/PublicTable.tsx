@@ -350,7 +350,7 @@ export default function PublicTable() {
             <Form.Item noStyle field="keyword">
               <Input.Search
                 className="w-[220px]"
-                placeholder="请输入关键词"
+                placeholder="请输入公共属性id搜索"
                 suffix={<IconSearch />}
                 allowClear
                 onClear={() => {

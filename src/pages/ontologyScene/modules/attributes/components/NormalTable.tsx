@@ -138,7 +138,7 @@ export default function NormalTable({ onTotalChange }: NormalTableProps = {}) {
   const columns: TableColumnProps<PhysicalProperties>[] = [
     {
       title: '属性名称',
-      dataIndex: 'name',
+      dataIndex: 'comment',
       fixed: 'left',
       width: 150,
       render: (value, record) => (
@@ -168,7 +168,7 @@ export default function NormalTable({ onTotalChange }: NormalTableProps = {}) {
     },
     {
       title: '属性id',
-      dataIndex: 'id',
+      dataIndex: 'name',
       width: 150,
       render: (value) => (
         <div className="flex items-center gap-2">
@@ -217,7 +217,7 @@ export default function NormalTable({ onTotalChange }: NormalTableProps = {}) {
             <Form.Item noStyle field="keyword">
               <Input.Search
                 className="w-[220px]"
-                placeholder="请输入关键词"
+                placeholder="请输入属性id搜索"
                 suffix={<IconSearch />}
                 allowClear
                 onClear={() => {

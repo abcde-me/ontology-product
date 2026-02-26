@@ -332,8 +332,8 @@ export default function OntologySceneObjectTypeList() {
           <Form form={form}>
             <Form.Item noStyle field="keyword">
               <Input.Search
-                className="w-[220px]"
-                placeholder="请输入关键词"
+                className="w-[230px]"
+                placeholder="请输入对象类型名称或id搜索"
                 suffix={<IconSearch />}
                 allowClear
                 onClear={() => {
