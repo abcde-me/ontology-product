@@ -101,7 +101,6 @@ export default function BehaviorLogList() {
     // 将 BehaviorLogItem 转换为 BehaviorActionItem
     // 注意：这里需要根据实际的数据结构进行映射
     // TODO: ts错误暂时忽略
-    // @ts-expect-error
     const behaviorActionData: BehaviorActionItem = {
       id: Number(record.id),
       name: record.name || '',
@@ -143,11 +142,11 @@ export default function BehaviorLogList() {
         filter: params.keyword || '',
         type: activeTab, // 搜索时会带上当前 tab 的类型
         sources: sourcesFilter.length > 0 ? sourcesFilter : undefined, // 来源过滤
-        run_status: statusFilter.length > 0 ? statusFilter : undefined, // 执行状态过滤
+        run_status_list: statusFilter.length > 0 ? statusFilter : undefined, // 执行状态过滤列表
         ontology_object_type_ids:
           objectTypeFilter.length > 0 ? objectTypeFilter : undefined, // 对象类型过滤
-        sort_field: sortField, // 排序字段
-        sort_order: sortOrder // 排序方向
+        sort_by: sortField, // 排序字段
+        sort: sortOrder ? (sortOrder === 'ascend' ? 'asc' : 'desc') : undefined // 排序方向转换
       });
 
       // 更新对应 tab 的总数

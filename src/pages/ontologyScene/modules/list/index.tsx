@@ -286,9 +286,9 @@ export default function OntologySceneList() {
       const response = await listOntologyModel({
         pageNo: currentPage,
         pageSize: pageSize,
-        filter: filter ?? ''
-        // orderBy: 'createTime',
-        // order: 'desc'
+        filter: filter ?? '',
+        orderBy: 'create_time',
+        order: 'desc'
       });
 
       if (response.status === 200 && response.code === '') {

@@ -27,12 +27,17 @@ import { isNil } from 'lodash-es';
 export interface NormalTableProps {
   /** total 变化时的回调函数 */
   onTotalChange?: (total: number) => void;
+  /** 空态变化时的回调函数 */
+  onEmptyChange?: (isEmpty: boolean) => void;
 }
 
-export default function NormalTable({ onTotalChange }: NormalTableProps = {}) {
+export default function NormalTable({
+  onTotalChange,
+  onEmptyChange
+}: NormalTableProps = {}) {
   const [form] = Form.useForm();
   const { id: ontologyModelID } = useParams<{ id: string }>();
-  const [urlState, setUrlState] = useUrlState({ search: '' });
+  const [urlState, setUrlState] = useUrlState({ search: '', tab: 'normal' });
   const [detailDrawerVisible, setDetailDrawerVisible] = useState(false);
   const [selectedObjectType, setSelectedObjectType] = useState<{
     id: string;
@@ -90,14 +95,19 @@ export default function NormalTable({ onTotalChange }: NormalTableProps = {}) {
         }
       },
       form,
-      defaultPageSize: 10
+      defaultPageSize: 10,
+      manual: false // 手动控制请求，避免自动请求导致重复
     });
 
   // 从 URL 的 search 参数同步到表单
   useEffect(() => {
     const currentKeyword = form.getFieldValue('keyword');
     const searchValue = urlState.search || '';
-    if (searchValue !== '' && searchValue !== currentKeyword) {
+    if (
+      searchValue !== '' &&
+      searchValue !== currentKeyword &&
+      urlState.tab === 'normal'
+    ) {
       form.setFieldsValue({ keyword: searchValue });
       // 延迟提交，确保表单值已设置
       setTimeout(() => {
@@ -113,6 +123,18 @@ export default function NormalTable({ onTotalChange }: NormalTableProps = {}) {
       onTotalChange(pagination.total);
     }
   }, [pagination?.total, onTotalChange]);
+
+  // 计算空态并通知父组件
+  useEffect(() => {
+    const keyword = form.getFieldValue('keyword');
+    if (onEmptyChange && !loading) {
+      // 只在加载完成后才判断空态，避免加载过程中的误判
+      const isEmpty =
+        (!pagination?.total || pagination.total === 0) &&
+        (!keyword || keyword === '');
+      onEmptyChange(isEmpty);
+    }
+  }, [loading, pagination?.total]);
 
   // 处理查看详情：打开对象类型详情抽屉
   const handleViewDetail = (record: PhysicalProperties) => {
@@ -138,7 +160,7 @@ export default function NormalTable({ onTotalChange }: NormalTableProps = {}) {
   const columns: TableColumnProps<PhysicalProperties>[] = [
     {
       title: '属性名称',
-      dataIndex: 'name',
+      dataIndex: 'comment',
       fixed: 'left',
       width: 150,
       render: (value, record) => (
@@ -168,7 +190,7 @@ export default function NormalTable({ onTotalChange }: NormalTableProps = {}) {
     },
     {
       title: '属性id',
-      dataIndex: 'id',
+      dataIndex: 'name',
       width: 150,
       render: (value) => (
         <div className="flex items-center gap-2">
@@ -217,7 +239,9 @@ export default function NormalTable({ onTotalChange }: NormalTableProps = {}) {
             <Form.Item noStyle field="keyword">
               <Input.Search
                 className="w-[220px]"
-                placeholder="请输入关键词"
+                autoComplete="off"
+                key="normal-search"
+                placeholder="请输入属性id搜索"
                 suffix={<IconSearch />}
                 allowClear
                 onClear={() => {

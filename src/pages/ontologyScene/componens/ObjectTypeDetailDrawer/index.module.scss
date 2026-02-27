@@ -3,4 +3,20 @@
     /* 确保内容区域出现Popover时，不会被裁剪 */
     overflow: visible;
   }
+
+  // 表格行 hover 时，hover-blue 元素变蓝
+  :global(.arco-table-tr) {
+    &:hover {
+      :global(.hover-blue) {
+        color: #184ff2 !important;
+      }
+    }
+  }
+
+  // hover-blue 单独 hover 时的样式
+  :global(.hover-blue) {
+    &:hover {
+      cursor: pointer;
+    }
+  }
 }

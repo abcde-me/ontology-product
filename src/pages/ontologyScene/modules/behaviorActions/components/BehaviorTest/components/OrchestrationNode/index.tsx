@@ -71,48 +71,47 @@ export const OrchestrationNode: React.FC<OrchestrationNodeProps> = ({
       </div>
 
       {/* 表单项列表 */}
-      {node.behavior.configSchema?.fields &&
-        node.behavior.configSchema.fields.length > 0 && (
-          <div className="mt-2 flex flex-col gap-3">
-            {node.behavior.configSchema.fields.map((field) => {
-              const value = config[field.name];
+      {node.behavior.params && node.behavior.params.length > 0 && (
+        <div className="mt-2 flex flex-col gap-3">
+          {node.behavior.params.map((param) => {
+            const value = config[param.code];
 
-              // 判断是否已配置
-              let isUnconfigured =
-                value === undefined || value === null || value === '';
+            // 判断是否已配置
+            let isUnconfigured =
+              value === undefined || value === null || value === '';
 
-              // 对于布尔值，false 也是有效配置
-              if (field.type === 'switch' || field.widget === '切换开关') {
-                isUnconfigured = value === undefined || value === null;
+            // 对于布尔值（Switch），false 也是有效配置
+            if (param.uiType === 'switch') {
+              isUnconfigured = value === undefined || value === null;
+            }
+
+            // 格式化显示值
+            let displayValue = '未配置';
+            if (!isUnconfigured) {
+              if (typeof value === 'boolean') {
+                displayValue = value ? '是' : '否';
+              } else if (Array.isArray(value)) {
+                displayValue = value.join(', ');
+              } else {
+                displayValue = String(value);
               }
+            }
 
-              // 格式化显示值
-              let displayValue = '未配置';
-              if (!isUnconfigured) {
-                if (typeof value === 'boolean') {
-                  displayValue = value ? '是' : '否';
-                } else if (Array.isArray(value)) {
-                  displayValue = value.join(', ');
-                } else {
-                  displayValue = String(value);
-                }
-              }
-
-              return (
-                <div key={field.name} className="flex flex-col gap-1">
-                  {/* Label */}
-                  <span className="text-[13px] font-semibold text-[rgba(15,19,31,1)]">
-                    {field.label}
-                  </span>
-                  {/* Value */}
-                  <div className="rounded bg-[#F7F8FA] px-3 py-2 text-[13px] font-normal text-[#86909C]">
-                    {displayValue}
-                  </div>
+            return (
+              <div key={param.code} className="flex flex-col gap-1">
+                {/* Label */}
+                <span className="text-[13px] font-semibold text-[rgba(15,19,31,1)]">
+                  {param.name}
+                </span>
+                {/* Value */}
+                <div className="rounded bg-[#F7F8FA] px-3 py-2 text-[13px] font-normal text-[#86909C]">
+                  {displayValue}
                 </div>
-              );
-            })}
-          </div>
-        )}
+              </div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 };

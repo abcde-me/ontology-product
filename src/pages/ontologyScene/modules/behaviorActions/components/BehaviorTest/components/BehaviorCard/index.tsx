@@ -110,11 +110,11 @@ export const BehaviorCard: React.FC<BehaviorCardProps> = ({
         </div>
 
         {/* 描述说明 */}
-        {behavior.description && (
-          <div className="mt-2 flex items-center gap-2">
-            <span className="flex-shrink-0 text-[12px] font-normal text-[#86909c]">
-              描述说明：
-            </span>
+        <div className="mt-2 flex items-center gap-2">
+          <span className="flex-shrink-0 text-[12px] font-normal text-[#86909c]">
+            描述说明：
+          </span>
+          {behavior.description ? (
             <Tooltip
               content={
                 <div className="max-w-[400px] break-words">
@@ -130,17 +130,19 @@ export const BehaviorCard: React.FC<BehaviorCardProps> = ({
                 {behavior.description}
               </div>
             </Tooltip>
-          </div>
-        )}
+          ) : (
+            <span className="text-[13px] font-normal text-[#86909c]">--</span>
+          )}
+        </div>
 
         {/* 对象类型 */}
-        {(behavior.ontologyObjectTypeName ||
+        <div className="mt-1 flex items-center gap-2">
+          <span className="flex-shrink-0 text-[12px] font-normal text-[#86909c]">
+            对象类型：
+          </span>
+          {behavior.ontologyObjectTypeName ||
           behavior.objectTypeName ||
-          behavior.objectType) && (
-          <div className="mt-1 flex items-center gap-2">
-            <span className="flex-shrink-0 text-[12px] font-normal text-[#86909c]">
-              对象类型：
-            </span>
+          behavior.objectType ? (
             <div className="flex flex-1 items-center gap-1 overflow-hidden">
               <div className="flex h-[12px] w-[12px] flex-shrink-0 items-center justify-center">
                 <IconComponent className="h-full w-full text-white" />
@@ -151,8 +153,10 @@ export const BehaviorCard: React.FC<BehaviorCardProps> = ({
                   behavior.objectType}
               </span>
             </div>
-          </div>
-        )}
+          ) : (
+            <span className="text-[13px] font-normal text-[#86909c]">--</span>
+          )}
+        </div>
       </div>
     </div>
   );

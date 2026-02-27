@@ -42,6 +42,7 @@ import {
 } from '../../common/constants';
 import dayjs from 'dayjs';
 import { isNil } from 'lodash-es';
+import { OsEmptyStatusWrapper } from '@/pages/ontologyScene/componens';
 
 export default function OntologySceneObjectTypeList() {
   const [form] = Form.useForm();
@@ -316,8 +317,22 @@ export default function OntologySceneObjectTypeList() {
     }
   ];
 
+  // 计算是否为空：当接口返回为空且搜索值不为空时，isEmpty 为 true
+  const isEmpty =
+    !loading &&
+    (!data || data.length === 0) &&
+    (!pagination?.total || pagination.total === 0) &&
+    urlState.search &&
+    urlState.search !== '';
+
   return (
-    <div className={styles['object-type-list']}>
+    <OsEmptyStatusWrapper
+      className={styles['object-type-list']}
+      onCreate={handleCreate}
+      title={'对象类型'}
+      description={'核心数据模型的原子单位,描述系统中可独立存在的实体'}
+      empty={isEmpty}
+    >
       <div>
         <div className="mb-1 font-PingFangSc text-[20px] font-[600] leading-[30px] text-default">
           对象类型
@@ -332,8 +347,9 @@ export default function OntologySceneObjectTypeList() {
           <Form form={form}>
             <Form.Item noStyle field="keyword">
               <Input.Search
-                className="w-[220px]"
-                placeholder="请输入关键词"
+                autoComplete="off"
+                className="w-[230px]"
+                placeholder="请输入对象类型名称或id搜索"
                 suffix={<IconSearch />}
                 allowClear
                 onClear={() => {
@@ -397,6 +413,6 @@ export default function OntologySceneObjectTypeList() {
           defaultActiveTab={activeTab}
         />
       )}
-    </div>
+    </OsEmptyStatusWrapper>
   );
 }

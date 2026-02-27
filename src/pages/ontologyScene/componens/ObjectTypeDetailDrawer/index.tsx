@@ -536,7 +536,7 @@ export default function ObjectTypeDetailDrawer({
     },
     {
       title: '表字段',
-      dataIndex: 'tableField',
+      dataIndex: 'name',
       width: 140,
       render: (value) => {
         return <EllipsisPopover value={value || '-'} />;
@@ -547,9 +547,6 @@ export default function ObjectTypeDetailDrawer({
       dataIndex: 'ontologyPublicPropertiesName',
       width: 140,
       render: (value, record) => {
-        if (!value) {
-          return <span className="text-[#86909C]">-</span>;
-        }
         return (
           <span
             onClick={() => {

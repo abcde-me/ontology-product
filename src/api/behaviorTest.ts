@@ -7,7 +7,7 @@ export function getBehaviorList(params: {
   keyword?: string;
   objectType?: string;
 }) {
-  return UAPI.RES.behaviorList({}).get(params).inRegion().do();
+  return UAPI.RES.GetListOntologyActionApi({}).get(params).inRegion().do();
 }
 
 /**
