@@ -34,6 +34,7 @@ import { SceneType } from '@/pages/datasetManagement';
 import { formatFileSize } from '@/utils/format';
 import { IconPlus } from '@arco-design/web-react/icon';
 import AddSceneFormModal from './AddSceneForm';
+import { NoDataCard } from '@ceai-front/arco-material';
 
 interface Dataset {
   key?: string;
@@ -657,7 +658,35 @@ const DatasetForm = React.forwardRef<
       <Modal
         title="新建数据集"
         visible={visible}
-        footer={null}
+        footer={
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'flex-end',
+              alignItems: 'center',
+              gap: '12px'
+              // paddingTop: '20px',
+              // borderTop: '1px solid #f0f0f0'
+            }}
+          >
+            <Button
+              onClick={() => {
+                onCancel();
+                form.resetFields();
+                setFileIds([]);
+                setAllSelectFile([]);
+                setAfterPageSelectFile([]);
+                setPreviewFileData(null);
+                setIsPageChange(false);
+              }}
+            >
+              取消
+            </Button>
+            <Button type="primary" loading={!canSubmit} onClick={handleSubmit}>
+              确定
+            </Button>
+          </div>
+        }
         style={{ width: '600px' }}
         onCancel={() => {
           onCancel();
@@ -822,6 +851,7 @@ const DatasetForm = React.forwardRef<
                     </div>
                   );
                 }}
+                getPopupContainer={() => document.body}
                 options={targetDataSourceOptions}
                 onChange={handleTargetDataSourceChange}
                 expandTrigger="hover"
@@ -876,6 +906,7 @@ const DatasetForm = React.forwardRef<
                     ?.props?.children;
                 }}
                 dropdownMenuClassName="pb-8"
+                getPopupContainer={() => document.body}
               >
                 {sceneOption.map((item) => (
                   <Select.Option key={item.id} value={item.id}>
@@ -985,6 +1016,7 @@ const DatasetForm = React.forwardRef<
                           setFileIds(selectedRowKeys as string[]);
                         }
                       }}
+                      noDataElement={<NoDataCard type="block" />}
                     />
                     {previewFileData && previewFileData.length > 0 && (
                       <Pagination
@@ -1215,40 +1247,7 @@ const DatasetForm = React.forwardRef<
               </div>
             )}
 
-            <FormItem wrapperCol={{ span: 24 }}>
-              <div
-                style={{
-                  display: 'flex',
-                  justifyContent: 'flex-end',
-                  alignItems: 'center',
-                  gap: '12px',
-                  marginTop: '24px'
-                  // paddingTop: '20px',
-                  // borderTop: '1px solid #f0f0f0'
-                }}
-              >
-                <Button
-                  onClick={() => {
-                    onCancel();
-                    form.resetFields();
-                    setFileIds([]);
-                    setAllSelectFile([]);
-                    setAfterPageSelectFile([]);
-                    setPreviewFileData(null);
-                    setIsPageChange(false);
-                  }}
-                >
-                  取消
-                </Button>
-                <Button
-                  type="primary"
-                  loading={!canSubmit}
-                  onClick={handleSubmit}
-                >
-                  确定
-                </Button>
-              </div>
-            </FormItem>
+            <FormItem wrapperCol={{ span: 24 }}></FormItem>
           </Form>
         </div>
       </Modal>
