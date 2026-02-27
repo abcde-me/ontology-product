@@ -55,7 +55,7 @@ export function getBehaviorLogList(params: {
   type: 'action' | 'function';
   sources?: string[];
   run_status?: number[];
-  ontology_object_type_ids?: string[];
+  associated_object_type_list?: string[];
   sort_field?: string;
   sort_order?: 'ascend' | 'descend';
 }) {
