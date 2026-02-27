@@ -1246,8 +1246,6 @@ const DatasetForm = React.forwardRef<
                 </FormItem>
               </div>
             )}
-
-            <FormItem wrapperCol={{ span: 24 }}></FormItem>
           </Form>
         </div>
       </Modal>
