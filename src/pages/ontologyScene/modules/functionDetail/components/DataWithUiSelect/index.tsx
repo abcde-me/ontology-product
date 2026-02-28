@@ -38,6 +38,7 @@ export const DataWithUiSelect = (props: CustomFormItemCompProps<IValue>) => {
               maxRows: 5
             }}
             disabled={disabled}
+            value={value?.paramValue}
             onChange={(value) => changeValue({ paramValue: value })}
           />
         );
@@ -47,6 +48,7 @@ export const DataWithUiSelect = (props: CustomFormItemCompProps<IValue>) => {
             placeholder={'请输入'}
             className={`${styles['ui-comp']} w-[160px]`}
             disabled={disabled}
+            value={value?.paramValue}
             onChange={(value) => changeValue({ paramValue: value })}
           />
         );
@@ -59,6 +61,7 @@ export const DataWithUiSelect = (props: CustomFormItemCompProps<IValue>) => {
               width: '160px'
             }}
             disabled={disabled}
+            value={value?.paramValue}
             onChange={(value) => changeValue({ paramValue: value })}
           />
         );
@@ -68,6 +71,7 @@ export const DataWithUiSelect = (props: CustomFormItemCompProps<IValue>) => {
             className={styles['ui-comp']}
             placeholder={'请选择'}
             disabled={disabled}
+            value={value?.paramValue}
             onChange={(value) => changeValue({ paramValue: value })}
             options={[
               {
@@ -87,6 +91,7 @@ export const DataWithUiSelect = (props: CustomFormItemCompProps<IValue>) => {
             disabled={disabled}
             className={`min-w-[160px] ${styles['ui-comp']}`}
             showTime={false}
+            value={value?.paramValue}
             onChange={(value) => changeValue({ paramValue: value })}
           />
         );
@@ -100,13 +105,22 @@ export const DataWithUiSelect = (props: CustomFormItemCompProps<IValue>) => {
           />
         );
       case UiType.Geopoint:
-        return <MapPicker className={styles['ui-comp']} disabled={disabled} />;
+        return (
+          <MapPicker
+            className={styles['ui-comp']}
+            disabled={disabled}
+            value={value?.paramValue}
+            onChange={(value) => changeValue({ paramValue: value })}
+          />
+        );
       case UiType.Timestamp:
         return (
           <DatePicker
             showTime
             className={styles['ui-comp']}
             disabled={disabled}
+            value={value?.paramValue}
+            onChange={(value) => changeValue({ paramValue: value })}
           />
         );
       case UiType.ObjectOne:
@@ -115,11 +129,18 @@ export const DataWithUiSelect = (props: CustomFormItemCompProps<IValue>) => {
             placeholder={'请选择对象类型'}
             className={'flex-1'}
             disabled={disabled}
+            value={value?.paramValue}
+            onChange={(value) => changeValue({ paramValue: value })}
           />
         );
       case UiType.ObjectSet:
         return (
-          <ObjectInterfaceSelect className={'flex-1'} disabled={disabled} />
+          <ObjectInterfaceSelect
+            className={'flex-1'}
+            disabled={disabled}
+            value={value?.paramValue}
+            onChange={(value) => changeValue({ paramValue: value })}
+          />
         );
       default:
         return (
@@ -127,6 +148,8 @@ export const DataWithUiSelect = (props: CustomFormItemCompProps<IValue>) => {
             placeholder={'请输入'}
             className={styles['ui-comp']}
             disabled={disabled}
+            value={value?.paramValue}
+            onChange={(value) => changeValue({ paramValue: value })}
           />
         );
     }

@@ -29,7 +29,7 @@ export const ValidateRules = (props: { readonly?: boolean }) => {
     <Form.List field={'validationRules'}>
       {(fields) => {
         if (fields.length === 0)
-          return <p className={'text-[#7D859C]'}>暂无校验规则</p>;
+          return <NoDataCard type={'global'} title={'暂无校验规则'} />;
         return fields.map(({ key, field }) => {
           const paramName = form.getFieldValue(`${field}.name`);
           const paramType = form.getFieldValue(`${field}.type`);

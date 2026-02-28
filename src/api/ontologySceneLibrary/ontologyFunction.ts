@@ -56,6 +56,11 @@ export const testFunction = async (params: TestFunction) => {
   return res.data?.[0] || null;
 };
 
+// 终止函数测试
+export const stopTestFunction = async (id?: number) => {
+  return await UAPI.RES.StopFunctionTestAPi({}).post({ id }).inRegion().do();
+};
+
 // 本体文件上传
 export const uploadFunctionFile = async (file: File | UploadItem) => {
   const targetFile =

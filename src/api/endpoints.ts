@@ -810,6 +810,8 @@ export const ModaForgeResourceEndpoints = {
   GetOntologyFunctionListApi: PrefixAimdp + '/ListOntologyFunction',
   // 函数测试
   ExecuteFunctionTestAPi: PrefixAimdp + '/ExecuteTest',
+  // 停止函数测试
+  StopFunctionTestAPi: PrefixAimdp + '/StopTest',
   // 函数详情
   GetOntologyFunctionDetailApi: PrefixAimdp + '/GetOntologyFunction',
   // 创建函数

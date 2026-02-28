@@ -61,7 +61,6 @@ export default function BehaviorActionDetailPage() {
         onClose: goBack
       });
     });
-    console.log(values);
   };
 
   const { data: functionData, loading: functionLoading } = useRequest(
@@ -79,10 +78,7 @@ export default function BehaviorActionDetailPage() {
       return;
     }
     form.setFieldsValue(buildActionSchema(actionDetail));
-    if (actionDetail.functionId !== functionData?.id) {
-      form.setFieldsValue(buildFunctionSchema(functionData));
-    }
-  }, [actionDetail, functionData]);
+  }, [actionDetail]);
 
   const functionHasParam = !!functionData?.params?.filter(
     (p) => p.inputType === InputType.Input
@@ -107,6 +103,19 @@ export default function BehaviorActionDetailPage() {
           form={form}
           labelAlign={'left'}
           disabled={actionLoading}
+          onValuesChange={(changes, allValues) => {
+            const functionChange =
+              Object.keys(changes).length === 1 && 'functionId' in changes;
+            if (functionChange) {
+              const functionId = changes.functionId;
+              if (isNil(functionId)) {
+                return form.setFieldsValue({ functionId });
+              }
+              getFunctionDetail(functionId).then((res) => {
+                form.setFieldsValue(buildFunctionSchema(res));
+              });
+            }
+          }}
         >
           <div className={'module-title'}>基本信息</div>
           <FormItem

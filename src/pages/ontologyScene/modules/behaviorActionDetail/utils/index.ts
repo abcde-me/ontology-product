@@ -57,7 +57,6 @@ export function buildActionSchema(action: BehaviorActionDetail): ActionSchema {
       }
     )
   };
-  debugger;
   return res;
 }
 

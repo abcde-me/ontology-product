@@ -6,6 +6,7 @@ import {
   IconDelete,
   IconExpand,
   IconFile,
+  IconLoading,
   IconPlayArrowFill,
   IconPlus,
   IconRecordStop,
@@ -35,17 +36,13 @@ import {
   UiType
 } from '@/pages/ontologyScene/types/ontologyFunction';
 import classNames from 'classnames';
-import {
-  getFunctionSDK,
-  testFunction
-} from '@/api/ontologySceneLibrary/ontologyFunction';
+import { getFunctionSDK } from '@/api/ontologySceneLibrary/ontologyFunction';
 import { ResizeBoxWithCursorChange } from '@/pages/ontologyScene/componens';
 import { isNil } from 'lodash-es';
 import { buildTestFunctionData } from '@/pages/ontologyScene/modules/functionDetail/utils';
 import { useParams } from 'react-router-dom';
 import { UploadItem } from '@arco-design/web-react/es/Upload';
-import { getBehaviorLogDetail } from '@/api/behaviorTest';
-import { BehaviorLogItem } from '@/pages/ontologyScene/modules/behaviorLog/types';
+import useTestFunction from '@/pages/ontologyScene/hooks/useTestFunction';
 
 export const FunctionsSetting = () => {
   const { form, disabled: readonly, isSubmitting } = Form.useFormContext();
@@ -53,30 +50,17 @@ export const FunctionsSetting = () => {
   const [isFullscreen, { enterFullscreen, exitFullscreen }] =
     useFullscreen(ref);
   const [showDoc, setShowDoc] = useState(false);
-  const [testIng, setTestIng] = useState(false);
 
+  // const { id: OSid } = useParams<Record<string, string>>();
+
+  const {
+    loading: testLoading,
+    startTest,
+    stopTest,
+    runLog: runLogInfo,
+    testIng
+  } = useTestFunction();
   const disabled = readonly || testIng;
-  const { id: OSid } = useParams<Record<string, string>>();
-
-  const [testingFunction, setTestingFunction] = useState<number>();
-
-  // 轮询获取运行详情
-  const { data: runLogInfo, cancel } = useRequest(
-    () => {
-      return getBehaviorLogDetail({ id: testingFunction! }).then((res) => {
-        return res.data as BehaviorLogItem;
-      });
-    },
-    {
-      ready: !isNil(testingFunction),
-      pollingInterval: 3000,
-      refreshDeps: [testingFunction],
-      onSuccess(data: BehaviorLogItem) {
-        if (data.run_status !== 1) cancel();
-        setTestIng(data.run_status === 1);
-      }
-    }
-  );
 
   const { data: content, loading: SDKLoading } = useRequest(() => {
     return getFunctionSDK();
@@ -108,18 +92,9 @@ export const FunctionsSetting = () => {
       .validate()
       .then((res: Required<OntologyFunctionSchema>) => {
         const functionTest = buildTestFunctionData(res);
-        testFunction({ ...functionTest, id: +OSid }).then((res) => {
-          if (isNil(res)) return;
-          setTestingFunction(res);
-          setTestIng(true);
-        });
+        startTest(functionTest);
       })
       .catch(console.error);
-  };
-  const handleStopTest = () => {
-    setTimeout(() => {
-      setTestIng(false);
-    }, 2000);
   };
 
   return (
@@ -186,6 +161,15 @@ export const FunctionsSetting = () => {
                                       )
                                     ) {
                                       onError('文件上传失败，请重新上传');
+                                      return;
+                                    }
+                                    if (
+                                      (paramValue as UploadItem[]).some(
+                                        ({ status }) => status !== 'done'
+                                      )
+                                    ) {
+                                      onError('文件正在上传，请稍候');
+                                      return;
                                     }
                                   }
                                 }
@@ -351,9 +335,18 @@ export const FunctionsSetting = () => {
             </ProButton>
           )}
           <Button
-            icon={testIng ? <IconRecordStop /> : <IconPlayArrowFill />}
+            icon={
+              testLoading ? (
+                <IconLoading />
+              ) : testIng ? (
+                <IconRecordStop />
+              ) : (
+                <IconPlayArrowFill />
+              )
+            }
             size={'mini'}
-            onClick={testIng ? handleStopTest : handleTest}
+            onClick={testIng ? stopTest : handleTest}
+            disabled={testLoading}
           >
             {testIng ? '停止运行' : '运行'}
           </Button>
