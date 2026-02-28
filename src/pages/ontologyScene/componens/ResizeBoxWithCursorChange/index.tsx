@@ -16,6 +16,9 @@ type ResizeBoxWithCursorChangeProps = ComponentProps<typeof ResizeBox> & {
   minHeight?: number;
 };
 
+/**
+ * 需要结合max-width || max-height使用
+ * */
 export const ResizeBoxWithCursorChange = (
   props: ResizeBoxWithCursorChangeProps
 ) => {
@@ -58,7 +61,7 @@ export const ResizeBoxWithCursorChange = (
   }, [minHeight, minWidth, maxHeight, maxWidth]);
 
   const DropTrigger = (
-    <div className={styles['resize-trigger']}>
+    <div className={classNames([styles['resize-trigger'], 'resize-trigger'])}>
       <div />
     </div>
   );

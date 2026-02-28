@@ -19,11 +19,15 @@ import {
 import { EditorView } from '@codemirror/view';
 import { Transaction } from '@codemirror/state';
 import classNames from 'classnames';
+import { BehaviorLogItem } from '@/pages/ontologyScene/modules/behaviorLog/types';
+import { ResizeBoxWithCursorChange } from '@/pages/ontologyScene/componens';
 
 const extension = [python(), lintGutter()];
 
-export const FunctionScript = (props: CustomFormItemCompProps<string>) => {
-  const { value, onChange, disabled } = props;
+export const FunctionScript = (
+  props: CustomFormItemCompProps<string> & { runInfo?: BehaviorLogItem }
+) => {
+  const { value, onChange, disabled, runInfo } = props;
   const codeEditor = useRef<EditorView>();
   const extensions = useMemo(() => {
     if (isNil(value)) return extension;
@@ -33,7 +37,13 @@ export const FunctionScript = (props: CustomFormItemCompProps<string>) => {
 
   return (
     <>
-      <div className={classNames([styles['function-body'], props.className])}>
+      <div
+        className={classNames([
+          styles['function-body'],
+          props.className,
+          isNil(runInfo) ? '' : 'pb-[40px]'
+        ])}
+      >
         <CodeMirror
           extensions={extensions}
           basicSetup={{
@@ -53,7 +63,16 @@ export const FunctionScript = (props: CustomFormItemCompProps<string>) => {
           }}
         />
       </div>
-      <div className={styles['function-footer']}></div>
+      {!!runInfo && (
+        <ResizeBoxWithCursorChange
+          directions={['top']}
+          className={styles['function-footer']}
+          maxHeight={600}
+          minHeight={40}
+        >
+          <div className={styles['run-log-wrapper']}>这是一条神奇的天路</div>
+        </ResizeBoxWithCursorChange>
+      )}
     </>
   );
 };

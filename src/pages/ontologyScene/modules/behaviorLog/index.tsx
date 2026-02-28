@@ -291,7 +291,7 @@ export default function BehaviorLogList() {
           setShowBehaviorDetail(false);
           setBehaviorData(undefined);
         }}
-        data={behaviorData}
+        actionItem={behaviorData?.id}
       />
 
       {/* 执行详情抽屉 */}

@@ -76,6 +76,9 @@ export interface BehaviorActionDetail {
    * 本体ID
    */
   ontologyModelID?: number;
+  ontologyObjectTypeIcon?: string;
+  ontologyObjectTypeId?: string;
+  objectTypeID?: string;
   /**
    * 行为唯一编码
    */

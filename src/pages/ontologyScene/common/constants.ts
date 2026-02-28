@@ -30,6 +30,7 @@ import ObjectTypeWarship from '@/pages/ontologyScene/assets/object-type-warship.
 import ObjectTypeBuilding from '@/pages/ontologyScene/assets/object-type-building.svg';
 import ObjectTypeLocation from '@/pages/ontologyScene/assets/object-type-location.svg';
 import ObjectTypeOffice from '@/pages/ontologyScene/assets/object-type-office.svg';
+import AttachmentIcon from '@/pages/ontologyScene/assets/attachement-icon.svg'; // 注意文件名拼写
 import { SyncStatus } from '@/types/graphApi';
 
 // 本体场景预定义图标选项（15个图标，对应图片中的所有场景）
@@ -72,7 +73,8 @@ export const OBJECT_TYPE_ICON_OPTIONS = [
   { value: 'object-type-warship', icon: ObjectTypeWarship }, // 军舰
   { value: 'object-type-building', icon: ObjectTypeBuilding }, // 建筑
   { value: 'object-type-location', icon: ObjectTypeLocation }, // 地点
-  { value: 'object-type-office', icon: ObjectTypeOffice } // 办公
+  { value: 'object-type-office', icon: ObjectTypeOffice }, // 办公
+  { value: 'attachment-icon', icon: AttachmentIcon } // 附件专用图标
 ];
 
 // 对象类型同步状态配置

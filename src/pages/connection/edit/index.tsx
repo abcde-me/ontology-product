@@ -19,7 +19,7 @@ const Option = Select.Option;
 const options = [
   { text: 'MySQL', value: 'MySQL' },
   { text: 'PostgreSQL', value: 'PostgreSQL' },
-  { text: '达梦数据库', value: 'DM' },
+  { text: '达梦', value: 'DM' },
   { text: 'GaussDB', value: 'GaussDB' }
 ];
 // 单选
