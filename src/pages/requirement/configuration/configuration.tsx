@@ -926,6 +926,14 @@ export default function RequirementConfig() {
   }, [type, annotationTypeContentCode, isAnnotationTypeMatchingDetail]);
 
   useEffect(() => {
+    // 在编辑或复制模式下，如果标注类型与详情一致，说明是初始化阶段，不清空 model_id
+    if (
+      (type === 'edit' || type === 'copy') &&
+      annotationTypeContentCode ===
+        requirementDetail?.label_tool?.label_tool_code
+    ) {
+      return;
+    }
     basicForm.setFieldValue('model_id', undefined);
   }, [annotationTypeContentCode]);
 
