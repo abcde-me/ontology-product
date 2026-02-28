@@ -79,8 +79,8 @@ const Panel: FC<NodePanelProps<VideoParserNodeType>> = ({ id, data }) => {
         <FormItem label="字幕与音频校验：" field="audio_pret" labelAlign="left">
           <Checkbox.Group
             options={[
-              { label: '支持多音轨解析', value: 'orbit', disabled: true },
-              { label: '开启降噪处理', value: 'denoise' }
+              { label: '降噪', value: 'denoise' },
+              { label: '语音增强', value: 'enhance' }
             ]}
           />
         </FormItem>
