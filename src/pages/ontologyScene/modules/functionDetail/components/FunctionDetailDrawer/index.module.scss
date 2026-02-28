@@ -8,9 +8,6 @@
 }
 
 .drawer-content {
-  background: #ffffff;
-  border-radius: 6px;
-  padding: 16px;
   display: flex;
   flex-direction: column;
   gap: 16px;
@@ -46,6 +43,7 @@
   display: flex;
   gap: 8px;
   align-items: flex-start;
+  overflow: hidden;
 }
 
 .info-label {
@@ -53,18 +51,27 @@
   font-weight: 400;
   font-size: 14px;
   line-height: 22px;
-  color: #86909c;
+  color: #646c85;
   flex-shrink: 0;
-  min-width: 70px;
+  width: 80px;
+
+  &::after {
+    content: ':';
+    margin-left: 4px;
+  }
 }
 
 .info-value {
   font-family: PingFang SC;
-  font-weight: 600;
+  font-weight: 400;
   font-size: 14px;
   line-height: 22px;
   color: #0f131f;
-  word-break: break-all;
+  flex: 1;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  align-items: center;
 }
 
 .detail-table {

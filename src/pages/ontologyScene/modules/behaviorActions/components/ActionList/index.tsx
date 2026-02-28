@@ -23,11 +23,6 @@ import { isEmpty, isNil } from 'lodash-es';
 
 export const ActionList = (props: {
   onViewDetail: (data: BehaviorActionItem) => void;
-  /**
-   * 改变页面状态
-   * @param status true:初始无数据，false:有数据
-   */
-  changePageStatus: (status: boolean) => void;
 }) => {
   const [keyword, setKeyword] = useState('');
   const [form] = Form.useForm();
@@ -42,7 +37,6 @@ export const ActionList = (props: {
   const { tableProps, onSubmit, refresh } = useArcoTable(
     ({ pagination, query = {} }) => {
       if (isNil(OSId)) {
-        props.changePageStatus(true);
         return Promise.resolve({
           items: [] as BehaviorActionItem[],
           total: 0
@@ -54,10 +48,7 @@ export const ActionList = (props: {
         ontologyModelID: +OSId,
         ...(query as any)
       };
-      return getActionList(search).then((res) => {
-        props.changePageStatus(isEmpty(query) && isEmpty(res));
-        return res;
-      });
+      return getActionList(search);
     },
     {
       defaultPageSize: 10,

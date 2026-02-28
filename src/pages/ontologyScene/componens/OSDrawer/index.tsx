@@ -27,6 +27,7 @@ export const OsDrawer = (props: OSDrawerProps) => {
       width={width}
       closeIcon={null}
       mask={false}
+      // maskStyle={{ background: 'transparent', cursor: 'not-allowed' }}
       className={drawerClassName}
       title={
         <div className={'flex items-center justify-between gap-4'}>

@@ -37,9 +37,12 @@ export const getActionList = async (params: IActionListParams) => {
 };
 
 // 获取行为详情
-export const getActionDetail = (id: string | number) => {
-  // return Promise.resolve(MockList[0]);
-  return UAPI.RES.GetOntologyActionApi({}).post({ id }).inRegion().do();
+export const getActionDetail = async (id: string | number) => {
+  const res = await UAPI.RES.GetOntologyActionApi({})
+    .post({ id })
+    .inRegion()
+    .do();
+  return (res.data as BehaviorActionDetail) || null;
 };
 
 // 保存行为（新增/更新）

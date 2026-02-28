@@ -1,7 +1,8 @@
 import React from 'react';
 import styles from './index.module.scss';
-import { Select } from '@arco-design/web-react';
 import classNames from 'classnames';
+import { ObjectTypeSelect } from '../../componens';
+import { SelectWithNoData } from '@/components/new-no-data-comps';
 
 export const ObjectInterfaceSelect = (
   props: CustomFormItemCompProps<React.Key[][]>
@@ -9,11 +10,10 @@ export const ObjectInterfaceSelect = (
   const { value, onChange, disabled, className } = props;
   return (
     <div className={classNames([styles['obj-interface'], className])}>
-      <Select
-        mode={'multiple'}
-        options={[]}
-        dropdownRender={(menu) => <div className={'mex-h-[400px]'}>{menu}</div>}
-        // notFoundContent={'暂无数据'}
+      <ObjectTypeSelect className={styles['obj-one']} />
+      <SelectWithNoData
+        className={styles['interface']}
+        placeholder={'请先选择对象类型'}
       />
     </div>
   );

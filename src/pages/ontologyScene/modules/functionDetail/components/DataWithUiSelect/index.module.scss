@@ -1,5 +1,6 @@
 .comp-wrapper {
   display: flex;
+  overflow: hidden;
 
   &:focus-within,
   &:hover {

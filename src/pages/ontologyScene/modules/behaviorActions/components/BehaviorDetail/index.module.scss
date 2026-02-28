@@ -29,14 +29,18 @@
       gap: 4px;
       align-items: center;
 
-      .icon-content {
-        width: 16px;
-        height: 16px;
-        border-radius: 2px;
-        background: #0ab58d;
-        display: flex;
-        align-items: center;
-        justify-content: center;
+      .obj-tag {
+        background: transparent;
+        border: none;
+        max-width: 100%;
+        width: max-content;
+
+        :global {
+          .object-type-tag-icon {
+            width: 16px;
+            height: 16px;
+          }
+        }
       }
     }
   }

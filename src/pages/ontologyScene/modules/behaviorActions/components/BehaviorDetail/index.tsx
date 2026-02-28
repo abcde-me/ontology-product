@@ -1,40 +1,94 @@
 import React, { useState } from 'react';
 import {
-  BehaviorActionItem,
+  OntologyActionParam,
   RuleName,
+  TYPE2COMP_OPTIONS,
   TYPE2RULE_TYPES
 } from '@/pages/ontologyScene/types/behaviorActions';
 import styles from './index.module.scss';
-import { OsDrawer, PyCodeContent } from '@/pages/ontologyScene/componens';
-import { Form, Tabs } from '@arco-design/web-react';
-import { IconEdit } from '@arco-design/web-react/icon';
+import {
+  ContentWithCopy,
+  OsDrawer,
+  PyCodeContent
+} from '@/pages/ontologyScene/componens';
+import { Form, Table, TableColumnProps, Tabs } from '@arco-design/web-react';
 import { useHistory } from 'react-router-dom';
 import { useRequest } from 'ahooks';
 import { getFunctionDetail } from '@/api/ontologySceneLibrary/ontologyFunction';
 import { isNil } from 'lodash-es';
 import { ValidateRules } from '@/pages/ontologyScene/componens/ValidateRules';
-import { ParamType } from '@/pages/ontologyScene/types/ontologyFunction';
+import {
+  ParamType,
+  UiType
+} from '@/pages/ontologyScene/types/ontologyFunction';
+import { getActionDetail } from '@/api/ontologySceneLibrary/ontologyAction';
+import ObjectTypeTag from '../../../../componens/ObjectTypeTag';
 
 interface IProps {
   show: boolean;
   onClose: () => void;
-  data?: BehaviorActionItem;
+  actionItem?: number;
 }
 
 export const BehaviorDetail = (props: IProps) => {
-  const { data, onClose, show } = props;
+  const { actionItem, onClose, show } = props;
   const history = useHistory();
-  const [activeTab, setActiveTab] = useState('');
+  const [activeTab, setActiveTab] = useState('params');
   const [form] = Form.useForm();
-  const { data: functionInfo } = useRequest(
+  const { data: actionDetail } = useRequest(
     () => {
-      if (isNil(data)) return Promise.resolve(undefined);
-      return getFunctionDetail(data.functionId!);
+      return getActionDetail(actionItem!);
     },
     {
-      refreshDeps: [data?.functionId]
+      refreshDeps: [actionItem],
+      ready: !isNil(actionItem)
     }
   );
+  const { data: functionInfo } = useRequest(
+    () => {
+      if (isNil(actionDetail?.functionId)) return Promise.resolve(undefined);
+      return getFunctionDetail(actionDetail!.functionId);
+    },
+    {
+      refreshDeps: [actionDetail],
+      ready: !!actionDetail
+    }
+  );
+
+  const paramColumns: TableColumnProps<OntologyActionParam>[] = [
+    {
+      title: '参数显示名称',
+      dataIndex: 'name',
+      key: 'name',
+      width: 160
+    },
+
+    {
+      title: '参数ID',
+      dataIndex: 'code',
+      key: 'code',
+      width: 160,
+      render(value) {
+        return value ? <ContentWithCopy value={value} /> : '-';
+      }
+    },
+
+    {
+      title: '数据类型',
+      dataIndex: 'type',
+      key: 'type',
+      width: 140
+    },
+    {
+      title: '界面控件',
+      dataIndex: 'uiType',
+      key: 'uiType',
+      width: 160,
+      render: (type: UiType = UiType.Input) => {
+        return type;
+      }
+    }
+  ];
 
   return (
     <OsDrawer
@@ -45,9 +99,12 @@ export const BehaviorDetail = (props: IProps) => {
       title={'行为详情'}
       maskClosable
       closable
+      afterClose={() => {
+        setActiveTab('params');
+      }}
       onEdit={() => {
         history.push(
-          `/tenant/compute/modaforge/ontologyScene/detail/undefined/behaviorActions/edit/${data?.id}`
+          `/tenant/compute/modaforge/ontologyScene/detail/undefined/behaviorActions/edit/${actionItem}`
         );
       }}
     >
@@ -63,30 +120,45 @@ export const BehaviorDetail = (props: IProps) => {
           <div className={'flex w-full flex-wrap'}>
             <div className={styles['base-info-item']}>
               <div className={styles['item-field']}>行为名称：</div>
-              <div className={styles['item-value']}>这是名称</div>
+              <div className={styles['item-value']}>
+                {actionDetail?.name || '-'}
+              </div>
             </div>
             <div className={styles['base-info-item']}>
               <div className={styles['item-field']}>描述说明：</div>
-              <div className={styles['item-value']}>这是描述</div>
+              <div className={styles['item-value']}>
+                {actionDetail?.description || '-'}
+              </div>
             </div>
             <div className={styles['base-info-item']}>
               <div className={styles['item-field']}>所属对象类型：</div>
               <div className={styles['item-value']}>
-                <div className={styles['icon-content']}>
-                  <IconEdit />
-                </div>
-                <div className="flex-1 overflow-hidden text-ellipsis whitespace-nowrap">
-                  这是名称这是名称这是名称这是名称这是名称这是名称这是名称这是名称这是名称这是名称这是名称
-                </div>
+                <ObjectTypeTag
+                  ontologyObjectTypeIcon={
+                    actionDetail?.ontologyObjectTypeIcon || '-'
+                  }
+                  ontologyObjectTypeName={actionDetail?.objectTypeName || '-'}
+                  ontologyObjectTypeId={String(
+                    actionDetail?.ontologyObjectTypeId ||
+                      actionDetail?.objectTypeID ||
+                      ''
+                  )}
+                  onClick={() => {}}
+                  className={styles['obj-tag']}
+                />
               </div>
             </div>
             <div className={styles['base-info-item']}>
               <div className={styles['item-field']}>函数：</div>
-              <div className={styles['item-value']}>函数</div>
+              <div className={styles['item-value']}>
+                {actionDetail?.functionName || '-'}
+              </div>
             </div>
             <div className={styles['base-info-item']}>
-              <div className={styles['item-field']}>id：</div>
-              <div className={styles['item-value']}>id</div>
+              <div className={styles['item-field']}>行为id：</div>
+              <div className={styles['item-value']}>
+                <ContentWithCopy value={(actionDetail?.id || '-').toString()} />
+              </div>
             </div>
           </div>
         </div>
@@ -97,7 +169,7 @@ export const BehaviorDetail = (props: IProps) => {
               setActiveTab(key);
               if (key === 'rules') {
                 form.setFieldsValue({
-                  validationRules: data?.params.flatMap((param) => {
+                  validationRules: actionDetail?.params?.flatMap((param) => {
                     const { name, type, enabledValidation, validationRule } =
                       param;
                     if (
@@ -109,7 +181,7 @@ export const BehaviorDetail = (props: IProps) => {
                     )
                       return [];
                     return {
-                      enabledValidation: enabledValidation!,
+                      enabledValidation: enabledValidation,
                       failMessage: validationRule?.failMessage || '',
                       rule_name:
                         validationRule?.ruleName ||
@@ -126,10 +198,26 @@ export const BehaviorDetail = (props: IProps) => {
               }
             }}
           >
-            <Tabs.TabPane title={'参数配置（5）'} key={'params'} />
-            <Tabs.TabPane title={'校验规则（5）'} key={'rules'} />
+            <Tabs.TabPane
+              title={`参数配置（${functionInfo?.params?.length || 0}）`}
+              key={'params'}
+            />
+            <Tabs.TabPane
+              title={`校验规则（${actionDetail?.params?.filter(({ type }) => [ParamType.String, ParamType.Integer, ParamType.Float].includes(type)).length}）`}
+              key={'rules'}
+            />
             <Tabs.TabPane title={'函数'} key={'function'} />
           </Tabs>
+          {activeTab === 'params' && (
+            <div className={'h-full w-full'}>
+              <Table
+                pagination={false}
+                data={actionDetail?.params || []}
+                columns={paramColumns}
+                border={false}
+              />
+            </div>
+          )}
           {activeTab === 'function' && (
             <PyCodeContent value={functionInfo?.content} readOnly />
           )}

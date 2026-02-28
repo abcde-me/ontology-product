@@ -21,7 +21,8 @@ const excludeUrl = [
   '/ceai/user-space/api/v1/GetProjOrg',
   '/ceai/user-space/api/v1/Login',
   '/ceai/user-space/api/v1/GetUserInfo',
-  '/ceai/user-space/api/v1/Logout'
+  '/ceai/user-space/api/v1/Logout',
+  '/ceai/aimdp-manager/api/v1/UploadOntologyActionDataFile'
 ];
 
 // UAPI默认配置(配置项和Axios配置项兼容)（示例）
@@ -38,7 +39,6 @@ UAPI_CONFIG.addRequestInterceptor(
   (config) => {
     const consolePluginToken = localStorage.getItem('console_token');
     const projectId = useUserInfoStore.getState().projectId;
-
     // config.headers['Access-Control-Allow-Origin'] = '*';
     //配置自定义请求头
     if (config.headers && !config.headers?.['x-auth-validate'])

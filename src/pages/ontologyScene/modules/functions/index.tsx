@@ -11,8 +11,6 @@ import {
   Tabs
 } from '@arco-design/web-react';
 import styles from './index.module.scss';
-import { BehaviorActionItem } from '@/pages/ontologyScene/types/behaviorActions';
-import { ONTOLOGY_SCENE_MENU_ITEM_KEYS } from '@/common/constants';
 import { useHistory, useParams } from 'react-router-dom';
 import useArcoTable from '@/hooks/use-arco-table';
 import { IconPlus, IconSearch } from '@arco-design/web-react/icon';
@@ -29,6 +27,7 @@ import {
 } from '@/api/ontologySceneLibrary/ontologyFunction';
 import { isEmpty, isNil } from 'lodash-es';
 import { OsEmptyStatusWrapper } from '@/pages/ontologyScene/componens';
+import { FunctionDetailDrawer } from '@/pages/ontologyScene/modules/functionDetail/components';
 
 // 函数
 export default function OntologySceneFunctions() {
@@ -37,9 +36,11 @@ export default function OntologySceneFunctions() {
     id: string;
     moduleType: string;
   }>();
-
+  // 当前查看的函数
+  const [currentFunction, setCurrentFunction] =
+    useState<OntologyFunctionItem>();
   const history = useHistory();
-  const [functionsEmpty, setFunctionsEmpty] = useState(true);
+  const [functionsEmpty, setFunctionsEmpty] = useState(false);
   const { tableProps, onSubmit, refresh } = useArcoTable(
     ({ pagination, query, filters, sorter }) => {
       if (isNil(ontologyModelID))
@@ -100,7 +101,7 @@ export default function OntologySceneFunctions() {
             'hover-blue font-PingFangSc text-[14px] font-medium leading-[22px] '
           }
           onClick={() => {
-            // props.onViewDetail(record);
+            setCurrentFunction(record);
           }}
         >
           {value}
@@ -179,7 +180,7 @@ export default function OntologySceneFunctions() {
       }}
       title={'函数'}
       description={'函数的描述'}
-      empty={functionsEmpty}
+      empty={functionsEmpty && !tableProps.loading}
     >
       <div className={styles['function-content']}>
         <div className={styles['function-list']}>
@@ -227,6 +228,14 @@ export default function OntologySceneFunctions() {
           />
         </div>
       </div>
+      <FunctionDetailDrawer
+        data={currentFunction}
+        visible={!!currentFunction}
+        onEdit={() => route2FunctionDetail('edit', currentFunction)}
+        onCancel={() => {
+          setCurrentFunction(undefined);
+        }}
+      />
     </OsEmptyStatusWrapper>
   );
 }

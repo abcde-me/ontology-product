@@ -13,13 +13,14 @@ import type { SyntaxNodeRef, TreeCursor } from '@lezer/common';
 import { ExternalChange } from '@uiw/react-codemirror';
 import {
   InputType,
-  OntologyFunctionParam,
   OntologyFunctionDetail,
+  OntologyFunctionParam,
   OntologyFunctionSchema,
-  TYPE_MAP,
-  ParamType
+  ParamType,
+  TestFunction,
+  TYPE_MAP
 } from '@/pages/ontologyScene/types/ontologyFunction';
-import { UiType } from '@/pages/ontologyScene/types/ontologyFunction';
+import { isNil } from 'lodash-es';
 
 export const bypassFrozenRange = Annotation.define<boolean>();
 
@@ -374,3 +375,48 @@ export function buildFunctionDetail(
     params: [...inputParams, ...outputParams]
   };
 }
+
+export const buildTestFunctionData = (
+  formData: Required<OntologyFunctionSchema>
+): TestFunction => {
+  const { content, code, name, description, input, output } = formData;
+  const res: TestFunction = {
+    logic_function: [code],
+    arguments: [],
+    code,
+    content,
+    name,
+    params: [],
+    run_action_with_validate: true,
+    run_type: 'function',
+    target: [code]
+  };
+  res.params = [input, output].flatMap((params) => {
+    return params.map((param, idx) => {
+      const { name, type, uiTypeAndValue } = param;
+      const base: OntologyFunctionParam = {
+        code: name,
+        name,
+        type,
+        inputType: InputType.Output
+      };
+      if (!isNil(uiTypeAndValue)) {
+        const [dataType] = uiTypeAndValue.uiType!.split('_')!;
+        const paramValue = JSON.stringify(
+          dataType === ParamType.Attachment
+            ? uiTypeAndValue.paramValue[0].url
+            : uiTypeAndValue.paramValue
+        );
+        res.arguments.push({
+          name,
+          value: paramValue
+        });
+        base.inputType = InputType.Input;
+        base.value = paramValue;
+        base.type = dataType as ParamType;
+      }
+      return base;
+    });
+  });
+  return res;
+};
