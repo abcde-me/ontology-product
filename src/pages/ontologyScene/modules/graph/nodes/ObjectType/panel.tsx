@@ -6,7 +6,8 @@ import {
   Message,
   Popover,
   Tag,
-  Spin
+  Spin,
+  Pagination
 } from '@arco-design/web-react';
 import { IconCopy, IconFile } from '@arco-design/web-react/icon';
 import copy from 'copy-to-clipboard';
@@ -355,24 +356,27 @@ const Panel: FC<any> = ({ id, data }) => {
                 ? { x: instancesColumns.length * 140 }
                 : undefined
             }
-            pagination={{
-              current: instancesPage,
-              pageSize: instancesPageSize,
-              total: instancesTotal,
-              showTotal: true,
-              showJumper: true,
-              sizeCanChange: true,
-              sizeOptions: [10, 20, 50, 100],
-              onChange: (page, pageSize) => {
-                setInstancesPage(page);
-                setInstancesPageSize(pageSize);
-              }
-            }}
+            pagination={false}
             rowKey={(record) => `${record.id}`}
             border={false}
             // className="mt-2"
             noDataElement={<NoDataCard title="暂无数据" />}
           />
+          {instancesTotal > 0 && (
+            <div className="mt-[16px] flex items-center justify-end">
+              <Pagination
+                current={instancesPage}
+                pageSize={instancesPageSize}
+                total={instancesTotal}
+                showTotal
+                sizeOptions={[10, 20, 50, 100]}
+                onChange={(page, pageSize) => {
+                  setInstancesPage(page);
+                  setInstancesPageSize(pageSize);
+                }}
+              />
+            </div>
+          )}
         </Tabs.TabPane>
 
         <Tabs.TabPane key="properties" title={`属性(${propertiesTotal})`}>
@@ -382,24 +386,27 @@ const Panel: FC<any> = ({ id, data }) => {
             scroll={{ x: 400 }}
             loading={propertiesLoading}
             rowClassName={() => 'group'}
-            pagination={{
-              current: propertiesPage,
-              pageSize: propertiesPageSize,
-              total: propertiesTotal,
-              showTotal: true,
-              showJumper: true,
-              sizeCanChange: true,
-              sizeOptions: [10, 20, 50, 100],
-              onChange: (page, pageSize) => {
-                setPropertiesPage(page);
-                setPropertiesPageSize(pageSize);
-              }
-            }}
             noDataElement={<NoDataCard title="暂无数据" />}
             rowKey="id"
             border={false}
+            pagination={false}
             // className="mt-2"
           />
+          {propertiesTotal > 0 && (
+            <div className="mt-[16px] flex items-center justify-end">
+              <Pagination
+                current={propertiesPage}
+                pageSize={propertiesPageSize}
+                total={propertiesTotal}
+                showTotal
+                sizeOptions={[10, 20, 50, 100]}
+                onChange={(page, pageSize) => {
+                  setPropertiesPage(page);
+                  setPropertiesPageSize(pageSize);
+                }}
+              />
+            </div>
+          )}
         </Tabs.TabPane>
 
         <Tabs.TabPane key="links" title={`链接(${linksTotal})`}>

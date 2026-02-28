@@ -2,6 +2,10 @@
   :global(.react-flow) {
     border-radius: 0px !important;
   }
+
+  :global(.wk-node-panel-content-scroller-container) {
+    width: 600px !important;
+  }
 }
 
 .edge-style {
