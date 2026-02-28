@@ -1,6 +1,10 @@
 import React, { useMemo, useState } from 'react';
 import classNames from 'classnames';
-import { OsDrawer, OSDrawerProps } from '@/pages/ontologyScene/componens';
+import {
+  ContentWithCopy,
+  OsDrawer,
+  OSDrawerProps
+} from '@/pages/ontologyScene/componens';
 import {
   InputType,
   OntologyFunctionItem,
@@ -13,15 +17,10 @@ import {
   TableColumnProps
 } from '@arco-design/web-react';
 import styles from './index.module.scss';
+import { CopyItemIcon, SearchTable } from '@ceai-front/arco-material';
 
 interface IProps extends OSDrawerProps {
   data?: OntologyFunctionItem;
-}
-
-interface BasicInfo {
-  displayName: string;
-  panelId: string;
-  description: string;
 }
 
 interface ParamRow {
@@ -30,29 +29,6 @@ interface ParamRow {
 }
 
 const DEFAULT_PAGE_SIZE = 5;
-
-// Mock data for standalone display without API wiring.
-const MOCK_BASIC_INFO: BasicInfo = {
-  displayName: '函数示例',
-  panelId: 'panel_function_001',
-  description: '用于演示函数参数详情展示的示例数据。'
-};
-
-const MOCK_INPUT_PARAMS: ParamRow[] = [
-  { name: 'device_id', type: 'String' },
-  { name: 'start_time', type: 'Timestamp' },
-  { name: 'end_time', type: 'Timestamp' },
-  { name: 'with_detail', type: 'Boolean' },
-  { name: 'page_size', type: 'Int' },
-  { name: 'page_index', type: 'Int' }
-];
-
-const MOCK_OUTPUT_PARAMS: ParamRow[] = [
-  { name: 'success', type: 'Boolean' },
-  { name: 'message', type: 'String' },
-  { name: 'data_list', type: 'Array' },
-  { name: 'total', type: 'Int' }
-];
 
 const INPUT_COLUMNS: TableColumnProps<ParamRow>[] = [
   {
@@ -120,23 +96,16 @@ export const FunctionDetailDrawer = (props: IProps) => {
     pageSize: DEFAULT_PAGE_SIZE
   });
 
-  const basicInfo = useMemo<BasicInfo>(() => {
+  const basicInfo = useMemo(() => {
     return {
-      displayName: data?.name ?? MOCK_BASIC_INFO.displayName,
-      panelId:
-        data?.code ?? (data?.id ? String(data.id) : MOCK_BASIC_INFO.panelId),
-      description: data?.description ?? MOCK_BASIC_INFO.description
+      displayName: data?.name || '-',
+      panelId: data?.code || '-',
+      description: data?.description || '-'
     };
   }, [data]);
 
   const { inputParams, outputParams } = useMemo(() => {
-    if (data?.params?.length) {
-      return splitParams(data.params);
-    }
-    return {
-      inputParams: MOCK_INPUT_PARAMS,
-      outputParams: MOCK_OUTPUT_PARAMS
-    };
+    return splitParams(data?.params);
   }, [data]);
 
   const inputTableData = useMemo(() => {
@@ -155,6 +124,13 @@ export const FunctionDetailDrawer = (props: IProps) => {
     );
   }, [outputParams, outputPagination]);
 
+  const COMMON_PAGINATION = {
+    showJumper: false,
+    showMore: false,
+    sizeCanChange: false,
+    pageSize: 10,
+    simple: true
+  };
   return (
     <OsDrawer
       {...drawerProps}
@@ -175,7 +151,9 @@ export const FunctionDetailDrawer = (props: IProps) => {
             </div>
             <div className={styles['info-item']}>
               <div className={styles['info-label']}>面板ID</div>
-              <div className={styles['info-value']}>{basicInfo.panelId}</div>
+              <div className={styles['info-value']}>
+                <ContentWithCopy value={basicInfo.panelId} />
+              </div>
             </div>
             <div className={styles['info-item']}>
               <div className={styles['info-label']}>描述说明</div>
@@ -186,8 +164,6 @@ export const FunctionDetailDrawer = (props: IProps) => {
           </div>
         </div>
 
-        <div className={styles['section-divider']} />
-
         {/* 输入详情 */}
         <div className={styles['section']}>
           <div className={styles['section-title']}>输入详情</div>
@@ -195,53 +171,21 @@ export const FunctionDetailDrawer = (props: IProps) => {
             className={styles['detail-table']}
             columns={INPUT_COLUMNS}
             data={inputTableData}
-            pagination={false}
+            pagination={COMMON_PAGINATION}
             border={false}
-            rowKey="name"
           />
-          <div className={styles['pagination-wrapper']}>
-            <Pagination
-              size="small"
-              current={inputPagination.current}
-              pageSize={inputPagination.pageSize}
-              total={inputParams.length}
-              onChange={(page, pageSize) => {
-                setInputPagination((prev) => ({
-                  current: page,
-                  pageSize: pageSize || prev.pageSize
-                }));
-              }}
-            />
-          </div>
         </div>
-
-        <div className={styles['section-divider']} />
 
         {/* 输出详情 */}
         <div className={styles['section']}>
           <div className={styles['section-title']}>输出详情</div>
           <Table
             className={styles['detail-table']}
-            columns={OUTPUT_COLUMNS}
             data={outputTableData}
-            pagination={false}
+            columns={OUTPUT_COLUMNS}
             border={false}
-            rowKey="name"
+            pagination={COMMON_PAGINATION}
           />
-          <div className={styles['pagination-wrapper']}>
-            <Pagination
-              size="small"
-              current={outputPagination.current}
-              pageSize={outputPagination.pageSize}
-              total={outputParams.length}
-              onChange={(page, pageSize) => {
-                setOutputPagination((prev) => ({
-                  current: page,
-                  pageSize: pageSize || prev.pageSize
-                }));
-              }}
-            />
-          </div>
         </div>
       </div>
     </OsDrawer>

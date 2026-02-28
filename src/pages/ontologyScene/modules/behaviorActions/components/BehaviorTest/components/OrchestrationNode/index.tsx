@@ -1,7 +1,8 @@
 import React from 'react';
-import { Modal, Message, Tooltip } from '@arco-design/web-react';
+import { Modal, Tooltip } from '@arco-design/web-react';
 import { OrchestrationNode as OrchestrationNodeType } from '../../types';
 import { useBusinessStore } from '../../store/businessStore';
+import { formatParamDisplayValue } from './utils';
 import DeleteSvg from '@/assets/benti/delete.svg';
 
 interface OrchestrationNodeProps {
@@ -11,6 +12,71 @@ interface OrchestrationNodeProps {
   onDelete: () => void;
 }
 
+// 参数显示项组件 - 处理异步显示值
+interface ParamDisplayItemProps {
+  paramName: string;
+  displayValueOrPromise: string | Promise<string>;
+}
+
+const ParamDisplayItem: React.FC<ParamDisplayItemProps> = React.memo(
+  ({ paramName, displayValueOrPromise }) => {
+    const [displayValue, setDisplayValue] = React.useState<string>('');
+    const [isLoading, setIsLoading] = React.useState(false);
+
+    React.useEffect(() => {
+      if (typeof displayValueOrPromise === 'string') {
+        setDisplayValue(displayValueOrPromise);
+        setIsLoading(false);
+      } else {
+        // 如果是 Promise，等待解析
+        setIsLoading(true);
+        displayValueOrPromise
+          .then((value) => {
+            setDisplayValue(value);
+            setIsLoading(false);
+          })
+          .catch(() => {
+            setDisplayValue('加载失败');
+            setIsLoading(false);
+          });
+      }
+    }, [displayValueOrPromise]);
+
+    return (
+      <div className="flex flex-col gap-1">
+        {/* Label */}
+        <span className="text-[13px] font-semibold text-[rgba(15,19,31,1)]">
+          {paramName}
+        </span>
+        {/* Value */}
+        <div className="rounded bg-[#F7F8FA] px-3 py-2 text-[13px] font-normal text-[#86909C]">
+          {isLoading ? '加载中...' : displayValue || '未配置'}
+        </div>
+      </div>
+    );
+  },
+  // 自定义比较函数：只有当 paramName 变化或 displayValueOrPromise 的实际值变化时才重新渲染
+  (prevProps, nextProps) => {
+    if (prevProps.paramName !== nextProps.paramName) {
+      return false; // 需要重新渲染
+    }
+
+    // 如果都是字符串，比较字符串值
+    if (
+      typeof prevProps.displayValueOrPromise === 'string' &&
+      typeof nextProps.displayValueOrPromise === 'string'
+    ) {
+      return (
+        prevProps.displayValueOrPromise === nextProps.displayValueOrPromise
+      );
+    }
+
+    // 如果有 Promise，总是重新渲染（因为 Promise 对象每次都不同）
+    // 但由于有缓存机制，实际上不会重复请求
+    return false;
+  }
+);
+
 export const OrchestrationNode: React.FC<OrchestrationNodeProps> = ({
   node,
   isSelected,
@@ -18,9 +84,8 @@ export const OrchestrationNode: React.FC<OrchestrationNodeProps> = ({
   onDelete
 }) => {
   const [isDeleteHovered, setIsDeleteHovered] = React.useState(false);
-  const nodeConfigs = useBusinessStore((state) => state.nodeConfigs);
-
-  const config = nodeConfigs[node.id] || {};
+  // 只订阅当前节点的配置，避免其他节点配置变化时重新渲染
+  const config = useBusinessStore((state) => state.nodeConfigs[node.id] || {});
 
   const handleDelete = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -75,39 +140,17 @@ export const OrchestrationNode: React.FC<OrchestrationNodeProps> = ({
         <div className="mt-2 flex flex-col gap-3">
           {node.behavior.params.map((param) => {
             const value = config[param.code];
-
-            // 判断是否已配置
-            let isUnconfigured =
-              value === undefined || value === null || value === '';
-
-            // 对于布尔值（Switch），false 也是有效配置
-            if (param.uiType === 'switch') {
-              isUnconfigured = value === undefined || value === null;
-            }
-
-            // 格式化显示值
-            let displayValue = '未配置';
-            if (!isUnconfigured) {
-              if (typeof value === 'boolean') {
-                displayValue = value ? '是' : '否';
-              } else if (Array.isArray(value)) {
-                displayValue = value.join(', ');
-              } else {
-                displayValue = String(value);
-              }
-            }
+            const displayValueOrPromise = formatParamDisplayValue(
+              value,
+              param.uiType
+            );
 
             return (
-              <div key={param.code} className="flex flex-col gap-1">
-                {/* Label */}
-                <span className="text-[13px] font-semibold text-[rgba(15,19,31,1)]">
-                  {param.name}
-                </span>
-                {/* Value */}
-                <div className="rounded bg-[#F7F8FA] px-3 py-2 text-[13px] font-normal text-[#86909C]">
-                  {displayValue}
-                </div>
-              </div>
+              <ParamDisplayItem
+                key={param.code}
+                paramName={param.name}
+                displayValueOrPromise={displayValueOrPromise}
+              />
             );
           })}
         </div>

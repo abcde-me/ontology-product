@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import {
   Form,
   Input,
-  Table,
   TableColumnProps,
   Pagination,
   Message
@@ -22,19 +21,13 @@ import { listOntologyPhysicalProperties } from '@/api/ontologySceneLibrary/graph
 import type { PhysicalProperties } from '@/types/graphApi';
 import { useParams } from 'react-router';
 import { useHistory } from 'react-router-dom';
-import { isNil } from 'lodash-es';
 
 export interface NormalTableProps {
   /** total 变化时的回调函数 */
   onTotalChange?: (total: number) => void;
-  /** 空态变化时的回调函数 */
-  onEmptyChange?: (isEmpty: boolean) => void;
 }
 
-export default function NormalTable({
-  onTotalChange,
-  onEmptyChange
-}: NormalTableProps = {}) {
+export default function NormalTable({ onTotalChange }: NormalTableProps = {}) {
   const [form] = Form.useForm();
   const { id: ontologyModelID } = useParams<{ id: string }>();
   const [urlState, setUrlState] = useUrlState({ search: '', tab: 'normal' });
@@ -123,18 +116,6 @@ export default function NormalTable({
       onTotalChange(pagination.total);
     }
   }, [pagination?.total, onTotalChange]);
-
-  // 计算空态并通知父组件
-  useEffect(() => {
-    const keyword = form.getFieldValue('keyword');
-    if (onEmptyChange && !loading) {
-      // 只在加载完成后才判断空态，避免加载过程中的误判
-      const isEmpty =
-        (!pagination?.total || pagination.total === 0) &&
-        (!keyword || keyword === '');
-      onEmptyChange(isEmpty);
-    }
-  }, [loading, pagination?.total]);
 
   // 处理查看详情：打开对象类型详情抽屉
   const handleViewDetail = (record: PhysicalProperties) => {

@@ -283,13 +283,13 @@ export const mockApi = {
 
     // 对象类型过滤
     if (
-      params.ontology_object_type_ids &&
-      params.ontology_object_type_ids.length > 0
+      params.associated_object_type_list &&
+      params.associated_object_type_list.length > 0
     ) {
       list = list.filter(
         (item) =>
           item.ontologyObjectTypeId &&
-          params.ontology_object_type_ids!.includes(
+          params.associated_object_type_list!.includes(
             String(item.ontologyObjectTypeId)
           )
       );

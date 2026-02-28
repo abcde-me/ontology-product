@@ -66,6 +66,9 @@ export interface BehaviorActionItem {
    */
   updateUser?: string;
   objectType?: string;
+  ontologyObjectTypeIcon?: string;
+  ontologyObjectTypeId?: string;
+  objectTypeID?: string;
 }
 
 /**
@@ -76,6 +79,9 @@ export interface BehaviorActionDetail {
    * 本体ID
    */
   ontologyModelID?: number;
+  ontologyObjectTypeIcon?: string;
+  ontologyObjectTypeId?: string;
+  objectTypeID?: string;
   /**
    * 行为唯一编码
    */
@@ -283,6 +289,20 @@ export const TYPE2COMP_OPTIONS = {
   [ParamType.Attachment]: [
     { label: '文件上传', value: UiType.Uploader, icon: IconCodeBlock }
   ]
+};
+
+export const UI_TYPE_LABEL = {
+  [UiType.Input]: '单行文本框',
+  [UiType.TextArea]: '文本域',
+  [UiType.InputNumber]: '数字步进器',
+  [UiType.InputNumberFloat]: '高精度数字输入框',
+  [UiType.Switch]: '切换开关',
+  [UiType.Date]: '日期选择器',
+  [UiType.Timestamp]: '日期时间选择器',
+  [UiType.Geopoint]: '地图选择器',
+  [UiType.ObjectOne]: '对象搜索选择器',
+  [UiType.ObjectSet]: '对象集选择器',
+  [UiType.Uploader]: '文件上传'
 };
 
 export const TYPE2RULE_TYPES = {

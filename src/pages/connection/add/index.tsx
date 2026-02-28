@@ -21,7 +21,7 @@ const options = [
   { text: 'Doris', value: 'Doris' },
   { text: 'Elasticsearch', value: 'Elasticsearch' },
   { text: 'GaussDB', value: 'GaussDB' },
-  { text: '达梦数据库', value: 'DM' }
+  { text: '达梦', value: 'DM' }
 ];
 const add = forwardRef((props: any, ref) => {
   // 创建的表单实例

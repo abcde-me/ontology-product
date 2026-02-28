@@ -4,6 +4,8 @@ import {
   Button,
   Form,
   Input,
+  Message,
+  Modal,
   Space,
   Table,
   TableColumnProps
@@ -18,18 +20,18 @@ import {
 import { ONTOLOGY_SCENE_MENU_ITEM_KEYS } from '@/common/constants';
 import { useHistory, useParams } from 'react-router-dom';
 import useArcoTable from '@/hooks/use-arco-table';
-import { getActionList } from '@/api/ontologySceneLibrary/ontologyAction';
-import { isEmpty, isNil } from 'lodash-es';
+import {
+  deleteAction,
+  getActionList
+} from '@/api/ontologySceneLibrary/ontologyAction';
+import { isNil } from 'lodash-es';
+import ObjectTypeTag from '../../../../componens/ObjectTypeTag';
+import ObjectTypeDetailDrawer from '../../../../componens/ObjectTypeDetailDrawer';
 
 export const ActionList = (props: {
   onViewDetail: (data: BehaviorActionItem) => void;
-  /**
-   * 改变页面状态
-   * @param status true:初始无数据，false:有数据
-   */
-  changePageStatus: (status: boolean) => void;
 }) => {
-  const [keyword, setKeyword] = useState('');
+  const [currentObj, setCurrentObj] = useState<string>();
   const [form] = Form.useForm();
   const { id: OSId, moduleType = ONTOLOGY_SCENE_MENU_ITEM_KEYS.GRAPH } =
     useParams<{
@@ -42,7 +44,6 @@ export const ActionList = (props: {
   const { tableProps, onSubmit, refresh } = useArcoTable(
     ({ pagination, query = {} }) => {
       if (isNil(OSId)) {
-        props.changePageStatus(true);
         return Promise.resolve({
           items: [] as BehaviorActionItem[],
           total: 0
@@ -54,10 +55,7 @@ export const ActionList = (props: {
         ontologyModelID: +OSId,
         ...(query as any)
       };
-      return getActionList(search).then((res) => {
-        props.changePageStatus(isEmpty(query) && isEmpty(res));
-        return res;
-      });
+      return getActionList(search);
     },
     {
       defaultPageSize: 10,
@@ -106,18 +104,20 @@ export const ActionList = (props: {
       filters: [],
       width: 200,
       onFilter: (value, record) => record.objectType === value,
-      render: (value) => (
-        <div className={'flex w-full items-center gap-2 overflow-hidden'}>
-          {/*todo icon渲染占位*/}
-          <IconEdit />
-          <div
-            className={
-              'hover-blue overflow-hidden text-ellipsis whitespace-nowrap font-PingFangSc text-[14px] font-medium leading-[22px] '
-            }
-          >
-            {value}
-          </div>
-        </div>
+      render: (value, actionDetail) => (
+        <ObjectTypeTag
+          ontologyObjectTypeIcon={actionDetail?.ontologyObjectTypeIcon || '-'}
+          ontologyObjectTypeName={actionDetail?.objectTypeName || '-'}
+          ontologyObjectTypeId={String(
+            actionDetail?.ontologyObjectTypeId ||
+              actionDetail?.objectTypeId ||
+              ''
+          )}
+          onClick={() => {
+            setCurrentObj((actionDetail.objectTypeId || '').toString());
+          }}
+          className={styles['obj-tag']}
+        />
       )
     },
     {
@@ -187,6 +187,9 @@ export const ActionList = (props: {
             className={
               'p-0 font-PingFangSc text-[14px] font-normal leading-[22px] text-blue-primary'
             }
+            onClick={() => {
+              handleDelete(record);
+            }}
           >
             删除
           </Button>
@@ -194,6 +197,23 @@ export const ActionList = (props: {
       )
     }
   ];
+
+  const handleDelete = (record: BehaviorActionItem) => {
+    Modal.confirm({
+      title: `确定删除${record.name}吗？`,
+      content: '删除后，不可恢复',
+      onOk: () => {
+        deleteAction(record.id!).then((res) => {
+          Message.success({
+            content: '删除成功',
+            duration: 0.5,
+            onClose: refresh
+          });
+        });
+      }
+    });
+  };
+
   return (
     <div className={styles['action-list']}>
       <div>
@@ -232,6 +252,13 @@ export const ActionList = (props: {
           columns
         }}
         className={styles['action-table']}
+      />
+      <ObjectTypeDetailDrawer
+        visible={!!currentObj}
+        onClose={() => {
+          setCurrentObj(undefined);
+        }}
+        objectTypeId={currentObj}
       />
     </div>
   );

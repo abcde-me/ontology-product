@@ -9,14 +9,7 @@ import {
   Popover,
   Spin
 } from '@arco-design/web-react';
-import {
-  IconPlus,
-  IconEdit,
-  IconDelete,
-  IconStorage,
-  IconSwap,
-  IconFolder
-} from '@arco-design/web-react/icon';
+import { IconPlus, IconEdit, IconDelete } from '@arco-design/web-react/icon';
 import {
   ExpandableProcessFlow,
   EllipsisPopover,
@@ -25,7 +18,6 @@ import {
   NoResultCard
 } from '@ceai-front/arco-material';
 import { Link } from '@arco-design/web-react';
-// import initialBg from '../../assets/initial-bg.png';
 import ObjectSmallIcon from '../../assets/object-small.svg';
 import LinkSmallIcon from '../../assets/link-small.svg';
 import BehaviorSmallIcon from '../../assets/behavior-small.svg';
@@ -263,25 +255,15 @@ export default function OntologySceneList() {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(20);
   const [loading, setLoading] = useState(false);
-  const [initialLoading, setInitialLoading] = useState(true);
-  const [noData, setNoData] = useState(false);
   const [totalCount, setTotalCount] = useState(0);
   const [modalVisible, setModalVisible] = useState(false);
   const [modalMode, setModalMode] = useState<'create' | 'edit'>('create');
   const [editingScene, setEditingScene] = useState<SceneCardItem | null>(null);
   const [submitLoading, setSubmitLoading] = useState(false);
-  const [createInitialLoading, setCreateInitialLoading] = useState(false);
-  const isFirstLoadRef = useRef(true);
 
   // 加载场景列表
   const loadSceneList = useCallback(async () => {
-    const isFirstLoad = isFirstLoadRef.current;
-    if (isFirstLoad) {
-      setInitialLoading(true);
-      isFirstLoadRef.current = false;
-    } else {
-      setLoading(true);
-    }
+    setLoading(true);
     try {
       const response = await listOntologyModel({
         pageNo: currentPage,
@@ -295,13 +277,6 @@ export default function OntologySceneList() {
         const result = response.data?.result || [];
         setSceneList(result);
         setTotalCount(response.data?.totalCount || 0);
-        // 只在首次加载且数据为空时设置 noData
-        if (isFirstLoad && result.length === 0) {
-          setNoData(true);
-        } else if (result.length > 0) {
-          // 如果有数据了，重置 noData
-          setNoData(false);
-        }
       } else {
         Message.error(response.message || '加载失败');
       }
@@ -309,11 +284,7 @@ export default function OntologySceneList() {
       console.error('加载场景列表失败:', error);
       Message.error('加载场景列表失败');
     } finally {
-      if (isFirstLoad) {
-        setInitialLoading(false);
-      } else {
-        setLoading(false);
-      }
+      setLoading(false);
     }
   }, [currentPage, pageSize, filter]);
 
@@ -436,12 +407,6 @@ export default function OntologySceneList() {
     setCurrentPage(1); // 清除时重置到第一页
   };
 
-  // 处理分页变化
-  // const handlePageChange = (page: number, size: number) => {
-  //   setCurrentPage(page);
-  //   setPageSize(size);
-  // };
-
   // 流程步骤配置
   const processSteps: SceneProcessStep[] = [
     {
@@ -538,191 +503,6 @@ export default function OntologySceneList() {
     }
   ];
 
-  // 首次加载时显示全页 loading
-  if (initialLoading) {
-    return (
-      <div
-        className={classNames(
-          'flex min-h-full flex-col items-center justify-center bg-white p-[24px]',
-          styles['ontology-scene-list']
-        )}
-      >
-        <Spin />
-      </div>
-    );
-  }
-
-  // 处理初始背景图点击创建场景
-  // const handleInitialBgClick = async () => {
-  //   if (createInitialLoading) return;
-
-  //   setCreateInitialLoading(true);
-  //   try {
-  //     const response = await createOntologyModel({
-  //       name: '新建本体场景',
-  //       description: '',
-  //       icon: ICON_OPTIONS[0]?.value || 'ontology-scene-1',
-  //       tagIdList: []
-  //     });
-
-  //     if (response.status === 200 && response.code === '') {
-  //       Message.success('创建成功');
-  //       // 创建成功后跳转到详情页
-  //       history.push(
-  //         `/tenant/compute/modaforge/ontologyScene/detail/${response.data.id}`
-  //       );
-  //     } else {
-  //       Message.error(response.message || '创建失败');
-  //     }
-  //   } catch (error) {
-  //     Message.error('创建失败');
-  //     console.error('创建场景失败:', error);
-  //   } finally {
-  //     setCreateInitialLoading(false);
-  //   }
-  // };
-
-  // 只在第一次进入页面请求接口并且返回数据是空的时候展示无数据背景图
-  if (noData && sceneList.length === 0) {
-    return (
-      <div
-        className={classNames(
-          styles['ontology-scene-list-initial-page'],
-          'flex h-full w-full overflow-hidden bg-white'
-        )}
-      >
-        {createInitialLoading ? (
-          <div className="flex h-full items-center justify-center">
-            <Spin />
-          </div>
-        ) : (
-          <>
-            {/* 内容区域 */}
-            <div className="relative mx-auto flex h-full w-full min-w-[1000px] max-w-[1220px] flex-1 flex-col items-center">
-              <div className="mt-[118px] w-full">
-                {/* 大标题 - 入场动效 */}
-                <h1
-                  className={classNames(
-                    'mb-[12px] text-[40px] font-[600] leading-[54px] text-[var(--color-text-1)]',
-                    styles['fade-in-up']
-                  )}
-                  style={{
-                    animationDelay: '0ms'
-                  }}
-                >
-                  企业级{' '}
-                  <span className={classNames(styles['primary-color'])}>
-                    本体
-                  </span>{' '}
-                  构建中心
-                </h1>
-
-                {/* 说明文字 - 入场动效 */}
-                <p
-                  className={classNames(
-                    'mb-[36px] w-[429px] text-[16px] leading-[24px] text-[var(--color-text-3)]',
-                    styles['fade-in-up']
-                  )}
-                  style={{
-                    animationDelay: '50ms'
-                  }}
-                >
-                  将离散的底层数据映射为可视、可管、可执行的业务对象, 构建面向
-                  AI 时代的语义基础设施
-                </p>
-
-                {/* 按钮 - 入场动效和悬停动效 */}
-                <div
-                  className={classNames(styles['fade-in-up'])}
-                  style={{
-                    animationDelay: '100ms'
-                  }}
-                >
-                  <Button
-                    type="primary"
-                    size="large"
-                    className={classNames(styles['create-button'])}
-                    onClick={handleCreate}
-                  >
-                    <span className="mr-2 inline-block transition-transform duration-200 group-hover:translate-x-1">
-                      立即创建本体场景
-                    </span>
-                    <span className="inline-block">→</span>
-                  </Button>
-                </div>
-
-                {/* 本体介绍 */}
-                <div
-                  className={classNames(
-                    'absolute bottom-[16px] left-0 right-0 flex w-full gap-[20px] rounded-[4px] bg-white p-[32px]',
-                    styles['fade-in-up']
-                  )}
-                  style={{ animationDelay: '150ms' }}
-                >
-                  {/* 统一数据语言 */}
-                  <div className="flex flex-1 gap-[12px]">
-                    <div className="flex h-[76px] w-[76px] flex-shrink-0 items-center justify-center rounded-lg bg-[#EBF0FA]">
-                      <IconStorage className="h-6 w-6 text-[#165dff]" />
-                    </div>
-                    <div className="flex flex-col gap-[8px]">
-                      <h3 className="text-[16px] font-[600] leading-[24px] text-[var(--color-text-1)]">
-                        统一数据语言
-                      </h3>
-                      <p className="text-[12px] leading-[22px] text-[var(--color-text-4)]">
-                        打通底层数据孤岛,将晦涩的数据与代码转化为统一的业务语言,让业务人员无需懂技术也能看懂数据、使用数据。
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* 构筑可信AI */}
-                  <div className="flex flex-1 gap-[12px]">
-                    <div className="flex h-[76px] w-[76px] flex-shrink-0 items-center justify-center rounded-lg bg-[#EBF0FA]">
-                      <IconSwap className="h-6 w-6 text-[#165dff]" />
-                    </div>
-                    <div className="flex flex-col gap-[8px]">
-                      <h3 className="text-[16px] font-[600] leading-[24px] text-[var(--color-text-1)]">
-                        构筑可信AI
-                      </h3>
-                      <p className="text-[12px] leading-[22px] text-[var(--color-text-4)]">
-                        为大模型建立严谨的知识围栏,确保AI在业务场景中回答精准、可控、无虚假,让企业放心应用生成式
-                        AI。
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* 经验资产数字化 */}
-                  <div className="flex flex-1 gap-[12px]">
-                    <div className="flex h-[76px] w-[76px] flex-shrink-0 items-center justify-center rounded-lg bg-[#EBF0FA]">
-                      <IconFolder className="h-6 w-6 text-[#165dff]" />
-                    </div>
-                    <div className="flex flex-col gap-[8px]">
-                      <h3 className="text-[16px] font-[600] leading-[24px] text-[var(--color-text-1)]">
-                        经验资产数字化
-                      </h3>
-                      <p className="text-[12px] leading-[22px] text-[var(--color-text-4)]">
-                        将原本在专家脑中的行业经验,固化为可复用的数字资产,支持在各类业务场景中随时调用,降低重复建设成本。
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </>
-        )}
-        {/* 创建/编辑弹窗 */}
-        {modalVisible && (
-          <SceneModal
-            visible={modalVisible}
-            mode={modalMode}
-            onSubmit={handleModalSubmit}
-            onCancel={handleModalCancel}
-            loading={submitLoading}
-          />
-        )}
-      </div>
-    );
-  }
-
   return (
     <div
       className={classNames(
@@ -778,7 +558,7 @@ export default function OntologySceneList() {
         </div>
       ) : (
         <div className="flex h-full w-full flex-1 items-center justify-center">
-          <NoResultCard title="暂无搜索结果" />
+          {filter ? <NoResultCard title="暂无搜索结果" /> : <NoDataCard />}
         </div>
       )}
 

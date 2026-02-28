@@ -37,6 +37,8 @@ export const DataWithUiSelect = (props: CustomFormItemCompProps<IValue>) => {
               minRows: 1,
               maxRows: 5
             }}
+            disabled={disabled}
+            value={value?.paramValue}
             onChange={(value) => changeValue({ paramValue: value })}
           />
         );
@@ -45,6 +47,8 @@ export const DataWithUiSelect = (props: CustomFormItemCompProps<IValue>) => {
           <InputNumberWithLabel
             placeholder={'请输入'}
             className={`${styles['ui-comp']} w-[160px]`}
+            disabled={disabled}
+            value={value?.paramValue}
             onChange={(value) => changeValue({ paramValue: value })}
           />
         );
@@ -56,6 +60,8 @@ export const DataWithUiSelect = (props: CustomFormItemCompProps<IValue>) => {
             style={{
               width: '160px'
             }}
+            disabled={disabled}
+            value={value?.paramValue}
             onChange={(value) => changeValue({ paramValue: value })}
           />
         );
@@ -64,6 +70,8 @@ export const DataWithUiSelect = (props: CustomFormItemCompProps<IValue>) => {
           <Select
             className={styles['ui-comp']}
             placeholder={'请选择'}
+            disabled={disabled}
+            value={value?.paramValue}
             onChange={(value) => changeValue({ paramValue: value })}
             options={[
               {
@@ -80,33 +88,70 @@ export const DataWithUiSelect = (props: CustomFormItemCompProps<IValue>) => {
       case UiType.Date:
         return (
           <DatePicker
+            disabled={disabled}
             className={`min-w-[160px] ${styles['ui-comp']}`}
             showTime={false}
+            value={value?.paramValue}
             onChange={(value) => changeValue({ paramValue: value })}
           />
         );
       case UiType.Uploader:
         return (
           <FunctionFileParam
+            disabled={disabled}
             onChange={(value) => changeValue({ paramValue: value })}
             value={value?.paramValue}
+            className={styles['ui-comp']}
           />
         );
       case UiType.Geopoint:
-        return <MapPicker className={styles['ui-comp']} />;
+        return (
+          <MapPicker
+            className={styles['ui-comp']}
+            disabled={disabled}
+            value={value?.paramValue}
+            onChange={(value) => changeValue({ paramValue: value })}
+          />
+        );
       case UiType.Timestamp:
-        return <DatePicker showTime className={styles['ui-comp']} />;
+        return (
+          <DatePicker
+            showTime
+            className={styles['ui-comp']}
+            disabled={disabled}
+            value={value?.paramValue}
+            onChange={(value) => changeValue({ paramValue: value })}
+          />
+        );
       case UiType.ObjectOne:
         return (
           <ObjectTypeSelect
             placeholder={'请选择对象类型'}
             className={'flex-1'}
+            disabled={disabled}
+            value={value?.paramValue}
+            onChange={(value) => changeValue({ paramValue: value })}
           />
         );
       case UiType.ObjectSet:
-        return <ObjectInterfaceSelect className={'flex-1'} />;
+        return (
+          <ObjectInterfaceSelect
+            className={'flex-1'}
+            disabled={disabled}
+            value={value?.paramValue}
+            onChange={(value) => changeValue({ paramValue: value })}
+          />
+        );
       default:
-        return <Input placeholder={'请输入'} className={styles['ui-comp']} />;
+        return (
+          <Input
+            placeholder={'请输入'}
+            className={styles['ui-comp']}
+            disabled={disabled}
+            value={value?.paramValue}
+            onChange={(value) => changeValue({ paramValue: value })}
+          />
+        );
     }
   };
 
@@ -126,6 +171,7 @@ export const DataWithUiSelect = (props: CustomFormItemCompProps<IValue>) => {
             uiType
           });
         }}
+        disabled={disabled}
       />
       {!!value &&
         renderComponentByUiType(value.uiType!.split('_').pop() as UiType)}

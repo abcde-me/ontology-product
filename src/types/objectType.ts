@@ -153,7 +153,7 @@ export interface CreateOntologyPhysicalProperty {
   /**
    * 是否选中
    */
-  isSelected: 1 | 0;
+  isUse: 1 | 0;
   /**
    * 是否存入公共属性库
    */

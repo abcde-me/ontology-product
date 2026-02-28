@@ -47,11 +47,11 @@
 }
 
 .resize-trigger {
-  width: 8px;
+  width: 5px;
   background: transparent;
   height: 100%;
   display: flex;
-  justify-content: center;
+  justify-content: flex-end;
 
   div {
     width: 1px;
@@ -68,4 +68,17 @@
 
 .resize-box {
   padding: 0 !important;
+
+  :global {
+    .arco-resizebox-trigger-horizontal {
+      .resize-trigger {
+        width: 100% !important;
+
+        div {
+          height: 1px !important;
+          width: 100% !important;
+        }
+      }
+    }
+  }
 }

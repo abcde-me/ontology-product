@@ -4,7 +4,6 @@ import {
   Form,
   Input,
   Space,
-  Table,
   TableColumnProps,
   Pagination,
   Message
@@ -29,45 +28,10 @@ import { listOntologyLinkType } from '@/api/ontologySceneLibrary/graph';
 import { LinkInfo, LinkType, SyncStatus } from '@/types/graphApi';
 import ObjectTypeTag from '@/pages/ontologyScene/componens/ObjectTypeTag';
 import dayjs from 'dayjs';
-import { isNil } from 'lodash-es';
-import { OsEmptyStatusWrapper } from '@/pages/ontologyScene/componens';
-
-// 链接数据接口
-export interface LinkItem {
-  id: string;
-  name: string;
-  sourceObjectType: {
-    id?: string | number;
-    name: string;
-    icon?: string;
-  };
-  targetObjectType: {
-    id?: string | number;
-    name: string;
-    icon?: string;
-  };
-  linkType: '1:1' | '1:N' | 'N:N';
-  syncStatus: 'success' | 'running' | 'failed';
-  syncTime: string;
-  attributes: string | { count: number; first: string };
-  linkCount: number;
-}
-
-// 同步状态配置
-const SYNC_STATUS_CONFIG = {
-  success: {
-    text: '成功',
-    color: '#00b42a'
-  },
-  running: {
-    text: '运行中',
-    color: '#165dff'
-  },
-  failed: {
-    text: '失败',
-    color: '#f53f3f'
-  }
-};
+import {
+  OBJECT_TYPE_SYNC_STATUS_CONFIG,
+  OBJECT_TYPE_SYNC_STATUS_FILTERS
+} from '../../common/constants';
 
 // 将 LinkType 枚举转换为字符串
 const getLinkTypeText = (type?: LinkType): '1:1' | '1:N' | 'N:N' => {
@@ -83,8 +47,8 @@ const getLinkTypeText = (type?: LinkType): '1:1' | '1:N' | 'N:N' => {
   }
 };
 
-// 将 SyncStatus 枚举转换为字符串
-const getSyncStatusText = (
+// 将 SyncStatus 枚举转换为 LinkDetailDrawer 期望的字符串类型
+const convertSyncStatusToString = (
   status?: SyncStatus
 ): 'success' | 'running' | 'failed' => {
   switch (status) {
@@ -101,41 +65,11 @@ const getSyncStatusText = (
   }
 };
 
-// 将 LinkInfo 转换为 LinkItem
-const convertLinkInfoToLinkItem = (linkInfo: LinkInfo): LinkItem => {
-  return {
-    id: String(linkInfo.id || linkInfo.code || ''),
-    name: linkInfo.name || '',
-    sourceObjectType: {
-      id: linkInfo.sourceObjectTypeID,
-      name: linkInfo.sourceObjectTypeName || '',
-      icon: linkInfo.sourceObjectTypeIcon
-    },
-    targetObjectType: {
-      id: linkInfo.targetObjectTypeID,
-      name: linkInfo.targetObjectTypeName || '',
-      icon: linkInfo.targetObjectTypeIcon
-    },
-    linkType: getLinkTypeText(linkInfo.type),
-    syncStatus: getSyncStatusText(linkInfo.syncStatus),
-    syncTime: linkInfo.syncTime || '',
-    attributes: 'properties', // 暂时使用固定值，后续可以从其他接口获取
-    linkCount: 0 // 暂时使用固定值，后续可以从其他接口获取
-  };
-};
-
 // 链接类型筛选选项
 const LINK_TYPE_FILTERS = [
   { text: '1:1', value: '1:1' },
   { text: '1:N', value: '1:N' },
   { text: 'N:N', value: 'N:N' }
-];
-
-// 同步状态筛选选项
-const SYNC_STATUS_FILTERS = [
-  { text: '成功', value: 'success' },
-  { text: '运行中', value: 'running' },
-  { text: '失败', value: 'failed' }
 ];
 
 export default function OntologySceneLinksList() {
@@ -147,11 +81,11 @@ export default function OntologySceneLinksList() {
   const [detailActiveTab, setDetailActiveTab] = useState<
     'instances' | 'attributes'
   >('instances');
-  const [selectedLink, setSelectedLink] = useState<LinkItem | null>(null);
+  const [selectedLink, setSelectedLink] = useState<LinkInfo | null>(null);
 
   // 使用 useTable hook
   const { data, loading, pagination, refresh, submit, onChange } =
-    useWorkflowTable<LinkItem, any>({
+    useWorkflowTable<LinkInfo, any>({
       service: async (params) => {
         try {
           const order = params.orders?.[0]?.asc ? 'asc' : 'desc';
@@ -167,12 +101,9 @@ export default function OntologySceneLinksList() {
           const linkInfos = response.data?.result || [];
           const totalCount = response.data?.totalCount || 0;
 
-          // 转换为 LinkItem 格式
-          const items = linkInfos.map(convertLinkInfoToLinkItem);
-
           return {
             data: {
-              items,
+              items: linkInfos,
               total: totalCount,
               page: params.page || 1,
               page_size: params.page_size || 10
@@ -216,63 +147,57 @@ export default function OntologySceneLinksList() {
   };
 
   // 处理属性点击
-  const handleAttributesClick = (record: LinkItem) => {
+  const handleAttributesClick = (record: LinkInfo) => {
     setSelectedLink(record);
     setDetailActiveTab('attributes');
     setDetailDrawerVisible(true);
   };
 
-  // 处理链接数点击
-  const handleLinkCountClick = (record: LinkItem) => {
-    setSelectedLink(record);
-    setDetailActiveTab('instances');
-    setDetailDrawerVisible(true);
-  };
-
   // 处理编辑
-  const handleEdit = (record: LinkItem) => {
+  const handleEdit = (record: LinkInfo) => {
     history.push(
-      `/tenant/compute/modaforge/ontologyScene/detail/${OSId}/links/edit/${record.id}`
+      `/tenant/compute/modaforge/ontologyScene/detail/${OSId}/links/edit/${record.id || record.code}`
     );
   };
 
   // 处理删除
-  const handleDelete = (record: LinkItem) => {
+  const handleDelete = (record: LinkInfo) => {
     // TODO: 实现删除功能
     Message.info(`删除 ${record.name}`);
   };
 
   // 处理查看详情（点击链接名称）
-  const handleViewDetail = (record: LinkItem) => {
+  const handleViewDetail = (record: LinkInfo) => {
     setSelectedLink(record);
     setDetailActiveTab('instances');
     setDetailDrawerVisible(true);
   };
 
   // 表格列定义
-  const columns: TableColumnProps<LinkItem>[] = [
+  const columns: TableColumnProps<LinkInfo>[] = [
     {
       title: '链接名称',
       dataIndex: 'name',
       width: 150,
       render: (value, record) => (
-        <EllipsisPopover
-          wrapperClassName="min-w-0 hover-blue font-[600]"
-          value={value}
-          onClick={() => handleViewDetail(record)}
-        />
+        <div onClick={() => handleViewDetail(record)}>
+          <EllipsisPopover
+            wrapperClassName="min-w-0 hover-blue font-[600]"
+            value={value}
+          />
+        </div>
       )
     },
     {
-      title: 'id',
-      dataIndex: 'id',
+      title: '链接id',
+      dataIndex: 'code',
       width: 150,
       render: (value) => (
         <div className="flex items-center gap-2">
-          <div className="font-PingFangSc text-[14px] font-normal leading-[22px] text-[#23293b]">
-            {value}
-          </div>
-          <CopyItemIcon className="hidden flex-shrink-0" value={value} />
+          <EllipsisPopover wrapperClassName="min-w-0" value={value} />
+          {value && (
+            <CopyItemIcon className="hidden flex-shrink-0" value={value} />
+          )}
         </div>
       )
     },
@@ -280,14 +205,14 @@ export default function OntologySceneLinksList() {
       title: '源对象类型',
       dataIndex: 'sourceObjectType',
       width: 180,
-      render: (value: LinkItem['sourceObjectType']) => {
+      render: (_, record) => {
         return (
           <div>
-            {value?.id ? (
+            {record.sourceObjectTypeID ? (
               <ObjectTypeTag
-                ontologyObjectTypeIcon={value.icon}
-                ontologyObjectTypeName={value.name}
-                ontologyObjectTypeId={value.id}
+                ontologyObjectTypeIcon={record.sourceObjectTypeIcon}
+                ontologyObjectTypeName={record.sourceObjectTypeName || ''}
+                ontologyObjectTypeId={record.sourceObjectTypeID}
               />
             ) : (
               <span>-</span>
@@ -300,14 +225,14 @@ export default function OntologySceneLinksList() {
       title: '目标对象类型',
       dataIndex: 'targetObjectType',
       width: 180,
-      render: (value: LinkItem['targetObjectType']) => {
+      render: (_, record) => {
         return (
           <div>
-            {value?.id ? (
+            {record.targetObjectTypeID ? (
               <ObjectTypeTag
-                ontologyObjectTypeIcon={value.icon}
-                ontologyObjectTypeName={value.name}
-                ontologyObjectTypeId={value.id}
+                ontologyObjectTypeIcon={record.targetObjectTypeIcon}
+                ontologyObjectTypeName={record.targetObjectTypeName || ''}
+                ontologyObjectTypeId={record.targetObjectTypeID}
               />
             ) : (
               <span>-</span>
@@ -318,13 +243,13 @@ export default function OntologySceneLinksList() {
     },
     {
       title: '链接类型',
-      dataIndex: 'linkType',
+      dataIndex: 'type',
       width: 120,
       filters: LINK_TYPE_FILTERS,
-      onFilter: (value, record) => record.linkType === value,
+      onFilter: (value, record) => getLinkTypeText(record.type) === value,
       render: (value) => (
         <div className="font-PingFangSc text-[14px] font-normal leading-[22px] text-[#23293b]">
-          {value}
+          {getLinkTypeText(value)}
         </div>
       )
     },
@@ -332,20 +257,21 @@ export default function OntologySceneLinksList() {
       title: '同步状态',
       dataIndex: 'syncStatus',
       width: 120,
-      filters: SYNC_STATUS_FILTERS,
+      filters: OBJECT_TYPE_SYNC_STATUS_FILTERS,
       onFilter: (value, record) => record.syncStatus === value,
       render: (value) => {
-        const config = SYNC_STATUS_CONFIG[value];
+        const config = OBJECT_TYPE_SYNC_STATUS_CONFIG[value];
+        if (!config) return <span>-</span>;
         return (
           <div className="flex items-center gap-2">
             <div
               className="h-2 w-2 rounded-full"
               style={{ backgroundColor: config.color }}
             />
-            <span className="font-PingFangSc text-[14px] font-normal leading-[22px]">
+            <span className="text-[14px] font-normal leading-[22px]">
               {config.text}
             </span>
-            {value === 'failed' && (
+            {value === SyncStatus.FAILED && (
               <IconInfoCircle
                 className="cursor-pointer text-[#f53f3f]"
                 style={{ fontSize: '14px' }}
@@ -367,37 +293,15 @@ export default function OntologySceneLinksList() {
       title: '属性',
       dataIndex: 'attributes',
       width: 150,
-      render: (value, record) => {
-        if (typeof value === 'string') {
-          return (
-            <div className="font-PingFangSc text-[14px] font-normal leading-[22px] text-[#23293b]">
-              {value}
-            </div>
-          );
-        }
+      render: (_, record) => {
+        // 暂时使用固定值，后续可以从其他接口获取
+        const value = 'properties';
         return (
-          <div
-            className="hover-blue font-PingFangSc text-[14px] font-normal leading-[22px] text-[#23293b]"
-            onClick={() => handleAttributesClick(record)}
-          >
-            {value.first} 等{value.count}个
+          <div className="text-[14px] font-normal leading-[22px] text-[#23293b]">
+            {value}
           </div>
         );
       }
-    },
-    {
-      title: '链接数',
-      dataIndex: 'linkCount',
-      width: 120,
-      sorter: true,
-      render: (value, record) => (
-        <div
-          className="hover-blue font-PingFangSc text-[14px] font-normal leading-[22px] text-[#23293b]"
-          onClick={() => handleLinkCountClick(record)}
-        >
-          {value}
-        </div>
-      )
     },
     {
       title: '操作',
@@ -427,46 +331,32 @@ export default function OntologySceneLinksList() {
 
   const drawerData = useMemo(() => {
     if (!selectedLink) return undefined;
-    const attributeCount =
-      typeof selectedLink.attributes === 'string'
-        ? 0
-        : Number(selectedLink.attributes?.count) || 0;
+    // 暂时使用固定值，后续可以从其他接口获取
+    const attributeCount = 0;
+    const instanceCount = 0;
 
     return {
-      id: selectedLink.id,
-      name: selectedLink.name,
-      syncStatus: selectedLink.syncStatus,
-      linkType: selectedLink.linkType,
+      id: String(selectedLink.id || selectedLink.code || ''),
+      name: selectedLink.name || '',
+      syncStatus: convertSyncStatusToString(selectedLink.syncStatus),
+      linkType: getLinkTypeText(selectedLink.type),
       sourceObjectType: {
-        id: selectedLink.sourceObjectType.id,
-        name: selectedLink.sourceObjectType.name,
+        id: selectedLink.sourceObjectTypeID,
+        name: selectedLink.sourceObjectTypeName || '',
         iconColor: undefined // ObjectTypeTag 使用 icon 而不是 iconColor
       },
       targetObjectType: {
-        id: selectedLink.targetObjectType.id,
-        name: selectedLink.targetObjectType.name,
+        id: selectedLink.targetObjectTypeID,
+        name: selectedLink.targetObjectTypeName || '',
         iconColor: undefined // ObjectTypeTag 使用 icon 而不是 iconColor
       },
-      instanceCount: Number(selectedLink.linkCount) || 0,
+      instanceCount,
       attributeCount
     };
   }, [selectedLink]);
 
-  // 计算是否为空：当接口返回为空且搜索值为空时，isEmpty 为 true
-  const isEmpty =
-    !loading &&
-    (!data || data.length === 0) &&
-    (!pagination?.total || pagination.total === 0) &&
-    (!urlState.search || urlState.search === '');
-
   return (
-    <OsEmptyStatusWrapper
-      className={styles['links-list']}
-      onCreate={handleCreate}
-      title={'链接'}
-      description={'描述不同实体对象之间的语义联系与数据拓扑结构'}
-      empty={isEmpty}
-    >
+    <div className={styles['links-list']}>
       <div>
         <div className="mb-1 font-PingFangSc text-[20px] font-[600] leading-[30px] text-default">
           链接
@@ -507,7 +397,7 @@ export default function OntologySceneLinksList() {
           columns,
           data,
           loading,
-          rowKey: 'id',
+          rowKey: (record) => String(record.id || record.code || ''),
           border: false,
           pagination: false,
           scroll: { x: true },
@@ -543,11 +433,13 @@ export default function OntologySceneLinksList() {
             setDetailDrawerVisible(false);
             setSelectedLink(null);
           }}
-          linkId={selectedLink?.id}
+          linkId={
+            selectedLink?.id ? String(selectedLink.id) : selectedLink?.code
+          }
           data={drawerData as any}
           defaultActiveTab={detailActiveTab}
         />
       )}
-    </OsEmptyStatusWrapper>
+    </div>
   );
 }

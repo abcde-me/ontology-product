@@ -41,7 +41,7 @@ export default function BehaviorActionDetailPage() {
   const { data: actionDetail, loading: actionLoading } = useRequest(
     () => {
       if (actionId === '_NEW_') return Promise.resolve(undefined);
-      return getActionDetail(actionId);
+      return getActionDetail(+actionId);
     },
     {
       refreshDeps: [actionId]
@@ -61,7 +61,6 @@ export default function BehaviorActionDetailPage() {
         onClose: goBack
       });
     });
-    console.log(values);
   };
 
   const { data: functionData, loading: functionLoading } = useRequest(
@@ -80,10 +79,6 @@ export default function BehaviorActionDetailPage() {
     }
     form.setFieldsValue(buildActionSchema(actionDetail));
   }, [actionDetail]);
-
-  useEffect(() => {
-    form.setFieldsValue(buildFunctionSchema(functionData));
-  }, [functionData]);
 
   const functionHasParam = !!functionData?.params?.filter(
     (p) => p.inputType === InputType.Input
@@ -108,6 +103,19 @@ export default function BehaviorActionDetailPage() {
           form={form}
           labelAlign={'left'}
           disabled={actionLoading}
+          onValuesChange={(changes, allValues) => {
+            const functionChange =
+              Object.keys(changes).length === 1 && 'functionId' in changes;
+            if (functionChange) {
+              const functionId = changes.functionId;
+              if (isNil(functionId)) {
+                return form.setFieldsValue({ functionId });
+              }
+              getFunctionDetail(functionId).then((res) => {
+                form.setFieldsValue(buildFunctionSchema(res));
+              });
+            }
+          }}
         >
           <div className={'module-title'}>基本信息</div>
           <FormItem

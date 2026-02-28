@@ -4,13 +4,16 @@ import {
   DatePicker,
   Input,
   InputNumber,
+  Select,
   Switch,
   Upload
 } from '@arco-design/web-react';
 import { InputNumberWithLabel } from '@ceai-front/arco-material';
 import {
   DateTimePicker,
+  FunctionFileParam,
   MapPicker,
+  ObjectInterfaceSelect,
   ObjectOne,
   ObjectSet,
   ObjectTypeSelect
@@ -28,27 +31,45 @@ export const renderComponentByUiType = (type: UiType) => {
     case UiType.InputNumberFloat:
       return <InputNumber placeholder={'请输入'} className={'w-[160px]'} />;
     case UiType.Switch:
-      return <Switch />;
-    case UiType.Date:
-      return <DatePicker className={'min-w-[160px]'} showTime={false} />;
-    case UiType.Uploader:
       return (
-        <Upload
-          multiple
-          className={styles['upload']}
-          action={'/'}
-          //图片和pdf格式
-          accept={'.jpg,.jpeg,.png,.pdf'}
+        <Select
+          className={styles['ui-comp']}
+          placeholder={'请选择'}
+          options={[
+            {
+              label: 'true',
+              value: 'true'
+            },
+            {
+              label: 'false',
+              value: 'false'
+            }
+          ]}
         />
       );
+    case UiType.Date:
+      return (
+        <DatePicker
+          className={'min-w-[160px]'}
+          showTime={false}
+          getPopupContainer={(node) => node.parentElement || document.body}
+        />
+      );
+    case UiType.Uploader:
+      return <FunctionFileParam className={styles['upload']} />;
     case UiType.Geopoint:
       return <MapPicker />;
     case UiType.Timestamp:
-      return <DateTimePicker />;
+      return <DatePicker showTime />;
     case UiType.ObjectOne:
-      return <ObjectTypeSelect placeholder={'请选择对象类型'} />;
+      return (
+        <ObjectTypeSelect
+          placeholder={'请选择对象类型'}
+          getPopupContainer={(node) => node.parentElement || document.body}
+        />
+      );
     case UiType.ObjectSet:
-      return <ObjectSet />;
+      return <ObjectInterfaceSelect />;
     default:
       return <Input placeholder={'请输入'} />;
   }

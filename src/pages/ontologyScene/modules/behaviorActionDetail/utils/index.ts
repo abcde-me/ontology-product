@@ -17,7 +17,7 @@ import { isNil } from 'lodash-es';
 // 动作详情数据转form所需数据
 export function buildActionSchema(action: BehaviorActionDetail): ActionSchema {
   const { code, name, description, functionId, objectTypeId } = action;
-  return {
+  const res = {
     code: code,
     name,
     description,
@@ -57,6 +57,7 @@ export function buildActionSchema(action: BehaviorActionDetail): ActionSchema {
       }
     )
   };
+  return res;
 }
 
 export function buildFunctionSchema(

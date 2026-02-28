@@ -143,7 +143,7 @@ export default function BehaviorLogList() {
         type: activeTab, // 搜索时会带上当前 tab 的类型
         sources: sourcesFilter.length > 0 ? sourcesFilter : undefined, // 来源过滤
         run_status_list: statusFilter.length > 0 ? statusFilter : undefined, // 执行状态过滤列表
-        ontology_object_type_ids:
+        associated_object_type_list:
           objectTypeFilter.length > 0 ? objectTypeFilter : undefined, // 对象类型过滤
         sort_by: sortField, // 排序字段
         sort: sortOrder ? (sortOrder === 'ascend' ? 'asc' : 'desc') : undefined // 排序方向转换
@@ -291,7 +291,7 @@ export default function BehaviorLogList() {
           setShowBehaviorDetail(false);
           setBehaviorData(undefined);
         }}
-        data={behaviorData}
+        actionItem={behaviorData?.id}
       />
 
       {/* 执行详情抽屉 */}

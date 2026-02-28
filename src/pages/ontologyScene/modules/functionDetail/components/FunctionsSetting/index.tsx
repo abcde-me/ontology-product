@@ -6,6 +6,7 @@ import {
   IconDelete,
   IconExpand,
   IconFile,
+  IconLoading,
   IconPlayArrowFill,
   IconPlus,
   IconRecordStop,
@@ -29,6 +30,7 @@ import {
 } from '@/pages/ontologyScene/modules/functionDetail/components';
 import {
   OntologyFunctionParam,
+  OntologyFunctionSchema,
   OutputTypeOptions,
   ParamType,
   UiType
@@ -37,6 +39,10 @@ import classNames from 'classnames';
 import { getFunctionSDK } from '@/api/ontologySceneLibrary/ontologyFunction';
 import { ResizeBoxWithCursorChange } from '@/pages/ontologyScene/componens';
 import { isNil } from 'lodash-es';
+import { buildTestFunctionData } from '@/pages/ontologyScene/modules/functionDetail/utils';
+import { useParams } from 'react-router-dom';
+import { UploadItem } from '@arco-design/web-react/es/Upload';
+import useTestFunction from '@/pages/ontologyScene/hooks/useTestFunction';
 
 export const FunctionsSetting = () => {
   const { form, disabled: readonly, isSubmitting } = Form.useFormContext();
@@ -44,17 +50,17 @@ export const FunctionsSetting = () => {
   const [isFullscreen, { enterFullscreen, exitFullscreen }] =
     useFullscreen(ref);
   const [showDoc, setShowDoc] = useState(false);
-  const [testIng, setTestIng] = useState(false);
 
+  // const { id: OSid } = useParams<Record<string, string>>();
+
+  const {
+    loading: testLoading,
+    startTest,
+    stopTest,
+    runLog: runLogInfo,
+    testIng
+  } = useTestFunction();
   const disabled = readonly || testIng;
-
-  const inputParams: OntologyFunctionParam[] = Form.useWatch('input', form);
-
-  const testAble = useMemo(() => {
-    return inputParams?.every(
-      ({ uiTypeAndValue }) => !isNil(uiTypeAndValue?.paramValue)
-    );
-  }, [inputParams]);
 
   const { data: content, loading: SDKLoading } = useRequest(() => {
     return getFunctionSDK();
@@ -82,13 +88,13 @@ export const FunctionsSetting = () => {
   };
 
   const handleTest = () => {
-    Message.success('开始测试');
-    setTestIng(true);
-  };
-  const handleStopTest = () => {
-    setTimeout(() => {
-      setTestIng(false);
-    }, 2000);
+    form
+      .validate()
+      .then((res: Required<OntologyFunctionSchema>) => {
+        const functionTest = buildTestFunctionData(res);
+        startTest(functionTest);
+      })
+      .catch(console.error);
   };
 
   return (
@@ -134,8 +140,41 @@ export const FunctionsSetting = () => {
                             <Input placeholder={''} disabled={disabled} />
                           </Form.Item>
                           <Form.Item
-                            className={'mb-0 flex-1'}
+                            className={'mb-0 flex-1 overflow-hidden'}
                             field={`${field}.uiTypeAndValue`}
+                            rules={[
+                              {
+                                validateTrigger: 'onFinish',
+                                validator(
+                                  value: OntologyFunctionParam['uiTypeAndValue'],
+                                  onError
+                                ) {
+                                  const { uiType, paramValue } = value!;
+                                  if (isNil(paramValue)) {
+                                    return onError('请填写参数值');
+                                  }
+                                  const [dataType] = uiType!.split('_');
+                                  if (dataType === ParamType.Attachment) {
+                                    if (
+                                      (paramValue as UploadItem[]).some(
+                                        ({ status }) => status === 'error'
+                                      )
+                                    ) {
+                                      onError('文件上传失败，请重新上传');
+                                      return;
+                                    }
+                                    if (
+                                      (paramValue as UploadItem[]).some(
+                                        ({ status }) => status !== 'done'
+                                      )
+                                    ) {
+                                      onError('文件正在上传，请稍候');
+                                      return;
+                                    }
+                                  }
+                                }
+                              }
+                            ]}
                           >
                             <DataWithUiSelect disabled={disabled} />
                           </Form.Item>
@@ -208,7 +247,7 @@ export const FunctionsSetting = () => {
                               key === f.key ? [] : `${f.field}.name`
                             )}
                           >
-                            <Input placeholder={''} />
+                            <Input placeholder={''} disabled={disabled} />
                           </Form.Item>
                           <Form.Item
                             className={`mb-0  flex-1`}
@@ -217,11 +256,13 @@ export const FunctionsSetting = () => {
                             <SelectWithNoData
                               placeholder={''}
                               options={OutputTypeOptions}
+                              disabled={disabled}
                             />
                           </Form.Item>
                           <IconDelete
                             className={`mt-2 text-[16px] hover:cursor-pointer`}
                             onClick={() => {
+                              if (disabled) return;
                               remove(index);
                               setTimeout(() => {
                                 form
@@ -239,6 +280,7 @@ export const FunctionsSetting = () => {
                       type={'text'}
                       icon={<IconPlus />}
                       className={'h-auto pl-0'}
+                      disabled={disabled}
                       onClick={() => {
                         add({
                           name: `var_${fields.length + 1}`,
@@ -293,10 +335,18 @@ export const FunctionsSetting = () => {
             </ProButton>
           )}
           <Button
-            icon={testIng ? <IconRecordStop /> : <IconPlayArrowFill />}
+            icon={
+              testLoading ? (
+                <IconLoading />
+              ) : testIng ? (
+                <IconRecordStop />
+              ) : (
+                <IconPlayArrowFill />
+              )
+            }
             size={'mini'}
-            disabled={!testAble}
-            onClick={testIng ? handleStopTest : handleTest}
+            onClick={testIng ? stopTest : handleTest}
+            disabled={testLoading}
           >
             {testIng ? '停止运行' : '运行'}
           </Button>
@@ -307,6 +357,8 @@ export const FunctionsSetting = () => {
             className={classNames({
               'hidden-border': showDoc
             })}
+            runInfo={runLogInfo}
+            disabled={disabled}
           />
         </Form.Item>
       </div>

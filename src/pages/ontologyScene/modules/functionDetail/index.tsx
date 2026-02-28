@@ -43,9 +43,7 @@ export default function OSFunctionDetailPage() {
   const { data: functionDetail, loading } = useRequest(
     () => {
       if (functionId === '_NEW_') return Promise.resolve(null);
-      return getFunctionDetail(functionId).then((res) => {
-        return res.data || null;
-      });
+      return getFunctionDetail(functionId);
     },
     {
       refreshDeps: [OSId, functionId]
@@ -58,12 +56,22 @@ export default function OSFunctionDetailPage() {
     );
   };
 
+  // 提交数据时忽略掉入参的value以及类型，因为类型一定会有值，value只在测试的时候才校验
+  const validateBeforeSave = async (data: OntologyFunctionSchema) => {
+    const fields = ['code', 'name', 'output'];
+    data.input!.forEach((param, i) => {
+      fields.push(`input[${i}].name`);
+    });
+    return form.validate(fields);
+  };
+
   const saveAction = async () => {
     try {
-      const values: OntologyFunctionSchema = await form.validate();
+      const allValues: OntologyFunctionSchema = form.getFieldsValue();
+      await validateBeforeSave(allValues);
       await saveFunction({
         ...(functionDetail || {}),
-        ...buildFunctionDetail(values),
+        ...buildFunctionDetail(allValues),
         ontologyModelID: +OSId
       });
       Message.success({

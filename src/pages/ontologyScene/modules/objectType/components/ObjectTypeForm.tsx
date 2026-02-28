@@ -49,7 +49,7 @@ import {
   DATA_SOURCE_TYPE,
   DataSourceType
 } from '@/pages/ontologyScene/common/constants';
-import IconSelector from '@/pages/ontologyScene/componens/IconSelector';
+import ObjectTypeIconSelector from './ObjectTypeIconSelector';
 import { EllipsisPopover } from '@ceai-front/arco-material';
 import { PrefixAimdp } from '@/api/endpoints';
 
@@ -262,7 +262,7 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
                 comment: column, // 属性名称，默认与表字段名相同
                 columnType: 'STRING', // 默认类型
                 isPrimary: index === 0 ? 1 : 0, // 第一个字段默认为主键
-                isSelected: 1, // 默认选中
+                isUse: 1, // 默认选中
                 isStoreAsPublic: 0, // 默认不存入公共属性
                 publicPropertyID: 0, // 默认未绑定公共属性
                 _tableField: column,
@@ -289,7 +289,7 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
               comment: 'id',
               columnType: 'STRING',
               isPrimary: 1,
-              isSelected: 1,
+              isUse: 1,
               isStoreAsPublic: 0,
               publicPropertyID: 0,
               _tableField: 'id',
@@ -321,7 +321,7 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
     const handleSelectAll = (checked: boolean) => {
       const newFields: AttributeField[] = attributeFields.map((field) => ({
         ...field,
-        isSelected: checked ? 1 : 0
+        isUse: checked ? 1 : 0
       }));
       setAttributeFields(newFields);
     };
@@ -440,9 +440,8 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
     };
 
     const allSelected =
-      attributeFields.length > 0 &&
-      attributeFields.every((f) => f.isSelected === 1);
-    const someSelected = attributeFields.some((f) => f.isSelected === 1);
+      attributeFields.length > 0 && attributeFields.every((f) => f.isUse === 1);
+    const someSelected = attributeFields.some((f) => f.isUse === 1);
 
     // 属性字段映射表格列定义
     const attributeColumns: TableColumnProps<AttributeField>[] = [
@@ -463,9 +462,9 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
           <div className="flex items-center gap-[12px]">
             <Checkbox
               disabled={record.isPrimary === 1}
-              checked={record.isSelected === 1}
+              checked={record.isUse === 1}
               onChange={(checked) =>
-                handleFieldChange(index, { isSelected: checked ? 1 : 0 })
+                handleFieldChange(index, { isUse: checked ? 1 : 0 })
               }
             />
             <span>{record._tableField || value}</span>
@@ -635,7 +634,7 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
                   comment: field.fieldName, // 属性名称，使用描述或字段名
                   columnType: field.dataType, // 字段类型
                   isPrimary: index === 0 ? 1 : 0, // 第一个字段默认为主键
-                  isSelected: 1, // 默认选中
+                  isUse: 1, // 默认选中
                   isStoreAsPublic: 0, // 默认不存入公共属性
                   publicPropertyID: 0, // 默认未绑定公共属性
                   _tableField: field.fieldName,
@@ -843,7 +842,7 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
           comment: column, // 属性名称，默认与表字段名相同
           columnType: 'varchar(2000)', // 默认类型
           isPrimary: index === 0 ? 1 : 0, // 第一个字段默认为主键
-          isSelected: 1, // 默认选中
+          isUse: 1, // 默认选中
           isStoreAsPublic: 0, // 默认不存入公共属性
           publicPropertyID: 0, // 默认未绑定公共属性
           _tableField: column,
@@ -889,16 +888,14 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
         }
 
         // 过滤出选中的字段，并转换为接口格式（移除临时字段）
-        const selectedFields = attributeFields
-          .filter((field) => field.isSelected === 1)
-          .map(
-            ({
-              _tableField,
-              _attributeName,
-              _storedPublicPropertyId,
-              ...field
-            }) => field
-          );
+        const selectedFields = attributeFields.map(
+          ({
+            _tableField,
+            _attributeName,
+            _storedPublicPropertyId,
+            ...field
+          }) => field
+        );
 
         const formData: ObjectTypeFormData = {
           code: values.code,
@@ -1021,7 +1018,7 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
             </FormItem>
 
             <FormItem label="图标：" field="icon">
-              <IconSelector
+              <ObjectTypeIconSelector
                 initialValue={selectedIcon}
                 onChange={handleIconChange}
                 options={OBJECT_TYPE_ICON_OPTIONS}
@@ -1172,7 +1169,7 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
                 {
                   required: true,
                   validator: (value, callback) => {
-                    if (!value || value.length === 0) {
+                    if (!attributeFields || attributeFields.length === 0) {
                       callback('请先上传文件或选择数据源');
                     } else {
                       callback();
