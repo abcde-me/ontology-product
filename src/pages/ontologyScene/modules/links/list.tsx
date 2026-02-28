@@ -4,7 +4,6 @@ import {
   Form,
   Input,
   Space,
-  Table,
   TableColumnProps,
   Pagination,
   Message
@@ -29,8 +28,6 @@ import { listOntologyLinkType } from '@/api/ontologySceneLibrary/graph';
 import { LinkInfo, LinkType, SyncStatus } from '@/types/graphApi';
 import ObjectTypeTag from '@/pages/ontologyScene/componens/ObjectTypeTag';
 import dayjs from 'dayjs';
-import { isNil } from 'lodash-es';
-import { OsEmptyStatusWrapper } from '@/pages/ontologyScene/componens';
 
 // 链接数据接口
 export interface LinkItem {
@@ -452,21 +449,8 @@ export default function OntologySceneLinksList() {
     };
   }, [selectedLink]);
 
-  // 计算是否为空：当接口返回为空且搜索值为空时，isEmpty 为 true
-  const isEmpty =
-    !loading &&
-    (!data || data.length === 0) &&
-    (!pagination?.total || pagination.total === 0) &&
-    (!urlState.search || urlState.search === '');
-
   return (
-    <OsEmptyStatusWrapper
-      className={styles['links-list']}
-      onCreate={handleCreate}
-      title={'链接'}
-      description={'描述不同实体对象之间的语义联系与数据拓扑结构'}
-      empty={isEmpty}
-    >
+    <div className={styles['links-list']}>
       <div>
         <div className="mb-1 font-PingFangSc text-[20px] font-[600] leading-[30px] text-default">
           链接
@@ -548,6 +532,6 @@ export default function OntologySceneLinksList() {
           defaultActiveTab={detailActiveTab}
         />
       )}
-    </OsEmptyStatusWrapper>
+    </div>
   );
 }
