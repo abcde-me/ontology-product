@@ -10,7 +10,9 @@ import {
 import { InputNumberWithLabel } from '@ceai-front/arco-material';
 import {
   DateTimePicker,
+  FunctionFileParam,
   MapPicker,
+  ObjectInterfaceSelect,
   ObjectOne,
   ObjectSet,
   ObjectTypeSelect
@@ -32,23 +34,15 @@ export const renderComponentByUiType = (type: UiType) => {
     case UiType.Date:
       return <DatePicker className={'min-w-[160px]'} showTime={false} />;
     case UiType.Uploader:
-      return (
-        <Upload
-          multiple
-          className={styles['upload']}
-          action={'/'}
-          //图片和pdf格式
-          accept={'.jpg,.jpeg,.png,.pdf'}
-        />
-      );
+      return <FunctionFileParam className={styles['upload']} />;
     case UiType.Geopoint:
       return <MapPicker />;
     case UiType.Timestamp:
-      return <DateTimePicker />;
+      return <DatePicker showTime />;
     case UiType.ObjectOne:
       return <ObjectTypeSelect placeholder={'请选择对象类型'} />;
     case UiType.ObjectSet:
-      return <ObjectSet />;
+      return <ObjectInterfaceSelect />;
     default:
       return <Input placeholder={'请输入'} />;
   }

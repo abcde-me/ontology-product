@@ -806,6 +806,8 @@ export const ModaForgeResourceEndpoints = {
   // ===================== 本体函数相关 =====================
   // 函数列表
   GetOntologyFunctionListApi: PrefixAimdp + '/ListOntologyFunction',
+  // 函数测试
+  ExecuteFunctionTestAPi: PrefixAimdp + '/ExecuteTest',
   // 函数详情
   GetOntologyFunctionDetailApi: PrefixAimdp + '/GetOntologyFunction',
   // 创建函数
@@ -816,6 +818,9 @@ export const ModaForgeResourceEndpoints = {
   DeleteOntologyFunctionListApi: PrefixAimdp + '/DeleteOntologyFunction',
   // 本体函数SDK
   GetOntologyFunctionSDKDocApi: PrefixAimdp + '/GetOntologyFunctionSDKDoc',
+  // 本体函数文件上传
+  UploadOntologyActionDataFileApi:
+    PrefixAimdp + '/UploadOntologyActionDataFile',
   // ===================== 本体行为相关 =====================
   // 创建本体行为
   CreateOntologyActionApi: PrefixAimdp + '/CreateOntologyAction',

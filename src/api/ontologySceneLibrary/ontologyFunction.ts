@@ -3,8 +3,10 @@ import {
   InputType,
   OntologyFunctionDetail,
   OntologyFunctionItem,
-  ParamType
+  ParamType,
+  TestFunction
 } from '@/pages/ontologyScene/types/ontologyFunction';
+import { UploadItem } from '@arco-design/web-react/es/Upload';
 
 // 保存函数（新增/更新）
 export const saveFunction = (data: OntologyFunctionDetail) => {
@@ -30,7 +32,7 @@ export const getFunctionDetail = async (id: string | number) => {
     .post({ id: +id })
     .inRegion()
     .do();
-  return res.data || null;
+  return (res.data as OntologyFunctionDetail) || null;
 };
 
 // 获取函数列表
@@ -46,47 +48,68 @@ export const getFunctionList = async (params: Record<string | number, any>) => {
   };
 };
 // 函数测试
-export const testFunction = (params: Record<string | number, any>) => {
-  // return Promise.resolve({
-  //   items: MockList,
-  //   total: MockList.length
-  // });
-  // return UAPI.RES.GetOntologyFunctionListApi({}).post(params).inRegion().do();
+export const testFunction = async (params: TestFunction) => {
+  const res = await UAPI.RES.ExecuteFunctionTestAPi({})
+    .post(params)
+    .inRegion()
+    .do();
+  return res.data?.[0] || null;
 };
 
-export const getFunctionSDK = () => {
-  const content = `
-# 用 Python 处理数据并返回结果
+// 本体文件上传
+export const uploadFunctionFile = async (file: File | UploadItem) => {
+  const targetFile =
+    (file as UploadItem)?.originFile ?? (file as File | undefined);
 
-在这个示例中，我们演示了一个简单的 Python 函数，用来对输入数据进行处理，并返回最终结果。
+  if (!targetFile) {
+    return Promise.reject(new Error('无效的文件'));
+  }
 
-## 函数说明
+  const res = await UAPI.RES.UploadOntologyActionDataFileApi({})
+    .post({ file: targetFile })
+    .inRegion()
+    // @ts-ignore
+    .withConfig({
+      transformRequest: (data, headers) => {
+        if (data instanceof FormData) return data;
+        const formData = new FormData();
+        const payload = data || {};
 
-- 函数名：\`process_numbers\`
-- 功能：  
-  - 过滤掉负数  
-  - 对剩余数字求平方  
-  - 返回平方和
+        Object.keys(payload).forEach((key) => {
+          const value = payload[key];
+          if (value === undefined || value === null) return;
+          if (value instanceof Blob) {
+            formData.append(key, value);
+            return;
+          }
+          if (Array.isArray(value)) {
+            value.forEach((item) => formData.append(key, item));
+            return;
+          }
+          if (typeof value === 'object') {
+            formData.append(key, JSON.stringify(value));
+            return;
+          }
+          formData.append(key, String(value));
+        });
 
-## Python 示例代码
+        if (headers) {
+          delete headers['Content-Type'];
+          delete headers['content-type'];
+        }
 
-\`\`\`python
-def process_numbers(numbers):
-    """
-    处理数字列表：
-    1. 过滤负数
-    2. 对非负数求平方
-    3. 返回平方和
-    """
-    total = 0
+        return formData;
+      }
+    })
+    .do();
 
-    for n in numbers:
-        if n < 0:
-            continue
-        total += n * n
+  return res.data?.path || '';
+};
 
-    return total
-
-`;
-  return Promise.resolve(content);
+export const getFunctionSDK = async () => {
+  const res = await UAPI.RES.GetOntologyFunctionSDKDocApi({})
+    .post({})
+    .inRegion()
+    .do();
+  return res.data.data ?? '暂无数据';
 };

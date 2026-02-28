@@ -41,7 +41,7 @@ export default function BehaviorActionDetailPage() {
   const { data: actionDetail, loading: actionLoading } = useRequest(
     () => {
       if (actionId === '_NEW_') return Promise.resolve(undefined);
-      return getActionDetail(actionId);
+      return getActionDetail(+actionId);
     },
     {
       refreshDeps: [actionId]
@@ -79,11 +79,10 @@ export default function BehaviorActionDetailPage() {
       return;
     }
     form.setFieldsValue(buildActionSchema(actionDetail));
-  }, [actionDetail]);
-
-  useEffect(() => {
-    form.setFieldsValue(buildFunctionSchema(functionData));
-  }, [functionData]);
+    if (actionDetail.functionId !== functionData?.id) {
+      form.setFieldsValue(buildFunctionSchema(functionData));
+    }
+  }, [actionDetail, functionData]);
 
   const functionHasParam = !!functionData?.params?.filter(
     (p) => p.inputType === InputType.Input

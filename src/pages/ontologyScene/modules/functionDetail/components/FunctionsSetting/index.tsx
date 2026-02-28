@@ -29,14 +29,23 @@ import {
 } from '@/pages/ontologyScene/modules/functionDetail/components';
 import {
   OntologyFunctionParam,
+  OntologyFunctionSchema,
   OutputTypeOptions,
   ParamType,
   UiType
 } from '@/pages/ontologyScene/types/ontologyFunction';
 import classNames from 'classnames';
-import { getFunctionSDK } from '@/api/ontologySceneLibrary/ontologyFunction';
+import {
+  getFunctionSDK,
+  testFunction
+} from '@/api/ontologySceneLibrary/ontologyFunction';
 import { ResizeBoxWithCursorChange } from '@/pages/ontologyScene/componens';
 import { isNil } from 'lodash-es';
+import { buildTestFunctionData } from '@/pages/ontologyScene/modules/functionDetail/utils';
+import { useParams } from 'react-router-dom';
+import { UploadItem } from '@arco-design/web-react/es/Upload';
+import { getBehaviorLogDetail } from '@/api/behaviorTest';
+import { BehaviorLogItem } from '@/pages/ontologyScene/modules/behaviorLog/types';
 
 export const FunctionsSetting = () => {
   const { form, disabled: readonly, isSubmitting } = Form.useFormContext();
@@ -47,14 +56,27 @@ export const FunctionsSetting = () => {
   const [testIng, setTestIng] = useState(false);
 
   const disabled = readonly || testIng;
+  const { id: OSid } = useParams<Record<string, string>>();
 
-  const inputParams: OntologyFunctionParam[] = Form.useWatch('input', form);
+  const [testingFunction, setTestingFunction] = useState<number>();
 
-  const testAble = useMemo(() => {
-    return inputParams?.every(
-      ({ uiTypeAndValue }) => !isNil(uiTypeAndValue?.paramValue)
-    );
-  }, [inputParams]);
+  // 轮询获取运行详情
+  const { data: runLogInfo, cancel } = useRequest(
+    () => {
+      return getBehaviorLogDetail({ id: testingFunction! }).then((res) => {
+        return res.data as BehaviorLogItem;
+      });
+    },
+    {
+      ready: !isNil(testingFunction),
+      pollingInterval: 3000,
+      refreshDeps: [testingFunction],
+      onSuccess(data: BehaviorLogItem) {
+        if (data.run_status !== 1) cancel();
+        setTestIng(data.run_status === 1);
+      }
+    }
+  );
 
   const { data: content, loading: SDKLoading } = useRequest(() => {
     return getFunctionSDK();
@@ -82,8 +104,17 @@ export const FunctionsSetting = () => {
   };
 
   const handleTest = () => {
-    Message.success('开始测试');
-    setTestIng(true);
+    form
+      .validate()
+      .then((res: Required<OntologyFunctionSchema>) => {
+        const functionTest = buildTestFunctionData(res);
+        testFunction({ ...functionTest, id: +OSid }).then((res) => {
+          if (isNil(res)) return;
+          setTestingFunction(res);
+          setTestIng(true);
+        });
+      })
+      .catch(console.error);
   };
   const handleStopTest = () => {
     setTimeout(() => {
@@ -134,8 +165,32 @@ export const FunctionsSetting = () => {
                             <Input placeholder={''} disabled={disabled} />
                           </Form.Item>
                           <Form.Item
-                            className={'mb-0 flex-1'}
+                            className={'mb-0 flex-1 overflow-hidden'}
                             field={`${field}.uiTypeAndValue`}
+                            rules={[
+                              {
+                                validateTrigger: 'onFinish',
+                                validator(
+                                  value: OntologyFunctionParam['uiTypeAndValue'],
+                                  onError
+                                ) {
+                                  const { uiType, paramValue } = value!;
+                                  if (isNil(paramValue)) {
+                                    return onError('请填写参数值');
+                                  }
+                                  const [dataType] = uiType!.split('_');
+                                  if (dataType === ParamType.Attachment) {
+                                    if (
+                                      (paramValue as UploadItem[]).some(
+                                        ({ status }) => status === 'error'
+                                      )
+                                    ) {
+                                      onError('文件上传失败，请重新上传');
+                                    }
+                                  }
+                                }
+                              }
+                            ]}
                           >
                             <DataWithUiSelect disabled={disabled} />
                           </Form.Item>
@@ -208,7 +263,7 @@ export const FunctionsSetting = () => {
                               key === f.key ? [] : `${f.field}.name`
                             )}
                           >
-                            <Input placeholder={''} />
+                            <Input placeholder={''} disabled={disabled} />
                           </Form.Item>
                           <Form.Item
                             className={`mb-0  flex-1`}
@@ -217,11 +272,13 @@ export const FunctionsSetting = () => {
                             <SelectWithNoData
                               placeholder={''}
                               options={OutputTypeOptions}
+                              disabled={disabled}
                             />
                           </Form.Item>
                           <IconDelete
                             className={`mt-2 text-[16px] hover:cursor-pointer`}
                             onClick={() => {
+                              if (disabled) return;
                               remove(index);
                               setTimeout(() => {
                                 form
@@ -239,6 +296,7 @@ export const FunctionsSetting = () => {
                       type={'text'}
                       icon={<IconPlus />}
                       className={'h-auto pl-0'}
+                      disabled={disabled}
                       onClick={() => {
                         add({
                           name: `var_${fields.length + 1}`,
@@ -295,7 +353,6 @@ export const FunctionsSetting = () => {
           <Button
             icon={testIng ? <IconRecordStop /> : <IconPlayArrowFill />}
             size={'mini'}
-            disabled={!testAble}
             onClick={testIng ? handleStopTest : handleTest}
           >
             {testIng ? '停止运行' : '运行'}
@@ -307,6 +364,8 @@ export const FunctionsSetting = () => {
             className={classNames({
               'hidden-border': showDoc
             })}
+            runInfo={runLogInfo}
+            disabled={disabled}
           />
         </Form.Item>
       </div>
