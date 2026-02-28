@@ -3,6 +3,9 @@ import { UiType } from '@/pages/ontologyScene/types/ontologyFunction';
 
 // 对象类型名称缓存
 const objectTypeNameCache: Record<number, string> = {};
+// Promise 缓存，避免重复请求
+const objectTypeNamePromiseCache: Record<number, Promise<string> | undefined> =
+  {};
 
 /**
  * 获取对象类型名称
@@ -12,38 +15,59 @@ const objectTypeNameCache: Record<number, string> = {};
 export const getObjectTypeName = async (
   objectTypeId: number
 ): Promise<string> => {
-  // 如果缓存中有，直接返回
+  // 如果缓存中有结果，直接返回
   if (objectTypeNameCache[objectTypeId]) {
-    return objectTypeNameCache[objectTypeId];
+    return Promise.resolve(objectTypeNameCache[objectTypeId]);
   }
 
-  try {
-    // 动态导入 API 函数以避免循环依赖
-    const { listOntologyObjectType } = await import(
-      '@/api/ontologySceneLibrary/objectType'
-    );
+  // 如果正在请求中，返回同一个 Promise
+  const cachedPromise = objectTypeNamePromiseCache[objectTypeId];
+  if (cachedPromise) {
+    return cachedPromise;
+  }
 
-    const response = await listOntologyObjectType({
-      pageNo: 1,
-      pageSize: 100
-    });
+  // 创建新的请求 Promise
+  const promise = (async () => {
+    try {
+      // 动态导入 API 函数以避免循环依赖
+      const { listOntologyObjectType } = await import(
+        '@/api/ontologySceneLibrary/objectType'
+      );
 
-    if (response.status === 200 && response.data?.result) {
-      // 缓存所有对象类型名称
-      response.data.result.forEach((item) => {
-        if (item.id && item.name) {
-          objectTypeNameCache[item.id] = item.name;
-        }
+      const response = await listOntologyObjectType({
+        pageNo: 1,
+        pageSize: 100
       });
 
-      // 返回目标对象类型名称
-      return objectTypeNameCache[objectTypeId] || String(objectTypeId);
-    }
-  } catch (error) {
-    console.error('获取对象类型名称失败:', error);
-  }
+      if (response.status === 200 && response.data?.result) {
+        // 缓存所有对象类型名称
+        response.data.result.forEach((item) => {
+          if (item.id && item.name) {
+            objectTypeNameCache[item.id] = item.name;
+          }
+        });
 
-  return String(objectTypeId);
+        // 返回目标对象类型名称
+        const name = objectTypeNameCache[objectTypeId] || String(objectTypeId);
+
+        // 清除 Promise 缓存
+        delete objectTypeNamePromiseCache[objectTypeId];
+
+        return name;
+      }
+    } catch (error) {
+      console.error('获取对象类型名称失败:', error);
+      // 清除 Promise 缓存
+      delete objectTypeNamePromiseCache[objectTypeId];
+    }
+
+    return String(objectTypeId);
+  })();
+
+  // 缓存 Promise
+  objectTypeNamePromiseCache[objectTypeId] = promise;
+
+  return promise;
 };
 
 /**

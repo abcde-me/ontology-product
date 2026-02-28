@@ -30,7 +30,13 @@ export const renderComponentByUiType = (type: UiType) => {
     case UiType.Switch:
       return <Switch />;
     case UiType.Date:
-      return <DatePicker className={'min-w-[160px]'} showTime={false} />;
+      return (
+        <DatePicker
+          className={'min-w-[160px]'}
+          showTime={false}
+          getPopupContainer={(node) => node.parentElement || document.body}
+        />
+      );
     case UiType.Uploader:
       return (
         <Upload
@@ -46,7 +52,12 @@ export const renderComponentByUiType = (type: UiType) => {
     case UiType.Timestamp:
       return <DateTimePicker />;
     case UiType.ObjectOne:
-      return <ObjectTypeSelect placeholder={'请选择对象类型'} />;
+      return (
+        <ObjectTypeSelect
+          placeholder={'请选择对象类型'}
+          getPopupContainer={(node) => node.parentElement || document.body}
+        />
+      );
     case UiType.ObjectSet:
       return <ObjectSet />;
     default:
