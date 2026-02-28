@@ -1,7 +1,8 @@
 import React from 'react';
-import { Modal, Message, Tooltip } from '@arco-design/web-react';
+import { Modal, Tooltip } from '@arco-design/web-react';
 import { OrchestrationNode as OrchestrationNodeType } from '../../types';
 import { useBusinessStore } from '../../store/businessStore';
+import { formatParamDisplayValue } from './utils';
 import DeleteSvg from '@/assets/benti/delete.svg';
 
 interface OrchestrationNodeProps {
@@ -10,6 +11,41 @@ interface OrchestrationNodeProps {
   onClick: () => void;
   onDelete: () => void;
 }
+
+// 参数显示项组件 - 处理异步显示值
+interface ParamDisplayItemProps {
+  paramName: string;
+  displayValueOrPromise: string | Promise<string>;
+}
+
+const ParamDisplayItem: React.FC<ParamDisplayItemProps> = ({
+  paramName,
+  displayValueOrPromise
+}) => {
+  const [displayValue, setDisplayValue] = React.useState<string>('');
+
+  React.useEffect(() => {
+    if (typeof displayValueOrPromise === 'string') {
+      setDisplayValue(displayValueOrPromise);
+    } else {
+      // 如果是 Promise，等待解析
+      displayValueOrPromise.then(setDisplayValue);
+    }
+  }, [displayValueOrPromise]);
+
+  return (
+    <div className="flex flex-col gap-1">
+      {/* Label */}
+      <span className="text-[13px] font-semibold text-[rgba(15,19,31,1)]">
+        {paramName}
+      </span>
+      {/* Value */}
+      <div className="rounded bg-[#F7F8FA] px-3 py-2 text-[13px] font-normal text-[#86909C]">
+        {displayValue || '加载中...'}
+      </div>
+    </div>
+  );
+};
 
 export const OrchestrationNode: React.FC<OrchestrationNodeProps> = ({
   node,
@@ -75,39 +111,17 @@ export const OrchestrationNode: React.FC<OrchestrationNodeProps> = ({
         <div className="mt-2 flex flex-col gap-3">
           {node.behavior.params.map((param) => {
             const value = config[param.code];
-
-            // 判断是否已配置
-            let isUnconfigured =
-              value === undefined || value === null || value === '';
-
-            // 对于布尔值（Switch），false 也是有效配置
-            if (param.uiType === 'switch') {
-              isUnconfigured = value === undefined || value === null;
-            }
-
-            // 格式化显示值
-            let displayValue = '未配置';
-            if (!isUnconfigured) {
-              if (typeof value === 'boolean') {
-                displayValue = value ? '是' : '否';
-              } else if (Array.isArray(value)) {
-                displayValue = value.join(', ');
-              } else {
-                displayValue = String(value);
-              }
-            }
+            const displayValueOrPromise = formatParamDisplayValue(
+              value,
+              param.uiType
+            );
 
             return (
-              <div key={param.code} className="flex flex-col gap-1">
-                {/* Label */}
-                <span className="text-[13px] font-semibold text-[rgba(15,19,31,1)]">
-                  {param.name}
-                </span>
-                {/* Value */}
-                <div className="rounded bg-[#F7F8FA] px-3 py-2 text-[13px] font-normal text-[#86909C]">
-                  {displayValue}
-                </div>
-              </div>
+              <ParamDisplayItem
+                key={param.code}
+                paramName={param.name}
+                displayValueOrPromise={displayValueOrPromise}
+              />
             );
           })}
         </div>
