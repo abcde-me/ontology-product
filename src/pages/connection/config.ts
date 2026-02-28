@@ -20,7 +20,7 @@ export const DATABASE_TYPE_ENUM = [
     value: 'GaussDB'
   },
   {
-    label: '达梦数据库',
+    label: '达梦',
     value: 'DM'
   }
 ];
