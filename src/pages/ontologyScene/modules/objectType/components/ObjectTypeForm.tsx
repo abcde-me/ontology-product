@@ -49,7 +49,7 @@ import {
   DATA_SOURCE_TYPE,
   DataSourceType
 } from '@/pages/ontologyScene/common/constants';
-import IconSelector from '@/pages/ontologyScene/componens/IconSelector';
+import ObjectTypeIconSelector from './ObjectTypeIconSelector';
 import { EllipsisPopover } from '@ceai-front/arco-material';
 import { PrefixAimdp } from '@/api/endpoints';
 
@@ -1018,7 +1018,7 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
             </FormItem>
 
             <FormItem label="图标：" field="icon">
-              <IconSelector
+              <ObjectTypeIconSelector
                 initialValue={selectedIcon}
                 onChange={handleIconChange}
                 options={OBJECT_TYPE_ICON_OPTIONS}

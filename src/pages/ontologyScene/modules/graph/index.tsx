@@ -7,7 +7,12 @@ import {
 } from '@ceai-front/workflow';
 import '@ceai-front/workflow/dist/es/ai-workflow.css';
 import { MyNode, MyNodePanel, MyNodeDefault } from './nodes';
-import { getWorkflow, createWorkflow, updateWorkflow } from './common/api';
+import {
+  getWorkflow,
+  createWorkflow,
+  updateWorkflow,
+  setDraft
+} from './common/api';
 import { getOntologyTopology } from '@/api/ontologySceneLibrary/graph';
 import dagre from '@dagrejs/dagre';
 import type { GetOntologyTopologyResponse } from '@/types/graphApi';
@@ -180,6 +185,12 @@ export default function OntologySceneGraph() {
     (!topologyData.edges || topologyData.edges.length === 0);
 
   useEffect(() => {
+    // 重置 loading 状态和拓扑数据
+    setLoading(true);
+    setTopologyData(null);
+    // 清除之前的 draft 缓存，避免显示旧数据
+    setDraft(null);
+
     // 获取本体拓扑数据
     getOntologyTopology({
       id: Number(OSId)
@@ -195,7 +206,7 @@ export default function OntologySceneGraph() {
       .finally(() => {
         setLoading(false);
       });
-  }, []);
+  }, [OSId]);
 
   const nodesReadonlyChecker = useCallback(() => {
     return true;
