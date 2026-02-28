@@ -3,7 +3,8 @@ import {
   OntologyActionParam,
   RuleName,
   TYPE2COMP_OPTIONS,
-  TYPE2RULE_TYPES
+  TYPE2RULE_TYPES,
+  UI_TYPE_LABEL
 } from '@/pages/ontologyScene/types/behaviorActions';
 import styles from './index.module.scss';
 import {
@@ -23,6 +24,8 @@ import {
 } from '@/pages/ontologyScene/types/ontologyFunction';
 import { getActionDetail } from '@/api/ontologySceneLibrary/ontologyAction';
 import ObjectTypeTag from '../../../../componens/ObjectTypeTag';
+import NoDataEmpty from '@/components/NoDataEmpty';
+import { NoDataCard } from '@ceai-front/arco-material';
 
 interface IProps {
   show: boolean;
@@ -85,7 +88,7 @@ export const BehaviorDetail = (props: IProps) => {
       key: 'uiType',
       width: 160,
       render: (type: UiType = UiType.Input) => {
-        return type;
+        return UI_TYPE_LABEL[type];
       }
     }
   ];
@@ -140,7 +143,7 @@ export const BehaviorDetail = (props: IProps) => {
                   ontologyObjectTypeName={actionDetail?.objectTypeName || '-'}
                   ontologyObjectTypeId={String(
                     actionDetail?.ontologyObjectTypeId ||
-                      actionDetail?.objectTypeID ||
+                      actionDetail?.objectTypeId ||
                       ''
                   )}
                   onClick={() => {}}
@@ -215,6 +218,7 @@ export const BehaviorDetail = (props: IProps) => {
                 data={actionDetail?.params || []}
                 columns={paramColumns}
                 border={false}
+                noDataElement={<NoDataCard title="暂无数据" type={'global'} />}
               />
             </div>
           )}
