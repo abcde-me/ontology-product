@@ -2,7 +2,7 @@ import React from 'react';
 import { CanvasHeader } from '../CanvasHeader';
 import { OrchestrationCanvas } from '../OrchestrationCanvas';
 
-export const MiddlePanel: React.FC = () => {
+export const MiddlePanel: React.FC = React.memo(() => {
   return (
     <div className="flex h-full w-full flex-col">
       <CanvasHeader />
@@ -11,4 +11,4 @@ export const MiddlePanel: React.FC = () => {
       </div>
     </div>
   );
-};
+});

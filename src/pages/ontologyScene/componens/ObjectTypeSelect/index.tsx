@@ -23,6 +23,8 @@ export interface ObjectTypeSelectProps {
   allowClear?: boolean;
   /** 标签文本 */
   label?: string;
+  /** 下拉菜单挂载的容器 */
+  getPopupContainer?: (node: HTMLElement) => HTMLElement;
 }
 
 /**
@@ -37,7 +39,8 @@ const ObjectTypeSelect: React.FC<ObjectTypeSelectProps> = ({
   className = '',
   ontologyModelID,
   allowClear = true,
-  label = ''
+  label = '',
+  getPopupContainer
 }) => {
   const [loading, setLoading] = useState(false);
   const [objectTypeList, setObjectTypeList] = useState<ObjectType[]>([]);
@@ -127,6 +130,7 @@ const ObjectTypeSelect: React.FC<ObjectTypeSelectProps> = ({
         allowClear={allowClear}
         loading={loading}
         showSearch
+        getPopupContainer={getPopupContainer}
         filterOption={(inputValue, option: any) => {
           const optionValue = option?.value ?? option;
           const item = objectTypeList.find((obj) => obj.id === optionValue);
