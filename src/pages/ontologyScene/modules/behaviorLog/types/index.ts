@@ -63,7 +63,7 @@ export interface BehaviorLogListParams {
   type: 'action' | 'function';
   sources?: string[]; // 来源过滤
   run_status_list?: number[]; // 执行状态过滤列表
-  associated_object_type_list?: string[]; // 对象类型过滤
+  associated_object_type_list?: string[]; // 对象类型过滤（传给接口的参数名）
   sort_by?: string; // 排序字段
   sort?: 'asc' | 'desc'; // 排序方向
 }
