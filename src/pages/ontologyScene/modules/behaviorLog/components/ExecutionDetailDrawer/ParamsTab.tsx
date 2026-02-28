@@ -1,8 +1,45 @@
-import React from 'react';
-import { Table, TableColumnProps } from '@arco-design/web-react';
+import React, { useRef, useState, useEffect } from 'react';
+import { Table, TableColumnProps, Tooltip } from '@arco-design/web-react';
 import { NoDataCard, EllipsisPopover } from '@ceai-front/arco-material';
 import { ObjectTypeTagList } from '@/pages/ontologyScene/componens';
 import { ParamItem, OutputParamItem } from './types';
+
+// 溢出检测组件
+const EllipsisTextWithTooltip: React.FC<{ text: string }> = ({ text }) => {
+  const textRef = useRef<HTMLDivElement>(null);
+  const [showTooltip, setShowTooltip] = useState(false);
+
+  const handleMouseEnter = () => {
+    const element = textRef.current;
+    if (element) {
+      const isOverflow = element.scrollWidth > element.clientWidth;
+      setShowTooltip(isOverflow);
+    }
+  };
+
+  const handleMouseLeave = () => {
+    setShowTooltip(false);
+  };
+
+  return (
+    <Tooltip content={text} popupVisible={showTooltip}>
+      <div
+        ref={textRef}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+        style={{
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+          whiteSpace: 'nowrap',
+          width: '100%',
+          cursor: 'default'
+        }}
+      >
+        {text}
+      </div>
+    </Tooltip>
+  );
+};
 
 interface ParamsTabProps {
   params: ParamItem[];
@@ -29,6 +66,9 @@ export const ParamsTab: React.FC<ParamsTabProps> = ({
     {
       title: '值',
       dataIndex: 'value',
+      ellipsis: true,
+      tooltip: true,
+      width: 300,
       render: (value, record) => {
         // 如果数据类型是 ObjectSet 或 Attachment，使用 ObjectTypeTagList 渲染
         if (record.type === 'ObjectSet' || record.type === 'Attachment') {
@@ -55,14 +95,18 @@ export const ParamsTab: React.FC<ParamsTabProps> = ({
         }
 
         // 其他类型的值渲染
-        if (typeof value === 'object') {
+        if (typeof value === 'object' && value !== null) {
           return (
             <pre className="text-xs">{JSON.stringify(value, null, 2)}</pre>
           );
         }
 
-        const stringValue = String(value);
-        return <EllipsisPopover value={stringValue} isEdit={false} />;
+        const stringValue = value ? String(value) : '-';
+        return stringValue !== '-' ? (
+          <EllipsisTextWithTooltip text={stringValue} />
+        ) : (
+          <span>-</span>
+        );
       }
     }
   ];
