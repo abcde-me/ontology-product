@@ -143,6 +143,35 @@ function layoutNodesWithDagre(
     return node;
   });
 
+  // 计算所有节点的边界框，用于X轴方向居中显示
+  if (layoutedNodes.length > 0) {
+    const minX = Math.min(...layoutedNodes.map((node) => node.position.x));
+    const maxX = Math.max(
+      ...layoutedNodes.map((node) => node.position.x + NODE_WIDTH)
+    );
+
+    // 计算图谱在X轴方向的中心点
+    const graphCenterX = (minX + maxX) / 2;
+
+    // 计算X轴偏移量，使图谱中心移动到画布中心 (X=0)
+    const centerOffsetX = graphCenterX;
+
+    // 调整所有节点位置，使图谱在X轴方向居中
+    const centeredNodes = layoutedNodes.map((node) => ({
+      ...node,
+      position: {
+        x: node.position.x + centerOffsetX,
+        y: node.position.y // Y轴位置保持不变
+      }
+    }));
+
+    return {
+      nodes: centeredNodes,
+      edges: workflowEdges,
+      draft: true
+    };
+  }
+
   return {
     nodes: layoutedNodes,
     edges: workflowEdges,
