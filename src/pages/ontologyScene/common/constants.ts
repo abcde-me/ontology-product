@@ -13,9 +13,23 @@ import OperationsMaintenanceSceneIcon from '@/pages/ontologyScene/assets/operati
 import InformationSceneIcon from '@/pages/ontologyScene/assets/information-scene.png';
 import SecurityDefenseSceneIcon from '@/pages/ontologyScene/assets/security-defense-scene.png';
 import CommunicationSceneIcon from '@/pages/ontologyScene/assets/communication-scene.png';
-import ObjectTypeIcon1 from '@/pages/ontologyScene/assets/object-type1.svg';
-import ObjectTypeIcon2 from '@/pages/ontologyScene/assets/object-type2.svg';
-import ObjectTypeIcon3 from '@/pages/ontologyScene/assets/object-type3.svg';
+import ObjectTypeIcon1 from '@/pages/ontologyScene/assets/object-type-one.svg';
+import ObjectTypeIcon2 from '@/pages/ontologyScene/assets/object-type-two.svg';
+import ObjectTypeIcon3 from '@/pages/ontologyScene/assets/object-type-three.svg';
+import ObjectTypeIcon4 from '@/pages/ontologyScene/assets/object-type-four.svg';
+import ObjectTypeIcon5 from '@/pages/ontologyScene/assets/object-type-five.svg';
+import ObjectTypeIcon6 from '@/pages/ontologyScene/assets/object-type-six.svg';
+import ObjectTypeFighter from '@/pages/ontologyScene/assets/object-type-fighter.svg';
+import ObjectTypeDrone from '@/pages/ontologyScene/assets/object-type-drone.svg';
+import ObjectTypeCameraPoint from '@/pages/ontologyScene/assets/object-type-camera-point.svg';
+import ObjectTypePerson from '@/pages/ontologyScene/assets/object-type-person.svg';
+import ObjectTypeIntelligence from '@/pages/ontologyScene/assets/object-type-intelligence.svg';
+import ObjectTypeCivilAviation from '@/pages/ontologyScene/assets/object-type-civil-aviation.svg';
+import ObjectTypeCoalMine from '@/pages/ontologyScene/assets/object-type-coal-mine.svg';
+import ObjectTypeWarship from '@/pages/ontologyScene/assets/object-type-warship.svg';
+import ObjectTypeBuilding from '@/pages/ontologyScene/assets/object-type-building.svg';
+import ObjectTypeLocation from '@/pages/ontologyScene/assets/object-type-location.svg';
+import ObjectTypeOffice from '@/pages/ontologyScene/assets/object-type-office.svg';
 import AttachmentIcon from '@/pages/ontologyScene/assets/attachement-icon.svg'; // 注意文件名拼写
 import { SyncStatus } from '@/types/graphApi';
 
@@ -41,14 +55,25 @@ export const ICON_OPTIONS = [
   { value: 'communication-scene', icon: CommunicationSceneIcon } // 通讯场景
 ];
 
-// 对象类型预定义图标选项（7个图标，包含附件专用图标）
+// 对象类型预定义图标选项
 export const OBJECT_TYPE_ICON_OPTIONS = [
-  { value: 'object-type-1', icon: ObjectTypeIcon1 },
-  { value: 'object-type-2', icon: ObjectTypeIcon2 },
-  { value: 'object-type-3', icon: ObjectTypeIcon3 },
-  { value: 'object-type-4', icon: ObjectTypeIcon1 },
-  { value: 'object-type-5', icon: ObjectTypeIcon2 },
-  { value: 'object-type-6', icon: ObjectTypeIcon3 },
+  { value: 'object-type-1', icon: ObjectTypeIcon1 }, // 通用-1
+  { value: 'object-type-2', icon: ObjectTypeIcon2 }, // 通用-2
+  { value: 'object-type-3', icon: ObjectTypeIcon3 }, // 通用-3
+  { value: 'object-type-4', icon: ObjectTypeIcon4 }, // 通用-4
+  { value: 'object-type-5', icon: ObjectTypeIcon5 }, // 通用-5
+  { value: 'object-type-6', icon: ObjectTypeIcon6 }, // 通用-6
+  { value: 'object-type-fighter', icon: ObjectTypeFighter }, // 战斗机
+  { value: 'object-type-drone', icon: ObjectTypeDrone }, // 无人机
+  { value: 'object-type-camera-point', icon: ObjectTypeCameraPoint }, // 摄像点位
+  { value: 'object-type-person', icon: ObjectTypePerson }, // 人员
+  { value: 'object-type-intelligence', icon: ObjectTypeIntelligence }, // 情报
+  { value: 'object-type-civil-aviation', icon: ObjectTypeCivilAviation }, // 民航
+  { value: 'object-type-coal-mine', icon: ObjectTypeCoalMine }, // 煤矿
+  { value: 'object-type-warship', icon: ObjectTypeWarship }, // 军舰
+  { value: 'object-type-building', icon: ObjectTypeBuilding }, // 建筑
+  { value: 'object-type-location', icon: ObjectTypeLocation }, // 地点
+  { value: 'object-type-office', icon: ObjectTypeOffice }, // 办公
   { value: 'attachment-icon', icon: AttachmentIcon } // 附件专用图标
 ];
 
