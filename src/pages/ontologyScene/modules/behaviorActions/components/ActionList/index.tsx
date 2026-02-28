@@ -114,7 +114,7 @@ export const ActionList = (props: {
               ''
           )}
           onClick={() => {
-            setCurrentObj(actionDetail.objectTypeId);
+            setCurrentObj((actionDetail.objectTypeId || '').toString());
           }}
           className={styles['obj-tag']}
         />
