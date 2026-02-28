@@ -55,7 +55,7 @@ const useConfig = (id: string, payload: VideoParserNodeType) => {
         )
           ? ''
           : `${fields.activity_mode_num}`;
-        ((draft.is_poly_orbit = fields.audio_pret.includes('orbit') ? 2 : 1),
+        ((draft.is_poly_orbit = fields.audio_pret.includes('enhance') ? 2 : 1),
           (draft.is_denoise = fields.audio_pret.includes('denoise') ? 2 : 1),
           (draft.audio_pret = fields.audio_pret));
       });

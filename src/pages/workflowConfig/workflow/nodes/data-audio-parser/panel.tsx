@@ -89,8 +89,8 @@ const Panel: FC<NodePanelProps<AudioParserNodeType>> = ({ id, data }) => {
         >
           <Checkbox.Group
             options={[
-              { label: '降噪', value: 'enhance' },
-              { label: '语音增强', value: 'denoist' }
+              { label: '降噪', value: 'denoise' },
+              { label: '语音增强', value: 'enhance' }
             ]}
           />
         </FormItem>
