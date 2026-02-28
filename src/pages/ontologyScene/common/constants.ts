@@ -16,6 +16,7 @@ import CommunicationSceneIcon from '@/pages/ontologyScene/assets/communication-s
 import ObjectTypeIcon1 from '@/pages/ontologyScene/assets/object-type1.svg';
 import ObjectTypeIcon2 from '@/pages/ontologyScene/assets/object-type2.svg';
 import ObjectTypeIcon3 from '@/pages/ontologyScene/assets/object-type3.svg';
+import AttachmentIcon from '@/pages/ontologyScene/assets/attachement-icon.svg'; // 注意文件名拼写
 import { SyncStatus } from '@/types/graphApi';
 
 // 本体场景预定义图标选项（15个图标，对应图片中的所有场景）
@@ -40,14 +41,15 @@ export const ICON_OPTIONS = [
   { value: 'communication-scene', icon: CommunicationSceneIcon } // 通讯场景
 ];
 
-// 对象类型预定义图标选项（6个图标，用于2行3列网格布局）
+// 对象类型预定义图标选项（7个图标，包含附件专用图标）
 export const OBJECT_TYPE_ICON_OPTIONS = [
   { value: 'object-type-1', icon: ObjectTypeIcon1 },
   { value: 'object-type-2', icon: ObjectTypeIcon2 },
   { value: 'object-type-3', icon: ObjectTypeIcon3 },
   { value: 'object-type-4', icon: ObjectTypeIcon1 },
   { value: 'object-type-5', icon: ObjectTypeIcon2 },
-  { value: 'object-type-6', icon: ObjectTypeIcon3 }
+  { value: 'object-type-6', icon: ObjectTypeIcon3 },
+  { value: 'attachment-icon', icon: AttachmentIcon } // 附件专用图标
 ];
 
 // 对象类型同步状态配置

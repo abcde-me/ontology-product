@@ -1,6 +1,5 @@
 import React from 'react';
 import { EllipsisPopover } from '@ceai-front/arco-material';
-import { IconFile } from '@arco-design/web-react/icon';
 import { OBJECT_TYPE_ICON_OPTIONS } from '@/pages/ontologyScene/common/constants';
 
 export interface ObjectTypeTagProps {

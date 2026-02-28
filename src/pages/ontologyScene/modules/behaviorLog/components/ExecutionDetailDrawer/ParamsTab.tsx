@@ -1,6 +1,6 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useRef, useState } from 'react';
 import { Table, TableColumnProps, Tooltip } from '@arco-design/web-react';
-import { NoDataCard, EllipsisPopover } from '@ceai-front/arco-material';
+import { NoDataCard } from '@ceai-front/arco-material';
 import { ObjectTypeTagList } from '@/pages/ontologyScene/componens';
 import { ParamItem, OutputParamItem } from './types';
 
@@ -84,7 +84,11 @@ export const ParamsTab: React.FC<ParamsTabProps> = ({
             ontologyObjectTypeName:
               item.name || item.ontologyObjectTypeName || '',
             ontologyObjectTypeId: item.id || item.ontologyObjectTypeId,
-            ontologyObjectTypeIcon: item.icon || item.ontologyObjectTypeIcon,
+            // 如果是 Attachment 类型，使用特殊的 icon 值，否则使用原有的 icon
+            ontologyObjectTypeIcon:
+              record.type === 'Attachment'
+                ? 'attachment-icon' // 为 Attachment 类型设置特殊的 icon 标识
+                : item.icon || item.ontologyObjectTypeIcon,
             onClick: () => {
               // 可以添加点击事件，跳转到对象类型详情
               console.log('Click object type:', item);
