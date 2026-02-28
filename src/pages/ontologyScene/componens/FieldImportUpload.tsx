@@ -5,6 +5,7 @@ import { IconUpload, IconDownload } from '@arco-design/web-react/icon';
 import { UploadStatus } from '../types/objectType';
 import { downloadDataAssetFieldsTemplate } from '@/api/dataAsset';
 import { useUserInfoStore } from '@/store/userInfoStore';
+import { getTemplateFile } from '@/api/ontologySceneLibrary/objectType';
 
 interface FieldImportUploadProps {
   onFileChange: (fileData: any) => void;
@@ -115,7 +116,7 @@ const FieldImportUpload: React.FC<FieldImportUploadProps> = ({
 
   const handleDownloadTemplate = async () => {
     try {
-      const res = await downloadDataAssetFieldsTemplate();
+      const res = await getTemplateFile({ file_name: 'object_type' });
 
       if (res?.status !== 200 || res?.code !== '') {
         Message.error(res.message ?? '下载模板失败');
@@ -143,7 +144,7 @@ const FieldImportUpload: React.FC<FieldImportUploadProps> = ({
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `标准模板.csv`;
+      a.download = `example.csv`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
@@ -208,10 +209,16 @@ const FieldImportUpload: React.FC<FieldImportUploadProps> = ({
             <span className="text-[14px] text-[var(--color-text-1)]">
               点击或拖拽文件到此处上传
             </span>
-            <span className="text-[12px] text-[var(--color-text-4)]">
-              {fileType === 'csv'
-                ? '仅支持上传UTF-8编码格式的文件,文件大小不超过500MB'
-                : '支持CSV格式文件'}
+            <span className="text-center text-[12px] text-[var(--color-text-4)]">
+              {fileType === 'csv' ? (
+                <>
+                  仅支持上传UTF-8编码格式的文件,文件大小不超过500MB;
+                  <br />
+                  文件名支持字母数字下划线组合,列名支持字母数字下划线组合
+                </>
+              ) : (
+                '支持CSV格式文件'
+              )}
             </span>
             {fileType === 'excel' && (
               <span className="text-[12px] text-[var(--color-text-4)]">
@@ -219,23 +226,6 @@ const FieldImportUpload: React.FC<FieldImportUploadProps> = ({
               </span>
             )}
           </div>
-          {/* 下载模板提示 */}
-          {fileType === 'excel' && (
-            <div className="mt-[4px] text-[14px] text-[var(--color-text-2)]">
-              <span>按照格式准备数据，点击</span>
-              <a
-                href="#"
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  handleDownloadTemplate();
-                }}
-                className="text-[#007DFA]"
-              >
-                下载模板
-              </a>
-            </div>
-          )}
           {fileType === 'csv' && (
             <div className="mt-[4px] flex items-center gap-1 text-[14px] text-[var(--color-text-2)]">
               <a

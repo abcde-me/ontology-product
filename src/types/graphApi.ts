@@ -340,7 +340,7 @@ export enum LinkType {
 
 export interface LinkInfo {
   /**
-   * 编码
+   * 链接id
    */
   code?: string;
   /**

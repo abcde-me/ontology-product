@@ -431,3 +431,10 @@ export const listMetadataIcebergTiDBTable = async (
     .inRegion()
     .do();
 };
+
+// 下载标准模版
+export const getTemplateFile = async (params: {
+  file_name: 'link_type' | 'object_type';
+}): Promise<ApiRes<string>> => {
+  return await UAPI.RES.GetTemplateFileApi({}).post(params).inRegion().do();
+};

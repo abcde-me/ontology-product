@@ -50,10 +50,6 @@ export default function OntologySceneObjectTypeEdit() {
 
         const objectType = detailRes.data;
 
-        // 直接使用详情接口返回的物理属性列表
-        const physicalPropertiesList =
-          objectType.ontologyPhysicalPropertiesList || [];
-
         // 根据 sourceType 确定数据源类型
         const dataSourceType =
           objectType.sourceType === SourceType.FILE_UPLOAD
@@ -71,7 +67,8 @@ export default function OntologySceneObjectTypeEdit() {
           originalDbName: objectType.originalDbName || '',
           originalTableName: objectType.originalTableName || '',
           sourceType: objectType.sourceType,
-          ontologyPhysicalPropertiesList: physicalPropertiesList,
+          ontologyPhysicalPropertiesList:
+            objectType.ontologyPhysicalPropertiesList || [],
           _dataSource: {
             type: dataSourceType,
             database:

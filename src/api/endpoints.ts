@@ -781,6 +781,8 @@ export const ModaForgeResourceEndpoints = {
     PrefixAimdp + '/UploadOntologyEntityDataFile',
   // 本体查询iceberg表的字段信息
   ListMetadataIcebergTiDBTableApi: PrefixAimdp + '/ListMetadataIcebergTiDB',
+  // 下载标准模版
+  GetTemplateFileApi: PrefixAimdp + '/GetTemplateFile',
 
   //属性
   // 获取公共属性列表
