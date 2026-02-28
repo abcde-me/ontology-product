@@ -4,30 +4,23 @@ import {
   Form,
   Input,
   Space,
-  Table,
   TableColumnProps,
   Pagination,
   Message,
   Modal
 } from '@arco-design/web-react';
-import { IconPlus, IconSearch, IconFile } from '@arco-design/web-react/icon';
+import { IconPlus, IconSearch } from '@arco-design/web-react/icon';
 import {
   CopyItemIcon,
   DotStatus,
   EllipsisPopover,
-  NoDataCard,
   ProButton,
   SearchTable
 } from '@ceai-front/arco-material';
 import useUrlState from '@ahooksjs/use-url-state';
 import { useHistory, useParams } from 'react-router-dom';
 import { useWorkflowTable } from '../../hooks/useTable';
-import ObjectTypeDetailDrawer, {
-  ObjectTypeDetailData,
-  InstanceItem,
-  AttributeItem,
-  LinkItem
-} from '../../componens/ObjectTypeDetailDrawer';
+import ObjectTypeDetailDrawer from '../../componens/ObjectTypeDetailDrawer';
 import {
   listOntologyObjectType,
   deleteOntologyObjectType
@@ -41,8 +34,6 @@ import {
   OBJECT_TYPE_ICON_OPTIONS
 } from '../../common/constants';
 import dayjs from 'dayjs';
-import { isNil } from 'lodash-es';
-import { OsEmptyStatusWrapper } from '@/pages/ontologyScene/componens';
 
 export default function OntologySceneObjectTypeList() {
   const [form] = Form.useForm();
@@ -317,22 +308,8 @@ export default function OntologySceneObjectTypeList() {
     }
   ];
 
-  // 计算是否为空：当接口返回为空且搜索值不为空时，isEmpty 为 true
-  const isEmpty =
-    !loading &&
-    (!data || data.length === 0) &&
-    (!pagination?.total || pagination.total === 0) &&
-    urlState.search &&
-    urlState.search !== '';
-
   return (
-    <OsEmptyStatusWrapper
-      className={styles['object-type-list']}
-      onCreate={handleCreate}
-      title={'对象类型'}
-      description={'核心数据模型的原子单位,描述系统中可独立存在的实体'}
-      empty={isEmpty}
-    >
+    <div className={styles['object-type-list']}>
       <div>
         <div className="mb-1 font-PingFangSc text-[20px] font-[600] leading-[30px] text-default">
           对象类型
@@ -413,6 +390,6 @@ export default function OntologySceneObjectTypeList() {
           defaultActiveTab={activeTab}
         />
       )}
-    </OsEmptyStatusWrapper>
+    </div>
   );
 }

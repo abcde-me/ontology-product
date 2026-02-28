@@ -9,7 +9,6 @@ import {
   Form,
   Input,
   Space,
-  Table,
   TableColumnProps,
   Pagination,
   Message,
@@ -38,7 +37,6 @@ import { ListOntologyPublicPropertiesReq } from '@/types/attributes';
 import { ObjectTypeTagList } from '@/pages/ontologyScene/componens';
 import ObjectTypeDetailDrawer from '@/pages/ontologyScene/componens/ObjectTypeDetailDrawer';
 import dayjs from 'dayjs';
-import { isNil } from 'lodash-es';
 
 // 公共属性数据接口（保留用于兼容性）
 export interface PublicAttributeItem {
@@ -56,8 +54,6 @@ export interface PublicAttributeItem {
 }
 
 export interface PublicTableProps {
-  /** 空态变化时的回调函数 */
-  onEmptyChange?: (isEmpty: boolean) => void;
   /** total 变化时的回调函数 */
   onTotalChange?: (total: number) => void;
   /** 创建成功时的回调函数 */
@@ -70,10 +66,7 @@ export interface PublicTableRef {
 }
 
 const PublicTable = React.forwardRef<PublicTableRef, PublicTableProps>(
-  (
-    { onEmptyChange, onTotalChange, onCreateSuccess }: PublicTableProps = {},
-    ref
-  ) => {
+  ({ onTotalChange, onCreateSuccess }: PublicTableProps = {}, ref) => {
     const [form] = Form.useForm();
     const [urlState, setUrlState] = useUrlState({ search: '', tab: '' });
 
@@ -172,20 +165,6 @@ const PublicTable = React.forwardRef<PublicTableRef, PublicTableProps>(
       }
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [urlState.search]);
-
-    // 计算空态并通知父组件
-    useEffect(() => {
-      const keyword = form.getFieldValue('keyword');
-      if (onEmptyChange && !loading) {
-        // 只在加载完成后才判断空态，避免加载过程中的误判
-        const isEmpty =
-          (!pagination?.total || pagination.total === 0) &&
-          (!keyword || keyword === '');
-
-        onEmptyChange(isEmpty);
-      }
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [loading, pagination?.total]);
 
     // 当 total 变化时，通知父组件
     useEffect(() => {
