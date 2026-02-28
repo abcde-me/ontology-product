@@ -4,6 +4,7 @@ import {
   DatePicker,
   Input,
   InputNumber,
+  Select,
   Switch,
   Upload
 } from '@arco-design/web-react';
@@ -30,7 +31,22 @@ export const renderComponentByUiType = (type: UiType) => {
     case UiType.InputNumberFloat:
       return <InputNumber placeholder={'请输入'} className={'w-[160px]'} />;
     case UiType.Switch:
-      return <Switch />;
+      return (
+        <Select
+          className={styles['ui-comp']}
+          placeholder={'请选择'}
+          options={[
+            {
+              label: 'true',
+              value: 'true'
+            },
+            {
+              label: 'false',
+              value: 'false'
+            }
+          ]}
+        />
+      );
     case UiType.Date:
       return (
         <DatePicker
