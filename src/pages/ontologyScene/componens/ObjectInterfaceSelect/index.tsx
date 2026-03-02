@@ -293,7 +293,6 @@ export const ObjectInterfaceSelect = (
         onChange={handleValueChange}
         onDropdownVisibleChange={handleDropdownVisibleChange}
         dropdownRender={() => {
-          // debugger;
           // If no object type is selected, show a simple hint
           if (isNil(objectTypeID)) {
             return (

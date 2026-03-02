@@ -11,7 +11,9 @@ import { IconInfoCircle } from '@arco-design/web-react/icon';
 import { FunctionContentDialog } from '@/pages/ontologyScene/modules/behaviorActionDetail/components';
 import { useParams } from 'react-router-dom';
 
-export const FunctionsSelect = (props: CustomFormItemCompProps<string>) => {
+export const FunctionsSelect = (
+  props: CustomFormItemCompProps<number | undefined>
+) => {
   const { value, onChange, disabled } = props;
   const { id: OSId } = useParams<Record<string, string>>();
   const { data: allFunctions = [], loading: functionsLoading } = useRequest(
@@ -43,6 +45,11 @@ export const FunctionsSelect = (props: CustomFormItemCompProps<string>) => {
     }
   );
 
+  const changeFunction = (value: number | undefined) => {
+    const functionData = allFunctions.find((f) => f.id === value);
+    onChange?.(value, functionData);
+  };
+
   return (
     <div className={'flex w-full items-center gap-3'}>
       <Select
@@ -55,7 +62,7 @@ export const FunctionsSelect = (props: CustomFormItemCompProps<string>) => {
         }}
         value={value}
         allowClear
-        onChange={(val) => props.onChange?.(val)}
+        onChange={changeFunction}
       >
         {allFunctions.map((item) => {
           const { value, code, name } = item;

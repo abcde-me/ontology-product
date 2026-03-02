@@ -51,7 +51,7 @@ export const FunctionsSetting = () => {
     useFullscreen(ref);
   const [showDoc, setShowDoc] = useState(false);
 
-  // const { id: OSid } = useParams<Record<string, string>>();
+  const { id: OSid, functionId } = useParams<Record<string, string>>();
 
   const {
     loading: testLoading,
@@ -91,8 +91,10 @@ export const FunctionsSetting = () => {
     form
       .validate()
       .then((res: Required<OntologyFunctionSchema>) => {
-        const functionTest = buildTestFunctionData(res);
-        startTest(functionTest);
+        const functionTest = buildTestFunctionData(res, {
+          id: functionId ? +functionId : undefined
+        });
+        startTest({ ...functionTest, id: +OSid });
       })
       .catch(console.error);
   };

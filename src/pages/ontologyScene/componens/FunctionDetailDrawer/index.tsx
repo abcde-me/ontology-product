@@ -11,17 +11,14 @@ import {
   OntologyFunctionItem,
   OntologyFunctionParam
 } from '@/pages/ontologyScene/types/ontologyFunction';
-import {
-  Empty,
-  Pagination,
-  Table,
-  TableColumnProps
-} from '@arco-design/web-react';
+import { Table, TableColumnProps } from '@arco-design/web-react';
 import styles from './index.module.scss';
-import { CopyItemIcon, SearchTable } from '@ceai-front/arco-material';
+import { useRequest } from 'ahooks';
+import { getFunctionDetail } from '@/api/ontologySceneLibrary/ontologyFunction';
+import { isNil } from 'lodash-es';
 
 interface IProps extends OSDrawerProps {
-  data?: OntologyFunctionItem;
+  data?: number;
 }
 
 interface ParamRow {
@@ -29,7 +26,13 @@ interface ParamRow {
   type: string;
 }
 
-const DEFAULT_PAGE_SIZE = 5;
+const COMMON_PAGINATION = {
+  showJumper: false,
+  showMore: false,
+  sizeCanChange: false,
+  pageSize: 10,
+  simple: true
+};
 
 const INPUT_COLUMNS: TableColumnProps<ParamRow>[] = [
   {
@@ -80,58 +83,30 @@ const splitParams = (params?: OntologyFunctionParam[]) => {
   return { inputParams, outputParams };
 };
 
-const getPagedData = (list: ParamRow[], current: number, pageSize: number) => {
-  const start = (current - 1) * pageSize;
-  return list.slice(start, start + pageSize);
-};
-
 export const FunctionDetailDrawer = (props: IProps) => {
   const { data, className, title, footer, ...drawerProps } = props;
-  // Pagination state for input/output tables is maintained separately.
-  const [inputPagination, setInputPagination] = useState({
-    current: 1,
-    pageSize: DEFAULT_PAGE_SIZE
-  });
-  const [outputPagination, setOutputPagination] = useState({
-    current: 1,
-    pageSize: DEFAULT_PAGE_SIZE
-  });
+
+  const { data: functionData, loading } = useRequest(
+    () => {
+      if (isNil(data)) return Promise.resolve(undefined);
+      return getFunctionDetail(data);
+    },
+    {
+      refreshDeps: [data]
+    }
+  );
 
   const basicInfo = useMemo(() => {
     return {
-      displayName: data?.name || '-',
-      panelId: data?.code || '-',
-      description: data?.description || '-'
+      displayName: functionData?.name || '-',
+      panelId: functionData?.code || '-',
+      description: functionData?.description || '-'
     };
-  }, [data]);
+  }, [functionData]);
 
   const { inputParams, outputParams } = useMemo(() => {
-    return splitParams(data?.params);
-  }, [data]);
-
-  const inputTableData = useMemo(() => {
-    return getPagedData(
-      inputParams,
-      inputPagination.current,
-      inputPagination.pageSize
-    );
-  }, [inputParams, inputPagination]);
-
-  const outputTableData = useMemo(() => {
-    return getPagedData(
-      outputParams,
-      outputPagination.current,
-      outputPagination.pageSize
-    );
-  }, [outputParams, outputPagination]);
-
-  const COMMON_PAGINATION = {
-    showJumper: false,
-    showMore: false,
-    sizeCanChange: false,
-    pageSize: 10,
-    simple: true
-  };
+    return splitParams(functionData?.params);
+  }, [functionData]);
   return (
     <OsDrawer
       {...drawerProps}
@@ -171,7 +146,7 @@ export const FunctionDetailDrawer = (props: IProps) => {
           <Table
             className={styles['detail-table']}
             columns={INPUT_COLUMNS}
-            data={inputTableData}
+            data={inputParams}
             pagination={COMMON_PAGINATION}
             border={false}
           />
@@ -182,7 +157,7 @@ export const FunctionDetailDrawer = (props: IProps) => {
           <div className={styles['section-title']}>输出详情</div>
           <Table
             className={styles['detail-table']}
-            data={outputTableData}
+            data={outputParams}
             columns={OUTPUT_COLUMNS}
             border={false}
             pagination={COMMON_PAGINATION}
@@ -190,7 +165,7 @@ export const FunctionDetailDrawer = (props: IProps) => {
         </div>
         <div className={styles['section']}>
           <div className={styles['section-title']}>函数</div>
-          <PyCodeContent value={data?.content} readOnly />
+          <PyCodeContent value={functionData?.content} readOnly />
         </div>
       </div>
     </OsDrawer>

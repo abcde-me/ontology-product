@@ -9,7 +9,7 @@ import {
 import { UploadItem } from '@arco-design/web-react/es/Upload';
 
 // 保存函数（新增/更新）
-export const saveFunction = (data: OntologyFunctionDetail) => {
+export const saveFunction = (data: Partial<OntologyFunctionDetail>) => {
   // 有 id 走更新，无 id 走新增
   const api = data?.id
     ? UAPI.RES.UpdateOntologyFunctionApi

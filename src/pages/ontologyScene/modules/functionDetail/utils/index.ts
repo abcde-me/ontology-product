@@ -18,6 +18,7 @@ import {
   OntologyFunctionSchema,
   ParamType,
   TestFunction,
+  TestFunctionItem,
   TYPE_MAP
 } from '@/pages/ontologyScene/types/ontologyFunction';
 import { isNil } from 'lodash-es';
@@ -379,26 +380,30 @@ export function buildFunctionDetail(
 /**
  *
  * @param formData
- * @param config 函数测试的基础配置，便于适配 run_type in [function,action]两种情况
+ * @param config
  */
 export const buildTestFunctionData = (
   formData: Required<OntologyFunctionSchema>,
-  config: Partial<TestFunction> = {}
+  config: Record<string, any> = {}
 ): TestFunction => {
   const { content, code, name, description = '', input, output } = formData;
   const res: TestFunction = {
-    logic_function: [code],
-    arguments: [],
-    code,
-    content,
-    name,
-    params: [],
+    list_data: [],
     run_action_with_validate: true,
     run_type: 'function',
-    target: [code],
-    description
+    target: [code]
   };
-  res.params = [input, output].flatMap((params) => {
+  const testData: TestFunctionItem = {
+    arguments: [],
+    code: code,
+    content: content,
+    logic_function: [code],
+    name: name,
+    params: [],
+    description,
+    ...config
+  };
+  testData.params = [input, output].flatMap((params) => {
     return params.map((param, idx) => {
       const { name, type, uiTypeAndValue } = param;
       const base: OntologyFunctionParam = {
@@ -414,7 +419,7 @@ export const buildTestFunctionData = (
             ? uiTypeAndValue.paramValue[0].url
             : uiTypeAndValue.paramValue
         );
-        res.arguments.push({
+        testData.arguments.push({
           name,
           value: paramValue
         });
@@ -425,5 +430,6 @@ export const buildTestFunctionData = (
       return base;
     });
   });
-  return { ...res, ...config };
+  res.list_data.push(testData);
+  return res;
 };

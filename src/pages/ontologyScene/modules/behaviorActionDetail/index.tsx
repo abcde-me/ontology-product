@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import styles from './index.module.scss';
 import { Form, Input, Message, Select } from '@arco-design/web-react';
 import { ProButton } from '@ceai-front/arco-material';
@@ -21,9 +21,15 @@ import {
 } from '@/pages/ontologyScene/modules/behaviorActionDetail/utils';
 import { isNil } from 'lodash-es';
 import { getFunctionDetail } from '@/api/ontologySceneLibrary/ontologyFunction';
-import { InputType } from '@/pages/ontologyScene/types/ontologyFunction';
+import {
+  InputType,
+  OntologyFunctionDetail
+} from '@/pages/ontologyScene/types/ontologyFunction';
 import { IconLeft } from '@arco-design/web-react/icon';
-import { ActionSchema } from '@/pages/ontologyScene/types/behaviorActions';
+import {
+  ActionSchema,
+  BehaviorActionDetail
+} from '@/pages/ontologyScene/types/behaviorActions';
 
 const { TextArea } = Input;
 
@@ -39,13 +45,16 @@ export default function BehaviorActionDetailPage() {
     );
   };
 
+  const [currentAction, setCurrentAction] = useState<BehaviorActionDetail>();
+
   const { data: actionDetail, loading: actionLoading } = useRequest(
     () => {
       if (actionId === '_NEW_') return Promise.resolve(undefined);
       return getActionDetail(+actionId);
     },
     {
-      refreshDeps: [actionId]
+      refreshDeps: [actionId],
+      onSuccess: setCurrentAction
     }
   );
 
@@ -102,6 +111,9 @@ export default function BehaviorActionDetailPage() {
         <Form
           autoComplete={'off'}
           form={form}
+          initialValues={{
+            objectTypeId: -1
+          }}
           labelAlign={'left'}
           disabled={actionLoading}
           onValuesChange={(changes, allValues) => {
@@ -148,11 +160,52 @@ export default function BehaviorActionDetailPage() {
             />
           </FormItem>
           <div className={'module-title'}>函数与校验</div>
-          <FormItem label="绑定对象类型" field="objectTypeId" required>
-            <ObjectTypeSelect placeholder={'请选择绑定对象类型'} />
+          <FormItem label="绑定对象类型" field="objectTypeId">
+            <ObjectTypeSelect
+              showAll
+              allowClear={false}
+              placeholder={'请选择绑定对象类型'}
+              onChange={(v, obj) => {
+                form.setFieldValue('objectTypeId', v);
+                setCurrentAction((p) => {
+                  const { id, name } = obj || {};
+                  if (isNil(p)) {
+                    return {
+                      objectTypeId: id,
+                      objectTypeName: name
+                    };
+                  }
+                  return {
+                    ...p,
+                    objectTypeId: id,
+                    objectTypeName: name
+                  };
+                });
+              }}
+            />
           </FormItem>
           <FormItem label="函数" field="functionId" required>
-            <FunctionsSelect />
+            <FunctionsSelect
+              onChange={(v, f: OntologyFunctionDetail) => {
+                form.setFieldValue('functionId', v);
+                setCurrentAction((p) => {
+                  const { name, code, content } = f || {};
+                  if (isNil(p)) {
+                    return {
+                      functionName: name,
+                      functionCode: code,
+                      functionContent: content
+                    };
+                  }
+                  return {
+                    ...p,
+                    functionName: name,
+                    functionCode: code,
+                    functionContent: content
+                  };
+                });
+              }}
+            />
           </FormItem>
           <Form.Item
             noStyle
@@ -165,7 +218,7 @@ export default function BehaviorActionDetailPage() {
                     {isNil(functionId) ? (
                       <p className={'text-[#7D859C]'}>请先选择函数</p>
                     ) : functionHasParam ? (
-                      <ParamsSetting functionDetail={functionData} />
+                      <ParamsSetting actionDetail={currentAction} />
                     ) : (
                       <p className={'text-[#7D859C]'}>暂无入参配置</p>
                     )}

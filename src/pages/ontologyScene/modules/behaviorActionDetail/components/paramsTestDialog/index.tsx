@@ -1,17 +1,16 @@
 import React, { useCallback } from 'react';
-import { Form, Modal, RulesProps } from '@arco-design/web-react';
+import { Form, Modal } from '@arco-design/web-react';
 import styles from '././index.module.scss';
 import { DotStatus, NoDataCard, ProButton } from '@ceai-front/arco-material';
 import { IconLoading, IconPlayArrowFill } from '@arco-design/web-react/icon';
 import {
-  ActionSchema,
   BehaviorActionDetail,
   OntologyActionParam,
   RuleName,
   ValidateRule
 } from '@/pages/ontologyScene/types/behaviorActions';
 import {
-  buildActionTest,
+  buildActionTestItem,
   renderComponentByUiType
 } from '@/pages/ontologyScene/utils';
 import {
@@ -20,7 +19,7 @@ import {
 } from '@/pages/ontologyScene/types/ontologyFunction';
 import { isNil } from 'lodash-es';
 import useTestFunction from '@/pages/ontologyScene/hooks/useTestFunction';
-import { buildActionDetail } from '@/pages/ontologyScene/modules/behaviorActionDetail/utils';
+import { useParams } from 'react-router-dom';
 
 interface IProps {
   visible: boolean;
@@ -28,13 +27,14 @@ interface IProps {
   onOk?: () => void;
   onClose: () => void;
   validateRules: ValidateRule[];
-  actionData: ActionSchema;
+  actionData: BehaviorActionDetail;
   functionData?: OntologyFunctionDetail;
 }
 
 export const ParamsTestDialog = (props: IProps) => {
   const { data, visible, onClose, validateRules, actionData } = props;
   const [form] = Form.useForm();
+  const { id: OSId } = useParams<Record<string, string>>();
   const field2Rule = validateRules.reduce((p, c) => {
     const { rule_name, ruleConfig, failMessage, enabledValidation, name } = c;
     if (enabledValidation) {
@@ -79,32 +79,27 @@ export const ParamsTestDialog = (props: IProps) => {
     testIng,
     loading,
     startTest,
-    stopTest
+    clear
   } = useTestFunction();
   const testAction = useCallback(() => {
-    const { code, content, name } = props.functionData!;
+    const { functionCode } = props.actionData;
     form
       .validate()
       .then((res) => {
         startTest({
-          ...buildActionTest(buildActionDetail(actionData)),
-          logic_function: [code],
-          code,
-          content: content,
-          name,
-          target: [code],
-          arguments: Object.entries(res).map(([key, value]) => ({
-            name: key,
-            value: JSON.stringify(value)
-          }))
+          list_data: [buildActionTestItem(props.actionData, res)],
+          target: [functionCode!],
+          id: +OSId,
+          run_action_with_validate: true,
+          run_type: 'action'
         });
       })
       .catch(console.error);
-  }, [props.actionData, props.functionData]);
+  }, [props.actionData]);
 
   const closeModal = () => {
     form.resetFields();
-    stopTest();
+    clear();
     onClose();
   };
 
@@ -115,7 +110,7 @@ export const ParamsTestDialog = (props: IProps) => {
       visible={visible}
       style={{ width: '900px' }}
       className={styles['params-dialog']}
-      onCancel={onClose}
+      onCancel={closeModal}
     >
       <div className={styles['params-dialog-content']}>
         <div className={styles['left']}>

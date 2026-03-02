@@ -270,19 +270,25 @@ export interface OntologyFunctionSchema {
   content?: string;
 }
 
-export interface TestFunction {
+export interface TestFunctionItem {
   arguments: Argument[];
   code: string;
   content: string;
   description?: string;
-  id?: number;
   logic_function: string[];
   name: string;
   object_name?: string;
   params: OntologyFunctionParam[];
-  run_action_with_validate: boolean;
+  pk?: number;
+  object_id?: number;
+}
+
+export interface TestFunction {
+  id?: number;
   run_type: 'action' | 'function';
+  run_action_with_validate: boolean;
   target: string[];
+  list_data: TestFunctionItem[];
 }
 
 export interface Argument {
