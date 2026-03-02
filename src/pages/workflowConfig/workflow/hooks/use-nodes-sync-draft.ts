@@ -171,6 +171,7 @@ export const useNodesSyncDraft = () => {
           const { data: res, message } = await createWorkflowDraft(
             Object.assign({}, postParams.params, {
               version: 'draft',
+              workflow_name: flowDetail?.data?.workflow_name || '',
               ...params
             })
           );
