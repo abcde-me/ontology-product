@@ -4,7 +4,9 @@ import {
   ListOntologyLinkTypeDataReq,
   ListOntologyLinkTypeDataRes,
   LinkTypeAttributeInfo,
-  GetOntologyLinkTypeRes
+  GetOntologyLinkTypeRes,
+  CreateOntologyLinkTypeReq,
+  UpdateOntologyLinkTypeReq
 } from '@/types/links';
 import { LinkType } from '@/types/graphApi';
 import { ObjectType } from '@/types/objectType';
@@ -509,4 +511,32 @@ export const getOntologyLinkType = async (params: {
   //   requestId: 'mock-request-id',
   //   status: 200
   // });
+};
+
+// 创建链接类型
+export const createOntologyLinkType = async (
+  params: CreateOntologyLinkTypeReq
+): Promise<
+  ApiRes<{
+    id: number;
+  }>
+> => {
+  return await UAPI.RES.CreateOntologyLinkTypeApi({})
+    .post(params)
+    .inRegion()
+    .do();
+};
+
+// 更新链接类型
+export const updateOntologyLinkType = async (
+  params: UpdateOntologyLinkTypeReq
+): Promise<
+  ApiRes<{
+    id: number;
+  }>
+> => {
+  return await UAPI.RES.UpdateOntologyLinkTypeApi({})
+    .post(params)
+    .inRegion()
+    .do();
 };

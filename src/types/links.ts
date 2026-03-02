@@ -76,7 +76,7 @@ export interface LinkTypeAttributeInfo {
    */
   isPrimary?: number;
   /**
-   * 是否使用（1：是，0：否）
+   * 是否选中（1：是，0：否）
    */
   isUse?: number;
   /**
@@ -152,7 +152,7 @@ export interface GetOntologyLinkTypeRes {
    */
   description?: string;
   /**
-   * minio文件地址
+   * 本地文件上传后的存储地址
    */
   filePath?: string;
   /**
@@ -164,7 +164,7 @@ export interface GetOntologyLinkTypeRes {
    */
   isDeleted?: number;
   /**
-   * 链接数据库名称
+   * 数据库名称
    */
   linkDBName?: string;
   /**
@@ -172,11 +172,11 @@ export interface GetOntologyLinkTypeRes {
    */
   linkSourceColumnID?: number;
   /**
-   * 来源类型 1 来自iceberg  2 文件上传
+   * 来源类型 1 数据湖同步  2 本地CSV导入
    */
   linkSourceType?: number;
   /**
-   * 链接表名称
+   * 数据表名称
    */
   linkTableName?: string;
   /**
@@ -184,7 +184,7 @@ export interface GetOntologyLinkTypeRes {
    */
   linkTargetColumnID?: number;
   /**
-   * 名称
+   * 链接名称
    */
   name?: string;
   /**
@@ -192,7 +192,7 @@ export interface GetOntologyLinkTypeRes {
    */
   ontologyDbName?: string;
   /**
-   * 链接类型列信息
+   * 属性字段映射列表
    */
   ontologyLinkTypeColumnList?: LinkTypeAttributeInfo[];
   /**
@@ -207,6 +207,14 @@ export interface GetOntologyLinkTypeRes {
    * 源对象类型ID
    */
   sourceObjectTypeID?: number;
+  /**
+   * 源对象类型名称
+   */
+  sourceObjectTypeName?: string;
+  /**
+   * 源对象类型图标
+   */
+  sourceObjectTypeIcon?: string;
   /**
    * 源对象类型信息
    */
@@ -228,6 +236,14 @@ export interface GetOntologyLinkTypeRes {
    */
   targetObjectTypeID?: number;
   /**
+   * 目标对象类型名称
+   */
+  targetObjectTypeName?: string;
+  /**
+   * 目标对象类型图标
+   */
+  targetObjectTypeIcon?: string;
+  /**
    * 目标对象类型信息
    */
   targetObjectTypeInfo?: ObjectType;
@@ -247,4 +263,99 @@ export interface GetOntologyLinkTypeRes {
    * 修改人
    */
   updateUser?: string;
+}
+
+export interface OntologyLinkTypeColumn {
+  /**
+   * 字段类型
+   */
+  columnType: string;
+  /**
+   * 属性名称
+   */
+  comment: string;
+  /**
+   * 是否主键（1：是，0：否）
+   */
+  isPrimary?: number;
+  /**
+   * 是否使用（1：是，0：否）
+   */
+  isUse?: number;
+  /**
+   * 表字段
+   */
+  linkTypeID: string;
+  /**
+   * 表字段
+   */
+  name: string;
+}
+
+export interface CreateOntologyLinkTypeReq {
+  /**
+   * 链接id
+   */
+  code: string;
+  /**
+   * 描述
+   */
+  description?: string;
+  /**
+   * 本地文件上传后的存储地址
+   */
+  filePath?: string;
+  /**
+   * 数据库名称
+   */
+  linkDbName?: string;
+  /**
+   * 源对象类型属性名称
+   */
+  linkSourceColumnName?: string;
+  /**
+   * 数据表名称
+   */
+  linkTableName?: string;
+  /**
+   * 目标对象类型属性名称
+   */
+  linkTargetColumnName?: string;
+  /**
+   * 链接名称
+   */
+  name: string;
+  ontologyDbName?: string;
+  /**
+   * 属性字段映射列表
+   */
+  ontologyLinkTypeColumnList?: OntologyLinkTypeColumn[];
+  /**
+   * 本体模型ID
+   */
+  ontologyModelID: number;
+  ontologyTableName?: string;
+  /**
+   * 源对象类型ID
+   */
+  sourceObjectTypeID: number;
+  /**
+   * 来源类型 1 来自iceberg  2 文件上传
+   */
+  sourceType?: number;
+  /**
+   * 目标对象类型ID
+   */
+  targetObjectTypeID: number;
+  /**
+   * 类型 1对1 2 1对N 3 N对N
+   */
+  type: number;
+}
+
+export interface UpdateOntologyLinkTypeReq extends CreateOntologyLinkTypeReq {
+  /**
+   * 唯一标识
+   */
+  id: string;
 }

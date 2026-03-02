@@ -14,3 +14,39 @@
     }
   }
 }
+
+.link-form {
+  :global(.arco-form-item-wrapper) {
+    max-width: 800px;
+  }
+  :global(.arco-form-label-item) {
+    min-width: 110px;
+  }
+}
+
+.attribute-fields-form-item {
+  :global(.arco-form-item-wrapper) {
+    max-width: 100%;
+  }
+}
+
+// Cascader 下拉菜单样式（通过 dropdownMenuClassName 应用）
+.link-type-cascader-dropdown {
+  :global(.arco-cascader-list-column) {
+    width: 300px !important;
+  }
+
+  // 确保选项内容能够正确显示和溢出处理
+  :global(.arco-cascader-list-item) {
+    padding: 8px 12px;
+  }
+
+  :global(.arco-cascader-list-item-label) {
+    width: 100%;
+    overflow: hidden;
+  }
+
+  :global(.arco-cascader-list-empty) {
+    width: unset !important;
+  }
+}
