@@ -1,13 +1,17 @@
-import React, { useEffect, useMemo, useRef } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import styles from './index.module.scss';
 import { Button, Tooltip } from '@arco-design/web-react';
 import {
+  IconDown,
   IconExpand,
   IconFile,
+  IconLoading,
   IconRecordStop,
-  IconShrink
+  IconRight,
+  IconShrink,
+  IconToBottom
 } from '@arco-design/web-react/icon';
-import { ProButton } from '@ceai-front/arco-material';
+import { DotStatus, ProButton } from '@ceai-front/arco-material';
 import CodeMirror from '@uiw/react-codemirror';
 import { python } from '@codemirror/lang-python';
 import { lintGutter } from '@codemirror/lint';
@@ -25,10 +29,14 @@ import { ResizeBoxWithCursorChange } from '@/pages/ontologyScene/componens';
 const extension = [python(), lintGutter()];
 
 export const FunctionScript = (
-  props: CustomFormItemCompProps<string> & { runInfo?: BehaviorLogItem }
+  props: CustomFormItemCompProps<string> & {
+    runInfo?: BehaviorLogItem;
+    isFullscreen: boolean;
+  }
 ) => {
-  const { value, onChange, disabled, runInfo } = props;
+  const { value, onChange, disabled, runInfo, isFullscreen } = props;
   const codeEditor = useRef<EditorView>();
+  const [logOpen, setLogOpen] = useState(false);
   const extensions = useMemo(() => {
     if (isNil(value)) return extension;
     // return extension;
@@ -67,10 +75,50 @@ export const FunctionScript = (
         <ResizeBoxWithCursorChange
           directions={['top']}
           className={styles['function-footer']}
-          maxHeight={600}
-          minHeight={40}
+          maxHeight={logOpen ? (isFullscreen ? 600 : 300) : 40}
+          minHeight={logOpen ? 120 : 40}
+          style={{
+            maxHeight: logOpen ? (isFullscreen ? '600px' : '300px') : '40px',
+            height: logOpen ? '120px' : '40px'
+          }}
         >
-          <div className={styles['run-log-wrapper']}>这是一条神奇的天路</div>
+          <div
+            className={styles['run-log-header']}
+            onClick={() => {
+              setLogOpen((p) => !p);
+            }}
+          >
+            {logOpen ? <IconDown /> : <IconRight />}
+            运行结果
+            {runInfo.run_status === 1 && (
+              <div className={'flex items-center gap-2 text-[#6E7B8D]'}>
+                运行中
+                <IconLoading style={{ color: '#184FF2' }} />
+              </div>
+            )}
+            {runInfo.run_status === 2 && (
+              <DotStatus color={'#10B981'} text={'运行成功'} />
+            )}
+            {runInfo.run_status === 3 && (
+              <DotStatus color={'#E52E2D'} text={'运行失败'} />
+            )}
+            {runInfo.run_status === 4 && (
+              <DotStatus color={'#E52E2D'} text={'KILL'} />
+            )}
+          </div>
+          <div
+            className={classNames({
+              [styles['run-log-wrapper']]: true,
+              visible: logOpen,
+              hidden: !logOpen
+            })}
+          >
+            {runInfo.run_log || (
+              <div className={'flex items-center gap-2 text-[#6E7B8D]'}>
+                <IconLoading style={{ color: '#184FF2' }} />
+              </div>
+            )}
+          </div>
         </ResizeBoxWithCursorChange>
       )}
     </>

@@ -19,7 +19,7 @@ export const FunctionsSelect = (props: CustomFormItemCompProps<string>) => {
       return getFunctionList({
         ontologyModelID: +OSId,
         pageNum: 1,
-        pageSize: 10
+        pageSize: 1000
       }).then((res) =>
         res.items.map((f) => {
           return {

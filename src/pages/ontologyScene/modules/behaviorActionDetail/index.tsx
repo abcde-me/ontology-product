@@ -23,6 +23,7 @@ import { isNil } from 'lodash-es';
 import { getFunctionDetail } from '@/api/ontologySceneLibrary/ontologyFunction';
 import { InputType } from '@/pages/ontologyScene/types/ontologyFunction';
 import { IconLeft } from '@arco-design/web-react/icon';
+import { ActionSchema } from '@/pages/ontologyScene/types/behaviorActions';
 
 const { TextArea } = Input;
 
@@ -164,7 +165,7 @@ export default function BehaviorActionDetailPage() {
                     {isNil(functionId) ? (
                       <p className={'text-[#7D859C]'}>请先选择函数</p>
                     ) : functionHasParam ? (
-                      <ParamsSetting />
+                      <ParamsSetting functionDetail={functionData} />
                     ) : (
                       <p className={'text-[#7D859C]'}>暂无入参配置</p>
                     )}

@@ -1,5 +1,8 @@
 import React from 'react';
-import { UiType } from '@/pages/ontologyScene/types/ontologyFunction';
+import {
+  TestFunction,
+  UiType
+} from '@/pages/ontologyScene/types/ontologyFunction';
 import {
   DatePicker,
   Input,
@@ -20,6 +23,8 @@ import {
 } from '@/pages/ontologyScene/componens';
 import styles from '../styles/index.module.scss';
 import { LinkType } from '@/types/graphApi';
+import { BehaviorActionDetail } from '@/pages/ontologyScene/types/behaviorActions';
+import { TestFunctionInfo } from '@/pages/ontologyScene/hooks/useTestFunction';
 
 export const renderComponentByUiType = (type: UiType) => {
   switch (type) {
@@ -88,4 +93,21 @@ export const getLinkTypeText = (type?: LinkType): '1:1' | '1:N' | 'N:N' => {
     default:
       return '1:1';
   }
+};
+
+export const buildActionTest = (data: BehaviorActionDetail): TestFunction => {
+  const res: TestFunction = {
+    arguments: [],
+    code: data.functionCode!,
+    content: data.functionContent!,
+    logic_function: [data.functionCode!],
+    name: data.functionName!,
+    params: data.params || [],
+    run_action_with_validate: true,
+    id: data.functionId,
+    run_type: 'action',
+    target: [data.functionCode!],
+    object_name: data.objectTypeName
+  };
+  return res;
 };

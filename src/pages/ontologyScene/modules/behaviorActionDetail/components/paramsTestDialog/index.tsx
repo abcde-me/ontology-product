@@ -1,22 +1,113 @@
-import React from 'react';
-import { Form, Modal } from '@arco-design/web-react';
+import React, { useCallback } from 'react';
+import { Form, Modal, RulesProps } from '@arco-design/web-react';
 import styles from '././index.module.scss';
-import { NoDataCard, ProButton } from '@ceai-front/arco-material';
-import { IconPlayArrowFill } from '@arco-design/web-react/icon';
-import { OntologyActionParam } from '@/pages/ontologyScene/types/behaviorActions';
-import { renderComponentByUiType } from '@/pages/ontologyScene/utils';
-import { UiType } from '@/pages/ontologyScene/types/ontologyFunction';
+import { DotStatus, NoDataCard, ProButton } from '@ceai-front/arco-material';
+import { IconLoading, IconPlayArrowFill } from '@arco-design/web-react/icon';
+import {
+  ActionSchema,
+  BehaviorActionDetail,
+  OntologyActionParam,
+  RuleName,
+  ValidateRule
+} from '@/pages/ontologyScene/types/behaviorActions';
+import {
+  buildActionTest,
+  renderComponentByUiType
+} from '@/pages/ontologyScene/utils';
+import {
+  OntologyFunctionDetail,
+  UiType
+} from '@/pages/ontologyScene/types/ontologyFunction';
+import { isNil } from 'lodash-es';
+import useTestFunction from '@/pages/ontologyScene/hooks/useTestFunction';
+import { buildActionDetail } from '@/pages/ontologyScene/modules/behaviorActionDetail/utils';
 
 interface IProps {
   visible: boolean;
   data: OntologyActionParam[];
   onOk?: () => void;
-  onClose?: () => void;
+  onClose: () => void;
+  validateRules: ValidateRule[];
+  actionData: ActionSchema;
+  functionData?: OntologyFunctionDetail;
 }
 
 export const ParamsTestDialog = (props: IProps) => {
-  const { data, visible, onClose, onOk } = props;
+  const { data, visible, onClose, validateRules, actionData } = props;
   const [form] = Form.useForm();
+  const field2Rule = validateRules.reduce((p, c) => {
+    const { rule_name, ruleConfig, failMessage, enabledValidation, name } = c;
+    if (enabledValidation) {
+      p[name] = [
+        {
+          validator(value, onError) {
+            if (isNil(value)) {
+              return onError(`请填写${name}`);
+            }
+            switch (rule_name) {
+              case RuleName.RangeRule:
+                if (
+                  value < ruleConfig.minValue ||
+                  value > ruleConfig.maxValue
+                ) {
+                  onError(failMessage);
+                }
+                break;
+              case RuleName.LengthRule:
+                const length = value.trim().length;
+                if (
+                  length < ruleConfig.minLength ||
+                  length > ruleConfig.maxLength
+                ) {
+                  onError(failMessage);
+                }
+                break;
+              default:
+                const strEnum = (ruleConfig as string).trim().split('_');
+                if (!strEnum.includes(value)) {
+                  onError(failMessage);
+                }
+            }
+          }
+        }
+      ];
+    }
+    return p;
+  }, {});
+  const {
+    runLog: runInfo,
+    testIng,
+    loading,
+    startTest,
+    stopTest
+  } = useTestFunction();
+  const testAction = useCallback(() => {
+    const { code, content, name } = props.functionData!;
+    form
+      .validate()
+      .then((res) => {
+        startTest({
+          ...buildActionTest(buildActionDetail(actionData)),
+          logic_function: [code],
+          code,
+          content: content,
+          name,
+          target: [code],
+          arguments: Object.entries(res).map(([key, value]) => ({
+            name: key,
+            value: JSON.stringify(value)
+          }))
+        });
+      })
+      .catch(console.error);
+  }, [props.actionData, props.functionData]);
+
+  const closeModal = () => {
+    form.resetFields();
+    stopTest();
+    onClose();
+  };
+
   return (
     <Modal
       title={'参数测试'}
@@ -30,7 +121,12 @@ export const ParamsTestDialog = (props: IProps) => {
         <div className={styles['left']}>
           <div className={styles['header']}>参数配置</div>
           <div className={styles['body']}>
-            <Form autoComplete={'off'} layout={'vertical'}>
+            <Form
+              autoComplete={'off'}
+              layout={'vertical'}
+              form={form}
+              disabled={loading || testIng}
+            >
               {data?.map((param) => {
                 const { name, code, uiType } = param;
                 return (
@@ -39,7 +135,11 @@ export const ParamsTestDialog = (props: IProps) => {
                     key={code}
                     label={name}
                     field={code}
-                    rules={[{ required: true, message: '请输入参数值' }]}
+                    rules={
+                      field2Rule[name] || [
+                        { required: true, message: '请输入参数值' }
+                      ]
+                    }
                     triggerPropName={
                       uiType === UiType.Switch ? 'checked' : 'value'
                     }
@@ -55,15 +155,50 @@ export const ParamsTestDialog = (props: IProps) => {
               type={'primary'}
               icon={<IconPlayArrowFill>/</IconPlayArrowFill>}
               size={'small'}
+              onClick={testAction}
+              disabled={loading || testIng}
             >
               运行
             </ProButton>
           </div>
         </div>
         <div className={styles['right']}>
-          <div className={styles['header']}>运行结果</div>
+          <div className={styles['header']}>
+            运行结果
+            {!!runInfo && (
+              <div>
+                {runInfo.run_status === 1 || loading ? (
+                  <div className={'flex items-center gap-2 text-[#6E7B8D]'}>
+                    运行中
+                    <IconLoading style={{ color: '#184FF2' }} />
+                  </div>
+                ) : (
+                  <>
+                    {runInfo.run_status === 2 && (
+                      <DotStatus color={'#10B981'} text={'运行成功'} />
+                    )}
+                    {runInfo.run_status === 3 && (
+                      <DotStatus color={'#E52E2D'} text={'运行失败'} />
+                    )}
+                    {runInfo.run_status === 4 && (
+                      <DotStatus color={'#E52E2D'} text={'KILL'} />
+                    )}
+                  </>
+                )}
+              </div>
+            )}
+          </div>
           <div className={styles['body']}>
-            <NoDataCard type={'block'} title={'请先在左侧配置参数'} />
+            {!runInfo?.run_log ? (
+              <NoDataCard
+                type={'block'}
+                title={
+                  loading || testIng ? '行为测试中...' : '请先在左侧配置参数'
+                }
+              />
+            ) : (
+              <div className={styles['run-log']}>{runInfo.run_log}</div>
+            )}
           </div>
         </div>
       </div>
