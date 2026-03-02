@@ -376,10 +376,16 @@ export function buildFunctionDetail(
   };
 }
 
+/**
+ *
+ * @param formData
+ * @param config 函数测试的基础配置，便于适配 run_type in [function,action]两种情况
+ */
 export const buildTestFunctionData = (
-  formData: Required<OntologyFunctionSchema>
+  formData: Required<OntologyFunctionSchema>,
+  config: Partial<TestFunction> = {}
 ): TestFunction => {
-  const { content, code, name, description, input, output } = formData;
+  const { content, code, name, description = '', input, output } = formData;
   const res: TestFunction = {
     logic_function: [code],
     arguments: [],
@@ -389,7 +395,8 @@ export const buildTestFunctionData = (
     params: [],
     run_action_with_validate: true,
     run_type: 'function',
-    target: [code]
+    target: [code],
+    description
   };
   res.params = [input, output].flatMap((params) => {
     return params.map((param, idx) => {
@@ -418,5 +425,5 @@ export const buildTestFunctionData = (
       return base;
     });
   });
-  return res;
+  return { ...res, ...config };
 };
