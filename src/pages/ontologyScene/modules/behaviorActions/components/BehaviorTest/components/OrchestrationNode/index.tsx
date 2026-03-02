@@ -96,9 +96,10 @@ export const OrchestrationNode: React.FC<OrchestrationNodeProps> = ({
     });
   };
 
+  // 边框颜色：选中 > 默认
   const borderColor = isSelected
-    ? 'border-[#184FF2]'
-    : 'border-[rgba(236,240,243,1)]';
+    ? 'border-[#184FF2]' // 蓝色边框表示选中
+    : 'border-[rgba(236,240,243,1)]'; // 默认灰色边框
 
   return (
     <div
