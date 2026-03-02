@@ -25,7 +25,7 @@ import {
 } from '@/api/ontologySceneLibrary/links';
 import { GetOntologyLinkTypeRes } from '@/types/links';
 import { OBJECT_TYPE_SYNC_STATUS_CONFIG } from '@/pages/ontologyScene/common/constants';
-import { SyncStatus } from '@/types/graphApi';
+import { LinkType, SyncStatus } from '@/types/graphApi';
 
 const TabPane = Tabs.TabPane;
 
@@ -211,9 +211,9 @@ function EdgePanel() {
 
   const linkTypeText = useMemo(() => {
     const type = basicInfo?.type;
-    if (type === '1:1') return '1:1';
-    if (type === '1:N') return '1:N';
-    if (type === 'N:N') return 'N:N';
+    if (type === LinkType.ONE_TO_ONE) return '1:1';
+    if (type === LinkType.ONE_TO_MANY) return '1:N';
+    if (type === LinkType.MANY_TO_MANY) return 'N:N';
     return basicInfo?.type || '-';
   }, [basicInfo?.type]);
 
