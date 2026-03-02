@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
 import {
   Form,
   Input,
@@ -11,7 +12,8 @@ import {
   TableColumnProps,
   Checkbox,
   Tooltip,
-  Spin
+  Spin,
+  Cascader
 } from '@arco-design/web-react';
 import {
   IconUpload,
@@ -27,6 +29,15 @@ import OneWayArrowIcon from '../../../assets/one-way-arrow.svg';
 import TwoWayArrowIcon from '../../../assets/double-headed-arrow.svg';
 import styles from './LinkForm.module.scss';
 import { LinkType } from '../../../types/link';
+import { listOntologyPhysicalProperties } from '@/api/ontologySceneLibrary/graph';
+import { PrefixAimdp } from '@/api/endpoints';
+import {
+  listMetadataIcebergDatabaseName,
+  listMetadataIcebergTable,
+  listMetadataIcebergTiDBTable
+} from '@/api/ontologySceneLibrary/objectType';
+import { MetadataMenuItem, IcebergTableItem } from '@/types/objectType';
+import { EllipsisPopover } from '@ceai-front/arco-material';
 
 const FormItem = Form.Item;
 
@@ -35,6 +46,7 @@ export interface AttributeField {
   selected: boolean;
   attributeName: string;
   fieldType: string;
+  isPrimary?: boolean; // 是否为主键
 }
 
 export interface LinkFormData {
@@ -47,6 +59,9 @@ export interface LinkFormData {
   intermediateTable?: {
     type: 'local_csv' | 'data_lake_sync';
     file?: any;
+    filePath?: string;
+    database?: string;
+    table?: string;
   };
   sourceAttribute?: string; // N:N关联中间表的源属性
   targetAttribute?: string; // N:N关联中间表的目标属性
@@ -75,24 +90,204 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
     const [intermediateTable, setIntermediateTable] = useState<{
       type: 'local_csv' | 'data_lake_sync';
       file?: any;
+      filePath?: string;
+      database?: string;
+      table?: string;
     }>({
       type: 'local_csv'
     });
+    const [selectedDatabase, setSelectedDatabase] = useState<
+      string | undefined
+    >();
+    const [selectedTable, setSelectedTable] = useState<string | undefined>();
+    // 级联选择器相关状态
+    const [cascaderOptions, setCascaderOptions] = useState<
+      Array<{
+        label: string;
+        value: string;
+        children?: Array<{ label: string; value: string }>;
+        isLeaf?: boolean;
+      }>
+    >([]);
+    const [cascaderValue, setCascaderValue] = useState<string[]>([]);
+    const [databaseList, setDatabaseList] = useState<MetadataMenuItem[]>([]);
+    const [tableListMap, setTableListMap] = useState<
+      Record<number, IcebergTableItem[]>
+    >({});
+    const [loadingTables, setLoadingTables] = useState<Record<number, boolean>>(
+      {}
+    );
     const [attributeFields, setAttributeFields] = useState<AttributeField[]>(
       []
     );
     const [fieldsLoading, setFieldsLoading] = useState(false);
     const [fileUploaded, setFileUploaded] = useState(false);
+    const [sourceAttributeOptions, setSourceAttributeOptions] = useState<
+      Array<{ label: string; value: string }>
+    >([]);
+    const [sourceAttributesLoading, setSourceAttributesLoading] =
+      useState(false);
+    const [targetAttributeOptions, setTargetAttributeOptions] = useState<
+      Array<{ label: string; value: string }>
+    >([]);
+    const [targetAttributesLoading, setTargetAttributesLoading] =
+      useState(false);
+    const [targetPrimaryAttribute, setTargetPrimaryAttribute] = useState<{
+      name: string;
+      id: number;
+    } | null>(null);
+    const [targetPrimaryAttributeLoading, setTargetPrimaryAttributeLoading] =
+      useState(false);
 
-    // 模拟属性列表（根据选择的对象类型动态变化）
+    const { id: OSId } = useParams<{ id: string }>();
+    const ontologyModelID = OSId ? Number(OSId) : undefined;
+
+    // 监听表单字段变化
+    const sourceObjectType = Form.useWatch('sourceObjectType', form);
+    const targetObjectType = Form.useWatch('targetObjectType', form);
+
+    // 获取属性选项（从API获取真实数据，根据对象类型ID返回对应的属性列表）
     const getAttributeOptions = (objectTypeId?: number) => {
       if (!objectTypeId) return [];
-      return [
-        { label: '属性1', value: 'attr1' },
-        { label: '属性2', value: 'attr2' },
-        { label: '属性3', value: 'attr3' }
-      ];
+      // 根据当前选中的对象类型返回对应的选项
+      if (objectTypeId === sourceObjectType) {
+        return sourceAttributeOptions;
+      }
+      if (objectTypeId === targetObjectType) {
+        return targetAttributeOptions;
+      }
+      return [];
     };
+
+    // 获取源对象类型的属性列表
+    useEffect(() => {
+      if (!sourceObjectType || !ontologyModelID) {
+        setSourceAttributeOptions([]);
+        return;
+      }
+
+      const fetchSourceAttributes = async () => {
+        setSourceAttributesLoading(true);
+        try {
+          const response = await listOntologyPhysicalProperties({
+            objectTypeIdList: [sourceObjectType],
+            ontologyModelID,
+            pageNo: 1,
+            pageSize: 1000 // 获取所有属性
+          });
+          if (response.status === 200 && response.data?.result) {
+            const options = response.data.result.map((item) => ({
+              label: item.name || item.tableField || '',
+              value: String(item.id || item.tableField || '')
+            }));
+            setSourceAttributeOptions(options);
+          } else {
+            setSourceAttributeOptions([]);
+          }
+        } catch (error) {
+          console.error('获取源对象类型属性失败:', error);
+          setSourceAttributeOptions([]);
+        } finally {
+          setSourceAttributesLoading(false);
+        }
+      };
+
+      fetchSourceAttributes();
+    }, [sourceObjectType, ontologyModelID]);
+
+    // 获取目标对象类型的主键属性（用于1:1和1:N类型）
+    useEffect(() => {
+      if (!targetObjectType || !ontologyModelID) {
+        setTargetPrimaryAttribute(null);
+        setTargetAttributeOptions([]);
+        return;
+      }
+
+      if (linkType === 'N:N') {
+        const fetchTargetAttributesByN = async () => {
+          setTargetAttributesLoading(true);
+          try {
+            const response = await listOntologyPhysicalProperties({
+              objectTypeIdList: [targetObjectType],
+              ontologyModelID,
+              pageNo: 1,
+              pageSize: 1000 // 获取所有属性
+            });
+            if (response.status === 200 && response.data?.result) {
+              const options = response.data.result.map((item) => ({
+                label: item.name || item.tableField || '',
+                value: String(item.id || item.tableField || '')
+              }));
+              setTargetAttributeOptions(options);
+            } else {
+              setTargetAttributeOptions([]);
+            }
+          } catch (error) {
+            console.error('获取目标对象类型属性失败:', error);
+            setTargetAttributeOptions([]);
+          } finally {
+            setTargetAttributesLoading(false);
+          }
+        };
+
+        fetchTargetAttributesByN();
+        return;
+      }
+
+      const fetchTargetPrimaryAttribute = async () => {
+        setTargetPrimaryAttributeLoading(true);
+        try {
+          const response = await listOntologyPhysicalProperties({
+            objectTypeIdList: [targetObjectType],
+            ontologyModelID,
+            isPrimary: 1,
+            pageNo: 1,
+            pageSize: 1 // 只需要第一个主键属性
+          });
+          if (
+            response.status === 200 &&
+            response.data?.result &&
+            response.data.result.length > 0
+          ) {
+            const firstPrimary = response.data.result[0];
+            const primaryAttribute = {
+              name: firstPrimary.name || firstPrimary.tableField || '',
+              id: firstPrimary.id || 0
+            };
+            setTargetPrimaryAttribute(primaryAttribute);
+            // 只有在没有当前值时才自动设置表单字段值
+            const currentValue = form.getFieldValue('targetObjectAttribute');
+            if (!currentValue) {
+              form.setFieldValue(
+                'targetObjectAttribute',
+                String(primaryAttribute.id)
+              );
+            } else {
+              // 如果已有值，从已加载的属性列表中查找对应的属性名称
+              const attrId = String(currentValue);
+              const matchedOption = targetAttributeOptions.find(
+                (opt) => opt.value === attrId
+              );
+              if (matchedOption) {
+                setTargetPrimaryAttribute({
+                  name: matchedOption.label,
+                  id: Number(attrId)
+                });
+              }
+            }
+          } else {
+            setTargetPrimaryAttribute(null);
+          }
+        } catch (error) {
+          console.error('获取目标对象类型主键属性失败:', error);
+          setTargetPrimaryAttribute(null);
+        } finally {
+          setTargetPrimaryAttributeLoading(false);
+        }
+      };
+
+      fetchTargetPrimaryAttribute();
+    }, [targetObjectType, ontologyModelID]);
 
     useEffect(() => {
       if (initialValues) {
@@ -111,7 +306,25 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
         }
         if (initialValues.intermediateTable) {
           setIntermediateTable(initialValues.intermediateTable);
-          setFileUploaded(!!initialValues.intermediateTable.file);
+          setFileUploaded(
+            !!(
+              initialValues.intermediateTable.file ||
+              initialValues.intermediateTable.filePath ||
+              (initialValues.intermediateTable.database &&
+                initialValues.intermediateTable.table)
+            )
+          );
+          // 如果是数据湖同步且有数据库和表，设置级联选择器的值
+          if (
+            initialValues.intermediateTable.type === 'data_lake_sync' &&
+            initialValues.intermediateTable.database &&
+            initialValues.intermediateTable.table
+          ) {
+            setSelectedDatabase(initialValues.intermediateTable.database);
+            setSelectedTable(initialValues.intermediateTable.table);
+            // 注意：这里需要等数据库列表加载后才能设置 cascaderValue
+            // 所以先设置 selectedDatabase 和 selectedTable，在 loadDatabaseList 后再设置 cascaderValue
+          }
         }
         if (initialValues.attributeFields) {
           setAttributeFields(initialValues.attributeFields);
@@ -136,49 +349,57 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
             tableField: 'id',
             selected: true,
             attributeName: 'id',
-            fieldType: 'STRING'
+            fieldType: 'STRING',
+            isPrimary: true // 第一个字段默认为主键
           },
           {
             tableField: 'field_1',
             selected: true,
             attributeName: 'field_1',
-            fieldType: 'STRING'
+            fieldType: 'STRING',
+            isPrimary: false
           },
           {
             tableField: 'field_2',
             selected: true,
             attributeName: 'field_2',
-            fieldType: 'STRING'
+            fieldType: 'STRING',
+            isPrimary: false
           },
           {
             tableField: 'field_3',
             selected: true,
             attributeName: 'field_3',
-            fieldType: 'STRING'
+            fieldType: 'STRING',
+            isPrimary: false
           },
           {
             tableField: 'field_4',
             selected: true,
             attributeName: 'field_4',
-            fieldType: 'STRING'
+            fieldType: 'STRING',
+            isPrimary: false
           },
           {
             tableField: 'field_5',
             selected: true,
             attributeName: 'field_5',
-            fieldType: 'STRING'
+            fieldType: 'STRING',
+            isPrimary: false
           },
           {
             tableField: 'field_6',
             selected: true,
             attributeName: 'field_6',
-            fieldType: 'STRING'
+            fieldType: 'STRING',
+            isPrimary: false
           },
           {
             tableField: 'field_7',
             selected: true,
             attributeName: 'field_7',
-            fieldType: 'STRING'
+            fieldType: 'STRING',
+            isPrimary: false
           }
         ];
 
@@ -212,6 +433,15 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
       form.setFieldValue('attributeFields', newFields);
     };
 
+    const handlePrimaryKeyChange = (index: number) => {
+      const newFields: AttributeField[] = attributeFields.map((field, i) => ({
+        ...field,
+        isPrimary: i === index
+      }));
+      setAttributeFields(newFields);
+      form.setFieldValue('attributeFields', newFields);
+    };
+
     const allSelected =
       attributeFields.length > 0 && attributeFields.every((f) => f.selected);
     const someSelected = attributeFields.some((f) => f.selected);
@@ -226,27 +456,47 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
               indeterminate={someSelected && !allSelected}
               onChange={(checked) => handleSelectAll(!!checked)}
             />
-            <span>表字段</span>
           </div>
         ),
-        dataIndex: 'tableField',
-        width: 150,
+        dataIndex: 'selected',
+        width: 60,
         render: (value, record, index) => (
-          <div className="flex items-center gap-[12px]">
-            <Checkbox
-              checked={record.selected}
-              onChange={(checked) =>
-                handleFieldChange(index, { selected: checked })
-              }
-            />
-            <span>{value}</span>
+          <Checkbox
+            checked={record.selected}
+            onChange={(checked) =>
+              handleFieldChange(index, { selected: checked })
+            }
+          />
+        )
+      },
+      {
+        title: '表字段',
+        dataIndex: 'tableField',
+        width: 375,
+        render: (value) => <span>{value}</span>
+      },
+      {
+        title: (
+          <div className="flex items-center gap-[8px]">
+            <span>主键</span>
+            <Tooltip content="选择作为主键的字段">
+              <IconQuestionCircle className="pointer-events-auto cursor-pointer text-[#86909C]" />
+            </Tooltip>
           </div>
+        ),
+        dataIndex: 'isPrimary',
+        width: 84,
+        render: (_, record, index) => (
+          <Radio
+            checked={record.isPrimary === true}
+            onChange={() => handlePrimaryKeyChange(index)}
+          />
         )
       },
       {
         title: '属性名称',
         dataIndex: 'attributeName',
-        width: 365,
+        width: 435,
         render: (value, record, index) => (
           <Input
             value={value}
@@ -259,7 +509,7 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
       {
         title: '字段类型',
         dataIndex: 'fieldType',
-        width: 120,
+        width: 200,
         render: (value) => <span>{value}</span>
       }
     ];
@@ -275,56 +525,335 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
       setFileUploaded(false);
     };
 
+    // 加载数据库列表
+    const loadDatabaseList = async () => {
+      try {
+        const response = await listMetadataIcebergDatabaseName({
+          instanceId: 1 // 固定值
+        });
+        if (response.status === 200 && response.code === '') {
+          const databases = response.data.data || [];
+          setDatabaseList(databases);
+          // 转换为级联选择器格式
+          const options = databases.map((db) => ({
+            label: db.databaseName,
+            value: String(db.id),
+            isLeaf: false
+          }));
+          setCascaderOptions(options);
+        } else {
+          Message.error(response.message || '加载数据库列表失败');
+        }
+      } catch (error) {
+        console.error('加载数据库列表失败:', error);
+        Message.error('加载数据库列表失败');
+      }
+    };
+
+    // 级联选择器的 loadMore 函数，用于动态加载表列表
+    const handleCascaderLoadMore = async (
+      pathValue: string[],
+      level: number
+    ): Promise<any[]> => {
+      if (level === 1 && pathValue.length > 0) {
+        const databaseId = Number(pathValue[0]);
+        if (!isNaN(databaseId) && !tableListMap[databaseId]) {
+          try {
+            setLoadingTables((prev) => ({ ...prev, [databaseId]: true }));
+            const response = await listMetadataIcebergTable({
+              pageNum: 1,
+              pageSize: 1000, // 加载所有表
+              filters: {
+                databaseId
+              }
+            });
+
+            if (response.status === 200 && response.code === '') {
+              const tables = response.data.data?.list || [];
+              setTableListMap((prev) => ({ ...prev, [databaseId]: tables }));
+
+              // 更新级联选择器的选项
+              setCascaderOptions((prevOptions) =>
+                prevOptions.map((option) => {
+                  if (option.value === String(databaseId)) {
+                    return {
+                      ...option,
+                      children: tables.map((table) => ({
+                        label: table.tableName,
+                        value: String(table.id),
+                        isLeaf: true
+                      }))
+                    };
+                  }
+                  return option;
+                })
+              );
+
+              // 返回更新后的选项
+              return tables.map((table) => ({
+                label: table.tableName,
+                value: String(table.id)
+              }));
+            } else {
+              Message.error(response.message || '加载表列表失败');
+              return [];
+            }
+          } catch (error) {
+            console.error('加载表列表失败:', error);
+            Message.error('加载表列表失败');
+            return [];
+          } finally {
+            setLoadingTables((prev) => ({ ...prev, [databaseId]: false }));
+          }
+        } else if (tableListMap[databaseId]) {
+          return tableListMap[databaseId].map((table) => ({
+            label: table.tableName,
+            value: String(table.id),
+            isLeaf: true
+          }));
+        }
+      }
+      return [];
+    };
+
+    const handleCascaderChange = async (value: string[] | undefined) => {
+      // 处理 undefined 或空值的情况
+      const newValue = value && Array.isArray(value) ? value : [];
+      setCascaderValue(newValue);
+
+      // 同步更新 intermediateTable 状态和表单字段值
+      if (newValue.length === 2 && newValue[1]) {
+        // 从 cascaderOptions 中获取数据库名
+        const databaseId = Number(newValue[0]);
+        const tableId = Number(newValue[1]);
+        const databaseOption = cascaderOptions.find(
+          (opt) => opt.value === String(databaseId)
+        );
+        const databaseName = databaseOption?.label || newValue[0];
+
+        // 从 tableListMap 中获取表名
+        const tables = tableListMap[databaseId] || [];
+        const tableItem = tables.find((t) => t.id === tableId);
+        const tableName = tableItem?.tableName || newValue[1];
+
+        // 更新 intermediateTable 状态
+        setIntermediateTable((prev) => ({
+          ...prev,
+          database: databaseName,
+          table: tableName
+        }));
+        setSelectedDatabase(databaseName);
+        setSelectedTable(tableName);
+
+        // 更新表单字段值，用于validator验证
+        form.setFieldValue('databaseTable', `${databaseName}/${tableName}`);
+      } else {
+        // 清空选择时，也清空 intermediateTable
+        setIntermediateTable((prev) => ({
+          ...prev,
+          database: undefined,
+          table: undefined
+        }));
+        setSelectedDatabase(undefined);
+        setSelectedTable(undefined);
+
+        // 清空表单字段值
+        form.setFieldValue('databaseTable', undefined);
+      }
+
+      // 当 table 值变化且有值时，调用接口获取字段列表
+      if (newValue.length === 2 && newValue[1]) {
+        const tableId = Number(newValue[1]);
+        if (!isNaN(tableId) && tableId > 0) {
+          setFieldsLoading(true);
+          try {
+            const response = await listMetadataIcebergTiDBTable({
+              pageNum: 1,
+              pageSize: 1000, // 加载所有字段
+              filters: {
+                tableId
+              }
+            });
+
+            if (response.status === 200 && response.code === '') {
+              const fieldList = response.data.data?.list || [];
+
+              // 将返回的字段列表转换为 AttributeField 格式
+              const fields: AttributeField[] = fieldList.map(
+                (field, index) => ({
+                  tableField: field.fieldName, // 表字段名
+                  selected: true, // 默认全部选中
+                  attributeName: field.fieldName, // 属性名称，默认与表字段名相同
+                  fieldType: field.dataType || 'STRING', // 字段类型
+                  isPrimary: index === 0 // 第一个字段默认为主键
+                })
+              );
+
+              setAttributeFields(fields);
+              form.setFieldValue('attributeFields', fields);
+              setFileUploaded(true);
+            } else {
+              Message.error(response.message || '加载字段列表失败');
+              setAttributeFields([]);
+              form.setFieldValue('attributeFields', []);
+              setFileUploaded(false);
+            }
+          } catch (error) {
+            console.error('加载字段列表失败:', error);
+            Message.error('加载字段列表失败');
+            setAttributeFields([]);
+            form.setFieldValue('attributeFields', []);
+            setFileUploaded(false);
+          } finally {
+            setFieldsLoading(false);
+          }
+        } else {
+          // 如果 tableId 无效，清空字段列表
+          setAttributeFields([]);
+          form.setFieldValue('attributeFields', []);
+          setFileUploaded(false);
+        }
+      } else {
+        // 如果没有选择表，清空字段列表
+        setAttributeFields([]);
+        form.setFieldValue('attributeFields', []);
+        setFileUploaded(false);
+      }
+    };
+
     const handleIntermediateTableTypeChange = (
       type: 'local_csv' | 'data_lake_sync'
     ) => {
-      setIntermediateTable({
-        ...intermediateTable,
-        type
-      });
-    };
-
-    const handleIntermediateTableFileChange = (fileData: any) => {
-      // FieldImportUpload 返回的是字段数据数组或文件对象
-      // 这里我们需要存储文件信息，然后加载字段
-      const file =
-        Array.isArray(fileData) && fileData.length > 0 ? fileData[0] : fileData;
+      // 切换到本地CSV导入时，清空数据库和表
+      if (type === 'local_csv') {
+        setSelectedDatabase(undefined);
+        setSelectedTable(undefined);
+        setCascaderValue([]);
+        form.setFieldsValue({
+          databaseTable: undefined
+        });
+      }
+      // 切换数据源类型时，清空上传的本地文件和数据库/表
       const newIntermediateTable = {
-        ...intermediateTable,
-        file: fileData // 存储返回的数据，可能是字段数组
+        type,
+        database: undefined,
+        table: undefined,
+        file: undefined, // 切换类型时清空文件
+        filePath: undefined // 切换类型时清空文件路径
       };
       setIntermediateTable(newIntermediateTable);
+      // 切换数据源类型时清空属性字段映射
       setAttributeFields([]);
       form.setFieldValue('attributeFields', []);
       setFileUploaded(false);
 
-      // 如果返回的是字段数据数组，直接使用；否则调用API加载
-      if (Array.isArray(fileData) && fileData.length > 0) {
-        // 假设返回的是字段数据，需要转换为 AttributeField 格式
-        // 这里先调用 loadAttributeFields 来模拟加载
-        loadAttributeFields(fileData);
-      } else if (fileData) {
-        // 如果是文件对象，调用API加载字段
-        loadAttributeFields(fileData);
+      // 如果切换到数据湖同步，加载数据库列表
+      if (type === 'data_lake_sync') {
+        loadDatabaseList();
       }
     };
 
-    const handleSubmit = async () => {
+    // 当数据源类型为 data_lake_sync 时，加载数据库列表
+    useEffect(() => {
+      if (
+        intermediateTable.type === 'data_lake_sync' &&
+        cascaderOptions.length === 0
+      ) {
+        loadDatabaseList();
+      }
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [intermediateTable.type]);
+
+    const handleIntermediateTableFileChange = (fileData: any) => {
+      // FieldImportUpload 已经上传并解析了文件，fileData 是服务器返回的数据结构
+      // 包含 { columnList: string[], path: string }
+      if (!fileData || (Array.isArray(fileData) && fileData.length === 0)) {
+        // 文件被移除
+        setIntermediateTable({
+          ...intermediateTable,
+          file: undefined,
+          filePath: undefined
+        });
+        setAttributeFields([]);
+        form.setFieldValue('attributeFields', []);
+        setFileUploaded(false);
+        return;
+      }
+
+      // 处理返回的数据结构
+      const responseData =
+        Array.isArray(fileData) && fileData.length > 0 ? fileData[0] : fileData;
+
+      // 检查是否是服务器返回的数据结构（包含 columnList 和 path）
+      if (responseData && responseData.columnList && responseData.path) {
+        const { columnList, path } = responseData;
+
+        // 保存文件路径
+        const newIntermediateTable = {
+          ...intermediateTable,
+          type: 'local_csv' as const,
+          file: undefined, // 不需要保存文件对象，只需要路径
+          filePath: path
+        };
+        setIntermediateTable(newIntermediateTable);
+
+        // 将 columnList 转换为 AttributeField 格式
+        const fields: AttributeField[] = columnList.map((column, index) => ({
+          tableField: column, // 表字段名
+          selected: true, // 默认全部选中
+          attributeName: column, // 属性名称，默认与表字段名相同
+          fieldType: 'STRING', // 默认类型
+          isPrimary: index === 0 // 第一个字段默认为主键
+        }));
+
+        setAttributeFields(fields);
+        form.setFieldValue('attributeFields', fields);
+        setFileUploaded(true);
+      }
+    };
+
+    const handleSubmit = () => {
       try {
-        const values = await form.validate();
+        // 先验证表单
+        form.validate().catch(() => {
+          // 验证失败时，错误会在表单中显示
+        });
+
+        // 获取所有字段值
+        const values = form.getFieldsValue();
+
+        // 使用多种方式获取 sourceObjectType 和 targetObjectType
+        // 1. 优先使用 Form.useWatch 的值（实时监听）
+        // 2. 其次使用 form.getFieldValue() 单独获取
+        // 3. 最后从 form.getFieldsValue() 中获取
+        const currentSourceObjectType =
+          sourceObjectType ||
+          form.getFieldValue('sourceObjectType') ||
+          values.sourceObjectType;
+        const currentTargetObjectType =
+          targetObjectType ||
+          form.getFieldValue('targetObjectType') ||
+          values.targetObjectType;
 
         // 验证链接对
-        if (!values.sourceObjectType || !values.targetObjectType) {
+        if (!currentSourceObjectType || !currentTargetObjectType) {
           Message.warning('请选择源对象类型和目标对象类型');
           return;
         }
 
         if (linkType === 'N:N') {
           if (
-            !intermediateTable.file &&
-            intermediateTable.type === 'local_csv'
+            intermediateTable.type === 'local_csv' &&
+            !intermediateTable.filePath
           ) {
             Message.warning('请上传中间表文件');
+            return;
+          }
+          if (
+            intermediateTable.type === 'data_lake_sync' &&
+            (!intermediateTable.database || !intermediateTable.table)
+          ) {
+            Message.warning('请选择数据库和表');
             return;
           }
 
@@ -338,15 +867,21 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
             return;
           }
         } else {
-          if (!values.targetObjectAttribute) {
-            Message.warning('请选择目标对象类型属性');
-            return;
-          }
+          // if (!values.targetObjectAttribute) {
+          //   Message.warning('请选择目标对象类型属性');
+          //   return;
+          // }
         }
 
         const formData: LinkFormData = {
-          ...values,
+          name: values.name || '',
+          id: values.id || '',
+          sourceObjectType: currentSourceObjectType,
+          targetObjectType: currentTargetObjectType,
           linkType,
+          targetObjectAttribute: values.targetObjectAttribute,
+          sourceAttribute: values.sourceAttribute,
+          targetAttribute: values.targetAttribute,
           intermediateTable: linkType === 'N:N' ? intermediateTable : undefined,
           attributeFields: linkType === 'N:N' ? attributeFields : []
         };
@@ -362,8 +897,6 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
       submit: handleSubmit
     }));
 
-    const sourceObjectType = Form.useWatch('sourceObjectType', form);
-    const targetObjectType = Form.useWatch('targetObjectType', form);
     const targetObjectAttribute = Form.useWatch('targetObjectAttribute', form);
 
     return (
@@ -380,6 +913,7 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
             labelCol={{ span: 3 }}
             wrapperCol={{ span: 18 }}
             labelAlign="left"
+            className={styles['link-form']}
           >
             {/* 链接类型 */}
             <div className="my-[16px] text-[16px] font-[500] leading-[24px] text-[var(--color-text-1)]">
@@ -449,9 +983,35 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
             </FormItem>
 
             <FormItem
-              label="id："
+              label="链接id："
               field="id"
-              rules={[{ required: true, message: '请输入唯一标识' }]}
+              rules={[
+                { required: true, message: '请输入唯一标识' },
+                {
+                  validator: (value, callback) => {
+                    if (!value) {
+                      callback();
+                      return;
+                    }
+                    // 首字符必须为英文字母
+                    if (!/^[a-zA-Z]/.test(value)) {
+                      callback('首字符必须为英文字母');
+                      return;
+                    }
+                    // 仅允许英文字母与数字（不允许下划线及特殊符号）
+                    if (!/^[a-zA-Z0-9]+$/.test(value)) {
+                      callback('仅允许英文字母与数字(不允许下划线及特殊符号)');
+                      return;
+                    }
+                    callback();
+                  }
+                }
+              ]}
+              extra={
+                <div className="text-[12px] text-[var(--color-text-4)]">
+                  首字符必须为英文字母;仅允许英文字母与数字(不允许下划线及特殊符号)
+                </div>
+              }
             >
               <Input
                 className="max-w-[640px]"
@@ -471,15 +1031,6 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
                     const targetType = form.getFieldValue('targetObjectType');
                     if (!sourceType || !targetType) {
                       callback('请选择源对象类型和目标对象类型');
-                    } else if (linkType !== 'N:N') {
-                      const targetAttr = form.getFieldValue(
-                        'targetObjectAttribute'
-                      );
-                      if (!targetAttr) {
-                        callback('请选择目标对象类型属性');
-                      } else {
-                        callback();
-                      }
                     } else {
                       callback();
                     }
@@ -534,6 +1085,7 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
                           <ObjectTypeSelect
                             value={targetObjectType}
                             onChange={(val) => {
+                              console.log('val11------->', val);
                               form.setFieldValue('targetObjectType', val);
                               form.setFieldValue(
                                 'targetObjectAttribute',
@@ -546,30 +1098,19 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
                             className="mb-0"
                           />
                         </div>
-                        <Select
+                        <Input
                           className={styles['table-select-wrapper']}
                           placeholder={
-                            targetObjectType ? '请选择属性' : '请先选择对象类型'
+                            targetObjectType
+                              ? targetPrimaryAttributeLoading
+                                ? '加载中...'
+                                : '暂无主键属性'
+                              : '请先选择对象类型'
                           }
-                          value={targetObjectAttribute}
-                          onChange={(val) => {
-                            form.setFieldValue('targetObjectAttribute', val);
-                          }}
-                          disabled={!targetObjectType}
+                          value={targetPrimaryAttribute?.name || ''}
+                          disabled
                           style={{ width: '50%' }}
-                          allowClear
-                        >
-                          {getAttributeOptions(targetObjectType).map(
-                            (option) => (
-                              <Select.Option
-                                key={option.value}
-                                value={option.value}
-                              >
-                                {option.label}
-                              </Select.Option>
-                            )
-                          )}
-                        </Select>
+                        />
                       </Input.Group>
                     </div>
                   </>
@@ -596,9 +1137,15 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
                       validator: (value, callback) => {
                         if (
                           intermediateTable.type === 'local_csv' &&
-                          !intermediateTable.file
+                          !intermediateTable.filePath
                         ) {
                           callback('请上传中间表文件');
+                        } else if (
+                          intermediateTable.type === 'data_lake_sync' &&
+                          (!intermediateTable.database ||
+                            !intermediateTable.table)
+                        ) {
+                          callback('请选择数据库和表');
                         } else {
                           callback();
                         }
@@ -618,24 +1165,104 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
                     {intermediateTable.type === 'local_csv' && (
                       <div>
                         <FieldImportUpload
+                          from="link_type"
                           accept=".csv"
                           fileType="csv"
                           maxSize={500}
-                          onFileChange={handleIntermediateTableFileChange}
+                          customAction={`${PrefixAimdp}/UploadOntologyEntityDataFile`}
+                          onFileChange={(file) => {
+                            // 文件被移除时，FieldImportUpload 传递空数组 []
+                            if (
+                              file === undefined ||
+                              (Array.isArray(file) && file.length === 0)
+                            ) {
+                              // 文件被移除
+                              setIntermediateTable((prev) => ({
+                                ...prev,
+                                file: undefined,
+                                filePath: undefined
+                              }));
+                              form.setFieldValue('intermediateTable', {
+                                ...intermediateTable,
+                                file: undefined
+                              });
+                              setAttributeFields([]);
+                              form.setFieldValue('attributeFields', []);
+                              setFileUploaded(false);
+                            } else {
+                              handleIntermediateTableFileChange(file);
+                            }
+                          }}
                           onUploadingChange={(isUploading) => {
                             // Handle uploading state if needed
                           }}
                         />
                       </div>
                     )}
-
-                    {intermediateTable.type === 'data_lake_sync' && (
-                      <div className="text-[14px] text-[var(--color-text-3)]">
-                        数据湖同步功能待实现
-                      </div>
-                    )}
                   </div>
                 </FormItem>
+
+                {intermediateTable.type === 'data_lake_sync' && (
+                  <FormItem
+                    label="数据库/表："
+                    field="databaseTable"
+                    rules={[
+                      {
+                        required: true,
+                        validator: (value, callback) => {
+                          if (
+                            intermediateTable.type === 'data_lake_sync' &&
+                            (!cascaderValue || cascaderValue.length === 0)
+                          ) {
+                            callback('请选择数据库/表');
+                          } else {
+                            callback();
+                          }
+                        }
+                      }
+                    ]}
+                  >
+                    <div className="flex items-center">
+                      <Cascader
+                        placeholder="请选择数据库/表"
+                        dropdownMenuClassName={
+                          styles['link-type-cascader-dropdown']
+                        }
+                        value={
+                          cascaderValue.length > 0 ? cascaderValue : undefined
+                        }
+                        options={cascaderOptions}
+                        onChange={(value) => {
+                          handleCascaderChange(value as string[] | undefined);
+                        }}
+                        loadMore={handleCascaderLoadMore}
+                        allowClear
+                        renderFormat={(valueShow) => {
+                          if (valueShow.length === 0) return '';
+                          if (valueShow.length === 1) {
+                            return valueShow[0];
+                          }
+                          // 显示格式：数据库名/表名
+                          return `${valueShow[0]}/${valueShow[1]}`;
+                        }}
+                        renderOption={(option) => {
+                          return (
+                            <EllipsisPopover
+                              preferTypography
+                              value={option.label}
+                            />
+                          );
+                        }}
+                        showSearch
+                        dropdownMenuColumnStyle={{
+                          whiteSpace: 'nowrap',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis'
+                        }}
+                      />
+                    </div>
+                  </FormItem>
+                )}
 
                 {/* 关联中间表 */}
                 <div className="my-[16px] flex items-center gap-[8px] text-[16px] font-[500] leading-[24px] text-[var(--color-text-1)]">
@@ -677,6 +1304,7 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
                           form.setFieldValue('sourceAttribute', val);
                         }}
                         disabled={!fileUploaded}
+                        loading={sourceAttributesLoading}
                         allowClear
                       >
                         {getAttributeOptions(sourceObjectType).map((option) => (
@@ -710,6 +1338,7 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
                           form.setFieldValue('targetAttribute', val);
                         }}
                         disabled={!fileUploaded}
+                        loading={targetAttributesLoading}
                         allowClear
                       >
                         {getAttributeOptions(targetObjectType).map((option) => (
@@ -731,6 +1360,7 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
                 </div>
                 <FormItem
                   field="attributeFields"
+                  className={styles['attribute-fields-form-item']}
                   rules={[
                     {
                       required: true,

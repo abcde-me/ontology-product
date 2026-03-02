@@ -825,6 +825,12 @@ export const ModaForgeResourceEndpoints = {
   // 本体函数文件上传
   UploadOntologyActionDataFileApi:
     PrefixAimdp + '/UploadOntologyActionDataFile',
+  // 创建链接类型
+  CreateOntologyLinkTypeApi: PrefixAimdp + '/CreateOntologyLinkType',
+  // 更新链接类型
+  UpdateOntologyLinkTypeApi: PrefixAimdp + '/UpdateOntologyLinkType',
+
+  // 本体行为
   // ===================== 本体行为相关 =====================
   // 创建本体行为
   CreateOntologyActionApi: PrefixAimdp + '/CreateOntologyAction',

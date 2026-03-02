@@ -14,6 +14,7 @@ interface FieldImportUploadProps {
   fileType?: 'excel' | 'csv'; // 文件类型，用于不同的验证和提示
   maxSize?: number; // 文件大小限制（MB），默认50MB
   customAction?: string; // 自定义上传接口地址
+  from?: 'object_type' | 'link_type';
 }
 
 const FieldImportUpload: React.FC<FieldImportUploadProps> = ({
@@ -22,7 +23,8 @@ const FieldImportUpload: React.FC<FieldImportUploadProps> = ({
   accept = '.csv',
   fileType = 'csv',
   maxSize = 50,
-  customAction
+  customAction,
+  from = 'object_type'
 }) => {
   const [fileList, setFileList] = useState<any>([]);
   const projectId = useUserInfoStore((state) => state.projectId);
@@ -116,7 +118,7 @@ const FieldImportUpload: React.FC<FieldImportUploadProps> = ({
 
   const handleDownloadTemplate = async () => {
     try {
-      const res = await getTemplateFile({ file_name: 'object_type' });
+      const res = await getTemplateFile({ file_name: from });
 
       if (res?.status !== 200 || res?.code !== '') {
         Message.error(res.message ?? '下载模板失败');

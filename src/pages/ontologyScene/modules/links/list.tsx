@@ -143,7 +143,7 @@ export default function OntologySceneLinksList() {
   // 处理编辑
   const handleEdit = (record: LinkInfo) => {
     history.push(
-      `/tenant/compute/modaforge/ontologyScene/detail/${OSId}/links/edit/${record.id || record.code}`
+      `/tenant/compute/modaforge/ontologyScene/detail/${OSId}/links/edit/${record.id}`
     );
   };
 

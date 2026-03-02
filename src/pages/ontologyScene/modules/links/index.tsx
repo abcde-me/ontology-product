@@ -33,7 +33,7 @@ export default function OntologySceneObjectType() {
           component={OntologySceneLinksCreate}
         />
         <Route
-          path={`${match.path}/edit/:objectTypeId`}
+          path={`${match.path}/edit/:linkId`}
           component={OntologySceneLinksEdit}
         />
       </Switch>
