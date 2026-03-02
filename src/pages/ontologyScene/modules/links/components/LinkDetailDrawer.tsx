@@ -10,18 +10,34 @@ import {
 } from '@arco-design/web-react';
 import { IconCopy } from '@arco-design/web-react/icon';
 import copy from 'copy-to-clipboard';
-import { EllipsisPopover, NoDataCard } from '@ceai-front/arco-material';
+import {
+  DotStatus,
+  EllipsisPopover,
+  NoDataCard
+} from '@ceai-front/arco-material';
 import { OsDrawer } from '@/pages/ontologyScene/componens';
+import {
+  getOntologyLinkType,
+  listOntologyLinkTypeData,
+  listOntologyLinkTypeColumn
+} from '@/api/ontologySceneLibrary/links';
+import { GetOntologyLinkTypeRes, LinkTypeAttributeInfo } from '@/types/links';
+import { LinkType, SyncStatus } from '@/types/graphApi';
+import { getLinkTypeText } from '@/pages/ontologyScene/utils';
+import {
+  OBJECT_TYPE_SYNC_STATUS_CONFIG,
+  OBJECT_TYPE_ICON_OPTIONS
+} from '@/pages/ontologyScene/common/constants';
+import { isNil } from 'lodash-es';
 
 const TabPane = Tabs.TabPane;
 
-export type LinkType = '1:1' | '1:N' | 'N:N';
-export type SyncStatus = 'success' | 'running' | 'failed';
+export type SyncStatusDisplay = 'success' | 'running' | 'failed';
 
 export interface LinkDetailData {
   id: string;
   name: string;
-  syncStatus: SyncStatus;
+  syncStatus: SyncStatusDisplay;
   linkType: LinkType;
   sourceObjectType: {
     id?: string;
@@ -37,19 +53,6 @@ export interface LinkDetailData {
   attributeCount: number;
 }
 
-export interface LinkInstanceItem {
-  id: string;
-  sourceInstance: string;
-  targetInstance: string;
-}
-
-export interface LinkAttributeItem {
-  id: string;
-  attributeName: string;
-  tableField: string;
-  fieldType: string;
-}
-
 interface LinkDetailDrawerProps {
   visible: boolean;
   onClose: () => void;
@@ -58,82 +61,66 @@ interface LinkDetailDrawerProps {
   /** 可选：用于快速首屏展示（例如从列表行直接带入） */
   data?: Partial<LinkDetailData>;
   defaultActiveTab?: 'instances' | 'attributes';
-  fetchBasicInfo?: (linkId: string) => Promise<LinkDetailData>;
+  fetchBasicInfo?: (linkId: string) => Promise<GetOntologyLinkTypeRes>;
   fetchInstances?: (
     linkId: string,
     params: { page: number; pageSize: number }
-  ) => Promise<{ items: LinkInstanceItem[]; total: number }>;
+  ) => Promise<{ items: Record<string, any>[]; total: number }>;
   fetchAttributes?: (
     linkId: string,
     params: { page: number; pageSize: number }
-  ) => Promise<{ items: LinkAttributeItem[]; total: number }>;
+  ) => Promise<{ items: LinkTypeAttributeInfo[]; total: number }>;
   defaultInstancesPageSize?: number;
   defaultAttributesPageSize?: number;
 }
 
-const SYNC_STATUS_CONFIG: Record<SyncStatus, { text: string; color: string }> =
-  {
-    success: { text: '成功', color: '#00b42a' },
-    running: { text: '运行中', color: '#165dff' },
-    failed: { text: '失败', color: '#f53f3f' }
-  };
-
-const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-
-async function defaultFetchBasicInfo(linkId: string): Promise<LinkDetailData> {
-  await sleep(200);
-  return {
-    id: linkId,
-    name: `链接-${linkId}`,
-    syncStatus: 'success',
-    linkType: '1:1',
-    sourceObjectType: { id: 'source', name: '气象站', iconColor: '#00b42a' },
-    targetObjectType: { id: 'target', name: '地理区域', iconColor: '#722ED1' },
-    instanceCount: 100,
-    attributeCount: 12
-  };
+// 默认获取基本信息函数
+async function defaultFetchBasicInfo(
+  linkId: string
+): Promise<GetOntologyLinkTypeRes> {
+  const res = await getOntologyLinkType({ id: Number(linkId) });
+  if (res.status === 200 && res.code === '' && res.data) {
+    return res.data;
+  }
+  throw new Error(res.message || '获取链接基本信息失败');
 }
 
+// 默认获取实例列表函数
 async function defaultFetchInstances(
   linkId: string,
   params: { page: number; pageSize: number }
-): Promise<{ items: LinkInstanceItem[]; total: number }> {
-  await sleep(240);
-  const total = 100;
-  const start = (params.page - 1) * params.pageSize;
-  const end = Math.min(start + params.pageSize, total);
-  const items: LinkInstanceItem[] = Array.from({
-    length: Math.max(end - start, 0)
-  }).map((_, idx) => {
-    const n = start + idx + 1;
-    return {
-      id: `${linkId}-INS-LINK-${String(n).padStart(3, '0')}`,
-      sourceInstance: `WS-${String(n).padStart(2, '0')}`,
-      // 为了贴近 UI 截图：右侧展示类似 “8.5m/s” 的值
-      targetInstance: `${(Math.random() * 30).toFixed(1)}m/s`
-    };
+): Promise<{ items: Record<string, any>[]; total: number }> {
+  const res = await listOntologyLinkTypeData({
+    id: Number(linkId),
+    page: params.page,
+    pageSize: params.pageSize
   });
-  return { items, total };
+  if (res.status === 200 && res.code === '' && res.data) {
+    return {
+      items: res.data.result || [],
+      total: res.data.totalCount || 0
+    };
+  }
+  throw new Error(res.message || '获取链接实例列表失败');
 }
 
+// 默认获取属性列表函数
 async function defaultFetchAttributes(
   linkId: string,
   params: { page: number; pageSize: number }
-): Promise<{ items: LinkAttributeItem[]; total: number }> {
-  await sleep(180);
-  const all: LinkAttributeItem[] = Array.from({ length: 12 }).map((_, idx) => {
-    const n = (idx % 3) + 1;
-    return {
-      id: `${linkId}-ATTR-${idx + 1}`,
-      attributeName: `WS-0${n}`,
-      tableField: `${(Math.random() * 30).toFixed(1)}m/s`,
-      fieldType: 'STRING'
-    };
+): Promise<{ items: LinkTypeAttributeInfo[]; total: number }> {
+  const res = await listOntologyLinkTypeColumn({
+    linkTypeID: Number(linkId),
+    pageNo: params.page,
+    pageSize: params.pageSize
   });
-  const total = all.length;
-  const start = (params.page - 1) * params.pageSize;
-  const end = Math.min(start + params.pageSize, total);
-  return { items: all.slice(start, end), total };
+  if (res.status === 200 && res.code === '' && res.data) {
+    return {
+      items: res.data.result || [],
+      total: res.data.totalCount || 0
+    };
+  }
+  throw new Error(res.message || '获取链接属性列表失败');
 }
 
 export default function LinkDetailDrawer({
@@ -166,23 +153,12 @@ export default function LinkDetailDrawer({
   const fetchInstancesFn = fetchInstances || defaultFetchInstances;
   const fetchAttributesFn = fetchAttributes || defaultFetchAttributes;
 
-  const [basicInfo, setBasicInfo] = useState<LinkDetailData | undefined>(
-    data?.id
-      ? ({
-          id: data.id,
-          name: data.name || '-',
-          syncStatus: data.syncStatus || 'success',
-          linkType: data.linkType || '1:1',
-          sourceObjectType: data.sourceObjectType || { name: '-' },
-          targetObjectType: data.targetObjectType || { name: '-' },
-          instanceCount: Number(data.instanceCount) || 0,
-          attributeCount: Number(data.attributeCount) || 0
-        } as LinkDetailData)
-      : undefined
-  );
+  const [basicInfo, setBasicInfo] = useState<
+    GetOntologyLinkTypeRes | undefined
+  >(undefined);
   const [basicInfoLoading, setBasicInfoLoading] = useState(false);
 
-  const [instancesData, setInstancesData] = useState<LinkInstanceItem[]>([]);
+  const [instancesData, setInstancesData] = useState<Record<string, any>[]>([]);
   const [instancesLoading, setInstancesLoading] = useState(false);
   const [instancesPagination, setInstancesPagination] = useState({
     current: 1,
@@ -190,7 +166,9 @@ export default function LinkDetailDrawer({
     total: 0
   });
 
-  const [attributesData, setAttributesData] = useState<LinkAttributeItem[]>([]);
+  const [attributesData, setAttributesData] = useState<LinkTypeAttributeInfo[]>(
+    []
+  );
   const [attributesLoading, setAttributesLoading] = useState(false);
   const [attributesPagination, setAttributesPagination] = useState({
     current: 1,
@@ -213,7 +191,7 @@ export default function LinkDetailDrawer({
         setInstancesPagination({
           current: page,
           pageSize,
-          total: Number(res.total) || 0
+          total: res.total || 0
         });
       } catch (e) {
         Message.error('加载实例失败');
@@ -234,7 +212,7 @@ export default function LinkDetailDrawer({
         setAttributesPagination({
           current: page,
           pageSize,
-          total: Number(res.total) || 0
+          total: res.total || 0
         });
       } catch (e) {
         Message.error('加载属性失败');
@@ -266,25 +244,14 @@ export default function LinkDetailDrawer({
   }, [visible, resolvedLinkId]);
 
   const displayData = basicInfo;
-  const syncStatusConfig = displayData
-    ? SYNC_STATUS_CONFIG[displayData.syncStatus]
-    : SYNC_STATUS_CONFIG.success;
 
   const instanceCount = useMemo(() => {
-    return (
-      Number(displayData?.instanceCount) ||
-      Number(instancesPagination.total) ||
-      0
-    );
-  }, [displayData?.instanceCount, instancesPagination.total]);
+    return instancesPagination.total || 0;
+  }, [instancesPagination.total]);
 
   const attributeCount = useMemo(() => {
-    return (
-      Number(displayData?.attributeCount) ||
-      Number(attributesPagination.total) ||
-      0
-    );
-  }, [displayData?.attributeCount, attributesPagination.total]);
+    return attributesPagination.total || 0;
+  }, [attributesPagination.total]);
 
   const handleEdit = () => {
     if (!resolvedLinkId) return;
@@ -294,58 +261,92 @@ export default function LinkDetailDrawer({
   };
 
   const renderObjectTypeCard = (
-    objectType: { name: string; iconColor?: string },
+    objectType: { name?: string; icon?: string } | undefined,
     isSource: boolean
-  ) => (
-    <div
-      className="flex flex-1 items-center gap-3 rounded-lg px-4 py-3"
-      style={{
-        backgroundColor: isSource ? '#E8F4FF' : '#F5E8FF',
-        minHeight: '56px'
-      }}
-    >
+  ) => {
+    const name = objectType?.name || '-';
+    // 根据 icon 字段匹配对应的图标
+    const iconOption = objectType?.icon
+      ? OBJECT_TYPE_ICON_OPTIONS.find(
+          (option) => option.value === objectType.icon
+        )
+      : null;
+    const IconComponent = iconOption?.icon ?? OBJECT_TYPE_ICON_OPTIONS[0].icon;
+
+    return (
       <div
-        className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded"
-        style={{ backgroundColor: objectType.iconColor || '#165dff' }}
+        className="flex flex-1 items-center gap-3 rounded-lg px-4 py-3"
+        style={{
+          backgroundColor: '#fff',
+          minHeight: '56px'
+        }}
       >
-        <div className="h-3 w-3 rounded-sm bg-white" />
+        <div className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded">
+          <IconComponent className="h-6 w-6" />
+        </div>
+        <div className="min-w-0 flex-1 font-PingFangSc text-sm font-normal leading-[22px] text-[#23293b]">
+          <EllipsisPopover preferTypography value={name} />
+        </div>
+        <div className="flex items-center">
+          <div className="h-2 w-2 rounded-full bg-[#00b42a]" />
+        </div>
       </div>
-      <div className="min-w-0 flex-1 font-PingFangSc text-sm font-normal leading-[22px] text-[#23293b]">
-        <EllipsisPopover preferTypography value={objectType.name || '-'} />
-      </div>
-      <div className="flex items-center">
-        <div className="h-2 w-2 rounded-full bg-[#00b42a]" />
-      </div>
-    </div>
-  );
+    );
+  };
 
-  const instanceColumns: TableColumnProps<LinkInstanceItem>[] = [
-    {
-      title: '源对象类型',
-      dataIndex: 'sourceInstance',
-      width: 240
-    },
-    {
-      title: '目标对象类型',
-      dataIndex: 'targetInstance',
-      width: 240
+  // 动态生成实例表格列
+  const instanceColumns = useMemo<
+    TableColumnProps<Record<string, any>>[]
+  >(() => {
+    if (!instancesData || instancesData.length === 0) {
+      return [];
     }
-  ];
 
-  const attributeColumns: TableColumnProps<LinkAttributeItem>[] = [
+    // 从第一个对象中获取所有属性名
+    const firstRecord = instancesData[0];
+    const keys = Object.keys(firstRecord);
+
+    if (keys.length === 0) {
+      return [];
+    }
+
+    // 计算列宽
+    const columnCount = keys.length;
+    const fixedWidth = 240; // 固定列宽
+    const tableWidth = 480; // 假设表格总宽度
+    const averageWidth = Math.floor(tableWidth / columnCount);
+
+    // 根据列数决定列宽策略
+    const shouldUseFixedWidth = columnCount > 2;
+    const columnWidth = shouldUseFixedWidth ? fixedWidth : averageWidth;
+
+    // 生成列配置
+    return keys.map((key) => ({
+      title: <EllipsisPopover value={key} className="pointer-events-auto" />,
+      dataIndex: key,
+      width: columnWidth,
+      ellipsis: true,
+      render: (text: any) => {
+        return <EllipsisPopover value={String(text ?? '')} />;
+      }
+    }));
+  }, [instancesData]);
+
+  // 属性表格列，直接使用 API 返回的字段
+  const attributeColumns: TableColumnProps<LinkTypeAttributeInfo>[] = [
     {
       title: '属性名称',
-      dataIndex: 'attributeName',
+      dataIndex: 'comment',
       width: 240
     },
     {
       title: '表字段',
-      dataIndex: 'tableField',
+      dataIndex: 'name',
       width: 240
     },
     {
       title: '字段类型',
-      dataIndex: 'fieldType',
+      dataIndex: 'columnType',
       width: 160
     }
   ];
@@ -384,11 +385,20 @@ export default function LinkDetailDrawer({
                   同步状态：
                 </div>
                 <div className="flex items-center gap-2 font-PingFangSc text-sm font-normal leading-[22px] text-[#23293b]">
-                  <div
-                    className="h-2 w-2 flex-shrink-0 rounded-full"
-                    style={{ backgroundColor: syncStatusConfig.color }}
-                  />
-                  <span>{syncStatusConfig.text}</span>
+                  {!isNil(displayData?.syncStatus) ? (
+                    <DotStatus
+                      text={
+                        OBJECT_TYPE_SYNC_STATUS_CONFIG[displayData.syncStatus]
+                          .text
+                      }
+                      color={
+                        OBJECT_TYPE_SYNC_STATUS_CONFIG[displayData.syncStatus]
+                          .color
+                      }
+                    />
+                  ) : (
+                    '-'
+                  )}
                 </div>
               </div>
             </div>
@@ -396,11 +406,11 @@ export default function LinkDetailDrawer({
             <div className="flex gap-[16px]">
               <div className="flex w-[418px] gap-[8px]">
                 <div className="w-[100px] flex-shrink-0 text-[14px] leading-[22px] text-[var(--color-text-4)]">
-                  id:
+                  链接id:
                 </div>
                 <div className="flex items-center gap-[4px]">
                   <span className="text-[14px] leading-[22px] text-[var(--color-text-1)]">
-                    {displayData?.id || resolvedLinkId || '-'}
+                    {displayData?.code || '-'}
                   </span>
                   {(displayData?.id || resolvedLinkId) && (
                     <IconCopy
@@ -419,7 +429,7 @@ export default function LinkDetailDrawer({
                   链接类型：
                 </div>
                 <div className="text-[14px] leading-[22px] text-[var(--color-text-1)]">
-                  {displayData?.linkType || '-'}
+                  {displayData?.type ? getLinkTypeText(displayData.type) : '-'}
                 </div>
               </div>
             </div>
@@ -431,22 +441,16 @@ export default function LinkDetailDrawer({
           <div className="text-[14px] font-[600] leading-[22px] text-[var(--color-text-1)]">
             关系对
           </div>
-          <div className="flex items-center gap-4">
-            {renderObjectTypeCard(
-              displayData?.sourceObjectType || { name: '-' },
-              true
-            )}
+          <div className="flex items-center gap-4 bg-[#F2F8FF] p-[12px]">
+            {renderObjectTypeCard(displayData?.sourceObjectTypeInfo, true)}
             <div className="flex w-[76px] min-w-[76px] items-center gap-2">
               <span className="h-0 flex-1 border-t border-dashed border-[#CBD5E1]" />
               <span className="rounded border border-[#E5E6EB] bg-white px-2 py-[2px] text-[12px] leading-[18px] text-[#23293b]">
-                {displayData?.linkType || '-'}
+                {displayData?.type ? getLinkTypeText(displayData.type) : '-'}
               </span>
               <span className="h-0 flex-1 border-t border-dashed border-[#CBD5E1]" />
             </div>
-            {renderObjectTypeCard(
-              displayData?.targetObjectType || { name: '-' },
-              false
-            )}
+            {renderObjectTypeCard(displayData?.targetObjectTypeInfo, false)}
           </div>
         </div>
 
@@ -458,16 +462,27 @@ export default function LinkDetailDrawer({
         >
           <TabPane key="instances" title={`实例(${instanceCount})`}>
             <div className="mt-[16px] flex flex-col gap-[16px]">
-              <Table
-                loading={instancesLoading}
-                columns={instanceColumns}
-                data={instancesData}
-                rowKey="id"
-                border={false}
-                pagination={false}
-                noDataElement={<NoDataCard title="暂无数据" />}
-                className="[&_.arco-table-td]:py-[10px] [&_.arco-table-th]:bg-[#f7f8fa] [&_.arco-table-th]:py-[10px]"
-              />
+              {instancesPagination.total === 0 ? (
+                <div className="flex justify-center py-[100px]">
+                  <NoDataCard title="暂无数据" />
+                </div>
+              ) : (
+                <Table
+                  loading={instancesLoading}
+                  columns={instanceColumns}
+                  data={instancesData}
+                  rowKey={(record) => {
+                    // 尝试使用可能的 id 字段，否则使用对象字符串化
+                    return String(
+                      record.id || record.link_id || JSON.stringify(record)
+                    );
+                  }}
+                  border={false}
+                  pagination={false}
+                  noDataElement={<NoDataCard title="暂无数据" />}
+                  className="[&_.arco-table-td]:py-[10px] [&_.arco-table-th]:bg-[#f7f8fa] [&_.arco-table-th]:py-[10px]"
+                />
+              )}
               {instancesPagination.total > 0 && (
                 <div className="flex justify-end pt-[16px]">
                   <Pagination
@@ -490,7 +505,7 @@ export default function LinkDetailDrawer({
                 loading={attributesLoading}
                 columns={attributeColumns}
                 data={attributesData}
-                rowKey="id"
+                rowKey={(record) => String(record.id || record.name || '')}
                 border={false}
                 pagination={false}
                 noDataElement={<NoDataCard title="暂无数据" />}

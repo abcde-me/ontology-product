@@ -32,20 +32,7 @@ import {
   OBJECT_TYPE_SYNC_STATUS_CONFIG,
   OBJECT_TYPE_SYNC_STATUS_FILTERS
 } from '../../common/constants';
-
-// 将 LinkType 枚举转换为字符串
-const getLinkTypeText = (type?: LinkType): '1:1' | '1:N' | 'N:N' => {
-  switch (type) {
-    case LinkType.ONE_TO_ONE:
-      return '1:1';
-    case LinkType.ONE_TO_MANY:
-      return '1:N';
-    case LinkType.MANY_TO_MANY:
-      return 'N:N';
-    default:
-      return '1:1';
-  }
-};
+import { getLinkTypeText } from '../../utils';
 
 // 将 SyncStatus 枚举转换为 LinkDetailDrawer 期望的字符串类型
 const convertSyncStatusToString = (
