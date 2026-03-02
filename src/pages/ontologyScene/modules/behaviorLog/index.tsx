@@ -130,7 +130,7 @@ export default function BehaviorLogList() {
   );
 
   // 使用 useTable hook
-  const { data, loading, pagination, submit, onChange } = useTable<
+  const { data, loading, pagination, submit, onChange, refresh } = useTable<
     BehaviorLogItem,
     any
   >({
@@ -160,7 +160,7 @@ export default function BehaviorLogList() {
         data: {
           items: result.items,
           total: result.total,
-          page: result.page,
+          page: result.pageNo, // 后端返回的是 pageNo，不是 page
           pageSize: result.pageSize
         }
       };
@@ -171,7 +171,8 @@ export default function BehaviorLogList() {
 
   // Tab 切换时重新加载数据
   const handleTabChange = (key: string) => {
-    setActiveTab(key as 'action' | 'function');
+    const newTab = key as 'action' | 'function';
+    setActiveTab(newTab);
     // 重置表单和过滤条件
     form.resetFields();
     setSourcesFilter([]);
@@ -179,6 +180,7 @@ export default function BehaviorLogList() {
     setObjectTypeFilter([]);
     setSortField(undefined);
     setSortOrder(undefined);
+    // activeTab 已经在 deps 中，会自动触发重新加载，但需要确保重置到第1页
     setTimeout(() => {
       submit();
     }, 0);
@@ -186,34 +188,39 @@ export default function BehaviorLogList() {
 
   // 处理表格变化（包括过滤和排序）
   const handleTableChange = (pag: any, sorter: any, filters: any) => {
-    // 处理来源过滤
-    if (filters && filters.sources) {
-      setSourcesFilter(filters.sources);
-    } else {
-      setSourcesFilter([]);
+    // 只有当 filters 不为 undefined 时才处理过滤逻辑
+    if (filters !== undefined) {
+      // 处理来源过滤
+      if (filters.sources) {
+        setSourcesFilter(filters.sources);
+      } else {
+        setSourcesFilter([]);
+      }
+
+      // 处理执行状态过滤
+      if (filters.run_status) {
+        setStatusFilter(filters.run_status);
+      } else {
+        setStatusFilter([]);
+      }
+
+      // 处理对象类型过滤
+      if (filters.ontologyObjectTypeName) {
+        setObjectTypeFilter(filters.ontologyObjectTypeName);
+      } else {
+        setObjectTypeFilter([]);
+      }
     }
 
-    // 处理执行状态过滤
-    if (filters && filters.run_status) {
-      setStatusFilter(filters.run_status);
-    } else {
-      setStatusFilter([]);
-    }
-
-    // 处理对象类型过滤
-    if (filters && filters.ontologyObjectTypeName) {
-      setObjectTypeFilter(filters.ontologyObjectTypeName);
-    } else {
-      setObjectTypeFilter([]);
-    }
-
-    // 处理排序
-    if (sorter && sorter.field && sorter.direction) {
-      setSortField(sorter.field);
-      setSortOrder(sorter.direction);
-    } else {
-      setSortField(undefined);
-      setSortOrder(undefined);
+    // 只有当 sorter 不为 undefined 时才处理排序逻辑
+    if (sorter !== undefined) {
+      if (sorter.field && sorter.direction) {
+        setSortField(sorter.field);
+        setSortOrder(sorter.direction);
+      } else {
+        setSortField(undefined);
+        setSortOrder(undefined);
+      }
     }
 
     // 调用原有的 onChange

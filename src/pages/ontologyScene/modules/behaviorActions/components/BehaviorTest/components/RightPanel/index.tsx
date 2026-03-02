@@ -132,11 +132,7 @@ export const RightPanel: React.FC = () => {
               field={param.code}
               required={param.enabledValidation}
               // @ts-ignore
-              rules={
-                param.enabledValidation
-                  ? buildFormFieldValidateRules(param)
-                  : []
-              }
+              rules={buildFormFieldValidateRules(param)}
               triggerPropName={
                 param.uiType === UiType.Switch ? 'checked' : 'value'
               }
