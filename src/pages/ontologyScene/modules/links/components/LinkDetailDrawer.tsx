@@ -388,11 +388,11 @@ export default function LinkDetailDrawer({
                   {!isNil(displayData?.syncStatus) ? (
                     <DotStatus
                       text={
-                        OBJECT_TYPE_SYNC_STATUS_CONFIG[displayData.syncStatus]
+                        OBJECT_TYPE_SYNC_STATUS_CONFIG[displayData!.syncStatus]
                           .text
                       }
                       color={
-                        OBJECT_TYPE_SYNC_STATUS_CONFIG[displayData.syncStatus]
+                        OBJECT_TYPE_SYNC_STATUS_CONFIG[displayData!.syncStatus]
                           .color
                       }
                     />
