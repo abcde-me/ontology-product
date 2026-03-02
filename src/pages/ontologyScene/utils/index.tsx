@@ -19,6 +19,7 @@ import {
   ObjectTypeSelect
 } from '@/pages/ontologyScene/componens';
 import styles from '../styles/index.module.scss';
+import { LinkType } from '@/types/graphApi';
 
 export const renderComponentByUiType = (type: UiType) => {
   switch (type) {
@@ -72,5 +73,19 @@ export const renderComponentByUiType = (type: UiType) => {
       return <ObjectInterfaceSelect />;
     default:
       return <Input placeholder={'请输入'} />;
+  }
+};
+
+// 将 LinkType 枚举转换为字符串
+export const getLinkTypeText = (type?: LinkType): '1:1' | '1:N' | 'N:N' => {
+  switch (type) {
+    case LinkType.ONE_TO_ONE:
+      return '1:1';
+    case LinkType.ONE_TO_MANY:
+      return '1:N';
+    case LinkType.MANY_TO_MANY:
+      return 'N:N';
+    default:
+      return '1:1';
   }
 };

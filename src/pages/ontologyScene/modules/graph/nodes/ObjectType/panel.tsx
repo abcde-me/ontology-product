@@ -479,21 +479,16 @@ const Panel: FC<any> = ({ id, data }) => {
                     </div>
 
                     {/* 关系图 */}
-                    <div className="flex items-center rounded-[4px] bg-[#F2F8FF] p-[12px]">
-                      {/* 左侧对象（当前节点） */}
+                    <div className="flex items-center">
                       {renderLinkCard(leftObjectType, true)}
-
-                      {/* 箭头和关系类型 */}
-                      <div className="flex flex-1 items-center gap-1">
-                        <div className="h-0.5 flex-1 border-t border-dashed border-gray-300"></div>
-                        <div className="rounded bg-gray-100 px-2 py-1 text-xs font-medium text-gray-600">
+                      <div className="flex w-[76px] min-w-[76px] items-center">
+                        <span className="h-0 flex-1 bg-white" />
+                        <span className="rounded border border-[#E5E6EB] bg-white px-2 py-[2px] text-[12px] leading-[18px] text-[#23293b]">
                           {linkType}
-                        </div>
-                        <div className="h-0.5 flex-1 border-t border-dashed border-gray-300"></div>
-                        <div className="h-0 w-0 border-b-2 border-l-4 border-t-2 border-b-transparent border-l-gray-400 border-t-transparent"></div>
+                        </span>
+                        <span className="h-0 flex-1 bg-white" />
+                        <div className="h-0 w-0 border-b-[4px] border-l-[6px] border-t-[4px] border-b-transparent border-l-gray-400 border-t-transparent"></div>
                       </div>
-
-                      {/* 右侧对象（关联节点） */}
                       {renderLinkCard(rightObjectType, false)}
                     </div>
                   </div>

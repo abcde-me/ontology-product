@@ -25,6 +25,7 @@ import { MarkerType } from 'reactflow';
 import { useDemoStore } from './common/store';
 import { useParams } from 'react-router-dom';
 import { OsEmptyStatusWrapper } from '@/pages/ontologyScene/componens';
+import GraphEmptyImage from '@/pages/ontologyScene/assets/graph-empty.png';
 
 const nodesConfig = [
   {
@@ -255,50 +256,52 @@ export default function OntologySceneGraph() {
   }
 
   return (
-    <OsEmptyStatusWrapper
-      className="flex h-full w-full flex-col overflow-hidden bg-white"
-      empty={isEmpty}
-      isShowCard={false}
-    >
-      <AIWorkflowProvider
-        nodes={nodesConfig}
-        initWorkflow={initWorkflow}
-        api={{
-          workflowNotExistedMarks: ['ResourceNotFound', '资源不存在'],
-          getWorkflow,
-          createWorkflow,
-          updateWorkflow
-        }}
-        nodesReadonlyChecker={nodesReadonlyChecker}
-        headerHeight={0}
-        edge={{
-          markerEnd: {
-            type: MarkerType.ArrowClosed,
-            width: 14,
-            height: 14,
-            color: '#C3C7D4'
-          },
-          targetXOffset: -8,
-          labelRenderer: CustomLabel
-        }}
-        events={{
-          onNodeClick: (node) => {
-            setShowCustomEdgePanel(false);
-          }
-        }}
-        subHeader={{ fullyCustomSubheader: <SubHeader /> }}
-        rightPanels={[
-          {
-            id: 'custom-edge-panel',
-            isShow: showCustomEdgePanel,
-            panel: EdgePanel
-          }
-        ]}
-      >
-        <AIWorflow
-          className={classNames(styles['ai-workflow'], styles['edge-style'])}
-        />
-      </AIWorkflowProvider>
-    </OsEmptyStatusWrapper>
+    <div className="flex h-full w-full flex-col overflow-hidden bg-white">
+      {isEmpty ? (
+        <div className="flex h-full w-full items-center justify-center">
+          <img className="w-[702px]" src={GraphEmptyImage} alt="empty" />
+        </div>
+      ) : (
+        <AIWorkflowProvider
+          nodes={nodesConfig}
+          initWorkflow={initWorkflow}
+          api={{
+            workflowNotExistedMarks: ['ResourceNotFound', '资源不存在'],
+            getWorkflow,
+            createWorkflow,
+            updateWorkflow
+          }}
+          nodesReadonlyChecker={nodesReadonlyChecker}
+          headerHeight={0}
+          edge={{
+            markerEnd: {
+              type: MarkerType.ArrowClosed,
+              width: 14,
+              height: 14,
+              color: '#C3C7D4'
+            },
+            targetXOffset: -8,
+            labelRenderer: CustomLabel
+          }}
+          events={{
+            onNodeClick: (node) => {
+              setShowCustomEdgePanel(false);
+            }
+          }}
+          subHeader={{ fullyCustomSubheader: <SubHeader /> }}
+          rightPanels={[
+            {
+              id: 'custom-edge-panel',
+              isShow: showCustomEdgePanel,
+              panel: EdgePanel
+            }
+          ]}
+        >
+          <AIWorflow
+            className={classNames(styles['ai-workflow'], styles['edge-style'])}
+          />
+        </AIWorkflowProvider>
+      )}
+    </div>
   );
 }
