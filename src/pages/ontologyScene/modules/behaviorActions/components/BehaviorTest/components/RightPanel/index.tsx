@@ -7,6 +7,7 @@ import { renderComponentByUiType } from '@/pages/ontologyScene/utils';
 import { UiType } from '@/pages/ontologyScene/types/ontologyFunction';
 import BehaviorConfigSvg from '@/assets/benti/behaviorConfig.svg';
 import BehaviorTestSvg from '@/assets/benti/behaviorTest.svg';
+import { buildFormFieldValidateRules } from '@/pages/ontologyScene/modules/behaviorActionDetail/utils';
 
 export const RightPanel: React.FC = () => {
   const selectedNodeId = useUIStore((state) => state.selectedNodeId);
@@ -111,7 +112,7 @@ export const RightPanel: React.FC = () => {
           <BehaviorConfigSvg className="h-3.5 w-3.5" />
           <span className="text-base font-medium text-[#000]">参数配置</span>
         </div>
-        {/* <BehaviorTestSvg className="h-4 w-4 cursor-pointer" /> */}
+        <BehaviorTestSvg className="h-4 w-4 cursor-pointer" />
       </div>
 
       {/* 表单内容 */}
@@ -130,12 +131,12 @@ export const RightPanel: React.FC = () => {
               label={param.name}
               field={param.code}
               required={param.enabledValidation}
-              rules={[
-                {
-                  required: param.enabledValidation,
-                  message: `请输入${param.name}`
-                }
-              ]}
+              // @ts-ignore
+              rules={
+                param.enabledValidation
+                  ? buildFormFieldValidateRules(param)
+                  : []
+              }
               triggerPropName={
                 param.uiType === UiType.Switch ? 'checked' : 'value'
               }
