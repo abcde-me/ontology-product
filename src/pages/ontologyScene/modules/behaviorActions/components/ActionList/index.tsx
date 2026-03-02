@@ -27,11 +27,17 @@ import {
 import { isNil } from 'lodash-es';
 import ObjectTypeTag from '../../../../componens/ObjectTypeTag';
 import ObjectTypeDetailDrawer from '../../../../componens/ObjectTypeDetailDrawer';
+import { FunctionDetailDrawer } from '@/pages/ontologyScene/componens/FunctionDetailDrawer';
+
+const baseUrl = '/tenant/compute/modaforge/ontologyScene/detail';
 
 export const ActionList = (props: {
   onViewDetail: (data: BehaviorActionItem) => void;
 }) => {
+  // 查看的对象类型
   const [currentObj, setCurrentObj] = useState<string>();
+  // 查看的函数
+  const [currentFunction, setCurrentFunction] = useState<number>();
   const [form] = Form.useForm();
   const { id: OSId, moduleType = ONTOLOGY_SCENE_MENU_ITEM_KEYS.GRAPH } =
     useParams<{
@@ -68,7 +74,6 @@ export const ActionList = (props: {
     type?: 'view' | 'edit' | 'create',
     data?: BehaviorActionItem
   ) => {
-    const baseUrl = '/tenant/compute/modaforge/ontologyScene/detail';
     history.push(
       `${baseUrl}/${OSId}/behaviorActions/${type}/${data ? data.id : '_NEW_'}`
     );
@@ -123,11 +128,14 @@ export const ActionList = (props: {
     {
       title: '函数',
       dataIndex: 'functionName',
-      render: (value) => (
+      render: (value, record) => (
         <div
           className={
             'hover-blue w-full overflow-hidden text-ellipsis whitespace-nowrap font-PingFangSc text-[14px] font-normal leading-[22px] '
           }
+          onClick={() => {
+            setCurrentFunction(record.functionId);
+          }}
         >
           {value}
         </div>
@@ -259,6 +267,16 @@ export const ActionList = (props: {
           setCurrentObj(undefined);
         }}
         objectTypeId={currentObj}
+      />
+      <FunctionDetailDrawer
+        data={currentFunction}
+        visible={!!currentFunction}
+        onEdit={() => {
+          history.push(`${baseUrl}/${OSId}/functions/edit/${currentFunction}`);
+        }}
+        onCancel={() => {
+          setCurrentFunction(undefined);
+        }}
       />
     </div>
   );

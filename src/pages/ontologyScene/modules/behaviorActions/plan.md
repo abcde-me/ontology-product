@@ -236,7 +236,7 @@ const orchestrationNodes = useBehaviorTestStore(
 **渲染逻辑**：
 
 ```typescript
-return isEmpty ? <EmptyState /> : <TestLayout />;
+return isEmpty ? <EmptyState / > : <TestLayout / >;
 ```
 
 ---
@@ -263,9 +263,11 @@ return isEmpty ? <EmptyState /> : <TestLayout />;
   .left-panel {
     border-right: 1px solid #e5e6eb;
   }
+
   .middle-panel {
     background: #f7f8fa;
   }
+
   .right-panel {
     border-left: 1px solid #e5e6eb;
   }
@@ -527,21 +529,33 @@ interface CanvasHeaderProps {
 const { orchestrationNodes, selectedNodeId, selectNode, removeNode } = useBehaviorTestStore();
 
 return (
-  <div className="orchestration-canvas">
-    {orchestrationNodes.map((node, index) => (
-      <React.Fragment key={node.id}>
+  <div className = "orchestration-canvas" >
+    {
+      orchestrationNodes.map((node, index) => (
+        <React.Fragment key = { node.id } >
         <OrchestrationNode
-          node={node}
-          isSelected={selectedNodeId === node.id}
-          onClick={() => selectNode(node.id)}
-          onDelete={() => removeNode(node.id)}
-        />
-        {index < orchestrationNodes.length - 1 && <NodeConnector />}
-      </React.Fragment>
-    ))}
-    <AddNodePlaceholder />
-  </div>
-);
+          node = { node }
+      isSelected = { selectedNodeId === node.id
+    }
+onClick = {()
+=>
+selectNode(node.id)
+}
+onDelete = {()
+=>
+removeNode(node.id)
+}
+/>
+{
+  index < orchestrationNodes.length - 1 && <NodeConnector / >
+}
+</React.Fragment>
+))
+}
+<AddNodePlaceholder / >
+</div>
+)
+;
 ```
 
 ---
@@ -884,12 +898,16 @@ const { selectedNodeId, orchestrationNodes, nodeConfigs, updateNodeConfig } = us
 const selectedNode = orchestrationNodes.find(n => n.id === selectedNodeId);
 
 <ConfigPanel
-  selectedNodeId={selectedNodeId}
-  configSchema={selectedNode?.behavior.configSchema}
-  config={nodeConfigs[selectedNodeId] || {}}
-  onConfigChange={(config) => {
-    updateNodeConfig(selectedNodeId, config);
-  }}
+  selectedNodeId = { selectedNodeId }
+configSchema = { selectedNode?.behavior.configSchema
+}
+config = { nodeConfigs[selectedNodeId] || {} }
+onConfigChange = {(config)
+=>
+{
+  updateNodeConfig(selectedNodeId, config);
+}
+}
 />
 ```
 
@@ -1790,13 +1808,15 @@ return response.data || response;
 #### 1. 获取行为列表
 
 ```typescript
-GET /api/ontology/{osId}/behaviors
+GET / api / ontology / { osId }
+/behaviors
 
-Query Parameters:
-- keyword?: string        // 搜索关键词
-- objectType?: string     // 对象类型筛选
-- page?: number          // 分页（可选）
-- pageSize?: number      // 每页数量（可选）
+Query
+Parameters:
+  -keyword ? : string        // 搜索关键词
+  - objectType ? : string     // 对象类型筛选
+  - page ? : number          // 分页（可选）
+  - pageSize ? : number      // 每页数量（可选）
 
 Response: {
   code: number;
@@ -1825,13 +1845,16 @@ interface BehaviorItem {
 #### 2. 执行测试
 
 ```typescript
-POST /api/ontology/{osId}/behaviors/test
+POST / api / ontology / { osId }
+/behaviors/
+test
 
 Body: {
   nodes: {
     behaviorId: string;
     config: Record<string, any>;
-  }[]
+  }
+  []
 }
 
 Response: {
@@ -1857,16 +1880,19 @@ interface TestResult {
 #### 3. 保存编排方案（可选）
 
 ```typescript
-POST /api/ontology/{osId}/behaviors/orchestration
+POST / api / ontology / { osId }
+/behaviors/
+orchestration
 
 Body: {
   name: string;
-  description?: string;
+  description ? : string;
   nodes: {
     behaviorId: string;
     order: number;
     config: Record<string, any>;
-  }[]
+  }
+  []
 }
 
 Response: {
@@ -1882,11 +1908,14 @@ Response: {
 #### 4. 获取历史记录（可选）
 
 ```typescript
-GET /api/ontology/{osId}/behaviors/history
+GET / api / ontology / { osId }
+/behaviors/
+history
 
-Query Parameters:
-- page?: number
-- pageSize?: number
+Query
+Parameters:
+  -page ? : number
+  - pageSize ? : number
 
 Response: {
   code: number;
@@ -1897,7 +1926,8 @@ Response: {
       name: string;
       createdAt: string;
       nodes: any[];
-    }[];
+    }
+    [];
     total: number;
   }
 }
@@ -2296,6 +2326,7 @@ export const API_CONFIG = {
 
 // services/behaviorTestApi.ts
 import { API_CONFIG } from '@/config/apiConfig';
+
 const USE_MOCK = API_CONFIG.useMock;
 ```
 
@@ -2453,39 +2484,59 @@ export default function OntologySceneBehaviorActions() {
   const [behaviorData, setBehaviorData] = useState<BehaviorActionItem>();
 
   return (
-    <div className={`flex h-full w-full flex-col gap-4 overflow-hidden bg-white ${styles['behavior']}`}>
-      <Tabs
-        className={'flex-shrink-0'}
-        activeTab={activeTab}
-        onChange={setActiveTab}
-      >
-        <Tabs.TabPane title={'行为列表'} key={'list'} />
-        <Tabs.TabPane title={'行为测试'} key={'test'} />
-      </Tabs>
+    <div className = {`flex h-full w-full flex-col gap-4 overflow-hidden bg-white ${styles['behavior']}`
+}>
+  <Tabs
+    className = { 'flex-shrink-0' }
+  activeTab = { activeTab }
+  onChange = { setActiveTab }
+  >
+  <Tabs.TabPane title = { '行为列表' }
+  key = { 'list' }
+  />
+  < Tabs.TabPane
+  title = { '行为测试' }
+  key = { 'test' }
+  />
+  < /Tabs>
 
-      <div className={styles['behavior-content']}>
-        {activeTab === 'list' && (
-          <ActionList
-            onViewDetail={(data) => {
-              setShowDetail(true);
-              setBehaviorData(data);
-            }}
-          />
-        )}
-        {activeTab === 'test' && <BehaviorTest />} {/* 🆕 行为测试 Tab */}
-      </div>
+  < div
+  className = { styles['behavior-content'] } >
+    { activeTab === 'list' && (
+      <ActionList
+        onViewDetail = {(data)
+=>
+  {
+    setShowDetail(true);
+    setBehaviorData(data);
+  }
+}
+  />
+)
+}
+  {
+    activeTab === 'test' && <BehaviorTest / >
+  }
+  {/* 🆕 行为测试 Tab */
+  }
+  </div>
 
-      {/* 行为详情抽屉（仅行为列表 Tab 使用） */}
-      <BehaviorDetail
-        show={showDetail}
-        onClose={() => {
-          setShowDetail(false);
-          setBehaviorData(undefined);
-        }}
-        data={behaviorData}
-      />
-    </div>
-  );
+  {/* 行为详情抽屉（仅行为列表 Tab 使用） */
+  }
+  <BehaviorDetail
+    show = { showDetail }
+  onClose = {()
+=>
+  {
+    setShowDetail(false);
+    setBehaviorData(undefined);
+  }
+}
+  data = { behaviorData }
+  />
+  < /div>
+)
+  ;
 }
 ```
 
@@ -2569,10 +2620,15 @@ fetchBehaviors: async (params = {}) => {
 import { Virtuoso } from 'react-virtuoso';
 
 <Virtuoso
-  data={filteredBehaviorList}
-  itemContent={(index, behavior) => (
-    <BehaviorCard key={behavior.id} behavior={behavior} />
-  )}
+  data = { filteredBehaviorList }
+itemContent = {(index, behavior)
+=>
+(
+  <BehaviorCard key = { behavior.id }
+behavior = { behavior }
+/>
+)
+}
 />
 ```
 
@@ -2607,7 +2663,9 @@ const { selectedNodeId, selectNode, ...rest } = useUIStore();
 #### 加载状态
 
 ```typescript
-{loadingBehaviors && <BehaviorCardListSkeleton />}
+{
+  loadingBehaviors && <BehaviorCardListSkeleton / >
+}
 ```
 
 #### 操作确认
@@ -2642,12 +2700,19 @@ useHotkeys('esc', () => selectNode(null));
 import { ReactSortable } from 'react-sortablejs';
 
 <ReactSortable
-  list={orchestrationNodes}
-  setList={(newList) => reorderNodes(newList)}
+  list = { orchestrationNodes }
+setList = {(newList)
+=>
+reorderNodes(newList)
+}
 >
-  {orchestrationNodes.map(node => (
-    <OrchestrationNode key={node.id} node={node} />
-  ))}
+{
+  orchestrationNodes.map(node => (
+    <OrchestrationNode key = { node.id }
+  node = { node }
+  />
+))
+}
 </ReactSortable>
 ```
 
@@ -2727,11 +2792,13 @@ const { hasPermission } = usePermission();
 const canTest = hasPermission('behavior:test');
 
 <Button
-  disabled={!canTest || !canExecuteTest()}
-  onClick={handleTest}
->
+  disabled = {!
+canTest || !canExecuteTest()
+}
+onClick = { handleTest }
+  >
   测试
-</Button>
+  < /Button>
 ```
 
 ---
@@ -3004,10 +3071,18 @@ git commit -m "refactor(behaviorTest): 拆分 Store 为 UI Store 和 Business St
 ```typescript
 {
   name: 'confidence',
-  label: '置信度阈值',
-  type: 'input',
-  required: true,
-  validation: (value: any) => {
+    label
+:
+  '置信度阈值',
+    type
+:
+  'input',
+    required
+:
+  true,
+    validation
+:
+  (value: any) => {
     const num = parseFloat(value);
     if (isNaN(num)) return '请输入有效数字';
     if (num < 0 || num > 1) return '置信度必须在0-1之间';
@@ -3029,10 +3104,18 @@ git commit -m "refactor(behaviorTest): 拆分 Store 为 UI Store 和 Business St
 ```typescript
 {
   id: '1',
-  name: '实体识别',
-  description: '从原始图片中识别 AF-101...',
-  objectType: '多媒体情报',
-  configSchema: {
+    name
+:
+  '实体识别',
+    description
+:
+  '从原始图片中识别 AF-101...',
+    objectType
+:
+  '多媒体情报',
+    configSchema
+:
+  {
     fields: [
       {
         name: 'targetTeam',
@@ -3046,7 +3129,8 @@ git commit -m "refactor(behaviorTest): 拆分 Store 为 UI Store 和 Business St
       },
       // ... 更多字段
     ],
-  },
+  }
+,
   validationRules: [
     {
       id: 'rule_1',

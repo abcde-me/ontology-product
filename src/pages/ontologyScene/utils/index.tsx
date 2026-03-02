@@ -1,6 +1,7 @@
 import React from 'react';
 import {
   TestFunction,
+  TestFunctionItem,
   UiType
 } from '@/pages/ontologyScene/types/ontologyFunction';
 import {
@@ -95,19 +96,22 @@ export const getLinkTypeText = (type?: LinkType): '1:1' | '1:N' | 'N:N' => {
   }
 };
 
-export const buildActionTest = (data: BehaviorActionDetail): TestFunction => {
-  const res: TestFunction = {
-    arguments: [],
+export const buildActionTestItem = (
+  data: BehaviorActionDetail,
+  functionParams: Record<string, any>
+): TestFunctionItem => {
+  return {
+    arguments: Object.entries(functionParams).map(([key, value]) => ({
+      name: key,
+      value: JSON.stringify(value)
+    })),
     code: data.functionCode!,
     content: data.functionContent!,
     logic_function: [data.functionCode!],
     name: data.functionName!,
     params: data.params || [],
-    run_action_with_validate: true,
-    id: data.functionId,
-    run_type: 'action',
-    target: [data.functionCode!],
-    object_name: data.objectTypeName
+    object_name: data.objectTypeName,
+    object_id: data.objectTypeId,
+    pk: data.id
   };
-  return res;
 };

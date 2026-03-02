@@ -16,7 +16,10 @@ import {
   NumberRangeValue
 } from '@/pages/ontologyScene/componens';
 import { isNil } from 'lodash-es';
-import { TYPE2RULE_TYPES } from '@/pages/ontologyScene/types/behaviorActions';
+import {
+  RuleName,
+  TYPE2RULE_TYPES
+} from '@/pages/ontologyScene/types/behaviorActions';
 import { SelectWithNoData } from '@/components/new-no-data-comps';
 
 export const ValidateRules = (props: { readonly?: boolean }) => {
@@ -73,6 +76,13 @@ export const ValidateRules = (props: { readonly?: boolean }) => {
                   <SelectWithNoData
                     options={TYPE2RULE_TYPES?.[paramType] || []}
                     disabled={disabled}
+                    onChange={(rule) => {
+                      form.setFieldsValue({
+                        [`${field}.ruleConfig`]: undefined,
+                        [`${field}.failMessage`]: undefined,
+                        [`${field}.rule_name`]: rule
+                      });
+                    }}
                   />
                 </FormItem>
                 <Form.Item
@@ -83,103 +93,109 @@ export const ValidateRules = (props: { readonly?: boolean }) => {
                 >
                   {(values, form) => {
                     const ruleName = form.getFieldValue(`${field}.rule_name`);
-                    if (ruleName === 'range_rule') {
-                      return (
-                        <FormItem
-                          label={'数值范围'}
-                          field={`${field}.ruleConfig`}
-                          required
-                          rules={[
-                            {
-                              validator(v, onError) {
-                                if (isNil(v)) return onError('请填写数值范围');
-                                const value = v as NumberRangeValue;
-                                if (isNil(value.minValue)) {
-                                  return onError('请填写最小值');
-                                }
-                                if (isNil(value.maxValue)) {
-                                  return onError('请填写最大值');
-                                }
-                              }
-                            }
-                          ]}
-                        >
-                          <NumberRange
-                            disabled={disabled}
-                            minField={'minValue'}
-                            maxField={'maxValue'}
-                          />
-                        </FormItem>
-                      );
-                    }
-                    if (ruleName === 'length_rule') {
-                      return (
-                        <FormItem
-                          label={'长度限制'}
-                          field={`${field}.ruleConfig`}
-                          required
-                          rules={[
-                            {
-                              validator(v, onError) {
-                                if (isNil(v)) return onError('请填写数值范围');
-                                const value = v as NumberRangeValue;
-                                if (isNil(value.minLength)) {
-                                  return onError('请填写最小值');
-                                }
-                                if (isNil(value.maxLength)) {
-                                  return onError('请填写最大值');
+                    const enabledValidation = form.getFieldValue(
+                      `${field}.enabledValidation`
+                    );
+                    return (
+                      <>
+                        {ruleName === RuleName.RangeRule && (
+                          <FormItem
+                            label={'数值范围'}
+                            field={`${field}.ruleConfig`}
+                            required={enabledValidation}
+                            rules={[
+                              {
+                                validator(v, onError) {
+                                  if (!enabledValidation) return;
+                                  if (isNil(v))
+                                    return onError('请填写数值范围');
+                                  const value = v as NumberRangeValue;
+                                  if (isNil(value.minValue)) {
+                                    return onError('请填写最小值');
+                                  }
+                                  if (isNil(value.maxValue)) {
+                                    return onError('请填写最大值');
+                                  }
                                 }
                               }
-                            }
-                          ]}
-                        >
-                          <NumberRange
-                            disabled={disabled}
-                            minField={'minLength'}
-                            maxField={'maxLength'}
-                          />
-                        </FormItem>
-                      );
-                    }
-                    if (ruleName === 'enum_rule') {
-                      return (
+                            ]}
+                          >
+                            <NumberRange
+                              disabled={disabled}
+                              minField={'minValue'}
+                              maxField={'maxValue'}
+                            />
+                          </FormItem>
+                        )}
+                        {ruleName === RuleName.LengthRule && (
+                          <FormItem
+                            label={'长度限制'}
+                            field={`${field}.ruleConfig`}
+                            required={enabledValidation}
+                            rules={[
+                              {
+                                validator(v, onError) {
+                                  if (!enabledValidation) return;
+                                  if (isNil(v))
+                                    return onError('请填写数值范围');
+                                  const value = v as NumberRangeValue;
+                                  if (isNil(value.minLength)) {
+                                    return onError('请填写最小值');
+                                  }
+                                  if (isNil(value.maxLength)) {
+                                    return onError('请填写最大值');
+                                  }
+                                }
+                              }
+                            ]}
+                          >
+                            <NumberRange
+                              disabled={disabled}
+                              minField={'minLength'}
+                              maxField={'maxLength'}
+                            />
+                          </FormItem>
+                        )}
+                        {ruleName === RuleName.EnumRule && (
+                          <FormItem
+                            label={'枚举限制'}
+                            field={`${field}.ruleConfig`}
+                            required={enabledValidation}
+                            rules={[
+                              {
+                                required: enabledValidation,
+                                message: '请输入限制的枚举值，用逗号分隔'
+                              }
+                            ]}
+                          >
+                            <Input
+                              placeholder={'请输入限制的枚举值，用逗号分隔'}
+                              disabled={disabled}
+                            />
+                          </FormItem>
+                        )}
                         <FormItem
-                          label={'枚举限制'}
-                          field={`${field}.ruleConfig`}
-                          required
+                          label={'报错文案'}
+                          field={`${field}.failMessage`}
+                          required={enabledValidation}
                           rules={[
                             {
-                              required: true,
-                              message: '请输入限制的枚举值，用逗号分隔'
+                              required: enabledValidation,
+                              message: '请输入当参数错误时，界面展示的报错文案'
                             }
                           ]}
                         >
                           <Input
-                            placeholder={'请输入限制的枚举值，用逗号分隔'}
+                            placeholder={
+                              '请输入当参数错误时，界面展示的报错文案'
+                            }
                             disabled={disabled}
                           />
                         </FormItem>
-                      );
-                    }
-                    return null;
+                      </>
+                    );
                   }}
                 </Form.Item>
-                <FormItem
-                  label={'报错文案'}
-                  field={`${field}.failMessage`}
-                  required
-                  rules={[
-                    {
-                      required: true,
-                      message: '请输入当参数错误时，界面展示的报错文案'
-                    }
-                  ]}
-                >
-                  <Input
-                    placeholder={'请输入当参数错误时，界面展示的报错文案'}
-                    disabled={disabled}
-                  />
-                </FormItem>
               </div>
             </div>
           );

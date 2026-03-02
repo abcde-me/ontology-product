@@ -6,31 +6,48 @@ import { IconPlayArrowFill } from '@arco-design/web-react/icon';
 import { ParamsTestDialog } from '../../components';
 import {
   ActionSchema,
+  BehaviorActionDetail,
   OntologyActionParam,
-  TYPE2COMP_OPTIONS
+  TYPE2COMP_OPTIONS,
+  ValidateRule
 } from '@/pages/ontologyScene/types/behaviorActions';
 import { OntologyFunctionDetail } from '@/pages/ontologyScene/types/ontologyFunction';
 
 export const ParamsSetting = (
   props: CustomFormItemCompProps<any> & {
     functionDetail?: OntologyFunctionDetail;
+    actionDetail?: BehaviorActionDetail;
   }
 ) => {
+  const { actionDetail = {} } = props;
   const [paramsTest, setParamsTest] = useState(false);
   const { form, disabled } = Form.useFormContext();
   const functionParams: OntologyActionParam[] = Form.useWatch(
     'function_params',
     form
   );
-  const validateRules = Form.useWatch('validationRules', form);
+  const validateRules: ValidateRule[] = Form.useWatch('validationRules', form);
   const testParams = () => {
-    setParamsTest(true);
+    const validateFields = validateRules.flatMap(
+      ({ enabledValidation }, index) => {
+        if (!enabledValidation) return [];
+        return [
+          `validationRules[${index}].ruleConfig`,
+          `validationRules[${index}].failMessage`
+        ];
+      }
+    );
+    form
+      .validate(validateFields)
+      .then(() => {
+        setParamsTest(true);
+      })
+      .catch(console.error);
   };
 
   const closeDialog = () => {
     setParamsTest(false);
   };
-  const actionData: ActionSchema = form.getFieldsValue();
 
   return (
     <div className={styles['params-setting']}>
@@ -104,8 +121,7 @@ export const ParamsSetting = (
         onOk={closeDialog}
         data={functionParams}
         validateRules={validateRules}
-        actionData={actionData}
-        functionData={props.functionDetail}
+        actionData={actionDetail}
       />
     </div>
   );

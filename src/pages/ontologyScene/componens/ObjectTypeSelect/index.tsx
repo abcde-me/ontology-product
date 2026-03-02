@@ -5,6 +5,7 @@ import { listOntologyObjectType } from '@/api/ontologySceneLibrary/objectType';
 import { ObjectType } from '@/types/objectType';
 import { OBJECT_TYPE_ICON_OPTIONS } from '@/pages/ontologyScene/common/constants';
 import styles from './index.module.scss';
+import { SyncStatus } from '@/types/graphApi';
 
 export interface ObjectTypeSelectProps {
   /** 当前选中的对象类型ID */
@@ -25,6 +26,8 @@ export interface ObjectTypeSelectProps {
   label?: string;
   /** 下拉菜单挂载的容器 */
   getPopupContainer?: (node: HTMLElement) => HTMLElement;
+  /** 是否显示全部 */
+  showAll?: boolean;
 }
 
 /**
@@ -40,7 +43,8 @@ const ObjectTypeSelect: React.FC<ObjectTypeSelectProps> = ({
   ontologyModelID,
   allowClear = true,
   label = '',
-  getPopupContainer
+  getPopupContainer,
+  showAll = false
 }) => {
   const [loading, setLoading] = useState(false);
   const [objectTypeList, setObjectTypeList] = useState<ObjectType[]>([]);
@@ -56,7 +60,16 @@ const ObjectTypeSelect: React.FC<ObjectTypeSelectProps> = ({
         pageSize: 100 // 获取所有数据
       });
       if (response.status === 200 && response.data) {
-        setObjectTypeList(response.data.result || []);
+        const objectTypes = response.data.result || [];
+        if (showAll) {
+          objectTypes.unshift({
+            syncStatus: SyncStatus.SUCCESS,
+            id: -1,
+            name: '全局',
+            description: '全局'
+          });
+        }
+        setObjectTypeList(objectTypes);
       }
     } catch (error) {
       console.error('获取对象类型列表失败:', error);
@@ -83,9 +96,11 @@ const ObjectTypeSelect: React.FC<ObjectTypeSelectProps> = ({
 
     return (
       <div className="flex cursor-pointer items-center gap-[8px] px-[12px] py-[8px] transition-colors hover:bg-[#F2F8FF]">
-        <div className="flex h-[36px] w-[36px] flex-shrink-0 items-center justify-center">
-          <IconComponent className="h-[36px] w-[36px]" />
-        </div>
+        {option.id > 0 && (
+          <div className="flex h-[36px] w-[36px] flex-shrink-0 items-center justify-center">
+            <IconComponent className="h-[36px] w-[36px]" />
+          </div>
+        )}
         <div className="min-w-0 flex-1">
           <div className="mb-[4px] flex items-center gap-[8px]">
             <EllipsisPopover
@@ -93,15 +108,19 @@ const ObjectTypeSelect: React.FC<ObjectTypeSelectProps> = ({
               value={option.name || '-'}
               className="text-[14px] leading-[22px] text-[var(--color-text-1)]"
             />
-            <span className="flex-shrink-0 text-[14px] leading-[22px] text-[var(--color-text-1)]">
-              (id: {option.id})
-            </span>
+            {option.id > 0 && (
+              <span className="flex-shrink-0 text-[14px] leading-[22px] text-[var(--color-text-1)]">
+                (id: {option.id})
+              </span>
+            )}
           </div>
-          <EllipsisPopover
-            preferTypography
-            value={option.description || '描述说明文案'}
-            className="text-[12px] leading-[18px] text-[var(--color-text-4)]"
-          />
+          {option.id > 0 && (
+            <EllipsisPopover
+              preferTypography
+              value={option.description || '描述说明文案'}
+              className="text-[12px] leading-[18px] text-[var(--color-text-4)]"
+            />
+          )}
         </div>
       </div>
     );
@@ -152,9 +171,11 @@ const ObjectTypeSelect: React.FC<ObjectTypeSelectProps> = ({
           return (
             <div className="flex items-center gap-2">
               {/* 左侧图标 */}
-              <div className="flex h-[24px] w-[24px] flex-shrink-0 items-center justify-center rounded">
-                <IconComponent className="h-[24px] w-[24px]" />
-              </div>
+              {value > 0 && (
+                <div className="flex h-[24px] w-[24px] flex-shrink-0 items-center justify-center rounded">
+                  <IconComponent className="h-[24px] w-[24px]" />
+                </div>
+              )}
               {/* 右侧名称 */}
               <EllipsisPopover
                 preferTypography

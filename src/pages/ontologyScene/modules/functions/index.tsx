@@ -229,7 +229,7 @@ export default function OntologySceneFunctions() {
         </div>
       </div>
       <FunctionDetailDrawer
-        data={currentFunction}
+        data={currentFunction?.id}
         visible={!!currentFunction}
         onEdit={() => route2FunctionDetail('edit', currentFunction)}
         onCancel={() => {

@@ -9,7 +9,7 @@ interface ApiRes<T> {
 interface CustomFormItemCompProps<T = Record<string, any>> {
   value?: T;
   disabled?: boolean;
-  onChange?: (v: T) => any;
+  onChange?: (v: T, ...rest: any[]) => any;
   id?: React.Key;
   ref?: React.Ref<any>;
   className?: string;

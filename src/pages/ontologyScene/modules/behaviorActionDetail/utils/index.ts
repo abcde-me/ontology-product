@@ -31,7 +31,7 @@ export function buildActionSchema(action: BehaviorActionDetail): ActionSchema {
     name,
     description,
     functionId,
-    objectTypeId,
+    objectTypeId: objectTypeId || -1,
     function_content: functionContent,
     function_code: functionCode,
     function_name: functionName,
@@ -116,8 +116,8 @@ export function buildActionDetail(action: ActionSchema): BehaviorActionDetail {
     code,
     name,
     description,
-    functionId: action.functionId,
-    objectTypeId: action.objectTypeId,
+    functionId,
+    objectTypeId,
     params: function_params?.map((param) => {
       const { type, name, code, uiType } = param;
       const base: Partial<OntologyActionParam> = {
@@ -203,4 +203,24 @@ export const buildFormFieldValidateRules = (
       }
     }
   ];
+};
+const buildActionDetailByFunction = (data: {
+  action: ActionSchema;
+  functionData: OntologyFunctionDetail;
+  actionDetail?: BehaviorActionDetail;
+}): BehaviorActionDetail => {
+  const { action, functionData, actionDetail = {} } = data;
+  let res: BehaviorActionDetail = {
+    ...actionDetail,
+    ...buildActionDetail(action)
+  };
+  if (!isNil(functionData)) {
+    res = {
+      ...res,
+      functionName: functionData.name,
+      functionCode: functionData.code,
+      functionContent: functionData.content
+    };
+  }
+  return res;
 };

@@ -19,6 +19,8 @@ export interface TestFunctionInfo {
   startTest: (data: TestFunction) => void;
   // 停止测试
   stopTest: () => void;
+  // 清空数据
+  clear: () => void;
   // 加载中
   loading: boolean;
 }
@@ -82,7 +84,13 @@ const useTestFunction = (): TestFunctionInfo => {
     // 停止测试
     stopTest: handelStopTestFunction,
     // 加载中
-    loading
+    loading,
+    clear: () => {
+      setRunLogInfo(undefined);
+      setTestIng(false);
+      setTestingFunction(undefined);
+      cancel();
+    }
   };
 };
 export default useTestFunction;
