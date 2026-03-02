@@ -187,9 +187,9 @@ export default function NormalTable({ onTotalChange }: NormalTableProps = {}) {
     },
     {
       title: '数据源',
-      dataIndex: 'dataSource',
+      dataIndex: 'dataSourceName',
       width: 180,
-      render: () => <EllipsisPopover value="-" />
+      render: (value) => <EllipsisPopover value={value || '-'} />
     },
     {
       title: '关联公共属性',
