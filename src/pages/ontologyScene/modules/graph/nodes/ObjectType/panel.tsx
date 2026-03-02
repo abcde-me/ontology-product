@@ -6,7 +6,8 @@ import {
   Message,
   Popover,
   Tag,
-  Spin
+  Spin,
+  Pagination
 } from '@arco-design/web-react';
 import { IconCopy, IconFile } from '@arco-design/web-react/icon';
 import copy from 'copy-to-clipboard';
@@ -355,24 +356,27 @@ const Panel: FC<any> = ({ id, data }) => {
                 ? { x: instancesColumns.length * 140 }
                 : undefined
             }
-            pagination={{
-              current: instancesPage,
-              pageSize: instancesPageSize,
-              total: instancesTotal,
-              showTotal: true,
-              showJumper: true,
-              sizeCanChange: true,
-              sizeOptions: [10, 20, 50, 100],
-              onChange: (page, pageSize) => {
-                setInstancesPage(page);
-                setInstancesPageSize(pageSize);
-              }
-            }}
+            pagination={false}
             rowKey={(record) => `${record.id}`}
             border={false}
             // className="mt-2"
             noDataElement={<NoDataCard title="暂无数据" />}
           />
+          {instancesTotal > 0 && (
+            <div className="mt-[16px] flex items-center justify-end">
+              <Pagination
+                current={instancesPage}
+                pageSize={instancesPageSize}
+                total={instancesTotal}
+                showTotal
+                sizeOptions={[10, 20, 50, 100]}
+                onChange={(page, pageSize) => {
+                  setInstancesPage(page);
+                  setInstancesPageSize(pageSize);
+                }}
+              />
+            </div>
+          )}
         </Tabs.TabPane>
 
         <Tabs.TabPane key="properties" title={`属性(${propertiesTotal})`}>
@@ -382,24 +386,27 @@ const Panel: FC<any> = ({ id, data }) => {
             scroll={{ x: 400 }}
             loading={propertiesLoading}
             rowClassName={() => 'group'}
-            pagination={{
-              current: propertiesPage,
-              pageSize: propertiesPageSize,
-              total: propertiesTotal,
-              showTotal: true,
-              showJumper: true,
-              sizeCanChange: true,
-              sizeOptions: [10, 20, 50, 100],
-              onChange: (page, pageSize) => {
-                setPropertiesPage(page);
-                setPropertiesPageSize(pageSize);
-              }
-            }}
             noDataElement={<NoDataCard title="暂无数据" />}
             rowKey="id"
             border={false}
+            pagination={false}
             // className="mt-2"
           />
+          {propertiesTotal > 0 && (
+            <div className="mt-[16px] flex items-center justify-end">
+              <Pagination
+                current={propertiesPage}
+                pageSize={propertiesPageSize}
+                total={propertiesTotal}
+                showTotal
+                sizeOptions={[10, 20, 50, 100]}
+                onChange={(page, pageSize) => {
+                  setPropertiesPage(page);
+                  setPropertiesPageSize(pageSize);
+                }}
+              />
+            </div>
+          )}
         </Tabs.TabPane>
 
         <Tabs.TabPane key="links" title={`链接(${linksTotal})`}>
@@ -472,21 +479,16 @@ const Panel: FC<any> = ({ id, data }) => {
                     </div>
 
                     {/* 关系图 */}
-                    <div className="flex items-center rounded-[4px] bg-[#F2F8FF] p-[12px]">
-                      {/* 左侧对象（当前节点） */}
+                    <div className="flex items-center">
                       {renderLinkCard(leftObjectType, true)}
-
-                      {/* 箭头和关系类型 */}
-                      <div className="flex flex-1 items-center gap-1">
-                        <div className="h-0.5 flex-1 border-t border-dashed border-gray-300"></div>
-                        <div className="rounded bg-gray-100 px-2 py-1 text-xs font-medium text-gray-600">
+                      <div className="flex w-[76px] min-w-[76px] items-center">
+                        <span className="h-0 flex-1 bg-white" />
+                        <span className="rounded border border-[#E5E6EB] bg-white px-2 py-[2px] text-[12px] leading-[18px] text-[#23293b]">
                           {linkType}
-                        </div>
-                        <div className="h-0.5 flex-1 border-t border-dashed border-gray-300"></div>
-                        <div className="h-0 w-0 border-b-2 border-l-4 border-t-2 border-b-transparent border-l-gray-400 border-t-transparent"></div>
+                        </span>
+                        <span className="h-0 flex-1 bg-white" />
+                        <div className="h-0 w-0 border-b-[4px] border-l-[6px] border-t-[4px] border-b-transparent border-l-gray-400 border-t-transparent"></div>
                       </div>
-
-                      {/* 右侧对象（关联节点） */}
                       {renderLinkCard(rightObjectType, false)}
                     </div>
                   </div>

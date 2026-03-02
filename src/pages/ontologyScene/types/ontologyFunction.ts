@@ -11,11 +11,11 @@ export interface OntologyFunctionDetail {
   /**
    * 函数唯一编码
    */
-  code?: string;
+  code: string;
   /**
    * 函数代码内容
    */
-  content?: string;
+  content: string;
   /**
    * 创建时间
    */
@@ -35,7 +35,7 @@ export interface OntologyFunctionDetail {
   /**
    * 函数名称
    */
-  name?: string;
+  name: string;
   /**
    * 所属本体场景模型ID
    */

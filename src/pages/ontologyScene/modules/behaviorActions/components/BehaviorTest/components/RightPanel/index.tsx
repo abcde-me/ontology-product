@@ -7,6 +7,7 @@ import { renderComponentByUiType } from '@/pages/ontologyScene/utils';
 import { UiType } from '@/pages/ontologyScene/types/ontologyFunction';
 import BehaviorConfigSvg from '@/assets/benti/behaviorConfig.svg';
 import BehaviorTestSvg from '@/assets/benti/behaviorTest.svg';
+import { buildFormFieldValidateRules } from '@/pages/ontologyScene/modules/behaviorActionDetail/utils';
 
 export const RightPanel: React.FC = () => {
   const selectedNodeId = useUIStore((state) => state.selectedNodeId);
@@ -30,7 +31,10 @@ export const RightPanel: React.FC = () => {
 
         const config = nodeConfigs[selectedNodeId] || {};
 
-        // 如果没有配置，使用默认值
+        // 先重置表单，清空所有字段
+        form.resetFields();
+
+        // 如果有配置，设置配置值
         const initialValues: Record<string, any> = {};
         selectedNode.behavior.params?.forEach((param) => {
           if (config[param.code] !== undefined) {
@@ -38,8 +42,15 @@ export const RightPanel: React.FC = () => {
           }
         });
 
-        form.setFieldsValue(initialValues);
+        // 只有当有配置值时才设置，否则保持表单为空（已被 resetFields 清空）
+        if (Object.keys(initialValues).length > 0) {
+          form.setFieldsValue(initialValues);
+        }
       }
+    } else if (!selectedNodeId) {
+      // 当没有选中节点时，清空 ref 和表单
+      isInitialLoadRef.current = null;
+      form.resetFields();
     }
   }, [selectedNodeId, selectedNode, nodeConfigs, form]);
 
@@ -101,13 +112,14 @@ export const RightPanel: React.FC = () => {
           <BehaviorConfigSvg className="h-3.5 w-3.5" />
           <span className="text-base font-medium text-[#000]">参数配置</span>
         </div>
-        {/* <BehaviorTestSvg className="h-4 w-4 cursor-pointer" /> */}
+        <BehaviorTestSvg className="h-4 w-4 cursor-pointer" />
       </div>
 
       {/* 表单内容 */}
       <div className="scrollbar-hide flex-1 overflow-y-auto px-5 py-4">
-        {/* 动态表单 */}
+        {/* 动态表单 - 使用 selectedNodeId 作为 key 强制重新渲染 */}
         <Form
+          key={selectedNodeId}
           form={form}
           layout="vertical"
           onValuesChange={handleFormChange}
@@ -119,12 +131,8 @@ export const RightPanel: React.FC = () => {
               label={param.name}
               field={param.code}
               required={param.enabledValidation}
-              rules={[
-                {
-                  required: param.enabledValidation,
-                  message: `请输入${param.name}`
-                }
-              ]}
+              // @ts-ignore
+              rules={buildFormFieldValidateRules(param)}
               triggerPropName={
                 param.uiType === UiType.Switch ? 'checked' : 'value'
               }

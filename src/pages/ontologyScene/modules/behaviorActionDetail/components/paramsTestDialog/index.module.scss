@@ -49,6 +49,9 @@
       .header {
         border-radius: 0 12px 0 0;
         border-left: none;
+        display: flex;
+        gap: 4px;
+        align-items: center;
       }
 
       .body {
@@ -57,6 +60,14 @@
         border-top: none;
         border-left: none;
         border-radius: 0 0 12px 0;
+      }
+
+      .run-log {
+        font-family: PingFang SC;
+        font-weight: 400;
+        font-size: 14px;
+        line-height: 22px;
+        color: black;
       }
     }
 
@@ -76,7 +87,7 @@
         }
 
         :global(.aa-no-data-card) {
-          margin-top: 80px;
+          margin-top: 40%;
         }
       }
     }

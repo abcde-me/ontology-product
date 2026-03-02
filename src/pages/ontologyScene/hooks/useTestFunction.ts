@@ -32,8 +32,11 @@ const useTestFunction = (): TestFunctionInfo => {
   // 正在请求接口时，不允许再次点击测试
   const [loading, setLoading] = useState<boolean>(false);
 
+  const [runLogInfo, setRunLogInfo] = useState<BehaviorLogItem>();
+
   const handelTestFunction = (functionTest: TestFunction) => {
     setLoading(true);
+    setRunLogInfo(undefined);
     testFunction({ ...functionTest, id: +OSid }).then((res) => {
       if (isNil(res)) return;
       setTestingFunction(res);
@@ -48,7 +51,7 @@ const useTestFunction = (): TestFunctionInfo => {
   }, [testingFunction]);
 
   // 轮询获取运行详情
-  const { data: runLogInfo, cancel } = useRequest(
+  const { cancel } = useRequest(
     () => {
       return getBehaviorLogDetail({ id: testingFunction! }).then((res) => {
         return res.data as BehaviorLogItem;
@@ -62,11 +65,10 @@ const useTestFunction = (): TestFunctionInfo => {
         // 不是运行中时，取消轮询
         if (data.run_status !== 1) {
           cancel();
-          setLoading(false);
-          setTestIng(false);
-          return;
         }
+        setLoading(false);
         setTestIng(data.run_status === 1);
+        setRunLogInfo(data);
       }
     }
   );

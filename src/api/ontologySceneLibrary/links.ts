@@ -4,9 +4,9 @@ import {
   ListOntologyLinkTypeDataReq,
   ListOntologyLinkTypeDataRes,
   LinkTypeAttributeInfo,
-  GetOntologyLinkTypeRes,
-  LinkType
+  GetOntologyLinkTypeRes
 } from '@/types/links';
+import { LinkType } from '@/types/graphApi';
 import { ObjectType } from '@/types/objectType';
 import { SyncStatus } from '@/types/graphApi';
 import UAPI from '@/api';

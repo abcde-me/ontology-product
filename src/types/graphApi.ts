@@ -246,6 +246,10 @@ export interface PhysicalProperties {
    * 表字段
    */
   tableField?: string;
+  /**
+   * 数据源名称
+   */
+  dataSourceName?: string;
 }
 
 export interface ListOntologyPhysicalPropertiesRes {

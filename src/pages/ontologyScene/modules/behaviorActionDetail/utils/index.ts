@@ -16,13 +16,25 @@ import { isNil } from 'lodash-es';
 
 // 动作详情数据转form所需数据
 export function buildActionSchema(action: BehaviorActionDetail): ActionSchema {
-  const { code, name, description, functionId, objectTypeId } = action;
-  const res = {
+  const {
+    code,
+    name,
+    description,
+    functionId,
+    objectTypeId,
+    functionContent,
+    functionCode,
+    functionName
+  } = action;
+  const res: ActionSchema = {
     code: code,
     name,
     description,
     functionId,
     objectTypeId,
+    function_content: functionContent,
+    function_code: functionCode,
+    function_name: functionName,
     ...action.params?.reduce<Partial<ActionSchema>>(
       (p, param) => {
         const { name, code, type, enabledValidation, validationRule, uiType } =
@@ -36,18 +48,7 @@ export function buildActionSchema(action: BehaviorActionDetail): ActionSchema {
         if (
           [ParamType.Float, ParamType.String, ParamType.Integer].includes(type)
         ) {
-          p.validationRules?.push({
-            enabledValidation: enabledValidation!,
-            failMessage: validationRule?.failMessage || '',
-            rule_name:
-              validationRule?.ruleName || TYPE2RULE_TYPES[type][0].value,
-            ruleConfig:
-              validationRule?.ruleName === RuleName.EnumRule
-                ? param.validationRule?.ruleConfig?.options.toString()
-                : param.validationRule?.ruleConfig,
-            name,
-            type
-          });
+          p.validationRules?.push(buildParamValidateRule(param));
         }
         return p;
       },
@@ -144,3 +145,62 @@ export function buildActionDetail(action: ActionSchema): BehaviorActionDetail {
     })
   };
 }
+
+export const buildParamValidateRule = (
+  param: OntologyActionParam
+): ValidateRule => {
+  const { name, type, enabledValidation, validationRule } = param;
+  return {
+    enabledValidation: enabledValidation!,
+    failMessage: validationRule?.failMessage || '',
+    rule_name: validationRule?.ruleName || TYPE2RULE_TYPES[type][0].value,
+    ruleConfig:
+      validationRule?.ruleName === RuleName.EnumRule
+        ? param.validationRule?.ruleConfig!.options!.toString()
+        : param.validationRule?.ruleConfig,
+    name,
+    type
+  };
+};
+
+export const buildFormFieldValidateRules = (
+  param: OntologyActionParam
+): Record<string, any> => {
+  if (!param.validationRule) {
+    return [{ require: true, message: `请填写${param.name}` }];
+  }
+  const { ruleConfig, failMessage, ruleName } = param.validationRule;
+  return [
+    {
+      validator(value, onError) {
+        if (isNil(value)) {
+          return onError(`请填写${param.name}`);
+        }
+        switch (ruleName) {
+          case RuleName.RangeRule:
+            if (
+              value < ruleConfig!.minValue! ||
+              value > ruleConfig!.maxValue!
+            ) {
+              onError(failMessage);
+            }
+            break;
+          case RuleName.LengthRule:
+            const length = value.trim().length;
+            if (
+              length < ruleConfig!.minLength! ||
+              length > ruleConfig!.maxLength!
+            ) {
+              onError(failMessage);
+            }
+            break;
+          default:
+            const strEnum = (ruleConfig as string).trim().split('_');
+            if (!strEnum.includes(value)) {
+              onError(failMessage);
+            }
+        }
+      }
+    }
+  ];
+};

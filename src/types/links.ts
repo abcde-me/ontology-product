@@ -1,4 +1,4 @@
-import { SyncStatus } from './graphApi';
+import { LinkType, SyncStatus } from './graphApi';
 import { ObjectType } from './objectType';
 
 export interface ListOntologyLinkTypeColumnReq {
@@ -132,15 +132,6 @@ export interface ListOntologyLinkTypeDataRes {
    * 总数
    */
   totalCount?: number;
-}
-
-export enum LinkType {
-  /** 1:1 一对一 */
-  ONE_TO_ONE = '1:1',
-  /** 1:N 一对多 */
-  ONE_TO_MANY = '1:N',
-  /** N:N 多对多 */
-  MANY_TO_MANY = 'N:N'
 }
 
 export interface GetOntologyLinkTypeRes {

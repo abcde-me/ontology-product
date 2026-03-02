@@ -107,6 +107,14 @@ export interface BehaviorActionDetail {
    */
   functionName?: string;
   /**
+   * 函数名
+   */
+  functionCode?: string;
+  /**
+   * 函数内容
+   */
+  functionContent?: string;
+  /**
    * 行为ID
    */
   id?: number;
@@ -210,7 +218,13 @@ export interface ValidationRule {
    * ```
    * - options: array<string> - 可选值列表
    */
-  ruleConfig?: Record<string, any>;
+  ruleConfig?: {
+    options?: string[];
+    minLength?: number;
+    maxLength?: number;
+    minValue?: number;
+    maxValue?: number;
+  };
   /**
    * 规则类型：
    * - range_rule: 范围规则
@@ -251,6 +265,9 @@ export interface ActionSchema {
   validationRules?: ValidateRule[];
   type?: ParamType;
   uiType?: UiType;
+  function_content?: string;
+  function_code?: string;
+  function_name?: string;
 }
 
 export const TYPE2COMP_OPTIONS = {

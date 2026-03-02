@@ -72,6 +72,6 @@ export interface BehaviorLogListParams {
 export interface BehaviorLogListResponse {
   items: BehaviorLogItem[];
   total: number;
-  page: number;
+  pageNo: number; // 后端返回的是 pageNo
   pageSize: number;
 }

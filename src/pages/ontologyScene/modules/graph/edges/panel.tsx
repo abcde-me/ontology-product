@@ -25,7 +25,7 @@ import {
 } from '@/api/ontologySceneLibrary/links';
 import { GetOntologyLinkTypeRes } from '@/types/links';
 import { OBJECT_TYPE_SYNC_STATUS_CONFIG } from '@/pages/ontologyScene/common/constants';
-import { SyncStatus } from '@/types/graphApi';
+import { LinkType, SyncStatus } from '@/types/graphApi';
 
 const TabPane = Tabs.TabPane;
 
@@ -211,9 +211,9 @@ function EdgePanel() {
 
   const linkTypeText = useMemo(() => {
     const type = basicInfo?.type;
-    if (type === '1:1') return '1:1';
-    if (type === '1:N') return '1:N';
-    if (type === 'N:N') return 'N:N';
+    if (type === LinkType.ONE_TO_ONE) return '1:1';
+    if (type === LinkType.ONE_TO_MANY) return '1:N';
+    if (type === LinkType.MANY_TO_MANY) return 'N:N';
     return basicInfo?.type || '-';
   }, [basicInfo?.type]);
 
@@ -328,7 +328,7 @@ function EdgePanel() {
   }
 
   return (
-    <div className="flex h-full w-[400px] flex-col rounded-[12px] bg-white">
+    <div className="flex h-full w-[600px] flex-col rounded-[12px] bg-white">
       {/* 头部 */}
       <div className="mx-[16px] flex items-center justify-between border-b border-[var(--color-border-2)] border-gray-300 pb-[8px] pt-[20px]">
         <div className="flex items-center gap-2">
@@ -405,14 +405,15 @@ function EdgePanel() {
             <div className="text-[14px] font-[600] leading-[22px] text-[#1E293B]">
               关系对
             </div>
-            <div className="flex items-center gap-4">
+            <div className="flex items-center">
               {renderObjectTypeCard(basicInfo?.sourceObjectTypeInfo, true)}
-              <div className="flex w-[76px] min-w-[76px] items-center gap-2">
+              <div className="flex w-[76px] min-w-[76px] items-center">
                 <span className="h-0 flex-1 border-t border-dashed border-[#CBD5E1]" />
                 <span className="rounded border border-[#E5E6EB] bg-white px-2 py-[2px] text-[12px] leading-[18px] text-[#23293b]">
                   {linkTypeText}
                 </span>
                 <span className="h-0 flex-1 border-t border-dashed border-[#CBD5E1]" />
+                <div className="h-0 w-0 border-b-[4px] border-l-[6px] border-t-[4px] border-b-transparent border-l-gray-400 border-t-transparent"></div>
               </div>
               {renderObjectTypeCard(basicInfo?.targetObjectTypeInfo, false)}
             </div>

@@ -359,6 +359,7 @@ export const FunctionsSetting = () => {
             })}
             runInfo={runLogInfo}
             disabled={disabled}
+            isFullscreen={isFullscreen}
           />
         </Form.Item>
       </div>

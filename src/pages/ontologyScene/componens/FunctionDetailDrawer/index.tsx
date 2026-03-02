@@ -3,7 +3,8 @@ import classNames from 'classnames';
 import {
   ContentWithCopy,
   OsDrawer,
-  OSDrawerProps
+  OSDrawerProps,
+  PyCodeContent
 } from '@/pages/ontologyScene/componens';
 import {
   InputType,
@@ -186,6 +187,10 @@ export const FunctionDetailDrawer = (props: IProps) => {
             border={false}
             pagination={COMMON_PAGINATION}
           />
+        </div>
+        <div className={styles['section']}>
+          <div className={styles['section-title']}>函数</div>
+          <PyCodeContent value={data?.content} readOnly />
         </div>
       </div>
     </OsDrawer>
