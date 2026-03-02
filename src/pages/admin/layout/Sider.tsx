@@ -6,14 +6,10 @@ import { menus, type MenuModel } from './menus';
 import './sider.scss';
 import { usePermission } from '@/hooks/usePermission';
 import { useUserInfo, useUserInfoStore } from '@/store/userInfoStore';
-import {
-  getLocalStorage,
-  ProjectSelect,
-  SiderMenu
-} from '@ceai-front/arco-material';
+import { ProjectSelect, SiderMenu } from '@ceai-front/arco-material';
 import { GetProjOrg } from '@/api/modules/project';
 import { isSameArray } from '@/utils/array';
-import { setLocalStorage } from '@/utils/storage';
+import { setLocalStorage, getLocalStorage } from '@/utils/storage';
 import { ProjectIdKey } from '@/utils/const';
 import { isInFrame, isWujie } from '@/utils/env';
 
