@@ -9,7 +9,7 @@ import { useUserInfo, useUserInfoStore } from '@/store/userInfoStore';
 import { ProjectSelect, SiderMenu } from '@ceai-front/arco-material';
 import { GetProjOrg } from '@/api/modules/project';
 import { isSameArray } from '@/utils/array';
-import { setLocalStorage } from '@/utils/storage';
+import { setLocalStorage, getLocalStorage } from '@/utils/storage';
 import { ProjectIdKey } from '@/utils/const';
 import { isInFrame, isWujie } from '@/utils/env';
 
@@ -227,6 +227,25 @@ export const LayoutWithSider = memo(function LayoutWithSider({ children }) {
         }))
       }));
       setProjects(newResult);
+
+      // 设置 store 的 projectList，用于 PermissionRoute 判断加载状态
+      useUserInfoStore.setState({ projectList: result || [] });
+      const fullProjectIdKey = `${ProjectIdKey}${userInfo?.id}`;
+
+      if (result.length) {
+        const pId = getLocalStorage<string[]>(fullProjectIdKey);
+        if (Array.isArray(pId)) {
+          const org = result.find((r) => r.id === pId[0]);
+          if (org && org.projectList.find((p) => p.id === pId[1])) {
+            setProjectId(pId);
+            return;
+          }
+        }
+
+        const defaultPId = [result[0].id, result[0].projectList[0].id];
+        setLocalStorage(fullProjectIdKey, defaultPId);
+        setProjectId(defaultPId);
+      }
     };
 
     if (userInfo?.id) {
