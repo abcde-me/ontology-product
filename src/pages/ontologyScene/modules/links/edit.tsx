@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useHistory, useParams } from 'react-router-dom';
 import { Message, Button, Spin } from '@arco-design/web-react';
 import LinkForm, { LinkFormData, LinkFormRef } from './components/LinkForm';
-import { LinkType } from '../../types/link';
+import { LinkType } from '@/types/graphApi';
 
 export default function OntologySceneLinksEdit() {
   const history = useHistory();
@@ -24,7 +24,8 @@ export default function OntologySceneLinksEdit() {
         setInitialValues({
           name: '示例链接',
           id: 'example_link_id',
-          linkType: LinkType.ONE_TO_ONE,
+          // @ts-expect-error
+          linkType: LinkType.ONE_TO_MANY,
           sourceObjectType: 1,
           targetObjectType: 2,
           targetObjectAttribute: 'attr1',
