@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { Form } from '@arco-design/web-react';
+import { Form, Message } from '@arco-design/web-react';
 import { NoDataCard } from '@ceai-front/arco-material';
 import { useUIStore } from '../../store/uiStore';
 import { useBusinessStore } from '../../store/businessStore';
@@ -11,48 +11,103 @@ import { buildFormFieldValidateRules } from '@/pages/ontologyScene/modules/behav
 
 export const RightPanel: React.FC = () => {
   const selectedNodeId = useUIStore((state) => state.selectedNodeId);
+  const setTestResultVisible = useUIStore(
+    (state) => state.setTestResultVisible
+  );
+  const setIsTestRunning = useUIStore((state) => state.setIsTestRunning);
   const orchestrationNodes = useBusinessStore(
     (state) => state.orchestrationNodes
   );
-  const nodeConfigs = useBusinessStore((state) => state.nodeConfigs);
   const updateNodeConfig = useBusinessStore((state) => state.updateNodeConfig);
+  const setNodeValidationErrors = useBusinessStore(
+    (state) => state.setNodeValidationErrors
+  );
+  const addNodeTouchedField = useBusinessStore(
+    (state) => state.addNodeTouchedField
+  );
+  const executeSingleNodeTest = useBusinessStore(
+    (state) => state.executeSingleNodeTest
+  );
 
   const selectedNode = orchestrationNodes.find((n) => n.id === selectedNodeId);
   const [form] = Form.useForm();
   const updateTimerRef = useRef<NodeJS.Timeout | null>(null);
-  const isInitialLoadRef = useRef<string | null>(null);
+  const previousNodeIdRef = useRef<string | null>(null);
 
-  // 当选中节点变化时，重置表单
+  // 当选中节点变化时，保存上一个节点的验证状态，并加载新节点的配置和验证状态
   useEffect(() => {
-    if (selectedNode && selectedNodeId) {
-      // 只在节点切换时加载配置，避免输入时重新加载
-      if (isInitialLoadRef.current !== selectedNodeId) {
-        isInitialLoadRef.current = selectedNodeId;
+    // 保存上一个节点的验证状态
+    if (
+      previousNodeIdRef.current &&
+      previousNodeIdRef.current !== selectedNodeId
+    ) {
+      const previousNodeId = previousNodeIdRef.current;
+      const store = useBusinessStore.getState();
+      const touchedFields =
+        store.nodeTouchedFields[previousNodeId] || new Set<string>();
 
-        const config = nodeConfigs[selectedNodeId] || {};
-
-        // 先重置表单，清空所有字段
-        form.resetFields();
-
-        // 如果有配置，设置配置值
-        const initialValues: Record<string, any> = {};
-        selectedNode.behavior.params?.forEach((param) => {
-          if (config[param.code] !== undefined) {
-            initialValues[param.code] = config[param.code];
-          }
-        });
-
-        // 只有当有配置值时才设置，否则保持表单为空（已被 resetFields 清空）
-        if (Object.keys(initialValues).length > 0) {
-          form.setFieldsValue(initialValues);
-        }
+      // 只有当有字段被触碰过时，才保存验证状态
+      if (touchedFields.size > 0) {
+        // 获取当前表单的验证状态
+        form
+          .validate()
+          .then(() => {
+            // 验证通过，清除错误
+            setNodeValidationErrors(previousNodeId, {});
+          })
+          .catch((errors: any) => {
+            // 验证失败，只保存已触碰字段的错误
+            const errorMap: Record<string, string> = {};
+            if (errors && typeof errors === 'object') {
+              Object.entries(errors).forEach(
+                ([field, fieldError]: [string, any]) => {
+                  // 只保存已触碰字段的错误
+                  if (
+                    touchedFields.has(field) &&
+                    fieldError &&
+                    fieldError.errors &&
+                    fieldError.errors.length > 0
+                  ) {
+                    errorMap[field] = fieldError.errors[0];
+                  }
+                }
+              );
+            }
+            setNodeValidationErrors(previousNodeId, errorMap);
+          });
       }
-    } else if (!selectedNodeId) {
-      // 当没有选中节点时，清空 ref 和表单
-      isInitialLoadRef.current = null;
-      form.resetFields();
     }
-  }, [selectedNodeId, selectedNode, nodeConfigs, form]);
+
+    // 更新上一个节点 ID
+    previousNodeIdRef.current = selectedNodeId;
+
+    // 加载新节点的配置和验证状态
+    if (selectedNode && selectedNodeId) {
+      const store = useBusinessStore.getState();
+      const config = store.nodeConfigs[selectedNodeId] || {};
+      const savedErrors = store.nodeValidationErrors[selectedNodeId] || {};
+      const touchedFields =
+        store.nodeTouchedFields[selectedNodeId] || new Set<string>();
+
+      // 使用 setFields 来同时设置值和错误状态
+      const fieldsObj: Record<string, any> = {};
+      selectedNode.behavior.params?.forEach((param) => {
+        const value = config[param.code];
+        // 只恢复已触碰字段的错误
+        const error = touchedFields.has(param.code)
+          ? savedErrors[param.code]
+          : undefined;
+
+        fieldsObj[param.code] = {
+          value: value !== undefined ? value : undefined,
+          error: error ? { message: error } : undefined
+        };
+      });
+
+      form.setFields(fieldsObj);
+    }
+    // 只依赖 selectedNodeId，避免其他状态变化触发
+  }, [selectedNodeId]);
 
   // 组件卸载时清除定时器
   useEffect(() => {
@@ -63,26 +118,54 @@ export const RightPanel: React.FC = () => {
     };
   }, []);
 
-  // 表单值变化时使用防抖更新到 Store（避免输入时频繁更新导致光标丢失）
+  // 表单值变化时更新配置并标记字段为已触碰
   const handleFormChange = (
     changedValues: Record<string, any>,
     allValues: Record<string, any>
   ) => {
     if (selectedNodeId) {
+      // 标记变化的字段为已触碰
+      Object.keys(changedValues).forEach((field) => {
+        addNodeTouchedField(selectedNodeId, field);
+      });
+
       // 清除之前的定时器
       if (updateTimerRef.current) {
         clearTimeout(updateTimerRef.current);
       }
 
-      // 设置新的定时器，300ms 后更新
+      // 更新配置
       updateTimerRef.current = setTimeout(() => {
-        console.log('表单值变化:', {
-          nodeId: selectedNodeId,
-          changedValues,
-          allValues
-        });
         updateNodeConfig(selectedNodeId, allValues);
       }, 300);
+    }
+  };
+
+  // 单节点测试
+  const handleSingleNodeTest = async () => {
+    if (!selectedNodeId) return;
+
+    // 先验证表单
+    try {
+      await form.validate();
+
+      // 表单验证通过，执行测试
+      setIsTestRunning(true);
+      setTestResultVisible(true);
+
+      await executeSingleNodeTest(selectedNodeId);
+
+      Message.success('测试完成');
+    } catch (error: any) {
+      // 表单验证失败
+      if (error && typeof error === 'object' && !error.message) {
+        Message.error('请检查表单填写是否正确');
+      } else {
+        // 其他错误
+        Message.error(error?.message || '测试失败');
+      }
+    } finally {
+      setIsTestRunning(false);
     }
   };
 
@@ -95,7 +178,6 @@ export const RightPanel: React.FC = () => {
             <BehaviorConfigSvg className="h-3.5 w-3.5" />
             <span className="text-base font-medium text-[#000]">参数配置</span>
           </div>
-          {/* <BehaviorTestSvg className="h-4 w-4 cursor-pointer" /> */}
         </div>
         <div className="flex flex-1 items-center justify-center px-5">
           <NoDataCard title="请先选择行为" />
@@ -112,14 +194,16 @@ export const RightPanel: React.FC = () => {
           <BehaviorConfigSvg className="h-3.5 w-3.5" />
           <span className="text-base font-medium text-[#000]">参数配置</span>
         </div>
-        <BehaviorTestSvg className="h-4 w-4 cursor-pointer" />
+        <BehaviorTestSvg
+          className="h-4 w-4 cursor-pointer"
+          onClick={handleSingleNodeTest}
+        />
       </div>
 
       {/* 表单内容 */}
       <div className="scrollbar-hide flex-1 overflow-y-auto px-5 py-4">
-        {/* 动态表单 - 使用 selectedNodeId 作为 key 强制重新渲染 */}
+        {/* 动态表单 - 不使用 key，通过 setFields 来管理字段状态 */}
         <Form
-          key={selectedNodeId}
           form={form}
           layout="vertical"
           onValuesChange={handleFormChange}

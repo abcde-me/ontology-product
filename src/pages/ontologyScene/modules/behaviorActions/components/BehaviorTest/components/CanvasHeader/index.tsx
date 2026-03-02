@@ -17,16 +17,11 @@ export const CanvasHeader: React.FC = () => {
   );
   const canExecute = useBusinessStore((state) => state.canExecuteTest());
   const executeTest = useBusinessStore((state) => state.executeTest);
+  const validateAllNodes = useBusinessStore((state) => state.validateAllNodes);
   const clearOrchestration = useBusinessStore(
     (state) => state.clearOrchestration
   );
   const selectNode = useUIStore((state) => state.selectNode);
-
-  console.log('CanvasHeader render:', {
-    nodesCount: orchestrationNodes.length,
-    canExecute,
-    isTestRunning
-  });
 
   const handleRefresh = () => {
     Modal.confirm({
@@ -41,13 +36,61 @@ export const CanvasHeader: React.FC = () => {
   };
 
   const handleTest = async () => {
+    // 打印所有节点的配置数据
+    console.log('=== 开始测试 ===');
+    console.log(
+      '所有节点:',
+      orchestrationNodes.map((n) => ({
+        id: n.id,
+        name: n.behavior.name,
+        order: n.order
+      }))
+    );
+
+    const allNodeConfigs = useBusinessStore.getState().nodeConfigs;
+    console.log('所有节点配置 (nodeConfigs):', allNodeConfigs);
+
+    // 组装成数组格式
+    const testDataArray = orchestrationNodes.map((node, index) => {
+      const config = allNodeConfigs[node.id] || {};
+      return {
+        nodeIndex: index + 1,
+        nodeId: node.id,
+        behaviorId: node.behaviorId,
+        behaviorName: node.behavior.name,
+        behaviorCode: node.behavior.code,
+        formData: config,
+        // 转换成后端需要的参数格式
+        arguments: Object.entries(config).map(([key, value]) => ({
+          name: key,
+          value: JSON.stringify(value)
+        }))
+      };
+    });
+
+    console.log('组装后的测试数据数组:', testDataArray);
+    console.log('JSON格式:', JSON.stringify(testDataArray, null, 2));
+
+    // 先验证所有节点
+    const { isValid, invalidNodeIds } = validateAllNodes();
+
+    if (!isValid && invalidNodeIds.length > 0) {
+      console.log('验证失败的节点:', invalidNodeIds);
+      Message.error('部分节点配置不完整或有误，请检查后重试');
+      // 选中第一个有错误的节点
+      selectNode(invalidNodeIds[0]);
+      return;
+    }
+
+    console.log('所有节点验证通过，开始执行测试');
     setIsTestRunning(true);
-    setTestResultVisible(true); // 打开测试结果抽屉
+    setTestResultVisible(true);
     try {
       await executeTest();
       Message.success('测试执行成功');
-    } catch (error) {
-      Message.error('测试执行失败，请稍后重试');
+    } catch (error: any) {
+      console.error('测试执行失败:', error);
+      Message.error(error?.message || '测试执行失败，请稍后重试');
     } finally {
       setIsTestRunning(false);
     }

@@ -330,7 +330,7 @@ export const mockApi = {
     return {
       items: paginatedList,
       total,
-      page,
+      pageNo: page,
       pageSize
     };
   },
