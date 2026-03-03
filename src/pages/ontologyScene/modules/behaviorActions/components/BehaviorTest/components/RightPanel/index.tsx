@@ -3,31 +3,44 @@ import { Form, Message } from '@arco-design/web-react';
 import { NoDataCard } from '@ceai-front/arco-material';
 import { useUIStore } from '../../store/uiStore';
 import { useBusinessStore } from '../../store/businessStore';
-import { renderComponentByUiType } from '@/pages/ontologyScene/utils';
+import {
+  renderComponentByUiType,
+  buildActionTestItem
+} from '@/pages/ontologyScene/utils';
 import { UiType } from '@/pages/ontologyScene/types/ontologyFunction';
 import BehaviorConfigSvg from '@/assets/benti/behaviorConfig.svg';
 import BehaviorTestSvg from '@/assets/benti/behaviorTest.svg';
 import { buildFormFieldValidateRules } from '@/pages/ontologyScene/modules/behaviorActionDetail/utils';
+import { TestFunctionInfo } from '@/pages/ontologyScene/hooks/useTestFunction';
+import { useParams } from 'react-router-dom';
 
-export const RightPanel: React.FC = () => {
+interface RightPanelProps {
+  testFunctionHook: TestFunctionInfo;
+}
+
+export const RightPanel: React.FC<RightPanelProps> = ({ testFunctionHook }) => {
+  const { id: OSId } = useParams<Record<string, string>>();
   const selectedNodeId = useUIStore((state) => state.selectedNodeId);
   const setTestResultVisible = useUIStore(
     (state) => state.setTestResultVisible
   );
-  const setIsTestRunning = useUIStore((state) => state.setIsTestRunning);
   const orchestrationNodes = useBusinessStore(
     (state) => state.orchestrationNodes
   );
   const updateNodeConfig = useBusinessStore((state) => state.updateNodeConfig);
-  const setNodeValidationErrors = useBusinessStore(
-    (state) => state.setNodeValidationErrors
-  );
   const addNodeTouchedField = useBusinessStore(
     (state) => state.addNodeTouchedField
   );
-  const executeSingleNodeTest = useBusinessStore(
-    (state) => state.executeSingleNodeTest
-  );
+
+  // 从 props 接收 testFunctionHook
+  const { runLog: runInfo, testIng, loading, startTest } = testFunctionHook;
+
+  // 当测试状态变化时，更新 UI store
+  useEffect(() => {
+    if (runInfo) {
+      console.log('测试结果更新:', runInfo);
+    }
+  }, [runInfo, testIng]);
 
   const selectedNode = orchestrationNodes.find((n) => n.id === selectedNodeId);
   const [form] = Form.useForm();
@@ -53,7 +66,7 @@ export const RightPanel: React.FC = () => {
           .validate()
           .then(() => {
             // 验证通过，清除错误
-            setNodeValidationErrors(previousNodeId, {});
+            store.setNodeValidationErrors(previousNodeId, {});
           })
           .catch((errors: any) => {
             // 验证失败，只保存已触碰字段的错误
@@ -73,7 +86,7 @@ export const RightPanel: React.FC = () => {
                 }
               );
             }
-            setNodeValidationErrors(previousNodeId, errorMap);
+            store.setNodeValidationErrors(previousNodeId, errorMap);
           });
       }
     }
@@ -106,7 +119,6 @@ export const RightPanel: React.FC = () => {
 
       form.setFields(fieldsObj);
     }
-    // 只依赖 selectedNodeId，避免其他状态变化触发
   }, [selectedNodeId]);
 
   // 组件卸载时清除定时器
@@ -143,19 +155,38 @@ export const RightPanel: React.FC = () => {
 
   // 单节点测试
   const handleSingleNodeTest = async () => {
-    if (!selectedNodeId) return;
+    if (!selectedNodeId || !selectedNode) return;
 
     // 先验证表单
     try {
-      await form.validate();
+      const formValues = await form.validate();
 
-      // 表单验证通过，执行测试
-      setIsTestRunning(true);
+      console.log('=== 单节点测试 ===');
+      console.log('节点信息:', {
+        nodeId: selectedNodeId,
+        behaviorName: selectedNode.behavior.name,
+        behaviorCode: selectedNode.behavior.code,
+        functionCode: selectedNode.behavior.functionCode
+      });
+      console.log('表单数据:', formValues);
+
+      // 构建测试数据
+      const testItem = buildActionTestItem(selectedNode.behavior, formValues);
+      console.log('测试项:', testItem);
+
+      // 调用测试接口
+      startTest({
+        list_data: [testItem],
+        target: [selectedNode.behavior.functionCode!],
+        id: +OSId,
+        run_action_with_validate: true,
+        run_type: 'action'
+      });
+
+      // 打开测试结果抽屉
       setTestResultVisible(true);
 
-      await executeSingleNodeTest(selectedNodeId);
-
-      Message.success('测试完成');
+      Message.success('测试已开始');
     } catch (error: any) {
       // 表单验证失败
       if (error && typeof error === 'object' && !error.message) {
@@ -164,8 +195,6 @@ export const RightPanel: React.FC = () => {
         // 其他错误
         Message.error(error?.message || '测试失败');
       }
-    } finally {
-      setIsTestRunning(false);
     }
   };
 
@@ -208,6 +237,7 @@ export const RightPanel: React.FC = () => {
           layout="vertical"
           onValuesChange={handleFormChange}
           autoComplete="off"
+          disabled={loading || testIng}
         >
           {selectedNode.behavior.params?.map((param) => (
             <Form.Item

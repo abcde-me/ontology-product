@@ -186,7 +186,7 @@ export const buildFormFieldValidateRules = (
             }
             break;
           case RuleName.LengthRule:
-            const length = value.trim().length;
+            const length = String(value).trim().length;
             if (
               length < ruleConfig!.minLength! ||
               length > ruleConfig!.maxLength!
@@ -195,8 +195,24 @@ export const buildFormFieldValidateRules = (
             }
             break;
           default:
-            const strEnum = (ruleConfig as string).trim().split('_');
-            if (!strEnum.includes(value)) {
+            // enum_rule: ruleConfig 可能是字符串、对象(options为字符串或数组)、或undefined
+            let enumOptions: string[] = [];
+
+            if (typeof ruleConfig === 'string') {
+              // ruleConfig 是字符串: "option1_option2_option3"
+              enumOptions = (ruleConfig as string).trim().split('_');
+            } else if (ruleConfig && typeof ruleConfig === 'object') {
+              const options = (ruleConfig as any).options;
+              if (Array.isArray(options)) {
+                // options 是数组: ["option1", "option2", "option3"]
+                enumOptions = options;
+              } else if (typeof options === 'string') {
+                // options 是字符串: "option1_option2_option3"
+                enumOptions = options.trim().split('_');
+              }
+            }
+
+            if (enumOptions.length > 0 && !enumOptions.includes(value)) {
               onError(failMessage);
             }
         }

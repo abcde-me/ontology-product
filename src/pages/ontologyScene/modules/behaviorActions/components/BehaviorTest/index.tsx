@@ -8,6 +8,7 @@ import { TestResultDrawer } from './components/TestResultDrawer';
 import { BehaviorActionItem } from '@/pages/ontologyScene/types/behaviorActions';
 import { useUIStore } from './store/uiStore';
 import { useBusinessStore } from './store/businessStore';
+import useTestFunction from '@/pages/ontologyScene/hooks/useTestFunction';
 
 interface BehaviorTestProps {
   onViewDetail?: (data: BehaviorActionItem) => void;
@@ -18,8 +19,9 @@ export const BehaviorTest: React.FC<BehaviorTestProps> = ({ onViewDetail }) => {
   const setTestResultVisible = useUIStore(
     (state) => state.setTestResultVisible
   );
-  const isTestRunning = useUIStore((state) => state.isTestRunning);
-  const testResults = useBusinessStore((state) => state.testResults);
+
+  // 在父组件中使用 useTestFunction，这样所有子组件共享同一个实例
+  const testFunctionHook = useTestFunction();
 
   // 组件卸载时关闭抽屉
   useEffect(() => {
@@ -34,7 +36,7 @@ export const BehaviorTest: React.FC<BehaviorTestProps> = ({ onViewDetail }) => {
         <TestLayout
           leftPanel={<LeftPanel onViewDetail={onViewDetail} />}
           middlePanel={<MiddlePanel />}
-          rightPanel={<RightPanel />}
+          rightPanel={<RightPanel testFunctionHook={testFunctionHook} />}
         />
       </div>
       {/* 测试历史抽屉 */}
@@ -43,8 +45,7 @@ export const BehaviorTest: React.FC<BehaviorTestProps> = ({ onViewDetail }) => {
       <TestResultDrawer
         visible={testResultVisible}
         onClose={() => setTestResultVisible(false)}
-        isRunning={isTestRunning}
-        results={testResults}
+        testFunctionHook={testFunctionHook}
       />
     </>
   );
