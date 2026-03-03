@@ -295,3 +295,30 @@ export interface Argument {
   name?: string;
   value: string;
 }
+
+export interface FunctionListQuery {
+  /**
+   * 搜索关键字，支持按函数名称、编码模糊搜索
+   */
+  filter?: string;
+  /**
+   * 本体场景ID
+   */
+  ontologyModelID: number;
+  /**
+   * 排序方向
+   */
+  order?: 'asc' | 'desc';
+  /**
+   * 排序字段
+   */
+  orderBy?: string;
+  /**
+   * 页码，从1开始
+   */
+  pageNum?: number;
+  /**
+   * 每页数量
+   */
+  pageSize?: number;
+}

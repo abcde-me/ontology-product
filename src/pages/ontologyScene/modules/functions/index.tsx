@@ -20,7 +20,10 @@ import {
   SearchTable
 } from '@ceai-front/arco-material';
 import { SafeTableCell } from '@/components/SafeTableCell';
-import { OntologyFunctionItem } from '@/pages/ontologyScene/types/ontologyFunction';
+import {
+  FunctionListQuery,
+  OntologyFunctionItem
+} from '@/pages/ontologyScene/types/ontologyFunction';
 import {
   deleteFunction,
   getFunctionList
@@ -28,6 +31,7 @@ import {
 import { isEmpty, isNil } from 'lodash-es';
 import { OsEmptyStatusWrapper } from '@/pages/ontologyScene/componens';
 import { FunctionDetailDrawer } from '@/pages/ontologyScene/modules/functionDetail/components';
+import { SorterInfo } from '@arco-design/web-react/lib/Table/interface';
 
 // 函数
 export default function OntologySceneFunctions() {
@@ -48,12 +52,18 @@ export default function OntologySceneFunctions() {
           items: [],
           total: 0
         });
-      return getFunctionList({
+      const filterParams: FunctionListQuery = {
         ontologyModelID: +ontologyModelID,
         pageNum: pagination.current,
         pageSize: pagination.pageSize,
-        ...query
-      }).then((res) => {
+        ...(query as Record<string, any>)
+      };
+      if (!isNil(sorter)) {
+        filterParams.order =
+          (sorter as SorterInfo).direction === 'ascend' ? 'asc' : 'desc';
+        filterParams.orderBy = (sorter as SorterInfo).field as string;
+      }
+      return getFunctionList(filterParams).then((res) => {
         setFunctionsEmpty(!query?.filter && !res.items?.length);
         return res;
       });
@@ -95,6 +105,7 @@ export default function OntologySceneFunctions() {
     {
       title: '显示名称',
       dataIndex: 'name',
+      width: 200,
       render: (value, record) => (
         <div
           className={
@@ -109,11 +120,16 @@ export default function OntologySceneFunctions() {
       )
     },
     {
+      title: '描述说明',
+      dataIndex: 'description',
+      ellipsis: true
+    },
+    {
       title: '函数名称(id)',
       dataIndex: 'code',
       ellipsis: true,
       tooltip: true,
-      width: 200,
+      width: 250,
       render(value) {
         return (
           <div className={'flex gap-2 overflow-hidden'}>
@@ -135,10 +151,11 @@ export default function OntologySceneFunctions() {
     {
       title: '最近修改时间',
       sorter: true,
-      dataIndex: 'functionName',
+      dataIndex: 'updatedAt',
       render: (value) => {
         return <SafeTableCell value={value} />;
-      }
+      },
+      width: 250
     },
     {
       title: '操作',
@@ -168,19 +185,14 @@ export default function OntologySceneFunctions() {
             删除
           </Button>
         </Space>
-      )
+      ),
+      width: 150
     }
   ];
 
   return (
-    <OsEmptyStatusWrapper
+    <div
       className={`flex h-full w-full flex-col gap-4 overflow-hidden bg-white ${styles['function']}`}
-      onCreate={() => {
-        route2FunctionDetail('create');
-      }}
-      title={'函数'}
-      description={'函数的描述'}
-      empty={functionsEmpty && !tableProps.loading}
     >
       <div className={styles['function-content']}>
         <div className={styles['function-list']}>
@@ -236,6 +248,6 @@ export default function OntologySceneFunctions() {
           setCurrentFunction(undefined);
         }}
       />
-    </OsEmptyStatusWrapper>
+    </div>
   );
 }
