@@ -59,7 +59,7 @@ function layoutNodesWithDagre(
   // 创建 dagre 图
   const g = new dagre.graphlib.Graph();
   g.setDefaultEdgeLabel(() => ({}));
-  g.setGraph({ rankdir: 'LR', nodesep: 60, ranksep: 200 });
+  g.setGraph({ rankdir: 'LR', nodesep: 60, ranksep: 280 });
 
   // 创建节点映射，用于后续查找
   const nodeIdMap = new Map<number, string>();

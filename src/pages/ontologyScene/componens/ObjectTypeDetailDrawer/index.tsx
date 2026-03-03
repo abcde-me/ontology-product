@@ -12,7 +12,11 @@ import {
 } from '@arco-design/web-react';
 import { IconCopy } from '@arco-design/web-react/icon';
 import { OsDrawer } from '@/pages/ontologyScene/componens';
-import { EllipsisPopover, NoDataCard } from '@ceai-front/arco-material';
+import {
+  DotStatus,
+  EllipsisPopover,
+  NoDataCard
+} from '@ceai-front/arco-material';
 import copy from 'copy-to-clipboard';
 import { getOntologyObjectTypeDetail } from '@/api/ontologySceneLibrary/objectType';
 import {
@@ -32,6 +36,7 @@ import {
 } from '@/pages/ontologyScene/common/constants';
 import { IconFile } from '@arco-design/web-react/icon';
 import styles from './index.module.scss';
+import { isNil } from 'lodash-es';
 
 const TabPane = Tabs.TabPane;
 
@@ -62,18 +67,8 @@ export interface LinkItem {
   linkId: string;
   linkName: string;
   linkType?: LinkType;
-  sourceObjectType: {
-    id: string;
-    name: string;
-    icon?: string;
-    iconColor?: string;
-  };
-  targetObjectType: {
-    id: string;
-    name: string;
-    icon?: string;
-    iconColor?: string;
-  };
+  sourceObjectTypeInfo: LinkInfo['sourceObjectTypeInfo'];
+  targetObjectTypeInfo: LinkInfo['targetObjectTypeInfo'];
 }
 
 interface ObjectTypeDetailDrawerProps {
@@ -318,6 +313,7 @@ export default function ObjectTypeDetailDrawer({
         } else {
           // 使用真实接口
           const res = await listOntologyPhysicalProperties({
+            ontologyModelID: Number(ontologyModelID),
             objectTypeIdList: [resolvedObjectTypeIdNum],
             pageNo: page,
             pageSize
@@ -388,9 +384,9 @@ export default function ObjectTypeDetailDrawer({
           // 使用真实接口
           const res = await listOntologyLinkType({
             sourceObjectTypeIDList: [resolvedObjectTypeIdNum],
-            targetObjectTypeIDList: [resolvedObjectTypeIdNum],
+            ontologyModelID: Number(ontologyModelID),
             pageNo: 1,
-            pageSize: 1000 // 链接通常不需要分页，设置一个较大的值
+            pageSize: 10
           });
           if (res.code === '' && res.status === 200 && res.data) {
             // 将 LinkInfo 转换为 LinkItem
@@ -399,18 +395,8 @@ export default function ObjectTypeDetailDrawer({
                 linkId: link.code || String(link.id || ''),
                 linkName: link.name || '',
                 linkType: link.type,
-                sourceObjectType: {
-                  id: String(link.sourceObjectTypeID || ''),
-                  name: link.sourceObjectTypeName || '',
-                  icon: link.sourceObjectTypeIcon,
-                  iconColor: getObjectTypeColor(link.sourceObjectTypeIcon)
-                },
-                targetObjectType: {
-                  id: String(link.targetObjectTypeID || ''),
-                  name: link.targetObjectTypeName || '',
-                  icon: link.targetObjectTypeIcon,
-                  iconColor: getObjectTypeColor(link.targetObjectTypeIcon)
-                }
+                sourceObjectTypeInfo: link.sourceObjectTypeInfo,
+                targetObjectTypeInfo: link.targetObjectTypeInfo
               })
             );
             setLinksData(convertedLinks);
@@ -573,11 +559,17 @@ export default function ObjectTypeDetailDrawer({
 
   // 渲染链接卡片（参考 panel.tsx 的实现）
   const renderLinkCard = (
-    objectType: { id: string; name: string; icon?: string; iconColor?: string },
+    objectType: {
+      id?: string;
+      name?: string;
+      icon?: string;
+      syncStatus?: SyncStatus;
+    },
     isSource: boolean
   ) => {
+    const name = objectType?.name || '-';
     // 根据 icon 字段匹配对应的图标
-    const iconOption = objectType.icon
+    const iconOption = objectType?.icon
       ? OBJECT_TYPE_ICON_OPTIONS.find(
           (option) => option.value === objectType.icon
         )
@@ -586,14 +578,28 @@ export default function ObjectTypeDetailDrawer({
 
     return (
       <div
-        className={`flex items-center gap-2 rounded border border-green-200 bg-green-50 px-3 py-2`}
+        className="flex flex-1 items-center gap-3 rounded-lg px-4 py-3"
+        style={{
+          backgroundColor: '#fff',
+          minHeight: '56px'
+        }}
       >
-        <div className="flex h-6 w-6 flex-shrink-0 items-center justify-center">
+        <div className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded">
           <IconComponent className="h-6 w-6" />
         </div>
-        <span className="text-sm font-medium text-gray-700">
-          {objectType.name}
-        </span>
+        <div className="min-w-0 text-[14px] leading-[22px] text-[#23293b]">
+          <EllipsisPopover preferTypography value={name} />
+        </div>
+        {!isNil(objectType?.syncStatus) ? (
+          <div className="flex items-center">
+            <DotStatus
+              text=""
+              color={
+                OBJECT_TYPE_SYNC_STATUS_CONFIG[objectType.syncStatus].color
+              }
+            />
+          </div>
+        ) : null}
       </div>
     );
   };
@@ -642,7 +648,7 @@ export default function ObjectTypeDetailDrawer({
                 <div className="flex min-w-0 flex-1 items-center gap-[4px]">
                   {displayData?.name ? (
                     <>
-                      {renderObjectTypeIcon(displayData?.icon)}
+                      {renderObjectTypeIcon(displayData.icon)}
                       <div className="min-w-0 flex-1">
                         <EllipsisPopover
                           preferTypography
@@ -803,8 +809,8 @@ export default function ObjectTypeDetailDrawer({
               ) : (
                 linksData.map((link) => {
                   // 确定左侧（当前节点）和右侧（关联节点）的显示
-                  const leftObjectType = link.sourceObjectType;
-                  const rightObjectType = link.targetObjectType;
+                  const leftObjectType = link.sourceObjectTypeInfo ?? {};
+                  const rightObjectType = link.targetObjectTypeInfo ?? {};
 
                   return (
                     <div
@@ -835,21 +841,16 @@ export default function ObjectTypeDetailDrawer({
                       </div>
 
                       {/* 关系图 */}
-                      <div className="flex items-center rounded-[4px] bg-[#F2F8FF] p-[12px]">
-                        {/* 左侧对象（当前节点） */}
+                      <div className="flex items-center bg-[#F2F8FF] p-[12px]">
                         {renderLinkCard(leftObjectType, true)}
-
-                        {/* 箭头和关系类型 */}
-                        <div className="flex flex-1 items-center gap-1">
-                          <div className="h-0.5 flex-1 border-t border-dashed border-gray-300"></div>
-                          <div className="rounded bg-gray-100 px-2 py-1 text-xs font-medium text-gray-600">
-                            {getLinkTypeText(link.linkType)}
-                          </div>
-                          <div className="h-0.5 flex-1 border-t border-dashed border-gray-300"></div>
-                          <div className="h-0 w-0 border-b-2 border-l-4 border-t-2 border-b-transparent border-l-gray-400 border-t-transparent"></div>
+                        <div className="flex w-[76px] min-w-[76px] items-center">
+                          <span className="h-0 flex-1 border-t border-dashed border-[#CBD5E1]" />
+                          <span className="rounded border border-[#E5E6EB] bg-white px-2 py-[2px] text-[12px] leading-[18px] text-[#23293b]">
+                            {link.linkType}
+                          </span>
+                          <span className="h-0 flex-1 border-t border-dashed border-[#CBD5E1]" />
+                          <div className="h-0 w-0 border-b-[4px] border-l-[6px] border-t-[4px] border-b-transparent border-l-gray-400 border-t-transparent"></div>
                         </div>
-
-                        {/* 右侧对象（关联节点） */}
                         {renderLinkCard(rightObjectType, false)}
                       </div>
                     </div>

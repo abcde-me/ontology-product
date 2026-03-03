@@ -269,6 +269,10 @@ export interface ListOntologyPhysicalPropertiesRes {
 
 export interface ListOntologyLinkTypeReq {
   /**
+   * 本体模型ID
+   */
+  ontologyModelID?: number;
+  /**
    * 搜索内容
    */
   filter?: string;
@@ -463,6 +467,24 @@ export interface LinkInfo {
    * 修改人
    */
   updateUser?: string;
+  /**
+   * 源对象类型信息
+   */
+  sourceObjectTypeInfo?: {
+    id: number;
+    name: string;
+    icon: string;
+    syncStatus: SyncStatus;
+  };
+  /**
+   * 目标对象类型信息
+   */
+  targetObjectTypeInfo?: {
+    id: number;
+    name: string;
+    icon: string;
+    syncStatus: SyncStatus;
+  };
 }
 
 export interface ListOntologyLinkTypeRes {

@@ -414,7 +414,7 @@ export default function OntologySceneLinksList() {
               <Input.Search
                 autoComplete="off"
                 className="w-[220px]"
-                placeholder="请输入关键词"
+                placeholder="请输入链接id搜索"
                 suffix={<IconSearch />}
                 allowClear
                 onClear={() => {
