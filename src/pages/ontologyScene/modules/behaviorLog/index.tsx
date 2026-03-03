@@ -186,6 +186,13 @@ export default function BehaviorLogList() {
   const handleTabChange = (key: string) => {
     const newTab = key as 'action' | 'function';
     setActiveTab(newTab);
+
+    // 关闭执行详情抽屉
+    if (showExecutionDetail) {
+      setShowExecutionDetail(false);
+      setSelectedExecutionId(undefined);
+    }
+
     // 重置表单和过滤条件
     form.resetFields();
     setSourcesFilter([]);
