@@ -261,7 +261,9 @@ export default function LinkDetailDrawer({
   };
 
   const renderObjectTypeCard = (
-    objectType: { name?: string; icon?: string } | undefined,
+    objectType:
+      | { name?: string; icon?: string; syncStatus?: SyncStatus }
+      | undefined,
     isSource: boolean
   ) => {
     const name = objectType?.name || '-';
@@ -284,12 +286,19 @@ export default function LinkDetailDrawer({
         <div className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded">
           <IconComponent className="h-6 w-6" />
         </div>
-        <div className="min-w-0 flex-1 font-PingFangSc text-sm font-normal leading-[22px] text-[#23293b]">
+        <div className="min-w-0 text-sm font-normal leading-[22px] text-[#23293b]">
           <EllipsisPopover preferTypography value={name} />
         </div>
-        <div className="flex items-center">
-          <div className="h-2 w-2 rounded-full bg-[#00b42a]" />
-        </div>
+        {!isNil(objectType?.syncStatus) ? (
+          <div className="flex items-center">
+            <DotStatus
+              text=""
+              color={
+                OBJECT_TYPE_SYNC_STATUS_CONFIG[objectType.syncStatus].color
+              }
+            />
+          </div>
+        ) : null}
       </div>
     );
   };
@@ -337,7 +346,10 @@ export default function LinkDetailDrawer({
     {
       title: '属性名称',
       dataIndex: 'comment',
-      width: 240
+      width: 240,
+      render: (text: string) => {
+        return <EllipsisPopover value={text || '-'} />;
+      }
     },
     {
       title: '表字段',
@@ -412,13 +424,13 @@ export default function LinkDetailDrawer({
                   <span className="text-[14px] leading-[22px] text-[var(--color-text-1)]">
                     {displayData?.code || '-'}
                   </span>
-                  {(displayData?.id || resolvedLinkId) && (
+                  {!isNil(displayData?.code) && (
                     <IconCopy
                       fontSize={14}
                       className="hover:cursor-pointer"
                       onClick={(e) => {
                         e.stopPropagation();
-                        handleCopy(String(displayData?.id || resolvedLinkId));
+                        handleCopy(String(displayData?.code));
                       }}
                     />
                   )}

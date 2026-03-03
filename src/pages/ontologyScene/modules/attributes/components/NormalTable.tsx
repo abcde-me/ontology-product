@@ -47,6 +47,7 @@ export default function NormalTable({ onTotalChange }: NormalTableProps = {}) {
         try {
           // 调用 listOntologyPhysicalProperties 接口
           const response = await listOntologyPhysicalProperties({
+            ontologyModelID: Number(ontologyModelID),
             filter: params.keyword || '',
             pageNo: params.page || 1,
             pageSize: params.page_size || 10,
@@ -119,11 +120,7 @@ export default function NormalTable({ onTotalChange }: NormalTableProps = {}) {
 
   // 处理查看详情：打开对象类型详情抽屉
   const handleViewDetail = (record: PhysicalProperties) => {
-    // 使用对象类型ID打开详情抽屉
-    const objectTypeId = String(
-      record.ontologyObjectTypeId || record.objectTypeID || record.id || ''
-    );
-    setSelectedObjectType({ id: objectTypeId });
+    setSelectedObjectType({ id: String(record.ontologyObjectTypeId) });
     setActiveTab('instances');
     setDetailDrawerVisible(true);
   };

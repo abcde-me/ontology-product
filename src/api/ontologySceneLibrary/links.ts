@@ -8,9 +8,6 @@ import {
   CreateOntologyLinkTypeReq,
   UpdateOntologyLinkTypeReq
 } from '@/types/links';
-import { LinkType } from '@/types/graphApi';
-import { ObjectType } from '@/types/objectType';
-import { SyncStatus } from '@/types/graphApi';
 import UAPI from '@/api';
 
 // 获取链接的属性列表
@@ -536,6 +533,16 @@ export const updateOntologyLinkType = async (
   }>
 > => {
   return await UAPI.RES.UpdateOntologyLinkTypeApi({})
+    .post(params)
+    .inRegion()
+    .do();
+};
+
+// 删除链接类型
+export const deleteOntologyLinkType = async (params: {
+  id: number;
+}): Promise<ApiRes<string>> => {
+  return await UAPI.RES.DeleteOntologyLinkTypeApi({})
     .post(params)
     .inRegion()
     .do();
