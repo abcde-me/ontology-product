@@ -113,11 +113,7 @@ export const FunctionScript = (
               hidden: !logOpen
             })}
           >
-            {runInfo.run_log || (
-              <div className={'flex items-center gap-2 text-[#6E7B8D]'}>
-                <IconLoading style={{ color: '#184FF2' }} />
-              </div>
-            )}
+            {runInfo.run_log}
           </div>
         </ResizeBoxWithCursorChange>
       )}

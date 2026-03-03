@@ -179,6 +179,20 @@ export interface OntologyActionParam {
   validationRule?: ValidationRule;
 }
 
+export interface EnumRule {
+  options: string[];
+}
+
+export interface LengthRule {
+  minLength: number;
+  maxLength: number;
+}
+
+export interface RangeRule {
+  minValue: number;
+  maxValue: number;
+}
+
 /**
  * ValidationRule，参数校验规则
  */
@@ -218,13 +232,7 @@ export interface ValidationRule {
    * ```
    * - options: array<string> - 可选值列表
    */
-  ruleConfig?: {
-    options?: string[];
-    minLength?: number;
-    maxLength?: number;
-    minValue?: number;
-    maxValue?: number;
-  };
+  ruleConfig?: EnumRule | LengthRule | RangeRule;
   /**
    * 规则类型：
    * - range_rule: 范围规则

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import {
+  EnumRule,
   OntologyActionParam,
   RuleName,
   TYPE2COMP_OPTIONS,
@@ -191,7 +192,9 @@ export const BehaviorDetail = (props: IProps) => {
                         TYPE2RULE_TYPES[type][0].value,
                       ruleConfig:
                         validationRule?.ruleName === RuleName.EnumRule
-                          ? param.validationRule?.ruleConfig?.options?.toString()
+                          ? (
+                              param.validationRule?.ruleConfig as EnumRule
+                            )?.options?.toString()
                           : param.validationRule?.ruleConfig,
                       name,
                       type

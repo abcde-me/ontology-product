@@ -1,7 +1,10 @@
 import {
   ActionSchema,
   BehaviorActionDetail,
+  EnumRule,
+  LengthRule,
   OntologyActionParam,
+  RangeRule,
   RuleName,
   TYPE2COMP_OPTIONS,
   TYPE2RULE_TYPES,
@@ -136,7 +139,7 @@ export function buildActionDetail(action: ActionSchema): BehaviorActionDetail {
           ruleName: rule_name,
           failMessage,
           ruleConfig:
-            rule_name === RuleName.EnumRule
+            rule_name === RuleName.EnumRule && typeof ruleConfig === 'string'
               ? { options: ruleConfig?.split(',') }
               : ruleConfig
         };
@@ -157,7 +160,7 @@ export const buildParamValidateRule = (
     rule_name: validationRule?.ruleName || TYPE2RULE_TYPES[type][0].value,
     ruleConfig:
       validationRule?.ruleName === RuleName.EnumRule
-        ? param.validationRule?.ruleConfig!.options!.toString()
+        ? (param.validationRule?.ruleConfig as EnumRule).options.toString()
         : param.validationRule?.ruleConfig,
     name,
     type
@@ -180,8 +183,8 @@ export const buildFormFieldValidateRules = (
         switch (ruleName) {
           case RuleName.RangeRule:
             if (
-              value < ruleConfig!.minValue! ||
-              value > ruleConfig!.maxValue!
+              value < (ruleConfig as RangeRule).minValue ||
+              value > (ruleConfig as RangeRule).maxValue
             ) {
               onError(failMessage);
             }
@@ -189,31 +192,14 @@ export const buildFormFieldValidateRules = (
           case RuleName.LengthRule:
             const length = String(value).trim().length;
             if (
-              length < ruleConfig!.minLength! ||
-              length > ruleConfig!.maxLength!
+              length < (ruleConfig as LengthRule).minLength ||
+              length > (ruleConfig as LengthRule).maxLength
             ) {
               onError(failMessage);
             }
             break;
           default:
-            // enum_rule: ruleConfig 可能是字符串、对象(options为字符串或数组)、或undefined
-            let enumOptions: string[] = [];
-
-            if (typeof ruleConfig === 'string') {
-              // ruleConfig 是字符串: "option1_option2_option3"
-              enumOptions = (ruleConfig as string).trim().split('_');
-            } else if (ruleConfig && typeof ruleConfig === 'object') {
-              const options = (ruleConfig as any).options;
-              if (Array.isArray(options)) {
-                // options 是数组: ["option1", "option2", "option3"]
-                enumOptions = options;
-              } else if (typeof options === 'string') {
-                // options 是字符串: "option1_option2_option3"
-                enumOptions = options.trim().split('_');
-              }
-            }
-
-            if (enumOptions.length > 0 && !enumOptions.includes(value)) {
+            if (!(ruleConfig as EnumRule).options.includes(value)) {
               onError(failMessage);
             }
         }

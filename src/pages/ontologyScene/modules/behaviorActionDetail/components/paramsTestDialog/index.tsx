@@ -5,7 +5,10 @@ import { DotStatus, NoDataCard, ProButton } from '@ceai-front/arco-material';
 import { IconLoading, IconPlayArrowFill } from '@arco-design/web-react/icon';
 import {
   BehaviorActionDetail,
+  EnumRule,
+  LengthRule,
   OntologyActionParam,
+  RangeRule,
   RuleName,
   ValidateRule
 } from '@/pages/ontologyScene/types/behaviorActions';
@@ -35,8 +38,13 @@ export const ParamsTestDialog = (props: IProps) => {
   const { data, visible, onClose, validateRules, actionData } = props;
   const [form] = Form.useForm();
   const { id: OSId } = useParams<Record<string, string>>();
-  const field2Rule = validateRules.reduce((p, c) => {
-    const { rule_name, ruleConfig, failMessage, enabledValidation, name } = c;
+  const field2Rule = actionData.params?.reduce((p, c) => {
+    const { validationRule, enabledValidation, name } = c;
+    const {
+      ruleConfig,
+      ruleName: rule_name,
+      failMessage
+    } = validationRule || {};
     if (enabledValidation) {
       p[name] = [
         {
@@ -47,8 +55,8 @@ export const ParamsTestDialog = (props: IProps) => {
             switch (rule_name) {
               case RuleName.RangeRule:
                 if (
-                  value < ruleConfig.minValue ||
-                  value > ruleConfig.maxValue
+                  value < (ruleConfig as RangeRule).minValue ||
+                  value > (ruleConfig as RangeRule).maxValue
                 ) {
                   onError(failMessage);
                 }
@@ -56,15 +64,14 @@ export const ParamsTestDialog = (props: IProps) => {
               case RuleName.LengthRule:
                 const length = value.trim().length;
                 if (
-                  length < ruleConfig.minLength ||
-                  length > ruleConfig.maxLength
+                  length < (ruleConfig as LengthRule).minLength ||
+                  length > (ruleConfig as LengthRule).maxLength
                 ) {
                   onError(failMessage);
                 }
                 break;
               default:
-                const strEnum = (ruleConfig as string).trim().split('_');
-                if (!strEnum.includes(value)) {
+                if (!(ruleConfig as EnumRule).options.includes(value)) {
                   onError(failMessage);
                 }
             }
@@ -82,13 +89,13 @@ export const ParamsTestDialog = (props: IProps) => {
     clear
   } = useTestFunction();
   const testAction = useCallback(() => {
-    const { functionCode } = props.actionData;
+    const { functionCode, code } = props.actionData;
     form
       .validate()
       .then((res) => {
         startTest({
           list_data: [buildActionTestItem(props.actionData, res)],
-          target: [functionCode!],
+          target: [code!],
           id: +OSId,
           run_action_with_validate: true,
           run_type: 'action'
@@ -131,7 +138,7 @@ export const ParamsTestDialog = (props: IProps) => {
                     label={name}
                     field={code}
                     rules={
-                      field2Rule[name] || [
+                      field2Rule?.[name] || [
                         { required: true, message: '请输入参数值' }
                       ]
                     }

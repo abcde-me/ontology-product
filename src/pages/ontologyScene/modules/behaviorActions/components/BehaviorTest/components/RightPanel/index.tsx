@@ -100,7 +100,7 @@ export const RightPanel: React.FC<RightPanelProps> = ({ testFunctionHook }) => {
       // 调用测试接口
       startTest({
         list_data: [testItem],
-        target: [selectedNode.behavior.functionCode!],
+        target: [selectedNode.behavior.code!],
         id: +OSId,
         run_action_with_validate: true,
         run_type: 'action'

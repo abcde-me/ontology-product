@@ -77,6 +77,7 @@ export const ValidateRules = (props: { readonly?: boolean }) => {
                     options={TYPE2RULE_TYPES?.[paramType] || []}
                     disabled={disabled}
                     onChange={(rule) => {
+                      debugger;
                       form.setFieldsValue({
                         [`${field}.ruleConfig`]: undefined,
                         [`${field}.failMessage`]: undefined,
@@ -164,7 +165,7 @@ export const ValidateRules = (props: { readonly?: boolean }) => {
                             rules={[
                               {
                                 required: enabledValidation,
-                                message: '请输入限制的枚举值，用逗号分隔'
+                                message: '请输入限制的枚举值，用“,”分隔'
                               }
                             ]}
                           >
