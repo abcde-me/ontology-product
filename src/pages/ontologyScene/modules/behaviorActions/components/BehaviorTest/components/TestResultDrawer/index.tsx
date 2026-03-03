@@ -56,7 +56,7 @@ export const TestResultDrawer: React.FC<TestResultDrawerProps> = ({
       <div className="flex items-center gap-2">
         <span>测试结果</span>
         <DotStatus text={config.text} color={config.color} />
-        <span className="text-sm text-[#94A3B8]">( {durationInSeconds}s)</span>
+        <span className="text-sm text-[#94A3B8]">({durationInSeconds}s)</span>
       </div>
     );
   };
@@ -72,11 +72,11 @@ export const TestResultDrawer: React.FC<TestResultDrawerProps> = ({
       <div className="h-[calc(100vh-140px)] overflow-y-auto rounded-lg bg-[#F7F8FA] p-4">
         {loading || testIng ? (
           <div className="text-sm text-[#86909C]">运行中...</div>
-        ) : !runInfo?.run_log ? (
+        ) : !runInfo ? (
           <NoDataCard type="block" title="请先在左侧配置参数并点击测试" />
         ) : (
           <pre className="m-0 whitespace-pre-wrap break-words font-mono text-xs leading-relaxed text-[#1d2129]">
-            {runInfo.run_log}
+            {runInfo.run_log || ''}
           </pre>
         )}
       </div>
