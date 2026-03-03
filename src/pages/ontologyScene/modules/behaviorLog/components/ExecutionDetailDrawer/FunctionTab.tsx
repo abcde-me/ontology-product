@@ -21,7 +21,7 @@ export const FunctionTab: React.FC<FunctionTabProps> = ({ code, loading }) => {
   }
 
   return (
-    <div className="mt-4">
+    <div className="mt-4 overflow-auto" style={{ maxHeight: '600px' }}>
       <PyCodeContent value={code} readOnly />
     </div>
   );

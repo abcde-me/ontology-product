@@ -28,6 +28,10 @@ export const PyCodeContent = (
           foldGutter: false,
           highlightActiveLine: false
         }}
+        style={{
+          overflow: 'auto',
+          ...otherProps.style
+        }}
       />
     </div>
   );
