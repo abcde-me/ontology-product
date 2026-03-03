@@ -783,6 +783,8 @@ export const ModaForgeResourceEndpoints = {
   ListMetadataIcebergTiDBTableApi: PrefixAimdp + '/ListMetadataIcebergTiDB',
   // 下载标准模版
   GetTemplateFileApi: PrefixAimdp + '/GetTemplateFile',
+  // 获取对象类型同步日志
+  GetObjectTypeSyncTaskLogApi: PrefixAimdp + '/GetObjectTypeSyncTaskLog',
 
   //属性
   // 获取公共属性列表

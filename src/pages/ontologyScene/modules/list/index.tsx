@@ -183,7 +183,7 @@ const SceneCard: React.FC<SceneCardProps> = ({
             <span className="text-[12px] leading-[18px] text-[var(--color-text-3)]">
               对象
             </span>
-            <span className="text-[14px] font-[500] leading-[22px] text-[var(--color-text-1)]">
+            <span className="font-DINAlternate text-[14px] font-[500] leading-[22px] text-[var(--color-text-1)]">
               {item.ontologyObjectTypeCounts || 0}
             </span>
           </div>
@@ -200,7 +200,7 @@ const SceneCard: React.FC<SceneCardProps> = ({
             <span className="text-[12px] leading-[18px] text-[var(--color-text-3)]">
               链接
             </span>
-            <span className="text-[14px] font-[500] leading-[22px] text-[var(--color-text-1)]">
+            <span className="font-DINAlternate text-[14px] font-[500] leading-[22px] text-[var(--color-text-1)]">
               {item.ontologyLinkTypeCounts || 0}
             </span>
           </div>
@@ -217,7 +217,7 @@ const SceneCard: React.FC<SceneCardProps> = ({
             <span className="text-[12px] leading-[18px] text-[var(--color-text-3)]">
               行为
             </span>
-            <span className="text-[14px] font-[500] leading-[22px] text-[var(--color-text-1)]">
+            <span className="font-DINAlternate text-[14px] font-[500] leading-[22px] text-[var(--color-text-1)]">
               {item.ontologyActionCounts || 0}
             </span>
           </div>
@@ -234,7 +234,7 @@ const SceneCard: React.FC<SceneCardProps> = ({
             <span className="text-[12px] leading-[18px] text-[var(--color-text-3)]">
               函数
             </span>
-            <span className="text-[14px] font-[500] leading-[22px] text-[var(--color-text-1)]">
+            <span className="font-DINAlternate text-[14px] font-[500] leading-[22px] text-[var(--color-text-1)]">
               {item.ontologyFunctionCounts || 0}
             </span>
           </div>
