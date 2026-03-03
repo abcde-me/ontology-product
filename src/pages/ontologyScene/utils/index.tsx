@@ -16,7 +16,7 @@ import styles from '../styles/index.module.scss';
 import { LinkType } from '@/types/graphApi';
 import { BehaviorActionDetail } from '@/pages/ontologyScene/types/behaviorActions';
 
-export const renderComponentByUiType = (type: UiType) => {
+export const renderComponentByUiType = (type: UiType, osid?: number) => {
   switch (type) {
     case UiType.TextArea:
       return <Input.TextArea placeholder={'请输入'} />;
@@ -62,10 +62,11 @@ export const renderComponentByUiType = (type: UiType) => {
         <ObjectTypeSelect
           placeholder={'请选择对象类型'}
           getPopupContainer={(node) => node.parentElement || document.body}
+          ontologyModelID={osid}
         />
       );
     case UiType.ObjectSet:
-      return <ObjectInterfaceSelect />;
+      return <ObjectInterfaceSelect mode={'multiple'} />;
     default:
       return <Input placeholder={'请输入'} />;
   }
