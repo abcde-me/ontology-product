@@ -440,11 +440,17 @@ export const getTemplateFile = async (params: {
 };
 
 // 获取对象类型同步日志
-export const getObjectTypeSyncLog = async (params: {
-  id: number;
-  pageNo: number;
-  pageSize: number;
-}): Promise<ApiRes<string>> => {
+export const getObjectTypeSyncLog = async (
+  params: {
+    id: number;
+    pageNo: number;
+    pageSize: number;
+  } & Record<string, any>
+): Promise<
+  ApiRes<{
+    message: string;
+  }>
+> => {
   return await UAPI.RES.GetObjectTypeSyncTaskLogApi({})
     .post(params)
     .inRegion()

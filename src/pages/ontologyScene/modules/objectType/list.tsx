@@ -22,9 +22,11 @@ import useUrlState from '@ahooksjs/use-url-state';
 import { useHistory, useParams } from 'react-router-dom';
 import { useWorkflowTable } from '../../hooks/useTable';
 import ObjectTypeDetailDrawer from '../../componens/ObjectTypeDetailDrawer';
+import TaskLogDrawer from '../../componens/TaskLogDrawer';
 import {
   listOntologyObjectType,
-  deleteOntologyObjectType
+  deleteOntologyObjectType,
+  getObjectTypeSyncLog
 } from '@/api/ontologySceneLibrary/objectType';
 import { ObjectType } from '@/types/objectType';
 import { SyncStatus } from '@/types/graphApi';
@@ -48,6 +50,9 @@ export default function OntologySceneObjectTypeList() {
   const [activeTab, setActiveTab] = useState<
     'instances' | 'attributes' | 'links'
   >('instances');
+  const [logDrawerVisible, setLogDrawerVisible] = useState(false);
+  const [logTaskId, setLogTaskId] = useState<number | null>(null);
+  const [logTaskName, setLogTaskName] = useState<string | undefined>();
 
   // 使用 useTable hook
   const { data, loading, pagination, refresh, submit, onChange } =
@@ -193,7 +198,13 @@ export default function OntologySceneObjectTypeList() {
 
   // 处理查看日志
   const handleViewLog = (record: ObjectType) => {
-    console.log('record', record);
+    if (!record.id) {
+      Message.error('对象类型ID无效');
+      return;
+    }
+    setLogTaskId(record.id);
+    setLogTaskName(record.name);
+    setLogDrawerVisible(true);
   };
 
   // 表格列定义
@@ -405,6 +416,15 @@ export default function OntologySceneObjectTypeList() {
           }}
           objectTypeId={selectedObjectType?.id?.toString() || ''}
           defaultActiveTab={activeTab}
+        />
+      )}
+      {logTaskId !== null && (
+        <TaskLogDrawer
+          visible={logDrawerVisible}
+          taskInstanceId={logTaskId}
+          taskName={logTaskName}
+          onClose={() => setLogDrawerVisible(false)}
+          fetchLog={getObjectTypeSyncLog}
         />
       )}
     </div>

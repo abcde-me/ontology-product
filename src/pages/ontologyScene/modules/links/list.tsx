@@ -34,6 +34,8 @@ import {
 } from '../../common/constants';
 import { getLinkTypeText } from '../../utils';
 import ObjectTypeDetailDrawer from '../../componens/ObjectTypeDetailDrawer';
+import TaskLogDrawer from '../../componens/TaskLogDrawer';
+import { getLinkTypeSyncTaskLog } from '@/api/ontologySceneLibrary/links';
 import LogIcon from '../../assets/log-icon.svg';
 
 // 将 SyncStatus 枚举转换为 LinkDetailDrawer 期望的字符串类型
@@ -76,6 +78,9 @@ export default function OntologySceneLinksList() {
     'instances' | 'attributes'
   >('instances');
   const [selectedLink, setSelectedLink] = useState<LinkInfo | null>(null);
+  const [logDrawerVisible, setLogDrawerVisible] = useState(false);
+  const [logTaskId, setLogTaskId] = useState<number | null>(null);
+  const [logTaskName, setLogTaskName] = useState<string | undefined>();
 
   // 使用 useTable hook
   const { data, loading, pagination, refresh, submit, onChange } =
@@ -199,7 +204,13 @@ export default function OntologySceneLinksList() {
 
   // 处理查看日志
   const handleViewLog = (record: LinkInfo) => {
-    console.log('record', record);
+    if (!record.id) {
+      Message.error('链接ID无效');
+      return;
+    }
+    setLogTaskId(record.id);
+    setLogTaskName(record.name);
+    setLogDrawerVisible(true);
   };
 
   // 表格列定义
@@ -480,6 +491,17 @@ export default function OntologySceneLinksList() {
             setObjectTypeDetailDrawerVisible(false);
             setSelectedObjectType(null);
           }}
+        />
+      )}
+
+      {/* 日志抽屉 */}
+      {logTaskId !== null && (
+        <TaskLogDrawer
+          visible={logDrawerVisible}
+          taskInstanceId={logTaskId}
+          taskName={logTaskName}
+          onClose={() => setLogDrawerVisible(false)}
+          fetchLog={getLinkTypeSyncTaskLog}
         />
       )}
     </div>
