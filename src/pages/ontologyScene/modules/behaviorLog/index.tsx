@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Form, Pagination, Tabs } from '@arco-design/web-react';
+import { Form, Pagination, Tabs, Message } from '@arco-design/web-react';
 import { SearchTable } from '@ceai-front/arco-material';
 import { useTable } from './hooks/useTable';
 import { useColumns } from './hooks/useColumns';
@@ -10,6 +10,7 @@ import ObjectTypeDetailDrawer from '@/pages/ontologyScene/componens/ObjectTypeDe
 import { BehaviorDetail } from '@/pages/ontologyScene/modules/behaviorActions/components';
 import { BehaviorActionItem } from '@/pages/ontologyScene/types/behaviorActions';
 import { listOntologyObjectType } from '@/api/ontologySceneLibrary/objectType';
+import { FunctionDetailDrawer } from '@/pages/ontologyScene/componens/FunctionDetailDrawer';
 import styles from './index.module.scss';
 
 export default function BehaviorLogList() {
@@ -36,6 +37,8 @@ export default function BehaviorLogList() {
   const [behaviorData, setBehaviorData] = useState<BehaviorActionItem>();
   const [showExecutionDetail, setShowExecutionDetail] = useState(false);
   const [selectedExecutionId, setSelectedExecutionId] = useState<string>();
+  const [showFunctionDetail, setShowFunctionDetail] = useState(false);
+  const [selectedFunctionId, setSelectedFunctionId] = useState<number>();
 
   // 获取对象类型列表用于过滤
   React.useEffect(() => {
@@ -120,13 +123,23 @@ export default function BehaviorLogList() {
     setShowExecutionDetail(true);
   };
 
+  // 处理查看函数详情
+  const handleViewFunctionDetail = (record: BehaviorLogItem) => {
+    // 只有当 pk 存在时才显示函数详情抽屉
+    if (record.pk) {
+      setSelectedFunctionId(Number(record.pk));
+      setShowFunctionDetail(true);
+    }
+  };
+
   // 根据当前 tab 获取对应的列配置
   const columns = useColumns(
     activeTab,
     handleViewObjectTypeDetail,
     handleViewBehaviorDetail,
     handleViewExecutionDetail,
-    objectTypeFilters
+    objectTypeFilters,
+    handleViewFunctionDetail
   );
 
   // 使用 useTable hook
@@ -310,6 +323,16 @@ export default function BehaviorLogList() {
         }}
         executionId={selectedExecutionId}
         mode={activeTab}
+      />
+
+      {/* 函数详情抽屉 */}
+      <FunctionDetailDrawer
+        data={selectedFunctionId}
+        visible={showFunctionDetail}
+        onCancel={() => {
+          setShowFunctionDetail(false);
+          setSelectedFunctionId(undefined);
+        }}
       />
     </div>
   );
