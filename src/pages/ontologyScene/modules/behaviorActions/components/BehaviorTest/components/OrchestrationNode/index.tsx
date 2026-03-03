@@ -131,7 +131,7 @@ export const OrchestrationNode: React.FC<OrchestrationNodeProps> = ({
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-2">
           {/* 编号 */}
-          <div className="flex h-4 w-4 flex-shrink-0 items-center justify-center rounded border border-[rgba(190,213,253,1)] bg-[rgba(242,248,255,1)] text-[10px] font-bold leading-none text-[rgba(64,115,245,1)]">
+          <div className="flex h-4 w-4 flex-shrink-0 items-center justify-center rounded border border-[rgba(190,213,253,1)] bg-[rgba(242,248,255,1)] font-DINAlternate text-[10px] font-bold leading-none text-[rgba(64,115,245,1)]">
             {String(node.order + 1).padStart(2, '0')}
           </div>
           {/* 行为名称 */}
