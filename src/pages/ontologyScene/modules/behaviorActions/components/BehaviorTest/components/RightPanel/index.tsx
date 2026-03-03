@@ -27,99 +27,23 @@ export const RightPanel: React.FC<RightPanelProps> = ({ testFunctionHook }) => {
   const orchestrationNodes = useBusinessStore(
     (state) => state.orchestrationNodes
   );
+  const nodeConfigs = useBusinessStore((state) => state.nodeConfigs);
   const updateNodeConfig = useBusinessStore((state) => state.updateNodeConfig);
-  const addNodeTouchedField = useBusinessStore(
-    (state) => state.addNodeTouchedField
-  );
 
   // 从 props 接收 testFunctionHook
-  const { runLog: runInfo, testIng, loading, startTest } = testFunctionHook;
-
-  // 当测试状态变化时，更新 UI store
-  useEffect(() => {
-    if (runInfo) {
-      console.log('测试结果更新:', runInfo);
-    }
-  }, [runInfo, testIng]);
+  const { testIng, loading, startTest } = testFunctionHook;
 
   const selectedNode = orchestrationNodes.find((n) => n.id === selectedNodeId);
   const [form] = Form.useForm();
   const updateTimerRef = useRef<NodeJS.Timeout | null>(null);
-  const previousNodeIdRef = useRef<string | null>(null);
 
-  // 当选中节点变化时，保存上一个节点的验证状态，并加载新节点的配置和验证状态
+  // 当选中节点变化时，加载节点配置
   useEffect(() => {
-    // 保存上一个节点的验证状态
-    if (
-      previousNodeIdRef.current &&
-      previousNodeIdRef.current !== selectedNodeId
-    ) {
-      const previousNodeId = previousNodeIdRef.current;
-      const store = useBusinessStore.getState();
-      const touchedFields =
-        store.nodeTouchedFields[previousNodeId] || new Set<string>();
-
-      // 只有当有字段被触碰过时，才保存验证状态
-      if (touchedFields.size > 0) {
-        // 获取当前表单的验证状态
-        form
-          .validate()
-          .then(() => {
-            // 验证通过，清除错误
-            store.setNodeValidationErrors(previousNodeId, {});
-          })
-          .catch((errors: any) => {
-            // 验证失败，只保存已触碰字段的错误
-            const errorMap: Record<string, string> = {};
-            if (errors && typeof errors === 'object') {
-              Object.entries(errors).forEach(
-                ([field, fieldError]: [string, any]) => {
-                  // 只保存已触碰字段的错误
-                  if (
-                    touchedFields.has(field) &&
-                    fieldError &&
-                    fieldError.errors &&
-                    fieldError.errors.length > 0
-                  ) {
-                    errorMap[field] = fieldError.errors[0];
-                  }
-                }
-              );
-            }
-            store.setNodeValidationErrors(previousNodeId, errorMap);
-          });
-      }
-    }
-
-    // 更新上一个节点 ID
-    previousNodeIdRef.current = selectedNodeId;
-
-    // 加载新节点的配置和验证状态
     if (selectedNode && selectedNodeId) {
-      const store = useBusinessStore.getState();
-      const config = store.nodeConfigs[selectedNodeId] || {};
-      const savedErrors = store.nodeValidationErrors[selectedNodeId] || {};
-      const touchedFields =
-        store.nodeTouchedFields[selectedNodeId] || new Set<string>();
-
-      // 使用 setFields 来同时设置值和错误状态
-      const fieldsObj: Record<string, any> = {};
-      selectedNode.behavior.params?.forEach((param) => {
-        const value = config[param.code];
-        // 只恢复已触碰字段的错误
-        const error = touchedFields.has(param.code)
-          ? savedErrors[param.code]
-          : undefined;
-
-        fieldsObj[param.code] = {
-          value: value !== undefined ? value : undefined,
-          error: error ? { message: error } : undefined
-        };
-      });
-
-      form.setFields(fieldsObj);
+      const config = nodeConfigs[selectedNodeId] || {};
+      form.setFieldsValue(config);
     }
-  }, [selectedNodeId]);
+  }, [selectedNodeId, selectedNode, nodeConfigs, form]);
 
   // 组件卸载时清除定时器
   useEffect(() => {
@@ -130,17 +54,12 @@ export const RightPanel: React.FC<RightPanelProps> = ({ testFunctionHook }) => {
     };
   }, []);
 
-  // 表单值变化时更新配置并标记字段为已触碰
+  // 表单值变化时更新配置
   const handleFormChange = (
     changedValues: Record<string, any>,
     allValues: Record<string, any>
   ) => {
     if (selectedNodeId) {
-      // 标记变化的字段为已触碰
-      Object.keys(changedValues).forEach((field) => {
-        addNodeTouchedField(selectedNodeId, field);
-      });
-
       // 清除之前的定时器
       if (updateTimerRef.current) {
         clearTimeout(updateTimerRef.current);
@@ -231,8 +150,9 @@ export const RightPanel: React.FC<RightPanelProps> = ({ testFunctionHook }) => {
 
       {/* 表单内容 */}
       <div className="scrollbar-hide flex-1 overflow-y-auto px-5 py-4">
-        {/* 动态表单 - 不使用 key，通过 setFields 来管理字段状态 */}
+        {/* 动态表单 - 使用 key 让表单在切换节点时重置 */}
         <Form
+          key={selectedNodeId}
           form={form}
           layout="vertical"
           onValuesChange={handleFormChange}
