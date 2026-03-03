@@ -35,6 +35,7 @@ import {
 } from '@/pages/ontologyScene/common/constants';
 import { useParams } from 'react-router';
 import { isNil } from 'lodash-es';
+import { getLinkTypeText } from '@/pages/ontologyScene/utils';
 
 const Panel: FC<any> = ({ id, data }) => {
   const [activeTab, setActiveTab] = useState('instances');
@@ -260,20 +261,6 @@ const Panel: FC<any> = ({ id, data }) => {
     }
   ];
 
-  // 链接关系类型映射
-  const getLinkTypeText = (type?: LinkType) => {
-    switch (type) {
-      case LinkType.ONE_TO_ONE:
-        return '1:1';
-      case LinkType.ONE_TO_MANY:
-        return '1:N';
-      case LinkType.MANY_TO_MANY:
-        return 'N:N';
-      default:
-        return '-';
-    }
-  };
-
   // 获取对象类型图标颜色
   const getObjectTypeColor = (icon?: string) => {
     // 根据图标类型返回颜色，这里简化处理
@@ -435,95 +422,60 @@ const Panel: FC<any> = ({ id, data }) => {
 
         <Tabs.TabPane key="links" title={`链接(${linksTotal})`}>
           <div>
-            {linksLoading ? (
-              <div className="flex justify-center py-[100px]">
-                <Spin />
-              </div>
-            ) : linksData.length === 0 ? (
-              <div className="flex justify-center py-[100px]">
-                <NoDataCard title="暂无数据" />
-              </div>
-            ) : (
-              linksData.map((link) => {
-                // 判断当前节点是源节点还是目标节点
-                const isSource = link.sourceObjectTypeID === nodeId;
-                // 确定左侧（当前节点）和右侧（关联节点）的显示
-                const leftObjectType = link.sourceObjectTypeInfo ?? {};
-                const rightObjectType = link.targetObjectTypeInfo ?? {};
-                const linkTypeText = getLinkTypeText(link.type);
+            {linksData.map((link) => {
+              // 判断当前节点是源节点还是目标节点
+              const isSource = link.sourceObjectTypeID === nodeId;
+              // 确定左侧（当前节点）和右侧（关联节点）的显示
+              const leftObjectType = link.sourceObjectTypeInfo ?? {};
+              const rightObjectType = link.targetObjectTypeInfo ?? {};
+              const linkTypeText = getLinkTypeText(link.type);
 
-                return (
-                  <div
-                    key={link.id}
-                    className="mb-[16px] rounded-[12px] border border-[var(--color-border-2)] bg-white p-[16px]"
-                  >
-                    {/* 标题区域 */}
-                    <div className="mb-[8px] text-[14px] font-[600] text-[var(--color-text-1)]">
-                      <EllipsisPopover value={link.name} />
-                    </div>
-
-                    {/* ID */}
-                    <div className="mb-[8px] flex items-center gap-[8px] overflow-hidden leading-[22px]">
-                      <span className="text-[14px] text-[var(--color-text-5)]">
-                        id:
-                      </span>
-                      <span className="min-w-0 max-w-full text-[14px] text-[var(--color-text-1)]">
-                        <EllipsisPopover value={link.code} />
-                      </span>
-                      <Popover content="复制">
-                        <IconCopy
-                          fontSize={14}
-                          className="cursor-pointer hover:text-[#184FF2]"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleCopy(link.code || String(link.id));
-                          }}
-                        />
-                      </Popover>
-                    </div>
-
-                    {/* 关系图 */}
-                    <div className="flex items-center bg-[#F2F8FF] p-[12px]">
-                      {renderObjectTypeCard(leftObjectType, true)}
-                      <div className="flex w-[76px] min-w-[76px] items-center">
-                        <span className="h-0 flex-1 border-t border-dashed border-[#CBD5E1]" />
-                        <span className="rounded border border-[#E5E6EB] bg-white px-2 py-[2px] text-[12px] leading-[18px] text-[#23293b]">
-                          {linkTypeText}
-                        </span>
-                        <span className="h-0 flex-1 border-t border-dashed border-[#CBD5E1]" />
-                        <div className="h-0 w-0 border-b-[4px] border-l-[6px] border-t-[4px] border-b-transparent border-l-gray-400 border-t-transparent"></div>
-                      </div>
-                      {renderObjectTypeCard(rightObjectType, false)}
-                    </div>
+              return (
+                <div
+                  key={link.id}
+                  className="mb-[16px] rounded-[12px] border border-[var(--color-border-2)] bg-white p-[16px]"
+                >
+                  {/* 标题区域 */}
+                  <div className="mb-[8px] text-[14px] font-[600] text-[var(--color-text-1)]">
+                    <EllipsisPopover value={link.name} />
                   </div>
-                );
-              })
-            )}
-            {/* {linksTotal > linksPageSize && (
-              <div className="flex justify-center pt-4">
-                <div className="flex items-center gap-2">
-                  <button
-                    className="rounded border border-gray-300 px-3 py-1 text-sm hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
-                    disabled={linksPage === 1}
-                    onClick={() => setLinksPage(linksPage - 1)}
-                  >
-                    上一页
-                  </button>
-                  <span className="text-sm text-gray-600">
-                    {linksPage} / {Math.ceil(linksTotal / linksPageSize)}
-                  </span>
-                  <button
-                    className="rounded border border-gray-300 px-3 py-1 text-sm hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
-                    disabled={
-                      linksPage >= Math.ceil(linksTotal / linksPageSize)
-                    }
-                    onClick={() => setLinksPage(linksPage + 1)}
-                  >
-                    下一页
-                  </button>
+
+                  {/* ID */}
+                  <div className="mb-[8px] flex items-center gap-[8px] overflow-hidden leading-[22px]">
+                    <span className="text-[14px] text-[var(--color-text-5)]">
+                      id:
+                    </span>
+                    <span className="min-w-0 max-w-full text-[14px] text-[var(--color-text-1)]">
+                      <EllipsisPopover value={link.code} />
+                    </span>
+                    <Popover content="复制">
+                      <IconCopy
+                        fontSize={14}
+                        className="cursor-pointer hover:text-[#184FF2]"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleCopy(link.code || String(link.id));
+                        }}
+                      />
+                    </Popover>
+                  </div>
+
+                  {/* 关系图 */}
+                  <div className="flex items-center bg-[#F2F8FF] p-[12px]">
+                    {renderObjectTypeCard(leftObjectType, true)}
+                    <div className="flex w-[76px] min-w-[76px] items-center">
+                      <span className="h-0 flex-1 border-t border-dashed border-[#CBD5E1]" />
+                      <span className="rounded border border-[#E5E6EB] bg-white px-2 py-[2px] text-[12px] leading-[18px] text-[#23293b]">
+                        {linkTypeText}
+                      </span>
+                      <span className="h-0 flex-1 border-t border-dashed border-[#CBD5E1]" />
+                      <div className="h-0 w-0 border-b-[4px] border-l-[6px] border-t-[4px] border-b-transparent border-l-gray-400 border-t-transparent"></div>
+                    </div>
+                    {renderObjectTypeCard(rightObjectType, false)}
+                  </div>
                 </div>
-              </div>
-            )} */}
+              );
+            })}
           </div>
         </Tabs.TabPane>
       </Tabs>

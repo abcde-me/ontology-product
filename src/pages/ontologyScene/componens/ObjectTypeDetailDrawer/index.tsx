@@ -37,6 +37,7 @@ import {
 import { IconFile } from '@arco-design/web-react/icon';
 import styles from './index.module.scss';
 import { isNil } from 'lodash-es';
+import { getLinkTypeText } from '../../utils';
 
 const TabPane = Tabs.TabPane;
 
@@ -152,20 +153,6 @@ const getObjectTypeColor = (icon?: string): string => {
     return '#00b42a'; // green
   }
   return '#722ED1'; // purple
-};
-
-// 链接关系类型映射
-const getLinkTypeText = (type?: LinkType): string => {
-  switch (type) {
-    case LinkType.ONE_TO_ONE:
-      return '1:1';
-    case LinkType.ONE_TO_MANY:
-      return '1:N';
-    case LinkType.MANY_TO_MANY:
-      return 'N:N';
-    default:
-      return '-';
-  }
 };
 
 export default function ObjectTypeDetailDrawer({
@@ -846,7 +833,7 @@ export default function ObjectTypeDetailDrawer({
                         <div className="flex w-[76px] min-w-[76px] items-center">
                           <span className="h-0 flex-1 border-t border-dashed border-[#CBD5E1]" />
                           <span className="rounded border border-[#E5E6EB] bg-white px-2 py-[2px] text-[12px] leading-[18px] text-[#23293b]">
-                            {link.linkType}
+                            {getLinkTypeText(link.linkType)}
                           </span>
                           <span className="h-0 flex-1 border-t border-dashed border-[#CBD5E1]" />
                           <div className="h-0 w-0 border-b-[4px] border-l-[6px] border-t-[4px] border-b-transparent border-l-gray-400 border-t-transparent"></div>
