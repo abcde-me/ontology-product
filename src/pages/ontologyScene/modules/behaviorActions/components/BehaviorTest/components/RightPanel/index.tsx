@@ -175,7 +175,7 @@ export const RightPanel: React.FC<RightPanelProps> = ({ testFunctionHook }) => {
                 param.uiType === UiType.Switch ? 'checked' : 'value'
               }
             >
-              {renderComponentByUiType(param.uiType)}
+              {renderComponentByUiType(param.uiType, OSId ? +OSId : undefined)}
             </Form.Item>
           ))}
         </Form>

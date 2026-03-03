@@ -167,6 +167,7 @@ export default function BehaviorActionDetailPage() {
             <ObjectTypeSelect
               showAll
               allowClear={false}
+              ontologyModelID={+OSId}
               placeholder={'请选择绑定对象类型'}
               onChange={(v, obj) => {
                 form.setFieldValue('objectTypeId', v);

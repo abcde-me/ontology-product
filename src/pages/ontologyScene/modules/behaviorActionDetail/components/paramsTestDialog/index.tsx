@@ -139,7 +139,7 @@ export const ParamsTestDialog = (props: IProps) => {
                       uiType === UiType.Switch ? 'checked' : 'value'
                     }
                   >
-                    {renderComponentByUiType(uiType)}
+                    {renderComponentByUiType(uiType, OSId ? +OSId : undefined)}
                   </Form.Item>
                 );
               })}

@@ -1,33 +1,22 @@
 import React from 'react';
 import {
-  TestFunction,
+  InputType,
   TestFunctionItem,
   UiType
 } from '@/pages/ontologyScene/types/ontologyFunction';
-import {
-  DatePicker,
-  Input,
-  InputNumber,
-  Select,
-  Switch,
-  Upload
-} from '@arco-design/web-react';
+import { DatePicker, Input, InputNumber, Select } from '@arco-design/web-react';
 import { InputNumberWithLabel } from '@ceai-front/arco-material';
 import {
-  DateTimePicker,
   FunctionFileParam,
   MapPicker,
   ObjectInterfaceSelect,
-  ObjectOne,
-  ObjectSet,
   ObjectTypeSelect
 } from '@/pages/ontologyScene/componens';
 import styles from '../styles/index.module.scss';
 import { LinkType } from '@/types/graphApi';
 import { BehaviorActionDetail } from '@/pages/ontologyScene/types/behaviorActions';
-import { TestFunctionInfo } from '@/pages/ontologyScene/hooks/useTestFunction';
 
-export const renderComponentByUiType = (type: UiType) => {
+export const renderComponentByUiType = (type: UiType, osid?: number) => {
   switch (type) {
     case UiType.TextArea:
       return <Input.TextArea placeholder={'请输入'} />;
@@ -73,10 +62,11 @@ export const renderComponentByUiType = (type: UiType) => {
         <ObjectTypeSelect
           placeholder={'请选择对象类型'}
           getPopupContainer={(node) => node.parentElement || document.body}
+          ontologyModelID={osid}
         />
       );
     case UiType.ObjectSet:
-      return <ObjectInterfaceSelect />;
+      return <ObjectInterfaceSelect mode={'multiple'} />;
     default:
       return <Input placeholder={'请输入'} />;
   }
@@ -109,7 +99,12 @@ export const buildActionTestItem = (
     content: data.functionContent!,
     logic_function: [data.functionCode!],
     name: data.functionName!,
-    params: data.params || [],
+    params: (data.params || []).map((p) => {
+      return {
+        inputType: p.uiType ? InputType.Input : InputType.Output,
+        ...p
+      };
+    }),
     object_name: data.objectTypeName,
     object_id: data.objectTypeId,
     pk: data.id
