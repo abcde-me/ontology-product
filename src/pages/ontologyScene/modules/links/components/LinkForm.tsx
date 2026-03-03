@@ -5,7 +5,6 @@ import {
   Input,
   Button,
   Message,
-  Upload,
   Radio,
   Select,
   Table,
@@ -15,12 +14,7 @@ import {
   Spin,
   Cascader
 } from '@arco-design/web-react';
-import {
-  IconUpload,
-  IconQuestionCircle,
-  IconCheck,
-  IconRight
-} from '@arco-design/web-react/icon';
+import { IconQuestionCircle } from '@arco-design/web-react/icon';
 import FieldImportUpload from '../../../componens/FieldImportUpload';
 import { ObjectTypeSelect } from '../../../componens';
 import classNames from 'classnames';
@@ -171,9 +165,7 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
         try {
           const response = await listOntologyPhysicalProperties({
             objectTypeIdList: [sourceObjectType],
-            ontologyModelID,
-            pageNo: 1,
-            pageSize: 1000 // 获取所有属性
+            ontologyModelID
           });
           if (response.status === 200 && response.data?.result) {
             const options = response.data.result.map((item) => ({
@@ -209,9 +201,7 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
           try {
             const response = await listOntologyPhysicalProperties({
               objectTypeIdList: [targetObjectType],
-              ontologyModelID,
-              pageNo: 1,
-              pageSize: 1000 // 获取所有属性
+              ontologyModelID
             });
             if (response.status === 200 && response.data?.result) {
               const options = response.data.result.map((item) => ({
@@ -1041,6 +1031,7 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
               <div className="flex items-center">
                 <div className="flex-1 rounded-[4px] bg-[#FAFBFF] p-[12px]">
                   <ObjectTypeSelect
+                    ontologyModelID={ontologyModelID}
                     label="源对象类型："
                     value={sourceObjectType}
                     onChange={(val) => {
@@ -1058,6 +1049,7 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
                     </div>
                     <div className="flex-1 flex-1 rounded-[4px] bg-[#FAFBFF] p-[12px]">
                       <ObjectTypeSelect
+                        ontologyModelID={ontologyModelID}
                         label="目标对象类型："
                         value={targetObjectType}
                         onChange={(val) => {
@@ -1083,9 +1075,9 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
                       >
                         <div style={{ flex: 1, minWidth: 0 }}>
                           <ObjectTypeSelect
+                            ontologyModelID={ontologyModelID}
                             value={targetObjectType}
                             onChange={(val) => {
-                              console.log('val11------->', val);
                               form.setFieldValue('targetObjectType', val);
                               form.setFieldValue(
                                 'targetObjectAttribute',
