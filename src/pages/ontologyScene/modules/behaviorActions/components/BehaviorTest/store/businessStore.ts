@@ -295,10 +295,26 @@ export const useBusinessStore = create<BusinessStore>((set, get) => ({
             }
             break;
           case 'enum_rule':
-            const strEnum = (ruleConfig as any as string).trim().split('_');
-            if (!strEnum.includes(value)) {
+            // enum_rule: ruleConfig 可能是字符串、对象(options为字符串或数组)、或undefined
+            let enumOptions: string[] = [];
+
+            if (typeof ruleConfig === 'string') {
+              // ruleConfig 是字符串: "option1_option2_option3"
+              enumOptions = ruleConfig.trim().split('_');
+            } else if (ruleConfig && typeof ruleConfig === 'object') {
+              const options = (ruleConfig as any).options;
+              if (Array.isArray(options)) {
+                // options 是数组: ["option1", "option2", "option3"]
+                enumOptions = options;
+              } else if (typeof options === 'string') {
+                // options 是字符串: "option1_option2_option3"
+                enumOptions = options.trim().split('_');
+              }
+            }
+
+            if (enumOptions.length > 0 && !enumOptions.includes(value)) {
               errors[param.code] =
-                failMessage || `值必须是以下之一: ${strEnum.join(', ')}`;
+                failMessage || `值必须是以下之一: ${enumOptions.join(', ')}`;
             }
             break;
         }
