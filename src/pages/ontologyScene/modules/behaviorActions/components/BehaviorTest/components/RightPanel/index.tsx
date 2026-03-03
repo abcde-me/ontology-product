@@ -109,7 +109,7 @@ export const RightPanel: React.FC<RightPanelProps> = ({ testFunctionHook }) => {
       // 打开测试结果抽屉
       setTestResultVisible(true);
 
-      Message.success('测试已开始');
+      // Message.success('测试已开始');
     } catch (error: any) {
       // 表单验证失败
       if (error && typeof error === 'object' && !error.message) {

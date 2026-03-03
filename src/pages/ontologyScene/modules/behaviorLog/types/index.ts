@@ -61,6 +61,7 @@ export interface BehaviorLogListParams {
   pageSize: number;
   filter: string;
   type: 'action' | 'function';
+  ontologyModelID?: number; // 本体模型ID
   sources?: string[]; // 来源过滤
   run_status_list?: number[]; // 执行状态过滤列表
   associated_object_type_list?: string[]; // 对象类型过滤（传给接口的参数名）

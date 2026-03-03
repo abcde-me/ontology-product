@@ -117,7 +117,7 @@ export const CanvasHeader: React.FC<CanvasHeaderProps> = ({
       // 打开测试结果抽屉
       setTestResultVisible(true);
 
-      Message.success('测试已开始');
+      // Message.success('测试已开始');
     } catch (error: any) {
       console.error('测试执行失败:', error);
       Message.error(error?.message || '测试执行失败，请稍后重试');
