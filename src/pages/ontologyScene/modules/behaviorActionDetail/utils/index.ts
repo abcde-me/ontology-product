@@ -112,7 +112,7 @@ export function buildActionDetail(action: ActionSchema): BehaviorActionDetail {
     p.set(c.name, c);
     return p;
   }, new Map<string, ValidateRule>());
-  return {
+  const res = {
     code,
     name,
     description,
@@ -144,6 +144,7 @@ export function buildActionDetail(action: ActionSchema): BehaviorActionDetail {
       return base as OntologyActionParam;
     })
   };
+  return res;
 }
 
 export const buildParamValidateRule = (
@@ -219,24 +220,4 @@ export const buildFormFieldValidateRules = (
       }
     }
   ];
-};
-const buildActionDetailByFunction = (data: {
-  action: ActionSchema;
-  functionData: OntologyFunctionDetail;
-  actionDetail?: BehaviorActionDetail;
-}): BehaviorActionDetail => {
-  const { action, functionData, actionDetail = {} } = data;
-  let res: BehaviorActionDetail = {
-    ...actionDetail,
-    ...buildActionDetail(action)
-  };
-  if (!isNil(functionData)) {
-    res = {
-      ...res,
-      functionName: functionData.name,
-      functionCode: functionData.code,
-      functionContent: functionData.content
-    };
-  }
-  return res;
 };

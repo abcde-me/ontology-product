@@ -1,31 +1,20 @@
 import React from 'react';
 import {
-  TestFunction,
+  InputType,
   TestFunctionItem,
   UiType
 } from '@/pages/ontologyScene/types/ontologyFunction';
-import {
-  DatePicker,
-  Input,
-  InputNumber,
-  Select,
-  Switch,
-  Upload
-} from '@arco-design/web-react';
+import { DatePicker, Input, InputNumber, Select } from '@arco-design/web-react';
 import { InputNumberWithLabel } from '@ceai-front/arco-material';
 import {
-  DateTimePicker,
   FunctionFileParam,
   MapPicker,
   ObjectInterfaceSelect,
-  ObjectOne,
-  ObjectSet,
   ObjectTypeSelect
 } from '@/pages/ontologyScene/componens';
 import styles from '../styles/index.module.scss';
 import { LinkType } from '@/types/graphApi';
 import { BehaviorActionDetail } from '@/pages/ontologyScene/types/behaviorActions';
-import { TestFunctionInfo } from '@/pages/ontologyScene/hooks/useTestFunction';
 
 export const renderComponentByUiType = (type: UiType) => {
   switch (type) {
@@ -109,7 +98,12 @@ export const buildActionTestItem = (
     content: data.functionContent!,
     logic_function: [data.functionCode!],
     name: data.functionName!,
-    params: data.params || [],
+    params: (data.params || []).map((p) => {
+      return {
+        inputType: p.uiType ? InputType.Input : InputType.Output,
+        ...p
+      };
+    }),
     object_name: data.objectTypeName,
     object_id: data.objectTypeId,
     pk: data.id
