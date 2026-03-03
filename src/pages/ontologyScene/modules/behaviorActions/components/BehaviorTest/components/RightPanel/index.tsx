@@ -29,6 +29,10 @@ export const RightPanel: React.FC<RightPanelProps> = ({ testFunctionHook }) => {
   );
   const nodeConfigs = useBusinessStore((state) => state.nodeConfigs);
   const updateNodeConfig = useBusinessStore((state) => state.updateNodeConfig);
+  const validateNode = useBusinessStore((state) => state.validateNode);
+  const markFieldAsTouched = useBusinessStore(
+    (state) => state.markFieldAsTouched
+  );
 
   // 从 props 接收 testFunctionHook
   const { testIng, loading, startTest } = testFunctionHook;
@@ -54,7 +58,7 @@ export const RightPanel: React.FC<RightPanelProps> = ({ testFunctionHook }) => {
     };
   }, []);
 
-  // 表单值变化时更新配置
+  // 表单值变化时更新配置（不再实时验证）
   const handleFormChange = (
     changedValues: Record<string, any>,
     allValues: Record<string, any>

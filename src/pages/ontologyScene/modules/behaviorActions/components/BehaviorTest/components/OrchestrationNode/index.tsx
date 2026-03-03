@@ -15,11 +15,13 @@ interface OrchestrationNodeProps {
 // 参数显示项组件 - 处理异步显示值
 interface ParamDisplayItemProps {
   paramName: string;
+  paramCode: string;
   displayValueOrPromise: string | Promise<string>;
+  errorMessage?: string;
 }
 
 const ParamDisplayItem: React.FC<ParamDisplayItemProps> = React.memo(
-  ({ paramName, displayValueOrPromise }) => {
+  ({ paramName, paramCode, displayValueOrPromise, errorMessage }) => {
     const [displayValue, setDisplayValue] = React.useState<string>('');
     const [isLoading, setIsLoading] = React.useState(false);
 
@@ -49,16 +51,26 @@ const ParamDisplayItem: React.FC<ParamDisplayItemProps> = React.memo(
           {paramName}
         </span>
         {/* Value */}
-        <div className="rounded bg-[#F7F8FA] px-3 py-2 text-[13px] font-normal text-[#86909C]">
+        <div
+          className={`rounded px-3 py-2 text-[13px] font-normal ${errorMessage ? 'border border-[#F53F3F] bg-[#FFECE8]' : 'bg-[#F7F8FA]'} text-[#86909C]`}
+        >
           {isLoading ? '加载中...' : displayValue || '未配置'}
         </div>
+        {/* Error Message */}
+        {errorMessage && (
+          <span className="text-[12px] text-[#F53F3F]">{errorMessage}</span>
+        )}
       </div>
     );
   },
-  // 自定义比较函数：只有当 paramName 变化或 displayValueOrPromise 的实际值变化时才重新渲染
+  // 自定义比较函数
   (prevProps, nextProps) => {
-    if (prevProps.paramName !== nextProps.paramName) {
-      return false; // 需要重新渲染
+    if (
+      prevProps.paramName !== nextProps.paramName ||
+      prevProps.paramCode !== nextProps.paramCode ||
+      prevProps.errorMessage !== nextProps.errorMessage
+    ) {
+      return false;
     }
 
     // 如果都是字符串，比较字符串值
@@ -71,8 +83,6 @@ const ParamDisplayItem: React.FC<ParamDisplayItemProps> = React.memo(
       );
     }
 
-    // 如果有 Promise，总是重新渲染（因为 Promise 对象每次都不同）
-    // 但由于有缓存机制，实际上不会重复请求
     return false;
   }
 );
@@ -86,6 +96,17 @@ export const OrchestrationNode: React.FC<OrchestrationNodeProps> = ({
   const [isDeleteHovered, setIsDeleteHovered] = React.useState(false);
   // 只订阅当前节点的配置，避免其他节点配置变化时重新渲染
   const config = useBusinessStore((state) => state.nodeConfigs[node.id] || {});
+  const getNodeErrorCount = useBusinessStore(
+    (state) => state.getNodeErrorCount
+  );
+  const nodeValidationErrors = useBusinessStore(
+    (state) => state.nodeValidationErrors[node.id] || {}
+  );
+  const isFieldTouched = useBusinessStore((state) => state.isFieldTouched);
+
+  // 获取错误数量
+  const errorCount = getNodeErrorCount(node.id);
+  const hasErrors = errorCount > 0;
 
   const handleDelete = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -106,7 +127,7 @@ export const OrchestrationNode: React.FC<OrchestrationNodeProps> = ({
       className={`cursor-pointer rounded-lg border-2 bg-white px-4 pb-4 pt-3 shadow-[0_2px_8px_rgba(0,0,0,0.08)] transition-all duration-200 ${borderColor}`}
       onClick={onClick}
     >
-      {/* 节点头部：编号 + 行为名称 + 删除 */}
+      {/* 节点头部：编号 + 行为名称 + 错误提示 + 删除 */}
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-2">
           {/* 编号 */}
@@ -117,6 +138,34 @@ export const OrchestrationNode: React.FC<OrchestrationNodeProps> = ({
           <span className="overflow-hidden text-ellipsis whitespace-nowrap text-sm font-semibold text-[#1d2129]">
             {node.behavior.name}
           </span>
+          {/* 错误提示 */}
+          {hasErrors && (
+            <Tooltip
+              content={
+                <div className="max-w-xs">
+                  {Object.entries(nodeValidationErrors).map(
+                    ([field, error]) => {
+                      const param = node.behavior.params?.find(
+                        (p) => p.code === field
+                      );
+                      return (
+                        <div key={field} className="mb-1">
+                          <span className="font-semibold">
+                            {param?.name || field}:
+                          </span>{' '}
+                          {error}
+                        </div>
+                      );
+                    }
+                  )}
+                </div>
+              }
+            >
+              <div className="flex h-5 min-w-[20px] items-center justify-center rounded-full bg-[#F53F3F] px-1.5 text-[11px] font-semibold text-white">
+                {errorCount}
+              </div>
+            </Tooltip>
+          )}
         </div>
         {/* 删除图标 */}
         <Tooltip content="删除">
@@ -145,12 +194,19 @@ export const OrchestrationNode: React.FC<OrchestrationNodeProps> = ({
               value,
               param.uiType
             );
+            // 只显示已触碰字段的错误
+            const fieldTouched = isFieldTouched(node.id, param.code);
+            const errorMessage = fieldTouched
+              ? nodeValidationErrors[param.code]
+              : undefined;
 
             return (
               <ParamDisplayItem
                 key={param.code}
                 paramName={param.name}
+                paramCode={param.code}
                 displayValueOrPromise={displayValueOrPromise}
+                errorMessage={errorMessage}
               />
             );
           })}

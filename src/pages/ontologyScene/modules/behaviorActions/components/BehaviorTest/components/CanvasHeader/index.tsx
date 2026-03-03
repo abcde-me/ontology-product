@@ -24,8 +24,10 @@ export const CanvasHeader: React.FC<CanvasHeaderProps> = ({
     (state) => state.orchestrationNodes
   );
   const nodeConfigs = useBusinessStore((state) => state.nodeConfigs);
-  const canExecute = useBusinessStore((state) => state.canExecuteTest());
   const validateAllNodes = useBusinessStore((state) => state.validateAllNodes);
+  const markAllFieldsAsTouched = useBusinessStore(
+    (state) => state.markAllFieldsAsTouched
+  );
   const clearOrchestration = useBusinessStore(
     (state) => state.clearOrchestration
   );
@@ -49,12 +51,35 @@ export const CanvasHeader: React.FC<CanvasHeaderProps> = ({
     console.log('=== 开始多节点测试 ===');
     console.log('节点数量:', orchestrationNodes.length);
 
-    // 先验证所有节点
+    // 1. 检查是否有节点
+    if (orchestrationNodes.length === 0) {
+      Message.warning('请先添加节点');
+      return;
+    }
+
+    // 2. 标记所有节点的所有字段为已触碰
+    orchestrationNodes.forEach((node) => {
+      markAllFieldsAsTouched(node.id);
+    });
+
+    // 3. 验证所有节点
     const { isValid, invalidNodeIds } = validateAllNodes();
 
     if (!isValid && invalidNodeIds.length > 0) {
       console.log('验证失败的节点:', invalidNodeIds);
-      Message.error('部分节点配置不完整或有误，请检查后重试');
+
+      // 构建详细的错误信息
+      const errorMessages = invalidNodeIds
+        .map((nodeId, index) => {
+          const node = orchestrationNodes.find((n) => n.id === nodeId);
+          const errorCount = useBusinessStore
+            .getState()
+            .getNodeErrorCount(nodeId);
+          return `节点${node?.order ? node.order + 1 : index + 1} (${node?.behavior.name}): ${errorCount}个错误`;
+        })
+        .join('；');
+
+      Message.error(`配置有误，请检查：${errorMessages}`);
       // 选中第一个有错误的节点
       selectNode(invalidNodeIds[0]);
       return;
@@ -115,11 +140,6 @@ export const CanvasHeader: React.FC<CanvasHeaderProps> = ({
         <div className="h-4 w-px bg-[#e5e6eb]" />
         <Button
           type="primary"
-          style={{
-            backgroundColor: canExecute ? '#184FF2' : '#F5F7FC',
-            borderColor: canExecute ? '#184FF2' : '#C3C7D4',
-            color: canExecute ? '#fff' : '#9CA3B8'
-          }}
           className="flex items-center justify-center"
           icon={
             <svg
@@ -131,13 +151,12 @@ export const CanvasHeader: React.FC<CanvasHeaderProps> = ({
             >
               <path
                 d="M4.44512 5.3787V0.75L10.6808 0.750125V5.37882L14.19 11.5874C14.8653 12.7821 14.0087 14.2628 12.6364 14.273L2.56664 14.348C1.19138 14.3582 0.313147 12.8848 0.976377 11.68L4.44512 5.3787Z"
-                stroke={canExecute ? 'white' : '#9CA3B8'}
+                stroke="white"
                 strokeWidth="1.5"
               />
             </svg>
           }
           onClick={handleTest}
-          disabled={!canExecute}
           loading={loading || testIng}
         >
           测试

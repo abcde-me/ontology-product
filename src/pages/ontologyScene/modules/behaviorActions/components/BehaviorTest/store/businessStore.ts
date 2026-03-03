@@ -19,6 +19,8 @@ interface BusinessStore {
   behaviorList: BehaviorItem[];
   orchestrationNodes: OrchestrationNode[];
   nodeConfigs: Record<string, NodeConfig>;
+  nodeValidationErrors: Record<string, Record<string, string>>; // 存储每个节点的验证错误
+  nodeTouchedFields: Record<string, Set<string>>; // 存储每个节点已触碰的字段
   testResults: TestResult[];
   historyList: HistoryItem[];
   currentBehaviorDetail: BehaviorItem | null;
@@ -42,6 +44,8 @@ interface BusinessStore {
   addNode: (behavior: BehaviorItem) => string;
   removeNode: (nodeId: string) => void;
   updateNodeConfig: (nodeId: string, config: NodeConfig) => void;
+  markFieldAsTouched: (nodeId: string, fieldCode: string) => void; // 标记字段为已触碰
+  markAllFieldsAsTouched: (nodeId: string) => void; // 标记节点所有字段为已触碰
   validateNode: (nodeId: string) => {
     isValid: boolean;
     errors: Record<string, string>;
@@ -58,6 +62,8 @@ interface BusinessStore {
   isNodeConfigured: (nodeId: string) => boolean;
   canExecuteTest: () => boolean;
   getNodeById: (nodeId: string) => OrchestrationNode | undefined;
+  getNodeErrorCount: (nodeId: string) => number; // 获取节点错误数量
+  isFieldTouched: (nodeId: string, fieldCode: string) => boolean; // 检查字段是否已触碰
 
   // ===== 重置 =====
   resetBusiness: () => void;
@@ -69,6 +75,8 @@ export const useBusinessStore = create<BusinessStore>((set, get) => ({
   behaviorList: [],
   orchestrationNodes: [],
   nodeConfigs: {},
+  nodeValidationErrors: {}, // 存储验证错误
+  nodeTouchedFields: {}, // 存储已触碰的字段
   testResults: [],
   historyList: [],
   currentBehaviorDetail: null,
@@ -153,7 +161,12 @@ export const useBusinessStore = create<BusinessStore>((set, get) => ({
 
   // 删除节点
   removeNode: (nodeId: string) => {
-    const { orchestrationNodes, nodeConfigs } = get();
+    const {
+      orchestrationNodes,
+      nodeConfigs,
+      nodeValidationErrors,
+      nodeTouchedFields
+    } = get();
 
     // 删除节点
     const newNodes = orchestrationNodes.filter((node) => node.id !== nodeId);
@@ -163,19 +176,61 @@ export const useBusinessStore = create<BusinessStore>((set, get) => ({
       node.order = index;
     });
 
-    // 删除配置
+    // 删除配置、验证错误和已触碰字段
     const newConfigs = { ...nodeConfigs };
     delete newConfigs[nodeId];
 
+    const newErrors = { ...nodeValidationErrors };
+    delete newErrors[nodeId];
+
+    const newTouched = { ...nodeTouchedFields };
+    delete newTouched[nodeId];
+
     set({
       orchestrationNodes: newNodes,
-      nodeConfigs: newConfigs
+      nodeConfigs: newConfigs,
+      nodeValidationErrors: newErrors,
+      nodeTouchedFields: newTouched
+    });
+  },
+
+  // 标记字段为已触碰
+  markFieldAsTouched: (nodeId: string, fieldCode: string) => {
+    const { nodeTouchedFields } = get();
+    const currentTouched = nodeTouchedFields[nodeId] || new Set<string>();
+    const newTouched = new Set(currentTouched);
+    newTouched.add(fieldCode);
+
+    set({
+      nodeTouchedFields: {
+        ...nodeTouchedFields,
+        [nodeId]: newTouched
+      }
+    });
+  },
+
+  // 标记节点所有字段为已触碰
+  markAllFieldsAsTouched: (nodeId: string) => {
+    const { orchestrationNodes, nodeTouchedFields } = get();
+    const node = orchestrationNodes.find((n) => n.id === nodeId);
+
+    if (!node) return;
+
+    const allFieldCodes = new Set(
+      node.behavior.params?.map((p) => p.code) || []
+    );
+
+    set({
+      nodeTouchedFields: {
+        ...nodeTouchedFields,
+        [nodeId]: allFieldCodes
+      }
     });
   },
 
   // 验证单个节点（不依赖 DOM）
   validateNode: (nodeId: string) => {
-    const { orchestrationNodes, nodeConfigs } = get();
+    const { orchestrationNodes, nodeConfigs, nodeValidationErrors } = get();
     const node = orchestrationNodes.find((n) => n.id === nodeId);
 
     if (!node) {
@@ -261,6 +316,14 @@ export const useBusinessStore = create<BusinessStore>((set, get) => ({
       }
     });
 
+    // 保存验证错误到 store
+    set({
+      nodeValidationErrors: {
+        ...nodeValidationErrors,
+        [nodeId]: errors
+      }
+    });
+
     return {
       isValid: Object.keys(errors).length === 0,
       errors
@@ -320,6 +383,12 @@ export const useBusinessStore = create<BusinessStore>((set, get) => ({
       nodeConfigs: newConfigs,
       orchestrationNodes: newNodes
     });
+
+    // 如果该节点的字段已被触碰过，重新验证该节点以更新错误状态
+    const { nodeTouchedFields } = get();
+    if (nodeTouchedFields[nodeId] && nodeTouchedFields[nodeId].size > 0) {
+      get().validateNode(nodeId);
+    }
   },
 
   // 重新排序节点
@@ -530,12 +599,28 @@ export const useBusinessStore = create<BusinessStore>((set, get) => ({
     return orchestrationNodes.find((n) => n.id === nodeId);
   },
 
+  // 获取节点错误数量
+  getNodeErrorCount: (nodeId: string): number => {
+    const { nodeValidationErrors } = get();
+    const errors = nodeValidationErrors[nodeId] || {};
+    return Object.keys(errors).length;
+  },
+
+  // 检查字段是否已触碰
+  isFieldTouched: (nodeId: string, fieldCode: string): boolean => {
+    const { nodeTouchedFields } = get();
+    const touched = nodeTouchedFields[nodeId] || new Set<string>();
+    return touched.has(fieldCode);
+  },
+
   // 重置业务数据
   resetBusiness: () =>
     set({
       behaviorList: [],
       orchestrationNodes: [],
       nodeConfigs: {},
+      nodeValidationErrors: {},
+      nodeTouchedFields: {},
       testResults: [],
       historyList: [],
       currentBehaviorDetail: null,
@@ -549,6 +634,8 @@ export const useBusinessStore = create<BusinessStore>((set, get) => ({
     set({
       orchestrationNodes: [],
       nodeConfigs: {},
+      nodeValidationErrors: {},
+      nodeTouchedFields: {},
       testResults: []
     })
 }));
