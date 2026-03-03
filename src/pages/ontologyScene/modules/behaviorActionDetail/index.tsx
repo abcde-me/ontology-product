@@ -128,6 +128,12 @@ export default function BehaviorActionDetailPage() {
                 form.setFieldsValue(buildFunctionSchema(res));
               });
             }
+            setCurrentAction((p = {}) => {
+              return {
+                ...p,
+                ...buildActionDetail(allValues)
+              };
+            });
           }}
         >
           <div className={'module-title'}>基本信息</div>

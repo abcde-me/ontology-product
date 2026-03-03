@@ -13,6 +13,11 @@ import {
 } from '../services/behaviorTestApi';
 import { getActionList } from '@/api/ontologySceneLibrary/ontologyAction';
 import { UiType } from '@/pages/ontologyScene/types/ontologyFunction';
+import {
+  EnumRule,
+  LengthRule,
+  RangeRule
+} from '@/pages/ontologyScene/types/behaviorActions';
 
 interface BusinessStore {
   // ===== 数据 =====
@@ -263,53 +268,43 @@ export const useBusinessStore = create<BusinessStore>((set, get) => ({
         value !== undefined &&
         value !== null &&
         value !== '' &&
-        param.validationRule
+        param.validationRule &&
+        param.enabledValidation
       ) {
-        const { ruleName, ruleConfig, failMessage } = param.validationRule;
+        const { ruleName, failMessage } = param.validationRule;
 
         switch (ruleName) {
-          case 'range_rule':
+          case 'range_rule': {
+            const ruleConfig = param.validationRule.ruleConfig as RangeRule;
             if (
               ruleConfig &&
-              (value < ruleConfig.minValue! || value > ruleConfig.maxValue!)
+              (value < ruleConfig.minValue || value > ruleConfig.maxValue)
             ) {
               errors[param.code] =
                 failMessage ||
                 `值必须在 ${ruleConfig.minValue} 到 ${ruleConfig.maxValue} 之间`;
             }
             break;
-          case 'length_rule':
+          }
+          case 'length_rule': {
             const length = String(value).trim().length;
+            const ruleConfig = param.validationRule.ruleConfig as LengthRule;
             if (
               ruleConfig &&
-              (length < ruleConfig.minLength! || length > ruleConfig.maxLength!)
+              (length < ruleConfig.minLength || length > ruleConfig.maxLength)
             ) {
               errors[param.code] =
                 failMessage ||
                 `长度必须在 ${ruleConfig.minLength} 到 ${ruleConfig.maxLength} 之间`;
             }
             break;
+          }
           case 'enum_rule':
-            // enum_rule: ruleConfig 可能是字符串、对象(options为字符串或数组)、或undefined
-            let enumOptions: string[] = [];
-
-            if (typeof ruleConfig === 'string') {
-              // ruleConfig 是字符串: "option1_option2_option3"
-              enumOptions = String(ruleConfig).trim().split('_');
-            } else if (ruleConfig && typeof ruleConfig === 'object') {
-              const options = (ruleConfig as any).options;
-              if (Array.isArray(options)) {
-                // options 是数组: ["option1", "option2", "option3"]
-                enumOptions = options;
-              } else if (typeof options === 'string') {
-                // options 是字符串: "option1_option2_option3"
-                enumOptions = String(options).trim().split('_');
-              }
-            }
-
-            if (enumOptions.length > 0 && !enumOptions.includes(value)) {
+            const ruleConfig = param.validationRule.ruleConfig as EnumRule;
+            if (!ruleConfig.options.includes(value)) {
               errors[param.code] =
-                failMessage || `值必须是以下之一: ${enumOptions.join(', ')}`;
+                failMessage ||
+                `值必须是以下之一: ${ruleConfig.options.join(', ')}`;
             }
             break;
         }
