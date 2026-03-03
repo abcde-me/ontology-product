@@ -11,9 +11,11 @@ import { BehaviorDetail } from '@/pages/ontologyScene/modules/behaviorActions/co
 import { BehaviorActionItem } from '@/pages/ontologyScene/types/behaviorActions';
 import { listOntologyObjectType } from '@/api/ontologySceneLibrary/objectType';
 import { FunctionDetailDrawer } from '@/pages/ontologyScene/componens/FunctionDetailDrawer';
+import { useParams } from 'react-router-dom';
 import styles from './index.module.scss';
 
 export default function BehaviorLogList() {
+  const { id: ontologyModelID } = useParams<{ id: string }>();
   const [form] = Form.useForm();
   const [activeTab, setActiveTab] = useState<'action' | 'function'>('action');
   const [actionTotal, setActionTotal] = useState(0);
@@ -72,7 +74,8 @@ export default function BehaviorLogList() {
           pageNo: 1,
           pageSize: 1,
           filter: '',
-          type: otherType
+          type: otherType,
+          ontologyModelID: ontologyModelID ? Number(ontologyModelID) : undefined
         });
 
         if (otherType === 'action') {
@@ -154,6 +157,7 @@ export default function BehaviorLogList() {
         pageSize: params.pageSize || 10,
         filter: params.keyword || '',
         type: activeTab, // 搜索时会带上当前 tab 的类型
+        ontologyModelID: ontologyModelID ? Number(ontologyModelID) : undefined, // 本体模型ID
         sources: sourcesFilter.length > 0 ? sourcesFilter : undefined, // 来源过滤
         run_status_list: statusFilter.length > 0 ? statusFilter : undefined, // 执行状态过滤列表
         associated_object_type_list:
