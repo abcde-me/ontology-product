@@ -1,5 +1,6 @@
 import UAPI from '@/api';
 import {
+  FunctionListQuery,
   InputType,
   OntologyFunctionDetail,
   OntologyFunctionItem,
@@ -36,7 +37,7 @@ export const getFunctionDetail = async (id: string | number) => {
 };
 
 // 获取函数列表
-export const getFunctionList = async (params: Record<string | number, any>) => {
+export const getFunctionList = async (params: FunctionListQuery) => {
   const res = await UAPI.RES.GetOntologyFunctionListApi({})
     .post(params)
     .inRegion()

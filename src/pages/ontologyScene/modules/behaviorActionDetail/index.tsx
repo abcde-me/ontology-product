@@ -150,7 +150,10 @@ export default function BehaviorActionDetailPage() {
             field="code"
             rules={[{ required: true, message: '请输入唯一标识' }]}
           >
-            <Input placeholder="请输入唯一标识" />
+            <Input
+              placeholder="请输入唯一标识"
+              disabled={pageMode === 'edit'}
+            />
           </FormItem>
 
           <FormItem label="描述说明" field="description" required={false}>

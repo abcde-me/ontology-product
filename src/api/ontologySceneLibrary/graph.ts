@@ -301,79 +301,28 @@ export async function listOntologyObjectTypeData(params: {
   id: number;
   page: number;
   pageSize: number;
+  /**
+   * 查询条件列表
+   */
+  fieldList?: {
+    /**
+     * 字段名
+     */
+    fieldName?: string;
+    /**
+     * 字段值（支持模糊查询）
+     */
+    fieldValue?: string;
+    /**
+     * 字段值列表（支持IN条件查询）
+     */
+    fieldValueList?: string[];
+  }[];
 }): Promise<ApiRes<ListOntologyObjectTypeDataRes>> {
   return await UAPI.RES.ListOntologyObjectTypeDataApi({})
     .post(params)
     .inRegion()
     .do();
-
-  // return Promise.resolve({
-  //   code: '',
-  //   data: {
-  //     result: [
-  //       {
-  //         id: 'WS-01WS-01WS-01WS-01WS-01WS-01WS-01WS-01WS-01WS-01WS-01',
-  //         wind: '8.5m/s',
-  //         vis: '12km',
-  //         wind_speed: '8.5m/s'
-  //         // visibility: '12km'
-  //       },
-  //       {
-  //         id: 'WS-02',
-  //         wind: '22.0m/s',
-  //         vis: '2km',
-  //         wind_speed: '22.0m/s',
-  //         visibility: '2km'
-  //       },
-  //       {
-  //         id: 'WS-03',
-  //         wind: '5.4m/s',
-  //         vis: '32km',
-  //         wind_speed: '5.4m/s',
-  //         visibility: '32km'
-  //       },
-  //       {
-  //         id: 'WS-04',
-  //         wind: '8.5m/s',
-  //         vis: '12km',
-  //         wind_speed: '8.5m/s',
-  //         visibility: '12km'
-  //       },
-  //       {
-  //         id: 'WS-05',
-  //         wind: '22.0m/s',
-  //         vis: '2km',
-  //         wind_speed: '22.0m/s',
-  //         visibility: '2km'
-  //       },
-  //       {
-  //         id: 'WS-06',
-  //         wind: '5.4m/s',
-  //         vis: '32km',
-  //         wind_speed: '5.4m/s',
-  //         visibility: '32km'
-  //       },
-  //       {
-  //         id: 'WS-07',
-  //         wind: '8.5m/s',
-  //         vis: '12km',
-  //         wind_speed: '8.5m/s',
-  //         visibility: '12km'
-  //       },
-  //       {
-  //         id: 'WS-08',
-  //         wind: '22.0m/s',
-  //         vis: '2km',
-  //         wind_speed: '22.0m/s',
-  //         visibility: '2km'
-  //       }
-  //     ],
-  //     totalCount: 8
-  //   },
-  //   message: 'mock success',
-  //   requestId: 'mock-request-id',
-  //   status: 200
-  // });
 }
 
 // 获取物理属性列表

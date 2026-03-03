@@ -92,7 +92,7 @@ export const FunctionsSetting = () => {
       .validate()
       .then((res: Required<OntologyFunctionSchema>) => {
         const functionTest = buildTestFunctionData(res, {
-          id: functionId ? +functionId : undefined
+          pk: functionId ? +functionId : undefined
         });
         startTest({ ...functionTest, id: +OSid });
       })

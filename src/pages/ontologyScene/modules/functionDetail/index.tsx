@@ -171,7 +171,7 @@ export default function OSFunctionDetailPage() {
                           item.id!.toString() !== functionId
                       ).length
                     ) {
-                      onError('显示名称已存在');
+                      onError('显示名称不可重复');
                     }
                   });
                 }
@@ -198,7 +198,9 @@ export default function OSFunctionDetailPage() {
                     return onError('请输入函数名称');
                   }
                   if (!/^[a-zA-Z0-9_]+$/.test(value)) {
-                    return onError('请输入正确的函数名称');
+                    return onError(
+                      '函数名称(id)格式错误，仅支持英文、数字、下划线'
+                    );
                   }
                   if (value.trim().length < 2) {
                     return onError('函数名称至少2字符');
@@ -216,7 +218,7 @@ export default function OSFunctionDetailPage() {
                           item.id!.toString() !== functionId
                       ).length
                     ) {
-                      onError('函数名称(id)已存在');
+                      onError('函数名称(id)不可重复');
                       return Promise.resolve();
                     }
                   });

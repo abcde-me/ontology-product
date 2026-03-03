@@ -231,8 +231,8 @@ export const ActionList = (props: {
       </div>
       <SearchTable
         searchForm={
-          <Form form={form}>
-            <Form.Item noStyle>
+          <Form form={form} onValuesChange={onSubmit}>
+            <Form.Item noStyle field={'filter'}>
               <Input
                 className={'w-[220px]'}
                 placeholder={'请输入关键字'}
