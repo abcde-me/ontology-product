@@ -28,7 +28,7 @@ export const TestResultDrawer: React.FC<TestResultDrawerProps> = ({
       return (
         <div className="flex items-center gap-2">
           <span>测试结果</span>
-          <div className="flex items-center gap-2 text-[#6E7B8D]">
+          <div className="flex items-center gap-2 text-sm text-[#6E7B8D]">
             测试中
             <IconLoading style={{ color: '#184FF2' }} />
           </div>
@@ -56,9 +56,7 @@ export const TestResultDrawer: React.FC<TestResultDrawerProps> = ({
       <div className="flex items-center gap-2">
         <span>测试结果</span>
         <DotStatus text={config.text} color={config.color} />
-        <span className="text-sm text-[#94A3B8]">
-          （ {durationInSeconds}s）
-        </span>
+        <span className="text-sm text-[#94A3B8]">( {durationInSeconds}s)</span>
       </div>
     );
   };

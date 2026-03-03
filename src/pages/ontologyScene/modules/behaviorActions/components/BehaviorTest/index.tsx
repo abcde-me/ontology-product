@@ -35,7 +35,7 @@ export const BehaviorTest: React.FC<BehaviorTestProps> = ({ onViewDetail }) => {
       <div className="absolute inset-0 h-full w-full overflow-hidden">
         <TestLayout
           leftPanel={<LeftPanel onViewDetail={onViewDetail} />}
-          middlePanel={<MiddlePanel />}
+          middlePanel={<MiddlePanel testFunctionHook={testFunctionHook} />}
           rightPanel={<RightPanel testFunctionHook={testFunctionHook} />}
         />
       </div>

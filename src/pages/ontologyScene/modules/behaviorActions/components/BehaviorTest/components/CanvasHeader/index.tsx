@@ -4,10 +4,18 @@ import { useUIStore } from '../../store/uiStore';
 import { useBusinessStore } from '../../store/businessStore';
 import BehaviorScheduleSvg from '@/assets/benti/behaviorSchedule.svg';
 import BehaviorRefreshSvg from '@/assets/benti/behaviorRefresh.svg';
+import { TestFunctionInfo } from '@/pages/ontologyScene/hooks/useTestFunction';
+import { buildActionTestItem } from '@/pages/ontologyScene/utils';
+import { useParams } from 'react-router-dom';
 
-export const CanvasHeader: React.FC = () => {
-  const isTestRunning = useUIStore((state) => state.isTestRunning);
-  const setIsTestRunning = useUIStore((state) => state.setIsTestRunning);
+interface CanvasHeaderProps {
+  testFunctionHook: TestFunctionInfo;
+}
+
+export const CanvasHeader: React.FC<CanvasHeaderProps> = ({
+  testFunctionHook
+}) => {
+  const { id: OSId } = useParams<Record<string, string>>();
   const setTestResultVisible = useUIStore(
     (state) => state.setTestResultVisible
   );
@@ -15,13 +23,15 @@ export const CanvasHeader: React.FC = () => {
   const orchestrationNodes = useBusinessStore(
     (state) => state.orchestrationNodes
   );
+  const nodeConfigs = useBusinessStore((state) => state.nodeConfigs);
   const canExecute = useBusinessStore((state) => state.canExecuteTest());
-  const executeTest = useBusinessStore((state) => state.executeTest);
   const validateAllNodes = useBusinessStore((state) => state.validateAllNodes);
   const clearOrchestration = useBusinessStore(
     (state) => state.clearOrchestration
   );
   const selectNode = useUIStore((state) => state.selectNode);
+
+  const { startTest, loading, testIng } = testFunctionHook;
 
   const handleRefresh = () => {
     Modal.confirm({
@@ -35,41 +45,9 @@ export const CanvasHeader: React.FC = () => {
     });
   };
 
-  const handleTest = async () => {
-    // 打印所有节点的配置数据
-    console.log('=== 开始测试 ===');
-    console.log(
-      '所有节点:',
-      orchestrationNodes.map((n) => ({
-        id: n.id,
-        name: n.behavior.name,
-        order: n.order
-      }))
-    );
-
-    const allNodeConfigs = useBusinessStore.getState().nodeConfigs;
-    console.log('所有节点配置 (nodeConfigs):', allNodeConfigs);
-
-    // 组装成数组格式
-    const testDataArray = orchestrationNodes.map((node, index) => {
-      const config = allNodeConfigs[node.id] || {};
-      return {
-        nodeIndex: index + 1,
-        nodeId: node.id,
-        behaviorId: node.behaviorId,
-        behaviorName: node.behavior.name,
-        behaviorCode: node.behavior.code,
-        formData: config,
-        // 转换成后端需要的参数格式
-        arguments: Object.entries(config).map(([key, value]) => ({
-          name: key,
-          value: JSON.stringify(value)
-        }))
-      };
-    });
-
-    console.log('组装后的测试数据数组:', testDataArray);
-    console.log('JSON格式:', JSON.stringify(testDataArray, null, 2));
+  const handleTest = () => {
+    console.log('=== 开始多节点测试 ===');
+    console.log('节点数量:', orchestrationNodes.length);
 
     // 先验证所有节点
     const { isValid, invalidNodeIds } = validateAllNodes();
@@ -82,17 +60,42 @@ export const CanvasHeader: React.FC = () => {
       return;
     }
 
-    console.log('所有节点验证通过，开始执行测试');
-    setIsTestRunning(true);
-    setTestResultVisible(true);
     try {
-      await executeTest();
-      Message.success('测试执行成功');
+      // 循环所有节点，构建 list_data 和 target
+      const list_data = orchestrationNodes.map((node) => {
+        const config = nodeConfigs[node.id] || {};
+        console.log(`节点 ${node.behavior.name} 配置:`, config);
+        return buildActionTestItem(node.behavior, config);
+      });
+
+      const target = orchestrationNodes.map(
+        (node) => node.behavior.functionCode!
+      );
+
+      console.log('测试数据:', {
+        list_data,
+        target,
+        id: +OSId,
+        run_action_with_validate: true,
+        run_type: 'action'
+      });
+
+      // 调用测试接口
+      startTest({
+        list_data,
+        target,
+        id: +OSId,
+        run_action_with_validate: true,
+        run_type: 'action'
+      });
+
+      // 打开测试结果抽屉
+      setTestResultVisible(true);
+
+      Message.success('测试已开始');
     } catch (error: any) {
       console.error('测试执行失败:', error);
       Message.error(error?.message || '测试执行失败，请稍后重试');
-    } finally {
-      setIsTestRunning(false);
     }
   };
 
@@ -135,7 +138,7 @@ export const CanvasHeader: React.FC = () => {
           }
           onClick={handleTest}
           disabled={!canExecute}
-          loading={isTestRunning}
+          loading={loading || testIng}
         >
           测试
         </Button>
