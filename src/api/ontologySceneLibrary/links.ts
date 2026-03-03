@@ -547,3 +547,21 @@ export const deleteOntologyLinkType = async (params: {
     .inRegion()
     .do();
 };
+
+// 获取链接类型同步日志
+export const getLinkTypeSyncTaskLog = async (
+  params: {
+    id: number;
+    pageNo: number;
+    pageSize: number;
+  } & Record<string, any>
+): Promise<
+  ApiRes<{
+    message: string;
+  }>
+> => {
+  return await UAPI.RES.GetLinkTypeSyncTaskLogApi({})
+    .post(params)
+    .inRegion()
+    .do();
+};

@@ -453,14 +453,15 @@ export default function LinkDetailDrawer({
           <div className="text-[14px] font-[600] leading-[22px] text-[var(--color-text-1)]">
             关系对
           </div>
-          <div className="flex items-center gap-4 bg-[#F2F8FF] p-[12px]">
+          <div className="flex items-center bg-[#F2F8FF] p-[12px]">
             {renderObjectTypeCard(displayData?.sourceObjectTypeInfo, true)}
-            <div className="flex w-[76px] min-w-[76px] items-center gap-2">
+            <div className="flex w-[76px] min-w-[76px] items-center">
               <span className="h-0 flex-1 border-t border-dashed border-[#CBD5E1]" />
               <span className="rounded border border-[#E5E6EB] bg-white px-2 py-[2px] text-[12px] leading-[18px] text-[#23293b]">
-                {displayData?.type ? getLinkTypeText(displayData.type) : '-'}
+                {getLinkTypeText(displayData?.type)}
               </span>
               <span className="h-0 flex-1 border-t border-dashed border-[#CBD5E1]" />
+              <div className="h-0 w-0 border-b-[4px] border-l-[6px] border-t-[4px] border-b-transparent border-l-gray-400 border-t-transparent"></div>
             </div>
             {renderObjectTypeCard(displayData?.targetObjectTypeInfo, false)}
           </div>

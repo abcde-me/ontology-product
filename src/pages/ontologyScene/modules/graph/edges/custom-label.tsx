@@ -2,11 +2,11 @@ import { useNodesReadOnly } from '@ceai-front/workflow';
 import { Badge, Tag } from '@arco-design/web-react';
 import React, { useMemo } from 'react';
 import cn from 'classnames';
-import { IconLink } from '@arco-design/web-react/icon';
 import { useNodes } from 'reactflow';
 import { useDemoStore } from '../common/store';
-import { DotStatus } from '@ceai-front/arco-material';
+import { DotStatus, EllipsisPopover } from '@ceai-front/arco-material';
 import { OBJECT_TYPE_SYNC_STATUS_CONFIG } from '@/pages/ontologyScene/common/constants';
+import IconLink from '../../../assets/graph-link-icon.svg';
 
 export default function CustomLabel(props: any) {
   const { labelX, labelY, defaultLabelRenderer, source, target, data, id } =
@@ -41,20 +41,19 @@ export default function CustomLabel(props: any) {
           onClick={() => {
             // 保存边的ID（链接ID）和节点信息
             // 边的 id 是字符串格式的链接ID，需要转换为数字
-            console.log('------------id------------', data?.id);
             setSelectedEdgeId(data?.id ?? null);
             setSourceNode(sourceNode);
             setTargetNode(targetNode);
             setShowCustomEdgePanel((s) => !s);
           }}
         >
-          <div className="flex h-[24px] items-center justify-center gap-[6px] rounded-[4px] border border-[var(--color-border-1)] bg-[#fff] pl-[6px]">
-            <IconLink />
-            <span className="text-[var(--color-text-1)]">{data?.name}</span>
-            <DotStatus
-              color={OBJECT_TYPE_SYNC_STATUS_CONFIG[data.syncStatus]?.color}
-              text=""
-            />
+          <div className="flex h-[24px] max-w-[198px] items-center justify-center gap-[6px] rounded-[4px] border border-[var(--color-border-1)] bg-[#fff] px-[6px] hover:shadow-[0px_2px_8px_0px_#00000014]">
+            <IconLink className="h-[18px] w-[18px] flex-shrink-0" />
+            <EllipsisPopover
+              className="min-w-0 text-[var(--color-text-1)]"
+              preferTypography
+              value={data?.name}
+            ></EllipsisPopover>
           </div>
         </div>
       )}
