@@ -26,7 +26,8 @@ export const useColumns = (
   onViewObjectTypeDetail?: (record: BehaviorLogItem) => void,
   onViewBehaviorDetail?: (record: BehaviorLogItem) => void,
   onViewExecutionDetail?: (record: BehaviorLogItem) => void,
-  objectTypeFilters?: ObjectTypeFilter[]
+  objectTypeFilters?: ObjectTypeFilter[],
+  onViewFunctionDetail?: (record: BehaviorLogItem) => void
 ): TableColumnProps<BehaviorLogItem>[] => {
   return useMemo(() => {
     // 行为 tab 的列配置
@@ -221,8 +222,15 @@ export const useColumns = (
         dataIndex: 'name',
         width: 180,
         ellipsis: true,
-        render: (value) => (
-          <div className="font-PingFangSc text-[14px] font-normal leading-[22px] text-[#4e5969]">
+        render: (value, record) => (
+          <div
+            className={`font-PingFangSc text-[14px] font-normal leading-[22px] ${record.pk ? 'hover-blue cursor-pointer text-[#4e5969]' : 'text-[#4e5969]'}`}
+            onClick={() => {
+              if (record.pk) {
+                onViewFunctionDetail?.(record);
+              }
+            }}
+          >
             {value || '-'}
           </div>
         )
@@ -315,6 +323,7 @@ export const useColumns = (
     onViewObjectTypeDetail,
     onViewBehaviorDetail,
     onViewExecutionDetail,
-    objectTypeFilters
+    objectTypeFilters,
+    onViewFunctionDetail
   ]);
 };
