@@ -294,7 +294,7 @@ export default function LinkDetailDrawer({
             <DotStatus
               text=""
               color={
-                OBJECT_TYPE_SYNC_STATUS_CONFIG[objectType.syncStatus].color
+                OBJECT_TYPE_SYNC_STATUS_CONFIG[objectType!.syncStatus].color
               }
             />
           </div>
