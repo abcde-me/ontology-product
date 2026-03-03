@@ -438,3 +438,15 @@ export const getTemplateFile = async (params: {
 }): Promise<ApiRes<string>> => {
   return await UAPI.RES.GetTemplateFileApi({}).post(params).inRegion().do();
 };
+
+// 获取对象类型同步日志
+export const getObjectTypeSyncLog = async (params: {
+  id: number;
+  pageNo: number;
+  pageSize: number;
+}): Promise<ApiRes<string>> => {
+  return await UAPI.RES.GetObjectTypeSyncTaskLogApi({})
+    .post(params)
+    .inRegion()
+    .do();
+};
