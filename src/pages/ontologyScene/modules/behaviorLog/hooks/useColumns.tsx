@@ -257,8 +257,12 @@ export const useColumns = (
         width: 200,
         ellipsis: true,
         render: (value) => (
-          <div className="font-PingFangSc text-[14px] font-normal leading-[22px] text-[#4e5969]">
-            {value || '-'}
+          <div>
+            {value ? (
+              <EllipsisPopover value={value} isEdit={false} preferTypography />
+            ) : (
+              '-'
+            )}
           </div>
         )
       },
