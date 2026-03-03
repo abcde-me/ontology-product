@@ -448,28 +448,8 @@ const Panel: FC<any> = ({ id, data }) => {
                 // 判断当前节点是源节点还是目标节点
                 const isSource = link.sourceObjectTypeID === nodeId;
                 // 确定左侧（当前节点）和右侧（关联节点）的显示
-                const leftObjectType = {
-                  name: isSource
-                    ? link.sourceObjectTypeName || '未知'
-                    : link.targetObjectTypeName || '未知',
-                  icon: isSource
-                    ? link.sourceObjectTypeIcon
-                    : link.targetObjectTypeIcon,
-                  iconColor: isSource
-                    ? getObjectTypeColor(link.sourceObjectTypeIcon)
-                    : getObjectTypeColor(link.targetObjectTypeIcon)
-                };
-                const rightObjectType = {
-                  name: isSource
-                    ? link.targetObjectTypeName || '未知'
-                    : link.sourceObjectTypeName || '未知',
-                  icon: isSource
-                    ? link.targetObjectTypeIcon
-                    : link.sourceObjectTypeIcon,
-                  iconColor: isSource
-                    ? getObjectTypeColor(link.targetObjectTypeIcon)
-                    : getObjectTypeColor(link.sourceObjectTypeIcon)
-                };
+                const leftObjectType = link.sourceObjectTypeInfo ?? {};
+                const rightObjectType = link.targetObjectTypeInfo ?? {};
                 const linkTypeText = getLinkTypeText(link.type);
 
                 return (
