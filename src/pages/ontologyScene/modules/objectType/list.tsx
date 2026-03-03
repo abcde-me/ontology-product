@@ -7,7 +7,8 @@ import {
   TableColumnProps,
   Pagination,
   Message,
-  Modal
+  Modal,
+  Popover
 } from '@arco-design/web-react';
 import { IconPlus, IconSearch } from '@arco-design/web-react/icon';
 import {
@@ -33,6 +34,7 @@ import {
   OBJECT_TYPE_SYNC_STATUS_FILTERS,
   OBJECT_TYPE_ICON_OPTIONS
 } from '../../common/constants';
+import LogIcon from '../../assets/log-icon.svg';
 import dayjs from 'dayjs';
 
 export default function OntologySceneObjectTypeList() {
@@ -111,11 +113,9 @@ export default function OntologySceneObjectTypeList() {
   useEffect(() => {
     const currentKeyword = form.getFieldValue('keyword');
     const searchValue = urlState.search || '';
-    console.log('searchValue1111', searchValue);
     if (searchValue !== '' && searchValue !== currentKeyword) {
       form.setFieldsValue({ keyword: searchValue });
       // 延迟提交，确保表单值已设置
-      console.log('submit222');
       setTimeout(() => {
         submit();
       }, 0);
@@ -166,8 +166,8 @@ export default function OntologySceneObjectTypeList() {
   // 处理删除
   const handleDelete = (record: ObjectType) => {
     Modal.confirm({
-      title: '确认删除',
-      content: `确定要删除对象类型"${record.name || ''}"吗？`,
+      title: '确认删除对象类型吗？',
+      content: `删除后，不可恢复`,
       onOk: async () => {
         try {
           if (!record.id) {
@@ -189,6 +189,11 @@ export default function OntologySceneObjectTypeList() {
         }
       }
     });
+  };
+
+  // 处理查看日志
+  const handleViewLog = (record: ObjectType) => {
+    console.log('record', record);
   };
 
   // 表格列定义
@@ -256,12 +261,24 @@ export default function OntologySceneObjectTypeList() {
       width: 120,
       filters: OBJECT_TYPE_SYNC_STATUS_FILTERS,
       onFilter: (value, record) => record.syncStatus === value,
-      render: (value: SyncStatus) => {
+      render: (value: SyncStatus, record: ObjectType) => {
         if (value === undefined || value === null) {
           return null;
         }
         const config = OBJECT_TYPE_SYNC_STATUS_CONFIG[value];
-        return <DotStatus text={config.text} color={config.color} />;
+        return (
+          <div className="flex items-center gap-[4px]">
+            <DotStatus text={config.text} color={config.color} />
+            {value === SyncStatus.FAILED && (
+              <Popover content="查看日志">
+                <LogIcon
+                  className="h-[14px] w-[14px] text-[var(--color-text-4)] hover:cursor-pointer hover:text-[#184FF2]"
+                  onClick={() => handleViewLog(record)}
+                />
+              </Popover>
+            )}
+          </div>
+        );
       }
     },
     {

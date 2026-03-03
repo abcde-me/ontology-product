@@ -7,15 +7,13 @@ import {
   TableColumnProps,
   Pagination,
   Message,
-  Modal
+  Modal,
+  Popover
 } from '@arco-design/web-react';
-import {
-  IconPlus,
-  IconSearch,
-  IconInfoCircle
-} from '@arco-design/web-react/icon';
+import { IconPlus, IconSearch } from '@arco-design/web-react/icon';
 import {
   CopyItemIcon,
+  DotStatus,
   EllipsisPopover,
   ProButton,
   SearchTable
@@ -36,6 +34,7 @@ import {
 } from '../../common/constants';
 import { getLinkTypeText } from '../../utils';
 import ObjectTypeDetailDrawer from '../../componens/ObjectTypeDetailDrawer';
+import LogIcon from '../../assets/log-icon.svg';
 
 // 将 SyncStatus 枚举转换为 LinkDetailDrawer 期望的字符串类型
 const convertSyncStatusToString = (
@@ -198,6 +197,11 @@ export default function OntologySceneLinksList() {
     setDetailDrawerVisible(true);
   };
 
+  // 处理查看日志
+  const handleViewLog = (record: LinkInfo) => {
+    console.log('record', record);
+  };
+
   // 表格列定义
   const columns: TableColumnProps<LinkInfo>[] = [
     {
@@ -287,23 +291,21 @@ export default function OntologySceneLinksList() {
       width: 120,
       filters: OBJECT_TYPE_SYNC_STATUS_FILTERS,
       onFilter: (value, record) => record.syncStatus === value,
-      render: (value) => {
+      render: (value: SyncStatus, record: LinkInfo) => {
+        if (value === undefined || value === null) {
+          return null;
+        }
         const config = OBJECT_TYPE_SYNC_STATUS_CONFIG[value];
-        if (!config) return <span>-</span>;
         return (
-          <div className="flex items-center gap-2">
-            <div
-              className="h-2 w-2 rounded-full"
-              style={{ backgroundColor: config.color }}
-            />
-            <span className="text-[14px] font-normal leading-[22px]">
-              {config.text}
-            </span>
+          <div className="flex items-center gap-[4px]">
+            <DotStatus text={config.text} color={config.color} />
             {value === SyncStatus.FAILED && (
-              <IconInfoCircle
-                className="cursor-pointer text-[#f53f3f]"
-                style={{ fontSize: '14px' }}
-              />
+              <Popover content="查看日志">
+                <LogIcon
+                  className="h-[14px] w-[14px] text-[var(--color-text-4)] hover:cursor-pointer hover:text-[#184FF2]"
+                  onClick={() => handleViewLog(record)}
+                />
+              </Popover>
             )}
           </div>
         );

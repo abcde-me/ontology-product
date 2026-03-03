@@ -68,7 +68,8 @@ module.exports = {
         // => @media (min-width: 769px) { ... }
       },
       fontFamily: {
-        PingFangSc: 'PingFang SC'
+        PingFangSc: 'PingFang SC',
+        DINAlternate: 'DINAlternate'
       },
       boxShadow: {
         xs: '0px 1px 2px 0px rgba(16, 24, 40, 0.05)',
