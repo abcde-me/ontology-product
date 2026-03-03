@@ -40,7 +40,7 @@ export const useExecutionDetailStore = create<ExecutionDetailStore>(
     logs: '',
     functionCode: '',
     loading: false,
-    activeTab: 'params',
+    activeTab: 'logs',
 
     // 设置抽屉可见性
     setVisible: (visible) => {
@@ -53,7 +53,7 @@ export const useExecutionDetailStore = create<ExecutionDetailStore>(
 
     // 设置执行ID
     setExecutionId: (id) => {
-      set({ executionId: id });
+      set({ executionId: id, activeTab: 'logs' }); // 重置为默认 tab
       if (id) {
         get().loadExecutionDetail(id);
       }
@@ -127,7 +127,7 @@ export const useExecutionDetailStore = create<ExecutionDetailStore>(
         logs: '',
         functionCode: '',
         loading: false,
-        activeTab: 'params'
+        activeTab: 'logs'
       });
     }
   })
