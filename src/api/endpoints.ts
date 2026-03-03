@@ -805,6 +805,8 @@ export const ModaForgeResourceEndpoints = {
   ListOntologyLinkTypeDataApi: PrefixAimdp + '/ListOntologyLinkTypeData',
   // 获取链接类型详细信息
   GetOntologyLinkTypeApi: PrefixAimdp + '/GetOntologyLinkType',
+  // 删除链接类型
+  DeleteOntologyLinkTypeApi: PrefixAimdp + '/DeleteOntologyLinkType',
   // ===================== 本体函数相关 =====================
   // 函数列表
   GetOntologyFunctionListApi: PrefixAimdp + '/ListOntologyFunction',

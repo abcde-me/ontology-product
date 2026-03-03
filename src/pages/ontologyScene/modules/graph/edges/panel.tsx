@@ -24,8 +24,12 @@ import {
   listOntologyLinkTypeColumn
 } from '@/api/ontologySceneLibrary/links';
 import { GetOntologyLinkTypeRes } from '@/types/links';
-import { OBJECT_TYPE_SYNC_STATUS_CONFIG } from '@/pages/ontologyScene/common/constants';
+import {
+  OBJECT_TYPE_ICON_OPTIONS,
+  OBJECT_TYPE_SYNC_STATUS_CONFIG
+} from '@/pages/ontologyScene/common/constants';
 import { LinkType, SyncStatus } from '@/types/graphApi';
+import { isNil } from 'lodash-es';
 
 const TabPane = Tabs.TabPane;
 
@@ -202,11 +206,9 @@ function EdgePanel() {
   };
 
   const syncStatusConfig = useMemo(() => {
-    const status = basicInfo?.syncStatus ?? SyncStatus.SUCCESS;
-    return (
-      OBJECT_TYPE_SYNC_STATUS_CONFIG[status] ||
-      OBJECT_TYPE_SYNC_STATUS_CONFIG[SyncStatus.SUCCESS]
-    );
+    return OBJECT_TYPE_SYNC_STATUS_CONFIG[
+      basicInfo?.syncStatus ?? SyncStatus.SUCCESS
+    ];
   }, [basicInfo?.syncStatus]);
 
   const linkTypeText = useMemo(() => {
@@ -219,32 +221,44 @@ function EdgePanel() {
 
   // 渲染对象类型卡片
   const renderObjectTypeCard = (
-    objectType: { name?: string; icon?: string } | undefined,
+    objectType:
+      | { name?: string; icon?: string; syncStatus?: SyncStatus }
+      | undefined,
     isSource: boolean
   ) => {
     const name = objectType?.name || '-';
-    const iconColor = isSource ? '#00b42a' : '#722ED1';
+    // 根据 icon 字段匹配对应的图标
+    const iconOption = objectType?.icon
+      ? OBJECT_TYPE_ICON_OPTIONS.find(
+          (option) => option.value === objectType.icon
+        )
+      : null;
+    const IconComponent = iconOption?.icon ?? OBJECT_TYPE_ICON_OPTIONS[0].icon;
 
     return (
       <div
         className="flex flex-1 items-center gap-3 rounded-lg px-4 py-3"
         style={{
-          backgroundColor: isSource ? '#E8F4FF' : '#F5E8FF',
+          backgroundColor: '#fff',
           minHeight: '56px'
         }}
       >
-        <div
-          className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded"
-          style={{ backgroundColor: iconColor }}
-        >
-          <div className="h-3 w-3 rounded-sm bg-white" />
+        <div className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded">
+          <IconComponent className="h-6 w-6" />
         </div>
-        <div className="min-w-0 flex-1 font-PingFangSc text-sm font-normal leading-[22px] text-[#23293b]">
+        <div className="min-w-0 text-sm font-normal leading-[22px] text-[#23293b]">
           <EllipsisPopover preferTypography value={name} />
         </div>
-        <div className="flex items-center">
-          <div className="h-2 w-2 rounded-full bg-[#00b42a]" />
-        </div>
+        {!isNil(objectType?.syncStatus) ? (
+          <div className="flex items-center">
+            <DotStatus
+              text=""
+              color={
+                OBJECT_TYPE_SYNC_STATUS_CONFIG[objectType.syncStatus].color
+              }
+            />
+          </div>
+        ) : null}
       </div>
     );
   };
@@ -290,7 +304,10 @@ function EdgePanel() {
     {
       title: '属性名称',
       dataIndex: 'comment',
-      width: 120
+      width: 120,
+      render: (text: string) => {
+        return <EllipsisPopover value={text || '-'} />;
+      }
     },
     {
       title: '表字段',
@@ -367,10 +384,22 @@ function EdgePanel() {
                 <span className="w-[80px] flex-shrink-0 text-[14px] leading-[22px] text-[#86909c]">
                   同步状态：
                 </span>
-                <DotStatus
-                  text={syncStatusConfig.text}
-                  color={syncStatusConfig.color}
-                />
+                <div className="flex items-center gap-2 font-PingFangSc text-sm font-normal leading-[22px] text-[#23293b]">
+                  {!isNil(basicInfo?.syncStatus) ? (
+                    <DotStatus
+                      text={
+                        OBJECT_TYPE_SYNC_STATUS_CONFIG[basicInfo!.syncStatus]
+                          .text
+                      }
+                      color={
+                        OBJECT_TYPE_SYNC_STATUS_CONFIG[basicInfo!.syncStatus]
+                          .color
+                      }
+                    />
+                  ) : (
+                    '-'
+                  )}
+                </div>
               </div>
               <div className="flex items-center gap-[8px]">
                 <span className="w-[80px] flex-shrink-0 text-[14px] leading-[22px] text-[#86909c]">
@@ -378,15 +407,15 @@ function EdgePanel() {
                 </span>
                 <div className="flex items-center gap-[4px]">
                   <span className="text-[14px] leading-[22px] text-[#1E293B]">
-                    {basicInfo?.code || selectedEdgeId || '-'}
+                    {basicInfo?.code || '-'}
                   </span>
-                  <IconCopy
-                    fontSize={14}
-                    className="cursor-pointer text-gray-500 hover:text-gray-700"
-                    onClick={() =>
-                      handleCopy(String(basicInfo?.code || selectedEdgeId))
-                    }
-                  />
+                  {!isNil(basicInfo?.code) && (
+                    <IconCopy
+                      fontSize={14}
+                      className="cursor-pointer text-gray-500 hover:text-gray-700"
+                      onClick={() => handleCopy(String(basicInfo?.code))}
+                    />
+                  )}
                 </div>
               </div>
               <div className="flex items-center gap-[8px]">
@@ -405,7 +434,7 @@ function EdgePanel() {
             <div className="text-[14px] font-[600] leading-[22px] text-[#1E293B]">
               关系对
             </div>
-            <div className="flex items-center">
+            <div className="flex items-center gap-4 bg-[#F2F8FF] p-[12px]">
               {renderObjectTypeCard(basicInfo?.sourceObjectTypeInfo, true)}
               <div className="flex w-[76px] min-w-[76px] items-center">
                 <span className="h-0 flex-1 border-t border-dashed border-[#CBD5E1]" />
@@ -430,27 +459,28 @@ function EdgePanel() {
               title={`实例(${instancesPagination.total})`}
             >
               <div className="gap-[16px mt-[16px] flex w-full flex-col">
-                <Table
-                  loading={instancesLoading}
-                  columns={instanceColumns}
-                  data={instancesData}
-                  scroll={
-                    instanceColumns.length > 4
-                      ? { x: instanceColumns.length * 140 }
-                      : undefined
-                  }
-                  rowKey={(record) => {
-                    // 尝试使用唯一标识字段作为 rowKey
-                    if (record.link_id) return String(record.link_id);
-                    if (record.id) return String(record.id);
-                    // 如果没有唯一标识，使用所有字段的组合
-                    return Object.values(record).join('-');
-                  }}
-                  border={false}
-                  pagination={false}
-                  noDataElement={<NoDataCard title="暂无数据" />}
-                  className="[&_.arco-table-td]:py-[10px] [&_.arco-table-th]:bg-[#f7f8fa] [&_.arco-table-th]:py-[10px]"
-                />
+                {instancesPagination.total === 0 ? (
+                  <div className="flex justify-center py-[100px]">
+                    <NoDataCard title="暂无数据" />
+                  </div>
+                ) : (
+                  <Table
+                    loading={instancesLoading}
+                    columns={instanceColumns}
+                    data={instancesData}
+                    rowKey={(record) => {
+                      // 尝试使用唯一标识字段作为 rowKey
+                      if (record.link_id) return String(record.link_id);
+                      if (record.id) return String(record.id);
+                      // 如果没有唯一标识，使用所有字段的组合
+                      return Object.values(record).join('-');
+                    }}
+                    border={false}
+                    pagination={false}
+                    noDataElement={<NoDataCard title="暂无数据" />}
+                    className="[&_.arco-table-td]:py-[10px] [&_.arco-table-th]:bg-[#f7f8fa] [&_.arco-table-th]:py-[10px]"
+                  />
+                )}
                 {instancesPagination.total > 0 && (
                   <div className="flex justify-end pt-[16px]">
                     <Pagination

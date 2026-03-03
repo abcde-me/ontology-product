@@ -6,7 +6,8 @@ import {
   Space,
   TableColumnProps,
   Pagination,
-  Message
+  Message,
+  Modal
 } from '@arco-design/web-react';
 import {
   IconPlus,
@@ -25,6 +26,7 @@ import { useWorkflowTable } from '../../hooks/useTable';
 import styles from './list.module.scss';
 import LinkDetailDrawer from './components/LinkDetailDrawer';
 import { listOntologyLinkType } from '@/api/ontologySceneLibrary/graph';
+import { deleteOntologyLinkType } from '@/api/ontologySceneLibrary/links';
 import { LinkInfo, LinkType, SyncStatus } from '@/types/graphApi';
 import ObjectTypeTag from '@/pages/ontologyScene/componens/ObjectTypeTag';
 import dayjs from 'dayjs';
@@ -33,6 +35,7 @@ import {
   OBJECT_TYPE_SYNC_STATUS_FILTERS
 } from '../../common/constants';
 import { getLinkTypeText } from '../../utils';
+import ObjectTypeDetailDrawer from '../../componens/ObjectTypeDetailDrawer';
 
 // 将 SyncStatus 枚举转换为 LinkDetailDrawer 期望的字符串类型
 const convertSyncStatusToString = (
@@ -65,6 +68,11 @@ export default function OntologySceneLinksList() {
   const { id: OSId } = useParams<{ id: string }>();
   const [urlState, setUrlState] = useUrlState({ search: '' });
   const [detailDrawerVisible, setDetailDrawerVisible] = useState(false);
+  const [objectTypeDetailDrawerVisible, setObjectTypeDetailDrawerVisible] =
+    useState(false);
+  const [selectedObjectType, setSelectedObjectType] = useState<{
+    id: string;
+  } | null>(null);
   const [detailActiveTab, setDetailActiveTab] = useState<
     'instances' | 'attributes'
   >('instances');
@@ -82,6 +90,7 @@ export default function OntologySceneLinksList() {
             filter: params.keyword || undefined,
             pageNo: params.page || 1,
             pageSize: params.page_size || 10,
+            ontologyModelID: Number(OSId),
             ...(orderBy && { order, orderBy })
           });
 
@@ -149,12 +158,41 @@ export default function OntologySceneLinksList() {
 
   // 处理删除
   const handleDelete = (record: LinkInfo) => {
-    // TODO: 实现删除功能
-    Message.info(`删除 ${record.name}`);
+    if (!record.id) {
+      Message.error('链接ID无效');
+      return;
+    }
+
+    Modal.confirm({
+      title: '确认删除链接吗？',
+      content: `删除后，不可恢复`,
+      onOk: async () => {
+        try {
+          const response = await deleteOntologyLinkType({ id: record.id! });
+          if (response.status === 200 && response.code === '') {
+            Message.success('删除成功');
+            refresh();
+          } else {
+            Message.error(response.message || '删除失败');
+          }
+        } catch (error) {
+          Message.error('删除失败');
+        }
+      }
+    });
   };
 
   // 处理查看详情（点击链接名称）
-  const handleViewDetail = (record: LinkInfo) => {
+  const handleViewObjectTypeDetail = (record: LinkInfo, isSource = true) => {
+    if (isSource) {
+      setSelectedObjectType({ id: String(record.sourceObjectTypeID) });
+    } else {
+      setSelectedObjectType({ id: String(record.targetObjectTypeID) });
+    }
+    setObjectTypeDetailDrawerVisible(true);
+  };
+
+  const handleViewLinkDetail = (record: LinkInfo) => {
     setSelectedLink(record);
     setDetailActiveTab('instances');
     setDetailDrawerVisible(true);
@@ -166,8 +204,9 @@ export default function OntologySceneLinksList() {
       title: '链接名称',
       dataIndex: 'name',
       width: 150,
+      fixed: 'left',
       render: (value, record) => (
-        <div onClick={() => handleViewDetail(record)}>
+        <div onClick={() => handleViewLinkDetail(record)}>
           <EllipsisPopover
             wrapperClassName="min-w-0 hover-blue font-[600]"
             value={value}
@@ -200,6 +239,7 @@ export default function OntologySceneLinksList() {
                 ontologyObjectTypeIcon={record.sourceObjectTypeIcon}
                 ontologyObjectTypeName={record.sourceObjectTypeName || ''}
                 ontologyObjectTypeId={record.sourceObjectTypeID}
+                onClick={() => handleViewObjectTypeDetail(record)}
               />
             ) : (
               <span>-</span>
@@ -220,6 +260,7 @@ export default function OntologySceneLinksList() {
                 ontologyObjectTypeIcon={record.targetObjectTypeIcon}
                 ontologyObjectTypeName={record.targetObjectTypeName || ''}
                 ontologyObjectTypeId={record.targetObjectTypeID}
+                onClick={() => handleViewObjectTypeDetail(record, false)}
               />
             ) : (
               <span>-</span>
@@ -425,6 +466,18 @@ export default function OntologySceneLinksList() {
           }
           data={drawerData as any}
           defaultActiveTab={detailActiveTab}
+        />
+      )}
+
+      {/* 对象类型详情抽屉 */}
+      {objectTypeDetailDrawerVisible && (
+        <ObjectTypeDetailDrawer
+          objectTypeId={selectedObjectType?.id}
+          visible={objectTypeDetailDrawerVisible}
+          onClose={() => {
+            setObjectTypeDetailDrawerVisible(false);
+            setSelectedObjectType(null);
+          }}
         />
       )}
     </div>

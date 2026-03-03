@@ -604,6 +604,20 @@ export default function ObjectTypeDetailDrawer({
       displayData?.syncStatus ?? SyncStatus.NOT_SYNC
     ];
 
+  const renderObjectTypeIcon = (icon?: string) => {
+    // 根据 icon 字段匹配对应的图标
+    const iconOption = icon
+      ? OBJECT_TYPE_ICON_OPTIONS.find((option) => option.value === icon)
+      : null;
+    const IconComponent = iconOption?.icon ?? OBJECT_TYPE_ICON_OPTIONS[0].icon;
+
+    return (
+      <div className="flex h-[14px] w-[14px] flex-shrink-0 items-center justify-center">
+        <IconComponent className="h-[14px] w-[14px]" />
+      </div>
+    );
+  };
+
   return (
     <OsDrawer
       visible={visible}
@@ -626,29 +640,20 @@ export default function ObjectTypeDetailDrawer({
                   对象类型名称：
                 </div>
                 <div className="flex min-w-0 flex-1 items-center gap-[4px]">
-                  {(() => {
-                    // 根据 icon 字段匹配对应的图标
-                    const iconOption = displayData?.icon
-                      ? OBJECT_TYPE_ICON_OPTIONS.find(
-                          (option) => option.value === displayData.icon
-                        )
-                      : null;
-                    const IconComponent =
-                      iconOption?.icon ?? OBJECT_TYPE_ICON_OPTIONS[0].icon;
-
-                    return (
-                      <div className="flex h-[14px] w-[14px] flex-shrink-0 items-center justify-center">
-                        <IconComponent className="h-[14px] w-[14px]" />
+                  {displayData?.name ? (
+                    <>
+                      {renderObjectTypeIcon(displayData?.icon)}
+                      <div className="min-w-0 flex-1">
+                        <EllipsisPopover
+                          preferTypography
+                          value={displayData?.name}
+                          className="text-[14px] leading-[22px] text-[var(--color-text-1)]"
+                        />
                       </div>
-                    );
-                  })()}
-                  <div className="min-w-0 flex-1">
-                    <EllipsisPopover
-                      preferTypography
-                      value={displayData?.name || '-'}
-                      className="text-[14px] leading-[22px] text-[var(--color-text-1)]"
-                    />
-                  </div>
+                    </>
+                  ) : (
+                    '-'
+                  )}
                 </div>
               </div>
               <div className="flex gap-[8px]">
