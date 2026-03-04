@@ -67,9 +67,11 @@ export const useColumns = (
             value ? (
               <div
                 onClick={() => {
-                  onViewBehaviorDetail?.(record);
+                  if (record.pk && record.pk !== 0) {
+                    onViewBehaviorDetail?.(record);
+                  }
                 }}
-                className="hover-blue cursor-pointer font-PingFangSc text-[14px] font-normal leading-[22px] text-[#4e5969]"
+                className={`font-PingFangSc text-[14px] font-normal leading-[22px] ${record.pk && record.pk !== 0 ? 'hover-blue cursor-pointer text-[#4e5969]' : 'text-[#4e5969]'}`}
               >
                 {value}
               </div>
