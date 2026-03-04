@@ -147,6 +147,7 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
     const [storeAsPublicLoading, setStoreAsPublicLoading] = useState<
       Record<number, boolean>
     >({});
+    const [initialFileList, setInitialFileList] = useState<any[]>([]);
 
     // 加载数据库列表
     const loadDatabaseList = async () => {
@@ -223,6 +224,24 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
             })
           );
           setAttributeFields(fields);
+        }
+        // 解析 filePath 并设置初始文件列表
+        if (initialValues.filePath && initialValues.filePath.trim()) {
+          const fileName = initialValues.filePath.split('/').pop() || '';
+          if (fileName && fileName.trim()) {
+            setInitialFileList([{ name: fileName }]);
+          }
+          // 如果数据源类型是 LOCAL_CSV，需要设置 dataSource.filePath
+          const dataSourceType =
+            initialValues._dataSource?.type || DATA_SOURCE_TYPE.LOCAL_CSV;
+          if (dataSourceType === DATA_SOURCE_TYPE.LOCAL_CSV) {
+            setDataSource((prev) => ({
+              ...prev,
+              type: DATA_SOURCE_TYPE.LOCAL_CSV,
+              filePath: initialValues.filePath
+            }));
+            setFileUploaded(true);
+          }
         }
       } else {
         // 初始化默认值，确保第一个选项被选中
@@ -394,7 +413,7 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
           });
 
           if (response.status === 200 && response.code === '') {
-            const publicPropertyId = response.data.data.id;
+            const publicPropertyId = response.data;
             handleFieldChange(index, {
               isStoreAsPublic: 1,
               _storedPublicPropertyId: publicPropertyId // 存入公共属性时创建的ID
@@ -803,6 +822,10 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
       form.setFieldValue('attributeFields', []);
       setFileUploaded(false);
       setIsReUpload(false);
+      // 切换数据源类型时清空初始文件列表
+      if (type === DATA_SOURCE_TYPE.DATA_DIRECTORY_SYNC) {
+        setInitialFileList([]);
+      }
     };
 
     const handleDataSourceFileChange = (fileData: any) => {
@@ -1085,6 +1108,7 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
                   fileType="csv"
                   maxSize={500}
                   customAction={`${PrefixAimdp}/UploadOntologyEntityDataFile`}
+                  fileList={initialFileList}
                   onFileChange={(file) => {
                     // 文件被移除时，FieldImportUpload 传递空数组 []
                     if (
@@ -1101,6 +1125,7 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
                       setAttributeFields([]);
                       form.setFieldValue('attributeFields', []);
                       setFileUploaded(false);
+                      setInitialFileList([]); // 清空初始文件列表
                     } else {
                       // 重新上传CSV文件时，设置isReUpload为true
                       setIsReUpload(!!initialValues?.code);

@@ -1,5 +1,5 @@
 import { Upload, Message } from '@arco-design/web-react';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { PrefixAimdp } from '@/api/endpoints';
 import { IconUpload, IconDownload } from '@arco-design/web-react/icon';
 import { UploadStatus } from '../types/objectType';
@@ -15,6 +15,7 @@ interface FieldImportUploadProps {
   maxSize?: number; // 文件大小限制（MB），默认50MB
   customAction?: string; // 自定义上传接口地址
   from?: 'object_type' | 'link_type';
+  fileList?: any[]; // 初始文件列表
 }
 
 const FieldImportUpload: React.FC<FieldImportUploadProps> = ({
@@ -24,10 +25,20 @@ const FieldImportUpload: React.FC<FieldImportUploadProps> = ({
   fileType = 'csv',
   maxSize = 50,
   customAction,
-  from = 'object_type'
+  from = 'object_type',
+  fileList: initialFileList = []
 }) => {
-  const [fileList, setFileList] = useState<any>([]);
+  const [fileList, setFileList] = useState<any>(initialFileList);
   const projectId = useUserInfoStore((state) => state.projectId);
+
+  // 当外部传入的 fileList 变化时，同步更新内部状态
+  useEffect(() => {
+    if (initialFileList && initialFileList.length > 0) {
+      setFileList(initialFileList);
+    } else if (initialFileList && initialFileList.length === 0) {
+      setFileList([]);
+    }
+  }, [initialFileList]);
 
   const handleUploadChange = (files: any, file: any) => {
     console.log('---handleUploadChange', files, file);

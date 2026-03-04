@@ -226,13 +226,7 @@ export const listOntologyPublicProperties = async (
 
 export const createOntologyPublicProperties = async (
   params: CreateOntologyPublicPropertiesReq
-): Promise<
-  ApiRes<{
-    data: {
-      id: number;
-    };
-  }>
-> => {
+): Promise<ApiRes<number>> => {
   return await UAPI.RES.CreateOntologyPublicPropertiesApi({})
     .post(params)
     .inRegion()
