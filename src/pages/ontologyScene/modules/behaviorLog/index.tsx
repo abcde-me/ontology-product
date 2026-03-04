@@ -104,11 +104,16 @@ export default function BehaviorLogList() {
 
   // 处理查看行为详情
   const handleViewBehaviorDetail = (record: BehaviorLogItem) => {
+    // 只有当 pk 存在且不为 0 时才显示行为详情抽屉
+    if (!record.pk || record.pk === 0) {
+      return;
+    }
+
     // 将 BehaviorLogItem 转换为 BehaviorActionItem
     // 注意：这里需要根据实际的数据结构进行映射
     // TODO: ts错误暂时忽略
     const behaviorActionData: BehaviorActionItem = {
-      id: Number(record.id),
+      id: Number(record.pk),
       name: record.name || '',
       code: record.code,
       description: record.description || '',
