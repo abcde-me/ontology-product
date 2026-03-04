@@ -24,7 +24,11 @@ type IValue = {
   uiType?: string;
   paramValue?: any;
 };
-export const DataWithUiSelect = (props: CustomFormItemCompProps<IValue>) => {
+export const DataWithUiSelect = (
+  props: CustomFormItemCompProps<IValue> & {
+    osid?: number;
+  }
+) => {
   const { value, onChange, disabled } = props;
   const renderComponentByUiType = (type: UiType) => {
     switch (type) {
@@ -125,12 +129,12 @@ export const DataWithUiSelect = (props: CustomFormItemCompProps<IValue>) => {
         );
       case UiType.ObjectOne:
         return (
-          <ObjectTypeSelect
-            placeholder={'请选择对象类型'}
+          <ObjectInterfaceSelect
             className={'flex-1'}
             disabled={disabled}
             value={value?.paramValue}
             onChange={(value) => changeValue({ paramValue: value })}
+            mode={'single'}
           />
         );
       case UiType.ObjectSet:
@@ -140,6 +144,7 @@ export const DataWithUiSelect = (props: CustomFormItemCompProps<IValue>) => {
             disabled={disabled}
             value={value?.paramValue}
             onChange={(value) => changeValue({ paramValue: value })}
+            mode={'multiple'}
           />
         );
       default:

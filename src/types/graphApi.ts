@@ -164,6 +164,8 @@ export interface ListOntologyPhysicalPropertiesReq {
    * 公共属性关联筛选：all(全部), none(未关联), related(有关联)
    */
   publicPropertyRelation?: PublicPropertyRelation;
+  // 对象id
+  id?: number;
 }
 
 /**

@@ -12,6 +12,7 @@ import { FormItem, ObjectTypeSelect } from '@/pages/ontologyScene/componens';
 import { useRequest } from 'ahooks';
 import {
   getActionDetail,
+  getActionList,
   saveBehaviorAction
 } from '@/api/ontologySceneLibrary/ontologyAction';
 import {
@@ -20,15 +21,20 @@ import {
   buildFunctionSchema
 } from '@/pages/ontologyScene/modules/behaviorActionDetail/utils';
 import { isNil } from 'lodash-es';
-import { getFunctionDetail } from '@/api/ontologySceneLibrary/ontologyFunction';
+import {
+  getFunctionDetail,
+  getFunctionList
+} from '@/api/ontologySceneLibrary/ontologyFunction';
 import {
   InputType,
-  OntologyFunctionDetail
+  OntologyFunctionDetail,
+  OntologyFunctionItem
 } from '@/pages/ontologyScene/types/ontologyFunction';
 import { IconLeft } from '@arco-design/web-react/icon';
 import {
   ActionSchema,
-  BehaviorActionDetail
+  BehaviorActionDetail,
+  BehaviorActionItem
 } from '@/pages/ontologyScene/types/behaviorActions';
 
 const { TextArea } = Input;
@@ -141,7 +147,32 @@ export default function BehaviorActionDetailPage() {
             label="行为名称"
             field="name"
             required
-            rules={[{ required: true, message: '请输入行为动作名称' }]}
+            rules={[
+              {
+                validator(v, cb) {
+                  const value = v as string;
+                  if (!value?.trim()) {
+                    return cb('请输入行为名称');
+                  }
+                  return getActionList({
+                    ontologyModelID: +OSId,
+                    pageNum: 1,
+                    pageSize: 10,
+                    filter: value
+                  }).then((res) => {
+                    if (
+                      res.items?.filter(
+                        (item: BehaviorActionItem) =>
+                          item.name === value &&
+                          item.id!.toString() !== actionId
+                      ).length
+                    ) {
+                      cb('行为名称不可重复');
+                    }
+                  });
+                }
+              }
+            ]}
           >
             <Input
               placeholder="请输入关键字名称"
@@ -154,7 +185,32 @@ export default function BehaviorActionDetailPage() {
             label="行为id"
             required
             field="code"
-            rules={[{ required: true, message: '请输入唯一标识' }]}
+            rules={[
+              {
+                validator(v, cb) {
+                  const value = v as string;
+                  if (!value?.trim()) {
+                    return cb('请输入行为id');
+                  }
+                  return getActionList({
+                    ontologyModelID: +OSId,
+                    pageNum: 1,
+                    pageSize: 10,
+                    filter: value
+                  }).then((res) => {
+                    if (
+                      res.items?.filter(
+                        (item: BehaviorActionItem) =>
+                          item.code === value &&
+                          item.id!.toString() !== actionId
+                      ).length
+                    ) {
+                      cb('行为id不可重复');
+                    }
+                  });
+                }
+              }
+            ]}
           >
             <Input
               placeholder="请输入唯一标识"

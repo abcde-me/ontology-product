@@ -95,7 +95,7 @@ export const buildActionTestItem = (
       name: key,
       value: JSON.stringify(value)
     })),
-    code: data.functionCode!,
+    code: data.code!,
     content: data.functionContent!,
     logic_function: [data.functionCode!],
     name: data.functionName!,
