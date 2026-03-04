@@ -118,6 +118,7 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
     const [fieldsLoading, setFieldsLoading] = useState(false);
     const [fileUploaded, setFileUploaded] = useState(false);
     const [isReUpload, setIsReUpload] = useState(false);
+    const [initialFileList, setInitialFileList] = useState<any[]>([]);
     const [sourceAttributeOptions, setSourceAttributeOptions] = useState<
       Array<{ label: string; value: string }>
     >([]);
@@ -317,9 +318,25 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
             // 注意：这里需要等数据库列表加载后才能设置 cascaderValue
             // 所以先设置 selectedDatabase 和 selectedTable，在 loadDatabaseList 后再设置 cascaderValue
           }
+          // 如果有中间表文件路径，解析文件名并设置初始文件列表
+          if (initialValues.intermediateTable.filePath) {
+            const fileName =
+              initialValues.intermediateTable.filePath.split('/').pop() || '';
+            if (fileName && fileName.trim()) {
+              setInitialFileList([{ name: fileName }]);
+            }
+          }
         }
         if (initialValues.attributeFields) {
-          setAttributeFields(initialValues.attributeFields);
+          // 如果是本地CSV，确保字段类型正确：主键varchar(500)，非主键varchar(2000)
+          const processedFields =
+            initialValues.intermediateTable?.type === 'local_csv'
+              ? initialValues.attributeFields.map((field) => ({
+                  ...field,
+                  fieldType: field.isPrimary ? 'varchar(500)' : 'varchar(2000)'
+                }))
+              : initialValues.attributeFields;
+          setAttributeFields(processedFields);
         }
       } else {
         form.setFieldsValue({
@@ -426,10 +443,19 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
     };
 
     const handlePrimaryKeyChange = (index: number) => {
-      const newFields: AttributeField[] = attributeFields.map((field, i) => ({
-        ...field,
-        isPrimary: i === index
-      }));
+      const newFields: AttributeField[] = attributeFields.map((field, i) => {
+        const isPrimary = i === index;
+        // 如果是本地CSV上传，根据是否为主键设置字段类型
+        let fieldType = field.fieldType;
+        if (intermediateTable.type === 'local_csv') {
+          fieldType = isPrimary ? 'varchar(500)' : 'varchar(2000)';
+        }
+        return {
+          ...field,
+          isPrimary,
+          fieldType
+        };
+      });
       setAttributeFields(newFields);
       form.setFieldValue('attributeFields', newFields);
     };
@@ -502,7 +528,15 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
         title: '字段类型',
         dataIndex: 'fieldType',
         width: 200,
-        render: (value) => <span>{value}</span>
+        render: (value, record) => {
+          // 如果是本地CSV上传，根据是否为主键显示字段类型
+          if (intermediateTable.type === 'local_csv') {
+            return (
+              <span>{record.isPrimary ? 'varchar(500)' : 'varchar(2000)'}</span>
+            );
+          }
+          return <span>{value}</span>;
+        }
       }
     ];
 
@@ -743,6 +777,7 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
 
       // 如果切换到数据湖同步，加载数据库列表
       if (type === 'data_lake_sync') {
+        setInitialFileList([]);
         loadDatabaseList();
       }
     };
@@ -797,7 +832,7 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
           tableField: column, // 表字段名
           selected: true, // 默认全部选中
           attributeName: column, // 属性名称，默认与表字段名相同
-          fieldType: 'STRING', // 默认类型
+          fieldType: index === 0 ? 'varchar(500)' : 'varchar(2000)', // 本地CSV：主键varchar(500)，非主键varchar(2000)
           isPrimary: index === 0 // 第一个字段默认为主键
         }));
 
@@ -837,26 +872,32 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
         }
 
         if (linkType === 'N:N') {
-          if (
-            intermediateTable.type === 'local_csv' &&
-            !intermediateTable.filePath
-          ) {
-            Message.warning('请上传中间表文件');
-            return;
-          }
-          if (
-            intermediateTable.type === 'data_lake_sync' &&
-            (!intermediateTable.database || !intermediateTable.table)
-          ) {
-            Message.warning('请选择数据库和表');
-            return;
+          // 中间表校验（N:N）
+          if (intermediateTable.type === 'local_csv') {
+            // 本地 CSV：既要有文件（或已存在的文件路径），也要有字段映射
+            if (
+              !intermediateTable.filePath &&
+              !fileUploaded &&
+              attributeFields.length === 0
+            ) {
+              Message.warning('请上传中间表文件');
+              return;
+            }
+          } else if (intermediateTable.type === 'data_lake_sync') {
+            // 数据湖同步：必须选择数据库和表
+            if (!intermediateTable.database || !intermediateTable.table) {
+              Message.warning('请选择数据库和表');
+              return;
+            }
           }
 
+          // 关联属性校验
           if (!values.sourceAttribute || !values.targetAttribute) {
             Message.warning('请选择关联中间表的属性');
             return;
           }
 
+          // 字段映射校验：无论来源类型，都需要有字段映射
           if (attributeFields.length === 0) {
             Message.warning('请先上传中间表');
             return;
@@ -868,6 +909,17 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
           // }
         }
 
+        // 处理字段类型：如果是本地CSV，确保主键为varchar(500)，非主键为varchar(2000)
+        const processedAttributeFields =
+          linkType === 'N:N' && intermediateTable.type === 'local_csv'
+            ? attributeFields.map((field) => ({
+                ...field,
+                fieldType: field.isPrimary ? 'varchar(500)' : 'varchar(2000)'
+              }))
+            : linkType === 'N:N'
+              ? attributeFields
+              : [];
+
         const formData: LinkFormData = {
           name: values.name || '',
           id: values.id || '',
@@ -878,7 +930,7 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
           sourceAttribute: values.sourceAttribute,
           targetAttribute: values.targetAttribute,
           intermediateTable: linkType === 'N:N' ? intermediateTable : undefined,
-          attributeFields: linkType === 'N:N' ? attributeFields : [],
+          attributeFields: processedAttributeFields,
           isReUpload:
             linkType === 'N:N' && intermediateTable.type === 'local_csv'
               ? isReUpload
@@ -1171,6 +1223,7 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
                           fileType="csv"
                           maxSize={500}
                           customAction={`${PrefixAimdp}/UploadOntologyEntityDataFile`}
+                          fileList={initialFileList}
                           onFileChange={(file) => {
                             // 文件被移除时，FieldImportUpload 传递空数组 []
                             if (
@@ -1190,6 +1243,7 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
                               setAttributeFields([]);
                               form.setFieldValue('attributeFields', []);
                               setFileUploaded(false);
+                              setInitialFileList([]);
                             } else {
                               // 重新上传CSV文件时，设置isReUpload为true
                               setIsReUpload(!!initialValues?.id);
@@ -1304,6 +1358,7 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
                         placeholder="请先上传中间表"
                         value={form.getFieldValue('sourceAttribute')}
                         onChange={(val) => {
+                          console.log('---onChange', val);
                           form.setFieldValue('sourceAttribute', val);
                         }}
                         disabled={!fileUploaded}
