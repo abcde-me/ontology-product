@@ -138,7 +138,7 @@ export enum ParamType {
   Date = 'Date',
   Timestamp = 'Timestamp',
   Geopoint = 'Geopoint',
-  ObjectOne = 'ObjectOne',
+  ObjectOne = 'ObjectRef',
   Attachment = 'Attachment',
   ObjectSet = 'ObjectSet'
 }
@@ -178,7 +178,7 @@ export const TYPE_MAP: Record<string, string> = {
   [ParamType.Boolean]: 'bool',
   [ParamType.Date]: 'date',
   [ParamType.Timestamp]: 'datetime',
-  [ParamType.ObjectOne]: 'ObjectOne',
+  [ParamType.ObjectOne]: 'ObjectRef',
   [ParamType.ObjectSet]: 'ObjectSet',
   [ParamType.Geopoint]: 'GeoPoint',
   [ParamType.Attachment]: 'Attachment',
@@ -191,10 +191,10 @@ export const DEFAULT_FUNCTION_CONTENT = `# 请先修改函数名称
 # 点击运行可以在下方日志区看到运行结果
 
 def my_function(arg1: str) -> dict: # 只读
-  # 在此编写函数逻辑
-  var_1 = 1.0
-  var_2 = 1.0
-  return {"var_1": var_1, "var_2": var_2} # 只读`;
+    # 在此编写函数逻辑
+    var_1 = 1.0
+    var_2 = 1.0
+    return {"var_1":var_1,"var_2":var_2} #只读`;
 
 export const DEFAULT_FUNCTION_SCHEMA: OntologyFunctionSchema = {
   content: DEFAULT_FUNCTION_CONTENT,

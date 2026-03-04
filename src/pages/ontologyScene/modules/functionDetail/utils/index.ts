@@ -23,6 +23,7 @@ import {
 } from '@/pages/ontologyScene/types/ontologyFunction';
 import { isNil } from 'lodash-es';
 import dayjs from 'dayjs';
+import { formatParamValueByType } from '@/pages/ontologyScene/utils';
 
 export const bypassFrozenRange = Annotation.define<boolean>();
 
@@ -378,36 +379,6 @@ export function buildFunctionDetail(
   };
 }
 
-const formatParamValue = (param: OntologyFunctionParam) => {
-  const { uiTypeAndValue } = param;
-  const { paramValue: value, uiType } = uiTypeAndValue!;
-  const [dataType] = uiType!.split('_')!;
-  if (
-    [ParamType.Integer, ParamType.Float, ParamType.String].includes(
-      dataType as ParamType
-    )
-  ) {
-    return value.toString();
-  }
-  if (dataType === ParamType.Boolean) {
-    return value === 'true' ? 'True' : 'False';
-  }
-  if (dataType === ParamType.Date) {
-    return value.toString();
-  }
-  if (dataType === ParamType.Timestamp) {
-    const s = dayjs(value).unix().toString();
-    return s;
-  }
-  if (dataType === ParamType.Attachment) {
-    return `Attachment("${value[0].url}")`;
-  }
-  if (dataType === ParamType.Geopoint) {
-    return `GeoPoint(${value.lat}, ${value.lng})`;
-  }
-  return JSON.stringify(value);
-};
-
 /**
  *
  * @param formData
@@ -445,7 +416,7 @@ export const buildTestFunctionData = (
       };
       if (!isNil(uiTypeAndValue)) {
         const [dataType] = uiTypeAndValue.uiType!.split('_')!;
-        const paramValue = formatParamValue(param);
+        const paramValue = formatParamValueByType(param);
         testData.arguments.push({
           name,
           value: paramValue

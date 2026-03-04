@@ -1,4 +1,4 @@
-import { ParamType, UiType } from './ontologyFunction';
+import { InputType, ParamType, UiType } from './ontologyFunction';
 import { IconCodeBlock } from '@arco-design/web-react/icon';
 
 /**
@@ -177,6 +177,7 @@ export interface OntologyActionParam {
    */
   uiType: UiType;
   validationRule?: ValidationRule;
+  inputType?: InputType;
 }
 
 export interface EnumRule {

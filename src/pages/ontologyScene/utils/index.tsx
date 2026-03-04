@@ -1,6 +1,8 @@
 import React from 'react';
 import {
   InputType,
+  OntologyFunctionParam,
+  ParamType,
   TestFunctionItem,
   UiType
 } from '@/pages/ontologyScene/types/ontologyFunction';
@@ -15,6 +17,7 @@ import {
 import styles from '../styles/index.module.scss';
 import { LinkType } from '@/types/graphApi';
 import { BehaviorActionDetail } from '@/pages/ontologyScene/types/behaviorActions';
+import dayjs from 'dayjs';
 
 export const renderComponentByUiType = (type: UiType, osid?: number) => {
   switch (type) {
@@ -86,27 +89,69 @@ export const getLinkTypeText = (type?: LinkType): '1:1' | '1:N' | 'N:N' => {
   }
 };
 
+export const formatParamValueByType = (
+  param: OntologyFunctionParam,
+  argValue?: any
+) => {
+  let dataType: ParamType, value: any;
+  if ('uiTypeAndValue' in param) {
+    const { uiTypeAndValue } = param;
+    const { paramValue, uiType } = uiTypeAndValue!;
+    dataType = uiType!.split('_')[0] as ParamType;
+    value = paramValue;
+  } else {
+    dataType = param.type || ParamType.String;
+    value = argValue;
+  }
+  if (
+    [ParamType.Integer, ParamType.Float, ParamType.String].includes(dataType)
+  ) {
+    return value.toString();
+  }
+  if (dataType === ParamType.Boolean) {
+    return value === 'true' ? 'True' : 'False';
+  }
+  if (dataType === ParamType.Date) {
+    return value.toString();
+  }
+  if (dataType === ParamType.Timestamp) {
+    const s = dayjs(value).unix().toString();
+    return s;
+  }
+  if (dataType === ParamType.Attachment) {
+    return `Attachment("${value[0].url}")`;
+  }
+  if (dataType === ParamType.Geopoint) {
+    return `GeoPoint(${value.lat}, ${value.lng})`;
+  }
+  return JSON.stringify(value);
+};
+
 export const buildActionTestItem = (
   data: BehaviorActionDetail,
   functionParams: Record<string, any>
 ): TestFunctionItem => {
-  return {
-    arguments: Object.entries(functionParams).map(([key, value]) => ({
-      name: key,
-      value: JSON.stringify(value)
-    })),
+  const res: TestFunctionItem = {
+    arguments: [],
     code: data.code!,
     content: data.functionContent!,
     logic_function: [data.functionCode!],
-    name: data.functionName!,
-    params: (data.params || []).map((p) => {
-      return {
-        inputType: p.uiType ? InputType.Input : InputType.Output,
-        ...p
-      };
-    }),
+    name: data.name!,
+    description: data.description || '',
+    params: [],
     object_name: data.objectTypeName,
     object_id: data.objectTypeId,
     pk: data.id
   };
+  (data.params || []).forEach((p) => {
+    res.params.push({
+      inputType: p.uiType ? InputType.Input : InputType.Output,
+      ...p
+    });
+    res.arguments.push({
+      value: formatParamValueByType(p, functionParams[p.name]),
+      name: p.name
+    });
+  });
+  return res;
 };

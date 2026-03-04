@@ -59,7 +59,7 @@ export const FunctionScript = (
             highlightActiveLineGutter: false,
             foldGutter: false,
             highlightActiveLine: false,
-            tabSize: 2
+            tabSize: 4
           }}
           value={value}
           onCreateEditor={(view) => {

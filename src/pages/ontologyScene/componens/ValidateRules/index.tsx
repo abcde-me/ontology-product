@@ -41,11 +41,17 @@ export const ValidateRules = (props: { readonly?: boolean }) => {
               <div className={styles['comp-header']}>
                 <div
                   className={
-                    'font-PingFangSc text-[14px] font-medium leading-[22px] text-black'
+                    'flex items-center gap-2 font-PingFangSc text-[14px] font-medium leading-[22px] text-black'
                   }
                 >
                   {paramName}
-                  <Tag className={'ml-3'}>{paramType}</Tag>
+                  <Tag
+                    className={`ml-3 text-[#184FF2] ${styles['type-tag']}`}
+                    bordered
+                    color={'transparent'}
+                  >
+                    {paramType}
+                  </Tag>
                 </div>
                 <div className={'flex w-max flex-shrink-0 items-center gap-1'}>
                   <div
