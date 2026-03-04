@@ -127,7 +127,8 @@ export function buildActionDetail(action: ActionSchema): BehaviorActionDetail {
         type,
         name,
         code,
-        uiType
+        uiType,
+        inputType: InputType.Input
       };
       const ruleMsg = ruleMap.get(name!);
       base.enabledValidation = !!ruleMsg?.enabledValidation;
