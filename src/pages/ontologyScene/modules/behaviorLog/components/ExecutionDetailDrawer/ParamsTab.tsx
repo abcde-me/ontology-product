@@ -3,6 +3,7 @@ import { Table, TableColumnProps, Tooltip } from '@arco-design/web-react';
 import { NoDataCard } from '@ceai-front/arco-material';
 import { ObjectTypeTagList } from '@/pages/ontologyScene/componens';
 import { ParamItem, OutputParamItem } from './types';
+import dayjs from 'dayjs';
 
 // 溢出检测组件
 const EllipsisTextWithTooltip: React.FC<{ text: string }> = ({ text }) => {
@@ -96,6 +97,22 @@ export const ParamsTab: React.FC<ParamsTabProps> = ({
           }));
 
           return <ObjectTypeTagList tags={tags} />;
+        }
+
+        // 如果数据类型是 Timestamp，转换时间戳为可读格式
+        if (record.type === 'Timestamp') {
+          if (!value || value === '-') {
+            return <span>-</span>;
+          }
+          // 尝试将值转换为数字（秒级时间戳）
+          const timestamp = Number(value);
+          if (!isNaN(timestamp)) {
+            // 转换为 YYYY-MM-DD HH:mm:ss 格式
+            const formattedDate = dayjs
+              .unix(timestamp)
+              .format('YYYY-MM-DD HH:mm:ss');
+            return <EllipsisTextWithTooltip text={formattedDate} />;
+          }
         }
 
         // 其他类型的值渲染
