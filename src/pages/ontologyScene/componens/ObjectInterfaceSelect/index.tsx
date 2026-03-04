@@ -1,178 +1,226 @@
-import React, { useCallback, useMemo, useRef, useState } from 'react';
-import { Select } from '@arco-design/web-react';
-import { useVirtualList } from 'ahooks';
-import classNames from 'classnames';
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState
+} from 'react';
 import styles from './index.module.scss';
+import classNames from 'classnames';
+import { ObjectTypeSelect } from '../../componens';
+import { SelectWithNoData } from '@/components/new-no-data-comps';
+import { isNil } from 'lodash-es';
+import { useRequest, useVirtualList } from 'ahooks';
+import { Spin } from '@arco-design/web-react';
+import { NoDataCard } from '@ceai-front/arco-material';
+import {
+  listOntologyObjectTypeData,
+  listOntologyPhysicalProperties
+} from '@/api/ontologySceneLibrary/graph';
+import { ObjectType } from '@/types/objectType';
+import { InterfaceSelect } from '@/pages/ontologyScene/componens/ObjectInterfaceSelect/InsSelect';
+import { useParams } from 'react-router-dom';
 
-export interface ObjectInterfaceSelectProps
-  extends CustomFormItemCompProps<string | number> {
-  placeholder?: string;
+export interface ObjInsValue {
+  objectTypeID?: number;
+  objInsID?: React.Key[] | React.Key | undefined;
 }
 
-type OptionItem = {
-  value: number;
+// Page size for backend pagination
+const PAGE_SIZE = 20;
+// Row height used by the virtual list
+const ITEM_HEIGHT = 36;
+// Dropdown panel height
+const DROPDOWN_HEIGHT = 240;
+// Scroll threshold to trigger loading the next page
+const LOAD_MORE_THRESHOLD = 40;
+
+type ObjectInstance = Record<string, unknown> & {
+  id?: React.Key;
+  name?: string;
+  code?: string;
+};
+
+type InstanceOption = {
+  value: React.Key;
   label: string;
+  raw?: ObjectInstance;
 };
 
-const dropdownHeight = 400;
-const rowHeight = 36;
-const mockTotal = 10000;
+// Normalize any value into a stable string key
+const normalizeKey = (value: React.Key) => String(value);
 
-/** 生成模拟数据 */
-const createMockOptions = (total: number): OptionItem[] => {
-  const list: OptionItem[] = [];
-  for (let i = 1; i <= total; i += 1) {
-    list.push({
-      value: i,
-      label: `实例-${i}`
-    });
-  }
-  return list;
+// Build a display label with best-effort fields
+const getInstanceLabel = (item: ObjectInstance) => {
+  const candidate = item.name ?? item.code ?? item.id;
+  return isNil(candidate) ? '-' : String(candidate);
 };
 
-/** 构建值与展示文本的映射 */
-const buildLabelMap = (list: OptionItem[]) => {
-  const map = new Map<string, string>();
-  for (const item of list) {
-    map.set(String(item.value), item.label);
-  }
-  return map;
+// Normalize instance data to ensure a usable id exists
+const normalizeInstance = (
+  item: ObjectInstance,
+  index: number,
+  page: number
+) => {
+  const rawId = item.id ?? item.code ?? item.name;
+  const safeId = isNil(rawId) ? `${page}-${index}` : rawId;
+  return { ...item, id: safeId };
 };
 
-/** 获取模拟数据列表 */
-const getMockOptionList = () => createMockOptions(mockTotal);
+export interface ObjInsProps extends CustomFormItemCompProps<ObjInsValue> {
+  mode: 'single' | 'multiple';
+  onChange?: (
+    value: ObjInsValue,
+    options?: [ObjectType, Record<string, any>]
+  ) => void;
+}
 
-/** 对象实例下拉选择组件 */
-export const ObjectInterfaceSelect = (props: ObjectInterfaceSelectProps) => {
-  const { value, onChange, disabled, className, placeholder } = props;
+export const ObjectInterfaceSelect = (props: ObjInsProps) => {
+  const { value, onChange, disabled, className } = props;
+  const { objectTypeID, objInsID } = value || {};
+  const [currentInsList, setCurrentInsList] = useState<Set<any>>(new Set());
+  const { id: OSId } = useParams<Record<string, any>>();
 
-  // 下拉容器与包裹层引用
-  const containerRef = useRef<HTMLDivElement>(null);
-  const wrapperRef = useRef<HTMLDivElement>(null);
-
-  // 控制下拉显示状态
-  const [popupVisible, setPopupVisible] = useState(false);
-
-  // 生成模拟数据
-  const optionList = useMemo(getMockOptionList, []);
-
-  /** 获取回显映射 */
-  const getLabelMap = useCallback(
-    () => buildLabelMap(optionList),
-    [optionList]
-  );
-
-  // 构建回显映射
-  const labelMap = useMemo(getLabelMap, [getLabelMap]);
-
-  // 虚拟滚动列表
-  const [virtualList] = useVirtualList(optionList, {
-    containerTarget: containerRef,
-    wrapperTarget: wrapperRef,
-    itemHeight: rowHeight,
-    overscan: 8
+  // Cache object instances for the selected object type
+  const [instanceList, setInstanceList] = useState<ObjectInstance[]>([]);
+  // Pagination state for server-side paging
+  const [pageInfo, setPageInfo] = useState({
+    current: 1,
+    total: 0
   });
+  // Track dropdown visibility to trigger initial loading
+  const [dropdownVisible, setDropdownVisible] = useState(false);
 
-  /** 处理下拉显示状态变化 */
-  const handlePopupVisibleChange = useCallback((visible: boolean) => {
-    setPopupVisible(visible);
-  }, []);
+  // Normalize selected values into an array
+  const selectedValues = useMemo<React.Key[]>(
+    () => (Array.isArray(objInsID) ? objInsID : []),
+    [objInsID]
+  );
 
-  /** 处理清空或输入变化 */
+  // Fetch object instances with server-side pagination
+  const { runAsync, loading } = useRequest(
+    async (params: { id: number; page: number; pageSize: number }) => {
+      const res = await listOntologyObjectTypeData(params);
+      return res;
+    },
+    { manual: true }
+  );
+
+  const { data: primaryKey, loading: primaryKeyLoading } = useRequest(
+    () => {
+      return listOntologyPhysicalProperties({
+        id: objectTypeID!
+      }).then((res) => {
+        return res.data.result?.find(({ isPrimary }) => !!isPrimary)?.name;
+      });
+    },
+    {
+      ready: !!objectTypeID,
+      refreshDeps: [objectTypeID]
+    }
+  );
+
+  // Load a specific page and merge into the list
+  // const loadPage = useCallback(
+  //   async (page: number) => {
+  //     if (isNil(objectTypeID)) return;
+  //     try {
+  //       const res = await runAsync({
+  //         id: objectTypeID,
+  //         page,
+  //         pageSize: PAGE_SIZE
+  //       });
+  //       const result = (res.data?.result || []) as ObjectInstance[];
+  //       const totalCount = Number(res.data?.totalCount) || 0;
+  //       const normalized = result.map((item, index) =>
+  //         normalizeInstance(item, index, page)
+  //       );
+  //
+  //       setInstanceList((prev) => {
+  //         if (page === 1) return normalized;
+  //         // De-duplicate by id when merging pages
+  //         const map = new Map<string, ObjectInstance>();
+  //         prev.forEach((item) => {
+  //           if (!isNil(item.id)) map.set(normalizeKey(item.id), item);
+  //         });
+  //         normalized.forEach((item) => {
+  //           if (!isNil(item.id)) map.set(normalizeKey(item.id), item);
+  //         });
+  //         return Array.from(map.values());
+  //       });
+  //
+  //       setPageInfo({
+  //         current: page,
+  //         total: totalCount
+  //       });
+  //     } catch (error) {
+  //       console.error('加载对象实例失败:', error);
+  //     }
+  //   },
+  //   [objectTypeID, runAsync]
+  // );
+
+  // Reset list when the object type changes
+  useEffect(() => {
+    setInstanceList([]);
+    setPageInfo({
+      current: 1,
+      total: 0
+    });
+
+    if (dropdownVisible && !isNil(objectTypeID)) {
+      // loadPage(1);
+    }
+  }, [objectTypeID, dropdownVisible]);
+
+  // Handle object type change by clearing selected instances
+  const handleObjectTypeChange = useCallback(
+    (nextId?: number) => {
+      onChange?.({
+        objectTypeID: nextId,
+        objInsID: []
+      });
+    },
+    [onChange]
+  );
+
+  // Handle Select value changes (tag remove / clear)
   const handleValueChange = useCallback(
-    (nextValue: string | number) => {
-      onChange?.(nextValue);
+    (nextValue: React.Key[] | React.Key) => {
+      const nextValues = Array.isArray(nextValue)
+        ? nextValue
+        : isNil(nextValue)
+          ? []
+          : [nextValue];
+      onChange?.({
+        objectTypeID,
+        objInsID: nextValues
+      });
     },
-    [onChange]
-  );
-
-  /** 处理点击选项 */
-  const handleOptionClick = useCallback(
-    (option: OptionItem) => {
-      onChange?.(option.value);
-      setPopupVisible(false);
-    },
-    [onChange]
-  );
-
-  /** 渲染虚拟列表的单行 */
-  /** 处理列表行点击事件 */
-  const handleRowClick = useCallback(
-    (event: React.MouseEvent<HTMLDivElement>) => {
-      const target = event.currentTarget;
-      const indexAttr = target.getAttribute('data-index');
-      if (!indexAttr) return;
-      const index = Number(indexAttr);
-      if (Number.isNaN(index)) return;
-      const option = optionList[index];
-      if (!option) return;
-      handleOptionClick(option);
-    },
-    [handleOptionClick, optionList]
-  );
-
-  /** 渲染虚拟列表的单行 */
-  const renderVirtualRow = useCallback(
-    (item: { data: OptionItem; index: number }) => {
-      const isSelected = value === item.data.value;
-      return (
-        <div
-          key={item.data.value}
-          data-index={item.index}
-          style={{
-            height: rowHeight,
-            lineHeight: `${rowHeight}px`,
-            padding: '0 12px',
-            cursor: 'pointer',
-            background: isSelected ? '#F2F8FF' : 'transparent'
-          }}
-          onClick={handleRowClick}
-        >
-          {item.data.label}
-        </div>
-      );
-    },
-    [value, handleRowClick]
-  );
-
-  /** 渲染下拉内容 */
-  const renderDropdown = useCallback(() => {
-    return (
-      <div
-        ref={containerRef}
-        style={{
-          height: dropdownHeight,
-          overflow: 'auto',
-          padding: '4px 0'
-        }}
-      >
-        <div ref={wrapperRef}>{virtualList.map(renderVirtualRow)}</div>
-      </div>
-    );
-  }, [virtualList, renderVirtualRow]);
-
-  /** 自定义回显内容 */
-  const renderValue = useCallback(
-    (_: any, currentValue: string | number) => {
-      if (currentValue === undefined || currentValue === null) return null;
-      return labelMap.get(String(currentValue)) || String(currentValue);
-    },
-    [labelMap]
+    [objectTypeID, onChange]
   );
 
   return (
     <div className={classNames([styles['obj-interface'], className])}>
-      <Select
-        className={styles['interface']}
-        value={value}
+      <ObjectTypeSelect
+        className={styles['obj-one']}
+        value={objectTypeID}
+        onChange={handleObjectTypeChange}
         disabled={disabled}
-        allowClear
-        popupVisible={popupVisible}
-        placeholder={placeholder || '请选择'}
-        onChange={handleValueChange}
-        onDropdownVisibleChange={handlePopupVisibleChange}
-        dropdownRender={renderDropdown}
-        renderFormat={renderValue}
+        ontologyModelID={+OSId}
+      />
+      <InterfaceSelect
+        objectTypeId={objectTypeID}
+        primaryKey={primaryKey}
+        disabled={primaryKeyLoading || disabled}
+        mode={props.mode}
+        value={value?.objInsID}
+        onChange={(v) => {
+          onChange?.({
+            ...value,
+            objInsID: v
+          });
+        }}
       />
     </div>
   );

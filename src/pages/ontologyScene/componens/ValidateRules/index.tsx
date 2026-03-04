@@ -77,7 +77,6 @@ export const ValidateRules = (props: { readonly?: boolean }) => {
                     options={TYPE2RULE_TYPES?.[paramType] || []}
                     disabled={disabled}
                     onChange={(rule) => {
-                      debugger;
                       form.setFieldsValue({
                         [`${field}.ruleConfig`]: undefined,
                         [`${field}.failMessage`]: undefined,

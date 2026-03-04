@@ -1,8 +1,12 @@
 .obj-interface {
   display: flex;
+  width: 100%;
+  flex: 1;
+  overflow: hidden;
 
   .obj-one {
-    flex: 1;
+    flex-basis: 50%;
+    flex-shrink: 0;
 
     :global {
       .arco-select-view {
@@ -13,6 +17,54 @@
   }
 
   .interface {
-    flex: 1;
+    flex-basis: 50%;
+    flex-shrink: 0;
+    overflow: hidden;
+  }
+}
+
+.ins-list {
+  border: none !important;
+
+  .ins-item {
+    height: 40px !important;
+    border: none !important;
+    overflow: hidden;
+    align-items: center;
+    padding: 0 12px !important;
+    cursor: pointer;
+
+    &:hover {
+      background-color: rgb(242 248 255 / var(--tw-bg-opacity, 1));
+    }
+
+    :global {
+      .arco-list-item-main,
+      .arco-list-item-content {
+        height: 100%;
+        overflow: hidden;
+      }
+    }
+
+    .content-container {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      height: 100%;
+      cursor: pointer;
+      overflow: hidden;
+
+      p {
+        flex: 1;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        font-family: PingFang SC;
+        font-weight: 400;
+        font-size: 14px;
+        line-height: 22px;
+        color: #0f131f;
+      }
+    }
   }
 }

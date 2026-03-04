@@ -158,7 +158,7 @@ export default function OSFunctionDetailPage() {
                   if (value.trim().length < 2) {
                     return onError('显示名称至少2字符');
                   }
-                  getFunctionList({
+                  return getFunctionList({
                     ontologyModelID: +OSId,
                     pageNum: 1,
                     pageSize: 10,
