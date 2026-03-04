@@ -1,11 +1,12 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   EnumRule,
   OntologyActionParam,
   RuleName,
   TYPE2COMP_OPTIONS,
   TYPE2RULE_TYPES,
-  UI_TYPE_LABEL
+  UI_TYPE_LABEL,
+  ValidateRule
 } from '@/pages/ontologyScene/types/behaviorActions';
 import styles from './index.module.scss';
 import {
@@ -38,6 +39,7 @@ export const BehaviorDetail = (props: IProps) => {
   const { actionItem, onClose, show } = props;
   const history = useHistory();
   const [activeTab, setActiveTab] = useState('params');
+  const [validateRules, setValidateRules] = useState<ValidateRule[]>();
   const [form] = Form.useForm();
   const { data: actionDetail } = useRequest(
     () => {
@@ -93,6 +95,31 @@ export const BehaviorDetail = (props: IProps) => {
       }
     }
   ];
+
+  // useEffect(() => {
+  //   setValidateRules(
+  //     actionDetail?.params?.flatMap((param) => {
+  //       const { name, type, enabledValidation, validationRule } = param;
+  //       if (
+  //         ![ParamType.Integer, ParamType.String, ParamType.Float].includes(type)
+  //       )
+  //         return [] as ValidateRule[];
+  //       return {
+  //         enabledValidation: enabledValidation,
+  //         failMessage: validationRule?.failMessage || '',
+  //         rule_name: validationRule?.ruleName || TYPE2RULE_TYPES[type][0].value,
+  //         ruleConfig:
+  //           validationRule?.ruleName === RuleName.EnumRule
+  //             ? (
+  //                 param.validationRule?.ruleConfig as EnumRule
+  //               )?.options?.toString()
+  //             : param.validationRule?.ruleConfig,
+  //         name,
+  //         type
+  //       };
+  //     }) || []
+  //   );
+  // }, [actionDetail]);
 
   return (
     <OsDrawer
@@ -230,7 +257,7 @@ export const BehaviorDetail = (props: IProps) => {
           )}
           {activeTab === 'rules' && (
             <Form form={form} disabled>
-              <ValidateRules readonly />
+              {/*<ValidateRuleCard />*/}
             </Form>
           )}
         </div>
