@@ -60,6 +60,7 @@ export interface LinkFormData {
   sourceAttribute?: string; // N:N关联中间表的源属性
   targetAttribute?: string; // N:N关联中间表的目标属性
   attributeFields: AttributeField[];
+  isReUpload?: boolean;
 }
 
 interface LinkFormProps {
@@ -116,6 +117,7 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
     );
     const [fieldsLoading, setFieldsLoading] = useState(false);
     const [fileUploaded, setFileUploaded] = useState(false);
+    const [isReUpload, setIsReUpload] = useState(false);
     const [sourceAttributeOptions, setSourceAttributeOptions] = useState<
       Array<{ label: string; value: string }>
     >([]);
@@ -513,6 +515,7 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
       setIntermediateTable({ type: 'local_csv' });
       setAttributeFields([]);
       setFileUploaded(false);
+      setIsReUpload(false);
     };
 
     // 加载数据库列表
@@ -736,6 +739,7 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
       setAttributeFields([]);
       form.setFieldValue('attributeFields', []);
       setFileUploaded(false);
+      setIsReUpload(false);
 
       // 如果切换到数据湖同步，加载数据库列表
       if (type === 'data_lake_sync') {
@@ -767,6 +771,7 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
         setAttributeFields([]);
         form.setFieldValue('attributeFields', []);
         setFileUploaded(false);
+        setIsReUpload(false);
         return;
       }
 
@@ -873,7 +878,11 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
           sourceAttribute: values.sourceAttribute,
           targetAttribute: values.targetAttribute,
           intermediateTable: linkType === 'N:N' ? intermediateTable : undefined,
-          attributeFields: linkType === 'N:N' ? attributeFields : []
+          attributeFields: linkType === 'N:N' ? attributeFields : [],
+          isReUpload:
+            linkType === 'N:N' && intermediateTable.type === 'local_csv'
+              ? isReUpload
+              : false
         };
 
         onSubmit(formData);
@@ -1182,6 +1191,8 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
                               form.setFieldValue('attributeFields', []);
                               setFileUploaded(false);
                             } else {
+                              // 重新上传CSV文件时，设置isReUpload为true
+                              setIsReUpload(!!initialValues?.id);
                               handleIntermediateTableFileChange(file);
                             }
                           }}

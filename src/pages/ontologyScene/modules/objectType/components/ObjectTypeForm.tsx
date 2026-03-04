@@ -75,6 +75,7 @@ export interface ObjectTypeFormData {
   originalTableName: string;
   sourceType?: SourceType;
   ontologyPhysicalPropertiesList?: CreateOntologyPhysicalProperty[];
+  isReUpload?: boolean;
   // 内部使用的字段
   _dataSource?: {
     type: DataSourceType;
@@ -140,6 +141,7 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
     );
     const [fieldsLoading, setFieldsLoading] = useState(false);
     const [fileUploaded, setFileUploaded] = useState(false);
+    const [isReUpload, setIsReUpload] = useState(false);
     const [bindModalVisible, setBindModalVisible] = useState(false);
     const [currentFieldIndex, setCurrentFieldIndex] = useState<number>(-1);
     const [storeAsPublicLoading, setStoreAsPublicLoading] = useState<
@@ -800,6 +802,7 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
       setAttributeFields([]);
       form.setFieldValue('attributeFields', []);
       setFileUploaded(false);
+      setIsReUpload(false);
     };
 
     const handleDataSourceFileChange = (fileData: any) => {
@@ -894,7 +897,19 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
             _attributeName,
             _storedPublicPropertyId,
             ...field
-          }) => field
+          }) => {
+            // 当是本地CSV导入时，将主键字段的类型设置为varchar(500)
+            if (
+              dataSource.type === DATA_SOURCE_TYPE.LOCAL_CSV &&
+              field.isPrimary === 1
+            ) {
+              return {
+                ...field,
+                columnType: 'varchar(500)'
+              };
+            }
+            return field;
+          }
         );
 
         const formData: ObjectTypeFormData = {
@@ -922,6 +937,8 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
               ? SourceType.FILE_UPLOAD
               : SourceType.ICEBERG,
           ontologyPhysicalPropertiesList: selectedFields,
+          isReUpload:
+            dataSource.type === DATA_SOURCE_TYPE.LOCAL_CSV ? isReUpload : false,
           _dataSource: dataSource
         };
 
@@ -1085,6 +1102,8 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
                       form.setFieldValue('attributeFields', []);
                       setFileUploaded(false);
                     } else {
+                      // 重新上传CSV文件时，设置isReUpload为true
+                      setIsReUpload(!!initialValues?.code);
                       handleDataSourceFileChange(file);
                     }
                   }}

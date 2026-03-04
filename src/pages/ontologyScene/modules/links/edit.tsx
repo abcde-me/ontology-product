@@ -194,10 +194,12 @@ export default function OntologySceneLinksEdit() {
         if (data.intermediateTable.type === 'local_csv') {
           requestData.sourceType = 2; // 文件上传
           requestData.filePath = data.intermediateTable.filePath;
+          requestData.isReUpload = data.isReUpload ? 1 : 0;
         } else if (data.intermediateTable.type === 'data_lake_sync') {
           requestData.sourceType = 1; // 来自iceberg
           requestData.linkDbName = data.intermediateTable.database;
           requestData.linkTableName = data.intermediateTable.table;
+          requestData.isReUpload = 0;
         }
 
         // 处理属性字段映射
