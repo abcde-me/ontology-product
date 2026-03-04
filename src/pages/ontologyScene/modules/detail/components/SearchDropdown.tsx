@@ -188,6 +188,30 @@ const SearchDropdown: React.FC<SearchDropdownProps> = ({
     };
   }, []);
 
+  // 高亮显示搜索关键词
+  const highlightSearchKeyword = useCallback(
+    (text: string, keyword: string) => {
+      if (!keyword) return text;
+
+      const index = text.toLowerCase().indexOf(keyword.toLowerCase());
+
+      if (index === -1) return text;
+
+      const prefix = text.substr(0, index);
+      const suffix = text.substr(index + keyword.length);
+      return (
+        <span>
+          {prefix}
+          <span style={{ color: '#007DFA' }}>
+            {text.substr(index, keyword.length)}
+          </span>
+          {suffix}
+        </span>
+      );
+    },
+    []
+  );
+
   // 渲染对象类型搜索结果
   const renderObjectTypeResult = (item: ObjectType) => {
     // 根据 icon 字段匹配对应的图标
@@ -216,7 +240,10 @@ const SearchDropdown: React.FC<SearchDropdownProps> = ({
           <div className="mb-[4px] flex items-center gap-[8px]">
             <EllipsisPopover
               preferTypography
-              value={item.name || '-'}
+              value={highlightSearchKeyword(
+                item.name || '-',
+                searchValue.trim()
+              )}
               className="text-[14px] leading-[22px] text-[var(--color-text-1)]"
             />
             <span className="flex-shrink-0 text-[14px] leading-[22px] text-[var(--color-text-1)]">
@@ -255,7 +282,7 @@ const SearchDropdown: React.FC<SearchDropdownProps> = ({
         <div className="flex items-center gap-[8px]">
           <EllipsisPopover
             preferTypography
-            value={name || '-'}
+            value={highlightSearchKeyword(name || '-', searchValue.trim())}
             className="text-[14px] leading-[22px] text-[var(--color-text-1)]"
           />
           <span className="flex-shrink-0 text-[14px] leading-[22px] text-[var(--color-text-1)]">
@@ -351,7 +378,7 @@ const SearchDropdown: React.FC<SearchDropdownProps> = ({
         <div className="flex items-center gap-[8px]">
           <EllipsisPopover
             preferTypography
-            value={name || '-'}
+            value={highlightSearchKeyword(name || '-', searchValue.trim())}
             className="text-[14px] leading-[22px] text-[var(--color-text-1)]"
           />
           <span className="flex-shrink-0 text-[14px] leading-[22px] text-[var(--color-text-1)]">
@@ -384,7 +411,7 @@ const SearchDropdown: React.FC<SearchDropdownProps> = ({
         onClick={handleFunctionResultClick}
       >
         <div className="text-[14px] font-medium leading-[22px] text-[var(--color-text-1)]">
-          {item.name}
+          {highlightSearchKeyword(item.name, searchValue.trim())}
         </div>
         <div className="text-[12px] leading-[20px] text-[var(--color-text-3)]">
           显示名称: {item.displayName}
