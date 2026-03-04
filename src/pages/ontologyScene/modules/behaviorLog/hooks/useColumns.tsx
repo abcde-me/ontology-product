@@ -82,15 +82,24 @@ export const useColumns = (
         {
           title: '行为id',
           dataIndex: 'code',
-          width: 150,
+          width: 180,
           ellipsis: true,
           render: (value) => (
             <div className="flex items-center gap-2">
-              <div className="font-PingFangSc text-[14px] font-normal leading-[22px] text-[#23293b]">
-                {value || '-'}
-              </div>
-              {value && (
-                <CopyItemIcon className="hidden flex-shrink-0" value={value} />
+              {value ? (
+                <>
+                  <EllipsisPopover
+                    value={value}
+                    isEdit={false}
+                    preferTypography
+                  />
+                  <CopyItemIcon
+                    className="hidden flex-shrink-0"
+                    value={value}
+                  />
+                </>
+              ) : (
+                '-'
               )}
             </div>
           )
@@ -244,11 +253,17 @@ export const useColumns = (
         ellipsis: true,
         render: (value) => (
           <div className="flex items-center gap-2">
-            <div className="font-PingFangSc text-[14px] font-normal leading-[22px] text-[#23293b]">
-              {value || '-'}
-            </div>
-            {value && (
-              <CopyItemIcon className="hidden flex-shrink-0" value={value} />
+            {value ? (
+              <>
+                <EllipsisPopover
+                  value={value}
+                  isEdit={false}
+                  preferTypography
+                />
+                <CopyItemIcon className="hidden flex-shrink-0" value={value} />
+              </>
+            ) : (
+              '-'
             )}
           </div>
         )
