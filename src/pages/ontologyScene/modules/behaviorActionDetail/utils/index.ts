@@ -40,18 +40,29 @@ export function buildActionSchema(action: BehaviorActionDetail): ActionSchema {
     function_name: functionName,
     ...action.params?.reduce<Partial<ActionSchema>>(
       (p, param) => {
-        const { name, code, type, enabledValidation, validationRule, uiType } =
-          param;
-        p.function_params?.push({
+        const {
           name,
-          code: code ?? name,
+          code,
           type,
-          uiType
-        });
-        if (
-          [ParamType.Float, ParamType.String, ParamType.Integer].includes(type)
-        ) {
-          p.validationRules?.push(buildParamValidateRule(param));
+          enabledValidation,
+          validationRule,
+          uiType,
+          inputType
+        } = param;
+        if (inputType === InputType.Input) {
+          p.function_params?.push({
+            name,
+            code: code ?? name,
+            type,
+            uiType
+          });
+          if (
+            [ParamType.Float, ParamType.String, ParamType.Integer].includes(
+              type
+            )
+          ) {
+            p.validationRules?.push(buildParamValidateRule(param));
+          }
         }
         return p;
       },

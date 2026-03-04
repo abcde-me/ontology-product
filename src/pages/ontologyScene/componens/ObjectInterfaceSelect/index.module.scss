@@ -26,6 +26,14 @@
 .ins-list {
   border: none !important;
 
+  :global {
+    .arco-list-content {
+      &::-webkit-scrollbar {
+        display: none;
+      }
+    }
+  }
+
   .ins-item {
     height: 40px !important;
     border: none !important;
@@ -66,5 +74,9 @@
         color: #0f131f;
       }
     }
+  }
+
+  .ins-selected {
+    background-color: rgb(242 248 255 / var(--tw-bg-opacity, 1));
   }
 }
