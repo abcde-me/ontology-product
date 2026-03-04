@@ -424,6 +424,10 @@ export interface LinkInfo {
    */
   sourceObjectTypeName?: string;
   /**
+   * 源对象类型同步状态
+   */
+  sourceObjectTypeSyncStatus?: SyncStatus;
+  /**
    * 源对象类型图标
    */
   sourceObjectTypeIcon?: string;
@@ -451,6 +455,10 @@ export interface LinkInfo {
    * 目标对象类型图标
    */
   targetObjectTypeIcon?: string;
+  /**
+   * 目标对象类型同步状态
+   */
+  targetObjectTypeSyncStatus?: SyncStatus;
   /**
    * 目标属性ID
    */
