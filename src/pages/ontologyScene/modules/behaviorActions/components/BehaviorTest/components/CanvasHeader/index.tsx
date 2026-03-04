@@ -33,7 +33,7 @@ export const CanvasHeader: React.FC<CanvasHeaderProps> = ({
   );
   const selectNode = useUIStore((state) => state.selectNode);
 
-  const { startTest, loading, testIng } = testFunctionHook;
+  const { startTest } = testFunctionHook;
 
   const handleRefresh = () => {
     Modal.confirm({
@@ -157,7 +157,6 @@ export const CanvasHeader: React.FC<CanvasHeaderProps> = ({
             </svg>
           }
           onClick={handleTest}
-          loading={loading || testIng}
         >
           测试
         </Button>
