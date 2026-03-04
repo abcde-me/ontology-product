@@ -34,6 +34,18 @@ import { getOntologyModelDetail } from '@/api/ontologySceneLibrary/ontologyScene
 import { OntologScene } from '@/types/ontologySceneApi';
 import MenuIcon from '../../assets/menu.svg';
 import styles from './index.module.scss';
+import CreateObjectIcon from '../../assets/create-object.svg';
+import CreateLinkIcon from '../../assets/create-link.svg';
+import CreateBehaviorIcon from '../../assets/create-behavior.svg';
+import CreateFunctionIcon from '../../assets/create-function.svg';
+import MenuObjectIcon from '../../assets/menu-object.svg';
+import MenuGraphIcon from '../../assets/menu-graph.svg';
+import MenuLinkIcon from '../../assets/menu-link.svg';
+import MenuAttributeIcon from '../../assets/menu-attribute.svg';
+import MenuBehaviorIcon from '../../assets/menu-behavior.svg';
+import MenuFunctionIcon from '../../assets/menu-function.svg';
+import MenuBehaviorLogIcon from '../../assets/menu-log.svg';
+import { EllipsisPopover } from '@ceai-front/arco-material';
 
 // 懒加载各个模块
 const OntologySceneGraph = lazy(() => import('../graph'));
@@ -107,22 +119,22 @@ export default function OntologySceneDetail() {
         {
           key: ONTOLOGY_SCENE_MENU_ITEM_KEYS.GRAPH,
           title: '本体图谱',
-          icon: <MenuIcon fontSize={20} />
+          icon: <MenuGraphIcon fontSize={20} />
         },
         {
           key: ONTOLOGY_SCENE_MENU_ITEM_KEYS.OBJECT_TYPE,
           title: '对象类型',
-          icon: <MenuIcon fontSize={20} />
+          icon: <MenuObjectIcon fontSize={20} />
         },
         {
           key: ONTOLOGY_SCENE_MENU_ITEM_KEYS.ATTRIBUTES,
           title: '属性',
-          icon: <MenuIcon fontSize={20} />
+          icon: <MenuAttributeIcon fontSize={20} />
         },
         {
           key: ONTOLOGY_SCENE_MENU_ITEM_KEYS.LINKS,
           title: '链接',
-          icon: <MenuIcon fontSize={20} />
+          icon: <MenuLinkIcon fontSize={20} />
         }
       ]
     },
@@ -134,12 +146,12 @@ export default function OntologySceneDetail() {
         {
           key: ONTOLOGY_SCENE_MENU_ITEM_KEYS.BEHAVIOR_ACTIONS,
           title: '行为动作',
-          icon: <MenuIcon fontSize={20} />
+          icon: <MenuBehaviorIcon fontSize={20} />
         },
         {
           key: ONTOLOGY_SCENE_MENU_ITEM_KEYS.FUNCTIONS,
           title: '函数',
-          icon: <MenuIcon fontSize={20} />
+          icon: <MenuFunctionIcon fontSize={20} />
         }
       ]
     },
@@ -151,7 +163,7 @@ export default function OntologySceneDetail() {
         {
           key: ONTOLOGY_SCENE_MENU_ITEM_KEYS.BEHAVIOR_LOG,
           title: '执行记录',
-          icon: <MenuIcon fontSize={20} />
+          icon: <MenuBehaviorLogIcon fontSize={20} />
         }
       ]
     }
@@ -201,7 +213,7 @@ export default function OntologySceneDetail() {
       [ONTOLOGY_SCENE_MENU_ITEM_KEYS.OBJECT_TYPE]: `${baseUrl}/${type}/create`,
       [ONTOLOGY_SCENE_MENU_ITEM_KEYS.LINKS]: `${baseUrl}/${type}/create`,
       [ONTOLOGY_SCENE_MENU_ITEM_KEYS.BEHAVIOR_ACTIONS]: `${baseUrl}/${type}/create/_NEW_`,
-      [ONTOLOGY_SCENE_MENU_ITEM_KEYS.FUNCTIONS]: `${baseUrl}/${type}/create`
+      [ONTOLOGY_SCENE_MENU_ITEM_KEYS.FUNCTIONS]: `${baseUrl}/${type}/create/_NEW_`
     };
     const path = createPaths[type];
     if (path) {
@@ -213,26 +225,26 @@ export default function OntologySceneDetail() {
     {
       key: ONTOLOGY_SCENE_MENU_ITEM_KEYS.OBJECT_TYPE,
       title: '对象类型',
-      description: '解释文案',
-      icon: <IconSettings fontSize={20} />
+      description: '核心数据模型的原子单位,描述系统中可独立存在的实体',
+      icon: <CreateObjectIcon fontSize={40} />
     },
     {
       key: ONTOLOGY_SCENE_MENU_ITEM_KEYS.LINKS,
       title: '链接',
-      description: '解释文案',
-      icon: <IconLink fontSize={20} />
+      description: '描述不同实体对象之间的语义联系与数据拓扑结构',
+      icon: <CreateLinkIcon fontSize={40} />
     },
     {
       key: ONTOLOGY_SCENE_MENU_ITEM_KEYS.BEHAVIOR_ACTIONS,
       title: '行为',
-      description: '解释文案',
-      icon: <IconThunderbolt fontSize={20} />
+      description: '行为定义可在对象上执行的操作，封装业务逻辑与状态流转',
+      icon: <CreateBehaviorIcon fontSize={40} />
     },
     {
       key: ONTOLOGY_SCENE_MENU_ITEM_KEYS.FUNCTIONS,
       title: '函数',
-      description: '解释文案',
-      icon: <IconCode fontSize={20} />
+      description: '用于定义计算属性和行为逻辑的底层代码实现',
+      icon: <CreateFunctionIcon fontSize={40} />
     }
   ];
 
@@ -242,14 +254,17 @@ export default function OntologySceneDetail() {
         {createMenuItems.map((item) => (
           <MenuItem key={item.key} onClick={() => handleCreate(item.key)}>
             <div className="flex items-center gap-[8px]">
-              <div className="h-[36px] w-[36px] bg-[#DCDCDC]"></div>
-              <div className="flex flex-col">
+              <div className="flex items-center justify-center">
+                {item.icon}
+              </div>
+              <div className="flex min-w-0 flex-col">
                 <span className="text-[14px] font-[600] leading-[22px] text-[var(--color-text-1)]">
                   {item.title}
                 </span>
-                <span className="mt-[4px] text-[12px] leading-[18px] text-[var(--color-text-4)]">
-                  {item.description}
-                </span>
+                <EllipsisPopover
+                  value={item.description}
+                  className="min-w-0 text-[12px] leading-[18px] text-[var(--color-text-4)]"
+                />
               </div>
             </div>
           </MenuItem>
@@ -319,12 +334,13 @@ export default function OntologySceneDetail() {
               position="bl"
             >
               <Button
-                type="primary"
-                className="flex w-full items-center justify-center"
+                className={cls(
+                  'flex w-full items-center justify-center',
+                  styles['ontology-scene-detail-create-button']
+                )}
               >
                 <IconPlus className="mr-[4px]" />
                 创建
-                <IconDown className="ml-[4px]" />
               </Button>
             </Dropdown>
           </div>

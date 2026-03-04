@@ -1047,6 +1047,7 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
               <Input
                 placeholder="请输入id。用于 API 调用，全局唯一"
                 allowClear
+                disabled={!!initialValues?.code}
               />
             </FormItem>
 

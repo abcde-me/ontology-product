@@ -143,20 +143,22 @@ const SceneCard: React.FC<SceneCardProps> = ({
               value={item.name}
             />
 
-            <div className="flex items-center gap-[8px]">
-              <Popover content="编辑">
-                <IconEdit
-                  className="h-4 w-4 cursor-pointer text-[#4e5969] transition-colors hover:text-[#165dff]"
-                  onClick={handleEdit}
-                />
-              </Popover>
-              <Popover content="删除">
-                <IconDelete
-                  className="h-4 w-4 cursor-pointer text-[#4e5969] transition-colors hover:text-[#165dff]"
-                  onClick={handleDelete}
-                />
-              </Popover>
-            </div>
+            {isHovered && (
+              <div className="flex items-center gap-[8px]">
+                {/* <Popover content="编辑">
+                  <IconEdit
+                    className="h-4 w-4 cursor-pointer text-[#4e5969] transition-colors hover:text-[#165dff]"
+                    onClick={handleEdit}
+                  />
+                </Popover> */}
+                <Popover content="删除">
+                  <IconDelete
+                    className="h-4 w-4 cursor-pointer text-[#4e5969] transition-colors hover:text-[#165dff]"
+                    onClick={handleDelete}
+                  />
+                </Popover>
+              </div>
+            )}
           </div>
 
           {/* 描述说明 */}
@@ -241,8 +243,16 @@ const SceneCard: React.FC<SceneCardProps> = ({
         </div>
       </div>
       {/* 更新日期 */}
-      <div className="text-[14px] leading-[22px] text-[var(--color-text-4)]">
-        更新于 {dayjs(item.updateTime).format('YYYY-MM-DD HH:mm:ss')}
+      <div className="flex items-center">
+        {item.updateUser && (
+          <EllipsisPopover
+            className="min-w-0 max-w-[200px] flex-1 text-[14px] leading-[22px] text-[var(--color-text-4)]"
+            value={item.updateUser}
+          />
+        )}
+        <span className="text-[14px] leading-[22px] text-[var(--color-text-4)]">
+          更新于 {dayjs(item.updateTime).format('YYYY-MM-DD')}
+        </span>
       </div>
     </div>
   );

@@ -355,7 +355,6 @@ export default function OntologySceneObjectTypeList() {
                 autoComplete="off"
                 className="w-[230px]"
                 placeholder="请输入对象类型名称或id搜索"
-                suffix={<IconSearch />}
                 allowClear
                 onClear={() => {
                   setUrlState({ search: '' });

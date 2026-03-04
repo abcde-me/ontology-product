@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Button,
   Drawer,
@@ -19,6 +19,7 @@ import {
   ProButton,
   SearchTable
 } from '@ceai-front/arco-material';
+import useUrlState from '@ahooksjs/use-url-state';
 import { SafeTableCell } from '@/components/SafeTableCell';
 import {
   FunctionListQuery,
@@ -45,6 +46,7 @@ export default function OntologySceneFunctions() {
     useState<OntologyFunctionItem>();
   const history = useHistory();
   const [functionsEmpty, setFunctionsEmpty] = useState(false);
+  const [urlState, setUrlState] = useUrlState({ search: '' });
   const { tableProps, onSubmit, refresh } = useArcoTable(
     ({ pagination, query, filters, sorter }) => {
       if (isNil(ontologyModelID))
@@ -74,6 +76,20 @@ export default function OntologySceneFunctions() {
       deps: [ontologyModelID]
     }
   );
+
+  // 从 URL 的 search 参数同步到表单
+  useEffect(() => {
+    const currentFilter = form.getFieldValue('filter');
+    const searchValue = urlState.search || '';
+    if (searchValue !== '' && searchValue !== currentFilter) {
+      form.setFieldsValue({ filter: searchValue });
+      // 延迟提交，确保表单值已设置
+      setTimeout(() => {
+        onSubmit();
+      }, 0);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [urlState.search]);
 
   const route2FunctionDetail = (
     type?: 'view' | 'edit' | 'create',
@@ -208,18 +224,19 @@ export default function OntologySceneFunctions() {
             searchForm={
               <Form form={form} autoComplete={'off'}>
                 <Form.Item noStyle field={'filter'}>
-                  <Input
+                  <Input.Search
+                    autoComplete="off"
                     className={'w-[220px]'}
                     placeholder={'请输入关键字'}
-                    onChange={onSubmit}
                     allowClear
-                    suffix={
-                      <div
-                        className={`mr-[-12px] flex h-full items-center border-l-[1px] border-solid border-l-[#C3C7D4] bg-[#F5F7FC] px-3 ${styles['search']}`}
-                      >
-                        <IconSearch onClick={onSubmit} />
-                      </div>
-                    }
+                    onSearch={(value) => {
+                      setUrlState({ search: value || '' });
+                      onSubmit();
+                    }}
+                    onClear={() => {
+                      setUrlState({ search: '' });
+                      onSubmit();
+                    }}
                   />
                 </Form.Item>
               </Form>

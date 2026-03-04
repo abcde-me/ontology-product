@@ -33,8 +33,16 @@
     }
   }
 
+  &-create-button:global(.arco-btn-secondary) {
+    background-color: #edf5ff !important;
+
+    &:hover {
+      background-color: #bed5fd !important;
+    }
+  }
+
   &-create-dropdown {
-    min-width: 176px;
+    width: 248px;
     max-height: unset;
     border-radius: 12px;
 
