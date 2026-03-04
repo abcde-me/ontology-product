@@ -259,7 +259,7 @@ export default function BehaviorLogList() {
   return (
     <div className={styles['behaviorLog-list']}>
       {/* 页面头部 */}
-      <PageHeader />
+      <PageHeader activeTab={activeTab} />
 
       {/* Tab 切换 */}
       <Tabs
