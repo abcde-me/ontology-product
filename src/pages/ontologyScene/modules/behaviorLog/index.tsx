@@ -273,6 +273,7 @@ export default function BehaviorLogList() {
 
       {/* 搜索表格 */}
       <SearchTable
+        key={activeTab}
         className={styles['behaviorLog-table']}
         searchForm={<SearchForm form={form} onSearch={submit} />}
         tableProps={{
