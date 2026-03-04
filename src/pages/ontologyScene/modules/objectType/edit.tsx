@@ -119,7 +119,8 @@ export default function OntologySceneObjectTypeEdit() {
         originalDbName: data.originalDbName,
         originalTableName: data.originalTableName,
         sourceType: data.sourceType,
-        ontologyPhysicalPropertiesList: data.ontologyPhysicalPropertiesList
+        ontologyPhysicalPropertiesList: data.ontologyPhysicalPropertiesList,
+        isReUpload: data.isReUpload ? 1 : 0
       };
 
       const res = await updateOntologyObjectType(updateParams);
