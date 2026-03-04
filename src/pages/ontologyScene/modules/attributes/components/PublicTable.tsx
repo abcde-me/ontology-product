@@ -17,6 +17,7 @@ import {
 import { IconPlus, IconSearch } from '@arco-design/web-react/icon';
 import {
   CopyItemIcon,
+  EllipsisPopover,
   ProButton,
   SearchTable
 } from '@ceai-front/arco-material';
@@ -310,7 +311,8 @@ const PublicTable = React.forwardRef<PublicTableRef, PublicTableProps>(
         dataIndex: 'description',
         ellipsis: true,
         tooltip: true,
-        width: 200
+        width: 200,
+        render: (value) => <EllipsisPopover value={value || '-'} />
       },
       {
         title: '绑定对象类型',

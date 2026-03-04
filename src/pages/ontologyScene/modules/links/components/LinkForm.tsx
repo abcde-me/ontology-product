@@ -842,12 +842,10 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
       }
     };
 
-    const handleSubmit = () => {
+    const handleSubmit = async () => {
       try {
         // 先验证表单
-        form.validate().catch(() => {
-          // 验证失败时，错误会在表单中显示
-        });
+        await form.validate();
 
         // 获取所有字段值
         const values = form.getFieldsValue();
@@ -1321,22 +1319,19 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
                   </FormItem>
                 )}
 
-                {/* 关联中间表 */}
-                <div className="my-[16px] flex items-center gap-[8px] text-[16px] font-[500] leading-[24px] text-[var(--color-text-1)]">
-                  <span>关联中间表</span>
-                </div>
-
                 <FormItem
-                  label="源对象类型属性："
-                  field="sourceAttribute"
+                  label="关联中间表："
+                  field="relationAttributes"
                   rules={[
                     {
                       required: true,
                       validator: (value, callback) => {
-                        if (!fileUploaded) {
-                          callback('请先上传中间表');
-                        } else if (!value) {
-                          callback('请选择源对象类型属性');
+                        const sourceAttributeValue =
+                          form.getFieldValue('sourceAttribute');
+                        const targetAttribute =
+                          form.getFieldValue('targetAttribute');
+                        if (!sourceAttributeValue || !targetAttribute) {
+                          callback('请选择源对象类型属性和目标对象类型属性');
                         } else {
                           callback();
                         }
@@ -1354,26 +1349,42 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
                           <IconQuestionCircle className="cursor-pointer text-[#86909C]" />
                         </Tooltip>
                       </div>
-                      <Select
-                        placeholder="请先上传中间表"
-                        value={form.getFieldValue('sourceAttribute')}
-                        onChange={(val) => {
-                          console.log('---onChange', val);
-                          form.setFieldValue('sourceAttribute', val);
-                        }}
-                        disabled={!fileUploaded}
-                        loading={sourceAttributesLoading}
-                        allowClear
+                      <FormItem
+                        field="sourceAttribute"
+                        rules={[
+                          {
+                            required: true,
+                            validator: (value, callback) => {
+                              if (!fileUploaded) {
+                                callback('请先上传中间表');
+                              } else if (!value) {
+                                callback('请选择源对象类型属性');
+                              } else {
+                                callback();
+                              }
+                            }
+                          }
+                        ]}
+                        noStyle
                       >
-                        {getAttributeOptions(sourceObjectType).map((option) => (
-                          <Select.Option
-                            key={option.value}
-                            value={option.value}
-                          >
-                            {option.label}
-                          </Select.Option>
-                        ))}
-                      </Select>
+                        <Select
+                          placeholder="请先上传中间表"
+                          disabled={!fileUploaded}
+                          loading={sourceAttributesLoading}
+                          allowClear
+                        >
+                          {getAttributeOptions(sourceObjectType).map(
+                            (option) => (
+                              <Select.Option
+                                key={option.value}
+                                value={option.value}
+                              >
+                                {option.label}
+                              </Select.Option>
+                            )
+                          )}
+                        </Select>
+                      </FormItem>
                     </div>
 
                     <div className="flex flex-col items-center">
@@ -1389,25 +1400,42 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
                           <IconQuestionCircle className="cursor-pointer text-[#86909C]" />
                         </Tooltip>
                       </div>
-                      <Select
-                        placeholder="请先上传中间表"
-                        value={form.getFieldValue('targetAttribute')}
-                        onChange={(val) => {
-                          form.setFieldValue('targetAttribute', val);
-                        }}
-                        disabled={!fileUploaded}
-                        loading={targetAttributesLoading}
-                        allowClear
+                      <FormItem
+                        field="targetAttribute"
+                        rules={[
+                          {
+                            required: true,
+                            validator: (value, callback) => {
+                              if (!fileUploaded) {
+                                callback('请先上传中间表');
+                              } else if (!value) {
+                                callback('请选择目标对象类型属性');
+                              } else {
+                                callback();
+                              }
+                            }
+                          }
+                        ]}
+                        noStyle
                       >
-                        {getAttributeOptions(targetObjectType).map((option) => (
-                          <Select.Option
-                            key={option.value}
-                            value={option.value}
-                          >
-                            {option.label}
-                          </Select.Option>
-                        ))}
-                      </Select>
+                        <Select
+                          placeholder="请先上传中间表"
+                          disabled={!fileUploaded}
+                          loading={targetAttributesLoading}
+                          allowClear
+                        >
+                          {getAttributeOptions(targetObjectType).map(
+                            (option) => (
+                              <Select.Option
+                                key={option.value}
+                                value={option.value}
+                              >
+                                {option.label}
+                              </Select.Option>
+                            )
+                          )}
+                        </Select>
+                      </FormItem>
                     </div>
                   </div>
                 </FormItem>

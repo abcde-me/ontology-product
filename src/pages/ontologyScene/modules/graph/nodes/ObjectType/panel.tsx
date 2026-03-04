@@ -75,7 +75,6 @@ const Panel: FC<any> = ({ id, data }) => {
 
   // 加载实例数据
   const loadInstances = async (page: number, pageSize: number) => {
-    console.log('loadInstances', page, pageSize);
     setInstancesLoading(true);
     try {
       const res = await listOntologyObjectTypeData({
@@ -122,6 +121,7 @@ const Panel: FC<any> = ({ id, data }) => {
       const res = await listOntologyLinkType({
         ontologyModelID: Number(OSId),
         sourceObjectTypeIDList: [nodeId],
+        targetObjectTypeIDList: [nodeId],
         pageNo: page,
         pageSize: pageSize
       });
@@ -191,7 +191,7 @@ const Panel: FC<any> = ({ id, data }) => {
       width: columnWidth,
       ellipsis: true,
       render: (text: string) => {
-        return <EllipsisPopover value={text} />;
+        return <EllipsisPopover value={text || '-'} />;
       }
     }));
   }, [instancesData]);
@@ -426,8 +426,16 @@ const Panel: FC<any> = ({ id, data }) => {
               // 判断当前节点是源节点还是目标节点
               const isSource = link.sourceObjectTypeID === nodeId;
               // 确定左侧（当前节点）和右侧（关联节点）的显示
-              const leftObjectType = link.sourceObjectTypeInfo ?? {};
-              const rightObjectType = link.targetObjectTypeInfo ?? {};
+              const leftObjectType = {
+                name: link.sourceObjectTypeName,
+                icon: link.sourceObjectTypeIcon,
+                syncStatus: link.sourceObjectTypeSyncStatus
+              };
+              const rightObjectType = {
+                name: link.targetObjectTypeName,
+                icon: link.targetObjectTypeIcon,
+                syncStatus: link.targetObjectTypeSyncStatus
+              };
               const linkTypeText = getLinkTypeText(link.type);
 
               return (

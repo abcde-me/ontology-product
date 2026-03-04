@@ -56,7 +56,6 @@ export interface ObjectTypeDetailData {
 
 // 实例数据接口
 export interface InstanceItem {
-  id: string;
   [key: string]: any; // 动态字段，如 WIND, VIS 等
 }
 
@@ -68,8 +67,18 @@ export interface LinkItem {
   linkId: string;
   linkName: string;
   linkType?: LinkType;
-  sourceObjectTypeInfo: LinkInfo['sourceObjectTypeInfo'];
-  targetObjectTypeInfo: LinkInfo['targetObjectTypeInfo'];
+  sourceObjectTypeInfo: {
+    name?: string;
+    icon?: string;
+    syncStatus?: SyncStatus;
+    id?: string;
+  };
+  targetObjectTypeInfo: {
+    name?: string;
+    icon?: string;
+    syncStatus?: SyncStatus;
+    id?: string;
+  };
 }
 
 interface ObjectTypeDetailDrawerProps {
@@ -247,20 +256,7 @@ export default function ObjectTypeDetailDrawer({
             pageSize
           });
           if (res.code === '' && res.status === 200) {
-            // 确保每个实例都有 id 字段
-            const instances = (res.data.result || []).map(
-              (item: Record<string, unknown>) => {
-                // 如果已经有 id 字段，直接返回；否则尝试从其他字段生成
-                if (item.id) {
-                  return item as InstanceItem;
-                }
-                // 尝试从其他可能的 id 字段获取
-                const id = String(Math.random());
-                return { ...item, id: String(id) };
-              }
-            );
-
-            setInstancesData(instances);
+            setInstancesData(res?.data?.result || []);
             setInstancesPagination({
               current: page,
               pageSize,
@@ -371,6 +367,7 @@ export default function ObjectTypeDetailDrawer({
           // 使用真实接口
           const res = await listOntologyLinkType({
             sourceObjectTypeIDList: [resolvedObjectTypeIdNum],
+            targetObjectTypeIDList: [resolvedObjectTypeIdNum],
             ontologyModelID: Number(ontologyModelID),
             pageNo: 1,
             pageSize: 10
@@ -382,8 +379,18 @@ export default function ObjectTypeDetailDrawer({
                 linkId: link.code || String(link.id || ''),
                 linkName: link.name || '',
                 linkType: link.type,
-                sourceObjectTypeInfo: link.sourceObjectTypeInfo,
-                targetObjectTypeInfo: link.targetObjectTypeInfo
+                sourceObjectTypeInfo: {
+                  name: link.sourceObjectTypeName,
+                  icon: link.sourceObjectTypeIcon,
+                  syncStatus: link.sourceObjectTypeSyncStatus,
+                  id: String(link.sourceObjectTypeID)
+                },
+                targetObjectTypeInfo: {
+                  name: link.targetObjectTypeName,
+                  icon: link.targetObjectTypeIcon,
+                  syncStatus: link.targetObjectTypeSyncStatus,
+                  id: String(link.targetObjectTypeID)
+                }
               })
             );
             setLinksData(convertedLinks);
@@ -454,7 +461,7 @@ export default function ObjectTypeDetailDrawer({
       width: columnWidth,
       ellipsis: true,
       render: (text: string) => {
-        return <EllipsisPopover value={text} />;
+        return <EllipsisPopover value={text || '-'} />;
       }
     }));
   };
