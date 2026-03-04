@@ -42,6 +42,62 @@ const EllipsisTextWithTooltip: React.FC<{ text: string }> = ({ text }) => {
   );
 };
 
+// 参数值渲染组件
+const ParamValueRenderer: React.FC<{ value: any; record: ParamItem }> = ({
+  value,
+  record
+}) => {
+  // 如果数据类型是 ObjectSet 或 Attachment，使用 ObjectTypeTagList 渲染
+  if (record.type === 'ObjectSet' || record.type === 'Attachment') {
+    const objectTypeList = Array.isArray(value) ? value : [];
+
+    if (objectTypeList.length === 0) {
+      return <span>-</span>;
+    }
+
+    // 转换为 ObjectTypeTagList 需要的格式
+    const tags = objectTypeList.map((item: any) => ({
+      ontologyObjectTypeName: item.name || item.ontologyObjectTypeName || '',
+      ontologyObjectTypeId: item.id || item.ontologyObjectTypeId,
+      ontologyObjectTypeIcon:
+        record.type === 'Attachment'
+          ? 'attachment-icon'
+          : item.icon || item.ontologyObjectTypeIcon,
+      onClick: () => {
+        console.log('Click object type:', item);
+      }
+    }));
+
+    return <ObjectTypeTagList tags={tags} />;
+  }
+
+  // 如果数据类型是 Timestamp，转换时间戳为可读格式
+  if (record.type === 'Timestamp') {
+    if (!value || value === '-') {
+      return <span>-</span>;
+    }
+
+    const timestamp = Number(value);
+    if (!isNaN(timestamp)) {
+      const formattedDate = dayjs.unix(timestamp).format('YYYY-MM-DD HH:mm:ss');
+      return <EllipsisTextWithTooltip text={formattedDate} />;
+    }
+  }
+
+  // 对象类型的值渲染
+  if (typeof value === 'object' && value !== null) {
+    return <pre className="text-xs">{JSON.stringify(value, null, 2)}</pre>;
+  }
+
+  // 其他类型的值渲染
+  const stringValue = value ? String(value) : '-';
+  return stringValue !== '-' ? (
+    <EllipsisTextWithTooltip text={stringValue} />
+  ) : (
+    <span>-</span>
+  );
+};
+
 interface ParamsTabProps {
   params: ParamItem[];
   outputParams: OutputParamItem[];
@@ -70,65 +126,9 @@ export const ParamsTab: React.FC<ParamsTabProps> = ({
       ellipsis: true,
       tooltip: true,
       width: 300,
-      render: (value, record) => {
-        // 如果数据类型是 ObjectSet 或 Attachment，使用 ObjectTypeTagList 渲染
-        if (record.type === 'ObjectSet' || record.type === 'Attachment') {
-          // value 应该是一个对象类型列表数组
-          const objectTypeList = Array.isArray(value) ? value : [];
-
-          if (objectTypeList.length === 0) {
-            return <span>-</span>;
-          }
-
-          // 转换为 ObjectTypeTagList 需要的格式
-          const tags = objectTypeList.map((item: any) => ({
-            ontologyObjectTypeName:
-              item.name || item.ontologyObjectTypeName || '',
-            ontologyObjectTypeId: item.id || item.ontologyObjectTypeId,
-            // 如果是 Attachment 类型，使用特殊的 icon 值，否则使用原有的 icon
-            ontologyObjectTypeIcon:
-              record.type === 'Attachment'
-                ? 'attachment-icon' // 为 Attachment 类型设置特殊的 icon 标识
-                : item.icon || item.ontologyObjectTypeIcon,
-            onClick: () => {
-              // 可以添加点击事件，跳转到对象类型详情
-              console.log('Click object type:', item);
-            }
-          }));
-
-          return <ObjectTypeTagList tags={tags} />;
-        }
-
-        // 如果数据类型是 Timestamp，转换时间戳为可读格式
-        if (record.type === 'Timestamp') {
-          if (!value || value === '-') {
-            return <span>-</span>;
-          }
-          // 尝试将值转换为数字（秒级时间戳）
-          const timestamp = Number(value);
-          if (!isNaN(timestamp)) {
-            // 转换为 YYYY-MM-DD HH:mm:ss 格式
-            const formattedDate = dayjs
-              .unix(timestamp)
-              .format('YYYY-MM-DD HH:mm:ss');
-            return <EllipsisTextWithTooltip text={formattedDate} />;
-          }
-        }
-
-        // 其他类型的值渲染
-        if (typeof value === 'object' && value !== null) {
-          return (
-            <pre className="text-xs">{JSON.stringify(value, null, 2)}</pre>
-          );
-        }
-
-        const stringValue = value ? String(value) : '-';
-        return stringValue !== '-' ? (
-          <EllipsisTextWithTooltip text={stringValue} />
-        ) : (
-          <span>-</span>
-        );
-      }
+      render: (value, record) => (
+        <ParamValueRenderer value={value} record={record} />
+      )
     }
   ];
 
