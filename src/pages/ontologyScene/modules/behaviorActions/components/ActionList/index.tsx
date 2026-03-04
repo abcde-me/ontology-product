@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { BehaviorActionItem } from '@/pages/ontologyScene/types/behaviorActions';
 import {
   Button,
@@ -19,6 +19,7 @@ import {
 } from '@ceai-front/arco-material';
 import { ONTOLOGY_SCENE_MENU_ITEM_KEYS } from '@/common/constants';
 import { useHistory, useParams } from 'react-router-dom';
+import useUrlState from '@ahooksjs/use-url-state';
 import useArcoTable from '@/hooks/use-arco-table';
 import {
   deleteAction,
@@ -44,6 +45,7 @@ export const ActionList = (props: {
       id: string;
       moduleType: string;
     }>();
+  const [urlState, setUrlState] = useUrlState({ search: '' });
 
   const history = useHistory();
 
@@ -69,6 +71,20 @@ export const ActionList = (props: {
       deps: [OSId]
     }
   );
+
+  // 从 URL 的 search 参数同步到表单
+  useEffect(() => {
+    const currentFilter = form.getFieldValue('filter');
+    const searchValue = urlState.search || '';
+    if (searchValue !== '' && searchValue !== currentFilter) {
+      form.setFieldsValue({ filter: searchValue });
+      // 延迟提交，确保表单值已设置
+      setTimeout(() => {
+        onSubmit();
+      }, 0);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [urlState.search]);
 
   const route2ActionDetail = (
     type?: 'view' | 'edit' | 'create',
@@ -231,18 +247,21 @@ export const ActionList = (props: {
       </div>
       <SearchTable
         searchForm={
-          <Form form={form} onValuesChange={onSubmit}>
+          <Form form={form}>
             <Form.Item noStyle field={'filter'}>
-              <Input
+              <Input.Search
+                autoComplete="off"
                 className={'w-[220px]'}
                 placeholder={'请输入关键字'}
-                suffix={
-                  <div
-                    className={`mr-[-12px] flex h-full items-center border-l-[1px] border-solid border-l-[#C3C7D4] bg-[#F5F7FC] px-3 ${styles['search']}`}
-                  >
-                    <IconSearch />
-                  </div>
-                }
+                allowClear
+                onClear={() => {
+                  setUrlState({ search: '' });
+                  onSubmit();
+                }}
+                onSearch={(value) => {
+                  setUrlState({ search: value || '' });
+                  onSubmit();
+                }}
               />
             </Form.Item>
           </Form>

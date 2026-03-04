@@ -14,13 +14,21 @@ const { TextArea } = Input;
 
 // 字段类型选项
 const FIELD_TYPE_OPTIONS = [
-  { label: 'STRING', value: 'STRING' },
-  { label: 'INTEGER', value: 'INTEGER' },
-  { label: 'FLOAT', value: 'FLOAT' },
-  { label: 'DOUBLE', value: 'DOUBLE' },
-  { label: 'BOOLEAN', value: 'BOOLEAN' },
-  { label: 'DATE', value: 'DATE' },
-  { label: 'TIMESTAMP', value: 'TIMESTAMP' }
+  { label: 'tinyint(1)', value: 'tinyint(1)' },
+  { label: 'int', value: 'int' },
+  { label: 'bigint', value: 'bigint' },
+  { label: 'float', value: 'float' },
+  { label: 'double', value: 'double' },
+  { label: 'varchar(5000)', value: 'varchar(5000)' },
+  { label: 'varchar(500)', value: 'varchar(500)' },
+  { label: 'varchar(2000)', value: 'varchar(2000)' },
+  { label: 'varchar(255)', value: 'varchar(255)' },
+  { label: 'char(36)', value: 'char(36)' },
+  { label: 'date', value: 'date' },
+  { label: 'time(6)', value: 'time(6)' },
+  { label: 'datetime(6)', value: 'datetime(6)' },
+  { label: 'timestamp(6)', value: 'timestamp(6)' },
+  { label: 'longblob', value: 'longblob' }
 ];
 
 export interface PublicAttributeFormData {
@@ -138,7 +146,11 @@ const PublicAttributeModal: React.FC<PublicAttributeModalProps> = ({
           field="columnType"
           rules={[{ required: true, message: '请选择字段类型' }]}
         >
-          <Select placeholder="请选择字段类型" allowClear>
+          <Select
+            placeholder="请选择字段类型"
+            allowClear
+            disabled={(initialValues?.ontologyObjectTypeCounts || 0) > 0}
+          >
             {FIELD_TYPE_OPTIONS.map((option) => (
               <Select.Option key={option.value} value={option.value}>
                 {option.label}

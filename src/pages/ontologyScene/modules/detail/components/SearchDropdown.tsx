@@ -7,6 +7,8 @@ import { debounce } from 'lodash-es';
 import { listOntologyObjectType } from '@/api/ontologySceneLibrary/objectType';
 import { listOntologyPhysicalProperties } from '@/api/ontologySceneLibrary/graph';
 import { listOntologyLinkType } from '@/api/ontologySceneLibrary/graph';
+import { getActionList } from '@/api/ontologySceneLibrary/ontologyAction';
+import { getFunctionList } from '@/api/ontologySceneLibrary/ontologyFunction';
 import { ObjectType } from '@/types/objectType';
 import { LinkInfo, PhysicalProperties } from '@/types/graphApi';
 import { OBJECT_TYPE_ICON_OPTIONS } from '@/pages/ontologyScene/common/constants';
@@ -68,7 +70,6 @@ const SearchDropdown: React.FC<SearchDropdownProps> = ({
 
   // 搜索函数
   const performSearch = useCallback(async (value: string, type: SearchType) => {
-    console.log('performSearch----->', value, type);
     if (!value.trim()) {
       setResults([]);
       setLoading(false);
@@ -82,9 +83,10 @@ const SearchDropdown: React.FC<SearchDropdownProps> = ({
       switch (type) {
         case 'objectType':
           const objectTypeRes = await listOntologyObjectType({
+            ontologyModelID: Number(OSId),
             filter: value,
             pageNo: 1,
-            pageSize: 10
+            pageSize: 200
           });
           if (objectTypeRes.status === 200 && objectTypeRes.data) {
             searchResults = objectTypeRes.data.result || [];
@@ -93,9 +95,10 @@ const SearchDropdown: React.FC<SearchDropdownProps> = ({
 
         case 'attribute':
           const attributeRes = await listOntologyPhysicalProperties({
+            ontologyModelID: Number(OSId),
             filter: value,
             pageNo: 1,
-            pageSize: 10
+            pageSize: 200
           });
           if (attributeRes.status === 200 && attributeRes.data) {
             searchResults = attributeRes.data.result || [];
@@ -104,9 +107,10 @@ const SearchDropdown: React.FC<SearchDropdownProps> = ({
 
         case 'link':
           const linkRes = await listOntologyLinkType({
+            ontologyModelID: Number(OSId),
             filter: value,
             pageNo: 1,
-            pageSize: 10
+            pageSize: 200
           });
           if (linkRes.status === 200 && linkRes.data) {
             searchResults = linkRes.data.result || [];
@@ -114,49 +118,41 @@ const SearchDropdown: React.FC<SearchDropdownProps> = ({
           break;
 
         case 'behavior':
-          // TODO: 待定接口，使用 mock 数据
-          searchResults = [
-            {
-              id: 1,
-              name: '飞行行为',
-              objectTypeList: [
-                { id: 1, name: '飞机' },
-                { id: 2, name: '飞行器' }
-              ]
-            },
-            {
-              id: 2,
-              name: '攻击行为',
-              objectTypeList: [{ id: 3, name: '作战单元' }]
-            }
-          ].filter((item) =>
-            item.name.toLowerCase().includes(value.toLowerCase())
-          );
+          const behaviorRes = await getActionList({
+            ontologyModelID: Number(OSId),
+            filter: value,
+            pageNum: 1,
+            pageSize: 200
+          });
+          // 将 BehaviorActionItem[] 转换为 BehaviorItem[] 格式
+          searchResults = (behaviorRes.items || []).map((item) => ({
+            id: item.id || 0,
+            name: item.name || '',
+            objectTypeList:
+              item.objectTypeId && item.objectTypeName
+                ? [
+                    {
+                      id: item.objectTypeId,
+                      name: item.objectTypeName
+                    }
+                  ]
+                : []
+          }));
           break;
 
         case 'function':
-          // TODO: 待定接口，使用 mock 数据
-          searchResults = [
-            {
-              id: 'identity_and_extract',
-              name: 'identity_and_extract',
-              displayName: '视觉特征提取'
-            },
-            {
-              id: 'infer_affiliation',
-              name: 'infer_affiliation',
-              displayName: '关键推理'
-            },
-            {
-              id: 'asses_threat_zone',
-              name: 'asses_threat_zone',
-              displayName: '关键推理'
-            }
-          ].filter(
-            (item) =>
-              item.name.toLowerCase().includes(value.toLowerCase()) ||
-              item.displayName.toLowerCase().includes(value.toLowerCase())
-          );
+          const functionRes = await getFunctionList({
+            ontologyModelID: Number(OSId),
+            filter: value,
+            pageNum: 1,
+            pageSize: 200
+          });
+          // 将 OntologyFunctionItem[] 转换为 FunctionItem[] 格式
+          searchResults = (functionRes.items || []).map((item) => ({
+            id: String(item.id || ''),
+            name: item.code || '',
+            displayName: item.name || ''
+          }));
           break;
       }
 
@@ -200,7 +196,6 @@ const SearchDropdown: React.FC<SearchDropdownProps> = ({
       : null;
     const IconComponent = iconOption?.icon ?? OBJECT_TYPE_ICON_OPTIONS[0].icon;
     const handleObjectTypeResultClick = () => {
-      console.log('handleObjectTypeResultClick----->', item);
       // 跳转到对象类型详情页面
       history.push(
         `/tenant/compute/modaforge/ontologyScene/detail/${OSId}/objectType/list?search=${encodeURIComponent(item?.name ?? '')}`
@@ -244,7 +239,6 @@ const SearchDropdown: React.FC<SearchDropdownProps> = ({
     const id = item.id || 0;
 
     const handleLinkResultClick = () => {
-      console.log('handleLinkResultClick----->', item);
       // 跳转到链接详情页面
       history.push(
         `/tenant/compute/modaforge/ontologyScene/detail/${OSId}/links/list?search=${encodeURIComponent(item?.name ?? '')}`
@@ -335,14 +329,16 @@ const SearchDropdown: React.FC<SearchDropdownProps> = ({
     }
 
     const handleAttributeLinkResultClick = () => {
-      console.log('handleAttributeLinkResultClick----->', item);
-
       if (type === 'attribute') {
         // 跳转到属性列表页面
         history.push(
           `/tenant/compute/modaforge/ontologyScene/detail/${OSId}/attributes/list?search=${encodeURIComponent(item?.name ?? '')}`
         );
       } else {
+        // 跳转到行为列表页面
+        history.push(
+          `/tenant/compute/modaforge/ontologyScene/detail/${OSId}/behaviorActions?search=${encodeURIComponent(item?.name ?? '')}`
+        );
       }
     };
 
@@ -374,10 +370,18 @@ const SearchDropdown: React.FC<SearchDropdownProps> = ({
 
   // 渲染函数搜索结果
   const renderFunctionResult = (item: FunctionItem) => {
+    const handleFunctionResultClick = () => {
+      // 跳转到函数列表页面
+      history.push(
+        `/tenant/compute/modaforge/ontologyScene/detail/${OSId}/functions?search=${encodeURIComponent(item?.name ?? '')}`
+      );
+    };
+
     return (
       <div
         key={item.id}
         className="flex cursor-pointer flex-col gap-[4px] rounded-[4px] p-[12px] transition-colors hover:bg-[var(--color-fill-2)]"
+        onClick={handleFunctionResultClick}
       >
         <div className="text-[14px] font-medium leading-[22px] text-[var(--color-text-1)]">
           {item.name}

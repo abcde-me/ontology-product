@@ -12,7 +12,8 @@ import {
   TableColumnProps,
   Pagination,
   Message,
-  Modal
+  Modal,
+  Popover
 } from '@arco-design/web-react';
 import { IconPlus, IconSearch } from '@arco-design/web-react/icon';
 import {
@@ -299,6 +300,7 @@ const PublicTable = React.forwardRef<PublicTableRef, PublicTableProps>(
       {
         title: '公共属性名称',
         dataIndex: 'comment',
+        fixed: 'left',
         width: 150,
         render: (value) => (
           <div className="font-PingFangSc text-[14px] font-medium leading-[22px] text-[#23293b]">
@@ -388,24 +390,46 @@ const PublicTable = React.forwardRef<PublicTableRef, PublicTableProps>(
         dataIndex: 'actions',
         width: 120,
         fixed: 'right',
-        render: (_, record: PublicProperty) => (
-          <Space size={16}>
+        render: (_, record: PublicProperty) => {
+          const disableDelete = (record.ontologyObjectTypeCounts || 0) > 0;
+
+          const deleteButton = (
             <Button
               type="text"
-              className="p-0 font-PingFangSc text-[14px] font-normal leading-[22px] text-blue-primary"
-              onClick={() => handleEdit(record)}
-            >
-              编辑
-            </Button>
-            <Button
-              type="text"
-              className="p-0 font-PingFangSc text-[14px] font-normal leading-[22px] text-blue-primary"
-              onClick={() => handleDelete(record)}
+              disabled={disableDelete}
+              className={
+                disableDelete
+                  ? 'cursor-not-allowed p-0 font-PingFangSc text-[14px] font-normal leading-[22px] text-[var(--color-text-4)]'
+                  : 'p-0 font-PingFangSc text-[14px] font-normal leading-[22px] text-blue-primary'
+              }
+              style={disableDelete ? { padding: 0 } : undefined}
+              onClick={() => {
+                if (!disableDelete) {
+                  handleDelete(record);
+                }
+              }}
             >
               删除
             </Button>
-          </Space>
-        )
+          );
+
+          return (
+            <Space size={16}>
+              <Button
+                type="text"
+                className="p-0 font-PingFangSc text-[14px] font-normal leading-[22px] text-blue-primary"
+                onClick={() => handleEdit(record)}
+              >
+                编辑
+              </Button>
+              {disableDelete ? (
+                <Popover content="请先移除对象关联">{deleteButton}</Popover>
+              ) : (
+                deleteButton
+              )}
+            </Space>
+          );
+        }
       }
     ];
 
@@ -417,9 +441,8 @@ const PublicTable = React.forwardRef<PublicTableRef, PublicTableProps>(
             <Form form={form}>
               <Form.Item noStyle field="keyword">
                 <Input.Search
-                  className="w-[220px]"
-                  placeholder="请输入公共属性id搜索"
-                  suffix={<IconSearch />}
+                  className="w-[240px]"
+                  placeholder="请输入公共属性名称或id搜索"
                   allowClear
                   autoComplete="off"
                   onClear={() => {

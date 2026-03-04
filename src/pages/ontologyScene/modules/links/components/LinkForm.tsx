@@ -1066,6 +1066,7 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
                 className="max-w-[640px]"
                 showWordLimit
                 placeholder="请输入唯一标识"
+                disabled={!!initialValues?.id}
               />
             </FormItem>
 
