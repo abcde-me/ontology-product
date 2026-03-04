@@ -61,13 +61,7 @@ export const renderComponentByUiType = (type: UiType, osid?: number) => {
     case UiType.Timestamp:
       return <DatePicker showTime />;
     case UiType.ObjectOne:
-      return (
-        <ObjectTypeSelect
-          placeholder={'请选择对象类型'}
-          getPopupContainer={(node) => node.parentElement || document.body}
-          ontologyModelID={osid}
-        />
-      );
+      return <ObjectInterfaceSelect mode={'single'} />;
     case UiType.ObjectSet:
       return <ObjectInterfaceSelect mode={'multiple'} />;
     default:
@@ -123,6 +117,18 @@ export const formatParamValueByType = (
   }
   if (dataType === ParamType.Geopoint) {
     return `GeoPoint(${value.lat}, ${value.lng})`;
+  }
+  if (dataType === ParamType.ObjectOne) {
+    return `ObjectRef(object_type="${value.objectTypeID}", pk=${value.objInsID})`;
+  }
+  if (dataType === ParamType.ObjectSet) {
+    const { objectTypeID, objInsID } = value;
+    const args = (objInsID || [])
+      .map((id) => {
+        return `{"object_type":${objectTypeID},"pk":${id}}`;
+      })
+      .toString();
+    return `ObjectSet([${args}])`;
   }
   return JSON.stringify(value);
 };

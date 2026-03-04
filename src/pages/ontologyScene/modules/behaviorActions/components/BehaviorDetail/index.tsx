@@ -21,6 +21,7 @@ import { getFunctionDetail } from '@/api/ontologySceneLibrary/ontologyFunction';
 import { isNil } from 'lodash-es';
 import { ValidateRules } from '@/pages/ontologyScene/componens/ValidateRules';
 import {
+  InputType,
   ParamType,
   UiType
 } from '@/pages/ontologyScene/types/ontologyFunction';
@@ -28,6 +29,7 @@ import { getActionDetail } from '@/api/ontologySceneLibrary/ontologyAction';
 import ObjectTypeTag from '../../../../componens/ObjectTypeTag';
 import NoDataEmpty from '@/components/NoDataEmpty';
 import { NoDataCard } from '@ceai-front/arco-material';
+import { ValidateRuleCard } from '@/pages/ontologyScene/modules/behaviorActions/components';
 
 interface IProps {
   show: boolean;
@@ -39,8 +41,8 @@ export const BehaviorDetail = (props: IProps) => {
   const { actionItem, onClose, show } = props;
   const history = useHistory();
   const [activeTab, setActiveTab] = useState('params');
-  const [validateRules, setValidateRules] = useState<ValidateRule[]>();
-  const [form] = Form.useForm();
+  const [validateRules, setValidateRules] = useState<ValidateRule[]>([]);
+  const [inputParams, setInputParams] = useState<OntologyActionParam[]>([]);
   const { data: actionDetail } = useRequest(
     () => {
       return getActionDetail(actionItem!);
@@ -96,30 +98,33 @@ export const BehaviorDetail = (props: IProps) => {
     }
   ];
 
-  // useEffect(() => {
-  //   setValidateRules(
-  //     actionDetail?.params?.flatMap((param) => {
-  //       const { name, type, enabledValidation, validationRule } = param;
-  //       if (
-  //         ![ParamType.Integer, ParamType.String, ParamType.Float].includes(type)
-  //       )
-  //         return [] as ValidateRule[];
-  //       return {
-  //         enabledValidation: enabledValidation,
-  //         failMessage: validationRule?.failMessage || '',
-  //         rule_name: validationRule?.ruleName || TYPE2RULE_TYPES[type][0].value,
-  //         ruleConfig:
-  //           validationRule?.ruleName === RuleName.EnumRule
-  //             ? (
-  //                 param.validationRule?.ruleConfig as EnumRule
-  //               )?.options?.toString()
-  //             : param.validationRule?.ruleConfig,
-  //         name,
-  //         type
-  //       };
-  //     }) || []
-  //   );
-  // }, [actionDetail]);
+  useEffect(() => {
+    const inputParams: OntologyActionParam[] = [],
+      validateRules: ValidateRule[] = [];
+    actionDetail?.params?.forEach((param) => {
+      const { name, type, enabledValidation, validationRule, inputType } =
+        param;
+      if (inputType === InputType.Input) {
+        inputParams.push(param);
+        if (
+          [ParamType.Integer, ParamType.String, ParamType.Float].includes(type)
+        ) {
+          const rule: ValidateRule = {
+            enabledValidation: enabledValidation!,
+            failMessage: validationRule?.failMessage || '',
+            rule_name:
+              validationRule?.ruleName || TYPE2RULE_TYPES[type][0].value,
+            ruleConfig: param.validationRule?.ruleConfig,
+            name,
+            type
+          };
+          validateRules.push(rule);
+        }
+      }
+      setInputParams(inputParams);
+      setValidateRules(validateRules);
+    });
+  }, [actionDetail]);
 
   return (
     <OsDrawer
@@ -198,45 +203,14 @@ export const BehaviorDetail = (props: IProps) => {
             activeTab={activeTab}
             onChange={(key) => {
               setActiveTab(key);
-              if (key === 'rules') {
-                form.setFieldsValue({
-                  validationRules: actionDetail?.params?.flatMap((param) => {
-                    const { name, type, enabledValidation, validationRule } =
-                      param;
-                    if (
-                      ![
-                        ParamType.Integer,
-                        ParamType.String,
-                        ParamType.Float
-                      ].includes(type)
-                    )
-                      return [];
-                    return {
-                      enabledValidation: enabledValidation,
-                      failMessage: validationRule?.failMessage || '',
-                      rule_name:
-                        validationRule?.ruleName ||
-                        TYPE2RULE_TYPES[type][0].value,
-                      ruleConfig:
-                        validationRule?.ruleName === RuleName.EnumRule
-                          ? (
-                              param.validationRule?.ruleConfig as EnumRule
-                            )?.options?.toString()
-                          : param.validationRule?.ruleConfig,
-                      name,
-                      type
-                    };
-                  })
-                });
-              }
             }}
           >
             <Tabs.TabPane
-              title={`参数配置（${functionInfo?.params?.length || 0}）`}
+              title={`参数配置（${inputParams.length}）`}
               key={'params'}
             />
             <Tabs.TabPane
-              title={`校验规则（${actionDetail?.params?.filter(({ type }) => [ParamType.String, ParamType.Integer, ParamType.Float].includes(type)).length}）`}
+              title={`校验规则（${validateRules.length}）`}
               key={'rules'}
             />
             <Tabs.TabPane title={'函数'} key={'function'} />
@@ -256,9 +230,11 @@ export const BehaviorDetail = (props: IProps) => {
             <PyCodeContent value={functionInfo?.content} readOnly />
           )}
           {activeTab === 'rules' && (
-            <Form form={form} disabled>
-              {/*<ValidateRuleCard />*/}
-            </Form>
+            <>
+              {validateRules?.map((rule, index) => (
+                <ValidateRuleCard key={`${rule.rule_name}_index`} rule={rule} />
+              ))}
+            </>
           )}
         </div>
       </div>

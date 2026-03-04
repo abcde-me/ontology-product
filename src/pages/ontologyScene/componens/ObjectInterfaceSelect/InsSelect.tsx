@@ -6,11 +6,12 @@ import React, {
   useState
 } from 'react';
 import { Checkbox, List, Message, Select, Spin } from '@arco-design/web-react';
-import { useRequest, useVirtualList } from 'ahooks';
+import { useDebounce, useDebounceFn, useRequest, useVirtualList } from 'ahooks';
 import classNames from 'classnames';
 import styles from './index.module.scss';
 import { listOntologyObjectTypeData } from '@/api/ontologySceneLibrary/graph';
 import { isNil } from 'lodash-es';
+import { NoDataCard } from '@ceai-front/arco-material';
 
 export interface ObjectInterfaceSelectProps
   extends CustomFormItemCompProps<React.Key | React.Key[] | undefined> {
@@ -25,34 +26,6 @@ type OptionItem = {
   label: string;
 };
 
-const dropdownHeight = 400;
-const rowHeight = 36;
-const mockTotal = 10000;
-
-/** 生成模拟数据 */
-const createMockOptions = (total: number): OptionItem[] => {
-  const list: OptionItem[] = [];
-  for (let i = 1; i <= total; i += 1) {
-    list.push({
-      value: i,
-      label: `实例-${i}`
-    });
-  }
-  return list;
-};
-
-/** 构建值与展示文本的映射 */
-const buildLabelMap = (list: OptionItem[]) => {
-  const map = new Map<string, string>();
-  for (const item of list) {
-    map.set(String(item.value), item.label);
-  }
-  return map;
-};
-
-/** 获取模拟数据列表 */
-const getMockOptionList = () => createMockOptions(mockTotal);
-
 /** 对象实例下拉选择组件 */
 export const InterfaceSelect = (props: ObjectInterfaceSelectProps) => {
   const {
@@ -66,21 +39,23 @@ export const InterfaceSelect = (props: ObjectInterfaceSelectProps) => {
     objectTypeId
   } = props;
 
-  // 下拉容器与包裹层引用
-  const containerRef = useRef<HTMLDivElement>(null);
-  const wrapperRef = useRef<HTMLDivElement>(null);
-
   const [scrollLoading, setScrollLoading] = useState<React.ReactNode>(
     <Spin loading={true} />
   );
 
-  // 未过滤时的全部对象实例
-  const [allIns, setAllIns] = useState<Record<string, any>[]>([]);
+  // 未搜索时的已有全部数据
+  const insCache = useRef<Record<string, any>[]>();
+
+  // 当前展示的全部对象实例
+  const [currentInsList, setCurrentInsList] = useState<Record<string, any>[]>(
+    []
+  );
 
   // 控制下拉显示状态
   const [popupVisible, setPopupVisible] = useState(false);
 
-  const [, set] = useState();
+  // 搜索文本
+  const [searchText, setSearchText] = useState<string>();
 
   const { runAsync, loading } = useRequest(
     (params: {
@@ -96,31 +71,23 @@ export const InterfaceSelect = (props: ObjectInterfaceSelectProps) => {
       return listOntologyObjectTypeData(params);
     },
     {
-      refreshDeps: [objectTypeId],
-      manual: true,
-      onSuccess(res) {
-        setScrollLoading(
-          res.data.result?.length >= 200 ? (
-            <Spin loading={true} />
-          ) : (
-            '已加载全部数据'
-          )
-        );
-      }
+      refreshDeps: [objectTypeId, searchText],
+      manual: true
     }
   );
 
-  // 生成模拟数据
-  const optionList = useMemo(getMockOptionList, []);
-
-  /** 获取回显映射 */
-  const getLabelMap = useCallback(
-    () => buildLabelMap(optionList),
-    [optionList]
+  const { run: searchIns } = useDebounceFn(
+    (text?: string) => {
+      setSearchText(text);
+      runAsync({
+        page: 1,
+        pageSize: 20,
+        fieldList: [{ fieldName: primaryKey, fieldValue: text }],
+        id: objectTypeId!
+      });
+    },
+    { wait: 500 }
   );
-
-  // 构建回显映射
-  const labelMap = useMemo(getLabelMap, [getLabelMap]);
 
   useEffect(() => {
     setPopupVisible(!!primaryKey);
@@ -128,25 +95,12 @@ export const InterfaceSelect = (props: ObjectInterfaceSelectProps) => {
       runAsync({
         id: objectTypeId!,
         page: 1,
-        pageSize: 200
+        pageSize: 20
       }).then((res) => {
-        setAllIns(res.data?.result || []);
+        setCurrentInsList(res.data?.result || []);
       });
     }
   }, [primaryKey, objectTypeId]);
-
-  // 虚拟滚动列表
-  const [virtualList] = useVirtualList(allIns, {
-    containerTarget: containerRef,
-    wrapperTarget: wrapperRef,
-    itemHeight: rowHeight,
-    overscan: 8
-  });
-
-  /** 处理下拉显示状态变化 */
-  const handlePopupVisibleChange = useCallback((visible: boolean) => {
-    setPopupVisible(visible);
-  }, []);
 
   /** 处理清空或输入变化 */
   const handleValueChange = useCallback(
@@ -156,32 +110,44 @@ export const InterfaceSelect = (props: ObjectInterfaceSelectProps) => {
     [onChange]
   );
 
-  /** 处理点击选项 */
-  const handleOptionClick = useCallback(
-    (option: OptionItem) => {
-      onChange?.(option.value);
-      setPopupVisible(false);
+  const loadMore = useCallback(
+    (page = 1) => {
+      runAsync({
+        page: page,
+        pageSize: 20,
+        id: objectTypeId!,
+        fieldList: [
+          {
+            fieldName: primaryKey,
+            fieldValue: searchText || ''
+          }
+        ]
+      }).then((res) => {
+        setScrollLoading(
+          res.data.result?.length >= 20 ? (
+            <Spin loading={true} />
+          ) : (
+            '已加载全部数据'
+          )
+        );
+        setCurrentInsList((prevState) => {
+          if (page === 1) {
+            return res.data.result || [];
+          }
+          const allInstance = [...prevState, ...(res.data.result || [])];
+          if (isNil(searchText)) {
+            insCache.current = allInstance;
+          }
+          return allInstance;
+        });
+      });
     },
-    [onChange]
-  );
-
-  /** 处理列表行点击事件 */
-  const handleRowClick = useCallback(
-    (event: React.MouseEvent<HTMLDivElement>) => {
-      const target = event.currentTarget;
-      const indexAttr = target.getAttribute('data-index');
-      if (!indexAttr) return;
-      const index = Number(indexAttr);
-      if (Number.isNaN(index)) return;
-      const option = optionList[index];
-      if (!option) return;
-      handleOptionClick(option);
-    },
-    [handleOptionClick, optionList]
+    [objectTypeId, runAsync, searchText]
   );
 
   /** 渲染下拉内容 */
   const renderDropdown = () => {
+    if (!primaryKey) return <NoDataCard type={'block'} />;
     return (
       <List
         style={{ width: '100%', maxHeight: 400 }}
@@ -192,42 +158,47 @@ export const InterfaceSelect = (props: ObjectInterfaceSelectProps) => {
           itemHeight: 40
         }}
         scrollLoading={scrollLoading}
-        onReachBottom={(currentPage) =>
-          runAsync({ page: currentPage, pageSize: 200, id: objectTypeId! })
-        }
-        dataSource={allIns}
+        onReachBottom={loadMore}
+        dataSource={currentInsList}
         render={(item, index) => (
           <List.Item
             key={index}
             style={{ border: 'none !important' }}
-            className={styles['ins-item']}
+            className={classNames({
+              [styles['ins-item']]: true,
+              [styles['ins-selected']]:
+                item[primaryKey] === value ||
+                (value as any[])?.includes?.(item[primaryKey])
+            })}
           >
             <label className={styles['content-container']}>
               <Checkbox
                 className={`flex-shrink-0 ${mode === 'multiple' ? '' : 'hidden'}`}
+                checked={
+                  item[primaryKey] === value ||
+                  (value as any[])?.includes?.(item[primaryKey])
+                }
                 onChange={(c, e) => {
                   if (mode === 'multiple') {
+                    if (c) {
+                      onChange?.([...(value as any), item[primaryKey]]);
+                      return;
+                    }
+                    onChange?.(
+                      (value as any).filter((v: any) => v !== item[primaryKey])
+                    );
                     return;
                   }
-                  onChange?.(c ? JSON.stringify(item) : undefined);
+                  onChange?.(item[primaryKey]);
                 }}
               />
-              <p>{`${JSON.stringify(item)}_${primaryKey}`}</p>
+              <p>{item[primaryKey]}</p>
             </label>
           </List.Item>
         )}
       />
     );
   };
-
-  /** 自定义回显内容 */
-  const renderValue = useCallback(
-    (_: any, currentValue: string | number) => {
-      if (currentValue === undefined || currentValue === null) return null;
-      return labelMap.get(String(currentValue)) || String(currentValue);
-    },
-    [labelMap]
-  );
 
   return (
     <Select
@@ -236,18 +207,15 @@ export const InterfaceSelect = (props: ObjectInterfaceSelectProps) => {
       value={value as any}
       disabled={disabled || !objectTypeId || !primaryKey}
       allowClear
+      loading={loading}
       mode={mode === 'multiple' ? 'multiple' : undefined}
       defaultPopupVisible={popupVisible}
-      // popupVisible={popupVisible}
       placeholder={placeholder || '请选择'}
       onChange={handleValueChange}
-      // onDropdownVisibleChange={handlePopupVisibleChange}
       dropdownRender={renderDropdown}
-      // @ts-ignore
-      // renderFormat={renderValue}
-      // renderFormat={(v) => {
-      //
-      // }}
+      showSearch
+      onSearch={searchIns}
+      maxTagCount={2}
     />
   );
 };
