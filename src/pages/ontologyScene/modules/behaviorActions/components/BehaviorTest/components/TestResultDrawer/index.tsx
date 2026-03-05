@@ -42,7 +42,7 @@ export const TestResultDrawer: React.FC<TestResultDrawerProps> = ({
     'name' in runInfo.runLog[0];
 
   // 渲染状态信息（在日志内容上方）
-  const renderStatusInfo = (item: BehaviorLogItem) => {
+  const renderStatusInfo = (item: BehaviorLogItem, withMargin = true) => {
     const statusConfig = {
       1: { text: '测试中', color: '#6E7B8D' },
       2: { text: '测试成功', color: '#00B981' },
@@ -55,7 +55,7 @@ export const TestResultDrawer: React.FC<TestResultDrawerProps> = ({
     const durationInSeconds = (duration / 1000).toFixed(2);
 
     return (
-      <div className="mb-4 flex items-center gap-2">
+      <div className={`flex items-center gap-2 ${withMargin ? 'mb-4' : ''}`}>
         {config && (
           <>
             <DotStatus text={config.text} color={config.color} />
@@ -94,6 +94,21 @@ export const TestResultDrawer: React.FC<TestResultDrawerProps> = ({
     if (isMultipleResults) {
       const behaviorList = runInfo.runLog as BehaviorLogItem[];
 
+      // 如果只有一个行为，不显示 tabs
+      if (behaviorList.length === 1) {
+        const item = behaviorList[0];
+        return (
+          <div>
+            <div className="mb-4 flex items-center gap-2">
+              <span className="text-base font-medium">{item.name}</span>
+              {renderStatusInfo(item, false)}
+            </div>
+            {renderLogContent(item)}
+          </div>
+        );
+      }
+
+      // 多个行为：显示 tabs
       return (
         <Tabs
           activeTab={activeTab}
