@@ -203,7 +203,9 @@ export const ParamsTestDialog = (props: IProps) => {
               />
             ) : (
               <div className={styles['run-log']}>
-                {runInfo.runLog.map(({ run_log }) => run_log).join('\n')}
+                {runInfo.runLog
+                  .map((item) => ('run_log' in item ? item.run_log : ''))
+                  .join('\n')}
               </div>
             )}
           </div>
