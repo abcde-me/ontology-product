@@ -8,7 +8,8 @@ import {
   Pagination,
   Message,
   Modal,
-  Popover
+  Popover,
+  Checkbox
 } from '@arco-design/web-react';
 import { IconPlus, IconSearch } from '@arco-design/web-react/icon';
 import {
@@ -42,6 +43,8 @@ import ObjectTypeDetailDrawer from '../../componens/ObjectTypeDetailDrawer';
 import TaskLogDrawer from '../../componens/TaskLogDrawer';
 import { getLinkTypeSyncTaskLog } from '@/api/ontologySceneLibrary/links';
 import LogIcon from '../../assets/log-icon.svg';
+import { listOntologyObjectType } from '@/api/ontologySceneLibrary/objectType';
+import type { ListOntologyObjectTypeReq, ObjectType } from '@/types/objectType';
 
 // 将 SyncStatus 枚举转换为 LinkDetailDrawer 期望的字符串类型
 const convertSyncStatusToString = (
@@ -86,6 +89,40 @@ export default function OntologySceneLinksList() {
   const [logDrawerVisible, setLogDrawerVisible] = useState(false);
   const [logTaskId, setLogTaskId] = useState<number | null>(null);
   const [logTaskName, setLogTaskName] = useState<string | undefined>();
+  const [objectTypeFilters, setObjectTypeFilters] = useState<
+    Array<{ text: string; value: string }>
+  >([]);
+  const [sourceObjectTypeFilterKeys, setSourceObjectTypeFilterKeys] = useState<
+    string[]
+  >([]);
+  const [targetObjectTypeFilterKeys, setTargetObjectTypeFilterKeys] = useState<
+    string[]
+  >([]);
+
+  // 获取对象类型列表用于源/目标对象类型筛选
+  useEffect(() => {
+    const fetchObjectTypes = async () => {
+      try {
+        const params: ListOntologyObjectTypeReq = {
+          ontologyModelID: OSId ? Number(OSId) : undefined
+        };
+        const res = await listOntologyObjectType(params);
+        const list: ObjectType[] = res.data?.result || [];
+        const filters = list.map((item) => ({
+          text: item.name || '',
+          value: String(item.id)
+        }));
+        setObjectTypeFilters(filters);
+      } catch (error) {
+        console.error('获取对象类型列表失败:', error);
+        Message.error('获取对象类型列表失败');
+      }
+    };
+
+    if (OSId) {
+      fetchObjectTypes();
+    }
+  }, [OSId]);
 
   // 使用 useTable hook
   const { data, loading, pagination, refresh, submit, onChange } =
@@ -122,14 +159,8 @@ export default function OntologySceneLinksList() {
       formatParams: (formValues, pagination, sorter, filters) => {
         const keyword = formValues.keyword;
 
-        const syncStatusValues = (filters?.syncStatus || []) as
-          | SyncStatus[]
-          | SyncStatus
-          | undefined;
-        const typeFilterValues = (filters?.type || []) as
-          | string[]
-          | string
-          | undefined;
+        const syncStatusValues = filters?.syncStatus || [];
+        const typeFilterValues = filters?.type || [];
 
         const syncStatusList = Array.isArray(syncStatusValues)
           ? syncStatusValues
@@ -156,6 +187,9 @@ export default function OntologySceneLinksList() {
 
         const hasSorter = sorter && sorter.direction;
 
+        const sourceObjectTypeIDList = sourceObjectTypeFilterKeys.map(Number);
+        const targetObjectTypeIDList = targetObjectTypeFilterKeys.map(Number);
+
         return {
           ontologyModelID: Number(OSId),
           filter: keyword || undefined,
@@ -165,6 +199,8 @@ export default function OntologySceneLinksList() {
             ? { syncStatusList }
             : {}),
           ...(typeList && typeList.length ? { typeList } : {}),
+          sourceObjectTypeIDList,
+          targetObjectTypeIDList,
           ...(hasSorter &&
             sorter && {
               orderBy: sorter.field as string,
@@ -295,6 +331,56 @@ export default function OntologySceneLinksList() {
       title: '源对象类型',
       dataIndex: 'sourceObjectType',
       width: 180,
+      filters: objectTypeFilters,
+      filterDropdown: ({ confirm }: any) => {
+        return (
+          <div className="rounded-[4px] bg-white shadow-md">
+            <div className="max-h-[214px] max-w-[184px] overflow-auto py-[8px] pl-[7px] pr-[12px]">
+              <div className="flex gap-[8px]">
+                <Checkbox.Group
+                  direction="vertical"
+                  options={objectTypeFilters.map((item) => ({
+                    label: (
+                      <EllipsisPopover
+                        value={item.text || '-'}
+                        wrapperClassName="inline-flex max-w-[130px]"
+                        className="text-[14px] leading-[22px] text-[var(--color-text-1)]"
+                      />
+                    ),
+                    value: item.value
+                  }))}
+                  value={sourceObjectTypeFilterKeys}
+                  onChange={(values: string[]) => {
+                    setSourceObjectTypeFilterKeys(values);
+                  }}
+                />
+              </div>
+            </div>
+            <div className="flex justify-end gap-[8px] border-t border-solid border-[#E2E8F0] bg-white px-3 py-2">
+              <Button
+                size="small"
+                type="outline"
+                onClick={() => {
+                  setSourceObjectTypeFilterKeys([]);
+                  confirm?.();
+                }}
+              >
+                重置
+              </Button>
+              <Button
+                size="small"
+                type="primary"
+                onClick={() => {
+                  confirm?.();
+                }}
+              >
+                确定
+              </Button>
+            </div>
+          </div>
+        );
+      },
+      filteredValue: sourceObjectTypeFilterKeys,
       render: (_, record) => {
         return (
           <div>
@@ -316,6 +402,56 @@ export default function OntologySceneLinksList() {
       title: '目标对象类型',
       dataIndex: 'targetObjectType',
       width: 180,
+      filters: objectTypeFilters,
+      filterDropdown: ({ confirm }: any) => {
+        return (
+          <div className="rounded-[4px] bg-white shadow-md">
+            <div className="max-h-[214px] max-w-[184px] overflow-auto py-[8px] pl-[7px] pr-[12px]">
+              <div className="flex gap-[8px]">
+                <Checkbox.Group
+                  direction="vertical"
+                  options={objectTypeFilters.map((item) => ({
+                    label: (
+                      <EllipsisPopover
+                        value={item.text || '-'}
+                        wrapperClassName="inline-flex max-w-[130px]"
+                        className="text-[14px] leading-[22px] text-[var(--color-text-1)]"
+                      />
+                    ),
+                    value: item.value
+                  }))}
+                  value={targetObjectTypeFilterKeys}
+                  onChange={(values: string[]) => {
+                    setTargetObjectTypeFilterKeys(values);
+                  }}
+                />
+              </div>
+            </div>
+            <div className="flex justify-end gap-[8px] border-t border-solid border-[#E2E8F0] bg-white px-3 py-2">
+              <Button
+                size="small"
+                type="outline"
+                onClick={() => {
+                  setTargetObjectTypeFilterKeys([]);
+                  confirm?.();
+                }}
+              >
+                重置
+              </Button>
+              <Button
+                size="small"
+                type="primary"
+                onClick={() => {
+                  confirm?.();
+                }}
+              >
+                确定
+              </Button>
+            </div>
+          </div>
+        );
+      },
+      filteredValue: targetObjectTypeFilterKeys,
       render: (_, record) => {
         return (
           <div>
