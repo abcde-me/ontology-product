@@ -16,7 +16,16 @@ export const TestResultDrawer: React.FC<TestResultDrawerProps> = ({
   testFunctionHook
 }) => {
   // 从 props 接收 testFunctionHook
-  const { runLog: runInfo, testIng, loading } = testFunctionHook;
+  const { runLog: runInfo, testIng, loading, stopTest } = testFunctionHook;
+
+  // 处理关闭抽屉
+  const handleClose = () => {
+    // 如果正在测试，停止测试
+    if (testIng || loading) {
+      stopTest();
+    }
+    onClose();
+  };
 
   // 渲染标题（包含状态）
   const renderTitle = () => {
@@ -77,7 +86,7 @@ export const TestResultDrawer: React.FC<TestResultDrawerProps> = ({
   return (
     <OsDrawer
       visible={visible}
-      onCancel={onClose}
+      onCancel={handleClose}
       title={renderTitle()}
       footer={null}
       width={552}
