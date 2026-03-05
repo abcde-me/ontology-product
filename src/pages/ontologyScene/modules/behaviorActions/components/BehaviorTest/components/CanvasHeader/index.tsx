@@ -48,9 +48,6 @@ export const CanvasHeader: React.FC<CanvasHeaderProps> = ({
   };
 
   const handleTest = () => {
-    console.log('=== 开始多节点测试 ===');
-    console.log('节点数量:', orchestrationNodes.length);
-
     // 1. 检查是否有节点
     if (orchestrationNodes.length === 0) {
       Message.warning('请先添加节点');
@@ -66,8 +63,6 @@ export const CanvasHeader: React.FC<CanvasHeaderProps> = ({
     const { isValid, invalidNodeIds } = validateAllNodes();
 
     if (!isValid && invalidNodeIds.length > 0) {
-      console.log('验证失败的节点:', invalidNodeIds);
-
       // 构建详细的错误信息
       const errorMessages = invalidNodeIds
         .map((nodeId, index) => {
@@ -89,19 +84,10 @@ export const CanvasHeader: React.FC<CanvasHeaderProps> = ({
       // 循环所有节点，构建 list_data 和 target
       const list_data = orchestrationNodes.map((node) => {
         const config = nodeConfigs[node.id] || {};
-        console.log(`节点 ${node.behavior.name} 配置:`, config);
         return buildActionTestItem(node.behavior, config);
       });
 
       const target = orchestrationNodes.map((node) => node.behavior.code!);
-
-      console.log('测试数据:', {
-        list_data,
-        target,
-        id: +OSId,
-        run_action_with_validate: true,
-        run_type: 'action'
-      });
 
       // 调用测试接口
       startTest({
