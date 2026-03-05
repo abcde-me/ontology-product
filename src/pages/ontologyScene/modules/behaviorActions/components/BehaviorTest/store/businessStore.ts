@@ -221,8 +221,11 @@ export const useBusinessStore = create<BusinessStore>((set, get) => ({
 
     if (!node) return;
 
+    // 只标记输入参数字段为已触碰，过滤掉输出参数
     const allFieldCodes = new Set(
-      node.behavior.params?.map((p) => p.code) || []
+      node.behavior.params
+        ?.filter((p) => p.inputType === 'input')
+        .map((p) => p.code) || []
     );
 
     set({
@@ -246,70 +249,73 @@ export const useBusinessStore = create<BusinessStore>((set, get) => ({
     const errors: Record<string, string> = {};
     const params = node.behavior.params || [];
 
-    params.forEach((param) => {
-      const value = config[param.code];
+    // 只验证输入参数，过滤掉输出参数
+    params
+      .filter((param) => param.inputType === 'input')
+      .forEach((param) => {
+        const value = config[param.code];
 
-      // 检查必填
-      if (param.enabledValidation) {
-        if (param.uiType === UiType.Switch) {
-          if (value === undefined || value === null) {
-            errors[param.code] = `请填写${param.name}`;
-          }
-        } else {
-          if (value === undefined || value === null || value === '') {
-            errors[param.code] = `请填写${param.name}`;
-            return; // 必填未填，跳过其他验证
+        // 检查必填
+        if (param.enabledValidation) {
+          if (param.uiType === UiType.Switch) {
+            if (value === undefined || value === null) {
+              errors[param.code] = `请填写${param.name}`;
+            }
+          } else {
+            if (value === undefined || value === null || value === '') {
+              errors[param.code] = `请填写${param.name}`;
+              return; // 必填未填，跳过其他验证
+            }
           }
         }
-      }
 
-      // 如果有值且有验证规则，进行规则验证
-      if (
-        value !== undefined &&
-        value !== null &&
-        value !== '' &&
-        param.validationRule &&
-        param.enabledValidation
-      ) {
-        const { ruleName, failMessage } = param.validationRule;
+        // 如果有值且有验证规则，进行规则验证
+        if (
+          value !== undefined &&
+          value !== null &&
+          value !== '' &&
+          param.validationRule &&
+          param.enabledValidation
+        ) {
+          const { ruleName, failMessage } = param.validationRule;
 
-        switch (ruleName) {
-          case 'range_rule': {
-            const ruleConfig = param.validationRule.ruleConfig as RangeRule;
-            if (
-              ruleConfig &&
-              (value < ruleConfig.minValue || value > ruleConfig.maxValue)
-            ) {
-              errors[param.code] =
-                failMessage ||
-                `值必须在 ${ruleConfig.minValue} 到 ${ruleConfig.maxValue} 之间`;
+          switch (ruleName) {
+            case 'range_rule': {
+              const ruleConfig = param.validationRule.ruleConfig as RangeRule;
+              if (
+                ruleConfig &&
+                (value < ruleConfig.minValue || value > ruleConfig.maxValue)
+              ) {
+                errors[param.code] =
+                  failMessage ||
+                  `值必须在 ${ruleConfig.minValue} 到 ${ruleConfig.maxValue} 之间`;
+              }
+              break;
             }
-            break;
+            case 'length_rule': {
+              const length = String(value).trim().length;
+              const ruleConfig = param.validationRule.ruleConfig as LengthRule;
+              if (
+                ruleConfig &&
+                (length < ruleConfig.minLength || length > ruleConfig.maxLength)
+              ) {
+                errors[param.code] =
+                  failMessage ||
+                  `长度必须在 ${ruleConfig.minLength} 到 ${ruleConfig.maxLength} 之间`;
+              }
+              break;
+            }
+            case 'enum_rule':
+              const ruleConfig = param.validationRule.ruleConfig as EnumRule;
+              if (!ruleConfig.options.includes(value)) {
+                errors[param.code] =
+                  failMessage ||
+                  `值必须是以下之一: ${ruleConfig.options.join(', ')}`;
+              }
+              break;
           }
-          case 'length_rule': {
-            const length = String(value).trim().length;
-            const ruleConfig = param.validationRule.ruleConfig as LengthRule;
-            if (
-              ruleConfig &&
-              (length < ruleConfig.minLength || length > ruleConfig.maxLength)
-            ) {
-              errors[param.code] =
-                failMessage ||
-                `长度必须在 ${ruleConfig.minLength} 到 ${ruleConfig.maxLength} 之间`;
-            }
-            break;
-          }
-          case 'enum_rule':
-            const ruleConfig = param.validationRule.ruleConfig as EnumRule;
-            if (!ruleConfig.options.includes(value)) {
-              errors[param.code] =
-                failMessage ||
-                `值必须是以下之一: ${ruleConfig.options.join(', ')}`;
-            }
-            break;
         }
-      }
-    });
+      });
 
     // 保存验证错误到 store
     set({
