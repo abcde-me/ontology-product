@@ -1,9 +1,11 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { Table, TableColumnProps, Tooltip } from '@arco-design/web-react';
 import { NoDataCard } from '@ceai-front/arco-material';
 import { ObjectTypeTagList } from '@/pages/ontologyScene/componens';
 import { ParamItem, OutputParamItem } from './types';
 import dayjs from 'dayjs';
+import { getOntologyObjectTypeDetail } from '@/api/ontologySceneLibrary/objectType';
+import { OBJECT_TYPE_ICON_OPTIONS } from '@/pages/ontologyScene/common/constants';
 
 // 溢出检测组件
 const EllipsisTextWithTooltip: React.FC<{ text: string }> = ({ text }) => {
@@ -40,6 +42,71 @@ const EllipsisTextWithTooltip: React.FC<{ text: string }> = ({ text }) => {
       </div>
     </Tooltip>
   );
+};
+
+// ObjectRef 渲染组件
+const ObjectRefRenderer: React.FC<{ value: string }> = ({ value }) => {
+  const [displayContent, setDisplayContent] = useState<React.ReactNode>('-');
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchObjectTypeDetail = async () => {
+      try {
+        // 解析 ObjectRef 字符串: ObjectRef(object_type="85", pk=王五10)
+        const match = value.match(
+          /ObjectRef\(object_type="(\d+)",\s*pk=([^)]+)\)/
+        );
+        if (!match) {
+          setDisplayContent(value);
+          setLoading(false);
+          return;
+        }
+
+        const [, objectTypeId, pk] = match;
+
+        // 调用 API 获取对象类型详情
+        const response = await getOntologyObjectTypeDetail({
+          id: Number(objectTypeId)
+        });
+
+        if (response.data) {
+          const { icon, name } = response.data;
+
+          // 匹配图标
+          const iconOption = OBJECT_TYPE_ICON_OPTIONS.find(
+            (option) => option.value === icon
+          );
+          const IconComponent =
+            iconOption?.icon ?? OBJECT_TYPE_ICON_OPTIONS[0].icon;
+
+          // 渲染：图标 + 名称 / pk
+          setDisplayContent(
+            <div className="flex items-center gap-2">
+              <IconComponent className="h-4 w-4 flex-shrink-0" />
+              <span>
+                {name} / {pk}
+              </span>
+            </div>
+          );
+        } else {
+          setDisplayContent(value);
+        }
+      } catch (error) {
+        console.error('Failed to fetch ObjectRef detail:', error);
+        setDisplayContent(value);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchObjectTypeDetail();
+  }, [value]);
+
+  if (loading) {
+    return <span>加载中...</span>;
+  }
+
+  return <>{displayContent}</>;
 };
 
 // 参数值渲染组件
@@ -138,6 +205,19 @@ const ParamValueRenderer: React.FC<{ value: any; record: ParamItem }> = ({
       const formattedDate = dayjs.unix(timestamp).format('YYYY-MM-DD HH:mm:ss');
       return <EllipsisTextWithTooltip text={formattedDate} />;
     }
+  }
+
+  // 如果数据类型是 ObjectRef，使用 ObjectRefRenderer 渲染
+  if (record.type === 'ObjectRef') {
+    if (!value || value === '-') {
+      return <span>-</span>;
+    }
+
+    if (typeof value === 'string') {
+      return <ObjectRefRenderer value={value} />;
+    }
+
+    return <span>{String(value)}</span>;
   }
 
   // 如果数据类型是 Geopoint，提取坐标值
