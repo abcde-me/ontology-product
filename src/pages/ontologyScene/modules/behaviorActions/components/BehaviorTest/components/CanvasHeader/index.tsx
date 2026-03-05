@@ -84,7 +84,16 @@ export const CanvasHeader: React.FC<CanvasHeaderProps> = ({
       // 循环所有节点，构建 list_data 和 target
       const list_data = orchestrationNodes.map((node) => {
         const config = nodeConfigs[node.id] || {};
-        return buildActionTestItem(node.behavior, config);
+
+        // 过滤掉出参，只保留入参
+        const behaviorWithInputParamsOnly = {
+          ...node.behavior,
+          params: node.behavior.params?.filter(
+            (param) => param.inputType === 'input'
+          )
+        };
+
+        return buildActionTestItem(behaviorWithInputParamsOnly, config);
       });
 
       const target = orchestrationNodes.map((node) => node.behavior.code!);

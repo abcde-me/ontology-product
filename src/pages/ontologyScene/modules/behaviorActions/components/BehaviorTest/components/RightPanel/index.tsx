@@ -111,8 +111,19 @@ export const RightPanel: React.FC<RightPanelProps> = ({ testFunctionHook }) => {
     try {
       const formValues = await form.validate();
 
+      // 过滤掉出参，只保留入参
+      const behaviorWithInputParamsOnly = {
+        ...selectedNode.behavior,
+        params: selectedNode.behavior.params?.filter(
+          (param) => param.inputType === 'input'
+        )
+      };
+
       // 构建测试数据
-      const testItem = buildActionTestItem(selectedNode.behavior, formValues);
+      const testItem = buildActionTestItem(
+        behaviorWithInputParamsOnly,
+        formValues
+      );
 
       // 调用测试接口
       startTest({
