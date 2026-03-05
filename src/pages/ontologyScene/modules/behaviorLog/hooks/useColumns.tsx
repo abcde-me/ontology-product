@@ -129,6 +129,7 @@ export const useColumns = (
           dataIndex: 'associated_object_type',
           width: 180,
           filters: objectTypeFilters || [],
+          filterMultiple: true,
           render: (value, record) => (
             <div>
               {value ? (

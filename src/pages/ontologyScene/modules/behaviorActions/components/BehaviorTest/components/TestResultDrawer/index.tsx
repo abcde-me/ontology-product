@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { OsDrawer } from '@/pages/ontologyScene/componens';
 import { DotStatus, NoDataCard } from '@ceai-front/arco-material';
 import { IconLoading } from '@arco-design/web-react/icon';
-import { Tabs, Message } from '@arco-design/web-react';
+import { Tabs, Message, Modal } from '@arco-design/web-react';
 import { TestFunctionInfo } from '@/pages/ontologyScene/hooks/useTestFunction';
 import { BehaviorLogItem } from '@/pages/ontologyScene/modules/behaviorLog/types';
 
@@ -27,12 +27,22 @@ export const TestResultDrawer: React.FC<TestResultDrawerProps> = ({
 
   // 处理关闭抽屉
   const handleClose = () => {
-    // 如果正在测试，停止测试并显示提示
+    // 如果正在测试，显示确认对话框
     if (testIng || loading) {
-      stopTest();
-      Message.info('已停止运行');
+      Modal.confirm({
+        title: '确认关闭',
+        content: '测试正在运行中，关闭后将停止运行，确定要关闭吗？',
+        okText: '确定',
+        cancelText: '取消',
+        onOk: () => {
+          stopTest();
+          Message.info('已停止运行');
+          onClose();
+        }
+      });
+    } else {
+      onClose();
     }
-    onClose();
   };
 
   // 判断是否为多个行为测试结果
