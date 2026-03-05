@@ -15,7 +15,7 @@ export interface BehaviorLogItem {
   start_time: string; // 开始时间
   end_time: string; // 结束时间
   operator_time?: string; // 操作时间
-  run_log?: string; // 运行日志
+  run_log: string; // 运行日志
   input_params?: string; // 入参（JSON字符串）
   return_params?: string; // 出参（JSON字符串）
   execute_code?: string; // 执行代码
