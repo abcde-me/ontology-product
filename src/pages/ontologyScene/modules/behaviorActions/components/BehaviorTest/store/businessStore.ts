@@ -305,14 +305,36 @@ export const useBusinessStore = create<BusinessStore>((set, get) => ({
               }
               break;
             }
-            case 'enum_rule':
+            case 'enum_rule': {
               const ruleConfig = param.validationRule.ruleConfig as EnumRule;
-              if (!ruleConfig.options.includes(value)) {
+              // 将值转换为字符串进行比较（处理数字、布尔值等类型）
+              const stringValue =
+                typeof value === 'object'
+                  ? JSON.stringify(value)
+                  : String(value);
+              if (!ruleConfig.options.includes(stringValue)) {
                 errors[param.code] =
                   failMessage ||
                   `值必须是以下之一: ${ruleConfig.options.join(', ')}`;
               }
               break;
+            }
+            default: {
+              // 默认按枚举规则处理（兼容未知的规则类型）
+              const ruleConfig = param.validationRule.ruleConfig as EnumRule;
+              if (ruleConfig && ruleConfig.options) {
+                const stringValue =
+                  typeof value === 'object'
+                    ? JSON.stringify(value)
+                    : String(value);
+                if (!ruleConfig.options.includes(stringValue)) {
+                  errors[param.code] =
+                    failMessage ||
+                    `值必须是以下之一: ${ruleConfig.options.join(', ')}`;
+                }
+              }
+              break;
+            }
           }
         }
       });
