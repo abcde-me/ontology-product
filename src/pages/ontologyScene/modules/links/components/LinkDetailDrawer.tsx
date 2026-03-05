@@ -286,8 +286,12 @@ export default function LinkDetailDrawer({
         <div className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded">
           <IconComponent className="h-6 w-6" />
         </div>
-        <div className="min-w-0 text-sm font-normal leading-[22px] text-[#23293b]">
-          <EllipsisPopover preferTypography value={name} />
+        <div className="min-w-0 flex-1 text-sm font-normal leading-[22px] text-[#23293b]">
+          <EllipsisPopover
+            value={name}
+            preferTypography
+            wrapperClassName="min-w-0"
+          />
         </div>
         {!isNil(objectType?.syncStatus) ? (
           <div className="flex items-center">
@@ -454,7 +458,14 @@ export default function LinkDetailDrawer({
             关系对
           </div>
           <div className="flex items-center bg-[#F2F8FF] p-[12px]">
-            {renderObjectTypeCard(displayData?.sourceObjectTypeInfo, true)}
+            {renderObjectTypeCard(
+              {
+                name: displayData?.sourceObjectTypeName,
+                icon: displayData?.sourceObjectTypeIcon,
+                syncStatus: displayData?.sourceObjectTypeSyncStatus
+              },
+              true
+            )}
             <div className="flex w-[76px] min-w-[76px] items-center">
               <span className="h-0 flex-1 border-t border-dashed border-[#CBD5E1]" />
               <span className="rounded border border-[#E5E6EB] bg-white px-2 py-[2px] text-[12px] leading-[18px] text-[#23293b]">
@@ -463,7 +474,14 @@ export default function LinkDetailDrawer({
               <span className="h-0 flex-1 border-t border-dashed border-[#CBD5E1]" />
               <div className="h-0 w-0 border-b-[4px] border-l-[6px] border-t-[4px] border-b-transparent border-l-gray-400 border-t-transparent"></div>
             </div>
-            {renderObjectTypeCard(displayData?.targetObjectTypeInfo, false)}
+            {renderObjectTypeCard(
+              {
+                name: displayData?.targetObjectTypeName,
+                icon: displayData?.targetObjectTypeIcon,
+                syncStatus: displayData?.targetObjectTypeSyncStatus
+              },
+              false
+            )}
           </div>
         </div>
 

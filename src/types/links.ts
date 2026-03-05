@@ -216,6 +216,10 @@ export interface GetOntologyLinkTypeRes {
    */
   sourceObjectTypeIcon?: string;
   /**
+   * 源对象类型同步状态
+   */
+  sourceObjectTypeSyncStatus?: SyncStatus;
+  /**
    * 源对象类型信息
    */
   sourceObjectTypeInfo?: ObjectType;
@@ -251,6 +255,10 @@ export interface GetOntologyLinkTypeRes {
    * 目标属性ID
    */
   targetPropertyID?: number;
+  /**
+   * 目标对象类型同步状态
+   */
+  targetObjectTypeSyncStatus?: SyncStatus;
   /**
    * 链接类型
    */

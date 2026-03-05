@@ -21,6 +21,8 @@ import { listOntologyPhysicalProperties } from '@/api/ontologySceneLibrary/graph
 import type { PhysicalProperties } from '@/types/graphApi';
 import { useParams } from 'react-router';
 import { useHistory } from 'react-router-dom';
+import { listOntologyObjectType } from '@/api/ontologySceneLibrary/objectType';
+import type { ListOntologyPhysicalPropertiesReq } from '@/types/graphApi';
 
 export interface NormalTableProps {
   /** total 变化时的回调函数 */
@@ -39,29 +41,51 @@ export default function NormalTable({ onTotalChange }: NormalTableProps = {}) {
     'instances' | 'attributes' | 'links'
   >('attributes');
   const history = useHistory();
+  const [objectTypeFilters, setObjectTypeFilters] = useState<
+    Array<{ text: string; value: string }>
+  >([]);
+
+  // 获取对象类型列表用于“所属对象类型”筛选
+  useEffect(() => {
+    const fetchObjectTypes = async () => {
+      try {
+        const response = await listOntologyObjectType({
+          ontologyModelID: Number(ontologyModelID)
+        });
+
+        if (response.status === 200 && response.data?.result) {
+          const filters = response.data.result.map((item) => ({
+            text: item.name || '',
+            value: String(item.id)
+          }));
+          setObjectTypeFilters(filters);
+        }
+      } catch (error) {
+        console.error('获取对象类型列表失败:', error);
+        Message.error('获取对象类型列表失败');
+      }
+    };
+
+    if (ontologyModelID) {
+      fetchObjectTypes();
+    }
+  }, [ontologyModelID]);
 
   // 使用 useTable hook
   const { data, loading, pagination, refresh, submit, onChange } =
-    useWorkflowTable<PhysicalProperties, any>({
+    useWorkflowTable<PhysicalProperties, ListOntologyPhysicalPropertiesReq>({
       service: async (params) => {
         try {
           // 调用 listOntologyPhysicalProperties 接口
-          const response = await listOntologyPhysicalProperties({
-            ontologyModelID: Number(ontologyModelID),
-            filter: params.keyword || '',
-            pageNo: params.page || 1,
-            pageSize: params.page_size || 10,
-            order: params.order || '',
-            orderBy: params.orderBy || ''
-          });
+          const response = await listOntologyPhysicalProperties(params);
 
           if (response.status === 200 && response.data) {
             return {
               data: {
                 items: response.data.result || [],
                 total: response.data.totalCount || 0,
-                page: params.page || 1,
-                page_size: params.page_size || 10
+                page: params.pageNo || 1,
+                page_size: params.pageSize || 10
               }
             };
           }
@@ -71,8 +95,8 @@ export default function NormalTable({ onTotalChange }: NormalTableProps = {}) {
             data: {
               items: [],
               total: 0,
-              page: params.page || 1,
-              page_size: params.page_size || 10
+              page: params.pageNo || 1,
+              page_size: params.pageSize || 10
             }
           };
         } catch (error) {
@@ -82,15 +106,38 @@ export default function NormalTable({ onTotalChange }: NormalTableProps = {}) {
             data: {
               items: [],
               total: 0,
-              page: params.page || 1,
-              page_size: params.page_size || 10
+              page: params.pageNo || 1,
+              page_size: params.pageSize || 10
             }
           };
         }
       },
       form,
       defaultPageSize: 10,
-      manual: false // 手动控制请求，避免自动请求导致重复
+      manual: false, // 手动控制请求，避免自动请求导致重复
+      formatParams: (formValues, pag, sorter, filters) => {
+        const objectTypeIds =
+          filters?.ontologyObjectTypeName &&
+          Array.isArray(filters.ontologyObjectTypeName)
+            ? (filters.ontologyObjectTypeName as (string | number)[])
+                .map((id) => Number(id))
+                .filter((id) => !Number.isNaN(id))
+            : undefined;
+
+        return {
+          ontologyModelID: Number(ontologyModelID),
+          filter: formValues.keyword || '',
+          objectTypeIdList: objectTypeIds,
+          pageNo: pag.current || 1,
+          pageSize: pag.pageSize || 10,
+          order: sorter?.direction
+            ? sorter.direction === 'ascend'
+              ? 'asc'
+              : 'desc'
+            : undefined,
+          orderBy: sorter?.field as string | undefined
+        };
+      }
     });
 
   // 从 URL 的 search 参数同步到表单
@@ -149,6 +196,7 @@ export default function NormalTable({ onTotalChange }: NormalTableProps = {}) {
       title: '所属对象类型',
       dataIndex: 'ontologyObjectTypeName',
       width: 180,
+      filters: objectTypeFilters,
       render: (value, record) => (
         <div>
           {value ? (
