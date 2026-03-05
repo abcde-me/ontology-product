@@ -29,7 +29,7 @@ export const getActionList = async (params: IActionListParams) => {
     .post(params)
     .inRegion()
     .do();
-  const { result: items = [], total = 0 } = res.data;
+  const { result: items = [], totalCount: total = 0 } = res.data;
   return {
     items: (items ?? []) as BehaviorActionItem[],
     total: (total ?? 0) as number

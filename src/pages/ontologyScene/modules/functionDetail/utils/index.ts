@@ -207,7 +207,7 @@ const buildFUnctionSignature = (data: {
   return `${signature} -> ${returnType}:`;
 };
 const buildReturnCode = (outputs: OntologyFunctionParam[]) => {
-  if (outputs.length === 0) return 'return None';
+  if (!outputs?.length) return 'return None';
   return `return {${outputs.map((item) => `"${item.name}":${item.name}`).join(',')}}`;
 };
 

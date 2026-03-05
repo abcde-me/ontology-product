@@ -50,6 +50,15 @@ export const FunctionsSelect = (
     onChange?.(value, functionData);
   };
 
+  const searchFunction = (text: string) => {
+    return allFunctions.flatMap(({ code, name, id }) => {
+      if (code.includes(text) || name.includes(text)) {
+        return [id];
+      }
+      return [];
+    });
+  };
+
   return (
     <div className={'flex w-full items-center gap-3'}>
       <Select
@@ -63,6 +72,10 @@ export const FunctionsSelect = (
         value={value}
         allowClear
         onChange={changeFunction}
+        showSearch
+        filterOption={(inputValue, option) => {
+          return searchFunction(inputValue).includes(option.props.value);
+        }}
       >
         {allFunctions.map((item) => {
           const { value, code, name } = item;
@@ -78,8 +91,11 @@ export const FunctionsSelect = (
                 {code}
                 <Tooltip content={'详情'}>
                   <IconInfoCircle
-                    className={'function-info-icon text-[16px]'}
+                    className={
+                      'function-info-icon z-50 cursor-pointer text-[16px]'
+                    }
                     onClick={(event) => {
+                      event.preventDefault();
                       event.stopPropagation();
                       setShowFunctionContent(true);
                     }}

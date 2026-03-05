@@ -55,9 +55,9 @@ const ObjectTypeSelect: React.FC<ObjectTypeSelectProps> = ({
     try {
       const response = await listOntologyObjectType({
         ontologyModelID,
-        pageNo: 1,
+        pageNo: -1,
         // todo 参数太大会报错，先这么着
-        pageSize: 100 // 获取所有数据
+        pageSize: -1 // 获取所有数据
       });
       if (response.status === 200 && response.data) {
         const objectTypes = response.data.result || [];
@@ -65,8 +65,8 @@ const ObjectTypeSelect: React.FC<ObjectTypeSelectProps> = ({
           objectTypes.unshift({
             syncStatus: SyncStatus.SUCCESS,
             id: -1,
-            name: '全局',
-            description: '全局'
+            name: '全局行为',
+            description: '全局行为'
           });
         }
         setObjectTypeList(objectTypes);

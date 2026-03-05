@@ -250,6 +250,7 @@ export default function OntologySceneFunctions() {
               <ProButton
                 icon={<IconPlus />}
                 onClick={() => route2FunctionDetail('create')}
+                type={'primary'}
               >
                 创建函数
               </ProButton>

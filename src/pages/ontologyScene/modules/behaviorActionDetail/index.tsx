@@ -72,7 +72,7 @@ export default function BehaviorActionDetailPage() {
       ontologyModelID: +OSId
     }).then((res) => {
       Message.success({
-        content: '保存成功',
+        content: `成功${pageMode === 'create' ? '创建' : '编辑'}行为`,
         duration: 500,
         onClose: goBack
       });
@@ -174,23 +174,27 @@ export default function BehaviorActionDetailPage() {
               }
             ]}
           >
-            <Input
-              placeholder="请输入关键字名称"
-              maxLength={50}
-              showWordLimit
-            />
+            <Input placeholder="请输入行为名称" maxLength={50} showWordLimit />
           </FormItem>
 
           <FormItem
             label="行为id"
             required
             field="code"
+            extra={
+              '首字符必须为英文字母；仅允许英文字母与数字（不允许下划线及特殊符号）；建议 camelCase'
+            }
             rules={[
               {
                 validator(v, cb) {
-                  const value = v as string;
-                  if (!value?.trim()) {
+                  const value = (v as string).trim();
+                  if (!value) {
                     return cb('请输入行为id');
+                  }
+                  if (!/^[A-Za-z][A-Za-z0-9]*$/.test(value)) {
+                    cb(
+                      '首字符必须为英文字母；仅允许英文字母与数字（不允许下划线及特殊符号）'
+                    );
                   }
                   return getActionList({
                     ontologyModelID: +OSId,
@@ -213,7 +217,7 @@ export default function BehaviorActionDetailPage() {
             ]}
           >
             <Input
-              placeholder="请输入唯一标识"
+              placeholder="请输入id。用于 API 调用，全局唯一"
               disabled={pageMode === 'edit'}
             />
           </FormItem>
@@ -230,7 +234,7 @@ export default function BehaviorActionDetailPage() {
               showAll
               allowClear={false}
               ontologyModelID={+OSId}
-              placeholder={'请选择绑定对象类型'}
+              placeholder={'请选择行为动作作用于的对象类型'}
               onChange={(v, obj) => {
                 form.setFieldValue('objectTypeId', v);
                 setCurrentAction((p) => {

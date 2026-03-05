@@ -79,16 +79,15 @@ export const InterfaceSelect = (props: ObjectInterfaceSelectProps) => {
   const { run: searchIns } = useDebounceFn(
     (text?: string) => {
       setSearchText(text);
-      if (!text) {
-        setCurrentInsList(insCache.current);
-        return;
-      }
       runAsync({
         page: 1,
         pageSize: 20,
         fieldList: [{ fieldName: primaryKey, fieldValue: text }],
         id: objectTypeId!
-      }).then((res) => {});
+      }).then((res) => {
+        setCurrentInsList(res.data.result || []);
+        setScrollLoading(null);
+      });
     },
     { wait: 500 }
   );
@@ -138,16 +137,16 @@ export const InterfaceSelect = (props: ObjectInterfaceSelectProps) => {
           if (page === 1) {
             return res.data.result || [];
           }
-          const allInstance = [...prevState, ...(res.data.result || [])];
-          if (isNil(searchText)) {
-            insCache.current = allInstance;
-          }
-          return allInstance;
+          return [...prevState, ...(res.data.result || [])];
         });
       });
     },
     [objectTypeId, runAsync, searchText]
   );
+
+  useEffect(() => {
+    loadMore(1);
+  }, [primaryKey]);
 
   /** 渲染下拉内容 */
   const renderDropdown = () => {
