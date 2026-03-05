@@ -69,10 +69,13 @@ export const TestResultDrawer: React.FC<TestResultDrawerProps> = ({
       return <span>测试结果</span>;
     }
 
+    // 计算总运行时间
+    // 如果 runInfo 是单个对象，直接使用其 duration
+    // 如果将来支持多个行为，可以在这里累加
+    const totalDuration = Number(runInfo.duration) || 0;
+
     // 将毫秒转换为秒，保留2位小数
-    const durationInSeconds = runInfo.duration
-      ? (Number(runInfo.duration) / 1000).toFixed(2)
-      : '0.00';
+    const durationInSeconds = (totalDuration / 1000).toFixed(2);
 
     return (
       <div className="flex items-center gap-2">

@@ -531,9 +531,12 @@ export async function batchUpdateSegments(
  * 将后端返回的 ApiMaterial 转换为前端的 Element
  */
 function transformApiMaterialToElement(material: any): Element {
+  // 将 type 转换为小写进行匹配，兼容后端返回的大小写变化
+  const materialType = (material.type || '').toLowerCase();
+
   const baseElement = {
     id: material.id,
-    type: material.type === 'title' ? 'text' : material.type // 将 title 转换为 text
+    type: materialType === 'title' ? 'text' : materialType // 将 title 转换为 text
   };
 
   // 提取位置信息
@@ -551,7 +554,7 @@ function transformApiMaterialToElement(material: any): Element {
     pageId = position.page_id;
   }
 
-  switch (material.type) {
+  switch (materialType) {
     case 'text':
     case 'title':
       return {
