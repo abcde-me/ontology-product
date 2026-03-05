@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { OsDrawer } from '@/pages/ontologyScene/componens';
 import { DotStatus, NoDataCard } from '@ceai-front/arco-material';
 import { IconLoading } from '@arco-design/web-react/icon';
-import { Tabs } from '@arco-design/web-react';
+import { Tabs, Message } from '@arco-design/web-react';
 import { TestFunctionInfo } from '@/pages/ontologyScene/hooks/useTestFunction';
 import { BehaviorLogItem } from '@/pages/ontologyScene/modules/behaviorLog/types';
 
@@ -27,9 +27,10 @@ export const TestResultDrawer: React.FC<TestResultDrawerProps> = ({
 
   // 处理关闭抽屉
   const handleClose = () => {
-    // 如果正在测试，停止测试
+    // 如果正在测试，停止测试并显示提示
     if (testIng || loading) {
       stopTest();
+      Message.info('已停止运行');
     }
     onClose();
   };
