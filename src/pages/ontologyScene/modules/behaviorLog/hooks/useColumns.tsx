@@ -126,7 +126,7 @@ export const useColumns = (
         },
         {
           title: '所属对象类型',
-          dataIndex: 'ontologyObjectTypeName',
+          dataIndex: 'associated_object_type',
           width: 180,
           filters: objectTypeFilters || [],
           render: (value, record) => (
