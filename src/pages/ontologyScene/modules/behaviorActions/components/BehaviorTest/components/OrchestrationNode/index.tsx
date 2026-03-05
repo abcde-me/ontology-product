@@ -138,34 +138,6 @@ export const OrchestrationNode: React.FC<OrchestrationNodeProps> = ({
           <span className="overflow-hidden text-ellipsis whitespace-nowrap text-sm font-semibold text-[#1d2129]">
             {node.behavior.name}
           </span>
-          {/* 错误提示 */}
-          {hasErrors && (
-            <Tooltip
-              content={
-                <div className="max-w-xs">
-                  {Object.entries(nodeValidationErrors).map(
-                    ([field, error]) => {
-                      const param = node.behavior.params?.find(
-                        (p) => p.code === field
-                      );
-                      return (
-                        <div key={field} className="mb-1">
-                          <span className="font-semibold">
-                            {param?.name || field}:
-                          </span>{' '}
-                          {error}
-                        </div>
-                      );
-                    }
-                  )}
-                </div>
-              }
-            >
-              <div className="flex h-5 min-w-[20px] items-center justify-center rounded-full bg-[#F53F3F] px-1.5 text-[11px] font-semibold text-white">
-                {errorCount}
-              </div>
-            </Tooltip>
-          )}
         </div>
         {/* 删除图标 */}
         <Tooltip content="删除">
