@@ -1,5 +1,65 @@
+import React, { useEffect, useState } from 'react';
 import dayjs from 'dayjs';
 import { UiType } from '@/pages/ontologyScene/types/ontologyFunction';
+import { getOntologyObjectTypeDetail } from '@/api/ontologySceneLibrary/objectType';
+import { OBJECT_TYPE_ICON_OPTIONS } from '@/pages/ontologyScene/common/constants';
+
+// ObjectRef 渲染组件 - 用于显示对象引用
+const ObjectRefRenderer: React.FC<{ objectTypeId: number; pk: string }> = ({
+  objectTypeId,
+  pk
+}) => {
+  const [displayContent, setDisplayContent] =
+    useState<React.ReactNode>('加载中...');
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchObjectTypeDetail = async () => {
+      try {
+        // 调用 API 获取对象类型详情
+        const response = await getOntologyObjectTypeDetail({
+          id: objectTypeId
+        });
+
+        if (response.data) {
+          const { icon, name } = response.data;
+
+          // 匹配图标
+          const iconOption = OBJECT_TYPE_ICON_OPTIONS.find(
+            (option) => option.value === icon
+          );
+          const IconComponent =
+            iconOption?.icon ?? OBJECT_TYPE_ICON_OPTIONS[0].icon;
+
+          // 渲染：图标 + 名称 / pk
+          setDisplayContent(
+            <div className="flex items-center gap-2">
+              <IconComponent className="h-4 w-4 flex-shrink-0" />
+              <span>
+                {name} / {pk}
+              </span>
+            </div>
+          );
+        } else {
+          setDisplayContent(`${objectTypeId} / ${pk}`);
+        }
+      } catch (error) {
+        console.error('Failed to fetch ObjectRef detail:', error);
+        setDisplayContent(`${objectTypeId} / ${pk}`);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchObjectTypeDetail();
+  }, [objectTypeId, pk]);
+
+  if (loading) {
+    return <span>加载中...</span>;
+  }
+
+  return <>{displayContent}</>;
+};
 
 // 对象类型名称缓存
 const objectTypeNameCache: Record<number, string> = {};
@@ -74,12 +134,12 @@ export const getObjectTypeName = async (
  * 格式化参数显示值
  * @param value 参数值
  * @param uiType 参数的 UI 类型
- * @returns 格式化后的显示字符串或 Promise<string>
+ * @returns 格式化后的显示字符串、Promise<string> 或 React 组件
  */
 export const formatParamDisplayValue = (
   value: any,
   uiType: UiType
-): string | Promise<string> => {
+): string | Promise<string> | React.ReactNode => {
   // 未配置的情况
   if (value === undefined || value === null || value === '') {
     // 对于 Switch 类型，false 也是有效配置
@@ -89,8 +149,48 @@ export const formatParamDisplayValue = (
     return '未配置';
   }
 
-  // 处理 ObjectOne 类型 - 异步获取对象类型名称
+  // 处理 ObjectOne 类型 - 渲染为 ObjectRefRenderer 组件
   if (uiType === UiType.ObjectOne) {
+    // 如果值是对象格式 { objectTypeID: 85, objInsID: "王五104" }
+    if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
+      const objectTypeId =
+        value.objectTypeID || value.object_type || value.objectType;
+      const pk = value.objInsID || value.pk;
+
+      if (objectTypeId && pk !== undefined && pk !== null) {
+        // 返回 React 组件
+        return (
+          <ObjectRefRenderer
+            objectTypeId={Number(objectTypeId)}
+            pk={String(pk)}
+          />
+        );
+      }
+
+      // 如果对象格式不符合预期，尝试 JSON 序列化
+      try {
+        return JSON.stringify(value);
+      } catch {
+        return String(value);
+      }
+    }
+
+    // 如果值是 ObjectRef 格式的字符串
+    if (typeof value === 'string' && value.includes('ObjectRef(')) {
+      // 解析 ObjectRef 字符串: ObjectRef(object_type="85", pk=王五10)
+      const match = value.match(
+        /ObjectRef\(object_type="(\d+)",\s*pk=([^)]+)\)/
+      );
+      if (match) {
+        const [, objectTypeId, pk] = match;
+        // 返回 React 组件
+        return (
+          <ObjectRefRenderer objectTypeId={Number(objectTypeId)} pk={pk} />
+        );
+      }
+    }
+
+    // 如果是纯数字ID，获取对象类型名称
     const objectTypeId = typeof value === 'number' ? value : Number(value);
     if (!isNaN(objectTypeId)) {
       return getObjectTypeName(objectTypeId);
