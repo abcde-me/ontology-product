@@ -10,7 +10,7 @@ import {
   Tooltip
 } from '@arco-design/web-react';
 import { IconArrowLeft, IconCopy, IconEdit } from '@arco-design/web-react/icon';
-import { DotStatus } from '@ceai-front/arco-material';
+import { DotStatus, EllipsisPopover } from '@ceai-front/arco-material';
 import React, { useEffect, useState } from 'react';
 import { useHistory, useLocation } from 'react-router';
 import { REQUIREMENT_STATUS_CONFIG } from '../common';
@@ -98,9 +98,9 @@ function RequirementInfo() {
               需求管理
             </BreadcrumbItem>
             <BreadcrumbItem>
-              <span style={{ marginRight: '8px' }}>
-                {requirementDetail?.name || ''}
-              </span>
+              <div style={{ marginRight: '8px', maxWidth: '300px' }}>
+                <EllipsisPopover value={requirementDetail?.name || ''} />
+              </div>
               <span>
                 <DotStatus
                   text={getLabelByValue(

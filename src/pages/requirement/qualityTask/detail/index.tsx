@@ -29,7 +29,7 @@ import { openNewPage } from '@/utils/env';
 import { useGetRequirementDetail } from '../../hooks/useGetRequirementDetail';
 import { REQUIREMENT_STATUS_CONFIG } from '../../common';
 import getLabelByValue from '@/utils/getLabelByValue';
-import { DotStatus } from '@ceai-front/arco-material';
+import { DotStatus, EllipsisPopover } from '@ceai-front/arco-material';
 import EqualIcon from '@/assets/annotation/equal-icon.svg';
 import MinusIcon from '@/assets/annotation/minus-icon.svg';
 import { useHasPermission } from '@/store/userInfoStore';
@@ -452,9 +452,9 @@ function QualityTaskDetail() {
             质检任务
           </BreadcrumbItem>
           <BreadcrumbItem>
-            <span style={{ marginRight: '8px' }}>
-              {requirementDetail?.name || ''}
-            </span>
+            <div style={{ marginRight: '8px', maxWidth: '300px' }}>
+              <EllipsisPopover value={requirementDetail?.name || ''} />
+            </div>
             <span>
               <DotStatus
                 text={getLabelByValue(
