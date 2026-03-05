@@ -188,28 +188,30 @@ export const OrchestrationNode: React.FC<OrchestrationNodeProps> = ({
       {/* 表单项列表 */}
       {node.behavior.params && node.behavior.params.length > 0 && (
         <div className="mt-2 flex flex-col gap-3">
-          {node.behavior.params.map((param) => {
-            const value = config[param.code];
-            const displayValueOrPromise = formatParamDisplayValue(
-              value,
-              param.uiType
-            );
-            // 只显示已触碰字段的错误
-            const fieldTouched = isFieldTouched(node.id, param.code);
-            const errorMessage = fieldTouched
-              ? nodeValidationErrors[param.code]
-              : undefined;
+          {node.behavior.params
+            .filter((param) => param.inputType === 'input') // 只显示输入参数
+            .map((param) => {
+              const value = config[param.code];
+              const displayValueOrPromise = formatParamDisplayValue(
+                value,
+                param.uiType
+              );
+              // 只显示已触碰字段的错误
+              const fieldTouched = isFieldTouched(node.id, param.code);
+              const errorMessage = fieldTouched
+                ? nodeValidationErrors[param.code]
+                : undefined;
 
-            return (
-              <ParamDisplayItem
-                key={param.code}
-                paramName={param.name}
-                paramCode={param.code}
-                displayValueOrPromise={displayValueOrPromise}
-                errorMessage={errorMessage}
-              />
-            );
-          })}
+              return (
+                <ParamDisplayItem
+                  key={param.code}
+                  paramName={param.name}
+                  paramCode={param.code}
+                  displayValueOrPromise={displayValueOrPromise}
+                  errorMessage={errorMessage}
+                />
+              );
+            })}
         </div>
       )}
     </div>

@@ -166,21 +166,26 @@ export const RightPanel: React.FC<RightPanelProps> = ({ testFunctionHook }) => {
           onValuesChange={handleFormChange}
           autoComplete="off"
         >
-          {selectedNode.behavior.params?.map((param) => (
-            <Form.Item
-              key={param.code}
-              label={param.name}
-              field={param.code}
-              required={param.enabledValidation}
-              // @ts-ignore
-              rules={buildFormFieldValidateRules(param)}
-              triggerPropName={
-                param.uiType === UiType.Switch ? 'checked' : 'value'
-              }
-            >
-              {renderComponentByUiType(param.uiType, OSId ? +OSId : undefined)}
-            </Form.Item>
-          ))}
+          {selectedNode.behavior.params
+            ?.filter((param) => param.inputType === 'input') // 只显示输入参数
+            .map((param) => (
+              <Form.Item
+                key={param.code}
+                label={param.name}
+                field={param.code}
+                required={param.enabledValidation}
+                // @ts-ignore
+                rules={buildFormFieldValidateRules(param)}
+                triggerPropName={
+                  param.uiType === UiType.Switch ? 'checked' : 'value'
+                }
+              >
+                {renderComponentByUiType(
+                  param.uiType,
+                  OSId ? +OSId : undefined
+                )}
+              </Form.Item>
+            ))}
         </Form>
       </div>
     </div>
