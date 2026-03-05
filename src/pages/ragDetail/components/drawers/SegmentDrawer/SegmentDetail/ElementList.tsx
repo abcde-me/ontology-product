@@ -4,7 +4,13 @@
  */
 
 import React from 'react';
-import type { Element } from '../../../../types';
+import type {
+  Element,
+  TextElement,
+  ImageElement,
+  TableElement,
+  FormulaElement
+} from '../../../../types';
 import TextElementCard from './TextElementCard';
 import ImageElementCard from './ImageElementCard';
 import TableElementCard from './TableElementCard';
@@ -17,12 +23,15 @@ interface ElementListProps {
 
 const ElementList: React.FC<ElementListProps> = ({ elements, isEditing }) => {
   const renderElement = (element: Element) => {
-    switch (element.type) {
+    // 将 type 转换为小写进行匹配，兼容后端返回的大小写变化
+    const elementType = element.type.toLowerCase();
+
+    switch (elementType) {
       case 'text':
         return (
           <TextElementCard
             key={element.id}
-            element={element}
+            element={element as TextElement}
             isEditing={isEditing}
           />
         );
@@ -30,7 +39,7 @@ const ElementList: React.FC<ElementListProps> = ({ elements, isEditing }) => {
         return (
           <ImageElementCard
             key={element.id}
-            element={element}
+            element={element as ImageElement}
             isEditing={isEditing}
           />
         );
@@ -38,7 +47,7 @@ const ElementList: React.FC<ElementListProps> = ({ elements, isEditing }) => {
         return (
           <TableElementCard
             key={element.id}
-            element={element}
+            element={element as TableElement}
             isEditing={isEditing}
           />
         );
@@ -46,11 +55,12 @@ const ElementList: React.FC<ElementListProps> = ({ elements, isEditing }) => {
         return (
           <FormulaElementCard
             key={element.id}
-            element={element}
+            element={element as FormulaElement}
             isEditing={isEditing}
           />
         );
       default:
+        console.warn(`Unknown element type: ${element.type}`);
         return null;
     }
   };
