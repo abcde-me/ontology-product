@@ -48,7 +48,7 @@ export default function BehaviorLogList() {
       try {
         const response = await listOntologyObjectType({
           pageNo: 1,
-          pageSize: 1000, // 获取所有对象类型，增加到1000
+          pageSize: 100, // 获取所有对象类型，增加到1000
           ontologyModelID: ontologyModelID ? Number(ontologyModelID) : undefined
         });
         if (response.data?.result) {
