@@ -20,11 +20,24 @@ export const TestResultDrawer: React.FC<TestResultDrawerProps> = ({
 
   // 渲染标题（包含状态）
   const renderTitle = () => {
+    // 先判断是否正在测试（即使 runInfo 还没有）
+    if (loading || testIng) {
+      return (
+        <div className="flex items-center gap-2">
+          <span>测试结果</span>
+          <div className="flex items-center gap-2 text-sm text-[#6E7B8D]">
+            测试中
+            <IconLoading style={{ color: '#184FF2' }} />
+          </div>
+        </div>
+      );
+    }
+
     if (!runInfo) {
       return <span>测试结果</span>;
     }
 
-    if (runInfo.run_status === 1 || loading || testIng) {
+    if (runInfo.run_status === 1) {
       return (
         <div className="flex items-center gap-2">
           <span>测试结果</span>
