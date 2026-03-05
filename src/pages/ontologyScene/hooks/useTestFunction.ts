@@ -9,7 +9,7 @@ import { TestFunction } from '@/pages/ontologyScene/types/ontologyFunction';
 export interface RunStatus {
   // 初始化，运行中，成功，失败，KILL
   run_status: 0 | 1 | 2 | 3 | 4;
-  runLog: Partial<BehaviorLogItem>[];
+  runLog: Partial<BehaviorLogItem>[] | BehaviorLogItem[];
 }
 
 export interface TestFunctionInfo {
