@@ -159,7 +159,7 @@ export const ActionList = (props: {
     },
     {
       title: '行为id',
-      dataIndex: 'id',
+      dataIndex: 'code',
       render: (value, record) => {
         if (!value) return '-';
         return (
@@ -175,20 +175,6 @@ export const ActionList = (props: {
           </div>
         );
       }
-    },
-    {
-      title: '资源id',
-      dataIndex: 'code',
-      sorter: true,
-      render: (value) => (
-        <div
-          className={
-            'hover-blue font-PingFangSc text-[14px] font-normal leading-[22px]'
-          }
-        >
-          {value}
-        </div>
-      )
     },
     {
       title: '操作',

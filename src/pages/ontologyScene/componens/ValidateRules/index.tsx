@@ -21,6 +21,7 @@ import {
   TYPE2RULE_TYPES
 } from '@/pages/ontologyScene/types/behaviorActions';
 import { SelectWithNoData } from '@/components/new-no-data-comps';
+import { ParamType } from '@/pages/ontologyScene/types/ontologyFunction';
 
 export const ValidateRules = (props: { readonly?: boolean }) => {
   const { form, disabled: fieldsDisabled } = Form.useFormContext();
@@ -94,7 +95,10 @@ export const ValidateRules = (props: { readonly?: boolean }) => {
                 <Form.Item
                   noStyle
                   shouldUpdate={(prevValues, currentValues) => {
-                    return true;
+                    return (
+                      prevValues[`${field}.rule_name`] !==
+                      currentValues[`${field}.rule_name`]
+                    );
                   }}
                 >
                   {(values, form) => {
@@ -169,8 +173,27 @@ export const ValidateRules = (props: { readonly?: boolean }) => {
                             required={enabledValidation}
                             rules={[
                               {
-                                required: enabledValidation,
-                                message: '请输入限制的枚举值，用“,”分隔'
+                                validator(v, onError) {
+                                  if (!enabledValidation) return;
+                                  if (enabledValidation) {
+                                    if (isNil(v)) {
+                                      return onError(
+                                        '请输入限制的枚举值，用“,”分隔'
+                                      );
+                                    }
+                                    if (paramType === ParamType.Integer) {
+                                      const hasNaN = (v as string)
+                                        .trim()
+                                        .split(',')
+                                        .some((num) => isNaN(+num));
+                                      if (hasNaN) {
+                                        return onError(
+                                          '请输入数字枚举值，用“,”分隔'
+                                        );
+                                      }
+                                    }
+                                  }
+                                }
                               }
                             ]}
                           >

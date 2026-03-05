@@ -41,7 +41,6 @@ export const DataWithUiSelect = (
               minRows: 1,
               maxRows: 5
             }}
-            disabled={disabled}
             value={value?.paramValue}
             onChange={(value) => changeValue({ paramValue: value })}
           />
@@ -51,7 +50,6 @@ export const DataWithUiSelect = (
           <InputNumberWithLabel
             placeholder={'请输入'}
             className={`${styles['ui-comp']} w-[160px]`}
-            disabled={disabled}
             value={value?.paramValue}
             onChange={(value) => changeValue({ paramValue: value })}
           />
@@ -64,7 +62,6 @@ export const DataWithUiSelect = (
             style={{
               width: '160px'
             }}
-            disabled={disabled}
             value={value?.paramValue}
             onChange={(value) => changeValue({ paramValue: value })}
           />
@@ -74,7 +71,6 @@ export const DataWithUiSelect = (
           <Select
             className={styles['ui-comp']}
             placeholder={'请选择'}
-            disabled={disabled}
             value={value?.paramValue}
             onChange={(value) => changeValue({ paramValue: value })}
             options={[
@@ -92,7 +88,6 @@ export const DataWithUiSelect = (
       case UiType.Date:
         return (
           <DatePicker
-            disabled={disabled}
             className={`min-w-[160px] ${styles['ui-comp']}`}
             showTime={false}
             value={value?.paramValue}
@@ -102,7 +97,6 @@ export const DataWithUiSelect = (
       case UiType.Uploader:
         return (
           <FunctionFileParam
-            disabled={disabled}
             onChange={(value) => changeValue({ paramValue: value })}
             value={value?.paramValue}
             className={styles['ui-comp']}
@@ -112,7 +106,6 @@ export const DataWithUiSelect = (
         return (
           <MapPicker
             className={styles['ui-comp']}
-            disabled={disabled}
             value={value?.paramValue}
             onChange={(value) => changeValue({ paramValue: value })}
           />
@@ -122,7 +115,6 @@ export const DataWithUiSelect = (
           <DatePicker
             showTime
             className={styles['ui-comp']}
-            disabled={disabled}
             value={value?.paramValue}
             onChange={(value) => changeValue({ paramValue: value })}
           />
@@ -131,7 +123,6 @@ export const DataWithUiSelect = (
         return (
           <ObjectInterfaceSelect
             className={'flex-1'}
-            disabled={disabled}
             value={value?.paramValue}
             onChange={(value) => changeValue({ paramValue: value })}
             mode={'single'}
@@ -141,7 +132,6 @@ export const DataWithUiSelect = (
         return (
           <ObjectInterfaceSelect
             className={'flex-1'}
-            disabled={disabled}
             value={value?.paramValue}
             onChange={(value) => changeValue({ paramValue: value })}
             mode={'multiple'}
@@ -152,7 +142,6 @@ export const DataWithUiSelect = (
           <Input
             placeholder={'请输入'}
             className={styles['ui-comp']}
-            disabled={disabled}
             value={value?.paramValue}
             onChange={(value) => changeValue({ paramValue: value })}
           />

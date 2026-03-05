@@ -11,8 +11,7 @@ import { InputNumberWithLabel } from '@ceai-front/arco-material';
 import {
   FunctionFileParam,
   MapPicker,
-  ObjectInterfaceSelect,
-  ObjectTypeSelect
+  ObjectInterfaceSelect
 } from '@/pages/ontologyScene/componens';
 import styles from '../styles/index.module.scss';
 import { LinkType } from '@/types/graphApi';
@@ -119,13 +118,13 @@ export const formatParamValueByType = (
     return `GeoPoint(${value.lat}, ${value.lng})`;
   }
   if (dataType === ParamType.ObjectOne) {
-    return `ObjectRef(object_type="${value.objectTypeID}", pk=${value.objInsID})`;
+    return `ObjectRef(object_type="${value.objectTypeID}", pk="${value.objInsID}")`;
   }
   if (dataType === ParamType.ObjectSet) {
     const { objectTypeID, objInsID } = value;
     const args = (objInsID || [])
       .map((id) => {
-        return `{"object_type":${objectTypeID},"pk":${id}}`;
+        return `{"object_type":"${objectTypeID}","pk":"${id}}"`;
       })
       .toString();
     return `ObjectSet([${args}])`;

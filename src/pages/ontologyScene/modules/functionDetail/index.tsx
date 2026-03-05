@@ -27,6 +27,7 @@ import {
   saveFunction
 } from '@/api/ontologySceneLibrary/ontologyFunction';
 import { BehaviorLogItem } from '@/pages/ontologyScene/modules/behaviorLog/types';
+import { IconLeft } from '@arco-design/web-react/icon';
 
 const { TextArea } = Input;
 
@@ -112,6 +113,12 @@ export default function OSFunctionDetailPage() {
       className={`${styles['behavior-action-detail']} flex h-full w-full flex-col `}
     >
       <div className={`${styles['page-header']} text-default`}>
+        <ProButton
+          icon={<IconLeft />}
+          size={'default'}
+          type={'outline'}
+          onClick={goBack}
+        />
         {`${pageMode === 'edit' ? '编辑' : '创建'}函数`}
       </div>
       <div className={`${styles['page-body']}`} ref={bodyRef}>
@@ -252,7 +259,7 @@ export default function OSFunctionDetailPage() {
                 bodyRef.current.scrollTop = bodyRef.current.scrollHeight;
               }}
             >
-              <FunctionsSetting />
+              <FunctionsSetting disabled={!!functionDetail?.boundAction} />
             </FormItem>
           </div>
         </Form>

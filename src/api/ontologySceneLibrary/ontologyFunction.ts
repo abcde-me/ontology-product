@@ -54,7 +54,7 @@ export const testFunction = async (params: TestFunction) => {
     .post(params)
     .inRegion()
     .do();
-  return res.data?.[0] || null;
+  return res.data || [];
 };
 
 // 终止函数测试

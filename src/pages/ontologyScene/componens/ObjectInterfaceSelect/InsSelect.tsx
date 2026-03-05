@@ -44,7 +44,7 @@ export const InterfaceSelect = (props: ObjectInterfaceSelectProps) => {
   );
 
   // 未搜索时的已有全部数据
-  const insCache = useRef<Record<string, any>[]>();
+  const insCache = useRef<Record<string, any>[]>([]);
 
   // 当前展示的全部对象实例
   const [currentInsList, setCurrentInsList] = useState<Record<string, any>[]>(
@@ -79,12 +79,16 @@ export const InterfaceSelect = (props: ObjectInterfaceSelectProps) => {
   const { run: searchIns } = useDebounceFn(
     (text?: string) => {
       setSearchText(text);
+      if (!text) {
+        setCurrentInsList(insCache.current);
+        return;
+      }
       runAsync({
         page: 1,
         pageSize: 20,
         fieldList: [{ fieldName: primaryKey, fieldValue: text }],
         id: objectTypeId!
-      });
+      }).then((res) => {});
     },
     { wait: 500 }
   );
@@ -202,7 +206,7 @@ export const InterfaceSelect = (props: ObjectInterfaceSelectProps) => {
 
   return (
     <Select
-      className={styles['interface']}
+      className={classNames([styles['interface'], className])}
       dropdownMenuClassName={styles['list-container']}
       value={value as any}
       disabled={disabled || !objectTypeId || !primaryKey}
@@ -215,7 +219,7 @@ export const InterfaceSelect = (props: ObjectInterfaceSelectProps) => {
       dropdownRender={renderDropdown}
       showSearch
       onSearch={searchIns}
-      maxTagCount={2}
+      maxTagCount={'responsive'}
     />
   );
 };
