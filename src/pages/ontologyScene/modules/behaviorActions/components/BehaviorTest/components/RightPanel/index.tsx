@@ -41,15 +41,9 @@ export const RightPanel: React.FC<RightPanelProps> = ({ testFunctionHook }) => {
   useEffect(() => {
     if (selectedNode && selectedNodeId) {
       const config = nodeConfigs[selectedNodeId] || {};
-
-      // 先重置表单，清除所有字段
-      form.resetFields();
-
-      // 然后设置当前节点的配置
+      // 设置当前节点的配置
+      // 由于使用了 key={selectedNodeId}，表单会重新挂载，不需要 resetFields
       form.setFieldsValue(config);
-    } else {
-      // 如果没有选中节点，重置表单
-      form.resetFields();
     }
   }, [selectedNodeId, selectedNode, nodeConfigs, form]);
 

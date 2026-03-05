@@ -36,12 +36,14 @@ export const BehaviorTest: React.FC<BehaviorTestProps> = ({ onViewDetail }) => {
     setTestResultVisible(false);
   }, [ontologyModelID, clearOrchestration, selectNode, setTestResultVisible]);
 
-  // 组件卸载时关闭抽屉
+  // 组件卸载时清空编排和关闭抽屉
   useEffect(() => {
     return () => {
+      clearOrchestration();
+      selectNode(null);
       setTestResultVisible(false);
     };
-  }, [setTestResultVisible]);
+  }, [clearOrchestration, selectNode, setTestResultVisible]);
 
   return (
     <>
