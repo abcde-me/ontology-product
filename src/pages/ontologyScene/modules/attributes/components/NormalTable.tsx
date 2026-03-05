@@ -4,7 +4,9 @@ import {
   Input,
   TableColumnProps,
   Pagination,
-  Message
+  Message,
+  Checkbox,
+  Button
 } from '@arco-design/web-react';
 import { IconSearch } from '@arco-design/web-react/icon';
 import {
@@ -44,6 +46,9 @@ export default function NormalTable({ onTotalChange }: NormalTableProps = {}) {
   const [objectTypeFilters, setObjectTypeFilters] = useState<
     Array<{ text: string; value: string }>
   >([]);
+  const [objectTypeFilterKeys, setObjectTypeFilterKeys] = useState<string[]>(
+    []
+  );
 
   // 获取对象类型列表用于“所属对象类型”筛选
   useEffect(() => {
@@ -114,20 +119,12 @@ export default function NormalTable({ onTotalChange }: NormalTableProps = {}) {
       },
       form,
       defaultPageSize: 10,
-      manual: false, // 手动控制请求，避免自动请求导致重复
+      manual: false,
       formatParams: (formValues, pag, sorter, filters) => {
-        const objectTypeIds =
-          filters?.ontologyObjectTypeName &&
-          Array.isArray(filters.ontologyObjectTypeName)
-            ? (filters.ontologyObjectTypeName as (string | number)[])
-                .map((id) => Number(id))
-                .filter((id) => !Number.isNaN(id))
-            : undefined;
-
         return {
           ontologyModelID: Number(ontologyModelID),
           filter: formValues.keyword || '',
-          objectTypeIdList: objectTypeIds,
+          objectTypeIdList: objectTypeFilterKeys.map(Number),
           pageNo: pag.current || 1,
           pageSize: pag.pageSize || 10,
           order: sorter?.direction
@@ -197,6 +194,59 @@ export default function NormalTable({ onTotalChange }: NormalTableProps = {}) {
       dataIndex: 'ontologyObjectTypeName',
       width: 180,
       filters: objectTypeFilters,
+      filterDropdown: ({ setFilterKeys, confirm, clearFilters }: any) => {
+        return (
+          <div className="rounded-[4px] bg-white shadow-md">
+            <div className="max-h-[214px] max-w-[184px] overflow-auto py-[8px] pl-[7px] pr-[12px]">
+              <div className="flex gap-[8px]">
+                <Checkbox.Group
+                  direction="vertical"
+                  options={objectTypeFilters.map((item) => ({
+                    label: (
+                      <EllipsisPopover
+                        value={item.text || '-'}
+                        wrapperClassName="inline-flex max-w-[130px]"
+                        className="text-[14px] leading-[22px] text-[var(--color-text-1)]"
+                      />
+                    ),
+                    value: item.value
+                  }))}
+                  value={objectTypeFilterKeys}
+                  onChange={(values: string[]) => {
+                    setObjectTypeFilterKeys(values);
+                  }}
+                />
+              </div>
+            </div>
+            <div className="flex justify-end gap-[8px] border-t border-solid border-[#E2E8F0] bg-white px-3 py-2">
+              <Button
+                size="small"
+                type="outline"
+                onClick={() => {
+                  // 外部状态与表格内部筛选一起重置
+                  setObjectTypeFilterKeys([]);
+                  // clearFilters?.();
+                  confirm?.();
+                }}
+              >
+                重置
+              </Button>
+              <Button
+                size="small"
+                type="primary"
+                onClick={() => {
+                  // 将外部维护的选中项同步给表格内部的筛选，再确认
+                  // setFilterKeys?.(objectTypeFilterKeys);
+                  confirm?.();
+                }}
+              >
+                确定
+              </Button>
+            </div>
+          </div>
+        );
+      },
+      filteredValue: objectTypeFilterKeys,
       render: (value, record) => (
         <div>
           {value ? (

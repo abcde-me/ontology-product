@@ -107,7 +107,7 @@ export default function OntologySceneObjectTypeList() {
           pageSize: pagination.pageSize
         };
 
-        if (sorter && sorter.field) {
+        if (sorter && sorter.direction) {
           params.order = sorter.direction === 'ascend' ? 'asc' : 'desc';
           params.orderBy = sorter.field as string;
         }
