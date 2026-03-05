@@ -5,14 +5,16 @@
 }
 
 .table-select-group {
-  // &:global(.arco-input-group) {
-  //   // width: unset !important;
-  // }
-  .table-select-wrapper {
-    :global(.arco-select-view) {
-      border-right-width: 1px !important;
-      border-radius: 0 !important;
-    }
+  :global(.arco-select-view) {
+    border-right-width: 0 !important;
+    border-top-right-radius: 0 !important;
+    border-bottom-right-radius: 0 !important;
+  }
+
+  :global(.arco-input) {
+    border-left-width: 0 !important;
+    border-top-left-radius: 0 !important;
+    border-bottom-left-radius: 0 !important;
   }
 }
 
