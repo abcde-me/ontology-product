@@ -29,6 +29,9 @@ export const RightPanel: React.FC<RightPanelProps> = ({ testFunctionHook }) => {
   );
   const nodeConfigs = useBusinessStore((state) => state.nodeConfigs);
   const updateNodeConfig = useBusinessStore((state) => state.updateNodeConfig);
+  const markFieldAsTouched = useBusinessStore(
+    (state) => state.markFieldAsTouched
+  );
 
   // 从 props 接收 testFunctionHook
   const { startTest } = testFunctionHook;
@@ -37,6 +40,7 @@ export const RightPanel: React.FC<RightPanelProps> = ({ testFunctionHook }) => {
   const [form] = Form.useForm();
   const updateTimerRef = useRef<NodeJS.Timeout | null>(null);
   const prevNodeIdRef = useRef<string | null>(null);
+  const isLoadingConfigRef = useRef(false); // 标记是否正在加载配置
 
   // 当选中节点变化时，加载节点配置
   useEffect(() => {
@@ -47,6 +51,9 @@ export const RightPanel: React.FC<RightPanelProps> = ({ testFunctionHook }) => {
       if (selectedNode && selectedNodeId) {
         const config = nodeConfigs[selectedNodeId] || {};
 
+        // 标记正在加载配置
+        isLoadingConfigRef.current = true;
+
         // 先重置表单，清除所有字段（包括验证状态）
         form.resetFields();
 
@@ -54,6 +61,8 @@ export const RightPanel: React.FC<RightPanelProps> = ({ testFunctionHook }) => {
         // 这样可以避免字段值残留的问题
         setTimeout(() => {
           form.setFieldsValue(config);
+          // 加载完成
+          isLoadingConfigRef.current = false;
         }, 0);
       }
     }
@@ -68,12 +77,20 @@ export const RightPanel: React.FC<RightPanelProps> = ({ testFunctionHook }) => {
     };
   }, []);
 
-  // 表单值变化时更新配置（不再实时验证）
+  // 表单值变化时更新配置
   const handleFormChange = (
-    _changedValues: Record<string, any>,
+    changedValues: Record<string, any>,
     allValues: Record<string, any>
   ) => {
     if (selectedNodeId) {
+      // 如果正在加载配置，不标记字段为 touched
+      if (!isLoadingConfigRef.current) {
+        // 标记变化的字段为已触碰（只在用户真正修改时）
+        Object.keys(changedValues).forEach((fieldCode) => {
+          markFieldAsTouched(selectedNodeId, fieldCode);
+        });
+      }
+
       // 清除之前的定时器
       if (updateTimerRef.current) {
         clearTimeout(updateTimerRef.current);
@@ -169,9 +186,13 @@ export const RightPanel: React.FC<RightPanelProps> = ({ testFunctionHook }) => {
                 key={param.code}
                 label={param.name}
                 field={param.code}
-                required={param.enabledValidation}
+                required
                 // @ts-ignore
-                rules={buildFormFieldValidateRules(param)}
+                rules={
+                  buildFormFieldValidateRules(param) || [
+                    { required: true, message: '请输入参数值' }
+                  ]
+                }
                 triggerPropName={
                   param.uiType === UiType.Switch ? 'checked' : 'value'
                 }
