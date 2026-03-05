@@ -417,6 +417,8 @@ export default function OntologySceneObjectTypeList() {
           defaultActiveTab={activeTab}
         />
       )}
+
+      {/* 对象类型同步日志抽屉 */}
       {logTaskId !== null && (
         <TaskLogDrawer
           visible={logDrawerVisible}

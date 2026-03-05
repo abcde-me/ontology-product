@@ -32,6 +32,9 @@ import {
 } from '@/api/ontologySceneLibrary/objectType';
 import { MetadataMenuItem, IcebergTableItem } from '@/types/objectType';
 import { EllipsisPopover } from '@ceai-front/arco-material';
+import Link1To1Icon from '../../../assets/link-11.svg';
+import Link1ToNIcon from '../../../assets/link-1n.svg';
+import LinkNNIcon from '../../../assets/link-nn.svg';
 
 const FormItem = Form.Item;
 
@@ -344,83 +347,6 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
         });
       }
     }, [initialValues, form]);
-
-    // 从文件加载字段列表
-    const loadAttributeFields = async (file?: any) => {
-      setFieldsLoading(true);
-      try {
-        // TODO: 调用实际API获取字段列表
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-
-        // 模拟返回的字段数据
-        const mockFields: AttributeField[] = [
-          {
-            tableField: 'id',
-            selected: true,
-            attributeName: 'id',
-            fieldType: 'STRING',
-            isPrimary: true // 第一个字段默认为主键
-          },
-          {
-            tableField: 'field_1',
-            selected: true,
-            attributeName: 'field_1',
-            fieldType: 'STRING',
-            isPrimary: false
-          },
-          {
-            tableField: 'field_2',
-            selected: true,
-            attributeName: 'field_2',
-            fieldType: 'STRING',
-            isPrimary: false
-          },
-          {
-            tableField: 'field_3',
-            selected: true,
-            attributeName: 'field_3',
-            fieldType: 'STRING',
-            isPrimary: false
-          },
-          {
-            tableField: 'field_4',
-            selected: true,
-            attributeName: 'field_4',
-            fieldType: 'STRING',
-            isPrimary: false
-          },
-          {
-            tableField: 'field_5',
-            selected: true,
-            attributeName: 'field_5',
-            fieldType: 'STRING',
-            isPrimary: false
-          },
-          {
-            tableField: 'field_6',
-            selected: true,
-            attributeName: 'field_6',
-            fieldType: 'STRING',
-            isPrimary: false
-          },
-          {
-            tableField: 'field_7',
-            selected: true,
-            attributeName: 'field_7',
-            fieldType: 'STRING',
-            isPrimary: false
-          }
-        ];
-
-        setAttributeFields(mockFields);
-        form.setFieldValue('attributeFields', mockFields);
-        setFileUploaded(true);
-      } catch (error) {
-        Message.error('加载字段列表失败');
-      } finally {
-        setFieldsLoading(false);
-      }
-    };
 
     // 属性字段映射相关方法
     const handleFieldChange = (
@@ -991,7 +917,11 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
                       <LinkCheckIcon className="absolute right-0 top-0" />
                     )}
                     <div className="flex flex-row items-center gap-[8px]">
-                      <div className="h-[40px] w-[40px] bg-[#DCDCDC]"></div>
+                      <div className="h-[40px] w-[40px]">
+                        {type === LinkType.ONE_TO_ONE && <Link1To1Icon />}
+                        {type === LinkType.ONE_TO_MANY && <Link1ToNIcon />}
+                        {type === LinkType.MANY_TO_MANY && <LinkNNIcon />}
+                      </div>
                       <div className="flex flex-col gap-[4px]">
                         <div className="text-[16px] font-[500] leading-[24px] text-[var(--color-text-1)]">
                           {type}

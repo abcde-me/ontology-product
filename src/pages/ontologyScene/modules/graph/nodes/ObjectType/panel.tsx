@@ -16,6 +16,7 @@ import {
   listOntologyPhysicalProperties,
   listOntologyLinkType
 } from '@/api/ontologySceneLibrary/graph';
+import { getOntologyObjectTypeDetail } from '@/api/ontologySceneLibrary/objectType';
 import type {
   ListOntologyObjectTypeDataRes,
   ListOntologyPhysicalPropertiesRes,
@@ -23,6 +24,7 @@ import type {
   PhysicalProperties,
   LinkInfo
 } from '@/types/graphApi';
+import type { GetOntologyObjectTypeDetailRes } from '@/types/objectType';
 import { LinkType, SyncStatus } from '@/types/graphApi';
 import {
   DotStatus,
@@ -59,6 +61,11 @@ const Panel: FC<any> = ({ id, data }) => {
   const [linksLoading, setLinksLoading] = useState(false);
   const [linksPage, setLinksPage] = useState(1);
   const [linksPageSize, setLinksPageSize] = useState(10);
+
+  // 对象详情相关状态
+  const [objectTypeDetail, setObjectTypeDetail] =
+    useState<GetOntologyObjectTypeDetailRes | null>(null);
+  const [detailLoading, setDetailLoading] = useState(false);
 
   // 获取节点ID，从 id 或 data 中提取
   // id prop 是字符串类型（如 "1"），需要转换为数字
@@ -136,10 +143,28 @@ const Panel: FC<any> = ({ id, data }) => {
     }
   };
 
+  // 加载对象详情
+  const loadObjectTypeDetail = async () => {
+    if (!nodeId) return;
+    setDetailLoading(true);
+    try {
+      const res = await getOntologyObjectTypeDetail({ id: nodeId });
+      if (res.status === 200 && res.code === '' && res.data) {
+        setObjectTypeDetail(res.data);
+      }
+    } catch (error) {
+      console.error('加载对象详情失败:', error);
+      Message.error('加载对象详情失败');
+    } finally {
+      setDetailLoading(false);
+    }
+  };
+
   useEffect(() => {
+    loadObjectTypeDetail();
     loadProperties(propertiesPage, propertiesPageSize);
     loadLinks(linksPage, linksPageSize);
-  }, []);
+  }, [nodeId]);
 
   // 根据 tab 切换加载数据
   useEffect(() => {
@@ -200,12 +225,12 @@ const Panel: FC<any> = ({ id, data }) => {
   const propertiesColumns = [
     {
       title: '属性名称',
-      dataIndex: 'name',
-      width: 150,
+      dataIndex: 'comment',
+      width: 140,
       ellipsis: true,
       render: (text: string, record: PhysicalProperties) => (
         <div className="flex items-center gap-2">
-          <EllipsisPopover value={text} />
+          <EllipsisPopover value={text || '-'} />
           {record.isPrimary === 1 && (
             <Tag color="purple" size="small">
               主键
@@ -215,34 +240,37 @@ const Panel: FC<any> = ({ id, data }) => {
       )
     },
     {
-      title: 'id',
-      dataIndex: 'id',
-      width: 100,
+      title: '属性id',
+      dataIndex: 'name',
+      width: 140,
       render: (text: string) => (
         <div className="flex items-center gap-2">
-          <span>{text}</span>
-          <Popover content="复制">
-            <IconCopy
-              fontSize={14}
-              className="cursor-pointer opacity-0 transition-opacity hover:text-[#184FF2] group-hover:opacity-100"
-              onClick={(e) => {
-                e.stopPropagation();
-                handleCopy(String(text));
-              }}
-            />
-          </Popover>
+          <EllipsisPopover value={text || '-'} />
+          {text && (
+            <Popover content="复制">
+              <IconCopy
+                fontSize={14}
+                className="cursor-pointer opacity-0 transition-opacity hover:text-[#184FF2] group-hover:opacity-100"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleCopy(String(text));
+                }}
+              />
+            </Popover>
+          )}
         </div>
       )
     },
     {
       title: '表字段',
-      dataIndex: 'tableField',
-      width: 150
+      dataIndex: 'name',
+      width: 140,
+      render: (text: string) => <EllipsisPopover value={text || '-'} />
     },
     {
       title: '关联公共属性',
       dataIndex: 'ontologyPublicPropertiesName',
-      width: 150,
+      width: 140,
       render: (text: string) => {
         if (text && text !== '-') {
           return (
@@ -257,20 +285,9 @@ const Panel: FC<any> = ({ id, data }) => {
     {
       title: '字段类型',
       dataIndex: 'columnType',
-      width: 120
+      width: 140
     }
   ];
-
-  // 获取对象类型图标颜色
-  const getObjectTypeColor = (icon?: string) => {
-    // 根据图标类型返回颜色，这里简化处理
-    return icon === 'intelligence' ||
-      icon === 'track' ||
-      icon === 'mission' ||
-      icon === 'asset'
-      ? 'green'
-      : 'purple';
-  };
 
   // 渲染对象类型卡片
   const renderObjectTypeCard = (
@@ -323,30 +340,49 @@ const Panel: FC<any> = ({ id, data }) => {
         <div className="text-[14px] font-[600] text-[var(--color-text-1)]">
           基本信息
         </div>
-        <div className="flex items-center">
-          <span className="w-[82px] text-[14px] text-[var(--color-text-4)]">
-            同步状态:
-          </span>
-          <DotStatus text="成功" color="#0CBF92" />
-        </div>
-        <div className="flex items-center">
-          <span className="w-[82px] text-[14px] text-[var(--color-text-4)]">
-            对象类型id:
-          </span>
-          <div className="flex items-center gap-1 leading-[22px]">
-            <span className="text-[14px] text-[var(--color-text-1)]">{id}</span>
-            <Popover content="复制">
-              <IconCopy
-                fontSize={14}
-                className="cursor-pointer hover:text-[#184FF2]"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleCopy(id || 'WeatherStation');
-                }}
+        <Spin loading={detailLoading}>
+          <div className="flex items-center">
+            <span className="w-[82px] text-[14px] text-[var(--color-text-4)]">
+              同步状态:
+            </span>
+            {objectTypeDetail?.syncStatus !== undefined ? (
+              <DotStatus
+                text={
+                  OBJECT_TYPE_SYNC_STATUS_CONFIG[objectTypeDetail.syncStatus]
+                    .text
+                }
+                color={
+                  OBJECT_TYPE_SYNC_STATUS_CONFIG[objectTypeDetail.syncStatus]
+                    .color
+                }
               />
-            </Popover>
+            ) : (
+              '-'
+            )}
           </div>
-        </div>
+          <div className="flex items-center">
+            <span className="w-[82px] text-[14px] text-[var(--color-text-4)]">
+              对象类型id:
+            </span>
+            <div className="flex items-center gap-1 leading-[22px]">
+              <span className="text-[14px] text-[var(--color-text-1)]">
+                {objectTypeDetail?.code || '-'}
+              </span>
+              {!isNil(objectTypeDetail?.code) && (
+                <Popover content="复制">
+                  <IconCopy
+                    fontSize={14}
+                    className="cursor-pointer hover:text-[#184FF2]"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleCopy(objectTypeDetail?.code || '');
+                    }}
+                  />
+                </Popover>
+              )}
+            </div>
+          </div>
+        </Spin>
       </div>
 
       {/* Tabs */}

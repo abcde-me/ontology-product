@@ -30,7 +30,7 @@ const Node = ({ id, data }) => {
             id:
           </span>
           <span className="text-[14px] leading-[22px] text-[var(--color-text-1)]">
-            {id}
+            {data.code}
           </span>
           <Popover content="复制">
             <IconCopy
@@ -39,7 +39,7 @@ const Node = ({ id, data }) => {
               onClick={(e) => {
                 e.stopPropagation();
                 e.preventDefault();
-                handleCopy(id);
+                handleCopy(data.code);
               }}
             />
           </Popover>

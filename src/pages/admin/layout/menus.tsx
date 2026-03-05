@@ -31,6 +31,7 @@ import DataAsset from '@/assets/sider/data-asset.svg';
 import MetadataManagement from '@/assets/sider/metadata-management.svg';
 import DataApi from '@/assets/sider/data-api.svg';
 import DataMarket from '@/assets/sider/data-market.svg';
+import OntologyLibrary from '@/assets/sider/ontology-library.svg';
 import WorkflowList from '@/assets/sider/workflow-list.svg';
 import WorkflowTask from '@/assets/sider/workflow-task.svg';
 import OrganMenu from '@/assets/sider/organmenu.svg';
@@ -226,7 +227,7 @@ export const menus: MenuModel[] = [
     children: [
       {
         title: '本体场景库',
-        icon: <DataMarket className={iconClass} />,
+        icon: <OntologyLibrary className={iconClass} />,
         key: 'OntologySceneLibrary',
         path: '/tenant/compute/modaforge/ontologyScene',
         permission: DATA_MANAGEMENT_PERMISSIONS.LIST
