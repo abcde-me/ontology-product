@@ -117,7 +117,10 @@ export const generateMockData = (
       duration,
       start_time: startTime,
       end_time: endTime,
-      run_log: status === 1 ? '运行中...' : getMockRunLogs(String(i + 1)),
+      run_log:
+        status === 1
+          ? '运行中...'
+          : `[信息] 执行完成\n[输出] 处理结果: 成功\n[信息] 执行统计: ${duration}`,
       ontologyObjectTypeName: objectType.name,
       ontologyObjectTypeIcon: objectType.icon,
       ontologyObjectTypeId: objectType.id,
