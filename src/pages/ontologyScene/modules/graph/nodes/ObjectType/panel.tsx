@@ -35,9 +35,12 @@ import {
   OBJECT_TYPE_ICON_OPTIONS,
   OBJECT_TYPE_SYNC_STATUS_CONFIG
 } from '@/pages/ontologyScene/common/constants';
-import { useParams } from 'react-router';
+import { useHistory, useParams } from 'react-router';
 import { isNil } from 'lodash-es';
 import { getLinkTypeText } from '@/pages/ontologyScene/utils';
+import { AttributeItem } from '@/pages/ontologyScene/componens/ObjectTypeDetailDrawer';
+
+const defaultPageSize = 10;
 
 const Panel: FC<any> = ({ id, data }) => {
   const [activeTab, setActiveTab] = useState('instances');
@@ -45,8 +48,9 @@ const Panel: FC<any> = ({ id, data }) => {
   const [instancesTotal, setInstancesTotal] = useState(0);
   const [instancesLoading, setInstancesLoading] = useState(false);
   const [instancesPage, setInstancesPage] = useState(1);
-  const [instancesPageSize, setInstancesPageSize] = useState(10);
+  const [instancesPageSize, setInstancesPageSize] = useState(defaultPageSize);
   const { id: OSId } = useParams<{ id: string }>();
+  const history = useHistory();
 
   const [propertiesData, setPropertiesData] = useState<PhysicalProperties[]>(
     []
@@ -60,7 +64,7 @@ const Panel: FC<any> = ({ id, data }) => {
   const [linksTotal, setLinksTotal] = useState(0);
   const [linksLoading, setLinksLoading] = useState(false);
   const [linksPage, setLinksPage] = useState(1);
-  const [linksPageSize, setLinksPageSize] = useState(10);
+  const [linksPageSize, setLinksPageSize] = useState(defaultPageSize);
 
   // 对象详情相关状态
   const [objectTypeDetail, setObjectTypeDetail] =
@@ -221,6 +225,14 @@ const Panel: FC<any> = ({ id, data }) => {
     }));
   }, [instancesData]);
 
+  const handleViewPublicAttribute = (record: AttributeItem) => {
+    if (!record.ontologyPublicPropertiesName) {
+      return;
+    }
+    const url = `/tenant/compute/modaforge/ontologyScene/detail/${OSId}/attributes/list?tab=public&search=${encodeURIComponent(record.ontologyPublicPropertiesName || '')}`;
+    history.push(url);
+  };
+
   // 属性表格列
   const propertiesColumns = [
     {
@@ -271,11 +283,20 @@ const Panel: FC<any> = ({ id, data }) => {
       title: '关联公共属性',
       dataIndex: 'ontologyPublicPropertiesName',
       width: 140,
-      render: (text: string) => {
+      render: (text: string, record: PhysicalProperties) => {
         if (text && text !== '-') {
           return (
-            <span className="cursor-pointer group-hover:text-[#184FF2]">
-              {text}
+            <span
+              onClick={() => {
+                handleViewPublicAttribute(record);
+              }}
+            >
+              <EllipsisPopover
+                value={text || '-'}
+                className={
+                  text ? 'cursor-pointer group-hover:text-[#184FF2]' : ''
+                }
+              />
             </span>
           );
         }
@@ -411,7 +432,7 @@ const Panel: FC<any> = ({ id, data }) => {
               noDataElement={<NoDataCard title="暂无数据" />}
             />
           )}
-          {instancesTotal > 0 && (
+          {instancesTotal > defaultPageSize && (
             <div className="mt-[16px] flex items-center justify-end">
               <Pagination
                 current={instancesPage}
@@ -441,7 +462,7 @@ const Panel: FC<any> = ({ id, data }) => {
             pagination={false}
             // className="mt-2"
           />
-          {propertiesTotal > 0 && (
+          {propertiesTotal > defaultPageSize && (
             <div className="mt-[16px] flex items-center justify-end">
               <Pagination
                 current={propertiesPage}

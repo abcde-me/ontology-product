@@ -32,6 +32,7 @@ import { LinkType, SyncStatus } from '@/types/graphApi';
 import { isNil } from 'lodash-es';
 
 const TabPane = Tabs.TabPane;
+const defaultPageSize = 10;
 
 function EdgePanel() {
   const history = useHistory();
@@ -59,7 +60,7 @@ function EdgePanel() {
   const [instancesLoading, setInstancesLoading] = useState(false);
   const [instancesPagination, setInstancesPagination] = useState({
     current: 1,
-    pageSize: 10,
+    pageSize: defaultPageSize,
     total: 0
   });
 
@@ -67,7 +68,7 @@ function EdgePanel() {
   const [attributesLoading, setAttributesLoading] = useState(false);
   const [attributesPagination, setAttributesPagination] = useState({
     current: 1,
-    pageSize: 10,
+    pageSize: defaultPageSize,
     total: 0
   });
 
@@ -161,19 +162,19 @@ function EdgePanel() {
       setActiveTab('instances');
       setInstancesPagination({
         current: 1,
-        pageSize: 10,
+        pageSize: defaultPageSize,
         total: 0
       });
       setAttributesPagination({
         current: 1,
-        pageSize: 10,
+        pageSize: defaultPageSize,
         total: 0
       });
 
       // 重新加载数据
       loadBasicInfo();
-      loadInstances(1, 10);
-      loadAttributes(1, 10);
+      loadInstances(1, defaultPageSize);
+      loadAttributes(1, defaultPageSize);
     } else {
       // 如果没有 selectedEdgeId，清空所有数据
       setBasicInfo(null);
@@ -181,12 +182,12 @@ function EdgePanel() {
       setAttributesData([]);
       setInstancesPagination({
         current: 1,
-        pageSize: 10,
+        pageSize: defaultPageSize,
         total: 0
       });
       setAttributesPagination({
         current: 1,
-        pageSize: 10,
+        pageSize: defaultPageSize,
         total: 0
       });
     }
@@ -246,8 +247,12 @@ function EdgePanel() {
         <div className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded">
           <IconComponent className="h-6 w-6" />
         </div>
-        <div className="min-w-0 text-sm font-normal leading-[22px] text-[#23293b]">
-          <EllipsisPopover preferTypography value={name} />
+        <div className="min-w-0 flex-1 text-sm font-normal leading-[22px] text-[#23293b]">
+          <EllipsisPopover
+            preferTypography
+            wrapperClassName="min-w-0"
+            value={name}
+          />
         </div>
         {!isNil(objectType?.syncStatus) ? (
           <div className="flex items-center">
@@ -435,7 +440,14 @@ function EdgePanel() {
               关系对
             </div>
             <div className="flex items-center gap-4 bg-[#F2F8FF] p-[12px]">
-              {renderObjectTypeCard(basicInfo?.sourceObjectTypeInfo, true)}
+              {renderObjectTypeCard(
+                {
+                  name: basicInfo?.sourceObjectTypeName,
+                  icon: basicInfo?.sourceObjectTypeIcon,
+                  syncStatus: basicInfo?.sourceObjectTypeSyncStatus
+                },
+                true
+              )}
               <div className="flex w-[76px] min-w-[76px] items-center">
                 <span className="h-0 flex-1 border-t border-dashed border-[#CBD5E1]" />
                 <span className="rounded border border-[#E5E6EB] bg-white px-2 py-[2px] text-[12px] leading-[18px] text-[#23293b]">
@@ -444,7 +456,14 @@ function EdgePanel() {
                 <span className="h-0 flex-1 border-t border-dashed border-[#CBD5E1]" />
                 <div className="h-0 w-0 border-b-[4px] border-l-[6px] border-t-[4px] border-b-transparent border-l-gray-400 border-t-transparent"></div>
               </div>
-              {renderObjectTypeCard(basicInfo?.targetObjectTypeInfo, false)}
+              {renderObjectTypeCard(
+                {
+                  name: basicInfo?.targetObjectTypeName,
+                  icon: basicInfo?.targetObjectTypeIcon,
+                  syncStatus: basicInfo?.targetObjectTypeSyncStatus
+                },
+                false
+              )}
             </div>
           </div>
 
@@ -481,7 +500,7 @@ function EdgePanel() {
                     className="[&_.arco-table-td]:py-[10px] [&_.arco-table-th]:bg-[#f7f8fa] [&_.arco-table-th]:py-[10px]"
                   />
                 )}
-                {instancesPagination.total > 0 && (
+                {instancesPagination.total > defaultPageSize && (
                   <div className="flex justify-end pt-[16px]">
                     <Pagination
                       current={instancesPagination.current}
@@ -512,7 +531,7 @@ function EdgePanel() {
                   noDataElement={<NoDataCard title="暂无数据" />}
                   className="[&_.arco-table-td]:py-[8px] [&_.arco-table-th]:bg-[#f7f8fa] [&_.arco-table-th]:py-[8px]"
                 />
-                {attributesPagination.total > 0 && (
+                {attributesPagination.total > defaultPageSize && (
                   <div className="flex justify-end pt-[16px]">
                     <Pagination
                       current={attributesPagination.current}

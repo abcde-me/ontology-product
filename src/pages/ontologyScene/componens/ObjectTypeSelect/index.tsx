@@ -117,7 +117,7 @@ const ObjectTypeSelect: React.FC<ObjectTypeSelectProps> = ({
           {option.id > 0 && (
             <EllipsisPopover
               preferTypography
-              value={option.description || '描述说明文案'}
+              value={option.description || '-'}
               className="text-[12px] leading-[18px] text-[var(--color-text-4)]"
             />
           )}
@@ -151,15 +151,26 @@ const ObjectTypeSelect: React.FC<ObjectTypeSelectProps> = ({
         showSearch
         getPopupContainer={getPopupContainer}
         filterOption={(inputValue, option: any) => {
-          const optionValue = option?.value ?? option;
+          // 如果没有输入搜索文本，显示所有选项
+          if (!inputValue) return true;
+
+          // 从 option 中获取对象类型 ID
+          const optionValue = option?.props?.value ?? option;
           const item = objectTypeList.find((obj) => obj.id === optionValue);
+
+          // 如果找不到对应的对象类型，不显示该选项
           if (!item) return false;
-          const searchText = inputValue.toLowerCase();
-          return (
-            item.name?.toLowerCase().includes(searchText) ||
-            item.description?.toLowerCase().includes(searchText) ||
-            String(item.id).includes(searchText)
-          );
+
+          // 将搜索文本转为小写进行匹配
+          const searchText = inputValue.toLowerCase().trim();
+
+          // 匹配对象类型的名称、描述或 ID
+          const nameMatch =
+            item.name?.toLowerCase().includes(searchText) ?? false;
+          const descriptionMatch =
+            item.description?.toLowerCase().includes(searchText) ?? false;
+
+          return nameMatch || descriptionMatch;
         }}
         renderFormat={(option, value) => {
           if (!value || !option) return null;
@@ -171,7 +182,7 @@ const ObjectTypeSelect: React.FC<ObjectTypeSelectProps> = ({
           return (
             <div className="flex items-center gap-2">
               {/* 左侧图标 */}
-              {value > 0 && (
+              {Number(value) > 0 && (
                 <div className="flex h-[24px] w-[24px] flex-shrink-0 items-center justify-center rounded">
                   <IconComponent className="h-[24px] w-[24px]" />
                 </div>
