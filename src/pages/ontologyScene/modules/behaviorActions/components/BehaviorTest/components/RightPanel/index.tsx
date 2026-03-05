@@ -36,20 +36,26 @@ export const RightPanel: React.FC<RightPanelProps> = ({ testFunctionHook }) => {
   const selectedNode = orchestrationNodes.find((n) => n.id === selectedNodeId);
   const [form] = Form.useForm();
   const updateTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const prevNodeIdRef = useRef<string | null>(null);
 
   // 当选中节点变化时，加载节点配置
   useEffect(() => {
-    if (selectedNode && selectedNodeId) {
-      const config = nodeConfigs[selectedNodeId] || {};
+    // 只在节点ID变化时才重置和加载配置
+    if (selectedNodeId !== prevNodeIdRef.current) {
+      prevNodeIdRef.current = selectedNodeId;
 
-      // 先重置表单，清除所有字段（包括验证状态）
-      form.resetFields();
+      if (selectedNode && selectedNodeId) {
+        const config = nodeConfigs[selectedNodeId] || {};
 
-      // 使用 setTimeout 确保 resetFields 完成后再设置新值
-      // 这样可以避免字段值残留的问题
-      setTimeout(() => {
-        form.setFieldsValue(config);
-      }, 0);
+        // 先重置表单，清除所有字段（包括验证状态）
+        form.resetFields();
+
+        // 使用 setTimeout 确保 resetFields 完成后再设置新值
+        // 这样可以避免字段值残留的问题
+        setTimeout(() => {
+          form.setFieldsValue(config);
+        }, 0);
+      }
     }
   }, [selectedNodeId, selectedNode, nodeConfigs, form]);
 
