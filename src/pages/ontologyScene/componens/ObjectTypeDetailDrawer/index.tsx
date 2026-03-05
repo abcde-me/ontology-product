@@ -501,16 +501,18 @@ export default function ObjectTypeDetailDrawer({
       render: (value) => (
         <div className="flex items-center gap-2">
           <EllipsisPopover value={value || '-'} />
-          <Popover content="复制">
-            <IconCopy
-              fontSize={14}
-              className="cursor-pointer opacity-0 transition-opacity hover:text-[#184FF2] group-hover:opacity-100"
-              onClick={(e) => {
-                e.stopPropagation();
-                handleCopy(String(value));
-              }}
-            />
-          </Popover>
+          {value && (
+            <Popover content="复制">
+              <IconCopy
+                fontSize={14}
+                className="cursor-pointer opacity-0 transition-opacity hover:text-[#184FF2] group-hover:opacity-100"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleCopy(String(value));
+                }}
+              />
+            </Popover>
+          )}
         </div>
       )
     },

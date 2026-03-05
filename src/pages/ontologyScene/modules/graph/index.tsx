@@ -83,7 +83,8 @@ function layoutNodesWithDagre(
         desc: topologyNode.description ?? '',
         title: topologyNode.name || '未命名节点',
         attributes: topologyNode.ontologyPhysicalPropertiesList || [],
-        syncStatus: topologyNode.syncStatus
+        syncStatus: topologyNode.syncStatus,
+        code: topologyNode.code ?? ''
       },
       position: { x: 0, y: 0 } // 临时位置，稍后由 dagre 计算
     });

@@ -178,16 +178,10 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
 
     useEffect(() => {
       if (initialValues) {
+        const formData = form.getFieldsValue();
         form.setFieldsValue({
-          name: initialValues.name,
-          code: initialValues.code,
-          description: initialValues.description,
-          icon: initialValues.icon,
-          ontologyModelID: initialValues.ontologyModelID,
-          filePath: initialValues.filePath,
-          originalDbName: initialValues.originalDbName,
-          originalTableName: initialValues.originalTableName,
-          sourceType: initialValues.sourceType,
+          ...formData,
+          ...initialValues,
           dataSourceType:
             initialValues._dataSource?.type || DATA_SOURCE_TYPE.LOCAL_CSV,
           database: initialValues._dataSource?.database,
@@ -281,7 +275,7 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
               (column, index) => ({
                 name: column, // 表字段名
                 comment: column, // 属性名称，默认与表字段名相同
-                columnType: 'STRING', // 默认类型
+                columnType: index === 0 ? 'varchar(500)' : 'STRING', // 主键字段默认为varchar(500)，其他字段为STRING
                 isPrimary: index === 0 ? 1 : 0, // 第一个字段默认为主键
                 isUse: 1, // 默认选中
                 isStoreAsPublic: 0, // 默认不存入公共属性
@@ -348,10 +342,37 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
     };
 
     const handlePrimaryKeyChange = (index: number) => {
-      const newFields: AttributeField[] = attributeFields.map((field, i) => ({
-        ...field,
-        isPrimary: i === index ? 1 : 0
-      }));
+      const newFields: AttributeField[] = attributeFields.map((field, i) => {
+        const isNewPrimary = i === index;
+        const isOldPrimary = field.isPrimary === 1;
+        const isLocalCsv = dataSource.type === DATA_SOURCE_TYPE.LOCAL_CSV;
+
+        // 如果是本地CSV导入
+        if (isLocalCsv) {
+          // 新的主键字段：设置为varchar(500)
+          if (isNewPrimary) {
+            return {
+              ...field,
+              isPrimary: 1,
+              columnType: 'varchar(500)'
+            };
+          }
+          // 旧的主键字段：恢复为varchar(2000)
+          if (isOldPrimary && !isNewPrimary) {
+            return {
+              ...field,
+              isPrimary: 0,
+              columnType: 'varchar(2000)'
+            };
+          }
+        }
+
+        // 其他情况：只更新主键状态
+        return {
+          ...field,
+          isPrimary: isNewPrimary ? 1 : 0
+        };
+      });
       setAttributeFields(newFields);
     };
 
@@ -570,17 +591,7 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
       {
         title: '字段类型',
         dataIndex: 'columnType',
-        width: 200,
-        render: (value, record, index) => {
-          // 如果是主键并且数据源类型是 LOCAL_CSV，显示 varchar(500)
-          if (
-            record.isPrimary === 1 &&
-            dataSource.type === DATA_SOURCE_TYPE.LOCAL_CSV
-          ) {
-            return <span>varchar(500)</span>;
-          }
-          return <span>{value}</span>;
-        }
+        width: 200
       }
     ];
 
@@ -866,7 +877,7 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
         const fields: AttributeField[] = columnList.map((column, index) => ({
           name: column, // 表字段名
           comment: column, // 属性名称，默认与表字段名相同
-          columnType: 'varchar(2000)', // 默认类型
+          columnType: index === 0 ? 'varchar(500)' : 'varchar(2000)', // 主键字段默认为varchar(500)，其他字段为varchar(2000)
           isPrimary: index === 0 ? 1 : 0, // 第一个字段默认为主键
           isUse: 1, // 默认选中
           isStoreAsPublic: 0, // 默认不存入公共属性
@@ -889,8 +900,6 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
     const handleSubmit = async () => {
       try {
         const values = await form.validate();
-
-        console.log('---values', values);
 
         if (
           !dataSource.filePath &&
@@ -921,16 +930,6 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
             _storedPublicPropertyId,
             ...field
           }) => {
-            // 当是本地CSV导入时，将主键字段的类型设置为varchar(500)
-            if (
-              dataSource.type === DATA_SOURCE_TYPE.LOCAL_CSV &&
-              field.isPrimary === 1
-            ) {
-              return {
-                ...field,
-                columnType: 'varchar(500)'
-              };
-            }
             return field;
           }
         );
@@ -950,11 +949,11 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
           originalDbName:
             dataSource.type === DATA_SOURCE_TYPE.DATA_DIRECTORY_SYNC
               ? dataSource.database || ''
-              : 'upload_db',
+              : '',
           originalTableName:
             dataSource.type === DATA_SOURCE_TYPE.DATA_DIRECTORY_SYNC
               ? dataSource.table || ''
-              : 'upload_table',
+              : '',
           sourceType:
             dataSource.type === DATA_SOURCE_TYPE.LOCAL_CSV
               ? SourceType.FILE_UPLOAD
