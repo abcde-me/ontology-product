@@ -9,19 +9,32 @@ import { BehaviorActionItem } from '@/pages/ontologyScene/types/behaviorActions'
 import { useUIStore } from './store/uiStore';
 import { useBusinessStore } from './store/businessStore';
 import useTestFunction from '@/pages/ontologyScene/hooks/useTestFunction';
+import { useParams } from 'react-router-dom';
 
 interface BehaviorTestProps {
   onViewDetail?: (data: BehaviorActionItem) => void;
 }
 
 export const BehaviorTest: React.FC<BehaviorTestProps> = ({ onViewDetail }) => {
+  const { id: ontologyModelID } = useParams<{ id: string }>();
   const testResultVisible = useUIStore((state) => state.testResultVisible);
   const setTestResultVisible = useUIStore(
     (state) => state.setTestResultVisible
   );
+  const selectNode = useUIStore((state) => state.selectNode);
+  const clearOrchestration = useBusinessStore(
+    (state) => state.clearOrchestration
+  );
 
   // 在父组件中使用 useTestFunction，这样所有子组件共享同一个实例
   const testFunctionHook = useTestFunction();
+
+  // 当路由参数（本体ID）变化时，清空编排
+  useEffect(() => {
+    clearOrchestration();
+    selectNode(null);
+    setTestResultVisible(false);
+  }, [ontologyModelID, clearOrchestration, selectNode, setTestResultVisible]);
 
   // 组件卸载时关闭抽屉
   useEffect(() => {
