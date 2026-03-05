@@ -135,13 +135,15 @@ const PublicTable = React.forwardRef<PublicTableRef, PublicTableProps>(
           }
         },
         formatParams: (formValues, pagination, sorter) => {
+          const hasSorterField = sorter && sorter.direction;
+
           return {
             filter: formValues.keyword,
             pageNo: pagination.current || 1,
             pageSize: pagination.pageSize || 10,
-            ...(sorter && {
-              orderBy: sorter.field as string,
-              order: sorter.direction === 'ascend' ? 'asc' : 'desc'
+            ...(hasSorterField && {
+              orderBy: sorter.field,
+              order: sorter && sorter.direction === 'ascend' ? 'asc' : 'desc'
             })
           } as ListOntologyPublicPropertiesReq;
         },

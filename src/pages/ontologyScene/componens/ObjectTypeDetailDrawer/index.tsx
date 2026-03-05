@@ -688,18 +688,20 @@ export default function ObjectTypeDetailDrawer({
                   </div>
                 </div>
               </div>
-              <div className="flex gap-[8px]">
+              <div className="flex min-w-0 flex-1 gap-[8px]">
                 <div className="w-[90px] text-[14px] leading-[22px] text-[var(--color-text-4)]">
                   对象类型id:
                 </div>
-                <div className="flex items-center gap-[4px]">
-                  <span className="text-[14px] leading-[22px] text-[var(--color-text-1)]">
-                    {displayData?.code ?? '-'}
-                  </span>
+                <div className="flex min-w-0 flex-1 items-center gap-[4px]">
+                  <EllipsisPopover
+                    value={displayData?.code ?? '-'}
+                    wrapperClassName="min-w-0"
+                    className="text-[14px] leading-[22px] text-[var(--color-text-1)]"
+                  ></EllipsisPopover>
                   {displayData?.code && (
                     <IconCopy
                       fontSize={14}
-                      className="hover:cursor-pointer"
+                      className="flex-shrink-0 hover:cursor-pointer"
                       onClick={(e) => {
                         e.stopPropagation();
                         handleCopy(

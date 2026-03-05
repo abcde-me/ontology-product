@@ -25,7 +25,12 @@ import styles from './list.module.scss';
 import LinkDetailDrawer from './components/LinkDetailDrawer';
 import { listOntologyLinkType } from '@/api/ontologySceneLibrary/graph';
 import { deleteOntologyLinkType } from '@/api/ontologySceneLibrary/links';
-import { LinkInfo, LinkType, SyncStatus } from '@/types/graphApi';
+import {
+  LinkInfo,
+  LinkType,
+  ListOntologyLinkTypeReq,
+  SyncStatus
+} from '@/types/graphApi';
 import ObjectTypeTag from '@/pages/ontologyScene/componens/ObjectTypeTag';
 import dayjs from 'dayjs';
 import {
@@ -84,19 +89,10 @@ export default function OntologySceneLinksList() {
 
   // 使用 useTable hook
   const { data, loading, pagination, refresh, submit, onChange } =
-    useWorkflowTable<LinkInfo, any>({
+    useWorkflowTable<LinkInfo, ListOntologyLinkTypeReq>({
       service: async (params) => {
         try {
-          const order = params.orders?.[0]?.asc ? 'asc' : 'desc';
-          const orderBy = params.orders?.[0]?.column;
-
-          const response = await listOntologyLinkType({
-            filter: params.keyword || undefined,
-            pageNo: params.page || 1,
-            pageSize: params.page_size || 10,
-            ontologyModelID: Number(OSId),
-            ...(orderBy && { order, orderBy })
-          });
+          const response = await listOntologyLinkType(params);
 
           const linkInfos = response.data?.result || [];
           const totalCount = response.data?.totalCount || 0;
@@ -105,8 +101,8 @@ export default function OntologySceneLinksList() {
             data: {
               items: linkInfos,
               total: totalCount,
-              page: params.page || 1,
-              page_size: params.page_size || 10
+              page: params.pageNo || 1,
+              page_size: params.pageSize || 10
             }
           };
         } catch (error) {
@@ -115,14 +111,67 @@ export default function OntologySceneLinksList() {
             data: {
               items: [],
               total: 0,
-              page: params.page || 1,
-              page_size: params.page_size || 10
+              page: params.pageNo || 1,
+              page_size: params.pageSize || 10
             }
           };
         }
       },
       form,
-      defaultPageSize: 10
+      defaultPageSize: 10,
+      formatParams: (formValues, pagination, sorter, filters) => {
+        const keyword = formValues.keyword;
+
+        const syncStatusValues = (filters?.syncStatus || []) as
+          | SyncStatus[]
+          | SyncStatus
+          | undefined;
+        const typeFilterValues = (filters?.type || []) as
+          | string[]
+          | string
+          | undefined;
+
+        const syncStatusList = Array.isArray(syncStatusValues)
+          ? syncStatusValues
+          : syncStatusValues !== undefined
+            ? [syncStatusValues]
+            : undefined;
+
+        const typeList: LinkType[] | undefined = Array.isArray(typeFilterValues)
+          ? typeFilterValues
+              .map((val) => {
+                switch (val) {
+                  case '1:1':
+                    return LinkType.ONE_TO_ONE;
+                  case '1:N':
+                    return LinkType.ONE_TO_MANY;
+                  case 'N:N':
+                    return LinkType.MANY_TO_MANY;
+                  default:
+                    return undefined;
+                }
+              })
+              .filter((v): v is LinkType => v !== undefined)
+          : undefined;
+
+        const hasSorter = sorter && sorter.direction;
+
+        return {
+          ontologyModelID: Number(OSId),
+          filter: keyword || undefined,
+          pageNo: pagination.current || 1,
+          pageSize: pagination.pageSize || 10,
+          ...(syncStatusList && syncStatusList.length
+            ? { syncStatusList }
+            : {}),
+          ...(typeList && typeList.length ? { typeList } : {}),
+          ...(hasSorter &&
+            sorter && {
+              orderBy: sorter.field as string,
+              order: sorter.direction === 'ascend' ? 'asc' : 'desc'
+            })
+        };
+      }
     });
 
   // 从 URL 的 search 参数同步到表单
@@ -325,6 +374,7 @@ export default function OntologySceneLinksList() {
     {
       title: '同步时间',
       dataIndex: 'syncTime',
+      sorter: true,
       width: 180,
       render: (value) => (
         <div>{value ? dayjs(value).format('YYYY-MM-DD HH:mm:ss') : '-'}</div>

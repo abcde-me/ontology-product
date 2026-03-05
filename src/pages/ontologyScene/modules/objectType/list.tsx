@@ -28,7 +28,7 @@ import {
   deleteOntologyObjectType,
   getObjectTypeSyncLog
 } from '@/api/ontologySceneLibrary/objectType';
-import { ObjectType } from '@/types/objectType';
+import { ObjectType, ListOntologyObjectTypeReq } from '@/types/objectType';
 import { SyncStatus } from '@/types/graphApi';
 import styles from './list.module.scss';
 import {
@@ -56,25 +56,10 @@ export default function OntologySceneObjectTypeList() {
 
   // 使用 useTable hook
   const { data, loading, pagination, refresh, submit, onChange } =
-    useWorkflowTable<ObjectType, any>({
+    useWorkflowTable<ObjectType, ListOntologyObjectTypeReq>({
       service: async (params) => {
         try {
-          const requestParams: any = {
-            filter: params.keyword,
-            ontologyModelID: ontologyModelID
-              ? Number(ontologyModelID)
-              : undefined,
-            pageNo: params.page || 1,
-            pageSize: params.page_size || 10
-          };
-
-          // 如果有排序参数，添加排序信息
-          if (params.orders && params.orders.length > 0) {
-            requestParams.order = params.orders[0].asc ? 'asc' : 'desc';
-            requestParams.orderBy = params.orders[0].column;
-          }
-
-          const response = await listOntologyObjectType(requestParams);
+          const response = await listOntologyObjectType(params);
 
           if (response.status === 200 && response.code === '') {
             const items = response.data?.result || [];
@@ -83,8 +68,8 @@ export default function OntologySceneObjectTypeList() {
               data: {
                 items,
                 total: response.data?.totalCount || 0,
-                page: params.page || 1,
-                page_size: params.page_size || 10
+                page: params.pageNo || 1,
+                page_size: params.pageSize || 10
               }
             };
           } else {
@@ -93,8 +78,8 @@ export default function OntologySceneObjectTypeList() {
               data: {
                 items: [],
                 total: 0,
-                page: params.page || 1,
-                page_size: params.page_size || 10
+                page: params.pageNo || 1,
+                page_size: params.pageSize || 10
               }
             };
           }
@@ -104,14 +89,36 @@ export default function OntologySceneObjectTypeList() {
             data: {
               items: [],
               total: 0,
-              page: params.page || 1,
-              page_size: params.page_size || 10
+              page: params.pageNo || 1,
+              page_size: params.pageSize || 10
             }
           };
         }
       },
       form,
-      defaultPageSize: 10
+      defaultPageSize: 10,
+      formatParams: (formValues, pagination, sorter, filters) => {
+        const params: ListOntologyObjectTypeReq = {
+          filter: formValues.keyword || undefined,
+          ontologyModelID: ontologyModelID
+            ? Number(ontologyModelID)
+            : undefined,
+          pageNo: pagination.current,
+          pageSize: pagination.pageSize
+        };
+
+        if (sorter && sorter.field) {
+          params.order = sorter.direction === 'ascend' ? 'asc' : 'desc';
+          params.orderBy = sorter.field as string;
+        }
+
+        // 同步状态筛选交给服务端处理，支持多选
+        if (filters?.syncStatus && filters.syncStatus.length > 0) {
+          params.syncStatusList = filters.syncStatus as SyncStatus[];
+        }
+
+        return params;
+      }
     });
 
   // 从 URL 的 search 参数同步到表单
@@ -271,7 +278,6 @@ export default function OntologySceneObjectTypeList() {
       dataIndex: 'syncStatus',
       width: 120,
       filters: OBJECT_TYPE_SYNC_STATUS_FILTERS,
-      onFilter: (value, record) => record.syncStatus === value,
       render: (value: SyncStatus, record: ObjectType) => {
         if (value === undefined || value === null) {
           return null;
