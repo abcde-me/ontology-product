@@ -48,7 +48,8 @@ export default function BehaviorLogList() {
       try {
         const response = await listOntologyObjectType({
           pageNo: 1,
-          pageSize: 100 // 获取所有对象类型
+          pageSize: 1000, // 获取所有对象类型，增加到1000
+          ontologyModelID: ontologyModelID ? Number(ontologyModelID) : undefined
         });
         if (response.data?.result) {
           const filters = response.data.result.map((item) => ({
@@ -62,7 +63,7 @@ export default function BehaviorLogList() {
       }
     };
     fetchObjectTypes();
-  }, []);
+  }, [ontologyModelID]);
 
   // 初始化时获取另一个 tab 的总数（当前 tab 的 total 会由 useTable 自动获取）
   React.useEffect(() => {
@@ -234,8 +235,8 @@ export default function BehaviorLogList() {
       }
 
       // 处理对象类型过滤
-      if (filters.ontologyObjectTypeName) {
-        setObjectTypeFilter(filters.ontologyObjectTypeName);
+      if (filters.associated_object_type) {
+        setObjectTypeFilter(filters.associated_object_type);
       } else {
         setObjectTypeFilter([]);
       }
