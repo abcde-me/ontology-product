@@ -70,6 +70,9 @@ const ObjectTypeIconSelector: React.FC<ObjectTypeIconSelectorProps> = ({
     setSelectedIconOption(
       options.find((opt) => opt.value === newValue) || options[0]
     );
+    if (newValue) {
+      onChange?.(newValue);
+    }
   }, [initialValue, options]);
 
   const getLabel = (value: string) => {

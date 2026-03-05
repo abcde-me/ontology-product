@@ -123,6 +123,8 @@ async function defaultFetchAttributes(
   throw new Error(res.message || '获取链接属性列表失败');
 }
 
+const defaultPageSize = 10;
+
 export default function LinkDetailDrawer({
   visible,
   onClose,
@@ -132,8 +134,8 @@ export default function LinkDetailDrawer({
   fetchBasicInfo,
   fetchInstances,
   fetchAttributes,
-  defaultInstancesPageSize = 10,
-  defaultAttributesPageSize = 10
+  defaultInstancesPageSize = defaultPageSize,
+  defaultAttributesPageSize = defaultPageSize
 }: LinkDetailDrawerProps) {
   const history = useHistory();
   const { id: OSId } = useParams<{ id: string }>();
@@ -514,7 +516,7 @@ export default function LinkDetailDrawer({
                   className="[&_.arco-table-td]:py-[10px] [&_.arco-table-th]:bg-[#f7f8fa] [&_.arco-table-th]:py-[10px]"
                 />
               )}
-              {instancesPagination.total > 0 && (
+              {instancesPagination.total > defaultPageSize && (
                 <div className="flex justify-end pt-[16px]">
                   <Pagination
                     current={instancesPagination.current}
@@ -542,7 +544,7 @@ export default function LinkDetailDrawer({
                 noDataElement={<NoDataCard title="暂无数据" />}
                 className="[&_.arco-table-td]:py-[8px] [&_.arco-table-th]:bg-[#f7f8fa] [&_.arco-table-th]:py-[8px]"
               />
-              {attributesPagination.total > 0 && (
+              {attributesPagination.total > defaultPageSize && (
                 <div className="flex justify-end pt-[16px]">
                   <Pagination
                     current={attributesPagination.current}

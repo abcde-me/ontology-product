@@ -470,8 +470,16 @@ export default function ObjectTypeDetailDrawer({
     if (!record.ontologyPublicPropertiesName) {
       return;
     }
-    const url = `/tenant/compute/modaforge/ontologyScene/detail/${ontologyModelID}/attributes/list?tab=public&search=${encodeURIComponent(record.ontologyPublicPropertiesName || '')}`;
-    history.push(url);
+    const url = `/tenant/compute/modaforge/ontologyScene/detail/${ontologyModelID}/attributes/list?tab=public&search=${encodeURIComponent(
+      record.ontologyPublicPropertiesName || ''
+    )}`;
+    const currentUrl = `${history.location.pathname}${history.location.search}`;
+
+    if (currentUrl === url) {
+      window.location.reload();
+    } else {
+      history.push(url);
+    }
   };
 
   // 属性表格列定义 - 直接使用接口定义的字段名

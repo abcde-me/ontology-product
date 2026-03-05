@@ -55,7 +55,9 @@ export default function NormalTable({ onTotalChange }: NormalTableProps = {}) {
     const fetchObjectTypes = async () => {
       try {
         const response = await listOntologyObjectType({
-          ontologyModelID: Number(ontologyModelID)
+          ontologyModelID: Number(ontologyModelID),
+          pageNo: -1,
+          pageSize: -1
         });
 
         if (response.status === 200 && response.data?.result) {

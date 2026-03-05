@@ -104,7 +104,9 @@ export default function OntologySceneLinksList() {
     const fetchObjectTypes = async () => {
       try {
         const params: ListOntologyObjectTypeReq = {
-          ontologyModelID: OSId ? Number(OSId) : undefined
+          ontologyModelID: OSId ? Number(OSId) : undefined,
+          pageNo: -1,
+          pageSize: -1
         };
         const res = await listOntologyObjectType(params);
         const list: ObjectType[] = res.data?.result || [];
