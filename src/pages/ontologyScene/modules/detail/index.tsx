@@ -145,7 +145,7 @@ export default function OntologySceneDetail() {
       children: [
         {
           key: ONTOLOGY_SCENE_MENU_ITEM_KEYS.BEHAVIOR_ACTIONS,
-          title: '行为动作',
+          title: '行为',
           icon: <MenuBehaviorIcon fontSize={20} />
         },
         {

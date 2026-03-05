@@ -22,10 +22,10 @@ import ObjectSmallIcon from '../../assets/object-small.svg';
 import LinkSmallIcon from '../../assets/link-small.svg';
 import BehaviorSmallIcon from '../../assets/behavior-small.svg';
 import FunctionSmallIcon from '../../assets/function-small.svg';
-import ObjectTypeCreateIcon from '../../assets/object-type-create.svg';
-import LinkCreateIcon from '../../assets/link-create.svg';
-import BehaviorCreateIcon from '../../assets/behavior-create.svg';
-import TestCreateIcon from '../../assets/test-create.svg';
+import ObjectTypeCreateIcon from '../../assets/object-type-create.png';
+import LinkCreateIcon from '../../assets/link-create.png';
+import BehaviorCreateIcon from '../../assets/behavior-create.png';
+import TestCreateIcon from '../../assets/test-create.png';
 import { ONTOLOGY_SCENE_MENU_ITEM_KEYS } from '@/common/constants';
 import SceneModal, { SceneFormData } from './components/SceneModal';
 import styles from './index.module.scss';
@@ -144,7 +144,7 @@ const SceneCard: React.FC<SceneCardProps> = ({
             />
 
             {isHovered && (
-              <div className="flex items-center gap-[8px]">
+              <div className="ml-[16px] flex items-center gap-[8px]">
                 {/* <Popover content="编辑">
                   <IconEdit
                     className="h-4 w-4 cursor-pointer text-[#4e5969] transition-colors hover:text-[#165dff]"
@@ -372,8 +372,8 @@ export default function OntologySceneList() {
   // 处理删除场景
   const handleDelete = (item: SceneCardItem) => {
     Modal.confirm({
-      title: '确认删除',
-      content: `确定要删除场景"${item.name || ''}"吗？`,
+      title: '确定删除此本体场景吗？',
+      content: `删除后，不可恢复`,
       onOk: async () => {
         try {
           if (!item.id) {
@@ -420,94 +420,40 @@ export default function OntologySceneList() {
   // 流程步骤配置
   const processSteps: SceneProcessStep[] = [
     {
-      icon: <ObjectTypeCreateIcon />,
-      title: '定义对象类型',
+      icon: <img src={ObjectTypeCreateIcon} />,
+      title: '定义对象',
       description: (
         <>
-          <span>将业务中的设备、人映射为标准数字对象,构筑数据模型的基石</span>
-          <Link
-            type="text"
-            onClick={() => {
-              history.push(
-                `/tenant/compute/modaforge/ontologyScene/detail/create/${ONTOLOGY_SCENE_MENU_ITEM_KEYS.OBJECT_TYPE}/create`
-              );
-            }}
-            className="ml-1 text-xs"
-          >
-            创建对象类型
-          </Link>
+          <span>将现实业务中的人员、设备等要素，转化为标准的数字模型</span>
         </>
       )
     },
     {
-      icon: <LinkCreateIcon />,
+      icon: <img src={LinkCreateIcon} />,
       title: '建立链接',
       description: (
         <>
-          <span>定义对象间的业务关联,将离散数据编织成可探索的关系网络</span>
-          <Link
-            type="text"
-            onClick={() => {
-              history.push(
-                `/tenant/compute/modaforge/ontologyScene/detail/create/${ONTOLOGY_SCENE_MENU_ITEM_KEYS.LINKS}/create`
-              );
-            }}
-            className="ml-1 text-xs"
-          >
-            创建链接
-          </Link>
+          <span>配置对象之间的逻辑关联，将数据节点连接成清晰的业务关系网</span>
         </>
       )
     },
     {
-      icon: <BehaviorCreateIcon />,
+      icon: <img src={BehaviorCreateIcon} />,
       title: '配置行为',
       description: (
         <>
-          <span>安全的业务操作指令封装,使系统升级为可操作的工作台</span>
-          <Link
-            type="text"
-            onClick={() => {
-              history.push(
-                `/tenant/compute/modaforge/ontologyScene/detail/create/${ONTOLOGY_SCENE_MENU_ITEM_KEYS.BEHAVIOR_ACTIONS}/create/_NEW_`
-              );
-            }}
-            className="ml-1 text-xs"
-          >
-            创建动作
-          </Link>
-          <span className="mx-1 text-xs">或</span>
-          <Link
-            type="text"
-            onClick={() => {
-              history.push(
-                `/tenant/compute/modaforge/ontologyScene/detail/create/${ONTOLOGY_SCENE_MENU_ITEM_KEYS.FUNCTIONS}/create`
-              );
-            }}
-            className="text-xs"
-          >
-            创建函数
-          </Link>
+          <span>
+            定义对象的业务指令与动作，让静态的数字模型具备执行任务的能力
+          </span>
         </>
       )
     },
     {
-      icon: <TestCreateIcon />,
-      title: '测试行为',
+      icon: <img src={TestCreateIcon} />,
+      title: '仿真模拟',
       description: (
         <>
-          <span>文案待提供</span>
-          <Link
-            type="text"
-            onClick={() => {
-              history.push(
-                `/tenant/compute/modaforge/ontologyScene/detail/create/${ONTOLOGY_SCENE_MENU_ITEM_KEYS.BEHAVIOR_ACTIONS}`
-              );
-            }}
-            className="ml-1 text-xs"
-          >
-            去测试
-          </Link>
+          <span>引入规则模拟运行，验证业务流程的自动化判断与决策效果</span>
         </>
       )
     }
@@ -524,7 +470,7 @@ export default function OntologySceneList() {
       <ExpandableProcessFlow
         title="本体场景库"
         description="将离散的底层数据映射为可视、可管、可执行的业务对象,构建面向AI时代的语义基础设施"
-        toggleText="收起"
+        toggleText="操作引导"
         defaultExpanded={true}
         steps={processSteps as any}
       />
@@ -573,12 +519,13 @@ export default function OntologySceneList() {
       )}
 
       {/* 分页 */}
-      {totalCount > pageSize && (
+      {totalCount > 20 && (
         <div className="flex items-center justify-end py-4">
           <Pagination
             current={currentPage}
             pageSize={pageSize}
             total={totalCount}
+            sizeCanChange
             sizeOptions={[20, 40, 60, 80]}
             onChange={(page, pageSize) => {
               setCurrentPage(page);
