@@ -3,6 +3,7 @@ import dayjs from 'dayjs';
 import { UiType } from '@/pages/ontologyScene/types/ontologyFunction';
 import { getOntologyObjectTypeDetail } from '@/api/ontologySceneLibrary/objectType';
 import { OBJECT_TYPE_ICON_OPTIONS } from '@/pages/ontologyScene/common/constants';
+import { ObjectTypeTagList } from '@/pages/ontologyScene/componens';
 
 // ObjectRef 渲染组件 - 用于显示对象引用
 const ObjectRefRenderer: React.FC<{ objectTypeId: number; pk: string }> = ({
@@ -196,6 +197,101 @@ export const formatParamDisplayValue = (
       return getObjectTypeName(objectTypeId);
     }
     return String(value);
+  }
+
+  // 处理 ObjectSet 类型 - 渲染为 ObjectTypeTagList 组件
+  if (uiType === UiType.ObjectSet) {
+    let objectTypeList: any[] = [];
+
+    // 如果是对象格式 { objectTypeID: 85, objInsID: ['王五104', '王五103'] }
+    if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
+      const objectTypeId =
+        value.objectTypeID || value.object_type || value.objectType;
+      const objInsIDs = value.objInsID || value.pks || [];
+
+      if (objectTypeId && Array.isArray(objInsIDs) && objInsIDs.length > 0) {
+        // 为每个 objInsID 创建一个对象
+        objectTypeList = objInsIDs.map((pk: string) => ({
+          name: pk,
+          ontologyObjectTypeName: pk,
+          id: objectTypeId,
+          ontologyObjectTypeId: String(objectTypeId),
+          ontologyObjectTypeIcon: value.icon || undefined
+        }));
+      }
+    }
+    // 如果是字符串格式，需要先解析
+    else if (typeof value === 'string') {
+      // 处理 ObjectSet([{...}]) 格式
+      const objectSetMatch = value.match(/ObjectSet\((\[.+\])\)/);
+      if (objectSetMatch) {
+        try {
+          // 解析 JSON 数组
+          let jsonStr = objectSetMatch[1];
+
+          // 修复 pk 值没有引号的问题
+          // 将 "pk":值 替换为 "pk":"值"
+          jsonStr = jsonStr.replace(/"pk":([^,}\]]+)/g, (match, pkValue) => {
+            // 如果值已经有引号，不处理
+            if (pkValue.trim().startsWith('"')) {
+              return match;
+            }
+            // 否则给值加上引号
+            return `"pk":"${pkValue.trim()}"`;
+          });
+
+          const parsedArray = JSON.parse(jsonStr);
+          objectTypeList = parsedArray.map((item: any) => ({
+            name: item.pk || '',
+            ontologyObjectTypeName: item.pk || '',
+            id: item.object_type,
+            ontologyObjectTypeId: String(item.object_type),
+            // icon 字段可以从 item 中获取，如果没有则不传
+            ontologyObjectTypeIcon: item.icon || undefined
+          }));
+        } catch (error) {
+          console.error('Failed to parse ObjectSet:', error);
+          return String(value);
+        }
+      }
+    }
+    // 如果是数组格式
+    else if (Array.isArray(value)) {
+      objectTypeList = value.map((item: any) => {
+        // 如果是对象格式 { objectTypeID: 85, objInsID: "王五104" }
+        if (typeof item === 'object' && item !== null) {
+          const objectTypeId =
+            item.objectTypeID || item.object_type || item.objectType || item.id;
+          const pk = item.objInsID || item.pk || item.name;
+          const icon = item.icon || item.ontologyObjectTypeIcon;
+
+          return {
+            name: pk || '',
+            ontologyObjectTypeName: pk || '',
+            id: objectTypeId,
+            ontologyObjectTypeId: String(objectTypeId),
+            ontologyObjectTypeIcon: icon
+          };
+        }
+        return item;
+      });
+    }
+
+    if (objectTypeList.length === 0) {
+      return '未配置';
+    }
+
+    // 转换为 ObjectTypeTagList 需要的格式
+    const tags = objectTypeList.map((item: any) => ({
+      ontologyObjectTypeName: item.name || item.ontologyObjectTypeName || '',
+      ontologyObjectTypeId: item.id || item.ontologyObjectTypeId,
+      ontologyObjectTypeIcon: item.icon || item.ontologyObjectTypeIcon,
+      onClick: () => {
+        console.log('Click object type:', item);
+      }
+    }));
+
+    return <ObjectTypeTagList tags={tags} />;
   }
 
   // 处理 Uploader 类型 - 显示文件名列表
