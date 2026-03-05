@@ -316,6 +316,14 @@ export interface ListOntologyLinkTypeReq {
    * 目标对象类型列表
    */
   targetObjectTypeIDList?: number[];
+  /**
+   * 同步状态列表
+   */
+  syncStatusList?: SyncStatus[];
+  /**
+   * 链接类型列表
+   */
+  typeList?: LinkType[];
 }
 
 export enum SyncStatus {

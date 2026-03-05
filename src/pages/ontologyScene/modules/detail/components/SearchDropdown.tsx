@@ -239,11 +239,11 @@ const SearchDropdown: React.FC<SearchDropdownProps> = ({
         <div className="min-w-0 flex-1">
           <div className="mb-[4px] flex items-center gap-[8px]">
             <EllipsisPopover
-              preferTypography
               value={highlightSearchKeyword(
                 item.name || '-',
                 searchValue.trim()
               )}
+              wrapperClassName="min-w-0"
               className="text-[14px] leading-[22px] text-[var(--color-text-1)]"
             />
             <span className="flex-shrink-0 text-[14px] leading-[22px] text-[var(--color-text-1)]">
@@ -251,8 +251,8 @@ const SearchDropdown: React.FC<SearchDropdownProps> = ({
             </span>
           </div>
           <EllipsisPopover
-            preferTypography
-            value={item.description || '描述说明文案'}
+            value={item.description || '-'}
+            wrapperClassName="min-w-0 flex-1"
             className="text-[12px] leading-[18px] text-[var(--color-text-4)]"
           />
         </div>

@@ -1,5 +1,6 @@
 import { Message, Popover } from '@arco-design/web-react';
 import { IconCopy } from '@arco-design/web-react/icon';
+import { EllipsisPopover } from '@ceai-front/arco-material';
 import copy from 'copy-to-clipboard';
 import React from 'react';
 
@@ -29,9 +30,11 @@ const Node = ({ id, data }) => {
           <span className="w-[30px] text-[12px] leading-[22px] text-[var(--color-text-4)]">
             id:
           </span>
-          <span className="text-[14px] leading-[22px] text-[var(--color-text-1)]">
-            {data.code}
-          </span>
+          <EllipsisPopover
+            value={data.code}
+            wrapperClassName="flex-1 min-w-0"
+            className="text-[14px] leading-[22px] text-[var(--color-text-1)]"
+          ></EllipsisPopover>
           <Popover content="复制">
             <IconCopy
               fontSize={14}

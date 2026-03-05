@@ -39,6 +39,10 @@ export interface ListOntologyObjectTypeReq {
    * Example: 10
    */
   pageSize?: number;
+  /**
+   * 同步状态
+   */
+  syncStatusList?: SyncStatus[];
 }
 
 export interface ObjectType {
