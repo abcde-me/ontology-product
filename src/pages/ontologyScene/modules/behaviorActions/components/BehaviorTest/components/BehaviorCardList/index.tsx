@@ -1,5 +1,6 @@
 import React from 'react';
 import { NoDataCard } from '@ceai-front/arco-material';
+import { Message } from '@arco-design/web-react';
 import { BehaviorCard } from '../BehaviorCard';
 import { BehaviorItem } from '../../types';
 import { useBusinessStore } from '../../store/businessStore';
@@ -16,9 +17,18 @@ export const BehaviorCardList: React.FC<BehaviorCardListProps> = ({
   onViewDetail
 }) => {
   const addNode = useBusinessStore((state) => state.addNode);
+  const orchestrationNodes = useBusinessStore(
+    (state) => state.orchestrationNodes
+  );
   const selectNode = useUIStore((state) => state.selectNode);
 
   const handleCardClick = (behavior: BehaviorItem) => {
+    // 检查节点数量限制
+    if (orchestrationNodes.length >= 99) {
+      Message.warning('最多只能添加99个节点');
+      return;
+    }
+
     const nodeId = addNode(behavior);
     selectNode(nodeId);
   };
