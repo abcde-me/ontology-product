@@ -1,8 +1,12 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { OsDrawer } from '@/pages/ontologyScene/componens';
 import { DotStatus, NoDataCard } from '@ceai-front/arco-material';
 import { IconLoading } from '@arco-design/web-react/icon';
+import { Tabs } from '@arco-design/web-react';
 import { TestFunctionInfo } from '@/pages/ontologyScene/hooks/useTestFunction';
+import { BehaviorLogItem } from '@/pages/ontologyScene/modules/behaviorLog/types';
+
+const TabPane = Tabs.TabPane;
 
 interface TestResultDrawerProps {
   visible: boolean;
@@ -18,6 +22,9 @@ export const TestResultDrawer: React.FC<TestResultDrawerProps> = ({
   // 从 props 接收 testFunctionHook
   const { runLog: runInfo, testIng, loading, stopTest } = testFunctionHook;
 
+  // 当前激活的 tab
+  const [activeTab, setActiveTab] = useState<string>('0');
+
   // 处理关闭抽屉
   const handleClose = () => {
     // 如果正在测试，停止测试
@@ -27,83 +34,107 @@ export const TestResultDrawer: React.FC<TestResultDrawerProps> = ({
     onClose();
   };
 
-  // 渲染标题（包含状态）
-  const renderTitle = () => {
-    // 先判断是否正在测试（即使 runInfo 还没有）
-    if (loading || testIng) {
-      return (
-        <div className="flex items-center gap-2">
-          <span>测试结果</span>
-          <div className="flex items-center gap-2 text-sm text-[#6E7B8D]">
-            测试中
-            <IconLoading style={{ color: '#184FF2' }} />
-          </div>
-        </div>
-      );
-    }
+  // 判断是否为多个行为测试结果
+  const isMultipleResults =
+    runInfo &&
+    Array.isArray(runInfo.runLog) &&
+    runInfo.runLog.length > 0 &&
+    'name' in runInfo.runLog[0];
 
-    if (!runInfo) {
-      return <span>测试结果</span>;
-    }
-
-    if (runInfo.run_status === 1) {
-      return (
-        <div className="flex items-center gap-2">
-          <span>测试结果</span>
-          <div className="flex items-center gap-2 text-sm text-[#6E7B8D]">
-            测试中
-            <IconLoading style={{ color: '#184FF2' }} />
-          </div>
-        </div>
-      );
-    }
-
+  // 渲染状态信息（在日志内容上方）
+  const renderStatusInfo = (item: BehaviorLogItem) => {
     const statusConfig = {
-      2: { text: '运行成功', color: '#00B981' },
+      1: { text: '测试中', color: '#6E7B8D' },
+      2: { text: '测试成功', color: '#00B981' },
       3: { text: '运行失败', color: '#F53F3F' },
       4: { text: 'KILL', color: '#F53F3F' }
     };
 
-    const config = statusConfig[runInfo.run_status as 2 | 3 | 4];
-    if (!config) {
-      return <span>测试结果</span>;
-    }
-
-    // 计算总运行时间
-    // 如果 runInfo 是单个对象，直接使用其 duration
-    // 如果将来支持多个行为，可以在这里累加
-    const totalDuration = Number(runInfo.duration) || 0;
-
-    // 将毫秒转换为秒，保留2位小数
-    const durationInSeconds = (totalDuration / 1000).toFixed(2);
+    const config = statusConfig[item.run_status as 1 | 2 | 3 | 4];
+    const duration = Number(item.duration) || 0;
+    const durationInSeconds = (duration / 1000).toFixed(2);
 
     return (
-      <div className="flex items-center gap-2">
-        <span>测试结果</span>
-        <DotStatus text={config.text} color={config.color} />
-        <span className="text-sm text-[#94A3B8]">({durationInSeconds}s)</span>
+      <div className="mb-4 flex items-center gap-2">
+        {config && (
+          <>
+            <DotStatus text={config.text} color={config.color} />
+            <span className="text-sm text-[#94A3B8]">
+              ({durationInSeconds}s)
+            </span>
+          </>
+        )}
+        {item.run_status === 1 && (
+          <IconLoading style={{ color: '#184FF2', fontSize: '14px' }} />
+        )}
       </div>
     );
+  };
+
+  // 渲染单个行为的日志内容
+  const renderLogContent = (logItem: BehaviorLogItem) => {
+    return (
+      <pre className="m-0 whitespace-pre-wrap break-words font-mono text-xs leading-relaxed text-[#1d2129]">
+        {logItem.run_log || ''}
+      </pre>
+    );
+  };
+
+  // 渲染内容区域
+  const renderContent = () => {
+    if (loading || testIng) {
+      return <div className="text-sm text-[#86909C]">运行中...</div>;
+    }
+
+    if (!runInfo) {
+      return <NoDataCard type="block" title="请先在左侧配置参数并点击测试" />;
+    }
+
+    // 多个行为测试结果：使用 Tabs
+    if (isMultipleResults) {
+      const behaviorList = runInfo.runLog as BehaviorLogItem[];
+
+      return (
+        <Tabs
+          activeTab={activeTab}
+          onChange={setActiveTab}
+          type="line"
+          style={{ height: '100%' }}
+        >
+          {behaviorList.map((item, index) => (
+            <TabPane
+              key={String(index)}
+              title={item.name || `行为 ${index + 1}`}
+            >
+              <div className="pt-4">
+                {renderStatusInfo(item)}
+                {renderLogContent(item)}
+              </div>
+            </TabPane>
+          ))}
+        </Tabs>
+      );
+    }
+
+    // 单个行为测试结果：直接显示日志
+    const firstItem = runInfo.runLog[0] as BehaviorLogItem;
+    if (firstItem && firstItem.run_log) {
+      return renderLogContent(firstItem);
+    }
+
+    return <NoDataCard type="block" title="暂无测试结果" />;
   };
 
   return (
     <OsDrawer
       visible={visible}
       onCancel={handleClose}
-      title={renderTitle()}
+      title="测试结果"
       footer={null}
       width={552}
     >
       <div className="h-[calc(100vh-140px)] overflow-y-auto rounded-lg bg-[#F7F8FA] p-4">
-        {loading || testIng ? (
-          <div className="text-sm text-[#86909C]">运行中...</div>
-        ) : !runInfo ? (
-          <NoDataCard type="block" title="请先在左侧配置参数并点击测试" />
-        ) : (
-          <pre className="m-0 whitespace-pre-wrap break-words font-mono text-xs leading-relaxed text-[#1d2129]">
-            {runInfo.run_log || ''}
-          </pre>
-        )}
+        {renderContent()}
       </div>
     </OsDrawer>
   );
