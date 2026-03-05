@@ -12,25 +12,27 @@ interface OrchestrationNodeProps {
   onDelete: () => void;
 }
 
-// 参数显示项组件 - 处理异步显示值
+// 参数显示项组件 - 处理异步显示值和 React 组件
 interface ParamDisplayItemProps {
   paramName: string;
   paramCode: string;
-  displayValueOrPromise: string | Promise<string>;
+  displayValueOrPromise: string | Promise<string> | React.ReactNode;
   errorMessage?: string;
 }
 
 const ParamDisplayItem: React.FC<ParamDisplayItemProps> = React.memo(
-  ({ paramName, paramCode, displayValueOrPromise, errorMessage }) => {
-    const [displayValue, setDisplayValue] = React.useState<string>('');
+  ({ paramName, displayValueOrPromise, errorMessage }) => {
+    const [displayValue, setDisplayValue] = React.useState<React.ReactNode>('');
     const [isLoading, setIsLoading] = React.useState(false);
 
     React.useEffect(() => {
+      // 如果是字符串，直接设置
       if (typeof displayValueOrPromise === 'string') {
         setDisplayValue(displayValueOrPromise);
         setIsLoading(false);
-      } else {
-        // 如果是 Promise，等待解析
+      }
+      // 如果是 Promise，等待解析
+      else if (displayValueOrPromise instanceof Promise) {
         setIsLoading(true);
         displayValueOrPromise
           .then((value) => {
@@ -41,6 +43,11 @@ const ParamDisplayItem: React.FC<ParamDisplayItemProps> = React.memo(
             setDisplayValue('加载失败');
             setIsLoading(false);
           });
+      }
+      // 如果是 React 组件，直接设置
+      else {
+        setDisplayValue(displayValueOrPromise);
+        setIsLoading(false);
       }
     }, [displayValueOrPromise]);
 
@@ -83,6 +90,7 @@ const ParamDisplayItem: React.FC<ParamDisplayItemProps> = React.memo(
       );
     }
 
+    // 对于 Promise 和 React 组件，总是重新渲染
     return false;
   }
 );
@@ -106,7 +114,6 @@ export const OrchestrationNode: React.FC<OrchestrationNodeProps> = ({
 
   // 获取错误数量
   const errorCount = getNodeErrorCount(node.id);
-  const hasErrors = errorCount > 0;
 
   const handleDelete = (e: React.MouseEvent) => {
     e.stopPropagation();
