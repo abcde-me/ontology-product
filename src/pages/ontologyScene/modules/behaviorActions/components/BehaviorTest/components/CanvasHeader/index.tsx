@@ -93,9 +93,7 @@ export const CanvasHeader: React.FC<CanvasHeaderProps> = ({
         return buildActionTestItem(node.behavior, config);
       });
 
-      const target = orchestrationNodes.map(
-        (node) => node.behavior.functionCode!
-      );
+      const target = orchestrationNodes.map((node) => node.behavior.code!);
 
       console.log('测试数据:', {
         list_data,
