@@ -52,6 +52,10 @@ export interface OntologyFunctionDetail {
    * 更新人
    */
   updateUser?: string;
+  /**
+   * 绑定行为
+   */
+  boundAction?: boolean;
 }
 
 /**
@@ -216,6 +220,10 @@ export const DEFAULT_FUNCTION_SCHEMA: OntologyFunctionSchema = {
  */
 export interface OntologyFunctionItem {
   /**
+   * 绑定行为
+   */
+  boundAction?: boolean;
+  /**
    * 函数唯一编码
    */
   code?: string;
@@ -259,6 +267,7 @@ export interface OntologyFunctionItem {
    * 更新人
    */
   updateUser?: string;
+  b;
 }
 
 export interface OntologyFunctionSchema {

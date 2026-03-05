@@ -15,6 +15,7 @@ import {
 import {
   Button,
   Form,
+  FormItemProps,
   Input,
   Message,
   ResizeBox,
@@ -44,7 +45,19 @@ import { useParams } from 'react-router-dom';
 import { UploadItem } from '@arco-design/web-react/es/Upload';
 import useTestFunction from '@/pages/ontologyScene/hooks/useTestFunction';
 
-export const FunctionsSetting = () => {
+const FormItemWithTooltip = (props: { content: string } & FormItemProps) => {
+  const { content, ...otherProps } = props;
+  return (
+    <Tooltip content={props.content}>
+      <Form.Item {...otherProps}></Form.Item>
+    </Tooltip>
+  );
+};
+
+export const FunctionsSetting = (props: {
+  disabled: boolean;
+  extra?: React.ReactNode;
+}) => {
   const { form, disabled: readonly, isSubmitting } = Form.useFormContext();
   const ref = useRef(null);
   const [isFullscreen, { enterFullscreen, exitFullscreen }] =
@@ -54,13 +67,12 @@ export const FunctionsSetting = () => {
   const { id: OSid, functionId } = useParams<Record<string, string>>();
 
   const {
-    loading: testLoading,
     startTest,
     stopTest,
     runLog: runLogInfo,
     testIng
   } = useTestFunction();
-  const disabled = readonly || testIng;
+  const disabled = readonly || testIng || props.disabled;
 
   const { data: content, loading: SDKLoading } = useRequest(() => {
     return getFunctionSDK();
@@ -131,7 +143,12 @@ export const FunctionsSetting = () => {
                     {fields.map(({ field, key }, index) => {
                       return (
                         <div className={styles['params-item']} key={index}>
-                          <Form.Item
+                          <FormItemWithTooltip
+                            content={
+                              props.disabled
+                                ? '该函数已被行为绑定，不可修改'
+                                : ''
+                            }
                             className={`mb-0 flex-1 ${styles['param-name-item']}`}
                             field={`${field}.name`}
                             rules={getInputAndOutputRules('input')}
@@ -140,8 +157,14 @@ export const FunctionsSetting = () => {
                             )}
                           >
                             <Input placeholder={''} disabled={disabled} />
-                          </Form.Item>
-                          <Form.Item
+                          </FormItemWithTooltip>
+
+                          <FormItemWithTooltip
+                            content={
+                              props.disabled
+                                ? '该函数已被行为绑定，不可修改'
+                                : ''
+                            }
                             className={'mb-0 flex-1 overflow-hidden'}
                             field={`${field}.uiTypeAndValue`}
                             rules={[
@@ -179,7 +202,7 @@ export const FunctionsSetting = () => {
                             ]}
                           >
                             <DataWithUiSelect disabled={disabled} />
-                          </Form.Item>
+                          </FormItemWithTooltip>
                           <IconDelete
                             className={`mt-2 text-[16px] hover:cursor-pointer`}
                             onClick={() => {
@@ -241,7 +264,12 @@ export const FunctionsSetting = () => {
                           className={`${styles['params-item']} ${styles['output-params-item']}`}
                           key={index}
                         >
-                          <Form.Item
+                          <FormItemWithTooltip
+                            content={
+                              props.disabled
+                                ? '该函数已被行为绑定，不可修改'
+                                : ''
+                            }
                             className={`mb-0 flex-1 ${styles['param-name-item']}`}
                             field={`${field}.name`}
                             rules={getInputAndOutputRules('output')}
@@ -250,8 +278,13 @@ export const FunctionsSetting = () => {
                             )}
                           >
                             <Input placeholder={''} disabled={disabled} />
-                          </Form.Item>
-                          <Form.Item
+                          </FormItemWithTooltip>
+                          <FormItemWithTooltip
+                            content={
+                              props.disabled
+                                ? '该函数已被行为绑定，不可修改'
+                                : ''
+                            }
                             className={`mb-0  flex-1`}
                             field={`${field}.type`}
                           >
@@ -260,7 +293,7 @@ export const FunctionsSetting = () => {
                               options={OutputTypeOptions}
                               disabled={disabled}
                             />
-                          </Form.Item>
+                          </FormItemWithTooltip>
                           <IconDelete
                             className={`mt-2 text-[16px] hover:cursor-pointer`}
                             onClick={() => {
@@ -337,24 +370,19 @@ export const FunctionsSetting = () => {
             </ProButton>
           )}
           <Button
-            icon={
-              testLoading ? (
-                <IconLoading />
-              ) : testIng ? (
-                <IconRecordStop />
-              ) : (
-                <IconPlayArrowFill />
-              )
-            }
+            icon={testIng ? <IconRecordStop /> : <IconPlayArrowFill />}
             size={'mini'}
             onClick={testIng ? stopTest : handleTest}
-            disabled={testLoading}
           >
             {testIng ? '停止运行' : '运行'}
           </Button>
         </div>
         <div className={`w-max ${styles['fullscreen-statue']}`}></div>
-        <Form.Item noStyle field={'content'}>
+        <FormItemWithTooltip
+          content={props.disabled ? '该函数已被行为绑定，不可修改' : ''}
+          noStyle
+          field={'content'}
+        >
           <FunctionScript
             className={classNames({
               'hidden-border': showDoc
@@ -363,7 +391,7 @@ export const FunctionsSetting = () => {
             disabled={disabled}
             isFullscreen={isFullscreen}
           />
-        </Form.Item>
+        </FormItemWithTooltip>
       </div>
       {showDoc && (
         <ResizeBoxWithCursorChange

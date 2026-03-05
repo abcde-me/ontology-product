@@ -25,12 +25,13 @@ import { Transaction } from '@codemirror/state';
 import classNames from 'classnames';
 import { BehaviorLogItem } from '@/pages/ontologyScene/modules/behaviorLog/types';
 import { ResizeBoxWithCursorChange } from '@/pages/ontologyScene/componens';
+import { RunStatus } from '@/pages/ontologyScene/hooks/useTestFunction';
 
 const extension = [python(), lintGutter()];
 
 export const FunctionScript = (
   props: CustomFormItemCompProps<string> & {
-    runInfo?: BehaviorLogItem;
+    runInfo?: RunStatus;
     isFullscreen: boolean;
   }
 ) => {
@@ -39,7 +40,6 @@ export const FunctionScript = (
   const [logOpen, setLogOpen] = useState(false);
   const extensions = useMemo(() => {
     if (isNil(value)) return extension;
-    // return extension;
     return extension.concat([getFreezeRanges(value)]);
   }, [value]);
 
@@ -71,7 +71,7 @@ export const FunctionScript = (
           }}
         />
       </div>
-      {!!runInfo && (
+      {!!runInfo?.run_status && (
         <ResizeBoxWithCursorChange
           directions={['top']}
           className={styles['function-footer']}
@@ -113,7 +113,7 @@ export const FunctionScript = (
               hidden: !logOpen
             })}
           >
-            {runInfo.run_log}
+            {runInfo.runLog?.map((item, index) => item.run_log).join('\n')}
           </div>
         </ResizeBoxWithCursorChange>
       )}

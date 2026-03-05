@@ -20,6 +20,13 @@
     flex-basis: 50%;
     flex-shrink: 0;
     overflow: hidden;
+
+    :global {
+      .arco-select-view {
+        border-top-left-radius: 0 !important;
+        border-bottom-left-radius: 0 !important;
+      }
+    }
   }
 }
 

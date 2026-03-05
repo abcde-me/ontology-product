@@ -219,7 +219,7 @@ export const BehaviorDetail = (props: IProps) => {
             <div className={'h-full w-full'}>
               <Table
                 pagination={false}
-                data={actionDetail?.params || []}
+                data={inputParams}
                 columns={paramColumns}
                 border={false}
                 noDataElement={<NoDataCard title="暂无数据" type={'global'} />}
@@ -231,6 +231,9 @@ export const BehaviorDetail = (props: IProps) => {
           )}
           {activeTab === 'rules' && (
             <>
+              {!validateRules.length && (
+                <NoDataCard type={'block'} title={'暂无校验规则'} />
+              )}
               {validateRules?.map((rule, index) => (
                 <ValidateRuleCard key={`${rule.rule_name}_index`} rule={rule} />
               ))}

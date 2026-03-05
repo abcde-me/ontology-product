@@ -211,9 +211,11 @@ export const buildFormFieldValidateRules = (
             }
             break;
           default:
-            if (!(ruleConfig as EnumRule).options.includes(value)) {
+            // 字符串和数字类型的枚举值校验，都处理成字符串进行校验
+            if (!(ruleConfig as EnumRule).options.includes(value.toString())) {
               onError(failMessage);
             }
+            break;
         }
       }
     }

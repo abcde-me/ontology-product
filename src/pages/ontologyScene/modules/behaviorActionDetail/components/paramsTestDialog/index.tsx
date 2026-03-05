@@ -71,9 +71,12 @@ export const ParamsTestDialog = (props: IProps) => {
                 }
                 break;
               default:
-                if (!(ruleConfig as EnumRule).options.includes(value)) {
+                if (
+                  !(ruleConfig as EnumRule).options.includes(value.toString())
+                ) {
                   onError(failMessage);
                 }
+                break;
             }
           }
         }
@@ -191,7 +194,7 @@ export const ParamsTestDialog = (props: IProps) => {
             )}
           </div>
           <div className={styles['body']}>
-            {!runInfo?.run_log ? (
+            {!runInfo?.run_status ? (
               <NoDataCard
                 type={'block'}
                 title={
@@ -199,7 +202,9 @@ export const ParamsTestDialog = (props: IProps) => {
                 }
               />
             ) : (
-              <div className={styles['run-log']}>{runInfo.run_log}</div>
+              <div className={styles['run-log']}>
+                {runInfo.runLog.map(({ run_log }) => run_log).join('\n')}
+              </div>
             )}
           </div>
         </div>

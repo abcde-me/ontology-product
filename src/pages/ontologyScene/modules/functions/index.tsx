@@ -27,6 +27,7 @@ import {
 } from '@/pages/ontologyScene/types/ontologyFunction';
 import {
   deleteFunction,
+  getFunctionDetail,
   getFunctionList
 } from '@/api/ontologySceneLibrary/ontologyFunction';
 import { isEmpty, isNil } from 'lodash-es';
@@ -102,18 +103,22 @@ export default function OntologySceneFunctions() {
   };
 
   const handleDelete = (record: OntologyFunctionItem) => {
-    Modal.confirm({
-      title: `确定删除${record.name}吗？`,
-      content: '删除后，不可恢复',
-      onOk: () => {
-        deleteFunction(record.id!).then((res) => {
-          Message.success({
-            content: '删除成功',
-            duration: 0.5,
-            onClose: refresh
+    getFunctionDetail(record.id!).then((res) => {
+      if (res.boundAction)
+        return Message.warning('该函数已被行为绑定，请先解绑再删除');
+      Modal.confirm({
+        title: `确定删除${record.name}吗？`,
+        content: '删除后，不可恢复',
+        onOk: () => {
+          deleteFunction(record.id!).then((res) => {
+            Message.success({
+              content: '删除成功',
+              duration: 0.5,
+              onClose: refresh
+            });
           });
-        });
-      }
+        }
+      });
     });
   };
 
