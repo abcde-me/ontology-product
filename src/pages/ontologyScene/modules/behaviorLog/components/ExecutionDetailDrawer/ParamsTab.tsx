@@ -49,7 +49,63 @@ const ParamValueRenderer: React.FC<{ value: any; record: ParamItem }> = ({
 }) => {
   // 如果数据类型是 ObjectSet 或 Attachment，使用 ObjectTypeTagList 渲染
   if (record.type === 'ObjectSet' || record.type === 'Attachment') {
-    const objectTypeList = Array.isArray(value) ? value : [];
+    // 如果是字符串格式，需要先解析
+    let objectTypeList: any[] = [];
+
+    if (typeof value === 'string') {
+      // 处理 Attachment("path/to/file.jpg") 格式
+      if (record.type === 'Attachment') {
+        const attachmentMatch = value.match(/Attachment\("([^"]+)"\)/);
+        if (attachmentMatch) {
+          const filePath = attachmentMatch[1];
+          // 提取文件名（路径的最后一部分）
+          const fileName = filePath.split('/').pop() || filePath;
+          objectTypeList = [
+            {
+              name: fileName,
+              ontologyObjectTypeName: fileName,
+              id: filePath,
+              ontologyObjectTypeId: filePath
+            }
+          ];
+        }
+      }
+      // 处理 ObjectSet([{...}]) 格式
+      else if (record.type === 'ObjectSet') {
+        const objectSetMatch = value.match(/ObjectSet\((\[.+\])\)/);
+        if (objectSetMatch) {
+          try {
+            // 解析 JSON 数组
+            let jsonStr = objectSetMatch[1];
+
+            // 修复 pk 值没有引号的问题
+            // 将 "pk":值 替换为 "pk":"值"
+            jsonStr = jsonStr.replace(/"pk":([^,}\]]+)/g, (match, pkValue) => {
+              // 如果值已经有引号，不处理
+              if (pkValue.trim().startsWith('"')) {
+                return match;
+              }
+              // 否则给值加上引号
+              return `"pk":"${pkValue.trim()}"`;
+            });
+
+            const parsedArray = JSON.parse(jsonStr);
+            objectTypeList = parsedArray.map((item: any) => ({
+              name: item.pk || '',
+              ontologyObjectTypeName: item.pk || '',
+              id: item.object_type,
+              ontologyObjectTypeId: String(item.object_type),
+              // icon 字段可以从 item 中获取，如果没有则不传
+              ontologyObjectTypeIcon: item.icon || undefined
+            }));
+          } catch (error) {
+            console.error('Failed to parse ObjectSet:', error);
+          }
+        }
+      }
+    } else if (Array.isArray(value)) {
+      objectTypeList = value;
+    }
 
     if (objectTypeList.length === 0) {
       return <span>-</span>;
@@ -82,6 +138,24 @@ const ParamValueRenderer: React.FC<{ value: any; record: ParamItem }> = ({
       const formattedDate = dayjs.unix(timestamp).format('YYYY-MM-DD HH:mm:ss');
       return <EllipsisTextWithTooltip text={formattedDate} />;
     }
+  }
+
+  // 如果数据类型是 Geopoint，提取坐标值
+  if (record.type === 'Geopoint') {
+    if (!value || value === '-') {
+      return <span>-</span>;
+    }
+
+    const stringValue = String(value);
+    // 使用正则匹配 GeoPoint(lat, lng) 格式
+    const geoPointMatch = stringValue.match(/GeoPoint\(([\d.]+),\s*([\d.]+)\)/);
+    if (geoPointMatch) {
+      const [, lat, lng] = geoPointMatch;
+      const formattedValue = `[${lat}, ${lng}]`;
+      return <EllipsisTextWithTooltip text={formattedValue} />;
+    }
+    // 如果不匹配，返回原始值
+    return <EllipsisTextWithTooltip text={stringValue} />;
   }
 
   // 对象类型的值渲染

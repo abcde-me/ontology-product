@@ -88,18 +88,8 @@ export const RightPanel: React.FC<RightPanelProps> = ({ testFunctionHook }) => {
     try {
       const formValues = await form.validate();
 
-      console.log('=== 单节点测试 ===');
-      console.log('节点信息:', {
-        nodeId: selectedNodeId,
-        behaviorName: selectedNode.behavior.name,
-        behaviorCode: selectedNode.behavior.code,
-        functionCode: selectedNode.behavior.functionCode
-      });
-      console.log('表单数据:', formValues);
-
       // 构建测试数据
       const testItem = buildActionTestItem(selectedNode.behavior, formValues);
-      console.log('测试项:', testItem);
 
       // 调用测试接口
       startTest({
