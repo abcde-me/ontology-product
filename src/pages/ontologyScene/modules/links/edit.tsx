@@ -90,11 +90,11 @@ export default function OntologySceneLinksEdit() {
             formData.intermediateTable = intermediateTable;
 
             // 处理源属性和目标属性 - 直接使用接口字段名
-            if (data.linkSourceColumnID) {
-              formData.sourceAttribute = String(data.linkSourceColumnID);
+            if (data.linkSourceColumnName) {
+              formData.sourceAttribute = data.linkSourceColumnName;
             }
-            if (data.linkTargetColumnID) {
-              formData.targetAttribute = String(data.linkTargetColumnID);
+            if (data.linkTargetColumnName) {
+              formData.targetAttribute = data.linkTargetColumnName;
             }
 
             // 处理属性字段映射 - 直接使用接口字段名
@@ -105,7 +105,7 @@ export default function OntologySceneLinksEdit() {
               formData.attributeFields = data.ontologyLinkTypeColumnList.map(
                 (column) => ({
                   tableField: column.name || '',
-                  selected: column.isUse === 1,
+                  isUse: column.isUse ? 1 : 0,
                   attributeName: column.comment || column.name || '',
                   fieldType: column.columnType || 'STRING',
                   isPrimary: column.isPrimary === 1
@@ -127,39 +127,6 @@ export default function OntologySceneLinksEdit() {
     };
     loadData();
   }, [linkId]);
-
-  // 根据属性ID获取属性名称
-  const getAttributeNameById = async (
-    attributeId: string,
-    objectTypeId: number,
-    ontologyModelID: number
-  ): Promise<string | undefined> => {
-    try {
-      const attrId = Number(attributeId);
-      if (isNaN(attrId)) {
-        // 如果不是数字，可能是tableField，直接返回
-        return attributeId;
-      }
-
-      const response = await listOntologyPhysicalProperties({
-        objectTypeIdList: [objectTypeId],
-        ontologyModelID,
-        pageNo: 1,
-        pageSize: 1000
-      });
-
-      if (response.status === 200 && response.data?.result) {
-        const attribute = response.data.result.find(
-          (item) => item.id === attrId
-        );
-        return attribute?.name || attribute?.tableField || attributeId;
-      }
-      return attributeId;
-    } catch (error) {
-      console.error('Get attribute name error:', error);
-      return attributeId;
-    }
-  };
 
   const handleSubmit = async (data: LinkFormData) => {
     setLoading(true);
@@ -204,52 +171,29 @@ export default function OntologySceneLinksEdit() {
 
         // 处理属性字段映射
         if (data.attributeFields && data.attributeFields.length > 0) {
-          requestData.ontologyLinkTypeColumnList = data.attributeFields
-            .filter((field) => field.selected)
-            .map(
-              (field): OntologyLinkTypeColumn => ({
-                name: field.tableField,
-                comment: field.attributeName,
-                columnType: field.fieldType,
-                isPrimary: field.isPrimary ? 1 : 0,
-                isUse: 1,
-                linkTypeID: linkId // 更新时需要
-              })
-            );
+          requestData.ontologyLinkTypeColumnList = data.attributeFields.map(
+            (field): OntologyLinkTypeColumn => ({
+              name: field.tableField,
+              comment: field.attributeName,
+              columnType: field.fieldType,
+              isPrimary: field.isPrimary ? 1 : 0,
+              isUse: field.isUse ? 1 : 0,
+              linkTypeID: linkId // 更新时需要
+            })
+          );
         }
 
         // 处理源属性和目标属性
         if (data.sourceAttribute && data.sourceObjectType) {
-          const sourceAttrName = await getAttributeNameById(
-            data.sourceAttribute,
-            data.sourceObjectType,
-            ontologyModelID
-          );
-          if (sourceAttrName) {
-            requestData.linkSourceColumnName = sourceAttrName;
-          }
+          requestData.linkSourceColumnName = data.sourceAttribute;
         }
         if (data.targetAttribute && data.targetObjectType) {
-          const targetAttrName = await getAttributeNameById(
-            data.targetAttribute,
-            data.targetObjectType,
-            ontologyModelID
-          );
-          if (targetAttrName) {
-            requestData.linkTargetColumnName = targetAttrName;
-          }
+          requestData.linkTargetColumnName = data.targetAttribute;
         }
       } else {
         // 1:1 和 1:N 类型，处理目标对象属性
         if (data.targetObjectAttribute && data.targetObjectType) {
-          const targetAttrName = await getAttributeNameById(
-            data.targetObjectAttribute,
-            data.targetObjectType,
-            ontologyModelID
-          );
-          if (targetAttrName) {
-            requestData.linkTargetColumnName = targetAttrName;
-          }
+          requestData.linkTargetColumnName = data.targetObjectAttribute;
         }
       }
 

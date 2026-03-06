@@ -46,7 +46,7 @@ const FormItem = Form.Item;
 
 export interface AttributeField {
   tableField: string;
-  selected: boolean;
+  isUse: number; // 1代表选中，0代表未选中
   attributeName: string;
   fieldType: string;
   isPrimary?: boolean; // 是否为主键
@@ -186,8 +186,8 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
             });
             if (response.status === 200 && response.data?.result) {
               const options = response.data.result.map((item) => ({
-                label: item.name || item.tableField || '',
-                value: String(item.id || item.tableField || '')
+                label: item.name || '',
+                value: item.name || ''
               }));
               setSourceAttributeOptions(options);
             } else {
@@ -222,7 +222,7 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
           ) {
             const firstPrimary = response.data.result[0];
             const primaryAttribute = {
-              name: firstPrimary.name || firstPrimary.tableField || '',
+              name: firstPrimary.name || '',
               id: firstPrimary.id || 0
             };
             setSourcePrimaryAttribute(primaryAttribute);
@@ -256,8 +256,8 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
             });
             if (response.status === 200 && response.data?.result) {
               const options = response.data.result.map((item) => ({
-                label: item.name || item.tableField || '',
-                value: String(item.id || item.tableField || '')
+                label: item.name || '',
+                value: item.name || ''
               }));
               setTargetAttributeOptions(options);
             } else {
@@ -407,7 +407,7 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
     const handleSelectAll = (checked: boolean) => {
       const newFields = attributeFields.map((field) => ({
         ...field,
-        selected: checked
+        isUse: checked ? 1 : 0
       }));
       setAttributeFields(newFields);
       form.setFieldValue('attributeFields', newFields);
@@ -432,8 +432,8 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
     };
 
     const allSelected =
-      attributeFields.length > 0 && attributeFields.every((f) => f.selected);
-    const someSelected = attributeFields.some((f) => f.selected);
+      attributeFields.length > 0 && attributeFields.every((f) => f.isUse === 1);
+    const someSelected = attributeFields.some((f) => f.isUse === 1);
 
     // 属性字段映射表格列定义
     const attributeColumns: TableColumnProps<AttributeField>[] = [
@@ -447,13 +447,13 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
             />
           </div>
         ),
-        dataIndex: 'selected',
+        dataIndex: 'isUse',
         width: 60,
         render: (value, record, index) => (
           <Checkbox
-            checked={record.selected}
+            checked={record.isUse === 1}
             onChange={(checked) =>
-              handleFieldChange(index, { selected: checked })
+              handleFieldChange(index, { isUse: checked ? 1 : 0 })
             }
           />
         )
@@ -680,7 +680,7 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
               const fields: AttributeField[] = fieldList.map(
                 (field, index) => ({
                   tableField: field.fieldName, // 表字段名
-                  selected: true, // 默认全部选中
+                  isUse: 1, // 默认全部选中
                   attributeName: field.fieldName, // 属性名称，默认与表字段名相同
                   fieldType: field.dataType || 'STRING', // 字段类型
                   isPrimary: index === 0 // 第一个字段默认为主键
@@ -801,7 +801,7 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
         // 将 columnList 转换为 AttributeField 格式
         const fields: AttributeField[] = columnList.map((column, index) => ({
           tableField: column, // 表字段名
-          selected: true, // 默认全部选中
+          isUse: 1, // 默认全部选中
           attributeName: column, // 属性名称，默认与表字段名相同
           fieldType: index === 0 ? 'varchar(500)' : 'varchar(2000)', // 本地CSV：主键varchar(500)，非主键varchar(2000)
           isPrimary: index === 0 // 第一个字段默认为主键

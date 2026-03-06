@@ -172,6 +172,10 @@ export interface GetOntologyLinkTypeRes {
    */
   linkSourceColumnID?: number;
   /**
+   * 链接源属性名称
+   */
+  linkSourceColumnName?: string;
+  /**
    * 来源类型 1 数据湖同步  2 本地CSV导入
    */
   linkSourceType?: number;
@@ -183,6 +187,10 @@ export interface GetOntologyLinkTypeRes {
    * 链接目标属性ID
    */
   linkTargetColumnID?: number;
+  /**
+   * 链接目标属性名称
+   */
+  linkTargetColumnName?: string;
   /**
    * 链接名称
    */

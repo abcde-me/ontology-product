@@ -476,7 +476,6 @@ export default function OntologySceneLinksList() {
       dataIndex: 'type',
       width: 120,
       filters: LINK_TYPE_FILTERS,
-      onFilter: (value, record) => getLinkTypeText(record.type) === value,
       render: (value) => (
         <div className="font-PingFangSc text-[14px] font-normal leading-[22px] text-[#23293b]">
           {getLinkTypeText(value)}
@@ -488,7 +487,6 @@ export default function OntologySceneLinksList() {
       dataIndex: 'syncStatus',
       width: 120,
       filters: OBJECT_TYPE_SYNC_STATUS_FILTERS,
-      onFilter: (value, record) => record.syncStatus === value,
       render: (value: SyncStatus, record: LinkInfo) => {
         if (value === undefined || value === null) {
           return null;
