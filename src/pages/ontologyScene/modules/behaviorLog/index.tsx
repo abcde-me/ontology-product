@@ -48,13 +48,13 @@ export default function BehaviorLogList() {
       try {
         const response = await listOntologyObjectType({
           pageNo: 1,
-          pageSize: 100, // 获取所有对象类型，增加到1000
+          pageSize: 0, // 获取所有对象类型
           ontologyModelID: ontologyModelID ? Number(ontologyModelID) : undefined
         });
         if (response.data?.result) {
           const filters = response.data.result.map((item) => ({
             text: item.name || '',
-            value: String(item.id)
+            value: item.code || String(item.id) // 使用 code 而不是 id
           }));
           setObjectTypeFilters(filters);
         }
