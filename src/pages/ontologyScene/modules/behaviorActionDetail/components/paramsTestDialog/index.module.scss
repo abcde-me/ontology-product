@@ -77,10 +77,11 @@
       flex-direction: column;
       flex-basis: 50%;
       flex-shrink: 0;
+      overflow: hidden;
 
       .body {
         padding: 12px 16px;
-        overflow-y: auto;
+        overflow: auto;
 
         &::-webkit-scrollbar {
           display: none;
