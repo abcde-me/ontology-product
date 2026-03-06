@@ -40,6 +40,7 @@ import { EllipsisPopover } from '@ceai-front/arco-material';
 import Link1To1Icon from '../../../assets/link-11.svg';
 import Link1ToNIcon from '../../../assets/link-1n.svg';
 import LinkNNIcon from '../../../assets/link-nn.svg';
+import { openNewPage } from '@/utils/env';
 
 const FormItem = Form.Item;
 
@@ -1325,9 +1326,8 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
                                     onClick={(e) => {
                                       e.stopPropagation();
                                       // 打开新页面，使用表的 ID（option.value）
-                                      window.open(
-                                        `/tenant/compute/modaforge/metadataManagement/detail?id=${option.value}&metadataType=ICEBERG`,
-                                        '_blank'
+                                      openNewPage(
+                                        `/tenant/compute/modaforge/metadataManagement/detail?id=${option.value}&metadataType=ICEBERG`
                                       );
                                     }}
                                   />

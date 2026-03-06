@@ -27,6 +27,7 @@ import { useParams } from 'react-router-dom';
 import { OsEmptyStatusWrapper } from '@/pages/ontologyScene/componens';
 import GraphEmptyImage from '@/pages/ontologyScene/assets/graph-empty.png';
 import { OBJECT_TYPE_ICON_OPTIONS } from '../../common/constants';
+import ObjectTypeIcon1 from '@/pages/ontologyScene/assets/object-type-one.svg';
 
 const nodesConfig = [
   {
@@ -38,12 +39,24 @@ const nodesConfig = [
     title: '本体节点', // 节点标题
     showDefaultSourceHandle: true, // 是否显示默认的源连接点
     showDefaultTargetHandle: true, // 是否显示默认的目标连接点
-    showNodeControl: false // 是否显示节点控制按钮
+    showNodeControl: false, // 是否显示节点控制按钮
+    iconRender: (data, { type }) => {
+      const iconItem = OBJECT_TYPE_ICON_OPTIONS.find(
+        (option) => option.value === data.icon
+      );
+      const IconComponent = iconItem?.icon ?? OBJECT_TYPE_ICON_OPTIONS[0].icon;
+      return (
+        <IconComponent
+          className={`mr-[8px] flex-shrink-0 ${type === 'node' ? 'h-[24px] w-[24px]' : 'h-[20px] w-[20px]'}`}
+        />
+      );
+    }
   }
 ];
 
-const NODE_WIDTH = 256;
+const NODE_WIDTH = 244;
 const NODE_HEIGHT = 112;
+const MENU_WIDTH = 200;
 
 // 使用 dagre 进行布局计算
 function layoutNodesWithDagre(
@@ -85,7 +98,8 @@ function layoutNodesWithDagre(
         title: topologyNode.name || '未命名节点',
         attributes: topologyNode.ontologyPhysicalPropertiesList || [],
         syncStatus: topologyNode.syncStatus,
-        code: topologyNode.code ?? ''
+        code: topologyNode.code ?? '',
+        icon: topologyNode.icon ?? ''
       },
       position: { x: 0, y: 0 } // 临时位置，稍后由 dagre 计算
     });
@@ -156,8 +170,17 @@ function layoutNodesWithDagre(
     // 计算图谱在X轴方向的中心点
     const graphCenterX = (minX + maxX) / 2;
 
-    // 计算X轴偏移量，使图谱中心移动到画布中心 (X=0)
-    const centerOffsetX = graphCenterX;
+    // 获取画布宽度（如果可用，否则使用默认值）
+    const canvasWidth =
+      typeof window !== 'undefined'
+        ? window.innerWidth - MENU_WIDTH
+        : 1920 - MENU_WIDTH;
+    // 计算画布中心点
+    const canvasCenterX = canvasWidth / 2;
+
+    // 计算X轴偏移量，使图谱中心移动到画布中心
+    // 如果图谱中心在X=graphCenterX，要移动到X=canvasCenterX，偏移量 = canvasCenterX - graphCenterX
+    const centerOffsetX = canvasCenterX - graphCenterX;
 
     // 调整所有节点位置，使图谱在X轴方向居中
     const centeredNodes = layoutedNodes.map((node) => ({
