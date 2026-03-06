@@ -24,6 +24,8 @@ import { updateOntologyModel } from '@/api/ontologySceneLibrary/ontologyScene';
 import { OntologScene } from '@/types/ontologySceneApi';
 import SearchDropdown from './SearchDropdown';
 import { EllipsisPopover } from '@ceai-front/arco-material';
+import DeveloperResourceIcon from '@/pages/ontologyScene/assets/developer-resource.svg';
+import { openNewPage } from '@/utils/env';
 
 const { Header: LayoutHeader } = Layout;
 
@@ -123,6 +125,10 @@ export default function Header({
     handleTitleBlur();
   };
 
+  const handleDeveloperResource = () => {
+    openNewPage('https://my.feishu.cn/docx/XzAqdVIHmoptbAxFNeCcTIfEnjb');
+  };
+
   return (
     <LayoutHeader
       className={cls(
@@ -175,7 +181,7 @@ export default function Header({
         >
           {/* 搜索图标，绝对定位 */}
           <div
-            className="top-50% absolute right-0 flex -translate-y-1/2 cursor-pointer items-center text-[var(--color-text-3)] transition-all duration-300 ease-in-out hover:text-[var(--color-text-1)]"
+            className="top-50% absolute right-0 flex -translate-y-1/2 cursor-pointer items-center text-[var(--color-text-3)] transition-all duration-300 ease-in-out hover:text-[var(--color-text-3)]"
             style={{
               opacity: searchHovered ? 0 : 1,
               visibility: searchHovered ? 'hidden' : 'visible',
@@ -207,13 +213,10 @@ export default function Header({
         </div>
 
         <div
-          className="flex cursor-pointer items-center text-[var(--color-text-3)] transition-colors hover:text-[var(--color-text-1)]"
-          onClick={() => {
-            // 开发者资源功能处理
-            console.log('开发者资源');
-          }}
+          className="flex cursor-pointer items-center text-[var(--color-text-3)] transition-colors hover:text-[var(--color-text-3)]"
+          onClick={handleDeveloperResource}
         >
-          <IconCode className="mr-[7px] text-[15px]" />
+          <DeveloperResourceIcon className="mr-[4px] text-[16px]" />
           <span className="text-[14px]">开发者资源</span>
         </div>
       </div>

@@ -54,6 +54,7 @@ import {
 import ObjectTypeIconSelector from './ObjectTypeIconSelector';
 import { EllipsisPopover } from '@ceai-front/arco-material';
 import { PrefixAimdp } from '@/api/endpoints';
+import { openNewPage } from '@/utils/env';
 
 const FormItem = Form.Item;
 const { TextArea } = Input;
@@ -1212,9 +1213,8 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
                                   onClick={(e) => {
                                     e.stopPropagation();
                                     // 打开新页面，使用表的 ID（option.value）
-                                    window.open(
-                                      `/tenant/compute/modaforge/metadataManagement/detail?id=${option.value}&metadataType=ICEBERG`,
-                                      '_blank'
+                                    openNewPage(
+                                      `/tenant/compute/modaforge/metadataManagement/detail?id=${option.value}&metadataType=ICEBERG`
                                     );
                                   }}
                                 />
