@@ -293,7 +293,7 @@ export interface OntologyLinkTypeColumn {
   /**
    * 表字段
    */
-  linkTypeID: string;
+  linkTypeID?: string;
   /**
    * 表字段
    */
