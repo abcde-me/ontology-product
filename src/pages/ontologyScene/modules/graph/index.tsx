@@ -26,6 +26,7 @@ import { useDemoStore } from './common/store';
 import { useParams } from 'react-router-dom';
 import { OsEmptyStatusWrapper } from '@/pages/ontologyScene/componens';
 import GraphEmptyImage from '@/pages/ontologyScene/assets/graph-empty.png';
+import { OBJECT_TYPE_ICON_OPTIONS } from '../../common/constants';
 
 const nodesConfig = [
   {

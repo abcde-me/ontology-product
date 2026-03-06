@@ -12,9 +12,14 @@ import {
   Checkbox,
   Tooltip,
   Spin,
-  Cascader
+  Cascader,
+  Tag,
+  Popover
 } from '@arco-design/web-react';
-import { IconQuestionCircle } from '@arco-design/web-react/icon';
+import {
+  IconQuestionCircle,
+  IconInfoCircle
+} from '@arco-design/web-react/icon';
 import FieldImportUpload from '../../../componens/FieldImportUpload';
 import { ObjectTypeSelect } from '../../../componens';
 import classNames from 'classnames';
@@ -136,6 +141,10 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
       name: string;
       id: number;
     } | null>(null);
+    const [sourcePrimaryAttribute, setSourcePrimaryAttribute] = useState<{
+      name: string;
+      id: number;
+    } | null>(null);
     const [targetPrimaryAttributeLoading, setTargetPrimaryAttributeLoading] =
       useState(false);
 
@@ -166,31 +175,66 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
         return;
       }
 
-      const fetchSourceAttributes = async () => {
-        setSourceAttributesLoading(true);
+      if (linkType === LinkType.MANY_TO_MANY) {
+        const fetchSourceAttributes = async () => {
+          setSourceAttributesLoading(true);
+          try {
+            const response = await listOntologyPhysicalProperties({
+              objectTypeIdList: [sourceObjectType],
+              ontologyModelID
+            });
+            if (response.status === 200 && response.data?.result) {
+              const options = response.data.result.map((item) => ({
+                label: item.name || item.tableField || '',
+                value: String(item.id || item.tableField || '')
+              }));
+              setSourceAttributeOptions(options);
+            } else {
+              setSourceAttributeOptions([]);
+            }
+          } catch (error) {
+            console.error('获取源对象类型属性失败:', error);
+            setSourceAttributeOptions([]);
+          } finally {
+            setSourceAttributesLoading(false);
+          }
+        };
+
+        fetchSourceAttributes();
+
+        return;
+      }
+
+      const fetchSourcePrimaryAttribute = async () => {
         try {
           const response = await listOntologyPhysicalProperties({
             objectTypeIdList: [sourceObjectType],
-            ontologyModelID
+            ontologyModelID,
+            isPrimary: 1,
+            pageNo: 1,
+            pageSize: 1 // 只需要第一个主键属性
           });
-          if (response.status === 200 && response.data?.result) {
-            const options = response.data.result.map((item) => ({
-              label: item.name || item.tableField || '',
-              value: String(item.id || item.tableField || '')
-            }));
-            setSourceAttributeOptions(options);
+          if (
+            response.status === 200 &&
+            response.data?.result &&
+            response.data.result.length > 0
+          ) {
+            const firstPrimary = response.data.result[0];
+            const primaryAttribute = {
+              name: firstPrimary.name || firstPrimary.tableField || '',
+              id: firstPrimary.id || 0
+            };
+            setSourcePrimaryAttribute(primaryAttribute);
           } else {
-            setSourceAttributeOptions([]);
+            setSourcePrimaryAttribute(null);
           }
         } catch (error) {
-          console.error('获取源对象类型属性失败:', error);
-          setSourceAttributeOptions([]);
-        } finally {
-          setSourceAttributesLoading(false);
+          console.error('获取目标对象类型主键属性失败:', error);
+          setSourcePrimaryAttribute(null);
         }
       };
 
-      fetchSourceAttributes();
+      fetchSourcePrimaryAttribute();
     }, [sourceObjectType, ontologyModelID]);
 
     // 获取目标对象类型的主键属性（用于1:1和1:N类型）
@@ -1018,7 +1062,7 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
                 }
               ]}
             >
-              <div className="flex items-center">
+              <div className="flex items-start">
                 <div className="flex-1 rounded-[4px] bg-[#FAFBFF] p-[12px]">
                   <ObjectTypeSelect
                     ontologyModelID={ontologyModelID}
@@ -1026,10 +1070,26 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
                     value={sourceObjectType}
                     onChange={(val) => {
                       form.setFieldValue('sourceObjectType', val);
+                      if (!val) {
+                        setSourcePrimaryAttribute(null);
+                      }
                     }}
                     placeholder="请选择对象类型"
                     allowClear
                   />
+                  {linkType !== LinkType.MANY_TO_MANY &&
+                    sourcePrimaryAttribute && (
+                      <div className="mt-[4px] flex items-center text-[14px] leading-[20px] text-[var(--color-text-1)]">
+                        {sourcePrimaryAttribute.name}
+                        <Tag
+                          color="#FBF2FF"
+                          className="ml-[4px] text-[#9254DE]"
+                          size="small"
+                        >
+                          主键
+                        </Tag>
+                      </div>
+                    )}
                 </div>
 
                 {linkType === 'N:N' ? (
@@ -1056,8 +1116,14 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
                       <OneWayArrowIcon />
                     </div>
                     <div className="flex-1 flex-1 rounded-[4px] bg-[#FAFBFF] p-[12px]">
-                      <div className="mb-[8px] text-[14px] text-[var(--color-text-2)]">
-                        目标对象类型和属性：
+                      <div className="mb-[8px] flex items-center gap-[4px] text-[14px] text-[var(--color-text-2)]">
+                        <span>
+                          目标对象类型和属性
+                          <Tooltip content="选择目标对象类型后，会自动关联目标对象类型的主键属性">
+                            <IconQuestionCircle className="cursor-pointer text-[#86909C]" />
+                          </Tooltip>
+                          ：
+                        </span>
                       </div>
                       <Input.Group
                         compact
@@ -1232,6 +1298,45 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
                           return `${valueShow[0]}/${valueShow[1]}`;
                         }}
                         renderOption={(option) => {
+                          // 判断是否是第二层（数据表）
+                          const isTableLevel = option.isLeaf === true;
+
+                          if (isTableLevel) {
+                            // 第二层：数据表，添加信息图标
+                            return (
+                              <div
+                                className={classNames(
+                                  styles['table-option-with-icon'],
+                                  'flex w-full items-center justify-between'
+                                )}
+                              >
+                                <EllipsisPopover
+                                  preferTypography
+                                  value={option.label}
+                                  className="min-w-0 flex-1"
+                                />
+                                <Popover
+                                  content="详情"
+                                  position="top"
+                                  trigger="hover"
+                                >
+                                  <IconInfoCircle
+                                    className="flex-shrink-0 cursor-pointer text-[16px] text-[#86909C] transition-colors hover:text-[#165DFF]"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      // 打开新页面，使用表的 ID（option.value）
+                                      window.open(
+                                        `/tenant/compute/modaforge/metadataManagement/detail?id=${option.value}&metadataType=ICEBERG`,
+                                        '_blank'
+                                      );
+                                    }}
+                                  />
+                                </Popover>
+                              </div>
+                            );
+                          }
+
+                          // 第一层：数据库，保持原样
                           return (
                             <EllipsisPopover
                               preferTypography

@@ -21,6 +21,7 @@ export interface BehaviorLogItem {
   execute_code?: string; // 执行代码
   execute_command?: string; // 执行命令
   associated_object_type?: string; // 关联对象类型
+  associated_object_type_id?: string | number; // 关联对象类型ID（后端返回字段）
   ontologyObjectTypeName?: string; // 所属对象类型名称
   ontologyObjectTypeIcon?: string; // 所属对象类型图标
   ontologyObjectTypeId?: string | number; // 所属对象类型ID

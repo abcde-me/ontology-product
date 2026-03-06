@@ -48,13 +48,13 @@ export default function BehaviorLogList() {
       try {
         const response = await listOntologyObjectType({
           pageNo: 1,
-          pageSize: 100, // 获取所有对象类型，增加到1000
+          pageSize: 0, // 获取所有对象类型
           ontologyModelID: ontologyModelID ? Number(ontologyModelID) : undefined
         });
         if (response.data?.result) {
           const filters = response.data.result.map((item) => ({
             text: item.name || '',
-            value: String(item.id)
+            value: item.code || String(item.id) // 使用 code 而不是 id
           }));
           setObjectTypeFilters(filters);
         }
@@ -93,13 +93,23 @@ export default function BehaviorLogList() {
 
   // 处理查看对象类型详情
   const handleViewObjectTypeDetail = (record: BehaviorLogItem) => {
-    const objectTypeId = String(
-      record.ontologyObjectTypeId || record.objectTypeID || ''
-    );
-    if (objectTypeId) {
+    // 关闭其他所有抽屉
+    setShowExecutionDetail(false);
+    setShowBehaviorDetail(false);
+    setShowFunctionDetail(false);
+    setSelectedExecutionId(undefined);
+    setBehaviorData(undefined);
+    setSelectedFunctionId(undefined);
+
+    // 直接使用后端返回的 associated_object_type_id
+    const objectTypeId = String(record.associated_object_type_id || '');
+
+    if (objectTypeId && objectTypeId !== '\u0000' && objectTypeId !== '0') {
       setSelectedObjectType({ id: objectTypeId });
       setObjectTypeActiveTab('instances');
       setDetailDrawerVisible(true);
+    } else {
+      Message.warning('无法获取对象类型信息');
     }
   };
 
@@ -109,6 +119,14 @@ export default function BehaviorLogList() {
     if (!record.pk || record.pk === 0) {
       return;
     }
+
+    // 关闭其他所有抽屉
+    setShowExecutionDetail(false);
+    setDetailDrawerVisible(false);
+    setShowFunctionDetail(false);
+    setSelectedExecutionId(undefined);
+    setSelectedObjectType(null);
+    setSelectedFunctionId(undefined);
 
     // 将 BehaviorLogItem 转换为 BehaviorActionItem
     // 注意：这里需要根据实际的数据结构进行映射
@@ -128,6 +146,14 @@ export default function BehaviorLogList() {
 
   // 处理查看执行详情
   const handleViewExecutionDetail = (record: BehaviorLogItem) => {
+    // 关闭其他所有抽屉
+    setShowBehaviorDetail(false);
+    setDetailDrawerVisible(false);
+    setShowFunctionDetail(false);
+    setBehaviorData(undefined);
+    setSelectedObjectType(null);
+    setSelectedFunctionId(undefined);
+
     setSelectedExecutionId(String(record.id));
     setShowExecutionDetail(true);
   };
@@ -136,6 +162,14 @@ export default function BehaviorLogList() {
   const handleViewFunctionDetail = (record: BehaviorLogItem) => {
     // 只有当 pk 存在时才显示函数详情抽屉
     if (record.pk) {
+      // 关闭其他所有抽屉
+      setShowExecutionDetail(false);
+      setShowBehaviorDetail(false);
+      setDetailDrawerVisible(false);
+      setSelectedExecutionId(undefined);
+      setBehaviorData(undefined);
+      setSelectedObjectType(null);
+
       setSelectedFunctionId(Number(record.pk));
       setShowFunctionDetail(true);
     }

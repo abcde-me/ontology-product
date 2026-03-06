@@ -5,14 +5,16 @@
 }
 
 .table-select-group {
-  // &:global(.arco-input-group) {
-  //   // width: unset !important;
-  // }
-  .table-select-wrapper {
-    :global(.arco-select-view) {
-      border-right-width: 1px !important;
-      border-radius: 0 !important;
-    }
+  :global(.arco-select-view) {
+    border-right-width: 0 !important;
+    border-top-right-radius: 0 !important;
+    border-bottom-right-radius: 0 !important;
+  }
+
+  :global(.arco-input) {
+    border-left-width: 0 !important;
+    border-top-left-radius: 0 !important;
+    border-bottom-left-radius: 0 !important;
   }
 }
 
@@ -45,6 +47,18 @@
   :global(.arco-cascader-list-item-label) {
     width: 100%;
     overflow: hidden;
+    padding: 0 !important;
+  }
+
+  // 为第二层（数据表）选项添加样式，确保图标正确显示
+  :global(.arco-cascader-list-item) {
+    :global(.table-option-with-icon) {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      gap: 8px;
+    }
   }
 
   :global(.arco-cascader-list-empty) {

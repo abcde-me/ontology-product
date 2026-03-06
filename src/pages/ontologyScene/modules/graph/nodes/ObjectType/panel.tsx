@@ -238,13 +238,16 @@ const Panel: FC<any> = ({ id, data }) => {
     {
       title: '属性名称',
       dataIndex: 'comment',
-      width: 140,
+      width: 150,
       ellipsis: true,
       render: (text: string, record: PhysicalProperties) => (
         <div className="flex items-center gap-2">
-          <EllipsisPopover className="font-[600]" value={text || '-'} />
+          <EllipsisPopover
+            className="max-w-[70px] font-[600]"
+            value={text || '-'}
+          />
           {record.isPrimary === 1 && (
-            <Tag color="purple" size="small">
+            <Tag color="#FBF2FF" className="text-[#9254DE]" size="small">
               主键
             </Tag>
           )}

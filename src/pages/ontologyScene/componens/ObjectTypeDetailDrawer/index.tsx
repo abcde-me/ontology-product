@@ -495,7 +495,7 @@ export default function ObjectTypeDetailDrawer({
             value={value || '-'}
           />
           {record.isPrimary === 1 && (
-            <Tag size="small" color="blue">
+            <Tag color="#FBF2FF" className="text-[#9254DE]" size="small">
               主键
             </Tag>
           )}

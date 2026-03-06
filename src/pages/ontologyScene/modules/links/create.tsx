@@ -102,8 +102,8 @@ export default function OntologySceneLinksCreate() {
                 comment: field.attributeName,
                 columnType: field.fieldType,
                 isPrimary: field.isPrimary ? 1 : 0,
-                isUse: 1,
-                linkTypeID: '' // 创建时不需要
+                isUse: 1
+                // linkTypeID: field.tableField // 创建时不需要
               })
             );
         }
