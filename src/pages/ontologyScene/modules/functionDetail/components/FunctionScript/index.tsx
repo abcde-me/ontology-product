@@ -103,7 +103,7 @@ export const FunctionScript = (
               <DotStatus color={'#E52E2D'} text={'运行失败'} />
             )}
             {runInfo.run_status === 4 && (
-              <DotStatus color={'#E52E2D'} text={'KILL'} />
+              <DotStatus color={'#E52E2D'} text={'已被手动停止'} />
             )}
           </div>
           <div

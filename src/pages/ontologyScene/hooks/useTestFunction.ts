@@ -96,7 +96,7 @@ const useTestFunction = (): TestFunctionInfo => {
           return {
             ...item,
             run_status: 4,
-            run_log: '停止运行'
+            run_log: '已被手动停止'
           };
         })
       };
