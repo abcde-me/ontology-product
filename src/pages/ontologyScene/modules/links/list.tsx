@@ -538,14 +538,53 @@ export default function OntologySceneLinksList() {
     },
     {
       title: '属性',
-      dataIndex: 'attributes',
+      dataIndex: 'ontologyLinkTypeColumnList',
       width: 150,
-      render: (_, record) => {
-        // 暂时使用固定值，后续可以从其他接口获取
-        const value = 'properties';
+      render: (value, record) => {
+        // 解析属性列表（可能是逗号分隔的字符串）
+        const attributes = value
+          ? typeof value === 'string'
+            ? value
+                .split(',')
+                .map((item) => item.trim())
+                .filter(Boolean)
+            : Array.isArray(value)
+              ? value
+                  .map((item) =>
+                    typeof item === 'string'
+                      ? item
+                      : item.name || item.comment || ''
+                  )
+                  .filter(Boolean)
+              : []
+          : [];
+
+        // 如果属性数量大于等于2，显示第一个名称 + "等n个"
+        if (attributes.length >= 2) {
+          const firstAttribute = attributes[0];
+          return (
+            <div
+              className="hover-blue cursor-pointer text-[14px] font-normal leading-[22px] text-[#23293b]"
+              onClick={() => handleAttributesClick(record)}
+            >
+              {firstAttribute} 等{attributes.length}个
+            </div>
+          );
+        }
+
+        // 如果只有1个或0个属性，直接显示
         return (
-          <div className="text-[14px] font-normal leading-[22px] text-[#23293b]">
-            {value}
+          <div
+            className={`text-[14px] font-normal leading-[22px] text-[#23293b] ${
+              attributes.length === 1 ? 'hover-blue cursor-pointer' : ''
+            }`}
+            onClick={
+              attributes.length === 1
+                ? () => handleAttributesClick(record)
+                : undefined
+            }
+          >
+            {attributes.length === 1 ? attributes[0] : value || '-'}
           </div>
         );
       }
