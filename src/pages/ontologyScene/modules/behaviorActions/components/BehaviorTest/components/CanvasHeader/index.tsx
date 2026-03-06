@@ -136,14 +136,20 @@ export const CanvasHeader: React.FC<CanvasHeaderProps> = ({
           className="flex items-center justify-center"
           icon={
             <svg
-              width="16"
-              height="16"
-              viewBox="0 0 16 16"
+              width="20"
+              height="20"
+              viewBox="0 0 20 20"
               fill="none"
               xmlns="http://www.w3.org/2000/svg"
             >
+              <path d="M4.5 2.69922H13.5" stroke="white" strokeWidth="1.5" />
               <path
-                d="M4.44512 5.3787V0.75L10.6808 0.750125V5.37882L14.19 11.5874C14.8653 12.7821 14.0087 14.2628 12.6364 14.273L2.56664 14.348C1.19138 14.3582 0.313147 12.8848 0.976377 11.68L4.44512 5.3787Z"
+                d="M5.85039 7.32791V2.69922L12.0861 2.69934V7.32804L15.5953 13.5366C16.2706 14.7313 15.414 16.212 14.0417 16.2222L3.97192 16.2972C2.59665 16.3074 1.71842 14.834 2.38165 13.6292L5.85039 7.32791Z"
+                stroke="white"
+                strokeWidth="1.5"
+              />
+              <path
+                d="M4.0498 9C4.9498 9.45 7.57699 8.92692 8.9998 10.35C10.3498 11.7002 13.4998 10.35 14.3998 9.9"
                 stroke="white"
                 strokeWidth="1.5"
               />
