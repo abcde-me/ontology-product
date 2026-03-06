@@ -270,8 +270,8 @@ const PublicTable = React.forwardRef<PublicTableRef, PublicTableProps>(
     // 处理删除
     const handleDelete = (record: PublicProperty) => {
       Modal.confirm({
-        title: '删除公共属性',
-        content: `确定删除公共属性 ${record.comment || record.name} 吗？`,
+        title: '确定删除公共属性吗？',
+        content: `删除后，不可恢复，所绑定的对象类型也会删除此属性`,
         onOk: async () => {
           try {
             if (!record.id) {

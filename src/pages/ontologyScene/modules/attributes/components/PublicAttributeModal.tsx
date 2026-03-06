@@ -78,7 +78,7 @@ const PublicAttributeModal: React.FC<PublicAttributeModalProps> = ({
     try {
       const values = await form.validate();
       await onSubmit(values);
-      form.resetFields();
+      // form.resetFields();
     } catch (error) {
       console.error('Form validation failed:', error);
     }
