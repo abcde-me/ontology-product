@@ -13,9 +13,13 @@ import {
   Tooltip,
   Spin,
   Cascader,
-  Tag
+  Tag,
+  Popover
 } from '@arco-design/web-react';
-import { IconQuestionCircle } from '@arco-design/web-react/icon';
+import {
+  IconQuestionCircle,
+  IconInfoCircle
+} from '@arco-design/web-react/icon';
 import FieldImportUpload from '../../../componens/FieldImportUpload';
 import { ObjectTypeSelect } from '../../../componens';
 import classNames from 'classnames';
@@ -1294,6 +1298,45 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
                           return `${valueShow[0]}/${valueShow[1]}`;
                         }}
                         renderOption={(option) => {
+                          // 判断是否是第二层（数据表）
+                          const isTableLevel = option.isLeaf === true;
+
+                          if (isTableLevel) {
+                            // 第二层：数据表，添加信息图标
+                            return (
+                              <div
+                                className={classNames(
+                                  styles['table-option-with-icon'],
+                                  'flex w-full items-center justify-between'
+                                )}
+                              >
+                                <EllipsisPopover
+                                  preferTypography
+                                  value={option.label}
+                                  className="min-w-0 flex-1"
+                                />
+                                <Popover
+                                  content="详情"
+                                  position="top"
+                                  trigger="hover"
+                                >
+                                  <IconInfoCircle
+                                    className="flex-shrink-0 cursor-pointer text-[16px] text-[#86909C] transition-colors hover:text-[#165DFF]"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      // 打开新页面，使用表的 ID（option.value）
+                                      window.open(
+                                        `/tenant/compute/modaforge/metadataManagement/detail?id=${option.value}&metadataType=ICEBERG`,
+                                        '_blank'
+                                      );
+                                    }}
+                                  />
+                                </Popover>
+                              </div>
+                            );
+                          }
+
+                          // 第一层：数据库，保持原样
                           return (
                             <EllipsisPopover
                               preferTypography
