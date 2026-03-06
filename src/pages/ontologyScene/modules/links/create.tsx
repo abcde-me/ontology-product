@@ -94,40 +94,24 @@ export default function OntologySceneLinksCreate() {
 
         // 处理属性字段映射
         if (data.attributeFields && data.attributeFields.length > 0) {
-          requestData.ontologyLinkTypeColumnList = data.attributeFields
-            .filter((field) => field.selected)
-            .map(
-              (field): OntologyLinkTypeColumn => ({
-                name: field.tableField,
-                comment: field.attributeName,
-                columnType: field.fieldType,
-                isPrimary: field.isPrimary ? 1 : 0,
-                isUse: 1
-                // linkTypeID: field.tableField // 创建时不需要
-              })
-            );
+          requestData.ontologyLinkTypeColumnList = data.attributeFields.map(
+            (field): OntologyLinkTypeColumn => ({
+              name: field.tableField,
+              comment: field.attributeName,
+              columnType: field.fieldType,
+              isPrimary: field.isPrimary ? 1 : 0,
+              isUse: field.isUse ? 1 : 0
+              // linkTypeID: field.tableField // 创建时不需要
+            })
+          );
         }
 
         // 处理源属性和目标属性
         if (data.sourceAttribute && data.sourceObjectType) {
-          const sourceAttrName = await getAttributeNameById(
-            data.sourceAttribute,
-            data.sourceObjectType,
-            ontologyModelID
-          );
-          if (sourceAttrName) {
-            requestData.linkSourceColumnName = sourceAttrName;
-          }
+          requestData.linkSourceColumnName = data.sourceAttribute;
         }
         if (data.targetAttribute && data.targetObjectType) {
-          const targetAttrName = await getAttributeNameById(
-            data.targetAttribute,
-            data.targetObjectType,
-            ontologyModelID
-          );
-          if (targetAttrName) {
-            requestData.linkTargetColumnName = targetAttrName;
-          }
+          requestData.linkTargetColumnName = data.targetAttribute;
         }
       } else {
         // 1:1 和 1:N 类型，处理目标对象属性
