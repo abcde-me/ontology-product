@@ -156,7 +156,8 @@ export default function Header({
           <>
             <EllipsisPopover
               value={title}
-              className="ml-[12px] mr-[8px] max-w-[455px] text-[16px] font-[600] text-[var(--color-text-1)]"
+              wrapperClassName="max-w-[455px] ml-[12px] mr-[8px]"
+              className="w-full text-[16px] font-[600] text-[var(--color-text-1)]"
             />
 
             <Popover trigger="hover" content="编辑">

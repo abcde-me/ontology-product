@@ -15,7 +15,10 @@ import {
   IconCode,
   IconFile,
   IconPlus,
-  IconDown
+  IconDown,
+  IconUp,
+  IconMenuFold,
+  IconMenuUnfold
 } from '@arco-design/web-react/icon';
 import {
   useHistory,
@@ -75,6 +78,8 @@ export default function OntologySceneDetail() {
   const [sceneTitle, setSceneTitle] = useState('新建本体场景');
   const [sceneDetail, setSceneDetail] = useState<OntologScene | null>(null);
   const [loading, setLoading] = useState(false);
+  // 控制侧边栏横向收起/展开状态
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   // 页面进入时请求场景详情
   useEffect(() => {
@@ -221,6 +226,10 @@ export default function OntologySceneDetail() {
     }
   };
 
+  const toggleSidebar = () => {
+    setSidebarCollapsed((prev) => !prev);
+  };
+
   const createMenuItems = [
     {
       key: ONTOLOGY_SCENE_MENU_ITEM_KEYS.OBJECT_TYPE,
@@ -277,14 +286,26 @@ export default function OntologySceneDetail() {
     return menuData.map((group) => {
       if (group.type === 'group') {
         return (
-          <MenuGroup key={group.key} title={group.title}>
+          <MenuGroup
+            key={group.key}
+            title={
+              !sidebarCollapsed ? (
+                <span className="text-[12px] leading-[38px] text-[var(--color-text-4)]">
+                  {group.title}
+                </span>
+              ) : null
+            }
+          >
             {group.children?.map((item) => (
               <MenuItem
                 key={item.key}
                 onClick={() => handleMenuSelect(item.key)}
+                title={sidebarCollapsed ? item.title : undefined}
               >
-                <span className="mr-[8px]">{item.icon}</span>
-                <span>{item.title}</span>
+                <span className={cls(sidebarCollapsed ? '' : 'mr-[8px]')}>
+                  {item.icon}
+                </span>
+                {!sidebarCollapsed && <span>{item.title}</span>}
               </MenuItem>
             ))}
           </MenuGroup>
@@ -326,31 +347,57 @@ export default function OntologySceneDetail() {
         }}
       />
       <Layout className="flex flex-row overflow-hidden">
-        <div className="flex min-w-[200px] flex-shrink-0 flex-col border-r border-[var(--color-border-2)] bg-white">
-          <div className="px-[12px] pt-[24px]">
+        <div
+          className={cls(
+            'flex flex-shrink-0 flex-col border-r border-[var(--color-border-2)] bg-white transition-all duration-200',
+            styles['ontology-scene-detail-sidebar'],
+            sidebarCollapsed &&
+              styles['ontology-scene-detail-sidebar-collapsed']
+          )}
+        >
+          <div
+            className={cls(
+              'pt-[24px]',
+              sidebarCollapsed ? 'px-[8px]' : 'px-[12px]'
+            )}
+          >
             <Dropdown
               droplist={renderCreateDropdown()}
               trigger="click"
               position="bl"
+              // disabled={sidebarCollapsed}
             >
               <Button
                 className={cls(
-                  'flex w-full items-center justify-center',
+                  '!flex w-full items-center justify-center',
                   styles['ontology-scene-detail-create-button']
                 )}
               >
-                <IconPlus className="mr-[4px]" />
-                创建
+                <IconPlus className={cls(sidebarCollapsed ? '' : 'mr-[4px]')} />
+                {!sidebarCollapsed && '创建'}
               </Button>
             </Dropdown>
           </div>
           <Menu
             selectedKeys={[activeTab]}
             className={cls(styles['ontology-scene-detail-menu'], 'flex-1')}
-            // hasCollapseButton
           >
             {renderMenu()}
           </Menu>
+          <div className="p-[8px]">
+            <Button
+              type="text"
+              className="w-full"
+              onClick={toggleSidebar}
+              icon={
+                sidebarCollapsed ? (
+                  <IconMenuUnfold className="text-[20px] text-[var(--color-text-2)]" />
+                ) : (
+                  <IconMenuFold className="text-[20px] text-[var(--color-text-2)]" />
+                )
+              }
+            />
+          </div>
         </div>
 
         <Layout.Content className="flex-1 overflow-auto">
