@@ -117,5 +117,5 @@ export const getFunctionSDK = async () => {
     .post({})
     .inRegion()
     .do();
-  return res.data.data ?? '暂无数据';
+  return res.data?.doc ?? '暂无数据';
 };

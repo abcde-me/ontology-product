@@ -127,11 +127,7 @@ export const InterfaceSelect = (props: ObjectInterfaceSelectProps) => {
         ]
       }).then((res) => {
         setScrollLoading(
-          res.data.result?.length >= 20 ? (
-            <Spin loading={true} />
-          ) : (
-            '已加载全部数据'
-          )
+          res.data.result?.length >= 20 ? <Spin loading={true} /> : null
         );
         setCurrentInsList((prevState) => {
           if (page === 1) {

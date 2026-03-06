@@ -219,6 +219,8 @@ export default function BehaviorActionDetailPage() {
             <Input
               placeholder="请输入id。用于 API 调用，全局唯一"
               disabled={pageMode === 'edit'}
+              maxLength={100}
+              showWordLimit
             />
           </FormItem>
 
@@ -226,6 +228,8 @@ export default function BehaviorActionDetailPage() {
             <TextArea
               placeholder="请输入描述说明"
               autoSize={{ minRows: 3, maxRows: 6 }}
+              maxLength={500}
+              showWordLimit
             />
           </FormItem>
           <div className={'module-title'}>函数与校验</div>

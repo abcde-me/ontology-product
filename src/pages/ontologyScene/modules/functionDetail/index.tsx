@@ -76,7 +76,7 @@ export default function OSFunctionDetailPage() {
         ontologyModelID: +OSId
       });
       Message.success({
-        content: '保存成功',
+        content: `成功${pageMode === 'edit' ? '编辑' : '创建'}函数`,
         duration: 0.5,
         onClose() {
           goBack();

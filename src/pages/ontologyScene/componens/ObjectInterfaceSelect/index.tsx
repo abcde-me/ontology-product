@@ -30,7 +30,9 @@ export const ObjectInterfaceSelect = (props: ObjInsProps) => {
   const { data: primaryKey, loading: primaryKeyLoading } = useRequest(
     () => {
       return listOntologyPhysicalProperties({
-        id: objectTypeID!
+        objectTypeIdList: [objectTypeID!],
+        isPrimary: 1,
+        ontologyModelID: +OSId
       }).then((res) => {
         return res.data.result?.find(({ isPrimary }) => !!isPrimary)?.name;
       });
