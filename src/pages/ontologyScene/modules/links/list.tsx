@@ -71,6 +71,14 @@ const LINK_TYPE_FILTERS = [
   { text: 'N:N', value: 'N:N' }
 ];
 
+// 同步状态筛选选项（本页面使用字符串值，便于表格回显）
+const LINK_SYNC_STATUS_FILTERS = OBJECT_TYPE_SYNC_STATUS_FILTERS.map(
+  (item) => ({
+    text: item.text,
+    value: String(item.value)
+  })
+);
+
 export default function OntologySceneLinksList() {
   const [form] = Form.useForm();
   const history = useHistory();
@@ -98,6 +106,11 @@ export default function OntologySceneLinksList() {
   const [targetObjectTypeFilterKeys, setTargetObjectTypeFilterKeys] = useState<
     string[]
   >([]);
+  // 链接类型和同步状态筛选值
+  const [typeFilterKeys, setTypeFilterKeys] = useState<string[]>([]);
+  const [syncStatusFilterKeys, setSyncStatusFilterKeys] = useState<string[]>(
+    []
+  );
 
   // 获取对象类型列表用于源/目标对象类型筛选
   useEffect(() => {
@@ -166,8 +179,14 @@ export default function OntologySceneLinksList() {
 
         const syncStatusList = Array.isArray(syncStatusValues)
           ? syncStatusValues
+              .map((v) => (typeof v === 'string' ? Number(v) : v))
+              .filter((v) => !isNaN(v))
           : syncStatusValues !== undefined
-            ? [syncStatusValues]
+            ? [
+                typeof syncStatusValues === 'string'
+                  ? Number(syncStatusValues)
+                  : syncStatusValues
+              ].filter((v) => !isNaN(v))
             : undefined;
 
         const typeList: LinkType[] | undefined = Array.isArray(typeFilterValues)
@@ -212,7 +231,7 @@ export default function OntologySceneLinksList() {
       }
     });
 
-  // 从 URL 的 search 参数同步到表单
+  // 从 URL 参数同步到表单和筛选条件
   useEffect(() => {
     const currentKeyword = form.getFieldValue('keyword');
     const searchValue = urlState.search || '';
@@ -476,6 +495,7 @@ export default function OntologySceneLinksList() {
       dataIndex: 'type',
       width: 120,
       filters: LINK_TYPE_FILTERS,
+      filteredValue: typeFilterKeys,
       render: (value) => (
         <div className="font-PingFangSc text-[14px] font-normal leading-[22px] text-[#23293b]">
           {getLinkTypeText(value)}
@@ -486,7 +506,8 @@ export default function OntologySceneLinksList() {
       title: '同步状态',
       dataIndex: 'syncStatus',
       width: 120,
-      filters: OBJECT_TYPE_SYNC_STATUS_FILTERS,
+      filters: LINK_SYNC_STATUS_FILTERS,
+      filteredValue: syncStatusFilterKeys,
       render: (value: SyncStatus, record: LinkInfo) => {
         if (value === undefined || value === null) {
           return null;
@@ -627,6 +648,34 @@ export default function OntologySceneLinksList() {
           pagination: false,
           scroll: { x: true },
           onChange: (pagination, sorter, filters) => {
+            // 更新链接类型筛选
+            if ('type' in (filters || {})) {
+              const typeValue = filters?.type;
+              const typeValues =
+                typeValue === null || typeValue === undefined
+                  ? []
+                  : Array.isArray(typeValue)
+                    ? typeValue
+                    : [typeValue];
+              setTypeFilterKeys(typeValues);
+            } else {
+              setTypeFilterKeys([]);
+            }
+
+            // 更新同步状态筛选
+            if ('syncStatus' in (filters || {})) {
+              const syncStatusValue = filters?.syncStatus;
+              const syncStatusValues =
+                syncStatusValue === null || syncStatusValue === undefined
+                  ? []
+                  : Array.isArray(syncStatusValue)
+                    ? syncStatusValue.map(String)
+                    : [String(syncStatusValue)];
+              setSyncStatusFilterKeys(syncStatusValues);
+            } else {
+              setSyncStatusFilterKeys([]);
+            }
+
             onChange(pagination, sorter, filters);
           }
         }}
