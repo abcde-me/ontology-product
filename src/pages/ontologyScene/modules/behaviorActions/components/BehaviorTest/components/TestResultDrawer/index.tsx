@@ -45,6 +45,21 @@ export const TestResultDrawer: React.FC<TestResultDrawerProps> = ({
     }
   };
 
+  // 渲染标题（包含状态信息）
+  const renderTitle = () => {
+    return (
+      <div className="flex items-center gap-2">
+        <span>测试结果</span>
+        {(loading || testIng) && (
+          <>
+            <span className="text-sm text-[#6E7B8D]">测试中</span>
+            <IconLoading style={{ color: '#184FF2', fontSize: '14px' }} />
+          </>
+        )}
+      </div>
+    );
+  };
+
   // 判断是否为多个行为测试结果
   const isMultipleResults =
     runInfo &&
@@ -94,7 +109,13 @@ export const TestResultDrawer: React.FC<TestResultDrawerProps> = ({
   // 渲染内容区域
   const renderContent = () => {
     if (loading || testIng) {
-      return <div className="text-sm text-[#86909C]">运行中...</div>;
+      return (
+        <div className="flex h-full flex-col">
+          <div className="flex-1 rounded bg-[#F7F8FA] p-4">
+            <div className="text-sm text-[#86909C]">运行中...</div>
+          </div>
+        </div>
+      );
     }
 
     if (!runInfo) {
@@ -109,12 +130,16 @@ export const TestResultDrawer: React.FC<TestResultDrawerProps> = ({
       if (behaviorList.length === 1) {
         const item = behaviorList[0];
         return (
-          <div>
-            <div className="mb-4 flex items-center gap-2">
-              <span className="text-base font-medium">{item.name}</span>
+          <div className="flex h-full flex-col">
+            {/* 标题和状态信息 */}
+            <div className="mb-2.5 flex flex-shrink-0 items-center gap-2">
+              <span className="text-sm font-semibold">{item.name}</span>
               {renderStatusInfo(item, false)}
             </div>
-            {renderLogContent(item)}
+            {/* 日志内容区域 - 固定高度，可滚动 */}
+            <div className="flex-1 overflow-y-auto rounded bg-[#F7F8FA] p-4">
+              {renderLogContent(item)}
+            </div>
           </div>
         );
       }
@@ -155,13 +180,11 @@ export const TestResultDrawer: React.FC<TestResultDrawerProps> = ({
     <OsDrawer
       visible={visible}
       onCancel={handleClose}
-      title="测试结果"
+      title={renderTitle()}
       footer={null}
       width={552}
     >
-      <div className="h-[calc(100vh-140px)] overflow-y-auto rounded-lg bg-[#F7F8FA] p-4">
-        {renderContent()}
-      </div>
+      <div className="flex h-full flex-col">{renderContent()}</div>
     </OsDrawer>
   );
 };
