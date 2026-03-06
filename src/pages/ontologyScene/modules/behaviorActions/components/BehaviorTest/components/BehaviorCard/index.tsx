@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Tooltip } from '@arco-design/web-react';
 import { OBJECT_TYPE_ICON_OPTIONS } from '@/pages/ontologyScene/common/constants';
 import { BehaviorItem } from '../../types';
+import EllipsisTextWithTooltip from '@/pages/ontologyScene/modules/behaviorLog/components/EllipsisTextWithTooltip';
 
 interface BehaviorCardProps {
   behavior: BehaviorItem;
@@ -17,23 +18,16 @@ export const BehaviorCard: React.FC<BehaviorCardProps> = ({
   const [isHovered, setIsHovered] = useState(false);
   const [isDetailHovered, setIsDetailHovered] = useState(false);
   const nameRef = React.useRef<HTMLDivElement>(null);
-  const descRef = React.useRef<HTMLDivElement>(null);
   const [showNameTooltip, setShowNameTooltip] = useState(false);
-  const [showDescTooltip, setShowDescTooltip] = useState(false);
 
-  // 检测文本是否被截断
+  // 检测名称文本是否被截断
   React.useEffect(() => {
     if (nameRef.current) {
       setShowNameTooltip(
         nameRef.current.scrollWidth > nameRef.current.clientWidth
       );
     }
-    if (descRef.current) {
-      setShowDescTooltip(
-        descRef.current.scrollWidth > descRef.current.clientWidth
-      );
-    }
-  }, [behavior.name, behavior.description]);
+  }, [behavior.name]);
 
   const handleClick = () => {
     onClick(behavior);
@@ -115,21 +109,12 @@ export const BehaviorCard: React.FC<BehaviorCardProps> = ({
             描述说明：
           </span>
           {behavior.description ? (
-            <Tooltip
-              content={
-                <div className="max-w-[400px] break-words">
-                  {behavior.description}
-                </div>
-              }
-              disabled={!showDescTooltip}
-            >
-              <div
-                ref={descRef}
-                className="flex-1 overflow-hidden text-ellipsis whitespace-nowrap text-[13px] font-normal leading-relaxed text-[#0F131F]"
-              >
-                {behavior.description}
-              </div>
-            </Tooltip>
+            <div className="min-w-0 flex-1">
+              <EllipsisTextWithTooltip
+                className="text-[13px] font-normal leading-relaxed text-[#0F131F]"
+                value={behavior.description}
+              />
+            </div>
           ) : (
             <span className="text-[13px] font-normal text-[#86909c]">--</span>
           )}
@@ -147,11 +132,17 @@ export const BehaviorCard: React.FC<BehaviorCardProps> = ({
               <div className="flex h-[12px] w-[12px] flex-shrink-0 items-center justify-center">
                 <IconComponent className="h-full w-full text-white" />
               </div>
-              <span className="overflow-hidden text-ellipsis whitespace-nowrap text-[13px] font-normal text-[#0F131F]">
-                {behavior.ontologyObjectTypeName ||
-                  behavior.objectTypeName ||
-                  behavior.objectType}
-              </span>
+              <div className="min-w-0 flex-1">
+                <EllipsisTextWithTooltip
+                  className="text-[13px] font-normal text-[#0F131F]"
+                  value={
+                    behavior.ontologyObjectTypeName ||
+                    behavior.objectTypeName ||
+                    behavior.objectType ||
+                    ''
+                  }
+                />
+              </div>
             </div>
           ) : (
             <span className="text-[13px] font-normal text-[#86909c]">--</span>
