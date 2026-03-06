@@ -74,7 +74,7 @@ export const CanvasHeader: React.FC<CanvasHeaderProps> = ({
         })
         .join('；');
 
-      Message.error(`配置有误，请检查：${errorMessages}`);
+      // Message.error(`配置有误，请检查：${errorMessages}`);
       // 选中第一个有错误的节点
       selectNode(invalidNodeIds[0]);
       return;
