@@ -77,13 +77,13 @@ export default function OntologySceneLinksEdit() {
           // 处理 N:N 类型的中间表
           if (data.type === LinkType.MANY_TO_MANY) {
             const intermediateTable: any = {
-              type: data.linkSourceType === 1 ? 'data_lake_sync' : 'local_csv'
+              type: data.sourceType === 1 ? 'data_lake_sync' : 'local_csv'
             };
 
-            if (data.linkSourceType === 1) {
+            if (data.sourceType === 1) {
               intermediateTable.database = data.linkDBName;
               intermediateTable.table = data.linkTableName;
-            } else if (data.linkSourceType === 2) {
+            } else if (data.sourceType === 2) {
               intermediateTable.filePath = data.filePath;
             }
 

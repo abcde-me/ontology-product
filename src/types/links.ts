@@ -178,7 +178,7 @@ export interface GetOntologyLinkTypeRes {
   /**
    * 来源类型 1 数据湖同步  2 本地CSV导入
    */
-  linkSourceType?: number;
+  sourceType?: number;
   /**
    * 数据表名称
    */
