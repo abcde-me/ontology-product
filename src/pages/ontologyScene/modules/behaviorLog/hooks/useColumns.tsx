@@ -140,6 +140,7 @@ export const useColumns = (
                     record.ontologyObjectTypeId || record.objectTypeID || ''
                   )}
                   onClick={() => onViewObjectTypeDetail?.(record)}
+                  className="!border-none !bg-transparent"
                 />
               ) : (
                 <span>-</span>
