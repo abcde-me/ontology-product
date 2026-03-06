@@ -541,23 +541,12 @@ export default function OntologySceneLinksList() {
       dataIndex: 'ontologyLinkTypeColumnList',
       width: 150,
       render: (value, record) => {
+        if (!value || value.length === 0) {
+          return '-';
+        }
+
         // 解析属性列表（可能是逗号分隔的字符串）
-        const attributes = value
-          ? typeof value === 'string'
-            ? value
-                .split(',')
-                .map((item) => item.trim())
-                .filter(Boolean)
-            : Array.isArray(value)
-              ? value
-                  .map((item) =>
-                    typeof item === 'string'
-                      ? item
-                      : item.name || item.comment || ''
-                  )
-                  .filter(Boolean)
-              : []
-          : [];
+        const attributes = value.map((item) => item.name);
 
         // 如果属性数量大于等于2，显示第一个名称 + "等n个"
         if (attributes.length >= 2) {
@@ -578,13 +567,9 @@ export default function OntologySceneLinksList() {
             className={`text-[14px] font-normal leading-[22px] text-[#23293b] ${
               attributes.length === 1 ? 'hover-blue cursor-pointer' : ''
             }`}
-            onClick={
-              attributes.length === 1
-                ? () => handleAttributesClick(record)
-                : undefined
-            }
+            onClick={() => handleAttributesClick(record)}
           >
-            {attributes.length === 1 ? attributes[0] : value || '-'}
+            {attributes[0]}
           </div>
         );
       }
