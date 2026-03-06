@@ -15,7 +15,7 @@ import {
   PyCodeContent
 } from '@/pages/ontologyScene/componens';
 import { Form, Table, TableColumnProps, Tabs } from '@arco-design/web-react';
-import { useHistory } from 'react-router-dom';
+import { useHistory, useParams } from 'react-router-dom';
 import { useRequest } from 'ahooks';
 import { getFunctionDetail } from '@/api/ontologySceneLibrary/ontologyFunction';
 import { isNil } from 'lodash-es';
@@ -43,6 +43,7 @@ export const BehaviorDetail = (props: IProps) => {
   const [activeTab, setActiveTab] = useState('params');
   const [validateRules, setValidateRules] = useState<ValidateRule[]>([]);
   const [inputParams, setInputParams] = useState<OntologyActionParam[]>([]);
+  const { id: OSId } = useParams<Record<string, string>>();
   const { data: actionDetail } = useRequest(
     () => {
       return getActionDetail(actionItem!);
@@ -140,7 +141,7 @@ export const BehaviorDetail = (props: IProps) => {
       }}
       onEdit={() => {
         history.push(
-          `/tenant/compute/modaforge/ontologyScene/detail/undefined/behaviorActions/edit/${actionItem}`
+          `/tenant/compute/modaforge/ontologyScene/detail/${OSId}/behaviorActions/edit/${actionItem}`
         );
       }}
     >

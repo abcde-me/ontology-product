@@ -8,7 +8,8 @@ import {
   Modal,
   Space,
   TableColumnProps,
-  Tabs
+  Tabs,
+  Tooltip
 } from '@arco-design/web-react';
 import styles from './index.module.scss';
 import { useHistory, useParams } from 'react-router-dom';
@@ -126,23 +127,26 @@ export default function OntologySceneFunctions() {
     {
       title: '显示名称',
       dataIndex: 'name',
-      width: 200,
+      ellipsis: true,
       render: (value, record) => (
-        <div
-          className={
-            'hover-blue font-PingFangSc text-[14px] font-medium leading-[22px] '
-          }
-          onClick={() => {
-            setCurrentFunction(record);
-          }}
-        >
-          {value}
-        </div>
+        <Tooltip content={value}>
+          <div
+            className={
+              'hover-blue w-full overflow-hidden overflow-ellipsis whitespace-nowrap font-PingFangSc text-[14px] font-medium leading-[22px]'
+            }
+            onClick={() => {
+              setCurrentFunction(record);
+            }}
+          >
+            {value}
+          </div>
+        </Tooltip>
       )
     },
     {
       title: '描述说明',
       dataIndex: 'description',
+      width: 300,
       ellipsis: true
     },
     {
@@ -250,6 +254,7 @@ export default function OntologySceneFunctions() {
               <ProButton
                 icon={<IconPlus />}
                 onClick={() => route2FunctionDetail('create')}
+                type={'primary'}
               >
                 创建函数
               </ProButton>

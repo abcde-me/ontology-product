@@ -60,7 +60,7 @@ export default function OSFunctionDetailPage() {
   // 提交数据时忽略掉入参的value以及类型，因为类型一定会有值，value只在测试的时候才校验
   const validateBeforeSave = async (data: OntologyFunctionSchema) => {
     const fields = ['code', 'name', 'output'];
-    data.input!.forEach((param, i) => {
+    data.input?.forEach((param, i) => {
       fields.push(`input[${i}].name`);
     });
     return form.validate(fields);
@@ -76,7 +76,7 @@ export default function OSFunctionDetailPage() {
         ontologyModelID: +OSId
       });
       Message.success({
-        content: '保存成功',
+        content: `成功${pageMode === 'edit' ? '编辑' : '创建'}函数`,
         duration: 0.5,
         onClose() {
           goBack();

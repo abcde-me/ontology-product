@@ -2,6 +2,7 @@ import React from 'react';
 import styles from './index.module.scss';
 import { CopyItemIcon } from '@ceai-front/arco-material';
 import classNames from 'classnames';
+import { Tooltip } from '@arco-design/web-react';
 
 export interface ContentWithCopyProps {
   copy?: boolean;
@@ -14,7 +15,9 @@ export const ContentWithCopy = (props: ContentWithCopyProps) => {
   const { copy = true, value, className, style } = props;
   return (
     <div className={classNames([styles['copy-value-wrapper'], className])}>
-      <p>{value}</p>
+      <Tooltip content={value}>
+        <p>{value}</p>
+      </Tooltip>
       {copy && (
         <CopyItemIcon
           value={value}

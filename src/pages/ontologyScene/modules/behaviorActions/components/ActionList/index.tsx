@@ -29,6 +29,7 @@ import { isNil } from 'lodash-es';
 import ObjectTypeTag from '../../../../componens/ObjectTypeTag';
 import ObjectTypeDetailDrawer from '../../../../componens/ObjectTypeDetailDrawer';
 import { FunctionDetailDrawer } from '@/pages/ontologyScene/componens/FunctionDetailDrawer';
+import { ContentWithCopy } from '@/pages/ontologyScene/componens';
 
 const baseUrl = '/tenant/compute/modaforge/ontologyScene/detail';
 
@@ -128,13 +129,14 @@ export const ActionList = (props: {
       render: (value, actionDetail) => (
         <ObjectTypeTag
           ontologyObjectTypeIcon={actionDetail?.ontologyObjectTypeIcon || '-'}
-          ontologyObjectTypeName={actionDetail?.objectTypeName || '-'}
+          ontologyObjectTypeName={actionDetail?.objectTypeName || '全局行为'}
           ontologyObjectTypeId={String(
             actionDetail?.ontologyObjectTypeId ||
               actionDetail?.objectTypeId ||
               ''
           )}
           onClick={() => {
+            if (actionDetail.objectTypeId! < 0) return;
             setCurrentObj((actionDetail.objectTypeId || '').toString());
           }}
           className={styles['obj-tag']}
@@ -162,18 +164,7 @@ export const ActionList = (props: {
       dataIndex: 'code',
       render: (value, record) => {
         if (!value) return '-';
-        return (
-          <div className={'flex gap-2 overflow-hidden'}>
-            <div
-              className={
-                'w-max overflow-hidden text-ellipsis whitespace-nowrap font-PingFangSc text-[14px] font-normal leading-[22px]'
-              }
-            >
-              {value}
-            </div>
-            <CopyItemIcon className={'hidden flex-shrink-0'} value={value} />
-          </div>
-        );
+        return <ContentWithCopy value={value} />;
       }
     },
     {
@@ -256,6 +247,7 @@ export const ActionList = (props: {
           <ProButton
             icon={<IconPlus />}
             onClick={() => route2ActionDetail('create')}
+            type={'primary'}
           >
             创建行为动作
           </ProButton>
