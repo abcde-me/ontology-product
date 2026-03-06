@@ -6,6 +6,7 @@ import {
 } from '@ceai-front/arco-material';
 import { TableColumnProps } from '@arco-design/web-react';
 import { ObjectTypeTag } from '@/pages/ontologyScene/componens';
+import EllipsisTextWithTooltip from '../components/EllipsisTextWithTooltip';
 import { BehaviorLogItem, RUN_STATUS_MAP } from '../types';
 
 interface ObjectTypeFilter {
@@ -45,8 +46,8 @@ export const useColumns = (
                 onViewExecutionDetail?.(record);
               }}
             >
-              <EllipsisPopover
-                wrapperClassName="min-w-0 hover-blue cursor-pointer font-PingFangSc text-[14px] font-normal leading-[22px] text-[#23293b]"
+              <EllipsisTextWithTooltip
+                className="hover-blue min-w-0 cursor-pointer font-PingFangSc text-[14px] font-normal leading-[22px] text-[#23293b]"
                 value={value || '-'}
                 quiteMessage={false}
               />
@@ -75,8 +76,8 @@ export const useColumns = (
                 }}
                 style={{ width: 180 }}
               >
-                <EllipsisPopover
-                  wrapperClassName={`min-w-0 font-PingFangSc text-[14px] font-normal leading-[22px] text-[#4e5969] ${record.pk && record.pk !== 0 ? 'hover-blue cursor-pointer' : ''}`}
+                <EllipsisTextWithTooltip
+                  className={`min-w-0 font-PingFangSc text-[14px] font-normal leading-[22px] text-[#4e5969] ${record.pk && record.pk !== 0 ? 'hover-blue cursor-pointer' : ''}`}
                   value={value}
                 />
               </div>
@@ -93,11 +94,7 @@ export const useColumns = (
             <div className="flex items-center gap-2">
               {value ? (
                 <>
-                  <EllipsisPopover
-                    value={value}
-                    isEdit={false}
-                    preferTypography
-                  />
+                  <EllipsisTextWithTooltip value={value} />
                   <CopyItemIcon
                     className="hidden flex-shrink-0"
                     value={value}
@@ -112,11 +109,13 @@ export const useColumns = (
         {
           title: '描述说明',
           dataIndex: 'description',
-          ellipsis: true,
-          tooltip: true,
           width: 200,
           render: (value) =>
-            value ? <EllipsisPopover value={value} isEdit={false} /> : '-'
+            value ? (
+              <EllipsisTextWithTooltip className="min-w-0" value={value} />
+            ) : (
+              '-'
+            )
         },
         {
           title: '所属对象类型',
@@ -213,10 +212,9 @@ export const useColumns = (
               onViewExecutionDetail?.(record);
             }}
           >
-            <EllipsisPopover
-              wrapperClassName="min-w-0 hover-blue cursor-pointer font-PingFangSc text-[14px] font-normal leading-[22px] text-[#23293b]"
+            <EllipsisTextWithTooltip
+              className="hover-blue min-w-0 cursor-pointer font-PingFangSc text-[14px] font-normal leading-[22px] text-[#23293b]"
               value={value || '-'}
-              quiteMessage={false}
             />
           </div>
         )
@@ -241,10 +239,9 @@ export const useColumns = (
                 }
               }}
             >
-              <EllipsisPopover
-                wrapperClassName={`min-w-0 font-PingFangSc text-[14px] font-normal leading-[22px] text-[#4e5969] ${record.pk ? 'hover-blue cursor-pointer' : ''}`}
+              <EllipsisTextWithTooltip
+                className={`min-w-0 font-PingFangSc text-[14px] font-normal leading-[22px] text-[#4e5969] ${record.pk ? 'hover-blue cursor-pointer' : ''}`}
                 value={value}
-                quiteMessage={false}
               />
             </div>
           ) : (
@@ -260,11 +257,7 @@ export const useColumns = (
           <div className="flex items-center gap-2">
             {value ? (
               <>
-                <EllipsisPopover
-                  value={value}
-                  isEdit={false}
-                  preferTypography
-                />
+                <EllipsisTextWithTooltip value={value} />
                 <CopyItemIcon className="hidden flex-shrink-0" value={value} />
               </>
             ) : (
@@ -277,9 +270,12 @@ export const useColumns = (
         title: '描述说明',
         dataIndex: 'description',
         width: 200,
-        ellipsis: true,
         render: (value) =>
-          value ? <EllipsisPopover value={value} isEdit={false} /> : '-'
+          value ? (
+            <EllipsisTextWithTooltip className="min-w-0" value={value} />
+          ) : (
+            '-'
+          )
       },
 
       {
