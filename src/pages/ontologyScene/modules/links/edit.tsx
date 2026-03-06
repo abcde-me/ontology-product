@@ -177,7 +177,7 @@ export default function OntologySceneLinksEdit() {
 
       // 使用接口定义的类型
       const requestData: UpdateOntologyLinkTypeReq = {
-        id: linkId,
+        id: Number(linkId),
         code: data.id,
         name: data.name,
         type: getApiLinkType(data.linkType),

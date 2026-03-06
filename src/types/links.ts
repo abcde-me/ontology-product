@@ -365,7 +365,7 @@ export interface UpdateOntologyLinkTypeReq extends CreateOntologyLinkTypeReq {
   /**
    * 唯一标识
    */
-  id: string;
+  id: number;
   /**
    * 是否重新上传（1：是，0：否）
    */
