@@ -146,24 +146,57 @@ export const TestResultDrawer: React.FC<TestResultDrawerProps> = ({
 
       // 多个行为：显示 tabs
       return (
-        <Tabs
-          activeTab={activeTab}
-          onChange={setActiveTab}
-          type="line"
-          style={{ height: '100%' }}
-        >
-          {behaviorList.map((item, index) => (
-            <TabPane
-              key={String(index)}
-              title={item.name || `行为 ${index + 1}`}
-            >
-              <div className="pt-4">
-                {renderStatusInfo(item)}
-                {renderLogContent(item)}
-              </div>
-            </TabPane>
-          ))}
-        </Tabs>
+        <div className="flex h-full flex-col">
+          <style>
+            {`
+              .test-result-tabs {
+                display: flex !important;
+                flex-direction: column !important;
+                height: 100% !important;
+              }
+              .test-result-tabs .arco-tabs-content {
+                flex: 1 !important;
+                overflow: hidden !important;
+                display: flex !important;
+                flex-direction: column !important;
+              }
+              .test-result-tabs .arco-tabs-content-list {
+                height: 100% !important;
+                flex: 1 !important;
+              }
+              .test-result-tabs .arco-tabs-content-item {
+                height: 100% !important;
+              }
+              .test-result-tabs .arco-tabs-pane {
+                height: 100% !important;
+              }
+            `}
+          </style>
+          <Tabs
+            activeTab={activeTab}
+            onChange={setActiveTab}
+            type="line"
+            className="test-result-tabs"
+          >
+            {behaviorList.map((item, index) => (
+              <TabPane
+                key={String(index)}
+                title={item.name || `行为 ${index + 1}`}
+              >
+                <div className="flex h-full flex-col">
+                  {/* 状态信息 */}
+                  <div className="mb-2.5 flex flex-shrink-0 items-center">
+                    {renderStatusInfo(item, false)}
+                  </div>
+                  {/* 日志内容区域 - 固定高度，可滚动 */}
+                  <div className="flex-1 overflow-y-auto rounded bg-[#F7F8FA] p-4">
+                    {renderLogContent(item)}
+                  </div>
+                </div>
+              </TabPane>
+            ))}
+          </Tabs>
+        </div>
       );
     }
 
