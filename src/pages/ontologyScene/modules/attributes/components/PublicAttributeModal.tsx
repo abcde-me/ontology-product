@@ -130,8 +130,31 @@ const PublicAttributeModal: React.FC<PublicAttributeModalProps> = ({
           field="name"
           rules={[
             { required: true, message: '请输入唯一标识' },
-            { maxLength: 50, message: 'id不能超过50个字符' }
+            {
+              validator: (value, callback) => {
+                if (!value) {
+                  callback();
+                  return;
+                }
+                // 首字符必须为英文字母
+                if (!/^[a-zA-Z]/.test(value)) {
+                  callback('首字符必须为英文字母');
+                  return;
+                }
+                // 仅允许英文字母与数字（不允许下划线及特殊符号）
+                if (!/^[a-zA-Z0-9]+$/.test(value)) {
+                  callback('仅允许英文字母与数字(不允许下划线及特殊符号)');
+                  return;
+                }
+                callback();
+              }
+            }
           ]}
+          extra={
+            <div className="text-[12px] text-[var(--color-text-4)]">
+              首字符必须为英文字母;仅允许英文字母与数字(不允许下划线及特殊符号)
+            </div>
+          }
         >
           <Input
             placeholder="请输入唯一标识"
