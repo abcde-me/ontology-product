@@ -41,12 +41,15 @@ export const useColumns = (
           fixed: 'left',
           render: (value, record) => (
             <div
-              className="hover-blue cursor-pointer font-PingFangSc text-[14px] font-normal leading-[22px] text-[#23293b]"
               onClick={() => {
                 onViewExecutionDetail?.(record);
               }}
             >
-              {value || '-'}
+              <EllipsisPopover
+                wrapperClassName="min-w-0 hover-blue cursor-pointer font-PingFangSc text-[14px] font-normal leading-[22px] text-[#23293b]"
+                value={value || '-'}
+                quiteMessage={false}
+              />
             </div>
           )
         },
@@ -62,7 +65,6 @@ export const useColumns = (
           title: '行为名称',
           dataIndex: 'name',
           width: 180,
-          ellipsis: true,
           render: (value, record) =>
             value ? (
               <div
@@ -71,9 +73,12 @@ export const useColumns = (
                     onViewBehaviorDetail?.(record);
                   }
                 }}
-                className={`font-PingFangSc text-[14px] font-normal leading-[22px] ${record.pk && record.pk !== 0 ? 'hover-blue cursor-pointer text-[#4e5969]' : 'text-[#4e5969]'}`}
+                style={{ width: 180 }}
               >
-                {value}
+                <EllipsisPopover
+                  wrapperClassName={`min-w-0 font-PingFangSc text-[14px] font-normal leading-[22px] text-[#4e5969] ${record.pk && record.pk !== 0 ? 'hover-blue cursor-pointer' : ''}`}
+                  value={value}
+                />
               </div>
             ) : (
               '-'
@@ -110,19 +115,8 @@ export const useColumns = (
           ellipsis: true,
           tooltip: true,
           width: 200,
-          render: (value) => (
-            <div>
-              {value ? (
-                <EllipsisPopover
-                  value={value}
-                  isEdit={false}
-                  preferTypography
-                />
-              ) : (
-                '-'
-              )}
-            </div>
-          )
+          render: (value) =>
+            value ? <EllipsisPopover value={value} isEdit={false} /> : '-'
         },
         {
           title: '所属对象类型',
@@ -215,12 +209,15 @@ export const useColumns = (
         fixed: 'left',
         render: (value, record) => (
           <div
-            className="hover-blue cursor-pointer font-PingFangSc text-[14px] font-normal leading-[22px] text-[#23293b]"
             onClick={() => {
               onViewExecutionDetail?.(record);
             }}
           >
-            {value || '-'}
+            <EllipsisPopover
+              wrapperClassName="min-w-0 hover-blue cursor-pointer font-PingFangSc text-[14px] font-normal leading-[22px] text-[#23293b]"
+              value={value || '-'}
+              quiteMessage={false}
+            />
           </div>
         )
       },
@@ -235,18 +232,24 @@ export const useColumns = (
         dataIndex: 'name',
         width: 180,
         ellipsis: true,
-        render: (value, record) => (
-          <div
-            className={`font-PingFangSc text-[14px] font-normal leading-[22px] ${record.pk ? 'hover-blue cursor-pointer text-[#4e5969]' : 'text-[#4e5969]'}`}
-            onClick={() => {
-              if (record.pk) {
-                onViewFunctionDetail?.(record);
-              }
-            }}
-          >
-            {value || '-'}
-          </div>
-        )
+        render: (value, record) =>
+          value ? (
+            <div
+              onClick={() => {
+                if (record.pk) {
+                  onViewFunctionDetail?.(record);
+                }
+              }}
+            >
+              <EllipsisPopover
+                wrapperClassName={`min-w-0 font-PingFangSc text-[14px] font-normal leading-[22px] text-[#4e5969] ${record.pk ? 'hover-blue cursor-pointer' : ''}`}
+                value={value}
+                quiteMessage={false}
+              />
+            </div>
+          ) : (
+            '-'
+          )
       },
       {
         title: '函数名称(id)',
@@ -275,15 +278,8 @@ export const useColumns = (
         dataIndex: 'description',
         width: 200,
         ellipsis: true,
-        render: (value) => (
-          <div>
-            {value ? (
-              <EllipsisPopover value={value} isEdit={false} preferTypography />
-            ) : (
-              '-'
-            )}
-          </div>
-        )
+        render: (value) =>
+          value ? <EllipsisPopover value={value} isEdit={false} /> : '-'
       },
 
       {
