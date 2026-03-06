@@ -128,16 +128,6 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
     const [fileUploaded, setFileUploaded] = useState(false);
     const [isReUpload, setIsReUpload] = useState(false);
     const [initialFileList, setInitialFileList] = useState<any[]>([]);
-    const [sourceAttributeOptions, setSourceAttributeOptions] = useState<
-      Array<{ label: string; value: string }>
-    >([]);
-    const [sourceAttributesLoading, setSourceAttributesLoading] =
-      useState(false);
-    const [targetAttributeOptions, setTargetAttributeOptions] = useState<
-      Array<{ label: string; value: string }>
-    >([]);
-    const [targetAttributesLoading, setTargetAttributesLoading] =
-      useState(false);
     const [targetPrimaryAttribute, setTargetPrimaryAttribute] = useState<{
       name: string;
       id: number;
@@ -156,55 +146,27 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
     const sourceObjectType = Form.useWatch('sourceObjectType', form);
     const targetObjectType = Form.useWatch('targetObjectType', form);
 
-    // 获取属性选项（从API获取真实数据，根据对象类型ID返回对应的属性列表）
-    const getAttributeOptions = (objectTypeId?: number) => {
-      if (!objectTypeId) return [];
-      // 根据当前选中的对象类型返回对应的选项
-      if (objectTypeId === sourceObjectType) {
-        return sourceAttributeOptions;
-      }
-      if (objectTypeId === targetObjectType) {
-        return targetAttributeOptions;
-      }
-      return [];
+    // 获取属性选项（从attributeFields中获取表字段作为选项）
+    const getAttributeOptions = () => {
+      // 使用 attributeFields 中的 tableField 作为选项
+      return attributeFields.map((field) => ({
+        label: field.tableField,
+        value: field.tableField
+      }));
     };
 
-    // 获取源对象类型的属性列表
+    // 获取源对象类型的主键属性（用于1:1和1:N类型）
     useEffect(() => {
       if (!sourceObjectType || !ontologyModelID) {
-        setSourceAttributeOptions([]);
+        setSourcePrimaryAttribute(null);
         return;
       }
 
-      if (linkType === LinkType.MANY_TO_MANY) {
-        const fetchSourceAttributes = async () => {
-          setSourceAttributesLoading(true);
-          try {
-            const response = await listOntologyPhysicalProperties({
-              objectTypeIdList: [sourceObjectType],
-              ontologyModelID
-            });
-            if (response.status === 200 && response.data?.result) {
-              const options = response.data.result.map((item) => ({
-                label: item.name || '',
-                value: item.name || ''
-              }));
-              setSourceAttributeOptions(options);
-            } else {
-              setSourceAttributeOptions([]);
-            }
-          } catch (error) {
-            console.error('获取源对象类型属性失败:', error);
-            setSourceAttributeOptions([]);
-          } finally {
-            setSourceAttributesLoading(false);
-          }
-        };
-
-        fetchSourceAttributes();
-
-        return;
-      }
+      // N:N 类型不需要获取源对象类型的属性列表（使用 attributeFields）
+      // if (linkType === LinkType.MANY_TO_MANY) {
+      //   setSourcePrimaryAttribute(null);
+      //   return;
+      // }
 
       const fetchSourcePrimaryAttribute = async () => {
         try {
@@ -230,48 +192,18 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
             setSourcePrimaryAttribute(null);
           }
         } catch (error) {
-          console.error('获取目标对象类型主键属性失败:', error);
+          console.error('获取源对象类型主键属性失败:', error);
           setSourcePrimaryAttribute(null);
         }
       };
 
       fetchSourcePrimaryAttribute();
-    }, [sourceObjectType, ontologyModelID]);
+    }, [sourceObjectType, ontologyModelID, linkType]);
 
     // 获取目标对象类型的主键属性（用于1:1和1:N类型）
     useEffect(() => {
       if (!targetObjectType || !ontologyModelID) {
         setTargetPrimaryAttribute(null);
-        setTargetAttributeOptions([]);
-        return;
-      }
-
-      if (linkType === 'N:N') {
-        const fetchTargetAttributesByN = async () => {
-          setTargetAttributesLoading(true);
-          try {
-            const response = await listOntologyPhysicalProperties({
-              objectTypeIdList: [targetObjectType],
-              ontologyModelID
-            });
-            if (response.status === 200 && response.data?.result) {
-              const options = response.data.result.map((item) => ({
-                label: item.name || '',
-                value: item.name || ''
-              }));
-              setTargetAttributeOptions(options);
-            } else {
-              setTargetAttributeOptions([]);
-            }
-          } catch (error) {
-            console.error('获取目标对象类型属性失败:', error);
-            setTargetAttributeOptions([]);
-          } finally {
-            setTargetAttributesLoading(false);
-          }
-        };
-
-        fetchTargetAttributesByN();
         return;
       }
 
@@ -303,18 +235,6 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
                 'targetObjectAttribute',
                 String(primaryAttribute.id)
               );
-            } else {
-              // 如果已有值，从已加载的属性列表中查找对应的属性名称
-              const attrId = String(currentValue);
-              const matchedOption = targetAttributeOptions.find(
-                (opt) => opt.value === attrId
-              );
-              if (matchedOption) {
-                setTargetPrimaryAttribute({
-                  name: matchedOption.label,
-                  id: Number(attrId)
-                });
-              }
             }
           } else {
             setTargetPrimaryAttribute(null);
@@ -328,7 +248,7 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
       };
 
       fetchTargetPrimaryAttribute();
-    }, [targetObjectType, ontologyModelID]);
+    }, [targetObjectType, ontologyModelID, linkType, form]);
 
     useEffect(() => {
       if (initialValues) {
@@ -690,11 +610,17 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
               setAttributeFields(fields);
               form.setFieldValue('attributeFields', fields);
               setFileUploaded(true);
+              // 清空关联中间表的选择（因为字段列表已改变）
+              form.setFieldValue('sourceAttribute', undefined);
+              form.setFieldValue('targetAttribute', undefined);
             } else {
               Message.error(response.message || '加载字段列表失败');
               setAttributeFields([]);
               form.setFieldValue('attributeFields', []);
               setFileUploaded(false);
+              // 清空关联中间表的选择
+              form.setFieldValue('sourceAttribute', undefined);
+              form.setFieldValue('targetAttribute', undefined);
             }
           } catch (error) {
             console.error('加载字段列表失败:', error);
@@ -702,6 +628,9 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
             setAttributeFields([]);
             form.setFieldValue('attributeFields', []);
             setFileUploaded(false);
+            // 清空关联中间表的选择
+            form.setFieldValue('sourceAttribute', undefined);
+            form.setFieldValue('targetAttribute', undefined);
           } finally {
             setFieldsLoading(false);
           }
@@ -710,12 +639,18 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
           setAttributeFields([]);
           form.setFieldValue('attributeFields', []);
           setFileUploaded(false);
+          // 清空关联中间表的选择
+          form.setFieldValue('sourceAttribute', undefined);
+          form.setFieldValue('targetAttribute', undefined);
         }
       } else {
         // 如果没有选择表，清空字段列表
         setAttributeFields([]);
         form.setFieldValue('attributeFields', []);
         setFileUploaded(false);
+        // 清空关联中间表的选择
+        form.setFieldValue('sourceAttribute', undefined);
+        form.setFieldValue('targetAttribute', undefined);
       }
     };
 
@@ -745,6 +680,9 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
       form.setFieldValue('attributeFields', []);
       setFileUploaded(false);
       setIsReUpload(false);
+      // 清空关联中间表的选择
+      form.setFieldValue('sourceAttribute', undefined);
+      form.setFieldValue('targetAttribute', undefined);
 
       // 如果切换到数据湖同步，加载数据库列表
       if (type === 'data_lake_sync') {
@@ -778,6 +716,9 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
         form.setFieldValue('attributeFields', []);
         setFileUploaded(false);
         setIsReUpload(false);
+        // 清空关联中间表的选择
+        form.setFieldValue('sourceAttribute', undefined);
+        form.setFieldValue('targetAttribute', undefined);
         return;
       }
 
@@ -810,6 +751,9 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
         setAttributeFields(fields);
         form.setFieldValue('attributeFields', fields);
         setFileUploaded(true);
+        // 清空关联中间表的选择（因为字段列表已改变）
+        form.setFieldValue('sourceAttribute', undefined);
+        form.setFieldValue('targetAttribute', undefined);
       }
     };
 
@@ -1078,24 +1022,23 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
                     placeholder="请选择对象类型"
                     allowClear
                   />
-                  {linkType !== LinkType.MANY_TO_MANY &&
-                    sourcePrimaryAttribute && (
-                      <div className="mt-[4px] flex items-center text-[14px] leading-[20px] text-[var(--color-text-1)]">
-                        {sourcePrimaryAttribute.name}
-                        <Tag
-                          color="#FBF2FF"
-                          className="ml-[4px] text-[#9254DE]"
-                          size="small"
-                        >
-                          主键
-                        </Tag>
-                      </div>
-                    )}
+                  {sourcePrimaryAttribute && (
+                    <div className="mt-[4px] flex items-center text-[14px] leading-[20px] text-[var(--color-text-1)]">
+                      {sourcePrimaryAttribute.name}
+                      <Tag
+                        color="#FBF2FF"
+                        className="ml-[4px] text-[#9254DE]"
+                        size="small"
+                      >
+                        主键
+                      </Tag>
+                    </div>
+                  )}
                 </div>
 
                 {linkType === 'N:N' ? (
                   <>
-                    <div className="flex flex-col items-center">
+                    <div className="flex flex-col">
                       <TwoWayArrowIcon />
                     </div>
                     <div className="flex-1 flex-1 rounded-[4px] bg-[#FAFBFF] p-[12px]">
@@ -1109,6 +1052,18 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
                         placeholder="请选择对象类型"
                         allowClear
                       />
+                      {targetPrimaryAttribute && (
+                        <div className="mt-[4px] flex items-center text-[14px] leading-[20px] text-[var(--color-text-1)]">
+                          {targetPrimaryAttribute.name}
+                          <Tag
+                            color="#FBF2FF"
+                            className="ml-[4px] text-[#9254DE]"
+                            size="small"
+                          >
+                            主键
+                          </Tag>
+                        </div>
+                      )}
                     </div>
                   </>
                 ) : (
@@ -1240,6 +1195,9 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
                               form.setFieldValue('attributeFields', []);
                               setFileUploaded(false);
                               setInitialFileList([]);
+                              // 清空关联中间表的选择
+                              form.setFieldValue('sourceAttribute', undefined);
+                              form.setFieldValue('targetAttribute', undefined);
                             } else {
                               // 重新上传CSV文件时，设置isReUpload为true
                               setIsReUpload(!!initialValues?.id);
@@ -1406,19 +1364,16 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
                         <Select
                           placeholder="请先上传中间表"
                           disabled={!fileUploaded}
-                          loading={sourceAttributesLoading}
                           allowClear
                         >
-                          {getAttributeOptions(sourceObjectType).map(
-                            (option) => (
-                              <Select.Option
-                                key={option.value}
-                                value={option.value}
-                              >
-                                {option.label}
-                              </Select.Option>
-                            )
-                          )}
+                          {getAttributeOptions().map((option) => (
+                            <Select.Option
+                              key={option.value}
+                              value={option.value}
+                            >
+                              {option.label}
+                            </Select.Option>
+                          ))}
                         </Select>
                       </FormItem>
                     </div>
@@ -1457,19 +1412,16 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
                         <Select
                           placeholder="请先上传中间表"
                           disabled={!fileUploaded}
-                          loading={targetAttributesLoading}
                           allowClear
                         >
-                          {getAttributeOptions(targetObjectType).map(
-                            (option) => (
-                              <Select.Option
-                                key={option.value}
-                                value={option.value}
-                              >
-                                {option.label}
-                              </Select.Option>
-                            )
-                          )}
+                          {getAttributeOptions().map((option) => (
+                            <Select.Option
+                              key={option.value}
+                              value={option.value}
+                            >
+                              {option.label}
+                            </Select.Option>
+                          ))}
                         </Select>
                       </FormItem>
                     </div>
@@ -1504,7 +1456,7 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
                       </span>
                     </div>
                   ) : attributeFields.length === 0 ? (
-                    <div className="py-8 text-center text-[14px] text-[#86909C]">
+                    <div className="text-start text-[14px] text-[#86909C]">
                       请先上传中间表
                     </div>
                   ) : (
