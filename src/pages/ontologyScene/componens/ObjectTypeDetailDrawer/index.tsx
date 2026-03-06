@@ -38,6 +38,7 @@ import { IconFile } from '@arco-design/web-react/icon';
 import styles from './index.module.scss';
 import { isNil } from 'lodash-es';
 import { getLinkTypeText } from '../../utils';
+import { openNewPage } from '@/utils/env';
 
 const TabPane = Tabs.TabPane;
 
@@ -473,13 +474,7 @@ export default function ObjectTypeDetailDrawer({
     const url = `/tenant/compute/modaforge/ontologyScene/detail/${ontologyModelID}/attributes/list?tab=public&search=${encodeURIComponent(
       record.ontologyPublicPropertiesName || ''
     )}`;
-    const currentUrl = `${history.location.pathname}${history.location.search}`;
-
-    if (currentUrl === url) {
-      window.location.reload();
-    } else {
-      history.push(url);
-    }
+    openNewPage(url);
   };
 
   // 属性表格列定义 - 直接使用接口定义的字段名
@@ -712,9 +707,7 @@ export default function ObjectTypeDetailDrawer({
                       className="flex-shrink-0 hover:cursor-pointer"
                       onClick={(e) => {
                         e.stopPropagation();
-                        handleCopy(
-                          String(displayData?.id || resolvedObjectTypeId)
-                        );
+                        handleCopy(String(displayData?.code));
                       }}
                     />
                   )}

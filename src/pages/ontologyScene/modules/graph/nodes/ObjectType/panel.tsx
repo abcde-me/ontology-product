@@ -39,6 +39,7 @@ import { useHistory, useParams } from 'react-router';
 import { isNil } from 'lodash-es';
 import { getLinkTypeText } from '@/pages/ontologyScene/utils';
 import { AttributeItem } from '@/pages/ontologyScene/componens/ObjectTypeDetailDrawer';
+import { openNewPage } from '@/utils/env';
 
 const defaultPageSize = 10;
 
@@ -230,7 +231,7 @@ const Panel: FC<any> = ({ id, data }) => {
       return;
     }
     const url = `/tenant/compute/modaforge/ontologyScene/detail/${OSId}/attributes/list?tab=public&search=${encodeURIComponent(record.ontologyPublicPropertiesName || '')}`;
-    history.push(url);
+    openNewPage(url);
   };
 
   // 属性表格列

@@ -25,6 +25,7 @@ import { useParams } from 'react-router';
 import { useHistory } from 'react-router-dom';
 import { listOntologyObjectType } from '@/api/ontologySceneLibrary/objectType';
 import type { ListOntologyPhysicalPropertiesReq } from '@/types/graphApi';
+import { openNewPage } from '@/utils/env';
 
 export interface NormalTableProps {
   /** total 变化时的回调函数 */
@@ -177,7 +178,7 @@ export default function NormalTable({ onTotalChange }: NormalTableProps = {}) {
     }
 
     const url = `/tenant/compute/modaforge/ontologyScene/detail/${ontologyModelID}/attributes/list?tab=public&search=${encodeURIComponent(record.ontologyPublicPropertiesName || '')}`;
-    history.push(url);
+    openNewPage(url);
   };
 
   // 表格列定义
