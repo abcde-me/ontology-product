@@ -5,7 +5,8 @@ import {
   Spin,
   Dropdown,
   Button,
-  Message
+  Message,
+  Popover
 } from '@arco-design/web-react';
 import {
   IconApps,
@@ -296,18 +297,29 @@ export default function OntologySceneDetail() {
               ) : null
             }
           >
-            {group.children?.map((item) => (
-              <MenuItem
-                key={item.key}
-                onClick={() => handleMenuSelect(item.key)}
-                title={sidebarCollapsed ? item.title : undefined}
-              >
-                <span className={cls(sidebarCollapsed ? '' : 'mr-[8px]')}>
-                  {item.icon}
-                </span>
-                {!sidebarCollapsed && <span>{item.title}</span>}
-              </MenuItem>
-            ))}
+            {group.children?.map((item) => {
+              const menuItemContent = (
+                <MenuItem
+                  key={item.key}
+                  onClick={() => handleMenuSelect(item.key)}
+                >
+                  <span className={cls(sidebarCollapsed ? '' : 'mr-[8px]')}>
+                    {item.icon}
+                  </span>
+                  {!sidebarCollapsed && <span>{item.title}</span>}
+                </MenuItem>
+              );
+
+              if (sidebarCollapsed) {
+                return (
+                  <Popover key={item.key} content={item.title} position="right">
+                    {menuItemContent}
+                  </Popover>
+                );
+              }
+
+              return menuItemContent;
+            })}
           </MenuGroup>
         );
       }
@@ -365,7 +377,6 @@ export default function OntologySceneDetail() {
               droplist={renderCreateDropdown()}
               trigger="click"
               position="bl"
-              // disabled={sidebarCollapsed}
             >
               <Button
                 className={cls(
