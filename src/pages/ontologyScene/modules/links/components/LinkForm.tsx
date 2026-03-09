@@ -283,6 +283,10 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
           ) {
             setSelectedDatabase(initialValues.intermediateTable.database);
             setSelectedTable(initialValues.intermediateTable.table);
+            setCascaderValue([
+              initialValues.intermediateTable.database,
+              initialValues.intermediateTable.table
+            ]);
             // 注意：这里需要等数据库列表加载后才能设置 cascaderValue
             // 所以先设置 selectedDatabase 和 selectedTable，在 loadDatabaseList 后再设置 cascaderValue
           }

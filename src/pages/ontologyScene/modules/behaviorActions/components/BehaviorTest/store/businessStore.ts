@@ -15,7 +15,6 @@ import { getActionList } from '@/api/ontologySceneLibrary/ontologyAction';
 import { UiType } from '@/pages/ontologyScene/types/ontologyFunction';
 import {
   EnumRule,
-  LengthRule,
   RangeRule
 } from '@/pages/ontologyScene/types/behaviorActions';
 

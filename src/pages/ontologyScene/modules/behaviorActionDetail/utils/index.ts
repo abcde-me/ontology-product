@@ -2,7 +2,6 @@ import {
   ActionSchema,
   BehaviorActionDetail,
   EnumRule,
-  LengthRule,
   OntologyActionParam,
   RangeRule,
   RuleName,
