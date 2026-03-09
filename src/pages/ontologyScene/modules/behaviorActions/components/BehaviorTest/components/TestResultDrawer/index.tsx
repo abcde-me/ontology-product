@@ -22,11 +22,11 @@ export const TestResultDrawer: React.FC<TestResultDrawerProps> = ({
   // 从 props 接收 testFunctionHook
   const { runLog: runInfo, testIng, loading, stopTest } = testFunctionHook;
 
-  // 使用 ref 存储最新的 runInfo 状态，避免闭包问题
-  const runInfoRef = useRef(runInfo);
+  // 使用 ref 存储最新的 testIng 状态，避免闭包问题
+  const testIngRef = useRef(testIng);
   useEffect(() => {
-    runInfoRef.current = runInfo;
-  }, [runInfo]);
+    testIngRef.current = testIng;
+  }, [testIng]);
 
   // 当前激活的 tab
   const [activeTab, setActiveTab] = useState<string>('0');
@@ -41,7 +41,7 @@ export const TestResultDrawer: React.FC<TestResultDrawerProps> = ({
         okText: '确定',
         cancelText: '取消',
         onOk: () => {
-          // 使用 ref 获取最新的 testIng 状态
+          // 使用 ref 获取最新的 testIng 状态，检查测试接口是否仍在运行
           if (testIngRef.current) {
             // 仍在运行，执行停止
             stopTest();
