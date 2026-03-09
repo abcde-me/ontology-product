@@ -89,6 +89,8 @@ interface DatasetFormProps {
   handleAddSceneTypeSubmit: (values: any) => Promise<void>;
   addSceneTypeVisible: boolean;
   setAddSceneTypeVisible: (visible: boolean) => void;
+  isEdit: boolean;
+  setIsEdit: (isEdit: boolean) => void;
 }
 
 const FormItem = Form.Item;
@@ -218,7 +220,9 @@ const DatasetForm = React.forwardRef<
     sceneTypeForm,
     handleAddSceneTypeSubmit,
     addSceneTypeVisible,
-    setAddSceneTypeVisible
+    setAddSceneTypeVisible,
+    isEdit,
+    setIsEdit
   } = props;
   const [form] = Form.useForm();
   const [dataSource, setDataSource] = useState<'volume' | 'connector'>(
@@ -926,6 +930,7 @@ const DatasetForm = React.forwardRef<
                   icon={<IconPlus />}
                   className={styles.addSceneBtn}
                   onClick={() => {
+                    setIsEdit(false);
                     setAddSceneTypeVisible(true);
                   }}
                 >
@@ -1256,6 +1261,7 @@ const DatasetForm = React.forwardRef<
         setAddSceneTypeVisible={setAddSceneTypeVisible}
         handleAddSceneTypeSubmit={handleAddSceneTypeSubmit}
         newTagList={newTagList}
+        isEdit={isEdit}
       />
     </>
   );

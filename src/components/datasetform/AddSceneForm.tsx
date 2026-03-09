@@ -7,11 +7,14 @@ export default function AddSceneFormModal({
   sceneTypeForm,
   setAddSceneTypeVisible,
   handleAddSceneTypeSubmit,
-  newTagList
+  newTagList,
+  isEdit
 }) {
   return (
     <Modal
       className={styles.addSceneTypeModal}
+      maskStyle={{ zIndex: 9998 }}
+      wrapClassName={styles.addSceneTypeModalWrapper}
       visible={addSceneTypeVisible}
       onOk={() => sceneTypeForm.submit()}
       onCancel={() => {
@@ -19,7 +22,7 @@ export default function AddSceneFormModal({
         setAddSceneTypeVisible(false);
       }}
       maskClosable={false}
-      title="新增场景类型"
+      title={isEdit ? '编辑场景类型' : '新增场景类型'}
     >
       <Form form={sceneTypeForm} onSubmit={handleAddSceneTypeSubmit}>
         <Form.Item

@@ -608,12 +608,16 @@ export async function GetTaskLatestOperation(params) {
 export async function GetTaskFile(params) {
   return await UAPI.RES.lePreviewTaskFile({})
     .post(params)
-    .withConfig({ responseType: 'blob' })
+    .withConfig({ timeout: 300000, responseType: 'blob' })
     .inRegion()
     .do({ headers: { 'need-header-data': 'true' } });
 }
 
 // AI识别
 export async function AIRecognition(params) {
-  return await UAPI.RES.leAIRecognition({}).post(params).inRegion().do();
+  return await UAPI.RES.leAIRecognition({})
+    .post(params)
+    .withConfig({ timeout: 300000 })
+    .inRegion()
+    .do();
 }

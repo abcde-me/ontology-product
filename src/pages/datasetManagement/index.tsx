@@ -1858,7 +1858,10 @@ const DatasetManagement: React.FC = () => {
         }
         type="card"
         activeTab={activeTab}
-        onAddTab={() => setAddSceneTypeVisible(true)}
+        onAddTab={() => {
+          setIsEdit(false);
+          setAddSceneTypeVisible(true);
+        }}
         ref={stickyRef}
         onChange={(value) => {
           const selectValue = value === '0' ? [] : [Number(value)];
@@ -2174,6 +2177,8 @@ const DatasetManagement: React.FC = () => {
         handleAddSceneTypeSubmit={handleAddSceneTypeSubmit}
         addSceneTypeVisible={addSceneTypeVisible}
         setAddSceneTypeVisible={setAddSceneTypeVisible}
+        isEdit={isEdit}
+        setIsEdit={setIsEdit}
         ref={childRef}
       />
       {/* 导出数据集弹窗 */}
@@ -2195,6 +2200,7 @@ const DatasetManagement: React.FC = () => {
         setAddSceneTypeVisible={setAddSceneTypeVisible}
         handleAddSceneTypeSubmit={handleAddSceneTypeSubmit}
         newTagList={newTagList}
+        isEdit={isEdit}
       />
 
       {/* 移动数据集弹窗 */}
@@ -2243,6 +2249,7 @@ const DatasetManagement: React.FC = () => {
                 icon={<IconPlus />}
                 className={styles.addSceneBtn}
                 onClick={() => {
+                  setIsEdit(false);
                   setAddSceneTypeVisible(true);
                 }}
               >
