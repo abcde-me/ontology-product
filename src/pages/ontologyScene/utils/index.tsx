@@ -153,10 +153,11 @@ export const buildActionTestItem = (
       inputType: p.uiType ? InputType.Input : InputType.Output,
       ...p
     });
-    res.arguments.push({
-      value: formatParamValueByType(p, functionParams[p.name]),
-      name: p.name
-    });
+    p.inputType === InputType.Input &&
+      res.arguments.push({
+        value: formatParamValueByType(p, functionParams[p.name]),
+        name: p.name
+      });
   });
   return res;
 };
