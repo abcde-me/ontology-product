@@ -471,7 +471,7 @@ export default function ObjectTypeDetailDrawer({
     if (!record.ontologyPublicPropertiesName) {
       return;
     }
-    const url = `/tenant/compute/modaforge/ontologyScene/detail/${ontologyModelID}/attributes/list?tab=public&search=${encodeURIComponent(
+    const url = `/modaforge/tenant/compute/modaforge/ontologyScene/detail/${ontologyModelID}/attributes/list?tab=public&search=${encodeURIComponent(
       record.ontologyPublicPropertiesName || ''
     )}`;
     openNewPage(url);
