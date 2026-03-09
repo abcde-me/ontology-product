@@ -1,4 +1,4 @@
-import React, { useCallback, useState, useEffect } from 'react';
+import React, { useCallback, useState, useEffect, useMemo } from 'react';
 import {
   AIWorflow,
   AIWorkflowProvider,
@@ -18,18 +18,21 @@ import dagre from '@dagrejs/dagre';
 import type { GetOntologyTopologyResponse } from '@/types/graphApi';
 import styles from './index.module.scss';
 import { CustomLabel, EdgePanel } from './edges';
-import { Spin } from '@arco-design/web-react';
+import { Button, Spin } from '@arco-design/web-react';
 import SubHeader from './subHeader';
 import classNames from 'classnames';
 import { MarkerType } from 'reactflow';
 import { useDemoStore } from './common/store';
-import { useParams } from 'react-router-dom';
+import { useHistory, useParams } from 'react-router-dom';
 import { OsEmptyStatusWrapper } from '@/pages/ontologyScene/componens';
 import GraphEmptyImage from '@/pages/ontologyScene/assets/graph-empty.png';
 import { OBJECT_TYPE_ICON_OPTIONS } from '../../common/constants';
 import ObjectTypeIcon1 from '@/pages/ontologyScene/assets/object-type-one.svg';
 
-const nodesConfig = [
+const createNodesConfig = (
+  OSId: string,
+  history: ReturnType<typeof useHistory>
+) => [
   {
     type: 'default', // 节点类型
     node: MyNode, // 画布展示的节点
@@ -49,6 +52,33 @@ const nodesConfig = [
         <IconComponent
           className={`mr-[8px] flex-shrink-0 ${type === 'node' ? 'h-[24px] w-[24px]' : 'h-[20px] w-[20px]'}`}
         />
+      );
+    },
+    panelBeforeCloseExtra: (data) => {
+      const { id: resolvedObjectTypeId } = data;
+
+      const handleEdit = () => {
+        if (resolvedObjectTypeId) {
+          history.push(
+            `/tenant/compute/modaforge/ontologyScene/detail/${OSId}/objectType/edit/${resolvedObjectTypeId}`
+          );
+        }
+      };
+
+      return (
+        <>
+          <Button
+            size="small"
+            type="outline"
+            className="px-[12px]"
+            onClick={() => {
+              handleEdit();
+            }}
+          >
+            编辑
+          </Button>
+          <div className="ml-[16px] mr-[12px] h-[16px] w-[1px] bg-[#CBD5E1]"></div>
+        </>
       );
     }
   }
@@ -230,7 +260,12 @@ export default function OntologySceneGraph() {
   const [loading, setLoading] = useState(true);
   const showCustomEdgePanel = useDemoStore((s) => s.showCustomEdgePanel);
   const setShowCustomEdgePanel = useDemoStore((s) => s.setShowCustomEdgePanel);
+  const history = useHistory();
   const { id: OSId } = useParams<{ id: string }>();
+  const nodesConfig = useMemo(
+    () => createNodesConfig(OSId, history),
+    [OSId, history]
+  );
 
   // 计算是否为空：当 nodes 和 edges 都是空数组时，isEmpty 为 true
   const isEmpty =

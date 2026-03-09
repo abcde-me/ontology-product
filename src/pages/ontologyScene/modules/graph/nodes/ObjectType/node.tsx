@@ -32,13 +32,13 @@ const Node = ({ id, data }) => {
           </span>
           <EllipsisPopover
             value={data.code}
-            wrapperClassName="flex-1 min-w-0"
+            wrapperClassName="min-w-0"
             className="text-[14px] leading-[22px] text-[var(--color-text-1)]"
           ></EllipsisPopover>
           <Popover content="复制">
             <IconCopy
               fontSize={14}
-              className="hidden cursor-pointer hover:text-[#184FF2] group-hover:block"
+              className="hidden flex-shrink-0 cursor-pointer hover:text-[#184FF2] group-hover:block"
               onClick={(e) => {
                 e.stopPropagation();
                 e.preventDefault();
