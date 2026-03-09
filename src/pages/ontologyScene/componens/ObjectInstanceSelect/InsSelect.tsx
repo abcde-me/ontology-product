@@ -19,6 +19,7 @@ export interface ObjectInterfaceSelectProps
   primaryKey?: string;
   objectTypeId?: number;
   mode?: 'single' | 'multiple';
+  searchKey: string;
 }
 
 type OptionItem = {
@@ -36,7 +37,8 @@ export const InterfaceSelect = (props: ObjectInterfaceSelectProps) => {
     mode = 'single',
     placeholder,
     primaryKey,
-    objectTypeId
+    objectTypeId,
+    searchKey: string
   } = props;
 
   const [scrollLoading, setScrollLoading] = useState<React.ReactNode>(
