@@ -6,7 +6,6 @@ import { IconLoading, IconPlayArrowFill } from '@arco-design/web-react/icon';
 import {
   BehaviorActionDetail,
   EnumRule,
-  LengthRule,
   OntologyActionParam,
   RangeRule,
   RuleName,
