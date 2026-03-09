@@ -184,11 +184,6 @@ export interface EnumRule {
   options: string[];
 }
 
-export interface LengthRule {
-  minLength: number;
-  maxLength: number;
-}
-
 export interface RangeRule {
   minValue: number;
   maxValue: number;
@@ -218,8 +213,8 @@ export interface ValidationRule {
    * - **length_rule**: 长度规则配置
    * ```json
    * {
-   * "minLength": 2,
-   * "maxLength": 50
+   * "minValue": 2,
+   * "maxValue": 50
    * }
    * ```
    * - minLength: integer - 最小长度
@@ -233,7 +228,7 @@ export interface ValidationRule {
    * ```
    * - options: array<string> - 可选值列表
    */
-  ruleConfig?: EnumRule | LengthRule | RangeRule;
+  ruleConfig?: EnumRule | RangeRule;
   /**
    * 规则类型：
    * - range_rule: 范围规则

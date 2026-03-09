@@ -11,7 +11,7 @@ import { InputNumberWithLabel } from '@ceai-front/arco-material';
 import {
   FunctionFileParam,
   MapPicker,
-  ObjectInterfaceSelect
+  ObjectInstanceSelect
 } from '@/pages/ontologyScene/componens';
 import styles from '../styles/index.module.scss';
 import { LinkType } from '@/types/graphApi';
@@ -60,9 +60,9 @@ export const renderComponentByUiType = (type: UiType, osid?: number) => {
     case UiType.Timestamp:
       return <DatePicker showTime />;
     case UiType.ObjectOne:
-      return <ObjectInterfaceSelect mode={'single'} />;
+      return <ObjectInstanceSelect mode={'single'} />;
     case UiType.ObjectSet:
-      return <ObjectInterfaceSelect mode={'multiple'} />;
+      return <ObjectInstanceSelect mode={'multiple'} />;
     default:
       return <Input placeholder={'请输入'} />;
   }

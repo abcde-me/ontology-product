@@ -149,10 +149,10 @@ export const ValidateRules = (props: { readonly?: boolean }) => {
                                   if (isNil(v))
                                     return onError('请填写数值范围');
                                   const value = v as NumberRangeValue;
-                                  if (isNil(value.minLength)) {
+                                  if (isNil(value.minValue)) {
                                     return onError('请填写最小值');
                                   }
-                                  if (isNil(value.maxLength)) {
+                                  if (isNil(value.maxValue)) {
                                     return onError('请填写最大值');
                                   }
                                 }
@@ -161,8 +161,8 @@ export const ValidateRules = (props: { readonly?: boolean }) => {
                           >
                             <NumberRange
                               disabled={disabled}
-                              minField={'minLength'}
-                              maxField={'maxLength'}
+                              minField={'minValue'}
+                              maxField={'maxValue'}
                             />
                           </FormItem>
                         )}

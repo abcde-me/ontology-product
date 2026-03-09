@@ -5,7 +5,7 @@ import { ObjectTypeSelect } from '../../componens';
 import { useRequest } from 'ahooks';
 import { listOntologyPhysicalProperties } from '@/api/ontologySceneLibrary/graph';
 import { ObjectType } from '@/types/objectType';
-import { InterfaceSelect } from '@/pages/ontologyScene/componens/ObjectInterfaceSelect/InsSelect';
+import { InterfaceSelect } from '@/pages/ontologyScene/componens/ObjectInstanceSelect/InsSelect';
 import { useParams } from 'react-router-dom';
 
 export interface ObjInsValue {
@@ -22,7 +22,7 @@ export interface ObjInsProps extends CustomFormItemCompProps<ObjInsValue> {
   ) => void;
 }
 
-export const ObjectInterfaceSelect = (props: ObjInsProps) => {
+export const ObjectInstanceSelect = (props: ObjInsProps) => {
   const { value, onChange, disabled, className } = props;
   const { objectTypeID, objInsID } = value || {};
   const { id: OSId } = useParams<Record<string, any>>();
