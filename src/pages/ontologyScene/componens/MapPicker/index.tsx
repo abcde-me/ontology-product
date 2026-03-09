@@ -103,11 +103,11 @@ export const MapPicker: React.FC<MapPickerProps> = ({
   const placeSearchRef = useRef<any>();
   const mapClickBoundRef = useRef(false);
 
-  const displayValue = useMemo(() => {
-    if (!currentPoint) return '';
+  const getDisplayValue = () => {
+    if (!currentPoint) return undefined;
     const { lng, lat } = currentPoint;
     return `${lng.toFixed(6)}, ${lat.toFixed(6)}`;
-  }, [currentPoint]);
+  };
 
   const ensureMarker = useCallback(() => {
     if (!mapRef.current || !AMapRef.current) return null;
@@ -216,11 +216,8 @@ export const MapPicker: React.FC<MapPickerProps> = ({
 
   // 同步外部受控值
   useEffect(() => {
-    if (
-      value &&
-      typeof value.lng === 'number' &&
-      typeof value.lat === 'number'
-    ) {
+    if (!value) return setCurrentPoint(undefined);
+    if (value && [value.lat, value.lng].every((n) => typeof n === 'number')) {
       setCurrentPoint(value);
       if (mapRef.current) {
         updateMarker(value, false);
@@ -306,7 +303,7 @@ export const MapPicker: React.FC<MapPickerProps> = ({
           className={classNames(styles.input, className)}
           style={style}
           readOnly
-          value={displayValue}
+          value={getDisplayValue()}
           placeholder={placeholder}
           disabled={disabled || loadingMap || !mapReady}
           allowClear
@@ -342,7 +339,7 @@ export const MapPicker: React.FC<MapPickerProps> = ({
           >
             <Input
               readOnly
-              value={displayValue}
+              value={getDisplayValue()}
               placeholder={'请点击地图选择坐标'}
             />
           </FormItem>

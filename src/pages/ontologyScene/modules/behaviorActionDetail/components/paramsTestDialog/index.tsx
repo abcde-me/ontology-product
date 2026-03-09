@@ -145,9 +145,6 @@ export const ParamsTestDialog = (props: IProps) => {
                         { required: true, message: '请输入参数值' }
                       ]
                     }
-                    triggerPropName={
-                      uiType === UiType.Switch ? 'checked' : 'value'
-                    }
                   >
                     {renderComponentByUiType(uiType, OSId ? +OSId : undefined)}
                   </Form.Item>

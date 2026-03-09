@@ -204,9 +204,6 @@ export const RightPanel: React.FC<RightPanelProps> = ({ testFunctionHook }) => {
                     { required: true, message: '请输入参数值' }
                   ]
                 }
-                triggerPropName={
-                  param.uiType === UiType.Switch ? 'checked' : 'value'
-                }
               >
                 {renderComponentByUiType(
                   param.uiType,

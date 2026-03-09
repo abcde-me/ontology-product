@@ -50,11 +50,7 @@ export const getFunctionList = async (params: FunctionListQuery) => {
 };
 // 函数测试
 export const testFunction = async (params: TestFunction) => {
-  const res = await UAPI.RES.ExecuteFunctionTestAPi({})
-    .post(params)
-    .inRegion()
-    .do();
-  return res.data || [];
+  return UAPI.RES.ExecuteFunctionTestAPi({}).post(params).inRegion().do();
 };
 
 // 终止函数测试
