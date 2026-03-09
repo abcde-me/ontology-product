@@ -1145,7 +1145,7 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
                                     e.stopPropagation();
                                     // 打开新页面，使用表的 ID（option.value）
                                     openNewPage(
-                                      `/tenant/compute/modaforge/metadataManagement/detail?id=${option.value}&metadataType=ICEBERG`
+                                      `/modaforge/tenant/compute/modaforge/metadataManagement/detail?id=${option.value}&metadataType=ICEBERG`
                                     );
                                   }}
                                 />

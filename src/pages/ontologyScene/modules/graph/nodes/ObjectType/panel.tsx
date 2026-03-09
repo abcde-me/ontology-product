@@ -230,7 +230,7 @@ const Panel: FC<any> = ({ id, data }) => {
     if (!record.ontologyPublicPropertiesName) {
       return;
     }
-    const url = `/tenant/compute/modaforge/ontologyScene/detail/${OSId}/attributes/list?tab=public&search=${encodeURIComponent(record.ontologyPublicPropertiesName || '')}`;
+    const url = `/modaforge/tenant/compute/modaforge/ontologyScene/detail/${OSId}/attributes/list?tab=public&search=${encodeURIComponent(record.ontologyPublicPropertiesName || '')}`;
     openNewPage(url);
   };
 
