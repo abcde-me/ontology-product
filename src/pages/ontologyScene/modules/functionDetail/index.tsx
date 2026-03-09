@@ -70,11 +70,18 @@ export default function OSFunctionDetailPage() {
     try {
       const allValues: OntologyFunctionSchema = form.getFieldsValue();
       await validateBeforeSave(allValues);
-      await saveFunction({
+      const res = await saveFunction({
         ...(functionDetail || {}),
         ...buildFunctionDetail(allValues),
         ontologyModelID: +OSId
       });
+      if (res.message !== 'ok') {
+        Message.error({
+          content: res.message,
+          duration: 0.5
+        });
+        return;
+      }
       Message.success({
         content: `成功${pageMode === 'edit' ? '编辑' : '创建'}函数`,
         duration: 0.5,
