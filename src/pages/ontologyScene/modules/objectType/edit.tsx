@@ -169,7 +169,7 @@ export default function OntologySceneObjectTypeEdit() {
               )}
             </div>
             {/* 底部操作按钮 - 使用sticky */}
-            <div className="ticky bottom-0 z-10 border-t border-[#E5E6EB] bg-white px-6 py-4">
+            <div className="sticky bottom-0 z-10 border-t border-[#E5E6EB] bg-white px-6 py-4">
               <div className="flex justify-start gap-[8px]">
                 <Button
                   type="primary"

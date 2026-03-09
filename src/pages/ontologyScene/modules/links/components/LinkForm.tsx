@@ -361,6 +361,7 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
         title: (
           <div className="flex items-center gap-[12px]">
             <Checkbox
+              className="pointer-events-auto mr-[12px]"
               checked={allSelected}
               indeterminate={someSelected && !allSelected}
               onChange={(checked) => handleSelectAll(!!checked)}
@@ -1475,7 +1476,7 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
         </div>
 
         {showFooter && (
-          <div className="sticky bottom-0 z-10 border-t border-[#E5E6EB] bg-white px-6 py-4">
+          <div className="fixed bottom-0 z-10 border-t border-[#E5E6EB] bg-white px-6 py-4">
             <div className="flex justify-end gap-3">
               <Button onClick={onCancel} disabled={loading}>
                 取消

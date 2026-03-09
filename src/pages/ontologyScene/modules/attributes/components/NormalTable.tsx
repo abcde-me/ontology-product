@@ -272,14 +272,19 @@ export default function NormalTable({ onTotalChange }: NormalTableProps = {}) {
       dataIndex: 'name',
       width: 150,
       render: (value) => (
-        <div className="flex items-center gap-2">
-          <div className="font-PingFangSc text-[14px] font-normal leading-[22px] text-[#23293b]">
+        <div className="flex items-center gap-[8px]">
+          <EllipsisPopover
+            wrapperClassName="min-w-0 leading-[22px]"
+            value={value || '-'}
+          >
             {value}
-          </div>
-          <CopyItemIcon
-            className="hidden flex-shrink-0"
-            value={String(value || '')}
-          />
+          </EllipsisPopover>
+          {value && (
+            <CopyItemIcon
+              className="flex hidden flex-shrink-0 items-center leading-[22px]"
+              value={String(value || '')}
+            />
+          )}
         </div>
       )
     },
