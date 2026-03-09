@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { OsDrawer } from '@/pages/ontologyScene/componens';
 import { DotStatus, NoDataCard } from '@ceai-front/arco-material';
 import { IconLoading } from '@arco-design/web-react/icon';
@@ -22,6 +22,12 @@ export const TestResultDrawer: React.FC<TestResultDrawerProps> = ({
   // 从 props 接收 testFunctionHook
   const { runLog: runInfo, testIng, loading, stopTest } = testFunctionHook;
 
+  // 使用 ref 存储最新的 runInfo 状态，避免闭包问题
+  const runInfoRef = useRef(runInfo);
+  useEffect(() => {
+    runInfoRef.current = runInfo;
+  }, [runInfo]);
+
   // 当前激活的 tab
   const [activeTab, setActiveTab] = useState<string>('0');
 
@@ -35,8 +41,13 @@ export const TestResultDrawer: React.FC<TestResultDrawerProps> = ({
         okText: '确定',
         cancelText: '取消',
         onOk: () => {
-          stopTest();
-          Message.info('已停止运行');
+          // 使用 ref 获取最新的 testIng 状态
+          if (testIngRef.current) {
+            // 仍在运行，执行停止
+            stopTest();
+            Message.info('已停止运行');
+          }
+          // 无论是否停止，都关闭抽屉
           onClose();
         }
       });
