@@ -84,7 +84,7 @@ export const TestResultDrawer: React.FC<TestResultDrawerProps> = ({
       1: { text: '测试中', color: '#6E7B8D' },
       2: { text: '测试成功', color: '#00B981' },
       3: { text: '运行失败', color: '#F53F3F' },
-      4: { text: 'KILL', color: '#F53F3F' }
+      4: { text: '已被手动停止', color: '#F53F3F' }
     };
 
     const config = statusConfig[item.run_status as 1 | 2 | 3 | 4];
