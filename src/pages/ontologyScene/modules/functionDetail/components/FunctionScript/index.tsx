@@ -113,7 +113,13 @@ export const FunctionScript = (
               hidden: !logOpen
             })}
           >
-            {runInfo.runLog?.map((item, index) => item.run_log).join('\n')}
+            {runInfo.runLog
+              ?.map((item, index) => item.run_log)
+              .join('\n')
+              .split('\n')
+              .map((l, i) => {
+                return <p key={i}>{l}</p>;
+              })}
           </div>
         </ResizeBoxWithCursorChange>
       )}

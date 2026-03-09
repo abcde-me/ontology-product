@@ -28,6 +28,7 @@ export interface ObjectTypeSelectProps {
   getPopupContainer?: (node: HTMLElement) => HTMLElement;
   /** 是否显示全部 */
   showAll?: boolean;
+  primaryKey?: keyof ObjectType;
 }
 
 /**
@@ -44,7 +45,8 @@ const ObjectTypeSelect: React.FC<ObjectTypeSelectProps> = ({
   allowClear = true,
   label = '',
   getPopupContainer,
-  showAll = false
+  showAll = false,
+  primaryKey = 'id'
 }) => {
   const [loading, setLoading] = useState(false);
   const [objectTypeList, setObjectTypeList] = useState<ObjectType[]>([]);
@@ -66,6 +68,7 @@ const ObjectTypeSelect: React.FC<ObjectTypeSelectProps> = ({
             syncStatus: SyncStatus.SUCCESS,
             id: -1,
             name: '全局行为',
+            code: '-1',
             description: '全局行为'
           });
         }
@@ -129,7 +132,7 @@ const ObjectTypeSelect: React.FC<ObjectTypeSelectProps> = ({
   // 处理选择变化
   const handleChange = (val: number | undefined) => {
     const selected = val
-      ? objectTypeList.find((item) => item.id === val)
+      ? objectTypeList.find((item) => item[primaryKey] === val)
       : undefined;
     onChange?.(val, selected);
   };
@@ -156,7 +159,9 @@ const ObjectTypeSelect: React.FC<ObjectTypeSelectProps> = ({
 
           // 从 option 中获取对象类型 ID
           const optionValue = option?.props?.value ?? option;
-          const item = objectTypeList.find((obj) => obj.id === optionValue);
+          const item = objectTypeList.find(
+            (obj) => obj[primaryKey] === optionValue
+          );
 
           // 如果找不到对应的对象类型，不显示该选项
           if (!item) return false;
@@ -174,7 +179,7 @@ const ObjectTypeSelect: React.FC<ObjectTypeSelectProps> = ({
         }}
         renderFormat={(option, value) => {
           if (!value || !option) return null;
-          const item = objectTypeList.find((obj) => obj.id === value);
+          const item = objectTypeList.find((obj) => obj[primaryKey] === value);
           if (!item) return null;
 
           const IconComponent = getIconComponent(item.icon);
@@ -182,7 +187,7 @@ const ObjectTypeSelect: React.FC<ObjectTypeSelectProps> = ({
           return (
             <div className="flex items-center gap-2">
               {/* 左侧图标 */}
-              {Number(value) > 0 && (
+              {Number(item.id) > 0 && (
                 <div className="flex h-[24px] w-[24px] flex-shrink-0 items-center justify-center rounded">
                   <IconComponent className="h-[24px] w-[24px]" />
                 </div>
@@ -200,7 +205,7 @@ const ObjectTypeSelect: React.FC<ObjectTypeSelectProps> = ({
         className="object-type-select"
       >
         {objectTypeList.map((item) => (
-          <Select.Option key={item.id} value={item.id}>
+          <Select.Option key={item.id} value={item[primaryKey] as any}>
             {renderOption(item)}
           </Select.Option>
         ))}

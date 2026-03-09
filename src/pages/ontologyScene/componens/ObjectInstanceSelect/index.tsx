@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import styles from './index.module.scss';
 import classNames from 'classnames';
 import { ObjectTypeSelect } from '../../componens';
@@ -27,10 +27,13 @@ export const ObjectInstanceSelect = (props: ObjInsProps) => {
   const { objectTypeID, objInsID } = value || {};
   const { id: OSId } = useParams<Record<string, any>>();
 
+  const [currentObj, setCurrentObj] = useState<ObjectType>();
+
   const { data: primaryKey, loading: primaryKeyLoading } = useRequest(
     () => {
       return listOntologyPhysicalProperties({
-        objectTypeIdList: [objectTypeID!],
+        // @ts-ignore
+        objectTypeIdList: [currentObj?.id],
         isPrimary: 1,
         ontologyModelID: +OSId
       }).then((res) => {
@@ -38,18 +41,19 @@ export const ObjectInstanceSelect = (props: ObjInsProps) => {
       });
     },
     {
-      ready: !!objectTypeID,
-      refreshDeps: [objectTypeID]
+      ready: !!currentObj,
+      refreshDeps: [currentObj]
     }
   );
 
   // Handle object type change by clearing selected instances
   const handleObjectTypeChange = useCallback(
-    (nextId?: number) => {
+    (nextId?: number, objType?: ObjectType) => {
       onChange?.({
         objectTypeID: nextId,
         objInsID: []
       });
+      setCurrentObj(objType);
     },
     [onChange]
   );
@@ -58,19 +62,21 @@ export const ObjectInstanceSelect = (props: ObjInsProps) => {
     <div className={classNames([styles['obj-interface'], className])}>
       <ObjectTypeSelect
         className={styles['obj-one']}
-        value={objectTypeID}
+        value={currentObj?.code as any}
         onChange={handleObjectTypeChange}
         disabled={disabled}
         ontologyModelID={+OSId}
+        primaryKey={'code'}
       />
       <InterfaceSelect
-        objectTypeId={objectTypeID}
+        objectTypeId={currentObj?.id}
         placeholder={primaryKey ? `请选择对象实例` : '请先选择对象类型'}
         primaryKey={primaryKey}
         disabled={primaryKeyLoading || disabled}
         className={styles['ins-sel']}
         mode={props.mode}
-        value={value?.objInsID}
+        value={objInsID}
+        searchKey={'code'}
         onChange={(v) => {
           onChange?.({
             ...value,

@@ -124,7 +124,7 @@ export const formatParamValueByType = (
     const { objectTypeID, objInsID } = value;
     const args = (objInsID || [])
       .map((id) => {
-        return `{"object_type":"${objectTypeID}","pk":"${id}}"`;
+        return `{"object_type":"${objectTypeID}","pk":"${id}"}`;
       })
       .toString();
     return `ObjectSet([${args}])`;
