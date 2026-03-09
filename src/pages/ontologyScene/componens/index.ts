@@ -14,7 +14,7 @@ export * from './PyCodeContent';
 export * from './TaskLogDrawer';
 export { default as ObjectTypeSelect } from './ObjectTypeSelect';
 export type { ObjectTypeSelectProps } from './ObjectTypeSelect';
-export * from './ObjectInterfaceSelect';
+export * from './ObjectInstanceSelect';
 export { default as ObjectTypeDetailDrawer } from './ObjectTypeDetailDrawer';
 export * from './OSEmptyStatus';
 export * from './FunctionFileParam';

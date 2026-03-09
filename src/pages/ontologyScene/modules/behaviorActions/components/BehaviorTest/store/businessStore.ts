@@ -294,14 +294,14 @@ export const useBusinessStore = create<BusinessStore>((set, get) => ({
             }
             case 'length_rule': {
               const length = String(value).trim().length;
-              const ruleConfig = param.validationRule.ruleConfig as LengthRule;
+              const ruleConfig = param.validationRule.ruleConfig as RangeRule;
               if (
                 ruleConfig &&
-                (length < ruleConfig.minLength || length > ruleConfig.maxLength)
+                (length < ruleConfig.minValue || length > ruleConfig.maxValue)
               ) {
                 errors[param.code] =
                   failMessage ||
-                  `长度必须在 ${ruleConfig.minLength} 到 ${ruleConfig.maxLength} 之间`;
+                  `长度必须在 ${ruleConfig.minValue} 到 ${ruleConfig.maxValue} 之间`;
               }
               break;
             }

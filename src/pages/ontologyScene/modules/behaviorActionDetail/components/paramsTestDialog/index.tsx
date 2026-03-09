@@ -64,8 +64,8 @@ export const ParamsTestDialog = (props: IProps) => {
               case RuleName.LengthRule:
                 const length = value.trim().length;
                 if (
-                  length < (ruleConfig as LengthRule).minLength ||
-                  length > (ruleConfig as LengthRule).maxLength
+                  length < (ruleConfig as RangeRule).minValue ||
+                  length > (ruleConfig as RangeRule).maxValue
                 ) {
                   onError(failMessage);
                 }

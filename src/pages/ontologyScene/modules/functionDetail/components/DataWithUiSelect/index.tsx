@@ -15,7 +15,7 @@ import {
   DateTimePicker,
   FunctionFileParam,
   MapPicker,
-  ObjectInterfaceSelect,
+  ObjectInstanceSelect,
   ObjectSet,
   ObjectTypeSelect
 } from '@/pages/ontologyScene/componens';
@@ -121,7 +121,7 @@ export const DataWithUiSelect = (
         );
       case UiType.ObjectOne:
         return (
-          <ObjectInterfaceSelect
+          <ObjectInstanceSelect
             className={'flex-1'}
             value={value?.paramValue}
             onChange={(value) => changeValue({ paramValue: value })}
@@ -130,7 +130,7 @@ export const DataWithUiSelect = (
         );
       case UiType.ObjectSet:
         return (
-          <ObjectInterfaceSelect
+          <ObjectInstanceSelect
             className={'flex-1'}
             value={value?.paramValue}
             onChange={(value) => changeValue({ paramValue: value })}

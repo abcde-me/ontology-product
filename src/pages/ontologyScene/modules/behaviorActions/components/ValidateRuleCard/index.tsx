@@ -2,7 +2,7 @@ import React, { useEffect, useMemo } from 'react';
 import styles from './index.module.scss';
 import {
   EnumRule,
-  LengthRule,
+  RangeRule,
   RuleName,
   ValidateRule
 } from '@/pages/ontologyScene/types/behaviorActions';
@@ -17,13 +17,13 @@ const RuleConfig = {
   },
   [RuleName.LengthRule]: {
     label: '长度范围：',
-    getValue(config: LengthRule) {
-      return `${config.minLength} ~ ${config.maxLength}`;
+    getValue(config: RangeRule) {
+      return `${config.minValue} ~ ${config.maxValue}`;
     }
   },
   [RuleName.RangeRule]: {
     label: '数值范围：',
-    getValue(config: any) {
+    getValue(config: RangeRule) {
       return `${config.minValue} ~ ${config.maxValue}`;
     }
   }
