@@ -10,11 +10,19 @@ import styles from './index.module.scss';
 import { IconInfoCircle } from '@arco-design/web-react/icon';
 import { FunctionContentDialog } from '@/pages/ontologyScene/modules/behaviorActionDetail/components';
 import { useParams } from 'react-router-dom';
+import { OntologyFunctionDetail } from '@/pages/ontologyScene/types/ontologyFunction';
 
 export const FunctionsSelect = (
-  props: CustomFormItemCompProps<number | undefined>
+  props: CustomFormItemCompProps<number | undefined> & {
+    currentFunctionData?: OntologyFunctionDetail;
+  }
 ) => {
-  const { value, onChange, disabled } = props;
+  const {
+    value,
+    onChange,
+    disabled,
+    currentFunctionData: functionDetail
+  } = props;
   const { id: OSId } = useParams<Record<string, string>>();
   const { data: allFunctions = [], loading: functionsLoading } = useRequest(
     () => {
@@ -34,16 +42,6 @@ export const FunctionsSelect = (
     }
   );
   const [showFunctionContent, setShowFunctionContent] = useState(false);
-
-  const { data: functionDetail } = useRequest(
-    () => {
-      if (isNil(value)) return Promise.resolve(undefined);
-      return getFunctionDetail(value);
-    },
-    {
-      refreshDeps: [value]
-    }
-  );
 
   const changeFunction = (value: number | undefined) => {
     const functionData = allFunctions.find((f) => f.id === value);

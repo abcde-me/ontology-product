@@ -44,6 +44,8 @@ export default function BehaviorActionDetailPage() {
   const [form] = Form.useForm();
   const { id: OSId, pageMode, actionId } = useParams<Record<string, string>>();
   const currentFunction = Form.useWatch('functionId', form);
+  const currentParams = Form.useWatch('function_params', form);
+  const paramRules = Form.useWatch('validationRules', form);
 
   const goBack = () => {
     history.replace(
@@ -99,15 +101,18 @@ export default function BehaviorActionDetailPage() {
   useEffect(() => {
     if (isNil(functionData)) return;
     setCurrentAction((p) => {
+      const formValues = form.getFieldsValue();
+      const action = buildActionDetail(formValues);
       const outParams =
         functionData?.params?.filter((p) => p.inputType === InputType.Output) ||
         [];
-      p?.params?.push(...outParams);
+      action?.params?.push(...(outParams as any));
       return {
-        ...p
+        ...(p || {}),
+        ...action
       };
     });
-  }, [functionData]);
+  }, [functionData, paramRules, currentParams]);
 
   const functionHasParam = !!functionData?.params?.filter(
     (p) => p.inputType === InputType.Input
@@ -135,25 +140,6 @@ export default function BehaviorActionDetailPage() {
           }}
           labelAlign={'left'}
           disabled={actionLoading}
-          onValuesChange={(changes, allValues) => {
-            const functionChange =
-              Object.keys(changes).length === 1 && 'functionId' in changes;
-            if (functionChange) {
-              const functionId = changes.functionId;
-              if (isNil(functionId)) {
-                return form.setFieldsValue({ functionId });
-              }
-              getFunctionDetail(functionId).then((res) => {
-                form.setFieldsValue(buildFunctionSchema(res));
-              });
-            }
-            setCurrentAction((p = {}) => {
-              return {
-                ...p,
-                ...buildActionDetail(allValues)
-              };
-            });
-          }}
         >
           <div className={'module-title'}>基本信息</div>
           <FormItem
@@ -275,6 +261,7 @@ export default function BehaviorActionDetailPage() {
             <FunctionsSelect
               onChange={(v, f: OntologyFunctionDetail) => {
                 form.setFieldValue('functionId', v);
+                form.setFieldsValue(buildFunctionSchema(f));
                 setCurrentAction((p) => {
                   const { name, code, content } = f || {};
                   if (isNil(p)) {
@@ -292,6 +279,7 @@ export default function BehaviorActionDetailPage() {
                   };
                 });
               }}
+              currentFunctionData={functionData}
             />
           </FormItem>
           <Form.Item
