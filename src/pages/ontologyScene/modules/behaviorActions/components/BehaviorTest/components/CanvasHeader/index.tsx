@@ -36,6 +36,13 @@ export const CanvasHeader: React.FC<CanvasHeaderProps> = ({
   const { startTest } = testFunctionHook;
 
   const handleRefresh = () => {
+    // 如果没有节点，直接提示
+    if (orchestrationNodes.length === 0) {
+      Message.info('当前没有编排内容');
+      return;
+    }
+
+    // 有节点时才弹窗确认
     Modal.confirm({
       title: '确认刷新',
       content: '刷新后将清空当前编排和配置，确认继续吗？',
