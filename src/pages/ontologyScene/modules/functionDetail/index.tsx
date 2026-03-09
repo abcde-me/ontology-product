@@ -76,10 +76,7 @@ export default function OSFunctionDetailPage() {
         ontologyModelID: +OSId
       });
       if (res.message !== 'ok') {
-        Message.error({
-          content: res.message,
-          duration: 0.5
-        });
+        Message.error(res.message);
         return;
       }
       Message.success({
