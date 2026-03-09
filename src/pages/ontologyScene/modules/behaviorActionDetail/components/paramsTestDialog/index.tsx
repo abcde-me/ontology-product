@@ -16,7 +16,10 @@ import {
   renderComponentByUiType
 } from '@/pages/ontologyScene/utils';
 import {
+  InputType,
   OntologyFunctionDetail,
+  TestFunction,
+  TestFunctionItem,
   UiType
 } from '@/pages/ontologyScene/types/ontologyFunction';
 import { isNil } from 'lodash-es';

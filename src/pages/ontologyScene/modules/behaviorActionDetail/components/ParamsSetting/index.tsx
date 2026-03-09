@@ -122,6 +122,7 @@ export const ParamsSetting = (
         data={functionParams}
         validateRules={validateRules}
         actionData={actionDetail}
+        functionData={props.functionDetail}
       />
     </div>
   );

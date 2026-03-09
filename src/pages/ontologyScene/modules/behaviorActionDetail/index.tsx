@@ -96,6 +96,19 @@ export default function BehaviorActionDetailPage() {
     form.setFieldsValue(buildActionSchema(actionDetail));
   }, [actionDetail]);
 
+  useEffect(() => {
+    if (isNil(functionData)) return;
+    setCurrentAction((p) => {
+      const outParams =
+        functionData?.params?.filter((p) => p.inputType === InputType.Output) ||
+        [];
+      p?.params?.push(...outParams);
+      return {
+        ...p
+      };
+    });
+  }, [functionData]);
+
   const functionHasParam = !!functionData?.params?.filter(
     (p) => p.inputType === InputType.Input
   )?.length;
@@ -292,7 +305,10 @@ export default function BehaviorActionDetailPage() {
                     {isNil(functionId) ? (
                       <p className={'text-[#7D859C]'}>请先选择函数</p>
                     ) : functionHasParam ? (
-                      <ParamsSetting actionDetail={currentAction} />
+                      <ParamsSetting
+                        actionDetail={currentAction}
+                        functionDetail={functionData}
+                      />
                     ) : (
                       <p className={'text-[#7D859C]'}>暂无入参配置</p>
                     )}
