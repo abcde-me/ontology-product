@@ -168,7 +168,6 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
             isLeaf: false
             // children: []
           }));
-          console.log('options', options);
           setCascaderOptions(options);
         } else {
           Message.error(response.message || '加载数据库列表失败');
@@ -255,76 +254,6 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
       }
     }, [dataSource.type]);
 
-    // 从文件或数据库获取字段列表
-    const loadAttributeFields = async (
-      file?: any,
-      database?: string,
-      table?: string
-    ) => {
-      setFieldsLoading(true);
-      try {
-        if (dataSource.type === DATA_SOURCE_TYPE.LOCAL_CSV && file) {
-          // 调用 uploadOntologyCSVFileAndParse 接口
-          const response = await uploadOntologyCSVFileAndParse({ file });
-          if (response.status === 200 && response.code === '') {
-            const columnList = response.data.data.columnList;
-            const filePath = response.data.data.path;
-
-            // 保存文件路径
-            setDataSource((prev) => ({ ...prev, filePath }));
-
-            // 将 columnList 转换为 AttributeField 格式
-            const fields: AttributeField[] = columnList.map(
-              (column, index) => ({
-                name: column, // 表字段名
-                comment: column, // 属性名称，默认与表字段名相同
-                columnType: index === 0 ? 'varchar(500)' : 'STRING', // 主键字段默认为varchar(500)，其他字段为STRING
-                isPrimary: index === 0 ? 1 : 0, // 第一个字段默认为主键
-                isUse: 1, // 默认选中
-                isStoreAsPublic: 0, // 默认不存入公共属性
-                publicPropertyID: 0, // 默认未绑定公共属性
-                _tableField: column,
-                _attributeName: column
-              })
-            );
-
-            setAttributeFields(fields);
-            setFileUploaded(true);
-          } else {
-            Message.error(response.message || '上传文件失败');
-          }
-        } else if (
-          dataSource.type === DATA_SOURCE_TYPE.DATA_DIRECTORY_SYNC &&
-          database &&
-          table
-        ) {
-          // TODO: 调用数据库表字段获取接口
-          await new Promise((resolve) => setTimeout(resolve, 1000));
-          // 模拟返回的字段数据
-          const mockFields: AttributeField[] = [
-            {
-              name: 'id',
-              comment: 'id',
-              columnType: 'STRING',
-              isPrimary: 1,
-              isUse: 1,
-              isStoreAsPublic: 0,
-              publicPropertyID: 0,
-              _tableField: 'id',
-              _attributeName: 'id'
-            }
-          ];
-          setAttributeFields(mockFields);
-          setFileUploaded(true);
-        }
-      } catch (error) {
-        Message.error('加载字段列表失败');
-        console.error('加载字段列表失败:', error);
-      } finally {
-        setFieldsLoading(false);
-      }
-    };
-
     // 属性字段映射相关方法
     const handleFieldChange = (
       index: number,
@@ -342,6 +271,7 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
         isUse: checked ? 1 : 0
       }));
       setAttributeFields(newFields);
+      form.setFieldValue('attributeFields', newFields);
     };
 
     const handlePrimaryKeyChange = (index: number) => {
@@ -492,9 +422,10 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
     const attributeColumns: TableColumnProps<AttributeField>[] = [
       {
         title: (
-          <div className="flex items-center gap-[12px]">
+          <div className="gap-[12px flex items-center">
             <Checkbox
               checked={allSelected}
+              className="pointer-events-auto mr-[12px]"
               indeterminate={someSelected && !allSelected}
               onChange={(checked) => handleSelectAll(!!checked)}
             />
@@ -1290,8 +1221,7 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
         </div>
 
         {showFooter && (
-          /* 底部操作按钮 - 使用sticky */
-          <div className="sticky bottom-0 z-10 border-t border-[#E5E6EB] bg-white px-6 py-4">
+          <div className="fixed bottom-0 z-10 border-t border-[#E5E6EB] bg-white px-6 py-4">
             <div className="flex justify-end gap-3">
               <Button onClick={onCancel} disabled={loading}>
                 取消
