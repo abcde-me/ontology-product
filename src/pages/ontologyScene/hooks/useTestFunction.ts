@@ -5,6 +5,7 @@ import { BehaviorLogItem } from '@/pages/ontologyScene/modules/behaviorLog/types
 import { isNil } from 'lodash-es';
 import { testFunction } from '@/api/ontologySceneLibrary/ontologyFunction';
 import { TestFunction } from '@/pages/ontologyScene/types/ontologyFunction';
+import { Message } from '@arco-design/web-react';
 
 export interface RunStatus {
   // 初始化，运行中，成功，失败，KILL
@@ -43,7 +44,17 @@ const useTestFunction = (): TestFunctionInfo => {
 
   const { run, cancel } = useRequest(
     (data: TestFunction) => {
-      return testFunction(data);
+      return testFunction(data)
+        .then((res) => {
+          if (res.message !== 'ok') {
+            return Promise.reject(res.message);
+          }
+          return res.data;
+        })
+        .catch((e) => {
+          Message.error(e);
+          return [];
+        });
     },
     {
       manual: true,

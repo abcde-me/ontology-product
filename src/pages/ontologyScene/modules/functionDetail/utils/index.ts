@@ -355,7 +355,7 @@ export function buildFunctionDetail(
       type,
       inputType: InputType.Input,
       uiType: ui,
-      idx
+      idx: idx + 1
     };
   });
   const outputParams = (output || []).map((item, idx) => {
@@ -365,7 +365,7 @@ export function buildFunctionDetail(
       code: name,
       type,
       inputType: InputType.Output,
-      idx
+      idx: idx + 1
     };
   });
 
@@ -406,7 +406,7 @@ export const buildTestFunctionData = (
     ...config
   };
   testData.params = [input, output].flatMap((params) => {
-    return params.map((param, idx) => {
+    return params.map((param) => {
       const { name, type, uiTypeAndValue } = param;
       const base: OntologyFunctionParam = {
         code: name,
