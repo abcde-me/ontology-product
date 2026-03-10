@@ -1040,7 +1040,7 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
                 <FieldImportUpload
                   accept=".csv"
                   fileType="csv"
-                  maxSize={500}
+                  maxSize={100}
                   customAction={`${PrefixAimdp}/UploadOntologyEntityDataFile`}
                   fileList={initialFileList}
                   onFileChange={(file) => {
