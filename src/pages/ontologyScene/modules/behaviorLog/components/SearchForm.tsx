@@ -14,7 +14,7 @@ export const SearchForm: React.FC<SearchFormProps> = ({ form, onSearch }) => {
       <Form.Item noStyle field="keyword">
         <Input.Search
           className="w-[220px]"
-          placeholder="请输入关键字"
+          placeholder="请输入名称"
           suffix={<IconSearch />}
           allowClear
           onClear={onSearch}
