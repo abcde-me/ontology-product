@@ -1,8 +1,8 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useRequest } from 'ahooks';
 import { BehaviorLogItem } from '@/pages/ontologyScene/modules/behaviorLog/types';
-import { isNil } from 'lodash-es';
+import { cloneDeep, isNil } from 'lodash-es';
 import { testFunction } from '@/api/ontologySceneLibrary/ontologyFunction';
 import { TestFunction } from '@/pages/ontologyScene/types/ontologyFunction';
 import { Message } from '@arco-design/web-react';
@@ -71,7 +71,7 @@ const useTestFunction = (): TestFunctionInfo => {
   );
 
   const buildRunLog = (data: BehaviorLogItem[]): RunStatus => {
-    const res = DefaultRunStatus;
+    const res = cloneDeep(DefaultRunStatus);
     res.runLog = data;
     const testing = data.some(({ run_status }) => run_status === 1);
     const fail = data.some(({ run_status }) => run_status === 3);
