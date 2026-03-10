@@ -115,7 +115,7 @@ const SceneModal: React.FC<SceneModalProps> = ({
         <Form.Item label="描述说明：" field="description">
           <TextArea
             placeholder="请输入描述说明"
-            autoSize={{ minRows: 3, maxRows: 6 }}
+            autoSize={{ minRows: 3 }}
             maxLength={500}
             showWordLimit
           />

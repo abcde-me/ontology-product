@@ -1017,7 +1017,7 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
             <FormItem label="描述说明：" field="description">
               <TextArea
                 placeholder="请输入描述说明，详述该实体的业务边界与逻辑范围"
-                autoSize={{ minRows: 3, maxRows: 6 }}
+                autoSize={{ minRows: 3 }}
               />
             </FormItem>
 
