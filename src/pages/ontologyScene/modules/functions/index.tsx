@@ -134,7 +134,7 @@ export default function OntologySceneFunctions() {
         <Tooltip content={value}>
           <div
             className={
-              'hover-blue w-full overflow-hidden overflow-ellipsis whitespace-nowrap font-PingFangSc text-[14px] font-medium leading-[22px]'
+              'hover-blue w-max max-w-full overflow-hidden overflow-ellipsis whitespace-nowrap font-PingFangSc text-[14px] font-medium leading-[22px]'
             }
             onClick={() => {
               setCurrentFunction(record);

@@ -81,12 +81,12 @@ export default function OSFunctionDetailPage() {
         ontologyModelID: +OSId
       });
       if (res.message !== 'ok') {
-        Message.error(res.message);
+        Message.error({ content: res.message, duration: 500 });
         return;
       }
       Message.success({
         content: `成功${pageMode === 'edit' ? '编辑' : '创建'}函数`,
-        duration: 0.5,
+        duration: 500,
         onClose() {
           goBack();
         }

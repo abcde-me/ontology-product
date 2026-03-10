@@ -76,7 +76,7 @@ export default function BehaviorActionDetailPage() {
       ontologyModelID: +OSId
     }).then((res) => {
       if (res.message !== 'ok') {
-        return Message.error(res.message);
+        return Message.error({ content: res.message, duration: 500 });
       }
       Message.success({
         content: `成功${pageMode === 'create' ? '创建' : '编辑'}行为`,
