@@ -235,7 +235,7 @@ export const ActionList = (props: {
               <Input.Search
                 autoComplete="off"
                 className={'w-[220px]'}
-                placeholder={'请输入关键字'}
+                placeholder={'请输入行为名称或行为id'}
                 allowClear
                 onClear={() => {
                   setUrlState({ search: '' });

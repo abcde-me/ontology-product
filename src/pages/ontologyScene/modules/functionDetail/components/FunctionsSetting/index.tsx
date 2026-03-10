@@ -198,7 +198,16 @@ export const FunctionsSetting = (props: {
                               }
                             ]}
                           >
-                            <DataWithUiSelect disabled={disabled} />
+                            <DataWithUiSelect
+                              disabled={disabled}
+                              onParamValueChange={() => {
+                                form.setFields({
+                                  [`${field}.uiTypeAndValue`]: {
+                                    error: undefined
+                                  }
+                                });
+                              }}
+                            />
                           </FormItemWithTooltip>
                           <IconDelete
                             className={`mt-2 text-[16px] hover:cursor-pointer`}
