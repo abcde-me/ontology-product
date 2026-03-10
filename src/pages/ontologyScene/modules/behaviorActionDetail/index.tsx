@@ -36,6 +36,8 @@ import {
   BehaviorActionDetail,
   BehaviorActionItem
 } from '@/pages/ontologyScene/types/behaviorActions';
+import { PermissionWrapper } from '@/components/PermissionGuard';
+import { ONTOLOGY_PERMISSIONS } from '@/config/permissions';
 
 const { TextArea } = Input;
 
@@ -320,9 +322,20 @@ export default function BehaviorActionDetailPage() {
         </Form>
       </div>
       <div className={`${styles['page-footer']}`}>
-        <ProButton type="primary" onClick={saveAction} loadingText="处理中...">
-          确认
-        </ProButton>
+        <PermissionWrapper
+          anyPermission={[
+            ONTOLOGY_PERMISSIONS.MODIFY,
+            ONTOLOGY_PERMISSIONS.CREATE
+          ]}
+        >
+          <ProButton
+            type="primary"
+            onClick={saveAction}
+            loadingText="处理中..."
+          >
+            确认
+          </ProButton>
+        </PermissionWrapper>
         <ProButton type={'outline'} onClick={goBack}>
           取消
         </ProButton>

@@ -4,6 +4,9 @@ import styles from './index.module.scss';
 import { IconClose } from '@arco-design/web-react/icon';
 import classNames from 'classnames';
 import { ProButton } from '@ceai-front/arco-material';
+import { usePermission } from '@/hooks';
+import { PermissionWrapper } from '@/components/PermissionGuard';
+import { ONTOLOGY_PERMISSIONS } from '@/config/permissions';
 
 export interface OSDrawerProps extends DrawerProps {
   onEdit?: () => void;
@@ -20,6 +23,8 @@ export const OsDrawer = (props: OSDrawerProps) => {
     { [styles['os-drawer-default-width']]: !width },
     className
   );
+
+  const { hasPermission } = usePermission();
 
   return (
     <Drawer
@@ -43,9 +48,11 @@ export const OsDrawer = (props: OSDrawerProps) => {
             </div>
             {extra && <div className="ml-4">{extra}</div>}
             {onEdit && (
-              <ProButton type={'outline'} size={'small'} onClick={onEdit}>
-                编辑
-              </ProButton>
+              <PermissionWrapper permission={ONTOLOGY_PERMISSIONS.MODIFY}>
+                <ProButton type={'outline'} size={'small'} onClick={onEdit}>
+                  编辑
+                </ProButton>
+              </PermissionWrapper>
             )}
           </div>
           <div className={'flex gap-4'}>
