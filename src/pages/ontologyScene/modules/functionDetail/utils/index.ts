@@ -198,10 +198,9 @@ const buildFUnctionSignature = (data: {
 }) => {
   const { name, input, output } = data;
   const signature = `def ${name}(${input
-    ?.map(
-      ({ name: p_name, type, uiTypeAndValue }) =>
-        `${p_name} : ${TYPE_MAP[uiTypeAndValue!.uiType!.split('_')[0]]}`
-    )
+    ?.map(({ name: p_name, uiTypeAndValue }) => {
+      return `${p_name} : ${TYPE_MAP[uiTypeAndValue!.uiType!.split('_')[0]]}`;
+    })
     .join(',')})`;
   const returnType = output.length > 0 ? 'dict' : 'None';
   return `${signature} -> ${returnType}:`;
@@ -406,27 +405,29 @@ export const buildTestFunctionData = (
     ...config
   };
   testData.params = [input, output].flatMap((params) => {
-    return params.map((param) => {
-      const { name, type, uiTypeAndValue } = param;
-      const base: OntologyFunctionParam = {
-        code: name,
-        name,
-        type,
-        inputType: InputType.Output
-      };
-      if (!isNil(uiTypeAndValue)) {
-        const [dataType] = uiTypeAndValue.uiType!.split('_')!;
-        const paramValue = formatParamValueByType(param);
-        testData.arguments.push({
+    return (
+      params?.map((param) => {
+        const { name, type, uiTypeAndValue } = param;
+        const base: OntologyFunctionParam = {
+          code: name,
           name,
-          value: paramValue
-        });
-        base.inputType = InputType.Input;
-        base.value = paramValue;
-        base.type = dataType as ParamType;
-      }
-      return base;
-    });
+          type,
+          inputType: InputType.Output
+        };
+        if (!isNil(uiTypeAndValue)) {
+          const [dataType] = uiTypeAndValue.uiType!.split('_')!;
+          const paramValue = formatParamValueByType(param);
+          testData.arguments.push({
+            name,
+            value: paramValue
+          });
+          base.inputType = InputType.Input;
+          base.value = paramValue;
+          base.type = dataType as ParamType;
+        }
+        return base;
+      }) || []
+    );
   });
   res.list_data.push(testData);
   return res;

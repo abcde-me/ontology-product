@@ -242,7 +242,7 @@ export default function OntologySceneFunctions() {
                   <Input.Search
                     autoComplete="off"
                     className={'w-[220px]'}
-                    placeholder={'请输入关键字'}
+                    placeholder={'请输入显示名称或函数名称'}
                     allowClear
                     onSearch={(value) => {
                       setUrlState({ search: value || '' });

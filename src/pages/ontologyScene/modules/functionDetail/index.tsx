@@ -106,7 +106,7 @@ export default function OSFunctionDetailPage() {
 
   const getParamNames = () => {
     const { input, output } = form.getFieldsValue(['input', 'output']);
-    return (input as OntologyFunctionParam[])
+    const fields = (input as OntologyFunctionParam[])
       .map((p, i) => {
         return `input[${i}].name`;
       })
@@ -115,6 +115,8 @@ export default function OSFunctionDetailPage() {
           return `output[${i}].name`;
         })
       );
+    // 没有出入参时，无需遍历name
+    return fields.length ? fields : ['input', 'output'];
   };
 
   return (
@@ -158,7 +160,7 @@ export default function OSFunctionDetailPage() {
             tooltip={'在界面上的中文展示名称，方便业务人员阅读与识别'}
             required
             extra={
-              '支持中文、英文、数字、下划线，2～32字符，不可与已有名称重复'
+              '支持中文、英文、数字、下划线，2～50字符，不可与已有名称重复'
             }
             rules={[
               {
@@ -196,7 +198,7 @@ export default function OSFunctionDetailPage() {
           >
             <Input
               placeholder="请输入函数名称用于在界面上展示，如关联推理"
-              maxLength={32}
+              maxLength={50}
               showWordLimit
             />
           </FormItem>
@@ -205,7 +207,7 @@ export default function OSFunctionDetailPage() {
             field="code"
             tooltip={'函数名称将作为本体语义下的唯一标识'}
             required
-            extra={'支持英文、数字、下划线，2～32字符，不可与已有名称重复'}
+            extra={'支持英文、数字、下划线，2～100字符，不可与已有名称重复'}
             rules={[
               {
                 validator(v, onError) {
@@ -244,7 +246,7 @@ export default function OSFunctionDetailPage() {
           >
             <Input
               placeholder="请输入id用于唯一标识符，如infer_affiliation"
-              maxLength={32}
+              maxLength={100}
               showWordLimit
               disabled={pageMode === 'edit'}
             />

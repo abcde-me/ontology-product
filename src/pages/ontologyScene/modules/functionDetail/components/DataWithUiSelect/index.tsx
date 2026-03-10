@@ -27,6 +27,7 @@ type IValue = {
 export const DataWithUiSelect = (
   props: CustomFormItemCompProps<IValue> & {
     osid?: number;
+    onParamValueChange?: () => void;
   }
 ) => {
   const { value, onChange, disabled } = props;
@@ -154,6 +155,7 @@ export const DataWithUiSelect = (
       ...value,
       ...data
     });
+    props.onParamValueChange?.();
   };
 
   return (
