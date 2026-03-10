@@ -39,6 +39,8 @@ import { ListOntologyPublicPropertiesReq } from '@/types/attributes';
 import { ObjectTypeTagList } from '@/pages/ontologyScene/componens';
 import ObjectTypeDetailDrawer from '@/pages/ontologyScene/componens/ObjectTypeDetailDrawer';
 import dayjs from 'dayjs';
+import { PermissionWrapper } from '@/components/PermissionGuard';
+import { ONTOLOGY_PERMISSIONS } from '@/config/permissions';
 
 // 公共属性数据接口（保留用于兼容性）
 export interface PublicAttributeItem {
@@ -417,18 +419,22 @@ const PublicTable = React.forwardRef<PublicTableRef, PublicTableProps>(
 
           return (
             <Space size={16}>
-              <Button
-                type="text"
-                className="p-0 font-PingFangSc text-[14px] font-normal leading-[22px] text-blue-primary"
-                onClick={() => handleEdit(record)}
-              >
-                编辑
-              </Button>
-              {disableDelete ? (
-                <Popover content="请先移除对象关联">{deleteButton}</Popover>
-              ) : (
-                deleteButton
-              )}
+              <PermissionWrapper permission={ONTOLOGY_PERMISSIONS.MODIFY}>
+                <Button
+                  type="text"
+                  className="p-0 font-PingFangSc text-[14px] font-normal leading-[22px] text-blue-primary"
+                  onClick={() => handleEdit(record)}
+                >
+                  编辑
+                </Button>
+              </PermissionWrapper>
+              <PermissionWrapper permission={ONTOLOGY_PERMISSIONS.DELETE}>
+                {disableDelete ? (
+                  <Popover content="请先移除对象关联">{deleteButton}</Popover>
+                ) : (
+                  deleteButton
+                )}
+              </PermissionWrapper>
             </Space>
           );
         }
@@ -460,9 +466,11 @@ const PublicTable = React.forwardRef<PublicTableRef, PublicTableProps>(
             </Form>
           }
           addButton={
-            <ProButton icon={<IconPlus />} onClick={handleCreate}>
-              创建公共属性
-            </ProButton>
+            <PermissionWrapper permission={ONTOLOGY_PERMISSIONS.MODIFY}>
+              <ProButton icon={<IconPlus />} onClick={handleCreate}>
+                创建公共属性
+              </ProButton>
+            </PermissionWrapper>
           }
           tableProps={{
             columns,
