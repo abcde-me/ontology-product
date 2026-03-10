@@ -200,7 +200,7 @@ export const FunctionsSetting = (props: {
                           >
                             <DataWithUiSelect
                               disabled={disabled}
-                              onParamValueChange={() => {
+                              onParamValueChange={(v) => {
                                 form.setFields({
                                   [`${field}.uiTypeAndValue`]: {
                                     error: undefined

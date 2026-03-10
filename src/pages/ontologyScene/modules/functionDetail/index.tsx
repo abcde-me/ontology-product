@@ -106,6 +106,8 @@ export default function OSFunctionDetailPage() {
 
   const getParamNames = () => {
     const { input, output } = form.getFieldsValue(['input', 'output']);
+    // 默认校验code
+    const validateFields = ['code'];
     const fields = (input as OntologyFunctionParam[])
       .map((p, i) => {
         return `input[${i}].name`;
@@ -116,7 +118,7 @@ export default function OSFunctionDetailPage() {
         })
       );
     // 没有出入参时，无需遍历name
-    return fields.length ? fields : ['input', 'output'];
+    return validateFields.concat(fields);
   };
 
   return (
@@ -140,7 +142,9 @@ export default function OSFunctionDetailPage() {
           labelAlign={'left'}
           className={`overflow-auto ${styles['function-form']}`}
           onValuesChange={(c, values) => {
-            if ('content' in c) return;
+            // 只有参数或函数id改变时，再去校验数据合法性构建py代码
+            const aboutPyCode = ['name', 'content'].some((f) => f in c);
+            if (aboutPyCode) return;
             // 触发表单校验
             form
               .validate(getParamNames())
