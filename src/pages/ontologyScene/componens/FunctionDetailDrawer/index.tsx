@@ -126,7 +126,7 @@ export const FunctionDetailDrawer = (props: IProps) => {
               </div>
             </div>
             <div className={styles['info-item']}>
-              <div className={styles['info-label']}>面板ID</div>
+              <div className={styles['info-label']}>函数名称(id)</div>
               <div className={styles['info-value']}>
                 <ContentWithCopy value={basicInfo.panelId} />
               </div>
