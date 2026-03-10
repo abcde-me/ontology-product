@@ -22,7 +22,8 @@ import {
   PROJECT_PERMISSIONS,
   API_KEY_PERMISSIONS,
   METADATA_MANAGEMENT_PERMISSIONS,
-  DATA_API_PERMISSIONS
+  DATA_API_PERMISSIONS,
+  ONTOLOGY_PERMISSIONS
 } from '@/config/permissions';
 import { ONTOLOGY_SCENE_MENU_ITEM_KEYS } from '@/common/constants';
 
@@ -183,7 +184,7 @@ export const routes: IRoute[] = [
     name: 'ontologyScene',
     key: '/tenant/compute/modaforge/ontologyScene',
     component: React.lazy(async () => import('../../ontologyScene')),
-    permission: DATA_MANAGEMENT_PERMISSIONS.LIST,
+    permission: ONTOLOGY_PERMISSIONS.LIST,
     children: [
       {
         name: 'ontologySceneList',
@@ -191,7 +192,7 @@ export const routes: IRoute[] = [
         component: React.lazy(
           async () => import('../../ontologyScene/modules/list/index')
         ),
-        permission: DATA_MANAGEMENT_PERMISSIONS.LIST
+        permission: ONTOLOGY_PERMISSIONS.LIST
       },
       {
         name: 'ontologySceneDetail',
@@ -199,7 +200,7 @@ export const routes: IRoute[] = [
         component: React.lazy(
           async () => import('../../ontologyScene/modules/detail/index')
         ),
-        permission: DATA_MANAGEMENT_PERMISSIONS.LIST,
+        permission: ONTOLOGY_PERMISSIONS.LIST,
         exact: false, // 设置为 false，以便匹配子路由
         children: [
           // 本体图谱
@@ -209,7 +210,7 @@ export const routes: IRoute[] = [
             component: React.lazy(
               async () => import('../../ontologyScene/modules/graph/index')
             ),
-            permission: DATA_MANAGEMENT_PERMISSIONS.LIST
+            permission: ONTOLOGY_PERMISSIONS.LIST
           },
           // 对象类型
           {
@@ -218,7 +219,7 @@ export const routes: IRoute[] = [
             component: React.lazy(
               async () => import('../../ontologyScene/modules/objectType/index')
             ),
-            permission: DATA_MANAGEMENT_PERMISSIONS.LIST
+            permission: ONTOLOGY_PERMISSIONS.LIST
           },
           // 属性
           {
@@ -227,7 +228,7 @@ export const routes: IRoute[] = [
             component: React.lazy(
               async () => import('../../ontologyScene/modules/attributes/index')
             ),
-            permission: DATA_MANAGEMENT_PERMISSIONS.LIST
+            permission: ONTOLOGY_PERMISSIONS.LIST
           },
           // 链接
           {
@@ -236,7 +237,7 @@ export const routes: IRoute[] = [
             component: React.lazy(
               async () => import('../../ontologyScene/modules/links/index')
             ),
-            permission: DATA_MANAGEMENT_PERMISSIONS.LIST
+            permission: ONTOLOGY_PERMISSIONS.LIST
           },
           // 行为动作
           {
@@ -246,7 +247,7 @@ export const routes: IRoute[] = [
               async () =>
                 import('../../ontologyScene/modules/behaviorActions/index')
             ),
-            permission: DATA_MANAGEMENT_PERMISSIONS.LIST
+            permission: ONTOLOGY_PERMISSIONS.LIST
           },
           // 函数
           {
@@ -255,7 +256,7 @@ export const routes: IRoute[] = [
             component: React.lazy(
               async () => import('../../ontologyScene/modules/functions/index')
             ),
-            permission: DATA_MANAGEMENT_PERMISSIONS.LIST
+            permission: ONTOLOGY_PERMISSIONS.LIST
           },
           // 执行记录
           {
@@ -265,7 +266,7 @@ export const routes: IRoute[] = [
               async () =>
                 import('../../ontologyScene/modules/behaviorLog/index')
             ),
-            permission: DATA_MANAGEMENT_PERMISSIONS.LIST
+            permission: ONTOLOGY_PERMISSIONS.LIST
           }
         ]
       }

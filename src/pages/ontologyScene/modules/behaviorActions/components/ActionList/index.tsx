@@ -30,6 +30,8 @@ import ObjectTypeTag from '../../../../componens/ObjectTypeTag';
 import ObjectTypeDetailDrawer from '../../../../componens/ObjectTypeDetailDrawer';
 import { FunctionDetailDrawer } from '@/pages/ontologyScene/componens/FunctionDetailDrawer';
 import { ContentWithCopy } from '@/pages/ontologyScene/componens';
+import { PermissionWrapper } from '@/components/PermissionGuard';
+import { ONTOLOGY_PERMISSIONS } from '@/config/permissions';
 
 const baseUrl = '/tenant/compute/modaforge/ontologyScene/detail';
 
@@ -172,28 +174,32 @@ export const ActionList = (props: {
       dataIndex: 'actions',
       render: (_, record) => (
         <Space size={16}>
-          <Button
-            type={'text'}
-            className={
-              'p-0 font-PingFangSc text-[14px] font-normal leading-[22px] text-blue-primary'
-            }
-            onClick={() => {
-              route2ActionDetail('edit', record);
-            }}
-          >
-            编辑
-          </Button>
-          <Button
-            type={'text'}
-            className={
-              'p-0 font-PingFangSc text-[14px] font-normal leading-[22px] text-blue-primary'
-            }
-            onClick={() => {
-              handleDelete(record);
-            }}
-          >
-            删除
-          </Button>
+          <PermissionWrapper permission={ONTOLOGY_PERMISSIONS.MODIFY}>
+            <Button
+              type={'text'}
+              className={
+                'p-0 font-PingFangSc text-[14px] font-normal leading-[22px] text-blue-primary'
+              }
+              onClick={() => {
+                route2ActionDetail('edit', record);
+              }}
+            >
+              编辑
+            </Button>
+          </PermissionWrapper>
+          <PermissionWrapper permission={ONTOLOGY_PERMISSIONS.DELETE}>
+            <Button
+              type={'text'}
+              className={
+                'p-0 font-PingFangSc text-[14px] font-normal leading-[22px] text-blue-primary'
+              }
+              onClick={() => {
+                handleDelete(record);
+              }}
+            >
+              删除
+            </Button>
+          </PermissionWrapper>
         </Space>
       )
     }
@@ -244,13 +250,15 @@ export const ActionList = (props: {
           </Form>
         }
         addButton={
-          <ProButton
-            icon={<IconPlus />}
-            onClick={() => route2ActionDetail('create')}
-            type={'primary'}
-          >
-            创建行为动作
-          </ProButton>
+          <PermissionWrapper permission={ONTOLOGY_PERMISSIONS.CREATE}>
+            <ProButton
+              icon={<IconPlus />}
+              onClick={() => route2ActionDetail('create')}
+              type={'primary'}
+            >
+              创建行为动作
+            </ProButton>
+          </PermissionWrapper>
         }
         tableProps={{
           ...tableProps,
