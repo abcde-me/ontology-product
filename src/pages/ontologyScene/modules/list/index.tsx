@@ -171,7 +171,7 @@ const SceneCard: React.FC<SceneCardProps> = ({
           {/* 描述说明 */}
           <div className="flex-1 text-[14px] leading-[22px] text-[var(--color-text-5)]">
             {item.description ? (
-              <EllipsisPopover value={item.description} />
+              <EllipsisPopover preferTypography value={item.description} />
             ) : (
               '-'
             )}

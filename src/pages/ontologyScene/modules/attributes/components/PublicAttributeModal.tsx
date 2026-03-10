@@ -185,7 +185,7 @@ const PublicAttributeModal: React.FC<PublicAttributeModalProps> = ({
         <FormItem label="描述说明：" field="description">
           <TextArea
             placeholder="可以描述公共属性的相关业务信息或数据来源规范"
-            autoSize={{ minRows: 3, maxRows: 6 }}
+            autoSize={{ minRows: 3 }}
           />
         </FormItem>
       </Form>
