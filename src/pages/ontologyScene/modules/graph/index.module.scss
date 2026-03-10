@@ -10,7 +10,7 @@
 
 .edge-style {
   // 基础边的样式
-  :global(.react-flow__edge.react-flow__edge-custom .react-flow__edge-path) {
+  :global(.react-flow__edge .react-flow__edge-path) {
     stroke: #c3c7d4 !important;
     stroke-dasharray: 4 4 !important;
     stroke-linecap: round;

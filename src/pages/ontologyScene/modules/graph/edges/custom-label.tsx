@@ -27,6 +27,11 @@ export default function CustomLabel(props: any) {
     return nodes.find((node) => node.id === target);
   }, [nodes, target]);
 
+  // 如果是空态边，不显示标签
+  if (data?.isEmptyState) {
+    return null;
+  }
+
   return (
     <>
       {!nodesReadOnly ? (
