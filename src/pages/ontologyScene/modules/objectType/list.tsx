@@ -279,7 +279,7 @@ export default function OntologySceneObjectTypeList() {
       title: '同步状态',
       dataIndex: 'syncStatus',
       width: 120,
-      filters: OBJECT_TYPE_SYNC_STATUS_FILTERS,
+      // filters: OBJECT_TYPE_SYNC_STATUS_FILTERS,
       render: (value: SyncStatus, record: ObjectType) => {
         if (value === undefined || value === null) {
           return null;

@@ -28,6 +28,7 @@ import { OsEmptyStatusWrapper } from '@/pages/ontologyScene/componens';
 import GraphEmptyImage from '@/pages/ontologyScene/assets/graph-empty.png';
 import { OBJECT_TYPE_ICON_OPTIONS } from '../../common/constants';
 import ObjectTypeIcon1 from '@/pages/ontologyScene/assets/object-type-one.svg';
+import EmptyStateGraph from './EmptyStateGraph';
 import { PermissionWrapper } from '@/components/PermissionGuard';
 import { ONTOLOGY_PERMISSIONS } from '@/config/permissions';
 
@@ -322,9 +323,7 @@ export default function OntologySceneGraph() {
   return (
     <div className="flex h-full w-full flex-col overflow-hidden bg-white">
       {isEmpty ? (
-        <div className="flex h-full w-full items-center justify-center">
-          <img className="w-[702px]" src={GraphEmptyImage} alt="empty" />
-        </div>
+        <EmptyStateGraph />
       ) : (
         <AIWorkflowProvider
           nodes={nodesConfig}

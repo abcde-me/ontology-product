@@ -508,8 +508,8 @@ export default function OntologySceneLinksList() {
       title: '同步状态',
       dataIndex: 'syncStatus',
       width: 120,
-      filters: LINK_SYNC_STATUS_FILTERS,
-      filteredValue: syncStatusFilterKeys,
+      // filters: LINK_SYNC_STATUS_FILTERS,
+      // filteredValue: syncStatusFilterKeys,
       render: (value: SyncStatus, record: LinkInfo) => {
         if (value === undefined || value === null) {
           return null;
