@@ -35,6 +35,8 @@ import { isEmpty, isNil } from 'lodash-es';
 import { OsEmptyStatusWrapper } from '@/pages/ontologyScene/componens';
 import { FunctionDetailDrawer } from '@/pages/ontologyScene/modules/functionDetail/components';
 import { SorterInfo } from '@arco-design/web-react/lib/Table/interface';
+import { PermissionWrapper } from '@/components/PermissionGuard';
+import { ONTOLOGY_PERMISSIONS } from '@/config/permissions';
 
 // 函数
 export default function OntologySceneFunctions() {
@@ -187,28 +189,32 @@ export default function OntologySceneFunctions() {
       dataIndex: 'actions',
       render: (_, record) => (
         <Space size={16}>
-          <Button
-            type={'text'}
-            className={
-              'p-0 font-PingFangSc text-[14px] font-normal leading-[22px] text-blue-primary'
-            }
-            onClick={() => {
-              route2FunctionDetail('edit', record);
-            }}
-          >
-            编辑
-          </Button>
-          <Button
-            type={'text'}
-            className={
-              'p-0 font-PingFangSc text-[14px] font-normal leading-[22px] text-blue-primary'
-            }
-            onClick={() => {
-              handleDelete(record);
-            }}
-          >
-            删除
-          </Button>
+          <PermissionWrapper permission={ONTOLOGY_PERMISSIONS.MODIFY}>
+            <Button
+              type={'text'}
+              className={
+                'p-0 font-PingFangSc text-[14px] font-normal leading-[22px] text-blue-primary'
+              }
+              onClick={() => {
+                route2FunctionDetail('edit', record);
+              }}
+            >
+              编辑
+            </Button>
+          </PermissionWrapper>
+          <PermissionWrapper permission={ONTOLOGY_PERMISSIONS.DELETE}>
+            <Button
+              type={'text'}
+              className={
+                'p-0 font-PingFangSc text-[14px] font-normal leading-[22px] text-blue-primary'
+              }
+              onClick={() => {
+                handleDelete(record);
+              }}
+            >
+              删除
+            </Button>
+          </PermissionWrapper>
         </Space>
       ),
       width: 150
@@ -251,13 +257,15 @@ export default function OntologySceneFunctions() {
               </Form>
             }
             addButton={
-              <ProButton
-                icon={<IconPlus />}
-                onClick={() => route2FunctionDetail('create')}
-                type={'primary'}
-              >
-                创建函数
-              </ProButton>
+              <PermissionWrapper permission={ONTOLOGY_PERMISSIONS.CREATE}>
+                <ProButton
+                  icon={<IconPlus />}
+                  onClick={() => route2FunctionDetail('create')}
+                  type={'primary'}
+                >
+                  创建函数
+                </ProButton>
+              </PermissionWrapper>
             }
             tableProps={{
               ...tableProps,

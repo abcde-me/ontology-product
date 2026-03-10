@@ -50,6 +50,8 @@ import MenuBehaviorIcon from '../../assets/menu-behavior.svg';
 import MenuFunctionIcon from '../../assets/menu-function.svg';
 import MenuBehaviorLogIcon from '../../assets/menu-log.svg';
 import { EllipsisPopover } from '@ceai-front/arco-material';
+import { PermissionWrapper } from '@/components/PermissionGuard';
+import { ONTOLOGY_PERMISSIONS } from '@/config/permissions';
 
 // 懒加载各个模块
 const OntologySceneGraph = lazy(() => import('../graph'));
@@ -373,21 +375,25 @@ export default function OntologySceneDetail() {
               sidebarCollapsed ? 'px-[8px]' : 'px-[12px]'
             )}
           >
-            <Dropdown
-              droplist={renderCreateDropdown()}
-              trigger="click"
-              position="bl"
-            >
-              <Button
-                className={cls(
-                  '!flex w-full items-center justify-center',
-                  styles['ontology-scene-detail-create-button']
-                )}
+            <PermissionWrapper permission={ONTOLOGY_PERMISSIONS.CREATE}>
+              <Dropdown
+                droplist={renderCreateDropdown()}
+                trigger="click"
+                position="bl"
               >
-                <IconPlus className={cls(sidebarCollapsed ? '' : 'mr-[4px]')} />
-                {!sidebarCollapsed && '创建'}
-              </Button>
-            </Dropdown>
+                <Button
+                  className={cls(
+                    '!flex w-full items-center justify-center',
+                    styles['ontology-scene-detail-create-button']
+                  )}
+                >
+                  <IconPlus
+                    className={cls(sidebarCollapsed ? '' : 'mr-[4px]')}
+                  />
+                  {!sidebarCollapsed && '创建'}
+                </Button>
+              </Dropdown>
+            </PermissionWrapper>
           </div>
           <Menu
             selectedKeys={[activeTab]}

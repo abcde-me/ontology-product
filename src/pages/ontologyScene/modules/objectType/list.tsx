@@ -38,6 +38,8 @@ import {
 } from '../../common/constants';
 import LogIcon from '../../assets/log-icon.svg';
 import dayjs from 'dayjs';
+import { PermissionWrapper } from '@/components/PermissionGuard';
+import { ONTOLOGY_PERMISSIONS } from '@/config/permissions';
 
 export default function OntologySceneObjectTypeList() {
   const [form] = Form.useForm();
@@ -323,20 +325,24 @@ export default function OntologySceneObjectTypeList() {
       fixed: 'right',
       render: (_, record) => (
         <Space size={16}>
-          <Button
-            type="text"
-            className="p-0 font-PingFangSc text-[14px] font-normal leading-[22px] text-blue-primary"
-            onClick={() => handleEdit(record)}
-          >
-            编辑
-          </Button>
-          <Button
-            type="text"
-            className="p-0 font-PingFangSc text-[14px] font-normal leading-[22px] text-blue-primary"
-            onClick={() => handleDelete(record)}
-          >
-            删除
-          </Button>
+          <PermissionWrapper permission={ONTOLOGY_PERMISSIONS.MODIFY}>
+            <Button
+              type="text"
+              className="p-0 font-PingFangSc text-[14px] font-normal leading-[22px] text-blue-primary"
+              onClick={() => handleEdit(record)}
+            >
+              编辑
+            </Button>
+          </PermissionWrapper>
+          <PermissionWrapper permission={ONTOLOGY_PERMISSIONS.DELETE}>
+            <Button
+              type="text"
+              className="p-0 font-PingFangSc text-[14px] font-normal leading-[22px] text-blue-primary"
+              onClick={() => handleDelete(record)}
+            >
+              删除
+            </Button>
+          </PermissionWrapper>
         </Space>
       )
     }
@@ -375,9 +381,11 @@ export default function OntologySceneObjectTypeList() {
           </Form>
         }
         addButton={
-          <ProButton icon={<IconPlus />} onClick={handleCreate}>
-            创建对象类型
-          </ProButton>
+          <PermissionWrapper permission={ONTOLOGY_PERMISSIONS.CREATE}>
+            <ProButton icon={<IconPlus />} onClick={handleCreate}>
+              创建对象类型
+            </ProButton>
+          </PermissionWrapper>
         }
         tableProps={{
           columns,

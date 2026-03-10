@@ -39,6 +39,9 @@ import {
 import { OntologScene } from '@/types/ontologySceneApi';
 import { ICON_OPTIONS } from '../../common/constants';
 import dayjs from 'dayjs';
+import { PermissionWrapper } from '@/components/PermissionGuard';
+import { ONTOLOGY_PERMISSIONS } from '@/config/permissions';
+import { useHasPermission } from '@/store/userInfoStore';
 
 // 扩展 ProcessStep 类型，使 description 支持 ReactNode
 interface SceneProcessStep extends Omit<ProcessStep, 'description'> {
@@ -69,6 +72,8 @@ const SceneCard: React.FC<SceneCardProps> = ({
 }) => {
   const [isHovered, setIsHovered] = useState(false);
   const history = useHistory();
+
+  const hasDetailPermission = useHasPermission(ONTOLOGY_PERMISSIONS.GET);
 
   const handleCardClick = useCallback(() => {
     onCardClick?.(item);
@@ -123,13 +128,13 @@ const SceneCard: React.FC<SceneCardProps> = ({
   return (
     <div
       className={`relative flex h-full cursor-pointer flex-col gap-[12px] rounded-lg border border-[#EBEEF5] bg-white p-[24px] transition-all duration-200 ${
-        isHovered
+        isHovered && hasDetailPermission
           ? 'border-[#165dff] shadow-[0_4px_12px_rgba(22,93,255,0.1)]'
           : ''
       }`}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      onClick={handleCardClick}
+      onClick={hasDetailPermission ? handleCardClick : undefined}
     >
       {/* 卡片头部 */}
       <div className="flex items-start gap-[12px]">
@@ -151,12 +156,14 @@ const SceneCard: React.FC<SceneCardProps> = ({
                     onClick={handleEdit}
                   />
                 </Popover> */}
-                <Popover content="删除">
-                  <IconDelete
-                    className="h-4 w-4 cursor-pointer text-[#4e5969] transition-colors hover:text-[#165dff]"
-                    onClick={handleDelete}
-                  />
-                </Popover>
+                <PermissionWrapper permission={ONTOLOGY_PERMISSIONS.DELETE}>
+                  <Popover content="删除">
+                    <IconDelete
+                      className="h-4 w-4 cursor-pointer text-[#4e5969] transition-colors hover:text-[#165dff]"
+                      onClick={handleDelete}
+                    />
+                  </Popover>
+                </PermissionWrapper>
               </div>
             )}
           </div>
@@ -486,14 +493,16 @@ export default function OntologySceneList() {
             width: 200
           }}
         />
-        <Button
-          type="primary"
-          icon={<IconPlus />}
-          onClick={handleCreate}
-          className="rounded"
-        >
-          创建本体场景
-        </Button>
+        <PermissionWrapper permission={ONTOLOGY_PERMISSIONS.CREATE}>
+          <Button
+            type="primary"
+            icon={<IconPlus />}
+            onClick={handleCreate}
+            className="rounded"
+          >
+            创建本体场景
+          </Button>
+        </PermissionWrapper>
       </div>
 
       {loading ? (

@@ -29,6 +29,8 @@ import GraphEmptyImage from '@/pages/ontologyScene/assets/graph-empty.png';
 import { OBJECT_TYPE_ICON_OPTIONS } from '../../common/constants';
 import ObjectTypeIcon1 from '@/pages/ontologyScene/assets/object-type-one.svg';
 import EmptyStateGraph from './EmptyStateGraph';
+import { PermissionWrapper } from '@/components/PermissionGuard';
+import { ONTOLOGY_PERMISSIONS } from '@/config/permissions';
 
 const createNodesConfig = (
   OSId: string,
@@ -68,17 +70,19 @@ const createNodesConfig = (
 
       return (
         <>
-          <Button
-            size="small"
-            type="outline"
-            className="px-[12px]"
-            onClick={() => {
-              handleEdit();
-            }}
-          >
-            编辑
-          </Button>
-          <div className="ml-[16px] mr-[12px] h-[16px] w-[1px] bg-[#CBD5E1]"></div>
+          <PermissionWrapper permission={ONTOLOGY_PERMISSIONS.MODIFY}>
+            <Button
+              size="small"
+              type="outline"
+              className="px-[12px]"
+              onClick={() => {
+                handleEdit();
+              }}
+            >
+              编辑
+            </Button>
+            <div className="ml-[16px] mr-[12px] h-[16px] w-[1px] bg-[#CBD5E1]"></div>
+          </PermissionWrapper>
         </>
       );
     }

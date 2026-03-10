@@ -21,7 +21,8 @@ import {
   DATA_ASSET_PERMISSIONS,
   METADATA_MANAGEMENT_PERMISSIONS,
   DATA_API_PERMISSIONS,
-  QUALITY_TASK_PERMISSIONS
+  QUALITY_TASK_PERMISSIONS,
+  ONTOLOGY_PERMISSIONS
 } from '@/config/permissions';
 import Connection from '@/assets/sider/connection.svg';
 import DataLoad from '@/assets/sider/data-load.svg';
@@ -230,7 +231,7 @@ export const menus: MenuModel[] = [
         icon: <OntologyLibrary className={iconClass} />,
         key: 'OntologySceneLibrary',
         path: '/tenant/compute/modaforge/ontologyScene',
-        permission: DATA_MANAGEMENT_PERMISSIONS.LIST
+        permission: ONTOLOGY_PERMISSIONS.LIST
       }
     ]
   },

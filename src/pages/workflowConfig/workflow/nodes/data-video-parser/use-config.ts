@@ -45,8 +45,8 @@ const useConfig = (id: string, payload: VideoParserNodeType) => {
         draft.vad_enabled = fields.vad_options.includes('vad') ? 2 : 1;
         ((draft.activity_mode = fields.activity_mode),
           (draft.is_open_multi_conv = fields.vad_options.includes('conv')
-            ? 2
-            : 1),
+            ? 1
+            : 2),
           (draft.vad_options = fields.vad_options));
         draft.audio_model_id = fields.audio_model_id;
         // draft.after_proc = fields.after_proc;

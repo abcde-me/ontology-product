@@ -28,6 +28,9 @@ import {
 } from '@/api/ontologySceneLibrary/ontologyFunction';
 import { BehaviorLogItem } from '@/pages/ontologyScene/modules/behaviorLog/types';
 import { IconLeft } from '@arco-design/web-react/icon';
+import { usePermission } from '@/hooks';
+import { PermissionWrapper } from '@/components/PermissionGuard';
+import { ONTOLOGY_PERMISSIONS } from '@/config/permissions';
 
 const { TextArea } = Input;
 
@@ -40,6 +43,8 @@ export default function OSFunctionDetailPage() {
     pageMode,
     functionId
   } = useParams<Record<string, string>>();
+
+  const { hasAnyPermission } = usePermission();
 
   const { data: functionDetail, loading } = useRequest(
     () => {
@@ -269,9 +274,20 @@ export default function OSFunctionDetailPage() {
         </Form>
       </div>
       <div className={`${styles['page-footer']}`}>
-        <ProButton type="primary" onClick={saveAction} loadingText="处理中...">
-          确认
-        </ProButton>
+        <PermissionWrapper
+          anyPermission={[
+            ONTOLOGY_PERMISSIONS.MODIFY,
+            ONTOLOGY_PERMISSIONS.CREATE
+          ]}
+        >
+          <ProButton
+            type="primary"
+            onClick={saveAction}
+            loadingText="处理中..."
+          >
+            确认
+          </ProButton>
+        </PermissionWrapper>
         <ProButton type={'outline'} onClick={() => history.goBack()}>
           取消
         </ProButton>

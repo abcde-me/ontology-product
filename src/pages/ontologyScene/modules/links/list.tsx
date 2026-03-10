@@ -45,6 +45,8 @@ import { getLinkTypeSyncTaskLog } from '@/api/ontologySceneLibrary/links';
 import LogIcon from '../../assets/log-icon.svg';
 import { listOntologyObjectType } from '@/api/ontologySceneLibrary/objectType';
 import type { ListOntologyObjectTypeReq, ObjectType } from '@/types/objectType';
+import { PermissionWrapper } from '@/components/PermissionGuard';
+import { ONTOLOGY_PERMISSIONS } from '@/config/permissions';
 
 // 将 SyncStatus 枚举转换为 LinkDetailDrawer 期望的字符串类型
 const convertSyncStatusToString = (
@@ -581,20 +583,24 @@ export default function OntologySceneLinksList() {
       fixed: 'right',
       render: (_, record) => (
         <Space size={16}>
-          <Button
-            type="text"
-            className="p-0 font-PingFangSc text-[14px] font-normal leading-[22px] text-blue-primary"
-            onClick={() => handleEdit(record)}
-          >
-            编辑
-          </Button>
-          <Button
-            type="text"
-            className="p-0 font-PingFangSc text-[14px] font-normal leading-[22px] text-blue-primary"
-            onClick={() => handleDelete(record)}
-          >
-            删除
-          </Button>
+          <PermissionWrapper permission={ONTOLOGY_PERMISSIONS.MODIFY}>
+            <Button
+              type="text"
+              className="p-0 font-PingFangSc text-[14px] font-normal leading-[22px] text-blue-primary"
+              onClick={() => handleEdit(record)}
+            >
+              编辑
+            </Button>
+          </PermissionWrapper>
+          <PermissionWrapper permission={ONTOLOGY_PERMISSIONS.DELETE}>
+            <Button
+              type="text"
+              className="p-0 font-PingFangSc text-[14px] font-normal leading-[22px] text-blue-primary"
+              onClick={() => handleDelete(record)}
+            >
+              删除
+            </Button>
+          </PermissionWrapper>
         </Space>
       )
     }
@@ -659,9 +665,11 @@ export default function OntologySceneLinksList() {
           </Form>
         }
         addButton={
-          <ProButton icon={<IconPlus />} onClick={handleCreate}>
-            创建链接
-          </ProButton>
+          <PermissionWrapper permission={ONTOLOGY_PERMISSIONS.CREATE}>
+            <ProButton icon={<IconPlus />} onClick={handleCreate}>
+              创建链接
+            </ProButton>
+          </PermissionWrapper>
         }
         tableProps={{
           columns,

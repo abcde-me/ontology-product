@@ -196,6 +196,15 @@ export const DATA_API_PERMISSIONS = {
   DETAIL: 'aimdp-manager:openapi:read:detail'
 } as const;
 
+// 本体权限
+export const ONTOLOGY_PERMISSIONS = {
+  LIST: 'aimdp-manager:ontology_model:read:list', // 菜单权限
+  GET: 'aimdp-manager:ontology_model:read:get',
+  CREATE: 'aimdp-manager:ontology_model:manage:create',
+  DELETE: 'aimdp-manager:ontology_model:manage:delete',
+  MODIFY: 'aimdp-manager:ontology_model:manage:modify'
+} as const;
+
 // 需求管理权限
 export const REQUIREMENT_PERMISSIONS = {
   LIST: 'aimdp-manager:label_req_manager:read:get_req_list', // 菜单权限
