@@ -1177,7 +1177,7 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
                           from="link_type"
                           accept=".csv"
                           fileType="csv"
-                          maxSize={500}
+                          maxSize={100}
                           customAction={`${PrefixAimdp}/UploadOntologyEntityDataFile`}
                           fileList={initialFileList}
                           onFileChange={(file) => {

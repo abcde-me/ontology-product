@@ -134,7 +134,7 @@ const DataSourceConfig: React.FC<DataSourceConfigProps> = ({
           <FieldImportUpload
             accept=".csv"
             fileType="csv"
-            maxSize={500}
+            maxSize={100}
             onFileChange={(fileData) => {
               // FieldImportUpload returns fileData array from response
               // We need to adapt it to work with our file handling

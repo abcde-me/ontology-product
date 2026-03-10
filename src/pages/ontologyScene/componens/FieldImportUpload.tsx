@@ -225,7 +225,7 @@ const FieldImportUpload: React.FC<FieldImportUploadProps> = ({
             <span className="text-center text-[12px] text-[var(--color-text-4)]">
               {fileType === 'csv' ? (
                 <>
-                  仅支持上传UTF-8编码格式的文件,文件大小不超过500MB;
+                  仅支持上传UTF-8编码格式的文件,文件大小不超过{maxSize}MB;
                   <br />
                   文件名支持字母数字下划线组合,列名支持字母数字下划线组合
                 </>
