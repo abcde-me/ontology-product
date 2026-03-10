@@ -307,9 +307,10 @@ const PublicTable = React.forwardRef<PublicTableRef, PublicTableProps>(
         fixed: 'left',
         width: 150,
         render: (value) => (
-          <div className="font-PingFangSc text-[14px] font-medium leading-[22px] text-[#23293b]">
-            {value || '-'}
-          </div>
+          <EllipsisPopover
+            value={value || '-'}
+            className="text-[14px] font-[600] leading-[22px] text-[var(--color-text-1)]"
+          ></EllipsisPopover>
         )
       },
       {
@@ -358,9 +359,10 @@ const PublicTable = React.forwardRef<PublicTableRef, PublicTableProps>(
         width: 150,
         render: (value) => (
           <div className="flex items-center gap-2">
-            <div className="font-PingFangSc text-[14px] font-normal leading-[22px] text-[#23293b]">
-              {value || '-'}
-            </div>
+            <EllipsisPopover
+              value={value || '-'}
+              className="text-[14px] leading-[22px] text-[var(--color-text-2)]"
+            ></EllipsisPopover>
             {value && (
               <CopyItemIcon className="hidden flex-shrink-0" value={value} />
             )}

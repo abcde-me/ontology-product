@@ -247,6 +247,27 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
       }
     }, [initialValues, form]);
 
+    /**
+     * 字段类型规范化：
+     * - 当为主键且类型为 varchar(5000) / char(36) / varchar(500) 时，统一设为 varchar(500)
+     * - 当非主键且类型为上述几种之一时，统一设为 varchar(5000)
+     * 此逻辑与 LinkForm 中保持一致，是因为服务端主键只能写入 varchar(500)，后续会统一在服务端优化
+     */
+    const normalizeColumnTypeForPrimary = (
+      columnType: string,
+      isPrimary?: boolean
+    ) => {
+      const lowerType = columnType.toString().toLowerCase();
+      if (
+        lowerType === 'varchar(5000)' ||
+        lowerType === 'char(36)' ||
+        lowerType === 'varchar(500)'
+      ) {
+        return isPrimary ? 'varchar(500)' : 'varchar(5000)';
+      }
+      return columnType;
+    };
+
     // 当数据源类型为 data_directory_sync 时，加载数据库列表
     useEffect(() => {
       if (dataSource.type === DATA_SOURCE_TYPE.DATA_DIRECTORY_SYNC) {
@@ -280,7 +301,7 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
         const isOldPrimary = field.isPrimary === 1;
         const isLocalCsv = dataSource.type === DATA_SOURCE_TYPE.LOCAL_CSV;
 
-        // 如果是本地CSV导入
+        // 如果是本地CSV导入，沿用原有规则：主键 varchar(500)，非主键 varchar(2000)
         if (isLocalCsv) {
           // 新的主键字段：设置为varchar(500)
           if (isNewPrimary) {
@@ -300,10 +321,14 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
           }
         }
 
-        // 其他情况：只更新主键状态
+        // 数据目录同步等非本地 CSV 场景：应用与 LinkForm 相同的规范化逻辑
         return {
           ...field,
-          isPrimary: isNewPrimary ? 1 : 0
+          isPrimary: isNewPrimary ? 1 : 0,
+          columnType: normalizeColumnTypeForPrimary(
+            field.columnType || '',
+            isNewPrimary
+          )
         };
       });
       setAttributeFields(newFields);
@@ -594,19 +619,24 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
               const fieldList = response.data.data?.list || [];
 
               // 将返回的字段列表转换为 AttributeField 格式
-              const fields: AttributeField[] = fieldList.map(
-                (field, index) => ({
+              const fields: AttributeField[] = fieldList.map((field, index) => {
+                const isPrimary = index === 0;
+                const baseType = field.dataType;
+                return {
                   name: field.fieldName, // 表字段名
                   comment: field.fieldName, // 属性名称，使用描述或字段名
-                  columnType: field.dataType, // 字段类型
-                  isPrimary: index === 0 ? 1 : 0, // 第一个字段默认为主键
+                  columnType: normalizeColumnTypeForPrimary(
+                    baseType,
+                    isPrimary
+                  ), // 应用主键字段类型规范
+                  isPrimary: isPrimary ? 1 : 0, // 第一个字段默认为主键
                   isUse: 1, // 默认选中
                   isStoreAsPublic: 0, // 默认不存入公共属性
                   publicPropertyID: 0, // 默认未绑定公共属性
                   _tableField: field.fieldName,
                   _attributeName: field.fieldName
-                })
-              );
+                };
+              });
 
               setAttributeFields(fields);
               form.setFieldValue('attributeFields', fields);

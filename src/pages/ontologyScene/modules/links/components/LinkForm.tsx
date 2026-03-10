@@ -317,6 +317,25 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
       }
     }, [initialValues, form]);
 
+    // 工具方法：根据主键规则规范化字段类型
+    const normalizeFieldTypeForPrimary = (
+      fieldType: string,
+      isPrimary?: boolean
+    ) => {
+      const lowerType = fieldType.toString().toLowerCase();
+      // 规则：当为主键且类型为 varchar(5000) 或 char(36) 时，强制转为 varchar(500),当非主键且类型为 varchar(500) 时，强制转为 varchar(5000)
+      // 此逻辑是因为服务端主键只能写入varchar(500)，后续会优化
+      if (
+        lowerType === 'varchar(5000)' ||
+        lowerType === 'char(36)' ||
+        lowerType === 'varchar(500)'
+      ) {
+        return isPrimary ? 'varchar(500)' : 'varchar(5000)';
+      }
+
+      return fieldType;
+    };
+
     // 属性字段映射相关方法
     const handleFieldChange = (
       index: number,
@@ -340,17 +359,23 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
     const handlePrimaryKeyChange = (index: number) => {
       const newFields: AttributeField[] = attributeFields.map((field, i) => {
         const isPrimary = i === index;
-        // 如果是本地CSV上传，根据是否为主键设置字段类型
         let fieldType = field.fieldType;
+
         if (intermediateTable.type === 'local_csv') {
+          // 本地 CSV：主键 varchar(500)，非主键 varchar(2000)
           fieldType = isPrimary ? 'varchar(500)' : 'varchar(2000)';
+        } else if (intermediateTable.type === 'data_lake_sync') {
+          // 数据湖同步：主键触发规范化（varchar(5000)/char(36) -> varchar(500)）
+          fieldType = normalizeFieldTypeForPrimary(fieldType, isPrimary);
         }
+
         return {
           ...field,
           isPrimary,
           fieldType
         };
       });
+
       setAttributeFields(newFields);
       form.setFieldValue('attributeFields', newFields);
     };
@@ -602,15 +627,22 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
               const fieldList = response.data.data?.list || [];
 
               // 将返回的字段列表转换为 AttributeField 格式
-              const fields: AttributeField[] = fieldList.map(
-                (field, index) => ({
+              const fields: AttributeField[] = fieldList
+                .map((field, index) => ({
                   tableField: field.fieldName, // 表字段名
                   isUse: 1, // 默认全部选中
                   attributeName: field.fieldName, // 属性名称，默认与表字段名相同
-                  fieldType: field.dataType || 'STRING', // 字段类型
+                  // 字段类型：直接使用接口返回的类型，后续再根据主键规则规范化
+                  fieldType: field.dataType || 'STRING',
                   isPrimary: index === 0 // 第一个字段默认为主键
-                })
-              );
+                }))
+                .map((f) => ({
+                  ...f,
+                  fieldType: normalizeFieldTypeForPrimary(
+                    f.fieldType,
+                    f.isPrimary
+                  )
+                }));
 
               setAttributeFields(fields);
               form.setFieldValue('attributeFields', fields);
@@ -827,16 +859,29 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
           // }
         }
 
-        // 处理字段类型：如果是本地CSV，确保主键为varchar(500)，非主键为varchar(2000)
+        // 处理字段类型：
+        // - 本地CSV：确保主键为varchar(500)，非主键为varchar(2000)
+        // - 数据湖同步：当为主键且类型为varchar(5000)或char(36)时，强制转为varchar(500)
         const processedAttributeFields =
-          linkType === 'N:N' && intermediateTable.type === 'local_csv'
-            ? attributeFields.map((field) => ({
-                ...field,
-                fieldType: field.isPrimary ? 'varchar(500)' : 'varchar(2000)'
-              }))
-            : linkType === 'N:N'
-              ? attributeFields
-              : [];
+          linkType === 'N:N'
+            ? attributeFields.map((field) => {
+                if (intermediateTable.type === 'local_csv') {
+                  return {
+                    ...field,
+                    fieldType: field.isPrimary
+                      ? 'varchar(500)'
+                      : 'varchar(2000)'
+                  };
+                }
+                return {
+                  ...field,
+                  fieldType: normalizeFieldTypeForPrimary(
+                    field.fieldType,
+                    field.isPrimary
+                  )
+                };
+              })
+            : [];
 
         const formData: LinkFormData = {
           name: values.name || '',
