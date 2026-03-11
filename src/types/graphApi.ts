@@ -119,6 +119,10 @@ export interface ListOntologyPhysicalPropertiesReq {
    */
   isPrimary?: 1 | 0;
   /**
+   * 是否使用（1：是，0：否）
+   */
+  isUse?: number;
+  /**
    * 对象类型ID
    */
   objectTypeIdList?: number[];

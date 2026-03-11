@@ -123,7 +123,8 @@ const Panel: FC<any> = ({ id, data }) => {
         objectTypeIdList: [nodeId],
         ontologyModelID: Number(OSId),
         pageNo: page,
-        pageSize
+        pageSize,
+        isUse: 1
       });
       if (res.code === '' && res.status === 200 && res.data) {
         setPropertiesData(res.data.result || []);
