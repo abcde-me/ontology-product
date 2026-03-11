@@ -15,6 +15,7 @@ import styles from './index.module.scss';
 import { IconEdit, IconPlus, IconSearch } from '@arco-design/web-react/icon';
 import {
   CopyItemIcon,
+  EllipsisPopover,
   ProButton,
   SearchTable
 } from '@ceai-front/arco-material';
@@ -104,18 +105,20 @@ export const ActionList = (props: {
       title: '行为名称',
       dataIndex: 'name',
       render: (value, record) => (
-        <Tooltip content={value}>
-          <div
-            className={
-              'hover-blue w-max max-w-full overflow-hidden overflow-ellipsis whitespace-nowrap font-PingFangSc text-[14px] font-medium leading-[22px]'
-            }
-            onClick={() => {
-              props.onViewDetail(record);
-            }}
-          >
-            {value}
-          </div>
-        </Tooltip>
+        <EllipsisPopover
+          value={
+            <p
+              onClick={() => {
+                props.onViewDetail(record);
+              }}
+              className={
+                'hover-blue w-max max-w-full overflow-hidden overflow-ellipsis whitespace-nowrap font-PingFangSc text-[14px] font-medium leading-[22px]'
+              }
+            >
+              {value}
+            </p>
+          }
+        />
       )
     },
     {
@@ -123,7 +126,10 @@ export const ActionList = (props: {
       dataIndex: 'description',
       ellipsis: true,
       tooltip: true,
-      width: 200
+      width: 200,
+      render(v) {
+        return <EllipsisPopover value={v} />;
+      }
     },
     {
       title: '绑定对象类型',
