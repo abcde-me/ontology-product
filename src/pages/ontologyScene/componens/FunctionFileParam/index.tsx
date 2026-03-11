@@ -1,7 +1,7 @@
 import React from 'react';
 import styles from './index.module.scss';
 import classNames from 'classnames';
-import { Button, Upload, UploadProps } from '@arco-design/web-react';
+import { Button, Popover, Upload, UploadProps } from '@arco-design/web-react';
 import {
   IconClose,
   IconLoading,
@@ -59,12 +59,16 @@ export const FunctionFileParam = (
                 className={'flex w-full items-center gap-1 overflow-hidden'}
               >
                 <div key={file.uid} className={styles['file-item']}>
-                  {['done', 'error'].includes(file.status || 'init') ? (
-                    <FileIcon className={'flex-shrink-0'} />
-                  ) : (
-                    <IconLoading />
-                  )}
-                  <p className={styles['file-name']}>{file.name}</p>
+                  <div className={'flex flex-1 items-center gap-2'}>
+                    {['done', 'error'].includes(file.status || 'init') ? (
+                      <FileIcon className={'flex-shrink-0'} />
+                    ) : (
+                      <IconLoading className={'flex-shrink-0'} />
+                    )}
+                    <Popover content={file.name ?? null}>
+                      <p className={styles['file-name']}>{file.name}</p>
+                    </Popover>
+                  </div>
                   <IconClose
                     className={'flex-shrink-0 cursor-pointer'}
                     onClick={() => {

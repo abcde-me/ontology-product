@@ -1,6 +1,7 @@
 .py-code {
   position: relative;
   height: 100%;
+  position: relative;
 
   .code-mask {
     position: absolute;
@@ -13,10 +14,32 @@
     pointer-events: none;
   }
 
+  .toolbar {
+    position: absolute;
+    z-index: 1000;
+    visibility: hidden;
+    display: flex;
+    top: 12px;
+    right: 16px;
+    gap: 8px;
+    cursor: pointer;
+  }
+
+  &:hover {
+    .toolbar {
+      visibility: visible;
+    }
+  }
+
   :global {
+    .cm-theme-light {
+      height: 100%;
+    }
+
     .cm-editor {
       background: var(--background-color-bg-2, #f8fafd);
       border-bottom: 1px solid var(--line-color-border-2, #dfe2eb);
+      height: 100%;
     }
 
     .cm-scroller {

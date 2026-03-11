@@ -165,7 +165,12 @@ export const FunctionDetailDrawer = (props: IProps) => {
         </div>
         <div className={styles['section']}>
           <div className={styles['section-title']}>函数</div>
-          <PyCodeContent value={functionData?.content} readOnly />
+          <PyCodeContent
+            value={functionData?.content}
+            readOnly
+            copy
+            fullScreen
+          />
         </div>
       </div>
     </OsDrawer>

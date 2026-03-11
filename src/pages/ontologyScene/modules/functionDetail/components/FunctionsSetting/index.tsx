@@ -156,7 +156,12 @@ export const FunctionsSetting = (props: {
                               key === f.key ? [] : `${f.field}.name`
                             )}
                           >
-                            <Input placeholder={''} disabled={disabled} />
+                            <Input
+                              placeholder={''}
+                              disabled={disabled}
+                              maxLength={100}
+                              showWordLimit
+                            />
                           </FormItemWithTooltip>
 
                           <Form.Item
@@ -170,7 +175,7 @@ export const FunctionsSetting = (props: {
                                   onError
                                 ) {
                                   const { uiType, paramValue } = value!;
-                                  if (isNil(paramValue)) {
+                                  if (!paramValue) {
                                     return onError('请填写参数值');
                                   }
                                   const [dataType] = uiType!.split('_');
@@ -265,8 +270,8 @@ export const FunctionsSetting = (props: {
                       }}
                     >
                       <p className={styles['param-name-item']}>出参名称</p>
-                      <p>数据类型</p>
-                      <div className={'w-4'} />
+                      <p className={'flex-1'}>数据类型</p>
+                      <div className={'w-4 flex-shrink-0'} />
                     </div>
                     {fields.map(({ field, key }, index) => {
                       return (
@@ -287,7 +292,12 @@ export const FunctionsSetting = (props: {
                               key === f.key ? [] : `${f.field}.name`
                             )}
                           >
-                            <Input placeholder={''} disabled={disabled} />
+                            <Input
+                              placeholder={''}
+                              disabled={disabled}
+                              maxLength={100}
+                              showWordLimit
+                            />
                           </FormItemWithTooltip>
                           <FormItemWithTooltip
                             content={
