@@ -112,7 +112,8 @@ async function defaultFetchAttributes(
   const res = await listOntologyLinkTypeColumn({
     linkTypeID: Number(linkId),
     pageNo: params.page,
-    pageSize: params.pageSize
+    pageSize: params.pageSize,
+    isUse: 1
   });
   if (res.status === 200 && res.code === '' && res.data) {
     return {

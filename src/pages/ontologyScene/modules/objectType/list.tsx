@@ -311,7 +311,6 @@ export default function OntologySceneObjectTypeList() {
       title: '同步时间',
       dataIndex: 'syncTime',
       width: 180,
-      sorter: true,
       render: (value) => (
         <div>{value ? dayjs(value).format('YYYY-MM-DD HH:mm:ss') : '-'}</div>
       )

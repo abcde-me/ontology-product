@@ -131,7 +131,8 @@ function EdgePanel() {
         const res = await listOntologyLinkTypeColumn({
           linkTypeID: selectedEdgeId,
           pageNo: page,
-          pageSize
+          pageSize,
+          isUse: 1
         });
         if (res.status === 200 && res.code === '' && res.data) {
           setAttributesData(res.data.result || []);

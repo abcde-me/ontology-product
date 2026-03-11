@@ -553,12 +553,14 @@ export default function OntologySceneLinksList() {
       dataIndex: 'ontologyLinkTypeColumnList',
       width: 150,
       render: (value, record) => {
-        if (!value || value.length === 0) {
+        const attributeList = value?.filter((item) => item.isUse === 1) || [];
+
+        if (!attributeList || attributeList.length === 0) {
           return '-';
         }
 
         // 解析属性列表（可能是逗号分隔的字符串）
-        const attributes = value.map((item) => item.name);
+        const attributes = attributeList.map((item) => item.name);
 
         // 如果属性数量大于等于2，显示第一个名称 + "等n个"
         if (attributes.length >= 2) {
