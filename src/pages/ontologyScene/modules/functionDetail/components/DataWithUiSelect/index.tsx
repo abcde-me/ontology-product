@@ -28,9 +28,16 @@ export const DataWithUiSelect = (
   props: CustomFormItemCompProps<IValue> & {
     osid?: number;
     onParamValueChange?: (v?: React.Key) => void;
+    disabledConfig: {
+      uiType: boolean;
+      paramValue: boolean;
+    };
+    readonly: boolean;
   }
 ) => {
-  const { value, onChange, disabled } = props;
+  const { value, onChange, disabledConfig } = props;
+  const disabled = disabledConfig.uiType || disabledConfig.paramValue;
+  const valueDisabled = disabledConfig.paramValue;
   const renderComponentByUiType = (type: UiType) => {
     switch (type) {
       case UiType.TextArea:
@@ -43,6 +50,7 @@ export const DataWithUiSelect = (
               maxRows: 5
             }}
             value={value?.paramValue}
+            disabled={valueDisabled}
             onChange={(value) => changeValue({ paramValue: value })}
           />
         );
@@ -52,6 +60,7 @@ export const DataWithUiSelect = (
             placeholder={'请输入'}
             className={`${styles['ui-comp']} w-[160px]`}
             value={value?.paramValue}
+            disabled={valueDisabled}
             onChange={(value) => changeValue({ paramValue: value })}
           />
         );
@@ -63,6 +72,7 @@ export const DataWithUiSelect = (
             style={{
               width: '160px'
             }}
+            disabled={valueDisabled}
             value={value?.paramValue}
             onChange={(value) => changeValue({ paramValue: value })}
           />
@@ -73,6 +83,7 @@ export const DataWithUiSelect = (
             className={styles['ui-comp']}
             placeholder={'请选择'}
             value={value?.paramValue}
+            disabled={valueDisabled}
             onChange={(value) => changeValue({ paramValue: value })}
             options={[
               {
@@ -92,6 +103,7 @@ export const DataWithUiSelect = (
             className={`min-w-[160px] ${styles['ui-comp']}`}
             showTime={false}
             value={value?.paramValue}
+            disabled={valueDisabled}
             onChange={(value) => changeValue({ paramValue: value })}
           />
         );
@@ -100,6 +112,7 @@ export const DataWithUiSelect = (
           <FunctionFileParam
             onChange={(value) => changeValue({ paramValue: value })}
             value={value?.paramValue}
+            disabled={valueDisabled}
             className={styles['ui-comp']}
           />
         );
@@ -108,6 +121,7 @@ export const DataWithUiSelect = (
           <MapPicker
             className={styles['ui-comp']}
             value={value?.paramValue}
+            disabled={valueDisabled}
             onChange={(value) => changeValue({ paramValue: value })}
           />
         );
@@ -117,6 +131,7 @@ export const DataWithUiSelect = (
             showTime
             className={styles['ui-comp']}
             value={value?.paramValue}
+            disabled={valueDisabled}
             onChange={(value) => changeValue({ paramValue: value })}
           />
         );
@@ -125,6 +140,7 @@ export const DataWithUiSelect = (
           <ObjectInstanceSelect
             className={'flex-1'}
             value={value?.paramValue}
+            disabled={valueDisabled}
             onChange={(value) => changeValue({ paramValue: value })}
             mode={'single'}
           />
@@ -134,6 +150,7 @@ export const DataWithUiSelect = (
           <ObjectInstanceSelect
             className={'flex-1'}
             value={value?.paramValue}
+            disabled={valueDisabled}
             onChange={(value) => changeValue({ paramValue: value })}
             mode={'multiple'}
           />
@@ -144,6 +161,7 @@ export const DataWithUiSelect = (
             placeholder={'请输入'}
             className={styles['ui-comp']}
             value={value?.paramValue}
+            disabled={valueDisabled}
             onChange={(value) => changeValue({ paramValue: value })}
           />
         );
@@ -161,6 +179,7 @@ export const DataWithUiSelect = (
   return (
     <div className={styles['comp-wrapper']}>
       <UiSelect
+        readonly={props.readonly}
         value={value?.uiType}
         onChange={(uiType) => {
           changeValue({

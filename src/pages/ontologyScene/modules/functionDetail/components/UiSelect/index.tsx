@@ -13,7 +13,9 @@ import {
 } from '@/pages/ontologyScene/types/ontologyFunction';
 import classNames from 'classnames';
 
-export const UiSelect = (props: CustomFormItemCompProps<string>) => {
+export const UiSelect = (
+  props: CustomFormItemCompProps<string> & { readonly: boolean }
+) => {
   const { value, onChange, disabled } = props;
   const currentIcon = useMemo(() => {
     const key = value ?? `${ParamType.String}_${UiType.Input}`;
@@ -49,10 +51,8 @@ export const UiSelect = (props: CustomFormItemCompProps<string>) => {
     </Menu>
   );
 
-  const dataType = value?.split('_')[0];
-
   return (
-    <Popover content={dataType || null}>
+    <Popover content={props.readonly ? '该函数已被行为绑定，不可修改' : null}>
       <div
         className={classNames([
           styles['ui-select-wrapper'],
