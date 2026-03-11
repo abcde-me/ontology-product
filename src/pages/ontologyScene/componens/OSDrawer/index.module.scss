@@ -1,4 +1,7 @@
 .os-drawer {
+  //工作流组件库把body的user-select设置为了none，这里覆盖一下
+  user-select: text !important;
+
   :global(.arco-drawer-header) {
     height: max-content;
     padding: 20px 24px;
