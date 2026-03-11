@@ -1,4 +1,10 @@
-import React, { useMemo, useState, useEffect, useCallback } from 'react';
+import React, {
+  useMemo,
+  useState,
+  useEffect,
+  useCallback,
+  useRef
+} from 'react';
 import { useHistory, useParams } from 'react-router-dom';
 import {
   Tabs,
@@ -39,6 +45,7 @@ import styles from './index.module.scss';
 import { isNil } from 'lodash-es';
 import { getLinkTypeText } from '../../utils';
 import { openNewPage } from '@/utils/env';
+import { useInfiniteScroll, useRequest } from 'ahooks';
 
 const TabPane = Tabs.TabPane;
 
@@ -102,32 +109,11 @@ interface ObjectTypeDetailDrawerProps {
     objectTypeId: string,
     params: { page: number; pageSize: number }
   ) => Promise<{ items: AttributeItem[]; total: number }>;
-  fetchLinks?: (objectTypeId: string) => Promise<LinkItem[]>;
   /** 可选：实例分页默认值 */
   defaultInstancesPageSize?: number;
   /** 可选：属性分页默认值 */
   defaultAttributesPageSize?: number;
 }
-
-// 将 ObjectType 转换为 ObjectTypeDetailData
-const convertObjectTypeToDetailData = (
-  objectType: ObjectType,
-  instanceCount = 0,
-  attributeCount = 0,
-  linkCount = 0
-): ObjectTypeDetailData => {
-  return {
-    code: String(objectType.code || ''),
-    id: objectType.id,
-    name: objectType.name || '',
-    description: objectType.description || '',
-    syncStatus: objectType.syncStatus,
-    icon: objectType.icon,
-    instanceCount,
-    attributeCount,
-    linkCount
-  };
-};
 
 // 将 GetOntologyObjectTypeDetailRes 转换为 ObjectTypeDetailData
 const convertDetailResToDetailData = (
@@ -151,19 +137,7 @@ const convertDetailResToDetailData = (
 
 // 直接使用 PhysicalProperties，不需要转换
 
-// 获取对象类型图标颜色
-const getObjectTypeColor = (icon?: string): string => {
-  // 根据图标类型返回颜色，参考 panel.tsx
-  if (
-    icon === 'intelligence' ||
-    icon === 'track' ||
-    icon === 'mission' ||
-    icon === 'asset'
-  ) {
-    return '#00b42a'; // green
-  }
-  return '#722ED1'; // purple
-};
+const DEFAULT_PAGE_SIZE = 10;
 
 export default function ObjectTypeDetailDrawer({
   visible,
@@ -174,9 +148,8 @@ export default function ObjectTypeDetailDrawer({
   fetchBasicInfo,
   fetchInstances,
   fetchAttributes,
-  fetchLinks,
-  defaultInstancesPageSize = 10,
-  defaultAttributesPageSize = 10
+  defaultInstancesPageSize = DEFAULT_PAGE_SIZE,
+  defaultAttributesPageSize = DEFAULT_PAGE_SIZE
 }: ObjectTypeDetailDrawerProps) {
   const history = useHistory();
   const { id: ontologyModelID } = useParams<{ id: string }>();
@@ -203,7 +176,6 @@ export default function ObjectTypeDetailDrawer({
   const fetchBasicInfoFn = fetchBasicInfo;
   const fetchInstancesFn = fetchInstances;
   const fetchAttributesFn = fetchAttributes;
-  const fetchLinksFn = fetchLinks;
 
   const [basicInfo, setBasicInfo] = useState<ObjectTypeDetailData | undefined>(
     data
@@ -228,6 +200,11 @@ export default function ObjectTypeDetailDrawer({
 
   const [linksData, setLinksData] = useState<LinkItem[]>([]);
   const [linksLoading, setLinksLoading] = useState(false);
+  const [linksTotal, setLinksTotal] = useState(0);
+  const [linksIsNoMore, setLinksIsNoMore] = useState(false);
+  const linksScrollContainerRef = useRef<HTMLDivElement>(null);
+  const linksPageNoRef = useRef(1);
+  const linksPageSize = DEFAULT_PAGE_SIZE;
 
   const loadInstances = useCallback(
     async (page: number, pageSize: number) => {
@@ -321,6 +298,123 @@ export default function ObjectTypeDetailDrawer({
     [fetchAttributesFn, resolvedObjectTypeIdNum, fetchAttributes]
   );
 
+  // 重置链接状态
+  const resetLinksState = useCallback(() => {
+    setLinksData([]);
+    linksPageNoRef.current = 1;
+    setLinksIsNoMore(false);
+    setLinksTotal(0);
+  }, []);
+
+  // 将 LinkInfo 转换为 LinkItem 的辅助函数
+  const convertLinkInfoToLinkItem = useCallback((link: LinkInfo): LinkItem => {
+    return {
+      linkId: link.code || String(link.id || ''),
+      linkName: link.name || '',
+      linkType: link.type,
+      sourceObjectTypeInfo: {
+        name: link.sourceObjectTypeName,
+        icon: link.sourceObjectTypeIcon,
+        syncStatus: link.sourceObjectTypeSyncStatus,
+        id: String(link.sourceObjectTypeID)
+      },
+      targetObjectTypeInfo: {
+        name: link.targetObjectTypeName,
+        icon: link.targetObjectTypeIcon,
+        syncStatus: link.targetObjectTypeSyncStatus,
+        id: String(link.targetObjectTypeID)
+      }
+    };
+  }, []);
+
+  // 使用 useRequest 加载链接数据（用于滚动加载）
+  const { loading: linksScrollLoading, run: loadLinksForScroll } = useRequest(
+    async () => {
+      if (!resolvedObjectTypeIdNum) {
+        throw new Error('对象类型ID不能为空');
+      }
+
+      const params = {
+        sourceObjectTypeIDList: [resolvedObjectTypeIdNum],
+        targetObjectTypeIDList: [resolvedObjectTypeIdNum],
+        ontologyModelID: Number(ontologyModelID),
+        pageNo: linksPageNoRef.current,
+        pageSize: linksPageSize
+      };
+
+      const res = await listOntologyLinkType(params);
+
+      if (res.code !== '' || res.status !== 200 || !res.data) {
+        throw new Error(res.message || '获取链接数据失败');
+      }
+
+      return res.data;
+    },
+    {
+      manual: true,
+      onSuccess: (data) => {
+        const newData = data.result || [];
+        if (newData.length > 0) {
+          const convertedLinks: LinkItem[] = newData.map(
+            convertLinkInfoToLinkItem
+          );
+          setLinksData((prevData) => [...prevData, ...convertedLinks]);
+          setLinksTotal(data.totalCount || 0);
+        }
+
+        // 判断是否是最后一页
+        if (newData.length < linksPageSize) {
+          setLinksIsNoMore(true);
+        } else {
+          linksPageNoRef.current += 1;
+        }
+      },
+      onError: (error) => {
+        console.error('获取链接数据失败:', error);
+        Message.error(error.message || '获取链接数据失败');
+        setLinksIsNoMore(true);
+      }
+    }
+  );
+
+  // 包装 loadLinksForScroll 以添加条件检查
+  const handleLoadLinksForScroll = useCallback(async () => {
+    if (
+      linksIsNoMore ||
+      !resolvedObjectTypeIdNum ||
+      linksScrollLoading ||
+      activeTab !== 'links' ||
+      !visible
+    ) {
+      return Promise.resolve();
+    }
+    return loadLinksForScroll();
+  }, [
+    linksIsNoMore,
+    resolvedObjectTypeIdNum,
+    linksScrollLoading,
+    activeTab,
+    visible,
+    loadLinksForScroll
+  ]);
+
+  // 无限滚动加载（仅当 activeTab === 'links' 时生效）
+  useInfiniteScroll(
+    async () => {
+      await handleLoadLinksForScroll();
+      return { list: [] };
+    },
+    {
+      target: linksScrollContainerRef,
+      isNoMore: () =>
+        linksIsNoMore ||
+        !resolvedObjectTypeIdNum ||
+        activeTab !== 'links' ||
+        !visible,
+      reloadDeps: [activeTab, resolvedObjectTypeIdNum, linksIsNoMore, visible]
+    }
+  );
+
   // 当抽屉打开且 objectTypeId 变化时，分别请求：基本信息 / 属性 / 链接 / 实例
   useEffect(() => {
     if (!visible || !resolvedObjectTypeIdNum) return;
@@ -356,58 +450,28 @@ export default function ObjectTypeDetailDrawer({
     // 属性（默认拉第一页）
     loadAttributes(1, attributesPagination.pageSize);
 
-    // 链接
-    (async () => {
-      setLinksLoading(true);
-      try {
-        // 如果传入了自定义 fetchLinks，使用自定义函数
-        if (fetchLinks) {
-          const res = await fetchLinksFn?.(String(resolvedObjectTypeIdNum));
-          setLinksData(res || []);
-        } else {
-          // 使用真实接口
-          const res = await listOntologyLinkType({
-            sourceObjectTypeIDList: [resolvedObjectTypeIdNum],
-            targetObjectTypeIDList: [resolvedObjectTypeIdNum],
-            ontologyModelID: Number(ontologyModelID),
-            pageNo: 1,
-            pageSize: 10
-          });
-          if (res.code === '' && res.status === 200 && res.data) {
-            // 将 LinkInfo 转换为 LinkItem
-            const convertedLinks: LinkItem[] = (res.data.result || []).map(
-              (link: LinkInfo) => ({
-                linkId: link.code || String(link.id || ''),
-                linkName: link.name || '',
-                linkType: link.type,
-                sourceObjectTypeInfo: {
-                  name: link.sourceObjectTypeName,
-                  icon: link.sourceObjectTypeIcon,
-                  syncStatus: link.sourceObjectTypeSyncStatus,
-                  id: String(link.sourceObjectTypeID)
-                },
-                targetObjectTypeInfo: {
-                  name: link.targetObjectTypeName,
-                  icon: link.targetObjectTypeIcon,
-                  syncStatus: link.targetObjectTypeSyncStatus,
-                  id: String(link.targetObjectTypeID)
-                }
-              })
-            );
-            setLinksData(convertedLinks);
-          }
-        }
-      } catch (e) {
-        Message.error('加载链接失败');
-      } finally {
-        setLinksLoading(false);
-      }
-    })();
+    loadLinksForScroll();
 
     // 实例（默认拉第一页）
     loadInstances(1, instancesPagination.pageSize);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [visible, resolvedObjectTypeIdNum]);
+
+  // 当切换到 links tab 时，如果还没有数据，触发加载
+  useEffect(() => {
+    if (
+      activeTab === 'links' &&
+      visible &&
+      resolvedObjectTypeIdNum &&
+      linksData.length === 0 &&
+      !linksScrollLoading &&
+      !linksIsNoMore
+    ) {
+      resetLinksState();
+      setTimeout(() => {
+        handleLoadLinksForScroll();
+      }, 0);
+    }
+  }, [activeTab, visible, resolvedObjectTypeIdNum]);
 
   // 处理编辑按钮点击
   const handleEdit = () => {
@@ -795,66 +859,75 @@ export default function ObjectTypeDetailDrawer({
               )}
             </div>
           </TabPane>
-          <TabPane key="links" title={`链接(${linksData.length})`}>
+          <TabPane
+            key="links"
+            title={`链接(${linksTotal || linksData.length})`}
+          >
             <div className="mt-[16px] flex flex-col gap-[16px]">
-              {linksLoading ? (
-                <div className="flex justify-center py-[100px]">
-                  <Spin />
-                </div>
-              ) : linksData.length === 0 ? (
+              {linksTotal === 0 && !linksScrollLoading && !linksLoading ? (
                 <div className="flex justify-center py-[100px]">
                   <NoDataCard title="暂无数据" />
                 </div>
               ) : (
-                linksData.map((link) => {
-                  // 确定左侧（当前节点）和右侧（关联节点）的显示
-                  const leftObjectType = link.sourceObjectTypeInfo ?? {};
-                  const rightObjectType = link.targetObjectTypeInfo ?? {};
+                <div
+                  ref={linksScrollContainerRef}
+                  className="max-h-[calc(100vh-270px)] overflow-y-auto"
+                >
+                  {linksData.map((link) => {
+                    // 确定左侧（当前节点）和右侧（关联节点）的显示
+                    const leftObjectType = link.sourceObjectTypeInfo ?? {};
+                    const rightObjectType = link.targetObjectTypeInfo ?? {};
 
-                  return (
-                    <div
-                      key={link.linkId}
-                      className="mb-[16px] rounded-[12px] border border-[var(--color-border-2)] bg-white p-[16px]"
-                    >
-                      {/* 标题区域 */}
-                      <div className="mb-[8px] text-[14px] font-[600] text-[var(--color-text-1)]">
-                        <EllipsisPopover value={link.linkName} />
-                      </div>
-
-                      {/* ID */}
-                      <div className="mb-[8px] flex items-center gap-[8px] overflow-hidden leading-[22px]">
-                        <span className="text-[14px] text-[var(--color-text-5)]">
-                          id:
-                        </span>
-                        <span className="min-w-0 max-w-full text-[14px] text-[var(--color-text-1)]">
-                          <EllipsisPopover value={link.linkId} />
-                        </span>
-                        <IconCopy
-                          fontSize={14}
-                          className="cursor-pointer hover:text-[#184FF2]"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleCopy(link.linkId);
-                          }}
-                        />
-                      </div>
-
-                      {/* 关系图 */}
-                      <div className="flex items-center bg-[#F2F8FF] p-[12px]">
-                        {renderLinkCard(leftObjectType, true)}
-                        <div className="flex w-[76px] min-w-[76px] items-center">
-                          <span className="h-0 flex-1 border-t border-dashed border-[#CBD5E1]" />
-                          <span className="rounded border border-[#E5E6EB] bg-white px-2 py-[2px] text-[12px] leading-[18px] text-[#23293b]">
-                            {getLinkTypeText(link.linkType)}
-                          </span>
-                          <span className="h-0 flex-1 border-t border-dashed border-[#CBD5E1]" />
-                          <div className="h-0 w-0 border-b-[4px] border-l-[6px] border-t-[4px] border-b-transparent border-l-gray-400 border-t-transparent"></div>
+                    return (
+                      <div
+                        key={link.linkId}
+                        className="mb-[16px] rounded-[12px] border border-[var(--color-border-2)] bg-white p-[16px]"
+                      >
+                        {/* 标题区域 */}
+                        <div className="mb-[8px] text-[14px] font-[600] text-[var(--color-text-1)]">
+                          <EllipsisPopover value={link.linkName} />
                         </div>
-                        {renderLinkCard(rightObjectType, false)}
+
+                        {/* ID */}
+                        <div className="mb-[8px] flex items-center gap-[8px] overflow-hidden leading-[22px]">
+                          <span className="text-[14px] text-[var(--color-text-5)]">
+                            id:
+                          </span>
+                          <span className="min-w-0 max-w-full text-[14px] text-[var(--color-text-1)]">
+                            <EllipsisPopover value={link.linkId} />
+                          </span>
+                          <IconCopy
+                            fontSize={14}
+                            className="cursor-pointer hover:text-[#184FF2]"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleCopy(link.linkId);
+                            }}
+                          />
+                        </div>
+
+                        {/* 关系图 */}
+                        <div className="flex items-center bg-[#F2F8FF] p-[12px]">
+                          {renderLinkCard(leftObjectType, true)}
+                          <div className="flex w-[76px] min-w-[76px] items-center">
+                            <span className="h-0 flex-1 border-t border-dashed border-[#CBD5E1]" />
+                            <span className="rounded border border-[#E5E6EB] bg-white px-2 py-[2px] text-[12px] leading-[18px] text-[#23293b]">
+                              {getLinkTypeText(link.linkType)}
+                            </span>
+                            <span className="h-0 flex-1 border-t border-dashed border-[#CBD5E1]" />
+                            <div className="h-0 w-0 border-b-[4px] border-l-[6px] border-t-[4px] border-b-transparent border-l-gray-400 border-t-transparent"></div>
+                          </div>
+                          {renderLinkCard(rightObjectType, false)}
+                        </div>
                       </div>
+                    );
+                  })}
+                  {linksScrollLoading && (
+                    <div className="flex items-center justify-center p-4">
+                      <Spin />
                     </div>
-                  );
-                })
+                  )}
+                </div>
               )}
             </div>
           </TabPane>

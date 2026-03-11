@@ -119,7 +119,7 @@ body {
   overflow: hidden;
 }
 
-body {
+#workflow-container {
   color: rgb(var(--foreground-rgb));
   user-select: none;
   /* background: linear-gradient(
