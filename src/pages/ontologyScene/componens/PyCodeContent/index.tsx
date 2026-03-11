@@ -17,10 +17,9 @@ export const PyCodeContent = (
     fullScreen?: boolean;
   }
 ) => {
-  const { copy, fullScreen, readOnly, ...otherProps } = props;
+  const { copy = true, fullScreen = true, readOnly, ...otherProps } = props;
   const codeRef = useRef<HTMLDivElement>(null);
-  const [isFullscreen, { enterFullscreen, exitFullscreen, toggleFullscreen }] =
-    useFullscreen(codeRef);
+  const [isFullscreen, { toggleFullscreen }] = useFullscreen(codeRef);
   return (
     <div className={styles['py-code']} ref={codeRef}>
       {readOnly && <div className={styles['code-mask']} />}

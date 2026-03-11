@@ -86,11 +86,9 @@ export default function OSFunctionDetailPage() {
       }
       Message.success({
         content: `成功${pageMode === 'edit' ? '编辑' : '创建'}函数`,
-        duration: 3000,
-        onClose() {
-          goBack();
-        }
+        duration: 3000
       });
+      goBack();
     } catch (e) {
       console.error(e);
     }
