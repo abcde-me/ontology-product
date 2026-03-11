@@ -161,10 +161,7 @@ export const formatParamDisplayValue = (
       if (objectTypeId && pk !== undefined && pk !== null) {
         // 返回 React 组件
         return (
-          <ObjectRefRenderer
-            objectTypeId={Number(objectTypeId)}
-            pk={String(pk)}
-          />
+          <ObjectRefRenderer objectTypeId={objectTypeId} pk={String(pk)} />
         );
       }
 
