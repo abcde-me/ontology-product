@@ -80,9 +80,9 @@ export default function BehaviorActionDetailPage() {
       }
       Message.success({
         content: `成功${pageMode === 'create' ? '创建' : '编辑'}行为`,
-        duration: 3000,
-        onClose: goBack
+        duration: 3000
       });
+      goBack();
     });
   };
 

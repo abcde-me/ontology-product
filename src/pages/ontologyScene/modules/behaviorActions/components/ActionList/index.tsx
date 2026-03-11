@@ -222,9 +222,9 @@ export const ActionList = (props: {
         deleteAction(record.id!).then((res) => {
           Message.success({
             content: '删除成功',
-            duration: 0.5,
-            onClose: refresh
+            duration: 3000
           });
+          refresh();
         });
       }
     });
