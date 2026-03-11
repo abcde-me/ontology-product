@@ -396,9 +396,7 @@ const versionColumns: any[] = [
         4: 'SQL脚本'
       };
       return (
-        <div style={{ whiteSpace: 'nowrap' }}>
-          {sourceTypeMap[value] || '-'}
-        </div>
+        <EllipsisPopover value={sourceTypeMap[value] || '-'} preferTypography />
       );
     }
   },
@@ -407,7 +405,7 @@ const versionColumns: any[] = [
     dataIndex: 'source_name',
     width: 200,
     render: (value: string) => {
-      return <div style={{ whiteSpace: 'nowrap' }}>{value || '-'}</div>;
+      return <EllipsisPopover value={value || '-'} preferTypography />;
     }
   },
   {
@@ -421,14 +419,16 @@ const versionColumns: any[] = [
     },
     sortDirections: ['ascend', 'descend'] as ('ascend' | 'descend')[],
     showSorterTooltip: true,
-    render: (time: string) => formatDate(time)
+    render: (time: string) => (
+      <EllipsisPopover value={formatDate(time)} preferTypography />
+    )
   },
   {
     title: '创建人',
     dataIndex: 'creator_name',
     width: 226,
     render: (value: string) => {
-      return <div style={{ whiteSpace: 'nowrap' }}>{value || '-'}</div>;
+      return <EllipsisPopover value={value || '-'} preferTypography />;
     }
   }
   // {
