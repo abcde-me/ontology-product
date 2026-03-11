@@ -785,6 +785,8 @@ export const ModaForgeResourceEndpoints = {
   GetTemplateFileApi: PrefixAimdp + '/GetTemplateFile',
   // 获取对象类型同步日志
   GetObjectTypeSyncTaskLogApi: PrefixAimdp + '/GetObjectTypeSyncTaskLog',
+  // 同步对象类型任务
+  SyncObjectTypeTaskApi: PrefixAimdp + '/SyncObjectTypeTask',
 
   //属性
   // 获取公共属性列表
@@ -811,6 +813,9 @@ export const ModaForgeResourceEndpoints = {
   DeleteOntologyLinkTypeApi: PrefixAimdp + '/DeleteOntologyLinkType',
   // 获取链接类型同步日志
   GetLinkTypeSyncTaskLogApi: PrefixAimdp + '/GetLinkTypeSyncTaskLog',
+  // 同步链接类型任务
+  SyncLinkTypeTaskApi: PrefixAimdp + '/SyncLinkTypeTask',
+
   // ===================== 本体函数相关 =====================
   // 函数列表
   GetOntologyFunctionListApi: PrefixAimdp + '/ListOntologyFunction',

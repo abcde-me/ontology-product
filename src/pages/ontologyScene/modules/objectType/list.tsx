@@ -10,7 +10,7 @@ import {
   Modal,
   Popover
 } from '@arco-design/web-react';
-import { IconPlus, IconSearch } from '@arco-design/web-react/icon';
+import { IconPlus, IconSearch, IconRefresh } from '@arco-design/web-react/icon';
 import {
   CopyItemIcon,
   DotStatus,
@@ -20,23 +20,21 @@ import {
 } from '@ceai-front/arco-material';
 import useUrlState from '@ahooksjs/use-url-state';
 import { useHistory, useParams } from 'react-router-dom';
+import { debounce } from 'lodash-es';
 import { useWorkflowTable } from '../../hooks/useTable';
 import ObjectTypeDetailDrawer from '../../componens/ObjectTypeDetailDrawer';
-import TaskLogDrawer from '../../componens/TaskLogDrawer';
 import {
   listOntologyObjectType,
   deleteOntologyObjectType,
-  getObjectTypeSyncLog
+  syncObjectTypeTask
 } from '@/api/ontologySceneLibrary/objectType';
 import { ObjectType, ListOntologyObjectTypeReq } from '@/types/objectType';
 import { SyncStatus } from '@/types/graphApi';
 import styles from './list.module.scss';
 import {
   OBJECT_TYPE_SYNC_STATUS_CONFIG,
-  OBJECT_TYPE_SYNC_STATUS_FILTERS,
   OBJECT_TYPE_ICON_OPTIONS
 } from '../../common/constants';
-import LogIcon from '../../assets/log-icon.svg';
 import dayjs from 'dayjs';
 import { PermissionWrapper } from '@/components/PermissionGuard';
 import { ONTOLOGY_PERMISSIONS } from '@/config/permissions';
@@ -52,9 +50,6 @@ export default function OntologySceneObjectTypeList() {
   const [activeTab, setActiveTab] = useState<
     'instances' | 'attributes' | 'links'
   >('instances');
-  const [logDrawerVisible, setLogDrawerVisible] = useState(false);
-  const [logTaskId, setLogTaskId] = useState<number | null>(null);
-  const [logTaskName, setLogTaskName] = useState<string | undefined>();
 
   // 使用 useTable hook
   const { data, loading, pagination, refresh, submit, onChange } =
@@ -205,16 +200,26 @@ export default function OntologySceneObjectTypeList() {
     });
   };
 
-  // 处理查看日志
-  const handleViewLog = (record: ObjectType) => {
+  // 失败重试（防抖处理）
+  const handleRetrySync = debounce(async (record: ObjectType) => {
     if (!record.id) {
       Message.error('对象类型ID无效');
       return;
     }
-    setLogTaskId(record.id);
-    setLogTaskName(record.name);
-    setLogDrawerVisible(true);
-  };
+
+    try {
+      const res = await syncObjectTypeTask({ id: record.id });
+      if (res.status === 200 && res.code === '') {
+        Message.success('重新同步成功');
+        // 重新刷新列表，获取最新状态
+        refresh();
+      } else {
+        Message.error(res.message || '重新同步失败');
+      }
+    } catch (e) {
+      Message.error('重新同步失败');
+    }
+  }, 500);
 
   // 表格列定义
   const columns: TableColumnProps<ObjectType>[] = [
@@ -285,14 +290,16 @@ export default function OntologySceneObjectTypeList() {
           return null;
         }
         const config = OBJECT_TYPE_SYNC_STATUS_CONFIG[value];
+        const isFailed = value === SyncStatus.FAILED;
+
         return (
           <div className="flex items-center gap-[4px]">
             <DotStatus text={config.text} color={config.color} />
-            {value === SyncStatus.FAILED && (
-              <Popover content="查看日志">
-                <LogIcon
+            {isFailed && (
+              <Popover content="重试">
+                <IconRefresh
                   className="h-[14px] w-[14px] text-[var(--color-text-4)] hover:cursor-pointer hover:text-[#184FF2]"
-                  onClick={() => handleViewLog(record)}
+                  onClick={() => handleRetrySync(record)}
                 />
               </Popover>
             )}
@@ -429,17 +436,6 @@ export default function OntologySceneObjectTypeList() {
           }}
           objectTypeId={selectedObjectType?.id?.toString() || ''}
           defaultActiveTab={activeTab}
-        />
-      )}
-
-      {/* 对象类型同步日志抽屉 */}
-      {logTaskId !== null && (
-        <TaskLogDrawer
-          visible={logDrawerVisible}
-          taskInstanceId={logTaskId}
-          taskName={logTaskName}
-          onClose={() => setLogDrawerVisible(false)}
-          fetchLog={getObjectTypeSyncLog}
         />
       )}
     </div>

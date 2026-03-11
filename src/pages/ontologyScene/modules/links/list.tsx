@@ -11,7 +11,7 @@ import {
   Popover,
   Checkbox
 } from '@arco-design/web-react';
-import { IconPlus, IconSearch } from '@arco-design/web-react/icon';
+import { IconPlus, IconSearch, IconRefresh } from '@arco-design/web-react/icon';
 import {
   CopyItemIcon,
   DotStatus,
@@ -21,11 +21,16 @@ import {
 } from '@ceai-front/arco-material';
 import useUrlState from '@ahooksjs/use-url-state';
 import { useHistory, useParams } from 'react-router-dom';
+import { debounce } from 'lodash-es';
 import { useWorkflowTable } from '../../hooks/useTable';
 import styles from './list.module.scss';
 import LinkDetailDrawer from './components/LinkDetailDrawer';
 import { listOntologyLinkType } from '@/api/ontologySceneLibrary/graph';
-import { deleteOntologyLinkType } from '@/api/ontologySceneLibrary/links';
+import {
+  deleteOntologyLinkType,
+  getLinkTypeSyncTaskLog,
+  syncLinkTypeTask
+} from '@/api/ontologySceneLibrary/links';
 import {
   LinkInfo,
   LinkType,
@@ -40,9 +45,6 @@ import {
 } from '../../common/constants';
 import { getLinkTypeText } from '../../utils';
 import ObjectTypeDetailDrawer from '../../componens/ObjectTypeDetailDrawer';
-import TaskLogDrawer from '../../componens/TaskLogDrawer';
-import { getLinkTypeSyncTaskLog } from '@/api/ontologySceneLibrary/links';
-import LogIcon from '../../assets/log-icon.svg';
 import { listOntologyObjectType } from '@/api/ontologySceneLibrary/objectType';
 import type { ListOntologyObjectTypeReq, ObjectType } from '@/types/objectType';
 import { PermissionWrapper } from '@/components/PermissionGuard';
@@ -96,9 +98,6 @@ export default function OntologySceneLinksList() {
     'instances' | 'attributes'
   >('instances');
   const [selectedLink, setSelectedLink] = useState<LinkInfo | null>(null);
-  const [logDrawerVisible, setLogDrawerVisible] = useState(false);
-  const [logTaskId, setLogTaskId] = useState<number | null>(null);
-  const [logTaskName, setLogTaskName] = useState<string | undefined>();
   const [objectTypeFilters, setObjectTypeFilters] = useState<
     Array<{ text: string; value: string }>
   >([]);
@@ -310,16 +309,26 @@ export default function OntologySceneLinksList() {
     setDetailDrawerVisible(true);
   };
 
-  // 处理查看日志
-  const handleViewLog = (record: LinkInfo) => {
+  // 失败重试（防抖处理）
+  const handleRetrySync = debounce(async (record: LinkInfo) => {
     if (!record.id) {
       Message.error('链接ID无效');
       return;
     }
-    setLogTaskId(record.id);
-    setLogTaskName(record.name);
-    setLogDrawerVisible(true);
-  };
+
+    try {
+      const res = await syncLinkTypeTask({ id: record.id });
+      if (res.status === 200 && res.code === '') {
+        Message.success('重新同步成功');
+        // 重新刷新列表，获取最新状态
+        refresh();
+      } else {
+        Message.error(res.message || '重新同步失败');
+      }
+    } catch (e) {
+      Message.error('重新同步失败');
+    }
+  }, 500);
 
   // 表格列定义
   const columns: TableColumnProps<LinkInfo>[] = [
@@ -512,17 +521,18 @@ export default function OntologySceneLinksList() {
       // filteredValue: syncStatusFilterKeys,
       render: (value: SyncStatus, record: LinkInfo) => {
         if (value === undefined || value === null) {
-          return null;
+          return '-';
         }
         const config = OBJECT_TYPE_SYNC_STATUS_CONFIG[value];
+
         return (
           <div className="flex items-center gap-[4px]">
             <DotStatus text={config.text} color={config.color} />
             {value === SyncStatus.FAILED && (
-              <Popover content="查看日志">
-                <LogIcon
+              <Popover content="重试">
+                <IconRefresh
                   className="h-[14px] w-[14px] text-[var(--color-text-4)] hover:cursor-pointer hover:text-[#184FF2]"
-                  onClick={() => handleViewLog(record)}
+                  onClick={() => handleRetrySync(record)}
                 />
               </Popover>
             )}
@@ -756,17 +766,6 @@ export default function OntologySceneLinksList() {
             setObjectTypeDetailDrawerVisible(false);
             setSelectedObjectType(null);
           }}
-        />
-      )}
-
-      {/* 日志抽屉 */}
-      {logTaskId !== null && (
-        <TaskLogDrawer
-          visible={logDrawerVisible}
-          taskInstanceId={logTaskId}
-          taskName={logTaskName}
-          onClose={() => setLogDrawerVisible(false)}
-          fetchLog={getLinkTypeSyncTaskLog}
         />
       )}
     </div>

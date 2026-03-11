@@ -92,3 +92,10 @@ export const getLinkTypeSyncTaskLog = async (
     .inRegion()
     .do();
 };
+
+// 同步链接类型任务
+export const syncLinkTypeTask = async (params: {
+  id: number;
+}): Promise<ApiRes<string>> => {
+  return await UAPI.RES.SyncLinkTypeTaskApi({}).post(params).inRegion().do();
+};
