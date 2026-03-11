@@ -33,7 +33,8 @@ export default function OntologySceneLinksCreate() {
         objectTypeIdList: [objectTypeId],
         ontologyModelID,
         pageNo: 1,
-        pageSize: 1000
+        pageSize: 1000,
+        isUse: 1
       });
 
       if (response.status === 200 && response.data?.result) {

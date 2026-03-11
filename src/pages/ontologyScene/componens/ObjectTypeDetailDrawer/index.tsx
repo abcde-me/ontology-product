@@ -277,7 +277,8 @@ export default function ObjectTypeDetailDrawer({
             ontologyModelID: Number(ontologyModelID),
             objectTypeIdList: [resolvedObjectTypeIdNum],
             pageNo: page,
-            pageSize
+            pageSize,
+            isUse: 1
           });
           if (res.code === '' && res.status === 200 && res.data) {
             // 直接使用 PhysicalProperties，不需要转换

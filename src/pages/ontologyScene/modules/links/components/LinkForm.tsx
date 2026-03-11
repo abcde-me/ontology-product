@@ -175,6 +175,7 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
             ontologyModelID,
             isPrimary: 1,
             pageNo: 1,
+            isUse: 1,
             pageSize: 1 // 只需要第一个主键属性
           });
           if (
@@ -215,7 +216,8 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
             ontologyModelID,
             isPrimary: 1,
             pageNo: 1,
-            pageSize: 1 // 只需要第一个主键属性
+            pageSize: 1,
+            isUse: 1 // 只需要第一个主键属性
           });
           if (
             response.status === 200 &&
