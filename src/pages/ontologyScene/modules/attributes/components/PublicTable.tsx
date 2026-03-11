@@ -361,6 +361,7 @@ const PublicTable = React.forwardRef<PublicTableRef, PublicTableProps>(
           <div className="flex items-center gap-2">
             <EllipsisPopover
               value={value || '-'}
+              wrapperClassName="min-w-0"
               className="text-[14px] leading-[22px] text-[var(--color-text-2)]"
             ></EllipsisPopover>
             {value && (
