@@ -1,5 +1,11 @@
 import type { FC } from 'react';
-import React, { useState, useEffect, useMemo } from 'react';
+import React, {
+  useState,
+  useEffect,
+  useMemo,
+  useRef,
+  useCallback
+} from 'react';
 import {
   Tabs,
   Table,
@@ -11,6 +17,7 @@ import {
 } from '@arco-design/web-react';
 import { IconCopy, IconFile } from '@arco-design/web-react/icon';
 import copy from 'copy-to-clipboard';
+import { useInfiniteScroll, useRequest } from 'ahooks';
 import {
   listOntologyObjectTypeData,
   listOntologyPhysicalProperties,
@@ -66,6 +73,9 @@ const Panel: FC<any> = ({ id, data }) => {
   const [linksLoading, setLinksLoading] = useState(false);
   const [linksPage, setLinksPage] = useState(1);
   const [linksPageSize, setLinksPageSize] = useState(defaultPageSize);
+  const [linksIsNoMore, setLinksIsNoMore] = useState(false);
+  const linksScrollContainerRef = useRef<HTMLDivElement>(null);
+  const linksPageNoRef = useRef(1);
 
   // 对象详情相关状态
   const [objectTypeDetail, setObjectTypeDetail] =
@@ -126,8 +136,8 @@ const Panel: FC<any> = ({ id, data }) => {
     }
   };
 
-  // 加载链接数据
-  const loadLinks = async (page: number, pageSize: number) => {
+  // 加载链接数据（支持追加模式）
+  const loadLinks = async (page: number, pageSize: number, append = false) => {
     setLinksLoading(true);
     try {
       const res = await listOntologyLinkType({
@@ -138,15 +148,97 @@ const Panel: FC<any> = ({ id, data }) => {
         pageSize: pageSize
       });
       if (res.code === '' && res.status === 200 && res.data) {
-        setLinksData(res.data.result || []);
+        const newData = res.data.result || [];
+        if (append) {
+          setLinksData((prevData) => [...prevData, ...newData]);
+        } else {
+          setLinksData(newData);
+        }
         setLinksTotal(res.data.totalCount || 0);
+        // 判断是否还有更多数据
+        if (newData.length < pageSize) {
+          setLinksIsNoMore(true);
+        } else {
+          setLinksIsNoMore(false);
+        }
       }
     } catch (error) {
       console.error('加载链接数据失败:', error);
+      setLinksIsNoMore(true);
     } finally {
       setLinksLoading(false);
     }
   };
+
+  // 重置链接状态
+  const resetLinksState = useCallback(() => {
+    setLinksData([]);
+    linksPageNoRef.current = 1;
+    setLinksIsNoMore(false);
+  }, []);
+
+  // 使用 useRequest 加载链接数据（用于滚动加载）
+  const { loading: linksScrollLoading, run: loadLinksForScroll } = useRequest(
+    async () => {
+      const params = {
+        ontologyModelID: Number(OSId),
+        sourceObjectTypeIDList: [nodeId],
+        targetObjectTypeIDList: [nodeId],
+        pageNo: linksPageNoRef.current,
+        pageSize: linksPageSize
+      };
+
+      const res = await listOntologyLinkType(params);
+
+      if (res.code !== '' || res.status !== 200 || !res.data) {
+        throw new Error(res.message || '获取链接数据失败');
+      }
+
+      return res.data;
+    },
+    {
+      manual: true,
+      onSuccess: (data) => {
+        const newData = data.result || [];
+        if (newData.length > 0) {
+          setLinksData((prevData) => [...prevData, ...newData]);
+          setLinksTotal(data.totalCount || 0);
+        }
+
+        // 判断是否是最后一页
+        if (newData.length < linksPageSize) {
+          setLinksIsNoMore(true);
+        } else {
+          linksPageNoRef.current += 1;
+        }
+      },
+      onError: (error) => {
+        console.error('获取链接数据失败:', error);
+        Message.error(error.message || '获取链接数据失败');
+        setLinksIsNoMore(true);
+      }
+    }
+  );
+
+  // 包装 loadLinksForScroll 以添加条件检查
+  const handleLoadLinksForScroll = useCallback(async () => {
+    if (
+      linksIsNoMore ||
+      !nodeId ||
+      linksScrollLoading ||
+      activeTab !== 'links'
+    ) {
+      return Promise.resolve();
+    }
+
+    return loadLinksForScroll();
+  }, [
+    linksIsNoMore,
+    nodeId,
+    linksScrollLoading,
+    activeTab,
+    loadLinksForScroll
+  ]);
 
   // 加载对象详情
   const loadObjectTypeDetail = async () => {
@@ -166,29 +258,37 @@ const Panel: FC<any> = ({ id, data }) => {
   };
 
   useEffect(() => {
+    loadInstances(instancesPage, instancesPageSize);
     loadObjectTypeDetail();
     loadProperties(propertiesPage, propertiesPageSize);
-    loadLinks(linksPage, linksPageSize);
+    // 重置链接状态并加载第一页
+    resetLinksState();
+    loadLinks(1, linksPageSize, false);
   }, [nodeId]);
 
   // 根据 tab 切换加载数据
   useEffect(() => {
-    if (activeTab === 'instances') {
-      loadInstances(instancesPage, instancesPageSize);
-    } else if (activeTab === 'properties') {
-      loadProperties(propertiesPage, propertiesPageSize);
-    } else if (activeTab === 'links') {
-      loadLinks(linksPage, linksPageSize);
+    if (activeTab === 'links') {
+      // 切换到 links tab 时，重置状态并加载第一页
+      resetLinksState();
+      // setTimeout(() => {
+      //   loadLinks(1, linksPageSize, false);
+      // }, 0);
     }
-  }, [
-    activeTab,
-    instancesPage,
-    instancesPageSize,
-    propertiesPage,
-    propertiesPageSize,
-    linksPage,
-    linksPageSize
-  ]);
+  }, [activeTab]);
+
+  // 无限滚动加载（仅当 activeTab === 'links' 时生效）
+  useInfiniteScroll(
+    async () => {
+      await handleLoadLinksForScroll();
+      return { list: [] };
+    },
+    {
+      target: linksScrollContainerRef,
+      isNoMore: () => linksIsNoMore || !nodeId || activeTab !== 'links',
+      reloadDeps: [activeTab, nodeId, linksIsNoMore]
+    }
+  );
 
   // 动态生成实例表格列
   const instancesColumns = useMemo(() => {
@@ -484,12 +584,15 @@ const Panel: FC<any> = ({ id, data }) => {
         </Tabs.TabPane>
 
         <Tabs.TabPane key="links" title={`链接(${linksTotal})`}>
-          {linksTotal === 0 ? (
+          {linksTotal === 0 && !linksScrollLoading ? (
             <div className="flex justify-center py-[100px]">
               <NoDataCard title="暂无数据" />
             </div>
           ) : (
-            <div>
+            <div
+              ref={linksScrollContainerRef}
+              className="max-h-[calc(100vh-360px)] overflow-y-auto"
+            >
               {linksData.map((link) => {
                 // 判断当前节点是源节点还是目标节点
                 const isSource = link.sourceObjectTypeID === nodeId;
@@ -552,6 +655,11 @@ const Panel: FC<any> = ({ id, data }) => {
                   </div>
                 );
               })}
+              {linksScrollLoading && (
+                <div className="flex items-center justify-center p-4">
+                  <Spin />
+                </div>
+              )}
             </div>
           )}
         </Tabs.TabPane>
