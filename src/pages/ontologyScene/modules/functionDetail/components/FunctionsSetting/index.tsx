@@ -35,7 +35,10 @@ import {
 } from '@/pages/ontologyScene/types/ontologyFunction';
 import classNames from 'classnames';
 import { getFunctionSDK } from '@/api/ontologySceneLibrary/ontologyFunction';
-import { ResizeBoxWithCursorChange } from '@/pages/ontologyScene/componens';
+import {
+  FormItem,
+  ResizeBoxWithCursorChange
+} from '@/pages/ontologyScene/componens';
 import { isNil } from 'lodash-es';
 import { buildTestFunctionData } from '@/pages/ontologyScene/modules/functionDetail/utils';
 import { useParams } from 'react-router-dom';
@@ -156,12 +159,7 @@ export const FunctionsSetting = (props: {
                             <Input placeholder={''} disabled={disabled} />
                           </FormItemWithTooltip>
 
-                          <FormItemWithTooltip
-                            content={
-                              props.disabled
-                                ? '该函数已被行为绑定，不可修改'
-                                : ''
-                            }
+                          <Form.Item
                             className={'mb-0 flex-1 overflow-hidden'}
                             field={`${field}.uiTypeAndValue`}
                             rules={[
@@ -199,7 +197,13 @@ export const FunctionsSetting = (props: {
                             ]}
                           >
                             <DataWithUiSelect
-                              disabled={disabled}
+                              readonly={props.disabled}
+                              disabledConfig={{
+                                // 数据类型选择框跟随禁用状态
+                                uiType: disabled,
+                                // 数据值填写组件只有在测试中禁用，其他时间保持可用状态
+                                paramValue: testIng
+                              }}
                               onParamValueChange={(v) => {
                                 form.setFields({
                                   [`${field}.uiTypeAndValue`]: {
@@ -208,7 +212,7 @@ export const FunctionsSetting = (props: {
                                 });
                               }}
                             />
-                          </FormItemWithTooltip>
+                          </Form.Item>
                           <IconDelete
                             className={`mt-2 text-[16px] hover:cursor-pointer`}
                             onClick={() => {

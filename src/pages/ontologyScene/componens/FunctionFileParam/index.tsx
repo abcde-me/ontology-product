@@ -19,7 +19,11 @@ export const FunctionFileParam = (
 
   return (
     <div
-      className={classNames([styles['function-file-param'], props.className])}
+      className={classNames([
+        styles['function-file-param'],
+        props.className,
+        disabled ? 'bg-[var(--color-fill-2)]' : ''
+      ])}
     >
       <Upload
         showUploadList={false}
