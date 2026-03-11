@@ -9,7 +9,7 @@ import {
   Popover,
   Spin
 } from '@arco-design/web-react';
-import { IconPlus, IconEdit, IconDelete } from '@arco-design/web-react/icon';
+import { IconPlus, IconDelete } from '@arco-design/web-react/icon';
 import {
   ExpandableProcessFlow,
   EllipsisPopover,
@@ -17,7 +17,6 @@ import {
   NoDataCard,
   NoResultCard
 } from '@ceai-front/arco-material';
-import { Link } from '@arco-design/web-react';
 import ObjectSmallIcon from '../../assets/object-small.svg';
 import LinkSmallIcon from '../../assets/link-small.svg';
 import BehaviorSmallIcon from '../../assets/behavior-small.svg';
@@ -127,11 +126,15 @@ const SceneCard: React.FC<SceneCardProps> = ({
 
   return (
     <div
-      className={`relative flex h-full cursor-pointer flex-col gap-[12px] rounded-lg border border-[#EBEEF5] bg-white p-[24px] transition-all duration-200 ${
-        isHovered && hasDetailPermission
-          ? 'border-[#165dff] shadow-[0_4px_12px_rgba(22,93,255,0.1)]'
-          : ''
-      }`}
+      className="relative flex h-full cursor-pointer flex-col gap-[12px] rounded-lg border border-[#EBEEF5] p-[24px] transition-all duration-200"
+      style={{
+        backgroundColor:
+          isHovered && hasDetailPermission ? '#F8FAFD' : '#FFFFFF',
+        boxShadow:
+          isHovered && hasDetailPermission
+            ? '0 6px 16px 0 rgba(100, 108, 133, 0.12)'
+            : 'none'
+      }}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       onClick={hasDetailPermission ? handleCardClick : undefined}
@@ -182,12 +185,12 @@ const SceneCard: React.FC<SceneCardProps> = ({
       {/* 底部图标和数字 */}
       <div className="flex items-center justify-between gap-[8px]">
         <div
-          className="flex flex-1 cursor-pointer flex-col gap-[3px] rounded-[4px] border border-[var(--color-border-2)] p-[8px] text-[14px] text-[var(--color-text-1)] [&:hover]:cursor-pointer"
+          className="group flex flex-1 cursor-pointer flex-col gap-[3px] rounded-[4px] border border-[var(--color-border-2)] p-[8px] text-[14px] text-[var(--color-text-1)] [&:hover]:cursor-pointer [&:hover]:border-[rgba(var(--primary-6))]"
           onClick={(e) =>
             handleIconClick(e, ONTOLOGY_SCENE_MENU_ITEM_KEYS.OBJECT_TYPE)
           }
         >
-          <ObjectSmallIcon className="h-[16px] w-[16px]" />
+          <ObjectSmallIcon className="h-[16px] w-[16px] text-[var(--color-text-1)] group-hover:text-[#184FF2]" />
           <div className="flex items-center justify-between">
             <span className="text-[12px] leading-[18px] text-[var(--color-text-3)]">
               对象
@@ -199,12 +202,12 @@ const SceneCard: React.FC<SceneCardProps> = ({
         </div>
 
         <div
-          className="hover:text-[rgba(var(--primary-6)) flex flex-1 cursor-pointer flex-col gap-[3px] rounded-[4px] border border-[var(--color-border-2)] p-[8px] text-[14px] text-[var(--color-text-1)] transition-colors"
+          className="group flex flex-1 cursor-pointer flex-col gap-[3px] rounded-[4px] border border-[var(--color-border-2)] p-[8px] text-[14px] text-[var(--color-text-1)] transition-colors [&:hover]:border-[rgba(var(--primary-6))]"
           onClick={(e) =>
             handleIconClick(e, ONTOLOGY_SCENE_MENU_ITEM_KEYS.LINKS)
           }
         >
-          <LinkSmallIcon className="h-[16px] w-[16px]" />
+          <LinkSmallIcon className="h-[16px] w-[16px] text-[var(--color-text-1)] group-hover:text-[#184FF2]" />
           <div className="flex items-center justify-between">
             <span className="text-[12px] leading-[18px] text-[var(--color-text-3)]">
               链接
@@ -216,12 +219,12 @@ const SceneCard: React.FC<SceneCardProps> = ({
         </div>
 
         <div
-          className="hover:text-[rgba(var(--primary-6)) flex flex-1 cursor-pointer flex-col gap-[3px] rounded-[4px] border border-[var(--color-border-2)] p-[8px] text-[14px] text-[var(--color-text-1)] transition-colors"
+          className="group flex flex-1 cursor-pointer flex-col gap-[3px] rounded-[4px] border border-[var(--color-border-2)] p-[8px] text-[14px] text-[var(--color-text-1)] transition-colors [&:hover]:border-[rgba(var(--primary-6))]"
           onClick={(e) =>
             handleIconClick(e, ONTOLOGY_SCENE_MENU_ITEM_KEYS.BEHAVIOR_ACTIONS)
           }
         >
-          <BehaviorSmallIcon className="h-[16px] w-[16px]" />
+          <BehaviorSmallIcon className="h-[16px] w-[16px] text-[var(--color-text-1)] group-hover:text-[#184FF2]" />
           <div className="flex items-center justify-between">
             <span className="text-[12px] leading-[18px] text-[var(--color-text-3)]">
               行为
@@ -233,12 +236,12 @@ const SceneCard: React.FC<SceneCardProps> = ({
         </div>
 
         <div
-          className="hover:text-[rgba(var(--primary-6)) flex flex-1 cursor-pointer flex-col gap-[3px] rounded-[4px] border border-[var(--color-border-2)] p-[8px] text-[14px] text-[var(--color-text-1)] transition-colors"
+          className="group flex flex-1 cursor-pointer flex-col gap-[3px] rounded-[4px] border border-[var(--color-border-2)] p-[8px] text-[14px] text-[var(--color-text-1)] transition-colors [&:hover]:border-[rgba(var(--primary-6))]"
           onClick={(e) =>
             handleIconClick(e, ONTOLOGY_SCENE_MENU_ITEM_KEYS.FUNCTIONS)
           }
         >
-          <FunctionSmallIcon className="h-[16px] w-[16px]" />
+          <FunctionSmallIcon className="h-[16px] w-[16px] text-[var(--color-text-1)] group-hover:text-[#184FF2]" />
           <div className="flex items-center justify-between">
             <span className="text-[12px] leading-[18px] text-[var(--color-text-3)]">
               函数
