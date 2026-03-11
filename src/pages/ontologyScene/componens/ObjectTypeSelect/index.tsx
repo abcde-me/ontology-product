@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { Select } from '@arco-design/web-react';
+import { Popover, Select, Tooltip } from '@arco-design/web-react';
 import { EllipsisPopover } from '@ceai-front/arco-material';
 import { listOntologyObjectType } from '@/api/ontologySceneLibrary/objectType';
 import { ObjectType } from '@/types/objectType';
@@ -98,31 +98,31 @@ const ObjectTypeSelect: React.FC<ObjectTypeSelectProps> = ({
     const IconComponent = getIconComponent(option.icon);
 
     return (
-      <div className="flex cursor-pointer items-center gap-[8px] px-[12px] py-[8px] transition-colors hover:bg-[#F2F8FF]">
+      <div className="flex cursor-pointer items-center gap-[8px] overflow-hidden px-[12px] py-[8px] transition-colors hover:bg-[#F2F8FF]">
         {option.id > 0 && (
           <div className="flex h-[36px] w-[36px] flex-shrink-0 items-center justify-center">
             <IconComponent className="h-[36px] w-[36px]" />
           </div>
         )}
         <div className="min-w-0 flex-1">
-          <div className="mb-[4px] flex items-center gap-[8px]">
-            <EllipsisPopover
-              preferTypography
-              value={option.name || '-'}
-              className="text-[14px] leading-[22px] text-[var(--color-text-1)]"
-            />
+          <div className="mb-[4px] flex items-center gap-[8px] overflow-hidden">
+            <Popover content={option.name || null}>
+              <p className="w-max overflow-hidden text-ellipsis whitespace-nowrap text-[14px] leading-[22px] text-[var(--color-text-1)]">
+                {option.name || '-'}
+              </p>
+            </Popover>
             {option.id > 0 && (
-              <span className="flex-shrink-0 text-[14px] leading-[22px] text-[var(--color-text-1)]">
+              <span className="flex-shrink-0 text-[14px] leading-[22px] text-[var(--color-text-1)] ">
                 (id: {option.id})
               </span>
             )}
           </div>
           {option.id > 0 && (
-            <EllipsisPopover
-              preferTypography
-              value={option.description || '-'}
-              className="text-[12px] leading-[18px] text-[var(--color-text-4)]"
-            />
+            <Popover content={option.description || null}>
+              <p className="min-w-0 overflow-hidden text-ellipsis whitespace-nowrap text-[12px] leading-[18px] text-[var(--color-text-4)]">
+                {option.description || '-'}
+              </p>
+            </Popover>
           )}
         </div>
       </div>

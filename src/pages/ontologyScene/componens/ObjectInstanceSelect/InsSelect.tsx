@@ -45,9 +45,6 @@ export const InterfaceSelect = (props: ObjectInterfaceSelectProps) => {
     <Spin loading={true} />
   );
 
-  // 未搜索时的已有全部数据
-  const insCache = useRef<Record<string, any>[]>([]);
-
   // 当前展示的全部对象实例
   const [currentInsList, setCurrentInsList] = useState<Record<string, any>[]>(
     []
@@ -73,7 +70,7 @@ export const InterfaceSelect = (props: ObjectInterfaceSelectProps) => {
       return listOntologyObjectTypeData(params);
     },
     {
-      refreshDeps: [objectTypeId, searchText],
+      refreshDeps: [objectTypeId, searchText, primaryKey],
       manual: true
     }
   );
@@ -103,6 +100,7 @@ export const InterfaceSelect = (props: ObjectInterfaceSelectProps) => {
         pageSize: 20
       }).then((res) => {
         setCurrentInsList(res.data?.result || []);
+        setScrollLoading(null);
       });
     }
   }, [primaryKey, objectTypeId]);
@@ -141,10 +139,6 @@ export const InterfaceSelect = (props: ObjectInterfaceSelectProps) => {
     },
     [objectTypeId, runAsync, searchText]
   );
-
-  useEffect(() => {
-    loadMore(1);
-  }, [primaryKey]);
 
   /** 渲染下拉内容 */
   const renderDropdown = () => {

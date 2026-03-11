@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { Button, Dropdown, Menu } from '@arco-design/web-react';
+import { Button, Dropdown, Menu, Popover } from '@arco-design/web-react';
 import { IconCodeBlock, IconDown } from '@arco-design/web-react/icon';
 import styles from './index.module.scss';
 import {
@@ -48,21 +48,29 @@ export const UiSelect = (props: CustomFormItemCompProps<string>) => {
       })}
     </Menu>
   );
+
+  const dataType = value?.split('_')[0];
+
   return (
-    <div
-      className={classNames([styles['ui-select-wrapper'], 'ui-select-wrapper'])}
-    >
-      <Dropdown
-        droplist={dropList}
-        trigger="click"
-        position="bl"
-        disabled={disabled}
+    <Popover content={dataType || null}>
+      <div
+        className={classNames([
+          styles['ui-select-wrapper'],
+          'ui-select-wrapper'
+        ])}
       >
-        <ProButton className={styles['ui-select']} type={'outline'}>
-          {currentIcon}
-          <IconDown />
-        </ProButton>
-      </Dropdown>
-    </div>
+        <Dropdown
+          droplist={dropList}
+          trigger="click"
+          position="bl"
+          disabled={disabled}
+        >
+          <ProButton className={styles['ui-select']} type={'outline'}>
+            {currentIcon}
+            <IconDown />
+          </ProButton>
+        </Dropdown>
+      </div>
+    </Popover>
   );
 };

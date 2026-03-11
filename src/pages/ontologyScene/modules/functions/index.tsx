@@ -17,6 +17,7 @@ import useArcoTable from '@/hooks/use-arco-table';
 import { IconPlus, IconSearch } from '@arco-design/web-react/icon';
 import {
   CopyItemIcon,
+  EllipsisPopover,
   ProButton,
   SearchTable
 } from '@ceai-front/arco-material';
@@ -32,7 +33,10 @@ import {
   getFunctionList
 } from '@/api/ontologySceneLibrary/ontologyFunction';
 import { isEmpty, isNil } from 'lodash-es';
-import { OsEmptyStatusWrapper } from '@/pages/ontologyScene/componens';
+import {
+  ContentWithCopy,
+  OsEmptyStatusWrapper
+} from '@/pages/ontologyScene/componens';
 import { FunctionDetailDrawer } from '@/pages/ontologyScene/modules/functionDetail/components';
 import { SorterInfo } from '@arco-design/web-react/lib/Table/interface';
 import { PermissionWrapper } from '@/components/PermissionGuard';
@@ -149,7 +153,10 @@ export default function OntologySceneFunctions() {
       title: '描述说明',
       dataIndex: 'description',
       width: 300,
-      ellipsis: true
+      ellipsis: true,
+      render(v) {
+        return <EllipsisPopover value={v} />;
+      }
     },
     {
       title: '函数名称(id)',
@@ -158,21 +165,7 @@ export default function OntologySceneFunctions() {
       tooltip: true,
       width: 250,
       render(value) {
-        return (
-          <div className={'flex gap-2 overflow-hidden'}>
-            <div
-              className={
-                'w-max overflow-hidden text-ellipsis whitespace-nowrap font-PingFangSc text-[14px] font-normal leading-[22px]'
-              }
-            >
-              {value}
-            </div>
-            <CopyItemIcon
-              className={'hover-blue hidden flex-shrink-0'}
-              value={value}
-            />
-          </div>
-        );
+        return <ContentWithCopy value={value} />;
       }
     },
     {
