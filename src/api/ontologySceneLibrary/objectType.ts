@@ -142,3 +142,10 @@ export const getObjectTypeSyncLog = async (
     .inRegion()
     .do();
 };
+
+// 同步对象类型任务
+export const syncObjectTypeTask = async (params: {
+  id: number;
+}): Promise<ApiRes<string>> => {
+  return await UAPI.RES.SyncObjectTypeTaskApi({}).post(params).inRegion().do();
+};
