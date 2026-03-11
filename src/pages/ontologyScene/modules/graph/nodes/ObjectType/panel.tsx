@@ -271,9 +271,6 @@ const Panel: FC<any> = ({ id, data }) => {
     if (activeTab === 'links') {
       // 切换到 links tab 时，重置状态并加载第一页
       resetLinksState();
-      // setTimeout(() => {
-      //   loadLinks(1, linksPageSize, false);
-      // }, 0);
     }
   }, [activeTab]);
 
