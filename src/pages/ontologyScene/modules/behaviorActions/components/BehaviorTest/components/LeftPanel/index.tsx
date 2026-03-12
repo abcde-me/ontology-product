@@ -72,7 +72,7 @@ export const LeftPanel: React.FC<LeftPanelProps> = ({ onViewDetail }) => {
   }, [handleScroll]);
 
   return (
-    <div className="flex h-full w-full flex-col">
+    <div className="flex h-full w-full flex-col border-t border-[#DFE2EB]">
       <div className="flex h-14 flex-shrink-0 items-center gap-1 border-b border-[#e5e6eb] px-6">
         <BehaviorCardSvg className="h-4 w-4" />
         <span className="text-base font-medium text-[#000]">行为卡片</span>

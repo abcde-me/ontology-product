@@ -12,6 +12,24 @@
     padding-right: 0;
     margin-right: 32px;
   }
+
+  .active-tab {
+    font-weight: 600 !important;
+    color: #184ff2 !important;
+  }
+
+  .action-tab {
+    font-family: PingFang SC;
+    font-weight: 400;
+    font-size: 20px;
+    line-height: 30px;
+    color: #23293b;
+
+    &:hover {
+      cursor: pointer;
+      color: #184ff2;
+    }
+  }
 }
 
 .behavior-content {
