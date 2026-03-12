@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useHistory } from 'react-router-dom';
 import {
   Layout,
@@ -19,6 +19,7 @@ import {
   IconPlus
 } from '@arco-design/web-react/icon';
 import cls from 'classnames';
+import { useClickAway } from 'ahooks';
 import SceneModal, { SceneFormData } from '../../list/components/SceneModal';
 import { updateOntologyModel } from '@/api/ontologySceneLibrary/ontologyScene';
 import { OntologScene } from '@/types/ontologySceneApi';
@@ -54,6 +55,8 @@ export default function Header({
   const [searchHovered, setSearchHovered] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   const [submitLoading, setSubmitLoading] = useState(false);
+  const searchContainerRef = useRef<HTMLDivElement>(null);
+  const searchDropdownRef = useRef<HTMLDivElement>(null);
 
   const handleBack = () => {
     history.push('/tenant/compute/modaforge/ontologyScene/list');
@@ -129,10 +132,21 @@ export default function Header({
     openNewPage('https://my.feishu.cn/docx/XzAqdVIHmoptbAxFNeCcTIfEnjb');
   };
 
+  // 使用 useClickAway 检测点击 SearchDropdown 外部区域时隐藏
+  useClickAway(
+    () => {
+      if (searchHovered) {
+        setSearchHovered(false);
+      }
+    },
+    searchDropdownRef,
+    'mousedown'
+  );
+
   return (
     <LayoutHeader
       className={cls(
-        'flex h-[56px] items-center justify-between border-b border-[var(--color-border-2)] bg-white px-[16px]'
+        'z-[1] flex h-[56px] items-center justify-between border-b border-[var(--color-border-2)] bg-white px-[16px] shadow-[0_2px_8px_0_rgba(0,0,0,0.08)]'
       )}
     >
       {/* 左侧区域 */}
@@ -173,12 +187,9 @@ export default function Header({
       {/* 右侧区域 */}
       <div className="flex items-center gap-x-[18px]">
         <div
+          ref={searchContainerRef}
           className="relative"
           onMouseEnter={() => setSearchHovered(true)}
-          onMouseLeave={() => {
-            console.log('onMouseLeave111');
-            // setSearchHovered(false)
-          }}
         >
           {/* 搜索图标，绝对定位 */}
           <div
@@ -197,6 +208,7 @@ export default function Header({
           </div>
           {/* SearchDropdown，绝对定位，可以超出容器 */}
           <div
+            ref={searchDropdownRef}
             className="top-50% absolute right-0 z-10 -translate-y-1/2"
             style={{
               opacity: searchHovered ? 1 : 0,
