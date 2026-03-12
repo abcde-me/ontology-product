@@ -28,7 +28,7 @@ import {
 import { getActionDetail } from '@/api/ontologySceneLibrary/ontologyAction';
 import ObjectTypeTag from '../../../../componens/ObjectTypeTag';
 import NoDataEmpty from '@/components/NoDataEmpty';
-import { NoDataCard } from '@ceai-front/arco-material';
+import { EllipsisPopover, NoDataCard } from '@ceai-front/arco-material';
 import { ValidateRuleCard } from '@/pages/ontologyScene/modules/behaviorActions/components';
 
 interface IProps {
@@ -154,17 +154,37 @@ export const BehaviorDetail = (props: IProps) => {
           >
             基本信息
           </div>
-          <div className={'flex w-full flex-wrap'}>
+          <div className={'flex w-full flex-wrap overflow-hidden'}>
             <div className={styles['base-info-item']}>
               <div className={styles['item-field']}>行为名称：</div>
               <div className={styles['item-value']}>
-                {actionDetail?.name || '-'}
+                <EllipsisPopover
+                  value={actionDetail?.description || '-'}
+                  preferTypography
+                  ellipsis={{
+                    showTooltip: {
+                      type: 'tooltip'
+                    }
+                  }}
+                >
+                  {actionDetail?.name || '-'}
+                </EllipsisPopover>
               </div>
             </div>
             <div className={styles['base-info-item']}>
               <div className={styles['item-field']}>描述说明：</div>
               <div className={styles['item-value']}>
-                {actionDetail?.description || '-'}
+                <EllipsisPopover
+                  value={actionDetail?.description || '-'}
+                  preferTypography
+                  ellipsis={{
+                    showTooltip: {
+                      type: 'tooltip'
+                    }
+                  }}
+                >
+                  {actionDetail?.description || '-'}
+                </EllipsisPopover>
               </div>
             </div>
             <div className={styles['base-info-item']}>

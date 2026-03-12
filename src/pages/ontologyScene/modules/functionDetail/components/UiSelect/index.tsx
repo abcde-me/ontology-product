@@ -51,8 +51,14 @@ export const UiSelect = (
     </Menu>
   );
 
+  const popupContainer = () => {
+    return document.querySelector('#functionSettingContainer') || document.body;
+  };
   return (
-    <Popover content={props.readonly ? '该函数已被行为绑定，不可修改' : null}>
+    <Popover
+      content={props.readonly ? '该函数已被行为绑定，不可修改' : null}
+      getPopupContainer={popupContainer}
+    >
       <div
         className={classNames([
           styles['ui-select-wrapper'],
@@ -64,6 +70,7 @@ export const UiSelect = (
           trigger="click"
           position="bl"
           disabled={disabled}
+          getPopupContainer={popupContainer}
         >
           <ProButton className={styles['ui-select']} type={'outline'}>
             {currentIcon}

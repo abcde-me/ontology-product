@@ -17,6 +17,7 @@ import {
   Form,
   FormItemProps,
   Input,
+  Message,
   Tooltip
 } from '@arco-design/web-react';
 import { SelectWithNoData } from '@/components/new-no-data-comps';
@@ -48,7 +49,14 @@ import useTestFunction from '@/pages/ontologyScene/hooks/useTestFunction';
 const FormItemWithTooltip = (props: { content: string } & FormItemProps) => {
   const { content, ...otherProps } = props;
   return (
-    <Tooltip content={props.content}>
+    <Tooltip
+      content={props.content}
+      getPopupContainer={() => {
+        return (
+          document.querySelector('#functionSettingContainer') || document.body
+        );
+      }}
+    >
       <Form.Item {...otherProps}></Form.Item>
     </Tooltip>
   );
@@ -59,11 +67,10 @@ export const FunctionsSetting = (props: {
   extra?: React.ReactNode;
 }) => {
   const { form, disabled: readonly, isSubmitting } = Form.useFormContext();
-  const ref = useRef(null);
+  const ref = useRef<HTMLDivElement>(null);
   const [isFullscreen, { enterFullscreen, exitFullscreen }] =
     useFullscreen(ref);
   const [showDoc, setShowDoc] = useState(false);
-
   const { id: OSid, functionId } = useParams<Record<string, string>>();
 
   const {
@@ -111,8 +118,24 @@ export const FunctionsSetting = (props: {
       .catch(console.error);
   };
 
+  const getPopoverContainer = () => {
+    return ref.current || document.body;
+  };
+
+  useEffect(() => {
+    Message.config({
+      getContainer() {
+        return isFullscreen ? ref.current || document.body : document.body;
+      }
+    });
+  }, [isFullscreen]);
+
   return (
-    <div className={styles['function-setting']} ref={ref}>
+    <div
+      className={styles['function-setting']}
+      ref={ref}
+      id={'functionSettingContainer'}
+    >
       <ResizeBoxWithCursorChange
         minWidth={520}
         maxWidth={isFullscreen ? 597 : 845}
@@ -218,8 +241,10 @@ export const FunctionsSetting = (props: {
                               }}
                             />
                           </Form.Item>
-                          <IconDelete
-                            className={`mt-2 text-[16px] hover:cursor-pointer`}
+                          <Button
+                            type={'text'}
+                            className={styles['del-field']}
+                            disabled={disabled}
                             onClick={() => {
                               if (disabled) return;
                               remove(index);
@@ -231,6 +256,11 @@ export const FunctionsSetting = (props: {
                                   .catch(console.error);
                               }, 0);
                             }}
+                            icon={
+                              <IconDelete
+                                className={`mt-2 text-[16px] text-[var(--icon-color-text-1)]`}
+                              />
+                            }
                           />
                         </div>
                       );
@@ -312,10 +342,13 @@ export const FunctionsSetting = (props: {
                               placeholder={''}
                               options={OutputTypeOptions}
                               disabled={disabled}
+                              getPopupContainer={getPopoverContainer}
                             />
                           </FormItemWithTooltip>
-                          <IconDelete
-                            className={`mt-2 text-[16px] hover:cursor-pointer`}
+                          <Button
+                            type={'text'}
+                            className={styles['del-field']}
+                            disabled={disabled}
                             onClick={() => {
                               if (disabled) return;
                               remove(index);
@@ -327,6 +360,11 @@ export const FunctionsSetting = (props: {
                                   .catch(console.error);
                               }, 0);
                             }}
+                            icon={
+                              <IconDelete
+                                className={`mt-2 text-[16px] text-[var(--icon-color-text-1)]`}
+                              />
+                            }
                           />
                         </div>
                       );
@@ -361,7 +399,13 @@ export const FunctionsSetting = (props: {
         <div className={styles['header']}>
           <div className={styles['full-screen']}>
             {isFullscreen ? (
-              <Tooltip content={'退出全屏'} position={'bottom'}>
+              <Tooltip
+                content={'退出全屏'}
+                position={'bottom'}
+                getPopupContainer={() => {
+                  return ref.current || document.body;
+                }}
+              >
                 <IconShrink
                   onClick={() => exitFullscreen()}
                   className={'hover:cursor-pointer'}
@@ -420,6 +464,7 @@ export const FunctionsSetting = (props: {
           minWidth={300}
           maxWidth={isFullscreen ? 377 : 625}
           style={{ maxWidth: isFullscreen ? '377px' : '625px' }}
+          triggerClassName={styles['resize-box-trigger']}
         >
           <div className={styles['sdk']}>
             <div className={`${styles['header']} text-[16px] `}>

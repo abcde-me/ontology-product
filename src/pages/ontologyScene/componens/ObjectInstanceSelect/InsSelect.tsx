@@ -5,7 +5,14 @@ import React, {
   useRef,
   useState
 } from 'react';
-import { Checkbox, List, Message, Select, Spin } from '@arco-design/web-react';
+import {
+  Checkbox,
+  List,
+  Message,
+  Select,
+  Spin,
+  Tooltip
+} from '@arco-design/web-react';
 import { useDebounce, useDebounceFn, useRequest, useVirtualList } from 'ahooks';
 import classNames from 'classnames';
 import styles from './index.module.scss';
@@ -20,6 +27,7 @@ export interface ObjectInterfaceSelectProps
   objectTypeId?: number;
   mode?: 'single' | 'multiple';
   searchKey: string;
+  getPopupContainer?: (node: HTMLElement) => HTMLElement;
 }
 
 type OptionItem = {
@@ -176,7 +184,11 @@ export const InterfaceSelect = (props: ObjectInterfaceSelectProps) => {
                 onChange={(c, e) => {
                   if (mode === 'multiple') {
                     if (c) {
-                      onChange?.([...(value as any), item[primaryKey]]);
+                      const instances = [
+                        ...((value as any) ?? []),
+                        item[primaryKey]
+                      ];
+                      onChange?.(instances);
                       return;
                     }
                     onChange?.(
@@ -187,7 +199,12 @@ export const InterfaceSelect = (props: ObjectInterfaceSelectProps) => {
                   onChange?.(item[primaryKey]);
                 }}
               />
-              <p>{item[primaryKey]}</p>
+              <Tooltip
+                content={item[primaryKey] || null}
+                getPopupContainer={props.getPopupContainer}
+              >
+                <p>{item[primaryKey]}</p>
+              </Tooltip>
             </label>
           </List.Item>
         )}
@@ -210,7 +227,11 @@ export const InterfaceSelect = (props: ObjectInterfaceSelectProps) => {
       dropdownRender={renderDropdown}
       showSearch
       onSearch={searchIns}
-      maxTagCount={'responsive'}
+      maxTagCount={{
+        count: 'responsive',
+        showPopover: { getPopupContainer: props.getPopupContainer }
+      }}
+      getPopupContainer={props.getPopupContainer}
     />
   );
 };

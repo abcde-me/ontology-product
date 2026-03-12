@@ -58,6 +58,7 @@ interface MapPickerProps extends CustomFormItemCompProps<GeoPoint> {
   disabled?: boolean;
   className?: string;
   style?: React.CSSProperties;
+  getPopupContainer?: () => Element;
 }
 
 // TODO: 请补充自己的高德 Key 与安全码
@@ -87,7 +88,8 @@ export const MapPicker: React.FC<MapPickerProps> = ({
   placeholder = '请选择坐标',
   disabled,
   className,
-  style
+  style,
+  getPopupContainer
 }) => {
   const AMapRef = useRef<any>();
   const [visible, setVisible] = useState(false);
@@ -328,6 +330,7 @@ export const MapPicker: React.FC<MapPickerProps> = ({
         unmountOnExit={false}
         mountOnEnter={false}
         style={{ width: 900 }}
+        getPopupContainer={getPopupContainer}
       >
         <div className={styles.toolbar}>
           <FormItem

@@ -70,7 +70,6 @@
       overflow: hidden;
 
       p {
-        flex: 1;
         overflow: hidden;
         white-space: nowrap;
         text-overflow: ellipsis;
@@ -79,6 +78,7 @@
         font-size: 14px;
         line-height: 22px;
         color: #0f131f;
+        width: max-content;
       }
     }
   }

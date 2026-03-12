@@ -38,6 +38,11 @@ export const DataWithUiSelect = (
   const { value, onChange, disabledConfig } = props;
   const disabled = disabledConfig.uiType || disabledConfig.paramValue;
   const valueDisabled = disabledConfig.paramValue;
+
+  const popupContainer = () => {
+    return document.querySelector('#functionSettingContainer') || document.body;
+  };
+
   const renderComponentByUiType = (type: UiType) => {
     switch (type) {
       case UiType.TextArea:
@@ -85,6 +90,7 @@ export const DataWithUiSelect = (
             value={value?.paramValue}
             disabled={valueDisabled}
             onChange={(value) => changeValue({ paramValue: value })}
+            getPopupContainer={popupContainer}
             options={[
               {
                 label: 'true',
@@ -105,6 +111,7 @@ export const DataWithUiSelect = (
             value={value?.paramValue}
             disabled={valueDisabled}
             onChange={(value) => changeValue({ paramValue: value })}
+            getPopupContainer={popupContainer}
           />
         );
       case UiType.Uploader:
@@ -114,6 +121,7 @@ export const DataWithUiSelect = (
             value={value?.paramValue}
             disabled={valueDisabled}
             className={styles['ui-comp']}
+            getPopupContainer={popupContainer}
           />
         );
       case UiType.Geopoint:
@@ -123,6 +131,7 @@ export const DataWithUiSelect = (
             value={value?.paramValue}
             disabled={valueDisabled}
             onChange={(value) => changeValue({ paramValue: value })}
+            getPopupContainer={popupContainer}
           />
         );
       case UiType.Timestamp:
@@ -133,6 +142,7 @@ export const DataWithUiSelect = (
             value={value?.paramValue}
             disabled={valueDisabled}
             onChange={(value) => changeValue({ paramValue: value })}
+            getPopupContainer={popupContainer}
           />
         );
       case UiType.ObjectOne:
@@ -143,6 +153,7 @@ export const DataWithUiSelect = (
             disabled={valueDisabled}
             onChange={(value) => changeValue({ paramValue: value })}
             mode={'single'}
+            getPopupContainer={popupContainer}
           />
         );
       case UiType.ObjectSet:
@@ -153,6 +164,7 @@ export const DataWithUiSelect = (
             disabled={valueDisabled}
             onChange={(value) => changeValue({ paramValue: value })}
             mode={'multiple'}
+            getPopupContainer={popupContainer}
           />
         );
       default:

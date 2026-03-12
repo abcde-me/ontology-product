@@ -155,7 +155,15 @@ export default function OntologySceneFunctions() {
       width: 300,
       ellipsis: true,
       render(v) {
-        return <EllipsisPopover value={v} />;
+        return (
+          <EllipsisPopover
+            value={v}
+            preferTypography
+            ellipsis={{
+              showTooltip: { type: 'tooltip' }
+            }}
+          />
+        );
       }
     },
     {
@@ -216,7 +224,7 @@ export default function OntologySceneFunctions() {
 
   return (
     <div
-      className={`flex h-full w-full flex-col gap-4 overflow-hidden bg-white ${styles['function']}`}
+      className={`flex h-full w-full flex-col gap-4 bg-white ${styles['function']}`}
     >
       <div className={styles['function-content']}>
         <div className={styles['function-list']}>
