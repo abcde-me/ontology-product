@@ -133,7 +133,7 @@ const SceneCard: React.FC<SceneCardProps> = ({
         boxShadow:
           isHovered && hasDetailPermission
             ? '0 6px 16px 0 rgba(100, 108, 133, 0.12)'
-            : 'none'
+            : '0px 5px 8px 0px #646C850A'
       }}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
@@ -190,7 +190,7 @@ const SceneCard: React.FC<SceneCardProps> = ({
             handleIconClick(e, ONTOLOGY_SCENE_MENU_ITEM_KEYS.OBJECT_TYPE)
           }
         >
-          <ObjectSmallIcon className="h-[16px] w-[16px] text-[var(--color-text-1)] group-hover:text-[#184FF2]" />
+          <ObjectSmallIcon className="h-[16px] w-[16px] text-[var(--color-text-4)] group-hover:text-[#184FF2]" />
           <div className="flex items-center justify-between">
             <span className="text-[12px] leading-[18px] text-[var(--color-text-3)]">
               对象
@@ -207,7 +207,7 @@ const SceneCard: React.FC<SceneCardProps> = ({
             handleIconClick(e, ONTOLOGY_SCENE_MENU_ITEM_KEYS.LINKS)
           }
         >
-          <LinkSmallIcon className="h-[16px] w-[16px] text-[var(--color-text-1)] group-hover:text-[#184FF2]" />
+          <LinkSmallIcon className="h-[16px] w-[16px] text-[var(--color-text-4)] group-hover:text-[#184FF2]" />
           <div className="flex items-center justify-between">
             <span className="text-[12px] leading-[18px] text-[var(--color-text-3)]">
               链接
@@ -224,7 +224,7 @@ const SceneCard: React.FC<SceneCardProps> = ({
             handleIconClick(e, ONTOLOGY_SCENE_MENU_ITEM_KEYS.BEHAVIOR_ACTIONS)
           }
         >
-          <BehaviorSmallIcon className="h-[16px] w-[16px] text-[var(--color-text-1)] group-hover:text-[#184FF2]" />
+          <BehaviorSmallIcon className="h-[16px] w-[16px] text-[var(--color-text-4)] group-hover:text-[#184FF2]" />
           <div className="flex items-center justify-between">
             <span className="text-[12px] leading-[18px] text-[var(--color-text-3)]">
               行为
@@ -241,7 +241,7 @@ const SceneCard: React.FC<SceneCardProps> = ({
             handleIconClick(e, ONTOLOGY_SCENE_MENU_ITEM_KEYS.FUNCTIONS)
           }
         >
-          <FunctionSmallIcon className="h-[16px] w-[16px] text-[var(--color-text-1)] group-hover:text-[#184FF2]" />
+          <FunctionSmallIcon className="h-[16px] w-[16px] text-[var(--color-text-4)] group-hover:text-[#184FF2]" />
           <div className="flex items-center justify-between">
             <span className="text-[12px] leading-[18px] text-[var(--color-text-3)]">
               函数
@@ -486,7 +486,7 @@ export default function OntologySceneList() {
       />
 
       {/* 搜索和创建区域 */}
-      <div className="flex items-center justify-between gap-4 rounded-lg bg-white py-[16px]">
+      <div className="flex items-center justify-between gap-4 rounded-lg bg-white pb-[20px] pt-[24px]">
         <Input.Search
           placeholder="请输入名称或描述"
           onClear={handleClear}
@@ -513,7 +513,7 @@ export default function OntologySceneList() {
           <Spin />
         </div>
       ) : sceneList.length > 0 ? (
-        <div className="grid grid-cols-4 gap-[20px] [@media(max-width:1440px)]:grid-cols-2 [@media(min-width:1440px)]:grid-cols-3 [@media(min-width:1920px)]:grid-cols-4">
+        <div className="grid grid-cols-4 gap-[16px] [@media(max-width:1440px)]:grid-cols-2 [@media(min-width:1440px)]:grid-cols-3 [@media(min-width:1920px)]:grid-cols-4">
           {sceneList.map((item) => (
             <SceneCard
               key={item.id}

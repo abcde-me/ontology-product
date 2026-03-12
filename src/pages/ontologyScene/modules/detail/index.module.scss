@@ -36,6 +36,10 @@
           height: 38px;
           margin-bottom: 8px !important;
 
+          &.arco-menu-selected {
+            background-color: #edf5ff;
+          }
+
           &:not(.arco-menu-selected):hover {
             background-color: #edf5ff;
             color: var(--color-text-2);

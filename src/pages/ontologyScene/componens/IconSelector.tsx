@@ -96,20 +96,22 @@ const IconSelector: React.FC<IconSelectorProps> = ({
                     borderRadius: 4,
                     border:
                       selectedIconValue === option.value
-                        ? '1px solid #184FF2'
-                        : '1px solid #E2E8F0',
+                        ? '1px solid rgba(var(--primary-6))'
+                        : '1px solid var(--color-border-2)',
                     transition: 'all 0.2s'
                   }}
                   onMouseEnter={(e) => {
                     if (selectedIconValue !== option.value) {
                       e.currentTarget.style.backgroundColor = '#f7f8fa';
-                      e.currentTarget.style.borderColor = '#e5e6eb';
+                      e.currentTarget.style.borderColor =
+                        'rgba(var(--primary-6))';
                     }
                   }}
                   onMouseLeave={(e) => {
                     if (selectedIconValue !== option.value) {
                       e.currentTarget.style.backgroundColor = 'transparent';
-                      e.currentTarget.style.borderColor = 'transparent';
+                      e.currentTarget.style.borderColor =
+                        'var(--color-border-2)';
                     }
                   }}
                 >

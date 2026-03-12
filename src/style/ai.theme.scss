@@ -76,6 +76,9 @@ $spacing-9: 24px;
   font-size: $font-size-body-3;
   color: var(--color-text-2);
   font-weight: $font-weight-600;
+  min-width: 32px;
+  height: 32px;
+  line-height: 32px;
 }
 
 .arco-pagination-item-active {

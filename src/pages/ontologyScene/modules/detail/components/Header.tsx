@@ -146,7 +146,7 @@ export default function Header({
   return (
     <LayoutHeader
       className={cls(
-        'z-[1] flex h-[56px] items-center justify-between border-b border-[var(--color-border-2)] bg-white px-[16px] shadow-[0_2px_8px_0_rgba(0,0,0,0.08)]'
+        'z-[2] flex h-[56px] items-center justify-between border-b border-[var(--color-border-2)] bg-white px-[16px] shadow-[0_2px_8px_0_rgba(0,0,0,0.08)]'
       )}
     >
       {/* 左侧区域 */}

@@ -485,6 +485,9 @@ const SearchDropdown: React.FC<SearchDropdownProps> = ({
           }}
           style={{ width: '104px' }}
           suffixIcon={<IconDown />}
+          getPopupContainer={() =>
+            (containerRef.current as HTMLElement) || document.body
+          }
         >
           {searchTypeOptions.map((option) => (
             <Option key={option.value} value={option.value}>
