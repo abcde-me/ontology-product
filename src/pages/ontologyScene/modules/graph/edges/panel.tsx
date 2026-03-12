@@ -418,7 +418,7 @@ function EdgePanel() {
                   {!isNil(basicInfo?.code) && (
                     <IconCopy
                       fontSize={14}
-                      className="cursor-pointer text-gray-500 hover:text-gray-700"
+                      className="cursor-pointer text-gray-500 hover:text-[rgba(var(--primary-6))]"
                       onClick={() => handleCopy(String(basicInfo?.code))}
                     />
                   )}

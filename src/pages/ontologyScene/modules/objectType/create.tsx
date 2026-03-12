@@ -6,6 +6,8 @@ import ObjectTypeForm, {
   ObjectTypeFormRef
 } from './components/ObjectTypeForm';
 import { createOntologyObjectType } from '@/api/ontologySceneLibrary/objectType';
+import { IconLeft } from '@arco-design/web-react/icon';
+import { ProButton } from '@ceai-front/arco-material';
 
 export default function OntologySceneObjectTypeCreate() {
   const history = useHistory();
@@ -52,9 +54,21 @@ export default function OntologySceneObjectTypeCreate() {
     );
   };
 
+  const goBack = () => {
+    history.replace(
+      `/tenant/compute/modaforge/ontologyScene/detail/${OSId}/objectType/list`
+    );
+  };
+
   return (
     <div className="flex h-[calc(100vh-56px)] w-full flex-col bg-[#fff]">
-      <div className="border-b border-[##EBEEF5] p-[24px] text-[20px] font-[600] leading-[30px] text-[var(--color-text-1)]">
+      <div className="flex items-center gap-[16px] border-b border-[##EBEEF5] p-[24px] text-[20px] font-[600] leading-[32px] text-[var(--color-text-1)]">
+        <ProButton
+          icon={<IconLeft />}
+          size={'default'}
+          type={'outline'}
+          onClick={goBack}
+        />
         创建对象类型
       </div>
       <div className="flex flex-1 flex-col overflow-hidden">

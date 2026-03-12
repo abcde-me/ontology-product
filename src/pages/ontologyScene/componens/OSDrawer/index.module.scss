@@ -17,6 +17,12 @@
     width: 100%;
   }
 
+  :global(.arco-tabs-header-nav-line .arco-tabs-header-title) {
+    padding-left: 0px;
+    padding-right: 0px;
+    margin-right: 32px;
+  }
+
   .drawer-header-extra {
     font-family: PingFang SC;
     font-weight: 400;

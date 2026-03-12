@@ -39,7 +39,7 @@ const Node = ({ id, data }) => {
           <Popover content="复制">
             <IconCopy
               fontSize={14}
-              className="hidden flex-shrink-0 cursor-pointer hover:text-[#184FF2] group-hover:block"
+              className="hidden flex-shrink-0 cursor-pointer hover:text-[rgba(var(--primary-6))] group-hover:block"
               onClick={(e) => {
                 e.stopPropagation();
                 e.preventDefault();

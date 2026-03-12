@@ -573,7 +573,7 @@ export default function ObjectTypeDetailDrawer({
             <Popover content="复制">
               <IconCopy
                 fontSize={14}
-                className="cursor-pointer opacity-0 transition-opacity hover:text-[#184FF2] group-hover:opacity-100"
+                className="cursor-pointer opacity-0 transition-opacity hover:text-[rgba(var(--primary-6))] group-hover:opacity-100"
                 onClick={(e) => {
                   e.stopPropagation();
                   handleCopy(String(value));
@@ -769,7 +769,7 @@ export default function ObjectTypeDetailDrawer({
                   {displayData?.code && (
                     <IconCopy
                       fontSize={14}
-                      className="flex-shrink-0 hover:cursor-pointer"
+                      className="flex-shrink-0 hover:cursor-pointer hover:text-[rgba(var(--primary-6))]"
                       onClick={(e) => {
                         e.stopPropagation();
                         handleCopy(String(displayData?.code));
@@ -892,14 +892,14 @@ export default function ObjectTypeDetailDrawer({
                         {/* ID */}
                         <div className="mb-[8px] flex items-center gap-[8px] overflow-hidden leading-[22px]">
                           <span className="text-[14px] text-[var(--color-text-5)]">
-                            id:
+                            链接id:
                           </span>
                           <span className="min-w-0 max-w-full text-[14px] text-[var(--color-text-1)]">
                             <EllipsisPopover value={link.linkId} />
                           </span>
                           <IconCopy
                             fontSize={14}
-                            className="cursor-pointer hover:text-[#184FF2]"
+                            className="cursor-pointer hover:text-[rgba(var(--primary-6))]"
                             onClick={(e) => {
                               e.stopPropagation();
                               handleCopy(link.linkId);

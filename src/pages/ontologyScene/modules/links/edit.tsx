@@ -14,6 +14,8 @@ import {
 } from '@/types/links';
 import { LinkType as FormLinkType } from '../../types/link';
 import { listOntologyPhysicalProperties } from '@/api/ontologySceneLibrary/graph';
+import { ProButton } from '@ceai-front/arco-material';
+import { IconLeft } from '@arco-design/web-react/icon';
 
 export default function OntologySceneLinksEdit() {
   const history = useHistory();
@@ -220,11 +222,23 @@ export default function OntologySceneLinksEdit() {
     );
   };
 
+  const goBack = () => {
+    history.replace(
+      `/tenant/compute/modaforge/ontologyScene/detail/${OSId}/links/list`
+    );
+  };
+
   return (
     <>
       {!fetching && initialValues ? (
         <div className="flex h-[calc(100vh-56px)] w-full flex-col bg-[#fff]">
-          <div className="border-b border-[##EBEEF5] p-[24px] text-[20px] font-[600] leading-[30px] text-[var(--color-text-1)]">
+          <div className="flex items-center gap-[16px] border-b border-[##EBEEF5] p-[24px] text-[20px] font-[600] leading-[32px] text-[var(--color-text-1)]">
+            <ProButton
+              icon={<IconLeft />}
+              size={'default'}
+              type={'outline'}
+              onClick={goBack}
+            />
             编辑链接
           </div>
           <div className="flex flex-1 flex-col overflow-hidden">

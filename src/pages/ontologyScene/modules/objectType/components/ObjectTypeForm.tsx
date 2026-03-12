@@ -961,7 +961,7 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
             </div>
 
             <FormItem
-              label="对象类型名称："
+              label="对象类型名称"
               field="name"
               rules={[
                 { required: true, message: '请输入对象类型名称' },
@@ -977,7 +977,7 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
             </FormItem>
 
             <FormItem
-              label="对象类型id："
+              label="对象类型id"
               field="code"
               rules={[
                 { required: true, message: '请输入id' },
@@ -1014,14 +1014,14 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
               />
             </FormItem>
 
-            <FormItem label="描述说明：" field="description">
+            <FormItem label="描述说明" field="description">
               <TextArea
                 placeholder="请输入描述说明，详述该实体的业务边界与逻辑范围"
                 autoSize={{ minRows: 3 }}
               />
             </FormItem>
 
-            <FormItem label="图标：" field="icon">
+            <FormItem label="图标" field="icon">
               <ObjectTypeIconSelector
                 initialValue={selectedIcon}
                 onChange={handleIconChange}
@@ -1034,7 +1034,7 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
               数据源
             </div>
             <FormItem
-              label="上传文件："
+              label="上传文件"
               field="dataSourceType"
               rules={[{ required: true, message: '请选择数据源类型' }]}
             >
@@ -1104,7 +1104,7 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
             ) : (
               <>
                 <FormItem
-                  label="数据库/表："
+                  label="数据库/表"
                   field="databaseTable"
                   rules={[
                     {
