@@ -124,7 +124,7 @@ export const FunctionDetailDrawer = (props: IProps) => {
               <div className={styles['info-label']}>显示名称</div>
               <div className={styles['info-value']}>
                 <EllipsisPopover
-                  value={basicInfo?.description || '-'}
+                  value={basicInfo?.displayName || '-'}
                   preferTypography
                   ellipsis={{
                     showTooltip: {
@@ -132,7 +132,7 @@ export const FunctionDetailDrawer = (props: IProps) => {
                     }
                   }}
                 >
-                  {basicInfo?.description || '-'}
+                  {basicInfo?.displayName || '-'}
                 </EllipsisPopover>
               </div>
             </div>
