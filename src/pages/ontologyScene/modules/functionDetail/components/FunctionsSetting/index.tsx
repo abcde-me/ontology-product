@@ -186,7 +186,6 @@ export const FunctionsSetting = (props: {
                               showWordLimit
                             />
                           </FormItemWithTooltip>
-
                           <Form.Item
                             className={'mb-0 flex-1 overflow-hidden'}
                             field={`${field}.uiTypeAndValue`}
@@ -241,6 +240,10 @@ export const FunctionsSetting = (props: {
                               }}
                             />
                           </Form.Item>
+                          {/*记录id但是不展示*/}
+                          <Form.Item className={'hidden'} field={`${field}.id`}>
+                            <Input />
+                          </Form.Item>
                           <Button
                             type={'text'}
                             className={styles['del-field']}
@@ -256,11 +259,7 @@ export const FunctionsSetting = (props: {
                                   .catch(console.error);
                               }, 0);
                             }}
-                            icon={
-                              <IconDelete
-                                className={`mt-2 text-[16px] text-[var(--icon-color-text-1)]`}
-                              />
-                            }
+                            icon={<IconDelete className={`mt-2 text-[16px]`} />}
                           />
                         </div>
                       );
@@ -345,6 +344,10 @@ export const FunctionsSetting = (props: {
                               getPopupContainer={getPopoverContainer}
                             />
                           </FormItemWithTooltip>
+                          {/*记录id但是不展示*/}
+                          <Form.Item className={'hidden'} field={`${field}.id`}>
+                            <Input />
+                          </Form.Item>
                           <Button
                             type={'text'}
                             className={styles['del-field']}
@@ -360,11 +363,7 @@ export const FunctionsSetting = (props: {
                                   .catch(console.error);
                               }, 0);
                             }}
-                            icon={
-                              <IconDelete
-                                className={`mt-2 text-[16px] text-[var(--icon-color-text-1)]`}
-                              />
-                            }
+                            icon={<IconDelete className={`mt-2 text-[16px]`} />}
                           />
                         </div>
                       );

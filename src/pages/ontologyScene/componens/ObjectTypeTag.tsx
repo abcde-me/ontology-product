@@ -51,7 +51,7 @@ const ObjectTypeTag: React.FC<ObjectTypeTagProps> = ({
       {/* 名称区域 */}
       <div className="flex-shrink-1 object-type-tag-name min-w-0">
         <EllipsisPopover
-          value={ontologyObjectTypeName}
+          value={ontologyObjectTypeName || '全局行为'}
           className={`text-[14px] leading-[26px] text-[var(--color-text-1)] ${
             onClick ? `${hoverClassName}` : ''
           }`}

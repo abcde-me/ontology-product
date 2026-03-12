@@ -8,7 +8,6 @@ import {
 } from '@/pages/ontologyScene/componens';
 import {
   InputType,
-  OntologyFunctionItem,
   OntologyFunctionParam
 } from '@/pages/ontologyScene/types/ontologyFunction';
 import { Message, Table, TableColumnProps } from '@arco-design/web-react';
@@ -17,6 +16,7 @@ import { useRequest } from 'ahooks';
 import { getFunctionDetail } from '@/api/ontologySceneLibrary/ontologyFunction';
 import { isNil } from 'lodash-es';
 import { EllipsisPopover } from '@ceai-front/arco-material';
+import MenuFunctionIcon from '@/pages/ontologyScene/assets/menu-function.svg';
 
 interface IProps extends OSDrawerProps {
   data?: number;
@@ -111,7 +111,27 @@ export const FunctionDetailDrawer = (props: IProps) => {
   return (
     <OsDrawer
       {...drawerProps}
-      title={title ?? '函数详情'}
+      title={
+        <div className={styles['drawer-title']}>
+          <MenuFunctionIcon
+            fontSize={20}
+            className={'flex-shrink-0 bg-transparent text-[#0F131F]'}
+          />
+          <div className={'flex-1'}>
+            <EllipsisPopover
+              preferTypography
+              value={functionData?.name || '-'}
+              ellipsis={{
+                showTooltip: {
+                  type: 'tooltip'
+                }
+              }}
+              className={styles['drawer-title-text']}
+            />
+          </div>
+        </div>
+      }
+      headerExtra={functionData?.description ?? null}
       footer={footer ?? null}
       className={classNames(styles['function-detail-drawer'], className)}
     >

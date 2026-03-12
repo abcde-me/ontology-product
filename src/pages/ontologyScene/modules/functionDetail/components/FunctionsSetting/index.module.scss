@@ -54,6 +54,10 @@ $border-color: #dfe2eb;
         .arco-form-item-control-children {
           height: auto !important;
         }
+
+        .arco-btn-disabled {
+          color: var(--color-text-6) !important;
+        }
       }
     }
   }
@@ -141,4 +145,6 @@ $border-color: #dfe2eb;
 .del-field {
   padding: 0;
   width: max-content !important;
+  border: none !important;
+  color: var(--icon-color-text-1) !important;
 }

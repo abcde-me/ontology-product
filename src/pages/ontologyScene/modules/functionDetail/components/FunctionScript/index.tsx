@@ -45,14 +45,14 @@ export const FunctionScript = (
 
   return (
     <>
-      <div
-        className={classNames([
-          styles['function-body'],
-          props.className
-          // isNil(runInfo) ? '' : 'pb-[40px]'
-        ])}
-      >
-        <div className={styles['pycode-container']}>
+      <div className={classNames([styles['function-body'], props.className])}>
+        <div
+          className={classNames({
+            [styles['pycode-container']]: true,
+            [styles['pycode-disabled']]: disabled
+          })}
+        >
+          {disabled && <div className={styles['code-mask']} />}
           <CodeMirror
             extensions={extensions}
             basicSetup={{
