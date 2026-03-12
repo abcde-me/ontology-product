@@ -3,6 +3,7 @@
   user-select: text !important;
   border-radius: 4px;
   box-shadow: 0 8px 20px 0 rgba(0, 0, 0, 0.12);
+  z-index: 1000;
 
   :global(.arco-drawer-header) {
     height: max-content;

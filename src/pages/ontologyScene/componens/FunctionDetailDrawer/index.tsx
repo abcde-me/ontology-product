@@ -111,6 +111,7 @@ export const FunctionDetailDrawer = (props: IProps) => {
   return (
     <OsDrawer
       {...drawerProps}
+      width={600}
       title={
         <div className={styles['drawer-title']}>
           <MenuFunctionIcon
