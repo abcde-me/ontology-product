@@ -417,7 +417,10 @@ export default function OntologySceneDetail() {
           </div>
         </div>
 
-        <Layout.Content className="flex-1 overflow-auto">
+        <Layout.Content
+          className="relative flex-1 overflow-auto"
+          id={'ontologySceneContent'}
+        >
           <Suspense
             fallback={
               <div className="flex h-full items-center justify-center">

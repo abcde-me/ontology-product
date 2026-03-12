@@ -14,7 +14,14 @@ import {
   OsDrawer,
   PyCodeContent
 } from '@/pages/ontologyScene/componens';
-import { Form, Table, TableColumnProps, Tabs } from '@arco-design/web-react';
+import {
+  Form,
+  Table,
+  TableColumnProps,
+  Tabs,
+  Tooltip,
+  Typography
+} from '@arco-design/web-react';
 import { useHistory, useParams } from 'react-router-dom';
 import { useRequest } from 'ahooks';
 import { getFunctionDetail } from '@/api/ontologySceneLibrary/ontologyFunction';
@@ -30,6 +37,7 @@ import ObjectTypeTag from '../../../../componens/ObjectTypeTag';
 import NoDataEmpty from '@/components/NoDataEmpty';
 import { EllipsisPopover, NoDataCard } from '@ceai-front/arco-material';
 import { ValidateRuleCard } from '@/pages/ontologyScene/modules/behaviorActions/components';
+import MenuBehaviorIcon from '@/pages/ontologyScene/assets/menu-behavior.svg';
 
 interface IProps {
   show: boolean;
@@ -130,10 +138,28 @@ export const BehaviorDetail = (props: IProps) => {
   return (
     <OsDrawer
       visible={show}
+      width={600}
       footer={null}
       onCancel={onClose}
       className={styles['behavior-detail']}
-      title={'行为详情'}
+      title={
+        <div className={styles['drawer-title']}>
+          <MenuBehaviorIcon fontSize={20} className={'flex-shrink-0'} />
+          <div className={'flex-1'}>
+            <EllipsisPopover
+              preferTypography
+              value={actionDetail?.name || '-'}
+              ellipsis={{
+                showTooltip: {
+                  type: 'tooltip'
+                }
+              }}
+              className={styles['drawer-title-text']}
+            />
+          </div>
+        </div>
+      }
+      headerExtra={actionDetail?.description}
       maskClosable
       closable
       afterClose={() => {
@@ -154,37 +180,39 @@ export const BehaviorDetail = (props: IProps) => {
           >
             基本信息
           </div>
-          <div className={'flex w-full flex-wrap overflow-hidden'}>
+          <div className={'w-full overflow-hidden'}>
             <div className={styles['base-info-item']}>
               <div className={styles['item-field']}>行为名称：</div>
               <div className={styles['item-value']}>
                 <EllipsisPopover
-                  value={actionDetail?.description || '-'}
                   preferTypography
+                  value={actionDetail?.name || '-'}
                   ellipsis={{
                     showTooltip: {
-                      type: 'tooltip'
+                      type: 'tooltip',
+                      props: {
+                        placement: 'bottom'
+                      }
                     }
                   }}
-                >
-                  {actionDetail?.name || '-'}
-                </EllipsisPopover>
+                />
               </div>
             </div>
             <div className={styles['base-info-item']}>
               <div className={styles['item-field']}>描述说明：</div>
               <div className={styles['item-value']}>
                 <EllipsisPopover
-                  value={actionDetail?.description || '-'}
                   preferTypography
+                  value={actionDetail?.description || '-'}
                   ellipsis={{
                     showTooltip: {
-                      type: 'tooltip'
+                      type: 'tooltip',
+                      props: {
+                        placement: 'bottom'
+                      }
                     }
                   }}
-                >
-                  {actionDetail?.description || '-'}
-                </EllipsisPopover>
+                />
               </div>
             </div>
             <div className={styles['base-info-item']}>
@@ -194,7 +222,9 @@ export const BehaviorDetail = (props: IProps) => {
                   ontologyObjectTypeIcon={
                     actionDetail?.ontologyObjectTypeIcon || '-'
                   }
-                  ontologyObjectTypeName={actionDetail?.objectTypeName || '-'}
+                  ontologyObjectTypeName={
+                    actionDetail?.objectTypeName || '全局对象'
+                  }
                   ontologyObjectTypeId={String(
                     actionDetail?.ontologyObjectTypeId ||
                       actionDetail?.objectTypeId ||
@@ -208,7 +238,18 @@ export const BehaviorDetail = (props: IProps) => {
             <div className={styles['base-info-item']}>
               <div className={styles['item-field']}>函数：</div>
               <div className={styles['item-value']}>
-                {actionDetail?.functionName || '-'}
+                <EllipsisPopover
+                  preferTypography
+                  value={actionDetail?.functionName || '-'}
+                  ellipsis={{
+                    showTooltip: {
+                      type: 'tooltip',
+                      props: {
+                        placement: 'bottom'
+                      }
+                    }
+                  }}
+                />
               </div>
             </div>
             <div className={styles['base-info-item']}>

@@ -306,11 +306,12 @@ export function buildFunctionSchema(
     Record<InputType, OntologyFunctionParam[]>
   >(
     (p, c) => {
-      const { name, type, inputType, value, idx, uiType } = c;
+      const { name, type, inputType, value, idx, uiType, id } = c;
       const base: OntologyFunctionParam = {
         name,
         type,
-        idx
+        idx,
+        id: id || 0
       };
       if (inputType === InputType.Input) {
         base.value = value;
@@ -346,7 +347,7 @@ export function buildFunctionDetail(
 ): Partial<OntologyFunctionDetail> {
   const { name, description, input, output, content, code } = meta;
   const inputParams = (input || []).map((item, idx) => {
-    const { name, code, uiTypeAndValue } = item;
+    const { name, code, uiTypeAndValue, id } = item;
     const [type, ui] = uiTypeAndValue!.uiType!.split('_');
     return {
       name,
@@ -354,14 +355,16 @@ export function buildFunctionDetail(
       type,
       inputType: InputType.Input,
       uiType: ui,
-      idx: idx + 1
+      idx: idx + 1,
+      id: id || 0
     };
   });
   const outputParams = (output || []).map((item, idx) => {
-    const { name, code, type } = item;
+    const { name, code, type, id } = item;
     return {
       name,
       code: name,
+      id: id || 0,
       type,
       inputType: InputType.Output,
       idx: idx + 1

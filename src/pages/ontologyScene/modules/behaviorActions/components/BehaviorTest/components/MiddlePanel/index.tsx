@@ -10,7 +10,7 @@ interface MiddlePanelProps {
 export const MiddlePanel: React.FC<MiddlePanelProps> = React.memo(
   ({ testFunctionHook }) => {
     return (
-      <div className="flex h-full w-full flex-col">
+      <div className="flex h-full w-full flex-col border-t border-[#DFE2EB]">
         <CanvasHeader testFunctionHook={testFunctionHook} />
         <div className="scrollbar-hide flex-1 overflow-y-auto overflow-x-hidden bg-[#F8F9FC] p-5">
           <OrchestrationCanvas />
