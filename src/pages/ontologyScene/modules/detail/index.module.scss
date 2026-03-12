@@ -1,4 +1,12 @@
 .ontology-scene-detail {
+  :global {
+    .arco-tabs-header-nav-line .arco-tabs-header-title {
+      padding-left: 0px;
+      padding-right: 0px;
+      margin-right: 32px;
+    }
+  }
+
   .ontology-scene-detail-sidebar {
     width: 200px;
 

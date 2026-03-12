@@ -408,7 +408,7 @@ const SearchDropdown: React.FC<SearchDropdownProps> = ({
     return (
       <div
         key={item.id}
-        className="flex cursor-pointer flex-col gap-[4px] rounded-[4px] p-[12px] transition-colors hover:bg-[var(--color-fill-2)]"
+        className="flex cursor-pointer flex-col gap-[4px] rounded-[4px] p-[12px] transition-colors hover:bg-[#F2F8FF]"
         onClick={handleFunctionResultClick}
       >
         <div className="text-[14px] font-medium leading-[22px] text-[var(--color-text-1)]">
@@ -507,7 +507,7 @@ const SearchDropdown: React.FC<SearchDropdownProps> = ({
 
       {/* 搜索结果区域 */}
       {visible && searchValue.trim() && (
-        <div className="shadow-[0px 4px 16px 0px rgba(0, 0, 0, 0.08)] absolute right-0 top-full z-50 w-[296px] rounded-[12px] bg-white py-[4px]">
+        <div className="absolute right-0 top-full z-50 w-[296px] rounded-[12px] bg-white py-[4px] shadow-[0px_2px_8px_0_rgba(0,0,0,0.08)]">
           {renderResults()}
         </div>
       )}

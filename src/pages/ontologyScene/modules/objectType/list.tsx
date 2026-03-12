@@ -256,6 +256,18 @@ export default function OntologySceneObjectTypeList() {
       }
     },
     {
+      title: '描述说明',
+      dataIndex: 'description',
+      ellipsis: true,
+      tooltip: true,
+      width: 200,
+      render: (value) => (
+        <div>
+          {value ? <EllipsisPopover value={value} isEdit={false} /> : '-'}
+        </div>
+      )
+    },
+    {
       title: '对象类型id',
       dataIndex: 'code',
       width: 200,
@@ -265,18 +277,6 @@ export default function OntologySceneObjectTypeList() {
           {value && (
             <CopyItemIcon className="hidden flex-shrink-0" value={value} />
           )}
-        </div>
-      )
-    },
-    {
-      title: '描述说明',
-      dataIndex: 'description',
-      ellipsis: true,
-      tooltip: true,
-      width: 200,
-      render: (value) => (
-        <div>
-          {value ? <EllipsisPopover value={value} isEdit={false} /> : '-'}
         </div>
       )
     },

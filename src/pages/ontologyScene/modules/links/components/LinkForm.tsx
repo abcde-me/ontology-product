@@ -987,7 +987,7 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
             </div>
 
             <FormItem
-              label="链接名称："
+              label="链接名称"
               field="name"
               rules={[
                 { required: true, message: '请输入链接名称' },
@@ -1003,7 +1003,7 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
             </FormItem>
 
             <FormItem
-              label="链接id："
+              label="链接id"
               field="id"
               rules={[
                 { required: true, message: '请输入唯一标识' },
@@ -1042,7 +1042,7 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
             </FormItem>
 
             <FormItem
-              label="链接对："
+              label="链接对"
               field="linkPair"
               rules={[
                 {
@@ -1185,7 +1185,7 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
                 </div>
 
                 <FormItem
-                  label="上传中间表："
+                  label="上传中间表"
                   field="intermediateTable"
                   rules={[
                     {
@@ -1267,7 +1267,7 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
 
                 {intermediateTable.type === 'data_lake_sync' && (
                   <FormItem
-                    label="数据库/表："
+                    label="数据库/表"
                     field="databaseTable"
                     rules={[
                       {
@@ -1366,7 +1366,7 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
                 )}
 
                 <FormItem
-                  label="关联中间表："
+                  label="关联中间表"
                   field="relationAttributes"
                   rules={[
                     {

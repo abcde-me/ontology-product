@@ -434,7 +434,7 @@ export default function LinkDetailDrawer({
                   {!isNil(displayData?.code) && (
                     <IconCopy
                       fontSize={14}
-                      className="hover:cursor-pointer"
+                      className="hover:cursor-pointer hover:text-[rgba(var(--primary-6))]"
                       onClick={(e) => {
                         e.stopPropagation();
                         handleCopy(String(displayData?.code));
