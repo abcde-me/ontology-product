@@ -82,7 +82,7 @@ const SceneModal: React.FC<SceneModalProps> = ({
 
   return (
     <Modal
-      title={mode === 'create' ? '创建本体场景' : '修改本体场景'}
+      title={mode === 'create' ? '创建本体场景' : '编辑本体场景'}
       visible={visible}
       onCancel={handleCancel}
       footer={

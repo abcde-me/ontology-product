@@ -26,8 +26,6 @@ type SearchType = 'objectType' | 'attribute' | 'behavior' | 'link' | 'function';
 interface SearchDropdownProps {
   visible: boolean;
   onVisibleChange: (visible: boolean) => void;
-  onMouseEnter?: () => void;
-  onMouseLeave?: () => void;
 }
 
 // 函数类型（待定接口，使用 mock 数据）
@@ -46,12 +44,9 @@ interface BehaviorItem {
 
 const SearchDropdown: React.FC<SearchDropdownProps> = ({
   visible,
-  onVisibleChange,
-  onMouseEnter,
-  onMouseLeave
+  onVisibleChange
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const leaveTimerRef = useRef<NodeJS.Timeout | null>(null);
   const { id: OSId } = useParams<{ id: string }>();
   const [searchType, setSearchType] = useState<SearchType>('objectType');
   const [searchValue, setSearchValue] = useState('');
@@ -167,9 +162,15 @@ const SearchDropdown: React.FC<SearchDropdownProps> = ({
 
   // 使用 lodash-es 的 debounce 创建防抖搜索函数
   const debouncedSearchRef = useRef(
-    debounce((value: string, type: SearchType) => {
-      performSearch(value, type);
-    }, 300)
+    debounce(
+      (value: string, type: SearchType) => {
+        performSearch(value, type);
+      },
+      300,
+      {
+        leading: true
+      }
+    )
   );
 
   // 搜索值变化时触发搜索
@@ -468,76 +469,10 @@ const SearchDropdown: React.FC<SearchDropdownProps> = ({
     );
   };
 
-  // 处理鼠标离开
-  const handleMouseLeave = useCallback(
-    (e: React.MouseEvent) => {
-      // 清除之前的定时器
-      if (leaveTimerRef.current) {
-        clearTimeout(leaveTimerRef.current);
-      }
-
-      // 检查 relatedTarget 是否仍在容器内（包括子元素，如 Select 下拉框）
-      const relatedTarget = e.relatedTarget as Node;
-      if (
-        containerRef.current &&
-        relatedTarget &&
-        (containerRef.current === relatedTarget ||
-          containerRef.current.contains(relatedTarget))
-      ) {
-        // 鼠标移到了子元素（如 Select 下拉框），不隐藏
-        return;
-      }
-
-      // 延迟检查，给鼠标移动到子元素的时间
-      leaveTimerRef.current = setTimeout(() => {
-        if (!containerRef.current) {
-          onVisibleChange(false);
-          onMouseLeave?.();
-          return;
-        }
-
-        // 再次检查鼠标当前位置是否仍在容器内
-        const elements = document.elementsFromPoint(e.clientX, e.clientY);
-        const isInContainer = elements.some((el) =>
-          containerRef.current?.contains(el)
-        );
-
-        if (!isInContainer) {
-          // 鼠标真正离开了，隐藏
-          onVisibleChange(false);
-          onMouseLeave?.();
-        }
-      }, 100);
-    },
-    [onVisibleChange, onMouseLeave]
-  );
-
-  // 处理鼠标进入
-  const handleMouseEnter = useCallback(() => {
-    // 清除离开定时器
-    if (leaveTimerRef.current) {
-      clearTimeout(leaveTimerRef.current);
-      leaveTimerRef.current = null;
-    }
-    onVisibleChange(true);
-    onMouseEnter?.();
-  }, [onVisibleChange, onMouseEnter]);
-
-  // 清理定时器
-  useEffect(() => {
-    return () => {
-      if (leaveTimerRef.current) {
-        clearTimeout(leaveTimerRef.current);
-      }
-    };
-  }, []);
-
   return (
     <div
       ref={containerRef}
       className={`relative w-[400px] ${styles['search-dropdown']}`}
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
     >
       {/* 搜索框区域 */}
       <InputGroup compact>
@@ -560,7 +495,7 @@ const SearchDropdown: React.FC<SearchDropdownProps> = ({
         <Input
           value={searchValue}
           onChange={(value) => setSearchValue(value)}
-          placeholder="请输入搜索内容"
+          placeholder="请输入名称或id"
           style={{ width: '296px' }}
           allowClear
           autoFocus
