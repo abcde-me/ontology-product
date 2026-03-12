@@ -2,6 +2,7 @@
   :global {
     .arco-drawer-body {
       padding: 24px;
+      overflow-x: hidden;
     }
   }
 }
@@ -11,8 +12,8 @@
   gap: 16px;
   padding: 12px 16px;
   border-radius: 8px;
-  flex-wrap: nowrap;
-  overflow-x: auto;
+  flex-wrap: wrap;
+  overflow: hidden;
 }
 
 .status-item {
@@ -20,7 +21,8 @@
   flex-direction: column;
   gap: 8px;
   min-width: 100px;
-  flex-shrink: 0;
+  flex: 1;
+  max-width: 100%;
 
   .label {
     font-size: 14px;
@@ -28,6 +30,8 @@
     color: #1e293b;
     font-weight: 500;
     white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .value {
@@ -36,6 +40,8 @@
     color: #1e293b;
     font-weight: 400;
     white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 }
 
@@ -61,6 +67,7 @@
 .info-item {
   display: flex;
   gap: 8px;
+  min-width: 0;
 
   &.full-width {
     grid-column: 1 / -1;
@@ -68,7 +75,6 @@
 
   .info-label {
     flex-shrink: 0;
-    width: 100px;
     font-size: 14px;
     line-height: 22px;
     color: #86909c;
@@ -80,13 +86,20 @@
     font-size: 14px;
     line-height: 22px;
     color: #1d2129;
+    overflow: hidden;
   }
 }
 
 .tabs-container {
+  overflow: hidden;
+
   :global {
     .arco-tabs-nav {
       margin-bottom: 16px;
+    }
+
+    .arco-tabs-content {
+      overflow: hidden;
     }
   }
 }

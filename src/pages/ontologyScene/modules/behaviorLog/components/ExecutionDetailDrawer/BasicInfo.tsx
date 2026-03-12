@@ -1,6 +1,7 @@
 import React from 'react';
-import { EllipsisPopover, CopyItemIcon } from '@ceai-front/arco-material';
+import { CopyItemIcon } from '@ceai-front/arco-material';
 import { ObjectTypeTag } from '@/pages/ontologyScene/componens';
+import EllipsisTextWithTooltip from '../EllipsisTextWithTooltip';
 import styles from './index.module.scss';
 
 interface BasicInfoProps {
@@ -32,7 +33,7 @@ export const BasicInfo: React.FC<BasicInfoProps> = ({
         <div className={styles['info-item']}>
           <div className={styles['info-label']}>{nameLabel}</div>
           <div className={styles['info-value']}>
-            <EllipsisPopover value={name || '-'} />
+            <EllipsisTextWithTooltip value={name || '-'} />
           </div>
         </div>
         <div className={styles['info-item']}>
@@ -60,10 +61,12 @@ export const BasicInfo: React.FC<BasicInfoProps> = ({
             </div>
           </div>
         )}
-        <div className={styles['info-item']}>
+        <div
+          className={`${styles['info-item']} ${mode === 'function' ? styles['full-width'] : ''}`}
+        >
           <div className={styles['info-label']}>描述说明：</div>
           <div className={styles['info-value']}>
-            <EllipsisPopover value={description || '-'} isEdit={false} />
+            <EllipsisTextWithTooltip value={description || '-'} />
           </div>
         </div>
       </div>
