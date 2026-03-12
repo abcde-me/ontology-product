@@ -13,7 +13,9 @@ import FileIcon from '../../assets/file-icon.svg';
 import { uploadFunctionFile } from '@/api/ontologySceneLibrary/ontologyFunction';
 
 export const FunctionFileParam = (
-  props: CustomFormItemCompProps<UploadProps['fileList']>
+  props: CustomFormItemCompProps<UploadProps['fileList']> & {
+    getPopupContainer?: () => Element;
+  }
 ) => {
   const { value, onChange, disabled } = props;
 
@@ -59,13 +61,18 @@ export const FunctionFileParam = (
                 className={'flex w-full items-center gap-1 overflow-hidden'}
               >
                 <div key={file.uid} className={styles['file-item']}>
-                  <div className={'flex flex-1 items-center gap-2'}>
+                  <div
+                    className={'flex flex-1 items-center gap-2 overflow-hidden'}
+                  >
                     {['done', 'error'].includes(file.status || 'init') ? (
                       <FileIcon className={'flex-shrink-0'} />
                     ) : (
                       <IconLoading className={'flex-shrink-0'} />
                     )}
-                    <Popover content={file.name ?? null}>
+                    <Popover
+                      content={file.name ?? null}
+                      getPopupContainer={props.getPopupContainer}
+                    >
                       <p className={styles['file-name']}>{file.name}</p>
                     </Popover>
                   </div>

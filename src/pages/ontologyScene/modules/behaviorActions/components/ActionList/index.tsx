@@ -128,7 +128,15 @@ export const ActionList = (props: {
       tooltip: true,
       width: 200,
       render(v) {
-        return <EllipsisPopover value={v} />;
+        return (
+          <EllipsisPopover
+            value={v}
+            preferTypography
+            ellipsis={{
+              showTooltip: { type: 'tooltip' }
+            }}
+          />
+        );
       }
     },
     {

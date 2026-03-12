@@ -48,81 +48,89 @@ export const FunctionScript = (
       <div
         className={classNames([
           styles['function-body'],
-          props.className,
-          isNil(runInfo) ? '' : 'pb-[40px]'
+          props.className
+          // isNil(runInfo) ? '' : 'pb-[40px]'
         ])}
       >
-        <CodeMirror
-          extensions={extensions}
-          basicSetup={{
-            lineNumbers: true,
-            highlightActiveLineGutter: false,
-            foldGutter: false,
-            highlightActiveLine: false,
-            tabSize: 4
-          }}
-          value={value}
-          onCreateEditor={(view) => {
-            codeEditor.current = view;
-          }}
-          readOnly={disabled}
-          onChange={(e) => {
-            onChange?.(e);
-          }}
-        />
-      </div>
-      {!!runInfo?.run_status && (
-        <ResizeBoxWithCursorChange
-          directions={['top']}
-          className={styles['function-footer']}
-          maxHeight={logOpen ? (isFullscreen ? 600 : 300) : 40}
-          minHeight={logOpen ? 120 : 40}
-          style={{
-            maxHeight: logOpen ? (isFullscreen ? '600px' : '300px') : '40px',
-            height: logOpen ? '120px' : '40px'
-          }}
-        >
-          <div
-            className={styles['run-log-header']}
-            onClick={() => {
-              setLogOpen((p) => !p);
+        <div className={styles['pycode-container']}>
+          <CodeMirror
+            extensions={extensions}
+            basicSetup={{
+              lineNumbers: true,
+              highlightActiveLineGutter: false,
+              foldGutter: false,
+              highlightActiveLine: false,
+              tabSize: 4
             }}
-          >
-            {logOpen ? <IconDown /> : <IconRight />}
-            运行结果
-            {runInfo.run_status === 1 && (
-              <div className={'flex items-center gap-2 text-[#6E7B8D]'}>
-                运行中
-                <IconLoading style={{ color: '#184FF2' }} />
+            value={value}
+            onCreateEditor={(view) => {
+              codeEditor.current = view;
+            }}
+            readOnly={disabled}
+            onChange={(e) => {
+              onChange?.(e);
+            }}
+          />
+        </div>
+        {!!runInfo?.run_status && (
+          <div className={'h-max flex-shrink-0'}>
+            <ResizeBoxWithCursorChange
+              directions={['top']}
+              className={styles['function-footer']}
+              maxHeight={logOpen ? (isFullscreen ? 600 : 300) : 40}
+              minHeight={logOpen ? 120 : 40}
+              style={{
+                maxHeight: logOpen
+                  ? isFullscreen
+                    ? '600px'
+                    : '300px'
+                  : '40px',
+                height: logOpen ? '120px' : '40px'
+              }}
+            >
+              <div
+                className={styles['run-log-header']}
+                onClick={() => {
+                  setLogOpen((p) => !p);
+                }}
+              >
+                {logOpen ? <IconDown /> : <IconRight />}
+                运行结果
+                {runInfo.run_status === 1 && (
+                  <div className={'flex items-center gap-2 text-[#6E7B8D]'}>
+                    运行中
+                    <IconLoading style={{ color: '#184FF2' }} />
+                  </div>
+                )}
+                {runInfo.run_status === 2 && (
+                  <DotStatus color={'#10B981'} text={'运行成功'} />
+                )}
+                {runInfo.run_status === 3 && (
+                  <DotStatus color={'#E52E2D'} text={'运行失败'} />
+                )}
+                {runInfo.run_status === 4 && (
+                  <DotStatus color={'#E52E2D'} text={'已被手动停止'} />
+                )}
               </div>
-            )}
-            {runInfo.run_status === 2 && (
-              <DotStatus color={'#10B981'} text={'运行成功'} />
-            )}
-            {runInfo.run_status === 3 && (
-              <DotStatus color={'#E52E2D'} text={'运行失败'} />
-            )}
-            {runInfo.run_status === 4 && (
-              <DotStatus color={'#E52E2D'} text={'已被手动停止'} />
-            )}
+              <div
+                className={classNames({
+                  [styles['run-log-wrapper']]: true,
+                  visible: logOpen,
+                  hidden: !logOpen
+                })}
+              >
+                {runInfo.runLog
+                  ?.map((item, index) => item.run_log)
+                  .join('\n')
+                  .split('\n')
+                  .map((l, i) => {
+                    return <p key={i}>{l}</p>;
+                  })}
+              </div>
+            </ResizeBoxWithCursorChange>
           </div>
-          <div
-            className={classNames({
-              [styles['run-log-wrapper']]: true,
-              visible: logOpen,
-              hidden: !logOpen
-            })}
-          >
-            {runInfo.runLog
-              ?.map((item, index) => item.run_log)
-              .join('\n')
-              .split('\n')
-              .map((l, i) => {
-                return <p key={i}>{l}</p>;
-              })}
-          </div>
-        </ResizeBoxWithCursorChange>
-      )}
+        )}
+      </div>
     </>
   );
 };

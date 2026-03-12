@@ -7,6 +7,7 @@ import { listOntologyPhysicalProperties } from '@/api/ontologySceneLibrary/graph
 import { ObjectType } from '@/types/objectType';
 import { InterfaceSelect } from '@/pages/ontologyScene/componens/ObjectInstanceSelect/InsSelect';
 import { useParams } from 'react-router-dom';
+import { isNil } from 'lodash-es';
 
 export interface ObjInsValue {
   objectTypeID?: number;
@@ -20,6 +21,7 @@ export interface ObjInsProps extends CustomFormItemCompProps<ObjInsValue> {
     value: ObjInsValue,
     options?: [ObjectType, Record<string, any>]
   ) => void;
+  getPopupContainer?: () => Element;
 }
 
 export const ObjectInstanceSelect = (props: ObjInsProps) => {
@@ -31,6 +33,9 @@ export const ObjectInstanceSelect = (props: ObjInsProps) => {
 
   const { data: primaryKey, loading: primaryKeyLoading } = useRequest(
     () => {
+      if (isNil(currentObj)) {
+        return Promise.resolve(undefined);
+      }
       return listOntologyPhysicalProperties({
         objectTypeIdList: [Number(currentObj?.id)],
         isPrimary: 1,
@@ -41,7 +46,6 @@ export const ObjectInstanceSelect = (props: ObjInsProps) => {
       });
     },
     {
-      ready: !!currentObj,
       refreshDeps: [currentObj]
     }
   );
@@ -51,7 +55,7 @@ export const ObjectInstanceSelect = (props: ObjInsProps) => {
     (nextId?: number, objType?: ObjectType) => {
       onChange?.({
         objectTypeID: nextId,
-        objInsID: []
+        objInsID: undefined
       });
       setCurrentObj(objType);
     },
@@ -67,10 +71,11 @@ export const ObjectInstanceSelect = (props: ObjInsProps) => {
         disabled={disabled}
         ontologyModelID={+OSId}
         primaryKey={'code'}
+        getPopupContainer={props.getPopupContainer as any}
       />
       <InterfaceSelect
         objectTypeId={currentObj?.id}
-        placeholder={primaryKey ? `请选择对象实例` : '请先选择对象类型'}
+        placeholder={!!primaryKey ? `请选择对象实例` : '请先选择对象类型'}
         primaryKey={primaryKey}
         disabled={primaryKeyLoading || disabled}
         className={styles['ins-sel']}
@@ -78,11 +83,13 @@ export const ObjectInstanceSelect = (props: ObjInsProps) => {
         value={objInsID}
         searchKey={'code'}
         onChange={(v) => {
+          debugger;
           onChange?.({
             ...value,
             objInsID: v
           });
         }}
+        getPopupContainer={props.getPopupContainer as any}
       />
     </div>
   );

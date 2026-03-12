@@ -11,11 +11,12 @@ import {
   OntologyFunctionItem,
   OntologyFunctionParam
 } from '@/pages/ontologyScene/types/ontologyFunction';
-import { Table, TableColumnProps } from '@arco-design/web-react';
+import { Message, Table, TableColumnProps } from '@arco-design/web-react';
 import styles from './index.module.scss';
 import { useRequest } from 'ahooks';
 import { getFunctionDetail } from '@/api/ontologySceneLibrary/ontologyFunction';
 import { isNil } from 'lodash-es';
+import { EllipsisPopover } from '@ceai-front/arco-material';
 
 interface IProps extends OSDrawerProps {
   data?: number;
@@ -122,7 +123,17 @@ export const FunctionDetailDrawer = (props: IProps) => {
             <div className={styles['info-item']}>
               <div className={styles['info-label']}>显示名称</div>
               <div className={styles['info-value']}>
-                {basicInfo.displayName}
+                <EllipsisPopover
+                  value={basicInfo?.description || '-'}
+                  preferTypography
+                  ellipsis={{
+                    showTooltip: {
+                      type: 'tooltip'
+                    }
+                  }}
+                >
+                  {basicInfo?.description || '-'}
+                </EllipsisPopover>
               </div>
             </div>
             <div className={styles['info-item']}>
@@ -134,7 +145,17 @@ export const FunctionDetailDrawer = (props: IProps) => {
             <div className={styles['info-item']}>
               <div className={styles['info-label']}>描述说明</div>
               <div className={styles['info-value']}>
-                {basicInfo.description}
+                <EllipsisPopover
+                  value={basicInfo?.description || '-'}
+                  preferTypography
+                  ellipsis={{
+                    showTooltip: {
+                      type: 'tooltip'
+                    }
+                  }}
+                >
+                  {basicInfo?.description || '-'}
+                </EllipsisPopover>
               </div>
             </div>
           </div>

@@ -133,3 +133,12 @@ $border-color: #dfe2eb;
     }
   }
 }
+
+.resize-box-trigger {
+  justify-content: flex-start;
+}
+
+.del-field {
+  padding: 0;
+  width: max-content !important;
+}
