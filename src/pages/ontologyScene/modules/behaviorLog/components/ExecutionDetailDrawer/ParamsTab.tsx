@@ -52,32 +52,81 @@ const ObjectRefRenderer: React.FC<{ value: string }> = ({ value }) => {
   useEffect(() => {
     const fetchObjectTypeDetail = async () => {
       try {
-        // 解析 ObjectRef 字符串: ObjectRef(object_type="85", pk=王五10)
-        const match = value.match(
-          /ObjectRef\(object_type="(\d+)",\s*pk=([^)]+)\)/
-        );
-        if (!match) {
+        // 解析 ObjectRef 字符串: ObjectRef(object_type="user0123456789", pk="张三")
+        // 使用更灵活的解析方式
+        if (!value.startsWith('ObjectRef(') || !value.endsWith(')')) {
           setDisplayContent(value);
           setLoading(false);
           return;
         }
 
-        const [, objectTypeId, pk] = match;
+        // 提取括号内的内容
+        const content = value.slice(10, -1); // 去掉 "ObjectRef(" 和 ")"
 
+        // 分割参数，处理可能包含引号的情况
+        const params = content.split(',').map((param) => param.trim());
+
+        let objectTypeId = '';
+        let pk = '';
+
+        // 解析每个参数
+        for (const param of params) {
+          if (param.startsWith('object_type=')) {
+            objectTypeId = param.split('=')[1].replace(/"/g, '').trim();
+          } else if (param.startsWith('pk=')) {
+            pk = param.split('=')[1].replace(/"/g, '').trim();
+          }
+        }
+
+        if (!objectTypeId || !pk) {
+          setDisplayContent(value);
+          setLoading(false);
+          return;
+        }
+        console.log('objectTypeId', objectTypeId);
         // 调用 API 获取对象类型详情
+        // 检查 objectTypeId 是否为数字
+        const numericId = Number(objectTypeId);
+        console.log('numericId', numericId);
+        if (isNaN(numericId)) {
+          // 如果不是数字，可能是字符串类型的 ID，暂时显示原始值
+          // 或者可以尝试其他 API 来获取详情
+          setDisplayContent(
+            <div className="flex items-center gap-2">
+              <span>
+                {objectTypeId} / {pk}
+              </span>
+            </div>
+          );
+          setLoading(false);
+          return;
+        }
+
         const response = await getOntologyObjectTypeDetail({
-          id: Number(objectTypeId)
+          id: numericId
         });
 
         if (response.data) {
           const { icon, name } = response.data;
 
+          console.log('ObjectRef API response:', { icon, name, pk });
+          console.log(
+            'Available icon options:',
+            OBJECT_TYPE_ICON_OPTIONS.map((opt) => opt.value)
+          );
+
           // 匹配图标
           const iconOption = OBJECT_TYPE_ICON_OPTIONS.find(
             (option) => option.value === icon
           );
+
+          console.log('Found iconOption:', iconOption);
+
           const IconComponent =
             iconOption?.icon ?? OBJECT_TYPE_ICON_OPTIONS[0].icon;
+
+          console.log('IconComponent:', IconComponent);
+          console.log('Default icon (fallback):', OBJECT_TYPE_ICON_OPTIONS[0]);
 
           // 渲染：图标 + 名称 / pk
           setDisplayContent(
@@ -89,6 +138,7 @@ const ObjectRefRenderer: React.FC<{ value: string }> = ({ value }) => {
             </div>
           );
         } else {
+          console.log('No response.data from API');
           setDisplayContent(value);
         }
       } catch (error) {
