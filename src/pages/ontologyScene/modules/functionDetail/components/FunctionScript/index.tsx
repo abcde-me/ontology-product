@@ -1,7 +1,8 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import styles from './index.module.scss';
-import { Button, Tooltip } from '@arco-design/web-react';
+import { Button, Message, Space, Tooltip } from '@arco-design/web-react';
 import {
+  IconCopy,
   IconDown,
   IconExpand,
   IconFile,
@@ -11,7 +12,12 @@ import {
   IconShrink,
   IconToBottom
 } from '@arco-design/web-react/icon';
-import { DotStatus, ProButton } from '@ceai-front/arco-material';
+import {
+  CopyItemIcon,
+  copyToClipboard,
+  DotStatus,
+  ProButton
+} from '@ceai-front/arco-material';
 import CodeMirror from '@uiw/react-codemirror';
 import { python } from '@codemirror/lang-python';
 import { lintGutter } from '@codemirror/lint';
@@ -43,9 +49,18 @@ export const FunctionScript = (
     return extension.concat([getFreezeRanges(value)]);
   }, [value]);
 
+  const currentRunLog =
+    runInfo?.runLog?.map((item, index) => item.run_log).join('\n') || '';
+
   return (
     <>
-      <div className={classNames([styles['function-body'], props.className])}>
+      <div
+        className={classNames([
+          styles['function-body'],
+          props.className,
+          disabled ? 'bg-[var(--color-fill-2)]' : ''
+        ])}
+      >
         <div
           className={classNames({
             [styles['pycode-container']]: true,
@@ -94,39 +109,56 @@ export const FunctionScript = (
                   setLogOpen((p) => !p);
                 }}
               >
-                {logOpen ? <IconDown /> : <IconRight />}
-                运行结果
-                {runInfo.run_status === 1 && (
-                  <div className={'flex items-center gap-2 text-[#6E7B8D]'}>
-                    运行中
-                    <IconLoading style={{ color: '#184FF2' }} />
-                  </div>
-                )}
-                {runInfo.run_status === 2 && (
-                  <DotStatus color={'#10B981'} text={'运行成功'} />
-                )}
-                {runInfo.run_status === 3 && (
-                  <DotStatus color={'#E52E2D'} text={'运行失败'} />
-                )}
-                {runInfo.run_status === 4 && (
-                  <DotStatus color={'#E52E2D'} text={'已被手动停止'} />
+                <Space>
+                  {logOpen ? <IconDown /> : <IconRight />}
+                  运行结果
+                  {runInfo.run_status === 1 && (
+                    <div className={'flex items-center gap-2 text-[#6E7B8D]'}>
+                      运行中
+                      <IconLoading style={{ color: '#184FF2' }} />
+                    </div>
+                  )}
+                  {runInfo.run_status === 2 && (
+                    <DotStatus color={'#10B981'} text={'运行成功'} />
+                  )}
+                  {runInfo.run_status === 3 && (
+                    <DotStatus color={'#E52E2D'} text={'运行失败'} />
+                  )}
+                  {runInfo.run_status === 4 && (
+                    <DotStatus color={'#E52E2D'} text={'已被手动停止'} />
+                  )}
+                </Space>
+                {!!currentRunLog && (
+                  <Tooltip
+                    getPopupContainer={() => {
+                      return (
+                        document.querySelector('#functionSettingContainer') ||
+                        document.body
+                      );
+                    }}
+                    content={'复制'}
+                  >
+                    <Button
+                      className={styles['copy-btn']}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        copyToClipboard(currentRunLog);
+                      }}
+                      icon={<IconCopy />}
+                      type={'text'}
+                    />
+                  </Tooltip>
                 )}
               </div>
-              <div
+              <pre
                 className={classNames({
                   [styles['run-log-wrapper']]: true,
                   visible: logOpen,
                   hidden: !logOpen
                 })}
               >
-                {runInfo.runLog
-                  ?.map((item, index) => item.run_log)
-                  .join('\n')
-                  .split('\n')
-                  .map((l, i) => {
-                    return <p key={i}>{l}</p>;
-                  })}
-              </div>
+                {currentRunLog}
+              </pre>
             </ResizeBoxWithCursorChange>
           </div>
         )}

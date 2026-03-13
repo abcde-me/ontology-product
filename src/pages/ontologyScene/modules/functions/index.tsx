@@ -135,18 +135,25 @@ export default function OntologySceneFunctions() {
       dataIndex: 'name',
       ellipsis: true,
       render: (value, record) => (
-        <Tooltip content={value}>
-          <div
+        <div
+          onClick={() => {
+            setCurrentFunction(record);
+          }}
+          className={'max-w-full overflow-hidden'}
+        >
+          <EllipsisPopover
             className={
-              'hover-blue w-max max-w-full overflow-hidden overflow-ellipsis whitespace-nowrap font-PingFangSc text-[14px] font-medium leading-[22px]'
+              'hover-blue  font-PingFangSc text-[14px] font-medium leading-[22px]'
             }
-            onClick={() => {
-              setCurrentFunction(record);
+            value={value}
+            preferTypography
+            ellipsis={{
+              showTooltip: {
+                type: 'tooltip'
+              }
             }}
-          >
-            {value}
-          </div>
-        </Tooltip>
+          />
+        </div>
       )
     },
     {
