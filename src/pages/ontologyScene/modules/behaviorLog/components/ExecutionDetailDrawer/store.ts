@@ -1,13 +1,7 @@
 import { create } from 'zustand';
 import { BehaviorLogItem } from '../../types';
 import { ParamItem, OutputParamItem } from './types';
-import {
-  fetchBehaviorLogDetail,
-  fetchBehaviorLogInputParams,
-  fetchBehaviorLogOutputParams,
-  fetchBehaviorLogRunLogs,
-  fetchBehaviorLogExecutionDetail
-} from '../../services/behaviorLogApi';
+import { fetchBehaviorLogDetail } from '../../services/behaviorLogApi';
 
 interface ExecutionDetailStore {
   // 状态
@@ -66,12 +60,8 @@ export const useExecutionDetailStore = create<ExecutionDetailStore>(
     loadExecutionDetail: async (id: string) => {
       set({ loading: true });
       try {
-        console.log('开始加载执行详情，ID:', id);
-
         // 只调用详情接口，所有数据都从这个接口获取
         const detail = await fetchBehaviorLogDetail(Number(id));
-
-        console.log('执行详情加载成功:', detail);
 
         // 解析入参（JSON字符串转数组）
         let params: ParamItem[] = [];
