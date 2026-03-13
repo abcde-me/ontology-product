@@ -1198,6 +1198,10 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
                         overflow: 'hidden',
                         textOverflow: 'ellipsis'
                       }}
+                      virtualListProps={{
+                        threshold: 100,
+                        isStaticItemHeight: true
+                      }}
                     />
                   </div>
                 </FormItem>

@@ -35,33 +35,57 @@
 
 // Cascader 下拉菜单样式（通过 dropdownMenuClassName 应用）
 .link-type-cascader-dropdown {
-  :global(.arco-cascader-list-column) {
-    width: 300px !important;
-  }
-
-  // 确保选项内容能够正确显示和溢出处理
-  :global(.arco-cascader-list-item) {
-    padding: 8px 12px;
-  }
-
-  :global(.arco-cascader-list-item-label) {
-    width: 100%;
-    overflow: hidden;
-    padding: 0 !important;
-  }
-
-  // 为第二层（数据表）选项添加样式，确保图标正确显示
-  :global(.arco-cascader-list-item) {
-    :global(.table-option-with-icon) {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      width: 100%;
-      gap: 8px;
+  :global {
+    // 列宽度
+    .arco-cascader-list-column {
+      width: 300px !important;
     }
-  }
 
-  :global(.arco-cascader-list-empty) {
-    width: unset !important;
+    // 列表项基础样式
+    .arco-cascader-list-item,
+    .arco-cascader-list-search-item {
+      font-size: 14px !important;
+      color: var(--color-text-1) !important;
+    }
+
+    // 列表项悬停和激活状态
+    .arco-cascader-list-item:hover,
+    .arco-cascader-list-search-item-hover {
+      background: var(--primary-primary-1, #eef6ff);
+    }
+
+    .arco-cascader-list-item-active {
+      background: var(--primary-primary-1, #eef6ff);
+    }
+
+    // 搜索项特殊样式
+    .arco-cascader-list-search-item {
+      padding: 0px 12px;
+    }
+
+    // 确保选项内容能够正确显示和溢出处理
+    .arco-cascader-list-item {
+      padding: 8px 12px;
+
+      // 为第二层（数据表）选项添加样式，确保图标正确显示
+      .table-option-with-icon {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+        gap: 8px;
+      }
+    }
+
+    // 列表项标签样式
+    .arco-cascader-list-item-label {
+      width: 100%;
+      overflow: hidden;
+      padding: 0 !important;
+    }
+
+    // .arco-cascader-list-empty {
+    //   width: unset !important;
+    // }
   }
 }

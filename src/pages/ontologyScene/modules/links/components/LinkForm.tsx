@@ -1288,6 +1288,10 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
                     <div className="flex items-center">
                       <Cascader
                         placeholder="请选择数据库/表"
+                        virtualListProps={{
+                          threshold: 100,
+                          isStaticItemHeight: true
+                        }}
                         dropdownMenuClassName={
                           styles['link-type-cascader-dropdown']
                         }
