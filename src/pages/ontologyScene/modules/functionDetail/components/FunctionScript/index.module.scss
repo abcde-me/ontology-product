@@ -11,6 +11,7 @@ $border-color: #dfe2eb;
   display: flex;
   flex-direction: column;
   position: relative;
+  height: 100%;
 
   :global {
     .cm-focused {

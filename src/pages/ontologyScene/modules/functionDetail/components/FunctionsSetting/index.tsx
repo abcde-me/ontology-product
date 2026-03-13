@@ -40,7 +40,6 @@ import {
   FormItem,
   ResizeBoxWithCursorChange
 } from '@/pages/ontologyScene/componens';
-import { isNil } from 'lodash-es';
 import { buildTestFunctionData } from '@/pages/ontologyScene/modules/functionDetail/utils';
 import { useParams } from 'react-router-dom';
 import { UploadItem } from '@arco-design/web-react/es/Upload';
@@ -440,11 +439,10 @@ export const FunctionsSetting = (props: {
             {testIng ? '停止运行' : '运行'}
           </Button>
         </div>
-        <div className={`w-max ${styles['fullscreen-statue']}`}></div>
         <FormItemWithTooltip
           content={props.disabled ? '该函数已被行为绑定，不可修改' : ''}
-          noStyle
           field={'content'}
+          className={'mb-0 flex-1 overflow-hidden'}
         >
           <FunctionScript
             className={classNames({
