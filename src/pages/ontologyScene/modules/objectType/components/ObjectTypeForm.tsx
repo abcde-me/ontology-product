@@ -1241,6 +1241,7 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
                 </div>
               ) : (
                 <Table
+                  scroll={{ x: true }}
                   columns={attributeColumns}
                   data={attributeFields}
                   rowKey={(record) =>

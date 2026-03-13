@@ -170,8 +170,9 @@ const BindPublicAttributeModal: React.FC<BindPublicAttributeModalProps> = ({
       title: '公共属性名称',
       dataIndex: 'comment',
       width: 160,
+      tooltip: true,
       render: (value) => {
-        return <EllipsisPopover value={value || '-'} />;
+        return <EllipsisPopover preferTypography value={value || '-'} />;
       }
     },
     {
@@ -229,6 +230,7 @@ const BindPublicAttributeModal: React.FC<BindPublicAttributeModalProps> = ({
       style={{ width: 800 }}
     >
       <Table
+        scroll={{ x: true }}
         columns={columns}
         loading={loading}
         data={publicProperties}

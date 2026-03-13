@@ -413,7 +413,7 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
       {
         title: '表字段',
         dataIndex: 'tableField',
-        width: 375,
+        width: 365,
         render: (value) => <span>{value}</span>
       },
       {
@@ -437,7 +437,7 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
       {
         title: '属性名称',
         dataIndex: 'attributeName',
-        width: 435,
+        width: 365,
         render: (value, record, index) => (
           <Input
             value={value}
@@ -1063,7 +1063,7 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
                 <div className="flex-1 rounded-[4px] bg-[#FAFBFF] p-[12px]">
                   <ObjectTypeSelect
                     ontologyModelID={ontologyModelID}
-                    label="源对象类型："
+                    label="源对象类型"
                     value={sourceObjectType}
                     onChange={(val) => {
                       form.setFieldValue('sourceObjectType', val);
@@ -1096,7 +1096,7 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
                     <div className="flex-1 flex-1 rounded-[4px] bg-[#FAFBFF] p-[12px]">
                       <ObjectTypeSelect
                         ontologyModelID={ontologyModelID}
-                        label="目标对象类型："
+                        label="目标对象类型"
                         value={targetObjectType}
                         onChange={(val) => {
                           form.setFieldValue('targetObjectType', val);
@@ -1130,7 +1130,6 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
                           <Tooltip content="选择目标对象类型后，会自动关联目标对象类型的主键属性">
                             <IconQuestionCircle className="cursor-pointer text-[#86909C]" />
                           </Tooltip>
-                          ：
                         </span>
                       </div>
                       <Input.Group
@@ -1517,6 +1516,7 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
                     </div>
                   ) : (
                     <Table
+                      scroll={{ x: true }}
                       columns={attributeColumns}
                       data={attributeFields}
                       rowKey={(record) => record.tableField}
