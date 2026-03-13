@@ -67,7 +67,6 @@ export const FunctionScript = (
             [styles['pycode-disabled']]: disabled
           })}
         >
-          {disabled && <div className={styles['code-mask']} />}
           <CodeMirror
             extensions={extensions}
             basicSetup={{

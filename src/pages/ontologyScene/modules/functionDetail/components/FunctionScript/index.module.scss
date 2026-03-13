@@ -159,4 +159,8 @@ $border-color: #dfe2eb;
       background: var(--color-fill-2) !important;
     }
   }
+
+  &:hover {
+    cursor: not-allowed;
+  }
 }
