@@ -162,7 +162,7 @@ export default function Header({
           <img className="h-[18px]" src={data?.logoPic || HeaderLogo} />
           <div className="mx-[6px] h-[18px] w-[1px] bg-white"></div>
           <div className="text-[16px] leading-[22px] text-white">
-            多模态数据治理平台
+            业务本体构建平台
           </div>
         </a>
         <div className="project-selector ml-[24px] flex items-center">
