@@ -9,7 +9,7 @@
 
 .status-card {
   display: flex;
-  gap: 16px;
+  gap: 12px;
   padding: 12px 16px;
   border-radius: 8px;
   flex-wrap: wrap;
@@ -23,6 +23,21 @@
   min-width: 100px;
   flex: 1;
   max-width: 100%;
+
+  // 为时间字段提供更多空间
+  &:nth-child(5), // 开始时间
+  &:nth-child(6) {
+    // 结束时间
+    flex: 1.5;
+    min-width: 140px;
+  }
+
+  // 状态字段可以更紧凑
+  &:nth-child(1) {
+    // 状态
+    flex: 0.8;
+    min-width: 80px;
+  }
 
   .label {
     font-size: 14px;
