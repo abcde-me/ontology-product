@@ -83,7 +83,6 @@ export const ObjectInstanceSelect = (props: ObjInsProps) => {
         value={objInsID}
         searchKey={'code'}
         onChange={(v) => {
-          debugger;
           onChange?.({
             ...value,
             objInsID: v

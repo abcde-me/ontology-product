@@ -38,7 +38,7 @@ import { ONTOLOGY_PERMISSIONS } from '@/config/permissions';
 const baseUrl = '/tenant/compute/modaforge/ontologyScene/detail';
 
 export const ActionList = (props: {
-  onViewDetail: (data: BehaviorActionItem) => void;
+  onViewDetail: (data?: BehaviorActionItem) => void;
 }) => {
   // 查看的对象类型
   const [currentObj, setCurrentObj] = useState<string>();
@@ -77,6 +77,12 @@ export const ActionList = (props: {
     }
   );
 
+  const closeDrawer = () => {
+    setCurrentObj(undefined);
+    setCurrentFunction(undefined);
+    props.onViewDetail(undefined);
+  };
+
   // 从 URL 的 search 参数同步到表单
   useEffect(() => {
     const currentFilter = form.getFieldValue('filter');
@@ -105,20 +111,26 @@ export const ActionList = (props: {
       title: '行为名称',
       dataIndex: 'name',
       render: (value, record) => (
-        <EllipsisPopover
-          value={
-            <p
-              onClick={() => {
-                props.onViewDetail(record);
-              }}
-              className={
-                'hover-blue w-max max-w-full overflow-hidden overflow-ellipsis whitespace-nowrap font-PingFangSc text-[14px] font-medium leading-[22px]'
+        <div
+          className={'max-w-full overflow-hidden'}
+          onClick={() => {
+            closeDrawer();
+            props.onViewDetail(record);
+          }}
+        >
+          <EllipsisPopover
+            className={
+              'hover-blue font-PingFangSc text-[14px] font-medium leading-[22px]'
+            }
+            value={value}
+            preferTypography
+            ellipsis={{
+              showTooltip: {
+                type: 'tooltip'
               }
-            >
-              {value}
-            </p>
-          }
-        />
+            }}
+          />
+        </div>
       )
     },
     {
@@ -156,6 +168,7 @@ export const ActionList = (props: {
           )}
           onClick={() => {
             if (actionDetail.objectTypeId! < 0) return;
+            closeDrawer();
             setCurrentObj((actionDetail.objectTypeId || '').toString());
           }}
           className={styles['obj-tag']}
@@ -167,14 +180,18 @@ export const ActionList = (props: {
       dataIndex: 'functionName',
       render: (value, record) => (
         <div
-          className={
-            'hover-blue w-full overflow-hidden text-ellipsis whitespace-nowrap font-PingFangSc text-[14px] font-normal leading-[22px] '
-          }
+          className={'max-w-full overflow-hidden'}
           onClick={() => {
+            closeDrawer();
             setCurrentFunction(record.functionId);
           }}
         >
-          {value}
+          <EllipsisPopover
+            className={'hover-blue text-[14px] font-normal leading-[22px] '}
+            value={value}
+            preferTypography
+            ellipsis={{ showTooltip: { type: 'tooltip' } }}
+          />
         </div>
       )
     },

@@ -112,6 +112,13 @@ $border-color: #dfe2eb;
     font-size: 14px;
     line-height: 22px;
     color: #1e293b;
+    justify-content: space-between;
+
+    &:hover {
+      .copy-btn {
+        visibility: visible;
+      }
+    }
 
     :global {
       .aa-dot-status span {
@@ -131,11 +138,16 @@ $border-color: #dfe2eb;
     overflow: auto;
     background: white;
     border-bottom-right-radius: 4px;
-    font-family: Monaco;
-    font-weight: 400;
-    font-size: 14px;
-    line-height: 22px;
-    white-space: nowrap;
+    white-space: pre !important;
+    font-family: Monaco !important;
+    font-weight: 400 !important;
+    font-size: 14px !important;
+    line-height: 22px !important;
+  }
+
+  .copy-btn {
+    justify-self: end;
+    visibility: hidden;
   }
 }
 
