@@ -71,7 +71,8 @@ export const deleteOntologyObjectType = async (params: {
 };
 
 export const getOntologyObjectTypeDetail = async (params: {
-  code: string;
+  id?: number;
+  code?: string;
 }): Promise<ApiRes<GetOntologyObjectTypeDetailRes>> => {
   return await UAPI.RES.GetOntologyObjectTypeApi({})
     .post(params)

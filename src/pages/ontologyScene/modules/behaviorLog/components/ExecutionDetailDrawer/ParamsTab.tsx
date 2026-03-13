@@ -84,6 +84,7 @@ const ObjectRefRenderer: React.FC<{ value: string }> = ({ value }) => {
           return;
         }
 
+        // 调用 API 获取对象类型详情
         const response = await getOntologyObjectTypeDetail({
           code: objectTypeId
         });
@@ -99,7 +100,7 @@ const ObjectRefRenderer: React.FC<{ value: string }> = ({ value }) => {
           const IconComponent =
             iconOption?.icon ?? OBJECT_TYPE_ICON_OPTIONS[0].icon;
 
-          // 渲染：图标 + 名称 / pk
+          // 渲染：图标 + objectTypeId / pk
           setDisplayContent(
             <div className="flex items-center gap-2">
               <IconComponent className="h-4 w-4 flex-shrink-0" />
@@ -109,7 +110,6 @@ const ObjectRefRenderer: React.FC<{ value: string }> = ({ value }) => {
             </div>
           );
         } else {
-          console.log('No response.data from API');
           setDisplayContent(value);
         }
       } catch (error) {
@@ -208,7 +208,7 @@ const ParamValueRenderer: React.FC<{ value: any; record: ParamItem }> = ({
           ? 'attachment-icon'
           : item.icon || item.ontologyObjectTypeIcon,
       onClick: () => {
-        console.log('Click object type:', item);
+        // 可以在这里添加点击处理逻辑
       }
     }));
 
