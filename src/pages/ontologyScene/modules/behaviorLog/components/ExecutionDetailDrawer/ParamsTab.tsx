@@ -83,57 +83,28 @@ const ObjectRefRenderer: React.FC<{ value: string }> = ({ value }) => {
           setLoading(false);
           return;
         }
-        console.log('objectTypeId', objectTypeId);
-        // 调用 API 获取对象类型详情
-        // 检查 objectTypeId 是否为数字
-        const numericId = Number(objectTypeId);
-        console.log('numericId', numericId);
-        if (isNaN(numericId)) {
-          // 如果不是数字，可能是字符串类型的 ID，暂时显示原始值
-          // 或者可以尝试其他 API 来获取详情
-          setDisplayContent(
-            <div className="flex items-center gap-2">
-              <span>
-                {objectTypeId} / {pk}
-              </span>
-            </div>
-          );
-          setLoading(false);
-          return;
-        }
 
         const response = await getOntologyObjectTypeDetail({
-          id: numericId
+          code: objectTypeId
         });
 
         if (response.data) {
-          const { icon, name } = response.data;
-
-          console.log('ObjectRef API response:', { icon, name, pk });
-          console.log(
-            'Available icon options:',
-            OBJECT_TYPE_ICON_OPTIONS.map((opt) => opt.value)
-          );
+          const { icon } = response.data;
 
           // 匹配图标
           const iconOption = OBJECT_TYPE_ICON_OPTIONS.find(
             (option) => option.value === icon
           );
 
-          console.log('Found iconOption:', iconOption);
-
           const IconComponent =
             iconOption?.icon ?? OBJECT_TYPE_ICON_OPTIONS[0].icon;
-
-          console.log('IconComponent:', IconComponent);
-          console.log('Default icon (fallback):', OBJECT_TYPE_ICON_OPTIONS[0]);
 
           // 渲染：图标 + 名称 / pk
           setDisplayContent(
             <div className="flex items-center gap-2">
               <IconComponent className="h-4 w-4 flex-shrink-0" />
               <span>
-                {name} / {pk}
+                {objectTypeId} / {pk}
               </span>
             </div>
           );
