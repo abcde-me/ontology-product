@@ -28,7 +28,6 @@ import PageLayout from './pages/admin/layout';
 import { store } from './store/createStore';
 import type { GlobalState } from './store';
 import { GlobalContext } from './context';
-import changeTheme from './utils/changeTheme';
 import useStorage from './utils/useStorage';
 import {
   init as initI18n,
@@ -292,10 +291,10 @@ function App() {
           <Redirect from="/login" to="/tenant/compute/modaforge/login" exact />
           <Redirect
             from="/modaforge"
-            to="/tenant/compute/modaforge/connection"
+            to="/tenant/compute/modaforge/home"
             exact
           />
-          <Redirect from="/" to="/tenant/compute/modaforge/connection" exact />
+          <Redirect from="/" to="/tenant/compute/modaforge/home" exact />
           <Route
             path={'/'}
             render={({ history }) => <PageLayout history={history} />}
@@ -312,7 +311,6 @@ function Index() {
     LAST_LANGUAGE_LOCAL_STORAGE_KEY,
     FALLBACK_LNG
   );
-  const [theme, setTheme] = useStorage('arco-theme', 'light');
 
   function getArcoLocale() {
     switch (lang) {
@@ -325,15 +323,9 @@ function Index() {
     }
   }
 
-  useEffect(() => {
-    changeTheme(theme);
-  }, [theme]);
-
   const contextValue = {
     lang,
-    setLang,
-    theme,
-    setTheme
+    setLang
   };
 
   return (

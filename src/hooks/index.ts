@@ -9,5 +9,9 @@ export {
   useUserPermissions
 } from './usePermission';
 
-// 编辑器相关 hooks
-export { useEditor } from './useEditor';
+// 表格相关 hooks
+export { default as useArcoTable } from './use-arco-table';
+
+// 工具类 hooks
+export { default as useSafeSelector } from './use-safe-selector';
+export { useScrollTo } from './useScrollTo';

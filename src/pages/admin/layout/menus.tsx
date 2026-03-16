@@ -1,49 +1,22 @@
 import React from 'react';
 import { isWujie } from '@/utils/env';
+import { IconHome } from '@arco-design/web-react/icon';
 import {
-  CONNECTION_PERMISSIONS,
-  DATA_LOAD_PERMISSIONS,
-  WORKFLOW_LIST_PERMISSIONS,
-  WORKFLOW_TASK_PERMISSIONS,
-  DATA_CATALOG_PERMISSIONS,
-  DATA_MANAGEMENT_PERMISSIONS,
-  PYSPARK_PERMISSIONS,
-  SQL_PERMISSIONS,
-  REQUIREMENT_PERMISSIONS,
-  ANNOTATION_TASK_PERMISSIONS,
+  ONTOLOGY_PERMISSIONS,
+  API_KEY_PERMISSIONS,
+  TAG_PERMISSIONS,
   ORGANIZATION_PERMISSIONS,
   USER_PERMISSIONS,
   USER_GROUP_PERMISSIONS,
   ROLE_PERMISSIONS,
-  PROJECT_PERMISSIONS,
-  API_KEY_PERMISSIONS,
-  TAG_PERMISSIONS,
-  DATA_ASSET_PERMISSIONS,
-  METADATA_MANAGEMENT_PERMISSIONS,
-  DATA_API_PERMISSIONS,
-  QUALITY_TASK_PERMISSIONS,
-  ONTOLOGY_PERMISSIONS
+  PROJECT_PERMISSIONS
 } from '@/config/permissions';
-import Connection from '@/assets/sider/connection.svg';
-import DataLoad from '@/assets/sider/data-load.svg';
-import DataCatalog from '@/assets/sider/data-catalog.svg';
-import DatasetManagement from '@/assets/sider/dataset-management.svg';
-import DataAsset from '@/assets/sider/data-asset.svg';
-import MetadataManagement from '@/assets/sider/metadata-management.svg';
-import DataApi from '@/assets/sider/data-api.svg';
-import DataMarket from '@/assets/sider/data-market.svg';
 import OntologyLibrary from '@/assets/sider/ontology-library.svg';
-import WorkflowList from '@/assets/sider/workflow-list.svg';
-import WorkflowTask from '@/assets/sider/workflow-task.svg';
 import OrganMenu from '@/assets/sider/organmenu.svg';
+import LabelMenu from '@/assets/label-menu.svg';
 import MemberMenu from '@/assets/sider/membermenu.svg';
 import BaseMenu from '@/assets/sider/basemenu.svg';
-import PasparkMenu from '@/assets/sider/pyspark.svg';
-import SqlMenu from '@/assets/sider/sql.svg';
-import AnnotationTask from '@/assets/sider/annotationTask.svg';
-import LabelMenu from '@/assets/label-menu.svg';
-import RequirementManagement from '@/assets/sider/requirementManagement.svg';
-import QualityTaskMenu from '@/assets/sider/qualityTask.svg';
+
 export type MenuModel = {
   title: string;
   icon?: any;
@@ -119,105 +92,18 @@ const hasActiveMenu = (name: string, search: string) => {
   const url = params.get('mdp_operation_center') || params.get('url');
   return url?.includes(name) ?? false;
 };
+
 export const menus: MenuModel[] = [
   {
     type: 'itemGroup',
-    title: '数据连接',
-    key: 'dataConnection',
+    title: '首页',
+    key: 'homeGroup',
     children: [
       {
-        title: '连接器',
-        icon: <Connection className={iconClass} />,
-        key: 'connection',
-        path: '/tenant/compute/modaforge/connection',
-        permission: CONNECTION_PERMISSIONS.LIST
-      },
-      {
-        title: '数据载入',
-        icon: <DataLoad className={iconClass} />,
-        path: '/tenant/compute/modaforge/dataLoad',
-        key: 'dataLoad',
-        permission: DATA_LOAD_PERMISSIONS.LIST
-      },
-      {
-        title: '数据目录',
-        icon: <DataCatalog className={iconClass} />,
-        key: 'dataCatalog',
-        path: '/tenant/compute/modaforge/dataCatalog',
-        permission: DATA_CATALOG_PERMISSIONS.LIST
-      }
-    ]
-  },
-  {
-    type: 'itemGroup',
-    title: '数据处理',
-    key: 'DataDeal',
-    children: [
-      {
-        title: '工作流',
-        icon: <WorkflowList className={iconClass} />,
-        key: 'workflowList',
-        path: '/tenant/compute/modaforge/workflowList',
-        permission: WORKFLOW_LIST_PERMISSIONS.LIST
-      },
-      {
-        title: '运行记录',
-        icon: <WorkflowTask className={iconClass} />,
-        key: 'workflowTask',
-        path: '/tenant/compute/modaforge/workflowTask',
-        permission: WORKFLOW_TASK_PERMISSIONS.LIST
-      }
-    ]
-  },
-  {
-    type: 'itemGroup',
-    title: '数据开发',
-    key: 'DataDevelop',
-    children: [
-      {
-        title: 'PySpark开发',
-        icon: <PasparkMenu className={iconClass} />,
-        key: 'pyspark',
-        path: '/tenant/compute/modaforge/pyspark',
-        permission: PYSPARK_PERMISSIONS.LIST
-      },
-      {
-        title: 'SQL开发',
-        icon: <SqlMenu className={iconClass} />,
-        key: 'sql',
-        path: '/tenant/compute/modaforge/sql',
-        anyPermission: [
-          SQL_PERMISSIONS.QUERY_SCRIPT_LIST,
-          SQL_PERMISSIONS.DEVELOP_SCIPT_LIST
-        ]
-      }
-    ]
-  },
-  {
-    type: 'itemGroup',
-    title: '数据标注',
-    key: 'labelMgmt',
-    children: [
-      {
-        title: '需求管理',
-        icon: <RequirementManagement className={iconClass} />,
-        key: 'requirement',
-        path: '/tenant/compute/modaforge/requirement',
-        permission: REQUIREMENT_PERMISSIONS.LIST
-      },
-      {
-        title: '标注任务',
-        icon: <AnnotationTask className={iconClass} />,
-        key: 'taskList',
-        path: '/tenant/compute/modaforge/taskList',
-        permission: ANNOTATION_TASK_PERMISSIONS.LIST
-      },
-      {
-        title: '质检任务',
-        icon: <QualityTaskMenu className={iconClass} />,
-        key: 'qualityTaskList',
-        path: '/tenant/compute/modaforge/qualityTask',
-        permission: QUALITY_TASK_PERMISSIONS.LIST
+        title: '首页',
+        icon: <IconHome className={iconClass} />,
+        key: 'home',
+        path: '/tenant/compute/modaforge/home'
       }
     ]
   },
@@ -235,42 +121,6 @@ export const menus: MenuModel[] = [
       }
     ]
   },
-  {
-    type: 'itemGroup',
-    title: '数据管理',
-    key: 'DataManagement',
-    children: [
-      {
-        title: '数据集市',
-        icon: <DataMarket className={iconClass} />,
-        key: 'datasetManagement',
-        path: '/tenant/compute/modaforge/datasetManagement',
-        permission: DATA_MANAGEMENT_PERMISSIONS.LIST
-      },
-      {
-        title: '数据资产',
-        icon: <DataAsset className={iconClass} />,
-        key: 'dataAsset',
-        path: '/tenant/compute/modaforge/dataAsset',
-        permission: DATA_ASSET_PERMISSIONS.LIST
-      },
-      {
-        title: '元数据管理',
-        icon: <MetadataManagement className={iconClass} />,
-        key: 'metadataManagement',
-        path: '/tenant/compute/modaforge/metadataManagement',
-        permission: METADATA_MANAGEMENT_PERMISSIONS.LIST
-      },
-      {
-        title: '数据API',
-        icon: <DataApi className={iconClass} />,
-        key: 'dataApi',
-        path: '/tenant/compute/modaforge/dataApi',
-        permission: DATA_API_PERMISSIONS.LIST
-      }
-    ]
-  },
-
   {
     type: 'itemGroup',
     title: '平台资源',

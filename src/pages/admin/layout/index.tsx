@@ -2,7 +2,6 @@ import { GlobalState } from '@/store';
 import '@/style/tailwind.css';
 import '@/style/markdowm.less';
 import '@/style/scrollbar.css';
-import useCheckHideRegion from '@/utils/useCheckHideRegion';
 import { Layout } from '@arco-design/web-react';
 import * as React from 'react';
 import 'github-markdown-css/github-markdown-light.css';
@@ -29,7 +28,6 @@ const LayoutPage: React.FC<LayoutPageProps> = () => {
   const { moduleType } = useSelector((state: GlobalState) => {
     return state?.plugins?.consolePluginTopbar ?? {};
   });
-  useCheckHideRegion();
   const dispatch = useDispatch();
 
   // 用户信息 store
@@ -37,14 +35,6 @@ const LayoutPage: React.FC<LayoutPageProps> = () => {
 
   // 路由数组
   const flattenRoutes = getFlatRoutes(routes);
-
-  // 身份验证超时管理：
-  // 开发环境：token有效期1分钟，剩余30秒时续约
-  // 生产环境：token有效期60分钟，剩余30分钟时续约
-  // useAuthTimeout({
-  //   renewBeforeExpire: 30, // 开发环境30秒，生产环境10分钟
-  //   renewEndpoint: '/api/auth/v1/renew'
-  // });
 
   // 获取用户信息 - 在 layout 初始化时调用
   React.useEffect(() => {
@@ -103,6 +93,19 @@ const LayoutPage: React.FC<LayoutPageProps> = () => {
       };
     }
   }, [dispatch, sidebarIsReady, t]);
+
+  // 如果用户信息还未初始化完成，显示全局loading
+  if (!isInitialized) {
+    return (
+      <div className="flex h-screen w-screen items-center justify-center">
+        <div className="text-center">
+          <div className="mb-4">
+            <div className="inline-block h-3 w-3 animate-spin rounded-full  border-solid border-blue-600 border-r-transparent"></div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   // 轮训刷新token，续约token
 

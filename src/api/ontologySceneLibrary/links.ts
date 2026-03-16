@@ -24,7 +24,7 @@ export const listOntologyLinkTypeColumn = async (
 export const listOntologyLinkTypeData = async (
   params: ListOntologyLinkTypeDataReq
 ): Promise<ApiRes<ListOntologyLinkTypeDataRes>> => {
-  return await UAPI.RES.ListOntologyLinkTypeDataApi({})
+  return await UAPI.RES.ListOntologyLinkDataApi({})
     .post(params)
     .inRegion()
     .do();

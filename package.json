@@ -1,8 +1,8 @@
 {
-  "name": "modaforge-front",
+  "name": "ontology-platform-front",
   "version": "0.1.1",
   "private": true,
-  "description": "CCXD Pro",
+  "description": "本体平台前端",
   "sideEffects": [
     "*.css",
     "*.scss",
@@ -267,10 +267,10 @@
     "workbox-webpack-plugin": "^6.4.1"
   },
   "consolePlugin": {
-    "name": "modaforge-front",
+    "name": "ontology-platform-front",
     "version": "0.0.1",
-    "displayName": "CCOS Console Plugin Template",
-    "description": "Template project for CCOS console plugins. Edit package.json to change this message and the plugin name.",
+    "displayName": "本体平台前端",
+    "description": "本体平台前端项目，专注于知识图谱构建和管理",
     "exposedModules": {
       "reduxReducer": "./src/store/plugin_index.ts",
       "AdminLayout": "./src/pages/admin/layout/index.tsx"

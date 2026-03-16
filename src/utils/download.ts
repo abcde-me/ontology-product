@@ -1,63 +1,59 @@
 import { Message } from '@arco-design/web-react';
-import { downloadFileById } from '@/api/dataCatalog';
 import { getLoginToken } from '@/utils/env';
 
 /**
- * 通用下载方法
- * @param id 文件ID
+ * 通用下载方法 - 通过URL下载文件
+ * @param url 下载URL
  * @param fileName 自定义文件名（可选）
  */
-export const downloadFile = async (id: string, fileName?: string) => {
-  //   在下载前检查token
+export const downloadFileByUrl = async (url: string, fileName?: string) => {
   const token = getLoginToken();
   if (!token) {
     Message.error('请先登录');
-    // 跳转到登录页
     return;
   }
 
   try {
-    // 调用下载API获取文件
-    const response = await downloadFileById(id);
+    const response = await fetch(url, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
 
-    let blob: Blob;
-    let downloadFileName = fileName || `file_${id}`;
+    if (!response.ok) {
+      throw new Error(`下载失败: ${response.statusText}`);
+    }
 
-    // 处理响应数据
-    if (response.data instanceof Blob) {
-      blob = response.data;
-    } else if (typeof response.data === 'string') {
-      blob = new Blob([response.data], { type: 'application/octet-stream' });
-    } else {
-      // 如果是对象，转换为JSON字符串
-      const content = JSON.stringify(response.data, null, 2);
-      blob = new Blob([content], { type: 'application/json' });
-      if (!fileName) {
-        downloadFileName = `file_${id}.json`;
+    const blob = await response.blob();
+
+    // 从响应头获取文件名（如果有）
+    let downloadFileName = fileName;
+    if (!downloadFileName) {
+      const contentDisposition = response.headers.get('content-disposition');
+      if (contentDisposition) {
+        const match = contentDisposition.match(
+          /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/
+        );
+        if (match && match[1]) {
+          downloadFileName = match[1].replace(/['"]/g, '');
+        }
       }
     }
 
-    // 从响应头获取文件名（如果有）
-    const contentDisposition = response.headers?.['content-disposition'];
-    if (contentDisposition && !fileName) {
-      const match = contentDisposition.match(
-        /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/
-      );
-      if (match && match[1]) {
-        downloadFileName = match[1].replace(/['"]/g, '');
-      }
+    if (!downloadFileName) {
+      downloadFileName = `download_${Date.now()}`;
     }
 
     // 创建下载链接并触发下载
-    const url = window.URL.createObjectURL(blob);
+    const downloadUrl = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
-    a.href = url;
+    a.href = downloadUrl;
     a.download = downloadFileName;
     a.style.display = 'none';
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
-    window.URL.revokeObjectURL(url);
+    window.URL.revokeObjectURL(downloadUrl);
 
     Message.success('文件下载成功');
     return true;
@@ -67,4 +63,21 @@ export const downloadFile = async (id: string, fileName?: string) => {
     Message.error(errorMessage);
     return false;
   }
+};
+
+/**
+ * 通用下载方法 - 通过Blob下载文件
+ * @param blob 文件Blob对象
+ * @param fileName 文件名
+ */
+export const downloadBlob = (blob: Blob, fileName: string) => {
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = fileName;
+  a.style.display = 'none';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  window.URL.revokeObjectURL(url);
 };

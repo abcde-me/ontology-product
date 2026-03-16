@@ -25,8 +25,8 @@ const LoginCard = () => {
         console.error('Invalid redirect URL:', e);
       }
     }
-    // 默认重定向到组织管理页面
-    return '/';
+    // 默认重定向到首页
+    return '/tenant/compute/modaforge/home';
   };
 
   const handleSubmit = async (values: any) => {

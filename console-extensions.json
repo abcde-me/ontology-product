@@ -4,53 +4,10 @@
     "properties": {
       "exact": true,
       "path": [
-        "/tenant/compute/appforge/appConfig",
-        "/tenant/compute/appforge/appCreate",
-        "/tenant/compute/appforge/appList",
-        "/tenant/compute/appforge/appStore",
-        "/tenant/compute/appforge/appStoreTwo",
-        "/tenant/compute/appforge/appChat",
-        "/tenant/compute/appforge/knowledgeBase",
-        "/tenant/compute/appforge/knowledgeCreate",
-        "/tenant/compute/appforge/knowledgeConfig",
-        "/tenant/compute/appforge/knowledgeDetail",
-        "/tenant/compute/appforge/knowledgeTest",
-        "/tenant/compute/appforge/documentDetail",
-        "/tenant/compute/appforge/addDocument",
-        "/tenant/compute/appforge/home",
-        "/tenant/compute/appforge/agentV2",
-        "/tenant/compute/appforge/agentCreate",
-        "/tenant/compute/appforge/agentPage",
-        "/tenant/compute/appforge/knowledgeBaseV2",
-        "/tenant/compute/appforge/createKnowledge",
-        "/tenant/compute/appforge/configurationpage",
-        "/tenant/compute/appforge/workFolwTwo",
-        "/tenant/compute/appforge/organization",
-        "/tenant/compute/appforge/member",
-        "/tenant/compute/appforge/plugins",
-        "/tenant/compute/appforge/plugin/detail",
         "/tenant/compute/modaforge/login",
         "/tenant/compute/modaforge/userinfo",
-        "/tenant/compute/appforge/apiKey",
-        "/tenant/compute/appforge/toolList",
-        "/tenant/compute/appforge/toolCreate",
-        "/tenant/compute/appforge/toolDetail",
-        "/tenant/compute/appforge/toolStore",
-        "/tenant/compute/appforge/toolStoreDetail",
-        "/tenant/compute/appforge/dataConnection",
-        "/tenant/compute/appforge/textDetailPage",
-        "/tenant/compute/appforge/dataSource",
-        "/tenant/compute/appforge/spaceMgmt",
-        "/tenant/compute/appforge/spaceDetail",
-        "/tenant/compute/appforge/prompt",
-        "/tenant/compute/appforge/workflowList",
-        "/tenant/compute/appforge/workflowConfig",
-        "/tenant/compute/appforge/workflowPublic",
-        "/tenant/compute/modaforge/dataCatalog",
-        "/tenant/compute/modaforge/datasetManagement",
-        "/tenant/compute/modaforge/requirement",
-        "/tenant/compute/modaforge/requirement/detail",
-        "/tenant/compute/modaforge/taskList"
+        "/tenant/compute/modaforge/home",
+        "/tenant/compute/modaforge/ontologyScene"
       ],
       "component": {
         "$codeRef": "AdminLayout.default"
@@ -60,17 +17,9 @@
   {
     "type": "console.header/config",
     "properties": {
-      "id": "appfore-appcreate",
-      "ssoType": "flase",
+      "id": "ontology-platform",
+      "ssoType": "false",
       "blacklist": [
-        "/tenant/compute/appforge/appCreate",
-        "/tenant/compute/appforge/appConfig",
-        "/tenant/compute/appforge/appChat",
-        "/tenant/compute/appforge/configurationpage",
-        "/tenant/compute/appforge/workflowConfig",
-        "/tenant/compute/appforge/workflowPublic",
-        "/tenant/compute/appforge/agentCreate",
-        "/tenant/compute/appforge/agentPage",
         "/tenant/compute/modaforge/login",
         "/tenant/compute/modaforge/userinfo"
       ]
@@ -79,7 +28,7 @@
   {
     "type": "console.redux-reducer",
     "properties": {
-      "scope": "consolePluginAibuilder",
+      "scope": "consolePluginnoto",
       "reducer": {
         "$codeRef": "reduxReducer"
       }
