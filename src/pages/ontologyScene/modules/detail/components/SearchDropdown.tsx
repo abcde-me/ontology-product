@@ -223,7 +223,7 @@ const SearchDropdown: React.FC<SearchDropdownProps> = ({
     const handleObjectTypeResultClick = () => {
       // 跳转到对象类型详情页面
       history.push(
-        `/tenant/compute/modaforge/ontologyScene/detail/${OSId}/objectType/list?search=${encodeURIComponent(item?.name ?? '')}`
+        `/tenant/compute/noto/ontologyScene/detail/${OSId}/objectType/list?search=${encodeURIComponent(item?.name ?? '')}`
       );
     };
 
@@ -269,7 +269,7 @@ const SearchDropdown: React.FC<SearchDropdownProps> = ({
     const handleLinkResultClick = () => {
       // 跳转到链接详情页面
       history.push(
-        `/tenant/compute/modaforge/ontologyScene/detail/${OSId}/links/list?search=${encodeURIComponent(item?.name ?? '')}`
+        `/tenant/compute/noto/ontologyScene/detail/${OSId}/links/list?search=${encodeURIComponent(item?.name ?? '')}`
       );
     };
 
@@ -360,12 +360,12 @@ const SearchDropdown: React.FC<SearchDropdownProps> = ({
       if (type === 'attribute') {
         // 跳转到属性列表页面
         history.push(
-          `/tenant/compute/modaforge/ontologyScene/detail/${OSId}/attributes/list?search=${encodeURIComponent(item?.name ?? '')}`
+          `/tenant/compute/noto/ontologyScene/detail/${OSId}/attributes/list?search=${encodeURIComponent(item?.name ?? '')}`
         );
       } else {
         // 跳转到行为列表页面
         history.push(
-          `/tenant/compute/modaforge/ontologyScene/detail/${OSId}/behaviorActions?search=${encodeURIComponent(item?.name ?? '')}`
+          `/tenant/compute/noto/ontologyScene/detail/${OSId}/behaviorActions?search=${encodeURIComponent(item?.name ?? '')}`
         );
       }
     };
@@ -401,7 +401,7 @@ const SearchDropdown: React.FC<SearchDropdownProps> = ({
     const handleFunctionResultClick = () => {
       // 跳转到函数列表页面
       history.push(
-        `/tenant/compute/modaforge/ontologyScene/detail/${OSId}/functions?search=${encodeURIComponent(item?.name ?? '')}`
+        `/tenant/compute/noto/ontologyScene/detail/${OSId}/functions?search=${encodeURIComponent(item?.name ?? '')}`
       );
     };
 

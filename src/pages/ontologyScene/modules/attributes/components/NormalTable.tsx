@@ -177,7 +177,7 @@ export default function NormalTable({ onTotalChange }: NormalTableProps = {}) {
       return;
     }
 
-    const url = `/modaforge/tenant/compute/modaforge/ontologyScene/detail/${ontologyModelID}/attributes/list?tab=public&search=${encodeURIComponent(record.ontologyPublicPropertiesName || '')}`;
+    const url = `/noto/tenant/compute/noto/ontologyScene/detail/${ontologyModelID}/attributes/list?tab=public&search=${encodeURIComponent(record.ontologyPublicPropertiesName || '')}`;
     openNewPage(url);
   };
 

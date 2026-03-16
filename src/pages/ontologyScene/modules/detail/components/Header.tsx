@@ -59,7 +59,7 @@ export default function Header({
   const searchDropdownRef = useRef<HTMLDivElement>(null);
 
   const handleBack = () => {
-    history.push('/tenant/compute/modaforge/ontologyScene/list');
+    history.push('/tenant/compute/noto/ontologyScene/list');
   };
 
   const handleEdit = () => {

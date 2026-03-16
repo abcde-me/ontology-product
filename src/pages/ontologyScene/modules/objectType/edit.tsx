@@ -134,7 +134,7 @@ export default function OntologySceneObjectTypeEdit() {
 
       Message.success('更新成功');
       history.push(
-        `/tenant/compute/modaforge/ontologyScene/detail/${OSId}/objectType/list`
+        `/tenant/compute/noto/ontologyScene/detail/${OSId}/objectType/list`
       );
     } catch (error) {
       console.error('更新失败:', error);
@@ -146,13 +146,13 @@ export default function OntologySceneObjectTypeEdit() {
 
   const handleCancel = () => {
     history.push(
-      `/tenant/compute/modaforge/ontologyScene/detail/${OSId}/objectType/list`
+      `/tenant/compute/noto/ontologyScene/detail/${OSId}/objectType/list`
     );
   };
 
   const goBack = () => {
     history.replace(
-      `/tenant/compute/modaforge/ontologyScene/detail/${OSId}/objectType/list`
+      `/tenant/compute/noto/ontologyScene/detail/${OSId}/objectType/list`
     );
   };
 

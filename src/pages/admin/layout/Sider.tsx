@@ -19,12 +19,12 @@ const MenuGroup = Menu.ItemGroup;
 const Sider = Layout.Sider;
 
 const hideSidebarPaths = [
-  '/tenant/compute/modaforge/workflowConfig',
-  '/tenant/compute/modaforge/login',
-  '/tenant/compute/modaforge/userinfo',
-  '/tenant/compute/modaforge/labelEditor',
-  '/tenant/compute/modaforge/ragDetail',
-  '/tenant/compute/modaforge/ontologyScene/detail'
+  '/tenant/compute/noto/workflowConfig',
+  '/tenant/compute/noto/login',
+  '/tenant/compute/noto/userinfo',
+  '/tenant/compute/noto/labelEditor',
+  '/tenant/compute/noto/ragDetail',
+  '/tenant/compute/noto/ontologyScene/detail'
 ];
 const collapseSidebarPaths = [];
 
@@ -66,7 +66,7 @@ export const LayoutWithSider = memo(function LayoutWithSider({ children }) {
     (isInFrame && !isWujie);
 
   const actives = useMemo(() => {
-    // console.log('modaforge actives', location.pathname, location.search, locSearch);
+    // console.log('noto actives', location.pathname, location.search, locSearch);
     const findMatch = (menus: MenuModel[]): string[] | null => {
       for (const menu of menus) {
         if (menu.children?.length && menu.children?.length > 0) {
@@ -100,10 +100,8 @@ export const LayoutWithSider = memo(function LayoutWithSider({ children }) {
 
   useEffect(() => {
     const handler = () => {
-      const isModaforge = (top ?? window).location.pathname.includes(
-        '/modaforge'
-      );
-      isModaforge && setLocSearch(window.location.search);
+      const isNoto = (top ?? window).location.pathname.includes('/noto');
+      isNoto && setLocSearch(window.location.search);
     };
     window.addEventListener('locationchange', handler);
     return () => window.removeEventListener('locationchange', handler);
@@ -270,7 +268,7 @@ export const LayoutWithSider = memo(function LayoutWithSider({ children }) {
         //   collapsed={collapsed}
         //   onCollapse={handleCollapsed}
         //   className={cn(
-        //     'modaforge-sider bg-transparent shadow-none',
+        //     'noto-sider bg-transparent shadow-none',
         //     collapsed ? 'mr-[24px] !w-[44px] bg-white' : ''
         //   )}
         // >

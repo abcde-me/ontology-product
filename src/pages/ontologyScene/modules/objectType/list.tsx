@@ -135,7 +135,7 @@ export default function OntologySceneObjectTypeList() {
   // 跳转到创建页面
   const handleCreate = () => {
     history.push(
-      `/tenant/compute/modaforge/ontologyScene/detail/${ontologyModelID}/objectType/create`
+      `/tenant/compute/noto/ontologyScene/detail/${ontologyModelID}/objectType/create`
     );
   };
 
@@ -168,7 +168,7 @@ export default function OntologySceneObjectTypeList() {
       return;
     }
     history.push(
-      `/tenant/compute/modaforge/ontologyScene/detail/${ontologyModelID}/objectType/edit/${record.id}`
+      `/tenant/compute/noto/ontologyScene/detail/${ontologyModelID}/objectType/edit/${record.id}`
     );
   };
 

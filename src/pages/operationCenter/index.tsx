@@ -19,15 +19,15 @@ function OperationCenterPage() {
     const curUrl = params.get('url');
     const mdpUrl = params.get('mdp_operation_center');
     if (curUrl && !mdpUrl && curUrl.startsWith('/operationcenter/')) {
-      bus.$emit('refresh', curUrl.replace('/operationcenter', ''), 'modaforge');
+      bus.$emit('refresh', curUrl.replace('/operationcenter', ''), 'noto');
     }
   };
 
   useEffect(() => {
-    console.log('modaforge URL before:', history);
+    console.log('noto URL before:', history);
     refreshOperationCenter(history.location.search);
     const unlisten = history.listen((location, action) => {
-      console.log('modaforge URL after:', location.search);
+      console.log('noto URL after:', location.search);
       refreshOperationCenter(location.search);
     });
 
@@ -54,7 +54,7 @@ function OperationCenterPage() {
           loading={document.createElement('span') as any}
           props={{
             embedBySingleApp: true,
-            appName: 'modaforge',
+            appName: 'noto',
             openNewPage: OpenNewPageForOperationCenter
           }}
         ></WujieReact>

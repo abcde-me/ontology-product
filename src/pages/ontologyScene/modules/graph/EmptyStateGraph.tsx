@@ -57,11 +57,11 @@ const GraphEmptyTooltipContent = ({
 
   const getRoute = () => {
     if (isObjectType)
-      return `/tenant/compute/modaforge/ontologyScene/detail/${OSId}/objectType/create`;
+      return `/tenant/compute/noto/ontologyScene/detail/${OSId}/objectType/create`;
     if (isBehavior)
-      return `/tenant/compute/modaforge/ontologyScene/detail/${OSId}/behaviorActions/create/_NEW_`;
+      return `/tenant/compute/noto/ontologyScene/detail/${OSId}/behaviorActions/create/_NEW_`;
     if (isLink)
-      return `/tenant/compute/modaforge/ontologyScene/detail/${OSId}/links/create`;
+      return `/tenant/compute/noto/ontologyScene/detail/${OSId}/links/create`;
     return '';
   };
 

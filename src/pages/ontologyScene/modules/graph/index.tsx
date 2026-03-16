@@ -63,7 +63,7 @@ const createNodesConfig = (
       const handleEdit = () => {
         if (resolvedObjectTypeId) {
           history.push(
-            `/tenant/compute/modaforge/ontologyScene/detail/${OSId}/objectType/edit/${resolvedObjectTypeId}`
+            `/tenant/compute/noto/ontologyScene/detail/${OSId}/objectType/edit/${resolvedObjectTypeId}`
           );
         }
       };

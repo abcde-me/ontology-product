@@ -203,7 +203,7 @@ function EdgePanel() {
   const handleEdit = () => {
     if (!selectedEdgeId || !OSId) return;
     history.push(
-      `/tenant/compute/modaforge/ontologyScene/detail/${OSId}/links/edit/${selectedEdgeId}`
+      `/tenant/compute/noto/ontologyScene/detail/${OSId}/links/edit/${selectedEdgeId}`
     );
   };
 

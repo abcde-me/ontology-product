@@ -1,3 +1,3 @@
 export const ProjectIdKey = '_AIProjectId_';
 
-export const MDPPrefix = '/modaforge';
+export const MDPPrefix = '/noto';

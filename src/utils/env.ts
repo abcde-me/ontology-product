@@ -18,7 +18,7 @@ export const logout = (basePath = '') => {
     (window as any).$wujie?.props?.logout();
   } else {
     if (isSingleApp) {
-      window.location.href = `/modaforge/login?redirect_uri=${encodeURIComponent(window.location.href)}`;
+      window.location.href = `/noto/login?redirect_uri=${encodeURIComponent(window.location.href)}`;
     } else {
       window.location.href = `${basePath}?redirect_uri=${encodeURIComponent(window.location.href)}`;
     }
@@ -62,7 +62,7 @@ export const OpenNewPageForOperationCenter = (page: string) => {
   } else {
     window.open(
       MDPPrefix +
-        '/tenant/compute/modaforge/operationCenter?url=' +
+        '/tenant/compute/noto/operationCenter?url=' +
         encodeURIComponent(page),
       '_blank'
     );

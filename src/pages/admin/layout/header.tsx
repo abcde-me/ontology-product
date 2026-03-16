@@ -146,7 +146,7 @@ export default function Header({
   };
 
   const goHelp = () => {
-    openNewPage('/modaforge/assets/多模态数据治理平台 - 用户手册.pdf');
+    openNewPage('/noto/assets/多模态数据治理平台 - 用户手册.pdf');
   };
 
   return (

@@ -29,7 +29,7 @@ export const init = () => {
     .init({
       backend: {
         // console compare: loadPath: '/locales/resource.json?lng={{lng}}&ns={{ns}}',
-        loadPath: '/modaforge/locales/{{lng}}/{{ns}}.json'
+        loadPath: '/noto/locales/{{lng}}/{{ns}}.json'
       },
       lng: getLastLanguage(),
       fallbackLng: FALLBACK_LNG,

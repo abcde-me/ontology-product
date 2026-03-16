@@ -103,7 +103,7 @@ export default function OntologySceneFunctions() {
     type?: 'view' | 'edit' | 'create',
     data?: OntologyFunctionItem
   ) => {
-    const baseUrl = '/tenant/compute/modaforge/ontologyScene/detail';
+    const baseUrl = '/tenant/compute/noto/ontologyScene/detail';
     history.push(
       `${baseUrl}/${ontologyModelID}/functions/${type}/${data ? data.id : '_NEW_'}`
     );

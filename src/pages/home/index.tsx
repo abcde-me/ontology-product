@@ -11,7 +11,7 @@ export default function HomePage() {
   const userInfo = useUserInfo();
 
   const handleNavigateToOntology = () => {
-    history.push('/tenant/compute/modaforge/ontologyScene');
+    history.push('/tenant/compute/noto/ontologyScene');
   };
 
   return (

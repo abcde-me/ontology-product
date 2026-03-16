@@ -58,7 +58,7 @@ export default function OSFunctionDetailPage() {
 
   const goBack = () => {
     history.replace(
-      `/tenant/compute/modaforge/ontologyScene/detail/${OSId}/functions`
+      `/tenant/compute/noto/ontologyScene/detail/${OSId}/functions`
     );
   };
 

@@ -35,7 +35,7 @@ export default function OntologySceneObjectTypeCreate() {
       if (response.status === 200 && response.code === '') {
         Message.success('创建成功');
         history.push(
-          `/tenant/compute/modaforge/ontologyScene/detail/${OSId}/objectType/list`
+          `/tenant/compute/noto/ontologyScene/detail/${OSId}/objectType/list`
         );
       } else {
         Message.error(response.message || '创建失败，请重试');
@@ -50,13 +50,13 @@ export default function OntologySceneObjectTypeCreate() {
 
   const handleCancel = () => {
     history.push(
-      `/tenant/compute/modaforge/ontologyScene/detail/${OSId}/objectType/list`
+      `/tenant/compute/noto/ontologyScene/detail/${OSId}/objectType/list`
     );
   };
 
   const goBack = () => {
     history.replace(
-      `/tenant/compute/modaforge/ontologyScene/detail/${OSId}/objectType/list`
+      `/tenant/compute/noto/ontologyScene/detail/${OSId}/objectType/list`
     );
   };
 

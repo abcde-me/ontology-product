@@ -86,18 +86,18 @@ const queryClient = new QueryClient({
 const flattenRoutes = getFlatRoutes(routes);
 const hiddenTopBarRoutes = [
   '/login',
-  '/tenant/compute/modaforge/login',
-  '/tenant/compute/modaforge/appCreate',
-  '/tenant/compute/modaforge/appConfig',
-  '/tenant/compute/modaforge/appChat',
-  '/tenant/compute/modaforge/configurationpage',
-  '/tenant/compute/modaforge/workflowConfig',
-  '/tenant/compute/modaforge/workflowPublic',
-  '/tenant/compute/modaforge/agentCreate',
-  '/tenant/compute/modaforge/labelEditor',
-  '/tenant/compute/modaforge/ragDetail',
-  '/tenant/compute/modaforge/compareFileData',
-  '/tenant/compute/modaforge/ontologyScene/detail'
+  '/tenant/compute/noto/login',
+  '/tenant/compute/noto/appCreate',
+  '/tenant/compute/noto/appConfig',
+  '/tenant/compute/noto/appChat',
+  '/tenant/compute/noto/configurationpage',
+  '/tenant/compute/noto/workflowConfig',
+  '/tenant/compute/noto/workflowPublic',
+  '/tenant/compute/noto/agentCreate',
+  '/tenant/compute/noto/labelEditor',
+  '/tenant/compute/noto/ragDetail',
+  '/tenant/compute/noto/compareFileData',
+  '/tenant/compute/noto/ontologyScene/detail'
 ];
 
 /**
@@ -105,13 +105,13 @@ const hiddenTopBarRoutes = [
  * 路由配置类似：/a/b/:c
  */
 const hiddenTopBarRouterParamsRouteKeyWords = [
-  'tenant/compute/modaforge/workflowConfig',
-  'tenant/compute/modaforge/ontologyScene/detail'
+  'tenant/compute/noto/workflowConfig',
+  'tenant/compute/noto/ontologyScene/detail'
 ];
 
 function App() {
   const localLayout = useSelector(
-    (state: GlobalState) => state?.plugins?.consolePluginmodaforge?.localLayout
+    (state: GlobalState) => state?.plugins?.consolePluginnoto?.localLayout
   );
   const location = useLocation();
   const history = useHistory();
@@ -164,7 +164,7 @@ function App() {
     if (
       projectId &&
       userActions.actions !== null &&
-      !window.location.pathname.includes('/tenant/compute/modaforge/login')
+      !window.location.pathname.includes('/tenant/compute/noto/login')
     ) {
       let finalMenus = [...menus];
       if (!userActions.isAdmin) {
@@ -258,9 +258,7 @@ function App() {
           <Header
             title="业务本体构建平台"
             openHelpLink={(linkInfo) => {
-              openNewPage(
-                '/modaforge/assets/多模态数据治理平台 - 用户手册.pdf'
-              );
+              openNewPage('/noto/assets/多模态数据治理平台 - 用户手册.pdf');
             }}
             userInfo={userInfo}
             logout={logout}
@@ -274,7 +272,7 @@ function App() {
         <Switch>
           <Route
             key="login"
-            path="/tenant/compute/modaforge/login"
+            path="/tenant/compute/noto/login"
             component={Login}
             exact
           />
@@ -288,13 +286,9 @@ function App() {
               />
             );
           })}*/}
-          <Redirect from="/login" to="/tenant/compute/modaforge/login" exact />
-          <Redirect
-            from="/modaforge"
-            to="/tenant/compute/modaforge/home"
-            exact
-          />
-          <Redirect from="/" to="/tenant/compute/modaforge/home" exact />
+          <Redirect from="/login" to="/tenant/compute/noto/login" exact />
+          <Redirect from="/noto" to="/tenant/compute/noto/home" exact />
+          <Redirect from="/" to="/tenant/compute/noto/home" exact />
           <Route
             path={'/'}
             render={({ history }) => <PageLayout history={history} />}
@@ -329,7 +323,7 @@ function Index() {
   };
 
   return (
-    <BrowserRouter basename="/modaforge">
+    <BrowserRouter basename="/noto">
       <ConfigProvider locale={getArcoLocale()}>
         <Provider store={store}>
           <QueryClientProvider client={queryClient}>

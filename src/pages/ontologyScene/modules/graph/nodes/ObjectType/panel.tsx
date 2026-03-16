@@ -328,7 +328,7 @@ const Panel: FC<any> = ({ id, data }) => {
     if (!record.ontologyPublicPropertiesName) {
       return;
     }
-    const url = `/modaforge/tenant/compute/modaforge/ontologyScene/detail/${OSId}/attributes/list?tab=public&search=${encodeURIComponent(record.ontologyPublicPropertiesName || '')}`;
+    const url = `/noto/tenant/compute/noto/ontologyScene/detail/${OSId}/attributes/list?tab=public&search=${encodeURIComponent(record.ontologyPublicPropertiesName || '')}`;
     openNewPage(url);
   };
 

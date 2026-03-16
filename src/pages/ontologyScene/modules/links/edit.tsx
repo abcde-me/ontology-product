@@ -203,7 +203,7 @@ export default function OntologySceneLinksEdit() {
       if (response.status === 200 && response.code === '') {
         Message.success('更新成功');
         history.push(
-          `/tenant/compute/modaforge/ontologyScene/detail/${OSId}/links/list`
+          `/tenant/compute/noto/ontologyScene/detail/${OSId}/links/list`
         );
       } else {
         Message.error(response.message || '更新失败，请重试');
@@ -218,13 +218,13 @@ export default function OntologySceneLinksEdit() {
 
   const handleCancel = () => {
     history.push(
-      `/tenant/compute/modaforge/ontologyScene/detail/${OSId}/links/list`
+      `/tenant/compute/noto/ontologyScene/detail/${OSId}/links/list`
     );
   };
 
   const goBack = () => {
     history.replace(
-      `/tenant/compute/modaforge/ontologyScene/detail/${OSId}/links/list`
+      `/tenant/compute/noto/ontologyScene/detail/${OSId}/links/list`
     );
   };
 

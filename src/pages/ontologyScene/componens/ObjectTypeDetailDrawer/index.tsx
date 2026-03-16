@@ -478,7 +478,7 @@ export default function ObjectTypeDetailDrawer({
   const handleEdit = () => {
     if (resolvedObjectTypeId) {
       history.push(
-        `/tenant/compute/modaforge/ontologyScene/detail/${ontologyModelID}/objectType/edit/${resolvedObjectTypeId}`
+        `/tenant/compute/noto/ontologyScene/detail/${ontologyModelID}/objectType/edit/${resolvedObjectTypeId}`
       );
     }
   };
@@ -536,7 +536,7 @@ export default function ObjectTypeDetailDrawer({
     if (!record.ontologyPublicPropertiesName) {
       return;
     }
-    const url = `/modaforge/tenant/compute/modaforge/ontologyScene/detail/${ontologyModelID}/attributes/list?tab=public&search=${encodeURIComponent(
+    const url = `/noto/tenant/compute/noto/ontologyScene/detail/${ontologyModelID}/attributes/list?tab=public&search=${encodeURIComponent(
       record.ontologyPublicPropertiesName || ''
     )}`;
     openNewPage(url);

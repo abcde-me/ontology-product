@@ -4,7 +4,7 @@ import axios, {
   AxiosResponse,
   Method
 } from 'axios';
-import { ActionEndpoints, ModaForgeResourceEndpoints } from './endpoints';
+import { ActionEndpoints, NotoResourceEndpoints } from './endpoints';
 import { getLoginToken, removeLoginToken } from '@/utils/env';
 
 const uapiAxios: AxiosInstance = axios.create(); // 创建一个独立的axios实例
@@ -23,7 +23,7 @@ type SetModuleFunction = (
 ) => Omit<UAPIChain, 'setModule' | 'withConfig'>;
 
 // 使用 keyof 和 typeof 获取 端点 的键
-type RESEndpointKeys = keyof typeof ModaForgeResourceEndpoints;
+type RESEndpointKeys = keyof typeof NotoResourceEndpoints;
 type ACTEndpointKeys = keyof typeof ActionEndpoints;
 
 type RequestFulfilledFunction = (
@@ -104,7 +104,7 @@ type Endpoint = string;
 let defaultConfig: Partial<AxiosRequestConfig> = {};
 
 // 目前是固定引入端点
-const modaForgeResEndpoints = ModaForgeResourceEndpoints;
+const notoResEndpoints = NotoResourceEndpoints;
 const actEndpoints = ActionEndpoints;
 
 const replaceUriParams = (uri: string, params: Record<string, any>) => {
@@ -284,13 +284,13 @@ for (const key in actEndpoints) {
   };
 }
 
-// 通过一种方法，ModaForgeResourceEndpoints 里每一个 key，将成为 API.RES 内对象的的 key
-for (const key in modaForgeResEndpoints) {
+// 通过一种方法，NotoResourceEndpoints 里每一个 key，将成为 API.RES 内对象的的 key
+for (const key in notoResEndpoints) {
   const resourceEndpointFunction: RESEndpointsFunction = (
     params: Record<string, string | number>
   ) => {
     const replacedUri = replaceUriParams(
-      modaForgeResEndpoints[key] as Endpoint,
+      notoResEndpoints[key] as Endpoint,
       params || {}
     );
     return {

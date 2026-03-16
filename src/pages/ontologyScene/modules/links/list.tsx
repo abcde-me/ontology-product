@@ -249,7 +249,7 @@ export default function OntologySceneLinksList() {
   // 跳转到创建页面
   const handleCreate = () => {
     history.push(
-      `/tenant/compute/modaforge/ontologyScene/detail/${OSId}/links/create`
+      `/tenant/compute/noto/ontologyScene/detail/${OSId}/links/create`
     );
   };
 
@@ -263,7 +263,7 @@ export default function OntologySceneLinksList() {
   // 处理编辑
   const handleEdit = (record: LinkInfo) => {
     history.push(
-      `/tenant/compute/modaforge/ontologyScene/detail/${OSId}/links/edit/${record.id}`
+      `/tenant/compute/noto/ontologyScene/detail/${OSId}/links/edit/${record.id}`
     );
   };
 

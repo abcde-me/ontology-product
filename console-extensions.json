@@ -4,10 +4,10 @@
     "properties": {
       "exact": true,
       "path": [
-        "/tenant/compute/modaforge/login",
-        "/tenant/compute/modaforge/userinfo",
-        "/tenant/compute/modaforge/home",
-        "/tenant/compute/modaforge/ontologyScene"
+        "/tenant/compute/noto/login",
+        "/tenant/compute/noto/userinfo",
+        "/tenant/compute/noto/home",
+        "/tenant/compute/noto/ontologyScene"
       ],
       "component": {
         "$codeRef": "AdminLayout.default"
@@ -20,8 +20,8 @@
       "id": "ontology-platform",
       "ssoType": "false",
       "blacklist": [
-        "/tenant/compute/modaforge/login",
-        "/tenant/compute/modaforge/userinfo"
+        "/tenant/compute/noto/login",
+        "/tenant/compute/noto/userinfo"
       ]
     }
   },

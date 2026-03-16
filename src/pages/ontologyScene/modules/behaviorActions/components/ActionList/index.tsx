@@ -35,7 +35,7 @@ import { ContentWithCopy } from '@/pages/ontologyScene/componens';
 import { PermissionWrapper } from '@/components/PermissionGuard';
 import { ONTOLOGY_PERMISSIONS } from '@/config/permissions';
 
-const baseUrl = '/tenant/compute/modaforge/ontologyScene/detail';
+const baseUrl = '/tenant/compute/noto/ontologyScene/detail';
 
 export const ActionList = (props: {
   onViewDetail: (data?: BehaviorActionItem) => void;

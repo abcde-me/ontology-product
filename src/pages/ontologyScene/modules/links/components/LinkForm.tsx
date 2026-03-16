@@ -1340,7 +1340,7 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
                                       e.stopPropagation();
                                       // 打开新页面，使用表的 ID（option.value）
                                       openNewPage(
-                                        `/modaforge/tenant/compute/modaforge/metadataManagement/detail?id=${option.value}&metadataType=ICEBERG`
+                                        `/noto/tenant/compute/noto/metadataManagement/detail?id=${option.value}&metadataType=ICEBERG`
                                       );
                                     }}
                                   />

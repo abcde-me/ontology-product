@@ -20,7 +20,7 @@ const resolveApp = (relativePath) => path.resolve(appDirectory, relativePath);
 //   require(resolveApp('package.json')).homepage,
 //   process.env.PUBLIC_URL
 // );
-const publicUrlOrPath = '/modaforge/';
+const publicUrlOrPath = '/noto/';
 // const buildPath = process.env.BUILD_PATH || 'build';
 const buildPath = 'dist';
 

@@ -182,10 +182,10 @@ export default function OntologySceneDetail() {
   const activeTab = React.useMemo(() => {
     const pathname = location.pathname;
     // 匹配第一个子路由段（菜单项 key），而不是最后一个
-    // 例如：/tenant/compute/modaforge/ontologyScene/detail/123/behaviorActions/create/_NEW_
+    // 例如：/tenant/compute/noto/ontologyScene/detail/123/behaviorActions/create/_NEW_
     // 应该匹配到 behaviorActions，而不是 _NEW_
     const routeMatch = pathname.match(
-      /\/tenant\/compute\/modaforge\/ontologyScene\/detail\/[^/]+\/([^/]+)/
+      /\/tenant\/compute\/noto\/ontologyScene\/detail\/[^/]+\/([^/]+)/
     );
     const matchedKey = routeMatch ? routeMatch[1] : '';
     // 验证匹配到的 key 是否是有效的菜单项 key

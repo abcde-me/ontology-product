@@ -101,7 +101,7 @@ const SceneCard: React.FC<SceneCardProps> = ({
     ) => {
       e.stopPropagation();
       history.push(
-        `/tenant/compute/modaforge/ontologyScene/detail/${item.id || ''}/${iconType}`
+        `/tenant/compute/noto/ontologyScene/detail/${item.id || ''}/${iconType}`
       );
     },
     [item, onIconClick]
@@ -343,7 +343,7 @@ export default function OntologySceneList() {
           Message.success('创建成功');
           // 创建成功后跳转到详情页
           history.push(
-            `/tenant/compute/modaforge/ontologyScene/detail/${response.data.id}`
+            `/tenant/compute/noto/ontologyScene/detail/${response.data.id}`
           );
         } else {
           Message.error(response.message || '创建失败');
@@ -410,9 +410,7 @@ export default function OntologySceneList() {
 
   // 处理卡片点击
   const handleCardClick = (item: SceneCardItem) => {
-    history.push(
-      `/tenant/compute/modaforge/ontologyScene/detail/${item.id || ''}`
-    );
+    history.push(`/tenant/compute/noto/ontologyScene/detail/${item.id || ''}`);
   };
 
   // 处理搜索（回车或点击搜索图标时触发）

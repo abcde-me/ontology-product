@@ -26,7 +26,7 @@ const LoginCard = () => {
       }
     }
     // 默认重定向到首页
-    return '/tenant/compute/modaforge/home';
+    return '/tenant/compute/noto/home';
   };
 
   const handleSubmit = async (values: any) => {

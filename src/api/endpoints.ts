@@ -16,7 +16,7 @@ export const PrefixAuthCenter = API_PREFIX + '/auth-center/api/v1';
 export const PrefixOntology = API_PREFIX + '/ontology-action/api/v1';
 
 // 多模态数据治理平台接口 - 本体相关
-export const ModaForgeResourceEndpoints = {
+export const NotoResourceEndpoints = {
   // 登录相关
   Login: PrefixUserSpace + '/Login',
   Logout: PrefixUserSpace + '/Logout',

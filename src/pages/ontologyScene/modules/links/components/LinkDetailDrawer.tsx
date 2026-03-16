@@ -259,7 +259,7 @@ export default function LinkDetailDrawer({
   const handleEdit = () => {
     if (!resolvedLinkId) return;
     history.push(
-      `/tenant/compute/modaforge/ontologyScene/detail/${OSId}/links/edit/${resolvedLinkId}`
+      `/tenant/compute/noto/ontologyScene/detail/${OSId}/links/edit/${resolvedLinkId}`
     );
   };
 

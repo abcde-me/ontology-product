@@ -51,7 +51,7 @@ export default function BehaviorActionDetailPage() {
 
   const goBack = () => {
     history.replace(
-      `/tenant/compute/modaforge/ontologyScene/detail/${OSId}/behaviorActions`
+      `/tenant/compute/noto/ontologyScene/detail/${OSId}/behaviorActions`
     );
   };
 
