@@ -174,11 +174,15 @@ function App() {
 
   // 获取用户信息 - 在 App 初始化时调用
   useEffect(() => {
+    // 如果当前在登录页，则不获取用户信息，避免因为 401 触发 logout() 导致重定向死循环
+    if (location.pathname.includes('/login')) {
+      return;
+    }
     // 只在未初始化时获取用户信息，避免重复请求
     if (!isInitialized) {
       fetchUserInfo();
     }
-  }, [fetchUserInfo, isInitialized]);
+  }, [fetchUserInfo, isInitialized, location.pathname]);
 
   // 是否单产品集成
   const isEmbedded = embedBySingleApp();
