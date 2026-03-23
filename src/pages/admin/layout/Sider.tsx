@@ -11,7 +11,7 @@ import { GetProjOrg } from '@/api/modules/project';
 import { isSameArray } from '@/utils/array';
 import { setLocalStorage, getLocalStorage } from '@/utils/storage';
 import { ProjectIdKey } from '@/utils/const';
-import { isInFrame, isWujie } from '@/utils/env';
+import { isInFrame, isWujie, embedBySingleApp } from '@/utils/env';
 
 const MenuItem = Menu.Item;
 const SubMenu = Menu.SubMenu;
@@ -59,11 +59,14 @@ export const LayoutWithSider = memo(function LayoutWithSider({ children }) {
   const lastClickPathRef = useRef<string | null>(null);
 
   // 如果是在iframe中，并且不是wujie，则隐藏侧边栏，临时以iframe的形式嵌入数据平台
+  // 或者在wujie中被单产品集成时，也隐藏侧边栏
+  const isEmbedded = embedBySingleApp();
   const sidebarHidden =
     hideSidebarPaths.some(
       (path) => path === location.pathname || location.pathname.includes(path)
     ) ||
-    (isInFrame && !isWujie);
+    (isInFrame && !isWujie) ||
+    isEmbedded; // 被单产品集成时隐藏侧边栏
 
   const actives = useMemo(() => {
     // console.log('noto actives', location.pathname, location.search, locSearch);

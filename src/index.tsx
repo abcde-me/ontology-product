@@ -48,7 +48,12 @@ import Login from './pages/login';
 import { Page404 } from './pages/errorPages';
 // import Header from './pages/admin/layout/header';
 import { Header } from '@ceai-front/arco-material';
-import { isInFrame, isWujie } from './utils/env';
+import {
+  isInFrame,
+  isWujie,
+  embedBySingleApp,
+  onRouterChange
+} from './utils/env';
 import { useUserInfo, useUserInfoStore } from './store/userInfoStore';
 import { usePathChange, usePermission } from '@/hooks';
 import { menus } from '@/pages/admin/layout/menus';
@@ -116,8 +121,15 @@ function App() {
   const location = useLocation();
   const history = useHistory();
 
-  const { userActions, setUserMenus, setUserActions, projectId, setProjectId } =
-    useUserInfoStore();
+  const {
+    userActions,
+    setUserMenus,
+    setUserActions,
+    projectId,
+    setProjectId,
+    fetchUserInfo,
+    isInitialized
+  } = useUserInfoStore();
   const { createPermissionFilter, setUserPermissions } = usePermission();
   const userInfo = useUserInfo() || {
     id: '',
@@ -159,6 +171,28 @@ function App() {
   const permissionInitializedRef = useRef(false);
   // 用于追踪项目是否刚刚切换过
   const projectSwitchedRef = useRef(false);
+
+  // 获取用户信息 - 在 App 初始化时调用
+  useEffect(() => {
+    // 只在未初始化时获取用户信息，避免重复请求
+    if (!isInitialized) {
+      fetchUserInfo();
+    }
+  }, [fetchUserInfo, isInitialized]);
+
+  // 是否单产品集成
+  const isEmbedded = embedBySingleApp();
+
+  // 监听路由变化，通知父应用
+  useEffect(() => {
+    if (isEmbedded) {
+      // 通知父应用路由变化，用于更新 URL 参数
+      onRouterChange(
+        `/noto${location.pathname}${location.search}`,
+        `/noto${location.pathname}`
+      );
+    }
+  }, [location.pathname, location.search, isEmbedded]);
 
   useEffect(() => {
     if (
@@ -211,33 +245,51 @@ function App() {
     }
   }, [userInfo?.id]);
 
+  const refreshPage = useCallback(
+    (url: string, from: string) => {
+      const pathname = parent.location.pathname;
+      console.log('------noto refresh------', url, from, pathname);
+      // 这里只能接受来自自身应用的切换，忽略其他应用切换请求
+      // url 不包含 /noto/ 前缀，需要直接使用
+      if (pathname.includes(`/${from}`)) {
+        history.push(url);
+      }
+    },
+    [history]
+  );
+
   const switchProject = useCallback(
     (pId: string[]) => {
       console.log('Wujie ProjectId', pId);
       if (isSameArray(pId, projectId)) return;
-      // // 直接使用传入的 pId 调用权限初始化，避免 state 更新的时序问题
-      // if (pId && pId[1]) {
-      //   setUserPermissions(pId[1]);
-      // }
+
       // 重置权限状态
       setUserActions({ isAdmin: false, actions: null });
       // 更新 projectId
       setProjectId(pId);
-      // 标记项目已切换，这样权限加载完成后会跳转到新项目的第一个有权限的路由
-      projectSwitchedRef.current = true;
-      // 重置初始化标记，但不要在这里设置为 false，因为我们已经调用了 setUserPermissions
+
+      // 只有在非 wujie 环境或者已经有 projectId 的情况下才标记为切换
+      // 这样可以避免初次加载时自动跳转
+      if (!isWujie || (projectId && projectId.length > 0)) {
+        // 标记项目已切换，这样权限加载完成后会跳转到新项目的第一个有权限的路由
+        projectSwitchedRef.current = true;
+      }
+
+      // 重置初始化标记
       permissionInitializedRef.current = true;
     },
-    [setUserPermissions, setUserActions, setProjectId]
+    [projectId, setUserActions, setProjectId]
   );
 
   useEffect(() => {
+    (window as any).$wujie?.bus.$on('refresh', refreshPage);
     (window as any).$wujie?.bus.$on('switchProject', switchProject);
 
     return () => {
+      (window as any).$wujie?.bus.$off('refresh', refreshPage);
       (window as any).$wujie?.bus.$off('switchProject', switchProject);
     };
-  }, [switchProject]);
+  }, [refreshPage, switchProject]);
 
   const hidden = useMemo(() => {
     const hiddenMenu =

@@ -13,6 +13,19 @@ export const isInFrame = window.self !== window.top;
 
 export const isWujie = !!(window as any).$wujie;
 
+export const embedAppName = () => (window as any).$wujie?.props?.appName;
+
+// 单产品集成
+export const embedBySingleApp = () =>
+  (window as any).$wujie?.props?.embedBySingleApp;
+
+export const getUrlSearchName = () =>
+  (window as any).$wujie?.props?.urlSearchName;
+
+export const onRouterChange = (path: string, menuPath: string) => {
+  (window as any).$wujie?.props?.onRouterChange?.(path, menuPath);
+};
+
 export const logout = (basePath = '') => {
   if (isWujie) {
     (window as any).$wujie?.props?.logout();
@@ -26,27 +39,26 @@ export const logout = (basePath = '') => {
 };
 
 export const setLoginToken = (token: string) => {
-  if (isWujie) {
-    (window as any).$wujie?.props?.setLoginToken(token);
-  } else {
-    setLocalStorage('loginToken', token);
-  }
+  // 使用 cookie+session 方式，不需要手动管理 token
+  // 直接使用 localStorage
+  setLocalStorage('loginToken', token);
+  setLocalStorage('console_token', token);
 };
+
 export const getLoginToken = () => {
-  if (isWujie) {
-    return (window as any).$wujie?.props?.getLoginToken() as string;
-  } else {
-    return getLocalStorage('loginToken') as string;
-  }
+  // 使用 cookie+session 方式，不需要从 wujie props 获取
+  // 直接从 localStorage 读取
+  return (
+    (getLocalStorage('console_token') as string) ||
+    (getLocalStorage('loginToken') as string)
+  );
 };
+
 export const removeLoginToken = () => {
-  if (isWujie) {
-    (window as any).$wujie?.props?.removeLoginToken();
-  } else {
-    removeLocalStorage('loginToken');
-    removeLocalStorage('console_token');
-    removeLocalStorage('customizeOptions');
-  }
+  // 使用 cookie+session 方式，直接清除 localStorage
+  removeLocalStorage('loginToken');
+  removeLocalStorage('console_token');
+  removeLocalStorage('customizeOptions');
 };
 export const openNewPage = (page: string) => {
   if (isWujie) {

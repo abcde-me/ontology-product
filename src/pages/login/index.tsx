@@ -6,6 +6,8 @@ import { Button, Card, Form, Input, Space } from '@arco-design/web-react';
 import React, { useState } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 
+const baseName = 'noto';
+
 const LoginCard = () => {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
@@ -20,13 +22,20 @@ const LoginCard = () => {
       try {
         const url = new URL(redirectUri);
         // 只返回路径部分，不包括域名
-        return url.pathname + url.search + url.hash;
+        let path = url.pathname + url.search + url.hash;
+        const prefix = `/${baseName}`;
+        if (path === prefix) {
+          path = '/';
+        } else if (path.startsWith(prefix + '/')) {
+          path = path.slice(prefix.length);
+        }
+        return path;
       } catch (e) {
         console.error('Invalid redirect URL:', e);
       }
     }
     // 默认重定向到首页
-    return '/tenant/compute/noto/home';
+    return '/';
   };
 
   const handleSubmit = async (values: any) => {

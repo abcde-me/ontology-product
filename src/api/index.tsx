@@ -37,12 +37,14 @@ UAPI_CONFIG.setDefaultConfig({
  */
 UAPI_CONFIG.addRequestInterceptor(
   (config) => {
-    const consolePluginToken = localStorage.getItem('console_token');
+    // 尝试获取 token（如果有的话）
+    const consolePluginToken = getLoginToken();
     const projectId = useUserInfoStore.getState().projectId;
     // config.headers['Access-Control-Allow-Origin'] = '*';
     //配置自定义请求头
     if (config.headers && !config.headers?.['x-auth-validate'])
       config.headers['x-auth-validate'] = JSON.stringify(true);
+    // 只有在 token 存在时才设置 Authorization header
     if (consolePluginToken && config.headers)
       config.headers['authorization'] = `Bearer ${consolePluginToken}`;
     config.headers && (config.headers['Content-Type'] = 'application/json');
