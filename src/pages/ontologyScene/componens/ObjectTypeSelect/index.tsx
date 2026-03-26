@@ -101,12 +101,19 @@ const ObjectTypeSelect: React.FC<ObjectTypeSelectProps> = ({
   const renderOption = (option: ObjectType) => {
     const IconComponent = getIconComponent(option.icon);
 
+    const isGlobal = option.id !== -1;
     return (
-      <div className="flex h-[60px] cursor-pointer items-center gap-[8px] overflow-hidden px-[12px] py-[8px] transition-colors hover:bg-[#F2F8FF]">
-        <div className="flex h-[36px] w-[36px] flex-shrink-0 items-center justify-center">
-          <IconComponent className="h-[36px] w-[36px]" />
-        </div>
-        <div className="flex h-[44px] min-w-0 flex-1 flex-col justify-center gap-1">
+      <div
+        className={`flex ${isGlobal ? 'h-[60px]' : ''} cursor-pointer items-center gap-[8px] overflow-hidden px-[12px] py-[8px] transition-colors hover:bg-[#F2F8FF]`}
+      >
+        {isGlobal && (
+          <div className="flex h-[36px] w-[36px] flex-shrink-0 items-center justify-center">
+            <IconComponent className="h-[36px] w-[36px]" />
+          </div>
+        )}
+        <div
+          className={`flex ${isGlobal ? 'h-[44px]' : ''} min-w-0 flex-1 flex-col justify-center gap-1`}
+        >
           <div className="nowrap flex h-[22px] flex-shrink-0 items-center overflow-hidden">
             <EllipsisPopover
               value={option.name}
@@ -195,9 +202,11 @@ const ObjectTypeSelect: React.FC<ObjectTypeSelectProps> = ({
           return (
             <div className="flex items-center gap-2">
               {/* 左侧图标 */}
-              <div className="flex h-[24px] w-[24px] flex-shrink-0 items-center justify-center rounded">
-                <IconComponent className="h-[24px] w-[24px]" />
-              </div>
+              {item.id !== -1 && (
+                <div className="flex h-[24px] w-[24px] flex-shrink-0 items-center justify-center rounded">
+                  <IconComponent className="h-[24px] w-[24px]" />
+                </div>
+              )}
               {/* 右侧名称 */}
               <EllipsisPopover
                 preferTypography

@@ -153,7 +153,7 @@ export const BehaviorDetail = (props: IProps) => {
       }}
       onEdit={() => {
         history.push(
-          `/tenant/compute/onto/ontologyScene/detail/${OSId}/behaviorActions/edit/${actionItem}`
+          `/tenant/compute/modaforge/ontologyScene/detail/${OSId}/behaviorActions/edit/${actionItem}`
         );
       }}
     >
@@ -192,7 +192,9 @@ export const BehaviorDetail = (props: IProps) => {
               <div className={styles['item-value']}>
                 <ObjectTypeTag
                   ontologyObjectTypeIcon={actionDetail?.objectTypeIcon || '-'}
-                  ontologyObjectTypeName={actionDetail?.objectTypeName || '-'}
+                  ontologyObjectTypeName={
+                    actionDetail?.objectTypeName || '全局行为'
+                  }
                   ontologyObjectTypeId={String(
                     actionDetail?.ontologyObjectTypeId ||
                       actionDetail?.objectTypeId ||

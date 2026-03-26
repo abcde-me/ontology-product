@@ -3,6 +3,7 @@ import { EllipsisPopover } from '@ceai-front/arco-material';
 import { OBJECT_TYPE_ICON_OPTIONS } from '@/pages/ontologyScene/common/constants';
 
 export interface ObjectTypeTagProps {
+  showIcon?: boolean;
   /** 对象类型图标值 */
   ontologyObjectTypeIcon?: string;
   /** 对象类型名称 */
@@ -27,7 +28,8 @@ const ObjectTypeTag: React.FC<ObjectTypeTagProps> = ({
   ontologyObjectTypeId,
   onClick,
   className = '',
-  hoverClassName = 'hover-blue'
+  hoverClassName = 'hover-blue',
+  showIcon = true
 }) => {
   // 根据 icon 字段匹配对应的图标
   const iconOption = ontologyObjectTypeIcon
@@ -37,6 +39,7 @@ const ObjectTypeTag: React.FC<ObjectTypeTagProps> = ({
     : null;
   const IconComponent = iconOption?.icon ?? OBJECT_TYPE_ICON_OPTIONS[0].icon;
 
+  const objTypeName = ontologyObjectTypeName || '全局行为';
   return (
     <div
       className={`object-type-tag inline-flex h-[26px] min-w-0 max-w-[110px] items-center gap-[4px] overflow-hidden rounded border border-[#EBEEF5] bg-[#F5F7FC] px-[4px] ${
@@ -45,13 +48,15 @@ const ObjectTypeTag: React.FC<ObjectTypeTagProps> = ({
       onClick={onClick}
     >
       {/* 图标区域 */}
-      <div className="object-type-tag-icon flex h-[12px] w-[12px] flex-shrink-0 items-center justify-center">
-        <IconComponent className="h-[100%] w-[100%] text-white" />
-      </div>
+      {objTypeName !== '全局行为' && (
+        <div className="object-type-tag-icon flex h-[12px] w-[12px] flex-shrink-0 items-center justify-center">
+          <IconComponent className="h-[100%] w-[100%] text-white" />
+        </div>
+      )}
       {/* 名称区域 */}
       <div className="flex-shrink-1 object-type-tag-name min-w-0">
         <EllipsisPopover
-          value={ontologyObjectTypeName || '全局行为'}
+          value={objTypeName}
           className={`text-[14px] leading-[26px] text-[var(--color-text-1)] ${
             onClick ? `${hoverClassName}` : ''
           }`}
