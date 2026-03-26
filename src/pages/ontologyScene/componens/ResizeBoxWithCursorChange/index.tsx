@@ -30,6 +30,7 @@ export const ResizeBoxWithCursorChange = (
     maxHeight,
     maxWidth,
     onMoving,
+    onMovingEnd,
     ...otherProps
   } = props;
   const boxRef = useRef<HTMLDivElement>(null);
@@ -55,6 +56,7 @@ export const ResizeBoxWithCursorChange = (
     if (!!maxHeight) {
       setYisMax(height >= maxHeight);
     }
+    onMovingEnd?.();
   }, [minHeight, minWidth]);
 
   useLayoutEffect(() => {

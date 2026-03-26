@@ -1,22 +1,9 @@
 .behavior-detail {
-  .drawer-title {
-    display: flex;
-    gap: 8px;
-    align-items: center;
-    overflow: hidden;
-
-    .drawer-title-text {
-      font-family: PingFang SC;
-      font-weight: 500;
-      font-size: 16px;
-      line-height: 24px;
-      color: var(--text-color-text-1, #0f172a);
-    }
-  }
-
   .base-info-item {
+    flex-basis: 50%;
+    flex-shrink: 0;
     margin-bottom: 12px;
-    //padding-right: 12px;
+    padding-right: 12px;
     display: flex;
     align-items: center;
     gap: 8px;
@@ -25,7 +12,6 @@
     font-weight: 400;
     font-size: 14px;
     line-height: 22px;
-    width: 100%;
 
     .item-field {
       width: 98px;
@@ -35,17 +21,13 @@
 
     .item-value {
       flex: 1;
-      min-width: 0;
       color: #0f131f;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
       display: flex;
       gap: 4px;
       align-items: center;
-
-      :global {
-        .aa-ellipsis-popover {
-          width: 100%;
-        }
-      }
 
       .obj-tag {
         background: transparent;

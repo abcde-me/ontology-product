@@ -7,7 +7,6 @@ import {
   renderComponentByUiType,
   buildActionTestItem
 } from '@/pages/ontologyScene/utils';
-import { UiType } from '@/pages/ontologyScene/types/ontologyFunction';
 import BehaviorConfigSvg from '@/assets/benti/behaviorConfig.svg';
 import BehaviorTestSvg from '@/assets/benti/behaviorTest.svg';
 import { buildFormFieldValidateRules } from '@/pages/ontologyScene/modules/behaviorActionDetail/utils';
@@ -61,12 +60,18 @@ export const RightPanel: React.FC<RightPanelProps> = ({ testFunctionHook }) => {
         // 这样可以避免字段值残留的问题
         setTimeout(() => {
           form.setFieldsValue(config);
-          // 加载完成
-          isLoadingConfigRef.current = false;
+          // 延迟重置加载状态，确保 setFieldsValue 触发的 onValuesChange 被忽略
+          setTimeout(() => {
+            isLoadingConfigRef.current = false;
+          }, 50);
         }, 0);
+      } else {
+        // 如果没有选中节点，直接重置表单
+        form.resetFields();
+        isLoadingConfigRef.current = false;
       }
     }
-  }, [selectedNodeId, selectedNode, nodeConfigs, form]);
+  }, [selectedNodeId, selectedNode, form]); // 移除 nodeConfigs 依赖
 
   // 组件卸载时清除定时器
   useEffect(() => {
@@ -82,30 +87,42 @@ export const RightPanel: React.FC<RightPanelProps> = ({ testFunctionHook }) => {
     changedValues: Record<string, any>,
     allValues: Record<string, any>
   ) => {
-    if (selectedNodeId) {
-      // 如果正在加载配置，不标记字段为 touched
-      if (!isLoadingConfigRef.current) {
-        // 标记变化的字段为已触碰（只在用户真正修改时）
-        Object.keys(changedValues).forEach((fieldCode) => {
-          markFieldAsTouched(selectedNodeId, fieldCode);
-        });
-      }
+    // 如果正在加载配置，忽略所有变化
+    if (isLoadingConfigRef.current) {
+      return;
+    }
+
+    if (selectedNodeId && selectedNode) {
+      // 标记变化的字段为已触碰（只在用户真正修改时）
+      Object.keys(changedValues).forEach((fieldCode) => {
+        markFieldAsTouched(selectedNodeId, fieldCode);
+      });
 
       // 清除之前的定时器
       if (updateTimerRef.current) {
         clearTimeout(updateTimerRef.current);
       }
 
-      // 更新配置
-      updateTimerRef.current = setTimeout(() => {
-        updateNodeConfig(selectedNodeId, allValues);
-      }, 300);
+      // 只有当前节点有参数时才更新配置
+      const hasInputParams = selectedNode.behavior.params?.some(
+        (param) => param.inputType === 'input'
+      );
+
+      if (hasInputParams) {
+        // 更新配置
+        updateTimerRef.current = setTimeout(() => {
+          updateNodeConfig(selectedNodeId, allValues);
+        }, 300);
+      }
     }
   };
 
   // 单节点测试
   const handleSingleNodeTest = async () => {
-    if (!selectedNodeId || !selectedNode) return;
+    if (!selectedNodeId || !selectedNode) {
+      Message.warning('请先选择行为');
+      return;
+    }
 
     // 先验证表单
     try {
@@ -144,7 +161,7 @@ export const RightPanel: React.FC<RightPanelProps> = ({ testFunctionHook }) => {
         Message.error('请检查表单填写是否正确');
       } else {
         // 其他错误
-        Message.error(error?.message || '测试失败');
+        // Message.error(error?.message || '测试失败');
       }
     }
   };
@@ -158,9 +175,34 @@ export const RightPanel: React.FC<RightPanelProps> = ({ testFunctionHook }) => {
             <BehaviorConfigSvg className="h-3.5 w-3.5" />
             <span className="text-base font-medium text-[#000]">参数配置</span>
           </div>
+          <BehaviorTestSvg
+            className="h-4 w-4 cursor-pointer"
+            onClick={handleSingleNodeTest}
+          />
         </div>
         <div className="flex flex-1 items-center justify-center px-5">
-          <NoDataCard title="请先选择行为" />
+          <NoDataCard title="请先选择行为" type="block" />
+        </div>
+      </div>
+    );
+  }
+
+  // 没有参数
+  if (selectedNode.behavior.params?.length === 0) {
+    return (
+      <div className="flex h-full w-full flex-col">
+        <div className="flex h-14 flex-shrink-0 items-center justify-between border-b border-[#e5e6eb] px-6">
+          <div className="flex items-center gap-1">
+            <BehaviorConfigSvg className="h-3.5 w-3.5" />
+            <span className="text-base font-medium text-[#000]">参数配置</span>
+          </div>
+          <BehaviorTestSvg
+            className="h-4 w-4 cursor-pointer"
+            onClick={handleSingleNodeTest}
+          />
+        </div>
+        <div className="flex flex-1 items-center justify-center px-5">
+          <NoDataCard title="暂无参数" type="block" />
         </div>
       </div>
     );

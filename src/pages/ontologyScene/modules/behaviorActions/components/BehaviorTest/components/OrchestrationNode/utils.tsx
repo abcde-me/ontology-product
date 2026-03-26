@@ -1,59 +1,66 @@
 import React, { useEffect, useState } from 'react';
 import dayjs from 'dayjs';
 import { UiType } from '@/pages/ontologyScene/types/ontologyFunction';
-import { getOntologyObjectTypeDetail } from '@/api/ontologySceneLibrary/objectType';
 import { OBJECT_TYPE_ICON_OPTIONS } from '@/pages/ontologyScene/common/constants';
 import { ObjectTypeTagList } from '@/pages/ontologyScene/componens';
+import EllipsisTextWithTooltip from '@/pages/ontologyScene/modules/behaviorLog/components/EllipsisTextWithTooltip';
 
 // ObjectRef 渲染组件 - 用于显示对象引用
-const ObjectRefRenderer: React.FC<{ objectTypeId: number; pk: string }> = ({
-  objectTypeId,
-  pk
-}) => {
+const ObjectRefRenderer: React.FC<{
+  objectTypeId?: number;
+  pk?: string;
+  objectTypeData?: {
+    name: string;
+    icon: string;
+    id: string;
+  };
+  objInsID?: number | string;
+}> = ({ objectTypeId, pk, objectTypeData, objInsID }) => {
   const [displayContent, setDisplayContent] =
     useState<React.ReactNode>('加载中...');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchObjectTypeDetail = async () => {
-      try {
-        // 调用 API 获取对象类型详情
-        const response = await getOntologyObjectTypeDetail({
-          id: objectTypeId
-        });
+    // 如果有新的数据结构，直接使用
+    if (objectTypeData && objInsID !== undefined) {
+      // 检查数据完整性
+      if (
+        objectTypeData.name &&
+        objectTypeData.icon &&
+        objInsID !== null &&
+        objInsID !== ''
+      ) {
+        const iconOption = OBJECT_TYPE_ICON_OPTIONS.find(
+          (option) => option.value === objectTypeData.icon
+        );
+        const IconComponent =
+          iconOption?.icon ?? OBJECT_TYPE_ICON_OPTIONS[0].icon;
 
-        if (response.data) {
-          const { icon, name } = response.data;
-
-          // 匹配图标
-          const iconOption = OBJECT_TYPE_ICON_OPTIONS.find(
-            (option) => option.value === icon
-          );
-          const IconComponent =
-            iconOption?.icon ?? OBJECT_TYPE_ICON_OPTIONS[0].icon;
-
-          // 渲染：图标 + 名称 / pk
-          setDisplayContent(
-            <div className="flex items-center gap-2">
-              <IconComponent className="h-4 w-4 flex-shrink-0" />
-              <span>
-                {name} / {pk}
-              </span>
-            </div>
-          );
-        } else {
-          setDisplayContent(`${objectTypeId} / ${pk}`);
-        }
-      } catch (error) {
-        console.error('Failed to fetch ObjectRef detail:', error);
-        setDisplayContent(`${objectTypeId} / ${pk}`);
-      } finally {
-        setLoading(false);
+        // 渲染：图标 + 名称 / pk
+        setDisplayContent(
+          <div className="flex items-center gap-2">
+            <IconComponent className="h-4 w-4 flex-shrink-0" />
+            <EllipsisTextWithTooltip
+              value={`${objectTypeData.name} / ${objInsID}`}
+              className="min-w-0 flex-1"
+            />
+          </div>
+        );
+      } else {
+        // 数据不完整，显示未配置
+        setDisplayContent('未配置');
       }
-    };
+      setLoading(false);
+      return;
+    }
 
-    fetchObjectTypeDetail();
-  }, [objectTypeId, pk]);
+    // 如果没有新数据结构，使用原来的 API 调用逻辑
+    if (!objectTypeId || !pk) {
+      setDisplayContent('数据格式错误');
+      setLoading(false);
+      return;
+    }
+  }, [objectTypeId, pk, objectTypeData, objInsID]);
 
   if (loading) {
     return <span>加载中...</span>;
@@ -152,25 +159,20 @@ export const formatParamDisplayValue = (
 
   // 处理 ObjectOne 类型 - 渲染为 ObjectRefRenderer 组件
   if (uiType === UiType.ObjectOne) {
-    // 如果值是对象格式 { objectTypeID: 85, objInsID: "王五104" }
+    // 如果值是新的对象格式 { objInsID: 1, objectTypeData: { name: '物品库存1', icon: 'object-type-fighter', id: 'inventory' } }
     if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
-      const objectTypeId =
-        value.objectTypeID || value.object_type || value.objectType;
-      const pk = value.objInsID || value.pk;
-
-      if (objectTypeId && pk !== undefined && pk !== null) {
-        // 返回 React 组件
+      // 检查是否是新的数据结构
+      if (value.objInsID !== undefined && value.objectTypeData) {
         return (
-          <ObjectRefRenderer objectTypeId={objectTypeId} pk={String(pk)} />
+          <ObjectRefRenderer
+            objectTypeData={value.objectTypeData}
+            objInsID={value.objInsID}
+          />
         );
       }
 
-      // 如果对象格式不符合预期，尝试 JSON 序列化
-      try {
-        return JSON.stringify(value);
-      } catch {
-        return String(value);
-      }
+      // 如果对象格式不符合预期，返回未配置
+      return '未配置';
     }
 
     // 如果值是 ObjectRef 格式的字符串
@@ -200,78 +202,33 @@ export const formatParamDisplayValue = (
   if (uiType === UiType.ObjectSet) {
     let objectTypeList: any[] = [];
 
-    // 如果是对象格式 { objectTypeID: 85, objInsID: ['王五104', '王五103'] }
+    // 如果是新的对象格式 { objInsID: ['17', '16'], objectTypeData: { name: 'objectType002', icon: 'object-type-civil-aviation', id: 'objectType002' } }
     if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
-      const objectTypeId =
-        value.objectTypeID || value.object_type || value.objectType;
-      const objInsIDs = value.objInsID || value.pks || [];
+      // 检查是否是新的数据结构
+      if (
+        value.objInsID &&
+        value.objectTypeData &&
+        Array.isArray(value.objInsID)
+      ) {
+        const { objInsID, objectTypeData } = value;
 
-      if (objectTypeId && Array.isArray(objInsIDs) && objInsIDs.length > 0) {
-        // 为每个 objInsID 创建一个对象
-        objectTypeList = objInsIDs.map((pk: string) => ({
-          name: pk,
-          ontologyObjectTypeName: pk,
-          id: objectTypeId,
-          ontologyObjectTypeId: String(objectTypeId),
-          ontologyObjectTypeIcon: value.icon || undefined
-        }));
-      }
-    }
-    // 如果是字符串格式，需要先解析
-    else if (typeof value === 'string') {
-      // 处理 ObjectSet([{...}]) 格式
-      const objectSetMatch = value.match(/ObjectSet\((\[.+\])\)/);
-      if (objectSetMatch) {
-        try {
-          // 解析 JSON 数组
-          let jsonStr = objectSetMatch[1];
-
-          // 修复 pk 值没有引号的问题
-          // 将 "pk":值 替换为 "pk":"值"
-          jsonStr = jsonStr.replace(/"pk":([^,}\]]+)/g, (match, pkValue) => {
-            // 如果值已经有引号，不处理
-            if (pkValue.trim().startsWith('"')) {
-              return match;
-            }
-            // 否则给值加上引号
-            return `"pk":"${pkValue.trim()}"`;
-          });
-
-          const parsedArray = JSON.parse(jsonStr);
-          objectTypeList = parsedArray.map((item: any) => ({
-            name: item.pk || '',
-            ontologyObjectTypeName: item.pk || '',
-            id: item.object_type,
-            ontologyObjectTypeId: String(item.object_type),
-            // icon 字段可以从 item 中获取，如果没有则不传
-            ontologyObjectTypeIcon: item.icon || undefined
+        // 检查数据完整性
+        if (
+          objectTypeData.name &&
+          objectTypeData.icon &&
+          objectTypeData.id &&
+          objInsID.length > 0
+        ) {
+          // 为每个 objInsID 创建一个对象
+          objectTypeList = objInsID.map((pk: string) => ({
+            name: `${objectTypeData.name}/${pk}`,
+            ontologyObjectTypeName: `${objectTypeData.name}/${pk}`,
+            id: objectTypeData.id,
+            ontologyObjectTypeId: String(objectTypeData.id),
+            ontologyObjectTypeIcon: objectTypeData.icon
           }));
-        } catch (error) {
-          console.error('Failed to parse ObjectSet:', error);
-          return String(value);
         }
       }
-    }
-    // 如果是数组格式
-    else if (Array.isArray(value)) {
-      objectTypeList = value.map((item: any) => {
-        // 如果是对象格式 { objectTypeID: 85, objInsID: "王五104" }
-        if (typeof item === 'object' && item !== null) {
-          const objectTypeId =
-            item.objectTypeID || item.object_type || item.objectType || item.id;
-          const pk = item.objInsID || item.pk || item.name;
-          const icon = item.icon || item.ontologyObjectTypeIcon;
-
-          return {
-            name: pk || '',
-            ontologyObjectTypeName: pk || '',
-            id: objectTypeId,
-            ontologyObjectTypeId: String(objectTypeId),
-            ontologyObjectTypeIcon: icon
-          };
-        }
-        return item;
-      });
     }
 
     if (objectTypeList.length === 0) {

@@ -90,6 +90,8 @@ const PublicTable = React.forwardRef<PublicTableRef, PublicTableProps>(
     const [activeTab, setActiveTab] = useState<
       'instances' | 'attributes' | 'links'
     >('attributes');
+    // 不随搜索变化的公共属性总数（用于 Tab 上展示）
+    const [allTotal, setAllTotal] = useState<number | undefined>(undefined);
 
     // 使用 useTable hook
     const { data, loading, pagination, refresh, submit, onChange } =
@@ -105,10 +107,18 @@ const PublicTable = React.forwardRef<PublicTableRef, PublicTableProps>(
             });
 
             if (response.status === 200 && response.data) {
+              const totalCount = response.data.totalCount || 0;
+
+              // 只有在“无搜索关键词”时，才更新全量总数，
+              // 确保 Tab 上展示的是公共属性总数，而不是搜索后的数量。
+              if (!params.filter) {
+                setAllTotal(totalCount);
+              }
+
               return {
                 data: {
                   items: response.data.result || [],
-                  total: response.data.totalCount || 0,
+                  total: totalCount,
                   page: params.pageNo || 1,
                   page_size: params.pageSize || 10
                 }
@@ -172,13 +182,19 @@ const PublicTable = React.forwardRef<PublicTableRef, PublicTableProps>(
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [urlState.search]);
 
-    // 当 total 变化时，通知父组件
+    // 当 total / 全量 total 变化时，通知父组件
     useEffect(() => {
-      if (onTotalChange && pagination?.total !== undefined) {
-        onTotalChange(pagination.total);
-      }
+      if (!onTotalChange) return;
+      // Tab 上展示的数量：优先使用“全量总数”，退化为当前分页 total
+      const totalForDisplay =
+        allTotal !== undefined
+          ? allTotal
+          : pagination?.total !== undefined
+            ? pagination.total
+            : 0;
+      onTotalChange(totalForDisplay);
       // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [pagination?.total]);
+    }, [allTotal, pagination?.total]);
 
     // 暴露给父组件的 ref 方法：打开创建弹窗
     useImperativeHandle(ref, () => ({
@@ -358,7 +374,7 @@ const PublicTable = React.forwardRef<PublicTableRef, PublicTableProps>(
         dataIndex: 'name',
         width: 150,
         render: (value) => (
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-[4px]">
             <EllipsisPopover
               value={value || '-'}
               wrapperClassName="min-w-0"
@@ -489,7 +505,7 @@ const PublicTable = React.forwardRef<PublicTableRef, PublicTableProps>(
           }}
         />
         {Number(pagination?.total) > 0 && (
-          <div className="mt-4 flex items-center justify-end">
+          <div className="mt-[12px] flex items-center justify-end">
             <Pagination
               {...pagination}
               onChange={(page, pageSize) => {
@@ -526,7 +542,6 @@ const PublicTable = React.forwardRef<PublicTableRef, PublicTableProps>(
               setSelectedObjectType(null);
             }}
             objectTypeId={selectedObjectType?.id}
-            defaultActiveTab={activeTab}
           />
         )}
       </div>

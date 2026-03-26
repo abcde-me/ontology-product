@@ -58,8 +58,43 @@ export default function OSFunctionDetailPage() {
 
   const goBack = () => {
     history.replace(
-      `/tenant/compute/noto/ontologyScene/detail/${OSId}/functions`
+      `/tenant/compute/onto/ontologyScene/detail/${OSId}/functions`
     );
+  };
+
+  // 校验是否重名,手动触发校验，减少接口请求次数
+  const validateSameValue = (field: 'name' | 'code') => {
+    const value = form.getFieldValue(field);
+    return getFunctionList({
+      ontologyModelID: +OSId,
+      pageNum: 1,
+      pageSize: 10,
+      filter: value
+    }).then((res) => {
+      if (
+        res.items?.filter(
+          (item: OntologyFunctionItem) =>
+            item[field] === value && item.id!.toString() !== functionId
+        ).length
+      ) {
+        const message =
+          field === 'name' ? '显示名称不可重复' : '函数名称(id)不可重复';
+        form.setFields({
+          [field]: {
+            error: {
+              message: message
+            }
+          }
+        });
+        return Promise.reject(new Error(message));
+      }
+      form.setFields({
+        [field]: {
+          error: undefined
+        }
+      });
+      return Promise.resolve();
+    });
   };
 
   // 提交数据时忽略掉入参的value以及类型，因为类型一定会有值，value只在测试的时候才校验
@@ -74,6 +109,7 @@ export default function OSFunctionDetailPage() {
   const saveAction = async () => {
     try {
       const allValues: OntologyFunctionSchema = form.getFieldsValue();
+      await Promise.all(['name', 'code'].map((f: any) => validateSameValue(f)));
       await validateBeforeSave(allValues);
       const res = await saveFunction({
         ...(functionDetail || {}),
@@ -95,12 +131,20 @@ export default function OSFunctionDetailPage() {
   };
 
   useEffect(() => {
-    if (!functionDetail) {
+    // 新建页才使用默认函数模板；编辑页在详情返回前不先灌默认值，
+    // 否则 FunctionScript 会先按默认 content/code 初始化冻结扩展，
+    // 等真实数据回来后首帧容易出现“内容对了但冻结没跟上”的竞态。
+    if (functionId === '_NEW_') {
       form.setFieldsValue(DEFAULT_FUNCTION_SCHEMA);
       return;
     }
+
+    if (!functionDetail) {
+      return;
+    }
+
     form.setFieldsValue(buildFunctionSchema(functionDetail));
-  }, [functionDetail]);
+  }, [form, functionDetail, functionId]);
 
   const getParamNames = () => {
     const { input, output } = form.getFieldsValue(['input', 'output']);
@@ -138,6 +182,7 @@ export default function OSFunctionDetailPage() {
           form={form}
           disabled={loading}
           labelAlign={'left'}
+          scrollToFirstError
           className={`overflow-auto ${styles['function-form']}`}
           onValuesChange={(c, values) => {
             // 只有参数或函数id改变时，再去校验数据合法性构建py代码
@@ -178,22 +223,6 @@ export default function OSFunctionDetailPage() {
                   if (value.trim().length < 2) {
                     return onError('显示名称至少2字符');
                   }
-                  return getFunctionList({
-                    ontologyModelID: +OSId,
-                    pageNum: 1,
-                    pageSize: 10,
-                    filter: value
-                  }).then((res) => {
-                    if (
-                      res.items?.filter(
-                        (item: OntologyFunctionItem) =>
-                          item.name === value &&
-                          item.id!.toString() !== functionId
-                      ).length
-                    ) {
-                      onError('显示名称不可重复');
-                    }
-                  });
                 }
               }
             ]}
@@ -201,7 +230,12 @@ export default function OSFunctionDetailPage() {
             <Input
               placeholder="请输入函数名称用于在界面上展示，如关联推理"
               maxLength={50}
+              className={'w-[640px]'}
               showWordLimit
+              allowClear
+              onBlur={(e) => {
+                if (!!e.target.value?.trim()) validateSameValue('name');
+              }}
             />
           </FormItem>
           <FormItem
@@ -213,10 +247,12 @@ export default function OSFunctionDetailPage() {
             rules={[
               {
                 validator(v, onError) {
-                  const value = v as string;
+                  let value = v as string;
                   if (isNil(v) || !value.trim()) {
                     return onError('请输入函数名称');
                   }
+                  // 去除字符串的所有0宽字符
+                  value = value.replaceAll(/[\u200B-\u200D\uFEFF]/g, '');
                   if (!/^[a-zA-Z0-9_]+$/.test(value)) {
                     return onError(
                       '函数名称(id)格式错误，仅支持英文、数字、下划线'
@@ -225,23 +261,6 @@ export default function OSFunctionDetailPage() {
                   if (value.trim().length < 2) {
                     return onError('函数名称至少2字符');
                   }
-                  return getFunctionList({
-                    ontologyModelID: +OSId,
-                    pageNum: 1,
-                    pageSize: 10,
-                    filter: value
-                  }).then((res) => {
-                    if (
-                      res.items?.filter(
-                        (item: OntologyFunctionItem) =>
-                          item.code === value &&
-                          item.id!.toString() !== functionId
-                      ).length
-                    ) {
-                      onError('函数名称(id)不可重复');
-                      return Promise.resolve();
-                    }
-                  });
                 }
               }
             ]}
@@ -251,6 +270,11 @@ export default function OSFunctionDetailPage() {
               maxLength={100}
               showWordLimit
               disabled={pageMode === 'edit'}
+              allowClear
+              className={'w-[640px]'}
+              onBlur={(e) => {
+                if (!!e.target.value?.trim()) validateSameValue('code');
+              }}
             />
           </FormItem>
 
@@ -260,6 +284,8 @@ export default function OSFunctionDetailPage() {
               autoSize={{ minRows: 3, maxRows: 6 }}
               maxLength={500}
               showWordLimit
+              className={'w-[640px]'}
+              wrapperStyle={{ width: 'auto' }}
             />
           </FormItem>
           <div className={styles['params-setting-container']}>

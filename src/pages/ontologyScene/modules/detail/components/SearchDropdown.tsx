@@ -3,7 +3,7 @@ import { Input, Select, Popover, Tag, Spin } from '@arco-design/web-react';
 const { Group: InputGroup } = Input;
 import { IconSearch, IconDown, IconFile } from '@arco-design/web-react/icon';
 import { EllipsisPopover, NoDataCard } from '@ceai-front/arco-material';
-import { debounce } from 'lodash-es';
+import { debounce, isNil } from 'lodash-es';
 import { listOntologyObjectType } from '@/api/ontologySceneLibrary/objectType';
 import { listOntologyPhysicalProperties } from '@/api/ontologySceneLibrary/graph';
 import { listOntologyLinkType } from '@/api/ontologySceneLibrary/graph';
@@ -37,7 +37,7 @@ interface FunctionItem {
 
 // 行为类型（待定接口，使用 mock 数据）
 interface BehaviorItem {
-  id: number;
+  code: string;
   name: string;
   objectTypeList: { id: number; name: string }[];
 }
@@ -121,7 +121,7 @@ const SearchDropdown: React.FC<SearchDropdownProps> = ({
           });
           // 将 BehaviorActionItem[] 转换为 BehaviorItem[] 格式
           searchResults = (behaviorRes.items || []).map((item) => ({
-            id: item.id || 0,
+            code: item.code,
             name: item.name || '',
             objectTypeList:
               item.objectTypeId && item.objectTypeName
@@ -144,7 +144,7 @@ const SearchDropdown: React.FC<SearchDropdownProps> = ({
           });
           // 将 OntologyFunctionItem[] 转换为 FunctionItem[] 格式
           searchResults = (functionRes.items || []).map((item) => ({
-            id: String(item.id || ''),
+            code: String(item.code || ''),
             name: item.code || '',
             displayName: item.name || ''
           }));
@@ -223,33 +223,43 @@ const SearchDropdown: React.FC<SearchDropdownProps> = ({
     const handleObjectTypeResultClick = () => {
       // 跳转到对象类型详情页面
       history.push(
-        `/tenant/compute/noto/ontologyScene/detail/${OSId}/objectType/list?search=${encodeURIComponent(item?.name ?? '')}`
+        `/tenant/compute/onto/ontologyScene/detail/${OSId}/objectType/list?search=${encodeURIComponent(item?.name ?? '')}`
       );
     };
 
     return (
       <div
-        key={item.id}
-        className="flex cursor-pointer items-center gap-[8px] px-[12px] py-[8px] transition-colors hover:bg-[#F2F8FF]"
+        key={item.code}
+        className="flex cursor-pointer items-center px-[12px] py-[8px] transition-colors hover:bg-[#F2F8FF]"
         onClick={handleObjectTypeResultClick}
       >
         {/* Icon */}
         <div className="flex h-[36px] w-[36px] flex-shrink-0 items-center justify-center">
-          <IconComponent className="h-[36px] w-[36px]" />
+          <IconComponent className="mr-[8px] h-[36px] w-[36px]" />
         </div>
         <div className="min-w-0 flex-1">
-          <div className="mb-[4px] flex items-center gap-[8px]">
-            <EllipsisPopover
-              value={highlightSearchKeyword(
-                item.name || '-',
-                searchValue.trim()
-              )}
-              wrapperClassName="min-w-0"
-              className="text-[14px] leading-[22px] text-[var(--color-text-1)]"
-            />
-            <span className="flex-shrink-0 text-[14px] leading-[22px] text-[var(--color-text-1)]">
-              (id: {item.id})
-            </span>
+          <div className="nowrap mb-[4px] flex h-[22px] flex-1 items-center leading-[22px]">
+            <div className="min-w-0 max-w-[160px] text-[14px] text-[var(--color-text-1)]">
+              <EllipsisPopover
+                value={highlightSearchKeyword(
+                  item.name || '-',
+                  searchValue.trim()
+                )}
+                className="flex-1 leading-[22px]"
+                wrapperClassName="min-w-0 leading-[22px] flex items-center"
+              />
+            </div>
+            {!isNil(item.code) && (
+              <div className="flex h-[22px] min-w-[60px] flex-1 items-center text-[14px] leading-[22px] text-[var(--color-text-1)]">
+                <div>(id:</div>
+                <EllipsisPopover
+                  value={highlightSearchKeyword(item.code, searchValue.trim())}
+                  className="flex-1 leading-[22px]"
+                  wrapperClassName="min-w-0 leading-[22px] flex items-center"
+                />
+                <div>)</div>
+              </div>
+            )}
           </div>
           <EllipsisPopover
             value={item.description || '-'}
@@ -264,31 +274,44 @@ const SearchDropdown: React.FC<SearchDropdownProps> = ({
   // 渲染链接搜索结果（特殊样式）
   const renderLinkResult = (item: LinkInfo) => {
     const name = item.name || '';
-    const id = item.id || 0;
+    const code = item.code || '';
 
     const handleLinkResultClick = () => {
       // 跳转到链接详情页面
       history.push(
-        `/tenant/compute/noto/ontologyScene/detail/${OSId}/links/list?search=${encodeURIComponent(item?.name ?? '')}`
+        `/tenant/compute/onto/ontologyScene/detail/${OSId}/links/list?search=${encodeURIComponent(item?.name ?? '')}`
       );
     };
 
     return (
       <div
-        key={id}
+        key={code}
         className="flex cursor-pointer flex-col items-start gap-[4px] px-[12px] py-[8px] transition-colors hover:bg-[#F2F8FF]"
         onClick={handleLinkResultClick}
       >
         {/* 标题和ID */}
-        <div className="flex items-center gap-[8px]">
-          <EllipsisPopover
-            preferTypography
-            value={highlightSearchKeyword(name || '-', searchValue.trim())}
-            className="text-[14px] leading-[22px] text-[var(--color-text-1)]"
-          />
-          <span className="flex-shrink-0 text-[14px] leading-[22px] text-[var(--color-text-1)]">
-            (id: {id})
-          </span>
+        <div className="nowrap flex h-[22px] w-full min-w-0 flex-shrink-0 items-center overflow-hidden">
+          <div className="min-w-0 max-w-[160px] text-[14px] text-[var(--color-text-1)]">
+            <EllipsisPopover
+              value={highlightSearchKeyword(
+                item.name || '-',
+                searchValue.trim()
+              )}
+              className="flex-1 leading-[22px]"
+              wrapperClassName="min-w-0 leading-[22px] flex items-center"
+            />
+          </div>
+          {!isNil(item.code) && (
+            <div className="flex h-[22px] min-w-[60px] flex-1 items-center text-[14px] leading-[22px] text-[var(--color-text-1)]">
+              <div>(id:</div>
+              <EllipsisPopover
+                value={highlightSearchKeyword(item.code, searchValue.trim())}
+                className="flex-1 leading-[22px]"
+                wrapperClassName="min-w-0 leading-[22px] flex items-center"
+              />
+              <div>)</div>
+            </div>
+          )}
         </div>
         {/* 链接对 */}
         <div className="flex items-center">
@@ -325,14 +348,14 @@ const SearchDropdown: React.FC<SearchDropdownProps> = ({
     type: 'attribute' | 'behavior'
   ) => {
     let name = '';
-    let id: number | string = 0;
+    let code = '';
     let objectTypeTags: ObjectTypeTagProps[] = [];
 
     if (type === 'attribute') {
       // PhysicalProperties 类型
       const attr = item as PhysicalProperties;
-      name = attr.name || '';
-      id = attr.id || 0;
+      name = attr.comment || '';
+      code = attr.name || '';
       // PhysicalProperties 只有单个对象类型信息，转换为标签格式
       if (attr.ontologyObjectTypeId && attr.ontologyObjectTypeName) {
         objectTypeTags = [
@@ -347,7 +370,7 @@ const SearchDropdown: React.FC<SearchDropdownProps> = ({
       // behavior
       const behavior = item as BehaviorItem;
       name = behavior.name || '';
-      id = behavior.id || 0;
+      code = behavior.code;
       // 将 behavior 的 objectTypeList 转换为标签格式
       objectTypeTags = (behavior.objectTypeList || []).map((objType) => ({
         ontologyObjectTypeId: objType.id,
@@ -360,31 +383,41 @@ const SearchDropdown: React.FC<SearchDropdownProps> = ({
       if (type === 'attribute') {
         // 跳转到属性列表页面
         history.push(
-          `/tenant/compute/noto/ontologyScene/detail/${OSId}/attributes/list?search=${encodeURIComponent(item?.name ?? '')}`
+          `/tenant/compute/onto/ontologyScene/detail/${OSId}/attributes/list?search=${encodeURIComponent(item?.name ?? '')}`
         );
       } else {
         // 跳转到行为列表页面
         history.push(
-          `/tenant/compute/noto/ontologyScene/detail/${OSId}/behaviorActions?search=${encodeURIComponent(item?.name ?? '')}`
+          `/tenant/compute/onto/ontologyScene/detail/${OSId}/behaviorActions?search=${encodeURIComponent(item?.name ?? '')}`
         );
       }
     };
 
     return (
       <div
-        key={id}
+        key={code}
         className="flex cursor-pointer flex-col items-start gap-[4px] px-[12px] py-[8px] transition-colors hover:bg-[#F2F8FF]"
         onClick={handleAttributeLinkResultClick}
       >
-        <div className="flex items-center gap-[8px]">
-          <EllipsisPopover
-            preferTypography
-            value={highlightSearchKeyword(name || '-', searchValue.trim())}
-            className="text-[14px] leading-[22px] text-[var(--color-text-1)]"
-          />
-          <span className="flex-shrink-0 text-[14px] leading-[22px] text-[var(--color-text-1)]">
-            (id: {id})
-          </span>
+        <div className="nowrap flex h-[22px] w-full min-w-0 flex-shrink-0 items-center overflow-hidden">
+          <div className="min-w-0 max-w-[160px] text-[14px] text-[var(--color-text-1)]">
+            <EllipsisPopover
+              value={highlightSearchKeyword(name || '-', searchValue.trim())}
+              className="flex-1 leading-[22px]"
+              wrapperClassName="min-w-0 leading-[22px] flex items-center"
+            />
+          </div>
+          {!isNil(code) && (
+            <div className="flex h-[22px] min-w-[60px] flex-1 items-center text-[14px] leading-[22px] text-[var(--color-text-1)]">
+              <div>(id:</div>
+              <EllipsisPopover
+                value={highlightSearchKeyword(code, searchValue.trim())}
+                className="flex-1 leading-[22px]"
+                wrapperClassName="min-w-0 leading-[22px] flex items-center"
+              />
+              <div>)</div>
+            </div>
+          )}
         </div>
         <div className="flex flex-wrap items-center gap-[8px]">
           <span className="text-[12px] leading-[18px] text-[var(--color-text-4)]">
@@ -401,22 +434,24 @@ const SearchDropdown: React.FC<SearchDropdownProps> = ({
     const handleFunctionResultClick = () => {
       // 跳转到函数列表页面
       history.push(
-        `/tenant/compute/noto/ontologyScene/detail/${OSId}/functions?search=${encodeURIComponent(item?.name ?? '')}`
+        `/tenant/compute/onto/ontologyScene/detail/${OSId}/functions?search=${encodeURIComponent(item?.name ?? '')}`
       );
     };
 
     return (
       <div
         key={item.id}
-        className="flex cursor-pointer flex-col gap-[4px] rounded-[4px] p-[12px] transition-colors hover:bg-[#F2F8FF]"
+        className="flex cursor-pointer flex-col gap-[4px] rounded-[4px] px-[12px] py-[8px] transition-colors hover:bg-[#F2F8FF]"
         onClick={handleFunctionResultClick}
       >
-        <div className="text-[14px] font-medium leading-[22px] text-[var(--color-text-1)]">
-          {highlightSearchKeyword(item.name, searchValue.trim())}
-        </div>
-        <div className="text-[12px] leading-[20px] text-[var(--color-text-3)]">
-          显示名称: {item.displayName}
-        </div>
+        <EllipsisPopover
+          value={highlightSearchKeyword(item.name, searchValue.trim())}
+          className="text-[14px] leading-[22px] text-[var(--color-text-1)]"
+        />
+        <EllipsisPopover
+          value={`显示名称: ${item.displayName}`}
+          className="text-[var(--color-text-4, #646C85)] text-[12px] leading-[20px]"
+        />
       </div>
     );
   };

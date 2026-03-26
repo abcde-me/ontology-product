@@ -24,10 +24,7 @@ import classNames from 'classnames';
 import { MarkerType } from 'reactflow';
 import { useDemoStore } from './common/store';
 import { useHistory, useParams } from 'react-router-dom';
-import { OsEmptyStatusWrapper } from '@/pages/ontologyScene/componens';
-import GraphEmptyImage from '@/pages/ontologyScene/assets/graph-empty.png';
 import { OBJECT_TYPE_ICON_OPTIONS } from '../../common/constants';
-import ObjectTypeIcon1 from '@/pages/ontologyScene/assets/object-type-one.svg';
 import EmptyStateGraph from './EmptyStateGraph';
 import { PermissionWrapper } from '@/components/PermissionGuard';
 import { ONTOLOGY_PERMISSIONS } from '@/config/permissions';
@@ -63,7 +60,7 @@ const createNodesConfig = (
       const handleEdit = () => {
         if (resolvedObjectTypeId) {
           history.push(
-            `/tenant/compute/noto/ontologyScene/detail/${OSId}/objectType/edit/${resolvedObjectTypeId}`
+            `/tenant/compute/onto/ontologyScene/detail/${OSId}/objectType/edit/${resolvedObjectTypeId}`
           );
         }
       };
@@ -281,6 +278,7 @@ export default function OntologySceneGraph() {
 
   useEffect(() => {
     // 重置 loading 状态和拓扑数据
+    setShowCustomEdgePanel(false);
     setLoading(true);
     setTopologyData(null);
     // 清除之前的 draft 缓存，避免显示旧数据

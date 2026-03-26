@@ -24,6 +24,8 @@ import {
   listOntologyLinkType
 } from '@/api/ontologySceneLibrary/graph';
 import { getOntologyObjectTypeDetail } from '@/api/ontologySceneLibrary/objectType';
+import { getActionListByObjectType } from '@/api/ontologySceneLibrary/ontologyAction';
+import type { BehaviorActionItem } from '@/pages/ontologyScene/types/behaviorActions';
 import type {
   ListOntologyObjectTypeDataRes,
   ListOntologyPhysicalPropertiesRes,
@@ -76,6 +78,12 @@ const Panel: FC<any> = ({ id, data }) => {
   const [linksIsNoMore, setLinksIsNoMore] = useState(false);
   const linksScrollContainerRef = useRef<HTMLDivElement>(null);
   const linksPageNoRef = useRef(1);
+
+  const [behaviorsData, setBehaviorsData] = useState<BehaviorActionItem[]>([]);
+  const [behaviorsTotal, setBehaviorsTotal] = useState(0);
+  const [behaviorsLoading, setBehaviorsLoading] = useState(false);
+  const [behaviorsPage, setBehaviorsPage] = useState(1);
+  const [behaviorsPageSize, setBehaviorsPageSize] = useState(defaultPageSize);
 
   // 对象详情相关状态
   const [objectTypeDetail, setObjectTypeDetail] =
@@ -168,6 +176,28 @@ const Panel: FC<any> = ({ id, data }) => {
       setLinksIsNoMore(true);
     } finally {
       setLinksLoading(false);
+    }
+  };
+
+  // 加载行为数据
+  const loadBehaviors = async (page: number, pageSize: number) => {
+    setBehaviorsLoading(true);
+    try {
+      const res = await getActionListByObjectType({
+        objectTypeId: nodeId,
+        ontologyModelID: Number(OSId),
+        pageNum: page,
+        pageSize: pageSize
+      });
+      if (res.code === '' && res.status === 200 && res.data) {
+        setBehaviorsData(res.data.result || []);
+        setBehaviorsTotal(res.data.totalCount || 0);
+      }
+    } catch (error) {
+      console.error('加载行为数据失败:', error);
+      Message.error('加载行为数据失败');
+    } finally {
+      setBehaviorsLoading(false);
     }
   };
 
@@ -265,6 +295,7 @@ const Panel: FC<any> = ({ id, data }) => {
     // 重置链接状态并加载第一页
     resetLinksState();
     loadLinks(1, linksPageSize, false);
+    loadBehaviors(behaviorsPage, behaviorsPageSize);
   }, [nodeId]);
 
   // 根据 tab 切换加载数据
@@ -328,7 +359,7 @@ const Panel: FC<any> = ({ id, data }) => {
     if (!record.ontologyPublicPropertiesName) {
       return;
     }
-    const url = `/noto/tenant/compute/noto/ontologyScene/detail/${OSId}/attributes/list?tab=public&search=${encodeURIComponent(record.ontologyPublicPropertiesName || '')}`;
+    const url = `/onto/tenant/compute/onto/ontologyScene/detail/${OSId}/attributes/list?tab=public&search=${encodeURIComponent(record.ontologyPublicPropertiesName || '')}`;
     openNewPage(url);
   };
 
@@ -409,6 +440,50 @@ const Panel: FC<any> = ({ id, data }) => {
       title: '字段类型',
       dataIndex: 'columnType',
       width: 140
+    }
+  ];
+
+  // 行为表格列
+  const behaviorsColumns = [
+    {
+      title: '行为名称',
+      dataIndex: 'name',
+      width: 140,
+      ellipsis: true,
+      render: (text: string) => (
+        <EllipsisPopover preferTypography value={text || '-'} />
+      )
+    },
+    {
+      title: '行为id',
+      dataIndex: 'code',
+      width: 140,
+      render: (text: string) => (
+        <div className="flex items-center gap-2">
+          <EllipsisPopover preferTypography value={text || '-'} />
+          {text && (
+            <Popover content="复制">
+              <IconCopy
+                fontSize={14}
+                className="cursor-pointer opacity-0 transition-opacity hover:text-[rgba(var(--primary-6))] group-hover:opacity-100"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleCopy(String(text));
+                }}
+              />
+            </Popover>
+          )}
+        </div>
+      )
+    },
+    {
+      title: '行为描述',
+      dataIndex: 'description',
+      width: 140,
+      ellipsis: true,
+      render: (text: string) => (
+        <EllipsisPopover preferTypography value={text || '-'} />
+      )
     }
   ];
 
@@ -545,6 +620,8 @@ const Panel: FC<any> = ({ id, data }) => {
                 onChange={(page, pageSize) => {
                   setInstancesPage(page);
                   setInstancesPageSize(pageSize);
+                  // 分页状态变化后需要重新请求数据，否则仅更新 state 不会刷新列表
+                  loadInstances(page, pageSize);
                 }}
               />
             </div>
@@ -575,6 +652,7 @@ const Panel: FC<any> = ({ id, data }) => {
                 onChange={(page, pageSize) => {
                   setPropertiesPage(page);
                   setPropertiesPageSize(pageSize);
+                  loadProperties(page, pageSize);
                 }}
               />
             </div>
@@ -658,6 +736,42 @@ const Panel: FC<any> = ({ id, data }) => {
                   <Spin />
                 </div>
               )}
+            </div>
+          )}
+        </Tabs.TabPane>
+
+        <Tabs.TabPane key="behaviors" title={`行为(${behaviorsTotal})`}>
+          {behaviorsTotal === 0 ? (
+            <div className="flex justify-center py-[100px]">
+              <NoDataCard title="暂无数据" />
+            </div>
+          ) : (
+            <Table
+              columns={behaviorsColumns}
+              data={behaviorsData}
+              loading={behaviorsLoading}
+              scroll={{ x: 400 }}
+              pagination={false}
+              rowKey={(record) => `${record.id || record.code}`}
+              border={false}
+              rowClassName={() => 'group'}
+              noDataElement={<NoDataCard title="暂无数据" />}
+            />
+          )}
+          {behaviorsTotal > defaultPageSize && (
+            <div className="mt-[16px] flex items-center justify-end">
+              <Pagination
+                current={behaviorsPage}
+                pageSize={behaviorsPageSize}
+                total={behaviorsTotal}
+                showTotal
+                sizeOptions={[10, 20, 50, 100]}
+                onChange={(page, pageSize) => {
+                  setBehaviorsPage(page);
+                  setBehaviorsPageSize(pageSize);
+                  loadBehaviors(page, pageSize);
+                }}
+              />
             </div>
           )}
         </Tabs.TabPane>

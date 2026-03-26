@@ -3,6 +3,7 @@ import { useHistory, useParams } from 'react-router-dom';
 import {
   Message,
   Pagination,
+  Popover,
   Spin,
   Table,
   TableColumnProps,
@@ -259,7 +260,7 @@ export default function LinkDetailDrawer({
   const handleEdit = () => {
     if (!resolvedLinkId) return;
     history.push(
-      `/tenant/compute/noto/ontologyScene/detail/${OSId}/links/edit/${resolvedLinkId}`
+      `/tenant/compute/onto/ontologyScene/detail/${OSId}/links/edit/${resolvedLinkId}`
     );
   };
 
@@ -280,7 +281,7 @@ export default function LinkDetailDrawer({
 
     return (
       <div
-        className="flex flex-1 items-center gap-3 rounded-lg px-4 py-3"
+        className="flex w-full max-w-[374px] flex-1 items-center gap-[8px] rounded-lg px-4 py-3"
         style={{
           backgroundColor: '#fff',
           minHeight: '56px'
@@ -289,15 +290,15 @@ export default function LinkDetailDrawer({
         <div className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded">
           <IconComponent className="h-6 w-6" />
         </div>
-        <div className="min-w-0 flex-1 text-sm font-normal leading-[22px] text-[#23293b]">
+        <div className="h-[24px] min-w-0 text-[14px] font-[600] text-[var(--color-text-1)]">
           <EllipsisPopover
             value={name}
-            preferTypography
+            className="min-w-0 leading-[24px]"
             wrapperClassName="min-w-0"
           />
         </div>
         {!isNil(objectType?.syncStatus) ? (
-          <div className="flex items-center">
+          <div className="flex h-[24px] items-center">
             <DotStatus
               text=""
               color={
@@ -372,6 +373,7 @@ export default function LinkDetailDrawer({
 
   return (
     <OsDrawer
+      key={resolvedLinkId}
       visible={visible}
       onCancel={onClose}
       title="链接详情"
@@ -432,14 +434,16 @@ export default function LinkDetailDrawer({
                     {displayData?.code || '-'}
                   </span>
                   {!isNil(displayData?.code) && (
-                    <IconCopy
-                      fontSize={14}
-                      className="hover:cursor-pointer hover:text-[rgba(var(--primary-6))]"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleCopy(String(displayData?.code));
-                      }}
-                    />
+                    <Popover content="复制">
+                      <IconCopy
+                        fontSize={14}
+                        className="hover:cursor-pointer hover:text-[rgba(var(--primary-6))]"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleCopy(String(displayData?.code));
+                        }}
+                      />
+                    </Popover>
                   )}
                 </div>
               </div>

@@ -14,14 +14,7 @@ import {
   OsDrawer,
   PyCodeContent
 } from '@/pages/ontologyScene/componens';
-import {
-  Form,
-  Table,
-  TableColumnProps,
-  Tabs,
-  Tooltip,
-  Typography
-} from '@arco-design/web-react';
+import { Form, Table, TableColumnProps, Tabs } from '@arco-design/web-react';
 import { useHistory, useParams } from 'react-router-dom';
 import { useRequest } from 'ahooks';
 import { getFunctionDetail } from '@/api/ontologySceneLibrary/ontologyFunction';
@@ -37,7 +30,6 @@ import ObjectTypeTag from '../../../../componens/ObjectTypeTag';
 import NoDataEmpty from '@/components/NoDataEmpty';
 import { EllipsisPopover, NoDataCard } from '@ceai-front/arco-material';
 import { ValidateRuleCard } from '@/pages/ontologyScene/modules/behaviorActions/components';
-import MenuBehaviorIcon from '@/pages/ontologyScene/assets/menu-behavior.svg';
 
 interface IProps {
   show: boolean;
@@ -77,7 +69,13 @@ export const BehaviorDetail = (props: IProps) => {
       title: '参数显示名称',
       dataIndex: 'name',
       key: 'name',
-      width: 160
+      width: 160,
+      ellipsis: true,
+      render(value) {
+        return (
+          <EllipsisPopover wrapperClassName={'w-full'} value={value || '-'} />
+        );
+      }
     },
 
     {
@@ -85,6 +83,7 @@ export const BehaviorDetail = (props: IProps) => {
       dataIndex: 'code',
       key: 'code',
       width: 160,
+      ellipsis: true,
       render(value) {
         return value ? <ContentWithCopy value={value} /> : '-';
       }
@@ -94,7 +93,12 @@ export const BehaviorDetail = (props: IProps) => {
       title: '数据类型',
       dataIndex: 'type',
       key: 'type',
-      width: 140
+      ellipsis: true,
+      render(value) {
+        return (
+          <EllipsisPopover wrapperClassName={'w-full'} value={value || '-'} />
+        );
+      }
     },
     {
       title: '界面控件',
@@ -138,28 +142,10 @@ export const BehaviorDetail = (props: IProps) => {
   return (
     <OsDrawer
       visible={show}
-      width={600}
       footer={null}
       onCancel={onClose}
       className={styles['behavior-detail']}
-      title={
-        <div className={styles['drawer-title']}>
-          <MenuBehaviorIcon fontSize={20} className={'flex-shrink-0'} />
-          <div className={'flex-1'}>
-            <EllipsisPopover
-              preferTypography
-              value={actionDetail?.name || '-'}
-              ellipsis={{
-                showTooltip: {
-                  type: 'tooltip'
-                }
-              }}
-              className={styles['drawer-title-text']}
-            />
-          </div>
-        </div>
-      }
-      headerExtra={actionDetail?.description}
+      title={'行为详情'}
       maskClosable
       closable
       afterClose={() => {
@@ -167,7 +153,7 @@ export const BehaviorDetail = (props: IProps) => {
       }}
       onEdit={() => {
         history.push(
-          `/tenant/compute/noto/ontologyScene/detail/${OSId}/behaviorActions/edit/${actionItem}`
+          `/tenant/compute/onto/ontologyScene/detail/${OSId}/behaviorActions/edit/${actionItem}`
         );
       }}
     >
@@ -180,51 +166,33 @@ export const BehaviorDetail = (props: IProps) => {
           >
             基本信息
           </div>
-          <div className={'w-full overflow-hidden'}>
+          <div className={'flex w-full flex-wrap overflow-hidden'}>
             <div className={styles['base-info-item']}>
               <div className={styles['item-field']}>行为名称：</div>
               <div className={styles['item-value']}>
                 <EllipsisPopover
-                  preferTypography
                   value={actionDetail?.name || '-'}
-                  ellipsis={{
-                    showTooltip: {
-                      type: 'tooltip',
-                      props: {
-                        placement: 'bottom'
-                      }
-                    }
-                  }}
-                />
+                  // preferTypography
+                  wrapperClassName={'w-full'}
+                ></EllipsisPopover>
               </div>
             </div>
             <div className={styles['base-info-item']}>
               <div className={styles['item-field']}>描述说明：</div>
               <div className={styles['item-value']}>
                 <EllipsisPopover
-                  preferTypography
                   value={actionDetail?.description || '-'}
-                  ellipsis={{
-                    showTooltip: {
-                      type: 'tooltip',
-                      props: {
-                        placement: 'bottom'
-                      }
-                    }
-                  }}
-                />
+                  // preferTypography
+                  wrapperClassName={'w-full'}
+                ></EllipsisPopover>
               </div>
             </div>
             <div className={styles['base-info-item']}>
               <div className={styles['item-field']}>所属对象类型：</div>
               <div className={styles['item-value']}>
                 <ObjectTypeTag
-                  ontologyObjectTypeIcon={
-                    actionDetail?.ontologyObjectTypeIcon || '-'
-                  }
-                  ontologyObjectTypeName={
-                    actionDetail?.objectTypeName || '全局对象'
-                  }
+                  ontologyObjectTypeIcon={actionDetail?.objectTypeIcon || '-'}
+                  ontologyObjectTypeName={actionDetail?.objectTypeName || '-'}
                   ontologyObjectTypeId={String(
                     actionDetail?.ontologyObjectTypeId ||
                       actionDetail?.objectTypeId ||
@@ -239,23 +207,18 @@ export const BehaviorDetail = (props: IProps) => {
               <div className={styles['item-field']}>函数：</div>
               <div className={styles['item-value']}>
                 <EllipsisPopover
-                  preferTypography
                   value={actionDetail?.functionName || '-'}
-                  ellipsis={{
-                    showTooltip: {
-                      type: 'tooltip',
-                      props: {
-                        placement: 'bottom'
-                      }
-                    }
-                  }}
+                  // preferTypography
+                  wrapperClassName={'w-full'}
                 />
               </div>
             </div>
             <div className={styles['base-info-item']}>
               <div className={styles['item-field']}>行为id：</div>
               <div className={styles['item-value']}>
-                <ContentWithCopy value={(actionDetail?.id || '-').toString()} />
+                <ContentWithCopy
+                  value={(actionDetail?.code || '-').toString()}
+                />
               </div>
             </div>
           </div>

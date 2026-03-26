@@ -3,7 +3,11 @@ import { useParams } from 'react-router-dom';
 import { useRequest } from 'ahooks';
 import { BehaviorLogItem } from '@/pages/ontologyScene/modules/behaviorLog/types';
 import { cloneDeep, isNil } from 'lodash-es';
-import { testFunction } from '@/api/ontologySceneLibrary/ontologyFunction';
+import {
+  batchGetExecuteTestLog,
+  stopTestFunction,
+  testFunction
+} from '@/api/ontologySceneLibrary/ontologyFunction';
 import { TestFunction } from '@/pages/ontologyScene/types/ontologyFunction';
 import { Message } from '@arco-design/web-react';
 
@@ -37,35 +41,91 @@ const DefaultRunStatus: RunStatus = {
 
 const useTestFunction = (): TestFunctionInfo => {
   const { id: OSid } = useParams<Record<string, string>>();
+  const [runningLog, setRunningLog] = useState<React.Key[]>();
   // 正在请求接口
   const [loading, setLoading] = useState<boolean>(false);
 
   const [runLogInfo, setRunLogInfo] = useState<RunStatus>(DefaultRunStatus);
 
+  const { run: getRunLogs, cancel: cancelGetRunLogs } = useRequest(
+    () => {
+      return batchGetExecuteTestLog(runningLog).then((res) => {
+        if (res.message !== 'ok') {
+          return Promise.reject(res.message);
+        }
+        return res.data as BehaviorLogItem[];
+      });
+    },
+    {
+      refreshDeps: [runningLog, runLogInfo],
+      manual: true,
+      pollingInterval: 3000,
+      ready: !!runningLog?.length,
+      onSuccess(res: BehaviorLogItem[]) {
+        setRunLogInfo(buildRunLog(res));
+        const running = res.some(({ run_status }) => run_status === 1);
+        const fail = res.some(({ run_status }) => run_status === 3);
+        const kill = res.some(({ run_status }) => run_status === 4);
+        if (!running) {
+          cancelGetRunLogs();
+          setLoading(false);
+        }
+        setRunLogInfo({
+          run_status: running ? 1 : fail ? 3 : kill ? 4 : 2,
+          runLog: res.map(({ run_status, run_log, ...other }) => {
+            return {
+              ...other,
+              run_status,
+              run_log: run_status === 4 ? '已被手动停止' : run_log
+            };
+          })
+        });
+      },
+      onError(e) {
+        setRunLogInfo({
+          run_status: 4,
+          runLog: runLogInfo.runLog?.map((log) => {
+            return {
+              ...log,
+              run_status: 4,
+              run_log: e.message
+            };
+          })
+        });
+        cancelGetRunLogs();
+        setLoading(false);
+      }
+    }
+  );
+
   const { run, cancel } = useRequest(
     (data: TestFunction) => {
-      return testFunction(data)
-        .then((res) => {
-          if (res.message !== 'ok') {
-            return Promise.reject(res.message);
-          }
-          return res.data;
-        })
-        .catch((e) => {
-          Message.error(e);
-          return [];
-        });
+      return testFunction(data).then((res) => {
+        if (res.message !== 'ok') {
+          return Promise.reject(res.message);
+        }
+        return res.data;
+      });
     },
     {
       manual: true,
       onSuccess(data: BehaviorLogItem[]) {
-        if (isNil(data))
-          return setRunLogInfo({
-            run_status: 2,
-            runLog: []
-          });
+        setRunningLog(data.map(({ id }) => id));
         setRunLogInfo(buildRunLog(data));
+        getRunLogs();
+      },
+      onError(e) {
+        Message.error(e.message);
         setLoading(false);
+        setRunLogInfo({
+          run_status: 4,
+          runLog: [
+            {
+              run_status: 4,
+              run_log: e.message
+            }
+          ]
+        });
       }
     }
   );
@@ -99,20 +159,10 @@ const useTestFunction = (): TestFunctionInfo => {
   };
 
   const handelStopTestFunction = () => {
-    cancel();
-    setRunLogInfo((p) => {
-      return {
-        run_status: 4,
-        runLog: p.runLog.map((item) => {
-          return {
-            ...item,
-            run_status: 4,
-            run_log: '已被手动停止'
-          };
-        })
-      };
+    stopTestFunction(runningLog?.[0]).then((res) => {
+      cancelGetRunLogs();
+      getRunLogs();
     });
-    setLoading(false);
   };
 
   return {
@@ -128,6 +178,7 @@ const useTestFunction = (): TestFunctionInfo => {
     loading,
     clear: () => {
       cancel();
+      cancelGetRunLogs();
       setRunLogInfo(DefaultRunStatus);
       setLoading(false);
     }

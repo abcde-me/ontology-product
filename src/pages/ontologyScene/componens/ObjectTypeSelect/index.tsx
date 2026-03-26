@@ -1,11 +1,12 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { Popover, Select, Tooltip } from '@arco-design/web-react';
+import { Popover, Select, SelectProps, Tooltip } from '@arco-design/web-react';
 import { EllipsisPopover } from '@ceai-front/arco-material';
 import { listOntologyObjectType } from '@/api/ontologySceneLibrary/objectType';
 import { ObjectType } from '@/types/objectType';
 import { OBJECT_TYPE_ICON_OPTIONS } from '@/pages/ontologyScene/common/constants';
 import styles from './index.module.scss';
 import { SyncStatus } from '@/types/graphApi';
+import { isNil } from 'lodash-es';
 
 export interface ObjectTypeSelectProps {
   /** 当前选中的对象类型ID */
@@ -29,6 +30,7 @@ export interface ObjectTypeSelectProps {
   /** 是否显示全部 */
   showAll?: boolean;
   primaryKey?: keyof ObjectType;
+  selectProps?: Partial<SelectProps>;
 }
 
 /**
@@ -46,7 +48,8 @@ const ObjectTypeSelect: React.FC<ObjectTypeSelectProps> = ({
   label = '',
   getPopupContainer,
   showAll = false,
-  primaryKey = 'id'
+  primaryKey = 'id',
+  selectProps = {}
 }) => {
   const [loading, setLoading] = useState(false);
   const [objectTypeList, setObjectTypeList] = useState<ObjectType[]>([]);
@@ -67,6 +70,7 @@ const ObjectTypeSelect: React.FC<ObjectTypeSelectProps> = ({
           objectTypes.unshift({
             syncStatus: SyncStatus.SUCCESS,
             id: -1,
+            icon: 'object-type-1',
             name: '全局行为',
             code: '-1',
             description: '全局行为'
@@ -99,22 +103,26 @@ const ObjectTypeSelect: React.FC<ObjectTypeSelectProps> = ({
 
     return (
       <div className="flex h-[60px] cursor-pointer items-center gap-[8px] overflow-hidden px-[12px] py-[8px] transition-colors hover:bg-[#F2F8FF]">
-        {option.id > 0 && (
-          <div className="flex h-[36px] w-[36px] flex-shrink-0 items-center justify-center">
-            <IconComponent className="h-[36px] w-[36px]" />
-          </div>
-        )}
-        <div className="flex h-[44px] min-w-0 flex-1 flex-col gap-1">
-          <div className="nowrap flex h-[22px] flex-shrink-0 items-center gap-[8px] overflow-hidden">
+        <div className="flex h-[36px] w-[36px] flex-shrink-0 items-center justify-center">
+          <IconComponent className="h-[36px] w-[36px]" />
+        </div>
+        <div className="flex h-[44px] min-w-0 flex-1 flex-col justify-center gap-1">
+          <div className="nowrap flex h-[22px] flex-shrink-0 items-center overflow-hidden">
             <EllipsisPopover
-              value={option.name || '-'}
-              className="text-[14px] leading-[22px] text-[var(--color-text-1)]"
-              wrapperClassName={'min-w-0'}
+              value={option.name}
+              className="flex-1 leading-[22px]"
+              wrapperClassName="min-w-0 leading-[22px] flex items-center"
             />
-            {option.id > 0 && (
-              <span className="flex-shrink-0 text-[14px] leading-[22px] text-[var(--color-text-1)] ">
-                (id: {option.id})
-              </span>
+            {!isNil(option.code) && option.code !== '-1' && (
+              <div className="flex h-[22px] min-w-[60px] flex-1 items-center text-[14px] leading-[22px] text-[var(--color-text-1)]">
+                <div>(id:</div>
+                <EllipsisPopover
+                  value={option.code}
+                  className="flex-1 leading-[22px]"
+                  wrapperClassName="min-w-0 leading-[22px] flex items-center"
+                />
+                <div>)</div>
+              </div>
             )}
           </div>
           {option.id > 0 && (
@@ -187,11 +195,9 @@ const ObjectTypeSelect: React.FC<ObjectTypeSelectProps> = ({
           return (
             <div className="flex items-center gap-2">
               {/* 左侧图标 */}
-              {Number(item.id) > 0 && (
-                <div className="flex h-[24px] w-[24px] flex-shrink-0 items-center justify-center rounded">
-                  <IconComponent className="h-[24px] w-[24px]" />
-                </div>
-              )}
+              <div className="flex h-[24px] w-[24px] flex-shrink-0 items-center justify-center rounded">
+                <IconComponent className="h-[24px] w-[24px]" />
+              </div>
               {/* 右侧名称 */}
               <EllipsisPopover
                 preferTypography
@@ -203,6 +209,7 @@ const ObjectTypeSelect: React.FC<ObjectTypeSelectProps> = ({
         }}
         dropdownMenuClassName={styles['object-type-select-dropdown']}
         className="object-type-select"
+        {...selectProps}
       >
         {objectTypeList.map((item) => (
           <Select.Option key={item.id} value={item[primaryKey] as any}>

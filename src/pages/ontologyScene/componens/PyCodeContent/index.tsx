@@ -29,17 +29,48 @@ export const PyCodeContent = (
     });
   }, [isFullscreen]);
 
+  const popupContainer = () => {
+    return isFullscreen ? codeRef.current || document.body : document.body;
+  };
   return (
     <div className={styles['py-code']} ref={codeRef}>
       {readOnly && <div className={styles['code-mask']} />}
       <div className={styles['toolbar']}>
-        {copy && <CopyItemIcon value={props.value || ''} />}
+        {copy && (
+          <Tooltip
+            content={'复制'}
+            getPopupContainer={popupContainer}
+            className={'z-40'}
+          >
+            <IconCopy
+              className={
+                'text-[14px] text-[#334155] hover:cursor-pointer hover:text-[#438DFB]'
+              }
+              onClick={() => {
+                copyToClipboard(props.value || '-');
+              }}
+            />
+          </Tooltip>
+        )}
         <Tooltip
           content={isFullscreen ? '退出全屏' : '全屏'}
-          getPopupContainer={() => codeRef.current || document.body}
+          getPopupContainer={popupContainer}
         >
           <div onClick={toggleFullscreen}>
-            {fullScreen && (isFullscreen ? <IconShrink /> : <IconExpand />)}
+            {fullScreen &&
+              (isFullscreen ? (
+                <IconShrink
+                  className={
+                    'text-[14px] text-[#334155] hover:cursor-pointer hover:text-[#438DFB]'
+                  }
+                />
+              ) : (
+                <IconExpand
+                  className={
+                    'text-[14px] text-[#334155] hover:cursor-pointer hover:text-[#438DFB]'
+                  }
+                />
+              ))}
           </div>
         </Tooltip>
       </div>

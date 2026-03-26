@@ -103,7 +103,7 @@ export const menus: MenuModel[] = [
         title: '首页',
         icon: <IconHome className={iconClass} />,
         key: 'home',
-        path: '/tenant/compute/noto/home'
+        path: '/tenant/compute/onto/home'
       }
     ]
   },
@@ -116,7 +116,7 @@ export const menus: MenuModel[] = [
         title: '本体场景库',
         icon: <OntologyLibrary className={iconClass} />,
         key: 'OntologySceneLibrary',
-        path: '/tenant/compute/noto/ontologyScene',
+        path: '/tenant/compute/onto/ontologyScene/list',
         permission: ONTOLOGY_PERMISSIONS.LIST
       }
     ]
@@ -131,11 +131,11 @@ export const menus: MenuModel[] = [
         icon: <OrganMenu className={iconClass} />,
         key: 'apiKeyMgmt',
         path:
-          '/tenant/compute/noto/operationCenter?url=' +
+          '/tenant/compute/onto/operationCenter?url=' +
           encodeURIComponent(
             '/operationcenter/tenant/compute/operationcenter/apikey'
           ),
-        activePaths: ['/tenant/compute/noto/operationCenter'],
+        activePaths: ['/tenant/compute/onto/operationCenter'],
         queryParamMatcher: hasActiveMenu.bind(null, 'apikey'),
         permission: API_KEY_PERMISSIONS.MENU
       },
@@ -144,11 +144,11 @@ export const menus: MenuModel[] = [
         title: '标签管理',
         icon: <LabelMenu className={iconClass} />,
         path:
-          '/tenant/compute/noto/operationCenter?url=' +
+          '/tenant/compute/onto/operationCenter?url=' +
           encodeURIComponent(
             '/operationcenter/tenant/compute/operationcenter/tag'
           ),
-        activePaths: ['/tenant/compute/noto/operationCenter'],
+        activePaths: ['/tenant/compute/onto/operationCenter'],
         queryParamMatcher: hasActiveMenu.bind(null, 'tag'),
         permission: TAG_PERMISSIONS.LIST
       }
@@ -165,11 +165,11 @@ export const menus: MenuModel[] = [
         icon: <OrganMenu className={iconClass} />,
         key: 'orgMgmt',
         path:
-          '/tenant/compute/noto/operationCenter?url=' +
+          '/tenant/compute/onto/operationCenter?url=' +
           encodeURIComponent(
             '/operationcenter/tenant/compute/operationcenter/organization'
           ),
-        activePaths: ['/tenant/compute/noto/operationCenter'],
+        activePaths: ['/tenant/compute/onto/operationCenter'],
         queryParamMatcher: hasActiveMenu.bind(null, 'organization'),
         permission: ORGANIZATION_PERMISSIONS.MENU
       },
@@ -177,12 +177,12 @@ export const menus: MenuModel[] = [
         title: '用户管理',
         icon: <MemberMenu className={iconClass} />,
         path:
-          '/tenant/compute/noto/operationCenter?url=' +
+          '/tenant/compute/onto/operationCenter?url=' +
           encodeURIComponent(
             '/operationcenter/tenant/compute/operationcenter/user'
           ),
         key: 'userMgmt',
-        activePaths: ['/tenant/compute/noto/operationCenter'],
+        activePaths: ['/tenant/compute/onto/operationCenter'],
         queryParamMatcher: (search: string) => {
           const url = new URLSearchParams(search).get('mdp_operation_center');
           return (
@@ -195,12 +195,12 @@ export const menus: MenuModel[] = [
         title: '用户组管理',
         icon: <MemberMenu className={iconClass} />,
         path:
-          '/tenant/compute/noto/operationCenter?url=' +
+          '/tenant/compute/onto/operationCenter?url=' +
           encodeURIComponent(
             '/operationcenter/tenant/compute/operationcenter/user-group'
           ),
         key: 'userGroupMgmt',
-        activePaths: ['/tenant/compute/noto/operationCenter'],
+        activePaths: ['/tenant/compute/onto/operationCenter'],
         queryParamMatcher: hasActiveMenu.bind(null, 'user-group'),
         permission: USER_GROUP_PERMISSIONS.MENU
       },
@@ -208,12 +208,12 @@ export const menus: MenuModel[] = [
         title: '角色管理',
         icon: <BaseMenu className={iconClass} />,
         path:
-          '/tenant/compute/noto/operationCenter?url=' +
+          '/tenant/compute/onto/operationCenter?url=' +
           encodeURIComponent(
             '/operationcenter/tenant/compute/operationcenter/role'
           ),
         key: 'roleMgmt',
-        activePaths: ['/tenant/compute/noto/operationCenter'],
+        activePaths: ['/tenant/compute/onto/operationCenter'],
         queryParamMatcher: hasActiveMenu.bind(null, 'role'),
         permission: ROLE_PERMISSIONS.MENU
       }
@@ -230,11 +230,11 @@ export const menus: MenuModel[] = [
         icon: <OrganMenu className={iconClass} />,
         key: 'projectMgmt',
         path:
-          '/tenant/compute/noto/operationCenter?url=' +
+          '/tenant/compute/onto/operationCenter?url=' +
           encodeURIComponent(
             '/operationcenter/tenant/compute/operationcenter/project'
           ),
-        activePaths: ['/tenant/compute/noto/operationCenter'],
+        activePaths: ['/tenant/compute/onto/operationCenter'],
         queryParamMatcher: hasActiveMenu.bind(null, 'project'),
         permission: PROJECT_PERMISSIONS.MENU
       }

@@ -1,7 +1,13 @@
 import React from 'react';
 import styles from './index.module.scss';
 import classNames from 'classnames';
-import { Button, Popover, Upload, UploadProps } from '@arco-design/web-react';
+import {
+  Button,
+  Form,
+  Popover,
+  Upload,
+  UploadProps
+} from '@arco-design/web-react';
 import {
   IconClose,
   IconLoading,
@@ -11,41 +17,40 @@ import {
 import { PrefixAimdp } from '@/api/endpoints';
 import FileIcon from '../../assets/file-icon.svg';
 import { uploadFunctionFile } from '@/api/ontologySceneLibrary/ontologyFunction';
+import { UploadItem } from '@arco-design/web-react/es/Upload';
 
 export const FunctionFileParam = (
-  props: CustomFormItemCompProps<UploadProps['fileList']> & {
+  props: CustomFormItemCompProps<UploadItem[]> & {
     getPopupContainer?: () => Element;
   }
 ) => {
   const { value, onChange, disabled } = props;
+  const { form } = Form.useFormContext();
 
   return (
     <div
       className={classNames([
         styles['function-file-param'],
         props.className,
-        disabled ? 'bg-[var(--color-fill-2)]' : ''
+        disabled ? 'bg-[var(--color-fill-2)]' : '',
+        'f-file-wrapper'
       ])}
     >
       <Upload
         showUploadList={false}
         className={styles['upload']}
         action={`${PrefixAimdp}/UploadOntologyActionDataFile`}
-        multiple={false}
+        // multiple={false}
         fileList={value}
         disabled={disabled}
-        limit={1}
-        onChange={(value) => {
-          onChange?.(
-            value.map((file) => {
-              // @ts-ignore
-              if (file.response?.status === 200) {
-                // @ts-ignore
-                file.url = file.response.data.path;
-              }
-              return file;
-            })
-          );
+        limit={2}
+        onChange={(value, file) => {
+          // @ts-ignore
+          if (file.response?.status === 200) {
+            // @ts-ignore
+            file.url = file.response.data.path;
+          }
+          onChange?.([file]);
         }}
       >
         <Button icon={<IconUpload />} className={styles['uploader']}>

@@ -8,6 +8,7 @@ import {
 } from '@/pages/ontologyScene/componens';
 import {
   InputType,
+  OntologyFunctionItem,
   OntologyFunctionParam
 } from '@/pages/ontologyScene/types/ontologyFunction';
 import { Message, Table, TableColumnProps } from '@arco-design/web-react';
@@ -16,7 +17,6 @@ import { useRequest } from 'ahooks';
 import { getFunctionDetail } from '@/api/ontologySceneLibrary/ontologyFunction';
 import { isNil } from 'lodash-es';
 import { EllipsisPopover } from '@ceai-front/arco-material';
-import MenuFunctionIcon from '@/pages/ontologyScene/assets/menu-function.svg';
 
 interface IProps extends OSDrawerProps {
   data?: number;
@@ -30,8 +30,9 @@ interface ParamRow {
 const COMMON_PAGINATION = {
   showJumper: false,
   showMore: false,
+  showTotal: true,
   sizeCanChange: false,
-  pageSize: 10,
+  pageSize: 6,
   simple: true
 };
 
@@ -39,12 +40,31 @@ const INPUT_COLUMNS: TableColumnProps<ParamRow>[] = [
   {
     title: '入参名称',
     dataIndex: 'name',
-    render: (value: string) => value || '-'
+    ellipsis: true,
+    render: (value: string) => {
+      return (
+        <EllipsisPopover
+          value={value || '-'}
+          preferTypography
+          wrapperClassName={'w-full'}
+        />
+      );
+    }
   },
   {
     title: '入参类型',
     dataIndex: 'type',
-    render: (value: string) => value || '-'
+    width: 200,
+    ellipsis: true,
+    render: (value: string) => {
+      return (
+        <EllipsisPopover
+          value={value || '-'}
+          preferTypography
+          wrapperClassName={'w-full'}
+        />
+      );
+    }
   }
 ];
 
@@ -52,12 +72,31 @@ const OUTPUT_COLUMNS: TableColumnProps<ParamRow>[] = [
   {
     title: '出参名称',
     dataIndex: 'name',
-    render: (value: string) => value || '-'
+    ellipsis: true,
+    render: (value: string) => {
+      return (
+        <EllipsisPopover
+          value={value || '-'}
+          preferTypography
+          wrapperClassName={'w-full'}
+        />
+      );
+    }
   },
   {
     title: '出参类型',
     dataIndex: 'type',
-    render: (value: string) => value || '-'
+    width: 200,
+    ellipsis: true,
+    render: (value: string) => {
+      return (
+        <EllipsisPopover
+          value={value || '-'}
+          preferTypography
+          wrapperClassName={'w-full'}
+        />
+      );
+    }
   }
 ];
 
@@ -111,28 +150,7 @@ export const FunctionDetailDrawer = (props: IProps) => {
   return (
     <OsDrawer
       {...drawerProps}
-      width={600}
-      title={
-        <div className={styles['drawer-title']}>
-          <MenuFunctionIcon
-            fontSize={20}
-            className={'flex-shrink-0 bg-transparent text-[#0F131F]'}
-          />
-          <div className={'flex-1'}>
-            <EllipsisPopover
-              preferTypography
-              value={functionData?.name || '-'}
-              ellipsis={{
-                showTooltip: {
-                  type: 'tooltip'
-                }
-              }}
-              className={styles['drawer-title-text']}
-            />
-          </div>
-        </div>
-      }
-      headerExtra={functionData?.description ?? null}
+      title={title ?? '函数详情'}
       footer={footer ?? null}
       className={classNames(styles['function-detail-drawer'], className)}
     >
@@ -146,12 +164,7 @@ export const FunctionDetailDrawer = (props: IProps) => {
               <div className={styles['info-value']}>
                 <EllipsisPopover
                   value={basicInfo?.displayName || '-'}
-                  preferTypography
-                  ellipsis={{
-                    showTooltip: {
-                      type: 'tooltip'
-                    }
-                  }}
+                  wrapperClassName={'w-full'}
                 >
                   {basicInfo?.displayName || '-'}
                 </EllipsisPopover>
@@ -168,12 +181,8 @@ export const FunctionDetailDrawer = (props: IProps) => {
               <div className={styles['info-value']}>
                 <EllipsisPopover
                   value={basicInfo?.description || '-'}
-                  preferTypography
-                  ellipsis={{
-                    showTooltip: {
-                      type: 'tooltip'
-                    }
-                  }}
+                  // preferTypography
+                  wrapperClassName={'w-full'}
                 >
                   {basicInfo?.description || '-'}
                 </EllipsisPopover>
@@ -190,7 +199,9 @@ export const FunctionDetailDrawer = (props: IProps) => {
             columns={INPUT_COLUMNS}
             data={inputParams}
             pagination={COMMON_PAGINATION}
-            border={false}
+            border={{
+              wrapper: true
+            }}
           />
         </div>
 
@@ -201,7 +212,9 @@ export const FunctionDetailDrawer = (props: IProps) => {
             className={styles['detail-table']}
             data={outputParams}
             columns={OUTPUT_COLUMNS}
-            border={false}
+            border={{
+              wrapper: true
+            }}
             pagination={COMMON_PAGINATION}
           />
         </div>

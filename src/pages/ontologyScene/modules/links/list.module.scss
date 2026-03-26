@@ -1,7 +1,6 @@
 .links-list {
   display: flex;
   flex-direction: column;
-  gap: 24px;
   padding: 24px;
 
   .search {
@@ -17,10 +16,6 @@
 
         :global(.hover-blue) {
           color: #184ff2 !important;
-        }
-
-        :global(.aa-copy-item) {
-          display: block !important;
         }
       }
     }

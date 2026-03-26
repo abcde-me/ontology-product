@@ -4,10 +4,10 @@
     "properties": {
       "exact": true,
       "path": [
-        "/tenant/compute/noto/login",
-        "/tenant/compute/noto/userinfo",
-        "/tenant/compute/noto/home",
-        "/tenant/compute/noto/ontologyScene"
+        "/tenant/compute/onto/login",
+        "/tenant/compute/onto/userinfo",
+        "/tenant/compute/onto/home",
+        "/tenant/compute/onto/ontologyScene"
       ],
       "component": {
         "$codeRef": "AdminLayout.default"
@@ -20,8 +20,8 @@
       "id": "ontology-platform",
       "ssoType": "false",
       "blacklist": [
-        "/tenant/compute/noto/login",
-        "/tenant/compute/noto/userinfo"
+        "/tenant/compute/onto/login",
+        "/tenant/compute/onto/userinfo"
       ]
     }
   },

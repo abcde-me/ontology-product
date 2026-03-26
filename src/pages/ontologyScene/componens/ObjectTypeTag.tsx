@@ -39,7 +39,7 @@ const ObjectTypeTag: React.FC<ObjectTypeTagProps> = ({
 
   return (
     <div
-      className={`object-type-tag inline-flex h-[26px] min-w-0 max-w-[96px] items-center gap-[4px] overflow-hidden rounded border border-[#EBEEF5] bg-[#F5F7FC] px-[4px] ${
+      className={`object-type-tag inline-flex h-[26px] min-w-0 max-w-[110px] items-center gap-[4px] overflow-hidden rounded border border-[#EBEEF5] bg-[#F5F7FC] px-[4px] ${
         onClick ? 'cursor-pointer' : ''
       } ${className}`}
       onClick={onClick}

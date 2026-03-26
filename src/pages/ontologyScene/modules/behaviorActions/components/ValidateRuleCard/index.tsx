@@ -7,23 +7,28 @@ import {
   ValidateRule
 } from '@/pages/ontologyScene/types/behaviorActions';
 import { Switch, Tag } from '@arco-design/web-react';
+import { EllipsisPopover } from '@ceai-front/arco-material';
 
 const RuleConfig = {
   [RuleName.EnumRule]: {
     label: '枚举值：',
     getValue(config: EnumRule) {
+      if (!config) return '--';
       return config.options.toString();
     }
   },
   [RuleName.LengthRule]: {
     label: '长度范围：',
     getValue(config: RangeRule) {
+      if (!config) return '--';
+
       return `${config.minValue} ~ ${config.maxValue}`;
     }
   },
   [RuleName.RangeRule]: {
     label: '数值范围：',
     getValue(config: RangeRule) {
+      if (!config) return '--';
       return `${config.minValue} ~ ${config.maxValue}`;
     }
   }
@@ -41,8 +46,16 @@ export const ValidateRuleCard = (props: { rule: ValidateRule }) => {
       <div
         className={`flex items-center gap-2 font-PingFangSc text-[14px] font-medium leading-[22px] text-black ${styles['rule-card-header']}`}
       >
-        <div className={'flex flex-shrink-0 items-center gap-2'}>
-          {name}
+        <div
+          className={
+            'flex flex-1 flex-shrink-0 items-center gap-2 overflow-hidden'
+          }
+        >
+          <EllipsisPopover
+            value={name}
+            preferTypography
+            wrapperClassName={'w-max'}
+          />
           <Tag
             className={`ml-3 text-[#184FF2] ${styles['type-tag']}`}
             bordered
@@ -51,7 +64,11 @@ export const ValidateRuleCard = (props: { rule: ValidateRule }) => {
             {type}
           </Tag>
         </div>
-        <Switch checked={enabledValidation} disabled />
+        <Switch
+          checked={enabledValidation}
+          disabled
+          className={'flex-shrink-0'}
+        />
       </div>
       <div className={styles['rule-card-body']}>
         <div className={styles['field-values']}>
@@ -60,7 +77,7 @@ export const ValidateRuleCard = (props: { rule: ValidateRule }) => {
         </div>
         <div className={styles['field-values']}>
           <div className={styles['field-label']}>报错文案：</div>
-          <div className={styles['field-value']}>{failMessage}</div>
+          <div className={styles['field-value']}>{failMessage || '--'}</div>
         </div>
       </div>
     </div>

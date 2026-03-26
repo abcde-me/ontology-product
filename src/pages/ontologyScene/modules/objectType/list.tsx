@@ -10,7 +10,12 @@ import {
   Modal,
   Popover
 } from '@arco-design/web-react';
-import { IconPlus, IconSearch, IconRefresh } from '@arco-design/web-react/icon';
+import {
+  IconPlus,
+  IconSearch,
+  IconRefresh,
+  IconQuestionCircle
+} from '@arco-design/web-react/icon';
 import {
   CopyItemIcon,
   DotStatus,
@@ -23,10 +28,12 @@ import { useHistory, useParams } from 'react-router-dom';
 import { debounce } from 'lodash-es';
 import { useWorkflowTable } from '../../hooks/useTable';
 import ObjectTypeDetailDrawer from '../../componens/ObjectTypeDetailDrawer';
+import TaskLogDrawer from '../../componens/TaskLogDrawer';
 import {
   listOntologyObjectType,
   deleteOntologyObjectType,
-  syncObjectTypeTask
+  syncObjectTypeTask,
+  getObjectTypeSyncLog
 } from '@/api/ontologySceneLibrary/objectType';
 import { ObjectType, ListOntologyObjectTypeReq } from '@/types/objectType';
 import { SyncStatus } from '@/types/graphApi';
@@ -38,6 +45,7 @@ import {
 import dayjs from 'dayjs';
 import { PermissionWrapper } from '@/components/PermissionGuard';
 import { ONTOLOGY_PERMISSIONS } from '@/config/permissions';
+import LogIcon from '@/pages/ontologyScene/assets/log-icon.svg';
 
 export default function OntologySceneObjectTypeList() {
   const [form] = Form.useForm();
@@ -50,6 +58,12 @@ export default function OntologySceneObjectTypeList() {
   const [activeTab, setActiveTab] = useState<
     'instances' | 'attributes' | 'links'
   >('instances');
+
+  const [logDrawerVisible, setLogDrawerVisible] = useState(false);
+  const [currentSyncTaskId, setCurrentSyncTaskId] = useState<number | null>(
+    null
+  );
+  const [currentTaskName, setCurrentTaskName] = useState<string>('');
 
   // 使用 useTable hook
   const { data, loading, pagination, refresh, submit, onChange } =
@@ -135,7 +149,7 @@ export default function OntologySceneObjectTypeList() {
   // 跳转到创建页面
   const handleCreate = () => {
     history.push(
-      `/tenant/compute/noto/ontologyScene/detail/${ontologyModelID}/objectType/create`
+      `/tenant/compute/onto/ontologyScene/detail/${ontologyModelID}/objectType/create`
     );
   };
 
@@ -168,7 +182,7 @@ export default function OntologySceneObjectTypeList() {
       return;
     }
     history.push(
-      `/tenant/compute/noto/ontologyScene/detail/${ontologyModelID}/objectType/edit/${record.id}`
+      `/tenant/compute/onto/ontologyScene/detail/${ontologyModelID}/objectType/edit/${record.id}`
     );
   };
 
@@ -198,6 +212,18 @@ export default function OntologySceneObjectTypeList() {
         }
       }
     });
+  };
+
+  // 查看同步日志
+  const handleViewSyncLog = (record: ObjectType) => {
+    if (!record.id) {
+      Message.error('对象类型ID无效');
+      return;
+    }
+
+    setCurrentSyncTaskId(record.id);
+    setCurrentTaskName(record.name || '');
+    setLogDrawerVisible(true);
   };
 
   // 失败重试（防抖处理）
@@ -272,7 +298,7 @@ export default function OntologySceneObjectTypeList() {
       dataIndex: 'code',
       width: 200,
       render: (value) => (
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-[4px]">
           <EllipsisPopover wrapperClassName="min-w-0" value={value} />
           {value && (
             <CopyItemIcon className="hidden flex-shrink-0" value={value} />
@@ -296,11 +322,38 @@ export default function OntologySceneObjectTypeList() {
           <div className="flex items-center gap-[4px]">
             <DotStatus text={config.text} color={config.color} />
             {isFailed && (
-              <Popover content="重试">
-                <IconRefresh
-                  className="h-[14px] w-[14px] text-[var(--color-text-4)] hover:cursor-pointer hover:text-[#184FF2]"
-                  onClick={() => handleRetrySync(record)}
-                />
+              <Popover
+                trigger="hover"
+                position="top"
+                content={
+                  <div className="flex items-center gap-[12px]">
+                    <span
+                      className="flex cursor-pointer items-center text-[#184FF2]"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleViewSyncLog(record);
+                      }}
+                    >
+                      <LogIcon className="mr-[4px] h-[14px] w-[14px]" />
+                      查看日志
+                    </span>
+                    <span
+                      className="flex cursor-pointer items-center text-[#184FF2]"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleRetrySync(record);
+                      }}
+                    >
+                      <IconRefresh
+                        className="mr-[4px] h-[14px] w-[14px]"
+                        onClick={() => handleRetrySync(record)}
+                      />
+                      重试
+                    </span>
+                  </div>
+                }
+              >
+                <IconQuestionCircle className="h-[14px] w-[14px] cursor-pointer text-[var(--color-text-4)] hover:text-[#184FF2]" />
               </Popover>
             )}
           </div>
@@ -360,7 +413,7 @@ export default function OntologySceneObjectTypeList() {
         <div className="mb-1 font-PingFangSc text-[20px] font-[600] leading-[30px] text-default">
           对象类型
         </div>
-        <div className="font-PingFangSc text-[14px] font-normal leading-[22px] text-[#334155]">
+        <div className="mb-[16px] font-PingFangSc text-[14px] font-normal leading-[22px] text-[#334155]">
           核心数据模型的原子单位,描述系统中可独立存在的实体
         </div>
       </div>
@@ -407,7 +460,7 @@ export default function OntologySceneObjectTypeList() {
         }}
       />
       {Number(pagination?.total) > 0 && (
-        <div className="mt-4 flex items-center justify-end">
+        <div className="mt-[12px] flex items-center justify-end">
           <Pagination
             {...pagination}
             onChange={(page, pageSize) => {
@@ -435,6 +488,19 @@ export default function OntologySceneObjectTypeList() {
           }}
           objectTypeId={selectedObjectType?.id?.toString() || ''}
           defaultActiveTab={activeTab}
+        />
+      )}
+      {logDrawerVisible && currentSyncTaskId && (
+        <TaskLogDrawer
+          visible={logDrawerVisible}
+          taskInstanceId={currentSyncTaskId}
+          taskName={currentTaskName}
+          onClose={() => {
+            setLogDrawerVisible(false);
+            setCurrentSyncTaskId(null);
+            setCurrentTaskName('');
+          }}
+          fetchLog={getObjectTypeSyncLog}
         />
       )}
     </div>

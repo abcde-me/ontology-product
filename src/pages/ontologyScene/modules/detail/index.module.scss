@@ -6,6 +6,18 @@
       padding-right: 0px;
       margin-right: 32px;
     }
+
+    .aa-ellipsis-popover {
+      display: flex;
+    }
+
+    :global(.arco-table-tr) {
+      &:hover {
+        .aa-copy-item {
+          display: flex;
+        }
+      }
+    }
   }
 
   .ontology-scene-detail-sidebar {

@@ -7,7 +7,7 @@
 
 # RUN chmod g+rwx /var/cache/nginx /var/run /var/log/nginx
 # # ！！！注意，最后一步必须是复制产物，流水线只能拿出最后一个layer做为产物的压缩包
-# COPY ./dist /usr/share/nginx/html/noto
+# COPY ./dist /usr/share/nginx/html/onto
 
 # # 设置默认执行用户
 # RUN useradd -u 1000 apps
@@ -24,6 +24,6 @@ COPY ./nginx/mime.types /etc/nginx/
 
 RUN chmod g+rwx /var/cache/nginx /var/run /var/log/nginx
 # ！！！注意，最后一步必须是复制产物，流水线只能拿出最后一个layer做为产物的压缩包
-COPY ./dist /usr/share/nginx/html/noto
+COPY ./dist /usr/share/nginx/html/onto
 EXPOSE 80
 

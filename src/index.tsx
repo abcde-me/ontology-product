@@ -51,7 +51,7 @@ import { Header } from '@ceai-front/arco-material';
 import {
   isInFrame,
   isWujie,
-  embedBySingleApp,
+  isEmbeddedBySingleApp,
   onRouterChange
 } from './utils/env';
 import { useUserInfo, useUserInfoStore } from './store/userInfoStore';
@@ -91,18 +91,18 @@ const queryClient = new QueryClient({
 const flattenRoutes = getFlatRoutes(routes);
 const hiddenTopBarRoutes = [
   '/login',
-  '/tenant/compute/noto/login',
-  '/tenant/compute/noto/appCreate',
-  '/tenant/compute/noto/appConfig',
-  '/tenant/compute/noto/appChat',
-  '/tenant/compute/noto/configurationpage',
-  '/tenant/compute/noto/workflowConfig',
-  '/tenant/compute/noto/workflowPublic',
-  '/tenant/compute/noto/agentCreate',
-  '/tenant/compute/noto/labelEditor',
-  '/tenant/compute/noto/ragDetail',
-  '/tenant/compute/noto/compareFileData',
-  '/tenant/compute/noto/ontologyScene/detail'
+  '/tenant/compute/onto/login',
+  '/tenant/compute/onto/appCreate',
+  '/tenant/compute/onto/appConfig',
+  '/tenant/compute/onto/appChat',
+  '/tenant/compute/onto/configurationpage',
+  '/tenant/compute/onto/workflowConfig',
+  '/tenant/compute/onto/workflowPublic',
+  '/tenant/compute/onto/agentCreate',
+  '/tenant/compute/onto/labelEditor',
+  '/tenant/compute/onto/ragDetail',
+  '/tenant/compute/onto/compareFileData',
+  '/tenant/compute/onto/ontologyScene/detail'
 ];
 
 /**
@@ -110,8 +110,8 @@ const hiddenTopBarRoutes = [
  * 路由配置类似：/a/b/:c
  */
 const hiddenTopBarRouterParamsRouteKeyWords = [
-  'tenant/compute/noto/workflowConfig',
-  'tenant/compute/noto/ontologyScene/detail'
+  'tenant/compute/onto/workflowConfig',
+  'tenant/compute/onto/ontologyScene/detail'
 ];
 
 function App() {
@@ -185,15 +185,15 @@ function App() {
   }, [fetchUserInfo, isInitialized, location.pathname]);
 
   // 是否单产品集成
-  const isEmbedded = embedBySingleApp();
+  const isEmbedded = isEmbeddedBySingleApp();
 
   // 监听路由变化，通知父应用
   useEffect(() => {
     if (isEmbedded) {
       // 通知父应用路由变化，用于更新 URL 参数
       onRouterChange(
-        `/noto${location.pathname}${location.search}`,
-        `/noto${location.pathname}`
+        `/onto${location.pathname}${location.search}`,
+        `/onto${location.pathname}`
       );
     }
   }, [location.pathname, location.search, isEmbedded]);
@@ -202,7 +202,7 @@ function App() {
     if (
       projectId &&
       userActions.actions !== null &&
-      !window.location.pathname.includes('/tenant/compute/noto/login')
+      !window.location.pathname.includes('/tenant/compute/onto/login')
     ) {
       let finalMenus = [...menus];
       if (!userActions.isAdmin) {
@@ -252,9 +252,9 @@ function App() {
   const refreshPage = useCallback(
     (url: string, from: string) => {
       const pathname = parent.location.pathname;
-      console.log('------noto refresh------', url, from, pathname);
+      console.log('------onto refresh------', url, from, pathname);
       // 这里只能接受来自自身应用的切换，忽略其他应用切换请求
-      // url 不包含 /noto/ 前缀，需要直接使用
+      // url 不包含 /onto/ 前缀，需要直接使用
       if (pathname.includes(`/${from}`)) {
         history.push(url);
       }
@@ -296,6 +296,7 @@ function App() {
   }, [refreshPage, switchProject]);
 
   const hidden = useMemo(() => {
+    const isEmbedded = isEmbeddedBySingleApp();
     const hiddenMenu =
       (location?.pathname &&
         (hiddenTopBarRoutes.includes(location?.pathname) ||
@@ -303,7 +304,9 @@ function App() {
             location?.pathname?.includes(keyWord)
           ))) ||
       localLayout?.hideTopBar ||
-      isInFrame;
+      isInFrame ||
+      isWujie ||
+      isEmbedded;
     return hiddenMenu;
   }, [localLayout?.hideTopBar, location?.pathname]);
 
@@ -314,7 +317,7 @@ function App() {
           <Header
             title="业务本体构建平台"
             openHelpLink={(linkInfo) => {
-              openNewPage('/noto/assets/多模态数据治理平台 - 用户手册.pdf');
+              openNewPage('/onto/assets/多模态数据治理平台 - 用户手册.pdf');
             }}
             userInfo={userInfo}
             logout={logout}
@@ -328,7 +331,7 @@ function App() {
         <Switch>
           <Route
             key="login"
-            path="/tenant/compute/noto/login"
+            path="/tenant/compute/onto/login"
             component={Login}
             exact
           />
@@ -342,9 +345,9 @@ function App() {
               />
             );
           })}*/}
-          <Redirect from="/login" to="/tenant/compute/noto/login" exact />
-          <Redirect from="/noto" to="/tenant/compute/noto/home" exact />
-          <Redirect from="/" to="/tenant/compute/noto/home" exact />
+          <Redirect from="/login" to="/tenant/compute/onto/login" exact />
+          <Redirect from="/onto" to="/tenant/compute/onto/home" exact />
+          <Redirect from="/" to="/tenant/compute/onto/home" exact />
           <Route
             path={'/'}
             render={({ history }) => <PageLayout history={history} />}
@@ -379,7 +382,7 @@ function Index() {
   };
 
   return (
-    <BrowserRouter basename="/noto">
+    <BrowserRouter basename="/onto">
       <ConfigProvider locale={getArcoLocale()}>
         <Provider store={store}>
           <QueryClientProvider client={queryClient}>

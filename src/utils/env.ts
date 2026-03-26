@@ -19,6 +19,42 @@ export const embedAppName = () => (window as any).$wujie?.props?.appName;
 export const embedBySingleApp = () =>
   (window as any).$wujie?.props?.embedBySingleApp;
 
+// 兼容 embedBySingleApp 透传失败时的兜底判断
+export const isEmbeddedBySingleApp = () => {
+  const appName = embedAppName();
+  if (!!embedBySingleApp() || appName === 'modaforge') {
+    return true;
+  }
+
+  const search = window.location.search || '';
+  if (search) {
+    const params = new URLSearchParams(search);
+    if (
+      params.get('embedBySingleApp') === '1' ||
+      params.get('hideLayout') === '1'
+    ) {
+      return true;
+    }
+  }
+
+  try {
+    const parentLocation = window.parent?.location;
+    if (!parentLocation) {
+      return false;
+    }
+
+    const parentPath = parentLocation.pathname || '';
+    const parentSearch = parentLocation.search || '';
+    const hasEmbeddedRoute = parentPath.includes(
+      '/modaforge/tenant/compute/modaforge/ontoCenter'
+    );
+    const hasEmbeddedFlag = new URLSearchParams(parentSearch).has('mdp_onto');
+    return hasEmbeddedRoute || hasEmbeddedFlag;
+  } catch (error) {
+    return false;
+  }
+};
+
 export const getUrlSearchName = () =>
   (window as any).$wujie?.props?.urlSearchName;
 
@@ -31,7 +67,7 @@ export const logout = (basePath = '') => {
     (window as any).$wujie?.props?.logout();
   } else {
     if (isSingleApp) {
-      window.location.href = `/noto/login?redirect_uri=${encodeURIComponent(window.location.href)}`;
+      window.location.href = `/onto/login?redirect_uri=${encodeURIComponent(window.location.href)}`;
     } else {
       window.location.href = `${basePath}?redirect_uri=${encodeURIComponent(window.location.href)}`;
     }
@@ -74,7 +110,7 @@ export const OpenNewPageForOperationCenter = (page: string) => {
   } else {
     window.open(
       MDPPrefix +
-        '/tenant/compute/noto/operationCenter?url=' +
+        '/tenant/compute/onto/operationCenter?url=' +
         encodeURIComponent(page),
       '_blank'
     );

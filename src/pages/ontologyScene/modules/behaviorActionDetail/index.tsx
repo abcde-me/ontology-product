@@ -51,7 +51,7 @@ export default function BehaviorActionDetailPage() {
 
   const goBack = () => {
     history.replace(
-      `/tenant/compute/noto/ontologyScene/detail/${OSId}/behaviorActions`
+      `/tenant/compute/onto/ontologyScene/detail/${OSId}/behaviorActions`
     );
   };
 
@@ -69,21 +69,26 @@ export default function BehaviorActionDetailPage() {
   );
 
   const saveAction = async () => {
-    const values = await form.validate();
-    saveBehaviorAction({
-      ...(actionDetail || {}),
-      ...buildActionDetail(values),
-      ontologyModelID: +OSId
-    }).then((res) => {
-      if (res.message !== 'ok') {
-        return Message.error({ content: res.message, duration: 3000 });
-      }
-      Message.success({
-        content: `成功${pageMode === 'create' ? '创建' : '编辑'}行为`,
-        duration: 3000
+    try {
+      await Promise.all(['name', 'code'].map((f: any) => validateSameValue(f)));
+      const values = await form.validate();
+      saveBehaviorAction({
+        ...(actionDetail || {}),
+        ...buildActionDetail(values),
+        ontologyModelID: +OSId
+      }).then((res) => {
+        if (res.message !== 'ok') {
+          return Message.error({ content: res.message, duration: 3000 });
+        }
+        Message.success({
+          content: `成功${pageMode === 'create' ? '创建' : '编辑'}行为`,
+          duration: 3000
+        });
+        goBack();
       });
-      goBack();
-    });
+    } catch (e) {
+      console.error(e);
+    }
   };
 
   const { data: functionData, loading: functionLoading } = useRequest(
@@ -123,6 +128,60 @@ export default function BehaviorActionDetailPage() {
     (p) => p.inputType === InputType.Input
   )?.length;
 
+  // 校验是否重名,手动触发校验，减少接口请求次数
+  const validateSameValue = (field: 'name' | 'code') => {
+    const value = form.getFieldValue(field);
+    return getActionList({
+      ontologyModelID: +OSId,
+      pageNum: 1,
+      pageSize: 10,
+      filter: value
+    }).then((res) => {
+      if (
+        res.items?.filter(
+          (item: BehaviorActionItem) =>
+            item[field] === value && item.id!.toString() !== actionId
+        ).length
+      ) {
+        const message =
+          field === 'name' ? '行为名称不可重复' : '行为id不可重复';
+        form.setFields({
+          [field]: {
+            error: {
+              message
+            }
+          }
+        });
+        return Promise.reject(new Error(message));
+      }
+      form.setFields({
+        [field]: {
+          error: undefined
+        }
+      });
+      return Promise.resolve();
+    });
+  };
+
+  const changeFormValues = (changedValues: Partial<ActionSchema>) => {
+    const keys = Object.keys(changedValues);
+    const pass = keys.some((key) => {
+      return ['function_params', 'validationRules'].some((f_v) =>
+        key.includes(f_v)
+      );
+    });
+    if (pass) return;
+    form.validate(keys).then(() => {
+      setCurrentAction((prevState) => {
+        const res = { ...prevState };
+        keys.forEach((key) => {
+          res[key] = changedValues[key];
+        });
+        return res;
+      });
+    });
+  };
+
   return (
     <div
       className={`${styles['behavior-action-detail']} flex h-full w-full flex-col `}
@@ -143,8 +202,10 @@ export default function BehaviorActionDetailPage() {
           initialValues={{
             objectTypeId: -1
           }}
+          scrollToFirstError
           labelAlign={'left'}
           disabled={actionLoading}
+          onValuesChange={changeFormValues}
         >
           <div className={'module-title'}>基本信息</div>
           <FormItem
@@ -158,27 +219,20 @@ export default function BehaviorActionDetailPage() {
                   if (!value?.trim()) {
                     return cb('请输入行为名称');
                   }
-                  return getActionList({
-                    ontologyModelID: +OSId,
-                    pageNum: 1,
-                    pageSize: 10,
-                    filter: value
-                  }).then((res) => {
-                    if (
-                      res.items?.filter(
-                        (item: BehaviorActionItem) =>
-                          item.name === value &&
-                          item.id!.toString() !== actionId
-                      ).length
-                    ) {
-                      cb('行为名称不可重复');
-                    }
-                  });
                 }
               }
             ]}
           >
-            <Input placeholder="请输入行为名称" maxLength={50} showWordLimit />
+            <Input
+              placeholder="请输入行为名称"
+              maxLength={50}
+              className={'w-[640px]'}
+              showWordLimit
+              allowClear
+              onBlur={(e) => {
+                if (!!e.target.value?.trim()) validateSameValue('name');
+              }}
+            />
           </FormItem>
 
           <FormItem
@@ -191,7 +245,7 @@ export default function BehaviorActionDetailPage() {
             rules={[
               {
                 validator(v, cb) {
-                  const value = (v as string).trim();
+                  const value = (v as string)?.trim();
                   if (!value) {
                     return cb('请输入行为id');
                   }
@@ -200,22 +254,6 @@ export default function BehaviorActionDetailPage() {
                       '首字符必须为英文字母；仅允许英文字母与数字（不允许下划线及特殊符号）'
                     );
                   }
-                  return getActionList({
-                    ontologyModelID: +OSId,
-                    pageNum: 1,
-                    pageSize: 10,
-                    filter: value
-                  }).then((res) => {
-                    if (
-                      res.items?.filter(
-                        (item: BehaviorActionItem) =>
-                          item.code === value &&
-                          item.id!.toString() !== actionId
-                      ).length
-                    ) {
-                      cb('行为id不可重复');
-                    }
-                  });
                 }
               }
             ]}
@@ -224,7 +262,12 @@ export default function BehaviorActionDetailPage() {
               placeholder="请输入id。用于 API 调用，全局唯一"
               disabled={pageMode === 'edit'}
               maxLength={100}
+              className={'w-[640px]'}
               showWordLimit
+              allowClear
+              onBlur={(e) => {
+                if (!!e.target.value?.trim()) validateSameValue('name');
+              }}
             />
           </FormItem>
 
@@ -233,36 +276,43 @@ export default function BehaviorActionDetailPage() {
               placeholder="请输入描述说明"
               autoSize={{ minRows: 3, maxRows: 6 }}
               maxLength={500}
+              // className={'w-[640px]'}
+              wrapperStyle={{ width: '640px' }}
               showWordLimit
             />
           </FormItem>
           <div className={'module-title'}>函数与校验</div>
           <FormItem label="绑定对象类型" field="objectTypeId">
             <ObjectTypeSelect
+              getPopupContainer={(node) => node.parentElement || document.body}
+              className={'w-[640px]'}
               showAll
               allowClear={false}
               ontologyModelID={+OSId}
               placeholder={'请选择行为动作作用于的对象类型'}
               onChange={(v, obj) => {
                 form.setFieldValue('objectTypeId', v);
-                setCurrentAction((p) => {
-                  const { id, name } = obj || {};
-                  if (isNil(p)) {
-                    return {
-                      objectTypeId: id,
-                      objectTypeName: name
-                    };
-                  }
-                  return {
-                    ...p,
-                    objectTypeId: id,
-                    objectTypeName: name
-                  };
+                const { id, name, icon = 'object-type-1' } = obj || {};
+
+                changeFormValues({
+                  objectTypeId: v,
+                  objectTypeIcon: icon,
+                  objectTypeName: name
                 });
               }}
             />
           </FormItem>
-          <FormItem label="函数" field="functionId" required>
+          <FormItem
+            label="函数"
+            field="functionId"
+            required
+            rules={[
+              {
+                required: true,
+                message: '请选择函数'
+              }
+            ]}
+          >
             <FunctionsSelect
               onChange={(v, f: OntologyFunctionDetail) => {
                 form.setFieldValue('functionId', v);
@@ -284,6 +334,7 @@ export default function BehaviorActionDetailPage() {
                   };
                 });
               }}
+              className={'w-[640px]'}
               currentFunctionData={functionData}
             />
           </FormItem>
@@ -294,19 +345,17 @@ export default function BehaviorActionDetailPage() {
             {({ functionId }) => {
               return (
                 <>
-                  <FormItem label="入参配置" required>
+                  <FormItem label="入参配置" required={!!functionId}>
                     {isNil(functionId) ? (
                       <p className={'text-[#7D859C]'}>请先选择函数</p>
-                    ) : functionHasParam ? (
+                    ) : (
                       <ParamsSetting
                         actionDetail={currentAction}
                         functionDetail={functionData}
                       />
-                    ) : (
-                      <p className={'text-[#7D859C]'}>暂无入参配置</p>
                     )}
                   </FormItem>
-                  <FormItem label="校验规则" required>
+                  <FormItem label="校验规则" required={functionHasParam}>
                     {isNil(functionId) ? (
                       <p className={'text-[#7D859C]'}>请先选择函数</p>
                     ) : functionHasParam ? (

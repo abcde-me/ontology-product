@@ -19,6 +19,7 @@ import {
   ObjectSet,
   ObjectTypeSelect
 } from '@/pages/ontologyScene/componens';
+import classNames from 'classnames';
 
 type IValue = {
   uiType?: string;
@@ -28,6 +29,7 @@ export const DataWithUiSelect = (
   props: CustomFormItemCompProps<IValue> & {
     osid?: number;
     onParamValueChange?: (v?: React.Key) => void;
+    getPopupContainer?: (node?: Element) => Element;
     disabledConfig: {
       uiType: boolean;
       paramValue: boolean;
@@ -35,13 +37,18 @@ export const DataWithUiSelect = (
     readonly: boolean;
   }
 ) => {
-  const { value, onChange, disabledConfig } = props;
+  const {
+    value,
+    onChange,
+    disabledConfig,
+    getPopupContainer: popupContainer
+  } = props;
   const disabled = disabledConfig.uiType || disabledConfig.paramValue;
   const valueDisabled = disabledConfig.paramValue;
 
-  const popupContainer = () => {
-    return document.querySelector('#functionSettingContainer') || document.body;
-  };
+  // const popupContainer = () => {
+  //   return document.querySelector('#functionSettingContainer') || document.body;
+  // };
 
   const renderComponentByUiType = (type: UiType) => {
     switch (type) {
@@ -67,6 +74,8 @@ export const DataWithUiSelect = (
             value={value?.paramValue}
             disabled={valueDisabled}
             onChange={(value) => changeValue({ paramValue: value })}
+            min={Number.MIN_SAFE_INTEGER}
+            max={Number.MAX_SAFE_INTEGER}
           />
         );
       case UiType.InputNumberFloat:
@@ -74,9 +83,8 @@ export const DataWithUiSelect = (
           <InputNumber
             placeholder={'请输入'}
             className={styles['ui-comp']}
-            style={{
-              width: '160px'
-            }}
+            min={Number.MIN_SAFE_INTEGER}
+            max={Number.MAX_SAFE_INTEGER}
             disabled={valueDisabled}
             value={value?.paramValue}
             onChange={(value) => changeValue({ paramValue: value })}
@@ -85,7 +93,7 @@ export const DataWithUiSelect = (
       case UiType.Switch:
         return (
           <Select
-            className={styles['ui-comp']}
+            className={`${styles['ui-comp']}`}
             placeholder={'请选择'}
             value={value?.paramValue}
             disabled={valueDisabled}
@@ -152,6 +160,8 @@ export const DataWithUiSelect = (
             value={value?.paramValue}
             disabled={valueDisabled}
             onChange={(value) => changeValue({ paramValue: value })}
+            objTypeSelectClassName={styles['obj-ref-type-select']}
+            objInsClassName={styles['obj-ref-ins-select']}
             mode={'single'}
             getPopupContainer={popupContainer}
           />
@@ -160,6 +170,8 @@ export const DataWithUiSelect = (
         return (
           <ObjectInstanceSelect
             className={'flex-1'}
+            objTypeSelectClassName={styles['obj-ref-type-select']}
+            objInsClassName={styles['obj-ref-ins-select']}
             value={value?.paramValue}
             disabled={valueDisabled}
             onChange={(value) => changeValue({ paramValue: value })}
@@ -189,7 +201,7 @@ export const DataWithUiSelect = (
   };
 
   return (
-    <div className={styles['comp-wrapper']}>
+    <div className={classNames([styles['comp-wrapper'], 'data-ui-select'])}>
       <UiSelect
         readonly={props.readonly}
         value={value?.uiType}
@@ -200,6 +212,7 @@ export const DataWithUiSelect = (
         }}
         disabled={disabled}
       />
+      <div className={`w-[1px] bg-[#c3c7d4] ${styles['ui-gap']} ui-gap`} />
       {!!value &&
         renderComponentByUiType(value.uiType!.split('_').pop() as UiType)}
     </div>

@@ -30,7 +30,7 @@ export const mockBehaviorList: BehaviorItem[] = [
           required: true,
           placeholder: '请选择目标编队',
           dataType: 'STRING',
-          widget: '对象搜索选择器',
+          widget: '对象实例单选器',
           options: [
             { label: '目标编队123', value: 'team_123' },
             { label: '目标编队456', value: 'team_456' },

@@ -1,59 +1,28 @@
-import React, { useRef, useState, useEffect } from 'react';
-import { Table, TableColumnProps, Tooltip } from '@arco-design/web-react';
+import React, { useState, useEffect } from 'react';
+import { Table, TableColumnProps } from '@arco-design/web-react';
 import { NoDataCard } from '@ceai-front/arco-material';
 import { ObjectTypeTagList } from '@/pages/ontologyScene/componens';
 import { ParamItem, OutputParamItem } from './types';
 import dayjs from 'dayjs';
 import { getOntologyObjectTypeDetail } from '@/api/ontologySceneLibrary/objectType';
 import { OBJECT_TYPE_ICON_OPTIONS } from '@/pages/ontologyScene/common/constants';
+import EllipsisTextWithTooltip from '../EllipsisTextWithTooltip';
+import styles from './index.module.scss';
 
-// 溢出检测组件
-const EllipsisTextWithTooltip: React.FC<{ text: string }> = ({ text }) => {
-  const textRef = useRef<HTMLDivElement>(null);
-  const [showTooltip, setShowTooltip] = useState(false);
-
-  const handleMouseEnter = () => {
-    const element = textRef.current;
-    if (element) {
-      const isOverflow = element.scrollWidth > element.clientWidth;
-      setShowTooltip(isOverflow);
-    }
-  };
-
-  const handleMouseLeave = () => {
-    setShowTooltip(false);
-  };
-
-  return (
-    <Tooltip content={text} popupVisible={showTooltip}>
-      <div
-        ref={textRef}
-        onMouseEnter={handleMouseEnter}
-        onMouseLeave={handleMouseLeave}
-        style={{
-          overflow: 'hidden',
-          textOverflow: 'ellipsis',
-          whiteSpace: 'nowrap',
-          width: '100%',
-          cursor: 'default'
-        }}
-      >
-        {text}
-      </div>
-    </Tooltip>
-  );
-};
+const PAGE_SIZ6 = 6;
 
 // ObjectRef 渲染组件
-const ObjectRefRenderer: React.FC<{ value: string }> = ({ value }) => {
+const ObjectRefRenderer: React.FC<{ value: string; record?: ParamItem }> = ({
+  value,
+  record
+}) => {
   const [displayContent, setDisplayContent] = useState<React.ReactNode>('-');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchObjectTypeDetail = async () => {
+    const parseObjectRef = () => {
       try {
         // 解析 ObjectRef 字符串: ObjectRef(object_type="user0123456789", pk="张三")
-        // 使用更灵活的解析方式
         if (!value.startsWith('ObjectRef(') || !value.endsWith(')')) {
           setDisplayContent(value);
           setLoading(false);
@@ -84,6 +53,43 @@ const ObjectRefRenderer: React.FC<{ value: string }> = ({ value }) => {
           return;
         }
 
+        // 如果 record 中有 obj_data，直接使用其中的 icon
+        if (record?.obj_data?.icon) {
+          const iconOption = OBJECT_TYPE_ICON_OPTIONS.find(
+            (option) => option.value === record.obj_data!.icon
+          );
+
+          const IconComponent =
+            iconOption?.icon ?? OBJECT_TYPE_ICON_OPTIONS[0].icon;
+
+          // 渲染：图标 + objectTypeId / pk
+          setDisplayContent(
+            <div className="flex items-center gap-2">
+              <IconComponent className="h-4 w-4 flex-shrink-0" />
+              <EllipsisTextWithTooltip
+                value={`${record?.obj_data?.name} / ${pk}`}
+                className="min-w-0 flex-1"
+              />
+            </div>
+          );
+          setLoading(false);
+          return;
+        }
+
+        // 如果没有 obj_data，回退到 API 调用（保持向后兼容）
+        fetchObjectTypeDetailFromAPI(objectTypeId, pk);
+      } catch (error) {
+        console.error('Failed to parse ObjectRef:', error);
+        setDisplayContent(value);
+        setLoading(false);
+      }
+    };
+
+    const fetchObjectTypeDetailFromAPI = async (
+      objectTypeId: string,
+      pk: string
+    ) => {
+      try {
         // 调用 API 获取对象类型详情
         const response = await getOntologyObjectTypeDetail({
           code: objectTypeId
@@ -104,9 +110,10 @@ const ObjectRefRenderer: React.FC<{ value: string }> = ({ value }) => {
           setDisplayContent(
             <div className="flex items-center gap-2">
               <IconComponent className="h-4 w-4 flex-shrink-0" />
-              <span>
-                {objectTypeId} / {pk}
-              </span>
+              <EllipsisTextWithTooltip
+                value={`${objectTypeId} / ${pk}`}
+                className="min-w-0 flex-1"
+              />
             </div>
           );
         } else {
@@ -120,8 +127,8 @@ const ObjectRefRenderer: React.FC<{ value: string }> = ({ value }) => {
       }
     };
 
-    fetchObjectTypeDetail();
-  }, [value]);
+    parseObjectRef();
+  }, [value, record]);
 
   if (loading) {
     return <span>加载中...</span>;
@@ -201,12 +208,17 @@ const ParamValueRenderer: React.FC<{ value: any; record: ParamItem }> = ({
 
     // 转换为 ObjectTypeTagList 需要的格式
     const tags = objectTypeList.map((item: any) => ({
-      ontologyObjectTypeName: item.name || item.ontologyObjectTypeName || '',
+      ontologyObjectTypeName:
+        record.type === 'Attachment'
+          ? item.name || item.ontologyObjectTypeName || ''
+          : record.obj_data?.name
+            ? `${record.obj_data.name}/${item.name || item.ontologyObjectTypeName || ''}`
+            : item.name || item.ontologyObjectTypeName || '',
       ontologyObjectTypeId: item.id || item.ontologyObjectTypeId,
       ontologyObjectTypeIcon:
         record.type === 'Attachment'
           ? 'attachment-icon'
-          : item.icon || item.ontologyObjectTypeIcon,
+          : record.obj_data?.icon || item.icon || item.ontologyObjectTypeIcon,
       onClick: () => {
         // 可以在这里添加点击处理逻辑
       }
@@ -235,7 +247,7 @@ const ParamValueRenderer: React.FC<{ value: any; record: ParamItem }> = ({
     }
 
     if (typeof value === 'string') {
-      return <ObjectRefRenderer value={value} />;
+      return <ObjectRefRenderer value={value} record={record} />;
     }
 
     return <span>{String(value)}</span>;
@@ -288,7 +300,10 @@ export const ParamsTab: React.FC<ParamsTabProps> = ({
     {
       title: '入参名称',
       dataIndex: 'name',
-      width: 200
+      width: 200,
+      render: (value) => (
+        <EllipsisTextWithTooltip value={value || '-'} className="min-w-0" />
+      )
     },
     {
       title: '数据类型',
@@ -296,7 +311,7 @@ export const ParamsTab: React.FC<ParamsTabProps> = ({
       width: 150
     },
     {
-      title: '值',
+      title: '试运行值',
       dataIndex: 'value',
       ellipsis: true,
       tooltip: true,
@@ -311,7 +326,10 @@ export const ParamsTab: React.FC<ParamsTabProps> = ({
     {
       title: '出参名称',
       dataIndex: 'name',
-      width: 200
+      width: 200,
+      render: (value) => (
+        <EllipsisTextWithTooltip value={value || '-'} className="min-w-0" />
+      )
     },
     {
       title: '出参类型',
@@ -321,10 +339,10 @@ export const ParamsTab: React.FC<ParamsTabProps> = ({
   ];
 
   return (
-    <div className="mt-4 space-y-6">
+    <div className="mt-4 space-y-4">
       {/* 入参详情 */}
       <div>
-        <div className="mb-3 text-[14px] font-medium text-[#1E293B]">
+        <div className="mb-4 text-[14px] font-medium text-[#1E293B]">
           入参详情
         </div>
         <Table
@@ -334,18 +352,17 @@ export const ParamsTab: React.FC<ParamsTabProps> = ({
           rowKey="name"
           border={false}
           pagination={{
-            pageSize: 5,
-            showTotal: false,
-            simple: false
+            pageSize: PAGE_SIZ6,
+            showTotal: false
           }}
           noDataElement={<NoDataCard title="暂无数据" />}
-          className="[&_.arco-table-th]:bg-[#f7f8fa]"
+          className={styles['execution-simple-page']}
         />
       </div>
 
       {/* 出参详情 */}
       <div>
-        <div className="mb-3 text-[14px] font-medium text-[#1E293B]">
+        <div className="mb-4 text-[14px] font-medium text-[#1E293B]">
           出参详情
         </div>
         <Table
@@ -355,9 +372,8 @@ export const ParamsTab: React.FC<ParamsTabProps> = ({
           rowKey="name"
           border={false}
           pagination={{
-            pageSize: 5,
-            showTotal: false,
-            simple: false
+            pageSize: PAGE_SIZ6,
+            showTotal: false
           }}
           noDataElement={<NoDataCard title="暂无数据" />}
           className="[&_.arco-table-th]:bg-[#f7f8fa]"

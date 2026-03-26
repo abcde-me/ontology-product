@@ -22,6 +22,7 @@ export default function OntologySceneBehaviorActions() {
 
   // 当 tab 改变时，更新 URL 参数
   const handleTabChange = (key: string) => {
+    setBehaviorData(undefined);
     setActiveTab(key);
     const params = new URLSearchParams(location.search);
     params.set('tab', key);

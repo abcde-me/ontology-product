@@ -20,7 +20,7 @@ const resolveApp = (relativePath) => path.resolve(appDirectory, relativePath);
 //   require(resolveApp('package.json')).homepage,
 //   process.env.PUBLIC_URL
 // );
-const publicUrlOrPath = '/noto/';
+const publicUrlOrPath = '/onto/';
 // const buildPath = process.env.BUILD_PATH || 'build';
 const buildPath = 'dist';
 

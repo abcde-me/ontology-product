@@ -53,8 +53,15 @@ export const testFunction = async (params: TestFunction) => {
   return UAPI.RES.ExecuteFunctionTestAPi({}).post(params).inRegion().do();
 };
 
+export const batchGetExecuteTestLog = async (ids?: (string | number)[]) => {
+  return await UAPI.RES.BatchGetExecuteTestLogApi({})
+    .post({ ids })
+    .inRegion()
+    .do();
+};
+
 // 终止函数测试
-export const stopTestFunction = async (id?: number) => {
+export const stopTestFunction = async (id?: string | number) => {
   return await UAPI.RES.StopFunctionTestAPi({}).post({ id }).inRegion().do();
 };
 

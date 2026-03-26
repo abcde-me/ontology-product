@@ -2,16 +2,25 @@ import React, { ComponentProps } from 'react';
 import { Form } from '@arco-design/web-react';
 import classNames from 'classnames';
 import styles from './index.module.scss';
+import { EllipsisPopover } from '@ceai-front/arco-material';
 
 interface IProps extends ComponentProps<typeof Form.Item> {
   labelWidth?: number;
 }
 
 export const FormItem = (props: IProps) => {
-  const { labelWidth, className, ...otherProps } = props;
+  const { labelWidth, className, label, ...otherProps } = props;
   return (
     <Form.Item
       {...otherProps}
+      label={
+        label ? (
+          <EllipsisPopover
+            value={label}
+            className={'text-[var(--color-text-2)]'}
+          />
+        ) : null
+      }
       required
       className={classNames(
         className,

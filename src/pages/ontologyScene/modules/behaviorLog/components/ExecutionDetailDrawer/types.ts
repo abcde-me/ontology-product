@@ -19,6 +19,10 @@ export interface ParamItem {
   name: string;
   type: string;
   value: any;
+  obj_data?: {
+    icon: string;
+    name: string;
+  };
 }
 
 // 出参数据类型

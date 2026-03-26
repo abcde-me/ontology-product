@@ -1,7 +1,11 @@
-import React, { useCallback } from 'react';
+import React, { ComponentProps, useCallback } from 'react';
 import { Form, Modal } from '@arco-design/web-react';
 import styles from '././index.module.scss';
-import { DotStatus, NoDataCard, ProButton } from '@ceai-front/arco-material';
+import {
+  DotStatus,
+  NoDataCard as AANoDataCard,
+  ProButton
+} from '@ceai-front/arco-material';
 import { IconLoading, IconPlayArrowFill } from '@arco-design/web-react/icon';
 import {
   BehaviorActionDetail,
@@ -25,6 +29,7 @@ import {
 import { isNil } from 'lodash-es';
 import useTestFunction from '@/pages/ontologyScene/hooks/useTestFunction';
 import { useParams } from 'react-router-dom';
+import { FormItem } from '@/pages/ontologyScene/componens';
 
 interface IProps {
   visible: boolean;
@@ -36,8 +41,17 @@ interface IProps {
   functionData?: OntologyFunctionDetail;
 }
 
+const NoDataCard = (props: ComponentProps<typeof AANoDataCard>) => {
+  return (
+    <div className={styles['no-data-card']}>
+      <AANoDataCard {...props} />
+    </div>
+  );
+};
+
 export const ParamsTestDialog = (props: IProps) => {
-  const { data, visible, onClose, validateRules, actionData } = props;
+  const { data, visible, onClose, validateRules, actionData, functionData } =
+    props;
   const [form] = Form.useForm();
   const { id: OSId } = useParams<Record<string, string>>();
   const field2Rule = actionData.params?.reduce((p, c) => {
@@ -52,7 +66,7 @@ export const ParamsTestDialog = (props: IProps) => {
         {
           validator(value, onError) {
             if (isNil(value)) {
-              return onError(`请填写${name}`);
+              return onError(`请输入参数值`);
             }
             switch (rule_name) {
               case RuleName.RangeRule:
@@ -73,9 +87,7 @@ export const ParamsTestDialog = (props: IProps) => {
                 }
                 break;
               default:
-                if (
-                  !(ruleConfig as EnumRule).options.includes(value.toString())
-                ) {
+                if (!(ruleConfig as EnumRule).options.includes(value)) {
                   onError(failMessage);
                 }
                 break;
@@ -115,14 +127,41 @@ export const ParamsTestDialog = (props: IProps) => {
     onClose();
   };
 
+  const functionHasParam = !!functionData?.params?.filter(
+    (p) => p.inputType === InputType.Input
+  )?.length;
+
+  const currentRunLog =
+    runInfo?.runLog?.map((item, index) => item.run_log).join('\n') || '';
+
+  const renderRunLog = () => {
+    // 初始为0
+    if (!runInfo.run_status) {
+      return (
+        <NoDataCard
+          type={'block'}
+          title={!functionHasParam ? '函数无入参配置' : '请先在左侧配置参数'}
+        />
+      );
+    }
+    if (testIng || loading) {
+      return <NoDataCard type={'block'} title={'行为测试中...'} />;
+    }
+    return <pre className={styles['run-log']}>{currentRunLog}</pre>;
+  };
+
   return (
     <Modal
       title={'参数测试'}
       footer={null}
       visible={visible}
-      style={{ width: '900px' }}
+      style={{ width: '900px', height: '600px' }}
       className={styles['params-dialog']}
+      getChildrenPopupContainer={(node) => node.parentElement || document.body}
       onCancel={closeModal}
+      afterClose={form.resetFields}
+      autoFocus={false}
+      focusLock={false}
     >
       <div className={styles['params-dialog-content']}>
         <div className={styles['left']}>
@@ -132,26 +171,35 @@ export const ParamsTestDialog = (props: IProps) => {
               autoComplete={'off'}
               layout={'vertical'}
               form={form}
+              scrollToFirstError
+              autoFocus={false}
               disabled={loading || testIng}
             >
-              {data?.map((param) => {
-                const { name, code, uiType } = param;
-                return (
-                  <Form.Item
-                    required
-                    key={code}
-                    label={name}
-                    field={code}
-                    rules={
-                      field2Rule?.[name] || [
-                        { required: true, message: '请输入参数值' }
-                      ]
-                    }
-                  >
-                    {renderComponentByUiType(uiType, OSId ? +OSId : undefined)}
-                  </Form.Item>
-                );
-              })}
+              {functionHasParam ? (
+                data?.map((param) => {
+                  const { name, code, uiType } = param;
+                  return (
+                    <FormItem
+                      required
+                      key={code}
+                      label={name}
+                      field={code}
+                      rules={
+                        field2Rule?.[name] || [
+                          { required: true, message: '请输入参数值' }
+                        ]
+                      }
+                    >
+                      {renderComponentByUiType(
+                        uiType,
+                        OSId ? +OSId : undefined
+                      )}
+                    </FormItem>
+                  );
+                })
+              ) : (
+                <NoDataCard type={'block'} title={'函数无入参配置'} />
+              )}
             </Form>
           </div>
           <div className={styles['footer']}>
@@ -192,26 +240,7 @@ export const ParamsTestDialog = (props: IProps) => {
               </div>
             )}
           </div>
-          <div className={styles['body']}>
-            {!runInfo?.run_status ? (
-              <NoDataCard
-                type={'block'}
-                title={
-                  loading || testIng ? '行为测试中...' : '请先在左侧配置参数'
-                }
-              />
-            ) : (
-              <div className={styles['run-log']}>
-                {runInfo.runLog
-                  .flatMap((item) =>
-                    ('run_log' in item ? item.run_log : '').split('\n')
-                  )
-                  .map((l, i) => (
-                    <p key={i}>{l}</p>
-                  ))}
-              </div>
-            )}
-          </div>
+          <div className={styles['body']}>{renderRunLog()}</div>
         </div>
       </div>
     </Modal>

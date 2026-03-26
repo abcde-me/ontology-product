@@ -11,7 +11,7 @@ import { GetProjOrg } from '@/api/modules/project';
 import { isSameArray } from '@/utils/array';
 import { setLocalStorage, getLocalStorage } from '@/utils/storage';
 import { ProjectIdKey } from '@/utils/const';
-import { isInFrame, isWujie, embedBySingleApp } from '@/utils/env';
+import { isInFrame, isWujie, isEmbeddedBySingleApp } from '@/utils/env';
 
 const MenuItem = Menu.Item;
 const SubMenu = Menu.SubMenu;
@@ -19,12 +19,12 @@ const MenuGroup = Menu.ItemGroup;
 const Sider = Layout.Sider;
 
 const hideSidebarPaths = [
-  '/tenant/compute/noto/workflowConfig',
-  '/tenant/compute/noto/login',
-  '/tenant/compute/noto/userinfo',
-  '/tenant/compute/noto/labelEditor',
-  '/tenant/compute/noto/ragDetail',
-  '/tenant/compute/noto/ontologyScene/detail'
+  '/tenant/compute/onto/workflowConfig',
+  '/tenant/compute/onto/login',
+  '/tenant/compute/onto/userinfo',
+  '/tenant/compute/onto/labelEditor',
+  '/tenant/compute/onto/ragDetail',
+  '/tenant/compute/onto/ontologyScene/detail'
 ];
 const collapseSidebarPaths = [];
 
@@ -60,12 +60,13 @@ export const LayoutWithSider = memo(function LayoutWithSider({ children }) {
 
   // 如果是在iframe中，并且不是wujie，则隐藏侧边栏，临时以iframe的形式嵌入数据平台
   // 或者在wujie中被单产品集成时，也隐藏侧边栏
-  const isEmbedded = embedBySingleApp();
+  const isEmbedded = isEmbeddedBySingleApp();
   const sidebarHidden =
     hideSidebarPaths.some(
       (path) => path === location.pathname || location.pathname.includes(path)
     ) ||
-    (isInFrame && !isWujie) ||
+    isInFrame ||
+    isWujie ||
     isEmbedded; // 被单产品集成时隐藏侧边栏
 
   const actives = useMemo(() => {
@@ -103,7 +104,7 @@ export const LayoutWithSider = memo(function LayoutWithSider({ children }) {
 
   useEffect(() => {
     const handler = () => {
-      const isNoto = (top ?? window).location.pathname.includes('/noto');
+      const isNoto = (top ?? window).location.pathname.includes('/onto');
       isNoto && setLocSearch(window.location.search);
     };
     window.addEventListener('locationchange', handler);

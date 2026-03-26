@@ -10,7 +10,7 @@
 .status-card {
   display: flex;
   gap: 12px;
-  padding: 12px 16px;
+  padding: 11px 16px;
   border-radius: 8px;
   flex-wrap: wrap;
   overflow: hidden;
@@ -79,6 +79,18 @@
   gap: 12px;
 }
 
+.function-info-grid {
+  .info-label {
+    width: max-content !important;
+  }
+}
+
+.action-info-grid {
+  .info-label {
+    width: 100px !important;
+  }
+}
+
 .info-item {
   display: flex;
   gap: 8px;
@@ -93,6 +105,8 @@
     font-size: 14px;
     line-height: 22px;
     color: #86909c;
+    display: flex;
+    align-items: center;
   }
 
   .info-value {
@@ -102,6 +116,22 @@
     line-height: 22px;
     color: #1d2129;
     overflow: hidden;
+    display: flex;
+    align-items: center;
+
+    .obj-tag {
+      background: transparent;
+      border: none;
+      max-width: 100%;
+      width: max-content;
+
+      :global {
+        .object-type-tag-icon {
+          width: 16px;
+          height: 16px;
+        }
+      }
+    }
   }
 }
 

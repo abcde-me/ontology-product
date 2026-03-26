@@ -1,9 +1,15 @@
-import React from 'react';
-import { Modal, Tooltip } from '@arco-design/web-react';
+import React, { useState } from 'react';
+import { Modal, Tooltip, Typography } from '@arco-design/web-react';
+import {
+  DotStatus,
+  CopyItemIcon,
+  EllipsisPopover
+} from '@ceai-front/arco-material';
 import { OrchestrationNode as OrchestrationNodeType } from '../../types';
 import { useBusinessStore } from '../../store/businessStore';
 import { formatParamDisplayValue } from './utils';
 import DeleteSvg from '@/assets/benti/delete.svg';
+import EllipsisTextWithTooltip from '@/pages/ontologyScene/modules/behaviorLog/components/EllipsisTextWithTooltip';
 
 interface OrchestrationNodeProps {
   node: OrchestrationNodeType;
@@ -54,9 +60,10 @@ const ParamDisplayItem: React.FC<ParamDisplayItemProps> = React.memo(
     return (
       <div className="flex flex-col gap-1">
         {/* Label */}
-        <span className="text-[13px] font-semibold text-[rgba(15,19,31,1)]">
-          {paramName}
-        </span>
+        <EllipsisTextWithTooltip
+          value={paramName}
+          className="text-[13px] font-semibold text-[rgba(15,19,31,1)]"
+        />
         {/* Value */}
         <div
           className={`rounded px-3 py-2 text-[13px] font-normal ${errorMessage ? 'border border-[#F53F3F] bg-[#FFECE8]' : 'bg-[#F7F8FA]'} text-[#86909C]`}
@@ -65,7 +72,10 @@ const ParamDisplayItem: React.FC<ParamDisplayItemProps> = React.memo(
         </div>
         {/* Error Message */}
         {errorMessage && (
-          <span className="text-[12px] text-[#F53F3F]">{errorMessage}</span>
+          <EllipsisTextWithTooltip
+            value={errorMessage}
+            className="text-[12px] text-[#F53F3F]"
+          />
         )}
       </div>
     );
@@ -136,15 +146,16 @@ export const OrchestrationNode: React.FC<OrchestrationNodeProps> = ({
     >
       {/* 节点头部：编号 + 行为名称 + 错误提示 + 删除 */}
       <div className="flex items-center justify-between gap-2">
-        <div className="flex items-center gap-2">
+        <div className="flex min-w-0 flex-1 items-center gap-2">
           {/* 编号 */}
           <div className="flex h-4 w-4 flex-shrink-0 items-center justify-center rounded border border-[rgba(190,213,253,1)] bg-[rgba(242,248,255,1)] font-DINAlternate text-[10px] font-bold leading-none text-[rgba(64,115,245,1)]">
             {String(node.order + 1).padStart(2, '0')}
           </div>
           {/* 行为名称 */}
-          <span className="overflow-hidden text-ellipsis whitespace-nowrap text-sm font-semibold text-[#1d2129]">
-            {node.behavior.name}
-          </span>
+          <EllipsisTextWithTooltip
+            value={node.behavior.name}
+            className="min-w-0 flex-1 text-sm font-semibold text-[#1d2129]"
+          />
         </div>
         {/* 删除图标 */}
         <Tooltip content="删除">

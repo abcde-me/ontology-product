@@ -1,7 +1,7 @@
 .action-list {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 24px;
 
   .search {
     border-radius: 0 4px 4px 0;
@@ -16,9 +16,9 @@
           color: #184ff2 !important;
         }
 
-        :global(.aa-copy-item) {
-          display: block;
-        }
+        // :global(.aa-copy-item) {
+        //   display: block;
+        // }
       }
     }
 

@@ -25,7 +25,7 @@ export const OrchestrationCanvas: React.FC = () => {
   };
 
   return (
-    <div className="mx-auto flex w-[480px] flex-col gap-3">
+    <div className="mx-auto flex max-w-[400px] flex-col gap-3">
       {orchestrationNodes.length === 0 ? (
         <div className="mx-auto mt-[115px]">
           <AddNodePlaceholder />

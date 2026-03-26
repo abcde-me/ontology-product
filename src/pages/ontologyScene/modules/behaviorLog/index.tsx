@@ -22,9 +22,9 @@ export default function BehaviorLogList() {
   const [functionTotal, setFunctionTotal] = useState(0);
   const [sourcesFilter, setSourcesFilter] = useState<string[]>([]); // 来源过滤
   const [statusFilter, setStatusFilter] = useState<number[]>([]); // 执行状态过滤
-  const [objectTypeFilter, setObjectTypeFilter] = useState<string[]>([]); // 对象类型过滤
+  const [objectTypeFilter, setObjectTypeFilter] = useState<number[]>([]); // 对象类型过滤
   const [objectTypeFilters, setObjectTypeFilters] = useState<
-    Array<{ text: string; value: string }>
+    Array<{ text: string; value: number }>
   >([]); // 对象类型过滤选项
   const [sortField, setSortField] = useState<string>(); // 排序字段
   const [sortOrder, setSortOrder] = useState<'ascend' | 'descend'>(); // 排序方向
@@ -52,10 +52,13 @@ export default function BehaviorLogList() {
           ontologyModelID: ontologyModelID ? Number(ontologyModelID) : undefined
         });
         if (response.data?.result) {
-          const filters = response.data.result.map((item) => ({
-            text: item.name || '',
-            value: item.code || String(item.id) // 使用 code 而不是 id
-          }));
+          const filters = [
+            { text: '全局行为', value: 0 }, // 添加全局行为选项
+            ...response.data.result.map((item) => ({
+              text: item.name || '',
+              value: item.id // 使用 id 字段作为筛选值
+            }))
+          ];
           setObjectTypeFilters(filters);
         }
       } catch (error) {
@@ -200,7 +203,7 @@ export default function BehaviorLogList() {
         ontologyModelID: ontologyModelID ? Number(ontologyModelID) : undefined, // 本体模型ID
         sources: sourcesFilter.length > 0 ? sourcesFilter : undefined, // 来源过滤
         run_status_list: statusFilter.length > 0 ? statusFilter : undefined, // 执行状态过滤列表
-        associated_object_type_list:
+        associated_object_type_id_list:
           objectTypeFilter.length > 0 ? objectTypeFilter : undefined, // 对象类型过滤
         sort_by: sortField, // 排序字段
         sort: sortOrder ? (sortOrder === 'ascend' ? 'asc' : 'desc') : undefined // 排序方向转换
@@ -298,7 +301,7 @@ export default function BehaviorLogList() {
 
       {/* Tab 切换 */}
       <Tabs
-        className="flex-shrink-0"
+        className="my-[16px] flex-shrink-0"
         activeTab={activeTab}
         onChange={handleTabChange}
       >
@@ -325,7 +328,7 @@ export default function BehaviorLogList() {
 
       {/* 分页 */}
       {Number(pagination?.total) > 0 && (
-        <div className="mt-4 flex items-center justify-end">
+        <div className="mt-[12px] flex items-center justify-end">
           <Pagination
             {...pagination}
             onChange={(page, pageSize) => {

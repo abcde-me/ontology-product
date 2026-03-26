@@ -182,10 +182,10 @@ export default function OntologySceneDetail() {
   const activeTab = React.useMemo(() => {
     const pathname = location.pathname;
     // 匹配第一个子路由段（菜单项 key），而不是最后一个
-    // 例如：/tenant/compute/noto/ontologyScene/detail/123/behaviorActions/create/_NEW_
+    // 例如：/tenant/compute/onto/ontologyScene/detail/123/behaviorActions/create/_NEW_
     // 应该匹配到 behaviorActions，而不是 _NEW_
     const routeMatch = pathname.match(
-      /\/tenant\/compute\/noto\/ontologyScene\/detail\/[^/]+\/([^/]+)/
+      /\/tenant\/compute\/onto\/ontologyScene\/detail\/[^/]+\/([^/]+)/
     );
     const matchedKey = routeMatch ? routeMatch[1] : '';
     // 验证匹配到的 key 是否是有效的菜单项 key
@@ -360,7 +360,10 @@ export default function OntologySceneDetail() {
           }
         }}
       />
-      <Layout className="flex flex-row overflow-hidden">
+      <Layout
+        className="relative flex flex-row overflow-hidden"
+        id={'ontologySceneContent'}
+      >
         <div
           className={cls(
             'flex flex-shrink-0 flex-col border-r border-[var(--color-border-2)] bg-white transition-all duration-200',
@@ -417,10 +420,7 @@ export default function OntologySceneDetail() {
           </div>
         </div>
 
-        <Layout.Content
-          className="relative flex-1 overflow-auto"
-          id={'ontologySceneContent'}
-        >
+        <Layout.Content className="relative flex-1 overflow-auto">
           <Suspense
             fallback={
               <div className="flex h-full items-center justify-center">

@@ -1,6 +1,12 @@
-import React, { useMemo } from 'react';
-import { Button, Dropdown, Menu, Popover } from '@arco-design/web-react';
-import { IconCodeBlock, IconDown } from '@arco-design/web-react/icon';
+import React, { useMemo, useState } from 'react';
+import {
+  Button,
+  Dropdown,
+  Menu,
+  Popover,
+  Tooltip
+} from '@arco-design/web-react';
+import { IconCodeBlock, IconDown, IconUp } from '@arco-design/web-react/icon';
 import styles from './index.module.scss';
 import {
   TYPE2COMP_OPTIONS,
@@ -20,8 +26,17 @@ export const UiSelect = (
   const currentIcon = useMemo(() => {
     const key = value ?? `${ParamType.String}_${UiType.Input}`;
     const Icon = TYPE_UI_OPTIONS[key];
-    return <Icon />;
+    return (
+      <Icon
+        width={16}
+        height={16}
+        color={'#23293B'}
+        className={'text-[16px] text-[#23293B]'}
+      />
+    );
   }, [value]);
+
+  const [menuVisible, setMenuVisible] = useState(false);
 
   const dropList = (
     <Menu
@@ -32,6 +47,7 @@ export const UiSelect = (
     >
       {Object.entries(TYPE2COMP_OPTIONS).flatMap(([type, options]) => {
         return options.map((option) => {
+          const Icon = option.icon;
           return (
             <Menu.Item
               key={`${type}_${option.value}`}
@@ -41,7 +57,12 @@ export const UiSelect = (
               })}
             >
               <div className={styles['ui-item']}>
-                <IconCodeBlock />
+                <Icon
+                  width={20}
+                  height={20}
+                  color={'#23293B'}
+                  className={'text-[20px] text-[#23293B]'}
+                />
                 {`${type}-${option.label}`}
               </div>
             </Menu.Item>
@@ -55,7 +76,7 @@ export const UiSelect = (
     return document.querySelector('#functionSettingContainer') || document.body;
   };
   return (
-    <Popover
+    <Tooltip
       content={props.readonly ? '该函数已被行为绑定，不可修改' : null}
       getPopupContainer={popupContainer}
     >
@@ -70,14 +91,24 @@ export const UiSelect = (
           trigger="click"
           position="bl"
           disabled={disabled}
+          // disabled
           getPopupContainer={popupContainer}
+          onVisibleChange={setMenuVisible}
         >
-          <ProButton className={styles['ui-select']} type={'outline'}>
+          <ProButton
+            className={classNames([
+              styles['ui-select'],
+              {
+                [styles['ui-select-active']]: menuVisible
+              }
+            ])}
+            type={'outline'}
+          >
             {currentIcon}
-            <IconDown />
+            {!menuVisible ? <IconDown className={'text-[12px]'} /> : <IconUp />}
           </ProButton>
         </Dropdown>
       </div>
-    </Popover>
+    </Tooltip>
   );
 };

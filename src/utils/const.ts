@@ -1,3 +1,3 @@
 export const ProjectIdKey = '_AIProjectId_';
 
-export const MDPPrefix = '/noto';
+export const MDPPrefix = '/onto';

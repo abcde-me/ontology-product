@@ -5,9 +5,27 @@
     height: 100%;
     width: 60px;
     border-radius: 4px 0 0 4px;
-    padding: 4px 12px;
-    border: 1px solid var(--line-color-border-1, #c3c7d4) !important;
+    padding: 0 12px;
+    border: 1px solid var(--line-color-border-1, #c3c7d4);
+    border-right: none;
     background: var(--fill-color-fill-2, #f5f7fc) !important;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    &:hover {
+      border-color: rgb(var(--primary-6)) !important;
+    }
+  }
+
+  .ui-select-active {
+    border-color: rgb(var(--primary-6));
+  }
+
+  :global {
+    .arco-btn-disabled {
+      background: var(--color-fill-2) !important;
+    }
   }
 }
 
@@ -27,6 +45,8 @@
 }
 
 .ui-menu {
+  width: 290px;
+
   :global {
     .arco-dropdown-menu-item {
       height: auto;

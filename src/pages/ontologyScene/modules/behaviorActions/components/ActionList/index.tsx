@@ -35,7 +35,7 @@ import { ContentWithCopy } from '@/pages/ontologyScene/componens';
 import { PermissionWrapper } from '@/components/PermissionGuard';
 import { ONTOLOGY_PERMISSIONS } from '@/config/permissions';
 
-const baseUrl = '/tenant/compute/noto/ontologyScene/detail';
+const baseUrl = '/tenant/compute/onto/ontologyScene/detail';
 
 export const ActionList = (props: {
   onViewDetail: (data?: BehaviorActionItem) => void;
@@ -110,6 +110,8 @@ export const ActionList = (props: {
     {
       title: '行为名称',
       dataIndex: 'name',
+      width: 200,
+      fixed: 'left',
       render: (value, record) => (
         <div
           className={'max-w-full overflow-hidden'}
@@ -122,7 +124,7 @@ export const ActionList = (props: {
             className={
               'hover-blue font-PingFangSc text-[14px] font-medium leading-[22px]'
             }
-            value={value}
+            value={value || '-'}
             preferTypography
             ellipsis={{
               showTooltip: {
@@ -138,11 +140,10 @@ export const ActionList = (props: {
       dataIndex: 'description',
       ellipsis: true,
       tooltip: true,
-      width: 200,
       render(v) {
         return (
           <EllipsisPopover
-            value={v}
+            value={v || '-'}
             preferTypography
             ellipsis={{
               showTooltip: { type: 'tooltip' }
@@ -159,7 +160,7 @@ export const ActionList = (props: {
       onFilter: (value, record) => record.objectType === value,
       render: (value, actionDetail) => (
         <ObjectTypeTag
-          ontologyObjectTypeIcon={actionDetail?.ontologyObjectTypeIcon || '-'}
+          ontologyObjectTypeIcon={actionDetail?.objectTypeIcon || '-'}
           ontologyObjectTypeName={actionDetail?.objectTypeName || '全局行为'}
           ontologyObjectTypeId={String(
             actionDetail?.ontologyObjectTypeId ||
@@ -206,6 +207,7 @@ export const ActionList = (props: {
     {
       title: '操作',
       dataIndex: 'actions',
+      fixed: 'right',
       render: (_, record) => (
         <Space size={16}>
           <PermissionWrapper permission={ONTOLOGY_PERMISSIONS.MODIFY}>
@@ -296,7 +298,10 @@ export const ActionList = (props: {
         }
         tableProps={{
           ...tableProps,
-          columns
+          columns,
+          scroll: {
+            x: 1000
+          }
         }}
         className={styles['action-table']}
       />

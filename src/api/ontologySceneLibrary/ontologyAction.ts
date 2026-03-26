@@ -57,3 +57,21 @@ export const saveBehaviorAction = (data: BehaviorActionDetail) => {
 export const deleteAction = (id: string | number) => {
   return UAPI.RES.DeleteOntologyActionApi({}).post({ id }).inRegion().do();
 };
+
+interface ListOntologyActionByObjectTypeRes {
+  totalCount: number;
+  result: BehaviorActionItem[];
+}
+
+// 根据对象类型ID查询行为列表
+export const getActionListByObjectType = async (params: {
+  objectTypeId: number;
+  ontologyModelID?: number;
+  pageNum?: number;
+  pageSize?: number;
+}): Promise<ApiRes<ListOntologyActionByObjectTypeRes>> => {
+  return await UAPI.RES.ListOntologyActionByObjectTypeApi({})
+    .post(params)
+    .inRegion()
+    .do();
+};

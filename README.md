@@ -78,13 +78,13 @@ git checkout -b hotfix-short-desc develop
 
 -[开发环境流水线地址](https://cdp.cestc.cn/product/#/project/pipeline/result?projectId=1909193124970778626&pipelineId=1955146558538309634&buildNo=1)  
 -❗触发条件：手动触发流水线  
--[开发环境地址](http://10.1.4.73:31501/tenant/compute/noto/login)
+-[开发环境地址](http://10.1.4.73:31501/tenant/compute/onto/login)
 
 #### 1. 测试环境发布（release-1.0分支）
 
 -[测试环境流水线地址](https://cdp.cestc.cn/product/#/project/pipeline/result?projectId=1909193124970778626&pipelineId=1955145494502100993&buildNo=1)  
 -❗触发条件：代码合并到 release-1.0 分支时，自动触发流水线  
--[测试环境地址](http://10.1.4.73:30501/tenant/compute/noto/login)
+-[测试环境地址](http://10.1.4.73:30501/tenant/compute/onto/login)
 
 ### 🔍 代码提交规范
 

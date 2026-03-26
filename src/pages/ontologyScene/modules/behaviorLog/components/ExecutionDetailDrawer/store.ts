@@ -67,23 +67,35 @@ export const useExecutionDetailStore = create<ExecutionDetailStore>(
         let params: ParamItem[] = [];
         try {
           params = detail.input_params ? JSON.parse(detail.input_params) : [];
+
+          // 过滤出 inputType 为 'input' 的参数，并使用 code 作为参数名称
+          // params = inputParamsArray
+          //   .filter((param: any) => param.inputType === 'input')
+          //   .map((param: any) => ({
+          //     name: param.code || param.name, // 使用 code 作为参数名称
+          //     type: param.type,
+          //     value: param.value || '-'
+          //   }));
         } catch (e) {
           console.error('解析入参失败:', e);
           params = [];
         }
 
-        // 解析出参（JSON字符串转对象）
+        // 解析出参（JSON字符串转数组）
         let outputParams: OutputParamItem[] = [];
         try {
-          const returnData = detail.return_params
+          const returnParamsArray = detail.return_params
             ? JSON.parse(detail.return_params)
-            : {};
-          // 将对象转换为数组格式 [{name: 'var1', type: 'ObjectRef', value: 'ObjectRef'}, ...]
-          outputParams = Object.entries(returnData).map(([name, type]) => ({
-            name,
-            type: type as string,
-            value: type as string
-          }));
+            : [];
+
+          // 过滤出 inputType 为 'output' 的参数，并使用 code 作为参数名称
+          outputParams = returnParamsArray
+            .filter((param: any) => param.inputType === 'output')
+            .map((param: any) => ({
+              name: param.code || param.name, // 使用 code 作为参数名称
+              type: param.type,
+              value: param.value || '-'
+            }));
         } catch (e) {
           console.error('解析出参失败:', e);
           outputParams = [];

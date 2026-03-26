@@ -6,12 +6,13 @@ import {
 } from '@ceai-front/arco-material';
 import { TableColumnProps } from '@arco-design/web-react';
 import { ObjectTypeTag } from '@/pages/ontologyScene/componens';
+import { ContentWithCopy } from '@/pages/ontologyScene/componens';
 import EllipsisTextWithTooltip from '../components/EllipsisTextWithTooltip';
 import { BehaviorLogItem, RUN_STATUS_MAP } from '../types';
 
 interface ObjectTypeFilter {
   text: string;
-  value: string;
+  value: number;
 }
 
 // 将毫秒转换为秒的辅助函数
@@ -47,7 +48,7 @@ export const useColumns = (
               }}
             >
               <EllipsisTextWithTooltip
-                className="hover-blue min-w-0 cursor-pointer font-PingFangSc text-[14px] font-normal leading-[22px] text-[#23293b]"
+                className="hover-blue min-w-0 cursor-pointer font-PingFangSc text-[14px] font-medium leading-[22px] text-[#23293b]"
                 value={value || '-'}
                 quiteMessage={false}
               />
@@ -91,18 +92,14 @@ export const useColumns = (
           width: 180,
           ellipsis: true,
           render: (value) => (
-            <div className="flex items-center gap-2">
-              {value ? (
-                <>
-                  <EllipsisTextWithTooltip value={value} />
-                  <CopyItemIcon
-                    className="hidden flex-shrink-0"
-                    value={value}
-                  />
-                </>
-              ) : (
-                '-'
-              )}
+            <div className="flex items-center gap-[8px]">
+              <EllipsisPopover
+                wrapperClassName="min-w-0 leading-[22px]"
+                value={value || '-'}
+              >
+                {value}
+              </EllipsisPopover>
+              <ContentWithCopy value={value} />
             </div>
           )
         },
@@ -127,13 +124,13 @@ export const useColumns = (
             <div>
               {value ? (
                 <ObjectTypeTag
-                  ontologyObjectTypeIcon={record.ontologyObjectTypeIcon}
+                  // @ts-ignore
+                  ontologyObjectTypeIcon={record.associated_object_type_icon}
                   ontologyObjectTypeName={value}
                   ontologyObjectTypeId={String(
                     record.ontologyObjectTypeId || record.objectTypeID || ''
                   )}
                   onClick={() => onViewObjectTypeDetail?.(record)}
-                  className="!border-none !bg-transparent"
                 />
               ) : (
                 <span>-</span>
@@ -189,6 +186,7 @@ export const useColumns = (
           dataIndex: 'end_time',
           width: 180,
           sorter: true,
+          fixed: 'right',
           render: (value) => (
             <div className="font-PingFangSc text-[14px] font-normal leading-[22px] text-[#4e5969]">
               {value || '-'}
@@ -213,7 +211,7 @@ export const useColumns = (
             }}
           >
             <EllipsisTextWithTooltip
-              className="hover-blue min-w-0 cursor-pointer font-PingFangSc text-[14px] font-normal leading-[22px] text-[#23293b]"
+              className="hover-blue min-w-0 cursor-pointer font-PingFangSc text-[14px] font-medium leading-[22px] text-[#23293b]"
               value={value || '-'}
             />
           </div>
@@ -254,15 +252,14 @@ export const useColumns = (
         width: 150,
         ellipsis: true,
         render: (value) => (
-          <div className="flex items-center gap-2">
-            {value ? (
-              <>
-                <EllipsisTextWithTooltip value={value} />
-                <CopyItemIcon className="hidden flex-shrink-0" value={value} />
-              </>
-            ) : (
-              '-'
-            )}
+          <div className="flex items-center gap-[8px]">
+            <EllipsisPopover
+              wrapperClassName="min-w-0 leading-[22px]"
+              value={value || '-'}
+            >
+              {value}
+            </EllipsisPopover>
+            <ContentWithCopy value={value} />
           </div>
         )
       },
@@ -283,7 +280,7 @@ export const useColumns = (
         dataIndex: 'run_status',
         width: 120,
         filters: [
-          { text: '处理中', value: 1 },
+          { text: '运行中', value: 1 },
           { text: '成功', value: 2 },
           { text: '失败', value: 3 },
           { text: '已停止', value: 4 }
@@ -326,6 +323,7 @@ export const useColumns = (
         dataIndex: 'end_time',
         width: 180,
         sorter: true,
+        fixed: 'right',
         render: (value) => (
           <div className="font-PingFangSc text-[14px] font-normal leading-[22px] text-[#4e5969]">
             {value || '-'}

@@ -1,5 +1,6 @@
 .validate-rules {
   margin-bottom: 16px;
+  width: 640px;
 
   .comp-header {
     justify-content: space-between;
@@ -10,15 +11,33 @@
     border: 1px solid #c3c7d4;
     border-bottom-color: #ebeef5;
     border-radius: 4px 4px 0 0;
+    gap: 16px;
+
+    .param-name-text {
+    }
 
     .type-tag {
-      border-color: #184ff2 !important;
       border-radius: 4px;
       height: 18px;
       display: flex;
       align-items: center;
       padding: 0 4px;
       margin: 0;
+    }
+
+    .String-type {
+      border-color: #0cbf92 !important;
+      color: #0cbf92;
+    }
+
+    .Integer-type {
+      border-color: #184ff2 !important;
+      color: #184ff2;
+    }
+
+    .Float-type {
+      border-color: #1abcf2 !important;
+      color: #1abcf2;
     }
   }
 

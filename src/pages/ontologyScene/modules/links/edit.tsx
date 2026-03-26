@@ -72,7 +72,10 @@ export default function OntologySceneLinksEdit() {
           };
 
           // 处理目标对象属性（1:1 和 1:N 类型）
-          if (data.targetPropertyID) {
+          // 优先使用接口直接返回的目标属性名称（避免只拿到 ID 导致回显/提交不一致）
+          if (data.linkTargetColumnName) {
+            formData.targetObjectAttribute = data.linkTargetColumnName;
+          } else if (data.targetPropertyID) {
             formData.targetObjectAttribute = String(data.targetPropertyID);
           }
 
@@ -194,8 +197,16 @@ export default function OntologySceneLinksEdit() {
         }
       } else {
         // 1:1 和 1:N 类型，处理目标对象属性
-        if (data.targetObjectAttribute && data.targetObjectType) {
+        if (data.linkTargetColumnName) {
+          requestData.linkTargetColumnName = data.linkTargetColumnName;
+          if (data.linkSourceColumnName) {
+            requestData.linkSourceColumnName = data.linkSourceColumnName;
+          }
+        } else if (data.targetObjectAttribute && data.targetObjectType) {
           requestData.linkTargetColumnName = data.targetObjectAttribute;
+          if (data.linkSourceColumnName) {
+            requestData.linkSourceColumnName = data.linkSourceColumnName;
+          }
         }
       }
 
@@ -203,7 +214,7 @@ export default function OntologySceneLinksEdit() {
       if (response.status === 200 && response.code === '') {
         Message.success('更新成功');
         history.push(
-          `/tenant/compute/noto/ontologyScene/detail/${OSId}/links/list`
+          `/tenant/compute/onto/ontologyScene/detail/${OSId}/links/list`
         );
       } else {
         Message.error(response.message || '更新失败，请重试');
@@ -218,13 +229,13 @@ export default function OntologySceneLinksEdit() {
 
   const handleCancel = () => {
     history.push(
-      `/tenant/compute/noto/ontologyScene/detail/${OSId}/links/list`
+      `/tenant/compute/onto/ontologyScene/detail/${OSId}/links/list`
     );
   };
 
   const goBack = () => {
     history.replace(
-      `/tenant/compute/noto/ontologyScene/detail/${OSId}/links/list`
+      `/tenant/compute/onto/ontologyScene/detail/${OSId}/links/list`
     );
   };
 
@@ -242,7 +253,7 @@ export default function OntologySceneLinksEdit() {
             编辑链接
           </div>
           <div className="flex flex-1 flex-col overflow-hidden">
-            <div className="overflow-y-auto">
+            <div className="overflow-y-auto pb-[65px]">
               <LinkForm
                 ref={formRef}
                 initialValues={initialValues}
@@ -253,7 +264,7 @@ export default function OntologySceneLinksEdit() {
               />
             </div>
             {/* 底部操作按钮 - 使用sticky */}
-            <div className="sticky bottom-0 z-10 border-t border-[#E5E6EB] bg-white px-6 py-4">
+            <div className="absolute bottom-0 left-0 right-0 z-10 border-t border-[#E5E6EB] bg-white px-6 py-4">
               <div className="flex justify-start gap-[8px]">
                 <Button
                   type="primary"

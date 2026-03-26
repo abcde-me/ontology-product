@@ -10,7 +10,6 @@ import {
   TableColumnProps,
   Checkbox,
   Switch,
-  Tooltip,
   Spin,
   Cascader,
   Popover
@@ -57,6 +56,30 @@ import { PrefixAimdp } from '@/api/endpoints';
 import { openNewPage } from '@/utils/env';
 
 const FormItem = Form.Item;
+
+// Arco Cascader：`searchNodeByLabel` 会对路径上每一层节点调用 filterOption，
+// 故可同时按库名（第一层）或表名/ID（第二层）筛选。
+function databaseTableCascaderFilterOption(
+  input: string,
+  option: { label?: unknown; value?: unknown }
+): boolean {
+  const q = String(input ?? '')
+    .trim()
+    .toLowerCase();
+  if (!q) return true;
+
+  const labelStr =
+    option?.label != null && option.label !== ''
+      ? String(option.label).toLowerCase()
+      : '';
+  const valueStr =
+    option?.value != null && option.value !== ''
+      ? String(option.value).toLowerCase()
+      : '';
+
+  return labelStr.includes(q) || valueStr.includes(q);
+}
+
 const { TextArea } = Input;
 
 // 使用接口定义的字段名
@@ -94,6 +117,7 @@ interface ObjectTypeFormProps {
   onCancel: () => void;
   loading?: boolean;
   showFooter?: boolean; // 是否显示底部按钮，如果为false，则由外层控制
+  isEdit?: boolean; // 是否是编辑模式
 }
 
 export interface ObjectTypeFormRef {
@@ -102,7 +126,14 @@ export interface ObjectTypeFormRef {
 
 const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
   (
-    { initialValues, onSubmit, onCancel, loading = false, showFooter = true },
+    {
+      initialValues,
+      onSubmit,
+      onCancel,
+      loading = false,
+      showFooter = true,
+      isEdit = false
+    },
     ref
   ) => {
     const [form] = Form.useForm();
@@ -181,14 +212,25 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
     useEffect(() => {
       if (initialValues) {
         const formData = form.getFieldsValue();
-        form.setFieldsValue({
-          ...formData,
-          ...initialValues,
-          dataSourceType:
-            initialValues._dataSource?.type || DATA_SOURCE_TYPE.LOCAL_CSV,
-          database: initialValues._dataSource?.database,
-          table: initialValues._dataSource?.table
-        });
+
+        if (isEdit) {
+          form.setFieldsValue({
+            ...formData,
+            ...initialValues,
+            dataSourceType:
+              initialValues._dataSource?.type || DATA_SOURCE_TYPE.LOCAL_CSV,
+            database: initialValues._dataSource?.database,
+            table: initialValues._dataSource?.table
+          });
+        } else {
+          form.setFieldsValue({
+            ...formData,
+            ...initialValues,
+            dataSourceType:
+              formData.dataSourceType || DATA_SOURCE_TYPE.LOCAL_CSV
+          });
+        }
+
         if (initialValues.icon) {
           setSelectedIcon(initialValues.icon);
         }
@@ -476,9 +518,9 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
         title: (
           <div className="flex items-center gap-[8px]">
             <span>主键</span>
-            <Tooltip content="选择作为主键的字段">
+            <Popover content="选择作为主键的字段">
               <IconQuestionCircle className="pointer-events-auto cursor-pointer text-[#86909C]" />
-            </Tooltip>
+            </Popover>
           </div>
         ),
         dataIndex: 'isPrimary',
@@ -509,20 +551,20 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
                 placeholder="请输入属性名称"
               />
               {record.publicPropertyID > 0 && (
-                <Tooltip content="取消绑定">
+                <Popover content="取消绑定">
                   <CancelArchiveIcon
                     className="absolute right-[12px] top-1/2 -translate-y-1/2 hover:cursor-pointer hover:text-[#184FF2]"
                     onClick={() => handleUnbindPublicAttribute(index)}
                   />
-                </Tooltip>
+                </Popover>
               )}
             </div>
-            <Tooltip content="绑定公共属性">
+            <Popover content="绑定公共属性">
               <ArchiveIcon
                 className="cursor-pointer text-[var(--color-text-2)] hover:cursor-pointer hover:text-[#184FF2]"
                 onClick={() => handleBindPublicAttribute(index)}
               />
-            </Tooltip>
+            </Popover>
           </div>
         )
       },
@@ -530,9 +572,9 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
         title: (
           <div className="flex items-center gap-[8px]">
             <span>存入公共属性</span>
-            <Tooltip content="是否将当前属性存入公共属性库">
+            <Popover content="是否将当前属性存入公共属性库">
               <IconQuestionCircle className="pointer-events-auto cursor-pointer text-[#86909C]" />
-            </Tooltip>
+            </Popover>
           </div>
         ),
         dataIndex: 'isStoreAsPublic',
@@ -588,17 +630,37 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
         // 更新表单字段值，用于validator验证
         form.setFieldValue('databaseTable', `${databaseName}/${tableName}`);
       } else {
-        // 清空选择时，也清空 dataSource
-        setDataSource((prev) => ({
-          ...prev,
-          database: undefined,
-          table: undefined
-        }));
-        setSelectedDatabase(undefined);
-        setSelectedTable(undefined);
+        // 只选择了第一层（数据库）时：保留已选数据库
+        if (newValue.length >= 1 && newValue[0]) {
+          const databaseOption = cascaderOptions.find(
+            (opt) => opt.value === String(newValue[0])
+          );
+          const databaseName = databaseOption?.label || newValue[0];
 
-        // 清空表单字段值
-        form.setFieldValue('databaseTable', undefined);
+          setDataSource((prev) => ({
+            ...prev,
+            database: databaseName,
+            table: undefined
+          }));
+          setSelectedDatabase(databaseName);
+          setSelectedTable(undefined);
+
+          form.setFieldValue('database', databaseName);
+          form.setFieldValue('table', undefined);
+          form.setFieldValue('databaseTable', undefined);
+        } else {
+          // 清空选择时，也清空 dataSource
+          setDataSource((prev) => ({
+            ...prev,
+            database: undefined,
+            table: undefined
+          }));
+          setSelectedDatabase(undefined);
+          setSelectedTable(undefined);
+
+          // 清空表单字段值
+          form.setFieldValue('databaseTable', undefined);
+        }
       }
 
       // 当 table 值变化且有值时，调用接口获取字段列表
@@ -624,7 +686,7 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
                 const baseType = field.dataType;
                 return {
                   name: field.fieldName, // 表字段名
-                  comment: field.fieldName, // 属性名称，使用描述或字段名
+                  comment: field.description || field.fieldName, // 属性名称，使用描述或字段名
                   columnType: normalizeColumnTypeForPrimary(
                     baseType,
                     isPrimary
@@ -634,7 +696,7 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
                   isStoreAsPublic: 0, // 默认不存入公共属性
                   publicPropertyID: 0, // 默认未绑定公共属性
                   _tableField: field.fieldName,
-                  _attributeName: field.fieldName
+                  _attributeName: field.description || field.fieldName
                 };
               });
 
@@ -1018,6 +1080,8 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
               <TextArea
                 placeholder="请输入描述说明，详述该实体的业务边界与逻辑范围"
                 autoSize={{ minRows: 3 }}
+                maxLength={500}
+                showWordLimit
               />
             </FormItem>
 
@@ -1113,7 +1177,7 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
                         if (
                           dataSource.type ===
                             DATA_SOURCE_TYPE.DATA_DIRECTORY_SYNC &&
-                          (!cascaderValue || cascaderValue.length === 0)
+                          (!cascaderValue || cascaderValue.length !== 2)
                         ) {
                           callback('请选择数据库/表');
                         } else {
@@ -1129,6 +1193,8 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
                       value={
                         cascaderValue.length > 0 ? cascaderValue : undefined
                       }
+                      filterOption={databaseTableCascaderFilterOption}
+                      changeOnSelect
                       options={cascaderOptions}
                       onChange={(value) => {
                         handleCascaderChange(value as string[] | undefined);
@@ -1175,7 +1241,7 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
                                     e.stopPropagation();
                                     // 打开新页面，使用表的 ID（option.value）
                                     openNewPage(
-                                      `/noto/tenant/compute/noto/metadataManagement/detail?id=${option.value}&metadataType=ICEBERG`
+                                      `/onto/tenant/compute/onto/metadataManagement/detail?id=${option.value}&metadataType=ICEBERG`
                                     );
                                   }}
                                 />

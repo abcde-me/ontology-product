@@ -14,13 +14,17 @@ $border-color: #dfe2eb;
   height: 100%;
 
   :global {
+    .cm-theme-light {
+      height: 100%;
+      overflow: hidden;
+    }
+
     .cm-focused {
       outline: none !important;
     }
 
     .cm-editor {
       height: 100%;
-      padding-right: 8px;
 
       &::-webkit-scrollbar {
         display: none;
@@ -60,6 +64,10 @@ $border-color: #dfe2eb;
         color: rgba(15, 23, 42, 1) !important;
       }
     }
+
+    .cm-content {
+      padding-right: 8px;
+    }
   }
 }
 
@@ -80,15 +88,11 @@ $border-color: #dfe2eb;
     top: 0;
     pointer-events: auto;
     z-index: 1000;
-
-    &:hover {
-      cursor: not-allowed;
-    }
+    cursor: not-allowed;
   }
 }
 
 .function-footer {
-  //width: calc(100% + 4px);
   height: 40px;
   min-height: 40px;
   max-height: calc(100% - 42px);
@@ -149,14 +153,18 @@ $border-color: #dfe2eb;
   .copy-btn {
     justify-self: end;
     visibility: hidden;
+    cursor: pointer;
   }
 }
 
 .pycode-disabled {
   :global {
-    .cm-editor,
-    .cm-gutters {
-      background: var(--color-fill-2) !important;
+    .cm-line {
+      color: #94a3b8 !important;
+
+      span {
+        color: #94a3b8 !important;
+      }
     }
   }
 

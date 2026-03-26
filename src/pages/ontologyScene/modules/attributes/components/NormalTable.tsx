@@ -50,6 +50,8 @@ export default function NormalTable({ onTotalChange }: NormalTableProps = {}) {
   const [objectTypeFilterKeys, setObjectTypeFilterKeys] = useState<string[]>(
     []
   );
+  // 不随搜索和筛选变化的物理属性总数（用于 Tab 上展示）
+  const [allTotal, setAllTotal] = useState<number | undefined>(undefined);
 
   // 获取对象类型列表用于“所属对象类型”筛选
   useEffect(() => {
@@ -88,10 +90,18 @@ export default function NormalTable({ onTotalChange }: NormalTableProps = {}) {
           const response = await listOntologyPhysicalProperties(params);
 
           if (response.status === 200 && response.data) {
+            const totalCount = response.data.totalCount || 0;
+
+            // 只有在“无搜索关键词且无对象类型筛选”时，才更新全量总数，
+            // 确保 Tab 上展示的是物理属性总数，而不是搜索/筛选后的数量。
+            if (!params.filter && objectTypeFilterKeys.length === 0) {
+              setAllTotal(totalCount);
+            }
+
             return {
               data: {
                 items: response.data.result || [],
-                total: response.data.totalCount || 0,
+                total: totalCount,
                 page: params.pageNo || 1,
                 page_size: params.pageSize || 10
               }
@@ -158,12 +168,18 @@ export default function NormalTable({ onTotalChange }: NormalTableProps = {}) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [urlState.search]);
 
-  // 当 total 变化时，通知父组件
+  // 当 total / 全量 total 变化时，通知父组件
   useEffect(() => {
-    if (onTotalChange && pagination?.total !== undefined) {
-      onTotalChange(pagination.total);
-    }
-  }, [pagination?.total, onTotalChange]);
+    if (!onTotalChange) return;
+    // Tab 上展示的数量：优先使用“全量总数”，退化为当前分页 total
+    const totalForDisplay =
+      allTotal !== undefined
+        ? allTotal
+        : pagination?.total !== undefined
+          ? pagination.total
+          : 0;
+    onTotalChange(totalForDisplay);
+  }, [allTotal, pagination?.total, onTotalChange]);
 
   // 处理查看详情：打开对象类型详情抽屉
   const handleViewDetail = (record: PhysicalProperties) => {
@@ -177,7 +193,7 @@ export default function NormalTable({ onTotalChange }: NormalTableProps = {}) {
       return;
     }
 
-    const url = `/noto/tenant/compute/noto/ontologyScene/detail/${ontologyModelID}/attributes/list?tab=public&search=${encodeURIComponent(record.ontologyPublicPropertiesName || '')}`;
+    const url = `/onto/tenant/compute/onto/ontologyScene/detail/${ontologyModelID}/attributes/list?tab=public&search=${encodeURIComponent(record.ontologyPublicPropertiesName || '')}`;
     openNewPage(url);
   };
 
@@ -272,7 +288,7 @@ export default function NormalTable({ onTotalChange }: NormalTableProps = {}) {
       dataIndex: 'name',
       width: 150,
       render: (value) => (
-        <div className="flex items-center gap-[8px]">
+        <div className="flex items-center gap-[4px]">
           <EllipsisPopover
             wrapperClassName="min-w-0 leading-[22px]"
             value={value || '-'}
@@ -353,7 +369,7 @@ export default function NormalTable({ onTotalChange }: NormalTableProps = {}) {
         }}
       />
       {Number(pagination?.total) > 0 && (
-        <div className="mt-4 flex items-center justify-end">
+        <div className="mt-[12px] flex items-center justify-end">
           <Pagination
             {...pagination}
             onChange={(page, pageSize) => {

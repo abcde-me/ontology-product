@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { Button, Select, Tooltip } from '@arco-design/web-react';
+import { Button, Select, Space, Tooltip } from '@arco-design/web-react';
 import { useRequest } from 'ahooks';
 import { isNil } from 'lodash-es';
 import {
@@ -7,10 +7,16 @@ import {
   getFunctionList
 } from '@/api/ontologySceneLibrary/ontologyFunction';
 import styles from './index.module.scss';
-import { IconInfoCircle } from '@arco-design/web-react/icon';
+import {
+  IconClose,
+  IconCloseCircle,
+  IconDown,
+  IconInfoCircle
+} from '@arco-design/web-react/icon';
 import { FunctionContentDialog } from '@/pages/ontologyScene/modules/behaviorActionDetail/components';
 import { useParams } from 'react-router-dom';
 import { OntologyFunctionDetail } from '@/pages/ontologyScene/types/ontologyFunction';
+import classNames from 'classnames';
 
 export const FunctionsSelect = (
   props: CustomFormItemCompProps<number | undefined> & {
@@ -42,6 +48,7 @@ export const FunctionsSelect = (
     }
   );
   const [showFunctionContent, setShowFunctionContent] = useState(false);
+  const [showFunction, setShowFunction] = useState(functionDetail);
 
   const changeFunction = (value: number | undefined) => {
     const functionData = allFunctions.find((f) => f.id === value);
@@ -57,8 +64,10 @@ export const FunctionsSelect = (
     });
   };
 
+  const currentFunction = allFunctions.find((f) => f.id === value);
+
   return (
-    <div className={'flex w-full items-center gap-3'}>
+    <div className={classNames([`flex items-center gap-3`, props.className])}>
       <Select
         placeholder={'请选择行为动作的函数'}
         className={`flex-1 ${styles['function-select']}`}
@@ -67,8 +76,54 @@ export const FunctionsSelect = (
           if (isNil(value)) return null;
           return option?.children?.[0] ?? null;
         }}
-        value={value}
+        getPopupContainer={(node) => node.parentElement || document.body}
+        arrowIcon={
+          <Space>
+            {!!value && (
+              <Tooltip content={'详情'}>
+                <IconInfoCircle
+                  className={
+                    'function-info-icon z-50 cursor-pointer text-[16px]'
+                  }
+                  onClick={(event) => {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    setShowFunctionContent(true);
+                    setShowFunction(currentFunction);
+                  }}
+                />
+              </Tooltip>
+            )}
+            <IconDown />
+          </Space>
+        }
         allowClear
+        clearIcon={
+          <Space>
+            {!!value && (
+              <Tooltip content={'详情'}>
+                <IconInfoCircle
+                  className={
+                    'function-info-icon z-50 cursor-pointer text-[16px]'
+                  }
+                  onClick={(event) => {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    setShowFunctionContent(true);
+                    setShowFunction(currentFunction);
+                  }}
+                />
+              </Tooltip>
+            )}
+            <IconClose
+              onClick={(e) => {
+                e.stopPropagation();
+                changeFunction(undefined);
+              }}
+            />
+          </Space>
+        }
+        value={value}
         onChange={changeFunction}
         showSearch
         filterOption={(inputValue, option) => {
@@ -83,26 +138,21 @@ export const FunctionsSelect = (
               value={value as string}
               className={styles['select-option']}
             >
-              <div
-                className={`${styles['function-name']} font-PingFangSc text-[14px] leading-[22px] text-[#0F131F]`}
-              >
-                {code}
-                <Tooltip content={'详情'}>
-                  <IconInfoCircle
-                    className={
-                      'function-info-icon z-50 cursor-pointer text-[16px]'
-                    }
-                    onClick={(event) => {
-                      event.preventDefault();
-                      event.stopPropagation();
-                      setShowFunctionContent(true);
-                    }}
-                  />
-                </Tooltip>
-              </div>
+              {code}
+              <Tooltip content={'详情'}>
+                <IconInfoCircle
+                  className={`${styles['function-info-icon']} z-50 cursor-pointer text-[16px]`}
+                  onClick={(event) => {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    setShowFunctionContent(true);
+                    setShowFunction(item);
+                  }}
+                />
+              </Tooltip>
               <div
                 className={
-                  'font-PingFangSc text-[12px] leading-[22px] text-[#7D859C]'
+                  'font-PingFangSc text-[12px] leading-[18px] text-[#7D859C]'
                 }
               >
                 显示名称：{name}
@@ -112,7 +162,7 @@ export const FunctionsSelect = (
         })}
       </Select>
       <FunctionContentDialog
-        data={functionDetail}
+        data={showFunction}
         visible={showFunctionContent}
         onCancel={() => setShowFunctionContent(false)}
       />

@@ -110,6 +110,9 @@ export interface OntologyFunctionParam {
    * 参数序号
    */
   idx?: number;
+  obj_data?: {
+    [key: string]: any;
+  };
 }
 
 /**
@@ -168,10 +171,22 @@ export const InputTypeOptions = Object.values(ParamType).map((value) => ({
 }));
 
 export const OutputTypeOptions = [
-  ...InputTypeOptions,
+  { value: ParamType.String, label: `${ParamType.String}-字符串` },
   {
-    label: 'Void',
-    value: 'Void'
+    label: `${ParamType.Integer}-整数`,
+    value: ParamType.Integer
+  },
+  { value: ParamType.Float, label: `${ParamType.Float}-浮点数` },
+  { value: ParamType.Boolean, label: `${ParamType.Boolean}-布尔` },
+  { value: ParamType.Date, label: `${ParamType.Date}-日期` },
+  { value: ParamType.Timestamp, label: `${ParamType.Timestamp}-时间戳` },
+  { value: ParamType.Geopoint, label: `${ParamType.Geopoint}-地理坐标` },
+  { value: ParamType.ObjectOne, label: `${ParamType.ObjectOne}-单一对象引用` },
+  { value: ParamType.ObjectSet, label: `${ParamType.ObjectSet}-对象集合引用` },
+  { value: ParamType.Attachment, label: `${ParamType.Attachment}-附件` },
+  {
+    label: `Any-任意`,
+    value: 'Any'
   }
 ];
 
@@ -290,6 +305,7 @@ export interface TestFunctionItem {
   params: OntologyFunctionParam[];
   pk?: number;
   object_id?: number;
+  object_icon?: string;
 }
 
 export interface TestFunction {

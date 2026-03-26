@@ -15,10 +15,8 @@ import {
   UploadOntologyCSVFileAndParseRes
 } from '@/types/objectType';
 import { SyncStatus } from '@/types/graphApi';
+import { sleep } from '@/utils';
 import UAPI from '@/api';
-
-// 工具函数：延时
-const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export const listOntologyObjectType = async (
   params: ListOntologyObjectTypeReq
@@ -91,34 +89,24 @@ export const uploadOntologyCSVFileAndParse = async (params: {
     .do();
 };
 
-// 创建iceberg表时-数据库下拉列表 (API endpoint not available)
+// 创建iceberg表时-数据库下拉列表
 export const listMetadataIcebergDatabaseName = async (params: {
   instanceId: number;
 }): Promise<ApiRes<ListMetadataIcebergDatabaseNameRes>> => {
-  console.warn(
-    'listMetadataIcebergDatabaseName: API endpoint not available, returning empty data'
-  );
-  return Promise.resolve({
-    status: 200,
-    code: '',
-    message: 'Success',
-    data: { databases: [] }
-  } as any);
+  return await UAPI.RES.listMetadataIcebergDatabaseNameApi({})
+    .post(params)
+    .inRegion()
+    .do();
 };
 
-// 查询iceberg的所有表 (API endpoint not available)
+// 查询iceberg的所有表
 export const listMetadataIcebergTable = async (
   params: ListMetadataIcebergTableReq
 ): Promise<ApiRes<ListMetadataIcebergTableRes>> => {
-  console.warn(
-    'listMetadataIcebergTable: API endpoint not available, returning empty data'
-  );
-  return Promise.resolve({
-    status: 200,
-    code: '',
-    message: 'Success',
-    data: { tables: [] }
-  } as any);
+  return await UAPI.RES.listMetadataIcebergTableApi({})
+    .post(params)
+    .inRegion()
+    .do();
 };
 
 // 本体查询iceberg表的字段信息

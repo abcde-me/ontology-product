@@ -59,7 +59,7 @@ export default function Header({
   const searchDropdownRef = useRef<HTMLDivElement>(null);
 
   const handleBack = () => {
-    history.push('/tenant/compute/noto/ontologyScene/list');
+    history.push('/tenant/compute/onto/ontologyScene/list');
   };
 
   const handleEdit = () => {
@@ -129,7 +129,8 @@ export default function Header({
   };
 
   const handleDeveloperResource = () => {
-    openNewPage('https://my.feishu.cn/docx/XzAqdVIHmoptbAxFNeCcTIfEnjb');
+    const fileName = '本体构建平台 Ontology API 开发指南.pdf';
+    openNewPage(`/onto/assets/${encodeURIComponent(fileName)}`);
   };
 
   // 使用 useClickAway 检测点击 SearchDropdown 外部区域时隐藏

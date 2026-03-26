@@ -203,7 +203,7 @@ function EdgePanel() {
   const handleEdit = () => {
     if (!selectedEdgeId || !OSId) return;
     history.push(
-      `/tenant/compute/noto/ontologyScene/detail/${OSId}/links/edit/${selectedEdgeId}`
+      `/tenant/compute/onto/ontologyScene/detail/${OSId}/links/edit/${selectedEdgeId}`
     );
   };
 

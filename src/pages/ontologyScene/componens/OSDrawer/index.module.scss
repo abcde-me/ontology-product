@@ -3,15 +3,16 @@
   user-select: text !important;
   border-radius: 4px;
   box-shadow: 0 8px 20px 0 rgba(0, 0, 0, 0.12);
-  z-index: 1000;
+  z-index: 1;
 
   :global(.arco-drawer-header) {
     height: max-content;
-    padding: 20px 24px 8px;
+    padding: 20px 24px 20px;
+    border: none !important;
   }
 
   :global(.arco-drawer-content) {
-    padding: 12px 24px;
+    padding: 0 24px 12px;
   }
 
   :global(.arco-drawer-header-title) {

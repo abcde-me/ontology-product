@@ -5,12 +5,19 @@ import { ObjectTypeSelect } from '../../componens';
 import { useRequest } from 'ahooks';
 import { listOntologyPhysicalProperties } from '@/api/ontologySceneLibrary/graph';
 import { ObjectType } from '@/types/objectType';
-import { InterfaceSelect } from '@/pages/ontologyScene/componens/ObjectInstanceSelect/InsSelect';
+import { InstanceSelect } from '@/pages/ontologyScene/componens/ObjectInstanceSelect/InsSelect';
 import { useParams } from 'react-router-dom';
 import { isNil } from 'lodash-es';
 
+interface ObjData {
+  icon?: string;
+  name?: string;
+  id?: number;
+  code?: string;
+}
+
 export interface ObjInsValue {
-  objectTypeID?: number;
+  objectTypeData?: ObjData;
   objInsID?: React.Key[] | React.Key | undefined;
 }
 
@@ -21,23 +28,23 @@ export interface ObjInsProps extends CustomFormItemCompProps<ObjInsValue> {
     value: ObjInsValue,
     options?: [ObjectType, Record<string, any>]
   ) => void;
-  getPopupContainer?: () => Element;
+  getPopupContainer?: (node?: HTMLElement) => Element;
+  objTypeSelectClassName?: string;
+  objInsClassName?: string;
 }
 
 export const ObjectInstanceSelect = (props: ObjInsProps) => {
   const { value, onChange, disabled, className } = props;
-  const { objectTypeID, objInsID } = value || {};
+  const { objectTypeData, objInsID } = value || {};
   const { id: OSId } = useParams<Record<string, any>>();
-
-  const [currentObj, setCurrentObj] = useState<ObjectType>();
 
   const { data: primaryKey, loading: primaryKeyLoading } = useRequest(
     () => {
-      if (isNil(currentObj)) {
+      if (isNil(value?.objectTypeData?.id)) {
         return Promise.resolve(undefined);
       }
       return listOntologyPhysicalProperties({
-        objectTypeIdList: [Number(currentObj?.id)],
+        objectTypeIdList: [Number(value?.objectTypeData?.id)],
         isPrimary: 1,
         ontologyModelID: +OSId,
         isUse: 1
@@ -46,39 +53,70 @@ export const ObjectInstanceSelect = (props: ObjInsProps) => {
       });
     },
     {
-      refreshDeps: [currentObj]
+      refreshDeps: [value?.objectTypeData?.id]
     }
   );
 
   // Handle object type change by clearing selected instances
   const handleObjectTypeChange = useCallback(
-    (nextId?: number, objType?: ObjectType) => {
+    (objKey?: string, objType?: ObjectType) => {
       onChange?.({
-        objectTypeID: nextId,
+        objectTypeData: !!objType
+          ? {
+              name: objType.name,
+              icon: objType.icon,
+              code: objKey,
+              id: objType.id
+            }
+          : undefined,
         objInsID: undefined
       });
-      setCurrentObj(objType);
     },
     [onChange]
   );
 
   return (
-    <div className={classNames([styles['obj-interface'], className])}>
+    <div
+      className={classNames([
+        styles['obj-instance'],
+        className,
+        'obj-ins-wrapper'
+      ])}
+    >
       <ObjectTypeSelect
-        className={styles['obj-one']}
-        value={currentObj?.code as any}
-        onChange={handleObjectTypeChange}
+        className={classNames([
+          styles['obj-one'],
+          props.objTypeSelectClassName
+        ])}
+        value={value?.objectTypeData?.code as any}
+        onChange={handleObjectTypeChange as any}
+        placeholder={'请搜索或选择对象类型'}
         disabled={disabled}
         ontologyModelID={+OSId}
         primaryKey={'code'}
         getPopupContainer={props.getPopupContainer as any}
+        selectProps={{
+          dropdownMenuStyle: {
+            width: 400
+          },
+          triggerProps: {
+            autoAlignPopupWidth: false,
+            position: 'bl',
+            style: {
+              width: 400
+            }
+          }
+        }}
       />
-      <InterfaceSelect
-        objectTypeId={currentObj?.id}
+      <div
+        className={`w-[1px] bg-[#c3c7d4] ${styles['ui-gap']} ui-gap flex-shrink-0`}
+      />
+      <InstanceSelect
+        objectTypeId={value?.objectTypeData?.id}
         placeholder={!!primaryKey ? `请选择对象实例` : '请先选择对象类型'}
         primaryKey={primaryKey}
         disabled={primaryKeyLoading || disabled}
-        className={styles['ins-sel']}
+        className={classNames([styles['ins-sel'], props.objInsClassName])}
         mode={props.mode}
         value={objInsID}
         searchKey={'code'}

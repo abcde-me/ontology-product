@@ -1,35 +1,42 @@
-.local-csv-form-item {
-  :global(.arco-form-label-item .arco-form-item-symbol) {
-    display: none;
-  }
-}
-
-.table-select-group {
-  :global(.arco-select-view) {
-    border-right-width: 0 !important;
-    border-top-right-radius: 0 !important;
-    border-bottom-right-radius: 0 !important;
-  }
-
-  :global(.arco-input) {
-    border-left-width: 0 !important;
-    border-top-left-radius: 0 !important;
-    border-bottom-left-radius: 0 !important;
-  }
-}
-
 .link-form {
-  :global(.arco-form-item-wrapper) {
-    max-width: 800px;
+  .local-csv-form-item {
+    :global(.arco-form-label-item .arco-form-item-symbol) {
+      display: none;
+    }
   }
-  :global(.arco-form-label-item) {
-    min-width: 110px;
-  }
-}
 
-.attribute-fields-form-item {
-  :global(.arco-form-item-wrapper) {
-    max-width: 100%;
+  .table-select-group {
+    > *:not(:last-child) {
+      border-right: none;
+    }
+
+    :global(.arco-select-view) {
+      border-right-width: 1px;
+    }
+
+    :global(.object-type-select .arco-select-view) {
+      border-right-width: 0;
+      border-top-right-radius: 0;
+      border-bottom-right-radius: 0;
+    }
+  }
+
+  .link-form {
+    :global(.arco-form-item-wrapper) {
+      max-width: 800px;
+    }
+    :global(.arco-form-label-item) {
+      width: 100px;
+      min-width: 100px;
+      max-width: 100px;
+    }
+  }
+
+  .attribute-fields-form-item {
+    :global(.arco-form-item-wrapper) {
+      max-width: 100%;
+      width: 100%;
+    }
   }
 }
 
@@ -51,11 +58,11 @@
     // 列表项悬停和激活状态
     .arco-cascader-list-item:hover,
     .arco-cascader-list-search-item-hover {
-      background: var(--primary-primary-1, #eef6ff);
+      background: var(--primary-primary-1, #f2f8ff);
     }
 
     .arco-cascader-list-item-active {
-      background: var(--primary-primary-1, #eef6ff);
+      background: var(--primary-primary-1, #f2f8ff);
     }
 
     // 搜索项特殊样式

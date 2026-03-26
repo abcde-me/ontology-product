@@ -8,6 +8,7 @@ import React, {
 import classNames from 'classnames';
 import {
   Button,
+  Form,
   Input,
   Message,
   Modal,
@@ -91,6 +92,9 @@ export const MapPicker: React.FC<MapPickerProps> = ({
   style,
   getPopupContainer
 }) => {
+  const [form] = Form.useForm();
+  const listRef = useRef<HTMLDivElement>(null);
+  const [showPointList, setShowPointList] = useState(false);
   const AMapRef = useRef<any>();
   const [visible, setVisible] = useState(false);
   const [mapReady, setMapReady] = useState(false);
@@ -105,9 +109,9 @@ export const MapPicker: React.FC<MapPickerProps> = ({
   const placeSearchRef = useRef<any>();
   const mapClickBoundRef = useRef(false);
 
-  const getDisplayValue = () => {
-    if (!currentPoint) return undefined;
-    const { lng, lat } = currentPoint;
+  const getDisplayValue = (point?: GeoPoint) => {
+    if (!point) return undefined;
+    const { lng, lat } = point;
     return `${lng.toFixed(6)}, ${lat.toFixed(6)}`;
   };
 
@@ -138,6 +142,9 @@ export const MapPicker: React.FC<MapPickerProps> = ({
         mapRef.current?.setCenter([point.lng, point.lat]);
       }
       setCurrentPoint(point);
+      form.setFields({
+        geoPoint: { error: undefined, value: getDisplayValue(point) }
+      });
     },
     [ensureMarker]
   );
@@ -238,6 +245,7 @@ export const MapPicker: React.FC<MapPickerProps> = ({
     // setSearchKeyword(keyword);
     if (!q) {
       setSearchOptions([]);
+      setShowPointList(false);
       return;
     }
     if (!placeSearchRef.current) {
@@ -266,6 +274,7 @@ export const MapPicker: React.FC<MapPickerProps> = ({
           }
         }));
       setSearchOptions(options);
+      setShowPointList(true);
     });
   }, []);
 
@@ -278,15 +287,21 @@ export const MapPicker: React.FC<MapPickerProps> = ({
       };
       updateMarker(point, true);
       mapRef.current?.setZoom?.(15);
+      setShowPointList(false);
     },
     [updateMarker]
   );
 
   const handleConfirm = () => {
-    if (currentPoint) {
-      onChange?.(currentPoint);
-    }
-    setVisible(false);
+    form
+      .validate()
+      .then(() => {
+        if (currentPoint) {
+          onChange?.(currentPoint);
+        }
+        setVisible(false);
+      })
+      .catch(console.error);
   };
 
   const handleClear = () => {
@@ -298,14 +313,27 @@ export const MapPicker: React.FC<MapPickerProps> = ({
     setVisible(false);
   };
 
+  useEffect(() => {
+    const clickInArea = (e: any) => {
+      if (mapContainerRef.current?.contains(e.target)) return;
+      setShowPointList(false);
+    };
+    document.addEventListener('click', clickInArea);
+    return () => document.removeEventListener('click', clickInArea);
+  }, []);
+
   return (
     <>
-      <Tooltip content="选择坐标" disabled={disabled}>
+      <Tooltip
+        disabled={disabled}
+        content="选择坐标"
+        getPopupContainer={getPopupContainer}
+      >
         <Input
           className={classNames(styles.input, className)}
           style={style}
           readOnly
-          value={getDisplayValue()}
+          value={getDisplayValue(currentPoint)}
           placeholder={placeholder}
           disabled={disabled || loadingMap || !mapReady}
           allowClear
@@ -314,7 +342,9 @@ export const MapPicker: React.FC<MapPickerProps> = ({
             !mapReady || loadingMap ? (
               <IconLoading />
             ) : (
-              <IconLocation onClick={openModal} />
+              <Tooltip content="选择坐标" getPopupContainer={getPopupContainer}>
+                <IconLocation onClick={openModal} />
+              </Tooltip>
             )
           }
           onClick={openModal}
@@ -326,53 +356,68 @@ export const MapPicker: React.FC<MapPickerProps> = ({
         visible={visible}
         onCancel={handleModalClose}
         onOk={handleConfirm}
-        okButtonProps={{ disabled: !currentPoint }}
-        unmountOnExit={false}
         mountOnEnter={false}
-        style={{ width: 900 }}
-        getPopupContainer={getPopupContainer}
+        style={{ width: 900, height: 600 }}
+        getChildrenPopupContainer={(node) =>
+          node.parentElement || document.body
+        }
+        afterClose={() => {
+          form.resetFields();
+        }}
+        className={styles.modal}
+        getPopupContainer={getPopupContainer || (() => document.body)}
       >
-        <div className={styles.toolbar}>
-          <FormItem
-            required
-            label={'已选坐标：'}
-            labelCol={{ span: 3 }}
-            layout={'horizontal'}
-            className={'mb-0'}
-          >
-            <Input
-              readOnly
-              value={getDisplayValue()}
-              placeholder={'请点击地图选择坐标'}
-            />
-          </FormItem>
-        </div>
-
-        <div className={styles.body}>
-          <div className={styles.mapWrapper}>
-            <div ref={mapContainerRef} className={styles.mapContainer} />
-            <SelectWithNoData
-              showSearch
-              allowClear
-              placeholder="请输入关键词"
-              loading={searchLoading}
-              options={searchOptions}
-              filterOption={false}
-              arrowIcon={<IconSearch />}
-              onSearch={handleSearch}
-              onChange={(val: string, option) => {
-                if (!val) return;
-                const [lng, lat] = val.split(',');
-                handleSelectPoi({
-                  name: '',
-                  location: {
-                    lng: +lng,
-                    lat: +lat
+        <div className={'flex h-full w-full flex-col'}>
+          <div className={styles.toolbar}>
+            <Form autoFocus={false} autoComplete={'off'} form={form}>
+              <FormItem
+                required={true}
+                label={'已选坐标：'}
+                className={'mb-0'}
+                layout={'horizontal'}
+                field="geoPoint"
+                rules={[
+                  {
+                    required: true,
+                    message: '请点击地图选择坐标'
                   }
-                });
-              }}
-              className={styles['search-place']}
-            />
+                ]}
+              >
+                <Input disabled placeholder={'请点击地图选择坐标'} />
+              </FormItem>
+            </Form>
+          </div>
+
+          <div className={styles.body}>
+            <div className={styles.mapWrapper}>
+              <div ref={mapContainerRef} className={styles.mapContainer} />
+              <SelectWithNoData
+                popupVisible={showPointList}
+                showSearch
+                allowClear
+                placeholder="请输入关键词"
+                loading={searchLoading}
+                options={searchOptions}
+                filterOption={false}
+                arrowIcon={<IconSearch />}
+                onSearch={handleSearch}
+                dropdownRender={(menu) => {
+                  return <div ref={listRef}>{menu}</div>;
+                }}
+                onChange={(val: string, option) => {
+                  if (!val) return;
+                  const [lng, lat] = val.split(',');
+                  handleSelectPoi({
+                    name: '',
+                    location: {
+                      lng: +lng,
+                      lat: +lat
+                    }
+                  });
+                }}
+                className={styles['search-place']}
+              />
+            </div>
           </div>
         </div>
       </Modal>

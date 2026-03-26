@@ -103,7 +103,7 @@ export default function OntologySceneFunctions() {
     type?: 'view' | 'edit' | 'create',
     data?: OntologyFunctionItem
   ) => {
-    const baseUrl = '/tenant/compute/noto/ontologyScene/detail';
+    const baseUrl = '/tenant/compute/onto/ontologyScene/detail';
     history.push(
       `${baseUrl}/${ontologyModelID}/functions/${type}/${data ? data.id : '_NEW_'}`
     );
@@ -133,7 +133,8 @@ export default function OntologySceneFunctions() {
     {
       title: '显示名称',
       dataIndex: 'name',
-      ellipsis: true,
+      width: 200,
+      fixed: 'left',
       render: (value, record) => (
         <div
           onClick={() => {
@@ -143,9 +144,9 @@ export default function OntologySceneFunctions() {
         >
           <EllipsisPopover
             className={
-              'hover-blue  font-PingFangSc text-[14px] font-medium leading-[22px]'
+              'hover-blue  font-PingFangSc text-[14px] font-[500] leading-[22px] text-[#23293B]'
             }
-            value={value}
+            value={value || '-'}
             preferTypography
             ellipsis={{
               showTooltip: {
@@ -164,7 +165,7 @@ export default function OntologySceneFunctions() {
       render(v) {
         return (
           <EllipsisPopover
-            value={v}
+            value={v || '-'}
             preferTypography
             ellipsis={{
               showTooltip: { type: 'tooltip' }
@@ -195,6 +196,7 @@ export default function OntologySceneFunctions() {
     {
       title: '操作',
       dataIndex: 'actions',
+      fixed: 'right',
       render: (_, record) => (
         <Space size={16}>
           <PermissionWrapper permission={ONTOLOGY_PERMISSIONS.MODIFY}>
@@ -277,7 +279,10 @@ export default function OntologySceneFunctions() {
             }
             tableProps={{
               ...tableProps,
-              columns
+              columns,
+              scroll: {
+                x: 1000
+              }
             }}
             className={styles['function-table']}
           />

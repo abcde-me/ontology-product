@@ -30,6 +30,8 @@ import {
   listOntologyPhysicalProperties,
   listOntologyLinkType
 } from '@/api/ontologySceneLibrary/graph';
+import { getActionListByObjectType } from '@/api/ontologySceneLibrary/ontologyAction';
+import type { BehaviorActionItem } from '@/pages/ontologyScene/types/behaviorActions';
 import type {
   ObjectType,
   GetOntologyObjectTypeDetailRes
@@ -206,6 +208,14 @@ export default function ObjectTypeDetailDrawer({
   const linksPageNoRef = useRef(1);
   const linksPageSize = DEFAULT_PAGE_SIZE;
 
+  const [behaviorsData, setBehaviorsData] = useState<BehaviorActionItem[]>([]);
+  const [behaviorsLoading, setBehaviorsLoading] = useState(false);
+  const [behaviorsPagination, setBehaviorsPagination] = useState({
+    current: 1,
+    pageSize: DEFAULT_PAGE_SIZE,
+    total: 0
+  });
+
   const loadInstances = useCallback(
     async (page: number, pageSize: number) => {
       if (!resolvedObjectTypeIdNum) return;
@@ -297,6 +307,35 @@ export default function ObjectTypeDetailDrawer({
       }
     },
     [fetchAttributesFn, resolvedObjectTypeIdNum, fetchAttributes]
+  );
+
+  // 加载行为数据
+  const loadBehaviors = useCallback(
+    async (page: number, pageSize: number) => {
+      if (!resolvedObjectTypeIdNum) return;
+      setBehaviorsLoading(true);
+      try {
+        const res = await getActionListByObjectType({
+          objectTypeId: resolvedObjectTypeIdNum,
+          ontologyModelID: Number(ontologyModelID),
+          pageNum: page,
+          pageSize: pageSize
+        });
+        if (res.code === '' && res.status === 200 && res.data) {
+          setBehaviorsData(res.data.result || []);
+          setBehaviorsPagination({
+            current: page,
+            pageSize,
+            total: res.data.totalCount || 0
+          });
+        }
+      } catch (e) {
+        Message.error('加载行为数据失败');
+      } finally {
+        setBehaviorsLoading(false);
+      }
+    },
+    [resolvedObjectTypeIdNum, ontologyModelID]
   );
 
   // 重置链接状态
@@ -455,7 +494,17 @@ export default function ObjectTypeDetailDrawer({
 
     // 实例（默认拉第一页）
     loadInstances(1, instancesPagination.pageSize);
-  }, [visible, resolvedObjectTypeIdNum]);
+
+    // 行为（默认拉第一页）
+    loadBehaviors(1, DEFAULT_PAGE_SIZE);
+  }, [
+    visible,
+    resolvedObjectTypeIdNum,
+    loadAttributes,
+    loadInstances,
+    loadBehaviors,
+    loadLinksForScroll
+  ]);
 
   // 当切换到 links tab 时，如果还没有数据，触发加载
   useEffect(() => {
@@ -478,7 +527,7 @@ export default function ObjectTypeDetailDrawer({
   const handleEdit = () => {
     if (resolvedObjectTypeId) {
       history.push(
-        `/tenant/compute/noto/ontologyScene/detail/${ontologyModelID}/objectType/edit/${resolvedObjectTypeId}`
+        `/tenant/compute/onto/ontologyScene/detail/${ontologyModelID}/objectType/edit/${resolvedObjectTypeId}`
       );
     }
   };
@@ -536,7 +585,7 @@ export default function ObjectTypeDetailDrawer({
     if (!record.ontologyPublicPropertiesName) {
       return;
     }
-    const url = `/noto/tenant/compute/noto/ontologyScene/detail/${ontologyModelID}/attributes/list?tab=public&search=${encodeURIComponent(
+    const url = `/onto/tenant/compute/onto/ontologyScene/detail/${ontologyModelID}/attributes/list?tab=public&search=${encodeURIComponent(
       record.ontologyPublicPropertiesName || ''
     )}`;
     openNewPage(url);
@@ -621,6 +670,50 @@ export default function ObjectTypeDetailDrawer({
     }
   ];
 
+  // 行为表格列定义
+  const behaviorColumns: TableColumnProps<BehaviorActionItem>[] = [
+    {
+      title: '行为名称',
+      dataIndex: 'name',
+      width: 140,
+      ellipsis: true,
+      render: (value) => (
+        <EllipsisPopover preferTypography value={value || '-'} />
+      )
+    },
+    {
+      title: '行为id',
+      dataIndex: 'code',
+      width: 140,
+      render: (value) => (
+        <div className="flex items-center gap-2">
+          <EllipsisPopover preferTypography value={value || '-'} />
+          {value && (
+            <Popover content="复制">
+              <IconCopy
+                fontSize={14}
+                className="cursor-pointer opacity-0 transition-opacity hover:text-[rgba(var(--primary-6))] group-hover:opacity-100"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleCopy(String(value));
+                }}
+              />
+            </Popover>
+          )}
+        </div>
+      )
+    },
+    {
+      title: '行为描述',
+      dataIndex: 'description',
+      width: 140,
+      ellipsis: true,
+      render: (value) => (
+        <EllipsisPopover preferTypography value={value || '-'} />
+      )
+    }
+  ];
+
   // 渲染链接卡片（参考 panel.tsx 的实现）
   const renderLinkCard = (
     objectType: {
@@ -690,6 +783,7 @@ export default function ObjectTypeDetailDrawer({
 
   return (
     <OsDrawer
+      key={resolvedObjectTypeId}
       visible={visible}
       onCancel={onClose}
       title="对象类型详情"
@@ -767,14 +861,16 @@ export default function ObjectTypeDetailDrawer({
                     className="text-[14px] leading-[22px] text-[var(--color-text-1)]"
                   ></EllipsisPopover>
                   {displayData?.code && (
-                    <IconCopy
-                      fontSize={14}
-                      className="flex-shrink-0 hover:cursor-pointer hover:text-[rgba(var(--primary-6))]"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleCopy(String(displayData?.code));
-                      }}
-                    />
+                    <Popover content="复制">
+                      <IconCopy
+                        fontSize={14}
+                        className="flex-shrink-0 hover:cursor-pointer hover:text-[rgba(var(--primary-6))]"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleCopy(String(displayData?.code));
+                        }}
+                      />
+                    </Popover>
                   )}
                 </div>
               </div>
@@ -897,14 +993,16 @@ export default function ObjectTypeDetailDrawer({
                           <span className="min-w-0 max-w-full text-[14px] text-[var(--color-text-1)]">
                             <EllipsisPopover value={link.linkId} />
                           </span>
-                          <IconCopy
-                            fontSize={14}
-                            className="cursor-pointer hover:text-[rgba(var(--primary-6))]"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleCopy(link.linkId);
-                            }}
-                          />
+                          <Popover content="复制">
+                            <IconCopy
+                              fontSize={14}
+                              className="cursor-pointer hover:text-[rgba(var(--primary-6))]"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleCopy(link.linkId);
+                              }}
+                            />
+                          </Popover>
                         </div>
 
                         {/* 关系图 */}
@@ -928,6 +1026,42 @@ export default function ObjectTypeDetailDrawer({
                       <Spin />
                     </div>
                   )}
+                </div>
+              )}
+            </div>
+          </TabPane>
+          <TabPane key="behaviors" title={`行为(${behaviorsPagination.total})`}>
+            <div className="mt-[16px] flex flex-col gap-[16px]">
+              {behaviorsPagination.total === 0 ? (
+                <div className="flex justify-center py-[100px]">
+                  <NoDataCard title="暂无数据" />
+                </div>
+              ) : (
+                <Table
+                  loading={behaviorsLoading}
+                  columns={behaviorColumns}
+                  data={behaviorsData}
+                  rowKey={(record) => `${record.id || record.code}`}
+                  border={false}
+                  pagination={false}
+                  noDataElement={<NoDataCard title="暂无数据" />}
+                  className="[&_.arco-table-th]:bg-[#f7f8fa]"
+                  rowClassName={() => 'group'}
+                  scroll={{ x: 400 }}
+                />
+              )}
+              {behaviorsPagination.total > DEFAULT_PAGE_SIZE && (
+                <div className="flex justify-end pt-[16px]">
+                  <Pagination
+                    current={behaviorsPagination.current}
+                    pageSize={behaviorsPagination.pageSize}
+                    total={behaviorsPagination.total}
+                    onChange={(page, pageSize) => {
+                      loadBehaviors(page, pageSize);
+                    }}
+                    showTotal
+                    size="small"
+                  />
                 </div>
               )}
             </div>

@@ -8,8 +8,8 @@ export default function DataAsset() {
     <Switch>
       <Redirect
         exact
-        from="/tenant/compute/noto/ontologyScene"
-        to="/tenant/compute/noto/ontologyScene/list"
+        from="/tenant/compute/onto/ontologyScene"
+        to="/tenant/compute/onto/ontologyScene/list"
       />
       {routes
         .find((route) => route.name === 'ontologyScene')

@@ -101,7 +101,7 @@ const SceneCard: React.FC<SceneCardProps> = ({
     ) => {
       e.stopPropagation();
       history.push(
-        `/tenant/compute/noto/ontologyScene/detail/${item.id || ''}/${iconType}`
+        `/tenant/compute/onto/ontologyScene/detail/${item.id || ''}/${iconType}`
       );
     },
     [item, onIconClick]
@@ -343,7 +343,7 @@ export default function OntologySceneList() {
           Message.success('创建成功');
           // 创建成功后跳转到详情页
           history.push(
-            `/tenant/compute/noto/ontologyScene/detail/${response.data.id}`
+            `/tenant/compute/onto/ontologyScene/detail/${response.data.id}`
           );
         } else {
           Message.error(response.message || '创建失败');
@@ -383,7 +383,7 @@ export default function OntologySceneList() {
   const handleDelete = (item: SceneCardItem) => {
     Modal.confirm({
       title: '确定删除此本体场景吗？',
-      content: `删除后，不可恢复`,
+      content: `请谨慎操作，删除该数据将删除对象、链接、行为、函数等所有数据，且不可恢复。`,
       onOk: async () => {
         try {
           if (!item.id) {
@@ -410,7 +410,7 @@ export default function OntologySceneList() {
 
   // 处理卡片点击
   const handleCardClick = (item: SceneCardItem) => {
-    history.push(`/tenant/compute/noto/ontologyScene/detail/${item.id || ''}`);
+    history.push(`/tenant/compute/onto/ontologyScene/detail/${item.id || ''}`);
   };
 
   // 处理搜索（回车或点击搜索图标时触发）

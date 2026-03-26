@@ -11,7 +11,12 @@ import {
   Popover,
   Checkbox
 } from '@arco-design/web-react';
-import { IconPlus, IconSearch, IconRefresh } from '@arco-design/web-react/icon';
+import {
+  IconPlus,
+  IconSearch,
+  IconRefresh,
+  IconQuestionCircle
+} from '@arco-design/web-react/icon';
 import {
   CopyItemIcon,
   DotStatus,
@@ -49,6 +54,8 @@ import { listOntologyObjectType } from '@/api/ontologySceneLibrary/objectType';
 import type { ListOntologyObjectTypeReq, ObjectType } from '@/types/objectType';
 import { PermissionWrapper } from '@/components/PermissionGuard';
 import { ONTOLOGY_PERMISSIONS } from '@/config/permissions';
+import TaskLogDrawer from '../../componens/TaskLogDrawer';
+import LogIcon from '@/pages/ontologyScene/assets/log-icon.svg';
 
 // 将 SyncStatus 枚举转换为 LinkDetailDrawer 期望的字符串类型
 const convertSyncStatusToString = (
@@ -112,6 +119,12 @@ export default function OntologySceneLinksList() {
   const [syncStatusFilterKeys, setSyncStatusFilterKeys] = useState<string[]>(
     []
   );
+
+  const [logDrawerVisible, setLogDrawerVisible] = useState(false);
+  const [currentSyncTaskId, setCurrentSyncTaskId] = useState<number | null>(
+    null
+  );
+  const [currentTaskName, setCurrentTaskName] = useState<string>('');
 
   // 获取对象类型列表用于源/目标对象类型筛选
   useEffect(() => {
@@ -249,7 +262,7 @@ export default function OntologySceneLinksList() {
   // 跳转到创建页面
   const handleCreate = () => {
     history.push(
-      `/tenant/compute/noto/ontologyScene/detail/${OSId}/links/create`
+      `/tenant/compute/onto/ontologyScene/detail/${OSId}/links/create`
     );
   };
 
@@ -263,7 +276,7 @@ export default function OntologySceneLinksList() {
   // 处理编辑
   const handleEdit = (record: LinkInfo) => {
     history.push(
-      `/tenant/compute/noto/ontologyScene/detail/${OSId}/links/edit/${record.id}`
+      `/tenant/compute/onto/ontologyScene/detail/${OSId}/links/edit/${record.id}`
     );
   };
 
@@ -309,6 +322,18 @@ export default function OntologySceneLinksList() {
     setDetailDrawerVisible(true);
   };
 
+  // 查看同步日志
+  const handleViewSyncLog = (record: LinkInfo) => {
+    if (!record.id) {
+      Message.error('链接ID无效');
+      return;
+    }
+
+    setCurrentSyncTaskId(record.id);
+    setCurrentTaskName(record.name || '');
+    setLogDrawerVisible(true);
+  };
+
   // 失败重试（防抖处理）
   const handleRetrySync = debounce(async (record: LinkInfo) => {
     if (!record.id) {
@@ -351,7 +376,7 @@ export default function OntologySceneLinksList() {
       dataIndex: 'code',
       width: 150,
       render: (value) => (
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-[4px]">
           <EllipsisPopover wrapperClassName="min-w-0" value={value} />
           {value && (
             <CopyItemIcon className="hidden flex-shrink-0" value={value} />
@@ -524,16 +549,41 @@ export default function OntologySceneLinksList() {
           return '-';
         }
         const config = OBJECT_TYPE_SYNC_STATUS_CONFIG[value];
+        const isFailed = value === SyncStatus.FAILED;
 
         return (
           <div className="flex items-center gap-[4px]">
             <DotStatus text={config.text} color={config.color} />
-            {value === SyncStatus.FAILED && (
-              <Popover content="重试">
-                <IconRefresh
-                  className="h-[14px] w-[14px] text-[var(--color-text-4)] hover:cursor-pointer hover:text-[#184FF2]"
-                  onClick={() => handleRetrySync(record)}
-                />
+            {isFailed && (
+              <Popover
+                trigger="hover"
+                position="top"
+                content={
+                  <div className="flex items-center gap-[12px]">
+                    <span
+                      className="flex cursor-pointer items-center text-[#184FF2]"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleViewSyncLog(record);
+                      }}
+                    >
+                      <LogIcon className="mr-[4px] h-[14px] w-[14px]" />
+                      查看日志
+                    </span>
+                    <span
+                      className="flex cursor-pointer items-center text-[#184FF2]"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleRetrySync(record);
+                      }}
+                    >
+                      <IconRefresh className="mr-[4px] h-[14px] w-[14px]" />
+                      重试
+                    </span>
+                  </div>
+                }
+              >
+                <IconQuestionCircle className="h-[14px] w-[14px] cursor-pointer text-[var(--color-text-4)] hover:text-[#184FF2]" />
               </Popover>
             )}
           </div>
@@ -650,7 +700,7 @@ export default function OntologySceneLinksList() {
         <div className="mb-1 font-PingFangSc text-[20px] font-[600] leading-[30px] text-default">
           链接
         </div>
-        <div className="font-PingFangSc text-[14px] font-normal leading-[22px] text-[#334155]">
+        <div className="mb-[16px] font-PingFangSc text-[14px] font-normal leading-[22px] text-[#334155]">
           描述不同实体对象之间的语义联系与数据拓扑结构
         </div>
       </div>
@@ -725,7 +775,7 @@ export default function OntologySceneLinksList() {
         }}
       />
       {Number(pagination?.total) > 0 && (
-        <div className="mt-4 flex items-center justify-end">
+        <div className="mt-[12px] flex items-center justify-end">
           <Pagination
             {...pagination}
             onChange={(page, pageSize) => {
@@ -768,6 +818,19 @@ export default function OntologySceneLinksList() {
             setObjectTypeDetailDrawerVisible(false);
             setSelectedObjectType(null);
           }}
+        />
+      )}
+      {logDrawerVisible && currentSyncTaskId && (
+        <TaskLogDrawer
+          visible={logDrawerVisible}
+          taskInstanceId={currentSyncTaskId}
+          taskName={currentTaskName}
+          onClose={() => {
+            setLogDrawerVisible(false);
+            setCurrentSyncTaskId(null);
+            setCurrentTaskName('');
+          }}
+          fetchLog={getLinkTypeSyncTaskLog}
         />
       )}
     </div>

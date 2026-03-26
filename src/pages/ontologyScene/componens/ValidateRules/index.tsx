@@ -9,7 +9,7 @@ import {
   Tag
 } from '@arco-design/web-react';
 import { IconPlayArrowFill } from '@arco-design/web-react/icon';
-import { NoDataCard } from '@ceai-front/arco-material';
+import { EllipsisPopover, NoDataCard } from '@ceai-front/arco-material';
 import {
   FormItem,
   NumberRange,
@@ -22,6 +22,7 @@ import {
 } from '@/pages/ontologyScene/types/behaviorActions';
 import { SelectWithNoData } from '@/components/new-no-data-comps';
 import { ParamType } from '@/pages/ontologyScene/types/ontologyFunction';
+import classNames from 'classnames';
 
 export const ValidateRules = (props: { readonly?: boolean }) => {
   const { form, disabled: fieldsDisabled } = Form.useFormContext();
@@ -37,17 +38,27 @@ export const ValidateRules = (props: { readonly?: boolean }) => {
         return fields.map(({ key, field }) => {
           const paramName = form.getFieldValue(`${field}.name`);
           const paramType = form.getFieldValue(`${field}.type`);
+          const enabledValidation = form.getFieldValue(
+            `${field}.enabledValidation`
+          );
+          const typeClassName = `${paramType}-type`;
           return (
             <div className={styles['validate-rules']} key={key}>
               <div className={styles['comp-header']}>
                 <div
-                  className={
-                    'flex items-center gap-2 font-PingFangSc text-[14px] font-medium leading-[22px] text-black'
-                  }
+                  className={'flex flex-1 items-center gap-2 overflow-hidden'}
                 >
-                  {paramName}
+                  <div className={'w-max overflow-hidden'}>
+                    <EllipsisPopover
+                      className={classNames([
+                        styles['param-name-text'],
+                        'font-PingFangSc text-[14px] font-medium leading-[22px] text-black'
+                      ])}
+                      value={paramName}
+                    />
+                  </div>
                   <Tag
-                    className={`ml-3 text-[#184FF2] ${styles['type-tag']}`}
+                    className={`ml-3 ${styles['type-tag']} flex-shrink-0 ${styles[typeClassName]}`}
                     bordered
                     color={'transparent'}
                   >
@@ -67,7 +78,24 @@ export const ValidateRules = (props: { readonly?: boolean }) => {
                     className={'mb-0 w-[30px]'}
                     triggerPropName={'checked'}
                   >
-                    <Switch disabled={disabled} />
+                    <Switch
+                      disabled={disabled}
+                      onChange={(e) => {
+                        form.setFieldsValue({
+                          [`${field}.enabledValidation`]: e
+                        });
+                        form.setFields({
+                          [`${field}.ruleConfig`]: {
+                            error: undefined,
+                            value: undefined
+                          },
+                          [`${field}.failMessage`]: {
+                            error: undefined,
+                            value: undefined
+                          }
+                        });
+                      }}
+                    />
                   </FormItem>
                 </div>
               </div>
@@ -78,11 +106,14 @@ export const ValidateRules = (props: { readonly?: boolean }) => {
                 <FormItem
                   label={'校验类型'}
                   field={`${field}.rule_name`}
-                  required
+                  required={enabledValidation}
                 >
                   <SelectWithNoData
                     options={TYPE2RULE_TYPES?.[paramType] || []}
-                    disabled={disabled}
+                    disabled={disabled || !enabledValidation}
+                    getPopupContainer={(node) =>
+                      node.parentElement || document.body
+                    }
                     onChange={(rule) => {
                       form.setFieldsValue({
                         [`${field}.ruleConfig`]: undefined,
@@ -131,7 +162,7 @@ export const ValidateRules = (props: { readonly?: boolean }) => {
                             ]}
                           >
                             <NumberRange
-                              disabled={disabled}
+                              disabled={disabled || !enabledValidation}
                               minField={'minValue'}
                               maxField={'maxValue'}
                             />
@@ -160,7 +191,7 @@ export const ValidateRules = (props: { readonly?: boolean }) => {
                             ]}
                           >
                             <NumberRange
-                              disabled={disabled}
+                              disabled={disabled || !enabledValidation}
                               minField={'minValue'}
                               maxField={'maxValue'}
                             />
@@ -199,7 +230,7 @@ export const ValidateRules = (props: { readonly?: boolean }) => {
                           >
                             <Input
                               placeholder={'请输入限制的枚举值，用逗号分隔'}
-                              disabled={disabled}
+                              disabled={disabled || !enabledValidation}
                             />
                           </FormItem>
                         )}
@@ -218,7 +249,7 @@ export const ValidateRules = (props: { readonly?: boolean }) => {
                             placeholder={
                               '请输入当参数错误时，界面展示的报错文案'
                             }
-                            disabled={disabled}
+                            disabled={disabled || !enabledValidation}
                           />
                         </FormItem>
                       </>

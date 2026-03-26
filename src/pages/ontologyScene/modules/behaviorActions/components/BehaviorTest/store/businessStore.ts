@@ -254,21 +254,46 @@ export const useBusinessStore = create<BusinessStore>((set, get) => ({
       .forEach((param) => {
         const value = config[param.code];
 
-        // 检查必填
-        if (param.enabledValidation) {
-          if (param.uiType === UiType.Switch) {
-            if (value === undefined || value === null) {
+        // 强制所有输入参数都必填，忽略 enabledValidation 字段
+        if (param.uiType === UiType.Switch) {
+          if (value === undefined || value === null) {
+            errors[param.code] = `请填写${param.name}`;
+          }
+        } else if (
+          param.uiType === UiType.ObjectOne ||
+          param.uiType === UiType.ObjectSet
+        ) {
+          // ObjectInstanceSelect 特殊处理：需要检查 objectTypeData 和 objInsID 都存在
+          if (!value || !value.objectTypeData) {
+            errors[param.code] = `请填写${param.name}`;
+            return; // 必填未填，跳过其他验证
+          }
+
+          // 对于 ObjectOne，objInsID 应该是单个值
+          // 对于 ObjectSet，objInsID 应该是数组且不为空
+          if (param.uiType === UiType.ObjectOne) {
+            if (
+              value.objInsID === undefined ||
+              value.objInsID === null ||
+              value.objInsID === ''
+            ) {
               errors[param.code] = `请填写${param.name}`;
+              return;
             }
-          } else {
-            if (value === undefined || value === null || value === '') {
+          } else if (param.uiType === UiType.ObjectSet) {
+            if (!Array.isArray(value.objInsID) || value.objInsID.length === 0) {
               errors[param.code] = `请填写${param.name}`;
-              return; // 必填未填，跳过其他验证
+              return;
             }
+          }
+        } else {
+          if (value === undefined || value === null || value === '') {
+            errors[param.code] = `请填写${param.name}`;
+            return; // 必填未填，跳过其他验证
           }
         }
 
-        // 如果有值且有验证规则，进行规则验证
+        // 如果有值且有验证规则，进行规则验证（只在 enabledValidation 为 true 时）
         if (
           value !== undefined &&
           value !== null &&
@@ -311,7 +336,7 @@ export const useBusinessStore = create<BusinessStore>((set, get) => ({
                 typeof value === 'object'
                   ? JSON.stringify(value)
                   : String(value);
-              if (!ruleConfig.options.includes(stringValue)) {
+              if (!ruleConfig.options.includes(value)) {
                 errors[param.code] =
                   failMessage ||
                   `值必须是以下之一: ${ruleConfig.options.join(', ')}`;
@@ -384,14 +409,34 @@ export const useBusinessStore = create<BusinessStore>((set, get) => ({
     const node = orchestrationNodes.find((n) => n.id === nodeId);
     if (!node) return;
 
-    // 检查所有必填参数是否已填写
+    // 检查所有输入参数是否已填写（强制所有输入参数必填）
     const requiredParams =
-      node.behavior.params?.filter((p) => p.enabledValidation) || [];
+      node.behavior.params?.filter((p) => p.inputType === 'input') || [];
     const isConfigured = requiredParams.every((param) => {
       const value = config[param.code];
       // 对于 Switch 类型，false 也是有效值
       if (param.uiType === UiType.Switch) {
         return value !== undefined && value !== null;
+      }
+      // 对于 ObjectInstanceSelect 类型，需要检查 objectTypeData 和 objInsID 都存在
+      if (
+        param.uiType === UiType.ObjectOne ||
+        param.uiType === UiType.ObjectSet
+      ) {
+        if (!value || !value.objectTypeData) {
+          return false;
+        }
+        // 对于 ObjectOne，objInsID 应该是单个值
+        // 对于 ObjectSet，objInsID 应该是数组且不为空
+        if (param.uiType === UiType.ObjectOne) {
+          return (
+            value.objInsID !== undefined &&
+            value.objInsID !== null &&
+            value.objInsID !== ''
+          );
+        } else if (param.uiType === UiType.ObjectSet) {
+          return Array.isArray(value.objInsID) && value.objInsID.length > 0;
+        }
       }
       return value !== undefined && value !== null && value !== '';
     });
@@ -548,21 +593,12 @@ export const useBusinessStore = create<BusinessStore>((set, get) => ({
     const node = orchestrationNodes.find((n) => n.id === nodeId);
 
     if (!node) {
-      console.log('isNodeConfigured: node not found', nodeId);
       return false;
     }
 
-    // 检查所有必填参数（enabledValidation 为 true 的参数）
+    // 检查所有输入参数是否已填写（强制所有输入参数必填）
     const requiredParams =
-      node.behavior.params?.filter((p) => p.enabledValidation) || [];
-
-    console.log('isNodeConfigured:', {
-      nodeId,
-      behaviorName: node.behavior.name,
-      requiredParamsCount: requiredParams.length,
-      hasConfig: !!nodeConfigs[nodeId],
-      params: node.behavior.params
-    });
+      node.behavior.params?.filter((p) => p.inputType === 'input') || [];
 
     // 如果没有必填参数，认为已配置
     if (requiredParams.length === 0) {
@@ -581,6 +617,26 @@ export const useBusinessStore = create<BusinessStore>((set, get) => ({
       // 对于 Switch 类型，false 也是有效值
       if (param.uiType === UiType.Switch) {
         return value !== undefined && value !== null;
+      }
+      // 对于 ObjectInstanceSelect 类型，需要检查 objectTypeData 和 objInsID 都存在
+      if (
+        param.uiType === UiType.ObjectOne ||
+        param.uiType === UiType.ObjectSet
+      ) {
+        if (!value || !value.objectTypeData) {
+          return false;
+        }
+        // 对于 ObjectOne，objInsID 应该是单个值
+        // 对于 ObjectSet，objInsID 应该是数组且不为空
+        if (param.uiType === UiType.ObjectOne) {
+          return (
+            value.objInsID !== undefined &&
+            value.objInsID !== null &&
+            value.objInsID !== ''
+          );
+        } else if (param.uiType === UiType.ObjectSet) {
+          return Array.isArray(value.objInsID) && value.objInsID.length > 0;
+        }
       }
       return value !== undefined && value !== null && value !== '';
     });

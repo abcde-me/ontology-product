@@ -4,21 +4,15 @@
       padding: 16px 20px;
       background: #f5f7fb;
     }
-  }
-}
 
-.drawer-title {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-  overflow: hidden;
+    .arco-table-th:first-child,
+    .arco-table-td:first-child {
+      border-left: none !important;
+    }
 
-  .drawer-title-text {
-    font-family: PingFang SC;
-    font-weight: 500;
-    font-size: 16px;
-    line-height: 24px;
-    color: var(--text-color-text-1, #0f172a);
+    .aa-ellipsis-popover > span {
+      flex: 1;
+    }
   }
 }
 
@@ -50,7 +44,7 @@
 
 .info-grid {
   display: grid;
-  grid-template-columns: repeat(1, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 12px 24px;
 }
 
@@ -87,12 +81,6 @@
   white-space: nowrap;
   text-overflow: ellipsis;
   align-items: center;
-
-  :global {
-    .aa-ellipsis-popover {
-      width: 100%;
-    }
-  }
 }
 
 .detail-table {

@@ -40,8 +40,8 @@ export const BehaviorCardList: React.FC<BehaviorCardListProps> = ({
 
   if (behaviors.length === 0) {
     return (
-      <div className="flex items-center justify-center px-5 pt-32">
-        <NoDataCard title="暂无行为数据" />
+      <div className="flex h-full items-center justify-center px-5">
+        <NoDataCard title="暂无数据" type="block" />
       </div>
     );
   }

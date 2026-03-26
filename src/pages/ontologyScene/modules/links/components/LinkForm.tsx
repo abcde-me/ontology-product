@@ -10,7 +10,6 @@ import {
   Table,
   TableColumnProps,
   Checkbox,
-  Tooltip,
   Spin,
   Cascader,
   Tag,
@@ -44,6 +43,29 @@ import { openNewPage } from '@/utils/env';
 
 const FormItem = Form.Item;
 
+// Arco Cascader：`searchNodeByLabel` 会对路径上每一层节点调用 filterOption，
+// 故可同时按库名（第一层）或表名/ID（第二层）筛选。
+function databaseTableCascaderFilterOption(
+  input: string,
+  option: { label?: unknown; value?: unknown }
+): boolean {
+  const q = String(input ?? '')
+    .trim()
+    .toLowerCase();
+  if (!q) return true;
+
+  const labelStr =
+    option?.label != null && option.label !== ''
+      ? String(option.label).toLowerCase()
+      : '';
+  const valueStr =
+    option?.value != null && option.value !== ''
+      ? String(option.value).toLowerCase()
+      : '';
+
+  return labelStr.includes(q) || valueStr.includes(q);
+}
+
 export interface AttributeField {
   tableField: string;
   isUse: number; // 1代表选中，0代表未选中
@@ -68,6 +90,8 @@ export interface LinkFormData {
   };
   sourceAttribute?: string; // N:N关联中间表的源属性
   targetAttribute?: string; // N:N关联中间表的目标属性
+  linkTargetColumnName?: string; // 1:1和1:N提交给后端的目标属性名
+  linkSourceColumnName?: string; // 1:1和1:N提交给后端的源属性名（主键）
   attributeFields: AttributeField[];
   isReUpload?: boolean;
 }
@@ -128,10 +152,10 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
     const [fileUploaded, setFileUploaded] = useState(false);
     const [isReUpload, setIsReUpload] = useState(false);
     const [initialFileList, setInitialFileList] = useState<any[]>([]);
-    const [targetPrimaryAttribute, setTargetPrimaryAttribute] = useState<{
-      name: string;
-      id: number;
-    } | null>(null);
+    const [targetPrimaryAttributeName, setTargetPrimaryAttributeName] =
+      useState<string | null>(null);
+    const [targetObjectAttributeOptions, setTargetObjectAttributeOptions] =
+      useState<string[]>([]);
     const [sourcePrimaryAttribute, setSourcePrimaryAttribute] = useState<{
       name: string;
       id: number;
@@ -185,7 +209,7 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
           ) {
             const firstPrimary = response.data.result[0];
             const primaryAttribute = {
-              name: firstPrimary.name || '',
+              name: firstPrimary.name || firstPrimary.tableField || '',
               id: firstPrimary.id || 0
             };
             setSourcePrimaryAttribute(primaryAttribute);
@@ -204,7 +228,8 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
     // 获取目标对象类型的主键属性（用于1:1和1:N类型）
     useEffect(() => {
       if (!targetObjectType || !ontologyModelID) {
-        setTargetPrimaryAttribute(null);
+        setTargetPrimaryAttributeName(null);
+        setTargetObjectAttributeOptions([]);
         return;
       }
 
@@ -214,36 +239,40 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
           const response = await listOntologyPhysicalProperties({
             objectTypeIdList: [targetObjectType],
             ontologyModelID,
-            isPrimary: 1,
-            pageNo: 1,
-            pageSize: 1,
-            isUse: 1 // 只需要第一个主键属性
+            pageNo: -1,
+            pageSize: -1,
+            isUse: 1
           });
           if (
             response.status === 200 &&
             response.data?.result &&
             response.data.result.length > 0
           ) {
-            const firstPrimary = response.data.result[0];
-            const primaryAttribute = {
-              name: firstPrimary.name || firstPrimary.tableField || '',
-              id: firstPrimary.id || 0
-            };
-            setTargetPrimaryAttribute(primaryAttribute);
+            const targetAttributeNames = response.data.result
+              .map((item) => item.name || item.tableField || '')
+              .filter(Boolean);
+            setTargetObjectAttributeOptions(targetAttributeNames);
+
+            // 由于每个对象类型只会有一个主键，这里直接取 isPrimary=1 的那一条
+            const primaryProperty =
+              response.data.result.find((item) => item.isPrimary === 1) ||
+              response.data.result[0];
+            const primaryName = primaryProperty?.name;
+            setTargetPrimaryAttributeName(primaryName || null);
+
             // 只有在没有当前值时才自动设置表单字段值
             const currentValue = form.getFieldValue('targetObjectAttribute');
             if (!currentValue) {
-              form.setFieldValue(
-                'targetObjectAttribute',
-                String(primaryAttribute.id)
-              );
+              form.setFieldValue('targetObjectAttribute', primaryName);
             }
           } else {
-            setTargetPrimaryAttribute(null);
+            setTargetPrimaryAttributeName(null);
+            setTargetObjectAttributeOptions([]);
           }
         } catch (error) {
           console.error('获取目标对象类型主键属性失败:', error);
-          setTargetPrimaryAttribute(null);
+          setTargetPrimaryAttributeName(null);
+          setTargetObjectAttributeOptions([]);
         } finally {
           setTargetPrimaryAttributeLoading(false);
         }
@@ -413,16 +442,16 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
       {
         title: '表字段',
         dataIndex: 'tableField',
-        width: 365,
-        render: (value) => <span>{value}</span>
+        width: 320,
+        render: (value) => <EllipsisPopover value={value || '-'} />
       },
       {
         title: (
           <div className="flex items-center gap-[8px]">
             <span>主键</span>
-            <Tooltip content="选择作为主键的字段">
+            <Popover content="选择作为主键的字段">
               <IconQuestionCircle className="pointer-events-auto cursor-pointer text-[#86909C]" />
-            </Tooltip>
+            </Popover>
           </div>
         ),
         dataIndex: 'isPrimary',
@@ -466,8 +495,14 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
     const handleLinkTypeChange = (type: LinkType) => {
       setLinkType(type);
       // 切换链接类型时清空整个表单
+      const cachedName = form.getFieldValue('name');
+      const cachedId = form.getFieldValue('id');
       form.resetFields();
-      form.setFieldValue('linkType', type);
+      form.setFieldsValue({
+        name: cachedName,
+        id: cachedId,
+        linkType: type
+      });
       // 重置所有相关状态
       setIntermediateTable({ type: 'local_csv' });
       setAttributeFields([]);
@@ -598,17 +633,36 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
         // 更新表单字段值，用于validator验证
         form.setFieldValue('databaseTable', `${databaseName}/${tableName}`);
       } else {
-        // 清空选择时，也清空 intermediateTable
-        setIntermediateTable((prev) => ({
-          ...prev,
-          database: undefined,
-          table: undefined
-        }));
-        setSelectedDatabase(undefined);
-        setSelectedTable(undefined);
+        // 只选择了第一层（数据库）时：保留已选数据库，清空表相关信息
+        if (newValue.length >= 1 && newValue[0]) {
+          const databaseOption = cascaderOptions.find(
+            (opt) => opt.value === String(newValue[0])
+          );
+          const databaseName = databaseOption?.label || newValue[0];
 
-        // 清空表单字段值
-        form.setFieldValue('databaseTable', undefined);
+          setIntermediateTable((prev) => ({
+            ...prev,
+            database: databaseName,
+            table: undefined
+          }));
+          setSelectedDatabase(databaseName);
+          setSelectedTable(undefined);
+
+          // 未选择表，databaseTable 暂不可用
+          form.setFieldValue('databaseTable', undefined);
+        } else {
+          // 清空选择时，也清空 intermediateTable
+          setIntermediateTable((prev) => ({
+            ...prev,
+            database: undefined,
+            table: undefined
+          }));
+          setSelectedDatabase(undefined);
+          setSelectedTable(undefined);
+
+          // 清空表单字段值
+          form.setFieldValue('databaseTable', undefined);
+        }
       }
 
       // 当 table 值变化且有值时，调用接口获取字段列表
@@ -633,9 +687,9 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
                 .map((field, index) => ({
                   tableField: field.fieldName, // 表字段名
                   isUse: 1, // 默认全部选中
-                  attributeName: field.fieldName, // 属性名称，默认与表字段名相同
+                  attributeName: field.description || field.fieldName, // 属性名称，默认与表字段名相同
                   // 字段类型：直接使用接口返回的类型，后续再根据主键规则规范化
-                  fieldType: field.dataType || 'STRING',
+                  fieldType: field.dataType || '',
                   isPrimary: index === 0 // 第一个字段默认为主键
                 }))
                 .map((f) => ({
@@ -855,10 +909,10 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
             return;
           }
         } else {
-          // if (!values.targetObjectAttribute) {
-          //   Message.warning('请选择目标对象类型属性');
-          //   return;
-          // }
+          if (!values.targetObjectAttribute) {
+            Message.warning('请选择目标对象类型属性');
+            return;
+          }
         }
 
         // 处理字段类型：
@@ -892,6 +946,9 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
           targetObjectType: currentTargetObjectType,
           linkType,
           targetObjectAttribute: values.targetObjectAttribute,
+          linkTargetColumnName: values.targetObjectAttribute,
+          linkSourceColumnName:
+            linkType === 'N:N' ? undefined : sourcePrimaryAttribute?.name,
           sourceAttribute: values.sourceAttribute,
           targetAttribute: values.targetAttribute,
           intermediateTable: linkType === 'N:N' ? intermediateTable : undefined,
@@ -913,20 +970,18 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
       submit: handleSubmit
     }));
 
-    const targetObjectAttribute = Form.useWatch('targetObjectAttribute', form);
-
     return (
       <div
         className={classNames(
           'flex flex-col px-[24px] pb-[16px]',
-          showFooter ? 'flex-1 pb-24' : ''
+          showFooter ? 'flex-1 pb-24' : '',
+          styles['link-form']
         )}
       >
         <div className={showFooter ? 'flex-1' : ''}>
           <Form
             form={form}
             autoComplete="off"
-            labelCol={{ span: 3 }}
             wrapperCol={{ span: 18 }}
             labelAlign="left"
             className={styles['link-form']}
@@ -1006,7 +1061,7 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
               label="链接id"
               field="id"
               rules={[
-                { required: true, message: '请输入唯一标识' },
+                { required: true, message: '请输入链接id' },
                 {
                   validator: (value, callback) => {
                     if (!value) {
@@ -1036,7 +1091,7 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
               <Input
                 className="max-w-[640px]"
                 showWordLimit
-                placeholder="请输入唯一标识"
+                placeholder="请输入id。用于 API 调用，全局唯一"
                 disabled={!!initialValues?.id}
               />
             </FormItem>
@@ -1060,20 +1115,30 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
               ]}
             >
               <div className="flex items-start">
-                <div className="flex-1 rounded-[4px] bg-[#FAFBFF] p-[12px]">
-                  <ObjectTypeSelect
-                    ontologyModelID={ontologyModelID}
-                    label="源对象类型"
-                    value={sourceObjectType}
-                    onChange={(val) => {
-                      form.setFieldValue('sourceObjectType', val);
-                      if (!val) {
-                        setSourcePrimaryAttribute(null);
-                      }
-                    }}
-                    placeholder="请选择对象类型"
-                    allowClear
-                  />
+                <div
+                  className={`flex-1 rounded-[4px] bg-[#FAFBFF] p-[12px] ${linkType === LinkType.MANY_TO_MANY ? 'mr-[120px]' : 'mr-[90px]'}`}
+                >
+                  <div className="relative">
+                    <ObjectTypeSelect
+                      ontologyModelID={ontologyModelID}
+                      label="源对象类型"
+                      value={sourceObjectType}
+                      onChange={(val) => {
+                        form.setFieldValue('sourceObjectType', val);
+                        if (!val) {
+                          setSourcePrimaryAttribute(null);
+                        }
+                      }}
+                      placeholder="请选择对象类型"
+                      allowClear
+                    />
+                    {linkType === LinkType.MANY_TO_MANY ? (
+                      <TwoWayArrowIcon className="absolute bottom-[3px] right-[calc(-12px-120px)]" />
+                    ) : (
+                      <OneWayArrowIcon className="absolute bottom-[9px] right-[calc(-12px-90px)]" />
+                    )}
+                  </div>
+
                   {sourcePrimaryAttribute && (
                     <div className="mt-[4px] flex items-center text-[14px] leading-[20px] text-[var(--color-text-1)]">
                       {sourcePrimaryAttribute.name}
@@ -1090,9 +1155,9 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
 
                 {linkType === 'N:N' ? (
                   <>
-                    <div className="flex flex-col">
-                      <TwoWayArrowIcon />
-                    </div>
+                    {/* <div className="flex flex-col">
+
+                    </div> */}
                     <div className="flex-1 flex-1 rounded-[4px] bg-[#FAFBFF] p-[12px]">
                       <ObjectTypeSelect
                         ontologyModelID={ontologyModelID}
@@ -1104,9 +1169,9 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
                         placeholder="请选择对象类型"
                         allowClear
                       />
-                      {targetPrimaryAttribute && (
+                      {targetPrimaryAttributeName && (
                         <div className="mt-[4px] flex items-center text-[14px] leading-[20px] text-[var(--color-text-1)]">
-                          {targetPrimaryAttribute.name}
+                          {targetPrimaryAttributeName}
                           <Tag
                             color="#FBF2FF"
                             className="ml-[4px] text-[#9254DE]"
@@ -1120,16 +1185,16 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
                   </>
                 ) : (
                   <>
-                    <div className="flex flex-col items-center">
+                    {/* <div className="flex flex-col items-center">
                       <OneWayArrowIcon />
-                    </div>
+                    </div> */}
                     <div className="flex-1 flex-1 rounded-[4px] bg-[#FAFBFF] p-[12px]">
                       <div className="mb-[8px] flex items-center gap-[4px] text-[14px] text-[var(--color-text-2)]">
                         <span>
                           目标对象类型和属性
-                          <Tooltip content="选择目标对象类型后，会自动关联目标对象类型的主键属性">
+                          <Popover content="选择目标对象类型后，会自动关联目标对象类型的主键属性">
                             <IconQuestionCircle className="cursor-pointer text-[#86909C]" />
-                          </Tooltip>
+                          </Popover>
                         </span>
                       </div>
                       <Input.Group
@@ -1151,22 +1216,65 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
                             allowClear
                             label=""
                             className="mb-0"
+                            selectProps={{
+                              dropdownMenuStyle: {
+                                width: 400
+                              },
+                              triggerProps: {
+                                autoAlignPopupWidth: false,
+                                position: 'bl',
+                                style: {
+                                  width: 400
+                                }
+                              }
+                            }}
                           />
                         </div>
-                        <Input
-                          className={styles['table-select-wrapper']}
-                          placeholder={
-                            targetObjectType
-                              ? targetPrimaryAttributeLoading
-                                ? '加载中...'
-                                : '暂无主键属性'
-                              : '请先选择对象类型'
-                          }
-                          value={targetPrimaryAttribute?.name || ''}
-                          disabled
-                          style={{ width: '50%' }}
-                        />
+                        <FormItem field="targetObjectAttribute" noStyle>
+                          <Select
+                            className={styles['table-select-wrapper']}
+                            placeholder={
+                              targetObjectType
+                                ? targetPrimaryAttributeLoading
+                                  ? '加载中...'
+                                  : '请选择属性'
+                                : '请先选择对象类型'
+                            }
+                            disabled={
+                              !targetObjectType || targetPrimaryAttributeLoading
+                            }
+                            allowClear
+                            style={{ width: '50%' }}
+                            dropdownMenuStyle={{ width: 400 }}
+                            triggerProps={{
+                              autoAlignPopupWidth: false,
+                              position: 'bl',
+                              style: {
+                                width: 400
+                              }
+                            }}
+                          >
+                            {targetObjectAttributeOptions.map((name) => (
+                              <Select.Option key={name} value={name}>
+                                {name}
+                              </Select.Option>
+                            ))}
+                          </Select>
+                        </FormItem>
                       </Input.Group>
+
+                      {targetPrimaryAttributeName && (
+                        <div className="mt-[4px] flex items-center text-[14px] leading-[20px] text-[var(--color-text-1)]">
+                          {targetPrimaryAttributeName}
+                          <Tag
+                            color="#FBF2FF"
+                            className="ml-[4px] text-[#9254DE]"
+                            size="small"
+                          >
+                            主键
+                          </Tag>
+                        </div>
+                      )}
                     </div>
                   </>
                 )}
@@ -1178,9 +1286,9 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
               <>
                 <div className="my-[16px] flex items-center gap-[8px] text-[16px] font-[500] leading-[24px] text-[var(--color-text-1)]">
                   <span>中间表</span>
-                  <Tooltip content="中间表用于存储N:N关系的关联数据">
+                  <Popover content="中间表用于存储N:N关系的关联数据">
                     <IconQuestionCircle className="cursor-pointer text-[#86909C]" />
-                  </Tooltip>
+                  </Popover>
                 </div>
 
                 <FormItem
@@ -1274,7 +1382,7 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
                         validator: (value, callback) => {
                           if (
                             intermediateTable.type === 'data_lake_sync' &&
-                            (!cascaderValue || cascaderValue.length === 0)
+                            (!cascaderValue || cascaderValue.length !== 2)
                           ) {
                             callback('请选择数据库/表');
                           } else {
@@ -1303,6 +1411,8 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
                         }}
                         loadMore={handleCascaderLoadMore}
                         allowClear
+                        filterOption={databaseTableCascaderFilterOption}
+                        changeOnSelect
                         renderFormat={(valueShow) => {
                           if (valueShow.length === 0) return '';
                           if (valueShow.length === 1) {
@@ -1340,7 +1450,7 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
                                       e.stopPropagation();
                                       // 打开新页面，使用表的 ID（option.value）
                                       openNewPage(
-                                        `/noto/tenant/compute/noto/metadataManagement/detail?id=${option.value}&metadataType=ICEBERG`
+                                        `/onto/tenant/compute/onto/metadataManagement/detail?id=${option.value}&metadataType=ICEBERG`
                                       );
                                     }}
                                   />
@@ -1389,52 +1499,53 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
                   ]}
                 >
                   <div className="flex items-center">
-                    <div className="flex-1 rounded-[4px] bg-[#FAFBFF] p-[12px]">
+                    <div className="mr-[120px] flex-1 rounded-[4px] bg-[#FAFBFF] p-[12px]">
                       <div className="mb-[8px] flex items-center gap-[4px]">
                         <span className="text-[14px] text-[var(--color-text-2)]">
                           源对象类型属性
                         </span>
-                        <Tooltip content="选择源对象类型中用于关联的属性">
+                        <Popover content="选择源对象类型中用于关联的属性">
                           <IconQuestionCircle className="cursor-pointer text-[#86909C]" />
-                        </Tooltip>
+                        </Popover>
                       </div>
-                      <FormItem
-                        field="sourceAttribute"
-                        rules={[
-                          {
-                            required: true,
-                            validator: (value, callback) => {
-                              if (!fileUploaded) {
-                                callback('请先上传中间表');
-                              } else if (!value) {
-                                callback('请选择源对象类型属性');
-                              } else {
-                                callback();
+                      <div className="relative">
+                        <FormItem
+                          field="sourceAttribute"
+                          rules={[
+                            {
+                              required: true,
+                              validator: (value, callback) => {
+                                if (!fileUploaded) {
+                                  callback('请先上传中间表');
+                                } else if (!value) {
+                                  callback('请选择源对象类型属性');
+                                } else {
+                                  callback();
+                                }
                               }
                             }
-                          }
-                        ]}
-                        noStyle
-                      >
-                        <Select
-                          placeholder="请先上传中间表"
-                          disabled={!fileUploaded}
-                          allowClear
+                          ]}
+                          noStyle
                         >
-                          {getAttributeOptions().map((option) => (
-                            <Select.Option
-                              key={option.value}
-                              value={option.value}
-                            >
-                              {option.label}
-                            </Select.Option>
-                          ))}
-                        </Select>
-                      </FormItem>
-                    </div>
-
-                    <div className="flex flex-col items-center">
-                      <TwoWayArrowIcon />
+                          <Select
+                            placeholder={
+                              fileUploaded ? '请选择属性' : '请先上传中间表'
+                            }
+                            disabled={!fileUploaded}
+                            allowClear
+                          >
+                            {getAttributeOptions().map((option) => (
+                              <Select.Option
+                                key={option.value}
+                                value={option.value}
+                              >
+                                {option.label}
+                              </Select.Option>
+                            ))}
+                          </Select>
+                        </FormItem>
+                        <TwoWayArrowIcon className="absolute bottom-[3px] right-[calc(-12px-120px)]" />
+                      </div>
                     </div>
 
                     <div className="flex-1 rounded-[4px] bg-[#FAFBFF] p-[12px]">
@@ -1442,9 +1553,9 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
                         <span className="text-[14px] text-[var(--color-text-2)]">
                           目标对象类型属性
                         </span>
-                        <Tooltip content="选择目标对象类型中用于关联的属性">
+                        <Popover content="选择目标对象类型中用于关联的属性">
                           <IconQuestionCircle className="cursor-pointer text-[#86909C]" />
-                        </Tooltip>
+                        </Popover>
                       </div>
                       <FormItem
                         field="targetAttribute"
@@ -1465,7 +1576,9 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
                         noStyle
                       >
                         <Select
-                          placeholder="请先上传中间表"
+                          placeholder={
+                            fileUploaded ? '请选择属性' : '请先上传中间表'
+                          }
                           disabled={!fileUploaded}
                           allowClear
                         >

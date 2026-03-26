@@ -19,3 +19,4 @@ export { default as ObjectTypeDetailDrawer } from './ObjectTypeDetailDrawer';
 export * from './OSEmptyStatus';
 export * from './FunctionFileParam';
 export * from './ContentWithCopy';
+export * from './Icons';

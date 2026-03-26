@@ -20,7 +20,7 @@ const ObjectTypeTagList: React.FC<ObjectTypeTagListProps> = ({
   const containerRef = useRef<HTMLDivElement>(null);
 
   // 如果标签数量小于 2，直接显示所有标签
-  if (tags.length < 2) {
+  if (tags.length <= 2) {
     return (
       <div className={`flex flex-wrap items-center gap-[4px] ${className}`}>
         {tags.map((tag, index) => (
@@ -38,7 +38,7 @@ const ObjectTypeTagList: React.FC<ObjectTypeTagListProps> = ({
 
   // Popover 内容：显示剩余的标签
   const popoverContent = (
-    <div className="flex flex-col gap-[4px] p-[4px]">
+    <div className="flex flex-wrap gap-[4px] p-[4px]">
       {remainingTags.map((tag, index) => (
         <ObjectTypeTag key={index} {...tag} />
       ))}
@@ -54,7 +54,7 @@ const ObjectTypeTagList: React.FC<ObjectTypeTagListProps> = ({
       <ObjectTypeTag {...firstTag} />
 
       {/* 第二个位置：显示剩余个数，hover 时显示 popover */}
-      <Popover trigger="hover" content={popoverContent} position="bottom">
+      <Popover trigger="hover" content={popoverContent} position="top">
         <div className="inline-flex h-[26px] min-w-0 cursor-pointer items-center justify-center rounded border border-[#EBEEF5] bg-[#F5F7FC] px-[4px]">
           <span className="text-[14px] leading-[26px] text-[var(--color-text-1)]">
             +{remainingCount}

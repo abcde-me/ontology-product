@@ -5,3 +5,6 @@ export const useQueryParams = () => {
   const { search } = useLocation();
   return React.useMemo(() => new URLSearchParams(search), [search]);
 };
+export const sleep = (ms: number) => {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+};

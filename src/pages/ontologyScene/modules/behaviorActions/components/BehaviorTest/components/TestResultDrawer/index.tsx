@@ -5,6 +5,7 @@ import { IconLoading } from '@arco-design/web-react/icon';
 import { Tabs, Message, Modal } from '@arco-design/web-react';
 import { TestFunctionInfo } from '@/pages/ontologyScene/hooks/useTestFunction';
 import { BehaviorLogItem } from '@/pages/ontologyScene/modules/behaviorLog/types';
+import EllipsisTextWithTooltip from '@/pages/ontologyScene/modules/behaviorLog/components/EllipsisTextWithTooltip';
 
 const TabPane = Tabs.TabPane;
 
@@ -144,8 +145,15 @@ export const TestResultDrawer: React.FC<TestResultDrawerProps> = ({
           <div className="flex h-full flex-col">
             {/* 标题和状态信息 */}
             <div className="mb-2.5 flex flex-shrink-0 items-center gap-2">
-              <span className="text-sm font-semibold">{item.name}</span>
-              {renderStatusInfo(item, false)}
+              <div className="min-w-0 flex-shrink">
+                <EllipsisTextWithTooltip
+                  value={item.name}
+                  className="text-sm font-semibold"
+                />
+              </div>
+              <div className="flex flex-shrink-0 items-center">
+                {renderStatusInfo(item, false)}
+              </div>
             </div>
             {/* 日志内容区域 - 固定高度，可滚动 */}
             <div className="flex-1 overflow-y-auto rounded bg-[#F7F8FA] p-4">
@@ -158,31 +166,6 @@ export const TestResultDrawer: React.FC<TestResultDrawerProps> = ({
       // 多个行为：显示 tabs
       return (
         <div className="flex h-full flex-col">
-          <style>
-            {`
-              .test-result-tabs {
-                display: flex !important;
-                flex-direction: column !important;
-                height: 100% !important;
-              }
-              .test-result-tabs .arco-tabs-content {
-                flex: 1 !important;
-                overflow: hidden !important;
-                display: flex !important;
-                flex-direction: column !important;
-              }
-              .test-result-tabs .arco-tabs-content-list {
-                height: 100% !important;
-                flex: 1 !important;
-              }
-              .test-result-tabs .arco-tabs-content-item {
-                height: 100% !important;
-              }
-              .test-result-tabs .arco-tabs-pane {
-                height: 100% !important;
-              }
-            `}
-          </style>
           <Tabs
             activeTab={activeTab}
             onChange={setActiveTab}

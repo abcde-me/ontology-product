@@ -1,7 +1,6 @@
 .behaviorLog-list {
   display: flex;
   flex-direction: column;
-  gap: 16px;
   padding: 24px;
 
   .search {
@@ -19,9 +18,9 @@
           color: #184ff2 !important;
         }
 
-        :global(.aa-copy-item) {
-          display: block !important;
-        }
+        // :global(.aa-copy-item) {
+        //   display: block !important;
+        // }
       }
     }
 

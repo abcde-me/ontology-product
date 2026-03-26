@@ -64,7 +64,7 @@ const EllipsisTextWithTooltip: React.FC<EllipsisTextWithTooltipProps> = ({
           overflow: 'hidden',
           textOverflow: 'ellipsis',
           whiteSpace: 'nowrap',
-          width: '100%'
+          maxWidth: '100%'
         }}
       >
         {displayText}

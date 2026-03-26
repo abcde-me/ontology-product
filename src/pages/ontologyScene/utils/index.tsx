@@ -11,7 +11,8 @@ import { InputNumberWithLabel } from '@ceai-front/arco-material';
 import {
   FunctionFileParam,
   MapPicker,
-  ObjectInstanceSelect
+  ObjectInstanceSelect,
+  ObjInsValue
 } from '@/pages/ontologyScene/componens';
 import styles from '../styles/index.module.scss';
 import { LinkType } from '@/types/graphApi';
@@ -24,10 +25,22 @@ export const renderComponentByUiType = (type: UiType, osid?: number) => {
       return <Input.TextArea placeholder={'请输入'} />;
     case UiType.InputNumber:
       return (
-        <InputNumberWithLabel placeholder={'请输入'} className={'w-[160px]'} />
+        <InputNumberWithLabel
+          placeholder={'请输入'}
+          className={'w-[160px]'}
+          min={Number.MIN_SAFE_INTEGER}
+          max={Number.MAX_SAFE_INTEGER}
+        />
       );
     case UiType.InputNumberFloat:
-      return <InputNumber placeholder={'请输入'} className={'w-[160px]'} />;
+      return (
+        <InputNumber
+          placeholder={'请输入'}
+          className={'w-[160px]'}
+          min={Number.MIN_SAFE_INTEGER}
+          max={Number.MAX_SAFE_INTEGER}
+        />
+      );
     case UiType.Switch:
       return (
         <Select
@@ -46,13 +59,7 @@ export const renderComponentByUiType = (type: UiType, osid?: number) => {
         />
       );
     case UiType.Date:
-      return (
-        <DatePicker
-          className={'min-w-[160px]'}
-          showTime={false}
-          getPopupContainer={(node) => node.parentElement || document.body}
-        />
-      );
+      return <DatePicker className={'min-w-[160px]'} showTime={false} />;
     case UiType.Uploader:
       return <FunctionFileParam className={styles['upload']} />;
     case UiType.Geopoint:
@@ -118,19 +125,27 @@ export const formatParamValueByType = (
     return `GeoPoint(${value.lat}, ${value.lng})`;
   }
   if (dataType === ParamType.ObjectOne) {
-    return `ObjectRef(object_type="${value.objectTypeID}", pk="${value.objInsID}")`;
+    if (value && value.objectTypeData && value.objInsID !== undefined) {
+      return `ObjectRef(object_type="${value.objectTypeData.code}", pk="${value.objInsID}")`;
+    }
+    return 'ObjectRef()'; // 如果数据不完整，返回空的 ObjectRef
   }
   if (dataType === ParamType.ObjectSet) {
-    const { objectTypeID, objInsID } = value;
-    const args = (objInsID || [])
-      .map((id) => {
-        return `{"object_type":"${objectTypeID}","pk":"${id}"}`;
-      })
-      .toString();
-    return `ObjectSet([${args}])`;
+    if (value && value.objectTypeData && Array.isArray(value.objInsID)) {
+      const { objectTypeData, objInsID } = value;
+      const args = (objInsID || [])
+        .map((id) => {
+          return `{"object_type":"${objectTypeData.code}","pk":"${id}"}`;
+        })
+        .toString();
+      return `ObjectSet([${args}])`;
+    }
+    return 'ObjectSet([])'; // 如果数据不完整，返回空的 ObjectSet
   }
   return JSON.stringify(value);
 };
+
+const getObjData = (objIns: ObjInsValue) => {};
 
 export const buildActionTestItem = (
   data: BehaviorActionDetail,
@@ -146,13 +161,22 @@ export const buildActionTestItem = (
     params: [],
     object_name: data.objectTypeName,
     object_id: data.objectTypeId,
-    pk: data.id
+    pk: data.id,
+    object_icon: data.objectTypeIcon
   };
   (data.params || []).forEach((p) => {
-    res.params.push({
-      inputType: p.uiType ? InputType.Input : InputType.Output,
-      ...p
-    });
+    const param: OntologyFunctionParam = {
+      ...p,
+      inputType: p.uiType ? InputType.Input : InputType.Output
+    };
+    if (['ObjectRef', 'ObjectSet'].includes(param.type!)) {
+      const objIns = functionParams[p.name] as ObjInsValue;
+      param.obj_data = {
+        icon: objIns?.objectTypeData?.icon,
+        name: objIns?.objectTypeData?.name
+      };
+    }
+    res.params.push(param);
     p.inputType === InputType.Input &&
       res.arguments.push({
         value: formatParamValueByType(p, functionParams[p.name]),

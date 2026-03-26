@@ -100,7 +100,7 @@ import { AnyPermission } from '@/components/Permission';
 ```typescript
 {
   name: 'connection',
-  key: '/tenant/compute/noto/connection',
+  key: '/tenant/compute/onto/connection',
   component: React.lazy(() => import('../../connection')),
   permission: PERMISSIONS.CONNECTOR.LIST,
   children: []
@@ -115,7 +115,7 @@ import { AnyPermission } from '@/components/Permission';
 {
   title: '连接器',
   key: 'connection',
-  path: '/tenant/compute/noto/connection',
+  path: '/tenant/compute/onto/connection',
   permission: PERMISSIONS.CONNECTOR.LIST
 }
 ```

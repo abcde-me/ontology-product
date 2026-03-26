@@ -12,14 +12,14 @@ function OperationCenterPage() {
   const pageUrl = useMemo(() => {
     return url ? decodeURIComponent(url) : url;
   }, [url]);
-  // const lastUrl = useRef(pageUrl);
+  const lastUrl = useRef(pageUrl);
 
   const refreshOperationCenter = (search: string) => {
     const params = new URLSearchParams(search);
     const curUrl = params.get('url');
     const mdpUrl = params.get('mdp_operation_center');
     if (curUrl && !mdpUrl && curUrl.startsWith('/operationcenter/')) {
-      bus.$emit('refresh', curUrl.replace('/operationcenter', ''), 'noto');
+      bus.$emit('refresh', curUrl.replace('/operationcenter', ''), 'onto');
     }
   };
 
@@ -34,12 +34,14 @@ function OperationCenterPage() {
     return () => unlisten();
   }, [history]);
 
-  // useEffect(() => {
-  //   if (lastUrl.current && pageUrl && pageUrl !== lastUrl.current) {
-  //     lastUrl.current = pageUrl;
-  //     bus.$emit('refresh', pageUrl.replace('/operationcenter', ''));
-  //   }
-  // }, [pageUrl]);
+  useEffect(() => {
+    if (lastUrl.current && pageUrl && pageUrl !== lastUrl.current) {
+      lastUrl.current = pageUrl;
+      if (pageUrl.startsWith('/operationcenter/')) {
+        bus.$emit('refresh', pageUrl.replace('/operationcenter', ''), 'noto');
+      }
+    }
+  }, [pageUrl]);
 
   return (
     <div className={`app-operation-center-page h-full w-full`}>

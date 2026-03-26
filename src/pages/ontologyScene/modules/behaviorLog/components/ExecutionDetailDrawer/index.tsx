@@ -93,9 +93,7 @@ export const ExecutionDetailDrawer: React.FC<ExecutionDetailDrawerProps> = ({
             name={detailData.name}
             code={detailData.code}
             description={detailData.description}
-            ontologyObjectTypeName={detailData.ontologyObjectTypeName}
-            ontologyObjectTypeIcon={detailData.ontologyObjectTypeIcon}
-            ontologyObjectTypeId={String(detailData.ontologyObjectTypeId || '')}
+            detailData={detailData}
           />
 
           {/* Tab 内容 */}

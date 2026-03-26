@@ -36,7 +36,7 @@ type OptionItem = {
 };
 
 /** 对象实例下拉选择组件 */
-export const InterfaceSelect = (props: ObjectInterfaceSelectProps) => {
+export const InstanceSelect = (props: ObjectInterfaceSelectProps) => {
   const {
     value,
     onChange,
@@ -212,26 +212,51 @@ export const InterfaceSelect = (props: ObjectInterfaceSelectProps) => {
     );
   };
 
+  const readonly = disabled || !objectTypeId || !primaryKey;
   return (
-    <Select
-      className={classNames([styles['interface'], className])}
-      dropdownMenuClassName={styles['list-container']}
-      value={value as any}
-      disabled={disabled || !objectTypeId || !primaryKey}
-      allowClear
-      loading={loading}
-      mode={mode === 'multiple' ? 'multiple' : undefined}
-      defaultPopupVisible={popupVisible}
-      placeholder={placeholder || '请选择'}
-      onChange={handleValueChange}
-      dropdownRender={renderDropdown}
-      showSearch
-      onSearch={searchIns}
-      maxTagCount={{
-        count: 'responsive',
-        showPopover: { getPopupContainer: props.getPopupContainer }
-      }}
-      getPopupContainer={props.getPopupContainer}
-    />
+    <div className={classNames([className, styles['ins-sel-wrapper']])}>
+      <Select
+        className={classNames([
+          styles['instance'],
+          readonly ? `${styles['ins-select-disabled']} ins-select-disabled` : ''
+        ])}
+        dropdownMenuClassName={styles['list-container']}
+        value={value as any}
+        disabled={readonly}
+        allowClear
+        loading={loading}
+        mode={mode === 'multiple' ? 'multiple' : undefined}
+        defaultPopupVisible={popupVisible}
+        placeholder={placeholder || '请选择'}
+        onChange={handleValueChange}
+        dropdownRender={renderDropdown}
+        showSearch
+        onSearch={searchIns}
+        maxTagCount={{
+          count: 0,
+          showPopover: {
+            className: styles['tag-popover'],
+            getPopupContainer(node) {
+              return props.getPopupContainer?.(node) || document.body;
+            }
+          }
+        }}
+        getPopupContainer={
+          props.getPopupContainer ||
+          ((node) => {
+            return node.parentElement || document.body;
+          })
+        }
+        dropdownMenuStyle={{ width: 400, maxHeight: 400 }}
+        triggerProps={{
+          autoAlignPopupWidth: false,
+          position: 'bl',
+          style: {
+            width: 400,
+            maxHeight: 400
+          }
+        }}
+      />
+    </div>
   );
 };

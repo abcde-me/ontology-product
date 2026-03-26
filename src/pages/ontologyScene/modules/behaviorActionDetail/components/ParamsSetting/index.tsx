@@ -11,7 +11,10 @@ import {
   TYPE2COMP_OPTIONS,
   ValidateRule
 } from '@/pages/ontologyScene/types/behaviorActions';
-import { OntologyFunctionDetail } from '@/pages/ontologyScene/types/ontologyFunction';
+import {
+  InputType,
+  OntologyFunctionDetail
+} from '@/pages/ontologyScene/types/ontologyFunction';
 
 export const ParamsSetting = (
   props: CustomFormItemCompProps<any> & {
@@ -19,7 +22,7 @@ export const ParamsSetting = (
     actionDetail?: BehaviorActionDetail;
   }
 ) => {
-  const { actionDetail = {} } = props;
+  const { actionDetail = {}, functionDetail } = props;
   const [paramsTest, setParamsTest] = useState(false);
   const { form, disabled } = Form.useFormContext();
   const functionParams: OntologyActionParam[] = Form.useWatch(
@@ -49,6 +52,10 @@ export const ParamsSetting = (
     setParamsTest(false);
   };
 
+  const functionHasParam = !!functionDetail?.params?.filter(
+    (p) => p.inputType === InputType.Input
+  )?.length;
+
   return (
     <div className={styles['params-setting']}>
       <div className={styles['comp-header']}>
@@ -64,57 +71,53 @@ export const ParamsSetting = (
         </Button>
       </div>
       <div className={styles['comp-content']}>
-        <Form.List field={'function_params'}>
-          {(fields) => {
-            return (
-              <>
-                <div className={styles['params-item']}>
-                  <div className={styles['field']}>参数显示名称</div>
-                  <div className={styles['field']}>id</div>
-                  <div className={styles['field']}>参数类型</div>
-                  <div className={styles['field']}>界面控件</div>
-                </div>
-                {fields.map(({ field, key }, index) => {
-                  const { type }: OntologyActionParam =
-                    form.getFieldValue(field);
-                  return (
-                    <div className={styles['params-item']} key={key}>
-                      <Form.Item
-                        field={`${field}.name`}
-                        className={'mb-2 px-4'}
-                      >
-                        <Input disabled />
-                      </Form.Item>
-                      <Form.Item
-                        field={`${field}.code`}
-                        className={'mb-2 px-4'}
-                      >
-                        <Input disabled />
-                      </Form.Item>
-                      <Form.Item
-                        field={`${field}.type`}
-                        className={'mb-2 px-4'}
-                      >
-                        <Select disabled />
-                      </Form.Item>
-                      <Form.Item
-                        field={`${field}.uiType`}
-                        className={'mb-2 px-4'}
-                      >
-                        <Select
-                          placeholder={'请选择界面控件'}
-                          disabled={disabled}
-                          options={TYPE2COMP_OPTIONS[type]}
-                        />
-                      </Form.Item>
-                    </div>
-                  );
-                })}
-              </>
-            );
-          }}
-        </Form.List>
+        {functionHasParam ? (
+          <Form.List field={'function_params'}>
+            {(fields) => {
+              return (
+                <>
+                  <div className={styles['params-item']}>
+                    <div className={styles['field']}>参数显示名称</div>
+                    <div className={styles['field']}>id</div>
+                    <div className={styles['field']}>参数类型</div>
+                    <div className={styles['field']}>界面控件</div>
+                  </div>
+                  {fields.map(({ field, key }, index) => {
+                    const { type }: OntologyActionParam =
+                      form.getFieldValue(field);
+                    return (
+                      <div className={styles['params-item']} key={key}>
+                        <Form.Item field={`${field}.name`} className={'mb-2'}>
+                          <Input readOnly className={'border-0'} />
+                        </Form.Item>
+                        <Form.Item field={`${field}.code`} className={'mb-2'}>
+                          <Input readOnly className={'border-0'} />
+                        </Form.Item>
+                        <Form.Item field={`${field}.type`} className={'mb-2'}>
+                          <Input readOnly className={'border-0'} />
+                        </Form.Item>
+                        <Form.Item field={`${field}.uiType`} className={'mb-2'}>
+                          <Select
+                            placeholder={'请选择界面控件'}
+                            disabled={disabled}
+                            options={TYPE2COMP_OPTIONS[type]}
+                            getPopupContainer={(node) =>
+                              node.parentElement || document.body
+                            }
+                          />
+                        </Form.Item>
+                      </div>
+                    );
+                  })}
+                </>
+              );
+            }}
+          </Form.List>
+        ) : (
+          <NoDataCard type={'block'} title={'暂无入参配置'} />
+        )}
       </div>
+
       <ParamsTestDialog
         onClose={closeDialog}
         visible={paramsTest}

@@ -99,7 +99,6 @@ export const CanvasHeader: React.FC<CanvasHeaderProps> = ({
             (param) => param.inputType === 'input'
           )
         };
-
         return buildActionTestItem(behaviorWithInputParamsOnly, config);
       });
 

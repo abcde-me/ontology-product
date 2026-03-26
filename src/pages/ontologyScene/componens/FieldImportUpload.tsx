@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { PrefixAimdp } from '@/api/endpoints';
 import { IconUpload, IconDownload } from '@arco-design/web-react/icon';
 import { UploadStatus } from '../types/objectType';
+import { downloadDataAssetFieldsTemplate } from '@/api/dataAsset';
 import { useUserInfoStore } from '@/store/userInfoStore';
 import { getTemplateFile } from '@/api/ontologySceneLibrary/objectType';
 

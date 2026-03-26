@@ -1,5 +1,15 @@
 import { InputType, ParamType, UiType } from './ontologyFunction';
-import { IconCodeBlock } from '@arco-design/web-react/icon';
+import InputIcon from '../assets/str-ui.svg';
+import TextAreaIcon from '../assets/str-arr-ui.svg';
+import NumberIcon from '../assets/int-ui.svg';
+import FloatIcon from '../assets/float-ui.svg';
+import BoolIcon from '../assets/bool-ui.svg';
+import DateIcon from '../assets/date-time-ui.svg';
+import DateTimeIcon from '../assets/date-time-arr-ui.svg';
+import { IconLocation } from '@arco-design/web-react/icon';
+import ObjRefIcon from '../assets/obj-ui.svg';
+import ObjSetIcon from '../assets/obj-arr-ui.svg';
+import AttachmentIcon from '../assets/file-ui.svg';
 
 /**
  * OntologyAction，行为对象
@@ -46,6 +56,10 @@ export interface BehaviorActionItem {
    */
   objectTypeName?: string;
   /**
+   * 对象类型图标
+   */
+  objectTypeIcon?: string;
+  /**
    * 所属本体场景模型ID
    */
   ontologyModelId?: number;
@@ -82,6 +96,10 @@ export interface BehaviorActionDetail {
   ontologyObjectTypeIcon?: string;
   ontologyObjectTypeId?: string;
   objectTypeID?: string;
+  /**
+   * 对象类型图标
+   */
+  objectTypeIcon?: string;
   /**
    * 行为唯一编码
    */
@@ -264,11 +282,11 @@ export interface ActionSchema {
   name?: string;
   description?: string;
   objectTypeId?: number;
+  objectTypeName?: string;
+  objectTypeIcon?: string;
   functionId?: number;
   function_params?: Partial<OntologyActionParam>[];
   validationRules?: ValidateRule[];
-  type?: ParamType;
-  uiType?: UiType;
   function_content?: string;
   function_code?: string;
   function_name?: string;
@@ -276,39 +294,39 @@ export interface ActionSchema {
 
 export const TYPE2COMP_OPTIONS = {
   [ParamType.String]: [
-    { label: '单行文本框', value: UiType.Input, icon: IconCodeBlock },
-    { label: '文本域', value: UiType.TextArea, icon: IconCodeBlock }
+    { label: '单行文本框', value: UiType.Input, icon: InputIcon },
+    { label: '文本域', value: UiType.TextArea, icon: TextAreaIcon }
   ],
   [ParamType.Integer]: [
-    { label: '数字步进器', value: UiType.InputNumber, icon: IconCodeBlock }
+    { label: '数字步进器', value: UiType.InputNumber, icon: NumberIcon }
   ],
   [ParamType.Float]: [
     {
       label: '高精度数字输入框',
       value: UiType.InputNumberFloat,
-      icon: IconCodeBlock
+      icon: FloatIcon
     }
   ],
   [ParamType.Boolean]: [
-    { label: '切换开关', value: UiType.Switch, icon: IconCodeBlock }
+    { label: '切换开关', value: UiType.Switch, icon: BoolIcon }
   ],
   [ParamType.Date]: [
-    { label: '日期选择器', value: UiType.Date, icon: IconCodeBlock }
+    { label: '日期选择器', value: UiType.Date, icon: DateIcon }
   ],
   [ParamType.Timestamp]: [
-    { label: '日期时间选择器', value: UiType.Timestamp, icon: IconCodeBlock }
+    { label: '日期时间选择器', value: UiType.Timestamp, icon: DateTimeIcon }
   ],
   [ParamType.Geopoint]: [
-    { label: '地图选择器', value: UiType.Geopoint, icon: IconCodeBlock }
+    { label: '地图选择器', value: UiType.Geopoint, icon: IconLocation }
   ],
   [ParamType.ObjectOne]: [
-    { label: '对象搜索选择器', value: UiType.ObjectOne, icon: IconCodeBlock }
+    { label: '对象实例单选器', value: UiType.ObjectOne, icon: ObjRefIcon }
   ],
   [ParamType.ObjectSet]: [
-    { label: '对象集选择器', value: UiType.ObjectSet, icon: IconCodeBlock }
+    { label: '对象实例多选器', value: UiType.ObjectSet, icon: ObjSetIcon }
   ],
   [ParamType.Attachment]: [
-    { label: '文件上传', value: UiType.Uploader, icon: IconCodeBlock }
+    { label: '文件上传', value: UiType.Uploader, icon: AttachmentIcon }
   ]
 };
 
@@ -321,8 +339,8 @@ export const UI_TYPE_LABEL = {
   [UiType.Date]: '日期选择器',
   [UiType.Timestamp]: '日期时间选择器',
   [UiType.Geopoint]: '地图选择器',
-  [UiType.ObjectOne]: '对象搜索选择器',
-  [UiType.ObjectSet]: '对象集选择器',
+  [UiType.ObjectOne]: '对象实例单选器',
+  [UiType.ObjectSet]: '对象实例多选器',
   [UiType.Uploader]: '文件上传'
 };
 

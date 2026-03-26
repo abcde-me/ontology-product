@@ -16,13 +16,14 @@ $border-color: #dfe2eb;
   }
 
   .header {
-    padding: 8px 16px;
+    padding: 11px 16px;
     border: 1px solid $border-color;
     border-bottom: 1px solid #ebeef5;
     flex-shrink: 0;
     display: flex;
     align-items: center;
     line-height: 24px;
+    background: #fafbff;
   }
 
   .body {
@@ -37,7 +38,6 @@ $border-color: #dfe2eb;
 
     .params-item {
       display: flex;
-      gap: 8px;
       padding-bottom: 8px;
 
       p {
@@ -62,34 +62,77 @@ $border-color: #dfe2eb;
     }
   }
 
+  .right-max {
+    &:hover {
+      cursor: e-resize !important;
+    }
+  }
+
+  .left-max {
+    &:hover {
+      cursor: w-resize !important;
+    }
+  }
+
   .left {
     height: 100%;
+    width: 100%;
+    overflow: hidden;
 
     .header {
       border-top-left-radius: 4px;
       border-right: none;
-      background: #fafbff;
       justify-content: space-between;
+      align-items: center;
+      font-family: PingFang SC;
+      font-weight: 500;
+      font-size: 14px;
+      line-height: 24px;
+      color: #0f131f;
     }
 
     .body {
       border-bottom-left-radius: 4px;
       border-top: none;
       border-right: none;
+
+      .param-name-input {
+        :global {
+          .arco-input-group-suffix {
+            display: none;
+          }
+        }
+
+        &:hover,
+        &:focus-within {
+          :global {
+            .arco-input-group-suffix {
+              display: inline-flex;
+            }
+          }
+        }
+      }
     }
 
     .param-name-item {
-      flex-basis: calc(33.33% - 12px) !important;
-      flex-shrink: 0;
-      flex-grow: 0;
+      min-width: 70px;
+      max-width: 220px;
+      margin-right: 8px;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .param-value-item {
+      min-width: 400px;
+      margin-right: 8px;
     }
   }
 
   .right {
     position: relative;
+    min-width: 295px;
     flex: 1;
     overflow: hidden;
-    min-width: 280px;
     display: flex;
     flex-direction: column;
 
@@ -132,22 +175,45 @@ $border-color: #dfe2eb;
   .sdk {
     height: 100%;
     min-height: 0;
+    min-width: 300px;
 
     .header {
       justify-content: space-between;
       border-left: none;
       border-top-right-radius: 4px;
+      background: transparent;
     }
+  }
+
+  .close-params-setting {
+    width: 56px;
+    height: 100%;
+    padding: 16px 24px 8px;
+    border-top-left-radius: 4px;
+    border-bottom-left-radius: 4px;
+    border: 1px solid var(--line-color-border-3, #ebeef5);
+    background: var(--fill-color-fill-3, #fafbff);
+    font-family: PingFang SC;
+    font-weight: 500;
+    font-size: 14px;
+    line-height: 22px;
+    color: black;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
   }
 }
 
 .resize-box-trigger {
-  justify-content: flex-start;
+  justify-content: flex-start !important;
 }
 
 .del-field {
   padding: 0;
   width: max-content !important;
   border: none !important;
+  flex-shrink: 0;
   color: var(--icon-color-text-1) !important;
 }

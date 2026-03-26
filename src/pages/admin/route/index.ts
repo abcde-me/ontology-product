@@ -35,20 +35,20 @@ export const routes: IRoute[] = [
   // 首页
   {
     name: 'home',
-    key: '/tenant/compute/noto/home',
+    key: '/tenant/compute/onto/home',
     component: React.lazy(async () => import('../../home')),
     children: []
   },
   // 本体场景库
   {
     name: 'ontologyScene',
-    key: '/tenant/compute/noto/ontologyScene',
+    key: '/tenant/compute/onto/ontologyScene',
     component: React.lazy(async () => import('../../ontologyScene')),
     permission: ONTOLOGY_PERMISSIONS.LIST,
     children: [
       {
         name: 'ontologySceneList',
-        key: '/tenant/compute/noto/ontologyScene/list',
+        key: '/tenant/compute/onto/ontologyScene/list',
         component: React.lazy(
           async () => import('../../ontologyScene/modules/list/index')
         ),
@@ -56,7 +56,7 @@ export const routes: IRoute[] = [
       },
       {
         name: 'ontologySceneDetail',
-        key: '/tenant/compute/noto/ontologyScene/detail/:id',
+        key: '/tenant/compute/onto/ontologyScene/detail/:id',
         component: React.lazy(
           async () => import('../../ontologyScene/modules/detail/index')
         ),
@@ -66,7 +66,7 @@ export const routes: IRoute[] = [
           // 本体图谱
           {
             name: 'ontologySceneGraph',
-            key: `/tenant/compute/noto/ontologyScene/detail/:id/${ONTOLOGY_SCENE_MENU_ITEM_KEYS.GRAPH}`,
+            key: `/tenant/compute/onto/ontologyScene/detail/:id/${ONTOLOGY_SCENE_MENU_ITEM_KEYS.GRAPH}`,
             component: React.lazy(
               async () => import('../../ontologyScene/modules/graph/index')
             ),
@@ -75,7 +75,7 @@ export const routes: IRoute[] = [
           // 对象类型
           {
             name: 'ontologySceneObjectType',
-            key: `/tenant/compute/noto/ontologyScene/detail/:id/${ONTOLOGY_SCENE_MENU_ITEM_KEYS.OBJECT_TYPE}`,
+            key: `/tenant/compute/onto/ontologyScene/detail/:id/${ONTOLOGY_SCENE_MENU_ITEM_KEYS.OBJECT_TYPE}`,
             component: React.lazy(
               async () => import('../../ontologyScene/modules/objectType/index')
             ),
@@ -84,7 +84,7 @@ export const routes: IRoute[] = [
           // 属性
           {
             name: 'ontologySceneAttributes',
-            key: `/tenant/compute/noto/ontologyScene/detail/:id/${ONTOLOGY_SCENE_MENU_ITEM_KEYS.ATTRIBUTES}`,
+            key: `/tenant/compute/onto/ontologyScene/detail/:id/${ONTOLOGY_SCENE_MENU_ITEM_KEYS.ATTRIBUTES}`,
             component: React.lazy(
               async () => import('../../ontologyScene/modules/attributes/index')
             ),
@@ -93,7 +93,7 @@ export const routes: IRoute[] = [
           // 链接
           {
             name: 'ontologySceneLinks',
-            key: `/tenant/compute/noto/ontologyScene/detail/:id/${ONTOLOGY_SCENE_MENU_ITEM_KEYS.LINKS}`,
+            key: `/tenant/compute/onto/ontologyScene/detail/:id/${ONTOLOGY_SCENE_MENU_ITEM_KEYS.LINKS}`,
             component: React.lazy(
               async () => import('../../ontologyScene/modules/links/index')
             ),
@@ -102,7 +102,7 @@ export const routes: IRoute[] = [
           // 行为动作
           {
             name: 'ontologySceneBehaviorActions',
-            key: `/tenant/compute/noto/ontologyScene/detail/:id/${ONTOLOGY_SCENE_MENU_ITEM_KEYS.BEHAVIOR_ACTIONS}`,
+            key: `/tenant/compute/onto/ontologyScene/detail/:id/${ONTOLOGY_SCENE_MENU_ITEM_KEYS.BEHAVIOR_ACTIONS}`,
             component: React.lazy(
               async () =>
                 import('../../ontologyScene/modules/behaviorActions/index')
@@ -112,7 +112,7 @@ export const routes: IRoute[] = [
           // 函数
           {
             name: 'ontologySceneFunctions',
-            key: `/tenant/compute/noto/ontologyScene/detail/:id/${ONTOLOGY_SCENE_MENU_ITEM_KEYS.FUNCTIONS}`,
+            key: `/tenant/compute/onto/ontologyScene/detail/:id/${ONTOLOGY_SCENE_MENU_ITEM_KEYS.FUNCTIONS}`,
             component: React.lazy(
               async () => import('../../ontologyScene/modules/functions/index')
             ),
@@ -121,7 +121,7 @@ export const routes: IRoute[] = [
           // 执行记录
           {
             name: 'ontologySceneBehaviorLog',
-            key: `/tenant/compute/noto/ontologyScene/detail/:id/${ONTOLOGY_SCENE_MENU_ITEM_KEYS.BEHAVIOR_LOG}`,
+            key: `/tenant/compute/onto/ontologyScene/detail/:id/${ONTOLOGY_SCENE_MENU_ITEM_KEYS.BEHAVIOR_LOG}`,
             component: React.lazy(
               async () =>
                 import('../../ontologyScene/modules/behaviorLog/index')
@@ -135,7 +135,7 @@ export const routes: IRoute[] = [
   // 运营中心页面
   {
     name: 'operationCenter',
-    key: '/tenant/compute/noto/operationCenter',
+    key: '/tenant/compute/onto/operationCenter',
     component: React.lazy(async () => import('../../operationCenter')),
     // permission: 'organizations:can_view',
     children: [],

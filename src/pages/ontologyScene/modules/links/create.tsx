@@ -118,7 +118,15 @@ export default function OntologySceneLinksCreate() {
         }
       } else {
         // 1:1 和 1:N 类型，处理目标对象属性
-        if (data.targetObjectAttribute && data.targetObjectType) {
+        if (data.linkTargetColumnName) {
+          requestData.linkTargetColumnName = data.linkTargetColumnName;
+          if (data.linkSourceColumnName) {
+            requestData.linkSourceColumnName = data.linkSourceColumnName;
+          }
+        } else if (data.targetObjectAttribute && data.targetObjectType) {
+          if (data.linkSourceColumnName) {
+            requestData.linkSourceColumnName = data.linkSourceColumnName;
+          }
           const targetAttrName = await getAttributeNameById(
             data.targetObjectAttribute,
             data.targetObjectType,
@@ -134,7 +142,7 @@ export default function OntologySceneLinksCreate() {
       if (response.status === 200 && response.code === '') {
         Message.success('创建成功');
         history.push(
-          `/tenant/compute/noto/ontologyScene/detail/${OSId}/links/list`
+          `/tenant/compute/onto/ontologyScene/detail/${OSId}/links/list`
         );
       } else {
         Message.error(response.message || '创建失败，请重试');
@@ -149,18 +157,18 @@ export default function OntologySceneLinksCreate() {
 
   const handleCancel = () => {
     history.push(
-      `/tenant/compute/noto/ontologyScene/detail/${OSId}/links/list`
+      `/tenant/compute/onto/ontologyScene/detail/${OSId}/links/list`
     );
   };
 
   const goBack = () => {
     history.replace(
-      `/tenant/compute/noto/ontologyScene/detail/${OSId}/links/list`
+      `/tenant/compute/onto/ontologyScene/detail/${OSId}/links/list`
     );
   };
 
   return (
-    <div className="flex h-[calc(100vh-56px)] w-full flex-col bg-[#fff]">
+    <div className="relative flex h-[calc(100vh-56px)] w-full flex-col bg-[#fff]">
       <div className="flex items-center gap-[16px] border-b border-[##EBEEF5] p-[24px] text-[20px] font-[600] leading-[32px] text-[var(--color-text-1)]">
         <ProButton
           icon={<IconLeft />}
@@ -171,7 +179,7 @@ export default function OntologySceneLinksCreate() {
         创建链接
       </div>
       <div className="flex flex-1 flex-col overflow-hidden">
-        <div className="overflow-y-auto">
+        <div className="overflow-y-auto pb-[65px]">
           <LinkForm
             ref={formRef}
             onSubmit={handleSubmit}
@@ -181,7 +189,7 @@ export default function OntologySceneLinksCreate() {
           />
         </div>
         {/* 底部操作按钮 - 使用sticky */}
-        <div className="sticky bottom-0 z-10 border-t border-[#E5E6EB] bg-white px-6 py-4">
+        <div className="absolute bottom-0 left-0 right-0 z-10 border-t border-[#E5E6EB] bg-white px-6 py-4">
           <div className="flex justify-start gap-[8px]">
             <Button
               type="primary"

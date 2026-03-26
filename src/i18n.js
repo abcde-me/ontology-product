@@ -29,7 +29,7 @@ export const init = () => {
     .init({
       backend: {
         // console compare: loadPath: '/locales/resource.json?lng={{lng}}&ns={{ns}}',
-        loadPath: '/noto/locales/{{lng}}/{{ns}}.json'
+        loadPath: '/onto/locales/{{lng}}/{{ns}}.json'
       },
       lng: getLastLanguage(),
       fallbackLng: FALLBACK_LNG,

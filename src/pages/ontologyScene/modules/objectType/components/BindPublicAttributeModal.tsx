@@ -122,22 +122,6 @@ const BindPublicAttributeModal: React.FC<BindPublicAttributeModalProps> = ({
         );
         if (exists) {
           setSelectedId(initialSelectedId);
-        } else {
-          // 如果初始ID不存在或类型不匹配，选择第一个类型匹配的项
-          const firstMatch = publicProperties.find((item) =>
-            isColumnTypeMatch(item)
-          );
-          if (firstMatch) {
-            setSelectedId(firstMatch.id);
-          }
-        }
-      } else {
-        // 没有初始选中ID，默认选中第一个类型匹配的项
-        const firstMatch = publicProperties.find((item) =>
-          isColumnTypeMatch(item)
-        );
-        if (firstMatch) {
-          setSelectedId(firstMatch.id);
         }
       }
     }
@@ -230,12 +214,14 @@ const BindPublicAttributeModal: React.FC<BindPublicAttributeModalProps> = ({
       style={{ width: 800 }}
     >
       <Table
-        scroll={{ x: true }}
+        scroll={{ x: true, y: 374 }}
         columns={columns}
         loading={loading}
         data={publicProperties}
         rowKey="id"
         pagination={Number(pagination?.total) > 10 ? pagination : false}
+        // 通过覆盖 td 的高度/行高实现固定行高（Arco Table 不支持 rowHeight prop）
+        className="[&_.arco-table-td]:h-[56px]"
         border={false}
         onChange={onChange}
       />

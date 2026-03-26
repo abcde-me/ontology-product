@@ -10,7 +10,9 @@ import {
   IconPlayArrowFill,
   IconPlus,
   IconRecordStop,
-  IconShrink
+  IconShrink,
+  IconToLeft,
+  IconToRight
 } from '@arco-design/web-react/icon';
 import {
   Button,
@@ -45,32 +47,46 @@ import { useParams } from 'react-router-dom';
 import { UploadItem } from '@arco-design/web-react/es/Upload';
 import useTestFunction from '@/pages/ontologyScene/hooks/useTestFunction';
 
-const FormItemWithTooltip = (props: { content: string } & FormItemProps) => {
-  const { content, ...otherProps } = props;
-  return (
+const CompWithTooltip = (Comp: React.FC<any>) => {
+  return ({ content, ...other }) => (
     <Tooltip
-      content={props.content}
+      content={content}
       getPopupContainer={() => {
         return (
           document.querySelector('#functionSettingContainer') || document.body
         );
       }}
     >
-      <Form.Item {...otherProps}></Form.Item>
+      <Comp {...other} />
     </Tooltip>
   );
 };
+
+const FormItemWithTooltip = CompWithTooltip(Form.Item);
+
+const ButtonWithTooltip = CompWithTooltip(Button);
+
+const DivWithTooltip = CompWithTooltip((props) => {
+  return <div {...props} />;
+});
 
 export const FunctionsSetting = (props: {
   disabled: boolean;
   extra?: React.ReactNode;
 }) => {
   const { form, disabled: readonly, isSubmitting } = Form.useFormContext();
+  const functionCode = Form.useWatch('code', form);
   const ref = useRef<HTMLDivElement>(null);
   const [isFullscreen, { enterFullscreen, exitFullscreen }] =
     useFullscreen(ref);
   const [showDoc, setShowDoc] = useState(false);
   const { id: OSid, functionId } = useParams<Record<string, string>>();
+
+  const [dropTriggerClass, setDropTriggerClass] = useState({
+    left: '',
+    right: ''
+  });
+  const functionScriptRef = useRef();
 
   const {
     startTest,
@@ -78,6 +94,9 @@ export const FunctionsSetting = (props: {
     runLog: runLogInfo,
     testIng
   } = useTestFunction();
+
+  const [closeParamsSetting, setCloseParamsSetting] = useState(false);
+
   const disabled = readonly || testIng || props.disabled;
 
   const { data: content, loading: SDKLoading } = useRequest(() => {
@@ -114,10 +133,13 @@ export const FunctionsSetting = (props: {
         });
         startTest({ ...functionTest, id: +OSid });
       })
-      .catch(console.error);
+      .catch((e) => {
+        console.error(e);
+        setCloseParamsSetting(false);
+      });
   };
 
-  const getPopoverContainer = () => {
+  const getPopoverContainer = (node) => {
     return ref.current || document.body;
   };
 
@@ -135,16 +157,43 @@ export const FunctionsSetting = (props: {
       ref={ref}
       id={'functionSettingContainer'}
     >
+      {closeParamsSetting && (
+        <div
+          className={styles['close-params-setting']}
+          onClick={() => {
+            setCloseParamsSetting(false);
+          }}
+        >
+          <IconToRight />
+          <div>参数配置列表</div>
+        </div>
+      )}
       <ResizeBoxWithCursorChange
-        minWidth={520}
-        maxWidth={isFullscreen ? 597 : 845}
+        minWidth={600}
         directions={['right']}
-        className={`h-full w-1/2 min-w-[520px]`}
-        style={{ maxWidth: isFullscreen ? '597px' : '845px' }}
+        className={`h-full w-1/2  ${closeParamsSetting ? 'hidden' : ''}`}
+        style={{
+          minWidth: '540px'
+        }}
+        triggerClassName={dropTriggerClass.left}
+        onMovingEnd={() => {
+          // @ts-ignore
+          const funcW = functionScriptRef.current?.getWidth();
+          setDropTriggerClass((p) => ({
+            ...p,
+            left: funcW <= 295 ? styles['left-max'] : ''
+          }));
+        }}
       >
         <div className={styles['left']}>
           <div className={styles['header']}>
             <div>参数配置列表</div>
+            <IconToLeft
+              className={'cursor-pointer'}
+              onClick={() => {
+                setCloseParamsSetting(true);
+              }}
+            />
           </div>
           <div className={styles['body']}>
             <Form.List field={'input'}>
@@ -159,8 +208,10 @@ export const FunctionsSetting = (props: {
                       }}
                     >
                       <p className={styles['param-name-item']}>入参名称</p>
-                      <p>类型与试运行值</p>
-                      <div className={'w-4'} />
+                      <p className={styles['param-value-item']}>
+                        类型与试运行值（运行请输入）
+                      </p>
+                      <div className={'w-4 flex-shrink-0'} />
                     </div>
                     {fields.map(({ field, key }, index) => {
                       return (
@@ -171,7 +222,7 @@ export const FunctionsSetting = (props: {
                                 ? '该函数已被行为绑定，不可修改'
                                 : ''
                             }
-                            className={`mb-0 flex-1 ${styles['param-name-item']}`}
+                            className={`mb-0 ${styles['param-name-item']}`}
                             field={`${field}.name`}
                             rules={getInputAndOutputRules('input')}
                             dependencies={fields.flatMap((f) =>
@@ -183,10 +234,11 @@ export const FunctionsSetting = (props: {
                               disabled={disabled}
                               maxLength={100}
                               showWordLimit
+                              className={`overflow-ellipsis whitespace-nowrap ${styles['param-name-input']}`}
                             />
                           </FormItemWithTooltip>
                           <Form.Item
-                            className={'mb-0 flex-1 overflow-hidden'}
+                            className={`mb-0 overflow-hidden ${styles['param-value-item']}`}
                             field={`${field}.uiTypeAndValue`}
                             rules={[
                               {
@@ -237,13 +289,19 @@ export const FunctionsSetting = (props: {
                                   }
                                 });
                               }}
+                              getPopupContainer={getPopoverContainer}
                             />
                           </Form.Item>
                           {/*记录id但是不展示*/}
                           <Form.Item className={'hidden'} field={`${field}.id`}>
                             <Input />
                           </Form.Item>
-                          <Button
+                          <ButtonWithTooltip
+                            content={
+                              props.disabled
+                                ? '该函数已被行为绑定，不可删除'
+                                : ''
+                            }
                             type={'text'}
                             className={styles['del-field']}
                             disabled={disabled}
@@ -263,7 +321,7 @@ export const FunctionsSetting = (props: {
                         </div>
                       );
                     })}
-                    <Button
+                    <ButtonWithTooltip
                       type={'text'}
                       icon={<IconPlus />}
                       className={'h-auto pl-0'}
@@ -276,9 +334,12 @@ export const FunctionsSetting = (props: {
                           }
                         })
                       }
+                      content={
+                        props.disabled ? '该函数已被行为绑定，不可添加' : ''
+                      }
                     >
                       添加
-                    </Button>
+                    </ButtonWithTooltip>
                   </>
                 );
               }}
@@ -313,7 +374,7 @@ export const FunctionsSetting = (props: {
                                 ? '该函数已被行为绑定，不可修改'
                                 : ''
                             }
-                            className={`mb-0 flex-1 ${styles['param-name-item']}`}
+                            className={`mb-0 mr-2 flex-1 ${styles['param-name-item']}`}
                             field={`${field}.name`}
                             rules={getInputAndOutputRules('output')}
                             dependencies={fields.flatMap((f) =>
@@ -325,6 +386,7 @@ export const FunctionsSetting = (props: {
                               disabled={disabled}
                               maxLength={100}
                               showWordLimit
+                              className={styles['param-name-input']}
                             />
                           </FormItemWithTooltip>
                           <FormItemWithTooltip
@@ -333,7 +395,7 @@ export const FunctionsSetting = (props: {
                                 ? '该函数已被行为绑定，不可修改'
                                 : ''
                             }
-                            className={`mb-0  flex-1`}
+                            className={`mb-0  mr-2 min-w-[400px] flex-1`}
                             field={`${field}.type`}
                           >
                             <SelectWithNoData
@@ -347,7 +409,12 @@ export const FunctionsSetting = (props: {
                           <Form.Item className={'hidden'} field={`${field}.id`}>
                             <Input />
                           </Form.Item>
-                          <Button
+                          <ButtonWithTooltip
+                            content={
+                              props.disabled
+                                ? '该函数已被行为绑定，不可删除'
+                                : ''
+                            }
                             type={'text'}
                             className={styles['del-field']}
                             disabled={disabled}
@@ -367,20 +434,25 @@ export const FunctionsSetting = (props: {
                         </div>
                       );
                     })}
-                    <Button
-                      type={'text'}
-                      icon={<IconPlus />}
-                      className={'h-auto pl-0'}
-                      disabled={disabled}
-                      onClick={() => {
-                        add({
-                          name: `var_${fields.length + 1}`,
-                          type: ParamType.String
-                        });
-                      }}
-                    >
-                      添加
-                    </Button>
+                    <Tooltip>
+                      <ButtonWithTooltip
+                        content={
+                          props.disabled ? '该函数已被行为绑定，不可添加' : ''
+                        }
+                        type={'text'}
+                        icon={<IconPlus />}
+                        className={'h-auto pl-0'}
+                        disabled={disabled}
+                        onClick={() => {
+                          add({
+                            name: `var_${fields.length + 1}`,
+                            type: ParamType.String
+                          });
+                        }}
+                      >
+                        添加
+                      </ButtonWithTooltip>
+                    </Tooltip>
                   </>
                 );
               }}
@@ -423,12 +495,13 @@ export const FunctionsSetting = (props: {
               icon={<IconFile />}
               size={'mini'}
               type={'outline'}
+              className={'flex items-center gap-1'}
               onClick={() => {
                 setShowDoc(true);
               }}
               disabled={SDKLoading}
             >
-              SDK开发文档
+              <p className={'text-[14px] font-[500]'}>SDK开发文档</p>
             </ProButton>
           )}
           <Button
@@ -448,6 +521,8 @@ export const FunctionsSetting = (props: {
             className={classNames({
               'hidden-border': showDoc
             })}
+            functionCode={functionCode}
+            ref={functionScriptRef}
             runInfo={runLogInfo}
             disabled={disabled}
             isFullscreen={isFullscreen}
@@ -459,15 +534,27 @@ export const FunctionsSetting = (props: {
           directions={['left']}
           className={'h-full w-[300px] min-w-[300px] '}
           minWidth={300}
-          maxWidth={isFullscreen ? 377 : 625}
-          style={{ maxWidth: isFullscreen ? '377px' : '625px' }}
-          triggerClassName={styles['resize-box-trigger']}
+          style={{
+            minWidth: '300px'
+          }}
+          triggerClassName={classNames([
+            styles['resize-box-trigger'],
+            dropTriggerClass.right
+          ])}
+          onMovingEnd={() => {
+            // @ts-ignore
+            const funcW = functionScriptRef.current?.getWidth();
+            setDropTriggerClass((p) => ({
+              ...p,
+              right: funcW <= 295 ? styles['right-max'] : ''
+            }));
+          }}
         >
           <div className={styles['sdk']}>
             <div className={`${styles['header']} text-[16px] `}>
               <div
                 className={
-                  'font-PingFangSc font-medium leading-6 text-[#0F131F]'
+                  'font-PingFangSc text-[14px] font-[500] leading-6 text-[#0F131F]'
                 }
               >
                 SDK开发文档

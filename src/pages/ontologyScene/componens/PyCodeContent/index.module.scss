@@ -23,6 +23,8 @@
     right: 16px;
     gap: 8px;
     cursor: pointer;
+    display: flex;
+    align-items: center;
   }
 
   &:hover {
@@ -34,12 +36,15 @@
   :global {
     .cm-theme-light {
       height: 100%;
+      overflow: auto;
     }
 
     .cm-editor {
       background: var(--background-color-bg-2, #f8fafd);
       border-bottom: 1px solid var(--line-color-border-2, #dfe2eb);
+      padding: 8px 16px;
       height: 100%;
+      overflow: hidden;
     }
 
     .cm-scroller {
@@ -56,7 +61,8 @@
 
     .cm-gutters-before {
       border: none;
-      background: transparent;
+      //background: transparent;
+      background: var(--background-color-bg-2, #f8fafd);
     }
 
     .cm-line {
