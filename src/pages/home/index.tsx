@@ -20,7 +20,7 @@ export default function HomePage() {
         {/* 欢迎区域 */}
         <div className="mb-8 text-center">
           <Title heading={1} className="mb-4 text-gray-800">
-            欢迎使用业务本体构建平台
+            欢迎使用本体构建与运营平台
           </Title>
           <Paragraph className="text-lg text-gray-600">
             {userInfo?.username
@@ -94,7 +94,7 @@ export default function HomePage() {
         {/* 平台介绍区域 */}
         <Card className="mt-8">
           <Title heading={3} className="mb-4">
-            关于业务本体构建平台
+            关于本体构建与运营平台
           </Title>
           <div className="grid gap-6 md:grid-cols-2">
             <div>

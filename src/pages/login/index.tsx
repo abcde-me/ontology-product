@@ -130,7 +130,7 @@ function Header() {
         <img className="w-48 object-contain" src={LogoPng} />
         <div className="mx-[6px] h-6 w-[1px] bg-gray-400"></div>
         <div className="text-[17px] font-bold text-gray-800">
-          业务本体构建平台
+          本体构建与运营平台
         </div>
       </Space>
     </div>

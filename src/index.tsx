@@ -315,7 +315,7 @@ function App() {
       <Layout.Header className={cls({ hidden })}>
         {!hidden && (
           <Header
-            title="业务本体构建平台"
+            title="本体构建与运营平台"
             openHelpLink={(linkInfo) => {
               openNewPage('/onto/assets/多模态数据治理平台 - 用户手册.pdf');
             }}
