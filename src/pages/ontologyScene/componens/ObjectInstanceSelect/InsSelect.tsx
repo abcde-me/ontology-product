@@ -165,13 +165,13 @@ export const InstanceSelect = (props: ObjectInterfaceSelectProps) => {
         dataSource={currentInsList}
         render={(item, index) => (
           <List.Item
-            key={index}
+            key={item[primaryKey]}
             style={{ border: 'none !important' }}
             className={classNames({
               [styles['ins-item']]: true,
               [styles['ins-selected']]:
                 item[primaryKey] === value ||
-                (value as any[])?.includes?.(item[primaryKey])
+                (Array.isArray(value) && value.includes(item[primaryKey]))
             })}
           >
             <label className={styles['content-container']}>
@@ -249,6 +249,7 @@ export const InstanceSelect = (props: ObjectInterfaceSelectProps) => {
         }
         dropdownMenuStyle={{ width: 400, maxHeight: 400 }}
         triggerProps={{
+          updateOnScroll: true,
           autoAlignPopupWidth: false,
           position: 'bl',
           style: {

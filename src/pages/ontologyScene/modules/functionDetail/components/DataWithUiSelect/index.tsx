@@ -46,10 +46,6 @@ export const DataWithUiSelect = (
   const disabled = disabledConfig.uiType || disabledConfig.paramValue;
   const valueDisabled = disabledConfig.paramValue;
 
-  // const popupContainer = () => {
-  //   return document.querySelector('#functionSettingContainer') || document.body;
-  // };
-
   const renderComponentByUiType = (type: UiType) => {
     switch (type) {
       case UiType.TextArea:
@@ -60,6 +56,10 @@ export const DataWithUiSelect = (
             autoSize={{
               minRows: 1,
               maxRows: 5
+            }}
+            style={{
+              whiteSpace: 'pre-wrap',
+              wordBreak: 'break-all'
             }}
             value={value?.paramValue}
             disabled={valueDisabled}
@@ -99,6 +99,9 @@ export const DataWithUiSelect = (
             disabled={valueDisabled}
             onChange={(value) => changeValue({ paramValue: value })}
             getPopupContainer={popupContainer}
+            triggerProps={{
+              updateOnScroll: true
+            }}
             options={[
               {
                 label: 'true',
@@ -120,6 +123,9 @@ export const DataWithUiSelect = (
             disabled={valueDisabled}
             onChange={(value) => changeValue({ paramValue: value })}
             getPopupContainer={popupContainer}
+            triggerProps={{
+              updateOnScroll: true
+            }}
           />
         );
       case UiType.Uploader:
@@ -151,6 +157,9 @@ export const DataWithUiSelect = (
             disabled={valueDisabled}
             onChange={(value) => changeValue({ paramValue: value })}
             getPopupContainer={popupContainer}
+            triggerProps={{
+              updateOnScroll: true
+            }}
           />
         );
       case UiType.ObjectOne:
@@ -205,14 +214,16 @@ export const DataWithUiSelect = (
       <UiSelect
         readonly={props.readonly}
         value={value?.uiType}
+        getPopupContainer={popupContainer}
         onChange={(uiType) => {
           changeValue({
-            uiType
+            uiType,
+            paramValue: undefined
           });
         }}
         disabled={disabled}
       />
-      <div className={`w-[1px] bg-[#c3c7d4] ${styles['ui-gap']} ui-gap`} />
+      <div className={`w-[1px] ${styles['ui-gap']} ui-gap`} />
       {!!value &&
         renderComponentByUiType(value.uiType!.split('_').pop() as UiType)}
     </div>

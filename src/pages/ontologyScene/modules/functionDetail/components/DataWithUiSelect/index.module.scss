@@ -4,6 +4,7 @@
 
   .ui-gap {
     z-index: 999;
+    background: #c3c7d4;
   }
 
   .textarea-comp {
@@ -15,8 +16,7 @@
   :global {
     .arco-select-view,
     .arco-input-group-addbefore,
-    .arco-input-number-step-button,
-    .arco-input-inner-wrapper {
+    .arco-input-number-step-button {
       border-left: none !important;
       border-top-left-radius: 0 !important;
       border-bottom-left-radius: 0 !important;
@@ -46,33 +46,32 @@
     white-space: nowrap;
   }
 
-  .obj-ref-type-select {
-    //flex: 1 0 50% !important;
-    //min-width: 185px;
-    //box-sizing: border-box;
-  }
-
   .obj-ref-ins-select {
-    //flex: 1 0 50% !important;
-    //min-width: 158px;
-
     .arco-select-view {
       border-left: none !important;
     }
   }
 }
 
+.comp-wrapper:not(:has(:global(.aa-input-number-with-label))) {
+  :global {
+    .arco-input-inner-wrapper {
+      border-left: none !important;
+      border-top-left-radius: 0 !important;
+      border-bottom-left-radius: 0 !important;
+    }
+  }
+}
+
 :global {
-  .arco-form-item-wrapper:has(.formblink-enter-done):not(
-      :has(.aa-input-number-with-label)
-    ) {
+  .arco-form-item-status-error:not(:has(.aa-input-number-with-label)) {
     .ui-gap {
       background: rgb(var(--danger-6)) !important;
     }
   }
 
   .data-ui-select:not(
-    :has(.aa-input-number-with-label, .ins-select-disabled:hover)
+    :has(.aa-input-number-with-label:hover, .ins-select-disabled:hover)
   ) {
     &:focus-within,
     &:active,

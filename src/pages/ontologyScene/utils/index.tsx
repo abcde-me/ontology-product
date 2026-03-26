@@ -56,16 +56,27 @@ export const renderComponentByUiType = (type: UiType, osid?: number) => {
               value: 'false'
             }
           ]}
+          triggerProps={{
+            updateOnScroll: true
+          }}
         />
       );
     case UiType.Date:
-      return <DatePicker className={'min-w-[160px]'} showTime={false} />;
+      return (
+        <DatePicker
+          className={'min-w-[160px]'}
+          showTime={false}
+          triggerProps={{
+            updateOnScroll: true
+          }}
+        />
+      );
     case UiType.Uploader:
       return <FunctionFileParam className={styles['upload']} />;
     case UiType.Geopoint:
       return <MapPicker />;
     case UiType.Timestamp:
-      return <DatePicker showTime />;
+      return <DatePicker showTime triggerProps={{ updateOnScroll: true }} />;
     case UiType.ObjectOne:
       return <ObjectInstanceSelect mode={'single'} />;
     case UiType.ObjectSet:

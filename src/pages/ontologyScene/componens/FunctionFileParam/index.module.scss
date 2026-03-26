@@ -9,10 +9,9 @@
   flex-direction: column;
   justify-content: center;
   overflow: auto;
-  //height: 32px;
 
   &:hover {
-    border: 1px solid rgb(var(--primary-6));
+    border-color: rgb(var(--primary-6));
   }
 
   .upload {
@@ -63,9 +62,9 @@
 }
 
 :global {
-  .arco-form-item-wrapper:has(.formblink-enter-done) {
+  .arco-form-item-status-error {
     .f-file-wrapper {
-      border: 1px solid rgb(var(--danger-6)) !important;
+      border-color: rgb(var(--danger-6)) !important;
     }
   }
 }
