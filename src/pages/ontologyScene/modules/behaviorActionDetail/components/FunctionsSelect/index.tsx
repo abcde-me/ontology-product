@@ -17,6 +17,7 @@ import { FunctionContentDialog } from '@/pages/ontologyScene/modules/behaviorAct
 import { useParams } from 'react-router-dom';
 import { OntologyFunctionDetail } from '@/pages/ontologyScene/types/ontologyFunction';
 import classNames from 'classnames';
+import { GlobalTooltip } from '@ceai-front/arco-material';
 
 export const FunctionsSelect = (
   props: CustomFormItemCompProps<number | undefined> & {
@@ -138,7 +139,7 @@ export const FunctionsSelect = (
               value={value as string}
               className={styles['select-option']}
             >
-              {code}
+              <GlobalTooltip.Ellipsis text={code} />
               <Tooltip content={'详情'}>
                 <IconInfoCircle
                   className={`${styles['function-info-icon']} z-50 cursor-pointer text-[16px]`}
@@ -152,10 +153,11 @@ export const FunctionsSelect = (
               </Tooltip>
               <div
                 className={
-                  'font-PingFangSc text-[12px] leading-[18px] text-[#7D859C]'
+                  'flex items-center overflow-hidden font-PingFangSc text-[12px] leading-[18px] text-[#7D859C]'
                 }
               >
-                显示名称：{name}
+                显示名称：
+                <GlobalTooltip.Ellipsis text={name} />
               </div>
             </Select.Option>
           );

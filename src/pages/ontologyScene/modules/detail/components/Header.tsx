@@ -24,9 +24,10 @@ import SceneModal, { SceneFormData } from '../../list/components/SceneModal';
 import { updateOntologyModel } from '@/api/ontologySceneLibrary/ontologyScene';
 import { OntologScene } from '@/types/ontologySceneApi';
 import SearchDropdown from './SearchDropdown';
-import { EllipsisPopover } from '@ceai-front/arco-material';
+
 import DeveloperResourceIcon from '@/pages/ontologyScene/assets/developer-resource.svg';
 import { openNewPage } from '@/utils/env';
+import { EllipsisPopover } from '@/pages/ontologyScene/componens';
 
 const { Header: LayoutHeader } = Layout;
 

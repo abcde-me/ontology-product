@@ -1,9 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import {
-  EnumRule,
   OntologyActionParam,
-  RuleName,
-  TYPE2COMP_OPTIONS,
   TYPE2RULE_TYPES,
   UI_TYPE_LABEL,
   ValidateRule
@@ -11,6 +8,7 @@ import {
 import styles from './index.module.scss';
 import {
   ContentWithCopy,
+  EllipsisPopover,
   OsDrawer,
   PyCodeContent
 } from '@/pages/ontologyScene/componens';
@@ -28,7 +26,7 @@ import {
 import { getActionDetail } from '@/api/ontologySceneLibrary/ontologyAction';
 import ObjectTypeTag from '../../../../componens/ObjectTypeTag';
 import NoDataEmpty from '@/components/NoDataEmpty';
-import { EllipsisPopover, NoDataCard } from '@ceai-front/arco-material';
+import { NoDataCard } from '@ceai-front/arco-material';
 import { ValidateRuleCard } from '@/pages/ontologyScene/modules/behaviorActions/components';
 
 interface IProps {

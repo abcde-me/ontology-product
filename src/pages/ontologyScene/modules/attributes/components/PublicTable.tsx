@@ -18,10 +18,11 @@ import {
 import { IconPlus, IconSearch } from '@arco-design/web-react/icon';
 import {
   CopyItemIcon,
-  EllipsisPopover,
   ProButton,
   SearchTable
 } from '@ceai-front/arco-material';
+import { EllipsisPopover } from '@/pages/ontologyScene/componens';
+
 import useUrlState from '@ahooksjs/use-url-state';
 import { useWorkflowTable } from '../../../hooks/useTable';
 import styles from '../list.module.scss';

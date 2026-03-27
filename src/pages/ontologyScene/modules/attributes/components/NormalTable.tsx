@@ -9,11 +9,7 @@ import {
   Button
 } from '@arco-design/web-react';
 import { IconSearch } from '@arco-design/web-react/icon';
-import {
-  CopyItemIcon,
-  EllipsisPopover,
-  SearchTable
-} from '@ceai-front/arco-material';
+import { CopyItemIcon, SearchTable } from '@ceai-front/arco-material';
 import useUrlState from '@ahooksjs/use-url-state';
 import { useWorkflowTable } from '../../../hooks/useTable';
 import styles from '../list.module.scss';
@@ -26,6 +22,7 @@ import { useHistory } from 'react-router-dom';
 import { listOntologyObjectType } from '@/api/ontologySceneLibrary/objectType';
 import type { ListOntologyPhysicalPropertiesReq } from '@/types/graphApi';
 import { openNewPage } from '@/utils/env';
+import { EllipsisPopover } from '@/pages/ontologyScene/componens';
 
 export interface NormalTableProps {
   /** total 变化时的回调函数 */

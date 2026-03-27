@@ -1,12 +1,13 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { Popover, Select, SelectProps, Tooltip } from '@arco-design/web-react';
-import { EllipsisPopover, GlobalTooltip } from '@ceai-front/arco-material';
+import { GlobalTooltip } from '@ceai-front/arco-material';
 import { listOntologyObjectType } from '@/api/ontologySceneLibrary/objectType';
 import { ObjectType } from '@/types/objectType';
 import { OBJECT_TYPE_ICON_OPTIONS } from '@/pages/ontologyScene/common/constants';
 import styles from './index.module.scss';
 import { SyncStatus } from '@/types/graphApi';
 import { isNil } from 'lodash-es';
+import { EllipsisPopover } from '@/pages/ontologyScene/componens';
 
 export interface ObjectTypeSelectProps {
   /** 当前选中的对象类型ID */
@@ -117,11 +118,11 @@ const ObjectTypeSelect: React.FC<ObjectTypeSelectProps> = ({
           <div className="nowrap flex h-[22px] flex-shrink-0 items-center overflow-hidden">
             <EllipsisPopover
               value={option.name}
-              className="flex-1 leading-[22px]"
+              className="w-max leading-[22px]"
               wrapperClassName="min-w-0 leading-[22px] flex items-center"
             />
             {!isNil(option.code) && option.code !== '-1' && (
-              <div className="flex h-[22px] min-w-[60px] flex-1 items-center text-[14px] leading-[22px] text-[var(--color-text-1)]">
+              <div className="flex h-[22px] w-max min-w-[60px] flex-shrink-0 items-center text-[14px] leading-[22px] text-[var(--color-text-1)]">
                 <div>(id:</div>
                 <EllipsisPopover
                   value={option.code}

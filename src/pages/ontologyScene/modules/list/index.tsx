@@ -12,7 +12,6 @@ import {
 import { IconPlus, IconDelete } from '@arco-design/web-react/icon';
 import {
   ExpandableProcessFlow,
-  EllipsisPopover,
   ProcessStep,
   NoDataCard,
   NoResultCard
@@ -41,6 +40,7 @@ import dayjs from 'dayjs';
 import { PermissionWrapper } from '@/components/PermissionGuard';
 import { ONTOLOGY_PERMISSIONS } from '@/config/permissions';
 import { useHasPermission } from '@/store/userInfoStore';
+import { EllipsisPopover } from '@/pages/ontologyScene/componens';
 
 // 扩展 ProcessStep 类型，使 description 支持 ReactNode
 interface SceneProcessStep extends Omit<ProcessStep, 'description'> {

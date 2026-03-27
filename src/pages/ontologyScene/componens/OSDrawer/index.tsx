@@ -3,7 +3,7 @@ import { Button, Drawer, DrawerProps } from '@arco-design/web-react';
 import styles from './index.module.scss';
 import { IconClose } from '@arco-design/web-react/icon';
 import classNames from 'classnames';
-import { ProButton } from '@ceai-front/arco-material';
+import { GlobalTooltip, ProButton } from '@ceai-front/arco-material';
 import { usePermission } from '@/hooks';
 import { PermissionWrapper } from '@/components/PermissionGuard';
 import { ONTOLOGY_PERMISSIONS } from '@/config/permissions';
@@ -23,8 +23,6 @@ export const OsDrawer = (props: OSDrawerProps) => {
     { [styles['os-drawer-default-width']]: !width },
     className
   );
-
-  const { hasPermission } = usePermission();
 
   return (
     <Drawer
@@ -50,7 +48,8 @@ export const OsDrawer = (props: OSDrawerProps) => {
                 'font-PingFangSc text-[16px] font-medium leading-6 text-[#0F131F]'
               }
             >
-              {title}
+              {/*@ts-ignore*/}
+              <GlobalTooltip.Ellipsis text={title || '-'} />
             </div>
             {extra && <div className="ml-4">{extra}</div>}
             {onEdit && (

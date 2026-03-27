@@ -35,11 +35,7 @@ import type {
 } from '@/types/graphApi';
 import type { GetOntologyObjectTypeDetailRes } from '@/types/objectType';
 import { LinkType, SyncStatus } from '@/types/graphApi';
-import {
-  DotStatus,
-  EllipsisPopover,
-  NoDataCard
-} from '@ceai-front/arco-material';
+import { DotStatus, NoDataCard } from '@ceai-front/arco-material';
 import {
   OBJECT_TYPE_ICON_OPTIONS,
   OBJECT_TYPE_SYNC_STATUS_CONFIG
@@ -49,6 +45,7 @@ import { isNil } from 'lodash-es';
 import { getLinkTypeText } from '@/pages/ontologyScene/utils';
 import { AttributeItem } from '@/pages/ontologyScene/componens/ObjectTypeDetailDrawer';
 import { openNewPage } from '@/utils/env';
+import { EllipsisPopover } from '@/pages/ontologyScene/componens';
 
 const defaultPageSize = 10;
 
@@ -505,7 +502,7 @@ const Panel: FC<any> = ({ id, data }) => {
 
     return (
       <div
-        className="flex flex-1 items-center gap-3 rounded-lg px-4 py-3"
+        className="flex flex-1 items-center gap-3 overflow-hidden rounded-lg px-4 py-3"
         style={{
           backgroundColor: '#fff',
           minHeight: '56px'
@@ -514,11 +511,11 @@ const Panel: FC<any> = ({ id, data }) => {
         <div className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded">
           <IconComponent className="h-6 w-6" />
         </div>
-        <div className="min-w-0 text-[14px] leading-[22px] text-[#23293b]">
+        <div className="min-w-0 overflow-hidden text-[14px] leading-[22px] text-[#23293b]">
           <EllipsisPopover preferTypography value={name} />
         </div>
         {!isNil(objectType?.syncStatus) ? (
-          <div className="flex items-center">
+          <div className="flex flex-shrink-0 items-center">
             <DotStatus
               text=""
               color={
@@ -716,7 +713,7 @@ const Panel: FC<any> = ({ id, data }) => {
                     </div>
 
                     {/* 关系图 */}
-                    <div className="flex items-center bg-[#F2F8FF] p-[12px]">
+                    <div className="flex items-center overflow-hidden bg-[#F2F8FF] p-[12px]">
                       {renderObjectTypeCard(leftObjectType, true)}
                       <div className="flex w-[76px] min-w-[76px] items-center">
                         <span className="h-0 flex-1 border-t border-dashed border-[#CBD5E1]" />
