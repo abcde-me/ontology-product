@@ -266,7 +266,7 @@ export default function BehaviorActionDetailPage() {
               showWordLimit
               allowClear
               onBlur={(e) => {
-                if (!!e.target.value?.trim()) validateSameValue('name');
+                if (!!e.target.value?.trim()) validateSameValue('code');
               }}
             />
           </FormItem>
@@ -276,6 +276,7 @@ export default function BehaviorActionDetailPage() {
               placeholder="请输入描述说明"
               autoSize={{ minRows: 3, maxRows: 6 }}
               maxLength={500}
+              className={'w-[640px] break-all'}
               // className={'w-[640px]'}
               wrapperStyle={{ width: '640px' }}
               showWordLimit

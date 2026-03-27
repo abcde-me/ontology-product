@@ -53,6 +53,7 @@ import { buildTestFunctionData } from '@/pages/ontologyScene/modules/functionDet
 import { useParams } from 'react-router-dom';
 import { UploadItem } from '@arco-design/web-react/es/Upload';
 import useTestFunction from '@/pages/ontologyScene/hooks/useTestFunction';
+import { isNil } from 'lodash-es';
 
 const CompWithTooltip = (Comp: React.FC<any>) => {
   return ({ content, ...other }) => (
@@ -289,7 +290,11 @@ export const FunctionsSetting = (props: {
                                   ) {
                                     const { objInsID } =
                                       paramValue as ObjInsValue;
-                                    if (!objInsID) {
+                                    if (
+                                      isNil(objInsID) ||
+                                      (Array.isArray(objInsID) &&
+                                        !objInsID.length)
+                                    ) {
                                       return onError('请选择对象实例');
                                     }
                                   }

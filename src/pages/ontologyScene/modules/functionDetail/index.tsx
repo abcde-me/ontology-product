@@ -284,8 +284,8 @@ export default function OSFunctionDetailPage() {
               autoSize={{ minRows: 3, maxRows: 6 }}
               maxLength={500}
               showWordLimit
-              className={'w-[640px]'}
-              wrapperStyle={{ width: 'auto' }}
+              className={'break-all'}
+              wrapperStyle={{ width: '640px' }}
             />
           </FormItem>
           <div className={styles['params-setting-container']}>

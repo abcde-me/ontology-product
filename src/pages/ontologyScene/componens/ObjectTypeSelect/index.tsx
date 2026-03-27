@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { Popover, Select, SelectProps, Tooltip } from '@arco-design/web-react';
-import { EllipsisPopover } from '@ceai-front/arco-material';
+import { EllipsisPopover, GlobalTooltip } from '@ceai-front/arco-material';
 import { listOntologyObjectType } from '@/api/ontologySceneLibrary/objectType';
 import { ObjectType } from '@/types/objectType';
 import { OBJECT_TYPE_ICON_OPTIONS } from '@/pages/ontologyScene/common/constants';
@@ -208,9 +208,9 @@ const ObjectTypeSelect: React.FC<ObjectTypeSelectProps> = ({
                 </div>
               )}
               {/* 右侧名称 */}
-              <EllipsisPopover
-                preferTypography
-                value={item.name || '-'}
+              <GlobalTooltip.Ellipsis
+                // preferTypography
+                text={item.name || '-'}
                 className="text-[14px] leading-[30px] text-[var(--color-text-1)]"
               />
             </div>
