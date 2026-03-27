@@ -96,11 +96,53 @@ export const removeLoginToken = () => {
   removeLocalStorage('console_token');
   removeLocalStorage('customizeOptions');
 };
+type RouteMapItem = { from: string; to: string };
+
+const normalizeRouteMap = (routeMap: unknown): RouteMapItem[] => {
+  if (!routeMap) return [];
+  if (Array.isArray(routeMap)) {
+    return routeMap.filter((item): item is RouteMapItem => {
+      if (!item || typeof item !== 'object') return false;
+      const candidate = item as RouteMapItem;
+      return (
+        typeof candidate.from === 'string' && typeof candidate.to === 'string'
+      );
+    });
+  }
+  if (typeof routeMap === 'object') {
+    return Object.entries(routeMap as Record<string, unknown>)
+      .filter((entry): entry is [string, string] => {
+        const [, to] = entry;
+        return typeof to === 'string';
+      })
+      .map(([from, to]) => ({ from, to }));
+  }
+  return [];
+};
+
+const mapPageToHost = (page: string) => {
+  const routeMap = (window as any).$wujie?.props?.routeMap;
+  const mappings = normalizeRouteMap(routeMap).sort(
+    (a, b) => b.from.length - a.from.length
+  );
+  if (!mappings.length) {
+    return page;
+  }
+  for (const { from, to } of mappings) {
+    if (page.startsWith(from)) {
+      return `${to}${page.slice(from.length)}`;
+    }
+  }
+  return page;
+};
+
 export const openNewPage = (page: string) => {
-  if (isWujie) {
-    (window as any).$wujie?.props?.openNewPage(page);
+  const mappedPage = mapPageToHost(page);
+  const wujieOpen = (window as any).$wujie?.props?.openNewPage;
+  if (isWujie && typeof wujieOpen === 'function') {
+    wujieOpen(mappedPage);
   } else {
-    window.open(page, '_blank');
+    window.open(mappedPage, '_blank');
   }
 };
 
