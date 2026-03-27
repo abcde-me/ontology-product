@@ -27,7 +27,7 @@ export default function Home() {
       if (response.status === 200 && response.code === '') {
         Message.success('创建成功');
         history.push(
-          `/tenant/compute/modaforge/ontologyScene/detail/${response.data.id}`
+          `/tenant/compute/onto/ontologyScene/detail/${response.data.id}`
         );
       } else {
         Message.error(response.message || '创建失败');
