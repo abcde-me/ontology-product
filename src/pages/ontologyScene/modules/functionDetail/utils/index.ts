@@ -634,7 +634,6 @@ export function getFreezeRanges(data: {
     functionName,
     funcReturn
   );
-  debugger;
   const ranges = [...funcSignatureRanges, ...lastReturnRanges];
 
   return [
