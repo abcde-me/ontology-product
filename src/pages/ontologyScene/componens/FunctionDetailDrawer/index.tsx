@@ -2,6 +2,7 @@ import React, { useMemo, useState } from 'react';
 import classNames from 'classnames';
 import {
   ContentWithCopy,
+  EllipsisPopover,
   OsDrawer,
   OSDrawerProps,
   PyCodeContent
@@ -17,7 +18,6 @@ import { useRequest } from 'ahooks';
 import { getFunctionDetail } from '@/api/ontologySceneLibrary/ontologyFunction';
 import { isNil } from 'lodash-es';
 import { GlobalTooltip } from '@ceai-front/arco-material';
-import { EllipsisPopover } from '@/pages/ontologyScene/componens';
 
 interface IProps extends OSDrawerProps {
   data?: number;
