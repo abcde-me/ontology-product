@@ -69,7 +69,7 @@ export const BehaviorDetail = (props: IProps) => {
       title: '参数显示名称',
       dataIndex: 'name',
       key: 'name',
-      width: 160,
+      width: 180,
       ellipsis: true,
       render(value) {
         return (
@@ -82,7 +82,7 @@ export const BehaviorDetail = (props: IProps) => {
       title: '参数ID',
       dataIndex: 'code',
       key: 'code',
-      width: 160,
+      width: 180,
       ellipsis: true,
       render(value) {
         return value ? <ContentWithCopy value={value} /> : '-';
@@ -93,6 +93,7 @@ export const BehaviorDetail = (props: IProps) => {
       title: '数据类型',
       dataIndex: 'type',
       key: 'type',
+      width: 180,
       ellipsis: true,
       render(value) {
         return (
@@ -104,7 +105,7 @@ export const BehaviorDetail = (props: IProps) => {
       title: '界面控件',
       dataIndex: 'uiType',
       key: 'uiType',
-      width: 160,
+      width: 180,
       render: (type: UiType = UiType.Input) => {
         return UI_TYPE_LABEL[type];
       }
@@ -178,7 +179,9 @@ export const BehaviorDetail = (props: IProps) => {
               </div>
             </div>
             <div className={styles['base-info-item']}>
-              <div className={styles['item-field']}>描述说明：</div>
+              <div className={styles['item-field']} style={{ width: 70 }}>
+                描述说明：
+              </div>
               <div className={styles['item-value']}>
                 <EllipsisPopover
                   value={actionDetail?.description || '-'}
@@ -206,7 +209,9 @@ export const BehaviorDetail = (props: IProps) => {
               </div>
             </div>
             <div className={styles['base-info-item']}>
-              <div className={styles['item-field']}>函数：</div>
+              <div className={styles['item-field']} style={{ width: 70 }}>
+                函数：
+              </div>
               <div className={styles['item-value']}>
                 <EllipsisPopover
                   value={actionDetail?.functionName || '-'}

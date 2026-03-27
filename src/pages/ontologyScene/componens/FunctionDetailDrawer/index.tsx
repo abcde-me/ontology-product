@@ -45,8 +45,8 @@ const INPUT_COLUMNS: TableColumnProps<ParamRow>[] = [
       return (
         <EllipsisPopover
           value={value || '-'}
-          preferTypography
           wrapperClassName={'w-full'}
+          preferTypography
         />
       );
     }
@@ -54,14 +54,14 @@ const INPUT_COLUMNS: TableColumnProps<ParamRow>[] = [
   {
     title: '入参类型',
     dataIndex: 'type',
-    width: 200,
+    width: 400,
     ellipsis: true,
     render: (value: string) => {
       return (
         <EllipsisPopover
           value={value || '-'}
-          preferTypography
           wrapperClassName={'w-full'}
+          preferTypography
         />
       );
     }
@@ -86,7 +86,7 @@ const OUTPUT_COLUMNS: TableColumnProps<ParamRow>[] = [
   {
     title: '出参类型',
     dataIndex: 'type',
-    width: 200,
+    width: 400,
     ellipsis: true,
     render: (value: string) => {
       return (
@@ -171,7 +171,12 @@ export const FunctionDetailDrawer = (props: IProps) => {
               </div>
             </div>
             <div className={styles['info-item']}>
-              <div className={styles['info-label']}>函数名称(id)</div>
+              <div
+                className={styles['info-label']}
+                style={{ width: 90, marginRight: 16 }}
+              >
+                函数名称(id)
+              </div>
               <div className={styles['info-value']}>
                 <ContentWithCopy value={basicInfo.panelId} />
               </div>
