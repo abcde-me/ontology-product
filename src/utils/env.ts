@@ -136,13 +136,34 @@ const mapPageToHost = (page: string) => {
   return page;
 };
 
+const standaloneMappings: RouteMapItem[] = [
+  {
+    from: '/onto/tenant/compute/onto/metadataManagement',
+    to: '/modaforge/tenant/compute/modaforge/metadataManagement'
+  }
+];
+
+const mapPageForStandalone = (page: string) => {
+  if (/^https?:\/\//i.test(page)) {
+    return page;
+  }
+  for (const { from, to } of standaloneMappings) {
+    if (page.startsWith(from)) {
+      const nextPath = `${to}${page.slice(from.length)}`;
+      const { protocol, hostname } = window.location;
+      return `${protocol}//${hostname}:9030${nextPath}`;
+    }
+  }
+  return page;
+};
+
 export const openNewPage = (page: string) => {
   const mappedPage = mapPageToHost(page);
   const wujieOpen = (window as any).$wujie?.props?.openNewPage;
   if (isWujie && typeof wujieOpen === 'function') {
     wujieOpen(mappedPage);
   } else {
-    window.open(mappedPage, '_blank');
+    window.open(mapPageForStandalone(mappedPage), '_blank');
   }
 };
 
