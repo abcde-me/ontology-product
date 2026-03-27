@@ -12,6 +12,7 @@ import BehaviorTestSvg from '@/assets/benti/behaviorTest.svg';
 import { buildFormFieldValidateRules } from '@/pages/ontologyScene/modules/behaviorActionDetail/utils';
 import { TestFunctionInfo } from '@/pages/ontologyScene/hooks/useTestFunction';
 import { useParams } from 'react-router-dom';
+import { FormItem } from '@/pages/ontologyScene/componens';
 
 interface RightPanelProps {
   testFunctionHook: TestFunctionInfo;
@@ -235,7 +236,7 @@ export const RightPanel: React.FC<RightPanelProps> = ({ testFunctionHook }) => {
           {selectedNode.behavior.params
             ?.filter((param) => param.inputType === 'input') // 只显示输入参数
             .map((param) => (
-              <Form.Item
+              <FormItem
                 key={param.code}
                 label={param.name}
                 field={param.code}
@@ -251,7 +252,7 @@ export const RightPanel: React.FC<RightPanelProps> = ({ testFunctionHook }) => {
                   param.uiType,
                   OSId ? +OSId : undefined
                 )}
-              </Form.Item>
+              </FormItem>
             ))}
         </Form>
       </div>

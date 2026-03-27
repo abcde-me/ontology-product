@@ -18,11 +18,9 @@ import {
 } from '@arco-design/web-react';
 import { IconCopy } from '@arco-design/web-react/icon';
 import { OsDrawer } from '@/pages/ontologyScene/componens';
-import {
-  DotStatus,
-  EllipsisPopover,
-  NoDataCard
-} from '@ceai-front/arco-material';
+import { DotStatus, NoDataCard } from '@ceai-front/arco-material';
+import { EllipsisPopover } from '@/pages/ontologyScene/componens';
+
 import copy from 'copy-to-clipboard';
 import { getOntologyObjectTypeDetail } from '@/api/ontologySceneLibrary/objectType';
 import {

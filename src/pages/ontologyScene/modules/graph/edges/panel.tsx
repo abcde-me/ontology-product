@@ -14,9 +14,9 @@ import {
 import { useHistory, useParams } from 'react-router-dom';
 import copy from 'copy-to-clipboard';
 import {
-  EllipsisPopover,
   NoDataCard,
-  DotStatus
+  DotStatus,
+  GlobalTooltip
 } from '@ceai-front/arco-material';
 import {
   getOntologyLinkType,
@@ -30,6 +30,7 @@ import {
 } from '@/pages/ontologyScene/common/constants';
 import { LinkType, SyncStatus } from '@/types/graphApi';
 import { isNil } from 'lodash-es';
+import { EllipsisPopover } from '@/pages/ontologyScene/componens';
 
 const TabPane = Tabs.TabPane;
 const defaultPageSize = 10;
@@ -239,7 +240,7 @@ function EdgePanel() {
 
     return (
       <div
-        className="flex flex-1 items-center gap-3 rounded-lg px-4 py-3"
+        className="flex flex-1 items-center gap-3 overflow-hidden rounded-lg px-4 py-3"
         style={{
           backgroundColor: '#fff',
           minHeight: '56px'
@@ -248,7 +249,7 @@ function EdgePanel() {
         <div className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded">
           <IconComponent className="h-6 w-6" />
         </div>
-        <div className="min-w-0 flex-1 text-sm font-normal leading-[22px] text-[#23293b]">
+        <div className="min-w-0 flex-1 overflow-hidden text-sm font-normal leading-[22px] text-[#23293b]">
           <EllipsisPopover
             preferTypography
             wrapperClassName="min-w-0"
@@ -353,14 +354,15 @@ function EdgePanel() {
   return (
     <div className="flex h-full w-[600px] flex-col rounded-[12px] bg-white">
       {/* 头部 */}
-      <div className="mx-[16px] flex items-center justify-between border-b border-[var(--color-border-2)] border-gray-300 pb-[8px] pt-[20px]">
-        <div className="flex items-center gap-2">
-          <IconLink className="h-4 w-4 text-gray-500" />
-          <span className="text-[16px]/[24px] font-semibold text-[#1E293B]">
-            {basicInfo?.name || '链接详情'}
-          </span>
+      <div className="mx-[16px] flex items-center justify-between gap-2 overflow-hidden border-b border-[var(--color-border-2)] border-gray-300 pb-[8px] pt-[20px]">
+        <div className="flex flex-1 items-center gap-2 overflow-hidden">
+          <IconLink className="h-4 w-4 flex-shrink-0 text-gray-500" />
+          <GlobalTooltip.Ellipsis
+            text={basicInfo?.name || '链接详情'}
+            className="overflow-hidden text-[16px]/[24px] font-semibold text-[#1E293B]"
+          ></GlobalTooltip.Ellipsis>
         </div>
-        <div className="flex items-center gap-[16px]">
+        <div className="flex flex-shrink-0 items-center gap-[16px]">
           <Button
             type="outline"
             onClick={handleEdit}
@@ -411,14 +413,14 @@ function EdgePanel() {
                 <span className="w-[80px] flex-shrink-0 text-[14px] leading-[22px] text-[#86909c]">
                   链接id：
                 </span>
-                <div className="flex items-center gap-[4px]">
-                  <span className="text-[14px] leading-[22px] text-[#1E293B]">
-                    {basicInfo?.code || '-'}
-                  </span>
+                <div className="flex items-center gap-[4px] overflow-hidden">
+                  <div className="w-max overflow-hidden text-[14px] leading-[22px] text-[#1E293B]">
+                    <EllipsisPopover value={basicInfo?.code || '-'} />
+                  </div>
                   {!isNil(basicInfo?.code) && (
                     <IconCopy
                       fontSize={14}
-                      className="cursor-pointer text-gray-500 hover:text-[rgba(var(--primary-6))]"
+                      className="flex-shrink-0 cursor-pointer text-gray-500 hover:text-[rgba(var(--primary-6))]"
                       onClick={() => handleCopy(String(basicInfo?.code))}
                     />
                   )}
@@ -436,11 +438,11 @@ function EdgePanel() {
           </div>
 
           {/* 关系对 */}
-          <div className="mb-[24px] flex flex-col gap-[12px]">
+          <div className="mb-[24px] flex flex-col gap-[12px] overflow-hidden">
             <div className="text-[14px] font-[600] leading-[22px] text-[#1E293B]">
               关系对
             </div>
-            <div className="flex items-center gap-4 bg-[#F2F8FF] p-[12px]">
+            <div className="flex items-center gap-4 overflow-hidden bg-[#F2F8FF] p-[12px]">
               {renderObjectTypeCard(
                 {
                   name: basicInfo?.sourceObjectTypeName,
@@ -449,7 +451,7 @@ function EdgePanel() {
                 },
                 true
               )}
-              <div className="flex w-[76px] min-w-[76px] items-center">
+              <div className="flex w-[76px] min-w-[76px] flex-shrink-0 items-center">
                 <span className="h-0 flex-1 border-t border-dashed border-[#CBD5E1]" />
                 <span className="rounded border border-[#E5E6EB] bg-white px-2 py-[2px] text-[12px] leading-[18px] text-[#23293b]">
                   {linkTypeText}

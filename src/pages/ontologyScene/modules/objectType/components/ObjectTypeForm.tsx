@@ -51,7 +51,7 @@ import {
   DataSourceType
 } from '@/pages/ontologyScene/common/constants';
 import ObjectTypeIconSelector from './ObjectTypeIconSelector';
-import { EllipsisPopover } from '@ceai-front/arco-material';
+import { EllipsisPopover } from '@/pages/ontologyScene/componens';
 import { PrefixAimdp } from '@/api/endpoints';
 import { openNewPage } from '@/utils/env';
 

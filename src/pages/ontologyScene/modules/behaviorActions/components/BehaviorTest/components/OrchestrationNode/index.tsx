@@ -1,10 +1,6 @@
 import React, { useState } from 'react';
 import { Modal, Tooltip, Typography } from '@arco-design/web-react';
-import {
-  DotStatus,
-  CopyItemIcon,
-  EllipsisPopover
-} from '@ceai-front/arco-material';
+
 import { OrchestrationNode as OrchestrationNodeType } from '../../types';
 import { useBusinessStore } from '../../store/businessStore';
 import { formatParamDisplayValue } from './utils';

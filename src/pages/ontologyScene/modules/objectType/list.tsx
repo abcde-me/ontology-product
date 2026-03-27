@@ -19,7 +19,6 @@ import {
 import {
   CopyItemIcon,
   DotStatus,
-  EllipsisPopover,
   ProButton,
   SearchTable
 } from '@ceai-front/arco-material';
@@ -46,6 +45,7 @@ import dayjs from 'dayjs';
 import { PermissionWrapper } from '@/components/PermissionGuard';
 import { ONTOLOGY_PERMISSIONS } from '@/config/permissions';
 import LogIcon from '@/pages/ontologyScene/assets/log-icon.svg';
+import { EllipsisPopover } from '@/pages/ontologyScene/componens';
 
 export default function OntologySceneObjectTypeList() {
   const [form] = Form.useForm();

@@ -16,7 +16,8 @@ import styles from './index.module.scss';
 import { useRequest } from 'ahooks';
 import { getFunctionDetail } from '@/api/ontologySceneLibrary/ontologyFunction';
 import { isNil } from 'lodash-es';
-import { EllipsisPopover, GlobalTooltip } from '@ceai-front/arco-material';
+import { GlobalTooltip } from '@ceai-front/arco-material';
+import { EllipsisPopover } from '@/pages/ontologyScene/componens';
 
 interface IProps extends OSDrawerProps {
   data?: number;

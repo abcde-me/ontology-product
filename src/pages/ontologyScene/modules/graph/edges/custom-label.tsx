@@ -1,12 +1,9 @@
 import { useNodesReadOnly } from '@ceai-front/workflow';
-import { Badge, Tag } from '@arco-design/web-react';
 import React, { useMemo } from 'react';
-import cn from 'classnames';
 import { useNodes } from 'reactflow';
 import { useDemoStore } from '../common/store';
-import { DotStatus, EllipsisPopover } from '@ceai-front/arco-material';
-import { OBJECT_TYPE_SYNC_STATUS_CONFIG } from '@/pages/ontologyScene/common/constants';
 import IconLink from '../../../assets/graph-link-icon.svg';
+import { EllipsisPopover } from '@/pages/ontologyScene/componens';
 
 export default function CustomLabel(props: any) {
   const { labelX, labelY, defaultLabelRenderer, source, target, data, id } =

@@ -1,9 +1,5 @@
 import React, { useMemo } from 'react';
-import {
-  DotStatus,
-  CopyItemIcon,
-  EllipsisPopover
-} from '@ceai-front/arco-material';
+import { DotStatus } from '@ceai-front/arco-material';
 import { TableColumnProps } from '@arco-design/web-react';
 import { ObjectTypeTag } from '@/pages/ontologyScene/componens';
 import { ContentWithCopy } from '@/pages/ontologyScene/componens';
