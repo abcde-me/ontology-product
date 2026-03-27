@@ -65,9 +65,7 @@ export const LayoutWithSider = memo(function LayoutWithSider({ children }) {
     hideSidebarPaths.some(
       (path) => path === location.pathname || location.pathname.includes(path)
     ) ||
-    isInFrame ||
-    isWujie ||
-    isEmbedded; // 被单产品集成时隐藏侧边栏
+    (isInFrame && !isWujie); // 被单产品集成时隐藏侧边栏
 
   const actives = useMemo(() => {
     // console.log('noto actives', location.pathname, location.search, locSearch);
