@@ -326,7 +326,12 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
             const fileName =
               initialValues.intermediateTable.filePath.split('/').pop() || '';
             if (fileName && fileName.trim()) {
-              setInitialFileList([{ name: fileName }]);
+              setInitialFileList([
+                {
+                  uid: `initial-link-file-${initialValues.id ?? 'new'}`,
+                  name: fileName
+                }
+              ]);
             }
           }
         }
