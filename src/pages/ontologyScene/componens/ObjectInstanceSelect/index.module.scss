@@ -115,16 +115,14 @@
     &:focus-within,
     &:active,
     &:hover {
-      .ui-gap {
+      .obj-ins-gap {
         background: rgb(var(--primary-6));
       }
     }
   }
 
-  .arco-form-item-wrapper:has(.formblink-enter-done):not(
-      :has(.aa-input-number-with-label)
-    ) {
-    .ui-gap {
+  .arco-form-item-status-error {
+    .obj-ins-gap {
       background: rgb(var(--danger-6)) !important;
     }
   }

@@ -109,7 +109,7 @@ export const ObjectInstanceSelect = (props: ObjInsProps) => {
         }}
       />
       <div
-        className={`w-[1px] bg-[#c3c7d4] ${styles['ui-gap']} ui-gap flex-shrink-0`}
+        className={`w-[1px] bg-[#c3c7d4] ${styles['ui-gap']} obj-ins-gap flex-shrink-0`}
       />
       <InstanceSelect
         objectTypeId={value?.objectTypeData?.id}

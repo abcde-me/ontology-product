@@ -219,6 +219,10 @@ const ObjectTypeSelect: React.FC<ObjectTypeSelectProps> = ({
         dropdownMenuClassName={styles['object-type-select-dropdown']}
         className="object-type-select"
         {...selectProps}
+        triggerProps={{
+          updateOnScroll: true,
+          ...selectProps?.triggerProps
+        }}
       >
         {objectTypeList.map((item) => (
           <Select.Option key={item.id} value={item[primaryKey] as any}>

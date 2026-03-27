@@ -1,4 +1,10 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, {
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState
+} from 'react';
 import styles from './index.module.scss';
 import { ProButton } from '@ceai-front/arco-material';
 import {
@@ -40,6 +46,7 @@ import classNames from 'classnames';
 import { getFunctionSDK } from '@/api/ontologySceneLibrary/ontologyFunction';
 import {
   FormItem,
+  ObjInsValue,
   ResizeBoxWithCursorChange
 } from '@/pages/ontologyScene/componens';
 import { buildTestFunctionData } from '@/pages/ontologyScene/modules/functionDetail/utils';
@@ -139,8 +146,8 @@ export const FunctionsSetting = (props: {
       });
   };
 
-  const getPopoverContainer = (node) => {
-    return ref.current || document.body;
+  const getPopoverContainer = () => {
+    return isFullscreen ? ref.current || document.body : document.body;
   };
 
   useEffect(() => {
@@ -253,6 +260,10 @@ export const FunctionsSetting = (props: {
                                   }
                                   const [dataType] = uiType!.split('_');
                                   if (dataType === ParamType.Attachment) {
+                                    const files = paramValue as UploadItem[];
+                                    if (!files.length) {
+                                      return onError('请选择文件');
+                                    }
                                     if (
                                       (paramValue as UploadItem[]).some(
                                         ({ status }) => status === 'error'
@@ -268,6 +279,18 @@ export const FunctionsSetting = (props: {
                                     ) {
                                       onError('文件正在上传，请稍候');
                                       return;
+                                    }
+                                  }
+                                  if (
+                                    [
+                                      ParamType.ObjectSet,
+                                      ParamType.ObjectOne
+                                    ].includes(dataType as ParamType)
+                                  ) {
+                                    const { objInsID } =
+                                      paramValue as ObjInsValue;
+                                    if (!objInsID) {
+                                      return onError('请选择对象实例');
                                     }
                                   }
                                 }
@@ -359,7 +382,7 @@ export const FunctionsSetting = (props: {
                       }}
                     >
                       <p className={styles['param-name-item']}>出参名称</p>
-                      <p className={'flex-1'}>数据类型</p>
+                      <p className={styles['param-value-item']}>数据类型</p>
                       <div className={'w-4 flex-shrink-0'} />
                     </div>
                     {fields.map(({ field, key }, index) => {
@@ -446,7 +469,7 @@ export const FunctionsSetting = (props: {
                         onClick={() => {
                           add({
                             name: `var_${fields.length + 1}`,
-                            type: ParamType.String
+                            type: ParamType.Float
                           });
                         }}
                       >

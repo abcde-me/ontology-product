@@ -1624,10 +1624,10 @@
     react-sticky "^6.0.3"
     zustand "^4.5.2"
 
-"@ceai-front/workflow@^0.1.5":
-  version "0.1.5"
-  resolved "http://npm.cestc.cn/@ceai-front/workflow/download/@ceai-front/workflow-0.1.5.tgz#f4b74c1e23250bfba220f95d47b28eac8e2da38b"
-  integrity sha1-9LdMHiMlC/uiIPldR7KOrI4to4s=
+"@ceai-front/workflow@^0.2.1":
+  version "0.2.1"
+  resolved "http://npm.cestc.cn/@ceai-front/workflow/download/@ceai-front/workflow-0.2.1.tgz#f11bf13c909b74545d5b178f5367e3ce3ecd3284"
+  integrity sha1-8RvxPJCbdFRdWxePU2fjzj7NMoQ=
   dependencies:
     "@arco-design/web-react" ">=2.66.5"
     "@dagrejs/dagre" "^1.1.4"
@@ -1655,6 +1655,7 @@
     ahooks "^3.8.1"
     class-variance-authority "^0.7.0"
     classnames "^2.5.1"
+    click-to-react-component "^1.1.3"
     copy-to-clipboard "^3.3.3"
     dayjs "^1.11.13"
     echarts "^5.5.1"
@@ -2366,12 +2367,24 @@
   resolved "http://npm.cestc.cn/@eslint/js/download/@eslint/js-8.57.1.tgz#de633db3ec2ef6a3c89e2f19038063e8a122e2c2"
   integrity sha1-3mM9s+wu9qPIni8ZA4Bj6KEi4sI=
 
+"@floating-ui/core@^0.6.2":
+  version "0.6.2"
+  resolved "http://npm.cestc.cn/@floating-ui/core/download/@floating-ui/core-0.6.2.tgz#f2813f0e5f3d5ed7af5029e1a082203dadf02b7d"
+  integrity sha1-8oE/Dl89XtevUCnhoIIgPa3wK30=
+
 "@floating-ui/core@^1.7.3":
   version "1.7.3"
   resolved "http://npm.cestc.cn/@floating-ui/core/download/@floating-ui/core-1.7.3.tgz#462d722f001e23e46d86fd2bd0d21b7693ccb8b7"
   integrity sha1-Ri1yLwAeI+Rthv0r0NIbdpPMuLc=
   dependencies:
     "@floating-ui/utils" "^0.2.10"
+
+"@floating-ui/dom@^0.4.5":
+  version "0.4.5"
+  resolved "http://npm.cestc.cn/@floating-ui/dom/download/@floating-ui/dom-0.4.5.tgz#2e88d16646119cc67d44683f75ee99840475bbfa"
+  integrity sha1-LojRZkYRnMZ9RGg/de6ZhAR1u/o=
+  dependencies:
+    "@floating-ui/core" "^0.6.2"
 
 "@floating-ui/dom@^1.7.4":
   version "1.7.4"
@@ -2380,6 +2393,24 @@
   dependencies:
     "@floating-ui/core" "^1.7.3"
     "@floating-ui/utils" "^0.2.10"
+
+"@floating-ui/react-dom-interactions@^0.3.1":
+  version "0.3.1"
+  resolved "http://npm.cestc.cn/@floating-ui/react-dom-interactions/download/@floating-ui/react-dom-interactions-0.3.1.tgz#abc0cb4b18e6f095397e50f9846572eee4e34554"
+  integrity sha1-q8DLSxjm8JU5flD5hGVy7uTjRVQ=
+  dependencies:
+    "@floating-ui/react-dom" "^0.6.3"
+    aria-hidden "^1.1.3"
+    point-in-polygon "^1.1.0"
+    use-isomorphic-layout-effect "^1.1.1"
+
+"@floating-ui/react-dom@^0.6.3":
+  version "0.6.3"
+  resolved "http://npm.cestc.cn/@floating-ui/react-dom/download/@floating-ui/react-dom-0.6.3.tgz#7b64cfd4fd12e4a0515dbf1b2be16e48c9a06c5a"
+  integrity sha1-e2TP1P0S5KBRXb8bK+FuSMmgbFo=
+  dependencies:
+    "@floating-ui/dom" "^0.4.5"
+    use-isomorphic-layout-effect "^1.1.1"
 
 "@floating-ui/react-dom@^2.1.2":
   version "2.1.6"
@@ -6822,6 +6853,13 @@ argparse@^2.0.1:
   resolved "http://npm.cestc.cn/argparse/download/argparse-2.0.1.tgz#246f50f3ca78a3240f6c997e8a9bd1eac49e4b38"
   integrity sha1-JG9Q88p4oyQPbJl+ipvR6sSeSzg=
 
+aria-hidden@^1.1.3:
+  version "1.2.6"
+  resolved "http://npm.cestc.cn/aria-hidden/download/aria-hidden-1.2.6.tgz#73051c9b088114c795b1ea414e9c0fff874ffc1a"
+  integrity sha1-cwUcmwiBFMeVsepBTpwP/4dP/Bo=
+  dependencies:
+    tslib "^2.0.0"
+
 aria-query@^5.3.2:
   version "5.3.2"
   resolved "http://npm.cestc.cn/aria-query/download/aria-query-5.3.2.tgz#93f81a43480e33a338f19163a3d10a50c01dcd59"
@@ -8481,6 +8519,15 @@ cli-truncate@^4.0.0:
   dependencies:
     slice-ansi "^5.0.0"
     string-width "^7.0.0"
+
+click-to-react-component@^1.1.3:
+  version "1.1.3"
+  resolved "http://npm.cestc.cn/click-to-react-component/download/click-to-react-component-1.1.3.tgz#a81a3334c7fa6afd2ad349dfb7c9433a8f85ac07"
+  integrity sha1-qBozNMf6av0q00nft8lDOo+FrAc=
+  dependencies:
+    "@floating-ui/react-dom-interactions" "^0.3.1"
+    htm "^3.1.0"
+    react-merge-refs "^1.1.0"
 
 client-only@^0.0.1:
   version "0.0.1"
@@ -13214,6 +13261,11 @@ hpack.js@^2.1.6:
     obuf "^1.0.0"
     readable-stream "^2.0.1"
     wbuf "^1.1.0"
+
+htm@^3.1.0:
+  version "3.1.1"
+  resolved "http://npm.cestc.cn/htm/download/htm-3.1.1.tgz#49266582be0dc66ed2235d5ea892307cc0c24b78"
+  integrity sha1-SSZlgr4Nxm7SI11eqJIwfMDCS3g=
 
 html-encoding-sniffer@^2.0.1:
   version "2.0.1"
@@ -20556,6 +20608,11 @@ react-mathjax@^1.0.1:
   integrity sha1-qMKC510neiAWMt/Qft9B7do3K0s=
   dependencies:
     load-script "^1.0.0"
+
+react-merge-refs@^1.1.0:
+  version "1.1.0"
+  resolved "http://npm.cestc.cn/react-merge-refs/download/react-merge-refs-1.1.0.tgz#73d88b892c6c68cbb7a66e0800faa374f4c38b06"
+  integrity sha1-c9iLiSxsaMu3pm4IAPqjdPTDiwY=
 
 react-papaparse@^4.4.0:
   version "4.4.0"
