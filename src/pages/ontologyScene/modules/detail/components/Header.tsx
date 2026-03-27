@@ -152,10 +152,10 @@ export default function Header({
       )}
     >
       {/* 左侧区域 */}
-      <div className="flex items-center">
+      <div className="flex items-center overflow-hidden">
         <Popover trigger="hover" content="返回">
           <IconArrowLeft
-            className="mx-[9px] cursor-pointer text-[14px] text-[var(--color-text-2)] hover:text-primary-600"
+            className="mx-[9px] flex-shrink-0 cursor-pointer text-[14px] text-[var(--color-text-2)] hover:text-primary-600"
             onClick={handleBack}
           />
         </Popover>
@@ -172,13 +172,12 @@ export default function Header({
           <>
             <EllipsisPopover
               value={title}
-              wrapperClassName="max-w-[455px] ml-[12px] mr-[8px]"
-              className="w-full text-[16px] font-[600] text-[var(--color-text-1)]"
+              className="ml-[12px] mr-[8px] w-full max-w-[455px] text-[16px] font-[600] text-[var(--color-text-1)]"
             />
 
             <Popover trigger="hover" content="编辑">
               <IconEdit
-                className="cursor-pointer text-[16px] text-[var(--color-text-2)] hover:text-primary-600"
+                className="flex-shrink-0 cursor-pointer text-[16px] text-[var(--color-text-2)] hover:text-primary-600"
                 onClick={handleEdit}
               />
             </Popover>
