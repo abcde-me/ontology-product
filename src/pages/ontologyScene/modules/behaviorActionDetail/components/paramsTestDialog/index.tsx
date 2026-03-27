@@ -22,6 +22,7 @@ import {
 import {
   InputType,
   OntologyFunctionDetail,
+  ParamType,
   TestFunction,
   TestFunctionItem,
   UiType
@@ -29,7 +30,8 @@ import {
 import { isNil } from 'lodash-es';
 import useTestFunction from '@/pages/ontologyScene/hooks/useTestFunction';
 import { useParams } from 'react-router-dom';
-import { FormItem } from '@/pages/ontologyScene/componens';
+import { FormItem, ObjInsValue } from '@/pages/ontologyScene/componens';
+import { UploadItem } from '@arco-design/web-react/es/Upload';
 
 interface IProps {
   visible: boolean;
@@ -98,6 +100,41 @@ export const ParamsTestDialog = (props: IProps) => {
     }
     return p;
   }, {});
+
+  const getOtherFieldRules = (uiType: UiType) => {
+    return [
+      {
+        validator(v, onError) {
+          if (!v) {
+            return onError(`请输入参数值`);
+          }
+          if (uiType === UiType.Uploader) {
+            const files = v as UploadItem[];
+            if (!files.length) {
+              return onError('请选择文件');
+            }
+            if (files.some(({ status }) => status === 'error')) {
+              onError('文件上传失败，请重新上传');
+              return;
+            }
+            if (files.some(({ status }) => status !== 'done')) {
+              onError('文件正在上传，请稍候');
+              return;
+            }
+          }
+          if ([UiType.ObjectSet, UiType.ObjectOne].includes(uiType)) {
+            const { objInsID } = v as ObjInsValue;
+            if (
+              isNil(objInsID) ||
+              (Array.isArray(objInsID) && !objInsID.length)
+            ) {
+              return onError('请选择对象实例');
+            }
+          }
+        }
+      }
+    ];
+  };
   const {
     runLog: runInfo,
     testIng,
@@ -184,11 +221,7 @@ export const ParamsTestDialog = (props: IProps) => {
                       key={code}
                       label={name}
                       field={code}
-                      rules={
-                        field2Rule?.[name] || [
-                          { required: true, message: '请输入参数值' }
-                        ]
-                      }
+                      rules={field2Rule?.[name] || getOtherFieldRules(uiType)}
                     >
                       {renderComponentByUiType(
                         uiType,
