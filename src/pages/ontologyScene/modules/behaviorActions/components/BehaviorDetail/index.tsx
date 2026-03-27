@@ -153,7 +153,7 @@ export const BehaviorDetail = (props: IProps) => {
       }}
       onEdit={() => {
         history.push(
-          `/tenant/compute/modaforge/ontologyScene/detail/${OSId}/behaviorActions/edit/${actionItem}`
+          `/tenant/compute/onto/ontologyScene/detail/${OSId}/behaviorActions/edit/${actionItem}`
         );
       }}
     >
