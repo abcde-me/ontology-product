@@ -253,12 +253,6 @@ export const useColumns = (
         ellipsis: true,
         render: (value) => (
           <div className="flex items-center gap-[8px]">
-            <EllipsisPopover
-              wrapperClassName="min-w-0 leading-[22px]"
-              value={value || '-'}
-            >
-              {value}
-            </EllipsisPopover>
             <ContentWithCopy value={value} />
           </div>
         )
