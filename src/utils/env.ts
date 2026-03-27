@@ -143,6 +143,14 @@ const standaloneMappings: RouteMapItem[] = [
   }
 ];
 
+const getModaforgeBaseUrl = () => {
+  const baseUrl = (window as any).__APP_CONFIG__?.MODAFORGE_BASE_URL;
+  if (typeof baseUrl === 'string' && baseUrl.trim()) {
+    return baseUrl.replace(/\/$/, '');
+  }
+  return '';
+};
+
 const mapPageForStandalone = (page: string) => {
   if (/^https?:\/\//i.test(page)) {
     return page;
@@ -150,6 +158,10 @@ const mapPageForStandalone = (page: string) => {
   for (const { from, to } of standaloneMappings) {
     if (page.startsWith(from)) {
       const nextPath = `${to}${page.slice(from.length)}`;
+      const baseUrl = getModaforgeBaseUrl();
+      if (baseUrl) {
+        return `${baseUrl}${nextPath}`;
+      }
       const { protocol, hostname } = window.location;
       return `${protocol}//${hostname}:9030${nextPath}`;
     }
