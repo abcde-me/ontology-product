@@ -14,7 +14,8 @@ import {
   ExpandableProcessFlow,
   ProcessStep,
   NoDataCard,
-  NoResultCard
+  NoResultCard,
+  GlobalTooltip
 } from '@ceai-front/arco-material';
 import ObjectSmallIcon from '../../assets/object-small.svg';
 import LinkSmallIcon from '../../assets/link-small.svg';
@@ -255,13 +256,13 @@ const SceneCard: React.FC<SceneCardProps> = ({
       {/* 更新日期 */}
       <div className="flex items-center">
         {item.updateUser && (
-          <EllipsisPopover
-            className="min-w-0 max-w-[200px] flex-1 text-[14px] leading-[22px] text-[var(--color-text-4)]"
-            value={item.updateUser}
+          <GlobalTooltip.Ellipsis
+            className="min-w-0 max-w-[200px] text-[14px] leading-[22px] text-[var(--color-text-4)]"
+            text={item.updateUser}
           />
         )}
         <span className="text-[14px] leading-[22px] text-[var(--color-text-4)]">
-          更新于 {dayjs(item.updateTime).format('YYYY-MM-DD')}
+          更新于{dayjs(item.updateTime).format('YYYY-MM-DD')}
         </span>
       </div>
     </div>
