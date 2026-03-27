@@ -326,7 +326,12 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
             const fileName =
               initialValues.intermediateTable.filePath.split('/').pop() || '';
             if (fileName && fileName.trim()) {
-              setInitialFileList([{ name: fileName }]);
+              setInitialFileList([
+                {
+                  uid: `initial-link-file-${initialValues.id ?? 'new'}`,
+                  name: fileName
+                }
+              ]);
             }
           }
         }
@@ -1450,7 +1455,7 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
                                       e.stopPropagation();
                                       // 打开新页面，使用表的 ID（option.value）
                                       openNewPage(
-                                        `/onto/tenant/compute/onto/metadataManagement/detail?id=${option.value}&metadataType=ICEBERG`
+                                        `/modaforge/tenant/compute/modaforge/metadataManagement/detail?id=${option.value}&metadataType=ICEBERG`
                                       );
                                     }}
                                   />
