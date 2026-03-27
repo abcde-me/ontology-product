@@ -394,8 +394,9 @@ export default function LinkDetailDrawer({
                 </div>
                 <div className="min-w-0 flex-1">
                   <EllipsisPopover
-                    preferTypography
+                    // preferTypography
                     value={displayData?.name || '-'}
+                    wrapperClassName="w-full"
                     isEdit={false}
                     className="text-[14px] leading-[22px] text-[var(--color-text-1)]"
                   />

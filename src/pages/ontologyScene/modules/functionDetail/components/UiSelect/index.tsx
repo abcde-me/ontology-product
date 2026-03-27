@@ -20,7 +20,10 @@ import {
 import classNames from 'classnames';
 
 export const UiSelect = (
-  props: CustomFormItemCompProps<string> & { readonly: boolean }
+  props: CustomFormItemCompProps<string> & {
+    readonly: boolean;
+    getPopupContainer?: (node: HTMLElement) => Element;
+  }
 ) => {
   const { value, onChange, disabled } = props;
   const currentIcon = useMemo(() => {
@@ -94,6 +97,9 @@ export const UiSelect = (
           // disabled
           getPopupContainer={popupContainer}
           onVisibleChange={setMenuVisible}
+          triggerProps={{
+            updateOnScroll: true
+          }}
         >
           <ProButton
             className={classNames([
