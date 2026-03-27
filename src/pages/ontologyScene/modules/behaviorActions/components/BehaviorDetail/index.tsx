@@ -133,9 +133,9 @@ export const BehaviorDetail = (props: IProps) => {
           validateRules.push(rule);
         }
       }
-      setInputParams(inputParams);
-      setValidateRules(validateRules);
     });
+    setInputParams(inputParams);
+    setValidateRules(validateRules);
   }, [actionDetail]);
 
   return (
