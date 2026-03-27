@@ -326,6 +326,8 @@ export default function OntologySceneGraph() {
         <AIWorkflowProvider
           nodes={nodesConfig}
           initWorkflow={initWorkflow}
+          nodesDraggableWhenReadonly
+          autoRefreshWhenTabVisible={false}
           api={{
             workflowNotExistedMarks: ['ResourceNotFound', '资源不存在'],
             getWorkflow,
