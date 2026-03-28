@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import styles from './index.module.scss';
-import { NoDataCard } from '@ceai-front/arco-material';
+import { GlobalTooltip, NoDataCard } from '@ceai-front/arco-material';
 import { Button, Form, Input, Select } from '@arco-design/web-react';
 import { IconPlayArrowFill } from '@arco-design/web-react/icon';
 import { ParamsTestDialog } from '../../components';
@@ -83,15 +83,26 @@ export const ParamsSetting = (
                     <div className={styles['field']}>界面控件</div>
                   </div>
                   {fields.map(({ field, key }, index) => {
-                    const { type }: OntologyActionParam =
-                      form.getFieldValue(field);
+                    const {
+                      type,
+                      name: paramName,
+                      code
+                    }: OntologyActionParam = form.getFieldValue(field);
                     return (
                       <div className={styles['params-item']} key={key}>
-                        <Form.Item field={`${field}.name`} className={'mb-2'}>
-                          <Input readOnly className={'border-0'} />
+                        <Form.Item
+                          field={`${field}.name`}
+                          className={'mb-2 overflow-hidden'}
+                        >
+                          <Input readOnly className={'hidden border-0'} />
+                          <GlobalTooltip.Ellipsis text={paramName || '-'} />
                         </Form.Item>
-                        <Form.Item field={`${field}.code`} className={'mb-2'}>
-                          <Input readOnly className={'border-0'} />
+                        <Form.Item
+                          field={`${field}.code`}
+                          className={'mb-2 overflow-hidden'}
+                        >
+                          <Input readOnly className={'hidden border-0'} />
+                          <GlobalTooltip.Ellipsis text={code || '-'} />
                         </Form.Item>
                         <Form.Item field={`${field}.type`} className={'mb-2'}>
                           <Input readOnly className={'border-0'} />
