@@ -108,6 +108,7 @@ export const MapPicker: React.FC<MapPickerProps> = ({
   const markerRef = useRef<any>();
   const placeSearchRef = useRef<any>();
   const mapClickBoundRef = useRef(false);
+  const mapInitializingRef = useRef(false);
 
   const getDisplayValue = (point?: GeoPoint) => {
     if (!point) return undefined;
@@ -185,7 +186,9 @@ export const MapPicker: React.FC<MapPickerProps> = ({
     });
   };
   const initMap = useCallback(async () => {
-    if (mapRef.current) return;
+    if (mapRef.current || mapInitializingRef.current) return;
+    mapInitializingRef.current = true;
+    setLoadingMap(true);
     try {
       const AMap = await loadAmap();
       AMapRef.current = AMap;
@@ -207,6 +210,7 @@ export const MapPicker: React.FC<MapPickerProps> = ({
       console.error('地图加载失败:', err);
       Message.error('地图加载失败，请检查网络或密钥配置');
     } finally {
+      mapInitializingRef.current = false;
       setLoadingMap(false);
     }
   }, [bindMapClick, currentPoint, initMapControls, updateMarker]);
@@ -227,18 +231,48 @@ export const MapPicker: React.FC<MapPickerProps> = ({
     }
   }, [value?.lng, value?.lat, updateMarker]);
 
-  const handleAfterOpen = useCallback(async () => {
-    if (!mapRef.current) {
-      setLoadingMap(true);
-      await initMap();
-    }
-    requestAnimationFrame(() => {
-      mapRef.current?.resize?.();
-      if (currentPoint) {
-        updateMarker(currentPoint, true);
+  // 兼容火狐浏览器，所以改成了第一次打开弹窗之后开始加载地图
+  useEffect(() => {
+    if (!visible) return;
+
+    let cancelled = false;
+    let timerId = 0;
+    let frameId = 0;
+
+    const ensureMapReady = async () => {
+      const container = mapContainerRef.current;
+      if (!container) {
+        frameId = window.requestAnimationFrame(ensureMapReady);
+        return;
       }
-    });
-  }, [currentPoint, initMap, updateMarker]);
+
+      if (container.clientWidth === 0 || container.clientHeight === 0) {
+        timerId = window.setTimeout(ensureMapReady, 50);
+        return;
+      }
+
+      if (!mapRef.current) {
+        await initMap();
+      }
+
+      if (cancelled) return;
+
+      frameId = window.requestAnimationFrame(() => {
+        mapRef.current?.resize?.();
+        if (currentPoint) {
+          updateMarker(currentPoint, true);
+        }
+      });
+    };
+
+    ensureMapReady();
+
+    return () => {
+      cancelled = true;
+      window.cancelAnimationFrame(frameId);
+      window.clearTimeout(timerId);
+    };
+  }, [currentPoint, initMap, updateMarker, visible]);
 
   // 远程搜索 POI，结果注入 Select options
   const handleSearch = useCallback((keyword: string) => {
@@ -364,7 +398,6 @@ export const MapPicker: React.FC<MapPickerProps> = ({
         getChildrenPopupContainer={(node) =>
           node.parentElement || document.body
         }
-        afterOpen={handleAfterOpen}
         afterClose={() => {
           form.resetFields();
         }}
