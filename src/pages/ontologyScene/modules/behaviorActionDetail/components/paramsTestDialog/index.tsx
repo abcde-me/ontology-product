@@ -30,7 +30,11 @@ import {
 import { isNil } from 'lodash-es';
 import useTestFunction from '@/pages/ontologyScene/hooks/useTestFunction';
 import { useParams } from 'react-router-dom';
-import { FormItem, ObjInsValue } from '@/pages/ontologyScene/componens';
+import {
+  FormItem,
+  ObjInsValue,
+  OsModal
+} from '@/pages/ontologyScene/componens';
 import { UploadItem } from '@arco-design/web-react/es/Upload';
 
 interface IProps {
@@ -188,7 +192,7 @@ export const ParamsTestDialog = (props: IProps) => {
   };
 
   return (
-    <Modal
+    <OsModal
       title={'参数测试'}
       footer={null}
       visible={visible}
@@ -276,6 +280,6 @@ export const ParamsTestDialog = (props: IProps) => {
           <div className={styles['body']}>{renderRunLog()}</div>
         </div>
       </div>
-    </Modal>
+    </OsModal>
   );
 };

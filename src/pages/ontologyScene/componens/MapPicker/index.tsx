@@ -24,7 +24,7 @@ import {
 import AMapLoader from '@amap/amap-jsapi-loader';
 import styles from './index.module.scss';
 import { SelectWithNoData } from '@/components/new-no-data-comps';
-import { FormItem } from '@/pages/ontologyScene/componens';
+import { FormItem, OsModal } from '@/pages/ontologyScene/componens';
 
 declare global {
   interface Window {
@@ -200,7 +200,7 @@ export const MapPicker: React.FC<MapPickerProps> = ({
       const center = currentPoint
         ? [currentPoint.lng, currentPoint.lat]
         : [116.397428, 39.90923];
-      mapRef.current = new AMap.Map(container, {
+      mapRef.current = new AMap.Map('aMapInitContainer', {
         zoom: 11,
         center,
         viewMode: '2D'
@@ -397,7 +397,7 @@ export const MapPicker: React.FC<MapPickerProps> = ({
         />
       </Tooltip>
 
-      <Modal
+      <OsModal
         title="选择坐标"
         visible={visible}
         onCancel={handleModalClose}
@@ -479,7 +479,7 @@ export const MapPicker: React.FC<MapPickerProps> = ({
             </div>
           </div>
         </div>
-      </Modal>
+      </OsModal>
     </>
   );
 };
