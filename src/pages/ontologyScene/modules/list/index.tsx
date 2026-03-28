@@ -549,27 +549,25 @@ export default function OntologySceneList() {
       )}
 
       {/* 创建/编辑弹窗 */}
-      {modalVisible && (
-        <SceneModal
-          visible={modalVisible}
-          mode={modalMode}
-          initialValues={
-            editingScene
-              ? {
-                  name: editingScene.name || '',
-                  description: editingScene.description || '',
-                  icon: editingScene.icon || ''
-                }
-              : undefined
-          }
-          onSubmit={handleModalSubmit}
-          onCancel={handleModalCancel}
-          loading={submitLoading}
-          existingSceneIcons={sceneList
-            .map((scene) => scene.icon)
-            .filter((icon): icon is string => !!icon)}
-        />
-      )}
+      <SceneModal
+        visible={modalVisible}
+        mode={modalMode}
+        initialValues={
+          editingScene
+            ? {
+                name: editingScene.name || '',
+                description: editingScene.description || '',
+                icon: editingScene.icon || ''
+              }
+            : undefined
+        }
+        onSubmit={handleModalSubmit}
+        onCancel={handleModalCancel}
+        loading={submitLoading}
+        existingSceneIcons={sceneList
+          .map((scene) => scene.icon)
+          .filter((icon): icon is string => !!icon)}
+      />
     </div>
   );
 }

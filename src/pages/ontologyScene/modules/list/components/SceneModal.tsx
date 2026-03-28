@@ -93,6 +93,9 @@ const SceneModal: React.FC<SceneModalProps> = ({
           </Button>
         </div>
       }
+      maskStyle={{
+        display: 'block !important'
+      }}
       getPopupContainer={() => document.querySelector('#root') || document.body}
       style={{ width: 600 }}
       closable

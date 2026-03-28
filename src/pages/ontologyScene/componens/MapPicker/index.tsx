@@ -205,6 +205,7 @@ export const MapPicker: React.FC<MapPickerProps> = ({
       }
       setMapReady(true);
     } catch (err) {
+      console.error('地图加载失败:', err);
       Message.error('地图加载失败，请检查网络或密钥配置');
     } finally {
       setLoadingMap(false);

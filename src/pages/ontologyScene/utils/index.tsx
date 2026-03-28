@@ -117,7 +117,7 @@ export const formatParamValueByType = (
   if (
     [ParamType.Integer, ParamType.Float, ParamType.String].includes(dataType)
   ) {
-    return value.toString();
+    return value.toString().replaceAll('\n', '\\n');
   }
   if (dataType === ParamType.Boolean) {
     return value === 'true' ? 'True' : 'False';
