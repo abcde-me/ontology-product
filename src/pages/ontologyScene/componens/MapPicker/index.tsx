@@ -192,7 +192,7 @@ export const MapPicker: React.FC<MapPickerProps> = ({
     setLoadingMap(true);
     try {
       const AMap = await loadAmap();
-      const container = mapContainerRef.current;
+      const container = document.querySelector('#aMapInitContainer');
       if (!container || !container.isConnected) {
         return false;
       }
@@ -247,7 +247,7 @@ export const MapPicker: React.FC<MapPickerProps> = ({
     let frameId = 0;
 
     const ensureMapReady = async () => {
-      const container = mapContainerRef.current;
+      const container = document.querySelector('#aMapInitContainer');
       if (!container || !container.isConnected) {
         frameId = window.requestAnimationFrame(ensureMapReady);
         return;
@@ -438,7 +438,11 @@ export const MapPicker: React.FC<MapPickerProps> = ({
 
           <div className={styles.body}>
             <div className={styles.mapWrapper}>
-              <div ref={mapContainerRef} className={styles.mapContainer} />
+              <div
+                ref={mapContainerRef}
+                className={styles.mapContainer}
+                id={'aMapInitContainer'}
+              />
               {loadingMap && (
                 <div className={styles.loadingMask}>
                   <Spin />
