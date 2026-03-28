@@ -186,16 +186,21 @@ export const MapPicker: React.FC<MapPickerProps> = ({
     });
   };
   const initMap = useCallback(async () => {
-    if (mapRef.current || mapInitializingRef.current) return;
+    if (mapRef.current) return true;
+    if (mapInitializingRef.current) return false;
     mapInitializingRef.current = true;
     setLoadingMap(true);
     try {
       const AMap = await loadAmap();
+      const container = mapContainerRef.current;
+      if (!container || !container.isConnected) {
+        return false;
+      }
       AMapRef.current = AMap;
       const center = currentPoint
         ? [currentPoint.lng, currentPoint.lat]
         : [116.397428, 39.90923];
-      mapRef.current = new AMap.Map(mapContainerRef.current, {
+      mapRef.current = new AMap.Map(container, {
         zoom: 11,
         center,
         viewMode: '2D'
@@ -206,9 +211,11 @@ export const MapPicker: React.FC<MapPickerProps> = ({
         updateMarker(currentPoint, true);
       }
       setMapReady(true);
+      return true;
     } catch (err) {
       console.error('地图加载失败:', err);
       Message.error('地图加载失败，请检查网络或密钥配置');
+      return false;
     } finally {
       mapInitializingRef.current = false;
       setLoadingMap(false);
@@ -241,7 +248,7 @@ export const MapPicker: React.FC<MapPickerProps> = ({
 
     const ensureMapReady = async () => {
       const container = mapContainerRef.current;
-      if (!container) {
+      if (!container || !container.isConnected) {
         frameId = window.requestAnimationFrame(ensureMapReady);
         return;
       }
@@ -252,7 +259,11 @@ export const MapPicker: React.FC<MapPickerProps> = ({
       }
 
       if (!mapRef.current) {
-        await initMap();
+        const initialized = await initMap();
+        if (!initialized || !mapRef.current) {
+          timerId = window.setTimeout(ensureMapReady, 50);
+          return;
+        }
       }
 
       if (cancelled) return;
