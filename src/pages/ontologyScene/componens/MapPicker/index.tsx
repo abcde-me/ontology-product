@@ -186,7 +186,6 @@ export const MapPicker: React.FC<MapPickerProps> = ({
   };
   const initMap = useCallback(async () => {
     if (mapRef.current) return;
-    setLoadingMap(true);
     try {
       const AMap = await loadAmap();
       AMapRef.current = AMap;
@@ -212,17 +211,10 @@ export const MapPicker: React.FC<MapPickerProps> = ({
     }
   }, [bindMapClick, currentPoint, initMapControls, updateMarker]);
 
-  // 地图未就绪时不弹框，确保弹出即有可用实例
   const openModal = useCallback(() => {
-    if (disabled || !mapReady) return;
+    if (disabled) return;
     setVisible(true);
-    requestAnimationFrame(() => {
-      mapRef.current?.resize?.();
-      if (currentPoint) {
-        updateMarker(currentPoint, true);
-      }
-    });
-  }, [currentPoint, disabled, initMap, updateMarker, mapReady]);
+  }, [disabled]);
 
   // 同步外部受控值
   useEffect(() => {
@@ -235,10 +227,18 @@ export const MapPicker: React.FC<MapPickerProps> = ({
     }
   }, [value?.lng, value?.lat, updateMarker]);
 
-  // 组件挂载即加载地图，避免弹框打开时再等待
-  useEffect(() => {
-    initMap();
-  }, []);
+  const handleAfterOpen = useCallback(async () => {
+    if (!mapRef.current) {
+      setLoadingMap(true);
+      await initMap();
+    }
+    requestAnimationFrame(() => {
+      mapRef.current?.resize?.();
+      if (currentPoint) {
+        updateMarker(currentPoint, true);
+      }
+    });
+  }, [currentPoint, initMap, updateMarker]);
 
   // 远程搜索 POI，结果注入 Select options
   const handleSearch = useCallback((keyword: string) => {
@@ -336,11 +336,11 @@ export const MapPicker: React.FC<MapPickerProps> = ({
           readOnly
           value={getDisplayValue(currentPoint)}
           placeholder={placeholder}
-          disabled={disabled || loadingMap || !mapReady}
+          disabled={disabled}
           allowClear
           onClear={handleClear}
           suffix={
-            !mapReady || loadingMap ? (
+            loadingMap ? (
               <IconLoading />
             ) : (
               <Tooltip content="选择坐标" getPopupContainer={getPopupContainer}>
@@ -357,11 +357,14 @@ export const MapPicker: React.FC<MapPickerProps> = ({
         visible={visible}
         onCancel={handleModalClose}
         onOk={handleConfirm}
-        mountOnEnter={false}
+        maskStyle={{
+          display: visible ? 'block' : 'none'
+        }}
         style={{ width: 900, height: 600 }}
         getChildrenPopupContainer={(node) =>
           node.parentElement || document.body
         }
+        afterOpen={handleAfterOpen}
         afterClose={() => {
           form.resetFields();
         }}
@@ -392,11 +395,18 @@ export const MapPicker: React.FC<MapPickerProps> = ({
           <div className={styles.body}>
             <div className={styles.mapWrapper}>
               <div ref={mapContainerRef} className={styles.mapContainer} />
+              {loadingMap && (
+                <div className={styles.loadingMask}>
+                  <Spin />
+                  <div className={styles.loadingText}>地图加载中...</div>
+                </div>
+              )}
               <SelectWithNoData
                 popupVisible={showPointList}
                 showSearch
                 allowClear
                 placeholder="请输入关键词"
+                disabled={!mapReady || loadingMap}
                 loading={searchLoading}
                 options={searchOptions}
                 filterOption={false}
