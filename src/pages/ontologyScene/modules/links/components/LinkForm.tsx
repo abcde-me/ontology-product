@@ -787,6 +787,10 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
         setInitialFileList([]);
         loadDatabaseList();
       }
+
+      form.setFields({
+        intermediateTable: { error: undefined }
+      });
     };
 
     // 当数据源类型为 data_lake_sync 时，加载数据库列表
@@ -1308,15 +1312,16 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
                           !intermediateTable.filePath
                         ) {
                           callback('请上传中间表文件');
-                        } else if (
-                          intermediateTable.type === 'data_lake_sync' &&
-                          (!intermediateTable.database ||
-                            !intermediateTable.table)
-                        ) {
-                          callback('请选择数据库和表');
-                        } else {
-                          callback();
                         }
+                        // else if (
+                        //   intermediateTable.type === 'data_lake_sync' &&
+                        //   (!intermediateTable.database ||
+                        //     !intermediateTable.table)
+                        // ) {
+                        //   callback('请选择数据库和表');
+                        // } else {
+                        //   callback();
+                        // }
                       }
                     }
                   ]}
