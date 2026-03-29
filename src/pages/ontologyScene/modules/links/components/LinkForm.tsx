@@ -789,7 +789,7 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
       }
 
       form.setFields({
-        intermediateTable: { error: undefined }
+        intermediateTable: { error: undefined, value: type }
       });
     };
 
