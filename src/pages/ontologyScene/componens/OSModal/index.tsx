@@ -1,8 +1,8 @@
 import React, { useEffect, ComponentProps } from 'react';
-import { Modal, ModalProps } from '@arco-design/web-react';
+import { Modal } from '@arco-design/web-react';
 
 export const OsModal = (props: ComponentProps<typeof Modal>) => {
-  const { getPopupContainer, visible, mask } = props;
+  const { getPopupContainer, visible, mask = true } = props;
   const isFirefox =
     typeof navigator !== 'undefined' && /firefox/i.test(navigator.userAgent);
 
