@@ -755,6 +755,11 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
     const handleIntermediateTableTypeChange = (
       type: 'local_csv' | 'data_lake_sync'
     ) => {
+      setTimeout(() => {
+        form.setFields({
+          intermediateTable: { error: undefined }
+        });
+      }, 0);
       // 切换到本地CSV导入时，清空数据库和表
       if (type === 'local_csv') {
         setSelectedDatabase(undefined);
@@ -787,10 +792,6 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
         setInitialFileList([]);
         loadDatabaseList();
       }
-
-      form.setFields({
-        intermediateTable: { error: undefined }
-      });
     };
 
     // 当数据源类型为 data_lake_sync 时，加载数据库列表
