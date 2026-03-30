@@ -1,7 +1,13 @@
 import React, { useState } from 'react';
 import styles from './index.module.scss';
 import { GlobalTooltip, NoDataCard } from '@ceai-front/arco-material';
-import { Button, Form, Input, Select } from '@arco-design/web-react';
+import {
+  Button,
+  Form,
+  Input,
+  InputProps,
+  Select
+} from '@arco-design/web-react';
 import { IconPlayArrowFill } from '@arco-design/web-react/icon';
 import { ParamsTestDialog } from '../../components';
 import {
@@ -15,6 +21,19 @@ import {
   InputType,
   OntologyFunctionDetail
 } from '@/pages/ontologyScene/types/ontologyFunction';
+import classNames from 'classnames';
+
+const InputWithTooltip = (props: InputProps) => {
+  const { value, readOnly, ...otherProps } = props;
+  return readOnly ? (
+    <GlobalTooltip.Ellipsis
+      className={classNames(otherProps.className)}
+      text={value || '-'}
+    />
+  ) : (
+    <Input value={value} readOnly {...otherProps} />
+  );
+};
 
 export const ParamsSetting = (
   props: CustomFormItemCompProps<any> & {
@@ -94,15 +113,13 @@ export const ParamsSetting = (
                           field={`${field}.name`}
                           className={'mb-2 overflow-hidden'}
                         >
-                          <Input readOnly className={'hidden border-0'} />
-                          <GlobalTooltip.Ellipsis text={paramName || '-'} />
+                          <InputWithTooltip readOnly className={'border-0'} />
                         </Form.Item>
                         <Form.Item
                           field={`${field}.code`}
                           className={'mb-2 overflow-hidden'}
                         >
-                          <Input readOnly className={'hidden border-0'} />
-                          <GlobalTooltip.Ellipsis text={code || '-'} />
+                          <InputWithTooltip readOnly className={'border-0'} />
                         </Form.Item>
                         <Form.Item field={`${field}.type`} className={'mb-2'}>
                           <Input readOnly className={'border-0'} />
