@@ -7,7 +7,7 @@ import { createOntologyModel } from '@/api/ontologySceneLibrary/ontologyScene';
 import SceneModal, {
   SceneFormData
 } from '@/pages/ontologyScene/modules/list/components/SceneModal';
-import homeBg from './assets/home-bac.png';
+import homeBgVideo from './assets/home-bac.mp4';
 
 export default function Home() {
   const history = useHistory();
@@ -55,10 +55,15 @@ export default function Home() {
       {/* 内容区域 */}
       <div className="relative mx-auto flex h-full w-full flex-1 flex-col items-center">
         <div className="absolute bottom-0 left-0 right-0 top-0 flex justify-center overflow-hidden">
-          <img
-            src={homeBg}
-            alt="home-bg"
+          <video
             className="h-full w-auto max-w-none"
+            src={homeBgVideo}
+            autoPlay
+            loop
+            muted
+            playsInline
+            preload="auto"
+            aria-hidden
           />
         </div>
         <div className="mt-[64px] w-full text-center">
