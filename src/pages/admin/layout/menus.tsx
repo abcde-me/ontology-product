@@ -123,6 +123,20 @@ export const menus: MenuModel[] = [
   },
   {
     type: 'itemGroup',
+    title: '业务自动化',
+    key: 'BusinessAuto',
+    children: [
+      {
+        title: '本体场景库',
+        icon: <OntologyLibrary className={iconClass} />,
+        key: 'OntologySceneLibrary',
+        path: '/tenant/compute/onto/ontologyScene/list',
+        permission: ONTOLOGY_PERMISSIONS.LIST
+      }
+    ]
+  },
+  {
+    type: 'itemGroup',
     title: '平台资源',
     key: 'platformResource',
     children: [
