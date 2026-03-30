@@ -281,6 +281,7 @@ export default function OntologySceneList() {
   const [modalMode, setModalMode] = useState<'create' | 'edit'>('create');
   const [editingScene, setEditingScene] = useState<SceneCardItem | null>(null);
   const [submitLoading, setSubmitLoading] = useState(false);
+  const containerRef = useRef<HTMLDivElement | null>(null);
 
   // 加载场景列表
   const loadSceneList = useCallback(async () => {
@@ -385,6 +386,8 @@ export default function OntologySceneList() {
     Modal.confirm({
       title: '确定删除此本体场景吗？',
       content: `请谨慎操作，删除该数据将删除对象、链接、行为、函数等所有数据，且不可恢复。`,
+      // 将弹窗挂载到当前模块容器，避免默认挂载在 document.body 下
+      getPopupContainer: () => containerRef.current || document.body,
       onOk: async () => {
         try {
           if (!item.id) {
@@ -470,6 +473,7 @@ export default function OntologySceneList() {
 
   return (
     <div
+      ref={containerRef}
       className={classNames(
         'flex min-h-full flex-col bg-white p-[24px]',
         styles['ontology-scene-list']
