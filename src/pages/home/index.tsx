@@ -56,7 +56,7 @@ export default function Home() {
       <div className="relative mx-auto flex h-full w-full flex-1 flex-col items-center">
         <div className="absolute bottom-0 left-0 right-0 top-0 flex justify-center overflow-hidden">
           <video
-            className="h-full w-auto max-w-none"
+            className="h-full w-full max-w-none object-cover"
             src={homeBgVideo}
             autoPlay
             loop
