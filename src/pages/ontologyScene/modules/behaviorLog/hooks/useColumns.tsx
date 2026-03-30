@@ -1,9 +1,5 @@
 import React, { useMemo } from 'react';
-import {
-  DotStatus,
-  CopyItemIcon,
-  EllipsisPopover
-} from '@ceai-front/arco-material';
+import { DotStatus } from '@ceai-front/arco-material';
 import { TableColumnProps } from '@arco-design/web-react';
 import { ObjectTypeTag } from '@/pages/ontologyScene/componens';
 import { ContentWithCopy } from '@/pages/ontologyScene/componens';
@@ -93,12 +89,6 @@ export const useColumns = (
           ellipsis: true,
           render: (value) => (
             <div className="flex items-center gap-[8px]">
-              <EllipsisPopover
-                wrapperClassName="min-w-0 leading-[22px]"
-                value={value || '-'}
-              >
-                {value}
-              </EllipsisPopover>
               <ContentWithCopy value={value} />
             </div>
           )
@@ -253,12 +243,6 @@ export const useColumns = (
         ellipsis: true,
         render: (value) => (
           <div className="flex items-center gap-[8px]">
-            <EllipsisPopover
-              wrapperClassName="min-w-0 leading-[22px]"
-              value={value || '-'}
-            >
-              {value}
-            </EllipsisPopover>
             <ContentWithCopy value={value} />
           </div>
         )

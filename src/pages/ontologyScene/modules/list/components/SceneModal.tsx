@@ -46,6 +46,10 @@ const SceneModal: React.FC<SceneModalProps> = ({
   const [selectedIcon, setSelectedIcon] = useState<string>(
     ICON_OPTIONS[0].value
   );
+  const getModalContainer = () =>
+    document.querySelector('#root') || document.body;
+  const isFirefox =
+    typeof navigator !== 'undefined' && /firefox/i.test(navigator.userAgent);
 
   useEffect(() => {
     if (mode === 'create') {
@@ -60,6 +64,26 @@ const SceneModal: React.FC<SceneModalProps> = ({
       setSelectedIcon(initialValues.icon || '');
     }
   }, [mode]);
+
+  useEffect(() => {
+    if (!isFirefox) return;
+
+    let frameId = 0;
+    const syncMaskDisplay = () => {
+      const container = getModalContainer();
+      const masks = container.querySelectorAll('.arco-modal-mask');
+      const currentMask = masks[masks.length - 1] as HTMLElement | undefined;
+      if (!currentMask) return;
+      currentMask.style.setProperty(
+        'display',
+        visible ? 'block' : 'none',
+        'important'
+      );
+    };
+
+    frameId = window.requestAnimationFrame(syncMaskDisplay);
+    return () => window.cancelAnimationFrame(frameId);
+  }, [isFirefox, visible]);
 
   const handleSubmit = async () => {
     try {
@@ -93,6 +117,7 @@ const SceneModal: React.FC<SceneModalProps> = ({
           </Button>
         </div>
       }
+      getPopupContainer={getModalContainer}
       style={{ width: 600 }}
       closable
     >

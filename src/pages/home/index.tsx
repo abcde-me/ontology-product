@@ -1,126 +1,125 @@
-import React from 'react';
-import { Card, Typography, Space, Button } from '@arco-design/web-react';
-import { IconRight, IconBook, IconSettings } from '@arco-design/web-react/icon';
+import React, { useState } from 'react';
+import classNames from 'classnames';
+import styles from './index.module.scss';
+import { Button, Message } from '@arco-design/web-react';
 import { useHistory } from 'react-router-dom';
-import { useUserInfo } from '@/store/userInfoStore';
+import { createOntologyModel } from '@/api/ontologySceneLibrary/ontologyScene';
+import SceneModal, {
+  SceneFormData
+} from '@/pages/ontologyScene/modules/list/components/SceneModal';
+import homeBg from './assets/home-bac.png';
 
-const { Title, Paragraph } = Typography;
-
-export default function HomePage() {
+export default function Home() {
   const history = useHistory();
-  const userInfo = useUserInfo();
+  const [modalVisible, setModalVisible] = useState(false);
+  const [submitLoading, setSubmitLoading] = useState(false);
 
-  const handleNavigateToOntology = () => {
-    history.push('/tenant/compute/onto/ontologyScene');
+  const handleModalSubmit = async (data: SceneFormData) => {
+    setSubmitLoading(true);
+    try {
+      const response = await createOntologyModel({
+        name: data.name,
+        description: data.description || '',
+        icon: data.icon || '',
+        tagIdList: []
+      });
+
+      if (response.status === 200 && response.code === '') {
+        Message.success('创建成功');
+        history.push(
+          `/tenant/compute/onto/ontologyScene/detail/${response.data.id}`
+        );
+      } else {
+        Message.error(response.message || '创建失败');
+      }
+    } catch (error) {
+      Message.error('创建失败');
+      console.error('提交失败:', error);
+    } finally {
+      setSubmitLoading(false);
+      setModalVisible(false);
+    }
+  };
+
+  const handleModalCancel = () => {
+    setModalVisible(false);
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-6">
-      <div className="mx-auto max-w-6xl">
-        {/* 欢迎区域 */}
-        <div className="mb-8 text-center">
-          <Title heading={1} className="mb-4 text-gray-800">
-            欢迎使用本体构建与运营平台
-          </Title>
-          <Paragraph className="text-lg text-gray-600">
-            {userInfo?.username
-              ? `欢迎回来，${userInfo.username}！`
-              : '欢迎使用本体管理系统'}
-          </Paragraph>
+    <div
+      className={classNames(
+        styles['home-page'],
+        'flex h-full w-full overflow-hidden bg-white'
+      )}
+    >
+      {/* 内容区域 */}
+      <div className="relative mx-auto flex h-full w-full flex-1 flex-col items-center">
+        <div className="absolute bottom-0 left-0 right-0 top-0 flex justify-center overflow-hidden">
+          <img
+            src={homeBg}
+            alt="home-bg"
+            className="h-full w-auto max-w-none"
+          />
         </div>
-
-        {/* 功能卡片区域 */}
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {/* 本体场景库卡片 */}
-          <Card
-            className="cursor-pointer transition-all duration-200 hover:shadow-lg"
-            onClick={handleNavigateToOntology}
+        <div className="mt-[64px] w-full text-center">
+          {/* 大标题 - 入场动效 */}
+          <h1
+            className={classNames(
+              'mb-[6px] text-[40px] font-[600] leading-[56px] text-[var(--color-text-1)]',
+              styles['fade-in-up']
+            )}
+            style={{
+              animationDelay: '0ms'
+            }}
           >
-            <div className="text-center">
-              <div className="mb-4 flex justify-center">
-                <div className="flex h-16 w-16 items-center justify-center rounded-full bg-blue-100">
-                  <IconBook className="text-2xl text-blue-600" />
-                </div>
-              </div>
-              <Title heading={4} className="mb-2">
-                本体场景库
-              </Title>
-              <Paragraph className="mb-4 text-gray-600">
-                管理和构建业务本体，创建对象类型、属性、链接关系等
-              </Paragraph>
-              <Button type="primary">
-                立即使用 <IconRight className="ml-1" />
-              </Button>
-            </div>
-          </Card>
+            <span className="text-[#184FF2]">本体</span> 构建与运营平台
+          </h1>
 
-          {/* 快速开始卡片 */}
-          <Card className="transition-all duration-200 hover:shadow-lg">
-            <div className="text-center">
-              <div className="mb-4 flex justify-center">
-                <div className="flex h-16 w-16 items-center justify-center rounded-full bg-green-100">
-                  <IconSettings className="text-2xl text-green-600" />
-                </div>
-              </div>
-              <Title heading={4} className="mb-2">
-                快速开始
-              </Title>
-              <Paragraph className="mb-4 text-gray-600">
-                了解如何创建本体场景、定义对象类型和建立关系
-              </Paragraph>
-              <Button type="outline">查看指南</Button>
-            </div>
-          </Card>
+          {/* 说明文字 - 入场动效 */}
+          <p
+            className={classNames(
+              'mb-[25px] text-[16px] leading-[24px] text-[var(--color-text-3)]',
+              styles['fade-in-up']
+            )}
+            style={{
+              animationDelay: '50ms'
+            }}
+          >
+            将离散的底层数据映射为可视、可管、可执行的业务对象，构建面向 AI
+            时代的语义基础设施
+          </p>
 
-          {/* 系统概览卡片 */}
-          <Card className="transition-all duration-200 hover:shadow-lg">
-            <div className="text-center">
-              <div className="mb-4 flex justify-center">
-                <div className="flex h-16 w-16 items-center justify-center rounded-full bg-purple-100">
-                  <IconBook className="text-2xl text-purple-600" />
-                </div>
-              </div>
-              <Title heading={4} className="mb-2">
-                系统概览
-              </Title>
-              <Paragraph className="mb-4 text-gray-600">
-                查看系统使用情况、本体统计信息和最近活动
-              </Paragraph>
-              <Button type="outline">查看详情</Button>
-            </div>
-          </Card>
-        </div>
-
-        {/* 平台介绍区域 */}
-        <Card className="mt-8">
-          <Title heading={3} className="mb-4">
-            关于本体构建与运营平台
-          </Title>
-          <div className="grid gap-6 md:grid-cols-2">
-            <div>
-              <Title heading={5} className="mb-2">
-                什么是本体？
-              </Title>
-              <Paragraph className="text-gray-600">
-                本体是对特定领域概念及其关系的形式化描述，它定义了领域内的基本术语和概念之间的关系，
-                为知识共享和重用提供了标准化的框架。
-              </Paragraph>
-            </div>
-            <div>
-              <Title heading={5} className="mb-2">
-                平台功能
-              </Title>
-              <ul className="space-y-2 text-gray-600">
-                <li>• 本体场景管理：创建和管理不同业务场景的本体</li>
-                <li>• 对象类型定义：定义业务实体及其属性</li>
-                <li>• 关系建模：建立实体间的链接关系</li>
-                <li>• 可视化图谱：直观展示本体结构和关系</li>
-                <li>• 行为动作：定义本体的业务行为和函数</li>
-              </ul>
-            </div>
+          {/* 按钮 - 入场动效和悬停动效 */}
+          <div
+            className={classNames(styles['fade-in-up'])}
+            style={{
+              animationDelay: '100ms'
+            }}
+          >
+            <Button
+              type="primary"
+              size="large"
+              className={classNames(styles['create-button'])}
+              onClick={() => setModalVisible(true)}
+            >
+              <span className="mr-2 inline-block transition-transform duration-200 group-hover:translate-x-1">
+                立即创建本体场景
+              </span>
+              <span className="inline-block">→</span>
+            </Button>
           </div>
-        </Card>
+        </div>
       </div>
+
+      {modalVisible && (
+        <SceneModal
+          visible={modalVisible}
+          mode="create"
+          onSubmit={handleModalSubmit}
+          onCancel={handleModalCancel}
+          loading={submitLoading}
+        />
+      )}
     </div>
   );
 }

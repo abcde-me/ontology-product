@@ -35,11 +35,11 @@ import {
   listMetadataIcebergTiDBTable
 } from '@/api/ontologySceneLibrary/objectType';
 import { MetadataMenuItem, IcebergTableItem } from '@/types/objectType';
-import { EllipsisPopover } from '@ceai-front/arco-material';
 import Link1To1Icon from '../../../assets/link-11.svg';
 import Link1ToNIcon from '../../../assets/link-1n.svg';
 import LinkNNIcon from '../../../assets/link-nn.svg';
 import { openNewPage } from '@/utils/env';
+import { EllipsisPopover } from '@/pages/ontologyScene/componens';
 
 const FormItem = Form.Item;
 
@@ -326,7 +326,12 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
             const fileName =
               initialValues.intermediateTable.filePath.split('/').pop() || '';
             if (fileName && fileName.trim()) {
-              setInitialFileList([{ name: fileName }]);
+              setInitialFileList([
+                {
+                  uid: `initial-link-file-${initialValues.id ?? 'new'}`,
+                  name: fileName
+                }
+              ]);
             }
           }
         }
@@ -750,6 +755,11 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
     const handleIntermediateTableTypeChange = (
       type: 'local_csv' | 'data_lake_sync'
     ) => {
+      setTimeout(() => {
+        form.setFields({
+          intermediateTable: { error: undefined }
+        });
+      }, 0);
       // 切换到本地CSV导入时，清空数据库和表
       if (type === 'local_csv') {
         setSelectedDatabase(undefined);
@@ -1303,15 +1313,16 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
                           !intermediateTable.filePath
                         ) {
                           callback('请上传中间表文件');
-                        } else if (
-                          intermediateTable.type === 'data_lake_sync' &&
-                          (!intermediateTable.database ||
-                            !intermediateTable.table)
-                        ) {
-                          callback('请选择数据库和表');
-                        } else {
-                          callback();
                         }
+                        // else if (
+                        //   intermediateTable.type === 'data_lake_sync' &&
+                        //   (!intermediateTable.database ||
+                        //     !intermediateTable.table)
+                        // ) {
+                        //   callback('请选择数据库和表');
+                        // } else {
+                        //   callback();
+                        // }
                       }
                     }
                   ]}

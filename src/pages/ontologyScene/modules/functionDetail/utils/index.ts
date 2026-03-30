@@ -281,7 +281,8 @@ function getPythonFuncSignatureRanges(code: string, functionName?: string) {
  */
 export function getPythonFuncLastReturnRanges(
   code: string,
-  functionName?: string
+  functionName?: string,
+  returnCode?: string
 ) {
   const state = EditorState.create({
     doc: code,
@@ -291,6 +292,102 @@ export function getPythonFuncLastReturnRanges(
   const tree = syntaxTree(state);
   const ranges: { from: number; to: number }[] = [];
   const normalizedFunctionName = functionName?.trim();
+  const normalizedReturnCode = returnCode?.trim();
+
+  const isValidReturnStatement = (targetReturnCode?: string) => {
+    if (!targetReturnCode) {
+      return false;
+    }
+
+    const verifyState = EditorState.create({
+      doc: `def __verify_return__():\n    ${targetReturnCode}`,
+      extensions: [python()]
+    });
+    const verifyTree = syntaxTree(verifyState);
+    let hasReturnStatement = false;
+    let hasErrorNode = false;
+
+    verifyTree.iterate({
+      enter(node) {
+        if (node.name === 'ReturnStatement') {
+          hasReturnStatement = true;
+        }
+        if (node.name === '⚠') {
+          hasErrorNode = true;
+        }
+      }
+    });
+
+    return hasReturnStatement && !hasErrorNode;
+  };
+
+  const findLastReturnByText = (
+    fallbackBlock: ReturnType<typeof findEditableFunctionBlock>,
+    targetReturnCode?: string
+  ) => {
+    if (!fallbackBlock) {
+      return null;
+    }
+
+    const lines = code.split('\n');
+    const lineOffsets = getLineStartOffsets(code);
+    let lastReturn: { from: number; to: number } | null = null;
+    let nestedBlockIndent: number | null = null;
+
+    for (
+      let lineIndex = fallbackBlock.bodyStartLine;
+      lineIndex < fallbackBlock.bodyEndLine;
+      lineIndex += 1
+    ) {
+      const line = lines[lineIndex];
+      const trimmed = line.trim();
+      const indent = getIndentSize(line);
+
+      if (isBlankOrComment(line)) {
+        continue;
+      }
+
+      if (nestedBlockIndent !== null) {
+        if (indent > nestedBlockIndent) {
+          continue;
+        }
+        nestedBlockIndent = null;
+      }
+
+      if (/^(def|class)\b/.test(trimmed)) {
+        nestedBlockIndent = indent;
+        continue;
+      }
+
+      if (/^return\b/.test(trimmed)) {
+        const currentReturn = {
+          from: lineOffsets[lineIndex] + line.indexOf('return'),
+          to: lineOffsets[lineIndex] + line.length
+        };
+
+        if (
+          targetReturnCode &&
+          line.slice(line.indexOf('return')).trim() === targetReturnCode
+        ) {
+          return currentReturn;
+        }
+
+        lastReturn = currentReturn;
+      }
+    }
+
+    return lastReturn;
+  };
+
+  const shouldFallbackToTextReturn = (range: { from: number; to: number }) => {
+    const returnSource = code.slice(range.from, range.to);
+    const lines = returnSource.split('\n');
+
+    // AST 在非法 Python 下可能会把“return (”和下一行真正的 return
+    // 合并成同一个 ReturnStatement。若后续行再次以 return 开头，说明该区间已被污染，
+    // 应回退到文本级最后一行 return。
+    return lines.slice(1).some((line) => line.trimStart().startsWith('return'));
+  };
 
   /**
    * 查找某个函数节点下最后一个 return 的区间
@@ -346,61 +443,69 @@ export function getPythonFuncLastReturnRanges(
         return;
       }
 
-      const lastReturn = findLastReturnInFunction(node);
+      if (isValidReturnStatement(normalizedReturnCode)) {
+        const exactRange = findLastReturnByText(
+          findEditableFunctionBlock(code, normalizedFunctionName),
+          normalizedReturnCode
+        );
+        if (exactRange) {
+          ranges.push(exactRange);
+        }
+        return;
+      }
+
+      const lastReturn = findLastReturnInFunction(node) as any;
       if (lastReturn) {
-        ranges.push(lastReturn);
+        if (
+          normalizedReturnCode &&
+          code.slice(lastReturn.from, lastReturn.to).trim() !==
+            normalizedReturnCode
+        ) {
+          const fallbackRange = findLastReturnByText(
+            findEditableFunctionBlock(code, normalizedFunctionName),
+            normalizedReturnCode
+          );
+          if (fallbackRange) {
+            ranges.push(fallbackRange);
+            return;
+          }
+        }
+
+        if (
+          !normalizedFunctionName ||
+          !shouldFallbackToTextReturn(lastReturn)
+        ) {
+          ranges.push(lastReturn);
+          return;
+        }
+
+        const fallbackRange = findLastReturnByText(
+          findEditableFunctionBlock(code, normalizedFunctionName),
+          normalizedReturnCode
+        );
+        if (fallbackRange) {
+          ranges.push(fallbackRange);
+        }
       }
     }
   });
 
   if (!ranges.length && normalizedFunctionName) {
-    const fallbackBlock = findEditableFunctionBlock(
-      code,
-      normalizedFunctionName
+    if (isValidReturnStatement(normalizedReturnCode)) {
+      const exactRange = findLastReturnByText(
+        findEditableFunctionBlock(code, normalizedFunctionName),
+        normalizedReturnCode
+      );
+      if (exactRange) {
+        return [exactRange];
+      }
+    }
+
+    const fallbackRange = findLastReturnByText(
+      findEditableFunctionBlock(code, normalizedFunctionName),
+      normalizedReturnCode
     );
-    if (!fallbackBlock) {
-      return ranges;
-    }
-
-    const lines = code.split('\n');
-    const lineOffsets = getLineStartOffsets(code);
-    let lastReturn: { from: number; to: number } | null = null;
-    let nestedBlockIndent: number | null = null;
-
-    for (
-      let lineIndex = fallbackBlock.bodyStartLine;
-      lineIndex < fallbackBlock.bodyEndLine;
-      lineIndex += 1
-    ) {
-      const line = lines[lineIndex];
-      const trimmed = line.trim();
-      const indent = getIndentSize(line);
-
-      if (isBlankOrComment(line)) {
-        continue;
-      }
-
-      if (nestedBlockIndent !== null) {
-        if (indent > nestedBlockIndent) {
-          continue;
-        }
-        nestedBlockIndent = null;
-      }
-
-      if (/^(def|class)\b/.test(trimmed)) {
-        nestedBlockIndent = indent;
-        continue;
-      }
-
-      if (/^return\b/.test(trimmed)) {
-        lastReturn = {
-          from: lineOffsets[lineIndex] + line.indexOf('return'),
-          to: lineOffsets[lineIndex] + line.length
-        };
-      }
-    }
-
-    return lastReturn ? [lastReturn] : ranges;
+    return fallbackRange ? [fallbackRange] : ranges;
   }
 
   return ranges;
@@ -420,7 +525,7 @@ const buildFUnctionSignature = (data: {
   const returnType = output.length > 0 ? 'dict' : 'None';
   return `${signature} -> ${returnType}:`;
 };
-const buildReturnCode = (outputs: OntologyFunctionParam[]) => {
+export const buildReturnCode = (outputs: OntologyFunctionParam[]) => {
   if (!outputs?.length) return 'return None';
   return `return {${outputs.map((item) => `"${item.name}":${item.name}`).join(',')}}`;
 };
@@ -517,9 +622,18 @@ const frozenMark = Decoration.mark({
  * - 计算需要冻结的区间
  * - 返回可直接用于 CodeMirror 的 transactionFilter 扩展
  */
-export function getFreezeRanges(code: string, functionName?: string) {
+export function getFreezeRanges(data: {
+  code: string;
+  functionName?: string;
+  funcReturn?: string;
+}) {
+  const { code, functionName, funcReturn } = data;
   const funcSignatureRanges = getPythonFuncSignatureRanges(code, functionName);
-  const lastReturnRanges = getPythonFuncLastReturnRanges(code, functionName);
+  const lastReturnRanges = getPythonFuncLastReturnRanges(
+    code,
+    functionName,
+    funcReturn
+  );
   const ranges = [...funcSignatureRanges, ...lastReturnRanges];
 
   return [

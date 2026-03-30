@@ -12,10 +12,10 @@ import {
 import { IconPlus, IconDelete } from '@arco-design/web-react/icon';
 import {
   ExpandableProcessFlow,
-  EllipsisPopover,
   ProcessStep,
   NoDataCard,
-  NoResultCard
+  NoResultCard,
+  GlobalTooltip
 } from '@ceai-front/arco-material';
 import ObjectSmallIcon from '../../assets/object-small.svg';
 import LinkSmallIcon from '../../assets/link-small.svg';
@@ -41,6 +41,7 @@ import dayjs from 'dayjs';
 import { PermissionWrapper } from '@/components/PermissionGuard';
 import { ONTOLOGY_PERMISSIONS } from '@/config/permissions';
 import { useHasPermission } from '@/store/userInfoStore';
+import { EllipsisPopover } from '@/pages/ontologyScene/componens';
 
 // 扩展 ProcessStep 类型，使 description 支持 ReactNode
 interface SceneProcessStep extends Omit<ProcessStep, 'description'> {
@@ -255,13 +256,13 @@ const SceneCard: React.FC<SceneCardProps> = ({
       {/* 更新日期 */}
       <div className="flex items-center">
         {item.updateUser && (
-          <EllipsisPopover
-            className="min-w-0 max-w-[200px] flex-1 text-[14px] leading-[22px] text-[var(--color-text-4)]"
-            value={item.updateUser}
+          <GlobalTooltip.Ellipsis
+            className="min-w-0 max-w-[200px] text-[14px] leading-[22px] text-[var(--color-text-4)]"
+            text={item.updateUser}
           />
         )}
         <span className="text-[14px] leading-[22px] text-[var(--color-text-4)]">
-          更新于 {dayjs(item.updateTime).format('YYYY-MM-DD')}
+          更新于{dayjs(item.updateTime).format('YYYY-MM-DD')}
         </span>
       </div>
     </div>
@@ -548,27 +549,25 @@ export default function OntologySceneList() {
       )}
 
       {/* 创建/编辑弹窗 */}
-      {modalVisible && (
-        <SceneModal
-          visible={modalVisible}
-          mode={modalMode}
-          initialValues={
-            editingScene
-              ? {
-                  name: editingScene.name || '',
-                  description: editingScene.description || '',
-                  icon: editingScene.icon || ''
-                }
-              : undefined
-          }
-          onSubmit={handleModalSubmit}
-          onCancel={handleModalCancel}
-          loading={submitLoading}
-          existingSceneIcons={sceneList
-            .map((scene) => scene.icon)
-            .filter((icon): icon is string => !!icon)}
-        />
-      )}
+      <SceneModal
+        visible={modalVisible}
+        mode={modalMode}
+        initialValues={
+          editingScene
+            ? {
+                name: editingScene.name || '',
+                description: editingScene.description || '',
+                icon: editingScene.icon || ''
+              }
+            : undefined
+        }
+        onSubmit={handleModalSubmit}
+        onCancel={handleModalCancel}
+        loading={submitLoading}
+        existingSceneIcons={sceneList
+          .map((scene) => scene.icon)
+          .filter((icon): icon is string => !!icon)}
+      />
     </div>
   );
 }

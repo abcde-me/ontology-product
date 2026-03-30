@@ -327,6 +327,7 @@ export default function OntologySceneGraph() {
           nodes={nodesConfig}
           initWorkflow={initWorkflow}
           nodesDraggableWhenReadonly
+          // @ts-expect-error
           autoRefreshWhenTabVisible={false}
           api={{
             workflowNotExistedMarks: ['ResourceNotFound', '资源不存在'],

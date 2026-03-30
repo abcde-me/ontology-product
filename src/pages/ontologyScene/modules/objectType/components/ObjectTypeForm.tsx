@@ -51,7 +51,7 @@ import {
   DataSourceType
 } from '@/pages/ontologyScene/common/constants';
 import ObjectTypeIconSelector from './ObjectTypeIconSelector';
-import { EllipsisPopover } from '@ceai-front/arco-material';
+import { EllipsisPopover } from '@/pages/ontologyScene/componens';
 import { PrefixAimdp } from '@/api/endpoints';
 import { openNewPage } from '@/utils/env';
 
@@ -267,7 +267,12 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
         if (initialValues.filePath && initialValues.filePath.trim()) {
           const fileName = initialValues.filePath.split('/').pop() || '';
           if (fileName && fileName.trim()) {
-            setInitialFileList([{ name: fileName }]);
+            setInitialFileList([
+              {
+                uid: `initial-object-file-${initialValues.code ?? fileName}`,
+                name: fileName
+              }
+            ]);
           }
           // 如果数据源类型是 LOCAL_CSV，需要设置 dataSource.filePath
           const dataSourceType =

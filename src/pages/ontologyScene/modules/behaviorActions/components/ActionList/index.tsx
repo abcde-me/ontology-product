@@ -15,7 +15,6 @@ import styles from './index.module.scss';
 import { IconEdit, IconPlus, IconSearch } from '@arco-design/web-react/icon';
 import {
   CopyItemIcon,
-  EllipsisPopover,
   ProButton,
   SearchTable
 } from '@ceai-front/arco-material';
@@ -31,7 +30,10 @@ import { isNil } from 'lodash-es';
 import ObjectTypeTag from '../../../../componens/ObjectTypeTag';
 import ObjectTypeDetailDrawer from '../../../../componens/ObjectTypeDetailDrawer';
 import { FunctionDetailDrawer } from '@/pages/ontologyScene/componens/FunctionDetailDrawer';
-import { ContentWithCopy } from '@/pages/ontologyScene/componens';
+import {
+  ContentWithCopy,
+  EllipsisPopover
+} from '@/pages/ontologyScene/componens';
 import { PermissionWrapper } from '@/components/PermissionGuard';
 import { ONTOLOGY_PERMISSIONS } from '@/config/permissions';
 

@@ -1594,10 +1594,10 @@
     ahooks "^3.7.8"
     react-resizable "^3.0.4"
 
-"@ceai-front/arco-material@1.1.9":
-  version "1.1.9"
-  resolved "http://npm.cestc.cn/@ceai-front/arco-material/download/@ceai-front/arco-material-1.1.9.tgz#e14f9bc260cc7ed9fcf0ad397fe1185d4d3803d8"
-  integrity sha1-4U+bwmDMftn88K05f+EYXU04A9g=
+"@ceai-front/arco-material@1.1.21":
+  version "1.1.21"
+  resolved "http://npm.cestc.cn/@ceai-front/arco-material/download/@ceai-front/arco-material-1.1.21.tgz#7a827d3c81a96ac54d6ee197c8ce9ce38b721dc0"
+  integrity sha1-eoJ9PIGpasVNbuGXyM6c44tyHcA=
   dependencies:
     "@ccf2e/arco-material" "^0.7.2"
     "@easyv/react-icons" "^1.0.0"
@@ -1624,10 +1624,10 @@
     react-sticky "^6.0.3"
     zustand "^4.5.2"
 
-"@ceai-front/workflow@^0.2.1":
-  version "0.2.1"
-  resolved "http://npm.cestc.cn/@ceai-front/workflow/download/@ceai-front/workflow-0.2.1.tgz#f11bf13c909b74545d5b178f5367e3ce3ecd3284"
-  integrity sha1-8RvxPJCbdFRdWxePU2fjzj7NMoQ=
+"@ceai-front/workflow@^0.2.2":
+  version "0.2.2"
+  resolved "http://npm.cestc.cn/@ceai-front/workflow/download/@ceai-front/workflow-0.2.2.tgz#77324727fddc4c397b0fb07bf4d14fdb5188821f"
+  integrity sha1-dzJHJ/3cTDl7D7B79NFP21GIgh8=
   dependencies:
     "@arco-design/web-react" ">=2.66.5"
     "@dagrejs/dagre" "^1.1.4"

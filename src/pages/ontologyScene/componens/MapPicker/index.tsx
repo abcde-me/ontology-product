@@ -24,7 +24,7 @@ import {
 import AMapLoader from '@amap/amap-jsapi-loader';
 import styles from './index.module.scss';
 import { SelectWithNoData } from '@/components/new-no-data-comps';
-import { FormItem } from '@/pages/ontologyScene/componens';
+import { FormItem, OsModal } from '@/pages/ontologyScene/componens';
 
 declare global {
   interface Window {
@@ -108,6 +108,7 @@ export const MapPicker: React.FC<MapPickerProps> = ({
   const markerRef = useRef<any>();
   const placeSearchRef = useRef<any>();
   const mapClickBoundRef = useRef(false);
+  const mapInitializingRef = useRef(false);
 
   const getDisplayValue = (point?: GeoPoint) => {
     if (!point) return undefined;
@@ -185,15 +186,21 @@ export const MapPicker: React.FC<MapPickerProps> = ({
     });
   };
   const initMap = useCallback(async () => {
-    if (mapRef.current) return;
+    if (mapRef.current) return true;
+    if (mapInitializingRef.current) return false;
+    mapInitializingRef.current = true;
     setLoadingMap(true);
     try {
       const AMap = await loadAmap();
+      const container = document.querySelector('#aMapInitContainer');
+      if (!container || !container.isConnected) {
+        return false;
+      }
       AMapRef.current = AMap;
       const center = currentPoint
         ? [currentPoint.lng, currentPoint.lat]
         : [116.397428, 39.90923];
-      mapRef.current = new AMap.Map(mapContainerRef.current, {
+      mapRef.current = new AMap.Map('aMapInitContainer', {
         zoom: 11,
         center,
         viewMode: '2D'
@@ -204,24 +211,21 @@ export const MapPicker: React.FC<MapPickerProps> = ({
         updateMarker(currentPoint, true);
       }
       setMapReady(true);
+      return true;
     } catch (err) {
+      console.error('地图加载失败:', err);
       Message.error('地图加载失败，请检查网络或密钥配置');
+      return false;
     } finally {
+      mapInitializingRef.current = false;
       setLoadingMap(false);
     }
   }, [bindMapClick, currentPoint, initMapControls, updateMarker]);
 
-  // 地图未就绪时不弹框，确保弹出即有可用实例
   const openModal = useCallback(() => {
-    if (disabled || !mapReady) return;
+    if (disabled) return;
     setVisible(true);
-    requestAnimationFrame(() => {
-      mapRef.current?.resize?.();
-      if (currentPoint) {
-        updateMarker(currentPoint, true);
-      }
-    });
-  }, [currentPoint, disabled, initMap, updateMarker, mapReady]);
+  }, [disabled]);
 
   // 同步外部受控值
   useEffect(() => {
@@ -234,10 +238,52 @@ export const MapPicker: React.FC<MapPickerProps> = ({
     }
   }, [value?.lng, value?.lat, updateMarker]);
 
-  // 组件挂载即加载地图，避免弹框打开时再等待
+  // 兼容火狐浏览器，所以改成了第一次打开弹窗之后开始加载地图
   useEffect(() => {
-    initMap();
-  }, []);
+    if (!visible) return;
+
+    let cancelled = false;
+    let timerId = 0;
+    let frameId = 0;
+
+    const ensureMapReady = async () => {
+      const container = document.querySelector('#aMapInitContainer');
+      if (!container || !container.isConnected) {
+        frameId = window.requestAnimationFrame(ensureMapReady);
+        return;
+      }
+
+      if (container.clientWidth === 0 || container.clientHeight === 0) {
+        timerId = window.setTimeout(ensureMapReady, 50);
+        return;
+      }
+
+      if (!mapRef.current) {
+        const initialized = await initMap();
+        if (!initialized || !mapRef.current) {
+          timerId = window.setTimeout(ensureMapReady, 50);
+          return;
+        }
+      }
+
+      if (cancelled) return;
+
+      frameId = window.requestAnimationFrame(() => {
+        mapRef.current?.resize?.();
+        if (currentPoint) {
+          updateMarker(currentPoint, true);
+        }
+      });
+    };
+
+    ensureMapReady();
+
+    return () => {
+      cancelled = true;
+      window.cancelAnimationFrame(frameId);
+      window.clearTimeout(timerId);
+    };
+  }, [currentPoint, initMap, updateMarker, visible]);
 
   // 远程搜索 POI，结果注入 Select options
   const handleSearch = useCallback((keyword: string) => {
@@ -335,11 +381,11 @@ export const MapPicker: React.FC<MapPickerProps> = ({
           readOnly
           value={getDisplayValue(currentPoint)}
           placeholder={placeholder}
-          disabled={disabled || loadingMap || !mapReady}
+          disabled={disabled}
           allowClear
           onClear={handleClear}
           suffix={
-            !mapReady || loadingMap ? (
+            loadingMap ? (
               <IconLoading />
             ) : (
               <Tooltip content="选择坐标" getPopupContainer={getPopupContainer}>
@@ -351,12 +397,14 @@ export const MapPicker: React.FC<MapPickerProps> = ({
         />
       </Tooltip>
 
-      <Modal
+      <OsModal
         title="选择坐标"
         visible={visible}
         onCancel={handleModalClose}
         onOk={handleConfirm}
-        mountOnEnter={false}
+        maskStyle={{
+          display: visible ? 'block' : 'none'
+        }}
         style={{ width: 900, height: 600 }}
         getChildrenPopupContainer={(node) =>
           node.parentElement || document.body
@@ -390,12 +438,23 @@ export const MapPicker: React.FC<MapPickerProps> = ({
 
           <div className={styles.body}>
             <div className={styles.mapWrapper}>
-              <div ref={mapContainerRef} className={styles.mapContainer} />
+              <div
+                ref={mapContainerRef}
+                className={styles.mapContainer}
+                id={'aMapInitContainer'}
+              />
+              {loadingMap && (
+                <div className={styles.loadingMask}>
+                  <Spin />
+                  <div className={styles.loadingText}>地图加载中...</div>
+                </div>
+              )}
               <SelectWithNoData
                 popupVisible={showPointList}
                 showSearch
                 allowClear
                 placeholder="请输入关键词"
+                disabled={!mapReady || loadingMap}
                 loading={searchLoading}
                 options={searchOptions}
                 filterOption={false}
@@ -420,7 +479,7 @@ export const MapPicker: React.FC<MapPickerProps> = ({
             </div>
           </div>
         </div>
-      </Modal>
+      </OsModal>
     </>
   );
 };

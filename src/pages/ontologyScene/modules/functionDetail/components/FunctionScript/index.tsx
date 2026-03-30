@@ -7,7 +7,7 @@ import React, {
   useImperativeHandle
 } from 'react';
 import styles from './index.module.scss';
-import { Button, Message, Space, Tooltip } from '@arco-design/web-react';
+import { Button, Form, Message, Space, Tooltip } from '@arco-design/web-react';
 import {
   IconCopy,
   IconDown,
@@ -30,6 +30,7 @@ import { python } from '@codemirror/lang-python';
 import { lintGutter } from '@codemirror/lint';
 import { isNil } from 'lodash-es';
 import {
+  buildReturnCode,
   bypassFrozenRange,
   getFreezeRanges
 } from '@/pages/ontologyScene/modules/functionDetail/utils';
@@ -40,6 +41,7 @@ import { BehaviorLogItem } from '@/pages/ontologyScene/modules/behaviorLog/types
 import { ResizeBoxWithCursorChange } from '@/pages/ontologyScene/componens';
 import { RunStatus } from '@/pages/ontologyScene/hooks/useTestFunction';
 import { OntologyFunctionDetail } from '@/pages/ontologyScene/types/ontologyFunction';
+import { OntologyActionParam } from '@/pages/ontologyScene/types/behaviorActions';
 
 const extension = [python(), lintGutter()];
 
@@ -64,10 +66,15 @@ export const FunctionScript = forwardRef(
     const functionDiv = useRef<HTMLDivElement>(null);
     const [logOpen, setLogOpen] = useState(false);
     const editorReady = !isNil(value);
+    const { form } = Form.useFormContext();
+    const paramsOut: OntologyActionParam[] = Form.useWatch('output', form);
     const extensions = useMemo(() => {
       if (!editorReady) return extension;
-      return extension.concat(getFreezeRanges(value, functionCode));
-    }, [editorReady, value, functionCode]);
+      const funcReturn = buildReturnCode(paramsOut);
+      return extension.concat(
+        getFreezeRanges({ code: value, functionName: functionCode, funcReturn })
+      );
+    }, [editorReady, value, functionCode, paramsOut]);
     const functionWidth = useRef<number>();
     useEffect(() => {
       const observer = new ResizeObserver((e: ResizeObserverEntry[]) => {

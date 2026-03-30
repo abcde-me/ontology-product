@@ -17,7 +17,6 @@ import useArcoTable from '@/hooks/use-arco-table';
 import { IconPlus, IconSearch } from '@arco-design/web-react/icon';
 import {
   CopyItemIcon,
-  EllipsisPopover,
   ProButton,
   SearchTable
 } from '@ceai-front/arco-material';
@@ -35,7 +34,7 @@ import {
 import { isEmpty, isNil } from 'lodash-es';
 import {
   ContentWithCopy,
-  OsEmptyStatusWrapper
+  EllipsisPopover
 } from '@/pages/ontologyScene/componens';
 import { FunctionDetailDrawer } from '@/pages/ontologyScene/modules/functionDetail/components';
 import { SorterInfo } from '@arco-design/web-react/lib/Table/interface';

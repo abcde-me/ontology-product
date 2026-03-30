@@ -20,7 +20,6 @@ import {
 import {
   CopyItemIcon,
   DotStatus,
-  EllipsisPopover,
   ProButton,
   SearchTable
 } from '@ceai-front/arco-material';
@@ -56,6 +55,7 @@ import { PermissionWrapper } from '@/components/PermissionGuard';
 import { ONTOLOGY_PERMISSIONS } from '@/config/permissions';
 import TaskLogDrawer from '../../componens/TaskLogDrawer';
 import LogIcon from '@/pages/ontologyScene/assets/log-icon.svg';
+import { EllipsisPopover } from '@/pages/ontologyScene/componens';
 
 // 将 SyncStatus 枚举转换为 LinkDetailDrawer 期望的字符串类型
 const convertSyncStatusToString = (

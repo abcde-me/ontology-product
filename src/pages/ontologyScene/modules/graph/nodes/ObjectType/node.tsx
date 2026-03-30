@@ -1,8 +1,8 @@
 import { Message, Popover } from '@arco-design/web-react';
 import { IconCopy } from '@arco-design/web-react/icon';
-import { EllipsisPopover } from '@ceai-front/arco-material';
 import copy from 'copy-to-clipboard';
 import React from 'react';
+import { EllipsisPopover } from '@/pages/ontologyScene/componens';
 
 const Node = ({ id, data }) => {
   // 原有的节点渲染逻辑

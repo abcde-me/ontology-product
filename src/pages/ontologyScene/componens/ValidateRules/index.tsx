@@ -9,7 +9,7 @@ import {
   Tag
 } from '@arco-design/web-react';
 import { IconPlayArrowFill } from '@arco-design/web-react/icon';
-import { EllipsisPopover, NoDataCard } from '@ceai-front/arco-material';
+import { NoDataCard } from '@ceai-front/arco-material';
 import {
   FormItem,
   NumberRange,
@@ -23,6 +23,7 @@ import {
 import { SelectWithNoData } from '@/components/new-no-data-comps';
 import { ParamType } from '@/pages/ontologyScene/types/ontologyFunction';
 import classNames from 'classnames';
+import { EllipsisPopover } from '@/pages/ontologyScene/componens';
 
 export const ValidateRules = (props: { readonly?: boolean }) => {
   const { form, disabled: fieldsDisabled } = Form.useFormContext();

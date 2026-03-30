@@ -13,10 +13,10 @@ import { IconCopy } from '@arco-design/web-react/icon';
 import copy from 'copy-to-clipboard';
 import {
   DotStatus,
-  EllipsisPopover,
+  GlobalTooltip,
   NoDataCard
 } from '@ceai-front/arco-material';
-import { OsDrawer } from '@/pages/ontologyScene/componens';
+import { OsDrawer, EllipsisPopover } from '@/pages/ontologyScene/componens';
 import {
   getOntologyLinkType,
   listOntologyLinkTypeData,
@@ -281,7 +281,7 @@ export default function LinkDetailDrawer({
 
     return (
       <div
-        className="flex w-full max-w-[374px] flex-1 items-center gap-[8px] rounded-lg px-4 py-3"
+        className="flex w-full max-w-[374px] flex-1 items-center gap-[8px] overflow-hidden rounded-lg px-4 py-3"
         style={{
           backgroundColor: '#fff',
           minHeight: '56px'
@@ -290,7 +290,7 @@ export default function LinkDetailDrawer({
         <div className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded">
           <IconComponent className="h-6 w-6" />
         </div>
-        <div className="h-[24px] min-w-0 text-[14px] font-[600] text-[var(--color-text-1)]">
+        <div className="h-[24px] min-w-0 overflow-hidden text-[14px] font-[600] text-[var(--color-text-1)]">
           <EllipsisPopover
             value={name}
             className="min-w-0 leading-[24px]"
@@ -430,15 +430,18 @@ export default function LinkDetailDrawer({
                 <div className="w-[100px] flex-shrink-0 text-[14px] leading-[22px] text-[var(--color-text-4)]">
                   链接id:
                 </div>
-                <div className="flex items-center gap-[4px]">
-                  <span className="text-[14px] leading-[22px] text-[var(--color-text-1)]">
-                    {displayData?.code || '-'}
-                  </span>
+                <div className="flex items-center gap-[4px] overflow-hidden">
+                  <GlobalTooltip.Ellipsis
+                    text={displayData?.code || '-'}
+                    className="flex-1 text-[14px] leading-[22px] text-[var(--color-text-1)]"
+                  >
+                    {/*{displayData?.code || '-'}*/}
+                  </GlobalTooltip.Ellipsis>
                   {!isNil(displayData?.code) && (
                     <Popover content="复制">
                       <IconCopy
                         fontSize={14}
-                        className="hover:cursor-pointer hover:text-[rgba(var(--primary-6))]"
+                        className="flex-shrink-0 hover:cursor-pointer hover:text-[rgba(var(--primary-6))]"
                         onClick={(e) => {
                           e.stopPropagation();
                           handleCopy(String(displayData?.code));

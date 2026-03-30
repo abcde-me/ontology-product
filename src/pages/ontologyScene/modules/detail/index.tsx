@@ -49,9 +49,9 @@ import MenuAttributeIcon from '../../assets/menu-attribute.svg';
 import MenuBehaviorIcon from '../../assets/menu-behavior.svg';
 import MenuFunctionIcon from '../../assets/menu-function.svg';
 import MenuBehaviorLogIcon from '../../assets/menu-log.svg';
-import { EllipsisPopover } from '@ceai-front/arco-material';
 import { PermissionWrapper } from '@/components/PermissionGuard';
 import { ONTOLOGY_PERMISSIONS } from '@/config/permissions';
+import { EllipsisPopover } from '@/pages/ontologyScene/componens';
 
 // 懒加载各个模块
 const OntologySceneGraph = lazy(() => import('../graph'));

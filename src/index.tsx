@@ -19,7 +19,10 @@ import ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
 import { ConfigProvider, Layout, Spin } from '@arco-design/web-react';
 import {} from '@ccf2e/arco-material';
-import { patchHistoryForLocationChange } from '@ceai-front/arco-material';
+import {
+  GlobalTooltip,
+  patchHistoryForLocationChange
+} from '@ceai-front/arco-material';
 import { useHistory } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import zhCN from '@arco-design/web-react/es/locale/zh-CN';
@@ -406,6 +409,7 @@ const render = (Component) => {
         </div>
       }
     >
+      <GlobalTooltip className={'z-[9999]'} />
       <Component />
     </Suspense>,
     document.getElementById('root')

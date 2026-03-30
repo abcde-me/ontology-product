@@ -20,3 +20,5 @@ export * from './OSEmptyStatus';
 export * from './FunctionFileParam';
 export * from './ContentWithCopy';
 export * from './Icons';
+export * from './EllipsisPopover';
+export * from './OSModal';

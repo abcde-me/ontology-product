@@ -1,9 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import {
-  EnumRule,
   OntologyActionParam,
-  RuleName,
-  TYPE2COMP_OPTIONS,
   TYPE2RULE_TYPES,
   UI_TYPE_LABEL,
   ValidateRule
@@ -11,6 +8,7 @@ import {
 import styles from './index.module.scss';
 import {
   ContentWithCopy,
+  EllipsisPopover,
   OsDrawer,
   PyCodeContent
 } from '@/pages/ontologyScene/componens';
@@ -28,7 +26,7 @@ import {
 import { getActionDetail } from '@/api/ontologySceneLibrary/ontologyAction';
 import ObjectTypeTag from '../../../../componens/ObjectTypeTag';
 import NoDataEmpty from '@/components/NoDataEmpty';
-import { EllipsisPopover, NoDataCard } from '@ceai-front/arco-material';
+import { NoDataCard } from '@ceai-front/arco-material';
 import { ValidateRuleCard } from '@/pages/ontologyScene/modules/behaviorActions/components';
 
 interface IProps {
@@ -69,7 +67,7 @@ export const BehaviorDetail = (props: IProps) => {
       title: '参数显示名称',
       dataIndex: 'name',
       key: 'name',
-      width: 160,
+      width: 180,
       ellipsis: true,
       render(value) {
         return (
@@ -82,7 +80,7 @@ export const BehaviorDetail = (props: IProps) => {
       title: '参数ID',
       dataIndex: 'code',
       key: 'code',
-      width: 160,
+      width: 180,
       ellipsis: true,
       render(value) {
         return value ? <ContentWithCopy value={value} /> : '-';
@@ -93,6 +91,7 @@ export const BehaviorDetail = (props: IProps) => {
       title: '数据类型',
       dataIndex: 'type',
       key: 'type',
+      width: 180,
       ellipsis: true,
       render(value) {
         return (
@@ -104,7 +103,7 @@ export const BehaviorDetail = (props: IProps) => {
       title: '界面控件',
       dataIndex: 'uiType',
       key: 'uiType',
-      width: 160,
+      width: 180,
       render: (type: UiType = UiType.Input) => {
         return UI_TYPE_LABEL[type];
       }
@@ -134,9 +133,9 @@ export const BehaviorDetail = (props: IProps) => {
           validateRules.push(rule);
         }
       }
-      setInputParams(inputParams);
-      setValidateRules(validateRules);
     });
+    setInputParams(inputParams);
+    setValidateRules(validateRules);
   }, [actionDetail]);
 
   return (
@@ -178,7 +177,9 @@ export const BehaviorDetail = (props: IProps) => {
               </div>
             </div>
             <div className={styles['base-info-item']}>
-              <div className={styles['item-field']}>描述说明：</div>
+              <div className={styles['item-field']} style={{ width: 70 }}>
+                描述说明：
+              </div>
               <div className={styles['item-value']}>
                 <EllipsisPopover
                   value={actionDetail?.description || '-'}
@@ -206,7 +207,9 @@ export const BehaviorDetail = (props: IProps) => {
               </div>
             </div>
             <div className={styles['base-info-item']}>
-              <div className={styles['item-field']}>函数：</div>
+              <div className={styles['item-field']} style={{ width: 70 }}>
+                函数：
+              </div>
               <div className={styles['item-value']}>
                 <EllipsisPopover
                   value={actionDetail?.functionName || '-'}

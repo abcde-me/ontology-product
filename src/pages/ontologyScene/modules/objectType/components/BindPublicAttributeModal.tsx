@@ -11,8 +11,7 @@ import {
 import { PublicProperty } from '@/types/attributes';
 import { listOntologyPublicProperties } from '@/api/ontologySceneLibrary/attributes';
 import { useWorkflowTable } from '@/pages/ontologyScene/hooks/useTable';
-import { PaginationProps } from '@arco-design/web-react';
-import { EllipsisPopover } from '@ceai-front/arco-material';
+import { EllipsisPopover } from '@/pages/ontologyScene/componens';
 
 export interface PublicAttribute {
   id: number; // 公共属性ID

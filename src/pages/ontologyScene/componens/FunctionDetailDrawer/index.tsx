@@ -2,6 +2,7 @@ import React, { useMemo, useState } from 'react';
 import classNames from 'classnames';
 import {
   ContentWithCopy,
+  EllipsisPopover,
   OsDrawer,
   OSDrawerProps,
   PyCodeContent
@@ -16,7 +17,7 @@ import styles from './index.module.scss';
 import { useRequest } from 'ahooks';
 import { getFunctionDetail } from '@/api/ontologySceneLibrary/ontologyFunction';
 import { isNil } from 'lodash-es';
-import { EllipsisPopover } from '@ceai-front/arco-material';
+import { GlobalTooltip } from '@ceai-front/arco-material';
 
 interface IProps extends OSDrawerProps {
   data?: number;
@@ -45,8 +46,8 @@ const INPUT_COLUMNS: TableColumnProps<ParamRow>[] = [
       return (
         <EllipsisPopover
           value={value || '-'}
-          preferTypography
           wrapperClassName={'w-full'}
+          preferTypography
         />
       );
     }
@@ -54,14 +55,14 @@ const INPUT_COLUMNS: TableColumnProps<ParamRow>[] = [
   {
     title: '入参类型',
     dataIndex: 'type',
-    width: 200,
+    width: 400,
     ellipsis: true,
     render: (value: string) => {
       return (
         <EllipsisPopover
           value={value || '-'}
-          preferTypography
           wrapperClassName={'w-full'}
+          preferTypography
         />
       );
     }
@@ -86,16 +87,10 @@ const OUTPUT_COLUMNS: TableColumnProps<ParamRow>[] = [
   {
     title: '出参类型',
     dataIndex: 'type',
-    width: 200,
+    width: 400,
     ellipsis: true,
     render: (value: string) => {
-      return (
-        <EllipsisPopover
-          value={value || '-'}
-          preferTypography
-          wrapperClassName={'w-full'}
-        />
-      );
+      return <GlobalTooltip.Ellipsis text={value || '-'} />;
     }
   }
 ];
@@ -153,6 +148,7 @@ export const FunctionDetailDrawer = (props: IProps) => {
       title={title ?? '函数详情'}
       footer={footer ?? null}
       className={classNames(styles['function-detail-drawer'], className)}
+      getChildrenPopupContainer={(node) => node.parentElement || document.body}
     >
       <div className={styles['drawer-content']}>
         {/* 基本信息 */}
@@ -162,16 +158,21 @@ export const FunctionDetailDrawer = (props: IProps) => {
             <div className={styles['info-item']}>
               <div className={styles['info-label']}>显示名称</div>
               <div className={styles['info-value']}>
-                <EllipsisPopover
-                  value={basicInfo?.displayName || '-'}
-                  wrapperClassName={'w-full'}
+                <GlobalTooltip.Ellipsis
+                  text={basicInfo?.displayName || '-'}
+                  // wrapperClassName={'w-full'}
                 >
                   {basicInfo?.displayName || '-'}
-                </EllipsisPopover>
+                </GlobalTooltip.Ellipsis>
               </div>
             </div>
             <div className={styles['info-item']}>
-              <div className={styles['info-label']}>函数名称(id)</div>
+              <div
+                className={styles['info-label']}
+                style={{ width: 90, marginRight: 16 }}
+              >
+                函数名称(id)
+              </div>
               <div className={styles['info-value']}>
                 <ContentWithCopy value={basicInfo.panelId} />
               </div>

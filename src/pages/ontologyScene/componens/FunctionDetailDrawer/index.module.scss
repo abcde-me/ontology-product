@@ -50,7 +50,7 @@
 
 .info-item {
   display: flex;
-  gap: 8px;
+  //gap: 8px;
   align-items: flex-start;
   overflow: hidden;
 }
@@ -62,7 +62,7 @@
   line-height: 22px;
   color: #646c85;
   flex-shrink: 0;
-  width: 90px;
+  width: 80px;
 
   &::after {
     content: ':';
