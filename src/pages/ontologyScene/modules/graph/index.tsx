@@ -6,6 +6,7 @@ import {
   GenerateNewNode
 } from '@ceai-front/workflow';
 import '@ceai-front/workflow/dist/es/ai-workflow.css';
+import useUrlState from '@ahooksjs/use-url-state';
 import { MyNode, MyNodePanel, MyNodeDefault } from './nodes';
 import {
   getWorkflow,
@@ -93,7 +94,8 @@ const MENU_WIDTH = 200;
 // 使用 dagre 进行布局计算
 function layoutNodesWithDagre(
   topologyData: GetOntologyTopologyResponse,
-  newNode: GenerateNewNode
+  newNode: GenerateNewNode,
+  selectedObjectTypeId?: string
 ) {
   const topologyNodes = topologyData.nodes ?? [];
   const topologyEdges = topologyData.edges ?? [];
@@ -128,6 +130,11 @@ function layoutNodesWithDagre(
         type: 'default',
         desc: topologyNode.description ?? '',
         title: topologyNode.name || '未命名节点',
+        // 用于控制节点面板的显隐：当节点被选中时面板会自动打开
+        selected: Boolean(
+          selectedObjectTypeId &&
+            String(nodeId) === String(selectedObjectTypeId)
+        ),
         attributes: topologyNode.ontologyPhysicalPropertiesList || [],
         syncStatus: topologyNode.syncStatus,
         code: topologyNode.code ?? '',
@@ -239,7 +246,8 @@ function layoutNodesWithDagre(
 
 // 创建基于接口数据的 initWorkflow
 const createInitWorkflow = (
-  topologyData: GetOntologyTopologyResponse | null
+  topologyData: GetOntologyTopologyResponse | null,
+  selectedObjectTypeId?: string
 ) => {
   return (newNode: GenerateNewNode) => {
     if (!topologyData) {
@@ -251,7 +259,7 @@ const createInitWorkflow = (
       };
     }
 
-    return layoutNodesWithDagre(topologyData, newNode);
+    return layoutNodesWithDagre(topologyData, newNode, selectedObjectTypeId);
   };
 };
 
@@ -260,6 +268,15 @@ export default function OntologySceneGraph() {
   const [topologyData, setTopologyData] =
     useState<GetOntologyTopologyResponse | null>(null);
   const [loading, setLoading] = useState(true);
+  const [urlState, setUrlState] = useUrlState<{ objectTypeId: string }>(
+    { objectTypeId: '' },
+    { navigateMode: 'replace' }
+  );
+  const objectTypeIdFromUrl = urlState.objectTypeId
+    ? String(urlState.objectTypeId)
+    : '';
+  // 只在页面首次加载时读取一次 URL 的初始值，用于初始化节点面板打开状态
+  const initialObjectTypeIdFromUrl = useMemo(() => objectTypeIdFromUrl, []);
   const showCustomEdgePanel = useDemoStore((s) => s.showCustomEdgePanel);
   const setShowCustomEdgePanel = useDemoStore((s) => s.setShowCustomEdgePanel);
   const history = useHistory();
@@ -306,9 +323,10 @@ export default function OntologySceneGraph() {
   }, []);
 
   // 基于获取的数据创建 initWorkflow
-  const initWorkflow = useCallback(createInitWorkflow(topologyData), [
-    topologyData
-  ]);
+  const initWorkflow = useCallback(
+    createInitWorkflow(topologyData, initialObjectTypeIdFromUrl),
+    [topologyData, initialObjectTypeIdFromUrl]
+  );
 
   if (loading) {
     return (
@@ -349,6 +367,9 @@ export default function OntologySceneGraph() {
           events={{
             onNodeClick: (node) => {
               setShowCustomEdgePanel(false);
+              // 把当前点击的对象类型 id 写入 URL，便于分享/刷新后自动打开面板
+              const clickedObjectTypeId = node?.id ? String(node.id) : '';
+              setUrlState({ objectTypeId: clickedObjectTypeId });
             }
           }}
           subHeader={{ fullyCustomSubheader: <SubHeader /> }}
