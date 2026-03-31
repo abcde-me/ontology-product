@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Drawer, Button, Message } from '@arco-design/web-react';
 import { IconRefresh, IconCopy } from '@arco-design/web-react/icon';
 import { useInfiniteScroll, useRequest } from 'ahooks';
-import copy from 'copy-to-clipboard';
+import { copyToClipboard } from '@ceai-front/arco-material';
 
 const PAGE_SIZE = 100;
 
@@ -114,13 +114,11 @@ const TaskLogDrawer: React.FC<TaskLogDrawerProps> = ({
   }, [resetState, handleLoadLogs]);
 
   // 复制日志
-  const handleCopy = useCallback(() => {
+  const handleCopy = useCallback(async () => {
     const logText = logs.join('\n');
-    const success = copy(logText);
-    if (success) {
-      Message.success('已复制到剪贴板');
-    } else {
-      Message.error('复制失败');
+    const result = await copyToClipboard(logText);
+    if (!result.success) {
+      Message.error(result.message || '复制失败');
     }
   }, [logs]);
 
@@ -177,7 +175,7 @@ const TaskLogDrawer: React.FC<TaskLogDrawerProps> = ({
             className="h-[24px]"
             type="outline"
             icon={<IconCopy />}
-            onClick={handleCopy}
+            onClick={() => void handleCopy()}
             disabled={logs.length === 0}
           >
             复制

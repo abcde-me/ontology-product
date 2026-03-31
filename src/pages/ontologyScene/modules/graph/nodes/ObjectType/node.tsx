@@ -1,8 +1,8 @@
 import { Message, Popover } from '@arco-design/web-react';
 import { IconCopy } from '@arco-design/web-react/icon';
-import copy from 'copy-to-clipboard';
 import React from 'react';
 import { EllipsisPopover } from '@/pages/ontologyScene/componens';
+import { copyToClipboard } from '@ceai-front/arco-material';
 
 const Node = ({ id, data }) => {
   // 原有的节点渲染逻辑
@@ -14,13 +14,10 @@ const Node = ({ id, data }) => {
   const remainingCount = attributes.length - 2;
   const remainingAttributes = attributes.slice(2);
 
-  const handleCopy = (value: string) => {
-    const isCopySuccess = copy(value);
-
-    if (isCopySuccess) {
-      Message.success('复制成功');
-    } else {
-      Message.error('复制失败');
+  const handleCopy = async (value: string) => {
+    const result = await copyToClipboard(value);
+    if (!result.success) {
+      Message.error(result.message || '复制失败');
     }
   };
 
@@ -43,7 +40,7 @@ const Node = ({ id, data }) => {
               onClick={(e) => {
                 e.stopPropagation();
                 e.preventDefault();
-                handleCopy(data.code);
+                void handleCopy(data.code);
               }}
             />
           </Popover>
