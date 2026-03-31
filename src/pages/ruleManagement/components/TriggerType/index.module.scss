@@ -1,0 +1,99 @@
+$primary-6: rgb(var(--primary-6));
+$primary-0: rgb(var(--primary-0, #f2f8ff));
+
+.trigger-type-container {
+  display: flex;
+  gap: 16px;
+
+  .trigger-type-card {
+    display: flex;
+    padding: 16px;
+    gap: 8px;
+    align-self: stretch;
+    border-radius: 4px;
+    border: 1px solid var(--color-border-1);
+    background: #fff;
+    position: relative;
+    flex-basis: calc(50% - 8px);
+    flex-shrink: 0;
+
+    .trigger-type-icon {
+      width: 40px;
+      height: 40px;
+      flex-shrink: 0;
+      border: 1px solid transparent;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .trigger-type-content {
+      flex: 1;
+
+      .trigger-type-title {
+        color: var(--color-text-1);
+        margin-bottom: 4px;
+
+        /* 16 弹窗标题/500 */
+        font-family: 'PingFang SC';
+        font-size: 16px;
+        font-weight: 500;
+        line-height: 24px; /* 150% */
+      }
+
+      .trigger-type-desc {
+        color: var(--color-text-4);
+
+        /* 12 最小字号/400 */
+        font-family: 'PingFang SC';
+        font-size: 12px;
+        font-weight: 400;
+        line-height: 18px; /* 150% */
+      }
+    }
+
+    .trigger-auto {
+      border-radius: 4px;
+      border-color: rgb(var(--primary-4));
+      background: #d4e7ff;
+    }
+
+    .trigger-change {
+      border-color: var(--chart-data-6, #9f40f5);
+      background: var(--chart-data-2, #f5edff);
+    }
+
+    .trigger-checked {
+      width: 20px;
+      height: 20px;
+      border-radius: 4px;
+      position: absolute;
+      top: 0;
+      right: 0;
+      z-index: -1;
+    }
+
+    &:hover {
+      border-color: $primary-6 !important;
+      cursor: pointer;
+    }
+  }
+
+  .trigger-type-card-active {
+    border: 1px solid $primary-6 !important;
+    background: #f2f8ff !important;
+
+    .trigger-type-title {
+      color: $primary-6 !important;
+    }
+
+    .trigger-type-desc {
+      color: var(--color-text-2) !important;
+    }
+
+    .trigger-checked {
+      z-index: 1000;
+    }
+  }
+}

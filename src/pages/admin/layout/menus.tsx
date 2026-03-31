@@ -123,6 +123,27 @@ export const menus: MenuModel[] = [
   },
   {
     type: 'itemGroup',
+    title: '业务自动化',
+    key: 'BusinessAutomation',
+    children: [
+      {
+        title: '规则管理',
+        icon: <OntologyLibrary className={iconClass} />,
+        key: 'AutomationRuleManagement',
+        path: '/tenant/compute/onto/businessAutomation/management',
+        permission: ONTOLOGY_PERMISSIONS.LIST
+      },
+      {
+        title: '执行日志',
+        icon: <OntologyLibrary className={iconClass} />,
+        key: 'AutomationRuleRunLog',
+        path: '/tenant/compute/onto/businessAutomation/runLog',
+        permission: ONTOLOGY_PERMISSIONS.LIST
+      }
+    ]
+  },
+  {
+    type: 'itemGroup',
     title: '平台资源',
     key: 'platformResource',
     children: [

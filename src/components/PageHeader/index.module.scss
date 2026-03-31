@@ -1,0 +1,35 @@
+.page-header {
+  padding: 24px 24px 0 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  overflow: hidden;
+
+  .page-header-title {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    overflow: hidden;
+
+    .page-header-title-text {
+      color: var(--text-1);
+
+      /* 20 数字指标/600 */
+      font-family: 'PingFang SC';
+      font-size: 20px;
+      font-weight: 600;
+      line-height: 30px; /* 150% */
+    }
+  }
+
+  .page-header-sub-title {
+    overflow: hidden;
+    color: var(--color-text-3);
+
+    /* 14 正文&二级标题/400 */
+    font-family: 'PingFang SC';
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 22px; /* 157.143% */
+  }
+}
