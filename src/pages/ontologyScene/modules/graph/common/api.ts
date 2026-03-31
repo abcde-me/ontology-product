@@ -23,7 +23,6 @@ const setDraft = (d) => {
 };
 
 const getWorkflow = () => {
-  console.log('getWorkflow', draft);
   return !draft
     ? Promise.resolve({
         code: 'ResourceNotFound',
