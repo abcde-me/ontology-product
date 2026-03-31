@@ -16,7 +16,11 @@ import {
   Pagination
 } from '@arco-design/web-react';
 import { IconCopy, IconFile } from '@arco-design/web-react/icon';
-import copy from 'copy-to-clipboard';
+import {
+  copyToClipboard,
+  DotStatus,
+  NoDataCard
+} from '@ceai-front/arco-material';
 import { useInfiniteScroll, useRequest } from 'ahooks';
 import {
   listOntologyObjectTypeData,
@@ -35,7 +39,7 @@ import type {
 } from '@/types/graphApi';
 import type { GetOntologyObjectTypeDetailRes } from '@/types/objectType';
 import { LinkType, SyncStatus } from '@/types/graphApi';
-import { DotStatus, NoDataCard } from '@ceai-front/arco-material';
+
 import {
   OBJECT_TYPE_ICON_OPTIONS,
   OBJECT_TYPE_SYNC_STATUS_CONFIG
@@ -91,12 +95,10 @@ const Panel: FC<any> = ({ id, data }) => {
   // id prop 是字符串类型（如 "1"），需要转换为数字
   const nodeId = data?.id || (id ? Number(id) : 1);
 
-  const handleCopy = (value: string) => {
-    const isCopySuccess = copy(value);
-    if (isCopySuccess) {
-      Message.success('复制成功');
-    } else {
-      Message.error('复制失败');
+  const handleCopy = async (value: string) => {
+    const result = await copyToClipboard(value);
+    if (!result.success) {
+      Message.error(result.message || '复制失败');
     }
   };
 
@@ -395,7 +397,7 @@ const Panel: FC<any> = ({ id, data }) => {
                 className="cursor-pointer opacity-0 transition-opacity hover:text-[rgba(var(--primary-6))] group-hover:opacity-100"
                 onClick={(e) => {
                   e.stopPropagation();
-                  handleCopy(String(text));
+                  void handleCopy(String(text));
                 }}
               />
             </Popover>
@@ -465,7 +467,7 @@ const Panel: FC<any> = ({ id, data }) => {
                 className="cursor-pointer opacity-0 transition-opacity hover:text-[rgba(var(--primary-6))] group-hover:opacity-100"
                 onClick={(e) => {
                   e.stopPropagation();
-                  handleCopy(String(text));
+                  void handleCopy(String(text));
                 }}
               />
             </Popover>
@@ -572,7 +574,7 @@ const Panel: FC<any> = ({ id, data }) => {
                     className="flex-shrink-0 cursor-pointer hover:text-[rgba(var(--primary-6))]"
                     onClick={(e) => {
                       e.stopPropagation();
-                      handleCopy(objectTypeDetail?.code || '');
+                      void handleCopy(objectTypeDetail?.code || '');
                     }}
                   />
                 </Popover>
@@ -706,7 +708,7 @@ const Panel: FC<any> = ({ id, data }) => {
                           className="cursor-pointer hover:text-[rgba(var(--primary-6))]"
                           onClick={(e) => {
                             e.stopPropagation();
-                            handleCopy(link.code || String(link.id));
+                            void handleCopy(link.code || String(link.id));
                           }}
                         />
                       </Popover>
