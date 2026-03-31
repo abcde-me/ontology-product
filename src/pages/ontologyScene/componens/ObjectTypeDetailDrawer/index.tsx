@@ -18,10 +18,13 @@ import {
 } from '@arco-design/web-react';
 import { IconCopy } from '@arco-design/web-react/icon';
 import { OsDrawer } from '@/pages/ontologyScene/componens';
-import { DotStatus, NoDataCard } from '@ceai-front/arco-material';
+import {
+  DotStatus,
+  NoDataCard,
+  copyToClipboard
+} from '@ceai-front/arco-material';
 import { EllipsisPopover } from '@/pages/ontologyScene/componens';
 
-import copy from 'copy-to-clipboard';
 import { getOntologyObjectTypeDetail } from '@/api/ontologySceneLibrary/objectType';
 import {
   listOntologyObjectTypeData,
@@ -530,14 +533,12 @@ export default function ObjectTypeDetailDrawer({
     }
   };
 
-  const handleCopy = (value: string) => {
-    const isCopySuccess = copy(value);
-
-    if (isCopySuccess) {
-      Message.success('复制成功');
-    } else {
-      Message.error('复制失败');
+  const handleCopy = async (value: string) => {
+    const result = await copyToClipboard(value);
+    if (result.success) {
+      return;
     }
+    Message.error(result.message || '复制失败');
   };
 
   // 实例表格列定义（动态生成，基于数据）
@@ -623,7 +624,7 @@ export default function ObjectTypeDetailDrawer({
                 className="cursor-pointer opacity-0 transition-opacity hover:text-[rgba(var(--primary-6))] group-hover:opacity-100"
                 onClick={(e) => {
                   e.stopPropagation();
-                  handleCopy(String(value));
+                  void handleCopy(String(value));
                 }}
               />
             </Popover>
@@ -693,7 +694,7 @@ export default function ObjectTypeDetailDrawer({
                 className="cursor-pointer opacity-0 transition-opacity hover:text-[rgba(var(--primary-6))] group-hover:opacity-100"
                 onClick={(e) => {
                   e.stopPropagation();
-                  handleCopy(String(value));
+                  void handleCopy(String(value));
                 }}
               />
             </Popover>
@@ -865,7 +866,7 @@ export default function ObjectTypeDetailDrawer({
                         className="flex-shrink-0 hover:cursor-pointer hover:text-[rgba(var(--primary-6))]"
                         onClick={(e) => {
                           e.stopPropagation();
-                          handleCopy(String(displayData?.code));
+                          void handleCopy(String(displayData?.code));
                         }}
                       />
                     </Popover>
@@ -997,7 +998,7 @@ export default function ObjectTypeDetailDrawer({
                               className="cursor-pointer hover:text-[rgba(var(--primary-6))]"
                               onClick={(e) => {
                                 e.stopPropagation();
-                                handleCopy(link.linkId);
+                                void handleCopy(link.linkId);
                               }}
                             />
                           </Popover>
