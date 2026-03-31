@@ -12,11 +12,11 @@ import {
   Pagination
 } from '@arco-design/web-react';
 import { useHistory, useParams } from 'react-router-dom';
-import copy from 'copy-to-clipboard';
 import {
   NoDataCard,
   DotStatus,
-  GlobalTooltip
+  GlobalTooltip,
+  copyToClipboard
 } from '@ceai-front/arco-material';
 import {
   getOntologyLinkType,
@@ -196,9 +196,11 @@ function EdgePanel() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedEdgeId]);
 
-  const handleCopy = (value: string) => {
-    const ok = copy(value);
-    ok ? Message.success('复制成功') : Message.error('复制失败');
+  const handleCopy = async (value: string) => {
+    const result = await copyToClipboard(value);
+    if (!result.success) {
+      Message.error(result.message || '复制失败');
+    }
   };
 
   const handleEdit = () => {
@@ -421,7 +423,7 @@ function EdgePanel() {
                     <IconCopy
                       fontSize={14}
                       className="flex-shrink-0 cursor-pointer text-gray-500 hover:text-[rgba(var(--primary-6))]"
-                      onClick={() => handleCopy(String(basicInfo?.code))}
+                      onClick={() => void handleCopy(String(basicInfo?.code))}
                     />
                   )}
                 </div>

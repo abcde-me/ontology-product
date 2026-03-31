@@ -70,7 +70,6 @@
     "bizcharts": "^4.1.11",
     "class-variance-authority": "^0.7.0",
     "classnames": "^2.5.1",
-    "copy-to-clipboard": "^3.3.3",
     "dagre": "^0.8.5",
     "dayjs": "^1.11.13",
     "echarts": "^5.5.1",

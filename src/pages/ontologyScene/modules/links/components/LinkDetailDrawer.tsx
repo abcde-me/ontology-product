@@ -10,11 +10,11 @@ import {
   Tabs
 } from '@arco-design/web-react';
 import { IconCopy } from '@arco-design/web-react/icon';
-import copy from 'copy-to-clipboard';
 import {
   DotStatus,
   GlobalTooltip,
-  NoDataCard
+  NoDataCard,
+  copyToClipboard
 } from '@ceai-front/arco-material';
 import { OsDrawer, EllipsisPopover } from '@/pages/ontologyScene/componens';
 import {
@@ -180,9 +180,11 @@ export default function LinkDetailDrawer({
     total: 0
   });
 
-  const handleCopy = (value: string) => {
-    const ok = copy(value);
-    ok ? Message.success('复制成功') : Message.error('复制失败');
+  const handleCopy = async (value: string) => {
+    const result = await copyToClipboard(value);
+    if (!result.success) {
+      Message.error(result.message || '复制失败');
+    }
   };
 
   const loadInstances = useCallback(
@@ -444,7 +446,7 @@ export default function LinkDetailDrawer({
                         className="flex-shrink-0 hover:cursor-pointer hover:text-[rgba(var(--primary-6))]"
                         onClick={(e) => {
                           e.stopPropagation();
-                          handleCopy(String(displayData?.code));
+                          void handleCopy(String(displayData?.code));
                         }}
                       />
                     </Popover>
