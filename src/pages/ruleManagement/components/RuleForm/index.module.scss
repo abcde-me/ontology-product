@@ -1,0 +1,109 @@
+.form-item-group {
+  color: var(--color-text-1);
+  /* 16 弹窗标题/500 */
+  font-family: 'PingFang SC';
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 24px; /* 150% */
+}
+
+.form-item-card {
+  width: 100%;
+  padding: 24px 24px 8px;
+  gap: 16px;
+  border-radius: 12px;
+  background: #fafbff;
+
+  :global {
+    .arco-form-label-item {
+      width: 106px !important;
+      flex: unset !important;
+    }
+
+    .arco-form-item-wrapper {
+      flex: 1;
+    }
+  }
+}
+
+.rule-form-item {
+  width: 900px;
+}
+
+.rule-form-main {
+  width: 900px;
+  flex: 0 0 900px;
+}
+
+.rule-form-detail-layout {
+  display: flex;
+  align-items: stretch;
+  gap: 16px;
+}
+
+.rule-form-aside {
+  min-width: 0;
+  flex: 1;
+  align-self: stretch;
+  padding-top: 396px;
+}
+
+.basic-info {
+  //padding: 24px;
+  //border-radius: 16px;
+  //background: #fff;
+}
+
+.basic-info-content {
+  margin-top: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  margin-bottom: 32px;
+}
+
+.base-form-item {
+  margin-bottom: 0;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+
+  :global {
+    .arco-form-label-item {
+      width: 106px !important;
+      flex: unset !important;
+    }
+
+    .arco-form-item-wrapper {
+      flex: 1;
+    }
+
+    .arco-form-item-label-col > label {
+      color: var(--color-text-2);
+      font-family: 'PingFang SC';
+      font-size: 14px;
+      font-weight: 400;
+      line-height: 22px;
+    }
+
+    .arco-form-item-control-col {
+      min-width: 0;
+    }
+
+    .arco-input,
+    .arco-textarea {
+      font-size: 14px;
+    }
+
+    .arco-textarea-wrapper {
+      display: block;
+    }
+  }
+}
+
+.rule-setting-config-sticky {
+  position: sticky;
+  top: 40px;
+  align-self: flex-start;
+}

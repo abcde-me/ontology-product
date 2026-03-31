@@ -857,7 +857,25 @@ export const ModaForgeResourceEndpoints = {
   // 删除本体行为
   DeleteOntologyActionApi: PrefixAimdp + '/DeleteOntologyAction',
   // 更新本体行为
-  UpdateOntologyActionApi: PrefixAimdp + '/UpdateOntologyAction'
+  UpdateOntologyActionApi: PrefixAimdp + '/UpdateOntologyAction',
+
+  // 业务自动化-自动化规则
+  CreateAutoRuleApi: PrefixAimdp + '/CreateAutoRule',
+  UpdateAutoRuleApi: PrefixAimdp + '/UpdateAutoRule',
+  GetAutoRuleDetailApi: PrefixAimdp + '/GetAutoRule',
+  GetAutoRuleListApi: PrefixAimdp + '/ListAutoRule',
+  DelAutoRuleApi: PrefixAimdp + '/DeleteAutoRule',
+  ActiveAutoRuleApi: PrefixAimdp + '/ActivateAutoRule',
+  PauseAutoRuleApi: PrefixAimdp + '/PauseAutoRule',
+  ExecuteAutoRuleApi: PrefixAimdp + '/ExecuteAutoRule',
+  // 业务自动化-规则执行日志
+  GetAutoRuleStatsApi: PrefixAimdp + '/GetAutoRuleStats',
+  GetAutoExecLogListApi: PrefixAimdp + '/ListAutoExecLog',
+  GetAutoExecLogDetailApi: PrefixAimdp + '/GetAutoExecLog',
+  // 获取规则快照
+  GetAutoExecLogRuleSnapshotApi: PrefixAimdp + '/GetAutoExecLogRuleSnapshot',
+  // 获取今日统计
+  GetAutoExecLogTodayStatsApi: PrefixAimdp + '/GetAutoExecLogTodayStats'
 };
 
 /**

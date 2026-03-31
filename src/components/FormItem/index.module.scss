@@ -1,0 +1,38 @@
+.form-item {
+  :global {
+    .arco-form-label-item {
+      overflow: hidden;
+
+      label {
+        align-items: center;
+        max-width: 100%;
+      }
+    }
+  }
+}
+
+.item-show-colon > :global(.arco-form-label-item) {
+  &::after {
+    content: '：';
+    margin-left: 4px;
+    color: var(--color-text-1);
+
+    /* 14 正文&二级标题/400 */
+    font-family: 'PingFang SC';
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 22px; /* 157.143% */
+  }
+}
+
+.item-partial {
+  :global(.arco-form-item-symbol) {
+    color: transparent !important;
+  }
+}
+
+.item-required {
+  :global(.arco-form-item-symbol) {
+    color: rgb(var(--danger-6)) !important;
+  }
+}

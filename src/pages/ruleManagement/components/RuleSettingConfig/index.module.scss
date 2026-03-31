@@ -1,0 +1,39 @@
+.rule-config {
+  border-radius: 12px;
+  background: rgb(var(--warning-1));
+  width: 100%;
+  height: max-content;
+  border: 1px solid rgb(var(--primary-3));
+  background: rgba(237, 245, 255, 0.6);
+
+  .rule-config-text {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    color: var(--color-text-1);
+    margin-bottom: 16px;
+
+    /* 14 正文&二级标题/600 */
+    font-family: 'PingFang SC';
+    font-size: 14px;
+  }
+
+  .rule-setting-content {
+  }
+}
+
+.rule-config-item {
+  padding: 16px;
+
+  .rule-config-text {
+    margin-bottom: 12px;
+  }
+}
+
+.rule-config-card {
+  padding: 24px;
+
+  .rule-config-text {
+    margin-bottom: 16px;
+  }
+}

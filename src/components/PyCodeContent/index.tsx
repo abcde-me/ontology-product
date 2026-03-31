@@ -9,14 +9,13 @@ import { IconCopy, IconExpand, IconShrink } from '@arco-design/web-react/icon';
 import { Message, Tooltip } from '@arco-design/web-react';
 
 const extension = [python(), lintGutter()];
-export const PyCodeContent = (
-  props: ReactCodeMirrorProps & {
-    // 是否可以复制
-    copy?: boolean;
-    // 是否可以全屏
-    fullScreen?: boolean;
-  }
-) => {
+export type PyCodeContentProps = ReactCodeMirrorProps & {
+  // 是否可以复制
+  copy?: boolean;
+  // 是否可以全屏
+  fullScreen?: boolean;
+};
+export const PyCodeContent = (props: PyCodeContentProps) => {
   const { copy = true, fullScreen = true, readOnly, ...otherProps } = props;
   const codeRef = useRef<HTMLDivElement>(null);
   const [isFullscreen, { toggleFullscreen }] = useFullscreen(codeRef);

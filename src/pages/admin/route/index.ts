@@ -132,6 +132,22 @@ export const routes: IRoute[] = [
       }
     ]
   },
+
+  // 自动化-规则管理
+  {
+    name: 'ruleManagement',
+    key: '/tenant/compute/onto/businessAutomation/management',
+    component: React.lazy(async () => import('../../ruleManagement')),
+    exact: false,
+    children: []
+  },
+  // 自动化-执行日志
+  {
+    name: 'baRunLog',
+    key: '/tenant/compute/onto/businessAutomation/runLog',
+    component: React.lazy(async () => import('../../ruleRunLog')),
+    children: []
+  },
   // 运营中心页面
   {
     name: 'operationCenter',
