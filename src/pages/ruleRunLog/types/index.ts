@@ -2,6 +2,9 @@
  * AutoExecLogItem
  */
 export interface AutoExecLogItem {
+  actionCode?: string;
+  actionId?: number;
+  actionName?: string;
   createTime?: string;
   durationMs?: number;
   errorMessage?: string;
