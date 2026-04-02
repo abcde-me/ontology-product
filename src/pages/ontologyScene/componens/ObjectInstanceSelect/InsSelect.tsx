@@ -10,6 +10,7 @@ import {
   List,
   Message,
   Select,
+  SelectProps,
   Spin,
   Tooltip
 } from '@arco-design/web-react';
@@ -28,6 +29,7 @@ export interface ObjectInterfaceSelectProps
   mode?: 'single' | 'multiple';
   searchKey: string;
   getPopupContainer?: (node: HTMLElement) => HTMLElement;
+  maxTagCount?: number | 'responsive';
 }
 
 type OptionItem = {
@@ -233,7 +235,7 @@ export const InstanceSelect = (props: ObjectInterfaceSelectProps) => {
         showSearch
         onSearch={searchIns}
         maxTagCount={{
-          count: 0,
+          count: props.maxTagCount || 0,
           showPopover: {
             className: styles['tag-popover'],
             getPopupContainer(node) {

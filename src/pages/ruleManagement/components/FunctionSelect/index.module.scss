@@ -1,0 +1,41 @@
+.select-option {
+  height: 60px;
+  padding-top: 8px !important;
+  padding-right: 32px !important;
+  padding-bottom: 8px !important;
+  font-family: PingFang SC;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 22px !important;
+
+  .function-info-icon {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 1000;
+  }
+}
+
+.function-select {
+  :global {
+    .arco-select-view-value {
+      display: flex;
+      align-items: center;
+
+      :global {
+        .function-info-icon {
+          position: absolute;
+          right: 0;
+          top: 3px !important;
+        }
+      }
+    }
+
+    .arco-select-clear-icon {
+      &:before {
+        display: none;
+      }
+    }
+  }
+}

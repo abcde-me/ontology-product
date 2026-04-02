@@ -1,6 +1,7 @@
 import UAPI from '@/api';
 import { AutoRuleDetail, AutoRuleItem } from '@/pages/ruleManagement/types';
 import { AUTO_RULES } from '@/api/businessAutomation/mock';
+import { BehaviorActionItem } from '@/pages/ontologyScene/types/behaviorActions';
 
 /**
  * ListAutoRuleRequest，内嵌 sdk.PagingRequest 字段与业务字段同级
@@ -29,22 +30,16 @@ export enum Order {
 }
 
 // 获取规则列表
-// todo 待完善
-// eslint-disable-next-line @typescript-eslint/require-await
 export const getAutoRuleList = async (params: GetRuleListParams) => {
-  // const res = await UAPI.RES.GetAutoRuleListApi({})
-  //   .post(params)
-  //   .inRegion()
-  //   .do();
+  const res = await UAPI.RES.GetAutoRuleListApi({})
+    .post(params)
+    .inRegion()
+    .do();
+  const { items = [] as AutoRuleItem, total = 0 } = res.data;
   return {
-    items: AUTO_RULES,
-    total: AUTO_RULES.length
+    items: items as AutoRuleItem[],
+    total
   };
-  // const { result: items = [], totalCount: total = 0 } = res.data;
-  // return {
-  //   items: (items ?? []) as AutoRuleItem[],
-  //   total: (total ?? 0) as number
-  // };
 };
 
 // 获取规则详情

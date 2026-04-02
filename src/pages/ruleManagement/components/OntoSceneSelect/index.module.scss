@@ -1,0 +1,79 @@
+.onto-scene-select-wrapper {
+  min-width: 0;
+}
+
+.onto-scene-select {
+  min-width: 0;
+}
+
+.scene-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-width: 0;
+}
+
+.scene-option-content {
+  min-width: 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.scene-option-title {
+  color: var(--color-text-1);
+  font-size: 14px;
+  line-height: 22px;
+
+  /* 14 正文&二级标题/400 */
+  font-family: 'PingFang SC'; /* 157.143% */
+  font-weight: 400;
+}
+
+.scene-option-desc {
+  color: var(--color-text-4, #646c85);
+  font-size: 12px;
+  line-height: 18px;
+
+  /* 12 正文/400 */
+  font-family: 'PingFang SC';
+
+  font-weight: 400;
+}
+
+.scene-value {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  height: 100%;
+  width: 100%;
+}
+
+.scene-value-text {
+  min-width: 0;
+  flex: 1;
+  color: var(--color-text-1);
+  font-size: 14px;
+  line-height: 22px;
+}
+
+.scene-icon-box {
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border-radius: 4px;
+  background: #f2f3f5;
+}
+
+.scene-icon {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}

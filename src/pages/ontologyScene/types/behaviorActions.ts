@@ -64,6 +64,10 @@ export interface BehaviorActionItem {
    */
   ontologyModelId?: number;
   /**
+   * 所属本体场景模型名称
+   */
+  ontologyModelName?: string;
+  /**
    * 参数数量
    */
   paramCount?: number;
