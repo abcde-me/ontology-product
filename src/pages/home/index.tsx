@@ -66,7 +66,7 @@ export default function Home() {
             aria-hidden
           />
         </div>
-        <div className="mt-[64px] w-full text-center">
+        <div className="mt-[8vh] w-full text-center">
           {/* 大标题 - 入场动效 */}
           <h1
             className={classNames(
@@ -103,7 +103,6 @@ export default function Home() {
           >
             <Button
               type="primary"
-              size="large"
               className={classNames(styles['create-button'])}
               onClick={() => setModalVisible(true)}
             >
