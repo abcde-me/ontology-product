@@ -1,0 +1,56 @@
+.rule-run-log {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.rule-run-log-content {
+  flex: 1;
+  overflow: auto;
+  padding: 0 24px 24px 24px;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+.search-input {
+  width: 260px;
+}
+
+.table-action {
+  padding: 0 !important;
+  color: rgb(var(--primary-6));
+  font-family: 'PingFang SC';
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 22px;
+
+  &:hover {
+    color: rgb(var(--primary-6)) !important;
+    background: transparent !important;
+  }
+}
+
+:global {
+  .rule-run-log-radio .arco-radio-button {
+    font-size: 14px;
+    font-weight: 400;
+  }
+
+  .rule-run-log-radio .arco-radio-button.arco-radio-checked {
+    font-size: 14px;
+    font-weight: 400;
+  }
+
+  .arco-table-tr {
+    &:hover {
+      .link-text {
+        color: rgb(var(--primary-6)) !important;
+      }
+    }
+  }
+}
