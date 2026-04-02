@@ -554,7 +554,12 @@ export function buildPythonFunctionScript(meta: {
   });
   const returnCode = buildReturnCode(outputs);
   const signatureRanges = getPythonFuncSignatureRanges(code, meta.code);
-  const funcLastReturnRanges = getPythonFuncLastReturnRanges(code, meta.code);
+  // 传入返回语句，返回语句所在的起始位置
+  const funcLastReturnRanges = getPythonFuncLastReturnRanges(
+    code,
+    meta.code,
+    returnCode
+  );
   if (!signatureRanges.length || !funcLastReturnRanges.length) {
     return code;
   }
