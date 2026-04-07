@@ -20,6 +20,7 @@ import {
 import {
   CopyItemIcon,
   DotStatus,
+  GlobalTooltip,
   ProButton,
   SearchTable
 } from '@ceai-front/arco-material';
@@ -56,6 +57,7 @@ import { ONTOLOGY_PERMISSIONS } from '@/config/permissions';
 import TaskLogDrawer from '../../componens/TaskLogDrawer';
 import LogIcon from '@/pages/ontologyScene/assets/log-icon.svg';
 import { EllipsisPopover } from '@/pages/ontologyScene/componens';
+import classNames from 'classnames';
 
 // 将 SyncStatus 枚举转换为 LinkDetailDrawer 期望的字符串类型
 const convertSyncStatusToString = (
@@ -364,9 +366,9 @@ export default function OntologySceneLinksList() {
       fixed: 'left',
       render: (value, record) => (
         <div onClick={() => handleViewLinkDetail(record)}>
-          <EllipsisPopover
-            wrapperClassName="min-w-0 hover-blue font-[600]"
-            value={value}
+          <GlobalTooltip.Ellipsis
+            className="hover-blue min-w-0 cursor-pointer font-[600]"
+            text={value}
           />
         </div>
       )
@@ -391,17 +393,22 @@ export default function OntologySceneLinksList() {
       filters: objectTypeFilters,
       filterDropdown: ({ confirm }: any) => {
         return (
-          <div className="rounded-[4px] bg-white shadow-md">
+          <div
+            className={classNames(
+              styles['links-table-filter-dropdown'],
+              'rounded-[4px] bg-white shadow-md'
+            )}
+          >
             <div className="max-h-[214px] max-w-[184px] overflow-auto py-[8px] pl-[7px] pr-[12px]">
               <div className="flex gap-[8px]">
                 <Checkbox.Group
                   direction="vertical"
                   options={objectTypeFilters.map((item) => ({
                     label: (
-                      <EllipsisPopover
-                        value={item.text || '-'}
-                        wrapperClassName="inline-flex max-w-[130px]"
-                        className="text-[14px] leading-[22px] text-[var(--color-text-1)]"
+                      <GlobalTooltip.Ellipsis
+                        text={item.text || '-'}
+                        // wrapperClassName="inline-flex max-w-[130px]"
+                        // className="text-[14px] leading-[22px] text-[var(--color-text-1)]"
                       />
                     ),
                     value: item.value
@@ -462,7 +469,12 @@ export default function OntologySceneLinksList() {
       filters: objectTypeFilters,
       filterDropdown: ({ confirm }: any) => {
         return (
-          <div className="rounded-[4px] bg-white shadow-md">
+          <div
+            className={classNames(
+              styles['links-table-filter-dropdown'],
+              'rounded-[4px] bg-white shadow-md'
+            )}
+          >
             <div className="max-h-[214px] max-w-[184px] overflow-auto py-[8px] pl-[7px] pr-[12px]">
               <div className="flex gap-[8px]">
                 <Checkbox.Group

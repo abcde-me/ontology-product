@@ -25,9 +25,31 @@
     }
   }
 
-  :global(.hover-blue) {
-    &:hover {
-      cursor: pointer;
+  :global(.arco-tooltip-content) {
+    font-size: 14px !important;
+  }
+}
+
+.links-table-filter-dropdown {
+  :global {
+    .arco-checkbox-group {
+      width: 100%;
+
+      .arco-checkbox {
+        display: flex;
+        align-items: center;
+        height: 32px;
+        width: 100%;
+
+        .arco-checkbox-text {
+          flex: 1;
+          min-width: 0;
+        }
+      }
+
+      .arco-checkbox-mask-wrapper {
+        top: 0;
+      }
     }
   }
 }
