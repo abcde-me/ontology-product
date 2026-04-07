@@ -47,7 +47,8 @@ import {
 import {
   OBJECT_TYPE_ICON_OPTIONS,
   DATA_SOURCE_TYPE,
-  DataSourceType
+  DataSourceType,
+  COLUMN_TYPE_OPTIONS
 } from '@/pages/ontologyScene/common/constants';
 import ObjectTypeIconSelector from './ObjectTypeIconSelector';
 import { EllipsisPopover } from '@/pages/ontologyScene/componens';
@@ -62,48 +63,6 @@ interface FileData {
 }
 
 const FormItem = Form.Item;
-const COLUMN_TYPE_OPTIONS = [
-  {
-    label: 'tinyint',
-    value: 'tinyint'
-  },
-  {
-    label: 'int',
-    value: 'int'
-  },
-  {
-    label: 'bigint',
-    value: 'bigint'
-  },
-  {
-    label: 'float',
-    value: 'float'
-  },
-  {
-    label: 'double',
-    value: 'double'
-  },
-  {
-    label: 'varchar(100)',
-    value: 'varchar(100)'
-  },
-  {
-    label: 'varchar(500)',
-    value: 'varchar(500)'
-  },
-  {
-    label: 'varchar(2000)',
-    value: 'varchar(2000)'
-  },
-  {
-    label: 'text',
-    value: 'text'
-  },
-  {
-    label: 'json',
-    value: 'json'
-  }
-];
 
 // Arco Cascader：`searchNodeByLabel` 会对路径上每一层节点调用 filterOption，
 // 故可同时按库名（第一层）或表名/ID（第二层）筛选。
@@ -396,24 +355,12 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
         const isOldPrimary = field.isPrimary === 1;
         const isLocalCsv = dataSource.type === DATA_SOURCE_TYPE.LOCAL_CSV;
 
-        // 如果是本地CSV导入，沿用原有规则：主键 varchar(500)，非主键 varchar(2000)
+        // 如果是本地CSV导入，类型不需要做特殊处理
         if (isLocalCsv) {
-          // 新的主键字段：设置为varchar(500)
-          if (isNewPrimary) {
-            return {
-              ...field,
-              isPrimary: 1,
-              columnType: 'varchar(500)'
-            };
-          }
-          // 旧的主键字段：恢复为varchar(2000)
-          if (isOldPrimary && !isNewPrimary) {
-            return {
-              ...field,
-              isPrimary: 0,
-              columnType: 'varchar(2000)'
-            };
-          }
+          return {
+            ...field,
+            isPrimary: isNewPrimary ? 1 : 0
+          };
         }
 
         // 数据目录同步等非本地 CSV 场景：应用与 LinkForm 相同的规范化逻辑
