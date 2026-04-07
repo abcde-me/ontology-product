@@ -162,6 +162,14 @@ export interface CreateOntologyPhysicalProperty {
    * 是否存入公共属性库
    */
   isStoreAsPublic: 1 | 0;
+  /**
+   * 是否向量化
+   */
+  isVector: 1 | 0;
+  /**
+   * 向量化源字段名
+   */
+  vectorSourceFieldName: string;
 }
 
 export enum SourceType {

@@ -889,9 +889,6 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
       if (responseData && responseData.columnList && responseData.path) {
         const { columnList, path, commentList, typeList } = responseData;
 
-        console.log('--------commentList--------', commentList);
-        console.log('--------typeList--------', typeList);
-
         // 切换文件时清空数据库和表
         setSelectedDatabase(undefined);
         setSelectedTable(undefined);
