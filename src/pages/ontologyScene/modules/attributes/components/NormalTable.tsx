@@ -23,6 +23,7 @@ import { listOntologyObjectType } from '@/api/ontologySceneLibrary/objectType';
 import type { ListOntologyPhysicalPropertiesReq } from '@/types/graphApi';
 import { openNewPage } from '@/utils/env';
 import { EllipsisPopover } from '@/pages/ontologyScene/componens';
+import classNames from 'classnames';
 
 export interface NormalTableProps {
   /** total 变化时的回调函数 */
@@ -212,7 +213,12 @@ export default function NormalTable({ onTotalChange }: NormalTableProps = {}) {
       filters: objectTypeFilters,
       filterDropdown: ({ setFilterKeys, confirm, clearFilters }: any) => {
         return (
-          <div className="rounded-[4px] bg-white shadow-md">
+          <div
+            className={classNames(
+              styles['attributes-table-filter-dropdown'],
+              'rounded-[4px] bg-white shadow-md'
+            )}
+          >
             <div className="max-h-[214px] max-w-[184px] overflow-auto py-[8px] pl-[7px] pr-[12px]">
               <div className="flex gap-[8px]">
                 <Checkbox.Group
