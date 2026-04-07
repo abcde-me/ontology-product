@@ -366,9 +366,9 @@ export default function OntologySceneLinksList() {
       fixed: 'left',
       render: (value, record) => (
         <div onClick={() => handleViewLinkDetail(record)}>
-          <EllipsisPopover
-            wrapperClassName="min-w-0 hover-blue font-[600]"
-            value={value}
+          <GlobalTooltip.Ellipsis
+            className="hover-blue min-w-0 font-[600]"
+            text={value}
           />
         </div>
       )
