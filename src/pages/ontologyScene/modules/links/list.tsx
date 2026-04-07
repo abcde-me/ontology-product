@@ -367,7 +367,7 @@ export default function OntologySceneLinksList() {
       render: (value, record) => (
         <div onClick={() => handleViewLinkDetail(record)}>
           <GlobalTooltip.Ellipsis
-            className="hover-blue min-w-0 font-[600]"
+            className="hover-blue min-w-0 cursor-pointer font-[600]"
             text={value}
           />
         </div>
