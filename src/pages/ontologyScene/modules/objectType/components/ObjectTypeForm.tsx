@@ -45,7 +45,6 @@ import {
   deleteOntologyPublicProperties
 } from '@/api/ontologySceneLibrary/attributes';
 import {
-  COLUMN_TYPE_OPTIONS,
   OBJECT_TYPE_ICON_OPTIONS,
   DATA_SOURCE_TYPE,
   DataSourceType
@@ -55,7 +54,56 @@ import { EllipsisPopover } from '@/pages/ontologyScene/componens';
 import { PrefixAimdp } from '@/api/endpoints';
 import { openNewPage } from '@/utils/env';
 
+interface FileData {
+  columnList: string[];
+  commentList: string[];
+  typeList: string[];
+  path: string;
+}
+
 const FormItem = Form.Item;
+const COLUMN_TYPE_OPTIONS = [
+  {
+    label: 'tinyint',
+    value: 'tinyint'
+  },
+  {
+    label: 'int',
+    value: 'int'
+  },
+  {
+    label: 'bigint',
+    value: 'bigint'
+  },
+  {
+    label: 'float',
+    value: 'float'
+  },
+  {
+    label: 'double',
+    value: 'double'
+  },
+  {
+    label: 'varchar(100)',
+    value: 'varchar(100)'
+  },
+  {
+    label: 'varchar(500)',
+    value: 'varchar(500)'
+  },
+  {
+    label: 'varchar(2000)',
+    value: 'varchar(2000)'
+  },
+  {
+    label: 'text',
+    value: 'text'
+  },
+  {
+    label: 'json',
+    value: 'json'
+  }
+];
 
 // Arco Cascader：`searchNodeByLabel` 会对路径上每一层节点调用 filterOption，
 // 故可同时按库名（第一层）或表名/ID（第二层）筛选。
@@ -597,7 +645,16 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
       {
         title: '字段类型',
         dataIndex: 'columnType',
-        width: 200
+        width: 200,
+        render: (value, record, index) => {
+          return (
+            <Select
+              options={COLUMN_TYPE_OPTIONS}
+              value={value}
+              onChange={(val) => handleFieldChange(index, { columnType: val })}
+            />
+          );
+        }
       }
     ];
 
@@ -870,7 +927,7 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
       }
     };
 
-    const handleDataSourceFileChange = (fileData: any) => {
+    const handleDataSourceFileChange = (fileData: FileData) => {
       // FieldImportUpload 已经上传并解析了文件，fileData 是服务器返回的数据结构
       // 包含 { columnList: string[], path: string }
       if (!fileData || (Array.isArray(fileData) && fileData.length === 0)) {
@@ -883,7 +940,10 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
 
       // 检查是否是服务器返回的数据结构（包含 columnList 和 path）
       if (responseData && responseData.columnList && responseData.path) {
-        const { columnList, path } = responseData;
+        const { columnList, path, commentList, typeList } = responseData;
+
+        console.log('--------commentList--------', commentList);
+        console.log('--------typeList--------', typeList);
 
         // 切换文件时清空数据库和表
         setSelectedDatabase(undefined);
@@ -907,14 +967,14 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
         // 将 columnList 转换为 AttributeField 格式
         const fields: AttributeField[] = columnList.map((column, index) => ({
           name: column, // 表字段名
-          comment: column, // 属性名称，默认与表字段名相同
-          columnType: index === 0 ? 'varchar(500)' : 'varchar(2000)', // 主键字段默认为varchar(500)，其他字段为varchar(2000)
+          comment: commentList[index] || column, // 属性名称，默认与表字段名相同
+          columnType: typeList[index] || COLUMN_TYPE_OPTIONS[0].value,
           isPrimary: index === 0 ? 1 : 0, // 第一个字段默认为主键
           isUse: 1, // 默认选中
           isStoreAsPublic: 0, // 默认不存入公共属性
           publicPropertyID: 0, // 默认未绑定公共属性
           _tableField: column,
-          _attributeName: column
+          _attributeName: commentList[index] || column
         }));
 
         setAttributeFields(fields);
