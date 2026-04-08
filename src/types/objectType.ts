@@ -169,7 +169,7 @@ export interface CreateOntologyPhysicalProperty {
   /**
    * 向量源字段
    */
-  vectorSourceFieldName?: string;
+  vectorSourceFieldId?: number;
 }
 
 export enum SourceType {
