@@ -96,7 +96,7 @@ function getAttributeRowKey(record: AttributeField): string {
   return String(record.name || record.id || `field-${record.name}`);
 }
 
-/** 将接口返回的扁平列表合并为表单行：isVector=1 的项挂到 vectorSourceFieldName 对应基字段上 */
+/** 将接口返回的扁平列表合并为表单行：isVector=1 的项挂到 vectorSourceFieldId 对应基字段上 */
 function mergeOntologyPhysicalPropertiesForForm(
   list: CreateOntologyPhysicalProperty[]
 ): AttributeField[] {
@@ -104,14 +104,14 @@ function mergeOntologyPhysicalPropertiesForForm(
   const vectorRows = list.filter((p) => p.isVector === 1);
   const baseRows = list.filter((p) => p.isVector !== 1);
   const vectorBySource = new Map(
-    vectorRows.map((v) => [v.vectorSourceFieldName || '', v])
+    vectorRows.map((v) => [String(v.vectorSourceFieldId ?? ''), v])
   );
   return baseRows.map((prop) => {
-    const vec = vectorBySource.get(prop.name);
+    const vec = vectorBySource.get(String(prop.id ?? ''));
     return {
       ...prop,
       isVector: 0,
-      vectorSourceFieldName: undefined,
+      vectorSourceFieldId: undefined,
       _tableField: prop.name,
       _attributeName: prop.comment,
       _vectorizationOn: Boolean(vec && prop.name),
@@ -139,7 +139,7 @@ function flattenOntologyPhysicalPropertiesForSubmit(
     const base: CreateOntologyPhysicalProperty = {
       ...rest,
       isVector: 0,
-      vectorSourceFieldName: undefined
+      vectorSourceFieldId: undefined
     };
     result.push(base);
 
@@ -156,7 +156,8 @@ function flattenOntologyPhysicalPropertiesForSubmit(
         isStoreAsPublic: 0,
         publicPropertyID: 0,
         isVector: 1,
-        vectorSourceFieldName: f.name
+        vectorSourceFieldId:
+          f.id !== undefined && f.id !== '' ? Number(f.id) : undefined
       };
       if (_vectorPropertyId !== undefined && _vectorPropertyId !== '') {
         vec.id = String(_vectorPropertyId);
