@@ -165,11 +165,11 @@ export interface CreateOntologyPhysicalProperty {
   /**
    * 是否向量化
    */
-  isVector: 1 | 0;
+  isVector?: 1 | 0;
   /**
-   * 向量化源字段名
+   * 向量源字段
    */
-  vectorSourceFieldName: string;
+  vectorSourceFieldName?: string;
 }
 
 export enum SourceType {

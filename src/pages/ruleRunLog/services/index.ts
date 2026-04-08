@@ -1,7 +1,7 @@
 import {
   getExecLogList,
   getExecLogDetail,
-  GetAutoExecLogTodayStats,
+  GetAutoLogStats,
   Order
 } from '@/api/businessAutomation/runLog';
 import {
@@ -53,7 +53,7 @@ export const fetchRuleRunLogTodayStats =
       return mockApi.getRuleRunLogTodayStats();
     }
 
-    const response = await GetAutoExecLogTodayStats(0);
+    const response = await GetAutoLogStats(0);
     return (response || {}) as AutoExecLogTodayStats;
   };
 

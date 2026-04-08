@@ -50,8 +50,8 @@ export async function GetAutoExecLogRuleSnapshot(id: string | number) {
   return res.data;
 }
 // 获取今日统计
-export async function GetAutoExecLogTodayStats(ruleId: string | number) {
-  const res = await UAPI.RES.GetAutoExecLogTodayStatsApi({})
+export async function GetAutoLogStats(ruleId: string | number) {
+  const res = await UAPI.RES.GetAutoLogStatsApi({})
     .post({ ruleId })
     .inRegion()
     .do();

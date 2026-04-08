@@ -1,3 +1,28 @@
+// 向量展开区表格
+.vector-expand-table {
+  // :global {
+  //   .arco-table-cell {
+  //     border-bottom: none !important;
+  //   }
+  // }
+}
+
+// 属性字段映射：隐藏展开列图标（展开仅由向量化开关驱动）
+.attribute-mapping-table {
+  :global {
+    .arco-table-expand-icon-cell {
+      width: 1px !important;
+      min-width: 1px !important;
+      padding: 0 !important;
+      border-right: none !important;
+    }
+
+    .arco-table-expand-icon {
+      display: none !important;
+    }
+  }
+}
+
 .local-csv-form-item {
   :global(.arco-form-label-item .arco-form-item-symbol) {
     display: none;
