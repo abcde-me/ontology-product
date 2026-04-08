@@ -152,7 +152,7 @@ export const BehaviorDetail = (props: IProps) => {
       }}
       onEdit={() => {
         history.push(
-          `/tenant/compute/onto/ontologyScene/detail/${OSId}/behaviorActions/edit/${actionItem}`
+          `/tenant/compute/onto/ontologyScene/detail/${actionDetail?.ontologyModelID}/behaviorActions/edit/${actionItem}`
         );
       }}
     >

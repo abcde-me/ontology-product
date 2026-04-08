@@ -9,18 +9,18 @@ import { renderComponentByUiType } from '@/pages/ontologyScene/utils';
 const PARAM_SOURCE_OPTIONS = [
   {
     label: '变更的实例',
-    value: 'runtime'
+    value: 'change_instance'
   },
   {
     label: '静态值',
-    value: 'static'
+    value: 'fixed_value'
   }
 ] as const;
 
 export interface ActionParamsItem {
   code?: string;
   name?: string;
-  source?: 'runtime' | 'static';
+  source?: 'change_instance' | 'fixed_value';
   type?: string;
   value?: string;
 }
@@ -28,6 +28,7 @@ export interface ActionParamsItem {
 export interface ActionParamsProps {
   actionData?: Partial<BehaviorActionItem>;
   field?: string;
+  modelId?: number;
 }
 
 const InputWithTooltip = (props: InputProps) => {
@@ -43,53 +44,18 @@ const InputWithTooltip = (props: InputProps) => {
 };
 
 export const ActionParams = (props: ActionParamsProps) => {
-  const { actionData, field = 'actionParams' } = props;
+  const { actionData, field = 'actionParams', modelId } = props;
   const { form } = Form.useFormContext();
+  const triggerType = Form.useWatch('triggerType', form);
+  const value = form.getFieldValue(field);
 
-  const params = actionData?.params || [];
-  const paramSignature = useMemo(() => {
-    return params
-      .map((item) => `${item.code || ''}-${item.name || ''}-${item.type || ''}`)
-      .join('|');
-  }, [params]);
-
-  useEffect(() => {
-    const currentParams = (form.getFieldValue(field) ||
-      []) as ActionParamsItem[];
-    const currentParamMap = new Map(
-      currentParams.map((item) => [item.code, item] as const)
-    );
-
-    const nextParams = params.flatMap((item) => {
-      if (item.inputType !== 'input') return [];
-      const currentItem = currentParamMap.get(item.code);
-      return {
-        code: item.code,
-        name: item.name,
-        type: item.type,
-        source: currentItem?.source || 'static',
-        value: currentItem?.value
-      };
-    });
-
-    form.setFieldValue(field, nextParams);
-  }, [field, form, paramSignature, params]);
-
-  if (!params.length) {
+  if (!value?.length) {
     return (
       <div className={styles['action-params-empty']}>
         <NoDataCard type={'block'} title={'暂无参数配置'} />
       </div>
     );
   }
-
-  const renderUI = (name: string) => {
-    const currentField = actionData?.params?.find(
-      (item) => item.code === name && item.inputType === 'input'
-    );
-
-    return renderComponentByUiType(currentField?.uiType as any);
-  };
 
   return (
     <div className={styles['action-params']}>
@@ -124,6 +90,9 @@ export const ActionParams = (props: ActionParamsProps) => {
                         <Form.Item field={`${itemField}.code`} noStyle>
                           <Input style={{ display: 'none' }} />
                         </Form.Item>
+                        <Form.Item field={`${itemField}.uiType`} noStyle>
+                          <Input style={{ display: 'none' }} />
+                        </Form.Item>
                       </div>
                     </div>
                     <div className={styles['action-params-cell']}>
@@ -142,13 +111,14 @@ export const ActionParams = (props: ActionParamsProps) => {
                       >
                         <Select
                           placeholder={'请选择入参来源'}
-                          options={PARAM_SOURCE_OPTIONS as any}
+                          options={
+                            triggerType === 1
+                              ? [PARAM_SOURCE_OPTIONS[1]]
+                              : (PARAM_SOURCE_OPTIONS as any)
+                          }
                           triggerProps={{
                             updateOnScroll: true
                           }}
-                          getPopupContainer={(node) =>
-                            node.parentElement || document.body
-                          }
                           onChange={(value) => {
                             if (value === 'runtime') {
                               form.setFieldValue(
@@ -169,8 +139,9 @@ export const ActionParams = (props: ActionParamsProps) => {
                         noStyle
                       >
                         {(_, { getFieldValue }) => {
-                          const source = getFieldValue(`${itemField}.source`);
-                          const fieldName = getFieldValue(`${itemField}.name`);
+                          const { source, uiType } = getFieldValue(
+                            `${itemField}`
+                          );
                           return source === 'runtime' ? (
                             <div
                               className={styles['action-params-runtime-text']}
@@ -185,7 +156,12 @@ export const ActionParams = (props: ActionParamsProps) => {
                                 { required: true, message: '请输入参数值' }
                               ]}
                             >
-                              {renderUI(fieldName)}
+                              {renderComponentByUiType(uiType, modelId, {
+                                objProps: {
+                                  className: styles['obj-ins-params'],
+                                  getPopupContainer: () => document.body
+                                }
+                              })}
                             </Form.Item>
                           );
                         }}

@@ -1,7 +1,18 @@
+import {
+  ChangeType,
+  InstanceScope,
+  MonthDayMode,
+  ParameterValue,
+  PeriodType,
+  PropertyConditionType
+} from '@/pages/ruleManagement/types/index';
+import { Operator } from 'semver';
+
 /**
  * CreateAutoRuleRequest
  */
 export interface CreateAutoRule {
+  id?: string | number;
   actionConfig?: ActionConfigReq;
   changeConfig?: ChangeConfigReq;
   description?: string;
@@ -33,8 +44,7 @@ export interface ActionConfigReq {
   /**
    * 行为参数 key-value 映射
    */
-  parameters?: { [key: string]: any };
-  [property: string]: any;
+  parameters?: ParameterValue[];
 }
 
 /**
@@ -42,17 +52,9 @@ export interface ActionConfigReq {
  */
 export interface ChangeConfigReq {
   /**
-   * 条件运算符，conditionType=meet_condition 时必填
+   * 变更种类：property_change=属性变化，instance_create=实例新增，instance_delete=实例删除；为空时默认 property_change
    */
-  conditionOperator?: ConditionOperator;
-  /**
-   * 变更条件类型：any_change=任意变化，meet_condition=满足条件
-   */
-  conditionType: ConditionType;
-  /**
-   * 条件比较值，conditionType=meet_condition 时必填
-   */
-  conditionValue?: string;
+  changeType?: ChangeType;
   /**
    * 指定实例 ID 列表（整型），instanceScope=specific 时必填
    */
@@ -62,41 +64,13 @@ export interface ChangeConfigReq {
    */
   instanceScope: InstanceScope;
   /**
-   * 监控属性 ID 列表（多选），对应 ontology_physical_properties.id，至少选择 1 个
-   */
-  monitorPropertyIds: number[];
-  /**
    * 本体对象类型 ID，对应 ontology_object_type.id
    */
   objectTypeId: number;
-}
-
-/**
- * 条件运算符，conditionType=meet_condition 时必填
- */
-export enum ConditionOperator {
-  Eq = 'eq',
-  Gt = 'gt',
-  Gte = 'gte',
-  Lt = 'lt',
-  Lte = 'lte',
-  Ne = 'ne'
-}
-
-/**
- * 变更条件类型：any_change=任意变化，meet_condition=满足条件
- */
-export enum ConditionType {
-  AnyChange = 'any_change',
-  MeetCondition = 'meet_condition'
-}
-
-/**
- * 实例范围：all=全部实例，specific=指定实例
- */
-export enum InstanceScope {
-  All = 'all',
-  Specific = 'specific'
+  /**
+   * 属性条件列表；changeType=property_change 时至少配置 1 项，多个条件按全部命中处理
+   */
+  propertyConditions?: PropertyConditionType[];
 }
 
 /**
@@ -115,7 +89,7 @@ export interface GateConfigReq {
    * 布尔函数 ID，对应 ontology_function.id，enabled=true 时必填；响应中的 functionName 由服务端基于该 ID 查询补齐
    */
   functionId?: number;
-  [property: string]: any;
+  parameters?: ParameterValue[];
 }
 
 /**
@@ -146,22 +120,4 @@ export interface ScheduleConfigReq {
    * 每周几触发，1=周一 ~ 7=周日（periodType=weekly 时必填）
    */
   weekDays?: number[];
-  [property: string]: any;
-}
-
-/**
- * 每月日期模式：specific=具体日期，last=每月最后一天（periodType=monthly 时必填）
- */
-export enum MonthDayMode {
-  Last = 'last',
-  Specific = 'specific'
-}
-
-/**
- * 周期类型：daily=每日，weekly=每周，monthly=每月
- */
-export enum PeriodType {
-  Daily = 'daily',
-  Monthly = 'monthly',
-  Weekly = 'weekly'
 }

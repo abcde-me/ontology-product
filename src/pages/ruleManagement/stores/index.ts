@@ -10,15 +10,12 @@ import type {
   OntologyModelInfo,
   OntologyObjectTypeInfo
 } from '../types';
-
-export interface RuleGateConfig extends GateConfigRes {
-  functionInfo?: Partial<OntologyFunctionDetail>;
-}
+import { cloneDeep, isNil } from 'lodash-es';
 
 export interface RuleDetailData
   extends Omit<AutoRuleDetail, 'gateConfig' | 'changeConfig' | 'actionConfig'> {
   actionConfig?: ActionConfigRes;
-  gateConfig?: RuleGateConfig;
+  gateConfig?: GateConfigRes;
   changeConfig?: ChangeConfigRes;
 }
 
@@ -41,13 +38,13 @@ interface RuleManagementActions {
   ) => void;
   changeObjectTypes: (payload?: ChangeObjectTypesPayload | null) => void;
   syncValidatedValues: (data?: Partial<RuleDetailData> | null) => void;
+  clear: () => void;
 }
 
 type RuleManagementStore = RuleManagementState & RuleManagementActions;
 
 const cloneData = <T>(data: T): T => {
-  if (data == null) return data;
-  return JSON.parse(JSON.stringify(data)) as T;
+  return cloneDeep(data);
 };
 
 const mergeRuleData = (
@@ -55,7 +52,6 @@ const mergeRuleData = (
   nextData?: Partial<RuleDetailData> | null
 ): AutoRuleDetail => {
   if (!nextData) return currentRuleData;
-
   const rawNextData = nextData;
   const clonedNextData = cloneData(nextData);
   const hasActionConfig = Object.prototype.hasOwnProperty.call(
@@ -74,12 +70,11 @@ const mergeRuleData = (
     rawNextData,
     'scheduleConfig'
   );
-
   return {
     ...currentRuleData,
     ...clonedNextData,
     actionConfig: hasActionConfig
-      ? rawNextData.actionConfig == null
+      ? isNil(rawNextData.actionConfig)
         ? undefined
         : {
             ...(currentRuleData.actionConfig || {}),
@@ -87,7 +82,7 @@ const mergeRuleData = (
           }
       : currentRuleData.actionConfig,
     gateConfig: hasGateConfig
-      ? rawNextData.gateConfig == null
+      ? isNil(rawNextData.gateConfig)
         ? undefined
         : {
             ...(currentRuleData.gateConfig || {}),
@@ -95,7 +90,7 @@ const mergeRuleData = (
           }
       : currentRuleData.gateConfig,
     changeConfig: hasChangeConfig
-      ? rawNextData.changeConfig == null
+      ? isNil(rawNextData.changeConfig)
         ? undefined
         : {
             ...(currentRuleData.changeConfig || {}),
@@ -103,7 +98,7 @@ const mergeRuleData = (
           }
       : currentRuleData.changeConfig,
     scheduleConfig: hasScheduleConfig
-      ? rawNextData.scheduleConfig == null
+      ? isNil(rawNextData.scheduleConfig)
         ? undefined
         : clonedNextData.scheduleConfig
       : currentRuleData.scheduleConfig
@@ -115,7 +110,7 @@ export const useRuleManagementStore = create<RuleManagementStore>()(
     (set, get) => ({
       ruleData: {
         triggerType: 1
-      },
+      } as any,
 
       init: (data) => {
         const nextData = cloneData(data || {});
@@ -132,7 +127,7 @@ export const useRuleManagementStore = create<RuleManagementStore>()(
                 actionConfig: {
                   actionId: actionData.id,
                   actionCode: actionData.code,
-                  parameters: actionData.params,
+                  parameters: actionData.params as any,
                   actionInfo: actionData
                 }
               })
@@ -151,43 +146,29 @@ export const useRuleManagementStore = create<RuleManagementStore>()(
           ruleData: {
             ...currentRuleData,
             gateConfig: functionInfo
-              ? {
+              ? ({
                   ...currentGateConfig,
                   functionId: functionInfo.id,
                   functionCode: functionInfo.code,
                   functionName: functionInfo.name,
                   functionInfo: cloneData(functionInfo)
-                }
-              : {
+                } as any)
+              : ({
                   ...currentGateConfig,
                   functionId: undefined,
                   functionCode: undefined,
                   functionName: undefined,
                   functionInfo: undefined
-                }
+                } as any)
           }
         });
       },
 
       changeObjectTypes: (payload) => {
         const currentRuleData = get().ruleData;
-        const currentChangeConfig = currentRuleData.changeConfig || {};
 
         set({
-          ruleData: {
-            ...currentRuleData,
-            modelId: payload?.modelId,
-            modelInfo: payload?.modelInfo
-              ? cloneData(payload.modelInfo)
-              : undefined,
-            changeConfig: {
-              ...currentChangeConfig,
-              objectTypeId: payload?.objectTypeId,
-              objectTypeInfo: payload?.objectTypeInfo
-                ? cloneData(payload.objectTypeInfo)
-                : undefined
-            }
-          }
+          ruleData: mergeRuleData(currentRuleData, payload)
         });
       },
 
@@ -195,6 +176,13 @@ export const useRuleManagementStore = create<RuleManagementStore>()(
         const currentRuleData = get().ruleData;
         set({
           ruleData: mergeRuleData(currentRuleData, data)
+        });
+      },
+      clear: () => {
+        set({
+          ruleData: {
+            triggerType: 1
+          } as any
         });
       }
     }),

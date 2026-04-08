@@ -1,29 +1,53 @@
-import React, { forwardRef, useImperativeHandle } from 'react';
+import React, {
+  forwardRef,
+  useCallback,
+  useEffect,
+  useImperativeHandle
+} from 'react';
 import classNames from 'classnames';
 import styles from './index.module.scss';
 import { FormInstance } from '@arco-design/web-react/es/Form';
-import { Form, Input, Radio, Select, Switch } from '@arco-design/web-react';
+import {
+  Checkbox,
+  Form,
+  Input,
+  Radio,
+  Select,
+  Switch
+} from '@arco-design/web-react';
 import FormItem from '@/components/FormItem';
 import {
   ActionParams,
   ActionSelect,
   FunctionSelect,
   OntoSceneSelect,
+  PropConditions,
   RuleSettingConfig,
   TriggerType
 } from '@/pages/ruleManagement/components';
 import SchedulerRun from '../SchedulerRun';
 import { CycleText } from '../SchedulerRun/types';
-import { FunctionsSelect } from '@/pages/ontologyScene/modules/behaviorActionDetail/components';
 import { useRuleManagementStore } from '../../stores';
 import { BehaviorActionItem } from '@/pages/ontologyScene/types/behaviorActions';
-import { buildAutoTrigger } from '../../utils';
-import { AutoRuleFormData, ChangeType } from '../../types';
+import { buildAutoTrigger, getParamsFromData } from '../../utils';
+import {
+  AutoRuleFormData,
+  ChangeType,
+  ConditionType,
+  GateConfigRes,
+  MonthDayMode,
+  PeriodType,
+  ScheduleConfigRes
+} from '../../types';
 import { ObjectTypeSelect } from '@/pages/ontologyScene/componens';
 import { InstanceSelect } from '@/pages/ontologyScene/componens/ObjectInstanceSelect/InsSelect';
 import { useRequest } from 'ahooks';
 import { isNil } from 'lodash-es';
 import { listOntologyPhysicalProperties } from '@/api/ontologySceneLibrary/graph';
+import { SelectWithNoData } from '@/components/new-no-data-comps';
+import { InstanceScope } from '@/pages/ruleManagement/types/';
+import { OntologyFunctionItem } from '@/pages/ontologyScene/types/ontologyFunction';
+import { getAutoRuleList } from '@/api/businessAutomation/list';
 
 const { TextArea } = Input;
 
@@ -69,26 +93,27 @@ export const RuleForm = forwardRef<
   const [form] = Form.useForm();
   const objectTypeId = Form.useWatch('objectTypeId', form);
   const modelId = Form.useWatch('modelId', form);
-  const { changeAction, ruleDetail, changeObjectType } = useRuleManagementStore(
-    (state) => ({
-      changeAction: state.changeAction,
-      changeObjectType: state.changeObjectTypes,
-      ruleDetail: state.ruleData
-    })
-  );
+  const propertyConditions = Form.useWatch('propertyConditions', form);
+  const changeType = Form.useWatch('changeType', form);
+  const { ruleDetail, getRule } = useRuleManagementStore((state) => ({
+    changeAction: state.changeAction,
+    changeObjectType: state.changeObjectTypes,
+    ruleDetail: state.ruleData,
+    getRule: () => state.ruleData
+  }));
 
-  const { data: primaryKey, loading: primaryKeyLoading } = useRequest(
+  const { data: properties, loading: propertiesLoading } = useRequest(
     () => {
       if (isNil(objectTypeId)) {
         return Promise.resolve(undefined);
       }
       return listOntologyPhysicalProperties({
         objectTypeIdList: [Number(objectTypeId)],
-        isPrimary: 1,
+        // isPrimary: 1,
         ontologyModelID: +modelId,
         isUse: 1
       }).then((res) => {
-        return res.data.result?.find(({ isPrimary }) => !!isPrimary)?.name;
+        return res.data.result || [];
       });
     },
     {
@@ -97,17 +122,90 @@ export const RuleForm = forwardRef<
     }
   );
 
+  const primaryKey = properties?.find(({ isPrimary }) => !!isPrimary)?.name;
+
+  const allProperties = (() => {
+    if (!!properties?.length) {
+      return properties.map(({ name, id }) => ({
+        label: name,
+        value: id!
+      }));
+    }
+    return [];
+  })();
+
   const syncValidatedValues = useRuleManagementStore(
     (state) => state.syncValidatedValues
   );
 
-  const handleManagedValuesChange = (changedValues: Record<string, any>) => {
+  const validateSameName = async (name: string) => {
+    const rules = await getAutoRuleList({
+      filter: name,
+      pageNo: 1,
+      pageSize: 10
+    });
+    const nameExist = rules.items.some((rule) => {
+      return rule.name === name && rule.id !== ruleDetail.id;
+    });
+    if (nameExist) {
+      form.setFields({
+        name: {
+          error: {
+            message: '名称不可重复'
+          }
+        }
+      });
+      return Promise.reject('名称不可重复');
+    }
+    return Promise.resolve();
+  };
+
+  const propsChange = (propIds?: React.Key[]) => {
+    const currentProps = ruleDetail.changeConfig?.propertyConditions;
+    const currentPropMap = new Map(currentProps?.map((p) => [p.id, p]));
+    const nextProps = properties
+      ?.filter(({ id }) => propIds?.includes(id as number))
+      .flatMap((p) => {
+        if (currentPropMap.size) {
+          if (currentPropMap.has(p.id as number)) {
+            const propValue = currentPropMap.get(p.id as number);
+            return {
+              ...propValue,
+              name: p.name,
+              fieldType: p.columnType
+            };
+          }
+          return [];
+        }
+        return {
+          id: p.id,
+          name: p.name,
+          fieldType: p.columnType,
+          operator: undefined,
+          type: ConditionType.AnyChange,
+          value: undefined
+        };
+      });
+    form.setFieldsValue({
+      propertyList: nextProps
+    });
+    syncValidatedValues({
+      changeConfig: {
+        propertyConditions: nextProps as any
+      }
+    });
+  };
+
+  const handleManagedValuesChange = (
+    changedValues: Record<string, any>,
+    values
+  ) => {
     const changedKeys = Object.keys(changedValues || {});
     const needNotChange = ['action', 'modelId', 'objectTypeId'].some((key) =>
       changedKeys?.includes(key)
     );
     // 编辑的的数据不需要进行数据初始化
-    if (!changedKeys.length || needNotChange || changedKeys.length > 10) return;
+    if (!changedKeys.length || needNotChange || changedKeys.length > 2) return;
     // 首先校验填写数据是否合法
     form
       .validate(changedKeys)
@@ -155,54 +253,99 @@ export const RuleForm = forwardRef<
           }
           return;
         }
+        if (
+          changedKeys.some((key) => ['cycle', 'date', 'time'].includes(key))
+        ) {
+          const { triggerType, cycle, date, time } = values;
+          if (triggerType === 1) {
+            const scheduleConfig: ScheduleConfigRes = {
+              enabled: true,
+              time: time || '',
+              periodType:
+                cycle === 'per_week'
+                  ? PeriodType.Weekly
+                  : cycle === 'per_month'
+                    ? PeriodType.Monthly
+                    : PeriodType.Daily
+            };
 
-        const isScheduleChanged = changedKeys.some((key) =>
-          ['cycle', 'date', 'time'].includes(key)
-        );
-        const isActionParamsChanged = changedKeys.some(
-          (key) => key === 'actionParams' || key.startsWith('actionParams')
-        );
-        const isActionChanged = changedKeys.some((key) =>
-          ['gateConfig', 'changeConfig', 'modelId'].includes(key)
-        );
+            if (cycle === 'per_week') {
+              const weekDays = Array.isArray(date)
+                ? date
+                    .map((item) => Number(item))
+                    .filter((item) => !Number.isNaN(item))
+                : [];
 
-        const allValues = form.getFieldsValue() as AutoRuleFormData;
+              if (weekDays.length) {
+                scheduleConfig.weekDays = weekDays;
+              }
+            }
 
-        if (isScheduleChanged) {
-          syncValidatedValues({
-            scheduleConfig: buildAutoTrigger(allValues).scheduleConfig
-          });
+            if (cycle === 'per_month') {
+              if (date === 'L') {
+                scheduleConfig.monthDayMode = MonthDayMode.Last;
+              } else {
+                const monthDays = (Array.isArray(date) ? date : [date])
+                  .map((item) => Number(item))
+                  .filter((item) => !Number.isNaN(item));
+
+                scheduleConfig.monthDayMode = MonthDayMode.Specific;
+                if (monthDays.length) {
+                  scheduleConfig.monthDays = monthDays;
+                }
+              }
+            }
+
+            return syncValidatedValues({
+              scheduleConfig
+            });
+          }
           return;
         }
-
-        if (isActionParamsChanged) {
+        if (changedKeys.some((key) => key.includes('actionParams'))) {
           syncValidatedValues({
             actionConfig: {
-              parameters: allValues.actionParams
+              parameters: values.actionParams
             }
           });
           return;
         }
-
-        if (isActionChanged) {
+        if (changedKeys.some((key) => key.includes('functionParams'))) {
           syncValidatedValues({
-            modelId: allValues.changeOntoScene as number | undefined,
-            gateConfig: allValues.advConfig
-              ? {
-                  enabled: true,
-                  functionId: allValues.gateChangeFunction as number | undefined
-                }
-              : undefined
+            gateConfig: {
+              parameters: values.functionParams
+            }
           });
+          return;
+        }
+        if ('propertyConditions' in changedValues) {
+          propsChange(changedValues.propertyConditions);
+          return;
         }
       })
       .catch((e) => {
         console.error('数据校验失败', e);
       });
   };
+  const validateValues = async () => {
+    try {
+      const name = form.getFieldValue('name');
+      const formData = await form.validate();
+      await validateSameName(name);
+      return Promise.resolve({
+        ...formData,
+        name
+      });
+    } catch (e) {
+      return Promise.reject(e);
+    }
+  };
 
   useImperativeHandle(ref, () => ({
-    form
+    form: {
+      ...form,
+      validate: validateValues
+    }
   }));
 
   return (
@@ -239,6 +382,10 @@ export const RuleForm = forwardRef<
                   placeholder={'请输入规则名称'}
                   maxLength={50}
                   showWordLimit
+                  onBlur={(e) => {
+                    if (!e.target.value?.trim()) return;
+                    validateSameName(e.target.value);
+                  }}
                 />
               </FormItem>
               <FormItem
@@ -311,6 +458,19 @@ export const RuleForm = forwardRef<
                               };
                             }
                           )}
+                          onChange={(value) => {
+                            form.setFieldsValue({
+                              changeType: value,
+                              propertyConditions: undefined,
+                              propertyList: undefined
+                            });
+                            syncValidatedValues({
+                              changeConfig: {
+                                changeType: value,
+                                propertyConditions: undefined
+                              }
+                            });
+                          }}
                         />
                       </FormItem>
                       <FormItem field={'modelId'} label={'本体场景'} required>
@@ -318,9 +478,24 @@ export const RuleForm = forwardRef<
                           placeholder={'请选择或搜索本体场景'}
                           currentSceneData={ruleDetail.modelInfo}
                           onChange={(value, option) => {
-                            form.setFieldValue('modelId', value);
+                            // 修改本体场景之后，重置对象类型、对象实例、属性条件
+                            form.setFieldsValue({
+                              modelId: value,
+                              objectTypeId: undefined,
+                              insType: InstanceScope.All,
+                              propertyConditions: undefined,
+                              propertyList: undefined
+                            });
                             syncValidatedValues({
-                              modelInfo: option
+                              modelInfo: option,
+                              modelId: value,
+                              changeConfig: {
+                                objectTypeId: undefined,
+                                instanceScope: InstanceScope.All,
+                                objectTypeInfo: undefined,
+                                instanceIds: undefined,
+                                propertyConditions: undefined
+                              }
                             });
                           }}
                         />
@@ -342,10 +517,21 @@ export const RuleForm = forwardRef<
                                 disabled={!modelId}
                                 ontologyModelID={modelId}
                                 onChange={(value, option) => {
-                                  form.setFieldsValue({ objectTypeId: value });
-                                  changeObjectType({
-                                    objectTypeInfo: option,
-                                    objectTypeId: value
+                                  // 修改对象类型之后，对象实例、属性条件
+                                  form.setFieldsValue({
+                                    objectTypeId: value,
+                                    insType: InstanceScope.All,
+                                    propertyConditions: undefined,
+                                    propertyList: undefined
+                                  });
+                                  syncValidatedValues({
+                                    changeConfig: {
+                                      objectTypeId: value,
+                                      instanceScope: InstanceScope.All,
+                                      objectTypeInfo: option,
+                                      instanceIds: undefined,
+                                      propertyConditions: undefined
+                                    }
                                   });
                                 }}
                                 placeholder={
@@ -358,44 +544,187 @@ export const RuleForm = forwardRef<
                           );
                         }}
                       </Form.Item>
-                      <FormItem
-                        label={'对象实例'}
-                        required
-                        shouldUpdate={(p, c) => {
-                          // @ts-ignore
-                          return p.objectTypeId !== c.objectTypeId;
-                        }}
+
+                      {/*用户选择完对象类型之后才能进行下一步的选择*/}
+                      <Form.Item
+                        noStyle
+                        shouldUpdate={(p, c) =>
+                          p.objectTypeId !== c.objectTypeId
+                        }
                       >
                         {({ objectTypeId }) => {
+                          if (!objectTypeId) return null;
                           return (
                             <>
-                              <Form.Item field={'insType'}>
-                                <Radio.Group
-                                  options={[
-                                    {
-                                      label: '全部实例',
-                                      value: 'all'
-                                    },
-                                    {
-                                      label: '部分实例',
-                                      value: 'some'
+                              <FormItem
+                                label={'对象实例'}
+                                required
+                                className={'mb-0'}
+                                shouldUpdate={(p, c) => {
+                                  return ['objectTypeId', 'insType'].some(
+                                    (field) => {
+                                      return p[field] !== c[field];
                                     }
-                                  ]}
-                                />
-                              </Form.Item>
-                              <Form.Item field={'ins'}>
-                                <InstanceSelect
-                                  objectTypeId={objectTypeId}
-                                  searchKey={''}
-                                  primaryKey={primaryKey}
-                                  mode={'multiple'}
-                                  maxTagCount={'responsive'}
-                                />
+                                  );
+                                }}
+                              >
+                                {({ objectTypeId, insType }) => {
+                                  return (
+                                    <>
+                                      <Form.Item field={'insType'}>
+                                        <Radio.Group
+                                          disabled={!objectTypeId}
+                                          options={[
+                                            {
+                                              label: '全部实例',
+                                              value: InstanceScope.All
+                                            },
+                                            {
+                                              label: '部分实例',
+                                              value: InstanceScope.Specific
+                                            }
+                                          ]}
+                                          onChange={(value) => {
+                                            form.setFieldsValue({
+                                              insType: value,
+                                              instanceIds: undefined
+                                            });
+                                            syncValidatedValues({
+                                              changeConfig: {
+                                                instanceScope: value,
+                                                instanceIds: undefined
+                                              }
+                                            });
+                                          }}
+                                        />
+                                      </Form.Item>
+                                      {insType !== InstanceScope.All && (
+                                        <Form.Item field={'instanceIds'}>
+                                          <InstanceSelect
+                                            objectTypeId={objectTypeId}
+                                            searchKey={''}
+                                            primaryKey={primaryKey}
+                                            mode={'multiple'}
+                                            maxTagCount={'responsive'}
+                                            placeholder={
+                                              !objectTypeId
+                                                ? '请先选择对象类型'
+                                                : '请选择对象实例'
+                                            }
+                                            onChange={(value) => {
+                                              form.setFieldsValue({
+                                                instanceIds: value
+                                              });
+                                              syncValidatedValues({
+                                                changeConfig: {
+                                                  instanceIds: value as number[]
+                                                }
+                                              });
+                                            }}
+                                          />
+                                        </Form.Item>
+                                      )}
+                                    </>
+                                  );
+                                }}
+                              </FormItem>
+                              <Form.Item noStyle shouldUpdate={() => true}>
+                                {({
+                                  propertyConditions,
+                                  insType,
+                                  changeType
+                                }) => {
+                                  if (changeType !== ChangeType.PropertyChange)
+                                    return null;
+                                  return (
+                                    <FormItem
+                                      label={'属性条件'}
+                                      className={'mb-0'}
+                                      required
+                                    >
+                                      <FormItem field={'propertyConditions'}>
+                                        <SelectWithNoData
+                                          placeholder={
+                                            !propertyConditions?.length &&
+                                            insType !== 'all'
+                                              ? '请先选择对象实例'
+                                              : '请选择属性'
+                                          }
+                                          mode={'multiple'}
+                                          maxTagCount={'responsive'}
+                                        >
+                                          {!!allProperties?.length && (
+                                            <div
+                                              className={
+                                                'flex h-[36px] items-center px-[7px]'
+                                              }
+                                            >
+                                              <Checkbox
+                                                onChange={(checked) => {
+                                                  form.setFieldValue(
+                                                    'propertyConditions',
+                                                    checked
+                                                      ? allProperties.map(
+                                                          (item) => item.value
+                                                        )
+                                                      : undefined
+                                                  );
+                                                }}
+                                                // value长度等于所有属性长度时，表示全选
+                                                checked={
+                                                  [
+                                                    propertyConditions,
+                                                    allProperties
+                                                  ].every(
+                                                    (arr) => !!arr?.length
+                                                  ) &&
+                                                  propertyConditions.length ===
+                                                    allProperties.length
+                                                }
+                                              >
+                                                全部
+                                              </Checkbox>
+                                            </div>
+                                          )}
+                                          {allProperties.map((item) => {
+                                            return (
+                                              <Select.Option
+                                                key={item.value}
+                                                value={item.value}
+                                              >
+                                                {item.label}
+                                              </Select.Option>
+                                            );
+                                          })}
+                                        </SelectWithNoData>
+                                      </FormItem>
+                                      {!!propertyConditions?.length && (
+                                        <FormItem field={'propertyList'}>
+                                          <PropConditions
+                                            allProps={properties}
+                                            propIds={propertyConditions}
+                                            onChange={(value) => {
+                                              form.setFieldValue(
+                                                'propertyList',
+                                                value
+                                              );
+                                              syncValidatedValues({
+                                                changeConfig: {
+                                                  propertyConditions: value
+                                                }
+                                              });
+                                            }}
+                                          />
+                                        </FormItem>
+                                      )}
+                                    </FormItem>
+                                  );
+                                }}
                               </Form.Item>
                             </>
                           );
                         }}
-                      </FormItem>
+                      </Form.Item>
                       <FormItem
                         triggerPropName={'checked'}
                         field={'advConfig'}
@@ -417,18 +746,57 @@ export const RuleForm = forwardRef<
                                   }
                                 />
                                 <FormItem
-                                  field={'gateChangeFunction'}
+                                  field={'function'}
                                   label={'条件函数'}
                                   tooltip={'触发时机到达后调用布尔函数二次确认'}
                                   required
                                 >
-                                  <FunctionSelect />
+                                  <FunctionSelect
+                                    onChange={(v, f: OntologyFunctionItem) => {
+                                      // 函数发生变化时，重置函数参数表单和当前规则数据
+                                      form.setFieldValue('functionParams', v);
+                                      const functionParams = getParamsFromData(
+                                        f?.params
+                                      ) as any;
+                                      form.setFieldsValue({
+                                        functionParams
+                                      });
+                                      syncValidatedValues({
+                                        gateConfig: v
+                                          ? ({
+                                              enabled: true,
+                                              functionId: v,
+                                              functionCode: f.code,
+                                              functionName: f.name,
+                                              functionInfo: f,
+                                              parameters: functionParams
+                                            } as GateConfigRes)
+                                          : undefined
+                                      });
+                                    }}
+                                  />
                                 </FormItem>
-                                <FormItem
-                                  field={'gateChangeParams'}
-                                  label={'参数配置'}
-                                  required
-                                ></FormItem>
+                                <Form.Item
+                                  noStyle
+                                  shouldUpdate={(p, c) => {
+                                    return p.function !== c.function;
+                                  }}
+                                >
+                                  {({ function: functionId }) => {
+                                    if (isNil(functionId)) return null;
+                                    return (
+                                      <FormItem label={'参数配置'} required>
+                                        <ActionParams
+                                          field={'functionParams'}
+                                          modelId={
+                                            ruleDetail.gateConfig?.functionInfo
+                                              ?.ontologyModelID
+                                          }
+                                        />
+                                      </FormItem>
+                                    );
+                                  }}
+                                </Form.Item>
                               </Form.Item>
                             );
                           }
@@ -450,11 +818,21 @@ export const RuleForm = forwardRef<
               <FormItem field={'action'} label={'绑定行为'} required>
                 <ActionSelect
                   onChange={(v, action) => {
+                    const actionParams = getParamsFromData(action?.params);
                     form.setFieldsValue({
                       action: v,
-                      actionParams: action?.params
+                      actionParams
                     });
-                    changeAction(action);
+                    syncValidatedValues({
+                      actionConfig: v
+                        ? {
+                            actionInfo: action,
+                            actionCode: action?.code,
+                            actionId: v as any,
+                            parameters: actionParams as any
+                          }
+                        : undefined
+                    });
                   }}
                   actionData={
                     ruleDetail.actionConfig?.actionInfo as BehaviorActionItem
@@ -473,6 +851,9 @@ export const RuleForm = forwardRef<
                       <FormItem label={'参数配置'} required>
                         <ActionParams
                           field={'actionParams'}
+                          modelId={
+                            ruleDetail.actionConfig?.actionInfo?.ontologyModelID
+                          }
                           actionData={
                             ruleDetail.actionConfig
                               ?.actionInfo as BehaviorActionItem

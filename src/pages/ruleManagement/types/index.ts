@@ -91,34 +91,7 @@ export interface ActionConfigRes {
   /**
    * 行为参数
    */
-  parameters?: { [key: string]: any };
-  [property: string]: any;
-}
-
-/**
- * OntologyActionParamInfo
- */
-export interface OntologyActionParamInfo {
-  actionId?: number;
-  code?: string;
-  id?: number;
-  name?: string;
-  createdAt?: string;
-  enabledValidation?: boolean;
-  inputType?: string;
-  type?: string;
-  uiType?: string;
-  updatedAt?: string;
-  validationRule?: MetadataRuleInfo;
-}
-
-/**
- * MetadataRuleInfo
- */
-export interface MetadataRuleInfo {
-  failMessage?: string;
-  ruleConfig?: { [key: string]: any };
-  ruleName?: string;
+  parameters?: ParameterValue[];
 }
 
 /**
@@ -138,15 +111,9 @@ export enum ChangeType {
  */
 export interface ChangeConfigRes {
   /**
-   * 变更种类：property_change=属性变化，instance_create=实例新增，instance_delete=实例删除；为空时默认 property_change
+   * 变更种类：property_change / instance_create / instance_delete
    */
-  changeType?: ChangeType;
-  conditionOperator?: string;
-  /**
-   * 变更条件类型：any_change / meet_condition
-   */
-  conditionType?: string;
-  conditionValue?: string;
+  changeType?: string;
   /**
    * 指定实例 ID 列表（整型）
    */
@@ -156,14 +123,36 @@ export interface ChangeConfigRes {
    */
   instanceScope?: string;
   /**
-   * 监控属性 ID 列表
-   */
-  monitorPropertyIds?: number[];
-  /**
    * 本体对象类型 ID
    */
   objectTypeId?: number;
   objectTypeInfo?: OntologyObjectTypeInfo;
+  /**
+   * 属性条件列表（changeType=property_change 时使用）
+   */
+  propertyConditions?: PropertyConditionType[];
+}
+
+/**
+ * PropertyConditionReq
+ */
+export interface PropertyConditionType {
+  /**
+   * 属性 ID，对应 ontology_physical_properties.id
+   */
+  id: number | string;
+  /**
+   * 条件运算符，type=meet_condition 时生效
+   */
+  operator?: Operator;
+  /**
+   * 条件类型：any_change=任意变化，meet_condition=满足条件
+   */
+  type: ConditionType;
+  /**
+   * 条件比较值，type=meet_condition 时生效
+   */
+  value?: string | number;
 }
 
 /**
@@ -216,6 +205,17 @@ export interface GateConfigRes {
    */
   functionName?: string;
   functionInfo?: OntologyFunctionDetail;
+  parameters?: ParameterValue[];
+}
+
+/**
+ * ParameterValue
+ */
+export interface ParameterValue {
+  code?: string;
+  id?: number;
+  source?: string;
+  value?: string;
 }
 
 /**
@@ -254,6 +254,7 @@ export interface ScheduleConfigRes {
    */
   weekDays?: number[];
 }
+
 /**
  * 每月日期模式：specific=具体日期，last=每月最后一天（periodType=monthly 时有值）
  */
@@ -270,3 +271,46 @@ export enum PeriodType {
   Monthly = 'monthly',
   Weekly = 'weekly'
 }
+
+/**
+ * 条件运算符，type=meet_condition 时生效
+ */
+export enum Operator {
+  Contains = 'contains',
+  Eq = 'eq',
+  Gt = 'gt',
+  Gte = 'gte',
+  Lt = 'lt',
+  Lte = 'lte',
+  Ne = 'ne',
+  NotContains = 'not_contains'
+}
+
+/**
+ * 变更条件类型：any_change=任意变化，meet_condition=满足条件
+ */
+export enum ConditionType {
+  AnyChange = 'any_change',
+  MeetCondition = 'meet_condition'
+}
+
+/**
+ * 实例范围：all=全部实例，specific=指定实例
+ */
+export enum InstanceScope {
+  All = 'all',
+  Specific = 'specific'
+}
+
+export const NUM_CONDITION_OPERATOR_OPTIONS = [
+  { label: '等于', value: Operator.Eq },
+  { label: '不等于', value: Operator.Ne },
+  { label: '大于', value: Operator.Gt },
+  { label: '大于等于', value: Operator.Gte },
+  { label: '小于', value: Operator.Lt },
+  { label: '小于等于', value: Operator.Lte }
+];
+export const STR_CONDITION_OPERATOR_OPTIONS = [
+  { label: '包含', value: Operator.Contains },
+  { label: '不包含', value: Operator.NotContains }
+];

@@ -18,9 +18,11 @@ import { useRequest } from 'ahooks';
 import { getFunctionDetail } from '@/api/ontologySceneLibrary/ontologyFunction';
 import { isNil } from 'lodash-es';
 import { GlobalTooltip } from '@ceai-front/arco-material';
+import { useHistory } from 'react-router-dom';
 
 interface IProps extends OSDrawerProps {
   data?: number;
+  editable?: boolean;
 }
 
 interface ParamRow {
@@ -121,6 +123,8 @@ const splitParams = (params?: OntologyFunctionParam[]) => {
 export const FunctionDetailDrawer = (props: IProps) => {
   const { data, className, title, footer, ...drawerProps } = props;
 
+  const history = useHistory();
+
   const { data: functionData, loading } = useRequest(
     () => {
       if (isNil(data)) return Promise.resolve(undefined);
@@ -142,6 +146,13 @@ export const FunctionDetailDrawer = (props: IProps) => {
   const { inputParams, outputParams } = useMemo(() => {
     return splitParams(functionData?.params);
   }, [functionData]);
+
+  const onEdit = () => {
+    history.push(
+      `/tenant/compute/onto/ontologyScene/detail/${functionData?.ontologyModelID}/functions/edit/${functionData?.id}`
+    );
+  };
+
   return (
     <OsDrawer
       {...drawerProps}
@@ -149,6 +160,7 @@ export const FunctionDetailDrawer = (props: IProps) => {
       footer={footer ?? null}
       className={classNames(styles['function-detail-drawer'], className)}
       getChildrenPopupContainer={(node) => node.parentElement || document.body}
+      onEdit={!!drawerProps.onEdit ? onEdit : undefined}
     >
       <div className={styles['drawer-content']}>
         {/* 基本信息 */}

@@ -2,8 +2,14 @@ import React from 'react';
 import styles from './index.module.scss';
 import RuleSettingIcon from '@/assets/rule-setting.svg';
 import classNames from 'classnames';
-import { AutoRuleDetail, PeriodType } from '@/pages/ruleManagement/types';
+import {
+  AutoRuleDetail,
+  ChangeType,
+  PeriodType
+} from '@/pages/ruleManagement/types';
 import { isEmpty, isNil } from 'lodash-es';
+import { getModelIconNode } from '@/pages/ruleManagement/utils';
+import { OBJECT_TYPE_ICON_OPTIONS } from '@/pages/ontologyScene/common/constants';
 
 interface RuleSettingConfigProps {
   mode: 'card' | 'item';
@@ -63,57 +69,134 @@ const buildCronDes = (scheduleConfig: AutoRuleDetail['scheduleConfig']) => {
   }
 };
 
+const renderActionConfig = (ruleData?: AutoRuleDetail) => {
+  const actionEmpty =
+    isNil(ruleData?.actionConfig) || isEmpty(ruleData?.actionConfig.actionInfo);
+  return (
+    <>
+      时，系统执行
+      <div
+        className={classNames(
+          styles['rule-setting-tag'],
+          actionEmpty ? 'text-[var(--color-text-6)]' : ''
+        )}
+      >
+        {actionEmpty
+          ? '请先在左侧配置'
+          : ruleData?.actionConfig?.actionInfo?.name}
+      </div>
+    </>
+  );
+};
+
+const renderAutoTriggerConfig = (ruleData?: AutoRuleDetail) => {
+  const scheduleEmpty = isNil(ruleData?.scheduleConfig);
+  return (
+    <>
+      当
+      <div
+        className={classNames(
+          styles['rule-setting-tag'],
+          scheduleEmpty ? 'text-[var(--color-text-6)]' : ''
+        )}
+      >
+        {scheduleEmpty
+          ? '请先在左侧配置'
+          : buildCronDes(ruleData?.scheduleConfig)}
+      </div>
+      {renderActionConfig(ruleData)}
+    </>
+  );
+};
+
+// 根据 icon 字段获取图标组件
+const getIconComponent = (iconValue?: string) => {
+  const iconOption = iconValue
+    ? OBJECT_TYPE_ICON_OPTIONS.find((option) => option.value === iconValue)
+    : null;
+  return iconOption?.icon ?? OBJECT_TYPE_ICON_OPTIONS[0]?.icon;
+};
+
+const renderAutoChangeConfig = (ruleData?: AutoRuleDetail) => {
+  const changeConfig = ruleData?.changeConfig;
+  const gateConfig = ruleData?.gateConfig;
+  const modelEmpty = isNil(ruleData?.modelId);
+  const objEmpty = isNil(changeConfig?.objectTypeId);
+  const funcEmpty = isNil(gateConfig?.functionId);
+  const IconComponent = getIconComponent(changeConfig?.objectTypeInfo?.icon);
+  return (
+    <>
+      当
+      <div
+        className={classNames(
+          styles['rule-setting-tag'],
+          modelEmpty ? 'text-[var(--color-text-6)]' : ''
+        )}
+      >
+        {modelEmpty ? (
+          '请先在左侧配置'
+        ) : (
+          <div className={'flex items-center gap-1'}>
+            {getModelIconNode(ruleData?.modelInfo?.icon, 'w-[14px] h-[14px]')}
+            {ruleData?.modelInfo?.name}
+          </div>
+        )}
+      </div>
+      的
+      <div
+        className={classNames(
+          styles['rule-setting-tag'],
+          objEmpty ? 'text-[var(--color-text-6)]' : ''
+        )}
+      >
+        {objEmpty ? (
+          '请先在左侧配置'
+        ) : (
+          <div className={'flex items-center gap-1'}>
+            <IconComponent className="h-[14px] w-[14px]" />
+            {changeConfig?.objectTypeInfo?.name}
+          </div>
+        )}
+      </div>
+      的实例发生
+      {changeConfig?.changeType === ChangeType.PropertyChange
+        ? '属性变更'
+        : changeConfig?.changeType === ChangeType.InstanceCreate
+          ? '实例创建'
+          : changeConfig?.changeType === ChangeType.InstanceDelete
+            ? '实例删除'
+            : '属性变更'}
+      {gateConfig?.enabled && (
+        <>
+          ，且条件函数
+          <div
+            className={classNames(
+              styles['rule-setting-tag'],
+              funcEmpty ? 'text-[var(--color-text-6)]' : ''
+            )}
+          >
+            {funcEmpty ? (
+              '请先在左侧配置'
+            ) : (
+              <div>{gateConfig?.functionInfo?.name}</div>
+            )}
+          </div>
+          返回为true
+        </>
+      )}
+      {renderActionConfig(ruleData)}
+    </>
+  );
+};
+
 export const RuleSettingConfig = (props: RuleSettingConfigProps) => {
   const { mode, ruleData } = props;
 
-  const renderAutoTriggerConfig = () => {
-    const scheduleEmpty = isNil(ruleData?.scheduleConfig);
-    const actionEmpty =
-      isNil(ruleData?.actionConfig) ||
-      isEmpty(ruleData?.actionConfig.actionInfo);
-    return (
-      <>
-        当
-        <div
-          className={classNames(
-            styles['rule-setting-tag'],
-            scheduleEmpty ? 'text-[var(--color-text-6)]' : ''
-          )}
-        >
-          {scheduleEmpty
-            ? '请先在左侧配置'
-            : buildCronDes(ruleData?.scheduleConfig)}
-        </div>
-        时，系统执行
-        <div
-          className={classNames(
-            styles['rule-setting-tag'],
-            actionEmpty ? 'text-[var(--color-text-6)]' : ''
-          )}
-        >
-          {actionEmpty
-            ? '请先在左侧配置'
-            : ruleData?.actionConfig?.actionInfo?.name}
-        </div>
-      </>
-    );
-  };
-
   const renderConfig = () => {
     if (ruleData?.triggerType === 1) {
-      return renderAutoTriggerConfig();
+      return renderAutoTriggerConfig(ruleData);
     }
-    return (
-      <>
-        当<div className={styles['rule-setting-tag']}>这是一条神奇的天路</div>
-        时间，
-        <div className={styles['rule-setting-tag']}>这又是一条神奇的天路啊</div>
-        哈哈哈
-        <div className={styles['rule-setting-tag']}>这又是一条神奇的天路啊</div>
-        嘻嘻
-        <div className={styles['rule-setting-tag']}>这又是一条神奇的天路啊</div>
-      </>
-    );
+    return renderAutoChangeConfig(ruleData);
   };
 
   return (

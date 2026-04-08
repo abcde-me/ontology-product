@@ -7,6 +7,7 @@ import { OntologyModelInfo } from '@/pages/ruleManagement/types';
 import { OntologScene } from '@/types/ontologySceneApi';
 import { ICON_OPTIONS } from '@/pages/ontologyScene/common/constants';
 import styles from './index.module.scss';
+import { getModelIconNode } from '@/pages/ruleManagement/utils';
 
 interface OntoSceneOption extends OntologyModelInfo {
   description?: string;
@@ -21,28 +22,13 @@ export interface OntoSceneSelectProps
   ontologySceneData?: OntologScene;
 }
 
-const getIconNode = (icon?: string, className?: string) => {
-  const matchedIcon = ICON_OPTIONS.find((option) => option.value === icon);
-  const iconSource = matchedIcon?.icon ?? ICON_OPTIONS[0]?.icon;
-
-  if (!iconSource) return null;
-
-  if (typeof iconSource === 'string') {
-    return <img src={iconSource} alt="" className={className} />;
-  }
-
-  return React.createElement(iconSource, {
-    className
-  });
-};
-
 const renderSceneValue = (scene?: OntoSceneOption | null) => {
   if (!scene) return null;
 
   return (
     <div className={styles['scene-value']}>
       <div className={`${styles['scene-icon-box']} !h-[24px] !w-[24px]`}>
-        {getIconNode(scene.icon, styles['scene-icon'])}
+        {getModelIconNode(scene.icon, styles['scene-icon'])}
       </div>
       <div className={styles['scene-value-text']}>
         <GlobalTooltip.Ellipsis text={scene.name || '-'} />
@@ -55,7 +41,7 @@ const renderSceneOption = (scene: OntoSceneOption) => {
   return (
     <div className={styles['scene-option']}>
       <div className={styles['scene-icon-box']}>
-        {getIconNode(scene.icon, styles['scene-icon'])}
+        {getModelIconNode(scene.icon, styles['scene-icon'])}
       </div>
       <div className={styles['scene-option-content']}>
         <GlobalTooltip.Ellipsis

@@ -96,7 +96,7 @@ export const AutoRuleDialog = (
             </div>
             <FormItemGroup title={'触发配置'} />
             <div className={styles['trigger-config']}>
-              <RuleSettingConfig mode={'item'} />
+              <RuleSettingConfig mode={'item'} ruleData={ruleDetail} />
             </div>
             <div className={styles['time-config']}>
               <FormItemGroup title={'每当以下时间'} className={'mb-4'} />

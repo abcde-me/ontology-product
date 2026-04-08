@@ -1,7 +1,6 @@
 import UAPI from '@/api';
 import { AutoRuleDetail, AutoRuleItem } from '@/pages/ruleManagement/types';
-import { AUTO_RULES } from '@/api/businessAutomation/mock';
-import { BehaviorActionItem } from '@/pages/ontologyScene/types/behaviorActions';
+import { CreateAutoRule } from '@/pages/ruleManagement/types/save';
 
 /**
  * ListAutoRuleRequest，内嵌 sdk.PagingRequest 字段与业务字段同级
@@ -44,18 +43,15 @@ export const getAutoRuleList = async (params: GetRuleListParams) => {
 
 // 获取规则详情
 export const getAutoRuleDetail = async (id: string | number) => {
-  return Promise.resolve(
-    (AUTO_RULES.find((item) => item.id === id) as AutoRuleDetail) || null
-  );
-  // const res = await UAPI.RES.GetAutoRuleDetailApi({})
-  //   .post({ id })
-  //   .inRegion()
-  //   .do();
-  // return (res.data as AutoRuleDetail) || null;
+  const res = await UAPI.RES.GetAutoRuleDetailApi({})
+    .post({ id: +id })
+    .inRegion()
+    .do();
+  return (res.data as AutoRuleDetail) || null;
 };
 
 // 保存规则（新增/更新）
-export const saveAutoRule = (data: Partial<AutoRuleDetail>) => {
+export const saveAutoRule = (data: CreateAutoRule) => {
   const api = data?.id
     ? UAPI.RES.UpdateAutoRuleApi
     : UAPI.RES.CreateAutoRuleApi;

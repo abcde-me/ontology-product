@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { ComponentProps } from 'react';
 import {
   InputType,
   OntologyFunctionParam,
@@ -18,8 +18,16 @@ import styles from '../styles/index.module.scss';
 import { LinkType } from '@/types/graphApi';
 import { BehaviorActionDetail } from '@/pages/ontologyScene/types/behaviorActions';
 import dayjs from 'dayjs';
+import { isNil } from 'lodash-es';
 
-export const renderComponentByUiType = (type: UiType, osid?: number) => {
+export const renderComponentByUiType = (
+  type: UiType,
+  osid?: number,
+  compProps?: {
+    objProps?: Partial<ComponentProps<typeof ObjectInstanceSelect>>;
+  }
+) => {
+  const objProps = compProps?.objProps || {};
   switch (type) {
     case UiType.TextArea:
       return <Input.TextArea placeholder={'请输入'} />;
@@ -78,9 +86,11 @@ export const renderComponentByUiType = (type: UiType, osid?: number) => {
     case UiType.Timestamp:
       return <DatePicker showTime triggerProps={{ updateOnScroll: true }} />;
     case UiType.ObjectOne:
-      return <ObjectInstanceSelect mode={'single'} />;
+      return <ObjectInstanceSelect mode={'single'} osid={osid} {...objProps} />;
     case UiType.ObjectSet:
-      return <ObjectInstanceSelect mode={'multiple'} />;
+      return (
+        <ObjectInstanceSelect mode={'multiple'} osid={osid} {...objProps} />
+      );
     default:
       return <Input placeholder={'请输入'} />;
   }
@@ -156,8 +166,6 @@ export const formatParamValueByType = (
   return JSON.stringify(value);
 };
 
-const getObjData = (objIns: ObjInsValue) => {};
-
 export const buildActionTestItem = (
   data: BehaviorActionDetail,
   functionParams: Record<string, any>
@@ -175,11 +183,14 @@ export const buildActionTestItem = (
     pk: data.id,
     object_icon: data.objectTypeIcon
   };
-  (data.params || []).forEach((p) => {
+  (data.params || []).forEach(({ id, ...p }) => {
     const param: OntologyFunctionParam = {
       ...p,
       inputType: p.uiType ? InputType.Input : InputType.Output
     };
+    if (!isNil(id)) {
+      param.id = id as number;
+    }
     if (['ObjectRef', 'ObjectSet'].includes(param.type!)) {
       const objIns = functionParams[p.name] as ObjInsValue;
       param.obj_data = {

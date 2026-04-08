@@ -178,6 +178,7 @@ export interface BehaviorActionDetail {
  * CreateOntologyActionParamRequest
  */
 export interface OntologyActionParam {
+  id?: string | number;
   /**
    * 参数唯一标识
    */

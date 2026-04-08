@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { PageContainer, RuleForm, RuleFormRef } from '../../components';
 import styles from '../../styles/index.module.scss';
 import { useHistory } from 'react-router-dom';
@@ -9,9 +9,10 @@ import { useRuleManagementStore } from '@/pages/ruleManagement/stores';
 
 const RuleCreatePage = () => {
   const ruleForm = useRef<RuleFormRef>();
-  const { ruleDetail } = useRuleManagementStore((state) => {
+  const { ruleDetail, clearData } = useRuleManagementStore((state) => {
     return {
-      ruleDetail: state.ruleData
+      ruleDetail: state.ruleData,
+      clearData: state.clear
     };
   });
   const history = useHistory();
@@ -20,8 +21,8 @@ const RuleCreatePage = () => {
     ruleForm.current?.form
       .validate()
       .then((formData) => {
-        const autoRule = buildAutoRule(formData);
-        return saveAutoRule(ruleDetail).then((res) => {
+        const autoRule = buildAutoRule(ruleDetail);
+        return saveAutoRule(autoRule).then((res) => {
           Message.success({
             content: '保存成功',
             duration: 2000,
@@ -40,13 +41,18 @@ const RuleCreatePage = () => {
     history.replace('/tenant/compute/onto/businessAutomation/management/list');
   };
 
+  useEffect(() => {
+    ruleForm.current?.form.setFieldsValue(ruleDetail);
+    return clearData;
+  }, []);
+
   return (
     <PageContainer
+      title={'创建规则'}
       confirmButtonProps={{ children: '确定', onClick: handleSubmit }}
       cancelButtonProps={{ children: '取消', onClick: goBack }}
-      title={'创建规则'}
-      showBack
       backPath={'/tenant/compute/onto/businessAutomation/management/list'}
+      showBack
     >
       <div className={styles['rule-info-page-content']}>
         <div className={styles['rule-info-page-line']} />

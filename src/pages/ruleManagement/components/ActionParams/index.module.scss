@@ -71,3 +71,7 @@
     }
   }
 }
+
+.obj-ins-params {
+  grid-template-columns: minmax(0, 1fr) 1px minmax(0, 1fr) !important;
+}

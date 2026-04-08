@@ -1,28 +1,18 @@
-import {
-  Form,
-  Input,
-  TimePicker,
-  Tag,
-  Select,
-  Alert,
-  Divider,
-  Radio
-} from '@arco-design/web-react';
+import { Divider, Form, Select, TimePicker } from '@arco-design/web-react';
 import Styles from './index.module.scss';
 import React, {
   forwardRef,
   useEffect,
   useImperativeHandle,
-  useRef,
   useState
 } from 'react';
 import './index.css';
 import {
-  WEEKLY_OPTIONS,
-  MONTHLY_OPTIONS,
   CYCLE_OPTIONS,
+  MONTHLY_OPTIONS,
   RELATIVE_TIME_OPTIONS,
-  TIME_TAB
+  TIME_TAB,
+  WEEKLY_OPTIONS
 } from './constants';
 import { CycleText, CycleValues, TimeType } from './types';
 import { FormValidateFn } from '@arco-design/web-react/es/Form/interface';
@@ -142,12 +132,13 @@ const formatOptions = (frequencyData: CycleValues, formVals) => {
 
 const CycleLoadingForm = forwardRef<CycleLoadingFormRef, CycleLoadingFormProps>(
   ({ options, onOptionsChange, extraNode }, ref) => {
-    const [form] = Form.useForm();
+    const { form } = Form.useFormContext();
     const [popupVisible, setPopupVisible] = useState(false);
     // 频率选择器选择的数据
     const [frequencyData, setFrequencyData] = useState(
       initFrequencyData(options)
     );
+    const dateVal = Form.useWatch('date', form);
     const initialValues = getInitialValues(frequencyData, options);
 
     // 点击快捷选项的回调
@@ -225,6 +216,14 @@ const CycleLoadingForm = forwardRef<CycleLoadingFormRef, CycleLoadingFormProps>(
     const [timeFlag, setTimeFlag] = useState(
       getTimeFlagInitialValues(frequencyData, options)
     );
+
+    useEffect(() => {
+      if (typeof dateVal === 'string') {
+        setTimeFlag(TimeType.RELATICELYTIME);
+        return;
+      }
+      setTimeFlag(TimeType.SEPCIFICTIME);
+    }, [dateVal]);
     const handleValuesChange = (_, allValues) => {
       const optionsFormat = formatOptions(frequencyData, allValues);
       console.log('当前所有字段值:', allValues, frequencyData);
@@ -272,9 +271,10 @@ const CycleLoadingForm = forwardRef<CycleLoadingFormRef, CycleLoadingFormProps>(
                   onChange={(val) => {
                     form.setFieldsValue({
                       date: [],
-                      time: ''
+                      time: '',
+                      cycle: val
                     });
-                    setFrequencyData(val);
+                    // setFrequencyData(val);
                   }}
                 >
                   {CYCLE_OPTIONS.map((item) => {
@@ -286,121 +286,135 @@ const CycleLoadingForm = forwardRef<CycleLoadingFormRef, CycleLoadingFormProps>(
                   })}
                 </Select>
               </Form.Item>
-              {frequencyData == CycleValues.PER_WEEK && (
-                <Form.Item
-                  field="date"
-                  style={{
-                    margin: '0 0 0 12px',
-                    display: 'flex',
-                    alignItems: 'center'
-                  }}
-                  rules={[{ required: true, message: '请选择时间' }]}
-                  validateTrigger={['onChange']}
-                >
-                  <Select
-                    mode="multiple"
-                    placeholder="请选择日期"
-                    style={{
-                      minWidth: 300
-                    }}
-                  >
-                    {WEEKLY_OPTIONS.map((item) => (
-                      <Option value={item.value} key={item.value}>
-                        {item.lable}
-                      </Option>
-                    ))}
-                  </Select>
-                </Form.Item>
-              )}
-              {frequencyData == CycleValues.PER_MONTH && (
-                <Form.Item
-                  field="date"
-                  key={frequencyData}
-                  style={{
-                    margin: '0 0 0 12px',
-                    display: 'flex',
-                    alignItems: 'center'
-                  }}
-                  rules={[{ required: true, message: '请选择时间' }]}
-                  validateTrigger={['onChange']}
-                >
-                  <Select
-                    mode={
-                      timeFlag === TimeType.RELATICELYTIME
-                        ? undefined
-                        : 'multiple'
-                    }
-                    key={timeFlag}
-                    style={{ minWidth: 300 }}
-                    placeholder="请选择日期"
-                    popupVisible={popupVisible}
-                    triggerProps={{
-                      trigger: 'focus'
-                    }}
-                    onVisibleChange={(visible) => {
-                      setPopupVisible(visible);
-                    }}
-                    dropdownRender={(menu) => (
-                      <div>
-                        <Divider style={{ margin: 0 }} />
-                        <div
+              <Form.Item
+                noStyle
+                shouldUpdate={(prev, next) => prev.cycle !== next.cycle}
+              >
+                {({ cycle }) => {
+                  if (cycle == CycleValues.PER_WEEK) {
+                    return (
+                      <Form.Item
+                        field="date"
+                        style={{
+                          margin: '0 0 0 12px',
+                          display: 'flex',
+                          alignItems: 'center'
+                        }}
+                        rules={[{ required: true, message: '请选择时间' }]}
+                        validateTrigger={['onChange']}
+                      >
+                        <Select
+                          mode="multiple"
+                          placeholder="请选择日期"
                           style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            padding: '3px',
-                            background: 'rgb(224, 229, 238)',
-                            margin: '5px 0px',
-                            height: '35px'
+                            minWidth: 300
                           }}
                         >
-                          {TIME_TAB.map((item) => {
-                            return (
+                          {WEEKLY_OPTIONS.map((item) => (
+                            <Option value={item.value} key={item.value}>
+                              {item.lable}
+                            </Option>
+                          ))}
+                        </Select>
+                      </Form.Item>
+                    );
+                  }
+                  if (cycle == CycleValues.PER_MONTH) {
+                    return (
+                      <Form.Item
+                        field="date"
+                        key={frequencyData}
+                        style={{
+                          margin: '0 0 0 12px',
+                          display: 'flex',
+                          alignItems: 'center'
+                        }}
+                        rules={[{ required: true, message: '请选择时间' }]}
+                        validateTrigger={['onChange']}
+                      >
+                        <Select
+                          mode={
+                            timeFlag === TimeType.RELATICELYTIME
+                              ? undefined
+                              : 'multiple'
+                          }
+                          key={timeFlag}
+                          style={{ minWidth: 300 }}
+                          placeholder="请选择日期"
+                          popupVisible={popupVisible}
+                          triggerProps={{
+                            trigger: 'focus'
+                          }}
+                          onVisibleChange={(visible) => {
+                            setPopupVisible(visible);
+                          }}
+                          dropdownRender={(menu) => (
+                            <div>
+                              <Divider style={{ margin: 0 }} />
                               <div
-                                key={item.value}
                                 style={{
-                                  width: '50%',
-                                  height: '100%',
-                                  background:
-                                    item.value == timeFlag
-                                      ? 'white'
-                                      : undefined,
-                                  color:
-                                    item.value == timeFlag
-                                      ? 'rgb(0, 125, 250)'
-                                      : undefined,
-                                  cursor: 'pointer',
                                   display: 'flex',
                                   alignItems: 'center',
-                                  justifyContent: 'center',
-                                  borderRadius: '3px'
+                                  padding: '3px',
+                                  background: 'rgb(224, 229, 238)',
+                                  margin: '5px 0px',
+                                  height: '35px'
                                 }}
-                                onClick={() => handleClickTimeTab(item.value)}
                               >
-                                {item.lable}
+                                {TIME_TAB.map((item) => {
+                                  return (
+                                    <div
+                                      key={item.value}
+                                      style={{
+                                        width: '50%',
+                                        height: '100%',
+                                        background:
+                                          item.value == timeFlag
+                                            ? 'white'
+                                            : undefined,
+                                        color:
+                                          item.value == timeFlag
+                                            ? 'rgb(0, 125, 250)'
+                                            : undefined,
+                                        cursor: 'pointer',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        borderRadius: '3px'
+                                      }}
+                                      onClick={() =>
+                                        handleClickTimeTab(item.value)
+                                      }
+                                    >
+                                      {item.lable}
+                                    </div>
+                                  );
+                                })}
                               </div>
-                            );
-                          })}
-                        </div>
-                        {menu}
-                      </div>
-                    )}
-                    dropdownMenuStyle={{ maxHeight: 200 }}
-                  >
-                    {timeFlag == TimeType.SEPCIFICTIME &&
-                      MONTHLY_OPTIONS.map((option) => (
-                        <Option key={option.lable} value={option.value}>
-                          {option.lable}
-                        </Option>
-                      ))}
-                    {timeFlag == TimeType.RELATICELYTIME &&
-                      RELATIVE_TIME_OPTIONS.map((option) => (
-                        <Option key={option.lable} value={option.value}>
-                          {option.lable}
-                        </Option>
-                      ))}
-                  </Select>
-                </Form.Item>
-              )}
+                              {menu}
+                            </div>
+                          )}
+                          dropdownMenuStyle={{ maxHeight: 200 }}
+                        >
+                          {timeFlag == TimeType.SEPCIFICTIME &&
+                            MONTHLY_OPTIONS.map((option) => (
+                              <Option key={option.lable} value={option.value}>
+                                {option.lable}
+                              </Option>
+                            ))}
+                          {timeFlag == TimeType.RELATICELYTIME &&
+                            RELATIVE_TIME_OPTIONS.map((option) => (
+                              <Option key={option.lable} value={option.value}>
+                                {option.lable}
+                              </Option>
+                            ))}
+                        </Select>
+                      </Form.Item>
+                    );
+                  }
+                  return null;
+                }}
+              </Form.Item>
             </div>
           </FormItem>
         </div>
