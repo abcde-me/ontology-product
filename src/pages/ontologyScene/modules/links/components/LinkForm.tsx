@@ -29,6 +29,7 @@ import styles from './LinkForm.module.scss';
 import { LinkType } from '../../../types/link';
 import { listOntologyPhysicalProperties } from '@/api/ontologySceneLibrary/graph';
 import { PrefixAimdp } from '@/api/endpoints';
+import { COLUMN_TYPE_OPTIONS } from '@/pages/ontologyScene/common/constants';
 import {
   listMetadataIcebergDatabaseName,
   listMetadataIcebergTable,
@@ -94,6 +95,13 @@ export interface LinkFormData {
   linkSourceColumnName?: string; // 1:1和1:N提交给后端的源属性名（主键）
   attributeFields: AttributeField[];
   isReUpload?: boolean;
+}
+
+interface FileData {
+  columnList: string[];
+  commentList: string[];
+  typeList: string[];
+  path: string;
 }
 
 interface LinkFormProps {
@@ -336,15 +344,7 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
           }
         }
         if (initialValues.attributeFields) {
-          // 如果是本地CSV，确保字段类型正确：主键varchar(500)，非主键varchar(2000)
-          const processedFields =
-            initialValues.intermediateTable?.type === 'local_csv'
-              ? initialValues.attributeFields.map((field) => ({
-                  ...field,
-                  fieldType: field.isPrimary ? 'varchar(500)' : 'varchar(2000)'
-                }))
-              : initialValues.attributeFields;
-          setAttributeFields(processedFields);
+          setAttributeFields(initialValues.attributeFields);
         }
       } else {
         form.setFieldsValue({
@@ -397,10 +397,7 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
         const isPrimary = i === index;
         let fieldType = field.fieldType;
 
-        if (intermediateTable.type === 'local_csv') {
-          // 本地 CSV：主键 varchar(500)，非主键 varchar(2000)
-          fieldType = isPrimary ? 'varchar(500)' : 'varchar(2000)';
-        } else if (intermediateTable.type === 'data_lake_sync') {
+        if (intermediateTable.type === 'data_lake_sync') {
           // 数据湖同步：主键触发规范化（varchar(5000)/char(36) -> varchar(500)）
           fieldType = normalizeFieldTypeForPrimary(fieldType, isPrimary);
         }
@@ -485,14 +482,21 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
         title: '字段类型',
         dataIndex: 'fieldType',
         width: 200,
-        render: (value, record) => {
-          // 如果是本地CSV上传，根据是否为主键显示字段类型
-          if (intermediateTable.type === 'local_csv') {
-            return (
-              <span>{record.isPrimary ? 'varchar(500)' : 'varchar(2000)'}</span>
-            );
-          }
-          return <span>{value}</span>;
+        render: (value, record, index) => {
+          return (
+            <Select
+              value={value}
+              onChange={(val) =>
+                handleFieldChange(index, { fieldType: String(val) })
+              }
+            >
+              {COLUMN_TYPE_OPTIONS.map((option) => (
+                <Select.Option key={option.value} value={option.value}>
+                  {option.label}
+                </Select.Option>
+              ))}
+            </Select>
+          );
         }
       }
     ];
@@ -805,7 +809,7 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [intermediateTable.type]);
 
-    const handleIntermediateTableFileChange = (fileData: any) => {
+    const handleIntermediateTableFileChange = (fileData: FileData) => {
       // FieldImportUpload 已经上传并解析了文件，fileData 是服务器返回的数据结构
       // 包含 { columnList: string[], path: string }
       if (!fileData || (Array.isArray(fileData) && fileData.length === 0)) {
@@ -831,7 +835,12 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
 
       // 检查是否是服务器返回的数据结构（包含 columnList 和 path）
       if (responseData && responseData.columnList && responseData.path) {
-        const { columnList, path } = responseData;
+        const {
+          columnList,
+          path,
+          commentList = [],
+          typeList = []
+        } = responseData;
 
         // 保存文件路径
         const newIntermediateTable = {
@@ -842,12 +851,12 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
         };
         setIntermediateTable(newIntermediateTable);
 
-        // 将 columnList 转换为 AttributeField 格式
+        // 将接口返回的列名、属性名、字段类型转换为 AttributeField 格式
         const fields: AttributeField[] = columnList.map((column, index) => ({
           tableField: column, // 表字段名
           isUse: 1, // 默认全部选中
-          attributeName: column, // 属性名称，默认与表字段名相同
-          fieldType: index === 0 ? 'varchar(500)' : 'varchar(2000)', // 本地CSV：主键varchar(500)，非主键varchar(2000)
+          attributeName: commentList[index] || column, // 属性名称优先使用接口返回值
+          fieldType: typeList[index] || COLUMN_TYPE_OPTIONS[0].value, // 字段类型优先使用接口返回值
           isPrimary: index === 0 // 第一个字段默认为主键
         }));
 
@@ -934,15 +943,13 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
                 if (intermediateTable.type === 'local_csv') {
                   return {
                     ...field,
-                    fieldType: field.isPrimary
-                      ? 'varchar(500)'
-                      : 'varchar(2000)'
+                    fieldType: field.fieldType || COLUMN_TYPE_OPTIONS[0].value
                   };
                 }
                 return {
                   ...field,
                   fieldType: normalizeFieldTypeForPrimary(
-                    field.fieldType,
+                    field.fieldType || COLUMN_TYPE_OPTIONS[0].value,
                     field.isPrimary
                   )
                 };

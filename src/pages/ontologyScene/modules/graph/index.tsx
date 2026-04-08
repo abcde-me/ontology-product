@@ -95,7 +95,7 @@ const MENU_WIDTH = 200;
 function layoutNodesWithDagre(
   topologyData: GetOntologyTopologyResponse,
   newNode: GenerateNewNode,
-  selectedObjectTypeId?: string
+  selectedObjectTypeCode?: string
 ) {
   const topologyNodes = topologyData.nodes ?? [];
   const topologyEdges = topologyData.edges ?? [];
@@ -132,8 +132,8 @@ function layoutNodesWithDagre(
         title: topologyNode.name || '未命名节点',
         // 用于控制节点面板的显隐：当节点被选中时面板会自动打开
         selected: Boolean(
-          selectedObjectTypeId &&
-            String(nodeId) === String(selectedObjectTypeId)
+          selectedObjectTypeCode &&
+            String(topologyNode.code ?? '') === String(selectedObjectTypeCode)
         ),
         attributes: topologyNode.ontologyPhysicalPropertiesList || [],
         syncStatus: topologyNode.syncStatus,
@@ -247,7 +247,7 @@ function layoutNodesWithDagre(
 // 创建基于接口数据的 initWorkflow
 const createInitWorkflow = (
   topologyData: GetOntologyTopologyResponse | null,
-  selectedObjectTypeId?: string
+  selectedObjectTypeCode?: string
 ) => {
   return (newNode: GenerateNewNode) => {
     if (!topologyData) {
@@ -259,7 +259,7 @@ const createInitWorkflow = (
       };
     }
 
-    return layoutNodesWithDagre(topologyData, newNode, selectedObjectTypeId);
+    return layoutNodesWithDagre(topologyData, newNode, selectedObjectTypeCode);
   };
 };
 
@@ -268,15 +268,15 @@ export default function OntologySceneGraph() {
   const [topologyData, setTopologyData] =
     useState<GetOntologyTopologyResponse | null>(null);
   const [loading, setLoading] = useState(true);
-  const [urlState, setUrlState] = useUrlState<{ objectTypeId: string }>(
-    { objectTypeId: '' },
+  const [urlState, setUrlState] = useUrlState<{ objectTypeCode: string }>(
+    { objectTypeCode: '' },
     { navigateMode: 'replace' }
   );
-  const objectTypeIdFromUrl = urlState.objectTypeId
-    ? String(urlState.objectTypeId)
+  const objectTypeCodeFromUrl = urlState.objectTypeCode
+    ? String(urlState.objectTypeCode)
     : '';
   // 只在页面首次加载时读取一次 URL 的初始值，用于初始化节点面板打开状态
-  const initialObjectTypeIdFromUrl = useMemo(() => objectTypeIdFromUrl, []);
+  const initialObjectTypeCodeFromUrl = useMemo(() => objectTypeCodeFromUrl, []);
   const showCustomEdgePanel = useDemoStore((s) => s.showCustomEdgePanel);
   const setShowCustomEdgePanel = useDemoStore((s) => s.setShowCustomEdgePanel);
   const history = useHistory();
@@ -324,8 +324,8 @@ export default function OntologySceneGraph() {
 
   // 基于获取的数据创建 initWorkflow
   const initWorkflow = useCallback(
-    createInitWorkflow(topologyData, initialObjectTypeIdFromUrl),
-    [topologyData, initialObjectTypeIdFromUrl]
+    createInitWorkflow(topologyData, initialObjectTypeCodeFromUrl),
+    [topologyData, initialObjectTypeCodeFromUrl]
   );
 
   if (loading) {
@@ -367,9 +367,12 @@ export default function OntologySceneGraph() {
           events={{
             onNodeClick: (node) => {
               setShowCustomEdgePanel(false);
-              // 把当前点击的对象类型 id 写入 URL，便于分享/刷新后自动打开面板
-              const clickedObjectTypeId = node?.id ? String(node.id) : '';
-              setUrlState({ objectTypeId: clickedObjectTypeId });
+              // 把当前点击的对象类型 code 写入 URL，便于分享/刷新后自动打开面板
+              const nodeData = node?.data as { code?: string } | undefined;
+              const clickedObjectTypeCode = nodeData?.code
+                ? String(nodeData.code)
+                : '';
+              setUrlState({ objectTypeCode: clickedObjectTypeCode });
             }
           }}
           subHeader={{ fullyCustomSubheader: <SubHeader /> }}

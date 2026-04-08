@@ -875,7 +875,7 @@ export const ModaForgeResourceEndpoints = {
   // 获取规则快照
   GetAutoExecLogRuleSnapshotApi: PrefixAimdp + '/GetAutoExecLogRuleSnapshot',
   // 获取今日统计
-  GetAutoExecLogTodayStatsApi: PrefixAimdp + '/GetAutoExecLogTodayStats'
+  GetAutoLogStatsApi: PrefixAimdp + '/GetAutoLogStats'
 };
 
 /**

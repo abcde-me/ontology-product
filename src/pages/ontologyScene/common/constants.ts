@@ -119,16 +119,45 @@ export const DATA_SOURCE_TYPE = {
 export type DataSourceType =
   (typeof DATA_SOURCE_TYPE)[keyof typeof DATA_SOURCE_TYPE];
 
-// 字段类型选项列表
 export const COLUMN_TYPE_OPTIONS = [
-  'STRING',
-  'DOUBLE',
-  'INTEGER',
-  'BOOLEAN',
-  'TIMESTAMP',
-  'DATE',
-  'BIGINT',
-  'FLOAT',
-  'DECIMAL',
-  'TEXT'
+  {
+    label: 'tinyint',
+    value: 'tinyint'
+  },
+  {
+    label: 'int',
+    value: 'int'
+  },
+  {
+    label: 'bigint',
+    value: 'bigint'
+  },
+  {
+    label: 'float',
+    value: 'float'
+  },
+  {
+    label: 'double',
+    value: 'double'
+  },
+  {
+    label: 'varchar(100)',
+    value: 'varchar(100)'
+  },
+  {
+    label: 'varchar(500)',
+    value: 'varchar(500)'
+  },
+  {
+    label: 'varchar(2000)',
+    value: 'varchar(2000)'
+  },
+  {
+    label: 'text',
+    value: 'text'
+  },
+  {
+    label: 'json',
+    value: 'json'
+  }
 ];
