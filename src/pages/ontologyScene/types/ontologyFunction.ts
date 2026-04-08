@@ -329,7 +329,7 @@ export interface FunctionListQuery {
   /**
    * 本体场景ID
    */
-  ontologyModelID: number;
+  ontologyModelID?: number;
   /**
    * 排序方向
    */

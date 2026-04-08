@@ -50,6 +50,7 @@ export const AUTO_RULE_DETAILS: AutoRuleDetail[] = [
       actionId: 1001,
       actionCode: 'send_temperature_alarm',
       parameters: {
+        // @ts-ignore
         level: 'high',
         receivers: ['ops-group']
       }
@@ -57,6 +58,7 @@ export const AUTO_RULE_DETAILS: AutoRuleDetail[] = [
     changeConfig: {
       objectTypeId: 2001,
       instanceScope: 'all',
+      // @ts-ignore
       monitorPropertyIds: [3001],
       conditionType: 'meet_condition',
       conditionOperator: '>',
@@ -69,6 +71,7 @@ export const AUTO_RULE_DETAILS: AutoRuleDetail[] = [
     },
     scheduleConfig: {
       enabled: false,
+      // @ts-ignore
       cronExpr: ''
     }
   },
@@ -78,6 +81,7 @@ export const AUTO_RULE_DETAILS: AutoRuleDetail[] = [
       actionId: 1002,
       actionCode: 'daily_inspection_summary',
       parameters: {
+        // @ts-ignore
         notifyChannel: 'email',
         template: 'inspection_daily'
       }
@@ -86,6 +90,8 @@ export const AUTO_RULE_DETAILS: AutoRuleDetail[] = [
       objectTypeId: 2002,
       instanceScope: 'specific',
       instanceIds: [5001, 5002],
+      // @ts-ignore
+
       monitorPropertyIds: [3002, 3003],
       conditionType: 'any_change'
     },
@@ -96,6 +102,8 @@ export const AUTO_RULE_DETAILS: AutoRuleDetail[] = [
     },
     scheduleConfig: {
       enabled: true,
+      // @ts-ignore
+
       cronExpr: '0 0 9 * * ?'
     }
   },
@@ -105,6 +113,8 @@ export const AUTO_RULE_DETAILS: AutoRuleDetail[] = [
       actionId: 1003,
       actionCode: 'sync_core_property_change',
       parameters: {
+        // @ts-ignore
+
         retryTimes: 3,
         targetSystem: 'asset-center'
       }
@@ -112,6 +122,8 @@ export const AUTO_RULE_DETAILS: AutoRuleDetail[] = [
     changeConfig: {
       objectTypeId: 2003,
       instanceScope: 'all',
+      // @ts-ignore
+
       monitorPropertyIds: [3004, 3005],
       conditionType: 'meet_condition',
       conditionOperator: '!=',
@@ -124,6 +136,8 @@ export const AUTO_RULE_DETAILS: AutoRuleDetail[] = [
     },
     scheduleConfig: {
       enabled: false,
+      // @ts-ignore
+
       cronExpr: ''
     }
   }

@@ -1,7 +1,7 @@
 import React from 'react';
 import PageHeader, { PageHeaderProps } from '@/components/PageHeader';
 import styles from './index.module.scss';
-import { Button, ButtonProps } from '@arco-design/web-react';
+import { Button, ButtonProps, Spin } from '@arco-design/web-react';
 import classNames from 'classnames';
 
 export interface PageContainerProps extends PageHeaderProps {
@@ -12,6 +12,8 @@ export interface PageContainerProps extends PageHeaderProps {
   // 页面内容
   children?: React.ReactNode;
   wrapperClassName?: string;
+  // 页面数据加载中
+  loading?: boolean;
 }
 
 export const PageContainer = (props: PageContainerProps) => {
@@ -20,11 +22,17 @@ export const PageContainer = (props: PageContainerProps) => {
     cancelButtonProps,
     children,
     wrapperClassName,
+    loading = false,
     ...otherProps
   } = props;
   return (
     <div className={classNames([styles['page-container']])}>
-      <PageHeader {...otherProps}></PageHeader>
+      {loading && (
+        <div className={styles.loading}>
+          <Spin loading={loading} />
+        </div>
+      )}
+      <PageHeader {...otherProps} />
       <div className={classNames(styles['page-content'], wrapperClassName)}>
         {children}
       </div>

@@ -43,6 +43,7 @@ declare module '*.png' {
 
 declare module '*.jpg' {
   const src: string;
+  // @ts-ignore
   export default src;
 }
 

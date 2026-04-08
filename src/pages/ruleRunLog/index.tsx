@@ -61,7 +61,7 @@ const RuleRunLog = () => {
   });
 
   const { onSubmit, tableProps } = useArcoTable<AutoExecLogItem>(
-    async ({ pagination, sorter, filters, query }) => {
+    ({ pagination, sorter, filters, query }) => {
       const currentSorter = Array.isArray(sorter) ? sorter[0] : sorter;
       const statusFilter = filters?.status?.[0];
       const { startTime, endTime } = getTimeRange(timeRange);

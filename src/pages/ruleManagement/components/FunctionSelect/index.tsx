@@ -19,7 +19,7 @@ import { OntologyFunctionDetail } from '@/pages/ontologyScene/types/ontologyFunc
 import classNames from 'classnames';
 import { GlobalTooltip } from '@ceai-front/arco-material';
 
-export const FunctionsSelect = (
+export const FunctionSelect = (
   props: CustomFormItemCompProps<number | undefined> & {
     currentFunctionData?: OntologyFunctionDetail;
   }
@@ -30,11 +30,9 @@ export const FunctionsSelect = (
     disabled,
     currentFunctionData: functionDetail
   } = props;
-  const { id: OSId } = useParams<Record<string, string>>();
   const { data: allFunctions = [], loading: functionsLoading } = useRequest(
     () => {
       return getFunctionList({
-        ontologyModelID: +OSId,
         pageNum: 1,
         pageSize: 1000
       }).then((res) =>
@@ -70,13 +68,15 @@ export const FunctionsSelect = (
   return (
     <div className={classNames([`flex items-center gap-3`, props.className])}>
       <Select
-        placeholder={'请选择或搜索函数'}
+        placeholder={'请选择行为动作的函数'}
         className={`flex-1 ${styles['function-select']}`}
         dropdownMenuClassName={styles['function-select-wrapper']}
         renderFormat={(option, value) => {
           if (isNil(value)) return null;
           return option?.children?.[0] ?? null;
         }}
+        disabled={disabled || functionsLoading}
+        loading={functionsLoading}
         getPopupContainer={(node) => node.parentElement || document.body}
         arrowIcon={
           <Space>
@@ -151,13 +151,23 @@ export const FunctionsSelect = (
                   }}
                 />
               </Tooltip>
-              <div
-                className={
-                  'flex items-center overflow-hidden font-PingFangSc text-[12px] leading-[18px] text-[#7D859C]'
-                }
-              >
-                显示名称：
-                <GlobalTooltip.Ellipsis text={name} />
+              <div className={'flex items-center gap-4 overflow-hidden'}>
+                <div
+                  className={
+                    'flex w-max max-w-[200px] flex-shrink-0 items-center overflow-hidden font-PingFangSc text-[12px] leading-[18px] text-[#7D859C]'
+                  }
+                >
+                  本体场景：
+                  <GlobalTooltip.Ellipsis text={name} />
+                </div>
+                <div
+                  className={
+                    'flex flex-1 items-center overflow-hidden font-PingFangSc text-[12px] leading-[18px] text-[#7D859C]'
+                  }
+                >
+                  显示名称：
+                  <GlobalTooltip.Ellipsis text={name} />
+                </div>
               </div>
             </Select.Option>
           );

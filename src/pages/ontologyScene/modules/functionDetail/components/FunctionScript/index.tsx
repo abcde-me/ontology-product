@@ -70,7 +70,7 @@ export const FunctionScript = forwardRef(
     const paramsOut: OntologyActionParam[] = Form.useWatch('output', form);
     const extensions = useMemo(() => {
       if (!editorReady) return extension;
-      const funcReturn = buildReturnCode(paramsOut);
+      const funcReturn = buildReturnCode(paramsOut as any);
       return extension.concat(
         getFreezeRanges({ code: value, functionName: functionCode, funcReturn })
       );

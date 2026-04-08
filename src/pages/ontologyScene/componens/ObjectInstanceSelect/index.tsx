@@ -46,7 +46,7 @@ export const ObjectInstanceSelect = (props: ObjInsProps) => {
       return listOntologyPhysicalProperties({
         objectTypeIdList: [Number(value?.objectTypeData?.id)],
         isPrimary: 1,
-        ontologyModelID: +OSId,
+        ontologyModelID: props.osid ?? +OSId,
         isUse: 1
       }).then((res) => {
         return res.data.result?.find(({ isPrimary }) => !!isPrimary)?.name;
@@ -92,7 +92,7 @@ export const ObjectInstanceSelect = (props: ObjInsProps) => {
         onChange={handleObjectTypeChange as any}
         placeholder={'请搜索或选择对象类型'}
         disabled={disabled}
-        ontologyModelID={+OSId}
+        ontologyModelID={props.osid ?? +OSId}
         primaryKey={'code'}
         getPopupContainer={props.getPopupContainer as any}
         selectProps={{
@@ -101,6 +101,7 @@ export const ObjectInstanceSelect = (props: ObjInsProps) => {
           },
           triggerProps: {
             autoAlignPopupWidth: false,
+            updateOnScroll: true,
             position: 'bl',
             style: {
               width: 400
