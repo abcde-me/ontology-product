@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   Form,
   Input,
@@ -89,12 +89,110 @@ function databaseTableCascaderFilterOption(
 
 const { TextArea } = Input;
 
+/** 向量列表字段 / 属性名称后缀（与后端约定一致） */
+const VECTOR_FIELD_SUFFIX = '_vector';
+
+function getAttributeRowKey(record: AttributeField): string {
+  return String(record.name || record.id || `field-${record.name}`);
+}
+
+/** 将接口返回的扁平列表合并为表单行：isVector=1 的项挂到 vectorSourceFieldName 对应基字段上 */
+function mergeOntologyPhysicalPropertiesForForm(
+  list: CreateOntologyPhysicalProperty[]
+): AttributeField[] {
+  if (!list?.length) return [];
+  const vectorRows = list.filter((p) => p.isVector === 1);
+  const baseRows = list.filter((p) => p.isVector !== 1);
+  const vectorBySource = new Map(
+    vectorRows.map((v) => [v.vectorSourceFieldName || '', v])
+  );
+  return baseRows.map((prop) => {
+    const vec = vectorBySource.get(prop.name);
+    return {
+      ...prop,
+      isVector: 0,
+      vectorSourceFieldName: undefined,
+      _tableField: prop.name,
+      _attributeName: prop.comment,
+      _vectorizationOn: Boolean(vec && prop.name),
+      _vectorComment: vec?.comment,
+      _vectorPropertyId: vec?.id
+    };
+  });
+}
+
+/** 表单行拍平为接口列表：向量化配置拆成 isVector=1 的独立项 */
+function flattenOntologyPhysicalPropertiesForSubmit(
+  fields: AttributeField[]
+): CreateOntologyPhysicalProperty[] {
+  const result: CreateOntologyPhysicalProperty[] = [];
+  for (const f of fields) {
+    const {
+      _tableField,
+      _attributeName,
+      _storedPublicPropertyId,
+      _vectorizationOn,
+      _vectorComment,
+      _vectorPropertyId,
+      ...rest
+    } = f;
+    const base: CreateOntologyPhysicalProperty = {
+      ...rest,
+      isVector: 0,
+      vectorSourceFieldName: undefined
+    };
+    result.push(base);
+
+    if (_vectorizationOn && f.isUse === 1) {
+      const vecName = `${f.name}${VECTOR_FIELD_SUFFIX}`;
+      const vecComment =
+        _vectorComment ?? `${f.comment ?? ''}${VECTOR_FIELD_SUFFIX}`;
+      const vec: CreateOntologyPhysicalProperty = {
+        name: vecName,
+        comment: vecComment,
+        columnType: 'VECTOR',
+        isPrimary: 0,
+        isUse: 1,
+        isStoreAsPublic: 0,
+        publicPropertyID: 0,
+        isVector: 1,
+        vectorSourceFieldName: f.name
+      };
+      if (_vectorPropertyId !== undefined && _vectorPropertyId !== '') {
+        vec.id = String(_vectorPropertyId);
+      }
+      result.push(vec);
+    }
+  }
+  return result;
+}
+
+function wrapDisabledFieldPopover(
+  node: React.ReactNode,
+  rowDisabled: boolean
+): React.ReactNode {
+  if (!rowDisabled) return node;
+  return (
+    <Popover content="请先勾选字段" trigger="hover">
+      <span className="inline-flex max-w-full cursor-not-allowed items-center">
+        {node}
+      </span>
+    </Popover>
+  );
+}
+
 // 使用接口定义的字段名
 export interface AttributeField extends CreateOntologyPhysicalProperty {
   // 为了UI显示，保留一些临时字段
   _tableField?: string; // 用于显示表字段名（对应 name）
   _attributeName?: string; // 用于显示属性名称（对应 comment）
   _storedPublicPropertyId?: number; // 存入公共属性时创建的ID（与publicPropertyID区分，publicPropertyID用于绑定已有公共属性）
+  /** 是否开启向量化（仅 UI，提交时展开为 isVector=1 的记录） */
+  _vectorizationOn?: boolean;
+  /** 向量属性的属性名称（comment），默认基字段 comment + _vector */
+  _vectorComment?: string;
+  /** 编辑态下后端返回的向量属性 id */
+  _vectorPropertyId?: string | number;
 }
 
 export interface ObjectTypeFormData {
@@ -261,14 +359,11 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
           }
         }
         if (initialValues.ontologyPhysicalPropertiesList) {
-          const fields = initialValues.ontologyPhysicalPropertiesList.map(
-            (prop) => ({
-              ...prop,
-              _tableField: prop.name,
-              _attributeName: prop.comment
-            })
+          setAttributeFields(
+            mergeOntologyPhysicalPropertiesForForm(
+              initialValues.ontologyPhysicalPropertiesList
+            )
           );
-          setAttributeFields(fields);
         }
         // 解析 filePath 并设置初始文件列表
         if (initialValues.filePath && initialValues.filePath.trim()) {
@@ -335,7 +430,13 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
       updates: Partial<AttributeField>
     ) => {
       const newFields = [...attributeFields];
-      newFields[index] = { ...newFields[index], ...updates };
+      const prev = newFields[index];
+      const merged: AttributeField = { ...prev, ...updates };
+      if (updates.isUse === 0) {
+        merged._vectorizationOn = false;
+        // 保留 _vectorComment，再次勾选/打开向量化时恢复用户编辑内容
+      }
+      newFields[index] = merged;
       setAttributeFields(newFields);
       form.setFieldValue('attributeFields', newFields);
     };
@@ -343,8 +444,42 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
     const handleSelectAll = (checked: boolean) => {
       const newFields: AttributeField[] = attributeFields.map((field) => ({
         ...field,
-        isUse: checked ? 1 : 0
+        isUse: checked ? 1 : 0,
+        ...(checked ? {} : { _vectorizationOn: false })
       }));
+      setAttributeFields(newFields);
+      form.setFieldValue('attributeFields', newFields);
+    };
+
+    const handleVectorizationChange = (index: number, enabled: boolean) => {
+      const newFields = attributeFields.map((field, i) => {
+        if (!enabled) {
+          if (i !== index) return field;
+          return {
+            ...field,
+            _vectorizationOn: false
+            // 保留 _vectorComment，关闭后再打开仍显示上次编辑
+          };
+        }
+        if (i === index) {
+          const commentBase = field._attributeName ?? field.comment ?? '';
+          const defaultVecComment = `${commentBase}${VECTOR_FIELD_SUFFIX}`;
+          const preserved =
+            field._vectorComment != null && field._vectorComment !== ''
+              ? field._vectorComment
+              : defaultVecComment;
+          return {
+            ...field,
+            _vectorizationOn: true,
+            _vectorComment: preserved
+          };
+        }
+        return {
+          ...field,
+          _vectorizationOn: false
+          // 互斥仅关闭开关，不丢弃其它行已编辑的向量属性名
+        };
+      });
       setAttributeFields(newFields);
       form.setFieldValue('attributeFields', newFields);
     };
@@ -485,11 +620,19 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
       attributeFields.length > 0 && attributeFields.every((f) => f.isUse === 1);
     const someSelected = attributeFields.some((f) => f.isUse === 1);
 
+    const vectorExpandedRowKeys = useMemo(
+      () =>
+        attributeFields
+          .filter((f) => f._vectorizationOn && f.isUse === 1)
+          .map((f) => getAttributeRowKey(f)),
+      [attributeFields]
+    );
+
     // 属性字段映射表格列定义
     const attributeColumns: TableColumnProps<AttributeField>[] = [
       {
         title: (
-          <div className="gap-[12px flex items-center">
+          <div className="flex items-center gap-[12px]">
             <Checkbox
               checked={allSelected}
               className="pointer-events-auto mr-[12px]"
@@ -525,48 +668,68 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
         ),
         dataIndex: 'isPrimary',
         width: 84,
-        render: (_, record, index) => (
-          <Radio
-            checked={record.isPrimary === 1}
-            onChange={() => handlePrimaryKeyChange(index)}
-          />
-        )
+        render: (_, record, index) => {
+          const rowDisabled = record.isUse !== 1;
+          return wrapDisabledFieldPopover(
+            <Radio
+              disabled={rowDisabled}
+              checked={record.isPrimary === 1}
+              onChange={() => handlePrimaryKeyChange(index)}
+            />,
+            rowDisabled
+          );
+        }
       },
       {
         title: '属性名称',
         dataIndex: 'comment',
         width: 365,
-        render: (value, record, index) => (
-          <div className="flex items-center gap-[12px]">
-            <div className="relative w-full">
-              <Input
-                value={record._attributeName || value}
-                className="w-full"
-                onChange={(val) =>
-                  handleFieldChange(index, {
-                    comment: val,
-                    _attributeName: val
-                  })
-                }
-                placeholder="请输入属性名称"
-              />
-              {record.publicPropertyID > 0 && (
-                <Popover content="取消绑定">
-                  <CancelArchiveIcon
-                    className="absolute right-[12px] top-1/2 -translate-y-1/2 hover:cursor-pointer hover:text-[#184FF2]"
-                    onClick={() => handleUnbindPublicAttribute(index)}
+        render: (value, record, index) => {
+          const rowDisabled = record.isUse !== 1;
+          return (
+            <div className="flex items-center gap-[12px]">
+              {wrapDisabledFieldPopover(
+                <div className="relative w-full">
+                  <Input
+                    disabled={rowDisabled}
+                    value={record._attributeName || value}
+                    className="w-full"
+                    onChange={(val) =>
+                      handleFieldChange(index, {
+                        comment: val,
+                        _attributeName: val
+                      })
+                    }
+                    placeholder="请输入属性名称"
+                  />
+                  {record.publicPropertyID > 0 && !rowDisabled && (
+                    <Popover content="取消绑定">
+                      <CancelArchiveIcon
+                        className="absolute right-[12px] top-1/2 -translate-y-1/2 hover:cursor-pointer hover:text-[#184FF2]"
+                        onClick={() => handleUnbindPublicAttribute(index)}
+                      />
+                    </Popover>
+                  )}
+                </div>,
+                rowDisabled
+              )}
+              {rowDisabled ? (
+                <Popover content="请先勾选字段" trigger="hover">
+                  <span className="inline-flex cursor-not-allowed">
+                    <ArchiveIcon className="text-[var(--color-text-4)] opacity-50" />
+                  </span>
+                </Popover>
+              ) : (
+                <Popover content="绑定公共属性">
+                  <ArchiveIcon
+                    className="cursor-pointer text-[var(--color-text-2)] hover:cursor-pointer hover:text-[#184FF2]"
+                    onClick={() => handleBindPublicAttribute(index)}
                   />
                 </Popover>
               )}
             </div>
-            <Popover content="绑定公共属性">
-              <ArchiveIcon
-                className="cursor-pointer text-[var(--color-text-2)] hover:cursor-pointer hover:text-[#184FF2]"
-                onClick={() => handleBindPublicAttribute(index)}
-              />
-            </Popover>
-          </div>
-        )
+          );
+        }
       },
       {
         title: (
@@ -580,12 +743,15 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
         dataIndex: 'isStoreAsPublic',
         width: 140,
         render: (value, record, index) => {
-          return (
+          const rowDisabled = record.isUse !== 1;
+          return wrapDisabledFieldPopover(
             <Switch
+              disabled={rowDisabled}
               checked={record.isStoreAsPublic === 1}
               loading={storeAsPublicLoading[index]}
               onChange={(checked) => handleStoreAsPublicChange(index, checked)}
-            />
+            />,
+            rowDisabled
           );
         }
       },
@@ -594,12 +760,33 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
         dataIndex: 'columnType',
         width: 200,
         render: (value, record, index) => {
-          return (
+          const rowDisabled = record.isUse !== 1;
+          return wrapDisabledFieldPopover(
             <Select
+              disabled={rowDisabled}
               options={COLUMN_TYPE_OPTIONS}
               value={value}
               onChange={(val) => handleFieldChange(index, { columnType: val })}
-            />
+            />,
+            rowDisabled
+          );
+        }
+      },
+      {
+        title: '向量化',
+        dataIndex: '_vectorizationOn',
+        width: 100,
+        render: (_, record, index) => {
+          const rowDisabled = record.isUse !== 1;
+          return wrapDisabledFieldPopover(
+            <Switch
+              disabled={rowDisabled}
+              checked={record._vectorizationOn === true}
+              onChange={(checked) =>
+                handleVectorizationChange(index, !!checked)
+              }
+            />,
+            rowDisabled
           );
         }
       }
@@ -887,10 +1074,12 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
 
       // 检查是否是服务器返回的数据结构（包含 columnList 和 path）
       if (responseData && responseData.columnList && responseData.path) {
-        const { columnList, path, commentList, typeList } = responseData;
-
-        console.log('--------commentList--------', commentList);
-        console.log('--------typeList--------', typeList);
+        const {
+          columnList,
+          path,
+          commentList = [],
+          typeList = []
+        } = responseData;
 
         // 切换文件时清空数据库和表
         setSelectedDatabase(undefined);
@@ -960,17 +1149,8 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
           return;
         }
 
-        // 过滤出选中的字段，并转换为接口格式（移除临时字段）
-        const selectedFields = attributeFields.map(
-          ({
-            _tableField,
-            _attributeName,
-            _storedPublicPropertyId,
-            ...field
-          }) => {
-            return field;
-          }
-        );
+        const selectedFields =
+          flattenOntologyPhysicalPropertiesForSubmit(attributeFields);
 
         const formData: ObjectTypeFormData = {
           code: values.code,
@@ -1319,14 +1499,79 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
                 </div>
               ) : (
                 <Table
+                  className={styles['attribute-mapping-table']}
                   scroll={{ x: true }}
                   columns={attributeColumns}
                   data={attributeFields}
-                  rowKey={(record) =>
-                    record.name || record.id || `field-${record.name}`
-                  }
+                  rowKey={(record) => getAttributeRowKey(record)}
                   border={false}
                   pagination={false}
+                  expandedRowKeys={vectorExpandedRowKeys}
+                  expandedRowRender={(record, index) => {
+                    if (!record._vectorizationOn || record.isUse !== 1) {
+                      return null;
+                    }
+                    const vecTableField = `${record.name}${VECTOR_FIELD_SUFFIX}`;
+                    return (
+                      <div className="bg-[#fff] p-[12px]">
+                        <Table
+                          className={styles['vector-expand-table']}
+                          border={false}
+                          pagination={false}
+                          data={[
+                            {
+                              key: `${record.name}-vector`,
+                              vecTableField,
+                              vectorComment: record._vectorComment ?? '',
+                              vectorType: 'VECTOR'
+                            }
+                          ]}
+                          columns={[
+                            {
+                              title: '表字段',
+                              dataIndex: 'vecTableField',
+                              render: (value) => (
+                                <span className="text-[14px] text-[var(--color-text-2)]">
+                                  {value}
+                                </span>
+                              )
+                            },
+                            {
+                              title: '属性名称',
+                              dataIndex: 'vectorComment',
+                              render: (_value) => (
+                                <Input
+                                  value={record._vectorComment ?? ''}
+                                  placeholder="请输入属性名称"
+                                  onChange={(val) =>
+                                    handleFieldChange(index, {
+                                      _vectorComment: val
+                                    })
+                                  }
+                                />
+                              )
+                            },
+                            {
+                              title: '字段类型',
+                              dataIndex: 'vectorType',
+                              render: (value) => (
+                                <span className="text-[14px] text-[var(--color-text-2)]">
+                                  {value}
+                                </span>
+                              )
+                            }
+                          ]}
+                          rowKey="key"
+                        />
+                      </div>
+                    );
+                  }}
+                  expandProps={{
+                    rowExpandable: (r) =>
+                      Boolean(r._vectorizationOn && r.isUse === 1),
+                    icon: () => null,
+                    width: 0
+                  }}
                 />
               )}
             </FormItem>
