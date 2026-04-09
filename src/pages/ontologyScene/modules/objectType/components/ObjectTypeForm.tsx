@@ -156,6 +156,7 @@ function flattenOntologyPhysicalPropertiesForSubmit(
         isStoreAsPublic: 0,
         publicPropertyID: 0,
         isVector: 1,
+        vectorSourceFieldName: f.name,
         vectorSourceFieldId:
           f.id !== undefined && f.id !== '' ? Number(f.id) : undefined
       };
@@ -170,12 +171,13 @@ function flattenOntologyPhysicalPropertiesForSubmit(
 
 function wrapDisabledFieldPopover(
   node: React.ReactNode,
-  rowDisabled: boolean
+  disabled: boolean,
+  popoverContent: React.ReactNode = '请先勾选字段'
 ): React.ReactNode {
-  if (!rowDisabled) return node;
+  if (!disabled) return node;
   return (
-    <Popover content="请先勾选字段" trigger="hover">
-      <span className="inline-flex max-w-full cursor-not-allowed items-center">
+    <Popover content={popoverContent} trigger="hover">
+      <span className="inline-flex max-w-full flex-1 cursor-not-allowed items-center align-middle">
         {node}
       </span>
     </Popover>
@@ -433,10 +435,6 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
       const newFields = [...attributeFields];
       const prev = newFields[index];
       const merged: AttributeField = { ...prev, ...updates };
-      if (updates.isUse === 0) {
-        merged._vectorizationOn = false;
-        // 保留 _vectorComment，再次勾选/打开向量化时恢复用户编辑内容
-      }
       newFields[index] = merged;
       setAttributeFields(newFields);
       form.setFieldValue('attributeFields', newFields);
@@ -445,8 +443,7 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
     const handleSelectAll = (checked: boolean) => {
       const newFields: AttributeField[] = attributeFields.map((field) => ({
         ...field,
-        isUse: checked ? 1 : 0,
-        ...(checked ? {} : { _vectorizationOn: false })
+        isUse: checked ? 1 : 0
       }));
       setAttributeFields(newFields);
       form.setFieldValue('attributeFields', newFields);
@@ -624,7 +621,7 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
     const vectorExpandedRowKeys = useMemo(
       () =>
         attributeFields
-          .filter((f) => f._vectorizationOn && f.isUse === 1)
+          .filter((f) => f._vectorizationOn)
           .map((f) => getAttributeRowKey(f)),
       [attributeFields]
     );
@@ -762,14 +759,20 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
         width: 200,
         render: (value, record, index) => {
           const rowDisabled = record.isUse !== 1;
-          return wrapDisabledFieldPopover(
-            <Select
-              disabled={rowDisabled}
-              options={COLUMN_TYPE_OPTIONS}
-              value={value}
-              onChange={(val) => handleFieldChange(index, { columnType: val })}
-            />,
-            rowDisabled
+          return (
+            <div className="flex flex-1">
+              {wrapDisabledFieldPopover(
+                <Select
+                  disabled={rowDisabled}
+                  options={COLUMN_TYPE_OPTIONS}
+                  value={value}
+                  onChange={(val) =>
+                    handleFieldChange(index, { columnType: val })
+                  }
+                />,
+                rowDisabled
+              )}
+            </div>
           );
         }
       },
@@ -779,15 +782,17 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
         width: 100,
         render: (_, record, index) => {
           const rowDisabled = record.isUse !== 1;
+          const disabled = rowDisabled || isEdit;
           return wrapDisabledFieldPopover(
             <Switch
-              disabled={rowDisabled}
+              disabled={disabled}
               checked={record._vectorizationOn === true}
               onChange={(checked) =>
                 handleVectorizationChange(index, !!checked)
               }
             />,
-            rowDisabled
+            disabled,
+            rowDisabled ? '请先勾选字段' : '编辑模式下不可修改向量化'
           );
         }
       }
@@ -1509,7 +1514,7 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
                   pagination={false}
                   expandedRowKeys={vectorExpandedRowKeys}
                   expandedRowRender={(record, index) => {
-                    if (!record._vectorizationOn || record.isUse !== 1) {
+                    if (!record._vectorizationOn) {
                       return null;
                     }
                     const vecTableField = `${record.name}${VECTOR_FIELD_SUFFIX}`;
@@ -1543,6 +1548,7 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
                               render: (_value) => (
                                 <Input
                                   value={record._vectorComment ?? ''}
+                                  disabled={isEdit || record.isUse !== 1}
                                   placeholder="请输入属性名称"
                                   onChange={(val) =>
                                     handleFieldChange(index, {
@@ -1568,8 +1574,7 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
                     );
                   }}
                   expandProps={{
-                    rowExpandable: (r) =>
-                      Boolean(r._vectorizationOn && r.isUse === 1),
+                    rowExpandable: (r) => Boolean(r._vectorizationOn),
                     icon: () => null,
                     width: 0
                   }}
