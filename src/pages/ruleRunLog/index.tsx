@@ -13,7 +13,7 @@ import {
 import { Order } from '@/api/businessAutomation/runLog';
 import { LogDetailDrawer, StatsCard } from './components';
 import { useColumns } from './hooks/useColumns';
-import { AutoRuleDialog } from '@/pages/ruleManagement/components';
+import { AutoRuleDrawer } from '@/pages/ruleManagement/components';
 import { BehaviorDetail } from '@/pages/ontologyScene/modules/behaviorActions/components';
 import { getTimeRange, TimeRange } from './utils/timeRange';
 import styles from './index.module.scss';
@@ -180,10 +180,11 @@ const RuleRunLog = () => {
           }}
         />
       </div>
-      <AutoRuleDialog
+      <AutoRuleDrawer
         visible={!!showRule}
         onCancel={() => setShowRule(undefined)}
         ruleId={showRule}
+        mode={'snapshot'}
       />
       <BehaviorDetail
         show={!!behaviorData}

@@ -1,9 +1,4 @@
-import React, {
-  forwardRef,
-  useCallback,
-  useEffect,
-  useImperativeHandle
-} from 'react';
+import React, { forwardRef, useImperativeHandle } from 'react';
 import classNames from 'classnames';
 import styles from './index.module.scss';
 import { FormInstance } from '@arco-design/web-react/es/Form';
@@ -29,14 +24,14 @@ import SchedulerRun from '../SchedulerRun';
 import { CycleText } from '../SchedulerRun/types';
 import { useRuleManagementStore } from '../../stores';
 import { BehaviorActionItem } from '@/pages/ontologyScene/types/behaviorActions';
-import { buildAutoTrigger, getParamsFromData } from '../../utils';
+import { getParamsFromData } from '../../utils';
 import {
-  AutoRuleFormData,
   ChangeType,
   ConditionType,
   GateConfigRes,
   MonthDayMode,
   PeriodType,
+  PropertyConditionType,
   ScheduleConfigRes
 } from '../../types';
 import { ObjectTypeSelect } from '@/pages/ontologyScene/componens';
@@ -93,8 +88,6 @@ export const RuleForm = forwardRef<
   const [form] = Form.useForm();
   const objectTypeId = Form.useWatch('objectTypeId', form);
   const modelId = Form.useWatch('modelId', form);
-  const propertyConditions = Form.useWatch('propertyConditions', form);
-  const changeType = Form.useWatch('changeType', form);
   const { ruleDetail, getRule } = useRuleManagementStore((state) => ({
     changeAction: state.changeAction,
     changeObjectType: state.changeObjectTypes,
@@ -166,16 +159,13 @@ export const RuleForm = forwardRef<
     const nextProps = properties
       ?.filter(({ id }) => propIds?.includes(id as number))
       .flatMap((p) => {
-        if (currentPropMap.size) {
-          if (currentPropMap.has(p.id as number)) {
-            const propValue = currentPropMap.get(p.id as number);
-            return {
-              ...propValue,
-              name: p.name,
-              fieldType: p.columnType
-            };
-          }
-          return [];
+        if (currentPropMap.has(p.id as number)) {
+          const propValue = currentPropMap.get(p.id as number);
+          return {
+            ...propValue,
+            name: p.name,
+            fieldType: p.columnType
+          };
         }
         return {
           id: p.id,
@@ -473,7 +463,12 @@ export const RuleForm = forwardRef<
                           }}
                         />
                       </FormItem>
-                      <FormItem field={'modelId'} label={'本体场景'} required>
+                      <FormItem
+                        field={'modelId'}
+                        label={'本体场景'}
+                        required
+                        rules={[{ required: true, message: '请选择本体场景' }]}
+                      >
                         <OntoSceneSelect
                           placeholder={'请选择或搜索本体场景'}
                           currentSceneData={ruleDetail.modelInfo}
@@ -512,6 +507,12 @@ export const RuleForm = forwardRef<
                               field={'objectTypeId'}
                               label={'对象类型'}
                               required
+                              rules={[
+                                {
+                                  required: true,
+                                  message: '请选择对象类型'
+                                }
+                              ]}
                             >
                               <ObjectTypeSelect
                                 disabled={!modelId}
@@ -599,7 +600,15 @@ export const RuleForm = forwardRef<
                                         />
                                       </Form.Item>
                                       {insType !== InstanceScope.All && (
-                                        <Form.Item field={'instanceIds'}>
+                                        <Form.Item
+                                          field={'instanceIds'}
+                                          rules={[
+                                            {
+                                              required: true,
+                                              message: '请选择对象实例'
+                                            }
+                                          ]}
+                                        >
                                           <InstanceSelect
                                             objectTypeId={objectTypeId}
                                             searchKey={''}
@@ -642,7 +651,15 @@ export const RuleForm = forwardRef<
                                       className={'mb-0'}
                                       required
                                     >
-                                      <FormItem field={'propertyConditions'}>
+                                      <FormItem
+                                        field={'propertyConditions'}
+                                        rules={[
+                                          {
+                                            required: true,
+                                            message: '请选择属性条件'
+                                          }
+                                        ]}
+                                      >
                                         <SelectWithNoData
                                           placeholder={
                                             !propertyConditions?.length &&
@@ -650,6 +667,7 @@ export const RuleForm = forwardRef<
                                               ? '请先选择对象实例'
                                               : '请选择属性'
                                           }
+                                          allowClear
                                           mode={'multiple'}
                                           maxTagCount={'responsive'}
                                         >
@@ -699,7 +717,35 @@ export const RuleForm = forwardRef<
                                         </SelectWithNoData>
                                       </FormItem>
                                       {!!propertyConditions?.length && (
-                                        <FormItem field={'propertyList'}>
+                                        <FormItem
+                                          field={'propertyList'}
+                                          rules={[
+                                            {
+                                              validator(v: any, onError) {
+                                                const value =
+                                                  v as PropertyConditionType[];
+                                                const valueIsEmpty = value.some(
+                                                  ({
+                                                    value: propValue,
+                                                    type
+                                                  }) =>
+                                                    [
+                                                      null,
+                                                      undefined,
+                                                      ''
+                                                    ].includes(
+                                                      propValue?.toString()
+                                                    ) &&
+                                                    type ===
+                                                      ConditionType.MeetCondition
+                                                );
+                                                if (valueIsEmpty) {
+                                                  onError('属性值不能为空');
+                                                }
+                                              }
+                                            }
+                                          ]}
+                                        >
                                           <PropConditions
                                             allProps={properties}
                                             propIds={propertyConditions}
@@ -750,6 +796,12 @@ export const RuleForm = forwardRef<
                                   label={'条件函数'}
                                   tooltip={'触发时机到达后调用布尔函数二次确认'}
                                   required
+                                  rules={[
+                                    {
+                                      required: true,
+                                      message: '请选择条件函数'
+                                    }
+                                  ]}
                                 >
                                   <FunctionSelect
                                     onChange={(v, f: OntologyFunctionItem) => {
@@ -815,7 +867,12 @@ export const RuleForm = forwardRef<
               className={'mb-4 !text-[14px] !font-[600] !leading-[22px]'}
             />
             <Form.Item noStyle>
-              <FormItem field={'action'} label={'绑定行为'} required>
+              <FormItem
+                field={'action'}
+                label={'绑定行为'}
+                required
+                rules={[{ required: true, message: '请选择行为' }]}
+              >
                 <ActionSelect
                   onChange={(v, action) => {
                     const actionParams = getParamsFromData(action?.params);
@@ -870,7 +927,11 @@ export const RuleForm = forwardRef<
         </div>
         <div className={styles['rule-form-aside']}>
           <div className={styles['rule-setting-config-sticky']}>
-            <RuleSettingConfig mode={'card'} ruleData={ruleDetail} />
+            <RuleSettingConfig
+              mode={'card'}
+              ruleData={ruleDetail}
+              properties={properties}
+            />
           </div>
         </div>
       </div>

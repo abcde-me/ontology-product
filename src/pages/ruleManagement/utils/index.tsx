@@ -11,6 +11,7 @@ import {
   ChangeType,
   InstanceScope,
   MonthDayMode,
+  OntologyObjectTypeInfo,
   ParameterValue,
   PeriodType
 } from '@/pages/ruleManagement/types';
@@ -18,7 +19,10 @@ import { cloneDeep, isNil } from 'lodash-es';
 import { OntologyActionParam } from '@/pages/ontologyScene/types/behaviorActions';
 import { OntologyFunctionParam } from '@/pages/ontologyScene/types/ontologyFunction';
 import { CycleValues } from '../components/SchedulerRun/types';
-import { ICON_OPTIONS } from '@/pages/ontologyScene/common/constants';
+import {
+  ICON_OPTIONS,
+  OBJECT_TYPE_ICON_OPTIONS
+} from '@/pages/ontologyScene/common/constants';
 import React from 'react';
 import { ActionConfigRes, GateConfigRes } from '@/pages/ruleRunLog/types';
 
@@ -64,6 +68,14 @@ export function buildAutoChange(data: AutoRuleDetail): CreateAutoRule {
   if (gateConfig?.enabled) {
     delete gateConfig?.functionInfo;
   }
+  changeConfig?.propertyConditions?.forEach((item) => {
+    const value = item.value;
+    try {
+      item.value = JSON.stringify(value);
+    } catch (e) {
+      console.error(e);
+    }
+  });
   return {
     name: name?.trim() || '',
     description: description?.trim(),
@@ -113,7 +125,10 @@ function buildAutoTriggerRuleForm(data: AutoRuleDetail): AutoRuleFormData {
     description,
     triggerType,
     action: actionConfig?.actionId,
-    actionParams: actionConfig?.parameters
+    actionParams: buildFormParams(
+      actionConfig?.parameters,
+      actionConfig?.actionInfo?.params
+    )
   };
 
   if (scheduleConfig?.periodType === PeriodType.Daily) {
@@ -187,7 +202,7 @@ export function buildAutoRuleForm(data: AutoRuleDetail): AutoRuleFormData {
   return buildAutoChangeRuleForm(autoRuleDetail);
 }
 
-function buildFormParams(
+export function buildFormParams(
   parameters?: ParameterValue[],
   metaParams?: (OntologyActionParam | OntologyFunctionParam)[]
 ) {
@@ -214,7 +229,7 @@ function buildFormParams(
   });
 }
 
-function buildObjPropertyInfo(changeConfig: ChangeConfigRes) {
+export function buildObjPropertyInfo(changeConfig: ChangeConfigRes) {
   const { objectTypeInfo, propertyConditions: props } = changeConfig;
   const propMap = new Map(
     objectTypeInfo?.ontologyPhysicalPropertiesList?.map((prop) => [
@@ -224,11 +239,19 @@ function buildObjPropertyInfo(changeConfig: ChangeConfigRes) {
   );
   return (props || []).map((item) => {
     const prop = propMap.get(item.id as number);
-    return {
+    const value = item.value;
+    const baseVal = {
       fieldType: prop?.columnType,
       name: prop?.name,
+      value: item.value,
       ...item
     };
+    try {
+      baseVal.value = JSON.parse(value as string);
+    } catch (e) {
+      console.error(e);
+    }
+    return baseVal;
   });
 }
 
@@ -245,4 +268,14 @@ export const getModelIconNode = (icon?: string, className?: string) => {
   return React.createElement(iconSource, {
     className
   });
+};
+
+// 根据 icon 字段获取图标组件
+export const getObjIconComponent = (obj: OntologyObjectTypeInfo) => {
+  const { code, icon: iconValue } = obj;
+  if (code === '-1') return null;
+  const iconOption = iconValue
+    ? OBJECT_TYPE_ICON_OPTIONS.find((option) => option.value === iconValue)
+    : null;
+  return iconOption?.icon ?? OBJECT_TYPE_ICON_OPTIONS[0]?.icon;
 };

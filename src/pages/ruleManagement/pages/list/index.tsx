@@ -30,7 +30,7 @@ import {
 } from '@/api/businessAutomation/list';
 import { useHistory, useRouteMatch } from 'react-router-dom';
 import { SorterInfo } from '@arco-design/web-react/lib/Table/interface';
-import { AutoRuleDialog } from '@/pages/ruleManagement/components';
+import { AutoRuleDrawer } from '@/pages/ruleManagement/components';
 import classNames from 'classnames';
 import { FunctionDetailDrawer } from '@/pages/ontologyScene/componens/FunctionDetailDrawer';
 
@@ -41,14 +41,14 @@ const TRIGGER_TYPE_MAP: Record<number, string> = {
 };
 
 const STATUS_MAP: Record<number, { label: string; color: string }> = {
-  0: { label: '已下线', color: '#94A3B8' },
+  0: { label: '未上线', color: '#94A3B8' },
   1: { label: '已上线', color: '#10B981' }
 };
 
 const RuleListPage = () => {
   const [form] = Form.useForm();
   const history = useHistory();
-  const [showRule, setShowRule] = useState<React.Key>();
+  const [showRule, setShowRule] = useState<React.Key | undefined>(10);
   const [showFunction, setShowFunction] = useState<number>();
 
   const routeToInfo = (pageType: string, ruleId?: number) => {
@@ -256,7 +256,7 @@ const RuleListPage = () => {
           }}
         />
       </div>
-      <AutoRuleDialog
+      <AutoRuleDrawer
         visible={!!showRule}
         onCancel={() => setShowRule(undefined)}
         ruleId={showRule}

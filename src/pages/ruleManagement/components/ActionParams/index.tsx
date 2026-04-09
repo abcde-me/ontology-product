@@ -5,6 +5,7 @@ import { BehaviorActionItem } from '@/pages/ontologyScene/types/behaviorActions'
 import { GlobalTooltip, NoDataCard } from '@ceai-front/arco-material';
 import classNames from 'classnames';
 import { renderComponentByUiType } from '@/pages/ontologyScene/utils';
+import { get } from 'lodash-es';
 
 const PARAM_SOURCE_OPTIONS = [
   {
@@ -29,6 +30,7 @@ export interface ActionParamsProps {
   actionData?: Partial<BehaviorActionItem>;
   field?: string;
   modelId?: number;
+  readOnly?: boolean;
 }
 
 const InputWithTooltip = (props: InputProps) => {
@@ -44,10 +46,15 @@ const InputWithTooltip = (props: InputProps) => {
 };
 
 export const ActionParams = (props: ActionParamsProps) => {
-  const { actionData, field = 'actionParams', modelId } = props;
+  const {
+    actionData,
+    field = 'actionParams',
+    modelId,
+    readOnly = false
+  } = props;
   const { form } = Form.useFormContext();
   const triggerType = Form.useWatch('triggerType', form);
-  const value = form.getFieldValue(field);
+  const value = Form.useWatch(field, form);
 
   if (!value?.length) {
     return (
@@ -72,7 +79,7 @@ export const ActionParams = (props: ActionParamsProps) => {
                 <div className={styles['action-params-cell']}>入参来源</div>
                 <div className={styles['action-params-cell']}>参数值</div>
               </div>
-              {fields.map(({ field: itemField, key }) => {
+              {fields.map(({ field: itemField, key }, index) => {
                 const currentItem = form.getFieldValue(itemField) as
                   | ActionParamsItem
                   | undefined;
@@ -82,7 +89,7 @@ export const ActionParams = (props: ActionParamsProps) => {
                     <div className={styles['action-params-cell']}>
                       <div className={styles['action-params-text']}>
                         <Form.Item field={`${itemField}.name`} noStyle>
-                          <InputWithTooltip readOnly />
+                          <InputWithTooltip readOnly className={'leading-8'} />
                         </Form.Item>
                         <Form.Item field={`${itemField}.id`} noStyle>
                           <Input style={{ display: 'none' }} />
@@ -96,53 +103,64 @@ export const ActionParams = (props: ActionParamsProps) => {
                       </div>
                     </div>
                     <div className={styles['action-params-cell']}>
-                      <div className={styles['action-params-text']}>
-                        {currentItem?.type || '-'}
-                      </div>
                       <Form.Item field={`${itemField}.type`} noStyle>
-                        <Input style={{ display: 'none' }} />
+                        <InputWithTooltip readOnly className={'leading-8'} />
                       </Form.Item>
                     </div>
                     <div className={styles['action-params-cell']}>
-                      <Form.Item
-                        field={`${itemField}.source`}
-                        className={styles['action-params-form-item']}
-                        rules={[{ required: true, message: '请选择入参来源' }]}
-                      >
-                        <Select
-                          placeholder={'请选择入参来源'}
-                          options={
-                            triggerType === 1
-                              ? [PARAM_SOURCE_OPTIONS[1]]
-                              : (PARAM_SOURCE_OPTIONS as any)
-                          }
-                          triggerProps={{
-                            updateOnScroll: true
-                          }}
-                          onChange={(value) => {
-                            if (value === 'runtime') {
-                              form.setFieldValue(
-                                `${itemField}.value`,
-                                undefined
-                              );
+                      {readOnly ? (
+                        <div className={styles['action-params-readonly-text']}>
+                          {currentItem?.source === 'change_instance'
+                            ? '变更的实例'
+                            : currentItem?.source === 'fixed_value'
+                              ? '静态值'
+                              : '-'}
+                        </div>
+                      ) : (
+                        <Form.Item
+                          field={`${itemField}.source`}
+                          className={styles['action-params-form-item']}
+                          rules={[
+                            { required: true, message: '请选择入参来源' }
+                          ]}
+                        >
+                          <Select
+                            placeholder={'请选择入参来源'}
+                            options={
+                              triggerType === 1
+                                ? [PARAM_SOURCE_OPTIONS[1]]
+                                : (PARAM_SOURCE_OPTIONS as any)
                             }
-                          }}
-                        />
-                      </Form.Item>
+                            triggerProps={{
+                              updateOnScroll: true
+                            }}
+                            onChange={(value) => {
+                              if (value === 'runtime') {
+                                form.setFieldValue(
+                                  `${itemField}.value`,
+                                  undefined
+                                );
+                              }
+                            }}
+                          />
+                        </Form.Item>
+                      )}
                     </div>
                     <div className={styles['action-params-cell']}>
                       <Form.Item
-                        shouldUpdate={(prev, next) =>
-                          prev[`${itemField}.source`] !==
-                          next[`${itemField}.source`]
-                        }
+                        shouldUpdate={(prev, next) => {
+                          return (
+                            get(prev, `${itemField}.source`) !==
+                            get(next, `${itemField}.source`)
+                          );
+                        }}
                         noStyle
                       >
                         {(_, { getFieldValue }) => {
                           const { source, uiType } = getFieldValue(
                             `${itemField}`
                           );
-                          return source === 'runtime' ? (
+                          return source === 'change_instance' ? (
                             <div
                               className={styles['action-params-runtime-text']}
                             >
@@ -151,7 +169,13 @@ export const ActionParams = (props: ActionParamsProps) => {
                           ) : (
                             <Form.Item
                               field={`${itemField}.value`}
-                              className={styles['action-params-form-item']}
+                              className={classNames(
+                                styles['action-params-form-item'],
+                                {
+                                  [styles['action-params-readonly-value']]:
+                                    readOnly
+                                }
+                              )}
                               rules={[
                                 { required: true, message: '请输入参数值' }
                               ]}
