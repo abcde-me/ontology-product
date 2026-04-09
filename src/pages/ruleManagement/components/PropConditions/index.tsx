@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   Form,
   Input,
@@ -33,6 +33,7 @@ export interface PropConditionsProps {
   propIds?: React.Key[];
   allProps?: PhysicalProperties[];
   disabled?: boolean;
+  readOnly?: boolean;
   className?: string;
   field?: string;
 }
@@ -42,7 +43,25 @@ const isIntegerField = (fieldType?: string) => {
 };
 
 export const PropConditions = (props: PropConditionsProps) => {
-  const { value: rows = [], onChange, disabled, className } = props;
+  const {
+    value: rows = [],
+    onChange,
+    disabled,
+    readOnly = false,
+    className
+  } = props;
+
+  const [propValueStatus, setPropValueStatus] =
+    useState<Record<string, boolean>>();
+
+  useEffect(() => {
+    const valueStatus = rows.reduce<Record<string, boolean>>((p, v) => {
+      const { id, value } = v;
+      p[id] = isNil(value) || !value.toString().trim();
+      return p;
+    }, {});
+    setPropValueStatus(valueStatus);
+  }, [rows]);
 
   const updateRow = (index: number, patch: Partial<PropConditionItem>) => {
     const nextRows = rows.map((row, rowIndex) => {
@@ -87,42 +106,46 @@ export const PropConditions = (props: PropConditionsProps) => {
     },
     {
       title: '变更条件',
-      filterIcon: (
+      filterIcon: readOnly ? null : (
         <BatchChangePropIcon
           className={
             'h-[16px] w-[16px] hover:cursor-pointer hover:text-[rgb(var(--primary-6))]'
           }
         />
       ),
-      filterDropdown: ({ confirm }) => {
-        return (
-          <div className={styles['batch-change-prop-dropdown']}>
-            <div
-              className={styles['batch-change-prop-item']}
-              onClick={() => {
-                batchChangeProp(ConditionType.MeetCondition);
-                confirm?.();
-              }}
-            >
-              全部设置为
-              <span>满足条件</span>
-            </div>
-            <div
-              className={styles['batch-change-prop-item']}
-              onClick={() => {
-                batchChangeProp(ConditionType.AnyChange);
-                confirm?.();
-              }}
-            >
-              全部设置为
-              <span>任意变化</span>
-            </div>
-          </div>
-        );
-      },
-      filterDropdownProps: {
-        triggerProps: { position: 'bl', updateOnScroll: true }
-      },
+      filterDropdown: readOnly
+        ? undefined
+        : ({ confirm }) => {
+            return (
+              <div className={styles['batch-change-prop-dropdown']}>
+                <div
+                  className={styles['batch-change-prop-item']}
+                  onClick={() => {
+                    batchChangeProp(ConditionType.MeetCondition);
+                    confirm?.();
+                  }}
+                >
+                  全部设置为
+                  <span>满足条件</span>
+                </div>
+                <div
+                  className={styles['batch-change-prop-item']}
+                  onClick={() => {
+                    batchChangeProp(ConditionType.AnyChange);
+                    confirm?.();
+                  }}
+                >
+                  全部设置为
+                  <span>任意变化</span>
+                </div>
+              </div>
+            );
+          },
+      filterDropdownProps: readOnly
+        ? undefined
+        : {
+            triggerProps: { position: 'bl', updateOnScroll: true }
+          },
       onFilter() {
         return true;
       },
@@ -132,26 +155,28 @@ export const PropConditions = (props: PropConditionsProps) => {
         return (
           <div className={styles['condition-type-change']}>
             {record.type === ConditionType.AnyChange ? '任意变化' : '满足条件'}
-            <Tooltip content={'切换变更条件'}>
-              <IconSwap
-                className={
-                  'hover:cursor-pointer hover:text-[rgb(var(--primary-6))]'
-                }
-                onClick={() => {
-                  updateRow(index, {
-                    type:
-                      record.type === ConditionType.AnyChange
-                        ? ConditionType.MeetCondition
-                        : ConditionType.AnyChange,
-                    operator:
-                      record.fieldType === 'int'
-                        ? Operator.Eq
-                        : Operator.Contains,
-                    value: undefined
-                  });
-                }}
-              />
-            </Tooltip>
+            {!readOnly && (
+              <Tooltip content={'切换变更条件'}>
+                <IconSwap
+                  className={
+                    'hover:cursor-pointer hover:text-[rgb(var(--primary-6))]'
+                  }
+                  onClick={() => {
+                    updateRow(index, {
+                      type:
+                        record.type === ConditionType.AnyChange
+                          ? ConditionType.MeetCondition
+                          : ConditionType.AnyChange,
+                      operator:
+                        record.fieldType === 'int'
+                          ? Operator.Eq
+                          : Operator.Contains,
+                      value: undefined
+                    });
+                  }}
+                />
+              </Tooltip>
+            )}
           </div>
         );
       }
@@ -167,26 +192,44 @@ export const PropConditions = (props: PropConditionsProps) => {
           return <span className={styles['placeholder-text']}>-</span>;
         }
 
+        if (readOnly) {
+          const options =
+            record.fieldType === 'int'
+              ? NUM_CONDITION_OPERATOR_OPTIONS
+              : STR_CONDITION_OPERATOR_OPTIONS;
+          const currentOption = options.find(
+            (item) => item.value === record.operator
+          );
+          return (
+            <span className={styles['readonly-text']}>
+              {currentOption?.label || '-'}
+            </span>
+          );
+        }
+
         return (
-          <Select
-            value={record.operator}
-            disabled={disabled}
-            options={
-              record.fieldType === 'int'
-                ? NUM_CONDITION_OPERATOR_OPTIONS
-                : STR_CONDITION_OPERATOR_OPTIONS
-            }
-            placeholder={'请选择'}
-            triggerProps={{
-              updateOnScroll: true
-            }}
-            getPopupContainer={(node) => document.body}
-            onChange={(operator: Operator) => {
-              updateRow(index, {
-                operator
-              });
-            }}
-          />
+          <Form.Item validateStatus={undefined} noStyle>
+            <Select
+              value={record.operator}
+              disabled={disabled || readOnly}
+              className={styles['operator']}
+              options={
+                record.fieldType === 'int'
+                  ? NUM_CONDITION_OPERATOR_OPTIONS
+                  : STR_CONDITION_OPERATOR_OPTIONS
+              }
+              placeholder={'请选择'}
+              triggerProps={{
+                updateOnScroll: true
+              }}
+              getPopupContainer={(node) => document.body}
+              onChange={(operator: Operator) => {
+                updateRow(index, {
+                  operator
+                });
+              }}
+            />
+          </Form.Item>
         );
       }
     },
@@ -200,29 +243,54 @@ export const PropConditions = (props: PropConditionsProps) => {
         if (anyChange) {
           return <span className={styles['placeholder-text']}>-</span>;
         }
-        return isIntegerField(record.fieldType) ? (
-          <InputNumber
-            value={record.value as number | undefined}
-            disabled={disabled}
-            placeholder={'请输入'}
-            style={{ width: '100%' }}
-            onChange={(nextValue) => {
-              updateRow(index, {
-                value: isNil(nextValue) ? nextValue : JSON.stringify(nextValue)
-              });
-            }}
-          />
-        ) : (
-          <Input
-            value={record.value as string}
-            disabled={disabled}
-            placeholder={'请输入'}
-            onChange={(nextValue) => {
-              updateRow(index, {
-                value: nextValue
-              });
-            }}
-          />
+        if (readOnly) {
+          return (
+            <div className={styles['readonly-value']}>
+              {isNil(record.value) || !String(record.value).trim()
+                ? '-'
+                : String(record.value)}
+            </div>
+          );
+        }
+        return (
+          <Form.Item
+            className={'mb-0'}
+            validateStatus={propValueStatus?.[record.id] ? 'error' : undefined}
+          >
+            {isIntegerField(record.fieldType) ? (
+              <InputNumber
+                defaultValue={record.value as number | undefined}
+                disabled={disabled || readOnly}
+                className={
+                  propValueStatus?.[record.id] ? '' : styles['value-common']
+                }
+                placeholder={'请输入'}
+                style={{ width: '100%' }}
+                onBlur={(e) => {
+                  const nextValue = e.target.value as number;
+                  updateRow(index, {
+                    value: nextValue
+                  });
+                }}
+              />
+            ) : (
+              <Input
+                defaultValue={record.value as string}
+                disabled={disabled || readOnly}
+                className={
+                  propValueStatus?.[record.id] ? '' : styles['value-common']
+                }
+                placeholder={'请输入'}
+                allowClear
+                onBlur={(e) => {
+                  const nextValue = e.target.value;
+                  updateRow(index, {
+                    value: nextValue
+                  });
+                }}
+              />
+            )}
+          </Form.Item>
         );
       }
     }

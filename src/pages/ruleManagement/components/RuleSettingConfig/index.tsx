@@ -5,16 +5,20 @@ import classNames from 'classnames';
 import {
   AutoRuleDetail,
   ChangeType,
+  InstanceScope,
   PeriodType
 } from '@/pages/ruleManagement/types';
 import { isEmpty, isNil } from 'lodash-es';
 import { getModelIconNode } from '@/pages/ruleManagement/utils';
 import { OBJECT_TYPE_ICON_OPTIONS } from '@/pages/ontologyScene/common/constants';
+import { PhysicalProperties } from '@/types/graphApi';
+import { ChangeConfigRes } from '@/pages/ruleRunLog/types';
 
 interface RuleSettingConfigProps {
   mode: 'card' | 'item';
   className?: string;
   ruleData?: AutoRuleDetail;
+  properties?: PhysicalProperties[];
 }
 const weekLabel = ['周一', '周二', '周三', '周四', '周五', '周六', '周日'];
 
@@ -117,7 +121,64 @@ const getIconComponent = (iconValue?: string) => {
   return iconOption?.icon ?? OBJECT_TYPE_ICON_OPTIONS[0]?.icon;
 };
 
-const renderAutoChangeConfig = (ruleData?: AutoRuleDetail) => {
+const renderInsConfig = (config: ChangeConfigRes) => {
+  if (config.instanceIds?.length) {
+    return config.instanceIds.map((id) => {
+      return (
+        <div key={id} className={classNames(styles['rule-setting-tag'])}>
+          {id}
+        </div>
+      );
+    });
+  }
+  return (
+    <div
+      className={classNames(
+        styles['rule-setting-tag'],
+        'text-[var(--color-text-6)]'
+      )}
+    >
+      请先在左侧配置
+    </div>
+  );
+};
+
+const renderPropConfig = (
+  config: ChangeConfigRes,
+  properties: PhysicalProperties[]
+) => {
+  const { propertyConditions } = config;
+  if (!propertyConditions?.length) {
+    return (
+      <div
+        className={classNames(
+          styles['rule-setting-tag'],
+          'text-[var(--color-text-6)]'
+        )}
+      >
+        请先在左侧配置
+      </div>
+    );
+  }
+  const propNameMap = new Map(properties.map((p) => [p.id, p.name]));
+  return (
+    <>
+      的属性
+      {propertyConditions.map((p) => {
+        return (
+          <div key={p.id} className={classNames(styles['rule-setting-tag'])}>
+            {propNameMap.get(p.id)}
+          </div>
+        );
+      })}
+    </>
+  );
+};
+
+const renderAutoChangeConfig = (
+  ruleData?: AutoRuleDetail,
+  properties?: PhysicalProperties[]
+) => {
   const changeConfig = ruleData?.changeConfig;
   const gateConfig = ruleData?.gateConfig;
   const modelEmpty = isNil(ruleData?.modelId);
@@ -158,14 +219,19 @@ const renderAutoChangeConfig = (ruleData?: AutoRuleDetail) => {
           </div>
         )}
       </div>
-      的实例发生
+      的{changeConfig?.instanceScope === InstanceScope.All ? '全部' : '部分'}
+      实例
+      {changeConfig?.instanceScope === InstanceScope.Specific
+        ? renderInsConfig(changeConfig)
+        : null}
+      发生
       {changeConfig?.changeType === ChangeType.PropertyChange
-        ? '属性变更'
+        ? '属性变化'
         : changeConfig?.changeType === ChangeType.InstanceCreate
-          ? '实例创建'
+          ? '实例新增'
           : changeConfig?.changeType === ChangeType.InstanceDelete
             ? '实例删除'
-            : '属性变更'}
+            : '属性变化'}
       {gateConfig?.enabled && (
         <>
           ，且条件函数
@@ -190,13 +256,13 @@ const renderAutoChangeConfig = (ruleData?: AutoRuleDetail) => {
 };
 
 export const RuleSettingConfig = (props: RuleSettingConfigProps) => {
-  const { mode, ruleData } = props;
+  const { mode, ruleData, properties } = props;
 
   const renderConfig = () => {
     if (ruleData?.triggerType === 1) {
       return renderAutoTriggerConfig(ruleData);
     }
-    return renderAutoChangeConfig(ruleData);
+    return renderAutoChangeConfig(ruleData, properties);
   };
 
   return (

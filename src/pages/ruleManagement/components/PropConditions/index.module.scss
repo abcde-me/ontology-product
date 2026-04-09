@@ -46,6 +46,10 @@
       border-bottom: none;
     }
 
+    .arco-spin-children {
+      width: 100%;
+    }
+
     .arco-select,
     .arco-input-wrapper,
     .arco-input-number {
@@ -99,4 +103,30 @@
     background-color: rgb(242 248 255 / var(--tw-bg-opacity, 1));
     cursor: pointer;
   }
+}
+
+.operator {
+  :global {
+    .arco-select-view {
+      border-color: var(--color-border-1) !important;
+    }
+  }
+}
+
+.value-common {
+  border-color: var(--color-border-1) !important;
+}
+
+.readonly-text {
+  color: var(--color-text-1);
+}
+
+.readonly-value {
+  width: 100%;
+  min-height: 32px;
+  display: flex;
+  align-items: center;
+  color: var(--color-text-1);
+  background: transparent;
+  border: none;
 }

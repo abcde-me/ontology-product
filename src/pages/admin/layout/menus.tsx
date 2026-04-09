@@ -1,6 +1,5 @@
 import React from 'react';
 import { isWujie } from '@/utils/env';
-import { IconMdpDatasetMgmt } from '@ceai-front/svg-icons';
 import {
   ONTOLOGY_PERMISSIONS,
   API_KEY_PERMISSIONS,
@@ -18,6 +17,7 @@ import MemberMenu from '@/assets/sider/membermenu.svg';
 import BaseMenu from '@/assets/sider/basemenu.svg';
 import HomeIcon from '@/assets/sider/home.svg';
 import RuleRunLogIcon from '@/assets/sider/rule-run-log.svg';
+import { IconMdpDatasetMgmt } from '@ceai-front/svg-icons';
 
 export type MenuModel = {
   title: string;

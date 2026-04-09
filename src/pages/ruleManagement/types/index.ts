@@ -47,6 +47,11 @@ export interface AutoRuleItem {
   updatedBy?: string;
 }
 
+export interface AutoRuleSnapShotInfo {
+  snapshotTime?: string;
+  triggerMode?: string;
+}
+
 /**
  * AutoRuleDetail
  */
@@ -253,6 +258,17 @@ export interface ScheduleConfigRes {
    * 每周几触发，1=周一 ~ 7=周日（periodType=weekly 时有值）
    */
   weekDays?: number[];
+}
+
+/**
+ * GetAutoExecLogRuleSnapshotResponse
+ */
+export interface AutoExecLogRuleSnapshot {
+  actionConfig?: ActionConfigRes;
+  gateConfig?: GateConfigRes;
+  ruleInfo?: Omit<AutoRuleDetail, any>;
+  triggerConfig?: Record<string, any>;
+  [property: string]: any;
 }
 
 /**

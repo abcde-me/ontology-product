@@ -1,4 +1,4 @@
-export * from './AutoRuleDialog';
+export * from './AutoRuleDrawer';
 export * from './RuleSettingConfig';
 export * from './RuleForm';
 export * from './PageContainer';
