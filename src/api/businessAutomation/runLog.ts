@@ -35,7 +35,7 @@ export async function getExecLogList(params: GetExecLogListParam) {
   return res.data;
 }
 export async function getExecLogDetail(id: string | number) {
-  const res = await UAPI.RES.GetAutoExecLogListApi({})
+  const res = await UAPI.RES.GetAutoExecLogDetailApi({})
     .post({ id })
     .inRegion()
     .do();
