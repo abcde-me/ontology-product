@@ -133,52 +133,23 @@ export const EXEC_LOGS: AutoExecLogItem[] = [
   {
     id: 1,
     logId: 'exec-log-1',
-    ruleId: 1,
     ruleName: '设备温度超限告警',
-    actionName: '实体识别',
-    actionCode: 'identify_entity',
-    actionId: 22,
-    projectId: 'project-1',
     status: 0,
-    triggerType: 2,
-    triggerTime: '2026-03-30 09:12:10',
-    createTime: '2026-03-30 09:12:12',
-    durationMs: 842,
-    gateResult: 1
+    createdAt: '2026-03-30 09:12:12'
   },
   {
     id: 2,
     logId: 'exec-log-2',
-    ruleId: 2,
     ruleName: '每日巡检结果汇总',
-    actionName: '关联分析与印证',
-    actionCode: 'link_verify',
-    actionId: 1002,
-    projectId: 'project-1',
     status: 1,
-    triggerType: 1,
-    triggerTime: '2026-03-30 09:00:00',
-    createTime: '2026-03-30 09:00:05',
-    durationMs: 1530,
-    gateResult: 1,
-    errorMessage: '下游通知服务调用超时'
+    createdAt: '2026-03-30 09:00:05'
   },
   {
     id: 3,
     logId: 'exec-log-3',
-    ruleId: 3,
     ruleName: '关键属性变更同步',
-    actionName: '威胁研判',
-    actionCode: 'threat_evaluate',
-    actionId: 1003,
-    projectId: 'project-2',
     status: 2,
-    triggerType: 3,
-    triggerTime: '2026-03-30 11:26:43',
-    createTime: '2026-03-30 11:26:44',
-    durationMs: 967,
-    gateResult: 0,
-    errorMessage: '门控校验未通过，未执行后续动作'
+    createdAt: '2026-03-30 11:26:44'
   }
 ];
 
@@ -187,6 +158,14 @@ export const EXEC_LOG_DETAILS: AutoExecLogDetail[] = [
     ...EXEC_LOGS[0],
     actionLogId: 7001,
     gateActionLogId: 7101,
+    createTime: '2026-03-30 09:12:12',
+    durationMs: 842,
+    gateResult: 1,
+    projectId: 'project-1',
+    ruleId: 1,
+    status: 0,
+    triggerTime: '2026-03-30 09:12:10',
+    triggerType: 2,
     detailLog: '检测到温度值 86，门控通过，已发送高优先级告警。',
     ruleSnapshot: {
       ...AUTO_RULE_DETAILS[0]
@@ -196,6 +175,15 @@ export const EXEC_LOG_DETAILS: AutoExecLogDetail[] = [
     ...EXEC_LOGS[1],
     actionLogId: 7002,
     gateActionLogId: 7102,
+    createTime: '2026-03-30 09:00:05',
+    durationMs: 1530,
+    errorMessage: '下游通知服务调用超时',
+    gateResult: 1,
+    projectId: 'project-1',
+    ruleId: 2,
+    status: 1,
+    triggerTime: '2026-03-30 09:00:00',
+    triggerType: 1,
     detailLog: '定时任务触发成功，汇总完成，但邮件通知阶段请求超时。',
     ruleSnapshot: {
       ...AUTO_RULE_DETAILS[1]
@@ -205,6 +193,15 @@ export const EXEC_LOG_DETAILS: AutoExecLogDetail[] = [
     ...EXEC_LOGS[2],
     actionLogId: 7003,
     gateActionLogId: 7103,
+    createTime: '2026-03-30 11:26:44',
+    durationMs: 967,
+    errorMessage: '门控校验未通过，未执行后续动作',
+    gateResult: 0,
+    projectId: 'project-2',
+    ruleId: 3,
+    triggerType: 3,
+    triggerTime: '2026-03-30 11:26:43',
+    status: 2,
     detailLog: '检测到关键属性变更，但门控函数校验失败，动作未执行。',
     ruleSnapshot: {
       ...AUTO_RULE_DETAILS[2]

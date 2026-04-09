@@ -11,12 +11,6 @@ const STATUS_MAP: Record<number, { label: string; color: string }> = {
   3: { label: '待执行', color: '#86909C' }
 };
 
-const formatDuration = (value?: number) => {
-  if (!value && value !== 0) return '-';
-  if (value < 1000) return `${value}ms`;
-  return `${(value / 1000).toFixed(2)}s`;
-};
-
 interface UseColumnsOptions {
   onViewLog?: (record: AutoExecLogItem) => void;
   onViewSnapshot?: (record: AutoExecLogItem) => void;
@@ -52,7 +46,7 @@ export const useColumns = ({
         width: 260,
         render: (value, record) => {
           const text = value || '-';
-          const canOpen = Boolean(record?.ruleId);
+          const canOpen = Boolean(record?.id);
           return (
             <div
               className={canOpen ? 'cursor-pointer' : undefined}
@@ -87,43 +81,11 @@ export const useColumns = ({
         }
       },
       {
-        title: '绑定行为',
-        dataIndex: 'actionName',
-        width: 200,
-        render: (_, record) => {
-          const actionName =
-            (record as any)?.actionName || (record as any)?.actionCode || '-';
-          const canOpen = Boolean(record?.actionId);
-          return (
-            <div
-              className={canOpen ? 'cursor-pointer' : undefined}
-              onClick={() => {
-                if (canOpen) {
-                  onViewAction?.(record);
-                }
-              }}
-            >
-              <GlobalTooltip.Ellipsis
-                text={actionName}
-                className={canOpen ? 'link-text' : undefined}
-              />
-            </div>
-          );
-        }
-      },
-      {
         title: '时间',
-        dataIndex: 'triggerTime',
+        dataIndex: 'createdAt',
         sorter: true,
         width: 200,
-        render: (value, record) =>
-          value || record.createTime || record.triggerTime || '-'
-      },
-      {
-        title: '耗时',
-        dataIndex: 'durationMs',
-        width: 120,
-        render: (value) => formatDuration(value)
+        render: (value) => value || '-'
       },
       {
         title: '操作',
