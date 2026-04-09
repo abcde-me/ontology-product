@@ -17,6 +17,7 @@ export interface AutoExecLogItem {
   id?: number;
   logId?: string;
   ruleName?: string;
+  duration?: string;
   /**
    * 0=成功，1=失败，2=部分成功，3=待执行
    */

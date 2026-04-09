@@ -20,6 +20,7 @@ import styles from './index.module.scss';
 import totalIcon from './assets/total.svg';
 import successIcon from './assets/success.svg';
 import failedIcon from './assets/failed.svg';
+import { set } from 'immer/dist/internal';
 
 const RuleRunLog = () => {
   const [form] = Form.useForm();
@@ -28,18 +29,6 @@ const RuleRunLog = () => {
   const [showRule, setShowRule] = useState<number | undefined>();
   const [behaviorData, setBehaviorData] = useState<number | undefined>();
   const [logRecord, setLogRecord] = useState<AutoExecLogItem | undefined>();
-
-  const openRuleByLog = async (record: AutoExecLogItem) => {
-    if (!record?.id) return;
-    try {
-      const detail = await fetchRuleRunLogDetail(record.id);
-      if (detail?.ruleId) {
-        setShowRule(detail.ruleId);
-      }
-    } catch (error) {
-      console.error('获取规则信息失败:', error);
-    }
-  };
 
   const openActionByLog = async (record: AutoExecLogItem) => {
     if (!record?.id) return;
@@ -76,10 +65,11 @@ const RuleRunLog = () => {
       setLogRecord(record);
     },
     onViewSnapshot: (record) => {
-      openRuleByLog(record);
+      setShowRule(record.id);
     },
+
     onViewRule: (record) => {
-      openRuleByLog(record);
+      setShowRule(record.id);
     },
     onViewAction: (record) => {
       openActionByLog(record);

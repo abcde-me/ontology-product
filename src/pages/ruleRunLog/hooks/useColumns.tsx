@@ -1,7 +1,10 @@
 import React, { useMemo } from 'react';
 import { Button, Space, TableColumnProps } from '@arco-design/web-react';
-import { DotStatus, GlobalTooltip } from '@ceai-front/arco-material';
-import { ContentWithCopy } from '@/pages/ontologyScene/componens';
+import {
+  CopyItemIcon,
+  DotStatus,
+  GlobalTooltip
+} from '@ceai-front/arco-material';
 import { AutoExecLogItem } from '../types';
 
 const STATUS_MAP: Record<number, { label: string; color: string }> = {
@@ -33,9 +36,20 @@ export const useColumns = ({
         dataIndex: 'logId',
         width: 220,
         fixed: 'left',
-        render: (value) =>
+        render: (value, record) =>
           value ? (
-            <ContentWithCopy value={String(value)} className="link-text" />
+            <div className="flex w-full items-center gap-[8px]">
+              <div
+                className="min-w-0 cursor-pointer"
+                onClick={() => onViewLog?.(record)}
+              >
+                <GlobalTooltip.Ellipsis
+                  text={String(value)}
+                  className="link-text w-full"
+                />
+              </div>
+              <CopyItemIcon value={String(value)} className="flex-shrink-0" />
+            </div>
           ) : (
             '-'
           )
@@ -43,7 +57,7 @@ export const useColumns = ({
       {
         title: '规则名称',
         dataIndex: 'ruleName',
-        width: 260,
+        width: 220,
         render: (value, record) => {
           const text = value || '-';
           const canOpen = Boolean(record?.id);
@@ -67,7 +81,7 @@ export const useColumns = ({
       {
         title: '状态',
         dataIndex: 'status',
-        width: 120,
+        width: 110,
         filters: [
           { text: '成功', value: '0' },
           { text: '失败', value: '1' },
@@ -84,13 +98,20 @@ export const useColumns = ({
         title: '时间',
         dataIndex: 'createdAt',
         sorter: true,
-        width: 200,
+        width: 180,
+        render: (value) => value || '-'
+      },
+      {
+        title: '耗时',
+        dataIndex: 'duration',
+        sorter: true,
+        width: 80,
         render: (value) => value || '-'
       },
       {
         title: '操作',
         dataIndex: 'actions',
-        width: 180,
+        width: 160,
         fixed: 'right',
         render: (_, record) => (
           <Space size={16}>
