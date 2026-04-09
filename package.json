@@ -42,6 +42,7 @@
     "@babel/preset-typescript": "^7.27.0",
     "@ccf2e/arco-material": "^0.7.2",
     "@ceai-front/arco-material": "1.1.21",
+    "@ceai-front/svg-icons": "^1.0.0",
     "@ceai-front/workflow": "^0.2.3",
     "@dagrejs/dagre": "^1.1.4",
     "@emoji-mart/data": "^1.1.2",

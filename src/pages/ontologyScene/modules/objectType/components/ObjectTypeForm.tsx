@@ -96,7 +96,7 @@ function getAttributeRowKey(record: AttributeField): string {
   return String(record.name || record.id || `field-${record.name}`);
 }
 
-/** 将接口返回的扁平列表合并为表单行：isVector=1 的项挂到 vectorSourceFieldId 对应基字段上 */
+/** 将接口返回的扁平列表合并为表单行：isVector=1 的项挂到 vectorSourceFieldName 对应基字段上 */
 function mergeOntologyPhysicalPropertiesForForm(
   list: CreateOntologyPhysicalProperty[]
 ): AttributeField[] {
@@ -104,14 +104,14 @@ function mergeOntologyPhysicalPropertiesForForm(
   const vectorRows = list.filter((p) => p.isVector === 1);
   const baseRows = list.filter((p) => p.isVector !== 1);
   const vectorBySource = new Map(
-    vectorRows.map((v) => [String(v.vectorSourceFieldId ?? ''), v])
+    vectorRows.map((v) => [String(v.vectorSourceFieldName ?? ''), v])
   );
   return baseRows.map((prop) => {
-    const vec = vectorBySource.get(String(prop.id ?? ''));
+    const vec = vectorBySource.get(String(prop.name ?? ''));
     return {
       ...prop,
       isVector: 0,
-      vectorSourceFieldId: undefined,
+      vectorSourceFieldName: undefined,
       _tableField: prop.name,
       _attributeName: prop.comment,
       _vectorizationOn: Boolean(vec && prop.name),
@@ -139,7 +139,7 @@ function flattenOntologyPhysicalPropertiesForSubmit(
     const base: CreateOntologyPhysicalProperty = {
       ...rest,
       isVector: 0,
-      vectorSourceFieldId: undefined
+      vectorSourceFieldName: undefined
     };
     result.push(base);
 
@@ -156,9 +156,7 @@ function flattenOntologyPhysicalPropertiesForSubmit(
         isStoreAsPublic: 0,
         publicPropertyID: 0,
         isVector: 1,
-        vectorSourceFieldName: f.name,
-        vectorSourceFieldId:
-          f.id !== undefined && f.id !== '' ? Number(f.id) : undefined
+        vectorSourceFieldName: f.name
       };
       if (_vectorPropertyId !== undefined && _vectorPropertyId !== '') {
         vec.id = String(_vectorPropertyId);
@@ -782,7 +780,7 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
         width: 100,
         render: (_, record, index) => {
           const rowDisabled = record.isUse !== 1;
-          const disabled = rowDisabled || isEdit;
+          const disabled = rowDisabled;
           return wrapDisabledFieldPopover(
             <Switch
               disabled={disabled}
@@ -792,7 +790,7 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
               }
             />,
             disabled,
-            rowDisabled ? '请先勾选字段' : '编辑模式下不可修改向量化'
+            '请先勾选字段'
           );
         }
       }
@@ -1548,7 +1546,7 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
                               render: (_value) => (
                                 <Input
                                   value={record._vectorComment ?? ''}
-                                  disabled={isEdit || record.isUse !== 1}
+                                  disabled={record.isUse !== 1}
                                   placeholder="请输入属性名称"
                                   onChange={(val) =>
                                     handleFieldChange(index, {
