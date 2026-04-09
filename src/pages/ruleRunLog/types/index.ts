@@ -1,25 +1,27 @@
+export enum AutoExecLogStatus {
+  /** 0=成功 */
+  SUCCESS = 0,
+  /** 1=失败 */
+  FAILED = 1,
+  /** 2=部分成功 */
+  PARTIAL_SUCCESS = 2,
+  /** 3=待执行 */
+  PENDING = 3
+}
+
 /**
  * AutoExecLogItem
  */
 export interface AutoExecLogItem {
-  actionCode?: string;
-  actionId?: number;
-  actionName?: string;
-  createTime?: string;
-  durationMs?: number;
-  errorMessage?: string;
-  /**
-   * 1=通过，0=未通过，省略=无门控
-   */
-  gateResult?: number;
+  createdAt?: string;
   id?: number;
   logId?: string;
-  projectId?: string;
-  ruleId?: number;
   ruleName?: string;
-  status?: number;
-  triggerTime?: string;
-  triggerType?: number;
+  duration?: string;
+  /**
+   * 0=成功，1=失败，2=部分成功，3=待执行
+   */
+  status?: AutoExecLogStatus;
 }
 
 /**

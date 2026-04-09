@@ -2,10 +2,14 @@ import React, { useEffect, useState } from 'react';
 import PageHeader from '@/components/PageHeader';
 import { SearchTable } from '@ceai-front/arco-material';
 import { Form, Input, Radio } from '@arco-design/web-react';
-import { IconDashboard, IconSearch } from '@arco-design/web-react/icon';
+import { IconSearch } from '@arco-design/web-react/icon';
 import { useArcoTable } from '@/hooks';
 import { AutoExecLogItem, AutoExecLogTodayStats } from './types';
-import { fetchRuleRunLogList, fetchRuleRunLogTodayStats } from './services';
+import {
+  fetchRuleRunLogDetail,
+  fetchRuleRunLogList,
+  fetchRuleRunLogTodayStats
+} from './services';
 import { Order } from '@/api/businessAutomation/runLog';
 import { LogDetailDrawer, StatsCard } from './components';
 import { useColumns } from './hooks/useColumns';
@@ -13,6 +17,10 @@ import { AutoRuleDialog } from '@/pages/ruleManagement/components';
 import { BehaviorDetail } from '@/pages/ontologyScene/modules/behaviorActions/components';
 import { getTimeRange, TimeRange } from './utils/timeRange';
 import styles from './index.module.scss';
+import totalIcon from './assets/total.svg';
+import successIcon from './assets/success.svg';
+import failedIcon from './assets/failed.svg';
+import { set } from 'immer/dist/internal';
 
 const RuleRunLog = () => {
   const [form] = Form.useForm();
@@ -21,6 +29,19 @@ const RuleRunLog = () => {
   const [showRule, setShowRule] = useState<number | undefined>();
   const [behaviorData, setBehaviorData] = useState<number | undefined>();
   const [logRecord, setLogRecord] = useState<AutoExecLogItem | undefined>();
+
+  const openActionByLog = async (record: AutoExecLogItem) => {
+    if (!record?.id) return;
+    try {
+      const detail = await fetchRuleRunLogDetail(record.id);
+      const actionId = detail?.ruleSnapshot?.actionConfig?.actionId;
+      if (actionId) {
+        setBehaviorData(actionId);
+      }
+    } catch (error) {
+      console.error('获取行为信息失败:', error);
+    }
+  };
 
   useEffect(() => {
     let active = true;
@@ -44,19 +65,14 @@ const RuleRunLog = () => {
       setLogRecord(record);
     },
     onViewSnapshot: (record) => {
-      if (record?.ruleId) {
-        setShowRule(record.ruleId);
-      }
+      setShowRule(record.id);
     },
+
     onViewRule: (record) => {
-      if (record?.ruleId) {
-        setShowRule(record.ruleId);
-      }
+      setShowRule(record.id);
     },
     onViewAction: (record) => {
-      if (record?.actionId) {
-        setBehaviorData(record.actionId);
-      }
+      openActionByLog(record);
     }
   });
 
@@ -104,15 +120,15 @@ const RuleRunLog = () => {
 
       <div className="mt-[8px] grid grid-cols-3 gap-[16px] px-[24px]">
         {[
-          { title: '今日触发', value: stats.total ?? 0 },
-          { title: '今日成功', value: stats.success ?? 0 },
-          { title: '今日失败', value: stats.failed ?? 0 }
+          { title: '今日触发', value: stats.total ?? 0, icon: totalIcon },
+          { title: '今日成功', value: stats.success ?? 0, icon: successIcon },
+          { title: '今日失败', value: stats.failed ?? 0, icon: failedIcon }
         ].map((item) => (
           <StatsCard
             key={item.title}
             title={item.title}
             value={item.value}
-            icon={<IconDashboard />}
+            icon={item.icon}
           />
         ))}
       </div>

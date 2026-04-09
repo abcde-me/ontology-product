@@ -57,8 +57,7 @@ export const LogDetailDrawer: React.FC<LogDetailDrawerProps> = ({
   const statusValue = record?.status ?? detail?.status;
   const statusConfig =
     typeof statusValue === 'number' ? STATUS_MAP[statusValue] : undefined;
-  const logContent =
-    detail?.detailLog || detail?.errorMessage || record?.errorMessage || '';
+  const logContent = detail?.detailLog || detail?.errorMessage || '';
 
   return (
     <OsDrawer

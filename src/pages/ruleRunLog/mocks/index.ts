@@ -1,13 +1,9 @@
 import dayjs from 'dayjs';
 import { EXEC_LOGS } from '@/api/businessAutomation/mock';
 import { EXEC_LOG_DETAILS } from '@/api/businessAutomation/mock';
-import {
-  AutoExecLogDetail,
-  AutoExecLogItem,
-  AutoExecLogTodayStats
-} from '../types';
+import { AutoExecLogDetail, AutoExecLogTodayStats } from '../types';
 
-export const USE_MOCK = true;
+export const USE_MOCK = false;
 
 const delay = (ms = 200) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -57,7 +53,7 @@ export const mockApi = {
 
     if (start || end) {
       list = list.filter((item) => {
-        const timeValue = item.triggerTime || item.createTime;
+        const timeValue = item.createdAt;
         if (!timeValue) return false;
         const time = dayjs(timeValue);
         if (!time.isValid()) return false;
@@ -79,7 +75,7 @@ export const mockApi = {
     const todayStart = dayjs().startOf('day');
     const todayEnd = dayjs().endOf('day');
     const todayLogs = EXEC_LOGS.filter((item) => {
-      const timeValue = item.triggerTime || item.createTime;
+      const timeValue = item.createdAt;
       if (!timeValue) return false;
       const time = dayjs(timeValue);
       if (!time.isValid()) return false;
