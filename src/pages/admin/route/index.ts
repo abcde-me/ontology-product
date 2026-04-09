@@ -37,7 +37,8 @@ export const routes: IRoute[] = [
     name: 'home',
     key: '/tenant/compute/onto/home',
     component: React.lazy(async () => import('../../home')),
-    children: []
+    children: [],
+    permission: ONTOLOGY_PERMISSIONS.LIST
   },
   // 本体场景库
   {

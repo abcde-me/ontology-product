@@ -1,6 +1,6 @@
 import React from 'react';
 import { isWujie } from '@/utils/env';
-import { IconHome } from '@arco-design/web-react/icon';
+import { IconMdpDatasetMgmt } from '@ceai-front/svg-icons';
 import {
   ONTOLOGY_PERMISSIONS,
   API_KEY_PERMISSIONS,
@@ -16,6 +16,8 @@ import OrganMenu from '@/assets/sider/organmenu.svg';
 import LabelMenu from '@/assets/label-menu.svg';
 import MemberMenu from '@/assets/sider/membermenu.svg';
 import BaseMenu from '@/assets/sider/basemenu.svg';
+import HomeIcon from '@/assets/sider/home.svg';
+import RuleRunLogIcon from '@/assets/sider/rule-run-log.svg';
 
 export type MenuModel = {
   title: string;
@@ -101,7 +103,7 @@ export const menus: MenuModel[] = [
     children: [
       {
         title: '首页',
-        icon: <IconHome className={iconClass} />,
+        icon: <HomeIcon className={iconClass} />,
         key: 'home',
         path: '/tenant/compute/onto/home'
       }
@@ -128,14 +130,14 @@ export const menus: MenuModel[] = [
     children: [
       {
         title: '规则管理',
-        icon: <OntologyLibrary className={iconClass} />,
+        icon: <IconMdpDatasetMgmt className={iconClass} />,
         key: 'AutomationRuleManagement',
         path: '/tenant/compute/onto/businessAutomation/management',
         permission: ONTOLOGY_PERMISSIONS.LIST
       },
       {
         title: '执行日志',
-        icon: <OntologyLibrary className={iconClass} />,
+        icon: <RuleRunLogIcon className={iconClass} />,
         key: 'AutomationRuleRunLog',
         path: '/tenant/compute/onto/businessAutomation/runLog',
         permission: ONTOLOGY_PERMISSIONS.LIST
