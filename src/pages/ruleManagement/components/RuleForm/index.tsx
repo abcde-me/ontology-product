@@ -626,7 +626,7 @@ export const RuleForm = forwardRef<
                                               });
                                               syncValidatedValues({
                                                 changeConfig: {
-                                                  instanceIds: value as number[]
+                                                  instanceIds: value as string[]
                                                 }
                                               });
                                             }}

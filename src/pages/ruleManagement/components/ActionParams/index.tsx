@@ -64,7 +64,7 @@ const renderParamReadonlyValue = (param: { type: ParamType; value: any }) => {
   ) {
     return (
       <div className={'flex h-full items-center overflow-hidden'}>
-        <GlobalTooltip.Ellipsis text={value} />
+        <GlobalTooltip.Ellipsis text={value?.toString()} />
       </div>
     );
   }
@@ -147,7 +147,6 @@ export const ActionParams = (props: ActionParamsProps) => {
   } = props;
   const { form } = Form.useFormContext();
   const triggerType = Form.useWatch('triggerType', form);
-  const value = Form.useWatch(field, form);
 
   const field2Rule = actionData?.params?.reduce((p, c) => {
     const { validationRule, enabledValidation, name } = c;
@@ -173,7 +172,7 @@ export const ActionParams = (props: ActionParamsProps) => {
                 }
                 break;
               case RuleName.LengthRule:
-                const length = value.trim().length;
+                const length = value?.toString().trim().length;
                 if (
                   length < (ruleConfig as RangeRule).minValue ||
                   length > (ruleConfig as RangeRule).maxValue
@@ -182,7 +181,11 @@ export const ActionParams = (props: ActionParamsProps) => {
                 }
                 break;
               default:
-                if (!(ruleConfig as EnumRule).options.includes(value)) {
+                if (
+                  !(ruleConfig as EnumRule).options
+                    .map(String)
+                    .includes(value?.toString())
+                ) {
                   onError(failMessage);
                 }
                 break;

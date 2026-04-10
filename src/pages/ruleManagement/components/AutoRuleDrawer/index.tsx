@@ -15,6 +15,7 @@ import {
 } from '@ceai-front/arco-material';
 import {
   ActionParams,
+  FunctionInfo,
   PropConditions,
   RuleSettingConfig
 } from '@/pages/ruleManagement/components';
@@ -32,13 +33,14 @@ import {
   buildFormParams,
   buildObjPropertyInfo,
   getModelIconNode,
-  getObjIconComponent
+  getObjIconComponent,
+  handleRuleDetailParams
 } from '@/pages/ruleManagement/utils';
 import { IconInfoCircle } from '@arco-design/web-react/icon';
 import { PyCodeContent } from '@/components/PyCodeContent';
 import { GetAutoExecLogRuleSnapshot } from '@/api/businessAutomation/runLog';
 import { isNil } from 'lodash-es';
-import { ContentWithCopy } from '@/pages/ontologyScene/components';
+import { ContentWithCopy, OsModal } from '@/pages/ontologyScene/components';
 
 const CHANGE_TYPE_TEXT = {
   [ChangeType.PropertyChange]: '属性变化',
@@ -98,16 +100,23 @@ export const AutoRuleDrawer = (
   const [form] = Form.useForm();
   const { data: ruleDetail, loading } = useRequest(
     () => {
-      if (mode === 'snapshot') {
-        return GetAutoExecLogRuleSnapshot(ruleId!);
-      }
-      return getAutoRuleDetail(ruleId!);
+      const getRule =
+        mode === 'view' ? getAutoRuleDetail : GetAutoExecLogRuleSnapshot;
+      return getRule(ruleId!)
+        .then((res) => {
+          handleRuleDetailParams(res);
+          return res;
+        })
+        .catch((e) => {
+          console.error(e);
+          return Promise.resolve(undefined);
+        });
     },
     {
       ready: !isNil(ruleId),
       refreshDeps: [ruleId, mode],
       onSuccess(data) {
-        let functionParams, actionParams;
+        let functionParams;
         if (data?.gateConfig?.enabled) {
           functionParams = buildFormParams(
             data.gateConfig?.parameters,
@@ -129,23 +138,6 @@ export const AutoRuleDrawer = (
     if (!ruleDetail?.changeConfig?.objectTypeInfo) return null;
     return getObjIconComponent(ruleDetail.changeConfig.objectTypeInfo);
   })();
-
-  const showFunctionCode = () => {
-    Modal.info({
-      icon: null,
-      title: ruleDetail?.gateConfig?.functionInfo?.name || '-',
-      footer: null,
-      style: {
-        width: 900,
-        maxHeight: 600
-      },
-      closable: true,
-      className: styles['function-modal'],
-      content: (
-        <PyCodeContent value={ruleDetail?.gateConfig?.functionInfo?.content} />
-      )
-    });
-  };
 
   return (
     <DrawerWithEditBtn
@@ -331,6 +323,12 @@ export const AutoRuleDrawer = (
                             tagList={
                               ruleDetail?.changeConfig?.instanceIds || []
                             }
+                            tagProps={{
+                              className: styles['ins-tag-item']
+                            }}
+                            // moreTagProps={{
+                            //   className: styles['ins-tag-item']
+                            // }}
                           />
                         )}
                       </div>
@@ -361,26 +359,9 @@ export const AutoRuleDrawer = (
                         条件函数：
                       </div>
                       <div className={styles['info-item-value']}>
-                        <div
-                          className={
-                            'flex w-full items-center gap-1 overflow-hidden'
-                          }
-                        >
-                          <div className={'w-max overflow-hidden'}>
-                            <GlobalTooltip.Ellipsis
-                              text={
-                                ruleDetail?.gateConfig?.functionInfo?.name ||
-                                '-'
-                              }
-                            />
-                          </div>
-                          <IconInfoCircle
-                            className={
-                              'flex-shrink-0 hover:cursor-pointer hover:text-[rgb(var(--primary-6))]'
-                            }
-                            onClick={showFunctionCode}
-                          />
-                        </div>
+                        <FunctionInfo
+                          functionInfo={ruleDetail?.gateConfig?.functionInfo}
+                        ></FunctionInfo>
                       </div>
                     </div>
                     <div className={`${styles['info-item']}`}>

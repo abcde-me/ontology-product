@@ -69,26 +69,6 @@
   }
 }
 
-.function-modal {
-  padding: 20px 24px 24px;
-
-  :global {
-    .arco-modal-content {
-      padding: 0 !important;
-    }
-
-    .arco-modal-header {
-      color: var(--color-text-1 /*#0F131F*/);
-
-      /* 16 弹窗标题/500 */
-      font-family: 'PingFang SC';
-      font-size: 16px;
-      font-weight: 500;
-      line-height: 24px; /* 150% */
-    }
-  }
-}
-
 .auto-rule-drawer {
   :global {
     .info-container {
@@ -107,6 +87,25 @@
   border-radius: 4px;
   background: var(--fill-color-fill-2, #f5f7fc);
   color: var(--color-text-2, #292f42);
+
+  /* 14 正文&二级标题/400 */
+  font-family: 'PingFang SC';
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 22px; /* 157.143% */
+}
+
+.ins-tag-item {
+  display: flex;
+  padding: 1px 4px;
+  align-items: center;
+  gap: 4px;
+  border-radius: 4px;
+  //background: var(--color-fill-2, #F5F7FC) !important;
+  background: #f5f7fc !important;
+  //color: var(--color-text-1, #0F131F);
+  color: #0f131f;
+  max-width: 160px;
 
   /* 14 正文&二级标题/400 */
   font-family: 'PingFang SC';

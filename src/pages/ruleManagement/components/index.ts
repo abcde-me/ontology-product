@@ -8,3 +8,4 @@ export * from './FunctionSelect';
 export * from './ActionParams';
 export * from './OntoSceneSelect';
 export * from './PropConditions';
+export * from './FunctionInfo';

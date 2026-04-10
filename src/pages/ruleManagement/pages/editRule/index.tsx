@@ -43,8 +43,8 @@ const RuleEditPage = () => {
           Message.error('加载数据失败');
           return;
         }
-        initRule(data);
         handleRuleDetailParams(data);
+        initRule(data);
         const ruleFormData = buildAutoRuleForm(data);
         ruleForm.current?.form.setFieldsValue(ruleFormData);
       }

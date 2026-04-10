@@ -1,24 +1,10 @@
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState
-} from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import ReactDOM from 'react-dom';
 import classNames from 'classnames';
-import {
-  Button,
-  Form,
-  Input,
-  Message,
-  Modal,
-  Spin,
-  Tooltip
-} from '@arco-design/web-react';
+import { Form, Input, Message, Spin, Tooltip } from '@arco-design/web-react';
 import {
   IconLoading,
   IconLocation,
-  IconRefresh,
   IconSearch
 } from '@arco-design/web-react/icon';
 import AMapLoader from '@amap/amap-jsapi-loader';
@@ -62,11 +48,23 @@ interface MapPickerProps extends CustomFormItemCompProps<GeoPoint> {
   getPopupContainer?: () => Element;
 }
 
-// TODO: 请补充自己的高德 Key 与安全码
+interface MapPickerRequest {
+  getPopupContainer?: () => Element;
+  onChange?: (value: GeoPoint) => void;
+  value?: GeoPoint;
+}
+
+interface MapPickerModalState {
+  request?: MapPickerRequest;
+  requestId: number;
+  visible: boolean;
+}
+
 const A_MAP_KEY = 'dc84b21bcd19ba6f62782df7349d7a8c';
 const A_MAP_SECURITY = '6f410a598a5d10d836148c2743fdde1d';
+const MAP_CONTAINER_ID = 'globalMapPickerContainer';
+const DEFAULT_CENTER: [number, number] = [116.397428, 39.90923];
 
-// const amapLoader: Promise<any> | null = null;
 const loadAmap = async () => {
   window._AMapSecurityConfig = {
     securityJsCode: A_MAP_SECURITY
@@ -83,38 +81,113 @@ const loadAmap = async () => {
   });
 };
 
-export const MapPicker: React.FC<MapPickerProps> = ({
-  value,
-  onChange,
-  placeholder = '请选择坐标',
-  disabled,
-  className,
-  style,
-  getPopupContainer
-}) => {
-  const [form] = Form.useForm();
-  const listRef = useRef<HTMLDivElement>(null);
-  const [showPointList, setShowPointList] = useState(false);
-  const AMapRef = useRef<any>();
-  const [visible, setVisible] = useState(false);
-  const [mapReady, setMapReady] = useState(false);
-  const [loadingMap, setLoadingMap] = useState(false);
-  const [searchLoading, setSearchLoading] = useState(false);
-  const [searchOptions, setSearchOptions] = useState<SearchOption[]>([]);
-  const [currentPoint, setCurrentPoint] = useState<GeoPoint | undefined>(value);
+const getDisplayValue = (point?: GeoPoint) => {
+  if (!point) return undefined;
+  const { lng, lat } = point;
+  return `${lng.toFixed(6)}, ${lat.toFixed(6)}`;
+};
 
+let modalState: MapPickerModalState = {
+  visible: false,
+  requestId: 0
+};
+const modalListeners = new Set<() => void>();
+let modalHost: HTMLDivElement | null = null;
+let modalMounted = false;
+
+const emitModalState = () => {
+  modalListeners.forEach((listener) => listener());
+};
+
+const updateModalState = (patch: Partial<MapPickerModalState>) => {
+  modalState = {
+    ...modalState,
+    ...patch
+  };
+  emitModalState();
+};
+
+const subscribeModalState = (listener: () => void) => {
+  modalListeners.add(listener);
+  return () => {
+    modalListeners.delete(listener);
+  };
+};
+
+const useMapPickerModalState = () => {
+  const [, forceUpdate] = useState(0);
+
+  useEffect(() => {
+    return subscribeModalState(() => {
+      forceUpdate((value) => value + 1);
+    });
+  }, []);
+
+  return modalState;
+};
+
+const ensureMapPickerModalHost = () => {
+  if (typeof document === 'undefined') return;
+
+  if (!modalHost) {
+    modalHost = document.createElement('div');
+    modalHost.setAttribute('data-map-picker-host', 'true');
+    document.body.appendChild(modalHost);
+  }
+
+  if (!modalMounted) {
+    ReactDOM.render(<GlobalMapPickerModal />, modalHost);
+    modalMounted = true;
+  }
+};
+
+const openGlobalMapPicker = (request: MapPickerRequest) => {
+  ensureMapPickerModalHost();
+  updateModalState({
+    request,
+    requestId: modalState.requestId + 1,
+    visible: true
+  });
+};
+
+const closeGlobalMapPicker = () => {
+  updateModalState({
+    visible: false
+  });
+};
+
+const clearGlobalMapPickerRequest = () => {
+  updateModalState({
+    request: undefined
+  });
+};
+
+// 全局单例地图弹窗
+const GlobalMapPickerModal = () => {
+  const [form] = Form.useForm();
+  const { visible, request, requestId } = useMapPickerModalState();
+  const listRef = useRef<HTMLDivElement>(null);
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
+  const AMapRef = useRef<any>();
   const mapRef = useRef<any>();
   const markerRef = useRef<any>();
   const placeSearchRef = useRef<any>();
   const mapClickBoundRef = useRef(false);
   const mapInitializingRef = useRef(false);
 
-  const getDisplayValue = (point?: GeoPoint) => {
-    if (!point) return undefined;
-    const { lng, lat } = point;
-    return `${lng.toFixed(6)}, ${lat.toFixed(6)}`;
-  };
+  const [showPointList, setShowPointList] = useState(false);
+  const [mapReady, setMapReady] = useState(false);
+  const [loadingMap, setLoadingMap] = useState(false);
+  const [searchLoading, setSearchLoading] = useState(false);
+  const [searchOptions, setSearchOptions] = useState<SearchOption[]>([]);
+  const [currentPoint, setCurrentPoint] = useState<GeoPoint | undefined>();
+
+  const clearMarker = useCallback(() => {
+    if (markerRef.current) {
+      markerRef.current.setMap(null);
+      markerRef.current = null;
+    }
+  }, []);
 
   const ensureMarker = useCallback(() => {
     if (!mapRef.current || !AMapRef.current) return null;
@@ -128,11 +201,17 @@ export const MapPicker: React.FC<MapPickerProps> = ({
           lat: e.lnglat.lat
         };
         setCurrentPoint(point);
+        form.setFields({
+          geoPoint: {
+            error: undefined,
+            value: getDisplayValue(point)
+          }
+        });
       });
       markerRef.current.setMap(mapRef.current);
     }
     return markerRef.current;
-  }, []);
+  }, [form]);
 
   const updateMarker = useCallback(
     (point: GeoPoint, moveMap = true) => {
@@ -144,11 +223,39 @@ export const MapPicker: React.FC<MapPickerProps> = ({
       }
       setCurrentPoint(point);
       form.setFields({
-        geoPoint: { error: undefined, value: getDisplayValue(point) }
+        geoPoint: {
+          error: undefined,
+          value: getDisplayValue(point)
+        }
       });
     },
-    [ensureMarker]
+    [ensureMarker, form]
   );
+
+  const resetPointState = useCallback(
+    (point?: GeoPoint) => {
+      setCurrentPoint(point);
+      form.setFields({
+        geoPoint: {
+          error: undefined,
+          value: getDisplayValue(point)
+        }
+      });
+
+      if (!mapRef.current) return;
+
+      if (point) {
+        updateMarker(point, true);
+        return;
+      }
+
+      clearMarker();
+      mapRef.current.setCenter(DEFAULT_CENTER);
+      mapRef.current.setZoom?.(11);
+    },
+    [clearMarker, form, updateMarker]
+  );
+
   const bindMapClick = useCallback(() => {
     if (!mapRef.current || mapClickBoundRef.current) return;
     const handleClick = (e: any) => {
@@ -162,47 +269,49 @@ export const MapPicker: React.FC<MapPickerProps> = ({
     mapClickBoundRef.current = true;
   }, [updateMarker]);
 
-  const initMapControls = () => {
+  const initMapControls = useCallback(() => {
     const AMap = AMapRef.current;
     if (!AMap || placeSearchRef.current) return;
     AMap.plugin('AMap.PlaceSearch', () => {
       placeSearchRef.current = new AMap.PlaceSearch({
-        pageSize: 100, //每页结果数,默认10
-        pageIndex: 1, //请求页码，默认1
+        pageSize: 100,
+        pageIndex: 1,
         city: '全国'
       });
     });
-    AMap.plugin('AMap.ToolBar', function () {
-      const toolBar = new AMap.ToolBar(); //缩放工具条实例化
-      mapRef.current.addControl(toolBar);
+    AMap.plugin('AMap.ToolBar', () => {
+      const toolBar = new AMap.ToolBar();
+      mapRef.current?.addControl(toolBar);
     });
-    AMap.plugin('AMap.Scale', function () {
-      const scale = new AMap.Scale(); //缩放工具条实例化
-      mapRef.current.addControl(scale);
+    AMap.plugin('AMap.Scale', () => {
+      const scale = new AMap.Scale();
+      mapRef.current?.addControl(scale);
     });
-    AMap.plugin('AMap.Geolocation', function () {
-      const geolocation = new AMap.Geolocation(); //缩放工具条实例化
-      mapRef.current.addControl(geolocation);
+    AMap.plugin('AMap.Geolocation', () => {
+      const geolocation = new AMap.Geolocation();
+      mapRef.current?.addControl(geolocation);
     });
-  };
+  }, []);
+
   const initMap = useCallback(async () => {
     if (mapRef.current) return true;
     if (mapInitializingRef.current) return false;
+
     mapInitializingRef.current = true;
     setLoadingMap(true);
     try {
       const AMap = await loadAmap();
-      const container = document.querySelector('#aMapInitContainer');
+      const container = document.querySelector(`#${MAP_CONTAINER_ID}`);
       if (!container || !container.isConnected) {
         return false;
       }
+
       AMapRef.current = AMap;
-      const center = currentPoint
-        ? [currentPoint.lng, currentPoint.lat]
-        : [116.397428, 39.90923];
-      mapRef.current = new AMap.Map('aMapInitContainer', {
+      mapRef.current = new AMap.Map(MAP_CONTAINER_ID, {
         zoom: 11,
-        center,
+        center: currentPoint
+          ? [currentPoint.lng, currentPoint.lat]
+          : DEFAULT_CENTER,
         viewMode: '2D'
       });
       bindMapClick();
@@ -222,23 +331,12 @@ export const MapPicker: React.FC<MapPickerProps> = ({
     }
   }, [bindMapClick, currentPoint, initMapControls, updateMarker]);
 
-  const openModal = useCallback(() => {
-    if (disabled) return;
-    setVisible(true);
-  }, [disabled]);
-
-  // 同步外部受控值
   useEffect(() => {
-    if (!value) return setCurrentPoint(undefined);
-    if (value && [value.lat, value.lng].every((n) => typeof n === 'number')) {
-      setCurrentPoint(value);
-      if (mapRef.current) {
-        updateMarker(value, false);
-      }
-    }
-  }, [value?.lng, value?.lat, updateMarker]);
+    setSearchOptions([]);
+    setShowPointList(false);
+    resetPointState(request?.value);
+  }, [request?.value?.lat, request?.value?.lng, requestId, resetPointState]);
 
-  // 兼容火狐浏览器，所以改成了第一次打开弹窗之后开始加载地图
   useEffect(() => {
     if (!visible) return;
 
@@ -247,7 +345,7 @@ export const MapPicker: React.FC<MapPickerProps> = ({
     let frameId = 0;
 
     const ensureMapReady = async () => {
-      const container = document.querySelector('#aMapInitContainer');
+      const container = document.querySelector(`#${MAP_CONTAINER_ID}`);
       if (!container || !container.isConnected) {
         frameId = window.requestAnimationFrame(ensureMapReady);
         return;
@@ -285,10 +383,8 @@ export const MapPicker: React.FC<MapPickerProps> = ({
     };
   }, [currentPoint, initMap, updateMarker, visible]);
 
-  // 远程搜索 POI，结果注入 Select options
   const handleSearch = useCallback((keyword: string) => {
     const q = keyword?.trim();
-    // setSearchKeyword(keyword);
     if (!q) {
       setSearchOptions([]);
       setShowPointList(false);
@@ -307,7 +403,7 @@ export const MapPicker: React.FC<MapPickerProps> = ({
       }
       const options: SearchOption[] = result.poiList.pois
         .filter((poi: any) => poi.location)
-        .map((poi: any, idx: number) => ({
+        .map((poi: any) => ({
           label: `${poi.name}${poi.address ? ' - ' + poi.address : ''}`,
           value: `${poi.location.lng},${poi.location.lat}`,
           poi: {
@@ -343,20 +439,11 @@ export const MapPicker: React.FC<MapPickerProps> = ({
       .validate()
       .then(() => {
         if (currentPoint) {
-          onChange?.(currentPoint);
+          request?.onChange?.(currentPoint);
         }
-        setVisible(false);
+        closeGlobalMapPicker();
       })
       .catch(console.error);
-  };
-
-  const handleClear = () => {
-    setCurrentPoint(undefined);
-    onChange?.(undefined as any);
-  };
-
-  const handleModalClose = () => {
-    setVisible(false);
   };
 
   useEffect(() => {
@@ -369,117 +456,135 @@ export const MapPicker: React.FC<MapPickerProps> = ({
   }, []);
 
   return (
-    <>
-      <Tooltip
-        disabled={disabled}
-        content="选择坐标"
-        getPopupContainer={getPopupContainer}
-      >
-        <Input
-          className={classNames(styles.input, className)}
-          style={style}
-          readOnly
-          value={getDisplayValue(currentPoint)}
-          placeholder={placeholder}
-          disabled={disabled}
-          allowClear
-          onClear={handleClear}
-          suffix={
-            loadingMap ? (
-              <IconLoading />
-            ) : (
-              <Tooltip content="选择坐标" getPopupContainer={getPopupContainer}>
-                <IconLocation onClick={openModal} />
-              </Tooltip>
-            )
-          }
-          onClick={openModal}
-        />
-      </Tooltip>
+    <OsModal
+      title="选择坐标"
+      visible={visible}
+      onCancel={closeGlobalMapPicker}
+      onOk={handleConfirm}
+      maskStyle={{
+        display: visible ? 'block' : 'none'
+      }}
+      style={{ width: 900, height: 600 }}
+      getChildrenPopupContainer={(node) => node.parentElement || document.body}
+      afterClose={() => {
+        form.resetFields();
+        clearGlobalMapPickerRequest();
+      }}
+      className={styles.modal}
+      getPopupContainer={request?.getPopupContainer || (() => document.body)}
+    >
+      <div className={'flex h-full w-full flex-col'}>
+        <div className={styles.toolbar}>
+          <Form autoFocus={false} autoComplete={'off'} form={form}>
+            <FormItem
+              required={true}
+              label={'已选坐标：'}
+              className={'mb-0'}
+              layout={'horizontal'}
+              field="geoPoint"
+              rules={[
+                {
+                  required: true,
+                  message: '请点击地图选择坐标'
+                }
+              ]}
+            >
+              <Input disabled placeholder={'请点击地图选择坐标'} />
+            </FormItem>
+          </Form>
+        </div>
 
-      <OsModal
-        title="选择坐标"
-        visible={visible}
-        onCancel={handleModalClose}
-        onOk={handleConfirm}
-        maskStyle={{
-          display: visible ? 'block' : 'none'
-        }}
-        style={{ width: 900, height: 600 }}
-        getChildrenPopupContainer={(node) =>
-          node.parentElement || document.body
-        }
-        afterClose={() => {
-          form.resetFields();
-        }}
-        className={styles.modal}
-        getPopupContainer={getPopupContainer || (() => document.body)}
-      >
-        <div className={'flex h-full w-full flex-col'}>
-          <div className={styles.toolbar}>
-            <Form autoFocus={false} autoComplete={'off'} form={form}>
-              <FormItem
-                required={true}
-                label={'已选坐标：'}
-                className={'mb-0'}
-                layout={'horizontal'}
-                field="geoPoint"
-                rules={[
-                  {
-                    required: true,
-                    message: '请点击地图选择坐标'
+        <div className={styles.body}>
+          <div className={styles.mapWrapper}>
+            <div
+              ref={mapContainerRef}
+              className={styles.mapContainer}
+              id={MAP_CONTAINER_ID}
+            />
+            {loadingMap && (
+              <div className={styles.loadingMask}>
+                <Spin />
+                <div className={styles.loadingText}>地图加载中...</div>
+              </div>
+            )}
+            <SelectWithNoData
+              popupVisible={showPointList}
+              showSearch
+              allowClear
+              placeholder="请输入关键词"
+              disabled={!mapReady || loadingMap}
+              loading={searchLoading}
+              options={searchOptions}
+              filterOption={false}
+              arrowIcon={<IconSearch />}
+              onSearch={handleSearch}
+              dropdownRender={(menu) => {
+                return <div ref={listRef}>{menu}</div>;
+              }}
+              onChange={(val: string) => {
+                if (!val) return;
+                const [lng, lat] = val.split(',');
+                handleSelectPoi({
+                  name: '',
+                  location: {
+                    lng: +lng,
+                    lat: +lat
                   }
-                ]}
-              >
-                <Input disabled placeholder={'请点击地图选择坐标'} />
-              </FormItem>
-            </Form>
-          </div>
-
-          <div className={styles.body}>
-            <div className={styles.mapWrapper}>
-              <div
-                ref={mapContainerRef}
-                className={styles.mapContainer}
-                id={'aMapInitContainer'}
-              />
-              {loadingMap && (
-                <div className={styles.loadingMask}>
-                  <Spin />
-                  <div className={styles.loadingText}>地图加载中...</div>
-                </div>
-              )}
-              <SelectWithNoData
-                popupVisible={showPointList}
-                showSearch
-                allowClear
-                placeholder="请输入关键词"
-                disabled={!mapReady || loadingMap}
-                loading={searchLoading}
-                options={searchOptions}
-                filterOption={false}
-                arrowIcon={<IconSearch />}
-                onSearch={handleSearch}
-                dropdownRender={(menu) => {
-                  return <div ref={listRef}>{menu}</div>;
-                }}
-                onChange={(val: string, option) => {
-                  if (!val) return;
-                  const [lng, lat] = val.split(',');
-                  handleSelectPoi({
-                    name: '',
-                    location: {
-                      lng: +lng,
-                      lat: +lat
-                    }
-                  });
-                }}
-                className={styles['search-place']}
-              />
-            </div>
+                });
+              }}
+              className={styles['search-place']}
+            />
           </div>
         </div>
-      </OsModal>
-    </>
+      </div>
+    </OsModal>
+  );
+};
+
+export const MapPicker: React.FC<MapPickerProps> = ({
+  value,
+  onChange,
+  placeholder = '请选择坐标',
+  disabled,
+  className,
+  style,
+  getPopupContainer
+}) => {
+  const openModal = useCallback(() => {
+    if (disabled) return;
+    openGlobalMapPicker({
+      value,
+      onChange,
+      getPopupContainer
+    });
+  }, [disabled, getPopupContainer, onChange, value]);
+
+  const handleClear = () => {
+    onChange?.(undefined as any);
+  };
+
+  return (
+    <Tooltip
+      disabled={disabled}
+      content="选择坐标"
+      getPopupContainer={getPopupContainer}
+    >
+      <Input
+        className={classNames(styles.input, className)}
+        style={style}
+        readOnly
+        value={getDisplayValue(value)}
+        placeholder={placeholder}
+        disabled={disabled}
+        allowClear
+        onClear={handleClear}
+        suffix={
+          <Tooltip content="选择坐标" getPopupContainer={getPopupContainer}>
+            <IconLocation onClick={openModal} />
+          </Tooltip>
+        }
+        onClick={openModal}
+      />
+    </Tooltip>
   );
 };
