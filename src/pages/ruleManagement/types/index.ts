@@ -63,6 +63,7 @@ export interface AutoRuleDetail {
   description?: string;
   gateConfig?: GateConfigRes;
   id?: number;
+  snapshotTime?: string;
   /**
    * 本体场景 ID
    */
@@ -330,3 +331,9 @@ export const STR_CONDITION_OPERATOR_OPTIONS = [
   { label: '包含', value: Operator.Contains },
   { label: '不包含', value: Operator.NotContains }
 ];
+
+export const RULE_STATUS_MAP: Record<number, { label: string; color: string }> =
+  {
+    0: { label: '未上线', color: '#94A3B8' },
+    1: { label: '已上线', color: '#10B981' }
+  };

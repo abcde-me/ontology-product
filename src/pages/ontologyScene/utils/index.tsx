@@ -13,7 +13,7 @@ import {
   MapPicker,
   ObjectInstanceSelect,
   ObjInsValue
-} from '@/pages/ontologyScene/componens';
+} from '@/pages/ontologyScene/components';
 import styles from '../styles/index.module.scss';
 import { LinkType } from '@/types/graphApi';
 import { BehaviorActionDetail } from '@/pages/ontologyScene/types/behaviorActions';

@@ -8,7 +8,11 @@ import { useRequest } from 'ahooks';
 import { getAutoRuleDetail } from '@/api/businessAutomation/list';
 import styles from './index.module.scss';
 import { Form, Modal, Spin } from '@arco-design/web-react';
-import { GlobalTooltip, TruncatedTagList } from '@ceai-front/arco-material';
+import {
+  DotStatus,
+  GlobalTooltip,
+  TruncatedTagList
+} from '@ceai-front/arco-material';
 import {
   ActionParams,
   PropConditions,
@@ -21,6 +25,7 @@ import {
   InstanceScope,
   MonthDayMode,
   PeriodType,
+  RULE_STATUS_MAP,
   ScheduleConfigRes
 } from '@/pages/ruleManagement/types';
 import {
@@ -33,6 +38,7 @@ import { IconInfoCircle } from '@arco-design/web-react/icon';
 import { PyCodeContent } from '@/components/PyCodeContent';
 import { GetAutoExecLogRuleSnapshot } from '@/api/businessAutomation/runLog';
 import { isNil } from 'lodash-es';
+import { ContentWithCopy } from '@/pages/ontologyScene/components';
 
 const CHANGE_TYPE_TEXT = {
   [ChangeType.PropertyChange]: '属性变化',
@@ -90,7 +96,6 @@ export const AutoRuleDrawer = (
   const { ruleId, mode, ...other } = props;
   const history = useHistory();
   const [form] = Form.useForm();
-
   const { data: ruleDetail, loading } = useRequest(
     () => {
       if (mode === 'snapshot') {
@@ -99,7 +104,7 @@ export const AutoRuleDrawer = (
       return getAutoRuleDetail(ruleId!);
     },
     {
-      ready: !!ruleId,
+      ready: !isNil(ruleId),
       refreshDeps: [ruleId, mode],
       onSuccess(data) {
         let functionParams, actionParams;
@@ -144,16 +149,31 @@ export const AutoRuleDrawer = (
 
   return (
     <DrawerWithEditBtn
-      onEdit={() => {
-        if (ruleId) {
-          history.push(
-            `/tenant/compute/onto/businessAutomation/management/info/edit/${ruleId}`
-          );
-        }
-      }}
+      onEdit={
+        ruleDetail?.status === 1
+          ? undefined
+          : () => {
+              if (ruleId) {
+                history.push(
+                  `/tenant/compute/onto/businessAutomation/management/info/edit/${ruleId}`
+                );
+              }
+            }
+      }
       footer={null}
       autoFocus={false}
-      title={'规则详情'}
+      title={
+        mode === 'view' ? (
+          '规则详情'
+        ) : (
+          <div className={'flex items-center gap-2'}>
+            规则快照
+            <div className={styles['snapshot-time']}>
+              {ruleDetail?.snapshotTime}
+            </div>
+          </div>
+        )
+      }
       className={styles['auto-rule-drawer']}
       {...other}
     >
@@ -182,6 +202,33 @@ export const AutoRuleDrawer = (
                         : '-'}
                     </div>
                   </div>
+                  {mode === 'snapshot' && (
+                    <>
+                      <div className={`${styles['info-item']}`}>
+                        <div className={styles['info-item-label']}>
+                          规则id：
+                        </div>
+                        <div className={styles['info-item-value']}>
+                          <ContentWithCopy value={ruleDetail?.id} />
+                        </div>
+                      </div>
+                      <div className={`${styles['info-item']}`}>
+                        <div className={styles['info-item-label']}>
+                          规则状态：
+                        </div>
+                        <div className={styles['info-item-value']}>
+                          <DotStatus
+                            color={
+                              RULE_STATUS_MAP[ruleDetail?.stauts || 0].color
+                            }
+                            text={
+                              RULE_STATUS_MAP[ruleDetail?.stauts || 0].label
+                            }
+                          />
+                        </div>
+                      </div>
+                    </>
+                  )}
                   <div className={styles['info-item']}>
                     <div className={styles['info-item-label']}>描述说明：</div>
                     <div className={styles['info-item-value']}>

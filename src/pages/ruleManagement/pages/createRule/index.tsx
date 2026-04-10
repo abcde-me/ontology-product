@@ -2,7 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import { PageContainer, RuleForm, RuleFormRef } from '../../components';
 import styles from '../../styles/index.module.scss';
 import { useHistory } from 'react-router-dom';
-import { buildAutoRule } from '@/pages/ruleManagement/utils';
+import { buildSaveAutoRuleData } from '@/pages/ruleManagement/utils';
 import { saveAutoRule } from '@/api/businessAutomation/list';
 import { Message } from '@arco-design/web-react';
 import { useRuleManagementStore } from '@/pages/ruleManagement/stores';
@@ -21,7 +21,7 @@ const RuleCreatePage = () => {
     ruleForm.current?.form
       .validate()
       .then((formData) => {
-        const autoRule = buildAutoRule(ruleDetail);
+        const autoRule = buildSaveAutoRuleData(ruleDetail);
         return saveAutoRule(autoRule).then((res) => {
           Message.success({
             content: '保存成功',

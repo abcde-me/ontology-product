@@ -38,7 +38,7 @@ import { EditorView } from '@codemirror/view';
 import { Transaction } from '@codemirror/state';
 import classNames from 'classnames';
 import { BehaviorLogItem } from '@/pages/ontologyScene/modules/behaviorLog/types';
-import { ResizeBoxWithCursorChange } from '@/pages/ontologyScene/componens';
+import { ResizeBoxWithCursorChange } from '@/pages/ontologyScene/components';
 import { RunStatus } from '@/pages/ontologyScene/hooks/useTestFunction';
 import { OntologyFunctionDetail } from '@/pages/ontologyScene/types/ontologyFunction';
 import { OntologyActionParam } from '@/pages/ontologyScene/types/behaviorActions';

@@ -1,11 +1,11 @@
 import React, { useCallback, useState } from 'react';
 import styles from './index.module.scss';
 import classNames from 'classnames';
-import { ObjectTypeSelect } from '../../componens';
+import { ObjectTypeSelect } from '..';
 import { useRequest } from 'ahooks';
 import { listOntologyPhysicalProperties } from '@/api/ontologySceneLibrary/graph';
 import { ObjectType } from '@/types/objectType';
-import { InstanceSelect } from '@/pages/ontologyScene/componens/ObjectInstanceSelect/InsSelect';
+import { InstanceSelect } from '@/pages/ontologyScene/components/ObjectInstanceSelect/InsSelect';
 import { useParams } from 'react-router-dom';
 import { isNil } from 'lodash-es';
 

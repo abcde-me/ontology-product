@@ -47,9 +47,9 @@ import {
 import { useHistory, useParams } from 'react-router';
 import { isNil } from 'lodash-es';
 import { getLinkTypeText } from '@/pages/ontologyScene/utils';
-import { AttributeItem } from '@/pages/ontologyScene/componens/ObjectTypeDetailDrawer';
+import { AttributeItem } from '@/pages/ontologyScene/components/ObjectTypeDetailDrawer';
 import { openNewPage } from '@/utils/env';
-import { EllipsisPopover } from '@/pages/ontologyScene/componens';
+import { EllipsisPopover } from '@/pages/ontologyScene/components';
 
 const defaultPageSize = 10;
 

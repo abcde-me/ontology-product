@@ -2,7 +2,7 @@ import React, { ComponentProps } from 'react';
 import { Form } from '@arco-design/web-react';
 import classNames from 'classnames';
 import styles from './index.module.scss';
-import { EllipsisPopover } from '@/pages/ontologyScene/componens';
+import { EllipsisPopover } from '@/pages/ontologyScene/components';
 
 interface IProps extends ComponentProps<typeof Form.Item> {
   labelWidth?: number;

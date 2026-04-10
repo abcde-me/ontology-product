@@ -1,6 +1,6 @@
 import React from 'react';
 import { CopyItemIcon } from '@ceai-front/arco-material';
-import { ObjectTypeTag } from '@/pages/ontologyScene/componens';
+import { ObjectTypeTag } from '@/pages/ontologyScene/components';
 import EllipsisTextWithTooltip from '../EllipsisTextWithTooltip';
 import styles from './index.module.scss';
 import classNames from 'classnames';

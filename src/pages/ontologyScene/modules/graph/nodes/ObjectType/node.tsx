@@ -1,7 +1,7 @@
 import { Message, Popover } from '@arco-design/web-react';
 import { IconCopy } from '@arco-design/web-react/icon';
 import React from 'react';
-import { EllipsisPopover } from '@/pages/ontologyScene/componens';
+import { EllipsisPopover } from '@/pages/ontologyScene/components';
 import { copyToClipboard } from '@ceai-front/arco-material';
 
 const Node = ({ id, data }) => {

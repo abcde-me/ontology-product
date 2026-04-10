@@ -7,7 +7,7 @@ import {
   ValidateRule
 } from '@/pages/ontologyScene/types/behaviorActions';
 import { Switch, Tag } from '@arco-design/web-react';
-import { EllipsisPopover } from '@/pages/ontologyScene/componens';
+import { EllipsisPopover } from '@/pages/ontologyScene/components';
 
 const RuleConfig = {
   [RuleName.EnumRule]: {

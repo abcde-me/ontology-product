@@ -18,7 +18,7 @@ import {
   ObjectInstanceSelect,
   ObjectSet,
   ObjectTypeSelect
-} from '@/pages/ontologyScene/componens';
+} from '@/pages/ontologyScene/components';
 import classNames from 'classnames';
 
 type IValue = {

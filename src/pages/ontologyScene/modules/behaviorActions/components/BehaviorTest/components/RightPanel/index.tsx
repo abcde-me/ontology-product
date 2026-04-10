@@ -12,7 +12,7 @@ import BehaviorTestSvg from '@/assets/benti/behaviorTest.svg';
 import { buildFormFieldValidateRules } from '@/pages/ontologyScene/modules/behaviorActionDetail/utils';
 import { TestFunctionInfo } from '@/pages/ontologyScene/hooks/useTestFunction';
 import { useParams } from 'react-router-dom';
-import { FormItem } from '@/pages/ontologyScene/componens';
+import { FormItem } from '@/pages/ontologyScene/components';
 
 interface RightPanelProps {
   testFunctionHook: TestFunctionInfo;

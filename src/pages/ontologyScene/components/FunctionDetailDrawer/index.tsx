@@ -6,7 +6,7 @@ import {
   OsDrawer,
   OSDrawerProps,
   PyCodeContent
-} from '@/pages/ontologyScene/componens';
+} from '@/pages/ontologyScene/components';
 import {
   InputType,
   OntologyFunctionItem,

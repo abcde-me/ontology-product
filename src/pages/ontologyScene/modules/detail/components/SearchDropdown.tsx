@@ -12,10 +12,10 @@ import { getFunctionList } from '@/api/ontologySceneLibrary/ontologyFunction';
 import { ObjectType } from '@/types/objectType';
 import { LinkInfo, PhysicalProperties } from '@/types/graphApi';
 import { OBJECT_TYPE_ICON_OPTIONS } from '@/pages/ontologyScene/common/constants';
-import ObjectTypeTagList from '@/pages/ontologyScene/componens/ObjectTypeTagList';
+import ObjectTypeTagList from '@/pages/ontologyScene/components/ObjectTypeTagList';
 import ObjectTypeTag, {
   ObjectTypeTagProps
-} from '@/pages/ontologyScene/componens/ObjectTypeTag';
+} from '@/pages/ontologyScene/components/ObjectTypeTag';
 import styles from './SearchDropdown.module.scss';
 import { useHistory, useParams } from 'react-router-dom';
 

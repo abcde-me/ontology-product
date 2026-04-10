@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import dayjs from 'dayjs';
 import { UiType } from '@/pages/ontologyScene/types/ontologyFunction';
 import { OBJECT_TYPE_ICON_OPTIONS } from '@/pages/ontologyScene/common/constants';
-import { ObjectTypeTagList } from '@/pages/ontologyScene/componens';
+import { ObjectTypeTagList } from '@/pages/ontologyScene/components';
 import EllipsisTextWithTooltip from '@/pages/ontologyScene/modules/behaviorLog/components/EllipsisTextWithTooltip';
 
 // ObjectRef 渲染组件 - 用于显示对象引用

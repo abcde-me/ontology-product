@@ -8,7 +8,7 @@ import {
   ValidateRules
 } from '@/pages/ontologyScene/modules/behaviorActionDetail/components';
 import { useHistory, useParams } from 'react-router-dom';
-import { FormItem, ObjectTypeSelect } from '@/pages/ontologyScene/componens';
+import { FormItem, ObjectTypeSelect } from '@/pages/ontologyScene/components';
 import { useRequest } from 'ahooks';
 import {
   getActionDetail,

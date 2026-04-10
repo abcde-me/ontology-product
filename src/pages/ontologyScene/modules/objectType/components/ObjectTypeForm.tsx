@@ -22,7 +22,7 @@ import {
 } from '@arco-design/web-react/icon';
 import ArchiveIcon from '../../../assets/archive.svg';
 import CancelArchiveIcon from '../../../assets/cancel-archive.svg';
-import FieldImportUpload from '../../../componens/FieldImportUpload';
+import FieldImportUpload from '@/pages/ontologyScene/components/FieldImportUpload';
 import BindPublicAttributeModal, {
   PublicAttribute
 } from './BindPublicAttributeModal';
@@ -51,7 +51,7 @@ import {
   COLUMN_TYPE_OPTIONS
 } from '@/pages/ontologyScene/common/constants';
 import ObjectTypeIconSelector from './ObjectTypeIconSelector';
-import { EllipsisPopover } from '@/pages/ontologyScene/componens';
+import { EllipsisPopover } from '@/pages/ontologyScene/components';
 import { PrefixAimdp } from '@/api/endpoints';
 import { openNewPage } from '@/utils/env';
 

@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { OsDrawer } from '@/pages/ontologyScene/componens';
+import { OsDrawer } from '@/pages/ontologyScene/components';
 import { DotStatus, NoDataCard } from '@ceai-front/arco-material';
 import { IconLoading } from '@arco-design/web-react/icon';
 import { Tabs, Message, Modal } from '@arco-design/web-react';

@@ -16,7 +16,7 @@ import {
   NoDataCard,
   copyToClipboard
 } from '@ceai-front/arco-material';
-import { OsDrawer, EllipsisPopover } from '@/pages/ontologyScene/componens';
+import { OsDrawer, EllipsisPopover } from '@/pages/ontologyScene/components';
 import {
   getOntologyLinkType,
   listOntologyLinkTypeData,

@@ -3,7 +3,7 @@ import React, { useMemo } from 'react';
 import { useNodes } from 'reactflow';
 import { useDemoStore } from '../common/store';
 import IconLink from '../../../assets/graph-link-icon.svg';
-import { EllipsisPopover } from '@/pages/ontologyScene/componens';
+import { EllipsisPopover } from '@/pages/ontologyScene/components';
 
 export default function CustomLabel(props: any) {
   const { labelX, labelY, defaultLabelRenderer, source, target, data, id } =

@@ -11,20 +11,20 @@ import {
   EllipsisPopover,
   OsDrawer,
   PyCodeContent
-} from '@/pages/ontologyScene/componens';
+} from '@/pages/ontologyScene/components';
 import { Form, Table, TableColumnProps, Tabs } from '@arco-design/web-react';
 import { useHistory, useParams } from 'react-router-dom';
 import { useRequest } from 'ahooks';
 import { getFunctionDetail } from '@/api/ontologySceneLibrary/ontologyFunction';
 import { isNil } from 'lodash-es';
-import { ValidateRules } from '@/pages/ontologyScene/componens/ValidateRules';
+import { ValidateRules } from '@/pages/ontologyScene/components/ValidateRules';
 import {
   InputType,
   ParamType,
   UiType
 } from '@/pages/ontologyScene/types/ontologyFunction';
 import { getActionDetail } from '@/api/ontologySceneLibrary/ontologyAction';
-import ObjectTypeTag from '../../../../componens/ObjectTypeTag';
+import ObjectTypeTag from '@/pages/ontologyScene/components/ObjectTypeTag';
 import NoDataEmpty from '@/components/NoDataEmpty';
 import { NoDataCard } from '@ceai-front/arco-material';
 import { ValidateRuleCard } from '@/pages/ontologyScene/modules/behaviorActions/components';

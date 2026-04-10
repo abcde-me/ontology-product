@@ -2,7 +2,7 @@ import React from 'react';
 import { Modal, ModalProps } from '@arco-design/web-react';
 import { OntologyFunctionDetail } from '@/pages/ontologyScene/types/ontologyFunction';
 import styles from './index.module.scss';
-import { OsModal, PyCodeContent } from '@/pages/ontologyScene/componens';
+import { OsModal, PyCodeContent } from '@/pages/ontologyScene/components';
 
 export const FunctionContentDialog = (
   props: ModalProps & {

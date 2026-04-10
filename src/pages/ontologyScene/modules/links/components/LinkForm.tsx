@@ -19,8 +19,8 @@ import {
   IconQuestionCircle,
   IconInfoCircle
 } from '@arco-design/web-react/icon';
-import FieldImportUpload from '../../../componens/FieldImportUpload';
-import { ObjectTypeSelect } from '../../../componens';
+import FieldImportUpload from '@/pages/ontologyScene/components/FieldImportUpload';
+import { ObjectTypeSelect } from '../../../components';
 import classNames from 'classnames';
 import LinkCheckIcon from '../../../assets/link-check.svg';
 import OneWayArrowIcon from '../../../assets/one-way-arrow.svg';
@@ -40,7 +40,7 @@ import Link1To1Icon from '../../../assets/link-11.svg';
 import Link1ToNIcon from '../../../assets/link-1n.svg';
 import LinkNNIcon from '../../../assets/link-nn.svg';
 import { openNewPage } from '@/utils/env';
-import { EllipsisPopover } from '@/pages/ontologyScene/componens';
+import { EllipsisPopover } from '@/pages/ontologyScene/components';
 
 const FormItem = Form.Item;
 
