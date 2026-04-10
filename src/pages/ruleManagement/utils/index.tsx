@@ -208,6 +208,7 @@ export function buildAutoRuleForm(data: AutoRuleDetail): AutoRuleFormData {
   return buildAutoChangeRuleForm(autoRuleDetail);
 }
 
+// 根据参数值和参数元数据构建表单参数
 export function buildFormParams(
   parameters?: ParameterValue[],
   metaParams?: (OntologyActionParam | OntologyFunctionParam)[]

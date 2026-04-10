@@ -93,7 +93,7 @@ export const AutoRuleDrawer = (
     mode?: 'view' | 'snapshot';
   }
 ) => {
-  const { ruleId, mode, ...other } = props;
+  const { ruleId, mode = 'view', ...other } = props;
   const history = useHistory();
   const [form] = Form.useForm();
   const { data: ruleDetail, loading } = useRequest(
@@ -150,7 +150,7 @@ export const AutoRuleDrawer = (
   return (
     <DrawerWithEditBtn
       onEdit={
-        ruleDetail?.status === 1
+        ruleDetail?.status === 1 || mode === 'snapshot'
           ? undefined
           : () => {
               if (ruleId) {
