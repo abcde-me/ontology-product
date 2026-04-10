@@ -5,7 +5,7 @@ import { getActionList } from '@/api/ontologySceneLibrary/ontologyAction';
 import { FetchDataSelect } from '@/components/FetchDataSelect';
 import { BehaviorActionItem } from '@/pages/ontologyScene/types/behaviorActions';
 import styles from './index.module.scss';
-import { ObjectTypeTag } from '@/pages/ontologyScene/componens';
+import { ObjectTypeTag } from '@/pages/ontologyScene/components';
 
 export interface ActionSelectProps {
   placeholder?: string;

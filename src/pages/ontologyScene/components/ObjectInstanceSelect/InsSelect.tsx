@@ -55,6 +55,10 @@ export const InstanceSelect = (props: ObjectInterfaceSelectProps) => {
     <Spin loading={true} />
   );
 
+  const selectWrapper = useRef<HTMLDivElement>(null);
+
+  const popupRef = useRef<HTMLDivElement>(null);
+
   // 当前展示的全部对象实例
   const [currentInsList, setCurrentInsList] = useState<Record<string, any>[]>(
     []
@@ -102,7 +106,26 @@ export const InstanceSelect = (props: ObjectInterfaceSelectProps) => {
   );
 
   useEffect(() => {
-    setPopupVisible(!!primaryKey);
+    const handleClick = (event: MouseEvent) => {
+      const target = event.target as Node;
+      const popupNode = popupRef.current;
+      const triggerNode = selectWrapper.current;
+      if (
+        !popupNode ||
+        popupNode.contains(target) ||
+        triggerNode?.contains(target)
+      ) {
+        return;
+      }
+      setPopupVisible(false);
+    };
+
+    document.addEventListener('click', handleClick);
+    return () => document.removeEventListener('click', handleClick);
+  }, []);
+
+  useEffect(() => {
+    // setPopupVisible(!!primaryKey);
     if ([primaryKey, objectTypeId].every((v) => !isNil(v))) {
       runAsync({
         id: objectTypeId!,
@@ -154,81 +177,90 @@ export const InstanceSelect = (props: ObjectInterfaceSelectProps) => {
   const renderDropdown = () => {
     if (!primaryKey) return <NoDataCard type={'block'} />;
     return (
-      <List
-        style={{ width: '100%', maxHeight: 400 }}
-        className={styles['ins-list']}
-        bordered={false}
-        virtualListProps={{
-          height: 400,
-          itemHeight: 40
-        }}
-        scrollLoading={scrollLoading}
-        onReachBottom={loadMore}
-        dataSource={currentInsList}
-        render={(item, index) => (
-          <List.Item
-            key={item[primaryKey]}
-            style={{ border: 'none !important' }}
-            className={classNames({
-              [styles['ins-item']]: true,
-              [styles['ins-selected']]:
-                item[primaryKey] === value ||
-                (Array.isArray(value) && value.includes(item[primaryKey]))
-            })}
-          >
-            <label className={styles['content-container']}>
-              <Checkbox
-                className={`flex-shrink-0 ${mode === 'multiple' ? '' : 'hidden'}`}
-                checked={
+      <div>
+        <List
+          style={{ width: '100%', maxHeight: 400 }}
+          className={styles['ins-list']}
+          bordered={false}
+          virtualListProps={{
+            height: 400,
+            itemHeight: 40
+          }}
+          scrollLoading={scrollLoading}
+          onReachBottom={loadMore}
+          dataSource={currentInsList}
+          render={(item, index) => (
+            <List.Item
+              key={item[primaryKey]}
+              style={{ border: 'none !important' }}
+              className={classNames({
+                [styles['ins-item']]: true,
+                [styles['ins-selected']]:
                   item[primaryKey] === value ||
-                  (value as any[])?.includes?.(item[primaryKey])
-                }
-                onChange={(c, e) => {
-                  if (mode === 'multiple') {
-                    if (c) {
-                      const instances = [
-                        ...((value as any) ?? []),
-                        item[primaryKey]
-                      ];
-                      onChange?.(instances);
+                  (Array.isArray(value) && value.includes(item[primaryKey]))
+              })}
+            >
+              <label className={styles['content-container']}>
+                <Checkbox
+                  className={`flex-shrink-0 ${mode === 'multiple' ? '' : 'hidden'}`}
+                  checked={
+                    item[primaryKey] === value ||
+                    (value as any[])?.includes?.(item[primaryKey])
+                  }
+                  onChange={(c, e) => {
+                    if (mode === 'multiple') {
+                      if (c) {
+                        const instances = [
+                          ...((value as any) ?? []),
+                          item[primaryKey]
+                        ];
+                        onChange?.(instances);
+                        return;
+                      }
+                      onChange?.(
+                        (value as any).filter(
+                          (v: any) => v !== item[primaryKey]
+                        )
+                      );
                       return;
                     }
-                    onChange?.(
-                      (value as any).filter((v: any) => v !== item[primaryKey])
-                    );
-                    return;
-                  }
-                  onChange?.(item[primaryKey]);
-                }}
-              />
-              <Tooltip
-                content={item[primaryKey] || null}
-                getPopupContainer={props.getPopupContainer}
-              >
-                <p>{item[primaryKey]}</p>
-              </Tooltip>
-            </label>
-          </List.Item>
-        )}
-      />
+                    onChange?.(item[primaryKey]);
+                    setPopupVisible(false);
+                  }}
+                />
+                <Tooltip
+                  content={item[primaryKey] || null}
+                  getPopupContainer={props.getPopupContainer}
+                >
+                  <p>{item[primaryKey]}</p>
+                </Tooltip>
+              </label>
+            </List.Item>
+          )}
+        />
+      </div>
     );
   };
 
   const readonly = disabled || !objectTypeId || !primaryKey;
   return (
-    <div className={classNames([className, styles['ins-sel-wrapper']])}>
+    <div
+      className={classNames([className, styles['ins-sel-wrapper']])}
+      ref={selectWrapper}
+    >
       <Select
         className={classNames([
           styles['instance'],
           readonly ? `${styles['ins-select-disabled']} ins-select-disabled` : ''
         ])}
+        onClick={() => setPopupVisible(true)}
         dropdownMenuClassName={styles['list-container']}
         value={value as any}
         disabled={readonly}
         allowClear
         loading={loading}
         mode={mode === 'multiple' ? 'multiple' : undefined}
-        defaultPopupVisible={popupVisible}
+        popupVisible={popupVisible}
         placeholder={placeholder || '请选择'}
         onChange={handleValueChange}
         dropdownRender={renderDropdown}

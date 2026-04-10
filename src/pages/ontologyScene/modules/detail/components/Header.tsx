@@ -27,7 +27,7 @@ import SearchDropdown from './SearchDropdown';
 
 import DeveloperResourceIcon from '@/pages/ontologyScene/assets/developer-resource.svg';
 import { openNewPage } from '@/utils/env';
-import { EllipsisPopover } from '@/pages/ontologyScene/componens';
+import { EllipsisPopover } from '@/pages/ontologyScene/components';
 
 const { Header: LayoutHeader } = Layout;
 

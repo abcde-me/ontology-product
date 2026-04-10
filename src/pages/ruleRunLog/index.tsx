@@ -26,7 +26,10 @@ const RuleRunLog = () => {
   const [form] = Form.useForm();
   const [timeRange, setTimeRange] = useState<TimeRange>('all');
   const [stats, setStats] = useState<AutoExecLogTodayStats>({});
-  const [showRule, setShowRule] = useState<number | undefined>();
+  const [showRule, setShowRule] = useState<{
+    mode?: 'view' | 'snapshot';
+    ruleId?: number;
+  }>();
   const [behaviorData, setBehaviorData] = useState<number | undefined>();
   const [logRecord, setLogRecord] = useState<AutoExecLogItem | undefined>();
 
@@ -65,11 +68,16 @@ const RuleRunLog = () => {
       setLogRecord(record);
     },
     onViewSnapshot: (record) => {
-      setShowRule(record.id);
+      setShowRule({
+        mode: 'snapshot',
+        ruleId: record.id
+      });
     },
 
     onViewRule: (record) => {
-      setShowRule(record.id);
+      setShowRule({
+        ruleId: record.ruleId
+      });
     },
     onViewAction: (record) => {
       openActionByLog(record);
@@ -183,8 +191,7 @@ const RuleRunLog = () => {
       <AutoRuleDrawer
         visible={!!showRule}
         onCancel={() => setShowRule(undefined)}
-        ruleId={showRule}
-        mode={'snapshot'}
+        {...showRule}
       />
       <BehaviorDetail
         show={!!behaviorData}

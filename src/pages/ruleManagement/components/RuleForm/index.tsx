@@ -34,8 +34,8 @@ import {
   PropertyConditionType,
   ScheduleConfigRes
 } from '../../types';
-import { ObjectTypeSelect } from '@/pages/ontologyScene/componens';
-import { InstanceSelect } from '@/pages/ontologyScene/componens/ObjectInstanceSelect/InsSelect';
+import { ObjectTypeSelect } from '@/pages/ontologyScene/components';
+import { InstanceSelect } from '@/pages/ontologyScene/components/ObjectInstanceSelect/InsSelect';
 import { useRequest } from 'ahooks';
 import { isNil } from 'lodash-es';
 import { listOntologyPhysicalProperties } from '@/api/ontologySceneLibrary/graph';

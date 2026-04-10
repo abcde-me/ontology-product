@@ -28,12 +28,17 @@ import { ActionConfigRes, GateConfigRes } from '@/pages/ruleRunLog/types';
 
 const formatParams = (config?: ActionConfigRes | GateConfigRes) => {
   config?.parameters.forEach((item) => {
-    item.value = !isNil(item.value) ? JSON.stringify(item.value) : '';
+    try {
+      if (isNil(item.value)) return;
+      item.value = JSON.stringify(item.value);
+    } catch (e) {
+      console.error(e);
+    }
   });
   return config;
 };
 
-export function buildAutoTrigger(data: AutoRuleDetail): CreateAutoRule {
+export function buildAutoTriggerSave(data: AutoRuleDetail): CreateAutoRule {
   const {
     name,
     description,
@@ -52,7 +57,7 @@ export function buildAutoTrigger(data: AutoRuleDetail): CreateAutoRule {
   };
 }
 
-export function buildAutoChange(data: AutoRuleDetail): CreateAutoRule {
+export function buildAutoChangeSave(data: AutoRuleDetail): CreateAutoRule {
   const autoRuleDetail = cloneDeep(data);
   const {
     name,
@@ -81,7 +86,7 @@ export function buildAutoChange(data: AutoRuleDetail): CreateAutoRule {
     description: description?.trim(),
     triggerType,
     changeConfig: changeConfig as ChangeConfigReq,
-    actionConfig: actionConfig as ActionConfigReq,
+    actionConfig: formatParams(actionConfig) as ActionConfigReq,
     gateConfig: formatParams(gateConfig) as GateConfigRes,
     modelId
   };
@@ -107,9 +112,10 @@ export function getParamsFromData(
   });
 }
 
-export function buildAutoRule(data: AutoRuleDetail): CreateAutoRule {
+export function buildSaveAutoRuleData(data: AutoRuleDetail): CreateAutoRule {
   const { triggerType, id } = data;
-  const buildAutoRule = triggerType === 1 ? buildAutoTrigger : buildAutoChange;
+  const buildAutoRule =
+    triggerType === 1 ? buildAutoTriggerSave : buildAutoChangeSave;
   const autoRule = buildAutoRule(data);
   if (!!id) {
     autoRule.id = id;
@@ -255,6 +261,7 @@ export function buildObjPropertyInfo(changeConfig: ChangeConfigRes) {
   });
 }
 
+// 根据icon字段获取本体
 export const getModelIconNode = (icon?: string, className?: string) => {
   const matchedIcon = ICON_OPTIONS.find((option) => option.value === icon);
   const iconSource = matchedIcon?.icon ?? ICON_OPTIONS[0]?.icon;
@@ -270,7 +277,7 @@ export const getModelIconNode = (icon?: string, className?: string) => {
   });
 };
 
-// 根据 icon 字段获取图标组件
+// 根据 icon 字段获取ObjType图标组件
 export const getObjIconComponent = (obj: OntologyObjectTypeInfo) => {
   const { code, icon: iconValue } = obj;
   if (code === '-1') return null;
@@ -279,3 +286,22 @@ export const getObjIconComponent = (obj: OntologyObjectTypeInfo) => {
     : null;
   return iconOption?.icon ?? OBJECT_TYPE_ICON_OPTIONS[0]?.icon;
 };
+
+// 处理规则详情中的参数，属性的value字段成正常类型
+export function handleRuleDetailParams(data: AutoRuleDetail) {
+  [
+    data.actionConfig?.parameters,
+    data.gateConfig?.parameters,
+    data.changeConfig?.propertyConditions
+  ].forEach((params) => {
+    if (!!params) {
+      params.forEach((param) => {
+        try {
+          param.value = JSON.parse(param.value as string);
+        } catch (e) {
+          console.error(e);
+        }
+      });
+    }
+  });
+}

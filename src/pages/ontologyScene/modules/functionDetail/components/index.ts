@@ -3,4 +3,4 @@ export * from './FunctionScript';
 export * from './SDKDocumentation';
 export * from './UiSelect';
 export * from './DataWithUiSelect';
-export * from '../../../componens/FunctionDetailDrawer';
+export * from '@/pages/ontologyScene/components/FunctionDetailDrawer';

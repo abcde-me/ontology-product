@@ -51,7 +51,7 @@ import MenuFunctionIcon from '../../assets/menu-function.svg';
 import MenuBehaviorLogIcon from '../../assets/menu-log.svg';
 import { PermissionWrapper } from '@/components/PermissionGuard';
 import { ONTOLOGY_PERMISSIONS } from '@/config/permissions';
-import { EllipsisPopover } from '@/pages/ontologyScene/componens';
+import { EllipsisPopover } from '@/pages/ontologyScene/components';
 
 // 懒加载各个模块
 const OntologySceneGraph = lazy(() => import('../graph'));

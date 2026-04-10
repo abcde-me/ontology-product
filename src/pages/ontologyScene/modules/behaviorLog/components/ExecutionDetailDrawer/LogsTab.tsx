@@ -1,5 +1,5 @@
 import React from 'react';
-import { PyCodeContent } from '@/pages/ontologyScene/componens';
+import { PyCodeContent } from '@/pages/ontologyScene/components';
 import { NoDataCard } from '@ceai-front/arco-material';
 
 interface LogsTabProps {

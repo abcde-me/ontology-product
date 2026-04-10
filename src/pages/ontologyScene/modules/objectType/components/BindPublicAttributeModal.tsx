@@ -11,7 +11,7 @@ import {
 import { PublicProperty } from '@/types/attributes';
 import { listOntologyPublicProperties } from '@/api/ontologySceneLibrary/attributes';
 import { useWorkflowTable } from '@/pages/ontologyScene/hooks/useTable';
-import { EllipsisPopover } from '@/pages/ontologyScene/componens';
+import { EllipsisPopover } from '@/pages/ontologyScene/components';
 
 export interface PublicAttribute {
   id: number; // 公共属性ID

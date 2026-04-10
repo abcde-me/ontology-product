@@ -14,7 +14,7 @@ import {
   FormItem,
   NumberRange,
   NumberRangeValue
-} from '@/pages/ontologyScene/componens';
+} from '@/pages/ontologyScene/components';
 import { isNil } from 'lodash-es';
 import {
   RuleName,
@@ -23,7 +23,7 @@ import {
 import { SelectWithNoData } from '@/components/new-no-data-comps';
 import { ParamType } from '@/pages/ontologyScene/types/ontologyFunction';
 import classNames from 'classnames';
-import { EllipsisPopover } from '@/pages/ontologyScene/componens';
+import { EllipsisPopover } from '@/pages/ontologyScene/components';
 
 export const ValidateRules = (props: { readonly?: boolean }) => {
   const { form, disabled: fieldsDisabled } = Form.useFormContext();

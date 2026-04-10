@@ -52,7 +52,9 @@
 .action-params-runtime-text {
   color: var(--color-text-3);
   font-size: 14px;
-  line-height: 22px;
+  display: flex;
+  align-items: center;
+  height: 100%;
 }
 
 .action-params-readonly-text {

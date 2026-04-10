@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Modal, Form, Input, Button } from '@arco-design/web-react';
 import { ICON_OPTIONS } from '@/pages/ontologyScene/common/constants';
-import IconSelector from '@/pages/ontologyScene/componens/IconSelector';
+import IconSelector from '@/pages/ontologyScene/components/IconSelector';
 
 const { TextArea } = Input;
 

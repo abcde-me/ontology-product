@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { ParamItem } from '@/pages/ontologyScene/modules/behaviorLog/components/ExecutionDetailDrawer/types';
-import { ObjectTypeTagList } from '@/pages/ontologyScene/componens';
+import { ObjectTypeTagList } from '@/pages/ontologyScene/components';
 import dayjs from 'dayjs';
 import EllipsisTextWithTooltip from '@/pages/ontologyScene/modules/behaviorLog/components/EllipsisTextWithTooltip';
 import { OBJECT_TYPE_ICON_OPTIONS } from '@/pages/ontologyScene/common/constants';

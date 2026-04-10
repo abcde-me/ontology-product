@@ -19,7 +19,11 @@ import {
   Tooltip
 } from '@arco-design/web-react';
 import { EllipsisPopover } from '@ceai-front/arco-material';
-import { AutoRuleDetail, AutoRuleItem } from '@/pages/ruleManagement/types';
+import {
+  AutoRuleDetail,
+  AutoRuleItem,
+  RULE_STATUS_MAP
+} from '@/pages/ruleManagement/types';
 import { useArcoTable } from '@/hooks';
 import {
   deleteAutoRule,
@@ -32,7 +36,7 @@ import { useHistory, useRouteMatch } from 'react-router-dom';
 import { SorterInfo } from '@arco-design/web-react/lib/Table/interface';
 import { AutoRuleDrawer } from '@/pages/ruleManagement/components';
 import classNames from 'classnames';
-import { FunctionDetailDrawer } from '@/pages/ontologyScene/componens/FunctionDetailDrawer';
+import { FunctionDetailDrawer } from '@/pages/ontologyScene/components/FunctionDetailDrawer';
 
 const TRIGGER_TYPE_MAP: Record<number, string> = {
   1: '定时触发',
@@ -40,15 +44,10 @@ const TRIGGER_TYPE_MAP: Record<number, string> = {
   3: '手动触发'
 };
 
-const STATUS_MAP: Record<number, { label: string; color: string }> = {
-  0: { label: '未上线', color: '#94A3B8' },
-  1: { label: '已上线', color: '#10B981' }
-};
-
 const RuleListPage = () => {
   const [form] = Form.useForm();
   const history = useHistory();
-  const [showRule, setShowRule] = useState<React.Key | undefined>(10);
+  const [showRule, setShowRule] = useState<React.Key>();
   const [showFunction, setShowFunction] = useState<number>();
 
   const routeToInfo = (pageType: string, ruleId?: number) => {
@@ -144,7 +143,7 @@ const RuleListPage = () => {
       dataIndex: 'status',
       width: 110,
       render: (value) => {
-        const { color, label } = STATUS_MAP[value]!;
+        const { color, label } = RULE_STATUS_MAP[value]!;
         return <DotStatus color={color} text={label} />;
       }
     },

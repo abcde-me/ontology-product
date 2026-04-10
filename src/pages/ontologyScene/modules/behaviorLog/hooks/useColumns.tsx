@@ -1,8 +1,8 @@
 import React, { useMemo } from 'react';
 import { DotStatus } from '@ceai-front/arco-material';
 import { TableColumnProps } from '@arco-design/web-react';
-import { ObjectTypeTag } from '@/pages/ontologyScene/componens';
-import { ContentWithCopy } from '@/pages/ontologyScene/componens';
+import { ObjectTypeTag } from '@/pages/ontologyScene/components';
+import { ContentWithCopy } from '@/pages/ontologyScene/components';
 import EllipsisTextWithTooltip from '../components/EllipsisTextWithTooltip';
 import { BehaviorLogItem, RUN_STATUS_MAP } from '../types';
 

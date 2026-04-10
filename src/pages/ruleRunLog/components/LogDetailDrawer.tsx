@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { OsDrawer, PyCodeContent } from '@/pages/ontologyScene/componens';
+import { OsDrawer, PyCodeContent } from '@/pages/ontologyScene/components';
 import { CopyItemIcon, DotStatus, NoDataCard } from '@ceai-front/arco-material';
 import { AutoExecLogDetail, AutoExecLogItem } from '../types';
 import { fetchRuleRunLogDetail } from '../services';

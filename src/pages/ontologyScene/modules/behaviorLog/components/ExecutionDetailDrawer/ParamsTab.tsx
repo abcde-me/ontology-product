@@ -4,7 +4,7 @@ import { NoDataCard } from '@ceai-front/arco-material';
 import {
   ObjectTypeTagList,
   ParamValueRenderer
-} from '@/pages/ontologyScene/componens';
+} from '@/pages/ontologyScene/components';
 import { ParamItem, OutputParamItem } from './types';
 import dayjs from 'dayjs';
 import { getOntologyObjectTypeDetail } from '@/api/ontologySceneLibrary/objectType';

@@ -201,6 +201,7 @@ export interface OntologyActionParam {
   uiType: UiType;
   validationRule?: ValidationRule;
   inputType?: InputType;
+  value?: any;
 }
 
 export interface EnumRule {

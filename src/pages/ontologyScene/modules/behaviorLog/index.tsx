@@ -6,11 +6,11 @@ import { useColumns } from './hooks/useColumns';
 import { PageHeader, SearchForm, ExecutionDetailDrawer } from './components';
 import { BehaviorLogItem } from './types';
 import { fetchBehaviorLogList } from './services/behaviorLogApi';
-import ObjectTypeDetailDrawer from '@/pages/ontologyScene/componens/ObjectTypeDetailDrawer';
+import ObjectTypeDetailDrawer from '@/pages/ontologyScene/components/ObjectTypeDetailDrawer';
 import { BehaviorDetail } from '@/pages/ontologyScene/modules/behaviorActions/components';
 import { BehaviorActionItem } from '@/pages/ontologyScene/types/behaviorActions';
 import { listOntologyObjectType } from '@/api/ontologySceneLibrary/objectType';
-import { FunctionDetailDrawer } from '@/pages/ontologyScene/componens/FunctionDetailDrawer';
+import { FunctionDetailDrawer } from '@/pages/ontologyScene/components/FunctionDetailDrawer';
 import { useParams } from 'react-router-dom';
 import styles from './index.module.scss';
 

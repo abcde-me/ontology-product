@@ -5,7 +5,11 @@ import { useHistory, useParams } from 'react-router-dom';
 import { useRequest } from 'ahooks';
 import { getAutoRuleDetail, saveAutoRule } from '@/api/businessAutomation/list';
 import { useRuleManagementStore } from '@/pages/ruleManagement/stores';
-import { buildAutoRule, buildAutoRuleForm } from '@/pages/ruleManagement/utils';
+import {
+  buildSaveAutoRuleData,
+  buildAutoRuleForm,
+  handleRuleDetailParams
+} from '@/pages/ruleManagement/utils';
 import { Message } from '@arco-design/web-react';
 import { isNil } from 'lodash-es';
 
@@ -40,6 +44,7 @@ const RuleEditPage = () => {
           return;
         }
         initRule(data);
+        handleRuleDetailParams(data);
         const ruleFormData = buildAutoRuleForm(data);
         ruleForm.current?.form.setFieldsValue(ruleFormData);
       }
@@ -52,7 +57,7 @@ const RuleEditPage = () => {
     ruleForm.current?.form
       .validate()
       .then(() => {
-        const autoRule = buildAutoRule(ruleDetail);
+        const autoRule = buildSaveAutoRuleData(ruleDetail);
         return saveAutoRule(autoRule).then((res) => {
           Message.success({
             content: '保存成功',

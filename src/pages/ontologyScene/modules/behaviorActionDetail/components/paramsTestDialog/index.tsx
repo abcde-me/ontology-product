@@ -34,7 +34,7 @@ import {
   FormItem,
   ObjInsValue,
   OsModal
-} from '@/pages/ontologyScene/componens';
+} from '@/pages/ontologyScene/components';
 import { UploadItem } from '@arco-design/web-react/es/Upload';
 
 interface IProps {

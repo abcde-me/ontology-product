@@ -27,13 +27,13 @@ import {
   getActionList
 } from '@/api/ontologySceneLibrary/ontologyAction';
 import { isNil } from 'lodash-es';
-import ObjectTypeTag from '../../../../componens/ObjectTypeTag';
-import ObjectTypeDetailDrawer from '../../../../componens/ObjectTypeDetailDrawer';
-import { FunctionDetailDrawer } from '@/pages/ontologyScene/componens/FunctionDetailDrawer';
+import ObjectTypeTag from '@/pages/ontologyScene/components/ObjectTypeTag';
+import ObjectTypeDetailDrawer from '@/pages/ontologyScene/components/ObjectTypeDetailDrawer';
+import { FunctionDetailDrawer } from '@/pages/ontologyScene/components/FunctionDetailDrawer';
 import {
   ContentWithCopy,
   EllipsisPopover
-} from '@/pages/ontologyScene/componens';
+} from '@/pages/ontologyScene/components';
 import { PermissionWrapper } from '@/components/PermissionGuard';
 import { ONTOLOGY_PERMISSIONS } from '@/config/permissions';
 

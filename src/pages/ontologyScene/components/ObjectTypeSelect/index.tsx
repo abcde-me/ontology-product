@@ -7,7 +7,7 @@ import { OBJECT_TYPE_ICON_OPTIONS } from '@/pages/ontologyScene/common/constants
 import styles from './index.module.scss';
 import { SyncStatus } from '@/types/graphApi';
 import { isNil } from 'lodash-es';
-import { EllipsisPopover } from '@/pages/ontologyScene/componens';
+import { EllipsisPopover } from '@/pages/ontologyScene/components';
 
 export interface ObjectTypeSelectProps {
   /** 当前选中的对象类型ID */

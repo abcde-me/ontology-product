@@ -42,21 +42,21 @@ import {
   ListOntologyLinkTypeReq,
   SyncStatus
 } from '@/types/graphApi';
-import ObjectTypeTag from '@/pages/ontologyScene/componens/ObjectTypeTag';
+import ObjectTypeTag from '@/pages/ontologyScene/components/ObjectTypeTag';
 import dayjs from 'dayjs';
 import {
   OBJECT_TYPE_SYNC_STATUS_CONFIG,
   OBJECT_TYPE_SYNC_STATUS_FILTERS
 } from '../../common/constants';
 import { getLinkTypeText } from '../../utils';
-import ObjectTypeDetailDrawer from '../../componens/ObjectTypeDetailDrawer';
+import ObjectTypeDetailDrawer from '@/pages/ontologyScene/components/ObjectTypeDetailDrawer';
 import { listOntologyObjectType } from '@/api/ontologySceneLibrary/objectType';
 import type { ListOntologyObjectTypeReq, ObjectType } from '@/types/objectType';
 import { PermissionWrapper } from '@/components/PermissionGuard';
 import { ONTOLOGY_PERMISSIONS } from '@/config/permissions';
-import TaskLogDrawer from '../../componens/TaskLogDrawer';
+import TaskLogDrawer from '@/pages/ontologyScene/components/TaskLogDrawer';
 import LogIcon from '@/pages/ontologyScene/assets/log-icon.svg';
-import { EllipsisPopover } from '@/pages/ontologyScene/componens';
+import { EllipsisPopover } from '@/pages/ontologyScene/components';
 import classNames from 'classnames';
 
 // 将 SyncStatus 枚举转换为 LinkDetailDrawer 期望的字符串类型

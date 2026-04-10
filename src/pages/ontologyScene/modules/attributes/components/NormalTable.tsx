@@ -13,8 +13,8 @@ import { CopyItemIcon, SearchTable } from '@ceai-front/arco-material';
 import useUrlState from '@ahooksjs/use-url-state';
 import { useWorkflowTable } from '../../../hooks/useTable';
 import styles from '../list.module.scss';
-import ObjectTypeDetailDrawer from '@/pages/ontologyScene/componens/ObjectTypeDetailDrawer';
-import { ObjectTypeTag } from '@/pages/ontologyScene/componens';
+import ObjectTypeDetailDrawer from '@/pages/ontologyScene/components/ObjectTypeDetailDrawer';
+import { ObjectTypeTag } from '@/pages/ontologyScene/components';
 import { listOntologyPhysicalProperties } from '@/api/ontologySceneLibrary/graph';
 import type { PhysicalProperties } from '@/types/graphApi';
 import { useParams } from 'react-router';
@@ -22,7 +22,7 @@ import { useHistory } from 'react-router-dom';
 import { listOntologyObjectType } from '@/api/ontologySceneLibrary/objectType';
 import type { ListOntologyPhysicalPropertiesReq } from '@/types/graphApi';
 import { openNewPage } from '@/utils/env';
-import { EllipsisPopover } from '@/pages/ontologyScene/componens';
+import { EllipsisPopover } from '@/pages/ontologyScene/components';
 import classNames from 'classnames';
 
 export interface NormalTableProps {

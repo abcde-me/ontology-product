@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { Tabs, Tag, Table } from '@arco-design/web-react';
 import { InfoDescription } from '@ceai-front/arco-material';
-import { OsDrawer } from '@/pages/ontologyScene/componens/OSDrawer';
+import { OsDrawer } from '@/pages/ontologyScene/components/OSDrawer';
 import { useUIStore } from '../../store/uiStore';
 import { useBusinessStore } from '../../store/businessStore';
 

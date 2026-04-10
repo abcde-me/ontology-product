@@ -30,7 +30,7 @@ import {
 } from '@/pages/ontologyScene/common/constants';
 import { LinkType, SyncStatus } from '@/types/graphApi';
 import { isNil } from 'lodash-es';
-import { EllipsisPopover } from '@/pages/ontologyScene/componens';
+import { EllipsisPopover } from '@/pages/ontologyScene/components';
 
 const TabPane = Tabs.TabPane;
 const defaultPageSize = 10;

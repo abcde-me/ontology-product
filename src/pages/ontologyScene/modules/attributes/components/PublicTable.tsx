@@ -21,7 +21,7 @@ import {
   ProButton,
   SearchTable
 } from '@ceai-front/arco-material';
-import { EllipsisPopover } from '@/pages/ontologyScene/componens';
+import { EllipsisPopover } from '@/pages/ontologyScene/components';
 
 import useUrlState from '@ahooksjs/use-url-state';
 import { useWorkflowTable } from '../../../hooks/useTable';
@@ -37,8 +37,8 @@ import {
 } from '@/api/ontologySceneLibrary/attributes';
 import { PublicProperty } from '@/types/attributes';
 import { ListOntologyPublicPropertiesReq } from '@/types/attributes';
-import { ObjectTypeTagList } from '@/pages/ontologyScene/componens';
-import ObjectTypeDetailDrawer from '@/pages/ontologyScene/componens/ObjectTypeDetailDrawer';
+import { ObjectTypeTagList } from '@/pages/ontologyScene/components';
+import ObjectTypeDetailDrawer from '@/pages/ontologyScene/components/ObjectTypeDetailDrawer';
 import dayjs from 'dayjs';
 import { PermissionWrapper } from '@/components/PermissionGuard';
 import { ONTOLOGY_PERMISSIONS } from '@/config/permissions';

@@ -48,7 +48,7 @@ import {
   FormItem,
   ObjInsValue,
   ResizeBoxWithCursorChange
-} from '@/pages/ontologyScene/componens';
+} from '@/pages/ontologyScene/components';
 import { buildTestFunctionData } from '@/pages/ontologyScene/modules/functionDetail/utils';
 import { useParams } from 'react-router-dom';
 import { UploadItem } from '@arco-design/web-react/es/Upload';

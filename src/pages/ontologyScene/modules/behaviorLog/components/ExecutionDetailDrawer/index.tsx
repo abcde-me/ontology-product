@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { Tabs } from '@arco-design/web-react';
-import { OsDrawer } from '@/pages/ontologyScene/componens';
+import { OsDrawer } from '@/pages/ontologyScene/components';
 import { StatusCard } from './StatusCard';
 import { BasicInfo } from './BasicInfo';
 import { ParamsTab } from './ParamsTab';

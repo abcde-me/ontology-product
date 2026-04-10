@@ -1,5 +1,5 @@
 import React from 'react';
-import { EllipsisPopover } from '../componens';
+import { EllipsisPopover } from './';
 import { OBJECT_TYPE_ICON_OPTIONS } from '@/pages/ontologyScene/common/constants';
 
 export interface ObjectTypeTagProps {

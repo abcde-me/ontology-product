@@ -26,8 +26,8 @@ import useUrlState from '@ahooksjs/use-url-state';
 import { useHistory, useParams } from 'react-router-dom';
 import { debounce } from 'lodash-es';
 import { useWorkflowTable } from '../../hooks/useTable';
-import ObjectTypeDetailDrawer from '../../componens/ObjectTypeDetailDrawer';
-import TaskLogDrawer from '../../componens/TaskLogDrawer';
+import ObjectTypeDetailDrawer from '@/pages/ontologyScene/components/ObjectTypeDetailDrawer';
+import TaskLogDrawer from '@/pages/ontologyScene/components/TaskLogDrawer';
 import {
   listOntologyObjectType,
   deleteOntologyObjectType,
@@ -45,7 +45,7 @@ import dayjs from 'dayjs';
 import { PermissionWrapper } from '@/components/PermissionGuard';
 import { ONTOLOGY_PERMISSIONS } from '@/config/permissions';
 import LogIcon from '@/pages/ontologyScene/assets/log-icon.svg';
-import { EllipsisPopover } from '@/pages/ontologyScene/componens';
+import { EllipsisPopover } from '@/pages/ontologyScene/components';
 
 export default function OntologySceneObjectTypeList() {
   const [form] = Form.useForm();

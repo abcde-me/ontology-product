@@ -3,7 +3,7 @@ import styles from './index.module.scss';
 import { Form, Input, Message } from '@arco-design/web-react';
 import { ProButton } from '@ceai-front/arco-material';
 import { useHistory, useParams } from 'react-router-dom';
-import { FormItem } from '@/pages/ontologyScene/componens';
+import { FormItem } from '@/pages/ontologyScene/components';
 import { FunctionsSetting } from '@/pages/ontologyScene/modules/functionDetail/components';
 import { useDebounceFn, useRequest } from 'ahooks';
 import {

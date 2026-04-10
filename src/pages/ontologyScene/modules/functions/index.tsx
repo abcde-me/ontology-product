@@ -35,7 +35,7 @@ import { isEmpty, isNil } from 'lodash-es';
 import {
   ContentWithCopy,
   EllipsisPopover
-} from '@/pages/ontologyScene/componens';
+} from '@/pages/ontologyScene/components';
 import { FunctionDetailDrawer } from '@/pages/ontologyScene/modules/functionDetail/components';
 import { SorterInfo } from '@arco-design/web-react/lib/Table/interface';
 import { PermissionWrapper } from '@/components/PermissionGuard';
