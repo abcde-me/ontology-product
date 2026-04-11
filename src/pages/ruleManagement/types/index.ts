@@ -123,7 +123,7 @@ export interface ChangeConfigRes {
   /**
    * 指定实例 ID 列表（整型）
    */
-  instanceIds?: number[];
+  instanceIds?: string[];
   /**
    * 实例范围：all / specific
    */

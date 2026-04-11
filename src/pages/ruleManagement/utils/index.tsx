@@ -81,6 +81,16 @@ export function buildAutoChangeSave(data: AutoRuleDetail): CreateAutoRule {
       console.error(e);
     }
   });
+  if (!!changeConfig?.instanceIds?.length) {
+    changeConfig.instanceIds = changeConfig.instanceIds.map((id) => {
+      try {
+        return JSON.stringify(id);
+      } catch (e) {
+        console.error(e);
+        return id;
+      }
+    });
+  }
   return {
     name: name?.trim() || '',
     description: description?.trim(),
@@ -208,6 +218,7 @@ export function buildAutoRuleForm(data: AutoRuleDetail): AutoRuleFormData {
   return buildAutoChangeRuleForm(autoRuleDetail);
 }
 
+// 根据参数值和参数元数据构建表单参数
 export function buildFormParams(
   parameters?: ParameterValue[],
   metaParams?: (OntologyActionParam | OntologyFunctionParam)[]
@@ -223,14 +234,9 @@ export function buildFormParams(
       type: meta?.type,
       uiType: meta?.uiType,
       inputType: meta?.inputType,
-      source: item.source
+      source: item.source,
+      value: item.value
     };
-    try {
-      base.value = JSON.parse(item.value || '');
-    } catch (e) {
-      console.error(e);
-      base.value = item.value;
-    }
     return base;
   });
 }
@@ -304,4 +310,15 @@ export function handleRuleDetailParams(data: AutoRuleDetail) {
       });
     }
   });
+  if (data.changeConfig?.instanceIds?.length) {
+    data.changeConfig.instanceIds = data.changeConfig.instanceIds.map(
+      (item) => {
+        try {
+          return JSON.parse(item as any);
+        } catch (e) {
+          return item;
+        }
+      }
+    );
+  }
 }

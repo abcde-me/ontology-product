@@ -177,7 +177,7 @@ export const InstanceSelect = (props: ObjectInterfaceSelectProps) => {
   const renderDropdown = () => {
     if (!primaryKey) return <NoDataCard type={'block'} />;
     return (
-      <div>
+      <div className={'w-full max-w-full'} ref={popupRef}>
         <List
           style={{ width: '100%', maxHeight: 400 }}
           className={styles['ins-list']}

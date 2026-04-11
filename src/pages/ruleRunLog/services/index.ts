@@ -9,7 +9,6 @@ import {
   AutoExecLogItem,
   AutoExecLogTodayStats
 } from '../types';
-import { USE_MOCK, mockApi } from '../mocks';
 
 export interface RuleRunLogListParams {
   filter?: string;
@@ -25,10 +24,6 @@ export interface RuleRunLogListParams {
 export const fetchRuleRunLogList = async (
   params: RuleRunLogListParams
 ): Promise<{ items: AutoExecLogItem[]; total: number }> => {
-  if (USE_MOCK) {
-    return mockApi.getRuleRunLogList(params);
-  }
-
   const response = await getExecLogList(params as any);
 
   if (response?.items && typeof response?.total === 'number') {
@@ -49,10 +44,6 @@ export const fetchRuleRunLogList = async (
 
 export const fetchRuleRunLogTodayStats =
   async (): Promise<AutoExecLogTodayStats> => {
-    if (USE_MOCK) {
-      return mockApi.getRuleRunLogTodayStats();
-    }
-
     const response = await GetAutoLogStats(0);
     return (response || {}) as AutoExecLogTodayStats;
   };
@@ -60,10 +51,6 @@ export const fetchRuleRunLogTodayStats =
 export const fetchRuleRunLogDetail = async (
   id: number | string
 ): Promise<AutoExecLogDetail | null> => {
-  if (USE_MOCK) {
-    return mockApi.getRuleRunLogDetail(id);
-  }
-
   const response = await getExecLogDetail(id);
   if (!response) return null;
 

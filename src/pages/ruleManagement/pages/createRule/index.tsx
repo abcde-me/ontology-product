@@ -23,6 +23,10 @@ const RuleCreatePage = () => {
       .then((formData) => {
         const autoRule = buildSaveAutoRuleData(ruleDetail);
         return saveAutoRule(autoRule).then((res) => {
+          if (res.message !== 'ok') {
+            Message.error(res.message);
+            return;
+          }
           Message.success({
             content: '保存成功',
             duration: 2000,
