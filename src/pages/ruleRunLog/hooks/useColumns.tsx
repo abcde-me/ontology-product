@@ -34,6 +34,14 @@ export const useColumns = ({
 }: UseColumnsOptions): TableColumnProps<AutoExecLogItem>[] => {
   const infoViewAble = useHasPermission(AUTOMATION_PERMISSIONS.GET);
 
+  // 先关闭所有打开的抽屉
+  const closeDrawer = () => {
+    [onViewLog, onViewSnapshot, onViewRule, onViewAction].forEach((fn) => {
+      // @ts-ignore
+      fn(undefined);
+    });
+  };
+
   return useMemo(
     () => [
       {
@@ -48,6 +56,7 @@ export const useColumns = ({
                 className={'min-w-0 cursor-pointer'}
                 onClick={() => {
                   if (!infoViewAble) return;
+                  closeDrawer();
                   onViewLog?.(record);
                 }}
               >
@@ -74,6 +83,7 @@ export const useColumns = ({
               className={canOpen ? 'cursor-pointer' : undefined}
               onClick={() => {
                 if (canOpen) {
+                  closeDrawer();
                   onViewRule?.(record);
                 }
               }}
@@ -129,7 +139,10 @@ export const useColumns = ({
               }}
               type="text"
               className={actionClassName}
-              onClick={() => onViewLog?.(record)}
+              onClick={() => {
+                closeDrawer();
+                onViewLog?.(record);
+              }}
             >
               查看日志
             </PermissionButton>
@@ -139,7 +152,10 @@ export const useColumns = ({
               }}
               type="text"
               className={actionClassName}
-              onClick={() => onViewSnapshot?.(record)}
+              onClick={() => {
+                closeDrawer();
+                onViewSnapshot?.(record);
+              }}
             >
               规则快照
             </PermissionButton>

@@ -96,6 +96,7 @@ const RuleListPage = () => {
         <div
           onClick={() => {
             if (!ruleInfoViewAble) return;
+            setShowFunction(undefined);
             setShowRule(record.id);
           }}
           className={ruleInfoViewAble ? 'hover:cursor-pointer' : ''}
@@ -134,7 +135,10 @@ const RuleListPage = () => {
         return (
           <div
             className={'hover:cursor-pointer'}
-            onClick={() => setShowFunction(record.gateConfig?.functionId)}
+            onClick={() => {
+              setShowFunction(record.gateConfig?.functionId);
+              setShowRule(undefined);
+            }}
           >
             <GlobalTooltip.Ellipsis
               text={functionName}
