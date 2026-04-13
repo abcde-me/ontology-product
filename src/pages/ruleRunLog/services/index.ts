@@ -16,7 +16,7 @@ export interface RuleRunLogListParams {
   pageSize?: number;
   startTime?: string;
   endTime?: string;
-  status?: number;
+  statusList?: number[];
   orderBy?: string;
   order?: Order;
 }

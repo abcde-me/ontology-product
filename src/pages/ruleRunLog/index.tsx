@@ -87,7 +87,11 @@ const RuleRunLog = () => {
   const { onSubmit, tableProps } = useArcoTable<AutoExecLogItem>(
     ({ pagination, sorter, filters, query }) => {
       const currentSorter = Array.isArray(sorter) ? sorter[0] : sorter;
-      const statusFilter = filters?.status?.[0];
+      const statusList = Array.isArray(filters?.status)
+        ? filters.status
+            .map((status) => Number(status))
+            .filter((status) => !Number.isNaN(status))
+        : [];
       const { startTime, endTime } = getTimeRange(timeRange);
 
       const queryValue = query as { filter?: string } | undefined;
@@ -100,7 +104,7 @@ const RuleRunLog = () => {
         filter: filterValue,
         pageNo: pagination.current,
         pageSize: pagination.pageSize,
-        status: statusFilter ? Number(statusFilter) : undefined,
+        statusList: statusList.length ? statusList : undefined,
         startTime,
         endTime,
         orderBy: currentSorter?.field as string,

@@ -607,6 +607,11 @@ export default function ObjectTypeDetailDrawer({
               主键
             </Tag>
           )}
+          {record.isVectorSourceField === 1 && (
+            <Tag color="#FBF2FF" className="text-[#9254DE]" size="small">
+              向量化
+            </Tag>
+          )}
         </div>
       )
     },
