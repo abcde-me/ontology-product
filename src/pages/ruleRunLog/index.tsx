@@ -100,28 +100,21 @@ const RuleRunLog = () => {
             .map((status) => Number(status))
             .filter((status) => !Number.isNaN(status)) || []
         : [];
-      const { startTime, endTime } = getTimeRange(timeRange);
 
-      const queryValue = query as { filter?: string } | undefined;
-      const filterValue =
-        typeof queryValue?.filter === 'string'
-          ? queryValue.filter.trim()
-          : undefined;
+      const queryValue = query as Record<string, any> | undefined;
 
       return fetchRuleRunLogList({
-        filter: filterValue,
         pageNo: pagination.current,
         pageSize: pagination.pageSize,
         statusList: statusList.length ? statusList : undefined,
-        startTime,
-        endTime,
         orderBy: currentSorter?.field as string,
         order:
           currentSorter?.direction === 'ascend'
             ? Order.Asc
             : currentSorter?.direction === 'descend'
               ? Order.Desc
-              : undefined
+              : undefined,
+        ...queryValue
       });
     },
     {
@@ -161,6 +154,7 @@ const RuleRunLog = () => {
               autoComplete={'off'}
               layout="inline"
               className="inline-flex items-center"
+              initialValues={{ timeRange: 'all' }}
             >
               <Form.Item noStyle field={'filter'}>
                 <Input.Search
@@ -173,19 +167,19 @@ const RuleRunLog = () => {
                 />
               </Form.Item>
               <div className="ml-[8px]">
-                <Form.Item noStyle>
+                <Form.Item noStyle field={'timeRange'}>
                   <Radio.Group
                     type="button"
                     value={timeRange}
                     className="aa-radio-group-tab rule-run-log-radio"
                     onChange={(value) => {
-                      setTimeRange(value as TimeRange);
+                      // setTimeRange(value as TimeRange);
                       onSubmit();
                     }}
                     options={[
                       { label: '全部', value: 'all' },
                       { label: '今天', value: 'today' },
-                      { label: '近7天', value: 'last7' }
+                      { label: '近7天', value: 'last7days' }
                     ]}
                   />
                 </Form.Item>

@@ -12,6 +12,7 @@ import {
 
 export interface RuleRunLogListParams {
   filter?: string;
+  timeRange?: string;
   pageNo?: number;
   pageSize?: number;
   startTime?: string;
