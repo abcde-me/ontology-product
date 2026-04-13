@@ -96,6 +96,21 @@ function getAttributeRowKey(record: AttributeField): string {
   return String(record.name || record.id || `field-${record.name}`);
 }
 
+/** 属性映射行：将后端可能以字符串返回的 id 规范为整数 */
+function normalizeAttributeFieldId(field: AttributeField): AttributeField {
+  const raw = field.id as unknown;
+  if (raw === undefined || raw === null || raw === '') {
+    const { id: _omit, ...rest } = field;
+    return rest as AttributeField;
+  }
+  const n = Number(raw);
+  if (!Number.isFinite(n)) {
+    const { id: _omit, ...rest } = field;
+    return rest as AttributeField;
+  }
+  return { ...field, id: Math.trunc(n) };
+}
+
 /** 将接口返回的扁平列表合并为表单行：isVector=1 的项挂到 vectorSourceFieldName 对应基字段上 */
 function mergeOntologyPhysicalPropertiesForForm(
   list: CreateOntologyPhysicalProperty[]
@@ -108,7 +123,7 @@ function mergeOntologyPhysicalPropertiesForForm(
   );
   return baseRows.map((prop) => {
     const vec = vectorBySource.get(String(prop.name ?? ''));
-    return {
+    return normalizeAttributeFieldId({
       ...prop,
       isVector: 0,
       vectorSourceFieldName: undefined,
@@ -117,7 +132,7 @@ function mergeOntologyPhysicalPropertiesForForm(
       _vectorizationOn: Boolean(vec && prop.name),
       _vectorComment: vec?.comment,
       _vectorPropertyId: vec?.id
-    };
+    });
   });
 }
 
@@ -159,7 +174,10 @@ function flattenOntologyPhysicalPropertiesForSubmit(
         vectorSourceFieldName: f.name
       };
       if (_vectorPropertyId !== undefined && _vectorPropertyId !== '') {
-        vec.id = String(_vectorPropertyId);
+        const vid = Number(_vectorPropertyId);
+        if (Number.isFinite(vid)) {
+          vec.id = Math.trunc(vid);
+        }
       }
       result.push(vec);
     }
@@ -432,7 +450,10 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
     ) => {
       const newFields = [...attributeFields];
       const prev = newFields[index];
-      const merged: AttributeField = { ...prev, ...updates };
+      const merged: AttributeField = normalizeAttributeFieldId({
+        ...prev,
+        ...updates
+      });
       newFields[index] = merged;
       setAttributeFields(newFields);
       form.setFieldValue('attributeFields', newFields);
@@ -441,10 +462,29 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
     const handleSelectAll = (checked: boolean) => {
       const newFields: AttributeField[] = attributeFields.map((field) => ({
         ...field,
-        isUse: checked ? 1 : 0
+        isUse: checked ? 1 : 0,
+        ...(!checked
+          ? {
+              _vectorizationOn: false,
+              _vectorComment: undefined
+            }
+          : {})
       }));
       setAttributeFields(newFields);
       form.setFieldValue('attributeFields', newFields);
+    };
+
+    /** 表字段列勾选变化：取消选中时关闭向量化并清空已编辑的向量属性名 */
+    const handleAttributeRowUseChange = (index: number, checked: boolean) => {
+      if (!checked) {
+        handleFieldChange(index, {
+          isUse: 0,
+          _vectorizationOn: false,
+          _vectorComment: undefined
+        });
+      } else {
+        handleFieldChange(index, { isUse: 1 });
+      }
     };
 
     const handleVectorizationChange = (index: number, enabled: boolean) => {
@@ -646,7 +686,7 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
               disabled={record.isPrimary === 1}
               checked={record.isUse === 1}
               onChange={(checked) =>
-                handleFieldChange(index, { isUse: checked ? 1 : 0 })
+                handleAttributeRowUseChange(index, !!checked)
               }
             />
             <span>{record._tableField || value}</span>

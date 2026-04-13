@@ -141,7 +141,7 @@ export interface CreateOntologyPhysicalProperty {
   /**
    * id,唯一标识
    */
-  id?: string;
+  id?: number;
   /**
    * 是否主键
    */
