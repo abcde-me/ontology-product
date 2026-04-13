@@ -4,7 +4,7 @@ import { SearchTable } from '@ceai-front/arco-material';
 import { Form, Input, Radio } from '@arco-design/web-react';
 import { IconSearch } from '@arco-design/web-react/icon';
 import { useArcoTable } from '@/hooks';
-import { AutoExecLogItem, AutoExecLogTodayStats } from './types';
+import { AutoExecLogItem, AutoExecLogTodayStats, TimeRange } from './types';
 import {
   fetchRuleRunLogDetail,
   fetchRuleRunLogList,
@@ -15,7 +15,6 @@ import { LogDetailDrawer, StatsCard } from './components';
 import { useColumns } from './hooks/useColumns';
 import { AutoRuleDrawer } from '@/pages/ruleManagement/components';
 import { BehaviorDetail } from '@/pages/ontologyScene/modules/behaviorActions/components';
-import { getTimeRange, TimeRange } from './utils/timeRange';
 import styles from './index.module.scss';
 import totalIcon from './assets/total.svg';
 import successIcon from './assets/success.svg';
@@ -24,7 +23,7 @@ import { set } from 'immer/dist/internal';
 
 const RuleRunLog = () => {
   const [form] = Form.useForm();
-  const [timeRange, setTimeRange] = useState<TimeRange>('all');
+  const [timeRange, setTimeRange] = useState<TimeRange>(TimeRange.ALL);
   const [stats, setStats] = useState<AutoExecLogTodayStats>({});
   const [showRule, setShowRule] = useState<{
     mode?: 'view' | 'snapshot';
@@ -100,7 +99,6 @@ const RuleRunLog = () => {
             .map((status) => Number(status))
             .filter((status) => !Number.isNaN(status)) || []
         : [];
-      const { startTime, endTime } = getTimeRange(timeRange);
 
       const queryValue = query as { filter?: string } | undefined;
       const filterValue =
@@ -113,8 +111,7 @@ const RuleRunLog = () => {
         pageNo: pagination.current,
         pageSize: pagination.pageSize,
         statusList: statusList.length ? statusList : undefined,
-        startTime,
-        endTime,
+        timeRange,
         orderBy: currentSorter?.field as string,
         order:
           currentSorter?.direction === 'ascend'
@@ -183,9 +180,9 @@ const RuleRunLog = () => {
                       onSubmit();
                     }}
                     options={[
-                      { label: '全部', value: 'all' },
-                      { label: '今天', value: 'today' },
-                      { label: '近7天', value: 'last7' }
+                      { label: '全部', value: TimeRange.ALL },
+                      { label: '今天', value: TimeRange.TODAY },
+                      { label: '近7天', value: TimeRange.LAST7DAYS }
                     ]}
                   />
                 </Form.Item>
