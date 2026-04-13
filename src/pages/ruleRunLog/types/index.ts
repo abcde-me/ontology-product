@@ -255,3 +255,12 @@ export interface AutoExecLogTodayStats {
   total?: number;
   [property: string]: any;
 }
+
+export enum TimeRange {
+  /** 全部 */
+  ALL = 'all',
+  /** 今天 */
+  TODAY = 'today',
+  /** 最近7天 */
+  LAST7DAYS = 'last7days'
+}
