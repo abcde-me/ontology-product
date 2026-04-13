@@ -1604,12 +1604,13 @@
     ahooks "^3.7.8"
     react-resizable "^3.0.4"
 
-"@ceai-front/arco-material@1.1.21":
-  version "1.1.21"
-  resolved "http://npm.cestc.cn/@ceai-front/arco-material/download/@ceai-front/arco-material-1.1.21.tgz#7a827d3c81a96ac54d6ee197c8ce9ce38b721dc0"
-  integrity sha1-eoJ9PIGpasVNbuGXyM6c44tyHcA=
+"@ceai-front/arco-material@1.2.2":
+  version "1.2.2"
+  resolved "http://npm.cestc.cn/@ceai-front/arco-material/download/@ceai-front/arco-material-1.2.2.tgz#22c6b0eabc3ebadc822889ff1fcb057e69e99d9f"
+  integrity sha1-Isaw6rw+utyCKIn/H8sFfmnpnZ8=
   dependencies:
     "@ccf2e/arco-material" "^0.7.2"
+    "@ceai-front/svg-icons" "^0.0.1"
     "@easyv/react-icons" "^1.0.0"
     ahooks "^3.8.1"
     antd "^5.21.2"
@@ -1632,6 +1633,50 @@
     react-resizable "^3.0.5"
     react-sortable-hoc "^2.0.0"
     react-sticky "^6.0.3"
+    zustand "^4.5.2"
+
+"@ceai-front/svg-icons@^0.0.1":
+  version "0.0.1"
+  resolved "http://npm.cestc.cn/@ceai-front/svg-icons/download/@ceai-front/svg-icons-0.0.1.tgz#cb1aaf8cc6602c28634dc2e5231120fb5c81fe43"
+  integrity sha1-yxqvjMZgLChjTcLlIxEg+1yB/kM=
+  dependencies:
+    "@ccf2e/arco-material" "^0.7.2"
+    "@easyv/react-icons" "^1.0.0"
+    "@types/react-syntax-highlighter" "^15.5.13"
+    ahooks "^3.8.1"
+    antd "^5.21.2"
+    axios ">=1.4.0"
+    classnames "^2.5.1"
+    dayjs "^1.11.13"
+    dnd-core "^16.0.1"
+    echarts "^5.6.0"
+    filesize "^10.1.6"
+    github-markdown-css "^5.8.1"
+    immer "^10.1.1"
+    intersection-observer "^0.12.2"
+    is-url "^1.2.4"
+    json5 "^2.2.3"
+    jsonrepair "^3.13.1"
+    katex "^0.16.27"
+    lodash "^4.17.21"
+    mermaid "^11.12.2"
+    query-string "^9.1.1"
+    rc-textarea "^1.8.2"
+    react-dnd "^16.0.1"
+    react-dnd-html5-backend "^16.0.1"
+    react-easy-crop "^5.0.7"
+    react-json-view "^1.21.3"
+    react-markdown "^10.1.0"
+    react-resizable "^3.0.5"
+    react-sortable-hoc "^2.0.0"
+    react-sticky "^6.0.3"
+    react-syntax-highlighter "^16.1.0"
+    rehype-katex "^7.0.1"
+    rehype-mathjax "^7.1.0"
+    rehype-raw "^7.0.0"
+    remark-breaks "^4.0.0"
+    remark-gfm "^4.0.1"
+    remark-math "^6.0.0"
     zustand "^4.5.2"
 
 "@ceai-front/svg-icons@^1.0.0":
