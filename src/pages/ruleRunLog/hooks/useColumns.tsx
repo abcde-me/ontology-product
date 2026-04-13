@@ -6,6 +6,9 @@ import {
   GlobalTooltip
 } from '@ceai-front/arco-material';
 import { AutoExecLogItem } from '../types';
+import PermissionButton from '@/components/PermissionButton';
+import { AUTOMATION_PERMISSIONS } from '@/config/permissions';
+import { useHasPermission } from '@/store/userInfoStore';
 
 const STATUS_MAP: Record<number, { label: string; color: string }> = {
   0: { label: '成功', color: '#10B981' },
@@ -29,6 +32,8 @@ export const useColumns = ({
   onViewAction,
   actionClassName
 }: UseColumnsOptions): TableColumnProps<AutoExecLogItem>[] => {
+  const infoViewAble = useHasPermission(AUTOMATION_PERMISSIONS.GET);
+
   return useMemo(
     () => [
       {
@@ -40,12 +45,15 @@ export const useColumns = ({
           value ? (
             <div className="flex w-full items-center gap-[8px]">
               <div
-                className="min-w-0 cursor-pointer"
-                onClick={() => onViewLog?.(record)}
+                className={'min-w-0 cursor-pointer'}
+                onClick={() => {
+                  if (!infoViewAble) return;
+                  onViewLog?.(record);
+                }}
               >
                 <GlobalTooltip.Ellipsis
                   text={String(value)}
-                  className="link-text w-full"
+                  className={`${infoViewAble ? 'link-text' : ''} w-full`}
                 />
               </div>
               <CopyItemIcon value={String(value)} className="flex-shrink-0" />
@@ -60,7 +68,7 @@ export const useColumns = ({
         width: 220,
         render: (value, record) => {
           const text = value || '-';
-          const canOpen = Boolean(record?.id);
+          const canOpen = Boolean(record?.id) && infoViewAble;
           return (
             <div
               className={canOpen ? 'cursor-pointer' : undefined}
@@ -115,20 +123,26 @@ export const useColumns = ({
         fixed: 'right',
         render: (_, record) => (
           <Space size={16}>
-            <Button
+            <PermissionButton
+              permission={{
+                permission: AUTOMATION_PERMISSIONS.GET
+              }}
               type="text"
               className={actionClassName}
               onClick={() => onViewLog?.(record)}
             >
               查看日志
-            </Button>
-            <Button
+            </PermissionButton>
+            <PermissionButton
+              permission={{
+                permission: AUTOMATION_PERMISSIONS.GET
+              }}
               type="text"
               className={actionClassName}
               onClick={() => onViewSnapshot?.(record)}
             >
               规则快照
-            </Button>
+            </PermissionButton>
           </Space>
         )
       }

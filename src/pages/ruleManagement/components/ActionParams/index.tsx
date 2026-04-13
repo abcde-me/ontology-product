@@ -201,7 +201,18 @@ export const ActionParams = (props: ActionParamsProps) => {
     return [
       {
         validator(v, onError) {
-          if (!v) {
+          if (
+            [
+              UiType.Input,
+              UiType.InputNumber,
+              UiType.TextArea,
+              UiType.InputNumberFloat
+            ].includes(uiType) &&
+            !v?.toString()?.trim()
+          ) {
+            return onError(`请输入参数值`);
+          }
+          if (isNil(v)) {
             return onError(`请输入参数值`);
           }
           if (uiType === UiType.Uploader) {
