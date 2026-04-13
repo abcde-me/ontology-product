@@ -4,6 +4,7 @@ import RuleSettingIcon from '@/assets/rule-setting.svg';
 import classNames from 'classnames';
 import {
   AutoRuleDetail,
+  ChangeConfigRes,
   ChangeType,
   InstanceScope,
   PeriodType
@@ -12,7 +13,6 @@ import { isEmpty, isNil } from 'lodash-es';
 import { getModelIconNode } from '@/pages/ruleManagement/utils';
 import { OBJECT_TYPE_ICON_OPTIONS } from '@/pages/ontologyScene/common/constants';
 import { PhysicalProperties } from '@/types/graphApi';
-import { ChangeConfigRes } from '@/pages/ruleRunLog/types';
 
 interface RuleSettingConfigProps {
   mode: 'card' | 'item';
@@ -167,7 +167,7 @@ const renderPropConfig = (
       {propertyConditions.map((p) => {
         return (
           <div key={p.id} className={classNames(styles['rule-setting-tag'])}>
-            {propNameMap.get(p.id)}
+            {propNameMap.get(p.id as number)}
           </div>
         );
       })}

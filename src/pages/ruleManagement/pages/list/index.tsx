@@ -24,7 +24,7 @@ import {
   AutoRuleItem,
   RULE_STATUS_MAP
 } from '@/pages/ruleManagement/types';
-import { useArcoTable } from '@/hooks';
+import { useArcoTable, useHasPermission } from '@/hooks';
 import {
   deleteAutoRule,
   getAutoRuleList,
@@ -32,16 +32,17 @@ import {
   onlineAutoRule,
   Order
 } from '@/api/businessAutomation/list';
-import { useHistory, useRouteMatch } from 'react-router-dom';
-import { SorterInfo } from '@arco-design/web-react/lib/Table/interface';
+import { useHistory } from 'react-router-dom';
 import { AutoRuleDrawer } from '@/pages/ruleManagement/components';
-import classNames from 'classnames';
 import { FunctionDetailDrawer } from '@/pages/ontologyScene/components/FunctionDetailDrawer';
+import { AUTOMATION_PERMISSIONS } from '@/config/permissions';
+import { PermissionWrapper } from '@/components/PermissionGuard';
+import PermissionButton from '@/components/PermissionButton';
+import { isNil } from 'lodash-es';
 
 const TRIGGER_TYPE_MAP: Record<number, string> = {
   1: '定时触发',
-  2: '变更触发',
-  3: '手动触发'
+  2: '变更触发'
 };
 
 const RuleListPage = () => {
@@ -49,6 +50,7 @@ const RuleListPage = () => {
   const history = useHistory();
   const [showRule, setShowRule] = useState<React.Key>();
   const [showFunction, setShowFunction] = useState<number>();
+  const ruleInfoViewAble = useHasPermission(AUTOMATION_PERMISSIONS.GET);
 
   const routeToInfo = (pageType: string, ruleId?: number) => {
     if (!ruleId)
@@ -92,12 +94,15 @@ const RuleListPage = () => {
       fixed: 'left',
       render: (value, record) => (
         <div
-          onClick={() => setShowRule(record.id)}
-          className={'hover:cursor-pointer'}
+          onClick={() => {
+            if (!ruleInfoViewAble) return;
+            setShowRule(record.id);
+          }}
+          className={ruleInfoViewAble ? 'hover:cursor-pointer' : ''}
         >
           <GlobalTooltip.Ellipsis
             text={value || '-'}
-            className={`link-text ${styles['rule-name']}`}
+            className={`${ruleInfoViewAble ? 'link-text' : ''} ${styles['rule-name']}`}
           />
         </div>
       )
@@ -116,6 +121,7 @@ const RuleListPage = () => {
         { text: '定时触发', value: '1' },
         { text: '变更触发', value: '2' }
       ],
+      filterMultiple: false,
       render: (value) => TRIGGER_TYPE_MAP[value as number] || '-'
     },
     {
@@ -145,7 +151,12 @@ const RuleListPage = () => {
       render: (value) => {
         const { color, label } = RULE_STATUS_MAP[value]!;
         return <DotStatus color={color} text={label} />;
-      }
+      },
+      filters: [
+        { text: '已上线', value: 1 },
+        { text: '未上线', value: 0 }
+      ],
+      filterMultiple: false
     },
     {
       title: '创建时间',
@@ -161,14 +172,20 @@ const RuleListPage = () => {
       fixed: 'right',
       render: (_, record) => (
         <Space size={16}>
-          <Button
+          <PermissionButton
+            permission={{
+              permission: AUTOMATION_PERMISSIONS.MODIFY
+            }}
             type="text"
             className={styles['table-action']}
             onClick={() => handleToggleStatus(record)}
           >
             {record.status === 1 ? '下线' : '上线'}
-          </Button>
-          <Button
+          </PermissionButton>
+          <PermissionButton
+            permission={{
+              permission: AUTOMATION_PERMISSIONS.MODIFY
+            }}
             type="text"
             className={styles['table-action']}
             disabled={record.status === 1}
@@ -177,8 +194,11 @@ const RuleListPage = () => {
             <Tooltip content={record.status === 1 ? '请先下线再编辑' : ''}>
               编辑
             </Tooltip>
-          </Button>
-          <Button
+          </PermissionButton>
+          <PermissionButton
+            permission={{
+              permission: AUTOMATION_PERMISSIONS.DELETE
+            }}
             type="text"
             className={styles['table-action']}
             onClick={() => handleDelete(record)}
@@ -187,7 +207,7 @@ const RuleListPage = () => {
             <Tooltip content={record.status === 1 ? '请先下线再删除' : ''}>
               删除
             </Tooltip>
-          </Button>
+          </PermissionButton>
         </Space>
       )
     }
@@ -198,13 +218,15 @@ const RuleListPage = () => {
       const currentSorter = Array.isArray(sorter) ? sorter[0] : sorter;
 
       const triggerType = filters?.triggerType?.[0];
+      const status = filters?.status?.[0];
 
       return getAutoRuleList({
         triggerType: triggerType ? Number(triggerType) : undefined,
+        status: isNil(status) ? undefined : +status,
         pageNo: pagination.current,
         pageSize: pagination.pageSize,
         orderBy: currentSorter?.field as string,
-        filter: (query as any)?.filter || '',
+        filter: (query as any)?.filter,
         order:
           currentSorter?.direction === 'ascend'
             ? Order.Asc
@@ -239,13 +261,15 @@ const RuleListPage = () => {
             </Form>
           }
           addButton={
-            <AddButton
-              onClick={() => {
-                routeToInfo('create');
-              }}
-            >
-              创建规则
-            </AddButton>
+            <PermissionWrapper permission={AUTOMATION_PERMISSIONS.CREATE}>
+              <AddButton
+                onClick={() => {
+                  routeToInfo('create');
+                }}
+              >
+                创建规则
+              </AddButton>
+            </PermissionWrapper>
           }
           tableProps={{
             columns,

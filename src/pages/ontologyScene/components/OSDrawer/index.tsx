@@ -11,11 +11,20 @@ import { ONTOLOGY_PERMISSIONS } from '@/config/permissions';
 export interface OSDrawerProps extends DrawerProps {
   onEdit?: () => void;
   extra?: React.ReactNode;
+  permission?: string;
 }
 
 export const OsDrawer = (props: OSDrawerProps) => {
-  const { className, onEdit, title, onCancel, extra, width, ...otherProps } =
-    props;
+  const {
+    className,
+    onEdit,
+    title,
+    onCancel,
+    extra,
+    width,
+    permission = ONTOLOGY_PERMISSIONS.MODIFY,
+    ...otherProps
+  } = props;
 
   // 如果没有传入width，使用默认宽度样式
   const drawerClassName = classNames(
@@ -53,7 +62,7 @@ export const OsDrawer = (props: OSDrawerProps) => {
             </div>
             {extra && <div className="ml-4">{extra}</div>}
             {onEdit && (
-              <PermissionWrapper permission={ONTOLOGY_PERMISSIONS.MODIFY}>
+              <PermissionWrapper permission={permission}>
                 <ProButton type={'outline'} size={'small'} onClick={onEdit}>
                   编辑
                 </ProButton>

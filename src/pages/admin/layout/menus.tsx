@@ -8,7 +8,8 @@ import {
   USER_PERMISSIONS,
   USER_GROUP_PERMISSIONS,
   ROLE_PERMISSIONS,
-  PROJECT_PERMISSIONS
+  PROJECT_PERMISSIONS,
+  AUTOMATION_PERMISSIONS
 } from '@/config/permissions';
 import OntologyLibrary from '@/assets/sider/ontology-library.svg';
 import OrganMenu from '@/assets/sider/organmenu.svg';
@@ -133,14 +134,14 @@ export const menus: MenuModel[] = [
         icon: <IconMdpDatasetMgmt className={iconClass} />,
         key: 'AutomationRuleManagement',
         path: '/tenant/compute/onto/businessAutomation/management',
-        permission: ONTOLOGY_PERMISSIONS.LIST
+        permission: AUTOMATION_PERMISSIONS.LIST
       },
       {
         title: '执行日志',
         icon: <RuleRunLogIcon className={iconClass} />,
         key: 'AutomationRuleRunLog',
         path: '/tenant/compute/onto/businessAutomation/runLog',
-        permission: ONTOLOGY_PERMISSIONS.LIST
+        permission: AUTOMATION_PERMISSIONS.LIST
       }
     ]
   },

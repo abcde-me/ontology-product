@@ -12,6 +12,15 @@ export const ONTOLOGY_PERMISSIONS = {
   MODIFY: 'aimdp-manager:ontology_model:manage:modify'
 } as const;
 
+// 业务自动化权限
+export const AUTOMATION_PERMISSIONS = {
+  LIST: 'ontology:rule:read:list',
+  GET: 'ontology:rule:read:get',
+  CREATE: 'ontology:rule:manage:create',
+  MODIFY: 'ontology:rule:manage:modify',
+  DELETE: 'ontology:rule:manage:delete'
+};
+
 // 需求管理权限
 export const REQUIREMENT_PERMISSIONS = {
   LIST: 'aimdp-manager:label_req_manager:read:get_req_list', // 菜单权限

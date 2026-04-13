@@ -177,7 +177,7 @@ export const usePermission = () => {
     try {
       const response = await ResourcePermissionActions({
         projectID: projectId,
-        platforms: ['aimdp-manager', 'aisocket', 'common']
+        platforms: ['aimdp-manager', 'aisocket', 'common', 'ontology']
       });
 
       if (isRequestSuccess(response)) {
