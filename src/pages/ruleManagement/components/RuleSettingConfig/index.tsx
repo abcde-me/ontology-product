@@ -198,7 +198,9 @@ const renderAutoChangeConfig = (
           '请先在左侧配置'
         ) : (
           <div className={'flex items-center gap-1'}>
-            {getModelIconNode(ruleData?.modelInfo?.icon, 'w-[14px] h-[14px]')}
+            <div className={'h-full w-max'}>
+              {getModelIconNode(ruleData?.modelInfo?.icon, 'w-[14px] h-[14px]')}
+            </div>
             {ruleData?.modelInfo?.name}
           </div>
         )}
@@ -214,7 +216,9 @@ const renderAutoChangeConfig = (
           '请先在左侧配置'
         ) : (
           <div className={'flex items-center gap-1'}>
-            <IconComponent className="h-[14px] w-[14px]" />
+            <div className={'flex h-full w-[14px] flex-1 self-start pt-1'}>
+              <IconComponent className="h-[14px] w-[14px]" />
+            </div>
             {changeConfig?.objectTypeInfo?.name}
           </div>
         )}

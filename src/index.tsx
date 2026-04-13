@@ -409,7 +409,12 @@ const render = (Component) => {
         </div>
       }
     >
-      <GlobalTooltip className={'z-[9999]'} />
+      <GlobalTooltip
+        className={'z-[9999]'}
+        triggerProps={{
+          updateOnScroll: true
+        }}
+      />
       <Component />
     </Suspense>,
     document.getElementById('root')

@@ -77,7 +77,7 @@ const renderParamReadonlyValue = (param: { type: ParamType; value: any }) => {
     );
   }
   if (type === ParamType.ObjectOne) {
-    const { name, icon } = value.objectTypeData;
+    const { name, icon } = value.objectTypeData || {};
     return (
       <div className={'flex h-full items-center overflow-hidden'}>
         <ObjectTypeTag
@@ -88,7 +88,7 @@ const renderParamReadonlyValue = (param: { type: ParamType; value: any }) => {
     );
   }
   if (type === ParamType.ObjectSet) {
-    const { name, icon } = value.objectTypeData;
+    const { name, icon } = value.objectTypeData || {};
     return (
       <div
         className={'flex h-full flex-wrap items-center gap-2 overflow-hidden'}

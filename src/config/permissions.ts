@@ -14,11 +14,11 @@ export const ONTOLOGY_PERMISSIONS = {
 
 // 业务自动化权限
 export const AUTOMATION_PERMISSIONS = {
-  LIST: 'ontology:rule:read:list',
-  GET: 'ontology:rule:read:get',
-  CREATE: 'ontology:rule:manage:create',
-  MODIFY: 'ontology:rule:manage:modify',
-  DELETE: 'ontology:rule:manage:delete'
+  LIST: 'aimdp-manager:rule:read:list',
+  GET: 'aimdp-manager:rule:read:get',
+  CREATE: 'aimdp-manager:rule:manage:create',
+  MODIFY: 'aimdp-manager:rule:manage:modify',
+  DELETE: 'aimdp-manager:rule:manage:delete'
 };
 
 // 需求管理权限

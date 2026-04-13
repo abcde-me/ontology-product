@@ -68,16 +68,24 @@ const RuleRunLog = () => {
       setLogRecord(record);
     },
     onViewSnapshot: (record) => {
-      setShowRule({
-        mode: 'snapshot',
-        ruleId: record.id
-      });
+      setShowRule(
+        record
+          ? {
+              mode: 'snapshot',
+              ruleId: record.id
+            }
+          : undefined
+      );
     },
 
     onViewRule: (record) => {
-      setShowRule({
-        ruleId: record.ruleId
-      });
+      setShowRule(
+        record
+          ? {
+              ruleId: record.ruleId
+            }
+          : undefined
+      );
     },
     onViewAction: (record) => {
       openActionByLog(record);
@@ -88,9 +96,9 @@ const RuleRunLog = () => {
     ({ pagination, sorter, filters, query }) => {
       const currentSorter = Array.isArray(sorter) ? sorter[0] : sorter;
       const statusList = Array.isArray(filters?.status)
-        ? filters.status
+        ? filters?.status
             .map((status) => Number(status))
-            .filter((status) => !Number.isNaN(status))
+            .filter((status) => !Number.isNaN(status)) || []
         : [];
       const { startTime, endTime } = getTimeRange(timeRange);
 
