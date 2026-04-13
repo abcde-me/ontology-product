@@ -165,7 +165,7 @@ function flattenOntologyPhysicalPropertiesForSubmit(
       const vec: CreateOntologyPhysicalProperty = {
         name: vecName,
         comment: vecComment,
-        columnType: 'VECTOR',
+        columnType: 'vector',
         isPrimary: 0,
         isUse: 1,
         isStoreAsPublic: 0,
@@ -1567,7 +1567,7 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
                               key: `${record.name}-vector`,
                               vecTableField,
                               vectorComment: record._vectorComment ?? '',
-                              vectorType: 'VECTOR'
+                              vectorType: 'vector'
                             }
                           ]}
                           columns={[
