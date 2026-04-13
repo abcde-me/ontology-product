@@ -93,7 +93,7 @@ const renderParamReadonlyValue = (param: { type: ParamType; value: any }) => {
       <div
         className={'flex h-full flex-wrap items-center gap-2 overflow-hidden'}
       >
-        {value.objInsID.map((objInsID) => {
+        {(value.objInsID || [])?.map((objInsID) => {
           return (
             <ObjectTypeTag
               key={objInsID}
