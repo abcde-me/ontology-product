@@ -7,16 +7,16 @@ import {
 import {
   AutoExecLogDetail,
   AutoExecLogItem,
-  AutoExecLogTodayStats
+  AutoExecLogTodayStats,
+  TimeRange
 } from '../types';
 
 export interface RuleRunLogListParams {
+  timeRange?: TimeRange;
   filter?: string;
   timeRange?: string;
   pageNo?: number;
   pageSize?: number;
-  startTime?: string;
-  endTime?: string;
   statusList?: number[];
   orderBy?: string;
   order?: Order;
