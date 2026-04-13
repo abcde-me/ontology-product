@@ -14,7 +14,6 @@ import {
 export interface RuleRunLogListParams {
   timeRange?: TimeRange;
   filter?: string;
-  timeRange?: string;
   pageNo?: number;
   pageSize?: number;
   statusList?: number[];
