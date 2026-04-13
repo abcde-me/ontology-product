@@ -15,7 +15,7 @@ export interface GetExecLogListParam {
   /**
    * 0=成功，1=失败，2=部分成功，3=待执行
    */
-  status?: number;
+  statusList?: number[];
   /**
    * 1=定时，2=变更，3=手动
    */
