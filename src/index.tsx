@@ -1,6 +1,6 @@
 import '@arco-design/web-react';
 import '@arco-design/web-react/icon';
-import '@arco-themes/react-cecloud-design/css/arco.css';
+import '@arco-themes/react-aiux2026/css/arco.css';
 import '@ccf2e/arco-material/dist/css/index.css';
 import '@ccf2e/arco-material/lib/style/css.js';
 import '@ceai-front/arco-material/dist/index.css';
@@ -409,12 +409,7 @@ const render = (Component) => {
         </div>
       }
     >
-      <GlobalTooltip
-        className={'z-[9999]'}
-        triggerProps={{
-          updateOnScroll: true
-        }}
-      />
+      <GlobalTooltip className={'z-[9999]'} />
       <Component />
     </Suspense>,
     document.getElementById('root')

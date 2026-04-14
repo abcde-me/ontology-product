@@ -53,11 +53,11 @@
     :global(.arco-tabs-header-title) {
       padding: 0 0 8px;
       margin-right: 32px;
-      color: #184ff2;
+      //color: #184ff2;
     }
 
     :global(.arco-tabs-header-ink) {
-      background: #184ff2;
+      background: rgb(var(--primary-6));
     }
   }
 }

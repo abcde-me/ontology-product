@@ -85,7 +85,7 @@ export const ParamsSetting = (
         >
           参数配置列表
         </div>
-        <Button size={'mini'} onClick={testParams}>
+        <Button size={'mini'} onClick={testParams} type={'outline'}>
           测试
         </Button>
       </div>

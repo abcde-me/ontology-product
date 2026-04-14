@@ -279,6 +279,7 @@ const RuleListPage = () => {
             columns,
             ...tableProps,
             rowKey: 'id',
+            border: false,
             scroll: { x: true }
           }}
         />

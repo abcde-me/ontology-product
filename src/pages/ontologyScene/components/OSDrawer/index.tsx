@@ -36,6 +36,7 @@ export const OsDrawer = (props: OSDrawerProps) => {
   return (
     <Drawer
       {...otherProps}
+      autoFocus={false}
       getChildrenPopupContainer={(node) => {
         return document.querySelector('#ontologySceneContent') || document.body;
       }}
@@ -63,9 +64,9 @@ export const OsDrawer = (props: OSDrawerProps) => {
             {extra && <div className="ml-4">{extra}</div>}
             {onEdit && (
               <PermissionWrapper permission={permission}>
-                <ProButton type={'outline'} size={'small'} onClick={onEdit}>
+                <Button type={'default'} size={'small'} onClick={onEdit}>
                   编辑
-                </ProButton>
+                </Button>
               </PermissionWrapper>
             )}
           </div>

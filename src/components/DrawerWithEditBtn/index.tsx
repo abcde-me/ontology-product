@@ -1,5 +1,5 @@
 import React from 'react';
-import { Drawer, DrawerProps } from '@arco-design/web-react';
+import { Button, Drawer, DrawerProps } from '@arco-design/web-react';
 import styles from './index.module.scss';
 import { IconClose } from '@arco-design/web-react/icon';
 import classNames from 'classnames';
@@ -63,9 +63,9 @@ export const DrawerWithEditBtn: React.FC<DrawerWithEditBtnProps> = (
             {extra && <div className="ml-4">{extra}</div>}
             {onEdit && (
               <PermissionWrapper permission={permission}>
-                <ProButton type={'outline'} size={'small'} onClick={onEdit}>
+                <Button type={'default'} size={'small'} onClick={onEdit}>
                   编辑
-                </ProButton>
+                </Button>
               </PermissionWrapper>
             )}
           </div>

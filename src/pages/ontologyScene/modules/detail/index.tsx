@@ -389,6 +389,7 @@ export default function OntologySceneDetail() {
                     '!flex w-full items-center justify-center',
                     styles['ontology-scene-detail-create-button']
                   )}
+                  type={'outline'}
                 >
                   <IconPlus
                     className={cls(sidebarCollapsed ? '' : 'mr-[4px]')}
