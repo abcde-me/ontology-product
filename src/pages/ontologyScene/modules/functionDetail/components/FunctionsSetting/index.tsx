@@ -519,10 +519,10 @@ export const FunctionsSetting = (props: {
             )}
           </div>
           {!showDoc && (
-            <ProButton
+            <Button
               icon={<IconFile />}
               size={'mini'}
-              type={'outline'}
+              type={'default'}
               className={'flex items-center gap-1'}
               onClick={() => {
                 setShowDoc(true);
@@ -530,12 +530,13 @@ export const FunctionsSetting = (props: {
               disabled={SDKLoading}
             >
               <p className={'text-[14px] font-[500]'}>SDK开发文档</p>
-            </ProButton>
+            </Button>
           )}
           <Button
             icon={testIng ? <IconRecordStop /> : <IconPlayArrowFill />}
             size={'mini'}
             onClick={testIng ? stopTest : handleTest}
+            type={'outline'}
           >
             {testIng ? '停止运行' : '运行'}
           </Button>

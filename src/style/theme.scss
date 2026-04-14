@@ -171,7 +171,8 @@ $spacing-9: 24px;
   padding: 24px 28px;
 }
 
-.arco-table-th-item {
+.arco-table-th-item:not(.arco-table-col-has-sorter),
+.arco-table-col-has-sorter .arco-table-cell-with-sorter {
   padding: 9px 16px !important;
 }
 

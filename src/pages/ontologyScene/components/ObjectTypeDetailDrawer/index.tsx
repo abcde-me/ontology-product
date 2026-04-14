@@ -739,7 +739,7 @@ export default function ObjectTypeDetailDrawer({
 
     return (
       <div
-        className="flex flex-1 items-center gap-3 rounded-lg px-4 py-3"
+        className="flex flex-1 flex-shrink-0 items-center gap-3 overflow-hidden rounded-lg px-4 py-3"
         style={{
           backgroundColor: '#fff',
           minHeight: '56px'
@@ -748,11 +748,11 @@ export default function ObjectTypeDetailDrawer({
         <div className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded">
           <IconComponent className="h-6 w-6" />
         </div>
-        <div className="min-w-0 text-[14px] leading-[22px] text-[#23293b]">
+        <div className="min-w-0 flex-1 overflow-hidden text-[14px] leading-[22px] text-[#23293b]">
           <EllipsisPopover preferTypography value={name} />
         </div>
         {!isNil(objectType?.syncStatus) ? (
-          <div className="flex items-center">
+          <div className="flex w-max flex-shrink-0 items-center">
             <DotStatus
               text=""
               color={
