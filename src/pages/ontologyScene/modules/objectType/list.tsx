@@ -441,9 +441,9 @@ export default function OntologySceneObjectTypeList() {
         }
         addButton={
           <PermissionWrapper permission={ONTOLOGY_PERMISSIONS.CREATE}>
-            <ProButton icon={<IconPlus />} onClick={handleCreate}>
+            <Button type="outline" icon={<IconPlus />} onClick={handleCreate}>
               创建对象类型
-            </ProButton>
+            </Button>
           </PermissionWrapper>
         }
         tableProps={{

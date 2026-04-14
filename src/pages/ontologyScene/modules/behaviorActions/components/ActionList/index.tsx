@@ -301,6 +301,7 @@ export const ActionList = (props: {
         tableProps={{
           ...tableProps,
           columns,
+          border: false,
           scroll: {
             x: 1000
           }

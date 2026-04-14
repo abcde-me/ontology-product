@@ -991,7 +991,7 @@ export default function ObjectTypeDetailDrawer({
 
                         {/* ID */}
                         <div className="mb-[8px] flex items-center gap-[8px] overflow-hidden leading-[22px]">
-                          <span className="text-[14px] text-[var(--color-text-5)]">
+                          <span className="w-max flex-shrink-0 text-[14px] text-[var(--color-text-5)]">
                             链接id:
                           </span>
                           <span className="min-w-0 max-w-full text-[14px] text-[var(--color-text-1)]">
@@ -1010,7 +1010,7 @@ export default function ObjectTypeDetailDrawer({
                         </div>
 
                         {/* 关系图 */}
-                        <div className="flex items-center bg-[#F2F8FF] p-[12px]">
+                        <div className="flex items-center overflow-hidden bg-[#F2F8FF] p-[12px]">
                           {renderLinkCard(leftObjectType, true)}
                           <div className="flex w-[76px] min-w-[76px] items-center">
                             <span className="h-0 flex-1 border-t border-dashed border-[#CBD5E1]" />

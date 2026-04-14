@@ -76,11 +76,12 @@ export const ValidateRules = (props: { readonly?: boolean }) => {
                   </div>
                   <FormItem
                     field={`${field}.enabledValidation`}
-                    className={'mb-0 w-[30px]'}
+                    noStyle
                     triggerPropName={'checked'}
                   >
                     <Switch
                       disabled={disabled}
+                      size={'small'}
                       onChange={(e) => {
                         form.setFieldsValue({
                           [`${field}.enabledValidation`]: e

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import styles from './index.module.scss';
-import { Form, Input, Message, Select } from '@arco-design/web-react';
+import { Button, Form, Input, Message, Select } from '@arco-design/web-react';
 import { ProButton } from '@ceai-front/arco-material';
 import {
   FunctionsSelect,
@@ -378,17 +378,13 @@ export default function BehaviorActionDetailPage() {
             ONTOLOGY_PERMISSIONS.CREATE
           ]}
         >
-          <ProButton
-            type="primary"
-            onClick={saveAction}
-            loadingText="处理中..."
-          >
+          <Button type="primary" onClick={saveAction}>
             确认
-          </ProButton>
+          </Button>
         </PermissionWrapper>
-        <ProButton type={'outline'} onClick={goBack}>
+        <Button type={'default'} onClick={goBack}>
           取消
-        </ProButton>
+        </Button>
       </div>
     </div>
   );

@@ -740,9 +740,9 @@ export default function OntologySceneLinksList() {
         }
         addButton={
           <PermissionWrapper permission={ONTOLOGY_PERMISSIONS.CREATE}>
-            <ProButton icon={<IconPlus />} onClick={handleCreate}>
+            <Button type={'outline'} icon={<IconPlus />} onClick={handleCreate}>
               创建链接
-            </ProButton>
+            </Button>
           </PermissionWrapper>
         }
         tableProps={{

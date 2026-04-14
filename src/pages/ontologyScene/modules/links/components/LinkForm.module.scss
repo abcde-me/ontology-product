@@ -6,7 +6,9 @@
   }
 
   .table-select-group {
-    > *:not(:last-child) {
+    display: flex !important;
+
+    & > *:not(:last-child) {
       border-right: none;
     }
 
@@ -25,6 +27,7 @@
     :global(.arco-form-item-wrapper) {
       max-width: 800px;
     }
+
     :global(.arco-form-label-item) {
       width: 100px;
       min-width: 100px;
