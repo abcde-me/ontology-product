@@ -161,10 +161,10 @@ export default function OntologySceneObjectTypeEdit() {
       {initialValues ? (
         <div className="relative flex h-[calc(100vh-56px)] w-full flex-col bg-[#fff]">
           <div className="flex items-center gap-[16px] border-b border-[##EBEEF5] p-[24px] text-[20px] font-[600] leading-[32px] text-[var(--color-text-1)]">
-            <ProButton
+            <Button
               icon={<IconLeft />}
               size={'default'}
-              type={'outline'}
+              type={'default'}
               onClick={goBack}
             />
             编辑对象类型

@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import styles from './index.module.scss';
-import { Form, Input, Message } from '@arco-design/web-react';
+import { Button, Form, Input, Message } from '@arco-design/web-react';
 import { ProButton } from '@ceai-front/arco-material';
 import { useHistory, useParams } from 'react-router-dom';
 import { FormItem } from '@/pages/ontologyScene/components';
@@ -168,10 +168,10 @@ export default function OSFunctionDetailPage() {
       className={`${styles['behavior-action-detail']} flex h-full w-full flex-col `}
     >
       <div className={`${styles['page-header']} text-default`}>
-        <ProButton
+        <Button
           icon={<IconLeft />}
           size={'default'}
-          type={'outline'}
+          type={'default'}
           onClick={goBack}
         />
         {`${pageMode === 'edit' ? '编辑' : '创建'}函数`}

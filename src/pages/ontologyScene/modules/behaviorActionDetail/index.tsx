@@ -187,10 +187,10 @@ export default function BehaviorActionDetailPage() {
       className={`${styles['behavior-action-detail']} flex h-full w-full flex-col `}
     >
       <div className={`${styles['page-header']} text-default`}>
-        <ProButton
+        <Button
           icon={<IconLeft />}
           size={'default'}
-          type={'outline'}
+          type={'default'}
           onClick={goBack}
         />
         {`${pageMode === 'edit' ? '编辑' : '创建'}行为`}
