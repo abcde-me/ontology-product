@@ -69,7 +69,7 @@ export const FormItemGroup = ({
 
 // const buildAutoRuleDetail = (data: any): AutoRuleDetail => {};
 
-const parseCron = (config: ScheduleConfigRes) => {
+const parseCron = (config?: ScheduleConfigRes) => {
   if (!config) return '';
   const { periodType, weekDays, monthDays, monthDayMode, time } = config;
   let res = '每';
@@ -106,7 +106,7 @@ export const AutoRuleDrawer = (
       return getRule(ruleId!)
         .then((res) => {
           handleRuleDetailParams(res);
-          return res;
+          return res as AutoRuleDetail;
         })
         .catch((e) => {
           console.error(e);
@@ -127,8 +127,8 @@ export const AutoRuleDrawer = (
         form.setFieldsValue({
           functionParams,
           actionParams: buildFormParams(
-            data.actionConfig?.parameters,
-            data.actionConfig?.actionInfo?.params
+            data?.actionConfig?.parameters,
+            data?.actionConfig?.actionInfo?.params
           )
         });
       }
@@ -203,7 +203,7 @@ export const AutoRuleDrawer = (
                           规则id：
                         </div>
                         <div className={styles['info-item-value']}>
-                          <ContentWithCopy value={ruleDetail?.id} />
+                          <ContentWithCopy value={ruleDetail?.id as any} />
                         </div>
                       </div>
                       <div className={`${styles['info-item']}`}>
@@ -213,10 +213,10 @@ export const AutoRuleDrawer = (
                         <div className={styles['info-item-value']}>
                           <DotStatus
                             color={
-                              RULE_STATUS_MAP[ruleDetail?.stauts || 0].color
+                              RULE_STATUS_MAP[ruleDetail?.status || 0].color
                             }
                             text={
-                              RULE_STATUS_MAP[ruleDetail?.stauts || 0].label
+                              RULE_STATUS_MAP[ruleDetail?.status || 0].label
                             }
                           />
                         </div>
@@ -240,7 +240,7 @@ export const AutoRuleDrawer = (
                   ruleData={ruleDetail}
                   properties={
                     ruleDetail?.changeConfig?.objectTypeInfo
-                      ?.ontologyPhysicalPropertiesList
+                      ?.ontologyPhysicalPropertiesList as any
                   }
                 />
               </div>
@@ -363,7 +363,7 @@ export const AutoRuleDrawer = (
                       <div className={styles['info-item-value']}>
                         <FunctionInfo
                           functionInfo={ruleDetail?.gateConfig?.functionInfo}
-                        ></FunctionInfo>
+                        />
                       </div>
                     </div>
                     <div className={`${styles['info-item']}`}>
