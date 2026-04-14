@@ -8,7 +8,7 @@ import styles from './index.module.scss';
 export const FunctionInfo = ({
   functionInfo
 }: {
-  functionInfo: OntologyFunctionDetail;
+  functionInfo?: OntologyFunctionDetail;
 }) => {
   const [show, setShow] = useState(false);
 
