@@ -28,7 +28,7 @@ const PageHeader = (props: PageHeaderProps) => {
         {showBack && (
           <Button
             icon={<IconLeft></IconLeft>}
-            type={'outline'}
+            type={'default'}
             onClick={goBack}
           />
         )}

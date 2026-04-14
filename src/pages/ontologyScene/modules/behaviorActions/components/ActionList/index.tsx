@@ -169,11 +169,14 @@ export const ActionList = (props: {
               actionDetail?.objectTypeId ||
               ''
           )}
-          onClick={() => {
-            if (actionDetail.objectTypeId! < 0) return;
-            closeDrawer();
-            setCurrentObj((actionDetail.objectTypeId || '').toString());
-          }}
+          onClick={
+            actionDetail.objectTypeId! < 0
+              ? undefined
+              : () => {
+                  closeDrawer();
+                  setCurrentObj((actionDetail.objectTypeId || '').toString());
+                }
+          }
           className={styles['obj-tag']}
         />
       )

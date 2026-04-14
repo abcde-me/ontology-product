@@ -4,7 +4,8 @@
   :global {
     .arco-form-label-item {
       overflow: hidden;
-      background: red !important;
+      display: flex;
+      align-items: center;
     }
 
     .arco-form-label-item > label {

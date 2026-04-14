@@ -156,8 +156,6 @@ $spacing-9: 24px;
 }
 
 .arco-modal-simple .arco-modal-content {
-  width: 464px;
-  height: 142px;
   padding-left: 28px;
   font-size: 14px;
 }
@@ -450,4 +448,11 @@ $spacing-9: 24px;
   //color: $color-bg-btn-line-hover !important;
   //background-color: $color-font-white !important;
   //border: 1px solid $color-bg-btn-line-hover !important;
+}
+
+.arco-table .arco-table-th-item.arco-table-col-has-filter .arco-table-filters {
+  display: inline-block !important;
+  margin-left: 8px;
+  position: relative !important;
+  vertical-align: -3px !important;
 }
