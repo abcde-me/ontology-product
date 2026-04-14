@@ -190,7 +190,8 @@ const RuleRunLog = () => {
             columns,
             ...tableProps,
             rowKey: (record) => record.logId || record.id || '',
-            scroll: { x: true }
+            scroll: { x: true },
+            border: false
           }}
         />
       </div>

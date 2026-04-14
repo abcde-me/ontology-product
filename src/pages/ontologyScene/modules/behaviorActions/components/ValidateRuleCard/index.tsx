@@ -68,6 +68,7 @@ export const ValidateRuleCard = (props: { rule: ValidateRule }) => {
           checked={enabledValidation}
           disabled
           className={'flex-shrink-0'}
+          size={'small'}
         />
       </div>
       <div className={styles['rule-card-body']}>

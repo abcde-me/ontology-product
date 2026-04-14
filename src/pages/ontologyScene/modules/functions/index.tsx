@@ -279,6 +279,7 @@ export default function OntologySceneFunctions() {
             tableProps={{
               ...tableProps,
               columns,
+              border: false,
               scroll: {
                 x: 1000
               }

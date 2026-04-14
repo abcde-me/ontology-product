@@ -487,9 +487,13 @@ const PublicTable = React.forwardRef<PublicTableRef, PublicTableProps>(
           }
           addButton={
             <PermissionWrapper permission={ONTOLOGY_PERMISSIONS.MODIFY}>
-              <ProButton icon={<IconPlus />} onClick={handleCreate}>
+              <Button
+                type={'outline'}
+                icon={<IconPlus />}
+                onClick={handleCreate}
+              >
                 创建公共属性
-              </ProButton>
+              </Button>
             </PermissionWrapper>
           }
           tableProps={{

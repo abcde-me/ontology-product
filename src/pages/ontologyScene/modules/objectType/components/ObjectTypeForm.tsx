@@ -785,6 +785,7 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
               disabled={rowDisabled}
               checked={record.isStoreAsPublic === 1}
               loading={storeAsPublicLoading[index]}
+              size={'small'}
               onChange={(checked) => handleStoreAsPublicChange(index, checked)}
             />,
             rowDisabled
@@ -828,6 +829,7 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
               onChange={(checked) =>
                 handleVectorizationChange(index, !!checked)
               }
+              size={'small'}
             />,
             disabled,
             '请先勾选字段'

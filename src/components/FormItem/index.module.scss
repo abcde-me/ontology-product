@@ -1,12 +1,17 @@
 .form-item {
+  width: auto;
+
   :global {
     .arco-form-label-item {
       overflow: hidden;
+      display: flex;
+      align-items: center;
+    }
 
-      label {
-        align-items: center;
-        max-width: 100%;
-      }
+    .arco-form-label-item > label {
+      align-items: center;
+      max-width: 100%;
+      display: flex !important;
     }
   }
 }

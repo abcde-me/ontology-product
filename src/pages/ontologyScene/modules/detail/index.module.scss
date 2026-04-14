@@ -2,7 +2,7 @@
   :global {
     // 整个模块覆盖组件样式
     .arco-tabs-header-nav-line .arco-tabs-header-title {
-      padding-left: 0px;
+      margin-left: 0px !important;
       padding-right: 0px;
       margin-right: 32px;
     }
@@ -109,6 +109,15 @@
     }
   }
 
+  .ontology-scene-detail-create-button {
+    background-color: #edf5ff !important;
+    padding: 0 10px;
+
+    &:hover {
+      background-color: #bed5fd !important;
+    }
+  }
+
   &-create-dropdown {
     width: 248px;
     max-height: unset;
@@ -124,6 +133,17 @@
           background-color: #f2f8ff;
         }
       }
+    }
+  }
+}
+
+.ontology-scene-detail-menu {
+  background: white;
+
+  :global {
+    .arco-menu-group-title,
+    .arco-menu-item {
+      background: white;
     }
   }
 }

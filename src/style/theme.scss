@@ -1,22 +1,4 @@
 /******** 定义全局css变量 https://arco.design/react/docs/token ********/
-:root {
-  /******** 文字颜色 *******/
-  --color-text-2: #1e293b;
-  --color-text-3: #4a5169;
-  --color-text-4: #6e7b8d;
-  --icon-color-text-1: #646c85;
-
-  /******** 文字大小 *******/
-  --font-size-primary: 14px;
-  --font-size-secondary: 12px;
-
-  /******** 主色 *******/
-  --primary-1: #eef6ff;
-  --primary-6: #007dfa;
-
-  /******** 边框颜色 *******/
-  --color-border-2: #e2e8f0;
-}
 
 /******** fontSize *******/
 $font-size-body-3: 14px;
@@ -81,6 +63,8 @@ $spacing-9: 24px;
 
 .arco-table .arco-table-th-item {
   font-size: $font-size-body-3;
+  display: flex;
+  align-items: center;
 }
 
 .arco-table
@@ -174,8 +158,6 @@ $spacing-9: 24px;
 }
 
 .arco-modal-simple .arco-modal-content {
-  width: 464;
-  height: 142;
   padding-left: 28px;
   font-size: 14px;
 }
@@ -189,16 +171,17 @@ $spacing-9: 24px;
   padding: 24px 28px;
 }
 
-.arco-table-th-item {
+.arco-table-th-item:not(.arco-table-col-has-sorter),
+.arco-table-col-has-sorter .arco-table-cell-with-sorter {
   padding: 9px 16px !important;
 }
 
 .arco-input-search .arco-input::placeholder {
-  color: #7f8c9f;
+  //color: #7f8c9f;
 }
 
 .arco-input-tag.arco-input-tag-focus .arco-input-tag-tag {
-  background-color: #e7ecf0;
+  //background-color: #e7ecf0;
 }
 
 .arco-select-size-default.arco-select-multiple input {
@@ -263,24 +246,24 @@ $spacing-9: 24px;
 }
 
 .arco-input-tag .arco-input-tag-tag {
-  background-color: #e7ecf0;
+  //background-color: #e7ecf0;
 }
 
 .arco-input-tag.arco-input-tag-focus .arco-input-tag-tag {
-  background-color: #e7ecf0;
+  //background-color: #e7ecf0;
 }
 
 .arco-select-option-wrapper:hover {
-  background-color: #eef6ff;
+  //background-color: #eef6ff;
   border-radius: 4px;
 }
 
 .arco-select-option-wrapper:hover .arco-select-option {
-  background-color: #eef6ff;
+  //background-color: #eef6ff;
 }
 
 .arco-select-popup .arco-select-option:hover {
-  background-color: #eef6ff;
+  //background-color: #eef6ff;
 }
 
 .arco-select-popup .arco-select-option-hover {
@@ -289,14 +272,14 @@ $spacing-9: 24px;
 
 // 正常按钮的颜色
 .arco-btn-primary:not(.arco-btn-disabled) {
-  background-color: $color-bg-btn-normal;
+  //background-color: $color-bg-btn-normal;
   color: white;
 }
 
 // 正常按钮划入的颜色
 .arco-btn-primary:not(.arco-btn-disabled):hover {
-  background-color: $color-bg-btn-normal-hover;
-  color: $color-bg-btn-normal-hover;
+  //background-color: $color-bg-btn-normal-hover;
+  //color: $color-bg-btn-normal-hover;
 }
 
 .arco-btn-secondary.arco-btn-disabled {
@@ -307,7 +290,7 @@ $spacing-9: 24px;
 .datasetManagement_batchDeleteBtn__M0nrF.arco-btn-secondary:not(
     .arco-btn-disabled
   ):not(.arco-btn-loading) {
-  color: $color-bg-btn-line;
+  //color: $color-bg-btn-line;
   background-color: white;
 }
 
@@ -315,8 +298,8 @@ $spacing-9: 24px;
 .datasetManagement_batchDeleteBtn__M0nrF.arco-btn-secondary:not(
     .arco-btn-disabled
   ):not(.arco-btn-loading):hover {
-  background-color: $color-bg-btn-line;
-  color: $color-bg-btn-line;
+  //background-color: $color-bg-btn-line;
+  //color: $color-bg-btn-line;
 }
 
 /* 全局修改所有 placeholder */
@@ -418,7 +401,7 @@ $spacing-9: 24px;
 }
 
 .arco-table-tr > th {
-  background-color: #f5f9ff;
+  //background-color: #f5f9ff;
 }
 
 .arco-form-item-symbol {
@@ -433,33 +416,45 @@ $spacing-9: 24px;
 }
 
 .arco-btn-primary:not(.arco-btn-disabled):hover {
-  color: $color-font-white;
-  background-color: $color-bg-btn-normal;
+  //color: $color-font-white;
+  //background-color: $color-bg-btn-normal;
 }
 
 .arco-table-tr > th {
-  background-color: #f5f9ff;
+  //background-color: #f5f9ff;
 }
 
 .arco-btn-primary:not(.arco-btn-disabled):hover {
-  color: $color-font-white;
-  background-color: $color-bg-btn-normal;
+  //color: $color-font-white;
+  //background-color: $color-bg-btn-normal;
 }
 
 .arco-form-label-item {
   > label {
     display: flex;
+
+    > strong {
+      display: flex;
+      align-items: center;
+    }
   }
 }
 
 .arco-btn-secondary:not(.arco-btn-disabled) {
-  color: $color-bg-btn-normal !important;
-  background-color: $color-font-white !important;
-  border: 1px solid $color-bg-btn-line !important;
+  //color: $color-bg-btn-normal !important;
+  //background-color: $color-font-white !important;
+  //border: 1px solid $color-bg-btn-line !important;
 }
 
 .arco-btn-secondary:not(.arco-btn-disabled):hover {
-  color: $color-bg-btn-line-hover !important;
-  background-color: $color-font-white !important;
-  border: 1px solid $color-bg-btn-line-hover !important;
+  //color: $color-bg-btn-line-hover !important;
+  //background-color: $color-font-white !important;
+  //border: 1px solid $color-bg-btn-line-hover !important;
+}
+
+.arco-table .arco-table-th-item.arco-table-col-has-filter .arco-table-filters {
+  display: inline-block !important;
+  margin-left: 8px;
+  position: relative !important;
+  vertical-align: -3px !important;
 }
