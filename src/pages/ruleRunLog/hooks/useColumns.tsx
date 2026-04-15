@@ -13,7 +13,7 @@ import { useHasPermission } from '@/store/userInfoStore';
 const STATUS_MAP: Record<number, { label: string; color: string }> = {
   0: { label: '成功', color: '#10B981' },
   1: { label: '失败', color: '#E52E2D' },
-  2: { label: '部分成功', color: '#F59E0B' },
+  2: { label: '跳过', color: '#F59E0B' },
   3: { label: '待执行', color: '#86909C' }
 };
 
@@ -103,7 +103,7 @@ export const useColumns = ({
         filters: [
           { text: '成功', value: '0' },
           { text: '失败', value: '1' },
-          { text: '部分成功', value: '2' },
+          { text: '跳过', value: '2' },
           { text: '待执行', value: '3' }
         ],
         render: (value) => {

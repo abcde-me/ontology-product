@@ -45,6 +45,14 @@ export interface AutoExecLogDetail {
   status?: number;
   triggerTime?: string;
   triggerType?: number;
+  /**
+   * 行为执行时长
+   */
+  actionDuration: string;
+  /**
+   * 函数（门控）执行时长
+   */
+  functionDuration: string;
 }
 
 /**
