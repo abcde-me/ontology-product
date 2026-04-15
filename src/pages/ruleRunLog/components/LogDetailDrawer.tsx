@@ -84,6 +84,14 @@ export const LogDetailDrawer: React.FC<LogDetailDrawerProps> = ({
               <span>-</span>
             )}
           </div>
+          <div className="flex items-center gap-[8px] text-[14px] text-[#4E5969]">
+            <span>门控耗时：</span>
+            <span>{detail?.functionDuration || '-'}</span>
+          </div>
+          <div className="flex items-center gap-[8px] text-[14px] text-[#4E5969]">
+            <span>行为耗时：</span>
+            <span>{detail?.actionDuration || '-'}</span>
+          </div>
         </div>
         <div className="min-h-0 flex-1">
           {loading ? (
