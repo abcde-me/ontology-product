@@ -39,6 +39,7 @@ import { AUTOMATION_PERMISSIONS } from '@/config/permissions';
 import { PermissionWrapper } from '@/components/PermissionGuard';
 import PermissionButton from '@/components/PermissionButton';
 import { isNil } from 'lodash-es';
+import { IconSearch } from '@ceai-front/svg-icons';
 
 const TRIGGER_TYPE_MAP: Record<number, string> = {
   1: '定时触发',
@@ -260,6 +261,7 @@ const RuleListPage = () => {
                   placeholder={'请输入规则名称'}
                   allowClear
                   onChange={onSubmit}
+                  suffix={<IconSearch />}
                 />
               </Form.Item>
             </Form>
