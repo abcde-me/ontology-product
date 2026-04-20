@@ -206,7 +206,7 @@ export const FunctionDetailDrawer = (props: IProps) => {
 
         {/* 输入详情 */}
         <div className={styles['section']}>
-          <div className={styles['section-title']}>输入详情</div>
+          <div className={styles['section-title']}>入参详情</div>
           <Table
             className={styles['detail-table']}
             columns={INPUT_COLUMNS}
@@ -220,7 +220,7 @@ export const FunctionDetailDrawer = (props: IProps) => {
 
         {/* 输出详情 */}
         <div className={styles['section']}>
-          <div className={styles['section-title']}>输出详情</div>
+          <div className={styles['section-title']}>出参详情</div>
           <Table
             className={styles['detail-table']}
             data={outputParams}
