@@ -74,13 +74,18 @@ export const ActionSelect = (props: ActionSelectProps) => {
             </div>
             <div className={'flex h-max items-center gap-4 overflow-hidden'}>
               <div className={styles['action-sel-item-info']}>
-                本体场景：
+                <div className={`flex-shrink-0 ${styles['default-text']}`}>
+                  本体场景：
+                </div>
                 <GlobalTooltip.Ellipsis
                   text={option.ontologyModelName || '-'}
+                  className={styles['default-text']}
                 />
               </div>
               <div className={styles['action-sel-item-info']}>
-                对象类型：
+                <div className={`flex-shrink-0 ${styles['default-text']}`}>
+                  绑定对象类型：
+                </div>
                 <ObjectTypeTag
                   className={styles['action-obj-type']}
                   hoverClassName={styles['action-obj-type-name']}

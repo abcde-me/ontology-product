@@ -9,6 +9,7 @@ import { AutoExecLogItem } from '../types';
 import PermissionButton from '@/components/PermissionButton';
 import { AUTOMATION_PERMISSIONS } from '@/config/permissions';
 import { useHasPermission } from '@/store/userInfoStore';
+import { ContentWithCopy } from '@/pages/ontologyScene/components';
 
 const STATUS_MAP: Record<number, { label: string; color: string }> = {
   0: { label: '成功', color: '#10B981' },
@@ -51,22 +52,15 @@ export const useColumns = ({
         fixed: 'left',
         render: (value, record) =>
           value ? (
-            <div className="flex w-full items-center gap-[8px]">
-              <div
-                className={'min-w-0 cursor-pointer'}
-                onClick={() => {
-                  if (!infoViewAble) return;
-                  closeDrawer();
-                  onViewLog?.(record);
-                }}
-              >
-                <GlobalTooltip.Ellipsis
-                  text={String(value)}
-                  className={`${infoViewAble ? 'link-text' : ''} w-full`}
-                />
-              </div>
-              <CopyItemIcon value={String(value)} className="flex-shrink-0" />
-            </div>
+            <ContentWithCopy
+              onClick={() => {
+                if (!infoViewAble) return;
+                closeDrawer();
+                onViewLog?.(record);
+              }}
+              value={value}
+              textClassName={'link-text hover:cursor-pointer font-[500]'}
+            />
           ) : (
             '-'
           )

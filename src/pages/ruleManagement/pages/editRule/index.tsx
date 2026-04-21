@@ -93,7 +93,7 @@ const RuleEditPage = () => {
       <div className={styles['rule-info-page-content']}>
         <div className={styles['rule-info-page-line']} />
         <div className={styles['rule-info-page-body']}>
-          <RuleForm ref={ruleForm} />
+          <RuleForm ref={ruleForm} mode={'edit'} />
         </div>
       </div>
     </PageContainer>

@@ -2,13 +2,14 @@ import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import type { OntologyFunctionDetail } from '@/pages/ontologyScene/types/ontologyFunction';
 import type { BehaviorActionItem } from '@/pages/ontologyScene/types/behaviorActions';
-import type {
+import {
   ActionConfigRes,
   AutoRuleDetail,
   ChangeConfigRes,
   GateConfigRes,
   OntologyModelInfo,
-  OntologyObjectTypeInfo
+  OntologyObjectTypeInfo,
+  PeriodType
 } from '../types';
 import { cloneDeep, isNil } from 'lodash-es';
 
@@ -109,8 +110,12 @@ export const useRuleManagementStore = create<RuleManagementStore>()(
   devtools(
     (set, get) => ({
       ruleData: {
-        triggerType: 1
-      } as any,
+        triggerType: 1,
+        scheduleConfig: {
+          enabled: true,
+          periodType: PeriodType.Daily
+        }
+      } as AutoRuleDetail,
 
       init: (data) => {
         const nextData = cloneData(data || {});

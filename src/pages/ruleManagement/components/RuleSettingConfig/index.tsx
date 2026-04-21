@@ -13,6 +13,8 @@ import { isEmpty, isNil } from 'lodash-es';
 import { getModelIconNode } from '@/pages/ruleManagement/utils';
 import { OBJECT_TYPE_ICON_OPTIONS } from '@/pages/ontologyScene/common/constants';
 import { PhysicalProperties } from '@/types/graphApi';
+import { GlobalTooltip } from '@ceai-front/arco-material';
+import { Popover } from '@arco-design/web-react';
 
 interface RuleSettingConfigProps {
   mode: 'card' | 'item';
@@ -79,15 +81,15 @@ const renderActionConfig = (ruleData?: AutoRuleDetail) => {
   return (
     <>
       时，系统执行
-      <div
-        className={classNames(
-          styles['rule-setting-tag'],
-          actionEmpty ? 'text-[var(--color-text-6)]' : ''
-        )}
-      >
-        {actionEmpty
-          ? '请先在左侧配置'
-          : ruleData?.actionConfig?.actionInfo?.name}
+      <div className={classNames(styles['rule-setting-tag'])}>
+        <GlobalTooltip.Ellipsis
+          text={
+            actionEmpty
+              ? '请先在左侧配置'
+              : ruleData?.actionConfig?.actionInfo?.name
+          }
+          className={actionEmpty ? '!text-[var(--color-text-4)]' : ''}
+        />
       </div>
     </>
   );
@@ -101,12 +103,16 @@ const renderAutoTriggerConfig = (ruleData?: AutoRuleDetail) => {
       <div
         className={classNames(
           styles['rule-setting-tag'],
-          scheduleEmpty ? 'text-[var(--color-text-6)]' : ''
+          scheduleEmpty ? '!text-[var(--color-text-4)]' : ''
         )}
       >
-        {scheduleEmpty
-          ? '请先在左侧配置'
-          : buildCronDes(ruleData?.scheduleConfig)}
+        <GlobalTooltip.Ellipsis
+          text={
+            scheduleEmpty
+              ? '请先在左侧配置'
+              : buildCronDes(ruleData?.scheduleConfig)
+          }
+        />
       </div>
       {renderActionConfig(ruleData)}
     </>
@@ -123,19 +129,55 @@ const getIconComponent = (iconValue?: string) => {
 
 const renderInsConfig = (config: ChangeConfigRes) => {
   if (config.instanceIds?.length) {
-    return config.instanceIds.map((id) => {
-      return (
-        <div key={id} className={classNames(styles['rule-setting-tag'])}>
-          {id}
-        </div>
-      );
-    });
+    const copyIds = [...config.instanceIds];
+    const showTag = copyIds.splice(0, 6);
+    return (
+      <>
+        {showTag.map((id) => {
+          return (
+            <div key={id} className={classNames(styles['rule-setting-tag'])}>
+              {id}
+            </div>
+          );
+        })}
+        {copyIds.length > 0 && (
+          <Popover
+            content={
+              <div className={'max-[200px] flex flex-wrap gap-2'}>
+                {copyIds.map((id) => {
+                  return (
+                    <div
+                      key={id}
+                      className={classNames(
+                        styles['rule-setting-tag'],
+                        '!max-w-[160px]'
+                      )}
+                    >
+                      <GlobalTooltip.Ellipsis text={id} />
+                    </div>
+                  );
+                })}
+              </div>
+            }
+          >
+            <div
+              className={classNames(
+                styles['rule-setting-tag'],
+                '!text-[var(--color-text-4)]'
+              )}
+            >
+              +{copyIds.length}
+            </div>
+          </Popover>
+        )}
+      </>
+    );
   }
   return (
     <div
       className={classNames(
         styles['rule-setting-tag'],
-        'text-[var(--color-text-6)]'
+        '!text-[var(--color-text-4)]'
       )}
     >
       请先在左侧配置
@@ -153,7 +195,7 @@ const renderPropConfig = (
       <div
         className={classNames(
           styles['rule-setting-tag'],
-          'text-[var(--color-text-6)]'
+          '!text-[var(--color-text-4)]'
         )}
       >
         请先在左侧配置
@@ -191,36 +233,38 @@ const renderAutoChangeConfig = (
       <div
         className={classNames(
           styles['rule-setting-tag'],
-          modelEmpty ? 'text-[var(--color-text-6)]' : ''
+          modelEmpty ? '!text-[var(--color-text-4)]' : ''
         )}
       >
         {modelEmpty ? (
           '请先在左侧配置'
         ) : (
-          <div className={'flex items-center gap-1'}>
-            <div className={'h-full w-max'}>
+          <>
+            <div className={'h-full w-max flex-shrink-0'}>
               {getModelIconNode(ruleData?.modelInfo?.icon, 'w-[14px] h-[14px]')}
             </div>
-            {ruleData?.modelInfo?.name}
-          </div>
+            <GlobalTooltip.Ellipsis text={ruleData?.modelInfo?.name} />
+          </>
         )}
       </div>
       的
       <div
         className={classNames(
           styles['rule-setting-tag'],
-          objEmpty ? 'text-[var(--color-text-6)]' : ''
+          objEmpty ? '!text-[var(--color-text-4)]' : ''
         )}
       >
         {objEmpty ? (
           '请先在左侧配置'
         ) : (
-          <div className={'flex items-center gap-1'}>
-            <div className={'flex h-full w-[14px] flex-1 self-start pt-1'}>
+          <>
+            <div
+              className={'flex h-full w-[14px] flex-shrink-0 self-start pt-1'}
+            >
               <IconComponent className="h-[14px] w-[14px]" />
             </div>
-            {changeConfig?.objectTypeInfo?.name}
-          </div>
+            <GlobalTooltip.Ellipsis text={changeConfig?.objectTypeInfo?.name} />
+          </>
         )}
       </div>
       的{changeConfig?.instanceScope === InstanceScope.All ? '全部' : '部分'}
@@ -242,13 +286,13 @@ const renderAutoChangeConfig = (
           <div
             className={classNames(
               styles['rule-setting-tag'],
-              funcEmpty ? 'text-[var(--color-text-6)]' : ''
+              funcEmpty ? '!text-[var(--color-text-4)]' : ''
             )}
           >
             {funcEmpty ? (
               '请先在左侧配置'
             ) : (
-              <div>{gateConfig?.functionInfo?.name}</div>
+              <GlobalTooltip.Ellipsis text={gateConfig?.functionInfo?.name} />
             )}
           </div>
           返回为true

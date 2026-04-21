@@ -21,6 +21,7 @@ import { PhysicalProperties } from '@/types/graphApi';
 import BatchChangePropIcon from '@/assets/batch-change-prop.svg';
 import { IconSwap } from '@arco-design/web-react/icon';
 import { isNil } from 'lodash-es';
+import { isNumericType } from '@/pages/ruleManagement/utils';
 
 export interface PropConditionItem extends PropertyConditionType {
   name?: string;
@@ -83,11 +84,12 @@ export const PropConditions = (props: PropConditionsProps) => {
     onChange?.(nextRows);
   };
 
+  // 批量变更属性条件
   const batchChangeProp = (type: ConditionType) => {
     const nextRows: PropertyConditionType[] = rows.map((row) => ({
       ...row,
       type,
-      operator: row.fieldType === 'int' ? Operator.Eq : Operator.Contains,
+      operator: isNumericType(row.fieldType) ? Operator.Eq : Operator.Contains,
       value: undefined
     }));
     onChange?.(nextRows);
@@ -167,10 +169,9 @@ export const PropConditions = (props: PropConditionsProps) => {
                         record.type === ConditionType.AnyChange
                           ? ConditionType.MeetCondition
                           : ConditionType.AnyChange,
-                      operator:
-                        record.fieldType === 'int'
-                          ? Operator.Eq
-                          : Operator.Contains,
+                      operator: isNumericType(record.fieldType)
+                        ? Operator.Eq
+                        : Operator.Contains,
                       value: undefined
                     });
                   }}
@@ -191,12 +192,11 @@ export const PropConditions = (props: PropConditionsProps) => {
         if (anyChange) {
           return <span className={styles['placeholder-text']}>-</span>;
         }
-
+        const numericType = isNumericType(record.fieldType);
+        const options = numericType
+          ? NUM_CONDITION_OPERATOR_OPTIONS
+          : STR_CONDITION_OPERATOR_OPTIONS;
         if (readOnly) {
-          const options =
-            record.fieldType === 'int'
-              ? NUM_CONDITION_OPERATOR_OPTIONS
-              : STR_CONDITION_OPERATOR_OPTIONS;
           const currentOption = options.find(
             (item) => item.value === record.operator
           );
@@ -208,20 +208,18 @@ export const PropConditions = (props: PropConditionsProps) => {
         }
 
         return (
-          <Form.Item validateStatus={undefined} noStyle>
+          <Form.Item validateStatus={undefined} className={'mb-0'}>
             <Select
               value={record.operator}
               disabled={disabled || readOnly}
               className={styles['operator']}
-              options={
-                record.fieldType === 'int'
-                  ? NUM_CONDITION_OPERATOR_OPTIONS
-                  : STR_CONDITION_OPERATOR_OPTIONS
-              }
+              options={options}
               placeholder={'请选择'}
               triggerProps={{
                 updateOnScroll: true
               }}
+              showSearch
+              dropdownMenuClassName={styles['condition-dropdown']}
               getPopupContainer={(node) => document.body}
               onChange={(operator: Operator) => {
                 updateRow(index, {

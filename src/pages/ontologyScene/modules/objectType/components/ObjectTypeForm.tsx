@@ -12,7 +12,8 @@ import {
   Switch,
   Spin,
   Cascader,
-  Popover
+  Popover,
+  Tooltip
 } from '@arco-design/web-react';
 import {
   IconQuestionCircle,
@@ -816,7 +817,14 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
         }
       },
       {
-        title: '向量化',
+        title: (
+          <div className={'flex items-center gap-1'}>
+            向量化
+            <Tooltip content={''}>
+              <IconQuestionCircle className="text-[var(--color-text-5)] hover:cursor-pointer" />
+            </Tooltip>
+          </div>
+        ),
         dataIndex: '_vectorizationOn',
         width: 100,
         render: (_, record, index) => {
