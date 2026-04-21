@@ -6,6 +6,7 @@ import { buildSaveAutoRuleData } from '@/pages/ruleManagement/utils';
 import { saveAutoRule } from '@/api/businessAutomation/list';
 import { Message } from '@arco-design/web-react';
 import { useRuleManagementStore } from '@/pages/ruleManagement/stores';
+import { CycleValues } from '@/pages/ruleManagement/components/SchedulerRun/types';
 
 const RuleCreatePage = () => {
   const ruleForm = useRef<RuleFormRef>();
@@ -46,7 +47,10 @@ const RuleCreatePage = () => {
   };
 
   useEffect(() => {
-    ruleForm.current?.form.setFieldsValue(ruleDetail);
+    ruleForm.current?.form.setFieldsValue({
+      triggerType: 1,
+      cycle: 'per_day'
+    });
     return clearData;
   }, []);
 

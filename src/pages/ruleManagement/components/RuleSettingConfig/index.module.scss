@@ -32,18 +32,21 @@
     font-size: 14px;
     font-weight: 400;
     line-height: 22px; /* 157.143% */
-
-    .rule-setting-tag {
-      display: flex;
-      padding: 2px 8px;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-      border-radius: 4px;
-      background: white;
-      border: 1px solid #dfe2eb;
-    }
   }
+}
+
+.rule-setting-tag {
+  display: flex;
+  padding: 2px 8px;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  border-radius: 4px;
+  background: white;
+  border: 1px solid #dfe2eb;
+  max-width: 400px;
+  flex-shrink: 0;
+  overflow: hidden;
 }
 
 .rule-config-item {

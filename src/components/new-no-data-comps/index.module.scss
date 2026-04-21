@@ -1,0 +1,8 @@
+.select-dropdown {
+  :global {
+    .arco-select-option:hover,
+    .arco-select-option-wrapper:hover {
+      background-color: rgb(var(--primary-1)) !important;
+    }
+  }
+}

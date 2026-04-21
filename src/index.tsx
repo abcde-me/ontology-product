@@ -60,7 +60,6 @@ import {
 import { useUserInfo, useUserInfoStore } from './store/userInfoStore';
 import { usePathChange, usePermission } from '@/hooks';
 import { menus } from '@/pages/admin/layout/menus';
-import { is } from 'immer/dist/internal';
 import { getLocalStorage } from './utils/storage';
 import { ProjectIdKey } from './utils/const';
 import { isSameArray } from './utils/array';

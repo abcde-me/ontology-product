@@ -18,7 +18,7 @@ export * from './ObjectInstanceSelect';
 export { default as ObjectTypeDetailDrawer } from './ObjectTypeDetailDrawer';
 export * from './OSEmptyStatus';
 export * from './FunctionFileParam';
-export * from './ContentWithCopy';
+export * from '../../../components/ContentWithCopy';
 export * from './Icons';
 export * from './EllipsisPopover';
 export * from './OSModal';

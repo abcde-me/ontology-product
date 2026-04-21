@@ -132,7 +132,8 @@ const RuleListPage = () => {
       width: 140,
       ellipsis: true,
       render: (_, record) => {
-        const functionName = record.gateConfig?.functionName || '-';
+        const functionName = record.gateConfig?.functionName;
+        if (!functionName) return '-';
         return (
           <div
             className={'hover:cursor-pointer'}

@@ -322,3 +322,20 @@ export function handleRuleDetailParams(data: AutoRuleDetail) {
     );
   }
 }
+
+export const isNumericType = (type?: string) => {
+  return !type
+    ? false
+    : [
+        'tinyint',
+        'smallint',
+        'mediumint',
+        'int',
+        'integer',
+        'bigint',
+        'float',
+        'real',
+        'double',
+        'double precision'
+      ].includes(type);
+};

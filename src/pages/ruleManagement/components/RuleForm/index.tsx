@@ -24,15 +24,17 @@ import SchedulerRun from '../SchedulerRun';
 import { CycleText } from '../SchedulerRun/types';
 import { useRuleManagementStore } from '../../stores';
 import { BehaviorActionItem } from '@/pages/ontologyScene/types/behaviorActions';
-import { getParamsFromData } from '../../utils';
+import { getParamsFromData, isNumericType } from '../../utils';
 import {
   ChangeType,
   ConditionType,
   GateConfigRes,
   MonthDayMode,
+  NUM_CONDITION_OPERATOR_OPTIONS,
   PeriodType,
   PropertyConditionType,
-  ScheduleConfigRes
+  ScheduleConfigRes,
+  STR_CONDITION_OPERATOR_OPTIONS
 } from '../../types';
 import { ObjectTypeSelect } from '@/pages/ontologyScene/components';
 import { InstanceSelect } from '@/pages/ontologyScene/components/ObjectInstanceSelect/InsSelect';
@@ -587,13 +589,19 @@ export const RuleForm = forwardRef<
                                           ]}
                                           onChange={(value) => {
                                             form.setFieldsValue({
-                                              insType: value,
-                                              instanceIds: undefined
+                                              insType: value
                                             });
+                                            // 切换实例类型时不清空已选择的实例id
+                                            const instanceIds =
+                                              form.getFieldValue('instanceIds');
                                             syncValidatedValues({
                                               changeConfig: {
                                                 instanceScope: value,
-                                                instanceIds: undefined
+                                                instanceIds:
+                                                  value ===
+                                                  InstanceScope.Specific
+                                                    ? instanceIds
+                                                    : undefined
                                               }
                                             });
                                           }}

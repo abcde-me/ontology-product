@@ -41,14 +41,16 @@ export const PyCodeContent = (props: PyCodeContentProps) => {
             getPopupContainer={popupContainer}
             className={'z-40'}
           >
-            <IconCopy
-              className={
-                'text-[14px] text-[#334155] hover:cursor-pointer hover:text-[#438DFB]'
-              }
-              onClick={() => {
-                copyToClipboard(props.value || '-');
-              }}
-            />
+            <div className={styles['code-toolbar']}>
+              <IconCopy
+                className={
+                  ' text-[#334155] hover:cursor-pointer hover:text-[#438DFB]'
+                }
+                onClick={() => {
+                  copyToClipboard(props.value || '-');
+                }}
+              />
+            </div>
           </Tooltip>
         )}
         <Tooltip
@@ -58,17 +60,21 @@ export const PyCodeContent = (props: PyCodeContentProps) => {
           <div onClick={toggleFullscreen}>
             {fullScreen &&
               (isFullscreen ? (
-                <IconShrink
-                  className={
-                    'text-[14px] text-[#334155] hover:cursor-pointer hover:text-[#438DFB]'
-                  }
-                />
+                <div className={styles['code-toolbar']}>
+                  <IconShrink
+                    className={
+                      'text-[#334155] hover:cursor-pointer hover:text-[#438DFB]'
+                    }
+                  />
+                </div>
               ) : (
-                <IconExpand
-                  className={
-                    'text-[14px] text-[#334155] hover:cursor-pointer hover:text-[#438DFB]'
-                  }
-                />
+                <div className={styles['code-toolbar']}>
+                  <IconExpand
+                    className={
+                      ' text-[#334155] hover:cursor-pointer hover:text-[#438DFB]'
+                    }
+                  />
+                </div>
               ))}
           </div>
         </Tooltip>
