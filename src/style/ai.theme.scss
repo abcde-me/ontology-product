@@ -720,3 +720,7 @@ $spacing-9: 24px;
 .arco-drawer-mask {
   background-color: var(--color-mask-bg);
 }
+
+.arco-table-empty-row > .arco-table-td {
+  border-bottom-width: 0 !important;
+}
