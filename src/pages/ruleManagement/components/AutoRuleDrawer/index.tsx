@@ -325,10 +325,7 @@ export const AutoRuleDrawer = (
                             tagList={
                               ruleDetail?.changeConfig?.instanceIds || []
                             }
-                            tagProps={{
-                              className: styles['ins-tag-item']
-                            }}
-                            // moreTagProps={{
+                            // tagProps={{
                             //   className: styles['ins-tag-item']
                             // }}
                           />

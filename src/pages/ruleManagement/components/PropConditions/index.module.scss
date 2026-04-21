@@ -111,10 +111,26 @@
       border-color: var(--color-border-1) !important;
     }
   }
+
+  &:hover,
+  &:active,
+  &:focus-within {
+    :global {
+      .arco-select-view {
+        border-color: rgb(var(--primary-6)) !important;
+      }
+    }
+  }
 }
 
 .value-common {
   border-color: var(--color-border-1) !important;
+
+  &:hover,
+  &:active,
+  &:focus-within {
+    border-color: rgb(var(--primary-6)) !important;
+  }
 }
 
 .readonly-text {
@@ -129,4 +145,13 @@
   color: var(--color-text-1);
   background: transparent;
   border: none;
+}
+
+.condition-dropdown {
+  :global {
+    .arco-select-option:hover,
+    .arco-select-option-selected {
+      background-color: rgb(var(--primary-1));
+    }
+  }
 }

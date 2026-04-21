@@ -12,7 +12,8 @@ import {
   Switch,
   Spin,
   Cascader,
-  Popover
+  Popover,
+  Tooltip
 } from '@arco-design/web-react';
 import {
   IconQuestionCircle,
@@ -816,7 +817,18 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
         }
       },
       {
-        title: '向量化',
+        title: (
+          <div className={'flex items-center gap-1'}>
+            向量化
+            <Popover
+              content={
+                '启用向量化后，此属性会参与AI问答的相似度计算，用于检索并召回语义相关的对象实例。'
+              }
+            >
+              <IconQuestionCircle className="pointer-events-auto cursor-pointer text-[#86909C]" />
+            </Popover>
+          </div>
+        ),
         dataIndex: '_vectorizationOn',
         width: 100,
         render: (_, record, index) => {

@@ -1,23 +1,24 @@
 import React from 'react';
 import styles from './index.module.scss';
-import { CopyItemIcon } from '@ceai-front/arco-material';
+import { CopyItemIcon, GlobalTooltip } from '@ceai-front/arco-material';
 import classNames from 'classnames';
-import { Tooltip } from '@arco-design/web-react';
 
 export interface ContentWithCopyProps {
   copy?: boolean;
   value: string;
   className?: string;
+  textClassName?: string;
   style?: React.CSSProperties;
+  onClick?: () => void;
 }
 
 export const ContentWithCopy = (props: ContentWithCopyProps) => {
-  const { copy = true, value, className, style } = props;
+  const { copy = true, value, className, style, onClick } = props;
   return (
     <div className={classNames([styles['copy-value-wrapper'], className])}>
-      <Tooltip content={value}>
-        <p>{value}</p>
-      </Tooltip>
+      <div className={'w-max overflow-hidden'} onClick={onClick}>
+        <GlobalTooltip.Ellipsis text={value} className={props.textClassName} />
+      </div>
       {copy && (
         <CopyItemIcon
           value={value}

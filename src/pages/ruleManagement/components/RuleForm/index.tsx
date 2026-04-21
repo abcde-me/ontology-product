@@ -24,15 +24,17 @@ import SchedulerRun from '../SchedulerRun';
 import { CycleText } from '../SchedulerRun/types';
 import { useRuleManagementStore } from '../../stores';
 import { BehaviorActionItem } from '@/pages/ontologyScene/types/behaviorActions';
-import { getParamsFromData } from '../../utils';
+import { getParamsFromData, isNumericType } from '../../utils';
 import {
   ChangeType,
   ConditionType,
   GateConfigRes,
   MonthDayMode,
+  NUM_CONDITION_OPERATOR_OPTIONS,
   PeriodType,
   PropertyConditionType,
-  ScheduleConfigRes
+  ScheduleConfigRes,
+  STR_CONDITION_OPERATOR_OPTIONS
 } from '../../types';
 import { ObjectTypeSelect } from '@/pages/ontologyScene/components';
 import { InstanceSelect } from '@/pages/ontologyScene/components/ObjectInstanceSelect/InsSelect';
@@ -83,8 +85,8 @@ export interface RuleFormRef {
 
 export const RuleForm = forwardRef<
   RuleFormRef | undefined,
-  Record<string, any>
->((props, ref) => {
+  { mode: 'create' | 'edit' }
+>(({ mode: pageMode }, ref) => {
   const [form] = Form.useForm();
   const objectTypeId = Form.useWatch('objectTypeId', form);
   const modelId = Form.useWatch('modelId', form);
@@ -191,11 +193,12 @@ export const RuleForm = forwardRef<
     values
   ) => {
     const changedKeys = Object.keys(changedValues || {});
+    const isEdit = pageMode === 'edit' && changedKeys.length > 5;
     const needNotChange = ['action', 'modelId', 'objectTypeId'].some((key) =>
       changedKeys?.includes(key)
     );
     // 编辑的的数据不需要进行数据初始化
-    if (!changedKeys.length || needNotChange || changedKeys.length > 2) return;
+    if (!changedKeys.length || needNotChange || isEdit) return;
     // 首先校验填写数据是否合法
     form
       .validate(changedKeys)
@@ -587,13 +590,19 @@ export const RuleForm = forwardRef<
                                           ]}
                                           onChange={(value) => {
                                             form.setFieldsValue({
-                                              insType: value,
-                                              instanceIds: undefined
+                                              insType: value
                                             });
+                                            // 切换实例类型时不清空已选择的实例id
+                                            const instanceIds =
+                                              form.getFieldValue('instanceIds');
                                             syncValidatedValues({
                                               changeConfig: {
                                                 instanceScope: value,
-                                                instanceIds: undefined
+                                                instanceIds:
+                                                  value ===
+                                                  InstanceScope.Specific
+                                                    ? instanceIds
+                                                    : undefined
                                               }
                                             });
                                           }}
@@ -777,7 +786,19 @@ export const RuleForm = forwardRef<
                         label={'高级配置'}
                         required={false}
                       >
-                        <Switch checkedText={'开'} uncheckedText={'关'} />
+                        <Switch
+                          checkedText={'开'}
+                          uncheckedText={'关'}
+                          onChange={(c) => {
+                            syncValidatedValues({
+                              gateConfig: undefined
+                            });
+                            form.setFieldsValue({
+                              function: undefined,
+                              functionParams: undefined
+                            });
+                          }}
+                        />
                       </FormItem>
                       <Form.Item shouldUpdate={() => true} noStyle>
                         {/*是否开启高级配置*/}
