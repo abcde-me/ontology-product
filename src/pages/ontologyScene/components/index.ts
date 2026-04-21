@@ -21,5 +21,5 @@ export * from './FunctionFileParam';
 export * from '../../../components/ContentWithCopy';
 export * from './Icons';
 export * from './EllipsisPopover';
-export * from './OSModal';
+export * from '../../../components/OSModal';
 export * from './ParamValueRenderer';
