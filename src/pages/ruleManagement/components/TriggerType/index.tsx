@@ -39,9 +39,7 @@ export const TriggerType = (props: {
             key={type}
             onClick={() => onChange?.(type)}
           >
-            <div className={`${styles['trigger-checked']}`}>
-              <TriggerCheckedIcon />
-            </div>
+            <TriggerCheckedIcon className={styles['trigger-checked']} />
             <div className={classNames(styles['trigger-type-icon'], className)}>
               {icon}
             </div>

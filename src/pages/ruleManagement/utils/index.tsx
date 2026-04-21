@@ -30,7 +30,9 @@ const formatParams = (config?: ActionConfigRes | GateConfigRes) => {
   config?.parameters.forEach((item) => {
     try {
       if (isNil(item.value)) return;
-      item.value = JSON.stringify(item.value);
+      item.value = ['string', 'number'].includes(typeof item.value)
+        ? item.value.toString()
+        : JSON.stringify(item.value);
     } catch (e) {
       console.error(e);
     }
@@ -76,7 +78,9 @@ export function buildAutoChangeSave(data: AutoRuleDetail): CreateAutoRule {
   changeConfig?.propertyConditions?.forEach((item) => {
     const value = item.value;
     try {
-      item.value = JSON.stringify(value);
+      item.value = ['string', 'number'].includes(typeof item.value)
+        ? value?.toString()
+        : JSON.stringify(value);
     } catch (e) {
       console.error(e);
     }
@@ -302,8 +306,11 @@ export function handleRuleDetailParams(data: AutoRuleDetail) {
   ].forEach((params) => {
     if (!!params) {
       params.forEach((param) => {
+        // true和false是字符串，parse会转成布尔
         try {
-          param.value = JSON.parse(param.value as string);
+          param.value = ['true', 'false'].includes(param.value)
+            ? param.value
+            : JSON.parse(param.value as string);
         } catch (e) {
           console.error(e);
         }

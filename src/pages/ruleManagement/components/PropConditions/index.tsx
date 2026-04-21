@@ -262,6 +262,7 @@ export const PropConditions = (props: PropConditionsProps) => {
                 className={
                   propValueStatus?.[record.id] ? '' : styles['value-common']
                 }
+                strictMode
                 placeholder={'请输入'}
                 style={{ width: '100%' }}
                 onBlur={(e) => {
