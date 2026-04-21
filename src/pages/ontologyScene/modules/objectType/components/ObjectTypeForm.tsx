@@ -820,13 +820,13 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
         title: (
           <div className={'flex items-center gap-1'}>
             向量化
-            <Tooltip
+            <Popover
               content={
                 '启用向量化后，此属性会参与AI问答的相似度计算，用于检索并召回语义相关的对象实例。'
               }
             >
-              <IconQuestionCircle className="text-[var(--color-text-5)] hover:cursor-pointer" />
-            </Tooltip>
+              <IconQuestionCircle className="pointer-events-auto cursor-pointer text-[#86909C]" />
+            </Popover>
           </div>
         ),
         dataIndex: '_vectorizationOn',
