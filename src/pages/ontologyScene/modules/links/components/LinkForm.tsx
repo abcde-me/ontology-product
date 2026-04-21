@@ -434,6 +434,7 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
         width: 60,
         render: (value, record, index) => (
           <Checkbox
+            disabled={record.isPrimary === true && record.isUse === 1}
             checked={record.isUse === 1}
             onChange={(checked) =>
               handleFieldChange(index, { isUse: checked ? 1 : 0 })
