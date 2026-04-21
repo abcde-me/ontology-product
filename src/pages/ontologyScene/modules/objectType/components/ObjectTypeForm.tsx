@@ -684,7 +684,7 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
         render: (value, record, index) => (
           <div className="flex items-center gap-[12px]">
             <Checkbox
-              disabled={record.isPrimary === 1}
+              disabled={record.isPrimary === 1 && record.isUse === 1}
               checked={record.isUse === 1}
               onChange={(checked) =>
                 handleAttributeRowUseChange(index, !!checked)
