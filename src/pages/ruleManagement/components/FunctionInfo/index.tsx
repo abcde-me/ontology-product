@@ -11,7 +11,7 @@ export const FunctionInfo = ({
 }: {
   functionInfo?: OntologyFunctionDetail;
 }) => {
-  const [show, setShow] = useState(true);
+  const [show, setShow] = useState(false);
 
   return (
     <>
@@ -38,9 +38,7 @@ export const FunctionInfo = ({
         visible={show}
         onCancel={() => setShow(false)}
       >
-        <div className={'h-max overflow-scroll'}>
-          <PyCodeContent value={functionInfo?.content} />
-        </div>
+        <PyCodeContent value={functionInfo?.content} />
       </OsModal>
     </>
   );

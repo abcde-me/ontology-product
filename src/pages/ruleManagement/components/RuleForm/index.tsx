@@ -791,9 +791,7 @@ export const RuleForm = forwardRef<
                           uncheckedText={'关'}
                           onChange={(c) => {
                             syncValidatedValues({
-                              gateConfig: {
-                                enabled: c
-                              }
+                              gateConfig: undefined
                             });
                             form.setFieldsValue({
                               function: undefined,
