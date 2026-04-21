@@ -81,18 +81,14 @@ const renderActionConfig = (ruleData?: AutoRuleDetail) => {
   return (
     <>
       时，系统执行
-      <div
-        className={classNames(
-          styles['rule-setting-tag'],
-          actionEmpty ? 'text-[var(--color-text-6)]' : ''
-        )}
-      >
+      <div className={classNames(styles['rule-setting-tag'])}>
         <GlobalTooltip.Ellipsis
           text={
             actionEmpty
               ? '请先在左侧配置'
               : ruleData?.actionConfig?.actionInfo?.name
           }
+          className={actionEmpty ? '!text-[var(--color-text-4)]' : ''}
         />
       </div>
     </>
@@ -107,7 +103,7 @@ const renderAutoTriggerConfig = (ruleData?: AutoRuleDetail) => {
       <div
         className={classNames(
           styles['rule-setting-tag'],
-          scheduleEmpty ? 'text-[var(--color-text-6)]' : ''
+          scheduleEmpty ? '!text-[var(--color-text-4)]' : ''
         )}
       >
         <GlobalTooltip.Ellipsis
@@ -167,7 +163,7 @@ const renderInsConfig = (config: ChangeConfigRes) => {
             <div
               className={classNames(
                 styles['rule-setting-tag'],
-                'text-[var(--color-text-6)]'
+                '!text-[var(--color-text-4)]'
               )}
             >
               +{copyIds.length}
@@ -181,7 +177,7 @@ const renderInsConfig = (config: ChangeConfigRes) => {
     <div
       className={classNames(
         styles['rule-setting-tag'],
-        'text-[var(--color-text-6)]'
+        '!text-[var(--color-text-4)]'
       )}
     >
       请先在左侧配置
@@ -199,7 +195,7 @@ const renderPropConfig = (
       <div
         className={classNames(
           styles['rule-setting-tag'],
-          'text-[var(--color-text-6)]'
+          '!text-[var(--color-text-4)]'
         )}
       >
         请先在左侧配置
@@ -237,7 +233,7 @@ const renderAutoChangeConfig = (
       <div
         className={classNames(
           styles['rule-setting-tag'],
-          modelEmpty ? 'text-[var(--color-text-6)]' : ''
+          modelEmpty ? '!text-[var(--color-text-4)]' : ''
         )}
       >
         {modelEmpty ? (
@@ -255,7 +251,7 @@ const renderAutoChangeConfig = (
       <div
         className={classNames(
           styles['rule-setting-tag'],
-          objEmpty ? 'text-[var(--color-text-6)]' : ''
+          objEmpty ? '!text-[var(--color-text-4)]' : ''
         )}
       >
         {objEmpty ? (
@@ -290,7 +286,7 @@ const renderAutoChangeConfig = (
           <div
             className={classNames(
               styles['rule-setting-tag'],
-              funcEmpty ? 'text-[var(--color-text-6)]' : ''
+              funcEmpty ? '!text-[var(--color-text-4)]' : ''
             )}
           >
             {funcEmpty ? (

@@ -85,8 +85,8 @@ export interface RuleFormRef {
 
 export const RuleForm = forwardRef<
   RuleFormRef | undefined,
-  Record<string, any>
->((props, ref) => {
+  { mode: 'create' | 'edit' }
+>(({ mode: pageMode }, ref) => {
   const [form] = Form.useForm();
   const objectTypeId = Form.useWatch('objectTypeId', form);
   const modelId = Form.useWatch('modelId', form);
@@ -193,11 +193,12 @@ export const RuleForm = forwardRef<
     values
   ) => {
     const changedKeys = Object.keys(changedValues || {});
+    const isEdit = pageMode === 'edit' && changedKeys.length > 5;
     const needNotChange = ['action', 'modelId', 'objectTypeId'].some((key) =>
       changedKeys?.includes(key)
     );
     // 编辑的的数据不需要进行数据初始化
-    if (!changedKeys.length || needNotChange || changedKeys.length > 2) return;
+    if (!changedKeys.length || needNotChange || isEdit) return;
     // 首先校验填写数据是否合法
     form
       .validate(changedKeys)
@@ -785,7 +786,21 @@ export const RuleForm = forwardRef<
                         label={'高级配置'}
                         required={false}
                       >
-                        <Switch checkedText={'开'} uncheckedText={'关'} />
+                        <Switch
+                          checkedText={'开'}
+                          uncheckedText={'关'}
+                          onChange={(c) => {
+                            syncValidatedValues({
+                              gateConfig: {
+                                enabled: c
+                              }
+                            });
+                            form.setFieldsValue({
+                              function: undefined,
+                              functionParams: undefined
+                            });
+                          }}
+                        />
                       </FormItem>
                       <Form.Item shouldUpdate={() => true} noStyle>
                         {/*是否开启高级配置*/}
