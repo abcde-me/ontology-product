@@ -87,7 +87,6 @@ export const LogDetailDrawer: React.FC<LogDetailDrawerProps> = ({
               <Tooltip
                 content={'复制'}
                 triggerProps={{
-                  popupVisible: true,
                   position: 'right',
                   getPopupContainer: () => document.body,
                   popupStyle: {
