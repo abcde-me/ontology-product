@@ -20,10 +20,10 @@ import { IconCopy } from '@arco-design/web-react/icon';
 import { OsDrawer } from '@/pages/ontologyScene/components';
 import {
   DotStatus,
+  GlobalTooltip,
   NoDataCard,
   copyToClipboard
 } from '@ceai-front/arco-material';
-import { EllipsisPopover } from '@/pages/ontologyScene/components';
 
 import { getOntologyObjectTypeDetail } from '@/api/ontologySceneLibrary/objectType';
 import {
@@ -570,12 +570,14 @@ export default function ObjectTypeDetailDrawer({
 
     // 生成列配置
     return keys.map((key) => ({
-      title: <EllipsisPopover value={key} className="pointer-events-auto" />,
+      title: (
+        <GlobalTooltip.Ellipsis text={key} className="pointer-events-auto" />
+      ),
       dataIndex: key,
       width: columnWidth,
       ellipsis: true,
       render: (text: string) => {
-        return <EllipsisPopover value={text || '-'} />;
+        return <GlobalTooltip.Ellipsis text={text || '-'} />;
       }
     }));
   };
@@ -598,9 +600,9 @@ export default function ObjectTypeDetailDrawer({
       width: 140,
       render: (value, record) => (
         <div className="flex items-center gap-2">
-          <EllipsisPopover
+          <GlobalTooltip.Ellipsis
             className="text-[14px] font-[600] leading-[22px] text-[var(--color-text-1)]"
-            value={value || '-'}
+            text={value || '-'}
           />
           {record.isPrimary === 1 && (
             <Tag color="#FBF2FF" className="text-[#9254DE]" size="small">
@@ -621,7 +623,7 @@ export default function ObjectTypeDetailDrawer({
       width: 140,
       render: (value) => (
         <div className="flex items-center gap-2">
-          <EllipsisPopover value={value || '-'} />
+          <GlobalTooltip.Ellipsis text={value || '-'} />
           {value && (
             <Popover content="复制">
               <IconCopy
@@ -642,7 +644,7 @@ export default function ObjectTypeDetailDrawer({
       dataIndex: 'name',
       width: 140,
       render: (value) => {
-        return <EllipsisPopover value={value || '-'} />;
+        return <GlobalTooltip.Ellipsis text={value || '-'} />;
       }
     },
     {
@@ -656,8 +658,8 @@ export default function ObjectTypeDetailDrawer({
               handleViewPublicAttribute(record);
             }}
           >
-            <EllipsisPopover
-              value={value || '-'}
+            <GlobalTooltip.Ellipsis
+              text={value || '-'}
               className={value ? 'hover-blue' : ''}
             />
           </span>
@@ -669,7 +671,7 @@ export default function ObjectTypeDetailDrawer({
       dataIndex: 'columnType',
       width: 140,
       render: (value) => {
-        return <EllipsisPopover value={value || '-'} />;
+        return <GlobalTooltip.Ellipsis text={value || '-'} />;
       }
     }
   ];
@@ -681,9 +683,7 @@ export default function ObjectTypeDetailDrawer({
       dataIndex: 'name',
       width: 140,
       ellipsis: true,
-      render: (value) => (
-        <EllipsisPopover preferTypography value={value || '-'} />
-      )
+      render: (value) => <GlobalTooltip.Ellipsis text={value || '-'} />
     },
     {
       title: '行为id',
@@ -691,7 +691,7 @@ export default function ObjectTypeDetailDrawer({
       width: 140,
       render: (value) => (
         <div className="flex items-center gap-2">
-          <EllipsisPopover preferTypography value={value || '-'} />
+          <GlobalTooltip.Ellipsis text={value || '-'} />
           {value && (
             <Popover content="复制">
               <IconCopy
@@ -712,9 +712,7 @@ export default function ObjectTypeDetailDrawer({
       dataIndex: 'description',
       width: 140,
       ellipsis: true,
-      render: (value) => (
-        <EllipsisPopover preferTypography value={value || '-'} />
-      )
+      render: (value) => <GlobalTooltip.Ellipsis text={value || '-'} />
     }
   ];
 
@@ -749,7 +747,7 @@ export default function ObjectTypeDetailDrawer({
           <IconComponent className="h-6 w-6" />
         </div>
         <div className="min-w-0 flex-1 overflow-hidden text-[14px] leading-[22px] text-[#23293b]">
-          <EllipsisPopover preferTypography value={name} />
+          <GlobalTooltip.Ellipsis text={name} />
         </div>
         {!isNil(objectType?.syncStatus) ? (
           <div className="flex w-max flex-shrink-0 items-center">
@@ -812,9 +810,8 @@ export default function ObjectTypeDetailDrawer({
                     <>
                       {renderObjectTypeIcon(displayData.icon)}
                       <div className="min-w-0 flex-1">
-                        <EllipsisPopover
-                          preferTypography
-                          value={displayData?.name}
+                        <GlobalTooltip.Ellipsis
+                          text={displayData?.name}
                           className="text-[14px] leading-[22px] text-[var(--color-text-1)]"
                         />
                       </div>
@@ -845,10 +842,8 @@ export default function ObjectTypeDetailDrawer({
                     描述说明：
                   </div>
                   <div className="min-w-0 flex-1">
-                    <EllipsisPopover
-                      preferTypography
-                      value={displayData?.description || '-'}
-                      isEdit={false}
+                    <GlobalTooltip.Ellipsis
+                      text={displayData?.description || '-'}
                       className="w-full text-[14px] leading-[22px] text-[var(--color-text-1)]"
                     />
                   </div>
@@ -859,11 +854,10 @@ export default function ObjectTypeDetailDrawer({
                   对象类型id:
                 </div>
                 <div className="flex min-w-0 flex-1 items-center gap-[4px]">
-                  <EllipsisPopover
-                    value={displayData?.code ?? '-'}
-                    wrapperClassName="min-w-0"
+                  <GlobalTooltip.Ellipsis
+                    text={displayData?.code ?? '-'}
                     className="text-[14px] leading-[22px] text-[var(--color-text-1)]"
-                  ></EllipsisPopover>
+                  />
                   {displayData?.code && (
                     <Popover content="复制">
                       <IconCopy
@@ -943,6 +937,7 @@ export default function ObjectTypeDetailDrawer({
                 noDataElement={<NoDataCard title="暂无数据" />}
                 className="[&_.arco-table-th]:bg-[#f7f8fa]"
                 rowClassName={() => 'group'}
+                scroll={{ x: true }}
               />
               {attributesPagination.total > defaultAttributesPageSize && (
                 <div className="flex justify-end pt-[16px]">
@@ -986,7 +981,7 @@ export default function ObjectTypeDetailDrawer({
                       >
                         {/* 标题区域 */}
                         <div className="mb-[8px] text-[14px] font-[600] text-[var(--color-text-1)]">
-                          <EllipsisPopover value={link.linkName} />
+                          <GlobalTooltip.Ellipsis text={link.linkName} />
                         </div>
 
                         {/* ID */}
@@ -995,7 +990,7 @@ export default function ObjectTypeDetailDrawer({
                             链接id:
                           </span>
                           <span className="min-w-0 max-w-full text-[14px] text-[var(--color-text-1)]">
-                            <EllipsisPopover value={link.linkId} />
+                            <GlobalTooltip.Ellipsis text={link.linkId} />
                           </span>
                           <Popover content="复制">
                             <IconCopy

@@ -7,6 +7,8 @@ import { createOntologyModel } from '@/api/ontologySceneLibrary/ontologyScene';
 import SceneModal, {
   SceneFormData
 } from '@/pages/ontologyScene/modules/list/components/SceneModal';
+import { PermissionWrapper } from '@/components/PermissionGuard';
+import { ONTOLOGY_PERMISSIONS } from '@/config/permissions';
 import homeBgVideo from './assets/home-bac.mp4';
 
 export default function Home() {
@@ -101,16 +103,18 @@ export default function Home() {
               animationDelay: '100ms'
             }}
           >
-            <Button
-              type="primary"
-              className={classNames(styles['create-button'])}
-              onClick={() => setModalVisible(true)}
-            >
-              <span className="mr-2 inline-block transition-transform duration-200 group-hover:translate-x-1">
-                立即创建本体场景
-              </span>
-              <span className="inline-block">→</span>
-            </Button>
+            <PermissionWrapper permission={ONTOLOGY_PERMISSIONS.CREATE}>
+              <Button
+                type="primary"
+                className={classNames(styles['create-button'])}
+                onClick={() => setModalVisible(true)}
+              >
+                <span className="mr-2 inline-block transition-transform duration-200 group-hover:translate-x-1">
+                  立即创建本体场景
+                </span>
+                <span className="inline-block">→</span>
+              </Button>
+            </PermissionWrapper>
           </div>
         </div>
       </div>
