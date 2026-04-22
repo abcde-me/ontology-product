@@ -44,7 +44,7 @@ export const ActionSelect = (props: ActionSelectProps) => {
       disabled={disabled}
       className={classNames(styles['instance'], className)}
       wrapperClassName={classNames(styles['ins-sel-wrapper'], wrapperClassName)}
-      placeholder={placeholder || '请选择'}
+      placeholder={'请选择或搜索行为'}
       getPopupContainer={getPopupContainer}
       renderValue={() => (
         <GlobalTooltip.Ellipsis text={actionData?.name || '-'} />

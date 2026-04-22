@@ -210,6 +210,10 @@ function buildAutoChangeRuleForm(data: AutoRuleDetail): AutoRuleFormData {
       actionConfig?.actionInfo?.params
     )
   };
+  changeConfig?.propertyConditions?.forEach((c, index) => {
+    const { value } = c;
+    formData[`propCondition[${index}].value`] = value;
+  });
 
   return formData as AutoRuleFormData;
 }

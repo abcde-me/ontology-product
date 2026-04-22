@@ -40,6 +40,11 @@
       color: var(--color-text-1);
       font-size: 14px;
       line-height: 22px;
+      vertical-align: top;
+
+      .arco-table-cell {
+        height: 100%;
+      }
     }
 
     .arco-table-tr:last-child .arco-table-td {
@@ -65,6 +70,7 @@
 .condition-type-change {
   display: flex;
   align-items: center;
+  height: 32px;
   gap: 8px;
   color: var(--color-text-2 /* #23293B*/);
 
@@ -100,18 +106,12 @@
   }
 
   &:hover {
-    background-color: rgb(242 248 255 / var(--tw-bg-opacity, 1));
+    background-color: rgb(var(--pprimary-5));
     cursor: pointer;
   }
 }
 
 .operator {
-  :global {
-    .arco-select-view {
-      border-color: var(--color-border-1) !important;
-    }
-  }
-
   &:hover,
   &:active,
   &:focus-within {
@@ -124,8 +124,6 @@
 }
 
 .value-common {
-  border-color: var(--color-border-1) !important;
-
   &:hover,
   &:active,
   &:focus-within {
@@ -154,4 +152,10 @@
       background-color: rgb(var(--primary-1));
     }
   }
+}
+
+.cell-wrapper {
+  display: flex;
+  align-items: center;
+  height: 32px;
 }

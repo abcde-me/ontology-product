@@ -25,6 +25,7 @@
     column-gap: 4px;
     row-gap: 16px;
     color: var(--color-text-1);
+    word-break: break-all;
     align-items: center;
 
     /* 14 正文&二级标题/400 */
@@ -44,7 +45,7 @@
   border-radius: 4px;
   background: white;
   border: 1px solid #dfe2eb;
-  max-width: 400px;
+  max-width: 50%;
   flex-shrink: 0;
   overflow: hidden;
   color: var(--text-1);
