@@ -84,7 +84,14 @@ export const LogDetailDrawer: React.FC<LogDetailDrawerProps> = ({
             <span>日志id：</span>
             <span className="text-[#1D2129]">{logId}</span>
             {logId !== '-' && (
-              <Tooltip content={'复制'}>
+              <Tooltip
+                content={'复制'}
+                triggerProps={{
+                  popupStyle: {
+                    zIndex: 1000
+                  }
+                }}
+              >
                 <IconCopy
                   className={
                     'flex-shrink-0 hover:cursor-pointer hover:text-[rgb(var(--primary-6))]'
