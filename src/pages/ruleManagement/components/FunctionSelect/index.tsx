@@ -18,6 +18,7 @@ import { useParams } from 'react-router-dom';
 import { OntologyFunctionDetail } from '@/pages/ontologyScene/types/ontologyFunction';
 import classNames from 'classnames';
 import { GlobalTooltip } from '@ceai-front/arco-material';
+import { SelectWithNoData } from '@/components/new-no-data-comps';
 
 export const FunctionSelect = (
   props: CustomFormItemCompProps<number | undefined> & {
@@ -67,8 +68,8 @@ export const FunctionSelect = (
 
   return (
     <div className={classNames([`flex items-center gap-3`, props.className])}>
-      <Select
-        placeholder={'请选择行为动作的函数'}
+      <SelectWithNoData
+        placeholder={'请选择或搜索函数'}
         className={`flex-1 ${styles['function-select']}`}
         dropdownMenuClassName={styles['function-select-wrapper']}
         renderFormat={(option, value) => {
@@ -79,7 +80,7 @@ export const FunctionSelect = (
         loading={functionsLoading}
         getPopupContainer={(node) => node.parentElement || document.body}
         arrowIcon={
-          <Space>
+          <div className={'flex items-center gap-2'}>
             {!!value && (
               <Tooltip content={'详情'}>
                 <IconInfoCircle
@@ -95,12 +96,12 @@ export const FunctionSelect = (
                 />
               </Tooltip>
             )}
-            <IconDown />
-          </Space>
+            <IconDown className={'function-info-icon'} />
+          </div>
         }
         allowClear
         clearIcon={
-          <Space>
+          <div className={'flex items-center gap-2'}>
             {!!value && (
               <Tooltip content={'详情'}>
                 <IconInfoCircle
@@ -122,7 +123,7 @@ export const FunctionSelect = (
                 changeFunction(undefined);
               }}
             />
-          </Space>
+          </div>
         }
         value={value}
         onChange={changeFunction}
@@ -131,7 +132,15 @@ export const FunctionSelect = (
           return searchFunction(inputValue).includes(option.props.value);
         }}
       >
-        {allFunctions.map((item) => {
+        <Select.Option
+          value={'info'}
+          disabled
+          className={styles['function-tooltip']}
+        >
+          <IconInfoCircle />
+          只支持返回值类型为布尔类型的函数
+        </Select.Option>
+        {allFunctions.flatMap((item, index) => {
           const { value, code, name } = item;
           return (
             <Select.Option
@@ -172,7 +181,7 @@ export const FunctionSelect = (
             </Select.Option>
           );
         })}
-      </Select>
+      </SelectWithNoData>
       <FunctionContentDialog
         data={showFunction}
         visible={showFunctionContent}

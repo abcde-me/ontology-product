@@ -23,6 +23,7 @@ import {
   ObjInsValue
 } from '@/pages/ontologyScene/components';
 import FileIcon from '@/pages/ontologyScene/assets/file-icon.svg';
+import { SelectWithNoData } from '@/components/new-no-data-comps';
 
 const PARAM_SOURCE_OPTIONS = [
   {
@@ -313,7 +314,7 @@ export const ActionParams = (props: ActionParamsProps) => {
                               { required: true, message: '请选择入参来源' }
                             ]}
                           >
-                            <Select
+                            <SelectWithNoData
                               placeholder={'请选择入参来源'}
                               options={
                                 triggerType === 1

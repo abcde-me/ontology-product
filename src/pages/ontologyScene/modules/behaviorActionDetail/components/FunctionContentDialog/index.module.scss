@@ -1,5 +1,19 @@
 .function-content {
+  & > div:nth-child(2) {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    max-height: 600px;
+  }
+
   :global {
+    .arco-modal-content {
+      padding: 0 24px 24px;
+      flex: 1;
+      overflow: hidden;
+      display: flex;
+    }
+
     .arco-modal-header {
       padding: 20px 24px !important;
 
@@ -11,9 +25,10 @@
         color: var(--text-color-text-1, #0f131f);
       }
     }
-
-    .arco-modal-content {
-      padding: 0 24px 24px;
-    }
   }
+}
+
+.function-content-code {
+  flex: 1;
+  overflow: auto;
 }

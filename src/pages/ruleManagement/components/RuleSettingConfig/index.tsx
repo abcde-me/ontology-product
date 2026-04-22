@@ -160,12 +160,7 @@ const renderInsConfig = (config: ChangeConfigRes) => {
               </div>
             }
           >
-            <div
-              className={classNames(
-                styles['rule-setting-tag'],
-                '!text-[var(--color-text-4)]'
-              )}
-            >
+            <div className={classNames(styles['rule-setting-tag'])}>
               +{copyIds.length}
             </div>
           </Popover>

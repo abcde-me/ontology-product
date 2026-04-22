@@ -1,8 +1,19 @@
 import React, { useEffect, useState } from 'react';
-import { OsDrawer, PyCodeContent } from '@/pages/ontologyScene/components';
-import { CopyItemIcon, DotStatus, NoDataCard } from '@ceai-front/arco-material';
+import {
+  ContentWithCopy,
+  OsDrawer,
+  PyCodeContent
+} from '@/pages/ontologyScene/components';
+import {
+  CopyItemIcon,
+  copyToClipboard,
+  DotStatus,
+  NoDataCard
+} from '@ceai-front/arco-material';
 import { AutoExecLogDetail, AutoExecLogItem } from '../types';
 import { fetchRuleRunLogDetail } from '../services';
+import { IconCopy } from '@arco-design/web-react/icon';
+import { Popover, Tooltip } from '@arco-design/web-react';
 
 interface LogDetailDrawerProps {
   visible: boolean;
@@ -13,7 +24,7 @@ interface LogDetailDrawerProps {
 const STATUS_MAP: Record<number, { label: string; color: string }> = {
   0: { label: '成功', color: '#10B981' },
   1: { label: '失败', color: '#E52E2D' },
-  2: { label: '部分成功', color: '#F59E0B' },
+  2: { label: '跳过', color: '#F59E0B' },
   3: { label: '待执行', color: '#86909C' }
 };
 
@@ -73,7 +84,23 @@ export const LogDetailDrawer: React.FC<LogDetailDrawerProps> = ({
             <span>日志id：</span>
             <span className="text-[#1D2129]">{logId}</span>
             {logId !== '-' && (
-              <CopyItemIcon value={String(logId)} className="flex-shrink-0" />
+              <Tooltip
+                content={'复制'}
+                triggerProps={{
+                  popupStyle: {
+                    zIndex: 1000
+                  }
+                }}
+              >
+                <IconCopy
+                  className={
+                    'flex-shrink-0 hover:cursor-pointer hover:text-[rgb(var(--primary-6))]'
+                  }
+                  onClick={() => {
+                    copyToClipboard(String(logId));
+                  }}
+                />
+              </Tooltip>
             )}
           </div>
           <div className="flex items-center gap-[8px] text-[14px] text-[#4E5969]">

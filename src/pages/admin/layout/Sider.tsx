@@ -148,7 +148,7 @@ export const LayoutWithSider = memo(function LayoutWithSider({ children }) {
           <MenuItem
             key={item.key}
             onClick={() => clickMenu(item?.path ?? '')}
-            className="flex items-center"
+            className="layout-menu-item flex items-center"
           >
             {item.icon}
             <span className={item.className}>{item.title}</span>
@@ -265,7 +265,7 @@ export const LayoutWithSider = memo(function LayoutWithSider({ children }) {
   };
 
   return (
-    <Layout className="flex h-full flex-auto flex-row  overflow-auto">
+    <Layout className="layout-menu-container flex h-full flex-auto  flex-row overflow-auto">
       {sidebarHidden ? null : (
         // <Sider
         //   collapsed={collapsed}
