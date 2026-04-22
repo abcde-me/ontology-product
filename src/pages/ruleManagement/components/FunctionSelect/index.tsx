@@ -132,54 +132,16 @@ export const FunctionSelect = (
           return searchFunction(inputValue).includes(option.props.value);
         }}
       >
+        <Select.Option
+          value={'info'}
+          disabled
+          className={styles['function-tooltip']}
+        >
+          <IconInfoCircle />
+          只支持返回值类型为布尔类型的函数
+        </Select.Option>
         {allFunctions.flatMap((item, index) => {
           const { value, code, name } = item;
-          if (index === 0) {
-            return (
-              <>
-                <div className={styles['function-tooltip']}>
-                  <IconInfoCircle />
-                  只支持返回值类型为布尔类型的函数
-                </div>
-                <Select.Option
-                  key={value}
-                  value={value as string}
-                  className={`${styles['select-option']} !pl-3`}
-                >
-                  <GlobalTooltip.Ellipsis text={code} />
-                  <Tooltip content={'详情'}>
-                    <IconInfoCircle
-                      className={`${styles['function-info-icon']} z-50 cursor-pointer text-[16px]`}
-                      onClick={(event) => {
-                        event.preventDefault();
-                        event.stopPropagation();
-                        setShowFunctionContent(true);
-                        setShowFunction(item);
-                      }}
-                    />
-                  </Tooltip>
-                  <div className={'flex items-center gap-4 overflow-hidden'}>
-                    <div
-                      className={
-                        'flex w-max max-w-[200px] flex-shrink-0 items-center overflow-hidden font-PingFangSc text-[12px] leading-[18px] text-[#7D859C]'
-                      }
-                    >
-                      本体场景：
-                      <GlobalTooltip.Ellipsis text={name} />
-                    </div>
-                    <div
-                      className={
-                        'flex flex-1 items-center overflow-hidden font-PingFangSc text-[12px] leading-[18px] text-[#7D859C]'
-                      }
-                    >
-                      显示名称：
-                      <GlobalTooltip.Ellipsis text={name} />
-                    </div>
-                  </div>
-                </Select.Option>
-              </>
-            );
-          }
           return (
             <Select.Option
               key={value}
