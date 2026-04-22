@@ -92,6 +92,15 @@
 
 .action-obj-type {
   height: 18px;
+
+  :global {
+    .object-type-tag-name {
+      & > div {
+        font-size: 12px;
+        color: var(--color-text-1);
+      }
+    }
+  }
 }
 
 .action-obj-type-name {

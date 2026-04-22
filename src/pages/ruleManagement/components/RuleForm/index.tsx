@@ -452,14 +452,18 @@ export const RuleForm = forwardRef<
                             }
                           )}
                           onChange={(value) => {
+                            // 重置对象实例，属性条件、对象ids
                             form.setFieldsValue({
                               changeType: value,
                               propertyConditions: undefined,
-                              propertyList: undefined
+                              propertyList: undefined,
+                              instanceIds: undefined
                             });
                             syncValidatedValues({
                               changeConfig: {
                                 changeType: value,
+                                instanceIds: undefined,
+                                instanceScope: InstanceScope.All,
                                 propertyConditions: undefined
                               }
                             });
@@ -556,8 +560,12 @@ export const RuleForm = forwardRef<
                           p.objectTypeId !== c.objectTypeId
                         }
                       >
-                        {({ objectTypeId }) => {
-                          if (!objectTypeId) return null;
+                        {({ objectTypeId, changeType }) => {
+                          if (
+                            !objectTypeId ||
+                            changeType !== ChangeType.PropertyChange
+                          )
+                            return null;
                           return (
                             <>
                               <FormItem
@@ -728,32 +736,32 @@ export const RuleForm = forwardRef<
                                       {!!propertyConditions?.length && (
                                         <FormItem
                                           field={'propertyList'}
-                                          rules={[
-                                            {
-                                              validator(v: any, onError) {
-                                                const value =
-                                                  v as PropertyConditionType[];
-                                                const valueIsEmpty = value.some(
-                                                  ({
-                                                    value: propValue,
-                                                    type
-                                                  }) =>
-                                                    [
-                                                      null,
-                                                      undefined,
-                                                      ''
-                                                    ].includes(
-                                                      propValue?.toString()
-                                                    ) &&
-                                                    type ===
-                                                      ConditionType.MeetCondition
-                                                );
-                                                if (valueIsEmpty) {
-                                                  onError('属性值不能为空');
-                                                }
-                                              }
-                                            }
-                                          ]}
+                                          // rules={[
+                                          //   {
+                                          //     validator(v: any, onError) {
+                                          //       const value =
+                                          //         v as PropertyConditionType[];
+                                          //       const valueIsEmpty = value.some(
+                                          //         ({
+                                          //           value: propValue,
+                                          //           type
+                                          //         }) =>
+                                          //           [
+                                          //             null,
+                                          //             undefined,
+                                          //             ''
+                                          //           ].includes(
+                                          //             propValue?.toString()
+                                          //           ) &&
+                                          //           type ===
+                                          //             ConditionType.MeetCondition
+                                          //       );
+                                          //       if (valueIsEmpty) {
+                                          //         onError('属性值不能为空');
+                                          //       }
+                                          //     }
+                                          //   }
+                                          // ]}
                                         >
                                           <PropConditions
                                             allProps={properties}

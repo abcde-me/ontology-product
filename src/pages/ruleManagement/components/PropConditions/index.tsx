@@ -99,12 +99,22 @@ export const PropConditions = (props: PropConditionsProps) => {
     {
       title: '属性',
       dataIndex: 'name',
-      render: (_, record) => record.name || '-'
+      render: (_, record) => {
+        return (
+          <div className={styles['cell-wrapper']}>{record.name || '-'}</div>
+        );
+      }
     },
     {
       title: '字段类型',
       dataIndex: 'fieldType',
-      render: (_, record) => record.fieldType || '-'
+      render: (_, record) => {
+        return (
+          <div className={styles['cell-wrapper']}>
+            {record.fieldType || '-'}
+          </div>
+        );
+      }
     },
     {
       title: '变更条件',
@@ -208,26 +218,23 @@ export const PropConditions = (props: PropConditionsProps) => {
         }
 
         return (
-          <Form.Item validateStatus={undefined} className={'mb-0'}>
-            <Select
-              value={record.operator}
-              disabled={disabled || readOnly}
-              className={styles['operator']}
-              options={options}
-              placeholder={'请选择'}
-              triggerProps={{
-                updateOnScroll: true
-              }}
-              showSearch
-              dropdownMenuClassName={styles['condition-dropdown']}
-              getPopupContainer={(node) => document.body}
-              onChange={(operator: Operator) => {
-                updateRow(index, {
-                  operator
-                });
-              }}
-            />
-          </Form.Item>
+          <Select
+            value={record.operator}
+            disabled={disabled || readOnly}
+            className={styles['operator']}
+            options={options}
+            placeholder={'请选择'}
+            triggerProps={{
+              updateOnScroll: true
+            }}
+            dropdownMenuClassName={styles['condition-dropdown']}
+            getPopupContainer={(node) => document.body}
+            onChange={(operator: Operator) => {
+              updateRow(index, {
+                operator
+              });
+            }}
+          />
         );
       }
     },
@@ -253,7 +260,13 @@ export const PropConditions = (props: PropConditionsProps) => {
         return (
           <Form.Item
             className={'mb-0'}
-            validateStatus={propValueStatus?.[record.id] ? 'error' : undefined}
+            field={`propCondition[${index}].value`}
+            rules={[
+              {
+                required: true,
+                message: '请输入属性值'
+              }
+            ]}
           >
             {isIntegerField(record.fieldType) ? (
               <InputNumber
