@@ -88,8 +88,10 @@ export const LogDetailDrawer: React.FC<LogDetailDrawerProps> = ({
                 content={'复制'}
                 triggerProps={{
                   popupVisible: true,
+                  position: 'right',
+                  getPopupContainer: () => document.body,
                   popupStyle: {
-                    zIndex: 1000
+                    zIndex: 9999
                   }
                 }}
               >
