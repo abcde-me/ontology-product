@@ -3,6 +3,7 @@
   padding-top: 8px !important;
   padding-right: 32px !important;
   padding-bottom: 8px !important;
+  position: relative;
   font-family: PingFang SC;
   font-weight: 400;
   font-size: 14px;
@@ -64,4 +65,9 @@
   gap: 8px;
   padding: 8px 12px 0;
   align-items: center;
+
+  &:hover {
+    cursor: alias !important;
+    background: transparent !important;
+  }
 }
