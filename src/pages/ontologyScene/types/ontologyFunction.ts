@@ -346,5 +346,5 @@ export interface FunctionListQuery {
    * 每页数量
    */
   pageSize?: number;
-  FunctionType?: string;
+  functionType?: string;
 }
