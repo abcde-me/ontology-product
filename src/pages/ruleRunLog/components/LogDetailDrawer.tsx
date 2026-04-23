@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import {
   ContentWithCopy,
-  OsDrawer,
+  DrawerWithEditBtn,
   PyCodeContent
 } from '@/pages/ontologyScene/components';
 import {
@@ -71,7 +71,7 @@ export const LogDetailDrawer: React.FC<LogDetailDrawerProps> = ({
   const logContent = detail?.detailLog || detail?.errorMessage || '';
 
   return (
-    <OsDrawer
+    <DrawerWithEditBtn
       visible={visible}
       onCancel={onClose}
       title="日志详情"
@@ -138,6 +138,6 @@ export const LogDetailDrawer: React.FC<LogDetailDrawerProps> = ({
           )}
         </div>
       </div>
-    </OsDrawer>
+    </DrawerWithEditBtn>
   );
 };

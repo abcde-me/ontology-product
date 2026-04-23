@@ -86,7 +86,7 @@ const renderActionConfig = (ruleData?: AutoRuleDetail) => {
           text={
             actionEmpty
               ? '请先在左侧配置'
-              : ruleData?.actionConfig?.actionInfo?.name
+              : ruleData?.actionConfig?.actionInfo?.name || '-'
           }
           className={actionEmpty ? '!text-[var(--color-text-4)]' : ''}
         />
@@ -238,7 +238,7 @@ const renderAutoChangeConfig = (
             <div className={'h-full w-max flex-shrink-0'}>
               {getModelIconNode(ruleData?.modelInfo?.icon, 'w-[14px] h-[14px]')}
             </div>
-            <GlobalTooltip.Ellipsis text={ruleData?.modelInfo?.name} />
+            <GlobalTooltip.Ellipsis text={ruleData?.modelInfo?.name || '-'} />
           </>
         )}
       </div>
@@ -258,7 +258,9 @@ const renderAutoChangeConfig = (
             >
               <IconComponent className="h-[14px] w-[14px]" />
             </div>
-            <GlobalTooltip.Ellipsis text={changeConfig?.objectTypeInfo?.name} />
+            <GlobalTooltip.Ellipsis
+              text={changeConfig?.objectTypeInfo?.name || '-'}
+            />
           </>
         )}
       </div>
@@ -287,7 +289,9 @@ const renderAutoChangeConfig = (
             {funcEmpty ? (
               '请先在左侧配置'
             ) : (
-              <GlobalTooltip.Ellipsis text={gateConfig?.functionInfo?.name} />
+              <GlobalTooltip.Ellipsis
+                text={gateConfig?.functionInfo?.name || '-'}
+              />
             )}
           </div>
           返回为true

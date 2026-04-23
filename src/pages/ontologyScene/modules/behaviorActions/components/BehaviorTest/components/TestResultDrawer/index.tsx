@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { OsDrawer } from '@/pages/ontologyScene/components';
+import { DrawerWithEditBtn } from '@/pages/ontologyScene/components';
 import { DotStatus, NoDataCard } from '@ceai-front/arco-material';
 import { IconLoading } from '@arco-design/web-react/icon';
 import { Tabs, Message, Modal } from '@arco-design/web-react';
@@ -204,7 +204,7 @@ export const TestResultDrawer: React.FC<TestResultDrawerProps> = ({
   };
 
   return (
-    <OsDrawer
+    <DrawerWithEditBtn
       visible={visible}
       onCancel={handleClose}
       title={renderTitle()}
@@ -212,6 +212,6 @@ export const TestResultDrawer: React.FC<TestResultDrawerProps> = ({
       width={552}
     >
       <div className="flex h-full flex-col">{renderContent()}</div>
-    </OsDrawer>
+    </DrawerWithEditBtn>
   );
 };
