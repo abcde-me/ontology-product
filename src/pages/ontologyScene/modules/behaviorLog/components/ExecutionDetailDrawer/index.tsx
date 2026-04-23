@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { Tabs } from '@arco-design/web-react';
-import { OsDrawer } from '@/pages/ontologyScene/components';
+import { DrawerWithEditBtn } from '@/pages/ontologyScene/components';
 import { StatusCard } from './StatusCard';
 import { BasicInfo } from './BasicInfo';
 import { ParamsTab } from './ParamsTab';
@@ -64,7 +64,7 @@ export const ExecutionDetailDrawer: React.FC<ExecutionDetailDrawerProps> = ({
   };
 
   return (
-    <OsDrawer
+    <DrawerWithEditBtn
       visible={visible}
       onCancel={onClose}
       title={title}
@@ -124,7 +124,7 @@ export const ExecutionDetailDrawer: React.FC<ExecutionDetailDrawerProps> = ({
           </div>
         </div>
       )}
-    </OsDrawer>
+    </DrawerWithEditBtn>
   );
 };
 

@@ -1,4 +1,4 @@
-export * from './OSDrawer';
+export * from '../../../components/DrawerWithEditBtn';
 export { default as ObjectTypeTag } from './ObjectTypeTag';
 export type { ObjectTypeTagProps } from './ObjectTypeTag';
 export { default as ObjectTypeTagList } from './ObjectTypeTagList';

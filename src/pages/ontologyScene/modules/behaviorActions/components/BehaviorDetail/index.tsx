@@ -9,7 +9,7 @@ import styles from './index.module.scss';
 import {
   ContentWithCopy,
   EllipsisPopover,
-  OsDrawer,
+  DrawerWithEditBtn,
   PyCodeContent
 } from '@/pages/ontologyScene/components';
 import { Form, Table, TableColumnProps, Tabs } from '@arco-design/web-react';
@@ -139,7 +139,7 @@ export const BehaviorDetail = (props: IProps) => {
   }, [actionDetail]);
 
   return (
-    <OsDrawer
+    <DrawerWithEditBtn
       visible={show}
       footer={null}
       onCancel={onClose}
@@ -150,6 +150,7 @@ export const BehaviorDetail = (props: IProps) => {
       afterClose={() => {
         setActiveTab('params');
       }}
+      resize
       onEdit={() => {
         history.push(
           `/tenant/compute/onto/ontologyScene/detail/${actionDetail?.ontologyModelID}/behaviorActions/edit/${actionItem}`
@@ -271,6 +272,6 @@ export const BehaviorDetail = (props: IProps) => {
           )}
         </div>
       </div>
-    </OsDrawer>
+    </DrawerWithEditBtn>
   );
 };

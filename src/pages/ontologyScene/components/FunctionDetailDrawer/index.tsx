@@ -3,8 +3,8 @@ import classNames from 'classnames';
 import {
   ContentWithCopy,
   EllipsisPopover,
-  OsDrawer,
-  OSDrawerProps,
+  DrawerWithEditBtn,
+  DrawerWithEditBtnProps,
   PyCodeContent
 } from '@/pages/ontologyScene/components';
 import {
@@ -20,7 +20,7 @@ import { isNil } from 'lodash-es';
 import { GlobalTooltip } from '@ceai-front/arco-material';
 import { useHistory } from 'react-router-dom';
 
-interface IProps extends OSDrawerProps {
+interface IProps extends DrawerWithEditBtnProps {
   data?: number;
   editable?: boolean;
 }
@@ -154,7 +154,7 @@ export const FunctionDetailDrawer = (props: IProps) => {
   };
 
   return (
-    <OsDrawer
+    <DrawerWithEditBtn
       {...drawerProps}
       title={title ?? '函数详情'}
       footer={footer ?? null}
@@ -241,6 +241,6 @@ export const FunctionDetailDrawer = (props: IProps) => {
           />
         </div>
       </div>
-    </OsDrawer>
+    </DrawerWithEditBtn>
   );
 };

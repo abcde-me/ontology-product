@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { Tabs, Tag, Table } from '@arco-design/web-react';
 import { InfoDescription } from '@ceai-front/arco-material';
-import { OsDrawer } from '@/pages/ontologyScene/components/OSDrawer';
+import { DrawerWithEditBtn } from '@/components/DrawerWithEditBtn';
 import { useUIStore } from '../../store/uiStore';
 import { useBusinessStore } from '../../store/businessStore';
 
@@ -118,7 +118,7 @@ export const BehaviorDetailDrawer: React.FC = () => {
   ];
 
   return (
-    <OsDrawer
+    <DrawerWithEditBtn
       visible={behaviorDetailVisible}
       title="行为详情"
       onCancel={handleClose}
@@ -183,6 +183,6 @@ export const BehaviorDetailDrawer: React.FC = () => {
           </Tabs>
         </div>
       </div>
-    </OsDrawer>
+    </DrawerWithEditBtn>
   );
 };
