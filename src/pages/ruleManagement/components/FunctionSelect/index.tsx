@@ -36,7 +36,7 @@ export const FunctionSelect = (
       return getFunctionList({
         pageNum: 1,
         pageSize: 1000,
-        FunctionType: 'gate'
+        functionType: 'gate'
       }).then((res) =>
         res.items.map((f) => {
           return {
