@@ -17,7 +17,7 @@ import {
   Popover
 } from '@arco-design/web-react';
 import { IconCopy } from '@arco-design/web-react/icon';
-import { OsDrawer } from '@/pages/ontologyScene/components';
+import { DrawerWithEditBtn } from '@/pages/ontologyScene/components';
 import {
   DotStatus,
   GlobalTooltip,
@@ -784,7 +784,7 @@ export default function ObjectTypeDetailDrawer({
   };
 
   return (
-    <OsDrawer
+    <DrawerWithEditBtn
       key={resolvedObjectTypeId}
       visible={visible}
       onCancel={onClose}
@@ -1067,6 +1067,6 @@ export default function ObjectTypeDetailDrawer({
           </TabPane>
         </Tabs>
       </div>
-    </OsDrawer>
+    </DrawerWithEditBtn>
   );
 }

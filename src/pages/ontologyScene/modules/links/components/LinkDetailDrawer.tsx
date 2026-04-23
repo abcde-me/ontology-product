@@ -16,7 +16,10 @@ import {
   NoDataCard,
   copyToClipboard
 } from '@ceai-front/arco-material';
-import { OsDrawer, EllipsisPopover } from '@/pages/ontologyScene/components';
+import {
+  DrawerWithEditBtn,
+  EllipsisPopover
+} from '@/pages/ontologyScene/components';
 import {
   getOntologyLinkType,
   listOntologyLinkTypeData,
@@ -374,7 +377,7 @@ export default function LinkDetailDrawer({
   ];
 
   return (
-    <OsDrawer
+    <DrawerWithEditBtn
       key={resolvedLinkId}
       visible={visible}
       onCancel={onClose}
@@ -573,6 +576,6 @@ export default function LinkDetailDrawer({
           </TabPane>
         </Tabs>
       </div>
-    </OsDrawer>
+    </DrawerWithEditBtn>
   );
 }
