@@ -43,9 +43,9 @@ const renderSceneOption = (scene: OntoSceneOption) => {
       <div className={styles['scene-icon-box']}>
         {getModelIconNode(scene.icon, styles['scene-icon'])}
       </div>
-      <div className={styles['scene-option-content']}>
+      <div className={classNames(styles['scene-option-content'])}>
         <GlobalTooltip.Ellipsis
-          className={styles['scene-option-title']}
+          className={classNames(styles['scene-option-title'], 'primary-text')}
           text={scene.name || '-'}
         />
         <GlobalTooltip.Ellipsis

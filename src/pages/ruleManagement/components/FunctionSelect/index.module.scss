@@ -15,6 +15,7 @@
     top: 50%;
     transform: translateY(-50%);
     z-index: 1000;
+    color: var(--color-text-4);
 
     &:hover {
       color: rgb(var(--primary-5)) !important;

@@ -118,11 +118,11 @@ const ObjectTypeSelect: React.FC<ObjectTypeSelectProps> = ({
           <div className="nowrap flex h-[22px] flex-shrink-0 items-center overflow-hidden">
             <EllipsisPopover
               value={option.name}
-              className="w-max leading-[22px]"
+              className="primary-text w-max leading-[22px]"
               wrapperClassName="min-w-0 leading-[22px] flex items-center"
             />
             {!isNil(option.code) && option.code !== '-1' && (
-              <div className="flex h-[22px] min-w-[60px] flex-1 flex-shrink-0 items-center text-[14px] leading-[22px] text-[var(--color-text-1)]">
+              <div className="primary-text flex h-[22px] min-w-[60px] flex-1 flex-shrink-0 items-center text-[14px] leading-[22px] text-[var(--color-text-1)]">
                 <div>(id:</div>
                 <EllipsisPopover
                   value={option.code}

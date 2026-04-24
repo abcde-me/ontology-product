@@ -79,7 +79,7 @@ export const FunctionsSelect = (
         }}
         getPopupContainer={(node) => node.parentElement || document.body}
         arrowIcon={
-          <Space>
+          <div className={'flex items-center gap-2'}>
             {!!value && (
               <Tooltip content={'详情'}>
                 <IconInfoCircle
@@ -96,11 +96,11 @@ export const FunctionsSelect = (
               </Tooltip>
             )}
             <IconDown />
-          </Space>
+          </div>
         }
         allowClear
         clearIcon={
-          <Space>
+          <div className={'flex items-center gap-2'}>
             {!!value && (
               <Tooltip content={'详情'}>
                 <IconInfoCircle
@@ -122,7 +122,7 @@ export const FunctionsSelect = (
                 changeFunction(undefined);
               }}
             />
-          </Space>
+          </div>
         }
         value={value}
         onChange={changeFunction}
