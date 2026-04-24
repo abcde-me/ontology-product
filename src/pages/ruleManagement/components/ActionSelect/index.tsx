@@ -60,7 +60,7 @@ export const ActionSelect = (props: ActionSelectProps) => {
               'flex h-[60px] w-full flex-col justify-center gap-1 overflow-hidden'
             }
           >
-            <div className={styles['action-sel-item-name']}>
+            <div className={`primary-text ${styles['action-sel-item-name']}`}>
               <GlobalTooltip.Ellipsis
                 text={option.name || '-'}
                 className={styles['ellipsis-text']}

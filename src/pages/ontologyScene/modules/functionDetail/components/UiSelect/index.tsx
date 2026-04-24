@@ -111,7 +111,11 @@ export const UiSelect = (
             type={'outline'}
           >
             {currentIcon}
-            {!menuVisible ? <IconDown className={'text-[12px]'} /> : <IconUp />}
+            {!menuVisible ? (
+              <IconDown className={'text-[12px] !text-[var(--color-text-1)]'} />
+            ) : (
+              <IconUp className={'!text-[var(--color-text-1)]'} />
+            )}
           </ProButton>
         </Dropdown>
       </div>

@@ -283,7 +283,8 @@ function FetchDataSelectInner<T extends Record<string, any>>(
                 className={classNames(
                   styles['option-item'],
                   {
-                    [styles['option-item-selected']]: checked
+                    [styles['option-item-selected']]: checked,
+                    'arco-select-option-selected': checked
                   },
                   `h-[${virtualListProps?.itemHeight || 40}px]`
                 )}
@@ -300,6 +301,7 @@ function FetchDataSelectInner<T extends Record<string, any>>(
                   ) : (
                     <GlobalTooltip.Ellipsis
                       text={String(item[mergedFieldNames.label] ?? '-')}
+                      className={'primary-text'}
                     />
                   )}
                 </label>
@@ -330,7 +332,10 @@ function FetchDataSelectInner<T extends Record<string, any>>(
         placeholder={placeholder}
         showSearch
         triggerProps={{
-          updateOnScroll: true
+          updateOnScroll: true,
+          style: {
+            zIndex: 9999
+          }
         }}
         getPopupContainer={getPopupContainer}
         onClick={() => setPopupVisible(true)}

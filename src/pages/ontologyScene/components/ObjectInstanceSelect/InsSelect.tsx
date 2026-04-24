@@ -197,6 +197,9 @@ export const InstanceSelect = (props: ObjectInterfaceSelectProps) => {
                 [styles['ins-item']]: true,
                 [styles['ins-selected']]:
                   item[primaryKey] === value ||
+                  (Array.isArray(value) && value.includes(item[primaryKey])),
+                'arco-select-option-selected':
+                  item[primaryKey] === value ||
                   (Array.isArray(value) && value.includes(item[primaryKey]))
               })}
             >
@@ -232,7 +235,7 @@ export const InstanceSelect = (props: ObjectInterfaceSelectProps) => {
                   content={item[primaryKey] || null}
                   getPopupContainer={props.getPopupContainer}
                 >
-                  <p>{item[primaryKey]}</p>
+                  <p className={'primary-text'}>{item[primaryKey]}</p>
                 </Tooltip>
               </label>
             </List.Item>

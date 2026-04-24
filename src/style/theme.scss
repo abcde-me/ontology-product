@@ -267,7 +267,7 @@ $spacing-9: 24px;
 }
 
 .arco-select-popup .arco-select-option-hover {
-  background-color: white;
+  //background-color: white;
 }
 
 // 正常按钮的颜色
@@ -457,4 +457,17 @@ $spacing-9: 24px;
   margin-left: 8px;
   position: relative !important;
   vertical-align: -3px !important;
+}
+
+.arco-select-popup .arco-select-option-selected:not(svg) {
+  background-color: transparent;
+  color: rgb(var(--primary-6));
+
+  .primary-text {
+    color: rgb(var(--primary-6)) !important;
+  }
+}
+
+.arco-select-popup .arco-select-option-selected:hover {
+  background-color: rgb(var(--primary-1));
 }
