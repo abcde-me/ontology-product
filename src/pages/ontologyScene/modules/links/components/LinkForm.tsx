@@ -67,6 +67,21 @@ function databaseTableCascaderFilterOption(
   return labelStr.includes(q) || valueStr.includes(q);
 }
 
+function wrapDisabledFieldPopover(
+  node: React.ReactNode,
+  disabled: boolean,
+  popoverContent: React.ReactNode = '请先勾选字段'
+): React.ReactNode {
+  if (!disabled) return node;
+  return (
+    <Popover content={popoverContent} trigger="hover">
+      <span className="inline-flex max-w-full flex-1 cursor-not-allowed items-center align-middle">
+        {node}
+      </span>
+    </Popover>
+  );
+}
+
 export interface AttributeField {
   tableField: string;
   isUse: number; // 1代表选中，0代表未选中
@@ -484,19 +499,32 @@ const LinkForm = React.forwardRef<LinkFormRef, LinkFormProps>(
         dataIndex: 'fieldType',
         width: 200,
         render: (value, record, index) => {
+          const rowNotSelected = record.isUse !== 1;
+          const isDataLakeSync = intermediateTable.type === 'data_lake_sync';
+          const rowDisabled = rowNotSelected || isDataLakeSync;
+          const selectPopoverContent = rowNotSelected
+            ? '请先勾选字段'
+            : '数据湖同步时字段类型与源表一致，不可修改';
           return (
-            <Select
-              value={value}
-              onChange={(val) =>
-                handleFieldChange(index, { fieldType: String(val) })
-              }
-            >
-              {COLUMN_TYPE_OPTIONS.map((option) => (
-                <Select.Option key={option.value} value={option.value}>
-                  {option.label}
-                </Select.Option>
-              ))}
-            </Select>
+            <div className="flex flex-1">
+              {wrapDisabledFieldPopover(
+                <Select
+                  disabled={rowDisabled}
+                  value={value}
+                  onChange={(val) =>
+                    handleFieldChange(index, { fieldType: String(val) })
+                  }
+                >
+                  {COLUMN_TYPE_OPTIONS.map((option) => (
+                    <Select.Option key={option.value} value={option.value}>
+                      {option.label}
+                    </Select.Option>
+                  ))}
+                </Select>,
+                rowDisabled,
+                selectPopoverContent
+              )}
+            </div>
           );
         }
       }
