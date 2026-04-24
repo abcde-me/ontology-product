@@ -798,7 +798,13 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
         dataIndex: 'columnType',
         width: 200,
         render: (value, record, index) => {
-          const rowDisabled = record.isUse !== 1;
+          const rowNotSelected = record.isUse !== 1;
+          const isDataDirectorySync =
+            dataSource.type === DATA_SOURCE_TYPE.DATA_DIRECTORY_SYNC;
+          const rowDisabled = rowNotSelected || isDataDirectorySync;
+          const selectPopoverContent = rowNotSelected
+            ? '请先勾选字段'
+            : '数据目录同步时字段类型与源表一致，不可修改';
           return (
             <div className="flex flex-1">
               {wrapDisabledFieldPopover(
@@ -810,7 +816,8 @@ const ObjectTypeForm = React.forwardRef<ObjectTypeFormRef, ObjectTypeFormProps>(
                     handleFieldChange(index, { columnType: val })
                   }
                 />,
-                rowDisabled
+                rowDisabled,
+                selectPopoverContent
               )}
             </div>
           );
