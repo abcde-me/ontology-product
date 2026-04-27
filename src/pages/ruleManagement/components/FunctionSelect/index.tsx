@@ -149,7 +149,7 @@ export const FunctionSelect = (
               value={value as string}
               className={styles['select-option']}
             >
-              <GlobalTooltip.Ellipsis text={code} />
+              <GlobalTooltip.Ellipsis text={code} className={'primary-text'} />
               <Tooltip content={'详情'}>
                 <IconInfoCircle
                   className={`${styles['function-info-icon']} z-50 cursor-pointer text-[16px]`}

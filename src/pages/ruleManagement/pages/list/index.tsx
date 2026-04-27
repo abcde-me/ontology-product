@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import styles from './index.module.scss';
 import PageHeader from '@/components/PageHeader';
 import {
@@ -40,6 +40,8 @@ import { PermissionWrapper } from '@/components/PermissionGuard';
 import PermissionButton from '@/components/PermissionButton';
 import { isNil } from 'lodash-es';
 import { IconSearch } from '@ceai-front/svg-icons';
+import { OsModal } from '@/components/OSModal';
+import { IconInfoCircleFill } from '@arco-design/web-react/icon';
 
 const TRIGGER_TYPE_MAP: Record<number, string> = {
   1: '定时触发',
@@ -52,6 +54,8 @@ const RuleListPage = () => {
   const [showRule, setShowRule] = useState<React.Key>();
   const [showFunction, setShowFunction] = useState<number>();
   const ruleInfoViewAble = useHasPermission(AUTOMATION_PERMISSIONS.GET);
+  const [delRule, setDelRule] = useState<AutoRuleItem>();
+  const containerRef = useRef<HTMLDivElement>(null);
 
   const routeToInfo = (pageType: string, ruleId?: number) => {
     if (!ruleId)
@@ -61,18 +65,6 @@ const RuleListPage = () => {
     history.push(
       `/tenant/compute/onto/businessAutomation/management/info/${pageType}/${ruleId}`
     );
-  };
-
-  const handleDelete = (record: AutoRuleItem) => {
-    Modal.confirm({
-      title: '删除规则',
-      content: `确定删除规则“${record.name || '-'}”吗？`,
-      onOk: async () => {
-        await deleteAutoRule(record.id!);
-        Message.success('删除成功');
-        refresh();
-      }
-    });
   };
 
   const handleToggleStatus = async (record: AutoRuleItem) => {
@@ -207,7 +199,7 @@ const RuleListPage = () => {
             }}
             type="text"
             className={styles['table-action']}
-            onClick={() => handleDelete(record)}
+            onClick={() => setDelRule(record)}
             disabled={record.status === 1}
           >
             <Tooltip content={record.status === 1 ? '请先下线再删除' : ''}>
@@ -247,7 +239,7 @@ const RuleListPage = () => {
   );
 
   return (
-    <div className={styles['rule-list-page']}>
+    <div className={styles['rule-list-page']} ref={containerRef}>
       <PageHeader
         title={'规则管理'}
         subTitle={'基于函数条件的自动化规则引擎，支持定时与条件触发。'}
@@ -300,6 +292,31 @@ const RuleListPage = () => {
         }}
         onEdit={() => {}}
       />
+      <OsModal
+        visible={!!delRule}
+        closeIcon={null}
+        style={{ width: 400 }}
+        getPopupContainer={() => {
+          return containerRef.current || document.body;
+        }}
+        title={
+          <>
+            <IconInfoCircleFill
+              style={{
+                color: 'rgb(var(--warning-6))'
+              }}
+            />
+            删除规则
+          </>
+        }
+        onOk={async () => {
+          await deleteAutoRule(delRule!.id!);
+          setDelRule(undefined);
+          Message.success('删除成功');
+          refresh();
+        }}
+        onCancel={() => setDelRule(undefined)}
+      >{`确定删除规则“${delRule?.name || '-'}”吗？`}</OsModal>
     </div>
   );
 };

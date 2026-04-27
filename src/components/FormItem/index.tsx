@@ -5,10 +5,22 @@ import styles from './index.module.scss';
 import { GlobalTooltip } from '@ceai-front/arco-material';
 
 interface IProps extends ComponentProps<typeof Form.Item> {
+  /**
+   * label宽度,暂不生效
+   */
   labelWidth?: number;
+  /**
+   * 是否显示冒号
+   */
   showColon?: boolean;
 }
 
+/**
+ * 预留必填标识位置的Form.Item组件
+ * 通过背景色来控制显隐transparent->rgb(var(--danger-6))
+ * @param props
+ * @constructor
+ */
 const FormItem = (props: IProps) => {
   const {
     labelWidth,
