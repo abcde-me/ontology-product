@@ -21,7 +21,7 @@ import {
   ProButton,
   SearchTable
 } from '@ceai-front/arco-material';
-import { EllipsisPopover } from '@/pages/ontologyScene/components';
+import { EllipsisPopover, OntoModal } from '@/pages/ontologyScene/components';
 
 import useUrlState from '@ahooksjs/use-url-state';
 import { useWorkflowTable } from '../../../hooks/useTable';
@@ -288,7 +288,7 @@ const PublicTable = React.forwardRef<PublicTableRef, PublicTableProps>(
 
     // 处理删除
     const handleDelete = (record: PublicProperty) => {
-      Modal.confirm({
+      OntoModal.confirm({
         title: '确定删除公共属性吗？',
         content: `删除后，不可恢复，所绑定的对象类型也会删除此属性`,
         onOk: async () => {

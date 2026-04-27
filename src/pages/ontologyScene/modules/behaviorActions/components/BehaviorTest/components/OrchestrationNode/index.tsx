@@ -6,6 +6,7 @@ import { useBusinessStore } from '../../store/businessStore';
 import { formatParamDisplayValue } from './utils';
 import DeleteSvg from '@/assets/benti/delete.svg';
 import EllipsisTextWithTooltip from '@/pages/ontologyScene/modules/behaviorLog/components/EllipsisTextWithTooltip';
+import { OntoModal } from '@/components/OSModal';
 
 interface OrchestrationNodeProps {
   node: OrchestrationNodeType;
@@ -123,7 +124,7 @@ export const OrchestrationNode: React.FC<OrchestrationNodeProps> = ({
 
   const handleDelete = (e: React.MouseEvent) => {
     e.stopPropagation();
-    Modal.confirm({
+    OntoModal.confirm({
       title: '确认删除',
       content: '删除后该节点的配置将丢失，确认删除吗？',
       onOk: onDelete

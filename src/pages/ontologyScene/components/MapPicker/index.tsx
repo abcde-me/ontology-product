@@ -10,7 +10,7 @@ import {
 import AMapLoader from '@amap/amap-jsapi-loader';
 import styles from './index.module.scss';
 import { SelectWithNoData } from '@/components/new-no-data-comps';
-import { FormItem, OsModal } from '@/pages/ontologyScene/components';
+import { FormItem, OntoModal } from '@/pages/ontologyScene/components';
 
 declare global {
   interface Window {
@@ -456,7 +456,7 @@ const GlobalMapPickerModal = () => {
   }, []);
 
   return (
-    <OsModal
+    <OntoModal
       title="选择坐标"
       visible={visible}
       onCancel={closeGlobalMapPicker}
@@ -537,7 +537,7 @@ const GlobalMapPickerModal = () => {
           </div>
         </div>
       </div>
-    </OsModal>
+    </OntoModal>
   );
 };
 

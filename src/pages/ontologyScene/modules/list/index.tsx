@@ -41,7 +41,7 @@ import dayjs from 'dayjs';
 import { PermissionWrapper } from '@/components/PermissionGuard';
 import { ONTOLOGY_PERMISSIONS } from '@/config/permissions';
 import { useHasPermission } from '@/store/userInfoStore';
-import { EllipsisPopover } from '@/pages/ontologyScene/components';
+import { EllipsisPopover, OntoModal } from '@/pages/ontologyScene/components';
 
 // 扩展 ProcessStep 类型，使 description 支持 ReactNode
 interface SceneProcessStep extends Omit<ProcessStep, 'description'> {
@@ -383,7 +383,7 @@ export default function OntologySceneList() {
 
   // 处理删除场景
   const handleDelete = (item: SceneCardItem) => {
-    Modal.confirm({
+    OntoModal.confirm({
       title: '确定删除此本体场景吗？',
       content: `请谨慎操作，删除该数据将删除对象、链接、行为、函数等所有数据，且不可恢复。`,
       // 将弹窗挂载到当前模块容器，避免默认挂载在 document.body 下

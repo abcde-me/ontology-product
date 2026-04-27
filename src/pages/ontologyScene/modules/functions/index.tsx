@@ -34,7 +34,8 @@ import {
 import { isEmpty, isNil } from 'lodash-es';
 import {
   ContentWithCopy,
-  EllipsisPopover
+  EllipsisPopover,
+  OntoModal
 } from '@/pages/ontologyScene/components';
 import { FunctionDetailDrawer } from '@/pages/ontologyScene/modules/functionDetail/components';
 import { SorterInfo } from '@arco-design/web-react/lib/Table/interface';
@@ -112,7 +113,7 @@ export default function OntologySceneFunctions() {
     getFunctionDetail(record.id!).then((res) => {
       if (res.boundAction)
         return Message.warning('该函数已被行为绑定，请先解绑再删除');
-      Modal.confirm({
+      OntoModal.confirm({
         title: `确定删除${record.name}吗？`,
         content: '删除后，不可恢复',
         onOk: () => {

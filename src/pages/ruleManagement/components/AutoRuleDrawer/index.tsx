@@ -40,7 +40,7 @@ import { IconInfoCircle } from '@arco-design/web-react/icon';
 import { PyCodeContent } from '@/components/PyCodeContent';
 import { GetAutoExecLogRuleSnapshot } from '@/api/businessAutomation/runLog';
 import { isNil } from 'lodash-es';
-import { ContentWithCopy, OsModal } from '@/pages/ontologyScene/components';
+import { ContentWithCopy, OntoModal } from '@/pages/ontologyScene/components';
 import { AUTOMATION_PERMISSIONS } from '@/config/permissions';
 
 const CHANGE_TYPE_TEXT = {
